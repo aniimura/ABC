@@ -164,6 +164,37 @@ theorem zeta_pi_coord_eq_iff {G : Type*} [CommGroup G] {l : ℕ} (hl : 0 < l) {Q
     rw [h1] at hn
     rw [mul_inv_eq_iff_eq_mul.mp hn, mul_comm]
 
+/-! ## ★★★★★★★★★★★★★★★★`σ` の座標での作用は `α = (1 1 / 0 1)` -/
+
+/-- ★★★★★★★★**`σ(ζ) = ζ`・`σ(π) = ζπ` なら `σ(ζᵃπᵇ) = ζ^{a+b}πᵇ`**——★**無条件**。
+
+☆`sigma_acts_as_alpha`（第 993）の**群の水準の形**である
+——あちらは体の単数群に特化していた。 -/
+theorem sigma_zeta_pi {G : Type*} [CommGroup G] {ζ π : G} (σ : G →* G)
+    (hζ : σ ζ = ζ) (hπ : σ π = ζ * π) (a b : ℤ) :
+    σ (ζ ^ a * π ^ b) = ζ ^ (a + b) * π ^ b := by
+  rw [map_mul, map_zpow, map_zpow, hζ, hπ, mul_zpow, zpow_add, mul_assoc]
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`σ` の行列はちょうど `α = (1 1 / 0 1)`**——★**無条件**（第 1164）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆`σ(ζᵃπᵇ)` を座標 `(a', b')` で書いたなら、必ず
+`a' ≡ a + b`、`b' ≡ b`（`mod l`）である。
+★★★これが「mod `l` 像が `α` を含む」ことの**座標の側の全体**である
+——残るのは Tate 一意化でこの `(ζ, π)` を `E[l]` の基底として実現する段だけである。 -/
+theorem sigma_coord_alpha {G : Type*} [CommGroup G] {l : ℕ} (hl : 0 < l) {Q ζ π : G}
+    (hζl : ζ ^ l = 1) (hζprim : ∀ n : ℕ, 0 < n → n < l → ζ ^ n ≠ 1)
+    (hπl : π ^ l = Q) (hQinf : ∀ j : ℤ, Q ^ j = 1 → j = 0)
+    (σ : G →* G) (hζ : σ ζ = ζ) (hπ : σ π = ζ * π)
+    (a b a' b' : ℤ)
+    (h : ∃ n : ℤ, σ (ζ ^ a * π ^ b) = ζ ^ a' * π ^ b' * Q ^ n) :
+    ((l : ℤ) ∣ (a + b - a')) ∧ ((l : ℤ) ∣ (b - b')) := by
+  rw [sigma_zeta_pi σ hζ hπ a b] at h
+  exact (zeta_pi_coord_eq_iff hl hζl hζprim hπl hQinf (a + b) b a' b').mp h
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def orderOf_eq_of_primitive.src : ABC3.Meta.Source :=
@@ -175,6 +206,22 @@ def zeta_pi_indep.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(ζ と π は Lˣ/⟨Q⟩ の中で独立。★無条件)",
     sectionId := "genell-thm-3-8" }
+
+def sigma_zeta_pi.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(σ(ζ)=ζ・σ(π)=ζπ なら σ(ζᵃπᵇ) = ζ^{a+b}πᵇ——群の水準。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def sigma_coord_alpha.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(σ の行列はちょうど α = (1 1 / 0 1)——座標の側の全体。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def sigma_coord_alpha.needs : List ABC3.Meta.ProofObligation :=
+  [ .implicitStep
+      ("★★★★**2026-09-02（第 1164）**——これで `AlphaBridge` の**座標の側が全部揃った**。" ++
+       "☆残るのは Tate 一意化で `(ζ, π)` を `E[l]` の基底として実現する段" ++
+       "（節点 2 の残り）と、分解群経由で大域の像へ移す段（節点 3）である。") 3 ]
 
 def zeta_pi_coord_eq_iff.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,

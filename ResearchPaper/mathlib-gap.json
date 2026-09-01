@@ -4962,5 +4962,15 @@
     "why": "★★これで座標は (ZMod l)² の元として**一意に**決まる。☆sigma_acts_as_alpha(第 993)の (a,b) ↦ (a+b, b) と合わせれば、σ の行列がちょうど α = (1 1 / 0 1) になる。★AlphaBridge の節点 2 はこの形を直接使う。",
     "frame": "☆AlphaBridge の進捗枠 0.9/3、重み 22 → 15。★Theorem 3.8 の残高 = I(5) ＋ II(15) = 20。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "sigmaCoordAlpha20260902": {
+    "block": 1164,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★★★★★σ の行列はちょうど α——AlphaBridge の座標の側が全部揃った",
+    "goal": "α が mod l 像に入る段の橋(第 1160 の枠、節点 1-2)。",
+    "what": "★sigma_zeta_pi(sigma_acts_as_alpha の群の水準の形)と sigma_coord_alpha —— σ(ζᵃπᵇ) を座標 (a', b') で書いたなら必ず a' ≡ a + b、b' ≡ b (mod l)(★無条件)。",
+    "why": "★★★これで **AlphaBridge の座標の側が全部揃った**。☆第 1161(独立性)→ 第 1162(核はちょうど lℤ × lℤ)→ 第 1163(座標は (ZMod l)² で一意)→ 第 1164(σ の行列は α)。★残るのは Tate 一意化で (ζ, π) を E[l] の基底として実現する段(節点 2 の残り 5)と、分解群経由で大域の像へ移す段(節点 3、6)である。",
+    "frame": "☆AlphaBridge の進捗枠 1.3/3、重み 22 → 12。★Theorem 3.8 の残高 = I(5) ＋ II(12) = 17。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
