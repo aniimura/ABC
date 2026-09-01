@@ -536,6 +536,40 @@ theorem isUnit_natCast_iff_notMem {L : Type} [Field L] [NumberField L]
         IsLocalRing.maximalIdeal (p.adicCompletionIntegers L) :=
   (IsLocalRing.notMem_maximalIdeal).symm
 
+/-! ## ★★★★★★★★第 1038 —— 残るのは分岐指数の上界だけ
+
+★第 1037 で `l ∈ 𝔪^{l−1}`（＝ `e_p ≥ l − 1`）まで来た。
+☆あとは **`e_p ≤ [L:ℚ]`** を言えば `l ≤ [L:ℚ] + 1` となり、
+`hd : [L:ℚ] + 1 < l` に矛盾する。
+
+★mathlib は `Ideal.sum_ramification_inertia`（`∑_{P|p} e_P f_P = [L:K]`）を持つ。
+☆`Ideal.ramificationIdx` は `sSup {n | map p ≤ P^n}` なので、
+`l ∈ p^{l−1}` から `l − 1 ≤ e_p` を出すには**上に有界**であることが要る。 -/
+
+/-- ☆**節点**: `p^{l−1}` が `l` を含むなら `l − 1 ≤ [L:ℚ]`。
+
+★中身は `∑_{P ∣ l} e_P f_P = [L:ℚ]`（mathlib `Ideal.sum_ramification_inertia`）と
+`e_p ≥ l − 1`（第 1037）である。 -/
+theorem le_finrank_of_natCast_mem_pow {L : Type} [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L)) {l : ℕ} (hl : l.Prime)
+    (hmem : ((l : ℕ) : 𝓞 L) ∈ p.asIdeal ^ (l - 1)) :
+    l - 1 ≤ Module.finrank ℚ L := by
+  sorry
+
+def le_finrank_of_natCast_mem_pow.src : Source :=
+  { paper := "GenEll", pdfPage := 18,
+    item := "Lemma 3.7(p^{l−1} が l を含むなら l − 1 ≤ [L:ℚ])",
+    sectionId := "genell-lemma-3-7" }
+
+def le_finrank_of_natCast_mem_pow.needs : List ProofObligation :=
+  [ .citation "[mathlib]" "Ideal.sum_ramification_inertia(∑ e f = [L:K])"
+      (.inMathlib "Ideal.sum_ramification_inertia") 1,
+    .implicitStep
+      ("☆`Ideal.ramificationIdx` は `sSup {n | map p ≤ P^n}` なので、" ++
+       "`l ∈ p^{l−1}` から `l − 1 ≤ e_p` を出すには**上に有界**であることが要る" ++
+       "（`p ≠ ⊥` と `l ≠ 0` から出る）。" ++
+       "★そのうえで `e_p · f_p ≤ ∑ = [L:ℚ]` と `f_p ≥ 1`") 2 ]
+
 /-- ★★★★★★★★★★★★★★★★**[GenEll] 悪い素点で `l` は単元**——
 `l` が定義体の次数より十分大きければ。
 
