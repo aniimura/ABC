@@ -4992,5 +4992,15 @@
     "measured": "★★第 1・第 2 の主張と第 3 の主張の数値の核は lemma_3_7(第 1151)と**同じ材料で通った**——htFalt_le_of_condA・htFalt_le_of_condB をそのまま使える。☆すなわち **Theorem 3.8 に繋げるのに残るのは hdag ただ 1 つ**であり、それを埋めるのが節点 2d(埋め込み L̄ ↪ L̄_v の配管)である。",
     "frame": "☆LCyclicReading の進捗枠 2.7/3、総重み 26 → 4(2d だけ)。★Theorem 3.8 の残高 = I(4) ＋ II(11) = 15。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "restrictLocalHom20260902": {
+    "block": 1167,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★局所の Galois 元は大域へ制限される——AlphaBridge の節点 3 の核",
+    "goal": "α が mod l 像に入る段の橋(第 1160 の枠、節点 3)。",
+    "what": "★Found/GenEll/Thm38Decomposition.lean の restrictLocalHom —— 塔 L → L_v → M と L 上正規な中間体 E に対し σ : M ≃ₐ[L_v] M → σ|_L : M ≃ₐ[L] M → σ|_E : E ≃ₐ[L] E の準同型。☆restrictLocalHom_commutes で埋め込みと可換であることも取った。",
+    "why": "★★**単射性は要らない**——必要なのは「局所の元の像が大域の像に**含まれる**」ことだけで、それは準同型があれば出る。☆これが「galRep の像は局所の α を含む」の骨である。★残るのは L̄ ↪ M(M は L_v の代数閉包)を実際に取る段(mathlib の IsAlgClosed.lift)と galRep との合成。",
+    "frame": "☆AlphaBridge の進捗枠 2/3、重み 22 → 8。★Theorem 3.8 の残高 = I(4) ＋ II(8) = 12。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
