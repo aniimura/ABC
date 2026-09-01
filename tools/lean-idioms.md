@@ -2667,3 +2667,27 @@ theorem natDegree_p : p.natDegree = 2 := by rw [p]; compute_degree!
 
 **併せて**: `set_option linter.tacticCheckInstances true` を勧めるノートが出たら、
 インスタンスのダイヤモンド由来なので `rw` ではなく `congr`／`convert` に切り替える。
+
+## `#no-guard` は行末までのコメント —— 同じ行の後続コマンドが消える
+
+ABC3 の Bash ガードを外す `#no-guard` は**シェルのコメント**なので、`#` から
+行末までが丸ごと捨てられる。次は前半しか実行されない:
+
+```bash
+ls some/dir #no-guard; echo "=== 次 ==="; grep -rn foo some/dir   # ← echo も grep も実行されない
+```
+
+出力に「後半の echo が出ていない」ことでしか気づけないため、
+**測定結果を「0 件だった」と誤読する**（第 1068 → 第 1069 で訂正）。
+
+直し方: `#no-guard` は**コマンド全体の最後**、できれば独立した最終行に置く。
+
+```bash
+ls some/dir
+echo "=== 次 ==="
+grep -rn foo some/dir
+#no-guard
+```
+
+☆教訓: grep が「0 件」を返したときは、**同じコマンド内の直前の echo が
+出力されているか**を必ず確かめる。出ていなければ grep は走っていない。
