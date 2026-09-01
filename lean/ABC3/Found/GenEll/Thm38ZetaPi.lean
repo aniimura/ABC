@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import Mathlib.GroupTheory.OrderOfElement
 import Mathlib.GroupTheory.QuotientGroup.Basic
+import ABC3.Found.GaloisRep.TatePhi
 import ABC3.Meta.Claim
 
 /-!
@@ -310,6 +311,32 @@ theorem torsion_eq_phi_zeta_pi {G P : Type*} [CommGroup G] [AddCommGroup P]
   obtain ⟨a, b, hab⟩ := exists_zeta_pi_of_torsion hπl hμ x h3
   exact ⟨a, b, by rw [hab]⟩
 
+/-! ## ★★★★★★★★★★★★Tate 母数は無限位数（`hQinf` の中身） -/
+
+/-- ★★★★★★★★★★★★★★**Tate 母数は無限位数**——★**無条件**（第 1172）。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+☆`TateSetup` は `0 < v(q)` を持っている。`v(qʲ) = j·v(q)` なので
+`qʲ = 1` なら `j·v(q) = 0`、したがって `j = 0`。
+
+★★これが第 1161-1171 のすべての補題が受けている `hQinf` の**中身**である
+——`TateSetup` からそのまま出るので、仮説ではなく**定理**になる。 -/
+theorem tateSetup_Q_zpow_eq_one {R : Type} [CommRing R] {I : Ideal R} {K : Type} [Field K]
+    [Algebra R K] (S : ABC3.Found.GaloisRep.TateSetup R I K) (j : ℤ) (h : S.Q ^ j = 1) :
+    j = 0 := by
+  have hv : ABC3.Found.GaloisRep.vAdd S.v (S.Q ^ j)
+      = j * ABC3.Found.GaloisRep.vAdd S.v S.Q :=
+    ABC3.Found.GaloisRep.vAdd_zpow S.v S.Q j
+  rw [h] at hv
+  have h1 : ABC3.Found.GaloisRep.vAdd S.v (1 : Kˣ) = 0 := by
+    simp [ABC3.Found.GaloisRep.vAdd]
+  rw [h1] at hv
+  rcases mul_eq_zero.mp hv.symm with hj | hq
+  · exact hj
+  · exact absurd hq S.hQ.ne'
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def orderOf_eq_of_primitive.src : ABC3.Meta.Source :=
@@ -321,6 +348,11 @@ def zeta_pi_indep.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(ζ と π は Lˣ/⟨Q⟩ の中で独立。★無条件)",
     sectionId := "genell-thm-3-8" }
+
+def tateSetup_Q_zpow_eq_one.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Definition 3.3(Tate 母数は無限位数——hQinf の中身。★無条件)",
+    sectionId := "genell-def-3-3" }
 
 def torsion_eq_phi_zeta_pi.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,

@@ -5043,5 +5043,15 @@
     "pitfall": "☆`Additive.ofMul_pow` は存在しない——mathlib では `Additive` 名前空間の外に `ofMul_pow` があり、しかも rfl である。★`Additive.ofMul (c^l) = l • Additive.ofMul c` も `ofMul (c^l) = 0 ↔ c^l = 1` も**定義上等しい**ので、rw を書かずに `exact` でよい。",
     "frame": "☆AlphaBridge の部品は 3/3、重み 22 → 1(配管)。★Theorem 3.8 の残高 = I(4) ＋ II(1) = 5。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "tateQInfiniteOrder20260902": {
+    "block": 1172,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★Tate 母数は無限位数——hQinf が仮説から定理になった",
+    "goal": "α が mod l 像に入る段の橋(第 1160 の枠、節点 2 の配管)。",
+    "what": "★tateSetup_Q_zpow_eq_one —— TateSetup は 0 < v(q) を持っているので、v(qʲ) = j·v(q) から qʲ = 1 なら j = 0。",
+    "why": "★★これが第 1161-1171 のすべての補題が受けている hQinf の**中身**である——TateSetup からそのまま出るので、**仮説ではなく定理**になった。☆具体の Tate 設定へ当てはめる配管の第 1 歩である。",
+    "frame": "☆AlphaBridge の部品は 3/3、配管の残りは ζ・π を実際に取る段(拡大体 L_v(ζ_l, q^{1/l}))と galRep への当てはめ。★Theorem 3.8 の残高 = I(4) ＋ II(1) = 5。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
