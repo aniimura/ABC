@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GenEll.DegreeBound
 import ABC3.Found.GenEll.GalRepContinuity
+import ABC3.Found.GenEll.PointDescentFinite
 import ABC3.Meta.Claim
 
 /-!
@@ -139,7 +140,99 @@ theorem finrank_adjoin_ptCoordSet_le (W : WeierstrassCurve L)
       rw [Finset.card_erase_of_mem (Finset.mem_univ _), Finset.card_univ, ZMod.card]
     exact le_of_eq hcard
 
+/-! ## ★★★★★★★★★★★★★★★★次数の評価つきの降下 -/
+
+open scoped Classical in
+set_option maxHeartbeats 1600000 in
+/-- ★★★★★★★★★★★★★★★★★★★★
+**安定直線の点は次数 `≤ l−1` の拡大で有理になる**——★**無条件**（第 1219）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆第 1207（`L̄` の位数 `l` の点は有限次拡大で有理）を、
+`M ≔ L(x_Q, y_Q)` に固定して**次数の評価つき**で述べ直したもの。
+
+★★★これで第 1208-1209（`[L'':L] < l` なら `l ∤ v_P(j)` が保たれる）が使える
+——`l − 1 < l` だからである。
+☆座標集合の等式は第 1197 が受け取る `hT` の形そのままである。 -/
+theorem exists_point_descent_of_stable (W : WeierstrassCurve L) [W.IsElliptic]
+    [(W.baseChange Lbar).IsElliptic]
+    {l : ℕ} (hl : l.Prime) (Q : (W.baseChange Lbar).toAffine.Point)
+    (hQ : addOrderOf Q = l)
+    (hst : ∀ σ : Lbar ≃ₐ[L] Lbar, ∃ k : ℕ, galPoint W σ Q = k • Q) :
+    ∃ M : IntermediateField L Lbar, FiniteDimensional L M ∧
+      Module.finrank L M ≤ l - 1 ∧
+      letI : DecidableEq (M : Type) := fun a b => Classical.propDecidable (a = b)
+      ∃ Q' : (W.baseChange M).toAffine.Point, addOrderOf Q' = l ∧
+        (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q'))).image
+            (fun q : M × M => (algebraMap M Lbar q.1, algebraMap M Lbar q.2))
+          = ((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)) := by
+  classical
+  have hQne : Q ≠ 0 := by
+    intro h0
+    rw [h0, addOrderOf_zero] at hQ
+    exact absurd hQ.symm hl.ne_one
+  have hdeg := finrank_adjoin_ptCoordSet_le W hl Q hQ hst
+  obtain ⟨x, y, hns, rfl⟩ : ∃ x y hns, Q = Point.some x y hns := by
+    cases Q with
+    | zero => exact absurd rfl hQne
+    | some x y hns => exact ⟨x, y, hns, rfl⟩
+  have hTalg : ∀ z ∈ ptCoordSet W (Point.some x y hns), IsAlgebraic L z :=
+    fun z _ => Algebra.IsAlgebraic.isAlgebraic z
+  haveI : Finite (ptCoordSet W (Point.some x y hns) : Set Lbar) :=
+    (finite_ptCoordSet W (Point.some x y hns)).to_subtype
+  set M := IntermediateField.adjoin L (ptCoordSet W (Point.some x y hns)) with hMdef
+  haveI hfin : FiniteDimensional L M :=
+    IntermediateField.finiteDimensional_adjoin (fun z hz => (hTalg z hz).isIntegral)
+  letI : DecidableEq (M : Type) := fun a b => Classical.propDecidable (a = b)
+  haveI hellM : (W.baseChange M).IsElliptic := by
+    show (W.map (algebraMap L M)).IsElliptic
+    infer_instance
+  have hC : (W.baseChange M).map (algebraMap M Lbar) = W.baseChange Lbar :=
+    baseChange_map_intermediate W M
+  haveI hell : ((W.baseChange M).map (algebraMap M Lbar)).IsElliptic := by
+    rw [hC]; infer_instance
+  have hxm : x ∈ M := IntermediateField.subset_adjoin L _ (Or.inl rfl)
+  have hym : y ∈ M := IntermediateField.subset_adjoin L _ (Or.inr rfl)
+  have hxr : (pointCoords (castPoint hC.symm (Point.some x y hns))).1
+      ∈ Set.range (algebraMap M Lbar) := by
+    rw [pointCoords_castPoint]
+    exact ⟨⟨x, hxm⟩, rfl⟩
+  have hyr : (pointCoords (castPoint hC.symm (Point.some x y hns))).2
+      ∈ Set.range (algebraMap M Lbar) := by
+    rw [pointCoords_castPoint]
+    exact ⟨⟨y, hym⟩, rfl⟩
+  obtain ⟨Q', hQ'⟩ := exists_rhPoint_eq (algebraMap M Lbar) (W.baseChange M)
+    (castPoint hC.symm (Point.some x y hns)) hxr hyr
+  have hord : addOrderOf (castPoint hC.symm (Point.some x y hns)) = l := by
+    rw [addOrderOf_castPoint]; exact hQ
+  have hord' : addOrderOf Q' = l := by
+    have hz : l • Q' = 0 := by
+      refine rhPoint_injective (algebraMap M Lbar) (W.baseChange M) ?_
+      rw [rhPoint_nsmul (algebraMap M Lbar) (W.baseChange M) Q' l, hQ', rhPoint_zero]
+      exact nsmul_eq_zero_of_addOrderOf hord
+    have hne : Q' ≠ 0 := by
+      intro h0
+      rw [h0, rhPoint_zero] at hQ'
+      exact (ne_zero_of_addOrderOf_prime hl hord) hQ'.symm
+    have hdvd := addOrderOf_dvd_of_nsmul_eq_zero hz
+    rcases hl.eq_one_or_self_of_dvd _ hdvd with h1' | h2'
+    · exact absurd (AddMonoid.addOrderOf_eq_one_iff.mp h1') hne
+    · exact h2'
+  refine ⟨M, hfin, hdeg, Q', hord', ?_⟩
+  rw [← image_pointCoords_rhPoint_nsmul (algebraMap M Lbar) (W.baseChange M) hord']
+  refine Finset.image_congr ?_
+  intro k _
+  dsimp only
+  rw [hQ', ← castPoint_nsmul, pointCoords_castPoint]
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def exists_point_descent_of_stable.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(安定直線の点は次数 ≤ l−1 の拡大で有理になる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def finrank_adjoin_ptCoordSet_le.src : Source :=
   { paper := "GenEll", pdfPage := 17,
