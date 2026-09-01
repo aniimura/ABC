@@ -5989,5 +5989,15 @@
     "measured": "★★★**波及は 3 ファイルだけ**で、どれも 1 行〜数行の修正で済んだ —— 原文の condA には HasMultRed が入っているので、呼ぶ側は最初から持っていた(第 1263 の見立てどおり)。",
     "consequence": "★★★これで lcyclicExcJ は**至る所で良い還元の曲線を含まなくなった** —— 第 1263 が指摘した「現状の定義では Galois-有限と言えない」欠陥が消えた。☆witness の sorry (1) は、これで**主張が真になった**状態である(証明は VeluQuotOK 経由の (†) 待ち)。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "lcyclicExcDesign20260902": {
+    "block": 1265,
+    "date": "2026-09-02",
+    "title": "記録——lcyclicExc の定義の選び方は難しさを移すだけで、どちらでも (†) が要る",
+    "goal": "witness (1) をどう閉じるかの設計を測る。",
+    "measured": "☆**2 つの設計がある**: (A) 現状のように「条件を満たす類の集合」と定義すると mem_lcyclicExc は自明だが galoisFinite が (†) を要る。(B) lemma_3_7_stableLine_cop が内部でやっているように「ht^Falt ≤ M の集合」と定義すると galoisFinite は galoisFiniteJ_htFalt_le(在庫)で即座に出るが、今度は mem_lcyclicExc が (†) を要る。★どちらでも **Lemma 3.5 の (†) が 1 回要る**ことに変わりはない。",
+    "measured2": "☆さらに、界面は galoisFinite_lcyclicExc を**すべての C・eps** について要求する。C を小さく取ると条件 (a) は弱くなり集合は大きくなるので、(A) の設計では C ごとに (†) の定数を合わせる必要がある —— (B) の設計ならその心配はない。",
+    "consequence": "★★★したがって witness (1) の実装は **(B) の設計＋(†)** が素直である。☆(†) は第 1225(hdag_of_stableLine)が VeluQuotOK の下で与える。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
