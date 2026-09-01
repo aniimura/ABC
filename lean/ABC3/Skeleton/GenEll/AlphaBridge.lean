@@ -22,7 +22,7 @@ import ABC3.Meta.Claim
 | # | 中身 | 状態 |
 |---|---|---|
 | I | `l`-巡回の読みの橋（`HasLCyclicVelu` ⟷ `HasLCyclicJ`） | ☆`Skeleton/GenEll/LCyclicReading.lean`（進捗枠 **2.7 / 3**、残り重み 4） |
-| II | **`α` が mod `l` 像に入ること** | ☆**本ファイル**（進捗枠 **2 / 3**、残り重み 8） |
+| II | **`α` が mod `l` 像に入ること** | ☆**本ファイル**（進捗枠 **2.5 / 3**、残り重み 6） |
 
 ★位相の側（像が閉部分群）は第 772、群論の側（`α` と安定直線から `SL₂`）は
 `§9-992` と `Lemma 3.1, (iv)` で済んでいる（`imageContainsSL2J_of_alpha'`）。
@@ -42,15 +42,22 @@ import ABC3.Meta.Claim
 ☆すなわち**両端は揃っている**——`Lˣ/qℤ` の側の `σ` と、行列 `α` の作用と、
 Tate 一意化の同変性である。★足りないのは**それらを繋ぐ 3 本**である。
 
-## ★★★★★★★★★★★★節点（進捗枠 **2 / 3**）
+## ★★★★★★★★★★★★節点（進捗枠 **2.5 / 3**）
 
 | # | 節点 | 内容 | 重み |
 |---|---|---|---|
 | 1 | `tateTorsion_basis_zeta_pi` | ★**核はちょうど `lℤ × lℤ`（第 1161-1162、`zeta_pi_mem_zpowers_iff`）**。☆残るのは全射の側（`E[l]` が実際にこの 2 元で生成されること）と `Q` の無限位数の紐付け | ★★**閉じた**（第 1165 `zeta_pi_basis`） | 8 → **0** |
 | 2 | `alpha_mem_localImage` | ★**座標の側は第 1164 で全部揃った**（`sigma_coord_alpha`）。☆残るのは Tate 一意化で `(ζ, π)` を `E[l]` の基底として実現する段 | 8 → **5** |
-| 3 | `alpha_mem_globalImage` | ★**制限準同型は第 1167 で取れた**（`restrictLocalHom`・`restrictLocalHom_commutes`）。☆残るのは `L̄ ↪ M` を実際に取る段（`IsAlgClosed.lift`）と `galRep` との合成 | 6 → **3** |
+| 3 | `alpha_mem_globalImage` | ★**制限準同型は第 1167 で取れた**（`restrictLocalHom`・`restrictLocalHom_commutes`）。☆残るのは `L̄ ↪ M` を実際に取る段（`IsAlgClosed.lift`）と `galRep` との合成 | ★★**閉じた**（第 1168 `globalOfLocalHom`）。☆残るのは `galRep` との合成だけ | 6 → **1** |
 
-☆総重み 22 → **8**（第 1161-1165 で節点 1、第 1167 で節点 3 の核が取れた）。
+☆総重み 22 → **6**（第 1161-1165 で節点 1、第 1167-1168 で節点 3 が閉じた）。
+
+### ★★★★★★★★第 1168 で節点 3 が閉じた
+
+`globalOfLocalHom`——`M` が代数閉体なら `L̄ = AlgebraicClosure L` は
+`IsAlgClosed.lift` で `M` に埋め込めるので、その埋め込みで
+`restrictLocalHom` を当てればよい。
+★★`Gal(M/L_v) →* Gal(L̄/L)` ができた——**局所で実現される行列は大域の像にも入る**。
 
 ### ★★★★★★★★第 1167 で取れたもの（節点 3 の核）
 
@@ -110,7 +117,7 @@ Tate 一意化の同変性である。★足りないのは**それらを繋ぐ 
 
 ## ★★★★★★何が `Theorem 3.8` に残るか（第 1160 の総括）
 
-    I（`l`-巡回の読み、残り 4） ＋ II（本ファイル、残り 8） ＝ **12**
+    I（`l`-巡回の読み、残り 4） ＋ II（本ファイル、残り 6） ＝ **10**
 
 ☆`Theorem 3.8` 以外（`Corollary 4.3`・`4.4`）は本定理の上にしか立たない。
 ★`Theorem 2.1`（§2）は曲線の Riemann–Roch が mathlib に無いので別筋である。
