@@ -186,6 +186,16 @@ theorem j_velu_tate_eq_map {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
     rw [map_add, map_add, map_mul, map_mul, map_ofNat, map_ofNat]
     exact h
 
+def c₄_tateCurveAt_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(E_q の c₄ = 1 + 240·σ₃(q)。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def c₆_tateCurveAt_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(E_q の c₆ = −1 + 504·σ₅(q)。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
 def c₄_tateCurveAt.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(Tate 曲線の c₄ = 1 − 48·a₄。★無条件)",
@@ -236,6 +246,28 @@ def two_y_add_x_sq.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Definition 3.3((2Y+X)² = 4X³ + X² + 4a₄X + 4a₆。★無条件)",
     sectionId := "genell-def-3-3" }
+
+/-! ## ★★★★★★★★★★★★特殊化した `c₄`・`c₆` -/
+
+/-- ★★★★★★★★★★★★
+**`E_q` の `c₄ = 1 + 240·σ₃(q)`**——★**無条件**（第 1255）。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+☆`tateCurveAt q hq = tateCurve.map (evalAdicHom q hq)` なので、
+第 1254（`c₄(tateCurve) = 1 + 240σ₃`）を環準同型で送るだけ。 -/
+theorem c₄_tateCurveAt_eq [IsAdicComplete I R] (q : R) (hq : q ∈ I) :
+    (tateCurveAt q hq).c₄ = 1 + 240 * evalAdicHom q hq (sigmaSeries 3) := by
+  rw [tateCurveAt, WeierstrassCurve.map_c₄, c₄_tateCurve, map_add, map_mul, map_one,
+    map_ofNat]
+
+/-- ★★★★★★★★★★★★
+**`E_q` の `c₆ = −1 + 504·σ₅(q)`**——★**無条件**（第 1255）。 -/
+theorem c₆_tateCurveAt_eq [IsAdicComplete I R] (q : R) (hq : q ∈ I) :
+    (tateCurveAt q hq).c₆ = -1 + 504 * evalAdicHom q hq (sigmaSeries 5) := by
+  rw [tateCurveAt, WeierstrassCurve.map_c₆, c₆_tateCurve, map_add, map_mul, map_neg,
+    map_one, map_ofNat]
 
 /-! ## ★★★★★★★★`c₄`・`c₆` を `a₄`・`a₆` で書く -/
 
