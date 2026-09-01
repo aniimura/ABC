@@ -2691,3 +2691,19 @@ grep -rn foo some/dir
 
 ☆教訓: grep が「0 件」を返したときは、**同じコマンド内の直前の echo が
 出力されているか**を必ず確かめる。出ていなければ grep は走っていない。
+
+## 在庫は「mathlib に無い」で止めず、**プロジェクト内も**引く
+
+第 1067-1069 で「楕円曲線の形式群は mathlib に無い」「分点多項式と捻れ点の橋が無い」と
+測定したが、**プロジェクト内には既に**
+
+- `redPoint` / `redHom` / `redPoint_add` / `redPoint_nsmul`（`Found/GaloisRep/RedKernel.lean`）
+- `one_lt_val_addX_of_infinity`（`E₁` が加法で閉じている、`InfinityKer.lean`）
+- `val_y_sq_eq_val_x_cube`（`w(y)² = w(x)³`、`Infinity.lean`）
+- `Psi` / `Phi` / `PSq` / `PsiRec` / `PsiDouble` / `OmegaMulPsi` / `Eds*`
+
+があった（Theorem 3.8 の Weil 対のために積まれていた）。
+
+☆教訓: `node tools/decl-index.mjs` の grep は**mathlib を調べる前に**やる。
+★特に「別の定理のために積んだ機械」は名前が違うので、
+概念名（`formalGroup`）ではなく**振る舞い**（`red`, `val_.*x`, `_add`）で引く。

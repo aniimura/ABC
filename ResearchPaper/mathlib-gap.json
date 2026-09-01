@@ -4026,5 +4026,26 @@
     "inventoryCorrection": "★★**在庫を引いて分かった重要な訂正**: プロジェクトには既に`redPoint`・`redHom`（`Found/GaloisRep/RedKernel.lean`）があり、**点の還元が群準同型であること**（`redPoint_add`）と**`n•` と可換であること**（`redPoint_nsmul`）が Theorem 3.8 のために証明済みである。☆`redPoint_eq_zero_iff` は「還元が 0 ⟺ `v(x) > 1`」、まさに還元の核の判定である。★ただし設定は `W.FunctionField`（Weil 対のための生成点）であって数体 `L` と `p` ではないので、一般化が要る。☆また `Psi`・`Phi`・`PSq`・`PsiRec`・`PsiDouble`・`OmegaMulPsi`・`Eds*` など**分点多項式の在庫も大量にある**（第 1069 の測定は mathlib だけを見ていた）。",
     "remaining": "☆残るのは濾過の核心 2 段である: (a) `E_m = {P : v(x_P) ≤ −2m}` が部分群であること、(b) `v(z(P+Q) − z P − z Q)` の評価（形式群の 1 次項）。★これが出れば「`p ∤ l` なら `l` 捉れは `E_1` に入らない」= 良い素点での整性が出る。",
     "note": "★944-1070 の 121 ブロック。"
+  },
+  "reductionKernelInventory20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1071（測定）",
+    "supersedes": "pointValuation20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "finding": "★★★★**還元の核の機械はプロジェクトに既にある**——Theorem 3.8（Weil 対）のために第 160-163 で建てられていた。☆内訳:",
+    "alreadyProved": [
+      "`val_y_sq_eq_val_x_cube`（`Found/GaloisRep/Infinity.lean:183`）——**`w(y)² = w(x)³`**。★第 1070 で私が数体で証明したものの乗法版である。",
+      "`val_y_le_of_val_x_le`（`InfinityKer.lean:100`）——`w x ≤ 1 ⟹ w y ≤ 1`。",
+      "`one_lt_val_x_iff`（`InfinityKer.lean:145`）——`w x > 1 ⟺ w y > 1`。",
+      "★★★★★★★`one_lt_val_addX_of_infinity`（`InfinityKer.lean:216`）——**`E₁` が加法で閉じている**。☆すなわち濾過の (a) は済んでいる。",
+      "`val_addX_le_of_mixed`（`InfinityKer.lean:347`）——混合なら和は無限遠に落ちない。",
+      "`redPoint_eq_zero_iff`（`RedKernel.lean:73`）——**還元が 0 ⟺ `w(x) > 1`**。",
+      "★★★★★★★★`redPoint_add`・`redHom`・`redPoint_nsmul`・`redPoint_zsmul`（`RedKernel.lean`）——**点の還元は群準同型で `n•` と可換**。"
+    ],
+    "theOneObstacle": "★★**設定が `W.FunctionField` である**——`variable {F} [Field F] (W : Affine F) [IsDedekindDomain W.CoordinateRing] (v : HeightOneSpectrum W.CoordinateRing)`。☆数体 `L` と `p : HeightOneSpectrum (𝓞 L)` ではない。",
+    "whyItIsCheap": "★★★★**実測: `CoordinateRing` は各ファイルに 1-2 箇所しか現れず、そのすべてが `variable` 宣言である**（`InfinityKer` 1・`RedKernel` 2・`RedPoint` 2）。☆証明本体が座標環を使う唯一の点は `valuation_algebraMap_field W v _`（`ValuationInfty.lean:122`）= 「係数の付値は `≤ 1`」だけで、残りはすべて `Valuation.map_add`・`map_mul`・`map_pow` の一般論である。★したがって汎化は`variable {F K} [Field F] [Field K] [Algebra F K] (w : Valuation K Γ) (hw : ∀ a : F, w (algebraMap F K a) ≤ 1)` に差し替え、`valuation_algebraMap_field W v` を `hw` に置き換えるだけの**機械的な作業**である。☆対象は 7 ファイル約 1540 行（Infinity・InfinityKer・RedPoint・RedHom・RedAdd・RedSlope・RedZero・RedKernel）。",
+    "remainingMath": "★★汎化しても**残る数学は 1 つ**である: 「`E₁` は剰余標数と素な捻れをもたない」（形式群の 1 次項、`v(z(P+Q) − z P − z Q)` の評価）。☆これはプロジェクトにも mathlib にも無い。",
+    "honestNote": "☆第 1070（`two_valAdd_y_eq_three_valAdd_x`）は既存の`val_y_sq_eq_val_x_cube` の**数体・加法版**である。★在庫を先に引いていれば「新規」ではなく「移送」と分かった。☆ただし下流（`valAdd`・`minDeltaExp`）が ℤ 値の加法付値を要求するので、加法版そのものは要る。",
+    "note": "★944-1071 の 122 ブロック。"
   }
 }
