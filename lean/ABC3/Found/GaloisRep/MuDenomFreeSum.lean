@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 import ABC3.Found.GaloisRep.MuHeadDenomFree
 import ABC3.Found.GaloisRep.MuDYSum
 import ABC3.Found.GaloisRep.MuPowerSum
+import ABC3.Found.GaloisRep.MuD2XSum
 import ABC3.Meta.Claim
 
 /-!
@@ -182,6 +183,41 @@ def sum_mu_dxpairE_zero.needs : List ProofObligation :=
       (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_dxtermE") 1,
     .citation "[ABC3]" "sum_erase_reflect(i â¦ lâi ã®å¥ãæ¿ããå¨åº«)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_erase_reflect") 1 ]
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★
+**`D²X` の対の `E` 版（`hu` を取らない）**（第 1116）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★`sum_mu_d2xpair` の分母なし版である。☆`c4_velu_tate` の本体。
+★頭項は第 1112（`hu` なし）、尾は在庫の `sum_mu_d2xtail_sigma`（これも `hu` なし）。 -/
+theorem sum_mu_d2xpairE {l : ℕ} (hl : l.Prime) {ζ : A} (hζ : IsPrimitiveRoot ζ l)
+    (q : A) (hq : q ∈ I) (hql : q ^ l ∈ I) :
+    120 * ∑ i ∈ (range l).erase 0,
+        (tateD2XtermE l (ζ ^ i)
+          + (l : A) ^ 4 * (tateD2Xtail (ζ ^ i) q hq + tateD2Xtail (ζ ^ (l - i)) q hq))
+      = (l : A) ^ 4 * (((l : A) ^ 4 - 1)
+          + 240 * ((l : A) ^ 4 * evalAdic (sigmaSeries 3) (q ^ l) hql
+              - evalAdic (sigmaSeries 3) q hq)) := by
+  have hswap : ∑ i ∈ (range l).erase 0, tateD2Xtail (ζ ^ (l - i)) q hq
+      = ∑ i ∈ (range l).erase 0, tateD2Xtail (ζ ^ i) q hq :=
+    sum_erase_reflect (fun j => tateD2Xtail (ζ ^ j) q hq)
+  have htail := sum_mu_d2xtail_sigma hl hζ q hq hql
+  have hhead := sum_mu_d2xtermE hl hζ
+  rw [Finset.sum_add_distrib, ← Finset.mul_sum, Finset.sum_add_distrib, hswap, htail]
+  linear_combination hhead
+
+def sum_mu_d2xpairE.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(DÂ²X ã®å¯¾ã® E çââhu ãåããªããc4_velu_tate ã®æ¬ä½)",
+    sectionId := "genell-lemma-3-5" }
+
+def sum_mu_d2xpairE.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "sum_mu_d2xtermE(é ­é ã®åãç¬¬ 1112ãè¨¼ææ¸ã¿)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_d2xtermE") 1,
+    .citation "[ABC3]" "sum_mu_d2xtail_sigma(å°¾ã®åãå¨åº«ãhu ä¸è¦)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_d2xtail_sigma") 1 ]
 
 end Domain
 

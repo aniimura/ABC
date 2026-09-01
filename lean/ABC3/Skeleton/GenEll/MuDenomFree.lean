@@ -32,12 +32,12 @@ import ABC3.Meta.Claim
 
 ★機構は在庫の `one_sub_mul_sum_nsmul`——`(1 − η)·S(η) = −l`、`IsUnit` 不要。
 
-## ★★★★★★★★★★残り 5 節点（進捗枠 **1 / 5**）
+## ★★★★★★★★★★残り 5 節点（進捗枠 **2 / 5**）
 
 | # | 節点 | 内容 | 重み |
 |---|---|---|---|
 | 1 | `sum_mu_dxpairE_zero` | `∑ DX` の `E` 版（`hu` なし）**★第 1115 で証明済み** | 8 |
-| 2 | `sum_mu_d2xpairE` | `∑ D²X` の `E` 版（`hu` なし） | 10 |
+| 2 | `sum_mu_d2xpairE` | `∑ D²X` の `E` 版（`hu` なし）**★第 1116 で証明済み** | 10 |
 | 3 | `sum_veluV2E_eq_sum_tateDYpairE` | Vélu の `v` と `DY` の一致の `E` 版 | 6 |
 | 4 | `c4_c6_velu_tateE` | `c₄`・`c₆` の恒等式の `E` 版 | 10 |
 | 5 | `minDeltaExp_eq_mul_at_bad_prime_dvd` | `p ∣ l` の悪い素点で `Δ_min` が `l` 倍 | 12 |
@@ -96,13 +96,11 @@ theorem sum_mu_d2xpairE {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot
     (q : R) (hq : q ∈ I) (hql : q ^ l ∈ I) :
     120 * ∑ i ∈ (range l).erase 0,
         (tateD2XtermE l (ζ ^ i)
-          + (l : R) ^ 4 * (tateD2Xtail (ζ ^ i) q hq
-              + (tateD2Xterm (q * (ζ ^ i) ^ (l - 1))
-                  + tateD2Xtail (q * (ζ ^ i) ^ (l - 1)) q hq)))
+          + (l : R) ^ 4 * (tateD2Xtail (ζ ^ i) q hq + tateD2Xtail (ζ ^ (l - i)) q hq))
       = (l : R) ^ 4 * (((l : R) ^ 4 - 1)
           + 240 * ((l : R) ^ 4 * evalAdic (sigmaSeries 3) (q ^ l) hql
-              - evalAdic (sigmaSeries 3) q hq)) := by
-  sorry
+              - evalAdic (sigmaSeries 3) q hq)) :=
+  ABC3.Found.GaloisRep.sum_mu_d2xpairE hl hζ q hq hql
 
 def sum_mu_d2xpairE.src : Source :=
   { paper := "GenEll", pdfPage := 17,
