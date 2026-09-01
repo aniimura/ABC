@@ -3137,3 +3137,14 @@ mathlib の `Affine.Point.add` は `x₁ = x₂` の場合分けに `DecidableEq
 **直し方**: commit 前に**必ず `lake build ABC3` の tail を読む**。
 新しい名前を付ける前に `grep -rn "theorem <name>\b" --include=*.lean lean/ABC3`
 （`.src` も含めて）当てる。衝突したら在庫の方を import して使う。
+
+## `ZMod (l^1)` と `ZMod l` はイデアルで繋ぐ(2026-09-02、第 1295)
+
+**失敗形**: `rw [pow_one] at h` で `h : (toZModPow 1 D).val < l ^ 1` を書き換えようとすると
+`motive is not type correct`——`l^1` が `ZMod (l^1)` の型指数に現れるため。
+
+**直し方**: 型指数には触らず、
+(1) 数の不等式は `have hpow : l ^ 1 = l := pow_one l` を足して `omega`、
+(2) 環準同型の同一視は**イデアルの言葉**で回す:
+`ker (toZModPow 1) = span {l^1}`、`span {l^1} = span {l}`(要素の書き換えなので安全)、
+`maximalIdeal = ker toZMod`。

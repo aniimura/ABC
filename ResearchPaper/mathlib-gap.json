@@ -6296,5 +6296,14 @@
   "route": "★段 1: 位数 `l` の点は第 1 層に持ち上がる（第 1202）。段 2: 持ち上げの `mod l` 座標は `0` でない（核は `l·T_l E`、第 1203・1204）。段 3: `σ` が点を固定するなら座標も固定される（第 1233）。",
   "consequence": "★★★これで `μ_l ⊂ E(K₀)` から「行列は直線を点ごとに固定する」が出る。☆残るのは `det = 1`（円分指標、`ζ_l ∈ L` なら）と、`μ_l ⊂ E(K₀)` の構成である。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "detModOne20260902": {
+  "block": 1295,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★ζ_l が基礎体にあれば det は mod l で 1（第 1292 の入力）",
+  "proved": "☆`Found/GenEll/DetModOne.lean`（第 1295）に 2 本。`toZMod_det_eq_one_of_fixed_root`・`det_glRed_eq_one_of_fixed_root`。",
+  "route": "★`det ρ(σ)` は円分指標（`det_cyclotomic_full`、在庫）。`σ ζ = ζ` から `ζ = ζ^k`（`k = (det mod l).val`）、`k = 1`。☆`ZMod (l^1)` と `ZMod l` の型の食い違いは**イデアルの言葉**で避けた（`ker (toZModPow 1) = span {l^1} = span {l} = maximalIdeal = ker toZMod`）。",
+  "consequence": "★★★これで第 1292 の 2 つの入力（`det = 1`・固定ベクトル）が揃った——第 1294 と合わせて **`h2` は `μ_l ⊂ E(K₀)` だけから出る**。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
