@@ -426,6 +426,57 @@ theorem isDiscreteValuationRing_adjoinRoot
 
 end DvrAdjoinRoot
 
+/-! ## ★★★★★★★★★★★★第 1021 —— 商体の側を建てる
+
+★環の側（完備・局所・整域・離散付値環）は第 1012-1018 で建った。
+☆商体は mathlib の `FractionRing (AdjoinRoot f)` をそのまま使えばよく、
+`IsFractionRing` は自動でつく。
+
+★要るのは **`K → Frac (AdjoinRoot f)`** の埋め込みである。
+☆`R → AdjoinRoot f → Frac (AdjoinRoot f)` が単射なので
+`IsFractionRing.lift` で `K` から延びる。 -/
+
+section QuadField
+
+variable {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+variable {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
+
+open Polynomial in
+/-- ★★★★★★★★★★★★**`K` から `Frac (R[X]/(f))` への埋め込み**（第 1021）。
+
+★`f` は 2 次のモニックなので `R → R[X]/(f)` は単射、
+`R[X]/(f) → Frac` も単射（整域）。☆その合成を `K` に延ばす。 -/
+noncomputable def quadFieldHom {f : R[X]} (hf : f.Monic) (hdeg : f.natDegree = 2)
+    [IsDomain (AdjoinRoot f)] : K →+* FractionRing (AdjoinRoot f) :=
+  IsFractionRing.lift (A := R) (K := K)
+    (g := (algebraMap (AdjoinRoot f) (FractionRing (AdjoinRoot f))).comp
+      (algebraMap R (AdjoinRoot f)))
+    (by
+      rw [RingHom.coe_comp]
+      refine Function.Injective.comp
+        (IsFractionRing.injective (AdjoinRoot f) (FractionRing (AdjoinRoot f))) ?_
+      rw [AdjoinRoot.algebraMap_eq]
+      refine AdjoinRoot.of.injective_of_degree_ne_zero ?_
+      rw [Polynomial.degree_eq_natDegree hf.ne_zero, hdeg]
+      simp)
+
+open Polynomial in
+/-- ★★★★**埋め込みは `R` の上で `R → R[X]/(f) → Frac` と一致する**。 -/
+theorem quadFieldHom_algebraMap {f : R[X]} (hf : f.Monic) (hdeg : f.natDegree = 2)
+    [IsDomain (AdjoinRoot f)] (x : R) :
+    quadFieldHom (K := K) hf hdeg (algebraMap R K x)
+      = algebraMap (AdjoinRoot f) (FractionRing (AdjoinRoot f)) (algebraMap R (AdjoinRoot f) x) :=
+  IsFractionRing.lift_algebraMap _ x
+
+open Polynomial in
+/-- ★★★★**体からの環準同型なので単射**。 -/
+theorem quadFieldHom_injective {f : R[X]} (hf : f.Monic) (hdeg : f.natDegree = 2)
+    [IsDomain (AdjoinRoot f)] :
+    Function.Injective (quadFieldHom (K := K) hf hdeg) :=
+  (quadFieldHom (K := K) hf hdeg).injective
+
+end QuadField
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def not_isSquare_in_fractionField.src : ABC3.Meta.Source :=

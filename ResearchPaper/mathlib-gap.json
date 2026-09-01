@@ -3503,5 +3503,28 @@
     ],
     "interfaceNow": "★★`isMuAtBadPrimes_of_veluQuotient_of_large` の仮説は`hl`（`l` 素数）・`hodd`（`l ≠ 2`）・`hd`（`[L:ℚ] + 1 < l`）・`hQ`（`l` 捉れ点）・`hE′`（Vélu の商）・半安定性 2 本・`hcop`。☆すべて原文が置いている仮定である。★したがって `Lemma 3.5` は**2 つの sorry 節点だけ**に乗っている:(1) `minDeltaExp_eq_mul_at_bad_prime_any` の非分裂の枝（不分岐 2 次拡大）、(2) `isUnit_natCast_at_bad_prime`（`ℚ_l(ζ_l)` の分岐——mathlib に無い）。",
     "note": "★944-1020 の 72 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
+  },
+  "quadFieldBuilt20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1021",
+    "supersedes": "lemma35HluMeasured20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "★★★★★★★★★★★★`quadFieldHom`（1021）——`K` から `Frac (R[X]/(f))` への埋め込み。☆`R → R[X]/(f) → Frac` が単射なので `IsFractionRing.lift` で `K` から延びる。",
+      "★★★★`quadFieldHom_algebraMap`・`quadFieldHom_injective`（1021）。"
+    ],
+    "unramQuadPlan": [
+      "★捻り `d` を取る —— 第 992／993 **済**",
+      "★`d` が `K` でも平方でない —— 第 1007 **済**",
+      "★`X² − d` が既約 —— 第 1008 **済**",
+      "★`R[X]/(f)` が `I`-進完備 —— 第 1012 **済**",
+      "★`R[X]/(f)` が局所環 —— 第 1015 **済**",
+      "★`R[X]/(f)` が整域・離散付値環 —— 第 1017／1018 **済**",
+      "★商体 `Frac (R[X]/(f))` と `K` からの埋め込み —— 第 1021 **済**",
+      "☆付値の橋 `hp′`（不分岐なので `e = 1`）—— 残",
+      "☆剰余体の 2 次拡大で 2 次式が分裂 —— 残"
+    ],
+    "remaining": "★★不分岐 2 次拡大は **7 段中 7 段のうち 7 段目まで済み、残り 2 段**。☆`hp′` は「`𝔪R′ = 𝔪R′` の生成元が `π` のまま」＝ `e = 1` から出る（第 1018 の証明で `maximalIdeal R′ = (φ π)` を示してある）。★分裂は「剰余体の 2 次拡大では `d` が平方になる」ことである。",
+    "note": "★944-1021 の 73 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
   }
 }
