@@ -243,6 +243,42 @@ Tate 一意化の同変性である。★足りないのは**それらを繋ぐ 
 
 ★（7 大域への輸送は第 1271 で済み、`T_l E` への持ち上げは第 1270 で済み。）
 
+### ★★★★★★★★★★★★★★★★★★★★★★★★第 1283-1290——鎖は「局所データを与える」まで詰んだ
+
+| 定理 | 内容 | 第 |
+|---|---|---|
+| `pointCoords_tatePhi_sigma` | ★★★同変性の**正しい形**（座標の言葉、`σR`・`σK` の対） | 1283 |
+| `map_vcX_fixed`・`map_vcY_fixed` | ★座標は写像と可換 | 1284 |
+| `galAct`・`pointCoords_galAct` | ★★`σ` が固定する曲線の上の点の作用 | 1285 |
+| `tateSigmaAct_eq_galAct` | ★★★**`tateSigmaAct` ＝ 実際の Galois 作用** | 1286 |
+| `exists_galPoint_conditions_global` | ★★★局所の 2 条件は大域へ降りる | 1287 |
+| `galAct_vcPoint` | ★★`σ` の作用は変数変換と可換 | 1288 |
+| `galAct_unipotent_ne_of_tate` | ★★★**局所側の完成**（Tate モデルで幂単・非自明） | 1289 |
+| `unipotent_ne_of_variableChange` | ★★2 条件は `E ⊗ K` に戻る | 1290 |
+
+☆**鎖はこう繋がる**:
+
+    第 1289（Tate モデルで幂単・非自明）
+      → 第 1290（`E ⊗ K` へ）
+      → 第 1287（大域 `L̄` へ）
+      → 第 1270（`T_l E` へ）
+      → 第 1237（`α` が mod `l` 像に入る）
+      → 第 1249（`ImageContainsSL2J`）
+
+### ★★★★★★★★残るのは節点 8（局所データを与える段）だけ
+
+☆第 1289 が受け取るのは次だけであり、どれも「作れる」ことが分かっている:
+
+| # | 与えるもの | 出どころ |
+|---|---|---|
+| a | `L′ ≔ L(ζ_l, E[l], √d)`（有限 Galois）と素点 `P`、`K ≔ P.adicCompletion L′` | `exists_finite_subextension`（第 1195）・`numberField_and_towers`（第 1222） |
+| b | `E ⊗ K` の分裂乗法還元 → `q`・変数変換 `C` | `exists_tate_model`・`tateParamR`（在庫） |
+| c | `TateSetup`・`Φ` | `mkTateSetup`・`dvrTatePhiAddEquiv`（在庫、**無条件**） |
+| d | `π`（`π^l = Q`） | 第 1279（`E[l]` が `K` に載っていればよい） |
+| e | `l ∤ v(Q)` | `not_dvd_vAdd_tateParam_of_not_dvd_jExp`（在庫）＋ `PrimeToLocalHeights` |
+| f | `σ`（`σζ = ζ`・`σπ = ζπ`）と `σR`・`hσv` | 第 1282（`IsGalois K₀ K` が要る） |
+
+★★`ζ_l` は**大域の体に添加してよい**——`ImageContainsSL2J` は部分群の像で言えば十分だからである。
 ### ★★★★★★★★第 1170 で節点 2 の群論の側が閉じた
 
 `exists_zeta_pi_of_torsion`——`G ⧸ ⟨Q⟩` の `l`-捻れはすべて `[ζᵃπᵇ]` である。
