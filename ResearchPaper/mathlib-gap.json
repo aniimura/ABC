@@ -5640,5 +5640,15 @@
     "measured": "☆材料は galMat_apply(在庫)・redVec_mulVec(第 1204)・exists_redVec_eq(第 1204、還元は全射)・mathlib の Matrix.ext_of_mulVec_single。",
     "consequence": "★★★これで α ∈ (galRep の像).map (glRedPadic l) が言える —— 局所から大域へは第 1167-1169 が運ぶ。☆残るのは具体の Tate 設定で e を ζ, π の基底として作る段である。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "unipotentConj20260902": {
+    "block": 1229,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★★★★★自明でない冪単行列は α に共役——ζ, π の基底を作らずに済む",
+    "goal": "α が mod l 像に入る段(第 1160 の枠、II 側)。",
+    "what": "★exists_conj_upperOne(Found/GenEll/UnipotentConj.lean)—— (M − 1)² = 0 かつ M ≠ 1 なら M は (1 1 / 0 1) に共役。",
+    "measured": "☆u ≔ (M−1) v(v は (M−1) v ≠ 0 なる標準基底ベクトル)と v が基底になる —— (M−1) u = 0 と u ≠ 0 から独立性が出る。その基底で M は e₁ ↦ e₁、e₂ ↦ e₁ + e₂ として作用する。",
+    "consequence": "★★★galRep は基底の取り替えで**共役**に変わる(galRep_basisChange、在庫)ので、σ の mod l の行列が α に共役でありさえすれば基底を取り替えて α そのものにできる。☆すなわち **ζ, π に合わせた基底 e₀ を作らなくてよい**。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

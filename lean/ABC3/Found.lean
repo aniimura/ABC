@@ -1389,6 +1389,7 @@ import ABC3.Found.GaloisRep.Lemma35Assemble
 import ABC3.Found.GenEll.Lemma37Hdag
 import ABC3.Found.GaloisRep.TateTransport
 import ABC3.Found.GenEll.AlphaMatrix
+import ABC3.Found.GenEll.UnipotentConj
 import ABC3.Found.GenEll.PadicRedVec
 import ABC3.Found.GenEll.LCyclicPoint
 import ABC3.Found.GenEll.PointDescent
