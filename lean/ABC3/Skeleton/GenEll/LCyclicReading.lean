@@ -110,7 +110,7 @@ import ABC3.Meta.Claim
 | 2b | `x` が整なら `y` も整（Weierstrass 方程式が `y` についてモニック） | ★第 1156（`isIntegral_y_of_isIntegral_x`） |
 | 2c | `v` は多項式なので整、かつ `L` の元 ⟹ **属する** | ★第 1157（`isIntegral_veluVFull`・`mem_primeSubring_of_isIntegral_image`） |
 | 2c' | `w` の `/2` | ★第 1158（`isIntegral_veluWFull_of_addOrderOf_prime`）——再添字して既存の対を使った |
-| 2d | 悪い素点の側（`Δ_min` の関係）を安定直線で回す | ☆残る。☆局所の連鎖（`TateIsogenyK`）はすでに `ζ` を完備体で取っており、`Q` の有理性を使っていない——**`hE'` を `L̄` の側で結べ直すだけ** |
+| 2d | 悪い素点の側（`Δ_min` の関係）を安定直線で回す | ☆残る。★**使われているのは `hcurveEq` の 1 か所だけ**と実測済（下記） |
 
 ★**付値の議論（深さ `m`・`ValAtLeast` の連鎖）がまるごと要らなくなる**のが本計測の利きである。
 
@@ -129,6 +129,23 @@ import ABC3.Meta.Claim
 ☆つまり `TorsionIntegralGood.lean` の `isIntegral_veluQuotientFull_of_addOrderOf_prime`
 を `L̄` と `A ≔ integralClosure R L̄` で組み直すだけである。
 ★**新しい数学は要らない**——Finset の対を作る道具を新規に書く必要は無い。
+
+### ★★★★★★★★節点 2d（悪い素点の側）の実測（第 1159）
+
+☆`Q` の**有理性**が悪い素点の連鎖で使われているのは、実は **1 か所だけ**である。
+
+    `minDeltaExp_eq_mul_of_globalVelu'_K` の `hcurveEq`
+    ——`E' ⊗ Lv` が Tate 曲線の `μ_l` による Vélu の商に一致すること
+
+★局所の議論自体（`TateIsogenyK.lean`）は `ζ` を**完備体の中で**取っており、
+`Q` が `L` 有理であることを**一度も使っていない**。
+☆`hcurveEq` は `k • Q` の座標の `Lv` への像が `tatePhi(ζ^i)` と一致すること
+（`Lemma 3.2, (i)`、`l ∤ v(q)` から出る）である。
+
+★★**安定直線でも同じことが成り立つ**——`H` の点は `L̄` にあり、
+`Lv` の代数閉包へ埋めれば同じ `μ_l` になる。
+☆したがって 2d の中身は**埋め込み `L̄ ↪ L̄_v` の配管**であり、
+数学的な新規は無い。★重みは配管の分だけである。
 
 ### ☆別の道（採らない理由）
 
