@@ -6103,5 +6103,15 @@
   "impact": "★★☆**影響**: 在庫の `tatePhi_pointMap`（Tate 一意化の `Point.map` との可換性）は**恒等射のときしか内容を持たない**。☆同じ理由で `tate_stab_of_pointStab`・`lemma_3_2_i_tate` の`σ : L ≃ₐ[K] L` も `IsScalarTower R K L` ＋ `TateSetup R I L` から `K = L` が出るので**恒等射しか動かない**。★本セッションの第 1273 もこの影響を受ける（真だが空虚）。☆第 1272（抽象な `Φ`・`τ`・`hτ`）は影響を受けない——そちらが本体である。",
   "fix": "★正しい形は `tatePhi_map`（在庫、`σR : R →+* R` と `σK : K →+* K` の**対**を受ける、第 1275 の測定では空虚ではない）から書き直したものである。☆点の側で `Point.map` を使うには、曲線を**σ で固定される部分環 `R₀`**（例: 基礎局所体の整数環）の上に置き、`σA : K →ₐ[R₀] K` とする必要がある。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "tateSigmaAct20260902": {
+  "block": 1276,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★第 1275 の訂正を受けた形——σ の作用を Φ で共役して定める",
+  "goal": "第 1273（空虚）を、非自明な σ に当たる形に直す。",
+  "proved": "☆`Found/GenEll/Thm38SigmaAct.lean`（第 1276）に 5 本。`quotAdd`・`tateSigmaAct`（`τ ≔ Φ ∘ σU の誘導写像 ∘ Φ⁻¹`）・`tateSigmaAct_phi`（同変性、定義から）・`tateSigmaAct_unipotent`・`tateSigmaAct_exists_ne`。",
+  "route": "★`τ` を `Φ` で**共役して定義**すれば同変性 `hτ` は定義から自明であり、第 1272（抽象な形、無傷）がそのまま当たる。☆したがって「`σ` は Tate 曲線の `E[l]` に幂単かつ非自明に作用する」は**この `τ` について無条件**である。",
+  "remaining": "★残るのは **`τ` が実際の Galois 作用（点の座標に `σ` を当てる写像）と一致すること**である。☆道具は `tatePhi_map`（在庫、`σR : R →+* R` と `σK : K →+* K` の**対**——第 1275 の測定では空虚ではない）と`tateCurveAt_map`（在庫、Tate 曲線は環について自然）。★曲線を **σ で固定される部分環 `R₀`（基礎局所体の整数環）の上**に置き直すのが配管の中身である——`TateCurveNatural.lean` の冒頭の設計文（`S = R_K` で `Point.map` を使う）がまさにそれを言っている。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
