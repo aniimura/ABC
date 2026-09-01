@@ -196,6 +196,237 @@ theorem veluV2_eq_tateDYpair_any {R : Type} [CommRing R] [IsDomain R] {I : Ideal
   rw [hwe] at h
   exact h
 
+/-! ## ★★★★★★★★第 1145 —— 高階の ODE も `hDX` なしで
+
+☆`tate_d2x`・`tate_d3x`・`tate_d4x` も同じく `DX ≠ 0` で割っている。
+★同じ径数の道でどれも `hDX` が外れる。要るのは各部品の `map_*` だけである。 -/
+
+section HigherODE
+
+variable {R R' : Type} [CommRing R] [CommRing R'] {I : Ideal R} {J : Ideal R'}
+
+theorem map_tateD2Xterm' (φ : R →+* R') {t : R} (ht : IsUnit (1 - t)) :
+    φ (tateD2Xterm t) = tateD2Xterm (φ t) := by
+  rw [tateD2Xterm, tateD2Xterm, map_mul, map_mul, map_pow, map_ring_inverse φ ht,
+    map_sub, map_one]
+  congr 1
+  simp [map_ofNat]
+
+theorem map_tateD3Xterm' (φ : R →+* R') {t : R} (ht : IsUnit (1 - t)) :
+    φ (tateD3Xterm t) = tateD3Xterm (φ t) := by
+  rw [tateD3Xterm, tateD3Xterm, map_mul, map_mul, map_pow, map_ring_inverse φ ht,
+    map_sub, map_one]
+  congr 1
+  simp [map_ofNat]
+
+theorem map_tateD4Xterm' (φ : R →+* R') {t : R} (ht : IsUnit (1 - t)) :
+    φ (tateD4Xterm t) = tateD4Xterm (φ t) := by
+  rw [tateD4Xterm, tateD4Xterm, map_mul, map_mul, map_pow, map_ring_inverse φ ht,
+    map_sub, map_one]
+  congr 1
+  simp [map_ofNat]
+
+theorem map_tateD2Xtail [IsAdicComplete I R] [IsAdicComplete J R'] (φ : R →+* R')
+    (hφ : ∀ (n : ℕ) (x : R), x ∈ I ^ n → φ x ∈ J ^ n) (u q : R) (hq : q ∈ I) :
+    φ (tateD2Xtail u q hq)
+      = tateD2Xtail (φ u) (φ q) (by simpa using hφ 1 q (by simpa using hq)) := by
+  rw [tateD2Xtail, map_adicSum φ hφ, tateD2Xtail]
+  refine adicSum_congr _ _ fun n => ?_
+  rw [map_tateD2Xterm' φ (isUnit_one_sub (I := I) (pow_succ_mul_mem_I hq n)), map_mul, map_pow]
+
+theorem map_tateD3Xtail [IsAdicComplete I R] [IsAdicComplete J R'] (φ : R →+* R')
+    (hφ : ∀ (n : ℕ) (x : R), x ∈ I ^ n → φ x ∈ J ^ n) (u q : R) (hq : q ∈ I) :
+    φ (tateD3Xtail u q hq)
+      = tateD3Xtail (φ u) (φ q) (by simpa using hφ 1 q (by simpa using hq)) := by
+  rw [tateD3Xtail, map_adicSum φ hφ, tateD3Xtail]
+  refine adicSum_congr _ _ fun n => ?_
+  rw [map_tateD3Xterm' φ (isUnit_one_sub (I := I) (pow_succ_mul_mem_I hq n)), map_mul, map_pow]
+
+theorem map_tateD4Xtail [IsAdicComplete I R] [IsAdicComplete J R'] (φ : R →+* R')
+    (hφ : ∀ (n : ℕ) (x : R), x ∈ I ^ n → φ x ∈ J ^ n) (u q : R) (hq : q ∈ I) :
+    φ (tateD4Xtail u q hq)
+      = tateD4Xtail (φ u) (φ q) (by simpa using hφ 1 q (by simpa using hq)) := by
+  rw [tateD4Xtail, map_adicSum φ hφ, tateD4Xtail]
+  refine adicSum_congr _ _ fun n => ?_
+  rw [map_tateD4Xterm' φ (isUnit_one_sub (I := I) (pow_succ_mul_mem_I hq n)), map_mul, map_pow]
+
+theorem map_tateDXpair [IsAdicComplete I R] [IsAdicComplete J R'] (φ : R →+* R')
+    (hφ : ∀ (n : ℕ) (x : R), x ∈ I ^ n → φ x ∈ J ^ n)
+    (a w q : R) (hq : q ∈ I) (ha : IsUnit (1 - a)) (hwu : IsUnit (1 - w)) :
+    φ (tateDXpair a w q hq)
+      = tateDXpair (φ a) (φ w) (φ q) (by simpa using hφ 1 q (by simpa using hq)) := by
+  rw [tateDXpair, tateDXpair, map_sub, map_add, map_add,
+    map_tateDXterm φ ha, map_tateDXtail φ hφ a q hq,
+    map_tateDXterm φ hwu, map_tateDXtail φ hφ w q hq]
+
+theorem map_tateD2Xpair [IsAdicComplete I R] [IsAdicComplete J R'] (φ : R →+* R')
+    (hφ : ∀ (n : ℕ) (x : R), x ∈ I ^ n → φ x ∈ J ^ n)
+    (a w q : R) (hq : q ∈ I) (ha : IsUnit (1 - a)) (hwu : IsUnit (1 - w)) :
+    φ (tateD2Xpair a w q hq)
+      = tateD2Xpair (φ a) (φ w) (φ q) (by simpa using hφ 1 q (by simpa using hq)) := by
+  rw [tateD2Xpair, tateD2Xpair, map_add, map_add, map_add,
+    map_tateD2Xterm' φ ha, map_tateD2Xtail φ hφ a q hq,
+    map_tateD2Xterm' φ hwu, map_tateD2Xtail φ hφ w q hq]
+
+theorem map_tateD3Xpair [IsAdicComplete I R] [IsAdicComplete J R'] (φ : R →+* R')
+    (hφ : ∀ (n : ℕ) (x : R), x ∈ I ^ n → φ x ∈ J ^ n)
+    (a w q : R) (hq : q ∈ I) (ha : IsUnit (1 - a)) (hwu : IsUnit (1 - w)) :
+    φ (tateD3Xpair a w q hq)
+      = tateD3Xpair (φ a) (φ w) (φ q) (by simpa using hφ 1 q (by simpa using hq)) := by
+  rw [tateD3Xpair, tateD3Xpair, map_sub, map_add, map_add,
+    map_tateD3Xterm' φ ha, map_tateD3Xtail φ hφ a q hq,
+    map_tateD3Xterm' φ hwu, map_tateD3Xtail φ hφ w q hq]
+
+theorem map_tateD4Xpair [IsAdicComplete I R] [IsAdicComplete J R'] (φ : R →+* R')
+    (hφ : ∀ (n : ℕ) (x : R), x ∈ I ^ n → φ x ∈ J ^ n)
+    (a w q : R) (hq : q ∈ I) (ha : IsUnit (1 - a)) (hwu : IsUnit (1 - w)) :
+    φ (tateD4Xpair a w q hq)
+      = tateD4Xpair (φ a) (φ w) (φ q) (by simpa using hφ 1 q (by simpa using hq)) := by
+  rw [tateD4Xpair, tateD4Xpair, map_add, map_add, map_add,
+    map_tateD4Xterm' φ ha, map_tateD4Xtail φ hφ a q hq,
+    map_tateD4Xterm' φ hwu, map_tateD4Xtail φ hφ w q hq]
+
+end HigherODE
+
+/-! ## ★★★★★★★★★★★★高階の ODE の `hDX` なし版（第 1145） -/
+
+set_option maxHeartbeats 4000000 in
+/-- ★★★★★★★★★★**`D²X = 6X² + X + 2a₄`——`DX ≠ 0` を取らない**（第 1145）。 -/
+theorem tate_d2x_any {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
+    [IsAdicComplete I R] (a w q : R) (hq : q ∈ I) (haw : a * w = q)
+    (hau : IsUnit a) (ha : IsUnit (1 - a)) :
+    tateD2Xpair a w q hq
+      = 6 * tateXpair a w q hq ^ 2 + tateXpair a w q hq
+        + 2 * (tateCurveAt q hq).a₄ := by
+  have haa : IsUnit (a * (1 - a)) := hau.mul ha
+  have hX : (PowerSeries.X : PowerSeries GenericParamRing)
+      ∈ Ideal.span {(PowerSeries.X : PowerSeries GenericParamRing)} :=
+    Ideal.mem_span_singleton_self _
+  have hwmem : (PowerSeries.C genericTinv * PowerSeries.X : PowerSeries GenericParamRing)
+      ∈ Ideal.span {(PowerSeries.X : PowerSeries GenericParamRing)} :=
+    Ideal.mul_mem_left _ _ hX
+  have hawU : (PowerSeries.C genericT : PowerSeries GenericParamRing)
+      * (PowerSeries.C genericTinv * PowerSeries.X) = PowerSeries.X := by
+    rw [← mul_assoc, ← map_mul, genericT_mul_inv, map_one, one_mul]
+  have haU : IsUnit (1 - (PowerSeries.C genericT : PowerSeries GenericParamRing)) := by
+    have h : (1 : PowerSeries GenericParamRing) - PowerSeries.C genericT
+        = PowerSeries.C (1 - genericT) := by rw [map_sub, map_one]
+    rw [h]; exact isUnit_C_of_isUnit isUnit_one_sub_genericT
+  have hwU : IsUnit (1 - (PowerSeries.C genericTinv * PowerSeries.X
+      : PowerSeries GenericParamRing)) :=
+    isUnit_one_sub (I := Ideal.span {(PowerSeries.X : PowerSeries GenericParamRing)}) hwmem
+  have hDXU := tateDXpair_C_ne_zero_domain (A := GenericParamRing)
+    genericT_ne_zero one_add_genericT_ne_zero isUnit_one_sub_genericT hwmem
+  have hev := evalAdicMapHom_mem_pow (genericSpec a haa) q hq
+  have h := congrArg (evalAdicMapHom (genericSpec a haa) q hq)
+    (tate_d2x (PowerSeries.C genericT)
+      (PowerSeries.C genericTinv * PowerSeries.X) PowerSeries.X hX hawU haU hwU hDXU)
+  simp only [map_tateD2Xpair _ hev _ _ _ hX haU hwU,
+    map_tateD3Xpair _ hev _ _ _ hX haU hwU, map_tateD4Xpair _ hev _ _ _ hX haU hwU,
+    map_tateDXpair _ hev _ _ _ hX haU hwU, map_tateXpair _ hev _ _ _ hX haU hwU,
+    map_tateCurveAt_a4 _ hev, map_add, map_mul, map_pow, map_ofNat,
+    evalAdicMapHom_apply, evalAdicMap_C, evalAdicMap_X, genericSpec_T] at h
+  have hwe : genericSpec a haa genericTinv * q = w := by
+    have hone : a * genericSpec a haa genericTinv = 1 := by
+      have h1 : genericSpec a haa genericT * genericSpec a haa genericTinv = 1 := by
+        rw [← map_mul, genericT_mul_inv, map_one]
+      rwa [genericSpec_T] at h1
+    refine hau.mul_left_cancel ?_
+    rw [← mul_assoc, hone, one_mul, haw]
+  rw [hwe] at h
+  exact h
+
+set_option maxHeartbeats 4000000 in
+/-- ★★★★★★★★★★**`D³X = 12X·DX + DX`——`DX ≠ 0` を取らない**（第 1145）。 -/
+theorem tate_d3x_any {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
+    [IsAdicComplete I R] (a w q : R) (hq : q ∈ I) (haw : a * w = q)
+    (hau : IsUnit a) (ha : IsUnit (1 - a)) :
+    tateD3Xpair a w q hq
+      = 12 * tateXpair a w q hq * tateDXpair a w q hq + tateDXpair a w q hq := by
+  have haa : IsUnit (a * (1 - a)) := hau.mul ha
+  have hX : (PowerSeries.X : PowerSeries GenericParamRing)
+      ∈ Ideal.span {(PowerSeries.X : PowerSeries GenericParamRing)} :=
+    Ideal.mem_span_singleton_self _
+  have hwmem : (PowerSeries.C genericTinv * PowerSeries.X : PowerSeries GenericParamRing)
+      ∈ Ideal.span {(PowerSeries.X : PowerSeries GenericParamRing)} :=
+    Ideal.mul_mem_left _ _ hX
+  have hawU : (PowerSeries.C genericT : PowerSeries GenericParamRing)
+      * (PowerSeries.C genericTinv * PowerSeries.X) = PowerSeries.X := by
+    rw [← mul_assoc, ← map_mul, genericT_mul_inv, map_one, one_mul]
+  have haU : IsUnit (1 - (PowerSeries.C genericT : PowerSeries GenericParamRing)) := by
+    have h : (1 : PowerSeries GenericParamRing) - PowerSeries.C genericT
+        = PowerSeries.C (1 - genericT) := by rw [map_sub, map_one]
+    rw [h]; exact isUnit_C_of_isUnit isUnit_one_sub_genericT
+  have hwU : IsUnit (1 - (PowerSeries.C genericTinv * PowerSeries.X
+      : PowerSeries GenericParamRing)) :=
+    isUnit_one_sub (I := Ideal.span {(PowerSeries.X : PowerSeries GenericParamRing)}) hwmem
+  have hDXU := tateDXpair_C_ne_zero_domain (A := GenericParamRing)
+    genericT_ne_zero one_add_genericT_ne_zero isUnit_one_sub_genericT hwmem
+  have hev := evalAdicMapHom_mem_pow (genericSpec a haa) q hq
+  have h := congrArg (evalAdicMapHom (genericSpec a haa) q hq)
+    (tate_d3x (PowerSeries.C genericT)
+      (PowerSeries.C genericTinv * PowerSeries.X) PowerSeries.X hX hawU haU hwU hDXU)
+  simp only [map_tateD2Xpair _ hev _ _ _ hX haU hwU,
+    map_tateD3Xpair _ hev _ _ _ hX haU hwU, map_tateD4Xpair _ hev _ _ _ hX haU hwU,
+    map_tateDXpair _ hev _ _ _ hX haU hwU, map_tateXpair _ hev _ _ _ hX haU hwU,
+    map_tateCurveAt_a4 _ hev, map_add, map_mul, map_pow, map_ofNat,
+    evalAdicMapHom_apply, evalAdicMap_C, evalAdicMap_X, genericSpec_T] at h
+  have hwe : genericSpec a haa genericTinv * q = w := by
+    have hone : a * genericSpec a haa genericTinv = 1 := by
+      have h1 : genericSpec a haa genericT * genericSpec a haa genericTinv = 1 := by
+        rw [← map_mul, genericT_mul_inv, map_one]
+      rwa [genericSpec_T] at h1
+    refine hau.mul_left_cancel ?_
+    rw [← mul_assoc, hone, one_mul, haw]
+  rw [hwe] at h
+  exact h
+
+set_option maxHeartbeats 4000000 in
+/-- ★★★★★★★★★★**`D⁴X = 12X·D²X + 12(DX)² + D²X`——`DX ≠ 0` を取らない**（第 1145）。 -/
+theorem tate_d4x_any {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
+    [IsAdicComplete I R] (a w q : R) (hq : q ∈ I) (haw : a * w = q)
+    (hau : IsUnit a) (ha : IsUnit (1 - a)) :
+    tateD4Xpair a w q hq
+      = 12 * tateXpair a w q hq * tateD2Xpair a w q hq
+        + 12 * tateDXpair a w q hq ^ 2 + tateD2Xpair a w q hq := by
+  have haa : IsUnit (a * (1 - a)) := hau.mul ha
+  have hX : (PowerSeries.X : PowerSeries GenericParamRing)
+      ∈ Ideal.span {(PowerSeries.X : PowerSeries GenericParamRing)} :=
+    Ideal.mem_span_singleton_self _
+  have hwmem : (PowerSeries.C genericTinv * PowerSeries.X : PowerSeries GenericParamRing)
+      ∈ Ideal.span {(PowerSeries.X : PowerSeries GenericParamRing)} :=
+    Ideal.mul_mem_left _ _ hX
+  have hawU : (PowerSeries.C genericT : PowerSeries GenericParamRing)
+      * (PowerSeries.C genericTinv * PowerSeries.X) = PowerSeries.X := by
+    rw [← mul_assoc, ← map_mul, genericT_mul_inv, map_one, one_mul]
+  have haU : IsUnit (1 - (PowerSeries.C genericT : PowerSeries GenericParamRing)) := by
+    have h : (1 : PowerSeries GenericParamRing) - PowerSeries.C genericT
+        = PowerSeries.C (1 - genericT) := by rw [map_sub, map_one]
+    rw [h]; exact isUnit_C_of_isUnit isUnit_one_sub_genericT
+  have hwU : IsUnit (1 - (PowerSeries.C genericTinv * PowerSeries.X
+      : PowerSeries GenericParamRing)) :=
+    isUnit_one_sub (I := Ideal.span {(PowerSeries.X : PowerSeries GenericParamRing)}) hwmem
+  have hDXU := tateDXpair_C_ne_zero_domain (A := GenericParamRing)
+    genericT_ne_zero one_add_genericT_ne_zero isUnit_one_sub_genericT hwmem
+  have hev := evalAdicMapHom_mem_pow (genericSpec a haa) q hq
+  have h := congrArg (evalAdicMapHom (genericSpec a haa) q hq)
+    (tate_d4x (PowerSeries.C genericT)
+      (PowerSeries.C genericTinv * PowerSeries.X) PowerSeries.X hX hawU haU hwU hDXU)
+  simp only [map_tateD2Xpair _ hev _ _ _ hX haU hwU,
+    map_tateD3Xpair _ hev _ _ _ hX haU hwU, map_tateD4Xpair _ hev _ _ _ hX haU hwU,
+    map_tateDXpair _ hev _ _ _ hX haU hwU, map_tateXpair _ hev _ _ _ hX haU hwU,
+    map_tateCurveAt_a4 _ hev, map_add, map_mul, map_pow, map_ofNat,
+    evalAdicMapHom_apply, evalAdicMap_C, evalAdicMap_X, genericSpec_T] at h
+  have hwe : genericSpec a haa genericTinv * q = w := by
+    have hone : a * genericSpec a haa genericTinv = 1 := by
+      have h1 : genericSpec a haa genericT * genericSpec a haa genericTinv = 1 := by
+        rw [← map_mul, genericT_mul_inv, map_one]
+      rwa [genericSpec_T] at h1
+    refine hau.mul_left_cancel ?_
+    rw [← mul_assoc, hone, one_mul, haw]
+  rw [hwe] at h
+  exact h
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def veluV2_eq_tateDYpair_any.src : ABC3.Meta.Source :=

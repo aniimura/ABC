@@ -4749,5 +4749,30 @@
     "note": "☆代わりに IsUnit a を置いたが、a = ζ^i は 1 の冪根なので自動である。★w は a·w = q で決まるので特殊化の像が w に一致する。",
     "remaining": "☆残るのは節点 2(c₄・c₆ を hDX なしで)・3(exists_veluW_two)・4(Ψ₂Sq の橋)。",
     "gate": "lake build ABC3 成功(6267 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
+  },
+  "tateODEAny20260901": {
+    "block": "1145-1146",
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★★★c₄・c₆ の恒等式を hDX なしで——l = 2 の枝の節点 2 が閉じた",
+    "goal": "Lemma 3.5 から l ≠ 2 を外す(l = 2 の枝の枠、進捗 1/4 → 2/4)。",
+    "what": [
+      "★第 1145: tate_d2x_any / tate_d3x_any / tate_d4x_any——高階の ODE も同じ径数の道で hDX が外れた。要ったのは各部品の map_*(map_tateD2Xterm'・map_tateD3Xterm'・map_tateD4Xterm'・各 tail・各 pair)だけである。",
+      "★★第 1146: sum_veluV2_eq_sum_tateDYpair_any / c4_velu_tate_any / c6_velu_tate_any。代わりに使うのは IsUnit (ζ^i) で、これは ζ^l = 1 から自動である。"
+    ],
+    "keyPoint": "☆l = 2 では点が 2-捩れなので hDX : tateDXpair ≠ 0 は**偽**である。★径数 T を通せば DX ≠ 0 が成り立つので在庫がそのまま効き、T ↦ a で特殊化すれば hDX なしの形が出る。",
+    "added": {
+      "Found/GaloisRep/VeluODEAny.lean": [
+        "map_tateD2Xterm' / map_tateD3Xterm' / map_tateD4Xterm'(IsDomain 不要版)",
+        "map_tateD2Xtail / map_tateD3Xtail / map_tateD4Xtail",
+        "map_tateDXpair / map_tateD2Xpair / map_tateD3Xpair / map_tateD4Xpair",
+        "tate_d2x_any / tate_d3x_any / tate_d4x_any(★hDX なし)"
+      ],
+      "Skeleton/GenEll/TateIsogenyAny.lean (新規)": [
+        "sum_veluV2_eq_sum_tateDYpair_any",
+        "c4_velu_tate_any / c6_velu_tate_any(★hDX なし)"
+      ]
+    },
+    "remaining": "☆残るのは節点 3(exists_veluW_two——l = 2 では veluU = 0)と節点 4(Ψ₂Sq の橋)。",
+    "gate": "lake build ABC3 成功(6268 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
   }
 }
