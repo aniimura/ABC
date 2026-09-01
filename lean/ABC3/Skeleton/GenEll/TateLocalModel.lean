@@ -691,6 +691,7 @@ def isUnit_natCast_of_split.needs : List ProofObligation :=
     .citation "[ABC3]" "le_finrank_of_natCast_mem_pow(第 1039、証明済み)"
       (.inProject "ABC3" "ABC3.Skeleton.GenEll.le_finrank_of_natCast_mem_pow") 1 ]
 
+open scoped Classical in
 /-- ★★★★★★★★★★★★★★★★**[GenEll] 悪い素点で `l` は単元**——
 `l` が定義体の次数より十分大きければ。
 
@@ -703,10 +704,125 @@ def isUnit_natCast_of_split.needs : List ProofObligation :=
 theorem isUnit_natCast_at_bad_prime {L : Type} [Field L] [NumberField L]
     (p : HeightOneSpectrum (𝓞 L)) (E : WeierstrassCurve L) [E.IsElliptic]
     {l : ℕ} (hl : l.Prime) (hd : Module.finrank ℚ L + 1 < l)
+    (hssE : SemistableAt p E)
     (hbad : jExp p E < 0) (hcop : ¬ ((l : ℤ) ∣ jExp p E))
     (Q : E.toAffine.Point) (hQ : addOrderOf Q = l) :
     IsUnit ((l : (p.adicCompletionIntegers L))) := by
-  sorry
+  haveI := ABC3.Found.GaloisRep.charZero_adicCompletion L p
+  haveI := ABC3.Found.GaloisRep.charZero_adicCompletionIntegers L p
+  obtain ⟨C, hC, hc4ne, hc4⟩ :=
+    ABC3.Found.GaloisRep.exists_minimal_c4_unit_of_jExp_neg p E hssE hbad
+  have hp := ABC3.Found.GaloisRep.valuation_algebraMap_adicCompletion L p
+  haveI hCE : (C • E).IsElliptic := by
+    rw [WeierstrassCurve.isElliptic_iff, WeierstrassCurve.variableChange_Δ]
+    exact ((C.u⁻¹).isUnit.pow 12).mul E.isUnit_Δ
+  haveI hmin :=
+    ABC3.Found.GaloisRep.isMinimal_baseChange_at_bad_prime p hp E C hC hc4ne hc4
+  haveI hmult :=
+    ABC3.Found.GaloisRep.hasMultiplicativeReduction_at_bad_prime p hp E C hC hc4ne hc4 hbad
+  have hjC : jExp p (C • E) < 0 := by
+    rw [ABC3.Found.GaloisRep.jExp_variableChange p E C]; exact hbad
+  have hcopC : ¬ ((l : ℤ) ∣ jExp p (C • E)) := by
+    rw [ABC3.Found.GaloisRep.jExp_variableChange p E C]; exact hcop
+  have hQ' : addOrderOf (ABC3.Found.GenEll.vcPoint C E Q) = l := by
+    rw [ABC3.Found.GenEll.addOrderOf_vcPoint C E Q]; exact hQ
+  have hA := ABC3.Found.GaloisRep.integralModel_c4_isUnit
+    (R := p.adicCompletionIntegers L) ((C • E).baseChange (p.adicCompletion L))
+  by_cases hs : WeierstrassCurve.HasSplitMultiplicativeReduction (p.adicCompletionIntegers L)
+      ((C • E).baseChange (p.adicCompletion L))
+  · exact isUnit_natCast_of_split p (C • E) hs hl hd hjC hcopC hQ'
+  · -- ★非分裂——不分岐 2 次拡大で ζ を作り、付値で降ろす
+    by_contra hnu
+    have hfm := ABC3.Found.GaloisRep.monic_splitQuadPoly _ hA
+    have hfd := ABC3.Found.GaloisRep.natDegree_splitQuadPoly _ hA
+    have hirr := ABC3.Found.GaloisRep.irreducible_map_residue_of_not_splits hfm hfd
+      (fun hsp => hs (ABC3.Found.GaloisRep.hasSplit_of_splits_splitQuadPoly _ hA hsp))
+    haveI hdom := ABC3.Found.GaloisRep.isDomain_adjoinRoot hfm hirr
+    haveI hlocR := ABC3.Found.GaloisRep.isLocalRing_adjoinRoot hfm hfd hirr
+    haveI hdvr := ABC3.Found.GaloisRep.isDiscreteValuationRing_adjoinRoot hfm hfd hirr
+    haveI hcomp0 : IsAdicComplete
+        (IsLocalRing.maximalIdeal (p.adicCompletionIntegers L))
+        (AdjoinRoot (ABC3.Found.GaloisRep.splitQuadPoly
+          (WeierstrassCurve.integralModel (p.adicCompletionIntegers L)
+            ((C • E).baseChange (p.adicCompletion L))) hA)) :=
+      ABC3.Found.GaloisRep.isAdicComplete_adjoinRoot _ hfm hfd
+    haveI hcomp : IsAdicComplete
+        (IsLocalRing.maximalIdeal (AdjoinRoot (ABC3.Found.GaloisRep.splitQuadPoly
+          (WeierstrassCurve.integralModel (p.adicCompletionIntegers L)
+            ((C • E).baseChange (p.adicCompletion L))) hA)))
+        (AdjoinRoot (ABC3.Found.GaloisRep.splitQuadPoly
+          (WeierstrassCurve.integralModel (p.adicCompletionIntegers L)
+            ((C • E).baseChange (p.adicCompletion L))) hA)) := by
+      rw [ABC3.Found.GaloisRep.maximalIdeal_adjoinRoot_eq_map hfm hfd hirr]
+      exact ABC3.Found.GaloisRep.isAdicComplete_map_algebraMap _
+    haveI hchar0 : CharZero (AdjoinRoot (ABC3.Found.GaloisRep.splitQuadPoly
+        (WeierstrassCurve.integralModel (p.adicCompletionIntegers L)
+          ((C • E).baseChange (p.adicCompletion L))) hA)) :=
+      charZero_of_injective_algebraMap
+        (ABC3.Found.GaloisRep.algebraMap_adjoinRoot_injective hfm hfd)
+    haveI hchar0K : CharZero (FractionRing (AdjoinRoot
+        (ABC3.Found.GaloisRep.splitQuadPoly
+          (WeierstrassCurve.integralModel (p.adicCompletionIntegers L)
+            ((C • E).baseChange (p.adicCompletion L))) hA))) :=
+      IsFractionRing.charZero _
+    letI : Algebra L (FractionRing (AdjoinRoot
+        (ABC3.Found.GaloisRep.splitQuadPoly (WeierstrassCurve.integralModel
+          (p.adicCompletionIntegers L)
+          ((C • E).baseChange (p.adicCompletion L))) hA))) :=
+      ((ABC3.Found.GaloisRep.quadFieldHom (K := p.adicCompletion L) hfm hfd).comp
+        (algebraMap L (p.adicCompletion L))).toAlgebra
+    have halg : ∀ x : L, algebraMap L (FractionRing (AdjoinRoot
+        (ABC3.Found.GaloisRep.splitQuadPoly (WeierstrassCurve.integralModel
+          (p.adicCompletionIntegers L)
+          ((C • E).baseChange (p.adicCompletion L))) hA))) x
+        = ABC3.Found.GaloisRep.quadFieldHom hfm hfd
+          (algebraMap L (p.adicCompletion L) x) := fun _ => rfl
+    haveI hmin' :=
+      ABC3.Found.GaloisRep.isMinimal_baseChange_ext p hp hfm hfd hirr halg E C hC hc4ne hc4
+    haveI hmult' := ABC3.Found.GaloisRep.hasMultiplicativeReduction_ext p hp hfm hfd hirr
+      halg E C hC hc4ne hc4 hbad
+    have h' := ABC3.Found.GaloisRep.hasSplitMultiplicativeReduction_ext (C • E) hA rfl halg
+    have hp' := ABC3.Found.GaloisRep.valuation_algebraMap_ext p hp hfm hfd hirr halg
+    have hΔ' := ABC3.Found.GaloisRep.tateModel_map_Delta_ne_zero
+      ((C • E).baseChange (FractionRing (AdjoinRoot _))) h'
+    letI : DecidableEq (FractionRing (AdjoinRoot (ABC3.Found.GaloisRep.splitQuadPoly
+      (WeierstrassCurve.integralModel (p.adicCompletionIntegers L)
+        ((C • E).baseChange (p.adicCompletion L))) hA))) := Classical.decEq _
+    have hcop'' := ABC3.Found.GaloisRep.not_dvd_vAdd_tateParam_of_not_dvd_jExp p hp'
+      (C • E) h' hjC hcopC
+    obtain ⟨P, hP, hP0⟩ := ABC3.Found.GaloisRep.exists_point_tateModel (C • E) h' hl hQ'
+    obtain ⟨ζ, uζ, hζ, hζu, hζl, hord, hPz⟩ :=
+      ABC3.Found.GenEll.exists_primitiveRoot_of_torsion_point
+        (tateParamR ((C • E).baseChange (FractionRing (AdjoinRoot _))) h')
+        (tateParamR_mem ((C • E).baseChange (FractionRing (AdjoinRoot _))) h')
+        (tateParamR_ne_zero ((C • E).baseChange (FractionRing (AdjoinRoot _))) h')
+        hΔ' hl hcop'' P hP hP0
+    have hlm : ((l : ℕ) : (p.adicCompletionIntegers L))
+        ∈ IsLocalRing.maximalIdeal (p.adicCompletionIntegers L) := by
+      by_contra hc
+      exact hnu (IsLocalRing.notMem_maximalIdeal.1 hc)
+    have hnu' : ¬ IsUnit ((l : AdjoinRoot (ABC3.Found.GaloisRep.splitQuadPoly
+        (WeierstrassCurve.integralModel (p.adicCompletionIntegers L)
+          ((C • E).baseChange (p.adicCompletion L))) hA))) := by
+      intro hu
+      refine IsLocalRing.notMem_maximalIdeal.2 hu ?_
+      have hcast : ((l : ℕ) : AdjoinRoot (ABC3.Found.GaloisRep.splitQuadPoly
+        (WeierstrassCurve.integralModel (p.adicCompletionIntegers L)
+          ((C • E).baseChange (p.adicCompletion L))) hA))
+          = algebraMap (p.adicCompletionIntegers L)
+            (AdjoinRoot (ABC3.Found.GaloisRep.splitQuadPoly
+        (WeierstrassCurve.integralModel (p.adicCompletionIntegers L)
+          ((C • E).baseChange (p.adicCompletion L))) hA))
+            ((l : ℕ) : (p.adicCompletionIntegers L)) := (map_natCast _ l).symm
+      rw [ABC3.Found.GaloisRep.maximalIdeal_adjoinRoot_eq_map hfm hfd hirr, hcast]
+      exact Ideal.mem_map_of_mem _ hlm
+    have hmemR' :=
+      ABC3.Found.GaloisRep.natCast_mem_maximalIdeal_pow_of_not_isUnit hl hζ hnu'
+    have hmemR := ABC3.Found.GaloisRep.natCast_mem_pow_of_mem_pow_quadExt
+      (K := p.adicCompletion L) hfm hfd hirr hmemR'
+    have hmem2 := natCast_mem_pow_of_mem_pow_completion p (m := l) (k := l - 1) hmemR
+    have hle := le_finrank_of_natCast_mem_pow p hl hmem2
+    omega
 
 def isUnit_natCast_iff_notMem.src : Source :=
   { paper := "GenEll", pdfPage := 18,
@@ -750,7 +866,7 @@ theorem isMuAtBadPrimes_of_veluQuotient_of_large {L : Type} [Field L] [NumberFie
     (hcop : ∀ p : HeightOneSpectrum (𝓞 L), jExp p E < 0 → ¬ ((l : ℤ) ∣ jExp p E)) :
     IsMuAtBadPrimes E E' l :=
   isMuAtBadPrimes_of_veluQuotient_of_coprime E E' hl hodd Q hQ hE' hssE hssE' hcop
-    (fun p hbad => isUnit_natCast_at_bad_prime p E hl hd hbad (hcop p hbad) Q hQ)
+    (fun p hbad => isUnit_natCast_at_bad_prime p E hl hd (hssE p) hbad (hcop p hbad) Q hQ)
 
 def isMuAtBadPrimes_of_veluQuotient_of_large.src : Source :=
   { paper := "GenEll", pdfPage := 17,
