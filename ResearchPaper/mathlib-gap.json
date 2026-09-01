@@ -5871,5 +5871,15 @@
     "what": "★h4 : c₄(E_q) + 240·v = l⁴·c₄(E_{q^l})、h6 : c₆(E_q) + 504·v + 6048·w = l⁶·c₆(E_{q^l})。ここで v, w は μ_l の点の Vélu の和(veluQuotientFull_tate_mu_K、第 1134 系が K の元として与える)。",
     "consequence": "☆これを入れれば j_velu_tate_eq_K(第 1251) → jExp_eq_mul_of_j_tate_pow(第 997) → minDeltaExp_eq_mul_of_jExp_all(第 1247) → degInfJ_quotLCyclicJ_of_jExp(第 1248) と繋がり、witness の sorry (2) が落ちる。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "c4c6Tate20260902": {
+    "block": 1253,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★Tate 曲線の c₄・c₆ を a₄・a₆ で書く——h4・h6 を級数の等式に落とす",
+    "goal": "witness の sorry (2) の最深の前提 h4・h6。",
+    "what": "★c₄_tateCurveAt(c₄ = 1 − 48·a₄)と c₆_tateCurveAt(c₆ = −1 + 72·a₄ − 864·a₆)(Found/GaloisRep/TateVelu.lean)。",
+    "measured": "☆Tate 曲線は a₁ = 1・a₂ = 0・a₃ = 0 なので b₂ = 1・b₄ = 2a₄・b₆ = 4a₆。★これで h4・h6 は a₄・a₆ の**級数の等式**に落ちる —— c₄・c₆ の定義を展開する手間が消えた。",
+    "consequence": "☆残るのは a₄(q)・a₆(q) の q 展開と μ_l の Vélu 和 v, w の関係(古典的な E₄・E₆ の恒等式)だけである。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

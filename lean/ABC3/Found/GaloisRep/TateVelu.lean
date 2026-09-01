@@ -186,6 +186,16 @@ theorem j_velu_tate_eq_map {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
     rw [map_add, map_add, map_mul, map_mul, map_ofNat, map_ofNat]
     exact h
 
+def c₄_tateCurveAt.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(Tate 曲線の c₄ = 1 − 48·a₄。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def c₆_tateCurveAt.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(Tate 曲線の c₆ = −1 + 72·a₄ − 864·a₆。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
 def j_velu_tate_eq_K.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (ii)(K の上で v, w を取った形の j_velu_tate_eq。★無条件)",
@@ -226,6 +236,27 @@ def two_y_add_x_sq.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Definition 3.3((2Y+X)² = 4X³ + X² + 4a₄X + 4a₆。★無条件)",
     sectionId := "genell-def-3-3" }
+
+/-! ## ★★★★★★★★`c₄`・`c₆` を `a₄`・`a₆` で書く -/
+
+/-- ★★★★★★**Tate 曲線の `c₄ = 1 − 48·a₄`**——★**無条件**（第 1253）。
+
+☆`a₁ = 1`・`a₂ = 0`・`a₃ = 0` なので `b₂ = 1`・`b₄ = 2a₄`。 -/
+theorem c₄_tateCurveAt [IsAdicComplete I R] (q : R) (hq : q ∈ I) :
+    (tateCurveAt q hq).c₄ = 1 - 48 * (tateCurveAt q hq).a₄ := by
+  simp only [WeierstrassCurve.c₄, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
+    tateCurveAt_a₁, tateCurveAt_a₂, tateCurveAt_a₃]
+  ring
+
+/-- ★★★★★★**Tate 曲線の `c₆ = −1 + 72·a₄ − 864·a₆`**——★**無条件**（第 1253）。
+
+☆`b₆ = 4a₆` なので `c₆ = −b₂³ + 36b₂b₄ − 216b₆`。 -/
+theorem c₆_tateCurveAt [IsAdicComplete I R] (q : R) (hq : q ∈ I) :
+    (tateCurveAt q hq).c₆
+      = -1 + 72 * (tateCurveAt q hq).a₄ - 864 * (tateCurveAt q hq).a₆ := by
+  simp only [WeierstrassCurve.c₆, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
+    WeierstrassCurve.b₆, tateCurveAt_a₁, tateCurveAt_a₂, tateCurveAt_a₃]
+  ring
 
 /-- ★★★★★★★★★★★★★★★★
 **`K` の上で `v, w` を取った形の `j_velu_tate_eq`**——★**無条件**（第 1251）。
