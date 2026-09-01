@@ -204,6 +204,21 @@ theorem mem_primeSubring_y_of_mem_x (p : HeightOneSpectrum (𝓞 L))
   omega
 
 
+/-- ☆**`v_p(n) = 0` なら `n` は `primeSubring p` で単元**。 -/
+theorem isUnit_natCast_primeSubring (p : HeightOneSpectrum (𝓞 L)) {n : ℕ}
+    (hn : ((n : L)) ≠ 0) (hval : valAdd p (Units.mk0 ((n : L)) hn) = 0) :
+    IsUnit ((n : primeSubring p)) := by
+  have hinv : valAdd p (Units.mk0 ((n : L)) hn)⁻¹ = 0 := by
+    rw [valAdd_inv, hval, neg_zero]
+  have hmem : ((n : L))⁻¹ ∈ primeSubring p := by
+    rw [mem_primeSubring_iff]
+    have h := (valAdd_nonneg_iff p (Units.mk0 ((n : L)) hn)⁻¹).1 (le_of_eq hinv.symm)
+    simpa using h
+  refine ⟨⟨(n : primeSubring p), ⟨((n : L))⁻¹, hmem⟩, ?_, ?_⟩, rfl⟩ <;>
+    · apply Subtype.ext
+      push_cast
+      field_simp
+
 /-! ## ★★★★★★★★★★★★★★★★第 1074 —— すべての倍点の座標が整 -/
 
 /-- ★★★★★★★★★★★★★★★★**位数 `l` の点のすべての倍点の座標は整**（第 1074）。

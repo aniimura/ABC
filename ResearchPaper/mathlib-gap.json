@@ -4064,5 +4064,18 @@
     "remaining": "☆残るのは**組み立てだけ**である: (a) `l` が素数なので `k • Q`（`k = 1..l−1`）も位数 `l`、よって座標は `R` の元、(b) `veluVFull`・`veluWFull` は座標の多項式なので `R` の元、(c) よって `E′ = veluQuotientFull E S` は `p` で整。★これで `isIntegral_veluQuotientFull_of_coprime`（第 1052）が閉じる。",
     "lesson": "★★**教訓**: 「mathlib に無い」で止めず**プロジェクト内を振る舞いで引く**。☆概念名（`formalGroup`）では引っかからず、`exists_divisor_root` という名前で2 年前から在庫にあった。`tools/lean-idioms.md` に記録済み。",
     "note": "★944-1073 の 124 ブロック。"
+  },
+  "veluIntegralClosed20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1074-1075",
+    "supersedes": "torsionIntegralGood20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "headline": "★★★★★★★★**`isIntegral_veluQuotientFull_of_coprime`（第 1052）が閉じた**。☆`Lemma 3.5` の整性の節点は `sorry`-free になった。",
+    "theorem": "`isIntegral_veluQuotientFull_of_addOrderOf_prime`（第 1074、`Found`）——`E` が `p` で整・`l` が奇素数・`l` が `primeSubring p` で単元・`addOrderOf Q = l` ならば`veluQuotientFull E (⟨Q⟩∖{O} の座標集合)` は `p` で整。",
+    "assembly": "☆組み立ては在庫だけで済んだ: `pointCoords_mem_of_addOrderOf_prime`（第 1074、`l` 素数なので `k•Q` も位数 `l`）＋ `exists_veluW_of_inv`（第 960、添字の反転が点の反転なので `veluWFull` の `/2` が消える）＋ `veluQuotientFull_image_eq`（座標が `R` の元なら商は `veluCurve Wi v w` の底変換）。",
+    "noRestriction": "★★**良い素点への制限は要らなかった**——`E` が `p` で整で `p ∤ l` でありさえすればよい。☆第 1067-1071 の「形式群が要る」という測定は誤りであった。",
+    "idiom": "☆配管: `Finset.image` の `DecidableEq` ダイヤモンド。`veluQuotientFull_image_eq` は `open scoped Classical` の下にあるので `Classical.propDecidable` を使う。`[DecidableEq L]` を binder で持つと `instDecidableEqProd` になって型が合わない。節ごと `open scoped Classical` に統一する。",
+    "remaining": "☆次は `hfin` である。`hint`（`E′` が各素点で整）は `p ∤ l` の素点では出たが、`p ∣ l` の有限個では Vélu のモデルは整とは限らない。★`lemma_3_5_velu_defect`（第 1050）が受ける `hfin` をどう供給するかが残りの設計である。",
+    "note": "★944-1075 の 126 ブロック。"
   }
 }

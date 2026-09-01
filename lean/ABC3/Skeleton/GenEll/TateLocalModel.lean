@@ -12,6 +12,7 @@ import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
 import ABC3.Skeleton.GenEll.TateIsogeny
 import ABC3.Found.GaloisRep.Lemma35Ineq
 import ABC3.Found.GaloisRep.UnramQuad
+import ABC3.Found.GaloisRep.TorsionIntegralGood
 
 /-!
 # `Lemma 3.5` に残る 2 つ —— **局所モデルの完備化への移行**（`Skeleton`）
@@ -1098,14 +1099,16 @@ Vélu の係数（`veluVFull`・`veluWFull`）はその多項式だから整に�
 theorem isIntegral_veluQuotientFull_of_coprime {L : Type} [Field L] [NumberField L]
     (p : HeightOneSpectrum (𝓞 L)) (E E' : WeierstrassCurve L)
     [E.IsElliptic] [E'.IsElliptic]
-    {l : ℕ} (hl : l.Prime)
-    (hlu : IsUnit ((l : (p.adicCompletionIntegers L))))
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    (hlu : IsUnit ((l : (primeSubring p))))
     (hEint : E.IsIntegral (primeSubring p))
     (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
     (hE' : E' = veluQuotientFull E (((range l).erase 0).image
       (fun k : ℕ => pointCoords (k • Q)))) :
     E'.IsIntegral (primeSubring p) := by
-  sorry
+  subst hE'
+  haveI := hEint
+  exact ABC3.Found.GaloisRep.isIntegral_veluQuotientFull_of_addOrderOf_prime p E hl hodd hlu Q hQ
 
 def isIntegral_veluQuotientFull_of_coprime.src : Source :=
   { paper := "GenEll", pdfPage := 17,
