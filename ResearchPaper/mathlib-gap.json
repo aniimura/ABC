@@ -5223,5 +5223,19 @@
     "measured": "★★**valAdd と ordAt は同じ定義**(-toAdd (unzero …))なので `rfl` で繋がり、LocalHeightRamified.lean の ordAt_liesOver がそのまま効く。☆第 320 の vAdd_algebraMap_eq_valAdd は不分岐を仮定していたが、分岐版はすでに在庫にあった——別の名前で置かれていたので第 1186 では見えていなかった。",
     "frame": "☆SemistableAt の底変換: 良い還元の場合は第 1187、分岐の valAdd は第 1188。★残るのは極小モデルを上げて isMinimal_of_c4_vAdd_eq_zero(第 320)を当てる組み立てだけ。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "semistableBaseChangeLeafRefined20260902": {
+    "block": 1189,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★SemistableAt の底変換に残る最後の葉——primeSubring 版の極小性判定",
+    "goal": "l-巡回の 2 つの読みを繋ぐ(第 1152 の枠、節点 2d-1)。",
+    "measured": "★★SemistableAt の底変換の第 2 の場合(極小モデル C で v_p(c₄) = 0)を組み立てようとして測った: ☆`isMinimal_of_c4_vAdd_eq_zero`(第 320、Found/GaloisRep/LocalHeightDelta.lean:88)は **完備 DVR `R` と `tateDvrVal R K` の言葉**で書かれており、`SemistableAt` が使う `IsMinimal (primeSubring p)` と `valAdd p` の言葉では**ない**。★したがって「`v_p(c₄) = 0` なら `primeSubring p` 上極小」の版が要る。",
+    "havePieces": [
+      "★第 1187 minDeltaExp_baseChange_eq_zero —— 良い還元の場合(第 1 の disjunct)",
+      "★第 1188 valAdd_algebraMap_liesOver —— 分岐した拡大での valAdd のスケーリング",
+      "★mathlib の map_variableChange —— (C.map φ) • (W.map φ) = (C • W).map φ",
+      "☆残る葉: isMinimal_of_c4_vAdd_eq_zero の primeSubring 版"
+    ],
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

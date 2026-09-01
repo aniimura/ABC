@@ -224,7 +224,16 @@ import ABC3.Meta.Claim
 `ordAt_liesOver` がそのまま `valAdd P (algebraMap x) = e·valAdd p x` を与える。
 
 ★良い還元の場合は第 1187（`minDeltaExp_baseChange_eq_zero`）で取れているので、
-☆残るのは**極小モデルを上げて `isMinimal_of_c4_vAdd_eq_zero` を当てる組み立てだけ**である。
+☆残るのは極小モデルを上げて極小性を出す段である。
+
+##### ★★★★第 1189 の実測——最後の葉は `primeSubring` 版の極小性判定
+
+`isMinimal_of_c4_vAdd_eq_zero`（第 320、`Found/GaloisRep/LocalHeightDelta.lean:88`）は
+**完備 DVR `R` と `tateDvrVal R K` の言葉**で書かれており、
+`SemistableAt` が使う `IsMinimal (primeSubring p)` と `valAdd p` の言葉では**ない**。
+
+★したがって「`v_p(c₄) = 0` なら `primeSubring p` 上極小」の版が 1 つ要る。
+☆それ以外の部品は揃っている（第 1187・第 1188・mathlib の `map_variableChange`）。
 
 ### ☆別の道（採らない理由）
 
