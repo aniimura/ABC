@@ -3443,5 +3443,28 @@
     ],
     "remaining": "☆不分岐 2 次拡大の残り: (1) `R′ = R[X]/(f)` が**局所環**であること（`f̄` が剰余体で既約なら `R′/𝔪R′` は体、mathlib の `isLocalRing_of_isAdicComplete_maximal` に第 1012 を当てる）、(2) `R′` が離散付値環（極大イデアルが `𝔪R′` で主）、(3) 付値の橋 `hp′`（不分岐なので `e = 1`）、(4) 剰余体の 2 次拡大で 2 次式が分裂すること。★★`p ∣ 2` も含めて扱うには `f` を「剰余が既約な 2 次モニック」に取る（`X² − d` は剰余標数 2 では既約にならない——Artin–Schreier が要る）。",
     "note": "★944-1012 の 64 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
+  },
+  "adjoinRootLocal20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1013-1015",
+    "supersedes": "adicCompleteProduct20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "★★★★★★★★`isAdicComplete_map_algebraMap`（1013）——`R`-加群としての `I`-進完備性を `R′` のイデアル `I.map φ` に対する完備性に移す。☆`Ideal.smul_top_eq_map` で両辺の台集合が `(I^n).map φ` に一致することを見る。",
+      "★★★★★★★★`isMaximal_map_adjoinRoot`（1014）——`f̄` が既約なら `I · R[X]/(f)` は極大。☆`AdjoinRoot.quotAdjoinRootEquivQuotPolynomialQuot` で `k[X]/(f̄)` に移し、`k[X]` が PID であることから極大性を得る。",
+      "★★★★★★★★★★★★`isLocalRing_adjoinRoot`（1015）——`R[X]/(f)` は局所環（`f` は 2 次モニック、`f̄` 既約）。☆1012（完備）＋1013（橋）＋1014（極大）を mathlib の`isLocalRing_of_isAdicComplete_maximal` に流す。"
+    ],
+    "unramQuadPlan": [
+      "★捻り `d` を取る —— 第 992／993 で**済**",
+      "★`d` が平方でなければ `K` でも平方でない —— 第 1007 で**済**",
+      "★`X² − d` が既約 —— 第 1008 で**済**",
+      "★`R[X]/(f)` が `I`-進完備 —— 第 1012 で**済**",
+      "★`R[X]/(f)` が**局所環** —— 第 1015 で**済**",
+      "☆`R′` が離散付値環（極大が `𝔪R′` で主、`f` 既約から整域）—— 残",
+      "☆`Frac R′ = K[X]/(f)` —— 残",
+      "☆付値の橋 `hp′`（不分岐なので `e = 1`）—— 残",
+      "☆剰余体の 2 次拡大で 2 次式が分裂 —— 残"
+    ],
+    "note": "★944-1015 の 67 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
   }
 }

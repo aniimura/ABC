@@ -5,6 +5,7 @@ import ABC3.Found.GaloisRep.BadPrimeData
 import Mathlib.FieldTheory.KummerExtension
 import Mathlib.RingTheory.AdicCompletion.Basic
 import Mathlib.RingTheory.AdjoinRoot
+import Mathlib.RingTheory.AdicCompletion.LocalRing
 
 /-!
 # 第 1007 ブロック —— **★★★★★★★★不分岐 2 次拡大の葉**（`Found`）
@@ -245,6 +246,95 @@ theorem isAdicComplete_adjoinRoot (I : Ideal R) [IsAdicComplete I R]
   isAdicComplete_of_linearEquiv I (adjoinRootEquivProd hf hdeg).symm
 
 end AdicProd
+
+/-! ## ★★★★★★★★★★★★第 1013-1015 —— `R[X]/(f)` は局所環
+
+★第 1012 は `IsAdicComplete I (AdjoinRoot f)` を **`R`-加群として**与える。
+☆mathlib の `isLocalRing_of_isAdicComplete_maximal` が欲しいのは
+**`AdjoinRoot f` 自身のイデアル**に対する完備性なので、その橋が要る（第 1013）。
+
+★極大性は `R′/𝔪R′ ≅ k[X]/(f̄)` であり、`f̄` が既約なら体である（第 1014）。
+☆両方を合わせれば `R′` は局所環である（第 1015）。 -/
+
+section LocalAdjoinRoot
+
+variable {R : Type} [CommRing R]
+
+/-- ★★★★**`I^n • ⊤`（`R`-加群）と `(I.map φ)^n • ⊤`（`R′`-加群）は同じ集合**。 -/
+theorem mem_smul_top_iff_map {R' : Type} [CommRing R'] [Algebra R R']
+    (I : Ideal R) (n : ℕ) (x : R') :
+    x ∈ (I.map (algebraMap R R')) ^ n • (⊤ : Submodule R' R')
+      ↔ x ∈ I ^ n • (⊤ : Submodule R R') := by
+  have h1 : ((I.map (algebraMap R R')) ^ n) • (⊤ : Submodule R' R')
+      = (I ^ n).map (algebraMap R R') := by
+    rw [← Ideal.map_pow, Ideal.smul_top_eq_map (S := R') ((I ^ n).map (algebraMap R R'))]
+    ext y
+    simp [Ideal.map_id]
+  rw [h1, Ideal.smul_top_eq_map (S := R') (I ^ n)]
+  rfl
+
+theorem isHausdorff_map_algebraMap {R' : Type} [CommRing R'] [Algebra R R']
+    (I : Ideal R) [IsHausdorff I R'] : IsHausdorff (I.map (algebraMap R R')) R' where
+  haus' := by
+    intro x hx
+    refine IsHausdorff.haus' (I := I) (M := R') x (fun n => (SModEq.sub_mem).2 ?_)
+    exact (mem_smul_top_iff_map I n _).1 ((SModEq.sub_mem).1 (hx n))
+
+theorem isPrecomplete_map_algebraMap {R' : Type} [CommRing R'] [Algebra R R']
+    (I : Ideal R) [IsPrecomplete I R'] : IsPrecomplete (I.map (algebraMap R R')) R' where
+  prec' := by
+    intro f hf
+    obtain ⟨L, hL⟩ := IsPrecomplete.prec' (I := I) (M := R') f (by
+      intro m n hmn
+      exact (SModEq.sub_mem).2 ((mem_smul_top_iff_map I m _).1 ((SModEq.sub_mem).1 (hf hmn))))
+    exact ⟨L, fun n => (SModEq.sub_mem).2
+      ((mem_smul_top_iff_map I n _).2 ((SModEq.sub_mem).1 (hL n)))⟩
+
+/-- ★★★★★★★★**`R`-加群としての `I`-進完備性は
+`R′` のイデアル `I.map φ` に対する完備性に移る**（第 1013）。 -/
+theorem isAdicComplete_map_algebraMap {R' : Type} [CommRing R'] [Algebra R R']
+    (I : Ideal R) [IsAdicComplete I R'] : IsAdicComplete (I.map (algebraMap R R')) R' :=
+  { toIsHausdorff := isHausdorff_map_algebraMap I,
+    toIsPrecomplete := isPrecomplete_map_algebraMap I }
+
+open Polynomial in
+/-- ★★★★★★★★**`f̄` が既約なら `I · R[X]/(f)` は極大**（第 1014）。
+
+☆`AdjoinRoot f / I ≅ k[X]/(f̄)` であり、`k` が体なら `k[X]` は PID、
+既約元が生成するイデアルは極大である。 -/
+theorem isMaximal_map_adjoinRoot (I : Ideal R) [I.IsMaximal]
+    {f : R[X]} (hirr : Irreducible (f.map (Ideal.Quotient.mk I))) :
+    (I.map (AdjoinRoot.of f)).IsMaximal := by
+  letI : Field (R ⧸ I) := Ideal.Quotient.field I
+  haveI hmax : (Ideal.span {f.map (Ideal.Quotient.mk I)}).IsMaximal :=
+    PrincipalIdealRing.isMaximal_of_irreducible hirr
+  refine Ideal.Quotient.maximal_of_isField _ ?_
+  refine MulEquiv.isField ?_ (AdjoinRoot.quotAdjoinRootEquivQuotPolynomialQuot I f).toMulEquiv
+  exact (Ideal.Quotient.maximal_ideal_iff_isField_quotient _).1 hmax
+
+open Polynomial in
+/-- ★★★★★★★★★★★★**`R[X]/(f)` は局所環**（第 1015）。
+
+★`f` は 2 次のモニックで、剰余体での還元 `f̄` が既約であるとする。
+☆第 1012（完備）＋第 1013（橋）＋第 1014（極大）を
+mathlib の `isLocalRing_of_isAdicComplete_maximal` に流す。 -/
+theorem isLocalRing_adjoinRoot [IsLocalRing R]
+    [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    {f : R[X]} (hf : f.Monic) (hdeg : f.natDegree = 2)
+    (hirr : Irreducible (f.map (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R)))) :
+    IsLocalRing (AdjoinRoot f) := by
+  haveI : IsAdicComplete (IsLocalRing.maximalIdeal R) (AdjoinRoot f) :=
+    isAdicComplete_adjoinRoot (IsLocalRing.maximalIdeal R) hf hdeg
+  haveI hcomp : IsAdicComplete
+      ((IsLocalRing.maximalIdeal R).map (algebraMap R (AdjoinRoot f))) (AdjoinRoot f) :=
+    isAdicComplete_map_algebraMap _
+  haveI hmax : ((IsLocalRing.maximalIdeal R).map (algebraMap R (AdjoinRoot f))).IsMaximal := by
+    rw [AdjoinRoot.algebraMap_eq]
+    exact isMaximal_map_adjoinRoot (IsLocalRing.maximalIdeal R) hirr
+  exact isLocalRing_of_isAdicComplete_maximal
+    ((IsLocalRing.maximalIdeal R).map (algebraMap R (AdjoinRoot f)))
+
+end LocalAdjoinRoot
 
 /-! ## ★出典の紐付け(`.src`) -/
 

@@ -2593,3 +2593,22 @@ have hcurveEq : veluQuotientFull W (image (fun k => pointCoords (k • P)) s)
 
 **併せて**: `j` を跨ぐ書き換えは motive が壊れる(`IsElliptic` が邪魔)。
 **曲線の水準で等式を作ってから** `ABC3.Found.GenEll.j_congr_curve` で `j` に移すと安全。
+
+## Python でファイルを書き換えるとき、開いた瞬間に空になる(第 1013)
+
+**失敗形**: `io.open(path,'w')` に渡す文字列の組み立てで例外が出ると、
+**ファイルはすでに truncate されていて 0 バイトになる**。
+(実例: `u'𝔪'` のようなサロゲート対を書くと
+`UnicodeEncodeError: surrogates not allowed` が出る。𝔪 は `\U0001D52A`。)
+
+**直し方**: **書き切ってから置換する**。
+
+```python
+tmp = src + '.tmp'
+io.open(tmp, 'w', encoding='utf-8', newline='\n').write(out)
+os.replace(tmp, src)
+```
+
+**併せて**: Lean のコード片は Write ツールで別ファイルに書き、
+Python はそれを読んで挿入するだけにすると、エスケープ事故そのものが起きない。
+壊したときは `git checkout HEAD -- <path>` で戻す(だからこまめに commit する)。
