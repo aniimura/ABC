@@ -3466,5 +3466,28 @@
       "☆剰余体の 2 次拡大で 2 次式が分裂 —— 残"
     ],
     "note": "★944-1015 の 67 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
+  },
+  "adjoinRootDvr20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1016-1018",
+    "supersedes": "adjoinRootLocal20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "★★★★★★★★`irreducible_of_irreducible_residue`（1016）——剰余体で既約なモニック多項式は `R` でも既約。☆mathlib の `Monic.irreducible_of_irreducible_map_of_isPrime_nilradical`。",
+      "★★★★★★★★`isDomain_adjoinRoot`（1017）——`R[X]/(f)` は整域（UFD で既約＝素、`AdjoinRoot.isDomain_of_prime`）。",
+      "★★★★★★★★★★★★★★★★`isDiscreteValuationRing_adjoinRoot`（1018）——`R[X]/(f)` は離散付値環。☆極大イデアルは `𝔪R′`（1014／1015）で、`𝔪 = (π)` の像は `(φ π)` なので**主**。★`IsDiscreteValuationRing.TFAE` の (5) ⟹ (1) がそのまま当たる。"
+    ],
+    "unramQuadPlan": [
+      "★捻り `d` を取る —— 第 992／993 **済**",
+      "★`d` が平方でなければ `K` でも平方でない —— 第 1007 **済**",
+      "★`X² − d` が既約 —— 第 1008 **済**",
+      "★`R[X]/(f)` が `I`-進完備 —— 第 1012 **済**",
+      "★`R[X]/(f)` が局所環 —— 第 1015 **済**",
+      "★`R[X]/(f)` が整域・**離散付値環** —— 第 1017／1018 **済**",
+      "☆`Frac (R[X]/(f)) = K[X]/(f)` —— 残",
+      "☆付値の橋 `hp′`（不分岐なので `e = 1`）—— 残",
+      "☆剰余体の 2 次拡大で 2 次式が分裂 —— 残"
+    ],
+    "note": "★★**不分岐 2 次拡大の「環の側」は建った**——完備・局所・整域・離散付値環。☆残るのは体の側（商体）と付値の橋、それに分裂の判定である。★944-1018 の 70 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
   }
 }

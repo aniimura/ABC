@@ -6,6 +6,8 @@ import Mathlib.FieldTheory.KummerExtension
 import Mathlib.RingTheory.AdicCompletion.Basic
 import Mathlib.RingTheory.AdjoinRoot
 import Mathlib.RingTheory.AdicCompletion.LocalRing
+import Mathlib.RingTheory.Polynomial.IrreducibleRing
+import Mathlib.RingTheory.DiscreteValuationRing.TFAE
 
 /-!
 # 第 1007 ブロック —— **★★★★★★★★不分岐 2 次拡大の葉**（`Found`）
@@ -335,6 +337,94 @@ theorem isLocalRing_adjoinRoot [IsLocalRing R]
     ((IsLocalRing.maximalIdeal R).map (algebraMap R (AdjoinRoot f)))
 
 end LocalAdjoinRoot
+
+/-! ## ★★★★★★★★★★★★★★★★第 1016-1018 —— `R[X]/(f)` は完備離散付値環
+
+★第 1015 で局所環になった。☆残るのは**整域**と**離散付値環**である。
+
+| 段 | 道具 |
+|---|---|
+| `f̄` 既約 → `f` 既約 | mathlib `Monic.irreducible_of_irreducible_map_of_isPrime_nilradical` |
+| `f` 既約 → `AdjoinRoot f` 整域 | `AdjoinRoot.isDomain_of_prime`（UFD で既約＝素） |
+| 極大が `𝔪R′` で主 → 離散付値環 | mathlib `IsDiscreteValuationRing.TFAE` の (5) ⟹ (1) |
+
+☆`𝔪R′` が主であることは `𝔪 = (π)` の像が `(φ π)` だからである。 -/
+
+section DvrAdjoinRoot
+
+variable {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+
+open Polynomial in
+/-- ★★★★★★★★**剰余体で既約なモニック多項式は `R` でも既約**（第 1016）。 -/
+theorem irreducible_of_irreducible_residue {f : R[X]} (hf : f.Monic)
+    (hirr : Irreducible (f.map (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R)))) :
+    Irreducible f := by
+  letI : Field (R ⧸ IsLocalRing.maximalIdeal R) :=
+    Ideal.Quotient.field (IsLocalRing.maximalIdeal R)
+  haveI hnil : (nilradical R).IsPrime := by
+    have h0 : nilradical R = ⊥ := nilradical_eq_zero R
+    rw [h0]; exact Ideal.isPrime_bot
+  exact Polynomial.Monic.irreducible_of_irreducible_map_of_isPrime_nilradical
+    (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R)) f hf hirr
+
+open Polynomial in
+/-- ★★★★★★★★**`R[X]/(f)` は整域**（第 1017）。 -/
+theorem isDomain_adjoinRoot {f : R[X]} (hf : f.Monic)
+    (hirr : Irreducible (f.map (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R)))) :
+    IsDomain (AdjoinRoot f) :=
+  AdjoinRoot.isDomain_of_prime
+    (UniqueFactorizationMonoid.irreducible_iff_prime.1
+      (irreducible_of_irreducible_residue hf hirr))
+
+open Polynomial in
+/-- ★★★★★★★★★★★★★★★★**`R[X]/(f)` は離散付値環**（第 1018）。
+
+★`f` は 2 次のモニックで、剰余体での還元 `f̄` が既約であるとする。
+☆極大イデアルは `𝔪R′`（第 1014／1015）であり、`𝔪 = (π)` の像は `(φ π)` なので**主**。
+★`IsDiscreteValuationRing.TFAE` の (5) ⟹ (1) がそのまま当たる。 -/
+theorem isDiscreteValuationRing_adjoinRoot
+    [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    {f : R[X]} (hf : f.Monic) (hdeg : f.natDegree = 2)
+    (hirr : Irreducible (f.map (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R))))
+    [IsDomain (AdjoinRoot f)] :
+    IsDiscreteValuationRing (AdjoinRoot f) := by
+  haveI hloc : IsLocalRing (AdjoinRoot f) := isLocalRing_adjoinRoot hf hdeg hirr
+  haveI : Module.Finite R (AdjoinRoot f) := Monic.finite_adjoinRoot hf
+  haveI : IsNoetherianRing (AdjoinRoot f) := AdjoinRoot.instIsNoetherianRing
+  have hmaxI : ((IsLocalRing.maximalIdeal R).map (algebraMap R (AdjoinRoot f))).IsMaximal := by
+    rw [AdjoinRoot.algebraMap_eq]
+    exact isMaximal_map_adjoinRoot _ hirr
+  have hmeq : IsLocalRing.maximalIdeal (AdjoinRoot f)
+      = (IsLocalRing.maximalIdeal R).map (algebraMap R (AdjoinRoot f)) :=
+    (IsLocalRing.eq_maximalIdeal hmaxI).symm
+  obtain ⟨π, hπ⟩ := (IsPrincipalIdealRing.principal (IsLocalRing.maximalIdeal R))
+  have hinj : Function.Injective (algebraMap R (AdjoinRoot f)) := by
+    rw [AdjoinRoot.algebraMap_eq]
+    refine AdjoinRoot.of.injective_of_degree_ne_zero ?_
+    rw [Polynomial.degree_eq_natDegree hf.ne_zero, hdeg]
+    simp
+  have hπ0 : π ≠ 0 := by
+    intro h
+    rw [h] at hπ
+    have hb : IsLocalRing.maximalIdeal R = ⊥ := by rw [hπ]; simp
+    exact (IsDiscreteValuationRing.not_isField R)
+      (IsLocalRing.isField_iff_maximalIdeal_eq.2 hb)
+  have hprin : Submodule.IsPrincipal (IsLocalRing.maximalIdeal (AdjoinRoot f)) := by
+    rw [hmeq, hπ, Ideal.map_span]
+    simp only [Set.image_singleton]
+    exact ⟨⟨algebraMap R (AdjoinRoot f) π, rfl⟩⟩
+  have hnf : ¬ IsField (AdjoinRoot f) := by
+    intro hfield
+    have h1 : IsLocalRing.maximalIdeal (AdjoinRoot f) = ⊥ :=
+      IsLocalRing.isField_iff_maximalIdeal_eq.1 hfield
+    have h2 : algebraMap R (AdjoinRoot f) π ∈ IsLocalRing.maximalIdeal (AdjoinRoot f) := by
+      rw [hmeq]
+      exact Ideal.mem_map_of_mem _ (by rw [hπ]; exact Ideal.subset_span rfl)
+    rw [h1, Ideal.mem_bot] at h2
+    exact hπ0 (hinj (by rw [h2, map_zero]))
+  exact ((IsDiscreteValuationRing.TFAE (AdjoinRoot f) hnf).out 4 0).1 hprin
+
+end DvrAdjoinRoot
 
 /-! ## ★出典の紐付け(`.src`) -/
 
