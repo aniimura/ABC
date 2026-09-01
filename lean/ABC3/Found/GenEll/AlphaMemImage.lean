@@ -54,7 +54,38 @@ theorem alpha_mem_map_of_galTate (E : SSCurve) (l : ℕ) [Fact l.Prime]
   rw [he₀]
   rfl
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★`ImageContainsSL2J` へ -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**像が `SL₂(ℤ_l)` を含む（`galTate` の言葉で）**——★（第 1246）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆`imageContainsSL2J_of_alpha`（在庫）の `halpha` を第 1237 で埋めた形。
+
+★★★これが `EllModuliWitness` の `imageContainsSL2J_torsionExt` が要る形である
+——残る仮説は `hclosed`（`galRep` の像が閉部分群）と、
+`σ` の `mod l` の冪単性・非自明性だけ。 -/
+theorem imageContainsSL2J_of_galTate (E : SSCurve) (l : ℕ) [Fact l.Prime] (hl5 : 5 ≤ l)
+    (hclosed : ∀ e : E.tate l ≃+ (Fin 2 → ℤ_[l]),
+      IsClosed (((galRep E.W l e).range : Subgroup (GL (Fin 2) ℤ_[l])) :
+        Set (GL (Fin 2) ℤ_[l])))
+    (e : E.tate l ≃+ (Fin 2 → ℤ_[l])) (σ : E.alg ≃ₐ[E.fld] E.alg)
+    (h2 : ∀ x : E.tate l, ∃ u : E.tate l,
+      galTate E.W l σ (galTate E.W l σ x) + x
+        = galTate E.W l σ x + galTate E.W l σ x + l • u)
+    (h1 : ∃ x : E.tate l, ∀ u : E.tate l, galTate E.W l σ x ≠ x + l • u)
+    (hno : ¬ HasLCyclicJ E l) :
+    ImageContainsSL2J E l :=
+  imageContainsSL2J_of_alpha E l hl5 hclosed (alpha_mem_map_of_galTate E l e σ h2 h1) hno
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def imageContainsSL2J_of_galTate.src : Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(像が SL₂(Z_l) を含む——galTate の言葉で。hclosed は仮説)",
+    sectionId := "genell-thm-3-8" }
 
 def alpha_mem_map_of_galTate.src : Source :=
   { paper := "GenEll", pdfPage := 19,
