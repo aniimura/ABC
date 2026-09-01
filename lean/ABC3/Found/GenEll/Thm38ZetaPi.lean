@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import Mathlib.GroupTheory.OrderOfElement
+import Mathlib.GroupTheory.QuotientGroup.Basic
 import ABC3.Meta.Claim
 
 /-!
@@ -249,6 +250,37 @@ theorem zeta_pi_basis {G : Type*} [CommGroup G] {l : ℕ} (hl : 0 < l) {Q ζ π 
     refine (zeta_pi_coord_eq_iff hl hζl hζprim hπl hQinf a₁ b₁ a₂ b₂).mp ⟨0, ?_⟩
     rw [heq, zpow_zero, mul_one]
 
+/-! ## ★★★★★★★★★★★★商群の `l`-捩れ -/
+
+/-- ☆`G ⧸ ⟨Q⟩` で `[x]ˡ = 1` は `xˡ ∈ ⟨Q⟩` と同じ。 -/
+theorem quotient_pow_eq_one_iff {G : Type*} [CommGroup G] (Q : G) (l : ℕ) (x : G) :
+    (QuotientGroup.mk x : G ⧸ Subgroup.zpowers Q) ^ l = 1 ↔ ∃ m : ℤ, x ^ l = Q ^ m := by
+  rw [← QuotientGroup.mk_pow, QuotientGroup.eq_one_iff, Subgroup.mem_zpowers_iff]
+  constructor
+  · rintro ⟨m, hm⟩
+    exact ⟨m, hm.symm⟩
+  · rintro ⟨m, hm⟩
+    exact ⟨m, hm.symm⟩
+
+/-- ★★★★★★★★★★★★★★★★
+**`G ⧸ ⟨Q⟩` の `l`-捩れはすべて `[ζᵃπᵇ]`**——★**無条件**（第 1170）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆`zeta_pi_span`（第 1165）を商群の言葉に直したもの。
+★★★Tate 一意化 `Φ : G ⧸ ⟨Q⟩ ≃+ E.Point` は加法同型なので、
+`E[l]` の元は `Φ [ζᵃπᵇ]` の形に書ける——これが `AlphaBridge` の節点 2 の
+**群論の側の全体**である。 -/
+theorem exists_zeta_pi_of_torsion {G : Type*} [CommGroup G] {l : ℕ} {Q ζ π : G}
+    (hπl : π ^ l = Q) (hμ : ∀ y : G, y ^ l = 1 → ∃ a : ℤ, y = ζ ^ a)
+    (x : G) (hx : (QuotientGroup.mk x : G ⧸ Subgroup.zpowers Q) ^ l = 1) :
+    ∃ a b : ℤ, (QuotientGroup.mk x : G ⧸ Subgroup.zpowers Q)
+      = QuotientGroup.mk (ζ ^ a * π ^ b) := by
+  obtain ⟨m, hm⟩ := (quotient_pow_eq_one_iff Q l x).mp hx
+  obtain ⟨a, ha⟩ := zeta_pi_span hπl hμ x m hm
+  exact ⟨a, m, by rw [ha]⟩
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def orderOf_eq_of_primitive.src : ABC3.Meta.Source :=
@@ -260,6 +292,23 @@ def zeta_pi_indep.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(ζ と π は Lˣ/⟨Q⟩ の中で独立。★無条件)",
     sectionId := "genell-thm-3-8" }
+
+def quotient_pow_eq_one_iff.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(G ⧸ ⟨Q⟩ で [x]ˡ = 1 は xˡ ∈ ⟨Q⟩ と同じ。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def exists_zeta_pi_of_torsion.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(G ⧸ ⟨Q⟩ の l-捻れはすべて [ζᵃπᵇ]。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def exists_zeta_pi_of_torsion.needs : List ABC3.Meta.ProofObligation :=
+  [ .implicitStep
+      ("★★★★**2026-09-02（第 1170）**——`AlphaBridge` の節点 2 の" ++
+       "**群論の側の全体**である。☆Tate 一意化 `Φ : G ⧸ ⟨Q⟩ ≃+ E.Point` は" ++
+       "加法同型なので、`E[l]` の元は `Φ [ζᵃπᵇ]` の形に書ける。" ++
+       "★残るのは `Φ` を介して `E[l]` の言葉に直す配管だけである。") 2 ]
 
 def zeta_pi_span.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
