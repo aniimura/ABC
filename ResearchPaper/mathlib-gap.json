@@ -4388,5 +4388,31 @@
     "effect": "★これで PowerSeries ℤ[ζ_l] →+* R(ζ_l ↦ ζ、X ↦ q)が環準同型として立つ。☆第 1125 の map_*DF が「DF 形は環準同型を通り抜ける」を与えているので、節点 3 の降下路 A₀ = PowerSeries ℤ[ζ_l] → A₁ = PowerSeries ℚ(ζ_l) → (降下) → A₀ → (特殊化) → R が繋がった。",
     "remaining": "☆残るのは A₁ の中で hu つきの veluV2_eq_tateDYpair を当て、PowerSeries.map の単射性(第 1107 の powerSeries_eq_of_map_eq)で A₀ に降ろす段である。★A₁ = PowerSeries ℚ(ζ_l) が IsAdicComplete (span {X}) を持つことは mathlib のインスタンス(第 1104 で実測)。",
     "gate": "lake build ABC3 成功(6253 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。一発で通った。"
+  },
+  "powerSeriesUniversal20260901": {
+    "block": 1127,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★PowerSeries を万有な完備環として使う——d+1<l を外す道の抜け道",
+    "goal": "Lemma 3.5 から原典に無い仮説 d + 1 < l を外す(§3 の枠の節点 3)。",
+    "keyIdea": "★★★★第 1091 で「R を商体 K に移すと q の I 進収束が壊れる(K は I-adic 完備でない)」と測って行き止まりにしていた。☆しかし PowerSeries A は (X)-adic 完備であり、**係数環 A を何に取り替えても壊れない**——ここが抜け道である。★A₀ = PowerSeries R → A₁ = PowerSeries (FractionRing R) なら A₁ で l も 1 − ζ^i も可逆になり、既存の hu つきの補題がそのまま使える。",
+    "route": [
+      "(1) 主張を A₀ = PowerSeries R の中で立てる(a = C α、q = X、w = C(α^{l−1})·X)",
+      "(2) A₁ = PowerSeries (FractionRing R) へ PowerSeries.map で送る。A₁ では 1 − C α も (l) も単元",
+      "(3) A₁ で hu つきの veluV2_eq_tateDYpair を当てる",
+      "(4) PowerSeries.map の単射性(PowerSeries.map_injective)で A₀ に降ろす",
+      "(5) evalAdicMapHom (RingHom.id R) q hq(第 1126)で R に特殊化する"
+    ],
+    "added": {
+      "Found/GaloisRep/PowerSeriesUniversal.lean (新規)": [
+        "map_mem_span_X_pow(係数の写像は (X)^n を保つ)",
+        "coeff_zero_of_mem_span_X((X) の元の定数項は 0)",
+        "partialEvalMap_X / evalAdicMap_X(X の値は q)",
+        "evalAdicMapHom_mem_pow(★特殊化の連続性——(X)^n を I^n に送る)",
+        "tateDXtail_mem / tateDYtail_mem(D 側の尾も I に入る)",
+        "isUnit_C_of_isUnit / isUnit_one_sub_C / isUnit_natCast_powerSeries"
+      ]
+    },
+    "mathlib": "☆使う instance は PowerSeries.instIsAdicCompleteSpanSingletonSetX(Mathlib/RingTheory/AdicCompletion/Completeness.lean:226)。★import を足すまで infer_instance が失敗する(実測)ので Mathlib.RingTheory.AdicCompletion.Completeness を明示 import した。",
+    "gate": "lake build ABC3 成功(6254 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
   }
 }
