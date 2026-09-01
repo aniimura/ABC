@@ -546,6 +546,51 @@ theorem isUnit_natCast_iff_notMem {L : Type} [Field L] [NumberField L]
 ☆`Ideal.ramificationIdx` は `sSup {n | map p ≤ P^n}` なので、
 `l ∈ p^{l−1}` から `l − 1 ≤ e_p` を出すには**上に有界**であることが要る。 -/
 
+/-! ## ★★★★★★★★★★★★第 1040 —— 完備化から `𝓞 L` へ降ろす
+
+★第 1037 は `l ∈ 𝔪_R^{l−1}`（`R` は完備化の整数環）を与える。
+☆第 1039 が要るのは `l ∈ p^{l−1}`（`𝓞 L` の側）である。
+★両者は付値で繋がる——`intValuation` は `hp`（第 964）で一致する。 -/
+
+open IsDedekindDomain NumberField in
+/-- ★★★★★★★★**自然数の `intValuation` は完備化で変わらない**（第 1040）。 -/
+theorem intValuation_natCast_completion {L : Type} [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L)) (m : ℕ) :
+    (IsDiscreteValuationRing.maximalIdeal (p.adicCompletionIntegers L)).intValuation
+        ((m : ℕ) : (p.adicCompletionIntegers L))
+      = p.intValuation ((m : ℕ) : 𝓞 L) := by
+  rw [← HeightOneSpectrum.valuation_of_algebraMap (K := p.adicCompletion L),
+    ← HeightOneSpectrum.valuation_of_algebraMap (K := L)]
+  rw [← ABC3.Found.GaloisRep.valuation_algebraMap_adicCompletion L p
+    ((algebraMap (𝓞 L) L) ((m : ℕ) : 𝓞 L))]
+  congr 1
+  push_cast
+  ring
+
+open IsDedekindDomain NumberField in
+/-- ★★★★★★★★★★★★**`𝔪_R^k` の元は `p^k` の元**（自然数について、第 1040）。 -/
+theorem natCast_mem_pow_of_mem_pow_completion {L : Type} [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L)) {m k : ℕ}
+    (h : ((m : ℕ) : (p.adicCompletionIntegers L))
+      ∈ (IsDiscreteValuationRing.maximalIdeal (p.adicCompletionIntegers L)).asIdeal ^ k) :
+    ((m : ℕ) : 𝓞 L) ∈ p.asIdeal ^ k := by
+  rw [← HeightOneSpectrum.intValuation_le_pow_iff_mem] at h ⊢
+  rwa [intValuation_natCast_completion] at h
+
+def intValuation_natCast_completion.src : Source :=
+  { paper := "GenEll", pdfPage := 18,
+    item := "Lemma 3.7(自然数の intValuation は完備化で変わらない。★無条件)",
+    sectionId := "genell-lemma-3-7" }
+
+def intValuation_natCast_completion.needs : List ProofObligation := []
+
+def natCast_mem_pow_of_mem_pow_completion.src : Source :=
+  { paper := "GenEll", pdfPage := 18,
+    item := "Lemma 3.7(𝔪_R^k の元は p^k の元——自然数について。★無条件)",
+    sectionId := "genell-lemma-3-7" }
+
+def natCast_mem_pow_of_mem_pow_completion.needs : List ProofObligation := []
+
 /-- ☆**節点**: `p^{l−1}` が `l` を含むなら `l − 1 ≤ [L:ℚ]`。
 
 ★中身は `∑_{P ∣ l} e_P f_P = [L:ℚ]`（mathlib `Ideal.sum_ramification_inertia`）と

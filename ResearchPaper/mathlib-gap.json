@@ -3710,5 +3710,18 @@
     "howItGoes": "★★★★`Ideal.ramificationIdx`（`sSup` なので有界性が要る）を**使わずに済んだ**——イデアルノルムで回る:☆`l ∈ p^{l−1}` ⟹ `span{l} ≤ p^{l−1}` ⟹ `absNorm(p)^{l−1} ∣ absNorm(span{l}) = l^{[L:ℚ]}`。★また `span{l} ≤ p` から `absNorm p ∣ l^{[L:ℚ]}` で、`absNorm p ≠ 1` なので`l ∣ absNorm p`。☆合わせて `l^{l−1} ∣ l^{[L:ℚ]}`、すなわち `l − 1 ≤ [L:ℚ]`。",
     "remaining": "☆`Lemma 3.5` に残る `sorry` は `isUnit_natCast_at_bad_prime`（第 1019）**ただ 1 つ**。★中身は「悪い素点で `l` 捉れ点 ⟹ `μ_l ⊂ Lv`（非分裂なら拡大 `Lv′`）」と「第 1037 の `l ∈ 𝔪^{l−1}` を `𝓞 L` の `p^{l−1}` に降ろす」段である（2-4 ブロック）。",
     "note": "★944-1039 の 91 ブロック。"
+  },
+  "descendToRingOfIntegers20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1040",
+    "supersedes": "ramificationBoundProved20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "★★★★★★★★`intValuation_natCast_completion`（1040）——自然数の `intValuation` は完備化で変わらない。",
+      "★★★★★★★★★★★★`natCast_mem_pow_of_mem_pow_completion`（1040）——`𝔪_R^k` の元は `p^k` の元（自然数について）。"
+    ],
+    "chainNow": "★★★★**`hlu` の議論は 3 段のうち 2 段が繋がった**: 第 1037（`¬IsUnit (l:R)` ⟹ `l ∈ 𝔪_R^{l−1}`）→ 第 1040（⟹ `l ∈ p^{l−1}`）→ 第 1039（⟹ `l − 1 ≤ [L:ℚ]`、`hd` に矛盾）。☆残るのは**入口**だけ——「悪い素点の `l` 捉れ点から `ζ`（原始 `l` 乗根）を作る」段である。",
+    "remaining": "☆`ζ` の作り方: 分裂なら第 947（`exists_primitiveRoot_of_torsion_point`）にTate モデル上の点を渡す（第 1026 の前半を切り出せばよい）。★非分裂なら不分岐 2 次拡大 `R′` で同じことをして、第 1024（付値の橋）で `𝔪_{R′}` から `𝔪_R` に降ろす。",
+    "note": "★944-1040 の 93 ブロック。"
   }
 }

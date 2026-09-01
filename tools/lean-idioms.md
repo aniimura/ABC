@@ -2646,3 +2646,24 @@ theorem natDegree_p : p.natDegree = 2 := by rw [p]; compute_degree!
 **併せて**: `refine g h ?_ ?_` で第 1 引数の暗黙変数がゴールから決まらないときは
 `(q := ...)` で明示する。それでも遅いときは、**大きな項を含む補題を
 小さい文脈(`Found/` の抽象的な補題)に切り出す**と桁で速くなる。
+
+## `↑` と `algebraMap` が一致せず `rw` が刺さらない(第 1040)
+
+**失敗形**: `HeightOneSpectrum.valuation_of_algebraMap` を `rw [←]` すると
+ゴールに `↑↑m` が現れるが、これは `algebraMap ... ↑m` と**構文的に別物**で、
+`map_natCast` も自作の `have e1 : algebraMap ... = ...` も刺さらない。
+(`𝓞 L → L` の coe と `algebraMap (𝓞 L) L` の食い違い。)
+
+**直し方**: 等式を `rw` で押し込まず、**`congr 1` に落として `push_cast` で潰す**。
+
+```lean
+  rw [← HeightOneSpectrum.valuation_of_algebraMap (K := Lv), 
+      ← HeightOneSpectrum.valuation_of_algebraMap (K := L)]
+  rw [← hp (algebraMap (𝓞 L) L ((m : ℕ) : 𝓞 L))]   -- hp の側を先に合わせる
+  congr 1
+  push_cast
+  ring
+```
+
+**併せて**: `set_option linter.tacticCheckInstances true` を勧めるノートが出たら、
+インスタンスのダイヤモンド由来なので `rw` ではなく `congr`／`convert` に切り替える。
