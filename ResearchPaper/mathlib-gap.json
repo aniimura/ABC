@@ -4863,5 +4863,17 @@
     "mathlib": "★★鍵は mathlib にそのものがあった: `InfiniteGalois.mem_range_algebraMap_iff_fixed`(Mathlib/FieldTheory/Galois/Infinite.lean) —— `x ∈ Set.range (algebraMap k K) ↔ ∀ f : Gal(K/k), f x = x`([IsGalois k K])。☆標数 0 なら IsGalois L (AlgebraicClosure L) はインスタンスで出る。★第 1152 の枠は「mathlib の無限 Galois 理論の navigation」と見積もっていたが、探すべき名前が 1 つあっただけだった。",
     "frame": "☆Skeleton/GenEll/LCyclicReading.lean の進捗枠は 1/3、総重み 26 → 14。★残るのは節点 2(Lemma 3.5 を安定直線の側で述べ直す、重み 10)と節点 3(Lemma 3.7 の言い直し、重み 4)。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "torsionIntegralClosure20260901": {
+    "block": 1155,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★捩れ点の座標は L̄ でも整——付値の議論がまるごと要らなくなる",
+    "goal": "l-巡回の 2 つの読みを繋ぐ(第 1152 の枠、節点 2)。",
+    "what": "★Found/GenEll/TorsionIntegralClosure.lean の isIntegral_x_of_addOrderOf_prime —— L̄ の位数 l の点の x は primeSubring p 上**整**である。☆ΨSq_l の主係数は l²(偶奇不問)で hlu から単元なので isIntegral_of_isUnit_leadingCoeff がそのまま効く。★付値を使わないので L̄ でも通る。",
+    "measured": "★★★★**節点 2 の道が短くなった**。TorsionIntegralGood.lean は捩れ点の座標が **L の付値環に属する**ことを付値の言葉で示している(v(x) < 0 なら深さ m が取れて… という連鎖)。☆安定直線の側では点の座標は L̄ にあり、L̄ に p の付値は一意には伸びない。★だが Lemma 3.5 が実際に要るのは Vélu の和 v・w が整であることだけで、第 1154 でそれらは L の元だと分かった。☆したがって「L̄ で整」→「L の元で整」→「primeSubring p は整閉なので属する」の 3 段でよく、**付値の議論(深さ m・ValAtLeast の連鎖)がまるごと要らなくなる**。",
+    "nodes": "☆節点 2 の細分: 2a「L̄ の捩れ点の x は整」★第 1155 で済み。2b「x が整なら y も整」(Weierstrass 方程式が y についてモニック、mathlib の IsIntegral.trans 周辺の navigation)。2c「v・w は多項式なので整、かつ L の元、整閉なので属する」。2d「悪い素点の側(Δ_min の関係)を安定直線で回す」。",
+    "frame": "☆進捗枠 1.3/3、総重み 26 → 11。",
+    "pitfall": "☆Affine.Point の加法群は [DecidableEq F] を取るので、AlgebraicClosure L では instance が無く「failed to synthesize AddMonoid ... Point」になる。★`open scoped Classical` を置くと Classical.propDecidable が拾われ、TorsionIntegralGood 側(同じく Classical)と一致する。第 1151 の逆の場合である——具体型に固有の DecidableEq が**無い**ときは open scoped Classical で揃う。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

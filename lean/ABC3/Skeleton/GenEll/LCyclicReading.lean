@@ -44,17 +44,17 @@ import ABC3.Meta.Claim
 ★★★これは `CLAUDE.md` の「逸脱」の規約が名指ししている場合である
 ——『後続の証明に影響が出ないならば読み替えを許容する』。**影響が出た**ので記録する。
 
-## ★★★★★★★★★★★★★★★★節点（進捗枠 **1 / 3**）
+## ★★★★★★★★★★★★★★★★節点（進捗枠 **1.3 / 3**）
 
 `Lemma 3.7` の第 3 の主張を **(J) の側で**言い直すのに要るもの:
 
 | # | 節点 | 内容 | 重み |
 |---|---|---|---|
 | 1 | `veluQuotientFull_descends` | ★★**閉じた**（第 1153 の `fixesCoeffs_veluQuotientFull` ＋ 第 1154 の `mem_range_of_fixed`） | 12 → **0** |
-| 2 | `lemma_3_5_height_ineq_stableLine` | ☆第 1 で作った `L` 上の商に対して `Lemma 3.5` の高さ不等式を回す（`degInf` の関係は `Lemma 3.2, (ii)` から） | 10 |
+| 2 | `lemma_3_5_height_ineq_stableLine` | ☆第 1 で作った `L` 上の商に対して `Lemma 3.5` の高さ不等式を回す。★**道は第 1155 で短くなった**（下記） | 10 → **7** |
 | 3 | `lemma_3_7_stableLine` | ☆第 3 の主張を `HasLCyclicJ` の側で述べ直す。★これで `Theorem 3.8` に繋がる | 4 |
 
-☆総重み 26 → **14**（第 1153-1154 で節点 1 が閉じた）。
+☆総重み 26 → **11**（第 1153-1154 で節点 1 が閉じ、第 1155 で節点 2 が 3 分進んだ）。
 
 ### ★★★★★★★★★★★★第 1154 で節点 1 が閉じた
 
@@ -93,6 +93,25 @@ import ABC3.Meta.Claim
 
 ☆在庫: `Found/GenEll/VeluPointSet.lean` の `veluQuotientFull_image_eq`（座標の像で取った商）と
 `Found/GaloisRep/VeluTateMuK.lean` の `veluQuotientFull_points_eq_field` が素材である。
+
+### ★★★★★★★★★★★★節点 2 の道（第 1155 の測定）——**付値の議論が丸ごと要らない**
+
+`Found/GaloisRep/TorsionIntegralGood.lean` は捻れ点の座標が
+**`L` の付値環 `primeSubring p` に属する**ことを付値の言葉で示している
+（`v(x) < 0` なら深さ `m` が取れて… という議論）。
+☆安定直線の側では点の座標は `L̄` にあり、`L̄` に `p` の付値は一意には伸びない。
+
+★★**だが `Lemma 3.5` が実際に要るのは Vélu の和 `v`・`w` が整であることだけ**であり、
+第 1154 で**それらは `L` の元**だと分かった。☆したがって:
+
+| 段 | 内容 | 状態 |
+|---|---|---|
+| 2a | `L̄` の捻れ点の `x` は `primeSubring p` 上**整** | ★第 1155（`isIntegral_x_of_addOrderOf_prime`） |
+| 2b | `x` が整なら `y` も整（Weierstrass 方程式が `y` についてモニック） | ☆残る |
+| 2c | `v`・`w` はその多項式なので整、かつ `L` の元。`primeSubring p` は整閉なので**属する** | ☆残る |
+| 2d | 悪い素点の側（`Δ_min` の関係）を安定直線で回す | ☆残る |
+
+★**付値の議論（深さ `m`・`ValAtLeast` の連鎖）がまるごと要らなくなる**のが本計測の利きである。
 
 ### ☆別の道（採らない理由）
 
