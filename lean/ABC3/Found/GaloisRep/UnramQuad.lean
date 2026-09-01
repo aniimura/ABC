@@ -1130,6 +1130,48 @@ theorem natCast_mem_maximalIdeal_pow_of_not_isUnit {R : Type} [CommRing R] [IsDo
 
 end CyclotomicLocal
 
+/-! ## ★★★★★★★★★★★★第 1043 —— 拡大から降ろす（`hlu` の非分裂側）
+
+★不分岐 2 次拡大では付値が変わらない（第 1024）ので、
+`l ∈ 𝔪_{R′}^{l−1}` は `l ∈ 𝔪_R^{l−1}` に降りる。 -/
+
+section QuadDescend
+
+open Polynomial IsDedekindDomain in
+/-- ★★★★★★★★**自然数の `intValuation` は不分岐 2 次拡大で変わらない**（第 1043）。 -/
+theorem intValuation_natCast_quadExt {R : Type} [CommRing R] [IsDomain R]
+    [IsDiscreteValuationRing R] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
+    {f : Polynomial R} (hf : f.Monic) (hdeg : f.natDegree = 2)
+    (hirr : Irreducible (f.map (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R))))
+    [IsDomain (AdjoinRoot f)] [IsDiscreteValuationRing (AdjoinRoot f)] (m : ℕ) :
+    (IsDiscreteValuationRing.maximalIdeal (AdjoinRoot f)).intValuation
+        ((m : ℕ) : AdjoinRoot f)
+      = (IsDiscreteValuationRing.maximalIdeal R).intValuation ((m : ℕ) : R) := by
+  rw [← HeightOneSpectrum.valuation_of_algebraMap (K := FractionRing (AdjoinRoot f)),
+    ← HeightOneSpectrum.valuation_of_algebraMap (K := K)]
+  rw [← valuation_quadFieldHom (K := K) hf hdeg hirr ((algebraMap R K) ((m : ℕ) : R))]
+  congr 1
+  rw [quadFieldHom_algebraMap]
+  push_cast
+  ring
+
+open Polynomial IsDedekindDomain in
+/-- ★★★★★★★★★★★★**`𝔪_{R′}^k` の元は `𝔪_R^k` の元**（自然数について、第 1043）。 -/
+theorem natCast_mem_pow_of_mem_pow_quadExt {R : Type} [CommRing R] [IsDomain R]
+    [IsDiscreteValuationRing R] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
+    {f : Polynomial R} (hf : f.Monic) (hdeg : f.natDegree = 2)
+    (hirr : Irreducible (f.map (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R))))
+    [IsDomain (AdjoinRoot f)] [IsDiscreteValuationRing (AdjoinRoot f)] {m k : ℕ}
+    (h : ((m : ℕ) : AdjoinRoot f)
+      ∈ (IsDiscreteValuationRing.maximalIdeal (AdjoinRoot f)).asIdeal ^ k) :
+    ((m : ℕ) : R) ∈ (IsDiscreteValuationRing.maximalIdeal R).asIdeal ^ k := by
+  rw [← HeightOneSpectrum.intValuation_le_pow_iff_mem] at h ⊢
+  rwa [intValuation_natCast_quadExt (K := K) hf hdeg hirr] at h
+
+end QuadDescend
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def not_isSquare_in_fractionField.src : ABC3.Meta.Source :=
