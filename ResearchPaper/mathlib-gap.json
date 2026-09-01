@@ -3221,5 +3221,16 @@
     "plumbing": "★配管（3 度目の同じ穴）: `Valued.mem_nhds` は `Valued.v.restrict` と `ValueGroup₀` の言葉で述べられている。`γ := 1` を渡し、`Valuation.restrict_lt_iff_lt_embedding` ＋ `simp [Units.val_one, map_one]` で落とす。☆`tools/lean-idioms.md` に追記した。",
     "remaining": "☆残るのは (i) `C • E` を `a₁ = a₃ = 0` に正規化して `p` での整性を保つ段、(ii) 捻り `d` を `Lv` の整数環から `L` に降ろす段（989 の全射性が効く）、(iii) 982 の二者択一を `hasSplitMultiplicativeReduction_baseChange` に流す段、(iv) 972 に並べて `minDeltaExp_variableChange` で戻す段。",
     "note": "★944-989 の 42 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
+  },
+  "lemma35ResidueRep20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 990",
+    "supersedes": "lemma35ResidueFieldFinite20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "★★★★★★★★★★★★`exists_integer_residue_eq`（990）——完備化の整数環の剰余の代表は `𝓞 L` から取れる（第 989 の全射性の中身）。☆第 982 が出す捻り `d` は `R` の元だが、第 929 が受けるのは `L` の元である。★2 次式の係数は `d` に `φ d` を通してしか依存しないので、剰余が同じ `𝓞 L` の元に取り替えれば `Splits` はそのまま移る。"
+    ],
+    "remaining": "☆残るのは (i) `C • E` を `a₁ = a₃ = 0` に正規化して `p` での整性を保つ段、(ii) 982 の二者択一を `hasSplitMultiplicativeReduction_baseChange` に流す段（990 で `d` を `L` に降ろしてから 929 へ）、(iii) 972 に並べて `minDeltaExp_variableChange` で戻す段。★mathlib の穴はもう無い——すべてプロジェクト内の配管である。",
+    "note": "★944-990 の 43 ブロック。`Theorem 2.1`（§2）だけは独立で [NCBelyi] の形式化を要する。"
   }
 }

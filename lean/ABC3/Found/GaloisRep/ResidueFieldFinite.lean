@@ -157,6 +157,51 @@ instance finite_residueField_adicCompletionIntegers (L : Type) [Field L] [Number
   rw [map_sub, sub_eq_zero] at hz
   exact hz
 
+/-! ## ★★★★★★★★★★★★第 990 —— 剰余の代表は `𝓞 L` から取れる
+
+★第 982 の二者択一が出す捻り `d` は**完備化の整数環 `R` の元**である。
+☆一方 `minDeltaExp_eq_mul_of_nonsplit`（第 929）が受ける捻りは **`L` の元**である。
+
+★第 989 の全射性を取り出しておけば、`d` と同じ剰余をもつ `𝓞 L` の元に取り替えられる。
+☆2 次式の係数は `d` に `φ d` を通してしか依存しないので、
+剰余が同じなら `Splits` はそのまま移る。 -/
+
+/-- ★★★★★★★★★★★★**完備化の整数環の剰余の代表は `𝓞 L` から取れる**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆第 989 の全射性の中身を取り出したものである。 -/
+theorem exists_integer_residue_eq (L : Type) [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L)) (x : p.adicCompletionIntegers L) :
+    ∃ a : 𝓞 L, IsLocalRing.residue (p.adicCompletionIntegers L)
+        (algebraMap (𝓞 L) (p.adicCompletionIntegers L) a)
+      = IsLocalRing.residue (p.adicCompletionIntegers L) x := by
+  obtain ⟨a, ha⟩ := exists_integer_congr_completion L p x
+  refine ⟨a, ?_⟩
+  have hz : IsLocalRing.residue (p.adicCompletionIntegers L)
+      (algebraMap (𝓞 L) (p.adicCompletionIntegers L) a - x) = 0 := by
+    rw [IsLocalRing.residue_eq_zero_iff]
+    refine mem_max_of_valued_lt_one L p _ ?_
+    have hcoe : ((algebraMap (𝓞 L) (p.adicCompletionIntegers L) a - x
+        : p.adicCompletionIntegers L) : p.adicCompletion L)
+        = algebraMap L (p.adicCompletion L) (algebraMap (𝓞 L) L a)
+          - (x : p.adicCompletion L) := rfl
+    rw [hcoe]
+    have heq : algebraMap L (p.adicCompletion L) (algebraMap (𝓞 L) L a)
+        - (x : p.adicCompletion L)
+        = -((x : p.adicCompletion L)
+          - algebraMap L (p.adicCompletion L) (algebraMap (𝓞 L) L a)) := by ring
+    rw [heq, Valuation.map_neg]
+    exact ha
+  rw [map_sub, sub_eq_zero] at hz
+  exact hz
+
+def exists_integer_residue_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(完備化の整数環の剰余の代表は 𝓞 L から取れる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def exists_integer_congr_completion.src : ABC3.Meta.Source :=
