@@ -277,8 +277,19 @@ def degInfJ_quotLCyclicJ.src : Source :=
     sectionId := "genell-lemma-3-5" }
 
 def degInfJ_quotLCyclicJ.needs : List ProofObligation :=
-  [ .citation "[ABC3]" "jExp_velu_bad / jExp_velu_good(Skeleton/GenEll/TateIsogeny.lean)"
-      (.inProject "ABC3" "ABC3.Skeleton.GenEll.jExp_velu_bad") 20 ]
+  [ .citation "[ABC3]" "isMuAtBadPrimes_of_veluQuotient_of_large(第 1044、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.isMuAtBadPrimes_of_veluQuotient_of_large") 1,
+    .citation "[ABC3]" "degInfOf_eq_of_local(局所の関係を足し上げる、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.degInfOf_eq_of_local") 1,
+    .implicitStep
+      ("★★**2026-09-01（第 1086）の測定**——" ++
+       "本欄の数学はすでにある。" ++
+       "☆`IsMuAtBadPrimes`（第 1044、`sorry`-free）が悪い素点で " ++
+       "`Δ_min(E′) = l·Δ_min(E)` を与え、半安定なら良い素点では両辺 `0`、" ++
+       "`degInfOf_eq_of_local` がそれを足し上げる。" ++
+       "★残っているのは**実現の橋**だけである——" ++
+       "`quotLCyclicJ x l` と `veluQuotientFull` を同定し、" ++
+       "`degInfJ` と `degInfOf` を同定する段。") 6 ]
 
 def faltingsHeightJ_quotLCyclicJ.src : Source :=
   { paper := "GenEll", pdfPage := 17,

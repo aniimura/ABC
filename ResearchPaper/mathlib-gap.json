@@ -4110,5 +4110,23 @@
     "noDownstreamImpact": "★★**後続への影響は無い**——`Lemma 3.7`・`Theorem 3.8` は `100·d·(ht^Falt + C·d^ε) ≤ l` を満たす `l` を取るので、`l ≠ 2` も `d + 1 < l` も自動的に成り立つ。",
     "whyMetricUnchanged": "☆指標が 18/24 のままなのは、`.src` の item が条つき（「Lemma 3.5(外部入力なし。★原典に無い仮説は l ≠ 2 と d+1 < l の 2 つ)」）だからである。★条なしにするには上の 2 つを外す必要があり、それぞれ「`l = 2` の Vélu の分岐」と「`p ∣ l` の悪い素点での Tate モデルの Vélu 計算（`μ_l` が非エタール）」を要する。",
     "note": "★944-1085 の 136 ブロック。"
+  },
+  "remainingMap20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1086（残作業の地図）",
+    "supersedes": "lemma35Unconditional20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "purpose": "☆ゴール `[GenEll] §1 9/9, §2 1/1, §3 9/9, §4 5/5` に足りない 6 項目それぞれについて、**何が残っているか**と**誰の判断が要るか**を 1 箇所に書く。",
+    "items": {
+      "Theorem 2.1 (§2)": "★★★★**リポジトリに無い文献を要する**——原典が引く [NCBelyi]（Mochizuki, Noncritical Belyi Maps）が `ResearchPaper/0_Source/` に無い。☆形式化対象を増やすかどうかは**ユーザーの判断**である。★条つき `.src` は 9 個あり、段 A・段 B の分解は済んでいる。",
+      "Lemma 3.5 (§3)": "★**高さ不等式は証明済み**（第 1085、`Found/GaloisRep/Lemma35Unconditional.lean`、外部入力なし、`#print axioms` は 3 公理）。☆条なし `.src` を名乗れないのは、原典に無い仮説を 2 つ置いているからである: (1) `l ≠ 2`（Vélu の `±` の対が不動点を持たないため）——外すには `l = 2` の Vélu の分岐（`veluU = 0` なので `/2` は無害だが、`preΨ_2 = 1` なので橋が変わる）。(2) `d + 1 < l`（第 1044 が `p ∤ l` を出すのに使う）——外すには `p ∣ l` の悪い素点で Tate モデルの Vélu を`l` が単元でない環で行う必要がある（`μ_l` が非エタール）。",
+      "Lemma 3.7 (§3)": "☆`Skeleton/GenEll/Section3.lean` に statement あり。★`Lemma 3.5` ＋ `Lemma 3.6`（初等評価、済）から出る形。",
+      "Theorem 3.8 (§3)": "☆`Interface/GenEll/GaloisRep.lean` / `Skeleton/GenEll/GaloisImage.lean`。★Weil 対の機械（`redPoint`・`redHom`・`Psi`・`Phi`・`Eds*`）は積んである。",
+      "Corollary 4.3 (§4)": "☆`Skeleton/GenEll/Section4.lean`。`Theorem 3.8` の下流。",
+      "Corollary 4.4 (§4)": "☆`Skeleton/GenEll/Section4.lean`。`Theorem 3.8` の下流。"
+    },
+    "witnessBridge": "★★`EllModuliWitness.lean` の `degInfJ_quotLCyclicJ` の数学はすでにある（`IsMuAtBadPrimes`（第 1044）＋ `degInfOf_eq_of_local`）。☆残るのは**実現の橋**だけ——`quotLCyclicJ x l` と `veluQuotientFull` の同定、`degInfJ` と `degInfOf` の同定。第 1086 で `.needs` をこの形に直した。",
+    "deadNodes": "☆`Skeleton/GenEll/{TateIsogeny,TateLocalModel}.lean` に残る 5 つの `sorry`（`isMinimal_baseChange`・`minDeltaExp_descend_of_nonsplit`・`isMuAtBadPrimes_of_veluQuotient`・`jExp_velu_bad`・`jExp_velu_good`）は**すべて死節点**である——コードからの参照は 0 件で、言及はドキュメント文字列と `.needs` の引用だけ。★第 1086 で `EllModuliWitness` の引用を証明済みの節点に差し替えた。",
+    "note": "★944-1086 の 137 ブロック。"
   }
 }
