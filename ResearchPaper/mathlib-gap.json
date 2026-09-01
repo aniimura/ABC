@@ -5681,5 +5681,16 @@
     "measured": "★★★第 1229(冪単は α に共役)＋第 1230(持ち上げ)＋第 1231(基底実現)＋本ブロックで、**T_l E の ζ, π 適合基底(無限の塔)を作る必要がなくなった** —— σ の mod l の行列が冪単かつ非自明でありさえすれば、基底を取り替えて α そのものにできる。",
     "remaining": "☆残るのはその冪単性と非自明性を Tate 側(第 1212)から出す段である。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "glRedUnipotent20260902": {
+    "block": 1234,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★★★★★σ が mod l で冪単に作用するなら行列も冪単",
+    "goal": "第 1229(冪単は α に共役)の仮説を Tate 側から出す。",
+    "what": "★redVec_add(第 1233)・redVec_galTate(第 1233)・redVec_nsmul_self・glRed_unipotent_of_galTate(Found/GenEll/AlphaMatrix.lean)。",
+    "measured": "☆redVec_galTate は第 1228 の**逆向き**で、galMat_apply(在庫)と redVec_mulVec(第 1204)から出る。★これで σ の T_l E 上の作用(galTate)から mod l の行列の冪単性が読める。☆Tate の描像では σ は μ_l を固定し π ↦ ζπ なので (σ − 1)² = 0 (mod l)。",
+    "idioms": "★simp に redVec_nsmul を入れると l • が ↑l * に化けて ZMod.natCast_self が当たらなくなる。redVec_nsmul_self(l 倍は mod l で消える)を直接使い、仮説の 2 • は y + y の形で書く。",
+    "consequence": "☆残るのは非自明性(σ が E[l] に自明でなく作用すること)を Tate 側から出す段である。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

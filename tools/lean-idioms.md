@@ -3003,3 +3003,13 @@ because it depends on 'PadicInt.instCommRing'`。
 
 **直し方**: 間に `RingHom.mapMatrix_apply` を挟む
 ——`rw [hz, RingHom.mapMatrix_apply, hmap] at hdet`。
+
+## `simp` に `redVec_nsmul` を入れると `l •` が `↑l *` に化ける（第 1234）
+
+**失敗形**: `simp only [..., redVec_nsmul, ...] at hkey` の後、
+`l • redVec (e u)` が `↑l * redVec (e u)` になり、
+`ZMod.natCast_self` を simp に足しても当たらない。
+
+**直し方**: `redVec_nsmul` を simp 集合から外し、
+`redVec_nsmul_self : redVec l (l • w) = 0` を直接当てる。
+★仮説側の `2 • y` は `y + y` の形で書いておくと `nsmul` が出てこない。
