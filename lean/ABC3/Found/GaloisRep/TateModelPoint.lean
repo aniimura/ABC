@@ -3,6 +3,9 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.TateParamMap
 import ABC3.Found.GaloisRep.AdicCompleteIntegers
+import ABC3.Found.GaloisRep.TateVeluMu
+import ABC3.Found.GaloisRep.TateSetupDvr
+import ABC3.Found.GenEll.CyclotomicUnits
 import ABC3.Found.GenEll.VeluPointSet
 import ABC3.Found.GenEll.PointTransport
 import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
@@ -110,6 +113,69 @@ theorem exists_point_j_tateModel {L : Type} [Field L] [NumberField L]
     rw [himg, hbase]
   rw [ABC3.Found.GenEll.j_congr_curve hcurve]
   exact hj
+
+/-! ## ★★★★★★★★★★★★★★★★第 971 —— Tate モデル側の商の楕円性
+
+★第 965（`minDeltaExp_eq_mul_of_torsion`）は Tate モデル側の Vélu の商の楕円性
+`hellQ` を受ける。☆その出どころは `hvw` が持っている `veluCurve` の楕円性である——
+`veluQuotientFull_tate_mu`（第 890）が両者を繋ぐ。
+
+★★第 969（`E′` から来る楕円性）は `C • (E ⊗ Lv)` **側**の商についてであった。
+こちらは **Tate モデル側**である。☆二つは第 968 で移り合う。
+
+★配管の注意: `(mkTateSetup q hq hq0).q` と `q` は定義上等しいが構文上は違うので、
+`rw` の前に `show` で `.q` の形に揃える（第 927 と同じ穴）。 -/
+
+open Finset in
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★**`μ_l` による Vélu の商（Tate モデル側）は楕円**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 971）**——これで第 965 の `hellQ` が
+`hvw` から直に出る。 -/
+theorem isElliptic_veluQuotient_tate_mu {R : Type} [CommRing R] [IsDomain R] [CharZero R]
+    [IsDiscreteValuationRing R] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    {K : Type} [Field K] [CharZero K] [Algebra R K] [IsFractionRing R K]
+    (q : R) (hq : q ∈ IsLocalRing.maximalIdeal R) (hq0 : q ≠ 0)
+    (hΔ : ((tateCurveAt q hq).map (algebraMap R K)).toAffine.Δ ≠ 0)
+    {l : ℕ} (hl : l.Prime) (hlu : IsUnit ((l : R))) (h2K : (2 : K) ≠ 0)
+    (ζ : R) (uζ : Kˣ) (hζ : IsPrimitiveRoot ζ l)
+    (hζu : algebraMap R K ζ = (uζ : K)) (hζl : uζ ^ l = 1)
+    (hord : ∀ n : ℕ, 0 < n → n < l → uζ ^ n ≠ 1)
+    (v w : R)
+    (hv : v = ∑ i ∈ (range l).erase 0,
+          veluV2 (tateCurveAt q hq)
+            (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+            (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq))
+    (hw : 2 * w = ∑ i ∈ (range l).erase 0,
+          (veluU (tateCurveAt q hq)
+              (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+              (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+            + 2 * (veluV2 (tateCurveAt q hq)
+                    (tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                    (tateYpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)
+                  * tateXpair (ζ ^ i) (q * (ζ ^ i) ^ (l - 1)) q hq)))
+    (hell : ((veluCurve (tateCurveAt q hq) v w).map (algebraMap R K)).IsElliptic) :
+    (ABC3.Found.GenEll.veluQuotientFull ((tateCurveAt q hq).map (algebraMap R K))
+      (((range l).erase 0).image (fun k : ℕ => ABC3.Found.GenEll.pointCoords
+        (k • tatePhi (mkTateSetup (K := K) q hq hq0) hΔ (QuotientGroup.mk uζ))))).IsElliptic := by
+  haveI := hell
+  have hquot := veluQuotientFull_tate_mu (mkTateSetup q hq hq0) hΔ
+    (dvrTatePhiAddEquiv q hq hq0 hΔ) (fun _ => rfl) hl.pos ζ uζ hζu hζl hord
+    (ABC3.Found.GenEll.isUnit_one_sub_pow_of_isUnit_natCast hl.pos hζ hlu) v w h2K hv hw
+  show (ABC3.Found.GenEll.veluQuotientFull ((tateCurveAt (mkTateSetup (K := K) q hq hq0).q
+      (mkTateSetup (K := K) q hq hq0).hq).map (algebraMap R K))
+    (((range l).erase 0).image (fun k : ℕ => ABC3.Found.GenEll.pointCoords
+      (k • tatePhi (mkTateSetup (K := K) q hq hq0) hΔ (QuotientGroup.mk uζ))))).IsElliptic
+  rw [hquot]
+  exact inferInstanceAs (((veluCurve (tateCurveAt q hq) v w).map (algebraMap R K)).IsElliptic)
+
+def isElliptic_veluQuotient_tate_mu.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(μ_l による Vélu の商(Tate モデル側)は楕円。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 /-! ## ★出典の紐付け(`.src`) -/
 
