@@ -155,6 +155,45 @@ def j_veluQuotientFull_nsmul_variableChange.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(⟨Q⟩ による Vélu の商の j は変数変換先で計算しても同じ。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★第 967 —— 大域の商を Tate モデル側の商の `j` に繋ぐ -/
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★**`L` の上で与えた Vélu の商の `j` を、
+底変換して変数変換した先の商の `j` に繋ぐ**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 967）**——これが `isMuAtBadPrimes_of_veluQuotient` の
+`hW′j` を作る段である。☆道は 2 段:
+
+1. `veluQuotientFull_baseChange`——`E′ ⊗ K` は `E ⊗ K` の `⟨Q ⊗ K⟩` による商
+2. `j_veluQuotientFull_nsmul_variableChange`（第 950）——それを `C • (E ⊗ K)` 側へ
+
+★点の位数は体拡大で保たれる（`addOrderOf_rhPoint`、在庫）ので、
+第 950 の `hQ` はそのまま満たされる。 -/
+theorem j_map_velu_vcPoint {L K : Type} [Field L] [Field K] (φ : L →+* K)
+    (C : WeierstrassCurve.VariableChange K)
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [(E.map φ).IsElliptic]
+    [(C • (E.map φ)).IsElliptic] [(E'.map φ).IsElliptic]
+    {l : ℕ} {Q : E.toAffine.Point} (hQ : addOrderOf Q = l) (h2 : (2 : K) ≠ 0)
+    (hE' : E' = veluQuotientFull E
+      (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))))
+    [(veluQuotientFull (C • (E.map φ))
+      (((Finset.range l).erase 0).image
+        (fun k : ℕ => pointCoords (k • vcPoint C (E.map φ) (rhPoint φ E Q))))).IsElliptic] :
+    (E'.map φ).j = (veluQuotientFull (C • (E.map φ))
+      (((Finset.range l).erase 0).image
+        (fun k : ℕ => pointCoords (k • vcPoint C (E.map φ) (rhPoint φ E Q))))).j := by
+  have hQ' : addOrderOf (rhPoint φ E Q) = l := by rw [addOrderOf_rhPoint, hQ]
+  exact j_veluQuotientFull_nsmul_variableChange C (E.map φ) (E'.map φ) hQ' h2
+    (veluQuotientFull_baseChange φ E E' hQ hE')
+
+def j_map_velu_vcPoint.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(大域の Vélu の商の j を底変換・変数変換先の商の j に繋ぐ。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def pointCoords_neg.src : ABC3.Meta.Source :=

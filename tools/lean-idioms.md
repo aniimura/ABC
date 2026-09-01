@@ -2547,3 +2547,11 @@ theorem foo : ... := ...
 ★呼ぶ側で `[DecidableEq F]` を束縛すると別インスタンスになり、`rw` が
 「パターンが見つからない」で落ちる。
 ☆呼ぶ側も `open scoped Classical in` にして `DecidableEq` は束縛しないこと。
+
+## 在庫の引き忘れ、二度目（第 967）
+
+`addOrderOf_rhPoint`・`addOrderOf_vcPoint` を新規に書こうとして
+`has already been declared`。**`Found/GenEll/PointVariableChange.lean:452, 1001`**
+に既にあった。★1 セッションで 2 回同じ穴に落ちた（第 958 と第 967）。
+☆対策: 補題を書く前に、**その回に使う名前を全部まとめて** decl-index に
+grep する（1 つずつ思い出した順に引くと漏れる）。
