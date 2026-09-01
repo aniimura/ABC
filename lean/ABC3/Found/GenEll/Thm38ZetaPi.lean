@@ -414,6 +414,31 @@ theorem tate_torsion_eq_phi_zeta_pi {R : Type} [CommRing R] {I : Ideal R} {K : T
       = Φ (Additive.ofMul (QuotientGroup.mk (ζ ^ a * π ^ b))) :=
   torsion_eq_phi_zeta_pi hπl (fun y hy => exists_zpow_of_pow_eq_one hζ y hy) Φ x hx
 
+/-! ## ★★★★★★★★体自己同型から受ける形 -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**体自己同型 `τ` が `ζ` を固定し `π ↦ ζπ` なら座標は `α` で動く**——★**無条件**（第 1176）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆Galois 元は体の自己同型として来るので、`Units.map` で単数群の準同型に直してから
+第 1174 を当てる。★★これが `AlphaBridge` の節点 2 が**外から受け取る形**である
+——`τ`・`ζ`・`π` は第 994 の Kummer の議論が与える。 -/
+theorem tate_sigma_coord_alpha_of_algEquiv {R : Type} [CommRing R] {I : Ideal R}
+    {K₀ K : Type} [Field K₀] [Field K] [Algebra K₀ K] [Algebra R K]
+    (S : ABC3.Found.GaloisRep.TateSetup R I K) {l : ℕ} (hl : 0 < l)
+    {ζ π : Kˣ} (hζ : IsPrimitiveRoot (ζ : K) l) (hπl : π ^ l = S.Q)
+    (τ : K ≃ₐ[K₀] K) (hτζ : τ (ζ : K) = (ζ : K)) (hτπ : τ (π : K) = (ζ : K) * (π : K))
+    (a b a' b' : ℤ)
+    (h : ∃ n : ℤ, Units.map (τ : K →* K) (ζ ^ a * π ^ b) = ζ ^ a' * π ^ b' * S.Q ^ n) :
+    ((l : ℤ) ∣ (a + b - a')) ∧ ((l : ℤ) ∣ (b - b')) := by
+  refine tate_sigma_coord_alpha S hl hζ hπl (Units.map (τ : K →* K)) ?_ ?_ a b a' b' h
+  · apply Units.ext
+    exact hτζ
+  · apply Units.ext
+    exact hτπ
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def orderOf_eq_of_primitive.src : ABC3.Meta.Source :=
@@ -425,6 +450,21 @@ def zeta_pi_indep.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(ζ と π は Lˣ/⟨Q⟩ の中で独立。★無条件)",
     sectionId := "genell-thm-3-8" }
+
+def tate_sigma_coord_alpha_of_algEquiv.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(体自己同型 τ から受ける形の α。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def tate_sigma_coord_alpha_of_algEquiv.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "exists_sigma_smul_root_of_val(Kummer の σ、第 994、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.exists_sigma_smul_root_of_val") 1,
+    .implicitStep
+      ("★★★★**2026-09-02（第 1176）**——`AlphaBridge` の節点 2 が" ++
+       "**外から受け取る形**である。☆`τ`・`ζ`・`π` は第 994 の Kummer の議論が与える" ++
+       "（`l ∤ v(q)` なら `σ(π) = ζπ` なる `σ` がある）。" ++
+       "★残るのはその `σ` を `AdjoinRoot (Xˡ − C q)` から " ++
+       "`L_v(ζ_l, q^{1/l})` の Tate 設定へ移す段だけである。") 1 ]
 
 def tate_sigma_coord_alpha.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
