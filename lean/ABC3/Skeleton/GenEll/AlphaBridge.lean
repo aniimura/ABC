@@ -179,6 +179,33 @@ Tate 一意化の同変性である。★足りないのは**それらを繋ぐ 
 | `tate_point_unipotent`・`tate_point_exists_ne` | ★★点の側で読んだ形（同変性は `tatePhi_pointMap`） | 1273 |
 | `exists_algEquiv_sigma_kummer` | ★Kummer の `σ` を**体自己同型**として取る | 1274 |
 
+★★☆★★☆**訂正（第 1275・1277）**——下の表の B1（局所体の建設）は**要らない**。
+また在庫の `tatePhi_pointMap` は `σA : K →ₐ[R] K` が恒等射しかないため
+（第 1275 で証明）、点の側の同変性は `tatePhi_map`（`σR`・`σK` の対）から
+書き直す必要がある。☆第 1276（`tateSigmaAct`）がその受け皿である。
+
+### ★★★★★★★★★★★★★★★★★★★★訂正後の道筋（第 1277）
+
+☆**`π` は体を拡げなくても作れる**——`exists_pow_eq_of_torsion_not_mu`（第 1277）:
+
+> `l`-捩れの類が `μ_l` の像に収まらなければ、その類の代表 `x` は `x^l = Q^k`（`l ∤ k`）を満たし、
+> Bezout で `π ≔ x^b Q^a` が `π^l = Q` を与える。
+
+★★★したがって道筋は「**大域の数体を `L′ ≔ L(ζ_l, E[l], √d)` に取り替え、
+その完備化 `P.adicCompletion L′` で `mkTateSetup`（在庫）を使う**」となる。
+
+| # | 訂正後の残り | 在庫 |
+|---|---|---|
+| 1 | `L′` を取る（`ζ_l`・`E[l]`・捻り `d` を添加。`L/L′` は有限 Galois） | `exists_finite_point_descent`（第 1207）等 |
+| 2 | `P.adicCompletion L′` で `TateSetup` と `Φ` | `mkTateSetup`・`dvrTatePhiAddEquiv`（**無条件**） |
+| 3 | `E ⊗ K′ ≅ tateCurveAt q`（変数変換は `R′` の上） | `exists_tate_model`（在庫） |
+| 4 | `π` を捩れから作る | **第 1277** |
+| 5 | `σ` を分解群から取り、`σπ = ζπ` にする | `exists_algEquiv_sigma_kummer`（第 1274）の類推 |
+| 6 | `τ = 実際の Galois 作用` | `tatePhi_map`＋`tateCurveAt_map`（在庫） |
+| 7 | 大域へ運び `T_l E` に上げる | 第 1271・第 1270 |
+
+★★**局所体の建設（完備 DVR の Eisenstein 拡大）は道から消えた**。
+
 ★★★**数学の中身は尽きた**。残っているのは次の 3 本の「局所体の建設」である:
 
 | # | 残る節点 | 中身 | 見立て |

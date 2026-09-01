@@ -6113,5 +6113,15 @@
   "route": "★`τ` を `Φ` で**共役して定義**すれば同変性 `hτ` は定義から自明であり、第 1272（抽象な形、無傷）がそのまま当たる。☆したがって「`σ` は Tate 曲線の `E[l]` に幂単かつ非自明に作用する」は**この `τ` について無条件**である。",
   "remaining": "★残るのは **`τ` が実際の Galois 作用（点の座標に `σ` を当てる写像）と一致すること**である。☆道具は `tatePhi_map`（在庫、`σR : R →+* R` と `σK : K →+* K` の**対**——第 1275 の測定では空虚ではない）と`tateCurveAt_map`（在庫、Tate 曲線は環について自然）。★曲線を **σ で固定される部分環 `R₀`（基礎局所体の整数環）の上**に置き直すのが配管の中身である——`TateCurveNatural.lean` の冒頭の設計文（`S = R_K` で `Point.map` を使う）がまさにそれを言っている。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "piFromTorsion20260902": {
+  "block": 1277,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★★★★★訂正——π は捩れから作れる。局所体の建設（B1）は道から消えた",
+  "goal": "第 1274 で挙げた B1（完備 DVR の Eisenstein 拡大）を回避できるか測る。",
+  "proved": "☆`Found/GenEll/Thm38PiExists.lean`（第 1277）に 2 本。`exists_pow_eq_of_not_dvd`（`x^l = Q^k` かつ `l ∤ k` なら `Q` は `l` 乗——Bezout）と`exists_pow_eq_of_torsion_not_mu`（`l`-捩れの類が `μ_l` に収まらなければ `Q` は `l` 乗）。",
+  "correction": "★★☆**第 1274 の道筋の訂正**——「`K ≔ L_v(ζ_l, q^{1/l})` を建てる」は**要らない**。☆`π` は「`Q` の `l` 乗根を添加した体」ではなく、**`l`-捩れ点の座標が住む体の中に既にある**。★これは `lemma_3_2_i`（在庫）の証明が使っている Bezout の技そのものである。",
+  "route": "★★★訂正後の道筋: **大域の数体を `L′ ≔ L(ζ_l, E[l], √d)` に取り替え、その完備化 `P.adicCompletion L′` で `mkTateSetup`・`dvrTatePhiAddEquiv`（どちらも無条件、在庫）を使う**。☆`E ⊗ K′ ≅ tateCurveAt q` は `exists_tate_model`（在庫、変数変換は `R′` の上）。★残りは (5) `σ` を分解群から取る、(6) `τ = 実際の Galois 作用`（`tatePhi_map`＋`tateCurveAt_map`）、(7) 大域へ運ぶ（第 1271・1270）の 3 本である。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
