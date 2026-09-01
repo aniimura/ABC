@@ -4788,5 +4788,14 @@
     "frame": "進捗 3/4。節点 1(第 1143-1144)・節点 2(第 1145-1146)・節点 3(不要と実測)。残るのは節点 4(Ψ₂Sq の橋)だけ。",
     "gate": "lake build ABC3 成功(6268 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。",
     "node4Route": "★★★★**節点 4 の道(第 1147 の実測)**——preΨ_eval_eq_zero_of_addOrderOf_prime(第 1072)は ΨSq_l = preΨ_l²(l 奇)に落とすために hodd を使っている。l = 2 では preΨ₂ = 1 なので ΨSq₂ = Ψ₂Sq(主係数 4)。☆**しかし場合分けは要らない**——mathlib は WeierstrassCurve.leadingCoeff_ΨSq(n ≠ 0 なら主係数は n²)と natDegree_ΨSq(次数は n² − 1)を**偶奇を問わず**持っている(DivisionPolynomial/Degree.lean)。★したがって preΨ ではなく ΨSq で書けば、ΨSq_l(x) = 0(exists_divisor_root → k = l、偶奇不要)と「主係数 l² は hlu から単元」で済み、TorsionIntegralGood.lean の 10 本から hodd が一撃で落ちる。"
+  },
+  "psiSqNoParity20260901": {
+    "block": 1148,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★ΨSq なら偶奇が要らない——l = 2 の枝の節点 4a",
+    "goal": "Lemma 3.5 から l ≠ 2 を外す(l = 2 の枝の枠、節点 4)。",
+    "what": "★ΨSq_eval_eq_zero_of_addOrderOf_prime と mem_primeSubring_x_of_addOrderOf_prime' を入れた。どちらも hodd を取らない。☆preΨ 版(第 1072-1073)は ΨSq_l = preΨ_l²(l 奇)に落とすために l ≠ 2 を使っていたが、**ΨSq のまま止めれば偶奇は要らない**——mathlib の leadingCoeff_ΨSq は n ≠ 0 なら主係数を n² と言う(偶奇不問)。",
+    "measured": "★★節点 4 は 2 つに割れる(実測): (4a) preΨ → ΨSq の取り替え——第 1148 で部品が入った。(4b) veluWFull の /2(valAtLeast_two_inv_of_dvd)——**Bézout 2a + lb = 1 を使うので l = 2 では真に壊れる**。☆しかし l = 2 では点が 2-捩れで veluU = 0 なので veluWFull = ∑(veluU/2 + veluV2·x) = veluV2·x となり /2 が消える。★これが 4b の道である。",
+    "gate": "lake build ABC3 成功(6268 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
   }
 }

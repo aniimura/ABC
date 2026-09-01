@@ -90,7 +90,20 @@ import ABC3.Meta.Claim
 * `ΨSq_l(x) = 0`（`exists_divisor_root` → `k = l`、偶奇不要）
 * 主係数は `l²` で、`hlu : IsUnit (l)` から単元
 
-で済み、`TorsionIntegralGood.lean` の 10 本から `hodd` が一撃で落ちる。
+で済む。★第 1148 で `ΨSq_eval_eq_zero_of_addOrderOf_prime`・
+`mem_primeSubring_x_of_addOrderOf_prime'`（どちらも `hodd` なし）が入った。
+
+### ☆節点 4 は 2 つに割れる（第 1148 の実測）
+
+| # | 中身 | 状態 |
+|---|---|---|
+| 4a | `preΨ` → `ΨSq`（捽れ点の `x` の整性） | ★第 1148 で部品が入った |
+| 4b | `veluWFull` の `/2`（`valAtLeast_two_inv_of_dvd`） | ☆残り |
+
+★**4b は Bézout `2a + lb = 1` を使っているので `l = 2` では真に壊れる**。
+☆しかし `l = 2` では点が 2-捽れで `veluU = 0` なので、
+`veluWFull = ∑ (veluU/2 + veluV2·x) = veluV2·x` となり `/2` が消える。
+★これが 4b の道である。
 -/
 
 namespace ABC3.Skeleton.GenEll

@@ -80,6 +80,31 @@ theorem preΨ_eval_eq_zero_of_addOrderOf_prime {x y : F} (h : W.toAffine.Nonsing
   rw [if_neg (Int.not_even_iff_odd.2 hoddl), mul_one] at hkroot
   exact pow_eq_zero_iff (two_ne_zero).elim |>.mp hkroot
 
+/-- ★★★★★★★★★★★★★★★★**素数位数の点の `x` は `ΨSq_l` の根**（第 1148）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★**偶奇を問わない**——`preΨ` に落とさず `ΨSq` のまま止めればよい。
+☆`l = 2` では `ΨSq₂ = Ψ₂Sq`（主係数 `4`）だが、
+mathlib の `leadingCoeff_ΨSq` は `n ≠ 0` なら主係数を `n²` と言うので場合分けが要らない。 -/
+theorem ΨSq_eval_eq_zero_of_addOrderOf_prime {x y : F} (h : W.toAffine.Nonsingular x y)
+    {l : ℕ} (hl : l.Prime)
+    (hQ : addOrderOf (Point.some x y h) = l) :
+    (W.ΨSq (l : ℤ)).eval x = 0 := by
+  have hn : l • (Point.some x y h) = 0 := by
+    rw [← hQ]; exact addOrderOf_nsmul_eq_zero _
+  obtain ⟨k, hk1, hkdvd, hkroot⟩ := exists_divisor_root W h l hl.one_lt.le hn
+  have hkl : k = l := by
+    rcases (Nat.Prime.eq_one_or_self_of_dvd hl k hkdvd) with rfl | rfl
+    · exfalso
+      rw [show ((1 : ℕ) : ℤ) = 1 from rfl, WeierstrassCurve.ΨSq_one] at hkroot
+      simp at hkroot
+    · rfl
+  subst hkl
+  exact hkroot
+
+
 
 /-! ## ★★★★★★★★★★★★第 1073 —— 根から整性へ -/
 
@@ -143,6 +168,51 @@ theorem mem_primeSubring_x_of_addOrderOf_prime (p : HeightOneSpectrum (𝓞 L))
   obtain ⟨z, hz⟩ := IsIntegrallyClosed.isIntegral_iff.1
     (isIntegral_of_isUnit_leadingCoeff haeval hu)
   exact hz ▸ z.2
+
+/-- ★★★★★★★★★★★★★★★★**良い素点では捩れ点の `x` は整**——★偶奇を問わない（第 1148）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`ΨSq_l` の主係数は `l²` で、`hlu` からそれは単元である。
+★`preΨ` 版（第 1073）は `l` 奇を要したが、本版は `l = 2` でも通る。 -/
+theorem mem_primeSubring_x_of_addOrderOf_prime' (p : HeightOneSpectrum (𝓞 L))
+    (W : WeierstrassCurve L) [WeierstrassCurve.IsIntegral (primeSubring p) W]
+    {l : ℕ} (hl : l.Prime) (hlu : IsUnit ((l : primeSubring p)))
+    {x y : L} (h : W.toAffine.Nonsingular x y)
+    (hQ : addOrderOf (WeierstrassCurve.Affine.Point.some x y h) = l) :
+    x ∈ primeSubring p := by
+  have hroot : (W.ΨSq (l : ℤ)).eval x = 0 :=
+    ΨSq_eval_eq_zero_of_addOrderOf_prime W h hl hQ
+  have hbc : (WeierstrassCurve.integralModel (primeSubring p) W).baseChange L = W :=
+    WeierstrassCurve.baseChange_integralModel_eq (primeSubring p) W
+  have hmap : W.ΨSq (l : ℤ)
+      = ((WeierstrassCurve.integralModel (primeSubring p) W).ΨSq (l : ℤ)).map
+          (algebraMap (primeSubring p) L) := by
+    conv_lhs => rw [← hbc]
+    exact (WeierstrassCurve.integralModel (primeSubring p) W).map_ΨSq
+      (algebraMap (primeSubring p) L) (l : ℤ)
+  have hne : (((l : ℤ)) : primeSubring p) ≠ 0 := by
+    have hc : (((l : ℤ)) : primeSubring p) = ((l : ℕ) : primeSubring p) := by push_cast; ring
+    rw [hc]
+    exact hlu.ne_zero
+  have hlc : ((WeierstrassCurve.integralModel (primeSubring p) W).ΨSq (l : ℤ)).leadingCoeff
+      = (((l : ℤ)) : primeSubring p) ^ 2 :=
+    (WeierstrassCurve.integralModel (primeSubring p) W).leadingCoeff_ΨSq hne
+  have hu : IsUnit
+      ((WeierstrassCurve.integralModel (primeSubring p) W).ΨSq (l : ℤ)).leadingCoeff := by
+    rw [hlc]
+    have hc : (((l : ℤ)) : primeSubring p) = ((l : ℕ) : primeSubring p) := by push_cast; ring
+    rw [hc]
+    exact hlu.pow 2
+  have haeval : Polynomial.aeval x
+      ((WeierstrassCurve.integralModel (primeSubring p) W).ΨSq (l : ℤ)) = 0 := by
+    rw [Polynomial.aeval_def, ← Polynomial.eval_map, ← hmap]
+    exact hroot
+  obtain ⟨z, hz⟩ := IsIntegrallyClosed.isIntegral_iff.1
+    (isIntegral_of_isUnit_leadingCoeff haeval hu)
+  exact hz ▸ z.2
+
 
 /-- ★★★★★★★★★★★★**`x` が整なら `y` も整**（第 1073）。
 
@@ -930,6 +1000,31 @@ theorem hfin_of_veluQuotientFull (E E' : WeierstrassCurve L)
 end Integral
 
 /-! ## ★出典の紐付け(`.src`) -/
+
+def ΨSq_eval_eq_zero_of_addOrderOf_prime.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(素数位数の点の x は ΨSq_l の根。★偶奇を問わない)",
+    sectionId := "genell-lemma-3-5" }
+
+def ΨSq_eval_eq_zero_of_addOrderOf_prime.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "exists_divisor_root(捽れ点と多項式の橋、第 53、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.exists_divisor_root") 1,
+    .implicitStep
+      ("★★**2026-09-01（第 1148）**——`preΨ` 版（第 1072）は " ++
+       "`ΨSq_l = preΨ_l²`（`l` 奇）に落とすために `l ≠ 2` を使っていた。" ++
+       "☆**`ΨSq` のまま止めれば偶奇は要らない**——mathlib の " ++
+       "`leadingCoeff_ΨSq` は `n ≠ 0` なら主係数を `n²` と言う。") 4 ]
+
+def mem_primeSubring_x_of_addOrderOf_prime'.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(良い素点では捽れ点の x は整。★偶奇を問わない)",
+    sectionId := "genell-lemma-3-5" }
+
+def mem_primeSubring_x_of_addOrderOf_prime'.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[mathlib]" "WeierstrassCurve.leadingCoeff_ΨSq(主係数は n²。偶奇不問)"
+      (.inMathlib "WeierstrassCurve.leadingCoeff_ΨSq") 1,
+    .citation "[ABC3]" "ΨSq_eval_eq_zero_of_addOrderOf_prime(第 1148、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.ΨSq_eval_eq_zero_of_addOrderOf_prime") 1 ]
 
 def preΨ_eval_eq_zero_of_addOrderOf_prime.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
