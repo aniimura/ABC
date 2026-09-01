@@ -2555,3 +2555,11 @@ theorem foo : ... := ...
 に既にあった。★1 セッションで 2 回同じ穴に落ちた（第 958 と第 967）。
 ☆対策: 補題を書く前に、**その回に使う名前を全部まとめて** decl-index に
 grep する（1 つずつ思い出した順に引くと漏れる）。
+
+## 同名の補題が 2 つの名前空間にある（第 970）
+
+`vcPoint` は `ABC3.Found.GaloisRep`（`W C` の順）と `ABC3.Found.GenEll`（`C W` の順）の
+**両方にある**。★`namespace ABC3.Found.GaloisRep` の中で裸の `vcPoint` と書くと
+GaloisRep 側が選ばれ、`Application type mismatch` になる。
+☆MCP の `lean_check` は top-level ＋ `open` で試すので**この衝突が出ない**。
+ファイルに移すときは名前空間を明示すること。

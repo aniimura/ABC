@@ -1283,6 +1283,7 @@ import ABC3.Found.GaloisRep.TateLinearQ
 import ABC3.Found.GaloisRep.TateJInv
 import ABC3.Found.GaloisRep.TateParamJ
 import ABC3.Found.GaloisRep.TateParamMap
+import ABC3.Found.GaloisRep.TateModelPoint
 import ABC3.Found.GaloisRep.TateQUnique
 import ABC3.Found.GaloisRep.TateMixedGroup
 import ABC3.Found.GaloisRep.TateUnitGroup
