@@ -86,7 +86,35 @@ theorem degInfJ_quot_eq (E : SSCurve) (S : Finset (E.fld × E.fld))
   rw [degInfJ_eq, degInfJ_eq]
   exact ABC3.Found.GaloisRep.degInfOf_eq_of_local E.W (veluQuotientFull E.W S) l hloc
 
+/-! ## ★★★★★★★★★★★★商の類の `ht^Falt` -/
+
+/-- ★★★★★★★★★★★★
+**商の類の `ht^Falt` の評価は曲線の評価そのもの**——★**無条件**（第 1243）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`faltingsHeightJ_eq`（類の値は曲線の `ht^Falt`、在庫）で置き換えるだけ。
+
+★★★これが `EllModuliWitness` の `faltingsHeightJ_quotLCyclicJ` が要る形である
+——同種写像の高さ評価 `hfalt` をそのまま類の言葉に移す。 -/
+theorem faltingsHeightJ_quot_le (E : SSCurve) (S : Finset (E.fld × E.fld))
+    (hell : (veluQuotientFull E.W S).IsElliptic)
+    (hss : ∀ p : HeightOneSpectrum (𝓞 E.fld), SemistableAt p (veluQuotientFull E.W S))
+    (l : ℕ) (C₀ : ℝ)
+    (hfalt : htFaltOf E.fld (veluQuotientFull E.W S)
+      ≤ htFaltOf E.fld E.W + 2 * Real.log l + C₀) :
+    faltingsHeightJ (quotSSCurve E S hell hss).j
+      ≤ faltingsHeightJ E.j + 2 * Real.log l + C₀ := by
+  rw [faltingsHeightJ_eq, faltingsHeightJ_eq]
+  exact hfalt
+
 /-! ## ★出典の紐付け(`.src`)——★**条つきである。指標には数えない** -/
+
+def faltingsHeightJ_quot_le.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(商の類の ht^Falt の評価は曲線の評価そのもの。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def degInfJ_quot_eq.src : Source :=
   { paper := "GenEll", pdfPage := 17,

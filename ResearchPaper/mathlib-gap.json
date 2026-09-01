@@ -5771,5 +5771,15 @@
     "measured": "☆degInfJ_eq(類の値は曲線の deg∞、在庫)と degInfOf_eq_of_local(局所の関係を足し上げる、在庫)を繋いだだけ。★局所の関係 v_p(Δ_min(E′)) = l·v_p(Δ_min(E)) は Lemma 3.2, (ii) が与える。",
     "consequence": "☆これで witness の sorry (2) は「quotLCyclicJ_spec(第 1241)で S を取り出し、Lemma 3.2, (ii) を当てる」だけになった。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "htFaltQuot20260902": {
+    "block": 1243,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★商の類の ht^Falt の評価——witness の sorry (3) の形",
+    "goal": "EllModuliWitness の sorry (3) faltingsHeightJ_quotLCyclicJ。",
+    "what": "★faltingsHeightJ_quot_le(Found/GenEll/QuotClassExists.lean)—— 同種写像の高さ評価をそのまま類の言葉に移す。",
+    "measured": "☆faltingsHeightJ_eq(類の値は曲線の ht^Falt、在庫)で置き換えるだけ。",
+    "consequence": "★★★これで witness の 4 本すべてに**形**が出た —— (1) 第 1239、(2) 第 1242、(3) 本ブロック、(4) 第 1237。☆残るのは quotLCyclicJ_spec で S を取り出して当てはめる配管と、galRep の連続性である。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
