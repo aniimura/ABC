@@ -3894,5 +3894,17 @@
     ],
     "remaining": "☆第 1054（局所の `Δ` の計算）に要る 4 段のうち **2 段が済んだ**: (a) `Δ` を Tate モデルまで運ぶ輸送（第 890＋944＋969）—— 残、(b) 第 962 で `Δ(veluCurve) = l¹²·Δ(tate q^l)` —— 材料は証明済み、(c) 極小性から `v_p(C₀.u) = 0` —— ★第 1056 で**済**、(d) `minDeltaExp = v_p(Δ) − 12·neronExp` で締める —— 定義。★併せて `v(Δ(E_{q^l})) = l·v(q)` は第 1055 で**済**。",
     "note": "★944-1056 の 108 ブロック。"
+  },
+  "vAddDeltaVelu20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1057",
+    "supersedes": "vAddTateModelU20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "★★★★★★★★`vAdd_Delta_veluCurve_tate`（1057）——`v(Δ(veluCurve (tate q) v w)) = 12·v(l) + l·v(q)`。☆第 962（`Delta_velu_tate_eq`）＋第 1055（`v(Δ(E_{q^l})) = l·v(q)`）。"
+    ],
+    "nodeStatus": "☆第 1054（局所の `Δ` の計算）の 4 段: (a) `Δ` を Tate モデルまで運ぶ輸送 —— **残（最後の 1 段）**、(b) `Δ(veluCurve) = 12·v(l) + l·v(q)` —— ★第 1057 で**済**、(c) 極小性から `v_p(C₀.u) = 0` —— ★第 1056 で**済**、(d) `minDeltaExp = v_p(Δ) − 12·neronExp` —— ★定義。",
+    "lastStep": "★(a) の中身: `C₀ • (E′ ⊗ Lv) = veluCurve (tate q) v w ⊗ Lv`。☆材料は第 890（`veluQuotientFull_tate_mu`）・第 944（`tateModel_baseChange`）・第 969（`veluQuotientFull_vcPoint_eq`）で、いずれも証明済み。★第 999／1027 が `j` について同じ輸送をやっているので、その `Δ` 版である。",
+    "note": "★944-1057 の 109 ブロック。"
   }
 }

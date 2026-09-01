@@ -7,6 +7,7 @@ import ABC3.Found.GenEll.JScale
 import ABC3.Found.GaloisRep.HtFaltJ
 import ABC3.Found.GaloisRep.TateParamMap
 import ABC3.Found.GaloisRep.TateSetupDvr
+import ABC3.Found.GaloisRep.VeluTateDelta
 
 /-!
 # 第 954 ブロック —— **★★★★★★★★★★★★★★★★悪い素点の局所データを取り出す**（`Found`）
@@ -662,6 +663,50 @@ theorem vAdd_tateModel_u_eq_zero {R : Type} [CommRing R] [IsDomain R]
 def vAdd_tateModel_u_eq_zero.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(Tate モデルへの変数変換の u は付値 0。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+/-! ## ★★★★★★★★第 1057 —— Vélu の商の `Δ` の付値
+
+★第 962（`Delta_velu_tate_eq`）と第 1055（`v(Δ(E_{q^l})) = l·v(q)`）を合わせる。
+☆結果は **`v(Δ(veluCurve (tate q) v w)) = 12·v(l) + l·v(q)`** である。
+
+★これが第 1054 の (b) 段であり、第 1051 の見通し
+「`neronExp p E′ = v_p(l)`」の中身である——
+`minDeltaExp = v_p(Δ) − 12·neronExp` に代入すれば
+`minDeltaExp = l·v(q)` と合わせて `neronExp = v(l)` が出る。 -/
+
+/-- ★★★★★★★★**Vélu の商の `Δ` の付値は `12·v(l) + l·v(q)`**（第 1057）。 -/
+theorem vAdd_Delta_veluCurve_tate {R : Type} [CommRing R] [IsDomain R] [CharZero R]
+    [IsDiscreteValuationRing R] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
+    (q : R) (hq : q ∈ IsLocalRing.maximalIdeal R) {l : ℕ}
+    (hql : q ^ l ∈ IsLocalRing.maximalIdeal R) (v w : R)
+    (h4 : (tateCurveAt q hq).c₄ + 240 * v = (l : R) ^ 4 * (tateCurveAt (q ^ l) hql).c₄)
+    (h6 : (tateCurveAt q hq).c₆ + 504 * v + 6048 * w
+      = (l : R) ^ 6 * (tateCurveAt (q ^ l) hql).c₆)
+    (hVne : algebraMap R K (ABC3.Found.GenEll.veluCurve (tateCurveAt q hq) v w).Δ ≠ 0)
+    (hTne : algebraMap R K (tateCurveAt (q ^ l) hql).Δ ≠ 0)
+    (hlne : algebraMap R K (l : R) ≠ 0)
+    (hqne : algebraMap R K q ≠ 0) :
+    vAdd (tateDvrVal R K)
+        (Units.mk0 (algebraMap R K
+          (ABC3.Found.GenEll.veluCurve (tateCurveAt q hq) v w).Δ) hVne)
+      = 12 * vAdd (tateDvrVal R K) (Units.mk0 (algebraMap R K (l : R)) hlne)
+        + l * vAdd (tateDvrVal R K) (Units.mk0 (algebraMap R K q) hqne) := by
+  have hsplit : (Units.mk0 (algebraMap R K
+        (ABC3.Found.GenEll.veluCurve (tateCurveAt q hq) v w).Δ) hVne)
+      = (Units.mk0 (algebraMap R K (l : R)) hlne) ^ 12
+        * (Units.mk0 (algebraMap R K (tateCurveAt (q ^ l) hql).Δ) hTne) := by
+    ext
+    rw [Units.val_mk0, Units.val_mul, Units.val_pow_eq_pow_val, Units.val_mk0, Units.val_mk0,
+      Delta_velu_tate_eq q hq l hql v w h4 h6, map_mul, map_pow]
+  rw [hsplit, vAdd_mul, vAdd_pow, vAdd_Delta_tateCurveAt_pow q hql hTne hqne]
+  push_cast
+  ring
+
+def vAdd_Delta_veluCurve_tate.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の商の Δ の付値は 12·v(l) + l·v(q)。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 /-! ## ★出典の紐付け(`.src`) -/
