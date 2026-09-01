@@ -3826,5 +3826,16 @@
     "hfin": "☆`hfin`: `∑ᶠ p, neronExp p E · log N(p) − ∑ᶠ p, neronExp p E′ · log N(p)` `≤ (3/2)·[L:ℚ]·log l`。",
     "remaining": "☆残るのは `hfin` の証明だけ。★`neronExp p W = (v_p(Δ(W)) − v_p(Δ_min(W)))/12` の形なので、`IsMuAtBadPrimes`（第 1044、証明済み：悪い素点で `Δ_min(E′) = l·Δ_min(E)`）とVélu の `Δ(E′) = l^12 Δ(E)`（第 962 `Delta_velu_tate_eq` の大域版）を突き合わせれば出るはずである。",
     "note": "★944-1050 の 102 ブロック。"
+  },
+  "hfinAnalysed20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1051（測定）",
+    "supersedes": "lemma35OneHypothesis20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "keyIdentity": "★★★★**`minDeltaExp p W = v_p(Δ(W)) − 12·neronExp p W`**（`DegInf.lean:117` の定義）。☆したがって `∑ᶠ neronExp p W · log N(p) = (1/12)(log|N(Δ(W))| − Σ_W)`、ただし `Σ_W := ∑ᶠ minDeltaExp p W · log N(p)`。",
+    "hfinExpanded": "☆`hfin` の左辺 `= (1/12)(log|N(Δ(E))/N(Δ(E′))| + (l−1)·Σ_E)`。★ここで `Σ_{E′} = l·Σ_E` は `IsMuAtBadPrimes`（第 1044、証明済み）から出る。",
+    "whyItHolds": "★★★★**`hfin` が成り立つ理由（見通し）**: 第 962 `Delta_velu_tate_eq` は `Δ(veluCurve (tate q) v w) = l¹² · Δ(tate q^l)` を与える。☆したがって悪い素点で `E` が極小なら `v_p(Δ(E′)) = 12·v_p(l) + l·minDeltaExp p E`、すなわち **`neronExp p E′ = v_p(l)`**。★★よって `∑ᶠ neronExp p E′ · log N(p) = ∑ᶠ v_p(l) · log N(p) = [L:ℚ]·log l` であり、`hfin` の左辺は `−[L:ℚ]·log l ≤ (3/2)·[L:ℚ]·log l` で**余裕をもって成り立つ**。☆`(3/2)` の余裕はこのためにある。",
+    "nextStep": "☆次の一手: 第 962 の**大域版**——`v_p(Δ(veluQuotientFull E S)) = 12·v_p(l) + l·minDeltaExp p E`（`E` が `p` で極小のとき）——を書く。★材料は `Delta_velu_tate_eq`（962）と `tateParam_quot_velu`（第 1027 の連鎖）である。",
+    "note": "★944-1050 の 102 ブロック。"
   }
 }
