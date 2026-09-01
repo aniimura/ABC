@@ -6163,5 +6163,16 @@
   "route": "★`ζ^l = σ(Q)/Q = 1`（`σ` は基礎体を固定）。☆`ζ ≠ 1` と `l` 素数から位数はちょうど `l` なので原始 `l` 乗根である。",
   "consequence": "★★★これで `tateSigmaAct_unipotent`・`tateSigmaAct_exists_ne`（第 1276）が要求する `hσπ : σU π = ζ * π` と `hζ : IsPrimitiveRoot ζ l` が**同時に**出る。☆訂正後の道筋（第 1277）の段 5 が閉じた。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "sigmaZetaPi20260902": {
+  "block": 1282,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★σ・ζ・π の三つ組が揃う（第 1276 の入力が完成）",
+  "goal": "第 1276 が要求する 4 つの仮説を一度に出す。",
+  "proved": "☆`exists_sigma_zeta_pi`（`Found/GenEll/Thm38SigmaFull.lean`、第 1282）——`l ∤ v(Q)` と「基礎体が `μ_l` を含む」から `IsPrimitiveRoot ζ l`・`σ ζ = ζ`・`σ π = ζ π` が出る。",
+  "route": "★`σ` は第 1280、`ζ` は第 1281。☆`σ ζ = ζ` は `ζ` が `l` 乗根なので基礎体に入ることから。",
+  "consequence": "★★★これで **`tateSigmaAct_unipotent`・`tateSigmaAct_exists_ne`（第 1276）の入力が完成**した。☆そのために大域の数体に `ζ_l` を添加しておく（`ImageContainsSL2J` は部分群の像で言えば十分）。",
+  "remaining": "★残るのは (6) `tateSigmaAct` が実際の Galois 作用と一致すること、(8) 悪い素点での `TateSetup` の組み立て、の 2 本である（(7) 大域への輸送は第 1271 で済み）。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }

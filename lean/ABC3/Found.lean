@@ -1395,6 +1395,7 @@ import ABC3.Found.GenEll.Thm38TorsionNotMu
 import ABC3.Found.GenEll.Thm38PiFromPhi
 import ABC3.Found.GenEll.Thm38SigmaExists
 import ABC3.Found.GenEll.Thm38SigmaZeta
+import ABC3.Found.GenEll.Thm38SigmaFull
 import ABC3.Found.GaloisRep.Lemma35Descend
 import ABC3.Found.GaloisRep.TowerInstances
 import ABC3.Found.GaloisRep.Lemma35Assemble
