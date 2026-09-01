@@ -219,6 +219,58 @@ theorem isUnit_natCast_primeSubring (p : HeightOneSpectrum (𝓞 L)) {n : ℕ}
       push_cast
       field_simp
 
+/-- ★★★★★★★★★★★★★★★★**`p ∣ l` でも `l·x` は整**（第 1076）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`preΨ_l` の主係数は `l` なので、単元でなくても
+`isIntegral_leadingCoeff_smul` が `l • x` の整性を与える。
+★これが `p ∣ l` での局所評価 `v_p(x) ≥ −v_p(l)` の正体である。 -/
+theorem natCast_mul_x_mem_of_addOrderOf_prime (p : HeightOneSpectrum (𝓞 L))
+    (E : WeierstrassCurve L) [WeierstrassCurve.IsIntegral (primeSubring p) E]
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    {x y : L} (h : E.toAffine.Nonsingular x y)
+    (hQ : addOrderOf (WeierstrassCurve.Affine.Point.some x y h) = l) :
+    ((l : L) * x) ∈ primeSubring p := by
+  have hroot : (E.preΨ (l : ℤ)).eval x = 0 :=
+    preΨ_eval_eq_zero_of_addOrderOf_prime E h hl hodd hQ
+  have hbc : (WeierstrassCurve.integralModel (primeSubring p) E).baseChange L = E :=
+    WeierstrassCurve.baseChange_integralModel_eq (primeSubring p) E
+  have hmap : E.preΨ (l : ℤ)
+      = ((WeierstrassCurve.integralModel (primeSubring p) E).preΨ (l : ℤ)).map
+          (algebraMap (primeSubring p) L) := by
+    conv_lhs => rw [← hbc]
+    exact (WeierstrassCurve.integralModel (primeSubring p) E).map_preΨ
+      (algebraMap (primeSubring p) L) (l : ℤ)
+  have haeval : Polynomial.aeval x
+      ((WeierstrassCurve.integralModel (primeSubring p) E).preΨ (l : ℤ)) = 0 := by
+    rw [Polynomial.aeval_def, ← Polynomial.eval_map, ← hmap]
+    exact hroot
+  have hoddl : Odd ((l : ℤ)) := by
+    have : Odd l := hl.odd_of_ne_two hodd
+    exact_mod_cast this
+  have hne : (((l : ℤ)) : primeSubring p) ≠ 0 := by
+    have hc : (((l : ℤ)) : primeSubring p) = ((l : ℕ) : primeSubring p) := by push_cast; ring
+    rw [hc]
+    simpa using (Nat.cast_ne_zero (R := primeSubring p)).2 hl.ne_zero
+  have hlc : ((WeierstrassCurve.integralModel (primeSubring p) E).preΨ (l : ℤ)).leadingCoeff
+      = (((l : ℤ)) : primeSubring p) := by
+    rw [(WeierstrassCurve.integralModel (primeSubring p) E).leadingCoeff_preΨ hne,
+      if_neg (Int.not_even_iff_odd.2 hoddl)]
+  have hint : IsIntegral (primeSubring p)
+      (((WeierstrassCurve.integralModel (primeSubring p) E).preΨ (l : ℤ)).leadingCoeff • x) :=
+    isIntegral_leadingCoeff_smul _ _ haeval
+  obtain ⟨z, hz⟩ := IsIntegrallyClosed.isIntegral_iff.1 hint
+  have hsm : ((WeierstrassCurve.integralModel (primeSubring p) E).preΨ (l : ℤ)).leadingCoeff • x
+      = (l : L) * x := by
+    rw [hlc, Algebra.smul_def]
+    congr 1
+    push_cast
+    ring
+  rw [hsm] at hz
+  exact hz ▸ z.2
+
 /-! ## ★★★★★★★★★★★★★★★★第 1074 —— すべての倍点の座標が整 -/
 
 /-- ★★★★★★★★★★★★★★★★**位数 `l` の点のすべての倍点の座標は整**（第 1074）。

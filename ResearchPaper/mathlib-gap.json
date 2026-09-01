@@ -4077,5 +4077,21 @@
     "idiom": "☆配管: `Finset.image` の `DecidableEq` ダイヤモンド。`veluQuotientFull_image_eq` は `open scoped Classical` の下にあるので `Classical.propDecidable` を使う。`[DecidableEq L]` を binder で持つと `instDecidableEqProd` になって型が合わない。節ごと `open scoped Classical` に統一する。",
     "remaining": "☆次は `hfin` である。`hint`（`E′` が各素点で整）は `p ∤ l` の素点では出たが、`p ∣ l` の有限個では Vélu のモデルは整とは限らない。★`lemma_3_5_velu_defect`（第 1050）が受ける `hfin` をどう供給するかが残りの設計である。",
     "note": "★944-1075 の 126 ブロック。"
+  },
+  "hfinDesign20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1076（設計＋定理）",
+    "supersedes": "veluIntegralClosed20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "theorem": "★★★★★★★★★★★★★★★★`natCast_mul_x_mem_of_addOrderOf_prime`（第 1076）——`p ∣ l` でも `l·x` は整。☆`preΨ_l` の主係数が `l` なので、単元でなくても `isIntegral_leadingCoeff_smul` が `l • x` の整性を与える。★これが `v_p(x) ≥ −v_p(l)` の正体である。",
+    "design": "★★★★**`hfin` の設計が閉じた**。☆`(3/2)` という定数の正体が分かった。",
+    "designSteps": [
+      "★**第 1053 の不変性が大域極小モデルを不要にする**——`neronExp p E − neronExp p E′` は `E`・`E′` に同じ `C` を当てても変わらない。☆Vélu は変数変換と可換（`veluCurve_variableChange`）なので、**各素点 `p` ごとに別々に** `p` で極小なモデルを取ってよい。★すると `neronExp p E = 0` となり、残るのは `−neronExp p E′` だけである。",
+      "☆`p ∤ l`: 第 1074 より `E′` は `p` で整、よって `neronExp p E′ ≥ 0`。寄与は `≤ 0`。",
+      "☆`p ∣ l`（`t := v_p(l)`）: 第 1076 より `v_p(x) ≥ −t`、第 1070 より `v_p(y) ≥ −(3/2)t`。よって `v_p(veluV2) ≥ −2t`・`v_p(veluU) ≥ −3t`。★`l` は奇なので `p ∣ l` では `v_p(2) = 0`、したがって `veluWFull` の `/2` は無害で `v_p(w) ≥ −3t`。☆`veluCurve` は `a₄ ↦ a₄ − 5v`（重み 4）・`a₆ ↦ a₆ − b₂v − 7w`（重み 6）なので、`u` を `−v(u) = ⌈t/2⌉` に取れば整になる。よって `neronExp p E′ ≥ −⌈t/2⌉`。",
+      "★**足し上げ**: `Σ_p v_p(l)·logN(p) = log|N_{L/ℚ}(l)| = d·log l`。☆`Σ_{p∣l} ⌈t_p/2⌉ logN(p) ≤ (1/2)Σ t_p logN(p) + (1/2)Σ_{p∣l} logN(p) ≤ (1/2)d log l + (1/2)d log l = d·log l ≤ (3/2)·d·log l`。★★**つまり `(3/2)` は `1/2`（`⌈t/2⌉` の主要項）＋ `1`（丸めと余裕）である。**"
+    ],
+    "remaining": "☆残るのは形式化だけである（見積り 15-25 ブロック）: (a) 各素点で極小なモデルへの局所化（第 1053 ＋ `veluCurve_variableChange`）、(b) `p ∣ l` での `v`・`w` の付値評価（第 1070・1076 から）、(c) 変数変換で整にする段と `neronExp ≥ valAdd u`、(d) `finsum` の足し上げと `Σ_p v_p(l) logN(p) = d log l`。",
+    "note": "★944-1076 の 127 ブロック。"
   }
 }
