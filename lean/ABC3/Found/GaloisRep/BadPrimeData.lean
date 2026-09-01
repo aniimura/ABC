@@ -709,6 +709,50 @@ def vAdd_Delta_veluCurve_tate.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(Vélu の商の Δ の付値は 12·v(l) + l·v(q)。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-- ★★★★★★★★★★★★**曲線の等式から `Δ` の付値へ**（第 1059）。
+
+☆第 1058（輸送）＋第 1056（`v(C₀.u) = 0`）＋第 1057（Vélu の `Δ`）を繋ぐ帳簿である。
+★これで「極小な素点では `v(Δ(E′)) = 12·v(l) + l·v(q)`」が出る。 -/
+theorem vAdd_Delta_of_veluCurve_eq {R : Type} [CommRing R] [IsDomain R] [CharZero R]
+    [IsDiscreteValuationRing R] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
+    (q : R) (hq : q ∈ IsLocalRing.maximalIdeal R) {l : ℕ}
+    (hql : q ^ l ∈ IsLocalRing.maximalIdeal R) (v w : R)
+    (h4 : (tateCurveAt q hq).c₄ + 240 * v = (l : R) ^ 4 * (tateCurveAt (q ^ l) hql).c₄)
+    (h6 : (tateCurveAt q hq).c₆ + 504 * v + 6048 * w
+      = (l : R) ^ 6 * (tateCurveAt (q ^ l) hql).c₆)
+    (C₀ : WeierstrassCurve.VariableChange R) (X : WeierstrassCurve K)
+    (hXΔ : X.Δ ≠ 0)
+    (hEq : (C₀.map (algebraMap R K)) • X
+      = (ABC3.Found.GenEll.veluCurve (tateCurveAt q hq) v w).map (algebraMap R K))
+    (hu : vAdd (tateDvrVal R K) ((C₀.map (algebraMap R K)).u) = 0)
+    (hTne : algebraMap R K (tateCurveAt (q ^ l) hql).Δ ≠ 0)
+    (hlne : algebraMap R K (l : R) ≠ 0)
+    (hqne : algebraMap R K q ≠ 0) :
+    vAdd (tateDvrVal R K) (Units.mk0 X.Δ hXΔ)
+      = 12 * vAdd (tateDvrVal R K) (Units.mk0 (algebraMap R K (l : R)) hlne)
+        + l * vAdd (tateDvrVal R K) (Units.mk0 (algebraMap R K q) hqne) := by
+  have hVne : algebraMap R K
+      (ABC3.Found.GenEll.veluCurve (tateCurveAt q hq) v w).Δ ≠ 0 := by
+    have hne : ((C₀.map (algebraMap R K)) • X).Δ ≠ 0 :=
+      variableChange_Delta_ne_zero X hXΔ (C₀.map (algebraMap R K))
+    rw [hEq, WeierstrassCurve.map_Δ] at hne
+    exact hne
+  have hchg := vAdd_Delta_variableChange (R := R) (K := K) X hXΔ (C₀.map (algebraMap R K))
+  rw [hu, mul_zero, sub_zero] at hchg
+  have hEqΔ : (Units.mk0 (((C₀.map (algebraMap R K)) • X).Δ)
+      (variableChange_Delta_ne_zero X hXΔ (C₀.map (algebraMap R K))))
+      = Units.mk0 (algebraMap R K
+        (ABC3.Found.GenEll.veluCurve (tateCurveAt q hq) v w).Δ) hVne := by
+    refine Units.ext ?_
+    rw [Units.val_mk0, Units.val_mk0, hEq, WeierstrassCurve.map_Δ]
+  rw [← hchg, hEqΔ, vAdd_Delta_veluCurve_tate q hq hql v w h4 h6 hVne hTne hlne hqne]
+
+def vAdd_Delta_of_veluCurve_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(曲線の等式から Δ の付値へ。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def minDeltaExp_pos_of_jExp_neg.src : ABC3.Meta.Source :=
