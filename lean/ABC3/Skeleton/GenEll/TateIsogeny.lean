@@ -14,6 +14,7 @@ import ABC3.Found.GenEll.CyclotomicUnits
 import ABC3.Found.GaloisRep.TateModelPoint
 import ABC3.Found.GaloisRep.BadPrimeData
 import ABC3.Found.GaloisRep.CompletionValuationBridge
+import ABC3.Found.GaloisRep.UnramQuad
 import ABC3.Found.GaloisRep.TateMuInvolution
 import ABC3.Found.GaloisRep.VeluTateDelta
 import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
@@ -2131,5 +2132,90 @@ def minDeltaExp_eq_mul_at_bad_prime_gen.needs : List ProofObligation :=
       (.inProject "ABC3" "ABC3.Skeleton.GenEll.exists_vw_tate_mu") 1,
     .citation "[ABC3]" "minDeltaExp_eq_mul_of_j_tate_pow(終点、第 997、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.minDeltaExp_eq_mul_of_j_tate_pow") 1 ]
+
+/-! ## ★★★★★★★★★★★★★★★★第 1028 —— 拡大に載せ替える
+
+★第 1027 は一般の `(Lv, R)` で書けている。
+☆本ブロックは **`(Lv′, R′) = (Frac (R[X]/(f)), R[X]/(f))`** を実際に流し込み、
+付値・完備性・標数・`l` の単元性を**すべて自前で作る**。
+
+☆残るのは `E ⊗ Lv′` の側の 3 本だけである:
+極小性・楕円性・**分裂乗法還元**。 -/
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★**[GenEll] 悪い素点での `Δ_min` の関係——
+不分岐 2 次拡大に載せ替えた形**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 1028）**——第 1027 に第 1012-1025 を流し込む段である。
+☆`hp′` は第 1024（付値の橋）、完備性は第 1012＋1013＋1022 で作る。 -/
+theorem minDeltaExp_eq_mul_at_bad_prime_ext {L : Type} [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L))
+    {Lv : Type} [Field Lv] [CharZero Lv] [Algebra L Lv]
+    {R : Type} [CommRing R] [IsDomain R] [CharZero R] [IsDiscreteValuationRing R]
+    [Algebra R Lv] [IsFractionRing R Lv] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation Lv
+        (IsDiscreteValuationRing.maximalIdeal R)) (algebraMap L Lv x)
+      = (HeightOneSpectrum.valuation L p) x)
+    {f : Polynomial R} (hf : f.Monic) (hdeg : f.natDegree = 2)
+    (hirr : Irreducible (f.map (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R))))
+    [IsDomain (AdjoinRoot f)] [IsDiscreteValuationRing (AdjoinRoot f)]
+    [Algebra L (FractionRing (AdjoinRoot f))]
+    (halg : ∀ x : L, algebraMap L (FractionRing (AdjoinRoot f)) x
+      = quadFieldHom hf hdeg (algebraMap L Lv x))
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    [(E.baseChange (FractionRing (AdjoinRoot f))).IsElliptic]
+    [(E.baseChange (FractionRing (AdjoinRoot f))).IsMinimal (AdjoinRoot f)]
+    [(E'.baseChange (FractionRing (AdjoinRoot f))).IsElliptic]
+    (h' : (E.baseChange (FractionRing (AdjoinRoot f))).HasSplitMultiplicativeReduction
+      (AdjoinRoot f))
+    (hssE : SemistableAt p E) (hssE' : SemistableAt p E') (hjneg : jExp p E < 0)
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2) (hcop : ¬ ((l : ℤ) ∣ jExp p E))
+    (hlu : IsUnit ((l : R)))
+    {Q : E.toAffine.Point} (hQ : addOrderOf Q = l)
+    (hE' : E' = veluQuotientFull E
+      (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) :
+    minDeltaExp p E' = l * minDeltaExp p E := by
+  haveI hloc : IsLocalRing (AdjoinRoot f) := inferInstance
+  -- ★完備性——第 1012（`R`-加群）→ 第 1013（イデアルの側）→ 第 1022（極大の同定）
+  haveI hcomp0 : IsAdicComplete (IsLocalRing.maximalIdeal R) (AdjoinRoot f) :=
+    isAdicComplete_adjoinRoot (IsLocalRing.maximalIdeal R) hf hdeg
+  haveI hcomp : IsAdicComplete (IsLocalRing.maximalIdeal (AdjoinRoot f)) (AdjoinRoot f) := by
+    rw [maximalIdeal_adjoinRoot_eq_map hf hdeg hirr]
+    exact isAdicComplete_map_algebraMap _
+  -- ☆標数
+  haveI hchar : CharZero (AdjoinRoot f) :=
+    charZero_of_injective_algebraMap (algebraMap_adjoinRoot_injective hf hdeg)
+  haveI hcharK : CharZero (FractionRing (AdjoinRoot f)) :=
+    IsFractionRing.charZero (AdjoinRoot f)
+  -- ★付値の橋
+  have hp' : ∀ x : L, (HeightOneSpectrum.valuation (FractionRing (AdjoinRoot f))
+      (IsDiscreteValuationRing.maximalIdeal (AdjoinRoot f)))
+      (algebraMap L (FractionRing (AdjoinRoot f)) x)
+      = (HeightOneSpectrum.valuation L p) x := by
+    intro x
+    rw [halg, valuation_quadFieldHom hf hdeg hirr, hp]
+  -- ☆`l` は `R′` でも単元
+  have hlu' : IsUnit ((l : AdjoinRoot f)) := by
+    have := hlu.map (algebraMap R (AdjoinRoot f))
+    rwa [map_natCast] at this
+  exact minDeltaExp_eq_mul_at_bad_prime_gen p hp' E E' h' hssE hssE' hjneg hl hodd hcop
+    hlu' (NeZero.ne' (2 : AdjoinRoot f)).symm (NeZero.ne' (2 : FractionRing (AdjoinRoot f))).symm
+    hQ hE'
+
+def minDeltaExp_eq_mul_at_bad_prime_ext.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(悪い素点での Δ_min の関係——不分岐 2 次拡大に載せ替えた形)",
+    sectionId := "genell-lemma-3-5" }
+
+def minDeltaExp_eq_mul_at_bad_prime_ext.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "minDeltaExp_eq_mul_at_bad_prime_gen(第 1027、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.minDeltaExp_eq_mul_at_bad_prime_gen") 1,
+    .citation "[ABC3]" "valuation_quadFieldHom(付値の橋、第 1024、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.valuation_quadFieldHom") 1,
+    .citation "[ABC3]" "isAdicComplete_adjoinRoot(完備性、第 1012、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.isAdicComplete_adjoinRoot") 1 ]
 
 end ABC3.Skeleton.GenEll
