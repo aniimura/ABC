@@ -1383,6 +1383,7 @@ import ABC3.Found.GaloisRep.Lemma37CFull
 import ABC3.Found.GaloisRep.TateLevelOne
 import ABC3.Found.GaloisRep.TateKerLevel
 import ABC3.Found.GaloisRep.JExpCoprime
+import ABC3.Found.GaloisRep.Lemma35Descend
 import ABC3.Found.GenEll.PadicRedVec
 import ABC3.Found.GenEll.LCyclicPoint
 import ABC3.Found.GenEll.PointDescent
