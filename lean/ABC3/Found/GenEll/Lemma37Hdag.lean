@@ -111,7 +111,39 @@ theorem lemma_3_7_stableLine_full (KV : Set ℂ) (hKV : CompactlyBoundedJ KV)
   exact lemma_3_7_stableLine_cop KV hKV eps heps C₅ hC₅
     (fun E l hl hcyc hcop => hdag E l hl hcyc hcop (hquot _ _))
 
+/-! ## ★★★★★★★★★★★★`lcyclicExc` の形 -/
+
+set_option maxHeartbeats 1600000 in
+/-- ★★★★★★★★★★★★★★★★
+**`l`-巡回な `j` は Galois-有限な例外集合に入る**（第 1239）。
+
+原文 (GenEll p.18):
+> Lemma 3.7. (Finite Exceptional Sets) Let
+
+☆第 1226 の第 3 の主張を取り出した形。
+★★★これが `EllModuliWitness` の `lcyclicExc` 欄
+（`galoisFiniteJ_lcyclicExcJ`）が要る形である。 -/
+theorem exists_galoisFinite_lcyclic (KV : Set ℂ) (hKV : CompactlyBoundedJ KV)
+    (eps : ℝ) (heps : 0 < eps)
+    (hquot : ∀ (E : SSCurve) (l : ℕ), VeluQuotOK E l) :
+    ∃ C : ℝ, 0 < C ∧ ∃ Exc : Set ℂ, GaloisFiniteJ Exc ∧
+      ∀ (E : DegCurve) (l : ℕ), Nat.Prime l →
+        ((100 * (E.deg : ℝ)
+              * (faltingsHeightJ E.j + C * (E.deg : ℝ) ^ eps) ≤ (l : ℝ)
+            ∧ E.toSSCurve.HasMultRed)
+          ∨ (E.j ∈ KV ∧ E.toSSCurve.PrimeToLocalHeights l)) →
+        HasLCyclicJ E.toSSCurve l → E.j ∈ Exc := by
+  obtain ⟨C, hCpos, Exc, hExc, h37⟩ := lemma_3_7_stableLine_full KV hKV eps heps hquot
+  refine ⟨C, hCpos, Exc, hExc, ?_⟩
+  intro E l hl hcond hcyc
+  exact (h37 E l hl _ _ Iff.rfl Iff.rfl).2.2 hcond hcyc
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def exists_galoisFinite_lcyclic.src : Source :=
+  { paper := "GenEll", pdfPage := 18,
+    item := "Lemma 3.7(l-巡回な j は Galois-有限な例外集合に入る——lcyclicExc 欄の形)",
+    sectionId := "genell-lemma-3-7" }
 
 def lemma_3_7_stableLine_full.src : Source :=
   { paper := "GenEll", pdfPage := 18,
