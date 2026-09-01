@@ -137,7 +137,7 @@ def evalAdicMap_eq_of_map_eq.src : ABC3.Meta.Source :=
     sectionId := "genell-def-3-3" }
 
 def evalAdicMap_eq_of_map_eq.needs : List ABC3.Meta.ProofObligation :=
-  [ .citation "[mathlib]" "PowerSeries.map_injective(åå°ãªä¿æ°ååã¯åªç´æ°ã§ãåå°)"
+  [ .citation "[mathlib]" "PowerSeries.map_injective(単射な係数写像は冪級数でも単射)"
       (.inMathlib "PowerSeries.map_injective") 1,
     .implicitStep
       ("★★**2026-09-01（第 1107）**——これで `Lemma 3.5` の分母払いの" ++

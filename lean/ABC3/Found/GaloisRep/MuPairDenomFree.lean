@@ -103,7 +103,7 @@ theorem natCast_pow_mul_veluV2_tate [IsDomain R] {l : ℕ} {a : R}
 
 def veluV2DF.src : Source :=
   { paper := "GenEll", pdfPage := 17,
-    item := "Lemma 3.5(VÃ©lu ã® v ã®åæ¯ãªãçââlâ¶ ãæãã¦ xã»y ã®æ¬¡æ°å·®ãå¸åãã)",
+    item := "Lemma 3.5(Vélu の v の分母なし版——l⁶ を掛けて x・y の次数差を吸収する)",
     sectionId := "genell-lemma-3-5" }
 
 def natCast_pow_mul_veluV2.needs : List ProofObligation :=

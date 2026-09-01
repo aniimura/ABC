@@ -2707,3 +2707,40 @@ grep -rn foo some/dir
 ☆教訓: `node tools/decl-index.mjs` の grep は**mathlib を調べる前に**やる。
 ★特に「別の定理のために積んだ機械」は名前が違うので、
 概念名（`formalGroup`）ではなく**振る舞い**（`red`, `val_.*x`, `_add`）で引く。
+
+## Bash のヒアドキュメントは**バックスラッシュを 1 段潰す**
+
+`<<'EOF'`（クォートつき）でも、このセッションの Bash 経路では
+`\` が `\` に、`/\/g` が `/\/g` に落ちる。JavaScript の正規表現や
+Python の `'\'` を含むスクリプトをヒアドキュメントで書くと**壊れる**。
+
+```
+# 壊れる
+console.log(p.replace(/\/g, '/'))   → /\/g  で SyntaxError
+
+# 壊れない(バックスラッシュを一切書かない)
+console.log(p.split(path.sep).join('/'))
+```
+
+☆教訓: バックスラッシュを含むファイル内容は **Write / Edit ツールで書く**。
+★ヒアドキュメントは「バックスラッシュが 1 個も無い」ときだけ使う。
+
+## 日本語の `.src` / docstring が**文字化けする**ことがある
+
+第 1119 前後で `Lemma 3.5(Vélu の v の…)` が
+`Lemma 3.5(VÃ©lu ã® v ã®…)` になっていた（`MuPairDenomFree.lean` 1 行、
+`MuDenomFreeSum.lean` 6 行、`AdicEvalGen.lean` 1 行）。
+**UTF-8 のバイト列を latin1 として読んで書き戻した**形である。
+`lake build` は通る（コメント・文字列リテラルなので型に影響しない）ので
+ビルドでは捕まらない。
+
+```bash
+node tools/mojibake.mjs        # 走査(検出したら終了コード 1)
+node tools/mojibake.mjs --fix  # 復元して書き戻す
+```
+
+機構: 化けた行は「latin1 で符号化 → UTF-8 で復号」が成功して**別の文字列**になる。
+正常な日本語行は U+00FF を超える文字を含むので latin1 で符号化できず素通りする。
+
+☆教訓: 日本語を含む行をスクリプトで書いたら `node tools/mojibake.mjs` を回す。
+★`.src` の `item` が化けると進捗指標が原典の項目名と照合できなくなる。

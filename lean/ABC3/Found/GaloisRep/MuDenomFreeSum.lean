@@ -175,13 +175,13 @@ theorem sum_mu_dxpairE_zero {l : ℕ} (hl : l.Prime) {ζ : A} (hζ : IsPrimitive
 
 def sum_mu_dxpairE_zero.src : Source :=
   { paper := "GenEll", pdfPage := 17,
-    item := "Lemma 3.5(å¯¾ã® E çââhu ãåããªããp â£ l ã§ãæãç«ã¤)",
+    item := "Lemma 3.5(対の E 版——hu を取らない。p ∣ l でも成り立つ)",
     sectionId := "genell-lemma-3-5" }
 
 def sum_mu_dxpairE_zero.needs : List ProofObligation :=
-  [ .citation "[ABC3]" "sum_mu_dxtermE(é ­é ã®åãç¬¬ 1113ãè¨¼ææ¸ã¿)"
+  [ .citation "[ABC3]" "sum_mu_dxtermE(頭項の和、第 1113、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_dxtermE") 1,
-    .citation "[ABC3]" "sum_erase_reflect(i â¦ lâi ã®å¥ãæ¿ããå¨åº«)"
+    .citation "[ABC3]" "sum_erase_reflect(i ↦ l−i の入れ替え、在庫)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_erase_reflect") 1 ]
 
 /-- ★★★★★★★★★★★★★★★★★★★★★★★★
@@ -210,13 +210,13 @@ theorem sum_mu_d2xpairE {l : ℕ} (hl : l.Prime) {ζ : A} (hζ : IsPrimitiveRoot
 
 def sum_mu_d2xpairE.src : Source :=
   { paper := "GenEll", pdfPage := 17,
-    item := "Lemma 3.5(DÂ²X ã®å¯¾ã® E çââhu ãåããªããc4_velu_tate ã®æ¬ä½)",
+    item := "Lemma 3.5(D²X の対の E 版——hu を取らない。c4_velu_tate の本体)",
     sectionId := "genell-lemma-3-5" }
 
 def sum_mu_d2xpairE.needs : List ProofObligation :=
-  [ .citation "[ABC3]" "sum_mu_d2xtermE(é ­é ã®åãç¬¬ 1112ãè¨¼ææ¸ã¿)"
+  [ .citation "[ABC3]" "sum_mu_d2xtermE(頭項の和、第 1112、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_d2xtermE") 1,
-    .citation "[ABC3]" "sum_mu_d2xtail_sigma(å°¾ã®åãå¨åº«ãhu ä¸è¦)"
+    .citation "[ABC3]" "sum_mu_d2xtail_sigma(尾の和、在庫、hu 不要)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.sum_mu_d2xtail_sigma") 1 ]
 
 end Domain
