@@ -4544,5 +4544,28 @@
     },
     "remaining": "☆残るのは消費者 C——isElliptic_veluQuotient_tate_mu に B の橋を当て、hvw の口を「R の v・w」から「K の v・w ＋ c₄・c₆ の関係」に付け替える配管である。",
     "gate": "lake build ABC3 成功(6259 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
+  },
+  "veluSumKDenomFree20260901": {
+    "block": 1134,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★★★K 水準の Vélu の和は分母なし版の像——節点 5 の消費者 C の核",
+    "goal": "Lemma 3.5 から原典に無い仮説 d + 1 < l を外す(§3 の枠の節点 5)。",
+    "what": [
+      "★第 1131 の exists_vw_tate_mu_field は v = φ(SV)/l⁶・w = φ(SW)/(2l⁸) を天下りに取っていた。本ブロックでそれが**本当に K 水準の Vélu の和である**ことを示した。",
+      "☆l⁶·∑ veluV2 (E_q ⊗ K) (tateXK ζ^i …) (tateYK ζ^i …) = φ(SV)",
+      "☆l⁸·∑ (veluU … + 2·veluV2 …·tateXK …) = φ(SW)"
+    ],
+    "mechanism": "★機構は 3 つの無条件恒等式の合成だけである: (1) l⁶·veluV2 W x y = veluV2DF l W (l²x) (l³y)(第 1119)、(2) l²·tateXK = φ(tateXpairDF)・l³·tateYK = φ(tateYpairDF)(第 1133)、(3) φ(veluV2DF l W X Y) = veluV2DF l (W.map φ) (φX) (φY)(第 1125)。☆どれも IsUnit (1 − ζ^i) も IsUnit (l) も要求しない。",
+    "added": {
+      "Found/GaloisRep/VeluSumKDenomFree.lean (新規)": [
+        "natCast_pow_mul_veluV2_K / natCast_pow_mul_veluU_K / natCast_pow_mul_veluW_K",
+        "sum_pow_eq_zero_of_ne_one_domain(整域版)",
+        "zeta_pow_ne_one / zeta_pow_pow / zeta_pow_sub_ne_zero_K",
+        "sum_natCast_pow_mul_veluV2_K(★∑ veluV2 は SV の像)",
+        "sum_natCast_pow_mul_veluW_K(★∑(veluU + 2 veluV2 X) は SW の像)"
+      ]
+    },
+    "remaining": "☆残るのは veluQuotientFull_tate_mu / isElliptic_veluQuotient_tate_mu を「K の座標で受ける形」に書き直し、hvw の口を付け替える配管である。★材料(座標の橋・和の橋・c₄/c₆/Δ/j の関係)はすべて揃った。",
+    "gate": "lake build ABC3 成功(6260 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
   }
 }
