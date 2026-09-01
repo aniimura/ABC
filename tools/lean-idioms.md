@@ -2744,3 +2744,24 @@ node tools/mojibake.mjs --fix  # 復元して書き戻す
 
 ☆教訓: 日本語を含む行をスクリプトで書いたら `node tools/mojibake.mjs` を回す。
 ★`.src` の `item` が化けると進捗指標が原典の項目名と照合できなくなる。
+
+## Python で Lean を書き換えるときの `𝓞`（サロゲート）
+
+**失敗形**: heredoc の Python に `'\ud835\udcde'` と書くと、Python 3 では
+孤立サロゲート 2 文字になり、ファイル中の `𝓞` と一致しない。
+`assert old in s` が落ちる（か、書き込むと壊れたファイルになる）。
+
+**直し方**: BMP 外の文字は `'\U0001D4DE'`（大文字 `U` + 8 桁）で書く。
+`𝓞` = `\U0001D4DE`、`𝓞 L` は `HeightOneSpectrum (𝓞 L)` に現れる。
+
+**もう一つ**: heredoc の中に長い Python を入れると bash が
+`unexpected EOF while looking for matching` で落ちることがある。
+そのときは Write ツールで `.py` を作ってから実行する。
+
+## `Units.ext` のあとは `push_cast` ではなく `simp only [Units.val_mul, Units.val_mk0]`
+
+**失敗形**: `Units.mk0 (a^2*x) h = Units.mk0 a ha * Units.mk0 a ha * Units.mk0 x hx`
+を `apply Units.ext; push_cast; ring` で閉じようとすると、`push_cast` が
+右辺だけを `↑a^2 * ↑x` にまとめて左辺の `↑(Units.mk0 …)` を残し、`ring` が閉じない。
+
+**直し方**: `apply Units.ext; simp only [Units.val_mul, Units.val_mk0]; ring`。

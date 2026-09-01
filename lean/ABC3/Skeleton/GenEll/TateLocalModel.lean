@@ -991,7 +991,7 @@ theorem isIntegral_veluQuotientFull_of_coprime {L : Type} [Field L] [NumberField
     E'.IsIntegral (primeSubring p) := by
   subst hE'
   haveI := hEint
-  exact ABC3.Found.GaloisRep.isIntegral_veluQuotientFull_of_addOrderOf_prime p E hl hodd hlu Q hQ
+  exact ABC3.Found.GaloisRep.isIntegral_veluQuotientFull_of_addOrderOf_prime p E hl hlu Q hQ
 
 
 /-! ## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★第 1084 —— `hfin` を外した形 -/
@@ -1021,7 +1021,7 @@ theorem lemma_3_5_velu (eps : ℝ) (heps : 0 < eps) :
   obtain ⟨C, hC⟩ := lemma_3_5_velu_defect eps heps
   refine ⟨C, fun L _ _ E E' _ _ l hl hodd hd Q hQ hE' hssE hssE' hcop => ?_⟩
   exact hC L E E' l hl hodd hd Q hQ hE'
-    (ABC3.Found.GaloisRep.hfin_of_veluQuotientFull E E' hl hodd Q hQ hE') hssE hssE' hcop
+    (ABC3.Found.GaloisRep.hfin_of_veluQuotientFull E E' hl Q hQ hE') hssE hssE' hcop
 
 def lemma_3_5_velu.src : Source :=
   { paper := "GenEll", pdfPage := 17,

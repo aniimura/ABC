@@ -77,16 +77,14 @@ theorem htFalt_le_of_condA_lcyclic (eps : ℝ) (heps : 0 < eps) :
     have h2 : C₀ + |B| + 1 ≤ (C₀ + |B| + 1) * d ^ eps := by nlinarith [abs_nonneg B]
     linarith [hBabs, hC₀0]
   have hbig : 100 * d ≤ (l : ℝ) := by nlinarith [hcondA, hd1, hone]
-  -- ★`l ≠ 2`
   have hbig' : (100 : ℝ) * (Module.finrank ℚ L : ℝ) ≤ (l : ℝ) := by
     rw [hddef] at hbig; exact hbig
   have hbigN : 100 * Module.finrank ℚ L ≤ l := by exact_mod_cast hbig'
   have hdN : 1 ≤ Module.finrank ℚ L := Module.finrank_pos
-  have hodd : l ≠ 2 := by omega
   -- ☆`Lemma 3.5` で `(†)` を埋める
   have hdag : ((l : ℝ) / 14) * degInfOf L E
       ≤ htFaltOf L E + 2 * Real.log l + max C₅ 0 := by
-    have h := h₅ L E E' l hl hodd Q hQ hE' hssE hssE' hcop
+    have h := h₅ L E E' l hl Q hQ hE' hssE hssE' hcop
     have hcoef : (1 : ℝ) / (12 * (1 + 1/6)) = 1 / 14 := by norm_num
     rw [hcoef] at h
     have hrw : (1 : ℝ) / 14 * (l : ℝ) * degInfOf L E

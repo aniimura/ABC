@@ -169,6 +169,38 @@ theorem exists_veluW_of_inv {A : Type} [CommRing A] (W : WeierstrassCurve A) (m 
   rw [hX i hi, hY i hi]
   exact veluTerm_pair_even W (X i) (Y i)
 
+/-! ## ★★★★★★★★第 1149 —— `l = 2` のときの `w` -/
+
+open WeierstrassCurve in
+/-- ★★★★★★★★★★★★**`l = 2` でも Vélu の `w` は環の中で作れる**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 1149）**——`exists_veluW_of_inv`（第 960）は
+`l = 2m+1`（奇）を使っている。☆`l = 2` では添字集合が
+`(range 2).erase 0 = {1}` と一点だけになり、対にならない。
+
+★だが**その一点は 2-捻れ**である——`Y 1 = negY (X 1) (Y 1)`。
+すなわち `veluGy = -2y - a₁x - a₃ = 0` なので `veluU = veluGy² = 0` となり、
+
+    `∑ (veluU + 2·veluV2·x) = 2·(veluV2·x)`
+
+である。☆つまり `w = veluV2·x` がそのまま取れる——**割り算をしない**。 -/
+theorem exists_veluW_two {A : Type} [CommRing A] (W : WeierstrassCurve A) (X Y : ℕ → A)
+    (hY : Y 1 = W.toAffine.negY (X 1) (Y 1)) :
+    ∃ w : A, 2 * w = ∑ i ∈ (range 2).erase 0,
+      (veluU W (X i) (Y i) + 2 * (veluV2 W (X i) (Y i) * X i)) := by
+  refine ⟨veluV2 W (X 1) (Y 1) * X 1, ?_⟩
+  have hs : (range 2).erase 0 = {1} := by decide
+  rw [hs, Finset.sum_singleton]
+  have hgy : veluGy W (X 1) (Y 1) = 0 := by
+    rw [WeierstrassCurve.Affine.negY] at hY
+    simp only [veluGy]
+    linear_combination -hY
+  rw [veluU, hgy]
+  ring
+
 end SymmSum
 
 /-! ## ★出典の紐付け(`.src`) -/
@@ -199,5 +231,17 @@ def exists_veluW_of_inv.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(添字の反転が点の反転なら Vélu の w は環の中で作れる。★無条件)",
     sectionId := "genell-lemma-3-5" }
+
+def exists_veluW_two.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(l = 2 でも Vélu の w は作れる——一点は 2-捻れで veluU = 0。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def exists_veluW_two.needs : List ABC3.Meta.ProofObligation :=
+  [ .implicitStep
+      ("★★★★**2026-09-01（第 1149）の測定**——`exists_veluW_of_inv` は " ++
+       "`l = 2m+1`（奇）を使うが、`l = 2` では添字集合が `{1}` と一点だけで対にならない。" ++
+       "☆しかしその一点は 2-捻れなので `veluGy = 0`、したがって `veluU = 0` であり、" ++
+       "`∑ (veluU + 2·veluV2·x) = 2·(veluV2·x)` となる。★割り算をしない。") 6 ]
 
 end ABC3.Found.GenEll

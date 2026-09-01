@@ -53,57 +53,42 @@ import ABC3.Meta.Claim
 ★これは第 1128 と同じ「万有な環を経由する」型であり、道具（`map_*`・`evalAdicMapHom`）は
 すべて第 1125-1127 で建ててある。
 
-## ★★★★★★★★★★残り 4 節点（進捗枠 **3 / 4**）
+## ★★★★★★★★★★★★★★★★**4 節点すべて閉じた（進捗枠 4 / 4）**
 
-| # | 節点 | 内容 | 重み |
+| # | 節点 | 内容 | 第 |
 |---|---|---|---|
-| 1 | `veluV2_eq_tateDYpair_any` | `hDX` を取らない `DY = veluV2` **★第 1143-1144 で証明済み** | 10 |
-| 2 | `c4_velu_tate_any` / `c6_velu_tate_any` | `hDX` を取らない `c₄`・`c₆` の恒等式 **★第 1145-1146 で証明済み** | 8 |
-| 3 | ~~`exists_veluW_two`~~ | **★不要と実測（第 1147）**——`_K` の連鎖は `exists_veluW` を使わない | 6 |
-| 4 | `ΨSq` への取り替え | `preΨ` の連鎖を `ΨSq` で書き直す（★偶奇不要） | 8 |
+| 1 | `veluV2_eq_tateDYpair_any` | `hDX` を取らない `DY = veluV2` | ★ 1143-1144 |
+| 2 | `c4_velu_tate_any` / `c6_velu_tate_any` | `hDX` を取らない `c₄`・`c₆` の恒等式 | ★ 1145-1146 |
+| 3 | `exists_veluW_two` | `l = 2` での Vélu の `w`（一点は 2-捻れで `veluU = 0`） | ★ 1149 |
+| 4 | `ΨSq` への取り替え | `preΨ` の連鎖を `ΨSq` で書き直す（★偶奇不要） | ★ 1148-1149 |
 
-☆総重み 32。★これが閉じれば `Lemma 3.5` は**原典どおりの仮説だけ**になる。
+★★★★**結果（第 1149）**——`lemma_3_5_height_ineq` から `l ≠ 2` が外れ、
+`.src` の `item` は**条なしの `"Lemma 3.5"`** になった。
+☆これで `Lemma 3.5` は**原典どおりの仮説だけ**である。
 
-### ★★★★★★★★第 1147 の実測——`hodd` の残りは 1 か所
+### ★★★★★★★★第 1147 の見積もりの訂正（第 1149 の実測）
 
-★第 1146 で `c4_velu_tate_any`・`c6_velu_tate_any` が出たので、
-`c4_velu_tateDF`・`c6_velu_tateDF`（第 1129-1130）も **`hodd` なし**になった。
+第 1147 は「`exists_veluW_of_inv` は `_K` の連鎖に現れないので節点 3 は不要」と書いたが、
+★実際には `hfin_of_veluQuotientFull` → `neronExp_sub_le_valAdd_natCast` →
+`isIntegral_veluQuotientFull_of_addOrderOf_prime` の中で使われていた。
+☆`_K` のファイルを grep しただけでは見えなかったのである。
 
-☆`_K` の連鎖（`lemma_3_5_velu_K` まで）で `hodd` を消費するのは
-**`hfin_of_veluQuotientFull` の `preΨ` の連鎖だけ**になった（節点 4）。
-★`exists_veluW_of_inv` は `_K` の連鎖に現れないので節点 3 は不要である。
+### ★★★★★★★★節点 4 は 2 つに割れた（第 1148-1149）
 
-### ★★★★★★★★★★★★節点 4 の道（第 1147 の実測）
-
-`preΨ_eval_eq_zero_of_addOrderOf_prime`（第 1072）は `ΨSq_l = preΨ_l²`（`l` 奇）に
-落とすために `hodd` を使っている。☆`l = 2` では `preΨ₂ = 1` なので
-`ΨSq₂ = Ψ₂Sq`（主係数 `4`）になる。
-
-★★**しかし場合分けは要らない**——mathlib は
-
-    `WeierstrassCurve.leadingCoeff_ΨSq`（`n ≠ 0` なら主係数は `n²`）
-    `WeierstrassCurve.natDegree_ΨSq`（次数は `n² − 1`）
-
-を**偶奇を問わず**持っている（`DivisionPolynomial/Degree.lean`）。
-☆したがって `preΨ` ではなく **`ΨSq` で書けば**
-
-* `ΨSq_l(x) = 0`（`exists_divisor_root` → `k = l`、偶奇不要）
-* 主係数は `l²` で、`hlu : IsUnit (l)` から単元
-
-で済む。★第 1148 で `ΨSq_eval_eq_zero_of_addOrderOf_prime`・
-`mem_primeSubring_x_of_addOrderOf_prime'`（どちらも `hodd` なし）が入った。
-
-### ☆節点 4 は 2 つに割れる（第 1148 の実測）
-
-| # | 中身 | 状態 |
+| # | 中身 | 道 |
 |---|---|---|
-| 4a | `preΨ` → `ΨSq`（捽れ点の `x` の整性） | ★第 1148 で部品が入った |
-| 4b | `veluWFull` の `/2`（`valAtLeast_two_inv_of_dvd`） | ☆残り |
+| 4a | `preΨ` → `ΨSq`（捻れ点の `x` の整性） | ★mathlib の `leadingCoeff_ΨSq` は `n ≠ 0` だけで `n²` を返す（偶奇不問） |
+| 4b | `veluWFull` の `/2`（`valAtLeast_two_inv_of_dvd`） | ★`v_p(2) = 0` ∨ `veluU = 0` の**選言**に弱めて両方を通した |
 
-★**4b は Bézout `2a + lb = 1` を使っているので `l = 2` では真に壊れる**。
-☆しかし `l = 2` では点が 2-捽れで `veluU = 0` なので、
-`veluWFull = ∑ (veluU/2 + veluV2·x) = veluV2·x` となり `/2` が消える。
-★これが 4b の道である。
+★★**4b の Bézout `2a + lb = 1` は `l = 2` で真に壊れる**。
+☆だが `l = 2` では点が 2-捻れで `veluU = 0` なので
+`veluWFull = ∑ (veluU/2 + veluV2·x) = veluV2·x` となり `/2` の項そのものが消える。
+
+### ☆実測の剥がれ（第 1149）
+
+`ΨSq` の主係数は `l²` なので、`p ∣ l` での深さの上限は
+`v(x) ≥ −v_p(l)`（`preΨ` 版）から `v(x) ≥ −2v_p(l)` に甲くなる。
+★しかし消費側は `M ≔ v_p(l)` を取るので、`hM : v_p(l) ≤ M` に弱めるだけで通った。
 -/
 
 namespace ABC3.Skeleton.GenEll
@@ -114,7 +99,7 @@ open ABC3.Meta
 
 def lTwoBranchFrame.src : Source :=
   { paper := "GenEll", pdfPage := 17,
-    item := "Lemma 3.5(l = 2 の枝を外す枠——残る唯一の逸脱)",
+    item := "Lemma 3.5(l = 2 の枝を外す枠——★第 1149 で閉じた)",
     sectionId := "genell-lemma-3-5" }
 
 def lTwoBranchFrame.needs : List ProofObligation :=

@@ -36,7 +36,7 @@ theorem minDeltaExp_eq_mul_at_bad_prime_any_K {L : Type} [Field L] [NumberField 
     (p : HeightOneSpectrum (𝓞 L)) (E E' : WeierstrassCurve L)
     [E.IsElliptic] [E'.IsElliptic]
     (hssE : SemistableAt p E) (hssE' : SemistableAt p E') (hjneg : jExp p E < 0)
-    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    {l : ℕ} (hl : l.Prime)
     (hcop : ¬ ((l : ℤ) ∣ jExp p E))
     {Q : E.toAffine.Point} (hQ : addOrderOf Q = l)
     (hE' : E' = veluQuotientFull E
@@ -58,7 +58,7 @@ theorem minDeltaExp_eq_mul_at_bad_prime_any_K {L : Type} [Field L] [NumberField 
     (R := p.adicCompletionIntegers L) ((C • E).baseChange (p.adicCompletion L))
   by_cases hs : WeierstrassCurve.HasSplitMultiplicativeReduction (p.adicCompletionIntegers L)
       ((C • E).baseChange (p.adicCompletion L))
-  · exact minDeltaExp_eq_mul_at_bad_prime_full_K p E E' hssE hssE' hjneg hl hodd hcop
+  · exact minDeltaExp_eq_mul_at_bad_prime_full_K p E E' hssE hssE' hjneg hl hcop
       C hmin hs hQ hE'
   · -- ★非分裂——不分岐 2 次拡大を通す（第 1034）
     have hirr := ABC3.Found.GaloisRep.irreducible_map_residue_of_not_splits
@@ -66,7 +66,7 @@ theorem minDeltaExp_eq_mul_at_bad_prime_any_K {L : Type} [Field L] [NumberField 
       (ABC3.Found.GaloisRep.natDegree_splitQuadPoly _ hA)
       (fun hsp => hs (ABC3.Found.GaloisRep.hasSplit_of_splits_splitQuadPoly _ hA hsp))
     exact minDeltaExp_eq_mul_at_bad_prime_nonsplit_K p hp E E' C hC hc4ne hc4 hA hirr
-      hssE hssE' hjneg hl hodd hcop hQ hE'
+      hssE hssE' hjneg hl hcop hQ hE'
 
 def minDeltaExp_eq_mul_at_bad_prime_any_K.src : Source :=
   { paper := "GenEll", pdfPage := 17,
@@ -89,14 +89,14 @@ open Finset in
 ★★**`p ∤ l` も `[L:ℚ] + 1 < l` も取らない**。 -/
 theorem isMuAtBadPrimes_of_veluQuotient_of_coprime_K {L : Type} [Field L] [NumberField L]
     (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
-    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    {l : ℕ} (hl : l.Prime)
     (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
     (hE' : E' = veluQuotientFull E (((range l).erase 0).image
       (fun k : ℕ => pointCoords (k • Q))))
     (hssE : ∀ p, SemistableAt p E) (hssE' : ∀ p, SemistableAt p E')
     (hcop : ∀ p : HeightOneSpectrum (𝓞 L), jExp p E < 0 → ¬ ((l : ℤ) ∣ jExp p E)) :
     IsMuAtBadPrimes E E' l := fun p hbad =>
-  minDeltaExp_eq_mul_at_bad_prime_any_K p E E' (hssE p) (hssE' p) hbad hl hodd
+  minDeltaExp_eq_mul_at_bad_prime_any_K p E E' (hssE p) (hssE' p) hbad hl
     (hcop p hbad) hQ hE'
 
 def isMuAtBadPrimes_of_veluQuotient_of_coprime_K.src : Source :=
@@ -123,14 +123,14 @@ open Finset in
 それを出すためだけにあった `hd` も落ちた。 -/
 theorem isMuAtBadPrimes_of_veluQuotient_nodeg {L : Type} [Field L] [NumberField L]
     (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
-    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    {l : ℕ} (hl : l.Prime)
     (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
     (hE' : E' = veluQuotientFull E (((range l).erase 0).image
       (fun k : ℕ => pointCoords (k • Q))))
     (hssE : ∀ p, SemistableAt p E) (hssE' : ∀ p, SemistableAt p E')
     (hcop : ∀ p : HeightOneSpectrum (𝓞 L), jExp p E < 0 → ¬ ((l : ℤ) ∣ jExp p E)) :
     IsMuAtBadPrimes E E' l :=
-  isMuAtBadPrimes_of_veluQuotient_of_coprime_K E E' hl hodd Q hQ hE' hssE hssE' hcop
+  isMuAtBadPrimes_of_veluQuotient_of_coprime_K E E' hl Q hQ hE' hssE hssE' hcop
 
 def isMuAtBadPrimes_of_veluQuotient_nodeg.src : Source :=
   { paper := "GenEll", pdfPage := 17,
@@ -146,7 +146,7 @@ open Finset in
 /-- ★★★★★★★★★★★★**不等式（第 1141、★`[L:ℚ]+1<l` なし）**。 -/
 theorem lemma_3_5_velu_large_K (eps : ℝ) (heps : 0 < eps) :
     ∃ C : ℝ, ∀ (L : Type) [Field L] [NumberField L] (E E' : WeierstrassCurve L)
-      [E.IsElliptic] [E'.IsElliptic] (l : ℕ), l.Prime → l ≠ 2 →
+      [E.IsElliptic] [E'.IsElliptic] (l : ℕ), l.Prime →
       ∀ Q : E.toAffine.Point, addOrderOf Q = l →
       E' = veluQuotientFull E (((range l).erase 0).image
           (fun k : ℕ => pointCoords (k • Q))) →
@@ -163,10 +163,10 @@ theorem lemma_3_5_velu_large_K (eps : ℝ) (heps : 0 < eps) :
       (1 / (12 * (1 + eps))) * (l : ℝ) * degInfOf L E
         ≤ htFaltOf L E + 2 * Real.log l + C := by
   obtain ⟨C, hC⟩ := ABC3.Found.GaloisRep.lemma_3_5_velu_bad_delta eps heps
-  refine ⟨C, fun L _ _ E E' _ _ l hl hodd Q hQ hE' P Cv hΔ hPC hell1 hell2 hmin0 hint
+  refine ⟨C, fun L _ _ E E' _ _ l hl Q hQ hE' P Cv hΔ hPC hell1 hell2 hmin0 hint
     hssE hssE' hcop => ?_⟩
   exact hC L E E' l hl.pos Q hQ hE' P Cv hΔ hPC hell1 hell2 hmin0 hint hssE hssE'
-    (isMuAtBadPrimes_of_veluQuotient_nodeg E E' hl hodd Q hQ hE' hssE hssE' hcop)
+    (isMuAtBadPrimes_of_veluQuotient_nodeg E E' hl Q hQ hE' hssE hssE' hcop)
 
 def lemma_3_5_velu_large_K.src : Source :=
   { paper := "GenEll", pdfPage := 17,
@@ -182,7 +182,7 @@ open Finset in
 /-- ★★★★★★★★★★★★**アルキメデスの周期対を自前で作る形（第 1141）**。 -/
 theorem lemma_3_5_velu_arch_K (eps : ℝ) (heps : 0 < eps) :
     ∃ C : ℝ, ∀ (L : Type) [Field L] [NumberField L] (E E' : WeierstrassCurve L)
-      [E.IsElliptic] [E'.IsElliptic] (l : ℕ), l.Prime → l ≠ 2 →
+      [E.IsElliptic] [E'.IsElliptic] (l : ℕ), l.Prime →
       ∀ Q : E.toAffine.Point, addOrderOf Q = l →
       E' = veluQuotientFull E (((range l).erase 0).image
           (fun k : ℕ => pointCoords (k • Q))) →
@@ -194,9 +194,9 @@ theorem lemma_3_5_velu_arch_K (eps : ℝ) (heps : 0 < eps) :
       (1 / (12 * (1 + eps))) * (l : ℝ) * degInfOf L E
         ≤ htFaltOf L E + 2 * Real.log l + C := by
   obtain ⟨C, hC⟩ := lemma_3_5_velu_large_K eps heps
-  refine ⟨C, fun L _ _ E E' _ _ l hl hodd Q hQ hE' hmin0 hint hssE hssE' hcop => ?_⟩
+  refine ⟨C, fun L _ _ E E' _ _ l hl Q hQ hE' hmin0 hint hssE hssE' hcop => ?_⟩
   obtain ⟨P, Cv, hΔ, hPC, hell1, hell2⟩ := exists_periodPair_family E
-  exact hC L E E' l hl hodd Q hQ hE' P Cv hΔ hPC hell1 hell2 hmin0 hint hssE hssE' hcop
+  exact hC L E E' l hl Q hQ hE' P Cv hΔ hPC hell1 hell2 hmin0 hint hssE hssE' hcop
 
 def lemma_3_5_velu_arch_K.src : Source :=
   { paper := "GenEll", pdfPage := 17,
@@ -212,7 +212,7 @@ open Finset in
 /-- ★★★★★★★★★★★★**`hfin` で受ける形（第 1141）**。 -/
 theorem lemma_3_5_velu_defect_K (eps : ℝ) (heps : 0 < eps) :
     ∃ C : ℝ, ∀ (L : Type) [Field L] [NumberField L] (E E' : WeierstrassCurve L)
-      [E.IsElliptic] [E'.IsElliptic] (l : ℕ), l.Prime → l ≠ 2 →
+      [E.IsElliptic] [E'.IsElliptic] (l : ℕ), l.Prime →
       ∀ Q : E.toAffine.Point, addOrderOf Q = l →
       E' = veluQuotientFull E (((range l).erase 0).image
           (fun k : ℕ => pointCoords (k • Q))) →
@@ -227,14 +227,14 @@ theorem lemma_3_5_velu_defect_K (eps : ℝ) (heps : 0 < eps) :
       (1 / (12 * (1 + eps))) * (l : ℝ) * degInfOf L E
         ≤ htFaltOf L E + 2 * Real.log l + C := by
   obtain ⟨C, hC⟩ := ABC3.Found.GaloisRep.lemma_3_5_of_isogeny_estimate_le eps heps
-  refine ⟨C, fun L _ _ E E' _ _ l hl hodd Q hQ hE' hfin hssE hssE' hcop => ?_⟩
+  refine ⟨C, fun L _ _ E E' _ _ l hl Q hQ hE' hfin hssE hssE' hcop => ?_⟩
   obtain ⟨P, Cv, hΔ, hPC, hell1, hell2⟩ := exists_periodPair_family E
   refine hC L E E' l hssE' ?_
     (ABC3.Found.GaloisRep.htFalt_veluQuotientFull_le_of_defect E E' l hl.pos Q hQ hE'
       P Cv hΔ hPC hell1 hell2 hfin)
   refine ABC3.Found.GaloisRep.degInfOf_ge_of_local E E' l (fun p => ?_)
   exact ABC3.Found.GaloisRep.minDeltaExp_le_of_bad_delta p E E' (hssE p) l
-    (fun hb => isMuAtBadPrimes_of_veluQuotient_nodeg E E' hl hodd Q hQ hE'
+    (fun hb => isMuAtBadPrimes_of_veluQuotient_nodeg E E' hl Q hQ hE'
       hssE hssE' hcop p hb)
 
 def lemma_3_5_velu_defect_K.src : Source :=
@@ -251,7 +251,7 @@ open Finset in
 /-- ★★★★★★★★★★★★★★★★**[GenEll] `Lemma 3.5`——曲線の水準（第 1141、★`[L:ℚ]+1<l` なし）**。 -/
 theorem lemma_3_5_velu_K (eps : ℝ) (heps : 0 < eps) :
     ∃ C : ℝ, ∀ (L : Type) [Field L] [NumberField L] (E E' : WeierstrassCurve L)
-      [E.IsElliptic] [E'.IsElliptic] (l : ℕ), l.Prime → l ≠ 2 →
+      [E.IsElliptic] [E'.IsElliptic] (l : ℕ), l.Prime →
       ∀ Q : E.toAffine.Point, addOrderOf Q = l →
       E' = veluQuotientFull E (((range l).erase 0).image
           (fun k : ℕ => pointCoords (k • Q))) →
@@ -261,9 +261,9 @@ theorem lemma_3_5_velu_K (eps : ℝ) (heps : 0 < eps) :
       (1 / (12 * (1 + eps))) * (l : ℝ) * degInfOf L E
         ≤ htFaltOf L E + 2 * Real.log l + C := by
   obtain ⟨C, hC⟩ := lemma_3_5_velu_defect_K eps heps
-  refine ⟨C, fun L _ _ E E' _ _ l hl hodd Q hQ hE' hssE hssE' hcop => ?_⟩
-  exact hC L E E' l hl hodd Q hQ hE'
-    (ABC3.Found.GaloisRep.hfin_of_veluQuotientFull E E' hl hodd Q hQ hE') hssE hssE' hcop
+  refine ⟨C, fun L _ _ E E' _ _ l hl Q hQ hE' hssE hssE' hcop => ?_⟩
+  exact hC L E E' l hl Q hQ hE'
+    (ABC3.Found.GaloisRep.hfin_of_veluQuotientFull E E' hl Q hQ hE') hssE hssE' hcop
 
 def lemma_3_5_velu_K.src : Source :=
   { paper := "GenEll", pdfPage := 17,

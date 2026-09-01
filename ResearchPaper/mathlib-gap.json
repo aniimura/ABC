@@ -4095,21 +4095,20 @@
     "note": "★944-1076 の 127 ブロック。"
   },
   "lemma35Unconditional20260901": {
-    "measuredAt": "2026-09-01",
-    "block": "第 1083-1085",
-    "supersedes": "hfinDesign20260901",
-    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
-    "headline": "★★★★★★★★**`Lemma 3.5` の高さ不等式が外部入力なしで証明できた**（`Found/GaloisRep/Lemma35Unconditional.lean`、`lemma_3_5_height_ineq`）。",
-    "chain": [
-      "`hfin_of_veluQuotientFull`（1083）——`hfin` そのもの。無条件。",
-      "`lemma_3_5_velu`（1084）——`lemma_3_5_velu_defect` の `hfin` を埋めた形。",
-      "`lemma_3_5_height_ineq`（1085）——`Found/` に置いた最終形。"
+    "block": 1149,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★★★★★★★★★Lemma 3.5 から l ≠ 2 が外れた——原典に無い仮説はもう 1 つも無い",
+    "goal": "Lemma 3.5 を原典どおりの仮説だけで証明する(l = 2 の枝の枠、節点 3・4)。",
+    "what": "★lemma_3_5_height_ineq の `.src` は条なしの \"Lemma 3.5\" になった。☆GenEll のゴール指標は 18/24 → **19/24**(§3 が 6/9 → 7/9)。",
+    "nodes": [
+      "節点 3 `exists_veluW_two`(SymmSum.lean): l = 2 では添字集合が {1} と一点で対にならないが、その一点は 2-捩れなので veluGy = 0、したがって veluU = 0 で ∑(veluU + 2·veluV2·x) = 2·(veluV2·x)。★割り算をしない。",
+      "節点 4a `natCast_sq_mul_x_mem_of_addOrderOf_prime`(TorsionIntegralGood.lean): ΨSq の主係数は l²(mathlib の leadingCoeff_ΨSq は n ≠ 0 だけを要求し偶奇を問わない)。preΨ 版が与えた v(x) ≥ −v_p(l) は v(x) ≥ −2v_p(l) と甲くなるが、消費側は M ≔ v_p(l) を取るので hM を `v_p(l) ≤ 2M` から `v_p(l) ≤ M` に弱めるだけで通った。",
+      "節点 4b: valAtLeast_veluVFull_veluWFull の h2 を **選言** `ValAtLeast p 0 (2⁻¹) ∨ ∀ z ∈ S, veluU E z.1 z.2 = 0` に弱めた。★Bézout 2a + lb = 1 は l = 2 で真に壊れるが、そのとき veluU = 0 で /2 の項そのものが消える。",
+      "isIntegral_veluQuotientFull_of_addOrderOf_prime を組み直した——`hneg`(添字の反転は点の反転)を `(range l).erase 0` の全体で取り(★偶奇を問わない)、w を作る一歩だけを l = 2 と l = 2m+1 で場合分けした。"
     ],
-    "sourceText": "☆原典 (GenEll p.17) を実読した。Lemma 3.5 の仮説は「`ε > 0`」「`l` 素数」「`H_F` が `l`-cyclic」「`E_H = E/H`」「`l` は悪い乗法還元の全素点での局所高さと素」だけである。",
-    "deviation": "★★★★**逸脱の記録**——本形式化は原典に無い仮説を **2 つ**置いている。☆(1) `l ≠ 2`: Vélu の `±` の対（`veluWFull` の `/2`）が不動点を持たないため。☆(2) `d + 1 < l`: 第 1044 が `p ∤ l` を出すのに使う。★原典は Lemma 3.2, (i) で直接 `μ_l` と同定するのでこれを要さない。☆我々の道では `IsPrimitiveRoot ζ l` を環の中で取るので `l` の可逆性が要り、`p ∣ l` の悪い素点では成り立たない。",
-    "noDownstreamImpact": "★★**後続への影響は無い**——`Lemma 3.7`・`Theorem 3.8` は `100·d·(ht^Falt + C·d^ε) ≤ l` を満たす `l` を取るので、`l ≠ 2` も `d + 1 < l` も自動的に成り立つ。",
-    "whyMetricUnchanged": "☆指標が 18/24 のままなのは、`.src` の item が条つき（「Lemma 3.5(外部入力なし。★原典に無い仮説は l ≠ 2 と d+1 < l の 2 つ)」）だからである。★条なしにするには上の 2 つを外す必要があり、それぞれ「`l = 2` の Vélu の分岐」と「`p ∣ l` の悪い素点での Tate モデルの Vélu 計算（`μ_l` が非エタール）」を要する。",
-    "note": "★944-1085 の 136 ブロック。"
+    "correction": "★★第 1147 は「exists_veluW_of_inv は _K の連鎖に現れないので節点 3 は不要」と書いたが、**誤りだった**。実際には hfin_of_veluQuotientFull → neronExp_sub_le_valAdd_natCast → isIntegral_veluQuotientFull_of_addOrderOf_prime の中で使われている。☆_K のファイルを grep しただけでは見えなかった。",
+    "swept": "☆hodd を落として組み直したもの: JVeluTateMuK.lean(3 本、実は本体で使っていない死に引数だった)、TateIsogenyK.lean(16 か所)、TateLocalModelK.lean(全部)、TorsionIntegralGood.lean の 6 本、TateLocalModel.lean の 2 か所、Lemma37CFull.lean(条件 (a) から l ≠ 2 を出す段が不要になった)。",
+    "gate": "lake build ABC3 成功、node tools/mojibake.mjs ok、node tools/check.mjs PASS、Found/ の sorry 0、genell-progress 19/24。"
   },
   "remainingMap20260901": {
     "measuredAt": "2026-09-01",

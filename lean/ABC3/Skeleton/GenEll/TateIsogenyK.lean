@@ -57,7 +57,7 @@ theorem minDeltaExp_eq_mul_of_globalVelu'_K {L : Type} [Field L] [NumberField L]
         (IsDiscreteValuationRing.maximalIdeal (p.adicCompletionIntegers L)))
         (algebraMap L (p.adicCompletion L) x) = (HeightOneSpectrum.valuation L p) x)
     (hssE : SemistableAt p E) (hssE' : SemistableAt p E') (hjneg : jExp p E < 0)
-    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    {l : ℕ} (hl : l.Prime)
     (hΔ : ((tateCurveAt (tateParamR (E.baseChange (p.adicCompletion L)) h)
         (tateParamR_mem (E.baseChange (p.adicCompletion L)) h)).map
       (algebraMap (p.adicCompletionIntegers L) (p.adicCompletion L))).toAffine.Δ ≠ 0)
@@ -179,7 +179,7 @@ theorem minDeltaExp_eq_mul_of_globalVelu'_K {L : Type} [Field L] [NumberField L]
   have hjtate := ABC3.Found.GaloisRep.j_veluQuot_eq_j_tate_pow_K
     (mkTateSetup (K := p.adicCompletion L) (tateParamR (E.baseChange (p.adicCompletion L)) h) (tateParamR_mem (E.baseChange (p.adicCompletion L)) h) (tateParamR_ne_zero (E.baseChange (p.adicCompletion L)) h)) hΔ
     (dvrTatePhiAddEquiv (tateParamR (E.baseChange (p.adicCompletion L)) h) (tateParamR_mem (E.baseChange (p.adicCompletion L)) h) (tateParamR_ne_zero (E.baseChange (p.adicCompletion L)) h) hΔ)
-    (fun _ => rfl) hl hodd hζ uζ hζu hζl hord hql h2K v w hv hw
+    (fun _ => rfl) hl hζ uζ hζu hζl hord hql h2K v w hv hw
   exact minDeltaExp_eq_mul_of_j_tate_pow p hp E E' h hssE hssE' hjneg hql
     ((hj hellP).trans ((ABC3.Found.GenEll.j_congr_curve hcurveEq).trans hjtate))
 
@@ -194,7 +194,7 @@ theorem minDeltaExp_eq_mul_at_bad_prime_K {L : Type} [Field L] [NumberField L]
     [(E.baseChange (p.adicCompletion L)).IsElliptic]
     [(E'.baseChange (p.adicCompletion L)).IsElliptic]
     (hssE : SemistableAt p E) (hssE' : SemistableAt p E') (hjneg : jExp p E < 0)
-    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    {l : ℕ} (hl : l.Prime)
     (hcop : ¬ ((l : ℤ) ∣ jExp p E))
     (hmin : WeierstrassCurve.IsMinimal (p.adicCompletionIntegers L)
       (E.baseChange (p.adicCompletion L)))
@@ -273,7 +273,7 @@ theorem minDeltaExp_eq_mul_at_bad_prime_K {L : Type} [Field L] [NumberField L]
   haveI : ((tateCurveAt ((tateParamR (E.baseChange (p.adicCompletion L)) h) ^ l) hql).map
       (algebraMap (p.adicCompletionIntegers L) (p.adicCompletion L))).IsElliptic :=
     tateCurveAt_map_isElliptic _ hql hev' hc4T'
-  exact minDeltaExp_eq_mul_of_globalVelu'_K p E E' h hp hssE hssE' hjneg hl hodd
+  exact minDeltaExp_eq_mul_of_globalVelu'_K p E E' h hp hssE hssE' hjneg hl
     (tateModel_map_Delta_ne_zero (E.baseChange (p.adicCompletion L)) h)
     (not_dvd_vAdd_tateParam_of_not_dvd_jExp p hp E h hjneg hcop)
     hql (two_ne_zero_adicCompletionIntegers L p) (two_ne_zero_adicCompletion L p)
@@ -286,7 +286,7 @@ theorem minDeltaExp_eq_mul_at_bad_prime_vc_K {L : Type} [Field L] [NumberField L
     (p : HeightOneSpectrum (𝓞 L)) (E E' : WeierstrassCurve L)
     [E.IsElliptic] [E'.IsElliptic]
     (hssE : SemistableAt p E) (hssE' : SemistableAt p E') (hjneg : jExp p E < 0)
-    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    {l : ℕ} (hl : l.Prime)
     (hcop : ¬ ((l : ℤ) ∣ jExp p E))
     (C : WeierstrassCurve.VariableChange L)
     [((C • E).baseChange (p.adicCompletion L)).IsElliptic]
@@ -357,7 +357,7 @@ theorem minDeltaExp_eq_mul_at_bad_prime_vc_K {L : Type} [Field L] [NumberField L
     rw [jExp_variableChange p E C]; exact hcop
   have hkey := minDeltaExp_eq_mul_at_bad_prime_K p (C • E) (C • E')
     (semistableAt_variableChange p E C hssE) (semistableAt_variableChange p E' C hssE')
-    hjC hl hodd hcopC hmin h hvw hQ' hEq
+    hjC hl hcopC hmin h hvw hQ' hEq
   rwa [minDeltaExp_variableChange p E' C, minDeltaExp_variableChange p E C] at hkey
 
 set_option maxHeartbeats 2000000 in
@@ -369,7 +369,7 @@ theorem minDeltaExp_eq_mul_at_bad_prime_full_K {L : Type} [Field L] [NumberField
     (p : HeightOneSpectrum (𝓞 L)) (E E' : WeierstrassCurve L)
     [E.IsElliptic] [E'.IsElliptic]
     (hssE : SemistableAt p E) (hssE' : SemistableAt p E') (hjneg : jExp p E < 0)
-    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    {l : ℕ} (hl : l.Prime)
     (hcop : ¬ ((l : ℤ) ∣ jExp p E))
     (C : WeierstrassCurve.VariableChange L)
     [((C • E).baseChange (p.adicCompletion L)).IsElliptic]
@@ -414,8 +414,8 @@ theorem minDeltaExp_eq_mul_at_bad_prime_full_K {L : Type} [Field L] [NumberField
   have hΔl : ((tateCurveAt ((tateParamR ((C • E).baseChange (p.adicCompletion L)) h) ^ l) hql).map
       (algebraMap (p.adicCompletionIntegers L) (p.adicCompletion L))).Δ ≠ 0 :=
     ((WeierstrassCurve.isElliptic_iff _).1 hEllQL).ne_zero
-  exact minDeltaExp_eq_mul_at_bad_prime_vc_K p E E' hssE hssE' hjneg hl hodd hcop C hmin h
-    (fun ζ hζ => ABC3.Found.GaloisRep.exists_vw_tate_mu_K hl hodd hζ _ _ hql hΔl)
+  exact minDeltaExp_eq_mul_at_bad_prime_vc_K p E E' hssE hssE' hjneg hl hcop C hmin h
+    (fun ζ hζ => ABC3.Found.GaloisRep.exists_vw_tate_mu_K hl hζ _ _ hql hΔl)
     hQ hE'
 
 
@@ -435,7 +435,7 @@ theorem minDeltaExp_eq_mul_at_bad_prime_gen_K {L : Type} [Field L] [NumberField 
     [(E'.baseChange Lv).IsElliptic]
     (h : (E.baseChange Lv).HasSplitMultiplicativeReduction R)
     (hssE : SemistableAt p E) (hssE' : SemistableAt p E') (hjneg : jExp p E < 0)
-    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2) (hcop : ¬ ((l : ℤ) ∣ jExp p E))
+    {l : ℕ} (hl : l.Prime) (hcop : ¬ ((l : ℤ) ∣ jExp p E))
     (h2K : (2 : Lv) ≠ 0)
     {Q : E.toAffine.Point} (hQ : addOrderOf Q = l)
     (hE' : E' = veluQuotientFull E
@@ -470,7 +470,7 @@ theorem minDeltaExp_eq_mul_at_bad_prime_gen_K {L : Type} [Field L] [NumberField 
     exists_primitiveRoot_of_torsion_point (tateParamR (E.baseChange Lv) h) hq hq0 hΔ hl hcop'
       P hP hP0
   obtain ⟨v, w, hv, hw, hell⟩ :=
-    ABC3.Found.GaloisRep.exists_vw_tate_mu_K (K := Lv) hl hodd hζ
+    ABC3.Found.GaloisRep.exists_vw_tate_mu_K (K := Lv) hl hζ
       (tateParamR (E.baseChange Lv) h) hq hql hΔl
   have hne : ∀ i ∈ (range l).erase 0, algebraMap R Lv (1 - ζ ^ i) ≠ 0 :=
     fun i hi => ABC3.Found.GaloisRep.zeta_pow_sub_ne_zero_K hinj hζ hi
@@ -507,7 +507,7 @@ theorem minDeltaExp_eq_mul_at_bad_prime_gen_K {L : Type} [Field L] [NumberField 
   have hjtate := ABC3.Found.GaloisRep.j_veluQuot_eq_j_tate_pow_K
     (mkTateSetup (K := Lv) (tateParamR (E.baseChange Lv) h) hq hq0) hΔ
     (dvrTatePhiAddEquiv (tateParamR (E.baseChange Lv) h) hq hq0 hΔ)
-    (fun _ => rfl) hl hodd hζ uζ hζu hζl hord hql h2K v w hv hw
+    (fun _ => rfl) hl hζ uζ hζu hζl hord hql h2K v w hv hw
   exact minDeltaExp_eq_mul_of_j_tate_pow p hp E E' h hssE hssE' hjneg hql
     ((hj hellP).trans ((ABC3.Found.GenEll.j_congr_curve hcurveEq).trans hjtate))
 
@@ -535,7 +535,7 @@ theorem minDeltaExp_eq_mul_at_bad_prime_ext_K {L : Type} [Field L] [NumberField 
     (h' : (E.baseChange (FractionRing (AdjoinRoot f))).HasSplitMultiplicativeReduction
       (AdjoinRoot f))
     (hssE : SemistableAt p E) (hssE' : SemistableAt p E') (hjneg : jExp p E < 0)
-    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2) (hcop : ¬ ((l : ℤ) ∣ jExp p E))
+    {l : ℕ} (hl : l.Prime) (hcop : ¬ ((l : ℤ) ∣ jExp p E))
     {Q : E.toAffine.Point} (hQ : addOrderOf Q = l)
     (hE' : E' = veluQuotientFull E
       (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) :
@@ -559,7 +559,7 @@ theorem minDeltaExp_eq_mul_at_bad_prime_ext_K {L : Type} [Field L] [NumberField 
       = (HeightOneSpectrum.valuation L p) x := by
     intro x
     rw [halg, valuation_quadFieldHom hf hdeg hirr, hp]
-  exact minDeltaExp_eq_mul_at_bad_prime_gen_K p hp' E E' h' hssE hssE' hjneg hl hodd hcop
+  exact minDeltaExp_eq_mul_at_bad_prime_gen_K p hp' E E' h' hssE hssE' hjneg hl hcop
     (NeZero.ne' (2 : FractionRing (AdjoinRoot f))).symm hQ hE'
 
 set_option maxHeartbeats 2000000 in
@@ -584,7 +584,7 @@ theorem minDeltaExp_eq_mul_at_bad_prime_nonsplit_K {L : Type} [Field L] [NumberF
       ((splitQuadPoly (WeierstrassCurve.integralModel R ((C • E).baseChange Lv)) hA).map
         (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R))))
     (hssE : SemistableAt p E) (hssE' : SemistableAt p E') (hjneg : jExp p E < 0)
-    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2) (hcop : ¬ ((l : ℤ) ∣ jExp p E))
+    {l : ℕ} (hl : l.Prime) (hcop : ¬ ((l : ℤ) ∣ jExp p E))
     {Q : E.toAffine.Point} (hQ : addOrderOf Q = l)
     (hE' : E' = veluQuotientFull E
       (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) :
@@ -623,7 +623,7 @@ theorem minDeltaExp_eq_mul_at_bad_prime_nonsplit_K {L : Type} [Field L] [NumberF
     rw [jExp_variableChange p E C]; exact hcop
   have hkey := minDeltaExp_eq_mul_at_bad_prime_ext_K p hp hfm hfd hirr halg (C • E) (C • E') h'
     (semistableAt_variableChange p E C hssE) (semistableAt_variableChange p E' C hssE')
-    hjC hl hodd hcopC hQ' hEq
+    hjC hl hcopC hQ' hEq
   rwa [minDeltaExp_variableChange p E' C, minDeltaExp_variableChange p E C] at hkey
 
 def minDeltaExp_eq_mul_of_globalVelu'_K.src : Source :=

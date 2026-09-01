@@ -343,6 +343,55 @@ theorem natCast_mul_x_mem_of_addOrderOf_prime (p : HeightOneSpectrum (𝓞 L))
   rw [hsm] at hz
   exact hz ▸ z.2
 
+/-- ★★★★★★★★★★★★★★★★**`p ∣ l` でも `l²·x` は整**——★偶奇を問わない（第 1149）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`ΨSq_l` の主係数は `l²` なので、単元でなくても
+`isIntegral_leadingCoeff_smul` が `l² • x` の整性を与える。
+★`preΨ` 版（第 1076）は `l` 奇を要し、得られる下界は `v(x) ≥ −v_p(l)` であった。
+☆本版は `v(x) ≥ −2v_p(l)` と甲くなるが、**消費側では `M ≔ v_p(l)` なので十分**である。 -/
+theorem natCast_sq_mul_x_mem_of_addOrderOf_prime (p : HeightOneSpectrum (𝓞 L))
+    (E : WeierstrassCurve L) [WeierstrassCurve.IsIntegral (primeSubring p) E]
+    {l : ℕ} (hl : l.Prime)
+    {x y : L} (h : E.toAffine.Nonsingular x y)
+    (hQ : addOrderOf (WeierstrassCurve.Affine.Point.some x y h) = l) :
+    (((l : L)) ^ 2 * x) ∈ primeSubring p := by
+  have hroot : (E.ΨSq (l : ℤ)).eval x = 0 :=
+    ΨSq_eval_eq_zero_of_addOrderOf_prime E h hl hQ
+  have hbc : (WeierstrassCurve.integralModel (primeSubring p) E).baseChange L = E :=
+    WeierstrassCurve.baseChange_integralModel_eq (primeSubring p) E
+  have hmap : E.ΨSq (l : ℤ)
+      = ((WeierstrassCurve.integralModel (primeSubring p) E).ΨSq (l : ℤ)).map
+          (algebraMap (primeSubring p) L) := by
+    conv_lhs => rw [← hbc]
+    exact (WeierstrassCurve.integralModel (primeSubring p) E).map_ΨSq
+      (algebraMap (primeSubring p) L) (l : ℤ)
+  have haeval : Polynomial.aeval x
+      ((WeierstrassCurve.integralModel (primeSubring p) E).ΨSq (l : ℤ)) = 0 := by
+    rw [Polynomial.aeval_def, ← Polynomial.eval_map, ← hmap]
+    exact hroot
+  have hne : (((l : ℤ)) : primeSubring p) ≠ 0 := by
+    have hc : (((l : ℤ)) : primeSubring p) = ((l : ℕ) : primeSubring p) := by push_cast; ring
+    rw [hc]
+    simpa using (Nat.cast_ne_zero (R := primeSubring p)).2 hl.ne_zero
+  have hlc : ((WeierstrassCurve.integralModel (primeSubring p) E).ΨSq (l : ℤ)).leadingCoeff
+      = (((l : ℤ)) : primeSubring p) ^ 2 :=
+    (WeierstrassCurve.integralModel (primeSubring p) E).leadingCoeff_ΨSq hne
+  have hint : IsIntegral (primeSubring p)
+      (((WeierstrassCurve.integralModel (primeSubring p) E).ΨSq (l : ℤ)).leadingCoeff • x) :=
+    isIntegral_leadingCoeff_smul _ _ haeval
+  obtain ⟨z, hz⟩ := IsIntegrallyClosed.isIntegral_iff.1 hint
+  have hsm : ((WeierstrassCurve.integralModel (primeSubring p) E).ΨSq (l : ℤ)).leadingCoeff • x
+      = ((l : L)) ^ 2 * x := by
+    rw [hlc, Algebra.smul_def]
+    congr 1
+    push_cast
+    ring
+  rw [hsm] at hz
+  exact hz ▸ z.2
+
 /-! ## ★★★★★★★★★★★★第 1077 —— `p ∣ l` での深さの上限 -/
 
 /-- ★★★★★★★★★★★★★★★★**捕れ点の深さは `v_p(l)/2` 以下**（第 1077）。
@@ -355,10 +404,10 @@ theorem natCast_mul_x_mem_of_addOrderOf_prime (p : HeightOneSpectrum (𝓞 L))
 ★よって `m ≤ M` で `v(x) ≥ −2M`・`v(y) ≥ −3M`。 -/
 theorem valAtLeast_pointCoords_of_le (p : HeightOneSpectrum (𝓞 L))
     (E : WeierstrassCurve L) [WeierstrassCurve.IsIntegral (primeSubring p) E]
-    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    {l : ℕ} (hl : l.Prime)
     (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
     (M : ℤ) (hM0 : 0 ≤ M)
-    (hlne : ((l : L)) ≠ 0) (hM : valAdd p (Units.mk0 ((l : L)) hlne) ≤ 2 * M)
+    (hlne : ((l : L)) ≠ 0) (hM : valAdd p (Units.mk0 ((l : L)) hlne) ≤ M)
     {k : ℕ} (hk0 : k ≠ 0) (hkl : k < l) :
     ValAtLeast p (-2 * M) (pointCoords (k • Q)).1 ∧
       ValAtLeast p (-3 * M) (pointCoords (k • Q)).2 := by
@@ -388,15 +437,20 @@ theorem valAtLeast_pointCoords_of_le (p : HeightOneSpectrum (𝓞 L))
         exact hxint ((mem_primeSubring_iff p x).2 ((valAdd_nonneg_iff p _).1 hge))
       have hy0 : y ≠ 0 := y_ne_zero_of_valAdd_x_neg p E hx0 h.1 hneg
       obtain ⟨m, hm0, hmx, hmy⟩ := exists_depth_of_valAdd_x_neg p E hx0 hy0 h.1 hneg
-      -- ☆`l·x` は整
-      have hlx := natCast_mul_x_mem_of_addOrderOf_prime p E hl hodd h hord'
-      have hlxne : ((l : L)) * x ≠ 0 := mul_ne_zero hlne hx0
-      have hlxv : 0 ≤ valAdd p (Units.mk0 (((l : L)) * x) hlxne) :=
+      -- ☆`l²·x` は整（★偶奇不問、第 1149）
+      have hlx := natCast_sq_mul_x_mem_of_addOrderOf_prime p E hl h hord'
+      have hlxne : ((l : L)) ^ 2 * x ≠ 0 := mul_ne_zero (pow_ne_zero 2 hlne) hx0
+      have hlxv : 0 ≤ valAdd p (Units.mk0 (((l : L)) ^ 2 * x) hlxne) :=
         (valAdd_nonneg_iff p _).2 ((mem_primeSubring_iff p _).1 hlx)
-      have hsplit : valAdd p (Units.mk0 (((l : L)) * x) hlxne)
-          = valAdd p (Units.mk0 ((l : L)) hlne) + valAdd p (Units.mk0 x hx0) := by
-        rw [← valAdd_mul p (Units.mk0 ((l : L)) hlne) (Units.mk0 x hx0)]
-        exact valAdd_eq_of_valuation_eq p _ _ (by simp)
+      have hsplit : valAdd p (Units.mk0 (((l : L)) ^ 2 * x) hlxne)
+          = valAdd p (Units.mk0 ((l : L)) hlne) + valAdd p (Units.mk0 ((l : L)) hlne)
+            + valAdd p (Units.mk0 x hx0) := by
+        have hu : Units.mk0 (((l : L)) ^ 2 * x) hlxne
+            = Units.mk0 ((l : L)) hlne * Units.mk0 ((l : L)) hlne * Units.mk0 x hx0 := by
+          apply Units.ext
+          simp only [Units.val_mul, Units.val_mk0]
+          ring
+        rw [hu, valAdd_mul, valAdd_mul]
       rw [hsplit] at hlxv
       have hmle : (m : ℤ) ≤ M := by omega
       refine ⟨?_, ?_⟩ <;> simp only [hkQ, pointCoords_some]
@@ -418,12 +472,16 @@ theorem valAtLeast_sum {ι : Type*} (p : HeightOneSpectrum (𝓞 L)) {s : Finset
 > Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
 
 ☆`v(x) ≥ −2M`・`v(y) ≥ −3M` なら `v(v) ≥ −4M`・`v(w) ≥ −6M`。
-★`w` の `/2` は `v_p(2) = 0` のとき無害である（`l` が奇なら `p ∣ l` でそう）。 -/
+★`w` の `/2` は `v_p(2) = 0` のとき無害である（`l` が奇なら `p ∣ l` でそう）。
+
+★★★★**2026-09-01（第 1149）**——`h2` を**選言**に弱めた。
+☆`l = 2` では `v_p(2) = 0` は真に壊れるが、そのとき点は 2-捻れで
+`veluU = 0` なので `/2` の項が消える。★どちらかが成り立てばよい。 -/
 theorem valAtLeast_veluVFull_veluWFull (p : HeightOneSpectrum (𝓞 L))
     (E : WeierstrassCurve L) [WeierstrassCurve.IsIntegral (primeSubring p) E]
     (S : Finset (L × L)) (M : ℤ) (hM0 : 0 ≤ M)
     (hS : ∀ z ∈ S, ValAtLeast p (-2 * M) z.1 ∧ ValAtLeast p (-3 * M) z.2)
-    (h2 : ValAtLeast p 0 ((2 : L)⁻¹)) :
+    (h2 : ValAtLeast p 0 ((2 : L)⁻¹) ∨ ∀ z ∈ S, veluU E z.1 z.2 = 0) :
     ValAtLeast p (-4 * M) (veluVFull E S) ∧ ValAtLeast p (-6 * M) (veluWFull E S) := by
   obtain ⟨ha1, ha2, ha3, ha4, _⟩ := mem_primeSubring_of_isIntegral p E
   have h1 : ValAtLeast p 0 E.a₁ := valAtLeast_of_mem ha1
@@ -473,8 +531,11 @@ theorem valAtLeast_veluVFull_veluWFull (p : HeightOneSpectrum (𝓞 L))
   · rw [veluWFull]
     refine valAtLeast_sum p (fun z hz => ?_)
     refine valAtLeast_add ?_ ?_
-    · rw [div_eq_mul_inv]
-      refine valAtLeast_mono ?_ (valAtLeast_mul (hU z hz) h2); omega
+    · rcases h2 with h2 | hz0
+      · rw [div_eq_mul_inv]
+        refine valAtLeast_mono ?_ (valAtLeast_mul (hU z hz) h2); omega
+      · rw [hz0 z hz, zero_div]
+        exact valAtLeast_zero p _
     · refine valAtLeast_mono ?_ (valAtLeast_mul (hV2 z hz) (hS z hz).1); omega
 
 /-! ## ★★★★★★★★★★★★第 1079 —— 付値評価から `neronExp` の下限へ -/
@@ -548,7 +609,7 @@ theorem neronExp_ge_of_valAtLeast (p : HeightOneSpectrum (𝓞 L)) (W : Weierstr
 ☆`l` が素数なので `0 < k < l` なら `k • Q` も位数 `l` である。 -/
 theorem pointCoords_mem_of_addOrderOf_prime (p : HeightOneSpectrum (𝓞 L))
     (E : WeierstrassCurve L) [WeierstrassCurve.IsIntegral (primeSubring p) E]
-    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2) (hlu : IsUnit ((l : primeSubring p)))
+    {l : ℕ} (hl : l.Prime) (hlu : IsUnit ((l : primeSubring p)))
     (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
     {k : ℕ} (hk0 : k ≠ 0) (hkl : k < l) :
     (pointCoords (k • Q)).1 ∈ primeSubring p ∧ (pointCoords (k • Q)).2 ∈ primeSubring p := by
@@ -564,7 +625,7 @@ theorem pointCoords_mem_of_addOrderOf_prime (p : HeightOneSpectrum (𝓞 L))
   rcases hkQ : k • Q with _ | ⟨x, y, h⟩
   · exact absurd hkQ hkne
   · have hord' : addOrderOf (WeierstrassCurve.Affine.Point.some x y h) = l := hkQ ▸ hord
-    have hx := mem_primeSubring_x_of_addOrderOf_prime p E hl hodd hlu h hord'
+    have hx := mem_primeSubring_x_of_addOrderOf_prime' p E hl hlu h hord'
     refine ⟨?_, ?_⟩
     · simpa only [hkQ, pointCoords_some] using hx
     · simpa only [hkQ, pointCoords_some] using mem_primeSubring_y_of_mem_x p E h.1 hx
@@ -580,88 +641,102 @@ open Finset in
 ★形式群は一度も使っていない。 -/
 theorem isIntegral_veluQuotientFull_of_addOrderOf_prime (p : HeightOneSpectrum (𝓞 L))
     (E : WeierstrassCurve L) [hE : WeierstrassCurve.IsIntegral (primeSubring p) E]
-    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2) (hlu : IsUnit ((l : primeSubring p)))
+    {l : ℕ} (hl : l.Prime) (hlu : IsUnit ((l : primeSubring p)))
     (Q : E.toAffine.Point) (hQ : addOrderOf Q = l) :
     (veluQuotientFull E (((range l).erase 0).image
       (fun k : ℕ => pointCoords (k • Q)))).IsIntegral (primeSubring p) := by
   classical
   obtain ⟨Wi, hWi⟩ := hE.integral
-  obtain ⟨m, rfl⟩ : ∃ m, l = 2 * m + 1 := hl.odd_of_ne_two hodd
-  have hlz : (2 * m + 1) • Q = 0 := by rw [← hQ]; exact addOrderOf_nsmul_eq_zero Q
-  have hmem : ∀ k ∈ (range (2 * m + 1)).erase 0,
+  have hlz : l • Q = 0 := by rw [← hQ]; exact addOrderOf_nsmul_eq_zero Q
+  have hmem : ∀ k ∈ (range l).erase 0,
       (pointCoords (k • Q)).1 ∈ primeSubring p ∧
         (pointCoords (k • Q)).2 ∈ primeSubring p := by
     intro k hk
     rw [mem_erase, mem_range] at hk
-    exact pointCoords_mem_of_addOrderOf_prime p E hl hodd hlu Q hQ hk.1 hk.2
+    exact pointCoords_mem_of_addOrderOf_prime p E hl hlu Q hQ hk.1 hk.2
   set X : ℕ → primeSubring p := fun i =>
     if h : (pointCoords (i • Q)).1 ∈ primeSubring p then ⟨(pointCoords (i • Q)).1, h⟩
     else 0 with hXdef
   set Y : ℕ → primeSubring p := fun i =>
     if h : (pointCoords (i • Q)).2 ∈ primeSubring p then ⟨(pointCoords (i • Q)).2, h⟩
     else 0 with hYdef
-  have hXc : ∀ i ∈ (range (2 * m + 1)).erase 0,
+  have hXc : ∀ i ∈ (range l).erase 0,
       algebraMap (primeSubring p) L (X i) = (pointCoords (i • Q)).1 := by
     intro i hi
     simp only [hXdef, dif_pos (hmem i hi).1]
     rfl
-  have hYc : ∀ i ∈ (range (2 * m + 1)).erase 0,
+  have hYc : ∀ i ∈ (range l).erase 0,
       algebraMap (primeSubring p) L (Y i) = (pointCoords (i • Q)).2 := by
     intro i hi
     simp only [hYdef, dif_pos (hmem i hi).2]
     rfl
-  have hP : ∀ i ∈ (range (2 * m + 1)).erase 0, pointCoords (i • Q)
+  have hP : ∀ i ∈ (range l).erase 0, pointCoords (i • Q)
       = ((algebraMap (primeSubring p) L (X i),
           algebraMap (primeSubring p) L (Y i)) : L × L) := by
     intro i hi
     rw [hXc i hi, hYc i hi]
-  -- ☆添字の反転は点の反転
-  have hsub : ∀ i ∈ Icc 1 m, (2 * m + 1 - i) ∈ (range (2 * m + 1)).erase 0 := by
-    intro i hi
-    rw [mem_Icc] at hi
-    rw [mem_erase, mem_range]
-    omega
-  have hin : ∀ i ∈ Icc 1 m, i ∈ (range (2 * m + 1)).erase 0 := by
-    intro i hi
-    rw [mem_Icc] at hi
-    rw [mem_erase, mem_range]
-    omega
-  have hneg : ∀ i ∈ Icc 1 m,
-      pointCoords ((2 * m + 1 - i) • Q)
+  -- ☆添字の反転は点の反転(★`l` の偶奇を問わない)
+  have hneg : ∀ i ∈ (range l).erase 0,
+      pointCoords ((l - i) • Q)
         = ((pointCoords (i • Q)).1,
            (Wi.map (algebraMap (primeSubring p) L)).toAffine.negY
              (pointCoords (i • Q)).1 (pointCoords (i • Q)).2) := by
     intro i hi
-    rw [mem_Icc] at hi
+    rw [mem_erase, mem_range] at hi
     have hkne : i • Q ≠ 0 :=
       nsmul_ne_zero_of_lt_addOrderOf hQ (by omega) (by omega)
-    have := nsmul_eq_neg_nsmul_of_addOrderOf hlz (by omega : i ≤ 2 * m + 1)
-    rw [this]
+    have hns := nsmul_eq_neg_nsmul_of_addOrderOf hlz (by omega : i ≤ l)
+    rw [hns]
     have hEq : E = Wi.map (algebraMap (primeSubring p) L) := hWi
     subst hEq
     exact pointCoords_neg hkne
-  have hXinv : ∀ i ∈ Icc 1 m, X (2 * m + 1 - i) = X i := by
-    intro i hi
-    have h1 := hXc _ (hsub i hi)
-    have h2 := hXc i (hin i hi)
-    apply Subtype.ext
-    have : algebraMap (primeSubring p) L (X (2 * m + 1 - i))
-        = algebraMap (primeSubring p) L (X i) := by
-      rw [h1, h2, hneg i hi]
-    exact this
-  have hYinv : ∀ i ∈ Icc 1 m, Y (2 * m + 1 - i) = Wi.toAffine.negY (X i) (Y i) := by
-    intro i hi
-    apply Subtype.ext
-    have hL : algebraMap (primeSubring p) L (Y (2 * m + 1 - i))
-        = algebraMap (primeSubring p) L (Wi.toAffine.negY (X i) (Y i)) := by
-      rw [hYc _ (hsub i hi), hneg i hi]
-      rw [← hXc i (hin i hi), ← hYc i (hin i hi)]
+  -- ★★★★★★★★`w` を作る——`l` が奇なら対で(第 960)、`l = 2` なら 2-捩れで(第 1149)
+  obtain ⟨w, hw⟩ : ∃ w : primeSubring p, 2 * w = ∑ i ∈ (range l).erase 0,
+      (ABC3.Found.GenEll.veluU Wi (X i) (Y i)
+        + 2 * (ABC3.Found.GenEll.veluV2 Wi (X i) (Y i) * X i)) := by
+    rcases eq_or_ne l 2 with rfl | hodd
+    · -- ★`l = 2`: 唯一の点は 2-捩れなので `veluU = 0`、割り算が要らない
+      refine ABC3.Found.GenEll.exists_veluW_two Wi X Y ?_
+      have h1 : (1 : ℕ) ∈ (range 2).erase 0 := by decide
+      have hn := hneg 1 h1
+      have h21 : (2 : ℕ) - 1 = 1 := rfl
+      rw [h21] at hn
+      have hsnd := congrArg Prod.snd hn
+      simp only at hsnd
+      apply Subtype.ext
+      show algebraMap (primeSubring p) L (Y 1)
+        = algebraMap (primeSubring p) L (Wi.toAffine.negY (X 1) (Y 1))
+      rw [hYc 1 h1, hsnd, ← hXc 1 h1, ← hYc 1 h1]
       exact (WeierstrassCurve.Affine.map_negY (W' := Wi)
-        (algebraMap (primeSubring p) L) (X i) (Y i)).symm
-    exact hL
-  obtain ⟨w, hw⟩ := ABC3.Found.GenEll.exists_veluW_of_inv Wi m X Y hXinv hYinv
+        (algebraMap (primeSubring p) L) (X 1) (Y 1)).symm
+    · -- ☆`l = 2m+1`: `i ↔ l−i` の対
+      obtain ⟨m, rfl⟩ : ∃ m, l = 2 * m + 1 := hl.odd_of_ne_two hodd
+      have hsub : ∀ i ∈ Icc 1 m, (2 * m + 1 - i) ∈ (range (2 * m + 1)).erase 0 := by
+        intro i hi
+        rw [mem_Icc] at hi
+        rw [mem_erase, mem_range]
+        omega
+      have hin : ∀ i ∈ Icc 1 m, i ∈ (range (2 * m + 1)).erase 0 := by
+        intro i hi
+        rw [mem_Icc] at hi
+        rw [mem_erase, mem_range]
+        omega
+      refine ABC3.Found.GenEll.exists_veluW_of_inv Wi m X Y ?_ ?_
+      · intro i hi
+        apply Subtype.ext
+        show algebraMap (primeSubring p) L (X (2 * m + 1 - i))
+          = algebraMap (primeSubring p) L (X i)
+        rw [hXc _ (hsub i hi), hXc i (hin i hi), hneg i (hin i hi)]
+      · intro i hi
+        apply Subtype.ext
+        show algebraMap (primeSubring p) L (Y (2 * m + 1 - i))
+          = algebraMap (primeSubring p) L (Wi.toAffine.negY (X i) (Y i))
+        rw [hYc _ (hsub i hi), hneg i (hin i hi)]
+        rw [← hXc i (hin i hi), ← hYc i (hin i hi)]
+        exact (WeierstrassCurve.Affine.map_negY (W' := Wi)
+          (algebraMap (primeSubring p) L) (X i) (Y i)).symm
   -- ★単射性
-  have hinj : ∀ i ∈ (range (2 * m + 1)).erase 0, ∀ j ∈ (range (2 * m + 1)).erase 0,
+  have hinj : ∀ i ∈ (range l).erase 0, ∀ j ∈ (range l).erase 0,
       ((algebraMap (primeSubring p) L (X i), algebraMap (primeSubring p) L (Y i)) : L × L)
         = ((algebraMap (primeSubring p) L (X j), algebraMap (primeSubring p) L (Y j)) : L × L)
       → i = j := by
@@ -694,17 +769,16 @@ theorem isIntegral_veluQuotientFull_of_addOrderOf_prime (p : HeightOneSpectrum (
       have := Nat.eq_zero_of_dvd_of_lt h3
       omega
   -- ★組み立て
-  have hS : ((range (2 * m + 1)).erase 0).image (fun k : ℕ => pointCoords (k • Q))
-      = ((range (2 * m + 1)).erase 0).image
+  have hS : ((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))
+      = ((range l).erase 0).image
           (fun i : ℕ => ((algebraMap (primeSubring p) L (X i),
                           algebraMap (primeSubring p) L (Y i)) : L × L)) :=
     Finset.image_congr (fun i hi => hP i hi)
   refine ⟨ABC3.Found.GenEll.veluCurve Wi
-    (∑ i ∈ (range (2 * m + 1)).erase 0, ABC3.Found.GenEll.veluV2 Wi (X i) (Y i)) w, ?_⟩
+    (∑ i ∈ (range l).erase 0, ABC3.Found.GenEll.veluV2 Wi (X i) (Y i)) w, ?_⟩
   rw [hS, hWi]
-  exact ABC3.Found.GenEll.veluQuotientFull_image_eq Wi ((range (2 * m + 1)).erase 0) X Y hinj
+  exact ABC3.Found.GenEll.veluQuotientFull_image_eq Wi ((range l).erase 0) X Y hinj
     _ w (two_ne_zero) rfl hw
-
 
 /-! ## ★★★★★★★★第 1081 —— `p ∣ l`（`l` 奇）なら `v_p(2) = 0` -/
 
@@ -776,9 +850,11 @@ open Finset in
 ★`h2` は `v_p(2) = 0`。`l` が奇素数で `p ∣ l` なら自動的に成り立つ。 -/
 theorem neronExp_veluQuotientFull_ge (p : HeightOneSpectrum (𝓞 L))
     (E : WeierstrassCurve L) [WeierstrassCurve.IsIntegral (primeSubring p) E]
-    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    {l : ℕ} (hl : l.Prime)
     (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
-    (hlne : ((l : L)) ≠ 0) (h2 : ValAtLeast p 0 ((2 : L)⁻¹))
+    (hlne : ((l : L)) ≠ 0)
+    (h2 : ValAtLeast p 0 ((2 : L)⁻¹) ∨ ∀ z ∈ ((range l).erase 0).image
+      (fun k : ℕ => pointCoords (k • Q)), veluU E z.1 z.2 = 0)
     (hΔ : (veluQuotientFull E (((range l).erase 0).image
       (fun k : ℕ => pointCoords (k • Q)))).Δ ≠ 0) :
     -(valAdd p (Units.mk0 ((l : L)) hlne))
@@ -795,7 +871,7 @@ theorem neronExp_veluQuotientFull_ge (p : HeightOneSpectrum (𝓞 L))
     intro z hz
     obtain ⟨k, hk, rfl⟩ := Finset.mem_image.1 hz
     rw [mem_erase, mem_range] at hk
-    exact valAtLeast_pointCoords_of_le p E hl hodd Q hQ M hM0 hlne (by omega) hk.1 hk.2
+    exact valAtLeast_pointCoords_of_le p E hl Q hQ M hM0 hlne (by omega) hk.1 hk.2
   obtain ⟨hv, hw⟩ := valAtLeast_veluVFull_veluWFull p E _ M hM0 hS h2
   obtain ⟨ha1, ha2, ha3, ha4, ha6⟩ := mem_primeSubring_of_isIntegral p E
   have k1 : ValAtLeast p 0 E.a₁ := valAtLeast_of_mem ha1
@@ -851,7 +927,7 @@ open Finset in
 ☆`p ∤ l` なら第 1074（`E′` が整）、`p ∣ l` なら第 1080。 -/
 theorem neronExp_sub_le_valAdd_natCast (p : HeightOneSpectrum (𝓞 L))
     (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
-    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    {l : ℕ} (hl : l.Prime)
     (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
     (hE' : E' = veluQuotientFull E (((range l).erase 0).image
       (fun k : ℕ => pointCoords (k • Q))))
@@ -899,13 +975,47 @@ theorem neronExp_sub_le_valAdd_natCast (p : HeightOneSpectrum (𝓞 L))
     · -- ☆`p ∤ l`: 第 1074 で `E'` は整
       haveI hint : (C • E').IsIntegral (primeSubring p) := by
         rw [hEq]
-        exact isIntegral_veluQuotientFull_of_addOrderOf_prime p (C • E) hl hodd
+        exact isIntegral_veluQuotientFull_of_addOrderOf_prime p (C • E) hl
           (isUnit_natCast_primeSubring p hlne hz.symm) (ABC3.Found.GenEll.vcPoint C E Q) hQ'
       have := neronExp_nonneg p (C • E') (variableChange_Delta_ne_zero E' hΔE' C) hint
       omega
     · -- ★`p ∣ l`: 第 1080
-      have h2 := valAtLeast_two_inv_of_dvd p hl hodd hlne hpos
-      have := neronExp_veluQuotientFull_ge p (C • E) hl hodd (ABC3.Found.GenEll.vcPoint C E Q) hQ' hlne h2 hΔv
+      -- ★★★★`l = 2` なら `v_p(2) = 0` は壊れるが、そのとき点は 2-捻れで `veluU = 0`（第 1149）
+      have h2 : ValAtLeast p 0 ((2 : L)⁻¹) ∨ ∀ z ∈ ((range l).erase 0).image
+          (fun k : ℕ => pointCoords (k • ABC3.Found.GenEll.vcPoint C E Q)),
+          ABC3.Found.GenEll.veluU (C • E) z.1 z.2 = 0 := by
+        rcases eq_or_ne l 2 with rfl | hodd
+        · refine Or.inr ?_
+          intro z hz
+          obtain ⟨k, hk, rfl⟩ := Finset.mem_image.1 hz
+          rw [mem_erase, mem_range] at hk
+          obtain rfl : k = 1 := by omega
+          set P := ABC3.Found.GenEll.vcPoint C E Q with hPdef
+          have hlz2 : (2 : ℕ) • P = 0 := by rw [← hQ']; exact addOrderOf_nsmul_eq_zero P
+          have hPne : (1 : ℕ) • P ≠ 0 :=
+            nsmul_ne_zero_of_lt_addOrderOf hQ' one_ne_zero (by omega)
+          have hns := nsmul_eq_neg_nsmul_of_addOrderOf hlz2 (by omega : (1 : ℕ) ≤ 2)
+          have h21 : (2 : ℕ) - 1 = 1 := rfl
+          rw [h21] at hns
+          have hn : pointCoords ((1 : ℕ) • P)
+              = ((pointCoords ((1 : ℕ) • P)).1,
+                 (C • E).toAffine.negY (pointCoords ((1 : ℕ) • P)).1
+                   (pointCoords ((1 : ℕ) • P)).2) := by
+            conv_lhs => rw [hns]
+            exact pointCoords_neg hPne
+          have hy := congrArg Prod.snd hn
+          simp only at hy
+          have hg : ABC3.Found.GenEll.veluGy (C • E)
+              (pointCoords ((1 : ℕ) • P)).1 (pointCoords ((1 : ℕ) • P)).2 = 0 := by
+            rw [WeierstrassCurve.Affine.negY] at hy
+            simp only [ABC3.Found.GenEll.veluGy]
+            linear_combination -hy
+          show ABC3.Found.GenEll.veluU (C • E)
+            (pointCoords ((1 : ℕ) • P)).1 (pointCoords ((1 : ℕ) • P)).2 = 0
+          rw [ABC3.Found.GenEll.veluU, hg]
+          ring
+        · exact Or.inl (valAtLeast_two_inv_of_dvd p hl hodd hlne hpos)
+      have := neronExp_veluQuotientFull_ge p (C • E) hl (ABC3.Found.GenEll.vcPoint C E Q) hQ' hlne h2 hΔv
       rw [hEq]
       exact this
   omega
@@ -921,7 +1031,7 @@ open Finset in
 ☆`Σᶠ_p v_p(l)·logN(p) = d·log l`（第 576 系の積公式）。 -/
 theorem hfin_of_veluQuotientFull (E E' : WeierstrassCurve L)
     [E.IsElliptic] [E'.IsElliptic]
-    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    {l : ℕ} (hl : l.Prime)
     (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
     (hE' : E' = veluQuotientFull E (((range l).erase 0).image
       (fun k : ℕ => pointCoords (k • Q)))) :
@@ -976,7 +1086,7 @@ theorem hfin_of_veluQuotientFull (E E' : WeierstrassCurve L)
     intro q
     have hlog : (0 : ℝ) ≤ Real.log (Ideal.absNorm q.asIdeal) :=
       le_trans (Real.log_nonneg (by norm_num)) (log_two_le_log_absNorm q)
-    have hloc := neronExp_sub_le_valAdd_natCast q E E' hl hodd Q hQ hE' hlne
+    have hloc := neronExp_sub_le_valAdd_natCast q E E' hl Q hQ hE' hlne
     have hcast : ((neronExp q E : ℝ) - (neronExp q E' : ℝ))
         ≤ (valAdd q (Units.mk0 ((l : L)) hlne) : ℝ) := by exact_mod_cast hloc
     calc f q - g q

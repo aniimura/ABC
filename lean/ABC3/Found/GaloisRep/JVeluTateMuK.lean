@@ -73,7 +73,7 @@ set_option maxHeartbeats 2000000 in
 > parameter qE of E satisfies the relation qE = qEl ; in particular, we have
 
 ★★**`IsUnit ((l : R))` を仮説に置いていない**。 -/
-theorem c4_c6_veluCurve_tate_field {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2) {ζ : R}
+theorem c4_c6_veluCurve_tate_field {l : ℕ} (hl : l.Prime) {ζ : R}
     (hζ : IsPrimitiveRoot ζ l) (q : R) (hq : q ∈ I) (hql : q ^ l ∈ I) (v w : K)
     (hv : (l : K) ^ 6 * v = algebraMap R K (veluSV l ζ q hq))
     (hw : (l : K) ^ 8 * (2 * w) = algebraMap R K (veluSW l ζ q hq)) :
@@ -129,7 +129,7 @@ theorem j_veluQuot_eq_j_tate_pow_K (S : TateSetup R I K)
     (Φ : Additive (Kˣ ⧸ Subgroup.zpowers S.Q)
       ≃+ ((tateCurveAt S.q S.hq).map (algebraMap R K)).toAffine.Point)
     (hΦ : ∀ c, Φ (Additive.ofMul c) = tatePhi S hΔ c)
-    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
+    {l : ℕ} (hl : l.Prime) {ζ : R} (hζ : IsPrimitiveRoot ζ l)
     (uζ : Kˣ) (hζu : algebraMap R K ζ = (uζ : K)) (hζl : uζ ^ l = 1)
     (hord : ∀ n : ℕ, 0 < n → n < l → uζ ^ n ≠ 1)
     (hql : S.q ^ l ∈ I) (h2K : (2 : K) ≠ 0)
@@ -173,7 +173,7 @@ theorem j_veluQuot_eq_j_tate_pow_K (S : TateSetup R I K)
   have hwS : (l : K) ^ 8 * (2 * w) = algebraMap R K (veluSW l ζ S.q S.hq) := by
     rw [hw]
     exact sum_natCast_pow_mul_veluW_K hinj hζ (tateCurveAt S.q S.hq) S.q S.hq
-  obtain ⟨h4, h6⟩ := c4_c6_veluCurve_tate_field hl hodd hζ S.q S.hq hql v w hvS hwS
+  obtain ⟨h4, h6⟩ := c4_c6_veluCurve_tate_field hl hζ S.q S.hq hql v w hvS hwS
   rw [ABC3.Found.GenEll.j_congr_curve hquot]
   exact j_eq_of_c4_c6 _ _ (l : K) hlK h4 h6
 
@@ -196,7 +196,7 @@ set_option maxHeartbeats 2000000 in
 ★★**`IsUnit ((l : R))` を仮説に置いていない**——`exists_vw_tate_mu`（第 1003）の
 `hlu` なし版である。
 ☆楕円性は `Δ(veluCurve) = l¹²·Δ(E_{q^l})`（第 1131 の `Delta_of_c4_c6`）から出る。 -/
-theorem exists_vw_tate_mu_K {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2) {ζ : R}
+theorem exists_vw_tate_mu_K {l : ℕ} (hl : l.Prime) {ζ : R}
     (hζ : IsPrimitiveRoot ζ l) (q : R) (hq : q ∈ I) (hql : q ^ l ∈ I)
     (hΔl : ((tateCurveAt (q ^ l) hql).map (algebraMap R K)).Δ ≠ 0) :
     ∃ v w : K,
@@ -238,7 +238,7 @@ theorem exists_vw_tate_mu_K {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2) {ζ : R}
   have hwS : (l : K) ^ 8 * (2 * (SWK / 2)) = algebraMap R K (veluSW l ζ q hq) := by
     rw [show (2 : K) * (SWK / 2) = SWK from by field_simp]
     exact sum_natCast_pow_mul_veluW_K hinj hζ (tateCurveAt q hq) q hq
-  obtain ⟨h4, h6⟩ := c4_c6_veluCurve_tate_field hl hodd hζ q hq hql SVK (SWK / 2) hvS hwS
+  obtain ⟨h4, h6⟩ := c4_c6_veluCurve_tate_field hl hζ q hq hql SVK (SWK / 2) hvS hwS
   have hΔeq := Delta_of_c4_c6 _ _ ((l : K)) h4 h6
   rw [WeierstrassCurve.isElliptic_iff, isUnit_iff_ne_zero, hΔeq]
   exact mul_ne_zero (pow_ne_zero _ hlK) hΔl
