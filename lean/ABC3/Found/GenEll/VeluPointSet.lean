@@ -194,6 +194,51 @@ def j_map_velu_vcPoint.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(大域の Vélu の商の j を底変換・変数変換先の商の j に繋ぐ。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★第 969 —— 商の楕円性は `E′` から来る
+
+★第 967 は `veluQuotientFull (C • (E ⊗ K)) (…)` の楕円性を**インスタンスとして受けて**いた。
+☆その出どころが要る。第 962（`Δ = l¹²Δ`）を使うと `ζ` が要り、`ζ` は点から来るので循環する。
+
+★★循環しない道がある: `veluQuotientFull_variableChange` により
+
+    `veluQuotientFull (C • (E ⊗ K)) (捻った点集合) = C • veluQuotientFull (E ⊗ K) (点集合)`
+
+で、右辺は `veluQuotientFull_baseChange` により `C • (E′ ⊗ K)` である。
+☆`E′ ⊗ K` は楕円だから、変数変換しても楕円である。
+
+★仮説 `hB`・`hBx` は点集合が反転で安定（第 949）なので自動的に満たされる。 -/
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★**Vélu の商の楕円性は `E′` から来る**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 969）**——これで第 967 のインスタンスが循環せずに出る。 -/
+theorem isElliptic_veluQuotient_vcPoint {L K : Type} [Field L] [Field K] (φ : L →+* K)
+    (C : WeierstrassCurve.VariableChange K)
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [(E.map φ).IsElliptic]
+    [(C • (E.map φ)).IsElliptic] [(E'.map φ).IsElliptic]
+    {l : ℕ} {Q : E.toAffine.Point} (hQ : addOrderOf Q = l) (h2 : (2 : K) ≠ 0)
+    (hE' : E' = veluQuotientFull E
+      (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) :
+    (veluQuotientFull (C • (E.map φ))
+      (((Finset.range l).erase 0).image
+        (fun k : ℕ => pointCoords (k • vcPoint C (E.map φ) (rhPoint φ E Q))))).IsElliptic := by
+  have hQ' : addOrderOf (rhPoint φ E Q) = l := by rw [addOrderOf_rhPoint, hQ]
+  have hbc := veluQuotientFull_baseChange φ E E' hQ hE'
+  have hstab := pointCoords_image_negY_stable (W := E.map φ) hQ'
+  have hVC := veluQuotientFull_variableChange C (E.map φ)
+    (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • rhPoint φ E Q)))
+    (sum_negY_eq_zero (E.map φ) _ hstab h2) (sum_negY_mul_x_eq_zero (E.map φ) _ hstab h2)
+  rw [image_pointCoords_vcPoint_nsmul C (E.map φ) hQ', hVC, ← hbc]
+  infer_instance
+
+def isElliptic_veluQuotient_vcPoint.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の商の楕円性は E′ から来る。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def pointCoords_neg.src : ABC3.Meta.Source :=
