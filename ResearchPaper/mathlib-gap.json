@@ -5999,5 +5999,15 @@
     "measured2": "☆さらに、界面は galoisFinite_lcyclicExc を**すべての C・eps** について要求する。C を小さく取ると条件 (a) は弱くなり集合は大きくなるので、(A) の設計では C ごとに (†) の定数を合わせる必要がある —— (B) の設計ならその心配はない。",
     "consequence": "★★★したがって witness (1) の実装は **(B) の設計＋(†)** が素直である。☆(†) は第 1225(hdag_of_stableLine)が VeluQuotOK の下で与える。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "veluQuotOKGap20260902": {
+    "block": 1266,
+    "date": "2026-09-02",
+    "title": "★★☆測定——witness に残る唯一の「数学の穴」は Vélu の商の半安定性である",
+    "goal": "残り 4 本のうち、配管でないものを特定する。",
+    "measured": "☆**在庫の測定(2026-09-02)**: veluQuotientFull の**楕円性**は Tate の設定で在庫にある(isElliptic_veluQuotientFull_tate_mu_K・isElliptic_veluQuotient_tate_mu・isElliptic_veluQuotient_vcPoint)。★しかし **SemistableAt p (veluQuotientFull …) は 1 件も無い** —— decl-index を \"semistable\" × \"velu\" で引いて 0 件。",
+    "consequence": "★★★したがって witness の 4 本に残る「数学の内容」は **VeluQuotOK の半安定性の部分ただ 1 つ**である(原文が「同種なので自動」と括弧で述べる段)。☆それ以外はすべて配管であり、受け口は第 1239・1249・1259・1260・1262 に用意してある。",
+    "note": "☆半安定性の同種不変性は Néron モデルの理論であり、mathlib には無い(2026-09-02 時点で Neron は 0 件)。★これが GenEll §3-§4 に残る最後の数学の塊である。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
