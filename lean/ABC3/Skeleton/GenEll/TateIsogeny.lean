@@ -2525,4 +2525,98 @@ def neronExp_veluQuotient_eq_of_minimal.needs : List ProofObligation :=
     .citation "[ABC3]" "vAdd_algebraMap_eq_valAdd(付値の橋、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.vAdd_algebraMap_eq_valAdd") 1 ]
 
+/-! ## ★★★★★★★★★★★★★★★★第 1066 —— Vélu の商の整性（悪い素点）
+
+★第 1003 が Vélu の係数 `v`・`w` を **`R` の元として**与えるので、
+`veluCurve (tate q) v w` は `R`-曲線である。
+☆第 1058 の輸送で `C₀ • (E′ ⊗ Lv)` がその底変換に等しく、
+第 1065 で整性が戻る。 -/
+
+open Finset in
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★**悪い素点では Vélu の商は整**（第 1066）。 -/
+theorem isIntegral_veluQuotient_baseChange_of_split {L : Type} [Field L] [NumberField L]
+    {Lv : Type} [Field Lv] [CharZero Lv] [Algebra L Lv]
+    {R : Type} [CommRing R] [IsDomain R] [CharZero R] [IsDiscreteValuationRing R]
+    [Algebra R Lv] [IsFractionRing R Lv] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    [(E.baseChange Lv).IsElliptic] [(E.baseChange Lv).IsMinimal R]
+    [(E'.baseChange Lv).IsElliptic]
+    (h : (E.baseChange Lv).HasSplitMultiplicativeReduction R)
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    (hcop : ¬ ((l : ℤ) ∣ vAdd (mkTateSetup (K := Lv) (tateParamR (E.baseChange Lv) h)
+        (tateParamR_mem (E.baseChange Lv) h)
+        (tateParamR_ne_zero (E.baseChange Lv) h)).v
+      (mkTateSetup (K := Lv) (tateParamR (E.baseChange Lv) h)
+        (tateParamR_mem (E.baseChange Lv) h)
+        (tateParamR_ne_zero (E.baseChange Lv) h)).Q))
+    (hlu : IsUnit ((l : R))) (h2 : (2 : R) ≠ 0) (h2K : (2 : Lv) ≠ 0)
+    {Q : E.toAffine.Point} (hQ : addOrderOf Q = l)
+    (hE' : E' = veluQuotientFull E
+      (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))))
+    : WeierstrassCurve.IsIntegral R (E'.baseChange Lv) := by
+  have hq := tateParamR_mem (E.baseChange Lv) h
+  have hq0 := tateParamR_ne_zero (E.baseChange Lv) h
+  have hΔ := ABC3.Found.GaloisRep.tateModel_map_Delta_ne_zero (E.baseChange Lv) h
+  have hql : (tateParamR (E.baseChange Lv) h) ^ l ∈ IsLocalRing.maximalIdeal R :=
+    ABC3.Found.GaloisRep.pow_mem_of_mem_ideal hq hl.pos
+  obtain ⟨C₀, P, hP, hP0, hcurve, hCE⟩ :=
+    ABC3.Found.GaloisRep.exists_variableChange_veluQuotient_tateModel E E' h hl hQ h2K hE'
+  obtain ⟨ζ, uζ, hζ, hζu, hζl, hord, hPz⟩ :=
+    ABC3.Found.GenEll.exists_primitiveRoot_of_torsion_point
+      (tateParamR (E.baseChange Lv) h) hq hq0 hΔ hl hcop P hP hP0
+  have hqlne : algebraMap R Lv ((tateParamR (E.baseChange Lv) h) ^ l) ≠ 0 :=
+    (map_ne_zero_iff _ (IsFractionRing.injective R Lv)).2 (pow_ne_zero l hq0)
+  have hc4T' : algebraMap R Lv
+      (tateCurveAt ((tateParamR (E.baseChange Lv) h) ^ l) hql).c₄ ≠ 0 :=
+    ((ABC3.Found.GaloisRep.tateCurveAt_c4_isUnit
+      ((tateParamR (E.baseChange Lv) h) ^ l) hql).map (algebraMap R Lv)).ne_zero
+  obtain ⟨u', hu'u, hueq'⟩ := ABC3.Found.GaloisRep.evalAdic_tateJinvSeries_eq_mul_unit
+    (I := IsLocalRing.maximalIdeal R) ((tateParamR (E.baseChange Lv) h) ^ l) hql
+  have hev' : algebraMap R Lv
+      (evalAdic tateJinvSeries ((tateParamR (E.baseChange Lv) h) ^ l) hql) ≠ 0 := by
+    rw [hueq', map_mul]
+    exact mul_ne_zero hqlne ((hu'u.map (algebraMap R Lv)).ne_zero)
+  haveI : ((tateCurveAt ((tateParamR (E.baseChange Lv) h) ^ l) hql).map
+      (algebraMap R Lv)).IsElliptic :=
+    ABC3.Found.GaloisRep.tateCurveAt_map_isElliptic _ hql hev' hc4T'
+  obtain ⟨v, w, hv, hw, hell, h4, h6⟩ :=
+    exists_vw_tate_mu (tateParamR (E.baseChange Lv) h) hq hq0 hΔ hl hodd hlu hql h2 ζ hζ
+  have hu := ABC3.Found.GenEll.isUnit_one_sub_pow_of_isUnit_natCast hl.pos hζ hlu
+  have hquot := ABC3.Found.GaloisRep.veluQuotientFull_tate_mu
+    (mkTateSetup (tateParamR (E.baseChange Lv) h) hq hq0) hΔ
+    (dvrTatePhiAddEquiv (tateParamR (E.baseChange Lv) h) hq hq0 hΔ) (fun _ => rfl)
+    hl.pos ζ uζ hζu hζl hord hu v w h2K hv hw
+  have hquot' : veluQuotientFull
+      ((tateCurveAt (tateParamR (E.baseChange Lv) h) hq).map (algebraMap R Lv))
+      (((range l).erase 0).image (fun k : ℕ => pointCoords
+        (k • tatePhi (mkTateSetup (K := Lv) (tateParamR (E.baseChange Lv) h) hq hq0) hΔ
+          (QuotientGroup.mk uζ))))
+      = (ABC3.Found.GenEll.veluCurve
+        (tateCurveAt (tateParamR (E.baseChange Lv) h) hq) v w).map (algebraMap R Lv) := hquot
+  have hEq : (C₀.map (algebraMap R Lv)) • (E'.baseChange Lv)
+      = (ABC3.Found.GenEll.veluCurve
+        (tateCurveAt (tateParamR (E.baseChange Lv) h) hq) v w).map (algebraMap R Lv) := by
+    rw [← hcurve, hPz]
+    exact hquot'
+  have hu0 := ABC3.Found.GaloisRep.vAdd_tateModel_u_eq_zero (E.baseChange Lv) h C₀ hCE hq0
+  have hTne : algebraMap R Lv
+      (tateCurveAt ((tateParamR (E.baseChange Lv) h) ^ l) hql).Δ ≠ 0 :=
+    (map_ne_zero_iff _ (IsFractionRing.injective R Lv)).2
+      (ABC3.Found.GaloisRep.tateCurveAt_Delta_ne_zero hql (pow_ne_zero l hq0))
+  exact ABC3.Found.GaloisRep.isIntegral_of_variableChange_map (E'.baseChange Lv)
+    (ABC3.Found.GenEll.veluCurve (tateCurveAt (tateParamR (E.baseChange Lv) h) hq) v w)
+    C₀ hEq
+
+def isIntegral_veluQuotient_baseChange_of_split.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(悪い素点では Vélu の商は整)",
+    sectionId := "genell-lemma-3-5" }
+
+def isIntegral_veluQuotient_baseChange_of_split.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "isIntegral_of_variableChange_map(第 1065、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.isIntegral_of_variableChange_map") 1,
+    .citation "[ABC3]" "exists_vw_tate_mu(v・w が R の元、第 1003、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.exists_vw_tate_mu") 1 ]
+
 end ABC3.Skeleton.GenEll
