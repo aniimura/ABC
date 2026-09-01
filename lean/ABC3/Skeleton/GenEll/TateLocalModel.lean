@@ -249,33 +249,47 @@ def isMuAtBadPrimes_of_veluQuotient.src : Source :=
     sectionId := "genell-lemma-3-5" }
 
 def isMuAtBadPrimes_of_veluQuotient.needs : List ProofObligation :=
-  [ .citation "[ABC3]" "minDeltaExp_eq_mul_of_veluMu(分裂の連鎖の終点、第 904、証明済み)"
-      (.inProject "ABC3" "ABC3.Skeleton.GenEll.minDeltaExp_eq_mul_of_veluMu") 1,
-    .citation "[ABC3]" "stableLine_is_mu_of_coprime(H ↦ μ_l、第 906、証明済み)"
-      (.inProject "ABC3" "ABC3.Found.GenEll.stableLine_is_mu_of_coprime") 1,
-    .citation "[ABC3]" "splits_quadTwist_of_not_isSquare(非分裂を捧りで分裂に、第 938、証明済み)"
-      (.inProject "ABC3" "ABC3.Found.GenEll.splits_quadTwist_of_not_isSquare") 1,
-    .citation "[ABC3]" "minDeltaExp_eq_mul_of_nonsplit(捧った対から降りる、第 929、証明済み)"
+  [ .citation "[ABC3]" "minDeltaExp_eq_mul_of_globalVelu(大域の Vélu の商で受ける形、第 972、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.minDeltaExp_eq_mul_of_globalVelu") 1,
+    .citation "[ABC3]" "exists_minimal_c4_unit_of_jExp_neg(C・hC・hc4、第 954、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.exists_minimal_c4_unit_of_jExp_neg") 1,
+    .citation "[ABC3]" "hasMultiplicativeReduction_at_bad_prime(極小性と乗法還元、第 976、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.hasMultiplicativeReduction_at_bad_prime") 1,
+    .citation "[ABC3]" "valuation_algebraMap_adicCompletion(hp、第 964、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.valuation_algebraMap_adicCompletion") 1,
+    .citation "[ABC3]" "isUnit_natCast_of_valAdd_eq_zero(hlu、第 953、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.isUnit_natCast_of_valAdd_eq_zero") 1,
+    .citation "[ABC3]" "not_dvd_vAdd_tateParam_of_not_dvd_jExp(hcop、第 978、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.not_dvd_vAdd_tateParam_of_not_dvd_jExp") 1,
+    .citation "[ABC3]" "tateModel_map_Delta_ne_zero(hΔ、第 977、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.tateModel_map_Delta_ne_zero") 1,
+    .citation "[ABC3]" "exists_veluW_mu(hvw の w、第 961、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.exists_veluW_mu") 1,
+    .citation "[ABC3]" "isElliptic_veluCurve_tate_map(hvw の楼円性、第 962、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.isElliptic_veluCurve_tate_map") 1,
+    .citation "[ABC3]" "splits_or_exists_twist_splits''(分裂性の二者択一、第 982、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.splits_or_exists_twist_splits''") 1,
+    .citation "[ABC3]" "minDeltaExp_eq_mul_of_nonsplit(非分裂の降下、第 929、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.minDeltaExp_eq_mul_of_nonsplit") 1,
-    .citation "[ABC3]" "isAdicComplete_adicCompletionIntegers(完備化の台、第 897、証明済み)"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.isAdicComplete_adicCompletionIntegers") 1,
-    .citation "[ABC3]" "tateParam_quot_velu_of_torsion(局所の段そのもの、第 948、証明済み)"
-      (.inProject "ABC3" "ABC3.Skeleton.GenEll.tateParam_quot_velu_of_torsion") 1,
-    .citation "[ABC3]" "tateParamR_map(Tate 母数は拡大で変わらない、第 944、証明済み)"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.tateParamR_map") 1,
-    .citation "[ABC3]" "exists_mu_point_dvr(有理点なら Galois は不要、第 946、証明済み)"
-      (.inProject "ABC3" "ABC3.Found.GenEll.exists_mu_point_dvr") 1,
     .implicitStep
-      ("★★★★**2026-09-01（第 944-948）の測定**——**体論的な障害はすべて落ちた**。" ++
-       "☆第 943 で挙げた 3 層は、(A) 拡大を立てる→第 945（Q が有理なので ζ は降りる）、" ++
-       "(B) 分岐指数→第 944（Tate 母数の段で降ろす）、" ++
-       "(C) Vélu の降下→第 945（H の点ははじめから有理）で消えた。" ++
-       "★Galois そのものも第 946 で消え、第 948 が局所の段を 1 つの定理にまとめた。") 2,
+      ("★★★★**2026-09-01（第 944-985）の測定**——" ++
+       "「大域データ（Q・hQ・hE′）＋局所データ → 結論」は" ++
+       "第 972 で 1 本の証明済み定理になった。" ++
+       "☆その局所データ 9 項目のうち 8 項目に供給元が付いている" ++
+       "（954・964・953・978・977・961・962・970+947+971）。") 2,
     .implicitStep
-      ("☆(D2) H = ⟨Q⟩ の点集合を pointCoords の水準で Tate モデルの側に揃える段。" ++
-       "変数変換分は j_veluCurve_variableChange（第 926）で移す") 3,
+      ("★★**残る 1 項目は分裂性であり、その唯一の障害は mathlib の穴である**: " ++
+       "`Finite (IsLocalRing.ResidueField (p.adicCompletionIntegers L))` が無い" ++
+       "（第 983・985 で実測）。" ++
+       "☆第 982 が `[Fintype k]` を要求するのでこれが要る。" ++
+       "★道筋: `L` の稠密性（`denseRange_algebraMap`、mathlib にあり）で " ++
+       "`𝓞 L → ResidueField R` の全射性を示し、" ++
+       "`Ideal.finiteQuotientOfFreeOfNeBot`（mathlib にあり）に帰着させる。" ++
+       "☆第 897（IsAdicComplete の内製）と同型の作業である。") 5,
     .implicitStep
-      ("☆(D3) 各悪い素点で 948 → 904 → 903 と流す段。" ++
-       "非分裂は 938/925/940/926/929 で捧りに移してから同じ連鎖を当てる") 3 ]
+      ("☆残りの配管: (i) `C • E` を `a₁ = a₃ = 0` に正規化して `p` での整性を保つ段" ++
+       "（第 981 により体の側でやればよい。`p ∣ 2` は第 979 の測定）、" ++
+       "(ii) 捧り `d` を `Lv` の整数環から `L` に降ろす段、" ++
+       "(iii) 972 に並べて `minDeltaExp_variableChange` で `E`・`E′` に戻す段。") 3 ]
 
 end ABC3.Skeleton.GenEll
