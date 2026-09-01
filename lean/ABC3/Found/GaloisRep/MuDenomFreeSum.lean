@@ -71,6 +71,24 @@ theorem sum_mu_d2xtermE_field {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimiti
       = (l : F) ^ 4 * (120 * ∑ i ∈ (range l).erase 0, tateD2Xterm (ζ ^ i)) from by ring,
     sum_mu_d2xterm_field hl hζ]
 
+/-- ★★★★★★★★**体版**: `∑ DX^E = 0`。 -/
+theorem sum_mu_dxtermE_field {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l) :
+    ∑ i ∈ (range l).erase 0, tateDXtermE l (ζ ^ i) = 0 := by
+  have hlne : ((l : F)) ≠ 0 := by
+    simpa using (Nat.cast_ne_zero (R := F)).2 hl.ne_zero
+  have hlu : IsUnit ((l : F)) := hlne.isUnit
+  have hbridge : ∀ i ∈ (range l).erase 0,
+      tateDXtermE l (ζ ^ i) = (l : F) ^ 3 * tateDXterm (ζ ^ i) := by
+    intro i hi
+    have hne : (1 : F) - ζ ^ i ≠ 0 := one_sub_zeta_ne_zero hζ hi
+    have hu : IsUnit ((1 : F) - ζ ^ i) := hne.isUnit
+    have hpow : (ζ ^ i) ^ l = 1 := by
+      rw [← pow_mul, mul_comm, pow_mul, hζ.pow_eq_one, one_pow]
+    have hzne : ζ ^ i ≠ 1 := fun hc => hne (by rw [hc, sub_self])
+    exact (natCast_pow_mul_tateDXterm hlu hu hpow
+      (sum_pow_eq_zero_of_ne_one hpow hzne)).symm
+  rw [Finset.sum_congr rfl hbridge, ← Finset.mul_sum, sum_mu_dxterm_field hl hζ, mul_zero]
+
 end Field
 
 section Domain
@@ -104,6 +122,28 @@ theorem sum_mu_d2xtermE {l : ℕ} (hl : l.Prime) {ζ : A} (hζ : IsPrimitiveRoot
       rw [map_tateD2XtermE, map_pow]
   rw [hmap, map_mul, map_sub, map_pow, map_natCast, map_one]
   exact sum_mu_d2xtermE_field hl (hζ.map_of_injective hinj)
+
+/-- ★★★★★★★★★★★★★★★★**整域版（`hu` を取らない）**: `∑ DX^E = 0`（第 1113）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`sum_mu_dxpair_zero` の頭項側である。★`p ∣ l` でも成り立つ。 -/
+theorem sum_mu_dxtermE {l : ℕ} (hl : l.Prime) {ζ : A} (hζ : IsPrimitiveRoot ζ l) :
+    ∑ i ∈ (range l).erase 0, tateDXtermE l (ζ ^ i) = 0 := by
+  have hinj : Function.Injective (algebraMap A (FractionRing A)) :=
+    IsFractionRing.injective A (FractionRing A)
+  haveI : CharZero (FractionRing A) := charZero_of_injective_algebraMap hinj
+  refine hinj ?_
+  have hmap : (algebraMap A (FractionRing A))
+      (∑ i ∈ (range l).erase 0, tateDXtermE l (ζ ^ i))
+      = ∑ i ∈ (range l).erase 0,
+          tateDXtermE l ((algebraMap A (FractionRing A)) ζ ^ i) := by
+    rw [map_sum]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [map_tateDXtermE, map_pow]
+  rw [hmap, map_zero]
+  exact sum_mu_dxtermE_field hl (hζ.map_of_injective hinj)
 
 end Domain
 
