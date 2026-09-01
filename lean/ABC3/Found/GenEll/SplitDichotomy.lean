@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.GenEll.QuadTwist
 import Mathlib.AlgebraicGeometry.EllipticCurve.Reduction
+import Mathlib.AlgebraicGeometry.EllipticCurve.NormalForms
 
 /-!
 # 第 963 ブロック —— **★★★★★★★★★★★★★★★★分裂するか、捧れば分裂するか**（`Found`）
@@ -304,6 +305,43 @@ theorem residue_c4_ne_zero_of_multiplicativeReduction {R : Type} [CommRing R] [I
 def residue_c4_ne_zero_of_multiplicativeReduction.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(乗法還元なら整モデルの c₄ は剰余体で 0 でない。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+/-! ## ★★★★★★★★★★★★第 994 —— 正規化は `u = 1` で行える
+
+★第 993 は `W.a₁ = 0`・`W.a₃ = 0` を受ける。
+☆それを作る変数変換は mathlib の `toCharNeTwoNF` であり、その `u` は **`1`** である
+（`{ u := 1, r := 0, s := ⅟2 * -a₁, t := ⅟2 * -a₃ }`）。
+
+★★したがって正規化しても `c₄` と `Δ` は**そのまま**であり、
+第 993 が受ける `hc4`（`v_p(c₄) = 0`）と `hΔpos` はそのまま移る。
+☆これが「正規化しても仮説が壊れない」ことの中身である。 -/
+
+/-- ★★★★★★★★**`2` が単元なら `u = 1` の変数変換で `a₁ = a₃ = 0` にできる**。
+
+☆mathlib の `toCharNeTwoNF` は `u := 1` なので、`c₄`・`Δ` を動かさない。 -/
+theorem exists_charNeTwoNF_u_one {R : Type} [CommRing R]
+    (W : WeierstrassCurve R) (h2 : IsUnit (2 : R)) :
+    ∃ C : WeierstrassCurve.VariableChange R, (C • W).IsCharNeTwoNF ∧ C.u = 1 := by
+  haveI : Invertible (2 : R) := h2.invertible
+  exact ⟨W.toCharNeTwoNF, WeierstrassCurve.toCharNeTwoNF_spec W, rfl⟩
+
+/-- ★★★★★★**`u = 1` の変数変換は `c₄` と `Δ` を動かさない**。 -/
+theorem variableChange_c4_Delta_of_u_one {R : Type} [CommRing R] (W : WeierstrassCurve R)
+    (C : WeierstrassCurve.VariableChange R) (hu : C.u = 1) :
+    (C • W).c₄ = W.c₄ ∧ (C • W).Δ = W.Δ := by
+  constructor
+  · rw [WeierstrassCurve.variableChange_c₄, hu]; simp
+  · rw [WeierstrassCurve.variableChange_Δ, hu]; simp
+
+def exists_charNeTwoNF_u_one.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(2 が単元なら u = 1 の変数変換で a₁ = a₃ = 0 にできる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def variableChange_c4_Delta_of_u_one.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(u = 1 の変数変換は c₄ と Δ を動かさない。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 /-! ## ★出典の紐付け(`.src`) -/
