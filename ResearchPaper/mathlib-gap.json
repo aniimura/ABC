@@ -4895,5 +4895,16 @@
     "measured": "★★★★**w の /2 の道を測った**。w だけは割り算があるので多項式の議論では済まないが、**再添字すれば既存の道具がそのまま使える**: l-巡回部分群 H は L̄ の中で巡回なので生成元 Q₀ ∈ E(L̄) が取れて S = ((range l).erase 0).image (fun k => pointCoords (k • Q₀)) と書ける(Q₀ は L 有理でなくてよい)。★反転は k ↦ l − k に対応するので exists_veluW_of_inv(第 960)と exists_veluW_two(第 1149)がそのまま効く。☆つまり TorsionIntegralGood.lean の isIntegral_veluQuotientFull_of_addOrderOf_prime を L̄ と A ≔ integralClosure R L̄ で組み直すだけである——**新しい数学は要らない**。",
     "frame": "☆進捗枠 1.7/3、総重み 26 → 7。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "veluWIntegralLbar20260901": {
+    "block": 1158,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★★★★★w も整——節点 2 の良い素点の側が閉じた",
+    "goal": "l-巡回の 2 つの読みを繋ぐ(第 1152 の枠、節点 2)。",
+    "what": "★isIntegral_veluWFull_of_addOrderOf_prime(Found/GenEll/TorsionIntegralClosure.lean)。☆w だけは /2 があるので多項式の議論では済まないが、H は L̄ の中で巡回なので生成元 Q で再添字でき、反転は k ↦ l − k に対応する。★したがって exists_veluW_of_inv(第 960)と exists_veluW_two(第 1149)が**そのまま効く**——A ≔ integralClosure R L̄ の中で w を作り、veluWFull_image で像に落とし、2 で割って w.2 で終わる。",
+    "measured": "★★**新しい数学は 1 つも要らなかった**——第 1157 の見立てどおり、TorsionIntegralGood.lean の isIntegral_veluQuotientFull_of_addOrderOf_prime を L̄ と A で組み直しただけである。☆付値環 primeSubring p の代わりに整閉包 A を使うので、深さ m・ValAtLeast の連鎖がまるごと消えた。",
+    "pitfall": "☆`rw [smul_comm, hlz, smul_zero]` が「pattern ?a • 0 が無い」で落ちる。★点の型が L̄ の上だと AddMonoid のインスタンスが別物になり smul_zero の SMulZeroClass が合わない。☆`simp` で置き換えれば通る。",
+    "frame": "☆進捗枠 2/3、総重み 26 → 5。★残るのは 2d(悪い素点の側——局所の連鎖 TateIsogenyK はすでに ζ を完備体で取っており Q の有理性を使っていないので、hE' を L̄ の側で結び直すだけ)と節点 3(Lemma 3.7 の言い直し、重み 4)。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
