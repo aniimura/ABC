@@ -417,7 +417,25 @@ import ABC3.Meta.Claim
 
 ★★★**これで第 1209 が残した義務 `[M:L] < l` は解けた**——
 `l − 1 < l` だからである。
-☆残るのはこれらを `lemma_3_5_height_ineq_stableLine` に組み上げる配管だけである。
+##### ★★★★★★★★★★★★★★★★★★★★★★★★第 1223——**節点 2 が閉じた**
+
+`lemma_3_5_height_ineq_stableLine`（`Found/GaloisRep/Lemma35Assemble.lean`）:
+
+    E[l] の中に Gal-安定な直線があれば、Lemma 3.5 の不等式が L の上で出る
+
+| 段 | 定理 | 第 |
+|---|---|---|
+| 安定直線 → 位数 `l` の点 | `exists_stablePoint_of_hasLCyclicJ` | 1205 |
+| 点を次数 `≤ l−1` の `M` へ降ろす | `exists_point_descent_of_stable` | 1219 |
+| インスタンス | `numberField_and_towers` | 1222 |
+| 仮説を `L` の側だけに | `lemma_3_5_height_ineq_descend` | 1221 |
+| 有限拡大で確かめれば足りる | `lemma_3_5_height_ineq_over_extension` | 1199 |
+
+★★**逸脱の記録**——Vélu の商が**楼円かつ半安定**であることは
+仮説として受ける（原文は「同種なので自動」と括弧で述べる。
+`Lemma35Unconditional` の逸脱表と同じ扱い）。
+
+★★★**これで節点 1・2・3 がすべて閉じた**。
 
 ☆（参考）部品の内訳——
 第 1187（良い還元）・第 1188（分岐した `valAdd`）・第 1190（極小性）・
