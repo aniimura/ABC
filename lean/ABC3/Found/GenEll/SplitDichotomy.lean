@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import ABC3.Found.GenEll.QuadTwist
+import Mathlib.AlgebraicGeometry.EllipticCurve.Reduction
 
 /-!
 # 第 963 ブロック —— **★★★★★★★★★★★★★★★★分裂するか、捧れば分裂するか**（`Found`）
@@ -175,6 +176,43 @@ theorem exists_variableChange_isCharNeTwoNF_of_isUnit_two {R : Type} [CommRing R
 def exists_variableChange_isCharNeTwoNF_of_isUnit_two.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(2 が単元なら IsCharNeTwoNF に正規化できる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+/-! ## ★★★★★★★★★★★★第 981 —— 整モデルの `IsCharNeTwoNF` は体の側で決まる
+
+★第 979 の二者択一は `[V.IsCharNeTwoNF]` を **整モデル** `V = integralModel R W` について受ける。
+☆第 980 は `R` の中で正規化する道（`2` が `R` で単元、すなわち `p ∤ 2`）だった。
+
+★★だが `integralModel_a₁_eq`（mathlib）は
+`algebraMap R K (integralModel R W).a₁ = W.a₁` を与える。
+`algebraMap R K` は単射だから、**`W.a₁ = 0` なら整モデルの `a₁` も `0`** である。
+
+☆つまり正規化は**体 `K`（あるいは `L`）の側でやればよい**——
+標数 0 なら `2` は必ず可逆だから、剰余標数の条件は要らない。
+★残る問題は「体の側で正規化した曲線が `p` で整のままか」であり、
+`p ∣ 2` ではそこが崩れうる（第 979・980 の測定を見よ）。 -/
+
+/-- ★★★★★★★★★★★★**体の側が `a₁ = a₃ = 0` なら整モデルもそうである**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`integralModel_a₁_eq`・`integralModel_a₃_eq`（mathlib）と
+`algebraMap R K` の単射性だけである。★剰余標数の条件は要らない。 -/
+theorem isCharNeTwoNF_integralModel {R : Type} [CommRing R] [IsDomain R]
+    [IsDiscreteValuationRing R] {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
+    (W : WeierstrassCurve K) [WeierstrassCurve.IsIntegral R W]
+    (ha1 : W.a₁ = 0) (ha3 : W.a₃ = 0) :
+    (WeierstrassCurve.integralModel R W).IsCharNeTwoNF := by
+  refine ⟨?_, ?_⟩
+  · refine IsFractionRing.injective R K ?_
+    rw [WeierstrassCurve.integralModel_a₁_eq R W, ha1, map_zero]
+  · refine IsFractionRing.injective R K ?_
+    rw [WeierstrassCurve.integralModel_a₃_eq R W, ha3, map_zero]
+
+def isCharNeTwoNF_integralModel.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(体の側が a₁ = a₃ = 0 なら整モデルもそう。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 /-! ## ★出典の紐付け(`.src`) -/
