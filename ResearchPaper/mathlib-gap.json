@@ -6092,5 +6092,16 @@
   "consequence": "☆B1-B3 が済めば `restrictLocalHom`（第 1167）＋第 1271 で大域へ運び、第 1270 で `T_l E` に上げ、`alpha_mem_map_of_galTate`（第 1237）に入る。★これが `EllModuliWitness` の 4 本目（`imageContainsSL2J_torsionExt`）である。",
   "note": "★B1 は既知数学（mathlib の Henselian ＋ Dedekind から組める）。☆`EllModuliWitness` の他の 3 本は `VeluQuotOK`（Vélu の定理＋同種の半安定不変性）に依る。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "tateSetupRigid20260902": {
+  "block": 1275,
+  "date": "2026-09-02",
+  "title": "★★☆★★☆欠陥の発見——TateSetup の σA : K →ₐ[R] K は恒等射しかない（在庫の同変性は非自明な Galois 元に当たらない）",
+  "goal": "第 1273 を実際の Galois 元に当てようとして、当たらないことに気づいたので測る。",
+  "proved": "☆`Found/GaloisRep/TateSetupRigid.lean`（第 1275）に 2 本、**Lean で証明した**。`tateSetup_exists_of_ne_zero`（`TateSetup` があれば `K` は `R` の像の分数体）と`tateSetup_algHom_eq_id`（**`σA : K →ₐ[R] K` は恒等射**）。",
+  "mechanism": "★`TateSetup` の `hmem0` は「`v ≥ 0` の元は `R` から来る」と言う。☆どの `x : Kˣ` でも `v(x) ≥ 0` か `v(x⁻¹) ≥ 0` のどちらかなので `K = Frac(R の像)`。★`R`-代数準同型は `R` の像で恒等、逆元も保つので `K` 全体で恒等である。",
+  "impact": "★★☆**影響**: 在庫の `tatePhi_pointMap`（Tate 一意化の `Point.map` との可換性）は**恒等射のときしか内容を持たない**。☆同じ理由で `tate_stab_of_pointStab`・`lemma_3_2_i_tate` の`σ : L ≃ₐ[K] L` も `IsScalarTower R K L` ＋ `TateSetup R I L` から `K = L` が出るので**恒等射しか動かない**。★本セッションの第 1273 もこの影響を受ける（真だが空虚）。☆第 1272（抽象な `Φ`・`τ`・`hτ`）は影響を受けない——そちらが本体である。",
+  "fix": "★正しい形は `tatePhi_map`（在庫、`σR : R →+* R` と `σK : K →+* K` の**対**を受ける、第 1275 の測定では空虚ではない）から書き直したものである。☆点の側で `Point.map` を使うには、曲線を**σ で固定される部分環 `R₀`**（例: 基礎局所体の整数環）の上に置き、`σA : K →ₐ[R₀] K` とする必要がある。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
