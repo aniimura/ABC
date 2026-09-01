@@ -5865,12 +5865,8 @@
   "h4h6Measure20260902": {
     "block": 1252,
     "date": "2026-09-02",
-    "title": "記録——残る最深の 1 本は h4・h6（Tate 曲線の c₄・c₆ の q 展開）",
-    "goal": "witness の sorry (2) の最深の前提を特定する。",
-    "measured": "☆**在庫の測定(2026-09-02)**: プロジェクト内の \"eisenstein\" を含む宣言は (a) Eisenstein **多項式**(分岐、TameRamification/DifferentKummer)と (b) EisensteinMatch.lean(§1 の別の文脈)だけで、**Tate 曲線の c₄・c₆ の q 展開は無い**。★したがって h4・h6 は未着手の解析の塊である。",
-    "what": "★h4 : c₄(E_q) + 240·v = l⁴·c₄(E_{q^l})、h6 : c₆(E_q) + 504·v + 6048·w = l⁶·c₆(E_{q^l})。ここで v, w は μ_l の点の Vélu の和(veluQuotientFull_tate_mu_K、第 1134 系が K の元として与える)。",
-    "consequence": "☆これを入れれば j_velu_tate_eq_K(第 1251) → jExp_eq_mul_of_j_tate_pow(第 997) → minDeltaExp_eq_mul_of_jExp_all(第 1247) → degInfJ_quotLCyclicJ_of_jExp(第 1248) と繋がり、witness の sorry (2) が落ちる。",
-    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+    "title": "★訂正済み——h4・h6 は未着手ではなく、既に証明されていた（第 1256 で訂正）",
+    "measured": "★★☆**この記録は誤りだった**。第 1256 の再測定により、h4・h6 は Skeleton/GenEll/TateIsogeny.lean の c4_velu_tate・c6_velu_tate として**証明済み**(sorry 0)であることが判明した。詳細は h4h6Correction20260902 を見よ。"
   },
   "c4c6Tate20260902": {
     "block": 1253,
@@ -5901,6 +5897,17 @@
     "what": "★c₄_tateCurveAt_eq と c₆_tateCurveAt_eq(Found/GaloisRep/TateVelu.lean)。",
     "measured": "☆tateCurveAt q hq = tateCurve.map (evalAdicHom q hq) なので、第 1254 を環準同型で送るだけ。",
     "consequence": "★★★これで h4・h6 は\n  1 + 240σ₃(q) + 240v = l⁴(1 + 240σ₃(q^l))\n  −1 + 504σ₅(q) + 504v + 6048w = l⁶(−1 + 504σ₅(q^l))\nという**σ の言葉の等式**になった —— 残るのは μ_l の Vélu 和 v, w をこの形に計算することだけである。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "h4h6Correction20260902": {
+    "block": 1256,
+    "date": "2026-09-02",
+    "title": "★★☆訂正——h4・h6（Lemma 3.2, (ii) の解析）は既に証明済みだった",
+    "goal": "第 1252 の測定の訂正。",
+    "measured": "★★☆**再測定(2026-09-02)**: Skeleton/GenEll/TateIsogeny.lean は **sorry 0** であり、次がすべて証明済みである —— c4_velu_tate(= h4)・c6_velu_tate(= h6)・j_velu_tate_mu・j_veluQuot_eq_j_tate_pow・minDeltaExp_eq_mul_at_bad_prime・minDeltaExp_eq_mul_of_globalVelu'。Found/GaloisRep/VeluMuSum.lean・TateVeluMu.lean・Skeleton/GenEll/TateODE.lean も sorry 0。",
+    "correction": "★第 1252 の「h4・h6 は未着手の解析の塊」は**誤り**である。在庫を「eisenstein」で grep しただけで判断したのが原因で、実際の名前は c4_velu_tate・c6_velu_tate だった(第 834-835 で数値確認、第 837 で証明)。☆CLAUDE.md 在庫の規則を守っていたが、**探す語が悪かった**。",
+    "consequence": "★★★したがって witness の sorry (2) に残るのは **h4・h6 ではなく、局所の結果を大域の deg∞ に繋ぐ配管**である —— minDeltaExp_eq_mul_at_bad_prime(局所、証明済み)を全素点で束ね、第 1244/1248 に渡す段。☆第 1247(良い素点で両辺 0)がその半分を与える。",
+    "keep": "☆第 1253-1255(c₄ = E₄、c₆ = −E₆、およびその特殊化)は**新しい事実**であり有効である —— 在庫には c₄・c₆ を σ で書いた形は無かった。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

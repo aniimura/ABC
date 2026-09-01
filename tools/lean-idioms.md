@@ -3044,3 +3044,15 @@ Bash ツールの上限 10 分で打ち切られた（`timeout` に 30 分を渡
 **直し方**: ビルドだけを単独のコマンドで走らせ、
 打ち切られたら**そのまま再実行**する（インクリメンタルに続きから進む）。
 ☆ゲートと commit は別のコマンドに分ける。
+
+## 在庫を引くときは「探す語」を疑う（第 1256）
+
+**失敗形**: `h4`・`h6`（Tate 曲線の `c₄`・`c₆` の同種関係）を
+「eisenstein」で grep して「未着手」と判断した。
+実際は `Skeleton/GenEll/TateIsogeny.lean` に
+**`c4_velu_tate`・`c6_velu_tate` として証明済み**（sorry 0）だった。
+
+**直し方**: 在庫を引くときは**結論の形**（`c₄`, `c₆`, `veluCurve`, `tateCurveAt`）でも
+grep する。☆`node tools/decl-index.mjs` の索引を
+「定理が何を言うか」の語で引くこと。
+★`grep -c sorry <file>` でそのファイルが完成しているかを先に見る。
