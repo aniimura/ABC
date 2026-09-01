@@ -2978,3 +2978,19 @@ because it depends on 'PadicInt.instCommRing'`。
 **直し方**: `AlgHom.map_adjoin`（`Mathlib/Algebra/Algebra/Subalgebra/Lattice.lean:865`、
 `namespace AlgHom` の中）と `Algebra.map_top`（同 263、`namespace Algebra` の中）。
 ★`grep -n "^namespace\|^end "` で**行番号より前の namespace** を見て決めること。
+
+## `IsScalarTower (𝓞 L) L M` は自動では出ないが `rfl` で出る（第 1222）
+
+**失敗形**: `M : IntermediateField L L̄` が `L` 上有限次でも
+`haveI : IsScalarTower (𝓞 L) L M := inferInstance` が
+`failed to synthesize`。`IsScalarTower (𝓞 L) (𝓞 M) M` も同じ。
+
+**測ったこと（2026-09-02）**: 自動で出るのは
+`NumberField M`（`NumberField.of_module_finite L M`）・`IsScalarTower ℚ L M`・
+`Algebra (𝓞 L) M`・`Module.Finite (𝓞 L) (𝓞 M)`・`Algebra.IsIntegral (𝓞 L) (𝓞 M)`。
+
+**直し方**: 2 つとも
+`IsScalarTower.of_algebraMap_eq fun _ => rfl` で出る
+——`Algebra (𝓞 L) M` は `𝓞 L ⊆ L → M` の制限だからである。
+★**数学の穴ではなくインスタンス探索の経路の問題**。
+☆`Found/GaloisRep/TowerInstances.lean` に補題として置いた。

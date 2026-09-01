@@ -5569,5 +5569,15 @@
     "measured": "★★★これで Lemma 3.5 の仮説は**L の側のもの ＋ L'' の上の点と商だけ**になった。☆第 1219 が [L'':L] ≤ l−1 の L'' と点 Q' を与えるので、これが受け口である。",
     "remaining": "☆残るのは Vélu の商が楕円かつ半安定であること(原文が「同種なので自動」と括弧で述べる段。Lemma35Unconditional の逸脱表と同じ扱い)である。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "towerInstances20260902": {
+    "block": 1222,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★中間体への塔のインスタンス——組み上げの最後の障害が消えた",
+    "goal": "第 1219 の M を第 1221 に入れる。",
+    "what": "★isScalarTower_ringOfIntegers_base・isScalarTower_ringOfIntegers_top・numberField_and_towers(Found/GaloisRep/TowerInstances.lean)。",
+    "measured": "☆**測定(2026-09-02)**: M : IntermediateField L L̄ が L 上有限次のとき、NumberField M(mathlib の of_module_finite)・IsScalarTower ℚ L M・Algebra (𝓞 L) M・Module.Finite (𝓞 L) (𝓞 M)・Algebra.IsIntegral (𝓞 L) (𝓞 M) は**自動で出る**。★IsScalarTower (𝓞 L) L M と IsScalarTower (𝓞 L) (𝓞 M) M だけ自動では出ないが、**どちらも rfl で出る**(Algebra (𝓞 L) M が 𝓞 L ⊆ L → M の制限だから)。",
+    "consequence": "★★★これで第 1219(([M:L] ≤ l−1 の M と点 Q')を第 1221(仮説は L の側だけ)に**そのまま入れられる**。☆数学の穴ではなくインスタンス探索の経路の問題だった。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
