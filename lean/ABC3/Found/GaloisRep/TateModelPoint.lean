@@ -432,7 +432,10 @@ theorem exists_variableChange_veluQuotient_tateModel {L : Type} [Field L] [Numbe
             (tateParamR_mem (E.baseChange Lv) h)).map (algebraMap R Lv))
           (((range l).erase 0).image
             (fun k : ℕ => ABC3.Found.GenEll.pointCoords (k • P)))
-        = (C₀.map (algebraMap R Lv)) • (E'.baseChange Lv) := by
+        = (C₀.map (algebraMap R Lv)) • (E'.baseChange Lv)
+      ∧ C₀ • WeierstrassCurve.integralModel R (E.baseChange Lv)
+        = tateCurveAt (tateParamR (E.baseChange Lv) h)
+          (tateParamR_mem (E.baseChange Lv) h) := by
   set φL : L →+* Lv := algebraMap L Lv with hφL
   set φR : R →+* Lv := algebraMap R Lv with hφR
   obtain ⟨hq, C₀, hne, hCE⟩ := tateParamR_spec (E.baseChange Lv) h
@@ -452,7 +455,7 @@ theorem exists_variableChange_veluQuotient_tateModel {L : Type} [Field L] [Numbe
       (rhPoint φL E Q)) = l := by
     rw [ABC3.Found.GenEll.addOrderOf_vcPoint (C₀.map φR) (E.map φL) (rhPoint φL E Q), hQ1]
   obtain ⟨P, hP, hP0, himg⟩ := exists_point_image_eq hbase hl _ hQ2
-  refine ⟨C₀, P, hP, hP0, ?_⟩
+  refine ⟨C₀, P, hP, hP0, ?_, hCE⟩
   have hE'map : E'.map φL = ABC3.Found.GenEll.veluQuotientFull (E.map φL)
       (((range l).erase 0).image
         (fun k : ℕ => ABC3.Found.GenEll.pointCoords (k • rhPoint φL E Q))) := by

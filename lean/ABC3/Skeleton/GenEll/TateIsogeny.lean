@@ -2322,4 +2322,112 @@ def minDeltaExp_eq_mul_at_bad_prime_nonsplit.needs : List ProofObligation :=
     .citation "[ABC3]" "isMinimal_baseChange_ext・hasMultiplicativeReduction_ext(第 1029)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.isMinimal_baseChange_ext") 1 ]
 
+/-! ## ★★★★★★★★★★★★★★★★★★★★第 1061 —— 局所の `Δ` の計算（組み立て）
+
+★第 1055-1060 の部品を第 1027 と同じ形で組む。
+☆結果は **`v(Δ(E′ ⊗ Lv)) = 12·v(l) + l·v(q)`** である。 -/
+
+open Finset in
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★**Vélu の商の `Δ` の付値**（第 1061）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`E` が完備化で極小・分裂乗法還元をもつとき、
+`v(Δ(E′ ⊗ Lv)) = 12·v(l) + l·v(q_E)` である。
+★これが第 1051 の見通し「`neronExp p E′ = v_p(l)`」の中身である。 -/
+theorem vAdd_Delta_veluQuotient_tate {L : Type} [Field L] [NumberField L]
+    {Lv : Type} [Field Lv] [CharZero Lv] [Algebra L Lv]
+    {R : Type} [CommRing R] [IsDomain R] [CharZero R] [IsDiscreteValuationRing R]
+    [Algebra R Lv] [IsFractionRing R Lv] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    [(E.baseChange Lv).IsElliptic] [(E.baseChange Lv).IsMinimal R]
+    [(E'.baseChange Lv).IsElliptic]
+    (h : (E.baseChange Lv).HasSplitMultiplicativeReduction R)
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    (hcop : ¬ ((l : ℤ) ∣ vAdd (mkTateSetup (K := Lv) (tateParamR (E.baseChange Lv) h)
+        (tateParamR_mem (E.baseChange Lv) h)
+        (tateParamR_ne_zero (E.baseChange Lv) h)).v
+      (mkTateSetup (K := Lv) (tateParamR (E.baseChange Lv) h)
+        (tateParamR_mem (E.baseChange Lv) h)
+        (tateParamR_ne_zero (E.baseChange Lv) h)).Q))
+    (hlu : IsUnit ((l : R))) (h2 : (2 : R) ≠ 0) (h2K : (2 : Lv) ≠ 0)
+    {Q : E.toAffine.Point} (hQ : addOrderOf Q = l)
+    (hE' : E' = veluQuotientFull E
+      (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))))
+    (hΔ' : (E'.baseChange Lv).Δ ≠ 0)
+    (hlne : algebraMap R Lv (l : R) ≠ 0)
+    (hqne : algebraMap R Lv (tateParamR (E.baseChange Lv) h) ≠ 0) :
+    vAdd (tateDvrVal R Lv) (Units.mk0 ((E'.baseChange Lv).Δ) hΔ')
+      = 12 * vAdd (tateDvrVal R Lv) (Units.mk0 (algebraMap R Lv (l : R)) hlne)
+        + l * vAdd (tateDvrVal R Lv)
+          (Units.mk0 (algebraMap R Lv (tateParamR (E.baseChange Lv) h)) hqne) := by
+  have hq := tateParamR_mem (E.baseChange Lv) h
+  have hq0 := tateParamR_ne_zero (E.baseChange Lv) h
+  have hΔ := ABC3.Found.GaloisRep.tateModel_map_Delta_ne_zero (E.baseChange Lv) h
+  have hql : (tateParamR (E.baseChange Lv) h) ^ l ∈ IsLocalRing.maximalIdeal R :=
+    ABC3.Found.GaloisRep.pow_mem_of_mem_ideal hq hl.pos
+  obtain ⟨C₀, P, hP, hP0, hcurve, hCE⟩ :=
+    ABC3.Found.GaloisRep.exists_variableChange_veluQuotient_tateModel E E' h hl hQ h2K hE'
+  obtain ⟨ζ, uζ, hζ, hζu, hζl, hord, hPz⟩ :=
+    ABC3.Found.GenEll.exists_primitiveRoot_of_torsion_point
+      (tateParamR (E.baseChange Lv) h) hq hq0 hΔ hl hcop P hP hP0
+  have hqlne : algebraMap R Lv ((tateParamR (E.baseChange Lv) h) ^ l) ≠ 0 :=
+    (map_ne_zero_iff _ (IsFractionRing.injective R Lv)).2 (pow_ne_zero l hq0)
+  have hc4T' : algebraMap R Lv
+      (tateCurveAt ((tateParamR (E.baseChange Lv) h) ^ l) hql).c₄ ≠ 0 :=
+    ((ABC3.Found.GaloisRep.tateCurveAt_c4_isUnit
+      ((tateParamR (E.baseChange Lv) h) ^ l) hql).map (algebraMap R Lv)).ne_zero
+  obtain ⟨u', hu'u, hueq'⟩ := ABC3.Found.GaloisRep.evalAdic_tateJinvSeries_eq_mul_unit
+    (I := IsLocalRing.maximalIdeal R) ((tateParamR (E.baseChange Lv) h) ^ l) hql
+  have hev' : algebraMap R Lv
+      (evalAdic tateJinvSeries ((tateParamR (E.baseChange Lv) h) ^ l) hql) ≠ 0 := by
+    rw [hueq', map_mul]
+    exact mul_ne_zero hqlne ((hu'u.map (algebraMap R Lv)).ne_zero)
+  haveI : ((tateCurveAt ((tateParamR (E.baseChange Lv) h) ^ l) hql).map
+      (algebraMap R Lv)).IsElliptic :=
+    ABC3.Found.GaloisRep.tateCurveAt_map_isElliptic _ hql hev' hc4T'
+  obtain ⟨v, w, hv, hw, hell, h4, h6⟩ :=
+    exists_vw_tate_mu (tateParamR (E.baseChange Lv) h) hq hq0 hΔ hl hodd hlu hql h2 ζ hζ
+  have hu := ABC3.Found.GenEll.isUnit_one_sub_pow_of_isUnit_natCast hl.pos hζ hlu
+  have hquot := ABC3.Found.GaloisRep.veluQuotientFull_tate_mu
+    (mkTateSetup (tateParamR (E.baseChange Lv) h) hq hq0) hΔ
+    (dvrTatePhiAddEquiv (tateParamR (E.baseChange Lv) h) hq hq0 hΔ) (fun _ => rfl)
+    hl.pos ζ uζ hζu hζl hord hu v w h2K hv hw
+  have hquot' : veluQuotientFull
+      ((tateCurveAt (tateParamR (E.baseChange Lv) h) hq).map (algebraMap R Lv))
+      (((range l).erase 0).image (fun k : ℕ => pointCoords
+        (k • tatePhi (mkTateSetup (K := Lv) (tateParamR (E.baseChange Lv) h) hq hq0) hΔ
+          (QuotientGroup.mk uζ))))
+      = (ABC3.Found.GenEll.veluCurve
+        (tateCurveAt (tateParamR (E.baseChange Lv) h) hq) v w).map (algebraMap R Lv) := hquot
+  have hEq : (C₀.map (algebraMap R Lv)) • (E'.baseChange Lv)
+      = (ABC3.Found.GenEll.veluCurve
+        (tateCurveAt (tateParamR (E.baseChange Lv) h) hq) v w).map (algebraMap R Lv) := by
+    rw [← hcurve, hPz]
+    exact hquot'
+  have hu0 := ABC3.Found.GaloisRep.vAdd_tateModel_u_eq_zero (E.baseChange Lv) h C₀ hCE hq0
+  have hTne : algebraMap R Lv
+      (tateCurveAt ((tateParamR (E.baseChange Lv) h) ^ l) hql).Δ ≠ 0 :=
+    (map_ne_zero_iff _ (IsFractionRing.injective R Lv)).2
+      (ABC3.Found.GaloisRep.tateCurveAt_Delta_ne_zero hql (pow_ne_zero l hq0))
+  exact ABC3.Found.GaloisRep.vAdd_Delta_of_veluCurve_eq
+    (tateParamR (E.baseChange Lv) h) hq hql v w h4 h6 C₀ (E'.baseChange Lv) hΔ' hEq hu0
+    hTne hlne hqne
+
+def vAdd_Delta_veluQuotient_tate.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の商の Δ の付値は 12·v(l) + l·v(q_E))",
+    sectionId := "genell-lemma-3-5" }
+
+def vAdd_Delta_veluQuotient_tate.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "vAdd_Delta_of_veluCurve_eq(帳簿、第 1059、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.vAdd_Delta_of_veluCurve_eq") 1,
+    .citation "[ABC3]" "exists_variableChange_veluQuotient_tateModel(輸送、第 1058、証明済み)"
+      (.inProject "ABC3"
+        "ABC3.Found.GaloisRep.exists_variableChange_veluQuotient_tateModel") 1,
+    .citation "[ABC3]" "vAdd_tateModel_u_eq_zero(極小性、第 1056、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.vAdd_tateModel_u_eq_zero") 1 ]
+
 end ABC3.Skeleton.GenEll
