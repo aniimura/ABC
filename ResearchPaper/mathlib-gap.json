@@ -3941,5 +3941,17 @@
     "howItGoes": "☆第 1058（輸送）で `C₀ • (E′ ⊗ Lv) = veluQuotientFull (tate q ⊗ Lv) (image k•P)`、第 947 で `P = tatePhi [uζ]`、第 890 で `= veluCurve (tate q) v w ⊗ Lv`、第 1056 で `v(C₀.u) = 0`、第 1059 の帳簿で締める。★第 1027 の `j` 版とまったく同じ組み立てである。",
     "remaining": "☆これで第 1051 の見通し「`neronExp p E′ = v_p(l)`」の**局所の中身が出た**。★残るのは `minDeltaExp = v_p(Δ) − 12·neronExp` に代入して`neronExp p E′ = v_p(l)` を出し（第 1054）、`hfin` に流す段である。",
     "note": "★944-1061 の 113 ブロック。"
+  },
+  "neronExpVeluProved20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1062",
+    "supersedes": "vAddDeltaVeluQuotient20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "★★★★★★★★★★★★★★★★★★★★★★★★`neronExp_veluQuotient_eq_of_minimal`（1062）——**極小な素点では `neronExp p E′ = v_p(l)`**。☆第 1054 で立てた節点が閉じた（`sorry` を消して証明に置き換えた）。"
+    ],
+    "howItGoes": "☆`minDeltaExp = v_p(Δ) − 12·neronExp`（定義）に第 1061（`v(Δ(E′ ⊗ Lv)) = 12·v(l) + l·v(q)`）と第 1044（`minDeltaExp p E′ = l·minDeltaExp p E`）を代入し、`vAdd_algebraMap_eq_valAdd`（付値の橋）で `L` の側に降ろして `omega`。",
+    "remaining": "☆`hfin` に残るのは (1) 本定理を `∑ᶠ` に足し上げる段と、(2) `isIntegral_veluQuotientFull_of_coprime`（第 1052、良い素点側の整性）である。★`Lemma 3.5` の中心（`IsMuAtBadPrimes`）は第 1044 で `sorry`-free。",
+    "note": "★944-1062 の 114 ブロック。"
   }
 }

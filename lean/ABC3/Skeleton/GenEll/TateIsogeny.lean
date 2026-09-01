@@ -2430,4 +2430,99 @@ def vAdd_Delta_veluQuotient_tate.needs : List ProofObligation :=
     .citation "[ABC3]" "vAdd_tateModel_u_eq_zero(極小性、第 1056、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.vAdd_tateModel_u_eq_zero") 1 ]
 
+open Finset in
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★**極小な素点では Vélu の商の Néron 指数は
+`v_p(l)`**（第 1062）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 1062）**——第 1051 の見通しの中身である。
+☆`minDeltaExp = v_p(Δ) − 12·neronExp` に
+第 1061（`v(Δ(E′)) = 12·v(l) + l·v(q)`）と
+第 1044（`minDeltaExp p E′ = l·minDeltaExp p E`）を代入する。 -/
+theorem neronExp_veluQuotient_eq_of_minimal {L : Type} [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L))
+    {Lv : Type} [Field Lv] [CharZero Lv] [Algebra L Lv]
+    {R : Type} [CommRing R] [IsDomain R] [CharZero R] [IsDiscreteValuationRing R]
+    [Algebra R Lv] [IsFractionRing R Lv] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation Lv
+        (IsDiscreteValuationRing.maximalIdeal R)) (algebraMap L Lv x)
+      = (HeightOneSpectrum.valuation L p) x)
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    [(E.baseChange Lv).IsElliptic] [(E.baseChange Lv).IsMinimal R]
+    [(E'.baseChange Lv).IsElliptic]
+    (h : (E.baseChange Lv).HasSplitMultiplicativeReduction R)
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    (hcop : ¬ ((l : ℤ) ∣ vAdd (mkTateSetup (K := Lv) (tateParamR (E.baseChange Lv) h)
+        (tateParamR_mem (E.baseChange Lv) h)
+        (tateParamR_ne_zero (E.baseChange Lv) h)).v
+      (mkTateSetup (K := Lv) (tateParamR (E.baseChange Lv) h)
+        (tateParamR_mem (E.baseChange Lv) h)
+        (tateParamR_ne_zero (E.baseChange Lv) h)).Q))
+    (hlu : IsUnit ((l : R))) (h2 : (2 : R) ≠ 0) (h2K : (2 : Lv) ≠ 0)
+    {Q : E.toAffine.Point} (hQ : addOrderOf Q = l)
+    (hE' : E' = veluQuotientFull E
+      (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))))
+    (hminE : neronExp p E = 0)
+    (hmu : minDeltaExp p E' = l * minDeltaExp p E)
+    (hlL : ((l : ℕ) : L) ≠ 0)
+    (hlR : algebraMap R Lv (l : R) ≠ 0)
+    (hlLv : algebraMap L Lv ((l : ℕ) : L) ≠ 0)
+    (hcast : algebraMap R Lv (l : R) = algebraMap L Lv ((l : ℕ) : L))
+    (hqE : vAdd (tateDvrVal R Lv)
+        (Units.mk0 (algebraMap R Lv (tateParamR (E.baseChange Lv) h))
+          ((map_ne_zero_iff _ (IsFractionRing.injective R Lv)).2
+            (tateParamR_ne_zero (E.baseChange Lv) h)))
+      = minDeltaExp p E) :
+    neronExp p E' = valAdd p (Units.mk0 ((l : ℕ) : L) hlL) := by
+  have hΔE : E.Δ ≠ 0 := (inferInstance : E.IsElliptic).isUnit.ne_zero
+  have hΔE' : E'.Δ ≠ 0 := (inferInstance : E'.IsElliptic).isUnit.ne_zero
+  have hΔ'Lv : (E'.baseChange Lv).Δ ≠ 0 := by
+    show (E'.map (algebraMap L Lv)).Δ ≠ 0
+    rw [WeierstrassCurve.map_Δ]
+    exact (map_ne_zero_iff _ (algebraMap L Lv).injective).2 hΔE'
+  have hkey := vAdd_Delta_veluQuotient_tate E E' h hl hodd hcop hlu h2 h2K hQ hE'
+    hΔ'Lv hlR ((map_ne_zero_iff _ (IsFractionRing.injective R Lv)).2
+      (tateParamR_ne_zero (E.baseChange Lv) h))
+  -- ★左辺を `valAdd p (Δ E′)` に直す
+  have hlhs : vAdd (tateDvrVal R Lv) (Units.mk0 ((E'.baseChange Lv).Δ) hΔ'Lv)
+      = valAdd p (Units.mk0 E'.Δ hΔE') := by
+    have he : (Units.mk0 ((E'.baseChange Lv).Δ) hΔ'Lv)
+        = Units.mk0 (algebraMap L Lv E'.Δ)
+          ((map_ne_zero_iff _ (algebraMap L Lv).injective).2 hΔE') := by
+      refine Units.ext ?_
+      exact WeierstrassCurve.map_Δ _ _
+    rw [he]
+    exact ABC3.Found.GaloisRep.vAdd_algebraMap_eq_valAdd p hp E'.Δ hΔE' _
+  -- ☆`v(l)` を `valAdd p (l)` に直す
+  have hlv : vAdd (tateDvrVal R Lv) (Units.mk0 (algebraMap R Lv (l : R)) hlR)
+      = valAdd p (Units.mk0 ((l : ℕ) : L) hlL) := by
+    have he : (Units.mk0 (algebraMap R Lv (l : R)) hlR)
+        = Units.mk0 (algebraMap L Lv ((l : ℕ) : L)) hlLv := by
+      refine Units.ext ?_
+      exact hcast
+    rw [he]
+    exact ABC3.Found.GaloisRep.vAdd_algebraMap_eq_valAdd p hp ((l : ℕ) : L) hlL _
+  rw [hlhs, hlv, hqE] at hkey
+  -- ★`minDeltaExp` の定義に流す
+  have hdE : minDeltaExp p E = valAdd p (Units.mk0 E.Δ hΔE) := by
+    rw [minDeltaExp, dif_neg hΔE, hminE]
+    ring
+  have hdE' : minDeltaExp p E' = valAdd p (Units.mk0 E'.Δ hΔE') - 12 * neronExp p E' := by
+    rw [minDeltaExp, dif_neg hΔE']
+  omega
+
+def neronExp_veluQuotient_eq_of_minimal.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(極小な素点では Vélu の商の Néron 指数は v_p(l))",
+    sectionId := "genell-lemma-3-5" }
+
+def neronExp_veluQuotient_eq_of_minimal.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "vAdd_Delta_veluQuotient_tate(第 1061、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.vAdd_Delta_veluQuotient_tate") 1,
+    .citation "[ABC3]" "vAdd_algebraMap_eq_valAdd(付値の橋、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.vAdd_algebraMap_eq_valAdd") 1 ]
+
 end ABC3.Skeleton.GenEll
