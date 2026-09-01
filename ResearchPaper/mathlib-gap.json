@@ -5448,5 +5448,15 @@
     "idioms": "★Ideal.ramificationIdx_le_finrank は S K L が**明示引数**(variable (S)、variable (K L))。★NoZeroSMulDivisors は Module.IsTorsionFree とは別クラスで、mathlib の iff は IsTorsionFree 側にしかないので、⟨fun {c x} hcx => …⟩ で直接作った。",
     "remaining": "★★★残る義務は **[M:L] < l** の 1 つ。M = L(H) の Galois 群は直線への作用で 𝔽_l^× に埋まる(第 1205 が σ Q = k • Q を与える)ので [M:L] ∣ l−1 < l である。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "lemma37StableLineCop20260902": {
+    "block": 1210,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★★★★★hdag を「実際に導ける形」に弱めた",
+    "goal": "Lemma 3.7 を安定直線の側で述べる(第 1152 の枠、節点 3)。",
+    "what": "★lemma_3_7_stableLine_cop(Found/GenEll/Lemma37StableLineCop.lean)—— 第 1166 の hdag に PrimeToLocalHeights を追加の仮説として持たせた形。",
+    "measured": "★★☆**第 1166 の hdag は導けない形だった**——Lemma 3.5 の不等式は l が局所高さと素であることを要るのに、hdag はそれを持っていなかった。☆使う側では (a)(b) のどちらの枝でも PrimeToLocalHeights が手元にある((a) は lemma_3_7_a_coprime、(b) は条件の定義そのもの)ので、**結論は第 1166 とまったく同じ**である。",
+    "consequence": "★★★これで残るギャップ hdag は**実際に導ける形**になった。☆その導出に残る義務は [M:L] < l の 1 つ(第 1209)。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
