@@ -395,7 +395,7 @@ theorem lemma_3_7 (D : EllModuliData) (KV : Set D.EllClass) (hKV : D.CompactlyBo
     refine Or.inl (D.mem_lcyclicExc _ eps KV E l hl hss hcyc hpr ?_)
     rcases hor with h | h
     · rw [hcA] at h
-      exact Or.inl h.1
+      exact Or.inl h
     · rw [hcB] at h
       exact Or.inr h.1
 

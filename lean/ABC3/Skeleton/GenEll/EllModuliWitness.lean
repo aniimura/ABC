@@ -87,8 +87,9 @@ def lcyclicExcJ (C eps : ℝ) (KV : Set ℂ) : Set ℂ :=
   {x : ℂ | ∃ (E : RealizedClass) (l : ℕ), x = E.cls ∧ Nat.Prime l ∧
     E.rep.toSSCurve.SemiStable ∧ HasLCyclicJ E.rep.toSSCurve l ∧
     E.rep.toSSCurve.PrimeToLocalHeights l ∧
-    ((100 * (E.degOfDefinition : ℝ)
-        * (faltingsHeightJ E.cls + C * (E.degOfDefinition : ℝ) ^ eps) ≤ (l : ℝ))
+    (((100 * (E.degOfDefinition : ℝ)
+          * (faltingsHeightJ E.cls + C * (E.degOfDefinition : ℝ) ^ eps) ≤ (l : ℝ))
+        ∧ E.rep.toSSCurve.HasMultRed)
       ∨ E.cls ∈ KV)}
 
 /-- ★★★`lcyclicExc` が `Galois`-finite であること——`Lemma 3.5` の (†) を受ける。

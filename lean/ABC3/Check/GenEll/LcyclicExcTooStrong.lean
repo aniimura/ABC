@@ -78,8 +78,9 @@ theorem lcyclic_classes_finite (D : EllModuliData) (C eps : ℝ) (KV : Set D.Ell
     ∃ S : Set D.EllClass, D.GaloisFinite S ∧
       ∀ (E : D.Curve) (l : ℕ), Nat.Prime l → D.SemiStable E →
         D.HasLCyclic E l → D.PrimeToLocalHeights E l →
-        ((100 * (D.degOfDefinition E : ℝ)
-            * (D.faltingsHeight (D.cls E) + C * (D.degOfDefinition E : ℝ) ^ eps) ≤ (l : ℝ))
+        (((100 * (D.degOfDefinition E : ℝ)
+              * (D.faltingsHeight (D.cls E) + C * (D.degOfDefinition E : ℝ) ^ eps) ≤ (l : ℝ))
+            ∧ D.HasMultRed E)
           ∨ D.cls E ∈ KV) →
         D.cls E ∈ S :=
   ⟨D.lcyclicExc C eps KV, D.galoisFinite_lcyclicExc C eps KV hKV,

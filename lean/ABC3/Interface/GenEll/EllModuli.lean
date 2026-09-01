@@ -209,8 +209,9 @@ structure EllModuliData extends TorsionGaloisRepData where
     GaloisFinite (lcyclicExc C eps KV)
   mem_lcyclicExc : ∀ (C eps : ℝ) (KV : Set EllClass) (E : Curve) (l : ℕ),
     Nat.Prime l → SemiStable E → HasLCyclic E l → PrimeToLocalHeights E l →
-    ((100 * (degOfDefinition E : ℝ)
-        * (faltingsHeight (cls E) + C * (degOfDefinition E : ℝ) ^ eps) ≤ (l : ℝ))
+    (((100 * (degOfDefinition E : ℝ)
+          * (faltingsHeight (cls E) + C * (degOfDefinition E : ℝ) ^ eps) ≤ (l : ℝ))
+        ∧ HasMultRed E)
       ∨ cls E ∈ KV) →
     cls E ∈ lcyclicExc C eps KV
   /-- ★★★★★**compactly bounded の中で乗法還元を持たない類の例外集合**。
