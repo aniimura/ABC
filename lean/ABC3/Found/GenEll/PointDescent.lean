@@ -72,6 +72,35 @@ theorem baseChange_map_intermediate {L Lbar : Type*} [Field L] [Field Lbar] [Alg
   congr 1
   exact (IsScalarTower.algebraMap_eq L M Lbar).symm
 
+/-! ## ★★★★★★曲線の等式に沿った点の輸送 -/
+
+/-- ★★★★★★**曲線の等式に沿って点を運ぶ**（第 1207）。
+
+☆`▸` を裸で使うと motive が通らないので、`cast` を 1 つの名前に閉じ込める。 -/
+def castPoint {F : Type*} [Field F] {C₁ C₂ : WeierstrassCurve F} (h : C₁ = C₂)
+    (P : C₁.toAffine.Point) : C₂.toAffine.Point :=
+  cast (congrArg (fun C : WeierstrassCurve F => C.toAffine.Point) h) P
+
+/-- ★★輸送は座標を変えない。 -/
+theorem pointCoords_castPoint {F : Type*} [Field F] {C₁ C₂ : WeierstrassCurve F}
+    (h : C₁ = C₂) (P : C₁.toAffine.Point) :
+    pointCoords (castPoint h P) = pointCoords P := by
+  subst h; rfl
+
+open scoped Classical in
+/-- ★★輸送は位数を変えない。 -/
+theorem addOrderOf_castPoint {F : Type*} [Field F] {C₁ C₂ : WeierstrassCurve F}
+    (h : C₁ = C₂) [C₁.IsElliptic] [C₂.IsElliptic] (P : C₁.toAffine.Point) :
+    addOrderOf (castPoint h P) = addOrderOf P := by
+  subst h; rfl
+
+open scoped Classical in
+/-- ★★輸送は自然数倍と可換。 -/
+theorem castPoint_nsmul {F : Type*} [Field F] {C₁ C₂ : WeierstrassCurve F}
+    (h : C₁ = C₂) [C₁.IsElliptic] [C₂.IsElliptic] (k : ℕ) (P : C₁.toAffine.Point) :
+    castPoint h (k • P) = k • castPoint h P := by
+  subst h; rfl
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def exists_rhPoint_eq.src : Source :=
@@ -86,6 +115,11 @@ def exists_rhPoint_eq.needs : List ProofObligation :=
        "対で使うと、第 1205 が作った `L̄` 上の位数 `l` の点が" ++
        "**有限拡大 `L''` の上で有理**になり、第 1199 に入る。" ++
        "★位数は `addOrderOf_rhPoint`（在庫）で移る。") 2 ]
+
+def castPoint.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(曲線の等式に沿って点を運ぶ。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def baseChange_map_intermediate.src : Source :=
   { paper := "GenEll", pdfPage := 17,

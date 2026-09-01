@@ -5417,5 +5417,15 @@
     "consequence": "★★★これが L̄ の点を有限拡大へ降ろす**原始関数**である —— 第 1195(有限個の座標は有限次拡大に入る)と対で使う。",
     "remaining": "☆残るのは M を取って cast を潰す組み上げだけである。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "pointDescentFinite20260902": {
+    "block": 1207,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★★★★★★★★★L̄ の位数 l の点は有限次拡大で有理になる——L(H) の道が繋がった",
+    "goal": "第 1205(HasLCyclicJ から L̄ 上の位数 l の点)と第 1199(Lemma 3.5 は有限拡大で足りる)を繋ぐ。",
+    "what": "★exists_finite_point_descent(Found/GenEll/PointDescentFinite.lean)—— {k • Q : k < l} の座標が生成する中間体 M は L 上有限次であり(第 1195)、Q の座標は M に入るので Q は W ⊗ M の点 Q' から来る(第 1206)。位数は rhPoint が単射な加法写像だから移る。",
+    "measured": "★★★結論の座標集合の等式は、第 1197(veluQuotientFull_descends_to_intermediate)が受け取る hT の形そのものである。☆在庫の image_pointCoords_rhPoint_nsmul がそのまま使えた。",
+    "idioms": "★★☆**↥M(IntermediateField)の DecidableEq は Subtype.instDecidableEq が横取りする**——open scoped Classical の propDecidable は優先度 low なので、在庫の補題(propDecidable で書かれている)と群構造が別物になり rw が落ちる。命題の中に letI を入れて直した。第 1151 の HasLCyclicVelu と同じ穴。診断は set_option pp.explicit true の example で行った。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

@@ -1385,6 +1385,7 @@ import ABC3.Found.GaloisRep.TateKerLevel
 import ABC3.Found.GenEll.PadicRedVec
 import ABC3.Found.GenEll.LCyclicPoint
 import ABC3.Found.GenEll.PointDescent
+import ABC3.Found.GenEll.PointDescentFinite
 import ABC3.Found.GaloisRep.Lemma35StableLine
 import ABC3.Found.GaloisRep.Lemma37CondBFull
 import ABC3.Found.GenEll.Lemma37Full

@@ -2914,3 +2914,28 @@ because it depends on 'PadicInt.instCommRing'`。
 
 **直し方**: 当てたい項を明示する —— `rw [e.apply_symm_apply u]`。
 ★`rw` は「最初の一致でメタ変数を決め、その具体形をすべて書き換える」規則である。
+
+## `↥M`（`IntermediateField`）の `DecidableEq` は `Subtype` が横取りする（第 1207）
+
+**失敗形**: `M : IntermediateField L L̄` として
+`rw [rhPoint_nsmul (algebraMap ↥M L̄) (W.baseChange ↥M) Q' l]` が
+「パターンが見つからない」で落ちる。`pp.explicit` で見ると、
+在庫側は `Affine.Point.instAddCommGroup … (fun a b ↦ Classical.propDecidable (a = b))`、
+こちら側は `Subtype.instDecidableEq …` 由来で、**群構造が別物**になっている。
+
+**理由**: `open scoped Classical` の `Classical.propDecidable` は優先度 low。
+`↥M` は `Subtype` なので `Subtype.instDecidableEq`（通常優先度）が先に当たる。
+
+**直し方**: 命題の**中**で `letI` を入れる（`M` が ∃ で束縛されていても書ける）:
+
+```
+∃ M : IntermediateField L Lbar, FiniteDimensional L M ∧
+  letI : DecidableEq (M : Type) := fun a b => Classical.propDecidable (a = b)
+  ∃ Q' : (W.baseChange M).toAffine.Point, …
+```
+
+証明の側でも `obtain` 直後に同じ `letI` を置く。★第 1151 の
+`HasLCyclicVelu` と同じ穴である（`E.fld` が `↥E.K` だった）。
+
+**診断のしかた**: `set_option pp.explicit true in` を付けた `example` で
+同じ `rw` を書き、パターンと目標の**インスタンス項**を並べて見る。
