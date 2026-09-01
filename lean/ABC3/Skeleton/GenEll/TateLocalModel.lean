@@ -9,6 +9,7 @@ import ABC3.Found.GenEll.VeluImage
 import ABC3.Found.GaloisRep.SplitAtCompletion
 import ABC3.Meta.Claim
 import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
+import ABC3.Skeleton.GenEll.TateIsogeny
 
 /-!
 # `Lemma 3.5` に残る 2 つ —— **局所モデルの完備化への移行**（`Skeleton`）
@@ -238,6 +239,82 @@ theorem isMuAtBadPrimes_of_veluQuotient {L : Type} [Field L] [NumberField L]
     (hcop : ∀ p : HeightOneSpectrum (𝓞 L), jExp p E < 0 → ¬ ((l : ℤ) ∣ jExp p E)) :
     IsMuAtBadPrimes E E' l := by
   sorry
+
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★第 1005 —— `IsMuAtBadPrimes` まで組む
+
+★第 1004 で悪い素点 1 個あたりの局所入力は `hmin`・`h`・`hlu` の 3 本になった。
+☆`hmin` は第 954（半安定性から `C`・`hC`・`hc4ne`・`hc4`）＋第 973 で**自前で作れる**。
+
+★★したがって `IsMuAtBadPrimes` は **残り 2 本**を仮説に置けば閉じる:
+
+* `hlu`——`l` が `p` の完備化の整数環で単元（すなわち `p ∤ l`）
+* `hsplit`——極小化した `C • E` が完備化で**分裂**乗法還元をもつこと
+
+☆後者は第 976＋993 が「分裂または捻りで分裂」まで詰めており、
+**`p ∣ 2` で非分裂の場合だけ**が不分岐 2 次拡大（943＋944）待ちである。 -/
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★**[GenEll] `IsMuAtBadPrimes`——
+残る仮説は `p ∤ l` と分裂性の 2 本**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 1005）**——第 944 から始まった連鎖の到達点である。
+☆`hsplit` と `hlu` を仮説に置けば `Lemma 3.5` の残る節点はこれで閉じる。 -/
+theorem isMuAtBadPrimes_of_veluQuotient_of_split {L : Type} [Field L] [NumberField L]
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
+    (hE' : E' = veluQuotientFull E (((range l).erase 0).image
+      (fun k : ℕ => pointCoords (k • Q))))
+    (hssE : ∀ p, SemistableAt p E) (hssE' : ∀ p, SemistableAt p E')
+    (hcop : ∀ p : HeightOneSpectrum (𝓞 L), jExp p E < 0 → ¬ ((l : ℤ) ∣ jExp p E))
+    (hlu : ∀ p : HeightOneSpectrum (𝓞 L), IsUnit ((l : (p.adicCompletionIntegers L))))
+    (hsplit : ∀ (p : HeightOneSpectrum (𝓞 L)), jExp p E < 0 →
+      ∀ (C : WeierstrassCurve.VariableChange L)
+        (_hmin : WeierstrassCurve.IsMinimal (p.adicCompletionIntegers L)
+          ((C • E).baseChange (p.adicCompletion L))),
+        ((C • E).baseChange (p.adicCompletion L)).HasSplitMultiplicativeReduction
+          (p.adicCompletionIntegers L)) :
+    IsMuAtBadPrimes E E' l := by
+  intro p hbad
+  obtain ⟨C, hC, hc4ne, hc4⟩ :=
+    ABC3.Found.GaloisRep.exists_minimal_c4_unit_of_jExp_neg p E (hssE p) hbad
+  haveI hCE : ((C • E).baseChange (p.adicCompletion L)).IsElliptic := by
+    rw [WeierstrassCurve.isElliptic_iff, isUnit_iff_ne_zero]
+    show ((C • E).map (algebraMap L (p.adicCompletion L))).Δ ≠ 0
+    rw [WeierstrassCurve.map_Δ]
+    exact (map_ne_zero_iff _ (algebraMap L (p.adicCompletion L)).injective).2
+      (variableChange_Delta_ne_zero E E.isUnit_Δ.ne_zero C)
+  haveI hCE' : ((C • E').baseChange (p.adicCompletion L)).IsElliptic := by
+    rw [WeierstrassCurve.isElliptic_iff, isUnit_iff_ne_zero]
+    show ((C • E').map (algebraMap L (p.adicCompletion L))).Δ ≠ 0
+    rw [WeierstrassCurve.map_Δ]
+    exact (map_ne_zero_iff _ (algebraMap L (p.adicCompletion L)).injective).2
+      (variableChange_Delta_ne_zero E' E'.isUnit_Δ.ne_zero C)
+  have hp := ABC3.Found.GaloisRep.valuation_algebraMap_adicCompletion L p
+  have hmin := ABC3.Found.GaloisRep.isMinimal_baseChange_at_bad_prime p hp E C hC hc4ne hc4
+  exact minDeltaExp_eq_mul_at_bad_prime_full p E E' (hssE p) (hssE' p) hbad hl hodd
+    (hcop p hbad) C hmin (hsplit p hbad C hmin) (hlu p) hQ hE'
+
+def isMuAtBadPrimes_of_veluQuotient_of_split.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(IsMuAtBadPrimes——残る仮説は p ∤ l と分裂性の 2 本)",
+    sectionId := "genell-lemma-3-5" }
+
+def isMuAtBadPrimes_of_veluQuotient_of_split.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "minDeltaExp_eq_mul_at_bad_prime_full(第 1004、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.minDeltaExp_eq_mul_at_bad_prime_full") 1,
+    .citation "[ABC3]" "exists_minimal_c4_unit_of_jExp_neg(C・hC・hc4、第 954、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.exists_minimal_c4_unit_of_jExp_neg") 1,
+    .citation "[ABC3]" "isMinimal_baseChange_at_bad_prime(hmin、第 973、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.isMinimal_baseChange_at_bad_prime") 1,
+    .implicitStep
+      ("★★★★**2026-09-01（第 1005）の測定**——残るのは 2 本だけである。" ++
+       "☆`hlu` は `p ∤ l`。★`hsplit` は第 976＋993 が" ++
+       "「分裂または捻りで分裂」まで詰めており、" ++
+       "`p ∣ 2` で非分裂の場合だけが不分岐 2 次拡大（943＋944）待ちである") 2 ]
 
 def IsMuAtBadPrimes.src : Source :=
   { paper := "GenEll", pdfPage := 17,
