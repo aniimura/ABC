@@ -6,6 +6,7 @@ import ABC3.Found.GaloisRep.AdicCompleteIntegers
 import ABC3.Found.GaloisRep.HtFinJ
 import ABC3.Found.GaloisRep.SemistableFin
 import ABC3.Found.GenEll.VeluImage
+import ABC3.Found.GaloisRep.SplitAtCompletion
 import ABC3.Meta.Claim
 import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
 
@@ -291,5 +292,72 @@ def isMuAtBadPrimes_of_veluQuotient.needs : List ProofObligation :=
        "（第 981 により体の側でやればよい。`p ∣ 2` は第 979 の測定）、" ++
        "(ii) 捧り `d` を `Lv` の整数環から `L` に降ろす段、" ++
        "(iii) 972 に並べて `minDeltaExp_variableChange` で `E`・`E′` に戻す段。") 3 ]
+
+/-! ## ★★★★★★★★★★★★★★★★★★★★第 993 —— 悪い素点での分裂／捻りの二者択一 -/
+
+open Polynomial in
+/-- ★★★★★★★★★★★★★★★★★★★★**[GenEll] 悪い素点では、完備化で分裂乗法還元をもつか、
+ある捻りで 2 次式が分裂するかのどちらかである**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 993）**——分裂性の連鎖の終点である:
+
+    976（乗法還元）→ 983（剰余体で c₄ ≠ 0）→ 981（整モデルの IsCharNeTwoNF）
+    → 989（剰余体の有限性・内製）→ 982（二者択一）→ 992（完備化で当てる）
+    → **993（HasSplitMultiplicativeReduction に流す）**
+
+☆捻りの側は 990 で `d` を `𝓞 L` に降ろし、929 で `Δ_min` を降ろす。 -/
+theorem hasSplit_or_twist_at_bad_prime {L : Type} [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L))
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation (p.adicCompletion L)
+        (IsDiscreteValuationRing.maximalIdeal (p.adicCompletionIntegers L)))
+        (algebraMap L (p.adicCompletion L) x) = (HeightOneSpectrum.valuation L p) x)
+    (W : WeierstrassCurve L) [WeierstrassCurve.IsIntegral (primeSubring p) W]
+    (ha1 : W.a₁ = 0) (ha3 : W.a₃ = 0)
+    (hΔ : W.Δ ≠ 0) (hc4ne : W.c₄ ≠ 0)
+    (hc4 : valAdd p (Units.mk0 W.c₄ hc4ne) = 0)
+    (hΔpos : 0 < valAdd p (Units.mk0 W.Δ hΔ))
+    [WeierstrassCurve.IsMinimal (p.adicCompletionIntegers L)
+      (W.baseChange (p.adicCompletion L))]
+    [WeierstrassCurve.HasMultiplicativeReduction (p.adicCompletionIntegers L)
+      (W.baseChange (p.adicCompletion L))] :
+    WeierstrassCurve.HasSplitMultiplicativeReduction (p.adicCompletionIntegers L)
+        (W.baseChange (p.adicCompletion L))
+      ∨ ∃ d : (p.adicCompletionIntegers L),
+        (algebraMap _ (IsLocalRing.ResidueField (p.adicCompletionIntegers L))) d ≠ 0
+        ∧ Splits (Polynomial.map
+          (algebraMap _ (IsLocalRing.ResidueField (p.adicCompletionIntegers L)))
+          (C (quadTwist (integralModel (p.adicCompletionIntegers L)
+                (W.baseChange (p.adicCompletion L))) d).c₄ * X ^ 2
+            + C ((quadTwist (integralModel (p.adicCompletionIntegers L)
+                  (W.baseChange (p.adicCompletion L))) d).a₁
+                * (quadTwist (integralModel (p.adicCompletionIntegers L)
+                  (W.baseChange (p.adicCompletion L))) d).c₄) * X
+            - C (54 * (quadTwist (integralModel (p.adicCompletionIntegers L)
+                    (W.baseChange (p.adicCompletion L))) d).b₆
+                - 3 * (quadTwist (integralModel (p.adicCompletionIntegers L)
+                      (W.baseChange (p.adicCompletion L))) d).b₂
+                    * (quadTwist (integralModel (p.adicCompletionIntegers L)
+                      (W.baseChange (p.adicCompletion L))) d).b₄
+                + (quadTwist (integralModel (p.adicCompletionIntegers L)
+                      (W.baseChange (p.adicCompletion L))) d).a₂
+                    * (quadTwist (integralModel (p.adicCompletionIntegers L)
+                      (W.baseChange (p.adicCompletion L))) d).c₄))) := by
+  rcases splits_or_twist_at_completion L p W ha1 ha3 with hs | ⟨d, hd, hs⟩
+  · exact Or.inl (hasSplitMultiplicativeReduction_baseChange p W hp hΔ hc4ne hc4 hΔpos hs)
+  · exact Or.inr ⟨d, hd, hs⟩
+
+def hasSplit_or_twist_at_bad_prime.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(悪い素点での分裂／捻りの二者択一)",
+    sectionId := "genell-lemma-3-5" }
+
+def hasSplit_or_twist_at_bad_prime.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "splits_or_twist_at_completion(完備化での二者択一、第 992、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.splits_or_twist_at_completion") 1,
+    .citation "[ABC3]" "hasSplitMultiplicativeReduction_baseChange(Splits から分裂還元へ、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.hasSplitMultiplicativeReduction_baseChange") 1 ]
 
 end ABC3.Skeleton.GenEll
