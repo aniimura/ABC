@@ -5303,5 +5303,15 @@
     "what": "★exists_finite_subextension(Found/GenEll/VeluDescent.lean)—— S の座標で生成する中間体 L(S) は L 上有限次で、S の座標はすべてその中にある。☆L̄ が L 上代数的なので IntermediateField.finiteDimensional_adjoin がそのまま効く。",
     "why": "☆これが第 1194 の道の第 1 段(L'' ≔ L(H) を取る)である。★残るのは段 2(E' ⊗ L'' = veluQuotientFull (E ⊗ L'') (image (k•Q)) の具体化)だけ——段 3 は第 1192、段 5 は第 1185、段 4 は在庫。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "mapInjective20260902": {
+    "block": 1196,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★単射な環準同型での底変換は曲線の等式を落とす",
+    "goal": "l-巡回の 2 つの読みを繋ぐ(第 1152 の枠、節点 2d-1、第 1194 の道の段 2)。",
+    "what": "★weierstrassCurve_map_injective(Found/GenEll/VeluDescent.lean)—— W.map f = W'.map f かつ f が単射なら W = W'。",
+    "why": "☆これが L̄ での等式を中間体 M へ**降ろす**ための一行である。★第 1194 の道の段 2(E' ⊗ L'' = veluQuotientFull (E ⊗ L'') …)は、両辺を L̄ へ送ると第 1154(node 1)で一致するので、本補題で M の上の等式に落ちる。",
+    "frame": "☆第 1194 の道の 5 段: 段 1 第 1195、段 2 第 1196 の部品 ＋ 組み立て、段 3 第 1192、段 4 在庫、段 5 第 1185。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

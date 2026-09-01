@@ -198,6 +198,26 @@ theorem exists_finite_subextension (S : Finset (Lbar × Lbar)) :
   · exact Finset.mem_coe.2 (Finset.mem_image.2 ⟨z, hz, rfl⟩)
   · exact Finset.mem_coe.2 (Finset.mem_image.2 ⟨z, hz, rfl⟩)
 
+/-! ## ★★★★★★★★曲線の底変換は単射 -/
+
+/-- ★★★★★★★★**単射な環準同型での底変換は曲線の等式を落とす**——★**無条件**（第 1196）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`W.map f = W'.map f` かつ `f` が単射なら `W = W'`。
+★★これが `L̄` での等式を中間体 `M` へ**降ろす**ための一行であり、
+第 1194 の道の**段 2**（`E' ⊗ L'' = veluQuotientFull (E ⊗ L'') …`）で使う。 -/
+theorem weierstrassCurve_map_injective {R A : Type*} [CommRing R] [CommRing A] (f : R →+* A)
+    (hf : Function.Injective f) {W W' : WeierstrassCurve R} (h : W.map f = W'.map f) :
+    W = W' := by
+  refine WeierstrassCurve.ext ?_ ?_ ?_ ?_ ?_
+  · exact hf (congrArg WeierstrassCurve.a₁ h)
+  · exact hf (congrArg WeierstrassCurve.a₂ h)
+  · exact hf (congrArg WeierstrassCurve.a₃ h)
+  · exact hf (congrArg WeierstrassCurve.a₄ h)
+  · exact hf (congrArg WeierstrassCurve.a₆ h)
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def mem_range_of_fixed.src : ABC3.Meta.Source :=
@@ -212,6 +232,11 @@ def mem_range_of_fixed.needs : List ABC3.Meta.ProofObligation :=
 def fixesCoeffs_baseChange.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(底変換した曲線の係数はどの σ でも固定される。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def weierstrassCurve_map_injective.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(単射な環準同型での底変換は曲線の等式を落とす。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 def exists_finite_subextension.src : ABC3.Meta.Source :=
