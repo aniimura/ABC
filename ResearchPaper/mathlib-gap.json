@@ -6216,5 +6216,15 @@
   "consequence": "★★★これで **`tateSigmaAct` の幂単性・非自明性（第 1276）は本物の Galois 作用の幂単性・非自明性**になった。☆第 1275 で見つけた欠陥の最終的な埋め合わせである。",
   "remaining": "★II 側に残るのは節点 8（悪い素点での組み立て）だけ:`L′ ≔ L(ζ_l, E[l], √d)` を取り、`P.adicCompletion L′` で `mkTateSetup`・`dvrTatePhiAddEquiv`・`exists_tate_model` を回し、局所から大域へ運ぶ（第 1271・1270）。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "localToGlobalPoint20260902": {
+  "block": 1287,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★局所の 2 条件は大域へ降りる（節点 7 の完成形）",
+  "goal": "局所の σ の幂単性・非自明性を大域の σ のそれにする。",
+  "proved": "☆`exists_galPoint_conditions_global`（`Found/GenEll/LocalToGlobalPoint.lean`、第 1287）。",
+  "route": "★第 1271（代数閉体の埋め込みで `E[n]` は全単射、2 条件は降りる）を`L̄ ↪ M`（`IsAlgClosed.lift`）と `restrictLocalHom_commutes`（第 1167）に当てるだけ。",
+  "consequence": "★★★これで「Tate 一意化で得た局所の `σ`」から `alpha_mem_map_of_galTate`（第 1237）の `h2`・`h1` が出る道が繋がった——残るのは第 1270（`E[l]` → `T_l E`、済）と節点 8（悪い素点での組み立て）だけである。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
