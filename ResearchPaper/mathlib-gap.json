@@ -4774,5 +4774,18 @@
     },
     "remaining": "☆残るのは節点 3(exists_veluW_two——l = 2 では veluU = 0)と節点 4(Ψ₂Sq の橋)。",
     "gate": "lake build ABC3 成功(6268 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
+  },
+  "c4c6DFNoHodd20260901": {
+    "block": 1147,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★★★c₄・c₆ の分母なし版から hodd が外れた——残る hodd は 1 か所",
+    "goal": "Lemma 3.5 から l ≠ 2 を外す(l = 2 の枝の枠、進捗 2/4 → 3/4)。",
+    "what": [
+      "★第 1146 の c4_velu_tate_any / c6_velu_tate_any を使って、c4_velu_tateDF / c6_velu_tateDF(第 1129-1130)から hodd が外れた。hodd は tateDXpair_C_ne_zero(α ≠ −1)のためだけに要っていた。",
+      "★★実測: _K の連鎖(lemma_3_5_velu_K まで)で hodd を消費するのは **hfin_of_veluQuotientFull の preΨ の連鎖だけ**になった(節点 4)。",
+      "☆exists_veluW_of_inv は _K の連鎖に現れないので、枠の節点 3(exists_veluW_two)は**不要**である。"
+    ],
+    "frame": "進捗 3/4。節点 1(第 1143-1144)・節点 2(第 1145-1146)・節点 3(不要と実測)。残るのは節点 4(Ψ₂Sq の橋)だけ。",
+    "gate": "lake build ABC3 成功(6268 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
   }
 }

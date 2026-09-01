@@ -53,16 +53,25 @@ import ABC3.Meta.Claim
 ★これは第 1128 と同じ「万有な環を経由する」型であり、道具（`map_*`・`evalAdicMapHom`）は
 すべて第 1125-1127 で建ててある。
 
-## ★★★★★★★★★★残り 4 節点（進捗枠 **2 / 4**）
+## ★★★★★★★★★★残り 4 節点（進捗枠 **3 / 4**）
 
 | # | 節点 | 内容 | 重み |
 |---|---|---|---|
 | 1 | `veluV2_eq_tateDYpair_any` | `hDX` を取らない `DY = veluV2` **★第 1143-1144 で証明済み** | 10 |
 | 2 | `c4_velu_tate_any` / `c6_velu_tate_any` | `hDX` を取らない `c₄`・`c₆` の恒等式 **★第 1145-1146 で証明済み** | 8 |
-| 3 | `exists_veluW_two` | `l = 2` では `veluU = 0` なので `w = v·x` | 6 |
+| 3 | ~~`exists_veluW_two`~~ | **★不要と実測（第 1147）**——`_K` の連鎖は `exists_veluW` を使わない | 6 |
 | 4 | `psi2Sq_eval_eq_zero` | `l = 2` の捩れ点と多項式の橋（`Ψ₂Sq`） | 8 |
 
 ☆総重み 32。★これが閉じれば `Lemma 3.5` は**原典どおりの仮説だけ**になる。
+
+### ★★★★★★★★第 1147 の実測——`hodd` の残りは 1 か所
+
+★第 1146 で `c4_velu_tate_any`・`c6_velu_tate_any` が出たので、
+`c4_velu_tateDF`・`c6_velu_tateDF`（第 1129-1130）も **`hodd` なし**になった。
+
+☆`_K` の連鎖（`lemma_3_5_velu_K` まで）で `hodd` を消費するのは
+**`hfin_of_veluQuotientFull` の `preΨ` の連鎖だけ**になった（節点 4）。
+★`exists_veluW_of_inv` は `_K` の連鎖に現れないので節点 3 は不要である。
 -/
 
 namespace ABC3.Skeleton.GenEll

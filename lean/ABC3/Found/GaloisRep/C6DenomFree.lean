@@ -177,8 +177,7 @@ end Lhs
 
 set_option maxHeartbeats 2000000 in
 /-- ★★★★★★★★★★**段 1**——体 `K` の上の `PowerSeries K` での `c₆` の分母なし恒等式。 -/
-theorem c6_velu_tateDF_field {K : Type} [Field K] [CharZero K] {l : ℕ} (hl : l.Prime)
-    (hodd : l ≠ 2) {ζ : K} (hζ : IsPrimitiveRoot ζ l) :
+theorem c6_velu_tateDF_field {K : Type} [Field K] [CharZero K] {l : ℕ} (hl : l.Prime) {ζ : K} (hζ : IsPrimitiveRoot ζ l) :
     (l : PowerSeries K) ^ 8
         * (tateCurveAt (PowerSeries.X : PowerSeries K)
             (Ideal.mem_span_singleton_self _)).c₆
@@ -258,20 +257,7 @@ theorem c6_velu_tateDF_field {K : Type} [Field K] [CharZero K] {l : ℕ} (hl : l
     have hcc := congrArg (PowerSeries.constantCoeff (R := K)) h
     rw [map_ofNat, map_zero] at hcc
     exact two_ne_zero hcc
-  have hDX : ∀ i ∈ (range l).erase 0,
-      tateDXpair ((PowerSeries.C ζ : PowerSeries K) ^ i)
-        (PowerSeries.X * ((PowerSeries.C ζ : PowerSeries K) ^ i) ^ (l - 1))
-        PowerSeries.X hX ≠ 0 := by
-    intro i hi
-    rw [← map_pow]
-    refine tateDXpair_C_ne_zero (pow_ne_zero _ hζ0) ?_ (hne i hi) ?_
-    · intro h
-      have hm1 : ζ ^ i = -1 := by linear_combination h
-      have hpow : ((-1 : K)) ^ l = 1 := by rw [← hm1, hpowK i]
-      rw [(hl.odd_of_ne_two hodd).neg_one_pow] at hpow
-      exact absurd hpow (by norm_num)
-    · exact Ideal.mul_mem_right _ _ hX
-  have hc6 := c6_velu_tate hl hζPS hu PowerSeries.X hX hXl h2 hDX
+  have hc6 := c6_velu_tate_any hl hζPS hu PowerSeries.X hX hXl h2
   -- ★`veluV2` の和
   have hkeyV : ∑ i ∈ (range l).erase 0,
       veluV2DF l (tateCurveAt (PowerSeries.X : PowerSeries K) hX)
@@ -344,22 +330,21 @@ theorem c6_velu_tateDF_field {K : Type} [Field K] [CharZero K] {l : ℕ} (hl : l
   linear_combination (l : PowerSeries K) ^ 8 * hc6
 
 /-- ☆段 1 を `c6DFlhs` の形に畳んだもの。 -/
-theorem c6DFlhs_field {K : Type} [Field K] [CharZero K] {l : ℕ} (hl : l.Prime)
-    (hodd : l ≠ 2) {ζ : K} (hζ : IsPrimitiveRoot ζ l) :
+theorem c6DFlhs_field {K : Type} [Field K] [CharZero K] {l : ℕ} (hl : l.Prime) {ζ : K} (hζ : IsPrimitiveRoot ζ l) :
     c6DFlhs l (PowerSeries.C ζ : PowerSeries K) PowerSeries.X
         (Ideal.mem_span_singleton_self _)
       = (l : PowerSeries K) ^ 14
           * (tateCurveAt ((PowerSeries.X : PowerSeries K) ^ l)
               (Ideal.pow_mem_of_mem _ (Ideal.mem_span_singleton_self _) l hl.pos)).c₆ := by
   rw [c6DFlhs]
-  exact c6_velu_tateDF_field hl hodd hζ
+  exact c6_velu_tateDF_field hl hζ
 
 /-! ## ★★★★★★★★段 2 —— 整域の `PowerSeries` へ降ろす -/
 
 set_option maxHeartbeats 2000000 in
 /-- ★★★★★★★★★★**段 2**——`A` が標数 0 の整域なら `PowerSeries A` でも成り立つ。 -/
 theorem c6DFlhs_powerSeries {A : Type} [CommRing A] [IsDomain A] [CharZero A] {l : ℕ}
-    (hl : l.Prime) (hodd : l ≠ 2) {ζ : A} (hζ : IsPrimitiveRoot ζ l) :
+    (hl : l.Prime) {ζ : A} (hζ : IsPrimitiveRoot ζ l) :
     c6DFlhs l (PowerSeries.C ζ : PowerSeries A) PowerSeries.X
         (Ideal.mem_span_singleton_self _)
       = (l : PowerSeries A) ^ 14
@@ -382,7 +367,7 @@ theorem c6DFlhs_powerSeries {A : Type} [CommRing A] [IsDomain A] [CharZero A] {l
   rw [map_c6DFlhs _ hcont _ _ _ _ hwu, map_mul, map_pow, map_natCast,
     ← WeierstrassCurve.map_c₆, map_tateCurveAt _ hcont]
   simp only [PowerSeries.map_C, PowerSeries.map_X, map_pow]
-  exact c6DFlhs_field hl hodd (hζ.map_of_injective hψ)
+  exact c6DFlhs_field hl (hζ.map_of_injective hψ)
 
 /-! ## ★★★★★★★★★★★★段 3 —— 完備環 `R` へ特殊化する -/
 
@@ -396,7 +381,7 @@ set_option maxHeartbeats 2000000 in
 ★★**`IsUnit (1 − ζ^i)` も `hDX` も仮説に置いていない**——
 `p ∣ l` の悪い素点でもそのまま意味を持ち、そこで成り立つ。 -/
 theorem c6_velu_tateDF {R : Type} [CommRing R] [IsDomain R] [CharZero R] {I : Ideal R}
-    [IsAdicComplete I R] {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2) {ζ : R}
+    [IsAdicComplete I R] {l : ℕ} (hl : l.Prime) {ζ : R}
     (hζ : IsPrimitiveRoot ζ l) (q : R) (hq : q ∈ I) (hql : q ^ l ∈ I) :
     c6DFlhs l ζ q hq = (l : R) ^ 14 * (tateCurveAt (q ^ l) hql).c₆ := by
   have hX : (PowerSeries.X : PowerSeries R)
@@ -409,7 +394,7 @@ theorem c6_velu_tateDF {R : Type} [CommRing R] [IsDomain R] [CharZero R] {I : Id
       f ∈ (Ideal.span {(PowerSeries.X : PowerSeries R)}) ^ n →
       evalAdicMapHom (RingHom.id R) q hq f ∈ I ^ n :=
     fun n f hf => evalAdicMapHom_mem_pow (RingHom.id R) q hq n f hf
-  have hps := c6DFlhs_powerSeries (A := R) hl hodd hζ
+  have hps := c6DFlhs_powerSeries (A := R) hl hζ
   have hmain := congrArg (evalAdicMapHom (RingHom.id R) q hq) hps
   rw [map_c6DFlhs _ hev _ _ _ _ hwu, map_mul, map_pow, map_natCast,
     ← WeierstrassCurve.map_c₆, map_tateCurveAt _ hev] at hmain

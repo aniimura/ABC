@@ -87,11 +87,11 @@ theorem c4_c6_veluCurve_tate_field {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2) {ζ
     have hR : ((l : ℕ) : R) = 0 := hinj (by rw [map_natCast, h, map_zero])
     exact (Nat.cast_ne_zero.2 hl.pos.ne' : ((l : ℕ) : R) ≠ 0) hR
   have h4 : (l : R) ^ 6 * (tateCurveAt q hq).c₄ + 240 * veluSV l ζ q hq
-      = (l : R) ^ 10 * (tateCurveAt (q ^ l) hql).c₄ := c4_velu_tateDF hl hodd hζ q hq hql
+      = (l : R) ^ 10 * (tateCurveAt (q ^ l) hql).c₄ := c4_velu_tateDF hl hζ q hq hql
   have h6 : (l : R) ^ 8 * (tateCurveAt q hq).c₆ + 504 * (l : R) ^ 2 * veluSV l ζ q hq
         + 3024 * veluSW l ζ q hq
       = (l : R) ^ 14 * (tateCurveAt (q ^ l) hql).c₆ := by
-    have h := c6_velu_tateDF hl hodd hζ q hq hql
+    have h := c6_velu_tateDF hl hζ q hq hql
     rw [c6DFlhs] at h
     exact h
   have h4K := congrArg (algebraMap R K) h4

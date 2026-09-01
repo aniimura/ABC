@@ -116,8 +116,8 @@ theorem exists_vw_tate_mu_field {R : Type} [CommRing R] [IsDomain R] [CharZero R
     intro h
     have hR : (2 : R) = 0 := hinj (by rw [map_ofNat, h, map_zero])
     exact two_ne_zero hR
-  have h4 := c4_velu_tateDF hl hodd hζ q hq hql
-  have h6 := c6_velu_tateDF hl hodd hζ q hq hql
+  have h4 := c4_velu_tateDF hl hζ q hq hql
+  have h6 := c6_velu_tateDF hl hζ q hq hql
   rw [c6DFlhs] at h6
   set SV : R := ∑ i ∈ (range l).erase 0,
       veluV2DF l (tateCurveAt q hq)

@@ -2,7 +2,7 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.VeluDYDenomFree
-import ABC3.Skeleton.GenEll.TateIsogeny
+import ABC3.Skeleton.GenEll.TateIsogenyAny
 import ABC3.Meta.Claim
 
 /-!
@@ -61,8 +61,7 @@ set_option maxHeartbeats 2000000 in
 > parameter qE of E satisfies the relation qE = qEl ; in particular, we have
 
 ☆`1 − C ζ^i` も `(l)` も単元なので、`c4_velu_tate` がそのまま効く。 -/
-theorem c4_velu_tateDF_field {K : Type} [Field K] [CharZero K] {l : ℕ} (hl : l.Prime)
-    (hodd : l ≠ 2) {ζ : K} (hζ : IsPrimitiveRoot ζ l) :
+theorem c4_velu_tateDF_field {K : Type} [Field K] [CharZero K] {l : ℕ} (hl : l.Prime) {ζ : K} (hζ : IsPrimitiveRoot ζ l) :
     (l : PowerSeries K) ^ 6
         * (tateCurveAt (PowerSeries.X : PowerSeries K)
             (Ideal.mem_span_singleton_self _)).c₄
@@ -121,20 +120,7 @@ theorem c4_velu_tateDF_field {K : Type} [Field K] [CharZero K] {l : ℕ} (hl : l
     have hcc := congrArg (PowerSeries.constantCoeff (R := K)) h
     rw [map_ofNat, map_zero] at hcc
     exact two_ne_zero hcc
-  have hDX : ∀ i ∈ (range l).erase 0,
-      tateDXpair ((PowerSeries.C ζ : PowerSeries K) ^ i)
-        (PowerSeries.X * ((PowerSeries.C ζ : PowerSeries K) ^ i) ^ (l - 1))
-        PowerSeries.X hX ≠ 0 := by
-    intro i hi
-    rw [← map_pow]
-    refine tateDXpair_C_ne_zero (pow_ne_zero _ hζ0) ?_ (hne i hi) ?_
-    · intro h
-      have hm1 : ζ ^ i = -1 := by linear_combination h
-      have hpow : ((-1 : K)) ^ l = 1 := by rw [← hm1, hpowK i]
-      rw [(hl.odd_of_ne_two hodd).neg_one_pow] at hpow
-      exact absurd hpow (by norm_num)
-    · exact Ideal.mul_mem_right _ _ hX
-  have hc4 := c4_velu_tate hl hζPS hlu hu PowerSeries.X hX hXl h2 hDX
+  have hc4 := c4_velu_tate_any hl hζPS hlu hu PowerSeries.X hX hXl h2
   have hkey : ∑ i ∈ (range l).erase 0,
       veluV2DF l (tateCurveAt (PowerSeries.X : PowerSeries K) hX)
         (tateXpairDF l ((PowerSeries.C ζ : PowerSeries K) ^ i)
@@ -160,7 +146,7 @@ theorem c4_velu_tateDF_field {K : Type} [Field K] [CharZero K] {l : ℕ} (hl : l
 set_option maxHeartbeats 2000000 in
 /-- ★★★★★★★★★★**段 2**——`A` が標数 0 の整域なら `PowerSeries A` でも成り立つ。 -/
 theorem c4_velu_tateDF_powerSeries {A : Type} [CommRing A] [IsDomain A] [CharZero A] {l : ℕ}
-    (hl : l.Prime) (hodd : l ≠ 2) {ζ : A} (hζ : IsPrimitiveRoot ζ l) :
+    (hl : l.Prime) {ζ : A} (hζ : IsPrimitiveRoot ζ l) :
     (l : PowerSeries A) ^ 6 * (tateCurveAt (PowerSeries.X : PowerSeries A)
           (Ideal.mem_span_singleton_self _)).c₄
       + 240 * ∑ i ∈ (range l).erase 0,
@@ -223,7 +209,7 @@ theorem c4_velu_tateDF_powerSeries {A : Type} [CommRing A] [IsDomain A] [CharZer
     simp only [PowerSeries.map_C, PowerSeries.map_X, map_mul, map_pow]
   rw [Finset.sum_congr rfl hterm]
   simp only [PowerSeries.map_X, map_pow]
-  exact c4_velu_tateDF_field hl hodd (hζ.map_of_injective hψ)
+  exact c4_velu_tateDF_field hl (hζ.map_of_injective hψ)
 
 /-! ## ★★★★★★★★★★★★段 3 —— 完備環 `R` へ特殊化する -/
 
@@ -237,7 +223,7 @@ set_option maxHeartbeats 2000000 in
 ★★**`IsUnit (l)` も `IsUnit (1 − ζ^i)` も `hDX` も仮説に置いていない**——
 `p ∣ l` の悪い素点でもそのまま意味を持ち、そこで成り立つ。 -/
 theorem c4_velu_tateDF {R : Type} [CommRing R] [IsDomain R] [CharZero R] {I : Ideal R}
-    [IsAdicComplete I R] {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2) {ζ : R}
+    [IsAdicComplete I R] {l : ℕ} (hl : l.Prime) {ζ : R}
     (hζ : IsPrimitiveRoot ζ l) (q : R) (hq : q ∈ I) (hql : q ^ l ∈ I) :
     (l : R) ^ 6 * (tateCurveAt q hq).c₄
         + 240 * ∑ i ∈ (range l).erase 0,
@@ -255,7 +241,7 @@ theorem c4_velu_tateDF {R : Type} [CommRing R] [IsDomain R] [CharZero R] {I : Id
       f ∈ (Ideal.span {(PowerSeries.X : PowerSeries R)}) ^ n →
       evalAdicMapHom (RingHom.id R) q hq f ∈ I ^ n :=
     fun n f hf => evalAdicMapHom_mem_pow (RingHom.id R) q hq n f hf
-  have hps := c4_velu_tateDF_powerSeries (A := R) hl hodd hζ
+  have hps := c4_velu_tateDF_powerSeries (A := R) hl hζ
   have hmain := congrArg (evalAdicMapHom (RingHom.id R) q hq) hps
   rw [map_add, map_mul, map_mul, map_mul, map_sum,
     show ∀ (f : PowerSeries R →+* R),
