@@ -634,6 +634,66 @@ theorem isIntegral_veluQuotientFull_of_addOrderOf_prime (p : HeightOneSpectrum (
     _ w (two_ne_zero) rfl hw
 
 
+/-! ## ★★★★★★★★第 1081 —— `p ∣ l`（`l` 奇）なら `v_p(2) = 0` -/
+
+/-- ☆整数は付値環の元。 -/
+theorem valAtLeast_intCast (p : HeightOneSpectrum (𝓞 L)) (a : ℤ) :
+    ValAtLeast p 0 ((a : L)) := by
+  refine valAtLeast_of_mem ?_
+  simpa using ((a : primeSubring p)).2
+
+/-- ★★★★★★★★**`l` が奇素数で `p ∣ l` なら `v_p(2) = 0`**（第 1081）。
+
+☆Bézout: `2a + lb = 1`。両方の付値が正なら `1` の付値も正になり矛盾する。 -/
+theorem valAtLeast_two_inv_of_dvd (p : HeightOneSpectrum (𝓞 L))
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    (hlne : ((l : L)) ≠ 0) (hpos : 0 < valAdd p (Units.mk0 ((l : L)) hlne)) :
+    ValAtLeast p 0 ((2 : L)⁻¹) := by
+  have h2ne : ((2 : L)) ≠ 0 := two_ne_zero
+  have h2nn : 0 ≤ valAdd p (Units.mk0 ((2 : L)) h2ne) := by
+    rw [valAdd_nonneg_iff]
+    refine (mem_primeSubring_iff p _).1 ?_
+    simpa using ((2 : primeSubring p)).2
+  have h2z : valAdd p (Units.mk0 ((2 : L)) h2ne) = 0 := by
+    by_contra hne
+    have hge : 1 ≤ valAdd p (Units.mk0 ((2 : L)) h2ne) := by omega
+    -- ☆Bézout
+    obtain ⟨a, b, hab⟩ : ∃ a b : ℤ, a * 2 + b * (l : ℤ) = 1 := by
+      have hnc : Nat.Coprime 2 l :=
+        (Nat.coprime_primes Nat.prime_two hl).2 (fun hc => hodd hc.symm)
+      have hcop : IsCoprime (2 : ℤ) (l : ℤ) := by
+        rw [Int.isCoprime_iff_gcd_eq_one]
+        show Int.gcd 2 (l : ℤ) = 1
+        unfold Int.gcd
+        simpa using hnc
+      obtain ⟨a, b, h⟩ := hcop
+      exact ⟨a, b, h⟩
+    have hone : ((a : L)) * ((2 : L)) + ((b : L)) * ((l : L)) = 1 := by
+      have := congrArg (fun z : ℤ => ((z : L))) hab
+      push_cast at this
+      exact this
+    have hA : ValAtLeast p 1 (((a : L)) * ((2 : L))) := by
+      refine valAtLeast_mono ?_ (valAtLeast_mul (valAtLeast_intCast p a)
+        (valAtLeast_mono hge (valAtLeast_unit p (Units.mk0 ((2 : L)) h2ne))))
+      omega
+    have hB : ValAtLeast p 1 (((b : L)) * ((l : L))) := by
+      refine valAtLeast_mono ?_ (valAtLeast_mul (valAtLeast_intCast p b)
+        (valAtLeast_mono hpos (valAtLeast_unit p (Units.mk0 ((l : L)) hlne))))
+      omega
+    have hsum := valAtLeast_add hA hB
+    rw [hone] at hsum
+    have hfin := hsum one_ne_zero
+    have h1z : valAdd p (Units.mk0 ((1 : L)) one_ne_zero) = 0 := by
+      rw [← valAdd_one p]
+      exact valAdd_eq_of_valuation_eq p _ _ (by simp)
+    omega
+  intro hz
+  have hinv : valAdd p (Units.mk0 ((2 : L)) h2ne)⁻¹ = 0 := by
+    rw [valAdd_inv, h2z, neg_zero]
+  refine le_of_eq ?_
+  rw [← hinv]
+  exact (valAdd_eq_of_valuation_eq p _ _ (by simp)).symm
+
 open Finset in
 /-- ★★★★★★★★★★★★★★★★★★★★**[GenEll] `p ∣ l` でも `neronExp p E′ ≥ −v_p(l)`**（第 1080）。
 
@@ -706,6 +766,77 @@ theorem neronExp_veluQuotientFull_ge (p : HeightOneSpectrum (𝓞 L))
     · exact valAtLeast_mono (by omega) k6
     · exact valAtLeast_mono (by omega) (valAtLeast_neg (valAtLeast_mul kb2 hv))
     · exact valAtLeast_mono (by omega) (valAtLeast_neg (valAtLeast_mul hc7 hw))
+
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★**[GenEll] `neronExp p E − neronExp p E′ ≤ v_p(l)`**（第 1082）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**大域極小モデルは不要である**——差は変数変換で不変なので、
+**各素点ごとに別々に** `p` で極小なモデルを取ってよい。
+☆`p ∤ l` なら第 1074（`E′` が整）、`p ∣ l` なら第 1080。 -/
+theorem neronExp_sub_le_valAdd_natCast (p : HeightOneSpectrum (𝓞 L))
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
+    (hE' : E' = veluQuotientFull E (((range l).erase 0).image
+      (fun k : ℕ => pointCoords (k • Q))))
+    (hlne : ((l : L)) ≠ 0) :
+    neronExp p E - neronExp p E' ≤ valAdd p (Units.mk0 ((l : L)) hlne) := by
+  classical
+  have hΔE : E.Δ ≠ 0 := E.isUnit_Δ.ne_zero
+  have hΔE' : E'.Δ ≠ 0 := E'.isUnit_Δ.ne_zero
+  obtain ⟨C, hC⟩ := WeierstrassCurve.exists_isMinimal (primeSubring p) E
+  haveI hCE : (C • E).IsElliptic := by
+    rw [WeierstrassCurve.isElliptic_iff, WeierstrassCurve.variableChange_Δ]
+    exact ((C.u⁻¹).isUnit.pow 12).mul E.isUnit_Δ
+  haveI hCE' : (C • E').IsElliptic := by
+    rw [WeierstrassCurve.isElliptic_iff, WeierstrassCurve.variableChange_Δ]
+    exact ((C.u⁻¹).isUnit.pow 12).mul E'.isUnit_Δ
+  haveI := hC
+  haveI hCint : (C • E).IsIntegral (primeSubring p) := inferInstance
+  -- ☆差は変数変換で不変（第 1053）
+  have hinv : neronExp p (C • E) - neronExp p (C • E') = neronExp p E - neronExp p E' := by
+    rw [neronExp_variableChange p E hΔE C, neronExp_variableChange p E' hΔE' C]
+    ring
+  -- ☆`C • E` は極小なので `neronExp = 0`
+  have hzero : neronExp p (C • E) = 0 := by
+    have h := neronExp_eq p (C • E) (variableChange_Delta_ne_zero E hΔE C) 1 (by
+      rw [one_smul]; exact hC)
+    rw [h]
+    show valAdd p (1 : Lˣ) = 0
+    exact valAdd_one p
+  -- ☆Vélu の商を変数変換で運ぶ（第 969）
+  have hQ' : addOrderOf (ABC3.Found.GenEll.vcPoint C E Q) = l := by
+    rw [ABC3.Found.GenEll.addOrderOf_vcPoint C E Q]; exact hQ
+  have hEq : C • E' = veluQuotientFull (C • E) (((range l).erase 0).image
+      (fun k : ℕ => pointCoords (k • ABC3.Found.GenEll.vcPoint C E Q))) :=
+    veluQuotientFull_vcPoint_eq C E E' hQ (two_ne_zero) hE'
+  have hΔv : (veluQuotientFull (C • E) (((range l).erase 0).image
+      (fun k : ℕ => pointCoords (k • ABC3.Found.GenEll.vcPoint C E Q)))).Δ ≠ 0 := by
+    rw [← hEq]; exact (C • E').isUnit_Δ.ne_zero
+  have hM0 : 0 ≤ valAdd p (Units.mk0 ((l : L)) hlne) := by
+    rw [valAdd_nonneg_iff]
+    refine (mem_primeSubring_iff p _).1 ?_
+    simpa using ((l : primeSubring p)).2
+  -- ★場合分け
+  have hge : -(valAdd p (Units.mk0 ((l : L)) hlne)) ≤ neronExp p (C • E') := by
+    rcases eq_or_lt_of_le hM0 with hz | hpos
+    · -- ☆`p ∤ l`: 第 1074 で `E'` は整
+      haveI hint : (C • E').IsIntegral (primeSubring p) := by
+        rw [hEq]
+        exact isIntegral_veluQuotientFull_of_addOrderOf_prime p (C • E) hl hodd
+          (isUnit_natCast_primeSubring p hlne hz.symm) (ABC3.Found.GenEll.vcPoint C E Q) hQ'
+      have := neronExp_nonneg p (C • E') (variableChange_Delta_ne_zero E' hΔE' C) hint
+      omega
+    · -- ★`p ∣ l`: 第 1080
+      have h2 := valAtLeast_two_inv_of_dvd p hl hodd hlne hpos
+      have := neronExp_veluQuotientFull_ge p (C • E) hl hodd (ABC3.Found.GenEll.vcPoint C E Q) hQ' hlne h2 hΔv
+      rw [hEq]
+      exact this
+  omega
 
 end Integral
 
