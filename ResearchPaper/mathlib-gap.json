@@ -4645,5 +4645,45 @@
     "technique": "☆原文をスクリプトで取り出して置換する方法が効いた(第 1137-1138)。★引っかかったのは instance 引数——S.q と qR は defeq だが構文的に違うので haveI で言い直す必要がある(第 971 と同じ穴)。☆WeierstrassCurve.isElliptic_iff は W を明示引数に取るので (isElliptic_iff _).1 と書く。",
     "remaining": "☆残るのは _full_K を isMuAtBadPrimes_of_veluQuotient_of_split(第 1005)→ lemma_3_5_velu → lemma_3_5_height_ineq に通して d + 1 < l を落とす段である。★これで Lemma 3.5 の逸脱は l ≠ 2 の 1 つだけになる。",
     "gate": "lake build ABC3 成功(6263 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
+  },
+  "lemma35NoDeg20260901": {
+    "block": "1139-1141",
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★★★★★★★★★Lemma 3.5 から d + 1 < l が外れた",
+    "goal": "Lemma 3.5 を原典どおりの仮説だけで証明する。",
+    "achieved": "★★★★**lemma_3_5_height_ineq の原典に無い仮説は l ≠ 2 の 1 つだけになった**(2026-09-01)。d + 1 < l は外れた。",
+    "why": "☆d + 1 < l は第 1044 が悪い素点で p ∤ l を出すためだけに要っていた(ζ_l の分岐から l−1 ≤ d)。★その p ∤ l が要らなくなったので落ちた。",
+    "chain": [
+      "第 1102-1119: 分母を払う((1−η)·S(η) = −l、IsUnit 不要)",
+      "第 1125-1128: 降下路(PowerSeries は係数環を取り替えても (X)-adic 完備)",
+      "第 1129-1130: c₄・c₆ の分母なし恒等式",
+      "第 1131-1132: 商体で割ると c₄ = l⁴c₄′・Δ = l¹²Δ′ ⟹ j は等しい",
+      "第 1133-1135: 座標(tateXK は最初から分母を払った形)・和・商の K 水準版",
+      "第 1136-1138: minDeltaExp の連鎖を _K 版で組み直し、hvw を無条件に作る",
+      "第 1139: _gen_K / _ext_K / _nonsplit_K(非分裂の枝も hlu なし)",
+      "第 1140: IsMuAtBadPrimes まで hlu なしで上げる",
+      "第 1141: lemma_3_5_velu_large_K / _arch_K / _defect_K / lemma_3_5_velu_K で hd を落とす"
+    ],
+    "keyPoint": "★★p ∣ l では Vélu のモデルは極小から l¹² 離れるが、Δ_min は極小モデルの判別式なのでそのずれは消える。☆j も l¹² が約分されるので変わらない。",
+    "added": {
+      "Skeleton/GenEll/TateIsogenyK.lean": [
+        "minDeltaExp_eq_mul_of_globalVelu'_K / _at_bad_prime_K / _vc_K / _full_K",
+        "minDeltaExp_eq_mul_at_bad_prime_gen_K / _ext_K / _nonsplit_K"
+      ],
+      "Skeleton/GenEll/TateLocalModelK.lean (新規)": [
+        "minDeltaExp_eq_mul_at_bad_prime_any_K",
+        "isMuAtBadPrimes_of_veluQuotient_of_coprime_K",
+        "isMuAtBadPrimes_of_veluQuotient_nodeg(★hd なし)",
+        "lemma_3_5_velu_large_K / _arch_K / _defect_K / lemma_3_5_velu_K"
+      ],
+      "Found/GaloisRep/Lemma35Unconditional.lean": [
+        "d + 1 < l を statement から削除、逸脱表を更新"
+      ],
+      "Found/GaloisRep/Lemma37CFull.lean": [
+        "hdlt が不要になったので削除"
+      ]
+    },
+    "remaining": "☆残る逸脱は l ≠ 2 だけ。★外すには l = 2 の Vélu の分岐が要る——veluU = 0 なので /2 は無害だが、preΨ_2 = 1 なので捩れ点との橋が別物になる(Ψ₂Sq の主係数は 4)。",
+    "gate": "lake build ABC3 成功(6264 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
   }
 }
