@@ -1110,6 +1110,47 @@ theorem isIntegral_veluQuotientFull_of_coprime {L : Type} [Field L] [NumberField
   haveI := hEint
   exact ABC3.Found.GaloisRep.isIntegral_veluQuotientFull_of_addOrderOf_prime p E hl hodd hlu Q hQ
 
+
+/-! ## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★第 1084 —— `hfin` を外した形 -/
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★**[GenEll] Lemma 3.5 —— 曲線の水準で無条件**（第 1084）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 1084）**——第 1083 で `hfin` が無条件に出たので、
+第 1050 の最後の仮説が消えた。
+☆残る仮説は「`l` が奇素数で `d+1 < l`」「`Q` の位数が `l`」
+「`E′` が Vélu の商」「半安定」「`l ∤ v_p(j)`」だけである。 -/
+theorem lemma_3_5_velu (eps : ℝ) (heps : 0 < eps) :
+    ∃ C : ℝ, ∀ (L : Type) [Field L] [NumberField L] (E E' : WeierstrassCurve L)
+      [E.IsElliptic] [E'.IsElliptic] (l : ℕ), l.Prime → l ≠ 2 →
+      Module.finrank ℚ L + 1 < l →
+      ∀ Q : E.toAffine.Point, addOrderOf Q = l →
+      E' = veluQuotientFull E (((range l).erase 0).image
+          (fun k : ℕ => pointCoords (k • Q))) →
+      (∀ p, SemistableAt p E) →
+      (∀ p, SemistableAt p E') →
+      (∀ p : HeightOneSpectrum (𝓞 L), jExp p E < 0 → ¬ ((l : ℤ) ∣ jExp p E)) →
+      (1 / (12 * (1 + eps))) * (l : ℝ) * degInfOf L E
+        ≤ htFaltOf L E + 2 * Real.log l + C := by
+  obtain ⟨C, hC⟩ := lemma_3_5_velu_defect eps heps
+  refine ⟨C, fun L _ _ E E' _ _ l hl hodd hd Q hQ hE' hssE hssE' hcop => ?_⟩
+  exact hC L E E' l hl hodd hd Q hQ hE'
+    (ABC3.Found.GaloisRep.hfin_of_veluQuotientFull E E' hl hodd Q hQ hE') hssE hssE' hcop
+
+def lemma_3_5_velu.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(曲線の水準で無条件——hfin を外した形)",
+    sectionId := "genell-lemma-3-5" }
+
+def lemma_3_5_velu.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "lemma_3_5_velu_defect(第 1050、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.lemma_3_5_velu_defect") 1,
+    .citation "[ABC3]" "hfin_of_veluQuotientFull(hfin そのもの、第 1083、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.hfin_of_veluQuotientFull") 1 ]
+
 def isIntegral_veluQuotientFull_of_coprime.src : Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(l が剰余標数と異なれば Vélu の商は整)",
