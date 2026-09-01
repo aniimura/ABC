@@ -55,7 +55,7 @@ theorem lemma_3_5_height_ineq_stableLine (eps : ℝ) (heps : 0 < eps) :
     ∃ C : ℝ, ∀ (L : Type) [Field L] [NumberField L] (E : WeierstrassCurve L) [E.IsElliptic]
       [(E.baseChange (AlgebraicClosure L)).IsElliptic] (l : ℕ), l.Prime →
       (∀ p : HeightOneSpectrum (𝓞 L), SemistableAt p E) →
-      (∀ p : HeightOneSpectrum (𝓞 L), ¬ ((l : ℤ) ∣ jExp p E)) →
+      (∀ p : HeightOneSpectrum (𝓞 L), jExp p E < 0 → ¬ ((l : ℤ) ∣ jExp p E)) →
       ∀ Q : (E.baseChange (AlgebraicClosure L)).toAffine.Point, addOrderOf Q = l →
       (∀ σ : AlgebraicClosure L ≃ₐ[L] AlgebraicClosure L,
         ∃ k : ℕ, galPoint E σ Q = k • Q) →

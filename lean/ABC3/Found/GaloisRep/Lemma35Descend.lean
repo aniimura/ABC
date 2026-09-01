@@ -56,7 +56,7 @@ theorem lemma_3_5_height_ineq_descend (eps : ℝ) (heps : 0 < eps) :
     ∃ C : ℝ, ∀ (L : Type) [Field L] [NumberField L] (E : WeierstrassCurve L) [E.IsElliptic]
       (l : ℕ), l.Prime →
       (∀ p : HeightOneSpectrum (𝓞 L), SemistableAt p E) →
-      (∀ p : HeightOneSpectrum (𝓞 L), ¬ ((l : ℤ) ∣ jExp p E)) →
+      (∀ p : HeightOneSpectrum (𝓞 L), jExp p E < 0 → ¬ ((l : ℤ) ∣ jExp p E)) →
       ∀ (L'' : Type) [Field L''] [NumberField L''] [Algebra L L''] [IsScalarTower ℚ L L'']
         [Algebra (𝓞 L) L''] [IsScalarTower (𝓞 L) L L'']
         [IsScalarTower (𝓞 L) (𝓞 L'') L''] [Module.Finite (𝓞 L) (𝓞 L'')]
@@ -77,7 +77,7 @@ theorem lemma_3_5_height_ineq_descend (eps : ℝ) (heps : 0 < eps) :
   haveI := hE1
   exact hC L E l hl hss L'' E'' hE0 hE1 Q hQ hE'
     (semistableAt_baseChange_all L L'' E hss) hssE'
-    (fun P _ => not_dvd_jExp_baseChange_all L L'' E hl hdeg hcop P)
+    (not_dvd_jExp_baseChange_all L L'' E hl hdeg hcop)
 
 /-! ## ★出典の紐付け(`.src`) -/
 

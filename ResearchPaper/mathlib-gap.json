@@ -5590,5 +5590,14 @@
     "deviation": "★★逸脱: Vélu の商が**楕円かつ半安定**であることは仮説として受ける(原文は「同種なので自動」と括弧で述べる。Lemma35Unconditional の逸脱表と同じ扱い)。",
     "consequence": "★★★これで LCyclicReading の節点 1・2・3 がすべて閉じた。☆残るのは DegCurve の語彙に読み替えて lemma_3_7_stableLine_cop(第 1210)の hdag に入れる段である。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "jExpGuarded20260902": {
+    "block": 1224,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★訂正——jExp の仮説を「v_p(j) < 0 のとき」の形に弱めた",
+    "goal": "PrimeToLocalHeights から実際に出る形にする。",
+    "what": "★not_dvd_jExp_baseChange_all(第 1220)・lemma_3_5_height_ineq_descend(第 1221)・lemma_3_5_height_ineq_stableLine(第 1223)の hcop を、無条件の ∀ p, ¬(l ∣ v_p(j)) から**ガード付き** ∀ p, v_p(j) < 0 → ¬(l ∣ v_p(j)) に弱めた。",
+    "measured": "★★☆**訂正**——PrimeToLocalHeights から出るのは(SSCurve.not_dvd_jExp_of_primeToLocalHeights、第 1151)**ガード付きの形だけ**であり、無条件版は要求しすぎだった。☆v_P(j) = e · v_p(j) で e > 0 なので、v_P(j) < 0 から v_p(j) < 0 が出る。したがって降ろす向きは問題なく通る。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

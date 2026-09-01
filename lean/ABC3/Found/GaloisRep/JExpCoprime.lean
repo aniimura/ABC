@@ -165,10 +165,24 @@ theorem semistableAt_baseChange_all (E : WeierstrassCurve L) [E.IsElliptic]
 `∀ P, jExp P (E ⊗ L'') < 0 → ¬ (l ∣ jExp P (E ⊗ L''))` の形である。 -/
 theorem not_dvd_jExp_baseChange_all (E : WeierstrassCurve L) [E.IsElliptic]
     {l : ℕ} (hl : l.Prime) (hdeg : Module.finrank L L' < l)
-    (hj : ∀ p : HeightOneSpectrum (𝓞 L), ¬ ((l : ℤ) ∣ jExp p E)) :
-    ∀ P : HeightOneSpectrum (𝓞 L'), ¬ ((l : ℤ) ∣ jExp P (E.baseChange L')) :=
-  fun P => not_dvd_jExp_baseChange_of_finrank_lt L L' (HeightOneSpectrumUnder P) P E hl hdeg
-    (hj _)
+    (hj : ∀ p : HeightOneSpectrum (𝓞 L), jExp p E < 0 → ¬ ((l : ℤ) ∣ jExp p E)) :
+    ∀ P : HeightOneSpectrum (𝓞 L'), jExp P (E.baseChange L') < 0 →
+      ¬ ((l : ℤ) ∣ jExp P (E.baseChange L')) := by
+  intro P hneg
+  have hjb : jExp P (E.baseChange L')
+      = ((HeightOneSpectrumUnder (A := 𝓞 L) P).asIdeal.ramificationIdx P.asIdeal : ℤ)
+        * jExp (HeightOneSpectrumUnder (A := 𝓞 L) P) E :=
+    jExp_baseChange L L' _ P E
+  have hene : (HeightOneSpectrumUnder (A := 𝓞 L) P).asIdeal.ramificationIdx P.asIdeal ≠ 0 :=
+    Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver P.asIdeal
+      (HeightOneSpectrumUnder (A := 𝓞 L) P).ne_bot
+  have hepos : (0 : ℤ)
+      < ((HeightOneSpectrumUnder (A := 𝓞 L) P).asIdeal.ramificationIdx P.asIdeal : ℤ) := by
+    exact_mod_cast Nat.pos_of_ne_zero hene
+  have hpneg : jExp (HeightOneSpectrumUnder (A := 𝓞 L) P) E < 0 := by
+    rw [hjb] at hneg
+    nlinarith [hneg, hepos]
+  exact not_dvd_jExp_baseChange_of_finrank_lt L L' _ P E hl hdeg (hj _ hpneg)
 
 end RamBound
 
