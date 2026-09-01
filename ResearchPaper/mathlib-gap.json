@@ -4282,5 +4282,54 @@
       "whyMultiplyingDoesNotWork": "☆「`l⁷` を掛ければ `DXpairDF·(bracketDF) = 0` になる」は正しいが、**それを出すには元の `tate_ode_mul`（`ha` が要る）が要る**ので循環する。",
       "alternativeRoute": "★**別の道**（未検証、要調査）: 悪い素点で要るのは `jExp p E′ = l·jExp p E` だけ（第 995 `minDeltaExp_eq_mul_of_jExp_mul`）。☆`Lemma 3.2, (ii)`（`quotMuEquiv`、`Found/GenEll/Lemma32.lean`、**`hu` 不要**）は`(L̄ˣ/q^ℤ)/μ_l ≃ L̄ˣ/(q^l)^ℤ` を**群として**与える。★もし「一意化群が同型なら `j` が等しい」を繋げれば、Vélu の明示計算（＝ODE の連鎖）を**丸ごと迂回できる**。☆在庫に `tateParamR_eq_of_j_tateCurveAt`（`j` → `q`）はあるので、逆向き（群同型 → `j`）が要る。**これが本当に軽いかは未測定。**"
     }
+  },
+  "deadNodeRemoval20260901": {
+    "block": 1123,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★死節点の除去——Skeleton/GenEll の sorry を正直な数にした",
+    "what": [
+      "★第 1086 で引用を付け替えたあと、5 つの `sorry` 節点が「誰からも引かれない・後継が証明済み」の死節点になっていた。測定して削除した。",
+      "☆削除前に引用状況を実測: jExp_velu_bad は inProject 引用 1 件（jExp_velu_good.needs の中——それ自身も削除対象）、他の 4 つは 0 件。",
+      "☆jExp_velu_bad への残り 4 件の言及は docstring の散文（Check/GenEll/QuotMuNeedsHypothesis.lean:19、Check/GenEll/VeluTateNeedsChange.lean:78、Found/GaloisRep/TateVelu.lean:142、Found/GenEll/JScale.lean:25）で、宣言参照ではない。"
+    ],
+    "removed": [
+      {
+        "file": "Skeleton/GenEll/TateIsogeny.lean",
+        "nodes": [
+          "jExp_velu_bad",
+          "jExp_velu_good"
+        ],
+        "successor": "★第 947 と 927 を繋ぐ節（ζ を消す道）がそのまま `Lemma 3.5` の j 付値を供給する。"
+      },
+      {
+        "file": "Skeleton/GenEll/TateLocalModel.lean",
+        "nodes": [
+          "isMinimal_baseChange"
+        ],
+        "successor": "isMinimal_baseChange_of_c4（第 908、Found/GaloisRep/DegInfTateParam.lean）——Lemma 3.5 が使うのは乗法還元の場合だけで、そこでは v_p(c₄)=0 だから直接出る。"
+      },
+      {
+        "file": "Skeleton/GenEll/TateLocalModel.lean",
+        "nodes": [
+          "minDeltaExp_descend_of_nonsplit"
+        ],
+        "successor": "minDeltaExp_eq_mul_of_nonsplit（第 929、Found/GaloisRep）——非分裂の降下は証明済み。"
+      },
+      {
+        "file": "Skeleton/GenEll/TateLocalModel.lean",
+        "nodes": [
+          "isMuAtBadPrimes_of_veluQuotient"
+        ],
+        "successor": "isMuAtBadPrimes_of_veluQuotient_of_split（第 1005、同ファイル、証明済み）——hlu・hsplit を仮説に置いた形。"
+      }
+    ],
+    "staleContentChecked": "★削除した isMuAtBadPrimes_of_veluQuotient.needs は「Finite (IsLocalRing.ResidueField (p.adicCompletionIntegers L)) が mathlib に無い」と書いていたが、これは第 989（lemma35ResidueFieldFinite20260901）で内製済みであり、記述自体が古かった。台帳に残っているので情報は失われない。",
+    "effect": [
+      "Skeleton/GenEll/TateIsogeny.lean の bare `sorry`: 2 → 0",
+      "Skeleton/GenEll/TateLocalModel.lean の bare `sorry`: 3 → 0",
+      "☆両ファイルのヘッダ表も、削除した節点と後継の対応表に書き換えた。",
+      "★lake build ABC3 成功（6251 jobs）、node tools/check.mjs PASS。"
+    ],
+    "why": "★依存グラフの `sorry` の数は「残っている工数」の見積りに直結する。後継が証明済みの節点が `sorry` のまま残っていると、実際より多く残っているように見える。数を正直にした。"
   }
 }
