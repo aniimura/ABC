@@ -240,8 +240,24 @@ import ABC3.Meta.Claim
 
 ★★★★**第 1192 で `SemistableAt` の底変換が閉じた**
 ——`semistableAt_baseChange`（`Found/GaloisRep/DegInfBaseChange.lean`）。
-☆これで**節点 2d-1 の葉はすべて埋まった**——
-残るのは既存の `_K` の連鎖を `L_v(ζ_l)` で走らせる組み立てだけである。
+☆これで**節点 2d-1 の葉はすべて埋まった**。
+
+##### ★★★★次の 1 本の名前（第 1193 の実測）
+
+`minDeltaExp_eq_mul_of_globalVelu'_K` が `hQ`・`hE'` を使うのは
+**`exists_point_j_tateModel`（`Found/GaloisRep/TateModelPoint.lean:58`）を呼ぶ 1 か所だけ**である。
+その結論は「局所の点 `P` があって `j(E' ⊗ L_v)` が `P` による Vélu の商の `j` に等しい」である。
+
+★★安定直線の側ではそれが**第 1180 ＋ 第 1184** から出る:
+第 1180 で `E' ⊗ L̄_v = veluQuotientFull (E ⊗ L̄_v) (ι S)`、
+第 1184 で `ι S` は `μ_l` の座標集合。☆`j` は底変換で保たれる。
+
+★したがって次に書くべき 1 本の名前は
+
+    `exists_point_j_tateModel_stableLine`
+
+であり、`hQ`・`hE'` の代わりに安定直線のデータを受ける。
+☆これが入れば `_K` の連鎖は**一行も変えずに**安定直線で走る。
 
 ☆（参考）部品の内訳——
 第 1187（良い還元）・第 1188（分岐した `valAdd`）・第 1190（極小性）・
