@@ -216,8 +216,15 @@ import ABC3.Meta.Claim
 
 ☆分岐する場合の `valAdd` のスケーリングが要る
 （`vAdd_algebraMap_eq_valAdd` は**不分岐を仮定している**、第 320）。
-★`LocalHeightRamified.lean` の `ordAt_liesOver` がその役をするが、
-`valAdd`（数体に特化）との紐付けが別に要る。
+★`LocalHeightRamified.lean` の `ordAt_liesOver` がその役をする。
+
+★★★★**第 1188 でその紐付けが取れた**——`valAdd_algebraMap_liesOver`
+（`Found/GaloisRep/DegInfBaseChange.lean`）。
+☆`valAdd` と `ordAt` は**同じ定義**（`-toAdd (unzero …)`）なので `rfl` で繋がり、
+`ordAt_liesOver` がそのまま `valAdd P (algebraMap x) = e·valAdd p x` を与える。
+
+★良い還元の場合は第 1187（`minDeltaExp_baseChange_eq_zero`）で取れているので、
+☆残るのは**極小モデルを上げて `isMinimal_of_c4_vAdd_eq_zero` を当てる組み立てだけ**である。
 
 ### ☆別の道（採らない理由）
 

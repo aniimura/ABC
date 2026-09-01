@@ -5213,5 +5213,15 @@
     "what": "★minDeltaExp_baseChange_eq_zero(Found/GaloisRep/DegInfBaseChange.lean)—— v_p(Δ_min) = 0 なら上でも 0。minDeltaExp_baseChange_le で ≤ e·0 = 0、minDeltaExp_nonneg で ≥ 0。",
     "why": "☆これが SemistableAt の底変換(第 1186 で特定した在庫に無い葉)の**第 1 の場合**である。★第 2 の場合(極小モデルと v(c₄) = 0)は分岐した valAdd のスケーリングが要る——vAdd_algebraMap_eq_valAdd は不分岐を仮定しており(第 320)、LocalHeightRamified.lean の ordAt_liesOver との紐付けが別に要る。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "valAddRamified20260902": {
+    "block": 1188,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★分岐した拡大での valAdd のスケーリング——第 1186 が名指しした穴が埋まった",
+    "goal": "l-巡回の 2 つの読みを繋ぐ(第 1152 の枠、節点 2d-1)。",
+    "what": "★valAdd_algebraMap_liesOver(Found/GaloisRep/DegInfBaseChange.lean)—— valAdd P (algebraMap x) = e(P|p) · valAdd p x。",
+    "measured": "★★**valAdd と ordAt は同じ定義**(-toAdd (unzero …))なので `rfl` で繋がり、LocalHeightRamified.lean の ordAt_liesOver がそのまま効く。☆第 320 の vAdd_algebraMap_eq_valAdd は不分岐を仮定していたが、分岐版はすでに在庫にあった——別の名前で置かれていたので第 1186 では見えていなかった。",
+    "frame": "☆SemistableAt の底変換: 良い還元の場合は第 1187、分岐の valAdd は第 1188。★残るのは極小モデルを上げて isMinimal_of_c4_vAdd_eq_zero(第 320)を当てる組み立てだけ。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

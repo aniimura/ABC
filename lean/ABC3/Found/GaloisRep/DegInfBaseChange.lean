@@ -6,6 +6,7 @@ import ABC3.Found.GaloisRep.FaltingsWitness
 import ABC3.Found.GaloisRep.SemistableFin
 import Mathlib.NumberTheory.RamificationInertia.Valuation
 import ABC3.Meta.Claim
+import ABC3.Found.GenEll.LocalHeightRamified
 
 /-!
 # `deg∞` と `ht^Falt` の基底変換不変性（`Found`）
@@ -447,9 +448,36 @@ theorem minDeltaExp_baseChange_eq_zero (p : HeightOneSpectrum (𝓞 L))
   have hnn := minDeltaExp_nonneg P (E.baseChange L')
   omega
 
+/-- ☆`valAdd` は `LocalHeightRamified.lean` の `ordAt` と同じものである。 -/
+theorem valAdd_eq_ordAt (p : HeightOneSpectrum (𝓞 L)) (x : Lˣ) :
+    valAdd p x = ABC3.Found.GenEll.ordAt p x := rfl
+
+/-- ★★★★★★★★★★★★★★**分岐した拡大での `valAdd` のスケーリング**（第 1188）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`valAdd P (algebraMap x) = e(P|p) · valAdd p x`。
+★`vAdd_algebraMap_eq_valAdd`（第 320）は**不分岐を仮定していた**が、
+`LocalHeightRamified.lean` の `ordAt_liesOver` は分岐を許す。
+☆`valAdd` と `ordAt` は同じ定義なので、そのまま移せる。
+
+★★★これが `Skeleton/GenEll/LCyclicReading.lean` の節点 2d-1 で
+第 1186 が名指しした「分岐した `valAdd` のスケーリング」である。 -/
+theorem valAdd_algebraMap_liesOver (p : HeightOneSpectrum (𝓞 L))
+    (P : HeightOneSpectrum (𝓞 L')) [P.asIdeal.LiesOver p.asIdeal] (x : Lˣ) :
+    valAdd P (Units.map (algebraMap L L').toMonoidHom x)
+      = (p.asIdeal.ramificationIdx P.asIdeal : ℤ) * valAdd p x :=
+  ABC3.Found.GenEll.ordAt_liesOver L' p P x
+
 end NumberField
 
 /-! ## ★出典の紐付け(`.src`) -/
+
+def valAdd_algebraMap_liesOver.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(分岐した拡大での valAdd のスケーリング。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def minDeltaExp_baseChange_eq_zero.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
