@@ -599,6 +599,71 @@ def vAdd_Delta_tateCurveAt_pow.src : ABC3.Meta.Source :=
     item := "Lemma 3.5(Δ(E_{q^l}) の付値は l·v(q)。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
+/-! ## ★★★★★★★★第 1056 —— Tate モデルへの変数変換は付値 `0`
+
+★第 1054 の局所計算の (c) 段である。
+☆`W` が極小なら Tate モデルも極小（`c₄` が単元だから）なので、
+両者を繋ぐ変数変換の `u` は付値 `0` である。
+
+★これは `localHeight_eq_vAdd_Delta`（在庫）の証明に埋まっていた段を取り出したものである。 -/
+
+/-- ★★★★★★★★**Tate モデルへの変数変換の `u` は付値 `0`**（第 1056）。 -/
+theorem vAdd_tateModel_u_eq_zero {R : Type} [CommRing R] [IsDomain R]
+    [IsDiscreteValuationRing R] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    {K : Type} [Field K] [Algebra R K] [IsFractionRing R K]
+    (W : WeierstrassCurve K) [hell : W.IsElliptic] [WeierstrassCurve.IsMinimal R W]
+    (h : W.HasSplitMultiplicativeReduction R)
+    {hq : tateParamR W h ∈ IsLocalRing.maximalIdeal R}
+    (C : WeierstrassCurve.VariableChange R)
+    (hCE : C • WeierstrassCurve.integralModel R W = tateCurveAt (tateParamR W h) hq)
+    (hqne : tateParamR W h ≠ 0) :
+    vAdd (tateDvrVal R K) ((C.map (algebraMap R K)).u) = 0 := by
+  have hΔ : W.Δ ≠ 0 := hell.isUnit.ne_zero
+  have hWmap : (WeierstrassCurve.integralModel R W).map (algebraMap R K) = W :=
+    WeierstrassCurve.baseChange_integralModel_eq R W
+  have hkey : (C.map (algebraMap R K)) • W
+      = (tateCurveAt (tateParamR W h) hq).map (algebraMap R K) := by
+    conv_lhs => rw [← hWmap]
+    rw [WeierstrassCurve.map_variableChange, hCE]
+  have hTΔ : ((tateCurveAt (tateParamR W h) hq).map (algebraMap R K)).Δ ≠ 0 := by
+    rw [WeierstrassCurve.map_Δ]
+    exact (map_ne_zero_iff _ (IsFractionRing.injective R K)).2
+      (tateCurveAt_Delta_ne_zero hq hqne)
+  have hTc4ne : ((tateCurveAt (tateParamR W h) hq).map (algebraMap R K)).c₄ ≠ 0 := by
+    rw [WeierstrassCurve.map_c₄]
+    exact (map_ne_zero_iff _ (IsFractionRing.injective R K)).2
+      (tateCurveAt_c4_isUnit _ hq).ne_zero
+  have hTc4 : vAdd (tateDvrVal R K)
+      (Units.mk0 (((tateCurveAt (tateParamR W h) hq).map (algebraMap R K)).c₄) hTc4ne) = 0 := by
+    have hveq : (Units.mk0 (((tateCurveAt (tateParamR W h) hq).map (algebraMap R K)).c₄) hTc4ne)
+        = Units.mk0 (algebraMap R K ((tateCurveAt (tateParamR W h) hq).c₄))
+          (by rw [← WeierstrassCurve.map_c₄]; exact hTc4ne) := by
+      refine Units.ext ?_
+      exact WeierstrassCurve.map_c₄ _ _
+    rw [hveq]
+    exact tateDvrVal_eq_zero_of_isUnit _ (tateCurveAt_c4_isUnit _ hq) _
+  haveI hTint : WeierstrassCurve.IsIntegral R
+      ((tateCurveAt (tateParamR W h) hq).map (algebraMap R K)) := isIntegral_baseChange _
+  have hTmin : WeierstrassCurve.IsMinimal R
+      ((tateCurveAt (tateParamR W h) hq).map (algebraMap R K)) :=
+    isMinimal_of_c4_vAdd_eq_zero _ hTΔ hTc4ne hTc4
+  have hmin1 : WeierstrassCurve.IsMinimal R ((1 : WeierstrassCurve.VariableChange K) • W) := by
+    rw [one_smul]; infer_instance
+  have hmin2 : WeierstrassCurve.IsMinimal R ((C.map (algebraMap R K)) • W) := by
+    rw [hkey]; exact hTmin
+  have hu0 := minimal_u_vAdd_eq W hΔ (1 : WeierstrassCurve.VariableChange K)
+    (C.map (algebraMap R K)) hmin1 hmin2
+  have hone : vAdd (tateDvrVal R K) ((1 : WeierstrassCurve.VariableChange K).u) = 0 := by
+    show vAdd (tateDvrVal R K) 1 = 0
+    rw [vAdd, map_one]
+    rfl
+  rw [← hu0, hone]
+
+def vAdd_tateModel_u_eq_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Tate モデルへの変数変換の u は付値 0。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def minDeltaExp_pos_of_jExp_neg.src : ABC3.Meta.Source :=
