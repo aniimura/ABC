@@ -5,6 +5,8 @@ import ABC3.Found.GaloisRep.DegInfBaseChange
 import ABC3.Found.GaloisRep.DegInfTateParam
 import ABC3.Found.GenEll.JScale
 import ABC3.Found.GaloisRep.HtFaltJ
+import ABC3.Found.GaloisRep.TateParamMap
+import ABC3.Found.GaloisRep.TateSetupDvr
 
 /-!
 # 第 954 ブロック —— **★★★★★★★★★★★★★★★★悪い素点の局所データを取り出す**（`Found`）
@@ -196,6 +198,111 @@ def isMinimal_baseChange_at_bad_prime.src : ABC3.Meta.Source :=
 def hasMultiplicativeReduction_at_bad_prime.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(悪い素点では完備化で乗法還元をもつ。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+/-! ## ★★★★★★★★★★★★★★★★第 978 —— `hcop` の出どころ
+
+★第 972 の `hcop` は **Tate 母数の付値**についての「`l` と互いに素」である。
+☆原文の仮定「`l` is prime to the local heights」は `jExp` の言葉なので、
+両者を繋ぐ橋が要る——それが第 932（`jExp_eq_neg_vAdd_of_j_tateCurveAt`）である。
+
+★第 932 の仮説はすべて出る:
+
+* Tate モデルの楕円性・`c₄ ≠ 0`・`j` の一致 → `tateModel_baseChange`（第 944）
+* `1/j` の評価が `0` でない → `evalAdic_tateJinvSeries_eq_mul_unit`（`q·単元` だから）
+* `E.j ≠ 0`・`E.c₄ ≠ 0` → `jExp p E < 0`（`j = 0` なら `jExp = 0`） -/
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★**Tate 母数の付値は `−jExp`**。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+★★★★**2026-09-01（第 978）**——第 932 を `q = tateParamR (E ⊗ Lv) h` に当てた形。
+☆`mkTateSetup` の `v`・`Q` は定義上 `tateDvrVal`・`Units.mk0 (φ q)` なので `rfl` で繋がる。 -/
+theorem vAdd_tateParam_eq_neg_jExp {Lv : Type} [Field Lv] [CharZero Lv] [Algebra L Lv]
+    {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    [Algebra R Lv] [IsFractionRing R Lv] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (p : HeightOneSpectrum (𝓞 L))
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation Lv
+        (IsDiscreteValuationRing.maximalIdeal R)) (algebraMap L Lv x)
+      = (HeightOneSpectrum.valuation L p) x)
+    (E : WeierstrassCurve L) [E.IsElliptic]
+    [(E.baseChange Lv).IsElliptic] [WeierstrassCurve.IsMinimal R (E.baseChange Lv)]
+    (h : WeierstrassCurve.HasSplitMultiplicativeReduction R (E.baseChange Lv))
+    (hj : jExp p E < 0) :
+    vAdd (mkTateSetup (K := Lv) (tateParamR (E.baseChange Lv) h)
+        (tateParamR_mem (E.baseChange Lv) h) (tateParamR_ne_zero (E.baseChange Lv) h)).v
+      (mkTateSetup (K := Lv) (tateParamR (E.baseChange Lv) h)
+        (tateParamR_mem (E.baseChange Lv) h)
+        (tateParamR_ne_zero (E.baseChange Lv) h)).Q = - jExp p E := by
+  have hq := tateParamR_mem (E.baseChange Lv) h
+  have hq0 := tateParamR_ne_zero (E.baseChange Lv) h
+  obtain ⟨hq', C₀, hne, hCE⟩ := tateParamR_spec (E.baseChange Lv) h
+  have hbase := tateModel_baseChange (E.baseChange Lv) h hCE
+  haveI : ((tateCurveAt (tateParamR (E.baseChange Lv) h) hq).map
+      (algebraMap R Lv)).IsElliptic := by rw [hbase]; infer_instance
+  have hjne : E.j ≠ 0 := by
+    intro hc; rw [jExp, dif_pos hc] at hj; omega
+  have hc4E : E.c₄ ≠ 0 := by
+    intro hc; apply hjne; rw [ABC3.Found.GenEll.j_eq_inv_Delta_mul, hc]; ring
+  have hqne : algebraMap R Lv (tateParamR (E.baseChange Lv) h) ≠ 0 :=
+    (map_ne_zero_iff _ (IsFractionRing.injective R Lv)).2 hq0
+  obtain ⟨u, hu, hueq⟩ := evalAdic_tateJinvSeries_eq_mul_unit
+    (I := IsLocalRing.maximalIdeal R) (tateParamR (E.baseChange Lv) h) hq
+  have hev : algebraMap R Lv
+      (evalAdic tateJinvSeries (tateParamR (E.baseChange Lv) h) hq) ≠ 0 := by
+    rw [hueq, map_mul]
+    exact mul_ne_zero hqne ((hu.map (algebraMap R Lv)).ne_zero)
+  have hc4Lv : (E.baseChange Lv).c₄ ≠ 0 := by
+    show (E.map (algebraMap L Lv)).c₄ ≠ 0
+    rw [WeierstrassCurve.map_c₄]
+    exact (map_ne_zero_iff _ (algebraMap L Lv).injective).2 hc4E
+  have hc4T : algebraMap R Lv
+      (tateCurveAt (tateParamR (E.baseChange Lv) h) hq).c₄ ≠ 0 := by
+    have hmap : algebraMap R Lv (tateCurveAt (tateParamR (E.baseChange Lv) h) hq).c₄
+        = ((tateCurveAt (tateParamR (E.baseChange Lv) h) hq).map (algebraMap R Lv)).c₄ :=
+      (WeierstrassCurve.map_c₄ _ _).symm
+    rw [hmap, hbase, WeierstrassCurve.variableChange_c₄]
+    exact mul_ne_zero (by simp) hc4Lv
+  have hjeq : (E.baseChange Lv).j
+      = ((tateCurveAt (tateParamR (E.baseChange Lv) h) hq).map (algebraMap R Lv)).j := by
+    rw [ABC3.Found.GenEll.j_congr_curve hbase, WeierstrassCurve.variableChange_j]
+  have hkey := jExp_eq_neg_vAdd_of_j_tateCurveAt p hp E
+    (tateParamR (E.baseChange Lv) h) hq hc4T hev hqne hjne hjeq
+  rw [hkey, neg_neg]
+  rfl
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★**原文の「`l` は局所高さと互いに素」を第 972 の `hcop` に直す**。 -/
+theorem not_dvd_vAdd_tateParam_of_not_dvd_jExp {Lv : Type} [Field Lv] [CharZero Lv]
+    [Algebra L Lv]
+    {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    [Algebra R Lv] [IsFractionRing R Lv] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (p : HeightOneSpectrum (𝓞 L))
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation Lv
+        (IsDiscreteValuationRing.maximalIdeal R)) (algebraMap L Lv x)
+      = (HeightOneSpectrum.valuation L p) x)
+    (E : WeierstrassCurve L) [E.IsElliptic]
+    [(E.baseChange Lv).IsElliptic] [WeierstrassCurve.IsMinimal R (E.baseChange Lv)]
+    (h : WeierstrassCurve.HasSplitMultiplicativeReduction R (E.baseChange Lv))
+    (hj : jExp p E < 0) {l : ℕ} (hcop : ¬ ((l : ℤ) ∣ jExp p E)) :
+    ¬ ((l : ℤ) ∣ vAdd (mkTateSetup (K := Lv) (tateParamR (E.baseChange Lv) h)
+        (tateParamR_mem (E.baseChange Lv) h) (tateParamR_ne_zero (E.baseChange Lv) h)).v
+      (mkTateSetup (K := Lv) (tateParamR (E.baseChange Lv) h)
+        (tateParamR_mem (E.baseChange Lv) h)
+        (tateParamR_ne_zero (E.baseChange Lv) h)).Q) := by
+  rw [vAdd_tateParam_eq_neg_jExp p hp E h hj]
+  simpa using hcop
+
+def vAdd_tateParam_eq_neg_jExp.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Definition 3.3(Tate 母数の付値は −jExp。★無条件)",
+    sectionId := "genell-def-3-3" }
+
+def not_dvd_vAdd_tateParam_of_not_dvd_jExp.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(l は局所高さと互いに素——hcop の形。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 /-! ## ★出典の紐付け(`.src`) -/
