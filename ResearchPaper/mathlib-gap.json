@@ -3837,5 +3837,16 @@
     "whyItHolds": "★★★★**`hfin` が成り立つ理由（見通し）**: 第 962 `Delta_velu_tate_eq` は `Δ(veluCurve (tate q) v w) = l¹² · Δ(tate q^l)` を与える。☆したがって悪い素点で `E` が極小なら `v_p(Δ(E′)) = 12·v_p(l) + l·minDeltaExp p E`、すなわち **`neronExp p E′ = v_p(l)`**。★★よって `∑ᶠ neronExp p E′ · log N(p) = ∑ᶠ v_p(l) · log N(p) = [L:ℚ]·log l` であり、`hfin` の左辺は `−[L:ℚ]·log l ≤ (3/2)·[L:ℚ]·log l` で**余裕をもって成り立つ**。☆`(3/2)` の余裕はこのためにある。",
     "nextStep": "☆次の一手: 第 962 の**大域版**——`v_p(Δ(veluQuotientFull E S)) = 12·v_p(l) + l·minDeltaExp p E`（`E` が `p` で極小のとき）——を書く。★材料は `Delta_velu_tate_eq`（962）と `tateParam_quot_velu`（第 1027 の連鎖）である。",
     "note": "★944-1050 の 102 ブロック。"
+  },
+  "hfinSplitIntoNodes20260901": {
+    "measuredAt": "2026-09-01",
+    "block": "第 1052",
+    "supersedes": "hfinAnalysed20260901",
+    "metric": "GenEll 必要分 18 / 24（§1 9/9・§2 0/1・§3 6/9・§4 3/5）",
+    "closedThisStretch": [
+      "☆`isIntegral_veluQuotientFull_of_coprime`（1052、節点）——`l` が剰余標数と異なれば Vélu の商は整。"
+    ],
+    "structure": "★★`hfin` は 2 つから出る: (1) `hmin`（`E` のモデルが各素点で極小）——モデルの取り方の問題、(2) `hint`（`E′` が各素点で整）——第 1052 の節点。☆(2) の中身は「位数が剰余標数と素な捻れ点は極小モデルで整座標をもつ」で、`l ≠ char(k_p)` は**第 1044 で証明済み**である。",
+    "note": "★944-1052 の 104 ブロック。☆`Lemma 3.5` の中心（`IsMuAtBadPrimes`）は第 1044 で `sorry`-free。不等式の側は `lemma_3_5_velu_defect`（第 1050）まで来て、残るのは `hfin` の 1 本。"
   }
 }

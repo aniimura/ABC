@@ -1077,6 +1077,49 @@ def lemma_3_5_velu_defect.needs : List ProofObligation :=
     .citation "[ABC3]" "exists_periodPair_family(アルキメデス、第 1046、証明済み)"
       (.inProject "ABC3" "ABC3.Skeleton.GenEll.exists_periodPair_family") 1 ]
 
+/-! ## ★★★★★★★★第 1052 —— `hfin` の残りを 2 つの節点に割る
+
+★第 1051 の分解により、`hfin` は次の 2 つから出る:
+
+| 節点 | 内容 |
+|---|---|
+| `hmin` | `E` のモデルが各素点で極小（`∀ p, neronExp p E = 0`）——モデルの取り方 |
+| `hint` | `E′`（Vélu の商）が各素点で整 |
+
+☆`hint` は古典的には「剰余標数と素な位数の捻れ点は極小モデルで整」から出る。
+★そして `l ≠ char(k_p)` は**第 1044 で証明済み**（`isUnit_natCast_at_bad_prime`）である。 -/
+
+open Finset in
+/-- ☆**節点**: `l` が剰余標数と異なれば Vélu の商は整である。
+
+★中身は「位数が剰余標数と素な捻れ点は極小モデルで整座標をもつ」であり、
+Vélu の係数（`veluVFull`・`veluWFull`）はその多項式だから整になる。
+☆`l ≠ char(k_p)` は第 1044（`isUnit_natCast_at_bad_prime`）が与える。 -/
+theorem isIntegral_veluQuotientFull_of_coprime {L : Type} [Field L] [NumberField L]
+    (p : HeightOneSpectrum (𝓞 L)) (E E' : WeierstrassCurve L)
+    [E.IsElliptic] [E'.IsElliptic]
+    {l : ℕ} (hl : l.Prime)
+    (hlu : IsUnit ((l : (p.adicCompletionIntegers L))))
+    (hEint : E.IsIntegral (primeSubring p))
+    (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
+    (hE' : E' = veluQuotientFull E (((range l).erase 0).image
+      (fun k : ℕ => pointCoords (k • Q)))) :
+    E'.IsIntegral (primeSubring p) := by
+  sorry
+
+def isIntegral_veluQuotientFull_of_coprime.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(l が剰余標数と異なれば Vélu の商は整)",
+    sectionId := "genell-lemma-3-5" }
+
+def isIntegral_veluQuotientFull_of_coprime.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "isUnit_natCast_at_bad_prime(l ≠ char(k_p)、第 1044、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.isUnit_natCast_at_bad_prime") 1,
+    .implicitStep
+      ("☆位数が剰余標数と素な捻れ点は極小モデルで整座標をもつ" ++
+       "（形式群の捻れが自明であることから）。" ++
+       "★Vélu の係数 `veluVFull`・`veluWFull` はその座標の多項式なので整になる") 3 ]
+
 def IsMuAtBadPrimes.src : Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(H が μ_l に対応することの帰結を型にしたもの)",
