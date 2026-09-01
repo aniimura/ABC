@@ -5488,5 +5488,15 @@
     "measured": "☆k • (c • Q) = (k·c) • Q = ((k·c) mod l) • Q であり、l が素で l ∤ k・l ∤ c だから (k·c) mod l ≠ 0。★曲線も Galois も出てこない**群論だけ**の命題である。",
     "consequence": "★★★第 1205 が与える「∀ σ, ∃ k, σ Q = k • Q」から「σ は ⟨Q⟩∖{O} を保つ」を出す核であり、fixesCoeffs_veluQuotientFull(第 1153)が受け取る「∀ z ∈ S, f z ∈ S」の形の中身である。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "degreeBound20260902": {
+    "block": 1214,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★共役の個数で次数を上から抑える——[M:L] < l へ向かう数え上げの段",
+    "goal": "第 1209 が残した唯一の義務 [M:L] < l。",
+    "what": "★finrank_le_of_algHom_mem_finset(Found/GenEll/DegreeBound.lean)—— M →ₐ[L] L̄ が有限集合 s に単射で入れば [M:L] ≤ #s。",
+    "measured": "☆標数 0(分離的)なら #(M →ₐ[L] L̄) = [M:L](mathlib の AlgHom.card、PrimitiveElement.lean:364)。★**Galois 群を直接使わない形**で数え上げを用意した。",
+    "remaining": "★★★残るのは「φ : M →ₐ[L] L̄ は Q ↦ c·Q の c ∈ 𝔽_l^× で決まる」の 1 本であり、その材料(安定性と保存性)は第 1205・第 1213 にある。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

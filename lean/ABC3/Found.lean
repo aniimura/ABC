@@ -1390,6 +1390,7 @@ import ABC3.Found.GenEll.PointDescentFinite
 import ABC3.Found.GenEll.Lemma37StableLineCop
 import ABC3.Found.GenEll.Thm38KummerAlpha
 import ABC3.Found.GenEll.VeluSetStable
+import ABC3.Found.GenEll.DegreeBound
 import ABC3.Found.GaloisRep.Lemma35StableLine
 import ABC3.Found.GaloisRep.Lemma37CondBFull
 import ABC3.Found.GenEll.Lemma37Full
