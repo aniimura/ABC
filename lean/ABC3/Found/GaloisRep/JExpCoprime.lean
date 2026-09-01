@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.DegInfBaseChange
+import ABC3.Found.GaloisRep.PrimeUnder
 import ABC3.Meta.Claim
 
 /-!
@@ -134,9 +135,54 @@ theorem not_dvd_jExp_baseChange_of_finrank_lt (p : HeightOneSpectrum (𝓞 L))
   not_dvd_jExp_baseChange L L' p P E hl
     (not_dvd_ramificationIdx_of_finrank_lt L L' p P hdeg) hj
 
+/-! ## ★★★★★★★★★★★★★★★★「すべての素点で」の形 -/
+
+variable [Algebra.IsIntegral (𝓞 L) (𝓞 L')]
+
+/-- ★★★★★★★★★★★★
+**半安定性は「すべての素点で」の形でも底変換で保たれる**——★**無条件**（第 1220）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`L'` の素点 `P` はその「下」`P ∩ 𝓞L` の上にある（`liesOver_under`）ので、
+第 1192 の `semistableAt_baseChange` がそのまま当たる。
+
+★★★これが第 1199 が要る `∀ P, SemistableAt P (E ⊗ L'')` の形である。 -/
+theorem semistableAt_baseChange_all (E : WeierstrassCurve L) [E.IsElliptic]
+    [(E.baseChange L').IsElliptic]
+    (hss : ∀ p : HeightOneSpectrum (𝓞 L), SemistableAt p E) :
+    ∀ P : HeightOneSpectrum (𝓞 L'), SemistableAt P (E.baseChange L') :=
+  fun P => semistableAt_baseChange L L' (HeightOneSpectrumUnder P) P E (hss _)
+
+/-- ★★★★★★★★★★★★★★★★
+**`[L':L] < l` なら「`l` と局所高さが素」は底変換で保たれる**——★**無条件**（第 1220）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★これが第 1199 が要る
+`∀ P, jExp P (E ⊗ L'') < 0 → ¬ (l ∣ jExp P (E ⊗ L''))` の形である。 -/
+theorem not_dvd_jExp_baseChange_all (E : WeierstrassCurve L) [E.IsElliptic]
+    {l : ℕ} (hl : l.Prime) (hdeg : Module.finrank L L' < l)
+    (hj : ∀ p : HeightOneSpectrum (𝓞 L), ¬ ((l : ℤ) ∣ jExp p E)) :
+    ∀ P : HeightOneSpectrum (𝓞 L'), ¬ ((l : ℤ) ∣ jExp P (E.baseChange L')) :=
+  fun P => not_dvd_jExp_baseChange_of_finrank_lt L L' (HeightOneSpectrumUnder P) P E hl hdeg
+    (hj _)
+
 end RamBound
 
 /-! ## ★出典の紐付け(`.src`) -/
+
+def semistableAt_baseChange_all.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(半安定性は「すべての素点で」の形でも底変換で保たれる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def not_dvd_jExp_baseChange_all.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5([L':L] < l なら「l と局所高さが素」は底変換で保たれる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def not_dvd_ramificationIdx_of_finrank_lt.src : Source :=
   { paper := "GenEll", pdfPage := 17,

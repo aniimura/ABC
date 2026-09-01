@@ -5549,5 +5549,15 @@
     "measured": "★★★これで第 1208-1209([L'':L] < l なら l ∤ v_P(j) が保たれる)が使える —— l − 1 < l だからである。☆座標集合の等式は第 1197 が受け取る hT の形そのままで、Q の座標だけで M を作れば {k • Q'} の座標は自動的に M に入る。",
     "consequence": "★★★I 側(L(H) の道)の**部品はすべて揃った** —— 第 1195・1197・1199・1205・1206・1207・1208・1209・1214-1218・1219。☆残るのは lemma_3_5_height_ineq_stableLine への組み上げ配管だけである。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "allPrimesForms20260902": {
+    "block": 1220,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★★★★★「すべての素点で」の形——第 1199 が要る 2 つの仮説",
+    "goal": "lemma_3_5_height_ineq_stableLine への組み上げ配管。",
+    "what": "★semistableAt_baseChange_all と not_dvd_jExp_baseChange_all(Found/GaloisRep/JExpCoprime.lean)。",
+    "measured": "☆L' の素点 P はその「下」P ∩ 𝓞L の上にある(PrimeUnder.lean の liesOver_under)ので、第 1192 と第 1209 がそのまま当たる。★これで第 1199 が要る ∀ P の 2 つの仮説が L の側の仮定から出る。",
+    "remaining": "☆残るのは Vélu の商が楕円かつ半安定であること(原文が「同種なので自動」と括弧で述べる段。Lemma35Unconditional の逸脱表と同じ)と、DegCurve の語彙への読み替えだけである。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
