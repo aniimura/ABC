@@ -4952,5 +4952,15 @@
     "why": "★★これが「([ζ], [π]) は E[l] の ℤ/l-基底である」ことの**正確な形**であり、AlphaBridge の節点 2 が消費する界面である。☆基底であることを ZMod l の言葉に翻訳する段は節点 2 の側に置く。",
     "frame": "☆AlphaBridge の進捗枠 0.75/3、重み 22 → 16。★Theorem 3.8 の残高 = I(5) ＋ II(16) = 21。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "zetaPiCoord20260902": {
+    "block": 1163,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★座標は (ZMod l)² の元として一意に決まる——節点 1 がほぼ閉じた",
+    "goal": "α が mod l 像に入る段の橋(第 1160 の枠、節点 1)。",
+    "what": "★zeta_pi_coord_eq_iff —— Lˣ/⟨Q⟩ の中で [ζ^{a₁}π^{b₁}] = [ζ^{a₂}π^{b₂}] ⟺ a₁ ≡ a₂, b₁ ≡ b₂ (mod l)(★無条件)。☆第 1162 の核の記述(zeta_pi_mem_zpowers_iff)を差に当てただけである。",
+    "why": "★★これで座標は (ZMod l)² の元として**一意に**決まる。☆sigma_acts_as_alpha(第 993)の (a,b) ↦ (a+b, b) と合わせれば、σ の行列がちょうど α = (1 1 / 0 1) になる。★AlphaBridge の節点 2 はこの形を直接使う。",
+    "frame": "☆AlphaBridge の進捗枠 0.9/3、重み 22 → 15。★Theorem 3.8 の残高 = I(5) ＋ II(15) = 20。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

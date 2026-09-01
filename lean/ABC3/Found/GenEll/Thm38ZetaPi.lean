@@ -130,6 +130,40 @@ theorem zeta_pi_mem_zpowers_iff {G : Type*} [CommGroup G] {l : ℕ} (hl : 0 < l)
   · rintro ⟨ha, hb⟩
     exact zeta_pi_mem_of_dvd hζl hπl ha hb
 
+/-! ## ★★★★★★★★★★★★同じ類 ⟺ 座標が `l` を法として一致 -/
+
+/-- ★★★★★★★★★★★★★★★★
+**`ζᵃπᵇ` の類が一致するのは座標が `l` を法として一致するとき**——★**無条件**（第 1163）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆`Lˣ/⟨Q⟩` の中で `[ζ^{a₁}π^{b₁}] = [ζ^{a₂}π^{b₂}] ⟺ a₁ ≡ a₂, b₁ ≡ b₂ (mod l)`。
+★★これで座標は `(ZMod l)²` の元として**一意に**決まる。
+☆`AlphaBridge` の節点 2 はこの形を直接使う——`σ` の作用が
+`(a,b) ↦ (a+b, b)`（`sigma_acts_as_alpha`、第 993）であることと合わせると、
+`σ` の行列がちょうど `α = (1 1 / 0 1)` になる。 -/
+theorem zeta_pi_coord_eq_iff {G : Type*} [CommGroup G] {l : ℕ} (hl : 0 < l) {Q ζ π : G}
+    (hζl : ζ ^ l = 1) (hζprim : ∀ n : ℕ, 0 < n → n < l → ζ ^ n ≠ 1)
+    (hπl : π ^ l = Q) (hQinf : ∀ j : ℤ, Q ^ j = 1 → j = 0)
+    (a₁ b₁ a₂ b₂ : ℤ) :
+    (∃ n : ℤ, ζ ^ a₁ * π ^ b₁ = ζ ^ a₂ * π ^ b₂ * Q ^ n)
+      ↔ ((l : ℤ) ∣ (a₁ - a₂) ∧ (l : ℤ) ∣ (b₁ - b₂)) := by
+  have key := zeta_pi_mem_zpowers_iff hl hζl hζprim hπl hQinf (a₁ - a₂) (b₁ - b₂)
+  have h1 : ζ ^ (a₁ - a₂) * π ^ (b₁ - b₂)
+      = (ζ ^ a₁ * π ^ b₁) * (ζ ^ a₂ * π ^ b₂)⁻¹ := by
+    rw [zpow_sub, zpow_sub, mul_inv]
+    simp only [mul_assoc, mul_comm, mul_left_comm]
+  rw [← key]
+  constructor
+  · rintro ⟨n, hn⟩
+    refine ⟨n, ?_⟩
+    rw [h1, hn, mul_comm (ζ ^ a₂ * π ^ b₂) (Q ^ n), mul_assoc, mul_inv_cancel, mul_one]
+  · rintro ⟨n, hn⟩
+    refine ⟨n, ?_⟩
+    rw [h1] at hn
+    rw [mul_inv_eq_iff_eq_mul.mp hn, mul_comm]
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def orderOf_eq_of_primitive.src : ABC3.Meta.Source :=
@@ -140,6 +174,11 @@ def orderOf_eq_of_primitive.src : ABC3.Meta.Source :=
 def zeta_pi_indep.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(ζ と π は Lˣ/⟨Q⟩ の中で独立。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def zeta_pi_coord_eq_iff.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(ζᵃπᵇ の類が一致するのは座標が mod l で一致するとき。★無条件)",
     sectionId := "genell-thm-3-8" }
 
 def zeta_pi_mem_zpowers_iff.src : ABC3.Meta.Source :=
