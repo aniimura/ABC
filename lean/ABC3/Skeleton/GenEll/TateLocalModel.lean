@@ -1115,10 +1115,15 @@ def isIntegral_veluQuotientFull_of_coprime.src : Source :=
 def isIntegral_veluQuotientFull_of_coprime.needs : List ProofObligation :=
   [ .citation "[ABC3]" "isUnit_natCast_at_bad_prime(l ≠ char(k_p)、第 1044、証明済み)"
       (.inProject "ABC3" "ABC3.Skeleton.GenEll.isUnit_natCast_at_bad_prime") 1,
+    .citation "[ABC3]" "exists_vw_tate_mu(悪い素点側はこれで出る、第 1003、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.exists_vw_tate_mu") 1,
     .implicitStep
-      ("☆位数が剰余標数と素な捻れ点は極小モデルで整座標をもつ" ++
-       "（形式群の捻れが自明であることから）。" ++
-       "★Vélu の係数 `veluVFull`・`veluWFull` はその座標の多項式なので整になる") 3 ]
+      ("★★**2026-09-01（第 1064）の測定**——本節点は 2 つに割れる。" ++
+       "☆**悪い素点**ではすでに出る——第 1003 が Vélu の係数 `v`・`w` を" ++
+       "**`R` の元として**与えるので `veluCurve (tate q) v w` は `R`-曲線であり、" ++
+       "第 1058 の輸送と `C₀ : VariableChange R`（`u` は単元）で `E′ ⊗ Lv` に移る。" ++
+       "★残るのは**良い素点**だけで、そこでは Tate の機械が使えないので" ++
+       "「位数が剰余標数と素な捧れ点は極小モデルで整」（形式群）が要る") 2 ]
 
 /-! ## ★★★★★★★★★★★★★★★★第 1053 —— `hfin` はモデルに依らない
 
