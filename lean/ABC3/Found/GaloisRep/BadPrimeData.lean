@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 import ABC3.Found.GaloisRep.DegInfBaseChange
 import ABC3.Found.GaloisRep.DegInfTateParam
 import ABC3.Found.GenEll.JScale
+import ABC3.Found.GaloisRep.HtFaltJ
 
 /-!
 # 第 954 ブロック —— **★★★★★★★★★★★★★★★★悪い素点の局所データを取り出す**（`Found`）
@@ -115,6 +116,86 @@ def valAdd_Delta_eq_neg_jExp.src : ABC3.Meta.Source :=
 def valAdd_Delta_pos_of_jExp_neg.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(悪い素点では極小モデルの v_p(Δ) は正。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+/-! ## ★★★★★★★★★★★★★★★★第 976 —— 悪い素点で局所の還元型を出す
+
+★第 972 は `E ⊗ Lv` の**極小性**と**分裂乗法還元**を受ける。
+☆第 974 で測ったとおり `IsMinimal` は変数変換で不変ではないので、
+渡すのは `C • E`（`SemistableAt` が与える極小モデル）である。
+
+★本ブロックは `SemistableAt` の 4 つのデータ（`C`・`hC`・`hc4ne`・`hc4`、第 954）から
+
+* `(C • E) ⊗ Lv` の極小性（第 908）
+* `(C • E) ⊗ Lv` の**乗法**還元（第 909、`0 < v_p(Δ)` は第 973 が与える）
+
+を出す。☆残るのは分裂性だけで、それは第 963 の二者択一が扱う。 -/
+
+section BadPrimeLocal
+
+variable {Lv : Type} [Field Lv] [Algebra L Lv]
+  {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+  [Algebra R Lv] [IsFractionRing R Lv]
+
+/-- ★**`jExp` は変数変換で不変**——`j` が不変だから。 -/
+theorem jExp_variableChange (p : HeightOneSpectrum (𝓞 L))
+    (E : WeierstrassCurve L) [E.IsElliptic] (C : WeierstrassCurve.VariableChange L) :
+    jExp p (C • E) = jExp p E :=
+  jExp_congr_j p (C • E) E (WeierstrassCurve.variableChange_j E C)
+
+/-- ★★★★★★★★**極小モデルは完備化でも極小**（第 908 を `C • E` に当てた形）。 -/
+theorem isMinimal_baseChange_at_bad_prime (p : HeightOneSpectrum (𝓞 L))
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation Lv
+        (IsDiscreteValuationRing.maximalIdeal R)) (algebraMap L Lv x)
+      = (HeightOneSpectrum.valuation L p) x)
+    (E : WeierstrassCurve L) [E.IsElliptic]
+    (C : WeierstrassCurve.VariableChange L)
+    (hC : WeierstrassCurve.IsMinimal (primeSubring p) (C • E))
+    (hc4ne : (C • E).c₄ ≠ 0) (hc4 : valAdd p (Units.mk0 ((C • E).c₄) hc4ne) = 0) :
+    WeierstrassCurve.IsMinimal R ((C • E).baseChange Lv) := by
+  haveI := hC
+  exact isMinimal_baseChange_of_c4 p hp (C • E)
+    (variableChange_Delta_ne_zero E (E.isUnit_Δ.ne_zero) C) hc4ne hc4
+
+/-- ★★★★★★★★★★★★**悪い素点では完備化で乗法還元をもつ**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 976）**——`0 < v_p(Δ)` は第 973 が `jExp < 0` から与える。
+☆残るのは分裂性だけで、それは第 963 の二者択一が扱う。 -/
+theorem hasMultiplicativeReduction_at_bad_prime (p : HeightOneSpectrum (𝓞 L))
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation Lv
+        (IsDiscreteValuationRing.maximalIdeal R)) (algebraMap L Lv x)
+      = (HeightOneSpectrum.valuation L p) x)
+    (E : WeierstrassCurve L) [E.IsElliptic]
+    (C : WeierstrassCurve.VariableChange L)
+    (hC : WeierstrassCurve.IsMinimal (primeSubring p) (C • E))
+    (hc4ne : (C • E).c₄ ≠ 0) (hc4 : valAdd p (Units.mk0 ((C • E).c₄) hc4ne) = 0)
+    (hj : jExp p E < 0)
+    [WeierstrassCurve.IsMinimal R ((C • E).baseChange Lv)] :
+    WeierstrassCurve.HasMultiplicativeReduction R ((C • E).baseChange Lv) := by
+  haveI := hC
+  have hΔ : (C • E).Δ ≠ 0 := variableChange_Delta_ne_zero E (E.isUnit_Δ.ne_zero) C
+  have hjC : jExp p (C • E) < 0 := by rw [jExp_variableChange p E C]; exact hj
+  exact hasMultiplicativeReduction_baseChange p hp (C • E) hΔ hc4ne hc4
+    (valAdd_Delta_pos_of_jExp_neg p (C • E) hΔ hc4ne hc4 hjC)
+
+end BadPrimeLocal
+
+def jExp_variableChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(jExp は変数変換で不変。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def isMinimal_baseChange_at_bad_prime.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(極小モデルは完備化でも極小。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def hasMultiplicativeReduction_at_bad_prime.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(悪い素点では完備化で乗法還元をもつ。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 /-! ## ★出典の紐付け(`.src`) -/
