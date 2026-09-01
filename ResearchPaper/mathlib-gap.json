@@ -6019,5 +6019,15 @@
     "correction": "★第 1266 の「Néron モデルの理論であり mathlib には無い」は mathlib については正しいが、**本プロジェクトの在庫を過小評価していた**。欠けているのは機構ではなく、**「半安定性が同種写像で保たれる」という 1 つの命題**である(decl-index を semistable × velu で引いて 0 件)。",
     "consequence": "☆したがって VeluQuotOK の半安定性は、在庫の SemistableModelData と Δ_min の局所の関係(第 1259 の hbad が使う minDeltaExp_eq_mul_at_bad_prime、証明済み)から**組み上げられる可能性が高い** —— v_p(Δ_min(E′)) = l·v_p(Δ_min(E)) は既にあるので、半安定性の定義(Δ_min = 0 または c₄ が単元)を商の側で確かめる道が見える。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "semistableCriterion20260902": {
+    "block": 1268,
+    "date": "2026-09-02",
+    "title": "★★☆測定——残る穴は「v_p(Δ_min) = max(0, −v_p(j)) ⟹ 半安定」の 1 命題に絞れた",
+    "goal": "VeluQuotOK の半安定性をどう出すかを測る。",
+    "measured": "☆SemistableAt の定義は「v_p(Δ_min) = 0（良還元）∨ 極小モデルの c₄ が単元（乗法還元）」。★在庫には **minDeltaExp_le_maxJ**（半安定 ⟹ v_p(Δ_min) ≤ max(0, −v_p(j))）と **maxJ_le_minDeltaExp**（**無条件**で逆向きの不等式）がある。",
+    "consequence": "★★★したがって残る穴は**逆向きの含意 1 本** —— 「v_p(Δ_min) = max(0, −v_p(j)) なら半安定」である。☆これが言えれば、商の Δ_min の関係（minDeltaExp_eq_mul_at_bad_prime、証明済み）と jExp の関係から**商の半安定性が出て VeluQuotOK が閉じる**。",
+    "note": "★これは Kodaira–Néron の分類（加法還元では v_p(Δ_min) > max(0, −v_p(j)) になる）の内容であり、mathlib にも本プロジェクトにも無い。☆ただし**言明は 1 行**であり、GenEll §3-§4 に残る唯一の数学の塊としては非常に小さい。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
