@@ -4567,5 +4567,24 @@
     },
     "remaining": "☆残るのは veluQuotientFull_tate_mu / isElliptic_veluQuotient_tate_mu を「K の座標で受ける形」に書き直し、hvw の口を付け替える配管である。★材料(座標の橋・和の橋・c₄/c₆/Δ/j の関係)はすべて揃った。",
     "gate": "lake build ABC3 成功(6260 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
+  },
+  "tateVeluMuK20260901": {
+    "block": 1135,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★★★★★E_q/μ_l の組み立ての K 水準版——節点 5 の消費者 C が閉じた",
+    "goal": "Lemma 3.5 から原典に無い仮説 d + 1 < l を外す(§3 の枠の節点 5)。",
+    "measured": "★★第 890 の veluQuotientFull_tate_mu が hu(IsUnit (1 − ζ^i))を要求していたのは、pointCoords_tatePtPair が tateXK_eq で座標を「R の元の像」に直すためだけであった(実測)。☆**その一歩手前で止めれば要らない**——tatePtPair は Point.some なので座標は tateXK・tateYK そのものである。",
+    "added": {
+      "Found/GaloisRep/TateVeluMuK.lean (新規)": [
+        "veluQuotientFull_image_eq_field(体の上、底変換なし。R = K で特殊化)",
+        "veluQuotientFull_points_eq_field(体の上の点の族から商へ)",
+        "pointCoords_tatePtPair_K(★座標は tateXK・tateYK そのもの。無条件)",
+        "veluQuotientFull_tate_mu_K(★E_q/μ_l の組み立て。IsUnit (1−ζ^i) を取らない)",
+        "isElliptic_veluQuotientFull_tate_mu_K(★商の楕円性)"
+      ]
+    },
+    "status": "★★節点 5 で hlu を消費する 3 か所すべてに hlu なしの代替が揃った: A = j_eq_of_c4_c6(第 1132)、B = natCast_pow_mul_tateXK(第 1133)、C = veluQuotientFull_tate_mu_K / isElliptic_veluQuotientFull_tate_mu_K(第 1134-1135)。",
+    "remaining": "☆残るのは minDeltaExp_eq_mul_of_globalVelu'(第 999)と minDeltaExp_eq_mul_at_bad_prime(第 1000)を _K 版で組み直す段だけである。",
+    "gate": "lake build ABC3 成功(6261 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。一発で通った。"
   }
 }

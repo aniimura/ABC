@@ -88,9 +88,13 @@ import ABC3.Meta.Claim
 
 | # | 消費者 | 何のために | 状態 |
 |---|---|---|---|
-| A | `j_velu_tate_mu_map` | `j(veluCurve) = j(E_{q^l})` | ★第 1132 の `j_eq_of_c4_c6` が代わりになる |
-| B | `pointCoords_tatePtPair`（`veluQuotientFull_tate_mu` 経由） | `μ_l` の点の座標を書く | ★第 1133 の `natCast_pow_mul_tateXK` が代わりになる |
-| C | `isElliptic_veluQuotient_tate_mu` | 商の楕円性 | ☆残り（B の橋を当てる配管） |
+| A | `j_velu_tate_mu_map` | `j(veluCurve) = j(E_{q^l})` | ★第 1132 の `j_eq_of_c4_c6` |
+| B | `pointCoords_tatePtPair` | `μ_l` の点の座標を書く | ★第 1133 の `natCast_pow_mul_tateXK` |
+| C | `veluQuotientFull_tate_mu` / `isElliptic_veluQuotient_tate_mu` | 商の形と楕円性 | ★第 1134-1135 の `_K` 版 |
+
+☆**3 つとも `hlu` なしの代替が揃った**（第 1132-1135）。
+★残るのは `minDeltaExp_eq_mul_of_globalVelu'`（第 999）と
+`minDeltaExp_eq_mul_at_bad_prime`（第 1000）を `_K` 版で組み直す段だけである。
 
 ★**A は閉じた**——`j = Δ⁻¹·c₄³` なので `c₄ ↦ l⁴c₄`・`Δ ↦ l¹²Δ` では `l¹²` が約分される
 （`j_of_c4_Delta`・`j_eq_of_c4_c6`、第 1132）。
