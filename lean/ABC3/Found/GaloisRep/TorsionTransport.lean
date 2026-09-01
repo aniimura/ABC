@@ -64,6 +64,7 @@ noncomputable def torsionMap (W : WeierstrassCurve K₀) (f : F →ₐ[K₀] K) 
   fun P => ⟨Point.map f (P : (W.baseChange F).toAffine.Point), by
     rw [← map_nsmul, P.2, map_zero]⟩
 
+set_option linter.unusedSectionVars false in
 /-- ★★★★★★★★★★★★★★★★
 **代数閉体の埋め込みは `E[n]` の間の全単射を与える**——★**無条件**（第 1271）。
 
@@ -72,7 +73,6 @@ noncomputable def torsionMap (W : WeierstrassCurve K₀) (f : F →ₐ[K₀] K) 
 
 ☆単射性は `Point.map_injective`、個数はどちらも `n²`（`torsion_card`）。
 ★★**有限集合の間の単射で個数が等しいから全射**——それだけである。 -/
-omit [DecidableEq K₀] in
 theorem torsionMap_bijective [IsAlgClosed F] [IsAlgClosed K] (W : WeierstrassCurve K₀)
     (hΔF : (W.baseChange F).Δ ≠ 0) (hΔK : (W.baseChange K).Δ ≠ 0)
     (f : F →ₐ[K₀] K) (n : ℕ) (hn : 1 ≤ n)

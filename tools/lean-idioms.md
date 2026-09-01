@@ -3065,3 +3065,19 @@ grep する。☆`node tools/decl-index.mjs` の索引を
 **直し方**: `by_cases h : a < b` を使う。分岐の順（`positive` が先）が入れ替わるので、
 `·` の中身も入れ替えること。`le_or_gt` / `lt_or_ge` は在るが、
 `by_cases` なら名前を覚えなくてよい。
+
+## `omit ... in` は docstring の**前**に置く(2026-09-02、第 1271)
+
+**失敗形**: `/-- doc -/` の直後に `omit [Inst] in` を挟むと
+`unexpected token 'omit'; expected 'lemma'` になる。docstring は宣言に直結するため。
+
+**直し方**: `omit`／`set_option ... in` は docstring より前の行に置く。
+
+## ゲートの読み方——`grep -A n | head -m` は error を隠す(2026-09-02、第 1271)
+
+**失敗形**: `lake build <target> 2>&1 | grep -E "error|warning" -A12 | head -45` で
+「error 無し」と判断したが、他ファイルの warning が 45 行を食い尽くしていて
+**自分のファイルの error が表示されていなかった**。そのまま commit した。
+
+**直し方**: 判定は `grep -E "^error" -A 20 | head -40`（行頭アンカー）で行い、
+かつ**必ず `lake build ABC3` の tail を読む**。warning と error を同じ grep に入れない。
