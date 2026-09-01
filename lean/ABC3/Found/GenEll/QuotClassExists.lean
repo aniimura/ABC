@@ -328,11 +328,56 @@ theorem faltingsHeightJ_quotLCyclicJ_zero (x : RealizedClass) (l : ℕ)
     (fun S hS => by simpa using hfalt S hS)
   simpa using h
 
+/-! ## ★★★★★★★★★★★★★★★★生成元を持ち歩く版 -/
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★
+**生成元 `Q` を持ち歩く `IsQuotClassJ`**（第 1262）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`IsQuotClassJ` は座標集合 `S` だけを持つので、
+`htFalt_veluQuotientFull_le`（第 704）が要る**生成元 `Q`** が取り出せない。
+★本定義は `Q` を持ち歩く形であり、`IsQuotClassJ` を含意する（下の定理）。
+
+★★★これが `EllModuliWitness` の `faltingsHeight_quotLCyclic` を
+在庫の同種写像の高さ評価に繋ぐための設計である。 -/
+def IsQuotClassPointJ (x : RealizedClass) (l : ℕ) (y : ℂ) : Prop :=
+  ∃ (Q : x.rep.toSSCurve.W.toAffine.Point) (_hQ : addOrderOf Q = l)
+    (hell : (veluQuotientFull x.rep.toSSCurve.W
+      (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))).IsElliptic)
+    (hss : ∀ p : HeightOneSpectrum (𝓞 x.rep.toSSCurve.fld),
+      SemistableAt p (veluQuotientFull x.rep.toSSCurve.W
+        (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))))),
+    (quotSSCurve x.rep.toSSCurve
+      (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))) hell hss).j = y
+
+open scoped Classical in
+/-- ★★★★★★★★**生成元つきなら座標集合つきでもある**——★**無条件**（第 1262）。
+
+☆個数の条件 `S.card + 1 = l` は第 1240 が与える。 -/
+theorem isQuotClassJ_of_point {x : RealizedClass} {l : ℕ} (hl : l.Prime) {y : ℂ}
+    (h : IsQuotClassPointJ x l y) : IsQuotClassJ x l y := by
+  obtain ⟨Q, hQ, hell, hss, hj⟩ := h
+  exact ⟨((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)), hell, hss,
+    card_image_pointCoords_nsmul hl hQ, hj⟩
+
 /-! ## ★出典の紐付け(`.src`)——★**条つきである。指標には数えない** -/
 
 def degInfJ_quotLCyclicJ_of_jExp.src : Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(quotLCyclicJ の deg∞——jExp の言葉で。Lemma 3.2, (ii) を仮説で受ける)",
+    sectionId := "genell-lemma-3-5" }
+
+def IsQuotClassPointJ.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(生成元 Q を持ち歩く IsQuotClassJ)",
+    sectionId := "genell-lemma-3-5" }
+
+def isQuotClassJ_of_point.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(生成元つきなら座標集合つきでもある。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
 def faltingsHeightJ_quotLCyclicJ_zero.src : Source :=

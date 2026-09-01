@@ -5959,5 +5959,15 @@
     "consequence": "★★★したがって **EllModuliData の witness を閉じれば、Theorem 3.8(§3 9/9)と Corollary 4.3・4.4(§4 5/5)が同時に落ちる** —— 指標は 20/24 → **23/24** になる。☆残るのは §2 の Theorem 2.1(本論文外の [Stacks] 58.6 と [NCBelyi] Thm 2.5、および mathlib に無い Riemann-Roch)だけである。",
     "remaining": "☆witness の 4 本に残るのは配管のみ(第 1257): (1) VeluQuotOK、(2) 良い素点の符号＋局所結果(第 1259 が受け口)、(3) 幾何のデータ(第 1260 が受け口)、(4) σ の冪単性・非自明性(第 1249 が受け口)。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "quotClassPoint20260902": {
+    "block": 1262,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★生成元 Q を持ち歩く IsQuotClassJ——witness (3) の設計",
+    "goal": "EllModuliWitness の sorry (3) を在庫の同種写像の高さ評価に繋ぐ。",
+    "what": "★IsQuotClassPointJ と isQuotClassJ_of_point(Found/GenEll/QuotClassExists.lean)。",
+    "measured": "☆IsQuotClassJ は座標集合 S だけを持つので、htFalt_veluQuotientFull_le(第 704)が要る**生成元 Q** が取り出せない。★生成元を持ち歩く形を定義し、IsQuotClassJ を含意することを示した(個数の条件は第 1240)。",
+    "consequence": "☆これで witness の quotLCyclic 欄を IsQuotClassPointJ に切り替えれば、(3) が在庫の評価に直結する。★設計の追加であり、既存の IsQuotClassJ は触っていない(波及なし)。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
