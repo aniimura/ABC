@@ -157,7 +157,36 @@ theorem exists_kummer_root_unit {K : Type*} [Field K] {l : ℕ} (hl : 0 < l) {q 
   rw [hu.unit_spec]
   exact hpow
 
+/-! ## ★★★★★★★★Kummer 拡大は体である -/
+
+open AdjoinRoot in
+/-- ★★★★★★★★★★**`q` が `l` 乗でなければ `AdjoinRoot (Xˡ − C q)` は体**——★**無条件**（第 1200）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆`l` 素数で `q` が `l` 乗でなければ `Xˡ − C q` は既約
+（mathlib の `X_pow_sub_C_irreducible_of_prime`）なので、`AdjoinRoot` は体になる。
+
+★★★これで Kummer 拡大を **Tate 設定の体 `K`** として使えるようになる
+——`TateSetup` は `[Field K]` を要求するからである。 -/
+theorem irreducible_X_pow_sub_C_of_not_pow {K : Type*} [Field K] {l : ℕ} (hl : l.Prime)
+    {q : K} (hq : ∀ b : K, b ^ l ≠ q) :
+    Irreducible (X ^ l - C q) :=
+  X_pow_sub_C_irreducible_of_prime hl hq
+
+/-- ☆`Fact` の形（インスタンス解決に使う）。 -/
+theorem fact_irreducible_X_pow_sub_C_of_not_pow {K : Type*} [Field K] {l : ℕ} (hl : l.Prime)
+    {q : K} (hq : ∀ b : K, b ^ l ≠ q) :
+    Fact (Irreducible (X ^ l - C q)) :=
+  ⟨irreducible_X_pow_sub_C_of_not_pow hl hq⟩
+
 /-! ## ★出典の紐付け(`.src`)——★**条つきである。指標には数えない** -/
+
+def irreducible_X_pow_sub_C_of_not_pow.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(q が l 乗でなければ AdjoinRoot (Xˡ − C q) は体。★無条件)",
+    sectionId := "genell-thm-3-8" }
 
 def exists_kummer_root_unit.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,

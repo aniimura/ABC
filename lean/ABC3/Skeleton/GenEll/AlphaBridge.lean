@@ -61,6 +61,16 @@ Tate 一意化の同変性である。★足りないのは**それらを繋ぐ 
 
 ★★★**残るのは具体の `TateSetup`・`galRep` に当てはめる配管だけ**である。
 
+### ★★★★★★★★第 1200——Kummer 拡大を Tate 設定の体として使える
+
+`irreducible_X_pow_sub_C_of_not_pow`・`fact_irreducible_X_pow_sub_C_of_not_pow`
+（`Found/GenEll/Thm38KummerExists.lean`）。
+
+☆`l` 素数で `q` が `l` 乗でなければ `Xˡ − C q` は既約なので
+`AdjoinRoot (Xˡ − C q)` は**体**になる。
+★`TateSetup` は `[Field K]` を要求するので、これがないと当てはめられなかった。
+☆`q` が `l` 乗でないことは `l ∤ v(q)` から出る（`not_lth_power_of_val`、第 994）。
+
 ### ★★★★★★★★★★★★第 1172-1174——仮説がすべて消えた
 
 | 仮説 | どこから出るか | 第 |
