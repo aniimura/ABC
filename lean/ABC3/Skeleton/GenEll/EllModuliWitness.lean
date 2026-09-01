@@ -61,6 +61,17 @@ import ABC3.Meta.Claim
 
 ★★★**したがって 4 本に残るのは配管だけであり、
 未証明の外部引用は 1 本もない**。
+
+## ★★★★★★★★★★★★★★★★★★★★この 4 本が 3 項目を同時に閉じる（第 1261）
+
+☆**測定（2026-09-02）**——`Skeleton/GenEll/Section4.lean` は **sorry 0**
+（`cor_4_3`・`cor_4_4` は `EllModuliData` から導出済み、第 367）であり、
+`Skeleton/GenEll/GaloisImage.lean` の `theorem_3_8` も sorry 0 である。
+
+★★★したがって**本ファイルの 4 本を閉じれば、
+`Theorem 3.8`（§3 9/9）と `Corollary 4.3`・`4.4`（§4 5/5）が同時に落ちる**
+——指標は 20/24 → **23/24** になる。
+☆残るのは §2 の `Theorem 2.1`（本論文外の 2 結果）だけである。
 -/
 
 namespace ABC3.Skeleton.GenEll
