@@ -5630,5 +5630,15 @@
     "measured": "☆addEquiv_limTors(在庫)が要るのは「#A[m] = m²」だけなので、加法同型 Φ で捩れ部分群を移せば E の側でも T_l ≅ Z_l² が言える。★Tate 一意化 Φ : Additive (Kˣ/qℤ) ≃+ E(K) がその Φ である。",
     "consequence": "☆これで α を galRep の行列として読む段の**基底の側**が用意できた。★残るのは zeta_pi_basis(第 1165)で作った基底の上で kummer_sigma_coord_alpha(第 1212)を行列に読み替える段である。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "alphaMatrix20260902": {
+    "block": 1228,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★★★★★座標の作用から行列を読む——α 橋 II 側の最後の読み替え",
+    "goal": "α が mod l 像に入る段(第 1160 の枠、II 側)。",
+    "what": "★glRed_galRep_eq_of_redVec(Found/GenEll/AlphaMatrix.lean)—— ∀ x, redVec (e (galTate σ x)) = α ·ᵥ redVec (e x) ⟹ glRedPadic l (galRep σ) = α。",
+    "measured": "☆材料は galMat_apply(在庫)・redVec_mulVec(第 1204)・exists_redVec_eq(第 1204、還元は全射)・mathlib の Matrix.ext_of_mulVec_single。",
+    "consequence": "★★★これで α ∈ (galRep の像).map (glRedPadic l) が言える —— 局所から大域へは第 1167-1169 が運ぶ。☆残るのは具体の Tate 設定で e を ζ, π の基底として作る段である。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
