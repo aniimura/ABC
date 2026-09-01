@@ -8,6 +8,8 @@ import ABC3.Found.GenEll.VeluPointSet
 import ABC3.Found.GenEll.SymmSum
 import ABC3.Found.GaloisRep.TateVeluPoints
 import ABC3.Found.GenEll.VeluImage
+import ABC3.Found.GaloisRep.LogProductFormula
+import ABC3.Found.GaloisRep.Lemma35Ineq
 import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
 
 /-!
@@ -837,6 +839,93 @@ theorem neronExp_sub_le_valAdd_natCast (p : HeightOneSpectrum (𝓞 L))
       rw [hEq]
       exact this
   omega
+
+
+open Finset in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★**[GenEll] `hfin` そのもの**（第 1083）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★第 1082 の各素点の評価を足し上げるだけである。
+☆`Σᶠ_p v_p(l)·logN(p) = d·log l`（第 576 系の積公式）。 -/
+theorem hfin_of_veluQuotientFull (E E' : WeierstrassCurve L)
+    [E.IsElliptic] [E'.IsElliptic]
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
+    (hE' : E' = veluQuotientFull E (((range l).erase 0).image
+      (fun k : ℕ => pointCoords (k • Q)))) :
+    (∑ᶠ p : HeightOneSpectrum (𝓞 L),
+        (neronExp p E : ℝ) * Real.log (Ideal.absNorm p.asIdeal))
+      - (∑ᶠ p : HeightOneSpectrum (𝓞 L),
+        (neronExp p E' : ℝ) * Real.log (Ideal.absNorm p.asIdeal))
+      ≤ (3 / 2) * (Module.finrank ℚ L : ℝ) * Real.log l := by
+  classical
+  have hlne : ((l : L)) ≠ 0 := Nat.cast_ne_zero.2 hl.ne_zero
+  have hlogl : (0 : ℝ) < Real.log l := Real.log_pos (by exact_mod_cast hl.one_lt)
+  have hd0 : (0 : ℝ) < (Module.finrank ℚ L : ℝ) := by
+    have := Module.finrank_pos (R := ℚ) (M := L)
+    exact_mod_cast this
+  set f : HeightOneSpectrum (𝓞 L) → ℝ := fun q =>
+    (neronExp q E : ℝ) * Real.log (Ideal.absNorm q.asIdeal) with hfdef
+  set g : HeightOneSpectrum (𝓞 L) → ℝ := fun q =>
+    (neronExp q E' : ℝ) * Real.log (Ideal.absNorm q.asIdeal) with hgdef
+  set h : HeightOneSpectrum (𝓞 L) → ℝ := fun q =>
+    (valAdd q (Units.mk0 ((l : L)) hlne) : ℝ) * Real.log (Ideal.absNorm q.asIdeal) with hhdef
+  -- ☆`Σᶠ h = d·log l`
+  have hHsum : (∑ᶠ q : HeightOneSpectrum (𝓞 L), h q)
+      = (Module.finrank ℚ L : ℝ) * Real.log l := by
+    rw [hhdef, ← sum_arch_log_eq_finsum_valAdd ((l : L)) hlne]
+    have hterm : ∀ σ : (L →+* ℂ), Real.log ‖σ ((l : L))‖ = Real.log l := by
+      intro σ
+      rw [map_natCast]
+      congr 1
+      simp
+    rw [Finset.sum_congr rfl (fun σ _ => hterm σ), Finset.sum_const, nsmul_eq_mul]
+    congr 1
+    exact_mod_cast congrArg (Nat.cast (R := ℝ)) (NumberField.Embeddings.card L ℂ)
+  -- ☆有限台（積公式から従う）
+  have hHfin : (Function.support h).Finite := by
+    by_contra hc
+    rw [finsum_of_infinite_support hc] at hHsum
+    nlinarith [hHsum, hd0, hlogl]
+  have hΔE : E.Δ ≠ 0 := E.isUnit_Δ.ne_zero
+  have hΔE' : E'.Δ ≠ 0 := E'.isUnit_Δ.ne_zero
+  have hFfin : (Function.support f).Finite := by
+    refine Set.Finite.subset (finite_bad_primes' E hΔE) (fun q hq => ?_)
+    simp only [Function.mem_support, hfdef, ne_eq] at hq ⊢
+    intro h0
+    exact hq (by rw [h0]; simp)
+  have hGfin : (Function.support g).Finite := by
+    refine Set.Finite.subset (finite_bad_primes' E' hΔE') (fun q hq => ?_)
+    simp only [Function.mem_support, hgdef, ne_eq] at hq ⊢
+    intro h0
+    exact hq (by rw [h0]; simp)
+  -- ★各素点の評価（第 1082）
+  have hterm : ∀ q : HeightOneSpectrum (𝓞 L), f q - g q ≤ h q := by
+    intro q
+    have hlog : (0 : ℝ) ≤ Real.log (Ideal.absNorm q.asIdeal) :=
+      le_trans (Real.log_nonneg (by norm_num)) (log_two_le_log_absNorm q)
+    have hloc := neronExp_sub_le_valAdd_natCast q E E' hl hodd Q hQ hE' hlne
+    have hcast : ((neronExp q E : ℝ) - (neronExp q E' : ℝ))
+        ≤ (valAdd q (Units.mk0 ((l : L)) hlne) : ℝ) := by exact_mod_cast hloc
+    calc f q - g q
+        = ((neronExp q E : ℝ) - (neronExp q E' : ℝ))
+            * Real.log (Ideal.absNorm q.asIdeal) := by rw [hfdef, hgdef]; ring
+      _ ≤ (valAdd q (Units.mk0 ((l : L)) hlne) : ℝ)
+            * Real.log (Ideal.absNorm q.asIdeal) := mul_le_mul_of_nonneg_right hcast hlog
+  have hFGfin : (Function.support (fun q => f q - g q)).Finite := by
+    refine Set.Finite.subset (hFfin.union hGfin) (fun q hq => ?_)
+    simp only [Function.mem_support, ne_eq] at hq
+    by_contra hc
+    simp only [Set.mem_union, Function.mem_support, ne_eq, not_or, not_not] at hc
+    exact hq (by rw [hc.1, hc.2]; ring)
+  have hle : (∑ᶠ q : HeightOneSpectrum (𝓞 L), (f q - g q))
+      ≤ (∑ᶠ q : HeightOneSpectrum (𝓞 L), h q) :=
+    finsum_le_finsum' hFGfin hHfin hterm
+  rw [finsum_sub_distrib hFfin hGfin] at hle
+  rw [hHsum] at hle
+  nlinarith [hle, hd0, hlogl]
 
 end Integral
 
