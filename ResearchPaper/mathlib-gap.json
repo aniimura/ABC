@@ -5172,5 +5172,14 @@
     "measured": "★★**第 1182 の見積もりの再訂正**——分岐指数が l と素であることは**要らなかった**。半安定なら両辺とも e 倍になる(minDeltaExp_baseChange_of_semistableAt、第 740)ので、e ≠ 0 で割るだけでよい。☆Thm38Kummer.lean の coprime_of_dvd_sub_one は使わない。",
     "frame": "☆節点 2d の重み 8 → **5**(残るのは 2d-1、局所の議論を L_v(ζ_l) で回す段)。★Theorem 3.8 の残高 = I(5) ＋ II(1) = 6。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "stableLineIsMu20260902": {
+    "block": 1184,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★l ∤ v(q) なら安定直線は μ_l——節点 2d-1 の入口",
+    "goal": "l-巡回の 2 つの読みを繋ぐ(第 1152 の枠、節点 2d-1)。",
+    "what": "★dvd_exponent_of_not_dvd_val(Found/GenEll/Lemma32StableLine.lean)—— lemma_3_2_i の**対偶**。安定な直線の生成元 x が xˡ = Qᵏ を満たすとき、l ∤ v(q) なら必ず l ∣ k——すなわち x は Q の冪を除いて l 乗根、つまり直線は μ_l である。",
+    "why": "★★★これが節点 2d-1 の**入口**である。☆安定直線の局所での姿が μ_l だと分かれば、既存の _K の連鎖が L_v(ζ_l) の上でそのまま走り、そこで得た Δ_min の関係は第 1183 で L_v へ降りる。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }
