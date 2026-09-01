@@ -818,6 +818,79 @@ theorem integralModel_ext {L : Type} [Field L] [NumberField L]
 
 end IntegralModelExt
 
+/-! ## ★★★★★★★★★★★★第 1031 —— 2 次式を monic 化する
+
+★`HasSplitMultiplicativeReduction` の `Splits` 条件の 2 次式は
+
+    `C c₄ · X² + C (a₁ c₄) · X − C (54 b₆ − 3 b₂ b₄ + a₂ c₄)`
+
+であり、乗法還元では `c₄` が**単元**なので `c₄` で括り出して monic にできる。
+☆その monic な因子を `f` に取れば、第 1025（剰余体で分裂）がそのまま効く。 -/
+
+section SplitQuad
+
+open Polynomial WeierstrassCurve in
+/-- ★★★★★★★★**分裂性の 2 次式の monic 化**（第 1031）。 -/
+noncomputable def splitQuadPoly {R : Type} [CommRing R] (I : WeierstrassCurve R)
+    (hA : IsUnit I.c₄) : Polynomial R :=
+  X ^ 2 + C I.a₁ * X - C ((54 * I.b₆ - 3 * I.b₂ * I.b₄ + I.a₂ * I.c₄)
+    * ((hA.unit⁻¹ : Rˣ) : R))
+
+open Polynomial WeierstrassCurve in
+/-- ★★★★**monic である**。 -/
+theorem monic_splitQuadPoly {R : Type} [CommRing R] [Nontrivial R] (I : WeierstrassCurve R)
+    (hA : IsUnit I.c₄) : (splitQuadPoly I hA).Monic := by
+  rw [splitQuadPoly]
+  monicity!
+
+open Polynomial WeierstrassCurve in
+/-- ★★★★**次数は 2**。 -/
+theorem natDegree_splitQuadPoly {R : Type} [CommRing R] [Nontrivial R] (I : WeierstrassCurve R)
+    (hA : IsUnit I.c₄) : (splitQuadPoly I hA).natDegree = 2 := by
+  rw [splitQuadPoly]
+  compute_degree!
+
+open Polynomial WeierstrassCurve in
+/-- ★★★★★★★★**もとの 2 次式は `c₄ ×` monic である**（第 1031）。 -/
+theorem quad_eq_c4_mul_splitQuadPoly {R : Type} [CommRing R] (I : WeierstrassCurve R)
+    (hA : IsUnit I.c₄) :
+    C I.c₄ * X ^ 2 + C (I.a₁ * I.c₄) * X
+        - C (54 * I.b₆ - 3 * I.b₂ * I.b₄ + I.a₂ * I.c₄)
+      = C I.c₄ * splitQuadPoly I hA := by
+  have hu : I.c₄ * ((hA.unit⁻¹ : Rˣ) : R) = 1 := by
+    have h1 : ((hA.unit : Rˣ) : R) * ((hA.unit⁻¹ : Rˣ) : R) = 1 := by
+      rw [← Units.val_mul, mul_inv_cancel, Units.val_one]
+    rwa [hA.unit_spec] at h1
+  have key : I.c₄ * ((54 * I.b₆ - 3 * I.b₂ * I.b₄ + I.a₂ * I.c₄)
+      * ((hA.unit⁻¹ : Rˣ) : R)) = 54 * I.b₆ - 3 * I.b₂ * I.b₄ + I.a₂ * I.c₄ := by
+    rw [← mul_assoc, mul_comm I.c₄, mul_assoc, hu, mul_one]
+  rw [splitQuadPoly, mul_sub, mul_add, ← C_mul, key]
+  simp only [C_mul]
+  ring
+
+open Polynomial in
+/-- ★★★★★★★★★★★★**単元 × monic は剰余体で分裂する**（第 1031）。
+
+☆monic の側は第 1025、単元の側は次数 0 なので自明に分裂する。 -/
+theorem splits_of_unit_mul_monic {R : Type} [CommRing R] [IsDomain R]
+    [IsDiscreteValuationRing R]
+    {f : Polynomial R} (hf : f.Monic) (hdeg : f.natDegree = 2)
+    [IsLocalRing (AdjoinRoot f)]
+    (A : R) (hA : IsUnit A) (q : Polynomial R) (hq : q = C A * f) :
+    (q.map ((IsLocalRing.residue (AdjoinRoot f)).comp
+      (algebraMap R (AdjoinRoot f)))).Splits := by
+  set ψ : R →+* IsLocalRing.ResidueField (AdjoinRoot f) :=
+    (IsLocalRing.residue (AdjoinRoot f)).comp (algebraMap R (AdjoinRoot f)) with hψ
+  have hAu : IsUnit (ψ A) := hA.map ψ
+  have hfm : (f.map ψ).Monic := hf.map ψ
+  have hdeg' : (f.map ψ).natDegree = 2 := by rw [hf.natDegree_map, hdeg]
+  rw [hq, Polynomial.map_mul, Polynomial.map_C]
+  refine (splits_mul ?_ hfm.ne_zero).2 ⟨Splits.of_natDegree_le_one (by simp), ?_⟩
+  · simpa using hAu.ne_zero
+  · exact splits_map_residueField hdeg hdeg'
+
+end SplitQuad
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def not_isSquare_in_fractionField.src : ABC3.Meta.Source :=

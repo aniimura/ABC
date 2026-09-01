@@ -2612,3 +2612,18 @@ os.replace(tmp, src)
 **併せて**: Lean のコード片は Write ツールで別ファイルに書き、
 Python はそれを読んで挿入するだけにすると、エスケープ事故そのものが起きない。
 壊したときは `git checkout HEAD -- <path>` で戻す(だからこまめに commit する)。
+
+## monic・次数の証明は `monicity!` / `compute_degree!`(第 1031)
+
+`X^2 + C a * X - C b` のような多項式について
+`Monic` と `natDegree = 2` を手で示すと `degree_sub_le` / `max_le_iff` /
+`degree_C_mul_le` を並べることになり、`WithBot ℕ` と `ℕ` の往復で崩れやすい。
+
+**mathlib のタクティクを使う**:
+
+```lean
+theorem monic_p : p.Monic := by rw [p]; monicity!
+theorem natDegree_p : p.natDegree = 2 := by rw [p]; compute_degree!
+```
+
+`!` 付きは残った副目標を `norm_num`/`assumption` で閉じにいく。
