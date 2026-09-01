@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import Mathlib.FieldTheory.PrimitiveElement
+import Mathlib.FieldTheory.Normal.Basic
 import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
 import ABC3.Meta.Claim
 
@@ -56,7 +57,46 @@ theorem finrank_le_of_algHom_mem_finset
   rw [← hcard, ← Finset.card_univ]
   exact Finset.card_le_card_of_injOn f (fun a _ => hs a) (fun a _ b _ h => hinj h)
 
+/-! ## ★★★★★★★★★★★★中間体の埋め込みは自己同型に延びる -/
+
+/-- ★★★★★★★★★★★★
+**中間体からの埋め込みは大域の自己同型に延びる**——★**無条件**（第 1215）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆mathlib の `AlgHom.liftNormal`（`E/Kᵢ/F` の塔で `E/F` が正規なら
+`ϕ : K₁ →ₐ[F] K₂` は `E →ₐ[F] E` に延びる）と
+`AlgHom.normal_bijective`（正規拡大の自己準同型は全単射）を繋いだもの。
+
+★★★これで「`φ : M →ₐ[L] L̄` は `Gal(L̄/L)` の元から来る」が言えるので、
+第 1205（`σ Q = c • Q`）が `φ` にも当たる
+——第 1214 の数え上げと合わせて `[M:L] ≤ l−1` へ向かう。 -/
+theorem exists_algEquiv_extend {L Lbar M : Type*} [Field L] [Field Lbar] [Field M]
+    [Algebra L Lbar] [Normal L Lbar]
+    [Algebra L M] [Algebra M Lbar] [IsScalarTower L M Lbar]
+    (φ : M →ₐ[L] Lbar) :
+    ∃ σ : Lbar ≃ₐ[L] Lbar, ∀ x : M, σ (algebraMap M Lbar x) = φ x := by
+  refine ⟨AlgEquiv.ofBijective (φ.liftNormal Lbar)
+    (AlgHom.normal_bijective L Lbar Lbar _), fun x => ?_⟩
+  show φ.liftNormal Lbar (algebraMap M Lbar x) = φ x
+  rw [AlgHom.liftNormal_commutes]
+  rfl
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def exists_algEquiv_extend.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(中間体からの埋め込みは大域の自己同型に延びる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def exists_algEquiv_extend.needs : List ProofObligation :=
+  [ .implicitStep
+      ("★★★★**2026-09-02（第 1215）**——「`φ : M →ₐ[L] L̄` は `Gal(L̄/L)` の" ++
+       "元から来る」の段である。☆mathlib の `AlgHom.liftNormal` と" ++
+       "`AlgHom.normal_bijective` を繋いだ。" ++
+       "★これで第 1205（`σ Q = c • Q`）が `φ` にも当たるので、" ++
+       "第 1214 の数え上げと合わせて `[M:L] ≤ l−1` へ向かう。") 2 ]
 
 def finrank_le_of_algHom_mem_finset.src : Source :=
   { paper := "GenEll", pdfPage := 17,
