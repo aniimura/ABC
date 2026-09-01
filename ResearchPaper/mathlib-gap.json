@@ -5750,5 +5750,16 @@
     "measured": "☆k ↦ k•Q は 0 < k < l で単射(位数がちょうど l)、pointCoords は原点でない点で単射(pointCoords_injective、在庫)なので、S はちょうど l − 1 個。★これが IsQuotClassJ が要求する S.card + 1 = l である。",
     "consequence": "☆これで HasLCyclicVelu(有理点の読み)から IsQuotClassJ の存在が出る道具が揃った —— quotLCyclicJ_spec が使えるようになる。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "quotClassExists20260902": {
+    "block": 1241,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★商の類の存在——quotLCyclicJ_spec が使えるようになった",
+    "goal": "EllModuliWitness の sorry (2)(3)。",
+    "what": "★exists_isQuotClassJ(Found/GenEll/QuotClassExists.lean)—— 位数 l の有理点 Q と、その Vélu の商が楕円・半安定・乗法還元であることから ∃ y, IsQuotClassJ x l y.1 が出る。",
+    "measured": "☆個数の条件 S.card + 1 = l は第 1240。★RealizedClass は {x : ℂ // ∃ E : DegCurve, E.j = x} なので、商の類を作るには商が**乗法還元を持つ**ことが要る。",
+    "deviation": "★★逸脱: 商が乗法還元を持つことは仮説として受ける(原文は「同種なので自動」と括弧で述べる。VeluQuotOK と同じ扱い)。",
+    "consequence": "☆これで quotLCyclicJ_spec が使えるようになり、witness の sorry (2)(3)(deg∞ と ht^Falt の関係)に取りかかれる。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

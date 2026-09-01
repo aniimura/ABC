@@ -1401,6 +1401,7 @@ import ABC3.Found.GenEll.Lemma37StableLineCop
 import ABC3.Found.GenEll.Thm38KummerAlpha
 import ABC3.Found.GenEll.VeluSetStable
 import ABC3.Found.GenEll.VeluSetCard
+import ABC3.Found.GenEll.QuotClassExists
 import ABC3.Found.GenEll.DegreeBound
 import ABC3.Found.GenEll.DegreeLine
 import ABC3.Found.GaloisRep.Lemma35StableLine
