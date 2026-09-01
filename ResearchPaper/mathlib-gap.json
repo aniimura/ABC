@@ -6153,5 +6153,15 @@
   "route": "★段 1 は付値の勘定（`π = ι y` なら `v(Q) = l·v(y)`）。☆段 2 は mathlib の `InfiniteGalois.mem_range_algebraMap_iff_fixed` の対偶である。",
   "consequence": "★★★`σ(π)^l = σ(Q) = Q = π^l` なので `σ(π)/π` は `l` 乗根であり、`σ(π) ≠ π` だから**原始 `l` 乗根**になる——これが `α` の非自明性の源である。☆`PrimeToLocalHeights`（`l ∤ v_p(q)`）がここで効く。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "sigmaZeta20260902": {
+  "block": 1281,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★σ(π) = ζπ で ζ は原始 l 乗根（α の形が出た）",
+  "goal": "第 1276 が要求する hσπ と hζ を同時に出す。",
+  "proved": "☆`sigma_pi_eq_zeta_mul`（`Found/GenEll/Thm38SigmaZeta.lean`、第 1281）——`σ` が `π` を動かせば `ζ ≔ σ(π)/π` は原始 `l` 乗根で `σ(π) = ζπ`。",
+  "route": "★`ζ^l = σ(Q)/Q = 1`（`σ` は基礎体を固定）。☆`ζ ≠ 1` と `l` 素数から位数はちょうど `l` なので原始 `l` 乗根である。",
+  "consequence": "★★★これで `tateSigmaAct_unipotent`・`tateSigmaAct_exists_ne`（第 1276）が要求する `hσπ : σU π = ζ * π` と `hζ : IsPrimitiveRoot ζ l` が**同時に**出る。☆訂正後の道筋（第 1277）の段 5 が閉じた。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
