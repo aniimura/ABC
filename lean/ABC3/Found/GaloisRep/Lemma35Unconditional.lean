@@ -29,22 +29,19 @@ import ABC3.Meta.Claim
 | `H_F` は部分群スキームで `H_F ×_F ℚ̄ ≅ ℤ/lℤ` | スキーム | ☆`L` 有理点 `Q` で `addOrderOf Q = l` | ★階数 1 の部分群を生成元で書いたもの。`E' = E/⟨Q⟩` を Vélu の商で読む |
 | `E_H` の半安定性 | 原文は「同種なので自動」と括弧で述べる | ☆`∀ p, SemistableAt p E'` を仮説に置く | ★「同種なら半安定」の形式化を後回しにしただけで、内容を弱めていない |
 
-### ★★★★★★★★追加した 2 つが消費側で自動的であること（実証）
+### ★★★★★★★★追加した 2 つがどこまで吸収されるか（実測）
 
-`Lemma 3.5` を消費するのは `galoisFiniteJ_lcyclicExcJ`（`EllModuliWitness.lean`）であり、
-そこでの例外集合 `lcyclicExcJ C eps KV` の定義は
+`Lemma 3.5` を消費するのは `Lemma 3.7` の第 3 の主張であり、
+そこには条件 (a) と条件 (b) の **2 つの枝**がある。
 
-    … ∧ ((100·d·(ht^Falt + C·d^ε) ≤ l) ∨ cls ∈ K_V)
+| 枝 | `l` の下界 | 逸脱は吸収されるか |
+|---|---|---|
+| 条件 (a)（`100·d·(ht^Falt + C·d^ε) ≤ l`） | `l ≥ 100·d ≥ 100` | ★**される**。第 1088 で実際に吸収した（`htFalt_le_of_condA_lcyclic`、外部入力なし） |
+| 条件 (b)（`[E_L] ∈ K_V` かつ `l` が局所高さと素） | **`2 ≤ l` だけ** | ☆**されない**。`htFalt_le_of_condB` は `2 ≤ l` で `(†)` を消費するので、`d + 1 < l` が成り立たない場合がある |
 
-である。☆`K_V` 側は compact boundedness で有限性が出るので
-`Lemma 3.5` を使うのは**左の枝だけ**である。
-
-★`lemma_3_7` は `C := |A| + 100|B| + 1`（`B ≤ ht^Falt` は下に有界）と取るので
-
-    ht^Falt + C·d^ε ≥ −|B| + (100|B| + 1)·1 = 99|B| + 1 ≥ 1
-
-よって **`l ≥ 100·d ≥ 100`**。☆すなわち `l ≠ 2` も
-`d + 1 < l`（`100d > d+1` は `d ≥ 1` で成立）も**自動的に成り立つ**。
+★★★★**したがって本定理の `.src` は条つきのままにしてある**。
+☆（2026-09-01、第 1089 の訂正。第 1087 では条件 (a) だけを見て
+条なしにしてしまったが、条件 (b) の枝を見落としていた。）
 
 ### ☆この 2 つを外すには
 
@@ -85,7 +82,7 @@ theorem lemma_3_5_height_ineq (eps : ℝ) (heps : 0 < eps) :
 
 def lemma_3_5_height_ineq.src : Source :=
   { paper := "GenEll", pdfPage := 17,
-    item := "Lemma 3.5",
+    item := "Lemma 3.5(外部入力なし。★原典に無い仮説 l ≠ 2・d+1 < l を置く——条件 (b) の枝では吸収されない)",
     sectionId := "genell-lemma-3-5" }
 
 def lemma_3_5_height_ineq.needs : List ProofObligation :=
