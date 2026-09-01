@@ -6256,5 +6256,15 @@
   "route": "★絡み合いは第 1288（`galAct` は変数変換と可換）。☆`GaloisRep.vcPoint W C` と `GenEll.vcPoint C W` は引数の順が違うだけで `rfl` で一致する。",
   "consequence": "★★★これで **α 側の鎖は「局所データを与える」ところまで詰んだ**:第 1289（Tate モデルで幂単・非自明）→ 第 1290（`E ⊗ K` へ）→ 第 1287（大域へ）→ 第 1270（`T_l E` へ）→ 第 1237（`α` が像に入る）→ 第 1249（`ImageContainsSL2J`）。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "alphaNode8Measure20260902": {
+  "block": 1291,
+  "date": "2026-09-02",
+  "title": "★★☆測定——α 側に残るのは「Galois 拡大の完備化は完備化の上で正規」の 1 命題",
+  "goal": "節点 8（局所データを与える段）に本当に残るものを特定する。",
+  "measured": "☆節点 8 の 6 項目 (a)-(f) を一つずつ当たった。(a) `L′` の構成は在庫の型（`exists_finite_subextension` 第 1195・`numberField_and_towers` 第 1222）。(b) 分裂乗法還元と `q`・変数変換は `exists_tate_model`・`tateParamR`（在庫）。(c) `TateSetup`・`Φ` は `mkTateSetup`・`dvrTatePhiAddEquiv`（在庫、**無条件**）。(d) `π` は第 1279（`E[l]` が `K` に載っていればよい）。(e) `l ∤ v(Q)` は**基礎体 `K₀ = L_v` の付値**についてでよく、`PrimeToLocalHeights` そのもの（拡大の分岐指数が `l` で割れても構わない——第 1280・1282 が使うのは `v₀` である）。",
+  "remaining": "★★☆**残るのは (f) だけ**——`σ` を作るには `K ≔ P.adicCompletion L′` が `K₀ ≔ p.adicCompletion L` の上で**正規**であることが要る。☆同値な言い方は「`K` は `K₀` と `L′` の合成体である」であり、数論の標準的な事実だが mathlib にも本プロジェクトにも無い（2026-09-02 実測）。★これが無いと「`π` を動かす `K` の自己同型」が取れない（`K₀(π)/K₀` だけなら分裂体なので正規だが、`TateSetup` を `K₀(π)` に建てるには完備 DVR の Eisenstein 拡大が要り、第 1277 で消したはずの道に戻ってしまう）。",
+  "consequence": "☆したがって α 側（`EllModuliWitness` の 4 本目）に残る数学は**この 1 命題**である。★それ以外の鎖（第 1289 → 1290 → 1287 → 1270 → 1237 → 1249）は**すべて証明済み**である。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
