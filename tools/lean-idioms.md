@@ -2939,3 +2939,21 @@ because it depends on 'PadicInt.instCommRing'`。
 
 **診断のしかた**: `set_option pp.explicit true in` を付けた `example` で
 同じ `rw` を書き、パターンと目標の**インスタンス項**を並べて見る。
+
+## `Ideal.ramificationIdx_le_finrank` は `S K L` が明示引数（第 1209）
+
+**失敗形**: `Ideal.ramificationIdx_le_finrank P.asIdeal` →
+`failed to synthesize CommRing ↥P.asIdeal`（`P.asIdeal` が `S` の位置に入った）。
+
+**直し方**: `Ideal.ramificationIdx_le_finrank (𝓞 L') L L' P.asIdeal`。
+★`variable (S)` と `variable (K L : Type*)` が効いている。
+
+## `NoZeroSMulDivisors` は `Module.IsTorsionFree` とは別クラス（第 1209）
+
+**測ったこと**: mathlib は `NoZeroSMulDivisors.iff_algebraMap_injective` を
+`Module.isTorsionFree_iff_algebraMap_injective` の deprecated alias にしたが、
+**`NoZeroSMulDivisors` 自体は残っており別クラス**である
+（`.2` の結果は `Module.IsTorsionFree` になって型が合わない）。
+
+**直し方**: クラスの定義（`eq_zero_or_eq_zero_of_smul_eq_zero`）から直接作る:
+`⟨fun {c x} hcx => …⟩`（`Algebra.smul_def` ＋ `mul_eq_zero` ＋ 単射性）。
