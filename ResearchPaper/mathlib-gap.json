@@ -4507,5 +4507,21 @@
     },
     "remaining": "☆残るのは minDeltaExp_eq_mul_at_bad_prime(第 1000)の hvw の口を「R の v・w で v = ∑veluV2 かつ 2w = ∑(…)」から「K の v・w ＋ c₄・c₆ の関係」に付け替える配管である(10-20 ブロック)。",
     "gate": "lake build ABC3 成功(6258 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
+  },
+  "jEqOfC4C620260901": {
+    "block": 1132,
+    "date": "2026-09-01",
+    "title": "★★★★★★★★★★★★c₄・c₆ が l⁴・l⁶ 倍なら j は等しい——節点 5 の消費者 A が閉じた",
+    "goal": "Lemma 3.5 から原典に無い仮説 d + 1 < l を外す(§3 の枠の節点 5)。",
+    "measured": "★★hlu : IsUnit ((l : R)) を消費しているのは 3 か所だけである(実測): (A) j_velu_tate_mu_map(j(veluCurve) = j(E_{q^l}))、(B) veluQuotientFull_tate_mu(商を veluCurve W v w の形にする)、(C) isElliptic_veluQuotient_tate_mu(商の楕円性)。",
+    "what": "★A を閉じた。j = Δ⁻¹·c₄³ なので c₄ ↦ l⁴c₄・Δ ↦ l¹²Δ では l¹² が約分される。☆第 1131 の Delta_of_c4_c6 と合わせて「c₄・c₆ が l⁴・l⁶ 倍なら j は等しい」(j_eq_of_c4_c6)になる。",
+    "added": {
+      "Found/GaloisRep/VeluTateMuField.lean": [
+        "j_of_c4_Delta(c₄ ↦ l⁴c₄・Δ ↦ l¹²Δ なら j は不変)",
+        "j_eq_of_c4_c6(★p ∣ l で j_velu_tate_mu_map の代わりになる形)"
+      ]
+    },
+    "remaining": "☆B・C に残るのは「μ_l の点の座標を K の中で tateXpairDF / l² と同定する」段である。★hvw の口を「R の v・w で v = ∑veluV2」から「K の v・w ＋ c₄・c₆ の関係」に付け替えれば hlu が落ちる(10-20 ブロック)。",
+    "gate": "lake build ABC3 成功(6258 jobs)、node tools/check.mjs PASS、Found/ の sorry 0。"
   }
 }
