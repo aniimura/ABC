@@ -305,6 +305,52 @@ def vAdd_Delta_eq_of_tateModel.src : ABC3.Meta.Source :=
     item := "Definition 3.3(Tate モデルの母数の付値は一意。★無条件)",
     sectionId := "genell-def-3-3" }
 
+/-! ## ★★★★★★★★★★★★`primeSubring` の言葉での極小性判定 -/
+
+section PrimeSubring
+
+variable {L : Type} [Field L] [NumberField L]
+
+open IsDedekindDomain NumberField
+
+/-- ☆ 2 つの加法付値は同時に `0` になる——付値が同値だから。 -/
+theorem vAdd_eq_zero_iff_valAdd_eq_zero (p : HeightOneSpectrum (𝓞 L)) (x : Lˣ) :
+    vAdd (tateDvrVal (primeSubring p) L) x = 0 ↔ valAdd p x = 0 := by
+  rw [vAdd_eq_zero_iff, valAdd_eq_zero_iff]
+  exact Valuation.isEquiv_iff_val_eq_one.1 (valuation_isEquiv p)
+
+/-- ★★★★★★★★★★★★★★★★
+**`v_p(c₄) = 0` なら `primeSubring p` 上極小**——★**無条件**（第 1190）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`isMinimal_of_c4_vAdd_eq_zero`（第 320）は完備 DVR と `tateDvrVal` の言葉だったが、
+`primeSubring p` は DVR で分数体が `L` なので、そのまま当てはまる。
+★2 つの加法付値が同時に `0` になることだけが橋である。
+
+★★★これが `Skeleton/GenEll/LCyclicReading.lean` の節点 2d-1 で
+第 1189 が名指しした**最後の葉**である。 -/
+theorem isMinimal_of_c4_valAdd_eq_zero (p : HeightOneSpectrum (𝓞 L))
+    (W : WeierstrassCurve L) [WeierstrassCurve.IsIntegral (primeSubring p) W]
+    (hΔ : W.Δ ≠ 0) (hc4 : W.c₄ ≠ 0)
+    (h : valAdd p (Units.mk0 W.c₄ hc4) = 0) :
+    WeierstrassCurve.IsMinimal (primeSubring p) W :=
+  isMinimal_of_c4_vAdd_eq_zero W hΔ hc4 ((vAdd_eq_zero_iff_valAdd_eq_zero p _).2 h)
+
+def isMinimal_of_c4_valAdd_eq_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(v_p(c₄) = 0 なら primeSubring p 上極小。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def isMinimal_of_c4_valAdd_eq_zero.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "isMinimal_of_c4_vAdd_eq_zero(第 320、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.isMinimal_of_c4_vAdd_eq_zero") 1,
+    .citation "[mathlib]" "Valuation.isEquiv_iff_val_eq_one(同値な付値は同時に 1)"
+      (.inMathlib "Valuation.isEquiv_iff_val_eq_one") 1 ]
+
+end PrimeSubring
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def localHeight_eq_vAdd_Delta.src : ABC3.Meta.Source :=

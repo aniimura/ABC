@@ -232,8 +232,15 @@ import ABC3.Meta.Claim
 **完備 DVR `R` と `tateDvrVal R K` の言葉**で書かれており、
 `SemistableAt` が使う `IsMinimal (primeSubring p)` と `valAdd p` の言葉では**ない**。
 
-★したがって「`v_p(c₄) = 0` なら `primeSubring p` 上極小」の版が 1 つ要る。
-☆それ以外の部品は揃っている（第 1187・第 1188・mathlib の `map_variableChange`）。
+★★**第 1190 でその版を取った**——`isMinimal_of_c4_valAdd_eq_zero`
+（`Found/GaloisRep/LocalHeightDelta.lean`）。
+☆`primeSubring p` は DVR で分数体が `L` なので第 320 がそのまま当てはまり、
+橋は「2 つの加法付値が同時に `0` になる」だけである
+（`valuation_isEquiv` ＋ mathlib の `Valuation.isEquiv_iff_val_eq_one`）。
+
+★★★**これで `SemistableAt` の底変換の部品はすべて揃った**——
+第 1187（良い還元）・第 1188（分岐した `valAdd`）・第 1190（極小性）・
+mathlib の `map_variableChange`。☆残るのは組み立てだけである。
 
 ### ☆別の道（採らない理由）
 
