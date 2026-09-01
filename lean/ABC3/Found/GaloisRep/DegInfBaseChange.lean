@@ -380,9 +380,44 @@ def htFaltOf_baseChange_of_semistable.src : ABC3.Meta.Source :=
     item := "Proposition 3.4(半安定な曲線の ht^Falt は基底変換で不変。★無条件)",
     sectionId := "genell-prop-3-4" }
 
+/-! ## ★★★★★★★★★★★★★★★★上での `Δ_min` の関係を下へ降ろす -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**上で `v_P(Δ_min(E')) = l·v_P(Δ_min(E))` なら下でも同じ**——★**無条件**（第 1183）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆両辺とも分岐指数 `e` 倍になるので、`e ≠ 0` で割れば下の関係が出る。
+★★★これが `Skeleton/GenEll/LCyclicReading.lean` の**節点 2d-2** である
+——安定直線の側では `ζ` が `L_v` に無いので局所の議論を `L_v(ζ_l)` へ上げるが、
+そこで得た `Δ_min` の関係は**そのまま降りる**。
+
+☆`Thm38Kummer.lean` の「分岐指数は `l` と素」は**要らなかった**
+——必要なのは `e ≠ 0` だけである（第 1182 の見積もりの再訂正）。 -/
+theorem minDeltaExp_descend_of_baseChange (p : HeightOneSpectrum (𝓞 L))
+    (P : HeightOneSpectrum (𝓞 L')) [P.asIdeal.LiesOver p.asIdeal]
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    (hp : SemistableAt p E) (hp' : SemistableAt p E')
+    (he : p.asIdeal.ramificationIdx P.asIdeal ≠ 0) {l : ℕ}
+    (h : minDeltaExp P (E'.baseChange L') = l * minDeltaExp P (E.baseChange L')) :
+    minDeltaExp p E' = l * minDeltaExp p E := by
+  rw [minDeltaExp_baseChange_of_semistableAt L L' p P E' hp',
+    minDeltaExp_baseChange_of_semistableAt L L' p P E hp] at h
+  have he' : ((p.asIdeal.ramificationIdx P.asIdeal : ℤ)) ≠ 0 := by
+    exact_mod_cast he
+  refine mul_left_cancel₀ he' ?_
+  rw [h]
+  ring
+
 end NumberField
 
 /-! ## ★出典の紐付け(`.src`) -/
+
+def minDeltaExp_descend_of_baseChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(上での Δ_min の関係は下へ降りる——分岐指数で割るだけ。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def valAdd_algebraMap.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,

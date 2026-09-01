@@ -5162,5 +5162,15 @@
     "material": "★★★素材はすでに Found/GenEll/Thm38Kummer.lean にある —— coprime_of_dvd_sub_one(K(ζ_l)/K の分岐指数は l と素)と dvd_of_ramification_coprime(e·v(q) = l·w かつ gcd(l,e)=1 なら l ∣ v(q))。☆もともと l ∤ v_K(q) を K(ζ_l) へ上げるために書かれたもので、同じ分岐の帳簿がここでも使える。",
     "weight": "☆節点 2d の重み: 4 → **8**。★新しい数学はないが「1 か所の配管」ではない。Theorem 3.8 の残高 = I(8) ＋ II(1) = 9。",
     "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+  },
+  "minDeltaDescend20260902": {
+    "block": 1183,
+    "date": "2026-09-02",
+    "title": "★★★★★★★★★★★★上での Δ_min の関係は下へ降りる——節点 2d-2 が閉じた",
+    "goal": "l-巡回の 2 つの読みを繋ぐ(第 1152 の枠、節点 2d-2)。",
+    "what": "★minDeltaExp_descend_of_baseChange(Found/GaloisRep/DegInfBaseChange.lean)—— 上で v_P(Δ_min(E')) = l·v_P(Δ_min(E)) なら下でも同じ。",
+    "measured": "★★**第 1182 の見積もりの再訂正**——分岐指数が l と素であることは**要らなかった**。半安定なら両辺とも e 倍になる(minDeltaExp_baseChange_of_semistableAt、第 740)ので、e ≠ 0 で割るだけでよい。☆Thm38Kummer.lean の coprime_of_dvd_sub_one は使わない。",
+    "frame": "☆節点 2d の重み 8 → **5**(残るのは 2d-1、局所の議論を L_v(ζ_l) で回す段)。★Theorem 3.8 の残高 = I(5) ＋ II(1) = 6。",
+    "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
   }
 }

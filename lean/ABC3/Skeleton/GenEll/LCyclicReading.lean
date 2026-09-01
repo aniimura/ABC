@@ -176,13 +176,20 @@ import ABC3.Meta.Claim
 | 段 | 内容 | 素材 |
 |---|---|---|
 | 2d-1 | 局所の議論を `L_v(ζ_l)` で回す | 既存の `_K` の連鎖そのもの |
-| 2d-2 | `Δ_min` の関係を `L_v` へ降ろす | ★`K(ζ_l)/K` の分岐指数は `l` と素（`coprime_of_dvd_sub_one`、第 994）と `dvd_of_ramification_coprime`（同） |
+| 2d-2 | `Δ_min` の関係を `L_v` へ降ろす | ★★**第 1183 で閉じた**（`minDeltaExp_descend_of_baseChange`）。☆分岐指数が `l` と素であることは**要らなかった**——両辺とも `e` 倍になるので `e ≠ 0` で割るだけ |
 
 ★★★**素材はすでに `Found/GenEll/Thm38Kummer.lean` にある**——
 それらはもともと `l ∤ v_K(q)` を `K(ζ_l)` へ上げるために書かれたものであり、
 同じ分岐の帳簿がここでも使える。
 
 ☆重みの訂正: **4 → 8**。★新しい数学はないが、「1 か所の配管」ではない。
+
+★★★★**再訂正（第 1183）**——**2d-2 は閉じた**。
+`minDeltaExp_descend_of_baseChange`（`Found/GaloisRep/DegInfBaseChange.lean`）。
+☆分岐指数が `l` と素であることは**要らなかった**——
+上で `v_P(Δ_min(E')) = l·v_P(Δ_min(E))` なら、両辺とも `e` 倍なので
+`e ≠ 0` で割れば下の関係が出る（`minDeltaExp_baseChange_of_semistableAt`、第 740）。
+★重み 8 → **5**（残るのは 2d-1、局所の議論を `L_v(ζ_l)` で回す段）。
 
 ### ☆別の道（採らない理由）
 
