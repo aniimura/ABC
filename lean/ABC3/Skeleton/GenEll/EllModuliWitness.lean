@@ -35,6 +35,25 @@ import ABC3.Meta.Claim
 
 ☆`mem_lcyclicExc` は `lcyclicExc` を**その定義そのもの**に取るので自明に埋まる
 ——有限性の側（`galoisFinite_lcyclicExc`）が本体である。
+
+## ★★★★★★★★★★★★★★★★残りの地図（2026-09-02、第 1239-1249）
+
+☆**4 本の `sorry` はすべて `Found` 側の形に降りた**。
+
+| # | `sorry` | `Found` 側の形 | 残る前提 |
+|---|---|---|---|
+| 1 | `galoisFiniteJ_lcyclicExcJ` | `exists_galoisFinite_lcyclic`（第 1239） | `VeluQuotOK` |
+| 2 | `degInfJ_quotLCyclicJ` | `degInfJ_quotLCyclicJ_of_jExp`（第 1248） | `Lemma 3.2, (ii)` |
+| 3 | `faltingsHeightJ_quotLCyclicJ` | `faltingsHeightJ_quotLCyclicJ_of_isog`（第 1245） | 同種写像の高さ評価 |
+| 4 | `imageContainsSL2J_torsionExt` | `imageContainsSL2J_of_galTate'`（第 1249） | `σ` の幂単性・非自明性 |
+
+★★**測定**——(4) の `hclosed`（像の閉性）は**不要だった**。
+`galRep` の連続性は `galRep_continuous'`（第 772、葉 5）で既に閉じている。
+
+☆(2) の道筋: `h4`・`h6`（Vélu の `v, w` と Eisenstein の関係）
+→ `j_velu_tate_eq_map`（在庫）→ `jExp_eq_mul_of_j_tate_pow`（第 997）
+→ `minDeltaExp_eq_mul_of_jExp_all`（第 1247）→ `degInfJ_quotLCyclicJ_of_jExp`（第 1248）。
+★残るのは **`h4`・`h6`**（Eisenstein の計算）だけである。
 -/
 
 namespace ABC3.Skeleton.GenEll
