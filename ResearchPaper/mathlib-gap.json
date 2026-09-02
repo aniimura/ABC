@@ -6469,5 +6469,14 @@
   "route": "★`vcPoint` は全単射（在庫）で `l`-捩れを保つので、位数も個数も移る。",
   "consequence": "★★★これで **Tate モデルの側で得た 2 つの入力（第 1297・1304）が `E ⊗ L_v` の言葉になる**——第 1311・1312 が受け取る形である。☆残るのは `E ⊗ L_v` と Tate モデルを結ぶ変数変換を実際に取る段（`exists_tate_model`、在庫）だけになった。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "tateLocalInputs20260902": {
+  "block": 1314,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★Tate 一意化が与える局所の 2 つの入力（II 側の局所の入力を 1 本に）",
+  "proved": "☆`tate_local_inputs`（`Found/GenEll/TateLocalInputs.lean`、第 1314）。",
+  "inputs": "☆受け取るのは `TateSetup`・`Φ`・`ζ`（原始 `l` 乗根）・`l ∤ v(Q)` の 4 つだけ。",
+  "consequence": "★★★これで II 側の鎖は次のように 1 本に繋がった:`mkTateSetup`・`dvrTatePhiAddEquiv`（在庫、無条件）→ 第 1314（局所の 2 入力）→ 第 1313（変数変換で `E` へ）→ 第 1311/1312（大域の `h2`・`h1`）→ 第 1237（`α` が像に入る）→ 第 1249（`ImageContainsSL2J`）。☆残るのは悪い素点で `exists_tate_model` を回して `TateSetup` と変数変換を実際に取る段だけ。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }

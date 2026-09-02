@@ -1426,6 +1426,7 @@ import ABC3.Found.GenEll.BaseChangeTower
 import ABC3.Found.GenEll.AlphaBridgeFull
 import ABC3.Found.GenEll.AlphaGlobalTransport2
 import ABC3.Found.GenEll.LocalInputVc
+import ABC3.Found.GenEll.TateLocalInputs
 import ABC3.Found.GaloisRep.Lemma35Descend
 import ABC3.Found.GaloisRep.TowerInstances
 import ABC3.Found.GaloisRep.Lemma35Assemble
