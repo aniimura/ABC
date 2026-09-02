@@ -1653,6 +1653,7 @@ import ABC3.Found.GaloisRep.TateVeluDeep
 import ABC3.Found.GaloisRep.TateDeepInvolution
 import ABC3.Found.GaloisRep.VeluSemistableBadFree
 import ABC3.Found.GaloisRep.VeluIntegralFromCoords
+import ABC3.Found.GaloisRep.TateCoordDescend
 import ABC3.Found.GenEll.MuOrDeep
 import ABC3.Found.GenEll.MuPrimitiveRootOrDeep
 import ABC3.Found.GenEll.VeluNotDvdLFree
