@@ -10,6 +10,7 @@ import ABC3.Found.GaloisRep.ResChar
 import ABC3.Found.GaloisRep.ThetaDiscr
 import ABC3.Found.GaloisRep.NorthcottHtJ
 import ABC3.Found.GenEll.Velu
+import ABC3.Found.GenEll.PointVariableChange
 import ABC3.Meta.Claim
 
 /-!
@@ -975,20 +976,26 @@ noncomputable def quotSSCurve (E : SSCurve) (S : Finset (E.fld × E.fld))
 @[simp] theorem quotSSCurve_fld (E : SSCurve) (S : Finset (E.fld × E.fld)) (hell) (hss) :
     (quotSSCurve E S hell hss).fld = E.fld := rfl
 
+open scoped Classical in
 /-- ★★★★★**`y` は `x` の `l`-巡回部分群による Vélu の商の類である**。
 
 原文 (GenEll p.17):
 > Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
 
-★`S` は `H∖{O}` の座標の集合であり、`|S| + 1 = l` が「位数 `l` の巡回群」の内容である。
-☆`S` が実際に部分群の座標集合であることは、ここでは要求していない
-——`degInf_quotLCyclic` 欄がそれを要求する側である。 -/
+★★★**2026-09-02（第 1339）の締め直し**——かつては任意の座標集合 `S`
+（`|S| + 1 = l` だけ）であったが、それでは**生成元 `Q` が取り出せず**
+同種写像の高さ評価（第 1338）を当てられなかった。
+☆本定義は**位数 `l` の点 `Q` を持ち歩く**形である
+（`|S| + 1 = l` は `card_image_pointCoords_nsmul` が導く）。 -/
 def IsQuotClassJ (x : RealizedClass) (l : ℕ) (y : ℂ) : Prop :=
-  ∃ (S : Finset (x.rep.toSSCurve.fld × x.rep.toSSCurve.fld))
-    (hell : (veluQuotientFull x.rep.toSSCurve.W S).IsElliptic)
+  ∃ (Q : x.rep.toSSCurve.W.toAffine.Point) (_hQ : addOrderOf Q = l)
+    (hell : (veluQuotientFull x.rep.toSSCurve.W
+      (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))).IsElliptic)
     (hss : ∀ p : HeightOneSpectrum (𝓞 x.rep.toSSCurve.fld),
-      SemistableAt p (veluQuotientFull x.rep.toSSCurve.W S)),
-    S.card + 1 = l ∧ (quotSSCurve x.rep.toSSCurve S hell hss).j = y
+      SemistableAt p (veluQuotientFull x.rep.toSSCurve.W
+        (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))))),
+    (quotSSCurve x.rep.toSSCurve
+      (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))) hell hss).j = y
 
 open scoped Classical in
 /-- ★★★★★**`quotLCyclic` 欄**——商の類（無ければ自分自身）。 -/

@@ -3168,3 +3168,23 @@ mathlib の `Affine.Point.add` は `x₁ = x₂` の場合分けに `DecidableEq
 `sum_veluB_nsmul` のような**これから付ける名前**で `.cache/decl-index.txt` を引いても当たらない。☆探すべきは概念語（`negY`・`stable`・`vcPoint`・`variableChange`）である。
 ★第 1334 では `veluQuotientFull_variableChange` の 2 仮説を潰す補題を書き上げてから**同名宣言の衝突**（`environment already contains ...`）で在庫の存在に気づいた（`VeluPointSet.lean` 第 949・`VeluImage.lean` 第 912 に全部あった）。
 ☆`lake build` の衝突エラーは在庫検索の最後の安全網であり、最初の網ではない。
+
+## `DecidableEq` のインスタンス違いは `subst` で揃える
+
+具体の体（`↑(K : IntermediateField ℚ ℂ)` など）では `DecidableEq` が `fun a b => a.instDecidableEq b` に解決され、
+`open scoped Classical` を置いた**変数の体**の定理は `fun a b => Classical.propDecidable (a = b)` を焼き込む。
+★両者は defeq でなく、`Point` の `+` ・ `addOrderOf` ・ `Finset.image` が全部ずれる。
+
+☆**直し方**——一般の定理の側に `[inst : DecidableEq L]` を**明示の束縛として付け**、
+証明の先頭で
+
+```lean
+have hinst : inst = fun a b => Classical.propDecidable (a = b) := by
+  funext a b
+  exact Subsingleton.elim _ _
+subst hinst
+```
+
+とする。★`inst` は局所変数なので `subst` が通り、以降は古典的な在庫がそのまま使える。
+☆呼ぶ側（具体の体）では合成された具体インスタンスがそのまま入るので何も起きない。
+（第 1338-1339 で実際にこれで抜けた。）

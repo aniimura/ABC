@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 import ABC3.Found.GenEll.VeluSetCard
 import ABC3.Found.GenEll.EllModuliObjects
 import ABC3.Found.GaloisRep.Lemma35Concrete
+import ABC3.Found.GaloisRep.UniformFamily
 import ABC3.Found.GaloisRep.BadPrimeData
 import ABC3.Meta.Claim
 
@@ -61,8 +62,7 @@ theorem exists_isQuotClassJ (x : RealizedClass) {l : ℕ} (hl : l.Prime)
     ⟨⟨quotSSCurve x.rep.toSSCurve
       (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))) hell hss,
       hmult⟩, rfl⟩⟩, ?_⟩
-  exact ⟨((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)), hell, hss,
-    card_image_pointCoords_nsmul hl hQ, rfl⟩
+  exact ⟨Q, hQ, hell, hss, rfl⟩
 
 /-! ## ★★★★★★★★★★★★商の類の `deg∞` -/
 
@@ -123,7 +123,7 @@ open scoped Classical in
 ★局所の関係は `Lemma 3.2, (ii)` が与える（仮説として受ける）。
 
 ★★★これが `EllModuliWitness` の `degInfJ_quotLCyclicJ` そのものの形である。 -/
-theorem degInfJ_quotLCyclicJ_of_local (x : RealizedClass) (l : ℕ)
+theorem degInfJ_quotLCyclicJ_of_local (x : RealizedClass) {l : ℕ} (hl : l.Prime)
     (hex : ∃ y : RealizedClass, IsQuotClassJ x l y.1)
     (hloc : ∀ (S : Finset (x.rep.toSSCurve.fld × x.rep.toSSCurve.fld)),
       S.card + 1 = l →
@@ -131,8 +131,9 @@ theorem degInfJ_quotLCyclicJ_of_local (x : RealizedClass) (l : ℕ)
         minDeltaExp p (veluQuotientFull x.rep.toSSCurve.W S)
           = l * minDeltaExp p x.rep.toSSCurve.W) :
     degInfJ (quotLCyclicJ x l).cls = (l : ℝ) * degInfJ x.cls := by
-  obtain ⟨S, hell, hss, hcard, hj⟩ := quotLCyclicJ_spec x l hex
-  have hq := degInfJ_quot_eq x.rep.toSSCurve S hell hss l (hloc S hcard)
+  obtain ⟨Q, hQ, hell, hss, hj⟩ := quotLCyclicJ_spec x l hex
+  have hcard := card_image_pointCoords_nsmul hl hQ
+  have hq := degInfJ_quot_eq x.rep.toSSCurve _ hell hss l (hloc _ hcard)
   rw [hj] at hq
   have hx : x.cls = x.rep.toSSCurve.j := (RealizedClass.rep_j x).symm
   rw [hx]
@@ -149,7 +150,7 @@ open scoped Classical in
 ★同種写像の高さ評価は仮説として受ける。
 
 ★★★これが `EllModuliWitness` の `faltingsHeightJ_quotLCyclicJ` そのものの形である。 -/
-theorem faltingsHeightJ_quotLCyclicJ_of_isog (x : RealizedClass) (l : ℕ) (C₀ : ℝ)
+theorem faltingsHeightJ_quotLCyclicJ_of_isog (x : RealizedClass) {l : ℕ} (hl : l.Prime) (C₀ : ℝ)
     (hex : ∃ y : RealizedClass, IsQuotClassJ x l y.1)
     (hfalt : ∀ (S : Finset (x.rep.toSSCurve.fld × x.rep.toSSCurve.fld)),
       S.card + 1 = l →
@@ -157,8 +158,9 @@ theorem faltingsHeightJ_quotLCyclicJ_of_isog (x : RealizedClass) (l : ℕ) (C₀
         ≤ htFaltOf x.rep.toSSCurve.fld x.rep.toSSCurve.W + 2 * Real.log l + C₀) :
     faltingsHeightJ (quotLCyclicJ x l).cls
       ≤ faltingsHeightJ x.cls + 2 * Real.log l + C₀ := by
-  obtain ⟨S, hell, hss, hcard, hj⟩ := quotLCyclicJ_spec x l hex
-  have hq := faltingsHeightJ_quot_le x.rep.toSSCurve S hell hss l C₀ (hfalt S hcard)
+  obtain ⟨Q, hQ, hell, hss, hj⟩ := quotLCyclicJ_spec x l hex
+  have hcard := card_image_pointCoords_nsmul hl hQ
+  have hq := faltingsHeightJ_quot_le x.rep.toSSCurve _ hell hss l C₀ (hfalt _ hcard)
   rw [hj] at hq
   have hx : x.cls = x.rep.toSSCurve.j := (RealizedClass.rep_j x).symm
   rw [hx]
@@ -207,7 +209,7 @@ open scoped Classical in
 
 ★★★これで witness の `degInfJ_quotLCyclicJ` は
 **`v_p(j(E′)) = l·v_p(j(E))`（`Lemma 3.2, (ii)`）ただ 1 つ**に帰着した。 -/
-theorem degInfJ_quotLCyclicJ_of_jExp (x : RealizedClass) (l : ℕ)
+theorem degInfJ_quotLCyclicJ_of_jExp (x : RealizedClass) {l : ℕ} (hl : l.Prime)
     (hex : ∃ y : RealizedClass, IsQuotClassJ x l y.1)
     (hrel : ∀ (S : Finset (x.rep.toSSCurve.fld × x.rep.toSSCurve.fld)),
       S.card + 1 = l →
@@ -222,12 +224,13 @@ theorem degInfJ_quotLCyclicJ_of_jExp (x : RealizedClass) (l : ℕ)
           0 ≤ jExp p x.rep.toSSCurve.W →
           0 ≤ jExp p (veluQuotientFull x.rep.toSSCurve.W S))) :
     degInfJ (quotLCyclicJ x l).cls = (l : ℝ) * degInfJ x.cls := by
-  obtain ⟨S, hell, hss, hcard, hj⟩ := quotLCyclicJ_spec x l hex
+  obtain ⟨Q, hQ, hell, hss, hj⟩ := quotLCyclicJ_spec x l hex
   haveI := hell
-  obtain ⟨hbad, hgood⟩ := hrel S hcard hss
+  have hcard := card_image_pointCoords_nsmul hl hQ
+  obtain ⟨hbad, hgood⟩ := hrel _ hcard hss
   have hloc := minDeltaExp_eq_mul_of_jExp_all x.rep.toSSCurve.W
-    (veluQuotientFull x.rep.toSSCurve.W S) x.rep.toSSCurve.ss hss hbad hgood
-  have hq := degInfJ_quot_eq x.rep.toSSCurve S hell hss l hloc
+    (veluQuotientFull x.rep.toSSCurve.W _) x.rep.toSSCurve.ss hss hbad hgood
+  have hq := degInfJ_quot_eq x.rep.toSSCurve _ hell hss l hloc
   rw [hj] at hq
   have hx : x.cls = x.rep.toSSCurve.j := (RealizedClass.rep_j x).symm
   rw [hx]
@@ -277,7 +280,7 @@ open scoped Classical in
 
 ★★★これで witness の `degInfJ_quotLCyclicJ` は
 **在庫の局所結果 ＋ 良い素点で符号が保たれること**だけになった。 -/
-theorem degInfJ_quotLCyclicJ_of_bad (x : RealizedClass) (l : ℕ)
+theorem degInfJ_quotLCyclicJ_of_bad (x : RealizedClass) {l : ℕ} (hl : l.Prime)
     (hex : ∃ y : RealizedClass, IsQuotClassJ x l y.1)
     (hrel : ∀ (S : Finset (x.rep.toSSCurve.fld × x.rep.toSSCurve.fld)),
       S.card + 1 = l →
@@ -292,12 +295,13 @@ theorem degInfJ_quotLCyclicJ_of_bad (x : RealizedClass) (l : ℕ)
           0 ≤ jExp p x.rep.toSSCurve.W →
           0 ≤ jExp p (veluQuotientFull x.rep.toSSCurve.W S))) :
     degInfJ (quotLCyclicJ x l).cls = (l : ℝ) * degInfJ x.cls := by
-  obtain ⟨S, hell, hss, hcard, hj⟩ := quotLCyclicJ_spec x l hex
+  obtain ⟨Q, hQ, hell, hss, hj⟩ := quotLCyclicJ_spec x l hex
   haveI := hell
-  obtain ⟨hbad, hgood⟩ := hrel S hcard hss
+  have hcard := card_image_pointCoords_nsmul hl hQ
+  obtain ⟨hbad, hgood⟩ := hrel _ hcard hss
   have hloc := minDeltaExp_eq_mul_all x.rep.toSSCurve.W
-    (veluQuotientFull x.rep.toSSCurve.W S) x.rep.toSSCurve.ss hss hbad hgood
-  have hq := degInfJ_quot_eq x.rep.toSSCurve S hell hss l hloc
+    (veluQuotientFull x.rep.toSSCurve.W _) x.rep.toSSCurve.ss hss hbad hgood
+  have hq := degInfJ_quot_eq x.rep.toSSCurve _ hell hss l hloc
   rw [hj] at hq
   have hx : x.cls = x.rep.toSSCurve.j := (RealizedClass.rep_j x).symm
   rw [hx]
@@ -316,7 +320,7 @@ open scoped Classical in
 
 ★★★これで witness の `faltingsHeightJ_quotLCyclicJ` は
 **在庫の同種写像の高さ評価に幾何のデータを渡すだけ**になった。 -/
-theorem faltingsHeightJ_quotLCyclicJ_zero (x : RealizedClass) (l : ℕ)
+theorem faltingsHeightJ_quotLCyclicJ_zero (x : RealizedClass) {l : ℕ} (hl : l.Prime)
     (hex : ∃ y : RealizedClass, IsQuotClassJ x l y.1)
     (hfalt : ∀ (S : Finset (x.rep.toSSCurve.fld × x.rep.toSSCurve.fld)),
       S.card + 1 = l →
@@ -324,44 +328,47 @@ theorem faltingsHeightJ_quotLCyclicJ_zero (x : RealizedClass) (l : ℕ)
         ≤ htFaltOf x.rep.toSSCurve.fld x.rep.toSSCurve.W + 2 * Real.log l) :
     faltingsHeightJ (quotLCyclicJ x l).cls
       ≤ faltingsHeightJ x.cls + 2 * Real.log l := by
-  have h := faltingsHeightJ_quotLCyclicJ_of_isog x l 0 hex
+  have h := faltingsHeightJ_quotLCyclicJ_of_isog x hl 0 hex
     (fun S hS => by simpa using hfalt S hS)
   simpa using h
 
-/-! ## ★★★★★★★★★★★★★★★★生成元を持ち歩く版 -/
+/-! ## ★★★★★★★★★★★★★★★★★★★★第 1339 —— `ht^Falt` は無条件になった -/
 
 open scoped Classical in
-/-- ★★★★★★★★★★★★
-**生成元 `Q` を持ち歩く `IsQuotClassJ`**（第 1262）。
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`quotLCyclicJ` の `ht^Falt` の評価**——★**無条件**（第 1339）。
 
 原文 (GenEll p.17):
 > Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
 
-☆`IsQuotClassJ` は座標集合 `S` だけを持つので、
-`htFalt_veluQuotientFull_le`（第 704）が要る**生成元 `Q`** が取り出せない。
-★本定義は `Q` を持ち歩く形であり、`IsQuotClassJ` を含意する（下の定理）。
+☆商の類が存在すれば第 1338（無条件の同種写像の高さ評価）がそのまま効き、
+存在しなければ `quotLCyclicJ x l = x` なので `2·log l ≥ 0` で済む。
 
-★★★これが `EllModuliWitness` の `faltingsHeight_quotLCyclic` を
-在庫の同種写像の高さ評価に繋ぐための設計である。 -/
-def IsQuotClassPointJ (x : RealizedClass) (l : ℕ) (y : ℂ) : Prop :=
-  ∃ (Q : x.rep.toSSCurve.W.toAffine.Point) (_hQ : addOrderOf Q = l)
-    (hell : (veluQuotientFull x.rep.toSSCurve.W
-      (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))).IsElliptic)
-    (hss : ∀ p : HeightOneSpectrum (𝓞 x.rep.toSSCurve.fld),
-      SemistableAt p (veluQuotientFull x.rep.toSSCurve.W
-        (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))))),
-    (quotSSCurve x.rep.toSSCurve
-      (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))) hell hss).j = y
-
-open scoped Classical in
-/-- ★★★★★★★★**生成元つきなら座標集合つきでもある**——★**無条件**（第 1262）。
-
-☆個数の条件 `S.card + 1 = l` は第 1240 が与える。 -/
-theorem isQuotClassJ_of_point {x : RealizedClass} {l : ℕ} (hl : l.Prime) {y : ℂ}
-    (h : IsQuotClassPointJ x l y) : IsQuotClassJ x l y := by
-  obtain ⟨Q, hQ, hell, hss, hj⟩ := h
-  exact ⟨((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)), hell, hss,
-    card_image_pointCoords_nsmul hl hQ, hj⟩
+★★★これが `EllModuliWitness` の `faltingsHeight_quotLCyclic` **そのもの**である
+——仮説は `l` が素数だけである。 -/
+theorem faltingsHeightJ_quotLCyclicJ_uncond (x : RealizedClass) {l : ℕ} (hl : l.Prime) :
+    faltingsHeightJ (quotLCyclicJ x l).cls
+      ≤ faltingsHeightJ x.cls + 2 * Real.log l := by
+  have hlog : (0 : ℝ) ≤ Real.log l :=
+    Real.log_nonneg (by exact_mod_cast hl.one_lt.le)
+  by_cases hex : ∃ y : RealizedClass, IsQuotClassJ x l y.1
+  · obtain ⟨Q, hQ, hell, hss, hj⟩ := quotLCyclicJ_spec x l hex
+    haveI := hell
+    have hfalt := ABC3.Found.GaloisRep.htFalt_veluQuotientFull_le_uncond
+      x.rep.toSSCurve.W
+      (veluQuotientFull x.rep.toSSCurve.W
+        (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))))
+      hl Q hQ rfl
+    have hq := faltingsHeightJ_quot_le x.rep.toSSCurve _ hell hss l 0 (by linarith [hfalt])
+    rw [hj] at hq
+    have hx : x.cls = x.rep.toSSCurve.j := (RealizedClass.rep_j x).symm
+    rw [hx]
+    show faltingsHeightJ (quotLCyclicJ x l).1 ≤ _
+    linarith [hq]
+  · have hself : quotLCyclicJ x l = x := by
+      rw [quotLCyclicJ, dif_neg hex]
+    rw [hself]
+    linarith
 
 /-! ## ★出典の紐付け(`.src`)——★**条つきである。指標には数えない** -/
 
@@ -370,15 +377,18 @@ def degInfJ_quotLCyclicJ_of_jExp.src : Source :=
     item := "Lemma 3.5(quotLCyclicJ の deg∞——jExp の言葉で。Lemma 3.2, (ii) を仮説で受ける)",
     sectionId := "genell-lemma-3-5" }
 
-def IsQuotClassPointJ.src : Source :=
+def faltingsHeightJ_quotLCyclicJ_uncond.src : Source :=
   { paper := "GenEll", pdfPage := 17,
-    item := "Lemma 3.5(生成元 Q を持ち歩く IsQuotClassJ)",
+    item := "Lemma 3.5(quotLCyclicJ の ht^Falt の評価。★無条件)",
     sectionId := "genell-lemma-3-5" }
 
-def isQuotClassJ_of_point.src : Source :=
-  { paper := "GenEll", pdfPage := 17,
-    item := "Lemma 3.5(生成元つきなら座標集合つきでもある。★無条件)",
-    sectionId := "genell-lemma-3-5" }
+def faltingsHeightJ_quotLCyclicJ_uncond.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "htFalt_veluQuotientFull_le_uncond(第 1338、無条件)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.htFalt_veluQuotientFull_le_uncond") 1,
+    .implicitStep
+      ("★★★★**2026-09-02（第 1339）**——`EllModuliWitness` の " ++
+       "`faltingsHeight_quotLCyclic` **そのもの**である。" ++
+       "☆`IsQuotClassJ` を生成元 `Q` を持ち歩く形に締め直したのが効いた。") 3 ]
 
 def faltingsHeightJ_quotLCyclicJ_zero.src : Source :=
   { paper := "GenEll", pdfPage := 17,

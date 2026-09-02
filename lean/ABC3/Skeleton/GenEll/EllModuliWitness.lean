@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GenEll.EllModuliObjects
+import ABC3.Found.GenEll.QuotClassExists
 import ABC3.Found.GenEll.EllModuliGalois
 import ABC3.Found.GenEll.DetCycloChar
 import ABC3.Interface.GenEll.EllModuli
@@ -62,6 +63,19 @@ import ABC3.Meta.Claim
 ★★★**したがって 4 本に残るのは配管だけであり、
 未証明の外部引用は 1 本もない**。
 
+## ★★★★★★★★★★★★★★★★★★★★**2026-09-02（第 1338-1339）——#3 が閉じた**
+
+☆`faltingsHeightJ_quotLCyclicJ`（#3）は **`sorry` ではなくなった**。道は 2 段:
+
+1. 第 1337-1338——`htFalt_veluQuotientFull_le_uncond` を**無条件**にした
+   （一意化の族は選択で取れ、`hfin` は第 1083・1149 が無条件に与える）。
+2. 第 1339——`IsQuotClassJ` を**生成元 `Q` を持ち歩く形**に締め直した
+   （かつては任意の座標集合 `S` で、同種写像の評価を当てられなかった）。
+
+★★★**残る `sorry` は 3 本**（#1 `galoisFiniteJ_lcyclicExcJ`・#2 `degInfJ_quotLCyclicJ`・#4 `imageContainsSL2J_torsionExt`）である。
+☆#1・#2 が共通に欲しがるのは「Vélu の商の半安定性」（良い素点側）であり、
+悪い素点側は第 1327、楕円性は第 1336 で閉じている。
+
 ## ★★★★★★★★★★★★★★★★★★★★この 4 本が 3 項目を同時に閉じる（第 1261）
 
 ☆**測定（2026-09-02）**——`Skeleton/GenEll/Section4.lean` は **sorry 0**
@@ -115,12 +129,18 @@ theorem degInfJ_quotLCyclicJ (x : RealizedClass) (l : ℕ) (hl : Nat.Prime l)
     degInfJ (quotLCyclicJ x l).cls = (l : ℝ) * degInfJ x.cls := by
   sorry
 
-/-- ★★★`ht^Falt(E′) ≤ ht^Falt(E) + 2log(l) + C₀`——`Lemma 3.5`（葉 1・2）を受ける。 -/
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`ht^Falt(E′) ≤ ht^Falt(E) + 2log(l)`——★これはもう `sorry` ではない**（2026-09-02、第 1339）。
+
+☆第 1338（無条件の同種写像の高さ評価）と、`IsQuotClassJ` を生成元 `Q` を持ち歩く形に締め直したことで、
+定数 `C₀ = 0` で閉じた。 -/
 theorem faltingsHeightJ_quotLCyclicJ :
     ∃ C₀ : ℝ, ∀ (x : RealizedClass) (l : ℕ), Nat.Prime l → HasLCyclicJ x.rep.toSSCurve l →
       faltingsHeightJ (quotLCyclicJ x l).cls
-        ≤ faltingsHeightJ x.cls + 2 * Real.log l + C₀ := by
-  sorry
+        ≤ faltingsHeightJ x.cls + 2 * Real.log l + C₀ :=
+  ⟨0, fun x l hl _ => by
+    have h := faltingsHeightJ_quotLCyclicJ_uncond x hl
+    linarith⟩
 
 /-- ★★★`α` の側（葉 3）を受ける。 -/
 theorem imageContainsSL2J_torsionExt (x : RealizedClass) (l : ℕ) (hl : Nat.Prime l)
