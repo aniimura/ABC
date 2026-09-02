@@ -23,12 +23,12 @@ import ABC3.Meta.Claim
 
 | # | 内容 | 状態 |
 |---|---|---|
-| 1 | `hcop`（`l ∤ jExp p E`）と `hc4L`（`c₄(E/C) ≠ 0`）を `VeluQuotOK` の側へ通す | ☆インタフェースの変更 |
+| 1 | `hcop`（`l ∤ jExp p E`）を `VeluQuotOK` の側へ通す | ☆インタフェースの変更 |
 | 2 | **`p ∣ l`** | ☆**形式群**が要る（`blocked-leaves.json` の `pDivLRevised2026_09_02`） |
 
 ☆`hcop` は消費側（`hdag_of_stableLine`）が `PrimeToLocalHeights l` として持っている。
-`hc4L` は数学的には自動（同種な曲線は `j` の非整性を共有する）だが、
-それを言うにはモジュラー多項式か同種不変性が要る。
+★`c₄(E/C) ≠ 0` は第 1408 で仮定から落とした——Tate モデルとの変数変換と
+`c₄(veluCurve) = c₄(E_q) + 240v` の単元性から出る。
 -/
 
 namespace ABC3.Found.GenEll
@@ -54,20 +54,18 @@ theorem semistableAt_veluQuot_of_not_dvd [inst : DecidableEq L]
     (hss : SemistableAt p E)
     {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2) (hlu : IsUnit ((l : primeSubring p)))
     (hcop : ¬ ((l : ℤ) ∣ jExp p E))
-    (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
-    (hc4L : (veluQuotientFull E
-      (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))).c₄ ≠ 0) :
+    (Q : E.toAffine.Point) (hQ : addOrderOf Q = l) :
     SemistableAt p (veluQuotientFull E
       (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) := by
   by_cases hj : 0 ≤ jExp p E
   · exact semistableAt_veluQuot_goodPrime p E hss hj hl hodd hlu Q hQ
-  · exact semistableAt_veluQuot_badPrime p E hss (by omega) hl hodd hlu hcop Q hQ hc4L
+  · exact semistableAt_veluQuot_badPrime p E hss (by omega) hl hodd hlu hcop Q hQ
 
 /-! ## ★出典の紐付け(`.src`) -/
 
 def semistableAt_veluQuot_of_not_dvd.src : Source :=
   { paper := "GenEll", pdfPage := 17,
-    item := "Lemma 3.5(p ∤ l では Vélu の商は半安定。★l ∤ jExp p・c₄ ≠ 0)",
+    item := "Lemma 3.5(p ∤ l では Vélu の商は半安定。★l ∤ jExp p のみ)",
     sectionId := "genell-lemma-3-5" }
 
 def semistableAt_veluQuot_of_not_dvd.needs : List ProofObligation :=
@@ -78,7 +76,7 @@ def semistableAt_veluQuot_of_not_dvd.needs : List ProofObligation :=
     .implicitStep
       ("★★★★**2026-09-02（第 1407）**——`semistableAt_veluQuotientFull` の " ++
        "**`p ∤ l` の側が完全に閉じた**。" ++
-       "☆残るのは（1）`hcop`・`hc4L` を `VeluQuotOK` の側へ通すインタフェースの変更と" ++
+       "☆残るのは（1）`hcop` を `VeluQuotOK` の側へ通すインタフェースの変更と" ++
        "（2）**`p ∣ l`**（形式群）である。") 17 ]
 
 end ABC3.Found.GenEll

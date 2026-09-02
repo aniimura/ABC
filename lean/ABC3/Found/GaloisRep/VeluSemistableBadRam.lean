@@ -37,14 +37,36 @@ open ABC3.Found.GenEll ABC3.Meta
 
 open scoped Classical
 
+/-- ☆Tate モデルの Vélu の商と変数変換で結ばれていれば `c₄ ≠ 0`（第 1408）。
+
+★`c₄(veluCurve) = c₄(E_q) + 240v` が単元だからである。 -/
+theorem c4_ne_zero_of_veluCurve_eq {Lv : Type} [Field Lv]
+    {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    [Algebra R Lv] [IsFractionRing R Lv] [IsAdicComplete (IsLocalRing.maximalIdeal R) R]
+    (q : R) (hq : q ∈ IsLocalRing.maximalIdeal R) (v w : R)
+    (hunit : IsUnit ((tateCurveAt q hq).c₄ + 240 * v))
+    (C₀ : WeierstrassCurve.VariableChange R) (X : WeierstrassCurve Lv)
+    (hEq : (C₀.map (algebraMap R Lv)) • X
+      = (veluCurve (tateCurveAt q hq) v w).map (algebraMap R Lv)) :
+    X.c₄ ≠ 0 := by
+  intro h0
+  have h1 := congrArg WeierstrassCurve.c₄ hEq
+  rw [WeierstrassCurve.variableChange_c₄, WeierstrassCurve.map_c₄, veluCurve_c₄, h0,
+    mul_zero] at h1
+  refine hunit.ne_zero ?_
+  refine (IsFractionRing.injective R Lv) ?_
+  rw [map_zero]
+  exact h1.symm
+
 set_option maxHeartbeats 800000 in
 /-- ★★★★★★★★★★★★★★★★★★★★
-**Vélu の商は悪い素点で半安定（分岐版）**——★**無条件**（第 1404）。
+**Vélu の商は悪い素点で半安定（分岐版）**——★**無条件**（第 1404、第 1408 で `hc4` を落とした）。
 
 原文 (GenEll p.17):
 > Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
 
-☆第 1327 の `hp` を `v_{Lv}(x) = v_p(x)^e`（`e ≥ 1`）に弱めた形である。 -/
+☆第 1327 の `hp` を `v_{Lv}(x) = v_p(x)^e`（`e ≥ 1`）に弱めた形である。
+★★`c₄ ≠ 0` は `hEq` と `hunit` から出るので仮定しない（第 1408）。 -/
 theorem semistableAt_velu_of_veluCurve_eq_ram {L : Type} [Field L] [NumberField L]
     {Lv : Type} [Field Lv] [Algebra L Lv]
     {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
@@ -55,7 +77,7 @@ theorem semistableAt_velu_of_veluCurve_eq_ram {L : Type} [Field L] [NumberField 
         (IsDiscreteValuationRing.maximalIdeal R)) (algebraMap L Lv x)
       = ((HeightOneSpectrum.valuation L p) x) ^ e)
     (E' : WeierstrassCurve L) [WeierstrassCurve.IsIntegral (primeSubring p) E']
-    (hΔ : E'.Δ ≠ 0) (hc4 : E'.c₄ ≠ 0)
+    (hΔ : E'.Δ ≠ 0)
     (q : R) (hq : q ∈ IsLocalRing.maximalIdeal R) (v w : R)
     (hunit : IsUnit ((tateCurveAt q hq).c₄ + 240 * v))
     (C₀ : WeierstrassCurve.VariableChange R)
@@ -64,9 +86,12 @@ theorem semistableAt_velu_of_veluCurve_eq_ram {L : Type} [Field L] [NumberField 
     (hu : vAdd (tateDvrVal R Lv) ((C₀.map (algebraMap R Lv)).u) = 0) :
     SemistableAt p E' := by
   have hinj : Function.Injective (algebraMap L Lv) := (algebraMap L Lv).injective
-  have hc4' : (E'.baseChange Lv).c₄ ≠ 0 := by
-    rw [WeierstrassCurve.baseChange, WeierstrassCurve.map_c₄]
-    exact (map_ne_zero_iff _ hinj).2 hc4
+  have hc4' : (E'.baseChange Lv).c₄ ≠ 0 :=
+    c4_ne_zero_of_veluCurve_eq q hq v w hunit C₀ (E'.baseChange Lv) hEq
+  have hc4 : E'.c₄ ≠ 0 := by
+    intro h0
+    refine hc4' ?_
+    rw [WeierstrassCurve.baseChange, WeierstrassCurve.map_c₄, h0, map_zero]
   have hloc := vAdd_c4_of_veluCurve_eq (R := R) (K := Lv) q hq v w hunit C₀
     (E'.baseChange Lv) hc4' hEq hu
   have hne2 : algebraMap L Lv E'.c₄ ≠ 0 := (map_ne_zero_iff _ hinj).2 hc4
@@ -117,7 +142,7 @@ theorem semistableAt_veluQuotient_bad_ram {L : Type} [Field L] [NumberField L]
     {Q : E.toAffine.Point} (hQ : addOrderOf Q = l)
     (hE' : E' = veluQuotientFull E
       (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))))
-    (hΔL : E'.Δ ≠ 0) (hc4L : E'.c₄ ≠ 0) :
+    (hΔL : E'.Δ ≠ 0) :
     SemistableAt p E' := by
   have hq := tateParamR_mem (E.baseChange Lv) h
   have hq0 := tateParamR_ne_zero (E.baseChange Lv) h
@@ -169,7 +194,7 @@ theorem semistableAt_veluQuotient_bad_ram {L : Type} [Field L] [NumberField L]
     rw [h4]
     exact (hlu.pow 4).mul
       (tateCurveAt_c4_isUnit ((tateParamR (E.baseChange Lv) h) ^ l) hql)
-  exact semistableAt_velu_of_veluCurve_eq_ram he p hpe E' hΔL hc4L
+  exact semistableAt_velu_of_veluCurve_eq_ram he p hpe E' hΔL
     (tateParamR (E.baseChange Lv) h) hq v w hunit C₀ hEq hu0
 
 /-! ## ★出典の紐付け(`.src`) -/

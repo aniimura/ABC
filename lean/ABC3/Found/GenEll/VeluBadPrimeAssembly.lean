@@ -29,11 +29,11 @@ import ABC3.Meta.Claim
 | 極小モデルからの戻し | `veluQuotientFull_vcPoint_eq` ＋ `semistableAt_variableChange` |
 
 ★★★これで**悪い素点の半安定性が `p` ごとに閉じた**
-——残る仮定は `l ∤ jExp p E`（＝`PrimeToLocalHeights`、消費側は持っている）と
-`c₄(E/C) ≠ 0` だけである。
+——残る仮定は `l ∤ jExp p E`（＝`PrimeToLocalHeights`、消費側は持っている）だけである。
 
-☆`c₄(E/C) ≠ 0` は数学的には自動（同種な曲線は `j` の非整性を共有するので `j(E/C) ≠ 0`）だが、
-それを言うにはモジュラー多項式か同種不変性が要るので、いまは仮定として受ける。
+☆`c₄(E/C) ≠ 0` は第 1408 で仮定から落とした——Tate モデルとの変数変換
+`(C₀ ⊗ Lv) • (E′ ⊗ Lv) = veluCurve(E_q, v, w) ⊗ Lv` と
+`c₄(veluCurve) = c₄(E_q) + 240v` の単元性から出る。
 -/
 
 namespace ABC3.Found.GenEll
@@ -105,7 +105,7 @@ set_option maxHeartbeats 4000000 in
 > Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
 
 ☆仮定は `SemistableAt p E`・`jExp p E < 0`（悪い素点）・`l` 奇素数・`p ∤ l`・
-`l ∤ jExp p E`（＝`PrimeToLocalHeights`）・`c₄(E/C) ≠ 0` である。
+`l ∤ jExp p E`（＝`PrimeToLocalHeights`）である。
 
 ★★★これで良い素点（第 1403）と合わせて **`p ∤ l` の側が閉じた**。 -/
 theorem semistableAt_veluQuot_badPrime [inst : DecidableEq L]
@@ -113,9 +113,7 @@ theorem semistableAt_veluQuot_badPrime [inst : DecidableEq L]
     (hss : SemistableAt p E) (hj : jExp p E < 0)
     {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2) (hlu : IsUnit ((l : primeSubring p)))
     (hcop : ¬ ((l : ℤ) ∣ jExp p E))
-    (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
-    (hc4L : (veluQuotientFull E
-      (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))).c₄ ≠ 0) :
+    (Q : E.toAffine.Point) (hQ : addOrderOf Q = l) :
     SemistableAt p (veluQuotientFull E
       (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) := by
   have hinst : inst = fun a b => Classical.propDecidable (a = b) := by
@@ -148,12 +146,8 @@ theorem semistableAt_veluQuot_badPrime [inst : DecidableEq L]
       (((range l).erase 0).image (fun k : ℕ => pointCoords (k • vcPoint C E Q)))).Δ ≠ 0 :=
     (veluQuotientFull (C • E)
       (((range l).erase 0).image (fun k : ℕ => pointCoords (k • vcPoint C E Q)))).isUnit_Δ.ne_zero
-  have hc4L' : (veluQuotientFull (C • E)
-      (((range l).erase 0).image (fun k : ℕ => pointCoords (k • vcPoint C E Q)))).c₄ ≠ 0 := by
-    rw [← heq, WeierstrassCurve.variableChange_c₄]
-    exact mul_ne_zero (pow_ne_zero 4 (Units.ne_zero _)) hc4L
   have hres := semistableAt_veluQuot_multRed_local L he1 p hpe E C hC hc4ne hc4 hj hl hodd
-    hle hcop hlu hluR h2R h2K (vcPoint C E Q) hQ' hΔL' hc4L'
+    hle hcop hlu hluR h2R h2K (vcPoint C E Q) hQ' hΔL'
   rw [← heq] at hres
   have hfin := semistableAt_variableChange p _ C⁻¹ hres
   rwa [inv_smul_smul] at hfin
@@ -172,7 +166,7 @@ def valAdd_natCast_eq_zero_of_isUnit.src : Source :=
 
 def semistableAt_veluQuot_badPrime.src : Source :=
   { paper := "GenEll", pdfPage := 17,
-    item := "Lemma 3.5(悪い素点 p ∤ l では Vélu の商は半安定。★l ∤ jExp p・c₄ ≠ 0)",
+    item := "Lemma 3.5(悪い素点 p ∤ l では Vélu の商は半安定。★l ∤ jExp p のみ)",
     sectionId := "genell-lemma-3-5" }
 
 def semistableAt_veluQuot_badPrime.needs : List ProofObligation :=
@@ -185,8 +179,7 @@ def semistableAt_veluQuot_badPrime.needs : List ProofObligation :=
     .implicitStep
       ("★★★★**2026-09-02（第 1406）**——第 1405 の局所パッケージを `p` ごとに作った。" ++
        "★★★これで良い素点（第 1403）と合わせて **`p ∤ l` の側が閉じた**。" ++
-       "☆残る仮定は `l ∤ jExp p E`（＝`PrimeToLocalHeights`、消費側は持っている）と" ++
-       "`c₄(E/C) ≠ 0`（同種な曲線は `j` の非整性を共有するので数学的には自動だが、" ++
-       "それを言うにはモジュラー多項式か同種不変性が要る）である。") 17 ]
+       "☆残る仮定は `l ∤ jExp p E`（＝`PrimeToLocalHeights`、消費側は持っている）だけである" ++
+       "——`c₄(E/C) ≠ 0` は第 1408 で落とした。") 17 ]
 
 end ABC3.Found.GenEll

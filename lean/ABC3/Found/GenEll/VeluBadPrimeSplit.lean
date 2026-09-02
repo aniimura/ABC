@@ -71,9 +71,7 @@ theorem semistableAt_veluQuot_multRed_local
     (hluR : IsUnit ((l : R))) (h2R : (2 : R) ≠ 0) (h2K : (2 : Lv) ≠ 0)
     (Q : (C • W).toAffine.Point) (hQ : addOrderOf Q = l)
     (hΔL : (veluQuotientFull (C • W)
-      (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))).Δ ≠ 0)
-    (hc4L : (veluQuotientFull (C • W)
-      (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))).c₄ ≠ 0) :
+      (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))).Δ ≠ 0) :
     SemistableAt p (veluQuotientFull (C • W)
       (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) := by
   have hinst : inst = fun a b => Classical.propDecidable (a = b) := by
@@ -90,7 +88,7 @@ theorem semistableAt_veluQuot_multRed_local
   by_cases hs : WeierstrassCurve.HasSplitMultiplicativeReduction R ((C • W).baseChange Lv)
   · exact semistableAt_veluQuotient_bad_ram he p hpe (C • W) _ hs hl hodd
       (not_dvd_vAdd_tateParam_of_not_dvd_jExp_ram p hpe (C • W) hs hjC hl hle hcopC)
-      hluR h2R h2K hQ rfl hΔL hc4L
+      hluR h2R h2K hQ rfl hΔL
   · set F := splitQuadPoly (WeierstrassCurve.integralModel R ((C • W).baseChange Lv)) hA
       with hFdef
     have hfm : F.Monic := monic_splitQuadPoly _ hA
@@ -126,7 +124,7 @@ theorem semistableAt_veluQuot_multRed_local
       (valuation_algebraMap_ext_ram p hpe hfm hfd hirr halg) (C • W) _ h' hl hodd
       (not_dvd_vAdd_tateParam_of_not_dvd_jExp_ram p
         (valuation_algebraMap_ext_ram p hpe hfm hfd hirr halg) (C • W) h' hjC hl hle hcopC)
-      hluR' h2R' h2K' hQ rfl hΔL hc4L
+      hluR' h2R' h2K' hQ rfl hΔL
 
 /-! ## ★出典の紐付け(`.src`) -/
 
