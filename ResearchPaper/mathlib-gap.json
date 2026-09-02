@@ -6521,5 +6521,15 @@
   "route": "★第 1309（局所の点データ）＋第 1310（塔の突き合わせ）＋第 1312（`ζ` は局所体で足りる）。",
   "consequence": "★★★これで II 側の橋は「`ζ ∈ L_v`・局所の点データ・`ι`／`σbar`／`hcomm`」だけを受け取る。☆`ζ ∈ L` は不要になり、`SSCurve` の底変換も不要である。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "alphaFromBadPrime20260902": {
+  "block": 1320,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★★★★★★★★★II 側の一本道——悪い素点から大域の h2・h1",
+  "proved": "☆`exists_h2_h1_of_bad_prime`（`Found/GenEll/AlphaFromBadPrime.lean`、第 1320）。",
+  "inputs": "☆受け取るのは原文の言葉だけ: (1) `jExp p E < 0` と `¬ l ∣ jExp p E`（`PrimeToLocalHeights`）、(2) `E ⊗ L_v` は極小かつ**分裂**乗法還元、(3) `ζ ∈ L̄` が原始 `l` 乗根でその像が `L_v` に入る、(4) `L̄ ↪ M`（`IsAlgClosed.lift`）。",
+  "route": "★第 1318（局所の 2 入力）＋第 1309（固定点・動く点）＋第 1319（大域へ）。",
+  "consequence": "★★★これで `alpha_mem_map_of_galTate`（第 1237）に渡せる `σ` が**悪い素点のデータだけ**から出る。☆残るのは (i) 分裂乗法還元の用意（不分岐 2 次捻り、在庫）と(iii) `ζ ∈ L_v`（素点を `L(ζ_l)` の上で取る）の 2 つだけ。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
