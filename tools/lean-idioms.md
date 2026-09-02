@@ -3206,3 +3206,45 @@ subst hinst
 `W.IsElliptic` のインスタンス合成が失敗する（`def` が reducible でないため）。
 ☆**直し方**——中身の形 `E.W.baseChange ↑(extField E M₀)` で書く。
 ★`haveI` で手で入れても、別の場所で再合成されると同じことが起きる。
+
+## `AdjoinRoot` の塔は**自前で合成しない**
+
+`AdjoinRoot f`（`f : R[X]`）には mathlib が
+
+* `instance [CommSemiring S] [Algebra S R] : Algebra S (AdjoinRoot f)`
+* `instance [IsScalarTower R₁ R₂ R] : IsScalarTower R₁ R₂ (AdjoinRoot f)`
+
+を持っているので、`S → R → AdjoinRoot f` の塔は**そのまま降りてくる**。
+☆ここで `(algebraMap R (AdjoinRoot f)).comp (algebraMap S R) |>.toAlgebra` を
+自前で `instance` にすると、`SMul` が `AdjoinRoot.instSMulAdjoinRoot` と食い違い
+
+```
+Type mismatch … (instAlgebraLocInt p hl).toSMul
+  but is expected to have type … AdjoinRoot.instSMulAdjoinRoot …
+```
+
+になる。★**まず何も定義せずに `lake build` して、足りないものだけ足す**こと
+（第 1377 でこれに落ちた——結局 4 つの自前インスタンスは全部不要だった）。
+
+## 定理の**主張**が要求するインスタンスは `haveI` では入らない
+
+`theorem foo : … IsLocalRing.maximalIdeal C …` のように主張の中で
+`[IsLocalRing C]` を使うなら、証明の中の `haveI` では遅い。
+☆**直し方**——先に `instance : IsDiscreteValuationRing C := …` を宣言してしまう
+（`IsLocalRing` はその射影で降りる）。★第 1377 でこれに落ちた。
+
+## `IsScalarTower.of_algebraMap_eq'` は引数から型が決まらないことがある
+
+`of_algebraMap_eq' rfl` は `IsScalarTower ?m ?m ?m` になって詰まる。
+☆`IsScalarTower.of_algebraMap_eq (R := …) (S := …) (A := …) (fun _ => rfl)` と
+明示するか、そもそも上の項のとおり**自前で作らない**。
+
+## `Basis` は `Module.Basis` に改名されている
+
+`have b : Basis ι R M := …` は `Unknown identifier `Basis`` になる。
+☆`Module.Basis` と書くか `open Module` する（第 1366）。
+
+## Lean の識別子に `′`(U+2032) は使えない
+
+`K′` は `expected token` になる。☆ASCII の `'`（`K'`）を使う。
+ドキュメンテーションコメントの中では `′` でよい（第 1374）。
