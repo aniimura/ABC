@@ -6782,5 +6782,13 @@
   "why": "★`IsQuotClassJ` の witness には `DegCurve`（＝`SSCurve` ＋ 乗法還元）が要る。☆商の乗法還元は持ち上げた `E` の乗法還元から Tate の関係で出るので、まず「持ち上げても乗法還元」を取る必要があった。",
   "pitfall": "★★`(E.ext M₀).W` の形では `IsElliptic` のインスタンスが合成されない（`SSCurve.ext` は `def` なので `.W` が簡約されない）。☆`E.W.baseChange ↥(extField E M₀)` の形で書けば通る。",
   "gate": "lake build ABC3 成功（6369 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
+ },
+ "quotClassExistence20260902": {
+  "block": "1348-1349",
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★商も乗法還元を持つ（＋残る段の測定）",
+  "proved": "☆`Skeleton/GenEll/QuotClassExistence.lean`（第 1348）に `hasMultRed_quotSSCurve`——`E` の乗法還元の素点で Tate の関係（`isMuAtBadPrimes_of_veluQuotient_nodeg`、第 1141）が効き、`v_p(Δ_min(E′)) = l·v_p(Δ_min(E)) ≠ 0`。★`IsQuotClassJ` の witness に要る `DegCurve`（`SSCurve` ＋ 乗法還元）が作れる。",
+  "measure": "★★★**残る段（第 1349）の測定**——材料は 7 段すべて揃った（安定な点・降下・持ち上げ・輸送・楕円性・半安定性の節点・乗法還元）。☆組み立てで詰まったのは **`DecidableEq` のインスタンスの食い違い**である:`exists_ext_point_of_stable`（第 1346）は古典的なインスタンスで返し、`SSCurve` の語彙は `↥K` の具体の `Subtype.instDecidableEq` で合成される。★橋は `addOrderOf_point_congr_dec`（第 1347）にあるので、第 1346 の結論から `letI` を外して具体側に寄せれば噛み合う。",
+  "gate": "lake build ABC3 成功（6370 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
  }
 }
