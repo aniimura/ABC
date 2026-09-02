@@ -402,6 +402,7 @@ import ABC3.Found.GaloisRep.JVeluTateMuK
 import ABC3.Found.GenEll.SymmSum
 import ABC3.Found.GenEll.EllModuliObjects
 import ABC3.Found.GenEll.DvrFromDedekind
+import ABC3.Found.GenEll.LocalFromQuotient
 import ABC3.Found.GenEll.ArtinianLocal
 import ABC3.Found.GenEll.AdicTransfer
 import ABC3.Found.GenEll.IdempotentLift

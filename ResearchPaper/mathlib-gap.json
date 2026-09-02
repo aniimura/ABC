@@ -6846,5 +6846,14 @@
   "proved": "☆`Found/GenEll/DvrFromDedekind.lean`（第 1363）に`isArtinianRing_of_module_finite`（段 5: Artin 環の上の加群有限代数は Artin 環）と`isDiscreteValuationRing_of_isDedekindDomain`（段 7: Dedekind ＋ 局所 ＋ 体でない ⟹ DVR）。どちらも mathlib の在庫の組み合わせ 1 行。",
   "progress": "★★★これで「完備 DVR `R` の有限整閉包 `R′` は完備 DVR」の**7 段がすべて揃った**:(1) 第 1357 冪等元の持ち上げ、(2) 第 1358 商に冪等元なし、(3) 第 1359 線型同型の移送、(4) 第 1360-1361 直積・係数環、(5) 第 1363 Artin 環、(6) 第 1362 Artin ⟹ 局所、(7) 第 1363 DVR。☆残るのは `IsIntegralClosure` の言葉で組み立てる**配管だけ**である（`IsIntegralClosure.finite`・`module_free`・`isDedekindDomain`・`isFractionRing_of_finite_extension` はすべて在庫）。",
   "gate": "lake build ABC3 成功（6376 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
+ },
+ "localFromQuotient20260902": {
+  "block": 1364,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★7 段を 1 本にまとめた（完備な整域は商が Artin なら局所）",
+  "proved": "☆`Found/GenEll/LocalFromQuotient.lean`（第 1364）に`isLocalRing_of_quotient`（商が局所で `I ≤ jacobson ⊥` なら元も局所）と`isLocalRing_of_isAdicComplete_of_domain`。どちらも `sorry` 無し。",
+  "route": "★`A ⧸ I` は非自明な冪等元を持たない（第 1358）ので Artin より局所（第 1362）。☆`I ≤ jacobson ⊥` なので `A` の極大イデアルは `A ⧸ I` の極大イデアルと 1 対 1。",
+  "progress": "★★★これで `R′ = integralClosure R L` に当てれば**「完備 DVR の有限整閉包は局所」が出る**。☆残るのは `IsIntegralClosure` の言葉での組み立て（`Module.Finite`・`Module.Free`・`IsDedekindDomain`・剰余体上の有限性・極大イデアルが `m_R R′` を含むこと）だけである。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
  }
 }
