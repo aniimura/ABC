@@ -6558,5 +6558,14 @@
   "route": "★在庫の `c4_velu_tate`（`Skeleton/GenEll/TateIsogeny.lean`、**sorry 0**）は`c₄(E_q) + 240·Σ v₂ = l⁴ · c₄(E_{q^l})` を与える。☆右辺は単元（`l` は単元、`c₄(E_{q^l}) = 1 + 240σ₃` も単元＝`tateCurveAt_c4_isUnit`）。",
   "consequence": "★★★これを第 1322（`c₄` が単元の整モデルは半安定）に渡せば、**`VeluQuotOK` の 2 つの穴のうち悪い素点側が埋まる**。☆残るのは良い素点側（同種で良還元が保たれる＝Néron–Ogg–Shafarevich）とVélu の商の楕円性である。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "veluTateC4Val20260902": {
+  "block": 1324,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★Vélu の商の c₄ は付値 0（第 1323 を付値の言葉に）",
+  "proved": "☆`vAdd_c4_velu_tate_eq_zero`（`Found/GaloisRep/VeluTateC4Val.lean`、第 1324）。",
+  "route": "★第 1323（`c₄` は `R` の単元）＋ `tateDvrVal_eq_zero_of_isUnit`（在庫）。",
+  "consequence": "☆これが第 1322（`c₄` が単元の整モデルは半安定）へ渡す一歩手前の形である。★残るのは商のモデルを Tate モデルに移す変数変換（第 969・1056、在庫）と大域の `valAdd` への翻訳（`vAdd_algebraMap_eq_valAdd`、在庫）である。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
