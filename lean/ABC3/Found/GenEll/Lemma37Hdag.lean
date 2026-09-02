@@ -49,7 +49,22 @@ open scoped Classical
   整性（`veluIntegralClosed`、在庫）の配管である。
 * **良い素点**（`jExp ≥ 0`）——☆**同種で良還元が保たれる**（Néron–Ogg–Shafarevich）が要る。
 
-★これと Vélu の商の楕円性（Vélu の定理）が `VeluQuotOK` に残る 2 つの既知数学である。 -/
+★これと Vélu の商の楕円性（Vélu の定理）が `VeluQuotOK` に残る 2 つの既知数学である。
+
+★★☆**2026-09-02（第 1327-1328）——悪い素点側は閉じ、残りは 1 本に絞れた**
+
+☆第 1327（`semistableAt_velu_of_veluCurve_eq`）で**悪い素点の半安定性は閉じた**。
+
+★良い素点側は `SemistableAt` の第 1 の選択肢（`minDeltaExp = 0`＝商も良還元）が要るが、
+その道筋は
+(1) `E` の整モデルは `v(Δ) = 0`、
+(2) `l`-捩れの点は整で還元は単射（`l ≠ char k`）、
+(3) Vélu の `v`・`w` は整なので商の還元は剰余体の上の Vélu の商、
+(4) 剰余体の上で商が楕円なら `Δ` は単元、
+であり、**根は「Vélu の定理（商の `Δ ≠ 0`）」1 本**である。
+
+★★★したがって `VeluQuotOK` の 2 つの穴（楕円性・良い素点の半安定性）は
+**どちらも Vélu の定理に落ちる**。 -/
 def VeluQuotOK (E : SSCurve) (l : ℕ) : Prop :=
   ∀ (M : IntermediateField E.fld E.alg) [FiniteDimensional E.fld M]
      (Q' : (E.W.baseChange M).toAffine.Point),

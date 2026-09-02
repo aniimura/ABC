@@ -6619,5 +6619,16 @@
   "route": "★4 段: 第 1323（Tate 曲線の Vélu の商は `c₄` が単元）→ 第 1326（曲線の等式から `v(c₄) = 0`）→ `vAdd_algebraMap_eq_valAdd`（在庫、局所→大域）→ 第 1322（`c₄` が単元の整モデルは半安定）。",
   "consequence": "★★★**原文が「同種なので自動」と括弧で述べた段のうち、悪い素点の半安定性が閉じた**。☆`VeluQuotOK` に残るのは (a) 良い素点側（同種で良還元が保たれる＝Néron–Ogg–Shafarevich）と(b) Vélu の商の楕円性（Vélu の定理）の 2 つである。★仮説の `hEq`（曲線の等式）と `hu`（`u` の付値 0）は、在庫の `veluQuotientFull_vcPoint_eq`（第 969）・`vAdd_tateModel_u_eq_zero`（第 1056）が与える形である。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "veluQuotOKMeasure20260902": {
+  "block": 1328,
+  "date": "2026-09-02",
+  "title": "★★☆測定——VeluQuotOK に残るのは「Vélu の定理」に絞れた（良い素点も同じ根に落ちる）",
+  "goal": "第 1327（悪い素点側が閉じた）を受けて、良い素点側に本当に要るものを測る。",
+  "measured": "☆良い素点（`jExp ≥ 0`、`E` 半安定 ⟹ 良還元）では `c₄` は単元とは限らない（`j ≡ 0` の場合）ので第 1322 は使えない。★要るのは `SemistableAt` の**第 1 の選択肢**（`minDeltaExp = 0`、すなわち商も良還元）である。",
+  "reduction": "★★☆その道筋は次のとおりで、**根は Vélu の定理 1 本**である:(1) `E` の整モデルは `v(Δ) = 0`。(2) `S ⊂ E[l]` の点は整（`torsionIntegralGood`、在庫）で、`l ≠ char k` なら還元は単射。(3) Vélu の `v`・`w` は整なので、商のモデルの還元は**剰余体の上の Vélu の商**になる。(4) 剰余体の上で Vélu の商が楕円（＝**Vélu の定理**）なら `Δ` は単元、すなわち `minDeltaExp = 0`。",
+  "consequence": "★★★したがって `VeluQuotOK` の 2 つの穴——**楕円性**と**良い素点の半安定性**——は**どちらも「Vélu の定理（商の Δ ≠ 0）」に落ちる**。☆悪い素点の半安定性は第 1327 で閉じた。★残る副次的な入力は「良い素点で `l`-捩れの還元が単射」（標準、Néron/形式群）である。",
+  "note": "☆本プロジェクトの在庫にある Vélu の楕円性は Tate 設定に限られる（`isElliptic_veluQuotient_tate_mu` 等）。一般の体の上の Vélu の定理は未着手である。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
