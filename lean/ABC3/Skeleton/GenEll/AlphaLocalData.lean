@@ -107,14 +107,30 @@ import ABC3.Meta.Claim
 ☆他（`IsMinimal`・`HasSplitMultiplicativeReduction`・`IsElliptic`）は
 インスタンス引数なので呼び出し側が別途与える。
 
-★★残るのは**組み立ての配管**であって mathlib の欠落ではない:
+★★残るのは**組み立ての配管**であって mathlib の欠落ではない。
+☆当初 4 つと測ったうち 3 つは同日中に済んだ:
 
-1. `L_v′/L_v` の付値の延長公式 `v_{L_v′}(y) = v_{L_v}(y)^e`（`y ∈ L_v`）
-   ——第 1369 の `m_A C = m_C^e` から出るはず。
-2. 拡大の上での `IsMinimal`・`IsElliptic`・`HasSplitMultiplicativeReduction`
-   ——不分岐版は `Found/GaloisRep/UnramQuad.lean`（第 1029-1033）にある。
-3. `ζ_l ∈ L_v′` の構成（`L_v(ζ_l)` は `≤ l−1` 次なので `l ∤ e`）。
-4. `SSCurve` の言葉（`E.alg ≃ₐ[E.fld] E.alg`）への翻訳。
+| # | 内容 | 状態 |
+|---|---|---|
+| 1 | 付値の延長公式 `v_C(φ y) = (v_A y)^e` | ★第 1373-1374（済） |
+| 2 | 拡大の上の `IsMinimal`・乗法還元 | ★第 1375（済） |
+| 3 | `ζ_l ∈ L_v′` の構成と `l ∤ e` | ★第 1376-1378（済） |
+| 4 | 分裂性の二者択一（分裂するか、非分岐 2 次拡大で分裂させるか） | ☆残 |
+| 5 | Tate 加群の**変数変換による輸送**（`C • E.W → E.W`） | ☆残 |
+| 6 | 最終組み立て（`M`・`ι`・`ζ`・`z`・`e : T_l E ≃+ ℤ_l²`） | ☆残 |
+
+★★★**4 の雛形**は `Skeleton/GenEll/TateLocalModel.lean` の
+`minDeltaExp_eq_mul_at_bad_prime_any`（第 1009）にある——
+`by_cases` で分裂性を場合分けし、非分裂側は
+`irreducible_map_residue_of_not_splits` → `isDiscreteValuationRing_adjoinRoot`
+→ `hasSplitMultiplicativeReduction_ext` と進む。
+☆非分岐なので `e` は変わらない（第 1024 `valuation_quadFieldHom` が等号）。
+
+★★**5 が必要な理由**——第 1372 は `[IsMinimal R (E.baseChange Lv)]` を要求するが、
+`SSCurve` の `E.W` 自体は `p`-極小とは限らない。
+☆`SemistableAt` が与えるのは `C • E.W` の極小性である。
+★点のレベルの輸送は `unipotent_ne_of_variableChange`（第 1290）にあるので、
+Tate 加群レベルの `vcPointAddEquiv` の逆極限版を作ればよい。
 
 ## ★★★★★★★★★★★★6（`ζ_l ∈ L_p`）の道の測定（2026-09-02、第 1353）
 
