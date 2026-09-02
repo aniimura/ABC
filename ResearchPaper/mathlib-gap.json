@@ -6360,5 +6360,14 @@
   "route": "★第 1298 で `σ` を取り、第 1270 で `T_l E` に上げる。",
   "consequence": "★★★これで `h1` の入力は **`E[l] ⊄ E(K₀)`** だけになった——Tate 曲線ではそれが `l ∤ v(Q)` から出る（第 1279）。☆`h2` は第 1300 ですべての `σ` について出るので、**同じ `σ` で `h2`・`h1` が揃う**。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "torsionFixedTransport20260902": {
+  "block": 1302,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★固定点も埋め込みで降りる（h2 の入力を局所から大域へ）",
+  "proved": "☆`exists_galPoint_fixed_of_map`（`Found/GaloisRep/TorsionFixedTransport.lean`、第 1302）。",
+  "route": "★道具は第 1271 と同じ——`torsionMap_bijective`（個数の勘定）と `point_map_galPoint`（同変性）。☆位数の保存は `addOrderOf_injective`（mathlib）。",
+  "consequence": "★★★これで **`μ_l ⊂ E(K₀)` の点が大域の `L̄` の側でも「`σ` が固定する位数 `l` の点」になる**——第 1296（`h2`）の入力が局所から運べる。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
