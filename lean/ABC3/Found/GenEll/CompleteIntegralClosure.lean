@@ -5,6 +5,7 @@ import Mathlib.RingTheory.DedekindDomain.IntegralClosure
 import Mathlib.RingTheory.DiscreteValuationRing.Basic
 import Mathlib.RingTheory.Finiteness.Quotient
 import Mathlib.LinearAlgebra.FreeModule.Finite.Basic
+import ABC3.Found.GenEll.AdicComparable
 import ABC3.Found.GenEll.AdicTransfer
 import ABC3.Found.GenEll.ArtinianLocal
 import ABC3.Found.GenEll.DvrFromDedekind
@@ -165,6 +166,49 @@ theorem isDiscreteValuationRing_integralClosure [IsAdicComplete (maximalIdeal A)
   exact isDiscreteValuationRing_of_isDedekindDomain C
     (not_isField_integralClosure (A := A) K L C)
 
+/-! ## ★★★★★★★★★★★★第 1368 —— 下流が使える形にする
+
+★第 1320（`exists_h2_h1_of_bad_prime`）が要求するのは
+
+* `IsDiscreteValuationRing C`（第 1366）
+* `IsFractionRing C L`
+* `IsAdicComplete (maximalIdeal C) C`
+
+の 3 つである。☆残る 2 つをここで作る。 -/
+
+/-- ★★★★★★**`m_A C ≠ ⊥`**（第 1368）。 -/
+theorem map_maximalIdeal_ne_bot :
+    (maximalIdeal A).map (algebraMap A C) ≠ ⊥ := by
+  obtain ⟨t, htmem, htne⟩ : ∃ t ∈ maximalIdeal A, t ≠ 0 :=
+    Submodule.ne_bot_iff _ |>.mp (IsDiscreteValuationRing.not_a_field A)
+  intro hbot
+  have hmem : algebraMap A C t ∈ (maximalIdeal A).map (algebraMap A C) :=
+    Ideal.mem_map_of_mem _ htmem
+  rw [hbot, Ideal.mem_bot] at hmem
+  exact htne (algebraMap_injective_integralClosure K L C (by simpa using hmem))
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**完備 DVR の有限分離整閉包は `m_C`-進完備**——★**無条件**（第 1368）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+★★★これで第 1320（`exists_h2_h1_of_bad_prime`）の
+`[IsAdicComplete (IsLocalRing.maximalIdeal R) R]` が**拡大先でも満たせる**。 -/
+theorem isAdicComplete_maximalIdeal_integralClosure [IsAdicComplete (maximalIdeal A) A]
+    [IsLocalRing C] : IsAdicComplete (maximalIdeal C) C := by
+  haveI : Algebra.IsIntegral A C := IsIntegralClosure.isIntegral_algebra A L
+  haveI : IsAdicComplete ((maximalIdeal A).map (algebraMap A C)) C :=
+    isAdicComplete_map_maximalIdeal K L C
+  haveI : IsDiscreteValuationRing C := isDiscreteValuationRing_integralClosure (A := A) K L C
+  exact isAdicComplete_maximalIdeal_of_isAdicComplete
+    ((maximalIdeal A).map (algebraMap A C))
+    (map_maximalIdeal_ne_bot K L C) (map_maximalIdeal_ne_top (R := A) (S := C))
+
+/-- ★★★★★★★★**`C` の商体は `L`**（第 1368）。 -/
+theorem isFractionRing_integralClosure : IsFractionRing C L :=
+  IsIntegralClosure.isFractionRing_of_finite_extension A K L C
+
 end IntegralClosure
 
 /-! ## ★出典の紐付け(`.src`) -/
@@ -182,6 +226,16 @@ def isLocalRing_integralClosure.src : Source :=
 def isAdicComplete_map_maximalIdeal.src : Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(完備 DVR の有限分離整閉包は m_A C-進完備。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def isAdicComplete_maximalIdeal_integralClosure.src : Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(完備 DVR の有限分離整閉包は m_C-進完備。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def isFractionRing_integralClosure.src : Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(整閉包の商体はもとの体。★無条件)",
     sectionId := "genell-thm-3-8" }
 
 def isDiscreteValuationRing_integralClosure.needs : List ProofObligation :=

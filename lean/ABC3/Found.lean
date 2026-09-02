@@ -402,6 +402,7 @@ import ABC3.Found.GaloisRep.JVeluTateMuK
 import ABC3.Found.GenEll.SymmSum
 import ABC3.Found.GenEll.EllModuliObjects
 import ABC3.Found.GenEll.DvrFromDedekind
+import ABC3.Found.GenEll.AdicComparable
 import ABC3.Found.GenEll.CompleteIntegralClosure
 import ABC3.Found.GenEll.IntegralJacobson
 import ABC3.Found.GenEll.LocalFromQuotient
