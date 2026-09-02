@@ -35,7 +35,21 @@ open ABC3.Found.GaloisRep ABC3.Interface.GaloisRep WeierstrassCurve
 open IsDedekindDomain NumberField Finset ABC3.Meta
 open scoped Classical
 
-/-- ☆Vélu の商が楕円かつ半安定であること（原文が「同種なので自動」と括弧で述べる段）。 -/
+/-- ☆Vélu の商が楕円かつ半安定であること（原文が「同種なので自動」と括弧で述べる段）。
+
+★★★★★★★★☆**2026-09-02（第 1322-1323）——悪い素点側の見通し**
+
+☆半安定性は 2 つに分かれる:
+
+* **悪い素点**（`jExp < 0`）——★**核は取れた**。
+  `isUnit_c4_velu_tate`（第 1323）が「Tate 曲線の Vélu の商は `c₄` が単元」を、
+  `semistableAt_of_c4_valAdd_zero`（第 1322）が「`c₄` が単元の整モデルは半安定」を与える。
+  ☆残るのは商のモデルを Tate モデルに移す変数変換
+  （`veluQuotientFull_vcPoint_eq` 第 969・`vAdd_tateModel_u_eq_zero` 第 1056、在庫）と
+  整性（`veluIntegralClosed`、在庫）の配管である。
+* **良い素点**（`jExp ≥ 0`）——☆**同種で良還元が保たれる**（Néron–Ogg–Shafarevich）が要る。
+
+★これと Vélu の商の楕円性（Vélu の定理）が `VeluQuotOK` に残る 2 つの既知数学である。 -/
 def VeluQuotOK (E : SSCurve) (l : ℕ) : Prop :=
   ∀ (M : IntermediateField E.fld E.alg) [FiniteDimensional E.fld M]
      (Q' : (E.W.baseChange M).toAffine.Point),
