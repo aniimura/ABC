@@ -1656,6 +1656,7 @@ import ABC3.Found.GaloisRep.VeluIntegralFromCoords
 import ABC3.Found.GaloisRep.TateCoordDescend
 import ABC3.Found.GaloisRep.TateDeepCoordMem
 import ABC3.Found.GaloisRep.VeluSemistableBadDeep
+import ABC3.Found.GaloisRep.SemistableScaled
 import ABC3.Found.GenEll.MuOrDeep
 import ABC3.Found.GenEll.MuPrimitiveRootOrDeep
 import ABC3.Found.GenEll.VeluNotDvdLFree
