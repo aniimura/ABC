@@ -3148,3 +3148,12 @@ mathlib の `Affine.Point.add` は `x₁ = x₂` の場合分けに `DecidableEq
 (2) 環準同型の同一視は**イデアルの言葉**で回す:
 `ker (toZModPow 1) = span {l^1}`、`span {l^1} = span {l}`(要素の書き換えなので安全)、
 `maximalIdeal = ker toZMod`。
+
+## 「一般形が在庫にある」を先に疑う(2026-09-02、第 1325)
+
+**失敗形**: `vAdd_c4_variableChange`(u の付値 0 なら c₄ の付値は不変)を書いたら
+`has already been declared`。在庫（`Found/GaloisRep/LocalHeightDelta.lean:64`）には
+**より一般の形**（`vAdd (c₄(C•W)) = vAdd (c₄ W) − 4·vAdd C.u`）が既にあった。
+
+**直し方**: 特別な場合を書く前に、**同じ名前と「一般形」の両方**を grep する。
+`vAdd`・`valAdd`・`c₄` のような基本量の変換則は、たいてい一般形で入っている。

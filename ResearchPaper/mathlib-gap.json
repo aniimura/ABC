@@ -6592,5 +6592,14 @@
   },
   "idioms": "☆`tools/lean-idioms.md` に 8 件追記（`omit` の位置、`Point` の `+` が `DecidableEq` の経路で割れる、単体ビルドでは名前衝突が見えない、`ZMod (l^1)` はイデアルで繋ぐ、在庫を引くときの `head` 切り 等）。",
   "gate": "lake build ABC3 成功（6356 jobs）、mojibake ok、check.mjs PASS、Found/ の実 sorry 0、origin/master へ push 済み。"
+ },
+ "vAddC4VcInStock20260902": {
+  "block": 1325,
+  "date": "2026-09-02",
+  "title": "★★☆在庫の確認——c₄ の付値の変数変換則は既にあった（より一般の形で）",
+  "measured": "☆「`u` の付値が `0` なら `c₄` の付値は変数変換で不変」を書こうとしたところ、在庫（`Found/GaloisRep/LocalHeightDelta.lean:64` の `vAdd_c4_variableChange`）に**より一般の形**——`vAdd (c₄(C•W)) = vAdd (c₄ W) − 4·vAdd C.u`——が既にあった。",
+  "consequence": "★したがって第 1324 → 第 1322 を繋ぐ「変数変換の段」は**在庫のまま使える**。☆残るのは商のモデルを Tate モデルに移す等式（`veluQuotientFull_vcPoint_eq`、第 969）と`u` の付値が `0` であること（`vAdd_tateModel_u_eq_zero`、第 1056）を当てる配管だけである。",
+  "idiom": "☆`tools/lean-idioms.md` に「一般形が在庫にあるかを先に疑う」を記録した。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
