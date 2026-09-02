@@ -6829,5 +6829,14 @@
   "next": "☆これで「完備 DVR `R` 上有限自由な**環** `R′` は `m_R R′`-進完備」が第 1359 ＋ 第 1360 ＋ 第 1361 で**完全に出る**。★残るのは (5) `R′/m_R R′` は Artin 環、(6) Artin ＋ 冪等元なし ⟹ 局所、(7) Dedekind ＋ 局所 ⟹ DVR の 3 段。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0。",
   "remainingSteps": "★★★**残る 3 段の材料（2026-09-02 に mathlib で確認）**——(5) `R′/m_R R′` が Artin 環: 剰余体上有限次元なので `isArtinian_of_finite_dimensional` 系。(6) 「Artin ＋ 非自明な冪等元なし ⟹ 局所」: `IsArtinianRing.isNilpotent_jacobson_bot`（`Artinian/Ring.lean:54`）で `J` は冪零、`A/J` は被約 Artin なので `IsArtinianRing.equivPi`（`Artinian/Module.lean:623`、`[IsReduced]` 必要）で体の有限直積、`IsArtinianRing.setOf_isMaximal_finite`（`Artinian/Module.lean:517`）で極大は有限個、冪等元は `existsUnique_isIdempotentElem_eq_of_ker_isNilpotent`（`RingTheory/Idempotents.lean`）で`J` に沿って持ち上がる。(7) 「Dedekind ＋ 局所 ⟹ DVR」: `RingTheory/DedekindDomain/Dvr.lean` の `IsDiscreteValuationRing` 系。☆Dedekind 側の別ルート: `Ideal.quotientInfEquivQuotientProd`（CRT、2 イデアル版）で`A/I ≅ A/J₁ × A/J₂` を作り、第 1357 で `A` へ持ち上げて整域と矛盾させる。"
+ },
+ "artinianLocal20260902": {
+  "block": 1362,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★Artin 環は非自明な冪等元が無ければ局所（第 1357 の道の第 6 段）",
+  "proved": "☆`Found/GenEll/ArtinianLocal.lean`（第 1362）に`bot_isMaximal_of_isSemisimpleRing`（可換半単純環で非自明な冪等元が無ければ `⊥` は極大）と`isLocalRing_of_isArtinian_of_no_idempotent`。どちらも `sorry` 無し。",
+  "route": "★段 1: `J = jacobson ⊥` は冪零（`IsArtinianRing.isNilpotent_jacobson_bot`、在庫）。☆段 2: `A/J` の冪等元は `J` に沿って `A` へ持ち上がる（`exists_isIdempotentElem_eq_of_ker_isNilpotent`、在庫）。★段 3: `A/J` は半単純（`IsSemiprimaryRing.isSemisimpleRing`、在庫）で、極大イデアル `m` の補元 `N` から `1 = e + f` を取ると `e` は冪等元。`e = 1` は `m ≠ ⊤` に反し、`e = 0` なら `N = ⊤` より `m = ⊥`。☆よって `A/J` は体、`J` は極大、`J` は全ての極大に含まれるので `A` は局所。",
+  "progress": "★★★これで「完備 DVR の有限整閉包は完備 DVR」の 7 段のうち **5 段が済んだ**（1 冪等元の持ち上げ・2 商に冪等元なし・3-4 完備性の移送・6 Artin ⟹ 局所）。☆残るのは (5) `R′/m_R R′` が Artin 環（剰余体上有限次元）と(7) Dedekind ＋ 局所 ⟹ DVR の 2 段である。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
  }
 }
