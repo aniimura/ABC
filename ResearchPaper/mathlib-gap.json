@@ -6649,5 +6649,14 @@
   "proved": "☆`Found/GenEll/VeluLatticeElliptic.lean`（第 1330）に 2 本。`exists_latticeCurve_eq_veluQuotientFull`（格子曲線の Vélu の商は大きい格子の曲線）と`exists_isElliptic_veluQuotientFull_lattice`（**したがって楕円**）。",
   "consequence": "★★★これで `VeluQuotOK` の楕円性は「`ℂ` へ埋め込む」道が見えた: 数体上の曲線は `ℂ` に埋め込め（`veluQuotientFull_map` で `Δ` が移る）、`ℂ` 上の楕円曲線は格子曲線に変数変換できる（`exists_periodPair_of_isElliptic`、在庫）。☆良い素点の半安定性（第 1328 の道筋）は剰余体の上の Vélu の定理が要るので、そちらは別途（`ℂ` の道は使えない）。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "veluEllipticDescent20260902": {
+  "block": 1331,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★Vélu の商の楕円性は体の埋め込みで降りる（ℂ → 数体）",
+  "proved": "☆`isElliptic_veluQuotientFull_of_map`（`Found/GenEll/VeluEllipticDescent.lean`、第 1331）。",
+  "route": "★楕円性は `Δ ≠ 0`（体の上）で、`Δ` は体の準同型で移る（`veluQuotientFull_map`、在庫）。☆体の準同型は単射なので、埋め込みの先で `Δ ≠ 0` なら元でも `Δ ≠ 0`。",
+  "consequence": "★★★これで **「数体上の Vélu の商は楕円」が `ℂ` の計算（第 1330）に帰着**した。☆残るのは、`ℂ` の側で「`E ⊗ ℂ` を格子曲線に変数変換し、`S` の像が代表系 `T` から来る集合と一致する」ことを言う段である（`exists_periodPair_of_isElliptic`（在庫）＋点の対応）。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
