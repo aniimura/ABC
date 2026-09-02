@@ -32533,3 +32533,21 @@ grep して **0 件**——円分体の分岐理論は mathlib に無い。
 
 ☆本日 1 日で「悪い素点の配管 3-6 ＋ `p ∣ l` 8-15」（第 1409 の見積もり）は
 **すべて消えた**——残るのは形式群 1 本と界面の配管である。
+
+## ★★★★★★★★★★★★★★★★2026-09-02（続 4）——§3・§4 の残りは `sorry` 2 本だけ（第 1437 の測定）
+
+界面を `5 ≤ l` に絞り（第 1437）、`Skeleton/GenEll/VeluSemistable.lean` の節点を
+第 1436 に繋いだあと、**GenEll の Skeleton/Found 全体に残る `sorry` を数えた**:
+
+| # | 場所 | 内容 | 効く先 |
+|---|---|---|---|
+| 1 | `Skeleton/GenEll/VeluSemistable.lean:245` | ★**形式群**——`p ∣ l` かつ良い素点で核の座標が `p` で整（`Ê(𝔪)[l] ∩ ⟨Q⟩ = 0`） | §3・§4 |
+| 2 | `Skeleton/GenEll/GaloisLocal.lean:70` | ★**`alpha_in_modl_image`**——乗法還元の素点で `α = (1 1 / 0 1)` が mod `l` 像に入る | §3・§4 |
+| 3 | `Skeleton/GenEll/Section2Converse.lean:108, 278` | ☆§2 `Theorem 2.1` の逆向き | §2 |
+| 4 | `Skeleton/GenEll/SigmaConvolution.lean:110` | ☆`sigma_one_convolution`（ラマヌジャンの畳み込み）——**消費側が無い**（死んだ葉） | なし |
+
+★★★**`EllModuliWitness.lean` には実 `sorry` が 1 つも無く、`GaloisImage.lean` の
+`theorem_3_8` も sorry 0** である。☆したがって §3 `Theorem 3.8` と §4 の 2 本は
+**上の #1 と #2 の 2 本だけ**に依っている。
+
+☆#4 は消費側が無いので、閉じても計器は動かない（記録のみ）。
