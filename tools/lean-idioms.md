@@ -3248,3 +3248,22 @@ Type mismatch … (instAlgebraLocInt p hl).toSMul
 
 `K′` は `expected token` になる。☆ASCII の `'`（`K'`）を使う。
 ドキュメンテーションコメントの中では `′` でよい（第 1374）。
+
+## 新しいファイルを作る前に**同名が無いか見る**
+
+`Write` は既存ファイルを黙って上書きする。
+★第 1383 で `Found/GenEll/SplitDichotomy.lean`（第 982 の既存ファイル）を
+上書きし、`isCharNeTwoNF_integralModel` が消えて
+`SplitAtCompletion.lean` が壊れた。
+
+☆**見分け方**——`Write` の返事が
+『has been updated successfully』（上書き）か
+『created successfully』（新規）かを見る。
+★さらに `Found.lean` への import 追加を
+`if '<名>' not in s` でガードしていると、
+**既存の同名 import があるせいでスキップされ**、
+上書きしたファイルがそのままビルドされて気づきにくい。
+
+☆**直し方**——`git checkout -- <path>` で戻し、
+新しい内容は別名（例: `AlphaSplitDichotomy.lean`）に置く。
+★**予防**——`ls lean/ABC3/**/<名>.lean` か `git ls-files | grep <名>` を先に見る。
