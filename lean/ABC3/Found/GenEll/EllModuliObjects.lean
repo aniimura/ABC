@@ -982,19 +982,27 @@ open scoped Classical in
 原文 (GenEll p.17):
 > Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
 
+★★★**2026-09-02（第 1344）の締め直し**——商を作る曲線を
+**同じ類の任意の `SSCurve` `E`（`E.j = x.cls`）**にした。
+☆`HasLCyclicJ` の生成元は `L` には無く、`L(H)`（次数は `l−1` を割る）で初めて
+有理になるからである（第 1343 の `SSCurve.ext`）。
+★`PrimeToLocalHeights` もデータに含める——`deg∞` の不等式に要るが、
+`choose` で取った `E` については外から渡せないからである。
+
 ★★★**2026-09-02（第 1339）の締め直し**——かつては任意の座標集合 `S`
 （`|S| + 1 = l` だけ）であったが、それでは**生成元 `Q` が取り出せず**
 同種写像の高さ評価（第 1338）を当てられなかった。
 ☆本定義は**位数 `l` の点 `Q` を持ち歩く**形である
 （`|S| + 1 = l` は `card_image_pointCoords_nsmul` が導く）。 -/
 def IsQuotClassJ (x : RealizedClass) (l : ℕ) (y : ℂ) : Prop :=
-  ∃ (Q : x.rep.toSSCurve.W.toAffine.Point) (_hQ : addOrderOf Q = l)
-    (hell : (veluQuotientFull x.rep.toSSCurve.W
+  ∃ (E : SSCurve) (_hEj : E.j = x.cls) (_hEpr : E.PrimeToLocalHeights l)
+    (Q : E.W.toAffine.Point) (_hQ : addOrderOf Q = l)
+    (hell : (veluQuotientFull E.W
       (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))).IsElliptic)
-    (hss : ∀ p : HeightOneSpectrum (𝓞 x.rep.toSSCurve.fld),
-      SemistableAt p (veluQuotientFull x.rep.toSSCurve.W
+    (hss : ∀ p : HeightOneSpectrum (𝓞 E.fld),
+      SemistableAt p (veluQuotientFull E.W
         (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))))),
-    (quotSSCurve x.rep.toSSCurve
+    (quotSSCurve E
       (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))) hell hss).j = y
 
 open scoped Classical in

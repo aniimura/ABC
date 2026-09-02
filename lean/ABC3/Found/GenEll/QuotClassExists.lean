@@ -46,23 +46,24 @@ open scoped Classical
 
 ★★逸脱: 商が乗法還元を持つことは仮説として受ける
 （原文は「同種なので自動」と括弧で述べる）。 -/
-theorem exists_isQuotClassJ (x : RealizedClass) {l : ℕ} (hl : l.Prime)
-    (Q : x.rep.toSSCurve.W.toAffine.Point) (hQ : addOrderOf Q = l)
-    (hell : (veluQuotientFull x.rep.toSSCurve.W
+theorem exists_isQuotClassJ (x : RealizedClass) {l : ℕ} (E : SSCurve)
+    (hEj : E.j = x.cls) (hEpr : E.PrimeToLocalHeights l)
+    (Q : E.W.toAffine.Point) (hQ : addOrderOf Q = l)
+    (hell : (veluQuotientFull E.W
       (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))).IsElliptic)
-    (hss : ∀ p : HeightOneSpectrum (𝓞 x.rep.toSSCurve.fld),
-      SemistableAt p (veluQuotientFull x.rep.toSSCurve.W
+    (hss : ∀ p : HeightOneSpectrum (𝓞 E.fld),
+      SemistableAt p (veluQuotientFull E.W
         (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))))
-    (hmult : (quotSSCurve x.rep.toSSCurve
+    (hmult : (quotSSCurve E
       (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))
       hell hss).HasMultRed) :
     ∃ y : RealizedClass, IsQuotClassJ x l y.1 := by
-  refine ⟨⟨(quotSSCurve x.rep.toSSCurve
+  refine ⟨⟨(quotSSCurve E
       (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))) hell hss).j,
-    ⟨⟨quotSSCurve x.rep.toSSCurve
+    ⟨⟨quotSSCurve E
       (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))) hell hss,
       hmult⟩, rfl⟩⟩, ?_⟩
-  exact ⟨Q, hQ, hell, hss, rfl⟩
+  exact ⟨E, hEj, hEpr, Q, hQ, hell, hss, rfl⟩
 
 /-! ## ★★★★★★★★★★★★商の類の `deg∞` -/
 
@@ -110,64 +111,6 @@ theorem faltingsHeightJ_quot_le (E : SSCurve) (S : Finset (E.fld × E.fld))
   rw [faltingsHeightJ_eq, faltingsHeightJ_eq]
   exact hfalt
 
-/-! ## ★★★★★★★★★★★★★★★★`quotLCyclicJ` の水準へ -/
-
-open scoped Classical in
-/-- ★★★★★★★★★★★★★★★★
-**`quotLCyclicJ` の `deg∞` は `l` 倍**——★（第 1244）。
-
-原文 (GenEll p.17):
-> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
-
-☆`quotLCyclicJ_spec`（在庫）で `S` を取り出し、第 1242 を当てる。
-★局所の関係は `Lemma 3.2, (ii)` が与える（仮説として受ける）。
-
-★★★これが `EllModuliWitness` の `degInfJ_quotLCyclicJ` そのものの形である。 -/
-theorem degInfJ_quotLCyclicJ_of_local (x : RealizedClass) {l : ℕ} (hl : l.Prime)
-    (hex : ∃ y : RealizedClass, IsQuotClassJ x l y.1)
-    (hloc : ∀ (S : Finset (x.rep.toSSCurve.fld × x.rep.toSSCurve.fld)),
-      S.card + 1 = l →
-      ∀ p : HeightOneSpectrum (𝓞 x.rep.toSSCurve.fld),
-        minDeltaExp p (veluQuotientFull x.rep.toSSCurve.W S)
-          = l * minDeltaExp p x.rep.toSSCurve.W) :
-    degInfJ (quotLCyclicJ x l).cls = (l : ℝ) * degInfJ x.cls := by
-  obtain ⟨Q, hQ, hell, hss, hj⟩ := quotLCyclicJ_spec x l hex
-  have hcard := card_image_pointCoords_nsmul hl hQ
-  have hq := degInfJ_quot_eq x.rep.toSSCurve _ hell hss l (hloc _ hcard)
-  rw [hj] at hq
-  have hx : x.cls = x.rep.toSSCurve.j := (RealizedClass.rep_j x).symm
-  rw [hx]
-  exact hq
-
-open scoped Classical in
-/-- ★★★★★★★★★★★★★★★★
-**`quotLCyclicJ` の `ht^Falt` の評価**——★（第 1245）。
-
-原文 (GenEll p.17):
-> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
-
-☆`quotLCyclicJ_spec`（在庫）で `S` を取り出し、第 1243 を当てる。
-★同種写像の高さ評価は仮説として受ける。
-
-★★★これが `EllModuliWitness` の `faltingsHeightJ_quotLCyclicJ` そのものの形である。 -/
-theorem faltingsHeightJ_quotLCyclicJ_of_isog (x : RealizedClass) {l : ℕ} (hl : l.Prime) (C₀ : ℝ)
-    (hex : ∃ y : RealizedClass, IsQuotClassJ x l y.1)
-    (hfalt : ∀ (S : Finset (x.rep.toSSCurve.fld × x.rep.toSSCurve.fld)),
-      S.card + 1 = l →
-      htFaltOf x.rep.toSSCurve.fld (veluQuotientFull x.rep.toSSCurve.W S)
-        ≤ htFaltOf x.rep.toSSCurve.fld x.rep.toSSCurve.W + 2 * Real.log l + C₀) :
-    faltingsHeightJ (quotLCyclicJ x l).cls
-      ≤ faltingsHeightJ x.cls + 2 * Real.log l + C₀ := by
-  obtain ⟨Q, hQ, hell, hss, hj⟩ := quotLCyclicJ_spec x l hex
-  have hcard := card_image_pointCoords_nsmul hl hQ
-  have hq := faltingsHeightJ_quot_le x.rep.toSSCurve _ hell hss l C₀ (hfalt _ hcard)
-  rw [hj] at hq
-  have hx : x.cls = x.rep.toSSCurve.j := (RealizedClass.rep_j x).symm
-  rw [hx]
-  exact hq
-
-/-! ## ★★★★★★★★★★★★局所の関係を全素点で -/
-
 /-- ★★★★★★★★★★★★
 **`Δ_min` の `l` 倍関係は全素点で成り立つ**——★**無条件**（第 1247）。
 
@@ -197,44 +140,6 @@ theorem minDeltaExp_eq_mul_of_jExp_all {L : Type} [Field L] [NumberField L]
       have hg := hgood p hnn
       exact max_eq_left (by omega)
     rw [h1, h2, mul_zero]
-
-open scoped Classical in
-/-- ★★★★★★★★★★★★★★★★
-**`quotLCyclicJ` の `deg∞`（`jExp` の言葉で）**——★（第 1248）。
-
-原文 (GenEll p.17):
-> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
-
-☆第 1247（`Δ_min` の関係は `jExp` の関係から出る）を第 1244 に流し込んだ形。
-
-★★★これで witness の `degInfJ_quotLCyclicJ` は
-**`v_p(j(E′)) = l·v_p(j(E))`（`Lemma 3.2, (ii)`）ただ 1 つ**に帰着した。 -/
-theorem degInfJ_quotLCyclicJ_of_jExp (x : RealizedClass) {l : ℕ} (hl : l.Prime)
-    (hex : ∃ y : RealizedClass, IsQuotClassJ x l y.1)
-    (hrel : ∀ (S : Finset (x.rep.toSSCurve.fld × x.rep.toSSCurve.fld)),
-      S.card + 1 = l →
-      ∀ [_inst : (veluQuotientFull x.rep.toSSCurve.W S).IsElliptic],
-      (∀ p : HeightOneSpectrum (𝓞 x.rep.toSSCurve.fld),
-        SemistableAt p (veluQuotientFull x.rep.toSSCurve.W S)) →
-      (∀ p : HeightOneSpectrum (𝓞 x.rep.toSSCurve.fld),
-          jExp p x.rep.toSSCurve.W < 0 →
-          jExp p (veluQuotientFull x.rep.toSSCurve.W S)
-            = (l : ℤ) * jExp p x.rep.toSSCurve.W)
-        ∧ (∀ p : HeightOneSpectrum (𝓞 x.rep.toSSCurve.fld),
-          0 ≤ jExp p x.rep.toSSCurve.W →
-          0 ≤ jExp p (veluQuotientFull x.rep.toSSCurve.W S))) :
-    degInfJ (quotLCyclicJ x l).cls = (l : ℝ) * degInfJ x.cls := by
-  obtain ⟨Q, hQ, hell, hss, hj⟩ := quotLCyclicJ_spec x l hex
-  haveI := hell
-  have hcard := card_image_pointCoords_nsmul hl hQ
-  obtain ⟨hbad, hgood⟩ := hrel _ hcard hss
-  have hloc := minDeltaExp_eq_mul_of_jExp_all x.rep.toSSCurve.W
-    (veluQuotientFull x.rep.toSSCurve.W _) x.rep.toSSCurve.ss hss hbad hgood
-  have hq := degInfJ_quot_eq x.rep.toSSCurve _ hell hss l hloc
-  rw [hj] at hq
-  have hx : x.cls = x.rep.toSSCurve.j := (RealizedClass.rep_j x).symm
-  rw [hx]
-  exact hq
 
 /-- ★★★★★★★★★★★★
 **悪い素点の関係を全素点へ束ねる**——★**無条件**（第 1258）。
@@ -268,70 +173,6 @@ theorem minDeltaExp_eq_mul_all {L : Type} [Field L] [NumberField L]
       exact max_eq_left (by omega)
     rw [h1, h2, mul_zero]
 
-open scoped Classical in
-/-- ★★★★★★★★★★★★★★★★
-**`quotLCyclicJ` の `deg∞`（局所の `Δ_min` の言葉で）**——★（第 1259）。
-
-原文 (GenEll p.17):
-> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
-
-☆仮説 `hbad` は `minDeltaExp_eq_mul_at_bad_prime`
-（`Skeleton/GenEll/TateIsogeny.lean`、**証明済み**）が与える形そのものである。
-
-★★★これで witness の `degInfJ_quotLCyclicJ` は
-**在庫の局所結果 ＋ 良い素点で符号が保たれること**だけになった。 -/
-theorem degInfJ_quotLCyclicJ_of_bad (x : RealizedClass) {l : ℕ} (hl : l.Prime)
-    (hex : ∃ y : RealizedClass, IsQuotClassJ x l y.1)
-    (hrel : ∀ (S : Finset (x.rep.toSSCurve.fld × x.rep.toSSCurve.fld)),
-      S.card + 1 = l →
-      ∀ [_inst : (veluQuotientFull x.rep.toSSCurve.W S).IsElliptic],
-      (∀ p : HeightOneSpectrum (𝓞 x.rep.toSSCurve.fld),
-        SemistableAt p (veluQuotientFull x.rep.toSSCurve.W S)) →
-      (∀ p : HeightOneSpectrum (𝓞 x.rep.toSSCurve.fld),
-          jExp p x.rep.toSSCurve.W < 0 →
-          minDeltaExp p (veluQuotientFull x.rep.toSSCurve.W S)
-            = l * minDeltaExp p x.rep.toSSCurve.W)
-        ∧ (∀ p : HeightOneSpectrum (𝓞 x.rep.toSSCurve.fld),
-          0 ≤ jExp p x.rep.toSSCurve.W →
-          0 ≤ jExp p (veluQuotientFull x.rep.toSSCurve.W S))) :
-    degInfJ (quotLCyclicJ x l).cls = (l : ℝ) * degInfJ x.cls := by
-  obtain ⟨Q, hQ, hell, hss, hj⟩ := quotLCyclicJ_spec x l hex
-  haveI := hell
-  have hcard := card_image_pointCoords_nsmul hl hQ
-  obtain ⟨hbad, hgood⟩ := hrel _ hcard hss
-  have hloc := minDeltaExp_eq_mul_all x.rep.toSSCurve.W
-    (veluQuotientFull x.rep.toSSCurve.W _) x.rep.toSSCurve.ss hss hbad hgood
-  have hq := degInfJ_quot_eq x.rep.toSSCurve _ hell hss l hloc
-  rw [hj] at hq
-  have hx : x.cls = x.rep.toSSCurve.j := (RealizedClass.rep_j x).symm
-  rw [hx]
-  exact hq
-
-open scoped Classical in
-/-- ★★★★★★★★★★★★★★★★
-**`quotLCyclicJ` の `ht^Falt`（定数 `0` の形）**——★（第 1260）。
-
-原文 (GenEll p.17):
-> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
-
-☆仮説は `htFalt_veluQuotientFull_le`
-（`Found/GaloisRep/VeluNormalized.lean`、第 704、**証明済み**）が与える形そのもの
-——定数は `0` でよい。
-
-★★★これで witness の `faltingsHeightJ_quotLCyclicJ` は
-**在庫の同種写像の高さ評価に幾何のデータを渡すだけ**になった。 -/
-theorem faltingsHeightJ_quotLCyclicJ_zero (x : RealizedClass) {l : ℕ} (hl : l.Prime)
-    (hex : ∃ y : RealizedClass, IsQuotClassJ x l y.1)
-    (hfalt : ∀ (S : Finset (x.rep.toSSCurve.fld × x.rep.toSSCurve.fld)),
-      S.card + 1 = l →
-      htFaltOf x.rep.toSSCurve.fld (veluQuotientFull x.rep.toSSCurve.W S)
-        ≤ htFaltOf x.rep.toSSCurve.fld x.rep.toSSCurve.W + 2 * Real.log l) :
-    faltingsHeightJ (quotLCyclicJ x l).cls
-      ≤ faltingsHeightJ x.cls + 2 * Real.log l := by
-  have h := faltingsHeightJ_quotLCyclicJ_of_isog x hl 0 hex
-    (fun S hS => by simpa using hfalt S hS)
-  simpa using h
-
 /-! ## ★★★★★★★★★★★★★★★★★★★★第 1339 —— `ht^Falt` は無条件になった -/
 
 open scoped Classical in
@@ -352,17 +193,15 @@ theorem faltingsHeightJ_quotLCyclicJ_uncond (x : RealizedClass) {l : ℕ} (hl : 
   have hlog : (0 : ℝ) ≤ Real.log l :=
     Real.log_nonneg (by exact_mod_cast hl.one_lt.le)
   by_cases hex : ∃ y : RealizedClass, IsQuotClassJ x l y.1
-  · obtain ⟨Q, hQ, hell, hss, hj⟩ := quotLCyclicJ_spec x l hex
+  · obtain ⟨E, hEj, hEpr, Q, hQ, hell, hss, hj⟩ := quotLCyclicJ_spec x l hex
     haveI := hell
     have hfalt := ABC3.Found.GaloisRep.htFalt_veluQuotientFull_le_uncond
-      x.rep.toSSCurve.W
-      (veluQuotientFull x.rep.toSSCurve.W
+      E.W
+      (veluQuotientFull E.W
         (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))))
       hl Q hQ rfl
-    have hq := faltingsHeightJ_quot_le x.rep.toSSCurve _ hell hss l 0 (by linarith [hfalt])
-    rw [hj] at hq
-    have hx : x.cls = x.rep.toSSCurve.j := (RealizedClass.rep_j x).symm
-    rw [hx]
+    have hq := faltingsHeightJ_quot_le E _ hell hss l 0 (by linarith [hfalt])
+    rw [hj, hEj] at hq
     show faltingsHeightJ (quotLCyclicJ x l).1 ≤ _
     linarith [hq]
   · have hself : quotLCyclicJ x l = x := by
@@ -371,11 +210,6 @@ theorem faltingsHeightJ_quotLCyclicJ_uncond (x : RealizedClass) {l : ℕ} (hl : 
     linarith
 
 /-! ## ★出典の紐付け(`.src`)——★**条つきである。指標には数えない** -/
-
-def degInfJ_quotLCyclicJ_of_jExp.src : Source :=
-  { paper := "GenEll", pdfPage := 17,
-    item := "Lemma 3.5(quotLCyclicJ の deg∞——jExp の言葉で。Lemma 3.2, (ii) を仮説で受ける)",
-    sectionId := "genell-lemma-3-5" }
 
 def faltingsHeightJ_quotLCyclicJ_uncond.src : Source :=
   { paper := "GenEll", pdfPage := 17,
@@ -389,16 +223,6 @@ def faltingsHeightJ_quotLCyclicJ_uncond.needs : List ProofObligation :=
       ("★★★★**2026-09-02（第 1339）**——`EllModuliWitness` の " ++
        "`faltingsHeight_quotLCyclic` **そのもの**である。" ++
        "☆`IsQuotClassJ` を生成元 `Q` を持ち歩く形に締め直したのが効いた。") 3 ]
-
-def faltingsHeightJ_quotLCyclicJ_zero.src : Source :=
-  { paper := "GenEll", pdfPage := 17,
-    item := "Lemma 3.5(quotLCyclicJ の ht^Falt——定数 0 の形)",
-    sectionId := "genell-lemma-3-5" }
-
-def degInfJ_quotLCyclicJ_of_bad.src : Source :=
-  { paper := "GenEll", pdfPage := 17,
-    item := "Lemma 3.5(quotLCyclicJ の deg∞——局所の Δ_min の言葉で)",
-    sectionId := "genell-lemma-3-5" }
 
 def minDeltaExp_eq_mul_all.src : Source :=
   { paper := "GenEll", pdfPage := 15,

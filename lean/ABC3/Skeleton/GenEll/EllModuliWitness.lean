@@ -222,29 +222,26 @@ open scoped Classical in
 ★★★**これが「不等式に弱める」ことの利得である**——等式なら
 良い素点で `minDeltaExp p E′ = 0`（同種で良還元が保たれること）が要った。 -/
 theorem degInfJ_quotLCyclicJ_ge_of_exists (x : RealizedClass) {l : ℕ} (hl : Nat.Prime l)
-    (hpr : x.rep.toSSCurve.PrimeToLocalHeights l)
     (hex : ∃ y : RealizedClass, IsQuotClassJ x l y.1) :
     (l : ℝ) * degInfJ x.cls ≤ degInfJ (quotLCyclicJ x l).cls := by
-  obtain ⟨Q, hQ, hell, hss, hj⟩ := quotLCyclicJ_spec x l hex
+  obtain ⟨E, hEj, hEpr, Q, hQ, hell, hss, hj⟩ := quotLCyclicJ_spec x l hex
   haveI := hell
-  have hcop := x.rep.toSSCurve.not_dvd_jExp_of_primeToLocalHeights hl hpr
-  have hmu := isMuAtBadPrimes_of_veluQuotient_nodeg x.rep.toSSCurve.W
-    (veluQuotientFull x.rep.toSSCurve.W
+  have hcop := E.not_dvd_jExp_of_primeToLocalHeights hl hEpr
+  have hmu := isMuAtBadPrimes_of_veluQuotient_nodeg E.W
+    (veluQuotientFull E.W
       (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))))
-    hl Q hQ rfl x.rep.toSSCurve.ss hss hcop
-  have hge := ABC3.Found.GaloisRep.degInfOf_ge_of_local x.rep.toSSCurve.W
-    (veluQuotientFull x.rep.toSSCurve.W
+    hl Q hQ rfl E.ss hss hcop
+  have hge := ABC3.Found.GaloisRep.degInfOf_ge_of_local E.W
+    (veluQuotientFull E.W
       (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) l
     (fun p => ABC3.Found.GaloisRep.minDeltaExp_le_of_bad_delta p _ _
-      (x.rep.toSSCurve.ss p) l (fun hb => hmu p hb))
-  have hq : (l : ℝ) * degInfJ x.rep.toSSCurve.j
-      ≤ degInfJ (quotSSCurve x.rep.toSSCurve
+      (E.ss p) l (fun hb => hmu p hb))
+  have hq : (l : ℝ) * degInfJ E.j
+      ≤ degInfJ (quotSSCurve E
         (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))) hell hss).j := by
     rw [degInfJ_eq, degInfJ_eq]
     exact hge
-  rw [hj] at hq
-  have hx : x.cls = x.rep.toSSCurve.j := (RealizedClass.rep_j x).symm
-  rw [hx]
+  rw [hj, hEj] at hq
   exact hq
 
 /-- ★★★`l·deg∞(E) ≤ deg∞(E′)`——★**残るのは「商の類の存在」だけ**（第 1340）。
@@ -258,7 +255,7 @@ theorem degInfJ_quotLCyclicJ (x : RealizedClass) (l : ℕ) (hl : Nat.Prime l)
     (hpr : x.rep.toSSCurve.PrimeToLocalHeights l) :
     (l : ℝ) * degInfJ x.cls ≤ degInfJ (quotLCyclicJ x l).cls := by
   by_cases hex : ∃ y : RealizedClass, IsQuotClassJ x l y.1
-  · exact degInfJ_quotLCyclicJ_ge_of_exists x hl hpr hex
+  · exact degInfJ_quotLCyclicJ_ge_of_exists x hl hex
   · sorry
 
 /-- ★★★★★★★★★★★★★★★★★★★★

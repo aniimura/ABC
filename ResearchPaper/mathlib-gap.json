@@ -6753,5 +6753,15 @@
   "why": "★★★**なぜ要るのか**——`HasLCyclicJ` が与えるのは `E[l]` の中の `Gal`-安定な**直線**であり、その生成元 `Q` が有理になるのは次数が `l−1` を割る拡大 `L(H)` の上である。☆したがって「商の類」（`IsQuotClassJ`）を作るには **`E` を `L(H)` へ持ち上げてから** Vélu を回す必要がある。★`j`・`ht^Falt`・`deg∞` は類の函数なので持ち上げで変わらない。",
   "next": "☆次は (1) `IsQuotClassJ` を「同じ類の任意の `SSCurve` の上で」と読み替え、(2) `HasLCyclicJ` から `L(H)` 上の位数 `l` の点を出す段（第 1219 の降下）を繋ぐこと。",
   "gate": "lake build ABC3 成功（6368 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
+ },
+ "isQuotClassExt20260902": {
+  "block": 1344,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★IsQuotClassJ を「同じ類の任意の SSCurve の上で」に読み替えた",
+  "frame": "☆`IsQuotClassJ x l y` を 「`∃ E : SSCurve, E.j = x.cls ∧ E.PrimeToLocalHeights l ∧ ∃ Q, addOrderOf Q = l ∧ …`」に直した。★かつては `x.rep.toSSCurve` の**L-有理な**点 `Q` を要求していたが、`HasLCyclicJ` が与えるのは `Gal`-安定な**直線**であり、生成元が有理になるのは `L(H)`（次数は `l−1` を割る）の上である。☆`PrimeToLocalHeights` もデータに含めた（`choose` で取った `E` には外から渡せないため）。",
+  "proved": "★`faltingsHeightJ_quotLCyclicJ_uncond`（第 1339）と `degInfJ_quotLCyclicJ_ge_of_exists`（第 1340）は**新しい語彙のまま通った**——`degInfJ`・`faltingsHeightJ` が類の函数だからである。☆`degInfJ_quotLCyclicJ_ge_of_exists` は `hpr` の引数が**不要になった**。",
+  "removed": "☆読み替えで意味を失った 5 本（`degInfJ_quotLCyclicJ_of_local`・`_of_isog`・`_of_jExp`・`_of_bad`・`faltingsHeightJ_quotLCyclicJ_zero`）を削除した——どれも「任意の座標集合 `S` にわたる仮説」を受ける形で、`E` が存在束縛になった今は書けない。★一般の補題（`minDeltaExp_eq_mul_of_jExp_all`・`minDeltaExp_eq_mul_all`）は残した。",
+  "next": "☆残るのは `HasLCyclicJ` から `∃ y, IsQuotClassJ x l y.1` を出す段である。★材料は揃っている: `exists_stablePoint_of_hasLCyclicJ` → 第 1219 の降下 → 第 1343 の `SSCurve.ext` → 第 1336 の楕円性 → 第 1342 の半安定性の節点。",
+  "gate": "lake build ABC3 成功（6368 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
  }
 }
