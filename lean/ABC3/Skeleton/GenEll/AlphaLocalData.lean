@@ -38,8 +38,17 @@ import ABC3.Meta.Claim
 | 5 | **分裂**乗法還元 | ☆非分岐 2 次拡大の段（第 1025-1043 に材料） |
 | 6 | `ζ_l ∈ L_p` | ☆円分拡大の段 |
 
-★★★**残るのは 5 と 6 の 2 枚だけ**であり、どちらも**局所の配管**である
-——未証明の外部引用は 1 本もない。
+★★★**残るのは 5 と 6 の 2 枚だけ**である。
+
+★★☆**訂正（2026-09-02、第 1354）**——この 2 枚を一度「局所の配管だけ」と書いたが、
+**それは誤りである**。どちらも `L_p` の**有限拡大**を取る段であり、
+☆**mathlib に「完備離散付値環の有限拡大は再び完備離散付値環」が無い**
+（2026-09-02 確認: `Mathlib/RingTheory/DiscreteValuationRing/` は `Basic`・`TFAE` の 2 本だけ、
+`Mathlib/NumberTheory/LocalField/Basic.lean` の `IsNonarchimedeanLocalField` は
+**他のどのファイルからも使われていない**）。
+★したがって `AdjoinRoot f` や `L_p(ζ_l)` に
+`IsDiscreteValuationRing`・`IsFractionRing`・`IsAdicComplete` を与える段が丸ごと無い。
+☆`ResearchPaper/blocked-leaves.json` に記録した。
 
 ☆5 の材料（`Found/GaloisRep/UnramQuad.lean`）は
 `valuation_algebraMap_ext`・`isMinimal_baseChange_ext`・`hasMultiplicativeReduction_ext`・
@@ -114,10 +123,15 @@ def exists_h2_h1_unipotent.needs : List ProofObligation :=
       (.inProject "ABC3" "ABC3.Found.GenEll.SSCurve.exists_local_multRed") 1,
     .citation "[ABC3]" "hasSplitMultiplicativeReduction_ext(第 1033、証明済み。DVR 構造は仮説)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.hasSplitMultiplicativeReduction_ext") 1,
+    .citation "[mathlib]" "完備離散付値環の有限拡大は再び完備離散付値環"
+      (.absent
+        ("mathlib に無い(2026-09-02 確認)。RingTheory/DiscreteValuationRing/ は Basic・TFAE の 2 本だけで、" ++
+         "NumberTheory/LocalField/Basic.lean の IsNonarchimedeanLocalField は他のどのファイルからも使われていない" ++
+         "——拡大で閉じることが無い")) 19,
     .implicitStep
-      ("★★★★**2026-09-02（第 1352）**——道は第 1320 で一本道であり、" ++
-       "残るのは**分裂乗法還元**（非分岐 2 次拡大）と **`ζ_l ∈ L_p`**（円分拡大）の" ++
-       "2 枚の局所の配管だけである。☆未証明の外部引用は 1 本もない。") 19 ]
+      ("★★★★**2026-09-02（第 1352-1354）**——道は第 1320 で一本道であり、" ++
+       "残るのは**分裂乗法還元**（非分岐 2 次拡大）と **`ζ_l ∈ L_p`**（円分拡大）の 2 枚。" ++
+       "☆どちらも `L_p` の有限拡大を取る段であり、**mathlib にその理論が無い**。") 19 ]
 
 def imageContainsSL2J_of_multRed.src : Source :=
   { paper := "GenEll", pdfPage := 19,

@@ -6807,6 +6807,7 @@
   "proved": "☆`Skeleton/GenEll/AlphaLocalData.lean`（第 1352）に `exists_h2_h1_unipotent`（節点）と`imageContainsSL2J_of_multRed`。★これで `imageContainsSL2J_torsionExt`（#4）が閉じ、`Skeleton/GenEll/EllModuliWitness.lean` の `sorry` は **0 本**になった。",
   "honest": "★★★**「証明が終わった」という意味ではない**——witness は**2 本の名前のついた葉**に依存している:(a) `semistableAt_veluQuotientFull`（良い素点で Vélu の商が良還元を持つ、第 1345）、(b) `exists_h2_h1_unipotent`（悪い素点の惰性は幂単かつ非自明、第 1352）。☆(a) は**新しい数学**（剰余体上の Vélu の定理 / Néron–Ogg–Shafarevich）を要る。★(b) は**局所の配管 2 枚**（分裂乗法還元と `ζ_l ∈ L_p`）だけで、未証明の外部引用は 1 本もない。",
   "count": "☆セッション開始時の witness の `sorry` は 4 本。★#3 は完全に閉じ（新しい葉なし）、#1・#2・#4 は名前のついた葉 2 本に集約された。",
-  "gate": "lake build ABC3 成功（6372 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
+  "gate": "lake build ABC3 成功（6372 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。",
+  "correction": "★★☆**訂正（第 1354）**——第 1352 で「残る 2 枚は局所の配管だけ、未証明の外部引用は 1 本もない」と書いたが**それは誤り**である。☆分裂乗法還元も `ζ_l ∈ L_p` も `L_p` の**有限拡大**を取る段であり、**mathlib に「完備離散付値環の有限拡大は再び完備離散付値環」が無い**（2026-09-02 確認: `RingTheory/DiscreteValuationRing/` は `Basic`・`TFAE` の 2 本だけ、`NumberTheory/LocalField/Basic.lean` の `IsNonarchimedeanLocalField` は他のどのファイルからも使われていない）。★`ResearchPaper/blocked-leaves.json` に記録した。"
  }
 }

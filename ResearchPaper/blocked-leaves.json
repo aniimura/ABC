@@ -31,6 +31,12 @@
       "unblockedBy": "★**Auslander–Buchsbaum の定理**(正則局所環 ⇒ UFD)**のみ**。ホモロジー代数(有限自由分解、Ext、深さ)を要し、mathlib には着手の形跡が無い。★★2026-08-17 時点で他の段はすべて取得済み(上記 reason 末尾)——この 1 本が入れば Definition 1.5, (ii) は原文どおりの仮定で閉じる。",
       "★皮肉": "★★**`Definition 1.5` の 4 条のうち、(i)(iii)(iv) は 2026-08-17 に実装できたのに、いちばん素朴に見える (ii) だけが残った。** (i) は `Scheme.SpecToEquivOfField` で、(iv) は `IdealSheafData.comap` で、いずれも mathlib の既製品 1 個で届いた。★『難しそうな順』と『実際に詰まる順』は一致しない——これは本プロジェクトで繰り返し出ている型である。",
       "★halfSolved": "算術因子の水準での被約化(`Found/GenEll/Conductor.lean` の `ADivRed` / `adivRed_idem` / `adivRed_isEffective` / `deg_adivRed_le`)は実装済みで、**`Proposition 1.6` の非アルキメデス側にはそれで足りている**。足りていないのは『scheme の上で `E_red` が Cartier である』という一般論の側だけである。★★**ゆえに `Definition 1.5` には条なしの `.src` を付けない**(付ければ `genell-progress` が 4→5 に動くが、それは過剰主張である)。"
+    },
+    {
+      "key": "[GenEll] Theorem 3.8(悪い素点の惰性の幂単性——完備離散付値環の有限拡大)",
+      "reason": "★`Skeleton/GenEll/AlphaLocalData.lean` の `exists_h2_h1_unipotent` に残る 2 枚（分裂乗法還元・`ζ_l ∈ L_p`）は、どちらも **`L_p` の有限拡大**を取る段である。☆**mathlib に「完備離散付値環の有限拡大は再び完備離散付値環」が無い**（2026-09-02 に確認: `Mathlib/RingTheory/DiscreteValuationRing/` は `Basic` と `TFAE` の 2 本だけ、`Mathlib/NumberTheory/LocalField/Basic.lean` の `IsNonarchimedeanLocalField` は**他のどのファイルからも使われていない**——拡大で閉じることが無い）。★したがって `AdjoinRoot f` や `L_p(ζ_l)` に `IsDiscreteValuationRing`・`IsFractionRing`・`IsAdicComplete` を与える段が丸ごと無い。",
+      "unblockedBy": "☆「完備離散付値環 `R` の分数体 `K` の有限拡大 `K′` に対し、`R` の整閉包 `R′` は完備離散付値環で `Frac R′ = K′`」を作ること（局所体の理論の基礎）。★本プロジェクトの `Found/GaloisRep/UnramQuad.lean`（第 1025-1043）は**その構造を仮説として受けた上で**分裂性を出すところまで来ている（`valuation_algebraMap_ext`・`isMinimal_baseChange_ext`・`hasMultiplicativeReduction_ext`・`hasSplitMultiplicativeReduction_ext`）ので、構造さえ入れば繋がる。",
+      "measuredAt": "2026-09-02（第 1354）"
     }
   ],
   "expandableWithWork": [
