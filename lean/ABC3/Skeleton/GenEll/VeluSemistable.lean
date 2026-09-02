@@ -53,42 +53,52 @@ open ABC3.Found.GenEll ABC3.Found.GaloisRep ABC3.Meta
 open scoped Classical
 
 /-- ★★★★★★★★★★★★★★★★★★★★★★★★
-**[GenEll] Vélu の商は半安定**（第 1342）。
+**[GenEll] Vélu の商は半安定**（第 1342、第 1345 で一般形に直した）。
 
 原文 (GenEll p.17):
 > Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
 
 ☆原文が「同種なので自動」と括弧で述べる段の**半安定性の側**である。
 
-★★★これが `VeluQuotOK` に残る**ただ 1 つの節点**である。 -/
-theorem veluQuotOK_semistable (E : SSCurve) (l : ℕ)
-    (M : IntermediateField E.fld E.alg) [FiniteDimensional E.fld M]
-    (Q' : (E.W.baseChange M).toAffine.Point) :
-    letI : DecidableEq (M : Type) := fun a b => Classical.propDecidable (a = b)
-    letI : NumberField (M : Type) := NumberField.of_module_finite E.fld M
-    letI : IsScalarTower (𝓞 E.fld) E.fld M := isScalarTower_ringOfIntegers_base E.fld M
-    letI : IsScalarTower (𝓞 E.fld) (𝓞 (M : Type)) M := isScalarTower_ringOfIntegers_top E.fld M
-    addOrderOf Q' = l →
-    ∀ P : HeightOneSpectrum (𝓞 (M : Type)),
-      SemistableAt P (veluQuotientFull (E.W.baseChange M)
-        (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q')))) := by
+★★★これが `VeluQuotOK`・`IsQuotClassJ` に残る**ただ 1 つの節点**である。 -/
+theorem semistableAt_veluQuotientFull {L : Type} [Field L] [NumberField L] [DecidableEq L]
+    (E : WeierstrassCurve L) [E.IsElliptic]
+    (hss : ∀ p : HeightOneSpectrum (𝓞 L), SemistableAt p E)
+    {l : ℕ} (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
+    (p : HeightOneSpectrum (𝓞 L)) :
+    SemistableAt p (veluQuotientFull E
+      (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) := by
   sorry
+
+/-- ★★★★★★★★★★★★**`SSCurve` の語彙で**（第 1345）。 -/
+theorem semistableAt_veluQuot_ss (E : SSCurve) {l : ℕ} (Q : E.W.toAffine.Point)
+    (hQ : addOrderOf Q = l) (p : HeightOneSpectrum (𝓞 E.fld)) :
+    SemistableAt p (veluQuotientFull E.W
+      (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) :=
+  semistableAt_veluQuotientFull E.W E.ss Q hQ p
 
 /-- ★★★★★★★★★★★★★★★★★★★★
 **`VeluQuotOK` はこの 1 本から出る**——★（第 1342）。
 
 ☆楕円性は第 1336（無条件）、半安定性は上の節点。 -/
-theorem veluQuotOK_all (E : SSCurve) (l : ℕ) : VeluQuotOK E l :=
-  veluQuotOK_of_semistable E l (fun M _ Q' => veluQuotOK_semistable E l M Q')
+theorem veluQuotOK_all (E : SSCurve) (l : ℕ) : VeluQuotOK E l := by
+  refine veluQuotOK_of_semistable E l (fun M _ Q' hQ' P => ?_)
+  letI : DecidableEq (M : Type) := fun a b => Classical.propDecidable (a = b)
+  letI : NumberField (M : Type) := NumberField.of_module_finite E.fld M
+  haveI hEell : (E.W.baseChange (M : Type)).IsElliptic := by
+    show (E.W.map (algebraMap E.fld M)).IsElliptic
+    infer_instance
+  exact semistableAt_veluQuotientFull (E.W.baseChange (M : Type))
+    (ABC3.Found.GaloisRep.semistableAt_baseChange_all E.fld (M : Type) E.W E.ss) Q' hQ' P
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
-def veluQuotOK_semistable.src : Source :=
+def semistableAt_veluQuotientFull.src : Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(Vélu の商は半安定——原文が「同種なので自動」と括弧で述べる段)",
     sectionId := "genell-lemma-3-5" }
 
-def veluQuotOK_semistable.needs : List ProofObligation :=
+def semistableAt_veluQuotientFull.needs : List ProofObligation :=
   [ .citation "[ABC3]" "semistableAt_velu_of_veluCurve_eq(悪い素点側、第 1327、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.semistableAt_velu_of_veluCurve_eq") 1,
     .citation "[ABC3]" "isIntegral_veluQuotientFull_of_addOrderOf_prime(良い素点で商は整、第 1074)"
@@ -112,7 +122,12 @@ def veluQuotOK_all.src : Source :=
 def veluQuotOK_all.needs : List ProofObligation :=
   [ .citation "[ABC3]" "veluQuotOK_of_semistable(第 1336、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GenEll.veluQuotOK_of_semistable") 1,
-    .citation "[ABC3]" "veluQuotOK_semistable(本ファイルの節点)"
-      (.inProject "ABC3" "ABC3.Skeleton.GenEll.veluQuotOK_semistable") 1 ]
+    .citation "[ABC3]" "semistableAt_veluQuotientFull(本ファイルの節点)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.semistableAt_veluQuotientFull") 1 ]
+
+def semistableAt_veluQuot_ss.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の商は半安定——SSCurve の語彙で)",
+    sectionId := "genell-lemma-3-5" }
 
 end ABC3.Skeleton.GenEll
