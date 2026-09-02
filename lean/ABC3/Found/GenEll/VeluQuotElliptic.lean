@@ -52,6 +52,7 @@ theorem veluQuotOK_of_semistable (E : SSCurve) (l : ℕ)
           (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q'))))) :
     VeluQuotOK E l := by
   intro M _ Q' hQ'
+  letI : DecidableEq (M : Type) := fun a b => Classical.propDecidable (a = b)
   letI : NumberField (M : Type) := NumberField.of_module_finite E.fld M
   haveI hEell : (E.W.baseChange (M : Type)).IsElliptic := by
     show (E.W.map (algebraMap E.fld M)).IsElliptic

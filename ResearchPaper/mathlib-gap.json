@@ -6787,8 +6787,9 @@
   "block": "1348-1349",
   "date": "2026-09-02",
   "title": "★★★★★★★★★★★★商も乗法還元を持つ（＋残る段の測定）",
-  "proved": "☆`Skeleton/GenEll/QuotClassExistence.lean`（第 1348）に `hasMultRed_quotSSCurve`——`E` の乗法還元の素点で Tate の関係（`isMuAtBadPrimes_of_veluQuotient_nodeg`、第 1141）が効き、`v_p(Δ_min(E′)) = l·v_p(Δ_min(E)) ≠ 0`。★`IsQuotClassJ` の witness に要る `DegCurve`（`SSCurve` ＋ 乗法還元）が作れる。",
-  "measure": "★★★**残る段（第 1349）の測定**——材料は 7 段すべて揃った（安定な点・降下・持ち上げ・輸送・楕円性・半安定性の節点・乗法還元）。☆組み立てで詰まったのは **`DecidableEq` のインスタンスの食い違い**である:`exists_ext_point_of_stable`（第 1346）は古典的なインスタンスで返し、`SSCurve` の語彙は `↥K` の具体の `Subtype.instDecidableEq` で合成される。★橋は `addOrderOf_point_congr_dec`（第 1347）にあるので、第 1346 の結論から `letI` を外して具体側に寄せれば噛み合う。",
-  "gate": "lake build ABC3 成功（6370 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
+  "proved": "☆`Skeleton/GenEll/QuotClassExistence.lean`（第 1348）に `hasMultRed_quotSSCurve`——`E` の乗法還元の素点で Tate の関係（`isMuAtBadPrimes_of_veluQuotient_nodeg`、第 1141）が効き、`v_p(Δ_min(E′)) = l·v_p(Δ_min(E)) ≠ 0`。★`IsQuotClassJ` の witness に要る `DegCurve`（`SSCurve` ＋ 乗法還元）が作れる。 ★**第 1349 で組み立ても閉じた**——`exists_isQuotClassJ_of_hasLCyclic`。",
+  "measure": "★★★詰まっていたのは `DecidableEq` のインスタンスの食い違いだけだった。☆直し方は 2 つ: (1) `exists_ext_point_of_stable`（第 1346）の結論から `letI` を外し、証明の中で `addOrderOf_point_congr_dec`（第 1347）を 1 回使って**具体側に寄せる**。(2) `isElliptic_veluQuotientFull_nsmul_nf`（第 1335）に`[DecidableEq K]` の**明示の束縛**を付ける。★★★これで `EllModuliWitness` の `degInfJ_quotLCyclicJ`（#2）が閉じた。",
+  "gate": "lake build ABC3 成功（6370 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。",
+  "count": "☆`EllModuliWitness` の `sorry` は **1 本**（#4 `imageContainsSL2J_torsionExt`、α 側）。別に `VeluSemistable.lean` に名前のついた葉が 1 本（良い素点の半安定性）。★セッション開始時は 4 本だった。"
  }
 }

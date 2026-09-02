@@ -38,11 +38,16 @@ noncomputable def embedComplex (K : Type) [Field K] [NumberField K] : K →+* �
 
 ★★★これが `VeluQuotOK` の**楕円性の側そのもの**である。 -/
 theorem isElliptic_veluQuotientFull_nsmul_nf (K : Type) [Field K] [NumberField K]
-    (W : WeierstrassCurve K) [W.IsElliptic]
+    [inst : DecidableEq K] (W : WeierstrassCurve K) [W.IsElliptic]
     {Q : W.toAffine.Point} {l : ℕ} (hl : 0 < l) (hQ : addOrderOf Q = l) :
     (veluQuotientFull W
-      (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))).IsElliptic :=
-  isElliptic_veluQuotientFull_nsmul_of_embed W (embedComplex K) hl hQ
+      (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))).IsElliptic := by
+  -- ★`Decidable` のインスタンスを古典的なものに揃える（配管）
+  have hinst : inst = fun a b => Classical.propDecidable (a = b) := by
+    funext a b
+    exact Subsingleton.elim _ _
+  subst hinst
+  exact isElliptic_veluQuotientFull_nsmul_of_embed W (embedComplex K) hl hQ
 
 /-- ★★★★★★★★★★★★★★★★★★★★★★★★★★
 **位数の仮定だけで Vélu の商は楕円**——★**無条件**（第 1335）。
@@ -50,7 +55,7 @@ theorem isElliptic_veluQuotientFull_nsmul_nf (K : Type) [Field K] [NumberField K
 ☆`l = 0`（位数無限）のときは点集合が空で商は `W` 自身だから、
 `0 < l` は要らない。★これが `VeluQuotOK` の楕円性の側にぴたりと嵌まる形である。 -/
 theorem isElliptic_veluQuotientFull_nsmul_nf' (K : Type) [Field K] [NumberField K]
-    (W : WeierstrassCurve K) [W.IsElliptic]
+    [DecidableEq K] (W : WeierstrassCurve K) [W.IsElliptic]
     {Q : W.toAffine.Point} {l : ℕ} (hQ : addOrderOf Q = l) :
     (veluQuotientFull W
       (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))).IsElliptic := by

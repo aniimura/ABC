@@ -83,35 +83,78 @@ theorem hasMultRed_quotSSCurve (E : SSCurve) {l : ℕ} (hl : l.Prime)
   have hl0 : (l : ℤ) ≠ 0 := by exact_mod_cast hl.ne_zero
   exact mul_ne_zero hl0 hp
 
-/-! ## ★★★★★★★★★★★★★★★★残っている段の測定（2026-09-02、第 1349）
+/-! ## ★★★★★★★★★★★★★★★★★★★★閉じた（2026-09-02、第 1349）
 
-☆**材料はすべて揃っている**が、最後の組み立てで `DecidableEq` のインスタンスが
-食い違って通らなかった。★測ったことを書いておく。
+☆詰まっていたのは **`DecidableEq` のインスタンスの食い違い**だけだった。
+★直し方は 2 つ:
 
-| # | 段 | 状態 |
-|---|---|---|
-| 1 | `Gal`-安定な点 `Q`（`E.alg` の上） | ★`exists_stablePoint_of_hasLCyclicJ`（在庫） |
-| 2 | `L(H)` へ降ろし `ℂ` の中へ運ぶ | ★第 1346（証明済み） |
-| 3 | `SSCurve` として持ち上げる | ★第 1343（証明済み） |
-| 4 | `j`・`PrimeToLocalHeights`・乗法還元の輸送 | ★第 1343・1347（証明済み） |
-| 5 | 商は楕円 | ★第 1335（無条件） |
-| 6 | 商は半安定 | ☆第 1345（節点） |
-| 7 | 商は乗法還元 | ★第 1348（上、証明済み） |
-| 8 | **組み立て** | ☆`DecidableEq` の合わせ込みが残る |
+1. `exists_ext_point_of_stable`（第 1346）の結論から `letI` を外し、
+   証明の中で `addOrderOf_point_congr_dec`（第 1347）を 1 回使って**具体側に寄せる**
+2. `isElliptic_veluQuotientFull_nsmul_nf`（第 1335）に `[DecidableEq K]` の
+   **明示の束縛**を付ける（他の補題と同じ手）
 
-★★☆**(8) の中身**——`exists_ext_point_of_stable`（第 1346）は
-`M₀` の `DecidableEq` を**古典的**に固定して返す（`exists_point_descent_of_stable` に合わせた）。
-☆一方 `SSCurve` の語彙（`IsQuotClassJ`・`isElliptic_veluQuotientFull_nsmul_nf'`）は
-`↥K` の**具体の** `Subtype.instDecidableEq` で合成される。
-★橋は `addOrderOf_point_congr_dec`（第 1347、証明済み）にあるが、
-`isElliptic_veluQuotientFull_nsmul_nf'` の側の暗黙引数の合わせ込みが要る。
-
-☆**次にやること**——`exists_ext_point_of_stable` の結論から `letI` を外し、
-証明の中で `addOrderOf_point_congr_dec` を 1 回使って具体のインスタンスに寄せる。
-★そうすれば `SSCurve` の語彙とそのまま噛み合う。
+★★★これで `EllModuliWitness` の `degInfJ_quotLCyclicJ`（#2）が閉じた。
 -/
 
+set_option maxHeartbeats 1600000 in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★
+**`HasLCyclicJ` なら商の類は存在する**——★**無条件**（第 1349）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★これが `EllModuliWitness` の `degInfJ_quotLCyclicJ`（#2）に残っていた
+**「商の類の存在」そのもの**である。 -/
+theorem exists_isQuotClassJ_of_hasLCyclic (x : RealizedClass) {l : ℕ} (hl : l.Prime)
+    (hcyc : HasLCyclicJ x.rep.toSSCurve l)
+    (hpr : x.rep.toSSCurve.PrimeToLocalHeights l) :
+    ∃ y : RealizedClass, IsQuotClassJ x l y.1 := by
+  obtain ⟨Q, hQ, hst⟩ := exists_stablePoint_of_hasLCyclicJ x.rep.toSSCurve l hl hcyc
+  obtain ⟨M₀, hfin, hdeg, Q₀, hQ₀⟩ := exists_ext_point_of_stable x.rep.toSSCurve hl Q hQ hst
+  haveI := hfin
+  have hfr : Module.finrank x.rep.toSSCurve.fld (extField x.rep.toSSCurve M₀)
+      = Module.finrank x.rep.toSSCurve.fld M₀ := rfl
+  have hdeg' : Module.finrank x.rep.toSSCurve.fld (extField x.rep.toSSCurve M₀) < l := by
+    have h2 := hl.two_le
+    omega
+  have hEj : (x.rep.toSSCurve.ext M₀).j = x.cls := by
+    rw [SSCurve.ext_j]
+    exact RealizedClass.rep_j x
+  have hEpr : (x.rep.toSSCurve.ext M₀).PrimeToLocalHeights l :=
+    x.rep.toSSCurve.primeToLocalHeights_ext M₀ hl hdeg' hpr
+  have hEmult : (x.rep.toSSCurve.ext M₀).HasMultRed :=
+    x.rep.toSSCurve.hasMultRed_ext M₀ x.rep.multRed
+  obtain ⟨Q₁, hQ₁⟩ : ∃ Q₁ : (x.rep.toSSCurve.ext M₀).W.toAffine.Point, addOrderOf Q₁ = l :=
+    ⟨Q₀, hQ₀⟩
+  clear hfr hdeg' hdeg hQ₀ hst hQ hpr hcyc
+  revert hEj hEpr hEmult Q₁ hQ₁
+  generalize (x.rep.toSSCurve.ext M₀) = E₁
+  intro hEj hEpr hEmult Q₁ hQ₁
+  exact exists_isQuotClassJ x E₁ hEj hEpr Q₁ hQ₁
+    (isElliptic_veluQuotientFull_nsmul_nf' E₁.fld E₁.W hQ₁)
+    (fun p => semistableAt_veluQuot_ss E₁ Q₁ hQ₁ p)
+    (hasMultRed_quotSSCurve E₁ hl hEpr hEmult Q₁ hQ₁
+      (isElliptic_veluQuotientFull_nsmul_nf' E₁.fld E₁.W hQ₁)
+      (fun p => semistableAt_veluQuot_ss E₁ Q₁ hQ₁ p))
+
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
+
+def exists_isQuotClassJ_of_hasLCyclic.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(HasLCyclicJ なら商の類は存在する。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def exists_isQuotClassJ_of_hasLCyclic.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "exists_ext_point_of_stable(第 1346、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.exists_ext_point_of_stable") 1,
+    .citation "[ABC3]" "isElliptic_veluQuotientFull_nsmul_nf(第 1335、無条件)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.isElliptic_veluQuotientFull_nsmul_nf") 1,
+    .citation "[ABC3]" "semistableAt_veluQuot_ss(第 1345、節点)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.semistableAt_veluQuot_ss") 1,
+    .implicitStep
+      ("★★★★**2026-09-02（第 1349）**——`EllModuliWitness` の " ++
+       "`degInfJ_quotLCyclicJ`（#2）に残っていた" ++
+       "**「商の類の存在」そのもの**である。") 3 ]
 
 def hasMultRed_quotSSCurve.src : Source :=
   { paper := "GenEll", pdfPage := 17,

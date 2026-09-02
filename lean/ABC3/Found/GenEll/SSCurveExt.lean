@@ -66,7 +66,7 @@ instance isScalarTower_extField : IsScalarTower ℚ E.fld (extField E M₀) :=
 noncomputable def SSCurve.ext : SSCurve where
   K := extField E M₀
   isNF := numberField_extField E M₀
-  W := E.W.baseChange (extField E M₀)
+  W := E.W.baseChange ((M₀ : IntermediateField E.fld ℂ) : Type)
   isEll := by
     show (E.W.map (algebraMap E.fld (extField E M₀))).IsElliptic
     infer_instance

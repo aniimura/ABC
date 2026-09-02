@@ -48,18 +48,13 @@ theorem exists_ext_point_of_stable (E : SSCurve) {l : ℕ} (hl : l.Prime)
     (hst : ∀ σ : E.alg ≃ₐ[E.fld] E.alg, ∃ k : ℕ, galPoint E.W σ Q = k • Q) :
     ∃ (M₀ : IntermediateField E.fld ℂ), FiniteDimensional E.fld M₀ ∧
       Module.finrank E.fld M₀ ≤ l - 1 ∧
-      letI : DecidableEq ((M₀ : IntermediateField E.fld ℂ) : Type) :=
-        fun a b => Classical.propDecidable (a = b)
       ∃ Q₀ : (E.W.baseChange ((M₀ : IntermediateField E.fld ℂ) : Type)).toAffine.Point,
         addOrderOf Q₀ = l := by
   classical
   obtain ⟨M, hfin, hdeg, Q', hQ', -⟩ :=
     exists_point_descent_of_stable E.W hl Q hQ hst
   haveI := hfin
-  letI : DecidableEq (M : Type) := fun a b => Classical.propDecidable (a = b)
   set ι : E.alg →ₐ[E.fld] ℂ := algToComplex E with hι
-  letI : DecidableEq ((M.map ι : IntermediateField E.fld ℂ) : Type) :=
-    fun a b => Classical.propDecidable (a = b)
   set e : M ≃ₐ[E.fld] (M.map ι) := IntermediateField.equivMap M ι with he
   haveI hfin₀ : FiniteDimensional E.fld (M.map ι) :=
     LinearEquiv.finiteDimensional e.toLinearEquiv
@@ -86,7 +81,7 @@ theorem exists_ext_point_of_stable (E : SSCurve) {l : ℕ} (hl : l.Prime)
     have hord := addOrderOf_congr_curve hcurve
       (rhPoint (e.toAlgHom.toRingHom) (E.W.baseChange (M : Type)) Q')
     rw [hord, addOrderOf_rhPoint]
-    exact hQ'
+    exact (addOrderOf_point_congr_dec _ _ Q').trans hQ'
 
 /-! ## ★出典の紐付け(`.src`) -/
 

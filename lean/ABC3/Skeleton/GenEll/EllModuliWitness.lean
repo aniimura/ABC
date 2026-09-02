@@ -10,6 +10,7 @@ import ABC3.Interface.GenEll.EllModuli
 import ABC3.Skeleton.GenEll.Section3
 import ABC3.Skeleton.GenEll.TateLocalModelK
 import ABC3.Skeleton.GenEll.VeluSemistable
+import ABC3.Skeleton.GenEll.QuotClassExistence
 import ABC3.Found.GenEll.Lemma37Full
 import ABC3.Skeleton.GenEll.GaloisImage
 import ABC3.Skeleton.GenEll.Section4
@@ -66,6 +67,24 @@ import ABC3.Meta.Claim
 
 ★★★**したがって 4 本に残るのは配管だけであり、
 未証明の外部引用は 1 本もない**。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★**2026-09-02（第 1343-1349）——#2 も閉じた**
+
+☆`HasLCyclicJ` から商の類の存在を出す道が通った
+（`Skeleton/GenEll/QuotClassExistence.lean` の `exists_isQuotClassJ_of_hasLCyclic`）。
+
+| 段 | 出どころ |
+|---|---|
+| `Gal`-安定な点 | `exists_stablePoint_of_hasLCyclicJ`（在庫） |
+| `L(H)` へ降ろし `ℂ` の中へ運ぶ | 第 1346 |
+| `SSCurve` として持ち上げる | 第 1343 |
+| `j`・`PrimeToLocalHeights`・乗法還元の輸送 | 第 1343・1347 |
+| 商は楕円 | 第 1335 |
+| 商は半安定 | 第 1345（節点） |
+| 商は乗法還元 | 第 1348 |
+
+★★★**本ファイルの `sorry` は 1 本**（#4 `imageContainsSL2J_torsionExt`、α 側）であり、
+別に `Skeleton/GenEll/VeluSemistable.lean` に名前のついた葉が 1 本ある。
 
 ## ★★★★★★★★★★★★★★★★★★★★**2026-09-02（第 1341-1342）——#1 が閉じた**
 
@@ -244,7 +263,10 @@ theorem degInfJ_quotLCyclicJ_ge_of_exists (x : RealizedClass) {l : ℕ} (hl : Na
   rw [hj, hEj] at hq
   exact hq
 
-/-- ★★★`l·deg∞(E) ≤ deg∞(E′)`——★**残るのは「商の類の存在」だけ**（第 1340）。
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`l·deg∞(E) ≤ deg∞(E′)`**——★**これはもう `sorry` ではない**（2026-09-02、第 1349）。
+
+☆商の類の存在は `exists_isQuotClassJ_of_hasLCyclic`（第 1349）が与える。
 
 ★★☆**測定（2026-09-02、第 1340）**——不等式に弱めたことで
 **良い素点の半安定性（同種で良還元が保たれること）は不要になった**。
@@ -254,9 +276,8 @@ theorem degInfJ_quotLCyclicJ (x : RealizedClass) (l : ℕ) (hl : Nat.Prime l)
     (hcyc : HasLCyclicJ x.rep.toSSCurve l)
     (hpr : x.rep.toSSCurve.PrimeToLocalHeights l) :
     (l : ℝ) * degInfJ x.cls ≤ degInfJ (quotLCyclicJ x l).cls := by
-  by_cases hex : ∃ y : RealizedClass, IsQuotClassJ x l y.1
-  · exact degInfJ_quotLCyclicJ_ge_of_exists x hl hex
-  · sorry
+  exact degInfJ_quotLCyclicJ_ge_of_exists x hl
+    (exists_isQuotClassJ_of_hasLCyclic x hl hcyc hpr)
 
 /-- ★★★★★★★★★★★★★★★★★★★★
 **`ht^Falt(E′) ≤ ht^Falt(E) + 2log(l)`——★これはもう `sorry` ではない**（2026-09-02、第 1339）。
