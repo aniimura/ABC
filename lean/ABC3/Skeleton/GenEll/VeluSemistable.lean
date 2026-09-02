@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GenEll.VeluQuotElliptic
 import ABC3.Found.GenEll.VeluSemistableAll
+import ABC3.Found.GenEll.VeluSemistableJ
 import ABC3.Meta.Claim
 
 /-!
@@ -238,10 +239,14 @@ theorem semistableAt_veluQuotientFull {L : Type} [Field L] [NumberField L] [Deci
     (p : HeightOneSpectrum (𝓞 L)) :
     SemistableAt p (veluQuotientFull E
       (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) := by
-  -- ★★★★★**2026-09-02（第 1437）**——第 1436 で仮定は 1 本になった。
-  refine ABC3.Found.GenEll.semistableAt_veluQuot_all_of_goodMem p E (hss p) hl hl5 Q hQ ?_
-  -- ☆残る 1 本: `p ∣ l` かつ良い素点のとき、極小モデルの上で核の座標が `p` で整であること
-  -- ★これは形式群の `l`-捩れ（`Ê(𝔪)[l] ∩ ⟨Q⟩ = 0`）である。
+  -- ★★★★★**2026-09-02（第 1439）**——第 1439 で仮定は 1 本になった。
+  haveI hVell := ABC3.Found.GenEll.isElliptic_veluQuotientFull_nsmul_nf' L E hQ
+  refine ABC3.Found.GenEll.semistableAt_veluQuot_all_of_jExp p E (hss p) hl hl5 Q hQ ?_
+  -- ☆残る 1 本: `p ∣ l` かつ良い素点のとき `0 ≤ jExp p (E/⟨Q⟩)`——
+  -- ★すなわち **`j(E′)` の整性**（`E` が良還元なら同種な `E′` の `j` も整）。
+  -- ☆古典的にはモジュラー多項式 `Φ_l(j, j′) = 0` の単項性、
+  -- あるいは Néron–Ogg–Shafarevich から出る。どちらも mathlib に無い。
+  intro hlu hj
   sorry
 
 /-- ★★★★★★★★★★★★**`SSCurve` の語彙で**（第 1345）。 -/
@@ -276,22 +281,23 @@ def semistableAt_veluQuotientFull.src : Source :=
     sectionId := "genell-lemma-3-5" }
 
 def semistableAt_veluQuotientFull.needs : List ProofObligation :=
-  [ .citation "[ABC3]" "semistableAt_veluQuot_all_of_goodMem(第 1436、証明済み)"
-      (.inProject "ABC3" "ABC3.Found.GenEll.semistableAt_veluQuot_all_of_goodMem") 1,
-    .citation "[Sil]" "The Arithmetic of Elliptic Curves, IV.6.1(形式群の捩れ——e < l−1 なら Ê(𝔪)[l] = 0)"
+  [ .citation "[ABC3]" "semistableAt_veluQuot_all_of_jExp(第 1439、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.semistableAt_veluQuot_all_of_jExp") 1,
+    .citation "[Sil]" "The Arithmetic of Elliptic Curves(同種で j の整性が保たれること)"
       (.absent
-        ("mathlib には楕円曲線の形式群が無い(2026-09-02 確認。" ++
-         "`Mathlib/RingTheory/FormalGroup/Basic.lean` は形式群の定義だけで 147 行)。" ++
-         "★別の道はモジュラー多項式 `Φ_l(j, j′) = 0` の単項性で、これも mathlib に無い" ++
-         "——第 1431 `minDeltaExp_eq_zero_of_jExp_nonneg` がそちらの受け口である")) 17,
+        ("`E` が `p` で良還元なら同種な `E′` の `j` も整である。" ++
+         "★古典的にはモジュラー多項式 `Φ_l(j, j′) = 0` の単項性から出るが、" ++
+         "mathlib にモジュラー多項式は無い(2026-09-02 確認)。" ++
+         "☆別の道は形式群／Néron モデル(Néron–Ogg–Shafarevich)で、" ++
+         "`Mathlib/RingTheory/FormalGroup/Basic.lean` は形式群の定義だけの 147 行である")) 17,
     .implicitStep
       ("★★★★★**2026-09-02（第 1437）**——第 1410-1436 で仮定は**1 本**になった。" ++
        "☆`p ∤ l` は第 1417 で無条件、`p ∣ l` の悪い素点は第 1428 で無条件" ++
        "（`p ∤ 6` は第 1435 が `l ≥ 5` から出す）。" ++
-       "★残る `sorry` は **`p ∣ l` かつ良い素点のとき、極小モデルの上で" ++
-       "核の座標が `p` で整であること**だけである" ++
-       "——これは形式群の `l`-捩れ（`Ê(𝔪)[l] ∩ ⟨Q⟩ = 0`）であり、" ++
-       "局所体の分岐が `e ≥ l−1` のときにしか破れない。" ++
+       "★残る `sorry` は **`p ∣ l` かつ良い素点のとき `0 ≤ jExp p (E/⟨Q⟩)`**" ++
+       "だけである——すなわち `j(E′)` の整性であり、これは**真の主張**である" ++
+       "（第 1436 が残していた「核の座標が整」は分岐が `e ≥ l−1` のとき偽なので、" ++
+       "第 1438-1439 で `j` の整性に置き換えた）。" ++
        "☆`5 ≤ l` は界面の側から取れる（`Check/GenEll/VeluQuotOKNeedsL5.lean`、第 1434）。") 17 ]
 
 def veluQuotOK_all.src : Source :=
