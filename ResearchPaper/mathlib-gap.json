@@ -6333,5 +6333,14 @@
   "route": "★第 1280（基礎体に無い元はどれかの `σ` が動かす）を座標に当てるだけ。",
   "consequence": "☆`E[l] ⊄ E(K₀)` から `h1`（第 1270）が出る道の一段目である。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "galPointRational20260902": {
+  "block": 1299,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★基礎体の点は σ に固定される（h2 の入力、配管 P1 の要）",
+  "proved": "☆`galPoint_rhPoint_eq`（`Found/GenEll/GalPointRational.lean`、第 1299）。",
+  "route": "★座標が `algebraMap K₀ M` の像にあり、`σ` は `K₀` を固定する（`AlgEquiv.commutes`）。",
+  "consequence": "★★★これで `μ_l ⊂ E(K₀)`（第 1297）が第 1296 の「`σ` が固定する位数 `l` の点」にそのままなる（位数は `addOrderOf_rhPoint`（在庫）で保たれる）。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
