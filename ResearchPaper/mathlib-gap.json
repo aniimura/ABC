@@ -6423,5 +6423,14 @@
   "route": "★`L̄ ↪ M`（`IsAlgClosed.lift`）と `restrictLocalHom`（第 1167）で `σ_M` を `L̄` に制限し、固定点は第 1302、動く点は第 1271 で運び、第 1303 に渡す。",
   "consequence": "★★★これで **II 側の鎖は「局所で固定点と動く点を作る」ところまで詰んだ**。☆固定点は `μ_l ⊂ E(K₀)`（第 1297・1299）、動く点は `l ∤ v(Q)`（第 1304・1306・1305）。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "localFixedMoved20260902": {
+  "block": 1309,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★局所で「固定点」と「動く点」を同時に取る（第 1308 が受け取る形）",
+  "proved": "☆`exists_local_fixed_moved`（`Found/GenEll/LocalFixedMoved.lean`、第 1309）。",
+  "inputs": "☆入力は 2 つだけ: 「`P₀ ∈ E(K₀)` が位数 `l`」と「`K₀` の `l`-捩れは `l` 個以下」。★どちらも `K₀` の上の Tate 一意化から出る（第 1297・1304）。",
+  "consequence": "★★★これで **II 側の鎖は「悪い素点で Tate 一意化を建てる」ところまで詰んだ**:第 1297/1304（局所データ）→ 第 1309（固定点・動く点）→ 第 1308（大域へ輸送）→ 第 1303（`h2`・`h1`）→ 第 1237（`α` が像に入る）→ 第 1249（`ImageContainsSL2J`）。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }

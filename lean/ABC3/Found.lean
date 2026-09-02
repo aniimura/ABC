@@ -1421,6 +1421,7 @@ import ABC3.Found.GenEll.NotRationalMoved
 import ABC3.Found.GenEll.TorsionNotRational
 import ABC3.Found.GenEll.AlphaLocalInput
 import ABC3.Found.GenEll.AlphaGlobalTransport
+import ABC3.Found.GenEll.LocalFixedMoved
 import ABC3.Found.GaloisRep.Lemma35Descend
 import ABC3.Found.GaloisRep.TowerInstances
 import ABC3.Found.GaloisRep.Lemma35Assemble
