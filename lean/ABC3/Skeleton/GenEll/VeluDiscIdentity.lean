@@ -2,6 +2,8 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.VeluKernelNorm
+import ABC3.Found.GaloisRep.VeluDiscDescent
+import ABC3.Found.GenEll.VeluEllipticNF
 import ABC3.Meta.Claim
 
 /-!
@@ -50,7 +52,7 @@ open ABC3.Found.GenEll ABC3.Found.GaloisRep ABC3.Meta
 open scoped Classical
 
 /-- ★★★★★★★★★★★★★★★★★★★★★★★★
-**[GenEll] Vélu の商の判別式の恒等式**（第 1387）。
+**[GenEll] Vélu の商の判別式の恒等式——`ℂ` の上**（第 1387、第 1390 で `ℂ` に絞った）。
 
 原文 (GenEll p.17):
 > Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
@@ -59,9 +61,11 @@ open scoped Classical
 
 ☆`l = 3, 5, 7` について数値で確かめてある（`tools/velu-disc-check.py`）。
 
-★★★これが `semistableAt_veluQuotientFull` の良い素点側に残る**ただ 1 本の節点**である。 -/
-theorem disc_pow_eq_veluQuot_mul {L : Type} [Field L] [DecidableEq L]
-    (E : WeierstrassCurve L) [E.IsElliptic]
+★★★**第 1390（`disc_pow_eq_of_embed`）で降下が作られたので、
+残るのは `ℂ` の側だけである**。
+☆`ℂ` では一意化（第 1330-1335）と `latticeCurve_eq_veluQuotientFull`（在庫）がある。 -/
+theorem disc_pow_eq_veluQuot_mul_complex
+    (E : WeierstrassCurve ℂ) [E.IsElliptic]
     {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
     (Q : E.toAffine.Point) (hQ : addOrderOf Q = l) :
     E.Δ ^ l
@@ -70,6 +74,33 @@ theorem disc_pow_eq_veluQuot_mul {L : Type} [Field L] [DecidableEq L]
         * (veluKernelNorm E
           (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) ^ 4 := by
   sorry
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**数体の上での恒等式**——`ℂ` の側から降りる（第 1390）。
+
+☆第 1334（`isElliptic_veluQuotientFull_nsmul_of_embed`）と同じ型の降下である。 -/
+theorem disc_pow_eq_veluQuot_mul {L : Type} [Field L] [NumberField L] [inst : DecidableEq L]
+    (E : WeierstrassCurve L) [E.IsElliptic]
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    (Q : E.toAffine.Point) (hQ : addOrderOf Q = l) :
+    E.Δ ^ l
+      = (veluQuotientFull E
+          (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))).Δ
+        * (veluKernelNorm E
+          (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) ^ 4 := by
+  have hinst : inst = fun a b => Classical.propDecidable (a = b) := by
+    funext a b
+    exact Subsingleton.elim _ _
+  subst hinst
+  set f := embedComplex L with hf
+  haveI hW1 : (E.map f).IsElliptic :=
+    ⟨isUnit_iff_ne_zero.2 (by
+      rw [WeierstrassCurve.map_Δ]
+      exact (map_ne_zero_iff f f.injective).2 E.isUnit_Δ.ne_zero)⟩
+  refine ABC3.Found.GaloisRep.disc_pow_eq_of_embed f E _ ?_
+  rw [← image_pointCoords_rhPoint_nsmul f E hQ]
+  have hQ₁ : addOrderOf (rhPoint f E Q) = l := by rw [addOrderOf_rhPoint, hQ]
+  exact disc_pow_eq_veluQuot_mul_complex (E.map f) hl hodd (rhPoint f E Q) hQ₁
 
 /-- ★★★★★★★★★★★★★★★★★★★★
 **良い素点では Vélu の商は半安定**——★恒等式（第 1387）から（第 1387）。
