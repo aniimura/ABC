@@ -6414,5 +6414,14 @@
   "route": "★`h2` は第 1300 が**どの `σ` についても**与えるので、`h1` の `σ`（第 1306 → 1305）をそのまま使えばよい。",
   "consequence": "★★★これで **`alpha_mem_map_of_galTate`（第 1237）の入力が局所データだけから出る**。☆(2) は第 1297（`Φ[ζ]` は位数 `l`）、(3) は第 1304（`l ∤ v(Q)`）——どちらも `K₀` の上の Tate 一意化から出る。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "alphaGlobalTransport20260902": {
+  "block": 1308,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★★★★★局所の σ から大域の h2・h1 を出す（II 側の輸送の完成形）",
+  "proved": "☆`exists_h2_h1_global_of_local`（`Found/GenEll/AlphaGlobalTransport.lean`、第 1308）。",
+  "route": "★`L̄ ↪ M`（`IsAlgClosed.lift`）と `restrictLocalHom`（第 1167）で `σ_M` を `L̄` に制限し、固定点は第 1302、動く点は第 1271 で運び、第 1303 に渡す。",
+  "consequence": "★★★これで **II 側の鎖は「局所で固定点と動く点を作る」ところまで詰んだ**。☆固定点は `μ_l ⊂ E(K₀)`（第 1297・1299）、動く点は `l ∤ v(Q)`（第 1304・1306・1305）。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
