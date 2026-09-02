@@ -346,6 +346,36 @@ Tate 一意化の同変性である。★足りないのは**それらを繋ぐ 
 ☆第 1291 で名指しした「完備化の正規性」も、第 1274 の「Eisenstein 拡大」も、
 **どちらも道から消えた**。
 
+### ★★★★★★★★★★★★★★★★★★★★★★★★第 1304-1311——鎖は「Tate 一意化を建てる」まで詰んだ
+
+| 定理 | 内容 | 第 |
+|---|---|---|
+| `card_torsion_le_of_not_dvd` | ★★`l ∤ v(Q)` ⇒ 基礎体の `l`-捩れは `l` 個以下 | 1304 |
+| `exists_galPoint_ne_of_not_rational` | ★基礎体の点でなければ動かされる | 1305 |
+| `exists_torsion_not_rational` | ★★個数の勘定（`l² > l`） | 1306 |
+| `exists_sigma_h2_h1_of_local` | ★★★局所データから `h2`・`h1` | 1307 |
+| `exists_h2_h1_global_of_local` | ★★★局所の `σ` から大域へ（輸送） | 1308 |
+| `exists_local_fixed_moved` | ★★局所で固定点・動く点を同時に | 1309 |
+| `baseChange_baseChange`・`galPoint_pointEquivOfEq` | ★塔の突き合わせ | 1310 |
+| `exists_h2_h1_global_of_localData` | ★★★★**橋の完成形** | 1311 |
+
+☆**鎖はこう繋がる**:
+
+    悪い素点で `TateSetup`（`mkTateSetup`・`dvrTatePhiAddEquiv`、在庫・無条件）
+      → `μ_l ⊂ E(L_v)`（第 1297）と `l`-捩れ ≤ `l` 個（第 1304）
+      → 第 1311（局所データ → 大域の `h2`・`h1`）
+      → 第 1237（`α` が mod `l` 像に入る）
+      → 第 1249（`ImageContainsSL2J`）
+
+### ★★★★★★★★残るのは 2 つ（2026-09-02 時点）
+
+| # | 残り | 中身 |
+|---|---|---|
+| a | 悪い素点で `TateSetup` を建て、`μ_l` と `l`-捩れの個数を `E` の言葉にする | `exists_tate_model`（在庫）で Tate モデルへ移し、`vcPoint` で戻す |
+| b | `ζ_l ∈ L` にするための大域の底変換 | `ImageContainsSL2J` は部分群の像で十分（制限準同型） |
+
+★★**未知の数学は 1 本も無い**——どちらも在庫の組み替えである。
+
 ### ★★★★★★★★第 1170 で節点 2 の群論の側が閉じた
 
 `exists_zeta_pi_of_torsion`——`G ⧸ ⟨Q⟩` の `l`-捻れはすべて `[ζᵃπᵇ]` である。
