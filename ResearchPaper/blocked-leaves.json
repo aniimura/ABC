@@ -36,7 +36,8 @@
       "key": "[GenEll] Theorem 3.8(悪い素点の惰性の幂単性——完備離散付値環の有限拡大)",
       "reason": "★`Skeleton/GenEll/AlphaLocalData.lean` の `exists_h2_h1_unipotent` に残る 2 枚（分裂乗法還元・`ζ_l ∈ L_p`）は、どちらも **`L_p` の有限拡大**を取る段である。☆**mathlib に「完備離散付値環の有限拡大は再び完備離散付値環」が無い**（2026-09-02 に確認: `Mathlib/RingTheory/DiscreteValuationRing/` は `Basic` と `TFAE` の 2 本だけ、`Mathlib/NumberTheory/LocalField/Basic.lean` の `IsNonarchimedeanLocalField` は**他のどのファイルからも使われていない**——拡大で閉じることが無い）。★したがって `AdjoinRoot f` や `L_p(ζ_l)` に `IsDiscreteValuationRing`・`IsFractionRing`・`IsAdicComplete` を与える段が丸ごと無い。",
       "unblockedBy": "☆「完備離散付値環 `R` の分数体 `K` の有限拡大 `K′` に対し、`R` の整閉包 `R′` は完備離散付値環で `Frac R′ = K′`」を作ること（局所体の理論の基礎）。★本プロジェクトの `Found/GaloisRep/UnramQuad.lean`（第 1025-1043）は**その構造を仮説として受けた上で**分裂性を出すところまで来ている（`valuation_algebraMap_ext`・`isMinimal_baseChange_ext`・`hasMultiplicativeReduction_ext`・`hasSplitMultiplicativeReduction_ext`）ので、構造さえ入れば繋がる。",
-      "measuredAt": "2026-09-02（第 1354）"
+      "measuredAt": "2026-09-02（第 1354）",
+      "refine": "★★☆**精査（2026-09-02、第 1355）**——「何も無い」ではなく**解析の側はある／代数の側の橋が無い**が正確である。☆mathlib にあるもの: `Analysis/Normed/Unbundled/SpectralNorm.lean`（`spectralNorm`・`spectralNorm_unique_field_norm_ext`・`spectralMulAlgNorm`・完備体の有限拡大の `CompleteSpace` インスタンス）、`Analysis/Normed/Field/Krasner.lean`、`Analysis/Normed/Unbundled/FiniteExtension.lean`。★つまり「完備非アルキメデス体の有限拡大への norm の一意な延長」は取れている。☆無いのは**そこから `IsDiscreteValuationRing 𝒪`・`IsFractionRing`・`IsAdicComplete` へ渡す橋**（値群の離散性＝分岐指数の有限性）である。★`Topology/Algebra/Valued/LocallyCompact.lean` に`CompactSpace 𝒪[K] ↔ CompleteSpace 𝒪[K] ∧ IsDiscreteValuationRing 𝒪[K] ∧ Finite 𝓀[K]` があるので、**局所コンパクト性を経由する道**が最短かもしれない。"
     }
   ],
   "expandableWithWork": [
