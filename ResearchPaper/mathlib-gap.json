@@ -6601,5 +6601,14 @@
   "consequence": "★したがって第 1324 → 第 1322 を繋ぐ「変数変換の段」は**在庫のまま使える**。☆残るのは商のモデルを Tate モデルに移す等式（`veluQuotientFull_vcPoint_eq`、第 969）と`u` の付値が `0` であること（`vAdd_tateModel_u_eq_zero`、第 1056）を当てる配管だけである。",
   "idiom": "☆`tools/lean-idioms.md` に「一般形が在庫にあるかを先に疑う」を記録した。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "vAddC4Velu20260902": {
+  "block": 1326,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★曲線の等式から c₄ の付値へ——Vélu の商は悪い素点で c₄ が単元",
+  "proved": "☆`vAdd_c4_of_veluCurve_eq`（`Found/GaloisRep/VAddC4Velu.lean`、第 1326）。",
+  "route": "★在庫の `vAdd_Delta_of_veluCurve_eq`（第 1059）の **`c₄` 版**である。☆`c₄(veluCurve W v w) = c₄(W) + 240v`（在庫）が単元（第 1323）で、`c₄` の付値の変換則（在庫）と `tateDvrVal_eq_zero_of_isUnit`（在庫）を繋ぐだけ。",
+  "consequence": "★★★これで **Vélu の商は悪い素点で `c₄` の付値が `0`**。☆第 1322（`c₄` が単元の整モデルは半安定）に渡せば、`VeluQuotOK` の悪い素点側が出る——残るのは `valAdd`（大域）への翻訳（`vAdd_algebraMap_eq_valAdd`、在庫）と整性（`veluIntegralClosed`、在庫）だけである。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
