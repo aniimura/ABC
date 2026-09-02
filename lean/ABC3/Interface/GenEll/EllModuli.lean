@@ -156,7 +156,7 @@ structure EllModuliData extends TorsionGaloisRepData where
   `l·deg∞(E) ≤ deg∞(E′)` の**向きだけ**である。
   ☆こう弱めると、良い素点では `0 ≤ minDeltaExp` が自明になり、
   この欄は**悪い素点の Tate の関係だけ**（在庫、第 1141）に落ちる。 -/
-  degInf_quotLCyclic : ∀ (E : Curve) (l : ℕ), Nat.Prime l → HasLCyclic E l →
+  degInf_quotLCyclic : ∀ (E : Curve) (l : ℕ), Nat.Prime l → 5 ≤ l → HasLCyclic E l →
     PrimeToLocalHeights E l →
     (l : ℝ) * degInf (cls E) ≤ degInf (cls (quotLCyclic E l))
   /-- ★★★★★**`ht^Falt(E′) ≤ ht^Falt(E) + 2log(l) + C₀`**——l-同種による変化。
@@ -215,7 +215,7 @@ structure EllModuliData extends TorsionGaloisRepData where
     CompactlyBounded KV → ∃ C₀ : ℝ, ∀ C : ℝ, C₀ ≤ C →
       GaloisFinite (lcyclicExc C eps KV)
   mem_lcyclicExc : ∀ (C eps : ℝ) (KV : Set EllClass) (E : Curve) (l : ℕ),
-    Nat.Prime l → SemiStable E → HasLCyclic E l → PrimeToLocalHeights E l →
+    Nat.Prime l → 5 ≤ l → SemiStable E → HasLCyclic E l → PrimeToLocalHeights E l →
     (((100 * (degOfDefinition E : ℝ)
           * (faltingsHeight (cls E) + C * (degOfDefinition E : ℝ) ^ eps) ≤ (l : ℝ))
         ∧ HasMultRed E)

@@ -200,7 +200,7 @@ open scoped Classical in
 ★有限性（`galoisFinite_lcyclicExc`）が本体であり、それは `Lemma 3.5` の (†) と
 `northcott`（`§9-1179`、第 753）から出る。 -/
 def lcyclicExcJ (C eps : ℝ) (KV : Set ℂ) : Set ℂ :=
-  {x : ℂ | ∃ (E : RealizedClass) (l : ℕ), x = E.cls ∧ Nat.Prime l ∧
+  {x : ℂ | ∃ (E : RealizedClass) (l : ℕ), x = E.cls ∧ Nat.Prime l ∧ 5 ≤ l ∧
     E.rep.toSSCurve.SemiStable ∧ HasLCyclicJ E.rep.toSSCurve l ∧
     E.rep.toSSCurve.PrimeToLocalHeights l ∧
     (((100 * (E.degOfDefinition : ℝ)
@@ -232,18 +232,18 @@ open scoped Classical in
 ★★★これで #1 の残りは **`VeluQuotOK` ただ 1 つ**になった
 ——第 1336 によりそれは「Vélu の商の半安定性」だけである。 -/
 theorem galoisFiniteJ_lcyclicExcJ_of_veluQuotOK
-    (hquot : ∀ (E : SSCurve) (l : ℕ), VeluQuotOK E l)
+    (hquot : ∀ (E : SSCurve) (l : ℕ), Nat.Prime l → 5 ≤ l → VeluQuotOK E l)
     (eps : ℝ) (heps : 0 < eps) (KV : Set ℂ) (hKV : CompactlyBoundedJ KV) :
     ∃ C₀ : ℝ, ∀ C : ℝ, C₀ ≤ C → GaloisFiniteJ (lcyclicExcJ C eps KV) := by
   obtain ⟨C₀, -, Exc, hExc, hmem⟩ := exists_galoisFinite_lcyclic KV hKV eps heps hquot
   refine ⟨C₀, fun C hC => galoisFiniteJ_subset ?_ hExc⟩
   intro x hx
-  obtain ⟨E, l, rfl, hl, hss, hcyc, hpr, hcond⟩ := hx
+  obtain ⟨E, l, rfl, hl, hl5, hss, hcyc, hpr, hcond⟩ := hx
   have hj : E.rep.j = E.cls := RealizedClass.rep_j E
   have hd0 : (0 : ℝ) ≤ (E.rep.deg : ℝ) := Nat.cast_nonneg _
   have hP : (0 : ℝ) ≤ (E.rep.deg : ℝ) ^ eps := Real.rpow_nonneg hd0 eps
   rw [← hj]
-  refine hmem E.rep l hl ?_ hcyc
+  refine hmem E.rep l hl hl5 ?_ hcyc
   rw [hj]
   rcases hcond with ⟨hle, hmult⟩ | hKVmem
   · have hdd : E.degOfDefinition = E.rep.deg := rfl
@@ -268,7 +268,8 @@ theorem galoisFiniteJ_lcyclicExcJ_of_veluQuotOK
 theorem galoisFiniteJ_lcyclicExcJ (eps : ℝ) (heps : 0 < eps) (KV : Set ℂ)
     (hKV : CompactlyBoundedJ KV) :
     ∃ C₀ : ℝ, ∀ C : ℝ, C₀ ≤ C → GaloisFiniteJ (lcyclicExcJ C eps KV) :=
-  galoisFiniteJ_lcyclicExcJ_of_veluQuotOK veluQuotOK_all eps heps KV hKV
+  galoisFiniteJ_lcyclicExcJ_of_veluQuotOK
+    (fun E l hl hl5 => veluQuotOK_all E l hl hl5) eps heps KV hKV
 
 open scoped Classical in
 /-- ★★★★★★★★★★★★★★★★★★★★
@@ -311,12 +312,12 @@ theorem degInfJ_quotLCyclicJ_ge_of_exists (x : RealizedClass) {l : ℕ} (hl : Na
 **良い素点の半安定性（同種で良還元が保たれること）は不要になった**。
 ☆残る `sorry` は「`HasLCyclicJ` から `IsQuotClassJ` の存在を出す」一点であり、
 それは `Gal`-安定な直線の生成元を `L(H)` で有理化して降ろす段（第 1194-1199）である。 -/
-theorem degInfJ_quotLCyclicJ (x : RealizedClass) (l : ℕ) (hl : Nat.Prime l)
+theorem degInfJ_quotLCyclicJ (x : RealizedClass) (l : ℕ) (hl : Nat.Prime l) (hl5 : 5 ≤ l)
     (hcyc : HasLCyclicJ x.rep.toSSCurve l)
     (hpr : x.rep.toSSCurve.PrimeToLocalHeights l) :
     (l : ℝ) * degInfJ x.cls ≤ degInfJ (quotLCyclicJ x l).cls := by
   exact degInfJ_quotLCyclicJ_ge_of_exists x hl
-    (exists_isQuotClassJ_of_hasLCyclic x hl hcyc hpr)
+    (exists_isQuotClassJ_of_hasLCyclic x hl hl5 hcyc hpr)
 
 /-- ★★★★★★★★★★★★★★★★★★★★
 **`ht^Falt(E′) ≤ ht^Falt(E) + 2log(l)`——★これはもう `sorry` ではない**（2026-09-02、第 1339）。
@@ -398,7 +399,7 @@ noncomputable def ellModuliWitness : EllModuliData where
   faltingsHeight_bddBelow := faltingsHeightJ_bddBelow
   northcott := fun C d _ => northcottJ C d
   quotLCyclic := quotLCyclicJ
-  degInf_quotLCyclic := fun E l hl hcyc hpr => degInfJ_quotLCyclicJ E l hl hcyc hpr
+  degInf_quotLCyclic := fun E l hl hl5 hcyc hpr => degInfJ_quotLCyclicJ E l hl hl5 hcyc hpr
   faltingsHeight_quotLCyclic := faltingsHeightJ_quotLCyclicJ
   degOfDefinition_pos := RealizedClass.degOfDefinition_pos
   primeToLocalHeights_of_lt := by
@@ -410,8 +411,8 @@ noncomputable def ellModuliWitness : EllModuliData where
   lcyclicExc := lcyclicExcJ
   galoisFinite_lcyclicExc := galoisFiniteJ_lcyclicExcJ
   mem_lcyclicExc := by
-    intro C eps KV E l hl hss hcyc hpr hor
-    exact ⟨E, l, rfl, hl, hss, hcyc, hpr, hor⟩
+    intro C eps KV E l hl hl5 hss hcyc hpr hor
+    exact ⟨E, l, rfl, hl, hl5, hss, hcyc, hpr, hor⟩
   noMultRedExc := noMultRedExcJ
   galoisFinite_noMultRedExc := galoisFiniteJ_noMultRedExcJ
   mem_noMultRedExc := by
@@ -464,7 +465,7 @@ noncomputable def ellModuliWitness : EllModuliData where
 ☆残る `sorry` は witness の 5 本だけである。 -/
 theorem lemma_3_7_witness (KV : Set ℂ) (hKV : CompactlyBoundedJ KV) (eps : ℝ) (heps : 0 < eps) :
     ∃ C : ℝ, 0 < C ∧ ∃ Exc : Set ℂ, GaloisFiniteJ Exc ∧
-      ∀ (E : RealizedClass) (l : ℕ), Nat.Prime l → E.rep.toSSCurve.SemiStable →
+      ∀ (E : RealizedClass) (l : ℕ), Nat.Prime l → 5 ≤ l → E.rep.toSSCurve.SemiStable →
         ∀ (condA condB : Prop),
           (condA ↔ (100 * (E.degOfDefinition : ℝ)
                       * (faltingsHeightJ E.cls + C * (E.degOfDefinition : ℝ) ^ eps)

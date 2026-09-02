@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GenEll.VeluQuotElliptic
+import ABC3.Found.GenEll.VeluSemistableAll
 import ABC3.Meta.Claim
 
 /-!
@@ -232,24 +233,31 @@ open scoped Classical
 theorem semistableAt_veluQuotientFull {L : Type} [Field L] [NumberField L] [DecidableEq L]
     (E : WeierstrassCurve L) [E.IsElliptic]
     (hss : ∀ p : HeightOneSpectrum (𝓞 L), SemistableAt p E)
-    {l : ℕ} (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
+    {l : ℕ} (hl : l.Prime) (hl5 : 5 ≤ l)
+    (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
     (p : HeightOneSpectrum (𝓞 L)) :
     SemistableAt p (veluQuotientFull E
       (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) := by
+  -- ★★★★★**2026-09-02（第 1437）**——第 1436 で仮定は 1 本になった。
+  refine ABC3.Found.GenEll.semistableAt_veluQuot_all_of_goodMem p E (hss p) hl hl5 Q hQ ?_
+  -- ☆残る 1 本: `p ∣ l` かつ良い素点のとき、極小モデルの上で核の座標が `p` で整であること
+  -- ★これは形式群の `l`-捩れ（`Ê(𝔪)[l] ∩ ⟨Q⟩ = 0`）である。
   sorry
 
 /-- ★★★★★★★★★★★★**`SSCurve` の語彙で**（第 1345）。 -/
-theorem semistableAt_veluQuot_ss (E : SSCurve) {l : ℕ} (Q : E.W.toAffine.Point)
+theorem semistableAt_veluQuot_ss (E : SSCurve) {l : ℕ} (hl : l.Prime) (hl5 : 5 ≤ l)
+    (Q : E.W.toAffine.Point)
     (hQ : addOrderOf Q = l) (p : HeightOneSpectrum (𝓞 E.fld)) :
     SemistableAt p (veluQuotientFull E.W
       (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) :=
-  semistableAt_veluQuotientFull E.W E.ss Q hQ p
+  semistableAt_veluQuotientFull E.W E.ss hl hl5 Q hQ p
 
 /-- ★★★★★★★★★★★★★★★★★★★★
 **`VeluQuotOK` はこの 1 本から出る**——★（第 1342）。
 
 ☆楕円性は第 1336（無条件）、半安定性は上の節点。 -/
-theorem veluQuotOK_all (E : SSCurve) (l : ℕ) : VeluQuotOK E l := by
+theorem veluQuotOK_all (E : SSCurve) (l : ℕ) (hl : l.Prime) (hl5 : 5 ≤ l) :
+    VeluQuotOK E l := by
   refine veluQuotOK_of_semistable E l (fun M _ Q' hQ' P => ?_)
   letI : DecidableEq (M : Type) := fun a b => Classical.propDecidable (a = b)
   letI : NumberField (M : Type) := NumberField.of_module_finite E.fld M
@@ -257,7 +265,8 @@ theorem veluQuotOK_all (E : SSCurve) (l : ℕ) : VeluQuotOK E l := by
     show (E.W.map (algebraMap E.fld M)).IsElliptic
     infer_instance
   exact semistableAt_veluQuotientFull (E.W.baseChange (M : Type))
-    (ABC3.Found.GaloisRep.semistableAt_baseChange_all E.fld (M : Type) E.W E.ss) Q' hQ' P
+    (ABC3.Found.GaloisRep.semistableAt_baseChange_all E.fld (M : Type) E.W E.ss)
+    hl hl5 Q' hQ' P
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
@@ -267,20 +276,23 @@ def semistableAt_veluQuotientFull.src : Source :=
     sectionId := "genell-lemma-3-5" }
 
 def semistableAt_veluQuotientFull.needs : List ProofObligation :=
-  [ .citation "[ABC3]" "semistableAt_velu_of_veluCurve_eq(悪い素点側、第 1327、証明済み)"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.semistableAt_velu_of_veluCurve_eq") 1,
-    .citation "[ABC3]" "isIntegral_veluQuotientFull_of_addOrderOf_prime(良い素点で商は整、第 1074)"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.isIntegral_veluQuotientFull_of_addOrderOf_prime") 1,
-    .citation "[FC]" "Degenerations of Abelian Varieties(同種で還元型が保たれること)"
+  [ .citation "[ABC3]" "semistableAt_veluQuot_all_of_goodMem(第 1436、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.semistableAt_veluQuot_all_of_goodMem") 1,
+    .citation "[Sil]" "The Arithmetic of Elliptic Curves, IV.6.1(形式群の捩れ——e < l−1 なら Ê(𝔪)[l] = 0)"
       (.absent
-        ("mathlib に Néron モデル・導手・Néron–Ogg–Shafarevich は無い(2026-09-02 確認)。" ++
-         "★本プロジェクトが `ℂ` で取った Vélu の定理(第 1330-1335)は一意化を使うので" ++
-         "標数 p の剰余体では使えない——剰余体上の代数的な Vélu の定理が要る")) 17,
+        ("mathlib には楕円曲線の形式群が無い(2026-09-02 確認。" ++
+         "`Mathlib/RingTheory/FormalGroup/Basic.lean` は形式群の定義だけで 147 行)。" ++
+         "★別の道はモジュラー多項式 `Φ_l(j, j′) = 0` の単項性で、これも mathlib に無い" ++
+         "——第 1431 `minDeltaExp_eq_zero_of_jExp_nonneg` がそちらの受け口である")) 17,
     .implicitStep
-      ("★★★★**2026-09-02（第 1342）**——原文は括弧 1 つで済ませている段である。" ++
-       "☆楕円性の側は第 1330-1336 で閉じた。悪い素点の半安定性は第 1327 で閉じた。" ++
-       "★残るのは**良い素点で `minDeltaExp p E′ = 0`**（同種で良還元が保たれること）" ++
-       "ただ 1 つであり、その根は剰余体の上の Vélu の定理 `Δ(Ẽ/H̃) ≠ 0` である。") 17 ]
+      ("★★★★★**2026-09-02（第 1437）**——第 1410-1436 で仮定は**1 本**になった。" ++
+       "☆`p ∤ l` は第 1417 で無条件、`p ∣ l` の悪い素点は第 1428 で無条件" ++
+       "（`p ∤ 6` は第 1435 が `l ≥ 5` から出す）。" ++
+       "★残る `sorry` は **`p ∣ l` かつ良い素点のとき、極小モデルの上で" ++
+       "核の座標が `p` で整であること**だけである" ++
+       "——これは形式群の `l`-捩れ（`Ê(𝔪)[l] ∩ ⟨Q⟩ = 0`）であり、" ++
+       "局所体の分岐が `e ≥ l−1` のときにしか破れない。" ++
+       "☆`5 ≤ l` は界面の側から取れる（`Check/GenEll/VeluQuotOKNeedsL5.lean`、第 1434）。") 17 ]
 
 def veluQuotOK_all.src : Source :=
   { paper := "GenEll", pdfPage := 17,

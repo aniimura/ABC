@@ -112,7 +112,36 @@ theorem theorem_3_8 (D : EllModuliData)
   have hcls : D.cls E' = D.cls E := D.cls_torsionExt E
   have hss : D.SemiStable E' := D.semiStable_torsionExt E
   have hExcE' : D.cls E' ∉ Exc := by rw [hcls]; exact hExcE
-  obtain ⟨ha, hb, hc⟩ := h37 E' l hl hss
+  -- ★★★★**`5 ≤ l` はどちらの枝からも出る**（`Check/GenEll/VeluQuotOKNeedsL5.lean`、第 1434）
+  have hl5 : 5 ≤ l := by
+    rcases hcond with ⟨hnum, -⟩ | ⟨-, -, hcop⟩
+    · -- ☆枝 (a): 括弧の中は `≥ 1`、`d ≥ 1` なので `l ≥ 2304000`
+      set d : ℝ := (D.degOfDefinition E : ℝ) with hddef
+      set F : ℝ := D.faltingsHeight (D.cls E) with hFdef
+      set P : ℝ := d ^ ε with hPdef
+      set K : ℝ := (23040:ℝ) ^ ε with hKdef
+      have hd1 : (1:ℝ) ≤ d := by
+        rw [hddef]; exact_mod_cast D.degOfDefinition_pos E
+      have hP1 : (1:ℝ) ≤ P := by
+        rw [hPdef]; exact Real.one_le_rpow hd1 hε.le
+      have hK0 : (0:ℝ) < K := by rw [hKdef]; exact hKpos
+      have hBF : -|B| ≤ F := le_trans (neg_abs_le B) (hB (D.cls E))
+      have hBnn : (0:ℝ) ≤ |B| := abs_nonneg B
+      have hC0 : (0:ℝ) ≤ C₇ * K := by positivity
+      have hbr : (1:ℝ) ≤ F + (C₇ * K + |B| + 1) * P := by nlinarith
+      have hlarge : (2304000:ℝ) ≤ (l:ℝ) := by nlinarith
+      have h5 : (5:ℝ) ≤ (l:ℝ) := by linarith
+      exact_mod_cast h5
+    · -- ☆枝 (b): `30` と素な素数は `7` 以上
+      by_contra hlt
+      rw [not_le] at hlt
+      interval_cases l
+      · exact absurd hl (by decide)
+      · exact absurd hl (by decide)
+      · exact absurd hcop (by decide)
+      · exact absurd hcop (by decide)
+      · exact absurd hl (by decide)
+  obtain ⟨ha, hb, hc⟩ := h37 E' l hl hl5 hss
     (100 * (D.degOfDefinition E' : ℝ)
         * (D.faltingsHeight (D.cls E') + C₇ * (D.degOfDefinition E' : ℝ) ^ ε) ≤ (l : ℝ)
       ∧ D.HasMultRed E')
@@ -188,34 +217,7 @@ theorem theorem_3_8 (D : EllModuliData)
         refine ⟨?_, hpl'⟩
         rw [hcls]; exact hKVE
       exact ⟨hb hcB hExcE', hpl', fun hcyc => hExcE' (hc (Or.inr hcB) hcyc)⟩
-  -- ★`Lemma 3.1, (iv)` が要求する `5 ≤ l` は、どちらの条件からも出る
-  have hl5 : 5 ≤ l := by
-    have h2 := hl.two_le
-    rcases hcond with ⟨hnum, -⟩ | ⟨-, -, hcop⟩
-    · set d : ℝ := (D.degOfDefinition E : ℝ) with hddef
-      set F : ℝ := D.faltingsHeight (D.cls E) with hFdef
-      have hd1 : (1:ℝ) ≤ d := by
-        rw [hddef]; exact_mod_cast D.degOfDefinition_pos E
-      have hP1 : (1:ℝ) ≤ d ^ ε := Real.one_le_rpow hd1 hε.le
-      have hFB : -|B| ≤ F := le_trans (neg_abs_le B) (hB (D.cls E))
-      have hBnn : (0:ℝ) ≤ |B| := abs_nonneg B
-      have hC7 : (0:ℝ) < C₇ * (23040:ℝ) ^ ε := mul_pos hC₇pos hKpos
-      have hCnn : (0:ℝ) ≤ C₇ * (23040:ℝ) ^ ε + |B| + 1 := by positivity
-      have hCP : (C₇ * (23040:ℝ) ^ ε + |B| + 1)
-          ≤ (C₇ * (23040:ℝ) ^ ε + |B| + 1) * d ^ ε := by nlinarith [hP1, hCnn]
-      have hsum : (1:ℝ) ≤ F + (C₇ * (23040:ℝ) ^ ε + |B| + 1) * d ^ ε := by linarith
-      have hprod : (2304000:ℝ)
-          ≤ 23040 * 100 * d * (F + (C₇ * (23040:ℝ) ^ ε + |B| + 1) * d ^ ε) := by
-        nlinarith [hd1, hsum]
-      have hkey : (2304000 : ℝ) ≤ (l : ℝ) := le_trans hprod hnum
-      have hnat : (2304000 : ℕ) ≤ l := by exact_mod_cast hkey
-      omega
-    · by_contra hlt
-      push_neg at hlt
-      interval_cases l
-      · exact absurd hcop (by decide)
-      · exact absurd hcop (by decide)
-      · rcases hl.eq_one_or_self_of_dvd 2 (by norm_num) with h | h <;> omega
+  -- ★`Lemma 3.1, (iv)` が要求する `5 ≤ l` は上で作った（どちらの条件からも出る）
   exact D.imageContainsSL2_of_torsionExt E l hl hl5 hmain.1 hmain.2.1 hmain.2.2
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/

@@ -222,7 +222,7 @@ theorem prop_3_4 (D : EllModuliData) (eps : ℝ) (heps : 0 < eps) :
 原文が明記している。したがって `∃ C` は `∀ E, ∀ l` の**外側**に置かねばならない。
 ★ここを取り違えると主張が別物になるので、量化子の順序が本 statement の要点である。 -/
 theorem lemma_3_5 (D : EllModuliData) (eps : ℝ) (heps : 0 < eps) :
-    ∃ C : ℝ, ∀ (E : D.Curve) (l : ℕ), Nat.Prime l →
+    ∃ C : ℝ, ∀ (E : D.Curve) (l : ℕ), Nat.Prime l → 5 ≤ l →
       D.HasLCyclic E l → D.PrimeToLocalHeights E l →
       (1 / (12 * (1 + eps))) * (l : ℝ) * D.degInf (D.cls E)
         ≤ D.faltingsHeight (D.cls E) + 2 * Real.log l + C := by
@@ -231,11 +231,11 @@ theorem lemma_3_5 (D : EllModuliData) (eps : ℝ) (heps : 0 < eps) :
   obtain ⟨C₂, hC₂⟩ := h2
   obtain ⟨C₀, hC₀⟩ := D.faltingsHeight_quotLCyclic
   have hpos : (0:ℝ) < 12 * (1 + eps) := by nlinarith
-  refine ⟨C₀ + (C₁ + C₂) / (12 * (1 + eps)), fun E l hl hcyc hprime => ?_⟩
+  refine ⟨C₀ + (C₁ + C₂) / (12 * (1 + eps)), fun E l hl hl5 hcyc hprime => ?_⟩
   set E' := D.quotLCyclic E l with hE'
   -- ★l·deg∞(E) ≤ deg∞(E′)（第 1340 で不等式に弱めた）
   have hdeg : (l : ℝ) * D.degInf (D.cls E) ≤ D.degInf (D.cls E') :=
-    D.degInf_quotLCyclic E l hl hcyc hprime
+    D.degInf_quotLCyclic E l hl hl5 hcyc hprime
   -- deg∞(E′) ≤ 12(1+ε)·ht^Falt(E′) + (C₁ + C₂)
   have hchain : D.degInf (D.cls E')
       ≤ 12 * (1 + eps) * D.faltingsHeight (D.cls E') + (C₁ + C₂) := by
@@ -303,7 +303,7 @@ set_option maxHeartbeats 1600000 in
 theorem lemma_3_7 (D : EllModuliData) (KV : Set D.EllClass) (hKV : D.CompactlyBounded KV)
     (eps : ℝ) (heps : 0 < eps) :
     ∃ C : ℝ, 0 < C ∧ ∃ Exc : Set D.EllClass, D.GaloisFinite Exc ∧
-      ∀ (E : D.Curve) (l : ℕ), Nat.Prime l → D.SemiStable E →
+      ∀ (E : D.Curve) (l : ℕ), Nat.Prime l → 5 ≤ l → D.SemiStable E →
         ∀ (condA condB : Prop),
           (condA ↔ (100 * (D.degOfDefinition E : ℝ)
                       * (D.faltingsHeight (D.cls E) + C * (D.degOfDefinition E : ℝ) ^ eps)
@@ -335,7 +335,7 @@ theorem lemma_3_7 (D : EllModuliData) (KV : Set D.EllClass) (hKV : D.CompactlyBo
     D.lcyclicExc Cc eps KV ∪ D.noMultRedExc KV,
     D.galoisFinite_union _ _ (hC₀ Cc (le_max_right _ _))
       (D.galoisFinite_noMultRedExc KV hKV), ?_⟩
-  intro E l hl hss condA condB hcA hcB
+  intro E l hl hl5 hss condA condB hcA hcB
   have hAimp : condA → D.PrimeToLocalHeights E l := by
     intro hc
     rw [hcA] at hc
@@ -397,7 +397,7 @@ theorem lemma_3_7 (D : EllModuliData) (KV : Set D.EllClass) (hKV : D.CompactlyBo
       · exact hAimp h
       · rw [hcB] at h
         exact h.2
-    refine Or.inl (D.mem_lcyclicExc _ eps KV E l hl hss hcyc hpr ?_)
+    refine Or.inl (D.mem_lcyclicExc _ eps KV E l hl hl5 hss hcyc hpr ?_)
     rcases hor with h | h
     · rw [hcA] at h
       exact Or.inl h

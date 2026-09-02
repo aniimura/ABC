@@ -134,9 +134,9 @@ set_option maxHeartbeats 1600000 in
 ★★★これで `Theorem 3.8` が要る `¬ HasLCyclicJ` が `[E] ∉ Exc` から出る。 -/
 theorem lemma_3_7_stableLine_full (KV : Set ℂ) (hKV : CompactlyBoundedJ KV)
     (eps : ℝ) (heps : 0 < eps)
-    (hquot : ∀ (E : SSCurve) (l : ℕ), VeluQuotOK E l) :
+    (hquot : ∀ (E : SSCurve) (l : ℕ), Nat.Prime l → 5 ≤ l → VeluQuotOK E l) :
     ∃ C : ℝ, 0 < C ∧ ∃ Exc : Set ℂ, GaloisFiniteJ Exc ∧
-      ∀ (E : DegCurve) (l : ℕ), Nat.Prime l →
+      ∀ (E : DegCurve) (l : ℕ), Nat.Prime l → 5 ≤ l →
         ∀ condA condB : Prop,
           (condA ↔ (100 * (E.deg : ℝ)
                       * (faltingsHeightJ E.j + C * (E.deg : ℝ) ^ eps) ≤ (l : ℝ)
@@ -147,7 +147,7 @@ theorem lemma_3_7_stableLine_full (KV : Set ℂ) (hKV : CompactlyBoundedJ KV)
         ∧ ((condA ∨ condB) → HasLCyclicJ E.toSSCurve l → E.j ∈ Exc) := by
   obtain ⟨C₅, hC₅, hdag⟩ := hdag_of_stableLine
   exact lemma_3_7_stableLine_cop KV hKV eps heps C₅ hC₅
-    (fun E l hl hcyc hcop => hdag E l hl hcyc hcop (hquot _ _))
+    (fun E l hl hl5 hcyc hcop => hdag E l hl hcyc hcop (hquot _ _ hl hl5))
 
 /-! ## ★★★★★★★★★★★★`lcyclicExc` の形 -/
 
@@ -163,9 +163,9 @@ set_option maxHeartbeats 1600000 in
 （`galoisFiniteJ_lcyclicExcJ`）が要る形である。 -/
 theorem exists_galoisFinite_lcyclic (KV : Set ℂ) (hKV : CompactlyBoundedJ KV)
     (eps : ℝ) (heps : 0 < eps)
-    (hquot : ∀ (E : SSCurve) (l : ℕ), VeluQuotOK E l) :
+    (hquot : ∀ (E : SSCurve) (l : ℕ), Nat.Prime l → 5 ≤ l → VeluQuotOK E l) :
     ∃ C : ℝ, 0 < C ∧ ∃ Exc : Set ℂ, GaloisFiniteJ Exc ∧
-      ∀ (E : DegCurve) (l : ℕ), Nat.Prime l →
+      ∀ (E : DegCurve) (l : ℕ), Nat.Prime l → 5 ≤ l →
         ((100 * (E.deg : ℝ)
               * (faltingsHeightJ E.j + C * (E.deg : ℝ) ^ eps) ≤ (l : ℝ)
             ∧ E.toSSCurve.HasMultRed)
@@ -173,8 +173,8 @@ theorem exists_galoisFinite_lcyclic (KV : Set ℂ) (hKV : CompactlyBoundedJ KV)
         HasLCyclicJ E.toSSCurve l → E.j ∈ Exc := by
   obtain ⟨C, hCpos, Exc, hExc, h37⟩ := lemma_3_7_stableLine_full KV hKV eps heps hquot
   refine ⟨C, hCpos, Exc, hExc, ?_⟩
-  intro E l hl hcond hcyc
-  exact (h37 E l hl _ _ Iff.rfl Iff.rfl).2.2 hcond hcyc
+  intro E l hl hl5 hcond hcyc
+  exact (h37 E l hl hl5 _ _ Iff.rfl Iff.rfl).2.2 hcond hcyc
 
 /-! ## ★出典の紐付け(`.src`) -/
 

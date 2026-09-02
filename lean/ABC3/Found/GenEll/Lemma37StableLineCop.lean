@@ -51,12 +51,12 @@ set_option maxHeartbeats 1600000 in
 ★★★これで残るギャップは**実際に導ける形**の `hdag` ただ 1 つになった。 -/
 theorem lemma_3_7_stableLine_cop (KV : Set ℂ) (hKV : CompactlyBoundedJ KV)
     (eps : ℝ) (heps : 0 < eps) (C₅ : ℝ) (hC₅ : 0 ≤ C₅)
-    (hdag : ∀ (E : DegCurve) (l : ℕ), Nat.Prime l → HasLCyclicJ E.toSSCurve l →
+    (hdag : ∀ (E : DegCurve) (l : ℕ), Nat.Prime l → 5 ≤ l → HasLCyclicJ E.toSSCurve l →
       E.toSSCurve.PrimeToLocalHeights l →
       ((l : ℝ) / 14) * degInfOf E.toSSCurve.fld E.toSSCurve.W
         ≤ htFaltOf E.toSSCurve.fld E.toSSCurve.W + 2 * Real.log l + C₅) :
     ∃ C : ℝ, 0 < C ∧ ∃ Exc : Set ℂ, GaloisFiniteJ Exc ∧
-      ∀ (E : DegCurve) (l : ℕ), Nat.Prime l →
+      ∀ (E : DegCurve) (l : ℕ), Nat.Prime l → 5 ≤ l →
         ∀ condA condB : Prop,
           (condA ↔ (100 * (E.deg : ℝ)
                       * (faltingsHeightJ E.j + C * (E.deg : ℝ) ^ eps) ≤ (l : ℝ)
@@ -72,7 +72,7 @@ theorem lemma_3_7_stableLine_cop (KV : Set ℂ) (hKV : CompactlyBoundedJ KV)
   refine ⟨max Ca Cc, lt_of_lt_of_le hCa0 (le_max_left _ _),
     {x : ℂ | faltingsHeightJ x ≤ max C₅ (|M + C₂| / 5 + 28 / 5 + 1.4 * C₅)},
     galoisFiniteJ_htFalt_le _, ?_⟩
-  intro E l hl condA condB hcA hcB
+  intro E l hl hl5 condA condB hcA hcB
   have hFeq : faltingsHeightJ E.j = htFaltOf E.toSSCurve.fld E.toSSCurve.W :=
     faltingsHeightJ_eq E.toSSCurve
   have hdeq : (E.deg : ℝ) = (Module.finrank ℚ E.toSSCurve.fld : ℝ) := rfl
@@ -101,7 +101,7 @@ theorem lemma_3_7_stableLine_cop (KV : Set ℂ) (hKV : CompactlyBoundedJ KV)
   rw [hFeq]
   rcases hAB with hc | hc
   · -- ☆条件 (a)——素性は `lemma_3_7_a_coprime` から
-    have hdagE := hdag E l hl hcyc (hA1 hc)
+    have hdagE := hdag E l hl hl5 hcyc (hA1 hc)
     have hcA' := hcA.1 hc
     obtain ⟨p, hp⟩ := hcA'.2
     have hmain := hCc C₅ hC₅ E.toSSCurve.fld E.toSSCurve.W l p hl.one_lt.le hp
@@ -109,7 +109,7 @@ theorem lemma_3_7_stableLine_cop (KV : Set ℂ) (hKV : CompactlyBoundedJ KV)
     exact le_trans hmain (le_max_left _ _)
   · -- ☆条件 (b)——素性は条件の定義そのもの
     have hcB' := hcB.1 hc
-    have hdagE := hdag E l hl hcyc hcB'.2
+    have hdagE := hdag E l hl hl5 hcyc hcB'.2
     have harch : htArchJ E.toSSCurve.fld E.toSSCurve.W ≤ M := hM E.toSSCurve hcB'.1
     have hmain := hCb M C₅ hC₅ E.toSSCurve.fld E.toSSCurve.W E.toSSCurve.ss harch l
       hl.two_le hdagE

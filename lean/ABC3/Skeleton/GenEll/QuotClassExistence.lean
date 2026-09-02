@@ -106,6 +106,7 @@ set_option maxHeartbeats 1600000 in
 ★★★これが `EllModuliWitness` の `degInfJ_quotLCyclicJ`（#2）に残っていた
 **「商の類の存在」そのもの**である。 -/
 theorem exists_isQuotClassJ_of_hasLCyclic (x : RealizedClass) {l : ℕ} (hl : l.Prime)
+    (hl5 : 5 ≤ l)
     (hcyc : HasLCyclicJ x.rep.toSSCurve l)
     (hpr : x.rep.toSSCurve.PrimeToLocalHeights l) :
     ∃ y : RealizedClass, IsQuotClassJ x l y.1 := by
@@ -132,10 +133,10 @@ theorem exists_isQuotClassJ_of_hasLCyclic (x : RealizedClass) {l : ℕ} (hl : l.
   intro hEj hEpr hEmult Q₁ hQ₁
   exact exists_isQuotClassJ x E₁ hEj hEpr Q₁ hQ₁
     (isElliptic_veluQuotientFull_nsmul_nf' E₁.fld E₁.W hQ₁)
-    (fun p => semistableAt_veluQuot_ss E₁ Q₁ hQ₁ p)
+    (fun p => semistableAt_veluQuot_ss E₁ hl hl5 Q₁ hQ₁ p)
     (hasMultRed_quotSSCurve E₁ hl hEpr hEmult Q₁ hQ₁
       (isElliptic_veluQuotientFull_nsmul_nf' E₁.fld E₁.W hQ₁)
-      (fun p => semistableAt_veluQuot_ss E₁ Q₁ hQ₁ p))
+      (fun p => semistableAt_veluQuot_ss E₁ hl hl5 Q₁ hQ₁ p))
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
