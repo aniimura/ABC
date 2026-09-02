@@ -6460,5 +6460,14 @@
   "measured": "★★☆**設計の訂正**——第 1311 は `ζ₀ ∈ L`（大域の体に原始 `l` 乗根）を仮定していた。☆しかし必要なのは「`σ` が `ζ` を固定する」ことだけで、それは `ζ ∈ L_v` から出る。★したがって `L_v` を「`L(ζ_l)` の素点での完備化」に取れば、**`SSCurve` を底変換する必要はまったく無い**（`restrictLocalHom` は `L` の上で働く）。",
   "consequence": "★★★これで第 1311 で挙げた残りの (b)（大域の底変換）が**消えた**。☆残るのは (a) 悪い素点で `TateSetup` を建てて `μ_l` と `l`-捩れの個数を作る段だけである。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "localInputVc20260902": {
+  "block": 1313,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★局所の 2 つの入力は変数変換で移る（Tate モデルから E へ）",
+  "proved": "☆`Found/GenEll/LocalInputVc.lean`（第 1313）に 2 本。`exists_point_order_of_vc`（位数 `l` の点は戻る）と `card_le_of_vc`（`l`-捩れの個数の上界は戻る）。",
+  "route": "★`vcPoint` は全単射（在庫）で `l`-捩れを保つので、位数も個数も移る。",
+  "consequence": "★★★これで **Tate モデルの側で得た 2 つの入力（第 1297・1304）が `E ⊗ L_v` の言葉になる**——第 1311・1312 が受け取る形である。☆残るのは `E ⊗ L_v` と Tate モデルを結ぶ変数変換を実際に取る段（`exists_tate_model`、在庫）だけになった。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
