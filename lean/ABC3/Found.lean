@@ -1411,6 +1411,7 @@ import ABC3.Found.GaloisRep.PointValuation
 import ABC3.Found.GaloisRep.TorsionIntegralGood
 import ABC3.Found.GaloisRep.KernelNormVal
 import ABC3.Found.GaloisRep.DeepDoubling
+import ABC3.Found.GaloisRep.VeluKernelNormVal
 import ABC3.Found.GaloisRep.Lemma35Unconditional
 import ABC3.Found.GaloisRep.Lemma37CFull
 import ABC3.Found.GaloisRep.TateLevelOne
