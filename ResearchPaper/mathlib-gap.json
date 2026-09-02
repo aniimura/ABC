@@ -6342,5 +6342,14 @@
   "route": "★座標が `algebraMap K₀ M` の像にあり、`σ` は `K₀` を固定する（`AlgEquiv.commutes`）。",
   "consequence": "★★★これで `μ_l ⊂ E(K₀)`（第 1297）が第 1296 の「`σ` が固定する位数 `l` の点」にそのままなる（位数は `addOrderOf_rhPoint`（在庫）で保たれる）。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "unipFromRational20260902": {
+  "block": 1300,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★★★★★h2 の完成形——基礎体に ζ_l と位数 l の点があれば、どの σ も幂単",
+  "proved": "☆`galTate_unipotent_of_rational`（`Found/GenEll/UnipFromRational.lean`、第 1300）。",
+  "route": "★第 1296 に第 1299（基礎体の点は固定される）と `AlgEquiv.commutes` を渡すだけ。",
+  "consequence": "★★★**`h2` は「基礎体に `ζ_l` と位数 `l` の点がある」だけから、すべての `σ` について出る**。☆Tate 曲線ではこの 2 つがちょうど `μ_l ⊂ E(K₀)`（第 1297）である。★残るのは `h1`（`E[l] ⊄ E(K₀)`、第 1298 の道）と、悪い素点での `TateSetup` の組み立てだけ。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
