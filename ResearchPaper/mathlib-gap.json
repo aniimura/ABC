@@ -6686,5 +6686,15 @@
   "inventory": "★★☆**在庫の引き方の反省**——`veluQuotientFull_variableChange` の 2 仮説（`hB`・`hBx`）を潰す補題を新規に書き始めたが、`sum_negY_eq_zero`・`sum_negY_mul_x_eq_zero`（第 912）と`pointCoords_image_negY_stable`・`image_pointCoords_vcPoint_nsmul`（第 949）と`veluQuotientFull_vcPoint_eq`（第 974）が**すべて在庫にあった**。☆宣言名で grep せず「概念語」で grep すべきだった（衝突エラーで気づいた）。",
   "consequence": "★★★`VeluQuotOK` の楕円性は「数体 `M` から `ℂ` への埋め込みを 1 本取る」だけになった。☆残るのは良い素点の半安定性である。",
   "gate": "lake build ABC3 成功（6363 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
+ },
+ "veluQuotElliptic20260902": {
+  "block": "1335-1336",
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★★★★★★★★★VeluQuotOK の楕円性の穴が閉じた",
+  "proved": "☆`Found/GenEll/VeluEllipticNF.lean`（第 1335）に `embedComplex`・`isElliptic_veluQuotientFull_nsmul_nf`・`isElliptic_veluQuotientFull_nsmul_nf`（プライム版）。★`Found/GenEll/VeluQuotElliptic.lean`（第 1336）に `veluQuotOK_of_semistable`。",
+  "frame": "★★`VeluQuotOK`（`Lemma37Hdag.lean`）と `lemma_3_5_height_ineq_stableLine`（`Lemma35Assemble.lean`）の `hquot` に**`addOrderOf Q′ = l` を仮説として追加**した（消費側は `exists_point_descent_of_stable` の`hord` をそのまま渡すので変更なし）。☆これは仮説を弱める方向の枠の締め直しである。",
+  "route": "★数体は `IsAlgClosed.lift` で `ℂ` に埋め込めるので第 1334 がそのまま効く。☆`l = 0`（位数無限）のときは点集合が空で商は `W` 自身なので `0 < l` すら要らない。",
+  "consequence": "★★★`Lemma 3.7`（安定直線の側）が外部に受けている既知数学は**「Vélu の商の半安定性」ただ 1 つ**になった。☆悪い素点側は第 1327 で閉じているので、残るのは**良い素点の半安定性 1 本**である。",
+  "gate": "lake build ABC3 成功（6365 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }

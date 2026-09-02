@@ -64,7 +64,15 @@ open scoped Classical
 であり、**根は「Vélu の定理（商の `Δ ≠ 0`）」1 本**である。
 
 ★★★したがって `VeluQuotOK` の 2 つの穴（楕円性・良い素点の半安定性）は
-**どちらも Vélu の定理に落ちる**。 -/
+**どちらも Vélu の定理に落ちる**
+
+★★★★★★★★★★★★★★★★**2026-09-02（第 1330-1336）——楕円性の穴は閉じた**
+
+☆解析側の在庫（`exists_velu_rep`・`latticeCurve_eq_veluQuotientFull`）が**Vélu の定理そのもの**を持っていた。
+★第 1333（`ℂ` の格子曲線）→ 第 1334（`ℂ` への埋め込みがある体）→ 第 1335（数体）と降り、第 1336 の `veluQuotOK_of_semistable` で
+**`VeluQuotOK` は半安定性だけに落ちた**。
+
+★★★残る既知数学は**良い素点の半安定性 1 本**である。 -/
 def VeluQuotOK (E : SSCurve) (l : ℕ) : Prop :=
   ∀ (M : IntermediateField E.fld E.alg) [FiniteDimensional E.fld M]
      (Q' : (E.W.baseChange M).toAffine.Point),
@@ -72,6 +80,7 @@ def VeluQuotOK (E : SSCurve) (l : ℕ) : Prop :=
      letI : NumberField (M : Type) := NumberField.of_module_finite E.fld M
      letI : IsScalarTower (𝓞 E.fld) E.fld M := isScalarTower_ringOfIntegers_base E.fld M
      letI : IsScalarTower (𝓞 E.fld) (𝓞 (M : Type)) M := isScalarTower_ringOfIntegers_top E.fld M
+     addOrderOf Q' = l →
      (veluQuotientFull (E.W.baseChange M)
         (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q')))).IsElliptic ∧
      ∀ P : HeightOneSpectrum (𝓞 (M : Type)),

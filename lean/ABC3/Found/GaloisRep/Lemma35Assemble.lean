@@ -65,6 +65,7 @@ theorem lemma_3_5_height_ineq_stableLine (eps : ℝ) (heps : 0 < eps) :
          letI : NumberField (M : Type) := NumberField.of_module_finite L M
          letI : IsScalarTower (𝓞 L) L M := isScalarTower_ringOfIntegers_base L M
          letI : IsScalarTower (𝓞 L) (𝓞 (M : Type)) M := isScalarTower_ringOfIntegers_top L M
+         addOrderOf Q' = l →
          (veluQuotientFull (E.baseChange M)
             (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q')))).IsElliptic ∧
          ∀ P : HeightOneSpectrum (𝓞 (M : Type)),
@@ -84,7 +85,7 @@ theorem lemma_3_5_height_ineq_stableLine (eps : ℝ) (heps : 0 < eps) :
   haveI hE0 : (E.baseChange (M : Type)).IsElliptic := by
     show (E.map (algebraMap L M)).IsElliptic
     infer_instance
-  obtain ⟨hell, hssq⟩ := hquot M Q'
+  obtain ⟨hell, hssq⟩ := hquot M Q' hord
   have hl2 : 2 ≤ l := hl.two_le
   have hdlt : Module.finrank L (M : Type) < l := by omega
   exact hC L E l hl hss hcop (M : Type) hdlt _ hE0 hell Q' hord rfl hssq

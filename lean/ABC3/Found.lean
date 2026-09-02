@@ -1394,6 +1394,8 @@ import ABC3.Found.GenEll.VeluEllipticDescent
 import ABC3.Found.GenEll.VeluLatticeSet
 import ABC3.Found.GenEll.VeluLatticePoint
 import ABC3.Found.GenEll.VeluEllipticField
+import ABC3.Found.GenEll.VeluEllipticNF
+import ABC3.Found.GenEll.VeluQuotElliptic
 import ABC3.Found.GaloisRep.TateUnipotent
 import ABC3.Found.GaloisRep.TorsionTransport
 import ABC3.Found.GaloisRep.TateSetupRigid
