@@ -6743,5 +6743,15 @@
   "measure": "★★★原文が「同種なので自動」と括弧で述べる段は 2 枚に分かれていた——楕円性（第 1330-1336 で閉じた）と半安定性。☆半安定性の悪い素点側は第 1327 で閉じているので、**残るのは良い素点で minDeltaExp p E′ = 0（同種で良還元が保たれること）1 本**。★その根は剰余体の上の Vélu の定理 Δ(Ẽ/H̃) ≠ 0 であり、本プロジェクトが ℂ で取った道（一意化、第 1330-1335）は標数 p では使えない。",
   "count": "☆`EllModuliWitness` の `sorry` は **2 本**（#2 の「商の類の存在」と #4）。別に `VeluSemistable.lean` に名前のついた葉が 1 本。★**数が減ったのではなく、何が残っているかが 1 行になった**と読むこと。",
   "gate": "lake build ABC3 成功（6367 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
+ },
+ "ssCurveExt20260902": {
+  "block": 1343,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★SSCurve を ℂ の中の有限拡大へ持ち上げる",
+  "proved": "☆`Found/GenEll/SSCurveExt.lean`（第 1343）に `extField`・`SSCurve.ext`・`SSCurve.ext_j`（`j` は変わらない）・`SSCurve.primeToLocalHeights_ext`。",
+  "route": "★`M₀ : IntermediateField E.fld ℂ` を `restrictScalars ℚ` して `IntermediateField ℚ ℂ` にする（`SSCurve.K` の型）。☆半安定性は `semistableAt_baseChange_all`（第 1220）、`PrimeToLocalHeights` は `not_dvd_jExp_baseChange_all`（第 1220、`[M₀:L] < l` が要る）。",
+  "why": "★★★**なぜ要るのか**——`HasLCyclicJ` が与えるのは `E[l]` の中の `Gal`-安定な**直線**であり、その生成元 `Q` が有理になるのは次数が `l−1` を割る拡大 `L(H)` の上である。☆したがって「商の類」（`IsQuotClassJ`）を作るには **`E` を `L(H)` へ持ち上げてから** Vélu を回す必要がある。★`j`・`ht^Falt`・`deg∞` は類の函数なので持ち上げで変わらない。",
+  "next": "☆次は (1) `IsQuotClassJ` を「同じ類の任意の `SSCurve` の上で」と読み替え、(2) `HasLCyclicJ` から `L(H)` 上の位数 `l` の点を出す段（第 1219 の降下）を繋ぐこと。",
+  "gate": "lake build ABC3 成功（6368 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
  }
 }
