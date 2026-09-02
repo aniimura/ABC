@@ -1413,6 +1413,7 @@ import ABC3.Found.GenEll.TateMuPoint
 import ABC3.Found.GenEll.GalPointCoord
 import ABC3.Found.GenEll.GalPointRational
 import ABC3.Found.GenEll.UnipFromRational
+import ABC3.Found.GenEll.NeFromCoord
 import ABC3.Found.GaloisRep.Lemma35Descend
 import ABC3.Found.GaloisRep.TowerInstances
 import ABC3.Found.GaloisRep.Lemma35Assemble
