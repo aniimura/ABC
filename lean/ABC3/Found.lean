@@ -1384,6 +1384,7 @@ import ABC3.Found.GaloisRep.TateLevelOne
 import ABC3.Found.GaloisRep.TateKerLevel
 import ABC3.Found.GaloisRep.JExpCoprime
 import ABC3.Found.GaloisRep.SemistableCriterion
+import ABC3.Found.GaloisRep.SemistableFromC4
 import ABC3.Found.GaloisRep.TateUnipotent
 import ABC3.Found.GaloisRep.TorsionTransport
 import ABC3.Found.GaloisRep.TateSetupRigid
