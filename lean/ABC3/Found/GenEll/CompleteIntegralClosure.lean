@@ -2,6 +2,7 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import Mathlib.RingTheory.DedekindDomain.IntegralClosure
+import Mathlib.NumberTheory.RamificationInertia.Basic
 import Mathlib.RingTheory.DiscreteValuationRing.Basic
 import Mathlib.RingTheory.Finiteness.Quotient
 import Mathlib.LinearAlgebra.FreeModule.Finite.Basic
@@ -209,6 +210,78 @@ theorem isAdicComplete_maximalIdeal_integralClosure [IsAdicComplete (maximalIdea
 theorem isFractionRing_integralClosure : IsFractionRing C L :=
   IsIntegralClosure.isFractionRing_of_finite_extension A K L C
 
+/-! ## ★★★★★★★★★★★★第 1369 —— 分岐指数 `e` を取り出す
+
+★下流（`hp`＝付値の両立）は拡大で**`e` 倍にずれる**。
+☆その `e` を明示に取り出し、`1 ≤ e` と `e ≤ [L:K]` を与える。
+
+★★この 2 つがあれば、`[L:K] < l` なる拡大（例: `L_p(ζ_l)/L_p` は `≤ l-1` 次）で
+**`l ∤ e`** が出る——これが `¬ l ∣ v(q)` を拡大先で保つ鍵である。 -/
+
+/-- ★★★★★★★★★★★★**`m_A C = m_C^e`（1 ≤ e）**——★**無条件**（第 1369）。 -/
+theorem exists_pow_eq_map_maximalIdeal [IsAdicComplete (maximalIdeal A) A] [IsLocalRing C] :
+    ∃ e : ℕ, 1 ≤ e ∧ (maximalIdeal A).map (algebraMap A C) = (maximalIdeal C) ^ e := by
+  haveI : Algebra.IsIntegral A C := IsIntegralClosure.isIntegral_algebra A L
+  haveI : IsDiscreteValuationRing C := isDiscreteValuationRing_integralClosure (A := A) K L C
+  obtain ⟨ϖ, hirr⟩ := IsDiscreteValuationRing.exists_irreducible C
+  obtain ⟨e, he⟩ := IsDiscreteValuationRing.ideal_eq_span_pow_irreducible
+    (map_maximalIdeal_ne_bot (A := A) K L C) hirr
+  have hIe : (maximalIdeal A).map (algebraMap A C) = (maximalIdeal C) ^ e := by
+    rw [he, hirr.maximalIdeal_eq, Ideal.span_singleton_pow]
+  refine ⟨e, ?_, hIe⟩
+  rcases Nat.eq_zero_or_pos e with h | h
+  · exact absurd (by rw [hIe, h, pow_zero, Ideal.one_eq_top])
+      (map_maximalIdeal_ne_top (R := A) (S := C))
+  · exact h
+
+/-- ★★★★★★★★**`m_C` は `m_A` の上にある**（第 1369）。 -/
+theorem liesOver_maximalIdeal [IsLocalRing C] [Algebra.IsIntegral A C] :
+    (maximalIdeal C).LiesOver (maximalIdeal A) := by
+  refine ⟨?_⟩
+  have hcomap : ((maximalIdeal C).comap (algebraMap A C)).IsMaximal :=
+    Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (maximalIdeal C)
+  exact (IsLocalRing.eq_maximalIdeal hcomap).symm
+
+/-- ★★★★★★★★★★★★★★★★
+**分岐指数は拡大次数以下**——★**無条件**（第 1369）。
+
+★★★`[L:K] < l` なら `l ∤ e` が出る——
+これが `¬ l ∣ v(q)`（`PrimeToLocalHeights`）を拡大先で保つ鍵である。 -/
+theorem le_finrank_of_pow_eq_map_maximalIdeal [IsLocalRing C] {e : ℕ}
+    (hIe : (maximalIdeal A).map (algebraMap A C) = (maximalIdeal C) ^ e) :
+    e ≤ Module.finrank K L := by
+  haveI : Algebra.IsIntegral A C := IsIntegralClosure.isIntegral_algebra A L
+  haveI : IsDiscreteValuationRing C := by
+    haveI : IsDedekindDomain C := IsIntegralClosure.isDedekindDomain A K L C
+    exact isDiscreteValuationRing_of_isDedekindDomain C (not_isField_integralClosure (A := A) K L C)
+  haveI : Module.Finite A C := IsIntegralClosure.finite A K L C
+  haveI : IsFractionRing C L := isFractionRing_integralClosure (A := A) K L C
+  haveI : Module.IsTorsionFree A C :=
+    (Module.isTorsionFree_iff_algebraMap_injective (R := A) (A := C)).2
+      (algebraMap_injective_integralClosure K L C)
+  haveI : NoZeroSMulDivisors A C := by
+    refine ⟨fun {c x} h => ?_⟩
+    rw [Algebra.smul_def] at h
+    rcases mul_eq_zero.1 h with h1 | h2
+    · exact Or.inl (algebraMap_injective_integralClosure K L C (by simpa using h1))
+    · exact Or.inr h2
+  haveI : (maximalIdeal C).LiesOver (maximalIdeal A) := liesOver_maximalIdeal (A := A) K L C
+  obtain ⟨ϖ, hirr⟩ := IsDiscreteValuationRing.exists_irreducible C
+  have hmϖ : maximalIdeal C = Ideal.span {ϖ} := hirr.maximalIdeal_eq
+  have hgt : ¬ ((maximalIdeal A).map (algebraMap A C) ≤ (maximalIdeal C) ^ (e + 1)) := by
+    rw [hIe, hmϖ, Ideal.span_singleton_pow, Ideal.span_singleton_pow,
+      Ideal.span_singleton_le_span_singleton]
+    rintro ⟨c, hc⟩
+    have hϖ0 : ϖ ≠ 0 := hirr.ne_zero
+    have he0 : ϖ ^ e ≠ 0 := pow_ne_zero _ hϖ0
+    have : ϖ ^ e * 1 = ϖ ^ e * (ϖ * c) := by rw [mul_one]; rw [pow_succ] at hc; linear_combination hc
+    exact hirr.not_isUnit
+      (isUnit_iff_exists_inv.mpr ⟨c, (mul_left_cancel₀ he0 this).symm⟩)
+  have hridx : Ideal.ramificationIdx (maximalIdeal A) (maximalIdeal C) = e :=
+    Ideal.ramificationIdx_spec (le_of_eq hIe) hgt
+  rw [← hridx]
+  exact Ideal.ramificationIdx_le_finrank C K L (maximalIdeal C)
+
 end IntegralClosure
 
 /-! ## ★出典の紐付け(`.src`) -/
@@ -237,6 +310,24 @@ def isFractionRing_integralClosure.src : Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(整閉包の商体はもとの体。★無条件)",
     sectionId := "genell-thm-3-8" }
+
+def exists_pow_eq_map_maximalIdeal.src : Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(整閉包の分岐指数 e。m_A C = m_C^e、1 ≤ e。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def le_finrank_of_pow_eq_map_maximalIdeal.src : Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(分岐指数は拡大次数以下。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def le_finrank_of_pow_eq_map_maximalIdeal.needs : List ProofObligation :=
+  [ .citation "[mathlib]" "Ideal.ramificationIdx_le_finrank(在庫)"
+      (.inMathlib "Ideal.ramificationIdx_le_finrank") 1,
+    .implicitStep
+      ("★★★★**2026-09-02（第 1369）**——`[L:K] < l` なら `l ∤ e` が出る。" ++
+       "☆`L_p(ζ_l)/L_p` は `≤ l-1` 次、分裂用の 2 次拡大は `≤ 2 < 5 ≤ l`。" ++
+       "★これが `¬ l ∣ v(q)` を拡大先で保つ鍵である。") 19 ]
 
 def isDiscreteValuationRing_integralClosure.needs : List ProofObligation :=
   [ .citation "[ABC3]" "isAdicComplete_of_linearEquiv(第 1359、証明済み)"
