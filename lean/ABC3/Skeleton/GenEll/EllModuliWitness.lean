@@ -11,6 +11,7 @@ import ABC3.Skeleton.GenEll.Section3
 import ABC3.Skeleton.GenEll.TateLocalModelK
 import ABC3.Skeleton.GenEll.VeluSemistable
 import ABC3.Skeleton.GenEll.QuotClassExistence
+import ABC3.Skeleton.GenEll.AlphaLocalData
 import ABC3.Found.GenEll.Lemma37Full
 import ABC3.Skeleton.GenEll.GaloisImage
 import ABC3.Skeleton.GenEll.Section4
@@ -67,6 +68,28 @@ import ABC3.Meta.Claim
 
 ★★★**したがって 4 本に残るのは配管だけであり、
 未証明の外部引用は 1 本もない**。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★**2026-09-02（第 1352）——本ファイルの `sorry` は 0 になった**
+
+☆セッション開始時は 4 本だった。★内訳:
+
+| # | 欄 | どう閉じたか |
+|---|---|---|
+| 1 | `galoisFiniteJ_lcyclicExcJ` | 第 1341-1342（`VeluQuotOK` を節点に） |
+| 2 | `degInfJ_quotLCyclicJ` | 第 1340（不等式に弱めた）＋第 1343-1349（存在） |
+| 3 | `faltingsHeightJ_quotLCyclicJ` | 第 1338-1339（高さ評価が無条件に） |
+| 4 | `imageContainsSL2J_torsionExt` | 第 1352（惰性の幂単性を節点に） |
+
+★★★**ただしこれは「証明が終わった」という意味ではない**——
+本ファイルは**2 本の名前のついた葉**に依存している:
+
+| 葉 | 内容 | 場所 |
+|---|---|---|
+| `semistableAt_veluQuotientFull` | 良い素点で Vélu の商が良還元を持つ | `VeluSemistable.lean` |
+| `exists_h2_h1_unipotent` | 悪い素点の惰性は幂単かつ非自明 | `AlphaLocalData.lean` |
+
+☆前者は**新しい数学**（剰余体上の Vélu の定理 / Néron–Ogg–Shafarevich）を要る。
+★後者は**局所の配管 2 枚**（分裂乗法還元と `ζ_l ∈ L_p`）だけである。
 
 ## ★★★★★★★★★★★★★★★★#4（α 側）の測定（2026-09-02）
 
@@ -308,12 +331,17 @@ theorem faltingsHeightJ_quotLCyclicJ :
     have h := faltingsHeightJ_quotLCyclicJ_uncond x hl
     linarith⟩
 
-/-- ★★★`α` の側（葉 3）を受ける。 -/
+/-- ★★★★★★★★★★★★★★★★
+**`α` の側**——★**これはもう `sorry` ではない**（2026-09-02、第 1352）。
+
+☆`Skeleton/GenEll/AlphaLocalData.lean` の `imageContainsSL2J_of_multRed` から出る。
+★その節点（`exists_h2_h1_unipotent`）は「悪い素点の惰性は幂単かつ非自明」
+（Tate 曲線の一意化）であり、本ファイルの `sorry` ではなくなった。 -/
 theorem imageContainsSL2J_torsionExt (x : RealizedClass) (l : ℕ) (hl : Nat.Prime l)
     (hl5 : 5 ≤ l) (hm : x.rep.toSSCurve.HasMultRed)
     (hp : x.rep.toSSCurve.PrimeToLocalHeights l)
-    (hc : ¬ HasLCyclicJ x.rep.toSSCurve l) : ImageContainsSL2J x.rep.toSSCurve l := by
-  sorry
+    (hc : ¬ HasLCyclicJ x.rep.toSSCurve l) : ImageContainsSL2J x.rep.toSSCurve l :=
+  imageContainsSL2J_of_multRed x.rep.toSSCurve l hl hl5 hm hp hc
 
 open scoped Classical in
 /-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★

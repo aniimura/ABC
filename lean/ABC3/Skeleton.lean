@@ -13,6 +13,7 @@ import ABC3.Skeleton.GenEll.TateIsogenyK
 import ABC3.Skeleton.GenEll.TateLocalModelK
 import ABC3.Skeleton.GenEll.VeluSemistable
 import ABC3.Skeleton.GenEll.QuotClassExistence
+import ABC3.Skeleton.GenEll.AlphaLocalData
 import ABC3.Skeleton.GenEll.TateIsogenyAny
 import ABC3.Skeleton.GenEll.LTwoBranch
 import ABC3.Skeleton.GenEll.LCyclicReading
