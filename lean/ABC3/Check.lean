@@ -16,6 +16,7 @@ import ABC3.Check.NCBelyi.Thm25Witness
 import ABC3.Check.GenEll.HeightInterfaceNondegenerate
 import ABC3.Check.GenEll.EllModuliDegInfPos
 import ABC3.Check.GenEll.ImageSL2NeedsL5
+import ABC3.Check.GenEll.VeluQuotOKNeedsL5
 import ABC3.Check.GenEll.AlphaNeedsOneBasis
 import ABC3.Check.GenEll.VeluTateNeedsChange
 import ABC3.Check.GenEll.QuotMuNeedsHypothesis
