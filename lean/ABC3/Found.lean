@@ -1651,6 +1651,7 @@ import ABC3.Found.Arakelov.VerticalTwistMetric
 import ABC3.Found.GaloisRep.TateDeepPoints
 import ABC3.Found.GaloisRep.TateVeluDeep
 import ABC3.Found.GenEll.MuOrDeep
+import ABC3.Found.GenEll.MuPrimitiveRootOrDeep
 /-!
 # Found — 実装済みの基礎
 
