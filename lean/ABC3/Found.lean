@@ -346,6 +346,7 @@ import ABC3.Found.IUTchIII.PadicLogMul
 import ABC3.Found.SemiAnbd.TemperedGroup
 import ABC3.Found.GenEll.Lemma31
 import ABC3.Found.GenEll.LatticeHalfPeriod
+import ABC3.Found.GenEll.HalfPeriodDisc
 import ABC3.Found.GenEll.LatticeScale
 import ABC3.Found.GenEll.LatticeNorm
 import ABC3.Found.GenEll.LatticeCurve
