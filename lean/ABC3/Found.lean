@@ -1430,6 +1430,7 @@ import ABC3.Found.GaloisRep.VeluTateC4Unit
 import ABC3.Found.GaloisRep.VeluTateC4Val
 import ABC3.Found.GaloisRep.VAddC4Velu
 import ABC3.Found.GaloisRep.VeluSemistableBad
+import ABC3.Found.GaloisRep.VeluSemistableBadRam
 import ABC3.Found.GenEll.VeluLatticeElliptic
 import ABC3.Found.GenEll.VeluEllipticDescent
 import ABC3.Found.GenEll.VeluLatticeSet
