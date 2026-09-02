@@ -322,6 +322,30 @@ Tate 一意化の同変性である。★足りないのは**それらを繋ぐ 
 * (P3) 悪い素点で `TateSetup` を建てる（`mkTateSetup`・`exists_tate_model`、在庫）
 * (P4) `ζ_l ∈ L` にするための大域の底変換（`ImageContainsSL2J` は部分群の像で十分）
 
+### ★★★★★★★★★★★★★★★★★★★★★★★★第 1298-1303——II 側は 3 つの入力だけに帰着した
+
+| 定理 | 内容 | 第 |
+|---|---|---|
+| `exists_galPoint_ne_of_coord_not_mem` | ★座標が基礎体に無ければ動かされる | 1298 |
+| `galPoint_rhPoint_eq` | ★基礎体の点は `σ` に固定される | 1299 |
+| `galTate_unipotent_of_rational` | ★★★基礎体に `ζ_l` と位数 `l` の点があれば**どの `σ` も**幂単 | 1300 |
+| `exists_galTate_ne_of_coord_not_mem` | ★★`h1` は座標が基礎体に無い点から | 1301 |
+| `exists_galPoint_fixed_of_map` | ★★固定点も埋め込みで降りる | 1302 |
+| `galTate_h2_h1_of_fixed_moved` | ★★★**`h2`・`h1` の一括** | 1303 |
+
+☆**II 側が要求するのはこの 3 つだけ**になった:
+
+| # | 入力 | 出どころ |
+|---|---|---|
+| 1 | `σ` が原始 `l` 乗根 `ζ` を固定 | `ζ_l ∈ L`（大域で添加してよい——`ImageContainsSL2J` は部分群の像で十分） |
+| 2 | `σ` が固定する位数 `l` の点 | `μ_l ⊂ E(K₀)`（第 1297）＋ 第 1302 で大域へ |
+| 3 | `σ` が動かす `l`-捩れ点 | `E[l] ⊄ E(K₀)`（`l ∤ v(Q)`、第 1279・1298）＋ 第 1271 で大域へ |
+
+★★★**どれも「基礎局所体 `K₀ = p.adicCompletion L` の上の Tate 一意化」から出る**
+——`mkTateSetup`・`dvrTatePhiAddEquiv`・`exists_tate_model` はすべて在庫（無条件）である。
+☆第 1291 で名指しした「完備化の正規性」も、第 1274 の「Eisenstein 拡大」も、
+**どちらも道から消えた**。
+
 ### ★★★★★★★★第 1170 で節点 2 の群論の側が閉じた
 
 `exists_zeta_pi_of_torsion`——`G ⧸ ⟨Q⟩` の `l`-捻れはすべて `[ζᵃπᵇ]` である。
