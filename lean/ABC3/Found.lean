@@ -407,6 +407,7 @@ import ABC3.Found.GaloisRep.RamifiedBadPrime
 import ABC3.Found.GaloisRep.RamifiedLocalData
 import ABC3.Found.GaloisRep.RamifiedQuadExt
 import ABC3.Found.GaloisRep.DiscIdentitySemistable
+import ABC3.Found.GaloisRep.VeluKernelNorm
 import ABC3.Found.GenEll.AlphaFromBadPrimeRam
 import ABC3.Found.GenEll.ValuationExtension
 import ABC3.Found.GenEll.CyclotomicLocalExt
