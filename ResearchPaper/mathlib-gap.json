@@ -6432,5 +6432,14 @@
   "inputs": "☆入力は 2 つだけ: 「`P₀ ∈ E(K₀)` が位数 `l`」と「`K₀` の `l`-捩れは `l` 個以下」。★どちらも `K₀` の上の Tate 一意化から出る（第 1297・1304）。",
   "consequence": "★★★これで **II 側の鎖は「悪い素点で Tate 一意化を建てる」ところまで詰んだ**:第 1297/1304（局所データ）→ 第 1309（固定点・動く点）→ 第 1308（大域へ輸送）→ 第 1303（`h2`・`h1`）→ 第 1237（`α` が像に入る）→ 第 1249（`ImageContainsSL2J`）。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "baseChangeTower20260902": {
+  "block": 1310,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★塔での底変換と galPoint の突き合わせ（第 1309 と第 1308 を繋ぐ）",
+  "proved": "☆`Found/GenEll/BaseChangeTower.lean`（第 1310）に 2 本。`baseChange_baseChange`（`(W ⊗ L_v) ⊗ M = W ⊗ M`）と `galPoint_pointEquivOfEq`。",
+  "route": "★座標は同じ（第 1285）で、`galPoint` はどちらも座標に `σ` を当てるだけ（第 1298）なので、点の一意性で一致する。☆原点でないことは `Point.map_injective` と `AddEquiv` の単射性から。",
+  "consequence": "★★★これで第 1309（曲線を `L_v` の上で見る）と第 1308（曲線を `L` の上で見る）が繋がる。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
