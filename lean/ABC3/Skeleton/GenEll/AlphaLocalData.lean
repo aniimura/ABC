@@ -50,6 +50,20 @@ import ABC3.Meta.Claim
 `IsDiscreteValuationRing`・`IsFractionRing`・`IsAdicComplete` を与える段が丸ごと無い。
 ☆`ResearchPaper/blocked-leaves.json` に記録した。
 
+★★☆**精査（2026-09-02、第 1355）**——「何も無い」ではなく
+**解析の側はある／代数の側の橋が無い**が正確である。
+
+☆mathlib に**ある**もの: `Analysis/Normed/Unbundled/SpectralNorm.lean`
+（`spectralNorm`・`spectralNorm_unique_field_norm_ext`・`spectralMulAlgNorm`・
+完備体の有限拡大の `CompleteSpace` インスタンス）、`Field/Krasner.lean`、
+`Unbundled/FiniteExtension.lean`。★つまり**norm の一意な延長は取れている**。
+
+★**無い**のはそこから `IsDiscreteValuationRing`・`IsFractionRing`・`IsAdicComplete`
+へ渡す橋（値群の離散性＝分岐指数の有限性）である。
+☆`Topology/Algebra/Valued/LocallyCompact.lean` に
+「整数環がコンパクト ↔ 完備かつ離散付値環かつ剰余体が有限」があるので、
+**局所コンパクト性を経由する道**が最短かもしれない。
+
 ☆5 の材料（`Found/GaloisRep/UnramQuad.lean`）は
 `valuation_algebraMap_ext`・`isMinimal_baseChange_ext`・`hasMultiplicativeReduction_ext`・
 `hasSplitMultiplicativeReduction_ext` まで揃っているが、
