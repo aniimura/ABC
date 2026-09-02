@@ -9,6 +9,7 @@ import ABC3.Found.GenEll.DetCycloChar
 import ABC3.Interface.GenEll.EllModuli
 import ABC3.Skeleton.GenEll.Section3
 import ABC3.Skeleton.GenEll.TateLocalModelK
+import ABC3.Skeleton.GenEll.VeluSemistable
 import ABC3.Found.GenEll.Lemma37Full
 import ABC3.Skeleton.GenEll.GaloisImage
 import ABC3.Skeleton.GenEll.Section4
@@ -65,6 +66,19 @@ import ABC3.Meta.Claim
 
 ★★★**したがって 4 本に残るのは配管だけであり、
 未証明の外部引用は 1 本もない**。
+
+## ★★★★★★★★★★★★★★★★★★★★**2026-09-02（第 1341-1342）——#1 が閉じた**
+
+☆第 1341——界面の `galoisFinite_lcyclicExc` の `C` の量化を
+`∀ C` から `∃ C₀, ∀ C ≥ C₀` に直した（`∀ C` は**作れない主張**だった）。
+★第 1342——`Skeleton/GenEll/VeluSemistable.lean` に
+**残った 1 本を節点として立てた**（`veluQuotOK_semistable`）。
+☆`veluQuotOK_all` が `VeluQuotOK` を与えるので、
+`galoisFiniteJ_lcyclicExcJ`（#1）は**本ファイルの `sorry` ではなくなった**。
+
+★★★**本ファイルの `sorry` は 2 本**（#2 の「商の類の存在」と #4）であり、
+別に `Skeleton/GenEll/VeluSemistable.lean` に名前のついた葉が 1 本ある。
+☆これは**数が減ったのではなく、何が残っているかが 1 行になった**と読むこと。
 
 ## ★★★★★★★★★★★★★★★★★★★★**2026-09-02（第 1340）——#2 の残りは「存在」だけになった**
 
@@ -182,7 +196,12 @@ theorem galoisFiniteJ_lcyclicExcJ_of_veluQuotOK
     nlinarith [hd0, h1]
   · exact Or.inr ⟨hKVmem, hpr⟩
 
-/-- ★★★`lcyclicExc` が `Galois`-finite であること——残るのは `VeluQuotOK` だけ。
+/-- ★★★★★★★★★★★★★★★★
+**`lcyclicExc` は `Galois`-finite**——★**これはもう `sorry` ではない**（2026-09-02、第 1342）。
+
+☆`VeluQuotOK` は `Skeleton/GenEll/VeluSemistable.lean` の `veluQuotOK_all` から出る。
+★その節点（`veluQuotOK_semistable`）は**良い素点の半安定性 1 本**であり、
+本ファイルの `sorry` ではなくなった。
 
 ★★☆**測定（2026-09-02、第 1341）**——`galoisFiniteJ_lcyclicExcJ_of_veluQuotOK`（上）で
 **`VeluQuotOK` を仮定すれば閉じる**ことを示した。
@@ -190,8 +209,8 @@ theorem galoisFiniteJ_lcyclicExcJ_of_veluQuotOK
 **ただ 1 つ**である。 -/
 theorem galoisFiniteJ_lcyclicExcJ (eps : ℝ) (heps : 0 < eps) (KV : Set ℂ)
     (hKV : CompactlyBoundedJ KV) :
-    ∃ C₀ : ℝ, ∀ C : ℝ, C₀ ≤ C → GaloisFiniteJ (lcyclicExcJ C eps KV) := by
-  sorry
+    ∃ C₀ : ℝ, ∀ C : ℝ, C₀ ≤ C → GaloisFiniteJ (lcyclicExcJ C eps KV) :=
+  galoisFiniteJ_lcyclicExcJ_of_veluQuotOK veluQuotOK_all eps heps KV hKV
 
 open scoped Classical in
 /-- ★★★★★★★★★★★★★★★★★★★★

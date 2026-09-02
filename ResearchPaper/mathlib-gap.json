@@ -6734,5 +6734,14 @@
   "proved": "★`Skeleton/GenEll/EllModuliWitness.lean` に`galoisFiniteJ_lcyclicExcJ_of_veluQuotOK`——`VeluQuotOK` さえあれば`lcyclicExcJ C eps KV` は `Galois`-有限（`exists_galoisFinite_lcyclic` の `Exc` に部分集合として入る、`galoisFiniteJ_subset` 第 1238）。",
   "measure": "★★★これで witness #1 の `sorry` の中身は **`VeluQuotOK` ただ 1 つ**になった。☆第 1336 によりそれは「Vélu の商の半安定性」であり、悪い素点側は第 1327、楕円性は第 1336 で閉じているので、**残るのは良い素点の半安定性 1 本**である（#2 と同じ根）。★また第 1263 の「条件 (a) に HasMultRed を足す」直しは**適用済み**だったので古い注記を更新した。",
   "gate": "lake build ABC3 成功（6366 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
+ },
+ "veluSemistableNode20260902": {
+  "block": 1342,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★★★★★残った 1 本を節点にし、witness #1 を閉じた",
+  "proved": "☆`Skeleton/GenEll/VeluSemistable.lean`（第 1342）に`veluQuotOK_semistable`（節点、`sorry`）と `veluQuotOK_all`（第 1336 と繋いだ形）。★これで `Skeleton/GenEll/EllModuliWitness.lean` の `galoisFiniteJ_lcyclicExcJ`（#1）が **`sorry` ではなくなった**。",
+  "measure": "★★★原文が「同種なので自動」と括弧で述べる段は 2 枚に分かれていた——楕円性（第 1330-1336 で閉じた）と半安定性。☆半安定性の悪い素点側は第 1327 で閉じているので、**残るのは良い素点で minDeltaExp p E′ = 0（同種で良還元が保たれること）1 本**。★その根は剰余体の上の Vélu の定理 Δ(Ẽ/H̃) ≠ 0 であり、本プロジェクトが ℂ で取った道（一意化、第 1330-1335）は標数 p では使えない。",
+  "count": "☆`EllModuliWitness` の `sorry` は **2 本**（#2 の「商の類の存在」と #4）。別に `VeluSemistable.lean` に名前のついた葉が 1 本。★**数が減ったのではなく、何が残っているかが 1 行になった**と読むこと。",
+  "gate": "lake build ABC3 成功（6367 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
  }
 }
