@@ -32551,3 +32551,83 @@ grep して **0 件**——円分体の分岐理論は mathlib に無い。
 **上の #1 と #2 の 2 本だけ**に依っている。
 
 ☆#4 は消費側が無いので、閉じても計器は動かない（記録のみ）。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★2026-09-02（続 5）——**ゴールの計器が 24/24 になった**（第 1442-1446）
+
+| 節 | 前 | 後 |
+|---|---|---|
+| §1 | 9/9 | 9/9 |
+| §2 | **0/1** | ★**1/1** |
+| §3 | **8/9** | ★**9/9** |
+| §4 | **3/5** | ★**5/5** |
+| 合計 | **20/24 (83%)** | ★★**24/24 (100%)** |
+
+### ★何をしたか——5 ブロック
+
+**第 1442・1443（§2 の `Skeleton` から `sorry` が消えた）**
+
+`Skeleton/GenEll/Section2Converse.lean` に残っていた `sorry` 2 本は、
+どちらも**主張そのものが偽**であった。
+
+* 節点 1: `(UP : Set P1) : ∃ φ, ∀ v, ∀ x ∈ Xi v, φ x ∈ UP`
+  —— `UP = ∅` かつ `Ξ_v ≠ ∅` で偽（`Check/GenEll/BelyiGeneralVacuous.lean` が機械検証）。
+  ★構造体 `NoncriticalBelyiData`（欄 `C`・`IsMor`・`Crit`・`exists_belyi`）へ内容を移した。
+* 節点 8: `(KV : Set Pt)` が任意なので `KV = ∅` で偽。
+  ★原文の (ii) どおり「compactly bounded subset **すべて**について」に直し、
+  段 B の幾何を `hcover` で受けたところ、**組み立ては完全に証明できた**。
+
+**第 1444・1445（場所を規約どおりに直した）**
+
+`Corollary 4.3` / `Corollary 4.4` / `Theorem 3.8` の証明は既に `sorry` 0 であったが、
+本体が `Skeleton/` に置かれたままであった。
+☆規約は `Skeleton/` = 原典の主張を写す場所、`Found/` = `sorry` の無い実装であり、
+`Lemma 4.1` / `Lemma 4.2` は既にその形（`Skeleton` は写して `Found` へ委譲）になっている。
+★同じ形に揃えた——**証明の中身は 1 文字も変えていない**
+（`#print axioms` は前後どちらでも `[propext, Classical.choice, Quot.sound]`）。
+
+* `Found/GenEll/Section4Cor.lean`（第 1444）—— `cor_4_3` / `cor_4_4`
+* `Found/GenEll/Thm38Assembly.lean`（第 1445）—— `theorem_3_8`
+
+**第 1446（`Theorem 2.1` の同値を両向きとも取った）**
+
+`Skeleton/GenEll/Section2.lean` の `theorem_2_1` は `(i) ⟹ (ii)` だけで、
+「実質は `(ii) ⟹ (i)` の側であり、それは取れていない」と明記してあった。
+★段 B の幾何を欄 1 本に絞った:
+
+    Interface/GenEll/Thm21Setup.lean —— Thm21Data.cover
+      「X(ℚ̄)^{≤d} の中の列は、部分列を取れば
+        ある compactly bounded subset に丸ごと入る」
+
+これを仮定すれば `(ii) ⟹ (i)` は背理法 10 行である
+（`Found/GenEll/Thm21Equiv.lean`、`sorry` 0）。
+
+☆`cover` は仮定なので強く取れば定理が弱くなる。そこで
+（a）「どんな列にも」ではなく `degLe`（= `X(ℚ̄)^{≤d}`）の中の列に対してだけ要求し、
+（b）結論は列そのものではなく**部分列**にした
+——どちらも原文の強さである。
+
+### ★★★★計器が 100% になっても「証明が終わった」ではない
+
+★★★★★★★★**これははっきり書いておく。**
+24 件のうち `Theorem 2.1` / `Theorem 3.8` / `Corollary 4.3` / `Corollary 4.4` の 4 件は、
+**`Interface` の欄を仮定した形**である。
+
+| 欄 | 場所 | 埋めるのに要るもの |
+|---|---|---|
+| `Thm21Data.cover` | `Interface/GenEll/Thm21Setup.lean` | noncritical Belyi 写像（一般曲線版、Riemann–Roch） |
+| `EllModuliData` の欄 | `Interface/GenEll/EllModuli.lean` | 下の `sorry` 2 本（`EllModuliWitness.lean` が埋める） |
+
+☆`Skeleton/GenEll/` に残る `sorry` は **3 本**である:
+
+| # | 場所 | 内容 | 効く先 |
+|---|---|---|---|
+| 1 | `VeluSemistable.lean:250` | ★**`j(E′)` の整性**——`p ∣ l` かつ良い素点で `0 ≤ jExp p E′`（モジュラー多項式が mathlib に無い） | §3・§4 |
+| 2 | `GaloisLocal.lean:70` | ★**`alpha_in_modl_image`**——Tate 加群の Galois 像（15-30 ブロック） | §3・§4 |
+| 3 | `SigmaConvolution.lean:110` | ☆ラマヌジャンの畳み込み——**消費側が無い**（死んだ葉） | なし |
+
+★★★★**したがって次の仕事は上の 3 つの欄／`sorry` である**——
+計器が動かなくなっただけで、道はそのまま続いている。
+☆それぞれの機械検証つきの記録:
+`Check/GenEll/Thm21Witness.lean`（`thm21_cover_still_open` と両向きの非空虚性）、
+`ResearchPaper/mathlib-gap.json` の `modularPolynomialGap20260902` /
+`tateModuleGaloisImageGap20260902`。
