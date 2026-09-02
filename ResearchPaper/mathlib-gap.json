@@ -6838,5 +6838,13 @@
   "route": "★段 1: `J = jacobson ⊥` は冪零（`IsArtinianRing.isNilpotent_jacobson_bot`、在庫）。☆段 2: `A/J` の冪等元は `J` に沿って `A` へ持ち上がる（`exists_isIdempotentElem_eq_of_ker_isNilpotent`、在庫）。★段 3: `A/J` は半単純（`IsSemiprimaryRing.isSemisimpleRing`、在庫）で、極大イデアル `m` の補元 `N` から `1 = e + f` を取ると `e` は冪等元。`e = 1` は `m ≠ ⊤` に反し、`e = 0` なら `N = ⊤` より `m = ⊥`。☆よって `A/J` は体、`J` は極大、`J` は全ての極大に含まれるので `A` は局所。",
   "progress": "★★★これで「完備 DVR の有限整閉包は完備 DVR」の 7 段のうち **5 段が済んだ**（1 冪等元の持ち上げ・2 商に冪等元なし・3-4 完備性の移送・6 Artin ⟹ 局所）。☆残るのは (5) `R′/m_R R′` が Artin 環（剰余体上有限次元）と(7) Dedekind ＋ 局所 ⟹ DVR の 2 段である。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
+ },
+ "dvrFromDedekind20260902": {
+  "block": 1363,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★★★★★7 段すべてが揃った（段 5 と段 7）",
+  "proved": "☆`Found/GenEll/DvrFromDedekind.lean`（第 1363）に`isArtinianRing_of_module_finite`（段 5: Artin 環の上の加群有限代数は Artin 環）と`isDiscreteValuationRing_of_isDedekindDomain`（段 7: Dedekind ＋ 局所 ＋ 体でない ⟹ DVR）。どちらも mathlib の在庫の組み合わせ 1 行。",
+  "progress": "★★★これで「完備 DVR `R` の有限整閉包 `R′` は完備 DVR」の**7 段がすべて揃った**:(1) 第 1357 冪等元の持ち上げ、(2) 第 1358 商に冪等元なし、(3) 第 1359 線型同型の移送、(4) 第 1360-1361 直積・係数環、(5) 第 1363 Artin 環、(6) 第 1362 Artin ⟹ 局所、(7) 第 1363 DVR。☆残るのは `IsIntegralClosure` の言葉で組み立てる**配管だけ**である（`IsIntegralClosure.finite`・`module_free`・`isDedekindDomain`・`isFractionRing_of_finite_extension` はすべて在庫）。",
+  "gate": "lake build ABC3 成功（6376 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
  }
 }
