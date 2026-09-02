@@ -352,6 +352,7 @@ import ABC3.Found.GenEll.VeluProdPerm
 import ABC3.Found.GenEll.VeluNorm
 import ABC3.Found.GenEll.LatticeDiscPow
 import ABC3.Found.GenEll.VeluDiscLattice
+import ABC3.Found.GenEll.VeluGoodPrime
 import ABC3.Found.GenEll.LatticeScale
 import ABC3.Found.GenEll.LatticeNorm
 import ABC3.Found.GenEll.LatticeCurve
