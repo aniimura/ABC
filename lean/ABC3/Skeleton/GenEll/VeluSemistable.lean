@@ -130,4 +130,8 @@ def semistableAt_veluQuot_ss.src : Source :=
     item := "Lemma 3.5(Vélu の商は半安定——SSCurve の語彙で)",
     sectionId := "genell-lemma-3-5" }
 
+def semistableAt_veluQuot_ss.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "semistableAt_veluQuotientFull(本ファイルの節点)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.semistableAt_veluQuotientFull") 1 ]
+
 end ABC3.Skeleton.GenEll
