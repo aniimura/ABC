@@ -1650,6 +1650,7 @@ import ABC3.Found.Arakelov.MetricRatio
 import ABC3.Found.Arakelov.VerticalTwistMetric
 import ABC3.Found.GaloisRep.TateDeepPoints
 import ABC3.Found.GaloisRep.TateVeluDeep
+import ABC3.Found.GaloisRep.TateDeepInvolution
 import ABC3.Found.GenEll.MuOrDeep
 import ABC3.Found.GenEll.MuPrimitiveRootOrDeep
 /-!
