@@ -998,9 +998,19 @@ open scoped Classical in
 
 ★☆第 686（変数変換）と合わせて、`L` 上の位数 `l` の点が
 各 `σ` で `latticeCurve (P σ)` の位数 `l` の点に対応する。 -/
-theorem addOrderOf_rhPoint (f : F →+* K) (W : WeierstrassCurve F)
+theorem addOrderOf_rhPoint [instF : DecidableEq F] [instK : DecidableEq K]
+    (f : F →+* K) (W : WeierstrassCurve F)
     [W.IsElliptic] [(W.map f).IsElliptic] (Pt : W.toAffine.Point) :
     addOrderOf (rhPoint f W Pt) = addOrderOf Pt := by
+  -- ★`Decidable` のインスタンスを古典的なものに揃える（配管）
+  have hF : instF = fun a b => Classical.propDecidable (a = b) := by
+    funext a b
+    exact Subsingleton.elim _ _
+  have hK : instK = fun a b => Classical.propDecidable (a = b) := by
+    funext a b
+    exact Subsingleton.elim _ _
+  subst hF
+  subst hK
   refine Nat.dvd_antisymm ?_ ?_
   · refine addOrderOf_dvd_of_nsmul_eq_zero ?_
     rw [← rhPoint_nsmul, addOrderOf_nsmul_eq_zero, rhPoint_zero]
@@ -1102,7 +1112,7 @@ open scoped Classical in
 
 ★`C σ • (E.map σ) = latticeCurve (P σ)` のような等式を挟むときに要る。
 ☆`subst` で片づく——`addOrderOf` は曲線の値に依らない。 -/
-theorem addOrderOf_congr_curve {W₁ W₂ : WeierstrassCurve F} (h : W₁ = W₂)
+theorem addOrderOf_congr_curve [DecidableEq F] {W₁ W₂ : WeierstrassCurve F} (h : W₁ = W₂)
     (Q : W₁.toAffine.Point) :
     addOrderOf (h ▸ Q : W₂.toAffine.Point) = addOrderOf Q := by
   subst h

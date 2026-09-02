@@ -6763,5 +6763,14 @@
   "removed": "☆読み替えで意味を失った 5 本（`degInfJ_quotLCyclicJ_of_local`・`_of_isog`・`_of_jExp`・`_of_bad`・`faltingsHeightJ_quotLCyclicJ_zero`）を削除した——どれも「任意の座標集合 `S` にわたる仮説」を受ける形で、`E` が存在束縛になった今は書けない。★一般の補題（`minDeltaExp_eq_mul_of_jExp_all`・`minDeltaExp_eq_mul_all`）は残した。",
   "next": "☆残るのは `HasLCyclicJ` から `∃ y, IsQuotClassJ x l y.1` を出す段である。★材料は揃っている: `exists_stablePoint_of_hasLCyclicJ` → 第 1219 の降下 → 第 1343 の `SSCurve.ext` → 第 1336 の楕円性 → 第 1342 の半安定性の節点。",
   "gate": "lake build ABC3 成功（6368 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
+ },
+ "extPoint20260902": {
+  "block": 1346,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★Gal-安定な点は ℂ の中の有限拡大の上で有理になる",
+  "proved": "☆`Found/GenEll/ExtPoint.lean`（第 1346）に `algToComplex` と `exists_ext_point_of_stable`。★第 1219 の降下で `M : IntermediateField E.fld E.alg` を取り、`IsAlgClosed.lift` で `ℂ` の中へ運ぶ（`M.map ι`）。☆点は `IntermediateField.equivMap` ＋ `rhPoint` で移り、位数は保たれる。",
+  "plumbing": "★`addOrderOf_congr_curve`・`addOrderOf_rhPoint`（`PointVariableChange.lean`）に`[DecidableEq]` の明示の束縛（＋`Subsingleton.elim` / `subst`）を入れた。☆混在（`F` は古典的、`K` は具体）は証明側で `letI` を先に置いて合成を古典的に寄せる。★`letI` を**定理の主張の中**に置くのは脆い（束縛ごとに再合成される）と記録した。",
+  "next": "☆残るのは `exists_ext_point_of_stable` の結論（`E.W.baseChange ↥M₀` の上の点）を `SSCurve.ext`（第 1343）の `SSCurve` の語彙に繋ぎ、`exists_isQuotClassJ`（第 1344）に渡す段である。★そこは `DecidableEq` のインスタンスの合わせ込みが要る。",
+  "gate": "lake build ABC3 成功（6369 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
  }
 }
