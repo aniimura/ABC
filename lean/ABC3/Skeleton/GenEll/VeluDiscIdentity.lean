@@ -46,7 +46,23 @@ Tate 標準形の族（13 例）すべて**厳密に成立**することを確�
 ——そうすれば第 1131（`Δ(veluCurve (tateCurveAt q)) = l¹²·Δ(tateCurveAt (q^l))`、証明済み）
 がそのまま当たる。
 
-## ★★★★★★★★道を 3 つ測った（2026-09-02、第 1396）
+## ★★★★★★★★★★★★★★★★閉じた（2026-09-02、第 1397-1402）
+
+★★★**σ 函数も q 展開も因子の理論も要らなかった**。道は 6 段:
+
+| 段 | 内容 | 番 |
+|---|---|---|
+| 1 | `Δ = 16·((e₁−e₂)(e₁−e₃)(e₂−e₃))²`（`e_i` は半周期の `℘` の値） | 第 1397 |
+| 2 | `∏_{i≠j}(℘(v_j+w) − e_i) = −D`（**`w` に依らない**） | 第 1398 |
+| 3 | 代表系の置換（平行移動と**負号**） | 第 1399 |
+| 4 | **同種のノルム** `∏_{w∈T}(℘(z+w) − e_i) = c_i(℘_{Λ′}(z) − e′_i)` | 第 1400 |
+| 5 | 帳簿（`D^l = (c₁c₂c₃)²D′`・`N² = 4^{l−1}c₁c₂c₃`） | 第 1401 |
+| 6 | 語彙の変換（`⟨Q⟩` の像へ） | 第 1402 |
+
+☆最も重い (4) は **Liouville（第 598、在庫）と `R` の偶関数性（第 1399）だけ**で出た
+——`R − c` が原点で 2 位で消えるので極が打ち消し合う。
+
+## ☆参考：当初測った 3 つの道（2026-09-02、第 1396）
 
 ☆どれも「新しい理論を 1 つ建てる」規模である。全文は
 `ResearchPaper/mathlib-gap.json` の `veluDiscIdentityRoutes20260902`。
@@ -94,9 +110,8 @@ theorem disc_pow_eq_velu_congr_curve {F : Type} [Field F] [DecidableEq F]
 
     Δ(E)^l = Δ(E/C) · ( ∏_{P ∈ C∖{O}} (2 y_P + a₁ x_P + a₃) )^4
 
-★★★**これが残るただ 1 つの節点である**。
-☆一意化（第 1330-1335）と `latticeCurve_eq_veluQuotientFull`（在庫）があるので、
-`Δ(Λ)` の積公式と `℘′(u) = −σ(2u)/σ(u)⁴` から出るはずである。 -/
+★★★★**2026-09-02（第 1402）に閉じた**——`ABC3.Found.GenEll.disc_pow_eq_lattice`。
+☆σ 函数も q 展開も要らず、Liouville（第 598）と `R` の偶関数性（第 1399）で出た。 -/
 theorem disc_pow_eq_veluQuot_mul_lattice (P : PeriodPair)
     {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
     (Q : (latticeCurve P).toAffine.Point) (hQ : addOrderOf Q = l) :
