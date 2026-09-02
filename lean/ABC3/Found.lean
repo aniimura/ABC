@@ -402,6 +402,7 @@ import ABC3.Found.GaloisRep.JVeluTateMuK
 import ABC3.Found.GenEll.SymmSum
 import ABC3.Found.GenEll.EllModuliObjects
 import ABC3.Found.GenEll.SSCurveExt
+import ABC3.Found.GenEll.BadPrimeFromMultRed
 import ABC3.Found.GenEll.ExtPoint
 import ABC3.Found.GenEll.EllModuliGalois
 import ABC3.Found.GenEll.DetCycloChar

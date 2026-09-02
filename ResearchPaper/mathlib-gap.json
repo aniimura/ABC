@@ -6791,5 +6791,13 @@
   "measure": "★★★詰まっていたのは `DecidableEq` のインスタンスの食い違いだけだった。☆直し方は 2 つ: (1) `exists_ext_point_of_stable`（第 1346）の結論から `letI` を外し、証明の中で `addOrderOf_point_congr_dec`（第 1347）を 1 回使って**具体側に寄せる**。(2) `isElliptic_veluQuotientFull_nsmul_nf`（第 1335）に`[DecidableEq K]` の**明示の束縛**を付ける。★★★これで `EllModuliWitness` の `degInfJ_quotLCyclicJ`（#2）が閉じた。",
   "gate": "lake build ABC3 成功（6370 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。",
   "count": "☆`EllModuliWitness` の `sorry` は **1 本**（#4 `imageContainsSL2J_torsionExt`、α 側）。別に `VeluSemistable.lean` に名前のついた葉が 1 本（良い素点の半安定性）。★セッション開始時は 4 本だった。"
+ },
+ "badPrimeFromMultRed20260902": {
+  "block": 1350,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★乗法還元から悪い素点の局所データを出す（#4 の入口）",
+  "proved": "☆`Found/GenEll/BadPrimeFromMultRed.lean`（第 1350）に `SSCurve.exists_jExp_neg` と `SSCurve.exists_bad_prime_data`。★`HasMultRed` → `v_p(j) < 0`（半安定だから）→ 第 954 の 4 つのデータ（`C`・`hC`・`hc4ne`・`hc4`）。",
+  "consequence": "★★★これで `isMinimal_baseChange_at_bad_prime`・`hasMultiplicativeReduction_at_bad_prime`（第 976、証明済み）が回る。☆#4（`imageContainsSL2J_torsionExt`）に残るのは**分裂性**と **`ζ_l ∈ L_v`** の 2 枚だけになった。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
  }
 }
