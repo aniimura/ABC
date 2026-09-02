@@ -37,7 +37,7 @@ import ABC3.Meta.Claim
 
 namespace ABC3.Found.GenEll
 
-open ABC3.Meta IsDedekindDomain
+open ABC3.Meta IsDedekindDomain NumberField
 
 section IntValuation
 
@@ -146,6 +146,42 @@ theorem valuation_algebraMap_pow {e : ℕ} (he : 1 ≤ e)
 
 end Valuation
 
+/-! ## ★★★★★★★★★★★★第 1374 —— 完備化と合成して `hpe` にする -/
+
+section Compose
+
+variable {L : Type} [Field L] [NumberField L]
+variable {K : Type} [Field K] [Algebra L K]
+variable {A : Type} [CommRing A] [IsDomain A] [IsDiscreteValuationRing A]
+  [Algebra A K] [IsFractionRing A K]
+variable {C : Type} [CommRing C] [IsDomain C] [IsDiscreteValuationRing C]
+variable {K' : Type} [Field K'] [Algebra C K'] [IsFractionRing C K']
+variable [Algebra A C] [Algebra A K'] [Algebra K K']
+  [IsScalarTower A C K'] [IsScalarTower A K K']
+variable [Algebra L K'] [IsScalarTower L K K']
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**完備化の `hp` と拡大の延長公式を合成して `hpe` を得る**——★**無条件**（第 1374）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+★★★これが第 1372（`exists_h2_h1_of_bad_prime_ram`）に渡す `hpe` である。
+☆`hp` の側は第 964（`valuation_algebraMap_adicCompletion`）で埋まる。 -/
+theorem valuation_algebraMap_pow_comp (p : HeightOneSpectrum (𝓞 L))
+    (hp : ∀ x : L, (HeightOneSpectrum.valuation K
+        (IsDiscreteValuationRing.maximalIdeal A)) (algebraMap L K x)
+      = (HeightOneSpectrum.valuation L p) x)
+    {e : ℕ} (he : 1 ≤ e)
+    (hIe : (IsLocalRing.maximalIdeal A).map (algebraMap A C)
+      = (IsLocalRing.maximalIdeal C) ^ e) (x : L) :
+    (HeightOneSpectrum.valuation K' (IsDiscreteValuationRing.maximalIdeal C))
+        (algebraMap L K' x)
+      = ((HeightOneSpectrum.valuation L p) x) ^ e := by
+  rw [IsScalarTower.algebraMap_apply L K K', valuation_algebraMap_pow he hIe, hp]
+
+end Compose
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def intValuation_algebraMap_pow.src : Source :=
@@ -156,6 +192,11 @@ def intValuation_algebraMap_pow.src : Source :=
 def valuation_algebraMap_pow.src : Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(付値の延長公式 v_C(φ y) = (v_A y)^e。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def valuation_algebraMap_pow_comp.src : Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(完備化の hp と拡大の延長公式を合成して hpe を得る。★無条件)",
     sectionId := "genell-thm-3-8" }
 
 def valuation_algebraMap_pow.needs : List ProofObligation :=
