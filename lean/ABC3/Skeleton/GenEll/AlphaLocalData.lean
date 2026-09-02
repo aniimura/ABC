@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GenEll.ImageSL2FromH2H1
 import ABC3.Found.GenEll.BadPrimeFromMultRed
+import ABC3.Found.GenEll.AlphaUnipotent
 import ABC3.Meta.Claim
 
 /-!
@@ -172,8 +173,8 @@ theorem exists_h2_h1_unipotent (E : SSCurve) (l : ℕ) [Fact l.Prime]
       (∀ x : E.tate l, ∃ u : E.tate l,
           galTate E.W l σ (galTate E.W l σ x) + x
             = galTate E.W l σ x + galTate E.W l σ x + l • u) ∧
-        (∃ x : E.tate l, ∀ u : E.tate l, galTate E.W l σ x ≠ x + l • u) := by
-  sorry
+        (∃ x : E.tate l, ∀ u : E.tate l, galTate E.W l σ x ≠ x + l • u) :=
+  E.exists_h2_h1_unipotent_of_multRed l hm hpr
 
 /-- ★★★★★★★★★★★★★★★★★★★★
 **`ImageContainsSL2J` はこの 1 本から出る**——★（第 1352）。

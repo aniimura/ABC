@@ -415,6 +415,7 @@ import ABC3.Found.GenEll.GalPointVc
 import ABC3.Found.GenEll.LocalDataVc
 import ABC3.Found.GenEll.SplitLocalAssembly
 import ABC3.Found.GenEll.AlphaSplitDichotomy
+import ABC3.Found.GenEll.AlphaUnipotent
 import ABC3.Found.GenEll.AdicComparable
 import ABC3.Found.GenEll.CompleteIntegralClosure
 import ABC3.Found.GenEll.IntegralJacobson
