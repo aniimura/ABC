@@ -6,6 +6,7 @@ import ABC3.Found.GaloisRep.VeluDiscDescent
 import ABC3.Found.GaloisRep.VeluDiscVarChange
 import ABC3.Found.GenEll.JSurjective
 import ABC3.Found.GenEll.VeluEllipticNF
+import ABC3.Found.GenEll.VeluDiscLattice
 import ABC3.Meta.Claim
 
 /-!
@@ -104,7 +105,8 @@ theorem disc_pow_eq_veluQuot_mul_lattice (P : PeriodPair)
           (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))).Δ
         * (veluKernelNorm (latticeCurve P)
           (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) ^ 4 := by
-  sorry
+  obtain ⟨m, hm⟩ := hl.odd_of_ne_two hodd
+  exact ABC3.Found.GenEll.disc_pow_eq_lattice P (show l = 2 * m + 1 by omega) Q hQ
 
 /-- ★★★★★★★★★★★★★★★★★★★★
 **`ℂ` の上の恒等式**——格子曲線から降りる（第 1392）。
