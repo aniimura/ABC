@@ -637,6 +637,163 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
     }
   }
 
+  // ── G8 / G9: 条なし `.src` を持つ Skeleton の命題に対する 2 つの規則
+  //
+  //    2026-09-03 の実測(ResearchPaper/workflow-speedup.md)で分かったこと:
+  //      * G3(load-bearing → 負の対照)は**自己申告**なので、21 日間で 1 度も鳴っていない
+  //        (`loadBearing` の宣言は 0 件だった)。
+  //      * そのあいだ `Skeleton` に**偽の statement** が置かれ続けた。
+  //        §2 節点 8 は 第 426(8/27) から 第 1443(9/2) まで約 1,000 ブロック生き残った。
+  //        どれも「置いた直後に空虚性を 1 行試す」だけで見つかるものであった。
+  //      * `Corollary 4.3/4.4`・`Theorem 3.8` は `sorry` 0 なのに `Skeleton/` に置かれたまま
+  //        で、第 1444-1445 でまとめて `Found/` へ移す仕事が発生した。
+  //
+  //    ★そこで「条なし `.src`(= `Kind N.M` ちょうど)を持つ命題」——すなわち
+  //      **原典の項目そのものを主張している宣言**——に限って、自己申告をやめて自動で要求する。
+  {
+    const KIND = 'Theorem|Proposition|Corollary|Definition|Lemma|Remark|Example';
+    const ITEM_EXACT = new RegExp(`^\\s*(?:${KIND})\\s+\\d+(?:\\.\\d+)+\\s*$`);
+    const SRC_ITEM_ONE =
+      /\.src[\s\S]{0,400}?paper\s*:=\s*"([^"]*)"[\s\S]{0,300}?item\s*:=\s*"([^"]*)"/;
+    const LEDGER_SUFFIX = /\.(src|needs|nonvacuous|waiting|record|loadBearing|negControl)$/;
+
+    /** 宣言の `.src` が条なしなら `[paper] item`、そうでなければ null。 */
+    const bareKey = (d) => {
+      const src = texts.get(d.file) ?? '';
+      let i = src.indexOf(`def ${d.name}.src`);
+      if (i < 0) i = src.indexOf(`${d.name}.src`);
+      if (i < 0) return null;
+      const m = SRC_ITEM_ONE.exec(src.slice(i));
+      if (!m) return null;
+      return ITEM_EXACT.test(m[2]) ? `[${m[1]}] ${m[2].trim()}` : null;
+    };
+
+    // 宣言の範囲(次の宣言の直前まで)を出すために、ファイルごとに行番号で並べる
+    const byFile = new Map();
+    for (const d of decls) {
+      if (!byFile.has(d.file)) byFile.set(d.file, []);
+      byFile.get(d.file).push(d);
+    }
+    for (const ds of byFile.values()) ds.sort((a, b) => a.line - b.line);
+    const bodyHasSorry = (d) => {
+      const ds = byFile.get(d.file);
+      const i = ds.findIndex((x) => x === d);
+      const end = i + 1 < ds.length ? ds[i + 1].line - 1 : Infinity;
+      const lines = stripLeanComments(texts.get(d.file) ?? '').split('\n');
+      return lines.slice(d.line - 1, end === Infinity ? undefined : end).some((l) => SORRY_RE.test(l));
+    };
+
+    const propish = decls.filter((x) =>
+      (x.kind === 'theorem' || x.kind === 'lemma') && !LEDGER_SUFFIX.test(x.name));
+
+    // `Found/` が条なし `.src` で受け持っている項目。
+    // ★宣言からではなく **`.src` そのもの**を走査する——
+    //   `Found/GenEll/Prop16Proper.lean` の `prop_1_6_proper.src` のように、
+    //   `.src` の基底名に対応する宣言が無い(本体は別名)ことがあるためである(2026-09-03 実測)。
+    const SRC_DEF_RE = /^\s*def\s+([A-Za-z_][\w.'!?]*)\.src\b/gm;
+    const doneInFound = new Set();
+    for (const [f, src] of texts) {
+      if (relative(dir, f).replace(/\\/g, '/').split('/')[0] !== 'Found') continue;
+      SRC_DEF_RE.lastIndex = 0;
+      let m;
+      while ((m = SRC_DEF_RE.exec(src)) !== null) {
+        const mm = SRC_ITEM_ONE.exec(src.slice(m.index));
+        if (mm && ITEM_EXACT.test(mm[2])) doneInFound.add(`[${mm[1]}] ${mm[2].trim()}`);
+      }
+    }
+
+    //    ★対象は `Skeleton/<論文>/<file>.lean` に置かれたものだけにする。
+    //      selftest の fixture は `Skeleton/<file>.lean`(平ら)に置かれるので、
+    //      G8/G9 専用の fixture(`Skeleton/Fx/…`)だけが較正に効く。
+    const inPaperDir = (d) =>
+      relative(dir, d.file).replace(/\\/g, '/').split('/').length >= 3;
+    const skBare = propish.filter((d) => d.bucket === 'Skeleton' && inPaperDir(d) && bareKey(d));
+
+    /** 非空虚性の対照があるか。
+     *  規約は 2 通りある(2026-09-03 実測):
+     *    * structure は `X.nonvacuous : Nonempty X`(G2 と同じ形)
+     *    * 命題は `<名前>_nonvacuous`(`Check/` 側に置く。Skeleton は Check を import できないため)
+     *      ——`theorem_2_5_ab_nonvacuous` のように後ろに語が挟まる形もあるので前方一致も見る。 */
+    const hasWitness = (n) =>
+      names.has(`${n}.nonvacuous`) || names.has(`${n}.negControl`) || names.has(`${n}_nonvacuous`) ||
+      [...names].some((x) => x.startsWith(`${n}_`) && x.endsWith('_nonvacuous'));
+
+    // ── G8: `sorry` 0 なら実装なので `Found/` へ置く(規約: Skeleton は主張、Found は実装)
+    for (const d of skBare) {
+      if (bodyHasSorry(d)) continue;
+      if (doneInFound.has(bareKey(d))) continue;
+      ng(at(d), `G8 \`${d.name}\` は sorry 0 なのに Skeleton/ にある。` +
+                `実装は Found/ へ移し、Skeleton からはそれへ委譲すること` +
+                `(Lemma 4.1 / Lemma 4.2 と同じ形。第 1444-1445 の移設を参照)`);
+    }
+
+    // ── G9: 条なし `.src` の命題には非空虚性の対照が要る
+    //    ★既存の 26 件は債務として明示的に繰り越す。**この表は減らす方向にしか変えない。**
+    //      新しく条なし `.src` を書いたときは、その場で `nonvacuous` を書くこと。
+    //    ★鍵は「ファイル#宣言名」——短名は名前空間をまたいで衝突するし、
+    //      行番号は動くので使えない。
+    const G9_DEBT = new Set([
+      'Skeleton/GenEll/GaloisImage.lean#theorem_3_8',
+      'Skeleton/GenEll/Section1.lean#prop_1_4',
+      'Skeleton/GenEll/Section1.lean#prop_1_6',
+      'Skeleton/GenEll/Section1.lean#prop_1_7',
+      'Skeleton/GenEll/Section1.lean#remark_1_4_1',
+      'Skeleton/GenEll/Section1.lean#remark_1_5_1',
+      'Skeleton/GenEll/Section3.lean#lemma_3_1',
+      'Skeleton/GenEll/Section3.lean#lemma_3_2',
+      'Skeleton/GenEll/Section3.lean#lemma_3_5',
+      'Skeleton/GenEll/Section3.lean#lemma_3_6',
+      'Skeleton/GenEll/Section3.lean#lemma_3_7',
+      'Skeleton/GenEll/Section3.lean#localHeight_pos',
+      'Skeleton/GenEll/Section3.lean#potLocalHeight_indep',
+      'Skeleton/GenEll/Section3.lean#prop_3_4',
+      'Skeleton/GenEll/Section4.lean#cor_4_3',
+      'Skeleton/GenEll/Section4.lean#cor_4_4',
+      'Skeleton/GenEll/Section4.lean#lemma_4_1',
+      'Skeleton/GenEll/Section4.lean#lemma_4_2',
+      'Skeleton/GenEll/Section4.lean#remark_4_1_1',
+      'Skeleton/NCBelyi/Theorem25.lean#lemma_2_2',
+      'Skeleton/NCBelyi/Theorem25.lean#lemma_2_3',
+      'Skeleton/PGC/Section1.lean#cyclotomicCharacter_recoverable',
+      'Skeleton/PGC/Section1.lean#residueCard_and_degree_recoverable',
+      'Skeleton/PGC/Section1Cor13.lean#inertia_recoverable',
+    ]);
+    // ★`Theorem 2.1` と `[NCBelyi] Theorem 2.5` は既に対照がある(表に載せない):
+    //   `theorem_2_1_nonvacuous` / `theorem_2_1_converse_nonvacuous`(第 1446)、
+    //   `theorem_2_5_ab_nonvacuous` / `theorem_2_5_c_nonvacuous`。
+    const debtKey = (d) => `${relative(dir, d.file).replace(/\\/g, '/')}#${d.name}`;
+    // ★繰り越し表を作り直すときは `ABC3_DEBUG_G9=1` で鍵をそのまま吐かせる。
+    if (process.env.ABC3_DEBUG_G9) {
+      for (const d of skBare) if (!hasWitness(d.name)) console.log(`DBG '${debtKey(d)}',`);
+    }
+    let nDebt = 0;
+    const staleDebt = new Set(G9_DEBT);
+    for (const d of skBare) {
+      const k = debtKey(d);
+      const covered = hasWitness(d.name);
+      staleDebt.delete(k);
+      if (covered) continue;
+      if (G9_DEBT.has(k)) { nDebt++; continue; }
+      ng(at(d), `G9 非空虚性の対照が無い: \`${d.name}.nonvacuous\` を書く` +
+                '(条なし `.src` = 原典の項目そのものの主張。仮定が空虚に真になっていないことを、' +
+                '実際に成り立つ具体例で 1 つ示す。★これが無いと偽の statement が長く生き残る' +
+                '——ResearchPaper/workflow-speedup.md §3 の実測)');
+    }
+    // ★繰り越し表の掃除は**本物の木を見たときだけ**行う。
+    //   selftest は fixture 1 本だけの木を叩くので、そこでは全項目が「不要」に見えてしまう。
+    if (!quiet) {
+      for (const stale of staleDebt) {
+        ng('tools/check.mjs (G9_DEBT)',
+          `G9 の繰り越し表に不要な項目がある: ${stale}。` +
+          '該当が消えた(または対照が書かれた)ので、表から削ること');
+      }
+    }
+    if (!quiet && nDebt > 0) {
+      console.log(`  -- G9 繰り越し ${nDebt} 件(条なし .src だが非空虚性の対照が無い)` +
+                  `——新規は落とす。既存はこの数を減らしていく`);
+    }
+  }
+
   // ── Found/ と Interface/ は sorry を残さない(各 bucket の docstring の規則)
   //    Skeleton/ の sorry は設計どおりなのでゲートしない。
   //    2026-08-14 の監査で、この規則が機械化されていないことが発覚したので追加。
@@ -1201,6 +1358,13 @@ function selftest() {
       'd36-universe-structure.lean', false],
     ['D37 引用行の末尾に docstring 終端があっても照合できる', 'Skeleton',
       'd37-quote-ends-docstring.lean', false],
+    // ★G8/G9 は `Skeleton/<論文>/…` に置かれたものだけを見るので、fixture も 1 段深く置く。
+    ['D38 条なし .src なのに非空虚性の対照が無い', 'Skeleton/Fx',
+      'd38-bare-src-no-nonvacuous.lean', true],
+    ['D39 条なし .src + 非空虚性の対照ありは通る', 'Skeleton/Fx',
+      'd39-bare-src-nonvacuous.lean', false],
+    ['D40 sorry 0 の条なし .src が Skeleton にある', 'Skeleton/Fx',
+      'd40-sorryfree-bare-src-in-skeleton.lean', true],
   ];
   const FIXTURES = join(ROOT, 'tools', 'selftest-fixtures');
   for (const [label, bucket, fixture, shouldFail] of leanCases) {
