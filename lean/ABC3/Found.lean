@@ -1662,6 +1662,7 @@ import ABC3.Found.GaloisRep.VeluSemistableBadMu
 import ABC3.Found.GenEll.MuOrDeep
 import ABC3.Found.GenEll.MuPrimitiveRootOrDeep
 import ABC3.Found.GenEll.VeluNotDvdLFree
+import ABC3.Found.GenEll.VeluBadPrimeAll
 /-!
 # Found — 実装済みの基礎
 
