@@ -501,8 +501,16 @@ def lemma_3_7_witness.src : Source :=
     sectionId := "genell-lemma-3-7" }
 
 def lemma_3_7_witness.needs : List ProofObligation :=
-  [ .citation "[ABC3]" "ellModuliWitness(残る sorry は 5 本の葉)"
-      (.inProject "ABC3" "ABC3.Skeleton.GenEll.ellModuliWitness") 1 ]
+  [ .citation "[ABC3]" "ellModuliWitness(本ファイルの sorry は 0。名前のついた葉 2 本に依存)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.ellModuliWitness") 1,
+    .citation "[ABC3]" "semistableAt_veluQuotientFull(良い素点で Vélu の商が良還元を持つ。第 1345、節点)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.semistableAt_veluQuotientFull") 1,
+    .citation "[ABC3]" "exists_h2_h1_unipotent(悪い素点の惰性は幂単かつ非自明。第 1352、節点)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.exists_h2_h1_unipotent") 1,
+    .implicitStep
+      ("★★★★**2026-09-02（第 1352）**——`EllModuliWitness` の `sorry` は 0 になったが、" ++
+       "**証明が終わったという意味ではない**——上の 2 本の葉に依存している。" ++
+       "☆したがって `Found/` への移行（指標に数えること）は**してはならない**。") 19 ]
 
 def theorem_3_8_witness.src : Source :=
   { paper := "GenEll", pdfPage := 19,
@@ -510,8 +518,16 @@ def theorem_3_8_witness.src : Source :=
     sectionId := "genell-thm-3-8" }
 
 def theorem_3_8_witness.needs : List ProofObligation :=
-  [ .citation "[ABC3]" "ellModuliWitness(残る sorry は 5 本の葉)"
-      (.inProject "ABC3" "ABC3.Skeleton.GenEll.ellModuliWitness") 1 ]
+  [ .citation "[ABC3]" "ellModuliWitness(本ファイルの sorry は 0。名前のついた葉 2 本に依存)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.ellModuliWitness") 1,
+    .citation "[ABC3]" "semistableAt_veluQuotientFull(良い素点で Vélu の商が良還元を持つ。第 1345、節点)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.semistableAt_veluQuotientFull") 1,
+    .citation "[ABC3]" "exists_h2_h1_unipotent(悪い素点の惰性は幂単かつ非自明。第 1352、節点)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.exists_h2_h1_unipotent") 1,
+    .implicitStep
+      ("★★★★**2026-09-02（第 1352）**——`EllModuliWitness` の `sorry` は 0 になったが、" ++
+       "**証明が終わったという意味ではない**——上の 2 本の葉に依存している。" ++
+       "☆したがって `Found/` への移行（指標に数えること）は**してはならない**。") 19 ]
 
 /-! ## ★出典の紐付け(`.src`) -/
 
