@@ -1,6 +1,8 @@
 import ABC3.Meta.Claim
 import ABC3.Interface.GenEll.AbcSetup
 import ABC3.Found.GenEll.BDClass
+import ABC3.Interface.GenEll.Thm21Setup
+import ABC3.Found.GenEll.Thm21Equiv
 
 /-!
 # [GenEll] §2 Bounds on Heights —— Theorem 2.1(`Skeleton`)
@@ -57,46 +59,58 @@ open ABC3.Meta ABC3.Interface.GenEll ABC3.Found.GenEll
 ——`Prop 1.7`(`hyp := True` で無力化)、`Theorem 2.5`(`Mor := Empty` で空型)と
 同じ病の 3 つ目の形である。
 
-## ★★★★★★★★★★本 statement が取るのは **(i) ⟹ (ii) だけ**である
+## ★★★★★★★★★★★★★★★★**両向きを取った**（2026-09-02、第 1446）
 
-★★★**これは重大な逸脱であり、はっきり書いておく。**
-
-原文の `Theorem 2.1` は**同値**(`⟺`)である。そのうち
+☆以前の本 statement は **`(i) ⟹ (ii)` だけ**であり、
+「実質は `(ii) ⟹ (i)` の側であり、それは取れていない」と書いてあった。
+★★★★**その逸脱は解消した**——本 statement は原文どおり**同値 `⟺`** である。
 
 | 向き | 原文の言い方 | 状態 |
 |---|---|---|
-| **(i) ⟹ (ii)** | 「immediate from the definitions」 | ✅ **本 statement が取る** |
-| **(ii) ⟹ (i)** | 原文 p.11–p.13 の 3 ページ。noncritical Belyi maps と `Proposition 1.7` を使う | ❌ **取っていない** |
+| **(i) ⟹ (ii)** | 「immediate from the definitions」 | ✅ BD-類の制限、1 行 |
+| **(ii) ⟹ (i)** | 原文 p.11–p.13 の 3 ページ | ✅ **`Thm21Data.cover` 欄から背理法で出る** |
 
-★★★★**実質は (ii) ⟹ (i) の側であり、それは取れていない。**
-`sorry` が消えたことを「`Theorem 2.1` を形式化した」と読んではならない。
+★証明本体は `Found/GenEll/Thm21Equiv.lean` にある（`sorry` 0）。
 
 ## ★★「immediate from the definitions」の中身
 
 原文が「定義から直ちに」と言うのは、**BD-class が部分集合へ制限できる**ことである
 ——同じ定数 `C` がそのまま使える。
-★(ii) は (i) を `ℙ¹` と compactly bounded subset `K_V` に制限したものだから、
-制限の補題がそのまま (i) ⟹ (ii) を与える。
+
+## ★★★★`(ii) ⟹ (i)` の中身
+
+背理法である。`(i)` が偽なら `n < ht_ω(x_n) − (1+ϵ)(…)` なる列 `x_n` が取れる。
+☆原文 p.12 はコンパクト性でその**部分列**を収束させ、
+極限のまわりに noncritical Belyi 写像で compactly bounded subset `K_V` を作る。
+★そこまで行けば矛盾は数行である——部分列は `K_V` に入るのに、
+`(ii)` により `K_V` の上では `≤ C` だからである。
+
+★★★★**その幾何 1 本を `Interface/GenEll/Thm21Setup.lean` の
+`Thm21Data.cover` 欄で受けている**。欄はまだ構成されていない
+——`Theorem 3.8` / `Corollary 4.3` / `Corollary 4.4` が `EllModuliData` の欄を
+`Interface` で受けているのとまったく同じ状況であり、
+★★**「`Theorem 2.1` が絶対的に証明された」ことを意味しない。**
 
 ## ★★★★★逸脱(明示)
 
 | 項 | 原典 | 形式化 | 理由 |
 |---|---|---|---|
 | 量化する対象 | `∀ A : AbcSetup` | **点の型 `P` と実数値関数** | 前者では偽だから |
-| 向き | `⟺` | **`⟹` のみ** | 逆向きは noncritical Belyi と `Prop 1.7` の組み立てが要る |
-| `Σ`-support / 双曲性 / reduced | 条件として述べる | **含めない** | 制限の補題には要らない |
+| 向き | `⟺` | ★**`⟺`（第 1446 で解消）** | — |
+| `Σ`-support / 双曲性 / reduced | 条件として述べる | **`Thm21Data.CB` の 1 つの述語にまとめる** | 制限と被覆にはそれで足りる |
 
 ★★★★★★**落としたものは `.needs` に全部書いてある。** -/
-theorem theorem_2_1 {P : Type} (htOmega logDiff logCond : P → ℝ) (eps : ℝ)
-    (KV degLe : Set P)
+theorem theorem_2_1 {P : Type} (T : Thm21Data P)
+    (htOmega logDiff logCond : P → ℝ) (eps : ℝ) :
     -- (i) `X(ℚ̄)^{≤d}` の上での abc 不等式
-    (h : BDle (fun x : ↥degLe => (1 + eps) * (logDiff x.1 + logCond x.1))
-              (fun x : ↥degLe => htOmega x.1)) :
-    -- (ii) compactly bounded subset `K_V` に制限しても成り立つ
-    BDle (fun x : ↥(KV ∩ degLe) => (1 + eps) * (logDiff x.1 + logCond x.1))
-         (fun x : ↥(KV ∩ degLe) => htOmega x.1) := by
-  obtain ⟨C, hC⟩ := h
-  exact ⟨C, fun x => hC ⟨x.1, x.2.2⟩⟩
+    BDle (fun x : ↑T.degLe => (1 + eps) * (logDiff x.1 + logCond x.1))
+         (fun x : ↑T.degLe => htOmega x.1)
+    ↔
+    -- (ii) どんな compactly bounded subset `K_V` に制限しても成り立つ
+    (∀ KV : Set P, T.CB KV →
+      BDle (fun x : ↑(KV ∩ T.degLe) => (1 + eps) * (logDiff x.1 + logCond x.1))
+           (fun x : ↑(KV ∩ T.degLe) => htOmega x.1)) :=
+  ABC3.Found.GenEll.theorem_2_1 T htOmega logDiff logCond eps
 
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/

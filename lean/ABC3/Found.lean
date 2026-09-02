@@ -529,6 +529,7 @@ import ABC3.Found.GenEll.Prop17
 import ABC3.Found.GenEll.Thm21Chain
 import ABC3.Found.GenEll.Thm21Extract
 import ABC3.Found.GenEll.Thm21DegRatio
+import ABC3.Found.GenEll.Thm21Equiv
 import ABC3.Found.GenEll.DifferentTameExact
 import ABC3.Found.GenEll.CartierPullback
 import ABC3.Found.GenEll.MinField
