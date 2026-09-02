@@ -407,6 +407,7 @@ import ABC3.Found.GaloisRep.RamifiedBadPrime
 import ABC3.Found.GaloisRep.RamifiedLocalData
 import ABC3.Found.GenEll.AlphaFromBadPrimeRam
 import ABC3.Found.GenEll.ValuationExtension
+import ABC3.Found.GenEll.CyclotomicLocalExt
 import ABC3.Found.GenEll.AdicComparable
 import ABC3.Found.GenEll.CompleteIntegralClosure
 import ABC3.Found.GenEll.IntegralJacobson
