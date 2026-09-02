@@ -1660,6 +1660,7 @@ import ABC3.Found.GaloisRep.SemistableScaled
 import ABC3.Found.GaloisRep.VAddScaled
 import ABC3.Found.GaloisRep.VeluSemistableBadMu
 import ABC3.Found.GaloisRep.MinDeltaShort
+import ABC3.Found.GaloisRep.GoodPrimeFromJ
 import ABC3.Found.GenEll.MuOrDeep
 import ABC3.Found.GenEll.MuPrimitiveRootOrDeep
 import ABC3.Found.GenEll.VeluNotDvdLFree
