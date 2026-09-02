@@ -6369,5 +6369,14 @@
   "route": "★道具は第 1271 と同じ——`torsionMap_bijective`（個数の勘定）と `point_map_galPoint`（同変性）。☆位数の保存は `addOrderOf_injective`（mathlib）。",
   "consequence": "★★★これで **`μ_l ⊂ E(K₀)` の点が大域の `L̄` の側でも「`σ` が固定する位数 `l` の点」になる**——第 1296（`h2`）の入力が局所から運べる。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "h2h1Package20260902": {
+  "block": 1303,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★★★★★h2 と h1 の一括——II 側は 3 つの入力だけに帰着した",
+  "proved": "☆`galTate_h2_h1_of_fixed_moved`（`Found/GenEll/H2H1Package.lean`、第 1303）。",
+  "inputs": "☆受け取るのは 3 つだけ: (1) `σ` が原始 `l` 乗根 `ζ` を固定（`ζ_l ∈ L`——大域で添加してよい）、(2) `σ` が位数 `l` の点を固定（`μ_l ⊂ E(K₀)`、第 1297 ＋ 第 1302 で大域へ）、(3) `σ` が動かす `l`-捩れ点がある（`E[l] ⊄ E(K₀)`、第 1279・1298 ＋ 第 1271 で大域へ）。",
+  "consequence": "★★★これで `alpha_mem_map_of_galTate`（第 1237）の入力が完成し、II 側（`α` が像に入る段）は**この 3 つの入力だけ**に帰着した。☆どれも「基礎局所体 `K₀` の上の Tate 一意化」から出る——局所体の拡大も同変性も要らない。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }

@@ -1415,6 +1415,7 @@ import ABC3.Found.GenEll.GalPointRational
 import ABC3.Found.GenEll.UnipFromRational
 import ABC3.Found.GenEll.NeFromCoord
 import ABC3.Found.GaloisRep.TorsionFixedTransport
+import ABC3.Found.GenEll.H2H1Package
 import ABC3.Found.GaloisRep.Lemma35Descend
 import ABC3.Found.GaloisRep.TowerInstances
 import ABC3.Found.GaloisRep.Lemma35Assemble
