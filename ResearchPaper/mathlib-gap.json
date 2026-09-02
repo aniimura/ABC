@@ -6441,5 +6441,15 @@
   "route": "★座標は同じ（第 1285）で、`galPoint` はどちらも座標に `σ` を当てるだけ（第 1298）なので、点の一意性で一致する。☆原点でないことは `Point.map_injective` と `AddEquiv` の単射性から。",
   "consequence": "★★★これで第 1309（曲線を `L_v` の上で見る）と第 1308（曲線を `L` の上で見る）が繋がる。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "alphaBridgeFull20260902": {
+  "block": 1311,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★★★★★★★★★II 側の橋の完成形——局所の Tate データから大域の h2・h1",
+  "proved": "☆`exists_h2_h1_global_of_localData`（`Found/GenEll/AlphaBridgeFull.lean`、第 1311）。",
+  "inputs": "☆受け取るのは 3 つだけ: (1) `ζ₀ ∈ L` が原始 `l` 乗根（大域で添加してよい）、(2) `P₀ ∈ E(L_v)` が位数 `l`（`μ_l ⊂ E(L_v)`、第 1297）、(3) `L_v` の `l`-捩れはたかだか `l` 個（`l ∤ v(q)`、第 1304）。",
+  "route": "★第 1309（局所で固定点・動く点）＋第 1310（塔の突き合わせ）＋第 1308（輸送）。",
+  "consequence": "★★★これで `alpha_mem_map_of_galTate`（第 1237）の入力が**局所の Tate データだけ**から出る。☆残るのは (a) 悪い素点で `TateSetup` を建てて (2)(3) を作る段、(b) `ζ_l ∈ L` にするための大域の底変換、の 2 つである。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
