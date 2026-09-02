@@ -6667,5 +6667,14 @@
   "route": "★`Q = Φ(z₀)` で `Φ` は加法準同型（`uniformHom`、在庫）なので `k • Q = Φ(k z₀)`。☆`k z₀ ∉ Λ`（`1 ≤ k < l`）では座標は `(℘(k z₀), ℘′(k z₀)/2)`（`uniformMap_of_notMem`、在庫）。",
   "consequence": "★★★これで第 1330（代表系 `T` の語彙）が**原文の `{pointCoords (k • Q)}` の語彙**と繋がる。☆残るのは `T.erase 0` と `((range l).erase 0).image (k ↦ k z₀)` の一致（`exists_velu_rep` の `hTdef` が与える）を挟む段だけである。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "veluLatticePoint20260902": {
+  "block": 1333,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★ℂ 上の Vélu の商は楕円（原文の語彙で）",
+  "proved": "☆`Found/GenEll/VeluLatticePoint.lean`（第 1333）に`isElliptic_veluQuotientFull_nsmul_lattice`。`veluQuotientFull (latticeCurve P) (((range l).erase 0).image (k ↦ pointCoords (k • Q)))` が楕円（`addOrderOf Q = l`、`0 < l` だけ）。",
+  "route": "★段 1: `1 ≤ k < l` では `k z₀ ∉ Λ`（`intCast_mul_mem_lattice_iff`）。☆段 2: 代表系 `T` から 0 を抜くと `{k z₀ : 1 ≤ k < l}`（`exists_velu_rep` の `hTdef`）。★段 3: 座標集合の突き合わせ（第 1332）。☆最後に第 1330 の `latticeCurve_eq_veluQuotientFull` と `isElliptic_latticeCurve'`。",
+  "consequence": "★★★これは `Skeleton/GenEll/AlphaBridge.lean` の `VeluQuotOK` が要求する**楕円性そのもの**（の `ℂ` 版）である。☆残るのは `ℂ` へ埋め込んで降ろす段（第 1331 `isElliptic_veluQuotientFull_of_map`）だけ。",
+  "gate": "lake build ABC3 成功（6362 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
  }
 }

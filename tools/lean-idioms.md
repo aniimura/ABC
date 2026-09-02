@@ -3157,3 +3157,8 @@ mathlib の `Affine.Point.add` は `x₁ = x₂` の場合分けに `DecidableEq
 
 **直し方**: 特別な場合を書く前に、**同じ名前と「一般形」の両方**を grep する。
 `vAdd`・`valAdd`・`c₄` のような基本量の変換則は、たいてい一般形で入っている。
+
+## 台帳 `.mjs` の中で Lean 名の `'`（プライム）がクォートを閉じる
+
+`isElliptic_latticeCurve'` のようにプライム付きの宣言名をシングルクォート文字列に入れると `SyntaxError: Unexpected identifier` になる。**プライムを含む行だけダブルクォート**にする。
+☆`node tools/_ledger-NNNN.mjs` の出力（`ledger NNNN written`）を必ず目で確認すること——コミットは通ってしまうので気づかない。
