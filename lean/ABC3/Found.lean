@@ -1392,6 +1392,7 @@ import ABC3.Found.GaloisRep.VeluSemistableBad
 import ABC3.Found.GenEll.VeluLatticeElliptic
 import ABC3.Found.GenEll.VeluEllipticDescent
 import ABC3.Found.GenEll.VeluLatticeSet
+import ABC3.Found.GenEll.VeluLatticePoint
 import ABC3.Found.GaloisRep.TateUnipotent
 import ABC3.Found.GaloisRep.TorsionTransport
 import ABC3.Found.GaloisRep.TateSetupRigid
