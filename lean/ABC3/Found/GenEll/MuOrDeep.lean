@@ -29,7 +29,16 @@ import ABC3.Meta.Claim
 | `l ∣ k` | ☆`[x] = [ζ]`（`ζ^l = 1`）——**`μ_l` 型**（第 1404-1406 の道） |
 | `l ∤ k` | ★**`0 < vAdd(y) < vAdd(Q)` な代表 `y` が取れる**——**深い代表** |
 
-☆後者の道: `l·vAdd(x) = k·vAdd(Q)` と `l` 素・`l ∤ k` から `l ∣ vAdd(Q)`。
+★★★★**2026-09-02（第 1413）で深い側を強めた**——`0 < vAdd(y) < vAdd(Q)` だけでなく
+
+    `∀ 0 < i < l`,  `vAdd(Q) ∤ i·vAdd(y)`
+
+まで出す。☆`vAdd(Q) = l·d`・`vAdd(y) = r·d`（`0 < r < l`）なので
+`l·d ∣ i·r·d ⟺ l ∣ i·r` で、`l` が素・`l ∤ i`・`l ∤ r` から偽である。
+★これが第 1412 の `veluQuotientFull_tate_deep` の入力 `hdeep` そのものであり、
+**核の `l−1` 個の非零点すべてが深い**ことを意味する。
+
+☆深い側の道: `l·vAdd(x) = k·vAdd(Q)` と `l` 素・`l ∤ k` から `l ∣ vAdd(Q)`。
 `vAdd(Q) = l·d` と置くと `vAdd(x) = k·d` で、`y := x·Q^{-⌊k/l⌋}` は
 
     `vAdd(y) = (k - l⌊k/l⌋)·d = (k mod l)·d`
@@ -69,13 +78,17 @@ omit [IsDomain R] [IsAdicComplete I R] [DecidableEq K] in
 ☆`l ∤ vAdd(Q)`（第 946 の `hcop`）を**仮定しない**のが要点である。
 
 ★`l ∤ k` の側では `l ∣ vAdd(Q)` が自動的に従い（`l·vAdd(x) = k·vAdd(Q)` と `l` の素性）、
-`vAdd(Q) = l·d` として `y := x·Q^{-⌊k/l⌋}` の付値が `(k mod l)·d` になる。 -/
+`vAdd(Q) = l·d` として `y := x·Q^{-⌊k/l⌋}` の付値が `(k mod l)·d` になる。
+
+★★★★**第 1413 で結論を強めた**——`y` の冪 `yⁱ`（`0 < i < l`）も
+すべて `vAdd(Q) ∤ i·vAdd(y)` を満たす（`l` が素だから）。 -/
 theorem mu_or_deep_of_pow_eq_zpow (S : TateSetup R I K) {l : ℕ} (hl : l.Prime)
     (x : Kˣ) (k : ℤ) (hxk : x ^ l = S.Q ^ k) :
     (∃ ζ : Kˣ, ζ ^ l = 1 ∧
         (QuotientGroup.mk x : Kˣ ⧸ Subgroup.zpowers S.Q) = QuotientGroup.mk ζ)
       ∨ (∃ y : Kˣ, (QuotientGroup.mk x : Kˣ ⧸ Subgroup.zpowers S.Q) = QuotientGroup.mk y
-          ∧ 0 < vAdd S.v y ∧ vAdd S.v y < vAdd S.v S.Q) := by
+          ∧ 0 < vAdd S.v y ∧ vAdd S.v y < vAdd S.v S.Q
+          ∧ ∀ i : ℕ, 0 < i → i < l → ¬ (vAdd S.v S.Q ∣ (i : ℤ) * vAdd S.v y)) := by
   by_cases hdvd : (l : ℤ) ∣ k
   · -- ★`l ∣ k` なら第 905 がそのまま `μ_l` 型を与える
     exact Or.inl (exists_rootOfUnity_mk_eq S.Q hl.pos x k hxk hdvd)
@@ -112,7 +125,7 @@ theorem mu_or_deep_of_pow_eq_zpow (S : TateSetup R I K) {l : ℕ} (hl : l.Prime)
     have hvy : vAdd S.v (x * (S.Q ^ (k / (l : ℤ)))⁻¹) = d * (k % (l : ℤ)) := by
       rw [vAdd_mul, vAdd_inv, vAdd_zpow, hvx, hd]
       nlinarith [hkr]
-    refine ⟨x * (S.Q ^ (k / (l : ℤ)))⁻¹, ?_, ?_, ?_⟩
+    refine ⟨x * (S.Q ^ (k / (l : ℤ)))⁻¹, ?_, ?_, ?_, ?_⟩
     · refine (QuotientGroup.eq (s := Subgroup.zpowers S.Q)).2 ?_
       have hval : x⁻¹ * (x * (S.Q ^ (k / (l : ℤ)))⁻¹) = (S.Q ^ (k / (l : ℤ)))⁻¹ := by
         rw [← mul_assoc, inv_mul_cancel, one_mul]
@@ -120,6 +133,20 @@ theorem mu_or_deep_of_pow_eq_zpow (S : TateSetup R I K) {l : ℕ} (hl : l.Prime)
       exact Subgroup.inv_mem _ (Subgroup.zpow_mem _ (Subgroup.mem_zpowers S.Q) _)
     · rw [hvy]; positivity
     · rw [hvy, hd]; nlinarith [hrl, hd0]
+    · -- ★★★`0 < i < l` なら `vAdd(Q) = l·d ∤ i·(r·d)`——`l` が素で `l ∤ i`・`l ∤ r` だから
+      intro i hi0 hil hcon
+      rw [hvy, hd] at hcon
+      obtain ⟨m, hm⟩ := hcon
+      have hcan : (i : ℤ) * (k % (l : ℤ)) = (l : ℤ) * m := by
+        have h : d * ((i : ℤ) * (k % (l : ℤ))) = d * ((l : ℤ) * m) := by
+          ring_nf
+          ring_nf at hm
+          linarith [hm]
+        exact mul_left_cancel₀ (by omega) h
+      rcases (Nat.prime_iff_prime_int.1 hl).dvd_mul.1 ⟨m, hcan⟩ with h | h
+      · have hli : l ∣ i := by exact_mod_cast h
+        exact absurd (Nat.le_of_dvd hi0 hli) (by omega)
+      · exact absurd (Int.le_of_dvd hr0 h) (by omega)
 
 /-! ## ★★★★★★★★★★★★点の側の二者択一 -/
 
@@ -143,7 +170,8 @@ theorem mu_or_deep_point (S : TateSetup R I K) {l : ℕ} (hl : l.Prime)
     (hP : l • P = 0) :
     (∃ ζ : Kˣ, ζ ^ l = 1 ∧ P = tatePhi S hΔ (QuotientGroup.mk ζ))
       ∨ (∃ y : Kˣ, P = tatePhi S hΔ (QuotientGroup.mk y)
-          ∧ 0 < vAdd S.v y ∧ vAdd S.v y < vAdd S.v S.Q) := by
+          ∧ 0 < vAdd S.v y ∧ vAdd S.v y < vAdd S.v S.Q
+          ∧ ∀ i : ℕ, 0 < i → i < l → ¬ (vAdd S.v S.Q ∣ (i : ℤ) * vAdd S.v y)) := by
   -- ★段 1
   obtain ⟨c, hc⟩ := Φ.surjective P
   obtain ⟨x, hx⟩ := QuotientGroup.mk_surjective (s := Subgroup.zpowers S.Q)
@@ -155,9 +183,10 @@ theorem mu_or_deep_point (S : TateSetup R I K) {l : ℕ} (hl : l.Prime)
   obtain ⟨k, hk⟩ := exists_zpow_of_nsmul_tatePhi_eq_zero S hΔ Φ hΦ x l
     (by rw [hPx]; exact hP)
   -- ★段 3
-  rcases mu_or_deep_of_pow_eq_zpow S hl x k hk.symm with ⟨ζ, hζl, hζc⟩ | ⟨y, hy, hy0, hy1⟩
+  rcases mu_or_deep_of_pow_eq_zpow S hl x k hk.symm with
+    ⟨ζ, hζl, hζc⟩ | ⟨y, hy, hy0, hy1, hy2⟩
   · exact Or.inl ⟨ζ, hζl, by rw [← hPx, hζc]⟩
-  · exact Or.inr ⟨y, by rw [← hPx, hy], hy0, hy1⟩
+  · exact Or.inr ⟨y, by rw [← hPx, hy], hy0, hy1, hy2⟩
 
 end Rational
 
@@ -190,7 +219,10 @@ theorem mu_or_deep_point_dvr (q : R) (hq : q ∈ IsLocalRing.maximalIdeal R) (hq
       ∨ (∃ y : Kˣ, P = tatePhi (mkTateSetup (K := K) q hq hq0) hΔ (QuotientGroup.mk y)
           ∧ 0 < vAdd (mkTateSetup (K := K) q hq hq0).v y
           ∧ vAdd (mkTateSetup (K := K) q hq hq0).v y
-            < vAdd (mkTateSetup (K := K) q hq hq0).v (mkTateSetup (K := K) q hq hq0).Q) :=
+            < vAdd (mkTateSetup (K := K) q hq hq0).v (mkTateSetup (K := K) q hq hq0).Q
+          ∧ ∀ i : ℕ, 0 < i → i < l →
+              ¬ (vAdd (mkTateSetup (K := K) q hq hq0).v (mkTateSetup (K := K) q hq hq0).Q
+                ∣ (i : ℤ) * vAdd (mkTateSetup (K := K) q hq hq0).v y)) :=
   mu_or_deep_point (mkTateSetup q hq hq0) hl hΔ
     (dvrTatePhiAddEquiv q hq hq0 hΔ) (fun _ => rfl) P hP
 
@@ -225,6 +257,9 @@ def mu_or_deep_point_dvr.needs : List ABC3.Meta.ProofObligation :=
        "代わりに**二者択一**を出した。" ++
        "☆`l ∤ k` の側では `l ∣ vAdd(Q)` が自動で従い、`vAdd(Q) = l·d` として " ++
        "`y := x·Q^{-⌊k/l⌋}` が `vAdd(y) = (k mod l)·d ∈ (0, vAdd(Q))` を満たす。" ++
+       "★★★★**2026-09-02（第 1413）で深い側を強めた**——" ++
+       "`∀ 0 < i < l, vAdd(Q) ∤ i·vAdd(y)`（核の非零点が**すべて**深い）まで出す。" ++
+       "これが第 1412 の `veluQuotientFull_tate_deep` の入力 `hdeep` である。" ++
        "★★★これは `hcopDoesNotDescend2026_09_02`（底変換で `l ∤ jExp` が壊れる）を" ++
        "**根本から回避する**ための骨である" ++
        "——`vAdd(y) > 0` は `y ∈ 𝔪` を意味し、核の `x` 座標がすべて `𝔪` に入るので " ++
