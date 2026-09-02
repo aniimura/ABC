@@ -3,6 +3,8 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GaloisRep.VeluKernelNorm
 import ABC3.Found.GaloisRep.VeluDiscDescent
+import ABC3.Found.GaloisRep.VeluDiscVarChange
+import ABC3.Found.GenEll.JSurjective
 import ABC3.Found.GenEll.VeluEllipticNF
 import ABC3.Meta.Claim
 
@@ -51,21 +53,52 @@ open ABC3.Found.GenEll ABC3.Found.GaloisRep ABC3.Meta
 
 open scoped Classical
 
+/-- ★★★★**曲線が等しければ恒等式は移る**——★**無条件**（第 1392）。 -/
+theorem disc_pow_eq_velu_congr_curve {F : Type} [Field F] [DecidableEq F]
+    {W₁ W₂ : WeierstrassCurve F} (h : W₁ = W₂) (Q : W₁.toAffine.Point) (l : ℕ) :
+    (W₁.Δ ^ l
+      = (veluQuotientFull W₁
+          (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))).Δ
+        * (veluKernelNorm W₁
+          (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) ^ 4)
+      ↔ (W₂.Δ ^ l
+      = (veluQuotientFull W₂
+          (((range l).erase 0).image
+            (fun k : ℕ => pointCoords (k • (h ▸ Q : W₂.toAffine.Point))))).Δ
+        * (veluKernelNorm W₂
+          (((range l).erase 0).image
+            (fun k : ℕ => pointCoords (k • (h ▸ Q : W₂.toAffine.Point))))) ^ 4) := by
+  subst h
+  exact Iff.rfl
+
 /-- ★★★★★★★★★★★★★★★★★★★★★★★★
-**[GenEll] Vélu の商の判別式の恒等式——`ℂ` の上**（第 1387、第 1390 で `ℂ` に絞った）。
+**[GenEll] Vélu の商の判別式の恒等式——格子曲線の上**（第 1392）。
 
 原文 (GenEll p.17):
 > Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
 
     Δ(E)^l = Δ(E/C) · ( ∏_{P ∈ C∖{O}} (2 y_P + a₁ x_P + a₃) )^4
 
-☆`l = 3, 5, 7` について数値で確かめてある（`tools/velu-disc-check.py`）。
+★★★**これが残るただ 1 つの節点である**。
+☆一意化（第 1330-1335）と `latticeCurve_eq_veluQuotientFull`（在庫）があるので、
+`Δ(Λ)` の積公式と `℘′(u) = −σ(2u)/σ(u)⁴` から出るはずである。 -/
+theorem disc_pow_eq_veluQuot_mul_lattice (P : PeriodPair)
+    {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
+    (Q : (latticeCurve P).toAffine.Point) (hQ : addOrderOf Q = l) :
+    (latticeCurve P).Δ ^ l
+      = (veluQuotientFull (latticeCurve P)
+          (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))).Δ
+        * (veluKernelNorm (latticeCurve P)
+          (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) ^ 4 := by
+  sorry
 
-★★★**第 1390（`disc_pow_eq_of_embed`）で降下が作られたので、
-残るのは `ℂ` の側だけである**。
-☆`ℂ` では一意化（第 1330-1335）と `latticeCurve_eq_veluQuotientFull`（在庫）がある。 -/
+/-- ★★★★★★★★★★★★★★★★★★★★
+**`ℂ` の上の恒等式**——格子曲線から降りる（第 1392）。
+
+☆一意化（第 1330-1335）で変数変換して格子曲線に直し、
+変数変換不変性（第 1391）で戻す。 -/
 theorem disc_pow_eq_veluQuot_mul_complex
-    (E : WeierstrassCurve ℂ) [E.IsElliptic]
+    (E : WeierstrassCurve ℂ) [hell : E.IsElliptic]
     {l : ℕ} (hl : l.Prime) (hodd : l ≠ 2)
     (Q : E.toAffine.Point) (hQ : addOrderOf Q = l) :
     E.Δ ^ l
@@ -73,7 +106,13 @@ theorem disc_pow_eq_veluQuot_mul_complex
           (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))).Δ
         * (veluKernelNorm E
           (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) ^ 4 := by
-  sorry
+  obtain ⟨P, C, hCP⟩ := exists_periodPair_of_isElliptic E hell
+  haveI hCE : (C • E).IsElliptic := by rw [hCP]; exact isElliptic_latticeCurve' P
+  refine ABC3.Found.GaloisRep.disc_pow_eq_veluQuot_mul_of_variableChange C E hl hQ
+    (by norm_num) ?_
+  rw [disc_pow_eq_velu_congr_curve hCP (ABC3.Found.GenEll.vcPoint C E Q) l]
+  refine disc_pow_eq_veluQuot_mul_lattice P hl hodd _ ?_
+  rw [addOrderOf_congr_curve hCP, addOrderOf_vcPoint, hQ]
 
 /-- ★★★★★★★★★★★★★★★★★★★★
 **数体の上での恒等式**——`ℂ` の側から降りる（第 1390）。
@@ -136,6 +175,30 @@ theorem semistableAt_veluQuot_good {L : Type} [Field L] [NumberField L]
     E.isUnit_Δ.ne_zero hΔ' hintE' hΔ0 hNne hNint hid
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
+
+def disc_pow_eq_velu_congr_curve.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(曲線が等しければ恒等式は移る。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def disc_pow_eq_velu_congr_curve.needs : List ProofObligation := []
+
+def disc_pow_eq_veluQuot_mul_lattice.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の商の判別式の恒等式——格子曲線の上)",
+    sectionId := "genell-lemma-3-5" }
+
+def disc_pow_eq_veluQuot_mul_lattice.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "latticeCurve_eq_veluQuotientFull(ℂ 側の Vélu、在庫、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.latticeCurve_eq_veluQuotientFull") 1,
+    .implicitStep
+      ("★★★★**2026-09-02（第 1392）**——★★★**これが残るただ 1 つの節点である**。" ++
+       "☆第 1390（埋め込みで降りる）と第 1391（変数変換で不変）で、" ++
+       "数体の場合も `ℂ` の場合もここに帰着した。" ++
+       "☆`l = 3, 5, 7` について数値で確かめてある（`tools/velu-disc-check.py`、13 例）。" ++
+       "★道具は在庫にある——`latticeCurve_eq_veluQuotientFull` が " ++
+       "`g₂`・`g₃` の Vélu の式を与えるので、" ++
+       "`Δ = g₂³ − 27g₃²` と `∏ ℘′(w)` の関係を取ればよい。") 17 ]
 
 def disc_pow_eq_veluQuot_mul_complex.src : Source :=
   { paper := "GenEll", pdfPage := 17,
