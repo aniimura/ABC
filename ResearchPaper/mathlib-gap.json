@@ -6725,5 +6725,14 @@
   "measure": "★★★**測定**——等式のままなら良い素点で `minDeltaExp p E′ = 0`（＝同種で良還元が保たれる＝Néron–Ogg–Shafarevich）が要った。☆不等式に弱めたことで**その要求が消えた**。★witness の #2 に残るのは「`HasLCyclicJ` から `IsQuotClassJ` の存在を出す」一点で、それは `Gal`-安定な直線の生成元を `L(H)` で有理化して降ろす段（第 1194-1199）である。",
   "idiom": "☆`isMuAtBadPrimes_of_veluQuotient_nodeg` にも `[inst : DecidableEq L]` ＋ `subst` の配管を入れた（具体の体と変数の体でインスタンスが違う）。",
   "gate": "lake build ABC3 成功（6366 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
+ },
+ "lcyclicExcQuant20260902": {
+  "block": 1341,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★lcyclicExc の C の量化を直し、#1 の残りを VeluQuotOK 1 本にした",
+  "frame": "☆界面 `EllModuliData.galoisFinite_lcyclicExc` の量化を`∀ C` から `∀ eps, 0 < eps → ∀ KV, CompactlyBounded KV → ∃ C₀, ∀ C ≥ C₀` に直した。★かつては `C` をいくらでも小さく取れるので条件 (a) が常に満たされ、**作れない主張**だった。☆消費側（`Section3.lean` の `lemma_3_7`）は `C` を自分で選ぶので、`C := max (|A| + 100|B| + 1) C₀` に替えるだけで波及なし。",
+  "proved": "★`Skeleton/GenEll/EllModuliWitness.lean` に`galoisFiniteJ_lcyclicExcJ_of_veluQuotOK`——`VeluQuotOK` さえあれば`lcyclicExcJ C eps KV` は `Galois`-有限（`exists_galoisFinite_lcyclic` の `Exc` に部分集合として入る、`galoisFiniteJ_subset` 第 1238）。",
+  "measure": "★★★これで witness #1 の `sorry` の中身は **`VeluQuotOK` ただ 1 つ**になった。☆第 1336 によりそれは「Vélu の商の半安定性」であり、悪い素点側は第 1327、楕円性は第 1336 で閉じているので、**残るのは良い素点の半安定性 1 本**である（#2 と同じ根）。★また第 1263 の「条件 (a) に HasMultRed を足す」直しは**適用済み**だったので古い注記を更新した。",
+  "gate": "lake build ABC3 成功（6366 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
  }
 }

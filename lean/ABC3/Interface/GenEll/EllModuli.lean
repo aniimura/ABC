@@ -211,8 +211,9 @@ structure EllModuliData extends TorsionGaloisRepData where
   `condA ∨ condB` を持っているので、**それを仮説として渡す**形に直した。
   ☆`lemma_3_7`・`theorem_3_8`・`Corollary 4.3/4.4` の**statement は変わらない**。 -/
   lcyclicExc : ℝ → ℝ → Set EllClass → Set EllClass
-  galoisFinite_lcyclicExc : ∀ (C eps : ℝ) (KV : Set EllClass), CompactlyBounded KV →
-    GaloisFinite (lcyclicExc C eps KV)
+  galoisFinite_lcyclicExc : ∀ (eps : ℝ), 0 < eps → ∀ KV : Set EllClass,
+    CompactlyBounded KV → ∃ C₀ : ℝ, ∀ C : ℝ, C₀ ≤ C →
+      GaloisFinite (lcyclicExc C eps KV)
   mem_lcyclicExc : ∀ (C eps : ℝ) (KV : Set EllClass) (E : Curve) (l : ℕ),
     Nat.Prime l → SemiStable E → HasLCyclic E l → PrimeToLocalHeights E l →
     (((100 * (degOfDefinition E : ℝ)

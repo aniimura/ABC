@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GenEll.EllModuliObjects
 import ABC3.Found.GenEll.QuotClassExists
+import ABC3.Found.GenEll.Lemma37Hdag
 import ABC3.Found.GenEll.EllModuliGalois
 import ABC3.Found.GenEll.DetCycloChar
 import ABC3.Interface.GenEll.EllModuli
@@ -135,20 +136,61 @@ def lcyclicExcJ (C eps : ℝ) (KV : Set ℂ) : Set ℂ :=
         ∧ E.rep.toSSCurve.HasMultRed)
       ∨ E.cls ∈ KV)}
 
-/-- ★★★`lcyclicExc` が `Galois`-finite であること——`Lemma 3.5` の (†) を受ける。
+/-! ## ★★★★★★★★★★★★★★★★`lcyclicExc` の有限性
 
-★★☆**測定（2026-09-02、第 1263）**——上の `lcyclicExcJ` の条件 (a) は
-「`100·d·(ht^Falt + C·d^ε) ≤ l`」だけで **`HasMultRed` を含まない**。
-☆しかし `htFalt_le_of_condA` は乗法還元の素点を取り出して使う。
-★至る所で良い還元の半安定曲線は `deg∞ = 0` なので (†) からは
-`ht^Falt` の上界が出ず、`l` を大きく取れば条件 (a) は必ず満たされる
-——したがって**現状の定義のままでは Galois-有限とは言えない**。
+★★☆**測定の履歴**——第 1263 で「条件 (a) に `HasMultRed` が無いと
+Galois-有限にならない」と測った。☆**その直しは適用済み**である
+（上の `lcyclicExcJ` の条件 (a) に `HasMultRed` が入っている）。
 
-★★★直し方は条件 (a) に `HasMultRed` を足すことであり、
-呼ぶ側（`Section3.lean` の `lemma_3_7`）は `condA` を持っていて
-原文の `condA` には `HasMultRed` が入っているので**波及はない**。 -/
-theorem galoisFiniteJ_lcyclicExcJ (C eps : ℝ) (KV : Set ℂ) (hKV : CompactlyBoundedJ KV) :
-    GaloisFiniteJ (lcyclicExcJ C eps KV) := by
+★★★**2026-09-02（第 1341）**——さらに界面の `C` の量化を
+`∀ C` から `∃ C₀, ∀ C ≥ C₀` に直した。☆`C` をいくらでも小さく取れると
+条件 (a) が常に満たされてしまい、**作れない主張**だったからである。
+-/
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★
+**`lcyclicExcJ` は `VeluQuotOK` さえあれば `Galois`-有限**——★（第 1341）。
+
+原文 (GenEll p.18):
+> Lemma 3.7. (Finite Exceptional Sets) Let
+
+☆`exists_galoisFinite_lcyclic`（第 1239）が与える `Exc` に**部分集合として入る**
+（`galoisFiniteJ_subset`、第 1238）。
+
+★★★これで #1 の残りは **`VeluQuotOK` ただ 1 つ**になった
+——第 1336 によりそれは「Vélu の商の半安定性」だけである。 -/
+theorem galoisFiniteJ_lcyclicExcJ_of_veluQuotOK
+    (hquot : ∀ (E : SSCurve) (l : ℕ), VeluQuotOK E l)
+    (eps : ℝ) (heps : 0 < eps) (KV : Set ℂ) (hKV : CompactlyBoundedJ KV) :
+    ∃ C₀ : ℝ, ∀ C : ℝ, C₀ ≤ C → GaloisFiniteJ (lcyclicExcJ C eps KV) := by
+  obtain ⟨C₀, -, Exc, hExc, hmem⟩ := exists_galoisFinite_lcyclic KV hKV eps heps hquot
+  refine ⟨C₀, fun C hC => galoisFiniteJ_subset ?_ hExc⟩
+  intro x hx
+  obtain ⟨E, l, rfl, hl, hss, hcyc, hpr, hcond⟩ := hx
+  have hj : E.rep.j = E.cls := RealizedClass.rep_j E
+  have hd0 : (0 : ℝ) ≤ (E.rep.deg : ℝ) := Nat.cast_nonneg _
+  have hP : (0 : ℝ) ≤ (E.rep.deg : ℝ) ^ eps := Real.rpow_nonneg hd0 eps
+  rw [← hj]
+  refine hmem E.rep l hl ?_ hcyc
+  rw [hj]
+  rcases hcond with ⟨hle, hmult⟩ | hKVmem
+  · have hdd : E.degOfDefinition = E.rep.deg := rfl
+    rw [hdd] at hle
+    refine Or.inl ⟨le_trans ?_ hle, hmult⟩
+    have h1 : C₀ * (E.rep.deg : ℝ) ^ eps ≤ C * (E.rep.deg : ℝ) ^ eps :=
+      mul_le_mul_of_nonneg_right hC hP
+    nlinarith [hd0, h1]
+  · exact Or.inr ⟨hKVmem, hpr⟩
+
+/-- ★★★`lcyclicExc` が `Galois`-finite であること——残るのは `VeluQuotOK` だけ。
+
+★★☆**測定（2026-09-02、第 1341）**——`galoisFiniteJ_lcyclicExcJ_of_veluQuotOK`（上）で
+**`VeluQuotOK` を仮定すれば閉じる**ことを示した。
+☆したがって本 `sorry` の中身は `VeluQuotOK`（第 1336 により「Vélu の商の半安定性」）
+**ただ 1 つ**である。 -/
+theorem galoisFiniteJ_lcyclicExcJ (eps : ℝ) (heps : 0 < eps) (KV : Set ℂ)
+    (hKV : CompactlyBoundedJ KV) :
+    ∃ C₀ : ℝ, ∀ C : ℝ, C₀ ≤ C → GaloisFiniteJ (lcyclicExcJ C eps KV) := by
   sorry
 
 open scoped Classical in
@@ -391,6 +433,23 @@ def theorem_3_8_witness.needs : List ProofObligation :=
       (.inProject "ABC3" "ABC3.Skeleton.GenEll.ellModuliWitness") 1 ]
 
 /-! ## ★出典の紐付け(`.src`) -/
+
+def galoisFiniteJ_lcyclicExcJ_of_veluQuotOK.src : Source :=
+  { paper := "GenEll", pdfPage := 18,
+    item := "Lemma 3.7(lcyclicExcJ は VeluQuotOK さえあれば Galois-有限)",
+    sectionId := "genell-lemma-3-7" }
+
+def galoisFiniteJ_lcyclicExcJ_of_veluQuotOK.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "exists_galoisFinite_lcyclic(第 1239、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.exists_galoisFinite_lcyclic") 1,
+    .citation "[ABC3]" "galoisFiniteJ_subset(第 1238、無条件)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.galoisFiniteJ_subset") 1,
+    .implicitStep
+      ("★★★★**2026-09-02（第 1341）**——界面の `galoisFinite_lcyclicExc` の " ++
+       "`C` の量化を `∃ C₀, ∀ C ≥ C₀` に直した。" ++
+       "☆かつては `∀ C` であり、`C` をいくらでも小さく取れるので" ++
+       "**作れない主張**だった（条件 (a) が常に満たされてしまう）。" ++
+       "★消費側（`Section3.lean` の `lemma_3_7`）は `C` を自分で選ぶので波及はない。") 3 ]
 
 def lcyclicExcJ.src : Source :=
   { paper := "GenEll", pdfPage := 18,

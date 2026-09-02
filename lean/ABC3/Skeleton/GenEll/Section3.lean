@@ -326,9 +326,14 @@ theorem lemma_3_7 (D : EllModuliData) (KV : Set D.EllClass) (hKV : D.CompactlyBo
     linarith
   have hLlo : (0.69 : ℝ) ≤ Real.log 2 := by linarith [Real.log_two_gt_d9]
   have hLhi : Real.log 2 ≤ (0.70 : ℝ) := by linarith [Real.log_two_lt_d9]
-  refine ⟨|A| + 100 * |B| + 1, by positivity,
-    D.lcyclicExc (|A| + 100 * |B| + 1) eps KV ∪ D.noMultRedExc KV,
-    D.galoisFinite_union _ _ (D.galoisFinite_lcyclicExc _ _ _ hKV)
+  obtain ⟨C₀, hC₀⟩ := D.galoisFinite_lcyclicExc eps heps KV hKV
+  have hbase : (0 : ℝ) < |A| + 100 * |B| + 1 := by positivity
+  set Cc : ℝ := max (|A| + 100 * |B| + 1) C₀ with hCcdef
+  have hCcge : |A| + 100 * |B| + 1 ≤ Cc := le_max_left _ _
+  have hCcpos : (0 : ℝ) < Cc := lt_of_lt_of_le hbase hCcge
+  refine ⟨Cc, hCcpos,
+    D.lcyclicExc Cc eps KV ∪ D.noMultRedExc KV,
+    D.galoisFinite_union _ _ (hC₀ Cc (le_max_right _ _))
       (D.galoisFinite_noMultRedExc KV hKV), ?_⟩
   intro E l hl hss condA condB hcA hcB
   have hAimp : condA → D.PrimeToLocalHeights E l := by
@@ -338,7 +343,8 @@ theorem lemma_3_7 (D : EllModuliData) (KV : Set D.EllClass) (hKV : D.CompactlyBo
     refine D.primeToLocalHeights_of_lt E l hl hss ?_
     set d : ℝ := (D.degOfDefinition E : ℝ) with hddef
     set F : ℝ := D.faltingsHeight (D.cls E) with hFdef
-    set C : ℝ := |A| + 100 * |B| + 1 with hCdef
+    set C : ℝ := Cc with hCdef
+    have hCge : |A| + 100 * |B| + 1 ≤ C := hCcge
     set P : ℝ := d ^ eps with hPdef
     set L : ℝ := Real.log 2 with hLdef
     have hd1 : (1 : ℝ) ≤ d := by
@@ -348,9 +354,7 @@ theorem lemma_3_7 (D : EllModuliData) (KV : Set D.EllClass) (hKV : D.CompactlyBo
     have hP1 : (1 : ℝ) ≤ P := by
       rw [hPdef]
       exact Real.one_le_rpow hd1 heps.le
-    have hCpos : (0 : ℝ) < C := by
-      rw [hCdef]
-      positivity
+    have hCpos : (0 : ℝ) < C := hCcpos
     have hAle : A ≤ |A| := le_abs_self A
     have hAnn : (0 : ℝ) ≤ |A| := abs_nonneg A
     have hBnn : (0 : ℝ) ≤ |B| := abs_nonneg B
@@ -372,14 +376,12 @@ theorem lemma_3_7 (D : EllModuliData) (KV : Set D.EllClass) (hKV : D.CompactlyBo
       rcases le_or_gt 0 (d * F) with hG | hG
       · have e1 : 14 * (d * F) ≤ 100 * L * (d * F) := by nlinarith
         have e3 : d * |A| < 69 * (C * d) := by
-          rw [hCdef]
-          nlinarith
+          nlinarith [hCge, hdpos, hAnn, hBnn, hd1]
         linarith
       · have f0 : -(d * F) ≤ d * |B| := by nlinarith
         have f1 : 14 * (d * F) - 100 * L * (d * F) ≤ 56 * (d * |B|) := by nlinarith
         have f3 : 56 * (d * |B|) + d * |A| < 69 * (C * d) := by
-          rw [hCdef]
-          nlinarith
+          nlinarith [hCge, hdpos, hAnn, hBnn, hd1]
         linarith
     have hL0 : (0 : ℝ) ≤ L := by linarith
     have hkey2 : 100 * d * (F + C * P) * L ≤ (l : ℝ) * L := by nlinarith
