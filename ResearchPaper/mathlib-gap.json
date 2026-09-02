@@ -6640,5 +6640,14 @@
   "alternatives": "☆`quotLCyclicJ` を `j` だけで定義して mathlib の `ofJ` を使う道も考えたが、`RealizedClass` は**半安定な代表**を要求するので、その存在に半安定還元定理が要る——別の大定理に置き換わるだけである。",
   "conclusion": "★★★したがって `VeluQuotOK`（`EllModuliWitness` の 3 本が依る）の根は**「Vélu の定理——楕円曲線の有限部分群による商は楕円」**であり、これは mathlib にも本プロジェクトにも無い（一般の体の上では）。☆本プロジェクトの在庫は Tate 設定に限られる（`isElliptic_veluQuotient_tate_mu` 等）。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "veluLatticeElliptic20260902": {
+  "block": 1330,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★★★★★★★★★訂正——Vélu の定理は在庫にあった（解析側）。格子曲線の Vélu の商は楕円",
+  "correction": "★★☆**第 1328-1329 の訂正**——「Vélu の定理は mathlib にも本プロジェクトにも無い」と書いたが、**解析側の在庫にあった**。`Found/GenEll/Uniformization.lean` の `latticeCurve_eq_veluQuotientFull`（証明済み）と `exists_isogeny_periodPair`・`exists_velu_rep`・`g₂_isogeny`・`g₃_isogeny`（すべて証明済み）が揃っている。",
+  "proved": "☆`Found/GenEll/VeluLatticeElliptic.lean`（第 1330）に 2 本。`exists_latticeCurve_eq_veluQuotientFull`（格子曲線の Vélu の商は大きい格子の曲線）と`exists_isElliptic_veluQuotientFull_lattice`（**したがって楕円**）。",
+  "consequence": "★★★これで `VeluQuotOK` の楕円性は「`ℂ` へ埋め込む」道が見えた: 数体上の曲線は `ℂ` に埋め込め（`veluQuotientFull_map` で `Δ` が移る）、`ℂ` 上の楕円曲線は格子曲線に変数変換できる（`exists_periodPair_of_isElliptic`、在庫）。☆良い素点の半安定性（第 1328 の道筋）は剰余体の上の Vélu の定理が要るので、そちらは別途（`ℂ` の道は使えない）。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
