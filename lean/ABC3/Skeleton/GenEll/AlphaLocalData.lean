@@ -87,6 +87,35 @@ import ABC3.Meta.Claim
 `AdjoinRoot f` が離散付値環であること（`IsDomain`・`IsLocalRing`・`IsDiscreteValuationRing`）
 はまだ仮説である。★6 は `L_p(ζ_l)/L_p` が `p ∤ l` なら非分岐であることを使う。
 
+## ★★★★★★★★★★★★★★★★★★★★mathlib の欠落は塞がった（2026-09-02、第 1365-1372）
+
+★上の「分岐する拡大の理論が mathlib に無い」は**自前で作って塞いだ**。
+
+| 第 | 内容 |
+|---|---|
+| 1357-1364 | 完備なイデアルに沿う幂等元の持ち上げから 8 段 |
+| 1365 | 整拡大では `m_R·S ≤ jacobson ⊥` |
+| **1366** | ★**完備 DVR の有限分離整閉包は DVR**（`isDiscreteValuationRing_integralClosure`） |
+| 1367-1368 | `m_A C`-進完備 → `m_C`-進完備、`IsFractionRing C L` |
+| 1369 | 分岐指数 `e`（`m_A C = m_C^e`、`1 ≤ e ≤ [L:K]`） |
+| 1370 | `hp` の分岐版 `hpe`（付値指数は `e` 倍） |
+| 1371 | `hcop` の出どころを分岐版に（`l ∤ e` なら通る） |
+| **1372** | ★**`exists_h2_h1_of_bad_prime_ram`**——`L_v` は `L_p` の任意の有限拡大でよい |
+
+★★★**測定の鍵（第 1370）**——`exists_h2_h1_of_bad_prime` の証明で
+不分岐の仮定 `hp` が使われるのは `vAdd_algebraMap_eq_valAdd` の**ただ 1 箇所**である。
+☆他（`IsMinimal`・`HasSplitMultiplicativeReduction`・`IsElliptic`）は
+インスタンス引数なので呼び出し側が別途与える。
+
+★★残るのは**組み立ての配管**であって mathlib の欠落ではない:
+
+1. `L_v′/L_v` の付値の延長公式 `v_{L_v′}(y) = v_{L_v}(y)^e`（`y ∈ L_v`）
+   ——第 1369 の `m_A C = m_C^e` から出るはず。
+2. 拡大の上での `IsMinimal`・`IsElliptic`・`HasSplitMultiplicativeReduction`
+   ——不分岐版は `Found/GaloisRep/UnramQuad.lean`（第 1029-1033）にある。
+3. `ζ_l ∈ L_v′` の構成（`L_v(ζ_l)` は `≤ l−1` 次なので `l ∤ e`）。
+4. `SSCurve` の言葉（`E.alg ≃ₐ[E.fld] E.alg`）への翻訳。
+
 ## ★★★★★★★★★★★★6（`ζ_l ∈ L_p`）の道の測定（2026-09-02、第 1353）
 
 ☆道は 2 つある。
@@ -154,15 +183,17 @@ def exists_h2_h1_unipotent.needs : List ProofObligation :=
       (.inProject "ABC3" "ABC3.Found.GenEll.SSCurve.exists_local_multRed") 1,
     .citation "[ABC3]" "hasSplitMultiplicativeReduction_ext(第 1033、証明済み。DVR 構造は仮説)"
       (.inProject "ABC3" "ABC3.Found.GaloisRep.hasSplitMultiplicativeReduction_ext") 1,
-    .citation "[mathlib]" "完備離散付値環の有限拡大は再び完備離散付値環"
-      (.absent
-        ("mathlib に無い(2026-09-02 確認)。RingTheory/DiscreteValuationRing/ は Basic・TFAE の 2 本だけで、" ++
-         "NumberTheory/LocalField/Basic.lean の IsNonarchimedeanLocalField は他のどのファイルからも使われていない" ++
-         "——拡大で閉じることが無い")) 19,
+    .citation "[ABC3]" "isDiscreteValuationRing_integralClosure(第 1366、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.isDiscreteValuationRing_integralClosure") 1,
+    .citation "[ABC3]" "exists_h2_h1_of_bad_prime_ram(第 1372、証明済み。分岐版)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.exists_h2_h1_of_bad_prime_ram") 1,
     .implicitStep
-      ("★★★★**2026-09-02（第 1352-1354）**——道は第 1320 で一本道であり、" ++
-       "残るのは**分裂乗法還元**（非分岐 2 次拡大）と **`ζ_l ∈ L_p`**（円分拡大）の 2 枚。" ++
-       "☆どちらも `L_p` の有限拡大を取る段であり、**mathlib にその理論が無い**。") 19 ]
+      ("★★★★**2026-09-02（第 1365-1372）**——**mathlib の欠落は塞がった**。" ++
+       "★完備 DVR の有限分離整閉包は完備 DVR（第 1366-1368）、" ++
+       "分岐指数は `e ≤ [L_v′:L_v]`（第 1369）、" ++
+       "`hp` の分岐版で `h2`・`h1` が出る（第 1370-1372）。" ++
+       "☆残るのは付値の延長公式・拡大の上の局所データ・`ζ_l` の構成・" ++
+       "`SSCurve` の言葉への翻訳の**配管**だけである。") 19 ]
 
 def imageContainsSL2J_of_multRed.src : Source :=
   { paper := "GenEll", pdfPage := 19,
