@@ -64,6 +64,23 @@ import ABC3.Meta.Claim
 「整数環がコンパクト ↔ 完備かつ離散付値環かつ剰余体が有限」があるので、
 **局所コンパクト性を経由する道**が最短かもしれない。
 
+★★★**欠けている primitive を 1 本に特定した（2026-09-02、第 1356）**
+
+> **完備なイデアルに沿って幂等元が持ち上がる**
+> （`IsAdicComplete I R` かつ `I ≤ Jacobson R` なら `R/I` の幂等元は `R` へ持ち上がる。
+> 同値に「完備局所環の上の加群有限代数は局所環の有限直積」）
+
+☆mathlib の `RingTheory/Idempotents.lean` は**幂零核に沿った持ち上げ**しか持たない
+（`lift_of_isNilpotent_ker`・`existsUnique_isIdempotentElem_eq_of_ker_isNilpotent`）。
+
+★これさえ入れば道は繋がる:
+`R′ ≔ integralClosure R L` は `IsIntegralClosure.finite`（加群有限）と
+`IsIntegralClosure.isDedekindDomain`（Dedekind）を持ち、`R′/m_R R′` は剰余体上有限次元
+＝Artin 環。☆`R′` は整域なので非自明な幂等元を持たず、よって `R′/m_R R′` は局所、
+`m_R R′ ⊆ Jacobson` なので `R′` は局所。
+★最後に `AdicCompletion/LocalRing.lean` の `isLocalRing_of_isAdicComplete_maximal` と
+合わせて DVR 構造が出る。
+
 ☆5 の材料（`Found/GaloisRep/UnramQuad.lean`）は
 `valuation_algebraMap_ext`・`isMinimal_baseChange_ext`・`hasMultiplicativeReduction_ext`・
 `hasSplitMultiplicativeReduction_ext` まで揃っているが、
