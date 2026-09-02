@@ -6827,6 +6827,7 @@
   "proved": "☆`Found/GenEll/AdicTransfer.lean`（第 1359）に `map_pow_smul_top`・`sModEq_map`・`isHausdorff_of_linearEquiv`・`isPrecomplete_of_linearEquiv`・`isAdicComplete_of_linearEquiv`。すべて `sorry` 無し。 ★第 1360 で `mem_pow_smul_top_pi`・`isHausdorff_pi`・`isPrecomplete_pi`・`isAdicComplete_pi`（有限直積の `I`-進完備性）も取れた。 ★第 1361 で `mem_pow_smul_top_iff_map`・`isAdicComplete_map`（`R`-加群として `I`-進完備なら `A`-環として `I·A`-進完備）も取れた。",
   "route": "★全射線型写像は `I^n • ⊤` を `I^n • ⊤` に移す（`Submodule.map_smul` ＋ `Submodule.map_top`）ので `SModEq` がそのまま移る。☆mathlib にはこの移送が無かった。",
   "next": "☆これで「完備 DVR `R` 上有限自由な**環** `R′` は `m_R R′`-進完備」が第 1359 ＋ 第 1360 ＋ 第 1361 で**完全に出る**。★残るのは (5) `R′/m_R R′` は Artin 環、(6) Artin ＋ 冪等元なし ⟹ 局所、(7) Dedekind ＋ 局所 ⟹ DVR の 3 段。",
-  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0。",
+  "remainingSteps": "★★★**残る 3 段の材料（2026-09-02 に mathlib で確認）**——(5) `R′/m_R R′` が Artin 環: 剰余体上有限次元なので `isArtinian_of_finite_dimensional` 系。(6) 「Artin ＋ 非自明な冪等元なし ⟹ 局所」: `IsArtinianRing.isNilpotent_jacobson_bot`（`Artinian/Ring.lean:54`）で `J` は冪零、`A/J` は被約 Artin なので `IsArtinianRing.equivPi`（`Artinian/Module.lean:623`、`[IsReduced]` 必要）で体の有限直積、`IsArtinianRing.setOf_isMaximal_finite`（`Artinian/Module.lean:517`）で極大は有限個、冪等元は `existsUnique_isIdempotentElem_eq_of_ker_isNilpotent`（`RingTheory/Idempotents.lean`）で`J` に沿って持ち上がる。(7) 「Dedekind ＋ 局所 ⟹ DVR」: `RingTheory/DedekindDomain/Dvr.lean` の `IsDiscreteValuationRing` 系。☆Dedekind 側の別ルート: `Ideal.quotientInfEquivQuotientProd`（CRT、2 イデアル版）で`A/I ≅ A/J₁ × A/J₂` を作り、第 1357 で `A` へ持ち上げて整域と矛盾させる。"
  }
 }
