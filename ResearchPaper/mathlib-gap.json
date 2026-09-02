@@ -6772,5 +6772,15 @@
   "plumbing": "★`addOrderOf_congr_curve`・`addOrderOf_rhPoint`（`PointVariableChange.lean`）に`[DecidableEq]` の明示の束縛（＋`Subsingleton.elim` / `subst`）を入れた。☆混在（`F` は古典的、`K` は具体）は証明側で `letI` を先に置いて合成を古典的に寄せる。★`letI` を**定理の主張の中**に置くのは脆い（束縛ごとに再合成される）と記録した。",
   "next": "☆残るのは `exists_ext_point_of_stable` の結論（`E.W.baseChange ↥M₀` の上の点）を `SSCurve.ext`（第 1343）の `SSCurve` の語彙に繋ぎ、`exists_isQuotClassJ`（第 1344）に渡す段である。★そこは `DecidableEq` のインスタンスの合わせ込みが要る。",
   "gate": "lake build ABC3 成功（6369 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
+ },
+ "hasMultRedExt20260902": {
+  "block": 1347,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★乗法還元は持ち上げても保たれる（＋DecidableEq の橋）",
+  "proved": "☆`Found/GenEll/SSCurveExt.lean` に `exists_heightOneSpectrum_over`（整拡大で素点は持ち上がる）と `SSCurve.hasMultRed_ext`。★`Found/GenEll/PointVariableChange.lean` に `addOrderOf_point_congr_dec`——`addOrderOf` は `DecidableEq` のインスタンスに依らない（`Subsingleton.elim` ＋ `subst`）。",
+  "route": "☆`jExp P (E ⊗ M₀) = e·jExp p E`（`jExp_baseChange`、在庫）で `e > 0` だから、`jExp p E < 0` なら `jExp P < 0`、したがって `minDeltaExp P ≠ 0`。",
+  "why": "★`IsQuotClassJ` の witness には `DegCurve`（＝`SSCurve` ＋ 乗法還元）が要る。☆商の乗法還元は持ち上げた `E` の乗法還元から Tate の関係で出るので、まず「持ち上げても乗法還元」を取る必要があった。",
+  "pitfall": "★★`(E.ext M₀).W` の形では `IsElliptic` のインスタンスが合成されない（`SSCurve.ext` は `def` なので `.W` が簡約されない）。☆`E.W.baseChange ↥(extField E M₀)` の形で書けば通る。",
+  "gate": "lake build ABC3 成功（6369 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
  }
 }

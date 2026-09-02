@@ -1108,6 +1108,25 @@ section Transport
 variable {F : Type*} [Field F]
 
 open scoped Classical in
+/-- ★★★★★★★★**`addOrderOf` は `DecidableEq` のインスタンスに依らない**（第 1347）。
+
+★★☆`Decidable` は部分単一型なので 2 つのインスタンスは**等しく**、`subst` できる。
+☆具体の体（`↥K`）では `Subtype.instDecidableEq` が、変数の体では
+`Classical.propDecidable` が合成されるので、両者を繋ぐ橋がどうしても要る。 -/
+theorem addOrderOf_point_congr_dec {F : Type} [fi : Field F] {W : WeierstrassCurve F}
+    (i₁ i₂ : DecidableEq F) (P : W.toAffine.Point) :
+    @addOrderOf W.toAffine.Point
+        (@SubNegMonoid.toAddMonoid _ (@AddGroup.toSubNegMonoid _
+          (@AddCommGroup.toAddGroup _
+            (@WeierstrassCurve.Affine.Point.instAddCommGroup F fi W.toAffine i₁)))) P
+      = @addOrderOf W.toAffine.Point
+        (@SubNegMonoid.toAddMonoid _ (@AddGroup.toSubNegMonoid _
+          (@AddCommGroup.toAddGroup _
+            (@WeierstrassCurve.Affine.Point.instAddCommGroup F fi W.toAffine i₂)))) P := by
+  have hi : i₁ = i₂ := Subsingleton.elim _ _
+  subst hi
+  rfl
+
 /-- ★★★★★★★★**曲線が等しければ点の位数は輸送される**。
 
 ★`C σ • (E.map σ) = latticeCurve (P σ)` のような等式を挟むときに要る。
@@ -1134,6 +1153,11 @@ theorem nsmul_congr_curve {W₁ W₂ : WeierstrassCurve F} (h : W₁ = W₂)
   rfl
 
 end Transport
+
+def addOrderOf_point_congr_dec.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(addOrderOf は DecidableEq のインスタンスに依らない。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def addOrderOf_congr_curve.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,

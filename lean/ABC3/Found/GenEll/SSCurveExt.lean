@@ -123,6 +123,57 @@ theorem SSCurve.primeToLocalHeights_ext {l : ℕ} (hl : Nat.Prime l)
   rw [hmd2] at hdvdZ
   exact hjb P hneg (dvd_neg.mp hdvdZ)
 
+/-- ★★★★★★**上にある素点は存在する**（整拡大での持ち上げ、第 1347）。 -/
+theorem exists_heightOneSpectrum_over (p : HeightOneSpectrum (𝓞 E.fld)) :
+    ∃ P : HeightOneSpectrum (𝓞 (extField E M₀)), P.asIdeal.LiesOver p.asIdeal := by
+  obtain ⟨P, -, hPp, hPo⟩ :=
+    Ideal.exists_ideal_over_prime_of_isIntegral (R := 𝓞 E.fld) (S := 𝓞 (extField E M₀))
+      p.asIdeal ⊥ (by simp)
+  haveI := hPp
+  have hPne : P ≠ ⊥ := by
+    intro h
+    rw [h] at hPo
+    exact p.ne_bot (by simpa using hPo.symm)
+  exact ⟨⟨P, hPp, hPne⟩, ⟨hPo.symm⟩⟩
+
+/-- ★★★★★★★★★★★★**乗法還元は持ち上げても保たれる**——★**無条件**（第 1347）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`jExp P (E ⊗ M₀) = e·jExp p E`（`jExp_baseChange`、在庫）で `e > 0` だから、
+`jExp p E < 0` なら `jExp P < 0`、したがって `minDeltaExp P ≠ 0` である。 -/
+theorem SSCurve.hasMultRed_ext (h : E.HasMultRed) : (E.ext M₀).HasMultRed := by
+  obtain ⟨p, hp⟩ := h
+  obtain ⟨P, hPo⟩ := exists_heightOneSpectrum_over E M₀ p
+  haveI := hPo
+  haveI hell : (E.W.baseChange ((extField E M₀ : IntermediateField ℚ ℂ) : Type)).IsElliptic := by
+    show (E.W.map (algebraMap E.fld (extField E M₀))).IsElliptic
+    infer_instance
+  have hmd : minDeltaExp p E.W = max 0 (- jExp p E.W) :=
+    minDeltaExp_eq_maxJ_of_semistable p E.W (E.ss p)
+  have hneg : jExp p E.W < 0 := by
+    by_cases hc : jExp p E.W < 0
+    · exact hc
+    · exact absurd (by rw [show E.localHeightAt p = minDeltaExp p E.W from rfl, hmd]; omega) hp
+  have hjb : jExp P (E.W.baseChange ((extField E M₀ : IntermediateField ℚ ℂ) : Type))
+      = (p.asIdeal.ramificationIdx P.asIdeal : ℤ) * jExp p E.W :=
+    ABC3.Found.GaloisRep.jExp_baseChange E.fld (extField E M₀) p P E.W
+  have hene : p.asIdeal.ramificationIdx P.asIdeal ≠ 0 :=
+    Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver P.asIdeal p.ne_bot
+  have hepos : (0 : ℤ) < (p.asIdeal.ramificationIdx P.asIdeal : ℤ) := by
+    exact_mod_cast Nat.pos_of_ne_zero hene
+  have hnegP : jExp P (E.W.baseChange ((extField E M₀ : IntermediateField ℚ ℂ) : Type)) < 0 := by
+    rw [hjb]
+    nlinarith [hepos, hneg]
+  refine ⟨P, ?_⟩
+  have hmdP : minDeltaExp P (E.W.baseChange ((extField E M₀ : IntermediateField ℚ ℂ) : Type))
+      = max 0 (- jExp P (E.W.baseChange ((extField E M₀ : IntermediateField ℚ ℂ) : Type))) :=
+    minDeltaExp_eq_maxJ_of_semistable P _ ((E.ext M₀).ss P)
+  show minDeltaExp P (E.W.baseChange ((extField E M₀ : IntermediateField ℚ ℂ) : Type)) ≠ 0
+  rw [hmdP]
+  omega
+
 end Ext
 
 /-! ## ★出典の紐付け(`.src`) -/
@@ -149,6 +200,16 @@ def SSCurve.primeToLocalHeights_ext.needs : List ProofObligation :=
       ("★★★★**2026-09-02（第 1343）**——`HasLCyclicJ` の生成元は " ++
        "`L(H)`（次数は `l−1` を割る）でないと有理にならないので、" ++
        "商の類を作るには `E` をそこへ持ち上げる必要がある。") 2 ]
+
+def exists_heightOneSpectrum_over.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(上にある素点は存在する——整拡大での持ち上げ。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def SSCurve.hasMultRed_ext.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(乗法還元は持ち上げても保たれる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def extField.src : Source :=
   { paper := "GenEll", pdfPage := 17,
