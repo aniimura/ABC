@@ -349,6 +349,7 @@ import ABC3.Found.GenEll.LatticeHalfPeriod
 import ABC3.Found.GenEll.HalfPeriodDisc
 import ABC3.Found.GenEll.HalfShiftProd
 import ABC3.Found.GenEll.VeluProdPerm
+import ABC3.Found.GenEll.VeluNorm
 import ABC3.Found.GenEll.LatticeScale
 import ABC3.Found.GenEll.LatticeNorm
 import ABC3.Found.GenEll.LatticeCurve
