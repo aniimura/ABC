@@ -6478,5 +6478,21 @@
   "inputs": "☆受け取るのは `TateSetup`・`Φ`・`ζ`（原始 `l` 乗根）・`l ∤ v(Q)` の 4 つだけ。",
   "consequence": "★★★これで II 側の鎖は次のように 1 本に繋がった:`mkTateSetup`・`dvrTatePhiAddEquiv`（在庫、無条件）→ 第 1314（局所の 2 入力）→ 第 1313（変数変換で `E` へ）→ 第 1311/1312（大域の `h2`・`h1`）→ 第 1237（`α` が像に入る）→ 第 1249（`ImageContainsSL2J`）。☆残るのは悪い素点で `exists_tate_model` を回して `TateSetup` と変数変換を実際に取る段だけ。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "tateModelVc20260902": {
+  "block": 1315,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★E と Tate モデルを結ぶ変数変換（K の上で）",
+  "proved": "☆`exists_vc_tateModel`（`Found/GenEll/TateModelVc.lean`、第 1315）——在庫の `tateParamR_spec` を `K` へ降ろした形（`baseChange_integralModel_eq`）。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "localInputVc2_20260902": {
+  "block": 1316,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★曲線の等式つきの変数変換で移す（第 1313 の一般化）",
+  "proved": "☆`exists_point_order_of_vc′`・`card_le_of_vc′`（`Found/GenEll/LocalInputVc2.lean`、第 1316）。",
+  "route": "★第 1315 が与えるのは `C′ • W = (Tate モデル)` という**曲線の等式**なので、等式で結ばれた曲線を受け取れるように一般化した（`subst` するだけ）。",
+  "consequence": "☆これで「Tate モデルの 2 入力 → `W` の 2 入力」が等式のまま繋がる。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
