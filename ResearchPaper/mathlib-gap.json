@@ -6378,5 +6378,22 @@
   "inputs": "☆受け取るのは 3 つだけ: (1) `σ` が原始 `l` 乗根 `ζ` を固定（`ζ_l ∈ L`——大域で添加してよい）、(2) `σ` が位数 `l` の点を固定（`μ_l ⊂ E(K₀)`、第 1297 ＋ 第 1302 で大域へ）、(3) `σ` が動かす `l`-捩れ点がある（`E[l] ⊄ E(K₀)`、第 1279・1298 ＋ 第 1271 で大域へ）。",
   "consequence": "★★★これで `alpha_mem_map_of_galTate`（第 1237）の入力が完成し、II 側（`α` が像に入る段）は**この 3 つの入力だけ**に帰着した。☆どれも「基礎局所体 `K₀` の上の Tate 一意化」から出る——局所体の拡大も同変性も要らない。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "torsionCardLocal20260902": {
+  "block": 1304,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★l ∤ v(Q) なら基礎体の l-捩れは l 個以下（h1 の入力の本体）",
+  "proved": "☆`card_torsion_le_of_not_dvd`（`Found/GenEll/TorsionCardLocal.lean`、第 1304）——第 1279 の対偶。",
+  "consequence": "☆`E[l]` は代数閉体の上では `l²` 個あるので、`l ≥ 2` なら**どれかは基礎体に無い**。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "notRationalMoved20260902": {
+  "block": 1305,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★基礎体の点でなければ動かされる（第 1298 を点の言葉で）",
+  "proved": "☆`exists_galPoint_ne_of_not_rational`（`Found/GenEll/NotRationalMoved.lean`、第 1305）。",
+  "route": "★`σ` がすべて固定するなら両座標が基礎体にあり（`InfiniteGalois`）、方程式も基礎体で成り立つ（`map_nonsingular` の逆向き）ので点は基礎体から来る。",
+  "consequence": "☆これで `h1` の入力は「基礎体の点でない `l`-捩れ点がある」という自然な形になった。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
