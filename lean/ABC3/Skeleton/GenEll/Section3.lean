@@ -233,8 +233,8 @@ theorem lemma_3_5 (D : EllModuliData) (eps : ℝ) (heps : 0 < eps) :
   have hpos : (0:ℝ) < 12 * (1 + eps) := by nlinarith
   refine ⟨C₀ + (C₁ + C₂) / (12 * (1 + eps)), fun E l hl hcyc hprime => ?_⟩
   set E' := D.quotLCyclic E l with hE'
-  -- deg∞(E′) = l·deg∞(E)
-  have hdeg : D.degInf (D.cls E') = (l : ℝ) * D.degInf (D.cls E) :=
+  -- ★l·deg∞(E) ≤ deg∞(E′)（第 1340 で不等式に弱めた）
+  have hdeg : (l : ℝ) * D.degInf (D.cls E) ≤ D.degInf (D.cls E') :=
     D.degInf_quotLCyclic E l hl hcyc hprime
   -- deg∞(E′) ≤ 12(1+ε)·ht^Falt(E′) + (C₁ + C₂)
   have hchain : D.degInf (D.cls E')
@@ -244,7 +244,10 @@ theorem lemma_3_5 (D : EllModuliData) (eps : ℝ) (heps : 0 < eps) :
     linarith
   -- ht^Falt(E′) ≤ ht^Falt(E) + 2log(l) + C₀
   have hfal := hC₀ E l hl hcyc
-  rw [hdeg] at hchain
+  have hchain' : (l : ℝ) * D.degInf (D.cls E)
+      ≤ 12 * (1 + eps) * D.faltingsHeight (D.cls E') + (C₁ + C₂) := le_trans hdeg hchain
+  clear hchain
+  rename' hchain' => hchain
   rw [mul_assoc, one_div_mul_eq_div, div_le_iff₀ hpos]
   have hexp : (D.faltingsHeight (D.cls E) + 2 * Real.log l
         + (C₀ + (C₁ + C₂) / (12 * (1 + eps)))) * (12 * (1 + eps))

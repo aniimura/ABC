@@ -7,6 +7,8 @@ import ABC3.Found.GenEll.EllModuliGalois
 import ABC3.Found.GenEll.DetCycloChar
 import ABC3.Interface.GenEll.EllModuli
 import ABC3.Skeleton.GenEll.Section3
+import ABC3.Skeleton.GenEll.TateLocalModelK
+import ABC3.Found.GenEll.Lemma37Full
 import ABC3.Skeleton.GenEll.GaloisImage
 import ABC3.Skeleton.GenEll.Section4
 import ABC3.Meta.Claim
@@ -122,12 +124,54 @@ theorem galoisFiniteJ_lcyclicExcJ (C eps : ℝ) (KV : Set ℂ) (hKV : CompactlyB
     GaloisFiniteJ (lcyclicExcJ C eps KV) := by
   sorry
 
-/-- ★★★`deg∞(E′) = l·deg∞(E)`——`Lemma 3.5`（葉 1・2）を受ける。 -/
+open scoped Classical in
+/-- ★★★★★★★★★★★★★★★★★★★★
+**商の類が存在すれば `l·deg∞(E) ≤ deg∞(E′)`**——★**無条件**（第 1340）。
+
+☆悪い素点では Tate の関係（`isMuAtBadPrimes_of_veluQuotient_nodeg`、第 1141）、
+良い素点では `minDeltaExp p E = 0` なので自明である。
+
+★★★**これが「不等式に弱める」ことの利得である**——等式なら
+良い素点で `minDeltaExp p E′ = 0`（同種で良還元が保たれること）が要った。 -/
+theorem degInfJ_quotLCyclicJ_ge_of_exists (x : RealizedClass) {l : ℕ} (hl : Nat.Prime l)
+    (hpr : x.rep.toSSCurve.PrimeToLocalHeights l)
+    (hex : ∃ y : RealizedClass, IsQuotClassJ x l y.1) :
+    (l : ℝ) * degInfJ x.cls ≤ degInfJ (quotLCyclicJ x l).cls := by
+  obtain ⟨Q, hQ, hell, hss, hj⟩ := quotLCyclicJ_spec x l hex
+  haveI := hell
+  have hcop := x.rep.toSSCurve.not_dvd_jExp_of_primeToLocalHeights hl hpr
+  have hmu := isMuAtBadPrimes_of_veluQuotient_nodeg x.rep.toSSCurve.W
+    (veluQuotientFull x.rep.toSSCurve.W
+      (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))))
+    hl Q hQ rfl x.rep.toSSCurve.ss hss hcop
+  have hge := ABC3.Found.GaloisRep.degInfOf_ge_of_local x.rep.toSSCurve.W
+    (veluQuotientFull x.rep.toSSCurve.W
+      (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) l
+    (fun p => ABC3.Found.GaloisRep.minDeltaExp_le_of_bad_delta p _ _
+      (x.rep.toSSCurve.ss p) l (fun hb => hmu p hb))
+  have hq : (l : ℝ) * degInfJ x.rep.toSSCurve.j
+      ≤ degInfJ (quotSSCurve x.rep.toSSCurve
+        (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))) hell hss).j := by
+    rw [degInfJ_eq, degInfJ_eq]
+    exact hge
+  rw [hj] at hq
+  have hx : x.cls = x.rep.toSSCurve.j := (RealizedClass.rep_j x).symm
+  rw [hx]
+  exact hq
+
+/-- ★★★`l·deg∞(E) ≤ deg∞(E′)`——★**残るのは「商の類の存在」だけ**（第 1340）。
+
+★★☆**測定（2026-09-02、第 1340）**——不等式に弱めたことで
+**良い素点の半安定性（同種で良還元が保たれること）は不要になった**。
+☆残る `sorry` は「`HasLCyclicJ` から `IsQuotClassJ` の存在を出す」一点であり、
+それは `Gal`-安定な直線の生成元を `L(H)` で有理化して降ろす段（第 1194-1199）である。 -/
 theorem degInfJ_quotLCyclicJ (x : RealizedClass) (l : ℕ) (hl : Nat.Prime l)
     (hcyc : HasLCyclicJ x.rep.toSSCurve l)
     (hpr : x.rep.toSSCurve.PrimeToLocalHeights l) :
-    degInfJ (quotLCyclicJ x l).cls = (l : ℝ) * degInfJ x.cls := by
-  sorry
+    (l : ℝ) * degInfJ x.cls ≤ degInfJ (quotLCyclicJ x l).cls := by
+  by_cases hex : ∃ y : RealizedClass, IsQuotClassJ x l y.1
+  · exact degInfJ_quotLCyclicJ_ge_of_exists x hl hpr hex
+  · sorry
 
 /-- ★★★★★★★★★★★★★★★★★★★★
 **`ht^Falt(E′) ≤ ht^Falt(E) + 2log(l)`——★これはもう `sorry` ではない**（2026-09-02、第 1339）。
@@ -339,6 +383,22 @@ def galoisFiniteJ_lcyclicExcJ.needs : List ProofObligation :=
     .implicitStep
       ("★(a)(b) 両側の高さ評価は済んでいる(htFalt_le_of_condA・htFalt_le_of_condB)。" ++
        "有限性は northcottJ(§9-1179、第 753、★無条件)から出る") 4 ]
+
+def degInfJ_quotLCyclicJ_ge_of_exists.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(商の類が存在すれば l·deg∞(E) ≤ deg∞(E′)。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def degInfJ_quotLCyclicJ_ge_of_exists.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "isMuAtBadPrimes_of_veluQuotient_nodeg(第 1141、証明済み)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.isMuAtBadPrimes_of_veluQuotient_nodeg") 1,
+    .citation "[ABC3]" "degInfOf_ge_of_local / minDeltaExp_le_of_bad_delta(在庫、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.degInfOf_ge_of_local") 1,
+    .implicitStep
+      ("★★★★**2026-09-02（第 1340）**——界面の `degInf_quotLCyclic` を" ++
+       "**等式から不等式に弱めた**ことで、" ++
+       "良い素点の半安定性（同種で良還元が保たれること）が不要になった。" ++
+       "☆消費側（`Section3.lean` の `lemma_3_5`）が使うのはこの向きだけである。") 3 ]
 
 def degInfJ_quotLCyclicJ.src : Source :=
   { paper := "GenEll", pdfPage := 17,

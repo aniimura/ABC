@@ -122,6 +122,7 @@ open Finset in
 ★★**`hd : [L:ℚ] + 1 < l` を取らない**——第 1140 で `p ∤ l` が不要になったので、
 それを出すためだけにあった `hd` も落ちた。 -/
 theorem isMuAtBadPrimes_of_veluQuotient_nodeg {L : Type} [Field L] [NumberField L]
+    [inst : DecidableEq L]
     (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
     {l : ℕ} (hl : l.Prime)
     (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
@@ -129,8 +130,13 @@ theorem isMuAtBadPrimes_of_veluQuotient_nodeg {L : Type} [Field L] [NumberField 
       (fun k : ℕ => pointCoords (k • Q))))
     (hssE : ∀ p, SemistableAt p E) (hssE' : ∀ p, SemistableAt p E')
     (hcop : ∀ p : HeightOneSpectrum (𝓞 L), jExp p E < 0 → ¬ ((l : ℤ) ∣ jExp p E)) :
-    IsMuAtBadPrimes E E' l :=
-  isMuAtBadPrimes_of_veluQuotient_of_coprime_K E E' hl Q hQ hE' hssE hssE' hcop
+    IsMuAtBadPrimes E E' l := by
+  -- ★`Decidable` のインスタンスは一意なので古典的なものに揃える（配管）
+  have hinst : inst = fun a b => Classical.propDecidable (a = b) := by
+    funext a b
+    exact Subsingleton.elim _ _
+  subst hinst
+  exact isMuAtBadPrimes_of_veluQuotient_of_coprime_K E E' hl Q hQ hE' hssE hssE' hcop
 
 def isMuAtBadPrimes_of_veluQuotient_nodeg.src : Source :=
   { paper := "GenEll", pdfPage := 17,
