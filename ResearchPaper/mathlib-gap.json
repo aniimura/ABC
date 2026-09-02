@@ -6324,5 +6324,14 @@
   "route": "★`l · Φ[ζ] = Φ[ζˡ] = 0`、`Φ[ζ] ≠ 0`——さもなくば `ζ ∈ ⟨Q⟩` だが `v(ζ) = 0 < v(Q)` なので `ζ = 1` になってしまう。",
   "consequence": "★★★これで**基礎局所体 `K₀` の上の Tate 一意化だけ**から `μ_l` の点が取れる——第 1296 が要る「`σ` が固定する位数 `l` の点」の出どころである。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "galPointCoord20260902": {
+  "block": 1298,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★基礎体に無い座標をもつ点は動かされる（h1 の入力、配管 P2 の一段目）",
+  "proved": "☆`Found/GenEll/GalPointCoord.lean`（第 1298）に 2 本。`pointCoords_galPoint`（`galPoint` は座標に `σ` を当てるだけ）と`exists_galPoint_ne_of_coord_not_mem`。",
+  "route": "★第 1280（基礎体に無い元はどれかの `σ` が動かす）を座標に当てるだけ。",
+  "consequence": "☆`E[l] ⊄ E(K₀)` から `h1`（第 1270）が出る道の一段目である。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }

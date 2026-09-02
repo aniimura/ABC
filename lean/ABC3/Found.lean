@@ -1410,6 +1410,7 @@ import ABC3.Found.GenEll.FixedVecFromPoint
 import ABC3.Found.GenEll.DetModOne
 import ABC3.Found.GenEll.GalTateUnipFull
 import ABC3.Found.GenEll.TateMuPoint
+import ABC3.Found.GenEll.GalPointCoord
 import ABC3.Found.GaloisRep.Lemma35Descend
 import ABC3.Found.GaloisRep.TowerInstances
 import ABC3.Found.GaloisRep.Lemma35Assemble
