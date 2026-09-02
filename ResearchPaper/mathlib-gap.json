@@ -6567,5 +6567,30 @@
   "route": "★第 1323（`c₄` は `R` の単元）＋ `tateDvrVal_eq_zero_of_isUnit`（在庫）。",
   "consequence": "☆これが第 1322（`c₄` が単元の整モデルは半安定）へ渡す一歩手前の形である。★残るのは商のモデルを Tate モデルに移す変数変換（第 969・1056、在庫）と大域の `valAdd` への翻訳（`vAdd_algebraMap_eq_valAdd`、在庫）である。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "sessionArc12691324": {
+  "measuredAt": "2026-09-02",
+  "block": "第 1269-1324（56 ブロック）",
+  "title": "★★★★★★★★★★★★★★★★★★★★★★★★セッションの弧——α 側は完走、VeluQuotOK は悪い素点側の核まで",
+  "metric": "GenEll 必要分 20 / 24（§1 9/9・§2 0/1・§3 8/9・§4 3/5）——不変",
+  "closedThisStretch": [
+   "★★★★★★★★★★★★第 1269 `semistableAt_of_minDeltaExp_eq`——第 1268 で名指しした「最後の数学の穴」。Kodaira–Néron は要らなかった。",
+   "★★☆第 1275 `tateSetup_algHom_eq_id`——**在庫の欠陥を Lean で証明**。`TateSetup R I K` は `K = Frac(R)` を強制するので `tatePhi_pointMap` の `σA` は恒等射しかない（同変性が空虚）。第 1283/1286 で正しい形に取り直した。",
+   "★★★★★★★★★★★★★★★★★★★★第 1270-1321 α 側の完走——悪い素点（`jExp < 0`・`PrimeToLocalHeights`・分裂乗法還元・`ζ ∈ L_v`）から `ImageContainsSL2J` まで、すべて `Found/`（sorry 0）で繋がった。",
+   "★★★★★★★★第 1322-1324 `VeluQuotOK` の悪い素点側の核——`c₄` が単元の整モデルは半安定（1322）、Tate 曲線の Vélu の商は `c₄` が単元（1323）、その付値は `0`（1324）。"
+  ],
+  "routeShortenings": [
+   "☆第 1277: `π` は捩れから作れる（Bezout）——**完備 DVR の Eisenstein 拡大は不要**になった。",
+   "☆第 1292: `det = 1` ＋ 固定ベクトル ⇒ Cayley–Hamilton で幂単——**Tate 一意化の同変性も完備化の正規性も不要**になった。",
+   "☆第 1312: `ζ` は基礎局所体にあれば足りる——**大域の底変換（`SSCurve` の底変換）は不要**になった。"
+  ],
+  "remaining": {
+   "alpha": "☆α 側（witness 4 本目）に残るのは局所体の帳簿 2 つ: (i) 悪い素点で**分裂**乗法還元を用意する（非分裂なら不分岐 2 次捻り、第 1007-1029 の在庫）、(iii) `ζ ∈ L_v` にする（素点を `L(ζ_l)` の上で取る）と付値の橋 `hp`（分岐指数 `e` は `l−1` を割るので `l ∤ e`）。★未知の数学は無い。",
+   "veluQuotOK": "☆`VeluQuotOK`（witness の他の 3 本が依る）に残るのは 2 つの既知数学: **Vélu の定理**（商の楕円性）と **Néron–Ogg–Shafarevich**（同種で良還元が保たれる）。★悪い素点側の半安定性は第 1322-1324 で核が取れており、残りは変数変換（第 969・1056）と整性（`veluIntegralClosed`）の配管である。",
+   "section2": "☆§2 の `Theorem 2.1` は [Stacks] 58.6 と [NCBelyi] Thm 2.5（＋曲線の Riemann–Roch）待ち。",
+   "migration": "★指標に数えるには `Theorem 3.8`・`Cor 4.3`・`Cor 4.4` を `Found/` に載せる必要がある（現在は `Skeleton/` にあり、`EllModuliData` を仮説として受けている）。"
+  },
+  "idioms": "☆`tools/lean-idioms.md` に 8 件追記（`omit` の位置、`Point` の `+` が `DecidableEq` の経路で割れる、単体ビルドでは名前衝突が見えない、`ZMod (l^1)` はイデアルで繋ぐ、在庫を引くときの `head` 切り 等）。",
+  "gate": "lake build ABC3 成功（6356 jobs）、mojibake ok、check.mjs PASS、Found/ の実 sorry 0、origin/master へ push 済み。"
  }
 }
