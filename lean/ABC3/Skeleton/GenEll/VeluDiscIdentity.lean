@@ -137,6 +137,22 @@ theorem semistableAt_veluQuot_good {L : Type} [Field L] [NumberField L]
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 
+def disc_pow_eq_veluQuot_mul_complex.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(Vélu の商の判別式の恒等式——`ℂ` の上)",
+    sectionId := "genell-lemma-3-5" }
+
+def disc_pow_eq_veluQuot_mul_complex.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "latticeCurve_eq_veluQuotientFull(ℂ 側の Vélu、在庫、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.latticeCurve_eq_veluQuotientFull") 1,
+    .citation "[ABC3]" "vAdd_Delta_veluCurve_tate(Tate 曲線での同型の式、第 1131、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.vAdd_Delta_veluCurve_tate") 1,
+    .implicitStep
+      ("★★★★**2026-09-02（第 1390）**——第 1390 の降下で**残るのは `ℂ` の側だけ**になった。" ++
+       "☆`l = 3, 5, 7` について数値で確かめてある（`tools/velu-disc-check.py`、13 例）。" ++
+       "★恒等式は変数変換で不変（`Δ ↦ u⁻¹²Δ`、`N ↦ u^{−3(l−1)}N` で重みが合う）なので、" ++
+       "☆一意化（第 1330-1335）で**格子曲線の場合に帰着できる見通し**である。") 17 ]
+
 def disc_pow_eq_veluQuot_mul.src : Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(Vélu の商の判別式の恒等式)",
