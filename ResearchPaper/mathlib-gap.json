@@ -6824,9 +6824,9 @@
   "block": 1359,
   "date": "2026-09-02",
   "title": "★★★★★★★★★★★★I-進完備性は線型同型で移る（第 1357 の道の第 3 段）",
-  "proved": "☆`Found/GenEll/AdicTransfer.lean`（第 1359）に `map_pow_smul_top`・`sModEq_map`・`isHausdorff_of_linearEquiv`・`isPrecomplete_of_linearEquiv`・`isAdicComplete_of_linearEquiv`。すべて `sorry` 無し。 ★第 1360 で `mem_pow_smul_top_pi`・`isHausdorff_pi`・`isPrecomplete_pi`・`isAdicComplete_pi`（有限直積の `I`-進完備性）も取れた。",
+  "proved": "☆`Found/GenEll/AdicTransfer.lean`（第 1359）に `map_pow_smul_top`・`sModEq_map`・`isHausdorff_of_linearEquiv`・`isPrecomplete_of_linearEquiv`・`isAdicComplete_of_linearEquiv`。すべて `sorry` 無し。 ★第 1360 で `mem_pow_smul_top_pi`・`isHausdorff_pi`・`isPrecomplete_pi`・`isAdicComplete_pi`（有限直積の `I`-進完備性）も取れた。 ★第 1361 で `mem_pow_smul_top_iff_map`・`isAdicComplete_map`（`R`-加群として `I`-進完備なら `A`-環として `I·A`-進完備）も取れた。",
   "route": "★全射線型写像は `I^n • ⊤` を `I^n • ⊤` に移す（`Submodule.map_smul` ＋ `Submodule.map_top`）ので `SModEq` がそのまま移る。☆mathlib にはこの移送が無かった。",
-  "next": "☆これで「完備 DVR `R` 上有限自由な `R′` は `I`-進完備」が（第 1359 の線型同型の移送 ＋ 第 1360 の直積）**出る**。★残るのは (5) `R′/m_R R′` は Artin 環、(6) Artin ＋ 冪等元なし ⟹ 局所、(7) Dedekind ＋ 局所 ⟹ DVR。",
+  "next": "☆これで「完備 DVR `R` 上有限自由な**環** `R′` は `m_R R′`-進完備」が第 1359 ＋ 第 1360 ＋ 第 1361 で**完全に出る**。★残るのは (5) `R′/m_R R′` は Artin 環、(6) Artin ＋ 冪等元なし ⟹ 局所、(7) Dedekind ＋ 局所 ⟹ DVR の 3 段。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
  }
 }

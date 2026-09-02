@@ -149,7 +149,57 @@ theorem isAdicComplete_pi [IsAdicComplete I R] : IsAdicComplete I (ι → R) whe
 
 end Pi
 
+/-! ## ★★★★★★★★★★★★第 1361 —— 係数環を上げる -/
+
+section BaseChange
+
+variable {A : Type*} [CommRing A] [Algebra R A]
+
+/-- ★★★★★★**`(I·A)^n` と `I^n • ⊤` は同じ集合**（第 1361）。 -/
+theorem mem_pow_smul_top_iff_map (n : ℕ) (x : A) :
+    x ∈ ((I.map (algebraMap R A)) ^ n • (⊤ : Submodule A A))
+      ↔ x ∈ (I ^ n • (⊤ : Submodule R A)) := by
+  rw [← Ideal.one_eq_top, Ideal.smul_eq_mul, mul_one, Ideal.smul_top_eq_map, Ideal.map_pow]
+  exact Iff.rfl
+
+/-- ★★★★★★★★★★★★
+**`R`-加群として `I`-進完備なら `A`-環として `I·A`-進完備**——★**無条件**（第 1361）。
+
+☆`(I·A)^n` と `I^n • ⊤` は集合として一致するので `SModEq` がそのまま移る。
+
+★★★これで「完備 DVR `R` 上有限自由な環 `R′` は `m_R R′`-進完備」が出る
+——第 1359（線型同型）＋ 第 1360（有限直積）＋ 本ブロック。 -/
+theorem isAdicComplete_map [IsAdicComplete I A] :
+    IsAdicComplete (I.map (algebraMap R A)) A where
+  haus' := by
+    intro x hx
+    refine IsHausdorff.haus' (I := I) (M := A) x ?_
+    intro n
+    have h := hx n
+    rw [SModEq.zero] at h ⊢
+    exact (mem_pow_smul_top_iff_map I n x).1 h
+  prec' := by
+    intro f hf
+    have hcauchy : ∀ {m n : ℕ}, m ≤ n →
+        f m ≡ f n [SMOD (I ^ m • ⊤ : Submodule R A)] := by
+      intro m n hmn
+      have h := hf hmn
+      rw [SModEq.sub_mem] at h ⊢
+      exact (mem_pow_smul_top_iff_map I m _).1 h
+    obtain ⟨L, hL⟩ := IsPrecomplete.prec' (I := I) (M := A) f hcauchy
+    refine ⟨L, fun n => ?_⟩
+    have h := hL n
+    rw [SModEq.sub_mem] at h ⊢
+    exact (mem_pow_smul_top_iff_map I n _).2 h
+
+end BaseChange
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def isAdicComplete_map.src : Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(R-加群として I-進完備なら A-環として I·A-進完備。★無条件)",
+    sectionId := "genell-thm-3-8" }
 
 def isAdicComplete_pi.src : Source :=
   { paper := "GenEll", pdfPage := 19,
