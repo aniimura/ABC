@@ -6809,5 +6809,15 @@
   "count": "☆セッション開始時の witness の `sorry` は 4 本。★#3 は完全に閉じ（新しい葉なし）、#1・#2・#4 は名前のついた葉 2 本に集約された。",
   "gate": "lake build ABC3 成功（6372 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。",
   "correction": "★★☆**訂正（第 1354）**——第 1352 で「残る 2 枚は局所の配管だけ、未証明の外部引用は 1 本もない」と書いたが**それは誤り**である。☆分裂乗法還元も `ζ_l ∈ L_p` も `L_p` の**有限拡大**を取る段であり、**mathlib に「完備離散付値環の有限拡大は再び完備離散付値環」が無い**（2026-09-02 確認: `RingTheory/DiscreteValuationRing/` は `Basic`・`TFAE` の 2 本だけ、`NumberTheory/LocalField/Basic.lean` の `IsNonarchimedeanLocalField` は他のどのファイルからも使われていない）。★`ResearchPaper/blocked-leaves.json` に記録した。"
+ },
+ "idempotentLift20260902": {
+  "block": 1357,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★★★★★完備なイデアルに沿って冪等元が持ち上がる（第 1356 で特定した primitive を作った）",
+  "proved": "☆`Found/GenEll/IdempotentLift.lean`（第 1357）に`exists_isIdempotentElem_of_isAdicComplete`——`IsAdicComplete I R` かつ `a² − a ∈ I` なら、`a` と `mod I` で合同な冪等元 `e` が存在する。★`idemStep`・`idemSeq`・`idemSeq_sq_sub_mem`・`idemSeq_succ_sub_mem`・`idemSeq_sub_mem_of_le` も同ファイル。すべて `sorry` 無し。",
+  "route": "★Newton の反復 `f(a) = 3a² − 2a³`。恒等式 `f(a) − a = −(a² − a)(2a − 1)` と `f(a)² − f(a) = (a² − a)²(4a² − 4a − 3)`（どちらも `ring`）から `a² − a ∈ I^n ⟹ f(a)² − f(a) ∈ I^{2n}` かつ `f(a) ≡ a (mod I^n)`。☆`IsPrecomplete.prec` で極限を取り、`IsHausdorff.haus` で `e² = e` を出す。",
+  "why": "★★★これは**mathlib に無い**（`RingTheory/Idempotents.lean` は冪零核に沿った持ち上げしか持たない）。☆第 1356 で「α 側の葉を止めている primitive はこれ 1 本」と特定したものである。",
+  "next": "☆次の段: (1) 完備局所環の上の加群有限代数は `I`-進完備、(2) `R′/m_R R′` は Artin 環、(3) `R′` は整域なので非自明な冪等元を持たない、(4) よって `R′` は局所、(5) Dedekind ＋ 局所 ⟹ DVR。",
+  "gate": "lake build ABC3 成功（6373 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
  }
 }
