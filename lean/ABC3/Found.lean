@@ -407,6 +407,7 @@ import ABC3.Found.GaloisRep.RamifiedBadPrime
 import ABC3.Found.GaloisRep.RamifiedLocalData
 import ABC3.Found.GaloisRep.RamifiedQuadExt
 import ABC3.Found.GaloisRep.DiscIdentitySemistable
+import ABC3.Found.GaloisRep.MinDeltaMod12
 import ABC3.Found.GaloisRep.VeluKernelNorm
 import ABC3.Found.GaloisRep.VeluDiscDescent
 import ABC3.Found.GaloisRep.VeluDiscVarChange
