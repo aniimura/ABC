@@ -6610,5 +6610,14 @@
   "route": "★在庫の `vAdd_Delta_of_veluCurve_eq`（第 1059）の **`c₄` 版**である。☆`c₄(veluCurve W v w) = c₄(W) + 240v`（在庫）が単元（第 1323）で、`c₄` の付値の変換則（在庫）と `tateDvrVal_eq_zero_of_isUnit`（在庫）を繋ぐだけ。",
   "consequence": "★★★これで **Vélu の商は悪い素点で `c₄` の付値が `0`**。☆第 1322（`c₄` が単元の整モデルは半安定）に渡せば、`VeluQuotOK` の悪い素点側が出る——残るのは `valAdd`（大域）への翻訳（`vAdd_algebraMap_eq_valAdd`、在庫）と整性（`veluIntegralClosed`、在庫）だけである。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "veluSemistableBad20260902": {
+  "block": 1327,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★★★★★Vélu の商は悪い素点で半安定——VeluQuotOK の悪い素点側が閉じた",
+  "proved": "☆`semistableAt_velu_of_veluCurve_eq`（`Found/GaloisRep/VeluSemistableBad.lean`、第 1327）。",
+  "route": "★4 段: 第 1323（Tate 曲線の Vélu の商は `c₄` が単元）→ 第 1326（曲線の等式から `v(c₄) = 0`）→ `vAdd_algebraMap_eq_valAdd`（在庫、局所→大域）→ 第 1322（`c₄` が単元の整モデルは半安定）。",
+  "consequence": "★★★**原文が「同種なので自動」と括弧で述べた段のうち、悪い素点の半安定性が閉じた**。☆`VeluQuotOK` に残るのは (a) 良い素点側（同種で良還元が保たれる＝Néron–Ogg–Shafarevich）と(b) Vélu の商の楕円性（Vélu の定理）の 2 つである。★仮説の `hEq`（曲線の等式）と `hu`（`u` の付値 0）は、在庫の `veluQuotientFull_vcPoint_eq`（第 969）・`vAdd_tateModel_u_eq_zero`（第 1056）が与える形である。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }

@@ -1388,6 +1388,7 @@ import ABC3.Found.GaloisRep.SemistableFromC4
 import ABC3.Found.GaloisRep.VeluTateC4Unit
 import ABC3.Found.GaloisRep.VeluTateC4Val
 import ABC3.Found.GaloisRep.VAddC4Velu
+import ABC3.Found.GaloisRep.VeluSemistableBad
 import ABC3.Found.GaloisRep.TateUnipotent
 import ABC3.Found.GaloisRep.TorsionTransport
 import ABC3.Found.GaloisRep.TateSetupRigid
