@@ -8,6 +8,7 @@ import ABC3.Check.GenEll.RemarkSigmaWitness
 import ABC3.Check.GenEll.Prop17Witness
 import ABC3.Check.GenEll.Prop17AxiomGap
 import ABC3.Check.GenEll.Prop17Direction
+import ABC3.Check.GenEll.BelyiGeneralVacuous
 import ABC3.Check.GenEll.Thm21AxiomGap
 import ABC3.Check.GenEll.Thm21Witness
 import ABC3.Check.NCBelyi.Thm25AxiomGap

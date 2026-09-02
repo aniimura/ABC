@@ -88,7 +88,18 @@ open ABC3.Meta ABC3.Found.GenEll
 ★原文の `Theorem 2.5` は**一般の滑らかな固有連結曲線 `X`** に対するもので、
 そこへの帰着に Riemann–Roch（`X` から `ℙ¹` への写像の構成）が要る。
 
-★★受ける形は「各 `v` の有限集合 `Ξ_v` の点を `U_ℙ` に送る `φ` が取れる」である。 -/
+★★受ける形は「各 `v` の有限集合 `Ξ_v` の点を `U_ℙ` に送る `φ` が取れる」である。
+
+★★★★★★★★**欠陥（2026-09-02、第 1389）——この主張は偽である**
+
+`UP` を**任意の集合**にしているので、`UP = ∅` かつ `Ξ_v ≠ ∅` で偽である。
+☆さらに `φ` は**単なる函数**であって射ではないので、
+`[NCBelyi] Theorem 2.5` の内容（`ℙ¹ ∖ {0,1,∞}` の上で不分岐な射）が写っていない。
+
+★★★**したがって `sorry` を埋めようとしても永久に埋まらない**。
+★先に**忠実な主張へ書き直す**こと。
+☆機械検証: `Check/GenEll/BelyiGeneralVacuous.lean` の
+`exists_belyi_noncritical_general_false`。 -/
 theorem exists_belyi_noncritical_general
     {Curve : Type} {Pt : Curve → Type} {P1 : Type} (X : Curve)
     (V : Type) (Xi : V → Set (Pt X)) (hfin : ∀ v, (Xi v).Finite)
@@ -105,7 +116,14 @@ def exists_belyi_noncritical_general.needs : List ProofObligation :=
   [ .otherPaper "[NCBelyi]" "Theorem 2.5(一般曲線版。ℙ¹ 版は Found/NCBelyi/Thm25P1.lean に済)" 5,
     .implicitStep
       ("★`X = ℙ¹` への帰着に Riemann–Roch が要る" ++
-       "（`Check/NCBelyi/Thm25AxiomGap.lean` が測定済み）。") 12 ]
+       "（`Check/NCBelyi/Thm25AxiomGap.lean` が測定済み）。") 12,
+    .implicitStep
+      ("★★★★**2026-09-02（第 1389）——現在の主張は偽である**。" ++
+       "`UP` が任意の集合なので `UP = ∅` かつ `Ξ_v ≠ ∅` で反例になる" ++
+       "（`Check/GenEll/BelyiGeneralVacuous.lean` で機械検証）。" ++
+       "☆`φ` も単なる函数で射ではない。" ++
+       "★先に忠実な主張へ書き直すこと——" ++
+       "`Found/NCBelyi/` の `ℙ¹` 版（21 ファイル、`sorry` 0）が語彙を持っている。") 12 ]
 
 /-! ## ★★★★節点 2-3 —— `K_V` の構成 -/
 
