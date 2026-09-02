@@ -6814,10 +6814,10 @@
   "block": 1357,
   "date": "2026-09-02",
   "title": "★★★★★★★★★★★★★★★★★★★★完備なイデアルに沿って冪等元が持ち上がる（第 1356 で特定した primitive を作った）",
-  "proved": "☆`Found/GenEll/IdempotentLift.lean`（第 1357）に`exists_isIdempotentElem_of_isAdicComplete`——`IsAdicComplete I R` かつ `a² − a ∈ I` なら、`a` と `mod I` で合同な冪等元 `e` が存在する。★`idemStep`・`idemSeq`・`idemSeq_sq_sub_mem`・`idemSeq_succ_sub_mem`・`idemSeq_sub_mem_of_le` も同ファイル。すべて `sorry` 無し。",
+  "proved": "☆`Found/GenEll/IdempotentLift.lean`（第 1357）に`exists_isIdempotentElem_of_isAdicComplete`——`IsAdicComplete I R` かつ `a² − a ∈ I` なら、`a` と `mod I` で合同な冪等元 `e` が存在する。★`idemStep`・`idemSeq`・`idemSeq_sq_sub_mem`・`idemSeq_succ_sub_mem`・`idemSeq_sub_mem_of_le` も同ファイル。すべて `sorry` 無し。 ★第 1358 で系 `isIdempotentElem_quotient_eq_zero_or_one`——**完備な整域の商は非自明な冪等元を持たない**——も取れた。",
   "route": "★Newton の反復 `f(a) = 3a² − 2a³`。恒等式 `f(a) − a = −(a² − a)(2a − 1)` と `f(a)² − f(a) = (a² − a)²(4a² − 4a − 3)`（どちらも `ring`）から `a² − a ∈ I^n ⟹ f(a)² − f(a) ∈ I^{2n}` かつ `f(a) ≡ a (mod I^n)`。☆`IsPrecomplete.prec` で極限を取り、`IsHausdorff.haus` で `e² = e` を出す。",
   "why": "★★★これは**mathlib に無い**（`RingTheory/Idempotents.lean` は冪零核に沿った持ち上げしか持たない）。☆第 1356 で「α 側の葉を止めている primitive はこれ 1 本」と特定したものである。",
-  "next": "☆次の段: (1) 完備局所環の上の加群有限代数は `I`-進完備、(2) `R′/m_R R′` は Artin 環、(3) `R′` は整域なので非自明な冪等元を持たない、(4) よって `R′` は局所、(5) Dedekind ＋ 局所 ⟹ DVR。",
+  "next": "☆次の段: (1) `R′` は DVR `R` 上有限自由（`IsIntegralClosure.module_free`、在庫）なので `IsAdicComplete` が積で移る、(2) `R′/m_R R′` は Artin 環、(3) 第 1358 より非自明な冪等元なし、(4) よって `R′` は局所、(5) Dedekind ＋ 局所 ⟹ DVR。★mathlib に無いのは (1) の「有限自由加群への `IsAdicComplete` の移送」と(4) の「Artin ＋ 冪等元なし ⟹ 局所」である。",
   "gate": "lake build ABC3 成功（6373 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
  }
 }

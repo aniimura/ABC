@@ -2,6 +2,8 @@
 Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import Mathlib.RingTheory.AdicCompletion.Basic
+import Mathlib.Tactic.LinearCombination
+import Mathlib.Tactic.Ring
 import Mathlib.RingTheory.Idempotents
 import ABC3.Meta.Claim
 
@@ -158,7 +160,48 @@ theorem exists_isIdempotentElem_of_isAdicComplete (I : Ideal R) [IsAdicComplete 
     rw [heq]
     exact Ideal.add_mem _ h1 h2
 
+/-- ★★★★★★★★★★★★★★★★★★★★
+**完備な整域の商は非自明な冪等元を持たない**——★**無条件**（第 1358）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆冪等元は第 1357 で `R` へ持ち上がり、`R` が整域なら `0` か `1` しかない。
+
+★★★これが「完備 DVR の有限整閉包は**局所**」の段で効く形である
+——商が Artin 環で非自明な冪等元を持たなければ局所だからである。 -/
+theorem isIdempotentElem_quotient_eq_zero_or_one (I : Ideal R) [IsAdicComplete I R]
+    [IsDomain R] {x : R ⧸ I} (hx : x * x = x) :
+    x = 0 ∨ x = 1 := by
+  obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+  have ha : a ^ 2 - a ∈ I := by
+    have : (Ideal.Quotient.mk I) (a ^ 2 - a) = 0 := by
+      rw [map_sub, map_pow]
+      rw [sq]
+      rw [hx]
+      exact sub_self _
+    exact (Submodule.Quotient.mk_eq_zero I).mp this
+  obtain ⟨e, he, hea⟩ := exists_isIdempotentElem_of_isAdicComplete I ha
+  have hmk : (Ideal.Quotient.mk I) a = (Ideal.Quotient.mk I) e := by
+    refine (Submodule.Quotient.eq I).mpr ?_
+    simpa using (Ideal.neg_mem_iff _).2 hea
+  have h01 : e = 0 ∨ e = 1 := by
+    have : e * (e - 1) = 0 := by
+      have : e ^ 2 - e = 0 := by rw [he]; ring
+      linear_combination this
+    rcases mul_eq_zero.mp this with h | h
+    · exact Or.inl h
+    · exact Or.inr (by linear_combination h)
+  rcases h01 with h | h
+  · exact Or.inl (by rw [hmk, h]; simp)
+  · exact Or.inr (by rw [hmk, h]; simp)
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def isIdempotentElem_quotient_eq_zero_or_one.src : Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(完備な整域の商は非自明な幂等元を持たない。★無条件)",
+    sectionId := "genell-thm-3-8" }
 
 def idemStep.src : Source :=
   { paper := "GenEll", pdfPage := 19,
