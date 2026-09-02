@@ -1654,6 +1654,7 @@ import ABC3.Found.GaloisRep.TateDeepInvolution
 import ABC3.Found.GaloisRep.VeluSemistableBadFree
 import ABC3.Found.GenEll.MuOrDeep
 import ABC3.Found.GenEll.MuPrimitiveRootOrDeep
+import ABC3.Found.GenEll.VeluNotDvdLFree
 /-!
 # Found — 実装済みの基礎
 
