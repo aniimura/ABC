@@ -6676,5 +6676,15 @@
   "route": "★段 1: `1 ≤ k < l` では `k z₀ ∉ Λ`（`intCast_mul_mem_lattice_iff`）。☆段 2: 代表系 `T` から 0 を抜くと `{k z₀ : 1 ≤ k < l}`（`exists_velu_rep` の `hTdef`）。★段 3: 座標集合の突き合わせ（第 1332）。☆最後に第 1330 の `latticeCurve_eq_veluQuotientFull` と `isElliptic_latticeCurve'`。",
   "consequence": "★★★これは `Skeleton/GenEll/AlphaBridge.lean` の `VeluQuotOK` が要求する**楕円性そのもの**（の `ℂ` 版）である。☆残るのは `ℂ` へ埋め込んで降ろす段（第 1331 `isElliptic_veluQuotientFull_of_map`）だけ。",
   "gate": "lake build ABC3 成功（6362 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
+ },
+ "veluEllipticField20260902": {
+  "block": 1334,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★★★★★★★★★ℂ に埋め込める体の上で Vélu の商は楕円",
+  "proved": "☆`Found/GenEll/VeluEllipticField.lean`（第 1334）に`isElliptic_veluQuotientFull_nsmul_of_embed`。任意の体 `F` と埋め込み `f : F →+* ℂ` に対し、位数 `l` の点 `Q` の生成する部分群による Vélu の商は楕円。補助に `isElliptic_of_variableChange_smul` と`isElliptic_velu_congr_curve`。",
+  "route": "★段 1-2: `ℂ` へ送る（第 1331 ＋ `image_pointCoords_rhPoint_nsmul`）。☆段 3: 一意化の変数変換 `C • (W⊗ℂ) = latticeCurve P`（`exists_periodPair_of_isElliptic`）。★段 4: 商は変数変換と可換（第 974 `veluQuotientFull_vcPoint_eq`）。☆段 5: 格子曲線の商は楕円（第 1333）。",
+  "inventory": "★★☆**在庫の引き方の反省**——`veluQuotientFull_variableChange` の 2 仮説（`hB`・`hBx`）を潰す補題を新規に書き始めたが、`sum_negY_eq_zero`・`sum_negY_mul_x_eq_zero`（第 912）と`pointCoords_image_negY_stable`・`image_pointCoords_vcPoint_nsmul`（第 949）と`veluQuotientFull_vcPoint_eq`（第 974）が**すべて在庫にあった**。☆宣言名で grep せず「概念語」で grep すべきだった（衝突エラーで気づいた）。",
+  "consequence": "★★★`VeluQuotOK` の楕円性は「数体 `M` から `ℂ` への埋め込みを 1 本取る」だけになった。☆残るのは良い素点の半安定性である。",
+  "gate": "lake build ABC3 成功（6363 jobs）、mojibake ok、check.mjs PASS、Found/ の sorry 0。"
  }
 }

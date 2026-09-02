@@ -3162,3 +3162,9 @@ mathlib の `Affine.Point.add` は `x₁ = x₂` の場合分けに `DecidableEq
 
 `isElliptic_latticeCurve'` のようにプライム付きの宣言名をシングルクォート文字列に入れると `SyntaxError: Unexpected identifier` になる。**プライムを含む行だけダブルクォート**にする。
 ☆`node tools/_ledger-NNNN.mjs` の出力（`ledger NNNN written`）を必ず目で確認すること——コミットは通ってしまうので気づかない。
+
+## 在庫は「宣言名」ではなく「概念語」で grep する
+
+`sum_veluB_nsmul` のような**これから付ける名前**で `.cache/decl-index.txt` を引いても当たらない。☆探すべきは概念語（`negY`・`stable`・`vcPoint`・`variableChange`）である。
+★第 1334 では `veluQuotientFull_variableChange` の 2 仮説を潰す補題を書き上げてから**同名宣言の衝突**（`environment already contains ...`）で在庫の存在に気づいた（`VeluPointSet.lean` 第 949・`VeluImage.lean` 第 912 に全部あった）。
+☆`lake build` の衝突エラーは在庫検索の最後の安全網であり、最初の網ではない。
