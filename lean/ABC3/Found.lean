@@ -1666,6 +1666,7 @@ import ABC3.Found.GenEll.MuPrimitiveRootOrDeep
 import ABC3.Found.GenEll.VeluNotDvdLFree
 import ABC3.Found.GenEll.VeluBadPrimeAll
 import ABC3.Found.GenEll.VeluGoodPrimeMem
+import ABC3.Found.GenEll.PrimeOverL
 /-!
 # Found — 実装済みの基礎
 
