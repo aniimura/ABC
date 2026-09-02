@@ -6531,5 +6531,14 @@
   "route": "★第 1318（局所の 2 入力）＋第 1309（固定点・動く点）＋第 1319（大域へ）。",
   "consequence": "★★★これで `alpha_mem_map_of_galTate`（第 1237）に渡せる `σ` が**悪い素点のデータだけ**から出る。☆残るのは (i) 分裂乗法還元の用意（不分岐 2 次捻り、在庫）と(iii) `ζ ∈ L_v`（素点を `L(ζ_l)` の上で取る）の 2 つだけ。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "imageSL2FromH2H1_20260902": {
+  "block": 1321,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★★★★★h2・h1 から ImageContainsSL2J へ（II 側の出口）",
+  "proved": "☆`imageContainsSL2J_of_h2_h1`（`Found/GenEll/ImageSL2FromH2H1.lean`、第 1321）。",
+  "route": "★基底は `nonempty_tate_basis`（在庫、`T_l E ≅ ℤ_l²`）が与える。☆`h2`・`h1` は基底に依らない言明なので `σ` だけあればよい。",
+  "consequence": "★★★これで **II 側は入口（悪い素点、第 1320）から出口（`ImageContainsSL2J`）まで繋がった**。☆`imageContainsSL2J_of_h2_h1`（第 1321）に第 1320 の結論を渡せばよい。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }

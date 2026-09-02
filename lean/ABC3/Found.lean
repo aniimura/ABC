@@ -1433,6 +1433,7 @@ import ABC3.Found.GenEll.LocalInputsSplit
 import ABC3.Found.GenEll.LocalInputsBadPrime
 import ABC3.Found.GenEll.AlphaBridgeFull2
 import ABC3.Found.GenEll.AlphaFromBadPrime
+import ABC3.Found.GenEll.ImageSL2FromH2H1
 import ABC3.Found.GaloisRep.Lemma35Descend
 import ABC3.Found.GaloisRep.TowerInstances
 import ABC3.Found.GaloisRep.Lemma35Assemble
