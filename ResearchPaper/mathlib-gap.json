@@ -6658,5 +6658,14 @@
   "route": "★楕円性は `Δ ≠ 0`（体の上）で、`Δ` は体の準同型で移る（`veluQuotientFull_map`、在庫）。☆体の準同型は単射なので、埋め込みの先で `Δ ≠ 0` なら元でも `Δ ≠ 0`。",
   "consequence": "★★★これで **「数体上の Vélu の商は楕円」が `ℂ` の計算（第 1330）に帰着**した。☆残るのは、`ℂ` の側で「`E ⊗ ℂ` を格子曲線に変数変換し、`S` の像が代表系 `T` から来る集合と一致する」ことを言う段である（`exists_periodPair_of_isElliptic`（在庫）＋点の対応）。",
   "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
+ },
+ "veluLatticeSet20260902": {
+  "block": 1332,
+  "date": "2026-09-02",
+  "title": "★★★★★★★★Q の倍数の座標集合＝代表系の座標集合（第 1330 を点の語彙に）",
+  "proved": "☆`Found/GenEll/VeluLatticeSet.lean`（第 1332）に 2 本。`pointCoords_uniformMap`（`Φ` の座標は格子点の座標）と `image_pointCoords_nsmul_eq`。",
+  "route": "★`Q = Φ(z₀)` で `Φ` は加法準同型（`uniformHom`、在庫）なので `k • Q = Φ(k z₀)`。☆`k z₀ ∉ Λ`（`1 ≤ k < l`）では座標は `(℘(k z₀), ℘′(k z₀)/2)`（`uniformMap_of_notMem`、在庫）。",
+  "consequence": "★★★これで第 1330（代表系 `T` の語彙）が**原文の `{pointCoords (k • Q)}` の語彙**と繋がる。☆残るのは `T.erase 0` と `((range l).erase 0).image (k ↦ k z₀)` の一致（`exists_velu_rep` の `hTdef` が与える）を挟む段だけである。",
+  "gate": "lake build ABC3 成功、mojibake ok、check.mjs PASS、Found/ の sorry 0、genell-progress 20/24。"
  }
 }
