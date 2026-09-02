@@ -3,6 +3,7 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 -/
 import ABC3.Found.GenEll.EllModuliObjects
 import ABC3.Found.GaloisRep.BadPrimeData
+import ABC3.Found.GaloisRep.CompletionValuationBridge
 import ABC3.Meta.Claim
 
 /-!
@@ -67,7 +68,48 @@ theorem SSCurve.exists_bad_prime_data (E : SSCurve) (h : E.HasMultRed) :
   obtain ⟨C, hC, hc4⟩ := exists_minimal_c4_unit_of_jExp_neg p E.W (E.ss p) hj
   exact ⟨p, C, hj, hC, hc4⟩
 
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★
+**乗法還元から完備化の上の乗法還元が出る**——★**無条件**（第 1351）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆`hp` は `valuation_algebraMap_adicCompletion`（在庫、証明済み）が与える。
+★極小性と乗法還元は第 976（証明済み）が与える。
+
+★★★これで #4 に残るのは**分裂性**と **`ζ_l ∈ L_v`** の 2 枚だけである。 -/
+theorem SSCurve.exists_local_multRed (E : SSCurve) (h : E.HasMultRed) :
+    ∃ (p : HeightOneSpectrum (𝓞 E.fld)) (C : WeierstrassCurve.VariableChange E.fld),
+      jExp p E.W < 0 ∧
+      ∃ _ : WeierstrassCurve.IsMinimal (p.adicCompletionIntegers E.fld)
+          ((C • E.W).baseChange (p.adicCompletion E.fld)),
+        WeierstrassCurve.HasMultiplicativeReduction (p.adicCompletionIntegers E.fld)
+          ((C • E.W).baseChange (p.adicCompletion E.fld)) := by
+  obtain ⟨p, C, hj, hC, hc4ne, hc4⟩ := E.exists_bad_prime_data h
+  have hp := valuation_algebraMap_adicCompletion E.fld p
+  haveI hmin : WeierstrassCurve.IsMinimal (p.adicCompletionIntegers E.fld)
+      ((C • E.W).baseChange (p.adicCompletion E.fld)) :=
+    isMinimal_baseChange_at_bad_prime (Lv := p.adicCompletion E.fld)
+      (R := p.adicCompletionIntegers E.fld) p hp E.W C hC hc4ne hc4
+  exact ⟨p, C, hj, hmin,
+    hasMultiplicativeReduction_at_bad_prime (Lv := p.adicCompletion E.fld)
+      (R := p.adicCompletionIntegers E.fld) p hp E.W C hC hc4ne hc4 hj⟩
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def SSCurve.exists_local_multRed.src : Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(乗法還元から完備化の上の乗法還元が出る。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def SSCurve.exists_local_multRed.needs : List ProofObligation :=
+  [ .citation "[ABC3]" "isMinimal_baseChange_at_bad_prime / hasMultiplicativeReduction_at_bad_prime(第 976、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.hasMultiplicativeReduction_at_bad_prime") 1,
+    .citation "[ABC3]" "valuation_algebraMap_adicCompletion(在庫、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.valuation_algebraMap_adicCompletion") 1,
+    .implicitStep
+      ("★★★★**2026-09-02（第 1351）**——#4 に残るのは" ++
+       "**分裂性**と **`ζ_l ∈ L_v`** の 2 枚だけになった。") 2 ]
 
 def SSCurve.exists_jExp_neg.src : Source :=
   { paper := "GenEll", pdfPage := 19,
