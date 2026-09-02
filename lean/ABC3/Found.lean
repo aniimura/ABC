@@ -1649,6 +1649,7 @@ import ABC3.Found.Arakelov.Prop14ii
 import ABC3.Found.Arakelov.MetricRatio
 import ABC3.Found.Arakelov.VerticalTwistMetric
 import ABC3.Found.GaloisRep.TateDeepPoints
+import ABC3.Found.GaloisRep.TateVeluDeep
 import ABC3.Found.GenEll.MuOrDeep
 /-!
 # Found — 実装済みの基礎
