@@ -53,4 +53,4 @@
 - [CorrHypトラックはSkeleton完了(24/24)](corrhyp-track-goal.md) — 2026-09-04、§1 5/5〜§6 1/1。ABC3b担当。check.mjsでG1(出典・逐語照合)を全項目パス、G9(非空虚性14件)は既知debtとして残す。次はTrack B。
 - [.txtキャッシュとライブpdftotextが同じシェルでも食い違う](txt-cache-vs-live-pdftotext-differs.md) — CorrHyp Theorem 4.2で実測。プライム記号・マイナス記号が同じページの同じ箇所で脱落。逐語は書いたら必ずcheck.mjsでライブ照合すること。
 - [pdftotextは下付き+上付きの出力順が出現ごとに不安定](pdftotext-subsup-order-unstable.md) — pGC §2-§4で実測。同じΓ_K^vが同一段落内でΓvK/ΓKvと入れ替わる。都度実測して<sup>/<sub>の書く順を合わせること。
-- [p進対数の準同型性: 一般のKでsorry無しで解決](padic-log-additivity-blocked.md) — 在庫確認でFound/IUTchIII/PadicLogMul.leanの既存証明(ℚ_p版)を発見、一般KへFound/PGC/PadicLogMul.lean::padicLog_mulとして一般化。pGC Prop 1.2のneedsの1つが解消(残り2つ=相互律の同型自体は依然absent)。
+- [p進対数: 一般のKで準同型性・単射性・全射性(球からの全単射)をsorry無しで解決](padic-log-additivity-blocked.md) — Found/PGC/PadicLogMul.lean(padicLog_mul)・PadicLogInjective.lean(padicLog_injOn)・PadicLogSurjective.lean(padicLog_bijOn、Banach不動点定理経由でexp/log互逆性を回避)。pGC Prop 1.2/2.1のneedsが前進(中心の相互律の同型自体は依然absent)。

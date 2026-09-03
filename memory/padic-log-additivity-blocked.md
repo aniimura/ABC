@@ -1,9 +1,20 @@
 ---
 name: padic-log-additivity-blocked
-description: pGC の一般局所体 K でも p進対数の準同型性を sorry 無しで解決した(2026-09-04、在庫確認が発端)
+description: pGC の一般局所体 K で p進対数の準同型性・単射性・全射性(=U_Kへの全単射)をすべてsorry無しで解決した(2026-09-04)
 metadata:
   type: project
 ---
+
+★★★★2026-09-04 さらに続報(全射性も解決): **`padicLog K` が半径 1/4 の球から
+それ自身への全単射であることを示した**(`Found/PGC/PadicLogSurjective.lean::
+padicLog_bijOn`)。下記で「互逆性(exp∘log=id)の証明は加法性より重い」と
+見積もっていたが、**全射性を得るのに互逆性は不要だった**——p進版の縮小写像
+(mathlib `ContractingWith.efixedPoint'`、Banach の不動点定理)を対数級数の
+尾部に直接適用する別ルートで、組み合わせ論を一切経由せずに解決できた
+(`x^n-y^n=(x-y)·Σxⁱyⁿ⁻¹⁻ⁱ` という古典的因数分解の超距離評価だけが鍵)。
+**教訓**: 「経路 A が重いと分かったら経路 A' (exp/log の互逆性)を探す」のではなく、
+一段引いて「そもそも何が欲しいのか(全射性)」に戻ると、互逆性を経由しない
+別の道具(不動点定理)が見つかることがある。
 
 ★★★2026-09-04 続報(解決): **一般の K(ℚ_p の任意の有限次拡大)でも p進対数の
 準同型性を sorry 無しで確立した。** `node tools/decl-index.mjs` を再生成して

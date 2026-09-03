@@ -77,7 +77,10 @@ def prop_2_1.needs : List ProofObligation :=
        "★2026-09-04: 準同型性は一般の K で確立(`Found/PGC/PadicLogMul.lean::padicLog_mul`)。" ++
        "★★同日: 単射性(‖x‖≤1/4 の球上)も一般の K で確立" ++
        "(`Found/PGC/PadicLogInjective.lean::padicLog_injOn`)。" ++
-       "残るのは全射性(像が実際に K の開部分群に一致すること、exp/log の互逆性を要する)") 4,
+       "★★★同日: 全射性(縮小写像+Banach の不動点定理、exp/log の互逆性を経由しない" ++
+       "別ルート)まで確立し、`padicLog K` が半径 1/4 の球からそれ自身への" ++
+       "全単射であることを示した(`Found/PGC/PadicLogSurjective.lean::padicLog_bijOn`)。" ++
+       "この folklore 入力は sorry 無しで解消") 4,
     .citation "[6] Serre, Local Fields, Chapter VII §8" "Verlagerung(転送写像)"
       (.inMathlib "MonoidHom.transfer") 4,
     .implicitStep "log による U_K⊗Q_p ≅ K と Verlagerung の両立性から Prop 2.1 自体への一段" 4 ]
