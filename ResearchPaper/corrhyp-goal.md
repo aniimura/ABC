@@ -200,6 +200,47 @@ spreading-out 定理群を持つ。これは `Spec K`(`K` を有限生成 `k`-�
 現時点で numbered item として Found 完成しているのは
 `Proposition 3.2`(§3)のみで、24/24 にはまだ遠い。
 
+★★★★★**2026-09-04続報、`Comm : Fuchsian → Fuchsian` の型付けが
+Margulis の二分法そのものを埋め込んでいることを原文照合で確認**(重要な発見)。
+`corrhyp_prop_3_2`(`Found/CorrHyp/FuchsianGroup.lean`)に `.src` を付けて
+Skeleton の `prop_3_2` と直結させようとして、次に気づいた:
+
+- 原文 p.5(`Comm(Γ)` 導入直後): 「X is not arithmetic. Thus, we have
+  Γ ⊆ Comm(Γ) ⊆ PSL2(R)⁰, and **Γ is of finite index in Comm(Γ)**.」
+  ——非 arithmetic ⟹ Comm(Γ) 自身が離散(Fuchsian)、という**Margulis の
+  二分法の主張そのもの**が §2 の地の文で明言されている。
+- `Interface/CorrHyp/HyperbolicCurve.lean` の `Comm : Fuchsian → Fuchsian`
+  という型(`Fuchsian` = 離散部分群)は、この事実を**型シグネチャの中に
+  既に組み込んでいる**——`Definition 2.1`(`InfinitelyManyCorr`)・
+  `Proposition 3.2` の**両方**が `D.Comm Γ : D.Fuchsian`(離散である前提)を
+  直接使っているため、これは Skeleton 設計時の見落としではなく、
+  原文の記述を素直に型にした結果。
+- ★しかし `Comm` が**全域関数**である以上、arithmetic の場合(Comm(Γ) は
+  PSL2(R)⁰ で稠密——離散ではない、原文 §2 の対偶側)にも `Fuchsian` 型の
+  値を返さねばならず、これは**論理的に無理**——`Comm` は「非arithmeticの
+  場合にのみ意味を持つ部分関数」として書き直す必要がある(あるいは
+  `MargulisArithmetic`/`ShimuraArithmetic` を経由した場合分けを型に
+  持ち込む)。★★これは**Interface の実装可能性そのものに関わる欠陥**
+  であり、単なる「橋渡しフィールドが足りない」より深い——`Comm` を
+  正しく全域化するには **Margulis の二分法自体を証明する(あるいは
+  posit した axiom として明示的に受け取る)** ことが避けられない。
+- **`Proposition 3.2` 自身の結論**(`Γ_Z ⊆ Comm(Γ_X)`)は実は
+  `Comm(Γ_X)` が離散であることを要求しない(単なる部分群包含の主張)
+  ——`corrhyp_prop_3_2` が離散性抜きで証明できたのはこのため。
+  ★つまり「`Proposition 3.2` を Skeleton の型のまま Found にする」ことは、
+  `Comm` の全域化問題という**§2 由来の別の欠落**を先に解決しない限り、
+  型すら整合しない。
+
+**結論(このセッションでは Interface を書き換えない)**: `Comm` の全域化・
+Margulis 二分法の扱いは `HyperbolicCurveData` を触る全 Skeleton ファイル
+(現状 `Section2.lean`・`Section3.lean` の2箇所のみ、と実測済み)に影響する
+設計判断であり、拙速に直さない。次にここへ戻るときの選択肢を記録する:
+(a) `Comm` を `Fuchsian → Fuchsian → Prop`(関係、部分的に空)に弱める、
+(b) `MargulisArithmetic`/`ShimuraArithmetic` を経由した `Comm` の場合分け版
+    (`Fuchsian → (h : ¬MargulisArithmetic Γ) → Fuchsian`)に変える、
+(c) Margulis の二分法自体を新たな独立した Found の目標として証明する
+    (代数群論・非可換 Galois コホモロジーの人年規模の欠落、既知)。
+
 関連: [[leaf-first-with-graph-feedback]] / [[leaves-are-measured-not-guessed]] /
 [[measure-mathlib-before-skeleton]] / [[genell-track-b]] / [[corrhyp-track-goal]] /
 [[stale-status-read-lean-first]] / [[no-wall-decompose-instead]]
