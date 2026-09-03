@@ -16,6 +16,21 @@ open ABC3.Meta ABC3.Interface.PGC ABC3.Found.PGC
 
 variable {p : ℕ} [Fact p.Prime]
 
+/-- `RamificationFiltration`(`Interface/`)から `K` 1つ分の `FilteredGroup`(`Found/`)を作る。
+
+★`ABC3.Interface.PGC.RamificationFiltration.filt`(`Skeleton/PGC/Section4.lean`)と
+**同じ構成**だが、Section4 は本ファイルを import するので(循環を避けるため)ここに
+独立に置く——小さな構造の詰め替えなので複製のコストは小さい。 -/
+noncomputable def filteredGroupOf (RF : RamificationFiltration p) (K : PAdicLocalField p) :
+    FilteredGroup :=
+  { G := K.absGal, Gv := RF.Gv K, isClosed := RF.isClosed K, isNormal := RF.isNormal K,
+    antitone := RF.antitone K }
+
+/-- 台帳の付随宣言(橋渡しの `def` であり、原典の項目そのものではない)。
+`ABC3.Interface.PGC.RamificationFiltration.filt.src`(`Section4.lean`)と同じ位置づけ。 -/
+def filteredGroupOf.src : Source :=
+  { paper := "pGC", pdfPage := 6, item := "Section 3 (filteredGroupOf)", sectionId := "cor-3-1" }
+
 /-! ## Corollary 3.1 -/
 
 /-- **[pGC] Corollary 3.1**
@@ -33,16 +48,37 @@ variable {p : ℕ} [Fact p.Prime]
 `isHodgeTate : ∀ K, Prop` として受け取り、その値が α で保たれることだけを主張する
 ——実際の Hodge-Tate 述語の構成は独立した課題として残す。
 
+## 逸脱の訂正(2026-09-04)
+
+★原文は明示的に「the **filtered** group Γ_K」(フィルトレーション込みの群)から
+回復できると述べている。以前の形式化は `_α` を**裸の**
+`ContinuousMulEquiv K.absGal K'.absGal`(フィルトレーションと無関係な同型)に
+取っていた——`_RF` はパラメータとして受け取りながら `_α` の型を一切制約していない、
+という不整合(先頭の `_` は「未使用」の意味そのままだった)。
+
+数論的に見ても、これは看過できない差である: `Γ_K` を**裸の**副有限群として見た
+同型類は(奇素数 p では)`p` と `[K:Q_p]` だけで決まり、`K` 自身には依らない
+(Iwasawa の型の古典的事実)——したがって裸の `α` が存在するだけでは
+`K ↦ K` に依存する述語(`isHodgeTate` のような自由なパラメータ)の不変性を
+導く根拠に**なりえない**。原文がわざわざ「filtered group」と言っているのは
+まさにこの理由による。
+
+**訂正**: `_α` の型を `FilteredGroup.Iso (filteredGroupOf RF K) (filteredGroupOf RF K')`
+に直した(`Theorem 4.2` が `FilteredGroup.OuterIso` を使うのと同じ発想——
+高次分岐群のフィルトレーションを保つ同型のみを許す)。`RF` は今回から実際に
+型の中で使われる(`_RF` → `RF`)。
+
 ## 依拠する境界外の結果
 
 - [1] Serre, *Abelian ℓ-adic Representations*, Chapter III §1.2(d_V ≤ dim_{Q_p}(V)、
   Hodge-Tate の定義そのもの)。mathlib 不在。
 - Proposition 2.2(K̄^ の回復)への直接依存。 -/
-theorem cor_3_1 (_RF : RamificationFiltration p)
+theorem cor_3_1 (RF : RamificationFiltration p)
     (V : PAdicLocalField p → Type*) [∀ K, AddCommGroup (V K)] [∀ K, Module ℚ_[p] (V K)]
     [∀ K, FiniteDimensional ℚ_[p] (V K)] [∀ K, SMul K.absGal (V K)]
     (isHodgeTate : ∀ K, Prop) :
-    ∀ {K K' : PAdicLocalField p} (_α : ContinuousMulEquiv K.absGal K'.absGal),
+    ∀ {K K' : PAdicLocalField p}
+      (_α : FilteredGroup.Iso (filteredGroupOf RF K) (filteredGroupOf RF K')),
       isHodgeTate K ↔ isHodgeTate K' := sorry
 
 def cor_3_1.src : Source :=
@@ -88,14 +124,23 @@ def IsUniformizing.src : Source :=
 > Given a continuous E[Γ_K]-module V of E-dimension 1, the issue of whether or not V is
 > uniformizing can be determined entirely group-theoretically from the filtered group Γ_K.
 
+## 逸脱の訂正(2026-09-04)
+
+Corollary 3.1 と同じ理由(原文「the filtered group Γ_K」、裸の同型では
+`K` に依存する述語の不変性を導く根拠にならない——`Γ_K` の裸の同型類は
+`p` と `[K:Q_p]` だけで決まるという古典的事実)で、`_α` の型を
+`FilteredGroup.Iso (filteredGroupOf RF K) (filteredGroupOf RF K')` に訂正した
+(`RF` も `_RF` → `RF` に)。
+
 ## 依拠する境界外の結果
 
 - [1] Serre, Chapter III, Appendix §5(d_V(i) による uniformizing の判定条件式)。
 - Corollary 3.1 への直接依存(d_V(i) が回復できることを使う)。 -/
-theorem cor_3_3 (_RF : RamificationFiltration p)
+theorem cor_3_3 (RF : RamificationFiltration p)
     (E : Type*) [Field E] [Algebra ℚ_[p] E]
     (toGal : ∀ K : PAdicLocalField p, {x : K.carrier // ‖x‖ = (1 : ℝ)} → K.absGal) :
-    ∀ {K K' : PAdicLocalField p} (_α : ContinuousMulEquiv K.absGal K'.absGal)
+    ∀ {K K' : PAdicLocalField p}
+      (_α : FilteredGroup.Iso (filteredGroupOf RF K) (filteredGroupOf RF K'))
       (ρ : K.absGal →* Eˣ) (ρ' : K'.absGal →* Eˣ),
       IsUniformizing K E (toGal K) ρ ↔ IsUniformizing K' E (toGal K') ρ' := sorry
 
