@@ -89,11 +89,17 @@ reindexingが要る」と見積もっていたが、これで不要になり、�
 `f`との関数等式を満たすこと(`psi_functional_equation`)を示し、`X`
 (恒等射)も同じ等式を満たすことと合わせて一意性補題で`ψ=X`を結論する。
 
-**残る作業**: `F_f(0,Y)=Y`(対称な単位元則)・結合律・可換律(形式群
-法則であることの残り)、torsion点の構成、Galois作用を経由した相互律
-写像の構成——pGC の各項目(Prop 1.2・Cor 1.3・Prop 2.1・Prop 2.2・
-Theorem 4.2)を閉じるには、なお相互律写像そのものの構成・性質証明と
-いう大きな仕事が残っている。
+**続報(同日、対称な単位元則F_f(0,Y)=Yも完成)**: `Found/PGC/
+LubinTateIdentityLawSymm.lean::formalGroupLaw_identity_left`——
+`LubinTateIdentityLaw.lean`をX_0↔X_1で対称に反復し、`F_f(0,Y)=Y`も
+sorry無しで確立した。`subst_family_comp_value`等の一般補題は
+X_0/X_1によらないためそのまま再利用でき、2回目はほぼ一発で通った。
+これで**両方の**単位元則(`F_f(X,0)=X`・`F_f(0,Y)=Y`)が完成。
+
+**残る作業**: 結合律・可換律(形式群法則であることの残り)、torsion点の
+構成、Galois作用を経由した相互律写像の構成——pGC の各項目(Prop 1.2・
+Cor 1.3・Prop 2.1・Prop 2.2・Theorem 4.2)を閉じるには、なお相互律写像
+そのものの構成・性質証明という大きな仕事が残っている。
 
 詳細な発見の経緯は `ResearchPaper/blocked-leaves.json` の
 `[pGC] Proposition 1.2 / ... —— 局所類体論の相互律` エントリの
