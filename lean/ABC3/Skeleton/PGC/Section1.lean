@@ -155,6 +155,9 @@ def residueCard_and_degree_recoverable.needs : List ProofObligation :=
         "'log' の出現は全て Nat.log / Real.log(付値の対数)。" ++
         "'padicExp|expPadic' → 0 件。" ++
         "公開プロジェクト(ClassFieldTheory・LocalClassFieldTheory)は 2026-08-14 に測定して 0 件" ++
-        "(ResearchPaper/lean-ecosystem.json。両リポジトリは本リポジトリに clone されていないので今日は再現していない)") 3 ]
+        "(ResearchPaper/lean-ecosystem.json。両リポジトリは本リポジトリに clone されていないので今日は再現していない)。" ++
+        "★2026-09-04: 級数の収束のみ `Found/PGC/PadicLog.lean` に自前で構築した(sorry 無し、" ++
+        "`padicLog`/`logTerm_summable`)——準同型性(log((1+x)(1+y))=log(1+x)+log(1+y))は" ++
+        "まだ無いので、この境界外入力は依然として absent のまま残る") 3 ]
 
 end ABC3.Skeleton.PGC

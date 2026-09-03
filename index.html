@@ -33,16 +33,16 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-09-04 ・ コミット 3868 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-09-04 ・ コミット 3873 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card warn"><div class="k">ゲート</div><div class="v">NG</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">41/41</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">20667</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">20745</div></div>
   <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">5026</div></div>
-  <div class="card"><div class="k">構造単位</div><div class="v">261</div></div>
+  <div class="card"><div class="k">構造単位</div><div class="v">274</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">58</div></div>
 </div>
 <div class="note"><b>★<code>sorry</code> の件数を単独で進捗と読まないこと。</b>
@@ -83,7 +83,7 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>依存グラフ(我々が写した範囲)</h2>
 <div class="grid">
-  <div class="card"><div class="k">節点</div><div class="v">86</div></div>
+  <div class="card"><div class="k">節点</div><div class="v">99</div></div>
   <div class="card"><div class="k">辺</div><div class="v">87</div></div>
   <div class="card"><div class="k">最大深さ</div><div class="v">7</div></div>
   <div class="card ok"><div class="k">循環</div><div class="v">14</div></div>
@@ -95,10 +95,10 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>見る</h2>
 <a class="big" href="dependency-graph.html"><b>依存の層 — 左から着手する →</b>
-<span>原文の参照から機械抽出した 1238 節点を、強連結成分で潰して 489 個の箱・64 層に並べたもの。
+<span>原文の参照から機械抽出した 1241 節点を、強連結成分で潰して 489 個の箱・64 層に並べたもの。
 右端が [IUTchIII] Corollary 3.12、左端(層 0)は依存を持たないので今すぐ着手できる。
 ボックスをクリックすると、緑=これに要るもの / 紫=これを使うもの が推移的にハイライトされる。
-<b>我々が触れている節点 88 件・Interface の義務 18/127 件。</b>
+<b>我々が触れている節点 98 件・Interface の義務 18/130 件。</b>
 生成は <code>node tools/graph-layers.mjs</code>。<br>★★<b>分解チェーンを木のまま展開している</b>——<code>Theorem 3.4</code>(18 節点・9 層)や <code>Proposition 4.4</code>(13 節点・5 層)は1 箱ではなく、<b>本来の大きさ</b>で出る。登記は <code>ResearchPaper/frdi-decomposition.json</code>、葉は <code>node tools/frdi-newleaves.mjs</code>。</span></a>
 <a class="big" href="PLAN.md"><b>PLAN.md — 計画と、その訂正の記録 →</b>
 <span>実測した事実、ゲート G1–G6、飛躍の扱い、正直な制約。<b>反証された自分の主張を消さずに残している。</b></span></a>
@@ -281,6 +281,11 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>a12624c2</code></td><td>2026-09-04</td><td>記録——LocProP §0-§4(21/21)達成をgoalドキュメントに反映</td></tr>
+<tr><td><code>d575ad3f</code></td><td>2026-09-04</td><td>[LocProP] §4 が4/4完了——J-Geometric Sections、§0-§4全21項目達成</td></tr>
+<tr><td><code>545d9608</code></td><td>2026-09-04</td><td>[LocProP] §3 が5/5完了——The Weight Zero Quotient、check.mjsゲート全通過</td></tr>
+<tr><td><code>d476ba63</code></td><td>2026-09-04</td><td>[LocProP] §2 が4/4完了——Review of Galois Cohomology、check.mjsゲート全通過</td></tr>
+<tr><td><code>c6ade9c0</code></td><td>2026-09-04</td><td>pGC §2-§4 構造化・骨格を追加、Definition 2.3とLemma 4.1をsorry無しで閉じた</td></tr>
 <tr><td><code>977f1f85</code></td><td>2026-09-04</td><td>記録——structureのinstanceフィールドが外部の宣言で見えない罠を追記</td></tr>
 <tr><td><code>e37e44b3</code></td><td>2026-09-04</td><td>[LocProP] §1 が4/4完了——The Ordinary Case、check.mjsゲート全通過</td></tr>
 <tr><td><code>e3b61716</code></td><td>2026-09-04</td><td>CorrHyp Skeleton完了をmemoryに記録、pdftotextのキャッシュずれを新規記録</td></tr>
@@ -288,11 +293,6 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>53fa25fc</code></td><td>2026-09-04</td><td>CorrHyp: G1逐語照合をtools/check.mjsで検証・全項目パスさせた(第7件)</td></tr>
 <tr><td><code>18be3c82</code></td><td>2026-09-04</td><td>[LocProP] §0 が4/4完了——Lemma 0.4もInterface posit経由で条なし化、check.mjsゲート全通過</td></tr>
 <tr><td><code>1b9494d6</code></td><td>2026-09-03</td><td>[LocProP] §0 が3/4になった——Definition 0.3をEtaleSetup経由で条なし化</td></tr>
-<tr><td><code>4e955711</code></td><td>2026-09-03</td><td>CorrHyp §6(Theorem 6.1)を形式化した——24件全節点が揃った(第6件)</td></tr>
-<tr><td><code>834ab212</code></td><td>2026-09-03</td><td>[LocProP] Definition 0.3 用のInterface posit——EtaleSetup(sorry無し・構造のみ)</td></tr>
-<tr><td><code>ac127dc1</code></td><td>2026-09-03</td><td>CorrHyp §5(Lemma 5.1, Definition 5.2, Theorem 5.3, Lemma 5.4-5.6, Theorem 5.7)を形式化した(第5件)</td></tr>
-<tr><td><code>c9847c58</code></td><td>2026-09-03</td><td>記録——amendによる非fast-forwardの対処(fetch+merge)を追記</td></tr>
-<tr><td><code>df69e5b6</code></td><td>2026-09-03</td><td>merge: origin の CorrHyp コミット(amend前のPDerivate.lean巻き込み版)と合流</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
