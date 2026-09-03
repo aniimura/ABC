@@ -1,46 +1,170 @@
 {
-  "_comment": [
-    "★番号を持たない概念を、依存グラフの節点として拾うための語彙表。",
-    "目的は**工数の把握**であり網羅ではない。足りなければここに足す。",
-    "",
-    "各項目: term = 表示名 / re = 原文中の表記ゆれを拾う正規表現(大文字小文字は無視) /",
-    "        defIn = 定義が置かれている論文のタグ(探索範囲を絞るため。null なら全論文)",
-    "",
-    "★この表は人手で作った。機械が『これが中層だ』と判定したのではない。",
-    "  子が挙げた4語(temperoid / Frobenioid / anabelioid / 半グラフ)を核に、",
-    "  実測で IUT の語彙として繰り返し現れたものを足した。"
-  ],
-  "concepts": [
-    { "term": "semi-graph",                  "re": "semi-?graph",                          "defIn": "SemiAnbd" },
-    { "term": "anabelioid",                  "re": "anabelioid",                           "defIn": "@The Geometry of Anabelioids" },
-    { "term": "semi-graph of anabelioids",   "re": "semi-?graph of anabelioids",           "defIn": "SemiAnbd" },
-    { "term": "temperoid",                   "re": "temperoid",                            "defIn": "SemiAnbd" },
-    { "term": "tempered fundamental group",  "re": "tempered fundamental group",           "defIn": "SemiAnbd" },
-    { "term": "Galois category",             "re": "Galois category",                      "defIn": null },
-    { "term": "pre-Frobenioid",              "re": "pre-?Frobenioid",                      "defIn": "FrdI" },
-    { "term": "Frobenioid",                  "re": "Frobenioid",                           "defIn": "FrdI" },
-    { "term": "model Frobenioid",            "re": "model Frobenioid",                     "defIn": "FrdI" },
-    { "term": "prime-strip",                 "re": "prime-?strip",                         "defIn": "IUTchI" },
-    { "term": "Hodge theater",               "re": "Hodge theater",                        "defIn": "IUTchI" },
-    { "term": "initial Theta-data",          "re": "initial .{0,3}-?data",                 "defIn": "IUTchI" },
-    { "term": "etale theta function",        "re": "(etale|´etale|\\u00e9tale) theta function", "defIn": "EtTh" },
-    { "term": "mono-theta environment",      "re": "mono-?theta environment",              "defIn": "EtTh" },
-    { "term": "log-shell",                   "re": "log-?shell",                           "defIn": "AbsTopIII" },
-    { "term": "log-volume",                  "re": "log-?volume",                          "defIn": "AbsTopIII" },
-    { "term": "log-link",                    "re": "log-?link",                            "defIn": "IUTchIII" },
-    { "term": "log-theta-lattice",           "re": "log-?theta-?lattice",                  "defIn": "IUTchIII" },
-    { "term": "Theta-link",                  "re": "(\\u0398|Theta)-?link",                "defIn": "IUTchI" },
-    { "term": "pilot object",                "re": "pilot object",                         "defIn": "IUTchIII" },
-    { "term": "multiradial",                 "re": "multiradial",                          "defIn": "IUTchII" },
-    { "term": "Kummer isomorphism",          "re": "Kummer isomorphism",                   "defIn": null },
-    { "term": "holomorphic hull",            "re": "holomorphic hull",                     "defIn": "IUTchIII" },
-    { "term": "arithmetic line bundle",      "re": "arithmetic line bundle",               "defIn": null },
-    { "term": "hyperbolic orbicurve",        "re": "hyperbolic orbicurve",                 "defIn": null },
-    { "term": "once-punctured elliptic curve", "re": "once-?punctured elliptic curve",     "defIn": null },
-    { "term": "stable reduction",            "re": "stable reduction",                     "defIn": null },
-    { "term": "field of moduli",             "re": "field of moduli",                      "defIn": null },
-    { "term": "cyclotome",                   "re": "cyclotome",                            "defIn": null },
-    { "term": "Frobenius-like",              "re": "Frobenius-?like",                      "defIn": null },
-    { "term": "etale-like",                  "re": "(etale|´etale|\\u00e9tale)-?like",     "defIn": null }
-  ]
+ "_comment": [
+  "★番号を持たない概念を、依存グラフの節点として拾うための語彙表。",
+  "目的は**工数の把握**であり網羅ではない。足りなければここに足す。",
+  "",
+  "各項目: term = 表示名 / re = 原文中の表記ゆれを拾う正規表現(大文字小文字は無視) /",
+  "        defIn = 定義が置かれている論文のタグ(探索範囲を絞るため。null なら全論文)",
+  "",
+  "★この表は人手で作った。機械が『これが中層だ』と判定したのではない。",
+  "  子が挙げた4語(temperoid / Frobenioid / anabelioid / 半グラフ)を核に、",
+  "  実測で IUT の語彙として繰り返し現れたものを足した。"
+ ],
+ "concepts": [
+  {
+   "term": "semi-graph",
+   "re": "semi-?graph",
+   "defIn": "SemiAnbd"
+  },
+  {
+   "term": "anabelioid",
+   "re": "anabelioid",
+   "defIn": "@The Geometry of Anabelioids"
+  },
+  {
+   "term": "semi-graph of anabelioids",
+   "re": "semi-?graph of anabelioids",
+   "defIn": "SemiAnbd"
+  },
+  {
+   "term": "temperoid",
+   "re": "temperoid",
+   "defIn": "SemiAnbd"
+  },
+  {
+   "term": "tempered fundamental group",
+   "re": "tempered fundamental group",
+   "defIn": "SemiAnbd"
+  },
+  {
+   "term": "Galois category",
+   "re": "Galois category",
+   "defIn": null
+  },
+  {
+   "term": "pre-Frobenioid",
+   "re": "pre-?Frobenioid",
+   "defIn": "FrdI"
+  },
+  {
+   "term": "Frobenioid",
+   "re": "Frobenioid",
+   "defIn": "FrdI"
+  },
+  {
+   "term": "model Frobenioid",
+   "re": "model Frobenioid",
+   "defIn": "FrdI"
+  },
+  {
+   "term": "prime-strip",
+   "re": "prime-?strip",
+   "defIn": "IUTchI"
+  },
+  {
+   "term": "Hodge theater",
+   "re": "Hodge theater",
+   "defIn": "IUTchI"
+  },
+  {
+   "term": "initial Theta-data",
+   "re": "initial .{0,3}-?data",
+   "defIn": "IUTchI"
+  },
+  {
+   "term": "etale theta function",
+   "re": "(etale|´etale|\\u00e9tale) theta function",
+   "defIn": "EtTh"
+  },
+  {
+   "term": "mono-theta environment",
+   "re": "mono-?theta environment",
+   "defIn": "EtTh"
+  },
+  {
+   "term": "log-shell",
+   "re": "log-?shell",
+   "defIn": "AbsTopIII"
+  },
+  {
+   "term": "log-volume",
+   "re": "log-?volume",
+   "defIn": "AbsTopIII"
+  },
+  {
+   "term": "log-link",
+   "re": "log-?link",
+   "defIn": "IUTchIII"
+  },
+  {
+   "term": "log-theta-lattice",
+   "re": "log-?theta-?lattice",
+   "defIn": "IUTchIII"
+  },
+  {
+   "term": "Theta-link",
+   "re": "(\\u0398|Theta)-?link",
+   "defIn": "IUTchI"
+  },
+  {
+   "term": "pilot object",
+   "re": "pilot object",
+   "defIn": "IUTchIII"
+  },
+  {
+   "term": "multiradial",
+   "re": "multiradial",
+   "defIn": "IUTchII"
+  },
+  {
+   "term": "Kummer isomorphism",
+   "re": "Kummer isomorphism",
+   "defIn": null
+  },
+  {
+   "term": "holomorphic hull",
+   "re": "holomorphic hull",
+   "defIn": "IUTchIII"
+  },
+  {
+   "term": "arithmetic line bundle",
+   "re": "arithmetic line bundle",
+   "defIn": "GenEll"
+  },
+  {
+   "term": "hyperbolic orbicurve",
+   "re": "hyperbolic orbicurve",
+   "defIn": "AbsTopI"
+  },
+  {
+   "term": "once-punctured elliptic curve",
+   "re": "once-?punctured elliptic curve",
+   "defIn": null
+  },
+  {
+   "term": "stable reduction",
+   "re": "stable reduction",
+   "defIn": null
+  },
+  {
+   "term": "field of moduli",
+   "re": "field of moduli",
+   "defIn": null
+  },
+  {
+   "term": "cyclotome",
+   "re": "cyclotome",
+   "defIn": "NodNon"
+  },
+  {
+   "term": "Frobenius-like",
+   "re": "Frobenius-?like",
+   "defIn": null
+  },
+  {
+   "term": "etale-like",
+   "re": "(etale|´etale|\\u00e9tale)-?like",
+   "defIn": null
+  }
+ ]
 }
