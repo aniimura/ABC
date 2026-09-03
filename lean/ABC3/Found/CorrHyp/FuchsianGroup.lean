@@ -180,4 +180,26 @@ theorem self_le_commensurator (F : FuchsianGroup) : F.Γ ≤ commensurator F.Γ 
       simpa [mul_assoc] using this
   rw [heq]
 
+/-! ## `Proposition 3.2` へ向けた足場
+
+原文 p.8 の証明は「for the purpose of proving this Proposition, we may assume
+that C is Galois over Z. Thus, Γ_C is normal (and of finite index) in Γ_Z」と、
+`Γ_C` を正規化する段から始まる。一般の `C` では正規とは限らないので、
+標準的な処方は「`Γ_Z` の中での `Γ_C` の normal core」を取ること
+(`Γ_C` を Galois 閉包に取り替えるのと同じ効果——★逸脱として記録:
+原文は具体的な Galois 閉包を取るが、ここでは normal core という
+より直接的な群論的構成で同じ役割を果たす)。 -/
+
+/-- `Proposition 3.2` へ向けた足場: `C ≤ Z` が有限指数なら、`Z.Γ` の中で
+正規かつ有限指数な `N ≤ C.Γ` が取れる(`Z.Γ` の中での `C.Γ` の normal core、
+`Subgroup.finiteIndex_normalCore` から)。
+
+★**sorry 無し**。`Proposition 3.2` 本体(`Γ_Z ≤ Comm(Γ_X)`)はまだ——
+`N` を大きい群へ写して `Γ_X` との交わりを比較する段が残る。 -/
+theorem exists_normalCore_le {C Z : FuchsianGroup} (hCZ : IsFiniteIndexIn C Z) :
+    ∃ N : Subgroup Z.Γ, N.Normal ∧ N.FiniteIndex ∧ N ≤ C.Γ.subgroupOf Z.Γ := by
+  haveI : (C.Γ.subgroupOf Z.Γ).FiniteIndex := hCZ.2
+  exact ⟨(C.Γ.subgroupOf Z.Γ).normalCore, inferInstance, inferInstance,
+    Subgroup.normalCore_le _⟩
+
 end ABC3.Found.CorrHyp
