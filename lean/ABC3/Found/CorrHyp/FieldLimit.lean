@@ -40,4 +40,18 @@ theorem fg_sup {k K : Type*} [CommRing k] [CommRing K] [Algebra k K]
     (R S : Subalgebra k K) (hR : R.FG) (hS : S.FG) : (R ⊔ S).FG :=
   hR.sup hS
 
+/-- `exists_fg_subalgebra_mem_two` の一般化: `K` の**任意有限個**の元は、
+ある有限生成 `k`-部分環に同時に属する。原文の「it only takes finitely
+many equations to define a curve or a correspondence」——`X_K`・`Z_K`・
+その間の correspondence を定義する有限個の方程式の係数をまとめて
+1つの有限生成部分環に落とす、という段の直接の道具になる。
+
+★**sorry 無し**。標準3公理のみ。`exists_fg_subalgebra_mem_two` はこれの
+特殊例なので、以後はこちらを使う。 -/
+theorem exists_fg_subalgebra_mem_finset {k K : Type*} [CommRing k] [CommRing K] [Algebra k K]
+    (s : Finset K) : ∃ R : Subalgebra k K, R.FG ∧ ∀ x ∈ s, x ∈ R := by
+  refine ⟨Algebra.adjoin k (s : Set K), Subalgebra.fg_adjoin_finset s, ?_⟩
+  intro x hx
+  exact Algebra.subset_adjoin hx
+
 end ABC3.Found.CorrHyp
