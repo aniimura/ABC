@@ -6,6 +6,10 @@ import Mathlib.Analysis.Complex.UpperHalfPlane.MoebiusAction
 import Mathlib.Analysis.Complex.UpperHalfPlane.ProperAction
 import Mathlib.NumberTheory.ModularForms.ProperlyDiscontinuous
 import Mathlib.GroupTheory.Schreier
+import Mathlib.GroupTheory.Commensurable
+import Mathlib.GroupTheory.GroupAction.ConjAct
+
+open scoped Pointwise
 
 /-!
 # [CorrHyp] Track B の第一歩 —— Fuchsian 群を mathlib 上で実装する
@@ -142,5 +146,38 @@ theorem isFiniteIndexIn_pbSnd {A B C : FuchsianGroup} (hA : IsFiniteIndexIn A C)
     unfold inter; congr 1; exact inf_comm _ _
   rw [this]
   exact isFiniteIndexIn_pbFst hB hA
+
+/-! ## `Comm`(commensurator)—— `Definition 2.1` の語彙
+
+原文 §2: `Comm(Γ) ≝ {γ ∈ PSL₂(ℝ)⁰ | (γ·Γ·γ⁻¹) ∼ Γ}`。mathlib にちょうど同じ概念が
+`Subgroup.Commensurable.commensurator` として存在する——ここでは `Γ ⊆ Comm(Γ)`
+(`Definition 2.1` 直前の地の文 "Note that Γ ⊆ Comm(Γ)")を実装する。
+
+★`Comm(Γ)` は一般には離散とは限らない(arithmetic な `Γ` では稠密になる、
+というのが §2 の主定理の内容そのもの)ので、`Comm` の戻り値は `FuchsianGroup`
+ではなく素の `Subgroup`——`Interface.CorrHyp.HyperbolicCurveData.Comm` が
+`Fuchsian → Fuchsian`(常に離散)と posit しているのは簡略化であり、
+ここで判明した不一致として記録する(逸脱)。 -/
+
+open Subgroup.Commensurable in
+/-- 原文 §2、`Definition 2.1` 直前:「Note that Γ ⊆ Comm(Γ)」。
+
+★**sorry 無し**。標準3公理のみ(`#print axioms` で確認済み)。 -/
+theorem self_le_commensurator (F : FuchsianGroup) : F.Γ ≤ commensurator F.Γ := by
+  intro g hg
+  rw [commensurator_mem_iff]
+  have heq : (ConjAct.toConjAct g • F.Γ : Subgroup _) = F.Γ := by
+    apply Subgroup.ext
+    intro x
+    rw [Subgroup.mem_pointwise_smul_iff_inv_smul_mem]
+    simp only [ConjAct.smul_def]
+    constructor
+    · intro hx
+      have := F.Γ.mul_mem (F.Γ.mul_mem hg hx) (F.Γ.inv_mem hg)
+      simpa [mul_assoc] using this
+    · intro hx
+      have := F.Γ.mul_mem (F.Γ.mul_mem (F.Γ.inv_mem hg) hx) hg
+      simpa [mul_assoc] using this
+  rw [heq]
 
 end ABC3.Found.CorrHyp
