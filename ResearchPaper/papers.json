@@ -560,6 +560,17 @@
    "notationRisk": "unmeasured",
    "notationNotes": "★★★★★まだ目視していない。★219ページの大論文——Galois groups over Q (MSRI Publications vol.16) pp.72-297。[LocProP]は[Del]をp.27・30-31など§3周辺で計4回、常に[NT]併記でMalčev completionの参照先として挙げる。特定の定理番号は引いていない(★2026-09-04実測)。フランス語。",
    "verifiedPages": []
+  },
+  "NT": {
+   "title": "Galois Rigidity of pro-l Pure Braid Groups of Algebraic Curves",
+   "file": "Nakamura Takao - Galois Rigidity of pro-l Pure Braid Groups",
+   "author": "Hiroaki Nakamura and Naotake Takao",
+   "year": 1998,
+   "pdfPages": 24,
+   "pageOffset": 1078,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★まだ目視していない。Trans. AMS 350, No.3 (1998) pp.1079-1102。[LocProP] §3(Malčev completion、\"cf. §2 of [NT]\"、p.1109相当)で[Del]と併記で引用。ユーザが直接ダウンロード(2026-09-04、AMSのcookie-consentブロックをブラウザで回避)。",
+   "verifiedPages": []
   }
  }
 }
