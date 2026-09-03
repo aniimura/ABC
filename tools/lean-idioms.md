@@ -25,6 +25,7 @@ Note: The target expression is not type-correct under the `instances` transparen
 
 | 手 | 例 |
 |---|---|
+| ★★**まずこれを試す**: `set_option backward.isDefEq.respectTransparency false in` を宣言の直前に置く | mathlib の `AffineTransitionLimit.lean` 自身が同種の場面(`Subtype`包みの`def`をPreorder-as-categoryの対象に使う等)で多用している。`rw`/`simp`の`Category.comp_id`等が「unused」と言われるのに式が消えない、という症状にも効く(`CorrHyp/FieldLimit.lean::cocone_ι_congr`、2026-09-04)。**副作用**: 宣言全体でdefeq判定が緩むので、他の箇所で意図しない項が通ってしまわないか要確認——`lake build`が通ることと`#print axioms`がsorryAxを含まないことは必ず確認する。 |
 | ★`rw` をやめて **`Eq.trans` / `congrArg` の項**で繋ぐ | `(Category.assoc _ _ _).trans (h.trans (Category.assoc _ _ _).symm)` |
 | ★`congrArg` には**関数の型を明示**する | `congrArg (fun t : X ⟶ Y => t ≫ f) h` |
 | ★`show` で**きれいな型**に言い換えてから触る | `show HomBirat.mk (biratPfIdx …) (rootMap … ≫ …) = _` |
