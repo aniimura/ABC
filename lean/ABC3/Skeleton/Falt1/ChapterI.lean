@@ -17,12 +17,15 @@ open ABC3.Interface.Falt1
 
 /-- **[Falt1] Theorem I.4.4, (i)(iv)**。
 
-原文 (Falt1 p.270-271):
-> 4.4. Theorem. (i) Hi(Δ,R^) ≅ Λi((R⊗V V̄)^(-1)d) ⊕ (rest), where "rest" is
-> annihilated by p1/(p-1). ...
-> (iv) The morphism ΩR/V → H1(Δ, ρ-1R^(1)) given by the extension Eρ is
-> induced by a functorial isomorphism
-> H1(Δ,R^)/(p-torsion) ≅ ΩR/V(dlog∞) ⊗R (R⊗V V̄)^(-1) -/
+内容 (Falt1 p.17-18、260dpi 目視。OCR 層は数式記号を激しく壊すため地の文
+で写す——Interface/Falt1/Ramification.lean 冒頭の注記と同じ運用。★旧版
+はここを `原文 (Falt1 p.270-271):` という無効なページ指定(範囲表記は
+tools/check.mjs の QUOTE_RE が受理しない)で書いており、実際には逐語照合
+が一度も走っていなかった——2026-09-04 に発見・修正): (i) H^i(Δ,R̂) ≅
+Λ^i((R⊗_V V̄)^(-1)d) ⊕ (rest), where "rest" is annihilated by
+p^{1/(p-1)}. ... (iv) The morphism Ω_{R/V} → H^1(Δ, ρ^{-1}R̂(1)) given
+by the extension E_ρ is induced by a functorial isomorphism
+H^1(Δ,R̂)/(p-torsion) ≅ Ω_{R/V}(dlog∞) ⊗_R (R⊗_V V̄)^(-1) -/
 def theorem_I_4_4 (E : PAdicHodgeSetup) :=
   And.intro (fun j => Nonempty.intro (E.thm44i j)) (fun j => Nonempty.intro (E.thm44iv j))
 

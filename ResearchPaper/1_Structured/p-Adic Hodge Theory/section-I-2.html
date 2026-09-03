@@ -1,0 +1,56 @@
+<!-- [Falt1] Chapter I §2 —— 条なし .src 用のアンカー。
+     260 dpi 目視確認 2026-09-04(物理p.6-8、印字p.259-261、逐語の食い違い無し)。
+     ★このPDFのpdftotext OCR層は数式記号を激しく壊すため、.verbatim は
+     OCRでも生き残る短い見出し部分に絞る(詳細: Interface/Falt1/Ramification.lean
+     冒頭の注記)。 -->
+
+<section class="statement definition"
+         id="falt1-def-2-1"
+         data-paper="Falt1"
+         data-pdf-page="6"
+         data-item="Definition 2.1"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">2.1. Definition</div>
+<div class="reading">Aを環、BをA-代数とする。Bがある3条件(i)B[1/p]が有限階数射影
+A[1/p]-加群かつétale A[1/p]-代数、(ii)トレース写像がBをAに写す、
+(iii)対角idempotentのp^ε近似がB⊗_ABの像にある、を満たすときBはAの
+almost étale coveringと呼ばれる。</div>
+<p class="open">実装: <code>Interface/Falt1/AlmostEtale.lean</code>でposit(証明していない)。</p>
+</section>
+
+<section class="statement theorem"
+         id="falt1-thm-2-2"
+         data-paper="Falt1"
+         data-pdf-page="7"
+         data-item="Theorem 2.2"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">2.2. Theorem. Suppose B</div>
+<div class="reading">B=A+mBがAのalmost étale covering、CをA-代数、I⊂Cを冪零イデアル、
+φ:B→C/IをA-代数準同型とすると、φはB→Cに一意にリフトする。</div>
+<p class="open">実装: <code>Interface/Falt1/AlmostEtale.lean</code>でposit(証明していない)。</p>
+</section>
+
+<section class="statement theorem"
+         id="falt1-thm-2-3"
+         data-paper="Falt1"
+         data-pdf-page="7"
+         data-item="Theorem 2.3"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">2.3. Theorem. Suppose I</div>
+<div class="reading">I⊂Aを冪零イデアル、B̄をĀ=A/I上のalmost étale coveringとすると、
+B̄≅B⊗_A Ā/(p-torsion)となるA上のalmost étale covering Bが存在する。</div>
+<p class="open">実装: <code>Interface/Falt1/AlmostEtale.lean</code>でposit(証明していない)。</p>
+</section>
+
+<section class="statement theorem"
+         id="falt1-thm-2-4"
+         data-paper="Falt1"
+         data-pdf-page="8"
+         data-item="Theorem 2.4"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">2.4. Theorem. Suppose B is an almost etale covering of A.</div>
+<div class="reading">(i) Ω_A⊗_A B→Ω_Bはalmost isomorphism(核・余核がmで零化される)。
+(ii) 有限群GがB上に作用しB[1/p]がA[1/p]のGalois被覆なら、i>0の高次
+コホモロジーH^i(G,M)およびM^G/tr_G(M)はmで零化される。</div>
+<p class="open">実装: <code>Interface/Falt1/AlmostEtale.lean</code>でposit(証明していない)。</p>
+</section>
