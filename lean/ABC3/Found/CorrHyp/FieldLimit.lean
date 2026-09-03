@@ -2,6 +2,8 @@
 Copyright (c) 2026 ABC3. All rights reserved.
 -/
 import Mathlib.RingTheory.Adjoin.FG
+import Mathlib.Algebra.Category.Ring.Basic
+import Mathlib.CategoryTheory.Category.Preorder
 
 /-!
 # [CorrHyp] `Lemma 4.1` へ向けた第一歩 —— `K` を有限生成 `k`-部分環の直極限として見る
@@ -93,5 +95,26 @@ theorem iSup_fgSubalgebra_eq_top (k K : Type*) [CommRing k] [CommRing K] [Algebr
   obtain ⟨R, hR, hx⟩ := exists_fg_subalgebra_mem_finset (k := k) ({x} : Finset K)
   exact le_iSup (fun R : FgSubalgebra k K => R.1) (⟨R, hR⟩ : FgSubalgebra k K)
     (hx x (Finset.mem_singleton_self x))
+
+open CategoryTheory in
+/-- `FgSubalgebra k K` を(前順序を薄い圏と見て)`CommRingCat` への図式にする
+関手——`R ↦ R`(環として)、`R ≤ S` を包含環準同型 `R ↪ S` に送る。
+`AffineTransitionLimit.lean` が要求する `D : I ⥤ Scheme` の手前、
+`CommRingCat` レベルの図式(`Spec` と合成すれば `Scheme` の図式になる)。
+
+★**sorry 無し**。標準3公理のみ。関手則(`map_id`/`map_comp`)は
+`Subalgebra.inclusion` が包含写像そのものであることから `rfl` で落ちる。 -/
+noncomputable def toRingCat (k K : Type*) [CommRing k] [CommRing K] [Algebra k K] :
+    FgSubalgebra k K ⥤ CommRingCat where
+  obj R := CommRingCat.of R.1
+  map {R S} h := CommRingCat.ofHom (Subalgebra.inclusion (leOfHom h)).toRingHom
+  map_id R := by
+    apply CommRingCat.hom_ext
+    ext x
+    rfl
+  map_comp {R S T} f g := by
+    apply CommRingCat.hom_ext
+    ext x
+    rfl
 
 end ABC3.Found.CorrHyp
