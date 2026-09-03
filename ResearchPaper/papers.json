@@ -571,6 +571,17 @@
    "notationRisk": "unmeasured",
    "notationNotes": "★★★まだ目視していない。Trans. AMS 350, No.3 (1998) pp.1079-1102。[LocProP] §3(Malčev completion、\"cf. §2 of [NT]\"、p.1109相当)で[Del]と併記で引用。ユーザが直接ダウンロード(2026-09-04、AMSのcookie-consentブロックをブラウザで回避)。",
    "verifiedPages": []
+  },
+  "BC": {
+   "title": "CMI Summer School Notes on p-adic Hodge Theory (Preliminary Version)",
+   "file": "Brinon Conrad - CMI Summer School Notes on p-adic Hodge Theory",
+   "author": "Olivier Brinon and Brian Conrad",
+   "year": 2009,
+   "pdfPages": 290,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★まだ目視していない。290頁の講義ノート(フリーPDF、Stanford)。[Falt2](Crystalline Cohomology and p-adic Galois Representations、JHU Press 1989、paywallで未取得)・[Hyodo](On variation of Hodge-Tate structures、Springer paywall)の代替典拠として登記。[LocProP] Proposition 2.4(Hodge-Tate完全列)に対応するのは §2.2「Theorems of Tate-Sen and Faltings」(p.12)・§2.3「Hodge-Tate decomposition」(p.15)。目次(Contents)はpdftotextで完全に読めた(4部13章、Part I §1-5・Part II §6-9・Part III §10-12・Part IV §13-)。★原典[Falt2]の代わりであり、逐語一致ではなく内容の等価性で代替する扱い(GenEllの[FC]代替と同種)。",
+   "verifiedPages": []
   }
  }
 }

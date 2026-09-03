@@ -1635,7 +1635,7 @@
    "nodes": 4,
    "nodesNote": "Lemma 2.2([Tate]の古典計算、Γ_K・R̂_K̄係数)・Lemma 2.1(Δ_R^prf・almost étale)・Lemma 2.3(Leray-Serre)・Proposition 2.4(Hodge-Tate完全列)。",
    "done": 0,
-   "doneNote": "★2026-09-04(ABC3c): §2全4項目をInterface/LocProP/GaloisCohomologyReview.leanでposit して閉じた(同型の存在Nonemptyとして、証明していない)。B_dR/B_dR^+の実在が分かったので、Lemma 2.2(Tateの古典計算)から在庫を当たり直す価値がある。"
+   "doneNote": "★2026-09-04(ABC3c): §2全4項目をInterface/LocProP/GaloisCohomologyReview.leanでposit して閉じた(同型の存在Nonemptyとして、証明していない)。B_dR/B_dR^+の実在が分かったので、Lemma 2.2(Tateの古典計算)から在庫を当たり直す価値がある。 ★2026-09-04追記(ユーザ): [Falt2]はJHU Pressのpaywallで未取得。代わりにBrinon-Conrad \"CMI Summer School Notes on p-adic Hodge Theory\"(papers.json短縮タグ BC、290頁、フリーPDF)を代替典拠として登記した。§2.2「Theorems of Tate-Sen and Faltings」・§2.3「Hodge-Tate decomposition」がProposition 2.4に対応する。"
   },
   "locprop-jacobian-ordinary-abelian-variety": {
    "what": "曲線のJacobian(一般、Weierstrass限定でない)とordinary abelian variety(p-rank = 次元)。[LocProP] Definition 1.1が要る。",
