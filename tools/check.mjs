@@ -176,6 +176,29 @@ const LEAN_SRC = join(LEAN_DIR, 'ABC3');
 /** 較正デモだけは axiom を持つことを許す(それが実演の内容だから) */
 const AXIOM_EXEMPT = ['Meta/Calibration.lean']; // lean/ABC3 からの相対
 
+/** ★`--brief`: 落ちたものと結論だけを出す(2026-09-03、第 1453)。
+ *
+ *  動機(実測): 既定の出力は **29,243 バイト / 270 行**ある。ブロックの末尾で毎回走らせるので、
+ *  読む側(人・エージェント)がその全部を毎回受け取っていた。実際に要るのは
+ *  「落ちたもの」と「PASS か否か」の 5 行程度である。
+ *  ★ゲートの判定は一切変えない——**印字だけ**を絞る。
+ */
+const BRIEF = process.argv.includes('--brief');
+if (BRIEF) {
+  const raw = console.log.bind(console);
+  // 通すもの: NG の明細 / selftest の要約 / 各段の合否 / 最後の判定
+  const KEEP = /\bNG\b|\bPASS\b|selftest:|繰り越し|理論の節点/;
+  console.log = (...a) => {
+    const s = a.map(String).join(' ');
+    // ★selftest の NG は**意図した落とし**(fixture が落ちることの確認)であって
+    //   本体の欠陥ではない。`--brief` では要約 1 行だけ出す。
+    if (IN_SELFTEST && !/selftest:/.test(s)) return;
+    if (KEEP.test(s)) raw(s.trim());
+  };
+}
+/** selftest の中か(上のフィルタが読む)。 */
+let IN_SELFTEST = false;
+
 let NG = 0;
 const ng = (where, msg) => { NG++; console.log(`  NG  ${where}\n      ${msg}`); };
 const ok = (msg) => console.log(`  ok  ${msg}`);
@@ -1336,6 +1359,7 @@ function checkLean() {
 // ────────────────────────────────────────────────────────────────
 
 function selftest() {
+  IN_SELFTEST = true;
   h1('selftest: 器具は壊れた入力を落とせるか');
   const tmp = mkdtempSync(join(tmpdir(), 'abc3-selftest-'));
   const papers = join(tmp, 'papers.json');
@@ -1454,6 +1478,7 @@ function selftest() {
 
   rmSync(tmp, { recursive: true, force: true });
   const total = cases.length + 1 + leanCases.length;
+  IN_SELFTEST = false;
   console.log(`\n  selftest: ${passed}/${total} PASS`);
   if (passed !== total) NG++;
   return passed === total;
@@ -1461,7 +1486,10 @@ function selftest() {
 
 // ────────────────────────────────────────────────────────────────
 
-const args = process.argv.slice(2);
+// ★`--brief` は**印字の量**の指定であって走らせる段の指定ではない。
+//   ここで外さないと `args.length === 0` が偽になり、**どの段も走らずに PASS を返す**
+//   (2026-09-03、`--brief` を入れた直後に実際に起きた。ゲートが空虚になる事故である)。
+const args = process.argv.slice(2).filter((a) => a !== '--brief');
 const only = (f) => args.includes(f);
 const all = args.length === 0;
 
