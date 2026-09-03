@@ -17,9 +17,12 @@
 
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-// ★LEDGER_RP で差し替えられる(試験のときに複製へ向けるため)。
-const RP = process.env.LEDGER_RP || 'D:/Math_ABC3/ResearchPaper';
+// ★リポジトリの位置は**このファイルの場所**から導く。絶対パスを焼き込むと引っ越しで壊れる。
+//   LEDGER_RP で差し替えられる(試験のときに複製へ向けるため)。
+const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
+const RP = process.env.LEDGER_RP || path.join(ROOT, 'ResearchPaper').replace(/\\/g, '/');
 const TARGETS = {
   blocked: { file: `${RP}/blocked-leaves.json`, kind: 'keyed', array: 'blocked', idField: 'key' },
   gap:     { file: `${RP}/mathlib-gap.json`,    kind: 'flat' },

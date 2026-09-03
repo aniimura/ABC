@@ -668,16 +668,26 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
       return ITEM_EXACT.test(m[2]) ? `[${m[1]}] ${m[2].trim()}` : null;
     };
 
-    // 宣言の範囲(次の宣言の直前まで)を出すために、ファイルごとに行番号で並べる
+    // 宣言の範囲(次の宣言の直前まで)を出すために、ファイルごとに行番号で並べる。
+    // ★境界に使うのは**字下げの無い**宣言だけである。`where` 節などで字下げされた
+    //   `def` を境界にすると、その先にある `sorry` を見落として
+    //   「sorry 0 だから Found へ移せ」と**誤爆**する(2026-09-03 時点で該当は 0 件だが、
+    //   入ったら作業を止めてしまうので先に塞ぐ)。
+    const topLevel = (d) => {
+      const line = (texts.get(d.file) ?? '').split('\n')[d.line - 1] ?? '';
+      return !/^\s/.test(line);
+    };
     const byFile = new Map();
     for (const d of decls) {
+      if (!topLevel(d)) continue;
       if (!byFile.has(d.file)) byFile.set(d.file, []);
       byFile.get(d.file).push(d);
     }
     for (const ds of byFile.values()) ds.sort((a, b) => a.line - b.line);
     const bodyHasSorry = (d) => {
-      const ds = byFile.get(d.file);
+      const ds = byFile.get(d.file) ?? [d];
       const i = ds.findIndex((x) => x === d);
+      if (i < 0) return true;   // 境界を取れないときは「sorry あり」に倒す(誤爆させない)
       const end = i + 1 < ds.length ? ds[i + 1].line - 1 : Infinity;
       const lines = stripLeanComments(texts.get(d.file) ?? '').split('\n');
       return lines.slice(d.line - 1, end === Infinity ? undefined : end).some((l) => SORRY_RE.test(l));
@@ -728,8 +738,12 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
     }
 
     // ── G9: 条なし `.src` の命題には非空虚性の対照が要る
-    //    ★既存の 26 件は債務として明示的に繰り越す。**この表は減らす方向にしか変えない。**
+    //    ★既存の分は債務として明示的に繰り越す。**この表は減らす方向にしか変えない。**
     //      新しく条なし `.src` を書いたときは、その場で `nonvacuous` を書くこと。
+    //    ☆逃げ道: 対照が本当に書けない(欄の実例がまだ作れない等)ときは、
+    //      ここへ 1 行足してよい。ただし**理由を隣にコメントで書く**こと——
+    //      自己申告に戻すのが目的ではなく、git の差分に残すのが目的である。
+    //      「その場で 1 行足せる」ので作業は止まらないが、足したことは必ず見える。
     //    ★鍵は「ファイル#宣言名」——短名は名前空間をまたいで衝突するし、
     //      行番号は動くので使えない。
     const G9_DEBT = new Set([
