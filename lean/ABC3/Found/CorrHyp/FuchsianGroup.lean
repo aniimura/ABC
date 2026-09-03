@@ -8,6 +8,8 @@ import Mathlib.NumberTheory.ModularForms.ProperlyDiscontinuous
 import Mathlib.GroupTheory.Schreier
 import Mathlib.GroupTheory.Commensurable
 import Mathlib.GroupTheory.GroupAction.ConjAct
+import Mathlib.GroupTheory.Coset.Basic
+import Mathlib.Tactic.Group
 
 open scoped Pointwise
 
@@ -338,5 +340,69 @@ theorem prop_3_2 {C X Z : FuchsianGroup} (hCX : IsFiniteIndexIn C X)
     rwa [Subgroup.inf_relIndex_left] at this
   · have := Subgroup.isFiniteRelIndex_iff_relIndex_ne_zero.mp hK2
     rwa [Subgroup.inf_relIndex_right] at this
+
+/-! ## `Theorem 3.3` へ向けた足場 —— 有限生成性の「逆向き」伝播
+
+原文 p.9 は「since `Comm(Γ_X)` has a finite index subgroup which is finitely
+generated — namely `Γ_X` — it follows that `Comm(Γ_X)` is itself finitely
+generated」と1行で済ませている。これは `fg_of_finiteIndexIn`(有限指数
+**部分群**が有限生成、Schreier)の**逆向き**——「有限生成な有限指数部分群を
+持つ群は有限生成」——であり、`exact?` で mathlib に見当たらなかった
+(2026-09-04 実測)。Reidemeister–Schreier の最も単純な形(`H` の生成元と
+`G/H` の代表系の和集合が `G` を生成する)として自分で証明した。 -/
+
+/-- `H ≤ G` が有限指数で `H` が有限生成なら `G` も有限生成。
+
+★**sorry 無し**。標準3公理のみ(`#print axioms` で確認済み)。証明: `H` の
+有限生成集合 `S` と `G ⧸ H` の代表系 `T`(`Quotient.out` から取る、
+有限指数なので有限)を合わせた `S ∪ T` が `G` を生成する——任意の `g` に対し、
+その属す剰余類の代表元 `t` を取れば `t⁻¹g ∈ H` なので `g = t·(t⁻¹g)` は
+`T` の元と `S` の生成する部分群の元の積になる。 -/
+theorem fg_of_fg_finiteIndex {G : Type*} [Group G] (H : Subgroup G) [H.FiniteIndex]
+    [Group.FG H] : Group.FG G := by
+  haveI : Finite (G ⧸ H) := Subgroup.finiteIndex_iff_finite_quotient.mp ‹H.FiniteIndex›
+  obtain ⟨S, hS, hSfin⟩ := Group.fg_iff.mp ‹Group.FG H›
+  classical
+  haveI : Fintype (G ⧸ H) := Fintype.ofFinite _
+  set T : Set G := Set.range (fun q : G ⧸ H => Quotient.out q) with hT
+  have hTfin : T.Finite := Set.finite_range _
+  refine Group.fg_iff.mpr ⟨H.subtype '' S ∪ T, ?_, hSfin.image _ |>.union hTfin⟩
+  apply le_antisymm le_top
+  intro g _
+  set t : G := Quotient.out (QuotientGroup.mk (s := H) g) with htdef
+  have ht_mem : t ∈ T := ⟨_, rfl⟩
+  have hcoset : (QuotientGroup.mk (s := H) t) = QuotientGroup.mk (s := H) g :=
+    QuotientGroup.out_eq' _
+  have hh : t⁻¹ * g ∈ H := by
+    rw [← QuotientGroup.eq]
+    exact hcoset
+  have hgeq : g = t * (t⁻¹ * g) := by group
+  rw [hgeq]
+  apply Subgroup.mul_mem
+  · exact Subgroup.subset_closure (Or.inr ht_mem)
+  · have hmem : (⟨t⁻¹ * g, hh⟩ : H) ∈ Subgroup.closure S := hS ▸ trivial
+    have hmap : H.subtype (⟨t⁻¹ * g, hh⟩ : H) ∈ (Subgroup.closure S).map H.subtype :=
+      Subgroup.mem_map_of_mem _ hmem
+    rw [MonoidHom.map_closure] at hmap
+    exact Subgroup.closure_mono (Set.subset_union_left) hmap
+
+/-- `Theorem 3.3` の群論側入力: `X` が非 arithmetic(`Γ_X` が `Comm(Γ_X)` の中で
+有限指数——`Definition 2.1`/`Theorem 2.5` の言い換え、まだ posit)で `Γ_X` が
+有限生成なら、`Comm(Γ_X)` も有限生成。
+
+★**sorry 無し**。`fg_of_fg_finiteIndex` を `H := Γ_X`・`G := Comm(Γ_X)` へ
+適用しただけ——ただし `Γ_X ≤ Comm(Γ_X)` かつ有限指数、という**部分群として
+見た `Comm(Γ_X)`** の話にする必要があるので、`Γ_X.subgroupOf (commensurator Γ_X)`
+の形で述べる。 -/
+theorem fg_commensurator {F : FuchsianGroup} (hfg : Group.FG F.Γ)
+    (hfi : (F.Γ.subgroupOf (Subgroup.Commensurable.commensurator F.Γ)).FiniteIndex) :
+    Group.FG (Subgroup.Commensurable.commensurator F.Γ) := by
+  haveI : Group.FG (F.Γ.subgroupOf (Subgroup.Commensurable.commensurator F.Γ)) := by
+    haveI := hfg
+    obtain ⟨S, hS, hSfin⟩ := Group.fg_iff.mp ‹Group.FG F.Γ›
+    let e := (Subgroup.subgroupOfEquivOfLe (self_le_commensurator F)).symm
+    refine Group.fg_iff.mpr ⟨e.toMonoidHom '' S, ?_, hSfin.image _⟩
+    rw [← MonoidHom.map_closure, hS, Subgroup.map_top_of_surjective _ e.surjective]
+  exact fg_of_fg_finiteIndex (F.Γ.subgroupOf (Subgroup.Commensurable.commensurator F.Γ))
 
 end ABC3.Found.CorrHyp
