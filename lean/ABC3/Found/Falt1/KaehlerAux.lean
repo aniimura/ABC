@@ -27,11 +27,27 @@ import Mathlib.RingTheory.AdjoinRoot
 3. ✅ `ker(mapBaseChange)`の台集合が`kerCotangentToTensor`の値域に一致する
    こと(`exact_kerCotangentToTensor_mapBaseChange`の集合レベルの言い換え)。
 
+**確認できた証明の道筋**(2026-09-04、`lean_check`で各断片を個別に確認
+済み——貼り合わせた1つの定理としてはまだ未完成):
+- `TensorProduct.AlgebraTensorModule.rid` と `LinearEquiv.baseChange`
+  を`KaehlerDifferential.polynomialEquiv`と組ませると
+  `TensorProduct A B Ω[A⁄R] ≃ₗ[B] B`(A=Polynomial R の場合)が出る。
+- `kerCotangentToTensor_toCotangent`(mathlib既存)より、生成元
+  `[f] ∈ I.Cotangent` の像は `1 ⊗ₜ D(f)`、これは上の同一視の下で
+  `algebraMap A B (Polynomial.derivative f) =: δ`(= Faltings の
+  f'(w))に対応する。
+- `I.Cotangent`(`I=(f)`)は`nzdCotangentEquivQuot`により`B`に同型で、
+  生成元`[f]`は`1∈B`に対応する。`I`自身は`toSpanSingleton A A f`の
+  値域として「Aから生成される巡回加群」であり、
+  `range(kerCotangentToTensor) = A∙δ = B∙δ = Ideal.span{δ}`(A→Bが
+  全射なのでA-span=B-spanは集合として一致、線形性の張り替えを経ずに
+  Submodule.extで示せる)。
+- これと`kerQuotEquivOmega`(既存)を合わせれば
+  `Ω_{B/R} ≅ B ⧸ Ideal.span{δ}`(δ = f'(root))が得られる見通し。
+  ★1つの定理として組み立てる作業はまだ残っている。
+
 **残っている作業**(正直な記録):
-4. 2・3・`nzdCotangentEquivQuot`(f が非零因子のとき)・
-   `KaehlerDifferential.polynomialEquiv`(`Ω_{A/R}≃A`、A=R[T]の場合)を
-   すべて貼り合わせ、`Ω_{B/R} ≅ B ⧸ (span{f'(root)})`という
-   モノジェニックな商の具体的な計算を完成させる(まだ未完成)。
+4. 上の道筋を実際に1つの定理として組み立てる(`Ω_{B/R} ≅ B/(f'(root))`)。
 5. **さらに大きな残作業**: 4 は "第二完全列"(Ω_{V[T]/V}を経由する
    商の計算)であって、Lemma 1.1 が実際に要求している "第一完全列"
    (`Ω_V ⊗_V W → Ω_W → Ω_{W/V} → 0`、V→W の塔に対するもの)とは別の
@@ -105,5 +121,15 @@ theorem ker_mapBaseChange_eq_range_kerCotangentToTensor {R A B : Type*}
   have hex := KaehlerDifferential.exact_kerCotangentToTensor_mapBaseChange R A B hsurj
   ext y
   exact hex y
+
+/-- `A = Polynomial R` のとき、`B ⊗[A] Ω[A⁄R] ≃ₗ[B] B`(`Ω[A⁄R] ≃ₗ[A] A` を
+`KaehlerDifferential.polynomialEquiv` で示した上で base change + rid)。
+`Ω_{B/R} ≅ B/(f'(root))` の計算(進捗ノート参照)で使う。 -/
+noncomputable def tensorPolynomialOmegaEquiv {R B : Type*} [CommRing R] [CommRing B]
+    [Algebra (Polynomial R) B] [Algebra R B] [IsScalarTower R (Polynomial R) B] :
+    TensorProduct (Polynomial R) B Ω[Polynomial R⁄R] ≃ₗ[B] B :=
+  (LinearEquiv.baseChange (Polynomial R) B Ω[Polynomial R⁄R] (Polynomial R)
+    (KaehlerDifferential.polynomialEquiv R)).trans
+  (TensorProduct.AlgebraTensorModule.rid (Polynomial R) B B)
 
 end ABC3.Found.Falt1
