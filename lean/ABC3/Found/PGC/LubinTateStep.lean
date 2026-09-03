@@ -16,18 +16,15 @@ import Mathlib.RingTheory.MvPowerSeries.Order
 `map_homogeneousComponent`)を組み合わせて直接与える——次数 `n+1` の斉次成分
 `homogeneousComponent (n+1) (Obstruction Φ)` に対する障害方程式が解ける。
 
-## まだ無いもの
+## 続報(2026-09-04): 1ステップ全体が完成した
 
-本ファイルは「(任意の `Φ` から出発した)1ステップの可解性」までを確立する。
-実際の構成(`Φ : ℕ → MvPowerSeries (Fin 2) A` を `Nat.rec` で組み立て、
-各 `Φ (n+1)` が `Φ n` に次数 `n+1` ちょうどの斉次成分を足したものであること、
-そして最終的な極限 `F` が関数等式を exact に満たすことを示す)は、まだ残る
-——特に「`f(Φ_n + φ_{n+1})` が `f(Φ_n) + π·φ_{n+1}` と次数 `n+2` 未満で一致する」
-という**線形化**(`φ_{n+1}` の次数が高いことによる高次項の消滅)の段は、
-本ファイルでは検証していない。mathlib の `MvPowerSeries.truncTotal_subst_*`
-系(代入が引数の低次の切り捨てにしか依存しないという「連続性」)が
-この段の土台になりうると見ている(実測、`RingTheory/MvPowerSeries/
-Substitution.lean`)が、実際に組むのは別途の作業として残る。
+本ファイルの「(任意の `Φ` から出発した)1ステップの可解性」に、f側の線形化
+(`Found/PGC/LubinTateLinearization.lean`)・g側の線形化(`Found/PGC/
+LubinTateGLinearization.lean`)を組み合わせて、`Found/PGC/
+LubinTateStepAssembly.lean::exists_next_step` として**1ステップ全体**
+(「障害が次数 `n` まで消えている」→「障害が次数 `n+1` まで消えている」)を
+sorry 無しで完成させた。残るのは `Nat.rec` で無限次まで実際に構成し、
+最終的な `F` が関数等式を exact に満たすことを示す組み立て作業のみ。
 -/
 
 namespace ABC3.Found.PGC
