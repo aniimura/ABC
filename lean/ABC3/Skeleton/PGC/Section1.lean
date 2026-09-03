@@ -173,6 +173,17 @@ def residueCard_and_degree_recoverable.needs : List ProofObligation :=
         "まだ無い。★同日、双対の `padicExp`(`Found/PGC/PadicExp.lean`)は加法性" ++
         "`exp(x+y)=exp(x)·exp(y)` まで sorry 無しで到達した(Cauchy 積+二項定理、" ++
         "微分不要)——`exp`/`log` の互逆性が示せれば log の加法性もここから従うが、" ++
-        "互逆性自体は未着手。この境界外入力は依然として absent のまま残る") 3 ]
+        "互逆性自体は未着手。" ++
+        "★★★2026-09-04 解消: 在庫確認(`node tools/decl-index.mjs` 再生成後の grep)で、" ++
+        "この準同型性が**ℚ_p の場合には既に本リポジトリの別セクションに存在した**と判明" ++
+        "(`Found/IUTchIII/PadicLogMul.lean::logOneAdd_mul`——AbsTopIII の log-shell 用に" ++
+        "以前構築済み、pGC 側からは未参照だった)。その証明を一般の K へ一般化し、" ++
+        "`Found/PGC/PadicLogMul.lean::padicLog_mul` として sorry 無しで完成させた" ++
+        "(`K.carrier` の `CharZero`/`IsAddTorsionFree` scoped instance を2つ追加しただけで、" ++
+        "証明の筋——形式冪級数 `ABC3.Found.IUTchIII.logOf_mul` の一般形+係数総和の" ++
+        "評価橋——はℚ_pの場合と一字一句並行だった)。" ++
+        "**この境界外入力(p進対数)は解消——mathlib 不在ではなく、本リポジトリで構築済み。**" ++
+        "ただし Proposition 1.2 自体はこれだけでは閉じない: 相互律の同型" ++
+        "`Γ_K^ab ≅ (K^×)^∧` そのものと、上の完全系列の典拠は依然として absent") 3 ]
 
 end ABC3.Skeleton.PGC

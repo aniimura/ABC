@@ -1,11 +1,38 @@
 ---
 name: padic-log-additivity-blocked
-description: 対数側の準同型性は依然未解決だが、指数側(padicExp)を自前構築して加法性まで到達した(2026-09-04)
+description: pGC の一般局所体 K でも p進対数の準同型性を sorry 無しで解決した(2026-09-04、在庫確認が発端)
 metadata:
   type: project
 ---
 
-★★2026-09-04 追記: **経路③(自前で `padicExp` を組む)が指数の加法性まで到達した。**
+★★★2026-09-04 続報(解決): **一般の K(ℚ_p の任意の有限次拡大)でも p進対数の
+準同型性を sorry 無しで確立した。** `node tools/decl-index.mjs` を再生成して
+`grep -iE "PowerSeries\.(exp|log)"` を打ったところ、この準同型性が
+**ℚ_p の場合には既に本リポジトリの別セクションに存在していた**と判明した
+(`Found/IUTchIII/PadicLogMul.lean::logOneAdd_mul`——AbsTopIII の log-shell を
+埋めるために別の過去セッションで構築済み、pGC 側からは一度も参照されていなかった)。
+その証明(形式冪級数の加法公式 `ABC3.Found.IUTchIII.logOf_mul`
+——`[IsAddTorsionFree A]` だけを要求する一般形——+ 係数総和を p進の値に繋ぐ
+「評価の橋」)を一般の `K : PAdicLocalField p` に一般化し、
+`Found/PGC/PadicLogMul.lean::padicLog_mul` として完成させた。追加で要ったのは
+`K.carrier` の `CharZero`/`IsAddTorsionFree` scoped instance を2つ用意しただけで、
+証明の筋自体は ℚ_p の場合と一字一句並行だった——**下記②の見立て
+(「形式冪級数の道は積の加法性を自分で組む必要があり重い」)は、実際に手を動かして
+みると当たっていたが、その重さは既に別の目的のために本リポジトリの中で
+支払い済みだった**、というのが今回の教訓。
+
+これで `Skeleton/PGC/Section1.lean` の Proposition 1.2 の3つの `.needs` のうち
+「p進対数」の項目は解消した(absent → 構築済み)。ただし Proposition 1.2 自体は
+これだけでは閉じない——相互律の同型 `Γ_K^ab ≅ (K^×)^∧` そのものは依然として
+absent であり、それが本項目群([[measure-mathlib-before-skeleton]] が指す
+`blocked-leaves.json` の中心的なブロッカー)であることに変わりはない。
+
+**以下は解決前(同日、時系列で前)の記録——「経路①②③」も「残る作業」の互逆性の
+提案も、上記の解決によって log-additivity 自体の目的では不要になった
+(padicExp_add・互逆性は依然として独立に興味深いが、それ自体はもう
+Proposition 1.2 の障害ではない)。探索過程の記録として残す。**
+
+★★2026-09-04 追記(旧): **経路③(自前で `padicExp` を組む)が指数の加法性まで到達した。**
 `Found/PGC/PadicExp.lean` に `padicExp`・`padicExp_add`(`exp(x+y)=exp(x)·exp(y)`)を
 `sorry` 無しで実装済み——`NormedAlgebra ℚ K.carrier` も形式冪級数も使わず、
 `K.carrier` 上で直接 `expTerm`(`xⁿ/n!`)を定義し、Cauchy 積
