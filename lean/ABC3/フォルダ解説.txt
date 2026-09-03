@@ -1,0 +1,69 @@
+`D:\Math_ABC3\lean\ABC3` は **6 つのバケツ**に分かれています。各バケツは自分の役割を `ABC3/<名前>.lean` の docstring に持っていて、`tools/check.mjs` がそれを機械で強制しています。
+
+## 全体像
+
+| フォルダ | 役割 | ファイル | 行 | `sorry` |
+|---|---|---:|---:|---|
+| `Skeleton/` | **原典の主張**（Track A） | 56 | 16,554 | ★あってよい（13 ファイル） |
+| `Interface/` | **まだ無い基礎の型** | 16 | 3,249 | 禁止 |
+| `Found/` | **実装済みの基礎**（Track B） | 1,676 | 367,216 | 禁止 |
+| `Gap/` | **飛躍を追加仮説として型に出す** | 6 | 1,185 | 禁止 |
+| `Check/` | **我々のモデルの検査** | 47 | 6,935 | 禁止 |
+| `Meta/` | 台帳の型そのもの | 2 | 294 | — |
+
+---
+
+### `Skeleton/` — 論文の主張を写す（証明しない）
+
+原典の statement を型として置く場所。**証明は付けず `sorry` で構いません**。
+
+- 各宣言 `foo` は `foo.src : Source`（論文タグ・物理ページ・section id）を必須（ゲート G1）。`1_Structured` の該当 section と照合されます。
+- `foo.needs : List ProofObligation` も必須（G6）——依存を空だと**主張する**ときも `[]` と明記します。
+- `Check/` を import してはならない（主語の分離）。
+- サブフォルダ：`GenEll` `FrdI` `PGC` `IUTchI` `IUTchIII` `AbsTopIII` `NCBelyi` `GaloisRep` `Divisor` `NumberField`
+
+### `Interface/` — Track A が要求し Track B がまだ供給していないもの
+
+**`axiom` を使わず `structure` で受ける**のが核心です。理由は docstring に明記されています——「`axiom` は検出不能な破滅、`structure` は検出可能な空虚」。
+
+- 各 `structure X` は `X.nonvacuous : Nonempty X`（実例を作った）か `X.waiting : WaitingFor`（何を待っているか書く）のどちらかが必須（G2）。
+- **`Found/` を import してはならない**——すると `Skeleton` が `Found` を推移的に引き、「実装が無くても statement を書ける」という 2 トラック構成が壊れます。
+- 例：`EllModuliData`（`Theorem 3.8`・`Cor 4.3/4.4` が乗る欄）、`Thm21Data`（昨日追加）、`AbcSetup`、`BelyiSetup`。
+
+### `Found/` — `sorry` の無い実装（本体、全体の 92%）
+
+`Interface` の `structure` を本物にする場所。「mathlib へ PR できる品質で書く——**IUT の当否に関わらず残る成果**になる」と規約に書かれています。
+
+- `.src` は**任意**。必須にすると補助補題に嘘の出典を書かせる逆インセンティブが生まれるため。ただし書けば `Skeleton` と同じ厳しさで検証されます。
+- サブフォルダ 13 個。実質の重心は `GaloisRep`（Tate 一意化・Vélu）と `GenEll`。
+- 昨日追加した `Section4Cor` `Thm38Assembly` `Thm21Equiv` `Thm25Assembly` はここです。
+
+### `Gap/` — 飛躍を「主張を弱めずに」扱う
+
+原典が確立していない段を、**追加仮説として型に出す**場所（G5）。
+
+```lean
+structure Gap_3_6 (d : Lemma35Data) : Prop where
+  extra : (足りない性質を、原典の語彙で正確に書いたもの)
+theorem prop_3_6 (d) (H : Gap_3_6 d) : Conclusion d := …
+```
+
+各 `structure G` は `G.record : GapRecord` を伴い、**`falsifier` が必須**——「何が起きればこの分類が覆るか」を書けないうちは飛躍と認定しない、という規則です。現在 8 件。
+
+### `Check/` — 我々のモデルが空虚に潰れていないかの検査
+
+`Skeleton/` が「**原典が**何を主張しているか」なのに対し、ここは「**我々の**型設計が壊れていないか」。主語が違うので分けてあります。
+
+- 識別力の検査（述語が常に真でも常に偽でもない）、負の対照、非空虚 witness。
+- `.src` は要求されません（原典の主張ではないので）。
+- **`Skeleton/` → `Check/` の import は禁止**。逆だけ可。
+- 例：`Check/GenEll/BelyiGeneralVacuous.lean`（§2 節点 1 が偽であることを機械検証したもの）、`Check/GenEll/Thm21Witness.lean`。
+
+### `Meta/` — 台帳の型そのもの
+
+- `Claim.lean` — `Source` `ProofObligation` `LeanStatus` `WaitingFor` `GapRecord` `LoadBearing` `NegControl` の定義。**台帳を JSON ではなく Lean の宣言として持つ**設計の中心です（ノードとファイルが別々に生まれないので被覆の乖離が構造的に起こらない）。
+- `Calibration.lean` — 「`axiom` は検出不能、`structure` は検出可能」を実演する較正デモ。ここだけ `axiom` を持つことが許されています。
+
+---
+
+補足：`sorry` は設計上 `Skeleton/` にしか許されておらず、他の 4 バケツでは `check.mjs` が機械的に落とします。現在 `Skeleton/` に 13 ファイル分あり、そのうち GenEll 系は 3 本（`GaloisLocal` `SigmaConvolution` `VeluSemistable`）です。
