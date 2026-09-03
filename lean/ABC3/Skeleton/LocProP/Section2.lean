@@ -41,7 +41,9 @@ def hodgeTateExactSeq.needs : List ABC3.Meta.ProofObligation :=
   [ .implicitStep
       "原文は[Falt2](Crystalline Cohomology and p-adic Galois Representations、
        JHU Press 1989)のTheorem 6.2(Comparison Theorem)を引くが、[Falt2]は
-       paywallで未取得。代わりにBrinon-Conrad(papers.json短縮タグBC、
-       §2.2-2.3)を等価な代替典拠として登記した(2026-09-04)。" 21 ]
+       paywallで未取得。代わりにBrinon-Conrad(papers.json短縮タグBC)の
+       Theorem 2.2.3(同じ内容の comparison isomorphism)を等価な代替典拠
+       として登記した(2026-09-04)。" 21,
+    .otherPaper "[BC]" "Theorem 2.2.3" 13 ]
 
 end ABC3.Skeleton.LocProP
