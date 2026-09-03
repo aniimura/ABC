@@ -536,7 +536,7 @@
    "pdfPages": 13,
    "pageOffset": 157,
    "notationRisk": "unmeasured",
-   "notationNotes": "★★★★★★★★**入手できたのは冒頭 13 ページ分だけ**(元は Proceedings of a Conference on Local Fields, Driebergen 1966, pp.158-183 の26ページ)。[LocProP] Lemma 2.2 の証明が引く §3.3, Theorem 1・Theorem 2 が範囲内かは未確認——着手前に要確認、無ければ全編の入手が要る。OCR/スキャンなので pdftotext の精度も低い可能性。",
+   "notationNotes": "★★★★★★★★**入手できたのは冒頭 13 ページ分だけ**(元は Proceedings of a Conference on Local Fields, Driebergen 1966, pp.158-183 の26ページ)。★2026-09-04実測: [LocProP] Lemma 2.2 の証明が引く §3.3, Theorem 1・Theorem 2 は**範囲内に在った**(txt内で確認、\"Theorem 1. We have H0(Γ,C)=K\"の文言あり)。ただし260dpi目視はまだ。OCR/スキャンなのでpdftotextの精度に注意。",
    "verifiedPages": []
   },
   "BK": {
