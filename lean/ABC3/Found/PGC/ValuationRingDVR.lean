@@ -53,4 +53,32 @@ theorem valuationRing_isDVR {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) :
     exact isCompact_iff_compactSpace.mp hcompact
   exact Valued.integer.isDiscreteValuationRing_of_compactSpace
 
+/-- **剰余体 `𝓀[K.carrier]` は標数 `p` を持つ**。`(p:K.carrier)` が単数でない
+(`‖(p:K.carrier)‖ < 1`、`norm_natCast_p_lt_one`)ことから、その `𝒪[K.carrier]`
+への持ち上げが極大イデアルに入り、還元 `residue` で 0 になることによる。 -/
+theorem charP_residueField {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) :
+    CharP (𝓀[K.carrier]) p := by
+  rw [CharP.charP_iff_prime_eq_zero Fact.out]
+  set u : 𝒪[K.carrier] :=
+    ⟨(p : ℕ), by rw [Valued.integer.mem_iff]; exact le_of_lt (norm_natCast_p_lt_one K)⟩ with hu
+  have hnu : (p : 𝓀[K.carrier]) = IsLocalRing.residue _ u := by rw [hu]; rfl
+  rw [hnu, IsLocalRing.residue_eq_zero_iff, IsLocalRing.mem_maximalIdeal, mem_nonunits_iff,
+    Valued.integer.isUnit_iff_norm_eq_one]
+  have hun : ‖u‖ = ‖((p : ℕ) : K.carrier)‖ := rfl
+  rw [hun]
+  exact ne_of_lt (norm_natCast_p_lt_one K)
+
+/-- 剰余体は有限体であり、標数 `p`(`p` は特にその標数指数)。
+`Found/PGC/FrobeniusExpand.lean::mvPowerSeries_pow_card_eq_expand` の
+`[ExpChar F p]` 要件をこれで満たせる。 -/
+noncomputable instance instFintypeResidueField {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) :
+    Fintype (𝓀[K.carrier]) :=
+  have := residueField_finite K
+  Fintype.ofFinite _
+
+noncomputable instance instExpCharResidueField {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) :
+    ExpChar (𝓀[K.carrier]) p :=
+  haveI := charP_residueField K
+  ExpChar.prime Fact.out
+
 end ABC3.Found.PGC
