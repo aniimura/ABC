@@ -1,0 +1,63 @@
+<!-- [LocProP] §0 Preliminaries and Notations —— 条なし .src 用のアンカー。
+     260 dpi 目視確認 2026-09-04(p.14-15、逐語の食い違い無し)。 -->
+
+<section class="statement definition"
+         id="locprop-def-0-1"
+         data-paper="LocProP"
+         data-pdf-page="14"
+         data-item="Definition 0.1"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">We shall call K a p-adic field if it is the quotient field of a p-adically</div>
+<div class="reading"><code>K</code> が「<code>p</code>-adic field」とは、<code>p</code>-adically complete・
+mixed characteristic な離散付値環 <code>O_K</code> の商体であること。剰余体 <code>k</code> が有限なら
+「<code>p</code>-adic local field」。</div>
+<p class="open">実装済み: <code>lean/ABC3/Found/LocProP/PAdicField.lean</code>(<code>sorry</code> 無し、
+<code>IsPAdicRing</code> / <code>IsPAdicLocalRing</code>、<code>ℤ_[p]</code> を非退化性 witness とする)。</p>
+</section>
+
+<section class="statement definition"
+         id="locprop-def-0-2"
+         data-paper="LocProP"
+         data-pdf-page="15"
+         data-item="Definition 0.2"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">We shall refer to any one of the</div>
+<div class="reading">pro-<code>p</code> 群 <code>Δ</code> の <code>p</code>-derivate 列 <code>Δ&lt;i&gt;</code>
+(<code>Δ&lt;0&gt; = Δ</code>、<code>Δ&lt;i+1&gt; = (Δ&lt;i&gt;)′</code>、<code>Δ′</code> は交換子と
+<code>p</code> 乗が生成する正規部分群の位相閉包)のいずれか。</div>
+<p class="open">実装済み: <code>lean/ABC3/Found/LocProP/PDerivate.lean</code>(<code>sorry</code> 無し)。
+★逸脱: 原文は <code>Δ′</code> を普遍性(最大 Hausdorff・可換・<code>p</code> 消去の商)で特徴づけるが、
+本ファイルは同値な明示公式(<code>derivedStep</code>)を definition として採用した
+(普遍性そのものは証明していない、<code>.needs</code> に folklore として記録)。</p>
+</section>
+
+<section class="statement definition"
+         id="locprop-def-0-3"
+         data-paper="LocProP"
+         data-pdf-page="15"
+         data-item="Definition 0.3"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">We shall refer to c1(L) as the arithmetic first Chern class of L.</div>
+<div class="reading">直線束 <code>L</code> の Kummer 完全列由来の連結射による像
+<code>c₁(L) ∈ H²(X_K, ℤ_p(1))</code> を「arithmetic first Chern class」と呼ぶ。</div>
+<p class="open">★<code>H²(X_K, ℤ_p(1))</code> と Kummer 完全列の連結射は
+<strong>mathlib に 0 件</strong>(スキームの étale cohomology が無い、2026-09-04 実測)。
+ゆえに <code>Interface/LocProP/EtaleSetup.lean</code> が <code>c1</code> として posit する。</p>
+</section>
+
+<section class="statement lemma"
+         id="locprop-lemma-0-4"
+         data-paper="LocProP"
+         data-pdf-page="15"
+         data-item="Lemma 0.4"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">Assume that K is a field. For all integers i, r, the natural morphisms</div>
+<div class="reading"><code>Δ_X</code>(・<code>Π_X</code>)の群 cohomology から <code>X_K̄</code>(・<code>X_K</code>)の
+étale cohomology への自然な射がすべて同型であること。</div>
+<p class="open">★★★逸脱: 原文の証明は Leray-Serre spectral sequence・Künneth の公式・
+étale 被覆と <code>H¹</code> の対応の三段を使うが、mathlib には profinite 群の
+Lyndon–Hochschild–Serre spectral sequence もスキームの étale cohomology も無い
+(2026-09-04 実測)。<code>Interface/LocProP/EtaleSetup.lean</code> の
+<code>CohomologyComparisonSetup.compare_bijective</code> として全単射性そのものを posit した
+(証明していない、<code>.needs</code> に明記)。</p>
+</section>
