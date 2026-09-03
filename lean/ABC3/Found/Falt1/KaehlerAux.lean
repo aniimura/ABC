@@ -50,6 +50,28 @@ import Mathlib.RingTheory.AdjoinRoot
    という設定への帰着(原文では「W は1元 w で生成される」の一般化)も
    まだ形式化していない。
 
+★★**訂正・再評価(2026-09-04)**: `R := V`(Falt1 の V)・`B := W`
+(Falt1 の W)と代入すれば、`omega_quotient_eq_derivative_span` は
+Falt1 Lemma 1.1 の**余核**の主張「`Ω_{W/V}`」を直接計算したものになる
+(Ω_{W/V} は定義から W が V 上の第二完全列の余核——単射性の仮定なしに
+定義される対象——なので、これは Lemma 1.1 の主張の一部を本当に得た
+ことになる。前回の報告で「第二完全列は Lemma 1.1 とは別物」と述べたのは
+過度に慎重だった)。残るのは (a) `Ω_V ⊗_V W → Ω_W` の単射性(絶対微分
+Ω_V:=Ω_{V/Z}・Ω_W:=Ω_{W/Z}、Z=絶対基底に対する「第一完全列」、
+Faltings の議論では `Ω_{V[T]/Z} ≅ Ω_V⊗V[T]⊕V[T]dT` の直和分解と
+f'(w)が非零因子であることを使う——別の議論、未着手)、(b) 長さの
+計算(下記)、(c) 一般の有限拡大への帰着(下記)。
+
+**differentIdeal への接続の道筋を発見**(2026-09-04): mathlib の
+`conductor_mul_differentIdeal`(`RingTheory/DedekindDomain/Different.lean`):
+`conductor A x * differentIdeal A B = span{aeval x (derivative (minpoly A x))}`。
+`x` が `B` を A-代数として生成するとき(`R[x]=⊤`)、
+`conductor_eq_top_of_adjoin_eq_top`より`conductor A x = ⊤`となり、
+`differentIdeal A B = span{f'(w)}`が直接出る(`AdjoinRoot.adjoinRoot_eq_top`
+で`R[root]=⊤`は確認済み)。★ただし`conductor_mul_differentIdeal`は
+Dedekind整域・体K,L・IsIntegralClosure等、本ファイルではまだ組み立てて
+いない仮定群を要求する——次の一歩として記録する。
+
 ★見積り: Lemma 1.1 だけでもこの規模の補題を10-20個組み合わせる必要が
 あり、数日〜数週間規模の作業になる可能性が高い。§2-4 は Faltings の
 "almost mathematics" 自体が mathlib に無い(`Almost`/`Malcev`/
