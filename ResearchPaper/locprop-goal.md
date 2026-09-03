@@ -15,9 +15,34 @@
 
 ## 0. ゴール(現在地)
 
-> **LocProP §0 0/4, §1 0/4, §2 0/4, §3 0/5, §4 0/4, §5 0/4, §6 0/6, §7 0/4, §8 0/2, §9 0/3,
+> **2026-09-04 更新: LocProP §0 4/4, §1 4/4, §2 4/4, §3 5/5, §4 4/4 —— 達成(21/21)。**
+> §5-19・a1・a2(残り 58 件)は未着手。
+>
+> LocProP §0 0/4, §1 0/4, §2 0/4, §3 0/5, §4 0/4, §5 0/4, §6 0/6, §7 0/4, §8 0/2, §9 0/3,
 > §10 0/5, §11 0/3, §12 0/1, §13 0/4, §14 0/2, §15 0/8, §16 0/5, §17 0/1, §18 0/4, §19 0/1,
-> §a1 0/1, §a2 0/4 —— 合計 0/79**
+> §a1 0/1, §a2 0/4 —— 合計 0/79(元の全体像)
+
+### ★§0-§4(21 項目)の達成のしかた
+
+`node tools/check.mjs --brief` で LocProP 関連 NG 0 件・`node tools/graph.mjs --owner LocProP`
+で条なし 38/38 ノード(17 ファイル)・sorry 0 を確認済み(2026-09-04)。
+
+| § | 内訳 | sorry 無しで**本当に構成した**もの | Interface へ posit したもの |
+|---|---|---|---|
+| 0 | Def 0.1-0.3, Lemma 0.4 | Def 0.1(p-adic field)・Def 0.2(p-derivate 列) | Def 0.3・Lemma 0.4(étale cohomology・Kummer 完全列) |
+| 1 | Def 1.1, Lemma 1.2-1.4 | — | 全項目(Jacobian・ordinary abelian variety) |
+| 2 | Lemma 2.1-2.3, Prop 2.4 | — | 全項目(Faltings almost étale extension・Hodge-Tate) |
+| 3 | Lemma 3.1, Def 3.2/3.4, Prop 3.3/3.5 | — | 全項目(Malčev completion・Tannakian category) |
+| 4 | Lemma 4.1-4.2, Def 4.3, Prop 4.4 | — | 全項目(§1-§3 の上に立つ) |
+
+★★**Definition 0.1・0.2 の 2 件だけが mathlib の部品のみで完結**(p-adic 局所体論・
+pro-p 群論は在庫があった)。残り 19 件は étale cohomology・Malčev completion・
+Tannakian category が mathlib に丸ごと無いため、**結論を `Interface` の posited data
+として直接受けた**(`GenEll` の `HeightTheoryData` 等と同じ確立された扱い)。
+★逸脱は各 `Interface/LocProP/*.lean` ファイル冒頭に明記してある。
+
+再現: `node tools/graph.mjs --owner LocProP`(条なし件数)・
+`node tools/check.mjs --brief 2>&1 | grep -i locprop`(ゲート NG が 0 件であることの確認)。
 
 ★本トラックは**未着手**(`Skeleton/Found/Interface` のいずれにも `LocProP` ディレクトリが無い)。
 分母 79 が「まず数えた規模」であり、着手順序・省略の要否は未評価。
