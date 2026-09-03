@@ -2,6 +2,7 @@ import Mathlib.RingTheory.Kaehler.Basic
 import Mathlib.RingTheory.Kaehler.Polynomial
 import Mathlib.LinearAlgebra.Span.Basic
 import Mathlib.RingTheory.AdjoinRoot
+import Mathlib.RingTheory.DedekindDomain.Different
 
 /-!
 # [Falt1] Lemma 1.1 に向けた補助補題(`Found`、sorry 無し)
@@ -277,5 +278,31 @@ noncomputable def omega_quotient_eq_derivative_span {R B : Type*} [CommRing R] [
   (kerQuotEquivOmega hsurj).symm.trans
     (Submodule.Quotient.equiv _ _ (tensorPolynomialOmegaEquiv (R:=R) (B:=B))
       (map_ker_mapBaseChange_eq_span f hB hsurj))
+
+/-- **differentIdeal への接続(完成)**: `w` が `W` を `V`-代数として生成し、
+かつ(拡大体レベルでも)`L` を `K`-代数として生成するなら、
+`differentIdeal V W = span{f'(w)}`(`f = minpoly V w`)。
+`conductor_mul_differentIdeal`(mathlib)と、生成元による conductor の
+自明化(`conductor_eq_top_of_adjoin_eq_top`)を組み合わせる。
+
+これで Lemma 1.1 の「長さ」の主張(`Ω_{W/V}` の長さ `= length(W/p^δW)`、
+`p^δ` は differentIdeal の生成元)への接続が完成した:
+`omega_quotient_eq_derivative_span` と本定理を貼り合わせれば
+`Ω_{W/V} ≅ W ⧸ differentIdeal V W` が得られる(まだ貼り合わせていない
+——`omega_quotient_eq_derivative_span` は `Polynomial R ⧸ (f)` という
+具体形を使うが、本定理は `AdjoinRoot`/一般の `W` で述べており、両者を
+繋ぐには `W ≃ Polynomial V ⧸ (minpoly V w)` という同型がさらに要る)。 -/
+theorem differentIdeal_eq_span_derivative {V K L W : Type*} [CommRing V] [IsDedekindDomain V]
+    [Field K] [Algebra V K] [IsFractionRing V K] [Field L] [Algebra K L] [FiniteDimensional K L]
+    [Algebra.IsSeparable K L] [CommRing W] [Algebra W L] [Algebra V W] [Algebra V L]
+    [IsScalarTower V K L] [IsScalarTower V W L] [IsIntegralClosure W V L]
+    [IsDedekindDomain W] [Module.IsTorsionFree V W]
+    (w : W) (hw : Algebra.adjoin K ({(algebraMap W L) w} : Set L) = ⊤)
+    (hadjoin : Algebra.adjoin V ({w} : Set W) = ⊤) :
+    differentIdeal V W = Ideal.span {(Polynomial.aeval w) (Polynomial.derivative (minpoly V w))} := by
+  have hc : conductor V w = ⊤ := conductor_eq_top_of_adjoin_eq_top hadjoin
+  have := conductor_mul_differentIdeal V K L w hw
+  rw [hc, Ideal.top_mul] at this
+  exact this
 
 end ABC3.Found.Falt1
