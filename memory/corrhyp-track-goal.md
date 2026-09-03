@@ -59,3 +59,23 @@ mathlib自身が使う`set_option backward.isDefEq.respectTransparency false`
 が完成し本体まであと一歩。§2(Margulis/Shimura本体・Thm2.5-2.6)・
 §5(Gauss-Bonnet、mathlibに0件)・§6(Roydenの定理)は未着手で、
 それぞれ独立した大きな未構築の数学を要する。
+
+★★★★2026-09-04さらに続報(第25-29件、Interface修正・具体的instance・
+道具による集計)。原文p.5の`Comm(Γ)`定義(離散性不問)に合わせて
+`Interface`を修正(`IsDiscrete`/`Gamma_isDiscrete`を新設、純追加)。
+`Found/CorrHyp/Instance.lean`に`HyperbolicCurveData`の具体的な項
+`corrHypInstance`(`FuchsianGroup`で構成)を作り、その上で
+**`Skeleton.CorrHyp.prop_3_2`のsorryを文字通り埋める**
+(`prop_3_2_at_instance`、`funext+rfl`でSkeletonの文と関数として完全一致を
+確認済み)ことに成功——「関連する具体モデル」ではなく「Skeletonの主張
+そのものの実装」。さらに`Found/CorrHyp/ModularExample.lean`でモジュラー群
+`SL(2,ℤ)`と主合同部分群`Γ(2)`(mathlibの`discreteSpecialLinearGroupIntRangeSL`・
+`CongruenceSubgroup.Gamma`)という教科書的な例を使い、§1の
+`Definition 1.1/1.3/1.4/1.5`を`.src`で登記した(`Definition 1.2`は
+`FEt`がProp包みのため`IsTrivial`が退化することを確認し、正直に見送った)。
+
+`tools/corrhyp-progress.mjs`(genell-progress.mjsと同じ分子規則で新設)の
+機械集計: **`CorrHyp §1 4/5, §2 0/6, §3 1/3, §4 0/2, §5 0/7, §6 0/1
+—— 合計5/24`**。§2の`Proposition 2.4`/`Theorem 2.5`は
+`MargulisArithmetic`/`ShimuraArithmetic`のplaceholderで「閉じる」ことは
+明示的に見送った(退化した証明になるため、`corrhyp-goal.md`に歯止めを記録)。
