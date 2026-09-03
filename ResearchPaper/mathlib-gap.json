@@ -1672,6 +1672,47 @@
    "nodesNote": "原文自身の構成順(𝔐_X[0]・𝔐_X[1]・c_X→Z_X→拡大類η_α→分裂)をそのまま節点にできる。",
    "done": 0,
    "doneNote": "★2026-09-04(ABC3c): Interface/LocProP/WeightZeroQuotient.leanで全項目をposit(証明していない)。この4理論の中で最も土台が薄い——見つかったmathlib資産はゼロ件だった。"
+  },
+  "falt1-almost-mathematics": {
+   "what": "Faltings の almost ring theory(almost étale covering の定義そのもの——射影性・トレース・idempotent近似の3条件、Hochschild cohomology、m-torsion の圏論的扱い)。[Falt1] Chapter I §2-§4(Definition 2.1・Theorem 2.2-2.4・3.1-3.2・4.1-4.5の大半)が要る。",
+   "whereUsed": [
+    "[Falt1] Definition 2.1(almost étale covering の定義)",
+    "[Falt1] Theorem 2.2-2.4(lifting・covering の存在・微分とコホモロジー)",
+    "[Falt1] Theorem 3.1-3.2(good reduction の almost étale性)",
+    "[Falt1] Theorem 4.1-4.5(almost isomorphism としての微分・コホモロジー計算)"
+   ],
+   "mathlibStatus": {
+    "verdict": "absent",
+    "searched": "2026-09-04、\"Almost\"(AlmostDisjoint/AlmostEverywhere等の無関係語を除く)・\"AlmostModule\"・\"AlmostRingHom\"・\"almost etale\"・\"almost ring\"をmathlib全体で検索、0件。RingTheory/Perfectoid/配下(BDeRham.lean・FontaineTheta.lean・Untilt.lean、locprop-perfectoid-hodge-tateで既発見)も確認したが、これらはp進周期環(B_dR等)・Fontaineのθ・tilting/untiltingのみで、almost mathematics の枠組み(Gabber-Ramero流のalmost加群の圏、m-adic近似による同型概念)そのものは含まない。",
+    "partial": [],
+    "absentPart": "almost étale covering の定義(射影性・トレース・idempotent近似)、almost isomorphism(核・余核がmで零化される、という圏論的な近似同型概念)、Hochschild cohomology のalmost版、m-torsion加群の一般論そのもの。"
+   },
+   "minimalForm": "Definition 2.1(定義そのもの)は、対象を丸ごとpositせずに実際の3条件(projective module・trace map・idempotent近似)を書き下すことはできる(既存のProjective/Trace/Idempotent APIを使える可能性)。ただしTheorem 2.2以降(lifting・covering存在・almost isomorphism)は「almost」という近似同型の概念自体を扱う一般論が要るため、Definition止まりでは進めない。",
+   "nodes": 11,
+   "nodesNote": "§2(4項目)+§3(2項目)+§4(4.1-4.3・4.5の4項目、4.4は別途[LocProP]用の縮小形あり)= 11項目がこの理論1本の上に立つ。§1(2項目)だけがこれと独立(differentIdeal・KaehlerDifferentialというmathlib既存インフラで攻められる、falt1-lemma11-kaehler参照)。",
+   "done": 0,
+   "doneNote": "★2026-09-04(ABC3c): /goal Falt1 Chapter I Found達成の一環で実測。全11項目はInterface(posit、証明していない)のまま——Found化にはalmost ring theoryをmathlib流に一から構築する必要がある(GenEllのAbelianVariety・LocProPのMalčev-Tannakianと同種の、mathlib本体への貢献に近い規模の作業)。"
+  },
+  "falt1-lemma11-kaehler-composition": {
+   "what": "[Falt1] Lemma 1.1(Ω_V⊗_V W→Ω_Wの単射性・余核Ω_{W/V}の長さ=length(W/p^δW))・Theorem 1.2(differentの列の収束)の証明そのもの。mathlibに個々の道具(differentIdeal・KaehlerDifferential)は実在するが、組み合わせた完成形の補題は無い。",
+   "whereUsed": [
+    "[Falt1] Chapter I §1(Lemma 1.1・Theorem 1.2)"
+   ],
+   "mathlibStatus": {
+    "verdict": "partial",
+    "searched": "2026-09-04、\"differentIdeal\"(RingTheory/DedekindDomain/Different.lean、differentIdeal・aeval_derivative_mem_differentIdeal・conductor_mul_differentIdeal等)・\"KaehlerDifferential\"(RingTheory/Kaehler/Basic.lean・Polynomial.lean、exact_kerCotangentToTensor_mapBaseChange・exact_mapBaseChange_map・polynomialEquiv等)をmathlib全体で検索、両方とも豊富に実在することを確認。",
+    "partial": [
+     "differentIdeal(RingTheory/DedekindDomain/Different.lean)—— 一般のDedekind整域の拡大に対する different ideal。aeval_derivative_mem_differentIdealで極小多項式の微分との関係も既にある",
+     "KaehlerDifferential.exact_mapBaseChange_map / exact_kerCotangentToTensor_mapBaseChange(RingTheory/Kaehler/Basic.lean)—— 一般の環の塔R→A→Bに対する「第一完全列」B⊗_AΩ_{A/R}→Ω_{B/R}→Ω_{B/A}→0、および全射A→Bに対する「第二完全列」(I/I²→B⊗_AΩ_{A/R}→Ω_{B/R}→0)がどちらも実在",
+     "KaehlerDifferential.polynomialEquiv(RingTheory/Kaehler/Polynomial.lean)—— Ω_{R[T]/R}≃R[T]の計算"
+    ],
+    "absentPart": "上記3つを実際に合成してLemma 1.1の主張(単射性+余核の長さ)を導く証明そのもの。特に「第一完全列の最初の射が単射である」という事実はFaltingsの具体的な議論(f'(w)dTの係数が非零因子)に依るもので、一般論からは出ない——組み立てるのに10-20個規模の補題が必要と見積もる(2026-09-04時点の実測)。「長さ」概念(length(W/p^δW))をmathlibのどの道具(合成列・Module.length等)で表すかも未調査。"
+   },
+   "minimalForm": "まず「モノジェニックな商のΩ計算」(W=A[T]/(f)のΩ_{W/A}≅W/(f'(w))、第二完全列の応用)を独立に完成させ、そのあと第一完全列との貼り合わせ(単射性)に進むのが筋が良さそうという見立て(未検証)。",
+   "nodes": 2,
+   "nodesNote": "Lemma 1.1・Theorem 1.2の2項目。Theorem 1.2はLemma 1.1のdifferentの評価を使う列の議論なので、Lemma 1.1が先。",
+   "done": 0,
+   "doneNote": "★2026-09-04(ABC3c): Found/Falt1/KaehlerAux.leanに再利用可能な最初の補題(nzdCotangentEquivQuot: 非零因子fが生成する単項イデアルのcotangent加群が商環に同型)をsorry無しで証明・登記した。Lemma 1.1本体はまだ未完成——正直な進捗として記録する。"
   }
  },
  "summary": {
