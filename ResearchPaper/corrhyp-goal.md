@@ -144,6 +144,17 @@ Royden の定理——いずれも GenEll のモジュラー多項式ギャッ�
 3つの独立した大きな塊(双曲幾何・スキーム論・代数群論)を要求する
 構造になっている(2026-09-04 実測、上記①②③)。
 
+★★**3つの塊のうち②(スキーム論)だけ、mathlib に相応の蓄積がある**
+(2026-09-04 追加実測)。`AlgebraicGeometry.Scheme.Etale`・
+`LocallyOfFiniteType` に加えて `AlgebraicGeometry/SpreadingOut.lean` に
+**まさに `Lemma 4.1` と同種の「有限型なら有限生成部分環まで下りて
+一意に持ち上がる」という spreading-out の補題群**
+(`spread_out_of_isGermInjective`・`exists_lift_of_germInjective` 等)が
+存在する。①(双曲幾何、Gauss–Bonnet 0件)・③(代数群論、非可換 Galois
+コホモロジー)より見込みがある——ただし「双曲曲線」をスキームとして
+定義する下ごしらえ自体は `FuchsianGroup` とは別建ての新規モデルになり、
+そこだけでも相応の量になる見込み(未着手、規模は未測定)。
+
 関連: [[leaf-first-with-graph-feedback]] / [[leaves-are-measured-not-guessed]] /
 [[measure-mathlib-before-skeleton]] / [[genell-track-b]] / [[corrhyp-track-goal]] /
 [[stale-status-read-lean-first]] / [[no-wall-decompose-instead]]
