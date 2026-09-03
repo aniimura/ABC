@@ -501,7 +501,65 @@
    "pageOffset": 0,
    "notationRisk": "medium",
    "notationNotes": "2026-09-04 に 200dpi 目視(p.3-13, p.15, p.17)。★装飾は組版は非常に綺麗(IUTchIII/GenEllのような深刻な脱落・順序入れ替えは無い)だが2点だけ実害がある——(1) ★オーバーバー脱落: 双曲曲線のコンパクト化 X̄(§1、p.3の型の定義)がpdftotextで裸のXになり、曲線Xそのものと区別できない(IUTchI/IIIと同型の罠)。ただし§1の各Definitionの本文自体はX̄を使わないので実害は無い。(2) ★花文字の脱落: Riemann面𝒳(script)・普遍被覆𝒳̃(tilde)・解析的商𝒴(script)がすべて pdftotext では地の文の X・Y に潰れる(§2冒頭 p.4、§3冒頭 p.7-8、§6 p.17のTeichmüller空間の記述)。本プロジェクトでは X(代数的双曲曲線)と 𝒳(その解析空間)は Interface 上で同一の carrier として扱う(原典側もこの2つを一貫して同一視して使っている——Definition 2.1/2.2/2.3は『X, 𝒳, or Γ』と3つの呼び方を並記)。(3) ★逐語照合で実測: 'étale' は pdftotext では合成前の '´etale'(結合しないアキュート記号+e)になる——Skeletonの逐語引用はこの壊れた綴りのまま写す必要がある(precomposed é を使うとcheck.mjsのG1照合が落ちる)。Corollaryは0件、Remarkはすべて無番号。",
-   "verifiedPages": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 17]
+   "verifiedPages": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    15,
+    17
+   ]
+  },
+  "Falt1": {
+   "title": "p-Adic Hodge Theory",
+   "file": "Faltings - p-adic Hodge theory",
+   "author": "Gerd Faltings",
+   "year": 1988,
+   "pdfPages": 46,
+   "pageOffset": 254,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★まだ目視していない。[LocProP] Lemma 2.1・2.3 の証明が直接引用(Section I, Theorem 4.4)。誌面は JAMS Vol.1 No.1 (1988) pp.255-299。テキスト層のみで座標記法(添字・上付き)の壊れ方は未測定。",
+   "verifiedPages": []
+  },
+  "Tate": {
+   "title": "p-Divisible Groups",
+   "file": "Tate - p-Divisible Groups",
+   "author": "John T. Tate",
+   "year": 1967,
+   "pdfPages": 13,
+   "pageOffset": 157,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★★★★★★**入手できたのは冒頭 13 ページ分だけ**(元は Proceedings of a Conference on Local Fields, Driebergen 1966, pp.158-183 の26ページ)。[LocProP] Lemma 2.2 の証明が引く §3.3, Theorem 1・Theorem 2 が範囲内かは未確認——着手前に要確認、無ければ全編の入手が要る。OCR/スキャンなので pdftotext の精度も低い可能性。",
+   "verifiedPages": []
+  },
+  "BK": {
+   "title": "L-Functions and Tamagawa Numbers of Motives",
+   "file": "Bloch Kato - L-Functions and Tamagawa Numbers of Motives",
+   "author": "Spencer Bloch and Kazuya Kato",
+   "year": 1990,
+   "pdfPages": 68,
+   "pageOffset": 332,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★まだ目視していない。The Grothendieck Festschrift, Progress in Mathematics vol.86, pp.333-400。[LocProP] Lemma 4.1 の証明が引く(§3, Example 3.11、Lemma 3.8.1)。",
+   "verifiedPages": []
+  },
+  "Del": {
+   "title": "Le Groupe Fondamental de la Droite Projective Moins Trois Points",
+   "file": "Deligne - Le Groupe Fondamental de la Droite Projective Moins Trois Points",
+   "author": "Pierre Deligne",
+   "year": 1989,
+   "pdfPages": 219,
+   "pageOffset": 71,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★★★まだ目視していない。★219ページの大論文——Galois groups over Q (MSRI Publications vol.16) pp.72-297。[LocProP]は[Del]をp.27・30-31など§3周辺で計4回、常に[NT]併記でMalčev completionの参照先として挙げる。特定の定理番号は引いていない(★2026-09-04実測)。フランス語。",
+   "verifiedPages": []
   }
  }
 }
