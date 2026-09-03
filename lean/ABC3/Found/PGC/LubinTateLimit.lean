@@ -136,7 +136,7 @@ theorem coeff_gsubst_LubinTateF_eq_ΦSeq (e : Fin 2 →₀ ℕ) (m : ℕ) (he : 
       MvPowerSeries.coeff e
         (MvPowerSeries.subst (fun i => PowerSeries.subst (MvPowerSeries.X i : MvPowerSeries (Fin 2) A) g)
           (ΦSeq hq hπmax g hg0 hg1 hgres f hf0 hf1 hfres m).1) := by
-  have haHS := hasSubst_g_subst_X g hg0
+  have haHS := hasSubst_g_subst_X (σ := Fin 2) g hg0
   have hsub : MvPowerSeries.subst (fun i => PowerSeries.subst (MvPowerSeries.X i : MvPowerSeries (Fin 2) A) g)
         (LubinTateF hq hπmax g hg0 hg1 hgres f hf0 hf1 hfres) -
       MvPowerSeries.subst (fun i => PowerSeries.subst (MvPowerSeries.X i : MvPowerSeries (Fin 2) A) g)

@@ -31,7 +31,7 @@ theorem coeff_subst_g_linearize_order {φ : MvPowerSeries (Fin 2) A} {n : ℕ}
       apply MvPowerSeries.coeff_of_lt_order
       calc ((Finsupp.degree e : ℕ) : ℕ∞) < ((n + 1 : ℕ) : ℕ∞) := by exact_mod_cast hlt
         _ ≤ φ.order := hφorder
-    have haHS := hasSubst_g_subst_X g hg0
+    have haHS := hasSubst_g_subst_X (σ := Fin 2) g hg0
     have hai_order : ∀ i, 1 ≤ (PowerSeries.subst (MvPowerSeries.X i : MvPowerSeries (Fin 2) A) g).order :=
       hai_order_g g hg0
     have hsubst_order : ((n + 1 : ℕ) : ℕ∞) ≤
@@ -70,7 +70,7 @@ theorem coeff_subst_g_linearize_order {φ : MvPowerSeries (Fin 2) A} {n : ℕ}
           calc ((Finsupp.degree d : ℕ) : ℕ∞) < ((n + 1 : ℕ) : ℕ∞) := by exact_mod_cast hdlt
             _ ≤ φ.order := hφorder
         rw [hφd0, hφ1hom d hdeq, sub_zero]
-    have haHS := hasSubst_g_subst_X g hg0
+    have haHS := hasSubst_g_subst_X (σ := Fin 2) g hg0
     have hai_order : ∀ i, 1 ≤ (PowerSeries.subst (MvPowerSeries.X i : MvPowerSeries (Fin 2) A) g).order :=
       hai_order_g g hg0
     have htailsubst_order : ((n + 2 : ℕ) : ℕ∞) ≤

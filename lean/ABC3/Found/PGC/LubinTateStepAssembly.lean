@@ -103,7 +103,7 @@ theorem exists_next_step {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
     rw [hcontra] at hd
     exact absurd hd (lt_irrefl _)
   have hΦorder : 1 ≤ Φ.order := MvPowerSeries.one_le_order_iff_constCoeff_eq_zero.mpr hΦ0
-  have haHS := hasSubst_g_subst_X g hg0
+  have haHS := hasSubst_g_subst_X (σ := Fin 2) g hg0
   refine ⟨φ, hφ, fun e he => ?_⟩
   have hAdd : MvPowerSeries.subst (fun i => PowerSeries.subst (MvPowerSeries.X i) g) (Φ + φ) =
       MvPowerSeries.subst (fun i => PowerSeries.subst (MvPowerSeries.X i) g) Φ +
