@@ -254,14 +254,18 @@ IsDiscrete (Gamma X)` を新設——`Comm`/`Sub`/`FiniteIndexIn` の型も
 ではなく、**Skeleton の主張そのものの実装**という、これまでで最も厳密な
 Found 完成(第26件)。
 
-★次に狙える候補: `corrHypInstance` は §1 の `Corr`/`IsIsogenous` 等の
-定義にも(placeholder 抜きで)非空虚な具体例を与えられる可能性がある
-(未着手だが道筋を実測: `Matrix.SpecialLinearGroup.discreteSpecialLinearGroupIntRangeSL`
-——`SL(2,ℤ)` の `SL(2,ℝ)` への像が離散、と `CongruenceSubgroup.Gamma N`
-——合同部分群、`[NeZero N]` で有限指数——を組み合わせれば、モジュラー群
-`SL(2,ℤ)` と合同部分群 `Γ(N)` という**教科書的に意味のある** Fuchsian 群の
-例で `IsFiniteIndexIn` の非空虚性を示せるはず。`Subgroup.map` 越しの
-有限指数の伝播が `exact?` で即座に閉じなかった、というところで中断)。
+★★★★**2026-09-04続報(第27件)、上の候補を実際に完成させた**。
+`Found/CorrHyp/ModularExample.lean`: モジュラー群 `SL(2,ℤ)`(`SL(2,ℝ)` への
+像、`discreteSpecialLinearGroupIntRangeSL` で離散)と主合同部分群 `Γ(2)`
+(`CongruenceSubgroup.Gamma 2`、mathlib に `FiniteIndex` 済み)を
+`corrHypInstance` の `FuchsianGroup` として具体化し、`T=[[1,1],[0,1]]`
+witness で両者が**相異なる**ことを確認した上で
+`isIsogenous_witness : IsIsogenous corrHypInstance FG_SL2Z FG_Gamma2`
+(`sorry` 無し、標準3公理のみ)を得た——`Definition 1.5` が
+`corrHypInstance` において**教科書的に意味のある**非空虚性を持つことの
+具体的な証拠(有限指数の伝播は `Subgroup.relIndex_map_map` で
+`ker(単射) = ⊥` を消し込むだけで閉じた)。
+
 `Definition 3.1`(`hyperbolicCore`)は今の `core := id` placeholder では
 実装にならない(本物の商構成、`Lemma 5.1` の内容)。`Theorem 3.3` は
 引き続き Riemann–Hurwitz/Gauss–Bonnet(mathlib 不在)待ち。
