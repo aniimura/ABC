@@ -23,18 +23,19 @@ variable (D : HyperbolicCurveData)
 /-- [CorrHyp] **Definition 2.1**。
 
 原文 (CorrHyp p.5):
-> We shall say that X, 𝒳, or Γ has infinitely many correspondences if Γ
+> We shall say that X, X , or Γ has infinitely many correspondences if Γ
 > has infinite index in Comm(Γ). -/
 def InfinitelyManyCorr (Γ : D.Fuchsian) : Prop := ¬ D.FiniteIndexIn Γ (D.Comm Γ)
 
 /-- [CorrHyp] **Definition 2.2**(Margulis-arithmetic)。
 
 原文 (CorrHyp p.5):
-> We shall call X, 𝒳, or Γ Margulis-arithmetic if there exists a connected
-> non-commutative almost Q-simple algebraic group G over Q, together with a
-> surjection τ : G_R → (PSL₂)_R of algebraic groups over R such that the Lie
-> group (Ker τ)(R) is compact, and the subgroups τ(G(Z)) and Γ (of PSL₂(R)⁰)
-> are commensurable.
+> We shall call X, X , or Γ Margulis-arithmetic if there exists a connected
+> non-commutative almost Q-simple algebraic group G over Q, together with a surjection τ :
+> GR
+> def
+> = G⊗Q R →(PSL2)R of algebraic groups over R such that the Lie group (Ker τ)(R)
+> is compact, and the subgroups τ(G(Z)) and Γ (of PSL2(R)0) are commensurable.
 
 ★`Interface` の抽象化(`HyperbolicCurveData.MargulisArithmetic`)をそのまま名指す。
 中身(代数群 `G` の構成)は `Proposition 2.4` の証明の中だけで使われる——
@@ -44,30 +45,35 @@ def MargulisArithmetic (Γ : D.Fuchsian) : Prop := D.MargulisArithmetic Γ
 /-- [CorrHyp] **Definition 2.3**(Shimura-arithmetic)。
 
 原文 (CorrHyp p.5–p.6):
-> We shall call X, 𝒳, or Γ Shimura-arithmetic if the following data exist:
-> (1) a totally real algebraic number field F; (2) a quaternion algebra A
-> over F which is trivial at one of the infinite places of F and nontrivial
-> at all the other infinite places; (3) a trivialization of A at the infinite
-> place of F at which A is trivial …; (4) an order O_A ⊆ A such that the
-> intersection of O_A ⊆ A ⊆ M₂(R) with SL₂(R) ⊆ M₂(R) has image in PSL₂(R)⁰
-> commensurable with Γ. -/
+> We shall call X, X , or Γ Shimura-arithmetic if the following data exist:
+> (1) a totally real algebraic number field F;
+> (2) a quaternion algebra A over F which is trivial at one of the infinite
+> places of F and nontrivial at all the other infinite places;
+> (3) a trivialization of A at the infinite place of F at which A is trivial; this
+> trivialization will be used to regard A as a subalgebra of M2(R);
+> (4) an order OA ⊆A such that the intersection of OA ⊆A ⊆M2(R) with
+> SL2(R) ⊆M2(R) has image in PSL2(R)0 commensurable with Γ. -/
 def ShimuraArithmetic (Γ : D.Fuchsian) : Prop := D.ShimuraArithmetic Γ
 
 /-- 原文 §2、`Proposition 2.4` の直後の段落: arithmetic = Margulis-arithmetic
 ∨ Shimura-arithmetic。
 
-原文 (CorrHyp p.6):
-> In the future, we shall refer to X, 𝒳, or Γ as arithmetic if it is either
-> Margulis-arithmetic or Shimura-arithmetic (since we now know that these two
-> notions of arithmeticity are equivalent).
+原文 (CorrHyp p.7、この段落は物理 p.7 の冒頭にある——p.6 ではない):
+> In the future, we shall refer to X, X , or Γ as arithmetic if it is either Margulis-arithmetic
+> or Shimura-arithmetic (since we now know that these two notions of arithmeticity are
+> equivalent).
 
 ★numbered item ではないが、`Theorem 2.5` 以降の全定理が使う語彙なのでここに置く。 -/
 def Arithmetic (Γ : D.Fuchsian) : Prop := D.MargulisArithmetic Γ ∨ D.ShimuraArithmetic Γ
 
+def Arithmetic.src : Source :=
+  { paper := "CorrHyp", pdfPage := 7, item := "Proposition 2.4 直後の地の文(arithmeticの定義)",
+    sectionId := "corrhyp-arithmetic-def" }
+
 /-- [CorrHyp] **Proposition 2.4**。
 
 原文 (CorrHyp p.6):
-> The Riemann surface 𝒳 is Margulis-arithmetic if and only if it is
+> The Riemann surface X is Margulis-arithmetic if and only if it is
 > Shimura-arithmetic. -/
 theorem prop_2_4 (Γ : D.Fuchsian) : D.MargulisArithmetic Γ ↔ D.ShimuraArithmetic Γ := sorry
 
@@ -75,8 +81,8 @@ theorem prop_2_4 (Γ : D.Fuchsian) : D.MargulisArithmetic Γ ↔ D.ShimuraArithm
 
 原文 (CorrHyp p.7):
 > ([Marg], p. 337, Theorem 27; p. 60, Lemma 3.1.1, (v)) The hyperbolic
-> Riemann surface 𝒳 is arithmetic if and only if it has infinitely many
-> correspondences (in the sense of Definition 2.1). -/
+> Riemann surface X is arithmetic if and only if it has infinitely many correspondences (in
+> the sense of Definition 2.1). -/
 theorem thm_2_5 (Γ : D.Fuchsian) : Arithmetic D Γ ↔ InfinitelyManyCorr D Γ := sorry
 
 /-- [CorrHyp] **Theorem 2.6**。
@@ -120,14 +126,16 @@ def thm_2_5.src : Source :=
   { paper := "CorrHyp", pdfPage := 7, item := "Theorem 2.5",
     sectionId := "corrhyp-thm-2-5" }
 
+/-- ★`[Marg]` は `papers.json` 未登記の外部文献(bibliography のみ)なので
+`otherPaper` ではなく `folklore` で引く。 -/
 def thm_2_5.needs : List ProofObligation :=
-  [ .otherPaper "[Marg]" "p. 337, Theorem 27; p. 60, Lemma 3.1.1, (v)" 337 ]
+  [ .folklore "[Marg], p. 337, Theorem 27; p. 60, Lemma 3.1.1, (v)(外部文献、未登記)" 7 ]
 
 def thm_2_6.src : Source :=
   { paper := "CorrHyp", pdfPage := 7, item := "Theorem 2.6",
     sectionId := "corrhyp-thm-2-6" }
 
 def thm_2_6.needs : List ProofObligation :=
-  [ .otherPaper "[Take]" "Theorem 2.1" 1 ]
+  [ .folklore "[Take], Theorem 2.1(外部文献、未登記)" 7 ]
 
 end ABC3.Skeleton.CorrHyp

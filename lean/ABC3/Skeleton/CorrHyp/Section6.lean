@@ -22,9 +22,9 @@ variable (D : HyperbolicCurveData)
 (`Definition 1.1` の 2 対象版とは trivial の意味が違う)。
 
 原文 (CorrHyp p.17):
-> Let us refer to as a correspondence on M_{g,r} an (ordered) pair of finite
-> étale morphisms α : E → M_{g,r}, β : E → M_{g,r}, where E is nonempty. We
-> shall call a correspondence (α, β) on M_{g,r} trivial if α = β. -/
+> Let us refer to as a correspondence on Mg,r an (ordered) pair of finite ´etale morphisms
+> α : E →Mg,r, β : E →Mg,r, where E is nonempty. We shall call a correspondence (α, β)
+> on Mg,r trivial if α = β. -/
 structure CorrOn (M : D.Space) where
   E : D.Space
   α : D.FEt E M
@@ -32,10 +32,14 @@ structure CorrOn (M : D.Space) where
 
 def CorrOn.IsTrivial {M : D.Space} (c : CorrOn D M) : Prop := c.α = c.β
 
+def CorrOn.IsTrivial.src : Source :=
+  { paper := "CorrHyp", pdfPage := 17, item := "§6 冒頭(correspondence on M_{g,r} の trivial)",
+    sectionId := "corrhyp-sec6-corron" }
+
 /-- [CorrHyp] **Theorem 6.1**。
 
 原文 (CorrHyp p.17):
-> Suppose that 2g − 2 + r ≥ 3. Then M_{g,r} is generically a scheme, and
+> Suppose that 2g −2 + r ≥3. Then Mg,r is generically a scheme, and
 > moreover, does not admit any nontrivial automorphisms or correspondences.
 
 ★`2g − 2 + r ≥ 3` は `Theorem 5.3` と同じく `2g + r ≥ 5`(ℤ上同値、ℕ減法回避)
@@ -62,8 +66,7 @@ Royden の定理([Gard] §9.2 p.169 Theorem 2、Teichmüller 空間 `𝒯` の
 正則自己同型群と `Γ = π₁(M_{g,r})` の同型)であり、本プロジェクトに
 Teichmüller 空間の構成は無い。 -/
 def thm_6_1.needs : List ProofObligation :=
-  [ .otherPaper "[Gard]" "§9.2, p. 169, Theorem 2(Roydenの定理——Aut(𝒯) ≅ Γ)" 169,
-    .folklore "『well-known general nonsense』(非自明な correspondence の存在 ⟹ Aut(𝒯)∖Γ に、Γ∩(γΓγ⁻¹) が両側で有限指数であるような元 γ が存在する、という一般論)" 17,
-    .otherPaper "[CorrHyp]" "p. 337 の議論(Theorem 2.5 の証明で使う一般論と同型、[Marg] 経由)" 337 ]
+  [ .folklore "[Gard], §9.2, p. 169, Theorem 2(Roydenの定理——Aut(𝒯) ≅ Γ、外部文献・未登記)" 17,
+    .folklore "『well-known general nonsense』(非自明な correspondence の存在 ⟹ Aut(𝒯)∖Γ に、Γ∩(γΓγ⁻¹) が両側で有限指数であるような元 γ が存在する、という一般論。[Marg] p.337 の議論と同型、Theorem 2.5 の証明で使ったのと同じ一般論)" 17 ]
 
 end ABC3.Skeleton.CorrHyp

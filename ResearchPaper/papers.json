@@ -500,8 +500,8 @@
    "pdfPages": 18,
    "pageOffset": 0,
    "notationRisk": "medium",
-   "notationNotes": "2026-09-04 に 200dpi 目視(p.3-12, p.17)。★装飾は組版は非常に綺麗(IUTchIII/GenEllのような深刻な脱落・順序入れ替えは無い)だが1点だけ実害がある——(1) ★オーバーバー脱落: 双曲曲線のコンパクト化 X̄(§1、p.3の型の定義)がpdftotextで裸のXになり、曲線Xそのものと区別できない(IUTchI/IIIと同型の罠)。ただし§1の各Definitionの本文自体はX̄を使わないので実害は無い。(2) ★花文字の脱落: Riemann面𝒳(script)・普遍被覆𝒳̃(tilde)・解析的商𝒴(script)がすべて pdftotext では地の文の X・Y に潰れる(§2冒頭 p.4、§3冒頭 p.7-8、§6 p.17のTeichmüller空間の記述)。本プロジェクトでは X(代数的双曲曲線)と 𝒳(その解析空間)は Interface 上で同一の carrier として扱う(原典側もこの2つを一貫して同一視して使っている——Definition 2.1/2.2/2.3は『X, 𝒳, or Γ』と3つの呼び方を並記)。Corollaryは0件、Remarkはすべて無番号。",
-   "verifiedPages": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 17]
+   "notationNotes": "2026-09-04 に 200dpi 目視(p.3-13, p.15, p.17)。★装飾は組版は非常に綺麗(IUTchIII/GenEllのような深刻な脱落・順序入れ替えは無い)だが2点だけ実害がある——(1) ★オーバーバー脱落: 双曲曲線のコンパクト化 X̄(§1、p.3の型の定義)がpdftotextで裸のXになり、曲線Xそのものと区別できない(IUTchI/IIIと同型の罠)。ただし§1の各Definitionの本文自体はX̄を使わないので実害は無い。(2) ★花文字の脱落: Riemann面𝒳(script)・普遍被覆𝒳̃(tilde)・解析的商𝒴(script)がすべて pdftotext では地の文の X・Y に潰れる(§2冒頭 p.4、§3冒頭 p.7-8、§6 p.17のTeichmüller空間の記述)。本プロジェクトでは X(代数的双曲曲線)と 𝒳(その解析空間)は Interface 上で同一の carrier として扱う(原典側もこの2つを一貫して同一視して使っている——Definition 2.1/2.2/2.3は『X, 𝒳, or Γ』と3つの呼び方を並記)。(3) ★逐語照合で実測: 'étale' は pdftotext では合成前の '´etale'(結合しないアキュート記号+e)になる——Skeletonの逐語引用はこの壊れた綴りのまま写す必要がある(precomposed é を使うとcheck.mjsのG1照合が落ちる)。Corollaryは0件、Remarkはすべて無番号。",
+   "verifiedPages": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 17]
   }
  }
 }

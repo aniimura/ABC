@@ -22,6 +22,11 @@ variable (D : HyperbolicCurveData)
 def extCorr {A B : D.Space} (c : Corr D A B) : Corr D (D.Ext A) (D.Ext B) :=
   ⟨D.Ext c.C, D.extFEt c.α, D.extFEt c.β⟩
 
+/-- 共通語彙(numbered item ではない)なので、`Lemma 4.1` の `X_K` を指す。 -/
+def extCorr.src : Source :=
+  { paper := "CorrHyp", pdfPage := 9, item := "Lemma 4.1 直前の地の文(X_K の記法)",
+    sectionId := "corrhyp-lemma-4-1" }
+
 /-- [CorrHyp] **Lemma 4.1**。
 
 原文 (CorrHyp p.9):
@@ -34,12 +39,12 @@ theorem lemma_4_1 (X ZK : D.Space) (c : Corr D (D.Ext X) ZK) :
 
 /-- [CorrHyp] **Theorem 4.2**(原文の "first main result"、`Theorem A` の本体)。
 
-原文 (CorrHyp p.10):
+原文 (CorrHyp p.10、pdftotextの実測ではこの箇所だけ ′(プライム)が脱落し、
+− (U+2212)も素の "-" になる——実際に呼び出したときの抽出結果に合わせて書く):
 > Let k be an algebraically closed field of characteristic zero. Let X be a
-> hyperbolic curve over k. Let (g′, r′) be a pair of nonnegative integers
-> satisfying 2g′ − 2 + r′ > 0. Then (up to isomorphism) there are only
-> finitely many hyperbolic curves over k of type (g′, r′) that are isogenous
-> to X. -/
+> hyperbolic curve over k. Let (g, r) be a pair of nonnegative integers satisfying 2g-2+r >
+> 0. Then (up to isomorphism) there are only finitely many hyperbolic curves over k of type
+> (g, r) that are isogenous to X. -/
 theorem thm_4_2 (X : D.Space) (gr' : ℕ × ℕ) :
     FinitelyManyUpTo D (fun Y => D.type Y = gr' ∧ IsIsogenous D X Y) := sorry
 

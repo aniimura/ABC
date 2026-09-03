@@ -21,14 +21,11 @@ variable (D : HyperbolicCurveData)
 
 /-- [CorrHyp] **Lemma 5.1**。
 
-原文 (CorrHyp p.11):
-> Let k be algebraically closed of characteristic zero. Suppose that k is a
-> subfield of C. Let X be a hyperbolic curve over k. Suppose that X_C is not
-> arithmetic. Then the morphism X_C → Y_C … descends to some morphism X → Y
-> over k. Moreover, X → Y has the universal property that any correspondence
-> (C → X, C → Z) over k, fits uniquely into a commutative diagram … Finally,
-> the morphism X → Y is independent (up to canonical isomorphism) of the
-> embedding of k into C.
+原文 (CorrHyp p.11、`def=` の行分割を避けて後半だけを引く):
+> Then the morphism XC →YC appearing in the discussion of the hyperbolic
+> core of XC (see Definition 3.1) descends to some morphism X →Y over k. Moreover,
+> X →Y has the universal property that any correspondence (C →X, C →Z) over k, fits
+> uniquely into a commutative diagram:
 
 ★`core`/`coreMap` は `Interface` に(この非 arithmetic の仮定なしで)posit して
 ある。本 statement はその普遍性を証明として要求する。「埋め込みに依らない」の
@@ -49,11 +46,11 @@ def hyperbolicCoreGeneral (X : D.Space) (_h : ¬ Arithmetic D (D.Gamma (D.Ext X)
 
 原文 (CorrHyp p.12):
 > Let k be algebraically closed of characteristic zero. Suppose that k is a
-> subfield of C. Fix nonnegative integers g and r such that 2g − 2 + r ≥ 3.
-> Then there exists an open dense substack U ⊆ (M_{g,r})_k … with the
-> following property: If X is a hyperbolic curve over some extension
-> algebraically closed field K of k corresponding to a point ∈ U(K), then the
-> hyperbolic core of X is equal to X.
+> subfield of C. Fix nonnegative integers g and r such that 2g −2 + r ≥3. Then there exists
+> an open dense substack U ⊆(Mg,r)k (where (Mg,r)k is the moduli stack of (hyperbolic)
+> curves of type (g, r) over k) with the following property: If X is a hyperbolic curve over
+> some extension algebraically closed field K of k corresponding to a point ∈U(K), then
+> the hyperbolic core of X is equal to X.
 
 ★`2g − 2 + r ≥ 3` は ℕ の減法(切り捨て)を避けて `2g + r ≥ 5`(ℤ上で同値)と書いた。 -/
 theorem thm_5_3 (g r : ℕ) (_h : 2 * g + r ≥ 5) :
@@ -78,8 +75,8 @@ theorem lemma_5_5 (g r : ℕ) :
 /-- [CorrHyp] **Lemma 5.6**。
 
 原文 (CorrHyp p.13):
-> The locus (inside (M_{g,r})_k) of nonarithmetic curves that are not equal
-> to their own hyperbolic cores is constructible (in (M_{g,r})_k). -/
+> The locus (inside (Mg,r)k) of nonarithmetic curves that are not equal to
+> their own hyperbolic cores is constructible (in (Mg,r)k). -/
 theorem lemma_5_6 (g r : ℕ) :
     D.IsConstructibleIn
       {X : D.Space | D.type X = (g, r) ∧ ¬ Arithmetic D (D.Gamma X) ∧ ¬ D.Iso (D.core X) X}

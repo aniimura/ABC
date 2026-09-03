@@ -44,10 +44,9 @@ open ABC3.Meta
 `(g_Y; r_Y; {i_σ}_{σ∈Σ_Y})`。
 
 原文 (CorrHyp p.12):
-> Let us write `g_Y` for the genus of the compactification of `Y^c`, and `r_Y`
-> for the number of points that need to be added to `Y^c` to compactify it. Let
-> us write `Σ_Y` for the set of points of `Y^c` over which `Y → Y^c` is not
-> étale.
+> morphism Y →Y c. Let us write gY for the genus of the compactification of Y c, and rY
+> for the number of points that need to be added to Y c to compactify it. Let us write ΣY
+> for the set of points of Y c over which Y →Y c is not ´etale.
 
 ★`Σ_Y` の有限性は原文に明記されないが、`Lemma 5.4`/`5.5` が `e_Y` の和を
 有限和として扱っているので implicit に仮定されている。ここでは `Fintype` として
@@ -67,9 +66,9 @@ attribute [instance] StackType.fintypeSigma
 
 /-- `e_Y ≝ 2g_Y − 2 + r_Y + Σ_{σ∈Σ_Y} j_σ`、`j_σ ≝ (i_σ−1)/i_σ`(`Y` の Euler 標数)。
 
-原文 (CorrHyp p.12):
-> `e_Y ≝ 2g_Y − 2 + r_Y + Σ_{σ∈Σ_Y} j_σ` … Thus, one may think of `e_Y` as the
-> Euler characteristic of `Y`. -/
+原文 (CorrHyp p.12、`eY` の定義式に続く一文——式そのものは表組みで複数行に
+分かれて抽出されるため逐語から外し、この一文だけを引く):
+> Thus, one may think of eY as the Euler characteristic of Y . -/
 noncomputable def StackType.e (t : StackType) : ℚ :=
   2 * (t.g : ℚ) - 2 + (t.r : ℚ) +
     ∑ σ ∈ (Finset.univ : Finset t.Sigma), ((t.i σ : ℚ) - 1) / (t.i σ : ℚ)
@@ -133,5 +132,23 @@ structure HyperbolicCurveData where
   IsOpenDenseIn : Set Space → ℕ → ℕ → Prop
   /-- `(M_{g,r})_k` の中で「構成可能」(`Lemma 5.6`)。 -/
   IsConstructibleIn : Set Space → ℕ → ℕ → Prop
+
+/-- ★**Track B は何を作らねばならないか。**
+
+`StackType` は `g` と `r` を固定して `Sigma := Empty` とすれば非空虚(`e = 2g-2+r`)
+なので、実は非空虚 witness 自体は作れる——ここでは代わりに、それが
+「原文の `Y` の型と一致する」という**意味のある**非空虚性ではないことを明記する。 -/
+def StackType.waiting : WaitingFor :=
+  { what := "StackType.nonvacuousを構成すること自体は容易(Sigma := Emptyでe = 2g-2+r)だが、それは『Yの型として実際に出現するデータ』であることを何も保証しない。意味のある非空虚性はHyperbolicCurveDataのcore/stackTypeが具体的なCorrHyp/GenEllのような対象で実装されて初めて言える"
+    trackB := "未着手。GenEllのFound/GenEll/相当のCorrHyp向け実装が要る" }
+
+/-- ★**Track B は何を作らねばならないか。**
+
+本構造体は双曲曲線・Fuchsian 群・モジュライスタック等、原文 §1-§6 のほぼ全語彙を
+一度に posit している。個々のフィールドが「意味のある」対象(実際の双曲曲線の圏、
+実際の `PSL₂(ℝ)` の部分群の圏、等)で実装されて初めて非空虚性に意味が出る。 -/
+def HyperbolicCurveData.waiting : WaitingFor :=
+  { what := "双曲曲線の圏(Space・FEt・pullback)、Fuchsian群の圏(PSL2(R)の部分群、Comm)、Margulis/Shimura-arithmeticの実装、モジュライスタックM_{g,r}の構成。2026-09-04時点でmathlibにhyperbolic curve・PSL2(R)・moduli stack of curvesの直接対応物は未実測"
+    trackB := "未着手。Skeleton化(本ファイル群)が2026-09-04に先行——GenEllと同じ順序(Track A→Track B)" }
 
 end ABC3.Interface.CorrHyp

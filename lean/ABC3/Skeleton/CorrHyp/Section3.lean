@@ -25,7 +25,7 @@ variable (D : HyperbolicCurveData)
 
 原文 (CorrHyp p.8):
 > Suppose that X is not arithmetic. Then we shall refer to Y (respectively,
-> 𝒴) as the hyperbolic core of X (respectively, 𝒳).
+> Y) as the hyperbolic core of X (respectively, X ).
 
 ★`core`/`coreMap` は `Interface` に(非 arithmetic の仮定なしで)posit してある。
 本 statement はその対象に「hyperbolic core」という名前を与える段であり、

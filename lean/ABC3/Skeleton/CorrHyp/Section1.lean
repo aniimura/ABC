@@ -22,8 +22,7 @@ variable (D : HyperbolicCurveData)
 
 原文 (CorrHyp p.3):
 > We shall refer to as a correspondence from X to Y any (ordered) pair
-> of finite, étale morphisms α : C → X, β : C → Y, where we assume that C is
-> nonempty. -/
+> of finite, ´etale morphisms α : C →X, β : C →Y , where we assume that C is nonempty. -/
 structure Corr (X Y : D.Space) where
   C : D.Space
   α : D.FEt C X
@@ -32,9 +31,8 @@ structure Corr (X Y : D.Space) where
 /-- [CorrHyp] **Definition 1.2**。
 
 原文 (CorrHyp p.4):
-> We shall refer to a correspondence (α : C → X, β : C → Y) from X to Y as
-> trivial if there exists a finite étale morphism γ : Y → X such that
-> α = γ ◦ β. -/
+> We shall refer to a correspondence (α : C →X, β : C →Y ) from X to
+> Y as trivial if there exists a finite ´etale morphism γ : Y →X such that α = γ ◦β. -/
 def Corr.IsTrivial {X Y : D.Space} (c : Corr D X Y) : Prop :=
   ∃ γ : D.FEt Y X, c.α = D.comp c.β γ
 
@@ -50,11 +48,10 @@ def Corr.transpose {X Y : D.Space} (c : Corr D X Y) : Corr D Y X :=
 /-- [CorrHyp] **Definition 1.4**。
 
 原文 (CorrHyp p.4):
-> Then we shall refer to as the composite of these two correspondences the
-> correspondence given by the following pair of morphisms: the first
-> morphism C₁ ×_Y C₂ → X is given by composing the projection to C₁ with α₁;
-> the second morphism C₁ ×_Y C₂ → Z is given by composing the projection to
-> C₂ with β₂. -/
+> the composite of these two correspondences the correspondence given by the following pair
+> of morphisms: the first morphism C1 ×Y C2 →X is given by composing the projection to
+> C1 with α1; the second morphism C1 ×Y C2 →Z is given by composing the projection to
+> C2 with β2. -/
 def Corr.comp' {X Y Z : D.Space} (c1 : Corr D X Y) (c2 : Corr D Y Z) : Corr D X Z :=
   ⟨D.pullback c1.β c2.α, D.comp (D.pbFst c1.β c2.α) c1.α, D.comp (D.pbSnd c1.β c2.α) c2.β⟩
 
@@ -62,7 +59,7 @@ def Corr.comp' {X Y Z : D.Space} (c1 : Corr D X Y) (c2 : Corr D Y Z) : Corr D X 
 
 原文 (CorrHyp p.4):
 > We shall call two hyperbolic curves X and Y over k isogenous if there
-> exists a correspondence from X to Y. -/
+> exists a corresondence from X to Y . -/
 def IsIsogenous (X Y : D.Space) : Prop := Nonempty (Corr D X Y)
 
 /-- 「(同型を除いて)有限個」を `Setoid`/`Quotient` を使わずに言い表す言い方。
@@ -102,5 +99,11 @@ an equivalence relation」を数えた(`node tools/hedge-index.mjs --paper CorrH
 def IsIsogenous.needs : List ProofObligation :=
   [ .implicitStep
       "「it follows immediately」の中身は反射性・対称性・推移性の3点。対称性はDefinition 1.3(transpose)、推移性はDefinition 1.4(comp')からsorry無しで出るが、反射性はFEtの恒等射(id : FEt X X)をInterfaceに足す必要があり、まだ足していない" 4 ]
+
+/-- 共通語彙(numbered item ではない)なので、最初に要る `Definition 1.5` の
+箇所を指す。 -/
+def FinitelyManyUpTo.src : Source :=
+  { paper := "CorrHyp", pdfPage := 4, item := "Definition 1.5(直後、isogenousの語彙を使う共通の言い方)",
+    sectionId := "corrhyp-def-1-5" }
 
 end ABC3.Skeleton.CorrHyp
