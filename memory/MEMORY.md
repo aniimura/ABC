@@ -50,4 +50,5 @@
 - [報告は未達でなく進捗を書く](report-progress-not-shortfall.md) — 「目標に届かない見通し」を締めに置かない。入ったもの・測ったこと・次の一手で構成する。★過大申告の訂正は別(測定の修正)。
 - [GenEll Lemma 3.5 は証明済みだが条つき](genell-lemma35-status.md) — ★2026-09-01 に高さ不等式が通った（`Found/`、公理 3 つ）。原典に無い仮説 `l ≠ 2`・`d+1 < l` を置く。条件 (a) では吸収されるが条件 (b) では吸収されない。条なし化は「μ-等級付きの分母払い」40-80 ブロック。「商体 K に移す」は潰した。
 - [並行セッションへは ListAgents/SendMessage で直接連絡できる](sibling-session-coordination-via-listagents.md) — 着手前にトラックを聞けば衝突を事前に避けられる。返信待ち中は git status とファイル mtime で間接推定。
-- [CorrHypトラックのゴールを設定した](corrhyp-track-goal.md) — 2026-09-04、§1 0/5〜§6 0/1(合計0/24)。§0は後続定理の再掲なので対象外。まだ担当セッション未定、着手前に notationRisk(unmeasured)の目視が要る。
+- [CorrHypトラックはSkeleton完了(24/24)](corrhyp-track-goal.md) — 2026-09-04、§1 5/5〜§6 1/1。ABC3b担当。check.mjsでG1(出典・逐語照合)を全項目パス、G9(非空虚性14件)は既知debtとして残す。次はTrack B。
+- [.txtキャッシュとライブpdftotextが同じシェルでも食い違う](txt-cache-vs-live-pdftotext-differs.md) — CorrHyp Theorem 4.2で実測。プライム記号・マイナス記号が同じページの同じ箇所で脱落。逐語は書いたら必ずcheck.mjsでライブ照合すること。
