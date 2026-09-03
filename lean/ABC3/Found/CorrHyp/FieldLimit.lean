@@ -80,4 +80,18 @@ instance {k K : Type*} [CommRing k] [CommRing K] [Algebra k K] :
   · show S ≤ R ⊔ S
     exact le_sup_right
 
+/-- `K` はその有限生成 `k`-部分環全体の(有向)合併に等しい——
+`K = ⋃ R`。双対を取れば `Spec K = lim Spec R`(`AffineTransitionLimit.lean`
+が要求する形)になる、という主張の代数側の核。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem iSup_fgSubalgebra_eq_top (k K : Type*) [CommRing k] [CommRing K] [Algebra k K] :
+    (⨆ R : FgSubalgebra k K, R.1) = (⊤ : Subalgebra k K) := by
+  apply le_antisymm le_top
+  intro x _
+  classical
+  obtain ⟨R, hR, hx⟩ := exists_fg_subalgebra_mem_finset (k := k) ({x} : Finset K)
+  exact le_iSup (fun R : FgSubalgebra k K => R.1) (⟨R, hR⟩ : FgSubalgebra k K)
+    (hx x (Finset.mem_singleton_self x))
+
 end ABC3.Found.CorrHyp
