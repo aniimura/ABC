@@ -98,6 +98,31 @@ theorem iSup_fgSubalgebra_eq_top (k K : Type*) [CommRing k] [CommRing K] [Algebr
     (hx x (Finset.mem_singleton_self x))
 
 open CategoryTheory in
+/-- `FgSubalgebra k K` は filtered(`IsDirected` から——2つの対象は `⊔` を
+共通の余錐に持ち、薄い圏なので平行射の coequalize は自明)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+instance instIsFilteredFgSubalgebra {k K : Type*} [CommRing k] [CommRing K] [Algebra k K] :
+    IsFiltered (FgSubalgebra k K) where
+  cocone_objs := fun ⟨R, hR⟩ ⟨S, hS⟩ =>
+    ⟨⟨R ⊔ S, fg_sup R S hR hS⟩, homOfLE (le_sup_left (a := R) (b := S)),
+      homOfLE (le_sup_right (a := R) (b := S)), trivial⟩
+  cocone_maps {X Y} f g := ⟨Y, 𝟙 Y, Subsingleton.elim _ _⟩
+  nonempty := ⟨⟨⊥, Subalgebra.fg_bot⟩⟩
+
+open CategoryTheory in
+/-- `(FgSubalgebra k K)ᵒᵖ` は cofiltered——`AffineTransitionLimit.lean` の
+`D : I ⥤ Scheme` が要求する `I` の性質そのもの(mathlib の
+`isCofilteredOrEmpty_op_of_isFilteredOrEmpty` から無条件)。
+
+★**sorry 無し**。標準3公理のみ。これで前回のコミットで「次の一手」として
+残していた欠落が埋まった——`toSchemeDiagram` に spreading-out 定理群を
+直接適用できる状態になった。 -/
+instance {k K : Type*} [CommRing k] [CommRing K] [Algebra k K] :
+    IsCofiltered (FgSubalgebra k K)ᵒᵖ := by
+  infer_instance
+
+open CategoryTheory in
 /-- `FgSubalgebra k K` を(前順序を薄い圏と見て)`CommRingCat` への図式にする
 関手——`R ↦ R`(環として)、`R ≤ S` を包含環準同型 `R ↪ S` に送る。
 `AffineTransitionLimit.lean` が要求する `D : I ⥤ Scheme` の手前、
@@ -130,14 +155,12 @@ noncomputable def toSchemeDiagram (k K : Type*) [CommRing k] [CommRing K] [Algeb
     (FgSubalgebra k K)ᵒᵖ ⥤ Scheme :=
   (toRingCat k K).op ⋙ Scheme.Spec
 
-/- ★★次の一手(未着手): `(FgSubalgebra k K)ᵒᵖ` が実際に
-`CategoryTheory.IsCofiltered` のインスタンスを持つことを示す
-(`IsDirected` から `IsFilteredOrEmpty`/`IsFiltered` を経由するはずだが、
-`infer_instance` では自動的に繋がらないことを確認した——mathlib に
-「有向前順序は filtered」という直接の instance が見当たらず、
-`IsFiltered` の生の条件(cocone の存在・平行射の coequalize)から
-手で組む必要がある、2026-09-04 実測)。これが済めば
-`AffineTransitionLimit.lean` の spreading-out 定理群を `toSchemeDiagram`
-に直接適用できる。 -/
+/- ★★次の一手(未着手): `toSchemeDiagram` の極限 `c : Cone toSchemeDiagram`
+を実際に構成し(`Spec K` がその頂点になるはず——`K = ⨆ R` の双対)、
+`AffineTransitionLimit.lean` の
+`Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation`/
+`Scheme.exists_hom_comp_eq_comp_of_locallyOfFiniteType` を適用できる形に
+持ち込む。`IsCofiltered` は済んだので、道具は揃った——残るのは
+「`Spec K` がこの図式の極限であること」自体の構成。 -/
 
 end ABC3.Found.CorrHyp
