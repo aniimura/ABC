@@ -1,350 +1,487 @@
 {
-  "_comment": [
-    "0_Source の論文の登記簿。1_Structured の data-paper タグと 0_Source のファイル名を結ぶ。",
-    "0_Source が増えたら、ここに1件追加してから 1_Structured を作る。",
-    "pageOffset: 印刷ページ番号 = 物理ページ番号 + pageOffset。",
-    "  locator は常に物理ページ(pdftoppm -f N / pdftotext -f N が指すページ)を使う。",
-    "notationRisk: .txt 抽出で対象の同定が壊れる危険度。high の論文は全 locator で PDF 目視必須。"
-  ],
-  "papers": {
-    "pGC": {
-      "title": "A Version of the Grothendieck Conjecture for p-adic Local Fields",
-      "file": "A Version of the Grothendieck Conjecture for p-adic Local Fields",
-      "year": 1997,
-      "pdfPages": 9,
-      "pageOffset": 0,
-      "notationRisk": "medium",
-      "notationNotes": "pdftotext で脱落を確認した記法: Ẑ(ハット、profinite completion) → 'Z'、K′(プライム) → 'K '、𝒪_K(script O) → 'OK'、太字 Z・Q(\\mathbf) → 'Z'・'Q'。いずれも『1つの基底文字に高々1種類の装飾』であり、装飾の有無という二値の取り違えに留まる。",
-      "verifiedPages": [
-        1,
-        3
-      ]
-    },
-    "EtTh": {
-      "title": "The Etale Theta Function and its Frobenioid-theoretic Manifestations",
-      "file": "The Etale Theta Function and its Frobenioid-theoretic Manifestations",
-      "pdfPages": 112,
-      "pageOffset": 0,
-      "notationRisk": "high",
-      "notationNotes": "★点(0/1/2個)×下線(0/1/2本)の合成記法で、同じ基底文字から複数の対象を区別している。p.11 の Gal(Y/X)(≅Z) は下線なし、p.43 Def 2.13(i) の Gal(Y̲̲/X̲̲)(≅l·Z) は下線2本——.txt ではどちらも 'Gal(Y /X)' で、矛盾しているように見える。下線はベクター図形として描画されており抽出不能。全 locator で PDF 目視必須。",
-      "verifiedPages": [
-        11,
-        43
-      ]
-    },
-    "IUTchIII": {
-      "title": "Inter-universal Teichmuller Theory III: Canonical Splittings of the Log-theta-lattice",
-      "file": "Inter-universal Teichmuller Theory III",
-      "year": 2020,
-      "pdfPages": 199,
-      "pageOffset": 0,
-      "notationRisk": "high",
-      "notationNotes": "★2026-08-14 実測(pdftoppm -r 150/400 で p.153・154・156・173・174 を目視、pdftotext -layout/既定と1文字ずつ突き合わせ)。EtTh と同型の危険が、しかも**主定理の結論式の中**にある。(1) 二重下線: Corollary 3.12 の結論 −|log(Θ̲̲)| ≥ −|log(q̲̲)| は Θ・q とも**下線2本**(400dpi 拡大で確認)。pdftotext は '− |log(Θ)| ≥ − |log(q)|' を返し下線は消える。(2) ★同一ページで同じ基底文字が別の対象: 物理 p.174 には下線2本の q̲̲(q-パイロット対象の対数体積)と、下線なし太字の q(『q-パラメータ』『q-パイロット対象』の語)が**同居**する。Θ も同様に Θ̲̲(下線2本)と Θ(『Θ-パイロット対象』『Θ-データ』『Θ-リンク』)が同居。.txt ではどちらも 'q' 'Θ' で、EtTh p.11 対 p.43 の罠が**1ページ内**で起きる。(3) 記号の完全脱落: ⋃(大合併)・△(ラベル同定記号)・↠(全射)は pdftotext 出力に**何も残らない**。ε̲ も -layout では空文字になる。(4) 意味反転: p.174 の '(≠ ∅)' は -layout で '(= ∅)' になる(否定の斜線が落ちる)。既定モードでは結合文字 U+0338 として残るが不安定。(5) フォントだけで区別する対: 添字 MOD(ローマン)と 𝔪𝔬𝔡(フラクトゥール)、LGP と 𝔩𝔤𝔭、log-volume の log(ローマン)と 𝔩𝔬𝔤-link の 𝔩𝔬𝔤。原文 p.156 は『MOD の方は両立するが 𝔪𝔬𝔡 の方は両立しない』と明示的に区別しており、この対比が消えると命題が別物になる。(6) 上下付きの混線: -layout は 𝕍̲^bad_mod を 'Vbmaodd'、𝕍^non_ℚ を 'VnQon' と交互に潰す。(7) ★★オーバーバーの脱落で**同一ページ内の2対象が同一文字列になる**(2026-08-14 実測、400dpi 目視): 物理 p.174 は 𝒰(バー無し)を『the various **unions** … of the **possible images**』、𝒰̄(バー有り)を『the various **holomorphic hulls**』と定義して使い分ける。物理 p.175 が『the [easily verified] compactness of the ¹,°𝒰_{j,v_ℚ}』とコンパクト性を主張しているのは**バー無し**(= 可能な像の和集合)であって正則包ではない。pdftotext はどちらも 'U' にするので .txt では判別不能——実際にこの取り違えが一度起きた。全 locator で PDF 目視必須。 ★2026-08-15 追加の実測(物理 p.115/p.116 を 400dpi 目視): **同じ記号 `𝔐(−)` が同じ命題の中で2つの異なる定義を持つ**。非アルキメデスの場合(p.115)は『the set of **nonempty compact open subsets**』、アルキメデスの場合(p.116)は『the set of **compact closures of nonempty open subsets**』。区別は文脈(v_ℚ が非アルキメデスかアルキメデスか)だけで、記号は同一。pdftotext ではフラクトゥール `𝔐` が `M` になるため、この2つはどちらも `M(−)` と出力され、区別できない。★同ページ帯(p.119)には `(†𝕄^⊛_𝔪𝔬𝔡)_α = (†𝕄^⊛_MOD)_α` のようにフラクトゥール `𝔪𝔬𝔡` とローマン `MOD` が同一式に現れる箇所もある。",
-      "verifiedPagesNote": "★目視(pdftoppm)したページのみを挙げる。p.128・130 は pdftotext でしか読んでいないので**挙げない**——それらの記法については何も言えない。",
-      "verifiedPages": [
-        31,
-        104,
-        112,
-        115,
-        116,
-        119,
-        120,
-        126,
-        127,
-        131,
-        146,
-        153,
-        154,
-        156,
-        173,
-        174,
-        175,
-        184
-      ]
-    },
-    "AbsTopIII": {
-      "title": "Topics in Absolute Anabelian Geometry III: Global Reconstruction Algorithms",
-      "file": "Topics in Absolute Anabelian Geometry III",
-      "pdfPages": 164,
-      "pageOffset": 0,
-      "notationRisk": "high",
-      "notationNotes": "★2026-08-14 実測(400dpi 目視 p.3・p.5)。log-shell の定義式 log_{k̄}(𝒪^×_k) ⊆ k において、**log の添字 k にオーバーバーが付く**が pdftotext は 'logk(Ok×)' と出力し落とす。IUTchIII で繰り返し踏んだのと同じ罠(𝒰 対 𝒰̄)がこの論文の**中心概念の定義式**で起きている。また 𝒪(script O)→'O'、上付き × は残る。目視したのは p.3・p.5 のみで、他ページの記法については何も言えない。",
-      "verifiedPagesNote": "★目視(pdftoppm)したページのみ。log-shell の定義(p.3)と性質 (L1)(p.5)のみ確認。",
-      "verifiedPages": [
-        3,
-        5,
-        113,
-        137,
-        145
-      ]
-    },
-    "SemiAnbd": {
-      "title": "Semi-graphs of Anabelioids",
-      "file": "Semi-graphs of Anabelioids",
-      "year": 2005,
-      "pdfPages": 92,
-      "pageOffset": 0,
-      "notationRisk": "high",
-      "notationNotes": "400dpi 目視(物理 p.33)と pdftotext を突き合わせて実測。(1) 花文字が落ちる: 𝓑^temp(Π) → 'Btemp(Π)'、𝒯₁,𝒯₂ → 'T1, T2'、Aut_𝒯(T) → 'AutT (T)'。(2) ★上下付きが平坦化されたうえ改行で分断される: π₁^temp(G) が 'πtemp' / '1' / '(G)' の3行になる(物理 p.38 で実測)。1つの記号が3行に割れるので、grep でも目視でも取り違えうる。(3) アクセントが壊れる: 'André' → 'Andr´e'。(4) 添字つき射 G_∞,i → 'G∞,i'。IUTchIII と同種だが、(2) は本論文で初めて観測した壊れ方であり、より重い。",
-      "verifiedPages": [
-        33
-      ]
-    },
-    "IUTchI": {
-      "title": "Inter-universal Teichmuller Theory I: Construction of Hodge Theaters",
-      "file": "Inter-universal Teichmuller Theory I",
-      "year": 2020,
-      "pdfPages": 186,
-      "pageOffset": 0,
-      "notationRisk": "high",
-      "notationNotes": "400dpi 目視(物理 p.61)と pdftotext を突き合わせて実測。★最も重いのは**オーバーバーの脱落**: `F̄/F` → `F/F`、`Gal(F̄/F)` → `Gal(F/F)`。後者は**自明群と読める**——IUTchIII で観測した `(≠ ∅)` → `(= ∅)` と同種の、装飾の脱落が意味を反転させる形である。ほかに (1) 下線の脱落: `C̲_K` → `CK`、`ε̲` → `ϵ`、`v̲` → `v`。(2) 黒板太字の平坦化: `𝕍` → `V`。(3) 上下付きの平坦化＋改行分断: `𝕍^bad_mod` → `Vbad` / 改行 / `mod`。`def=` も2行に割れる。(4) 添字の連結: `X_F` → `XF`。(5) 空白の脱落: `∈ F` → `∈F`。",
-      "verifiedPages": [
-        61
-      ]
-    },
-    "IUTchII": {
-      "title": "Inter-universal Teichmuller Theory II: Hodge-Arakelov-theoretic Evaluation",
-      "file": "Inter-universal Teichmuller Theory II",
-      "year": 2020,
-      "pdfPages": 174,
-      "pageOffset": 0,
-      "notationRisk": "high",
-      "notationNotes": "400dpi 目視(物理 p.158)と pdftotext を突き合わせて実測。★最も重いのは**2つの異なる字体が同じ文字に潰れること**: フラクトゥール `𝔉`(prime-strip)とスクリプト `ℱ`(prime-strip の型)が**どちらも `F`** になる。同一ページに両方が現れるので、pdftotext だけでは区別できない。ほかに (1) IUTchI と同じオーバーバー脱落: `F̄/F` → `F/F`。(2) `𝒞` → `C`、`𝒟` → `D`、`𝓗𝓣` → `HT`。(3) 上付きの記号列 `⊩▶×μ` は残るが上付きであることは失われ、`F⊩▶×μ` と地の文に並ぶ。(4) `∗C⊩of` のように直後の語と癒着する。(5) `Θ^±ell NF` → `Θ±ellNF`。",
-      "verifiedPages": [
-        158
-      ]
-    },
-    "FrdI": {
-      "title": "The Geometry of Frobenioids I: The General Theory",
-      "file": "The Geometry of Frobenioids I",
-      "year": 2008,
-      "pdfPages": 126,
-      "pageOffset": 0,
-      "notationRisk": "high",
-      "notationNotes": "400dpi 目視(物理 p.11、§0 のモノイド語彙)と pdftotext を突き合わせて実測。(1) ★上付きが**空白区切りの別トークン**になる: `M^±` → `M ±`、`M^char` → `M char`、`M^gp` → `M gp`、`M^pf` → `M pf`。`M ±` は「M と ± 」に読め、単項演算の記号と紛れる。(2) フラクトゥールが落ちる: 圏 `𝔐𝔬𝔫`(commutative monoids)→ `Mon`。(3) `def=` が `def` + 改行 + `=` に割れる。(4) 空白の脱落: `⊆M`、`↠M`。(5) 下付き `ℕ_{≥1}` → `N≥1`。★本論文は §0 に語彙が集中しており(§0 参照 52 件)、その §0 が上付きだらけなので、`.txt` だけで §0 を読むのは危険。",
-      "verifiedPages": [
-        11,
-        19
-      ]
-    },
-    "GenEll": {
-      "title": "Arithmetic Elliptic Curves in General Position",
-      "file": "Arithmetic Elliptic Curves in General Position",
-      "year": 2010,
-      "pdfPages": 25,
-      "pageOffset": 0,
-      "notationRisk": "high",
-      "notationNotes": "200dpi 目視(物理 p.13-14、Lemma 3.1)と pdftotext(既定・-layout の両モード)を突き合わせて実測。★危険の型が他論文と違う——下線・点ではなく **2 次元組版(行列)が 1 次元テキストに潰れるときの順序の入れ替わり**である。(1) ★★**行列の出現順が入れ替わる**: 原文 p.14 の (i) は `α ≝ (1 1 / 0 1)`(上三角)、`β ≝ (1 0 / 1 1)`(下三角) の順だが、pdftotext は `1 0 / 1 1` を先に、`1 1 / 0 1` を後に出す。しかも α・β のギリシャ文字自体が脱落して空白になるため、**どちらがどちらか .txt からは決められない**。(2) ★実害を確認: (iii) の仮定は目視では `α = (1 1 / 0 1)` だが、pdftotext 出力では直後に `1 0 / 1 1` が来るため、**.txt だけを読むと (iii) が β(下三角)についての主張に読める**。命題が別物になる。(3) 不等号の脱落: `l ≥ 5` → `l  5`、`≲` は出力に何も残らない。(4) ギリシャ文字の脱落: α β γ δ ε λ μ はすべて空白になる(p.14 の証明は本文がギリシャ文字だらけなので、.txt では主語が消える)。(5) 黒板太字は基底文字に潰れる: `𝔽_l` → `Fl`、`ℤ_l` → `Zl`、`ℚ_p` → `Qp`。(6) `≝` は `d=ef` として出る(check.mjs の normalize が吸収する)。★したがって GenEll は『装飾の有無』ではなく『**構造の順序**』が壊れる論文であり、行列を含む主張は全て PDF 目視必須。",
-      "verifiedPages": [
-        13,
-        14
-      ]
-    },
-    "NCBelyi": {
-      "title": "Noncritical Belyi Maps",
-      "file": "Noncritical Belyi Maps",
-      "year": 2004,
-      "pdfPages": 9,
-      "pageOffset": 0,
-      "notationRisk": "medium",
-      "notationNotes": "2026-08-17 に物理 p.5–p.6(Theorem 2.5)を 260 dpi 目視。★`ℚ̄`(上線つき)と `ℚ` の区別が主張の内容である——Theorem 2.5 は **`ℚ̄` 上の曲線**について `φ : X → ℙ¹_ℚ̄` を出す(`ℙ¹_ℚ` ではない)。pdftotext は上線を落とすので **`.txt` では両者が同じ `Q` になる**。★また `φ(T) ∩ {0,1,∞} = ∅` の `∩` は `.txt` で消える(p.1 の要約行では `φ(y) {0, 1, ∞} = ∅` と出る)。 ★★2026-08-17 追加(物理 p.2、Lemma 2.1 を 260 dpi 目視): pdftotext が **(1) 条件 (iii) の `α ≠ 0, r, 1, ∞` の `≠` を `=` に化けさせる**、**(2) `f′(x)` のプライム `′` を落とす**(`f (x) = 0` に見える)。条件 (d) の `f(α) + f₀ ≠ 0` も同様。★★目視せずに pdftotext だけで読んでいたら **条件 (iii) を真逆に転写していた**。",
-      "verifiedPages": [
-        2,
-        5,
-        6
-      ]
-    },
-    "Szp": {
-      "title": "Degrés, intersections, hauteurs",
-      "file": "Szpiro - Degres, intersections, hauteurs (Asterisque 127, 1985)",
-      "year": 1985,
-      "pdfPages": 19,
-      "pageOffset": 0,
-      "notationRisk": "unmeasured",
-      "notationNotes": "★★★**まだ 1 ページも目視していない。**`pdftotext` のテキスト層は取れているが、どの記号が壊れるかは未測定である(GenEll では行列の順序が入れ替わる等の実害が出た)。★逐語を `.src` や引用ブロックに使う前に、必ず 260 dpi で目視すること。★取得元は Numdam(公開)。 [GenEll] の参考文献 [Szp] そのもの。★Arakelov の要「無限遠の構造とはエルミート計量の与え方である」を述べる。Interface/Arakelov の B1・C3・D2 が直接依拠する。",
-      "verifiedPages": []
-    },
-    "MBMetr": {
-      "title": "Métriques permises",
-      "file": "Moret-Bailly - Metriques permises (Asterisque 127, 1985)",
-      "year": 1985,
-      "pdfPages": 60,
-      "pageOffset": 0,
-      "notationRisk": "unmeasured",
-      "notationNotes": "★★★**まだ 1 ページも目視していない。**`pdftotext` のテキスト層は取れているが、どの記号が壊れるかは未測定である(GenEll では行列の順序が入れ替わる等の実害が出た)。★逐語を `.src` や引用ブロックに使う前に、必ず 260 dpi で目視すること。★取得元は Numdam(公開)。 ★★算術的直線束の**エルミート計量**の理論。Interface/Arakelov の (C3) HermitianMetricData と (D1) APicData の原典側。",
-      "verifiedPages": []
-    },
-    "Elkik": {
-      "title": "Fonctions de Green, volumes de Faltings. Application aux surfaces arithmétiques",
-      "file": "Elkik - Fonctions de Green, volumes de Faltings (Asterisque 127, 1985)",
-      "year": 1985,
-      "pdfPages": 25,
-      "pageOffset": 0,
-      "notationRisk": "unmeasured",
-      "notationNotes": "★★★**まだ 1 ページも目視していない。**`pdftotext` のテキスト層は取れているが、どの記号が壊れるかは未測定である(GenEll では行列の順序が入れ替わる等の実害が出た)。★逐語を `.src` や引用ブロックに使う前に、必ず 260 dpi で目視すること。★取得元は Numdam(公開)。 ★★**Green 関数**。我々が Found/GenEll/ArchPoint.lean で `GreenFn` と呼んでいるものの原典側。(C3) と (G8) に効く。",
-      "verifiedPages": []
-    },
-    "MBComp": {
-      "title": "Compactifications, hauteurs et finitude",
-      "file": "Moret-Bailly - Compactifications, hauteurs et finitude (Asterisque 127, 1985)",
-      "year": 1985,
-      "pdfPages": 18,
-      "pageOffset": 0,
-      "notationRisk": "unmeasured",
-      "notationNotes": "★★★**まだ 1 ページも目視していない。**`pdftotext` のテキスト層は取れているが、どの記号が壊れるかは未測定である(GenEll では行列の順序が入れ替わる等の実害が出た)。★逐語を `.src` や引用ブロックに使う前に、必ず 260 dpi で目視すること。★取得元は Numdam(公開)。 ★高さと有限性(Northcott 型)。(D2) APicSpecData・(D3) ArakelovHeightData と `Proposition 1.4, (iv)` に効く。",
-      "verifiedPages": []
-    },
-    "RayHt": {
-      "title": "Hauteurs et isogénies",
-      "file": "Raynaud - Hauteurs et isogenies (Asterisque 127, 1985)",
-      "year": 1985,
-      "pdfPages": 37,
-      "pageOffset": 0,
-      "notationRisk": "unmeasured",
-      "notationNotes": "★★★**まだ 1 ページも目視していない。**`pdftotext` のテキスト層は取れているが、どの記号が壊れるかは未測定である(GenEll では行列の順序が入れ替わる等の実害が出た)。★逐語を `.src` や引用ブロックに使う前に、必ず 260 dpi で目視すること。★取得元は Numdam(公開)。 ★★★**同種写像のもとでの Faltings 高さの変化**。[GenEll] `Lemma 3.5`(E → E/H で ht^Falt がどう動くか)の機構そのもの。(G8) FaltingsHeightData に効く。",
-      "verifiedPages": []
-    },
-    "DelRep": {
-      "title": "Représentations ℓ-adiques",
-      "file": "Deligne - Representations l-adiques (Asterisque 127, 1985)",
-      "year": 1985,
-      "pdfPages": 8,
-      "pageOffset": 0,
-      "notationRisk": "unmeasured",
-      "notationNotes": "★★★**まだ 1 ページも目視していない。**`pdftotext` のテキスト層は取れているが、どの記号が壊れるかは未測定である(GenEll では行列の順序が入れ替わる等の実害が出た)。★逐語を `.src` や引用ブロックに使う前に、必ず 260 dpi で目視すること。★取得元は Numdam(公開)。 ★★ℓ 進表現。Interface/GaloisRep の (G3) GaloisRepData・(G4) ModLRepData の原典側。",
-      "verifiedPages": []
-    },
-    "DelSB616": {
-      "title": "Preuve des conjectures de Tate et de Shafarevitch (d'après G. Faltings)",
-      "file": "Deligne - Preuve des conjectures de Tate et de Shafarevitch (Bourbaki 616, 1983-84)",
-      "year": 1985,
-      "pdfPages": 18,
-      "pageOffset": 0,
-      "notationRisk": "measured-p5",
-      "notationNotes": "★★★**2026-08-27 に物理 p.5 を 260 dpi で目視した**（Exemple 1.4）。実測した壊れ方: ★pdftotext のテキスト層は**数式をほぼ落とす**。omega は w になり、アクセント付き文字は U+FFFD になる。★★**逐語に使えるのは数式を含まない行だけ**であり、数式は「読み」に日本語で書くこと。★取得元は Numdam（公開）。★★[GenEll] の参考文献 [Falt]（Invent. Math. 73, 1983）は有料。★★★**これはその公開の解説**であり、Faltings 高さと半安定還元を扱う。★★★★★**[Silv2]（Advanced Topics）Prop 2.1 の代わりになる原典である**——[GenEll] Proposition 3.4 の不等式の側。(G7)(G8) に効く。",
-      "verifiedPages": [
-        5
-      ]
-    },
-    "RaySB427": {
-      "title": "Construction analytique de courbes en géométrie non archimédienne (d'après David Mumford)",
-      "file": "Raynaud - Construction analytique de courbes en geometrie non archimedienne (Bourbaki 427, 1972-73)",
-      "year": 1974,
-      "pdfPages": 16,
-      "pageOffset": 0,
-      "notationRisk": "unmeasured",
-      "notationNotes": "★★★**まだ 1 ページも目視していない。**`pdftotext` のテキスト層は取れているが、どの記号が壊れるかは未測定である(GenEll では行列の順序が入れ替わる等の実害が出た)。★逐語を `.src` や引用ブロックに使う前に、必ず 260 dpi で目視すること。★取得元は Numdam(公開)。 ★★[GenEll] の参考文献 [FC](Faltings–Chai, Springer 1990)は書籍で入手できない。★★★**Mumford 構成の公開の解説**であり、非アルキメデス的一意化(Tate 曲線の一般化)を扱う。(G6) TateCurveData に効く。",
-      "verifiedPages": []
-    },
-    "EGA1": {
-      "title": "Éléments de géométrie algébrique : I. Le langage des schémas",
-      "file": "Grothendieck - EGA I, Le langage des schemas (Publ IHES 4, 1960)",
-      "year": 1960,
-      "pdfPages": 227,
-      "pageOffset": 0,
-      "notationRisk": "unmeasured",
-      "notationNotes": "★★★**まだ目視していない。**テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害が出た)。逐語を使う前に必ず目視すること。 ★スキームと加群層の言語。Interface/Arakelov の (B1) PicardData の原典側。Numdam(公開)。",
-      "verifiedPages": []
-    },
-    "EGA2": {
-      "title": "Éléments de géométrie algébrique : II. Étude globale élémentaire de quelques classes de morphismes",
-      "file": "Grothendieck - EGA II, Etude globale elementaire (Publ IHES 8, 1961)",
-      "year": 1961,
-      "pdfPages": 219,
-      "pageOffset": 0,
-      "notationRisk": "unmeasured",
-      "notationNotes": "★★★**まだ目視していない。**テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害が出た)。逐語を使う前に必ず目視すること。 ★★★**`Proj` と射影射**。Interface/Arakelov の (C2) ProjectiveModelData ——『ℙⁿ の点の関手』——の原典側である。`Proj` の語が 220 箇所。Numdam(公開)。",
-      "verifiedPages": []
-    },
-    "GS": {
-      "title": "Arithmetic intersection theory",
-      "file": "Gillet-Soule - Arithmetic intersection theory (Publ IHES 72, 1990)",
-      "year": 1990,
-      "pdfPages": 83,
-      "pageOffset": 0,
-      "notationRisk": "unmeasured",
-      "notationNotes": "★★★**まだ目視していない。**テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害が出た)。逐語を使う前に必ず目視すること。 ★★Arakelov 理論の現代的基礎。Green カレントと**算術版の移動補題**を含む。(D1)(D2)(D3) と、`Definition 1.2, (i)` の全域化に効く。Numdam(公開)。",
-      "verifiedPages": []
-    },
-    "SouleAI": {
-      "title": "Arithmetic Intersection (lecture notes)",
-      "file": "Soule - Arithmetic Intersection (lecture notes, 2017)",
-      "year": 2017,
-      "pdfPages": 26,
-      "pageOffset": 0,
-      "notationRisk": "unmeasured",
-      "notationNotes": "★★★**まだ目視していない。**テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害が出た)。逐語を使う前に必ず目視すること。 ★Soulé 本人が IHES のサイトで公開している講義録。`GS` の読みやすい入口。",
-      "verifiedPages": []
-    },
-    "ABSLean": {
-      "title": "Formalization of Auslander--Buchsbaum--Serre Criterion in Lean4",
-      "file": "Guan-Hu - Formalization of Auslander-Buchsbaum-Serre Criterion in Lean4 (arXiv 2510.24818)",
-      "year": 2025,
-      "pdfPages": 20,
-      "pageOffset": 0,
-      "notationRisk": "unmeasured",
-      "notationNotes": "★★★**まだ目視していない。**テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害が出た)。逐語を使う前に必ず目視すること。 ★★★2025-10 の arXiv。**Auslander–Buchsbaum–Serre 判定法(正則局所 ⟺ 有限大域次元)を Lean4 で形式化**したという報告。Rees の定理・Auslander–Buchsbaum 公式・Ischebeck の定理・Cohen–Macaulay 加群・Hilbert の syzygy 定理を含む。★`Definition 1.5, (ii)` の最難の入力がここにある。★★ただし『正則局所 ⇒ UFD』そのものは含まないと本文が述べている。公開先(GitHub)は未確認。",
-      "verifiedPages": []
-    },
-    "MilneAV": {
-      "title": "Abelian Varieties (course notes)",
-      "file": "Milne - Abelian Varieties (lecture notes)",
-      "year": 2008,
-      "pdfPages": 172,
-      "pageOffset": 0,
-      "notationRisk": "unmeasured",
-      "notationNotes": "★★★**まだ目視していない。**テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害が出た)。逐語を使う前に必ず目視すること。 ★★Milne が無償公開している講義録。**`T_ℓ A` が階数 2g の自由 `ℤ_ℓ` 加群であること**を述べる(実測: 本文 1995 行目)。Interface/GaloisRep の (G1)(G2)(G3) の原典側。★`[Serre]`(書籍、入手不可)の代替になる範囲がある。",
-      "verifiedPages": []
-    },
-    "Stacks": {
-      "title": "The Stacks Project",
-      "file": "Stacks Project (book, complete)",
-      "year": 2026,
-      "pdfPages": 7654,
-      "pageOffset": 0,
-      "notationRisk": "measured-p2516-2517-2520",
-      "notationNotes": "★★★**2026-08-27 に物理 p.2516 / p.2517 / p.2520 を 150 dpi で目視した**（Lemma 29.40.4 / 29.40.5 / 29.42.7）。★★★★★**実害が出たのは `pdftotext` ではなく `0_Source/Stacks Project (book, complete).txt` の側である**——この `.txt` は `-enc UTF-8` なしで作られており、→ ・ ≥ ・ ≫ ・ ⊗ がすべて空白に落ちている。そのため Lemma 29.40.4 の (3)（d ≥ 1）と (4)（d ≫ 1）が区別できず、実際に読み違えた。★★**`tools/check.mjs` が引く `pdftotext -enc UTF-8 -f N -l N` はこれらをそのまま出力する**（実測済み）。★★★★★**規約: `0_Source/*.txt` は探索にだけ使い、逐語は必ず `pdftotext -enc UTF-8` で取り直す。**★可換図式は X / GY / 1 S のような断片になるので逐語に使えない。★★★公開の集大成。実測で確認した要点: **tag `0AG0` Lemma 15.123.2「正則局所環は UFD」の完全な証明**——これが `Definition 1.5, (ii)` の中身である。★また `Proj`・点の関子・可逆層を網羅し、(B1)(B2)(C2) の原典側になる。",
-      "verifiedPages": [
-        2516,
-        2517,
-        2520
-      ]
-    },
-    "MilneCFT": {
-      "title": "Class Field Theory (course notes, v4.03)",
-      "file": "Milne - Class Field Theory",
-      "author": "J. S. Milne",
-      "year": 2020,
-      "pdfPages": 296,
-      "pageOffset": -14,
-      "notationRisk": "high",
-      "notationNotes": "★pdftotext の抽出が強く壊れる。実測(2026-08-20): `≠` → `□`、`⊆` → 空白、`√` → `p`、`[` → `OE`、`σ` が落ちる、`(σ, L/K)` → `. ; L=K/`。★**locator は必ず PDF 目視で確かめること**。",
-      "note": "★著者が自サイト(jmilne.org)で無償公開している講義ノート。Chebotarev 密度定理は Chapter V, Theorem 3.23(声明)と Chapter VIII, §7, Theorem 7.4(証明)。★**`ResearchPaper/0_Source/` は gitignore 済み**で、公開リポジトリには入らない。"
-    },
-    "MilneANT": {
-      "title": "Algebraic Number Theory (course notes, v3.08)",
-      "file": "Milne - Algebraic Number Theory",
-      "author": "J. S. Milne",
-      "year": 2020,
-      "pdfPages": 166,
-      "pageOffset": -8,
-      "notationRisk": "high",
-      "notationNotes": "★`MilneCFT` と同じ抽出の壊れ方をする。locator は PDF 目視。",
-      "note": "★著者が無償公開している講義ノート。分解群・惰性群・Frobenius 元の基礎(Chapter IV)の参照先。"
-    },
-    "Mzk7": {
-      "title": "The Geometry of Anabelioids",
-      "file": "The Geometry of Anabelioids",
-      "author": "S. Mochizuki",
-      "year": 2004,
-      "pdfPages": 57,
-      "pageOffset": 0,
-      "notationRisk": "high",
-      "notationNotes": "★[FrdI] と同じ抽出の壊れ方をする(矢印・script 文字・添字が脱落)。locator は PDF 目視。物理 p.14 の Corollary 1.1.6 は 2026-08-25 に目視確認済み。",
-      "note": "★[FrdI] の参照記号 [Mzk7]。Theorem 6.2, (iv) が引く Corollary 1.1.6(連結 anabelioid の間の 1-arrow の Aut は中心化群)の参照先。",
-      "verifiedPages": [
-        14
-      ]
-    }
+ "_comment": [
+  "0_Source の論文の登記簿。1_Structured の data-paper タグと 0_Source のファイル名を結ぶ。",
+  "0_Source が増えたら、ここに1件追加してから 1_Structured を作る。",
+  "pageOffset: 印刷ページ番号 = 物理ページ番号 + pageOffset。",
+  "  locator は常に物理ページ(pdftoppm -f N / pdftotext -f N が指すページ)を使う。",
+  "notationRisk: .txt 抽出で対象の同定が壊れる危険度。high の論文は全 locator で PDF 目視必須。"
+ ],
+ "papers": {
+  "pGC": {
+   "title": "A Version of the Grothendieck Conjecture for p-adic Local Fields",
+   "file": "A Version of the Grothendieck Conjecture for p-adic Local Fields",
+   "year": 1997,
+   "pdfPages": 9,
+   "pageOffset": 0,
+   "notationRisk": "medium",
+   "notationNotes": "pdftotext で脱落を確認した記法: Ẑ(ハット、profinite completion) → 'Z'、K′(プライム) → 'K '、𝒪_K(script O) → 'OK'、太字 Z・Q(\\mathbf) → 'Z'・'Q'。いずれも『1つの基底文字に高々1種類の装飾』であり、装飾の有無という二値の取り違えに留まる。",
+   "verifiedPages": [
+    1,
+    3
+   ]
+  },
+  "EtTh": {
+   "title": "The Etale Theta Function and its Frobenioid-theoretic Manifestations",
+   "file": "The Etale Theta Function and its Frobenioid-theoretic Manifestations",
+   "pdfPages": 112,
+   "pageOffset": 0,
+   "notationRisk": "high",
+   "notationNotes": "★点(0/1/2個)×下線(0/1/2本)の合成記法で、同じ基底文字から複数の対象を区別している。p.11 の Gal(Y/X)(≅Z) は下線なし、p.43 Def 2.13(i) の Gal(Y̲̲/X̲̲)(≅l·Z) は下線2本——.txt ではどちらも 'Gal(Y /X)' で、矛盾しているように見える。下線はベクター図形として描画されており抽出不能。全 locator で PDF 目視必須。",
+   "verifiedPages": [
+    11,
+    43
+   ]
+  },
+  "IUTchIII": {
+   "title": "Inter-universal Teichmuller Theory III: Canonical Splittings of the Log-theta-lattice",
+   "file": "Inter-universal Teichmuller Theory III",
+   "year": 2020,
+   "pdfPages": 199,
+   "pageOffset": 0,
+   "notationRisk": "high",
+   "notationNotes": "★2026-08-14 実測(pdftoppm -r 150/400 で p.153・154・156・173・174 を目視、pdftotext -layout/既定と1文字ずつ突き合わせ)。EtTh と同型の危険が、しかも**主定理の結論式の中**にある。(1) 二重下線: Corollary 3.12 の結論 −|log(Θ̲̲)| ≥ −|log(q̲̲)| は Θ・q とも**下線2本**(400dpi 拡大で確認)。pdftotext は '− |log(Θ)| ≥ − |log(q)|' を返し下線は消える。(2) ★同一ページで同じ基底文字が別の対象: 物理 p.174 には下線2本の q̲̲(q-パイロット対象の対数体積)と、下線なし太字の q(『q-パラメータ』『q-パイロット対象』の語)が**同居**する。Θ も同様に Θ̲̲(下線2本)と Θ(『Θ-パイロット対象』『Θ-データ』『Θ-リンク』)が同居。.txt ではどちらも 'q' 'Θ' で、EtTh p.11 対 p.43 の罠が**1ページ内**で起きる。(3) 記号の完全脱落: ⋃(大合併)・△(ラベル同定記号)・↠(全射)は pdftotext 出力に**何も残らない**。ε̲ も -layout では空文字になる。(4) 意味反転: p.174 の '(≠ ∅)' は -layout で '(= ∅)' になる(否定の斜線が落ちる)。既定モードでは結合文字 U+0338 として残るが不安定。(5) フォントだけで区別する対: 添字 MOD(ローマン)と 𝔪𝔬𝔡(フラクトゥール)、LGP と 𝔩𝔤𝔭、log-volume の log(ローマン)と 𝔩𝔬𝔤-link の 𝔩𝔬𝔤。原文 p.156 は『MOD の方は両立するが 𝔪𝔬𝔡 の方は両立しない』と明示的に区別しており、この対比が消えると命題が別物になる。(6) 上下付きの混線: -layout は 𝕍̲^bad_mod を 'Vbmaodd'、𝕍^non_ℚ を 'VnQon' と交互に潰す。(7) ★★オーバーバーの脱落で**同一ページ内の2対象が同一文字列になる**(2026-08-14 実測、400dpi 目視): 物理 p.174 は 𝒰(バー無し)を『the various **unions** … of the **possible images**』、𝒰̄(バー有り)を『the various **holomorphic hulls**』と定義して使い分ける。物理 p.175 が『the [easily verified] compactness of the ¹,°𝒰_{j,v_ℚ}』とコンパクト性を主張しているのは**バー無し**(= 可能な像の和集合)であって正則包ではない。pdftotext はどちらも 'U' にするので .txt では判別不能——実際にこの取り違えが一度起きた。全 locator で PDF 目視必須。 ★2026-08-15 追加の実測(物理 p.115/p.116 を 400dpi 目視): **同じ記号 `𝔐(−)` が同じ命題の中で2つの異なる定義を持つ**。非アルキメデスの場合(p.115)は『the set of **nonempty compact open subsets**』、アルキメデスの場合(p.116)は『the set of **compact closures of nonempty open subsets**』。区別は文脈(v_ℚ が非アルキメデスかアルキメデスか)だけで、記号は同一。pdftotext ではフラクトゥール `𝔐` が `M` になるため、この2つはどちらも `M(−)` と出力され、区別できない。★同ページ帯(p.119)には `(†𝕄^⊛_𝔪𝔬𝔡)_α = (†𝕄^⊛_MOD)_α` のようにフラクトゥール `𝔪𝔬𝔡` とローマン `MOD` が同一式に現れる箇所もある。",
+   "verifiedPagesNote": "★目視(pdftoppm)したページのみを挙げる。p.128・130 は pdftotext でしか読んでいないので**挙げない**——それらの記法については何も言えない。",
+   "verifiedPages": [
+    31,
+    104,
+    112,
+    115,
+    116,
+    119,
+    120,
+    126,
+    127,
+    131,
+    146,
+    153,
+    154,
+    156,
+    173,
+    174,
+    175,
+    184
+   ]
+  },
+  "AbsTopIII": {
+   "title": "Topics in Absolute Anabelian Geometry III: Global Reconstruction Algorithms",
+   "file": "Topics in Absolute Anabelian Geometry III",
+   "pdfPages": 164,
+   "pageOffset": 0,
+   "notationRisk": "high",
+   "notationNotes": "★2026-08-14 実測(400dpi 目視 p.3・p.5)。log-shell の定義式 log_{k̄}(𝒪^×_k) ⊆ k において、**log の添字 k にオーバーバーが付く**が pdftotext は 'logk(Ok×)' と出力し落とす。IUTchIII で繰り返し踏んだのと同じ罠(𝒰 対 𝒰̄)がこの論文の**中心概念の定義式**で起きている。また 𝒪(script O)→'O'、上付き × は残る。目視したのは p.3・p.5 のみで、他ページの記法については何も言えない。",
+   "verifiedPagesNote": "★目視(pdftoppm)したページのみ。log-shell の定義(p.3)と性質 (L1)(p.5)のみ確認。",
+   "verifiedPages": [
+    3,
+    5,
+    113,
+    137,
+    145
+   ]
+  },
+  "SemiAnbd": {
+   "title": "Semi-graphs of Anabelioids",
+   "file": "Semi-graphs of Anabelioids",
+   "year": 2005,
+   "pdfPages": 92,
+   "pageOffset": 0,
+   "notationRisk": "high",
+   "notationNotes": "400dpi 目視(物理 p.33)と pdftotext を突き合わせて実測。(1) 花文字が落ちる: 𝓑^temp(Π) → 'Btemp(Π)'、𝒯₁,𝒯₂ → 'T1, T2'、Aut_𝒯(T) → 'AutT (T)'。(2) ★上下付きが平坦化されたうえ改行で分断される: π₁^temp(G) が 'πtemp' / '1' / '(G)' の3行になる(物理 p.38 で実測)。1つの記号が3行に割れるので、grep でも目視でも取り違えうる。(3) アクセントが壊れる: 'André' → 'Andr´e'。(4) 添字つき射 G_∞,i → 'G∞,i'。IUTchIII と同種だが、(2) は本論文で初めて観測した壊れ方であり、より重い。",
+   "verifiedPages": [
+    33
+   ]
+  },
+  "IUTchI": {
+   "title": "Inter-universal Teichmuller Theory I: Construction of Hodge Theaters",
+   "file": "Inter-universal Teichmuller Theory I",
+   "year": 2020,
+   "pdfPages": 186,
+   "pageOffset": 0,
+   "notationRisk": "high",
+   "notationNotes": "400dpi 目視(物理 p.61)と pdftotext を突き合わせて実測。★最も重いのは**オーバーバーの脱落**: `F̄/F` → `F/F`、`Gal(F̄/F)` → `Gal(F/F)`。後者は**自明群と読める**——IUTchIII で観測した `(≠ ∅)` → `(= ∅)` と同種の、装飾の脱落が意味を反転させる形である。ほかに (1) 下線の脱落: `C̲_K` → `CK`、`ε̲` → `ϵ`、`v̲` → `v`。(2) 黒板太字の平坦化: `𝕍` → `V`。(3) 上下付きの平坦化＋改行分断: `𝕍^bad_mod` → `Vbad` / 改行 / `mod`。`def=` も2行に割れる。(4) 添字の連結: `X_F` → `XF`。(5) 空白の脱落: `∈ F` → `∈F`。",
+   "verifiedPages": [
+    61
+   ]
+  },
+  "IUTchII": {
+   "title": "Inter-universal Teichmuller Theory II: Hodge-Arakelov-theoretic Evaluation",
+   "file": "Inter-universal Teichmuller Theory II",
+   "year": 2020,
+   "pdfPages": 174,
+   "pageOffset": 0,
+   "notationRisk": "high",
+   "notationNotes": "400dpi 目視(物理 p.158)と pdftotext を突き合わせて実測。★最も重いのは**2つの異なる字体が同じ文字に潰れること**: フラクトゥール `𝔉`(prime-strip)とスクリプト `ℱ`(prime-strip の型)が**どちらも `F`** になる。同一ページに両方が現れるので、pdftotext だけでは区別できない。ほかに (1) IUTchI と同じオーバーバー脱落: `F̄/F` → `F/F`。(2) `𝒞` → `C`、`𝒟` → `D`、`𝓗𝓣` → `HT`。(3) 上付きの記号列 `⊩▶×μ` は残るが上付きであることは失われ、`F⊩▶×μ` と地の文に並ぶ。(4) `∗C⊩of` のように直後の語と癒着する。(5) `Θ^±ell NF` → `Θ±ellNF`。",
+   "verifiedPages": [
+    158
+   ]
+  },
+  "FrdI": {
+   "title": "The Geometry of Frobenioids I: The General Theory",
+   "file": "The Geometry of Frobenioids I",
+   "year": 2008,
+   "pdfPages": 126,
+   "pageOffset": 0,
+   "notationRisk": "high",
+   "notationNotes": "400dpi 目視(物理 p.11、§0 のモノイド語彙)と pdftotext を突き合わせて実測。(1) ★上付きが**空白区切りの別トークン**になる: `M^±` → `M ±`、`M^char` → `M char`、`M^gp` → `M gp`、`M^pf` → `M pf`。`M ±` は「M と ± 」に読め、単項演算の記号と紛れる。(2) フラクトゥールが落ちる: 圏 `𝔐𝔬𝔫`(commutative monoids)→ `Mon`。(3) `def=` が `def` + 改行 + `=` に割れる。(4) 空白の脱落: `⊆M`、`↠M`。(5) 下付き `ℕ_{≥1}` → `N≥1`。★本論文は §0 に語彙が集中しており(§0 参照 52 件)、その §0 が上付きだらけなので、`.txt` だけで §0 を読むのは危険。",
+   "verifiedPages": [
+    11,
+    19
+   ]
+  },
+  "GenEll": {
+   "title": "Arithmetic Elliptic Curves in General Position",
+   "file": "Arithmetic Elliptic Curves in General Position",
+   "year": 2010,
+   "pdfPages": 25,
+   "pageOffset": 0,
+   "notationRisk": "high",
+   "notationNotes": "200dpi 目視(物理 p.13-14、Lemma 3.1)と pdftotext(既定・-layout の両モード)を突き合わせて実測。★危険の型が他論文と違う——下線・点ではなく **2 次元組版(行列)が 1 次元テキストに潰れるときの順序の入れ替わり**である。(1) ★★**行列の出現順が入れ替わる**: 原文 p.14 の (i) は `α ≝ (1 1 / 0 1)`(上三角)、`β ≝ (1 0 / 1 1)`(下三角) の順だが、pdftotext は `1 0 / 1 1` を先に、`1 1 / 0 1` を後に出す。しかも α・β のギリシャ文字自体が脱落して空白になるため、**どちらがどちらか .txt からは決められない**。(2) ★実害を確認: (iii) の仮定は目視では `α = (1 1 / 0 1)` だが、pdftotext 出力では直後に `1 0 / 1 1` が来るため、**.txt だけを読むと (iii) が β(下三角)についての主張に読める**。命題が別物になる。(3) 不等号の脱落: `l ≥ 5` → `l  5`、`≲` は出力に何も残らない。(4) ギリシャ文字の脱落: α β γ δ ε λ μ はすべて空白になる(p.14 の証明は本文がギリシャ文字だらけなので、.txt では主語が消える)。(5) 黒板太字は基底文字に潰れる: `𝔽_l` → `Fl`、`ℤ_l` → `Zl`、`ℚ_p` → `Qp`。(6) `≝` は `d=ef` として出る(check.mjs の normalize が吸収する)。★したがって GenEll は『装飾の有無』ではなく『**構造の順序**』が壊れる論文であり、行列を含む主張は全て PDF 目視必須。",
+   "verifiedPages": [
+    13,
+    14
+   ]
+  },
+  "NCBelyi": {
+   "title": "Noncritical Belyi Maps",
+   "file": "Noncritical Belyi Maps",
+   "year": 2004,
+   "pdfPages": 9,
+   "pageOffset": 0,
+   "notationRisk": "medium",
+   "notationNotes": "2026-08-17 に物理 p.5–p.6(Theorem 2.5)を 260 dpi 目視。★`ℚ̄`(上線つき)と `ℚ` の区別が主張の内容である——Theorem 2.5 は **`ℚ̄` 上の曲線**について `φ : X → ℙ¹_ℚ̄` を出す(`ℙ¹_ℚ` ではない)。pdftotext は上線を落とすので **`.txt` では両者が同じ `Q` になる**。★また `φ(T) ∩ {0,1,∞} = ∅` の `∩` は `.txt` で消える(p.1 の要約行では `φ(y) {0, 1, ∞} = ∅` と出る)。 ★★2026-08-17 追加(物理 p.2、Lemma 2.1 を 260 dpi 目視): pdftotext が **(1) 条件 (iii) の `α ≠ 0, r, 1, ∞` の `≠` を `=` に化けさせる**、**(2) `f′(x)` のプライム `′` を落とす**(`f (x) = 0` に見える)。条件 (d) の `f(α) + f₀ ≠ 0` も同様。★★目視せずに pdftotext だけで読んでいたら **条件 (iii) を真逆に転写していた**。",
+   "verifiedPages": [
+    2,
+    5,
+    6
+   ]
+  },
+  "Szp": {
+   "title": "Degrés, intersections, hauteurs",
+   "file": "Szpiro - Degres, intersections, hauteurs (Asterisque 127, 1985)",
+   "year": 1985,
+   "pdfPages": 19,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★**まだ 1 ページも目視していない。**`pdftotext` のテキスト層は取れているが、どの記号が壊れるかは未測定である(GenEll では行列の順序が入れ替わる等の実害が出た)。★逐語を `.src` や引用ブロックに使う前に、必ず 260 dpi で目視すること。★取得元は Numdam(公開)。 [GenEll] の参考文献 [Szp] そのもの。★Arakelov の要「無限遠の構造とはエルミート計量の与え方である」を述べる。Interface/Arakelov の B1・C3・D2 が直接依拠する。",
+   "verifiedPages": []
+  },
+  "MBMetr": {
+   "title": "Métriques permises",
+   "file": "Moret-Bailly - Metriques permises (Asterisque 127, 1985)",
+   "year": 1985,
+   "pdfPages": 60,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★**まだ 1 ページも目視していない。**`pdftotext` のテキスト層は取れているが、どの記号が壊れるかは未測定である(GenEll では行列の順序が入れ替わる等の実害が出た)。★逐語を `.src` や引用ブロックに使う前に、必ず 260 dpi で目視すること。★取得元は Numdam(公開)。 ★★算術的直線束の**エルミート計量**の理論。Interface/Arakelov の (C3) HermitianMetricData と (D1) APicData の原典側。",
+   "verifiedPages": []
+  },
+  "Elkik": {
+   "title": "Fonctions de Green, volumes de Faltings. Application aux surfaces arithmétiques",
+   "file": "Elkik - Fonctions de Green, volumes de Faltings (Asterisque 127, 1985)",
+   "year": 1985,
+   "pdfPages": 25,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★**まだ 1 ページも目視していない。**`pdftotext` のテキスト層は取れているが、どの記号が壊れるかは未測定である(GenEll では行列の順序が入れ替わる等の実害が出た)。★逐語を `.src` や引用ブロックに使う前に、必ず 260 dpi で目視すること。★取得元は Numdam(公開)。 ★★**Green 関数**。我々が Found/GenEll/ArchPoint.lean で `GreenFn` と呼んでいるものの原典側。(C3) と (G8) に効く。",
+   "verifiedPages": []
+  },
+  "MBComp": {
+   "title": "Compactifications, hauteurs et finitude",
+   "file": "Moret-Bailly - Compactifications, hauteurs et finitude (Asterisque 127, 1985)",
+   "year": 1985,
+   "pdfPages": 18,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★**まだ 1 ページも目視していない。**`pdftotext` のテキスト層は取れているが、どの記号が壊れるかは未測定である(GenEll では行列の順序が入れ替わる等の実害が出た)。★逐語を `.src` や引用ブロックに使う前に、必ず 260 dpi で目視すること。★取得元は Numdam(公開)。 ★高さと有限性(Northcott 型)。(D2) APicSpecData・(D3) ArakelovHeightData と `Proposition 1.4, (iv)` に効く。",
+   "verifiedPages": []
+  },
+  "RayHt": {
+   "title": "Hauteurs et isogénies",
+   "file": "Raynaud - Hauteurs et isogenies (Asterisque 127, 1985)",
+   "year": 1985,
+   "pdfPages": 37,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★**まだ 1 ページも目視していない。**`pdftotext` のテキスト層は取れているが、どの記号が壊れるかは未測定である(GenEll では行列の順序が入れ替わる等の実害が出た)。★逐語を `.src` や引用ブロックに使う前に、必ず 260 dpi で目視すること。★取得元は Numdam(公開)。 ★★★**同種写像のもとでの Faltings 高さの変化**。[GenEll] `Lemma 3.5`(E → E/H で ht^Falt がどう動くか)の機構そのもの。(G8) FaltingsHeightData に効く。",
+   "verifiedPages": []
+  },
+  "DelRep": {
+   "title": "Représentations ℓ-adiques",
+   "file": "Deligne - Representations l-adiques (Asterisque 127, 1985)",
+   "year": 1985,
+   "pdfPages": 8,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★**まだ 1 ページも目視していない。**`pdftotext` のテキスト層は取れているが、どの記号が壊れるかは未測定である(GenEll では行列の順序が入れ替わる等の実害が出た)。★逐語を `.src` や引用ブロックに使う前に、必ず 260 dpi で目視すること。★取得元は Numdam(公開)。 ★★ℓ 進表現。Interface/GaloisRep の (G3) GaloisRepData・(G4) ModLRepData の原典側。",
+   "verifiedPages": []
+  },
+  "DelSB616": {
+   "title": "Preuve des conjectures de Tate et de Shafarevitch (d'après G. Faltings)",
+   "file": "Deligne - Preuve des conjectures de Tate et de Shafarevitch (Bourbaki 616, 1983-84)",
+   "year": 1985,
+   "pdfPages": 18,
+   "pageOffset": 0,
+   "notationRisk": "measured-p5",
+   "notationNotes": "★★★**2026-08-27 に物理 p.5 を 260 dpi で目視した**（Exemple 1.4）。実測した壊れ方: ★pdftotext のテキスト層は**数式をほぼ落とす**。omega は w になり、アクセント付き文字は U+FFFD になる。★★**逐語に使えるのは数式を含まない行だけ**であり、数式は「読み」に日本語で書くこと。★取得元は Numdam（公開）。★★[GenEll] の参考文献 [Falt]（Invent. Math. 73, 1983）は有料。★★★**これはその公開の解説**であり、Faltings 高さと半安定還元を扱う。★★★★★**[Silv2]（Advanced Topics）Prop 2.1 の代わりになる原典である**——[GenEll] Proposition 3.4 の不等式の側。(G7)(G8) に効く。",
+   "verifiedPages": [
+    5
+   ]
+  },
+  "RaySB427": {
+   "title": "Construction analytique de courbes en géométrie non archimédienne (d'après David Mumford)",
+   "file": "Raynaud - Construction analytique de courbes en geometrie non archimedienne (Bourbaki 427, 1972-73)",
+   "year": 1974,
+   "pdfPages": 16,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★**まだ 1 ページも目視していない。**`pdftotext` のテキスト層は取れているが、どの記号が壊れるかは未測定である(GenEll では行列の順序が入れ替わる等の実害が出た)。★逐語を `.src` や引用ブロックに使う前に、必ず 260 dpi で目視すること。★取得元は Numdam(公開)。 ★★[GenEll] の参考文献 [FC](Faltings–Chai, Springer 1990)は書籍で入手できない。★★★**Mumford 構成の公開の解説**であり、非アルキメデス的一意化(Tate 曲線の一般化)を扱う。(G6) TateCurveData に効く。",
+   "verifiedPages": []
+  },
+  "EGA1": {
+   "title": "Éléments de géométrie algébrique : I. Le langage des schémas",
+   "file": "Grothendieck - EGA I, Le langage des schemas (Publ IHES 4, 1960)",
+   "year": 1960,
+   "pdfPages": 227,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★**まだ目視していない。**テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害が出た)。逐語を使う前に必ず目視すること。 ★スキームと加群層の言語。Interface/Arakelov の (B1) PicardData の原典側。Numdam(公開)。",
+   "verifiedPages": []
+  },
+  "EGA2": {
+   "title": "Éléments de géométrie algébrique : II. Étude globale élémentaire de quelques classes de morphismes",
+   "file": "Grothendieck - EGA II, Etude globale elementaire (Publ IHES 8, 1961)",
+   "year": 1961,
+   "pdfPages": 219,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★**まだ目視していない。**テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害が出た)。逐語を使う前に必ず目視すること。 ★★★**`Proj` と射影射**。Interface/Arakelov の (C2) ProjectiveModelData ——『ℙⁿ の点の関手』——の原典側である。`Proj` の語が 220 箇所。Numdam(公開)。",
+   "verifiedPages": []
+  },
+  "GS": {
+   "title": "Arithmetic intersection theory",
+   "file": "Gillet-Soule - Arithmetic intersection theory (Publ IHES 72, 1990)",
+   "year": 1990,
+   "pdfPages": 83,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★**まだ目視していない。**テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害が出た)。逐語を使う前に必ず目視すること。 ★★Arakelov 理論の現代的基礎。Green カレントと**算術版の移動補題**を含む。(D1)(D2)(D3) と、`Definition 1.2, (i)` の全域化に効く。Numdam(公開)。",
+   "verifiedPages": []
+  },
+  "SouleAI": {
+   "title": "Arithmetic Intersection (lecture notes)",
+   "file": "Soule - Arithmetic Intersection (lecture notes, 2017)",
+   "year": 2017,
+   "pdfPages": 26,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★**まだ目視していない。**テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害が出た)。逐語を使う前に必ず目視すること。 ★Soulé 本人が IHES のサイトで公開している講義録。`GS` の読みやすい入口。",
+   "verifiedPages": []
+  },
+  "ABSLean": {
+   "title": "Formalization of Auslander--Buchsbaum--Serre Criterion in Lean4",
+   "file": "Guan-Hu - Formalization of Auslander-Buchsbaum-Serre Criterion in Lean4 (arXiv 2510.24818)",
+   "year": 2025,
+   "pdfPages": 20,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★**まだ目視していない。**テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害が出た)。逐語を使う前に必ず目視すること。 ★★★2025-10 の arXiv。**Auslander–Buchsbaum–Serre 判定法(正則局所 ⟺ 有限大域次元)を Lean4 で形式化**したという報告。Rees の定理・Auslander–Buchsbaum 公式・Ischebeck の定理・Cohen–Macaulay 加群・Hilbert の syzygy 定理を含む。★`Definition 1.5, (ii)` の最難の入力がここにある。★★ただし『正則局所 ⇒ UFD』そのものは含まないと本文が述べている。公開先(GitHub)は未確認。",
+   "verifiedPages": []
+  },
+  "MilneAV": {
+   "title": "Abelian Varieties (course notes)",
+   "file": "Milne - Abelian Varieties (lecture notes)",
+   "year": 2008,
+   "pdfPages": 172,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★**まだ目視していない。**テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害が出た)。逐語を使う前に必ず目視すること。 ★★Milne が無償公開している講義録。**`T_ℓ A` が階数 2g の自由 `ℤ_ℓ` 加群であること**を述べる(実測: 本文 1995 行目)。Interface/GaloisRep の (G1)(G2)(G3) の原典側。★`[Serre]`(書籍、入手不可)の代替になる範囲がある。",
+   "verifiedPages": []
+  },
+  "Stacks": {
+   "title": "The Stacks Project",
+   "file": "Stacks Project (book, complete)",
+   "year": 2026,
+   "pdfPages": 7654,
+   "pageOffset": 0,
+   "notationRisk": "measured-p2516-2517-2520",
+   "notationNotes": "★★★**2026-08-27 に物理 p.2516 / p.2517 / p.2520 を 150 dpi で目視した**（Lemma 29.40.4 / 29.40.5 / 29.42.7）。★★★★★**実害が出たのは `pdftotext` ではなく `0_Source/Stacks Project (book, complete).txt` の側である**——この `.txt` は `-enc UTF-8` なしで作られており、→ ・ ≥ ・ ≫ ・ ⊗ がすべて空白に落ちている。そのため Lemma 29.40.4 の (3)（d ≥ 1）と (4)（d ≫ 1）が区別できず、実際に読み違えた。★★**`tools/check.mjs` が引く `pdftotext -enc UTF-8 -f N -l N` はこれらをそのまま出力する**（実測済み）。★★★★★**規約: `0_Source/*.txt` は探索にだけ使い、逐語は必ず `pdftotext -enc UTF-8` で取り直す。**★可換図式は X / GY / 1 S のような断片になるので逐語に使えない。★★★公開の集大成。実測で確認した要点: **tag `0AG0` Lemma 15.123.2「正則局所環は UFD」の完全な証明**——これが `Definition 1.5, (ii)` の中身である。★また `Proj`・点の関子・可逆層を網羅し、(B1)(B2)(C2) の原典側になる。",
+   "verifiedPages": [
+    2516,
+    2517,
+    2520
+   ]
+  },
+  "MilneCFT": {
+   "title": "Class Field Theory (course notes, v4.03)",
+   "file": "Milne - Class Field Theory",
+   "author": "J. S. Milne",
+   "year": 2020,
+   "pdfPages": 296,
+   "pageOffset": -14,
+   "notationRisk": "high",
+   "notationNotes": "★pdftotext の抽出が強く壊れる。実測(2026-08-20): `≠` → `□`、`⊆` → 空白、`√` → `p`、`[` → `OE`、`σ` が落ちる、`(σ, L/K)` → `. ; L=K/`。★**locator は必ず PDF 目視で確かめること**。",
+   "note": "★著者が自サイト(jmilne.org)で無償公開している講義ノート。Chebotarev 密度定理は Chapter V, Theorem 3.23(声明)と Chapter VIII, §7, Theorem 7.4(証明)。★**`ResearchPaper/0_Source/` は gitignore 済み**で、公開リポジトリには入らない。"
+  },
+  "MilneANT": {
+   "title": "Algebraic Number Theory (course notes, v3.08)",
+   "file": "Milne - Algebraic Number Theory",
+   "author": "J. S. Milne",
+   "year": 2020,
+   "pdfPages": 166,
+   "pageOffset": -8,
+   "notationRisk": "high",
+   "notationNotes": "★`MilneCFT` と同じ抽出の壊れ方をする。locator は PDF 目視。",
+   "note": "★著者が無償公開している講義ノート。分解群・惰性群・Frobenius 元の基礎(Chapter IV)の参照先。"
+  },
+  "Mzk7": {
+   "title": "The Geometry of Anabelioids",
+   "file": "The Geometry of Anabelioids",
+   "author": "S. Mochizuki",
+   "year": 2004,
+   "pdfPages": 57,
+   "pageOffset": 0,
+   "notationRisk": "high",
+   "notationNotes": "★[FrdI] と同じ抽出の壊れ方をする(矢印・script 文字・添字が脱落)。locator は PDF 目視。物理 p.14 の Corollary 1.1.6 は 2026-08-25 に目視確認済み。",
+   "note": "★[FrdI] の参照記号 [Mzk7]。Theorem 6.2, (iv) が引く Corollary 1.1.6(連結 anabelioid の間の 1-arrow の Aut は中心化群)の参照先。",
+   "verifiedPages": [
+    14
+   ]
+  },
+  "IUTchIV": {
+   "title": "Inter-universal Teichmuller Theory IV: Log-volume Computations and Set-theoretic Foundations",
+   "file": "Inter-universal Teichmuller Theory IV",
+   "author": "Shinichi Mochizuki",
+   "year": 2020,
+   "pdfPages": 87,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★まだ目視していない。テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害、IUTchI-III・EtTh・AbsTopIII ではオーバーバー・script 文字・下線の脱落が実害になった)。逐語を使う前に必ず 260dpi で目視すること。",
+   "verifiedPages": []
+  },
+  "AbsTopI": {
+   "title": "Topics in Absolute Anabelian Geometry I: Generalities",
+   "file": "Topics in Absolute Anabelian Geometry I",
+   "author": "Shinichi Mochizuki",
+   "year": 2012,
+   "pdfPages": 83,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★まだ目視していない。テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害、IUTchI-III・EtTh・AbsTopIII ではオーバーバー・script 文字・下線の脱落が実害になった)。逐語を使う前に必ず 260dpi で目視すること。",
+   "verifiedPages": []
+  },
+  "AbsTopII": {
+   "title": "Topics in Absolute Anabelian Geometry II: Decomposition Groups and Endomorphisms",
+   "file": "Topics in Absolute Anabelian Geometry II",
+   "author": "Shinichi Mochizuki",
+   "year": 2013,
+   "pdfPages": 76,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★まだ目視していない。テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害、IUTchI-III・EtTh・AbsTopIII ではオーバーバー・script 文字・下線の脱落が実害になった)。逐語を使う前に必ず 260dpi で目視すること。",
+   "verifiedPages": []
+  },
+  "FrdII": {
+   "title": "The Geometry of Frobenioids II: Poly-Frobenioids",
+   "file": "The Geometry of Frobenioids II",
+   "author": "Shinichi Mochizuki",
+   "year": 2008,
+   "pdfPages": 72,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★まだ目視していない。テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害、IUTchI-III・EtTh・AbsTopIII ではオーバーバー・script 文字・下線の脱落が実害になった)。逐語を使う前に必ず 260dpi で目視すること。",
+   "verifiedPages": []
+  },
+  "AbsAnab": {
+   "title": "Absolute Anabelian Geometry",
+   "file": "Absolute Anabelian Geometry",
+   "author": "Shinichi Mochizuki",
+   "pdfPages": 45,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★まだ目視していない。テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害、IUTchI-III・EtTh・AbsTopIII ではオーバーバー・script 文字・下線の脱落が実害になった)。逐語を使う前に必ず 260dpi で目視すること。",
+   "verifiedPages": []
+  },
+  "CanLift": {
+   "title": "Canonical Liftings",
+   "file": "Canonical Liftings",
+   "author": "Shinichi Mochizuki",
+   "pdfPages": 34,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★まだ目視していない。テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害、IUTchI-III・EtTh・AbsTopIII ではオーバーバー・script 文字・下線の脱落が実害になった)。逐語を使う前に必ず 260dpi で目視すること。",
+   "verifiedPages": []
+  },
+  "CombGC": {
+   "title": "A Combinatorial Version of the Grothendieck Conjecture",
+   "file": "Combinatorial Grothendieck Conjecture",
+   "author": "Shinichi Mochizuki",
+   "year": 2007,
+   "pdfPages": 29,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★まだ目視していない。テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害、IUTchI-III・EtTh・AbsTopIII ではオーバーバー・script 文字・下線の脱落が実害になった)。逐語を使う前に必ず 260dpi で目視すること。",
+   "verifiedPages": []
+  },
+  "CombCusp": {
+   "title": "Combinatorial Cuspidalization of Hyperbolic Curves",
+   "file": "Combinatorial Cuspidalization",
+   "author": "Shinichi Mochizuki",
+   "pdfPages": 65,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★まだ目視していない。テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害、IUTchI-III・EtTh・AbsTopIII ではオーバーバー・script 文字・下線の脱落が実害になった)。逐語を使う前に必ず 260dpi で目視すること。",
+   "verifiedPages": []
+  },
+  "AbsSect": {
+   "title": "Galois Sections in Absolute Anabelian Geometry",
+   "file": "Galois Sections",
+   "author": "Shinichi Mochizuki",
+   "pdfPages": 25,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★まだ目視していない。テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害、IUTchI-III・EtTh・AbsTopIII ではオーバーバー・script 文字・下線の脱落が実害になった)。逐語を使う前に必ず 260dpi で目視すること。",
+   "verifiedPages": []
+  },
+  "MT": {
+   "title": "An Introduction to p-adic Teichmuller Theory",
+   "file": "An Introduction to p-adic Teichmuller Theory",
+   "author": "Shinichi Mochizuki",
+   "pdfPages": 51,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★まだ目視していない。テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害、IUTchI-III・EtTh・AbsTopIII ではオーバーバー・script 文字・下線の脱落が実害になった)。逐語を使う前に必ず 260dpi で目視すること。",
+   "verifiedPages": []
+  },
+  "HASurII": {
+   "title": "A Survey of the Hodge-Arakelov Theory of Elliptic Curves II",
+   "file": "A Survey of the Hodge-Arakelov Theory of Elliptic Curves II",
+   "author": "Shinichi Mochizuki",
+   "year": 2000,
+   "pdfPages": 34,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★まだ目視していない。テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害、IUTchI-III・EtTh・AbsTopIII ではオーバーバー・script 文字・下線の脱落が実害になった)。逐語を使う前に必ず 260dpi で目視すること。",
+   "verifiedPages": []
+  },
+  "NodNon": {
+   "title": "Topics Surrounding the Combinatorial Anabelian Geometry of Hyperbolic Curves I: Inertia Groups and Profinite Dehn Twists",
+   "file": "Combinatorial Anabelian Topics I",
+   "author": "Yuichiro Hoshi and Shinichi Mochizuki",
+   "pdfPages": 154,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★まだ目視していない。テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害、IUTchI-III・EtTh・AbsTopIII ではオーバーバー・script 文字・下線の脱落が実害になった)。逐語を使う前に必ず 260dpi で目視すること。",
+   "verifiedPages": []
+  },
+  "Config": {
+   "title": "The Algebraic and Anabelian Geometry of Configuration Spaces",
+   "file": "The Algebraic and Anabelian Geometry of Configuration Spaces",
+   "author": "Shinichi Mochizuki and Akio Tamagawa",
+   "year": 2007,
+   "pdfPages": 49,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★まだ目視していない。テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害、IUTchI-III・EtTh・AbsTopIII ではオーバーバー・script 文字・下線の脱落が実害になった)。逐語を使う前に必ず 260dpi で目視すること。",
+   "verifiedPages": []
   }
+ }
 }
