@@ -54,4 +54,30 @@ theorem exists_fg_subalgebra_mem_finset {k K : Type*} [CommRing k] [CommRing K] 
   intro x hx
   exact Algebra.subset_adjoin hx
 
+/-- `K` の有限生成 `k`-部分環全体(包含で前順序)。`AffineTransitionLimit.lean`
+の余濾過的な図式 `D : I ⥤ Scheme` の添字圏 `I` の候補——`Spec R`(`R` を
+ここの元とする)たちが `Spec K` への遷移射を持つ図式になる。 -/
+def FgSubalgebra (k K : Type*) [CommRing k] [CommRing K] [Algebra k K] : Type _ :=
+  {R : Subalgebra k K // R.FG}
+
+instance {k K : Type*} [CommRing k] [CommRing K] [Algebra k K] :
+    Preorder (FgSubalgebra k K) :=
+  Subtype.preorder _
+
+/-- `FgSubalgebra k K` は有向集合をなす(`fg_sup` から——任意の2つの
+有限生成部分環は、その和(なお有限生成)を共通の上界に持つ)。
+
+★**sorry 無し**。標準3公理のみ。`AffineTransitionLimit.lean` の理論が
+要求する「`I` が余濾過的(`IsCofiltered`)」の核となる性質——`IsDirected`
+から `IsCofilteredOrEmpty`/`IsCofiltered`(前順序を圏と見たとき)が従う。 -/
+instance {k K : Type*} [CommRing k] [CommRing K] [Algebra k K] :
+    IsDirected (FgSubalgebra k K) (· ≤ ·) := by
+  constructor
+  intro ⟨R, hR⟩ ⟨S, hS⟩
+  refine ⟨⟨R ⊔ S, fg_sup R S hR hS⟩, ?_, ?_⟩
+  · show R ≤ R ⊔ S
+    exact le_sup_left
+  · show S ≤ R ⊔ S
+    exact le_sup_right
+
 end ABC3.Found.CorrHyp
