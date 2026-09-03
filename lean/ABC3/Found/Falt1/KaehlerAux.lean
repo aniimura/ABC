@@ -132,4 +132,55 @@ noncomputable def tensorPolynomialOmegaEquiv {R B : Type*} [CommRing R] [CommRin
     (KaehlerDifferential.polynomialEquiv R)).trans
   (TensorProduct.AlgebraTensorModule.rid (Polynomial R) B B)
 
+/-- **主要な中間結果**: `B = Polynomial R ⧸ (f)` のとき、
+`kerCotangentToTensor` の値域は `{1 ⊗ₜ D(f)}` が張る `Polynomial R`-部分
+加群に一致する。
+
+証明の構造: `I = ker(A→B) = (f)` は(`toSpanSingleton A A f` の値域として)
+`A` から生成される巡回加群であり、`I.toCotangent` は全射なので、
+`kerCotangentToTensor` の値域は「生成元 `⟨f,_⟩` の像」`A`-生成する。
+その像は `kerCotangentToTensor_toCotangent` より `1⊗ₜD(f)`。 -/
+theorem range_kerCotangentToTensor_span {R B : Type*} [CommRing R] [CommRing B]
+    [Algebra (Polynomial R) B] [Algebra R B] [IsScalarTower R (Polynomial R) B] (f : Polynomial R)
+    (hB : RingHom.ker (algebraMap (Polynomial R) B) = Ideal.span ({f} : Set (Polynomial R))) :
+    LinearMap.range (KaehlerDifferential.kerCotangentToTensor R (Polynomial R) B) =
+      Submodule.span (Polynomial R) {(1 : B) ⊗ₜ[Polynomial R] (KaehlerDifferential.D R (Polynomial R) f)} := by
+  have hmem : ∀ x : Polynomial R, x * f ∈ RingHom.ker (algebraMap (Polynomial R) B) := by
+    intro x; rw [hB]; exact Ideal.mem_span_singleton'.mpr ⟨x, rfl⟩
+  set φ := (LinearMap.toSpanSingleton (Polynomial R) (Polynomial R) f).codRestrict _ hmem with hφdef
+  have hφsurj : Function.Surjective φ := by
+    intro y
+    have hy : (y : Polynomial R) ∈ Ideal.span ({f} : Set (Polynomial R)) := hB ▸ y.2
+    obtain ⟨x, hx⟩ := Ideal.mem_span_singleton'.mp hy
+    exact ⟨x, Subtype.ext hx⟩
+  have hcomp : Function.Surjective
+      ((RingHom.ker (algebraMap (Polynomial R) B)).toCotangent ∘ₗ φ) :=
+    (RingHom.ker (algebraMap (Polynomial R) B)).toCotangent_surjective.comp hφsurj
+  have hrange1 : LinearMap.range (KaehlerDifferential.kerCotangentToTensor R (Polynomial R) B) =
+      LinearMap.range (KaehlerDifferential.kerCotangentToTensor R (Polynomial R) B ∘ₗ
+        ((RingHom.ker (algebraMap (Polynomial R) B)).toCotangent ∘ₗ φ)) := by
+    rw [LinearMap.range_comp, LinearMap.range_eq_top.mpr hcomp, Submodule.map_top]
+  rw [hrange1]
+  have hfB : algebraMap (Polynomial R) B f = 0 := by
+    have : f ∈ RingHom.ker (algebraMap (Polynomial R) B) := hB ▸ Ideal.mem_span_singleton_self f
+    exact this
+  have heq : (KaehlerDifferential.kerCotangentToTensor R (Polynomial R) B ∘ₗ
+      ((RingHom.ker (algebraMap (Polynomial R) B)).toCotangent ∘ₗ φ)) =
+      LinearMap.toSpanSingleton (Polynomial R) _
+        ((1:B) ⊗ₜ[Polynomial R] (KaehlerDifferential.D R (Polynomial R) f)) := by
+    apply LinearMap.ext
+    intro x
+    show KaehlerDifferential.kerCotangentToTensor R (Polynomial R) B
+      ((RingHom.ker (algebraMap (Polynomial R) B)).toCotangent (φ x)) = _
+    rw [KaehlerDifferential.kerCotangentToTensor_toCotangent]
+    show (1:B) ⊗ₜ[Polynomial R] (KaehlerDifferential.D R (Polynomial R) (x*f))
+        = x • ((1:B) ⊗ₜ[Polynomial R] (KaehlerDifferential.D R (Polynomial R) f))
+    rw [Derivation.leibniz, TensorProduct.tmul_add]
+    have hzero : (1:B) ⊗ₜ[Polynomial R] (f • KaehlerDifferential.D R (Polynomial R) x) = 0 := by
+      rw [TensorProduct.tmul_smul]
+      show (f • (1:B)) ⊗ₜ[Polynomial R] (KaehlerDifferential.D R (Polynomial R) x) = 0
+      rw [Algebra.smul_def, hfB, zero_mul, TensorProduct.zero_tmul]
+    rw [hzero, add_zero, TensorProduct.tmul_smul]
+  rw [heq, LinearMap.range_toSpanSingleton]
+
 end ABC3.Found.Falt1
