@@ -523,10 +523,10 @@
    "author": "Gerd Faltings",
    "year": 1988,
    "pdfPages": 46,
-   "pageOffset": 254,
+   "pageOffset": 253,
    "notationRisk": "unmeasured",
-   "notationNotes": "★★★まだ目視していない。[LocProP] Lemma 2.1・2.3 の証明が直接引用(Section I, Theorem 4.4)。誌面は JAMS Vol.1 No.1 (1988) pp.255-299。テキスト層のみで座標記法(添字・上付き)の壊れ方は未測定。",
-   "verifiedPages": []
+   "notationNotes": "★★★まだ目視していない(散文部分)。[LocProP] Lemma 2.1・2.3 の証明が直接引用(Chapter I, Theorem 4.4)。誌面は JAMS Vol.1 No.1 (1988) pp.255-299(45ページ)。★2026-09-04訂正: pageOffsetは254ではなく253が正しい——物理p.1はJSTORの表紙(著者・出典スタンプのみ、本文page numberなし)で、物理p.2が印字p.255(論文本文の実際の1ページ目)。150dpiで物理p.1-3を目視確認し、物理p.3の見出し\"256 GERD FALTINGS\"で確定した(物理page=印字page-253)。テキスト層の座標記法(添字・上付き)の壊れ方は未測定だが、260dpi目視した物理p.17(Theorem 4.4所在)では地の文の単語間スペースが失われる(JSTORスキャンOCRの既知の癖)以外の逐語の食い違いは無かった。★Chapter見出しはCHAPTERという語を伴わず裸のローマ数字(\"I\"\"II\"\"III\")が単独行に出る——構造は tools/paper-items.mjs 系ではなく scratchpad/falt1-items.mjs 系の専用抽出が必要(2026-09-04, ResearchPaper/falt1-goal.md参照)。",
+   "verifiedPages": [1, 2, 3, 17, 18]
   },
   "Tate": {
    "title": "p-Divisible Groups",
