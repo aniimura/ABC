@@ -1,12 +1,13 @@
 import ABC3.Found.PGC.LubinTateUniqueness
 
 /-!
-# Lubin-Tate 形式群法則: 単位元則 `F_f(X,0)=X`(進行中)
+# Lubin-Tate 形式群法則: 単位元則 `F_f(X,0)=X`(`sorry` 無しで完成)
 
 `Found/PGC/LubinTateUniqueness.lean::powerSeries_uniqueness`(一意性補題)を
-`formalGroupLaw`(`F_f`)に実際に適用し、単位元則 `F_f(X,0)=X` を示す計画。
+`formalGroupLaw`(`F_f`)に実際に適用し、単位元則 `F_f(X,0)=X`
+(`formalGroupLaw_identity`)を確立した。
 
-## ここまでで確立したもの(`sorry` 無し)
+## 確立したもの(`sorry` 無し)
 
 - `restrictR`・`hasSubst_restrictR`・`coeff_restrictR_eq_zero_of_ne`・
   `coeff_restrictR_eq_of_e1_zero`: `X_1↦0` の代入とその係数計算。
@@ -16,25 +17,26 @@ import ABC3.Found.PGC.LubinTateUniqueness
 - `constantCoeff_formalGroupLaw`・`coeff_single01_formalGroupLaw`:
   `F_f` 自身の対応する係数(`ΦSeq` まで遡って計算)。
 - `subst_zero_eq_zero`: `PowerSeries.subst 0 p = 0`(`p` の定数項が0のとき)。
+- `hasSubst_const`・`subst_family_comp_value`: 1変数の値による代入の後に
+  2変数の族による代入を合成する一般補題——`PowerSeries.subst_def`
+  (`PowerSeries.subst` が定数族による `MvPowerSeries.subst` そのもので
+  あること)を経由して `MvPowerSeries.subst_comp_subst_apply` に帰着する。
+  当初 finsum の reindexing が要ると見積もっていたが、`subst_def` の
+  存在に気づいてからは不要になった。
+- ★★★★★★★★★`psi_functional_equation`: `ψ` が `f` との関数等式
+  `ψ.subst(f)=f.subst(ψ)` を満たす——`formalGroupLaw_f_isEndomorphism`
+  の両辺に `restrictR` を合成し、`subst_family_comp_value` と `subst_emb`
+  を組み合わせて `emb` の中で閉じる。
+- ★★★★★★★★★★`formalGroupLaw_identity`: **`F_f(X,0)=X`**(単位元則)。
+  `ψ` と `X` が同じ関数等式・同じ次数1の係数を持つことから
+  `powerSeries_uniqueness` で結論する。
 
-## 残っている段(未着手、具体的な計画あり)
+## まだ無いもの
 
-`ψ` が `f` との関数等式 `ψ.subst(f)=f.subst(ψ)` を満たすことを示す段
-(その後 `powerSeries_uniqueness` で `ψ=X` を結論する)。手計算では以下まで
-詰めた: `formalGroupLaw_f_isEndomorphism` の両辺に `restrictR`(`Y↦0`)を
-合成し、`MvPowerSeries.subst_comp_subst_apply`・`PowerSeries.subst_
-comp_subst_apply` で丁寧に追跡すると、最終的に
-「`c := fun s=>if s=0 then emb f else 0` を `F_f` に代入した結果」を
-「`emb f` を `ψ` に代入した結果の埋め込み」に結び付ける一般補題
-(`emb ψ' が X_1 に依存しないとき、任意の族 c による MvPowerSeries.subst
-は c 0 による PowerSeries.subst と一致する`)が必要だと分かった。この
-一般補題自体は `MvPowerSeries.coeff_subst` の finsum を `d 1=0` へ圧縮
-するだけで**数学的には**明らかだが、有限台への相当な reindexing
-(`Fin2→₀ℕ` 上の finsum を `ℕ` 上の finsum に単射 `n↦single 0 n` 経由で
-戻す)を要る具体的な Lean 化がこのセッションでは詰め切れず、`sorry` を
-含む形で残すよりも本ファイルから一旦除いた——次に戻るならここが
-出発点(`finsum_comp_injective` 相当の道具を探すか、`Finset.sum` へ
-早めに落として直接計算するか)。 -/
+`F_f(0,Y)=Y`(対称な単位元則、`X_0↦0` 版の `restrictR` で同様に示せる
+はず)・結合律・可換律——`formalGroupLaw` が実際に(可換)形式群法則
+であることを完全に示すにはこれらが要るが、単位元則の一方はこれで
+確立できた。 -/
 
 namespace ABC3.Found.PGC
 
@@ -219,5 +221,137 @@ omit [IsLocalRing A] [IsDomain A] [Fintype (IsLocalRing.ResidueField A)] in
 theorem subst_zero_eq_zero {p : PowerSeries A} (hp0 : PowerSeries.coeff 0 p = 0) :
     PowerSeries.subst (0 : MvPowerSeries (Fin 2) A) p = 0 :=
   MvPowerSeries.ext (coeff_subst_zero_eq_zero p hp0)
+
+omit [IsLocalRing A] [IsDomain A] [Fintype (IsLocalRing.ResidueField A)] in
+/-- 定数族への `HasSubst`: `v` の定数項が0なら `fun _ => v` は `HasSubst`。 -/
+theorem hasSubst_const {σ : Type*} [Finite σ] {v : MvPowerSeries (Fin 2) A}
+    (hv0 : MvPowerSeries.constantCoeff v = 0) :
+    MvPowerSeries.HasSubst (fun _ : σ => v) := by
+  constructor
+  · intro _; show IsNilpotent (MvPowerSeries.constantCoeff v); rw [hv0]; exact IsNilpotent.zero
+  · intro d; exact Set.toFinite _
+
+omit [IsLocalRing A] [IsDomain A] [Fintype (IsLocalRing.ResidueField A)] in
+/-- **1変数の値による代入と、その後に続く2変数の族による代入の合成**:
+`c` を(`v` を `p` に代入した結果)に代入するのは、まず `c` を `v` に代入して
+から `p` に代入するのと同じ——`PowerSeries.subst_def`(`PowerSeries.subst`が
+定数族による `MvPowerSeries.subst` そのものであること)経由で
+`MvPowerSeries.subst_comp_subst_apply` に帰着する。 -/
+theorem subst_family_comp_value {c : Fin 2 → MvPowerSeries (Fin 2) A}
+    (hc : MvPowerSeries.HasSubst c) {v : MvPowerSeries (Fin 2) A}
+    (hv0 : MvPowerSeries.constantCoeff v = 0) (p : PowerSeries A) :
+    MvPowerSeries.subst c (PowerSeries.subst v p) = PowerSeries.subst (MvPowerSeries.subst c v) p := by
+  rw [PowerSeries.subst_def v p, MvPowerSeries.subst_comp_subst_apply (hasSubst_const hv0) hc,
+    ← PowerSeries.subst_def]
+
+include hq hπmax hf0 hf1 hfres in
+/-- ★★★★★★★★★**`ψ:=F_f(X,0)` は `f` との関数等式を満たす**: `ψ(f(X))=f(ψ(X))`。
+鍵は `PowerSeries.subst_def`(`PowerSeries.subst a p = MvPowerSeries.subst
+(fun _=>a) p`、`PowerSeries.subst` が定数族による `MvPowerSeries.subst`
+そのものであること)——これで `restrictR` を経由する族 `c` を
+「`emb f` を送る定数族」経由で書き換えられ、finsum の reindexing を
+一切経由せずに閉じた。 -/
+theorem psi_functional_equation :
+    PowerSeries.subst f (psi hq hπmax f hf0 hf1 hfres) =
+      PowerSeries.subst (psi hq hπmax f hf0 hf1 hfres) f := by
+  apply emb_injective
+  have hf0c : PowerSeries.constantCoeff f = 0 := hf0' f hf0
+  have hHSf : PowerSeries.HasSubst f := by
+    show IsNilpotent (PowerSeries.constantCoeff f); rw [hf0c]; exact IsNilpotent.zero
+  have hHSψ : PowerSeries.HasSubst (psi hq hπmax f hf0 hf1 hfres) := by
+    show IsNilpotent (PowerSeries.constantCoeff (psi hq hπmax f hf0 hf1 hfres))
+    rw [constantCoeff_psi]; exact IsNilpotent.zero
+  set a : Fin 2 → MvPowerSeries (Fin 2) A :=
+    fun i => PowerSeries.subst (MvPowerSeries.X i : MvPowerSeries (Fin 2) A) f with ha_def
+  have hHSa : MvPowerSeries.HasSubst a := hasSubst_g_subst_X f hf0c
+  have hembf0 : MvPowerSeries.constantCoeff (emb f) = 0 := by
+    rw [← MvPowerSeries.coeff_zero_eq_constantCoeff_apply, coeff_emb]; simp [hf0]
+  have hHSembf : MvPowerSeries.HasSubst (fun _ : Fin 2 => emb f) := hasSubst_const hembf0
+  have hrestrict_a : ∀ i : Fin 2, MvPowerSeries.subst (restrictR (A := A)) (a i) =
+      PowerSeries.subst (restrictR (A := A) i) f := by
+    intro i
+    rw [ha_def]
+    show MvPowerSeries.subst (restrictR (A := A))
+      (PowerSeries.subst (MvPowerSeries.X i : MvPowerSeries (Fin 2) A) f) = _
+    rw [subst_family_comp_value (hasSubst_restrictR (A := A)) (MvPowerSeries.constantCoeff_X i) f]
+    rw [MvPowerSeries.subst_X (hasSubst_restrictR (A := A)) i]
+  -- 段1: `subst restrictR (subst a F_f) = subst c F_f`(`c s := if s=0 then emb f else 0`)。
+  have has0 : MvPowerSeries.subst (restrictR (A := A)) (a 0) = emb f := by
+    rw [hrestrict_a]
+    show PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) A) f = emb f
+    rfl
+  have has1 : MvPowerSeries.subst (restrictR (A := A)) (a 1) = 0 := by
+    rw [hrestrict_a]
+    show PowerSeries.subst (restrictR (A := A) 1) f = 0
+    rw [show (restrictR (A := A) 1) = 0 from rfl]
+    exact subst_zero_eq_zero hf0
+  have hstep1 : MvPowerSeries.subst (restrictR (A := A))
+      (MvPowerSeries.subst a (formalGroupLaw hq hπmax f hf0 hf1 hfres)) =
+      MvPowerSeries.subst (fun _ : Fin 2 => emb f)
+        (MvPowerSeries.subst (restrictR (A := A)) (formalGroupLaw hq hπmax f hf0 hf1 hfres)) := by
+    rw [MvPowerSeries.subst_comp_subst_apply hHSa (hasSubst_restrictR (A := A))]
+    rw [MvPowerSeries.subst_comp_subst_apply (hasSubst_restrictR (A := A)) hHSembf]
+    have hpt : ∀ s : Fin 2, MvPowerSeries.subst (restrictR (A := A)) (a s) =
+        MvPowerSeries.subst (fun _ : Fin 2 => emb f) (restrictR (A := A) s) := by
+      intro s
+      by_cases hs : s = 0
+      · subst hs; rw [has0]; exact (MvPowerSeries.subst_X hHSembf 0).symm
+      · have hs1 : s = 1 := by omega
+        subst hs1
+        rw [has1, show (restrictR (A := A)) 1 = 0 from rfl]
+        have hz := MvPowerSeries.subst_sub hHSembf (0 : MvPowerSeries (Fin 2) A) 0
+        simpa using hz.symm
+    exact congrArg (fun g => MvPowerSeries.subst g (formalGroupLaw hq hπmax f hf0 hf1 hfres))
+      (funext hpt)
+  -- 段2: `subst (fun_=>emb f) (emb ψ) = emb(subst f ψ)`。
+  have hstep2 : MvPowerSeries.subst (fun _ : Fin 2 => emb f) (emb (psi hq hπmax f hf0 hf1 hfres)) =
+      emb (PowerSeries.subst f (psi hq hπmax f hf0 hf1 hfres)) := by
+    show MvPowerSeries.subst (fun _ : Fin 2 => emb f)
+      (PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) A)
+        (psi hq hπmax f hf0 hf1 hfres)) = _
+    rw [subst_family_comp_value hHSembf (MvPowerSeries.constantCoeff_X 0)]
+    rw [show MvPowerSeries.subst (fun _ : Fin 2 => emb f)
+        (MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) A) = emb f from
+        MvPowerSeries.subst_X hHSembf 0]
+    exact subst_emb f (psi hq hπmax f hf0 hf1 hfres) hHSf
+  -- 段3: RHS 側。
+  have hstep3 : MvPowerSeries.subst (restrictR (A := A))
+      (PowerSeries.subst (formalGroupLaw hq hπmax f hf0 hf1 hfres) f) =
+      emb (PowerSeries.subst (psi hq hπmax f hf0 hf1 hfres) f) := by
+    have hFf0 : MvPowerSeries.constantCoeff (formalGroupLaw hq hπmax f hf0 hf1 hfres) = 0 :=
+      constantCoeff_formalGroupLaw hq hπmax f hf0 hf1 hfres
+    rw [subst_family_comp_value (hasSubst_restrictR (A := A)) hFf0]
+    rw [show MvPowerSeries.subst (restrictR (A := A)) (formalGroupLaw hq hπmax f hf0 hf1 hfres) =
+        emb (psi hq hπmax f hf0 hf1 hfres) from (emb_psi hq hπmax f hf0 hf1 hfres).symm]
+    exact subst_emb (psi hq hπmax f hf0 hf1 hfres) f hHSψ
+  have hFf := formalGroupLaw_f_isEndomorphism hq hπmax f hf0 hf1 hfres
+  calc emb (PowerSeries.subst f (psi hq hπmax f hf0 hf1 hfres))
+      = MvPowerSeries.subst (fun _ : Fin 2 => emb f) (emb (psi hq hπmax f hf0 hf1 hfres)) :=
+        hstep2.symm
+    _ = MvPowerSeries.subst (fun _ : Fin 2 => emb f)
+        (MvPowerSeries.subst (restrictR (A := A)) (formalGroupLaw hq hπmax f hf0 hf1 hfres)) := by
+        rw [emb_psi]
+    _ = MvPowerSeries.subst (restrictR (A := A))
+        (MvPowerSeries.subst a (formalGroupLaw hq hπmax f hf0 hf1 hfres)) := hstep1.symm
+    _ = MvPowerSeries.subst (restrictR (A := A))
+        (PowerSeries.subst (formalGroupLaw hq hπmax f hf0 hf1 hfres) f) := by rw [hFf]
+    _ = emb (PowerSeries.subst (psi hq hπmax f hf0 hf1 hfres) f) := hstep3
+
+include hq hπmax hf0 hf1 hfres in
+/-- ★★★★★★★★★★**Lubin-Tate 形式群法則の単位元則**: `F_f(X,0)=X`。
+`ψ:=F_f(X,0)`(`psi`)と `X`(恒等射)がどちらも `f` との同じ関数等式を
+満たし(`psi_functional_equation`・`PowerSeries.X_subst`/`subst_X`)、
+同じ次数1の係数(`coeff_one_psi`・`PowerSeries.coeff_one_X`)を持つ
+ことから、`powerSeries_uniqueness`(一意性補題)で `ψ=X` が出る——
+`emb` を経由して `F_f(X,0)=X` を `MvPowerSeries (Fin 2) A` の中で述べる。 -/
+theorem formalGroupLaw_identity (hπne0 : π ≠ 0) :
+    psi hq hπmax f hf0 hf1 hfres = PowerSeries.X := by
+  have hHSf : PowerSeries.HasSubst f := by
+    show IsNilpotent (PowerSeries.constantCoeff f); rw [hf0' f hf0]; exact IsNilpotent.zero
+  apply powerSeries_uniqueness hπmax hπne0 (hf0' f hf0) hf1 (constantCoeff_psi hq hπmax f hf0 hf1 hfres)
+    PowerSeries.constantCoeff_X
+  · rw [coeff_one_psi, PowerSeries.coeff_one_X]
+  · exact psi_functional_equation hq hπmax f hf0 hf1 hfres
+  · rw [PowerSeries.X_subst, PowerSeries.subst_X hHSf]
 
 end ABC3.Found.PGC
