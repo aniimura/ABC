@@ -94,7 +94,18 @@ def theorem_4_2.src : Source :=
 def theorem_4_2.needs : List ProofObligation :=
   [ .implicitStep
       ("Q_p-代数同型 α : K ≃ K′ を代数閉包への同型 ᾱ : K̄ ≃ K̄′ へ延長し、共役で誘導される" ++
-       "Γ_K ≅ Γ_K′ が ᾱ の取り方によらない外部同型類を定めることの構成") 7,
+       "Γ_K ≅ Γ_K′ が ᾱ の取り方によらない外部同型類を定めることの構成。" ++
+       "★2026-09-04 測定: 「延長+共役+選択非依存」の部分自体は一般の Galois 理論" ++
+       "(`IsAlgClosure.equivOfEquiv`・`equivOfEquiv_algebraMap`、mathlib 実測: " ++
+       "在庫あり)だけで構成できる見込みを確認した——局所類体論を経由しない。" ++
+       "★★ただし**別の穴が見つかった**: この構成が実際に返すのは Γ_K の**裸の**" ++
+       "同型であり、`Interface.PGC.RamificationFiltration`(現状の定義)には" ++
+       "「K の同型から誘導される共役が Gv を保つ」という自然性の公理が無い——" ++
+       "`RF : RamificationFiltration p` は K ごとに完全に独立な `Gv` を許す抽象データ" ++
+       "なので、この implicitStep を実際に埋めるには RF 自体にこの自然性を課すか" ++
+       "(本物の高次分岐群なら成り立つはずの性質だが、現在の Interface には無い)、" ++
+       "RF を具体的に構成してから示すかのどちらかが要る(`memory/" ++
+       "pgc-ramification-naturality-gap.md` 参照)") 7,
     .otherPaper "pGC" "Corollary 3.3" 6,
     .otherPaper "pGC" "Lemma 4.1" 7,
     .citation "[3] Serre, Local Class Field Theory" "Γ_K^ab ≅ (K×)^ による単射性の議論"

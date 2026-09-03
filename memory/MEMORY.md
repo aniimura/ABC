@@ -55,3 +55,4 @@
 - [pdftotextは下付き+上付きの出力順が出現ごとに不安定](pdftotext-subsup-order-unstable.md) — pGC §2-§4で実測。同じΓ_K^vが同一段落内でΓvK/ΓKvと入れ替わる。都度実測して<sup>/<sub>の書く順を合わせること。
 - [p進対数: 一般のKで準同型性・単射性・全射性(球からの全単射)をsorry無しで解決](padic-log-additivity-blocked.md) — Found/PGC/PadicLogMul.lean(padicLog_mul)・PadicLogInjective.lean(padicLog_injOn)・PadicLogSurjective.lean(padicLog_bijOn、Banach不動点定理経由でexp/log互逆性を回避)。pGC Prop 1.2/2.1のneedsが前進(中心の相互律の同型自体は依然absent)。
 - [pGC Cor 3.1/3.3: 裸のΓ_K同型を使っていた不整合を訂正](pgc-filtered-vs-bare-galois-iso.md) — 原文は「filtered group」と明示、裸の同型では原理的に不変性の根拠にならない(Γ_Kの裸の同型類はp,[K:Q_p]だけで決まる)。FilteredGroup.Isoに訂正(2026-09-04)。
+- [pGC Theorem 4.2: Φ構成に必要な自然性公理がRamificationFiltrationに無い](pgc-ramification-naturality-gap.md) — 体の同型→Γ_K同型への延長自体は一般Galois理論(IsAlgClosure.equivOfEquiv)で局所類体論を経由せず組める見込みだが、それがGvを保つ保証がInterfaceに無い(Cor3.1/3.3と同根の穴)。2026-09-04。
