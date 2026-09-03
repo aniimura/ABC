@@ -106,6 +106,21 @@ LubinTateCommutativity.lean::formalGroupLaw_commutative`——1変数一意性
 が2変数一意性補題の帰納法で必要になった。これで**単位元則2つ・可換律の
 3性質が全てsorry無しで揃った**。
 
+**続報(2026-09-04、結合律への布石——σ一般化の実測)**: 結合律
+`F_f(F_f(X,Y),Z)=F_f(X,F_f(Y,Z))`は3変数の一意性補題(可換律で作った
+`mvPowerSeries_uniqueness`のFin 3版)を要すると見て、その土台となる
+`hasSubst_g_subst_X`(`Found/PGC/LubinTateGLinearization.lean`)と
+`coeff_subst_linearize`(`Found/PGC/LubinTateLinearization.lean`)を
+`Fin 2`から任意の添字型`{σ:Type*}`へ一般化した(前者は`[Finite σ]`も
+追加)——両方とも証明が`Fin 2`に一切依存しておらず(`order_pow_sub_pow_ge`
+は既に`{A σ}`一般だった)、シグネチャを広げるだけで既存の全呼び出し
+箇所が無変更で通る後方互換な一般化だった。★一方`coeff_subst_g_linearize`
+自身(`Finsupp.prod`を`Fin.prod_univ_two`で2項に展開する箇所)は
+`Fin 2`固有の構造を使っており、3変数版(`Fin.prod_univ_three`)は
+別途専用の補題が要ることも判明——次に結合律に戻るときの具体的な
+出発点はここ(`coeff_subst_g_linearize`のFin 3版、`coeff_a_diff_order`・
+`coeff_ad_eq_of_degree`も同様に3項版が要る)。
+
 **残る作業**: 結合律(形式群法則であることの最後の1つ)、torsion点の
 構成、Galois作用を経由した相互律写像の構成——pGC の各項目(Prop 1.2・
 Cor 1.3・Prop 2.1・Prop 2.2・Theorem 4.2)を閉じるには、なお相互律写像
