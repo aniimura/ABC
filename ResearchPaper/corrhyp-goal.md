@@ -63,23 +63,51 @@ LocProP の §0 は新規の Definition/Lemma を持つが、本論文の §0 �
 引用結果であり、本プロジェクトでは証明せず posit する対象になる可能性が高い(要検討——
 `Interface` 行き。`genell-track-b` で `Theorem 3.8` 等の外部結果を扱った前例を参照)。
 
-## 3. 次にやること(Track B、Found/CorrHyp/)
+## 3. Track B(Found/CorrHyp/)——2026-09-04 に着手、実測に基づく規模感
 
-Skeleton が閉じたので、次は `HyperbolicCurveData`/`StackType` の各フィールドを
-本物のデータで置き換える段(Track B)。★件数と難度は別([[leaves-are-measured-not-guessed]])
-——候補を難度でなく依存の少なさで並べる:
+★★**Found(sorry 無しの証明)まで24件全部を1セッションで終える見込みは無い**
+——GenEll(数か月・現在も§3-§4に3本のsorryが残る)と同型の規模になることを、
+実際に mathlib を調べたうえで確認した。「壁」ではなく道として、葉から実装する。
 
-1. §1(`Corr`/`IsTrivial`/`transpose`/`comp'`/`IsIsogenous`)の土台である `Space`/`FEt`/
-   `pullback` を最初に実装する候補。ただし「双曲曲線」自体が mathlib に無い
-   (2026-09-04 時点で未実測——`exact?`/`decl-index.mjs --mathlib` で確認してから着手)。
-2. §2 の `MargulisArithmetic`/`ShimuraArithmetic` は代数群・非可換 Galois コホモロジーが
-   要り、GenEll の Track B と同程度に重い可能性が高い。
-3. §6(`Theorem 6.1`)は Royden の定理(外部文献、mathlib 未確認)への依存が本質的で、
-   件数最小(1 件)だが易しいとは限らない。
-4. G9(非空虚性の対照、14 件)は Track B 未着手なので後回しでよいが、
-   `HyperbolicCurveData`/`StackType` の**意味のある**非空虚 witness は
-   Track B が本物のデータを供給して初めて作れる(`.waiting` に記録済み)。
+### 使える資産(mathlib、2026-09-04 実測)
+
+| 材料 | 場所 |
+|---|---|
+| `ℍ`(上半平面)・`SL(2,ℝ)` の Möbius 作用 | `Analysis.Complex.UpperHalfPlane.*` |
+| `Subgroup 𝒢 ≤ SL(2,ℝ)`(離散)→ `ℍ` に固有不連続作用 | `UpperHalfPlane.instProperlyDiscontinuousSL2RSubgroup` |
+| Schreier の補題(有限指数部分群は有限生成) | `Subgroup.fg_of_index_ne_zero` |
+| 被覆空間・モノドロミー | `Topology.Covering.*` |
+| `PSL(n,K)` の構成 | `Matrix.ProjectiveSpecialLinearGroup` |
+
+### 無い(§2・§6 の律速)
+
+Margulis/Shimura-arithmeticity(代数群・非可換 Galois コホモロジー・Brauer 群)、
+四元数環の分類理論、モジュライスタック `M_{g,r}`、Teichmüller 空間、
+Royden の定理——いずれも GenEll のモジュラー多項式ギャップと同型の
+「未構築の数学」で、§2(`Definition 2.2`/`2.3`・`Proposition 2.4`・`Theorem 2.5`-`2.6`)
+と §6(`Theorem 6.1`)はこれ単体で人年規模になりうる。
+
+### 実装した第一歩
+
+`Found/CorrHyp/FuchsianGroup.lean`(2026-09-04、sorry 無し、標準3公理のみ):
+`FuchsianGroup`(`SL(2,ℝ)` の離散部分群、原文の `PSL₂(ℝ)⁰` からの逸脱を記録)、
+`ℍ` への固有不連続作用(mathlib から無条件)、`IsSub`/`IsFiniteIndexIn`、
+Schreier の補題からの `fg_of_finiteIndexIn`(`Theorem 3.3`/`Lemma 5.5` の核)。
+
+### 次の一手(依存の少なさ順)
+
+1. §1(`Corr`/`transpose`/`comp'`/`IsIsogenous`)を `FuchsianGroup` 上の
+   有限指数部分群として具体化——`Space := FuchsianGroup`、`FEt` を被覆写像
+   (`IsQuotientCoveringMap` 系)で実装する。
+2. §3(`Proposition 3.2`・`Theorem 3.3`)は原文の引用が 0 件で、群論の初等計算
+   だけ——①が済めば近い。
+3. §4(`Lemma 4.1`・`Theorem 4.2`)は係数拡大 `Ext`(k → K)が要り、
+   スキーム論(有限型・降下理論)が要るため②より重い。
+4. §2・§6 は上記のとおり大きな未構築の数学を要するので、まず外部数学の
+   規模を測ってから見積もる(`measure-mathlib-before-skeleton` の手順)。
+5. G9(非空虚性の対照、14 件)は Track B が本物のデータを供給して初めて
+   意味のある形で作れる(`.waiting` に記録済み)。
 
 関連: [[leaf-first-with-graph-feedback]] / [[leaves-are-measured-not-guessed]] /
 [[measure-mathlib-before-skeleton]] / [[genell-track-b]] / [[corrhyp-track-goal]] /
-[[stale-status-read-lean-first]]
+[[stale-status-read-lean-first]] / [[no-wall-decompose-instead]]
