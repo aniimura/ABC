@@ -3,9 +3,9 @@
 対象: S. Mochizuki, *Correspondences on Hyperbolic Curves* [CorrHyp]
 (物理 18 ページ、著者 1 名、`papers.json` に短縮タグ登記済み、`0_Source` に PDF/txt あり)。
 
-**★すべて `.txt`(pdftotext)由来であり、目視していない。** `papers.json` の
-`notationRisk: "unmeasured"` のとおり、どの記号が壊れるかは未測定(GenEll では行列の
-出現順が入れ替わる実害が出た——本論文固有の壊れ方はまだ不明)。着手時に PDF 目視が要る。
+**★2026-09-04、p.3-13・p.15・p.17 を 200dpi 目視確認済み**(`papers.json`
+`notationRisk: "medium"`)。実害は overline(X̄ → X)と script 文字(𝒳・𝒴 → X・Y)の
+脱落の 2 点(GenEll のような行列の順序入れ替えは無い、詳細は `papers.json` を見よ)。
 
 再現: `node tools/paper-items.mjs CorrHyp`(ABC3c が LocProP のために新設した汎用ツール。
 行頭 `Kind N.M.`(ピリオド+行末 or 開き括弧)の宣言規則で番号付き項目を §ごとに数える)。
@@ -15,10 +15,16 @@
 
 ## 0. ゴール(現在地)
 
-> **CorrHyp §1 0/5, §2 0/6, §3 0/3, §4 0/2, §5 0/7, §6 0/1 —— 合計 0/24**
+> **CorrHyp §1 5/5, §2 6/6, §3 3/3, §4 2/2, §5 7/7, §6 1/1 —— 合計 24/24(Skeleton)**
 
-★本トラックは**未着手**(`Skeleton/Found/Interface` のいずれにも `CorrHyp` ディレクトリが無い)。
-分母 24 が「まず数えた規模」であり、着手順序・省略の要否は未評価。
+★★**2026-09-04、S0(Skeleton = statement を型で固定する段)を完了した。**
+`Interface/CorrHyp/HyperbolicCurve.lean`(`HyperbolicCurveData`・`StackType` を posit)
+と `Skeleton/CorrHyp/Section1.lean`〜`Section6.lean` に 24 項目すべてを置き、
+`lake build` 0 エラー・`tools/check.mjs` で G1(出典・逐語照合)を全項目パスさせた。
+残る `sorry` は 19 件(Definition 5 件は sorry 無しで構成済み)。G9(非空虚性の対照)は
+14 件が未着手のまま——プロジェクト全体でトラッキング対象の既知 debt であり、
+`check.mjs` 自身が「新規は落とす(ブロックしない)」と明記している。
+次の段(S1: Track B で `Found/CorrHyp/` を積む)はまだ手つかず。
 
 ## 1. §ごとの内訳(節タイトルつき)
 
@@ -57,16 +63,23 @@ LocProP の §0 は新規の Definition/Lemma を持つが、本論文の §0 �
 引用結果であり、本プロジェクトでは証明せず posit する対象になる可能性が高い(要検討——
 `Interface` 行き。`genell-track-b` で `Theorem 3.8` 等の外部結果を扱った前例を参照)。
 
-## 3. 次にやること
+## 3. 次にやること(Track B、Found/CorrHyp/)
 
-1. ★**PDF 目視**(260dpi)で §1(p.3-4、相関・isogeny の定義)を確認してから
-   `Skeleton/CorrHyp/` を作り始める([[frdi-verbatim-ascii-only]] と同じ手順)。
-2. `papers.json` の `CorrHyp.verifiedPages` を目視済みページで埋める
-   (★このファイルは他セッションが編集中のことがあるため、単独で軽い追記に留める)。
-3. 葉から着手する([[leaf-first-with-graph-feedback]])。§1(`Definition 1.1`–`1.5`、
-   依存 0 —— 相関・isogeny の語彙そのもの)が入口候補。§6(`Theorem 6.1` のみ、1 件)は
-   件数最小だが Royden の定理という外部結果への依存が大きく、易しいとは限らない
-   ([[leaves-are-measured-not-guessed]] のとおり件数と難度は別)。
+Skeleton が閉じたので、次は `HyperbolicCurveData`/`StackType` の各フィールドを
+本物のデータで置き換える段(Track B)。★件数と難度は別([[leaves-are-measured-not-guessed]])
+——候補を難度でなく依存の少なさで並べる:
+
+1. §1(`Corr`/`IsTrivial`/`transpose`/`comp'`/`IsIsogenous`)の土台である `Space`/`FEt`/
+   `pullback` を最初に実装する候補。ただし「双曲曲線」自体が mathlib に無い
+   (2026-09-04 時点で未実測——`exact?`/`decl-index.mjs --mathlib` で確認してから着手)。
+2. §2 の `MargulisArithmetic`/`ShimuraArithmetic` は代数群・非可換 Galois コホモロジーが
+   要り、GenEll の Track B と同程度に重い可能性が高い。
+3. §6(`Theorem 6.1`)は Royden の定理(外部文献、mathlib 未確認)への依存が本質的で、
+   件数最小(1 件)だが易しいとは限らない。
+4. G9(非空虚性の対照、14 件)は Track B 未着手なので後回しでよいが、
+   `HyperbolicCurveData`/`StackType` の**意味のある**非空虚 witness は
+   Track B が本物のデータを供給して初めて作れる(`.waiting` に記録済み)。
 
 関連: [[leaf-first-with-graph-feedback]] / [[leaves-are-measured-not-guessed]] /
-[[measure-mathlib-before-skeleton]] / [[genell-track-b]] / [[corrhyp-track-goal]]
+[[measure-mathlib-before-skeleton]] / [[genell-track-b]] / [[corrhyp-track-goal]] /
+[[stale-status-read-lean-first]]
