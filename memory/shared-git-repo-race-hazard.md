@@ -32,4 +32,21 @@ HEAD と一致しているか確認する。ズレていたら(古い内容に�
 手で握り潰すことになる**。(3) `git add` は常に明示パスのみ
 (既存の指示どおり)、かつ commit 後の検証を1ステップとして習慣化する。
 
-関連: [[sibling-session-coordination-via-listagents]]
+**続報(2026-09-04、`.lake/build`キャッシュでも類似の再現性トラブルを観測)**:
+`hasSubst_g_subst_X`の一般化(型注釈なしでσを遅延推論に頼る既存3箇所)は
+一度 `lake build ABC3`(6590 jobs)が完全成功した**直後**に、同じソースを
+一切変更していないのに `lake build` を打ち直すと「typeclass instance
+problem is stuck」で**再現性をもって**(2回連続で同一エラー)落ちる
+現象に遭遇した。`git status`/`git diff`は該当ファイルにズレ無し
+(HEADと一致)だったので `.git` 側の合流ではない——ABC3b/cと`lean/.lake/
+build`(ビルドキャッシュ)も同じディレクトリを共有しているため、並行
+セッションの `lake build` がoleanを書き換えている最中に自分のビルドが
+古い/一部だけ更新された状態を読んだ可能性が疑われる(未確定)。
+**How to apply**: 原因の特定に時間をかけるより、型注釈なしでの
+`have h := generalizedLemma arg1 arg2`(戻り値の型から後方に多相型
+引数を推論させる書き方)を型注釈つき(`have h : ExpectedType := ...`
+または `generalizedLemma (σ := ConcreteType) arg1 arg2`)に直すほうが
+安く恒久的——多相化した既存補題を呼ぶ箇所は型注釈を省略しない習慣に
+切り替える。「一度通った」は「今後も通る」を保証しない(この環境では)。
+
+関連: [[sibling-session-coordination-via-listagents]]・[[pgc-lubin-tate-existence-progress]]

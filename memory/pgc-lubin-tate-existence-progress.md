@@ -121,10 +121,27 @@ LubinTateCommutativity.lean::formalGroupLaw_commutative`——1変数一意性
 出発点はここ(`coeff_subst_g_linearize`のFin 3版、`coeff_a_diff_order`・
 `coeff_ad_eq_of_degree`も同様に3項版が要る)。
 
-**残る作業**: 結合律(形式群法則であることの最後の1つ)、torsion点の
-構成、Galois作用を経由した相互律写像の構成——pGC の各項目(Prop 1.2・
-Cor 1.3・Prop 2.1・Prop 2.2・Theorem 4.2)を閉じるには、なお相互律写像
-そのものの構成・性質証明という大きな仕事が残っている。
+**続報(2026-09-04、一意性補題を任意有限変数へ一般化——結合律の土台完成)**:
+`mvPowerSeries_uniqueness`(可換律のFin 2固定2変数版)の証明を精査し、
+Fin 2への依存が「`Finsupp.prod`を`Fin.prod_univ_two`で2項展開する
+箇所」だけだったと判明。その展開を「有限集合上の望遠鏡和」
+(`order_prod_pow_sub_prod_pow_ge_finset`、`Finset.induction_on`で
+1項ずつ剥がす)に置き換え、`Found/PGC/LubinTateGeneralUniqueness.lean::
+mvPowerSeries_uniqueness_general`として**任意の有限添字型σ(Fin 3含む)**
+への一般化をsorry無しで完成させた。結合律`F_f(F_f(X,Y),Z)=F_f(X,F_f(Y,Z))`
+はσ:=Fin 3でこれを`G:=F_f(F_f(X,Y),Z)`・`H:=F_f(X,F_f(Y,Z))`に適用
+すれば示せる見込み——残るのは次数1係数の一致とG・Hそれぞれの関数等式
+(F_f自身の関数等式の2回合成)を示す段。
+★診断: この一般化作業中、既存の`hasSubst_g_subst_X`呼び出し3箇所
+(型注釈なしでσの遅延推論に依存)が「typeclass instance problem is
+stuck」で再現性をもって落ちる現象を発見し、`(σ := Fin 2)`の明示注釈で
+解消した——原因(前回のフルビルド成功時は通っていた)は未特定のまま
+(並行セッションと`.lake/build`キャッシュを共有する環境固有の可能性)。
+
+**残る作業**: 結合律の最後の2段(G・Hの次数1係数の一致・関数等式)、
+torsion点の構成、Galois作用を経由した相互律写像の構成——pGC の各項目
+(Prop 1.2・Cor 1.3・Prop 2.1・Prop 2.2・Theorem 4.2)を閉じるには、
+なお相互律写像そのものの構成・性質証明という大きな仕事が残っている。
 
 詳細な発見の経緯は `ResearchPaper/blocked-leaves.json` の
 `[pGC] Proposition 1.2 / ... —— 局所類体論の相互律` エントリの
