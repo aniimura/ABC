@@ -72,7 +72,21 @@ def filteredGroupOf.src : Source :=
 
 - [1] Serre, *Abelian ℓ-adic Representations*, Chapter III §1.2(d_V ≤ dim_{Q_p}(V)、
   Hodge-Tate の定義そのもの)。mathlib 不在。
-- Proposition 2.2(K̄^ の回復)への直接依存。 -/
+- Proposition 2.2(K̄^ の回復)への直接依存。
+
+## ★★検討中の懸念(2026-09-04、未解決)
+
+`isHodgeTate : ∀ K, Prop` は**完全に自由なパラメータ**——`V` の構造から
+導かれる制約が一切無い。これは `Cor 1.3` の `I_K`・`Prop 1.2` の `RD` で
+過去に発見した「自由なデータによる退化」(`Check/PGC/InertiaDegeneracy.lean`)
+と同じ型の罠になりうる: `isHodgeTate` が `K` の実際の構造と無関係に選べる
+限り、`FilteredGroup.Iso` が存在しても `isHodgeTate K ↔ isHodgeTate K'` を
+強制する根拠が(この statement の中には)無い。ただし過去のケースと異なり、
+**具体的な反証はまだ構成していない**——`FilteredGroup.Iso` を伴う異なる
+`K,K'` を実際に作るのが Cor 1.3 の場合より難しく見える(こちらは非自明な
+`RF`・非自明な同型 `α` の両方が要る)。次にここへ戻るなら
+`Check/PGC/RefutationAttempts.lean` と同じ手法で反証を試みるか、
+`isHodgeTate` に `V` から導かれる制約(transport 条件)を課す訂正を検討する。 -/
 theorem cor_3_1 (RF : RamificationFiltration p)
     (V : PAdicLocalField p → Type*) [∀ K, AddCommGroup (V K)] [∀ K, Module ℚ_[p] (V K)]
     [∀ K, FiniteDimensional ℚ_[p] (V K)] [∀ K, SMul K.absGal (V K)]
@@ -135,7 +149,17 @@ Corollary 3.1 と同じ理由(原文「the filtered group Γ_K」、裸の同型
 ## 依拠する境界外の結果
 
 - [1] Serre, Chapter III, Appendix §5(d_V(i) による uniformizing の判定条件式)。
-- Corollary 3.1 への直接依存(d_V(i) が回復できることを使う)。 -/
+- Corollary 3.1 への直接依存(d_V(i) が回復できることを使う)。
+
+## ★★検討中の懸念(2026-09-04、未解決)
+
+`Cor 3.1` と同じ型の懸念——`ρ : K.absGal →* Eˣ`・`ρ' : K'.absGal →* Eˣ` は
+`α` と無関係に自由に選べる(`α` との両立性を要求する仮説が無い)。
+`IsUniformizing` 自体は `ρ` に依存する述語なので、`ρ,ρ'` が `α` で
+互いに移り合う保証が無いまま両者の `IsUniformizing` が同値になる根拠は
+薄い——ただし原文の主張の対象が「`ρ` を固定した上で `V` が uniformizing か
+どうか」なのか「`α` で移り合う `(ρ,ρ')` の族について」なのか、逐語の
+読み直しが要る。詳細は `Cor 3.1` の同名の節を参照。 -/
 theorem cor_3_3 (RF : RamificationFiltration p)
     (E : Type*) [Field E] [Algebra ℚ_[p] E]
     (toGal : ∀ K : PAdicLocalField p, {x : K.carrier // ‖x‖ = (1 : ℝ)} → K.absGal) :
