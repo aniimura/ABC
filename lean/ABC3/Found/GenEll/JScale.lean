@@ -69,7 +69,106 @@ theorem j_eq_of_c4_c6_scale (W W' : WeierstrassCurve R) [W.IsElliptic] [W'.IsEll
       = ((((W.Δ')⁻¹ : Rˣ) : R) * n ^ 12) * W'.c₄ ^ 3 := by ring
     _ = (((W'.Δ')⁻¹ : Rˣ) : R) * W'.c₄ ^ 3 := by rw [hkey]
 
+/-- ★★★★★★**符号が `+` の版**——`c₆ = n⁶c₆'` でも `j` は一致する
+（`c₆` は 2 乗でしか入らないから）。 -/
+theorem j_eq_of_c4_c6_scale_pos (W W' : WeierstrassCurve R) [W.IsElliptic] [W'.IsElliptic]
+    (n : R) (h4 : W.c₄ = n ^ 4 * W'.c₄) (h6 : W.c₆ = n ^ 6 * W'.c₆) :
+    W.j = W'.j := by
+  have h1728 : (1728 : R) ≠ 0 := by
+    have : ((1728 : ℕ) : R) ≠ 0 := Nat.cast_ne_zero.2 (by norm_num)
+    simpa using this
+  have hΔ : W.Δ = n ^ 12 * W'.Δ := by
+    refine mul_left_cancel₀ h1728 ?_
+    have e1 : (1728 : R) * W.Δ = W.c₄ ^ 3 - W.c₆ ^ 2 := W.c_relation
+    have e2 : (1728 : R) * W'.Δ = W'.c₄ ^ 3 - W'.c₆ ^ 2 := W'.c_relation
+    rw [e1, h4, h6, show (1728 : R) * (n ^ 12 * W'.Δ) = n ^ 12 * ((1728 : R) * W'.Δ) from by ring,
+      e2]
+    ring
+  have hcoe : ((W.Δ' : Rˣ) : R) = n ^ 12 * ((W'.Δ' : Rˣ) : R) := by
+    rw [coe_Δ', coe_Δ', hΔ]
+  have hUne : ((W.Δ' : Rˣ) : R) ≠ 0 := (W.Δ').ne_zero
+  have hU'ne : ((W'.Δ' : Rˣ) : R) ≠ 0 := (W'.Δ').ne_zero
+  have hinvW : ((W.Δ' : Rˣ) : R) * (((W.Δ')⁻¹ : Rˣ) : R) = 1 := by
+    rw [← Units.val_mul, mul_inv_cancel, Units.val_one]
+  have hinvW' : ((W'.Δ' : Rˣ) : R) * (((W'.Δ')⁻¹ : Rˣ) : R) = 1 := by
+    rw [← Units.val_mul, mul_inv_cancel, Units.val_one]
+  have hkey : (((W.Δ')⁻¹ : Rˣ) : R) * n ^ 12 = (((W'.Δ')⁻¹ : Rˣ) : R) := by
+    refine mul_left_cancel₀ hUne ?_
+    calc ((W.Δ' : Rˣ) : R) * ((((W.Δ')⁻¹ : Rˣ) : R) * n ^ 12)
+        = (((W.Δ' : Rˣ) : R) * (((W.Δ')⁻¹ : Rˣ) : R)) * n ^ 12 := by ring
+      _ = n ^ 12 := by rw [hinvW, one_mul]
+      _ = (n ^ 12 * ((W'.Δ' : Rˣ) : R)) * (((W'.Δ')⁻¹ : Rˣ) : R) := by
+          rw [mul_assoc, hinvW', mul_one]
+      _ = ((W.Δ' : Rˣ) : R) * (((W'.Δ')⁻¹ : Rˣ) : R) := by rw [← hcoe]
+  rw [j, j, h4]
+  calc (((W.Δ')⁻¹ : Rˣ) : R) * (n ^ 4 * W'.c₄) ^ 3
+      = ((((W.Δ')⁻¹ : Rˣ) : R) * n ^ 12) * W'.c₄ ^ 3 := by ring
+    _ = (((W'.Δ')⁻¹ : Rˣ) : R) * W'.c₄ ^ 3 := by rw [hkey]
+
+/-- ★★★★★★**`j` の一致を分母を払った形に直す**。
+
+`j = Δ′⁻¹·c₄³` なので、両辺に `Δ·Δ′` を掛ければ
+
+    `c₄³·Δ′ = c₄′³·Δ`
+
+★これが `tateParam_injective`（第 878）に渡す形である。 -/
+theorem c4_cube_mul_Delta_of_j_eq (W W' : WeierstrassCurve R) [W.IsElliptic] [W'.IsElliptic]
+    (h : W.j = W'.j) : W.c₄ ^ 3 * W'.Δ = W'.c₄ ^ 3 * W.Δ := by
+  have hinvW : ((W.Δ' : Rˣ) : R) * (((W.Δ')⁻¹ : Rˣ) : R) = 1 := by
+    rw [← Units.val_mul, mul_inv_cancel, Units.val_one]
+  have hinvW' : ((W'.Δ' : Rˣ) : R) * (((W'.Δ')⁻¹ : Rˣ) : R) = 1 := by
+    rw [← Units.val_mul, mul_inv_cancel, Units.val_one]
+  rw [WeierstrassCurve.j, WeierstrassCurve.j] at h
+  rw [← coe_Δ', ← coe_Δ']
+  linear_combination
+    (((W.Δ' : Rˣ) : R) * ((W'.Δ' : Rˣ) : R)) * h
+      - (((W'.Δ' : Rˣ) : R) * W.c₄ ^ 3) * hinvW
+      + (((W.Δ' : Rˣ) : R) * W'.c₄ ^ 3) * hinvW'
+
+/-! ## ★★★★★★`j` を式で書く（`rw` の motive を避けるため） -/
+
+section JField
+
+variable {F : Type} [Field F]
+
+/-- ★★**`j = Δ⁻¹·c₄³`**——`Δ'` を外して式で書いた形。
+
+☆`IsElliptic` のインスタンスが `rw` の motive を壊す問題（`lean-idioms.md`）は、
+**`j` をこの形に直してから計算する**と避けられる。 -/
+theorem j_eq_inv_Delta_mul (W : WeierstrassCurve F) [W.IsElliptic] :
+    W.j = (W.Δ)⁻¹ * W.c₄ ^ 3 := by
+  rw [WeierstrassCurve.j, Units.val_inv_eq_inv_val, WeierstrassCurve.coe_Δ']
+
+/-- ★★**曲線が等しければ `j` も等しい**。
+
+☆`rw [h]` を `j` の上で直接やると motive が壊れるので、
+先に `j = Δ⁻¹c₄³` に直してから書き換える。 -/
+theorem j_congr_curve {W X : WeierstrassCurve F} [W.IsElliptic] [X.IsElliptic]
+    (h : W = X) : W.j = X.j := by
+  rw [j_eq_inv_Delta_mul, j_eq_inv_Delta_mul, h]
+
+/-- ★★★★★★**変数変換で等しい曲線は `j` が等しい**（等式の形で）。
+
+☆mathlib の `variableChange_j` は `(C • W).j = W.j` であるが、
+`h : C • W = X` から `W.j = X.j` を出すには `rw [← h]` が必要で、
+`X` が変数でないと motive が壊れる。
+★本補題は `j = Δ⁻¹c₄³` に直してから体の計算で済ませる。 -/
+theorem j_eq_of_smul_eq (C : WeierstrassCurve.VariableChange F) (W X : WeierstrassCurve F)
+    [W.IsElliptic] [X.IsElliptic] (h : C • W = X) : W.j = X.j := by
+  have hΔ : W.Δ ≠ 0 := W.isUnit_Δ.ne_zero
+  have hu : ((C.u⁻¹ : Fˣ) : F) ≠ 0 := (C.u⁻¹).ne_zero
+  rw [j_eq_inv_Delta_mul, j_eq_inv_Delta_mul, ← h,
+    WeierstrassCurve.variableChange_Δ, WeierstrassCurve.variableChange_c₄]
+  field_simp
+
+end JField
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def j_eq_of_smul_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(変数変換で等しい曲線は j が等しい——等式の形。★無条件)",
+    sectionId := "genell-lemma-3-2" }
 
 def j_eq_of_c4_c6_scale.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,

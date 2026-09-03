@@ -92,12 +92,49 @@ theorem addHom_padic_smul_of_torsion {A : Type u} [AddCommGroup A] {l : ℕ} [Fa
     rw [hs, map_nsmul, htor]
   rw [h1, h2, add_zero]
 
+/-- ★★★★★★★★**第 1 層の射影は位数ちょうど `l` の点を与える**——★**無条件**（第 1201）。
+
+原文 (GenEll p.19):
+> Then the image of the Galois representation Gal(Q[bb][bar]/L) → GL_2(Z[bb]_l) associated to
+
+☆`tateProj W l 1 f` は `l`-捩れなので、`≠ 0` なら位数はちょうど `l` である。
+
+★★★これが `HasLCyclicJ`（`T_l E` の側の言明）を
+`Lemma 3.5`・`Lemma 3.7` が要る `addOrderOf Q = l` へ運ぶ段である。
+☆`Gal` 同変性は上の `tateProj_galTate`（`n = 1`）が与える。 -/
+theorem addOrderOf_tateProj_one {K L : Type} [Field K] [DecidableEq K] [Field L] [DecidableEq L]
+    [Algebra K L] (W : WeierstrassCurve K) {l : ℕ} (hl : l.Prime)
+    (f : tateModule (W.baseChange L) l)
+    (h : ((tateProj (W.baseChange L) l 1 f : (W.baseChange L).toAffine.Point)) ≠ 0) :
+    addOrderOf ((tateProj (W.baseChange L) l 1 f : (W.baseChange L).toAffine.Point)) = l := by
+  have h0 : (l ^ 1) • ((tateProj (W.baseChange L) l 1 f :
+      (W.baseChange L).toAffine.Point)) = 0 := (tateProj (W.baseChange L) l 1 f).2
+  have hl0 : l • ((tateProj (W.baseChange L) l 1 f :
+      (W.baseChange L).toAffine.Point)) = 0 := by simpa using h0
+  have hdvd := addOrderOf_dvd_of_nsmul_eq_zero hl0
+  rcases hl.eq_one_or_self_of_dvd _ hdvd with h1 | h2
+  · exact absurd (AddMonoid.addOrderOf_eq_one_iff.mp h1) h
+  · exact h2
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def tateProj_galTate.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,
     item := "Theorem 3.8(l 進表現の行列式——射影が Galois 作用と可換であること)",
     sectionId := "genell-thm-3-8" }
+
+def addOrderOf_tateProj_one.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 19,
+    item := "Theorem 3.8(第 1 層の射影が 0 でなければ位数はちょうど l。★無条件)",
+    sectionId := "genell-thm-3-8" }
+
+def addOrderOf_tateProj_one.needs : List ABC3.Meta.ProofObligation :=
+  [ .implicitStep
+      ("★★★★**2026-09-02（第 1201）**——`HasLCyclicJ`（`T_l E` の `mod l` 還元の" ++
+       "中の `Gal`-安定な直線）を `Lemma 3.5`・`Lemma 3.7` が要る" ++
+       "**位数 `l` の点**へ運ぶ段である。" ++
+       "☆残るのは `tateProj … 1` の核が `l • T_l E` であること" ++
+       "（`T_l E / l ≅ E[l]`）で、これは `l •` が `E(L̄)` の上で全射であることを要る。") 3 ]
 
 def addHom_padic_smul_of_torsion.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 19,

@@ -231,6 +231,33 @@ theorem stable_of_mem_mu {K L : Type} [Field K] [Field L] [Algebra K L]
 ★★★★**その段は 2026-08-27 に `Lemma32Tate.lean` で閉じた**——
 本ファイルの条つき `.src` の限定は**本ファイルの範囲の話**であり、項目の残高ではない。 -/
 
+/-! ## ★★★★★★★★★★★★対偶——`l ∤ v(q)` なら安定直線は `μ_l` -/
+
+/-- ★★★★★★★★★★★★★★★★
+**`l ∤ v(q)` なら `Gal`-安定な直線は `μ_l` である**——★**無条件**（第 1184）。
+
+原文 (GenEll p.15):
+> Lemma 3.2. (Local Rank One Subgroups of l-Torsion)
+
+☆`lemma_3_2_i` の**対偶**である。安定な直線の生成元 `x` が `xˡ = Qᵏ` を満たすとき、
+`l ∤ v(q)` なら必ず `l ∣ k`——すなわち `x` は `Q` の冪を除いて `l` 乗根、
+つまり直線は `μ_l` である。
+
+★★★これが `Skeleton/GenEll/LCyclicReading.lean` の**節点 2d-1 の入口**である
+——安定直線の局所での姿が `μ_l` だと分かれば、既存の `_K` の連鎖が
+`L_v(ζ_l)` の上でそのまま走る。 -/
+theorem dvd_exponent_of_not_dvd_val {K L : Type} [Field K] [Field L] [Algebra K L]
+    [IsGalois K L] {l : ℕ} (hl : l.Prime) (q : Kˣ) (v : Kˣ →* Multiplicative ℤ)
+    (hqinf : ∀ j : ℤ, q ^ j = 1 → j = 0)
+    (x : Lˣ) (k : ℤ)
+    (hx : x ^ l = (Units.map (algebraMap K L : K →* L) q) ^ k)
+    (hstab : ∀ σ : L ≃ₐ[K] L, ∃ c n : ℤ, Units.map (σ : L →* L) x
+      = x ^ c * (Units.map (algebraMap K L : K →* L) q) ^ n)
+    (hnd : ¬ ((l : ℤ) ∣ vAdd v q)) :
+    (l : ℤ) ∣ k := by
+  by_contra hk
+  exact hnd (lemma_3_2_i hl q v hqinf x k hx hk hstab)
+
 def sigma_eq_of_stable.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (i)(安定性が π を K へ降ろす——核)",
@@ -240,6 +267,20 @@ def exists_root_of_stable.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Lemma 3.2, (i)(安定な π は K の元の l 乗根)",
     sectionId := "genell-lemma-3-2" }
+
+def dvd_exponent_of_not_dvd_val.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (i)(l ∤ v(q) なら安定直線は μ_l——対偶。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def dvd_exponent_of_not_dvd_val.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "lemma_3_2_i(第 410 ほか、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.lemma_3_2_i") 1,
+    .implicitStep
+      ("★★★★**2026-09-02（第 1184）**——`Skeleton/GenEll/LCyclicReading.lean` の" ++
+       "**節点 2d-1 の入口**である。☆安定直線の局所での姿が `μ_l` だと分かれば、" ++
+       "既存の `_K` の連鎖が `L_v(ζ_l)` の上でそのまま走る。" ++
+       "★そこで得た `Δ_min` の関係は第 1183 で `L_v` へ降りる。") 3 ]
 
 def lemma_3_2_i.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,

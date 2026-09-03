@@ -32158,3 +32158,476 @@ grep して **0 件**——円分体の分岐理論は mathlib に無い。
 | 2 | `0 ≤ v_p(j′)`（同種は良還元を保つ） | 同上 |
 | 3 | 局所理論の行列表示（`α` が mod `l` 像に） | `Theorem 3.8` |
 | 4 | `cyclotomic (l^n)` の `L` 上既約性 | `Corollary 4.3/4.4` |
+
+
+## 2026-09-02（第 1365-1392）—— **α 側の葉が閉じ、残る葉は 1 本＋2 件**
+
+### ★★★★★★★★到達点
+
+`EllModuliWitness` の証人チェーン（`theorem_3_8_witness`・`cor_4_3`・`cor_4_4`）は
+**すべて sorry 0** であり、残るのは下流の葉だけである。
+
+| 葉 | 状態 |
+|---|---|
+| `exists_h2_h1_unipotent`（α 側） | ★**閉じた**（第 1384） |
+| `semistableAt_veluQuotientFull` | 三つに割れ、二つ閉じた |
+
+### ✅ α 側（第 1365-1384）
+
+第 1354 で「mathlib に完備離散付値環の有限拡大の理論が無い」と記録したブロッカーを
+自前で建てて塞いだ。
+
+| 第 | 内容 |
+|---|---|
+| 1365-1366 | ★**完備 DVR の有限分離整閉包は DVR**（第 1357-1364 の 9 段の組み立て） |
+| 1367-1368 | `m_C`-進完備・`IsFractionRing C L` |
+| 1369 | 分岐指数 `e`（`1 <= e <= [L:K]`） |
+| 1370 | ★測定の鍵——`hp` が使われるのは `vAdd_algebraMap_eq_valAdd` の**ただ 1 箇所** |
+| 1371-1372 | `hcop` と `h2`/`h1` の分岐版（`exists_h2_h1_of_bad_prime_ram`） |
+| 1373-1375 | 付値の延長公式・`hpe`・拡大の上の局所データ |
+| 1376-1378 | `zeta_l` の構成（`Phi_l` の既約因子で `<= l-1` 次 ⟹ **`l ∤ e`**） |
+| 1379-1381 | 変数変換の輸送・`M`/`iota`/`zeta`/`z`/`e` の構成 |
+| 1382-1383 | 非分岐 2 次拡大の `e` 倍版・分裂性の二者択一 |
+| **1384** | ★**`SSCurve.exists_h2_h1_unipotent_of_multRed`（無条件）** |
+
+### ★残る葉 `semistableAt_veluQuotientFull` の三分割
+
+| 場合 | 状態 |
+|---|---|
+| 悪い素点（`p ∤ l`） | ★**閉じた**（第 1388）——第 1061 の配管を第 1327 に流した |
+| 良い素点（`p ∤ l`） | ★**恒等式 1 本**に落ちた（第 1385-1387、1390-1392） |
+| `p ∣ l` | ☆**良い素点だけ**に狭まった（第 1389） |
+
+★悪い素点で `p ∣ l` は起きない——`isUnit_natCast_of_split`（第 1042）が
+「`[L:Q] + 1 < l` なら `l` は単元」を与える（入口は Tate モデルの `zeta_l`）。
+
+### ★★★★★★★★★★★★残る 3 件（すべて新しい数学）
+
+#### (a) 格子曲線の上の判別式の恒等式（`disc_pow_eq_veluQuot_mul_lattice`）
+
+    Delta(E)^l = Delta(E/C) * ( prod_{P in C\{O}} (2 y_P + a1 x_P + a3) )^4
+
+* `l = 3, 5, 7` の 13 例で**厳密に成立**（`tools/velu-disc-check.py`）
+* 重みの検算 `12 + 12(l-1) = 12l` が合う
+* **核でない ±閉集合では偽**（比 `1/797121`）——自由な多項式恒等式ではない
+* 鎖は済んでいる: 数体（第 1390、埋め込みで降りる）← `C`（第 1392）← **格子曲線（残）**
+* 道具は在庫: `latticeCurve_eq_veluQuotientFull` が `g2`・`g3` の Vélu の式を与える。
+  `Delta = g2^3 - 27 g3^2` と `prod ℘'(w)` の関係を取ればよい。
+
+#### (b) `l` の上の良い素点（形式群）
+
+★良還元でも `E_1(K)`（還元で `O` に落ちる点）は `v(x) = -2k`・`v(y) = -3k` で整でない。
+`p ∣ l` では `E[l] ∩ E_1(K)` が非自明になりうるので第 1073 が使えない。
+☆だが恒等式はそれでも使える見通し: `v(N) = -3 * sum k_P` なので
+`v(Delta') = 12 * sum k_P`、12 で割れるから変数変換で `v(Delta) = 0` にできる。
+★これには形式群（捩れ点の付値）が要る——mathlib に無い（`formalGroupGap20260901`）。
+
+#### (c) §2 `Theorem 2.1` の逆向き
+
+★節点 1（`exists_belyi_noncritical_general`）は **`UP` が任意の集合なので偽**
+（`Check/GenEll/BelyiGeneralVacuous.lean` で機械検証、第 1389）。
+`phi` も単なる函数で射ではないので `[NCBelyi] Thm 2.5` の内容が写っていない。
+☆先に忠実な主張へ書き直すこと——`Found/NCBelyi/` の `P^1` 版（21 ファイル、sorry 0）が語彙を持つ。
+★一般曲線への帰着に Riemann-Roch が要る。
+
+### ★計器（`node tools/genell-progress.mjs`）
+
+`§1 9/9・§2 0/1・§3 8/9・§4 3/5 = 20/24`。
+★§3 の +1（`Theorem 3.8`）と §4 の +2（`Cor 4.3`・`Cor 4.4`）は**(a) と (b) が入れば同時に動く**
+——証人チェーンは既に sorry 0 で、葉が閉じれば `Found/` へ移せる。
+☆§2 の +1 は (c) が要る。
+
+
+---
+
+## ★★★★★★★★★★★★★★★★ 2026-09-02 の更新（第 1393-1404、全 12 ブロック）
+
+### ★(a) 判別式の恒等式は **閉じた**
+
+上の「残る 3 件」の (a) は終わった。
+`Skeleton/GenEll/VeluDiscIdentity.lean` は `sorry` 0 になり、
+`disc_pow_eq_veluQuot_mul`（数体版）も
+`semistableAt_veluQuot_good`（良い素点、`p ∤ l`）も**無条件**になった。
+
+☆上で「`Δ(Λ)` の積公式と `℘′` の関係を取ればよい」と書いた部分は、
+**σ 函数も q 展開も因子の理論も使わず**に次の 6 段で出た:
+
+| 段 | 内容 | 番 | ファイル |
+|---|---|---|---|
+| 1 | `Δ = 16·((e₁−e₂)(e₁−e₃)(e₂−e₃))²` | 1397 | `Found/GenEll/HalfPeriodDisc.lean` |
+| 2 | `∏_{i≠j}(℘(v_j+w) − e_i) = −D`（`w` に依らない） | 1398 | `Found/GenEll/HalfShiftProd.lean` |
+| 3 | 代表系の置換（平行移動・**負号**）、`R` は偶関数 | 1399 | `Found/GenEll/VeluProdPerm.lean` |
+| 4 | **同種のノルム**（Liouville） | 1400 | `Found/GenEll/VeluNorm.lean` |
+| 5 | 帳簿（`D^l = (c₁c₂c₃)²D′`・`N² = 4^{l−1}c₁c₂c₃`） | 1401 | `Found/GenEll/LatticeDiscPow.lean` |
+| 6 | 語彙の変換（`⟨Q⟩` の像へ） | 1402 | `Found/GenEll/VeluDiscLattice.lean` |
+
+★最も重い (4) の核心は「`R(0) = c` かつ `R` が偶 ⟹ `R′(0) = 0`
+⟹ `R − c` の解析的位数が `≥ 2`」で、これにより `F_i − c_i℘_{Λ′}` の極が打ち消し合う。
+☆Lean 特有の注意: `℘` は格子点でジャンク値 `0` を取るので差は格子点で連続にならない
+——`Λ′` の上で解析接続の値に置き換えた函数に Liouville を当てた。
+
+### ★良い素点（`p ∤ l`）も **閉じた**（第 1403）
+
+`Found/GenEll/VeluGoodPrime.lean` の `semistableAt_veluQuot_goodPrime`。
+仮定は `SemistableAt p E`・`0 ≤ jExp p E`・`l` 奇素数・`p ∤ l` だけ。
+
+### ☆悪い素点の配管（残）
+
+第 1404 で第 1327・第 1388 を**分岐版**に一般化した
+（`Found/GaloisRep/VeluSemistableBadRam.lean`）ので `L_p(ζ_l)` が使える。
+☆残るのは 2 つ:
+
+1. **分裂の二者択一**（非分裂乗法還元を二次拡大で分裂にする）
+   ——道具は第 1382 `Found/GaloisRep/RamifiedQuadExt.lean` にある。
+2. **`l ∣ v_p(q)` の場合**（核が `μ_l` 型でない）
+   ——商は `q^{1/l}` でやはり乗法還元だが、別の Tate の計算が要る。
+   ☆`hdag_of_stableLine` は `PrimeToLocalHeights l`（= `l ∤ jExp p`）を持っているので、
+   `VeluQuotOK` の側にそれを通せば (2) は避けられる可能性がある（拡大体 `M` での取り扱いが課題）。
+
+### ★(b) `p ∣ l` の見通しを改めた（重要）
+
+上の (b) で「`12 ∣ v(Δ′)` だから変数変換で `v(Δ) = 0` にできる」と書いたが、
+★**それでは足りない**。変数変換は `u` のスケールだけでは足りず、
+`a₁` の平行移動が要る（`v(a₁(E′)) ≥ (l−1)k` は一般に偽）。
+
+☆さらに、`VeluQuotOK` は `E.fld` の**任意の有限拡大 `M`** で半安定性を要求するので、
+「原文の条件 `[L:ℚ]+1 < l` から核に深い点は無い」という逃げ道も**使えない**
+（`M` が激しく分岐すれば `e = v_p(l)` はいくらでも大きくなる）。
+
+★★★恒等式から `v(Δ′_Vélu) = 12(l−1)k` が出るが、`v(j(E′)) ≥ 0`（良還元）と
+突き合わせると `c₄′ = c₄ + 240v` に `v(c₄′) ≥ 4(l−1)k` という大きな相殺が要る。
+その相殺はまさに形式群の現象である
+（`x_{jP} ≈ j^{−2}z^{−2}` なので `Σ_j j^{−4} ≡ 0 (mod l)` で主要項が消える）。
+★したがって **`p ∣ l` は形式群（または Néron モデル・有限平坦群スキーム）が本体**である。
+
+☆一方で、第 1393-1396 で**形式群なしに**次までは出た:
+
+* `12 ∣ v_p(Δ) − minDeltaExp`（どのモデルでも、第 1393）
+* **`3 ∣ v_p(N)`**（無条件、第 1396）——道具は
+  `Ψ₂Sq` と `Φ₂` の Bézout 恒等式（第 1394）と
+  「深い点は倍化で深さが変わらない」（第 1395）＋ Fermat の小定理
+
+### ★計器と残ブロック数の見積もり（2026-09-02 末）
+
+`§1 9/9・§2 0/1・§3 8/9・§4 3/5 = 20/24`（変わらず）。
+
+| 順 | 対象 | 効く先 | 残（推定） |
+|---|---|---|---|
+| 1 | 悪い素点の配管（分裂の二者択一、`l ∣ v(q)`） | §3 +1・§4 +2 | 3-6 |
+| 2 | `p ∣ l`（形式群） | 同上 | 8-15 |
+| 3 | §2 `Theorem 2.1` の逆向き | §2 +1 | 12-25 |
+
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★2026-09-02（続）——`hcop` が完全に落ち、`p ∤ l` が無条件になった（第 1410-1423）
+
+### ☆入口——`hcop` は底変換で保たれない（第 1408 の訂正）
+
+`VeluQuotOK` は `E.fld` の**任意の有限拡大 `M`** の素点で半安定性を要求し、
+底変換では `jExp P (E⊗M) = e(P∣p)·jExp p E` となるので、
+`l ∤ jExp p E`（＝`hcop`、`PrimeToLocalHeights`）は **`M` に降りない**。
+★したがって「悪い素点で `l ∣ v_P(q)` の場合」を正面から扱う必要があった。
+
+### ★★★★道——二者択一（`μ_l` 型か深い代表か）
+
+| 第 | 内容 |
+|---|---|
+| 1410 | `x^l = Q^k` の二者択一——`l ∣ k` なら `μ_l` 型、`l ∤ k` なら深い代表 `y` |
+| 1411 | 深い代表の道具立て（`normRep_vAdd_pos_of_not_dvd`・`veluV2_tateCurveAt_mem` ほか） |
+| 1412 | 深い核による Vélu の商 `= veluCurve (E_q) v w` と **`v ∈ 𝔪`**、`c₄ + 240v` は単元 |
+| 1413 | 深い側の強化——`∀ 0 < i < l, v(Q) ∤ i·v(y)`（核の非零点が**すべて**深い） |
+| 1414 | 原始根か深い代表かの二者択一（第 947 から `hcop` を外す） |
+| 1415 | 深い核でも Vélu の `w` は環の中で作れる（第 959-961 は核の形に依らない） |
+| 1416 | **`semistableAt_veluQuotient_bad_ram_free`**——局所で `hcop` なし |
+| 1417 | **`semistableAt_veluQuot_of_not_dvd_free`**——`p ∤ l` が**完全に無条件** |
+
+★★★要点は「**深い核では商が `E_{q′}` であることを示さなくてよい**」ことである。
+☆必要なのは `c₄(veluCurve) = c₄(E_q) + 240v` が単元であることだけで、
+それは `v = Σ v_Q ∈ 𝔪`（核の座標がすべて `𝔪` に入る）から出る。
+★これが `q^{1/l}` の Tate の計算（5-10 ブロックと見積もっていたもの）を**丸ごと回避**した。
+
+☆`μ_l` 型では逆に `c₄ + 240v = l⁴·c₄(E_{q^l})` が単元性を与える（第 1388 の `h4`）。
+★どちらの場合も `c₄′` が単元なので、`semistableAt_velu_of_veluCurve_eq_ram`（第 1404）に流し込める。
+
+### ★★★到達点
+
+`semistableAt_veluQuot_of_not_dvd_free`（`Found/GenEll/VeluNotDvdLFree.lean`）の仮定は
+
+* `SemistableAt p E`（もとの曲線が半安定）
+* `l` が奇素数、`p ∤ l`
+* `addOrderOf Q = l`
+
+**だけ**である。☆底変換で壊れる仮定を一つも使っていないので、
+`VeluQuotOK` にそのまま通せる。
+
+### ☆`p ∣ l` の内訳（第 1419-1423 の測定）
+
+`hlu`（`IsUnit (l : R)`）を実際に使っているのは 2 か所だけだった:
+
+1. `isIntegral_veluQuotientFull_of_addOrderOf_prime`（第 1074）——商の整性
+2. `exists_vw_tate_mu`（第 1003）——`μ_l` 側で `1 − ζ^i` が単元であること
+
+★**深い核の側では `hlu` を一度も使わない**。しかも座標が `𝔪` に入るので (1) も外せる:
+
+| 第 | 内容 |
+|---|---|
+| 1420 | `isIntegral_veluQuotientFull_of_pointCoords_mem`——(1) の `hlu` を仮説 `hmem` に置換 |
+| 1421 | `pointCoords_mem_primeSubring_of_image_mem`——Tate の座標が `R` なら核の座標は `p` で整 |
+| 1422 | `pointCoords_tatePhi_mem_maximal_of_deep`——深い核では Tate の座標が `𝔪` に入る |
+
+☆この 3 枚で **`p ∣ l` でも深い核なら商の整性が出る**。残る配管は 2-4 ブロック。
+
+★★★**残るのは `p ∣ l` の `μ_l` 側だけ**である。そこでは
+`E′ ⊗ L_v ≅ E_{q^l}` が `L_v` の上で言えるが（`c₄(veluCurve) = l⁴·c₄(E_{q^l})`、第 1129-1138、
+すべて `hlu` なし）、`SemistableAt p E′` が要求するのは
+**`L` の上の変数変換 `C′`** で `C′ • E′` が `p` 整かつ `v_p(c₄) = 0` になるものである。
+☆`u = l` を取れば `v_p(c₄) = 0` になるが、`r, s, t ∈ L` を選んで整性を保つ必要がある。
+
+★穴の正体は次のどちらか（`blocked-leaves.json` の `pDivLMuGapNamed2026_09_02`）:
+
+* （A）**Kraus / Laska-Kraus-Connell**——mathlib にない（2026-09-02 確認）。剰余標数は `l`。
+* （B）**弱近似**——`L` は `L_p` で稠密。`locCycField`（`p ∣ l` で分岐）を使わない形への組み直しが前提。
+
+### ★計器と残ブロック数の見積もり（2026-09-02 末、第 1423 時点）
+
+`§1 9/9・§2 0/1・§3 8/9・§4 3/5 = 20/24`（変わらず）。
+
+| 順 | 対象 | 効く先 | 残（推定） |
+|---|---|---|---|
+| 1 | `p ∣ l` の深い核の配管 | §3 +1・§4 +2 | 2-4 |
+| 2 | `p ∣ l` の `μ_l` 側（Kraus か弱近似） | 同上 | 6-15 |
+| 3 | インタフェース（`VeluQuotOK` の組み立て） | 同上 | 2-4 |
+| 4 | §2 `Theorem 2.1` の逆向き | §2 +1 | 12-25 |
+
+☆前回（第 1409 時点）の見積もり「悪い素点の配管 3-6 ＋ `p ∣ l` 8-15」のうち、
+**悪い素点の配管は 0 になった**（`hcop` ごと消えた）。
+
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★2026-09-02（続 2）——悪い素点は `p ∣ l` でも閉じた（第 1424-1429）
+
+### ☆`p ∣ l` の内訳（第 1419 の測定）
+
+`hlu`（`IsUnit (l : R)`、すなわち `p ∤ l`）を実際に使っているのは 2 か所だけだった:
+
+1. `isIntegral_veluQuotientFull_of_addOrderOf_prime`（第 1074）——商の整性
+2. `exists_vw_tate_mu`（第 1003）——`μ_l` 側で `1 − ζ^i` が単元であること
+
+### ★★★深い核の側——`hlu` は一度も要らない（第 1420-1422、1424）
+
+| 第 | 内容 |
+|---|---|
+| 1420 | `isIntegral_veluQuotientFull_of_pointCoords_mem`——(1) の `hlu` を仮説 `hmem` に置換 |
+| 1421 | `pointCoords_mem_primeSubring_of_image_mem`——Tate の座標が `R` なら核の座標は `p` で整 |
+| 1422 | `pointCoords_tatePhi_mem_maximal_of_deep`——深い核では Tate の座標が `𝔪` に入る |
+| 1424 | `semistableAt_veluQuotient_bad_deepOrMu`——「半安定か、核が `μ_l` 型か」 |
+
+### ★★★★★`μ_l` の側——**Kraus も弱近似も要らなかった**（第 1425-1427）
+
+`blocked-leaves.json` の `pDivLMuGapNamed2026_09_02` では
+「Kraus / Laska-Kraus-Connell か弱近似が要る」と見立てていたが、
+★鍵は mathlib の **`WeierstrassCurve.toShortNF`**（`2, 3` が単元なら短 Weierstrass 形へ）だった:
+
+1. `toShortNF` は **`u = 1`** なので `c₄`・`c₆` を変えず、
+   `a₄ = −c₄/48`・`a₆ = −c₆/864` にする
+2. そこを `u = n` で割ると `a₄ = −c₄/(48n⁴)`・`a₆ = −c₆/(864n⁶)`——
+   `v(c₄) = 4v(n)`・`v(c₆) = 6v(n)`・`v(48) = v(864) = 0` から**係数の付値がちょうど `0`**
+3. すなわち `p` 上整で `v_p(c₄) = 0`——第 1322 がそのまま効く
+
+☆`r, s, t` は `toShortNF` が全部作ってくれるので、`L` の稠密性（弱近似）は要らない。
+
+| 第 | 内容 |
+|---|---|
+| 1425 | `semistableAt_of_valAdd_c4_c6_scaled`——`v(c₄) = 4v(n)`・`v(c₆) = 6v(n)`・`p ∤ 6` なら半安定 |
+| 1426 | `c₆(E_q)` の単元性・`c₆` の変数変換の付値・`Lv` から `p` へ `e` で割る橋 |
+| 1427 | `semistableAt_veluQuotient_bad_mu`——`μ_l` 型でも `p ∣ l` で半安定 |
+| 1428 | `semistableAt_veluQuot_multRed_local_all`——**分裂性も `p ∤ l` も仮定しない** |
+
+### ★★★到達点
+
+`semistableAt_veluQuot_multRed_local_all`（`Found/GenEll/VeluBadPrimeAll.lean`）の
+残る条件は **`p ∤ 6`**（`h48`・`h864`）だけである。
+☆`p ∣ l` の場合それは `l ≥ 5` を意味する。
+
+### ☆残り 3 つ
+
+| # | 内容 | 状態 |
+|---|---|---|
+| (a) | **良い素点で `p ∣ l`** | ★形式群の本体。`v(Δ(E′)) = 12S` は恒等式から出るが、`v(c₄(E′)) ≥ 4S`・`v(c₆(E′)) ≥ 6S` が要る |
+| (b) | **`l = 3` かつ `p ∣ 3`** | ☆剰余標数 3 では短 Weierstrass 形が使えない |
+| (c) | **インタフェース** | ☆(a)(b) が閉じれば `VeluQuotOK` は仮定なしで出る（2-4 ブロック） |
+
+★(a) について: **`jExp p E′ ≥ 0` さえ言えれば閉じる**——
+`3v(c₄) ≥ v(Δ) = 12S` から `v(c₄) ≥ 4S`、
+`c₄³ − c₆² = 1728Δ` から `v(c₆) ≥ 6S` が出て、
+第 1425 の不等式版（`n = π^S`）で `minDeltaExp = 0` になる。
+☆`j(E′)` の整性は古典的にはモジュラー多項式 `Φ_l(j, j′) = 0` の単項性から出る
+（mathlib にはない）。
+
+### ★計器と残ブロック数の見積もり（2026-09-02 末、第 1429 時点）
+
+`§1 9/9・§2 0/1・§3 8/9・§4 3/5 = 20/24`（変わらず）。
+
+| 順 | 対象 | 効く先 | 残（推定） |
+|---|---|---|---|
+| 1 | 良い素点で `p ∣ l`（`jExp p E′ ≥ 0` に帰着させる） | §3 +1・§4 +2 | 4-10 |
+| 2 | `l = 3` かつ `p ∣ 3` | 同上 | 2-6 |
+| 3 | インタフェース（`VeluQuotOK` の組み立て） | 同上 | 2-4 |
+| 4 | §2 `Theorem 2.1` の逆向き | §2 +1 | 12-25 |
+
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★2026-09-02（続 3）——半安定性が仮定 1 本になった（第 1430-1436）
+
+### ★良い素点の `p ∣ l` を 2 通りに帰着させた
+
+| 第 | 内容 |
+|---|---|
+| 1430 | `minDeltaExp_eq_zero_of_short_integral`——第 1425 の**不等式版**（短 Weierstrass 形） |
+| 1431 | `minDeltaExp_eq_zero_of_jExp_nonneg`——**`jExp p E′ ≥ 0` から**（`j` の整性） |
+| 1432 | `semistableAt_veluQuot_good_of_mem`——第 1387 の `hlu` を**核の座標の整性**に置換 |
+
+☆(1431) の道: `j = c₄³/Δ` で `0 ≤ jExp = 3v(c₄) − 12S ⟹ v(c₄) ≥ 4S`、
+`1728Δ = c₄³ − c₆²` で `v(c₆²) ≥ 12S ⟹ v(c₆) ≥ 6S`。
+
+### ★★★界面は `5 ≤ l` しか要らない（第 1434 の測定）
+
+`Check/GenEll/VeluQuotOKNeedsL5.lean` に機械検査つきで記録した。
+`Theorem 3.8` が `lemma_3_7` を呼ぶ場面では
+
+* 枝 (a): `23040·100·d·(ht^Falt + C·d^ε) ≤ l` から **`l ≥ 100`**
+* 枝 (b): `Nat.Coprime l 30` から **`l ≥ 7`**
+
+★第 776（`ImageSL2NeedsL5`）と**同じ形**の測定である。
+☆したがって `l = 2` と `l = 3` の穴は**界面の側で消える**。
+
+### ★★★★★★★★組み立て（第 1435-1436）
+
+* 第 1435 `valAdd_48_eq_zero` ほか——`p ∣ l`・`l ≥ 5` から **`p ∤ 6`**（Bézout 1 本）
+* 第 1436 `semistableAt_veluQuot_all_of_goodMem`——**組み立て**
+
+| 場合 | 使うもの | 状態 |
+|---|---|---|
+| `p ∤ l` | 第 1417 | ★**無条件** |
+| `p ∣ l`・悪い素点 | 第 1428 | ★**無条件** |
+| `p ∣ l`・良い素点 | 第 1432 | ☆核の座標の整性 |
+
+★★★`semistableAt_veluQuot_all_of_goodMem` の仮定は
+
+1. `SemistableAt p E`
+2. `l` が素数で `5 ≤ l`
+3. `addOrderOf Q = l`
+4. ★☆**`p ∣ l` かつ良い素点のときだけ**、極小モデルの上で核の座標が `p` で整
+
+の 4 つだけである。☆(4) が形式群（`Ê(𝔪)[l] ∩ ⟨Q⟩ = 0`——局所体の分岐が
+`e ≥ l−1` のときにしか破れない）であり、第 1431 で
+**`jExp p E′ ≥ 0`**（`j` の整性、古典的にはモジュラー多項式）にも帰着させてある。
+
+### ★計器と残ブロック数の見積もり（2026-09-02 末、第 1436 時点）
+
+`§1 9/9・§2 0/1・§3 8/9・§4 3/5 = 20/24`（変わらず）。
+
+| 順 | 対象 | 効く先 | 残（推定） |
+|---|---|---|---|
+| 1 | 界面の narrowing（`mem_lcyclicExc`・`lemma_3_7` に `5 ≤ l`） | §3 +1・§4 +2 | 2-4 |
+| 2 | 形式群の `l`-捩れ（`Ê(𝔪)[l]`）または `j` の整性（モジュラー多項式） | 同上 | 10-25 |
+| 3 | `VeluQuotOK` の組み立て | 同上 | 2-4 |
+| 4 | §2 `Theorem 2.1` の逆向き | §2 +1 | 12-25 |
+
+☆本日 1 日で「悪い素点の配管 3-6 ＋ `p ∣ l` 8-15」（第 1409 の見積もり）は
+**すべて消えた**——残るのは形式群 1 本と界面の配管である。
+
+## ★★★★★★★★★★★★★★★★2026-09-02（続 4）——§3・§4 の残りは `sorry` 2 本だけ（第 1437 の測定）
+
+界面を `5 ≤ l` に絞り（第 1437）、`Skeleton/GenEll/VeluSemistable.lean` の節点を
+第 1436 に繋いだあと、**GenEll の Skeleton/Found 全体に残る `sorry` を数えた**:
+
+| # | 場所 | 内容 | 効く先 |
+|---|---|---|---|
+| 1 | `Skeleton/GenEll/VeluSemistable.lean:245` | ★**形式群**——`p ∣ l` かつ良い素点で核の座標が `p` で整（`Ê(𝔪)[l] ∩ ⟨Q⟩ = 0`） | §3・§4 |
+| 2 | `Skeleton/GenEll/GaloisLocal.lean:70` | ★**`alpha_in_modl_image`**——乗法還元の素点で `α = (1 1 / 0 1)` が mod `l` 像に入る | §3・§4 |
+| 3 | `Skeleton/GenEll/Section2Converse.lean:108, 278` | ☆§2 `Theorem 2.1` の逆向き | §2 |
+| 4 | `Skeleton/GenEll/SigmaConvolution.lean:110` | ☆`sigma_one_convolution`（ラマヌジャンの畳み込み）——**消費側が無い**（死んだ葉） | なし |
+
+★★★**`EllModuliWitness.lean` には実 `sorry` が 1 つも無く、`GaloisImage.lean` の
+`theorem_3_8` も sorry 0** である。☆したがって §3 `Theorem 3.8` と §4 の 2 本は
+**上の #1 と #2 の 2 本だけ**に依っている。
+
+☆#4 は消費側が無いので、閉じても計器は動かない（記録のみ）。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★2026-09-02（続 5）——**ゴールの計器が 24/24 になった**（第 1442-1446）
+
+| 節 | 前 | 後 |
+|---|---|---|
+| §1 | 9/9 | 9/9 |
+| §2 | **0/1** | ★**1/1** |
+| §3 | **8/9** | ★**9/9** |
+| §4 | **3/5** | ★**5/5** |
+| 合計 | **20/24 (83%)** | ★★**24/24 (100%)** |
+
+### ★何をしたか——5 ブロック
+
+**第 1442・1443（§2 の `Skeleton` から `sorry` が消えた）**
+
+`Skeleton/GenEll/Section2Converse.lean` に残っていた `sorry` 2 本は、
+どちらも**主張そのものが偽**であった。
+
+* 節点 1: `(UP : Set P1) : ∃ φ, ∀ v, ∀ x ∈ Xi v, φ x ∈ UP`
+  —— `UP = ∅` かつ `Ξ_v ≠ ∅` で偽（`Check/GenEll/BelyiGeneralVacuous.lean` が機械検証）。
+  ★構造体 `NoncriticalBelyiData`（欄 `C`・`IsMor`・`Crit`・`exists_belyi`）へ内容を移した。
+* 節点 8: `(KV : Set Pt)` が任意なので `KV = ∅` で偽。
+  ★原文の (ii) どおり「compactly bounded subset **すべて**について」に直し、
+  段 B の幾何を `hcover` で受けたところ、**組み立ては完全に証明できた**。
+
+**第 1444・1445（場所を規約どおりに直した）**
+
+`Corollary 4.3` / `Corollary 4.4` / `Theorem 3.8` の証明は既に `sorry` 0 であったが、
+本体が `Skeleton/` に置かれたままであった。
+☆規約は `Skeleton/` = 原典の主張を写す場所、`Found/` = `sorry` の無い実装であり、
+`Lemma 4.1` / `Lemma 4.2` は既にその形（`Skeleton` は写して `Found` へ委譲）になっている。
+★同じ形に揃えた——**証明の中身は 1 文字も変えていない**
+（`#print axioms` は前後どちらでも `[propext, Classical.choice, Quot.sound]`）。
+
+* `Found/GenEll/Section4Cor.lean`（第 1444）—— `cor_4_3` / `cor_4_4`
+* `Found/GenEll/Thm38Assembly.lean`（第 1445）—— `theorem_3_8`
+
+**第 1446（`Theorem 2.1` の同値を両向きとも取った）**
+
+`Skeleton/GenEll/Section2.lean` の `theorem_2_1` は `(i) ⟹ (ii)` だけで、
+「実質は `(ii) ⟹ (i)` の側であり、それは取れていない」と明記してあった。
+★段 B の幾何を欄 1 本に絞った:
+
+    Interface/GenEll/Thm21Setup.lean —— Thm21Data.cover
+      「X(ℚ̄)^{≤d} の中の列は、部分列を取れば
+        ある compactly bounded subset に丸ごと入る」
+
+これを仮定すれば `(ii) ⟹ (i)` は背理法 10 行である
+（`Found/GenEll/Thm21Equiv.lean`、`sorry` 0）。
+
+☆`cover` は仮定なので強く取れば定理が弱くなる。そこで
+（a）「どんな列にも」ではなく `degLe`（= `X(ℚ̄)^{≤d}`）の中の列に対してだけ要求し、
+（b）結論は列そのものではなく**部分列**にした
+——どちらも原文の強さである。
+
+### ★★★★計器が 100% になっても「証明が終わった」ではない
+
+★★★★★★★★**これははっきり書いておく。**
+24 件のうち `Theorem 2.1` / `Theorem 3.8` / `Corollary 4.3` / `Corollary 4.4` の 4 件は、
+**`Interface` の欄を仮定した形**である。
+
+| 欄 | 場所 | 埋めるのに要るもの |
+|---|---|---|
+| `Thm21Data.cover` | `Interface/GenEll/Thm21Setup.lean` | noncritical Belyi 写像（一般曲線版、Riemann–Roch） |
+| `EllModuliData` の欄 | `Interface/GenEll/EllModuli.lean` | 下の `sorry` 2 本（`EllModuliWitness.lean` が埋める） |
+
+☆`Skeleton/GenEll/` に残る `sorry` は **3 本**である:
+
+| # | 場所 | 内容 | 効く先 |
+|---|---|---|---|
+| 1 | `VeluSemistable.lean:250` | ★**`j(E′)` の整性**——`p ∣ l` かつ良い素点で `0 ≤ jExp p E′`（モジュラー多項式が mathlib に無い） | §3・§4 |
+| 2 | `GaloisLocal.lean:70` | ★**`alpha_in_modl_image`**——Tate 加群の Galois 像（15-30 ブロック） | §3・§4 |
+| 3 | `SigmaConvolution.lean:110` | ☆ラマヌジャンの畳み込み——**消費側が無い**（死んだ葉） | なし |
+
+★★★★**したがって次の仕事は上の 3 つの欄／`sorry` である**——
+計器が動かなくなっただけで、道はそのまま続いている。
+☆それぞれの機械検証つきの記録:
+`Check/GenEll/Thm21Witness.lean`（`thm21_cover_still_open` と両向きの非空虚性）、
+`ResearchPaper/mathlib-gap.json` の `modularPolynomialGap20260902` /
+`tateModuleGaloisImageGap20260902`。

@@ -998,9 +998,19 @@ open scoped Classical in
 
 ★☆第 686（変数変換）と合わせて、`L` 上の位数 `l` の点が
 各 `σ` で `latticeCurve (P σ)` の位数 `l` の点に対応する。 -/
-theorem addOrderOf_rhPoint (f : F →+* K) (W : WeierstrassCurve F)
+theorem addOrderOf_rhPoint [instF : DecidableEq F] [instK : DecidableEq K]
+    (f : F →+* K) (W : WeierstrassCurve F)
     [W.IsElliptic] [(W.map f).IsElliptic] (Pt : W.toAffine.Point) :
     addOrderOf (rhPoint f W Pt) = addOrderOf Pt := by
+  -- ★`Decidable` のインスタンスを古典的なものに揃える（配管）
+  have hF : instF = fun a b => Classical.propDecidable (a = b) := by
+    funext a b
+    exact Subsingleton.elim _ _
+  have hK : instK = fun a b => Classical.propDecidable (a = b) := by
+    funext a b
+    exact Subsingleton.elim _ _
+  subst hF
+  subst hK
   refine Nat.dvd_antisymm ?_ ?_
   · refine addOrderOf_dvd_of_nsmul_eq_zero ?_
     rw [← rhPoint_nsmul, addOrderOf_nsmul_eq_zero, rhPoint_zero]
@@ -1098,11 +1108,30 @@ section Transport
 variable {F : Type*} [Field F]
 
 open scoped Classical in
+/-- ★★★★★★★★**`addOrderOf` は `DecidableEq` のインスタンスに依らない**（第 1347）。
+
+★★☆`Decidable` は部分単一型なので 2 つのインスタンスは**等しく**、`subst` できる。
+☆具体の体（`↥K`）では `Subtype.instDecidableEq` が、変数の体では
+`Classical.propDecidable` が合成されるので、両者を繋ぐ橋がどうしても要る。 -/
+theorem addOrderOf_point_congr_dec {F : Type} [fi : Field F] {W : WeierstrassCurve F}
+    (i₁ i₂ : DecidableEq F) (P : W.toAffine.Point) :
+    @addOrderOf W.toAffine.Point
+        (@SubNegMonoid.toAddMonoid _ (@AddGroup.toSubNegMonoid _
+          (@AddCommGroup.toAddGroup _
+            (@WeierstrassCurve.Affine.Point.instAddCommGroup F fi W.toAffine i₁)))) P
+      = @addOrderOf W.toAffine.Point
+        (@SubNegMonoid.toAddMonoid _ (@AddGroup.toSubNegMonoid _
+          (@AddCommGroup.toAddGroup _
+            (@WeierstrassCurve.Affine.Point.instAddCommGroup F fi W.toAffine i₂)))) P := by
+  have hi : i₁ = i₂ := Subsingleton.elim _ _
+  subst hi
+  rfl
+
 /-- ★★★★★★★★**曲線が等しければ点の位数は輸送される**。
 
 ★`C σ • (E.map σ) = latticeCurve (P σ)` のような等式を挟むときに要る。
 ☆`subst` で片づく——`addOrderOf` は曲線の値に依らない。 -/
-theorem addOrderOf_congr_curve {W₁ W₂ : WeierstrassCurve F} (h : W₁ = W₂)
+theorem addOrderOf_congr_curve [DecidableEq F] {W₁ W₂ : WeierstrassCurve F} (h : W₁ = W₂)
     (Q : W₁.toAffine.Point) :
     addOrderOf (h ▸ Q : W₂.toAffine.Point) = addOrderOf Q := by
   subst h
@@ -1124,6 +1153,11 @@ theorem nsmul_congr_curve {W₁ W₂ : WeierstrassCurve F} (h : W₁ = W₂)
   rfl
 
 end Transport
+
+def addOrderOf_point_congr_dec.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(addOrderOf は DecidableEq のインスタンスに依らない。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def addOrderOf_congr_curve.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,

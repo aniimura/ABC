@@ -10,6 +10,7 @@ import ABC3.Found.GaloisRep.ResChar
 import ABC3.Found.GaloisRep.ThetaDiscr
 import ABC3.Found.GaloisRep.NorthcottHtJ
 import ABC3.Found.GenEll.Velu
+import ABC3.Found.GenEll.PointVariableChange
 import ABC3.Meta.Claim
 
 /-!
@@ -616,6 +617,17 @@ end DegCurve
 ☆原文の Galois-finite（有限個の Galois 軌道の合併）はこれより**強い**——逸脱として記録する。 -/
 def GaloisFiniteJ (S : Set ℂ) : Prop := ∀ d : ℕ, (S ∩ degLeJ d).Finite
 
+/-- ★★★**`GaloisFinite` は部分集合で閉じる**——★**無条件**（第 1238）。
+
+☆`GaloisFiniteJ S = ∀ d, (S ∩ degLeJ d).Finite` なので、
+`S ⊆ T` なら `S ∩ degLeJ d ⊆ T ∩ degLeJ d` で `Set.Finite.subset` が効く。
+
+★★これが `EllModuliWitness` の `lcyclicExc` の有限性を
+`Lemma 3.7` の `Exc`（第 1226）から出すのに要る。 -/
+theorem galoisFiniteJ_subset {S T : Set ℂ} (hST : S ⊆ T) (hT : GaloisFiniteJ T) :
+    GaloisFiniteJ S :=
+  fun d => (hT d).subset (Set.inter_subset_inter_left _ hST)
+
 /-- ★★**`galoisFinite_union` 欄**。 -/
 theorem galoisFiniteJ_union (S T : Set ℂ) (hS : GaloisFiniteJ S) (hT : GaloisFiniteJ T) :
     GaloisFiniteJ (S ∪ T) := by
@@ -964,20 +976,34 @@ noncomputable def quotSSCurve (E : SSCurve) (S : Finset (E.fld × E.fld))
 @[simp] theorem quotSSCurve_fld (E : SSCurve) (S : Finset (E.fld × E.fld)) (hell) (hss) :
     (quotSSCurve E S hell hss).fld = E.fld := rfl
 
+open scoped Classical in
 /-- ★★★★★**`y` は `x` の `l`-巡回部分群による Vélu の商の類である**。
 
 原文 (GenEll p.17):
 > Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
 
-★`S` は `H∖{O}` の座標の集合であり、`|S| + 1 = l` が「位数 `l` の巡回群」の内容である。
-☆`S` が実際に部分群の座標集合であることは、ここでは要求していない
-——`degInf_quotLCyclic` 欄がそれを要求する側である。 -/
+★★★**2026-09-02（第 1344）の締め直し**——商を作る曲線を
+**同じ類の任意の `SSCurve` `E`（`E.j = x.cls`）**にした。
+☆`HasLCyclicJ` の生成元は `L` には無く、`L(H)`（次数は `l−1` を割る）で初めて
+有理になるからである（第 1343 の `SSCurve.ext`）。
+★`PrimeToLocalHeights` もデータに含める——`deg∞` の不等式に要るが、
+`choose` で取った `E` については外から渡せないからである。
+
+★★★**2026-09-02（第 1339）の締め直し**——かつては任意の座標集合 `S`
+（`|S| + 1 = l` だけ）であったが、それでは**生成元 `Q` が取り出せず**
+同種写像の高さ評価（第 1338）を当てられなかった。
+☆本定義は**位数 `l` の点 `Q` を持ち歩く**形である
+（`|S| + 1 = l` は `card_image_pointCoords_nsmul` が導く）。 -/
 def IsQuotClassJ (x : RealizedClass) (l : ℕ) (y : ℂ) : Prop :=
-  ∃ (S : Finset (x.rep.toSSCurve.fld × x.rep.toSSCurve.fld))
-    (hell : (veluQuotientFull x.rep.toSSCurve.W S).IsElliptic)
-    (hss : ∀ p : HeightOneSpectrum (𝓞 x.rep.toSSCurve.fld),
-      SemistableAt p (veluQuotientFull x.rep.toSSCurve.W S)),
-    S.card + 1 = l ∧ (quotSSCurve x.rep.toSSCurve S hell hss).j = y
+  ∃ (E : SSCurve) (_hEj : E.j = x.cls) (_hEpr : E.PrimeToLocalHeights l)
+    (Q : E.W.toAffine.Point) (_hQ : addOrderOf Q = l)
+    (hell : (veluQuotientFull E.W
+      (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))).IsElliptic)
+    (hss : ∀ p : HeightOneSpectrum (𝓞 E.fld),
+      SemistableAt p (veluQuotientFull E.W
+        (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))))),
+    (quotSSCurve E
+      (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))) hell hss).j = y
 
 open scoped Classical in
 /-- ★★★★★**`quotLCyclic` 欄**——商の類（無ければ自分自身）。 -/
@@ -1100,6 +1126,11 @@ def RealizedClass.needs : List ABC3.Meta.ProofObligation :=
        "対しては破れる。そこで Curve を実現される類とし、各類に定義体の次数が" ++
        "最小の代表元を取る——原文 Corollary 4.3 の仮説" ++
        "『L is a minimal field of definition of the point [E_L]』そのものである") 4 ]
+
+def galoisFiniteJ_subset.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 18,
+    item := "Lemma 3.7(GaloisFinite は部分集合で閉じる。★無条件)",
+    sectionId := "genell-lemma-3-7" }
 
 def GaloisFiniteJ.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 18,

@@ -73,16 +73,18 @@ open ABC3.Interface.GenEll
 
 ★`l` の下界（条件 (a)）または `cls E ∈ K_V`（条件 (b)）が**仮説に入っている**。
 ☆これが無いと `l = 2` で反例が出る（上の docstring）。 -/
-theorem lcyclic_classes_finite (D : EllModuliData) (C eps : ℝ) (KV : Set D.EllClass)
-    (hKV : D.CompactlyBounded KV) :
+theorem lcyclic_classes_finite (D : EllModuliData) (eps : ℝ) (heps : 0 < eps)
+    (KV : Set D.EllClass) (hKV : D.CompactlyBounded KV) :
+    ∃ C₀ : ℝ, ∀ C : ℝ, C₀ ≤ C →
     ∃ S : Set D.EllClass, D.GaloisFinite S ∧
-      ∀ (E : D.Curve) (l : ℕ), Nat.Prime l → D.SemiStable E →
+      ∀ (E : D.Curve) (l : ℕ), Nat.Prime l → 5 ≤ l → D.SemiStable E →
         D.HasLCyclic E l → D.PrimeToLocalHeights E l →
-        ((100 * (D.degOfDefinition E : ℝ)
-            * (D.faltingsHeight (D.cls E) + C * (D.degOfDefinition E : ℝ) ^ eps) ≤ (l : ℝ))
+        (((100 * (D.degOfDefinition E : ℝ)
+              * (D.faltingsHeight (D.cls E) + C * (D.degOfDefinition E : ℝ) ^ eps) ≤ (l : ℝ))
+            ∧ D.HasMultRed E)
           ∨ D.cls E ∈ KV) →
         D.cls E ∈ S :=
-  ⟨D.lcyclicExc C eps KV, D.galoisFinite_lcyclicExc C eps KV hKV,
-    D.mem_lcyclicExc C eps KV⟩
+  let ⟨C₀, hC₀⟩ := D.galoisFinite_lcyclicExc eps heps KV hKV
+  ⟨C₀, fun C hC => ⟨D.lcyclicExc C eps KV, hC₀ C hC, D.mem_lcyclicExc C eps KV⟩⟩
 
 end ABC3.Check.GenEll

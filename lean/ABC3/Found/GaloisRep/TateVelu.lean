@@ -147,14 +147,74 @@ theorem j_velu_tate_eq {R : Type} [CommRing R] [IsDomain R] [CharZero R] {I : Id
     [(veluCurve (tateCurveAt q hq) v w).IsElliptic] [(tateCurveAt (q ^ l) hql).IsElliptic]
     (h4 : (tateCurveAt q hq).c₄ + 240 * v = (l : R) ^ 4 * (tateCurveAt (q ^ l) hql).c₄)
     (h6 : (tateCurveAt q hq).c₆ + 504 * v + 6048 * w
-      = -((l : R) ^ 6) * (tateCurveAt (q ^ l) hql).c₆) :
+      = (l : R) ^ 6 * (tateCurveAt (q ^ l) hql).c₆) :
     (veluCurve (tateCurveAt q hq) v w).j = (tateCurveAt (q ^ l) hql).j := by
-  refine ABC3.Found.GenEll.j_eq_of_c4_c6_scale _ _ ((l : R)) ?_ ?_
+  refine ABC3.Found.GenEll.j_eq_of_c4_c6_scale_pos _ _ ((l : R)) ?_ ?_
   · rw [veluCurve_c₄]
     exact h4
   · rw [veluCurve_c₆, tateCurveAt_b₂]
     rw [mul_one]
     exact h6
+
+/-- ★★★★★★★★★★**`K` に基底変換した形**の `j_velu_tate_eq`。
+
+★★★★**2026-08-31 の測定（第 881）**——`j_velu_tate_eq` は `R` の上の曲線に
+`[IsElliptic]` を仮定しているが、Tate 曲線は `Δ = q·(単元)` なので
+**`R` の上では `IsElliptic` ではない**——つまりその形は空虚である。
+★正しくは**分数体 `K` に落としてから** `j` を取る。 -/
+theorem j_velu_tate_eq_map {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
+    [IsAdicComplete I R] {K : Type} [Field K] [CharZero K] [Algebra R K]
+    (q : R) (hq : q ∈ I) (l : ℕ) (hql : q ^ l ∈ I) (v w : R)
+    [((veluCurve (tateCurveAt q hq) v w).map (algebraMap R K)).IsElliptic]
+    [((tateCurveAt (q ^ l) hql).map (algebraMap R K)).IsElliptic]
+    (h4 : (tateCurveAt q hq).c₄ + 240 * v = (l : R) ^ 4 * (tateCurveAt (q ^ l) hql).c₄)
+    (h6 : (tateCurveAt q hq).c₆ + 504 * v + 6048 * w
+      = (l : R) ^ 6 * (tateCurveAt (q ^ l) hql).c₆) :
+    ((veluCurve (tateCurveAt q hq) v w).map (algebraMap R K)).j
+      = ((tateCurveAt (q ^ l) hql).map (algebraMap R K)).j := by
+  refine ABC3.Found.GenEll.j_eq_of_c4_c6_scale_pos _ _ ((l : K)) ?_ ?_
+  · rw [WeierstrassCurve.map_c₄, WeierstrassCurve.map_c₄, veluCurve_c₄]
+    have h := congrArg (algebraMap R K) h4
+    rw [map_add, map_mul, map_mul, map_pow, map_natCast, map_ofNat] at h
+    rw [map_add, map_mul, map_ofNat]
+    exact h
+  · rw [WeierstrassCurve.map_c₆, WeierstrassCurve.map_c₆, veluCurve_c₆, tateCurveAt_b₂,
+      mul_one]
+    have h := congrArg (algebraMap R K) h6
+    rw [map_add, map_add, map_mul, map_mul, map_mul, map_pow, map_natCast,
+      map_ofNat, map_ofNat] at h
+    rw [map_add, map_add, map_mul, map_mul, map_ofNat, map_ofNat]
+    exact h
+
+def c₄_tateCurveAt_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(E_q の c₄ = 1 + 240·σ₃(q)。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def c₆_tateCurveAt_eq.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(E_q の c₆ = −1 + 504·σ₅(q)。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def c₄_tateCurveAt.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(Tate 曲線の c₄ = 1 − 48·a₄。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def c₆_tateCurveAt.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(Tate 曲線の c₆ = −1 + 72·a₄ − 864·a₆。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def j_velu_tate_eq_K.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(K の上で v, w を取った形の j_velu_tate_eq。★無条件)",
+    sectionId := "genell-lemma-3-2" }
+
+def j_velu_tate_eq_map.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 15,
+    item := "Lemma 3.2, (ii)(K に落とした形の j の一致)",
+    sectionId := "genell-lemma-3-2" }
 
 def j_velu_tate_eq.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
@@ -186,6 +246,80 @@ def two_y_add_x_sq.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 15,
     item := "Definition 3.3((2Y+X)² = 4X³ + X² + 4a₄X + 4a₆。★無条件)",
     sectionId := "genell-def-3-3" }
+
+/-! ## ★★★★★★★★★★★★特殊化した `c₄`・`c₆` -/
+
+/-- ★★★★★★★★★★★★
+**`E_q` の `c₄ = 1 + 240·σ₃(q)`**——★**無条件**（第 1255）。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+☆`tateCurveAt q hq = tateCurve.map (evalAdicHom q hq)` なので、
+第 1254（`c₄(tateCurve) = 1 + 240σ₃`）を環準同型で送るだけ。 -/
+theorem c₄_tateCurveAt_eq [IsAdicComplete I R] (q : R) (hq : q ∈ I) :
+    (tateCurveAt q hq).c₄ = 1 + 240 * evalAdicHom q hq (sigmaSeries 3) := by
+  rw [tateCurveAt, WeierstrassCurve.map_c₄, c₄_tateCurve, map_add, map_mul, map_one,
+    map_ofNat]
+
+/-- ★★★★★★★★★★★★
+**`E_q` の `c₆ = −1 + 504·σ₅(q)`**——★**無条件**（第 1255）。 -/
+theorem c₆_tateCurveAt_eq [IsAdicComplete I R] (q : R) (hq : q ∈ I) :
+    (tateCurveAt q hq).c₆ = -1 + 504 * evalAdicHom q hq (sigmaSeries 5) := by
+  rw [tateCurveAt, WeierstrassCurve.map_c₆, c₆_tateCurve, map_add, map_mul, map_neg,
+    map_one, map_ofNat]
+
+/-! ## ★★★★★★★★`c₄`・`c₆` を `a₄`・`a₆` で書く -/
+
+/-- ★★★★★★**Tate 曲線の `c₄ = 1 − 48·a₄`**——★**無条件**（第 1253）。
+
+☆`a₁ = 1`・`a₂ = 0`・`a₃ = 0` なので `b₂ = 1`・`b₄ = 2a₄`。 -/
+theorem c₄_tateCurveAt [IsAdicComplete I R] (q : R) (hq : q ∈ I) :
+    (tateCurveAt q hq).c₄ = 1 - 48 * (tateCurveAt q hq).a₄ := by
+  simp only [WeierstrassCurve.c₄, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
+    tateCurveAt_a₁, tateCurveAt_a₂, tateCurveAt_a₃]
+  ring
+
+/-- ★★★★★★**Tate 曲線の `c₆ = −1 + 72·a₄ − 864·a₆`**——★**無条件**（第 1253）。
+
+☆`b₆ = 4a₆` なので `c₆ = −b₂³ + 36b₂b₄ − 216b₆`。 -/
+theorem c₆_tateCurveAt [IsAdicComplete I R] (q : R) (hq : q ∈ I) :
+    (tateCurveAt q hq).c₆
+      = -1 + 72 * (tateCurveAt q hq).a₄ - 864 * (tateCurveAt q hq).a₆ := by
+  simp only [WeierstrassCurve.c₆, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
+    WeierstrassCurve.b₆, tateCurveAt_a₁, tateCurveAt_a₂, tateCurveAt_a₃]
+  ring
+
+/-- ★★★★★★★★★★★★★★★★
+**`K` の上で `v, w` を取った形の `j_velu_tate_eq`**——★**無条件**（第 1251）。
+
+原文 (GenEll p.15):
+> parameter qE of E satisfies the relation qE = qEl ; in particular, we have
+
+☆`veluQuotientFull_tate_mu_K`（第 1134 系）が与える `v, w` は
+**`R` ではなく `K` の元**なので、`j_velu_tate_eq_map`（`v w : R`）では受けられない。
+★本定理はそれを `K` の側で述べ直したものである。
+
+★★★これで「Vélu の商の `j` ＝ `q^l` の Tate 曲線の `j`」は
+**`h4`・`h6`（Eisenstein の計算）だけ**に帰着する。 -/
+theorem j_velu_tate_eq_K {R : Type} [CommRing R] [IsDomain R] {I : Ideal R}
+    [IsAdicComplete I R] {K : Type} [Field K] [CharZero K] [Algebra R K]
+    (q : R) (hq : q ∈ I) (l : ℕ) (hql : q ^ l ∈ I) (v w : K)
+    [(veluCurve ((tateCurveAt q hq).map (algebraMap R K)) v w).IsElliptic]
+    [((tateCurveAt (q ^ l) hql).map (algebraMap R K)).IsElliptic]
+    (h4 : ((tateCurveAt q hq).map (algebraMap R K)).c₄ + 240 * v
+      = (l : K) ^ 4 * ((tateCurveAt (q ^ l) hql).map (algebraMap R K)).c₄)
+    (h6 : ((tateCurveAt q hq).map (algebraMap R K)).c₆ + 504 * v + 6048 * w
+      = (l : K) ^ 6 * ((tateCurveAt (q ^ l) hql).map (algebraMap R K)).c₆) :
+    (veluCurve ((tateCurveAt q hq).map (algebraMap R K)) v w).j
+      = ((tateCurveAt (q ^ l) hql).map (algebraMap R K)).j := by
+  have hb2 : ((tateCurveAt q hq).map (algebraMap R K)).b₂ = 1 := by
+    rw [WeierstrassCurve.map_b₂, tateCurveAt_b₂, map_one]
+  refine ABC3.Found.GenEll.j_eq_of_c4_c6_scale_pos _ _ ((l : K)) ?_ ?_
+  · rw [ABC3.Found.GenEll.veluCurve_c₄]
+    exact h4
+  · rw [ABC3.Found.GenEll.veluCurve_c₆, hb2, mul_one]
+    exact h6
 
 /-! ## ★出典の紐付け(`.src`) -/
 

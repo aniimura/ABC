@@ -593,6 +593,58 @@ theorem htFalt_veluQuotientFull_le (E E' : WeierstrassCurve L)
   choose P' A B Cc D h1 h2 hdet hPC' using key
   exact htFalt_isogeny_le_of_velu E E' l hl P P' C hPC hPC' A B Cc D h1 h2 hdet hmin hint
 
+/-- ★★★★★★★★★★★★★★★★**`Lemma 3.5` の高さ評価——有限素点側を
+1 本の不等式で受ける形**（第 1049）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★★★★**2026-09-01（第 1049）の測定**——第 704 は
+`hmin`（`E` が大域極小）と `hint`（`E′` が整）を受けていたが、
+それらは**ただ 1 本の不等式 `hfin` を出すためだけ**に使われていた
+（`htFalt_isogeny_le_of_archDefect_minimal` の証明を実測）。
+☆本定理はその `hfin` を直接受ける形である。 -/
+theorem htFalt_veluQuotientFull_le_of_defect (E E' : WeierstrassCurve L)
+    [E.IsElliptic] [E'.IsElliptic] (l : ℕ) (hl : 0 < l)
+    (Q : E.toAffine.Point) (hQ : addOrderOf Q = l)
+    (hE' : E' = veluQuotientFull E
+      (((Finset.range l).erase 0).image (fun k : ℕ => pointCoords (k • Q))))
+    (P : (L →+* ℂ) → PeriodPair) (C : (L →+* ℂ) → VariableChange ℂ)
+    (hΔ : ∀ σ, latticeDisc (P σ) ≠ 0)
+    (hPC : ∀ σ, C σ • (E.map σ) = latticeCurve (P σ))
+    (hell1 : ∀ σ : L →+* ℂ, (E.map σ).IsElliptic)
+    (hell2 : ∀ σ : L →+* ℂ, (C σ • (E.map σ)).IsElliptic)
+    (hfin : (∑ᶠ p : HeightOneSpectrum (𝓞 L),
+              (neronExp p E : ℝ) * Real.log (Ideal.absNorm p.asIdeal))
+          - (∑ᶠ p : HeightOneSpectrum (𝓞 L),
+              (neronExp p E' : ℝ) * Real.log (Ideal.absNorm p.asIdeal))
+        ≤ (3 / 2) * (Module.finrank ℚ L : ℝ) * Real.log l) :
+    htFaltOf L E' ≤ htFaltOf L E + 2 * Real.log l := by
+  have key : ∀ σ : L →+* ℂ, ∃ (P' : PeriodPair) (A B Cc D : ℤ),
+      (P σ).ω₁ = (A : ℂ) * P'.ω₁ + (B : ℂ) * P'.ω₂ ∧
+      (P σ).ω₂ = (Cc : ℂ) * P'.ω₁ + (D : ℂ) * P'.ω₂ ∧
+      (A * D - B * Cc).natAbs = l ∧
+      C σ • (E'.map σ) = latticeCurve P' := by
+    intro σ
+    haveI := hell1 σ
+    haveI := hell2 σ
+    have hQσ : addOrderOf (rhPoint σ E Q) = l := by
+      rw [addOrderOf_rhPoint]; exact hQ
+    obtain ⟨P', A, B, Cc, D, h1, h2, hdet, hEq⟩ :=
+      exists_periodPair_veluQuotientFull (E.map σ) (C σ) (P σ) (hΔ σ) (hPC σ) hl hQσ
+    refine ⟨P', A, B, Cc, D, h1, h2, hdet, ?_⟩
+    rw [hEq, image_pointCoords_rhPoint_nsmul σ E hQ, hE', veluQuotientFull_map]
+  choose P' A B Cc D h1 h2 hdet hPC' using key
+  refine htFalt_isogeny_le_of_archDefect E E' l ?_ hfin
+  exact archDefect_isogeny E E' l hl P P' C C hPC hPC' (fun _ => 1) (fun _ => one_ne_zero)
+    (fun _ => by ring) A B Cc D (fun σ => by rw [one_mul]; exact h1 σ)
+    (fun σ => by rw [one_mul]; exact h2 σ) hdet
+
+def htFalt_veluQuotientFull_le_of_defect.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(高さ評価——有限素点側を 1 本の不等式で受ける形)",
+    sectionId := "genell-lemma-3-5" }
+
 def htFalt_veluQuotientFull_le.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(ht^Falt(E/⟨Q⟩) ≤ ht^Falt(E) + 2 log l——解析側の到達点)",

@@ -149,10 +149,16 @@ structure EllModuliData extends TorsionGaloisRepData where
   ★局所版は `Interface/GenEll/TateLocal.lean` の上の `Lemma 3.2, (ii)` であり、
   そこから素点にわたって足し上げる段は原文に書かれていない。
   ★★`l` が局所高さと素であることがここで効く
-  ——`Lemma 3.2, (i)` により `H` は各素点で `μ_l` になる。 -/
-  degInf_quotLCyclic : ∀ (E : Curve) (l : ℕ), Nat.Prime l → HasLCyclic E l →
+  ——`Lemma 3.2, (i)` により `H` は各素点で `μ_l` になる。
+
+  ★★★**2026-09-02（第 1340）の締め直し**——かつては**等式**であったが、
+  消費側（`Section3.lean` の `lemma_3_5`）が使うのは
+  `l·deg∞(E) ≤ deg∞(E′)` の**向きだけ**である。
+  ☆こう弱めると、良い素点では `0 ≤ minDeltaExp` が自明になり、
+  この欄は**悪い素点の Tate の関係だけ**（在庫、第 1141）に落ちる。 -/
+  degInf_quotLCyclic : ∀ (E : Curve) (l : ℕ), Nat.Prime l → 5 ≤ l → HasLCyclic E l →
     PrimeToLocalHeights E l →
-    degInf (cls (quotLCyclic E l)) = (l : ℝ) * degInf (cls E)
+    (l : ℝ) * degInf (cls E) ≤ degInf (cls (quotLCyclic E l))
   /-- ★★★★★**`ht^Falt(E′) ≤ ht^Falt(E) + 2log(l) + C₀`**——l-同種による変化。
 
   原文 (GenEll p.17):
@@ -205,12 +211,14 @@ structure EllModuliData extends TorsionGaloisRepData where
   `condA ∨ condB` を持っているので、**それを仮説として渡す**形に直した。
   ☆`lemma_3_7`・`theorem_3_8`・`Corollary 4.3/4.4` の**statement は変わらない**。 -/
   lcyclicExc : ℝ → ℝ → Set EllClass → Set EllClass
-  galoisFinite_lcyclicExc : ∀ (C eps : ℝ) (KV : Set EllClass), CompactlyBounded KV →
-    GaloisFinite (lcyclicExc C eps KV)
+  galoisFinite_lcyclicExc : ∀ (eps : ℝ), 0 < eps → ∀ KV : Set EllClass,
+    CompactlyBounded KV → ∃ C₀ : ℝ, ∀ C : ℝ, C₀ ≤ C →
+      GaloisFinite (lcyclicExc C eps KV)
   mem_lcyclicExc : ∀ (C eps : ℝ) (KV : Set EllClass) (E : Curve) (l : ℕ),
-    Nat.Prime l → SemiStable E → HasLCyclic E l → PrimeToLocalHeights E l →
-    ((100 * (degOfDefinition E : ℝ)
-        * (faltingsHeight (cls E) + C * (degOfDefinition E : ℝ) ^ eps) ≤ (l : ℝ))
+    Nat.Prime l → 5 ≤ l → SemiStable E → HasLCyclic E l → PrimeToLocalHeights E l →
+    (((100 * (degOfDefinition E : ℝ)
+          * (faltingsHeight (cls E) + C * (degOfDefinition E : ℝ) ^ eps) ≤ (l : ℝ))
+        ∧ HasMultRed E)
       ∨ cls E ∈ KV) →
     cls E ∈ lcyclicExc C eps KV
   /-- ★★★★★**compactly bounded の中で乗法還元を持たない類の例外集合**。

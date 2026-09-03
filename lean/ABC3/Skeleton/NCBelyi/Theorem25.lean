@@ -4,6 +4,7 @@ import ABC3.Found.NCBelyi.Separation
 import ABC3.Found.NCBelyi.Lemma22
 import ABC3.Found.NCBelyi.BelyiPoly
 import ABC3.Found.NCBelyi.Lemma24Chain
+import ABC3.Found.NCBelyi.Thm25Assembly
 import ABC3.Found.NCBelyi.Thm25Step3
 
 /-!
@@ -105,10 +106,7 @@ theorem theorem_2_5 (S : Finset ℂ) (hint : ∀ x ∈ S, IsIntegral ℚ x) :
           ∧ (∀ x : ℂ, (Polynomial.derivative (f.map (algebraMap ℚ ℂ))).eval x = 0 →
               (f.map (algebraMap ℚ ℂ)).eval x = 0
                 ∨ (f.map (algebraMap ℚ ℂ)).eval x = 1)) :=
-  ⟨ABC3.Found.NCBelyi.exists_belyi_poly S hint,
-   fun S₀ β h0 hpos hβ hβ0 hratio =>
-     ABC3.Found.NCBelyi.lemma_2_2 S₀ β h0 hpos hβ hβ0 hratio⟩
-
+  ABC3.Found.NCBelyi.theorem_2_5 S hint
 
 /-! ## ★出典の紐付け(`.src`)と、証明が要求するもの(`.needs`) -/
 

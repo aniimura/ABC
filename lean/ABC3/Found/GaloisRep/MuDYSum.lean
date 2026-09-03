@@ -68,6 +68,147 @@ theorem sum_mu_dyterm_field [CharZero F] {l : ℕ} (hl : l.Prime) {ζ : F}
     muPow_two_zero hl hζ, muPow_one_zero hl hζ]
   ring
 
+/-! ## ★★★★★★`D²f` と `Df` の指標和 -/
+
+/-- ★★**`D²f(t) = 6x⁴ − 12x³ + 7x² − x`**（`x = 1/(1−t)`）。 -/
+theorem tateD2Xterm_eq_powers {t : F} (hne : (1 : F) - t ≠ 0) :
+    tateD2Xterm t
+      = 6 * ((1 - t)⁻¹) ^ 4 - 12 * ((1 - t)⁻¹) ^ 3 + 7 * ((1 - t)⁻¹) ^ 2
+        - (1 - t)⁻¹ := by
+  rw [tateD2Xterm, Ring.inverse_eq_inv']
+  field_simp
+  ring
+
+/-- ★★**`Df(t) = 2x³ − 3x² + x`**（`x = 1/(1−t)`）。 -/
+theorem tateDXterm_eq_powers {t : F} (hne : (1 : F) - t ≠ 0) :
+    tateDXterm t = 2 * ((1 - t)⁻¹) ^ 3 - 3 * ((1 - t)⁻¹) ^ 2 + (1 - t)⁻¹ := by
+  rw [tateDXterm, Ring.inverse_eq_inv']
+  field_simp
+  ring
+
+/-- ★★★★★★★★**`120·∑_{ζ≠1} D²f(ζ) = l⁴ − 1`**。 -/
+theorem sum_mu_d2xterm_field [CharZero F] {l : ℕ} (hl : l.Prime) {ζ : F}
+    (hζ : IsPrimitiveRoot ζ l) :
+    120 * (∑ i ∈ (range l).erase 0, tateD2Xterm (ζ ^ i)) = (l : F) ^ 4 - 1 := by
+  have hsplit : ∑ i ∈ (range l).erase 0, tateD2Xterm (ζ ^ i)
+      = 6 * muPow l ζ 4 0 - 12 * muPow l ζ 3 0 + 7 * muPow l ζ 2 0 - muPow l ζ 1 0 := by
+    simp only [muPow, pow_zero, one_mul, Finset.mul_sum]
+    rw [← Finset.sum_sub_distrib, ← Finset.sum_add_distrib, ← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl (fun i hi => ?_)
+    rw [tateD2Xterm_eq_powers (one_sub_zeta_ne_zero hζ hi)]
+    ring
+  rw [hsplit, muPow_four_zero hl hζ, muPow_three_zero hl hζ,
+    muPow_two_zero hl hζ, muPow_one_zero hl hζ]
+  ring
+
+/-- ★★★★★★**`∑_{ζ≠1} Df(ζ) = 0`**——`∑_ζ X(ζ)` は `q` だけの関数なので
+微分で消える、という事実の定数項。 -/
+theorem sum_mu_dxterm_field [CharZero F] {l : ℕ} (hl : l.Prime) {ζ : F}
+    (hζ : IsPrimitiveRoot ζ l) :
+    ∑ i ∈ (range l).erase 0, tateDXterm (ζ ^ i) = 0 := by
+  have hsplit : ∑ i ∈ (range l).erase 0, tateDXterm (ζ ^ i)
+      = 2 * muPow l ζ 3 0 - 3 * muPow l ζ 2 0 + muPow l ζ 1 0 := by
+    simp only [muPow, pow_zero, one_mul, Finset.mul_sum]
+    rw [← Finset.sum_sub_distrib, ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun i hi => ?_)
+    rw [tateDXterm_eq_powers (one_sub_zeta_ne_zero hζ hi)]
+    ring
+  rw [hsplit, muPow_three_zero hl hζ, muPow_two_zero hl hζ, muPow_one_zero hl hζ]
+  ring
+
+/-! ## ★★★★★★★★`D⁴f` の指標和（σ₅ 側） -/
+
+/-- ★★**`D⁴f(t) = 120x⁶ − 360x⁵ + 390x⁴ − 180x³ + 31x² − x`**（`x = 1/(1−t)`）。 -/
+theorem tateD4Xterm_eq_powers {t : F} (hne : (1 : F) - t ≠ 0) :
+    tateD4Xterm t
+      = 120 * ((1 - t)⁻¹) ^ 6 - 360 * ((1 - t)⁻¹) ^ 5 + 390 * ((1 - t)⁻¹) ^ 4
+        - 180 * ((1 - t)⁻¹) ^ 3 + 31 * ((1 - t)⁻¹) ^ 2 - (1 - t)⁻¹ := by
+  rw [tateD4Xterm, Ring.inverse_eq_inv']
+  field_simp
+  ring
+
+/-- ★★★★★★★★**`252·∑_{ζ≠1} D⁴f(ζ) = 1 − l⁶`**。 -/
+theorem sum_mu_d4xterm_field [CharZero F] {l : ℕ} (hl : l.Prime) {ζ : F}
+    (hζ : IsPrimitiveRoot ζ l) :
+    252 * (∑ i ∈ (range l).erase 0, tateD4Xterm (ζ ^ i)) = 1 - (l : F) ^ 6 := by
+  have hsplit : ∑ i ∈ (range l).erase 0, tateD4Xterm (ζ ^ i)
+      = 120 * muPow l ζ 6 0 - 360 * muPow l ζ 5 0 + 390 * muPow l ζ 4 0
+        - 180 * muPow l ζ 3 0 + 31 * muPow l ζ 2 0 - muPow l ζ 1 0 := by
+    simp only [muPow, pow_zero, one_mul, Finset.mul_sum]
+    rw [← Finset.sum_sub_distrib, ← Finset.sum_add_distrib, ← Finset.sum_sub_distrib,
+      ← Finset.sum_add_distrib, ← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl (fun i hi => ?_)
+    rw [tateD4Xterm_eq_powers (one_sub_zeta_ne_zero hζ hi)]
+    ring
+  rw [hsplit, muPow_six_zero hl hζ, muPow_five_zero hl hζ, muPow_four_zero hl hζ,
+    muPow_three_zero hl hζ, muPow_two_zero hl hζ, muPow_one_zero hl hζ]
+  ring
+
+/-! ## ★★★★★★★★整域への転送（分数体に埋め込む） -/
+
+section Domain
+
+variable {A : Type} [CommRing A] [IsDomain A] [CharZero A]
+
+theorem map_ringInverse {B : Type} [CommRing B] (f : A →+* B) {x : A} (hx : IsUnit x) :
+    f (Ring.inverse x) = Ring.inverse (f x) := by
+  refine (ring_inverse_eq_of_mul_eq_one (hx.map f) ?_).symm
+  rw [← map_mul, Ring.mul_inverse_cancel x hx, map_one]
+
+theorem map_tateD2Xterm {B : Type} [CommRing B] (f : A →+* B) {t : A}
+    (ht : IsUnit (1 - t)) : f (tateD2Xterm t) = tateD2Xterm (f t) := by
+  rw [tateD2Xterm, tateD2Xterm, map_mul, map_mul, map_pow, map_ringInverse f ht]
+  simp [map_ofNat]
+
+/-- ★★★★★★★★**整域版**: `120·∑_{ζ≠1} D²f(ζ) = l⁴ − 1`。
+
+★分数体に埋め込んで体版（`sum_mu_d2xterm_field`）を使い、単射性で戻す。 -/
+theorem sum_mu_d2xterm {l : ℕ} (hl : l.Prime) {ζ : A} (hζ : IsPrimitiveRoot ζ l)
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i)) :
+    120 * (∑ i ∈ (range l).erase 0, tateD2Xterm (ζ ^ i)) = (l : A) ^ 4 - 1 := by
+  have hinj : Function.Injective (algebraMap A (FractionRing A)) :=
+    IsFractionRing.injective A (FractionRing A)
+  haveI : CharZero (FractionRing A) := charZero_of_injective_algebraMap hinj
+  refine hinj ?_
+  have hmap : (algebraMap A (FractionRing A))
+      (120 * ∑ i ∈ (range l).erase 0, tateD2Xterm (ζ ^ i))
+      = 120 * ∑ i ∈ (range l).erase 0,
+          tateD2Xterm ((algebraMap A (FractionRing A)) ζ ^ i) := by
+    rw [map_mul, map_sum]
+    congr 1
+    · exact map_ofNat _ 120
+    · refine Finset.sum_congr rfl (fun i hi => ?_)
+      rw [map_tateD2Xterm _ (hu i hi), map_pow]
+  rw [hmap, map_sub, map_pow, map_natCast, map_one]
+  exact sum_mu_d2xterm_field hl (hζ.map_of_injective hinj)
+
+theorem map_tateD4Xterm {B : Type} [CommRing B] (f : A →+* B) {t : A}
+    (ht : IsUnit (1 - t)) : f (tateD4Xterm t) = tateD4Xterm (f t) := by
+  rw [tateD4Xterm, tateD4Xterm, map_mul, map_mul, map_pow, map_ringInverse f ht]
+  simp [map_ofNat]
+
+/-- ★★★★★★**整域版**: `252·∑_{ζ≠1} D⁴f(ζ) = 1 − l⁶`。 -/
+theorem sum_mu_d4xterm {l : ℕ} (hl : l.Prime) {ζ : A} (hζ : IsPrimitiveRoot ζ l)
+    (hu : ∀ i ∈ (range l).erase 0, IsUnit (1 - ζ ^ i)) :
+    252 * (∑ i ∈ (range l).erase 0, tateD4Xterm (ζ ^ i)) = 1 - (l : A) ^ 6 := by
+  have hinj : Function.Injective (algebraMap A (FractionRing A)) :=
+    IsFractionRing.injective A (FractionRing A)
+  haveI : CharZero (FractionRing A) := charZero_of_injective_algebraMap hinj
+  refine hinj ?_
+  have hmap : (algebraMap A (FractionRing A))
+      (252 * ∑ i ∈ (range l).erase 0, tateD4Xterm (ζ ^ i))
+      = 252 * ∑ i ∈ (range l).erase 0,
+          tateD4Xterm ((algebraMap A (FractionRing A)) ζ ^ i) := by
+    rw [map_mul, map_sum]
+    congr 1
+    · exact map_ofNat _ 252
+    · refine Finset.sum_congr rfl (fun i hi => ?_)
+      rw [map_tateD4Xterm _ (hu i hi), map_pow]
+  rw [hmap, map_sub, map_pow, map_natCast, map_one]
+  exact sum_mu_d4xterm_field hl (hζ.map_of_injective hinj)
+
+end Domain
+
 /-! ## ★出典の紐付け(`.src`) -/
 
 def tateDYterm_eq_powers.src : ABC3.Meta.Source :=

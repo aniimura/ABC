@@ -8,6 +8,7 @@ import ABC3.Check.GenEll.RemarkSigmaWitness
 import ABC3.Check.GenEll.Prop17Witness
 import ABC3.Check.GenEll.Prop17AxiomGap
 import ABC3.Check.GenEll.Prop17Direction
+import ABC3.Check.GenEll.BelyiGeneralVacuous
 import ABC3.Check.GenEll.Thm21AxiomGap
 import ABC3.Check.GenEll.Thm21Witness
 import ABC3.Check.NCBelyi.Thm25AxiomGap
@@ -15,8 +16,12 @@ import ABC3.Check.NCBelyi.Thm25Witness
 import ABC3.Check.GenEll.HeightInterfaceNondegenerate
 import ABC3.Check.GenEll.EllModuliDegInfPos
 import ABC3.Check.GenEll.ImageSL2NeedsL5
+import ABC3.Check.GenEll.VeluQuotOKNeedsL5
 import ABC3.Check.GenEll.AlphaNeedsOneBasis
 import ABC3.Check.GenEll.VeluTateNeedsChange
+import ABC3.Check.GenEll.QuotMuNeedsHypothesis
+import ABC3.Check.GenEll.AdicCompleteMissing
+import ABC3.Check.GenEll.CompletionBridgeWitness
 import ABC3.Check.GenEll.LcyclicExcTooStrong
 import ABC3.Check.GenEll.Section3NotProvable
 import ABC3.Check.AbsTopIII.LogShellLanding

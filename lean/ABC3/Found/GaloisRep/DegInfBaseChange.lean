@@ -6,6 +6,7 @@ import ABC3.Found.GaloisRep.FaltingsWitness
 import ABC3.Found.GaloisRep.SemistableFin
 import Mathlib.NumberTheory.RamificationInertia.Valuation
 import ABC3.Meta.Claim
+import ABC3.Found.GenEll.LocalHeightRamified
 
 /-!
 # `deg∞` と `ht^Falt` の基底変換不変性（`Found`）
@@ -380,9 +381,228 @@ def htFaltOf_baseChange_of_semistable.src : ABC3.Meta.Source :=
     item := "Proposition 3.4(半安定な曲線の ht^Falt は基底変換で不変。★無条件)",
     sectionId := "genell-prop-3-4" }
 
+/-! ## ★★★★★★★★★★★★★★★★上での `Δ_min` の関係を下へ降ろす -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**上で `v_P(Δ_min(E')) = l·v_P(Δ_min(E))` なら下でも同じ**——★**無条件**（第 1183）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆両辺とも分岐指数 `e` 倍になるので、`e ≠ 0` で割れば下の関係が出る。
+★★★これが `Skeleton/GenEll/LCyclicReading.lean` の**節点 2d-2** である
+——安定直線の側では `ζ` が `L_v` に無いので局所の議論を `L_v(ζ_l)` へ上げるが、
+そこで得た `Δ_min` の関係は**そのまま降りる**。
+
+☆`Thm38Kummer.lean` の「分岐指数は `l` と素」は**要らなかった**
+——必要なのは `e ≠ 0` だけである（第 1182 の見積もりの再訂正）。 -/
+theorem minDeltaExp_descend_of_baseChange (p : HeightOneSpectrum (𝓞 L))
+    (P : HeightOneSpectrum (𝓞 L')) [P.asIdeal.LiesOver p.asIdeal]
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    (hp : SemistableAt p E) (hp' : SemistableAt p E')
+    (he : p.asIdeal.ramificationIdx P.asIdeal ≠ 0) {l : ℕ}
+    (h : minDeltaExp P (E'.baseChange L') = l * minDeltaExp P (E.baseChange L')) :
+    minDeltaExp p E' = l * minDeltaExp p E := by
+  rw [minDeltaExp_baseChange_of_semistableAt L L' p P E' hp',
+    minDeltaExp_baseChange_of_semistableAt L L' p P E hp] at h
+  have he' : ((p.asIdeal.ramificationIdx P.asIdeal : ℤ)) ≠ 0 := by
+    exact_mod_cast he
+  refine mul_left_cancel₀ he' ?_
+  rw [h]
+  ring
+
+/-- ★★★★★★★★★★★★★★**上での `Δ_min` の関係は下へ降りる（仮説なし）**（第 1185）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆第 1183 は `e ≠ 0` を仮説に取っていたが、`P` が `p` の上にあれば
+mathlib の `ramificationIdx_ne_zero_of_liesOver` で出る。
+★★これで `Skeleton/GenEll/LCyclicReading.lean` の**節点 2d-2 は仮説なし**になった。 -/
+theorem minDeltaExp_descend (p : HeightOneSpectrum (𝓞 L))
+    (P : HeightOneSpectrum (𝓞 L')) [P.asIdeal.LiesOver p.asIdeal]
+    (E E' : WeierstrassCurve L) [E.IsElliptic] [E'.IsElliptic]
+    (hp : SemistableAt p E) (hp' : SemistableAt p E') {l : ℕ}
+    (h : minDeltaExp P (E'.baseChange L') = l * minDeltaExp P (E.baseChange L')) :
+    minDeltaExp p E' = l * minDeltaExp p E :=
+  minDeltaExp_descend_of_baseChange L L' p P E E' hp hp'
+    (Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver P.asIdeal p.ne_bot) h
+
+/-- ★★★★★★★★**良い還元は底変換で保たれる**（第 1187）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`v_p(Δ_min) = 0` なら上でも `0` である——`minDeltaExp_baseChange_le` で
+`≤ e·0 = 0`、`minDeltaExp_nonneg` で `≥ 0`。
+
+★★これが `SemistableAt` の底変換の**第 1 の場合**である
+（`Skeleton/GenEll/LCyclicReading.lean` の節点 2d-1、第 1186 の実測）。
+☆第 2 の場合（極小モデルと `v(c₄) = 0`）は分岐した `valAdd` のスケーリングが要る。 -/
+theorem minDeltaExp_baseChange_eq_zero (p : HeightOneSpectrum (𝓞 L))
+    (P : HeightOneSpectrum (𝓞 L')) [P.asIdeal.LiesOver p.asIdeal]
+    (E : WeierstrassCurve L) [E.IsElliptic] (h : minDeltaExp p E = 0) :
+    minDeltaExp P (E.baseChange L') = 0 := by
+  have hle := minDeltaExp_baseChange_le L L' p P E E.isUnit_Δ.ne_zero
+  rw [h, mul_zero] at hle
+  have hnn := minDeltaExp_nonneg P (E.baseChange L')
+  omega
+
+/-- ☆`valAdd` は `LocalHeightRamified.lean` の `ordAt` と同じものである。 -/
+theorem valAdd_eq_ordAt (p : HeightOneSpectrum (𝓞 L)) (x : Lˣ) :
+    valAdd p x = ABC3.Found.GenEll.ordAt p x := rfl
+
+/-- ★★★★★★★★★★★★★★**分岐した拡大での `valAdd` のスケーリング**（第 1188）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`valAdd P (algebraMap x) = e(P|p) · valAdd p x`。
+★`vAdd_algebraMap_eq_valAdd`（第 320）は**不分岐を仮定していた**が、
+`LocalHeightRamified.lean` の `ordAt_liesOver` は分岐を許す。
+☆`valAdd` と `ordAt` は同じ定義なので、そのまま移せる。
+
+★★★これが `Skeleton/GenEll/LCyclicReading.lean` の節点 2d-1 で
+第 1186 が名指しした「分岐した `valAdd` のスケーリング」である。 -/
+theorem valAdd_algebraMap_liesOver (p : HeightOneSpectrum (𝓞 L))
+    (P : HeightOneSpectrum (𝓞 L')) [P.asIdeal.LiesOver p.asIdeal] (x : Lˣ) :
+    valAdd P (Units.map (algebraMap L L').toMonoidHom x)
+      = (p.asIdeal.ramificationIdx P.asIdeal : ℤ) * valAdd p x :=
+  ABC3.Found.GenEll.ordAt_liesOver L' p P x
+
+/-- ★★★★★★★★**付値環は底変換で付値環に入る**（第 1191）。
+
+★★☆**訂正（第 1192）**——同じ内容が `isIntegral_baseChange_primeSubring` の中の
+`key` として**すでにあった**（`valuation_liesOver` ＋ `pow_le_one₀` で 2 行）。
+☆本定理は `valAdd` の言葉で述べた版であり、`valAdd` を使う場面では読みやすいが、
+**新しい内容ではない**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`x ∈ primeSubring p` なら `algebraMap x ∈ primeSubring P`——
+`valAdd P (algebraMap x) = e·valAdd p x ≥ 0` だからである（第 1188）。
+★これが「整モデルを上げると整モデルになる」の中身である。 -/
+theorem algebraMap_mem_primeSubring (p : HeightOneSpectrum (𝓞 L))
+    (P : HeightOneSpectrum (𝓞 L')) [P.asIdeal.LiesOver p.asIdeal]
+    {x : L} (hx : x ∈ primeSubring p) :
+    algebraMap L L' x ∈ primeSubring P := by
+  rcases eq_or_ne x 0 with rfl | hx0
+  · simpa using (primeSubring P).zero_mem
+  · have hx0' : algebraMap L L' x ≠ 0 :=
+      (map_ne_zero_iff _ (algebraMap L L').injective).2 hx0
+    have hge : 0 ≤ valAdd p (Units.mk0 x hx0) :=
+      (valAdd_nonneg_iff p _).2 ((mem_primeSubring_iff p x).1 hx)
+    have heq : valAdd P (Units.map (algebraMap L L').toMonoidHom (Units.mk0 x hx0))
+        = (p.asIdeal.ramificationIdx P.asIdeal : ℤ) * valAdd p (Units.mk0 x hx0) :=
+      valAdd_algebraMap_liesOver L L' p P (Units.mk0 x hx0)
+    have hval : valAdd P (Units.mk0 (algebraMap L L' x) hx0')
+        = (p.asIdeal.ramificationIdx P.asIdeal : ℤ) * valAdd p (Units.mk0 x hx0) := by
+      rw [← heq]
+      exact valAdd_eq_of_valuation_eq P _ _ rfl
+    have hnn : (0 : ℤ) ≤ (p.asIdeal.ramificationIdx P.asIdeal : ℤ) := by positivity
+    have : 0 ≤ valAdd P (Units.mk0 (algebraMap L L' x) hx0') := by
+      rw [hval]
+      exact mul_nonneg hnn hge
+    exact (mem_primeSubring_iff P _).2 ((valAdd_nonneg_iff P _).1 this)
+
+/-! ## ★★★★★★★★★★★★★★★★`SemistableAt` の基底変換 -/
+
+/-- ★★★★★★★★★★★★★★★★★★★★
+**半安定性は基底変換で保たれる**——★**無条件**（第 1192）。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`SemistableAt` の 2 つの場合をそれぞれ上げる:
+
+| 場合 | 道 | 第 |
+|---|---|---|
+| `v_p(Δ_min) = 0` | `minDeltaExp_baseChange_eq_zero` | 1187 |
+| 極小モデル `C` で `v_p(c₄) = 0` | `C` を上げて `isMinimal_of_c4_valAdd_eq_zero` | 1190 |
+
+★`valAdd` のスケーリングは第 1188、整性の持ち上げは
+`isIntegral_baseChange_primeSubring`（在庫）。
+
+★★★これが `Skeleton/GenEll/LCyclicReading.lean` の節点 2d-1 で
+第 1186 が「在庫に無い」と名指しした葉の**本体**である。 -/
+theorem semistableAt_baseChange (p : HeightOneSpectrum (𝓞 L))
+    (P : HeightOneSpectrum (𝓞 L')) [P.asIdeal.LiesOver p.asIdeal]
+    (E : WeierstrassCurve L) [E.IsElliptic] [(E.baseChange L').IsElliptic]
+    (h : SemistableAt p E) : SemistableAt P (E.baseChange L') := by
+  rcases h with h0 | ⟨C, hC, hc4, hv⟩
+  · exact Or.inl (minDeltaExp_baseChange_eq_zero L L' p P E h0)
+  · haveI hint : WeierstrassCurve.IsIntegral (primeSubring p) (C • E) := by
+      have hh := ((WeierstrassCurve.isMinimal_iff _ _).1 hC).1
+      simpa using hh
+    haveI hintP : WeierstrassCurve.IsIntegral (primeSubring P) ((C • E).baseChange L') :=
+      isIntegral_baseChange_primeSubring L L' p P (C • E)
+    have hmap : (C.map (algebraMap L L')) • (E.baseChange L') = (C • E).baseChange L' :=
+      WeierstrassCurve.map_variableChange _ _ _
+    have hc4' : (((C • E).baseChange L')).c₄ ≠ 0 := by
+      rw [WeierstrassCurve.baseChange, WeierstrassCurve.map_c₄]
+      exact (map_ne_zero_iff _ (algebraMap L L').injective).2 hc4
+    have hΔ' : (((C • E).baseChange L')).Δ ≠ 0 := by
+      rw [WeierstrassCurve.baseChange, WeierstrassCurve.map_Δ]
+      exact (map_ne_zero_iff _ (algebraMap L L').injective).2
+        (variableChange_Delta_ne_zero E E.isUnit_Δ.ne_zero C)
+    have hval : valAdd P (Units.mk0 (((C • E).baseChange L')).c₄ hc4') = 0 := by
+      have hstep : valAdd P (Units.mk0 (((C • E).baseChange L')).c₄ hc4')
+          = (p.asIdeal.ramificationIdx P.asIdeal : ℤ)
+            * valAdd p (Units.mk0 ((C • E).c₄) hc4) := by
+        rw [← valAdd_algebraMap_liesOver L L' p P (Units.mk0 ((C • E).c₄) hc4)]
+        refine valAdd_eq_of_valuation_eq P _ _ ?_
+        show (P.valuation L') (((C • E).baseChange L')).c₄
+          = (P.valuation L') (algebraMap L L' ((C • E).c₄))
+        rw [WeierstrassCurve.baseChange, WeierstrassCurve.map_c₄]
+      rw [hstep, hv, mul_zero]
+    refine Or.inr ⟨C.map (algebraMap L L'), ?_, ?_⟩
+    · rw [hmap]
+      exact isMinimal_of_c4_valAdd_eq_zero P ((C • E).baseChange L') hΔ' hc4' hval
+    · rw [hmap]
+      exact ⟨hc4', hval⟩
+
 end NumberField
 
 /-! ## ★出典の紐付け(`.src`) -/
+
+def semistableAt_baseChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(半安定性は基底変換で保たれる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def semistableAt_baseChange.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "minDeltaExp_baseChange_eq_zero(第 1187、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.minDeltaExp_baseChange_eq_zero") 1,
+    .citation "[ABC3]" "isMinimal_of_c4_valAdd_eq_zero(第 1190、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.isMinimal_of_c4_valAdd_eq_zero") 1,
+    .citation "[ABC3]" "valAdd_algebraMap_liesOver(第 1188、証明済み)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.valAdd_algebraMap_liesOver") 1 ]
+
+def algebraMap_mem_primeSubring.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(付値環は底変換で付値環に入る。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def valAdd_algebraMap_liesOver.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(分岐した拡大での valAdd のスケーリング。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def minDeltaExp_baseChange_eq_zero.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(良い還元は底変換で保たれる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def minDeltaExp_descend.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(上での Δ_min の関係は下へ降りる——仮説なし。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def minDeltaExp_descend_of_baseChange.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(上での Δ_min の関係は下へ降りる——分岐指数で割るだけ。★無条件)",
+    sectionId := "genell-lemma-3-5" }
 
 def valAdd_algebraMap.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,

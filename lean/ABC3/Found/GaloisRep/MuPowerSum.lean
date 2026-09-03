@@ -163,6 +163,29 @@ theorem muPow_zero_rec {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot 
     sum_range_sum_range_lt] at h0
   linear_combination h0
 
+/-- ★`i ↦ l − i` は `(range l).erase 0` の全単射である。 -/
+theorem sum_erase_reflect {M : Type*} [AddCommMonoid M] {l : ℕ} (f : ℕ → M) :
+    ∑ i ∈ (range l).erase 0, f (l - i) = ∑ i ∈ (range l).erase 0, f i := by
+  refine Finset.sum_nbij' (fun i => l - i) (fun i => l - i) ?_ ?_ ?_ ?_ ?_
+  · intro a ha
+    have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+    have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+    exact Finset.mem_erase.2 ⟨by omega, Finset.mem_range.2 (by omega)⟩
+  · intro a ha
+    have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+    have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+    exact Finset.mem_erase.2 ⟨by omega, Finset.mem_range.2 (by omega)⟩
+  · intro a ha
+    have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+    have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+    omega
+  · intro a ha
+    have ha0 : a ≠ 0 := (Finset.mem_erase.1 ha).1
+    have hal : a < l := Finset.mem_range.1 (Finset.mem_erase.1 ha).2
+    omega
+  · intro a _
+    rfl
+
 /-! ## ★★★★★★★★重み付きの和 `M_m^{(k)}` -/
 
 /-- ★ホッケースティック `∑_{t<l} C(t,m) = C(l,m+1)`。 -/
@@ -454,6 +477,120 @@ theorem muPow_four_zero {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot
   ring
 
 end CharZeroChain
+
+/-! ## ★★★★★★★★`p₅`・`p₆` まで登る（c₆ 側） -/
+theorem cast_choose_six' (n : ℕ) :
+    720 * ((n.choose 6 : ℕ) : F)
+      = (n : F) * ((n : F) - 1) * ((n : F) - 2) * ((n : F) - 3) * ((n : F) - 4)
+        * ((n : F) - 5) := by
+  induction n with
+  | zero => simp
+  | succ k ih =>
+      rw [Nat.choose_succ_succ]
+      push_cast
+      push_cast at ih
+      linear_combination ih + 6 * cast_choose_five' (F := F) k
+
+theorem cast_choose_seven' (n : ℕ) :
+    5040 * ((n.choose 7 : ℕ) : F)
+      = (n : F) * ((n : F) - 1) * ((n : F) - 2) * ((n : F) - 3) * ((n : F) - 4)
+        * ((n : F) - 5) * ((n : F) - 6) := by
+  induction n with
+  | zero => simp
+  | succ k ih =>
+      rw [Nat.choose_succ_succ]
+      push_cast
+      push_cast at ih
+      linear_combination ih + 7 * cast_choose_six' (F := F) k
+
+section CharZeroChain2
+
+variable [CharZero F]
+
+theorem cast_choose_six_eq (n : ℕ) :
+    ((n.choose 6 : ℕ) : F)
+      = (n : F) * ((n : F) - 1) * ((n : F) - 2) * ((n : F) - 3) * ((n : F) - 4)
+        * ((n : F) - 5) / 720 := by
+  linear_combination cast_choose_six' (F := F) n / 720
+
+theorem cast_choose_seven_eq (n : ℕ) :
+    ((n.choose 7 : ℕ) : F)
+      = (n : F) * ((n : F) - 1) * ((n : F) - 2) * ((n : F) - 3) * ((n : F) - 4)
+        * ((n : F) - 5) * ((n : F) - 6) / 5040 := by
+  linear_combination cast_choose_seven' (F := F) n / 5040
+
+theorem muM_zero_five {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l) :
+    muM l ζ 0 5 = (-120 * (l : F) + 274 * (l : F) ^ 2 - 225 * (l : F) ^ 3 + 85 * (l : F) ^ 4 - 15 * (l : F) ^ 5 + 1 * (l : F) ^ 6) / 144 := by
+  rw [muM_level_zero hl hζ 5, cast_choose_five_eq (F := F) (l - 1),
+    cast_choose_six_eq (F := F) l, cast_pred (F := F) hl]
+  ring
+
+theorem muM_zero_six {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l) :
+    muM l ζ 0 6 = (720 * (l : F) - 1764 * (l : F) ^ 2 + 1624 * (l : F) ^ 3 - 735 * (l : F) ^ 4 + 175 * (l : F) ^ 5 - 21 * (l : F) ^ 6 + 1 * (l : F) ^ 7) / 840 := by
+  rw [muM_level_zero hl hζ 6, cast_choose_six_eq (F := F) (l - 1),
+    cast_choose_seven_eq (F := F) l, cast_pred (F := F) hl]
+  ring
+
+theorem muM_one_four {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l) :
+    muM l ζ 1 4 = (264 * (l : F) - 574 * (l : F) ^ 2 + 435 * (l : F) ^ 3 - 145 * (l : F) ^ 4 + 21 * (l : F) ^ 5 - 1 * (l : F) ^ 6) / 360 := by
+  rw [muM_rec hζ 0 4, muPow_one_zero hl hζ, muM_zero_five hl hζ, cast_choose_five_eq (F := F) l]
+  ring
+
+theorem muM_two_three {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l) :
+    muM l ζ 2 3 = (-906 * (l : F) + 1841 * (l : F) ^ 2 - 1230 * (l : F) ^ 3 + 320 * (l : F) ^ 4 - 24 * (l : F) ^ 5 - 1 * (l : F) ^ 6) / 1440 := by
+  rw [muM_rec hζ 1 3, muPow_two_zero hl hζ, muM_one_four hl hζ, cast_choose_four_eq (F := F) l]
+  ring
+
+theorem muM_three_two {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l) :
+    muM l ζ 3 2 = (726 * (l : F) - 1331 * (l : F) ^ 2 + 720 * (l : F) ^ 3 - 110 * (l : F) ^ 4 - 6 * (l : F) ^ 5 + 1 * (l : F) ^ 6) / 1440 := by
+  rw [muM_rec hζ 2 2, muPow_three_zero hl hζ, muM_two_three hl hζ, cast_choose_three_eq (F := F) l]
+  ring
+
+theorem muM_four_one {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l) :
+    muM l ζ 4 1 = (-95 * (l : F) + 144 * (l : F) ^ 2 - 50 * (l : F) ^ 3 + 1 * (l : F) ^ 5) / 288 := by
+  rw [muM_rec hζ 3 1, muPow_four_zero hl hζ, muM_three_two hl hζ, cast_choose_two_eq (F := F) l]
+  ring
+
+theorem muM_one_five {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l) :
+    muM l ζ 1 5 = (-1560 * (l : F) + 3682 * (l : F) ^ 2 - 3199 * (l : F) ^ 3 + 1330 * (l : F) ^ 4 - 280 * (l : F) ^ 5 + 28 * (l : F) ^ 6 - 1 * (l : F) ^ 7) / 2016 := by
+  rw [muM_rec hζ 0 5, muPow_one_zero hl hζ, muM_zero_six hl hζ, cast_choose_six_eq (F := F) l]
+  ring
+
+theorem muM_two_four {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l) :
+    muM l ζ 2 4 = (3480 * (l : F) - 7826 * (l : F) ^ 2 + 6251 * (l : F) ^ 3 - 2240 * (l : F) ^ 4 + 350 * (l : F) ^ 5 - 14 * (l : F) ^ 6 - 1 * (l : F) ^ 7) / 5040 := by
+  rw [muM_rec hζ 1 4, muPow_two_zero hl hζ, muM_one_five hl hζ, cast_choose_five_eq (F := F) l]
+  ring
+
+theorem muM_three_three {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l) :
+    muM l ζ 3 3 = (-12030 * (l : F) + 25319 * (l : F) ^ 2 - 17864 * (l : F) ^ 3 + 4970 * (l : F) ^ 4 - 350 * (l : F) ^ 5 - 49 * (l : F) ^ 6 + 4 * (l : F) ^ 7) / 20160 := by
+  rw [muM_rec hζ 2 3, muPow_three_zero hl hζ, muM_two_four hl hζ, cast_choose_four_eq (F := F) l]
+  ring
+
+theorem muM_four_two {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l) :
+    muM l ζ 4 2 = (29062 * (l : F) - 55335 * (l : F) ^ 2 + 31878 * (l : F) ^ 3 - 5250 * (l : F) ^ 4 - 462 * (l : F) ^ 5 + 105 * (l : F) ^ 6 + 2 * (l : F) ^ 7) / 60480 := by
+  rw [muM_rec hζ 3 2, muPow_four_zero hl hζ, muM_three_three hl hζ, cast_choose_three_eq (F := F) l]
+  ring
+
+/-- ★★★★**`p_5`**。 -/
+theorem muPow_five_zero {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l) :
+    muPow l ζ 5 0 = ((-95 : F) + 144 * (l : F) - 50 * (l : F) ^ 2 + 1 * (l : F) ^ 4) / 288 := by
+  refine mul_left_cancel₀ (cast_prime_ne_zero (F := F) hl) ?_
+  rw [muPow_zero_from_M hl hζ 4, muM_four_one hl hζ]
+  ring
+
+theorem muM_five_one {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l) :
+    muM l ζ 5 1 = (-19087 * (l : F) + 30240 * (l : F) ^ 2 - 11508 * (l : F) ^ 3 + 357 * (l : F) ^ 5 - 2 * (l : F) ^ 7) / 60480 := by
+  rw [muM_rec hζ 4 1, muPow_five_zero hl hζ, muM_four_two hl hζ, cast_choose_two_eq (F := F) l]
+  ring
+
+/-- ★★★★**`p_6`**。 -/
+theorem muPow_six_zero {l : ℕ} (hl : l.Prime) {ζ : F} (hζ : IsPrimitiveRoot ζ l) :
+    muPow l ζ 6 0 = ((-19087 : F) + 30240 * (l : F) - 11508 * (l : F) ^ 2 + 357 * (l : F) ^ 4 - 2 * (l : F) ^ 6) / 60480 := by
+  refine mul_left_cancel₀ (cast_prime_ne_zero (F := F) hl) ?_
+  rw [muPow_zero_from_M hl hζ 5, muM_five_one hl hζ]
+  ring
+
+end CharZeroChain2
 
 /-! ## ★出典の紐付け(`.src`) -/
 

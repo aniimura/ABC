@@ -7,6 +7,7 @@ import ABC3.Interface.GenEll.ArithLineBundle
 import ABC3.Interface.GenEll.GaloisRep
 import ABC3.Interface.GenEll.HeightTheory
 import ABC3.Interface.GenEll.AbcSetup
+import ABC3.Interface.GenEll.Thm21Setup
 import ABC3.Interface.GenEll.TateLocal
 import ABC3.Interface.GenEll.EllModuli
 import ABC3.Interface.NCBelyi.BelyiSetup

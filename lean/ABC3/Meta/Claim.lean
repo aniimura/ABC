@@ -167,6 +167,36 @@ structure WaitingFor where
   trackB : String
   deriving Repr
 
+/-- **論文に属さないノードの所属**——既存理論の登記(2026-09-03、第 1452)。
+
+## ★なぜ要るか(実測)
+
+`lean/ABC3/<bucket>/<X>/` の `<X>` のうち 6 つは論文名ではなく**理論名**であり、
+そこに `Found/` の 1,676 本のうち 951 本(57%)が入っていた
+(`GaloisRep` 459・`Arakelov` 375・`Divisor` 65・`NumberField` 20・`SixExp` 20・`ProL` 9)。
+`.src` を見れば所属**論文**は分かるが、ディレクトリからは**何の理論か**が分からず、
+Explorer 上でも依存グラフ上でも所属が見えなかった。
+
+## ★★依存は包含ではない
+
+理論を消費する論文の下へ移してはならない。
+`GenEll` が mathlib を使っていても mathlib は `GenEll/` の下に無いのと同じで、
+**使う側と使われる側は兄弟として並ぶ**。したがって理論は理論のまま置き、
+「何の理論で、どの論文が消費し、mathlib に在庫があるか」をここに書く。
+
+## ☆置き方
+
+理論ディレクトリごとに `Theory.lean` を 1 本置き、`<X>.theory : Theory` を宣言する。
+`tools/check.mjs` が G10 として「登記の無いディレクトリ」を落とす。 -/
+structure Theory where
+  /-- 何の理論か(例: `"楕円曲線の Galois 表現・Tate 一意化・Vélu の同種"`) -/
+  what : String
+  /-- この理論を消費している原典の論文タグ(例: `["GenEll"]`)。★複数あってよい。 -/
+  consumers : List String
+  /-- mathlib に在庫があるか。**実測値のみ**を書く(推測を書かない)。 -/
+  mathlibStatus : String
+  deriving Repr
+
 /-- 飛躍の分類。**既定は `modelError`**——`sourceGap` は最後の手段。 -/
 inductive GapClass
   /-- ① こちらのモデル化の誤り -/
