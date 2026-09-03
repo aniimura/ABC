@@ -23,6 +23,19 @@ Skeleton を完了した: `§1 5/5, §2 6/6, §3 3/3, §4 2/2, §5 7/7, §6 1/1`
 
 **How to apply:** 逐語引用を書いたら必ず `node tools/check.mjs`(または該当ページだけ
 `pdftotext` を直接呼んで)照合すること。「.txt を読んで手で写す」だけでは信用できない。
-次の一手は Track B(`Found/CorrHyp/`)——`corrhyp-goal.md` §3 に依存の少なさ順で
-候補を書いた。[[genell-track-b]](ABC3b=このセッション)が GenEll と CorrHyp の
-両方を持つことになった。
+[[genell-track-b]](ABC3b=このセッション)が GenEll と CorrHyp の両方を持つことになった。
+
+★★**2026-09-04、Found 層(Track B)に着手・16 コミット**。`FuchsianGroup`
+(`SL(2,ℝ)` の離散部分群、`ℂ` 上の解析的モデル)で §1(`Corr` の圏構造・
+isogeny の同値関係)・§2(`self_le_commensurator`)・§3(`Proposition 3.2`
+**完全証明**、`fg_of_fg_finiteIndex` = mathlib に無かった逆向き
+Reidemeister–Schreier を自作)を sorry 無しで実装、純粋な群論で閉じる
+範囲を掘り尽くした。§4 は `FieldLimit.lean` で着手(スキーム論トラック、
+`FuchsianGroup` とは別建て)。残る節点は3つの独立した未構築の数学
+(①双曲幾何=Gauss–Bonnet 0件、②スキーム論=`AffineTransitionLimit.lean`
+に直撃する道具あり、③代数群論=非可換 Galois コホモロジー)に分岐する
+——詳細と mathlib 補題名は `corrhyp-goal.md` §3。
+
+★この過程で `/goal` の条件文が「0/N…達成」の自己矛盾形になり Stop hook が
+延々と「未達成」判定を繰り返した——[[goal-condition-zero-numerator-trap]] に
+教訓を分離して記録した。
