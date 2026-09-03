@@ -147,13 +147,27 @@ Royden の定理——いずれも GenEll のモジュラー多項式ギャッ�
 ★★**3つの塊のうち②(スキーム論)だけ、mathlib に相応の蓄積がある**
 (2026-09-04 追加実測)。`AlgebraicGeometry.Scheme.Etale`・
 `LocallyOfFiniteType` に加えて `AlgebraicGeometry/SpreadingOut.lean` に
-**まさに `Lemma 4.1` と同種の「有限型なら有限生成部分環まで下りて
-一意に持ち上がる」という spreading-out の補題群**
-(`spread_out_of_isGermInjective`・`exists_lift_of_germInjective` 等)が
-存在する。①(双曲幾何、Gauss–Bonnet 0件)・③(代数群論、非可換 Galois
-コホモロジー)より見込みがある——ただし「双曲曲線」をスキームとして
-定義する下ごしらえ自体は `FuchsianGroup` とは別建ての新規モデルになり、
-そこだけでも相応の量になる見込み(未着手、規模は未測定)。
+「有限型なら有限生成部分環まで下りて一意に持ち上がる」という
+spreading-out の補題群が存在する。①(双曲幾何、Gauss–Bonnet 0件)・
+③(代数群論、非可換 Galois コホモロジー)より見込みがある。
+
+★★★**さらに一段実測(2026-09-04)——`Lemma 4.1` に直撃する道具を発見**:
+`AlgebraicGeometry/AffineTransitionLimit.lean` は「スキームが affine な
+遷移射を持つ余濾過的な図式(`D : I ⥤ Scheme`)の極限である」ときの
+spreading-out 定理群を持つ。これは `Spec K`(`K` を有限生成 `k`-部分環
+`R_i ⊆ K` の余極限とみなしたときの極限スキーム)の設定そのものであり、
+`Lemma 4.1` が要る2つの向きにそれぞれ対応する補題が**両方存在する**:
+
+| `Lemma 4.1` が要ること | 対応する mathlib 補題 |
+|---|---|
+| `K` 上で定義された対象は、ある有限段 `R_i` まで下りて存在する(spreading out) | `Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation` |
+| 極限上で一致する2つの射は、ある有限段まで下りればすでに一致する(rigidity/uniqueness) | `Scheme.exists_hom_comp_eq_comp_of_locallyOfFiniteType` |
+
+残る作業は「`X_K`(`K`上の双曲曲線)」「`Z_K` との correspondence」を
+この抽象的な極限の枠組みに具体的に載せる段——`I` を `K` の有限生成
+`k`-部分環の余濾過圏に取り、`D` をそれぞれの `Spec R_i` 上の底変換の
+図式にする、という設定作業がまだ残っている(未着手、規模は未測定だが
+道具はすでに mathlib にある)。
 
 関連: [[leaf-first-with-graph-feedback]] / [[leaves-are-measured-not-guessed]] /
 [[measure-mathlib-before-skeleton]] / [[genell-track-b]] / [[corrhyp-track-goal]] /
