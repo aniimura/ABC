@@ -62,10 +62,19 @@ LubinTateLimit.lean` で近似列 `ΦSeq` の極限 `F` を実際に構成し、
 わたって完全にsorry無しで完成**した——古典的な局所類体論の中核的構成の
 一つが形式化されたことになる。
 
-**残る作業**: この形式群の上に実際の局所類体論の相互律写像
-(Frobenius元・Lubin-Tateの主定理)を構成する段——pGC の各項目
-(Prop 1.2・Cor 1.3・Prop 2.1・Prop 2.2・Theorem 4.2)を閉じるには、
-なお相互律写像そのものの構成・性質証明という大きな仕事が残っている。
+**続報(同日、g=f特殊化で「fはF_fの自己準同型」を確立)**: `Found/PGC/
+LubinTateFormalGroupLaw.lean`で`LubinTateF`を`g:=f`で特殊化した古典的な
+形式群法則`formalGroupLaw`(F_f)を定義し、`formalGroupLaw_f_isEndomorphism`
+(`F_f(f(X),f(Y))=f(F_f(X,Y))`)をsorry無しで示した——`LubinTateF_
+functional_equation`の直接の特殊化。これはfが乗法元π∈𝒪_Kに対応する
+自己準同型`[π]_{F_f}`を与える(𝒪_K→End(F_f)という環準同型の第一歩)、
+という古典的な出発点。
+
+**残る作業**: F_fが実際に形式群法則であること(単位元則・結合律・
+可換律、Lubin-Tateの一意性補題経由が標準的)、torsion点の構成、
+Galois作用を経由した相互律写像の構成——pGC の各項目(Prop 1.2・
+Cor 1.3・Prop 2.1・Prop 2.2・Theorem 4.2)を閉じるには、なお相互律写像
+そのものの構成・性質証明という大きな仕事が残っている。
 
 詳細な発見の経緯は `ResearchPaper/blocked-leaves.json` の
 `[pGC] Proposition 1.2 / ... —— 局所類体論の相互律` エントリの

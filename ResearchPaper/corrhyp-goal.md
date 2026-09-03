@@ -169,6 +169,37 @@ spreading-out 定理群を持つ。これは `Spec K`(`K` を有限生成 `k`-�
 図式にする、という設定作業がまだ残っている(未着手、規模は未測定だが
 道具はすでに mathlib にある)。
 
+★★★★**2026-09-04続報(第23-24件)、上の「設定作業」の骨組みを完成**。
+`Found/CorrHyp/FieldLimit.lean`:
+- `I := (FgSubalgebra k K)ᵒᵖ`(`K` の有限生成 `k`-部分環全体、包含で有向)
+  を実際に構成し、`D := toSchemeDiagram k K := (toRingCat k K).op ⋙ Scheme.Spec`
+  という図式を作った。
+- **`Spec K` が `D` の極限であること**(`isLimit_specKCone`)を sorry 無しで
+  証明した——環側で `K` がその有限生成部分環の余極限であること
+  (`isColimitToRingCatCocone`、`Subalgebra.iSupLift` の `RingHom` 版が
+  mathlib に無かったので手で構成)を示し、`IsColimit.op` + `Scheme.Spec` が
+  極限を保つこと(`Γ ⊣ Spec` の右随伴、`Adjunction.rightAdjoint_preservesLimits`)
+  で `Scheme` 側へ運んだ。
+- 上の表の2定理が要求する側条件(`IsAffineHom(D.map f)`・
+  `CompactSpace(D.obj i)`・`QuasiSeparatedSpace(D.obj i)`)を、
+  `D.obj`/`D.map` が常に `Spec(…)` の形であることから**無条件の instance**
+  として確立した(mathlib の一般事実だけで済んだ)。
+
+**結果**: `c := specKCone k K`・`hc := isLimit_specKCone k K` として、
+`Scheme.exists_hom_comp_eq_comp_of_locallyOfFiniteType`/
+`Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation` を**側条件抜きで
+直接呼べる状態**になった——`Lemma 4.1` のスキーム論的な骨組みは完成。
+
+**まだ残る(誠実な現状)**: `lemma_4_1`(Skeleton)自体は `HyperbolicCurveData`
+の抽象フィールド(`Space`・`Ext`・`IsGenericallyScheme`・`ModuliStack`)で
+書かれており、これらを「`Spec K` 上の実際のスキーム」に結び付ける
+**橋渡しフィールド**が `Interface` にまだ無い。橋渡しを足しても、
+`.needs` に記録済みの `LocallyOfFinitePresentation f`(`X_K → Spec k`)や
+接空間の計算(標数0での単射性)は依然として要る——モジュライスタック
+`M_{g,r}` の実現(§5、mathlib に不在)と分かちがたく結びついている。
+現時点で numbered item として Found 完成しているのは
+`Proposition 3.2`(§3)のみで、24/24 にはまだ遠い。
+
 関連: [[leaf-first-with-graph-feedback]] / [[leaves-are-measured-not-guessed]] /
 [[measure-mathlib-before-skeleton]] / [[genell-track-b]] / [[corrhyp-track-goal]] /
 [[stale-status-read-lean-first]] / [[no-wall-decompose-instead]]
