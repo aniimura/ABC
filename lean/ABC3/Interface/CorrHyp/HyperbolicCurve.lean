@@ -95,11 +95,24 @@ structure HyperbolicCurveData where
   Iso : Space → Space → Prop
   /-- 双曲曲線の型 `(g, r)`(原文 §1 冒頭)。 -/
   type : Space → ℕ × ℕ
-  /-- `PSL₂(ℝ)⁰` の部分群 `Γ`(原文 §2、Fuchsian 群)。 -/
+  /-- `PSL₂(ℝ)⁰` の部分群 `Γ`(原文 §2)。★離散性は要求しない——原文
+  (p.5)自身が `Comm(Γ) := {γ ∈ PSL₂(ℝ)⁰ | (γ·Γ·γ⁻¹) ∼ Γ}` を「`PSL₂(ℝ)⁰`
+  の部分群」として定義しており、離散性を課していない。`Γ` が伝統的な
+  意味での Fuchsian 群(離散)であることは `IsDiscrete` で別途 posit する
+  ——`Comm(Γ)` は non-arithmetic な `Γ` に対してのみ離散になる
+  (Margulis の二分法、`corrhyp-goal.md` 2026-09-04 続報)。 -/
   Fuchsian : Type
   /-- `X ↦ Γ_X`(原文 §2、`Π ↪ Aut(H) = PSL₂(ℝ)⁰` の像)。 -/
   Gamma : Space → Fuchsian
-  /-- `Comm(Γ)`(原文 §2 の可換化群)。 -/
+  /-- `Γ` が(伝統的な意味で)離散であること。`Gamma X` は常にこれを満たす
+  (`Gamma_isDiscrete`)。`Comm(Γ)` はこれを満たすとは限らない——満たす
+  ことが `¬ MargulisArithmetic Γ ∧ ¬ ShimuraArithmetic Γ` と同値、という
+  のが Margulis の二分法([Marg])の主張(`Theorem 2.5` 相当、まだ
+  Skeleton には現れない補助事実)。 -/
+  IsDiscrete : Fuchsian → Prop
+  Gamma_isDiscrete : ∀ X : Space, IsDiscrete (Gamma X)
+  /-- `Comm(Γ)`(原文 §2 の commensurator 群、p.5 の定義そのまま——
+  `PSL₂(ℝ)⁰` の部分群として常に well-defined、離散とは限らない)。 -/
   Comm : Fuchsian → Fuchsian
   /-- `Γ₁ が Γ₂ の中で有限指数`。 -/
   FiniteIndexIn : Fuchsian → Fuchsian → Prop
