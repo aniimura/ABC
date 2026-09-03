@@ -1,9 +1,18 @@
 ---
 name: pgc-ramification-naturality-gap
-description: pGC Theorem 4.2のΦ構成に必要な自然性公理がRamificationFiltrationのInterfaceに無いと判明(2026-09-04)
+description: pGC Theorem 4.2のΦ構成——裸のΓ_K≅Γ_K′の部分はsorry無しで完成、FilteredGroup.Isoへの持ち上げに要る自然性公理がRamificationFiltrationのInterfaceに無い(2026-09-04)
 metadata:
   type: project
 ---
+
+★★★2026-09-04 続報(完成): 下記で「見込みを確認した」としていた「延長+共役+
+選択非依存」の部分を、実際に`Found/PGC/GaloisTransfer.lean`にsorry無しで
+完成させた——`galMulEquivOf`(互換な延長ᾱから誘導される裸のΓ_K≅Γ_K′)、
+`galMulEquivOf_indep`(2つの異なる延長から誘導される同型が、K′.absGalの
+内部自己同型でちょうど繋がる——`FilteredGroup.Iso.setoid`の同値関係と
+同じ形)。局所類体論は一切使っていない。★★下記の「別の穴」(FilteredGroup.Iso
+への持ち上げに要る自然性公理がRamificationFiltrationに無い)は未解決のまま
+残る——本ファイルはその手前(裸の群同型の部分)を完成させたに留まる。
 
 Theorem 4.2(`Skeleton/PGC/Section4.lean`)の `implicitStep`(体の同型 α:K≃K′ を
 代数閉包への同型 ᾱ:K̄≃K̄′ へ延長し、共役で誘導される Γ_K≅Γ_K′ が ᾱ の取り方に
