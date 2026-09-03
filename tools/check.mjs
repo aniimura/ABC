@@ -166,6 +166,8 @@ const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const SOURCE_DIR = join(ROOT, 'ResearchPaper', '0_Source');
 const STRUCT_DIR = join(ROOT, 'ResearchPaper', '1_Structured');
 const PAPERS_JSON = join(ROOT, 'ResearchPaper', 'papers.json');
+/** ★理論の登記簿(2026-09-03、案 B)。論文に属さないノードの所属を持つ。無くても動く。 */
+const THEORIES_JSON = join(ROOT, 'ResearchPaper', 'theories.json');
 /** 原文からの機械概算(規模の分母)。無くても動く。 */
 const SCALE_JSON = join(ROOT, 'ResearchPaper', 'dependency-scale.json');
 /** 葉の仕分け(自己申告)。無くても動く。 */
@@ -634,6 +636,52 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
     if (!names.has(`${d.name}.negControl`)) {
       ng(at(d), `G3 負の対照が無い: \`${d.name}.negControl : ABC3.Meta.NegControl\` を書く` +
                 '(性質を1つだけ落とした対照が破れることを確認する。破れないならその性質は効いていない)');
+    }
+  }
+
+  // ── G10: `lean/ABC3/<bucket>/<X>/` の `<X>` は、論文か**登記済みの理論**でなければならない
+  //
+  //    ★2026-09-03 の実測(案 B): 7 つのディレクトリが論文名ではなく、
+  //      `Found/` の 1,676 本のうち 951 本(57%)がそこに入っていた
+  //      (`GaloisRep` 459・`Arakelov` 375・`Divisor` 65・`NumberField` 20・`SixExp` 20・`ProL` 9)。
+  //      `.src` を見れば所属論文は分かるが、**ディレクトリからは何の理論か分からない**ので、
+  //      Explorer 上でも依存グラフ上でも所属が見えなかった。
+  //    ☆ファイルは動かさない——移動は検索性を下げると実測した(案 A を採らなかった理由)。
+  //      代わりに `ResearchPaper/theories.json` に登記させ、登記の無い名前を落とす。
+  if (existsSync(THEORIES_JSON)) {
+    const th = JSON.parse(readFileSync(THEORIES_JSON, 'utf8'));
+    const known = new Set([
+      ...Object.keys(reg),                       // 論文
+      ...Object.keys(th.theories ?? {}),         // 理論
+      ...Object.keys(th.paperDirs ?? {}),        // 大小違いなどの別名
+    ]);
+    const seen = new Map();                      // ディレクトリ名 → ファイル数
+    for (const f of texts.keys()) {
+      const parts = relative(dir, f).replace(/\\/g, '/').split('/');
+      if (parts.length < 3) continue;            // バケツ直下は対象外
+      seen.set(parts[1], (seen.get(parts[1]) ?? 0) + 1);
+    }
+    for (const [name, n] of seen) {
+      if (known.has(name)) continue;
+      ng(`lean/ABC3/*/${name}/`,
+        `G10 ディレクトリ "${name}"(${n} ファイル)が論文でも登記済みの理論でもない。` +
+        'ResearchPaper/theories.json の `theories` に「何の理論か・どの論文が消費するか・' +
+        'mathlib にあるか」を書いて登記すること' +
+        '(★ノードの所属をディレクトリから読めるようにするため。2026-09-03、案 B)');
+    }
+    if (!quiet) {
+      const rows = [...seen.entries()]
+        .filter(([k]) => (th.theories ?? {})[k])
+        .sort((a, b) => b[1] - a[1]);
+      if (rows.length) {
+        console.log(`  -- 理論の節点(論文に属さない層): ${rows.length} 理論 / ` +
+                    `${rows.reduce((s, r) => s + r[1], 0)} ファイル`);
+        for (const [k, n] of rows) {
+          const t = th.theories[k];
+          console.log(`     ${k.padEnd(13)} ${String(n).padStart(4)} ファイル ` +
+                      `← ${(t.consumers ?? []).join(', ')}`);
+        }
+      }
     }
   }
 
@@ -1373,12 +1421,15 @@ function selftest() {
     ['D37 引用行の末尾に docstring 終端があっても照合できる', 'Skeleton',
       'd37-quote-ends-docstring.lean', false],
     // ★G8/G9 は `Skeleton/<論文>/…` に置かれたものだけを見るので、fixture も 1 段深く置く。
-    ['D38 条なし .src なのに非空虚性の対照が無い', 'Skeleton/Fx',
+    ['D38 条なし .src なのに非空虚性の対照が無い', 'Skeleton/GenEll',
       'd38-bare-src-no-nonvacuous.lean', true],
-    ['D39 条なし .src + 非空虚性の対照ありは通る', 'Skeleton/Fx',
+    ['D39 条なし .src + 非空虚性の対照ありは通る', 'Skeleton/GenEll',
       'd39-bare-src-nonvacuous.lean', false],
-    ['D40 sorry 0 の条なし .src が Skeleton にある', 'Skeleton/Fx',
+    ['D40 sorry 0 の条なし .src が Skeleton にある', 'Skeleton/GenEll',
       'd40-sorryfree-bare-src-in-skeleton.lean', true],
+    // ★G10: ディレクトリ名が論文でも登記済みの理論でもない
+    ['D41 未登記のディレクトリに置かれている', 'Skeleton/NotARegisteredTheory',
+      'd41-unregistered-dir.lean', true],
   ];
   const FIXTURES = join(ROOT, 'tools', 'selftest-fixtures');
   for (const [label, bucket, fixture, shouldFail] of leanCases) {
