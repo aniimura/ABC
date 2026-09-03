@@ -3336,3 +3336,26 @@ theorem foo (E : Setup) (a : E.X) : ... := ...  -- ✗ E.X の Group インス�
 `node tools/decl-index.mjs --mathlib` が生成する `.cache/mathlib-index.txt` の
 各行末尾のファイルパス(例: `GroupTheory/Commensurable.lean`)から
 `Mathlib.` + パスの `/` を `.` に、`.lean` を外した形で機械的に作れる。
+
+## 20. 丸括弧タプル `(a, b, ...)` は `Type` 専用——`Prop` を混ぜると `Prod.mk` 型不一致(2026-09-04)
+
+`def foo := (a, b, c)` の丸括弧記法は常に `Prod.mk`(`Type u`/`Type v` 専用)
+に脱糖される。`a`・`b`・`c` の中に `Prop`(`Function.Injective f` の証明項等)
+が1つでも混ざると、「sort `Prop` だが `Type` が期待される」型不一致で落ちる
+——全要素が `Prop` の場合でも同じく落ちる(`(a,b) : P ∧ Q` は `⟨a,b⟩` の
+angle bracket + 期待型の指定が無いと通らない)。
+
+**さらに罠**: 型不一致を直そうとして `def foo (E : S) : A ×' B ×' ... := ⟨...⟩`
+のように **`×'`(`PProd`)で明示的に型注釈を書く**と、今度は
+`E.field1 : SomeType E.X`(`X` は `S` の中の抽象 `Type` フィールドで、
+`[instance]` フィールド `E.XInstGrp` で `AddCommGroup` 等が与えられている)
+の `X` に対するインスタンス探索が **注釈された型を独立に再エラボレートする
+過程で失敗する**(「配管」#の元祖の亜種——`@Struct.field` を型注釈無しで
+使う回避策と同じ根)。
+
+**How to apply**: `Prop` を含む/含みうるタプルは丸括弧もダメ、型注釈付き
+`×'`/`∧` もダメ。**`PProd.mk`/`And.intro` を型注釈無しでネストして直接呼ぶ**
+(`PProd.mk a <| PProd.mk b <| ... c`)。各 `field` の型は `E` からの
+projection として自動的に(インスタンス込みで)決まるので、独立な型注釈も
+インスタンス探索も不要になる。実例: `lean/ABC3/Skeleton/Falt1/Section4.lean`
+の `theorem_4_1`/`theorem_4_3`/`theorem_4_5`。
