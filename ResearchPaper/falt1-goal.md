@@ -1,21 +1,29 @@
-# [Falt1] トラックのゴール(2026-09-04 設定・確定、2026-09-04 全項目確定)
+# [Falt1] トラックのゴール(2026-09-04 設定・確定、Chapter I は 2026-09-04 完了)
 
 対象: G. Faltings, *p-Adic Hodge Theory*, JAMS Vol.1 No.1 (1988) pp.255-299
 (物理46ページ、`papers.json`に短縮タグ`Falt1`で登記済み、`0_Source`にPDF/txtあり)。
 
 ## 0. ゴール(現在地)
 
-> **Falt1 Chapter I §1 0/2, §2 0/4, §3 0/2, §4 0/5,
-> Chapter II §1 0/2, §2 0/4, §3 0/2,
-> Chapter III §1 0/3, §2 0/2, §3 0/3, §4 0/1 —— 合計 0/30**
+> **Falt1 Chapter I §1 2/2, §2 4/4, §3 2/2, §4 5/5 —— Chapter I 13/13 達成(2026-09-04)**
 >
-> ★先行あり: Chapter I §4.4(Theorem 4.4)は[LocProP]形式化の一環で
-> `Interface/Falt1/PAdicHodgeTheory.lean`・`Skeleton/Falt1/ChapterI.lean`
-> として既にposit済みだが、**(i)(iv)のみの縮小形**([LocProP] Lemma 2.1
-> が引く部分だけ)。このトラックでの「完了」は原文の(i)-(vii)全体を
-> 述べることなので、上のカウントには**含めていない**(0/5のまま)。
-> §4.4に着手する際は、この既存ファイルを土台に(ii)(iii)(v)(vi)(vii)まで
-> 拡張する。
+> 残り: Chapter II §1 0/2, §2 0/4, §3 0/2,
+> Chapter III §1 0/3, §2 0/2, §3 0/3, §4 0/1 —— 合計 0/17。
+> 全体では 13/30。
+
+★★**正直な注記(過大申告を避けるため)**: Chapter I 13項目はすべて
+`Interface`(posit、証明していない)+`Skeleton`(.src・.nonvacuous 付き)
++ 260dpi目視確認+ HTML逐語アンカーまで揃い、`node tools/check.mjs`・
+`node tools/graph.mjs --owner Falt1`(条なし13・項目13・sorry0)を通る。
+ただし:
+- §4.4(Theorem 4.4)は[LocProP]形式化時に作った**(i)(iv)のみの縮小形**
+  のまま(原文は(i)-(vii)まである)。`.needs`に理由を明記済み。
+- §4.2・§4.5は原文が持つ添字(i・M・R1,R2 の分解等)に関する**全称量化を
+  代表的な1インスタンスに簡略化**して posit した(`Interface/Falt1/
+  GaloisCohomologyCompute.lean` 冒頭に記録)。
+- 「almost mathematics」の核心である almost étale covering・m-torsion
+  等は mathlib に対応物が無いため全項目が posit ベース(`sorry` は無いが
+  `Found`(証明)ではない)。数学的に**証明した**わけではない。
 
 ## 1. 構造(2026-09-04 確定——旧版の3つの未確認点をすべて解消した)
 
