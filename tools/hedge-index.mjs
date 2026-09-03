@@ -32,6 +32,7 @@ const PAPERS = {
   FrdII: 'The Geometry of Frobenioids II.txt',
   GenEll: 'Arithmetic Elliptic Curves in General Position.txt',
   NCBelyi: 'Noncritical Belyi Maps.txt',
+  CorrHyp: 'Correspondences on Hyperbolic Curves.txt',
 };
 
 const args = process.argv.slice(2);
