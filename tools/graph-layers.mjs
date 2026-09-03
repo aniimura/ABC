@@ -309,9 +309,11 @@ const adj = new Map(), page = new Map();
       }
       const rem = Math.max(0, (o.fieldsTotal ?? 0) - (o.fieldsDone ?? 0));
       for (let i = 0; i < rem; i++) {
-        // ★追分類(`D1` 等)は**論文ではない**ので、タグはトラック名までにする。
-        //   ★以前は `Arakelov:D1 …` をタグにしていたため、論文一覧が分裂して見えていた。
-        const fk = `${o.track} / ${o.code} ${o.ja} 条件 ${(o.fieldsDone ?? 0) + i + 1} of ${o.fieldsTotal}`;
+        // ★これは**論文ではない**。`obligation-tree.json` の track(Arakelov / Galois)であり、
+        //   実体は `義務(Interface)` の未実装の条件である(2026-09-03 実測)。
+        //   ☆以前はタグを track にしていたので、論文一覧に `Arakelov` `Galois` が
+        //     論文のように並んでいた。タグは `義務` に寄せ、track は名前の中に残す。
+        const fk = `義務 / ${o.track}:${o.code} ${o.ja} 条件 ${(o.fieldsDone ?? 0) + i + 1} of ${o.fieldsTotal}`;
         if (!adj.has(fk)) { adj.set(fk, []); page.set(fk, 0); fadded++; }
         if (!adj.get(nk).includes(fk)) { adj.get(nk).push(fk); }
       }
