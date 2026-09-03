@@ -4,6 +4,7 @@ Copyright (c) 2026 ABC3. All rights reserved.
 import Mathlib.RingTheory.Adjoin.FG
 import Mathlib.Algebra.Category.Ring.Basic
 import Mathlib.CategoryTheory.Category.Preorder
+import Mathlib.AlgebraicGeometry.Scheme
 
 /-!
 # [CorrHyp] `Lemma 4.1` へ向けた第一歩 —— `K` を有限生成 `k`-部分環の直極限として見る
@@ -116,5 +117,27 @@ noncomputable def toRingCat (k K : Type*) [CommRing k] [CommRing K] [Algebra k K
     apply CommRingCat.hom_ext
     ext x
     rfl
+
+open AlgebraicGeometry CategoryTheory in
+/-- `toRingCat` を `Scheme.Spec`(`CommRingCatᵒᵖ ⥤ Scheme`)と合成した図式。
+`FgSubalgebra k K` は(`⊔` で)**filtered**(`R ≤ S` の向きで合流点を持つ)
+なので、その逆圏 `(FgSubalgebra k K)ᵒᵖ` が **cofiltered**——
+`AffineTransitionLimit.lean` の `D : I ⥤ Scheme` が要求する形そのもの。
+`R ↦ Spec R`、`R ≤ S` を `Spec S → Spec R` に送る。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def toSchemeDiagram (k K : Type*) [CommRing k] [CommRing K] [Algebra k K] :
+    (FgSubalgebra k K)ᵒᵖ ⥤ Scheme :=
+  (toRingCat k K).op ⋙ Scheme.Spec
+
+/- ★★次の一手(未着手): `(FgSubalgebra k K)ᵒᵖ` が実際に
+`CategoryTheory.IsCofiltered` のインスタンスを持つことを示す
+(`IsDirected` から `IsFilteredOrEmpty`/`IsFiltered` を経由するはずだが、
+`infer_instance` では自動的に繋がらないことを確認した——mathlib に
+「有向前順序は filtered」という直接の instance が見当たらず、
+`IsFiltered` の生の条件(cocone の存在・平行射の coequalize)から
+手で組む必要がある、2026-09-04 実測)。これが済めば
+`AffineTransitionLimit.lean` の spreading-out 定理群を `toSchemeDiagram`
+に直接適用できる。 -/
 
 end ABC3.Found.CorrHyp
