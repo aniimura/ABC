@@ -1,6 +1,7 @@
 import Mathlib.RingTheory.Kaehler.Basic
 import Mathlib.RingTheory.Kaehler.Polynomial
 import Mathlib.LinearAlgebra.Span.Basic
+import Mathlib.RingTheory.AdjoinRoot
 
 /-!
 # [Falt1] Lemma 1.1 に向けた補助補題(`Found`、sorry 無し)
@@ -17,19 +18,28 @@ import Mathlib.LinearAlgebra.Span.Basic
 `KaehlerDifferential.exact_kerCotangentToTensor_mapBaseChange` と
 組み合わせて使う)——の1コンポーネント。
 
-**残っている作業**(2026-09-04 時点、正直な記録):
-1. `RingHom.ker (algebraMap V[T] W) = Ideal.span {f}`(W = AdjoinRoot f
-   等の具体形で)を示す。
-2. `KaehlerDifferential.polynomialEquiv` と組み合わせて
-   `Ω_{W/V} ≅ W ⧸ (f'(w))` を得る(モノジェニックな商の計算)。
-3. **さらに大きな残作業**: これは "第二完全列"(Ω_{V[T]/V}を経由する
+**進捗**(2026-09-04):
+1. ✅ `RingHom.ker (AdjoinRoot.mk f) = Ideal.span {f}`(`AdjoinRoot f`は
+   定義から`Polynomial R ⧸ Ideal.span {f}`なので`Ideal.mk_ker`から従う)。
+2. ✅ `kerQuotEquivOmega`: 全射`A→B`に対し
+   `(B⊗_A Ω_{A/R}) ⧸ ker(mapBaseChange) ≃ₗ[B] Ω_{B/R}`
+   (`LinearMap.quotKerEquivOfSurjective`と`mapBaseChange_surjective`から)。
+3. ✅ `ker(mapBaseChange)`の台集合が`kerCotangentToTensor`の値域に一致する
+   こと(`exact_kerCotangentToTensor_mapBaseChange`の集合レベルの言い換え)。
+
+**残っている作業**(正直な記録):
+4. 2・3・`nzdCotangentEquivQuot`(f が非零因子のとき)・
+   `KaehlerDifferential.polynomialEquiv`(`Ω_{A/R}≃A`、A=R[T]の場合)を
+   すべて貼り合わせ、`Ω_{B/R} ≅ B ⧸ (span{f'(root)})`という
+   モノジェニックな商の具体的な計算を完成させる(まだ未完成)。
+5. **さらに大きな残作業**: 4 は "第二完全列"(Ω_{V[T]/V}を経由する
    商の計算)であって、Lemma 1.1 が実際に要求している "第一完全列"
    (`Ω_V ⊗_V W → Ω_W → Ω_{W/V} → 0`、V→W の塔に対するもの)とは別の
    完全列である。Lemma 1.1 の**単射性**の主張(第一完全列の最初の射が
    単射)は、この2つの完全列を貼り合わせる追加の議論(Faltings の原文
    だと「f'(w)dT の係数が非零因子だから」という具体的な計算)が必要で、
    まだ手を付けていない。
-4. `different(W/V) = (f'(w))` という事実(mathlib の
+6. `different(W/V) = (f'(w))` という事実(mathlib の
    `aeval_derivative_mem_differentIdeal`・`conductor_mul_differentIdeal`
    と接続)、および「W/p^δW の長さ」という古典的な「長さ」概念を
    mathlib のどの道具(`Module.length`? 合成列?)で表現するかも未調査。
@@ -65,5 +75,35 @@ noncomputable def nzdCotangentEquivQuot {A' : Type*} [CommRing A'] (f : A')
     rw [Submodule.map_top]; exact LinearEquiv.range e1.symm
   rw [h2]
   simp
+
+/-- `AdjoinRoot f`(`= Polynomial R ⧸ (f)`)への商写像の核は`(f)`そのもの。 -/
+theorem ker_adjoinRoot_mk {R : Type*} [CommRing R] (f : Polynomial R) :
+    RingHom.ker (AdjoinRoot.mk f) = Ideal.span ({f} : Set (Polynomial R)) := by
+  show RingHom.ker (Ideal.Quotient.mk (Ideal.span {f})) = Ideal.span {f}
+  exact Ideal.mk_ker
+
+/-- 環の塔 `R → A → B`(`A → B` が全射)に対し、Kähler 微分の「第二完全列」
+`B ⊗[A] Ω[A⁄R] → Ω[B⁄R] → 0`(`mapBaseChange` の core exactness)を
+商同型の形で述べたもの: `(B⊗_A Ω_{A/R}) ⧸ ker(mapBaseChange) ≃ₗ[B] Ω_{B/R}`。 -/
+noncomputable def kerQuotEquivOmega {R A B : Type*} [CommRing R] [CommRing A] [CommRing B]
+    [Algebra R A] [Algebra A B] [Algebra R B] [IsScalarTower R A B]
+    (hsurj : Function.Surjective (algebraMap A B)) :
+    letI M := TensorProduct A B Ω[A⁄R]
+    (M ⧸ (LinearMap.ker (KaehlerDifferential.mapBaseChange R A B) : Submodule B M)) ≃ₗ[B] Ω[B⁄R] :=
+  LinearMap.quotKerEquivOfSurjective _ (KaehlerDifferential.mapBaseChange_surjective R A B hsurj)
+
+/-- 上の `ker(mapBaseChange)` の台集合は `kerCotangentToTensor` の値域に一致する
+(Jacobi-Zariski 型の完全列 `exact_kerCotangentToTensor_mapBaseChange` の
+集合レベルの言い換え)。`kerQuotEquivOmega` と組み合わせて、`Ω_{B/R}` を
+`I/I²`(`I = ker(A→B)`)を経由して具体的に計算する足場になる。 -/
+theorem ker_mapBaseChange_eq_range_kerCotangentToTensor {R A B : Type*}
+    [CommRing R] [CommRing A] [CommRing B]
+    [Algebra R A] [Algebra A B] [Algebra R B] [IsScalarTower R A B]
+    (hsurj : Function.Surjective (algebraMap A B)) :
+    (LinearMap.ker (KaehlerDifferential.mapBaseChange R A B) : Set (TensorProduct A B Ω[A⁄R])) =
+      Set.range (KaehlerDifferential.kerCotangentToTensor R A B) := by
+  have hex := KaehlerDifferential.exact_kerCotangentToTensor_mapBaseChange R A B hsurj
+  ext y
+  exact hex y
 
 end ABC3.Found.Falt1
