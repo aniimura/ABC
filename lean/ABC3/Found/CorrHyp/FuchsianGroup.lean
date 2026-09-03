@@ -74,4 +74,62 @@ theorem fg_of_finiteIndexIn {F1 F2 : FuchsianGroup} (hfg : Group.FG F2.Γ)
   haveI : Group.FG (F1.Γ.subgroupOf F2.Γ) := Subgroup.fg_of_index_ne_zero _
   exact fg_transport (Subgroup.subgroupOfEquivOfLe h.1)
 
+/-! ## `FEt` の圏構造 —— `Definition 1.1`-`1.4` の具体化に要る 4 点
+
+`Space := FuchsianGroup`・`FEt A B := IsFiniteIndexIn A B` というモデルで
+`Corr`(`Definition 1.1`)を実装するには、`comp`(合成)と `pullback`(ファイバー積、
+`Definition 1.4`)が要る。ここで両方を実際に構成する——`Skeleton/CorrHyp/Section1.lean`
+の `Corr`/`comp'` が要求する 4 点(`comp`・`pullback`・`pbFst`・`pbSnd`)そのもの。 -/
+
+/-- `Γ₁ ⊓ Γ₂` の離散性(離散群の部分群は離散)。`pullback` の台。 -/
+def inter (F1 F2 : FuchsianGroup) : FuchsianGroup where
+  Γ := F1.Γ ⊓ F2.Γ
+  discrete := by
+    haveI := F1.discrete
+    haveI : DiscreteTopology (↥((F1.Γ ⊓ F2.Γ).subgroupOf F1.Γ)) := inferInstance
+    exact (Subgroup.subgroupOfContinuousMulEquivOfLe
+      (inf_le_left : F1.Γ ⊓ F2.Γ ≤ F1.Γ)).toHomeomorph.discreteTopology
+
+/-- `FEt` の合成(`Interface.CorrHyp.HyperbolicCurveData.comp`)。
+
+★**sorry 無し**——有限相対指数の乗法性(`Subgroup.relIndex_mul_relIndex`)から。 -/
+theorem isFiniteIndexIn_comp {A B C : FuchsianGroup} (hAB : IsFiniteIndexIn A B)
+    (hBC : IsFiniteIndexIn B C) : IsFiniteIndexIn A C := by
+  refine ⟨hAB.1.trans hBC.1, ?_⟩
+  haveI hAB' : A.Γ.IsFiniteRelIndex B.Γ := Subgroup.isFiniteRelIndex_iff_finiteIndex.mpr hAB.2
+  haveI hBC' : B.Γ.IsFiniteRelIndex C.Γ := Subgroup.isFiniteRelIndex_iff_finiteIndex.mpr hBC.2
+  rw [Subgroup.isFiniteRelIndex_iff_relIndex_ne_zero] at hAB' hBC'
+  rw [← Subgroup.isFiniteRelIndex_iff_finiteIndex, Subgroup.isFiniteRelIndex_iff_relIndex_ne_zero,
+      ← Subgroup.relIndex_mul_relIndex A.Γ B.Γ C.Γ hAB.1 hBC.1]
+  exact mul_ne_zero hAB' hBC'
+
+/-- `pullback f g` から `A` への射影(`Interface.CorrHyp.HyperbolicCurveData.pbFst`)。
+
+★**sorry 無し**——`(A ⊓ B).relIndex C = (A⊓B).relIndex A · A.relIndex C` かつ
+左辺が有限(`A`・`B` とも `C` の中で有限指数だから、`relIndex_inf_ne_zero`)なので、
+積が有限なら両因子とも有限。 -/
+theorem isFiniteIndexIn_pbFst {A B C : FuchsianGroup} (hA : IsFiniteIndexIn A C)
+    (hB : IsFiniteIndexIn B C) : IsFiniteIndexIn (inter A B) A := by
+  refine ⟨inf_le_left, ?_⟩
+  haveI hA' : A.Γ.IsFiniteRelIndex C.Γ := Subgroup.isFiniteRelIndex_iff_finiteIndex.mpr hA.2
+  haveI hB' : B.Γ.IsFiniteRelIndex C.Γ := Subgroup.isFiniteRelIndex_iff_finiteIndex.mpr hB.2
+  rw [Subgroup.isFiniteRelIndex_iff_relIndex_ne_zero] at hA' hB'
+  have hinf : (A.Γ ⊓ B.Γ).relIndex C.Γ ≠ 0 := Subgroup.relIndex_inf_ne_zero hA' hB'
+  rw [← Subgroup.isFiniteRelIndex_iff_finiteIndex, Subgroup.isFiniteRelIndex_iff_relIndex_ne_zero]
+  show (A.Γ ⊓ B.Γ).relIndex A.Γ ≠ 0
+  intro h0
+  have heq : (A.Γ ⊓ B.Γ).relIndex A.Γ * A.Γ.relIndex C.Γ = (A.Γ ⊓ B.Γ).relIndex C.Γ :=
+    Subgroup.relIndex_mul_relIndex (A.Γ ⊓ B.Γ) A.Γ C.Γ inf_le_left hA.1
+  rw [h0, zero_mul] at heq
+  exact hinf heq.symm
+
+/-- `pullback f g` から `B` への射影(`Interface.CorrHyp.HyperbolicCurveData.pbSnd`)。
+`inter A B = inter B A`(`⊓` の可換性)へ帰着して `pbFst` を使い回す。 -/
+theorem isFiniteIndexIn_pbSnd {A B C : FuchsianGroup} (hA : IsFiniteIndexIn A C)
+    (hB : IsFiniteIndexIn B C) : IsFiniteIndexIn (inter A B) B := by
+  have : inter A B = inter B A := by
+    unfold inter; congr 1; exact inf_comm _ _
+  rw [this]
+  exact isFiniteIndexIn_pbFst hB hA
+
 end ABC3.Found.CorrHyp
