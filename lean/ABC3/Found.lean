@@ -148,6 +148,7 @@ import ABC3.Found.FrdI.Prop55UntrIdx
 import ABC3.Found.FrdI.Prop55UntrCat
 import ABC3.Found.FrdI.Sec6GaloisCat
 import ABC3.Found.FrdI.Thm62Fsm
+import ABC3.Found.Divisor.Theory
 import ABC3.Found.Divisor.HeightOneDVR
 import ABC3.Found.Divisor.Hartogs
 import ABC3.Found.Divisor.FreeDivisorial
@@ -213,6 +214,7 @@ import ABC3.Found.Divisor.Ex63RlfRatStd
 import ABC3.Found.Divisor.Ex63RlfPic
 import ABC3.Found.Divisor.Ex61Morph
 import ABC3.Found.Divisor.CartierRlf
+import ABC3.Found.NumberField.Theory
 import ABC3.Found.NumberField.SepClosedIn
 import ABC3.Found.NumberField.SepClosedFunctor
 import ABC3.Found.NumberField.PrimeDivisorsOfValues
@@ -309,6 +311,7 @@ import ABC3.Found.FrdI.Rmk451
 import ABC3.Found.FrdI.Rmk451Birat
 import ABC3.Found.FrdI.TypeTransport
 import ABC3.Found.FrdI.Prop55Std
+import ABC3.Found.ProL.Theory
 import ABC3.Found.ProL.FinitePrimary
 import ABC3.Found.ProL.Defs
 import ABC3.Found.ProL.ProfiniteLimit
@@ -318,6 +321,7 @@ import ABC3.Found.ProL.Decomposition
 import ABC3.Found.ProL.ZetaPow
 import ABC3.Found.ProL.DivByP
 import ABC3.Found.ProL.OneSubPow
+import ABC3.Found.SixExp.Theory
 import ABC3.Found.SixExp.Liouville
 import ABC3.Found.SixExp.SchwarzZeros
 import ABC3.Found.SixExp.Extrapolation
@@ -391,6 +395,7 @@ import ABC3.Found.GenEll.VeluImage
 import ABC3.Found.GenEll.VeluPointSet
 import ABC3.Found.GenEll.CyclotomicUnits
 import ABC3.Found.GenEll.CyclotomicDenomFree
+import ABC3.Found.GaloisRep.Theory
 import ABC3.Found.GaloisRep.MuSumDenomFree
 import ABC3.Found.GaloisRep.MuHeadDenomFree
 import ABC3.Found.GaloisRep.AdicEvalGen
@@ -585,6 +590,7 @@ import ABC3.Found.GenEll.TensorPowCoherence
 import ABC3.Found.GenEll.CommonDegree
 import ABC3.Found.GenEll.FinCover
 import ABC3.Found.GenEll.ClearDenominator
+import ABC3.Found.Arakelov.Theory
 import ABC3.Found.Arakelov.SheafifyTrivValue
 import ABC3.Found.GenEll.TensorPowTriv
 import ABC3.Found.GenEll.ClearDenomGlue

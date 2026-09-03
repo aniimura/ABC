@@ -166,8 +166,6 @@ const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const SOURCE_DIR = join(ROOT, 'ResearchPaper', '0_Source');
 const STRUCT_DIR = join(ROOT, 'ResearchPaper', '1_Structured');
 const PAPERS_JSON = join(ROOT, 'ResearchPaper', 'papers.json');
-/** ★理論の登記簿(2026-09-03、案 B)。論文に属さないノードの所属を持つ。無くても動く。 */
-const THEORIES_JSON = join(ROOT, 'ResearchPaper', 'theories.json');
 /** 原文からの機械概算(規模の分母)。無くても動く。 */
 const SCALE_JSON = join(ROOT, 'ResearchPaper', 'dependency-scale.json');
 /** 葉の仕分け(自己申告)。無くても動く。 */
@@ -648,13 +646,23 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
   //      Explorer 上でも依存グラフ上でも所属が見えなかった。
   //    ☆ファイルは動かさない——移動は検索性を下げると実測した(案 A を採らなかった理由)。
   //      代わりに `ResearchPaper/theories.json` に登記させ、登記の無い名前を落とす。
-  if (existsSync(THEORIES_JSON)) {
-    const th = JSON.parse(readFileSync(THEORIES_JSON, 'utf8'));
-    const known = new Set([
-      ...Object.keys(reg),                       // 論文
-      ...Object.keys(th.theories ?? {}),         // 理論
-      ...Object.keys(th.paperDirs ?? {}),        // 大小違いなどの別名
-    ]);
+  //    ★★台帳は **Lean の宣言**で持つ(`Meta/Claim.lean` 冒頭の規約)。
+  //      理論ディレクトリごとに `Theory.lean` を置き、`def theory : ABC3.Meta.Theory` を宣言する。
+  //      (2026-09-03 に一度 `ResearchPaper/theories.json` へ書いたが、規約違反だったので戻した。)
+  {
+    /** ディレクトリ名 → `Theory` の宣言(あれば) */
+    const theoryOf = new Map();
+    for (const [f, src] of texts) {
+      const parts = relative(dir, f).replace(/\\/g, '/').split('/');
+      if (parts.length < 3 || parts[parts.length - 1] !== 'Theory.lean') continue;
+      const m = /def\s+theory\s*:\s*(?:ABC3\.Meta\.)?Theory[\s\S]{0,600}?consumers\s*:=\s*\[([^\]]*)\]/
+        .exec(src);
+      if (m) theoryOf.set(parts[1], m[1].match(/"([^"]*)"/g)?.map((s) => s.slice(1, -1)) ?? []);
+    }
+    // ★大小だけが違う論文ディレクトリ(`PGC` ↔ papers.json の `pGC`)。
+    //   ディレクトリ名を Lean の慣習(大文字始まり)に合わせているだけなので、別名で吸収する。
+    const PAPER_DIR_ALIAS = { PGC: 'pGC' };
+    const known = new Set([...Object.keys(reg), ...theoryOf.keys(), ...Object.keys(PAPER_DIR_ALIAS)]);
     const seen = new Map();                      // ディレクトリ名 → ファイル数
     for (const f of texts.keys()) {
       const parts = relative(dir, f).replace(/\\/g, '/').split('/');
@@ -665,22 +673,18 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
       if (known.has(name)) continue;
       ng(`lean/ABC3/*/${name}/`,
         `G10 ディレクトリ "${name}"(${n} ファイル)が論文でも登記済みの理論でもない。` +
-        'ResearchPaper/theories.json の `theories` に「何の理論か・どの論文が消費するか・' +
-        'mathlib にあるか」を書いて登記すること' +
+        `\`lean/ABC3/Found/${name}/Theory.lean\` に ` +
+        '`def theory : ABC3.Meta.Theory`(何の理論か・どの論文が消費するか・mathlib の在庫)' +
+        'を書いて登記すること' +
         '(★ノードの所属をディレクトリから読めるようにするため。2026-09-03、案 B)');
     }
-    if (!quiet) {
-      const rows = [...seen.entries()]
-        .filter(([k]) => (th.theories ?? {})[k])
-        .sort((a, b) => b[1] - a[1]);
-      if (rows.length) {
-        console.log(`  -- 理論の節点(論文に属さない層): ${rows.length} 理論 / ` +
-                    `${rows.reduce((s, r) => s + r[1], 0)} ファイル`);
-        for (const [k, n] of rows) {
-          const t = th.theories[k];
-          console.log(`     ${k.padEnd(13)} ${String(n).padStart(4)} ファイル ` +
-                      `← ${(t.consumers ?? []).join(', ')}`);
-        }
+    if (!quiet && theoryOf.size) {
+      const rows = [...seen.entries()].filter(([k]) => theoryOf.has(k)).sort((a, b) => b[1] - a[1]);
+      console.log(`  -- 理論の節点(論文に属さない層): ${rows.length} 理論 / ` +
+                  `${rows.reduce((s, r) => s + r[1], 0)} ファイル`);
+      for (const [k, n] of rows) {
+        console.log(`     ${k.padEnd(13)} ${String(n).padStart(4)} ファイル ` +
+                    `← ${theoryOf.get(k).join(', ')}`);
       }
     }
   }
