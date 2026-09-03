@@ -33,14 +33,14 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-09-04 ・ コミット 3873 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-09-04 ・ コミット 3876 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card warn"><div class="k">ゲート</div><div class="v">NG</div></div>
   <div class="card ok"><div class="k">selftest</div><div class="v">41/41</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">20745</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">20755</div></div>
   <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">5026</div></div>
   <div class="card"><div class="k">構造単位</div><div class="v">274</div></div>
   <div class="card"><div class="k">sorry</div><div class="v">58</div></div>
@@ -281,6 +281,9 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
+<tr><td><code>fe6888d2</code></td><td>2026-09-04</td><td>memory: p進対数の準同型性への2つの候補経路がどちらも近道でないことを記録</td></tr>
+<tr><td><code>3692a627</code></td><td>2026-09-04</td><td>memory: pdftotextの下付き+上付き出力順が出現ごとに不安定な件を記録</td></tr>
+<tr><td><code>57bb2e6d</code></td><td>2026-09-04</td><td>p進対数の級数収束をFound/PGC/PadicLog.leanでsorry無しに確立</td></tr>
 <tr><td><code>a12624c2</code></td><td>2026-09-04</td><td>記録——LocProP §0-§4(21/21)達成をgoalドキュメントに反映</td></tr>
 <tr><td><code>d575ad3f</code></td><td>2026-09-04</td><td>[LocProP] §4 が4/4完了——J-Geometric Sections、§0-§4全21項目達成</td></tr>
 <tr><td><code>545d9608</code></td><td>2026-09-04</td><td>[LocProP] §3 が5/5完了——The Weight Zero Quotient、check.mjsゲート全通過</td></tr>
@@ -290,9 +293,6 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 <tr><td><code>e37e44b3</code></td><td>2026-09-04</td><td>[LocProP] §1 が4/4完了——The Ordinary Case、check.mjsゲート全通過</td></tr>
 <tr><td><code>e3b61716</code></td><td>2026-09-04</td><td>CorrHyp Skeleton完了をmemoryに記録、pdftotextのキャッシュずれを新規記録</td></tr>
 <tr><td><code>e6663943</code></td><td>2026-09-04</td><td>CorrHypのゴールをSkeleton完了(24/24)に更新した</td></tr>
-<tr><td><code>53fa25fc</code></td><td>2026-09-04</td><td>CorrHyp: G1逐語照合をtools/check.mjsで検証・全項目パスさせた(第7件)</td></tr>
-<tr><td><code>18be3c82</code></td><td>2026-09-04</td><td>[LocProP] §0 が4/4完了——Lemma 0.4もInterface posit経由で条なし化、check.mjsゲート全通過</td></tr>
-<tr><td><code>1b9494d6</code></td><td>2026-09-03</td><td>[LocProP] §0 が3/4になった——Definition 0.3をEtaleSetup経由で条なし化</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない

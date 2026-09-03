@@ -158,6 +158,9 @@ def residueCard_and_degree_recoverable.needs : List ProofObligation :=
         "(ResearchPaper/lean-ecosystem.json。両リポジトリは本リポジトリに clone されていないので今日は再現していない)。" ++
         "★2026-09-04: 級数の収束のみ `Found/PGC/PadicLog.lean` に自前で構築した(sorry 無し、" ++
         "`padicLog`/`logTerm_summable`)——準同型性(log((1+x)(1+y))=log(1+x)+log(1+y))は" ++
-        "まだ無いので、この境界外入力は依然として absent のまま残る") 3 ]
+        "まだ無い。★同日、双対の `padicExp`(`Found/PGC/PadicExp.lean`)は加法性" ++
+        "`exp(x+y)=exp(x)·exp(y)` まで sorry 無しで到達した(Cauchy 積+二項定理、" ++
+        "微分不要)——`exp`/`log` の互逆性が示せれば log の加法性もここから従うが、" ++
+        "互逆性自体は未着手。この境界外入力は依然として absent のまま残る") 3 ]
 
 end ABC3.Skeleton.PGC

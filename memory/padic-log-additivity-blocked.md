@@ -1,9 +1,19 @@
 ---
 name: padic-log-additivity-blocked
-description: p進対数の準同型性を仕上げる2つの候補経路をどちらも試し、両方とも別の実装コストを要すると判明
+description: 対数側の準同型性は依然未解決だが、指数側(padicExp)を自前構築して加法性まで到達した(2026-09-04)
 metadata:
   type: project
 ---
+
+★★2026-09-04 追記: **経路③(自前で `padicExp` を組む)が指数の加法性まで到達した。**
+`Found/PGC/PadicExp.lean` に `padicExp`・`padicExp_add`(`exp(x+y)=exp(x)·exp(y)`)を
+`sorry` 無しで実装済み——`NormedAlgebra ℚ K.carrier` も形式冪級数も使わず、
+`K.carrier` 上で直接 `expTerm`(`xⁿ/n!`)を定義し、Cauchy 積
+(`Summable.tsum_mul_tsum_eq_tsum_sum_antidiagonal`)+ 二項定理(`add_pow`)
+だけで閉じた。**対数の加法性より指数の加法性のほうが本質的に易しい**
+(微分を経由しない、純粋に組み合わせ的な議論で済む)ことが判明——
+下記①②の記録は「対数を直接攻める」経路の記録として残すが、**次にここへ
+戻るときは③の続き(`exp`/`log` の互逆性)から入るのがよい**。
 
 pGC の p 進対数(`Found/PGC/PadicLog.lean`、級数の収束は sorry 無しで確立済み、
 2026-09-04)について、残る「準同型性」`log((1+x)(1+y))=log(1+x)+log(1+y)` を
@@ -24,10 +34,16 @@ mathlib の `ℚ` の既定 `NormedField` インスタンスはアルキメデ�
 `NormedField` を **scoped で**別に立てる必要があり、それ自体が新しい instance
 diamond のリスクを持つ小さくない作業。
 
-**結論**: どちらの経路も「対数の収束」と同程度、あるいはそれ以上の実装コストを
-要する——収束の確立(このセッションで sorry 無しに達成)より簡単な次の一手では
-なかった。次にここへ戻るときは、経路②(scoped `NormedField ℚ` p進版を立てて
-`NormedSpace.exp_add` を使う)の方が筋がよさそうだが、その instance が他の
-無条件 `NormedAlgebra ℚ ?` 系の証明を汚染しないことを先に確認すること。
+**結論(当時)**: ①②はどちらも「対数の収束」と同程度、あるいはそれ以上の実装
+コストを要すると見えた。実際には③(対数を直接攻めず、指数を自前で組む)が
+迂回路として機能した——**詰まったら「同じ対象を別の道具で直接攻める」のではなく
+「双対のより易しい対象を作って橋渡しする」を検討すること**、が一般化できる教訓。
+
+**残る作業**: `padicExp K (padicLog K x + padicLog K y) = padicExp K (padicLog K (x*y))`
+のような互逆性(`exp∘log=id`・`log∘exp=id`)が示せれば、`padicExp_add` から
+`log` の加法性が微分無しで出る。互逆性の証明は `exp`/`log` の係数どうしの合成公式
+(スターリング数的な組み合わせ論)を要し、加法性(二項定理だけ)より重いが、
+`Found/PGC/PadicExp.lean`/`PadicLog.lean` の道具立て(`expTerm`/`logTerm`・
+Cauchy 積・`NonarchimedeanRing` instance)はすでに揃っている。
 
 関連: [[measure-mathlib-before-skeleton]]
