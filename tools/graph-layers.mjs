@@ -461,20 +461,42 @@ for (const k of adj.keys()) {
   ours.set(k, { kind: k.includes('[埋まった]') ? 'done' : 'skeleton', file: 'lean/ABC3/Interface/' });
 }
 
-// ── ボックス化: SCC(>1) はそのまま / 単独節点は (層, 論文) でまとめる ──
+/** 節点キー `FrdI / Proposition 5.5` から節番号 `5` を取る。
+ *  ★ボックスの名前を `[論文] §N` の一つの形に揃えるために使う(2026-09-03)。 */
+const secOf = (k) => {
+  const m = /\s(\d+)(?:\.\d+)*$/.exec(k.split(' / ')[1] ?? '');
+  return m ? m[1] : '—';
+};
+/** ボックスの名前を `[論文] §N` の一つの形にする。
+ *  ★番号を持たない節点(概念・`§0` の語)もここで同じ形に寄せる。 */
+const tagOf = (k) => {
+  const t = k.split(' / ')[0];
+  if (t === 'CONCEPT') return '語彙(番号なし)';
+  const z = /^§0:(.+)$/.exec(t);          // `§0:AbsTopI` は「その論文の §0」である
+  if (z) return `${z[1]} §0`;
+  if (t.startsWith('義務')) return '義務(Interface)';
+  if (t === '基礎') return '基礎(mathlib の在庫)';
+  if (t === '分解') return '分解(段への割り付け)';
+  return `${t} §${secOf(k)}`;
+};
+
+// ── ボックス化: SCC(>1) はそのまま / 単独節点は (層, 論文, 節) でまとめる ──
 const boxes = new Map();  // id -> {layer, label, tags, items[], scc}
 const boxOfNode = new Map();
 for (const [c, mem] of members) {
   const L = layerOf(c);
   if (mem.length > 1) {
     const id = `scc${c}`;
-    const tg = new Map(); for (const m of mem) { const t = m.split(' / ')[0]; tg.set(t, (tg.get(t) ?? 0) + 1); }
+    const tg = new Map();
+    for (const m of mem) { const t = tagOf(m); tg.set(t, (tg.get(t) ?? 0) + 1); }
     boxes.set(id, { layer: L, tags: [...tg].sort((a, b) => b[1] - a[1]), items: mem, scc: true });
     for (const m of mem) boxOfNode.set(m, id);
   } else {
-    const k = mem[0], t = k.split(' / ')[0];
-    const id = `L${L}:${t}`;
-    if (!boxes.has(id)) boxes.set(id, { layer: L, tags: [[t, 0]], items: [], scc: false });
+    // ★ボックスの表記を揃えるため、(層, 論文) ではなく **(層, 論文, 節)** でまとめる
+    //   (2026-09-03)。こうするとどのボックスも `[論文] §N` の一つの形になる。
+    const k = mem[0], lab = tagOf(k);
+    const id = `L${L}:${lab}`;
+    if (!boxes.has(id)) boxes.set(id, { layer: L, tags: [[lab, 0]], items: [], scc: false });
     boxes.get(id).items.push(k);
     boxes.get(id).tags[0][1]++;
     boxOfNode.set(k, id);

@@ -33,17 +33,17 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 </style></head><body><div class="wrap">
 
 <h1>Math_ABC3 — 宇宙際タイヒミューラー理論の Lean 形式化</h1>
-<p class="sub">最終更新 2026-08-20 ・ コミット 1761 件 ・ このページは <code>node tools/index-html.mjs</code> で
+<p class="sub">最終更新 2026-09-03 ・ コミット 3835 件 ・ このページは <code>node tools/index-html.mjs</code> で
 <b>ゲートの実出力から生成</b>している(数字を手で書かない)</p>
 
 <h2>器具の状態</h2>
 <div class="grid">
   <div class="card ok"><div class="k">ゲート</div><div class="v">PASS</div></div>
-  <div class="card ok"><div class="k">selftest</div><div class="v">37/37</div></div>
-  <div class="card"><div class="k">Lean 宣言</div><div class="v">9554</div></div>
-  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">2447</div></div>
-  <div class="card"><div class="k">構造単位</div><div class="v">197</div></div>
-  <div class="card"><div class="k">sorry</div><div class="v">56</div></div>
+  <div class="card ok"><div class="k">selftest</div><div class="v">41/41</div></div>
+  <div class="card"><div class="k">Lean 宣言</div><div class="v">20501</div></div>
+  <div class="card"><div class="k">逐語照合(PDF と一致)</div><div class="v">4991</div></div>
+  <div class="card"><div class="k">構造単位</div><div class="v">202</div></div>
+  <div class="card"><div class="k">sorry</div><div class="v">39</div></div>
 </div>
 <div class="note"><b>★<code>sorry</code> の件数を単独で進捗と読まないこと。</b>
 <code>Interface</code> に条件を posit すれば <code>sorry</code> は消えるが、負債は増える(実例あり)。
@@ -52,30 +52,30 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>原文項目の実装率 —— [FrdI]「The Geometry of Frobenioids I」</h2>
 <div class="grid">
-  <div class="card ok"><div class="k">必要分の実装</div><div class="v">46/54</div></div>
-  <div class="card"><div class="k">達成率</div><div class="v">85%</div></div>
+  <div class="card ok"><div class="k">必要分の実装</div><div class="v">54/54</div></div>
+  <div class="card"><div class="k">達成率</div><div class="v">100%</div></div>
   <div class="card"><div class="k">直接名指し</div><div class="v">25</div></div>
   <div class="card"><div class="k">FrdI 全項目</div><div class="v">83</div></div>
-  <div class="card warn"><div class="k">条つきのみ(数に入らない)</div><div class="v">7</div></div>
+  <div class="card warn"><div class="k">条つきのみ(数に入らない)</div><div class="v">—</div></div>
 </div>
 <table><tr><th style="width:60px">節</th><th style="width:78px">実装/必要</th><th>進み</th></tr>
-<tr><td><b>§1</b></td><td style="font-variant-numeric:tabular-nums">14/15</td>
-<td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#2f6fd0;height:9px;border-radius:4px;width:93%"></div></div></td></tr>
+<tr><td><b>§1</b></td><td style="font-variant-numeric:tabular-nums">15/15</td>
+<td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#1e7a52;height:9px;border-radius:4px;width:100%"></div></div></td></tr>
 <tr><td><b>§2</b></td><td style="font-variant-numeric:tabular-nums">8/8</td>
 <td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#1e7a52;height:9px;border-radius:4px;width:100%"></div></div></td></tr>
 <tr><td><b>§3</b></td><td style="font-variant-numeric:tabular-nums">9/9</td>
 <td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#1e7a52;height:9px;border-radius:4px;width:100%"></div></div></td></tr>
 <tr><td><b>§4</b></td><td style="font-variant-numeric:tabular-nums">10/10</td>
 <td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#1e7a52;height:9px;border-radius:4px;width:100%"></div></div></td></tr>
-<tr><td><b>§5</b></td><td style="font-variant-numeric:tabular-nums">4/7</td>
-<td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#2f6fd0;height:9px;border-radius:4px;width:57%"></div></div></td></tr>
-<tr><td><b>§6</b></td><td style="font-variant-numeric:tabular-nums">1/5</td>
-<td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#c98a00;height:9px;border-radius:4px;width:20%"></div></div></td></tr>
+<tr><td><b>§5</b></td><td style="font-variant-numeric:tabular-nums">7/7</td>
+<td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#1e7a52;height:9px;border-radius:4px;width:100%"></div></div></td></tr>
+<tr><td><b>§6</b></td><td style="font-variant-numeric:tabular-nums">5/5</td>
+<td><div style="background:#eef0f3;border-radius:4px;height:9px;width:100%"><div style="background:#1e7a52;height:9px;border-radius:4px;width:100%"></div></div></td></tr>
 </table>
 <div class="note"><b>★「必要分」は [IUTchI–IV] が直接名指しする 25 件の<u>推移閉包</u>である</b>
 (FrdI 全 83 件のうち 54 件)。<b>数えるのは命題全体の <code>.src</code>(条なし)だけ</b>——
 (i) だけ実装して「済」と数えるのを防ぐため、条つきの <code>.src</code> は数に入れていない
-(いま 7 件が条つきのみ)。<br>
+(いま — 件が条つきのみ)。<br>
 <b>★§3 と §4 が止まっている理由は下の「原文の記載不備と、我々が足した前提」に書いてある</b>——
 §3 は <code>Gap_1_14_iii</code>(反例つきの原典の穴)、§4 は <code>Prop 4.4, (ii)</code> の
 <code>otriBase</code> に 5 件がぶら下がっている。数字は <code>node tools/frdi-progress.mjs</code> と
@@ -83,22 +83,22 @@ ul{margin:6px 0 0 18px;font-size:13.5px}li{margin-bottom:4px}
 
 <h2>依存グラフ(我々が写した範囲)</h2>
 <div class="grid">
-  <div class="card"><div class="k">節点</div><div class="v">44</div></div>
-  <div class="card"><div class="k">辺</div><div class="v">59</div></div>
+  <div class="card"><div class="k">節点</div><div class="v">47</div></div>
+  <div class="card"><div class="k">辺</div><div class="v">75</div></div>
   <div class="card"><div class="k">最大深さ</div><div class="v">7</div></div>
-  <div class="card ok"><div class="k">循環</div><div class="v">2</div></div>
-  <div class="card ok"><div class="k">着地した葉</div><div class="v">37</div></div>
-  <div class="card"><div class="k">未展開の葉</div><div class="v">10</div></div>
-  <div class="card"><div class="k">暗黙の段</div><div class="v">162</div></div>
-  <div class="card"><div class="k">Interface 実装待ち</div><div class="v">14</div></div>
+  <div class="card ok"><div class="k">循環</div><div class="v">14</div></div>
+  <div class="card ok"><div class="k">着地した葉</div><div class="v">291</div></div>
+  <div class="card"><div class="k">未展開の葉</div><div class="v">15</div></div>
+  <div class="card"><div class="k">暗黙の段</div><div class="v">269</div></div>
+  <div class="card"><div class="k">Interface 実装待ち</div><div class="v">11</div></div>
 </div>
 
 <h2>見る</h2>
 <a class="big" href="dependency-graph.html"><b>依存の層 — 左から着手する →</b>
-<span>原文の参照から機械抽出した 1174 節点を、強連結成分で潰して 296 個の箱・64 層に並べたもの。
+<span>原文の参照から機械抽出した 1190 節点を、強連結成分で潰して 460 個の箱・64 層に並べたもの。
 右端が [IUTchIII] Corollary 3.12、左端(層 0)は依存を持たないので今すぐ着手できる。
 ボックスをクリックすると、緑=これに要るもの / 紫=これを使うもの が推移的にハイライトされる。
-<b>我々が触れている節点 76 件・Interface の義務 14/37 件。</b>
+<b>我々が触れている節点 76 件・Interface の義務 18/42 件。</b>
 生成は <code>node tools/graph-layers.mjs</code>。<br>★★<b>分解チェーンを木のまま展開している</b>——<code>Theorem 3.4</code>(18 節点・9 層)や <code>Proposition 4.4</code>(13 節点・5 層)は1 箱ではなく、<b>本来の大きさ</b>で出る。登記は <code>ResearchPaper/frdi-decomposition.json</code>、葉は <code>node tools/frdi-newleaves.mjs</code>。</span></a>
 <a class="big" href="PLAN.md"><b>PLAN.md — 計画と、その訂正の記録 →</b>
 <span>実測した事実、ゲート G1–G6、飛躍の扱い、正直な制約。<b>反証された自分の主張を消さずに残している。</b></span></a>
@@ -281,25 +281,25 @@ mathlib に pro-<code>l</code> 群が実質不在だからである。<b>数え�
 
 <h2>直近のコミット</h2>
 <table><tr><th style="width:78px">hash</th><th style="width:88px">日付</th><th>件名</th></tr>
-<tr><td><code>7306607</code></td><td>2026-08-20</td><td>★★★★Dirichlet 密度の語彙——cheb 鎖の cheb-density</td></tr>
-<tr><td><code>077fbc6</code></td><td>2026-08-20</td><td>記憶の更新——§5 は 4/7、残り 3 項目は完全化のクラスタに帰着する</td></tr>
-<tr><td><code>4f87fa8</code></td><td>2026-08-20</td><td>★★★★★★Corollary 5.7 が閉じた——§5 は 4/7</td></tr>
-<tr><td><code>8a35949</code></td><td>2026-08-20</td><td>★★★★★Corollary 5.7, (i) の後半——base-Frobenius 対と pre-model 型が移る</td></tr>
-<tr><td><code>cbe8d88</code></td><td>2026-08-20</td><td>★★★★★★Corollary 5.7, (i)——Ψ は base-section を base-section へ移す</td></tr>
-<tr><td><code>7b0a445</code></td><td>2026-08-20</td><td>★★★★★Corollary 5.7, (iii)(iv)——base-Frobenius 対は圏同値で移る</td></tr>
-<tr><td><code>6c8515b</code></td><td>2026-08-20</td><td>記録の修正——cor57 の note の誤字（Τimes → 𝒪^×）</td></tr>
-<tr><td><code>196dee4</code></td><td>2026-08-20</td><td>★★★★★Corollary 5.7, (ii)——unit-profinite 型は圏同値で移る</td></tr>
-<tr><td><code>63598b3</code></td><td>2026-08-20</td><td>依存グラフ——ex63-model を半済に更新（組み立ては閉じた）</td></tr>
-<tr><td><code>7ea188f</code></td><td>2026-08-20</td><td>★★★★★算術因子のデータから model Frobenioid へ（Example 6.3 の Theorem 5.2 (ii) の段）</td></tr>
-<tr><td><code>691fb3a</code></td><td>2026-08-20</td><td>★★★★★★格子不変量 g₂, g₃ の q 展開(§9-528、第 215 ブロック)——道 β の段 4</td></tr>
-<tr><td><code>18bc6fe</code></td><td>2026-08-20</td><td>★★★★★Φ・B の数体についての関手性——鎖 arith が全節点完了</td></tr>
+<tr><td><code>54dbdcff</code></td><td>2026-09-03</td><td>★★★★★★★★1 ファイル = 1 ノードへ——条なし項目ごとに 49 本を割った(第 1458、案 a)</td></tr>
+<tr><td><code>e23cbc8f</code></td><td>2026-09-03</td><td>★★★★★★★★大きいファイル 5 本を意味(見出し・section)で割った(第 1457)</td></tr>
+<tr><td><code>45f0e4e7</code></td><td>2026-09-03</td><td>★★★★★★★★意味(見出し)でファイルを割る——Uniformization.lean を 12 枚に(第 1456)</td></tr>
+<tr><td><code>a622c4ee</code></td><td>2026-09-03</td><td>表示用の依存グラフ——論文 × セクションで群団化した(第 1455)</td></tr>
+<tr><td><code>3bc4d104</code></td><td>2026-09-03</td><td>★★★★★★★★依存グラフを当初の意図どおりに直した——ノード = Lean ファイル(第 1454)</td></tr>
+<tr><td><code>b9ac7e5b</code></td><td>2026-09-03</td><td>配管——check.mjs に --brief を足した。出力が 98.7% 減る(第 1453)</td></tr>
+<tr><td><code>65b7b946</code></td><td>2026-09-03</td><td>★★★★★★★★理論の登記を JSON から Lean へ戻した(第 1452)</td></tr>
+<tr><td><code>974936eb</code></td><td>2026-09-03</td><td>★★★★★★★★★★★★検索力と所属の可視化——案 I・D・B を実装した(第 1451)</td></tr>
+<tr><td><code>c2fc1064</code></td><td>2026-09-03</td><td>測定——着手時点ではブロック数を当てられない。合図の相関は −0.06(第 1450)</td></tr>
+<tr><td><code>96b69c21</code></td><td>2026-09-03</td><td>配管——新ゲートが将来「作業を止める」形にならないよう塞いだ(第 1449)</td></tr>
+<tr><td><code>88f6e83c</code></td><td>2026-09-03</td><td>★★★★★★★★偽の statement を検出するゲート G8・G9 を入れた(第 1448)</td></tr>
+<tr><td><code>72215b16</code></td><td>2026-09-03</td><td>配管——作業高速化の実測と、台帳更新を 1 本の CLI に集約(第 1447)</td></tr>
 </table>
 
 <div class="note"><b>原典について。</b>望月氏の論文は本リポジトリに含めていない
 (<code>ResearchPaper/0_Source/</code> は <code>.gitignore</code>)。第三者の著作物を再配布しないため。
 原本は RIMS で公開されている。本リポジトリが持つのは<b>「それをどう形式化するか」だけ</b>で、
 原文の引用は出典(論文名・物理ページ)つきの短い逐語に限り、
-<b>すべて PDF と機械照合している</b>(2447 件)。</div>
+<b>すべて PDF と機械照合している</b>(4991 件)。</div>
 
 <p class="foot">Lean 4 (v4.31.0-rc2) + mathlib ・ 再現は <code>lake build</code> と <code>node tools/check.mjs</code> ・
 このページは <code>node tools/index-html.mjs</code> で再生成する</p>
