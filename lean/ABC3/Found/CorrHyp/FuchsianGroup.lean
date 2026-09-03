@@ -81,6 +81,17 @@ theorem fg_of_finiteIndexIn {F1 F2 : FuchsianGroup} (hfg : Group.FG F2.Γ)
 `Definition 1.4`)が要る。ここで両方を実際に構成する——`Skeleton/CorrHyp/Section1.lean`
 の `Corr`/`comp'` が要求する 4 点(`comp`・`pullback`・`pbFst`・`pbSnd`)そのもの。 -/
 
+/-- `F` は `F` の中で(自明に)有限指数。`Definition 1.1`-`1.5` 末尾の
+「it follows immediately that the relation of isogeny is an equivalence
+relation」のうち**反射性**に要る恒等射(`Skeleton/CorrHyp/Section1.lean` の
+`IsIsogenous.needs` が「まだ足していない」と記していたもの)。
+
+★**sorry 無し**。 -/
+theorem isFiniteIndexIn_refl (F : FuchsianGroup) : IsFiniteIndexIn F F := by
+  refine ⟨le_refl _, ?_⟩
+  rw [Subgroup.subgroupOf_self]
+  infer_instance
+
 /-- `Γ₁ ⊓ Γ₂` の離散性(離散群の部分群は離散)。`pullback` の台。 -/
 def inter (F1 F2 : FuchsianGroup) : FuchsianGroup where
   Γ := F1.Γ ⊓ F2.Γ

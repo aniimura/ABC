@@ -82,6 +82,9 @@ structure HyperbolicCurveData where
   Space : Type
   /-- 有限 étale 射(原文 `finite, étale morphism`)。 -/
   FEt : Space → Space → Type
+  /-- 恒等射(`Found/CorrHyp/FuchsianGroup.lean` の `isFiniteIndexIn_refl` が
+  具体化する——`Definition 1.5` 直後の「isogeny は同値関係」の反射性に要る)。 -/
+  idFEt : ∀ A : Space, FEt A A
   /-- 有限 étale 射の合成。 -/
   comp : ∀ {A B C : Space}, FEt A B → FEt B C → FEt A C
   /-- 有限 étale 射に沿ったファイバー積(`Definition 1.4` の `C₁ ×_Y C₂`)。 -/
