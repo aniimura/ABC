@@ -80,7 +80,19 @@ def cyclotomicCharacter_recoverable.needs : List ProofObligation :=
         "grep -rli 'duality' Mathlib/NumberTheory Mathlib/RepresentationTheory → " ++
         "DirichletCharacter/Orthogonality・MulChar/Duality・Cyclotomic/Galois・Tannaka のみ。" ++
         "公開プロジェクト(ClassFieldTheory・LocalClassFieldTheory)は 2026-08-14 に測定して 0 ヒット" ++
-        "(ResearchPaper/lean-ecosystem.json。両リポジトリは本リポジトリに clone されていないので今日は再現していない)") 2,
+        "(ResearchPaper/lean-ecosystem.json。両リポジトリは本リポジトリに clone されていないので今日は再現していない)。" ++
+        "★★2026-09-04 再測定(mathlib が更新されていた——上の 2026-08-14 の" ++
+        "'tateCohomology|TateCohomology|GaloisCohomology → 0件' は今は誤り、古い版の話):" ++
+        "`RepresentationTheory/Homological/GroupCohomology/`(groupCohomology・H0/H1/H2、" ++
+        "有限群の非連続コホモロジー)と `RepresentationTheory/Homological/TateCohomology/` が" ++
+        "存在する。ただし `groupCohomology` は `[Group G]` のみを要求する**離散**群論で、" ++
+        "副有限 Γ_K の連続コサイクルではない——有限次拡大 L/K の Gal(L/K)(有限群)には" ++
+        "直接使える可能性があるが、(a) H²(Gal(L/K),Lˣ) と Brauer 群 Br(L/K) を繋ぐ" ++
+        "crossed product 構成、(b) 不変写像 Br(K)≅ℚ/ℤ の具体形、(c) Γ_K(射影極限)への" ++
+        "extension のいずれも mathlib に無い(`BrauerGroup`(`Algebra/BrauerGroup/`)は" ++
+        "CSA 経由の抽象論のみで、局所体の Brauer 群の計算は無い)。**抽象論の部品は増えたが、" ++
+        "局所体特有の算術内容(不変写像の具体形)は依然として不在**——次にここへ戻るなら" ++
+        "(a)(b)(c) のどれか1つを先に測ること") 2,
     .derivation "H^2(K,M) ≅ Z/p^nZ ⟺ M ≅ Z/p^nZ(1) を双対性から導く段" 3,
     .implicitStep "Z_p(1) の同型類が回復できることから、指標 χ が回復できることへの一段" 3 ]
 
