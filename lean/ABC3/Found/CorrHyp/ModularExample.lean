@@ -97,11 +97,41 @@ theorem FG_ne : FG_Gamma2 ≠ FG_SL2Z := by
   exact φ₂T_not_mem_Γ_Gamma2 (hΓ ▸ (⟨ModularGroup.T, rfl⟩ : φ₂ ModularGroup.T ∈ Γ_SL2Z))
 
 open ABC3.Skeleton.CorrHyp in
-/-- `corrHypInstance` における `Corr` の非空虚性 witness——
-`SL(2,ℤ)` から `Γ(2)` への correspondence(`Γ(2)` 自身を経由、
-`Γ(2) ↪ SL(2,ℤ)` と `Γ(2) ↪ Γ(2)`(恒等)の対)。 -/
+/-- **[CorrHyp] `Definition 1.1`(`Corr`)の `corrHypInstance` における実現**
+——`SL(2,ℤ)` から `Γ(2)` への correspondence(`Γ(2)` 自身を経由、
+`Γ(2) ↪ SL(2,ℤ)` と `Γ(2) ↪ Γ(2)`(恒等)の対)。`FEt` が本物の
+有限指数条件(`IsFiniteIndexIn`)で埋まっているので、この `C` が
+実際に `X`・`Y` 両方に有限指数で入るという非自明な内容を持つ。
+
+★**sorry 無し**。標準3公理のみ。 -/
 noncomputable def corr_witness : Corr corrHypInstance FG_SL2Z FG_Gamma2 :=
   ⟨FG_Gamma2, PLift.up FG_isFiniteIndexIn, PLift.up (isFiniteIndexIn_refl FG_Gamma2)⟩
+
+def corr_witness.src : ABC3.Meta.Source :=
+  { paper := "CorrHyp", pdfPage := 3, item := "Definition 1.1", sectionId := "corrhyp-def-1-1" }
+
+open ABC3.Skeleton.CorrHyp in
+/-- **[CorrHyp] `Definition 1.3`(`Corr.transpose`)の `corrHypInstance` に
+おける実現**——`corr_witness`(`SL(2,ℤ) → Γ(2)`)の転置(`Γ(2) → SL(2,ℤ)`)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def corr_witness_transpose : Corr corrHypInstance FG_Gamma2 FG_SL2Z :=
+  Corr.transpose corrHypInstance corr_witness
+
+def corr_witness_transpose.src : ABC3.Meta.Source :=
+  { paper := "CorrHyp", pdfPage := 4, item := "Definition 1.3", sectionId := "corrhyp-def-1-3" }
+
+open ABC3.Skeleton.CorrHyp in
+/-- **[CorrHyp] `Definition 1.4`(`Corr.comp'`)の `corrHypInstance` における
+実現**——`corr_witness` とその転置の合成(`SL(2,ℤ) → Γ(2) → SL(2,ℤ)`、
+`pullback`/`pbFst`/`pbSnd` を実際に経由する)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def corr_witness_comp : Corr corrHypInstance FG_SL2Z FG_SL2Z :=
+  Corr.comp' corrHypInstance corr_witness corr_witness_transpose
+
+def corr_witness_comp.src : ABC3.Meta.Source :=
+  { paper := "CorrHyp", pdfPage := 4, item := "Definition 1.4", sectionId := "corrhyp-def-1-4" }
 
 open ABC3.Skeleton.CorrHyp in
 /-- **[CorrHyp] `Definition 1.5`(`IsIsogenous`)の `corrHypInstance` における
@@ -111,5 +141,28 @@ isogenous であることを、モジュラー群と主合同部分群という�
 
 ★**sorry 無し**。標準3公理のみ。 -/
 theorem isIsogenous_witness : IsIsogenous corrHypInstance FG_SL2Z FG_Gamma2 := ⟨corr_witness⟩
+
+def isIsogenous_witness.src : ABC3.Meta.Source :=
+  { paper := "CorrHyp", pdfPage := 4, item := "Definition 1.5", sectionId := "corrhyp-def-1-5" }
+
+/-!
+## ★`Definition 1.2`(`IsTrivial`)は claim しない——正直な限界
+
+`FEt X Y := PLift (IsFiniteIndexIn X Y)` は `Prop` を包んだだけの型なので、
+**証明無関係性により同じ `X Y` の間の `FEt` は常に唯一**である。ゆえに
+`Corr.IsTrivial`(「ある `γ` で `α = β ∘ γ` と書ける」)は
+`corrHypInstance` では**任意の correspondence について自動的に真**になる
+(`γ := c.α` を取れば `cases` だけで閉じる——下の反例で確認済み)。
+これは原文の「trivial」(複数の互いに異なる有限被覆が存在しうる中で、
+特別にこの形に書けるもの)を**捉えていない**——`FEt` を `Prop` ではなく
+本物の `Type`(例えば被覆変換群を込めた型)にしない限り、`Definition 1.2`
+はこの instance で意味のある形では実装できない。★`.src` は付けない。 -/
+
+open ABC3.Skeleton.CorrHyp in
+theorem corr_witness_isTrivial_degenerate : Corr.IsTrivial corrHypInstance corr_witness := by
+  refine ⟨corr_witness.α, ?_⟩
+  cases corr_witness.α
+  cases (corrHypInstance.comp corr_witness.β corr_witness.α)
+  rfl
 
 end ABC3.Found.CorrHyp
