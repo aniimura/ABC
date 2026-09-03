@@ -73,4 +73,10 @@ instance instIsPAdicLocalRing (p : ℕ) [Fact p.Prime] : IsPAdicLocalRing p ℤ_
 /-- `K`(`p`-adic field 本体)は `𝒪_K` の商体として取り出す。 -/
 abbrev pAdicField (O : Type*) [CommRing O] [IsDomain O] : Type _ := FractionRing O
 
+/-- ★**[LocProP] Definition 0.1** の出典。`IsPAdicLocalRing` は `IsPAdicRing` を
+`extends` するので、前半・後半とも本条 1 件でここに繋がる。 -/
+def IsPAdicLocalRing.src : ABC3.Meta.Source :=
+  { paper := "LocProP", pdfPage := 14, item := "Definition 0.1",
+    sectionId := "locprop-def-0-1" }
+
 end ABC3.Found.LocProP
