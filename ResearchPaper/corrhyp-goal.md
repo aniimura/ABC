@@ -256,10 +256,31 @@ Found 完成(第26件)。
 
 ★次に狙える候補: `corrHypInstance` は §1 の `Corr`/`IsIsogenous` 等の
 定義にも(placeholder 抜きで)非空虚な具体例を与えられる可能性がある
-(未着手)。`Definition 3.1`(`hyperbolicCore`)は今の `core := id`
-placeholder では実装にならない(本物の商構成、`Lemma 5.1` の内容)。
-`Theorem 3.3` は引き続き Riemann–Hurwitz/Gauss–Bonnet(mathlib 不在)
-待ち。
+(未着手だが道筋を実測: `Matrix.SpecialLinearGroup.discreteSpecialLinearGroupIntRangeSL`
+——`SL(2,ℤ)` の `SL(2,ℝ)` への像が離散、と `CongruenceSubgroup.Gamma N`
+——合同部分群、`[NeZero N]` で有限指数——を組み合わせれば、モジュラー群
+`SL(2,ℤ)` と合同部分群 `Γ(N)` という**教科書的に意味のある** Fuchsian 群の
+例で `IsFiniteIndexIn` の非空虚性を示せるはず。`Subgroup.map` 越しの
+有限指数の伝播が `exact?` で即座に閉じなかった、というところで中断)。
+`Definition 3.1`(`hyperbolicCore`)は今の `core := id` placeholder では
+実装にならない(本物の商構成、`Lemma 5.1` の内容)。`Theorem 3.3` は
+引き続き Riemann–Hurwitz/Gauss–Bonnet(mathlib 不在)待ち。
+
+★★★**重要な歯止め(2026-09-04 確認)**: `corrHypInstance` の
+`MargulisArithmetic`/`ShimuraArithmetic := fun _ ↦ False` という
+placeholder を使って `Proposition 2.4`(`MargulisArithmetic Γ ↔
+ShimuraArithmetic Γ`)や `Theorem 2.5`(`Arithmetic ↔ InfinitelyManyCorr`)
+を「閉じる」ことは**してはいけない**——`Proposition 2.4` は `False ↔ False`
+に退化して形式的には閉じるが、これは Margulis/Shimura-arithmeticity の
+**実際の内容について何も示していない**(`corrhyp_prop_3_2` のケースと違い、
+この2項目は arithmeticity の値そのものが結論に効くので、`prop_3_2` のときの
+「未使用の仮定だから placeholder で害はない」という論法が通用しない——
+実際 `Theorem 2.5` は my instance では**偽になる**: `SL(2,ℤ)` は現実には
+arithmetic で `Comm` の中で無限指数のはずだが、`corrHypInstance` では
+`Arithmetic := False` と決め打っているため矛盾する)。★これは
+[[report-progress-not-shortfall]] や PGC セッションが記録した「自由な
+データによる退化」と同型の罠——`.src` を付けてよいのは、placeholder が
+**その項目の結論に一切影響しないことを確認した場合のみ**。
 
 関連: [[leaf-first-with-graph-feedback]] / [[leaves-are-measured-not-guessed]] /
 [[measure-mathlib-before-skeleton]] / [[genell-track-b]] / [[corrhyp-track-goal]] /
