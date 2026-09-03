@@ -1,0 +1,53 @@
+<!-- [LocProP] §2 Review of Galois Cohomology —— 条なし .src 用のアンカー。
+     260 dpi 目視確認 2026-09-04(p.20-21、逐語の食い違い無し)。 -->
+
+<section class="statement lemma"
+         id="locprop-lemma-2-1"
+         data-paper="LocProP"
+         data-pdf-page="20"
+         data-item="Lemma 2.1"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">For all j</div>
+<div class="reading">Faltings almost étale 理論による、`Δ_R^prf` の `R̂_K̄(j)` 係数コホモロジーの計算
+((1) H⁰ = R̂_K̄(j)、(2) H¹ = Ω ⊗ R̂_K̄(j-1))。</div>
+<p class="open">★Faltings almost étale extension 理論・Hodge-Tate 分解は
+<strong>mathlib に 0 件</strong>。<code>Interface/LocProP/GaloisCohomologyReview.lean</code>
+の <code>GaloisCohomologyReviewSetup</code> で同型の存在として posit する。</p>
+</section>
+
+<section class="statement lemma"
+         id="locprop-lemma-2-2"
+         data-paper="LocProP"
+         data-pdf-page="20"
+         data-item="Lemma 2.2"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">We have: (i)</div>
+<div class="reading">[Tate] による `Γ_K` の `R̂_K̄` 係数コホモロジーの計算
+(H⁰=R̂_K、j≠0 なら消滅、H¹=R̂_K)。</div>
+<p class="open">実装: <code>Found/LocProP/GaloisCohomologyImpl.lean</code> の <code>lemma22</code>。</p>
+</section>
+
+<section class="statement lemma"
+         id="locprop-lemma-2-3"
+         data-paper="LocProP"
+         data-pdf-page="20"
+         data-item="Lemma 2.3"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">For n = 0, 1, we have</div>
+<div class="reading">Leray-Serre スペクトル系列による、`Γ_R` の計算(H^n=R̂̂_K、
+`(-1)` 捻りは消滅)。</div>
+<p class="open">実装: <code>Found/LocProP/GaloisCohomologyImpl.lean</code> の <code>lemma23</code>。</p>
+</section>
+
+<section class="statement proposition"
+         id="locprop-prop-2-4"
+         data-paper="LocProP"
+         data-pdf-page="21"
+         data-item="Proposition 2.4"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">There is a natural exact sequence</div>
+<div class="reading">Hodge-Tate 完全列
+`0 → ℋ₁ ⊗ R̂_K(1) → H ⊗ R̂_K → ℋ₀ ⊗ R̂_K → 0`(`Γ_R` 作用と両立)。</div>
+<p class="open">★Comparison Theorem([Falt2] Thm 6.2)由来。実装:
+<code>Found/LocProP/GaloisCohomologyImpl.lean</code> の <code>prop24</code>。</p>
+</section>
