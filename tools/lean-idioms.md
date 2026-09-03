@@ -3282,3 +3282,18 @@ def foo : Bar :=
 ★★**`.field`/`.method` は直前の式と同じ行に置くか、式全体を1行にする。**
 複数行にしたいなら `Subgroup.topologicalClosure (Subgroup.normalClosure ...)` のように
 **外側の関数を先頭に出す**形へ書き換える。
+
+## `structure ... where` の中で `Type*` を使うと以降のフィールドが壊れる
+
+```lean
+structure Foo where
+  Pic : Type*                     -- ✗
+  picAddCommGroup : AddCommGroup Pic
+```
+
+`error: Unknown identifier picAddCommGroup`(`autoImplicit` が `false` なので
+暗黙変数として拾えない、という副次エラーつき)。★★**`Type*` の auto-bound
+universe が構造体フィールドの構文解析を巻き込んで壊す**(2026-09-04、
+`ABC3.Interface.LocProP.EtaleSetup` で実測。最小 5 行で再現)。
+★**対処: `universe u` を明示して `Type u` と書く。** `Type*` は構造体の外
+(トップレベルの `def`/`theorem` の引数)では問題なく使えている。
