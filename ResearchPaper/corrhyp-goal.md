@@ -100,34 +100,49 @@ Royden の定理——いずれも GenEll のモジュラー多項式ギャッ�
 | §3 `Proposition 3.2`(`Γ_Z ⊆ Comm(Γ_X)`) | `prop_3_2`(`Ncore` = `Z.Γ` の中での `C.Γ` の normal core、を経由) | ✅ **完成**——numbered item の本体として初 |
 | §3 `Theorem 3.3` | `fg_of_finiteIndexIn`(Schreier の補題、`Theorem 3.3` が要る片方向) | 部分——下記参照 |
 
-### `Theorem 3.3` に残る 2 つの壁(実測、まだ未着手)
+### `Theorem 3.3` に残っていた 2 つの壁
 
-1. **群論側**: 原文は「`Comm(Γ_X)` は有限生成部分群 `Γ_X` を有限指数に持つので、
-   それ自身も有限生成」と1行で済ませているが、これは
+1. **群論側 —— ★2026-09-04 解消**: 原文は「`Comm(Γ_X)` は有限生成部分群 `Γ_X`
+   を有限指数に持つので、それ自身も有限生成」と1行で済ませているが、これは
    `fg_of_finiteIndexIn`(有限指数**部分群**が有限生成、Schreier)の**逆向き**
    ——「有限生成な有限指数部分群を持つ群は有限生成」——であり、`exact?` で
-   mathlib に見当たらなかった(2026-09-04 実測)。Reidemeister–Schreier 型の
-   議論(`H` の生成元 + `G/H` の代表系)を自分で組む必要がある。
-2. **幾何側(§3 単体では閉じない)**: 「次数が `g',r'` と `e_Y` だけで抑えられる」
-   という原文の主張は、`FuchsianGroup` を実際の種数・穴の数(§1 冒頭の `type`)
-   に結び付ける Riemann–Hurwitz 型の計算を要求する——これは §5 の `StackType`/
-   `e_Y` の装置を先に作ることに等しく、`Theorem 3.3` 単体としては閉じない
-   (`Theorem 4.2` も同型の壁を持つ)。
+   mathlib に見当たらなかった。`fg_of_fg_finiteIndex`(Reidemeister–Schreier の
+   最も単純な形、`H` の生成元 + `G/H` の代表系が `G` を生成する)として
+   自分で証明した(sorry 無し)。
+2. **幾何側(まだ未着手、規模を実測した)**: 「次数が `g',r'` と `e_Y` だけで
+   抑えられる」という原文の主張は、`FuchsianGroup` を実際の種数・穴の数
+   (§1 冒頭の `type`)に結び付ける Riemann–Hurwitz 型の計算を要求する。
+   ★★**mathlib に Gauss–Bonnet・双曲多様体の面積・Riemann 面の種数の理論は
+   0 件**(2026-09-04、`grep` で `GaussBonnet`/`RiemannSurface`/幾何的な
+   `genus` を実測——`EulerCharacteristic` はホモロジー代数の鎖複体のものだけ)。
+   これは GenEll のモジュラー多項式ギャップと同型の「未構築の数学」であり、
+   `§3 単体でもTheorem 3.3・Theorem 4.2・Theorem 5.3・Lemma 5.4`-`5.7` 全体の
+   共通の律速——**Riemann 面の双曲幾何(面積・種数・Gauss–Bonnet)を
+   mathlib レベルで新たに構築する必要がある人年規模の欠落**として記録する。
+   `Skeleton/CorrHyp/Section5.lean` の `StackType`/`e_Y` はこの欠落を
+   posit で受けている(Skeleton 段階で正しい選択だった)。
 
 ### 次の一手(依存の少なさ順)
 
-1. 上記1(f.g. の逆向き伝播)を単独の補題として仕上げる——`Theorem 3.3`
-   本体はまだ届かないが、Reidemeister–Schreier の実装は他の節(`Lemma 5.5`)
-   にも要る資産になる。
-2. §5 の `StackType`/`e_Y`(Euler 標数)を `FuchsianGroup` の商 `ℍ/Γ` の
-   幾何と結び付ける——これができて初めて `Theorem 3.3`/`Theorem 5.3`/
-   `Lemma 5.4`-`5.7` に届く。
-3. §4(`Lemma 4.1`・`Theorem 4.2`)は係数拡大 `Ext`(k → K)が要り、
-   スキーム論(有限型・降下理論)が要るためさらに重い。
-4. §2 の `MargulisArithmetic`/`ShimuraArithmetic` 本体と §6 の Royden の定理は
-   上記のとおり大きな未構築の数学(代数群・Teichmüller 空間)を要する。
-5. G9(非空虚性の対照)は Track B が本物のデータを供給して初めて
+★★純粋な群論(`FuchsianGroup` の上だけで閉じる節点)は §1・§3 の
+`Proposition 3.2` まで**掘り尽くした**——残る節点はどれも「未構築の数学」
+(幾何・スキーム論・代数群論)を新たに要求する側に移った:
+
+1. §5 の `StackType`/`e_Y`(Euler 標数)を `FuchsianGroup` の商 `ℍ/Γ` の
+   実際の双曲幾何(面積・種数)と結び付ける——mathlib に Gauss–Bonnet が
+   無いので、これ自体が新規のライブラリ構築になる。できて初めて
+   `Theorem 3.3`/`Theorem 4.2`/`Theorem 5.3`/`Lemma 5.4`-`5.7` に届く。
+2. §4(`Lemma 4.1`・`Theorem 4.2`)は係数拡大 `Ext`(k → K)が要り、
+   スキーム論(有限型・降下理論)を要求する——①とは別種の未構築の数学。
+3. §2 の `MargulisArithmetic`/`ShimuraArithmetic` 本体と §6 の Royden の定理は
+   代数群論・Teichmüller 空間という、①②とも異なる第三の未構築の数学を要する。
+4. G9(非空虚性の対照)は Track B が本物のデータを供給して初めて
    意味のある形で作れる(`.waiting` に記録済み)。
+
+★どの道も本質的に異なる分野の「未構築の数学」に当たる——GenEll が
+モジュラー多項式ギャップ1つで止まったのと違い、本論文は最初から
+3つの独立した大きな塊(双曲幾何・スキーム論・代数群論)を要求する
+構造になっている(2026-09-04 実測、上記①②③)。
 
 関連: [[leaf-first-with-graph-feedback]] / [[leaves-are-measured-not-guessed]] /
 [[measure-mathlib-before-skeleton]] / [[genell-track-b]] / [[corrhyp-track-goal]] /
