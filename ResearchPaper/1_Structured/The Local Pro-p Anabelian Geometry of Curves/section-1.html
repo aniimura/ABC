@@ -1,0 +1,54 @@
+<!-- [LocProP] §1 The Ordinary Case —— 条なし .src 用のアンカー。
+     260 dpi 目視確認 2026-09-04(p.17-19、逐語の食い違い無し)。 -->
+
+<section class="statement definition"
+         id="locprop-def-1-1"
+         data-paper="LocProP"
+         data-pdf-page="17"
+         data-item="Definition 1.1"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">We shall call XK ordinary if the Jacobian of every connected component</div>
+<div class="reading"><code>X_K</code> が「ordinary」とは、特殊ファイバー <code>X̄_k</code> の
+正規化の各連結成分の Jacobian が ordinary abelian variety であること。</div>
+<p class="open">★<code>Jacobian</code>・<code>ordinary abelian variety</code> は
+<strong>mathlib に 0 件</strong>。<code>Interface/LocProP/OrdinaryCase.lean</code> の
+<code>isOrdinary : Prop</code>(posit)で受ける。</p>
+</section>
+
+<section class="statement lemma"
+         id="locprop-lemma-1-2"
+         data-paper="LocProP"
+         data-pdf-page="18"
+         data-item="Lemma 1.2"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">Suppose that g</div>
+<div class="reading"><code>g ≥ 2</code> のとき、節 <code>θ_X : Γ_K → Π_X_K^et</code> は
+「像が <code>Δ_X^et</code> のすべての元と可換」を満たす唯一の節である。</div>
+<p class="open">実装: <code>Found/LocProP/OrdinaryCaseImpl.lean</code> の <code>thetaUnique</code>
+(<code>OrdinaryCaseSetup.theta_unique</code> の posit を取り出すだけ)。</p>
+</section>
+
+<section class="statement lemma"
+         id="locprop-lemma-1-3"
+         data-paper="LocProP"
+         data-pdf-page="18"
+         data-item="Lemma 1.3"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">is the intersection of all open normal subgroups</div>
+<div class="reading"><code>Δ_X → Δ_X^et</code> の核は、条件 <code>(∗)^et</code> を満たす
+開正規部分群 <code>H ⊆ Δ_X</code> すべての共通部分に等しい。</div>
+<p class="open">実装: <code>Found/LocProP/OrdinaryCaseImpl.lean</code> の <code>kerEqIInter</code>。
+★条件 <code>(∗)^et</code> は <code>satisfiesConditionEt</code> として抽象化(posit)。</p>
+</section>
+
+<section class="statement lemma"
+         id="locprop-lemma-1-4"
+         data-paper="LocProP"
+         data-pdf-page="19"
+         data-item="Lemma 1.4"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">We have</div>
+<div class="reading">点 <code>x ∈ X_K(K)</code> が定める <code>α_x^et : Γ_K → Π_X_K^et</code> は
+<code>θ_X</code> に等しい。</div>
+<p class="open">実装: <code>Found/LocProP/OrdinaryCaseImpl.lean</code> の <code>alphaEtEqTheta</code>。</p>
+</section>
