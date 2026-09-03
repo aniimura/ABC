@@ -1,5 +1,6 @@
 import ABC3.Found.PGC.LubinTateDivisibility
 import ABC3.Found.PGC.ValuationRingDVR
+import Mathlib.RingTheory.MvPowerSeries.Order
 
 /-!
 # Lubin-Tate 形式群の存在補題: 次数 `n+1` の障害方程式の可解性(`sorry` 無し)
@@ -9,16 +10,24 @@ import ABC3.Found.PGC.ValuationRingDVR
 障害方程式 `(π − π^{n+1})·φ = R_n` が**解ける**ことを示す——次数ごとの
 再帰構成の**1ステップ分**が完成する。
 
+部品4(`exists_step_solution_for_R`)はこれを **`Φ` が何であっても**(次数
+`n` までの整合性という帰納的仮定を課さずに)、`residue_divides_R`(可除性、
+`Φ` 任意)と `MvPowerSeries.homogeneousComponent` の線型性(`map` と可換、
+`map_homogeneousComponent`)を組み合わせて直接与える——次数 `n+1` の斉次成分
+`homogeneousComponent (n+1) (Obstruction Φ)` に対する障害方程式が解ける。
+
 ## まだ無いもの
 
-本ファイルは「1ステップの可解性」までを確立する。実際の構成
-(`Φ : ℕ → MvPowerSeries (Fin 2) A` を `Nat.rec` で組み立て、各 `Φ (n+1)` が
-`Φ n` に**次数 `n+1` ちょうどの斉次成分**を足したものであることを保ち、
-最終的な極限 `F` が関数等式を exact に満たすことを示す)は、まだ残る——
-特に「`f(Φ_n + φ_{n+1}) − (Φ_n + φ_{n+1})(g,g)` の次数 `n+2` 以上の誤差項が
-消える」という段は、本ファイルでは検証していない(紙の上での議論は
-`ResearchPaper/blocked-leaves.json` の `progress2026_09_04e` に記録済みだが、
-Lean での形式化は別途の作業として残る)。
+本ファイルは「(任意の `Φ` から出発した)1ステップの可解性」までを確立する。
+実際の構成(`Φ : ℕ → MvPowerSeries (Fin 2) A` を `Nat.rec` で組み立て、
+各 `Φ (n+1)` が `Φ n` に次数 `n+1` ちょうどの斉次成分を足したものであること、
+そして最終的な極限 `F` が関数等式を exact に満たすことを示す)は、まだ残る
+——特に「`f(Φ_n + φ_{n+1})` が `f(Φ_n) + π·φ_{n+1}` と次数 `n+2` 未満で一致する」
+という**線形化**(`φ_{n+1}` の次数が高いことによる高次項の消滅)の段は、
+本ファイルでは検証していない。mathlib の `MvPowerSeries.truncTotal_subst_*`
+系(代入が引数の低次の切り捨てにしか依存しないという「連続性」)が
+この段の土台になりうると見ている(実測、`RingTheory/MvPowerSeries/
+Substitution.lean`)が、実際に組むのは別途の作業として残る。
 -/
 
 namespace ABC3.Found.PGC
@@ -80,5 +89,49 @@ theorem exists_step_solution {A : Type*} [CommRing A] [IsDomain A] [IsLocalRing 
   rw [hfact, hc, smul_smul]
   congr 1
   rw [← hu, mul_assoc, Units.mul_inv, mul_one]
+
+/-! ### 部品3: `MvPowerSeries.map` と `homogeneousComponent` は可換 -/
+
+theorem map_homogeneousComponent {R S σ : Type*} [Semiring R] [Semiring S] (h : R →+* S)
+    (p : ℕ) (f : MvPowerSeries σ R) :
+    MvPowerSeries.map h (MvPowerSeries.homogeneousComponent p f) =
+      MvPowerSeries.homogeneousComponent p (MvPowerSeries.map h f) := by
+  ext d
+  rw [MvPowerSeries.coeff_map, MvPowerSeries.coeff_homogeneousComponent,
+    MvPowerSeries.coeff_homogeneousComponent]
+  split_ifs with hd
+  · rw [MvPowerSeries.coeff_map]
+  · exact map_zero h
+
+/-! ### ★★部品4: 任意の `Φ` から出発して次数 `n+1` の障害方程式が解ける -/
+
+/-- ★★**`Φ` が何であっても(次数ごとの整合性という帰納的仮定を課さずに)、
+次数 `n+1` の障害方程式が解ける**。`residue_divides_R`(可除性、`Φ` 任意)を
+`homogeneousComponent (n+1)` の線型性(`map_homogeneousComponent`)と組み合わせ、
+`exists_step_solution` に渡すだけ。 -/
+theorem exists_step_solution_for_R {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π})
+    (g : PowerSeries A) (hg0 : PowerSeries.constantCoeff g = 0) (f : PowerSeries A)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff))
+    (hg : PowerSeries.map (IsLocalRing.residue A) g = PowerSeries.X ^ (pp ^ ff))
+    (Φ : MvPowerSeries (Fin 2) A) (hΦ0 : MvPowerSeries.constantCoeff Φ = 0) (n : ℕ) (hn : n ≠ 0) :
+    ∃ φ : MvPowerSeries (Fin 2) A,
+      (π - π ^ (n + 1)) • φ =
+        MvPowerSeries.homogeneousComponent (n + 1)
+          (MvPowerSeries.subst (fun i => PowerSeries.subst (MvPowerSeries.X i) g) Φ -
+            PowerSeries.subst Φ f) := by
+  have hR0 : MvPowerSeries.map (IsLocalRing.residue A)
+      (MvPowerSeries.subst (fun i => PowerSeries.subst (MvPowerSeries.X i) g) Φ -
+        PowerSeries.subst Φ f) = 0 :=
+    residue_divides_R hq g hg0 f hf hg Φ hΦ0
+  have hRcomp0 : MvPowerSeries.map (IsLocalRing.residue A)
+      (MvPowerSeries.homogeneousComponent (n + 1)
+        (MvPowerSeries.subst (fun i => PowerSeries.subst (MvPowerSeries.X i) g) Φ -
+          PowerSeries.subst Φ f)) = 0 := by
+    rw [map_homogeneousComponent, hR0, map_zero]
+  obtain ⟨c, hc⟩ := exists_scalar_dvd_of_map_residue_eq_zero hπmax hRcomp0
+  exact exists_step_solution (hπmax ▸ Ideal.mem_span_singleton_self π) hn ⟨c, hc⟩
 
 end ABC3.Found.PGC
