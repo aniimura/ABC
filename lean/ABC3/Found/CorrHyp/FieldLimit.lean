@@ -375,13 +375,51 @@ noncomputable def isLimit_specKCone (k K : Type*) [CommRing k] [CommRing K] [Alg
     IsLimit (specKCone k K) :=
   isLimitOfPreserves Scheme.Spec (IsColimit.op (isColimitToRingCatCocone k K))
 
-/- ★★次の一手(未着手): `Lemma 4.1` 本体へ——`X_K`・`Z_K`・その間の
-correspondence を「`toSchemeDiagram` 上の適当な `i`(有限生成部分環 `R`)への
-下降」として表すには、`Scheme.exists_hom_comp_eq_comp_of_locallyOfFiniteType`
-等の側条件(`∀ {i j} (f : i ⟶ j), IsAffineHom (D.map f)`——`Spec S → Spec R`
-は常にアフィン射なので無条件で成り立つはず、`[∀ i, CompactSpace/QuasiSeparatedSpace
-(D.obj i)]`——`Spec R` は常にコンパクト・準分離、`LocallyOfFinitePresentation f`
-——`X_K → Spec K` 側に要る仮定)を揃え、`HyperbolicCurveData` の
-`IsGenericallyScheme`/`ModuliStack` 関連フィールドと接続する。 -/
+/-!
+## `toSchemeDiagram` の側条件——`AffineTransitionLimit.lean` の定理群がそのまま使える形
+
+`Scheme.exists_hom_comp_eq_comp_of_locallyOfFiniteType`/
+`Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation` はどちらも
+`[IsCofiltered I]`(済み)に加え、`∀ {i j} (f : i ⟶ j), IsAffineHom (D.map f)`・
+`∀ i, CompactSpace (D.obj i)`・`∀ i, QuasiSeparatedSpace (D.obj i)` を要求する。
+`D := toSchemeDiagram k K` の場合、これらは`D.obj i`・`D.map f`が常に
+`Spec (…)`の形であることから mathlib の一般的なインスタンス(アフィンスキーム
+は常にコンパクト・準分離、環準同型の `Spec` は常にアフィン射)だけで
+**無条件に**満たされる——`toSchemeDiagram`(`Functor.comp`)越しには
+インスタンス探索が `Spec` の形を直接見ないので、`show` で `Spec` の形に
+戻してから `infer_instance` に渡す3つの instance をここに置く。 -/
+
+open AlgebraicGeometry CategoryTheory in
+instance toSchemeDiagram_isAffineHom {k K : Type*} [CommRing k] [CommRing K] [Algebra k K]
+    {i j : (FgSubalgebra k K)ᵒᵖ} (f : i ⟶ j) :
+    IsAffineHom ((toSchemeDiagram k K).map f) := by
+  show IsAffineHom (Scheme.Spec.map ((toRingCat k K).op.map f))
+  infer_instance
+
+open AlgebraicGeometry CategoryTheory in
+instance toSchemeDiagram_compactSpace {k K : Type*} [CommRing k] [CommRing K] [Algebra k K]
+    (i : (FgSubalgebra k K)ᵒᵖ) : CompactSpace ((toSchemeDiagram k K).obj i) := by
+  show CompactSpace (Scheme.Spec.obj ((toRingCat k K).op.obj i))
+  infer_instance
+
+open AlgebraicGeometry CategoryTheory in
+instance toSchemeDiagram_quasiSeparatedSpace {k K : Type*} [CommRing k] [CommRing K]
+    [Algebra k K] (i : (FgSubalgebra k K)ᵒᵖ) :
+    QuasiSeparatedSpace ((toSchemeDiagram k K).obj i) := by
+  show QuasiSeparatedSpace (Scheme.Spec.obj ((toRingCat k K).op.obj i))
+  infer_instance
+
+/- ★★次の一手(未着手): `Lemma 4.1` 本体へ——上の3instanceにより
+`Scheme.exists_hom_comp_eq_comp_of_locallyOfFiniteType`/
+`Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation` は
+`D := toSchemeDiagram k K`・`c := specKCone k K`・`hc := isLimit_specKCone k K`
+に対して**側条件抜きで直接呼べる**状態になった。残るのは数学的な内容:
+`X_K`・`Z_K`(`HyperbolicCurveData` の `Ext`/`Space` を実際に `Spec K` 上の
+スキームとして実現したもの)と、両者の間の correspondence を
+`f : X ⟶ (Functor.const _).obj (Spec k)`(構造射)の形に持ち込み、
+`LocallyOfFinitePresentation f`(hyperbolic curve は有限型なので成り立つはず)
+を示すこと。これは `HyperbolicCurveData` の `IsGenericallyScheme`/
+`ModuliStack` 関連フィールドの**具体的な実現**を要する——§5(モジュライ
+スタック・Gauss–Bonnet)が mathlib に不在という既知の欠落と直結する。 -/
 
 end ABC3.Found.CorrHyp
