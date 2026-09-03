@@ -112,11 +112,11 @@ theorem order_pow_sub_pow_ge {A σ : Type*} [CommRing A] {Φ φ : MvPowerSeries 
 `≤ deg φ` の範囲で `π·φ` にちょうど一致する。`f` の `k≥2` 次の項は
 `order_pow_sub_pow_ge` によって次数 `deg φ + 1` 以上にしか寄与しないので、
 `coeff_subst` の有限和から `k=0,1` の項だけが残る。 -/
-theorem coeff_subst_linearize {A : Type*} [CommRing A] {Φ φ : MvPowerSeries (Fin 2) A}
+theorem coeff_subst_linearize {A σ : Type*} [CommRing A] {Φ φ : MvPowerSeries σ A}
     (hΦ0 : MvPowerSeries.constantCoeff Φ = 0) (hφ0 : MvPowerSeries.constantCoeff φ = 0)
     (hΦ : 1 ≤ Φ.order) {m : ℕ} (hφord : (m : ℕ∞) ≤ φ.order) (hm : 1 ≤ m)
     (f : PowerSeries A) (π : A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
-    (e : Fin 2 →₀ ℕ) (he : ((Finsupp.degree e : ℕ) : ℕ∞) ≤ m) :
+    (e : σ →₀ ℕ) (he : ((Finsupp.degree e : ℕ) : ℕ∞) ≤ m) :
     MvPowerSeries.coeff e (PowerSeries.subst (Φ + φ) f) -
         MvPowerSeries.coeff e (PowerSeries.subst Φ f) = π * MvPowerSeries.coeff e φ := by
   have hΦHS : PowerSeries.HasSubst Φ := by

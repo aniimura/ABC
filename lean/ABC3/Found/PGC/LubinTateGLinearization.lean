@@ -267,16 +267,18 @@ theorem coeff_subst_g_linearize {A : Type*} [CommRing A] {φ : MvPowerSeries (Fi
 要るので、複製せずにここで公開する。 -/
 
 /-- `g ≡ 0 (mod deg 1)`(定数項0)のとき、`fun i => g.subst(X_i)` は
-`MvPowerSeries.subst` の前提 `HasSubst` を満たす。 -/
-theorem hasSubst_g_subst_X {A : Type*} [CommRing A] (g : PowerSeries A)
+`MvPowerSeries.subst` の前提 `HasSubst` を満たす。変数の添字型 `σ` は任意
+(証明が `Fin 2` に一切依存しないため)——`Fin 2` の場合も含め、
+`LubinTateAssociativity.lean` の `Fin 3` の場合もこのまま使い回せる。 -/
+theorem hasSubst_g_subst_X {A : Type*} [CommRing A] {σ : Type*} [Finite σ] (g : PowerSeries A)
     (hg0 : PowerSeries.constantCoeff g = 0) :
     MvPowerSeries.HasSubst
-      (fun i : Fin 2 => PowerSeries.subst (MvPowerSeries.X i : MvPowerSeries (Fin 2) A) g) := by
+      (fun i : σ => PowerSeries.subst (MvPowerSeries.X i : MvPowerSeries σ A) g) := by
   constructor
   · intro i
     show IsNilpotent (MvPowerSeries.constantCoeff (PowerSeries.subst (MvPowerSeries.X i) g))
     have heq0 : MvPowerSeries.constantCoeff
-        (PowerSeries.subst (MvPowerSeries.X i : MvPowerSeries (Fin 2) A) g) = 0 :=
+        (PowerSeries.subst (MvPowerSeries.X i : MvPowerSeries σ A) g) = 0 :=
       PowerSeries.constantCoeff_subst_eq_zero (MvPowerSeries.constantCoeff_X i) g hg0
     rw [heq0]; exact IsNilpotent.zero
   · intro d; exact Set.toFinite _
