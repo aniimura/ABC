@@ -266,6 +266,17 @@ witness で両者が**相異なる**ことを確認した上で
 具体的な証拠(有限指数の伝播は `Subgroup.relIndex_map_map` で
 `ker(単射) = ⊥` を消し込むだけで閉じた)。
 
+★§2 `Definition 2.1`(`InfinitelyManyCorr`)を `Γ_SL2Z`(モジュラー群)で
+非空虚に示せないか検討した(2026-09-04): `SL(2,ℤ)` は古典的に arithmetic
+で、その commensurator は `PGL(2,ℚ)`(`Γ_SL2Z` の中で無限指数)——これが
+示せれば `Definition 2.1` も非空虚性witnessを得られる。だが必要な
+「`diag(2,1/2) ∈ Comm(Γ_SL2Z)`」(Hecke型の共役、`gΓg⁻¹ ∩ Γ` が両側
+有限指数)は mathlib に対応する補題が無く(`Hecke`/対角共役で `grep` 0件)、
+`Γ(2)` の例のように既存の `FiniteIndex` インスタンスを流用できない——
+一から行列計算で `gΓg⁻¹ ∩ Γ` を合同部分群型の集合と同一視する必要がある。
+★これは §2 本体(Margulis/Shimura)ほどではないが軽くもない——次に §2 へ
+戻るときの実測済みの出発点として記録する(壁ではなく、測った道)。
+
 `Definition 3.1`(`hyperbolicCore`)は今の `core := id` placeholder では
 実装にならない(本物の商構成、`Lemma 5.1` の内容)。`Theorem 3.3` は
 引き続き Riemann–Hurwitz/Gauss–Bonnet(mathlib 不在)待ち。
