@@ -49,3 +49,4 @@
 - [在庫の一般補題でも仮引数が実例で偽になる](general-lemma-hypothesis-unsatisfiable.md) — 「渡すだけ」と書いたが渡せなかった。幾何(Ex 6.1)で通った道が算術(Ex 6.3)で塞がった実例。使う前に各仮引数を実例で検算する。
 - [報告は未達でなく進捗を書く](report-progress-not-shortfall.md) — 「目標に届かない見通し」を締めに置かない。入ったもの・測ったこと・次の一手で構成する。★過大申告の訂正は別(測定の修正)。
 - [GenEll Lemma 3.5 は証明済みだが条つき](genell-lemma35-status.md) — ★2026-09-01 に高さ不等式が通った（`Found/`、公理 3 つ）。原典に無い仮説 `l ≠ 2`・`d+1 < l` を置く。条件 (a) では吸収されるが条件 (b) では吸収されない。条なし化は「μ-等級付きの分母払い」40-80 ブロック。「商体 K に移す」は潰した。
+- [並行セッションへは ListAgents/SendMessage で直接連絡できる](sibling-session-coordination-via-listagents.md) — 着手前にトラックを聞けば衝突を事前に避けられる。返信待ち中は git status とファイル mtime で間接推定。

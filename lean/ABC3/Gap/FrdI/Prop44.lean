@@ -107,6 +107,41 @@ import ABC3.Found.FrdI.Prop44Core
 ★★★**穴の形が変わった**——「圏論の条件 1 つ」から
 「**1 つの交代双線形形式が消えるか**」になった。反例があるならその形式が非零な例として見える。
 
+## ★2026-09-03 の測定(ABC3c)—— `arbFactor` 経由の切り口(未検証・次の一手の候補)
+
+★これまでの経路(2026-08-17/18)は `(iii)(d)` の `coaPreOverEquiv`/`preStepSpan` を
+使って **`𝒪^▷(A)` 側**(co-angular pre-step 側)を攻めていた。★以下は代わりに
+**`(iv)(a)` の `arbFactor`**(`Frobenioid.lean` の `FrobenioidCore.arbFactor`)を使う
+**別の切り口**で、まだ Lean で試していない。
+
+`Prop44Core.lean` の `birat_hom_repr` により、`f ∈ End_{𝒞^birat}(A)`(= `𝒪^×(A^birat)`
+の元。`𝒞^birat` は自己射がすべて co-angular なので `End_{𝒞^birat}(A)` 全体が単元群)は
+
+    f = a' ≫ [φ]
+
+の形(`a : A' ⟶ A` は `𝒞` の co-angular pre-step、`a'` はその逆射、`φ : A' ⟶ A` は
+`𝒞` の**任意の**射)に書ける。★★**`φ` 自体には制約が無い**ので、ここへ直接
+`arbFactor` を当てて
+
+    φ = γ ≫ β ≫ α    (γ: Frobenius 型、β: pre-step、α: pull-back morphism)
+
+と分解できる。`pullBackLB` により `α` は LB-invertible ∧ linear。
+
+★★**なぜこれが効きうるか**: `𝒪^▷(A^birat)`(=交換子の値域)は「底が id かつ次数 1」
+の元だけを見ている(`Prop44Ker.lean` の `divGp_map_eq_zero_of_mem_otimes` 等を参照)。
+`γ`(Frobenius 型)・`α`(pull-back, linear)は一般に次数や底を動かす**成分**だが、
+`f` 全体は `A → A` の**自己射**なので、`Base f` と `degFr f` に閉じた制約が掛かる
+はずである。★**未確認**: この制約から `γ`・`α` が `𝒞^birat` で co-angular(＝ birat
+では自明)に潰れ、残る `β`(pre-step)が `preStepFactor`((v)(b))でさらに
+co-angular∘isometric に割れて、最終的に「`φ` は co-angular pre-step の逆元と
+co-angular pre-step の積」= **`𝒪^▷(A)_𝒞` 生成元の積**になる、という筋を想定している。
+
+★★★**現状はここまで**——上の「なぜ効きうるか」は**まだ Lean で 1 行も検証していない**。
+次の一手は `Base f = 𝟙` ∧ `degFr f = 1` という自己射の制約を `Base(γ≫β≫α)`・
+`degFr(γ≫β≫α)` の合成則へ具体的に落とし込み、`γ`・`α` の型を確定させることである。
+★この切り口が既存の (iii)(d) 経路と独立に失敗するなら、それも `pairing-vanishes` が
+③(反例)側に傾く証拠として記録する。
+
 ## ★影響範囲
 
 ★`Proposition 4.4, (ii)` が閉じないので、
