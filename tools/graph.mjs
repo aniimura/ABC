@@ -179,6 +179,64 @@ if (flag('--sorry')) {
   process.exit(0);
 }
 
+// ── 表示用の群団化(論文 × セクション) ─────────────────────────────────────
+//
+// ★内部のグラフは **1 ファイル = 1 ノード**で持つ(そのまま扱うと 1,814 節点で読めない)。
+//   表示するときだけ、**論文とそのセクション**で群団にまとめる。
+//   セクションは `.src` の item の番号の先頭から取る(`Lemma 3.5` → §3)。
+//   ★`sectionId` は項目ごと(`genell-lemma-3-5`、172 種)なので、節の単位には使えない。
+const SECT_RE = new RegExp(`^\\s*(?:${KIND})\\s+(\\d+)`);
+
+/** ノードの群団。`.src` があれば `[論文] §N`、無ければ所属で束ねる。 */
+function clusterOf(n) {
+  // ★`ABC3/Found.lean` などバケツの根は「import をまとめるだけ」のファイルである。
+  //   群団に混ぜると、根 → 全群団の辺が最上位に出てしまい表示が読めなくなる。
+  if (!n.dir) return '(根: import をまとめるファイル)';
+  const keys = n.items
+    .map((x) => { const m = SECT_RE.exec(x.item); return m ? `[${x.paper}] §${m[1]}` : null; })
+    .filter(Boolean);
+  if (!keys.length) return `${n.ownerKind === 'theory' ? '理論' : '論文'} ${n.owner} (項目なし)`;
+  // 最も多く現れた群団を主とする(ノード数の合計が総数と一致するようにするため)
+  const c = new Map();
+  for (const k of keys) c.set(k, (c.get(k) ?? 0) + 1);
+  return [...c].sort((a, b) => b[1] - a[1])[0][0];
+}
+
+if (flag('--clusters') || flag('--display')) {
+  const cl = new Map();
+  for (const n of nodes.values()) {
+    const k = clusterOf(n);
+    const r = cl.get(k) ?? { n: 0, sorry: 0, bare: new Set(), files: [] };
+    r.n++; r.sorry += n.hasSorry ? 1 : 0; n.bare.forEach((b) => r.bare.add(b)); r.files.push(n);
+    cl.set(k, r);
+  }
+  console.log('★表示用の依存グラフ —— 論文 × セクションで群団化');
+  console.log(`  内部は 1 ファイル = 1 ノード(${nodes.size} 節点)。ここではそれを ${cl.size} 群団にまとめる。\n`);
+  console.log(`  ${'群団'.padEnd(26)}${'ノード'.padStart(7)}${'sorry'.padStart(7)}  条なし .src`);
+  for (const [k, r] of [...cl].sort((a, b) => b[1].n - a[1].n)) {
+    const b = [...r.bare].map((x) => x.replace(/^\[[^\]]*\] /, '')).sort().join(' ');
+    console.log(`  ${k.padEnd(26)}${String(r.n).padStart(7)}${String(r.sorry).padStart(7)}  ${b.slice(0, 60)}`);
+  }
+  // 群団のあいだの辺
+  const ce = new Map();
+  const ROOTC = '(根: import をまとめるファイル)';
+  for (const n of nodes.values()) {
+    const a = clusterOf(n);
+    if (a === ROOTC) continue;              // ★根からの辺は依存ではなく取りまとめである
+    for (const i of n.imports) {
+      const b = clusterOf(nodes.get(i));
+      if (a === b || b === ROOTC) continue;
+      const k = `${a} → ${b}`;
+      ce.set(k, (ce.get(k) ?? 0) + 1);
+    }
+  }
+  console.log(`\n  群団のあいだの辺: ${ce.size} 種 / ${[...ce.values()].reduce((s, v) => s + v, 0)} 本(上位 15)`);
+  for (const [k, v] of [...ce].sort((a, b) => b[1] - a[1]).slice(0, 15)) {
+    console.log(`    ${String(v).padStart(5)}  ${k}`);
+  }
+  process.exit(0);
+}
+
 // ── 要約 ───────────────────────────────────────────────────────────────────
 const owner = opt('--owner');
 const sel = [...nodes.values()].filter((n) => !owner || n.owner === owner);
