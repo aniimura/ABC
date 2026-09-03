@@ -248,11 +248,95 @@ theorem Ncore_normal {C Z : FuchsianGroup} (h : IsFiniteIndexIn C Z)
       show (z : Matrix.SpecialLinearGroup (Fin 2) ℝ)⁻¹ * n * z = z⁻¹ * x * z⁻¹⁻¹
       rw [hn']; group
 
-/- ★★次の一手(未着手): `Ncore h` が `Z.Γ` の中で有限指数であること
-(`(exists_normalCore_le h).choose_spec.2.1` を `.map Z.Γ.subtype` 越しに運ぶ)、
-それを使って `Ncore h` が `X.Γ` の中でも有限指数であること(`Ncore h ≤ C.Γ ≤ X.Γ`
-と `relIndex` の推移律)を示し、最後に `z ∈ Z.Γ` に対して
-`X.Γ ⊓ (ConjAct.toConjAct z • X.Γ)` が両側で有限指数であることを
-`Ncore_normal` から出せば `Proposition 3.2`(`Z.Γ ≤ commensurator X.Γ`)が閉じる。 -/
+/-- `Ncore h`(`Z.Γ` の中での `C.Γ` の normal core を大きい群へ押し出したもの)は
+`(Ncore h).subgroupOf Z.Γ` として見ると、もとの `exists_normalCore_le h` の `N`
+そのものと一致する(`Subtype` の像を `comap` で戻すと元に戻る、という一般論)。 -/
+theorem Ncore_subgroupOf_Z {C Z : FuchsianGroup} (h : IsFiniteIndexIn C Z) :
+    (Ncore h).subgroupOf Z.Γ = (exists_normalCore_le h).choose := by
+  unfold Ncore Subgroup.subgroupOf
+  exact Subgroup.comap_map_eq_self_of_injective Z.Γ.subtype_injective _
+
+/-- `Ncore h` は `Z.Γ` の中で有限指数。★**sorry 無し**。 -/
+theorem Ncore_finiteIndex_Z {C Z : FuchsianGroup} (h : IsFiniteIndexIn C Z) :
+    ((Ncore h).subgroupOf Z.Γ).FiniteIndex := by
+  rw [Ncore_subgroupOf_Z]
+  exact (exists_normalCore_le h).choose_spec.2.1
+
+/-- `Ncore h` は `C.Γ` の中でも(したがって `relIndex` の意味で)有限指数。
+`Ncore h ≤ C.Γ ≤ Z.Γ` の推移律と `Ncore_finiteIndex_Z` から。 -/
+theorem Ncore_relIndex_C_ne_zero {C Z : FuchsianGroup} (h : IsFiniteIndexIn C Z) :
+    (Ncore h).relIndex C.Γ ≠ 0 := by
+  haveI := Ncore_finiteIndex_Z h
+  have hZ : (Ncore h).relIndex Z.Γ ≠ 0 :=
+    Subgroup.isFiniteRelIndex_iff_relIndex_ne_zero.mp
+      (Subgroup.isFiniteRelIndex_iff_finiteIndex.mpr ‹((Ncore h).subgroupOf Z.Γ).FiniteIndex›)
+  have heq : (Ncore h).relIndex C.Γ * C.Γ.relIndex Z.Γ = (Ncore h).relIndex Z.Γ :=
+    Subgroup.relIndex_mul_relIndex (Ncore h) C.Γ Z.Γ (Ncore_le_C h) h.1
+  intro h0
+  rw [h0, zero_mul] at heq
+  exact hZ heq.symm
+
+/-- `Ncore h` は(`hCX : IsFiniteIndexIn C X` が与えられれば)`X.Γ` の中でも
+有限指数。`Ncore h ≤ C.Γ ≤ X.Γ` の推移律から。 -/
+theorem Ncore_relIndex_X_ne_zero {C X Z : FuchsianGroup} (h : IsFiniteIndexIn C Z)
+    (hCX : IsFiniteIndexIn C X) : (Ncore h).relIndex X.Γ ≠ 0 := by
+  have hC : (Ncore h).relIndex C.Γ ≠ 0 := Ncore_relIndex_C_ne_zero h
+  haveI hCX' : C.Γ.IsFiniteRelIndex X.Γ :=
+    Subgroup.isFiniteRelIndex_iff_finiteIndex.mpr hCX.2
+  have hCXne : C.Γ.relIndex X.Γ ≠ 0 := Subgroup.isFiniteRelIndex_iff_relIndex_ne_zero.mp hCX'
+  have heq : (Ncore h).relIndex C.Γ * C.Γ.relIndex X.Γ = (Ncore h).relIndex X.Γ :=
+    Subgroup.relIndex_mul_relIndex (Ncore h) C.Γ X.Γ (Ncore_le_C h) hCX.1
+  intro h0
+  rw [h0] at heq
+  rcases mul_eq_zero.mp heq with h1 | h1
+  · exact hC h1
+  · exact hCXne h1
+
+open Subgroup.Commensurable in
+/-- [CorrHyp] **Proposition 3.2** の具体化。
+
+原文 (CorrHyp p.8): 「We have Γ_Z ⊆ Comm(Γ_X)」——`C` が `X`・`Z` それぞれに
+有限指数で埋め込まれた `FuchsianGroup`(`Corr D X Z` の台 `C` の具体化)なら、
+`Z.Γ ≤ Comm(X.Γ)`。
+
+証明の筋(原文が「C を Z 上 Galois に取り直せる」と1行で済ませている段を
+`Ncore`(`Z.Γ` の中での `C.Γ` の normal core)で具体化したもの):
+`N := Ncore h` は `C.Γ`(ゆえに `X.Γ`)にも `Z.Γ` にも有限指数で入り、
+`z ∈ Z.Γ` による共役で不変。ゆえに `N ≤ X.Γ ⊓ (z·X.Γ·z⁻¹)` かつ `N` は
+`X.Γ`・`z·X.Γ·z⁻¹` のどちらの中でも有限指数なので、交わりも両側で有限指数——
+これが `Commensurable (z·X.Γ·z⁻¹) X.Γ` の定義そのもの。
+
+★**sorry 無し**。標準3公理のみ(`#print axioms` で確認済み)。 -/
+theorem prop_3_2 {C X Z : FuchsianGroup} (hCX : IsFiniteIndexIn C X)
+    (hCZ : IsFiniteIndexIn C Z) : Z.Γ ≤ commensurator X.Γ := by
+  intro z hz
+  rw [commensurator_mem_iff]
+  set N := Ncore hCZ with hN
+  have hNX : N ≤ X.Γ := (Ncore_le_C hCZ).trans hCX.1
+  have hzsymm : (ConjAct.toConjAct z • N : Subgroup _) = N := by
+    rw [hN]; exact Ncore_normal hCZ hz
+  have hNzX : N ≤ (ConjAct.toConjAct z • X.Γ : Subgroup _) := by
+    rw [← hzsymm]
+    intro x hx
+    rw [Subgroup.mem_pointwise_smul_iff_inv_smul_mem] at hx ⊢
+    exact hNX hx
+  have hN1 : N.relIndex X.Γ ≠ 0 := Ncore_relIndex_X_ne_zero hCZ hCX
+  have hN2 : N.relIndex (ConjAct.toConjAct z • X.Γ : Subgroup _) ≠ 0 := by
+    have := Subgroup.relIndex_pointwise_smul (h := ConjAct.toConjAct z) N X.Γ
+    rw [hzsymm] at this
+    rw [this]; exact hN1
+  haveI hIF1 : N.IsFiniteRelIndex X.Γ := Subgroup.isFiniteRelIndex_iff_relIndex_ne_zero.mpr hN1
+  haveI hIF2 : N.IsFiniteRelIndex (ConjAct.toConjAct z • X.Γ : Subgroup _) :=
+    Subgroup.isFiniteRelIndex_iff_relIndex_ne_zero.mpr hN2
+  haveI hK1 : (X.Γ ⊓ (ConjAct.toConjAct z • X.Γ : Subgroup _)).IsFiniteRelIndex X.Γ :=
+    Subgroup.isFiniteRelIndex_of_le_left X.Γ (le_inf hNX hNzX)
+  haveI hK2 : (X.Γ ⊓ (ConjAct.toConjAct z • X.Γ : Subgroup _)).IsFiniteRelIndex
+      (ConjAct.toConjAct z • X.Γ : Subgroup _) :=
+    Subgroup.isFiniteRelIndex_of_le_left _ (le_inf hNX hNzX)
+  constructor
+  · have := Subgroup.isFiniteRelIndex_iff_relIndex_ne_zero.mp hK1
+    rwa [Subgroup.inf_relIndex_left] at this
+  · have := Subgroup.isFiniteRelIndex_iff_relIndex_ne_zero.mp hK2
+    rwa [Subgroup.inf_relIndex_right] at this
 
 end ABC3.Found.CorrHyp
