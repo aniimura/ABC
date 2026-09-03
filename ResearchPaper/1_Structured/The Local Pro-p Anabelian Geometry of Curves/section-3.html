@@ -1,0 +1,67 @@
+<!-- [LocProP] §3 The Weight Zero Quotient —— 条なし .src 用のアンカー。
+     260 dpi 目視確認 2026-09-04(p.22-27、逐語の食い違い無し)。 -->
+
+<section class="statement lemma"
+         id="locprop-lemma-3-1"
+         data-paper="LocProP"
+         data-pdf-page="22"
+         data-item="Lemma 3.1"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">The kernel of cX is zero if r &gt; 0. If r = 0, then the kernel of cX is one-</div>
+<div class="reading">交換子写像 `c_X : ∧² H_Qp → 𝔐_X[1]` の核は、`r > 0` なら 0、`r = 0` なら
+1 次元で交叉形式の双対の像に等しい。</div>
+<p class="open">★Malčev completion・Tannakian category は<strong>mathlib に 0 件</strong>。
+<code>Interface/LocProP/WeightZeroQuotient.lean</code> で posit する。</p>
+</section>
+
+<section class="statement definition"
+         id="locprop-def-3-2"
+         data-paper="LocProP"
+         data-pdf-page="24"
+         data-item="Definition 3.2"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">We shall refer to ZX as the weight zero quotient of</div>
+<div class="reading">パラメータ付き族の場合の `Δ_X` の "weight zero quotient" `Z_X` の命名
+(文字通りの商ではないと明記)。</div>
+<p class="open">実装: <code>Found/LocProP/WeightZeroQuotientImpl.lean</code> の
+<code>zXParametrized</code>。</p>
+</section>
+
+<section class="statement proposition"
+         id="locprop-prop-3-3"
+         data-paper="LocProP"
+         data-pdf-page="25"
+         data-item="Proposition 3.3"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">Suppose that</div>
+<div class="reading">`α` が切断 `σ` に付随する `α_σ` として得られるとき、拡大類
+`η_α = 0`。</div>
+<p class="open">実装: <code>Found/LocProP/WeightZeroQuotientImpl.lean</code> の
+<code>etaVanishes</code>。</p>
+</section>
+
+<section class="statement definition"
+         id="locprop-def-3-4"
+         data-paper="LocProP"
+         data-pdf-page="27"
+         data-item="Definition 3.4"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">We shall refer to ZX as the weight zero quotient of</div>
+<div class="reading">単一曲線の場合(パラメータなし)の `Δ_X` の "weight zero quotient" `Z_X`
+の命名。Definition 3.2 と同じ対象。</div>
+<p class="open">実装: <code>Found/LocProP/WeightZeroQuotientImpl.lean</code> の
+<code>zXSingle</code>(<code>zXParametrized</code> と同じ posited field)。</p>
+</section>
+
+<section class="statement proposition"
+         id="locprop-prop-3-5"
+         data-paper="LocProP"
+         data-pdf-page="27"
+         data-item="Proposition 3.5"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">Relative to the action of</div>
+<div class="reading">`α_x` が定める `Γ_K` 作用に関して、完全列
+`0 → 𝔷_X[1] → 𝔷_X → 𝔷_X[0] → 0` が分裂する。</div>
+<p class="open">実装: <code>Found/LocProP/WeightZeroQuotientImpl.lean</code> の
+<code>zSplits</code>。</p>
+</section>
