@@ -47,6 +47,21 @@ metadata:
 
 関連: [[lean-build-check-discipline]]、[[abc3-plan-two-track]]
 
+★★★**2026-09-04、`git add <path>` だけでは足りないことを実測**(ABC3b)。
+`git add lean/…/Section4.lean` としてから `git commit`(パスなし)したところ、
+**別セッションが先に `git add -A` していた `Found/LocProP/PDerivate.lean` が
+一緒にコミットされた**——`git add <path>` は「追加で何をステージするか」しか
+決めず、`git commit` はパスを指定しない限り**インデックス全体**をコミットするため。
+★まだ push 前・1 コミットのみだったので `git reset --soft HEAD~1` →
+巻き込まれたファイルだけ `git restore --staged` → 取り直し、で復元できた
+(これは「相手のコミット」ではなく「相手が未コミットのままステージしていたもの」
+が自分のコミットに紛れ込んだケースなので、上の「歴史を書き換えない」の対象外
+——書き換えたのは**自分の**直前コミットであり、相手のコミットには触れていない)。
+
+**How to apply(追加)**: `git add <path>` の後は **`git commit -m "…" -- <path>`
+のように commit 自体にもパスを渡す**。`add` だけでなく `commit` 側でも
+限定して初めて、ステージ済みの他人のファイルを除外できる。
+
 ★★★**2026-08-19、初めて実害が出た**。`psiBiratNf` が universe で落ちた状態の
 `Prop48Nf.lean` を置いたまま次の測定に移ったところ、
 **ABC3b の `git add -A` が壊れたファイルを 3 本の commit に巻き込んだ**
