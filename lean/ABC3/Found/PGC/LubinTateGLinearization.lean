@@ -259,4 +259,25 @@ theorem coeff_subst_g_linearize {A : Type*} [CommRing A] {φ : MvPowerSeries (Fi
     rw [hscale, MvPowerSeries.coeff_smul]
   rw [ha_def, hstep2, hstep1]
 
+/-! ### 補助: `HasSubst (fun i => g.subst(X_i))` を独立補題として外に出す
+
+`coeff_subst_g_linearize` の証明内で作ったのと同じ構成——次数ごとの帰納法の
+1ステップを組み立てる際(`LubinTateStepAssembly.lean`)にも同じ `HasSubst` が
+要るので、複製せずにここで公開する。 -/
+
+/-- `g ≡ 0 (mod deg 1)`(定数項0)のとき、`fun i => g.subst(X_i)` は
+`MvPowerSeries.subst` の前提 `HasSubst` を満たす。 -/
+theorem hasSubst_g_subst_X {A : Type*} [CommRing A] (g : PowerSeries A)
+    (hg0 : PowerSeries.constantCoeff g = 0) :
+    MvPowerSeries.HasSubst
+      (fun i : Fin 2 => PowerSeries.subst (MvPowerSeries.X i : MvPowerSeries (Fin 2) A) g) := by
+  constructor
+  · intro i
+    show IsNilpotent (MvPowerSeries.constantCoeff (PowerSeries.subst (MvPowerSeries.X i) g))
+    have heq0 : MvPowerSeries.constantCoeff
+        (PowerSeries.subst (MvPowerSeries.X i : MvPowerSeries (Fin 2) A) g) = 0 :=
+      PowerSeries.constantCoeff_subst_eq_zero (MvPowerSeries.constantCoeff_X i) g hg0
+    rw [heq0]; exact IsNilpotent.zero
+  · intro d; exact Set.toFinite _
+
 end ABC3.Found.PGC
