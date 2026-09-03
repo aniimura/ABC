@@ -482,6 +482,26 @@
    "notationRisk": "unmeasured",
    "notationNotes": "★★★まだ目視していない。テキスト層は取れているが、どの記号が壊れるかは未測定(GenEll では行列の順序が入れ替わる実害、IUTchI-III・EtTh・AbsTopIII ではオーバーバー・script 文字・下線の脱落が実害になった)。逐語を使う前に必ず 260dpi で目視すること。",
    "verifiedPages": []
+  },
+  "LocProP": {
+   "title": "The Local Pro-p Anabelian Geometry of Curves",
+   "file": "The Local Pro-p Anabelian Geometry of Curves",
+   "author": "Shinichi Mochizuki",
+   "pdfPages": 103,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★まだ目視していない。テキスト層は取れているが、どの記号が壊れるかは未測定。逐語を使う前に必ず 260dpi で目視すること。",
+   "verifiedPages": []
+  },
+  "CorrHyp": {
+   "title": "Correspondences on Hyperbolic Curves",
+   "file": "Correspondences on Hyperbolic Curves",
+   "author": "Shinichi Mochizuki",
+   "pdfPages": 18,
+   "pageOffset": 0,
+   "notationRisk": "unmeasured",
+   "notationNotes": "★★★まだ目視していない。テキスト層は取れているが、どの記号が壊れるかは未測定。逐語を使う前に必ず 260dpi で目視すること。",
+   "verifiedPages": []
   }
  }
 }
