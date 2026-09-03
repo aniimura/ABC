@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>[pGC] Section 2: Higher Ramification Groups</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.7; color: #222; }
+  h1 { font-size: 1.25em; border-bottom: 2px solid #333; padding-bottom: .3em; }
+  section.statement { border-left: 4px solid #1554b0; padding: .5em 1em; margin: 1.6em 0; background: #f7f9fc; }
+  section.statement.proposition { border-left-color: #0a7d1e; background: #f2f9f2; }
+  section.statement.corollary   { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.definition  { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.remark      { border-left-color: #666;    background: #f5f5f5; }
+  section.statement.setup       { border-left-color: #bbb;    background: #fafafa; }
+  .hdr { font-size: .8em; color: #777; margin-bottom: .4em; }
+  .hdr b { color: #333; }
+  .verbatim { background: #fff; border: 1px solid #ddd; padding: .6em .9em; margin: .5em 0; }
+  .reading  { font-size: .93em; color: #333; margin: .5em 0 0; }
+  .reading::before { content: "読み: "; font-weight: bold; color: #1554b0; }
+  p.open { background: #fff8e1; border-left: 4px solid #c9a227; padding: .4em .9em; margin: .6em 0; }
+  p.open::before { content: "未解決: "; font-weight: bold; }
+  /* 記法クラス — .txt で脱落する装飾を表示側で復元する */
+  .ul1  { text-decoration: underline; }
+  .ul2  { text-decoration: underline; text-decoration-style: double; }
+  .bar  { text-decoration: overline; }
+  .hat::after   { content: "\0302"; }
+  .tilde::after { content: "\0303"; }
+  .dot1::after  { content: "\0307"; }
+  .dot2::after  { content: "\0308"; }
+  .bb   { font-weight: bold; }
+  .scr  { font-family: "Segoe Script", cursive; font-style: italic; }
+</style>
+</head>
+<body>
+
+<p><a href="index.html">&larr; [pGC] 目次</a></p>
+
+<h1>[pGC] Section 2: Higher Ramification Groups</h1>
+
+<p class="hdr">
+原典: <b>A Version of the Grothendieck Conjecture for p-adic Local Fields</b> (S. Mochizuki, 1997)&nbsp;/&nbsp;
+範囲: <b>物理ページ 4–5</b>&nbsp;/&nbsp;
+記法の目視確認: <b>2026-09-03</b>(p.4 全面・p.5 全面、260dpi 相当の画像で目視)&nbsp;/&nbsp;
+規約: <a href="../README.md">1_Structured/README.md</a>
+</p>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-2-log-review"
+         data-paper="pGC" data-pdf-page="4" data-item="Section 2 (p-adic log review)"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>&sect;2 冒頭</b>(p進対数の復習) — 物理 p.4</p>
+
+<div class="verbatim">
+Recall that the p-adic logarithm defines a natural isomorphism of U<sub>K</sub> (modulo torsion) onto an open subgroup of K. In particular, it defines an isomorphism of U<sub>K</sub> ⊗<span class="bb">Z</span><sub>p</sub> <span class="bb">Q</span><sub>p</sub> with K. Now, for any finite extension L of K (corresponding to some subgroup &Gamma;<sub>L</sub> &sube; &Gamma;<sub>K</sub>), we have a commutative diagram
+</div>
+
+<div class="reading">
+本節で新たに導入される記法: U<sub>K</sub> <span class="glyph" data-txt="d=ef">&#8797;</span> <span class="scr" data-txt="O">O</span><sub>K</sub><sup>&times;</sup>(単数群、&sect;1 の局所類体論の完全系列で既出)。ここでは p 進対数 log : U<sub>K</sub> ⊗ <span class="bb">Q</span><sub>p</sub> &cong; K(捩れを法として)という<b>加法的な</b>同型を使う——&sect;1 とは異なる境界外の入力。
+<br>この後、可換図式(U<sub>K</sub>⊗<span class="bb">Q</span><sub>p</sub> &rarr; U<sub>L</sub>⊗<span class="bb">Q</span><sub>p</sub>、log で K &rarr; L に降りる)が続くが、`pdftotext` はこの種の2次元図式のセル順序を版面ごとに入れ替えるため、逐語欄には含めない(この reading で内容のみ記録する)。図式の可換性は「log が有限次拡大の間の自然な包含と両立する」という主張。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-2-verlagerung"
+         data-paper="pGC" data-pdf-page="4" data-item="Section 2 (Verlagerung)"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>Verlagerung(転送写像)による帰結</b> — 物理 p.4</p>
+
+<div class="verbatim">
+(where the horizontal maps are the natural inclusions). Moreover, if we regard U<sub>K</sub> (respectively, U<sub>L</sub>) as a subgroup of <span data-txt="&Gamma;aKb">&Gamma;<sub>K</sub><sup>ab</sup></span> (respectively, <span data-txt="&Gamma;aLb">&Gamma;<sub>L</sub><sup>ab</sup></span>) then the morphism U<sub>K</sub> &rarr; U<sub>L</sub> may be recovered group-theoretically by means of the &ldquo;Verlagerung, or transfer, map&rdquo; (see, e.g.,
+[6], Chapter VII, &sect;8). We thus obtain the following result:
+</div>
+
+<div class="reading">
+<b>境界内(既存確認、良い知らせ)</b>: 「Verlagerung, or transfer, map」は群論の標準的な transfer 写像(有限指数部分群からアーベル化された部分群への転送)——mathlib に<code>MonoidHom.transfer</code>(<code>Mathlib/GroupTheory/Transfer.lean:148</code>、<code>[FiniteIndex H] : G →* A</code>)として<b>存在する</b>(実測)。&sect;1・&sect;2 でこれまで調べた境界外入力(局所 Tate 双対性・局所類体論・高次分岐群・p 進対数の定量評価)の中で、初めて「公理化不要、既存の mathlib 部品で構成できる」と判明した対象。
+<br>[6] = J.-P. Serre, <i>Local Fields</i>, GTM 67, Chapter VII &sect;8。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement proposition"
+         id="prop-2-1"
+         data-paper="pGC" data-pdf-page="4" data-item="Proposition 2.1"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>Proposition 2.1</b> — 物理 p.4</p>
+
+<div class="verbatim">
+The &Gamma;<sub>K</sub>-module <span class="bar" data-txt="K">K</span> may be recovered group-theoretically from &Gamma;<sub>K</sub>.
+</div>
+
+<div class="reading">
+証明は独立した proof ブロックではなく、直前の2段(<a href="#setup-2-log-review">setup-2-log-review</a>・<a href="#setup-2-verlagerung">setup-2-verlagerung</a>)がそのまま論拠になっている。&sect;1 の Corollary 1.3 までと同じ「地の文＝証明」という文体。
+<br>回復されるのは<b>&Gamma;<sub>K</sub>-加群としての K</b>(加法群+&Gamma;<sub>K</sub> 作用)——直後の Note が明示するとおり、体としての乗法構造はまだ回復されていない。この限定は &sect;4 の主定理(Theorem 4.2)まで持ち越される。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement remark"
+         id="remark-2-1-mult"
+         data-paper="pGC" data-pdf-page="4" data-item="Section 2 (Note after Prop 2.1)"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>Proposition 2.1 直後の Note</b>(留保) — 物理 p.4</p>
+
+<div class="verbatim">
+Note, however, that at this point, the multiplicative structure on <span class="bar" data-txt="K">K</span> (i.e., its structure as a field, as opposed to just as an additive group with &Gamma;<sub>K</sub>-action) has yet to be recovered
+group-theoretically.
+</div>
+
+<div class="reading">
+この留保は Lean 化で見落としやすい——<code>AssociatedObject.RecoverableFromAbsGal</code> を K 上の<b>加法群構造</b>に対して適用するのか<b>体構造</b>に対して適用するのかを、Skeleton の型で区別する必要がある。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-2-herbrand"
+         data-paper="pGC" data-pdf-page="4" data-item="Section 2 (higher ramification, upper numbering)"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>高次分岐群(上付き番号付け)の導入</b> — 物理 p.4</p>
+
+<div class="verbatim">
+Now let v &ge; 0 be a real number. Then we shall denote by &Gamma;<sup>v</sup><sub>K</sub> &sube; &Gamma;<sub>K</sub> the higher ramification group associated to the number v in the &ldquo;upper numbering&rdquo; (see, e.g., [3], p. 155). Let us denote by U<sub>K</sub><sup>v</sup> &sube; U<sub>K</sub> the subgroup 1 + m<sub>K</sub><sup>n</sup>, where m<sub>K</sub> &sube; <span class="scr" data-txt="O">O</span><sub>K</sub> is the maximal ideal, and n is the unique integer for which n &minus; 1 &lt; v &le; n. Then it is well-known (Theorem 1 of [3], p. 155) that the image of &Gamma;<sub>K</sub><sup>v</sup> in &Gamma;<sub>K</sub><sup>ab</sup> is equal to U<sub>K</sub><sup>v</sup> &sube; U<sub>K</sub>.
+</div>
+
+<div class="reading">
+<b>境界外の依拠</b>: [3] = J.-P. Serre, <i>Local Class Field Theory</i>(Cassels&ndash;Fr&ouml;hlich 1967)、および Serre, <i>Local Fields</i> p.155 の Theorem 1(Herbrand の定理: 上付き番号付けの分岐群の &Gamma;<sub>K</sub><sup>ab</sup> における像が U<sub>K</sub><sup>v</sup> に一致する)。<b>mathlib に不在</b>(実測: <code>RamificationGroup.lean</code> には分岐群・惰性群の基本のみで、<code>upperNumbering</code>・<code>lowerNumbering</code>・Herbrand の定理に相当する宣言はゼロ件)。
+<br>この命題は「&Gamma;<sub>K</sub> 自体に、実数で添字付けられたフィルトレーション {&Gamma;<sub>K</sub><sup>v</sup>} という<b>追加データ</b>が付随する」という、&sect;1 には無かった構造を導入する。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-2-padiclog-quant"
+         data-paper="pGC" data-pdf-page="4" data-item="Section 2 (quantitative p-adic log)"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>p 進対数の定量評価</b> — 物理 p.4&ndash;5</p>
+
+<div class="verbatim">
+Let e<sub>K</sub> be the absolute ramification index of K (i.e., the ramification index of K over <span class="bb">Q</span><sub>p</sub>). Note that, by Proposition 1.2, it follows that e<sub>K</sub> can be recovered group-theoretically from &Gamma;<sub>K</sub>. Suppose that we are given (in addition to &Gamma;<sub>K</sub>) the subgroup &Gamma;<sup>v</sup><sub>K</sub> &sube; &Gamma;<sub>K</sub> for some v = r · e<sub>K</sub>, where r &ge; 2 is an integer. Then it follows that we know the subgroup U<sub>K</sub><sup>v</sup> &sube; U<sub>K</sub>. Moreover, it follows from the theory of the p-adic logarithm (see, e.g., [5], Chapter IV, &sect;1) that the submodule
+</div>
+
+<div class="reading">
+e<sub>K</sub> の回復は Proposition 1.2(絶対次数 [K:<span class="bb">Q</span><sub>p</sub>] の回復)に帰着——&sect;1 への直接依存。
+<br><b>境界外の依拠</b>: [5] = J.-P. Serre, <i>Local Fields</i>, GTM 67, Chapter IV &sect;1(p 進対数の収束半径の定量評価: r &ge; 2 のとき U<sub>K</sub><sup>v</sup> 上で対数が同型を保つ)。<b>mathlib に不在</b>(実測: <code>PadicInt.log</code> 等のキーワードで p 進対数写像自体がヒットしない)。この一文は「r &ge; 2」という具体的な数値条件を持つ点で、直前の Herbrand の定理より<b>定量的</b>。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-2-padiclog-cont"
+         data-paper="pGC" data-pdf-page="5" data-item="Section 2 (quantitative p-adic log, continued)"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>p 進対数の定量評価(続き)</b> — 物理 p.5</p>
+
+<div class="verbatim">
+p<sup>&minus;r</sup> · U<sub>K</sub><sup>v</sup> &sube; U<sub>K</sub> ⊗<sub><span class="bb">Z</span><sub>p</sub></sub> <span class="bb">Q</span><sub>p</sub>
+corresponds to the submodule <span class="scr" data-txt="O">O</span><sub>K</sub> &sube; K under the isomorphism induced by the p-adic logarithm.
+</div>
+
+<div class="reading">
+前段(<a href="#setup-2-padiclog-quant">setup-2-padiclog-quant</a>)から改ページで続く一文。ここで現れる <span class="scr">O</span><sub>K</sub>(K の整数環、バーなし)は、直後の Proposition 2.2 に現れる <span class="scr">O</span><sub><span class="bar">K</span></sub>(代数閉包 <span class="bar">K</span> の整数環)とは<b>別の対象</b>——`pdftotext` ではどちらも &ldquo;OK&rdquo; に潰れて区別が付かない(バーの脱落)ので、Lean 化では文脈から手動で区別する必要がある。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-2-completion"
+         data-paper="pGC" data-pdf-page="5" data-item="Section 2 (p-adic completion of Kbar)"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>K の p 進完備化の導入</b> — 物理 p.5</p>
+
+<div class="verbatim">
+Now let us denote by <span class="bar" data-txt="K">K</span><sup>&and;</sup> the p-adic completion of the field <span class="bar" data-txt="K">K</span>. Thus, <span class="bar" data-txt="K">K</span><sup>&and;</sup> is the quotient field of the p-adic completion of the ring of integers <span class="scr" data-txt="O">O</span><sub><span class="bar" data-txt="K">K</span></sub>. Then we see that we have obtained the following result:
+</div>
+
+<div class="reading">
+<span class="bar">K</span><sup>&and;</sup>(代数閉包 <span class="bar">K</span> の p 進完備化)は <span class="scr">O</span><sub><span class="bar">K</span></sub>(<span class="bar">K</span> の整数環)の p 進完備化の商体として定義される——&sect;1 で固定した代数閉包 <span class="bar">K</span> に依存する対象であることに注意。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement proposition"
+         id="prop-2-2"
+         data-paper="pGC" data-pdf-page="5" data-item="Proposition 2.2"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>Proposition 2.2</b> — 物理 p.5</p>
+
+<div class="verbatim">
+Suppose that we are given the following group-theoretic data: the topological group &Gamma;<sub>K</sub>, together with the indexed filtration &Gamma;<sub>K</sub><sup>v</sup> for all v &gt; 0. Then the &Gamma;<sub>K</sub>-modules <span class="scr" data-txt="O">O</span><sub><span class="bar" data-txt="K">K</span></sub>, and <span class="bar" data-txt="K">K</span><sup>&and;</sup> can be recovered group-theoretically from this group-theoretic data.
+</div>
+
+<div class="reading">
+Proposition 2.1 が単一の K に対する主張だったのに対し、ここでは<b>フィルトレーション {&Gamma;<sub>K</sub><sup>v</sup>}<sub>v&gt;0</sub> 全体</b>を追加データとして与え、代数閉包 <span class="bar">K</span> の整数環 <span class="scr">O</span><sub><span class="bar">K</span></sub> と p 進完備化 <span class="bar">K</span><sup>&and;</sup> という、より大きい対象を回復する。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="prop-2-2-proof"
+         data-paper="pGC" data-pdf-page="5" data-item="Proposition 2.2 (proof)"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>Proposition 2.2 の証明</b> — 物理 p.5</p>
+
+<div class="verbatim">
+Proof: To obtain <span class="scr" data-txt="O">O</span><sub><span class="bar" data-txt="K">K</span></sub>, we simply apply the above discussion to finite extensions L of K, and use Proposition 2.1. Note that when we pass to an open subgroup &Gamma;<sub>L</sub> &sube; &Gamma;<sub>K</sub>, since the upper numbering is not compatible with passage to subgroups, one must first convert to the lower numbering (which is compatible with passage to subgroups), and then convert back to the upper numbering for &Gamma;<sub>L</sub>. (See, e.g., [6], Chapter IV, for more details on the properties of the upper and lower numberings.) It is for this reason that we need all the &Gamma;<sub>K</sub><sup>v</sup> for v &gt; 0 (note that we already have &Gamma;<sup>0</sup><sub>K</sub> = I<sub>K</sub> by Corollary 1.3), rather than just &Gamma;<sub>K</sub><sup>v</sup> for sufficiently large v.
+To obtain <span class="bar" data-txt="K">K</span><sup>&and;</sup>, we note that <span class="bar" data-txt="K">K</span><sup>&and;</sup> is just the p-adic completion of <span class="scr" data-txt="O">O</span><sub><span class="bar" data-txt="K">K</span></sub> tensored over <span class="bb">Z</span><sub>p</sub> with <span class="bb">Q</span><sub>p</sub>.
+</div>
+
+<div class="reading">
+証明は2つの技法上の手順に依存する: (a) 上付き番号付け&harr;下付き番号付けの変換(&Gamma;<sub>L</sub> &sube; &Gamma;<sub>K</sub> への制限で上付きが保たれないため)——[6] = Serre, <i>Local Fields</i>, Chapter IV。(b) &Gamma;<sub>K</sub><sup>0</sup> = I<sub>K</sub>(惰性群)という等式——これは &sect;1 の Corollary 1.3 の系であり、<b>&sect;2 が &sect;1 の結果に直接依存する</b>ことを明示する一文。
+<br>証明末尾の QED 記号(&#9675;)は `pdftotext` のテキスト層に現れないため、逐語欄には含めない。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-2-def-intro"
+         data-paper="pGC" data-pdf-page="5" data-item="Section 2 (introducing filtered groups)"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>filtered group の定式化への導入</b> — 物理 p.5</p>
+
+<div class="verbatim">
+Before proceeding, it will be convenient to formalize the hypothesis of the preceding Proposition. Let G be a topological group. We would like to consider filtrations G<sup>v</sup> on G indexed by a real number v, as follows:
+</div>
+
+<div class="reading">
+Definition 2.3 は K に固有ではなく<b>一般の位相群 G</b> に対する定義——Proposition 2.2 の仮定(&Gamma;<sub>K</sub> + フィルトレーション)を抽象化したもの。Lean 化では G を任意の位相群として定義し、後で G := &Gamma;<sub>K</sub> を代入する形にする。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement definition"
+         id="def-2-3"
+         data-paper="pGC" data-pdf-page="5" data-item="Definition 2.3"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>Definition 2.3</b> — 物理 p.5</p>
+
+<div class="verbatim">
+We shall call a collection of closed normal subgroups {G<sup>v</sup>} of G (where v ranges over all positive real numbers) a filtration on G if G<sup>v<sub>1</sub></sup> &sube; G<sup>v<sub>2</sub></sup> whenever v<sub>1</sub> &ge; v<sub>2</sub>.
+</div>
+
+<div class="reading">
+定義そのものは純粋な構造(閉正規部分群の族、添字が大きいほど小さい部分群という降下条件)——証明を要しない。原文の変数名 v<sub>1</sub>, v<sub>2</sub> はどちらも実数で、条件は「v<sub>1</sub> &ge; v<sub>2</sub> &rArr; G<sup>v<sub>1</sub></sup> &sube; G<sup>v<sub>2</sub></sup>」(添字について反単調)。
+<br>Lean 化: <code>G : Type*</code> に <code>[TopologicalGroup G]</code> を課し、<code>Gv : &#8477; &rarr; Subgroup G</code> の族に対し (i) 各 <code>Gv v</code> が <code>IsClosed</code> かつ <code>Subgroup.Normal</code>、(ii) <code>Antitone Gv</code>(&#8477; の通常の順序で反単調)を要求する構造として定式化できる——<b>mathlib の在庫だけで書ける</b>(<code>Antitone</code>・<code>Subgroup.Normal</code>・<code>IsClosed</code> はいずれも標準)。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement remark"
+         id="remark-2-3-morphisms"
+         data-paper="pGC" data-pdf-page="5" data-item="Section 2 (closing remark on filtered-group morphisms)"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>Definition 2.3 直後の地の文</b>(射・同型・外部同型への言及) — 物理 p.5</p>
+
+<div class="verbatim">
+There are obvious notions of morphisms and isomorphisms between filtered groups, which we leave to the refer to formalize. Moreover, because of the normality assumption on the G<sup>v</sup>, there is also a notion of outer isomorphisms (i.e., isomorphisms, considered modulo inner isomorphisms) between filtered groups. Note that &Gamma;<sub>K</sub> is equipped with a natural filtration defined by the &Gamma;<sub>K</sub><sup>v</sup>. Thus, Proposition 2.2 may be reformulated as stating that the &Gamma;<sub>K</sub>-module <span class="bar" data-txt="K">K</span><sup>&and;</sup> may be recovered group-theoretically from the filtered group &Gamma;<sub>K</sub>.
+</div>
+
+<div class="reading">
+★ <b>原文の誤植</b>: &ldquo;leave to the refer to formalize&rdquo; は &ldquo;leave to the reader to formalize&rdquo; の誤りと読める(画像で確認済み、OCR ではなく組版由来の誤字)。逐語欄では原文どおり保持する。
+<br>★★ <b>これは CLAUDE.md の「省略」規約が指す明示的な畳み込みそのもの</b>——著者自身が「filtered group の射・同型・外部同型の<b>定義そのもの</b>を本文で与えない」と明言している。&sect;1 の Corollary 1.3(共通部分を取る最終手順が暗黙)より一段深い省略で、<b>合図の文が定義の不在を自認している</b>点が特徴。
+<br>Lean 化ではこの3つを自分で定義する必要がある: (a) filtered group の射(連続群準同型 f : G &rarr; G&prime; であって、各 v に対しある単調写像で添字を辻褄合わせしつつ f(G<sup>v</sup>) &sube; G&prime;<sup>?</sup> を満たすもの——原文はこの「添字の辻褄合わせ」の具体形も与えていないため、最小の忠実な定式化は「f(G<sup>v</sup>) &sube; G&prime;<sup>v</sup>(同じ添字)」に絞ることだが、これは<b>逸脱</b>候補(CLAUDE.md「逸脱」)として記録する。(b) 同型 = 可逆な射。(c) 外部同型 = 内部自己同型全体(Inn G)による同型群の商——mathlib の <code>MulAut</code>・<code>Inn</code> 相当の在庫で書ける。
+</div>
+
+<p class="open">
+&ldquo;filtered group の射&rdquo;の定義において、添字 v の変換規則(恒等に固定するか、単調全単射を許すか)を原文は指定していない。Theorem 4.2 で使われる「filtered groups の外部同型 &alpha; : &Gamma;<sub>K</sub> &cong; &Gamma;<sub>K&prime;</sub>」は添字を保つ同型(同じ v に対し &Gamma;<sub>K</sub><sup>v</sup> &rarr; &Gamma;<sub>K&prime;</sub><sup>v</sup>)を想定しているように読めるため、Lean 化では「添字保存」を最小の忠実な選択として採用し、この判断を<b>逸脱</b>として記録する。
+</p>
+</section>
+
+<!-- ================================================================= -->
+<h2>本節が依拠する外部文献(&sect;2 の境界)</h2>
+
+<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%">
+<tr><th>番号</th><th>文献</th><th>使われ方</th><th>mathlib(実測)</th></tr>
+<tr><td>[3]</td><td>J.-P. Serre, <i>Local Fields</i>, GTM 67, p.155, Theorem 1(または <i>Local Class Field Theory</i>)</td><td>Herbrand の定理(上付き番号付けの分岐群の &Gamma;<sub>K</sub><sup>ab</sup> での像)。&sect;2 の高次分岐群の論拠</td><td><b>不在</b></td></tr>
+<tr><td>[5]</td><td>J.-P. Serre, <i>Local Fields</i>, GTM 67, Chapter IV &sect;1</td><td>p 進対数の定量評価(r &ge; 2 での同型)</td><td><b>不在</b></td></tr>
+<tr><td>[6]</td><td>J.-P. Serre, <i>Local Fields</i>, GTM 67, Chapter VII &sect;8 / Chapter IV</td><td>Verlagerung(転送写像)、上付き&harr;下付き番号付けの変換</td><td>転送写像は<b>存在</b>(<code>MonoidHom.transfer</code>)。番号付けの変換は<b>不在</b></td></tr>
+</table>
+
+<p class="open">
+&sect;2 の Lean 化では、[3] と [5] を <code>ABC3/Interface/</code> の <code>structure</code> として受ける(<code>axiom</code> は使わない)。[6] のうち転送写像は mathlib の <code>MonoidHom.transfer</code> を直接使えるため、Interface 化は不要——ただし「有限次拡大 L への制限と両立する」という Proposition 2.1 の主張自体は、この転送写像の性質から改めて示す必要がある。
+</p>
+
+</body>
+</html>

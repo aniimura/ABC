@@ -101,4 +101,34 @@ def SubgroupCorrespondence.waiting : WaitingFor :=
   { what := "開部分群 H ⊆ Γ_K に対応する中間体が p進局所体であり、その絶対 Galois 群が H であること"
     trackB := "Found/LocalField — Krull 位相の Galois 対応と、ℚ_p 上の有限次性の接続" }
 
+/-- **[pGC] §2** Proposition 2.2 以降が仮説として使う、高次分岐群(上付き番号付け)の族
+`{Γ_K^v}_{v>0}`。
+
+原文 (pGC p.4):
+> Then we shall denote by Γ^v_K ⊆ Γ_K the higher ramification group associated to the
+> number v in the "upper numbering" (see, e.g., [3], p. 155).
+
+**なぜ Interface なのか**: これを構成するには Herbrand の定理
+(Theorem 1 of [3], p.155: 上付き番号付けの分岐群の Γ_K^ab での像が U_K^v に一致する)が
+要る。mathlib に**不在**(実測: `Mathlib/RingTheory/Valuation/RamificationGroup.lean` に
+`TODO: Define higher ramification groups in lower numbering` と明記、上付き番号付けは
+それ以前の段階)。
+
+`Gv` の定義域は原文では `v > 0` のみだが、`Antitone` の条件を書きやすくするため
+全実数上で定義する(`v ≤ 0` での値を固定する、という我々の設計判断——逸脱として記録)。
+`Found/PGC/FilteredGroup.lean` の `FilteredGroup` の3条件(閉・正規・反単調)と同形。 -/
+structure RamificationFiltration (p : ℕ) [Fact p.Prime] where
+  /-- `Γ_K^v ⊆ Γ_K`(v は実数) -/
+  Gv : (K : PAdicLocalField p) → ℝ → Subgroup K.absGal
+  /-- 各 `Γ_K^v` は閉部分群 -/
+  isClosed : ∀ K v, IsClosed (Gv K v : Set K.absGal)
+  /-- 各 `Γ_K^v` は正規部分群 -/
+  isNormal : ∀ K v, (Gv K v).Normal
+  /-- 降下条件: `v1 ≥ v2 → Γ_K^{v1} ⊆ Γ_K^{v2}` -/
+  antitone : ∀ K, Antitone (Gv K)
+
+def RamificationFiltration.waiting (p : ℕ) [Fact p.Prime] : WaitingFor :=
+  { what := "高次分岐群(上付き番号付け){Γ_K^v}_{v>0} の族。Herbrand の定理を要する"
+    trackB := "Found/PGC — RamificationGroup.lean の上付き/下付き番号付けの拡張(mathlib 本体の TODO)" }
+
 end ABC3.Interface.PGC

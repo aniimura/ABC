@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>[pGC] Section 3: Hodge-Tate Representations</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.7; color: #222; }
+  h1 { font-size: 1.25em; border-bottom: 2px solid #333; padding-bottom: .3em; }
+  section.statement { border-left: 4px solid #1554b0; padding: .5em 1em; margin: 1.6em 0; background: #f7f9fc; }
+  section.statement.proposition { border-left-color: #0a7d1e; background: #f2f9f2; }
+  section.statement.corollary   { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.definition  { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.remark      { border-left-color: #666;    background: #f5f5f5; }
+  section.statement.setup       { border-left-color: #bbb;    background: #fafafa; }
+  .hdr { font-size: .8em; color: #777; margin-bottom: .4em; }
+  .hdr b { color: #333; }
+  .verbatim { background: #fff; border: 1px solid #ddd; padding: .6em .9em; margin: .5em 0; }
+  .reading  { font-size: .93em; color: #333; margin: .5em 0 0; }
+  .reading::before { content: "読み: "; font-weight: bold; color: #1554b0; }
+  p.open { background: #fff8e1; border-left: 4px solid #c9a227; padding: .4em .9em; margin: .6em 0; }
+  p.open::before { content: "未解決: "; font-weight: bold; }
+  /* 記法クラス — .txt で脱落する装飾を表示側で復元する */
+  .ul1  { text-decoration: underline; }
+  .ul2  { text-decoration: underline; text-decoration-style: double; }
+  .bar  { text-decoration: overline; }
+  .hat::after   { content: "\0302"; }
+  .tilde::after { content: "\0303"; }
+  .dot1::after  { content: "\0307"; }
+  .dot2::after  { content: "\0308"; }
+  .bb   { font-weight: bold; }
+  .scr  { font-family: "Segoe Script", cursive; font-style: italic; }
+</style>
+</head>
+<body>
+
+<p><a href="index.html">&larr; [pGC] 目次</a></p>
+
+<h1>[pGC] Section 3: Hodge-Tate Representations</h1>
+
+<p class="hdr">
+原典: <b>A Version of the Grothendieck Conjecture for p-adic Local Fields</b> (S. Mochizuki, 1997)&nbsp;/&nbsp;
+範囲: <b>物理ページ 6</b>&nbsp;/&nbsp;
+記法の目視確認: <b>2026-09-03</b>(p.6 全面、260dpi 相当の画像で目視)&nbsp;/&nbsp;
+規約: <a href="../README.md">1_Structured/README.md</a>
+</p>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-3-hodgetate"
+         data-paper="pGC" data-pdf-page="6" data-item="Section 3 (Hodge-Tate, opening)"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>&sect;3 冒頭</b>(Hodge-Tate 表現の定義) — 物理 p.6</p>
+
+<div class="verbatim">
+Next, let us observe the following formal consequence of Proposition 2.2: Let V be a finite dimensional <span class="bb">Q</span><sub>p</sub>-vector space equipped with a continuous action by &Gamma;<sub>K</sub>. For any integer i, let d<sub>V</sub> (i) be the <span class="bb">Q</span><sub>p</sub>-dimension of the space of &Gamma;<sub>K</sub> -invariants of V (&minus;i)⊗<span class="bb">Q</span><sub>p</sub> <span class="bar" data-txt="K">K</span><sup>&and;</sup>. Let d<sub>V</sub> be the sum of the d<sub>V</sub> (i) as i ranges over all the integers. It is well-known ([1], Chapter III, &sect;1.2) that d<sub>V</sub> &le; dim<span class="bb">Q</span><sub>p</sub> (V ). Moreover, if d<sub>V</sub> = dim<span class="bb">Q</span><sub>p</sub> (V ), then the &Gamma;<sub>K</sub> -module V is called Hodge-Tate.
+</div>
+
+<div class="reading">
+&sect;2 のプロポジション(Proposition 2.2、フィルトレーション付き &Gamma;<sub>K</sub> から <span class="bar">K</span><sup>&and;</sup> が回復できる)の「形式的帰結」として d<sub>V</sub>(i)(V の Hodge-Tate 分解における i 次の重複度)が群論的データから決定できる、という主張の準備。
+<br><b>境界外の依拠</b>: [1] = J.-P. Serre, <i>Abelian &#8467;-adic Representations and Elliptic Curves</i>, Chapter III &sect;1.2(d<sub>V</sub> &le; dim<span class="bb">Q</span><sub>p</sub>(V) という不等式、Hodge-Tate の定義そのもの)。<b>mathlib に不在</b>(実測: Hodge-Tate 表現論に相当する宣言はゼロ件)。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement corollary"
+         id="cor-3-1"
+         data-paper="pGC" data-pdf-page="6" data-item="Corollary 3.1"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>Corollary 3.1</b> — 物理 p.6</p>
+
+<div class="verbatim">
+Given a continuous <span class="bb">Q</span><sub>p</sub>[&Gamma;<sub>K</sub> ]-vector space of finite <span class="bb">Q</span><sub>p</sub>-dimension, the issue of whether or not V is Hodge-Tate (as well as the invariants d<sub>V</sub> (i)) can be determined entirely group-theoretically from the filtered group &Gamma;<sub>K</sub> .
+</div>
+
+<div class="reading">
+証明は独立した proof ブロックではなく、直前の地の文(<a href="#setup-3-hodgetate">setup-3-hodgetate</a>)がそのまま論拠になっている——d<sub>V</sub>(i) の定義に現れる対象(&Gamma;<sub>K</sub> 作用・<span class="bar">K</span><sup>&and;</sup>・Tate twist)がすべて &sect;1&ndash;&sect;2 で回復済みであることから従う、という論法。
+<br>Proposition 2.1&ndash;2.2 とは異なり、Corollary 3.1 は<b>単一の対象</b>ではなく<b>「Hodge-Tate かどうかという判定 + 付随する不変量 d<sub>V</sub>(i)」</b>が回復できる、という判定問題の形をしている——&sect;1 の Corollary 1.3(不分岐判定)と同じ判定型の主張。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-3-repn"
+         data-paper="pGC" data-pdf-page="6" data-item="Section 3 (uniformizing representations, setup)"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>uniformizing 表現への導入</b> — 物理 p.6</p>
+
+<div class="verbatim">
+We shall especially be interested in the following type of representation: Let E be a finite Galois extension of <span class="bb">Q</span><sub>p</sub> containing K. Let us suppose that the &Gamma;<sub>K</sub> -module V is equipped with an E-action, and that V has dimension one over E. Thus, End<sub>E</sub>(V ) = E, and the &Gamma;<sub>K</sub> action on V is given by some representation ρ<sub>V</sub> : &Gamma;<sub>K</sub> &rarr; E&times;, which necessarily factors through <span data-txt="&Gamma;aKb">&Gamma;<sub>K</sub><sup>ab</sup></span>. Now we make the following
+</div>
+
+<div class="reading">
+E は K を含む <span class="bb">Q</span><sub>p</sub> の有限ガロア拡大。V は E 上1次元の &Gamma;<sub>K</sub>-加群(すなわち指標 ρ<sub>V</sub> : &Gamma;<sub>K</sub> &rarr; E<sup>&times;</sup>)——アーベル化 &Gamma;<sub>K</sub><sup>ab</sup> を経由することは類体論の帰結(指標は連結成分/交換子を殺す)。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement definition"
+         id="def-3-2"
+         data-paper="pGC" data-pdf-page="6" data-item="Definition 3.2"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>Definition 3.2</b> — 物理 p.6</p>
+
+<div class="verbatim">
+We shall call the E[&Gamma;<sub>K</sub>]-module V uniformizing if the restriction of ρ<sub>V</sub> to some open subgroup I of U<sub>K</sub> (&sube; <span data-txt="&Gamma;aKb">&Gamma;<sub>K</sub><sup>ab</sup></span>) is the morphism I &rarr; E&times; induced by restricting some morphism of fields K &rarr; E to I &sube; U<sub>K</sub> &sube; K.
+</div>
+
+<div class="reading">
+定義そのものは(E・K・&Gamma;<sub>K</sub>・ρ<sub>V</sub> が与えられた後は)命題を要しない条件文——「ある開部分群 I 上で ρ<sub>V</sub> が体の埋め込み K &rarr; E の制限と一致する」という条件。「uniformizing」の直観: ρ<sub>V</sub> が K 自身の加法的構造(U<sub>K</sub> を通じて)を&ldquo;一様化&rdquo;するように振る舞う、という意味。
+<br>Lean 化: 体の射 &iota; : K &rarr; E(<code>RingHom</code> または <code>AlgHom</code>)の存在と、開部分群 I &le; U<sub>K</sub> 上で ρ<sub>V</sub>|<sub>I</sub> = &iota;|<sub>I</sub> という等式——&sect;1&ndash;&sect;2 の Interface 化された U<sub>K</sub>・&Gamma;<sub>K</sub><sup>ab</sup> に依存する。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-3-uniformizing-criterion"
+         data-paper="pGC" data-pdf-page="6" data-item="Section 3 (uniformizing criterion via dV)"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>uniformizing 性の d<sub>V</sub> による判定条件</b> — 物理 p.6</p>
+
+<div class="verbatim">
+By class field theory, it follows immediately that uniformizing V exist. Now one knows ([1], Chapter III, Appendix, &sect;5) that V (as in the paragraph preceding
+Definition 3.2) is uniformizing if and only if d<sub>V</sub> (1) = [E : K]; d<sub>V</sub> (0) = [E : K] · ([K : <span class="bb">Q</span><sub>p</sub>] &minus; 1). Thus, we obtain the following
+</div>
+
+<div class="reading">
+&ldquo;it follows immediately&rdquo;(合図)——類体論から uniformizing な V の存在を導く一段。既に確立した Definition 3.2 の条件を満たす具体例の構成であり、証明の実質は「類体論による表現の構成」に依存する(&sect;1 で境界外とした局所類体論の入力の再利用)。
+<br><b>境界外の依拠</b>: [1] = Serre, <i>Abelian &#8467;-adic Representations</i>, Chapter III, Appendix &sect;5(d<sub>V</sub>(i) による uniformizing の判定条件式)。<b>mathlib に不在</b>。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement corollary"
+         id="cor-3-3"
+         data-paper="pGC" data-pdf-page="6" data-item="Corollary 3.3"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>Corollary 3.3</b> — 物理 p.6</p>
+
+<div class="verbatim">
+Given a continuous E[&Gamma;<sub>K</sub>]-module V of E-dimension 1, the issue of whether or not V is uniformizing can be determined entirely group-theoretically from the filtered group &Gamma;<sub>K</sub> .
+</div>
+
+<div class="reading">
+Corollary 3.1 と同型の論法: uniformizing 性は d<sub>V</sub>(1)・d<sub>V</sub>(0) という(Corollary 3.1 により回復可能な)不変量だけで判定できる、という直前の判定条件から直ちに従う。
+<br>この Corollary は &sect;4 の Theorem 4.2 の証明で直接使われる(uniformizing な E[&Gamma;<sub>K</sub>]-加群が、&alpha; : &Gamma;<sub>K</sub> &cong; &Gamma;<sub>K&prime;</sub> を通じて uniformizing な E[&Gamma;<sub>K&prime;</sub>]-加群に移ることを保証する)。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<h2>本節が依拠する外部文献(&sect;3 の境界)</h2>
+
+<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%">
+<tr><th>番号</th><th>文献</th><th>使われ方</th><th>mathlib(実測)</th></tr>
+<tr><td>[1]</td><td>J.-P. Serre, <i>Abelian &#8467;-adic Representations and Elliptic Curves</i>, Chapter III &sect;1.2 および Appendix &sect;5</td><td>Hodge-Tate の定義(d<sub>V</sub> &le; dim<span class="bb">Q</span><sub>p</sub>(V))。uniformizing の d<sub>V</sub> による判定条件</td><td><b>不在</b></td></tr>
+<tr><td>(類体論)</td><td>&sect;1 の境界外入力の再利用</td><td>uniformizing な V の存在(By class field theory, it follows immediately)</td><td><b>不在</b>(&sect;1 で既確認)</td></tr>
+</table>
+
+<p class="open">
+&sect;3 の Lean 化では、Hodge-Tate 表現論(d<sub>V</sub>(i) の定義・不等式)を <code>ABC3/Interface/</code> の <code>structure</code> として受ける。&sect;1&ndash;&sect;2 の境界外入力(局所 Tate 双対性・局所類体論・高次分岐群・p 進対数)がすべて &sect;3 の議論の前提としても効いてくる(&Gamma;<sub>K</sub> の filtered group 構造・<span class="bar">K</span><sup>&and;</sup> の回復を経由するため)——&sect;3 は新規の境界外入力を1件([1] の Hodge-Tate 理論)追加するのみで、既存の入力の上に構築される節である。
+</p>
+
+</body>
+</html>

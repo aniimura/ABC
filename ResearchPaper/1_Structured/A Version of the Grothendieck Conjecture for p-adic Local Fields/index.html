@@ -43,9 +43,9 @@ Theorem 4.2 本体の逐語は &sect;4 の構造化時に <code>section-4.html</
 <tr><th>節</th><th>内容</th><th>物理ページ</th><th>状態</th></tr>
 <tr><td>&sect;0</td><td>Introduction(主定理 Theorem 4.2 の先出し、経緯)</td><td>1&ndash;2</td><td class="todo">未着手</td></tr>
 <tr><td><b>&sect;1</b></td><td><b>The Cyclotomic Character and Inertia</b>(Prop 1.1・Prop 1.2・Cor 1.3・末尾 Remark)</td><td>2&ndash;4</td><td class="done"><a href="section-1.html">構造化済み</a>(2026-08-14)</td></tr>
-<tr><td>&sect;2</td><td>Higher Ramification Groups</td><td>4&ndash;</td><td class="todo">未着手(<span class="legacy">旧構成ファイル <code>section-2.legacy.html</code> あり&mdash;参照しない</span>)</td></tr>
-<tr><td>&sect;3</td><td>Hodge-Tate Representations</td><td>—</td><td class="todo">未着手</td></tr>
-<tr><td>&sect;4</td><td>The Main Theorem(Lemma 4.1・Theorem 4.2)</td><td>—</td><td class="todo">未着手</td></tr>
+<tr><td><b>&sect;2</b></td><td><b>Higher Ramification Groups</b>(Prop 2.1・Prop 2.2・Def 2.3)</td><td>4&ndash;5</td><td class="done"><a href="section-2.html">構造化済み</a>(2026-09-03、<span class="legacy">旧構成ファイル <code>section-2.legacy.html</code> は参照しない</span>)</td></tr>
+<tr><td><b>&sect;3</b></td><td><b>Hodge-Tate Representations</b>(Cor 3.1・Def 3.2・Cor 3.3)</td><td>6</td><td class="done"><a href="section-3.html">構造化済み</a>(2026-09-03)</td></tr>
+<tr><td><b>&sect;4</b></td><td><b>The Main Theorem</b>(Lemma 4.1・Theorem 4.2 の主張)</td><td>6(末尾)&ndash;7</td><td class="done"><a href="section-4.html">構造化済み</a>(2026-09-03、Theorem 4.2 の証明本体は p.8 以降&mdash;未構造化)</td></tr>
 </table>
 
 <h2>記法の状況(<code>papers.json</code>: <code>notationRisk = medium</code>)</h2>
@@ -58,8 +58,10 @@ Theorem 4.2 本体の逐語は &sect;4 の構造化時に <code>section-4.html</
 <li><b>K&prime;</b>(もう一つの局所体)&rarr; <code>K </code> と出力(<b>プライムが完全に脱落</b>)</li>
 <li><b>&#7824;</b>(ハット付き太字 Z、副有限完備化)&rarr; <code>Z</code> と出力(直前の <b>Z</b><sub>p</sub> と区別が付かない)</li>
 <li><b>&#119978;</b><sub>K</sub>(script体)&rarr; <code>OK</code> と出力</li>
+<li>&Gamma;<sub>K</sub><sup>v</sup>(高次分岐群、上付き v)&rarr; 出現箇所ごとに <code>&Gamma;vK</code> と <code>&Gamma;Kv</code> の<b>両方</b>が起きる(同一パラグラフ内でも一貫しない、実測)——逐語化では出現ごとに実際の順序を確認する必要がある</li>
+<li>&Gamma;<sub>K</sub><sup>ab</sup> &rarr; <code>&Gamma;aKb</code>(上付き ab が a と b に分裂し、下付き K を挟む)と出ることがある——<code>section-2.html</code>/<code>section-3.html</code> ではこの箇所だけ <code>data-txt</code> で語全体を一括指定して対応</li>
 </ul>
-<p>目視確認済みの物理ページ: <b>2・3・4(冒頭)</b>。&sect;0 および &sect;2 以降は未確認。</p>
+<p>目視確認済みの物理ページ: <b>2・3・4・5・6・7</b>(いずれも全面、260dpi 相当の画像で確認)。&sect;0 のみ未確認。</p>
 
 <h2>&sect;1 の規模(原文の証明文から抽出、★下界)</h2>
 <p>

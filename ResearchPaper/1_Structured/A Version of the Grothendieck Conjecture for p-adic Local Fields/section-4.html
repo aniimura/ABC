@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>[pGC] Section 4: The Main Theorem</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.7; color: #222; }
+  h1 { font-size: 1.25em; border-bottom: 2px solid #333; padding-bottom: .3em; }
+  section.statement { border-left: 4px solid #1554b0; padding: .5em 1em; margin: 1.6em 0; background: #f7f9fc; }
+  section.statement.proposition { border-left-color: #0a7d1e; background: #f2f9f2; }
+  section.statement.corollary   { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.definition  { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.remark      { border-left-color: #666;    background: #f5f5f5; }
+  section.statement.setup       { border-left-color: #bbb;    background: #fafafa; }
+  .hdr { font-size: .8em; color: #777; margin-bottom: .4em; }
+  .hdr b { color: #333; }
+  .verbatim { background: #fff; border: 1px solid #ddd; padding: .6em .9em; margin: .5em 0; }
+  .reading  { font-size: .93em; color: #333; margin: .5em 0 0; }
+  .reading::before { content: "読み: "; font-weight: bold; color: #1554b0; }
+  p.open { background: #fff8e1; border-left: 4px solid #c9a227; padding: .4em .9em; margin: .6em 0; }
+  p.open::before { content: "未解決: "; font-weight: bold; }
+  /* 記法クラス — .txt で脱落する装飾を表示側で復元する */
+  .ul1  { text-decoration: underline; }
+  .ul2  { text-decoration: underline; text-decoration-style: double; }
+  .bar  { text-decoration: overline; }
+  .hat::after   { content: "\0302"; }
+  .tilde::after { content: "\0303"; }
+  .dot1::after  { content: "\0307"; }
+  .dot2::after  { content: "\0308"; }
+  .bb   { font-weight: bold; }
+  .scr  { font-family: "Segoe Script", cursive; font-style: italic; }
+</style>
+</head>
+<body>
+
+<p><a href="index.html">&larr; [pGC] 目次</a></p>
+
+<h1>[pGC] Section 4: The Main Theorem</h1>
+
+<p class="hdr">
+原典: <b>A Version of the Grothendieck Conjecture for p-adic Local Fields</b> (S. Mochizuki, 1997)&nbsp;/&nbsp;
+範囲: <b>物理ページ 6(末尾)&ndash;7</b>&nbsp;/&nbsp;
+記法の目視確認: <b>2026-09-03</b>(p.6 末尾・p.7 全面、260dpi 相当の画像で目視)&nbsp;/&nbsp;
+規約: <a href="../README.md">1_Structured/README.md</a>
+</p>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-4-intro"
+         data-paper="pGC" data-pdf-page="6" data-item="Section 4 (opening)"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>&sect;4 冒頭</b>(2つの局所体 K・K&prime; の同一視への設定) — 物理 p.6 末尾</p>
+
+<div class="verbatim">
+Section 4: The Main Theorem
+Let K and K<span class="prime" data-txt="">&prime;</span> be local p-adic fields. Let us assume that we are given an isomorphism &alpha; : &Gamma;<sub>K</sub> &cong; &Gamma;<sub>K<span class="prime" data-txt="">&prime;</span></sub> of filtered groups. Let V be a uniformizing E[&Gamma;<sub>K</sub>]-module, for some Galois extension E of <span class="bb">Q</span><sub>p</sub> which contains both K and K<span class="prime" data-txt="">&prime;</span>. Note that &alpha; allows us to regard V also as an E[&Gamma;<sub>K<span class="prime" data-txt="">&prime;</span></sub> ]-module. Moreover, by Corollary 3.3, it follows that V is also a uniformizing
+</div>
+
+<div class="reading">
+&sect;1&ndash;&sect;3 は<b>単一の</b> K についての回復可能性を述べていた。&sect;4 で初めて<b>2つの局所体 K・K&prime;</b>とその間の同型 &alpha; : &Gamma;<sub>K</sub> &cong; &Gamma;<sub>K&prime;</sub>(filtered group としての同型)が現れる——ここから「&Gamma;<sub>K</sub> と &Gamma;<sub>K&prime;</sub> の同型から K &cong; K&prime; を構成する」という主定理の本体が始まる。
+<br>&ldquo;K&rdquo;(K&prime; のプライム)は `pdftotext` で完全に脱落するため(&sect;1 で確認済み)、逐語欄では <span class="prime">K&prime;</span> の位置に空文字置換の <code>data-txt=""</code> を用いる。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-4-diagram-lead"
+         data-paper="pGC" data-pdf-page="7" data-item="Section 4 (before the commutative diagram)"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>開部分群 I・I&prime; の構成への導入</b> — 物理 p.7</p>
+
+<div class="verbatim">
+E[&Gamma;<sub>K<span class="prime" data-txt="">&prime;</span></sub> ]-module. Thus, it follows that there exist open submodules I &sube; U<sub>K</sub> and I<span class="prime" data-txt="">&prime;</span> &sube; U<sub>K<span class="prime" data-txt="">&prime;</span></sub> such that the isomorphism U<sub>K</sub> &cong; U<sub>K<span class="prime" data-txt="">&prime;</span></sub> induced by &alpha; maps I onto I<span class="prime" data-txt="">&prime;</span>, and moreover, the resulting isomorphism &alpha;<sub>I</sub> : I &cong; I<span class="prime" data-txt="">&prime;</span> fits into a commutative diagram
+</div>
+
+<div class="reading">
+&alpha; : &Gamma;<sub>K</sub> &cong; &Gamma;<sub>K&prime;</sub> は U<sub>K</sub> &cong; U<sub>K&prime;</sub>(&sect;2 の Proposition 2.1&ndash;2.2 で回復された単数群の同型)を誘導し、これが開部分群 I &sube; U<sub>K</sub> を対応する I&prime; &sube; U<sub>K&prime;</sub> へ写す——&alpha;<sub>I</sub> はその制限。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-4-diagram-tail"
+         data-paper="pGC" data-pdf-page="7" data-item="Section 4 (after the commutative diagram)"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>体の同型 &alpha;<sub>K</sub> の構成</b> — 物理 p.7</p>
+
+<div class="verbatim">
+where the vertical morphisms are induced by field inclusions ι : K &rarr; E and ι<span class="prime" data-txt="">&prime;</span> : K<span class="prime" data-txt="">&prime;</span> &rarr; E. Since I (respectively, I<span class="prime" data-txt="">&prime;</span> ), regarded as a subset of U<sub>K</sub> &sube; K (respectively, U<sub>K<span class="prime" data-txt="">&prime;</span></sub> &sube; K<span class="prime" data-txt="">&prime;</span> ), generates K (respectively, K<span class="prime" data-txt="">&prime;</span> ) as a <span class="bb">Q</span><sub>p</sub>-vector space (by Lemma 4.1 below), it thus follows that Im(ι) = Im(ι<span class="prime" data-txt="">&prime;</span> ). In other words, K and K<span class="prime" data-txt="">&prime;</span> may be realized as the same subfield of E, i.e., the field inclusions ι and ι<span class="prime" data-txt="">&prime;</span> induce an isomorphism of fields &alpha;<sub>K</sub> : K &cong; K<span class="prime" data-txt="">&prime;</span> whose restriction to I &sube; U<sub>K</sub> &sube; K is &alpha;<sub>I</sub>.
+</div>
+
+<div class="reading">
+このパラグラフが Theorem 4.2 の証明の核——「I &sube; U<sub>K</sub> が体として K を(<span class="bb">Q</span><sub>p</sub> 上)生成する」という Lemma 4.1 を経由して、群論的なデータ(&alpha;<sub>I</sub>)から<b>体としての同型</b> &alpha;<sub>K</sub> : K &cong; K&prime; を構成する。&sect;2 の Proposition 2.1 直後の Note(「乗法構造はまだ回復されていない」)への答えがここで初めて与えられる。
+<br>可換図式(I &rarr; I&prime;、E<sup>&times;</sup> &rarr; E<sup>&times;</sup> を id で結ぶ)は `pdftotext` でセル順序が崩れるため逐語欄には含めない——内容は「&alpha;<sub>I</sub> が体への埋め込み ι・ι&prime; と両立する」という主張。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement remark"
+         id="lemma-4-1"
+         data-paper="pGC" data-pdf-page="7" data-item="Lemma 4.1"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>Lemma 4.1</b> — 物理 p.7</p>
+
+<div class="verbatim">
+Lemma 4.1 : If I &sube; U<sub>K</sub> is an open subgroup, then the <span class="bb">Q</span><sub>p</sub>-vector space generated by I in K is equal to K.
+</div>
+
+<div class="reading">
+★★ <b>この節の中で唯一、著者自身が完全な自己完結証明を与えている項目</b>——&sect;1&ndash;&sect;3 の境界外入力(局所 Tate 双対性・局所類体論・高次分岐群・p 進対数・Hodge-Tate 理論)を一切使わない、純粋な位相線形代数の主張。<b>mathlib だけで閉じられる見込みが高い</b>。
+<br>主張: K の開部分群 I(U<sub>K</sub> の部分群として)が K を <span class="bb">Q</span><sub>p</sub>-ベクトル空間として生成する。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="lemma-4-1-proof"
+         data-paper="pGC" data-pdf-page="7" data-item="Lemma 4.1 (proof)"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>Lemma 4.1 の証明</b> — 物理 p.7</p>
+
+<div class="verbatim">
+Proof: Let Z &sube; K be the <span class="bb">Q</span><sub>p</sub>-subspace of K generated by I. Note that U<sub>K</sub> is open in K (in the p-adic topology). Thus, I is open in K. Moreover, if z ∈ Z, then it follows from the definition of Z that z + I d=ef {z + i | i ∈ I} is also contained in Z. On the other hand, z + I is open in K. Thus, it follows that Z is open in K. On the other hand, if Z = K, then (since the p-adic topology on <span class="bb">Q</span><sub>p</sub> is not discrete), it would follow that Z is not open in K. This contradiction shows that Z = K, thus completing the proof of the Lemma.
+</div>
+
+<div class="reading">
+証明の骨格(Lean 化の指針): (1) Z := <span class="bb">Q</span><sub>p</sub> 上 I が張る部分空間、(2) U<sub>K</sub> は K で開、I &sube; U<sub>K</sub> は開部分群なので I も K で開、(3) 任意の z ∈ Z に対し z + I &sube; Z(Z が部分空間であることから)かつ z + I は開(平行移動は同相)——ゆえに Z は開集合の合併として開、(4) <span class="bb">Q</span><sub>p</sub> の位相は離散でない(<code>Padic</code> の非離散性、mathlib に既存)ので、K の真の開部分空間は存在しない(有限次元 <span class="bb">Q</span><sub>p</sub>-空間の位相は自明でない付値から来る非離散位相)——ゆえに Z = K。
+<br>★ <b>原文の誤植なし</b>だが記号 &ldquo;d=ef&rdquo;(&ldquo;定義により等しい&rdquo;、&Gamma;1&ndash;&Gamma;3 で &ldquo;&#8797;&rdquo; として現れた記号と同じ)がここでは崩れずそのまま &ldquo;d=ef&rdquo; の文字列として抽出される(実測)。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement corollary"
+         id="theorem-4-2"
+         data-paper="pGC" data-pdf-page="7" data-item="Theorem 4.2"
+         data-notation-checked="2026-09-03">
+<p class="hdr"><b>Theorem 4.2</b>(主定理) — 物理 p.7</p>
+
+<div class="verbatim">
+Theorem 4.2: Let K and K<span class="prime" data-txt="">&prime;</span> be finite extensions of <span class="bb">Q</span><sub>p</sub>. Let Isom<span class="bb">Q</span><sub>p</sub>(K, K<span class="prime" data-txt="">&prime;</span> ) denote the set of <span class="bb">Q</span><sub>p</sub>-algebra isomorphisms of K with K<span class="prime" data-txt="">&prime;</span> . Let OutF ilt(&Gamma;<sub>K</sub>, &Gamma;<sub>K<span class="prime" data-txt="">&prime;</span></sub>) denote the set
+of outer isomorphisms of filtered groups between the absolute Galois groups of K and K<span class="prime" data-txt="">&prime;</span>
+equipped with the filtrations defined by the higher (i.e., with index &gt; 0) ramification groups
+in the upper numbering. Then the natural morphism
+Isom<span class="bb">Q</span><sub>p</sub> (K, K<span class="prime" data-txt="">&prime;</span> ) &rarr; OutF ilt(&Gamma;<sub>K</sub> , &Gamma;<sub>K<span class="prime" data-txt="">&prime;</span></sub> ) induced by &ldquo;looking at the morphism induced on absolute Galois groups&rdquo; is a bijection.
+</div>
+
+<div class="reading">
+これが論文全体の主定理——&sect;1&ndash;&sect;4 で構築した「&Gamma;<sub>K</sub> から K の(加法的構造・整数環・分岐群フィルトレーション付きの)群論的データを回復する」という一連の結果を、Lemma 4.1 で得た「体としての同型」の構成と組み合わせ、<b>K &#8801; K&prime; ⟺ &Gamma;<sub>K</sub> &cong; &Gamma;<sub>K&prime;</sub>(filtered groups として、内部自己同型を法として)</b>という双方向性(全単射)にまで高める。
+<br>証明は物理 p.7 末尾から p.8 へ続く(単射性は &Gamma;<sub>K</sub><sup>ab</sup> &cong; (K<sup>&times;</sup>)<sup>&and;</sup> の局所類体論的同型を経由し、全射性は setup-4-diagram-tail で示した &alpha;<sub>K</sub> の構成そのもの)——今回はこの Section 4 の構造化を Theorem 4.2 の<b>主張</b>までとし、p.8 以降の証明の逐語構造化は次回に持ち越す(逸脱として記録: 証明本体の verbatim 化は本セッションの範囲外)。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<h2>本節が依拠する外部文献・既出の境界外入力(&sect;4 の境界)</h2>
+
+<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%">
+<tr><th>入力</th><th>使われ方</th><th>mathlib(実測)</th></tr>
+<tr><td>&sect;1&ndash;&sect;3 のすべての境界外入力</td><td>Theorem 4.2 は &sect;1&ndash;&sect;3 の結果の積み上げそのもの</td><td>すべて<b>不在</b>(&sect;1&ndash;&sect;3 で既確認)</td></tr>
+<tr><td>Q<sub>p</sub> の非離散性</td><td>Lemma 4.1 の証明の核</td><td><b>存在</b>(<code>Padic</code> の位相、標準)</td></tr>
+</table>
+
+<p class="open">
+Lemma 4.1 は &sect;1&ndash;&sect;3 の境界外入力を一切使わない自己完結証明を持つ——本節の Skeleton/Found 化では、まず Lemma 4.1 の sorry-free な証明を <code>Found/PGC/</code> に完成させることを優先する(&sect;1&ndash;&sect;3 のどの項目よりも mathlib だけで閉じられる可能性が高い)。
+</p>
+
+</body>
+</html>

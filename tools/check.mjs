@@ -846,6 +846,16 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
       'Skeleton/PGC/Section1.lean#cyclotomicCharacter_recoverable',
       'Skeleton/PGC/Section1.lean#residueCard_and_degree_recoverable',
       'Skeleton/PGC/Section1Cor13.lean#inertia_recoverable',
+      // ★2026-09-04 追加(§2-§4 の骨格、第 1467 前後)。理由: いずれも §1 と同型の
+      //   構造(Interface 仮説 + AssociatedObject 的な回復可能性)で、非空虚性の
+      //   witness を書くには RamificationFiltration/IsUniformizing 等の実装
+      //   (Herbrand の定理・局所類体論、いずれも mathlib 不在)が要る——
+      //   §1 の3件と同じ理由で、実装が来るまでの繰り越し。
+      'Skeleton/PGC/Section2.lean#prop_2_1',
+      'Skeleton/PGC/Section2.lean#prop_2_2',
+      'Skeleton/PGC/Section3.lean#cor_3_1',
+      'Skeleton/PGC/Section3.lean#cor_3_3',
+      'Skeleton/PGC/Section4.lean#theorem_4_2',
     ]);
     // ★`Theorem 2.1` と `[NCBelyi] Theorem 2.5` は既に対照がある(表に載せない):
     //   `theorem_2_1_nonvacuous` / `theorem_2_1_converse_nonvacuous`(第 1446)、
