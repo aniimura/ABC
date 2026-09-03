@@ -72,7 +72,12 @@ def prop_2_1.src : Source :=
 
 /-- 原文の証明文から抽出した、証明が要求するもの(G6)。★下界。 -/
 def prop_2_1.needs : List ProofObligation :=
-  [ .folklore "p進対数が U_K(捩れを法として)を K の開部分群に写す(§2 冒頭)" 4,
+  [ .folklore
+      ("p進対数が U_K(捩れを法として)を K の開部分群に写す(§2 冒頭)。" ++
+       "★2026-09-04: 準同型性は一般の K で確立(`Found/PGC/PadicLogMul.lean::padicLog_mul`)。" ++
+       "★★同日: 単射性(‖x‖≤1/4 の球上)も一般の K で確立" ++
+       "(`Found/PGC/PadicLogInjective.lean::padicLog_injOn`)。" ++
+       "残るのは全射性(像が実際に K の開部分群に一致すること、exp/log の互逆性を要する)") 4,
     .citation "[6] Serre, Local Fields, Chapter VII §8" "Verlagerung(転送写像)"
       (.inMathlib "MonoidHom.transfer") 4,
     .implicitStep "log による U_K⊗Q_p ≅ K と Verlagerung の両立性から Prop 2.1 自体への一段" 4 ]
