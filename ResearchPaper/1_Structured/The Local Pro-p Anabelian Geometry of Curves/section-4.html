@@ -1,0 +1,50 @@
+<!-- [LocProP] §4 J-Geometric Sections —— 条なし .src 用のアンカー。
+     260 dpi 目視確認 2026-09-04(p.30-31、逐語の食い違い無し)。 -->
+
+<section class="statement lemma"
+         id="locprop-lemma-4-1"
+         data-paper="LocProP"
+         data-pdf-page="30"
+         data-item="Lemma 4.1"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">Suppose that the residue field k is finite. Then there exists a geometric</div>
+<div class="reading">剰余体 `k` が有限なとき、`θ = θ_L` となる幾何点
+`L ∈ J_X^{(1)}(K)` が存在する ⟺ `δ_θ = 0`。</div>
+<p class="open">実装: <code>Found/LocProP/JGeometricImpl.lean</code> の <code>lPointExists</code>。</p>
+</section>
+
+<section class="statement lemma"
+         id="locprop-lemma-4-2"
+         data-paper="LocProP"
+         data-pdf-page="31"
+         data-item="Lemma 4.2"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">We have:</div>
+<div class="reading">`γ_α(φ) = ζ(γ)_Z · γ_β(φ) · ζ(γ)_Z⁻¹`(2 つの節 `α`・`β` が定める作用の比較)。</div>
+<p class="open">実装: <code>Found/LocProP/JGeometricImpl.lean</code> の
+<code>conjugationFormula</code>。</p>
+</section>
+
+<section class="statement definition"
+         id="locprop-def-4-3"
+         data-paper="LocProP"
+         data-pdf-page="31"
+         data-item="Definition 4.3"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">We shall call</div>
+<div class="reading">節 `α'` が「J-geometric」とは、`α'_Z` が `θ_geom` と(内部自己同型を除いて)
+一致すること。</div>
+<p class="open">実装: <code>Found/LocProP/JGeometricImpl.lean</code> の <code>isJGeometricDef</code>。</p>
+</section>
+
+<section class="statement proposition"
+         id="locprop-prop-4-4"
+         data-paper="LocProP"
+         data-pdf-page="31"
+         data-item="Proposition 4.4"
+         data-notation-checked="2026-09-04">
+<div class="verbatim">Let α</div>
+<div class="reading">連続準同型 `α : Γ_K → Π_{X_K}` が `Π_{X_K} → Γ_K` の節を定めるとき、
+`α` が `(∗)^spl` を満たす ⟺ `α` が J-geometric。</div>
+<p class="open">実装: <code>Found/LocProP/JGeometricImpl.lean</code> の <code>splIffJGeometric</code>。</p>
+</section>
