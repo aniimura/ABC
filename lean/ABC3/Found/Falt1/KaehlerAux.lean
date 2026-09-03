@@ -72,6 +72,20 @@ f'(w)が非零因子であることを使う——別の議論、未着手)、(b
 Dedekind整域・体K,L・IsIntegralClosure等、本ファイルではまだ組み立てて
 いない仮定群を要求する——次の一歩として記録する。
 
+**単射性(第一完全列)の道筋を調査**(2026-09-04): 必要になるのは
+`Ω_{V[T]/Z} ≅ (Ω_{V/Z}⊗_VV[T]) ⊕ V[T]dT`という直和分解。
+`KaehlerDifferential.polynomialEquiv R`(R=Vとして)は`Ω_{V[T]/V}≃V[T]`
+(Vからの**相対**微分)を与えるので、これと「第一完全列」
+`V[T]⊗_VΩ_{V/Z}→Ω_{V[T]/Z}→Ω_{V[T]/V}→0`(`exact_mapBaseChange_map`、
+R:=Z,A:=V,B:=V[T])を組み合わせれば右完全列は出るが、**分裂すること**
+(= 直和になること)は別に要る——V→V[T]の smooth性から従うはずだが、
+`RingTheory/Kaehler/Polynomial.lean`には既製の分裂補題は無い
+(`polynomialEquiv`はZ=Vの自明底の場合のみ、mvPolynomialBasisも同様)。
+`Algebra.Extension.Algebra.FormallySmooth.iff_split_injection`
+(`RingTheory/Smooth/Basic.lean`)等のformally smooth機構を経由する
+必要がありそうだが、まだ組み立てていない——Lemma 1.1の残り部分の
+中でも最も骨が折れそうな箇所として記録する。
+
 ★見積り: Lemma 1.1 だけでもこの規模の補題を10-20個組み合わせる必要が
 あり、数日〜数週間規模の作業になる可能性が高い。§2-4 は Faltings の
 "almost mathematics" 自体が mathlib に無い(`Almost`/`Malcev`/
