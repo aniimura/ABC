@@ -38,4 +38,24 @@ Reidemeister–Schreier を自作)を sorry 無しで実装、純粋な群論で
 
 ★この過程で `/goal` の条件文が「0/N…達成」の自己矛盾形になり Stop hook が
 延々と「未達成」判定を繰り返した——[[goal-condition-zero-numerator-trap]] に
-教訓を分離して記録した。
+教訓を分離して記録した。ユーザーが後に正しい形式(分子=分母、
+「§1 5/5, §2 6/6, §3 3/3, §4 2/2, §5 7/7, §6 1/1達成」= 24/24 全項目 Found
+達成)で `/goal` を再設定——これは自己矛盾ではない、文字通りの最終目標。
+
+★★**2026-09-04続報、23コミット目でLemma 4.1の核心を確立**。
+`FieldLimit.lean`に`Spec K = lim Spec R`(`R`は`K`の有限生成`k`-部分環、
+`AffineTransitionLimit.lean`が要求する余濾過的な極限錐)をsorry無しで
+証明した(`isLimit_specKCone`)。環側の余極限(`isColimitToRingCatCocone`、
+`Subalgebra.iSupLift`のRingHom版がmathlibに無かったので手で構成)を
+`IsColimit.op`+`Scheme.Spec`の極限保存(`Γ⊣Spec`の右随伴)でSchemeへ運んだ。
+配管の教訓: `FgSubalgebra k K`が`def`(非簡約)のため、Preorder-as-category
+の文脈でCategory.comp_id等をsimp/rwすると transparency エラーで止まる——
+mathlib自身が使う`set_option backward.isDefEq.respectTransparency false`
+が直接効いた(`tools/lean-idioms.md`に追記予定)。
+
+★正直な現状(24/24には程遠い): numbered itemとして完全に証明が閉じたのは
+`Proposition 3.2`(§3)のみ。§1のCorr/isogenyは`FuchsianGroup`モデル上で
+定義として機能する形まで到達。§4はLemma 4.1の**scaffolding**(Spec K=極限)
+が完成し本体まであと一歩。§2(Margulis/Shimura本体・Thm2.5-2.6)・
+§5(Gauss-Bonnet、mathlibに0件)・§6(Roydenの定理)は未着手で、
+それぞれ独立した大きな未構築の数学を要する。
