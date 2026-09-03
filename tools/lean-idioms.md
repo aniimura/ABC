@@ -3297,3 +3297,20 @@ universe が構造体フィールドの構文解析を巻き込んで壊す**(20
 `ABC3.Interface.LocProP.EtaleSetup` で実測。最小 5 行で再現)。
 ★**対処: `universe u` を明示して `Type u` と書く。** `Type*` は構造体の外
 (トップレベルの `def`/`theorem` の引数)では問題なく使えている。
+
+## `structure` の `[instance field]` は外部で自動解決されない
+
+```lean
+structure Setup where
+  X : Type u
+  [xGroup : Group X]
+  ...
+theorem foo (E : Setup) (a : E.X) : ... := ...  -- ✗ E.X の Group インスタンスが見えない
+```
+
+`failed to synthesize instance of type class Group E.X` になる。構造体の中では
+前のフィールドが後のフィールドの型検査に使えるが、**構造体の外で `E : Setup` を
+明示引数に取る新しい宣言を書くと、`E.xGroup` は自動で instance キャッシュに入らない**。
+★★**対処**: 型注釈を書かず `def foo := @Setup.foo` の形にする(型は Lean が
+フィールドの元の型から推論するので instance 解決が要らない)。`theorem` は
+型注釈必須なのでこの手が使えない——`def` を使うこと(第 1469)。
