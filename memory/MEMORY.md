@@ -58,3 +58,4 @@
 - [pGC Cor 3.1/3.3: 裸のΓ_K同型を使っていた不整合を訂正](pgc-filtered-vs-bare-galois-iso.md) — 原文は「filtered group」と明示、裸の同型では原理的に不変性の根拠にならない(Γ_Kの裸の同型類はp,[K:Q_p]だけで決まる)。FilteredGroup.Isoに訂正(2026-09-04)。
 - [pGC Theorem 4.2: 裸のΓ_K≅Γ_K′構成はsorry無しで完成、FilteredGroup.Isoへの持ち上げに要る自然性公理がRamificationFiltrationに無い](pgc-ramification-naturality-gap.md) — Found/PGC/GaloisTransfer.lean(galMulEquivOf・galMulEquivOf_indep、局所類体論不使用)。GvをGmulEquivが保つ保証はInterfaceに無い(Cor3.1/3.3と同根の穴)。2026-09-04。
 - [pGC 局所類体論: Lubin-Tate形式群の存在補題が全段にわたり完全にsorry無しで完成](pgc-lubin-tate-existence-progress.md) — Found/PGC/LubinTateLimit.lean::LubinTateF_functional_equation。F.subst(g,g)=f.subst(F)がexactに成立。残るは形式群上の相互律写像の構成。2026-09-04。
+- [ABC3b/cとは.git自体を共有——他セッションのcommitで自分のコミット内容が合流・作業ツリーが差し戻ることがある](shared-git-repo-race-hazard.md) — commit直後は`git log -1 --stat`で自分のメッセージか確認、触る前は`git status`/`git diff`でHEADとの一致を確認してから編集する。2026-09-04実測。
