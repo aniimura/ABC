@@ -536,7 +536,7 @@
    "pdfPages": 13,
    "pageOffset": 157,
    "notationRisk": "unmeasured",
-   "notationNotes": "★★★★★★★★**入手できたのは冒頭 13 ページ分だけ**(元は Proceedings of a Conference on Local Fields, Driebergen 1966, pp.158-183 の26ページ)。★2026-09-04実測: [LocProP] Lemma 2.2 の証明が引く §3.3, Theorem 1・Theorem 2 は**範囲内に在った**(txt内で確認、\"Theorem 1. We have H0(Γ,C)=K\"の文言あり)。ただし260dpi目視はまだ。OCR/スキャンなのでpdftotextの精度に注意。",
+   "notationNotes": "★★★★★★★★**入手できたのは冒頭 13 ページ分だけ**(元は Proceedings of a Conference on Local Fields, Driebergen 1966, pp.158-183 の26ページ)。★2026-09-04実測: [LocProP] Lemma 2.2 の証明が引く §3.3, Theorem 1・Theorem 2 は**範囲内に在った**(txt内で確認、\"Theorem 1. We have H0(Γ,C)=K\"の文言あり)。★2026-09-04, 260dpi目視完了(物理p.10、印字p.176-177): Theorem 1・Theorem 2 とも本文と一致。ただしpdftotextのOCR層は記号を激しく壊す(𝒢が\"W\"等に文字化け)ため、tools/check.mjsの逐語照合(`原文 (タグ p.N):` 記法)は本論文には使わず、Lean側は地の文(`内容 (Tate p.N):`)で写す運用にした——詳細はInterface/Tate/PDivisibleGroups.lean冒頭の注記。",
    "verifiedPages": []
   },
   "BK": {

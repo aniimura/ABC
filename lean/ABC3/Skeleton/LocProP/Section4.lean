@@ -20,6 +20,8 @@ open ABC3.Interface.LocProP
 def geometricPointCriterion (E : JGeometricSetup) := ABC3.Found.LocProP.lPointExists E
 def geometricPointCriterion.src : ABC3.Meta.Source :=
   { paper := "LocProP", pdfPage := 30, item := "Lemma 4.1", sectionId := "locprop-lemma-4-1" }
+def geometricPointCriterion.needs : List ABC3.Meta.ProofObligation :=
+  [ .otherPaper "[BK]" "Lemma 3.8.1" 23, .otherPaper "[BK]" "Example 3.11" 29 ]
 
 def actionConjugationFormula (E : JGeometricSetup) := ABC3.Found.LocProP.conjugationFormula E
 def actionConjugationFormula.src : ABC3.Meta.Source :=
