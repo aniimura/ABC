@@ -202,4 +202,57 @@ theorem exists_normalCore_le {C Z : FuchsianGroup} (hCZ : IsFiniteIndexIn C Z) :
   exact ⟨(C.Γ.subgroupOf Z.Γ).normalCore, inferInstance, inferInstance,
     Subgroup.normalCore_le _⟩
 
+/-- `exists_normalCore_le` の `N` を大きい群(`Z.Γ`・`C.Γ` と同じ
+`SpecialLinearGroup (Fin 2) ℝ`)へ押し出したもの。 -/
+noncomputable def Ncore {C Z : FuchsianGroup} (h : IsFiniteIndexIn C Z) :
+    Subgroup (Matrix.SpecialLinearGroup (Fin 2) ℝ) :=
+  (exists_normalCore_le h).choose.map Z.Γ.subtype
+
+theorem Ncore_le_Z {C Z : FuchsianGroup} (h : IsFiniteIndexIn C Z) : Ncore h ≤ Z.Γ := by
+  unfold Ncore
+  rintro x ⟨n, -, rfl⟩
+  exact n.2
+
+theorem Ncore_le_C {C Z : FuchsianGroup} (h : IsFiniteIndexIn C Z) : Ncore h ≤ C.Γ := by
+  unfold Ncore
+  rintro x ⟨n, hn, rfl⟩
+  have := (exists_normalCore_le h).choose_spec.2.2 hn
+  simpa [Subgroup.mem_subgroupOf] using this
+
+/-- `Ncore h` は `Z.Γ` の元による共役で不変(`Z.Γ` の中で正規)。
+
+★**sorry 無し**——`Ncore` の中身(`exists_normalCore_le` の `N`)が
+`↥Z.Γ` の中で正規であることを、大きい群での共役に翻訳しただけ。 -/
+theorem Ncore_normal {C Z : FuchsianGroup} (h : IsFiniteIndexIn C Z)
+    {z : Matrix.SpecialLinearGroup (Fin 2) ℝ} (hz : z ∈ Z.Γ) :
+    (ConjAct.toConjAct z • Ncore h : Subgroup _) = Ncore h := by
+  unfold Ncore
+  haveI := (exists_normalCore_le h).choose_spec.1
+  apply Subgroup.ext
+  intro x
+  rw [Subgroup.mem_pointwise_smul_iff_inv_smul_mem]
+  simp only [ConjAct.smul_def, Subgroup.mem_map, ConjAct.ofConjAct_inv, ConjAct.ofConjAct_toConjAct]
+  constructor
+  · rintro ⟨n, hn, hnx⟩
+    refine ⟨⟨z, hz⟩ * n * ⟨z, hz⟩⁻¹, ?_, ?_⟩
+    · have := (Subgroup.Normal.conj_mem (exists_normalCore_le h).choose_spec.1 n hn ⟨z, hz⟩)
+      simpa using this
+    · have hn' : (n : Matrix.SpecialLinearGroup (Fin 2) ℝ) = z⁻¹ * x * z⁻¹⁻¹ := hnx
+      show (z : Matrix.SpecialLinearGroup (Fin 2) ℝ) * n * z⁻¹ = x
+      rw [hn']; group
+  · rintro ⟨n, hn, hnx⟩
+    refine ⟨⟨z, hz⟩⁻¹ * n * ⟨z, hz⟩, ?_, ?_⟩
+    · have := (Subgroup.Normal.conj_mem (exists_normalCore_le h).choose_spec.1 n hn ⟨z, hz⟩⁻¹)
+      simpa using this
+    · have hn' : (n : Matrix.SpecialLinearGroup (Fin 2) ℝ) = x := hnx
+      show (z : Matrix.SpecialLinearGroup (Fin 2) ℝ)⁻¹ * n * z = z⁻¹ * x * z⁻¹⁻¹
+      rw [hn']; group
+
+/- ★★次の一手(未着手): `Ncore h` が `Z.Γ` の中で有限指数であること
+(`(exists_normalCore_le h).choose_spec.2.1` を `.map Z.Γ.subtype` 越しに運ぶ)、
+それを使って `Ncore h` が `X.Γ` の中でも有限指数であること(`Ncore h ≤ C.Γ ≤ X.Γ`
+と `relIndex` の推移律)を示し、最後に `z ∈ Z.Γ` に対して
+`X.Γ ⊓ (ConjAct.toConjAct z • X.Γ)` が両側で有限指数であることを
+`Ncore_normal` から出せば `Proposition 3.2`(`Z.Γ ≤ commensurator X.Γ`)が閉じる。 -/
+
 end ABC3.Found.CorrHyp
