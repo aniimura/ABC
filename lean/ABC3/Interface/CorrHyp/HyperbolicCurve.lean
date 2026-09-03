@@ -126,5 +126,12 @@ structure HyperbolicCurveData where
   ModuliStack : ℕ → ℕ → Space
   /-- 「概スキームである」(`Theorem 6.1` の結論の前半)。 -/
   IsGenericallyScheme : Space → Prop
+  /-- 有限 étale 射の次数(`§5` の `d`)。 -/
+  deg : ∀ {A B : Space}, FEt A B → ℕ
+  /-- `(M_{g,r})_k` の中で「開かつ稠密な部分スタック」に属する
+  (`Theorem 5.3` の `U ⊆ (M_{g,r})_k`)。 -/
+  IsOpenDenseIn : Set Space → ℕ → ℕ → Prop
+  /-- `(M_{g,r})_k` の中で「構成可能」(`Lemma 5.6`)。 -/
+  IsConstructibleIn : Set Space → ℕ → ℕ → Prop
 
 end ABC3.Interface.CorrHyp
