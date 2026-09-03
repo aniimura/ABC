@@ -3267,3 +3267,18 @@ Type mismatch … (instAlgebraLocInt p hl).toSMul
 ☆**直し方**——`git checkout -- <path>` で戻し、
 新しい内容は別名（例: `AlphaSplitDichotomy.lean`）に置く。
 ★**予防**——`ls lean/ABC3/**/<名>.lean` か `git ls-files | grep <名>` を先に見る。
+
+## `.field` を独立行に置くと関数適用に化ける
+
+```lean
+def foo : Bar :=
+  (baz arg)
+    .someProjection   -- ✗ 次の行に置くと `baz arg` への「関数適用」として構文解析される
+```
+
+`error: Function expected at baz arg but this term has type Bar` になる
+(`lean_check` の対話セッションでは 1 行で書いていたため気づかず、
+`lake build` で初めて壊れて見つかった——第 1467)。
+★★**`.field`/`.method` は直前の式と同じ行に置くか、式全体を1行にする。**
+複数行にしたいなら `Subgroup.topologicalClosure (Subgroup.normalClosure ...)` のように
+**外側の関数を先頭に出す**形へ書き換える。
