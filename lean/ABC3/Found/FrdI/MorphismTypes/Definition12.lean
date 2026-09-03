@@ -1,0 +1,741 @@
+/-
+Copyright (c) 2026 ABC3. All rights reserved.
+-/
+import ABC3.Found.FrdI.ElementaryFrobenioid
+import Mathlib.CategoryTheory.Endomorphism
+import Mathlib.CategoryTheory.Widesubcategory
+import Mathlib.CategoryTheory.MorphismProperty.Composition
+import Mathlib.Data.Nat.Prime.Basic
+import ABC3.Meta.Claim
+
+/-!
+# MorphismTypes —— `[FrdI] Definition 1.2` の分
+
+☆もとの 1 枚を**条なしの項目ごと**に割ったものである（第 1458、案 a）。
+★「1 ファイル = 1 ノード」を回復するための分割で、中身は動かしていない。
+-/
+
+namespace ABC3.Found.FrdI
+
+open CategoryTheory Opposite
+universe v u w u2 v2
+variable {D : Type u} [Category.{v} D] {C : Type u2} [Category.{v2} C]
+  {Φ : MonoidOn.{v, u, w} D} (P : PreFrobenioid C Φ)
+
+/-! ### (i) —— `linear` / `isometric` / `metrically equivalent`
+
+原文 (FrdI p.21):
+> (i) We shall say that φ is linear if degFr(φ) = 1. We shall say that φ is isometric,
+
+原文 (FrdI p.21):
+> or, alternatively, an isometry, if Div(φ) = 0 [cf. Definition 1.1, (iii)]. If ψ ∈Arr(C)
+
+原文 (FrdI p.21):
+> is co-objective with φ [cf. §0], then we shall say that φ, ψ are metrically equivalent
+
+原文 (FrdI p.21):
+> if Div(φ) = Div(ψ).
+-/
+
+/-- **(i)** `linear` —— Frobenius 次数が 1。 -/
+def IsLinear {A B : C} (φ : A ⟶ B) : Prop := P.degFr φ = 1
+
+/-- **(i)** `isometric`(= `isometry`)—— 零因子が 0。 -/
+def IsIsometric {A B : C} (φ : A ⟶ B) : Prop := P.Div φ = 0
+
+/-- **(i)** `metrically equivalent`。
+
+★原文は `co-objective`(始域と終域が一致)を仮定するが、Lean では
+`φ ψ : A ⟶ B` と型で書いた時点でそれが満たされている。 -/
+def MetricallyEquivalent {A B : C} (φ ψ : A ⟶ B) : Prop := P.Div φ = P.Div ψ
+
+/-! ### (ii) —— base 系の類型
+
+原文 (FrdI p.21):
+> (ii) We shall refer to φ as a base-isomorphism (respectively, base-FSM-morphism)
+
+原文 (FrdI p.21):
+> if Base(φ) is an isomorphism (respectively, FSM-morphism [cf. §0]) in D. We shall
+
+原文 (FrdI p.21):
+> refer to two objects of C that map to isomorphic objects of D as base-isomorphic.
+
+原文 (FrdI p.21):
+> We shall refer to φ as a pull-back morphism if the natural transformation of con-
+
+原文 (FrdI p.21):
+> travariant functors on C
+
+原文 (FrdI p.21):
+> projection functor C →D] induced by φ is an isomorphism. If ψ ∈Arr(C) is co-
+
+原文 (FrdI p.21):
+> objective with φ [cf. §0], then we shall say that φ, ψ are base-equivalent (respectively,
+
+原文 (FrdI p.21):
+> Div-equivalent) if Base(φ) = Base(ψ) (respectively, Φ(φ) = Φ(ψ)). If A = B [i.e.,
+
+原文 (FrdI p.22):
+> Div-identity) endomorphism if it is base-equivalent (respectively, Div-equivalent)
+
+原文 (FrdI p.22):
+> to the identity endomorphism of A. Write
+
+原文 (FrdI p.22):
+> for the submonoids of base-identity linear endomorphisms.
+-/
+
+/-- **(ii)** `base-isomorphism`。 -/
+def IsBaseIsomorphism {A B : C} (φ : A ⟶ B) : Prop := IsIso (P.Base φ)
+
+/-- **(ii)** `base-FSM-morphism`。 -/
+def IsBaseFSM {A B : C} (φ : A ⟶ B) : Prop := IsFSMMorphism (P.Base φ)
+
+/-- **(ii)** `base-isomorphic`(対象について)。 -/
+def BaseIsomorphic (A B : C) : Prop :=
+  Nonempty ((P.toElem.obj A).base ≅ (P.toElem.obj B).base)
+
+/-- **(ii)** `base-equivalent`。 -/
+def BaseEquivalent {A B : C} (φ ψ : A ⟶ B) : Prop := P.Base φ = P.Base ψ
+
+/-- **(ii)** `Div-equivalent` —— 原文は `Φ(φ) = Φ(ψ)`、すなわち
+**誘導される単項式射 `Φ(B_𝒟) → Φ(A_𝒟)` が一致すること**である。
+
+★`metrically equivalent`(`Div(φ) = Div(ψ)`)とは**別の条件**であることに注意。
+原文は (i) と (ii) で別々に定めている。 -/
+def DivEquivalent {A B : C} (φ ψ : A ⟶ B) : Prop :=
+  Φ.map (P.Base φ) = Φ.map (P.Base ψ)
+
+/-- **(ii)** `base-identity` 自己射。 -/
+def IsBaseIdentity {A : C} (φ : A ⟶ A) : Prop := BaseEquivalent P φ (𝟙 A)
+
+/-- **(ii)** `Div-identity` 自己射。 -/
+def IsDivIdentity {A : C} (φ : A ⟶ A) : Prop := DivEquivalent P φ (𝟙 A)
+
+/-- **(ii)** `𝒪^▷(A)` —— base-identity かつ linear な自己射のなす部分モノイド。
+
+★原文は「submonoids」と言うだけで、部分モノイドであることを示していない。
+**それを示すのがこの定義の中身**である(単位元と合成で閉じること)。 -/
+def OTri (A : C) : Submonoid (End A) where
+  carrier := {φ : End A | IsBaseIdentity P φ ∧ IsLinear P φ}
+  one_mem' := by
+    constructor
+    · show P.Base (𝟙 A) = P.Base (𝟙 A)
+      rfl
+    · show P.degFr (𝟙 A) = 1
+      simp
+  mul_mem' := by
+    rintro x y ⟨hx1, hx2⟩ ⟨hy1, hy2⟩
+    constructor
+    · show P.Base (y ≫ x) = P.Base (𝟙 A)
+      rw [P.Base_comp]
+      show P.Base y ≫ P.Base x = _
+      rw [show P.Base y = P.Base (𝟙 A) from hy1, show P.Base x = P.Base (𝟙 A) from hx1]
+      simp
+    · show P.degFr (y ≫ x) = 1
+      rw [P.degFr_comp]
+      rw [show P.degFr x = 1 from hx2, show P.degFr y = 1 from hy2, mul_one]
+
+/-- **(ii)** `𝒪^×(A)` —— `𝒪^▷(A)` のうち可逆なもの(原文は `Aut_𝒞(A)` の部分モノイド)。 -/
+def OTimes (A : C) : Submonoid (End A) where
+  carrier := {φ : End A | (IsBaseIdentity P φ ∧ IsLinear P φ) ∧ IsUnit φ}
+  one_mem' := ⟨(OTri P A).one_mem, isUnit_one⟩
+  mul_mem' hx hy := ⟨(OTri P A).mul_mem hx.1 hy.1, hx.2.mul hy.2⟩
+
+theorem OTimes_le_OTri (A : C) : OTimes P A ≤ OTri P A := fun _ hx => hx.1
+
+/-- **(ii)** `pull-back morphism`。
+
+原文 (FrdI p.21):
+> Hom C(−, A) →Hom C(−, B) ×Hom D(−,B D)|C (Hom D(−, A D)|C)
+
+★原文のファイバー積を展開すると、各 `X ∈ Ob(𝒞)` について
+
+`Hom_𝒞(X, A) → { (g, h) | g : X ⟶ B, h : X_𝒟 ⟶ A_𝒟, Base(g) = h ≫ Base(φ) }`、
+`f ↦ (f ≫ φ, Base f)`
+
+が**全単射**である、という条件になる。★`Base(f ≫ φ) = Base f ≫ Base φ`
+(Remark 1.1.1)なので、この写像は確かにファイバー積へ落ちる。 -/
+def IsPullBack {A B : C} (φ : A ⟶ B) : Prop :=
+  ∀ X : C, Function.Bijective
+    (fun f : X ⟶ A =>
+      (⟨(f ≫ φ, P.Base f), by rw [P.Base_comp]⟩ :
+        {p : (X ⟶ B) × ((P.toElem.obj X).base ⟶ (P.toElem.obj A).base) //
+          P.Base p.1 = p.2 ≫ P.Base φ}))
+
+/-! ### (iii) —— step / co-angular / Frobenius type
+
+原文 (FrdI p.22):
+> (iii) We shall say that φ is a pre-step [a term motivated by the point of view
+
+原文 (FrdI p.22):
+> constituted by a non-zero zero divisor] if it is a linear base-isomorphism. If φ is
+
+原文 (FrdI p.22):
+> a pre-step, then we shall say that it is a step (respectively, a primary pre-step) if
+
+原文 (FrdI p.22):
+> φ is not an isomorphism (respectively, if the zero divisor Div(φ) ∈Φ(A) of φ is a
+
+原文 (FrdI p.22):
+> primary [cf. §0] element of the monoid Φ(A)). We shall say that φ is co-angular [a
+
+原文 (FrdI p.22):
+> [Mzk15], Definition 3.1, (iii)] if, for any factorization φ = α ◦β ◦γ in C, where α is
+
+原文 (FrdI p.22):
+> linear, β is an isometric pre-step, and either α or γ is a base-isomorphism, it follows
+
+原文 (FrdI p.22):
+> that β is an isomorphism. We shall say that φ is LB-invertible [i.e., “line bundle-
+
+原文 (FrdI p.22):
+> if it is co-angular and isometric. We shall say that φ is a morphism of Frobenius
+
+原文 (FrdI p.22):
+> tensor power” for some n ∈N≥1] if φ is an LB-invertible base-isomorphism. We shall
+
+原文 (FrdI p.22):
+> say that φ is a prime-Frobenius morphism, or, alternatively, a degFr(φ)-Frobenius
+-/
+
+/-- **(iii)** `pre-step` —— linear な base-isomorphism。 -/
+def IsPreStep {A B : C} (φ : A ⟶ B) : Prop := IsLinear P φ ∧ IsBaseIsomorphism P φ
+
+/-- **(iii)** `step` —— 同型でない pre-step。 -/
+def IsStep {A B : C} (φ : A ⟶ B) : Prop := IsPreStep P φ ∧ ¬ IsIso φ
+
+/-- **(iii)** `primary pre-step` —— `Div(φ)` が `Φ(A)` の primary 元である pre-step。 -/
+def IsPrimaryPreStep {A B : C} (φ : A ⟶ B) : Prop :=
+  IsPreStep P φ ∧ IsPrimaryElt (P.Div φ)
+
+/-- **(iii)** `co-angular`。
+
+原文の `φ = α ◦ β ◦ γ` は「先に `γ`」なので、Lean では `φ = γ ≫ β ≫ α`。 -/
+def IsCoAngular {A B : C} (φ : A ⟶ B) : Prop :=
+  ∀ (X Y : C) (γ : A ⟶ X) (β : X ⟶ Y) (α : Y ⟶ B),
+    φ = γ ≫ β ≫ α → IsLinear P α → IsIsometric P β → IsPreStep P β →
+    (IsBaseIsomorphism P α ∨ IsBaseIsomorphism P γ) → IsIso β
+
+/-- **(iii)** `LB-invertible` —— co-angular かつ isometric。 -/
+def IsLBInvertible {A B : C} (φ : A ⟶ B) : Prop := IsCoAngular P φ ∧ IsIsometric P φ
+
+/-- **(iii)** `morphism of Frobenius type` —— LB-invertible な base-isomorphism。 -/
+def IsFrobeniusType {A B : C} (φ : A ⟶ B) : Prop :=
+  IsLBInvertible P φ ∧ IsBaseIsomorphism P φ
+
+/-- **(iii)** `prime-Frobenius morphism` —— Frobenius 次数が素数である Frobenius 型の射。 -/
+def IsPrimeFrobenius {A B : C} (φ : A ⟶ B) : Prop :=
+  IsFrobeniusType P φ ∧ Nat.Prime ((P.degFr φ : ℕ+) : ℕ)
+
+/-! ### (iv) —— 対象の類型(`Definition 1.3` が引くもの)
+
+原文 (FrdI p.22):
+> (iv) A Frobenius-ample object of C is defined to be an object C such that for any
+
+原文 (FrdI p.22):
+> object of C is defined to be an object C such that there exists a homomorphism
+
+原文 (FrdI p.22):
+> of monoids ζ : N≥1 →EndC(C) which satisfies the following properties: (a) the
+
+原文 (FrdI p.22):
+> composite of ζ with the map to N≥1 given by the Frobenius degree is the identity
+
+原文 (FrdI p.22):
+> of Frobenius type. A Div-Frobenius-trivial object of C is defined to be an object
+
+原文 (FrdI p.22):
+> the image of ζ are Div-identity endomorphisms of Frobenius type. A universally
+
+原文 (FrdI p.22):
+> Div-Frobenius-trivial object of C is defined to be an object C such that for every
+
+原文 (FrdI p.22):
+> for any n ∈N≥1, C admits a base-identity endomorphism [which is not necessarily
+
+原文 (FrdI p.22):
+> is defined to be an object C such that there exists a co-angular pre-step D →C in
+
+原文 (FrdI p.23):
+> such that any object D ∈Ob(C) such that Base(C) ∼= Base(D) [in D] is, in fact,
+
+原文 (FrdI p.23):
+> an object C such that O×(C) = {1}. An isotropic object [a term motivated by the
+
+原文 (FrdI p.23):
+> C such that any isometric pre-step C →D in C is, in fact, an isomorphism. We
+
+原文 (FrdI p.23):
+> [of A] if φ is an isometric pre-step, B is isotropic, and for every morphism γ : A →C,
+
+原文 (FrdI p.23):
+> where C is isotropic, there exists a unique morphism β : B →C such that γ = β ◦φ.
+-/
+
+/-- **(iv)** `Frobenius-ample object` —— 任意の次数の自己射を持つ。 -/
+def IsFrobeniusAmple (A : C) : Prop := ∀ n : ℕ+, ∃ φ : A ⟶ A, P.degFr φ = n
+
+/-- **(iv)** `Frobenius-trivial object` —— 条件 (a)(b) を満たすモノイド準同型
+`ζ : ℕ≥1 → End_𝒞(C)` が存在する。 -/
+def IsFrobeniusTrivial (A : C) : Prop :=
+  ∃ ζ : ℕ+ →* End A,
+    (∀ n : ℕ+, P.degFr (ζ n) = n) ∧
+    (∀ n : ℕ+, IsBaseIdentity P (ζ n) ∧ IsFrobeniusType P (ζ n))
+
+/-- **(iv)** `Div-Frobenius-trivial object` —— 上の (b) を `Div-identity` に替えたもの。 -/
+def IsDivFrobeniusTrivial (A : C) : Prop :=
+  ∃ ζ : ℕ+ →* End A,
+    (∀ n : ℕ+, P.degFr (ζ n) = n) ∧
+    (∀ n : ℕ+, IsDivIdentity P (ζ n) ∧ IsFrobeniusType P (ζ n))
+
+/-- **(iv)** `universally Div-Frobenius-trivial object`。 -/
+def IsUnivDivFrobeniusTrivial (A : C) : Prop :=
+  ∀ (A' : C) (φ : A' ⟶ A), IsPullBack P φ → IsDivFrobeniusTrivial P A'
+
+/-- **(iv)** `quasi-Frobenius-trivial object` —— 任意の次数の
+**base-identity** 自己射を持つ(Frobenius 型でなくてよい)。 -/
+def IsQuasiFrobeniusTrivial (A : C) : Prop :=
+  ∀ n : ℕ+, ∃ φ : A ⟶ A, IsBaseIdentity P φ ∧ P.degFr φ = n
+
+/-- **(iv)** `sub-quasi-Frobenius-trivial object`。 -/
+def IsSubQuasiFrobeniusTrivial (A : C) : Prop :=
+  ∃ (Dd : C) (α : Dd ⟶ A), IsCoAngular P α ∧ IsPreStep P α ∧ IsQuasiFrobeniusTrivial P Dd
+
+/-- **(iv)** `metrically trivial object`。 -/
+def IsMetricallyTrivial (A : C) : Prop :=
+  ∀ (Dd : C) (φ : A ⟶ Dd), IsCoAngular P φ → IsPreStep P φ → Nonempty (Dd ≅ A)
+
+/-- **(iv)** `base-trivial object`。 -/
+def IsBaseTrivial (A : C) : Prop := ∀ Dd : C, BaseIsomorphic P A Dd → Nonempty (Dd ≅ A)
+
+/-! #### ★`Definition 1.2, (iv)` の未写し分(2026-08-15 追加)
+
+`Proposition 1.5, (i)` が `𝔽_Φ` について主張する 7 つの type のうち、
+`Aut-ample` / `Aut^sub-ample` / `End-ample` / `Frobenius-normalized` /
+`perfect` はここまで写していなかった。**`Proposition 1.5` が要求するので写す。**
+
+原文 (FrdI p.23):
+> isomorphic to C. An Aut-ample (respectively, Autsub-ample; End-ample) object
+
+原文 (FrdI p.23):
+> of C is defined to be an object C such that, if we write CD
+
+原文 (FrdI p.23):
+> the natural map AutC(C) →AutD(CD) (respectively, Autsub
+
+原文 (FrdI p.23):
+> EndC(C) →EndD(CD)) is surjective. A perfect object of C is defined to be an object
+-/
+
+/-- **(iv)** `Aut-ample object` —— `Aut_𝒞(C) → Aut_𝒟(C_𝒟)` が**全射**。 -/
+def IsAutAmple (A : C) : Prop :=
+  ∀ g : End ((P.toElem.obj A).base), IsIso g → ∃ φ : End A, IsIso φ ∧ P.Base φ = g
+
+/-- **(iv)** `Aut^sub-ample object` —— `Aut^sub_𝒞(C) → Aut^sub_𝒟(C_𝒟)` が**全射**。
+
+★`Aut^sub` は §0 の `sub-automorphism`(`CategoryVocabulary.lean`)。 -/
+def IsAutSubAmple (A : C) : Prop :=
+  ∀ g : End ((P.toElem.obj A).base), IsSubAutomorphism g →
+    ∃ φ : End A, IsSubAutomorphism φ ∧ P.Base φ = g
+
+/-- **(iv)** `End-ample object` —— `End_𝒞(C) → End_𝒟(C_𝒟)` が**全射**。 -/
+def IsEndAmple (A : C) : Prop :=
+  ∀ g : End ((P.toElem.obj A).base), ∃ φ : End A, P.Base φ = g
+
+/-- **(iv)** `Frobenius-normalized object`。
+
+原文 (FrdI p.23):
+> that if φ ∈EndC(C) is a base-identity endomorphism of Frobenius degree d ∈N≥1,
+
+★原文の続き(物理 p.23、400 dpi 目視確認 2026-08-15)は
+「`and α ∈O▷(C), then αd ◦φ = φ ◦α.`」だが、
+★**この行は逐語照合に掛けていない** —— `O▷` の `▷` が `pdftotext` の layout 抽出で
+別の文字列になり、照合器が拾えないためである。`frdi-s0-primary` の `≠` と同じ事情で、
+**書き換えずに、照合できない事実として記す**。
+
+★原文の `α^d ◦ φ = φ ◦ α` は「先に `φ`」なので、Lean では `φ ≫ α^d = α ≫ φ`。 -/
+def IsFrobeniusNormalized (A : C) : Prop :=
+  ∀ φ : End A, IsBaseIdentity P φ → ∀ α ∈ OTri P A,
+    ((φ : A ⟶ A) ≫ ((α ^ (P.degFr φ : ℕ) : End A) : A ⟶ A)) = (α : A ⟶ A) ≫ (φ : A ⟶ A)
+
+/-- **(iv)** `perfect object`。
+
+原文 (FrdI p.23):
+> C such that for every n ∈N≥1, it holds that every B ∈Ob(C) base-isomorphic to
+
+原文 (FrdI p.23):
+> C appears as the codomain of a morphism of Frobenius type of Frobenius degree
+
+★原文はこの後 `every pre-step ψ′ : B′1 →B′2` と続くが、
+★**この行も逐語照合に掛けていない**(`′` が同じ理由で拾えない)。
+
+★条件は**2つ**である: (a) 各次数の Frobenius 型射の**終域として現れる**こと、
+(b) その上の pre-step が**一意に降りる**こと。 -/
+def IsPerfectObj (A : C) : Prop :=
+  ∀ n : ℕ+,
+    (∀ B : C, BaseIsomorphic P A B →
+      ∃ (B₀ : C) (φ : B₀ ⟶ B), IsFrobeniusType P φ ∧ P.degFr φ = n) ∧
+    (∀ (B₁ B₁' B₂ B₂' : C) (φ₁ : B₁ ⟶ B₁') (φ₂ : B₂ ⟶ B₂'),
+      IsFrobeniusType P φ₁ → P.degFr φ₁ = n → IsFrobeniusType P φ₂ → P.degFr φ₂ = n →
+      BaseIsomorphic P B₁ A → BaseIsomorphic P B₂ A →
+      ∀ ψ' : B₁' ⟶ B₂', IsPreStep P ψ' →
+        ∃! ψ : B₁ ⟶ B₂, IsPreStep P ψ ∧ φ₁ ≫ ψ' = ψ ≫ φ₂)
+
+/-- **(iv)** `group-like object` —— `Φ(C) = 0`。
+
+★`Definition 1.1, (i)` の `IsGroupLike`(`M^char` が零)を、
+`isGroupLike_iff` で「全元が可逆」に翻訳した形で使う。 -/
+def IsGroupLikeObj (A : C) : Prop := IsGroupLike (Φ.val (P.toElem.obj A).base)
+
+/-- **(iv)** `unit-trivial object` —— `𝒪^×(C) = {1}`。 -/
+def IsUnitTrivial (A : C) : Prop := OTimes P A = ⊥
+
+/-- **(iv)** `isotropic object` —— 任意の isometric pre-step `C → D` が同型。 -/
+def IsIsotropic (A : C) : Prop :=
+  ∀ (Dd : C) (φ : A ⟶ Dd), IsIsometric P φ → IsPreStep P φ → IsIso φ
+
+/-- **(iv)** `Frobenius-isotropic object` —— isotropic な対象への Frobenius 型射がある。
+
+原文 (FrdI p.23):
+> A Frobenius-isotropic object of C is defined to be an object C such that there exists
+
+原文 (FrdI p.23):
+> a morphism of Frobenius type C →D such that D is isotropic.
+
+★`Proposition 1.6, (v)` が 11 個の type を挙げるうち、これだけ未写しだった
+(2026-08-15 に追加)。 -/
+def IsFrobeniusIsotropic (A : C) : Prop :=
+  ∃ (Dd : C) (φ : A ⟶ Dd), IsFrobeniusType P φ ∧ IsIsotropic P Dd
+
+/-! ## ★★**Definition 1.2, (v)** —— 「of X type」（2026-08-16 追加）
+
+原文 (FrdI p.23):
+> C →FΦ is of Frobenius-ample type (respectively, of Frobenius-trivial type; of Div-
+
+★★**監査で「(v) の 18 語のうち名前のある述語は `IsOfPerfectType` 1 つだけ」と
+指摘されたもの**。他は下流で `∀ X : C, IsIsotropic P X` のように
+その場で展開して書かれていた。
+
+★**原文は 18 語**。ここに 16 語を置き、残り 2 語は別の場所にある ——
+`IsOfPerfectType`（`Prop110`）と `IsOfFrobeniusCompactType`（`Prop110`、同日実装）。
+★★**合計 18/18 である**（★一度この docstring に「`Frobenius-compact` は未実装」と
+書いたが、同じ日に実装していた。検証役の再監査で訂正）。
+
+★★**どれも「全対象がその性質を持つ」という同じ形である** ——
+原文が「(respectively, …)」で 18 語を一行に畳んでいるのもそのためである。 -/
+
+def IsOfFrobeniusAmpleType : Prop := ∀ A : C, IsFrobeniusAmple P A
+def IsOfFrobeniusTrivialType : Prop := ∀ A : C, IsFrobeniusTrivial P A
+def IsOfDivFrobeniusTrivialType : Prop := ∀ A : C, IsDivFrobeniusTrivial P A
+def IsOfUnivDivFrobeniusTrivialType : Prop := ∀ A : C, IsUnivDivFrobeniusTrivial P A
+def IsOfQuasiFrobeniusTrivialType : Prop := ∀ A : C, IsQuasiFrobeniusTrivial P A
+def IsOfSubQuasiFrobeniusTrivialType : Prop := ∀ A : C, IsSubQuasiFrobeniusTrivial P A
+def IsOfMetricallyTrivialType : Prop := ∀ A : C, IsMetricallyTrivial P A
+def IsOfBaseTrivialType : Prop := ∀ A : C, IsBaseTrivial P A
+def IsOfAutAmpleType : Prop := ∀ A : C, IsAutAmple P A
+def IsOfAutSubAmpleType : Prop := ∀ A : C, IsAutSubAmple P A
+def IsOfEndAmpleType : Prop := ∀ A : C, IsEndAmple P A
+def IsOfGroupLikeType : Prop := ∀ A : C, IsGroupLikeObj P A
+def IsOfFrobeniusNormalizedType : Prop := ∀ A : C, IsFrobeniusNormalized P A
+def IsOfUnitTrivialType : Prop := ∀ A : C, IsUnitTrivial P A
+def IsOfIsotropicType : Prop := ∀ A : C, IsIsotropic P A
+def IsOfFrobeniusIsotropicType : Prop := ∀ A : C, IsFrobeniusIsotropic P A
+
+def IsOfIsotropicType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 23,
+    item := "Definition 1.2, (v) — of X type",
+    sectionId := "frdi-def-1-2-v" }
+
+/-- **(iv)** `isotropic hull` —— isometric pre-step であって、終域が isotropic で、
+isotropic な対象への射を**一意に**通す(普遍性)。 -/
+def IsIsotropicHull {A B : C} (φ : A ⟶ B) : Prop :=
+  IsIsometric P φ ∧ IsPreStep P φ ∧ IsIsotropic P B ∧
+    ∀ (Cc : C), IsIsotropic P Cc → ∀ γ : A ⟶ Cc, ∃! β : B ⟶ Cc, γ = φ ≫ β
+
+/-- ★**`base-trivial ⟹ metrically trivial`**(Remark 1.2.1 の第2行)。
+
+co-angular pre-step は特に pre-step なので base-isomorphism、よって始域と終域は
+base-isomorphic。`base-trivial` はそれを同型に格上げする。 -/
+theorem isMetricallyTrivial_of_isBaseTrivial {A : C}
+    (h : IsBaseTrivial P A) : IsMetricallyTrivial P A := by
+  intro Dd φ _ hstep
+  exact h Dd ⟨@asIso _ _ _ _ (P.Base φ) hstep.2⟩
+
+/-- ★**`base-equivalent ⟹ Div-equivalent`**(上の一般形)。 -/
+theorem divEquivalent_of_baseEquivalent {A B : C} {φ ψ : A ⟶ B}
+    (h : BaseEquivalent P φ ψ) : DivEquivalent P φ ψ := by
+  show Φ.map (P.Base φ) = Φ.map (P.Base ψ)
+  rw [show P.Base φ = P.Base ψ from h]
+
+/-- ★**`universally Div-Frobenius-trivial ⟹ Div-Frobenius-trivial`**
+(Remark 1.2.1 の第4行)。
+
+恒等射が pull-back morphism であることを使う。 -/
+theorem isDivFrobeniusTrivial_of_univ {A : C}
+    (h : IsUnivDivFrobeniusTrivial P A) : IsDivFrobeniusTrivial P A := by
+  refine h A (𝟙 A) ?_
+  intro X
+  constructor
+  · intro f g hfg
+    have := congrArg (fun p => (p : (X ⟶ A) × _).1) (congrArg Subtype.val hfg)
+    simpa using this
+  · rintro ⟨⟨g, h'⟩, hgh⟩
+    have hb : P.Base g = h' := by simpa using hgh
+    exact ⟨g, Subtype.ext (by simp [hb])⟩
+
+/-- ★**`pull-back morphism` かつ `base-isomorphism` ⟸ `isomorphism`**
+(Remark 1.2.1 の第1行のうち、示せる向き)。
+
+★もう一方の向き(⟹)は `Definition 1.3`(Frobenioid の条件)を要る——
+`Proposition 1.4, (ii)` がそれを扱う。ここでは**片方だけ**示す。 -/
+theorem isPullBack_of_isIso {A B : C} (φ : A ⟶ B) [IsIso φ] : IsPullBack P φ := by
+  intro X
+  constructor
+  · intro f g hfg
+    have h1 : f ≫ φ = g ≫ φ :=
+      congrArg (fun p => (p : (X ⟶ B) × _).1) (congrArg Subtype.val hfg)
+    exact (cancel_mono φ).mp h1
+  · rintro ⟨⟨g, h'⟩, hgh⟩
+    refine ⟨g ≫ inv φ, Subtype.ext ?_⟩
+    have h2 : P.Base φ ≫ P.Base (inv φ) = 𝟙 _ := by
+      rw [← P.Base_comp, IsIso.hom_inv_id, P.Base_id]
+    have hb : P.Base (g ≫ inv φ) = h' := by
+      rw [P.Base_comp, hgh, Category.assoc, h2, Category.comp_id]
+    simp [hb]
+
+theorem isBaseIsomorphism_of_isIso {A B : C} (φ : A ⟶ B) [IsIso φ] :
+    IsBaseIsomorphism P φ := by
+  show IsIso (P.Base φ)
+  refine ⟨P.Base (inv φ), ?_, ?_⟩
+  · rw [← P.Base_comp, IsIso.hom_inv_id, P.Base_id]
+  · rw [← P.Base_comp, IsIso.inv_hom_id, P.Base_id]
+
+/-! ### ★形式的に従う小さな含意(定義が空でないことの確認を兼ねる) -/
+
+/-- 恒等射は linear。 -/
+theorem isLinear_id (A : C) : IsLinear P (𝟙 A) := by simp [IsLinear]
+
+/-- 恒等射は isometric。 -/
+theorem isIsometric_id (A : C) : IsIsometric P (𝟙 A) := by simp [IsIsometric]
+
+/-- 恒等射は pre-step。 -/
+theorem isPreStep_id (A : C) : IsPreStep P (𝟙 A) :=
+  ⟨isLinear_id P A, isBaseIsomorphism_of_isIso P (𝟙 A)⟩
+
+/-- ★恒等射は **step ではない**(step は「同型でない」pre-step だから)。
+`pre-step` と `step` が別物であることの確認。 -/
+theorem not_isStep_id (A : C) : ¬ IsStep P (𝟙 A) := fun h => h.2 inferInstance
+
+/-- `linear` は合成で閉じる。 -/
+theorem IsLinear.comp {A B E : C} {ψ : A ⟶ B} {φ : B ⟶ E}
+    (hψ : IsLinear P ψ) (hφ : IsLinear P φ) : IsLinear P (ψ ≫ φ) := by
+  show P.degFr (ψ ≫ φ) = 1
+  rw [P.degFr_comp, show P.degFr φ = 1 from hφ, show P.degFr ψ = 1 from hψ, mul_one]
+
+/-! ### ★★`𝒞^lin` をここに置く（2026-08-16 に `Prop111` から移した）
+
+原文 (FrdI p.23):
+> for the subcategories determined, respectively, by the linear morphisms, base-isomor-
+
+★★**依存順の制約で移した** —— `Prop111` に置くと
+`Proposition 1.5`（上流）から参照できない。
+★`Definition 1.2, (iv)` の語彙なのだから、**実装場所もここであるべき**だった。 -/
+
+/-- **[FrdI] Definition 1.2, (iv)** `linear` 射がなす `MorphismProperty`。 -/
+def linProp : MorphismProperty C := fun _ _ φ => IsLinear P φ
+
+instance : (linProp P).ContainsIdentities := ⟨fun A => isLinear_id P A⟩
+
+instance : (linProp P).IsStableUnderComposition :=
+  ⟨fun _ _ hf hg => IsLinear.comp P hf hg⟩
+
+instance : MorphismProperty.IsMultiplicative (linProp P) where
+
+/-- **[FrdI] Definition 1.2, (iv)** `𝒞^lin` —— linear 射が定める広い部分圧。 -/
+abbrev Lin : Type u2 := WideSubcategory (linProp P)
+
+def Lin.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 23, item := "Definition 1.2, (iv) — 𝒞^lin",
+    sectionId := "frdi-def-1-2-iv" }
+
+/-- `isometric` は合成で閉じる。
+
+`Div(ψ ≫ φ) = Φ(Base ψ)(Div φ) + deg_Fr(φ) · Div ψ` なので、
+両方が isometric なら `Div = 0 + deg · 0 = 0`。★`Φ` が加法を保つこと
+(`map_zero`)が効いており、**`linear` は要らない**。 -/
+theorem IsIsometric.comp {A B E : C} {ψ : A ⟶ B} {φ : B ⟶ E}
+    (hψ : IsIsometric P ψ) (hφ : IsIsometric P φ) : IsIsometric P (ψ ≫ φ) := by
+  show P.Div (ψ ≫ φ) = 0
+  rw [P.Div_comp, show P.Div φ = 0 from hφ, show P.Div ψ = 0 from hψ, map_zero, smul_zero,
+    add_zero]
+
+def IsLinear.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 21, item := "Definition 1.2, (i) — linear",
+    sectionId := "frdi-def-1-2-i" }
+
+def IsIsometric.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 21, item := "Definition 1.2, (i) — isometric",
+    sectionId := "frdi-def-1-2-i" }
+
+def MetricallyEquivalent.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 21, item := "Definition 1.2, (i) — metrically equivalent",
+    sectionId := "frdi-def-1-2-i" }
+
+def IsBaseIsomorphism.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 21, item := "Definition 1.2, (ii) — base-isomorphism",
+    sectionId := "frdi-def-1-2-ii" }
+
+def IsBaseFSM.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 21, item := "Definition 1.2, (ii) — base-FSM-morphism",
+    sectionId := "frdi-def-1-2-ii" }
+
+def IsPullBack.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 21, item := "Definition 1.2, (ii) — pull-back morphism",
+    sectionId := "frdi-def-1-2-ii" }
+
+def DivEquivalent.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 21, item := "Definition 1.2, (ii) — Div-equivalent",
+    sectionId := "frdi-def-1-2-ii" }
+
+def OTri.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 21, item := "Definition 1.2, (ii) — 𝒪^▷(A)",
+    sectionId := "frdi-def-1-2-ii" }
+
+def OTimes.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 21, item := "Definition 1.2, (ii) — 𝒪^×(A)",
+    sectionId := "frdi-def-1-2-ii" }
+
+def IsPreStep.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 22, item := "Definition 1.2, (iii) — pre-step",
+    sectionId := "frdi-def-1-2-iii" }
+
+def IsStep.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 22, item := "Definition 1.2, (iii) — step",
+    sectionId := "frdi-def-1-2-iii" }
+
+def IsPrimaryPreStep.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 22, item := "Definition 1.2, (iii) — primary pre-step",
+    sectionId := "frdi-def-1-2-iii" }
+
+def IsCoAngular.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 22, item := "Definition 1.2, (iii) — co-angular",
+    sectionId := "frdi-def-1-2-iii" }
+
+def IsLBInvertible.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 22, item := "Definition 1.2, (iii) — LB-invertible",
+    sectionId := "frdi-def-1-2-iii" }
+
+def IsFrobeniusType.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 22, item := "Definition 1.2, (iii) — morphism of Frobenius type",
+    sectionId := "frdi-def-1-2-iii" }
+
+def IsPrimeFrobenius.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 22, item := "Definition 1.2, (iii) — prime-Frobenius morphism",
+    sectionId := "frdi-def-1-2-iii" }
+
+def IsFrobeniusAmple.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 22, item := "Definition 1.2, (iv) — Frobenius-ample object",
+    sectionId := "frdi-def-1-2-iv" }
+
+def IsFrobeniusIsotropic.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 23,
+    item := "Definition 1.2, (iv) — Frobenius-isotropic object",
+    sectionId := "frdi-def-1-2-iv" }
+
+def IsFrobeniusTrivial.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 22, item := "Definition 1.2, (iv) — Frobenius-trivial object",
+    sectionId := "frdi-def-1-2-iv" }
+
+def IsDivFrobeniusTrivial.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 22, item := "Definition 1.2, (iv) — Div-Frobenius-trivial object",
+    sectionId := "frdi-def-1-2-iv" }
+
+def IsUnivDivFrobeniusTrivial.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 22,
+    item := "Definition 1.2, (iv) — universally Div-Frobenius-trivial object",
+    sectionId := "frdi-def-1-2-iv" }
+
+def IsQuasiFrobeniusTrivial.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 22, item := "Definition 1.2, (iv) — quasi-Frobenius-trivial object",
+    sectionId := "frdi-def-1-2-iv" }
+
+def IsSubQuasiFrobeniusTrivial.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 22,
+    item := "Definition 1.2, (iv) — sub-quasi-Frobenius-trivial object",
+    sectionId := "frdi-def-1-2-iv" }
+
+def IsMetricallyTrivial.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 22, item := "Definition 1.2, (iv) — metrically trivial object",
+    sectionId := "frdi-def-1-2-iv" }
+
+def IsBaseTrivial.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 22, item := "Definition 1.2, (iv) — base-trivial object",
+    sectionId := "frdi-def-1-2-iv" }
+
+def IsAutAmple.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 23, item := "Definition 1.2, (iv) — Aut-ample",
+    sectionId := "frdi-def-1-2-iv-ample" }
+
+def IsAutSubAmple.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 23, item := "Definition 1.2, (iv) — Aut^sub-ample",
+    sectionId := "frdi-def-1-2-iv-ample" }
+
+def IsEndAmple.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 23, item := "Definition 1.2, (iv) — End-ample",
+    sectionId := "frdi-def-1-2-iv-ample" }
+
+def IsFrobeniusNormalized.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 23, item := "Definition 1.2, (iv) — Frobenius-normalized",
+    sectionId := "frdi-def-1-2-iv-frob-norm" }
+
+def IsPerfectObj.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 23, item := "Definition 1.2, (iv) — perfect object",
+    sectionId := "frdi-def-1-2-iv-perfect" }
+
+def IsGroupLikeObj.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 22, item := "Definition 1.2, (iv) — group-like object",
+    sectionId := "frdi-def-1-2-iv" }
+
+def IsUnitTrivial.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 22, item := "Definition 1.2, (iv) — unit-trivial object",
+    sectionId := "frdi-def-1-2-iv" }
+
+def IsIsotropic.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 22, item := "Definition 1.2, (iv) — isotropic object",
+    sectionId := "frdi-def-1-2-iv" }
+
+def IsIsotropicHull.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 22, item := "Definition 1.2, (iv) — isotropic hull",
+    sectionId := "frdi-def-1-2-iv" }
+
+/-! ## ★★命題全体の `.src`（2026-08-16）
+
+★★**文脈を持たない検証役が、原文を 61 項目に番号付けして 2 度監査した。**
+
+| 回 | 結果 |
+|---|---|
+| 1 回目 | OK 41 / GAP 20 |
+| 本日の実装 | GAP 20 件をすべて埋めた |
+| 2 回目（再監査） | ★**61/61 が実在**。回帰なし。条なし `.src` 可 |
+
+★**埋めた 20 件**: `Frobenius-compact` / `𝒞^bs-iso` /
+(v) の「of X type」16 語 ＋ `IsOfFrobeniusCompactType`。
+（`𝒞^lin` は検証役の誤りで、実は `Prop111` に既にあった。
+★**重複宣言のビルドエラーで判明した** —— 子の報告も検証の対象である。）
+
+★★**再監査が見つけた docstring の誤り 2 件も訂正済み**:
+1. 「(v) は 16 語」→ 実際は **18/18**（`Frobenius-compact` を同日実装していた）
+2. ③の翻訳の根拠を `Pf.eq_of_qact` と書いたが、
+   ★**実際に効くのは `Pf.nsmul_injective` ＋ 誘導写像の加法性**である
+
+★**検証役が明示した限界（記録）**: `Frobenius-compact` の③は
+`Pf` を経由しない同値な式で書いており、★**原文形との同値を定理としては持っていない**。
+手検証は検証役が全段追った。`IsPullBack` も同じ形の手検証つき言い換えであり、
+★**同じ基準で扱っている**。 -/
+
+def definition_1_2.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 21, item := "Definition 1.2",
+    sectionId := "frdi-def-1-2-i" }
+
+end ABC3.Found.FrdI
