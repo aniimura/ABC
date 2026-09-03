@@ -3314,3 +3314,24 @@ theorem foo (E : Setup) (a : E.X) : ... := ...  -- ✗ E.X の Group インス�
 ★★**対処**: 型注釈を書かず `def foo := @Setup.foo` の形にする(型は Lean が
 フィールドの元の型から推論するので instance 解決が要らない)。`theorem` は
 型注釈必須なのでこの手が使えない——`def` を使うこと(第 1469)。
+
+## 19. `lean_start` は存在しない import パスでも「成功」を返す(2026-09-04)
+
+`mcp__abc3-lean__lean_start` に `Mathlib.Data.Rat.Basic`・
+`Mathlib.GroupTheory.Subgroup.Pointwise` のような**存在しないモジュール名**を
+渡すと、「起動して import を読み込んだ」と成功扱いのメッセージが返るが、
+**実際には import が 1 つも読み込まれず、後続の `lean_check` が
+`unknown namespace`/`unknown identifier` で全滅する**(自分自身の宣言・
+`ABC3.Meta` すら見えなくなる)。
+
+★★**見分け方**: 正常時は import 数に応じて数秒(温まっていれば 2〜8 秒程度)
+かかるが、**壊れているときは 2〜3 秒で返ってくる**——速すぎる成功は疑うこと。
+確実なのは、`lean_start` 直後に `#check` で ABC3 側の既知の宣言を 1 つ
+引いてみること(0.01 秒で判定できる)。
+
+**How to apply**: import パスを新規に足すときは、まず 1 個ずつ足して速度を見る
+(怪しい 1 個を孤立させる)か、`lean_start` の直後に必ず軽い `#check` で
+実際に読めているか確かめてから本題のコードを書く。存在するパスは
+`node tools/decl-index.mjs --mathlib` が生成する `.cache/mathlib-index.txt` の
+各行末尾のファイルパス(例: `GroupTheory/Commensurable.lean`)から
+`Mathlib.` + パスの `/` を `.` に、`.lean` を外した形で機械的に作れる。
