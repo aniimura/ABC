@@ -31,17 +31,16 @@ import ABC3.Found.PGC.LubinTateStep
   (有限台への還元、`Found/PGC/LubinTateDivisibility.lean::residue_divides_R`
   と同じ技法)。
 
-## まだ無いもの
+## 続報(2026-09-04): g 側の線形化も完成した
 
 `g` 側(`Φ.subst(g,g)` の変化分 `φ.subst(g,g)`)についても、`φ` が**ちょうど**
 次数 `n+1` の斉次式であるとき `φ.subst(g,g) ≡ π^{n+1}·φ`(次数 `n+2` 以上を除いて)
-となることを示す必要がある——`Φ.subst(g,g)` 自体は `Φ` について線型
-(`MvPowerSeries.subst a` が `AlgHom` なので `(Φ+φ).subst a = Φ.subst a + φ.subst a`
-が exact に成り立つ)なので、`f` 側ほど難しくないと見ているが、
-まだ形式化していない。これが済めば、`Found/PGC/LubinTateStep.lean` の
-`exists_step_solution_for_R` と合わせて、次数ごとの帰納法の1ステップ全体
-(「`Φ_n` の障害が次数 `n` まで消えている」→「`Φ_{n+1} := Φ_n+φ_{n+1}` の
-障害が次数 `n+1` まで消えている」)が完成する。
+となることが、`Found/PGC/LubinTateGLinearization.lean::coeff_subst_g_linearize`
+として sorry 無しで示された。これで `Found/PGC/LubinTateStep.lean` の
+`exists_step_solution_for_R`(障害方程式の可解性)と合わせて、次数ごとの
+帰納法の1ステップに要る**3つの部品**(f側の線形化・g側の線形化・可解性)が
+すべて揃った。残るのはこれらを組み合わせて実際に1ステップの帰納法の
+補題を組み立て、`Nat.rec` で無限次まで構成する純粋な組み立て作業のみ。
 -/
 
 namespace ABC3.Found.PGC
