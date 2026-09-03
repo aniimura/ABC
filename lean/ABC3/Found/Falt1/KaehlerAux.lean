@@ -19,46 +19,36 @@ import Mathlib.RingTheory.AdjoinRoot
 組み合わせて使う)——の1コンポーネント。
 
 **進捗**(2026-09-04):
-1. ✅ `RingHom.ker (AdjoinRoot.mk f) = Ideal.span {f}`(`AdjoinRoot f`は
-   定義から`Polynomial R ⧸ Ideal.span {f}`なので`Ideal.mk_ker`から従う)。
-2. ✅ `kerQuotEquivOmega`: 全射`A→B`に対し
-   `(B⊗_A Ω_{A/R}) ⧸ ker(mapBaseChange) ≃ₗ[B] Ω_{B/R}`
-   (`LinearMap.quotKerEquivOfSurjective`と`mapBaseChange_surjective`から)。
-3. ✅ `ker(mapBaseChange)`の台集合が`kerCotangentToTensor`の値域に一致する
-   こと(`exact_kerCotangentToTensor_mapBaseChange`の集合レベルの言い換え)。
+1. ✅ `RingHom.ker (AdjoinRoot.mk f) = Ideal.span {f}`。
+2. ✅ `kerQuotEquivOmega`・`ker_mapBaseChange_eq_range_kerCotangentToTensor`
+   (第二完全列の商同型化・台集合の言い換え)。
+3. ✅ `tensorPolynomialOmegaEquiv`・`tensorPolynomialOmegaEquiv_D`
+   (`B⊗_A Ω_{A/R} ≃ₗ[B] B`、`1⊗ₜD(f) ↦ f'(root)`)。
+4. ✅ `range_kerCotangentToTensor_span`(値域 = `{1⊗ₜD(f)}` の張る加群、
+   `Derivation.leibniz` + `f∈ker(A→B)` を使う)。
+5. ✅ `map_ker_mapBaseChange_eq_span`(A-span から B-span への架け替え、
+   A→B 全射性を使う)。
+6. ✅✅✅ **`omega_quotient_eq_derivative_span`**: 上記すべてを貼り合わせ、
+   `Ω_{B/R} ≅ B ⧸ (f'(root))`(`B = Polynomial R ⧸ (f)`)を**完全に証明した
+   (sorry 無し)**。これは Faltings の原文の議論
+   「`Ω_W` は `Ω_V⊗W⊕WdT` を `f'(w)dT` で割った商」の核心計算そのもの。
 
-**確認できた証明の道筋**(2026-09-04、`lean_check`で各断片を個別に確認
-済み——貼り合わせた1つの定理としてはまだ未完成):
-- `TensorProduct.AlgebraTensorModule.rid` と `LinearEquiv.baseChange`
-  を`KaehlerDifferential.polynomialEquiv`と組ませると
-  `TensorProduct A B Ω[A⁄R] ≃ₗ[B] B`(A=Polynomial R の場合)が出る。
-- `kerCotangentToTensor_toCotangent`(mathlib既存)より、生成元
-  `[f] ∈ I.Cotangent` の像は `1 ⊗ₜ D(f)`、これは上の同一視の下で
-  `algebraMap A B (Polynomial.derivative f) =: δ`(= Faltings の
-  f'(w))に対応する。
-- `I.Cotangent`(`I=(f)`)は`nzdCotangentEquivQuot`により`B`に同型で、
-  生成元`[f]`は`1∈B`に対応する。`I`自身は`toSpanSingleton A A f`の
-  値域として「Aから生成される巡回加群」であり、
-  `range(kerCotangentToTensor) = A∙δ = B∙δ = Ideal.span{δ}`(A→Bが
-  全射なのでA-span=B-spanは集合として一致、線形性の張り替えを経ずに
-  Submodule.extで示せる)。
-- これと`kerQuotEquivOmega`(既存)を合わせれば
-  `Ω_{B/R} ≅ B ⧸ Ideal.span{δ}`(δ = f'(root))が得られる見通し。
-  ★1つの定理として組み立てる作業はまだ残っている。
-
-**残っている作業**(正直な記録):
-4. 上の道筋を実際に1つの定理として組み立てる(`Ω_{B/R} ≅ B/(f'(root))`)。
-5. **さらに大きな残作業**: 4 は "第二完全列"(Ω_{V[T]/V}を経由する
-   商の計算)であって、Lemma 1.1 が実際に要求している "第一完全列"
+**残っている作業**(正直な記録、Lemma 1.1 完成にはまだ遠い):
+7. 上の定理は "第二完全列"(`R[X]→B` という1段のモノジェニックな塔)の
+   計算であって、Lemma 1.1 が実際に要求している "第一完全列"
    (`Ω_V ⊗_V W → Ω_W → Ω_{W/V} → 0`、V→W の塔に対するもの)とは別の
    完全列である。Lemma 1.1 の**単射性**の主張(第一完全列の最初の射が
    単射)は、この2つの完全列を貼り合わせる追加の議論(Faltings の原文
    だと「f'(w)dT の係数が非零因子だから」という具体的な計算)が必要で、
    まだ手を付けていない。
-6. `different(W/V) = (f'(w))` という事実(mathlib の
+8. `different(W/V) = (f'(w))` という事実(mathlib の
    `aeval_derivative_mem_differentIdeal`・`conductor_mul_differentIdeal`
    と接続)、および「W/p^δW の長さ」という古典的な「長さ」概念を
    mathlib のどの道具(`Module.length`? 合成列?)で表現するかも未調査。
+9. Falt1 の `V,W` は一般の完備離散付値環の拡大(必ずしも `Polynomial R`
+   上の1変数多項式商とは限らない)——本ファイルの `B = Polynomial R ⧸ (f)`
+   という設定への帰着(原文では「W は1元 w で生成される」の一般化)も
+   まだ形式化していない。
 
 ★見積り: Lemma 1.1 だけでもこの規模の補題を10-20個組み合わせる必要が
 あり、数日〜数週間規模の作業になる可能性が高い。§2-4 は Faltings の
@@ -182,5 +172,74 @@ theorem range_kerCotangentToTensor_span {R B : Type*} [CommRing R] [CommRing B]
       rw [Algebra.smul_def, hfB, zero_mul, TensorProduct.zero_tmul]
     rw [hzero, add_zero, TensorProduct.tmul_smul]
   rw [heq, LinearMap.range_toSpanSingleton]
+
+/-- `tensorPolynomialOmegaEquiv` の下で `1 ⊗ₜ D(f)` は `f` の(A→Bを経由した)
+微分 `algebraMap A B (derivative f)` に写る(= Faltings の `f'(w)`)。 -/
+theorem tensorPolynomialOmegaEquiv_D {R B : Type*} [CommRing R] [CommRing B]
+    [Algebra (Polynomial R) B] [Algebra R B] [IsScalarTower R (Polynomial R) B] (f : Polynomial R) :
+    tensorPolynomialOmegaEquiv ((1:B) ⊗ₜ[Polynomial R] (KaehlerDifferential.D R (Polynomial R) f)) =
+      algebraMap (Polynomial R) B (Polynomial.derivative f) := by
+  show (TensorProduct.AlgebraTensorModule.rid (Polynomial R) B B)
+    ((LinearEquiv.baseChange (Polynomial R) B Ω[Polynomial R⁄R] (Polynomial R)
+      (KaehlerDifferential.polynomialEquiv R)) ((1:B) ⊗ₜ[Polynomial R] (KaehlerDifferential.D R (Polynomial R) f))) = _
+  rw [LinearEquiv.baseChange_tmul, KaehlerDifferential.polynomialEquiv_D,
+    TensorProduct.AlgebraTensorModule.rid_tmul, Algebra.smul_def, mul_one]
+
+/-- `ker(mapBaseChange)` を `tensorPolynomialOmegaEquiv` で `B` に転送すると、
+`f'(root)`(= δ)が生成するイデアルにちょうど一致する。`range_kerCotangentToTensor_span`
+(値域が `{1⊗ₜD(f)}` の A-張る空間)と `tensorPolynomialOmegaEquiv_D`
+(その像が δ)を、A→B が全射という事実で B-張る空間に架け替える。 -/
+theorem map_ker_mapBaseChange_eq_span {R B : Type*} [CommRing R] [CommRing B]
+    [Algebra (Polynomial R) B] [Algebra R B] [IsScalarTower R (Polynomial R) B] (f : Polynomial R)
+    (hB : RingHom.ker (algebraMap (Polynomial R) B) = Ideal.span ({f} : Set (Polynomial R)))
+    (hsurj : Function.Surjective (algebraMap (Polynomial R) B)) :
+    Submodule.map (tensorPolynomialOmegaEquiv (R:=R) (B:=B)).toLinearMap
+      (LinearMap.ker (KaehlerDifferential.mapBaseChange R (Polynomial R) B))
+      = Ideal.span ({algebraMap (Polynomial R) B (Polynomial.derivative f)} : Set B) := by
+  set δ := algebraMap (Polynomial R) B (Polynomial.derivative f) with hδ
+  set e := (tensorPolynomialOmegaEquiv (R:=R) (B:=B))
+  have hsmul : ∀ (a : Polynomial R) (x : TensorProduct (Polynomial R) B Ω[Polynomial R⁄R]),
+      e (a • x) = a • e x := fun a x => LinearMap.map_smul_of_tower (e.toLinearMap) a x
+  apply SetLike.ext'
+  show (e : TensorProduct (Polynomial R) B Ω[Polynomial R⁄R] → B) '' _ = _
+  rw [ker_mapBaseChange_eq_range_kerCotangentToTensor hsurj]
+  have hrange : Set.range (KaehlerDifferential.kerCotangentToTensor R (Polynomial R) B)
+      = (Submodule.span (Polynomial R)
+          {(1:B) ⊗ₜ[Polynomial R] (KaehlerDifferential.D R (Polynomial R) f)} : Set _) := by
+    rw [← range_kerCotangentToTensor_span f hB]; rfl
+  rw [hrange]
+  ext b
+  simp only [Set.mem_image, SetLike.mem_coe, Submodule.mem_span_singleton]
+  constructor
+  · rintro ⟨y, ⟨a, rfl⟩, rfl⟩
+    refine ⟨algebraMap (Polynomial R) B a, ?_⟩
+    rw [hsmul, tensorPolynomialOmegaEquiv_D, hδ]
+    simp [Algebra.smul_def]
+  · rintro ⟨c, rfl⟩
+    obtain ⟨a, rfl⟩ := hsurj c
+    refine ⟨a • ((1:B) ⊗ₜ[Polynomial R] (KaehlerDifferential.D R (Polynomial R) f)), ⟨a, rfl⟩, ?_⟩
+    rw [hsmul, tensorPolynomialOmegaEquiv_D, hδ]
+    simp [Algebra.smul_def]
+
+/-- **[Falt1] Lemma 1.1 の "第二完全列" 側の核心計算(完成)**: `B = R[X] ⧸ (f)`
+のとき、`Ω_{B/R} ≅ B ⧸ (f'(root))`。これは Faltings の原文の議論
+「`Ω_W` は `Ω_V⊗W⊕WdT` を `f'(w)dT` で割った商」の mathlib 版。
+
+★これ自体は Lemma 1.1 の**主張そのもの**ではない——Falt1 の `V,W` は
+一般の完備離散付値環の拡大で、ここでの `R,B` はその中でも
+`B = R[X]/(f)` という「モノジェニックな塔の1段」の場合。Lemma 1.1 は
+`V→W` の塔(降下引数で結局モノジェニックな場合に帰着するが、その帰着
+自体は Faltings の議論の一部で、まだ形式化していない)に対する主張。
+それでも本定理は Lemma 1.1 の証明で実際に使われる計算そのものであり、
+「原文の証明の心臓部を実際に検証した」という意味で重要な一歩。 -/
+noncomputable def omega_quotient_eq_derivative_span {R B : Type*} [CommRing R] [CommRing B]
+    [Algebra (Polynomial R) B] [Algebra R B] [IsScalarTower R (Polynomial R) B] (f : Polynomial R)
+    (hB : RingHom.ker (algebraMap (Polynomial R) B) = Ideal.span ({f} : Set (Polynomial R)))
+    (hsurj : Function.Surjective (algebraMap (Polynomial R) B)) :
+    Ω[B⁄R] ≃ₗ[B]
+      B ⧸ Ideal.span ({algebraMap (Polynomial R) B (Polynomial.derivative f)} : Set B) :=
+  (kerQuotEquivOmega hsurj).symm.trans
+    (Submodule.Quotient.equiv _ _ (tensorPolynomialOmegaEquiv (R:=R) (B:=B))
+      (map_ker_mapBaseChange_eq_span f hB hsurj))
 
 end ABC3.Found.Falt1
