@@ -343,7 +343,12 @@ const WIP = new Set();
     let added = 0, edged = 0, unreached = 0, chains = 0;
     for (const c of D.chains ?? []) {
       const st = new Map((c.nodes ?? []).map((n) => [n.id, n.status]));
-      const key = (id) => `分解 / ${c.id} / ${id} [${st.get(id) === 'done' ? '済' : '未'}]`;
+      // ★分解の節点は**奉じる論文の項目に帰属する**(2026-09-03)。
+      //   以前は `分解 / …` を独立した「論文」のように扱っていたので、
+      //   論文一覧に 320 件の `分解` が並び、FrdI から切り離されて見えていた。
+      const sp = c.serves?.paper ?? '分解';
+      const si = c.serves?.item ?? c.id;
+      const key = (id) => `${sp} / ${si} \u25b8 ${c.id}/${id} [${st.get(id) === 'done' ? '済' : '未'}]`;
       const pg = c.serves?.page ?? 0;
       for (const n of c.nodes ?? []) {
         const nk = key(n.id);

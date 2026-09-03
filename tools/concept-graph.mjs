@@ -43,7 +43,15 @@ export function conceptNodes({ load, tags, NOT_A_DEP, conceptsPath, resolveTag, 
   const CS = JSON.parse(readFileSync(conceptsPath, 'utf8')).concepts;
   const nodes = new Map();   // "CONCEPT / term" -> {page, tag, defLine}
   const edges = [];          // [from, to]
-  const key = (t) => `CONCEPT / ${t}`;
+  // ★概念は**定義元の論文に帰属する**(2026-09-03)。
+  //   以前は `CONCEPT / …` を独立した「論文」のように扱っていたので、
+  //   論文一覧に `語彙(番号なし)` が 1 行で並び、定義元と切り離されて見えていた。
+  //   ☆定義元が特定できないものだけ `CONCEPT / …` のまま残す。
+  const homeOf = new Map(CS.filter((c) => c.defIn).map((c) => [c.term, c.defIn]));
+  const key = (t) => {
+    const h = homeOf.get(t);
+    return h ? `${h.replace(/^@/, '')} / \u8a9e\u5f59 ${t}` : `CONCEPT / ${t}`;
+  };
 
   // ── ① 各概念の定義箇所を見つける ────────────────────────
   const defBody = new Map();
