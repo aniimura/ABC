@@ -75,7 +75,21 @@ mathlib自身が使う`set_option backward.isDefEq.respectTransparency false`
 `FEt`がProp包みのため`IsTrivial`が退化することを確認し、正直に見送った)。
 
 `tools/corrhyp-progress.mjs`(genell-progress.mjsと同じ分子規則で新設)の
-機械集計: **`CorrHyp §1 4/5, §2 0/6, §3 1/3, §4 0/2, §5 0/7, §6 0/1
+機械集計(当初): **`CorrHyp §1 4/5, §2 0/6, §3 1/3, §4 0/2, §5 0/7, §6 0/1
 —— 合計5/24`**。§2の`Proposition 2.4`/`Theorem 2.5`は
 `MargulisArithmetic`/`ShimuraArithmetic`のplaceholderで「閉じる」ことは
 明示的に見送った(退化した証明になるため、`corrhyp-goal.md`に歯止めを記録)。
+
+★★★★★2026-09-04さらに続報(第30件、Hecke型対角共役でDefinition 2.1
+を達成)。`Found/CorrHyp/HeckeExample.lean`: `g:=diag(2,1/2)∈SL(2,ℝ)`を
+使い、`SL(2,ℤ)`が(古典的にarithmeticなので)自身のcommensuratorの中で
+無限指数を持つことを完全にsorry無しで証明した——`Γ(4)`(mathlibに
+`FiniteIndex`済み)を両方向の有限指数下界に使って`g2∈Comm(Γ_SL2Z)`を、
+`g2^k`(`k≥1`)の`(1,1)`成分`2⁻ᵏ`が整数になりえないことから無限個の
+相異なる剰余類の存在を、それぞれ確立した。配管の詰まり
+(`Matrix.SpecialLinearGroup`のinstances-transparency問題)は
+「`set A := (M:Matrix...)`で台のMatrixを先に1回だけ取り出す」という
+具体的な回避策で解決——`tools/lean-idioms.md`に記録済み。
+
+**最終集計: `CorrHyp §1 4/5, §2 1/6, §3 1/3, §4 0/2, §5 0/7, §6 0/1
+—— 合計6/24`**(このセッション開始時の1/24から6倍)。
