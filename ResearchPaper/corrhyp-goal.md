@@ -274,8 +274,22 @@ witness で両者が**相異なる**ことを確認した上で
 有限指数)は mathlib に対応する補題が無く(`Hecke`/対角共役で `grep` 0件)、
 `Γ(2)` の例のように既存の `FiniteIndex` インスタンスを流用できない——
 一から行列計算で `gΓg⁻¹ ∩ Γ` を合同部分群型の集合と同一視する必要がある。
-★これは §2 本体(Margulis/Shimura)ほどではないが軽くもない——次に §2 へ
-戻るときの実測済みの出発点として記録する(壁ではなく、測った道)。
+
+★★数学的な筋は紙の上で確認・実装も試みた(2026-09-04続報): `g:=diag(2,1/2)`
+に対し `g⁻¹Mg = [[a,b/4],[4c,d]]`・`gMg⁻¹ = [[a,4b],[c/4,d]]` を成分計算で
+確認し(`conj_inv_formula`/`conj_formula`、sorry無しで通した)、
+`Γ(4) ≤ (g•Γ_SL2Z) ⊓ Γ_SL2Z` かつ `Γ(4) ≤ (g⁻¹•Γ_SL2Z) ⊓ Γ_SL2Z` の**両方**
+(`Gamma(4)` 1つで両側向きの有限指数下界になる、`Gamma^0(4)` を介する
+S-共役の遠回りが不要と判明)という設計まで詰めたが、`Γ(4)` の
+`b ≡ 0 mod 4` から得る商 `k` を使って witness 行列 `N` を構成する箇所で
+`Matrix.SpecialLinearGroup n R := {A // A.det=1}` が `def`(非簡約)である
+ための instances-transparency の食い違いが**アナログ構成のたびに**再発し
+(`⟨N, hNdet⟩` が `Matrix.SpecialLinearGroup` ではなく素の `Subtype` として
+elaborate される、`have`で束ねると`simp`が展開できない、等)、
+`set_option backward.isDefEq.respectTransparency false` だけでは
+今回は解決しなかった。★これは §2 本体(Margulis/Shimura)ほどではないが
+軽くもない——次に §2 へ戻るときの実測済みの出発点として記録する
+(壁ではなく、測った道。数学は確定済み、残るのは純粋な配管の詰め)。
 
 `Definition 3.1`(`hyperbolicCore`)は今の `core := id` placeholder では
 実装にならない(本物の商構成、`Lemma 5.1` の内容)。`Theorem 3.3` は

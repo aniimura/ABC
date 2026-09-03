@@ -26,6 +26,7 @@ Note: The target expression is not type-correct under the `instances` transparen
 | 手 | 例 |
 |---|---|
 | ★★**まずこれを試す**: `set_option backward.isDefEq.respectTransparency false in` を宣言の直前に置く | mathlib の `AffineTransitionLimit.lean` 自身が同種の場面(`Subtype`包みの`def`をPreorder-as-categoryの対象に使う等)で多用している。`rw`/`simp`の`Category.comp_id`等が「unused」と言われるのに式が消えない、という症状にも効く(`CorrHyp/FieldLimit.lean::cocone_ι_congr`、2026-09-04)。**副作用**: 宣言全体でdefeq判定が緩むので、他の箇所で意図しない項が通ってしまわないか要確認——`lake build`が通ることと`#print axioms`がsorryAxを含まないことは必ず確認する。 |
+| `Matrix.SpecialLinearGroup n R := {A // A.det=1}` の匿名コンストラクタ`⟨N,hNdet⟩`が期待した`SpecialLinearGroup`型ではなく素の`Subtype`として elaborate される(`Application type mismatch`) | まず`have x : Matrix.SpecialLinearGroup n R := ⟨N,hNdet⟩`のように**型注釈つきの独立した`have`**で束ねてから使う(1回で直らないこともある——`respectTransparency false`でも直らない場合あり、2026-09-04実測、`CorrHyp`のHecke型共役の計算で発生・未解決のまま記録)。だめなら`Matrix.SpecialLinearGroup.ext`(2つの`SpecialLinearGroup`の等しさを台の`Matrix`の等しさに落とす)を先に`apply`してから、右辺の構成は`Matrix`レベルの`!![...]`のまま進め、`SpecialLinearGroup`型を持つ項を極力作らずに済ませるほうが安定する。 |
 | ★`rw` をやめて **`Eq.trans` / `congrArg` の項**で繋ぐ | `(Category.assoc _ _ _).trans (h.trans (Category.assoc _ _ _).symm)` |
 | ★`congrArg` には**関数の型を明示**する | `congrArg (fun t : X ⟶ Y => t ≫ f) h` |
 | ★`show` で**きれいな型**に言い換えてから触る | `show HomBirat.mk (biratPfIdx …) (rootMap … ≫ …) = _` |
