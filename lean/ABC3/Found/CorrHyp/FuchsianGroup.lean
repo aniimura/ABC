@@ -309,7 +309,7 @@ open Subgroup.Commensurable in
 これが `Commensurable (z·X.Γ·z⁻¹) X.Γ` の定義そのもの。
 
 ★**sorry 無し**。標準3公理のみ(`#print axioms` で確認済み)。 -/
-theorem prop_3_2 {C X Z : FuchsianGroup} (hCX : IsFiniteIndexIn C X)
+theorem corrhyp_prop_3_2 {C X Z : FuchsianGroup} (hCX : IsFiniteIndexIn C X)
     (hCZ : IsFiniteIndexIn C Z) : Z.Γ ≤ commensurator X.Γ := by
   intro z hz
   rw [commensurator_mem_iff]

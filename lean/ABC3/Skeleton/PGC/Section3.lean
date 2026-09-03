@@ -74,19 +74,24 @@ def filteredGroupOf.src : Source :=
   Hodge-Tate の定義そのもの)。mathlib 不在。
 - Proposition 2.2(K̄^ の回復)への直接依存。
 
-## ★★検討中の懸念(2026-09-04、未解決)
+## ★★検討中の懸念(2026-09-04、訂正込み)
 
 `isHodgeTate : ∀ K, Prop` は**完全に自由なパラメータ**——`V` の構造から
-導かれる制約が一切無い。これは `Cor 1.3` の `I_K`・`Prop 1.2` の `RD` で
-過去に発見した「自由なデータによる退化」(`Check/PGC/InertiaDegeneracy.lean`)
-と同じ型の罠になりうる: `isHodgeTate` が `K` の実際の構造と無関係に選べる
-限り、`FilteredGroup.Iso` が存在しても `isHodgeTate K ↔ isHodgeTate K'` を
-強制する根拠が(この statement の中には)無い。ただし過去のケースと異なり、
-**具体的な反証はまだ構成していない**——`FilteredGroup.Iso` を伴う異なる
-`K,K'` を実際に作るのが Cor 1.3 の場合より難しく見える(こちらは非自明な
-`RF`・非自明な同型 `α` の両方が要る)。次にここへ戻るなら
-`Check/PGC/RefutationAttempts.lean` と同じ手法で反証を試みるか、
-`isHodgeTate` に `V` から導かれる制約(transport 条件)を課す訂正を検討する。 -/
+導かれる制約が一切無い。一見 `Cor 1.3` の `I_K`・`Prop 1.2` の `RD` の
+「自由なデータによる退化」と同じ型の罠に見えるが、精査すると**事情が違う**:
+`K′=K` の場合(`_α` がどんな `FilteredGroup.Iso Γ_K≅Γ_K` であっても)は
+`isHodgeTate K ↔ isHodgeTate K` が `Iff.rfl` で**自明に成り立つ**——
+`isHodgeTate` が Galois 群の元(共役の選び方)に一切依存しないパラメータ
+だから、`Prop 1.1` の共役不変性(`cyclotomicCharacter_conj_invariant`)の
+ような別途の証明さえ要らない。ゆえに本当の障害は `K≠K′` かつ
+`FilteredGroup.Iso (filteredGroupOf RF K) (filteredGroupOf RF K')` が
+存在するという**witness の構成そのもの**に尽きる——これは
+`Check/PGC/RefutationAttempts.lean` が pGC §1 の3定理について
+既に詳細に調べ尽くした障害(「異なる2つの p進局所体の間の連続同型」が
+現状の道具では構成できない、0/3 反証できなかった)と**同一の根本原因**
+であり、`isHodgeTate` 固有の新しい罠ではない。したがって本項目は
+`Prop 1.1`・`Prop 1.2`・`Cor 1.3` と同じ意味で「反証もできないし証明も
+できない」——未解決のまま、`isHodgeTate` を制約する訂正は不要と見る。 -/
 theorem cor_3_1 (RF : RamificationFiltration p)
     (V : PAdicLocalField p → Type*) [∀ K, AddCommGroup (V K)] [∀ K, Module ℚ_[p] (V K)]
     [∀ K, FiniteDimensional ℚ_[p] (V K)] [∀ K, SMul K.absGal (V K)]
@@ -151,15 +156,22 @@ Corollary 3.1 と同じ理由(原文「the filtered group Γ_K」、裸の同型
 - [1] Serre, Chapter III, Appendix §5(d_V(i) による uniformizing の判定条件式)。
 - Corollary 3.1 への直接依存(d_V(i) が回復できることを使う)。
 
-## ★★検討中の懸念(2026-09-04、未解決)
+## ★★検討中の懸念(2026-09-04、訂正込み)
 
-`Cor 3.1` と同じ型の懸念——`ρ : K.absGal →* Eˣ`・`ρ' : K'.absGal →* Eˣ` は
-`α` と無関係に自由に選べる(`α` との両立性を要求する仮説が無い)。
-`IsUniformizing` 自体は `ρ` に依存する述語なので、`ρ,ρ'` が `α` で
-互いに移り合う保証が無いまま両者の `IsUniformizing` が同値になる根拠は
-薄い——ただし原文の主張の対象が「`ρ` を固定した上で `V` が uniformizing か
-どうか」なのか「`α` で移り合う `(ρ,ρ')` の族について」なのか、逐語の
-読み直しが要る。詳細は `Cor 3.1` の同名の節を参照。 -/
+`ρ : K.absGal →* Eˣ`・`ρ' : K'.absGal →* Eˣ` が `_α` と無関係に自由に
+選べる点は一見 `Cor 3.1` と同じ罠に見えるが、精査すると**反証はやはり
+効かない**——`toGal` が固定されていても、`IsUniformizing K E toGal ρ`
+自体が `ρ`(と `toGal`)の**具体的な組**に強く依存する非自明な存在命題
+(開集合 `I` 上で `ρ∘toGal` がある体準同型 `ι` と一致する)であり、
+`ι` は単射(体準同型)ゆえ `I` 上で単射的に変化しなければならない。
+`ρ∘toGal` がその条件を満たす——すなわち `IsUniformizing` が**真になる**
+——ような `(toGal,ρ)` の組を構成するには、それ自体が局所類体論の
+相互律に相当する非自明な数学的内容を要る(`toGal` を「悪く」選べば
+両辺とも恒等的に偽になり ↔ は自明に真、「良い」`toGal` を選ぶには
+相互律相当の構成が要る、という板挟み)。ゆえに `Cor 3.1` と同じ根本
+原因(`Check/PGC/RefutationAttempts.lean` が突き止めた、局所類体論を
+経由しない反証・証明のどちらも現状の道具では届かないという壁)に帰着する
+——`ρ,ρ'` の非拘束それ自体は独立した罠ではない。 -/
 theorem cor_3_3 (RF : RamificationFiltration p)
     (E : Type*) [Field E] [Algebra ℚ_[p] E]
     (toGal : ∀ K : PAdicLocalField p, {x : K.carrier // ‖x‖ = (1 : ℝ)} → K.absGal) :
