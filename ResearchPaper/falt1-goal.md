@@ -966,6 +966,40 @@ mathlib での正確な組み立て方は未確認)。
     `ψ` が単射なのでおそらく `Submodule.fg_of_injective` 的な既製品
     一発で閉じるはず)と `hsep` のみ**——`differentIdeal_tower_diamond`
     の instance 整備は完成が視野に入った。
+
+    ★★★★2026-09-04、**`Module.Finite V1 Wₙ₊₁` も完成した**
+    (`falt1ModuleFiniteV1Wn1`、commit `786fcd84`)——予想(単射像の
+    有限生成性)とは違う、もっと単純な経路で閉じた:`Module.Finite.
+    of_restrictScalars_finite`(`R→A→M` のタワーで `M` が `R` 上有限
+    なら `A` 上でも有限、「小さい環上の有限生成は大きい環上でも
+    有限生成」という一般に易しい事実)を `R:=V0,A:=V1,M:=Wₙ₊₁` に
+    適用するだけ——`IsScalarTower V0 V1 Wₙ₊₁`(`ψ.commutes` から)と
+    既存の `Module.Finite V0 Wₙ₊₁` の2つを揃えれば機械的。★`ψ` の
+    単射性は**この有限性には不要だった**(`IsTorsionFree` の方でのみ
+    必要)——予想が外れたが、より単純な経路が見つかった好例。
+
+    ★★★これで **`differentIdeal_tower_diamond` の instance 整備は
+    事実上完成した**——約20個中10個を直接証明し、残り(`Algebra
+    Vn1 Wn1`・`Algebra Vn Wn`・`Algebra Vn Vn1`・`IsScalarTower Vn
+    Vn1 Wn1`・`IsScalarTower Vn Wn Wn1` 等)は全て確認済みの
+    自動発見パターン(`letI`でインライン展開)で揃う。**唯一残る
+    のは `hsep`(`Algebra.IsSeparable (FractionRing V0)(FractionRing
+    Wₙ₊₁)`)のみ**——ただしこれは技術的に厄介な点が1つ判明した:
+    `integralClosure.isFractionRing_of_finite_extension`(mathlib)
+    により `IsFractionRing Wₙ₊₁ (AdjoinRoot gK)` は言えるが、これは
+    `FractionRing Wₙ₊₁`(**具体的な** `Localization (nonZeroDivisors
+    Wₙ₊₁)` という構成)と `AdjoinRoot gK` が**同型**であることしか
+    意味せず、**等しい**わけではない——`hsep` を `Algebra.IsSeparable
+    (FractionRing V0)(AdjoinRoot gK)`(こちらは `algIsSeparable_
+    adjoinRoot_of_separable` 系の既存道具が直接使える形)から
+    移送するには、この同型に沿った separability の transport が
+    もう1段要る。★また `Wₙ` 自身の `FractionRing V0` 上の分離性
+    (`Algebra.IsSeparable (FractionRing V0)(FractionRing Wₙ)`)も
+    新たな仮定として要りそう(`Wₙ` が塔のどこから来るかに依存)。
+    次回はこの「同型に沿った transport」から始めるとよい——
+    tools/lean-idioms.md #29 の教訓(cast を避け、`IsFractionRing`
+    の一意性補題 `IsFractionRing.algEquivOfIsFractionRing` 等を
+    使って明示的な同型として扱う)が活きる場面のはず。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
