@@ -473,14 +473,18 @@ theorem extDiagram_obj_quasiSeparatedSpace (X : Over BaseK) [QuasiSeparatedSpace
 の有限アフィン開被覆(`Scheme.exists_finite_affineOpenCover`)を
 `isLimit_extCone`(`Ext X` の台は `extDiagram X` の極限)経由で
 `Scheme.exists_isOpenCover_and_isAffine` に渡し、`X.left ×_{BaseK} Spec R`
-(ある有限生成 `k`-部分環 `R`)の有限アフィン開被覆に降ろす。
+(ある有限生成 `k`-部分環 `R`)の有限アフィン開被覆に降ろす——降ろした先の
+各片 `V j` が、元の `Ext X` 側の片(`(ExtF.obj X).left.affineCover.f (j:s)`
+の像)の**引き戻しそのもの**であることも保持する(`hVprop j`)——`c.α`
+(相関の有限エタール射)をこの片へ制限する際に使う。
 
 ★**sorry 無し**。標準3公理のみ。 -/
 theorem exists_extDiagram_finite_affine_descent (X : Over BaseK) [CompactSpace X.left]
     [QuasiSeparatedSpace X.left] :
-    ∃ (R : (FgSubalgebra ℚ ℝ)ᵒᵖ) (J : Type) (t : Finset J)
-      (V : t → ((extDiagram X).obj R).Opens),
-      TopologicalSpace.IsOpenCover V ∧ ∀ j, IsAffineOpen (V j) := by
+    ∃ (R : (FgSubalgebra ℚ ℝ)ᵒᵖ) (s : Finset (ExtF.obj X).left.affineCover.I₀)
+      (t : Finset s) (V : t → ((extDiagram X).obj R).Opens),
+      TopologicalSpace.IsOpenCover V ∧ ∀ j : t, IsAffineOpen (V j) ∧
+        (((ExtF.obj X).left).affineCover.f (j : s)).opensRange = (extCone X).π.app R ⁻¹ᵁ V j := by
   haveI hcompact : CompactSpace (ExtF.obj X).left := ExtF_compactSpace X
   haveI hqs : QuasiSeparatedSpace (ExtF.obj X).left := ExtF_quasiSeparatedSpace X
   obtain ⟨s, hcov, haff⟩ := Scheme.exists_finite_affineOpenCover (ExtF.obj X).left
@@ -492,6 +496,6 @@ theorem exists_extDiagram_finite_affine_descent (X : Over BaseK) [CompactSpace X
   obtain ⟨i, t, V, hVcov, hVprop⟩ := Scheme.exists_isOpenCover_and_isAffine
     (extDiagram X) (extCone X) (isLimit_extCone X)
     (fun j : s => (((ExtF.obj X).left).affineCover.f j).opensRange) hcov (fun j => haff j)
-  exact ⟨i, s, t, V, hVcov, fun j => (hVprop j).1⟩
+  exact ⟨i, s, t, V, hVcov, hVprop⟩
 
 end ABC3.Found.CorrHyp
