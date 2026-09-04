@@ -105,6 +105,27 @@ theorem iSup_fgSubalgebra_eq_top (k K : Type*) [CommRing k] [CommRing K] [Algebr
   exact le_iSup (fun R : FgSubalgebra k K => R.1) (⟨R, hR⟩ : FgSubalgebra k K)
     (hx x (Finset.mem_singleton_self x))
 
+/-- **有限個の `FgSubalgebra k K` は共通の上界を持つ**——`IsDirected` を
+`Finset` 上の有限帰納法で拡張しただけ(2つずつ合流させる)。`Lemma 4.1`
+の「複数のアフィン片・複数の標準エタール片を横断した細分段階の合流」
+(`corrhyp-goal.md` §4)で使う——有限個の局所降下先 `R_i` を1つの共通
+段階へまとめる。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_fgSubalgebra_upperBound {k K : Type} [CommRing k] [CommRing K] [Algebra k K]
+    {ι : Type} (t : Finset ι) (R : ι → FgSubalgebra k K) :
+    ∃ R' : FgSubalgebra k K, ∀ i ∈ t, R i ≤ R' := by
+  classical
+  induction t using Finset.induction with
+  | empty => exact ⟨⟨⊥, Subalgebra.fg_bot⟩, by simp⟩
+  | insert a s ha ih =>
+    obtain ⟨R', hR'⟩ := ih
+    obtain ⟨R'', hR1, hR2⟩ := (instIsDirectedFgSubalgebraLe (k := k) (K := K)).directed (R a) R'
+    refine ⟨R'', fun i hi => ?_⟩
+    rcases Finset.mem_insert.mp hi with rfl | hi
+    · exact hR1
+    · exact le_trans (hR' i hi) hR2
+
 open CategoryTheory in
 /-- `FgSubalgebra k K` は filtered(`IsDirected` から——2つの対象は `⊔` を
 共通の余錐に持ち、薄い圏なので平行射の coequalize は自明)。
