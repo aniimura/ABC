@@ -2165,6 +2165,47 @@ mathlib での正確な組み立て方は未確認)。
       「`Algebra V1 Wn1`インスタンス衝突」(前回セッションで診断済み)
       に再度注意しながら進める必要がある。
 
+      ★2026-09-04(続々々)、**インスタンス化を試みる前に、2つの構造的な
+      ギャップが判明した**(`falt1_cancelConductorDelta_assembled`の
+      シグネチャを再確認して発見):
+      1. **base ringのずれ**: `falt1_isPushout_adjoinRoot`は`g :
+         Polynomial R`(`R`は素の底環)についての命題だが、実際の
+         `V1 := integralClosure V0 (AdjoinRoot fK)`・`Wn1 :=
+         integralClosure Wn (AdjoinRoot gK)`は、`fK`・`gK`が
+         `FractionRing V0`・`FractionRing Wn`(**分数体**)上の多項式
+         として定義されている(Eisenstein性の議論に分数体が必要な
+         ため)。よって`falt1_isPushout_adjoinRoot`を使うには
+         `R = FractionRing V0`・`C = FractionRing Wn`とせざるを得ず、
+         得られるのは`Algebra.IsPushout (FractionRing V0)
+         (FractionRing Wn) (AdjoinRoot fK) (AdjoinRoot gK)`であって、
+         `pushoutKaehlerSplitStep`が要求する`Algebra.IsPushout V0 Wn
+         V1 Wn1`(=**整数環**のレベルでのpushout)ではない。
+      2. **`AdjoinRoot`と`integralClosure`のずれ**: `V1`・`Wn1`は
+         `AdjoinRoot fK`・`AdjoinRoot gK`**そのもの**ではなく、その中の
+         `V0`・`Wn`の**整閉包**(=分岐拡大の「整数環」)である——
+         `AdjoinRoot fK`は`FractionRing V0`上有限次数の**体**の
+         拡大体そのものであり、`V1`はその中の真部分環。
+      3. **数学的な疑義(最重要)**: 2026-09-04(続)に記録した
+         Brinon-Conrad Exercise 13.7.4 の発見(「`Ω¹_{B1/A}`の生成元の
+         個数は second fundamental exact sequence + Nakayama で出す」
+         という手法)と照らすと、Faltings自身の証明は**`Wₙ₊₁`が`Vₙ₊₁`
+         (=`V1`)と`Wₙ`の pushout である、という同型そのものは
+         主張していない**可能性が高い——`Wₙ₊₁`は非正規かもしれない拡大の
+         整数環であり、pushout(=テンソル積)は一般には整閉ではない
+         ため、`Algebra.IsPushout V0 Wn V1 Wn1`が字義通り成り立つとは
+         限らない。むしろ Faltings は「`Ω¹_{Wₙ₊₁/Vₙ₊₁}`を`d+1`個の
+         生成元をもつ加群として直接扱う」形で pushout の**厳密な同型**
+         を回避している可能性がある。
+
+      ★結論: `falt1_isPushout_adjoinRoot`(分数体レベルでの一般公式)は
+      それ自体正しく完成した独立した成果だが、これを`V1`/`Wn1`
+      (整数環レベル)へ**そのまま**インスタンス化するのは早計——
+      次回はまず「`Algebra.IsPushout V0 Wn V1 Wn1`は本当に成り立つか」
+      を(反例や、成り立つとしても追加の仮定(例えば`Wn`が`V0`上
+      不分岐、など)が要るかを含めて)再検討することから始める。
+      性急に誤った instantiation を試みるより、この構造的な疑問を
+      先に解消する方が着実。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
