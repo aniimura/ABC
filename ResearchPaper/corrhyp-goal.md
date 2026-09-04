@@ -151,6 +151,15 @@ Royden の定理——いずれも GenEll のモジュラー多項式ギャッ�
 spreading-out の補題群が存在する。①(双曲幾何、Gauss–Bonnet 0件)・
 ③(代数群論、非可換 Galois コホモロジー)より見込みがある。
 
+★★★★★★★**2026-09-04、セッション末に①を再実測・確定**
+(`genus`・`GaussBonnet`・`RiemannHurwitz` で `grep`——3語とも**文字通り
+0件**、無関係な `HurwitzZeta`(数論的ゼータ関数、別分野)のみヒット)。
+これで「双曲幾何(種数・Euler標数・Gauss–Bonnet)が mathlib に無い」は
+複数回の実測すべてで確認された確定事実——`Theorem 3.3`・§5 の大半・
+間接的に `Theorem 4.2`/`Theorem 6.1` の律速。次にここへ戻るセッションは
+再確認不要、この人年規模の欠落を埋める作業(mathlib への新規貢献に近い
+規模)から直接始めてよい。
+
 ★★★**さらに一段実測(2026-09-04)——`Lemma 4.1` に直撃する道具を発見**:
 `AlgebraicGeometry/AffineTransitionLimit.lean` は「スキームが affine な
 遷移射を持つ余濾過的な図式(`D : I ⥤ Scheme`)の極限である」ときの
