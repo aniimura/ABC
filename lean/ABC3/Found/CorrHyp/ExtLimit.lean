@@ -2551,23 +2551,9 @@ theorem corrHypGlueData_compat {X : Scheme} {U : X.Opens} {J : Type} (f : J → 
 
 /-- **`corrHypGlueData`から`piecesOpenCover`の`gluedCover`への射**——
 `Multicoequalizer.desc`(コクイザライザの普遍性)を`corrHypGlueData_
-compat`(唯一必要な整合条件)とともに適用するだけ。項目(b)の最終目標
-`corrHypGlueData.glued ≅ (U:Scheme)`に向けた最後の段——この射が
-`IsIso`であることを示せば(逆向きの射を同様に構成し、互いに逆である
-ことを`Multicoequalizer.hom_ext`で確認する、または`NatIso`経由で
-`HasColimit.isoOfNatIso`を使う)、mathlibの`Scheme.Cover.fromGlued`
-(`IsIso`、既製)が与える`gluedCover.glued ≅ U`と合成して完成する。
+compat`(唯一必要な整合条件)とともに適用するだけ。
 
-★**sorry 無し**。標準3公理のみ。
-
-★★次の一手(未着手、項目(b)の最終段): この射が`IsIso`であることを
-示す。逆向きの射(`gluedCover.diagram`→`corrHypGlueData.glued`、
-同様の整合条件が`corrHypGlueData_compat`の`i,j`を入れ替えるか`gdT`の
-対称性から従う見込み)を`Multicoequalizer.desc`で構成し、
-`Multicoequalizer.hom_ext`で両方向の合成が恒等射になることを確認する
-——それができれば`Iso.mk`でまとめ、`Scheme.Cover.fromGlued`との合成で
-`corrHypGlueData.glued ≅ (U:Scheme)`(項目(b)そのもの)が完成する。
-`corrhyp-goal.md`に記録。 -/
+★**sorry 無し**。標準3公理のみ。 -/
 noncomputable def corrHypGlueData_toGluedCover {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
     (Z : J → Scheme) (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i)
     (hcover : ⨆ i, X.basicOpen (f i) = U) :
@@ -2575,6 +2561,165 @@ noncomputable def corrHypGlueData_toGluedCover {X : Scheme} {U : X.Opens} {J : T
   Multicoequalizer.desc (corrHypGlueData f Z e).diagram _
     (fun i => (Scheme.Cover.gluedCover (piecesOpenCover f Z e hcover)).ι i)
     (fun ⟨i, j⟩ => corrHypGlueData_compat f Z e hcover i j)
+
+/-- `corrHypGlueData_toGluedCover`の逆向きの整合条件——
+`corrHypGlueData_compat`と同じ`piecesGluedCoverVIso_hom_fst`/`_hom_snd`
+から、今度は`corrHypGlueData`自身の`GlueData.glue_condition`(mathlib
+既製)を経由して導く。`φ.inv`を消して`gdF`/`gdT`絡みの言葉から
+`pullback.fst`/`pullbackSymmetry`絡みの言葉へ変換したのち、`φ`が
+iso であること(`Iso.hom_inv_id`)で`φ`自体を打ち消す、という
+`corrHypGlueData_compat`とは逆方向のキャンセルが必要になる。
+
+★配管の注意: `corrHypGlueData_compat`と同じく、一度も`rw`/`simp`を
+使わず`calc`+`congrArg`+`Category.assoc`(項として)だけで組み立てた
+(`#31`の壁の回避法、再確認)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem gluedCover_compat {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
+    (Z : J → Scheme) (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i)
+    (hcover : ⨆ i, X.basicOpen (f i) = U) (i j : J) :
+    pullback.fst ((piecesOpenCover f Z e hcover).f i) ((piecesOpenCover f Z e hcover).f j) ≫
+        (corrHypGlueData f Z e).ι i =
+      ((pullbackSymmetry ((piecesOpenCover f Z e hcover).f i) ((piecesOpenCover f Z e hcover).f j)).hom ≫
+        pullback.fst ((piecesOpenCover f Z e hcover).f j) ((piecesOpenCover f Z e hcover).f i)) ≫
+        (corrHypGlueData f Z e).ι j := by
+  have hglue2 : (gdT f Z e i j).hom ≫ gdF f Z e j i ≫ (corrHypGlueData f Z e).ι j =
+      gdF f Z e i j ≫ (corrHypGlueData f Z e).ι i :=
+    (corrHypGlueData f Z e).glue_condition i j
+  have hgdF : gdF f Z e i j = (piecesGluedCoverVIso f Z e hcover i j).inv ≫
+      pullback.fst ((piecesOpenCover f Z e hcover).f i) ((piecesOpenCover f Z e hcover).f j) :=
+    (Iso.inv_hom_id_assoc (piecesGluedCoverVIso f Z e hcover i j) (gdF f Z e i j)).symm.trans
+      (congrArg ((piecesGluedCoverVIso f Z e hcover i j).inv ≫ ·) (piecesGluedCoverVIso_hom_fst f Z e hcover i j))
+  have hgdTF : (gdT f Z e i j).hom ≫ gdF f Z e j i =
+      (piecesGluedCoverVIso f Z e hcover i j).inv ≫
+      (pullbackSymmetry ((piecesOpenCover f Z e hcover).f i) ((piecesOpenCover f Z e hcover).f j)).hom ≫
+      pullback.fst ((piecesOpenCover f Z e hcover).f j) ((piecesOpenCover f Z e hcover).f i) :=
+    (Iso.inv_hom_id_assoc (piecesGluedCoverVIso f Z e hcover i j)
+      ((gdT f Z e i j).hom ≫ gdF f Z e j i)).symm.trans
+      (congrArg ((piecesGluedCoverVIso f Z e hcover i j).inv ≫ ·) (piecesGluedCoverVIso_hom_snd f Z e hcover i j))
+  have hcancel : (piecesGluedCoverVIso f Z e hcover i j).inv ≫
+      (pullbackSymmetry ((piecesOpenCover f Z e hcover).f i) ((piecesOpenCover f Z e hcover).f j)).hom ≫
+      pullback.fst ((piecesOpenCover f Z e hcover).f j) ((piecesOpenCover f Z e hcover).f i) ≫
+      (corrHypGlueData f Z e).ι j =
+      (piecesGluedCoverVIso f Z e hcover i j).inv ≫
+      pullback.fst ((piecesOpenCover f Z e hcover).f i) ((piecesOpenCover f Z e hcover).f j) ≫
+      (corrHypGlueData f Z e).ι i :=
+    calc (piecesGluedCoverVIso f Z e hcover i j).inv ≫
+        (pullbackSymmetry ((piecesOpenCover f Z e hcover).f i) ((piecesOpenCover f Z e hcover).f j)).hom ≫
+        pullback.fst ((piecesOpenCover f Z e hcover).f j) ((piecesOpenCover f Z e hcover).f i) ≫
+        (corrHypGlueData f Z e).ι j
+        = ((piecesGluedCoverVIso f Z e hcover i j).inv ≫
+            (pullbackSymmetry ((piecesOpenCover f Z e hcover).f i) ((piecesOpenCover f Z e hcover).f j)).hom ≫
+            pullback.fst ((piecesOpenCover f Z e hcover).f j) ((piecesOpenCover f Z e hcover).f i)) ≫
+            (corrHypGlueData f Z e).ι j := (Category.assoc _ _ _).symm
+      _ = ((gdT f Z e i j).hom ≫ gdF f Z e j i) ≫ (corrHypGlueData f Z e).ι j :=
+          congrArg (· ≫ (corrHypGlueData f Z e).ι j) hgdTF.symm
+      _ = (gdT f Z e i j).hom ≫ gdF f Z e j i ≫ (corrHypGlueData f Z e).ι j := Category.assoc _ _ _
+      _ = gdF f Z e i j ≫ (corrHypGlueData f Z e).ι i := hglue2
+      _ = ((piecesGluedCoverVIso f Z e hcover i j).inv ≫
+            pullback.fst ((piecesOpenCover f Z e hcover).f i) ((piecesOpenCover f Z e hcover).f j)) ≫
+            (corrHypGlueData f Z e).ι i :=
+          congrArg (· ≫ (corrHypGlueData f Z e).ι i) hgdF
+      _ = (piecesGluedCoverVIso f Z e hcover i j).inv ≫
+            pullback.fst ((piecesOpenCover f Z e hcover).f i) ((piecesOpenCover f Z e hcover).f j) ≫
+            (corrHypGlueData f Z e).ι i := Category.assoc _ _ _
+  have hfinal := congrArg ((piecesGluedCoverVIso f Z e hcover i j).hom ≫ ·) hcancel
+  rw [← Category.assoc, ← Category.assoc, Iso.hom_inv_id, Category.id_comp,
+    ← Category.assoc, ← Category.assoc, Iso.hom_inv_id, Category.id_comp] at hfinal
+  exact hfinal.symm
+
+/-- **`piecesOpenCover`の`gluedCover`から`corrHypGlueData`への射(逆
+向き)**——`gluedCover_compat`とともに`Multicoequalizer.desc`を適用
+するだけ。 -/
+noncomputable def gluedCover_toCorrHypGlueData {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
+    (Z : J → Scheme) (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i)
+    (hcover : ⨆ i, X.basicOpen (f i) = U) :
+    (Scheme.Cover.gluedCover (piecesOpenCover f Z e hcover)).glued ⟶ (corrHypGlueData f Z e).glued :=
+  Multicoequalizer.desc (Scheme.Cover.gluedCover (piecesOpenCover f Z e hcover)).diagram _
+    (fun i => (corrHypGlueData f Z e).ι i)
+    (fun ⟨i, j⟩ => gluedCover_compat f Z e hcover i j)
+
+/-- `corrHypGlueData_toGluedCover`・`gluedCover_toCorrHypGlueData`が
+互いに逆であること(1本目)——`Multicoequalizer.hom_ext`(コクイザライザ
+からの射は各ピースへの制限で決まる)+両方の`Multicoequalizer.π_desc`
+(定義そのもの)を組み合わせるだけ。 -/
+theorem corrHypGlueData_toGluedCover_comp {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
+    (Z : J → Scheme) (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i)
+    (hcover : ⨆ i, X.basicOpen (f i) = U) :
+    corrHypGlueData_toGluedCover f Z e hcover ≫ gluedCover_toCorrHypGlueData f Z e hcover = 𝟙 _ := by
+  apply Multicoequalizer.hom_ext
+  intro i
+  have step1 : (Multicoequalizer.π (corrHypGlueData f Z e).diagram i ≫ corrHypGlueData_toGluedCover f Z e hcover) ≫
+      gluedCover_toCorrHypGlueData f Z e hcover =
+      (Scheme.Cover.gluedCover (piecesOpenCover f Z e hcover)).ι i ≫
+        gluedCover_toCorrHypGlueData f Z e hcover :=
+    congrArg (· ≫ gluedCover_toCorrHypGlueData f Z e hcover)
+      (Multicoequalizer.π_desc (corrHypGlueData f Z e).diagram _
+        (fun i => (Scheme.Cover.gluedCover (piecesOpenCover f Z e hcover)).ι i)
+        (fun ⟨i, j⟩ => corrHypGlueData_compat f Z e hcover i j) i)
+  have step2 : (Scheme.Cover.gluedCover (piecesOpenCover f Z e hcover)).ι i ≫
+      gluedCover_toCorrHypGlueData f Z e hcover = (corrHypGlueData f Z e).ι i :=
+    Multicoequalizer.π_desc (Scheme.Cover.gluedCover (piecesOpenCover f Z e hcover)).diagram _
+      (fun i => (corrHypGlueData f Z e).ι i) (fun ⟨i, j⟩ => gluedCover_compat f Z e hcover i j) i
+  have hgoal : Multicoequalizer.π (corrHypGlueData f Z e).diagram i ≫
+      (corrHypGlueData_toGluedCover f Z e hcover ≫ gluedCover_toCorrHypGlueData f Z e hcover) =
+      (corrHypGlueData f Z e).ι i :=
+    ((Category.assoc _ _ _).symm.trans step1).trans step2
+  exact hgoal.trans (Category.comp_id _).symm
+
+/-- 互いに逆であること(2本目、反対向き)——同じ構成の対称形。 -/
+theorem gluedCover_toCorrHypGlueData_comp {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
+    (Z : J → Scheme) (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i)
+    (hcover : ⨆ i, X.basicOpen (f i) = U) :
+    gluedCover_toCorrHypGlueData f Z e hcover ≫ corrHypGlueData_toGluedCover f Z e hcover = 𝟙 _ := by
+  apply Multicoequalizer.hom_ext
+  intro i
+  have step1 : (Multicoequalizer.π (Scheme.Cover.gluedCover (piecesOpenCover f Z e hcover)).diagram i ≫
+        gluedCover_toCorrHypGlueData f Z e hcover) ≫ corrHypGlueData_toGluedCover f Z e hcover =
+      (corrHypGlueData f Z e).ι i ≫ corrHypGlueData_toGluedCover f Z e hcover :=
+    congrArg (· ≫ corrHypGlueData_toGluedCover f Z e hcover)
+      (Multicoequalizer.π_desc (Scheme.Cover.gluedCover (piecesOpenCover f Z e hcover)).diagram _
+        (fun i => (corrHypGlueData f Z e).ι i) (fun ⟨i, j⟩ => gluedCover_compat f Z e hcover i j) i)
+  have step2 : (corrHypGlueData f Z e).ι i ≫ corrHypGlueData_toGluedCover f Z e hcover =
+      (Scheme.Cover.gluedCover (piecesOpenCover f Z e hcover)).ι i :=
+    Multicoequalizer.π_desc (corrHypGlueData f Z e).diagram _
+      (fun i => (Scheme.Cover.gluedCover (piecesOpenCover f Z e hcover)).ι i)
+      (fun ⟨i, j⟩ => corrHypGlueData_compat f Z e hcover i j) i
+  have hgoal : Multicoequalizer.π (Scheme.Cover.gluedCover (piecesOpenCover f Z e hcover)).diagram i ≫
+      (gluedCover_toCorrHypGlueData f Z e hcover ≫ corrHypGlueData_toGluedCover f Z e hcover) =
+      (Scheme.Cover.gluedCover (piecesOpenCover f Z e hcover)).ι i :=
+    ((Category.assoc _ _ _).symm.trans step1).trans step2
+  exact hgoal.trans (Category.comp_id _).symm
+
+/-- **`corrHypGlueData.glued ≅ (piecesOpenCover ...).gluedCover.glued`**
+——`corrHypGlueData_toGluedCover`/`gluedCover_toCorrHypGlueData`が
+互いに逆であることから`Iso.mk`でまとめるだけ。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def corrHypGlueData_gluedIso {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
+    (Z : J → Scheme) (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i)
+    (hcover : ⨆ i, X.basicOpen (f i) = U) :
+    (corrHypGlueData f Z e).glued ≅ (Scheme.Cover.gluedCover (piecesOpenCover f Z e hcover)).glued where
+  hom := corrHypGlueData_toGluedCover f Z e hcover
+  inv := gluedCover_toCorrHypGlueData f Z e hcover
+  hom_inv_id := corrHypGlueData_toGluedCover_comp f Z e hcover
+  inv_hom_id := gluedCover_toCorrHypGlueData_comp f Z e hcover
+
+/-- **★★★ロードマップ項目(b)の完成★★★: `corrHypGlueData.glued ≅ U`**
+——`corrHypGlueData_gluedIso`(`corrHypGlueData.glued ≅ gluedCover.glued`、
+このファイルで構成)と`Scheme.Cover.fromGlued`(mathlib既製、
+`gluedCover.glued ≅ U`、`IsIso`性を`asIso`で取り出す)を`.trans`で
+繋ぐだけ。`Z`の族(標準的な有限étale候補片)から作った`corrHypGlueData`
+の貼り合わせ結果が、実際に元の`U`に同型であることを示す——`Lemma 4.1`
+の構成的降下で「候補片の族が実際に`C`(の対応する開集合)を再構成する」
+ことを保証する、GlueData配線の最終目標。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def corrHypGlueData_glued_iso {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
+    (Z : J → Scheme) (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i)
+    (hcover : ⨆ i, X.basicOpen (f i) = U) :
+    (corrHypGlueData f Z e).glued ≅ (U : Scheme) :=
+  (corrHypGlueData_gluedIso f Z e hcover).trans (asIso (piecesOpenCover f Z e hcover).fromGlued)
 
 /-! ### `corrHypGlueData`の具体化(ロードマップ項目(a)の第一歩)
 
