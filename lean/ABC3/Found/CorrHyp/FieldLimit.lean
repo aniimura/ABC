@@ -1135,14 +1135,168 @@ theorem exists_fg_subalgebra_tensor_bivariate_finset (A : Type) [CommRing A] [Al
   rw [Finset.sum_attach q.support (fun i => Polynomial.monomial i (q.coeff i))]
   exact Polynomial.sum_monomial_eq q
 
-/- ★★次の一手(未着手): `exists_fg_subalgebra_tensor_bivariate_finset`を
-`StandardEtalePair.Ring`の実際の元(比較射の分母`g_l`等)へ接続するには、
-`StandardEtalePair.Ring`が`Bivariate`多項式環の商(`Ideal.Quotient.mk`、
-全射)であることを経由して、まず商から`Bivariate`多項式への持ち上げを
-取り(`Ideal.Quotient.mk_surjective`)、この補題で係数を降ろし、`Ideal.
-Quotient.mk`を有限段階側でも適用して`P₀.Ring`の元を作る、という一手が
-要る。`standardEtalePairRingBaseChange`は`equivMvPolynomialQuotient`
-(`MvPolynomial (Fin 2) R`経由)を使うため、`Bivariate.equivMvPolynomial`
-での往復も必要になる——`corrhyp-goal.md`に記録。 -/
+/-! ## `StandardEtalePair.Ring` の元を有限段階へ降ろす——作業単位1(b)の完成
+
+`exists_fg_subalgebra_tensor_bivariate_finset`を`StandardEtalePair.Ring`
+(`Bivariate`多項式環の商)の実際の元(比較射の分母`g_l`等)へ接続する。
+`equivMvPolynomialQuotient`(`MvPolynomial`経由)を使う迂回は不要——
+`P.Ring`は`.refl`で生の`Bivariate`商と同一視できるので、`Ideal.
+quotientMap`を直接使って`P₀.Ring →+* (P₀.map f).Ring`という環準同型を
+組み立てるほうが単純。 -/
+
+open scoped TensorProduct in
+/-- `exists_fg_subalgebra_tensor_standardEtalePair`の**構造体そのものの
+一致版**——`exists_fg_subalgebra_tensor_standardEtalePair_baseChange`の
+証明内部で使っていた技法(`.f`・`.g`の一致→`cases`+`subst`+`rfl`)を
+単独の補題として取り出した。`_promote`はこの形の入力を要求する。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_fg_subalgebra_tensor_standardEtalePair_mapEq (A : Type) [CommRing A]
+    [Algebra ℚ A] (P : StandardEtalePair (A ⊗[ℚ] ℝ)) :
+    ∃ (R : FgSubalgebra ℚ ℝ) (P₀ : StandardEtalePair (A ⊗[ℚ] R.1)),
+      P₀.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom = P := by
+  obtain ⟨R, P₀, hf, hg⟩ := exists_fg_subalgebra_tensor_standardEtalePair A P
+  refine ⟨R, P₀, ?_⟩
+  have hf' : (P₀.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom).f
+      = P.f := by rw [StandardEtalePair.map_f]; exact hf
+  have hg' : (P₀.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom).g
+      = P.g := by rw [StandardEtalePair.map_g]; exact hg
+  cases hpm : P₀.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom with
+  | mk f' monic_f' g' cond' =>
+    cases P with
+    | mk f monic_f g cond =>
+      rw [hpm] at hf' hg'
+      simp only at hf' hg'
+      subst hf' hg'
+      rfl
+
+open Polynomial in
+/-- **`P.Ring →+* (P.map f).Ring`という自然な環準同型**——`P.Ring`は
+`equivPolynomialQuotient`が`.refl`であることが示す通り生の`Bivariate`
+多項式環の商そのものなので、`Ideal.quotientMap`に`Polynomial.mapRingHom
+(Polynomial.mapRingHom f)`(2変数への持ち上げ)を渡すだけで組み立てられる
+——`(P.map f).f = P.f.map f`等(`StandardEtalePair.map`の定義)から、
+この写像がイデアルの生成元をちょうど対応する生成元へ送ることを確認する。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def standardEtalePairMapRingHom {R S : Type} [CommRing R] [CommRing S] (f : R →+* S)
+    (P : StandardEtalePair R) : P.Ring →+* (P.map f).Ring :=
+  Ideal.quotientMap _ (Polynomial.mapRingHom (Polynomial.mapRingHom f)) (by
+    rw [Ideal.span_le]
+    intro x hx
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hx
+    rw [SetLike.mem_coe, Ideal.mem_comap]
+    rcases hx with rfl | rfl
+    · show Polynomial.mapRingHom (Polynomial.mapRingHom f) (Polynomial.C P.f) ∈ _
+      rw [show (Polynomial.mapRingHom (Polynomial.mapRingHom f)) (Polynomial.C P.f)
+        = Polynomial.C (P.f.map f) from Polynomial.map_C _]
+      exact Ideal.subset_span (by simp [StandardEtalePair.map_f])
+    · show Polynomial.mapRingHom (Polynomial.mapRingHom f)
+        (Polynomial.X * Polynomial.C P.g - 1) ∈ _
+      rw [map_sub, map_mul, map_one]
+      rw [show (Polynomial.mapRingHom (Polynomial.mapRingHom f)) Polynomial.X = Polynomial.X from
+        Polynomial.map_X _]
+      rw [show (Polynomial.mapRingHom (Polynomial.mapRingHom f)) (Polynomial.C P.g)
+        = Polynomial.C (P.g.map f) from Polynomial.map_C _]
+      exact Ideal.subset_span (by simp [StandardEtalePair.map_g]))
+
+/-- `standardEtalePairMapRingHom`は`Ideal.Quotient.mk`と自然に可換
+(`Ideal.quotientMap_mk`の直接の帰結、`FunLike`適用と`.map`dot記法の
+不一致(lean-idioms #26)を`rfl`で吸収するだけ)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem standardEtalePairMapRingHom_mk {R S : Type} [CommRing R] [CommRing S] (f : R →+* S)
+    (P : StandardEtalePair R) (q : Polynomial (Polynomial R)) :
+    standardEtalePairMapRingHom f P (Ideal.Quotient.mk _ q) =
+      Ideal.Quotient.mk _ (q.map (Polynomial.mapRingHom f)) := by
+  have hcoe : (⇑(Polynomial.mapRingHom (Polynomial.mapRingHom f)) :
+      Polynomial (Polynomial R) → Polynomial (Polynomial S)) =
+      Polynomial.map (Polynomial.mapRingHom f) := rfl
+  show Ideal.quotientMap _ _ _ (Ideal.Quotient.mk _ q) = _
+  rw [Ideal.quotientMap_mk, hcoe]
+
+open scoped TensorProduct in
+/-- `Ideal (Polynomial (Polynomial (A ⊗[ℚ] ℝ)))`の`IsTwoSided`(可換環では
+自動のはずの事実)が、`Polynomial`の2重ネスト+`A ⊗[ℚ] ℝ`という一般の
+底環の組み合わせで通常の`inferInstance`では**候補の組み合わせ爆発**により
+失敗する(`CommRing`インスタンスの探索が`Polynomial.commRing`を再帰的に
+何度も試して失敗をキャッシュし、正しい経路へたどり着けない)ため、
+`letI`で`CommRing`の連鎖を1段ずつ明示して与えてから`infer_instance`する
+——この`instance`自体をグローバルに登録しておくと、以後この形の`Ideal`
+を扱う任意の場所(`Ideal.Quotient.mk_surjective`等)で自動的に見つかる
+ようになる。`tools/lean-idioms.md`に項目として追記予定。
+
+★**sorry 無し**。標準3公理のみ。 -/
+instance bivariateIsTwoSided {A : Type} [CommRing A] [Algebra ℚ A]
+    (I : Ideal (Polynomial (Polynomial (A ⊗[ℚ] ℝ)))) : I.IsTwoSided := by
+  letI i1 : CommRing (A ⊗[ℚ] ℝ) := inferInstance
+  letI i2 : CommRing (Polynomial (A ⊗[ℚ] ℝ)) := @Polynomial.commRing (A ⊗[ℚ] ℝ) i1
+  letI i3 : CommRing (Polynomial (Polynomial (A ⊗[ℚ] ℝ))) :=
+    @Polynomial.commRing (Polynomial (A ⊗[ℚ] ℝ)) i2
+  infer_instance
+
+open scoped TensorProduct in
+set_option maxHeartbeats 4000000 in
+/-- **作業単位1(b)の完成——`P.Ring`の任意の元は有限段階へ降ろせる**。
+`P : StandardEtalePair (A⊗[ℚ]ℝ)`の任意の元`z`について、ある有限段階
+`R`・`P₀ : StandardEtalePair (A⊗[ℚ]R.1)`・`z₀ : P₀.Ring`が存在し、
+`P₀`の base change が`P`に一致し(`_mapEq`)、かつ`z₀`の
+`standardEtalePairMapRingHom`による像が`z`に一致する(`HEq`——`P₀.map f`
+と`P`が値として等しいだけで型としては`▸`が必要になり、depth の深い
+`Polynomial (Polynomial (A⊗ℚℝ))` 上で`▸`を文越しに使うと`whnf`が
+combinatorial explosion で timeout するため、型の一致を要求しない`HEq`
+で述べる)。手順: `z`を`Ideal.Quotient.mk`の代表元`q`へ持ち上げ
+(`bivariateIsTwoSided`のおかげで`mk_surjective`が通る)、
+`exists_fg_subalgebra_tensor_bivariate_finset`で`q`の係数を降ろし、
+`P`自身の降下(`_mapEq`)と共通の上界`R'`(`⊔`)へ合流させ、
+`standardEtalePairMapRingHom_mk`で像を計算する。
+
+`Lemma 4.1`の「比較射の構成」(作業単位1)で、`f_l`・`f_m`(各局所片の
+`StandardEtalePresentation`の生成元由来の元)自体を有限段階の元として
+認識するのに直接使える。
+
+★**sorry 無し**。標準3公理のみ。`lake build`で重い(約40秒、
+`Ideal (Polynomial (Polynomial (A⊗ℚℝ)))`のインスタンス探索の深さのため
+`maxHeartbeats`を上げている)が、有限時間で完全に閉じる。 -/
+theorem exists_fg_subalgebra_tensor_standardEtale_elem (A : Type) [CommRing A] [Algebra ℚ A]
+    (P : StandardEtalePair (A ⊗[ℚ] ℝ)) (z : P.Ring) :
+    ∃ (R : FgSubalgebra ℚ ℝ) (P₀ : StandardEtalePair (A ⊗[ℚ] R.1)) (z₀ : P₀.Ring),
+      P₀.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom = P ∧
+      HEq (standardEtalePairMapRingHom
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom P₀ z₀) z := by
+  obtain ⟨R₁, P₁, hP₁⟩ := exists_fg_subalgebra_tensor_standardEtalePair_mapEq A P
+  obtain ⟨q, hq⟩ := Ideal.Quotient.mk_surjective z
+  obtain ⟨R₂, hR₂⟩ := exists_fg_subalgebra_tensor_bivariate_finset A ({q} : Finset _)
+  obtain ⟨q₀, hq₀⟩ := hR₂ q (Finset.mem_singleton_self q)
+  set R' : FgSubalgebra ℚ ℝ := ⟨R₁.1 ⊔ R₂.1, fg_sup R₁.1 R₂.1 R₁.2 R₂.2⟩ with hR'def
+  have hle1 : R₁ ≤ R' := show (R₁.1 : Subalgebra ℚ ℝ) ≤ R'.1 from le_sup_left
+  have hle2 : R₂ ≤ R' := show (R₂.1 : Subalgebra ℚ ℝ) ≤ R'.1 from le_sup_right
+  have hP₁' := exists_fg_subalgebra_tensor_standardEtalePair_promote A R₁ R' hle1 P₁ P hP₁
+  refine ⟨R', P₁.map (Algebra.TensorProduct.map (AlgHom.id ℚ A)
+    (Subalgebra.inclusion hle1)).toRingHom,
+    Ideal.Quotient.mk _ (q₀.map (Polynomial.mapRingHom
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hle2)).toRingHom)),
+    hP₁', ?_⟩
+  rw [standardEtalePairMapRingHom_mk]
+  have hval : (Subalgebra.val R'.1).comp (Subalgebra.inclusion hle2) = Subalgebra.val R₂.1 := rfl
+  have hid : (AlgHom.id ℚ A).comp (AlgHom.id ℚ A) = AlgHom.id ℚ A := by ext; simp
+  have hcomp := Algebra.TensorProduct.map_comp (AlgHom.id ℚ A) (AlgHom.id ℚ A)
+    (Subalgebra.val R'.1) (Subalgebra.inclusion hle2)
+  rw [hid, hval] at hcomp
+  have hcomp' : (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)).toRingHom.comp
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hle2)).toRingHom =
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R₂.1)).toRingHom :=
+    congrArg AlgHom.toRingHom hcomp.symm
+  have hmm : (q₀.map (Polynomial.mapRingHom
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hle2)).toRingHom)).map
+      (Polynomial.mapRingHom
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)).toRingHom) =
+      q₀.map (Polynomial.mapRingHom
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R₂.1)).toRingHom) := by
+    rw [Polynomial.map_map, Polynomial.mapRingHom_comp, hcomp']
+  rw [hmm, hq₀]
+  clear_value R'
+  subst hP₁'
+  rw [hq]
 
 end ABC3.Found.CorrHyp
