@@ -1939,3 +1939,32 @@ cocycle`等)として実際に配線する」という、新しい数学を要�
 (選択項の一致性の確認)も残る。集計は10/24で変わらず(§4は0/2のまま)。
 
 コミット: `5653409e`。
+
+### 2026-09-04さらに続報: 訂正——gdV/gdF/gdTを精密な等式を保つ形に作り直し、f_idが完成
+
+前ターンで残していた`f_id`(GlueDataの対角成分`gdF i i`が同型であること)に取り組む中で、
+**設計上の不備を発見・修正**した。`gdV`/`gdF`/`gdT`は当初`exists_transitionIso`
+(`Nonempty`で包んだ弱い実存)を使って定義していたが、`f_id`の証明に要る「選ばれた座標`s`が
+単元である」という事実を、`Classical.choice`の不透明性のせいで`.choose`から引き出せない
+と判明した——`Nonempty`へ包む段階で「`e.hom''ᵁW = Z.basicOpen s`」という**精密な等式**が
+失われてしまうため(`obtain`と`.choose`が定義上等しくないことも実測で確認)。
+
+**修正**: `exists_transitionIso`ではなく、その等式をそのまま保持する
+`exists_transitionOpen_eq_basicOpen`の`.choose`を直接使うように`gdV`・`gdF`・`gdT`を
+定義し直した——`.choose_spec`から常に精密な等式が引けるので、`f_id`はもちろん`t_id`・
+`f_mono`等すべて同じ`.choose`から一貫して証明できる。
+
+**配管の教訓**(`tools/lean-idioms.md` #29): `def`の中で`obtain`を使って`Exists.
+choose_spec`を分解すると、生成される項に`And.rec`が残り、後で`unfold`+`simp`しようと
+してもスタックする——`let`+`.1`/`.2`射影を使えば`unfold`後に`simp`が構造の中へ
+入っていける。
+
+**新規完成**(★すべてsorry無し): `gdV_diag_eq_top`(候補片の対角成分は`⊤`)・`gdF_id`
+(f_idそのもの)・`Scheme.hom_image_top_eq_top`・`isIso_ι_of_eq_top`(一般的補助事実)・
+再証明した`gdT_id`・`gdF_mono`・`gdF_isOpenImmersion`・`gdF_hasPullback`。
+
+**これで`Scheme.GlueData`の`J`・`U`・`V`・`f`・`t`・`t_id`・`f_mono`・`f_open`・
+`f_hasPullback`・`f_id`(12フィールド中10個)がすべて完成した**。残るのは`t'`・
+`t_fac`・`cocycle`のみ。集計は10/24で変わらず(§4は0/2のまま)。
+
+コミット: `d787b8e3`(訂正・f_id完成)・`ef3b03ce`(lean-idioms #29)。
