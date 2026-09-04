@@ -1669,6 +1669,383 @@ theorem exists_mvPolynomial_quotient_ringHom_descend2 (A : Type) [CommRing A] [A
     simp only [e1]
     rw [e3, hc]
 
+open scoped TensorProduct in
+/-- `Subalgebra.inclusion`を2回昇格させた後で生成元代入をとったものと、
+1回で昇格させてから生成元代入をとったものが一致すること
+(`round_trip_promote_eq2`の非対称版・準備補題)——遷移同型の往復合成
+`aeval ev'(ev i)`をさらに1段昇格させる場面で使う。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem round_trip_promote_eq (A : Type) [CommRing A] [Algebra ℚ A]
+    (Rc Rk : FgSubalgebra ℚ ℝ) (hRck : Rc ≤ Rk) (R' : FgSubalgebra ℚ ℝ) (hRkR' : Rk ≤ R') (hRcR' : Rc ≤ R')
+    {ι ι' : Type} (ev : ι → MvPolynomial ι' (A ⊗[ℚ] Rc.1)) (ev' : ι' → MvPolynomial ι (A ⊗[ℚ] Rc.1)) (i : ι) :
+    MvPolynomial.aeval (fun j => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRcR')).toRingHom (ev' j))
+      (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRcR')).toRingHom
+        (ev i)) - MvPolynomial.X i =
+      MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRkR')).toRingHom
+        (MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRck)).toRingHom
+          (MvPolynomial.aeval ev' (ev i) - MvPolynomial.X i)) := by
+  have step1 : MvPolynomial.map
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRkR')).toRingHom
+      (MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRck)).toRingHom
+        (MvPolynomial.aeval ev' (ev i))) =
+      MvPolynomial.aeval (fun j => MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRcR')).toRingHom (ev' j))
+        (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRcR')).toRingHom
+          (ev i)) := by
+    rw [MvPolynomial.map_map, algebraTensorMap_inclusion_comp_inclusion, mvPolynomial_map_aeval_comm_general]
+  have step2 : MvPolynomial.map
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRkR')).toRingHom
+      (MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRck)).toRingHom
+        (MvPolynomial.X (σ := ι) i)) = MvPolynomial.X i := by
+    rw [MvPolynomial.map_map, algebraTensorMap_inclusion_comp_inclusion, MvPolynomial.map_X]
+  rw [map_sub, map_sub, step1, step2]
+
+open scoped TensorProduct in
+/-- **候補となる遷移写像の往復合成が、途中の精密化を経由しても等しい
+こと**——`ev`・`ev'`(共通の`Rc`レベル)を`Rck:Rc→Rk`経由でさらに昇格
+させた場合と、直接`Rc→R'`(`hRcR'`)で昇格させた場合とで、往復合成
+`aeval ev'(ev i) - X i`が一致する。`exists_round_trip_descend`が返す
+結果を、さらに別の精密化`R'`へ持ち上げる際に使う——「Rレベルの
+候補写像の往復が恒等であること」を最終的な共通段階`R'`へ集約する
+配線の核心。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem round_trip_promote_eq2 (A : Type) [CommRing A] [Algebra ℚ A]
+    (Rc Rk : FgSubalgebra ℚ ℝ) (hRck : Rc ≤ Rk) (R' : FgSubalgebra ℚ ℝ) (hRkR' : Rk ≤ R') (hRcR' : Rc ≤ R')
+    {ι ι' : Type} (ev : ι → MvPolynomial ι' (A ⊗[ℚ] Rc.1)) (ev' : ι' → MvPolynomial ι (A ⊗[ℚ] Rc.1)) (i : ι) :
+    MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRkR')).toRingHom
+      (MvPolynomial.aeval (fun j => MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRck)).toRingHom (ev' j))
+        (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRck)).toRingHom
+          (ev i)) - MvPolynomial.X i) =
+      MvPolynomial.aeval (fun j => MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRcR')).toRingHom (ev' j))
+        (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRcR')).toRingHom
+          (ev i)) - MvPolynomial.X i := by
+  have step1 : MvPolynomial.map
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRkR')).toRingHom
+      (MvPolynomial.aeval (fun j => MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRck)).toRingHom (ev' j))
+        (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRck)).toRingHom
+          (ev i))) =
+      MvPolynomial.aeval (fun j => MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRcR')).toRingHom (ev' j))
+        (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRcR')).toRingHom
+          (ev i)) := by
+    rw [mvPolynomial_map_aeval_comm_general, MvPolynomial.map_map, algebraTensorMap_inclusion_comp_inclusion]
+    congr 1
+    congr 1
+    funext j
+    rw [MvPolynomial.map_map, algebraTensorMap_inclusion_comp_inclusion]
+  rw [map_sub, MvPolynomial.map_X, step1]
+
+open scoped TensorProduct in
+/-- **遷移写像の候補の往復合成が、既知のℝレベルの恒等性からRレベルへ
+構成的に降りる**——`ψ`・`ψ'`(ℝレベル)の往復合成`aeval ψ'(ψ i) - X i`が
+`q`の関係式イデアルに属するなら(既知)、`ev`・`ev'`(共通の`Rc`レベル、
+`ψ`・`ψ'`をそれぞれ再現する)自身の往復合成も、ある共通のさらなる
+精密化`R'`で同じイデアルに属する。`exists_mem_ideal_span_range_
+descend`(有限個の`i`ごとに個別に適用)+`exists_fgSubalgebra_
+upperBound`(それらの精密化を単一の`R'`へ合流)を組み合わせる。
+
+`exists_mvPolynomial_quotient_ringEquiv_descend`で、遷移写像の候補が
+実際に同型であることを示す核心部品の1つ。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_round_trip_descend (A : Type) [CommRing A] [Algebra ℚ A]
+    (R Rc : FgSubalgebra ℚ ℝ) (hR : R ≤ Rc) {ι ι' κ : Type} [Fintype ι] [Fintype κ]
+    (q : κ → MvPolynomial ι (A ⊗[ℚ] R.1))
+    (ev : ι → MvPolynomial ι' (A ⊗[ℚ] Rc.1)) (ev' : ι' → MvPolynomial ι (A ⊗[ℚ] Rc.1))
+    (ψ : ι → MvPolynomial ι' (A ⊗[ℚ] ℝ)) (ψ' : ι' → MvPolynomial ι (A ⊗[ℚ] ℝ))
+    (hev : ∀ i, MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val Rc.1)).toRingHom
+        (ev i) = ψ i)
+    (hev' : ∀ j, MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val Rc.1)).toRingHom
+        (ev' j) = ψ' j)
+    (hround : ∀ i, MvPolynomial.aeval ψ' (ψ i) - MvPolynomial.X i ∈
+      Ideal.span (Set.range (fun k => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom (q k)))) :
+    ∃ (R' : FgSubalgebra ℚ ℝ) (hRc : Rc ≤ R'),
+      ∀ i, MvPolynomial.aeval (fun j => MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRc)).toRingHom (ev' j))
+          (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRc)).toRingHom
+            (ev i)) - MvPolynomial.X i ∈
+        Ideal.span (Set.range (fun k => MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion (hR.trans hRc))).toRingHom (q k))) := by
+  classical
+  have hmemRc : ∀ i, MvPolynomial.map
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val Rc.1)).toRingHom
+      (MvPolynomial.aeval ev' (ev i) - MvPolynomial.X i) ∈
+      Ideal.span (Set.range (fun k => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom (q k))) := by
+    intro i
+    rw [map_sub, mvPolynomial_map_aeval_comm]
+    rw [show (fun j => MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val Rc.1)).toRingHom
+        (ev' j)) = ψ' from funext hev', hev, MvPolynomial.map_X]
+    exact hround i
+  have hmemRc' : ∀ i, MvPolynomial.map
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val Rc.1)).toRingHom
+      (MvPolynomial.aeval ev' (ev i) - MvPolynomial.X i) ∈
+      Ideal.span (Set.range (fun k => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val Rc.1)).toRingHom
+        (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR)).toRingHom
+          (q k)))) := by
+    intro i
+    have hspan : Set.range (fun k => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val Rc.1)).toRingHom
+        (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR)).toRingHom
+          (q k))) = Set.range (fun k => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom (q k)) := by
+      apply congrArg Set.range
+      funext k
+      rw [MvPolynomial.map_map, algebraTensorMap_val_comp_inclusion]
+    rw [hspan]
+    exact hmemRc i
+  choose Rk hRck hmemk using fun i => exists_mem_ideal_span_range_descend A Rc
+    (fun k => MvPolynomial.map
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR)).toRingHom (q k))
+    (MvPolynomial.aeval ev' (ev i) - MvPolynomial.X i) (hmemRc' i)
+  obtain ⟨R₀', hR₀'spec⟩ := exists_fgSubalgebra_upperBound (Finset.univ : Finset ι) Rk
+  obtain ⟨R', hRcR', hR₀'R'⟩ := exists_fgSubalgebra_upperBound2 Rc R₀'
+  have hRkR' : ∀ i, Rk i ≤ R' := fun i => (hR₀'spec i (Finset.mem_univ i)).trans hR₀'R'
+  refine ⟨R', hRcR', ?_⟩
+  intro i
+  have hpromote := mem_ideal_span_range_promote A (hRkR' i) _ _ (hmemk i)
+  rw [Ideal.mem_span_range_iff_exists_fun] at hpromote ⊢
+  obtain ⟨c, hc⟩ := hpromote
+  refine ⟨c, ?_⟩
+  have e1 : ∀ k, MvPolynomial.map
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion (hR.trans hRcR'))).toRingHom (q k) =
+      MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion (hRkR' i))).toRingHom
+        (MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion (hRck i))).toRingHom
+          (MvPolynomial.map
+            (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR)).toRingHom (q k))) := by
+    intro k
+    rw [MvPolynomial.map_map, MvPolynomial.map_map, algebraTensorMap_inclusion_comp_inclusion,
+      algebraTensorMap_inclusion_comp_inclusion]
+  simp only [e1]
+  rw [round_trip_promote_eq A Rc (Rk i) (hRck i) R' (hRkR' i) hRcR' ev ev' i, hc]
+
+set_option maxHeartbeats 4000000 in
+open scoped TensorProduct in
+/-- **「候補の遷移写像が実際に同型であること」の完成——項目(d)の
+第二段の最終形**: `R`レベルの片1(`q`、生成元`ι`)と`R₂`レベルの片2
+(`q₂`、生成元`ι'`)の間の、既知のℝレベルの相互に逆な遷移写像
+(`ψ`・`ψ'`、往復合成が恒等になる)から出発し、ある共通の精密化`R'`上の
+候補写像`ev`・`ev'`が、`ψ`・`ψ'`を再現し、互いの関係式を互いのイデアル
+へ写し、かつ**往復合成が実際に恒等射であること**まで構成的に示す。
+
+`exists_mvPolynomial_quotient_ringHom_descend2`を両方向(`ψ`用・`ψ'`用)
+に適用して`ev`・`ev'`の存在部分と関係式部分を得たのち、共通の精密化
+`Rc`へ合流させ、その上で`exists_round_trip_descend`を両方向(`hround1`・
+`hround2`用)に適用して往復合成の恒等性を得て、最後にすべてを単一の
+`R'`へ揃える——`transitionElem`/`gdT`/`cocycle`のRレベル版に相当する
+遷移**同型**データの降下が、これで完全に構成的に証明された。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_mvPolynomial_quotient_ringEquiv_descend (A : Type) [CommRing A] [Algebra ℚ A]
+    (R R₂ : FgSubalgebra ℚ ℝ) {ι κ ι' κ' : Type} [Fintype ι] [Fintype ι'] [Fintype κ] [Fintype κ']
+    (q : κ → MvPolynomial ι (A ⊗[ℚ] R.1)) (q₂ : κ' → MvPolynomial ι' (A ⊗[ℚ] R₂.1))
+    (ψ : ι → MvPolynomial ι' (A ⊗[ℚ] ℝ)) (ψ' : ι' → MvPolynomial ι (A ⊗[ℚ] ℝ))
+    (hψ : ∀ k, MvPolynomial.aeval ψ
+        (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom (q k)) ∈
+      Ideal.span (Set.range (fun k' => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R₂.1)).toRingHom (q₂ k'))))
+    (hψ' : ∀ k', MvPolynomial.aeval ψ'
+        (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R₂.1)).toRingHom (q₂ k')) ∈
+      Ideal.span (Set.range (fun k => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom (q k))))
+    (hround1 : ∀ i, MvPolynomial.aeval ψ' (ψ i) - MvPolynomial.X i ∈
+      Ideal.span (Set.range (fun k => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom (q k))))
+    (hround2 : ∀ j, MvPolynomial.aeval ψ (ψ' j) - MvPolynomial.X j ∈
+      Ideal.span (Set.range (fun k' => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R₂.1)).toRingHom (q₂ k')))) :
+    ∃ (R' : FgSubalgebra ℚ ℝ) (hR : R ≤ R') (hR₂ : R₂ ≤ R')
+      (ev : ι → MvPolynomial ι' (A ⊗[ℚ] R'.1)) (ev' : ι' → MvPolynomial ι (A ⊗[ℚ] R'.1)),
+      (∀ i, MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)).toRingHom (ev i)
+        = ψ i) ∧
+      (∀ j, MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)).toRingHom (ev' j)
+        = ψ' j) ∧
+      (∀ k, MvPolynomial.aeval ev (MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR)).toRingHom (q k)) ∈
+        Ideal.span (Set.range (fun k' => MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR₂)).toRingHom (q₂ k')))) ∧
+      (∀ k', MvPolynomial.aeval ev' (MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR₂)).toRingHom (q₂ k')) ∈
+        Ideal.span (Set.range (fun k => MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR)).toRingHom (q k)))) ∧
+      (∀ i, MvPolynomial.aeval ev' (ev i) - MvPolynomial.X i ∈
+        Ideal.span (Set.range (fun k => MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR)).toRingHom (q k)))) ∧
+      (∀ j, MvPolynomial.aeval ev (ev' j) - MvPolynomial.X j ∈
+        Ideal.span (Set.range (fun k' => MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR₂)).toRingHom (q₂ k')))) := by
+  classical
+  obtain ⟨Ra, hRRa, hR₂Ra, ev_a, hev_a, hq_a⟩ := exists_mvPolynomial_quotient_ringHom_descend2 A R R₂ q q₂ ψ hψ
+  obtain ⟨Rb, hR₂Rb, hRRb, ev'_b, hev'_b, hq₂_b⟩ := exists_mvPolynomial_quotient_ringHom_descend2 A R₂ R q₂ q ψ' hψ'
+  obtain ⟨Rc, hRaRc, hRbRc⟩ := exists_fgSubalgebra_upperBound2 Ra Rb
+  set ev_c : ι → MvPolynomial ι' (A ⊗[ℚ] Rc.1) := fun i => MvPolynomial.map
+    (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRaRc)).toRingHom (ev_a i) with hev_c_def
+  set ev'_c : ι' → MvPolynomial ι (A ⊗[ℚ] Rc.1) := fun j => MvPolynomial.map
+    (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRbRc)).toRingHom (ev'_b j) with hev'_c_def
+  have hev_c : ∀ i, MvPolynomial.map
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val Rc.1)).toRingHom (ev_c i) = ψ i := by
+    intro i
+    rw [hev_c_def, MvPolynomial.map_map, algebraTensorMap_val_comp_inclusion]
+    exact hev_a i
+  have hev'_c : ∀ j, MvPolynomial.map
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val Rc.1)).toRingHom (ev'_c j) = ψ' j := by
+    intro j
+    rw [hev'_c_def, MvPolynomial.map_map, algebraTensorMap_val_comp_inclusion]
+    exact hev'_b j
+  have hq_c : ∀ k, MvPolynomial.aeval ev_c (MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion (hRRa.trans hRaRc))).toRingHom (q k)) ∈
+      Ideal.span (Set.range (fun k' => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion (hR₂Ra.trans hRaRc))).toRingHom
+        (q₂ k'))) := by
+    intro k
+    have hp := mem_ideal_span_range_promote A hRaRc _ _ (hq_a k)
+    have eL : MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRaRc)).toRingHom
+        (MvPolynomial.aeval ev_a (MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRRa)).toRingHom (q k))) =
+        MvPolynomial.aeval ev_c (MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion (hRRa.trans hRaRc))).toRingHom (q k)) := by
+      rw [mvPolynomial_map_aeval_comm_general, MvPolynomial.map_map, algebraTensorMap_inclusion_comp_inclusion]
+    have eR : Set.range (fun k' => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRaRc)).toRingHom
+        (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR₂Ra)).toRingHom
+          (q₂ k'))) = Set.range (fun k' => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion (hR₂Ra.trans hRaRc))).toRingHom
+        (q₂ k')) := by
+      apply congrArg Set.range
+      funext k'
+      rw [MvPolynomial.map_map, algebraTensorMap_inclusion_comp_inclusion]
+    rw [eL, eR] at hp
+    exact hp
+  have hq₂_c : ∀ k', MvPolynomial.aeval ev'_c (MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion (hR₂Rb.trans hRbRc))).toRingHom
+        (q₂ k')) ∈
+      Ideal.span (Set.range (fun k => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion (hRRb.trans hRbRc))).toRingHom
+        (q k))) := by
+    intro k'
+    have hp := mem_ideal_span_range_promote A hRbRc _ _ (hq₂_b k')
+    have eL : MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRbRc)).toRingHom
+        (MvPolynomial.aeval ev'_b (MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR₂Rb)).toRingHom (q₂ k'))) =
+        MvPolynomial.aeval ev'_c (MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion (hR₂Rb.trans hRbRc))).toRingHom
+          (q₂ k')) := by
+      rw [mvPolynomial_map_aeval_comm_general, MvPolynomial.map_map, algebraTensorMap_inclusion_comp_inclusion]
+    have eR : Set.range (fun k => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRbRc)).toRingHom
+        (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hRRb)).toRingHom
+          (q k))) = Set.range (fun k => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion (hRRb.trans hRbRc))).toRingHom
+        (q k)) := by
+      apply congrArg Set.range
+      funext k
+      rw [MvPolynomial.map_map, algebraTensorMap_inclusion_comp_inclusion]
+    rw [eL, eR] at hp
+    exact hp
+  obtain ⟨R'₁, hRcR'₁, hround1'⟩ := exists_round_trip_descend A R Rc (hRRa.trans hRaRc) q ev_c ev'_c ψ ψ' hev_c hev'_c
+    hround1
+  obtain ⟨R'₂, hRcR'₂, hround2'⟩ := exists_round_trip_descend A R₂ Rc (hR₂Rb.trans hRbRc) q₂ ev'_c ev_c ψ' ψ hev'_c
+    hev_c hround2
+  obtain ⟨R', hR'₁R', hR'₂R'⟩ := exists_fgSubalgebra_upperBound2 R'₁ R'₂
+  refine ⟨R', hRRa.trans (hRaRc.trans (hRcR'₁.trans hR'₁R')), hR₂Rb.trans (hRbRc.trans (hRcR'₂.trans hR'₂R')),
+    fun i => MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A)
+      (Subalgebra.inclusion (hRcR'₁.trans hR'₁R'))).toRingHom (ev_c i),
+    fun j => MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A)
+      (Subalgebra.inclusion (hRcR'₁.trans hR'₁R'))).toRingHom (ev'_c j), ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · intro i
+    rw [MvPolynomial.map_map, algebraTensorMap_val_comp_inclusion]
+    exact hev_c i
+  · intro j
+    rw [MvPolynomial.map_map, algebraTensorMap_val_comp_inclusion]
+    exact hev'_c j
+  · intro k
+    have hp := mem_ideal_span_range_promote A (hRcR'₁.trans hR'₁R') _ _ (hq_c k)
+    have eL : MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A)
+          (Subalgebra.inclusion (hRcR'₁.trans hR'₁R'))).toRingHom
+        (MvPolynomial.aeval ev_c (MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion (hRRa.trans hRaRc))).toRingHom (q k))) =
+        MvPolynomial.aeval (fun i => MvPolynomial.map
+            (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion (hRcR'₁.trans hR'₁R'))).toRingHom
+            (ev_c i))
+          (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A)
+            (Subalgebra.inclusion (hRRa.trans (hRaRc.trans (hRcR'₁.trans hR'₁R'))))).toRingHom (q k)) := by
+      rw [mvPolynomial_map_aeval_comm_general, MvPolynomial.map_map, algebraTensorMap_inclusion_comp_inclusion]
+    have eR : Set.range (fun k' => MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A)
+          (Subalgebra.inclusion (hRcR'₁.trans hR'₁R'))).toRingHom
+        (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A)
+          (Subalgebra.inclusion (hR₂Ra.trans hRaRc))).toRingHom (q₂ k'))) = Set.range (fun k' =>
+        MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A)
+          (Subalgebra.inclusion (hR₂Rb.trans (hRbRc.trans (hRcR'₂.trans hR'₂R'))))).toRingHom (q₂ k')) := by
+      apply congrArg Set.range
+      funext k'
+      rw [MvPolynomial.map_map, algebraTensorMap_inclusion_comp_inclusion]
+    rw [eL, eR] at hp
+    exact hp
+  · intro k'
+    have hp := mem_ideal_span_range_promote A (hRcR'₂.trans hR'₂R') _ _ (hq₂_c k')
+    have eL : MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A)
+          (Subalgebra.inclusion (hRcR'₂.trans hR'₂R'))).toRingHom
+        (MvPolynomial.aeval ev'_c (MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion (hR₂Rb.trans hRbRc))).toRingHom
+          (q₂ k'))) =
+        MvPolynomial.aeval (fun j => MvPolynomial.map
+            (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion (hRcR'₁.trans hR'₁R'))).toRingHom
+            (ev'_c j))
+          (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A)
+            (Subalgebra.inclusion (hR₂Rb.trans (hRbRc.trans (hRcR'₂.trans hR'₂R'))))).toRingHom (q₂ k')) := by
+      rw [mvPolynomial_map_aeval_comm_general, MvPolynomial.map_map, algebraTensorMap_inclusion_comp_inclusion]
+    have eR : Set.range (fun k => MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A)
+          (Subalgebra.inclusion (hRcR'₂.trans hR'₂R'))).toRingHom
+        (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A)
+          (Subalgebra.inclusion (hRRb.trans hRbRc))).toRingHom (q k))) = Set.range (fun k =>
+        MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A)
+          (Subalgebra.inclusion (hRRa.trans (hRaRc.trans (hRcR'₁.trans hR'₁R'))))).toRingHom (q k)) := by
+      apply congrArg Set.range
+      funext k
+      rw [MvPolynomial.map_map, algebraTensorMap_inclusion_comp_inclusion]
+    rw [eL, eR] at hp
+    exact hp
+  · intro i
+    have hp := mem_ideal_span_range_promote A hR'₁R' _ _ (hround1' i)
+    rw [round_trip_promote_eq2 A Rc R'₁ hRcR'₁ R' hR'₁R' (hRcR'₁.trans hR'₁R') ev_c ev'_c i] at hp
+    have eR : Set.range (fun k => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR'₁R')).toRingHom
+        (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A)
+          (Subalgebra.inclusion ((hRRa.trans hRaRc).trans hRcR'₁))).toRingHom (q k))) = Set.range (fun k =>
+        MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A)
+          (Subalgebra.inclusion (hRRa.trans (hRaRc.trans (hRcR'₁.trans hR'₁R'))))).toRingHom (q k)) := by
+      apply congrArg Set.range
+      funext k
+      rw [MvPolynomial.map_map, algebraTensorMap_inclusion_comp_inclusion]
+    rwa [eR] at hp
+  · intro j
+    have hp := mem_ideal_span_range_promote A hR'₂R' _ _ (hround2' j)
+    rw [round_trip_promote_eq2 A Rc R'₂ hRcR'₂ R' hR'₂R' (hRcR'₂.trans hR'₂R') ev'_c ev_c j] at hp
+    have eR : Set.range (fun k' => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR'₂R')).toRingHom
+        (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A)
+          (Subalgebra.inclusion ((hR₂Rb.trans hRbRc).trans hRcR'₂))).toRingHom (q₂ k'))) = Set.range (fun k' =>
+        MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A)
+          (Subalgebra.inclusion (hR₂Rb.trans (hRbRc.trans (hRcR'₂.trans hR'₂R'))))).toRingHom (q₂ k')) := by
+      apply congrArg Set.range
+      funext k'
+      rw [MvPolynomial.map_map, algebraTensorMap_inclusion_comp_inclusion]
+    rwa [eR] at hp
+
 /-! ## `StandardEtalePair.Ring` の元を有限段階へ降ろす——作業単位1(b)の完成
 
 `exists_fg_subalgebra_tensor_bivariate_finset`を`StandardEtalePair.Ring`
