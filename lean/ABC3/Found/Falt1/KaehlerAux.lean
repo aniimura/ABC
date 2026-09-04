@@ -2938,4 +2938,135 @@ theorem falt1ModuleFiniteV1Wn1
   haveI := falt1ModuleFiniteV0Wn1 π n hnpos hn' hπne0' hprime' hnotsq'
   exact Module.Finite.of_restrictScalars_finite V0 _ _
 
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 1000000 in
+/-- `differentIdeal_tower_diamond` の `hsep`(`Algebra.IsSeparable (FractionRing V0)
+(FractionRing Wn1)`)を解決する。`FractionRing.liftAlgebra V0 (FractionRing Wn1)` で
+作った `Algebra` instance と、その instance に対する separability の証明を**一緒に**返す
+(`Σ'` で束ねる——`theorem` ではなく `def` にしたのは、戻り値の型が `Prop` ではなく
+`Type` だから)。呼び出し側は `.1` を `letI` で登録すれば `.2` がそのまま使える。
+
+証明の道筋: `Algebra.IsSeparable (FractionRing V0) (FractionRing Wn)`(仮定)と
+`Algebra.IsSeparable (FractionRing Wn) (AdjoinRoot gK)`(`gK` の separability から)を
+`Algebra.IsSeparable.trans` で繋ぐ。ただし繋ぐ先は `FractionRing Wn1`(`AdjoinRoot gK`
+ではない)なので、`FractionRing Wn1 ≃ₐ[Wn1] AdjoinRoot gK`
+(`IsLocalization.algEquiv`)を V0-level・Wn-level それぞれで「両立する
+`FractionRing.liftAlgebra` instance」に対して `AlgEquiv.ofRingEquiv` で持ち上げ、
+`IsLocalization.ringHom_ext` で一意性から可換性を出す、という二段階の「diamond」を
+どちらも `rfl`(部分体への埋め込みが `Subalgebra` の値射影と一致)+
+`IsScalarTower.algebraMap_apply` の pointwise な書き換えで解消する。 -/
+noncomputable def falt1_hsep_bundled
+    {V0 Wn : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    (π : V0) (n : ℕ) (hnpos : 0 < n)
+    (hn' : (n : FractionRing Wn) ≠ 0)
+    (hπne0' : algebraMap Wn (FractionRing Wn) (algebraMap V0 Wn π) ≠ 0)
+    (hprime' : (Ideal.span ({algebraMap V0 Wn π} : Set Wn)).IsPrime)
+    (hnotsq' : algebraMap V0 Wn π ∉ (Ideal.span ({algebraMap V0 Wn π} : Set Wn)) ^ 2)
+    (hinjV0Wn : Function.Injective (algebraMap V0 Wn))
+    [Algebra (FractionRing V0) (FractionRing Wn)]
+    [IsScalarTower V0 (FractionRing V0) (FractionRing Wn)]
+    [Algebra.IsSeparable (FractionRing V0) (FractionRing Wn)] :
+    Σ' (inst : Algebra (FractionRing V0) (FractionRing (integralClosure Wn (AdjoinRoot
+          (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+            (algebraMap Wn (FractionRing Wn))))))),
+      @Algebra.IsSeparable (FractionRing V0) (FractionRing (integralClosure Wn (AdjoinRoot
+          (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+            (algebraMap Wn (FractionRing Wn)))))) _ _ inst := by
+  set π' : Wn := algebraMap V0 Wn π with hπ'def
+  set g : Polynomial Wn := Polynomial.X ^ n - Polynomial.C π' with hgdef
+  set gK : Polynomial (FractionRing Wn) := g.map (algebraMap Wn (FractionRing Wn)) with hgKdef
+  have hirr : Irreducible gK :=
+    ABC3.Found.Falt1.eisenstein_X_pow_sub_C_irreducible_map π' n hnpos hprime' hnotsq'
+  haveI : Fact (Irreducible gK) := ⟨hirr⟩
+  have hmonicK : gK.Monic := (Polynomial.monic_X_pow_sub_C π' hnpos.ne').map _
+  have hsepK : gK.Separable := by
+    have hmapeq : gK = Polynomial.X ^ n - Polynomial.C (algebraMap Wn (FractionRing Wn) π') := by
+      rw [hgKdef, hgdef]; simp
+    rw [hmapeq]; exact Polynomial.separable_X_pow_sub_C _ hn' hπne0'
+  haveI : Module.Finite (FractionRing Wn) (AdjoinRoot gK) := hmonicK.finite_adjoinRoot
+  haveI : FiniteDimensional (FractionRing Wn) (AdjoinRoot gK) := ‹Module.Finite _ _›
+  haveI hsepAdjoin : Algebra.IsSeparable (FractionRing Wn) (AdjoinRoot gK) :=
+    ABC3.Found.Falt1.algIsSeparable_adjoinRoot_of_separable _ hmonicK hsepK
+  haveI : IsDedekindDomain (integralClosure Wn (AdjoinRoot gK)) := by infer_instance
+  haveI hFR : IsFractionRing (integralClosure Wn (AdjoinRoot gK)) (AdjoinRoot gK) :=
+    integralClosure.isFractionRing_of_finite_extension (A := Wn) (FractionRing Wn) (AdjoinRoot gK)
+  set Wn1 := integralClosure Wn (AdjoinRoot gK) with hWn1def
+  have hinjV0Wn1 : Function.Injective (algebraMap V0 Wn1) := by
+    rw [IsScalarTower.algebraMap_eq V0 Wn Wn1]
+    simp only [RingHom.coe_comp]
+    apply Function.Injective.comp _ hinjV0Wn
+    show Function.Injective (algebraMap Wn Wn1)
+    intro a b hab
+    have heq : (algebraMap Wn (AdjoinRoot gK)) a = (algebraMap Wn (AdjoinRoot gK)) b := by
+      have := congrArg (Subtype.val) hab
+      simpa using this
+    have hinj2 : Function.Injective (algebraMap Wn (AdjoinRoot gK)) := by
+      rw [IsScalarTower.algebraMap_eq Wn (FractionRing Wn) (AdjoinRoot gK)]
+      exact (algebraMap (FractionRing Wn) (AdjoinRoot gK)).injective.comp
+        (IsFractionRing.injective Wn (FractionRing Wn))
+    exact hinj2 heq
+  haveI hFaithV0 : FaithfulSMul V0 (FractionRing Wn1) := by
+    rw [faithfulSMul_iff_algebraMap_injective]
+    rw [IsScalarTower.algebraMap_eq V0 Wn1 (FractionRing Wn1)]
+    exact (IsFractionRing.injective Wn1 (FractionRing Wn1)).comp hinjV0Wn1
+  letI algFRWn1 : Algebra (FractionRing V0) (FractionRing Wn1) :=
+    FractionRing.liftAlgebra V0 (FractionRing Wn1)
+  haveI hSTcanon : IsScalarTower V0 (FractionRing V0) (FractionRing Wn1) := by infer_instance
+  have e_Wn1 : FractionRing Wn1 ≃ₐ[Wn1] AdjoinRoot gK :=
+    IsLocalization.algEquiv (nonZeroDivisors Wn1) (FractionRing Wn1) (AdjoinRoot gK)
+  have h2' : (algebraMap Wn1 (AdjoinRoot gK)).comp (algebraMap Wn Wn1) = algebraMap Wn (AdjoinRoot gK) := by
+    ext w; show ((algebraMap Wn Wn1) w : AdjoinRoot gK) = algebraMap Wn (AdjoinRoot gK) w; rfl
+  haveI hFaithWn : FaithfulSMul Wn (FractionRing Wn1) := by
+    rw [faithfulSMul_iff_algebraMap_injective]
+    rw [IsScalarTower.algebraMap_eq Wn Wn1 (FractionRing Wn1)]
+    refine (IsFractionRing.injective Wn1 (FractionRing Wn1)).comp ?_
+    intro a b hab
+    have heq : (algebraMap Wn (AdjoinRoot gK)) a = (algebraMap Wn (AdjoinRoot gK)) b := by
+      have := congrArg (Subtype.val) hab; simpa using this
+    have hinj2 : Function.Injective (algebraMap Wn (AdjoinRoot gK)) := by
+      rw [IsScalarTower.algebraMap_eq Wn (FractionRing Wn) (AdjoinRoot gK)]
+      exact (algebraMap (FractionRing Wn) (AdjoinRoot gK)).injective.comp
+        (IsFractionRing.injective Wn (FractionRing Wn))
+    exact hinj2 heq
+  letI algFRWn_Wn1 : Algebra (FractionRing Wn) (FractionRing Wn1) :=
+    FractionRing.liftAlgebra Wn (FractionRing Wn1)
+  haveI hSTWn : IsScalarTower Wn (FractionRing Wn) (FractionRing Wn1) := by infer_instance
+  have hringhom_eq' : ∀ w : Wn, (e_Wn1.toRingHom) (algebraMap (FractionRing Wn) (FractionRing Wn1)
+        (algebraMap Wn (FractionRing Wn) w)) = algebraMap (FractionRing Wn) (AdjoinRoot gK)
+        (algebraMap Wn (FractionRing Wn) w) := by
+    intro w
+    rw [← IsScalarTower.algebraMap_apply Wn (FractionRing Wn) (FractionRing Wn1)]
+    rw [← IsScalarTower.algebraMap_apply Wn (FractionRing Wn) (AdjoinRoot gK)]
+    rw [IsScalarTower.algebraMap_apply Wn Wn1 (FractionRing Wn1)]
+    show e_Wn1 (algebraMap Wn1 (FractionRing Wn1) (algebraMap Wn Wn1 w)) = algebraMap Wn (AdjoinRoot gK) w
+    rw [e_Wn1.commutes]
+    exact congrFun (congrArg DFunLike.coe h2') w
+  have hringhom_eq'' : (e_Wn1.toRingHom).comp (algebraMap (FractionRing Wn) (FractionRing Wn1))
+      = algebraMap (FractionRing Wn) (AdjoinRoot gK) :=
+    IsLocalization.ringHom_ext (nonZeroDivisors Wn) (RingHom.ext hringhom_eq')
+  have e_Wn1'' : FractionRing Wn1 ≃ₐ[FractionRing Wn] AdjoinRoot gK :=
+    AlgEquiv.ofRingEquiv (f := e_Wn1.toRingEquiv) (fun x => by
+      have := congrFun (congrArg DFunLike.coe hringhom_eq'') x; simpa using this)
+  haveI hsepFRWn1 : Algebra.IsSeparable (FractionRing Wn) (FractionRing Wn1) :=
+    (AlgEquiv.Algebra.isSeparable_iff e_Wn1'').mpr hsepAdjoin
+  haveI hSTV0Wn1 : IsScalarTower V0 Wn (FractionRing Wn1) := by infer_instance
+  have hSTfull_pt : ∀ v : V0,
+      algebraMap (FractionRing V0) (FractionRing Wn1) (algebraMap V0 (FractionRing V0) v)
+        = algebraMap (FractionRing Wn) (FractionRing Wn1)
+            (algebraMap (FractionRing V0) (FractionRing Wn) (algebraMap V0 (FractionRing V0) v)) := by
+    intro v
+    rw [← IsScalarTower.algebraMap_apply V0 (FractionRing V0) (FractionRing Wn1)]
+    rw [← IsScalarTower.algebraMap_apply V0 (FractionRing V0) (FractionRing Wn)]
+    rw [IsScalarTower.algebraMap_apply V0 Wn (FractionRing Wn)]
+    rw [← IsScalarTower.algebraMap_apply Wn (FractionRing Wn) (FractionRing Wn1)]
+    exact IsScalarTower.algebraMap_apply V0 Wn (FractionRing Wn1) v
+  haveI hSTfull : IsScalarTower (FractionRing V0) (FractionRing Wn) (FractionRing Wn1) := by
+    apply IsScalarTower.of_algebraMap_eq'
+    apply IsLocalization.ringHom_ext (nonZeroDivisors V0)
+    exact RingHom.ext hSTfull_pt
+  haveI hsepFinal : Algebra.IsSeparable (FractionRing V0) (FractionRing Wn1) :=
+    Algebra.IsSeparable.trans (FractionRing V0) (FractionRing Wn) (FractionRing Wn1)
+  exact ⟨algFRWn1, hsepFinal⟩
+
 end ABC3.Found.Falt1
