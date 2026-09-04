@@ -646,3 +646,27 @@ away_mul`(★sorry無し、今も有効な補題として残る)は無駄では�
 その先の「もう半分」の追求自体が不要だった。
 
 コミット: `27ba8b79`(訂正の記録、corrhyp-goal.md)。
+
+★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(作業単位1(b)へ着手、
+`StandardEtalePair.Ring`の元を降ろす2変数多項式版descentが完成、
+集計10/24で変わらず)。`exists_fg_subalgebra_tensor_bivariate_finset`
+(`FieldLimit.lean`、★sorry無し)——`Polynomial (Polynomial (A⊗[ℚ]ℝ))`
+(`StandardEtalePair.Ring`が経由する`Bivariate`多項式環そのもの)の
+有限個の元を共通の`R : FgSubalgebra ℚ ℝ`へ同時に降ろす、
+`exists_fg_subalgebra_tensor_finset`の2変数版。`lake build`で
+ABC3全体(6590 jobs)0エラーを確認。
+
+配管の教訓(`tools/lean-idioms.md` #26): `Polynomial.mapRingHom f`の
+`FunLike`適用と`.map f`(dot記法)は定義上等しい(`rfl`で確認済み)のに
+構文上一致せず`rw`/`simp_rw`が刺さらない——`have hcoe : ⇑(mapRingHom φ)
+= Polynomial.map φ := rfl`を明示的に挟んで解決。
+
+**残る接続**(未着手): `StandardEtalePair.Ring`は`Bivariate`多項式環の商
+なので、商から代表元への持ち上げ→この補題で係数降下→有限段階側でも
+`Ideal.Quotient.mk`を適用、という一手で比較射の分母`g_l`等の実際の元を
+降ろせるはず。ただし`standardEtalePairRingBaseChange`自体は
+`equivMvPolynomialQuotient`経由で組み立てられているため、両者の往復
+(`Bivariate.equivMvPolynomial`)も必要——次の一手として記録。
+
+コミット: `8c96fa00`(bivariate descent完成)・`8e78ac0f`(記録)・
+`5e2cb5ec`(lean-idioms #26)。
