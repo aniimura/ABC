@@ -1403,4 +1403,98 @@ theorem lubinTateActionAtTorsionPoint_eq_zero_iff_dvd_of_mem_iteratedLubinTatePs
     rw [mul_comm]
     exact pi_pow_action_action_eq_zero K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem c
 
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★**単位は原始的な捩れ点を原始的な
+捩れ点へ送る**: `u∈(𝒪_K)^×`・`x`が`ψ_n`の根(原始的なπ^n-捩れ点)
+ならば`u·x`も`ψ_n`の根。`(𝒪_K)^×`が`ψ_nの根`の集合に作用することの
+確認——`Gal(K(Λ_n)/K)≅(𝒪_K/π^n)^×`へ向けて、`(𝒪_K/π^n)^×`の
+軌道が「原始的な捩れ点全体」に収まることの布石。
+
+証明の筋: `u·x∈Λ_n`(既出`lubinTateActionAtTorsionPoint_mem`)は
+自動。`u·x∉Λ_{n-1}`は背理法——`u·x∈Λ_{n-1}`と仮定すると
+(`aeval_iteratedLubinTateDistinguished_eq_zero`と同じ`Polynomial.
+hom_eval₂`橋渡しで)`D_{n-1}(u·x)=0`(`adjoinIntegers K x`のレベル、
+`x`自身の座標系のまま)が出て、`[π^{n-1}]_f=D_{n-1}*U_{n-1}`から
+`(π^{n-1}*u)·x=0`、`lubinTateAction_mul`で単位`u`を約分(`u⁻¹`を
+掛けるだけ、`F_f`加法は不要)して`π^{n-1}·x=0`を得て
+`lubinTateActionAtTorsionPoint_pi_pow_pred_ne_zero_of_mem_
+iteratedLubinTatePsiTorsionPoints`に矛盾する——**新しい点`u·x`自身の
+`adjoinIntegers`を一切構築せず、`x`自身の座標系だけで閉じる**のが鍵
+(異なる点どうしの`adjoinIntegers`インスタンスを橋渡しする必要が
+無かった)。 -/
+theorem unit_action_mem_iteratedLubinTatePsiTorsionPoints
+    {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) (x : K.closure)
+    (hxψ : x ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    (hxn : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (u : (𝒪[K.carrier])ˣ) :
+    (↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem (u : 𝒪[K.carrier])) :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) ∈
+      iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn := by
+  haveI := completeSpace_adjoinIntegers K x
+  haveI := isLinearTopology_adjoinIntegers K x
+  haveI := continuousSMul_adjoinIntegers K x
+  set z := lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem (u : 𝒪[K.carrier])
+    with hz_def
+  have hyn : (↑(↑z : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) ∈
+      iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n :=
+    lubinTateActionAtTorsionPoint_mem K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem (u : 𝒪[K.carrier])
+  rw [← iteratedLubinTateTorsionPoints_sdiff_eq_iteratedLubinTatePsiTorsionPoints
+    K hq hπmax hπne0 f hf0 hf1 hf n hn, Finset.mem_sdiff]
+  refine ⟨hyn, fun hyn1 => ?_⟩
+  set g : adjoinIntegers K x →+* K.closure :=
+    (algebraMap (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) K.closure).comp
+      (algebraMap (adjoinIntegers K x) (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))
+    with hg_def
+  have hginj : Function.Injective g := fun a b h => Subtype.ext (Subtype.ext h)
+  rw [iteratedLubinTateTorsionPoints, Multiset.mem_toFinset, Polynomial.mem_roots'] at hyn1
+  obtain ⟨_, hyroot⟩ := hyn1
+  rw [Polynomial.IsRoot, Polynomial.eval_map] at hyroot
+  have hgz : g z = ↑(↑z : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := rfl
+  have hgcomp : g.comp (algebraMap (𝒪[K.carrier]) (adjoinIntegers K x)) =
+      algebraMap (𝒪[K.carrier]) K.closure := by
+    apply RingHom.ext; intro y; rfl
+  have haevalz0 : Polynomial.aeval z (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf (n - 1)) = 0 := by
+    apply hginj
+    have key := Polynomial.hom_eval₂ (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf (n - 1))
+      (algebraMap (𝒪[K.carrier]) (adjoinIntegers K x)) g z
+    rw [← Polynomial.aeval_def, hgcomp] at key
+    rw [key, map_zero, hgz]
+    exact hyroot
+  have hzero : lubinTateEvalAtPoint K x z
+      (hasEval_lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem (u : 𝒪[K.carrier]))
+      (LubinTateAction hq hπmax f hf0 hf1 hf (π ^ (n - 1))) = 0 := by
+    show PowerSeries.aeval _ (LubinTateAction hq hπmax f hf0 hf1 hf (π ^ (n - 1))) = 0
+    rw [LubinTateAction_pi_pow hq hπmax hπne0 f hf0 hf1 hf (n - 1),
+      iteratedLubinTate_eq_distinguished_mul_unit hq hπmax hπne0 f hf0 hf1 hf (n - 1),
+      map_mul, PowerSeries.aeval_coe, haevalz0, zero_mul]
+  have hmul := lubinTateAction_mul K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem (π ^ (n - 1)) (u : 𝒪[K.carrier])
+  have hprod0 : lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem
+      (π ^ (n - 1) * (u : 𝒪[K.carrier])) = 0 := hmul.symm.trans hzero
+  have hkey : lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem (π ^ (n - 1)) = 0 := by
+    have hmul2 := lubinTateAction_mul K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem
+      (↑u⁻¹ : 𝒪[K.carrier]) (π ^ (n - 1) * (u : 𝒪[K.carrier]))
+    rw [lubinTateEvalAtPoint_eq_zero_of_eq_zero K x
+      (hasEval_lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem
+        (π ^ (n - 1) * (u : 𝒪[K.carrier]))) hprod0
+      (LubinTateAction hq hπmax f hf0 hf1 hf (↑u⁻¹ : 𝒪[K.carrier]))
+      (constantCoeff_LubinTateAction hq hπmax f hf0 hf1 hf (↑u⁻¹ : 𝒪[K.carrier]))] at hmul2
+    have hcalc : (↑u⁻¹ : 𝒪[K.carrier]) * (π ^ (n - 1) * (u : 𝒪[K.carrier])) = π ^ (n - 1) := by
+      have heq2 : (↑u⁻¹ : 𝒪[K.carrier]) * (π ^ (n - 1) * (u : 𝒪[K.carrier])) =
+          π ^ (n - 1) * ((↑u⁻¹ : 𝒪[K.carrier]) * ↑u) := by ring
+      rw [heq2, Units.inv_mul, mul_one]
+    rw [hcalc] at hmul2
+    exact hmul2.symm
+  exact lubinTateActionAtTorsionPoint_pi_pow_pred_ne_zero_of_mem_iteratedLubinTatePsiTorsionPoints
+    K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hmem hxn hkey
+
 end ABC3.Found.PGC
