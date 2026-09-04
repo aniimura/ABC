@@ -609,6 +609,44 @@ mathlib での正確な組み立て方は未確認)。
     実際に検証する(3b との接続、まだ着手していない)、(c) `Ω¹_{V1/V0}`
     が `pushoutKaehlerSplit` 系の枠組みに乗ることの確認(生成元の個数
     `d+1` との対応)。
+
+    ★★★★★★★★★★★★★★★★★★★★★★2026-09-04、**単項生成性
+    (monogenicity)も完成した**(commit `3e1f9798`)——`falt1CokernelLengthEq`
+    が要求する `hadjoin : Algebra.adjoin V ({w}:Set W) = ⊤` を、上の
+    `V_1 := integralClosure V0 L` に対して実際に示した。決定的な発見:
+    **同じリポジトリの別の論文トラック**(`ABC3.Found.GenEll.
+    TameRamification`、Mochizuki [GenEll] の馴分岐の形式化)に、
+    まさに必要な部品が既に完成していた——
+    `mem_adjoin_of_pow_smul_of_isEisensteinAt`(Eisenstein なら
+    `π^k•z∈adjoin` から `z∈adjoin`、mathlib の `mem_adjoin_of_smul_
+    prime_smul_of_minpoly_isEisensteinAt` を `k` 回反復する帰納)と
+    `exists_smul_mem_adjoin_powerBasis`(`L` の任意の元はある `0≠d∈R`
+    倍すれば `adjoin` に入る、`IsLocalization.exist_integer_multiples`
+    経由)。**DVR** 上では任意の非零 `d` が `π^k×単元`
+    (`IsDiscreteValuationRing.eq_unit_mul_pow_irreducible`)と分解
+    できるので、この2つを橋渡しするだけで「任意の整な元は `adjoin`
+    に入る」(`adjoin_eq_top_of_isEisensteinAt`)、つまり `adjoin R
+    {gen} = integralClosure R L` が出た。★これは教科書の「Eisenstein
+    拡大は単項生成(totally ramified ⟹ monogenic)」という古典定理
+    そのものだが、`AdjoinRoot(f)` の整閉性を直接証明する迂回路を
+    通らずに到達できた——`Subalgebra.map_injective` +
+    `AlgHom.map_adjoin_singleton` で「`L` の中での等式」を「`W` 自身の
+    中での `⊤` 生成」に変換し(`adjoin_eq_top_in_integralClosure_of_
+    isEisensteinAt`)、`minpoly V0 w = f`(`X^n-π` そのもの、`minpoly.
+    isIntegrallyClosed_eq_field_fractions'` + `Polynomial.map_injective`
+    で `K` 上の minpoly `f_K` から `V0` 上の minpoly へ降ろす)を経由
+    して具体例へ組み立てた
+    (`adjoin_eq_top_integralClosure_adjoinRoot_X_pow_sub_C`)。
+    `#print axioms` で全定理 sorry 無しを確認、`lake build`
+    2837/2837 成功、`node tools/check.mjs --brief` は新規リグレッション
+    無し。★これで **`V_1` の1段について、Dedekind であること
+    (前回)と単項生成であること(今回)の両方が揃った**——
+    `falt1CokernelLengthEq` を実際に適用する準備が整った。次回は
+    上記の残る作業 (a)(b)(c) のうち、特に (b)(`hspan_eq` の検証、
+    `differentIdeal V0 V1 = span{f'(w)}` を `differentIdeal_eq_span_
+    derivative`(Lemma 1.1 自身の道具)で計算し、`cancel_conductor_
+    delta` の等式と突き合わせる)に取り組むのが、3b と 3c を実際に
+    接続する最短経路と見込む。
 4. ★★★★★2026-09-04、**完成した**(`delta_tendsto_zero`、commit
    `a9faa64e`)。長さの漸化不等式(上の逐語引用の通り: `δ_n-δ_{n+1}≥
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
