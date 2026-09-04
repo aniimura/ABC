@@ -2033,3 +2033,17 @@ Wの独立したPresentationを新規構成する必要はない。
 awayEquivAdjoin(Polynomial/AdjoinRoot形)は既存だがMvPolynomial(Fin n
 ⊕Unit)形への書き換えがまだ要る、具体的だが軽い次の一歩。集計は引き
 続き10/24——§4は引き続き0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き10
+localization_away_quotient_mvPolynomial_equiv(commit f0247a4b、
+FieldLimit.lean)完成——tの構成の第一歩を実装した。当初検討していた
+awayEquivAdjoin経由ではなく、IsLocalization.Away.mvPolynomialQuotient
+Equiv+MvPolynomial.quotientEquivQuotientMvPolynomialをIdeal.
+quotientEquivで繋ぐ、より直接的な道で完成させた。CorrHyp非依存の
+一般的な可換環論の事実。
+
+残る作業: これは入れ子の多項式環による商の形——exists_mvPolynomial_
+quotient_specIso_descendが要求する1段のMvPolynomial(n⊕Unit)B商の形へは
+MvPolynomial.sumAlgEquivでさらに1段変換する作業が残る。lake build
+(FieldLimit/ABC3)0エラー確認、push済み。集計は引き続き10/24——§4は
+引き続き0/2。

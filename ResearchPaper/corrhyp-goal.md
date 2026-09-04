@@ -4597,3 +4597,38 @@ mvPolynomial_baseChange`の単射性)により従う見込み。
 は`Polynomial`/`AdjoinRoot`の形で存在するが、`MvPolynomial(Fin n⊕Unit)`
 の形への書き換えがまだ要る)を確立する、という**具体的だが軽い**次の
 一歩として記録する。集計は引き続き10/24——§4は引き続き0/2。
+
+## 2026-09-05夜さらに続き10: `localization_away_quotient_mvPolynomial_
+equiv`を完成——`t`構成の第一歩を実際に実装した
+
+続き9で見積もった「具体的だが軽い次の一歩」を実装した。当初検討して
+いた`Localization.awayEquivAdjoin`(`Polynomial`/`AdjoinRoot`経由)は
+使わず、mathlibにすでにあった`IsLocalization.Away.mvPolynomialQuotient
+Equiv`(`S`を任意の`IsLocalization.Away`realizationとして与える形、
+`S:=Localization.Away h`に特殊化して使う)と`MvPolynomial.
+quotientEquivQuotientMvPolynomial`(`MvPolynomial σ(R⧸I)≃MvPolynomial
+σ R⧸(Iの像)`)を組み合わせる、より直接的な道で完成させた
+(`localization_away_quotient_mvPolynomial_equiv`、`FieldLimit.lean`、
+commit `f0247a4b`):
+
+```
+theorem localization_away_quotient_mvPolynomial_equiv (B : Type) [CommRing B] (n : Type) [Fintype n]
+    (I : Ideal (MvPolynomial n B)) (p : MvPolynomial n B) :
+    Nonempty (Localization.Away (Ideal.Quotient.mk I p) ≃+*
+      (MvPolynomial Unit (MvPolynomial n B) ⧸ Ideal.map MvPolynomial.C I) ⧸
+        (Ideal.span {MvPolynomial.C p * MvPolynomial.X () - 1}).map (Ideal.Quotient.mk (Ideal.map MvPolynomial.C I)))
+```
+
+証明の鍵は、2つの等式(`hnat`・`hnat2`:局所化関係式の定義元`C(mk I p)`・
+`X()`が、`quotientEquivQuotientMvPolynomial`の下で正しく対応する場所へ
+送られること)を確認してから`Ideal.quotientEquiv`(既存、`環同型+イデアル
+対応`から商同士の同型を作る、このセッションで何度も使った道具)で
+繋ぐだけ——`CorrHyp`非依存の一般的な可換環論の事実として完成した。
+
+**残る作業(正直な記録)**: これは`MvPolynomial Unit(MvPolynomial n B)`
+という**入れ子の**多項式環による商の形——`exists_mvPolynomial_quotient_
+specIso_descend`が要求する**1段の**`MvPolynomial(n⊕Unit)B`商の形へは、
+`MvPolynomial.sumAlgEquiv`(既存、`MvPolynomial(S1⊕S2)R≃MvPolynomial
+S1(MvPolynomial S2 R)`)でさらに1段変換する作業がまだ残る——次の一手
+として記録する。lake build(`FieldLimit`/`ABC3`)とも0エラー確認、
+push完了。集計は引き続き10/24——§4は引き続き0/2。
