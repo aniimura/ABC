@@ -1091,4 +1091,31 @@ theorem exists_scheme_basicOpen_cover_of_ring {X : Scheme} {U : X.Opens} (hU : I
   · exact iSup₂_le (fun i _ => X.basicOpen_le (f i))
   · exact himg.le.trans inf_le_right
 
+/-- **`exists_transitionOpen_eq_basicOpen`の帰結を、開集合の等式ではなく
+実際のスキーム同型として取り出す**——重なり`X.basicOpen(f₁·f₂)`が、
+候補片`Z`の対応する基本開集合`Z.basicOpen s`と**直接同型**であることを
+示す。`Scheme.Hom.isoImage`(開埋め込みの、その開集合への制限が同型で
+あること)+`eqToIso`(`exists_transitionOpen_eq_basicOpen`が与える開集合
+の等式)を合成するだけ。
+
+2つの標準エタール片`i`・`j`にこれを適用すると、どちらも同じ
+`X.basicOpen(f_i·f_j)`と同型になるので、それらを合成すれば
+`Z_i.basicOpen(s_i) ≅ Z_j.basicOpen(s_j)`という**遷移射そのもの**が
+直接得られる——GlueDataの`t`フィールドの構成材料。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_transitionIso {X : Scheme} {U : X.Opens} (f₁ f₂ : Γ(X, U))
+    {Z : Scheme} (e : (X.basicOpen f₁ : Scheme) ≅ Z) :
+    ∃ s : Γ(Z, ⊤), Nonempty
+      ((X.basicOpen (f₁ * f₂) : Scheme) ≅ (Z.basicOpen s : Scheme)) := by
+  obtain ⟨s, h1, h2⟩ := exists_transitionOpen_eq_basicOpen f₁ f₂ e
+  refine ⟨s, ⟨?_⟩⟩
+  set W := (X.basicOpen f₁).toScheme.basicOpen
+    ((X.basicOpen f₁).topIso.inv (X.presheaf.map (homOfLE (X.basicOpen_le f₁)).op f₂)) with hW
+  have iso1 : (W : Scheme) ≅ (X.basicOpen (f₁ * f₂) : Scheme) :=
+    ((X.basicOpen f₁).ι.isoImage W).trans (eqToIso (by rw [h1]))
+  have iso2 : (W : Scheme) ≅ (Z.basicOpen s : Scheme) :=
+    (e.hom.isoImage W).trans (eqToIso (by rw [h2]))
+  exact iso1.symm.trans iso2
+
 end ABC3.Found.CorrHyp
