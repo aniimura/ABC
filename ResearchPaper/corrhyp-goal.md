@@ -653,3 +653,28 @@ paper自身が暗黙に仮定している事実そのもの)。次にここへ�
 `lemma_4_1` を適用する具体的な文脈で `X` に `CompactSpace X.left`/
 `QuasiSeparatedSpace X.left` を仮定として追加する、のどちらかを選ぶ
 設計判断から始める。
+
+### 2026-09-04さらに続報: `QcqsSpace`・`corrHypInstance4`・被覆の降下が完成
+
+`Space` を qcqs スキームの部分型に絞る側を選び、`QcqsSpace.lean`
+(`FEt`/`Ext` の圏構造を `QcqsSpace` 上に再構築、すべて sorry 無し)・
+`Instance4.lean`(`corrHypInstance4`、`Lemma 4.1` の statement が型検査を
+通ることを確認)を完成させた。
+
+さらに `Lemma 4.1` の構成的降下で最も中心的な一手——**`Ext X` の有限アフィン
+開被覆が、ある有限段階 `X.left ×_{BaseK} Spec R` の有限アフィン開被覆から
+来ること**——を `exists_extDiagram_finite_affine_descent`(`ExtLimit.lean`)
+として完全に証明した。鍵となった `Scheme.exists_finite_affineOpenCover`
+(任意の準コンパクトなスキームが有限アフィン開被覆を持つという、CorrHyp に
+依存しない一般的な事実、`Scheme.affineCover` + `IsCompact.elim_finite_
+subcover` で構成)は、`exact?`/`apply?` では見つからず自分で組み立てた。
+
+**残る組み立て**: (a) `exists_extDiagram_finite_affine_descent` で得た
+各アフイン片(`X.left ×_{BaseK} Spec R` のアフィン開)上の有限エタール
+多元環を étale-locus のレベルでさらに細分し、`exists_fg_subalgebra_
+standardEtalePair_map`/`standardEtalePairRingBaseChange`(`FieldLimit.lean`)
+で有限段階へ降下すること、(b) 各片の降下結果を `Scheme.exists_hom_hom_
+comp_eq_comp_of_locallyOfFiniteType`(遷移射の一致の降下)で貼り合わせて
+`Z` 全体を構成すること。`Lemma 4.1` の証明に使う道具はほぼすべて揃った
+——残るのは「一般の有限エタール射を局所的に標準エタールへ帰着する」という
+最後の理論的なピースと、その後の純粋な貼り合わせ作業。
