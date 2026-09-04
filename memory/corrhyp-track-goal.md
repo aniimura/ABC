@@ -924,3 +924,18 @@ basicOpen(s_ik)=Z_i.basicOpen(s_ij·s_ik)`(`basicOpen_mul`)と環準同型の
 ——12フィールドの直接組み立てが唯一の道と確認済み。
 
 コミット: `68345679`(発見の記録)・`dd1354ea`(exists_transitionIso_finset)。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報
+(GlueDataの配線に着手、V・f・tフィールド完成、集計10/24で変わらず)。
+`gdV`・`gdF`・`gdT`(`ExtLimit.lean`、★sorry無し)完成——`piece_
+descends_iso`・`exists_transitionIso`を実際に`CategoryTheory.GlueData`
+の対象レベルのフィールドへ流し込んだ。特に`gdT`(遷移射`t(i,j):
+V(i,j)≅V(j,i)`)は`exists_transitionIso`をi側・j側それぞれに適用して
+得た2つの同型を、乗法の可換性で繋ぐだけで完成した。
+
+残る作業: `f_mono`・`f_hasPullback`・`f_id`(basicOpen.ιの標準的性質から
+自動のはず)・`t_id`・`t'`(`exists_transitionIso_finset`から)・
+`t_fac`・`cocycle`(選択項の一致性の確認、最も技術的な段)。これらを
+埋めれば`Scheme.GlueData`が完成する。
+
+コミット: `b79fab9b`(gdV・gdF・gdT完成)・`fd8e47c0`(記録)。
