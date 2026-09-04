@@ -14,6 +14,7 @@ import Mathlib.RingTheory.LocalProperties.Projective
 import Mathlib.RingTheory.TensorProduct.Basic
 import Mathlib.RingTheory.Ideal.Norm.RelNorm
 import Mathlib.Algebra.Homology.DerivedCategory.Ext.EnoughProjectives
+import Mathlib.Algebra.Homology.DerivedCategory.Ext.Linear
 import Mathlib.Algebra.Category.ModuleCat.Projective
 
 /-!
@@ -1323,7 +1324,7 @@ theorem hochschild_ext_eq_zero (R S : Type u) [CommRing R] [CommRing S] [Algebra
   haveI := hochModule_catProjective R S
   exact CategoryTheory.Abelian.Ext.eq_zero_of_projective e
 
-/-! ## remark 2.1(v) の almost 化への足場(2026-09-05、新規)。
+/-! ## remark 2.1(v) の almost 版(2026-09-05、完成)。
 
 `hochschild_ext_eq_zero`(honest な場合)は`B`が`FormallyUnramified`
 であること(`elem A B`自身がその annihilation性質を満たすこと)に
@@ -1557,17 +1558,153 @@ theorem hochSectionAlmost_augment {A B : Type u} [CommRing A] [CommRing B] [Alge
   rw [hochSectionOfWitness_augment, almost_swap_augment p hAE hf0inj n w hw]
   rw [Algebra.smul_def, mul_one, mul_comm]
 
-/-! **現状のまとめ(2026-09-05)**: 上記4定理・2定義により、
+/-! **almost 版 remark(v)の完成(2026-09-05)**: 上記により
 「`IsAlmostEtaleCovering A B p`(honest な`Algebra.FormallyUnramified
 A B`を要求しない、真に一般の almost 設定)の下で、`B`は`B⊗_AB`-線形
 写像`hochSectionOfWitness`を経て`μ:B⊗_AB→B`の"p^n-almost section"を
-持つ」ことが完全に証明された。remark(v)の almost 版を`Ext`の消滅
-(`p^n•Ext^k(B,M)=0`、honest な場合の`hochschild_ext_eq_zero`の直接
-一般化)まで持ち上げるには、`Ext^k_{T}(-,M)`(`T:=B⊗_AB`)の関手性
-(`s:B→T`・`μ:T→B`からの`Ext^k(s)`・`Ext^k(μ)`と、その合成が
-「`B`の元`algebraMap A B(p^n)`による掛け算」の pullback に一致する
-という事実)を要する——`CategoryTheory.Abelian.Ext`のこの向きの
-API(pre/post-composition による Hom 群上の作用)がどこまで揃って
-いるかの調査が次回の入口。 -/
+持つ」ことが完全に証明された。以下、これを`Ext`の almost 消滅
+(`p^n•Ext^k(B,M)=0`)まで持ち上げる——`Ext/Linear.lean`(mathlib、
+`R`-linear abelian category での`Ext X Y n`の`R`-加群構造)と、
+`Ext.mk₀`(射から`Ext ... 0`)・`Ext.mk₀_comp_mk₀_assoc`(合成の
+関手性)・`Ext.eq_zero_of_projective`(射影対象からの`Ext`の消滅)
+だけで閉じる。 -/
+
+set_option maxHeartbeats 1000000 in
+open CategoryTheory CategoryTheory.Abelian in
+/-- **「almost split ⟹ `Ext`の almost 消滅」という一般のホモロジー代数
+補題**(圏論の言葉だけで書けるので、almost étale とは独立に成立)。
+`S`が自由階数1の対象`T`(可換環`T`自身)に対して`s:S→T`・`μ:T→S`を持ち
+`s≫μ=τ•𝟙 S`(`τ∈T`、完全な切断ではなく`τ`倍の"almost"切断)ならば、
+`τ`は`Ext^{k+1}(S,M)`の全ての元を零化する。証明は3行:`Ext^{k+1}(T,M)=0`
+(`T`は`T`上射影的)を経由して`(mk₀ s)∘(mk₀ μ)∘e = 0`、他方この合成は
+`mk₀(s≫μ)∘e = mk₀(τ•𝟙)∘e = τ•e`。 -/
+theorem ext_smul_eq_zero_of_almost_split (T : Type u) [CommRing T] (S M : ModuleCat.{u} T)
+    (s : S ⟶ ModuleCat.of T T) (μ : ModuleCat.of T T ⟶ S) (τ : T)
+    (hsμ : s ≫ μ = τ • 𝟙 S) :
+    letI := CategoryTheory.HasExt.standard (ModuleCat.{u} T)
+    ∀ (k : ℕ) (e : Ext S M (k+1)), τ • e = 0 := by
+  letI := CategoryTheory.HasExt.standard (ModuleCat.{u} T)
+  intro k e
+  haveI : Module.Projective T T := inferInstance
+  haveI : Projective (ModuleCat.of T T) :=
+    ModuleCat.projective_of_categoryTheory_projective (ModuleCat.of T T)
+  have h1 : (Ext.mk₀ μ).comp e (zero_add (k+1)) = 0 := Ext.eq_zero_of_projective _
+  calc τ • e
+      = (τ • Ext.mk₀ (𝟙 S)).comp e (zero_add (k+1)) := by
+        rw [Ext.smul_comp, Ext.mk₀_id_comp]
+    _ = (Ext.mk₀ (τ • 𝟙 S)).comp e (zero_add (k+1)) := by rw [Ext.mk₀_smul]
+    _ = (Ext.mk₀ (s ≫ μ)).comp e (zero_add (k+1)) := by rw [hsμ]
+    _ = (Ext.mk₀ s).comp ((Ext.mk₀ μ).comp e (zero_add (k+1))) (zero_add (k+1)) :=
+        (Ext.mk₀_comp_mk₀_assoc s μ e).symm
+    _ = (Ext.mk₀ s).comp (0 : Ext (ModuleCat.of T T) M (k+1)) (zero_add (k+1)) := by rw [h1]
+    _ = 0 := Ext.comp_zero _ _ _ _ _
+
+set_option maxHeartbeats 1000000 in
+open CategoryTheory in
+/-- `hochSectionAlmost_augment`を`ModuleCat`の射の等式へ翻訳したもの
+(`ext_smul_eq_zero_of_almost_split`の仮定`s≫μ=τ•𝟙`の形に揃える)。
+`τ`は`algebraMap A (B⊗_AB) (p^n)`——`B⊗_AB`の元としての`p^n`。 -/
+theorem hochSectionAlmost_comp_lmul {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [Module.Free A B] (p : A)
+    (hAE : IsAlmostEtaleCovering (A := A) (B := B) p)
+    (hf0inj : letI := awayAlgebra p (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))))
+    (n : ℕ) (w : TensorProduct A B B)
+    (hw : letI := awayAlgebra p (A := A) (B := B)
+      haveI := hAE.2.2.1
+      haveI := (hAE.2.1 : Module.Finite _ _)
+      diagonalCompare p w
+        = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p))) :
+    letI : Algebra (TensorProduct A B B) B := (Algebra.TensorProduct.lmul' A).toRingHom.toAlgebra
+    (ModuleCat.ofHom (hochSectionOfWitness A B w (almost_swap_mul_eq p hAE hf0inj n w hw))
+      ≫ ModuleCat.ofHom (hochSectionLmul A B))
+      = (algebraMap A (TensorProduct A B B) (p^n)) • 𝟙 (ModuleCat.of (TensorProduct A B B) B) := by
+  letI : Algebra (TensorProduct A B B) B := (Algebra.TensorProduct.lmul' A).toRingHom.toAlgebra
+  ext b
+  simp only [ModuleCat.hom_comp, ModuleCat.hom_ofHom, LinearMap.comp_apply, ModuleCat.hom_smul,
+    ModuleCat.hom_id, LinearMap.smul_apply, LinearMap.id_apply]
+  show Algebra.TensorProduct.lmul' A
+      (hochSectionOfWitness A B w (almost_swap_mul_eq p hAE hf0inj n w hw) b)
+    = (algebraMap A (TensorProduct A B B)) (p ^ n) • b
+  rw [hochSectionAlmost_augment p hAE hf0inj n w hw b, Algebra.smul_def]
+  congr 1
+  show (algebraMap A B) (p ^ n)
+    = Algebra.TensorProduct.lmul' A (algebraMap A (TensorProduct A B B) (p^n))
+  rw [AlgHom.commutes]
+
+set_option maxHeartbeats 1000000 in
+open CategoryTheory CategoryTheory.Abelian in
+/-- **remark 2.1(v)、almost な場合、完全に証明**(`hochschild_ext_eq_zero`
+の honest 版の真の一般化)。`B`が`A`の almost étale covering
+(`IsAlmostEtaleCovering A B p`——`B/A`自体が古典的に unramified である
+必要は**無い**)であり、`B`が`A`上 free、`algebraMap B B[1/p]`が単射
+(Faltings 自身の標準仮定)であれば、条件(iii)の witness `w`
+(`p^ε e_{B/A}`に対応)の指数`n`について、**`p^n`は
+`HH^{k+1}(B/A,M) := Ext^{k+1}_{B⊗_AB}(B,M)`の全ての元を零化する**
+(任意の`B⊗_AB`-加群`M`、任意の`k`)。`n`は条件(iii)から任意に大きく
+(小さい`ε`で)取れるので、これはまさに Faltings の
+「for B almost etale over A, m annihilates the Hochschild cohomology
+in positive degrees」(物理p.6=印字p.259、remark (v) 最終文)の形式化。 -/
+theorem hochschild_ext_almost_zero {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [Module.Free A B] (p : A)
+    (hAE : IsAlmostEtaleCovering (A := A) (B := B) p)
+    (hf0inj : letI := awayAlgebra p (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))))
+    (n : ℕ) (w : TensorProduct A B B)
+    (hw : letI := awayAlgebra p (A := A) (B := B)
+      haveI := hAE.2.2.1
+      haveI := (hAE.2.1 : Module.Finite _ _)
+      diagonalCompare p w
+        = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p)))
+    (M : Type u) [AddCommGroup M] :
+    letI : Algebra (TensorProduct A B B) B := (Algebra.TensorProduct.lmul' A).toRingHom.toAlgebra
+    haveI := CategoryTheory.HasExt.standard (ModuleCat (TensorProduct A B B))
+    ∀ [Module (TensorProduct A B B) M] (k : ℕ) (e : Ext
+        (ModuleCat.of (TensorProduct A B B) B) (ModuleCat.of (TensorProduct A B B) M) (k+1)),
+      (algebraMap A (TensorProduct A B B) (p ^ n)) • e = 0 := by
+  letI : Algebra (TensorProduct A B B) B := (Algebra.TensorProduct.lmul' A).toRingHom.toAlgebra
+  haveI := CategoryTheory.HasExt.standard (ModuleCat (TensorProduct A B B))
+  intro _ k e
+  exact ext_smul_eq_zero_of_almost_split (TensorProduct A B B)
+    (ModuleCat.of (TensorProduct A B B) B) (ModuleCat.of (TensorProduct A B B) M)
+    (ModuleCat.ofHom (hochSectionOfWitness A B w (almost_swap_mul_eq p hAE hf0inj n w hw)))
+    (ModuleCat.ofHom (hochSectionLmul A B))
+    (algebraMap A (TensorProduct A B B) (p ^ n))
+    (hochSectionAlmost_comp_lmul p hAE hf0inj n w hw) k e
+
+set_option maxHeartbeats 1000000 in
+open CategoryTheory CategoryTheory.Abelian in
+/-- **`hochschild_ext_almost_zero`の非空虚性の対照**——真の非単元
+`p:=5`・`A:=ℤ`・`B:=Fin 2 → ℤ`で、仮定4つ(almost étale covering、
+`Module.Free`、`algebraMap B B[1/5]`の単射性、条件(iii)の witness)
+がすべて実際に成り立つ。単射性は`5`が`Fin 2 → ℤ`の非零因子である
+ことから(`IsLocalization.injective`+`Submonoid.powers_le`)、
+witness は`Definition 2.1`の条件(iii)そのもの(`hAE.2.2.2.2 1`)から。 -/
+example (M : Type) [AddCommGroup M] :
+    letI : Algebra (TensorProduct ℤ (Fin 2 → ℤ) (Fin 2 → ℤ)) (Fin 2 → ℤ) :=
+      (Algebra.TensorProduct.lmul' ℤ).toRingHom.toAlgebra
+    haveI := CategoryTheory.HasExt.standard (ModuleCat (TensorProduct ℤ (Fin 2 → ℤ) (Fin 2 → ℤ)))
+    ∀ [Module (TensorProduct ℤ (Fin 2 → ℤ) (Fin 2 → ℤ)) M] (k : ℕ)
+      (e : Ext (ModuleCat.of (TensorProduct ℤ (Fin 2 → ℤ) (Fin 2 → ℤ)) (Fin 2 → ℤ))
+        (ModuleCat.of (TensorProduct ℤ (Fin 2 → ℤ) (Fin 2 → ℤ)) M) (k+1)),
+      (algebraMap ℤ (TensorProduct ℤ (Fin 2 → ℤ) (Fin 2 → ℤ)) (5 ^ 1)) • e = 0 := by
+  letI : Algebra (TensorProduct ℤ (Fin 2 → ℤ) (Fin 2 → ℤ)) (Fin 2 → ℤ) :=
+    (Algebra.TensorProduct.lmul' ℤ).toRingHom.toAlgebra
+  haveI := CategoryTheory.HasExt.standard (ModuleCat (TensorProduct ℤ (Fin 2 → ℤ) (Fin 2 → ℤ)))
+  intro _ k e
+  have hAE := isAlmostEtaleCovering_of_etale_general (A := ℤ) (B := Fin 2 → ℤ) 5
+  have h5 : (algebraMap ℤ (Fin 2 → ℤ) 5) ∈ nonZeroDivisors (Fin 2 → ℤ) := by
+    rw [mem_nonZeroDivisors_iff]
+    constructor <;>
+    · intro x hx
+      funext i
+      have := congrFun hx i
+      simp only [Pi.mul_apply, Pi.ofNat_apply, map_ofNat] at this ⊢
+      omega
+  have hf0inj : Function.Injective
+      (algebraMap (Fin 2 → ℤ) (Localization.Away (algebraMap ℤ (Fin 2 → ℤ) 5))) :=
+    IsLocalization.injective _ (Submonoid.powers_le.mpr h5)
+  obtain ⟨w, hw⟩ := hAE.2.2.2.2 1 one_pos
+  exact hochschild_ext_almost_zero 5 hAE hf0inj 1 w hw M k e
 
 end ABC3.Found.Falt1
