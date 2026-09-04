@@ -1757,3 +1757,16 @@ piece_restrict_hom(D(f_i f_j)≤D(f_i)・D(f_i f_j)≤D(f_j)の2方向)
 分離性問題を回避できたことで、既存のcorrHypGlueDataOfEtaleの設計
 パターンをそのまま踏襲できる、より安全な道筋になった。集計は10/24
 で変わらず。corrhyp-goal.mdに詳細記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05(続き13)
+piece_restrict_hom_basicOpen_left/right(commit b8c6503d)——分離性
+不要な共通細分Wの制限写像(D(f)→D(f*g)・D(g)→D(f*g)の両方向)を実装。
+piece_restrict_homをScheme.basicOpen_mul+inf_le_left/rightへ
+specializeするだけの短い配線。lake build(ExtLimit/ABC3)0エラー確認、
+push済み。
+
+これでψ構成に必要な「2つの片を共通の第三の片Wへ制限する」配線の
+両方向が実際のRレベル環準同型として揃った。次の一手: W自身の
+Presentationの生成元を仲立ちに、両側の生成元をaevalの全射性経由で
+Wの生成元の多項式として表示し、実際のψ・hround1・hround2を構成する
+(未着手)。集計は10/24で変わらず。corrhyp-goal.mdに詳細記録。

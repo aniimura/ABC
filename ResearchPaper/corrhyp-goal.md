@@ -3932,3 +3932,29 @@ quotient_specIso_descend`の前提が実際に満たせる見込み。分離性�
 回避できたことで、既存の`corrHypGlueDataOfEtale`の設計パターンを
 そのまま踏襲できる、より安全な道筋になった。集計は10/24で変わらず
 ——§4は引き続き0/2。
+
+## 2026-09-05(続き14): `piece_restrict_hom_basicOpen_left`/`_right`——
+分離性不要な共通細分`W`の制限写像を実装
+
+前回発見した簡略化(基本開`X.basicOpen f`の被覆を使えば分離性の
+仮定なしに共通の細分`W`が取れる)を実際に実装した(commit `b8c6503d`):
+
+- `piece_restrict_hom_basicOpen_left`: `D(f)`側の片から`D(f*g)`
+  (`=D(f)⊓D(g)`)側の片への制限写像。
+- `piece_restrict_hom_basicOpen_right`: `D(g)`側の片から`D(f*g)`
+  側の片への制限写像(対)。
+
+いずれも`piece_restrict_hom`(既存)を`Scheme.basicOpen_mul`
+(mathlib)+`inf_le_left`/`inf_le_right`で得た包含関係へ specialize
+するだけの短い配線。`lake build ABC3.Found.CorrHyp.ExtLimit`・
+`ABC3`いずれも0エラーで確認、push済み。
+
+**これで、`ψ`構成に必要な「2つの片を共通の第三の片`W`へ制限する」
+という配線の**両方向**が、分離性の仮定なしに実際のRレベル環準同型
+として揃った**。残る次の一手(未着手): `W`自身の`Presentation`
+(`Algebra.Presentation.ofFinitePresentation`を`Γ(C,piece_W)`へ適用)
+の生成元を仲立ちに、`D(f)`側・`D(g)`側それぞれの生成元を`aeval`の
+全射性経由で`W`の生成元の多項式として表示し、実際の`ψ`(および`hround1`
+・`hround2`、層の制限公理から従う見込み)を構成する——`exists_
+mvPolynomial_quotient_specIso_descend`の前提を実際に満たす最後の
+ステップ。集計は10/24で変わらず——§4は引き続き0/2。
