@@ -2598,4 +2598,63 @@ theorem ideal_map_mvPolynomial_promote_baseChange_eq (B B' T ι : Type) [CommRin
   · intro x
     simp
 
+/-- **環同型が局所化元同士を対応させれば、対応する`Away`局所化も
+同型になる**——`IsLocalization.ringEquivOfRingEquiv`(mathlib)を
+直接適用するだけだが、`A`・`B`を**抽象的な`CommRing`**として一般化
+した形で用意しておくことが鍵——`A`・`B`をテンソル積などの具体的な
+構成のまま直接この補題を書こうとすると、`Mul`/`Add`インスタンスが
+(`Algebra.TensorProduct.instMul`経由か`instDistribOfSemiring.toMul`
+経由かで)非`defeq`に見えるinstance diamondに当たる(`descendPieceR`の
+局所化を実際にℝレベルへ橋渡しする際に発見した、新しい配管の教訓)——
+この補題のように**一度抽象的な`CommRing`型として切り出してから**
+具体的な型を代入すれば、そのdiamondを回避できる。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem ringEquiv_localization_of_apply_eq (A B : Type) [CommRing A] [CommRing B] (e : A ≃+* B) (a : A) (b : B)
+    (hab : e a = b) : Nonempty (Localization.Away a ≃+* Localization.Away b) :=
+  ⟨IsLocalization.ringEquivOfRingEquiv (Localization.Away a) (Localization.Away b) e
+    (hab ▸ Submonoid.map_powers e.toMonoidHom a)⟩
+
+open scoped TensorProduct in
+/-- **`descendPieceR`の`R'`レベル局所化は、実際にℝレベルで正しい対象
+(`quotient_mvPolynomial_baseChange`の右辺の局所化)を実現する**——
+`Lemma 4.1`の`GlueData`構築で残っていた最後の橋渡し。`isLocalization_
+away_tensor_eq`(局所化と底変換の可換性)・`ideal_map_mvPolynomial_
+promote_baseChange_eq`(イデアルの2段底変換の一致)・`quotient_
+mvPolynomial_baseChange_tmul_one`(純テンソル上の自然性)・
+`ringEquiv_localization_of_apply_eq`(局所化元の対応から局所化自身の
+同型を得る)という4つの部品を繋いで完成させた。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_ringEquiv_localization_of_eq (B B' T ι : Type) [CommRing B] [CommRing B'] [CommRing T]
+    [Algebra B B'] [Algebra B' T] [Algebra B T] [IsScalarTower B B' T]
+    (I : Ideal (MvPolynomial ι B)) (p₀ : MvPolynomial ι B') :
+    letI hIR' : Ideal (MvPolynomial ι B') := Ideal.map (MvPolynomial.map (algebraMap B B')) I
+    ∀ (M : Type) [CommRing M] [Algebra B' M]
+      [Algebra (MvPolynomial ι B' ⧸ hIR') M]
+      [IsScalarTower B' (MvPolynomial ι B' ⧸ hIR') M]
+      [IsLocalization.Away (Ideal.Quotient.mk hIR' p₀) M],
+    Nonempty (M ⊗[B'] T ≃+* Localization.Away (Ideal.Quotient.mk
+      (Ideal.map (MvPolynomial.map (algebraMap B T)) I) (MvPolynomial.map (algebraMap B' T) p₀))) := by
+  intro M _ _ _ _ _
+  obtain ⟨e0⟩ := isLocalization_away_tensor_eq B' (MvPolynomial ι B' ⧸
+      Ideal.map (MvPolynomial.map (algebraMap B B')) I) T M
+    (Ideal.Quotient.mk (Ideal.map (MvPolynomial.map (algebraMap B B')) I) p₀)
+  rw [Algebra.TensorProduct.algebraMap_apply] at e0
+  set IR' := Ideal.map (MvPolynomial.map (algebraMap B B')) I with hIR'def
+  have hIdealEq : Ideal.map (MvPolynomial.map (algebraMap B' T)) IR' =
+      Ideal.map (MvPolynomial.map (algebraMap B T)) I :=
+    ideal_map_mvPolynomial_promote_baseChange_eq B B' T ι I
+  set e2 : (MvPolynomial ι B' ⧸ IR') ⊗[B'] T ≃+* MvPolynomial ι T ⧸ Ideal.map (MvPolynomial.map (algebraMap B T)) I :=
+    (quotient_mvPolynomial_baseChange B' T ι IR').trans (Ideal.quotEquivOfEq hIdealEq) with he2def
+  have key : e2 ((Ideal.Quotient.mk IR' p₀) ⊗ₜ[B'] (1 : T)) =
+      Ideal.Quotient.mk (Ideal.map (MvPolynomial.map (algebraMap B T)) I) (MvPolynomial.map (algebraMap B' T) p₀) := by
+    rw [he2def, RingEquiv.trans_apply, quotient_mvPolynomial_baseChange_tmul_one, Ideal.quotEquivOfEq_mk]
+  obtain ⟨e3⟩ := ringEquiv_localization_of_apply_eq ((MvPolynomial ι B' ⧸ IR') ⊗[B'] T)
+    (MvPolynomial ι T ⧸ Ideal.map (MvPolynomial.map (algebraMap B T)) I) e2
+    ((Ideal.Quotient.mk IR' p₀) ⊗ₜ[B'] (1 : T))
+    (Ideal.Quotient.mk (Ideal.map (MvPolynomial.map (algebraMap B T)) I) (MvPolynomial.map (algebraMap B' T) p₀))
+    key
+  exact ⟨e0.trans e3⟩
+
 end ABC3.Found.CorrHyp
