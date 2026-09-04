@@ -2259,6 +2259,57 @@ mathlib での正確な組み立て方は未確認)。
       目標を追うより筋が良い——`V_n`側だけで完結する構成であり、
       `Wn`は最後の底変換の段階まで一切登場しない。
 
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05、
+      **上記1(反復pushoutで`V_{n+1}`を構成)の**核となる2つの道具**を
+      完成させ、1段の反復pushoutが実際に繋がることを確認した**
+      (commit `4943ba71`):
+      - `adjoinRootTensorAlgHom`/`_eq_fwd`/`_bijective`/
+        `adjoinRootTensorAlgEquiv`: `adjoinRootTensorEquivFwd`(線形
+        同型)を`AlgEquiv`として再構成(`Algebra.TensorProduct.lift`
+        で`AlgHom`化し、pure tensorでの一致から全単射性を移送)——
+        `mapBaseChange_injective_transport`のような`AlgEquiv`を要求
+        する道具に、instance diamond を再導入せず渡せるようになった。
+      - `mapBaseChange_injective_adjoinRoot_direct`:
+        `mapBaseChange_injective_adjoinRoot_tensor`(`TensorProduct`版)
+        を上の`AlgEquiv`で`AdjoinRoot(g.map φ)`側へ移送し、
+        `pushoutKaehlerSplitStep`の`hinj`を Lemma 1.1 型の非零因子
+        条件1つに直接帰着させた。
+
+      実際に`R`(=`V_n`役)・`g1 g2 : Polynomial R`を使い、`B1:=R`
+      (`pushoutKaehlerSplitBase`)から`falt1_isPushout_adjoinRoot g1`+
+      `mapBaseChange_injective_adjoinRoot_direct g1`で`pushoutKaehler
+      SplitStep`を1回適用できることをREPLで確認した(`letI`で
+      `falt1AdjoinRootAlgebra`/`falt1AdjoinRoot_isScalarTower`を
+      instanceとして局所登録するだけで、残りの`Algebra R B`・
+      `IsScalarTower`系はすべて`infer_instance`で自動解決した)。
+
+      **2段目(`g2`をさらに添加)を試みたところ、別の——3aで既に
+      予告されていた——障害に到達した**: 1段目の出力
+      `(∀i:Fin1,F i) × TensorProduct(AdjoinRoot g1)B2 Ω[AdjoinRoot
+      g1/R]`を2段目の`prev`が要求する`∀i:ι',F' i`という**1つの
+      Pi型**に組み替える必要があるが、これを`Option ι`(または
+      `Fin(n+1)`)で束ねようとすると、`Ω[(Option.elim i C F)/R]`と
+      いう**型`i`に依存する式そのもの**が`CommRing(Option.elim i C
+      F)`のようなinstanceを要求し、これは`i`が自由変数である限り
+      (`i=none`/`some j`と具体的に分岐できないため)`infer_instance`
+      では解決できないことを実測で確認した(3aのdocstringが予告して
+      いた「`recursive Type-valued def with dependent instances`」
+      という地雷に、より具体的な形で到達した)。
+
+      **今後の対処方針**(次回、着手する場合の設計指針として記録):
+      `Option.elim`/`Fin.snoc`で型族を都度組み替えるのではなく、
+      3aのdocstringが示唆した通り**Σ束ね**(`structure RAlg (R)
+      where carrier : Type*; [ring : CommRing carrier]; [alg :
+      Algebra R carrier]`)を使い、「`i`番目の環+その環自身が運ぶ
+      instance」を**1つのデータ**として扱う設計にすれば、
+      `(Option.elim i c f).ring`のような**射影**は`i`の分岐無しに
+      常に型付けされる(Σ型の外側の`Option.elim`の結果自体は自由変数
+      `i`のままでも、`.ring`フィールドの射影は無条件に使える)ため、
+      この instance 解決の壁を回避できる見込み。ただし`Ω[·/R]`
+      (`KaehlerDifferential`)をΣ束ねの`carrier`越しに使うための
+      追加の配線(`Algebra R (Option.elim i c f).carrier`をΣの
+      フィールドとして運ぶ、等)が必要で、まだ試していない。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
