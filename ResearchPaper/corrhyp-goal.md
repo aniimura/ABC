@@ -2060,3 +2060,15 @@ X.homOfLE ⋯ ≫ (transitionElemIso (f j)(f k*f i)(e j)).hom ≫
 
 コミット: `e41d967e`(`@[reducible]`修正のみ、t_fac本体はまだFoundに
 置いていない)。
+
+**追記**: 続けて`unfold transitionElemIso`(両辺の`transitionElemIso`呼び
+出しをさらに展開)を試したところ、`unfold`自体がその場で`have`/`let`を
+zeta簡約してくれるため、追加の`simp only`は一切不要(「未使用」警告で
+確認)——両辺が**抽象化層を一切残さない、`isoImage`・`eqToIso`・
+`homOfLE`・`e_i.hom`/`e_j.hom`・`X.presheaf.map`の生の合成同士**という
+完全にフラットな形まで展開できることを確認した。ここから先は、
+`transitionElem_basicOpen_eq`の証明で使った`ι_image_basicOpen_topIso_
+inv`・`basicOpen_res`・`basicOpen_mul`のような**自然性の具体的な補題**を
+両辺に個別に適用して同じ正規形へ落とす、地道な照合作業になる見込み
+(新しい数学的内容は不要、`gdT_id`より一段複雑な配管)。今回はここで
+一旦区切り、この完全展開形を次の一手の出発点として記録する。
