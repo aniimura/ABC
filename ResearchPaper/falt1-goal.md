@@ -3804,6 +3804,26 @@ cohomology** `H^2(B/A,I)` の類を定め、これが `m` で零化される
   既に存在する)を組み合わせる作業に近い、より見通しの良い次回の
   課題として記録する。
 
+  ★2026-09-05(続々々)、**`groupCohomology`名前空間を実際に調査した**
+  (正しい import は`Mathlib.RepresentationTheory.Homological.
+  GroupCohomology.Basic`——`Homological`が経路に要る、当初のガイダンス
+  の経路は誤り)。`groupCohomology A n : ModuleCat k`(`A:Rep k G`、
+  `k`線形な`G`表現のコホモロジー、`HomologicalComplex.homology`で
+  定義済み)・`groupCohomology.H0/H1/H2`(低次数の具体形)は確認できた
+  が、**「`|G|`(あるいは一般に transfer/corestriction 論法での
+  重み)が`H^i(G,M)`(`i>0`)を零化する」という標準的な事実
+  (restriction-corestriction合成が`|G|`倍になる、という古典的な
+  transfer 論法)は mathlib に見当たらなかった**(`groupCohomology`
+  名前空間 241 件を機械的に確認、それらしい補題名は無し)。この
+  transfer 論法自体を`inhomogeneousCochains`(コチェイン複体、
+  `ModuleCat`圏論的な取り扱い)のレベルから構築する必要があり、
+  これは homological algebra の新しい API 領域(`ModuleCat`・
+  `HomologicalComplex`の圏論的取り扱い)を要する、独立した規模の
+  作業と判断した——`remark_iii_trace_identity`(今回完成)を
+  `tr_{B/A}`版の transfer 写像の「重み」として使う、という数学的な
+  筋道は明確になったが、それを実装する homological algebra の配管
+  自体は次回への持ち越しとする。
+
 ★★★**結論(正直な評価)**: `/goal` の 13/13 は、このセッションでの
 継続作業だけでは現実的な時間内に到達できない規模の作業(Theorem 1.2
 1件でさらに大きな作業、§2-4 は新規ライブラリ構築に近い規模)である
