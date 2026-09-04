@@ -2546,4 +2546,27 @@ theorem exists_fg_subalgebra_tensor_quotientMvPolynomial_lift (A : Type) [CommRi
     congrArg AlgHom.toRingHom h2.symm
   rw [h3]
 
+/-- **`I`を`B→B'`で降ろしてから`B'→T`へ底変換したものは、`B→T`へ直接
+底変換したものと一致する**——`Ideal.map_map`(合成)+`IsScalarTower.
+algebraMap_eq`(`B→B'→T`が`B→T`と一致すること)を`MvPolynomial.
+ringHom_ext`で確認するだけの、`CorrHyp`非依存の一般的な可換環論の事実。
+`descendPieceR`(`ExtLimit.lean`)を`R`レベルからさらに`R'`レベルへ昇格
+したものが、`descendPieceR`自体の`ℝ`への底変換(`pieceAlgebra_R_model_
+baseChange`)と`quotient_mvPolynomial_baseChange`を通じて正しく整合する
+ことを示すための橋渡し——`descendPieceR`の局所化(`Lemma 4.1`)がℝレベル
+で正しい対象を実現していることの証明の核心部品。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem ideal_map_mvPolynomial_promote_baseChange_eq (B B' T ι : Type) [CommRing B] [CommRing B'] [CommRing T]
+    [Algebra B B'] [Algebra B' T] [Algebra B T] [IsScalarTower B B' T] (I : Ideal (MvPolynomial ι B)) :
+    Ideal.map (MvPolynomial.map (algebraMap B' T)) (Ideal.map (MvPolynomial.map (algebraMap B B')) I) =
+      Ideal.map (MvPolynomial.map (algebraMap B T)) I := by
+  rw [Ideal.map_map]
+  congr 1
+  apply MvPolynomial.ringHom_ext
+  · intro b
+    simp [RingHom.comp_apply, IsScalarTower.algebraMap_eq B B' T]
+  · intro x
+    simp
+
 end ABC3.Found.CorrHyp
