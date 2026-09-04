@@ -967,3 +967,23 @@ LubinTateActionEndomorphism.lean`で既に`sorry`無しで確立済み)を
 迂回できた。次に狙うべき比較的手前の目標: `a=0`の場合(`0·x=0`、
 `LubinTateAction`に`0`での挙動を示す既存補題があれば同様に迂回
 できるかもしれない)。
+
+**続報(2026-09-04・続き、`a=0`の場合も解決——`0·x=0`)**: 予告通り
+既存の補題だけで迂回できた(commit`8bf3e26b`)。
+`LubinTateActionPiPow.lean`に**`LubinTateAction_zero_eq_zero`**
+(`[0]_f=0`)を追加——`LubinTateAction_one_eq_X`と全く同じ
+`powerSeries_uniqueness`の型で、鍵は`coeff_subst_zero_eq_zero_1var`
+(`Found/PGC/LubinTateEndoBaseCase.lean`に**既に存在していた**、
+`subst 0 f = 0`を`f`の定数項が0であることから示す1変数版補題)。
+`AdjoinIntegers.lean`に**`lubinTateActionAtTorsionPoint_zero`**
+(`0·x=0`)も追加——上記と`PowerSeries.aeval`が`AlgHom`(`0↦0`)で
+あることを組み合わせるだけ。
+
+★これで`lubinTateActionAtTorsionPoint`が満たすべき加群作用の公理の
+うち、**単位律(`1·x=x`)・零元の吸収律(`0·x=0`)の2つ**が実際に
+成り立つことを確認できた。教訓: 一般の`a,b`についての加法性・乗法性
+には依然として`subst`/`aeval`の深い橋渡しが必要という見通しは
+変わらないが、**特殊値(`a=0,1`)は既存の具体的な等式だけで完全に
+迂回できる**——このプロジェクトの膨大な既存資産(`LubinTateAction`
+関連ファイル群)には、探せばこの種の「特殊値での挙動」を示す補題が
+既に眠っていることが多い、と再確認した。
