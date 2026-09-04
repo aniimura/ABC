@@ -3274,3 +3274,59 @@ tools/check.mjs --brief`(既存NG 13件のまま)・`node tools/mojibake.mjs`
 決めるのが良い——全射性だけで十分な可能性もある。次に戻るなら、
 まず`/goal`側(`lean/ABC3/Skeleton/PGC/Section1.lean`の
 `residueCard_and_degree_recoverable.needs`)を再確認するところから。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+大きな節目(2026-09-05): **`reciprocityMapLimit`の核の特徴づけを完成**
+(`Found/PGC/LubinTateReciprocityMapLimitKernel.lean`新規)——
+節目(5)の部品(iii)が(i)(ii)(iii-前半・全射性)に続き**完全に**完成した
+
+「単射性」に代わる正しい主張(上の軌道修正を参照)——`ker(reciprocity
+MapLimit)`の特徴づけ——を、`K_π`という中間体オブジェクトを構成せず
+に、**生成元の言葉で直接**確立した:
+
+```
+σ∈ker(reciprocityMapLimit) ↔ ∀m,σ((psiGenSeq m).pt)=(psiGenSeq m).pt
+```
+
+すなわち`σ`が核に入ることと、無限compatible生成元列(古典的な
+`Λ_∞`の生成元)を**すべて固定する**ことが同値。これは古典論の
+`ker=Gal(K̄/K_π)`(`K_π:=K(Λ_∞)`)の、`K_π`自体を構成しない形での
+実現になっている。
+
+### 証明の骨格
+
+(→) `reciprocityMapLimit σ=1`から各`m`で`reciprocityMapLimitFamily
+σ(m+1)=1`を取り出し、`principalUnitsQuotientEquiv`の単射性
+(`MulEquiv.map_eq_one_iff`)で`reciprocityMap(x_m)(σ)=1`、
+`QuotientGroup.mk_one`(逆向き)で`=QuotientGroup.mk 1`に書き換えて
+から`reciprocityMap_spec`+`unitActionQuotientLift_mk`+
+`lubinTateActionAtTorsionPoint_one`(既出、単位元の作用は恒等)で
+`σ(x_m)=x_m`。
+(←) 逆に`∀m,σ(x_m)=x_m`から`lubinTateActionAtTorsionPoint_one`で
+`x_m=1·x_m`と書き換え、`reciprocityMap_eq_mk_of_apply_eq`(既出、
+全射性の証明で使ったのと同じ道具)+`principalUnitsQuotientEquiv`の
+`map_one`で結論する。
+
+新しい数学的な難所は無かった——全射性の証明で確立した道具立てを
+そのまま組み合わせるだけで届いた。
+
+ゲート: `lake build ABC3.Found.PGC.LubinTateReciprocityMapLimitKernel`
+(個別)・`lake build ABC3`(6590 jobs, 成功)・`node tools/check.mjs
+--brief`(既存NG 13件のまま)・`node tools/mojibake.mjs`(文字化けなし)
+すべて確認済み。
+
+### 節目(5)の全体像(2026-09-05時点)
+
+古典的Lubin-Tate理論の射影極限による局所類体論の実現——節目(5)——の
+**構成的な部分はすべて完成した**:
+- (i) `principalUnitsQuotientEquiv`の2つの自然性(`mk`上・遷移写像)。
+- (ii) `reciprocityMapLimit:Gal(K.closure/K.carrier)→*Compatible
+  Units K hπmax`の群準同型としての構成。
+- (iii) その**全射性**と**核の特徴づけ**(`ker=`「生成元をすべて
+  固定する自己同型全体」、単射性の正しい言い換え)。
+
+残る作業は、この節目(5)自体を`/goal`の残り8項目(特にProposition
+1.2の`Γ_K^ab≅(K^×)^∧`)へどう接続するか——次に戻るなら、まず
+`/goal`側の実際の必要性(`lean/ABC3/Skeleton/PGC/Section1.lean`の
+`residueCard_and_degree_recoverable.needs`)を再確認し、節目(5)の
+どの部分がどこまで使えるかを見極めるところから。
