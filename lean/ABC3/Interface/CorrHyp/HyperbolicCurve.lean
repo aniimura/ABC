@@ -74,12 +74,22 @@ noncomputable def StackType.e (t : StackType) : ℚ :=
     ∑ σ ∈ (Finset.univ : Finset t.Sigma), ((t.i σ : ℚ) - 1) / (t.i σ : ℚ)
 
 /-- [CorrHyp] §1–§6 の語彙を受ける `Interface`。フィールドの由来は各フィールドの
-docstring、および `ABC3.Skeleton.CorrHyp.*` の各節点の docstring を見よ。 -/
-structure HyperbolicCurveData where
+docstring、および `ABC3.Skeleton.CorrHyp.*` の各節点の docstring を見よ。
+
+★★**`Space` だけ universe 多相にした(逸脱、記録・2026-09-04)**。`§4` の
+`Ext`(係数拡大)を実際の `Scheme`(`Found/CorrHyp/SchemeFEt.lean`)で実装しようと
+したところ、`Space := Over BaseK` が `Over BaseK : Type 1`(`Scheme` 自身が
+`Type 1` に住む——大きな圏の宿命)である一方 `Space : Type`(`Type 0` 固定)
+だったため型エラーになった。`Fuchsian`/`Aut` 等の他フィールドは `FuchsianGroup`
+モデル(`Type 0`)のままで構わないので**そのまま**にし、`Space` **だけ**
+`Type u` に上げた——`corrHypInstance`/`corrHypInstance2`(`u:=0` で自動的に
+そのまま通る)には一切影響しない、後続の証明にも影響しない(既存の
+`variable (D : HyperbolicCurveData)` は Lean が自動で `u` を汎化する)。 -/
+structure HyperbolicCurveData.{u} where
   /-- k 上の双曲曲線・その商であるスタック(`Y`)・モジュライスタック(`M_{g,r}`)を
   まとめて表す台。原文の `X` / `𝒳` / `Y` / `𝒴` / `M_{g,r}` はすべてここに落ちる
   (ファイル冒頭の読み替えを見よ)。 -/
-  Space : Type
+  Space : Type u
   /-- 有限 étale 射(原文 `finite, étale morphism`)。 -/
   FEt : Space → Space → Type
   /-- 恒等射(`Found/CorrHyp/FuchsianGroup.lean` の `isFiniteIndexIn_refl` が
