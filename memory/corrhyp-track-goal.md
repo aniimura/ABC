@@ -905,3 +905,22 @@ basicOpen`が与える開集合の等式を、`Scheme.Hom.isoImage`+`eqToIso`で
 整合性、まだ手つかず)、(e)貼り合わせ後の有限性確認、の2点。
 
 コミット: `925233b1`(exists_transitionIso完成)・`63edfedc`(記録)。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報
+(3重の重なりも新しい数学を要さないと判明、GlueDataは配線のみ残る、
+集計10/24で変わらず)。`exists_transitionIso`が`f₂`に**任意の元**
+(たとえば`f_j*f_k`という積)を渡せることに気づき、3重の重なりも
+**同じ補題の1回の適用**でカバーされると確認した(`exists_transitionIso_
+finset`、`ExtLimit.lean`、★sorry無し)。`Z_i.basicOpen(s_ij)⊓Z_i.
+basicOpen(s_ik)=Z_i.basicOpen(s_ij·s_ik)`(`basicOpen_mul`)と環準同型の
+乗法性から、この「1回適用」の結果が個別の2つの適用の積に一致すること
+も直接確認できる。
+
+**これでGlueDataの数学的な核心はすべて完成した**——残る作業は
+「これらの部品を`CategoryTheory.GlueData`の12フィールドとして実際に
+配線する」という、新しい数学を要さない(が分量のある)エンジニアリング
+作業のみに帰着した。`TopCat.GlueData.MkCore`(トポロジー版の簡略化
+コンストラクタ、cocycleが`rfl`で自動)のScheme版はmathlibに見当たらず
+——12フィールドの直接組み立てが唯一の道と確認済み。
+
+コミット: `68345679`(発見の記録)・`dd1354ea`(exists_transitionIso_finset)。
