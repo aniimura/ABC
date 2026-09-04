@@ -3659,6 +3659,54 @@ theorem falt1_differentIdeal_tower_length_via_hlen_eq
   rw [hlen_eq] at h
   exact h
 
+/-!
+## `Wₙ₊₁` を名前付き `def` で抽象化する(2026-09-04)
+
+`falt1_cancelConductorDelta_assembled` が戻り値を `True` にしている理由
+(このすぐ下のdocstringに記録済み)は、`Wₙ₊₁`(`integralClosure Wn
+(AdjoinRoot(...))`という巨大な入れ子式)を**シグネチャに`set`なしで
+そのまま複数回書く**と、`differentIdeal`・`Ideal.map`の型検査のたびに
+instance 探索をやり直す必要が生じ、`maxHeartbeats 3000000`でも
+`isDefEq`/`synthesize pending MVars`のtimeoutに達することが判明した
+ため(実測、`falt1_cancelConductorDelta_assembled`への統合を2度試みて
+2度とも revert・記録済み、`falt1-goal.md`参照)。
+
+**解決策**: `Wₙ₊₁`を独立の名前付き`def`(`Falt1Wn1`)として1回だけ定義し、
+必要な基本instance(`CommRing`・`Algebra Wn`・`Algebra V0`・
+`IsScalarTower V0 Wn`)を`inferInstanceAs`で**1回だけ**登録する。
+シグネチャでは`Falt1Wn1 V0 Wn π n`という短い適用が(複数回書いても)
+高速に型検査される(実測:数秒 vs. 実装前は500秒近いtimeout)。
+証明の中では通常通り`set Wn1 := integralClosure Wn (AdjoinRoot gK)`
+で局所展開し、`Falt1Wn1`側のinstance仮定は`‹...›`(assumption)で
+`Wn1`側へ1回だけ変換すれば、残りの証明は既存のものと同じ速度で進む
+——最後の`exact`は`Wn1`型で明示的に`have`した結果を返すだけで、
+`Falt1Wn1`の goal との defeq 判定は(既に確定した局所 instance を
+再利用するだけなので)高速。 -/
+
+noncomputable def Falt1Wn1 (V0 Wn : Type*) [CommRing V0] [CommRing Wn] [Algebra V0 Wn] (π : V0) (n : ℕ) : Type _ :=
+  integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+    (algebraMap Wn (FractionRing Wn))))
+
+noncomputable instance Falt1Wn1.commRing {V0 Wn : Type*} [CommRing V0] [CommRing Wn] [Algebra V0 Wn] (π : V0) (n : ℕ) :
+    CommRing (Falt1Wn1 V0 Wn π n) :=
+  inferInstanceAs (CommRing (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+    (algebraMap Wn (FractionRing Wn))))))
+
+noncomputable instance Falt1Wn1.algebra {V0 Wn : Type*} [CommRing V0] [CommRing Wn] [Algebra V0 Wn] (π : V0) (n : ℕ) :
+    Algebra Wn (Falt1Wn1 V0 Wn π n) :=
+  inferInstanceAs (Algebra Wn (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+    (algebraMap Wn (FractionRing Wn))))))
+
+noncomputable instance Falt1Wn1.algebraV0 {V0 Wn : Type*} [CommRing V0] [CommRing Wn] [Algebra V0 Wn] (π : V0) (n : ℕ) :
+    Algebra V0 (Falt1Wn1 V0 Wn π n) :=
+  inferInstanceAs (Algebra V0 (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+    (algebraMap Wn (FractionRing Wn))))))
+
+instance Falt1Wn1.isScalarTower {V0 Wn : Type*} [CommRing V0] [CommRing Wn] [Algebra V0 Wn] (π : V0) (n : ℕ) :
+    IsScalarTower V0 Wn (Falt1Wn1 V0 Wn π n) :=
+  inferInstanceAs (IsScalarTower V0 Wn (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+    (algebraMap Wn (FractionRing Wn))))))
+
 set_option maxHeartbeats 3000000 in
 set_option synthInstance.maxHeartbeats 3000000 in
 /-- **Theorem 1.2・item 3c の中核道具の完全な組み立て**:
@@ -3861,6 +3909,173 @@ theorem falt1_cancelConductorDelta_assembled
   --   Module.length Wn1 (Wn1 ⧸ Ideal.map (algebraMap Wn Wn1) (differentIdeal V0 Wn))
   --     = Module.length Wn1 (Wn1 ⧸ differentIdeal V1 Wn1)
   trivial
+
+set_option maxHeartbeats 3000000 in
+set_option synthInstance.maxHeartbeats 3000000 in
+/-- **Theorem 1.2・3b/3c、`differentIdeal`だけで書かれた閉じた式(完成、
+2026-09-04)**: `falt1_cancelConductorDelta_assembled`と同じ導出(`ψ`・`w`・
+`x`の取得、`hdiamond`・`hcond`・`hspan_eq`・`hfinal`の構成)を`Falt1Wn1`と
+いう名前付き`def`(このファイル冒頭近くで定義)を使って行い、
+`falt1_differentIdeal_tower_length`(Kähler微分の完全列を経由しない、
+`differentIdeal`の塔公式からの直接路)で結ぶ。`Wₙ₊₁`を毎回`integralClosure
+Wn(AdjoinRoot(...))`とベタ書きするとシグネチャの型検査自体が
+timeout する(前の定理が`True`を返している理由と同じ)ため、名前付き
+`def`で1回だけ展開することで解決した——これが Exercise 13.7.4 の議論
+(kernel/cokernel の長さ評価)とは独立に、`differentIdeal`の塔の乗法性
+だけから出る**閉じた形の結論**である:
+```
+length_{Wₙ₊₁}(Wₙ₊₁⧸differentIdeal V0 Wₙ₊₁) =
+  length_{Wₙ₊₁}(Wₙ₊₁⧸differentIdeal Wₙ Wₙ₊₁) +
+  length_{Wₙ₊₁}(Wₙ₊₁⧸Ideal.map(algebraMap Wₙ Wₙ₊₁)(differentIdeal V0 Wₙ))
+```
+残る作業: 左辺`differentIdeal V0 Wₙ₊₁`を`Ω¹_{Wₙ₊₁/V0}`の長さ(Lemma 1.1
+経由)と結びつけるには`Wₙ₊₁`の`V0`上の単項生成元が要る(未解決、
+falt1-goal.md参照)。右辺第2項は既にこの`Wₙ₊₁`の構成(`x`が`Wₙ`-代数として
+生成する)から求まる形にできている。 -/
+theorem falt1_theorem12_differentIdeal_length
+    {V0 Wn : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    (π : V0) (n : ℕ)
+    (hn : (n : FractionRing V0) ≠ 0) (hπne0 : algebraMap V0 (FractionRing V0) π ≠ 0)
+    (hprime : (Ideal.span ({π} : Set V0)).IsPrime) (hnotsq : π ∉ (Ideal.span ({π} : Set V0)) ^ 2)
+    (hnpos : 0 < n)
+    (hn' : (n : FractionRing Wn) ≠ 0)
+    (hπne0' : algebraMap Wn (FractionRing Wn) (algebraMap V0 Wn π) ≠ 0)
+    (hprime' : (Ideal.span ({algebraMap V0 Wn π} : Set Wn)).IsPrime)
+    (hnotsq' : algebraMap V0 Wn π ∉ (Ideal.span ({algebraMap V0 Wn π} : Set Wn)) ^ 2)
+    (hinjV0Wn : Function.Injective (algebraMap V0 Wn))
+    [Module.Finite V0 Wn]
+    [Module.IsTorsionFree V0 Wn]
+    [Algebra (FractionRing V0) (FractionRing Wn)]
+    [IsScalarTower V0 (FractionRing V0) (FractionRing Wn)]
+    [Algebra.IsSeparable (FractionRing V0) (FractionRing Wn)]
+    [IsDedekindDomain (Falt1Wn1 V0 Wn π n)]
+    [Module.IsTorsionFree V0 (Falt1Wn1 V0 Wn π n)]
+    [Module.IsTorsionFree Wn (Falt1Wn1 V0 Wn π n)] :
+    Module.length (Falt1Wn1 V0 Wn π n) ((Falt1Wn1 V0 Wn π n) ⧸ differentIdeal V0 (Falt1Wn1 V0 Wn π n)) =
+      Module.length (Falt1Wn1 V0 Wn π n) ((Falt1Wn1 V0 Wn π n) ⧸ differentIdeal Wn (Falt1Wn1 V0 Wn π n)) +
+      Module.length (Falt1Wn1 V0 Wn π n) ((Falt1Wn1 V0 Wn π n) ⧸
+        Ideal.map (algebraMap Wn (Falt1Wn1 V0 Wn π n)) (differentIdeal V0 Wn)) := by
+  set fK : Polynomial (FractionRing V0) := (Polynomial.X ^ n - Polynomial.C π).map (algebraMap V0 (FractionRing V0)) with hfKdef
+  set gK : Polynomial (FractionRing Wn) := (Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π)).map (algebraMap Wn (FractionRing Wn)) with hgKdef
+  have hirrf : Irreducible fK :=
+    ABC3.Found.Falt1.eisenstein_X_pow_sub_C_irreducible_map π n hnpos hprime hnotsq
+  haveI : Fact (Irreducible fK) := ⟨hirrf⟩
+  have hirrg : Irreducible gK :=
+    ABC3.Found.Falt1.eisenstein_X_pow_sub_C_irreducible_map (algebraMap V0 Wn π) n hnpos hprime' hnotsq'
+  haveI : Fact (Irreducible gK) := ⟨hirrg⟩
+  have hmonicf : fK.Monic := (Polynomial.monic_X_pow_sub_C π hnpos.ne').map _
+  haveI : Module.Finite (FractionRing V0) (AdjoinRoot fK) := hmonicf.finite_adjoinRoot
+  haveI : FiniteDimensional (FractionRing V0) (AdjoinRoot fK) := ‹Module.Finite _ _›
+  have hmonicg : gK.Monic := (Polynomial.monic_X_pow_sub_C (algebraMap V0 Wn π) hnpos.ne').map _
+  haveI : Module.Finite (FractionRing Wn) (AdjoinRoot gK) := hmonicg.finite_adjoinRoot
+  haveI : FiniteDimensional (FractionRing Wn) (AdjoinRoot gK) := ‹Module.Finite _ _›
+  have hsepf : fK.Separable := by
+    have hmapeq : fK = Polynomial.X ^ n - Polynomial.C (algebraMap V0 (FractionRing V0) π) := by
+      rw [hfKdef]; simp
+    rw [hmapeq]; exact Polynomial.separable_X_pow_sub_C _ hn hπne0
+  haveI : Algebra.IsSeparable (FractionRing V0) (AdjoinRoot fK) :=
+    ABC3.Found.Falt1.algIsSeparable_adjoinRoot_of_separable _ hmonicf hsepf
+  have hsepg : gK.Separable := by
+    have hmapeq : gK = Polynomial.X ^ n - Polynomial.C (algebraMap Wn (FractionRing Wn) (algebraMap V0 Wn π)) := by
+      rw [hgKdef]; simp
+    rw [hmapeq]; exact Polynomial.separable_X_pow_sub_C _ hn' hπne0'
+  haveI : Algebra.IsSeparable (FractionRing Wn) (AdjoinRoot gK) :=
+    ABC3.Found.Falt1.algIsSeparable_adjoinRoot_of_separable _ hmonicg hsepg
+  haveI : IsDedekindDomain V0 := by infer_instance
+  haveI : IsDedekindDomain Wn := by infer_instance
+  haveI hDedV1 : IsDedekindDomain (integralClosure V0 (AdjoinRoot fK)) := by infer_instance
+  set Wn1 := integralClosure Wn (AdjoinRoot gK) with hWn1def
+  haveI hDedWn1 : IsDedekindDomain Wn1 := ‹IsDedekindDomain (Falt1Wn1 V0 Wn π n)›
+  haveI hTFV1 : Module.IsTorsionFree V0 (integralClosure V0 (AdjoinRoot fK)) :=
+    ABC3.Found.Falt1.falt1ModuleIsTorsionFreeV0V1 π n hprime hnotsq hnpos
+  haveI hTFWn1 : Module.IsTorsionFree Wn Wn1 := ‹Module.IsTorsionFree Wn (Falt1Wn1 V0 Wn π n)›
+  haveI hTFV0Wn1 : Module.IsTorsionFree V0 Wn1 := ‹Module.IsTorsionFree V0 (Falt1Wn1 V0 Wn π n)›
+  haveI hFinWnWn1 : Module.Finite Wn Wn1 :=
+    ABC3.Found.Falt1.falt1ModuleFiniteWnWn1 π n hnpos hn' hπne0' hprime' hnotsq'
+  set V1 := integralClosure V0 (AdjoinRoot fK) with hV1def
+  obtain ⟨ψ, w, x, hwx, hψinj, hwadjoin, hwminpoly, hxadjoin, hxminpoly⟩ :=
+    ABC3.Found.Falt1.falt1BaseChangeGeneratorFull π n hn hπne0 hprime hnotsq hnpos hn' hπne0' hprime' hnotsq' hinjV0Wn
+  letI algV1Wn1 : Algebra V1 Wn1 := ψ.toRingHom.toAlgebra
+  haveI hSTV0V1Wn1 : IsScalarTower V0 V1 Wn1 := by
+    apply IsScalarTower.of_algebraMap_eq
+    intro y
+    exact (ψ.commutes y).symm
+  haveI hSTV0WnWn1 : IsScalarTower V0 Wn Wn1 := by infer_instance
+  haveI hFinV0V1 : Module.Finite V0 V1 :=
+    ABC3.Found.Falt1.falt1ModuleFiniteV0V1 π n hn hπne0 hprime hnotsq hnpos
+  haveI hFinV0Wn1 : Module.Finite V0 Wn1 :=
+    ABC3.Found.Falt1.falt1ModuleFiniteV0Wn1 π n hnpos hn' hπne0' hprime' hnotsq'
+  haveI hFinV1Wn1 : Module.Finite V1 Wn1 := by
+    haveI := ABC3.Found.Falt1.falt1ModuleFiniteV0Wn1 π n hnpos hn' hπne0' hprime' hnotsq'
+    exact Module.Finite.of_restrictScalars_finite V0 V1 Wn1
+  haveI hIsDomV1 : IsDomain V1 := inferInstance
+  haveI hIsDomWn1 : IsDomain Wn1 := inferInstance
+  haveI hTFV1Wn1 : Module.IsTorsionFree V1 Wn1 :=
+    ABC3.Found.Falt1.moduleIsTorsionFree_of_injective hψinj
+  haveI hTFV0Wn' : Module.IsTorsionFree V0 Wn :=
+    ABC3.Found.Falt1.moduleIsTorsionFree_of_injective hinjV0Wn
+  haveI hIsIntClosedV0 : IsIntegrallyClosed V0 := inferInstance
+  letI algFRWn1 := (ABC3.Found.Falt1.falt1_hsep_bundled π n hnpos hn' hπne0' hprime' hnotsq' hinjV0Wn).1
+  have hsep := (ABC3.Found.Falt1.falt1_hsep_bundled π n hnpos hn' hπne0' hprime' hnotsq' hinjV0Wn).2
+  have hdiamond := ABC3.Found.Falt1.differentIdeal_tower_diamond
+    (Vn := V0) (Vn1 := V1) (Wn := Wn) (Wn1 := Wn1) hsep
+  have hwfield := ABC3.Found.Falt1.falt1_fieldLevel_adjoin_top_of_ringLevel_minpoly π n hn hπne0 hprime hnotsq hnpos w hwminpoly
+  have hdiffV1 := ABC3.Found.Falt1.differentIdeal_eq_span_derivative w hwfield hwadjoin
+  rw [hwminpoly] at hdiffV1
+  have hxfield := ABC3.Found.Falt1.falt1_fieldLevel_adjoin_top_of_ringLevel_minpoly (algebraMap V0 Wn π) n hn' hπne0' hprime' hnotsq' hnpos x hxminpoly
+  have hcond := conductor_mul_differentIdeal Wn (FractionRing Wn) (AdjoinRoot gK) x hxfield
+  rw [hxminpoly] at hcond
+  have hderivV0 : Polynomial.aeval w (Polynomial.derivative (Polynomial.X ^ n - Polynomial.C π : Polynomial V0))
+      = (n : V1) * w ^ (n-1) := by
+    have hderiv : Polynomial.derivative (Polynomial.X ^ n - Polynomial.C π : Polynomial V0)
+        = Polynomial.C (n : V0) * Polynomial.X ^ (n-1) := by
+      rw [Polynomial.derivative_sub, Polynomial.derivative_X_pow, Polynomial.derivative_C, sub_zero]
+    rw [hderiv]
+    simp [Polynomial.aeval_mul, Polynomial.aeval_X_pow]
+  have hderivWn : Polynomial.aeval x (Polynomial.derivative (Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn))
+      = (n : Wn1) * x ^ (n-1) := by
+    have hderiv : Polynomial.derivative (Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)
+        = Polynomial.C (n : Wn) * Polynomial.X ^ (n-1) := by
+      rw [Polynomial.derivative_sub, Polynomial.derivative_X_pow, Polynomial.derivative_C, sub_zero]
+    rw [hderiv]
+    simp [Polynomial.aeval_mul, Polynomial.aeval_X_pow]
+  have hspan_eq : Ideal.span {Polynomial.aeval x (Polynomial.derivative (Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn))}
+      = Ideal.map ψ.toRingHom (differentIdeal V0 V1) := by
+    rw [hderivWn, hdiffV1, hderivV0, Ideal.map_span]
+    congr 1
+    simp only [Set.image_singleton]
+    congr 1
+    rw [map_mul, map_pow, map_natCast, show ψ.toRingHom w = ψ w from rfl, hwx]
+  letI algFRV1 := (ABC3.Found.Falt1.falt1_hsepV0V1_bundled π n hn hπne0 hprime hnotsq hnpos).1
+  have hsepV0V1 : @Algebra.IsSeparable (FractionRing V0) (FractionRing V1) _ _ algFRV1 :=
+    (ABC3.Found.Falt1.falt1_hsepV0V1_bundled π n hn hπne0 hprime hnotsq hnpos).2
+  have hdiffV1_ne : differentIdeal V0 V1 ≠ ⊥ :=
+    @differentIdeal_ne_bot V0 V1 _ _ _ _ _ _ _ _ hsepV0V1
+  have hIdiff_ne : Ideal.map ψ.toRingHom (differentIdeal V0 V1) ≠ 0 := by
+    show Ideal.map ψ.toRingHom (differentIdeal V0 V1) ≠ ⊥
+    intro heq
+    exact hdiffV1_ne ((Ideal.map_eq_bot_iff_of_injective hψinj).mp heq)
+  have hfinal := ABC3.Found.Falt1.cancel_conductor_delta
+    (Ideal.map ψ.toRingHom (differentIdeal V0 V1)) (differentIdeal Wn Wn1)
+    (conductor Wn x) (Ideal.span {Polynomial.aeval x (Polynomial.derivative (Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn))})
+    (differentIdeal V1 Wn1) (Ideal.map (algebraMap Wn Wn1) (differentIdeal V0 Wn))
+    hdiamond hcond hspan_eq hIdiff_ne
+  have hcondprod_ne : conductor Wn x * differentIdeal Wn Wn1 ≠ 0 := by
+    rw [hcond, hspan_eq]
+    exact hIdiff_ne
+  have hcond_top : conductor Wn x = ⊤ := conductor_eq_top_iff_adjoin_eq_top.mpr hxadjoin
+  have hIWnWn1_ne : differentIdeal Wn Wn1 ≠ 0 := by
+    have h := hcondprod_ne
+    rw [hcond_top, Ideal.top_mul] at h
+    exact h
+  haveI hPIDWn1 : IsPrincipalIdealRing Wn1 :=
+    ABC3.Found.Falt1.falt1_isPrincipalIdealRing_of_finite_ext_of_DVR (Wn := Wn) (Wn1 := Wn1)
+  have hresult : Module.length Wn1 (Wn1 ⧸ differentIdeal V0 Wn1) =
+      Module.length Wn1 (Wn1 ⧸ differentIdeal Wn Wn1) +
+      Module.length Wn1 (Wn1 ⧸ Ideal.map (algebraMap Wn Wn1) (differentIdeal V0 Wn)) :=
+    ABC3.Found.Falt1.falt1_differentIdeal_tower_length hsep hIWnWn1_ne
+  exact hresult
 
 /-!
 ## Exercise 13.7.4 (4)への足場: 第二基本完全列の単射性(2026-09-04)
