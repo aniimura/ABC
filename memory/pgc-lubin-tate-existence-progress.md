@@ -3159,3 +3159,64 @@ QuotientLift(U)=σ(x)`)を`σ,σ'`それぞれに適用すれば、同じUから
 (個別)・`lake build ABC3`(6590 jobs, 成功)・`node tools/check.mjs
 --brief`(既存NG 13件のまま)・`node tools/mojibake.mjs`(文字化けなし)
 すべて確認済み。
+
+## ★★★★★軌道修正2(2026-09-05、K_πの構成・貼り合わせより**単純な
+コンパクト性論法**を発見・部品を確立、`Found/PGC/LubinTateReciprocity
+Compactness.lean`新規)
+
+「`K_π`を構成し、両立する自己同型の無限列を貼り合わせる」という
+当初の計画は、**より単純なコンパクト性論法**に置き換えられることが
+分かった: `Gal(K.closure/K.carrier)`は副有限群ゆえコンパクトであり、
+各レベル`n`での条件`C_n:={σ:σ(x_n)=u·x_n}`は空でなく閉でn跨ぎで
+入れ子(`C_{n+1}⊆C_n`)——`IsCompact.nonempty_iInter_of_sequence_
+nonempty_isCompact_isClosed`(mathlib)で交わりが空でないことが従い、
+その交わりの元`σ`が**すべての`n`で同時に**条件を満たす。**`K_π`
+という新しい対象も、「無限列の貼り合わせ」という難所も回避できる**
+——節目(5)の全射性に向けた、より短い道筋。
+
+### 確立した部品(すべてsorry無し、`Found/PGC/LubinTateReciprocity
+Compactness.lean`)
+
+- `charZero_carrier`: `K.carrier`は`ℚ_[p]`の有限次拡大なので標数0
+  (`charZero_of_injective_algebraMap`)。
+- `isGalois_carrier_closure`: `K.closure/K.carrier`はGalois拡大
+  (`IsAlgClosure.normal`+標数0⟹`PerfectField`⟹分離的)。
+- `compactSpace_algEquiv`: **`Gal(K.closure/K.carrier)`はコンパクト**
+  ——`InfiniteGalois.continuousMulEquivToLimit`(副有限群の標準的な
+  射影極限との同相、`Mathlib.FieldTheory.Galois.Profinite`)を経由。
+- `mem_fixingSubgroup_adjoin_of_eq_self`: `x`を固定する自己同型は
+  `K.carrier⟮x⟯`全体を固定する(`x`が生成元であることと
+  `IntermediateField.algHom_ext_of_eq_adjoin`から)。
+- `isClosed_algEquiv_eq`: **`{σ:σ(x)=y}`は閉集合**(`σ₀(x)=y`となる
+  `σ₀`が1つあれば)——`(K.carrier⟮x⟯).fixingSubgroup`の`σ₀`による
+  左コセットに一致し、`fixingSubgroup`は開(`IntermediateField.
+  fixingSubgroup_isOpen`)かつ閉(`Subgroup.isClosed_of_isOpen`)、
+  コセットは同相写像(`Homeomorph.mulLeft σ₀`)の像なので閉性を保つ。
+
+新しい罠は無かった(小さな躓きはあった: `fixingSubgroup`のmembership
+が`{x}`ではなく`K.carrier⟮x⟯`全体を要求すること・`Homeomorph.mulLeft`
+の`_apply`補題が無いこと、など、いずれも`show`で迂回)。
+
+### 次に戻るときの最優先タスク(更新・簡略化)
+
+1. `v∈CompatibleUnits`を単一の大域単数`u`へ持ち上げる
+   (`unitReductionHom_surjective`、既出)。
+2. 各`n≥1`について`C_n:={σ:σ((psiGenSeq(n-1)).pt)=u·(psiGenSeq
+   (n-1)).pt}`を定義し、(a)`reciprocityMap_surjective`+`reciprocityMap
+   _spec`で非空、(b)`isClosed_algEquiv_eq`(本ファイル)で閉、
+   (c)`algEquiv_eq_of_reciprocityMap_eq_of_map_eq`(既出、前回)
+   +`principalUnitsQuotientEquiv_map_eq`(既出、(i))で`C_{n+1}⊆C_n`
+   を示す——この(c)が実質的に唯一残る組み立て作業。
+3. `IsCompact.nonempty_iInter_of_sequence_nonempty_isCompact_
+   isClosed`(mathlib)で交わりが空でないことを結論し、その元`σ`が
+   `reciprocityMapLimit σ = v`を満たすことを(`reciprocityMapLimit`
+   の定義を展開して)確認する——これで全射性が閉じる見込み。
+
+★`Found/PGC/LubinTateReciprocityAlgEquivCompat.lean`(前回)の
+`algEquiv_eq_of_reciprocityMap_eq_of_map_eq`と`normal_adjoin_of_
+mem_iteratedLubinTatePsiTorsionPoints`(前々回)は、このコンパクト性
+論法では**直接は使わない**見込み(前者は上の2.(c)で使える形に
+再利用できる可能性はあるが、後者(`K_π`の正規性)はK_π自体を構成
+しないこの経路では不要になった)——ただし両方とも他の文脈
+(例えば`galoisReciprocityEquiv`系や将来の核の特徴づけ)で有用な
+可能性があるので、削除はしない。
