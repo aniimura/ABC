@@ -3527,3 +3527,26 @@ has type ... but is expected to have type Algebra.Etale ...` という、
 ——実際に混在させて(`R C : Type*` かつ `PUnit : Type`)問題なく
 `lean_check` が通ることを確認済み。
 実例: `lean/ABC3/Found/Falt1/KaehlerAux.lean` の `tensorPolynomialAlgEquiv`。
+
+## 26. `Polynomial.mapRingHom f` を `FunLike` 適用した形と `.map f`(dot記法)
+は定義上等しい(`rfl`)のに構文上一致せず `rw`/`simp_rw` が刺さらない(2026-09-04)
+
+`(monomial n a).map f = monomial n (f a)`(`Polynomial.map_monomial`)を
+「多項式の多項式」(`Polynomial (Polynomial R)`)の**外側**の階層に適用すると、
+`f := Polynomial.mapRingHom φ`(内側の係数環を写す束縛`RingHom`)についての
+`f a`(`FunLike`適用、`a : Polynomial R`)が出現する。これは
+`a.map φ`(`Polynomial.map`のdot記法)と**定義上完全に等しい**
+(`example : ⇑(Polynomial.mapRingHom f) = Polynomial.map f := rfl` が通る)
+にもかかわらず、`Polynomial.map_sum`(dot記法`.map`前提)や、dot記法で
+書いた別の補題(`key2`等)を`rw`/`simp_rw`で当てようとすると
+「instances 透明度で type-correct でない」失敗になる——`FgSubalgebra`
+(第22・25項)と同種だが、今回は`FgSubalgebra`の透明度ではなく
+**`FunLike`適用 vs dot記法**という別の構文不一致が原因。
+
+**How to apply**: `have hcoe : (⇑(Polynomial.mapRingHom φ) : Polynomial R →
+Polynomial S) = Polynomial.map φ := rfl` を明示的に挟んで `rw [hcoe]` して
+から先に進む——以後は一貫して`.map`(dot記法)側の補題だけを使う
+(`Polynomial.map_sum`・`Polynomial.map_monomial`等、生成的な`map_sum`
+ではなく`Polynomial.map_sum`を選ぶ)。実例:
+`lean/ABC3/Found/CorrHyp/FieldLimit.lean` の
+`exists_fg_subalgebra_tensor_bivariate_finset`。
