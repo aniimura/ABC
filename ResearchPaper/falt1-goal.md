@@ -1678,6 +1678,33 @@ mathlib での正確な組み立て方は未確認)。
       `falt1_cancelConductorDelta_assembled`の**証明の中でだけ**行う
       よう設計し直すこと。
 
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、
+      上記の設計(`V1`を経由しない・`IsDedekindDomain`を追加の明示的
+      仮定として渡す・`Ideal.top_mul`で`hIWnWn1_ne`を作る・
+      `falt1_differentIdeal_tower_length hsep hIWnWn1_ne`で結ぶ)を
+      実際に試したところ、**instance 探索ではなく elaboration の
+      性能上の壁**に当たった: `set_option maxHeartbeats 3000000`
+      (既にこの定理に設定済み、通常の150倍)まで上げても
+      `(deterministic) timeout at isDefEq` で失敗する(`lake build`
+      実測、479秒かけてタイムアウト)。原因と見立てられるのは、
+      `Wn1`(`integralClosure Wn (AdjoinRoot(...))`という巨大な入れ子
+      式)を**シグネチャに`set`なしでそのまま3回以上書いた**ため、
+      `differentIdeal`・`Ideal.map`の型検査のたびに同じ巨大な式を
+      unfold して instance 探索し直す必要が生じ、証明本体側の
+      `set Wn1 := ...`(略記)と噛み合わないこと。安全のため
+      `falt1_cancelConductorDelta_assembled`への変更は再度 revert し
+      (`git diff`で無変更を確認)、`falt1_differentIdeal_tower_length`
+      (独立の一般補題、既に commit 済み)はそのまま活かした。
+      **次回の具体的な方針**: シグネチャレベルで`Wn1`を`let`束縛
+      (`theorem foo ... : let Wn1 := ...; <本文>`という形)して1回だけ
+      定義し、`intro`で導入してから使うか、あるいは`falt1_
+      cancelConductorDelta_assembled`自体を分割し、`Wn1`・`V1`を
+      **具体的な`integralClosure`式ではなく抽象的な型変数として渡す
+      新しいラッパー定理**(`falt1_differentIdeal_tower_length`と
+      同じ抽象化レベル)を用意して、そちらに`hlen_eq`等の**証明済み
+      の事実だけ**を引数として渡す設計にすること——巨大な具象型を
+      シグネチャに繰り返し書く設計そのものを避けるのが本筋。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
