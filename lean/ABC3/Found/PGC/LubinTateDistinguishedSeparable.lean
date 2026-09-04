@@ -1,4 +1,5 @@
 import ABC3.Found.PGC.LubinTatePsiNorm
+import ABC3.Found.PGC.AdjoinPAdicLocalField
 
 /-!
 # `D_n` は分離的——`Λ_n` は真に `q^n` 個の相異なる元(`sorry` 無し)
@@ -471,5 +472,33 @@ theorem hasEval_of_mem_iteratedLubinTateTorsionPoints {p : ℕ} [Fact p.Prime]
     PowerSeries.HasEval x :=
   tendsto_pow_atTop_nhds_zero_of_norm_lt_one
     (spectralNorm_lt_one_of_mem_iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n x hx)
+
+/-- `Λ_n` の元 `x` を添加した単純拡大 `K.carrier⟮x⟯` 自身を新たな
+`PAdicLocalField p` として得る(`AdjoinPAdicLocalField.lean::
+adjoinPAdicLocalField` の torsion-point 版)——必要な
+`FiniteDimensional K.carrier _` は
+`finiteDimensional_adjoin_of_mem_iteratedLubinTateTorsionPoints` から。
+これで `Found/PGC/LocalFieldNorm.lean` 等が `K` に与えていた機構
+(`𝒪[·]`・`Valued`・adic 完備性・`Ideal.isLinearTopology` の土台)が
+この新しい局所体へそのまま流用できる——ただし
+`AdjoinPAdicLocalField.lean` の docstring に記した通り、この新しい
+ノルム構造と `K.closure` から部分体として継承されるノルム構造が
+definitionally 一致するとは限らないので、両者の一致は今後の課題。 -/
+noncomputable def torsionPointAdjoinPAdicLocalField {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n) :
+    PAdicLocalField p :=
+  haveI := finiteDimensional_adjoin_of_mem_iteratedLubinTateTorsionPoints
+    K hq hπmax hπne0 f hf0 hf1 hf n x hx
+  adjoinPAdicLocalField K x
 
 end ABC3.Found.PGC
