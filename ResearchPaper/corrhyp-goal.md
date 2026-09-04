@@ -750,3 +750,55 @@ hU hV le_rfl` と書くと `hU`/`hV`/`le_rfl` がそれぞれ 1 つずつズレ�
 を実際に呼び出すために必要だった最後の理論的ギャップが埋まった。
 `Lemma 4.1` の証明を組み立てるのに必要な道具は、これで**文字通りすべて
 Lean の宣言として存在する**状態になった。
+
+### 2026-09-04さらに続報: 実際の組み立てに着手して見つかった2つの発見
+
+`Lemma 4.1` を `corrHypInstance4` に対して実際に組み立てようとして、
+statement を精査した結果、2つの重要な発見があった——**どちらも
+「見つからない数学」ではなく「statement 自体の精査から出た発見」**
+という点で、これまでの発見(EGA IV道具の在庫確認)とは性質が異なる。
+
+**発見1(要修正、未修正): `Definition 1.1`(`Corr`)から原文の
+「C is nonempty」が脱落している。** 原文 (p.3) は「a correspondence
+...where we assume that C is nonempty」だが、`Skeleton/CorrHyp/Section1.lean`
+の `structure Corr` にはこの仮定が無い(このセッションで見つけたが、
+`Section1.lean` 自体は以前のセッションで書かれたもの)。これは
+**単なる見た目の欠落ではなく実害がある**——mathlib で確認したところ、
+空スキーム `∅ = ⊥_ Scheme` から任意の `Y` への唯一の射
+`initial.to Y` は `IsFinite.instOfIsClosedImmersion`(閉埋め込みとして)
+かつ `Etale.instOfIsOpenImmersion`(開埋め込みとして)の両方の instance
+を持つ——つまり **`C := ∅` は常に有効な `FEt` の余地を作り、`Corr D A B`
+は任意の `A B` に対して(空相関により)常に inhabited になってしまう**。
+これがあると `Lemma 4.1`(`ZK = D.Ext Z` を要求)は `corrHypInstance4`
+上で**文字通り偽**になる(空相関を使えば任意の無関係な `ZK` に対して
+反例が作れる)——`Nonempty C` を戻すか、少なくとも `Lemma 4.1` を
+証明するときに明示的な追加前提として持ち込む必要がある。★sorry を
+埋める前に対処が要る、記録のみ(未修正)。
+
+**発見2(道具の再評価): `.needs` の「rigidity」項目は、おそらく
+新しい深い数学(SGA1のπ₁比較定理)ではなく、`AffineTransitionLimit.lean`
+に**既にある** Hom-集合の極限安定性の補題群で足りる可能性が高い。**
+最初、`.needs` の「étale site の変形に対する剛性」という文言から
+SGA1(Grothendieck)の「代数閉体の拡大でπ₁^etが変わらない」という
+深い比較定理を疑い、mathlib を検索したが該当なし(`Isom`/`Hom` スキーム
+の rigidity は存在しない)。しかし「deformation」という語は文脈上
+(EGA IVスタイルの極限による構成)**冪零厚化ではなく有向系の極限**を
+指している可能性が高く、その場合に対応するのは
+`AlgebraicGeometry.Scheme.exists_hom_hom_comp_eq_comp_of_locallyOfFiniteType`
+(`AffineTransitionLimit.lean:686`、2つの段階 `i`・`j` から来る射 `a`・`b`
+が極限で一致するなら、ある更に細かい段階 `k` で既に一致する、という
+Hom集合の安定性)・`exists_hom_comp_eq_comp_of_locallyOfFiniteType`
+(同一段階版)——これは**既に mathlib にあり**、今セッション未使用のまま
+残っている道具(前回セッションで「貼り合わせに使う」とだけ記録)。
+どちらの読み方が正しいかは実際に組み立てを進めないと確定しないが、
+**まず既存の道具で足りると仮定して進め、本当に足りなければそこで
+壁を特定する**、という順序が合理的。
+
+**現状の結論**: `Lemma 4.1` の完成には、(a) 発見1の修正
+(`Corr`定義への`Nonempty C`の復元、または`Lemma 4.1`への前提追加)、
+(b) `c.C` 自体を有限段階 `R` へ貼り合わせながら降ろす構成
+(`Scheme.GlueData` を経由、まだ着手していない大きな一手)、
+(c) 発見2のHom安定性補題を使った一意性の議論、という3つの残作業がある
+——これらは「見つからない数学の壁」ではなく「まだ組み立てていない
+エンジニアリング」に分類される点は変わらないが、(a)は原典との
+整合性を先に直す必要がある独立した issue として扱う。

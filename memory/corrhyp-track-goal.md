@@ -251,5 +251,23 @@ defeqチェックを経由させる——これが「配管の万能薬」だっ
 コミット: `5952d0b6`(exists_finite_affineOpenCover)・`3b4e8fcd`
 (exists_extDiagram_finite_affine_descent)・`0d96a0ad`
 (exists_finite_standardEtaleCover)・`c090560b`(descent強化)・
-`dd56de05`(GlueData在庫確認の記録)・今回のセッション
-(Etale.algebraEtale_appLE、コミット待ち)。
+`dd56de05`(GlueData在庫確認の記録)・`4d5713fc`
+(Etale.algebraEtale_appLE、スキーム→環の最後の橋渡し完成)。
+
+★★★★★★★★★★★★2026-09-04さらに続報(実組み立て着手で2つの発見)。
+`lemma_4_1`を`corrHypInstance4`へ実際に組み立てようとして statement を
+精査し、(1) `Corr`(Definition 1.1)から原文の「C is nonempty」が
+Skeletonで脱落しており、`∅→Y`が常に`IsFinite`かつ`Etale`(mathlib で
+確認済み)なので`Corr D A B`が任意の`A B`で inhabited になってしまい
+`Lemma 4.1`が`corrHypInstance4`上で文字通り偽になる、という実害のある
+ギャップを発見(未修正、記録のみ)。(2) `.needs`の「rigidity」項目は
+SGA1のπ₁比較定理のような未発見の深い数学ではなく、
+`AffineTransitionLimit.lean`に既にある`exists_hom_hom_comp_eq_comp_of_
+locallyOfFiniteType`等のHom集合の極限安定性補題で足りる可能性が高いと
+再評価(mathlibにIsom-scheme rigidityが無いことを確認した上での判断)。
+残作業は(a)Corr定義の修正、(b)`c.C`自体をGlueData経由で有限段階へ
+貼り合わせながら降ろす構成(未着手の大きな一手)、(c)Hom安定性補題での
+一意性議論——「見つからない数学の壁」ではなく「まだ組み立てていない
+エンジニアリング」である点は変わらない。集計は7/24で変わらず。
+
+コミット: `4d5713fc`(Etale橋渡し + 発見の記録、corrhyp-goal.md)。
