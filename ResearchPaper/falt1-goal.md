@@ -2716,6 +2716,52 @@ mathlib での正確な組み立て方は未確認)。
       本体(`RingTheory/Kaehler/Basic.lean:775`付近)を読み、
       `maximalIdeal B`版を直接組み立てる方針で次回は開始すること。
 
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05、
+      **上記の障害を完全に突破し、Exercise 13.7.4 step (1) の本体を
+      完成させた**(`falt1_kaehler_finrank_tensor_residueField_le`、
+      commit分は次項)。決め手は`rw`/`simp`で`RingHom.ker(algebraMap
+      B k_B)`と`maximalIdeal B`を**型として同一視しようとするのを
+      完全にやめた**こと——代わりに`Ideal.mapCotangent`(`AlgHom.id`+
+      2つの`≤`包含から作れる、mathlib既存の一般構成)を使って**両
+      方向の`R`-線形写像**を明示的に構成し、`Ideal.toCotangent`の
+      全射性(mathlib既存)を経由して互いに逆写像であることを示す
+      ことで、**書き換えを一切経由せず**橋渡しできた
+      (`falt1_mapCotangent_maximalIdeal_bijective`)。
+
+      これで:
+      1. `falt1_mapCotangent_maximalIdeal_bijective`: `RingHom.ker
+         (algebraMap B k_B)`と`maximalIdeal B`(=`CotangentSpace B`)
+         を繋ぐ全単射(`R`-線形)。
+      2. `LinearEquiv.ofBijective`でこれを`LinearEquiv`化し、
+         `kerCotangentToTensor`と合成 →`CotangentSpace B →ₗ[B] Ω[B/An]
+         ⊗k_B`という`B`-線形写像`h0'`を得る。
+      3. `LinearMap.extendScalarsOfSurjective`(`IsLocalRing.
+         residue_surjective`)で`h0'`を`k_B`-線形の`f'`へ持ち上げる。
+      4. `Set.range`の**関数レベルの比較**(`Function.Surjective.
+         range_comp`、`Submodule`型の違いを一切経由しない)で`f'`の
+         像が元の`kerCotangentToTensor`の像と一致することを示し、
+         `KaehlerDifferential.exact_kerCotangentToTensor_
+         mapBaseChange`(mathlib既存)から`Function.Exact f' g`
+         (`g:=mapBaseChange`)を`k_B`線形のまま直接導出。
+      5. rank-nullity(`LinearMap.finrank_range_add_finrank_ker`)+
+         `falt1_dvr_cotangentSpace_finrank_eq_one`(核の次元≤1)+
+         `Submodule.finrank_le`(像の次元≤`d`)を`omega`で結ぶ。
+
+      **教訓(次回以降、同種の「2つの依存的に絡んだ型を同一視したい」
+      場面で直接使える)**: `rw`/`simp`で型そのものを書き換えようと
+      せず、**両方向の明示的な写像(全単射)を構成してから
+      `LinearEquiv.ofBijective`で正式な同型にする**方が、依存型を
+      跨ぐ`Function.Exact`のような文脈では遥かに頑健——`Set.range`
+      のような**関数レベルの事実**(`Submodule`の型注釈を経由しない)
+      で比較を閉じるのも鍵だった。
+
+      これで Exercise 13.7.4 の6ステップのうち、**(1)(=Nakayama
+      部分の本体)・(2)(=Lemma 1.1)・(4)が完成**——残るは(1)の
+      「`Ω[B/An]⊗k_B`の次元→`Ω[B/An]`が`d+1`個で生成される」への
+      最終接続(`falt1_kaehler_spanFinrank_le`の仮定の形と`TensorProduct.
+      quotTensorEquivQuotSMul`越しの橋渡しがまだ残る、小さな仕上げ)・
+      (3)(elementary divisor theorem)・(5)(discriminantの塔)の3つ。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
