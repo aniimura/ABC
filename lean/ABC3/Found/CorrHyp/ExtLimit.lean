@@ -940,13 +940,72 @@ noncomputable def IsAffineOpen.basicOpenIsoSpecAway {X : Scheme} {U : X.Opens} (
     IsLocalization.algEquiv (Submonoid.powers f) _ _
   exact (hU.basicOpen f).isoSpec.trans (Scheme.Spec.mapIso e.symm.toRingEquiv.toCommRingCatIso.op)
 
-/- ★★次の一手(未着手): `IsAffineOpen.basicOpenIsoSpecAway`(今回完成)・
-`standardEtalePairPullbackIso`・`exists_fg_subalgebra_tensor_
-standardEtalePair_mapEq`を実際に合成し、「`C`の標準エタール片`C.basicOpen
-f_i`が、有限段階の候補局所片のbase changeにちょうど一致する」という
-1ピース分の完全な連結を示す——`algebraMap (A⊗R.1)(A⊗ℝ)`と`letI`で
-導入した`Algebra`インスタンスが構文的に一致しない場面で`▸`/`show`が
-必要になる配管が残っている(試みたが本セッションでは完了せず)。
-`corrhyp-goal.md`に記録。 -/
+/-! ## 1ピース分の完全な連結——`standardEtalePairPullbackIso`・
+`IsAffineOpen.basicOpenIsoSpecAway`・`exists_fg_subalgebra_tensor_
+standardEtalePair_mapEq`の合成
+
+前回の詰まり(`algebraMap (A⊗R.1)(A⊗ℝ)`と`letI`で導入した`Algebra`
+インスタンスの構文不一致)は、`exists_fg_subalgebra_tensor_
+standardEtalePair_mapEq`が返す等式を`letI`のスコープ内で`algebraMap`形へ
+**defeqの代入だけで**(`▸`や`show`を使わず、ただの`:=`で)通せることに
+気づいて解消した——`standardEtalePairPullbackIso`を**再証明せず**
+そのまま呼び、変換した等式で`▸`するだけにしたのが鍵(前回は環の同型を
+インラインで再導出しようとして`TensorProduct`の引数順を取り違えていた)。 -/
+
+open scoped TensorProduct in
+/-- **標準エタールな元`f`の局所化`Localization.Away f`は、ある有限段階の
+候補スキーム(`standardEtalePairSpecMap P₀`)を`A⊗ℝ`へbase changeした
+ものと同型**——`exists_fg_subalgebra_tensor_standardEtalePair_mapEq`
+(環の降下)+`standardEtalePairPullbackIso`(base changeのスキーム版)を
+`letI`のスコープ内でdefeqの代入だけで繋ぐ。`Algebra.IsStandardEtale`
+から得られる`StandardEtalePresentation`(`Nonempty`)を`Classical.choice`
+的に取り出して使う。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def onePieceSchemeIso {A B : Type} [CommRing A] [Algebra ℚ A]
+    [CommRing B] [Algebra (A ⊗[ℚ] ℝ) B] (f : B)
+    [Algebra.IsStandardEtale (A ⊗[ℚ] ℝ) (Localization.Away f)] :
+    ∃ (R : FgSubalgebra ℚ ℝ) (P₀ : StandardEtalePair (A ⊗[ℚ] R.1)),
+      letI : Algebra (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ) :=
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom.toAlgebra
+      Nonempty ((Spec (CommRingCat.of (Localization.Away f)) : Scheme) ≅
+        pullback (standardEtalePairSpecMap P₀)
+          (Spec.map (CommRingCat.ofHom (algebraMap (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ))))) := by
+  obtain ⟨Pres⟩ :=
+    ‹Algebra.IsStandardEtale (A ⊗[ℚ] ℝ) (Localization.Away f)›.nonempty_standardEtalePresentation
+  obtain ⟨R, P₀, hP₀⟩ := exists_fg_subalgebra_tensor_standardEtalePair_mapEq A Pres.P
+  letI : Algebra (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ) :=
+    (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom.toAlgebra
+  have hP₀' : P₀.map (algebraMap (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ)) = Pres.P := hP₀
+  refine ⟨R, P₀, ⟨?_⟩⟩
+  have i2 : (pullback (standardEtalePairSpecMap P₀)
+      (Spec.map (CommRingCat.ofHom (algebraMap (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ)))) : Scheme) ≅
+      Spec (CommRingCat.of Pres.P.Ring) := hP₀' ▸ standardEtalePairPullbackIso P₀
+  have i1 : (Spec (CommRingCat.of (Localization.Away f)) : Scheme) ≅ Spec (CommRingCat.of Pres.P.Ring) :=
+    Scheme.Spec.mapIso Pres.equivRing.toRingEquiv.toCommRingCatIso.symm.op
+  exact i1.trans i2.symm
+
+open scoped TensorProduct in
+/-- **作業単位1・3の核心の合流点——`C`(または任意のスキーム`X`)の
+標準エタール局所片`X.basicOpen f`は、有限段階の候補局所片のbase change
+にちょうど一致する**——`IsAffineOpen.basicOpenIsoSpecAway`(位相・
+アフィン性)と`onePieceSchemeIso`(環→スキームの降下)を合成するだけ。
+`Lemma 4.1`の「1アフィン片の降下」において、`exists_finite_
+standardEtaleCover`が返す各`f_i`をこの補題に適用すれば、`C`の対応する
+開集合が有限段階の候補スキームのbase changeと一致することが**直接**
+得られる——GlueDataの各ピースの構成に使う核心部品。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def piece_descends_iso {A : Type} [CommRing A] [Algebra ℚ A]
+    {X : Scheme} {U : X.Opens} (hU : IsAffineOpen U) [Algebra (A ⊗[ℚ] ℝ) Γ(X, U)]
+    (f : Γ(X, U)) [Algebra.IsStandardEtale (A ⊗[ℚ] ℝ) (Localization.Away f)] :
+    ∃ (R : FgSubalgebra ℚ ℝ) (P₀ : StandardEtalePair (A ⊗[ℚ] R.1)),
+      letI : Algebra (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ) :=
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom.toAlgebra
+      Nonempty ((X.basicOpen f : Scheme) ≅
+        pullback (standardEtalePairSpecMap P₀)
+          (Spec.map (CommRingCat.ofHom (algebraMap (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ))))) := by
+  obtain ⟨R, P₀, ⟨e⟩⟩ := onePieceSchemeIso (A := A) f
+  exact ⟨R, P₀, ⟨(IsAffineOpen.basicOpenIsoSpecAway hU f).trans e⟩⟩
 
 end ABC3.Found.CorrHyp
