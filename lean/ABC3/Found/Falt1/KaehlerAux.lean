@@ -280,13 +280,123 @@ theorem differentIdeal_eq_span_derivative {V K L W : Type*} [CommRing V] [IsDede
 
 `AdjoinRoot f` は定義から `Polynomial V ⧸ (f)` なので、これで
 `omega_quotient_eq_derivative_span`(`Polynomial R ⧸ (f)` の具体形)と
-Falt1 の一般の `W` を繋ぐ最初の橋になる。★残る橋渡し: この AlgEquiv に
-沿って `Ω` 加群を実際に転送する(`KaehlerDifferential.map` の
-functoriality を使う、まだ組み立てていない)。 -/
+Falt1 の一般の `W` を繋ぐ最初の橋になる。②の橋渡しは `omegaCongr`
+(下記)で完成した。 -/
 noncomputable def adjoinRootMinpolyEquiv {V W : Type*} [CommRing V] [CommRing W] [Algebra V W]
     [IsDomain V] [IsDomain W] [Module.IsTorsionFree V W] [IsIntegrallyClosed V]
     (w : W) (hint : IsIntegral V w) (hadjoin : Algebra.adjoin V ({w} : Set W) = ⊤) :
     AdjoinRoot (minpoly V w) ≃ₐ[V] W :=
   IsAdjoinRoot.adjoinRootAlgEquiv (IsAdjoinRootMonic.mkOfAdjoinEqTop hint hadjoin).toIsAdjoinRoot
+
+/-- `e : A ≃ₐ[R] B` から `Algebra A B`(`e` 自身を経由)を作ると
+`IsScalarTower R A B` が成り立つ(`e` が `R`-線形であることから)。
+`omegaCongr` の下準備。 -/
+theorem isScalarTower_of_algEquiv {R A B : Type*} [CommRing R] [CommRing A] [CommRing B]
+    [Algebra R A] [Algebra R B] (e : A ≃ₐ[R] B) :
+    letI : Algebra A B := e.toRingHom.toAlgebra
+    IsScalarTower R A B := by
+  letI : Algebra A B := e.toRingHom.toAlgebra
+  constructor
+  intro r a b
+  show algebraMap A B (r • a) * b = r • (algebraMap A B a * b)
+  have h : algebraMap A B (r • a) = r • algebraMap A B a := by
+    show e (r • a) = r • e a
+    exact map_smul e r a
+  rw [h, smul_mul_assoc]
+
+/-- `omegaCongr` の左逆性(`map R R B A ∘ map R R A B = id`)。生成元の集合
+`Set.range (D R A)` 上で `map_D` により具体的に計算し(`e.symm(e a)=a`)、
+`Submodule.span_induction` で加法・A-スカラー倍に持ち上げる。 -/
+theorem omegaCongr_leftInv {R A B : Type*} [CommRing R] [CommRing A] [CommRing B]
+    [Algebra R A] [Algebra R B] (e : A ≃ₐ[R] B) :
+    letI : Algebra A B := e.toRingHom.toAlgebra
+    letI : IsScalarTower R A B := isScalarTower_of_algEquiv e
+    letI : Algebra B A := e.symm.toRingHom.toAlgebra
+    letI : IsScalarTower R B A := isScalarTower_of_algEquiv e.symm
+    ∀ x : Ω[A⁄R], (KaehlerDifferential.map R R B A) ((KaehlerDifferential.map R R A B) x) = x := by
+  letI : Algebra A B := e.toRingHom.toAlgebra
+  haveI : IsScalarTower R A B := isScalarTower_of_algEquiv e
+  letI : Algebra B A := e.symm.toRingHom.toAlgebra
+  haveI : IsScalarTower R B A := isScalarTower_of_algEquiv e.symm
+  have hspan := KaehlerDifferential.span_range_derivation (R := R) (S := A)
+  intro x
+  have hx : x ∈ Submodule.span A (Set.range (KaehlerDifferential.D R A)) := hspan ▸ Submodule.mem_top
+  induction hx using Submodule.span_induction with
+  | mem y hy =>
+      obtain ⟨a, rfl⟩ := hy
+      rw [KaehlerDifferential.map_D, KaehlerDifferential.map_D]
+      congr 1
+      show e.symm (e a) = a
+      exact e.symm_apply_apply a
+  | zero => simp
+  | add y z hy hz ihy ihz => rw [map_add, map_add, ihy, ihz]
+  | smul a y hy ih =>
+      show (KaehlerDifferential.map R R B A) ((KaehlerDifferential.map R R A B) (a • y)) = a • y
+      rw [map_smul]
+      show (KaehlerDifferential.map R R B A)
+        (algebraMap A B a • (KaehlerDifferential.map R R A B) y) = a • y
+      rw [map_smul]
+      show algebraMap B A (algebraMap A B a) •
+        (KaehlerDifferential.map R R B A) ((KaehlerDifferential.map R R A B) y) = a • y
+      rw [ih]
+      congr 1
+      show e.symm (e a) = a
+      exact e.symm_apply_apply a
+
+/-- `omegaCongr` の右逆性(対称な議論)。 -/
+theorem omegaCongr_rightInv {R A B : Type*} [CommRing R] [CommRing A] [CommRing B]
+    [Algebra R A] [Algebra R B] (e : A ≃ₐ[R] B) :
+    letI : Algebra A B := e.toRingHom.toAlgebra
+    letI : IsScalarTower R A B := isScalarTower_of_algEquiv e
+    letI : Algebra B A := e.symm.toRingHom.toAlgebra
+    letI : IsScalarTower R B A := isScalarTower_of_algEquiv e.symm
+    ∀ x : Ω[B⁄R], (KaehlerDifferential.map R R A B) ((KaehlerDifferential.map R R B A) x) = x := by
+  letI : Algebra A B := e.toRingHom.toAlgebra
+  haveI : IsScalarTower R A B := isScalarTower_of_algEquiv e
+  letI : Algebra B A := e.symm.toRingHom.toAlgebra
+  haveI : IsScalarTower R B A := isScalarTower_of_algEquiv e.symm
+  have hspan := KaehlerDifferential.span_range_derivation (R := R) (S := B)
+  intro x
+  have hx : x ∈ Submodule.span B (Set.range (KaehlerDifferential.D R B)) := hspan ▸ Submodule.mem_top
+  induction hx using Submodule.span_induction with
+  | mem y hy =>
+      obtain ⟨b, rfl⟩ := hy
+      rw [KaehlerDifferential.map_D, KaehlerDifferential.map_D]
+      congr 1
+      show e (e.symm b) = b
+      exact e.apply_symm_apply b
+  | zero => simp
+  | add y z hy hz ihy ihz => rw [map_add, map_add, ihy, ihz]
+  | smul b y hy ih =>
+      show (KaehlerDifferential.map R R A B) ((KaehlerDifferential.map R R B A) (b • y)) = b • y
+      rw [map_smul]
+      show (KaehlerDifferential.map R R A B)
+        (algebraMap B A b • (KaehlerDifferential.map R R B A) y) = b • y
+      rw [map_smul]
+      show algebraMap A B (algebraMap B A b) •
+        (KaehlerDifferential.map R R A B) ((KaehlerDifferential.map R R B A) y) = b • y
+      rw [ih]
+      congr 1
+      show e (e.symm b) = b
+      exact e.apply_symm_apply b
+
+/-- **②の橋渡し(完成)**: 環同型 `e : A ≃ₐ[R] B` は `Ω[A⁄R] ≃+ Ω[B⁄R]`
+(加法群としての同型)を誘導する。mathlib には代数の**塔**
+(`KaehlerDifferential.map`)用の道具はあるが、代数**同型**に沿った
+transport の既製品は無かった——`map R R A B` と `map R R B A` を
+(`e`・`e.symm` から作った局所インスタンス `Algebra A B`・`Algebra B A`
+経由で)組み立て、`omegaCongr_leftInv`/`_rightInv` で互いに逆写像である
+ことを示して構成した。★加法群としての同型に留めた(`≃+`、`A`-線形性は
+求めない)——長さ・濃度の比較には十分。 -/
+noncomputable def omegaCongr {R A B : Type*} [CommRing R] [CommRing A] [CommRing B]
+    [Algebra R A] [Algebra R B] (e : A ≃ₐ[R] B) :
+    Ω[A⁄R] ≃+ Ω[B⁄R] := by
+  letI : Algebra A B := e.toRingHom.toAlgebra
+  haveI : IsScalarTower R A B := isScalarTower_of_algEquiv e
+  letI : Algebra B A := e.symm.toRingHom.toAlgebra
+  haveI : IsScalarTower R B A := isScalarTower_of_algEquiv e.symm
+  exact AddEquiv.ofBijective (KaehlerDifferential.map R R A B).toAddMonoidHom
+    ⟨Function.LeftInverse.injective (omegaCongr_leftInv e),
+     fun y => ⟨KaehlerDifferential.map R R B A y, omegaCongr_rightInv e y⟩⟩
 
 end ABC3.Found.Falt1
