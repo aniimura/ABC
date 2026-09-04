@@ -12,6 +12,7 @@ import Mathlib.Analysis.SpecificLimits.Basic
 import Mathlib.RingTheory.Polynomial.Eisenstein.Basic
 import Mathlib.RingTheory.Polynomial.GaussLemma
 import Mathlib.RingTheory.DedekindDomain.IntegralClosure
+import Mathlib.RingTheory.DedekindDomain.PID
 import ABC3.Found.GenEll.TameRamification
 
 /-!
@@ -3682,5 +3683,43 @@ theorem falt1_cancelConductorDelta_assembled
     (differentIdeal V1 Wn1) (Ideal.map (algebraMap Wn Wn1) (differentIdeal V0 Wn))
     hdiamond hcond hspan_eq hIdiff_ne
   trivial
+
+/-!
+## Theorem 1.2・3b(i)への足場: `Wₙ₊₁` は PID(2026-09-04)
+
+`length_quotient_span_singleton_mul`(既存、単項イデアルの場合の長さの
+加法性)を`conductor(Wₙ,x)`に適用するには`conductor(Wₙ,x) : Ideal Wₙ₊₁`
+が単項である必要がある——**`Wₙ₊₁` が PID なら自動的に成り立つ**。
+`Wₙ₊₁` が「全分岐(totally ramified)」であることを直接示す(「3c:
+戦略転換」節が「mathlib にまだ薄い領域」と記録した経路)必要は無い、
+と判明した: `IsPrincipalIdealRing.of_finite_maximals`(既存、Dedekind
+整域で極大イデアルが有限個なら PID)+ `IsDedekindDomain.primesOver_
+finite`(既存、有限拡大では上にある素イデアルは有限個)+
+`Ideal.isMaximal_comap_of_isIntegral_of_isMaximal`(既存、整拡大では
+極大イデアルの引き戻しは極大)を組み合わせるだけで、`Wₙ₊₁` の極大
+イデアル全体が「`Wₙ` の(唯一の)極大イデアルの上にある素イデアル」
+という**有限集合の部分集合**であることが分かり、単純な部分集合の
+有限性だけで閉じる——`Wₙ` が DVR で唯一の極大イデアルしか持たない
+ことだけを使い、「全分岐」という強い主張自体は一切不要だった。 -/
+
+set_option maxHeartbeats 800000 in
+/-- **DVR の有限拡大で(捩れ無しの)Dedekind整域になるものは PID**。
+`conductor(Wₙ,x)` が単項イデアルであることの直接の供給源。 -/
+theorem falt1_isPrincipalIdealRing_of_finite_ext_of_DVR
+    {Wn Wn1 : Type*} [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn]
+    [CommRing Wn1] [IsDedekindDomain Wn1] [Algebra Wn Wn1]
+    [Module.Finite Wn Wn1] [Module.IsTorsionFree Wn Wn1] :
+    IsPrincipalIdealRing Wn1 := by
+  apply IsPrincipalIdealRing.of_finite_maximals
+  have hsub : {I : Ideal Wn1 | I.IsMaximal} ⊆ (IsLocalRing.maximalIdeal Wn).primesOver Wn1 := by
+    intro I hI
+    haveI : I.IsMaximal := hI
+    haveI : Algebra.IsIntegral Wn Wn1 := Algebra.IsIntegral.of_finite Wn Wn1
+    have hcomap : (I.comap (algebraMap Wn Wn1)).IsMaximal :=
+      Ideal.isMaximal_comap_of_isIntegral_of_isMaximal I
+    have heq : IsLocalRing.maximalIdeal Wn = Ideal.under Wn I :=
+      (IsLocalRing.eq_maximalIdeal hcomap).symm
+    exact ⟨hI.isPrime, Ideal.LiesOver.mk heq⟩
+  exact Set.Finite.subset (IsDedekindDomain.primesOver_finite (IsLocalRing.maximalIdeal Wn) Wn1) hsub
 
 end ABC3.Found.Falt1
