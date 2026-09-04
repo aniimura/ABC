@@ -2051,6 +2051,69 @@ noncomputable def corrHypGlueData : Scheme.GlueData where
   }
   f_open := gdF_isOpenImmersion f Z e
 
+/-! ### ロードマップ項目(b)への第一歩——`U`自身の`OpenCover`
+
+`corrHypGlueData.glued`(貼り合わせてできるスキーム)が`U`に同型である
+ことを示すには、比較対象として「`Z`の族が実際に`U`を覆っている」ことを
+体現する`Scheme.OpenCover`が要る。`f i`が`U`を(基本開集合として)覆う
+という前提(`⨆ i, X.basicOpen (f i) = U`)から、`mathlib`の
+`Scheme.Cover.mkOfCovers`(全射性の条件だけからOpenCoverを組み立てる
+スマートコンストラクタ)で直接構成する——各`i`ごとの写像は
+`(e i).inv ≫ X.homOfLE (…) : Z i ⟶ U`(`X.basicOpen (f i) ⊆ U`への
+包含を`e i`で`Z i`側へ転送したもの)。
+
+配管の注意: 全射性の証明に出てくる被覆条件の不等式
+(`X.basicOpen (f i) ≤ U`)を`have`でインライン展開すると
+(`#31`と同系統の)`whnf`のheartbeat上限に達して詰まる——
+`basicOpen_le_of_iSup_eq`という独立した`theorem`に先出しして名前で
+参照するだけで解消する(`#31`の「部品は先に独立した`theorem`にする」
+という教訓の再確認)。 -/
+
+/-- `f i`による基本開集合は常に`U`に含まれる——`⨆ i, X.basicOpen (f i) = U`
+という被覆条件から。`piecesOpenCover`の全射性の証明をインラインで書くと
+`whnf`のheartbeat上限に達するので、先に独立した`theorem`として確定させた
+もの(`#31`と同系統の教訓)。 -/
+theorem basicOpen_le_of_iSup_eq {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
+    (hcover : ⨆ i, X.basicOpen (f i) = U) (i : J) : X.basicOpen (f i) ≤ U :=
+  (le_iSup (fun i => X.basicOpen (f i)) i).trans_eq hcover
+
+set_option maxHeartbeats 1000000 in
+/-- **`Z`の族が`U`を覆うという被覆条件から、`U`自身の`OpenCover`を直接
+構成する**——`Scheme.Cover.mkOfCovers`(全射性の条件だけからOpenCoverを
+組み立てるスマートコンストラクタ)に、各`i`ごとの写像
+`(e i).inv ≫ X.homOfLE (…) : Z i ⟶ U`と、`TopologicalSpace.Opens.
+mem_iSup`(点がある`X.basicOpen (f i)`に属することの言い換え)から
+得られる全射性を渡すだけ。`corrHypGlueData.glued ≅ U`
+(ロードマップ項目(b)、未完成)を示す比較対象として使う——`mathlib`の
+`Scheme.Cover.gluedCover`+`Scheme.Cover.fromGlued`(`IsIso`)がこの
+`OpenCover`から`U`への同型を既製で与える。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def piecesOpenCover {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
+    (Z : J → Scheme) (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i)
+    (hcover : ⨆ i, X.basicOpen (f i) = U) : (U : Scheme).OpenCover :=
+  Scheme.Cover.mkOfCovers J Z
+    (fun i => (e i).inv ≫ X.homOfLE (basicOpen_le_of_iSup_eq f hcover i))
+    (fun x => by
+      have hx : x.1 ∈ ⨆ i, X.basicOpen (f i) := by rw [hcover]; exact x.2
+      obtain ⟨i, hi⟩ := TopologicalSpace.Opens.mem_iSup.mp hx
+      refine ⟨i, (e i).hom ⟨x.1, hi⟩, ?_⟩
+      show ((e i).hom ≫ (e i).inv ≫ X.homOfLE (basicOpen_le_of_iSup_eq f hcover i)) ⟨x.1, hi⟩ = x
+      rw [← Category.assoc, Iso.hom_inv_id, Category.id_comp]
+      apply Subtype.ext
+      simp)
+
+/- ★★次の一手(未着手、項目(b)の核心): `piecesOpenCover f Z e hcover`
+の`gluedCover`(mathlib既製、`.glued ≅ U`が`Scheme.Cover.fromGlued`の
+`IsIso`性からすでに得られる)と`corrHypGlueData f Z e`(独自配線)の
+`.diagram`(`MultispanIndex`)同士の`NatIso`を構成し、
+`CategoryTheory.Limits.HasColimit.isoOfNatIso`で`.glued`同士の同型を
+得てから合成する——`U`成分は恒等(`piecesOpenCover`が`Z`をそのまま
+objectに使うため)、`V`成分(`pullback (𝒰.f i)(𝒰.f j) ≅ gdV f Z e (i,j)`)
+は`pullbackHomIsoLeft`+`pullbackSymmetry`+`isPullback_opens_inf`で
+組み立てられる見込み(Exploreエージェントの調査、`corrhyp-goal.md`に
+記録)。 -/
+
 /-! ### `corrHypGlueData`の具体化(ロードマップ項目(a)の第一歩)
 
 `corrHypGlueData`はここまで完全に抽象的(`X,U,J,f,Z,e`は任意)だった。
