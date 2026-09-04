@@ -244,8 +244,18 @@ R C D B` という自然性(`tensorKaehlerEquiv_eq_map_mapBaseChange`、
     を要する**、という結論に達した。★安易な誤形式化を避けるため、
     この評価が固まるまで 3b への Lean 実装は保留する。
 
-    ★★★★★★2026-09-04、**有望な道具を発見した**(未検証・未使用):
-    mathlib に **`differentIdeal` の塔の公式**が既にある
+    ★★★★★★★2026-09-04、**上記の等式を実際に Lean で構築・証明した**
+    (`differentIdeal_tower_diamond`、`Found/Falt1/KaehlerAux.lean`、
+    commit `937de066`、sorry無し)——`Algebra.IsSeparable` の引数を
+    `FractionRing.liftAlgebra` に明示的に固定しないと2回目の適用で
+    instance 探索が食い違うことが判明し(tools/lean-idioms.md #23と
+    同種)、それを回避して完成させた。下記の分析(未知数
+    `differentIdeal Wₙ Wₙ₊₁` の評価が核心の困難として残る)は変わらず
+    有効——これは Theorem 1.2 3b の**代数的骨格**として独立した
+    検証済みの一歩である。
+
+    ★★★★★★2026-09-04(発見時のメモ、上で実装完了): mathlib に
+    **`differentIdeal` の塔の公式**が既にある
     (`differentIdeal_eq_differentIdeal_mul_differentIdeal`、
     `RingTheory/DedekindDomain/Different.lean`)——`A→B→C` の塔に対し
     `differentIdeal A C = differentIdeal B C * (differentIdeal A B).
