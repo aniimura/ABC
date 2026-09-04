@@ -1485,3 +1485,20 @@ build(ExtLimit/ABC3とも)0エラー確認、コミット: `3816c246`・
 未着手)。person-years評価をさらに上方修正できる可能性を示す実質的な
 進展。corrhyp-goal.mdに詳細記録。集計10/24で変わらず——§4は引き続き
 0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04(続き16)
+続報(piece_descends_iso_family_promote完成、有限個の候補片が単一の
+R'へ実際に揃った、集計10/24で変わらず)。piece_descends_iso_R_of_proof
+とpiece_descends_iso_promote内部の(piece_descends_iso...).chooseが
+rflで一致することを確認した上で、各i∈tごとにpiece_descends_iso_
+promoteを適用するだけで完成。**Rレベルの複数添字を単一の共通段階R'へ
+合流させる部分が完成し、候補片Spec(P₀_i'.Ring)がすべて同じR'の上に
+揃った**。lake build(ExtLimit/ABC3とも)0エラー確認、コミット:
+`bf24a796`。
+
+残る道筋: 揃った候補片同士の重なり(transitionElem/gdT/cocycleのR
+レベル版)の構築——extDiagram Xの段階R'におけるアンビエントスキームの
+層への対応を精密に詰める必要あり(未着手)。「候補片を単一の共通段階
+へ揃える」という前半部分が既存部品だけで完成したのは、person-years
+評価のさらなる見直しを裏付ける具体的な進捗。corrhyp-goal.mdに詳細
+記録。

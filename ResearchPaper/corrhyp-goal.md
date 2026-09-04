@@ -3175,3 +3175,26 @@ tensor_standardEtalePair_promote`(既存、`FieldLimit.lean`)を組み合わ
 既存部品だけで済む)は、`person-years`評価をさらに上方修正できる
 可能性を示す実質的な進展である。集計は10/24で変わらず——§4は
 引き続き0/2。
+
+## 2026-09-04(続き16): `piece_descends_iso_family_promote`——有限個の候補片が単一の`R'`へ実際に揃った
+
+`piece_descends_iso_R_of_proof`と`piece_descends_iso_promote`内部の
+`(piece_descends_iso ...).choose`が`rfl`で一致することを確認した上で、
+`piece_descends_iso_family_promote`を完成させた——各`i∈t`ごとに
+`piece_descends_iso_promote`を`piece_descends_iso_R_upperBound_spec`
+が与える`hle`とともに適用するだけ。これで**`R`レベルの複数添字を
+単一の共通段階`R'`へ合流させる部分が完成し、候補片`Spec(P₀_i'.Ring)`
+(`R'`レベルへ昇格した後の`StandardEtalePair`)がすべて同じ`R'`の上に
+揃った**。`lean_check`で検証後ファイルへ反映、`lake build`
+(ExtLimit/ABC3とも)0エラー確認、コミット(`bf24a796`)。
+
+**残る道筋**: この揃った候補片同士の重なり(`transitionElem`/`gdT`/
+`cocycle`の`R`レベル版)を構築すること——`ℝ`レベルの`transitionElem`
+は`X.presheaf.map`(層の制限写像)を使っており、`R`レベルでは対応する
+「層」が`extDiagram X`の段階`R'`におけるアンビエントスキームの層
+(`(extDiagram X).obj (op R')`)になる見込みで、この対応を精密に詰める
+必要がある(まだ未着手)。ここまでで、`R`レベル貼り合わせ層の
+「候補片を単一の共通段階へ揃える」という前半部分が、既存部品だけで
+(新しいmathlib降下定理を要さず)完成した——`person-years`評価の
+さらなる見直しを裏付ける、具体的な進捗。集計は10/24で変わらず——
+§4は引き続き0/2。
