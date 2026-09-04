@@ -324,6 +324,15 @@ Primitive`)、★`φ_n`の次数は`q^n-1`(`natDegree_iteratedLubinTate
 Primitive`、`natDegree_mul`+両辺非零)を示した。古典的理論で`φ_n`の根
 が非零な`π^n`-捩れ点`Λ_n\{0}`を統べることの由来になる事実。
 
+**続報(2026-09-04、節目(3)への第六歩——`[π^b]_f∣[π^{a+b}]_f`、
+`Λ_n⊆Λ_m`の由来)**: `iteratedLubinTate_add`(`[π^{a+b}]_f=[π^a]_f∘
+[π^b]_f`)・★`iteratedLubinTate_dvd_iteratedLubinTate_add`
+(`[π^b]_f∣[π^{a+b}]_f`)・`iteratedLubinTate_dvd_of_le`(`n≤m`なら
+`[π^n]_f∣[π^m]_f`)。Weierstrass標準分解と独立な、より基礎的な冪級数
+レベルの整除関係で、`[π^a]_f`の定数項が0であることと`subst`が積を
+保つこと(`PowerSeries.subst_mul`)を組み合わせるだけで出た——古典的
+理論で「`n≤m`ならば`Λ_n⊆Λ_m`」の由来になる事実。
+
 **残る作業**: 節目(3)torsion点の構成本体(`D_n`の根を`Λ_n`として定義、
 `𝒪_K`加群構造、`K(Λ_n)/K`の完全分岐性)、節目(4)
 `L_n:=K(Λ_n)`が完全分岐かつ`Gal(L_n/K)≅(𝒪_K/π^n)^×`(Lubin-Tateの
