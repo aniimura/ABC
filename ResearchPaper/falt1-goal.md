@@ -2085,6 +2085,46 @@ mathlib での正確な組み立て方は未確認)。
       階数が等しければ自動的に単射、という一般論)で閉じられる見込み。
       次回はここから続ける。
 
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04(続)、
+      **`adjoinRootTensorEquivFwd`の全単射性が完成した**(階数比較の
+      迂回路ではなく、**明示的な逆写像を直接構成する**という、もっと
+      素朴だが完全に閉じる経路で解決):
+      - `adjoinRootTensorEquivInv g := AdjoinRoot.lift (algebraMap C
+        (R⊗C(AdjoinRoot g))) (1⊗ₜroot g) _`——`root(g.map φ) ↦ 1⊗ₜroot g`・
+        `C ↦ algebraMap C _`となる`AdjoinRoot.lift`。well-definedness
+        (`g.map φ`が`1⊗ₜroot g`で消える)は`Polynomial.aeval_algHom_apply`
+        (`aeval`のAlgHom越しの自然性、`1⊗ₜ-`を`includeRight`として見る)
+        +`AdjoinRoot.aeval_eq`(`aeval(root f)f=mk f f=0`)だけで閉じた
+        (ここでも`Ideal.Quotient`は一切経由しない)。
+      - 点ごとの挙動を2つの補題(`adjoinRootTensorEquivInv_monomial`
+        =`C a*X^n`での挙動、`adjoinRootTensorEquivInv_mk_map`=`mk(g.map φ)
+        (p.map φ)`での挙動)で確定し、`C`線形性を`adjoinRootTensorEquivInv_
+        smul`(`algebraMap`との両立、`AdjoinRoot.lift_of`)で別途確立。
+      - **往復1**(`fwd∘inv=id`、`adjoinRootTensorEquiv_roundtrip1`):
+        `AdjoinRoot.induction_on`→`Polynomial.induction_on`(`C`・`add`・
+        `monomial`)の二重帰納法。`monomial`のケースは`pow_succ`で`X^(n+1)
+        =X^n*X`に分解し、`adjoinRootTensorEquivInv_monomial`(`n=1`の
+        特殊形)と`adjoinRootTensorEquivFwd_one_tmul_mk`を`Algebra.
+        TensorProduct.tmul_mul_tmul`で繋いだ。
+      - **往復2**(`inv∘fwd=id`、`adjoinRootTensorEquiv_roundtrip2`):
+        `TensorProduct.induction_on`→`AdjoinRoot.induction_on`の二重
+        帰納法。`tmul`ケースは`c⊗ₜz = c•(1⊗ₜz)`という`TensorProduct.
+        smul_tmul'`による書き換えで`C`線形性(`adjoinRootTensorEquivInv_
+        smul`)に帰着させ、`1⊗ₜ-`の場合だけ`adjoinRootTensorEquivFwd_
+        one_tmul_mk`+`adjoinRootTensorEquivInv_mk_map`の合成で閉じた。
+      - **`adjoinRootTensorEquivFwd_bijective`**: 上記2つの往復から
+        `Function.bijective_iff_has_inverse`で直ちに従う。
+
+      これで`AdjoinRoot`/`Ideal.Quotient`のinstance diamondに一度も
+      触れずに、`TensorProduct R C (AdjoinRoot g) ≃ₗ[C] AdjoinRoot(g.map φ)`
+      という**完全な線形同型**(の存在、`LinearEquiv.ofBijective`経由)
+      が手に入った。次は`Algebra.IsPushout.of_equiv`(または`IsBaseChange.
+      of_equiv`)に`adjoinRootTensorEquivFwd_one_tmul_mk`から従う
+      tmul整合性条件を渡し、`Algebra.IsPushout V0 Wn (AdjoinRoot f)
+      (AdjoinRoot g)`(=具体的な`Falt1`のオブジェクトでのpushout性)を
+      確立、`pushoutKaehlerSplitStep`/`_length`を実際の`V_n`/`W_n`の塔に
+      接続する。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
