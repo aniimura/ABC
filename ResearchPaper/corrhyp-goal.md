@@ -948,3 +948,21 @@ pasting)——`f := X.hom`・`g := (toSchemeDiagramOver.obj R).hom`・
 ——残るのは `pullbackSpecIso`(mathlib既存)を`V_j`(アフィン)に適用して
 `Γ(U_j,U_j) ≅ Γ(V_j,V_j) ⊗[R] K` という**環レベルの結論**を引き出す
 最後の一手(`extConeIso`の`V_j`への制限、まだ未着手)。
+
+### 2026-09-04さらに続報: 残る環化の手順を特定(未着手)
+
+`pullbackSpecIso`を`V_j`(`(extDiagram X).obj R`のアフィン開)に実際に
+適用するための残り手順を特定した:
+1. `Q.fst ⁻¹ᵁ V_j`(`Q := pullback (pullback.snd X.hom (toSchemeDiagramOver.
+   obj R).hom) (phiR R)`)を`pullbackRestrictIsoRestrict`(mathlib既存)
+   + `pullbackRightPullbackFstIso`(pullback の pasting、既出)で
+   `pullback (V_j.ι ≫ pullback.snd X.hom (toSchemeDiagramOver.obj R).hom)
+   (phiR R)` と同一視する(pullbackSymmetryが要るかもしれない)。
+2. `V_j.ι ≫ pullback.snd X.hom (toSchemeDiagramOver.obj R).hom : V_j ⟶
+   Spec R` を、`V_j`がアフィン(`hVprop j`)なので**`Spec.map`の形に書く**
+   ——鍵は`AlgebraicGeometry.arrowIsoSpecΓOfIsAffine`(mathlib、アフィン
+   同士の射は`Arrow.mk f ≅ Arrow.mk (Spec.map f.appTop)`)+
+   `IsAffineOpen.isoSpec`(`V_j ≅ Spec Γ(V_j,V_j)`)。
+3. `pullbackSpecIso`を適用して`Γ(U_j,U_j) ≅ Γ(V_j,V_j) ⊗[R] K`を得る。
+
+まだ未着手(道具の在庫確認のみ)。次のセッションの最初の一手として記録。
