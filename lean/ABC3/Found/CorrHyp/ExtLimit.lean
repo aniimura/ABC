@@ -2929,14 +2929,24 @@ noncomputable def corrPieceGlueData_glued_iso (X : Over BaseK) (U : X.left.Opens
   show (corrHypGlueDataOfEtale (A := Γ(X.left, U)) (piece_preimage_isAffineOpen X U hU C α)).glued ≅ _
   exact corrHypGlueDataOfEtale_glued_iso (piece_preimage_isAffineOpen X U hU C α)
 
-/- ★★次の一手(未着手): (d)`c.C.1.left`自体の有限アフィン被覆
-(`Scheme.exists_finite_affineOpenCover`、既存)+`corrPieceGlueDataOfCorr`
-を各片へ適用したものの外側の貼り合わせ段階、`X.1.left`の有限アフィン
-被覆との整合。(e)`α・β`脚と整合性の等式`h▸extCorr D c'=c`の構成
-——ただし`h:ZK=D.Ext Z`という文字通りの命題的等号は、`Corr`定義の
-`Nonempty C`欠落および`QcqsSpace`が同型類の商でないことと組み合わさる
-と証明不可能(あるいは偽)になりうるという構造的懸念が判明している
-(`corrhyp-goal.md`2026-09-04の該当エントリに詳細記録、拙速な
-`Corr`修正は既に完成済みの§1 5/5を後退させかねないため見送り中)。 -/
+/- ★★次の一手(未着手、2026-09-04に理解を訂正): 「`c.C.1.left`の外側の
+貼り合わせ」ではない——`α⁻¹(piece)`は`C`自身の中に既に開集合として
+存在する(トートロジー、貼り合わせ不要)。真に必要なのは、
+`descendPiece`(`corrHypGlueData`の`Z i`)がまだ`ℝ`レベルのまま
+(`piece_descends_iso`が与える`Spec(P₀.Ring)`という**`R`レベル**の
+候補片が`descendPiece`内部で使い捨てられ、外へ取り出されていない)
+ことを踏まえ、この`R`レベルの候補片自体を`R`レベル(`FgSubalgebra
+ℚ ℝ`の圏)で貼り合わせる新しい層——異なる添字・異なるアフィン片
+ごとに異なりうる`R_i`を共通精密化`R_i⊔R_j`へ持ち上げて比較する新しい
+議論が要り、`ℝ`レベルで構築した`transitionElem`/`gdT`/`cocycle`一式
+に相当する困難をもう一段繰り返すことを意味する(新しい独立した規模
+の数学的内容、既存部品の配線だけでは済まない)。
+
+さらに`α・β`脚と整合性の等式`h▸extCorr D c'=c`の構成——ただし
+`h:ZK=D.Ext Z`という文字通りの命題的等号は、`Corr`定義の`Nonempty C`
+欠落および`QcqsSpace`が同型類の商でないことと組み合わさると証明不可能
+(あるいは偽)になりうるという構造的懸念が判明している(`corrhyp-
+goal.md`2026-09-04の該当エントリに詳細記録、拙速な`Corr`修正は既に
+完成済みの§1 5/5を後退させかねないため見送り中)。 -/
 
 end ABC3.Found.CorrHyp
