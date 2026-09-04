@@ -350,6 +350,19 @@ Monic.natDegree_map`(モニック多項式の次数は任意の環準同型で�
 不要だった。分離性(根が相異なること、`Λ_n`が真の`q^n`元集合になる
 ために必要)は別途の課題として残る。
 
+**続報(2026-09-04、★★★★★★★★★節目(3)への第八歩——`n≤m`ならば`D_n∣D_m`、
+`Λ_n⊆Λ_m`の多項式版)**: `iteratedLubinTate_dvd_map_residue`(商`r`の
+mod π像は`X^(q^m-q^n)`)を経て、★`iteratedLubinTateDistinguished_dvd_
+of_le`(`n≤m`ならば`D_n∣D_m`)を確立した——商`r`自身をWeierstrass分解
+し(`r=D'・U'`)、`(D_n・D')・(U_n・U')`が`[π^m]_f`のもう1つの
+Weierstrass分解であることを`Polynomial.IsDistinguishedAt.mul`
+(distinguished多項式の積はdistinguished)で確認、一意性
+(`IsWeierstrassFactorization.unique`)から`D_m=D_n・D'`を結論する
+という、トポロジー・分離性を一切使わない純粋代数的な議論。
+`iteratedLubinTateDistinguishedRoots_le_of_le`で代数閉体上の根の
+多重集合版(`Λ_n⊆Λ_m`)も得た。これで`Λ_n`が`n`について単調に増大
+する族を成すことが確立された。
+
 **残る作業**: 節目(3)torsion点の構成本体(`D_n`の根を`Λ_n`として定義、
 `𝒪_K`加群構造、`K(Λ_n)/K`の完全分岐性)、節目(4)
 `L_n:=K(Λ_n)`が完全分岐かつ`Gal(L_n/K)≅(𝒪_K/π^n)^×`(Lubin-Tateの
