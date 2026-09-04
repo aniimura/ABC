@@ -4468,3 +4468,35 @@ theorem foo {A B : Type u} [CommRing A] [CommRing B] [Algebra A B] ... := by
 実例: `lean/ABC3/Found/Falt1/AlmostEtale.lean`の`awayOne_etale_of_etale`
 (`Definition 2.1`のwitnessを`B:=Fin2→R`から「`Etale`・`Finite`・`Free`
 な任意の`B`」へ一般化、`B:=A`(恒等拡大)の場合を含む)。
+
+## 47. `maxHeartbeats`の`whnf`タイムアウトは「構造的に不可能」を意味
+しない——桁を上げて気長に待つだけで通ることがある(2026-09-05)
+
+**症状**: `pieceAlgebra`等`CorrHyp`固有の巨大な足場(`letI`が10個
+以上)を伴う証明が、`set_option maxHeartbeats 4000000`(既存コードの
+標準的な上限)でも`(deterministic) timeout at whnf`になる。この症状
+だけを見ると「この組み合わせ自体が構造的に無理(instance diamond等)」
+と判断してしまいがちだが、**実際には単に計算資源が足りていないだけ**
+のことがある。
+
+**確認の仕方**: `maxHeartbeats`を大幅に(例えば10倍、`40000000`)
+上げて、`mcp__abc3-lean__lean_check`をバックグラウンドで実行し
+(`timeoutSeconds`を大きく、または既定の120秒超過で自動的にバック
+グラウンド化されるのに任せ)、気長に待つ。今回の実例では`4000000`
+で`whnf`タイムアウトしていた配線が、`40000000`で**227秒**かけて
+無事通った——「証明できない」のではなく「もっと時間がかかる」だけ
+だった。
+
+**教訓**: `letI`の数が多い巨大な証明でタイムアウトに当たったとき、
+最初に疑うべきは(1)`intro`忘れ(`#41`)、(2)欠けているインスタンス
+(`letI`の追加漏れ)、(3)`algebraMap`記法の曖昧さ(`#1`系)——これらを
+1つずつ潰してもなお`whnf`タイムアウトが残るなら、**設計を諦める前に
+まず`maxHeartbeats`を10倍にして試す**のが低コストな次の一手になる。
+ただし個々の`lean_check`呼び出しが数分かかるようになるため、最終的に
+`.lean`ファイルへ書く際は`lake build`(こちらは`mathlib`用のグローバル
+設定に従うため、ファイル冒頭の`set_option maxHeartbeats N in`を宣言に
+直接付ける必要がある)でも同じ上限を明示することを忘れないこと。
+
+実例: `lean/ABC3/Found/CorrHyp/ExtLimit.lean`の
+`exists_descendPieceR_localization_baseChange`(`maxHeartbeats
+40000000`、227秒)。

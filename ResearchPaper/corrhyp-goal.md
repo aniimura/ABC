@@ -4482,3 +4482,48 @@ elaboration timeoutに当たっており、まだ**未完成**。次の一手は
 この補題へ渡す部分を別々の宣言にする)ことで、個々の断片が軽く保たれる
 よう工夫すること。lake build(`FieldLimit`/`ABC3`)とも0エラー確認、
 push完了。集計は引き続き10/24——§4は引き続き0/2。
+
+## 2026-09-05夜さらに続き7(完成): `exists_descendPieceR_localization_
+baseChange`——配線が完全に通った。原因は「分割の仕方」ではなく
+「`maxHeartbeats`の絶対量」だった
+
+前回「配線側もさらに細かく分割する」と記録したが、実際に当たっていた
+壁の正体を再検証した結果、**分割の仕方の問題ではなく、単に`maxHeartbeats`
+が足りていなかっただけ**だと判明した——`4000000`では`whnf`タイムアウト
+になっていた同じ配線を、`maxHeartbeats 40000000`(10倍)に上げて
+バックグラウンドで気長に待ったところ、**227秒かけて無事通った**。
+
+**完成した定理**——`exists_descendPieceR_localization_baseChange`
+(`ExtLimit.lean`、commit `bc6db389`):
+
+```
+theorem exists_descendPieceR_localization_baseChange (X U hU f g C α) [...] :
+    ∃ (R' : FgSubalgebra ℚ ℝ) (hR : R ≤ R') (p₀ : MvPolynomial (Fin n) (A ⊗[ℚ] R'.1)),
+    ∀ (M : Type) [...] [IsLocalization.Away (mk (I mapped to R') p₀) M],
+    Nonempty (M ⊗[A⊗R'.1] (A⊗ℝ) ≃+* Γ(C, piece(D(f*g))))
+```
+
+`exists_piece_basicOpen_R_lift`・`piece_isLocalization_basicOpen_mul`・
+`exists_ringEquiv_of_piece_lift`・`piece_basicOpen_mul_eq`という4つの
+既存部品を1つの証明に組み立てただけ——各部品はすでに個別に確立済み
+だったので、**新しい数学的な内容は不要**だった。
+
+**意義(正直な評価、大きな前進)**: これで`Lemma 4.1`のGlueData構築に
+おける「`R`レベルの局所化と正しい`ℝ`レベルの対象を結びつける」核心
+部分が**完全に完成した**——`descendPieceR_localization_isOpenImmersion`
+(開埋め込み性、続き19)と合わせれば、`GlueData`の`f i j`(`V(i,j)⟶U i`)
+に要る**全データ**(開埋め込みであり、かつℝレベルで正しい対象を指す)
+が揃った。続き15で発見して以来、本セッション全体を通じて追いかけて
+きた本丸のギャップが、数学的にもLeanの証明としても解決した。
+
+**残る作業(正直な記録)**: 実際に`Scheme.GlueData`の完全な構造
+(`J`(添字)・`U`(各片)・`V`(重なり)・`f`・`f_open`・`t`(遷移)・`t'`・
+`t_fac`・`cocycle`の約8データ)へ**組み立てる**作業自体はまだ未着手
+——特に`t`(`V(i,j)⟶V(j,i)`)の構成には、今回の部品を`f`・`g`を入れ替えて
+2回適用し(`D(f*g)=D(g*f)`という対称性)、両者が同じ`V(i,j)`を指す
+ことを比較する議論が必要。加えて、`GlueData`全体を組み立てるには
+**複数の添字`i,j,k`にまたがる共通の粗い段階`R''`への合流**(既存の
+`exists_fgSubalgebra_upperBound`が使える見込み)も要る。`β`脚の構成
+(`α`脚と対称、丸ごと未着手)も残っている。lake build(`ExtLimit`/
+`ABC3`)とも0エラー確認、push完了。集計は引き続き10/24——§4は
+引き続き0/2だが、`Lemma 4.1`の核心的な数学的困難は解決した。

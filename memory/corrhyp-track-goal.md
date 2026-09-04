@@ -1980,3 +1980,27 @@ exists_ringEquiv_localization_of_eqを実際のX,U,hU,f,g,C,αへ適用して
 等の足場を伴う)はまだelaboration timeoutで未完成——次はこの配線側も
 さらに細かく分割する。lake build(FieldLimit/ABC3)0エラー確認、
 push済み。集計は引き続き10/24——§4は引き続き0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き7(完成)
+壁の正体を再検証——分割の仕方の問題ではなく、単にmaxHeartbeatsが
+足りていなかっただけだった。4000000ではタイムアウトしていた同じ配線
+を40000000(10倍)に上げてバックグラウンドで気長に待ったところ227秒
+で無事通った。
+
+exists_descendPieceR_localization_baseChange(commit bc6db389、
+ExtLimit.lean)完成——exists_piece_basicOpen_R_lift・piece_
+isLocalization_basicOpen_mul・exists_ringEquiv_of_piece_lift・
+piece_basicOpen_mul_eqの4部品を1つの証明に組み立てただけ、新しい
+数学的内容は不要だった。
+
+意義(大きな前進): Lemma 4.1のGlueData構築における「Rレベルの局所化と
+正しいℝレベルの対象を結びつける」核心部分が完全に完成した。
+descendPieceR_localization_isOpenImmersion(開埋め込み性)と合わせれば
+GlueDataのf i jに要る全データが揃った——続き15で発見して以来セッション
+全体を通じて追いかけてきた本丸のギャップが解決した。
+
+残る作業: Scheme.GlueDataの完全な構造への組み立て(J・U・V・f・
+f_open・t・t'・t_fac・cocycle)——特にtの構成にD(f)↔D(g)対称性の実現、
+複数添字にまたがる共通段階R''への合流が要る。β脚(丸ごと未着手)も
+残る。lake build(ExtLimit/ABC3)0エラー確認、push済み。集計は引き続き
+10/24——§4は引き続き0/2だがLemma 4.1の核心的な数学的困難は解決した。
