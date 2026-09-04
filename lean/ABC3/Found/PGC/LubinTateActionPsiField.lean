@@ -140,4 +140,23 @@ theorem nodup_iteratedLubinTatePsiRoots {A : Type*} [CommRing A] [IsLocalRing A]
     ← Polynomial.map_map]
   exact (separable_iteratedLubinTatePsi_map_fractionRing hq hπmax hπne0 f hf0 hf1 hf n hn).map
 
+/-- `ψ_n` の分解体は `FractionRing A` 上 Galois——分離多項式の分解体は
+自動的に Galois という一般事実(`IsGalois.of_separable_splitting_
+field`)を分離性(`separable_iteratedLubinTatePsi_map_fractionRing`)
+に適用するだけ。ただし、この分解体が `AdjoinRoot ψ_n`(1つの根を
+添加するだけの体)と一致すること——古典的な Lubin-Tate 理論の
+実質的な内容、`𝒪_K` 作用による他の根への言及を要する——は、
+まだ別途の課題として残る。 -/
+theorem isGalois_iteratedLubinTatePsi_splittingField {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A] [UniqueFactorizationMonoid A] [CharZero A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n : ℕ) (hn : 1 ≤ n) :
+    IsGalois (FractionRing A) (Polynomial.map (algebraMap A (FractionRing A))
+      (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn)).SplittingField :=
+  IsGalois.of_separable_splitting_field
+    (separable_iteratedLubinTatePsi_map_fractionRing hq hπmax hπne0 f hf0 hf1 hf n hn)
+
 end ABC3.Found.PGC
