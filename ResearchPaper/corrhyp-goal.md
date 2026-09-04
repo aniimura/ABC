@@ -1301,3 +1301,29 @@ rigidityは不要になる可能性が高い——必要なのは**同じ段階`
 ——`c.C`が実際に貼り合わさっている、という事実——から取り出す段)、
 これは独立した construction であり未着手のまま。rigidityの「使い方」は
 絞れたが、「使うための材料の構成」はまだ手つかず。
+
+### 2026-09-04さらに続報: 戦略の簡略化——`GlueData`を手作りする必要は無い
+
+`Scheme.GlueData`(`J`・`U`・`V`・`f`・`t`・`t'`・`t_fac`・`cocycle`)を
+手作りで組み立てる前提で考えていたが、**もっと軽い道具で足りる**ことに
+気づいた——`Scheme.Cover.glueMorphisms`(mathlib、`corrhyp-goal.md`に
+以前から「在庫確認済み」と記していたもの)を確認したところ、
+「`X`(**既存の**スキーム)の開被覆`𝒰`と、各片からの射`f x : 𝒰.X x ⟶ Y`
+が重なり上で一致する(`pullback.fst≫f x = pullback.snd≫f y`という
+**単純な pullback 条件のみ**)」から直接`X ⟶ Y`を作る、という道具だった。
+
+**これは大きな簡略化**——`Z`(あるいはその有限段階での対応物)を
+**ゼロから貼り合わせて構成する必要は無く**、`c.C` は**すでに存在する
+スキーム**なので、`c.C`自身の(標準エタール片による)自然な開被覆に
+`glueMorphisms`を適用して**`c.C ⟶ (extDiagram X)の有限段階R'での対応物`
+という射を直接構成すればよい**——`GlueData`の`t`・`t'`・`cocycle`
+フィールドを全部手作りする必要が無くなった(`glueMorphisms`が要求する
+のは pairwise の一致条件だけで、3重の cocycle 条件は要らない)。
+
+ただし、この pairwise 一致条件を示すこと自体が、依然として rigidity
+(前回精緻化した単一段階版)を要する——**構造的な複雑さは減ったが、
+数学的な核(rigidityの適用)は変わらず必要**。次の一手として、
+(1)有限段階`R'`での`piecePullbackIso`の類似物(`toBaseK`の代わりに
+`(toSchemeDiagramOver.obj R').hom`を使う、同じ pullback pasting 技法
+で作れる見込み)、(2)各`Spec(P₀_i.Ring)`からこの`R'`側の対応物への
+射、(3)pairwise 一致の rigidity 検証、という3点が残る。
