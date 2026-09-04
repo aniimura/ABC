@@ -2872,7 +2872,43 @@ mathlib での正確な組み立て方は未確認)。
       `1`の`p^{n+1}`乗根型1個)を選んで初めて実行できる、次回への
       課題として残す)。
 
-      (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05、
+      **step (5)(discriminantの塔、局所版が無い)への潜在的な迂回路
+      を発見した**(未着手・戦略的な仮説の段階、次回検討すること)。
+
+      `conductor_mul_differentIdeal`(mathlib既存、`RingTheory/
+      DedekindDomain/Different.lean:634`)の正確なステートメント
+      ——`(x:B)(hx:Algebra.adjoin K{algebraMap B L x}=⊤):
+      conductor(A,x)*differentIdeal(A,B) = span{aeval x(derivative
+      (minpoly A x))}`——を再確認したところ、これは`x`が**A[x]がB
+      (=積分閉包)へ収束する任意の単生成元**でありさえすれば成り立つ
+      **完全に一般的な事実**であり、`falt1_cancelConductorDelta_
+      assembled`で使った際に「`x`が`V1`自身の生成元と一致する、
+      という本セッションの構成固有の単純化かもしれない」と記録して
+      いた懸念は**杞憂だった**——`conductor_mul_differentIdeal`
+      自体はどんな単生成元`x`にも適用できる。
+
+      これは、Faltings の「`d+1`個の**同時**添加」ではなく、
+      `pushoutKaehlerSplitStepOption`による「**1個ずつ逐次**添加」
+      (`d+1`回の微小段)で`V_{n+1}`を構成すれば、**各微小段**で
+      `conductor_mul_differentIdeal`(既存・実測済み)がそのまま
+      適用できる、という可能性を示唆する——もしこれが機能すれば、
+      discriminant の塔という**新しい独立の理論を一切構築せずに**、
+      Lemma 1.1 で既に確立した conductor/differentIdeal の道具**だけ**
+      でTheorem 1.2の核心を閉じられる見込みがある。
+
+      ★★ただし、これは`delta_tendsto_zero`(既に完成)が要求する
+      漸化式`δ_{n+1}≤δ_n-min(1,δ_n/(d+1))/(d+2)`(`d+1`個**同時**の
+      構成に固有の形)をそのまま使えないことを意味する——「1個ずつ
+      逐次」の構成では、`n`個のマクロ段の代わりに`(d+1)n`個の
+      ミクロ段の漸化式になり、**新しい収束の議論を再導出する**
+      必要がある(既存の`delta_tendsto_zero`を流用できない可能性が
+      高い)。これは discriminant の塔を避けられる代わりに**別の
+      新しい数学的議論**(逐次構成での収束)を要する、という
+      トレードオフであり、どちらが実際に軽いかは未検証——次回は
+      まずこの「逐次構成での収束」が本当に成り立つか(定性的に:
+      `d+1`回の逐次添加でも同じ`δ→0`の結論に到達できるか)を、
+      小さな具体例か概算で検討することから始めるのが良い。
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
       「菱形」版であって、対応物というより`falt1_differentIdeal_
