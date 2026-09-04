@@ -3035,3 +3035,77 @@ QuotientBijOn_bijective`(既出)を組み合わせるだけ。
 を`grep`して、`𝒪_K`(または`(𝒪_K/π^n)^×`)の作用で得られる元がすべて
 `adjoinIntegers K x`(ひいては`K.carrier⟮x⟯`)に収まることを述べる
 既存の定理を探すところから。
+
+## ★★★★★超重要な発見(2026-09-05、上の計画のステップ3(各`K(Λ_n)`
+の正規性)は着手前に**完成させた**。さらに調査の過程で、古典的
+Lubin-Tate理論の**固定レベルnでの完全な主定理**
+`Gal(K.carrier⟮x⟯/K.carrier)≃*(𝒪_K/π^n)^×`が**既に完成していた**
+ことが判明した——ロードマップを大きく前進させる発見)
+
+### 発見1: `normal_adjoin_of_mem_iteratedLubinTatePsiTorsionPoints`
+を新規に証明・commit済み(`Found/PGC/LubinTateNormalAdjoin.lean`)
+
+`Normal K.carrier (K.carrier⟮x⟯)`(`x`は`ψ_n`の根)を、`x`の最小
+多項式が`ψ_n`自身であること(`LubinTateReciprocitySurjective.lean`
+と同じ手筋)と`iteratedLubinTatePsiTorsionPoints_subset_adjoin`
+(既出、`ψ_nの全根がK(x)に収まる`)を組み合わせ、`K.carrier⟮x⟯`が
+`x`の最小多項式の**分裂体**に一致することを示して
+(`IntermediateField.adjoin_rootSet_isSplittingField`+
+`Normal.of_isSplittingField`)証明した。新しい罠は無かった
+(唯一`IsAlgClosed.splits_codomain`が非推奨だったので`IsAlgClosed.
+splits`へ差し替えた程度)。これで上の計画のステップ3が(各nについて)
+完成し、`K_π:=⨆n,K.carrier⟮(psiGenSeq n).pt⟯`に`IntermediateField.
+normal_iSup`を適用する準備が整った。
+
+### 発見2(★これがロードマップを大きく変える): 固定レベルnでの
+**完全な**Lubin-Tate相互律`galoisReciprocityEquiv`が既に完成していた
+
+`git log`を遡って調べたところ、2026-09-04 21:41〜22:06の一連の
+コミット(`232b930c`→`95231bf0`→`450a69fe`、§9-1347〜1349、
+「本セッションの最終到達点」と明記)で、以下がすべて**sorry無しで
+完成済み**だったと判明した(今回の(i)(ii)より前、しかしこれまで
+`reciprocityMapLimit`と組み合わせる相手が無く「宙に浮いていた」):
+
+- `Found/PGC/LubinTateReciprocitySurjective.lean::reciprocityMap_
+  surjective`(固定nでの`reciprocityMap`の全射性、`minpoly.exists_
+  algEquiv_of_root'`から直接)。
+- `Found/PGC/LubinTateReciprocityGaloisSurjective.lean::algEquivRestrict
+  Self_surjective`(`K.carrier⟮x⟯`の任意の自己同型`τ`が大域的な`σ`の
+  制限として実現される——**まさに私が計画のステップ4で欲しかった
+  「τを構成する」に相当する事実が、固定レベルnについては既にある**)。
+- `Found/PGC/LubinTateReciprocityIsomorphism.lean::galoisUnitReciprocity
+  Map_injective`/`_surjective`/`galoisUnitReciprocityEquiv`/
+  **`galoisReciprocityEquiv`**: **`Gal(K.carrier⟮x⟯/K.carrier)≃*
+  (𝒪_K/π^n𝒪_K)^×`という、古典的Lubin-Tate理論の主定理そのもの**
+  (固定レベルn、`K.carrier⟮x⟯≃ₐ[K.carrier]K.carrier⟮x⟯`が
+  `Aut(K(x)/K)`、単射性は`algEquivRestrictSelf_surjective`+
+  `reciprocityMap_spec`の一意性から、全射性は`reciprocityMap_
+  surjective`から)。
+
+### ロードマップの修正
+
+この発見により、`τ:K_π≃ₐ[K.carrier]K_π`(計画のステップ4)の構成は、
+**ゼロから作る必要が無い**——各`n`で`galoisUnitReciprocityEquiv`
+(の逆)を使って`τ_n:K.carrier⟮x_n⟯≃ₐ[K.carrier]K.carrier⟮x_n⟯`
+(`u`(mod`π^n`)に対応する自己同型)を取り、**これらが`n`を跨いで
+両立する**(`τ_{n+1}`を`K.carrier⟮x_n⟯`へ制限すると`τ_n`に一致する)
+ことを示してから、`IntermediateField`の**colimitとしての貼り合わせ**
+(`K_π=⨆n,K.carrier⟮x_n⟯`上への一意な拡張)を構成すればよい——
+「両立する自己同型の無限列を貼り合わせる」という、本セッションの
+(ii)で`compatible_of_succ`を作ったのと**同じ形の議論**が、今度は
+「群の元」ではなく「体の自己同型」に対して要る、という構造。
+
+**次に戻るときの最優先タスク**(更新): 
+1. まず`τ_n`の`n`跨ぎ両立性(`τ_{n+1}|_{K(x_n)}=τ_n`)を`galoisUnit
+   ReciprocityMap_eq_reciprocityMap`・`reciprocityMap_spec`・
+   `reciprocityMapLimitCompat`(既出、本セッション)を組み合わせて
+   示せるか検討する。
+2. 次に「両立する自己同型の列→`K_π`上の単一の自己同型」という貼り
+   合わせ(`IntermediateField`の`iSup`上でのAlgEquiv構成、おそらく
+   `AlgEquiv.ofBijective`+`IntermediateField.iSup`の普遍性、または
+   各元がどこかのレベルで初めて現れることを使った直接定義)の作り方
+   を検討する——これがおそらく最後の本質的な数学的難所。
+3. それさえできれば、`AlgEquiv.restrictNormalHom_surjective`
+   (`[Normal F K₁][Normal F E]`、今回の`normal_adjoin_of_mem_...`
+   +`IntermediateField.normal_iSup`で両方揃う)で`τ`を`K.closure`
+   全体の`σ`へ拡張し、`reciprocityMapLimit`の全射性が閉じる見込み。
