@@ -2070,4 +2070,116 @@ theorem adjoin_eq_top_integralClosure_adjoinRoot_X_pow_sub_C
   refine ⟨⟨PB.gen, hBint⟩, ?_⟩
   exact adjoin_eq_top_in_integralClosure_of_isEisensteinAt hBint hpiirr hEis
 
+/-!
+## Theorem 1.2・3b/3c 接続: `V_1` の differentIdeal の具体的な値(完成、2026-09-04)
+
+item 3b の `cancel_conductor_delta` が要求する `hspan_eq`(「conductor と
+δₙ₊₁ の base change が一致する」)を検証する足場として、`differentIdeal
+V0 V1` そのものを**具体的な式で**計算した——Lemma 1.1 自身の道具
+`differentIdeal_eq_span_derivative`(`w` が単項生成なら
+`differentIdeal V W = span{f'(w)}`)を、上で完成した monogenicity
+(`adjoin_eq_top_in_integralClosure_of_isEisensteinAt`)と組み合わせる
+だけで閉じた。
+
+★配管上の教訓(2026-09-04): `differentIdeal A B` は `[IsDedekindDomain
+B]`・`[Module.IsTorsionFree A B]` を引数に持つ——これらを結論の中で
+`integralClosure V0 (AdjoinRoot fK)` に対して**内部で `infer_instance`
+により導出しようとすると**、定理の**主張(goal)自体**が同じ2つの
+instance を要求するために、goal 側の(先に走る)instance 探索が
+失敗した結果が**キャッシュされ**、後から `haveI`/`infer_instance` で
+正しく揃えても失敗し続けるという罠に嵌った(`set` 起因ではなく、
+「主張に現れる instance 引数」と「証明内で後から用意する instance」の
+順序の罠——tools/lean-idioms.md に追記の価値がある新パターン)。
+解決策は、これら2つを**定理の引数として明示的に要求する**
+(`[IsDedekindDomain (...)]`・`[Module.IsTorsionFree V0 (...)]`)ことで
+goal 自体の instance 探索を迂回すること。実用上は
+`isDedekindDomain_integralClosure_adjoinRoot_X_pow_sub_C`(前段で証明
+済み)と `IsIntegralClosure.isTorsionFree`(mathlib)を呼び出し元で
+`haveI` すれば、この2つは自動的に埋まる。 -/
+
+set_option maxHeartbeats 1000000 in
+/-- **`V_1 := integralClosure V0 (AdjoinRoot(X^n-π の base change))` の
+differentIdeal は `span{n·w^{n-1}}`**(`w` は根の像)。古典的な
+「Eisenstein 拡大の判別式(discriminant)」の公式そのもの
+(`differentIdeal` は `discriminant` の平方根に相当する量)。
+`minpoly V0 w = X^n-π`(前段で確立済み)の微分 `n·X^{n-1}` を `w` に
+代入するだけ——`differentIdeal_eq_span_derivative` と
+monogenicity(`adjoin_eq_top_in_integralClosure_of_isEisensteinAt`)を
+貼り合わせる。`set_option maxHeartbeats`は、結論に現れる `differentIdeal`
+の instance 引数由来の重い探索を許容するため(上の教訓参照)。 -/
+theorem differentIdeal_eq_span_of_adjoinRoot_X_pow_sub_C
+    {V0 : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0] (π : V0) (n : ℕ)
+    (hn : (n : FractionRing V0) ≠ 0) (hπne0 : algebraMap V0 (FractionRing V0) π ≠ 0)
+    (hprime : (Ideal.span ({π} : Set V0)).IsPrime) (hnotsq : π ∉ (Ideal.span ({π} : Set V0)) ^ 2)
+    (hnpos : 0 < n)
+    [IsDedekindDomain (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    [Module.IsTorsionFree V0 (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))] :
+    ∃ w : integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))),
+      differentIdeal V0 (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))
+        = Ideal.span {(n : integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+            (algebraMap V0 (FractionRing V0))))) * w ^ (n - 1)} := by
+  set f : Polynomial V0 := Polynomial.X ^ n - Polynomial.C π with hfdef
+  set fK : Polynomial (FractionRing V0) := f.map (algebraMap V0 (FractionRing V0)) with hfKdef
+  have hirr : Irreducible fK :=
+    eisenstein_X_pow_sub_C_irreducible_map π n hnpos hprime hnotsq
+  haveI : Fact (Irreducible fK) := ⟨hirr⟩
+  have hmonicK : fK.Monic := (Polynomial.monic_X_pow_sub_C π hnpos.ne').map _
+  have hmapeq : fK = Polynomial.X ^ n - Polynomial.C (algebraMap V0 (FractionRing V0) π) := by
+    rw [hfKdef, hfdef]; simp
+  have hsepK : fK.Separable := by rw [hmapeq]; exact Polynomial.separable_X_pow_sub_C _ hn hπne0
+  haveI : Module.Finite (FractionRing V0) (AdjoinRoot fK) := hmonicK.finite_adjoinRoot
+  haveI : FiniteDimensional (FractionRing V0) (AdjoinRoot fK) := ‹Module.Finite _ _›
+  haveI : Algebra.IsSeparable (FractionRing V0) (AdjoinRoot fK) :=
+    algIsSeparable_adjoinRoot_of_separable _ hmonicK hsepK
+  set PB := AdjoinRoot.powerBasis hirr.ne_zero with hPBdef
+  have hPBgen : PB.gen = AdjoinRoot.root fK := AdjoinRoot.powerBasis_gen hirr.ne_zero
+  have hBint : IsIntegral V0 PB.gen := by
+    rw [hPBgen]
+    have hmonic : f.Monic := Polynomial.monic_X_pow_sub_C π hnpos.ne'
+    refine ⟨f, hmonic, ?_⟩
+    show Polynomial.aeval (AdjoinRoot.root fK) f = 0
+    rw [← Polynomial.aeval_map_algebraMap (A := FractionRing V0)]
+    rw [Polynomial.aeval_def, AdjoinRoot.algebraMap_eq]
+    exact AdjoinRoot.eval₂_root fK
+  have hminpolyK : minpoly (FractionRing V0) PB.gen = fK := by
+    rw [hPBgen]
+    have h := AdjoinRoot.minpoly_root hirr.ne_zero (f := fK)
+    rw [hmonicK.leadingCoeff, inv_one, Polynomial.C_1, mul_one] at h
+    exact h
+  have hEqmin : minpoly V0 PB.gen = f := by
+    have hEq : minpoly (FractionRing V0) PB.gen = (minpoly V0 PB.gen).map (algebraMap V0 (FractionRing V0)) :=
+      minpoly.isIntegrallyClosed_eq_field_fractions' (FractionRing V0) hBint
+    rw [hminpolyK] at hEq
+    have hEq2 : f.map (algebraMap V0 (FractionRing V0)) = (minpoly V0 PB.gen).map (algebraMap V0 (FractionRing V0)) := hEq
+    exact (Polynomial.map_injective _ (IsFractionRing.injective V0 (FractionRing V0)) hEq2).symm
+  set w : integralClosure V0 (AdjoinRoot fK) := ⟨PB.gen, hBint⟩ with hwdef
+  have hwL : (w : AdjoinRoot fK) = PB.gen := rfl
+  have hminpolyw : minpoly V0 w = minpoly V0 PB.gen := by
+    rw [← hwL]
+    exact (minpoly.algebraMap_eq (A := V0) (Subtype.val_injective) w).symm
+  have hadjoin : Algebra.adjoin V0 ({w} : Set (integralClosure V0 (AdjoinRoot fK))) = ⊤ := by
+    have hEis : (minpoly V0 PB.gen).IsEisensteinAt (Ideal.span ({π} : Set V0)) := by
+      rw [hEqmin]; exact isEisensteinAt_X_pow_sub_C π n hnpos hprime hnotsq
+    have hπ0 : π ≠ 0 := fun h => hπne0 (by rw [h]; simp)
+    have hprimeπ : Prime π := (Ideal.span_singleton_prime hπ0).mp hprime
+    exact adjoin_eq_top_in_integralClosure_of_isEisensteinAt hBint hprimeπ.irreducible hEis
+  have hw : Algebra.adjoin (FractionRing V0)
+      ({(algebraMap (integralClosure V0 (AdjoinRoot fK)) (AdjoinRoot fK)) w} : Set (AdjoinRoot fK)) = ⊤ := by
+    show Algebra.adjoin (FractionRing V0) ({(w:AdjoinRoot fK)} : Set (AdjoinRoot fK)) = ⊤
+    rw [hwL, hPBgen]
+    exact AdjoinRoot.adjoinRoot_eq_top
+  have hdiff := differentIdeal_eq_span_derivative w hw hadjoin
+  refine ⟨w, ?_⟩
+  rw [hdiff, hminpolyw, hEqmin, hfdef]
+  congr 1
+  have hderiv : Polynomial.derivative (Polynomial.X ^ n - Polynomial.C π : Polynomial V0)
+      = Polynomial.C (n : V0) * Polynomial.X ^ (n-1) := by
+    rw [Polynomial.derivative_sub, Polynomial.derivative_X_pow, Polynomial.derivative_C, sub_zero]
+  rw [hderiv]
+  simp [Polynomial.aeval_mul, Polynomial.aeval_X_pow]
+
 end ABC3.Found.Falt1

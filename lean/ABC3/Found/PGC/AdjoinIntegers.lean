@@ -28,14 +28,32 @@ extends Submonoid ...` という何層にも重なった部分構造の上で、
 `CompleteSpace` のすべてが**高速に**(1秒未満で)確認できた——
 `Valued` 特有の位相の競合が存在しないため。
 
-## 現状と次の一歩
+## 現状(2026-09-04、★★★★★★★★★★★★★節目——`PowerSeries.aeval` が
+`Λ_n` の元で実際に組み立てられた)
 
-`adjoinIntegers K x` の `CompactSpace`(`compactSpace_adjoinIntegers`)
-まで確立できた。`Valued.integer.isDiscreteValuationRing_of_
-compactSpace` は `Valued` 型クラスを要求するため、上記の理由でこの
-`Subring` には直接使えない——`IsDiscreteValuationRing`(ひいては
-`Ideal.isLinearTopology` 経由の `IsLinearTopology`)を`Valued` を経由
-せずに得る経路が次の課題として残る。
+`IsDiscreteValuationRing`(そこから `Ideal.isLinearTopology` 経由で
+`IsLinearTopology` を得る、という当初の計画)を`Valued` を経由せずに
+得る経路の代わりに、**もっと直接的な2つの経路**を見つけた:
+
+1. **`ValuationRing`・`IsLocalRing`**: `adjoinIntegers K x` の任意の
+   2元 `a,b` について、ノルムの大小で場合分けし、小さい方を大きい方
+   で割った商(ノルム`≤1`なので`adjoinIntegers K x`自身の元)を
+   `PreValuationRing`の証人として直接与えるだけ——`Valued`・
+   コンパクト性のどちらも不要。`ValuationRing.iff_local_bezout_domain`
+   で`IsLocalRing`も従う。
+2. **`IsLinearTopology`**: 半径`ε>0`の閉球`{y | ‖y‖≤ε}`が(非
+   アルキメデス三角不等式+ノルム`≤1`のスカラー倍で)そのまま
+   `adjoinIntegers K x`の**イデアル**になることを直接示し
+   (`adjoinIntegersBall`)、`Metric.nhds_basis_closedBall`と
+   `IsLinearTopology.mk_of_hasBasis`を組み合わせる——`Ideal.
+   isLinearTopology`(adic位相経由、`IsDiscreteValuationRing`が要る)
+   も`Valued`も一切経由しない。
+
+これに`𝒪[K.carrier]`から`adjoinIntegers K x`への埋め込み
+(`adjoinIntegersAlgebraMap`、`spectralNorm_extends`から等長)と、その
+連続性(`continuousSMul_adjoinIntegers`)を組み合わせると、
+`PowerSeries.aeval`の要求する条件が**すべて**揃い、`Λ_n`の元`x`で
+実際に冪級数を評価する`lubinTateEvalAtTorsionPoint`が完成した。
 -/
 
 namespace ABC3.Found.PGC
@@ -147,5 +165,226 @@ theorem compactSpace_adjoinIntegers {p : ℕ} [Fact p.Prime] (K : PAdicLocalFiel
       Set (IntermediateField.adjoin K.carrier ({x} : Set K.closure))) :=
     heq ▸ isCompact_closedBall 0 1
   exact isCompact_iff_compactSpace.mp hcompact
+
+/-! ### `adjoinIntegers K x` は付値環——`Valued`・コンパクト性を経由しない -/
+
+/-- `adjoinIntegers K x` は `PreValuationRing`——任意の2元 `a,b` の
+ノルムを比較し、小さい方を大きい方で割った商(ノルム`≤1`なので
+`adjoinIntegers K x`自身の元)を証人として直接与える。 -/
+theorem preValuationRing_adjoinIntegers {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure) :
+    PreValuationRing (adjoinIntegers K x) := by
+  constructor
+  intro a b
+  set L := IntermediateField.adjoin K.carrier ({x} : Set K.closure)
+  rcases eq_or_ne (a : L) 0 with ha0 | ha0
+  · refine ⟨0, Or.inr ?_⟩
+    apply Subtype.ext
+    show (b : L) * (0 : L) = (a : L)
+    rw [mul_zero, ha0]
+  · have hanorm : 0 < ‖(a : L)‖ := norm_pos_iff.mpr ha0
+    rcases le_total ‖(b : L)‖ ‖(a : L)‖ with hle | hle
+    · have hcmem : ‖(b : L) / (a : L)‖ ≤ 1 := by
+        rw [norm_div, div_le_one hanorm]; exact hle
+      refine ⟨⟨(b : L) / (a : L), hcmem⟩, Or.inl ?_⟩
+      apply Subtype.ext
+      show (a : L) * ((b : L) / (a : L)) = (b : L)
+      rw [mul_div_cancel₀ _ ha0]
+    · have hbnorm : 0 < ‖(b : L)‖ := lt_of_lt_of_le hanorm hle
+      have hbne0 : (b : L) ≠ 0 := norm_pos_iff.mp hbnorm
+      have hcmem : ‖(a : L) / (b : L)‖ ≤ 1 := by
+        rw [norm_div, div_le_one hbnorm]; exact hle
+      refine ⟨⟨(a : L) / (b : L), hcmem⟩, Or.inr ?_⟩
+      apply Subtype.ext
+      show (b : L) * ((a : L) / (b : L)) = (a : L)
+      rw [mul_div_cancel₀ _ hbne0]
+
+/-- ★★★★★★★★★**`adjoinIntegers K x` は付値環**——`PreValuationRing`
+から直ちに。 -/
+theorem valuationRing_adjoinIntegers {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure) :
+    ValuationRing (adjoinIntegers K x) :=
+  haveI := preValuationRing_adjoinIntegers K x
+  { }
+
+/-- `adjoinIntegers K x` は局所環——`ValuationRing.iff_local_
+bezout_domain`から。 -/
+theorem isLocalRing_adjoinIntegers {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure) :
+    IsLocalRing (adjoinIntegers K x) :=
+  haveI := valuationRing_adjoinIntegers K x
+  (ValuationRing.iff_local_bezout_domain.mp inferInstance).1
+
+/-! ### `IsLinearTopology`——半径 `ε` の閉球が直接イデアルになる -/
+
+/-- 半径 `ε` の「閉球」——`adjoinIntegers K x` のイデアル(`ε≤0` の
+場合は退化して `{0}` 寄りになるが、`ε>0` でのみ使うので問題ない)。
+非アルキメデス三角不等式(`add_mem'`)とノルム`≤1`のスカラー倍
+(`smul_mem'`)から直接イデアルの公理を満たす——`Valued`・
+`IsDiscreteValuationRing` を一切経由しない。 -/
+noncomputable def adjoinIntegersBall {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure)
+    (ε : ℝ) : Ideal (adjoinIntegers K x) where
+  carrier := {y | ‖(y : IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖ ≤ max ε 0}
+  zero_mem' := by simp
+  add_mem' := by
+    intro a b ha hb
+    simp only [Set.mem_setOf_eq] at *
+    haveI : IsUltrametricDist (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := by
+      infer_instance
+    calc ‖(a : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) +
+        (b : IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖
+        ≤ max ‖(a : IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖
+              ‖(b : IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖ :=
+          IsUltrametricDist.norm_add_le_max _ _
+      _ ≤ max ε 0 := max_le ha hb
+  smul_mem' := by
+    intro c a ha
+    simp only [Set.mem_setOf_eq] at *
+    show ‖(c : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) *
+        (a : IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖ ≤ max ε 0
+    rw [norm_mul]
+    calc ‖(c : IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖ *
+        ‖(a : IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖
+        ≤ 1 * max ε 0 := mul_le_mul c.2 ha (norm_nonneg _) zero_le_one
+      _ = max ε 0 := one_mul _
+
+/-- `ε>0` のとき、`adjoinIntegersBall K x ε`(集合として)はちょうど
+半径`ε`の閉球そのもの。 -/
+theorem coe_adjoinIntegersBall {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure)
+    (ε : ℝ) (hε : 0 < ε) :
+    (↑(adjoinIntegersBall K x ε) : Set (adjoinIntegers K x)) = Metric.closedBall 0 ε := by
+  ext y
+  simp only [SetLike.mem_coe, adjoinIntegersBall, Submodule.mem_mk, AddSubmonoid.mem_mk,
+    AddSubsemigroup.mem_mk, Set.mem_setOf_eq, max_eq_left hε.le, Metric.mem_closedBall,
+    dist_eq_norm, sub_zero]
+  show ‖(y : IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖ ≤ ε ↔ ‖y‖ ≤ ε
+  rfl
+
+/-- `adjoinIntegers K x` における `0` の近傍フィルターは、
+`adjoinIntegersBall K x ε`(`ε>0`)を基底に持つ——`Metric.nhds_basis_
+closedBall`(距離空間の一般論)と `coe_adjoinIntegersBall` から。 -/
+theorem hasBasis_nhds_adjoinIntegers {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure) :
+    (nhds (0 : adjoinIntegers K x)).HasBasis (fun ε : ℝ => 0 < ε)
+      (fun ε => (↑(adjoinIntegersBall K x ε) : Set (adjoinIntegers K x))) := by
+  have h := Metric.nhds_basis_closedBall (x := (0 : adjoinIntegers K x))
+  exact h.congr (fun _ => Iff.rfl) (fun ε hε => (coe_adjoinIntegersBall K x ε hε).symm)
+
+/-- ★★★★★★★★★★★**`adjoinIntegers K x` は線形位相**——`0` の近傍基底が
+イデアル(`adjoinIntegersBall`)で与えられることから mathlib の
+`IsLinearTopology.mk_of_hasBasis` で直接従う。`PowerSeries.aeval` が
+要求する「評価先が線形位相であること」の核心部分——`Ideal.
+isLinearTopology`(adic位相・`IsDiscreteValuationRing`が要る)も
+`Valued`も一切経由しない、より直接的な経路。 -/
+theorem isLinearTopology_adjoinIntegers {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure) :
+    IsLinearTopology (adjoinIntegers K x) (adjoinIntegers K x) :=
+  IsLinearTopology.mk_of_hasBasis (adjoinIntegers K x) (hasBasis_nhds_adjoinIntegers K x)
+
+/-! ### `𝒪[K.carrier]` から `adjoinIntegers K x` への埋め込み -/
+
+/-- `𝒪[K.carrier]` から `adjoinIntegers K x` への環準同型——
+`algebraMap K.carrier K.closure` の制限。`algebraMap_mem_
+adjoinIntegers` が値の所属を保証する。 -/
+noncomputable def adjoinIntegersAlgebraMap {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure) :
+    𝒪[K.carrier] →+* adjoinIntegers K x where
+  toFun y := ⟨⟨algebraMap K.carrier K.closure (y : K.carrier),
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)).algebraMap_mem _⟩,
+    algebraMap_mem_adjoinIntegers K x y⟩
+  map_one' := by
+    apply Subtype.ext; apply Subtype.ext
+    show algebraMap K.carrier K.closure ((1 : 𝒪[K.carrier]) : K.carrier) = 1
+    simp
+  map_mul' := by
+    intro a b
+    apply Subtype.ext; apply Subtype.ext
+    show algebraMap K.carrier K.closure ((a * b : 𝒪[K.carrier]) : K.carrier) =
+      algebraMap K.carrier K.closure (a : K.carrier) * algebraMap K.carrier K.closure (b : K.carrier)
+    rw [← map_mul]
+    norm_cast
+  map_zero' := by
+    apply Subtype.ext; apply Subtype.ext
+    show algebraMap K.carrier K.closure ((0 : 𝒪[K.carrier]) : K.carrier) = 0
+    simp
+  map_add' := by
+    intro a b
+    apply Subtype.ext; apply Subtype.ext
+    show algebraMap K.carrier K.closure ((a + b : 𝒪[K.carrier]) : K.carrier) =
+      algebraMap K.carrier K.closure (a : K.carrier) + algebraMap K.carrier K.closure (b : K.carrier)
+    rw [← map_add]
+    norm_cast
+
+/-- `adjoinIntegers K x` は `𝒪[K.carrier]`-代数——
+`adjoinIntegersAlgebraMap` から。★これで `𝒪[K.carrier]` が
+`𝒪[K.carrier⟮x⟯]` へ埋め込まれる、という何段階も前から見通していた
+課題が解決した。 -/
+noncomputable instance adjoinIntegersAlgebra {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure) :
+    Algebra (𝒪[K.carrier]) (adjoinIntegers K x) :=
+  (adjoinIntegersAlgebraMap K x).toAlgebra
+
+/-- `adjoinIntegersAlgebraMap` は連続——`algebraMap K.carrier
+K.closure` 自体が連続(`NormedAlgebra`から)であることの制限。 -/
+theorem continuous_algebraMap_adjoinIntegers {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure) :
+    Continuous (algebraMap (𝒪[K.carrier]) (adjoinIntegers K x)) := by
+  apply Continuous.subtype_mk
+  apply Continuous.subtype_mk
+  exact (continuous_algebraMap K.carrier K.closure).comp continuous_subtype_val
+
+/-- `adjoinIntegers K x` へのスカラー倍は連続——`algebraMap` の連続性
+(`continuous_algebraMap_adjoinIntegers`)から mathlib の
+`continuousSMul_of_algebraMap` で従う。`PowerSeries.aeval` が要求する
+最後の条件。 -/
+theorem continuousSMul_adjoinIntegers {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure) :
+    ContinuousSMul (𝒪[K.carrier]) (adjoinIntegers K x) :=
+  continuousSMul_of_algebraMap _ _ (continuous_algebraMap_adjoinIntegers K x)
+
+/-! ### ★★★★★★★★★★★★★節目——`Λ_n` の元で冪級数を実際に評価する -/
+
+/-- `Λ_n` の元 `x`(`adjoinIntegers K x` の元として)は位相的冪零——
+`spectralNorm_lt_one_of_mem_iteratedLubinTateTorsionPoints` から
+直接。 -/
+theorem hasEval_mem_adjoinIntegers_of_mem_iteratedLubinTateTorsionPoints {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :
+    PowerSeries.HasEval
+      (⟨⟨x, hmem⟩, mem_adjoinIntegers_of_mem_iteratedLubinTateTorsionPoints
+          K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem⟩ : adjoinIntegers K x) := by
+  apply tendsto_pow_atTop_nhds_zero_of_norm_lt_one
+  show spectralNorm K.carrier K.closure x < 1
+  exact spectralNorm_lt_one_of_mem_iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n x hx
+
+/-- ★★★★★★★★★★★★★**節目——冪級数 `f` を `Λ_n` の元 `x` で実際に
+評価する**。`PowerSeries.aeval` が要求する全条件(`CompleteSpace`・
+`IsLinearTopology`・`ContinuousSMul`、他は自動)が `adjoinIntegers K x`
+について揃うことを、このファイルと `LubinTateDistinguishedSeparable.
+lean` で積み上げた事実から組み立てるだけ。`f` に限らず任意の
+`PowerSeries (𝒪[K.carrier])`(特に `[a]_f` を表す `iteratedLubinTate`
+系列)を `x` へ適用できる、`𝒪[K.carrier]`-代数準同型そのもの。 -/
+noncomputable def lubinTateEvalAtTorsionPoint {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))] :
+    PowerSeries (𝒪[K.carrier]) →ₐ[𝒪[K.carrier]] adjoinIntegers K x :=
+  haveI := completeSpace_adjoinIntegers K x
+  haveI := isLinearTopology_adjoinIntegers K x
+  haveI := continuousSMul_adjoinIntegers K x
+  PowerSeries.aeval (R := 𝒪[K.carrier])
+    (hasEval_mem_adjoinIntegers_of_mem_iteratedLubinTateTorsionPoints
+      K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem)
 
 end ABC3.Found.PGC
