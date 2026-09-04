@@ -1547,6 +1547,99 @@ noncomputable def pushoutKaehlerSplitBase {R C0 : Type*} [CommRing R] [CommRing 
   (TensorProduct.lid C0 Ω[C0⁄R]).symm.trans (LinearEquiv.funUnique (Fin 1) C0 _).symm
 
 /-!
+## `pushoutKaehlerSplitStep` を`n`段連鎖させるための Σ 束ね基盤
+(2026-09-05、部分完成)
+
+`pushoutKaehlerSplitStep`を繰り返し適用するには、「前段までの添字族
+`F : ι → Type*`」と「新しい1因子`C : Type*`」を`Option ι`(または
+`Fin(n+1)`)で束ねた**新しい**型族へ組み替える必要がある。ところが
+`Option.elim i C F`のように**型そのもの**を自由変数`i`で分岐させると、
+`CommRing(Option.elim i C F)`のようなinstanceは`i`が具体的に
+`none`/`some j`と分からない限り`infer_instance`では解決できない
+(`recursive Type-valued def with dependent instances`、tools/
+lean-idioms.md 相当の地雷)。
+
+**解決の核**: 「環+その環が運ぶinstance」を**1つのデータ**(Σ型)
+として束ねれば、`.ring`/`.algR`のような**射影**は`i`の分岐無しに
+常に型付けされる(Σ型の外側の`Option.elim`の結果自体は自由変数の
+ままでも、射影は無条件に使える)。`RAlg`(`R`上の代数)と`RAlgOver`
+(`R`上の代数で、かつ具体的な現在の累積環`T`へも埋め込まれている
+もの)の2段構えで束ね、`RAlgOver.lift`で「`B1`への埋め込み」を
+「`B1↪B`の拡大」越しに「`B`への埋め込み」へ運ぶ。これで
+`pushoutKaehlerSplitStep`が要求する`B1`関係・`B`関係の両方の
+instanceを、自由変数`i`のままで供給できることを確認した
+(`letI`(`haveI`ではなく——値の透明性が要る)で登録すれば、
+`pushoutKaehlerSplitStep`自身の`∀i,Algebra(F i)B`等の要求は
+すべて解決する)。
+
+★2026-09-05時点で未完成の部分: 上記の束ねを実際に`Option ι`
+Pi型全体(`pushoutKaehlerSplitStepOption`という名の1段の
+組み替えラッパー)にまで組み立てる最後の接続(`LinearEquiv.
+piOptionEquivProd`との合成)で、`none.elim`/`(some i).elim`が
+期待通り`rfl`で潰れるはずの箇所が`Type mismatch`(instance
+スロットの不一致、原因未特定)を起こしており、まだ閉じていない
+——`RAlg`/`RAlgOver`/`RAlgOver.lift`/`RAlgOver.lift_isScalarTower`
+の4点(下記、すべてsorry無し・単独で動作確認済み)はそのまま次回
+使えるが、それらを`pushoutKaehlerSplitStep`の反復に実際に繋ぐ
+最後の1段はfalt1-goal.mdに記録の上、次回へ持ち越す。 -/
+
+/-- **Σ束ね(1)**: `R`上の代数を、それが運ぶ`CommRing`・`Algebra R`
+インスタンスごと1つのデータとして束ねたもの。`Option.elim`/
+`Fin.cons`等で型族を自由変数の添字で組み替えても、`.ring`・`.alg`
+という**射影**は分岐無しに使えるため、instance解決の壁を回避できる。 -/
+structure RAlg (R : Type*) [CommRing R] where
+  carrier : Type*
+  [ring : CommRing carrier]
+  [alg : Algebra R carrier]
+
+attribute [instance] RAlg.ring RAlg.alg
+
+/-- **Σ束ね(2)**: `RAlg R`に加え、具体的な「現在の累積環」`T`への
+埋め込み(`Algebra carrier T`・`IsScalarTower R carrier T`)まで
+一緒に運ぶ。`pushoutKaehlerSplitStep`の反復で「前段までの各因子が
+今の累積環にどう埋め込まれているか」を自由変数の添字`i`のままで
+記録するために使う。 -/
+structure RAlgOver (R T : Type*) [CommRing R] [CommRing T] [Algebra R T] where
+  carrier : Type*
+  [ring : CommRing carrier]
+  [algR : Algebra R carrier]
+  [algT : Algebra carrier T]
+  [towerT : IsScalarTower R carrier T]
+
+attribute [instance] RAlgOver.ring RAlgOver.algR RAlgOver.algT RAlgOver.towerT
+
+/-- **`RAlgOver`の運搬**: `B1`への埋め込みを、さらに`B1↪B`という
+1段の代数拡大越しに`B`への埋め込みへ運ぶ(合成`carrier→B1→B`を
+`RingHom.toAlgebra`で新しい`Algebra carrier B`として登録するだけ)。
+反復pushoutの各段で「前段の族を次の累積環へ運ぶ」ために使う。 -/
+noncomputable def RAlgOver.lift {R B1 B : Type*} [CommRing R] [CommRing B1] [CommRing B]
+    [Algebra R B1] [Algebra R B] [Algebra B1 B] [IsScalarTower R B1 B]
+    (x : RAlgOver R B1) : RAlgOver R B :=
+  letI algT' : Algebra x.carrier B := ((algebraMap B1 B).comp (algebraMap x.carrier B1)).toAlgebra
+  { carrier := x.carrier
+    algT := algT'
+    towerT := by
+      apply IsScalarTower.of_algebraMap_eq
+      intro r
+      show algebraMap R B r = algebraMap B1 B (algebraMap x.carrier B1 (algebraMap R x.carrier r))
+      rw [IsScalarTower.algebraMap_apply R B1 B, IsScalarTower.algebraMap_apply R x.carrier B1] }
+
+/-- `RAlgOver.lift`で運んだ埋め込みは、元の`carrier→B1`埋め込みと
+`B1→B`拡大の合成そのものなので、`carrier→B1→B`という
+`IsScalarTower`をなす(`pushoutKaehlerSplitStep`の`∀i,IsScalarTower
+(F i) B1 B`要求に直接対応する)。 -/
+theorem RAlgOver.lift_isScalarTower {R B1 B : Type*} [CommRing R] [CommRing B1] [CommRing B]
+    [Algebra R B1] [Algebra R B] [Algebra B1 B] [IsScalarTower R B1 B]
+    (x : RAlgOver R B1) :
+    letI : Algebra x.carrier B := (x.lift (B := B)).algT
+    IsScalarTower x.carrier B1 B := by
+  letI halgT : Algebra x.carrier B := (x.lift (B := B)).algT
+  apply IsScalarTower.of_algebraMap_eq
+  intro r
+  show algebraMap x.carrier B r = algebraMap B1 B (algebraMap x.carrier B1 r)
+  rfl
+
+/-!
 ## `Module.length` の `Pi` 型への加法性(2026-09-04)
 
 `pushoutKaehlerSplitStep` の結論(`LinearEquiv`)を実際に「長さ」の
