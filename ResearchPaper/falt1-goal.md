@@ -1927,6 +1927,38 @@ mathlib での正確な組み立て方は未確認)。
       か、あるいは一般に存在しない場合の代替(`y`無しで済む形への
       式変形)を検討することから始める。
 
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、
+      **上記「`y`無しで済む形」の代替を実際に見つけ、`pushoutKaehler
+      SplitStep`を「長さ」レベルまで持ち上げた**(`module_length_pi_fin`・
+      `module_length_pi`・`pushoutKaehlerSplitStep_length`、commit
+      `1927276d`、`lake build`完走(171秒)・sorry無し)。`x`が`Wₙ₊₁`の
+      `V0`上の単項生成元になれない理由(`x`の`V0`上の最小多項式の次数は
+      高々`n`——`x^n = algebraMap V0 Wₙ₊₁ π`という関係が`Wₙ`を経由せず
+      直接`V0`上でも成り立つため——`Wₙ₊₁`の`V0`次数`n·[Wₙ:V0]`より
+      小さい)を確認し、**単項生成元を経由しない元々の原文のアプローチ
+      (「`Ω¹`は`d+1`個の直和」)こそが正攻法だった**と再確認した。
+
+      `pushoutKaehlerSplitStep`(先に確立、`LinearEquiv`)を実際に
+      「長さ」の言葉に翻訳するには`Module.length`の`Pi`型への加法性
+      (`Module.length R(∀i,M i)=∑i,Module.length R(M i)`)が要るが、
+      mathlibには**変動する族**に対するこの一般形が見当たらなかった
+      ため(`Module.length_prod`は2項、`Module.length_pi`は定数族のみ)、
+      `Fin.consLinearEquiv`による`Fin n`上の帰納法+`LinearEquiv.
+      piCongrLeft`(添字の付け替え)で新規に証明した。結果:
+      ```
+      Module.length B(Ω[B/R]) =
+        (∑i,Module.length B(TensorProduct(F i)B Ω[F i/R])) +
+        Module.length B(TensorProduct C B Ω[C/R])
+      ```
+      これで「`Ω_{Wₙ₊₁/Vₙ}`は`d+1`個の巡回加群の直和」という原文の
+      主張が、**単項生成元を一切経由せず**「長さ」のレベルまで到達
+      した。次回: この`pushoutKaehlerSplitStep_length`を実際の`V_n`塔
+      (`V0→V1→...→Vn`、各段は単項生成——各**個別の段**は monogenic
+      なので Lemma 1.1 が使える)に沿って`n`回チェインし、各因子
+      `TensorProduct(F i)Wₙ₊₁ Ω[F i/Vᵢ]`(1段分の拡大)を`falt1CokernelLengthEq`
+      で`differentIdeal`に変換して和を取れば、`hrec`が要求する
+      `δₙ`の実数化に到達できる見込み——ここから続ける。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
