@@ -795,3 +795,57 @@ PowerSeries.aeval (R := 𝒪[K.carrier]) hHasEval
 `Algebra 𝒪[K.carrier] 𝒪[(adjoinPAdicLocalField K x).carrier]`
 (`𝒪[K.carrier]`が`𝒪[L]`へ埋め込まれること)の確立——これができれば
 `f`(または`[a]_f`)を実際に`x`で評価できる。
+
+**続報(2026-09-04・続き、正直な記録: 今回は新規コミット無し——
+2つの経路それぞれで型クラス探索/単一化の詰まりに遭遇)**:
+
+上記の課題(`𝒪[K.carrier]`を`𝒪[L]`へ埋め込む)に取り組んだが、
+**どちらの経路も実際に動かすところまで到達できなかった**——
+正直に記録する(ファイルへは何もコミットしていない):
+
+1. **`adjoinPAdicLocalField`経由**(`ℚ_[p]`再構成のノルム使用):
+   `spectralNorm.eq_of_tower (K:=ℚ_[p]) (L:=(adjoinPAdicLocalField
+   K x).carrier) y`を試みたところ、`Algebra K.carrier
+   (adjoinPAdicLocalField K x).carrier`が自動的に見つからず(`def`が
+   `@[reducible]`でないため`.carrier`が展開されない)、無理に進めると
+   `whnf`でタイムアウトした。
+
+2. **`K.closure`継承ノルム経由**(`adjoinPAdicLocalField`を経由しない、
+   より直接的な経路):`ProperSpace (K.carrier⟮x⟯)`
+   (`FiniteDimensional.proper K.carrier _`から)・
+   `IsUltrametricDist (K.carrier⟮x⟯)`(自動継承)は**あっさり確認
+   できた**(★これは確定した有用な事実として記録)。しかし、そこから
+   `Valued (K.carrier⟮x⟯) NNReal := NormedField.toValued`を導入し
+   (`letI`でも `scoped instance`でも同様)、`Valued.integer.mem_iff`
+   と`Metric.closedBall`を結びつけて`isCompact_closedBall`を適用
+   しようとしたところ、**120秒経っても終わらない**深刻な単一化の
+   詰まりに遭遇した(`maxHeartbeats`を200万まで上げても解決せず、
+   バックグラウンドタスクとして強制終了した)。原因は未特定——
+   `IntermediateField extends Subfield extends Subring extends
+   Submonoid ...`という何層にも重なった部分構造の射影を通した
+   `PseudoMetricSpace`/`UniformSpace`の一致判定が高コストになって
+   いる可能性が高い。
+
+★教訓・次回への申し送り: この特定の「`IntermediateField.adjoin`型に
+対して`Valued.integer`+`isCompact_closedBall`を直接適用する」という
+経路は、**単純に試すと危険**(セッションを長時間ブロックしうる)。
+次に試すべき代替案:
+(a) `x`を先に「素の」独立した型(`AdjoinRoot`や新しい`structure`で
+    包んだもの)へ移してから`Valued`/`Metric`の議論をする、
+(b) `IntermediateField`のまま作業するのを諦め、既存の
+    `PAdicLocalField`の抽象論(`valuationRing_isDVR`等)を先に
+    **完全に汎用化**(`K:PAdicLocalField p`でなく`[NormedField L]
+    [ProperSpace L]`などの直接の型クラス仮定を取る形に書き直す)
+    した上で、`adjoinPAdicLocalField`(ℚ_[p]再構成版、defeq問題は
+    `@[reducible]`を付けて再挑戦)に適用する、
+(c) そもそも`Valued.integer`の一般論を経由せず、
+    `spectralNorm_lt_one_of_mem_iteratedLubinTateTorsionPoints`の
+    ような**具体的な数値評価**だけで`𝒪[L]`への所属を直接示す
+    (`x`の`ノルム`が分かっているので、それが`≤1`であることを見せる
+    だけなら`Valued.integer.mem_iff`一発で済むはず——コンパクト性の
+    議論自体は今回の直接の目的には実は不要かもしれない、と気づいた:
+    `PowerSeries.aeval`に必要なのは`𝒪[L]`の`CompleteSpace`・
+    `IsLinearTopology`であって、`IsDiscreteValuationRing`(そこから
+    来る一意化元の存在)は`isAdic_maximalIdeal_valuationRing`の証明
+    でのみ使われていた——`CompleteSpace`は`Valued.integer`の
+    コンパクト性を経由しない別証明があるかもしれない)。
