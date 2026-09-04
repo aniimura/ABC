@@ -1,6 +1,6 @@
 ---
 name: pgc-lubin-tate-existence-progress
-description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——濃度の一致まで確立、Gal(K.closure/K.carrier) が Λ_n・ψ_nの根を置換として保つことも確立、残るは単射性/全射性(F_f の対数か Y-線形係数か Newton 法が要る、後者は次数1部分=X+Yまで既にある)。Galois同変性そのもの(σ(a·x)=a·σ(x))は cross-point instance bridging という既知の難所があるため後回しにした
+description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——★単射性(a·x=b·x⟹π^n∣(a-b))が F_f の逆元・対数を経由せず完成(加法公式+評価不等式のみ)、unitActionQuotientLift も単射。濃度は既に一致済みなので残るは有限組合せ論の仕上げ(単射+濃度一致⟹全単射)のみ。Galois同変性そのもの(σ(a·x)=a·σ(x))は cross-point instance bridging という既知の難所があるため後回しにした
 metadata:
   type: project
 ---
@@ -1704,6 +1704,105 @@ truncation-limit手法の中で使う見込みで、無駄にはならない—�
 truncation-limit手法で示す、(b)あるいは単射性/全射性(3経路の
 いずれか)を先に完成させる——どちらから手をつけても、最終的な
 `Gal(K(Λ_n)/K)≅(𝒪_K/π^n)^×`には両方必要になる見通し。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★ 続報(2026-09-04、
+最大の技術的突破): 単射性が、`F_f`の減法・逆元・対数を一切経由せず
+に完成した——当初の3候補はすべて不要だった
+
+これまで「単射性(`a·x=b·x⟹π^n∣(a-b)`)には`F_f`の形式逆元・
+Y-線形係数・Lubin-Tate対数のいずれかのフルな構成が要り、既存の
+存在補題と同規模の新規構築になる」と繰り返し判断されてきたが、
+実際には**もっと軽い第4の経路**で完全に閉じることが判明した。
+
+**鍵となる洞察**: 一般の`F_f(z,w1)=F_f(z,w2)⟹w1=w2`(フルな
+キャンセレーション)は不要——`a·x=b·x`という仮定と既存の加法公式
+`lubinTateAction_add`(`(b+c)·x=F_f(b·x,c·x)`、`c:=a-b`)を
+組み合わせると、`F_f(z,w)=z`という**特殊な**形の式(`z:=b·x`、
+`w:=c·x`)が自動的に出てくる。この特殊形から`w=0`を出すだけなら、
+`F_f`の単位元則(両側、`F_f(X,0)=X`・`F_f(0,Y)=Y`、既出)から
+「次数`≤1`部分がちょうど`X+Y`」であることを使った**評価レベルの
+不等式**`‖F_f(z,w)-z-w‖≤‖z‖*‖w‖`だけで十分——`z,w`の役割を
+入れ替えて一般化する必要も、真の逆元を構成する必要も無い。
+
+**新規に確立した内容(すべて`sorry`無し、ゲート通過済み)**:
+
+1. **`coeff_single1_formalGroupLaw`**(`LubinTateIdentityLawSymm.lean`、
+   commit`05619d4e`): `coeff_single0_formalGroupLaw`のX_0↔X_1対称版
+   ——`F_f`の「`X_1`のみ」の係数の一般`n`版。既存の`formalGroupLaw_
+   identity_left`(`F_f(0,Y)=Y`)から同じ手筋で出す。
+
+2. **★★★★★★★★★★★★★★★★★★★★★★★★`norm_aeval_formalGroupLaw_sub_le`**
+   (新ファイル`LubinTateFormalGroupLawEstimate.lean`、commit
+   `05619d4e`): **`‖F_f(z,w)-z-w‖≤‖z‖*‖w‖`**(評価レベル、
+   `‖z‖,‖w‖≤1`の任意の点)。`aeval_formalGroupLaw_eq_of_snd_eq_zero`
+   と全く同じtruncation-limit手法の**不等式版**——各truncationの
+   support から`X_0^1`・`X_1^1`の2つの特別な単項式(係数ちょうど1、
+   `coeff_single0/1_formalGroupLaw`)を`Finset.add_sum_erase`で2回
+   取り除き、残りの各単項式(すべて`i≥1∧j≥1`、さもなくば係数`0`)を
+   `‖coeff‖≤1`(係数の埋め込み先での評価)・`‖z‖^i≤‖z‖`
+   (`pow_le_of_le_one`、`i≥1`)から`‖z‖*‖w‖`で抑え
+   (`IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg`)、
+   最後に`le_of_tendsto`+`Filter.eventually_ge_atTop`で
+   `n→∞`の極限へ持ち上げる。抽象的な環`S`(`NormedCommRing`+
+   `IsUltrametricDist`+`IsLinearTopology`等)について述べており、
+   `adjoinIntegers K x`に限らず再利用可能な一般補題。
+   **重要な技術的注意**: `S:=adjoinIntegers K x`のまま`aeval`を
+   含む文を直接ステートメントに書くと`CompleteSpace ↥(adjoinIntegers
+   K x)`のインスタンス解決が原因不明に失敗する(`haveI`で明示的に
+   注入しても直らない、しかし`haveI`を消しても後続が壊れない
+   ——ステートメント自体の型検査時点で自動探索が先に失敗する
+   ことが原因と判明)。**回避策**: 抽象的な`S`で述べ、呼び出し側
+   (`lubinTateActionAtTorsionPoint_injective_of_eq`)で`S:=
+   adjoinIntegers K x`に**具体化して適用する**(この具体化された
+   呼び出しでは`haveI`で注入した具体的なインスタンスがちゃんと
+   使われるので問題が起きない)——`aeval_formalGroupLaw_eq_of_
+   snd_eq_zero`が最初からこの設計だった理由がここで腑に落ちた。
+
+3. **★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+   `lubinTateActionAtTorsionPoint_injective_of_eq`**(新ファイル
+   `LubinTateActionInjective.lean`、commit`05619d4e`):
+   **`a·x=b·x⟹π^n∣(a-b)`**(`x`が原始的な`π^n`-捩れ点のとき)。
+   `c:=a-b`、`lubinTateAction_add`で`a·x=F_f(b·x,c·x)`、仮定と
+   合わせて`b·x=F_f(b·x,c·x)`。上の不等式を`(z,w):=(b·x,c·x)`に
+   適用すると`‖c·x‖=‖F_f(b·x,c·x)-b·x-c·x‖≤‖b·x‖*‖c·x‖`。`b·x`は
+   捩れ点で`‖b·x‖<1`(`spectralNorm_lt_one_of_mem_
+   iteratedLubinTateTorsionPoints`)、`c·x≠0`と仮定すると
+   `‖c·x‖≤‖b·x‖*‖c·x‖<‖c·x‖`で矛盾——`c·x=0`が出て、既存の核の
+   特徴づけ(`lubinTateActionAtTorsionPoint_eq_zero_iff_dvd_of_
+   mem_iteratedLubinTatePsiTorsionPoints`)から結論。
+
+4. **`unitActionQuotientLift_injective`**(`LubinTateActionInjective.lean`、
+   commit`c87960d0`): 上を`u,v:(𝒪_K)^×`(単数)に適用し、
+   `π^n∣(u-v)`から`u⁻¹*v∈principalUnits K π n`
+   (`QuotientGroup.eq`+`mem_principalUnits_iff`+`u⁻¹*u=1`の
+   純代数計算、`linear_combination`で閉じる)を導くだけ。
+
+**現状**: `unitActionQuotientLift:(𝒪_K)^×⧸principalUnits K π n→
+adjoinIntegers K x`は**単射**であることが確立された。既存の
+`card_principalUnitsQuotient`=`card_iteratedLubinTatePsiTorsionPoints`
+(`QuotientCardinality.lean`、`Nat.card`ベース)と合わせれば、同じ
+有限濃度の集合間の単射——**全単射のはず**(有限集合の鳩の巣原理)。
+
+**残る最後の一歩(次のセッションへの最有力候補)**: 「単射+濃度
+一致⟹全単射」を`Function.Bijective`の言葉できちんとパッケージする
+だけの**純粋な有限組合せ論の仕上げ**——新しい数学的困難は無い
+見込みだが、`Nat.card`(quotient側)と`Finset.card`
+(`iteratedLubinTatePsiTorsionPoints`側、`K.closure`に住む)を
+橋渡しする型の付け替え(`adjoinIntegers K x`の元を`K.closure`へ
+2段階coerceする)が必要で、今回は時間の都合で着手を見送った。
+`unit_action_mem_iteratedLubinTatePsiTorsionPoints`(単数の作用は
+`ψ_nの根`に留まる、既出)を使えば「像が`ψ_nの根`に含まれる」ことは
+既に分かっているので、`Set.BijOn`/`Function.Injective.bijective`
+系のmathlib補題(`Finite.injOn_iff_bijOn_of_mapsTo`等、要調査)を
+探すところから始めるとよい。
+
+**当初の3つの候補(`F_f`の形式逆元のフル構成・Y-線形係数論法・
+Lubin-Tate対数)はすべて不要になった**——このセッションで実際に
+機能した経路は、既存の加法公式`lubinTateAction_add`と、単位元則
+から出る「次数`≤1`部分=`X+Y`」の評価レベル不等式を組み合わせる
+だけの、遥かに軽い第4の道だった。今後Galois同変性の完成や他の
+局面で同様の「大掛かりな構成を避ける軽い道」がないか、まず疑って
+みる価値がある教訓。
 
 ## 続報(同日、`algEquiv_mem_iteratedLubinTateTorsionPoints_of_mem`、
 `AdjoinIntegers.lean`、commit `93108293`): `Λ_n`全体もσで保たれる
