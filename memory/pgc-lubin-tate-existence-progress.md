@@ -376,6 +376,26 @@ mathlibに`RingTheory/PowerSeries/Evaluation.lean`(`PowerSeries.HasEval`・
 検討したが、well-defined性の証明が新たな作業として残る。詳細は
 `ResearchPaper/blocked-leaves.json`の`progress2026_09_04v`。
 
+**続報(2026-09-04、★★★★★★★★★★節目(3)への核心的定理——`φ_1`は既約、
+`K(α)/K`は次数`q-1`の完全分岐拡大)**: 直前の見立て(「分離性は導関数の
+付値評価を要する新規の数学的内容」)を再検討したところ、`n=1`の場合
+限定でEisenstein判定法が直接使えることに気づいた。鍵になったのは
+`coeff_one_iteratedLubinTate`(`[π^n]_f`の次数1係数は`π^n`——`f'(0)=π`
+の連鎖律を`coeff_one_subst_1var`で`n`回)——これと`D_n=X・φ_n`の
+係数シフトを組み合わせ、`iteratedLubinTateDistinguished_coeff_one_mul`
+(`D_n.coeff1・U_n定数項=π^n`)を経由して、★`iteratedLubinTatePrimitive_
+coeff_zero_notMem_sq`(`φ_1`の定数項は`𝔪²`に属さない——属すと仮定すると
+`π`自身が単元になる背理法)を確立した。`φ_n`が`D_n`(弱Eisenstein)の
+係数シフトから自動的に弱Eisensteinであることと合わせ、
+★★★★★★★★★★`irreducible_iteratedLubinTatePrimitive_one`
+(`φ_1`は既約)を`Polynomial.IsEisensteinAt.irreducible`で結論した。
+これは古典的なLubin-Tate理論の核心的な帰結——原始`π`-捩れ点を1つ
+添加した拡大`K(α)/K`は次数`q-1`の**完全分岐拡大(Eisenstein拡大)**
+である——の多項式版。`n≥2`の`φ_n`は同じ議論が通らない(定数項が
+`π^n∈𝔪²`になってしまう、`n=1`固有の現象)ため、一般の`n`への拡張は
+別の議論(原始捩れ点だけを分離する多項式`φ_n/φ_{n-1}`のEisenstein性
+など)が必要——引き続きの課題として残る。
+
 **残る作業**: 節目(3)torsion点の構成本体(`D_n`の根を`Λ_n`として定義、
 `𝒪_K`加群構造、`K(Λ_n)/K`の完全分岐性)、節目(4)
 `L_n:=K(Λ_n)`が完全分岐かつ`Gal(L_n/K)≅(𝒪_K/π^n)^×`(Lubin-Tateの
