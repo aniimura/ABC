@@ -3323,6 +3323,43 @@ mathlib での正確な組み立て方は未確認)。
       differentIdeal Wₙ Wₙ₊₁)=length(Wₙ₊₁⧸(n))+(n-1)`という完全な
       等式にまとめること)は次回に持ち越すが、必要な材料は**すべて
       揃った**。
+
+      ★★★★★★★2026-09-05、この「残る最後の接続」を**同じセッション
+      で完成させた**。鍵となる発見は、`falt1_falt1Wn1_isDiscreteValuation
+      Ring`が独自に構成していた`e2`(`falt1AdjoinRootEquivIntegralClosure`
+      経由)を再利用する代わりに、`x`(`falt1BaseChangeGeneratorFull`
+      供給)自身の`hxadjoin`・`hxminpoly`から**直接**`AdjoinRoot(minpoly
+      Wₙ x) ≃ₐ[Wₙ] Wₙ₊₁`を構成する`adjoinRootMinpolyEquiv`
+      (`IsAdjoinRootMonic.mkOfAdjoinEqTop`経由、既存)を使えば、
+      「根が`x`に写る」ことが`adjoinRootMinpolyEquiv_root`+
+      `IsAdjoinRoot.adjoinRootAlgEquiv_apply_root`(共に既存)から
+      **無条件に**従うと気づいたこと——これで`falt1_differentIdeal_
+      Wn_Wn1_eq_span_deriv`の`x`(`differentIdeal`の閉じた式の根拠)
+      と、全分岐(極大idealの一意性)の議論の`x`を**別々に構成して
+      一致を証明する**という難所を、そもそも回避できた。
+      `falt1_theorem12_length_differentIdeal_eq_length_quotient_n_add`
+      として、`falt1_differentIdeal_Wn_Wn1_eq_span_deriv`(閉じた式)
+      +全分岐の議論(自己完結、`falt1_falt1Wn1_isDiscreteValuationRing`
+      の議論を`x`の元で再構成)+`Ideal.span_singleton_mul_span_
+      singleton`・`Ideal.span_singleton_pow`(mathlib既存、`span{a·b}
+      =span{a}*span{b}`・`span{a}^k=span{a^k}`)+`falt1_length_
+      quotient_mul_of_ne_zero`+`IsDiscreteValuationRing.length_
+      quotient_pow_maximalIdeal`を貼り合わせ、
+      ```
+      length Wₙ₊₁ (Wₙ₊₁ ⧸ differentIdeal Wₙ Wₙ₊₁)
+        = length Wₙ₊₁ (Wₙ₊₁ ⧸ span{n}) + (n - 1)
+      ```
+      を確立した(`ℕ∞`の引き算の橋渡しに`ENat.coe_sub`が要った、
+      小さいが新しい罠)。`lean_check`で約12秒(この規模の証明として
+      は高速)で確認後`KaehlerAux.lean`に追記した。これで**Eisenstein
+      拡大が全分岐であるという事実から、Theorem 1.2 の漸化式(`δₙ→0`)
+      の`β`項の具体的な下限(`n-1`、`n=p`なら`p-1`)までを、完全に
+      自前で証明し切った**——step (5)の技術的な核心はこれで**完成**
+      した。次回: この結果を実際の`V_n`塔の帰納(`δ_n`・`δ_{n+1}`を
+      `differentIdeal V0 Wₙ`・`differentIdeal V0 Wₙ₊₁`の言葉で結ぶ、
+      `falt1_kaehler_length_exact_wn1_full`との統合)に接続し、
+      `delta_tendsto_zero`が要求する`hrec`の形へ正式に持ち上げる
+      作業に進む——これがTheorem 1.2の証明の最後の大きな統合作業。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・

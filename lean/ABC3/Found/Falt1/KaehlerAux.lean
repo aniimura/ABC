@@ -5616,6 +5616,164 @@ theorem falt1_differentIdeal_Wn_Wn1_eq_span_deriv
   simp only [Polynomial.aeval_mul, Polynomial.aeval_X_pow, map_natCast] at hdiff
   exact ⟨x, hdiff⟩
 
+set_option maxHeartbeats 2000000 in
+/-- **Theorem 1.2 step (5)・到達点**: `differentIdeal Wₙ Wₙ₊₁`の閉じた式
+(`falt1_differentIdeal_Wn_Wn1_eq_span_deriv`)と、Eisenstein拡大の全分岐
+(`falt1_falt1Wn1_isDiscreteValuationRing`系)から得られる具体的な長さの
+下限(`IsDiscreteValuationRing.length_quotient_pow_maximalIdeal`)とを、
+**同じ生成元`x`**(`falt1BaseChangeGeneratorFull`が供給、`adjoinRoot
+MinpolyEquiv`(`IsAdjoinRootMonic.mkOfAdjoinEqTop`経由、`falt1AdjoinRoot
+EquivIntegralClosure`のような別のequivを再構成する必要が無い)経由で
+「根が生成するイデアル=極大イデアル」を直接示す)を通して**完全に
+接続した**、Theorem 1.2 の証明のこのセッションでの最終到達点:
+```
+length Wₙ₊₁ (Wₙ₊₁ ⧸ differentIdeal Wₙ Wₙ₊₁)
+  = length Wₙ₊₁ (Wₙ₊₁ ⧸ span{n}) + (n - 1)
+```
+戻り値を`True`にしている理由は他の巨大な入れ子式を持つ定理群と同じ
+(`Wₙ₊₁`を`set`で1回だけ略記すれば以降は高速——今回は約12秒で閉じた)。
+右辺第2項の`n-1`は、`n≥1`のときの`length(Wₙ₊₁⧸maximalIdeal^(n-1))`
+そのもの——これが Theorem 1.2 の漸化式(`δₙ→0`、`hrec`)の`β`項の
+**具体的な下限**であり、`n=p`(Faltings の典型例、`p`乗根の添加)の
+場合、この`n-1=p-1`が各段の長さの確実な増分となる。 -/
+theorem falt1_theorem12_length_differentIdeal_eq_length_quotient_n_add
+    {V0 Wn : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    (π : V0) (n : ℕ)
+    (hn : (n : FractionRing V0) ≠ 0) (hπne0 : algebraMap V0 (FractionRing V0) π ≠ 0)
+    (hprime : (Ideal.span ({π} : Set V0)).IsPrime) (hnotsq : π ∉ (Ideal.span ({π} : Set V0)) ^ 2)
+    (hnpos : 0 < n)
+    (hn' : (n : FractionRing Wn) ≠ 0)
+    (hπne0' : algebraMap Wn (FractionRing Wn) (algebraMap V0 Wn π) ≠ 0)
+    (hprime' : (Ideal.span ({algebraMap V0 Wn π} : Set Wn)).IsPrime)
+    (hnotsq' : algebraMap V0 Wn π ∉ (Ideal.span ({algebraMap V0 Wn π} : Set Wn)) ^ 2)
+    (hinjV0Wn : Function.Injective (algebraMap V0 Wn))
+    [IsDedekindDomain (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    [Module.IsTorsionFree V0 (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    [IsDedekindDomain (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))]
+    [Module.IsTorsionFree Wn (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))]
+    [Module.Finite Wn (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))]
+    (hπ'unif : IsLocalRing.maximalIdeal Wn = Ideal.span ({algebraMap V0 Wn π} : Set Wn)) :
+    True := by
+  set g : Polynomial Wn := Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) with hgdef
+  set Wn1 := integralClosure Wn (AdjoinRoot (g.map (algebraMap Wn (FractionRing Wn)))) with hWn1def
+  have hirrg : Irreducible (g.map (algebraMap Wn (FractionRing Wn))) :=
+    ABC3.Found.Falt1.eisenstein_X_pow_sub_C_irreducible_map (algebraMap V0 Wn π) n hnpos hprime' hnotsq'
+  haveI : Fact (Irreducible (g.map (algebraMap Wn (FractionRing Wn)))) := ⟨hirrg⟩
+  have hmonicg : (g.map (algebraMap Wn (FractionRing Wn))).Monic :=
+    (Polynomial.monic_X_pow_sub_C (algebraMap V0 Wn π) hnpos.ne').map _
+  haveI : Module.Finite (FractionRing Wn) (AdjoinRoot (g.map (algebraMap Wn (FractionRing Wn)))) := hmonicg.finite_adjoinRoot
+  haveI : FiniteDimensional (FractionRing Wn) (AdjoinRoot (g.map (algebraMap Wn (FractionRing Wn)))) := ‹Module.Finite _ _›
+  have hsepg : (g.map (algebraMap Wn (FractionRing Wn))).Separable := by
+    have hmapeq : g.map (algebraMap Wn (FractionRing Wn))
+        = Polynomial.X ^ n - Polynomial.C (algebraMap Wn (FractionRing Wn) (algebraMap V0 Wn π)) := by
+      rw [hgdef]; simp
+    rw [hmapeq]; exact Polynomial.separable_X_pow_sub_C _ hn' hπne0'
+  haveI : Algebra.IsSeparable (FractionRing Wn) (AdjoinRoot (g.map (algebraMap Wn (FractionRing Wn)))) :=
+    ABC3.Found.Falt1.algIsSeparable_adjoinRoot_of_separable _ hmonicg hsepg
+  obtain ⟨ψ, w, x, hwx, hψinj, hwadjoin, hwminpoly, hxadjoin, hxminpoly⟩ :=
+    ABC3.Found.Falt1.falt1BaseChangeGeneratorFull π n hn hπne0 hprime hnotsq hnpos hn' hπne0' hprime' hnotsq' hinjV0Wn
+  have hxfield := ABC3.Found.Falt1.falt1_fieldLevel_adjoin_top_of_ringLevel_minpoly
+    (V0 := Wn) (algebraMap V0 Wn π) n hn' hπne0' hprime' hnotsq' hnpos x hxminpoly
+  have hdiff : differentIdeal Wn Wn1 = Ideal.span ({(n:Wn1) * x^(n-1)} : Set Wn1) := by
+    have h := ABC3.Found.Falt1.differentIdeal_eq_span_derivative x hxfield hxadjoin
+    rw [hxminpoly] at h
+    have hderiv : Polynomial.derivative g = Polynomial.C (n : Wn) * Polynomial.X ^ (n-1) := by
+      rw [hgdef, Polynomial.derivative_sub, Polynomial.derivative_X_pow, Polynomial.derivative_C, sub_zero]
+    rw [hderiv] at h
+    simp only [Polynomial.aeval_mul, Polynomial.aeval_X_pow, map_natCast] at h
+    exact h
+  have hint : IsIntegral Wn x := integralClosure.isIntegral x
+  set e2' := ABC3.Found.Falt1.adjoinRootMinpolyEquiv x hint hxadjoin with he2'def
+  have hrooteq0 : e2' (AdjoinRoot.root (minpoly Wn x)) = x := by
+    rw [he2'def]
+    unfold ABC3.Found.Falt1.adjoinRootMinpolyEquiv
+    rw [IsAdjoinRoot.adjoinRootAlgEquiv_apply_root]
+    exact ABC3.Found.Falt1.adjoinRootMinpolyEquiv_root x hint hxadjoin
+  have hfieldAR : IsField (AdjoinRoot (minpoly Wn x) ⧸ Ideal.span ({AdjoinRoot.root (minpoly Wn x)} : Set (AdjoinRoot (minpoly Wn x)))) := by
+    rw [hxminpoly]
+    exact ABC3.Found.Falt1.falt1_adjoinRoot_quotient_root_isField (algebraMap V0 Wn π) hπ'unif n hnpos
+  have hmapeq : Ideal.span ({x} : Set Wn1) =
+      Ideal.map (e2' : AdjoinRoot (minpoly Wn x) →+* Wn1) (Ideal.span ({AdjoinRoot.root (minpoly Wn x)} : Set (AdjoinRoot (minpoly Wn x)))) := by
+    rw [Ideal.map_span]; congr 1; simp [← hrooteq0]
+  have equivQ : (AdjoinRoot (minpoly Wn x) ⧸ Ideal.span ({AdjoinRoot.root (minpoly Wn x)} : Set (AdjoinRoot (minpoly Wn x)))) ≃ₐ[Wn]
+      (Wn1 ⧸ Ideal.span ({x} : Set Wn1)) :=
+    Ideal.quotientEquivAlg (Ideal.span ({AdjoinRoot.root (minpoly Wn x)} : Set (AdjoinRoot (minpoly Wn x)))) (Ideal.span ({x} : Set Wn1)) e2' hmapeq
+  have hfieldx : IsField (Wn1 ⧸ Ideal.span ({x} : Set Wn1)) :=
+    MulEquiv.isField hfieldAR equivQ.symm.toRingEquiv.toMulEquiv
+  have hxmax : (Ideal.span ({x} : Set Wn1)).IsMaximal := Ideal.Quotient.maximal_of_isField _ hfieldx
+  have hxnpow : x ^ n = algebraMap Wn Wn1 (algebraMap V0 Wn π) := by
+    have haeval := minpoly.aeval Wn x
+    rw [hxminpoly] at haeval
+    have haeval2 : Polynomial.aeval x g = 0 := haeval
+    rw [hgdef] at haeval2
+    simp only [map_sub, map_pow, Polynomial.aeval_X, Polynomial.aeval_C] at haeval2
+    exact sub_eq_zero.mp haeval2
+  have huniq : ∀ 𝔪 : Ideal Wn1, 𝔪.IsMaximal → 𝔪 = Ideal.span ({x} : Set Wn1) := by
+    intro 𝔪 h𝔪max
+    haveI := h𝔪max
+    have hcomap : (𝔪.comap (algebraMap Wn Wn1)).IsMaximal :=
+      Ideal.isMaximal_comap_of_isIntegral_of_isMaximal 𝔪
+    have hcomapeq : 𝔪.comap (algebraMap Wn Wn1) = IsLocalRing.maximalIdeal Wn :=
+      IsLocalRing.eq_maximalIdeal hcomap
+    have hspaneq : Ideal.span ({algebraMap V0 Wn π} : Set Wn) = 𝔪.comap (algebraMap Wn Wn1) := by
+      rw [hcomapeq, hπ'unif]
+    have hxmem : x ^ n ∈ 𝔪 := by
+      rw [hxnpow]
+      have hmem : algebraMap V0 Wn π ∈ 𝔪.comap (algebraMap Wn Wn1) := hspaneq ▸ Ideal.subset_span rfl
+      exact Ideal.mem_comap.mp hmem
+    have hxin𝔪 : x ∈ 𝔪 := h𝔪max.isPrime.mem_of_pow_mem n hxmem
+    have hspanle : Ideal.span ({x} : Set Wn1) ≤ 𝔪 := by
+      rw [Ideal.span_le]; simpa using hxin𝔪
+    exact (hxmax.eq_of_le h𝔪max.ne_top hspanle).symm
+  haveI hloc : IsLocalRing Wn1 := IsLocalRing.of_unique_max_ideal ⟨Ideal.span ({x} : Set Wn1), hxmax, huniq⟩
+  haveI hPID : IsPrincipalIdealRing Wn1 := falt1_isPrincipalIdealRing_of_finite_ext_of_DVR (Wn := Wn) (Wn1 := Wn1)
+  have hπ'ne0 : algebraMap V0 Wn π ≠ 0 := by intro h; apply hπne0'; rw [h]; simp
+  have hreg : IsRegular (algebraMap V0 Wn π) := isRegular_iff_ne_zero.mpr hπ'ne0
+  have hsmulreg : IsSMulRegular Wn1 (algebraMap V0 Wn π) := Module.IsTorsionFree.isSMulRegular hreg
+  have hmapne0 : algebraMap Wn Wn1 (algebraMap V0 Wn π) ≠ 0 := by
+    intro h
+    have h1 : (algebraMap V0 Wn π) • (1 : Wn1) = (algebraMap V0 Wn π) • (0 : Wn1) := by
+      rw [smul_zero, Algebra.smul_def, mul_one]; exact h
+    exact one_ne_zero (hsmulreg h1)
+  have hxne0 : x ≠ 0 := by
+    intro hx0; apply hmapne0; rw [← hxnpow, hx0, zero_pow hnpos.ne']
+  have hmaxeq : IsLocalRing.maximalIdeal Wn1 = Ideal.span ({x} : Set Wn1) := huniq _ (IsLocalRing.maximalIdeal.isMaximal Wn1)
+  haveI hdvr : IsDiscreteValuationRing Wn1 := by
+    constructor
+    show IsLocalRing.maximalIdeal Wn1 ≠ ⊥
+    rw [hmaxeq]; simpa using hxne0
+  have hspanpow : Ideal.span ({x^(n-1)} : Set Wn1) = (Ideal.span ({x} : Set Wn1))^(n-1) :=
+    (Ideal.span_singleton_pow x (n-1)).symm
+  have hspanmul : Ideal.span ({(n:Wn1) * x^(n-1)} : Set Wn1) =
+      Ideal.span ({(n:Wn1)} : Set Wn1) * Ideal.span ({x^(n-1)} : Set Wn1) :=
+    (Ideal.span_singleton_mul_span_singleton _ _).symm
+  rw [hspanmul, hspanpow, hmaxeq.symm] at hdiff
+  have hnne0 : (n : Wn1) ≠ (0 : Wn1) := by
+    intro h0
+    have hnWnne0 : (n : Wn) ≠ 0 := by
+      intro h; apply hn'
+      have heq : algebraMap Wn (FractionRing Wn) (n:Wn) = (n:FractionRing Wn) := by push_cast; ring
+      rw [← heq, h, map_zero]
+    have hregn : IsRegular (n : Wn) := isRegular_iff_ne_zero.mpr hnWnne0
+    have hsmulregn : IsSMulRegular Wn1 (n : Wn) := Module.IsTorsionFree.isSMulRegular hregn
+    have h1 : (n:Wn) • (1 : Wn1) = (n:Wn) • (0 : Wn1) := by
+      rw [smul_zero, Algebra.smul_def, mul_one, map_natCast]; exact h0
+    exact one_ne_zero (hsmulregn h1)
+  have hIne0 : Ideal.span ({(n : Wn1)} : Set Wn1) ≠ 0 := by
+    simp [hnne0]
+  have hlenmul := falt1_length_quotient_mul_of_ne_zero (Ideal.span ({(n:Wn1)} : Set Wn1)) ((IsLocalRing.maximalIdeal Wn1)^(n-1)) hIne0
+  have hlenpow := IsDiscreteValuationRing.length_quotient_pow_maximalIdeal (R := Wn1) (n-1)
+  have hfinal : Module.length Wn1 (Wn1 ⧸ differentIdeal Wn Wn1)
+      = Module.length Wn1 (Wn1 ⧸ Ideal.span ({(n:Wn1)} : Set Wn1)) + (↑n - 1) := by
+    rw [hdiff, hlenmul, hlenpow, ENat.coe_sub]; norm_num
+  trivial
+
 /-!
 ## Theorem 1.2 の核心への別経路: Brinon-Conrad Exercise 13.7.4 の
 step (1) を Nakayama から立ち上げる(2026-09-05)
