@@ -1657,3 +1657,25 @@ R・R₂・R₀(ψの存在部分が出す無関係なR)を2回のupperBound2で
 (3)β脚(未着手)・(4)h:ZK=D.Ext Zの構造的懸念、という4課題が残るが、
 遷移データ降下という核心は完成し、距離は着実に縮まっている。
 corrhyp-goal.mdに詳細記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05(続き7)
+★★「項目(d)の第二段」完全完成★★ exists_mvPolynomial_quotient_
+ringEquiv_descend(commit d7753ea6)——遷移写像がRレベルで実際に
+同型であることを証明。ψ・ψ'(ℝレベル、往復合成が恒等)から出発し、
+共通の精密化R'上の候補ev・ev'が(a)ψ・ψ'を再現・(b)互いの関係式を
+互いのイデアルへ写す・(c)往復合成が実際に恒等射、まで構成的に示した。
+
+新規部品: round_trip_promote_eq/eq2(往復合成の昇格naturality)・
+exists_round_trip_descend(ℝレベルの往復恒等性からRレベルの恒等性を
+構成的に導く)・本体(descend2を両方向に適用しRcへ合流、round_trip_
+descendを両方向に適用し最後にR'へ揃える)。証明本体は約380行、
+Subalgebraの≤のproof irrelevanceを最大限活用(結合順序が違っても
+defeq)——新しい配管の壁には当たらなかった。lake build(FieldLimit/
+ABC3)0エラー確認、push済み。
+
+**「項目(d)の第二段」全体(transitionElem/gdT/cocycleのRレベル版)が
+完全に構成的に証明された**——650行規模と見積もっていた作業が汎用的な
+数学的補題群として完成。正直な評価: 集計は10/24で変わらず。残る課題は
+(1)GlueDataとしての貼り合わせ配線(今回の同型データが核心材料)・
+(2)β脚(未着手)・(3)h:ZK=D.Ext Zの構造的懸念、の3つ。corrhyp-goal.md
+に詳細記録。

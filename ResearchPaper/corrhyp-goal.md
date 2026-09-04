@@ -3690,3 +3690,51 @@ comp_aeval`、mathlib、`φ.comp(aeval f)=aeval(fun i↦φ(f i))`で1段の
 4つの課題が残っている。それでも、(1)は今回の枠組みの直接の応用に
 近く、(2)は既存の一般的なGlueDataインフラの再利用が主体になる見込み
 なので、`Lemma 4.1`完成への距離は着実に縮まっている。
+
+## 2026-09-05(続き8): ★★「項目(d)の第二段」完全完成★★
+`exists_mvPolynomial_quotient_ringEquiv_descend`——遷移写像が
+Rレベルで実際に同型であることを証明
+
+前回の課題(1)(候補写像が同型であることの確認)に着手し、完成させた
+(commit `d7753ea6`)。`R`レベルの片1(`q`)と`R₂`レベルの片2(`q₂`)の
+間の、既知のℝレベルの相互に逆な遷移写像(`ψ`・`ψ'`、往復合成が恒等)
+から出発し、共通の精密化`R'`上の候補写像`ev`・`ev'`が、
+(a) `ψ`・`ψ'`を再現し、(b) 互いの関係式を互いのイデアルへ写し、
+(c) **往復合成が実際に恒等射であること**まで構成的に示した。
+
+新規部品:
+- `round_trip_promote_eq`/`round_trip_promote_eq2`: 往復合成の昇格に
+  関する2つのnaturality補題(2段の昇格=1段の昇格)。
+- `exists_round_trip_descend`: 既知のℝレベルの往復合成の恒等性から
+  Rレベルの候補写像自身の往復合成の恒等性を構成的に導く。
+- **`exists_mvPolynomial_quotient_ringEquiv_descend`**(本体):
+  `exists_mvPolynomial_quotient_ringHom_descend2`を両方向に適用して
+  `ev`・`ev'`を得たのち共通の精密化`Rc`へ合流させ、
+  `exists_round_trip_descend`を両方向に適用して往復合成の恒等性を
+  得て、最後にすべてを単一の`R'`へ揃えた。
+
+配管面では、`Subalgebra`の`≤`のProof irrelevanceを最大限活用し
+(`(h1.trans h2).trans h3`と`h1.trans(h2.trans h3)`が異なる結合順序
+でも defeq で一致する)、10箇所以上の「2つの合成写像が一致すること」
+を`algebraTensorMap_inclusion_comp_inclusion`の反復適用だけで通した
+——新しい配管の壁には当たらなかった(既存の技法の規模の大きい組み
+合わせ)。証明本体は約380行、`set_option maxHeartbeats 4000000`が
+必要だった(ファイル中の既存の前例と同系統)。
+
+`lake build ABC3.Found.CorrHyp.FieldLimit`・`ABC3`いずれも0エラーで
+確認、push済み。
+
+**これで、`transitionElem`/`gdT`/`cocycle`のRレベル版に相当する遷移
+「同型」データの降下——「項目(d)の第二段」全体が完全に構成的に証明
+された**。当初「650行規模のGlueDataエンジニアリング再構築」と見積
+もっていた作業が、汎用的な数学的補題群(単射性・イデアル所属の降下・
+写像の存在と同型性の降下)として完成した。
+
+**正直な評価**: 集計は10/24で変わらず——§4は引き続き0/2。残る課題は
+3つ: (1) Rレベルの候補片`descendPieceR`たちを実際に`corrHypGlueData`
+(既存、Scheme一般)として貼り合わせ`D.Space`元`Z`を構成する配線
+(今回完成した同型データがまさにこの配線に使う核心材料)、(2) `β`脚
+の構成(文字通り未着手)、(3) `h:ZK=D.Ext Z`の文字通りの等号という
+構造的懸念(既に「拙速に着手しない」と判断済み)。`Lemma 4.1`の数学的
+核心部分(RレベルでC全体を再構成できること)への距離は、今回で
+大きく縮まった。
