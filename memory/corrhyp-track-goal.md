@@ -482,6 +482,17 @@ standardEtalePair_baseChange`(降下)+`exists_fgSubalgebra_upperBound`
 
 コミット: `2b0f2231`(promote完成)・`e0ce98d2`(記録)。
 
+★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(訂正:Spaceの
+有限型性は不要と判明、残作業は純粋に3点、集計10/24で変わらず)。
+`exists_fg_subalgebra_tensor_finset`〜`_promote`の全補題が
+`{A}[CommRing A][Algebra ℚ A]`という完全に一般のAで書かれており、
+有限型性を要求していないと確認——`corrHypInstance4`をそのまま使えば
+よく新instanceは不要。§4の残作業は(a)実際の結線・複数片の合流、
+(b)GlueData貼り合わせ(rigidityとの組み合わせ)、(c)Corrのnonempty
+脱落の手当て、の3点に整理された。
+
+コミット: `2428e308`(訂正の記録)。
+
 ★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(残作業4段階を総括、
 集計10/24で変わらず)。generic flatnessの標準的前提(Rネター整域・
 加群/多元環がR上有限表示)を確認したところ、`corrHypInstance4`の
