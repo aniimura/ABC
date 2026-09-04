@@ -1630,3 +1630,16 @@ GlueDataで貼り合わせた**後**、大域的な性質(properness等)とし�
 明示的に言語化できた——次のセッションへの引き継ぎ事項として記録。
 
 コミット: `ca88ac3a`(standardEtalePairSpecMap等完成)。
+
+### 2026-09-04さらに続報: Cの局所片がアフィンであることを確認(work unit 3続き)
+
+`ExtLimit.lean`に`piece_preimage_isAffineOpen`・`piecePreimageIso`を完成(★sorry無し)。
+`piece_algebraEtale_tensor`が述べる「`Γ(C,α⁻¹(piece))`がAlgebra.Etale」という環レベルの
+事実が、実際に`α⁻¹(piece)`自身のスキーム構造(`IsFinite α → IsAffineHom α` +
+`piece_isAffineOpen` + `IsAffineOpen.preimage`)を正しく捉えていることを確認した——
+`exists_finite_standardEtaleCover`が返す基本開被覆`D(f_i)`を、実際に`C`内の開集合
+として解釈するための橋渡し。次の一手: `D(f_i) ≅ Spec(Localization.Away f_i)`
+(mathlibの`basicOpenIsoSpecAway`)と組み合わせ、`standardEtalePairPullbackIso`まで
+一直線につなげる。集計は10/24で変わらず。
+
+コミット: `8b4c1b2b`。
