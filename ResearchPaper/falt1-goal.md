@@ -1324,6 +1324,36 @@ mathlib での正確な組み立て方は未確認)。
     生成元を得る)、それが非零因子であること(`Wₙ₊₁`は整域なので
     非零⟹非零因子)を確認し、`length_quotient_span_singleton_mul`を
     実際に適用して長さの等式を得るところから続ける。
+
+    ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、**実行し、
+    長さの等式(`hlen_eq`)まで到達した**(`falt1_cancelConductorDelta_
+    assembled`の拡張、commit `0bd39e3b`、`lake build`・`#print axioms`
+    確認済み・sorry無し)。`conductor(Wₙ,x)≠0`は`length_quotient_
+    span_singleton_mul`が要求する形とは別の道筋で出た——単項生成元を
+    直接扱う代わりに、既に確立済みの`hcond`・`hspan_eq`・`hIdiff_ne`
+    から`conductor(Wₙ,x)*differentIdeal Wₙ Wₙ₊₁ = Ideal.map ψ
+    (differentIdeal V0 V1) ≠ 0`を作り、「積が非零なら整域では両因子
+    とも非零」で`conductor(Wₙ,x)≠0`を導いた(`falt1_length_quotient_
+    mul_of_ne_zero`が`I≠0`だけを仮定する形にしておいたので、単項
+    生成元を明示的に扱う必要すら無かった)。得られた式:
+    ```
+    Module.length Wₙ₊₁ (Wₙ₊₁ ⧸ Ideal.map (algebraMap Wₙ Wₙ₊₁) (differentIdeal V0 Wₙ))
+      = Module.length Wₙ₊₁ (Wₙ₊₁ ⧸ conductor Wₙ x) + Module.length Wₙ₊₁ (Wₙ₊₁ ⧸ differentIdeal V1 Wₙ₊₁)
+    ```
+    ★残る接続(次回持ち越し、これが真の核心の困難と評価する):
+    この式を`hrec`(実数列の不等式)へ変換するには、
+    (a) 左辺(`length(Wₙ₊₁/Ideal.map(differentIdeal V0 Wₙ))`)を
+    `δₙ`(`Wₙ`側の量)と結ぶこと——`length_map_pow_of_ramificationIdx`
+    (既存、素イデアルの冪の像の長さ=分岐指数倍)が使えるはずだが、
+    `differentIdeal V0 Wₙ`を「`Wₙ`の極大イデアルの冪」の形に書き直す
+    追加の手順が要る、
+    (b) 右辺第2項(`length(Wₙ₊₁/differentIdeal V1 Wₙ₊₁)`)が
+    `δₙ₊₁`そのもの、
+    (c) 右辺第1項(`length(Wₙ₊₁/conductor(Wₙ,x))`)の**下界評価**——
+    これが以前から「独立の古典的整数論(discriminant の塔・
+    conductor-discriminant の関係)を要する」と評価してきた核心の
+    困難に対応し、原文が「劣加水性・完全列」評価と呼ぶ箇所と一致する
+    と見られる。まだ着手していない。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
