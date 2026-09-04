@@ -886,4 +886,39 @@ noncomputable def standardEtalePairPullbackIso {R K : Type} [CommRing R] [CommRi
       (standardEtalePairRingBaseChange P₀).toRingEquiv
   exact (pullbackSpecIso R P₀.Ring K).trans (Scheme.Spec.mapIso e.symm.toCommRingCatIso.op)
 
+/-! ## `C` 自体の局所片がアフィンであること——`piece_algebraEtale_tensor` の
+土台を確認する
+
+`piece_algebraEtale_tensor`は「`Γ(C, α⁻¹(piece))`が環として
+`Algebra.Etale`である」ことを述べるが、これが`α⁻¹(piece)`自体の
+スキーム構造を正しく捉えるには、この開集合が**アフィン**であること
+(`Γ`が全データを持つこと)を確認する必要がある——`α`が有限(ゆえに
+アフィン射)であることと、`piece_isAffineOpen`(`Ext X`側のアフィン片が
+アフィン)から`IsAffineOpen.preimage`で直ちに従う。 -/
+
+/-- **`α`が有限のとき、`Ext X`のアフィン片`piece`の`α`による逆像は
+アフィン**——`IsFinite α → IsAffineHom α`(`IsFinite`の定義に含まれる)
+と`piece_isAffineOpen`(`Ext X`側)から`IsAffineOpen.preimage`で従う。
+`exists_finite_standardEtaleCover`(`FieldLimit.lean`)を`Γ(C, α⁻¹(piece))`
+へ適用する前に、この開集合が実際に`Spec Γ(C, α⁻¹(piece))`そのもの
+であることを保証する。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem piece_preimage_isAffineOpen (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U)
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] :
+    IsAffineOpen (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U) : C.Opens) :=
+  (piece_isAffineOpen X U hU).preimage α
+
+/-- **`C`の局所片`α⁻¹(piece)`は`Spec Γ(C, α⁻¹(piece))`そのものと同一視
+できる**——`piece_preimage_isAffineOpen`の`isoSpec`。`exists_finite_
+standardEtaleCover`が与える基本開被覆`D(f_i)`を、実際に`C`内の開集合
+として解釈するための橋渡し。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def piecePreimageIso (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U)
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] :
+    (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U) : Scheme) ≅
+      Spec (CommRingCat.of Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U))) :=
+  (piece_preimage_isAffineOpen X U hU C α).isoSpec
+
 end ABC3.Found.CorrHyp
