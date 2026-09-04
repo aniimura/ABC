@@ -1266,3 +1266,29 @@ LubinTateDistinguishedSeparable.lean`、commit`12d4b722`)**: 上の
 完全に閉じた——次は`Λ_n`(あるいは`ψ_nの根`)への`𝒪_K/π^n`(あるいは
 `(𝒪_K/π^n)^×`)の作用の単純推移性、そしてそこから`Gal(K(Λ_n)/K)`の
 構造への橋渡しに進む。
+
+**続報(同日、非空性・非自明性、commit`9476ba69`)**: 「生成元を1つ選ぶ」
+議論の前提となる基本事実を3つ追加した:
+
+1. `iteratedLubinTatePsiTorsionPoints_nonempty`: `|ψ_nの根|=
+   q^{n-1}(q-1)>0`(`q>1`、既出`Fintype.one_lt_card`)から、
+   「原始的な」π^n-捩れ点が実際に存在することを確認。
+2. `coeff_zero_iteratedLubinTatePsi_ne_zero`: `ψ_n`の定数項
+   (`𝒪[K.carrier]`の元)が非零——`‖ψ_n.coeff0‖=‖π‖≠0`
+   (既出`norm_iteratedLubinTatePsi_coeff_zero`)から。
+3. ★`zero_not_mem_iteratedLubinTatePsiTorsionPoints`: `0`は`ψ_n`の
+   根ではない——2.と`𝒪[K.carrier]→K.closure`の単射性(`K.carrier`
+   への包含+体拡大の単射性、`Subtype.coe_injective`と
+   `(algebraMap K.carrier K.closure).injective`の合成、
+   `FaithfulSMul`系の重いインスタンス探索は使わず直接構成)から。
+   `Λ_0={0}`なので、「原始的な」捩れ点が`Λ_0`の元と重ならない
+   非自明な元であることの確認になる。
+
+次は`(𝒪_K/π^n)`(あるいは`(𝒪_K/π^n)^×`)の`Λ_n`(または`ψ_nの根`)
+への作用の単純推移性——ただし**注意**: Lubin-Tate加群の加法は
+`AdjoinIntegers.lean::lubinTateAction_add`にある通り形式群則`F_f`に
+よるものであり、環の通常の加法とは一般に一致しない(`F_f(X,Y)≡X+Y
+mod deg2`だが高次では異なる)。したがって「`a≡b mod π^n`ならば
+`a·x=b·x`」(well-definedness)を示すには通常の減法ではなく`F_f`
+加法群としての逆元・結合律などの形式群公理を経由する必要があり、
+これは次の大きめの一歩になる見通し。
