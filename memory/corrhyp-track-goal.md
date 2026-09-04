@@ -939,3 +939,18 @@ V(i,j)≅V(j,i)`)は`exists_transitionIso`をi側・j側それぞれに適用し
 埋めれば`Scheme.GlueData`が完成する。
 
 コミット: `b79fab9b`(gdV・gdF・gdT完成)・`fd8e47c0`(記録)。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに
+続報(GlueDataのt_id・f_mono・f_open・f_hasPullback完成、集計10/24で
+変わらず)。`gdT_id`・`gdF_mono`・`gdF_isOpenImmersion`・
+`gdF_hasPullback`(`ExtLimit.lean`、★sorry無し)完成——12フィールド
+のうち`V`・`f`・`t`・`t_id`・`f_mono`・`f_open`・`f_hasPullback`(7個)
+が完成した。
+
+残る`f_id`(対角成分が同型)は、選ばれる座標`s`(`exists_transitionIso`
+の`.choose`、`Classical.choice`経由)が単元であることを示す必要がある
+と判明——`i=j`限定の強化版補題が別途要る(`RingedSpace.isUnit_res_
+basicOpen`で基本開集合の定義元がその上で単元であることは確認済み)。
+`t'`・`t_fac`・`cocycle`(5フィールド)も残る。
+
+コミット: `5653409e`(t_id等4フィールド完成)・`abc47300`(記録)。
