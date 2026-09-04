@@ -2611,6 +2611,27 @@ mathlib での正確な組み立て方は未確認)。
       残っている——次回はここ(`Algebra.discr`系のmathlib資産調査)
       から着手するのが最も効率的と判断する。
 
+      ★実際に`Algebra.discr`系を`.cache/mathlib-index.txt`で調査した
+      (2026-09-05):
+      - `NumberField.isCoprime_differentIdeal_of_isCoprime_discr`
+        (`NumberTheory/NumberField/Discriminant/Different.lean`)——
+        まさに欲しかった「判別式が互いに素なら differentIdeal も
+        互いに素」という事実そのもの。
+      - `NumberField.natAbs_discr_eq_natAbs_discr_pow_mul_natAbs_
+        discr_pow`——線形独立な拡大の合成体の判別式が各因子の
+        判別式の冪の積になる、という塔の乗法性そのもの。
+
+      ★★ただし**両方とも`NumberField`(ℚ上の大域体)専用**に
+      定式化されており、Faltings の Theorem 1.2 が要る**局所**の
+      設定(完全離散付値環、混標数`(0,p)`)にはそのままでは使えない
+      ——mathlib の discriminant-differentIdeal 連携が局所版まで
+      カバーしているかは未確認(次回の調査対象)。局所版が無ければ、
+      これら大域版の証明技法(`differentIdeal`の`absNorm`との関係
+      `NumberField.absNorm_differentIdeal`経由)を局所の Dedekind
+      次元1の設定へ移植する、という独立した形式化作業になる見込み
+      ——これが Theorem 1.2 の残る核心的な困難の**具体的な次の一手**
+      として確定した。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
