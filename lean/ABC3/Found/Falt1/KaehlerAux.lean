@@ -3005,6 +3005,54 @@ theorem mapBaseChange_injective_adjoinRoot_direct {R C : Type*} [CommRing R] [Co
     (mapBaseChange_injective_adjoinRoot_tensor g hnzd)
 
 /-!
+## `pushoutKaehlerSplitStepOption` の具体例: `AdjoinRoot` 因子2個の
+反復pushoutを実際に構築(2026-09-05)
+
+`pushoutKaehlerSplit3`(3項の場合)と同じ役割の**小さな具体例**——
+`falt1_isPushout_adjoinRoot`(`AdjoinRoot`の`Algebra.IsPushout`)と
+`mapBaseChange_injective_adjoinRoot_direct`(`hinj`をLemma 1.1型の
+条件に帰着)を`pushoutKaehlerSplitStepOption`に2回連鎖させることで、
+`V_{n+1}`が`d+1`個の単一生成拡大の**同時添加**(Faltings の「典型例」
+段落と一致する構成)として実際に組み立てられることを、初めて
+end-to-endで確認した。2段目の添字族`F`は`e1`(1段目の結果)の型から
+`_`で自動推論させれば、明示的に書き下す必要が無いことも分かった。 -/
+
+set_option maxHeartbeats 800000 in
+/-- `g1 g2 : Polynomial R`から2段の反復`AdjoinRoot` pushoutが実際に
+構築できることの具体例(存在の確認、`True`を返す——`Falt1Wn1`と同じ
+理由で、実際に使う際は`have`で取り出した`LinearEquiv`をそのまま
+次の計算に渡せばよい)。 -/
+theorem falt1_pushoutKaehlerSplitStepOption_adjoinRoot_example
+    {R : Type uFalt1R} [CommRing R] (g1 g2 : Polynomial R)
+    (hnzd1 : algebraMap (Polynomial R) (AdjoinRoot (g1.map (algebraMap R R)))
+        (Polynomial.derivative (g1.map (algebraMap R R)))
+        ∈ nonZeroDivisors (AdjoinRoot (g1.map (algebraMap R R))))
+    (hnzd2 : algebraMap (Polynomial (AdjoinRoot (g1.map (algebraMap R R))))
+        (AdjoinRoot (g2.map (algebraMap R (AdjoinRoot (g1.map (algebraMap R R))))))
+        (Polynomial.derivative (g2.map (algebraMap R (AdjoinRoot (g1.map (algebraMap R R))))))
+        ∈ nonZeroDivisors (AdjoinRoot (g2.map (algebraMap R (AdjoinRoot (g1.map (algebraMap R R))))))) :
+    True := by
+  letI hAlg1 : Algebra (AdjoinRoot g1) (AdjoinRoot (g1.map (algebraMap R R))) := falt1AdjoinRootAlgebra g1
+  letI hST1 : IsScalarTower R (AdjoinRoot g1) (AdjoinRoot (g1.map (algebraMap R R))) := falt1AdjoinRoot_isScalarTower g1
+  letI hPush1 : Algebra.IsPushout R R (AdjoinRoot g1) (AdjoinRoot (g1.map (algebraMap R R))) := falt1_isPushout_adjoinRoot g1
+  have hinj1 : Function.Injective (KaehlerDifferential.mapBaseChange R R (AdjoinRoot (g1.map (algebraMap R R)))) :=
+    mapBaseChange_injective_adjoinRoot_direct g1 hnzd1
+  set B2 := AdjoinRoot (g1.map (algebraMap R R)) with hB2def
+  -- ステップ1: `V_1 := AdjoinRoot g1` を`V_0 := R`(自明な出発点)に添加
+  have e1 := pushoutKaehlerSplitStepOption (R := R) (B1 := R) (B := B2)
+    (⟨AdjoinRoot g1⟩ : RAlg.{uFalt1R, uFalt1R} R) (fun _ : Fin 1 => (⟨R⟩ : RAlgOver.{uFalt1R, uFalt1R, uFalt1R} R R))
+    pushoutKaehlerSplitBase hinj1
+  letI hAlg2 : Algebra (AdjoinRoot g2) (AdjoinRoot (g2.map (algebraMap R B2))) := falt1AdjoinRootAlgebra g2
+  letI hST2 : IsScalarTower R (AdjoinRoot g2) (AdjoinRoot (g2.map (algebraMap R B2))) := falt1AdjoinRoot_isScalarTower g2
+  letI hPush2 : Algebra.IsPushout R B2 (AdjoinRoot g2) (AdjoinRoot (g2.map (algebraMap R B2))) := falt1_isPushout_adjoinRoot g2
+  have hinj2 : Function.Injective (KaehlerDifferential.mapBaseChange R B2 (AdjoinRoot (g2.map (algebraMap R B2)))) :=
+    mapBaseChange_injective_adjoinRoot_direct g2 hnzd2
+  -- ステップ2: `V_2 := AdjoinRoot g2` をさらに添加(1段目の添字族`F`は`e1`の型から自動推論)
+  have e2 := pushoutKaehlerSplitStepOption (R := R) (B1 := B2) (B := AdjoinRoot (g2.map (algebraMap R B2)))
+    (⟨AdjoinRoot g2⟩ : RAlg.{uFalt1R, uFalt1R} R) _ e1 hinj2
+  trivial
+
+/-!
 ## `V_1 → W_1` の橋渡し写像そのものが完成した(2026-09-04)
 
 `hspan_eq` の接続に必要な `Algebra V1 Wn1` インスタンスを、実際に構成
