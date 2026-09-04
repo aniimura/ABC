@@ -267,4 +267,76 @@ theorem iteratedLubinTateTorsionPoints_subset_of_le {p : ℕ} [Fact p.Prime] (K 
       (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf m) ≠ 0 :=
     (isDistinguishedAt_iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf m).monic.map _ |>.ne_zero
   exact Multiset.mem_of_le (Polynomial.roots.le_of_dvd hmne0 hdvd) hx
+
+open scoped Classical in
+/-- ★★★★★★★★★★**`Λ_n` の元のスペクトルノルムは `1` 未満**——`𝒪_K` 加群
+構造の構成(`[a]_f` による作用)へ向けた前段: `D_n` の根はすべて
+「位相的冪零」であることの言い換え。`D_n=D_{n-1}・ψ_n`・`D_0=X` の
+漸化式に沿った帰納法: `D_0=X` の根は `0`(`spectralNorm 0=0`)。
+`D_{n+1}` の根は `D_n` の根(IH)か `ψ_{n+1}` の根で、後者は
+`spectralNorm_root_iteratedLubinTatePsi` により
+`‖π‖^(1/(q^{n+1}-q^n))` に等しく、`0<‖π‖<1` かつ指数が正なので `1`
+未満(`Real.rpow_lt_one`)。 -/
+theorem spectralNorm_lt_one_of_mem_iteratedLubinTateTorsionPoints {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n) :
+    spectralNorm K.carrier K.closure x < 1 := by
+  haveI := valuationRing_isDVR K
+  induction n with
+  | zero =>
+    rw [iteratedLubinTateTorsionPoints, Multiset.mem_toFinset, Polynomial.mem_roots'] at hx
+    obtain ⟨_, hxroot⟩ := hx
+    rw [iteratedLubinTateDistinguished_zero] at hxroot
+    simp only [Polynomial.map_X, Polynomial.IsRoot.def, Polynomial.eval_X] at hxroot
+    rw [hxroot, spectralNorm_zero]
+    exact zero_lt_one
+  | succ n ih =>
+    rw [iteratedLubinTateTorsionPoints, Multiset.mem_toFinset, Polynomial.mem_roots'] at hx
+    obtain ⟨hne, hxroot⟩ := hx
+    have hn1 : 1 ≤ n + 1 := by omega
+    have heqmul : Polynomial.map (algebraMap (𝒪[K.carrier]) K.closure)
+        (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf (n + 1)) =
+        Polynomial.map (algebraMap (𝒪[K.carrier]) K.closure)
+          (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n) *
+        Polynomial.map (algebraMap (𝒪[K.carrier]) K.closure)
+          (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf (n + 1) hn1) := by
+      rw [← Polynomial.map_mul]
+      congr 1
+      have := iteratedLubinTateDistinguished_eq_mul_psi hq hπmax hπne0 f hf0 hf1 hf (n + 1) hn1
+      simpa using this
+    rw [heqmul] at hxroot
+    rw [Polynomial.IsRoot.def, Polynomial.eval_mul, mul_eq_zero] at hxroot
+    rcases hxroot with h1 | h2
+    · apply ih
+      rw [iteratedLubinTateTorsionPoints, Multiset.mem_toFinset, Polynomial.mem_roots']
+      refine ⟨?_, h1⟩
+      exact (isDistinguishedAt_iteratedLubinTateDistinguished
+        hq hπmax hπne0 f hf0 hf1 hf n).monic.map _ |>.ne_zero
+    · have haeval : Polynomial.aeval x (Polynomial.map (algebraMap (𝒪[K.carrier]) K.carrier)
+          (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf (n + 1) hn1)) = 0 := by
+        rw [Polynomial.aeval_def, Polynomial.eval₂_eq_eval_map, Polynomial.map_map,
+          ← IsScalarTower.algebraMap_eq (𝒪[K.carrier]) K.carrier K.closure]
+        exact h2
+      have hspec := spectralNorm_root_iteratedLubinTatePsi K hq hπmax hπne0 f hf0 hf1 hf
+        (n + 1) hn1 x haeval
+      rw [hspec]
+      obtain ⟨hπpos, hπlt1⟩ := norm_pi_pos_lt_one K hπmax hπne0
+      have hdegpos : (0 : ℝ) <
+          ((iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf (n + 1) hn1).natDegree : ℝ) := by
+        have h2 : 1 < pp ^ ff := hq ▸ Fintype.one_lt_card
+        have hlt : (pp ^ ff) ^ n < (pp ^ ff) ^ (n + 1) := Nat.pow_lt_pow_right h2 (by omega)
+        rw [natDegree_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf (n + 1) hn1]
+        simp only [Nat.add_sub_cancel]
+        exact_mod_cast (by omega : 0 < (pp ^ ff) ^ (n + 1) - (pp ^ ff) ^ n)
+      exact Real.rpow_lt_one hπpos.le hπlt1 (by positivity)
+
 end ABC3.Found.PGC
