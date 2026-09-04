@@ -54,21 +54,28 @@ Faltings の原文「`Ω_W` は `Ω_V⊗W⊕WdT` を `f'(w)dT` で割った商�
 `AdjoinRoot.instAlgebraPolynomial`(`inferInstanceAs` で明示登記)で
 解決した。
 
+**⑤ `≃ₗ[W]` への格上げと「長さ」への接続(完成)**: `falt1CokernelIso`
+は`≃+`(加法群としての同型)だったが、`falt1CokernelIsoLinear` で
+`Ω_{W/V} ≃ₗ[W] (W ⧸ differentIdeal V W)`(本物の `W`-線形同型)まで
+証明した。3段の合成(`(omegaCongr e).symm`・`omegaAdjoinRootQuot`・
+`Ideal.quotientEquiv`)それぞれのスムル整合性を辿って
+`AddEquiv.toLinearEquiv` に渡した(鍵は `Ideal.quotientEquiv_mk` の
+naturality——`Ideal.quotientEquivAlg` の重い `AlgEquiv→+*` 強制を
+一切使わずに済んだ)。これで `LinearEquiv.length_eq` が直接使え、
+`falt1CokernelLengthEq : Module.length W Ω[W⁄V] =
+Module.length W (W ⧸ differentIdeal V W)` を得た——Lemma 1.1 の
+「長さ」の主張そのものが完成した。
+
 ## 残っている作業(正直な記録、Lemma 1.1 完成にはまだ遠い)
 
-1. **「長さ」への接続**: `Module.length`(`RingTheory/Length.lean`)は
-   `LinearEquiv.length_eq (e : M ≃ₗ[R] N) : length R M = length R N`
-   という形で不変性を持つ——**`LinearEquiv`(線形同型)を要求する**、
-   `AddEquiv`(加法群としての同型)では直接使えない。`falt1CokernelIso`
-   はシグネチャでの instance 解決順の問題を避けるため意図的に `≃+` に
-   弱めていた(`omegaCongr` 等の内部の `KaehlerDifferential.map` 自体は
-   本来 A-線形だが、型としては落としてある)。★アップグレードの道筋:
-   `AddEquiv.toLinearEquiv (e : M ≃+ N) (h : ∀ c x, e (c•x) = c•e x) :
-   M ≃ₗ[R] N` が既にある(2026-09-04 に発見)ので、型を書き直す必要は
-   なく `falt1CokernelIso` の**スムル可換性を別命題として証明**すれば
-   よい——ただし合成の各段(`omegaCongr` の逆写像・`Ideal.quotientEquiv`
-   経由の transport)を辿って W-作用との整合性を確認する必要があり、
-   まだ完成していない。
+1. ✅(2026-09-04 解消)**「長さ」への接続**: `falt1CokernelIsoLinear`
+   (`falt1CokernelIso` を `≃ₗ[W]` へ格上げしたもの)と
+   `falt1CokernelLengthEq`(`LinearEquiv.length_eq` を適用しただけ)で
+   完成した。鍵は `Ideal.quotientEquiv_mk`(`Ideal.quotientEquivAlg` の
+   重い `AlgEquiv→+*` 強制を避け、`Ideal.quotientEquiv` 自身の
+   naturality を直接使う——下の実測ノート参照)。これで Lemma 1.1
+   「`Ω_{W/V}` の長さは `length(W/p^δW)` に等しい」の**全体**
+   (余核の特定+それが長さの等式まで持ち上がること)が証明された。
 2. **単射性(Lemma 1.1 の本体の主張、第一完全列)**: `Ω_V ⊗_V W → Ω_W`
    (絶対微分、Z=絶対基底とする塔 Z→V→W への「第一完全列」)の単射性。
    Faltings の議論は `Ω_{V[T]/Z} ≅ Ω_V⊗V[T]⊕V[T]dT` という直和分解と
@@ -535,40 +542,113 @@ theorem omegaCongr_symm_eq {R A B : Type*} [CommRing R] [CommRing A] [CommRing B
   exact (omegaCongr_rightInv e x).symm
 
 /-!
-## `falt1CokernelIso` の `≃ₗ[W]` への格上げ(道筋を確定、未完成)
+## `falt1CokernelIso` の `≃ₗ[W]` への格上げ(完成、2026-09-04)
 
-`AddEquiv.toLinearEquiv` にスムル整合性の証明を渡せば型を書き直さずに
-済む。`falt1CokernelIso = step1.trans (hJ ▸ step2.toAddEquiv)`、
-`step1 = (omegaCongr e).symm.trans (omegaAdjoinRootQuot ...)` の構造に
-沿って、3段のスムル整合性がすべて具体的な mathlib の道具に帰着する
-ことを確認した(2026-09-04):
+★★**性能上の壁を回避できた実測**: 当初は `step2 = Ideal.quotientEquiv
+...` の段を `Ideal.quotientEquivAlg` に差し替える計画だったが、
+`Ideal.map (e : AdjoinRoot (minpoly V w) →+* W) ...` の型検査が
+`maxHeartbeats 1000000`(既定の5倍、44秒)でも `timeout at whnf` で
+止まった(`AlgEquiv` の `→+*` への強制が `RingEquiv` 版よりはるかに
+重いため)。代わりに **`Ideal.quotientEquiv` 自身の naturality**
+(`Ideal.quotientEquiv_mk : (I.quotientEquiv J f hIJ) (mk I x) = mk J (f x)`
+——mathlib に既製品として存在、`f : R ≃+* S` という軽い `RingEquiv`
+だけを使う)を直接使うことで、`AlgEquiv` 強制を一切経由せずに
+`step2` のスムル整合性を 0.2 秒で証明できた。
+-/
 
-1. `(omegaCongr e).symm` の段: 上の `omegaCongr_symm_eq` により
-   `map R R W (AdjoinRoot ...)` そのもの——`map_smul` で `W`-線形性が
-   直接出る。
+/-- **`falt1CokernelIso` の `≃ₗ[W]` 版(完成)**: `Ω_{W/V} ≃ₗ[W]
+W ⧸ differentIdeal V W`——`falt1CokernelIso` と同じ内容だが本物の
+`W`-線形同型として構成し直した。3段の合成それぞれのスムル整合性:
+
+1. `(omegaCongr e).symm` の段: `omegaCongr_symm_eq` により
+   `map V V W (AdjoinRoot ...)` そのもの——`map_smul` で `W`-線形性。
 2. `omegaAdjoinRootQuot (minpoly V w)` の段: `omega_quotient_eq_derivative_span`
    は本物の `LinearEquiv`(`AdjoinRoot(minpoly V w)`-線形)なので
    `map_smul` がそのまま使える。
-3. `step2 = Ideal.quotientEquiv ...` の段: **`Ideal.quotientEquiv` を
-   `Ideal.quotientEquivAlg`(`RingTheory/Ideal/Quotient/Operations.lean`)
-   に差し替えれば**、`e` が `V`-代数同型であることから商同士の環準同型
-   としての整合性(`map_mul`)がそのまま自己作用(=環の乗法)との
-   両立性を与える——発見済みだが未実装。
+3. `step2 = Ideal.quotientEquiv ...` の段: `Ideal.quotientEquiv_mk`
+   (naturality)を `Ideal.Quotient.mk_surjective` で商の代表元に
+   帰着させて適用(`AlgEquiv→+*` 強制を経由しない、上のノート参照)。
 
-★3段とも「何を示せばよいか」は完全に特定できたが、`falt1CokernelIso`
-自体の書き換え(`Ideal.quotientEquivAlg` への差し替え含む)と、3段を
-`AddEquiv.trans` の下で合成する最終工程はまだ書いていない。
+3段を貼り合わせ、`AddEquiv.toLinearEquiv` にスムル整合性の証明を渡した。 -/
+noncomputable def falt1CokernelIsoLinear {V K L W : Type*} [CommRing V] [IsDedekindDomain V]
+    [Field K] [Algebra V K] [IsFractionRing V K] [Field L] [Algebra K L] [FiniteDimensional K L]
+    [Algebra.IsSeparable K L] [CommRing W] [Algebra W L] [Algebra V W] [Algebra V L]
+    [IsScalarTower V K L] [IsScalarTower V W L] [IsIntegralClosure W V L]
+    [IsDedekindDomain W] [Module.IsTorsionFree V W]
+    (w : W) (hint : IsIntegral V w) (hadjoin : Algebra.adjoin V ({w} : Set W) = ⊤)
+    (hw : Algebra.adjoin K ({(algebraMap W L) w} : Set L) = ⊤) :
+    Ω[W⁄V] ≃ₗ[W] (W ⧸ differentIdeal V W) := by
+  set e := adjoinRootMinpolyEquiv w hint hadjoin with he
+  letI : Algebra (AdjoinRoot (minpoly V w)) W := e.toRingHom.toAlgebra
+  haveI : IsScalarTower V (AdjoinRoot (minpoly V w)) W := isScalarTower_of_algEquiv e
+  letI : Algebra W (AdjoinRoot (minpoly V w)) := e.symm.toRingHom.toAlgebra
+  haveI : IsScalarTower V W (AdjoinRoot (minpoly V w)) := isScalarTower_of_algEquiv e.symm
+  set J := Ideal.map (e.toRingEquiv : AdjoinRoot (minpoly V w) →+* W)
+    (Ideal.span ({algebraMap (Polynomial V) (AdjoinRoot (minpoly V w))
+      (Polynomial.derivative (minpoly V w))} : Set (AdjoinRoot (minpoly V w)))) with hJdef
+  set step1 := (omegaCongr e).symm.trans (omegaAdjoinRootQuot (minpoly V w)) with hstep1
+  set step2 := Ideal.quotientEquiv _ J e.toRingEquiv rfl with hstep2
+  have hJ : J = differentIdeal V W := by
+    show Ideal.map _ (Ideal.span _) = _
+    rw [Ideal.map_span, Set.image_singleton]
+    have heval : (e.toRingEquiv : AdjoinRoot (minpoly V w) →+* W)
+        (algebraMap (Polynomial V) (AdjoinRoot (minpoly V w)) (Polynomial.derivative (minpoly V w)))
+        = Polynomial.aeval w (Polynomial.derivative (minpoly V w)) :=
+      adjoinRootMinpolyEquiv_algebraMap w hint hadjoin (Polynomial.derivative (minpoly V w))
+    rw [heval, ← differentIdeal_eq_span_derivative w hw hadjoin]
+  have hsmul : ∀ (c : W) (x : Ω[W⁄V]), (step1.trans step2.toAddEquiv) (c • x) =
+      c • (step1.trans step2.toAddEquiv) x := by
+    intro c x
+    show step2 (step1 (c • x)) = c • step2 (step1 x)
+    have hA : step1 (c • x) = (algebraMap W (AdjoinRoot (minpoly V w)) c) • step1 x := by
+      show (omegaAdjoinRootQuot (minpoly V w)) ((omegaCongr e).symm (c • x)) =
+        (algebraMap W (AdjoinRoot (minpoly V w)) c) • (omegaAdjoinRootQuot (minpoly V w)) ((omegaCongr e).symm x)
+      have h1cx := omegaCongr_symm_eq e (c • x)
+      have h1x := omegaCongr_symm_eq e x
+      rw [h1cx, h1x]
+      have h2 := map_smul (KaehlerDifferential.map V V W (AdjoinRoot (minpoly V w))) c x
+      rw [h2]
+      show (omega_quotient_eq_derivative_span (minpoly V w) (ker_adjoinRoot_mk (minpoly V w))
+              AdjoinRoot.mk_surjective).toAddEquiv
+            ((algebraMap W (AdjoinRoot (minpoly V w)) c) •
+              (KaehlerDifferential.map V V W (AdjoinRoot (minpoly V w))) x) =
+          (algebraMap W (AdjoinRoot (minpoly V w)) c) •
+            (omega_quotient_eq_derivative_span (minpoly V w) (ker_adjoinRoot_mk (minpoly V w))
+              AdjoinRoot.mk_surjective).toAddEquiv ((KaehlerDifferential.map V V W (AdjoinRoot (minpoly V w))) x)
+      exact map_smul (omega_quotient_eq_derivative_span (minpoly V w) (ker_adjoinRoot_mk (minpoly V w))
+        AdjoinRoot.mk_surjective) (algebraMap W (AdjoinRoot (minpoly V w)) c)
+        ((KaehlerDifferential.map V V W (AdjoinRoot (minpoly V w))) x)
+    rw [hA]
+    show step2 ((algebraMap W (AdjoinRoot (minpoly V w)) c) • step1 x) = c • step2 (step1 x)
+    have hC : ∀ (a : AdjoinRoot (minpoly V w)) (z : AdjoinRoot (minpoly V w) ⧸
+        Ideal.span ({algebraMap (Polynomial V) (AdjoinRoot (minpoly V w))
+          (Polynomial.derivative (minpoly V w))} : Set (AdjoinRoot (minpoly V w)))),
+        step2 (a • z) = (e.toRingEquiv a) • step2 z := by
+      intro a z
+      obtain ⟨z', rfl⟩ := Ideal.Quotient.mk_surjective z
+      show step2 (Ideal.Quotient.mk _ (a * z')) = e.toRingEquiv a • step2 (Ideal.Quotient.mk _ z')
+      rw [hstep2, Ideal.quotientEquiv_mk, Ideal.quotientEquiv_mk, map_mul]
+      rfl
+    rw [hC]
+    congr 1
+    show e.toRingEquiv (algebraMap W (AdjoinRoot (minpoly V w)) c) = c
+    show e (e.symm c) = c
+    exact e.apply_symm_apply c
+  exact hJ ▸ AddEquiv.toLinearEquiv (step1.trans step2.toAddEquiv) hsmul
 
-★★**実測(2026-09-04)**: 3.の `Ideal.quotientEquivAlg` への差し替えを
-実際に試したところ、`Ideal.map (e : AdjoinRoot (minpoly V w) →+* W) ...`
-の型検査が `maxHeartbeats 1000000`(既定の5倍、44秒)でも
-`timeout at whnf` で止まる——`AlgEquiv` の `→+*` への強制が
-`RingEquiv` 版よりはるかに重い(代数構造の証明項を一緒に unfold する
-ため)。これは「何を示すべきか分かっているが Lean の elaborator が
-時間内に応じない」という**性能上の壁**であり、`ここまでの3段の道筋」
-は数学的には正しいと確信しているが、`quotientEquivAlg` を使わずに
-(例えば `Ideal.quotientEquiv` の構成そのものの `map_mul` 整合性を
-直接示す、等)別の経路を探す必要がある——未着手。
--/
+/-- **[Falt1] Lemma 1.1「長さ」の主張(完成)**: `Module.length` の
+`LinearEquiv` に対する不変性(`LinearEquiv.length_eq`)を
+`falt1CokernelIsoLinear` に適用しただけ——`Ω_{W/V}` の長さが
+`W ⧸ differentIdeal V W` の長さ(Faltings の記法で `length(W/p^δW)`)
+に等しいという、Lemma 1.1 の主張そのもの。 -/
+theorem falt1CokernelLengthEq {V K L W : Type*} [CommRing V] [IsDedekindDomain V]
+    [Field K] [Algebra V K] [IsFractionRing V K] [Field L] [Algebra K L] [FiniteDimensional K L]
+    [Algebra.IsSeparable K L] [CommRing W] [Algebra W L] [Algebra V W] [Algebra V L]
+    [IsScalarTower V K L] [IsScalarTower V W L] [IsIntegralClosure W V L]
+    [IsDedekindDomain W] [Module.IsTorsionFree V W]
+    (w : W) (hint : IsIntegral V w) (hadjoin : Algebra.adjoin V ({w} : Set W) = ⊤)
+    (hw : Algebra.adjoin K ({(algebraMap W L) w} : Set L) = ⊤) :
+    Module.length W Ω[W⁄V] = Module.length W (W ⧸ differentIdeal V W) :=
+  LinearEquiv.length_eq (falt1CokernelIsoLinear w hint hadjoin hw)
 
 end ABC3.Found.Falt1
