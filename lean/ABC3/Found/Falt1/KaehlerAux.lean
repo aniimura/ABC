@@ -3605,6 +3605,35 @@ theorem falt1_length_quotient_mul_of_ne_zero {R : Type*} [CommRing R] [IsDomain 
   rw [hI']
   exact ABC3.Found.Falt1.length_quotient_span_singleton_mul a hanzd J
 
+/-- **`differentIdeal` の塔公式を「長さ」の言葉に翻訳した版(2026-09-04)**:
+`differentIdeal_eq_differentIdeal_mul_differentIdeal`(mathlib、塔
+`A→B→C`に対する直接の ideal 等式、`C` 側の単項生成元は一切不要)と
+`falt1_length_quotient_mul_of_ne_zero`(PID での長さの加法性、直前)を
+組み合わせるだけ。Kähler 微分の完全列(`falt1_kaehler_length_exact_
+wn1`系列)を経由せずに同じ形の長さの等式に到達できる、より直接的な
+経路——`falt1_cancelConductorDelta_assembled`の`hlen_eq`と組み合わせ
+れば`differentIdeal`だけで書かれた閉じた式が得られる(`Ideal.map
+(algebraMap B C)(differentIdeal A B)`の項を`hlen_eq`で`differentIdeal
+Vₙ₁ Wₙ₁`に置き換えるだけ、次回の作業)。 -/
+theorem falt1_differentIdeal_tower_length {A B C : Type*} [CommRing A] [IsDomain A] [IsIntegrallyClosed A]
+    [CommRing B] [IsDedekindDomain B] [Algebra A B]
+    [CommRing C] [IsDedekindDomain C] [IsPrincipalIdealRing C]
+    [Algebra B C] [Algebra A C] [IsScalarTower A B C]
+    [Module.IsTorsionFree A B] [Module.IsTorsionFree A C] [Module.IsTorsionFree B C]
+    [Module.Finite A B] [Module.Finite A C] [Module.Finite B C]
+    (hsep : @Algebra.IsSeparable (FractionRing A) (FractionRing C) _ _ (FractionRing.liftAlgebra A (FractionRing C)))
+    (hne : differentIdeal B C ≠ 0) :
+    Module.length C (C ⧸ differentIdeal A C) =
+      Module.length C (C ⧸ differentIdeal B C) +
+      Module.length C (C ⧸ Ideal.map (algebraMap B C) (differentIdeal A B)) := by
+  letI := FractionRing.liftAlgebra A (FractionRing C)
+  haveI := hsep
+  have htower : differentIdeal A C = differentIdeal B C * Ideal.map (algebraMap B C) (differentIdeal A B) :=
+    differentIdeal_eq_differentIdeal_mul_differentIdeal A B C
+  rw [htower]
+  exact ABC3.Found.Falt1.falt1_length_quotient_mul_of_ne_zero (differentIdeal B C)
+    (Ideal.map (algebraMap B C) (differentIdeal A B)) hne
+
 set_option maxHeartbeats 3000000 in
 set_option synthInstance.maxHeartbeats 3000000 in
 /-- **Theorem 1.2・item 3c の中核道具の完全な組み立て**:
