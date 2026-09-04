@@ -2055,6 +2055,36 @@ mathlib での正確な組み立て方は未確認)。
       という一般的な橋渡し補題をまず用意する、のどちらかで攻める
       ことから始める。
 
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、
+      **(a)(b)どちらでもない第3の道で、点ごとの挙動の証明を完全に
+      解決した**(`adjoinRootTensorEquivFwd`・`adjoinRootTensorEquivFwd_
+      one_tmul_mk`・`eval2_root_eq_mk`、commit `6740e740`、`lake build`
+      完走(171秒)・sorry無し)。`adjoinRootTensorEquiv`自体を修正
+      しようとするのをやめ、**`Ideal.Quotient`のAPIを一切経由しない
+      別経路の線形写像**を`AdjoinRoot`ネイティブAPIだけで新規に構成
+      した:
+      - `adjoinRootTensorEquivFwd g := TensorProduct.AlgebraTensorModule.
+        lift`で`(c,x) ↦ c • algHomAdjoinRootOfCompat' g x`という双線形
+        写像を持ち上げただけ(`algHomAdjoinRootOfCompat'`は`AdjoinRoot.map`
+        ベースの既存の道具、instance diamond を経由しない)。
+      - その点ごとの挙動(`1⊗ₜ(AdjoinRoot.mk g p) ↦ AdjoinRoot.mk(g.map φ)
+        (p.map φ)`)は、`AdjoinRoot.lift_mk`(`AdjoinRoot.map`の内部構成)
+        + 新規補題`eval2_root_eq_mk`(`eval₂(AdjoinRoot.of q)(root q)h =
+        AdjoinRoot.mk q h`、`Polynomial.induction_on`による3行の帰納法)
+        だけで**完全に**証明できた——`X`の場合(生成元自体)を含めて
+        すべて解決している(`Polynomial.induction_on`の`C`・`add`・
+        `monomial`の3ケースがそのまま定数・和・生成元の場合をカバー
+        するため、`ringHom_ext'`のような分割すら不要だった)。
+
+      **これで`adjoinRootTensorEquiv`の代わりに`adjoinRootTensorEquivFwd`
+      を使えば、instance diamond を一切経由せず`Algebra.IsPushout`へ
+      接続できる見込みが立った。** 残るのは`adjoinRootTensorEquivFwd`
+      の**全単射性**のみ(まだ未証明)——`g`がmonicなら両辺は`C`上
+      階数`deg g`の自由加群になるはずなので、(全射性を`root(g.map φ)`
+      の冪が像に入ることから示し)+(有限自由加群間の全射線形写像は
+      階数が等しければ自動的に単射、という一般論)で閉じられる見込み。
+      次回はここから続ける。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
