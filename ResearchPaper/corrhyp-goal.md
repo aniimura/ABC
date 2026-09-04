@@ -456,3 +456,32 @@ Prop のままにするか、witness 付きの構造体に変えるかは要検�
 次にここへ戻るときの出発点: 上の「構成的な降下」を`FEtK`(有限エタール、
 `IsFinite ∧ Etale`)の場合に特化した1つの補題として切り出し、
 `exists_isOpenCover_and_isAffine` から着手する。
+
+### 2026-09-04さらに続報: `StandardEtalePair` の降下が完成 ★★★
+
+上の「組み立て方の見通し」の最初の環——標準エタール表示(`f`・`g` の2多項式・
+`cond`)の降下——を実際に `FieldLimit.lean` に実装し、sorry 無しで完成させた:
+
+- `exists_fg_subalgebra_polynomial`(1変数)・`_pair`(2変数、同じ部分環に
+  同時に降ろす)・`_pair_monic`(monic 性も遺伝)・`_family`(有限個の多項式の
+  一般化)——多項式は係数が有限個なので、ある有限生成 `k`-部分環へ必ず
+  降ろせるという初等的だが必要な部品。
+- `exists_fg_subalgebra_standardEtaleCond`——`cond`(`f'*p₁+f*p₂=g^n`)自体は
+  `f, g, p₁, p₂` を`_family`で同時に降ろした上で、`Polynomial.map`
+  (`algebraMap R K` が単射なので単射)の単射性で等式を引き戻す。
+- `exists_fg_subalgebra_standardEtalePair`——上の2つを束ね、
+  `Algebra.StandardEtalePair K` 全体がある有限生成 `k`-部分環上の
+  `StandardEtalePair` の像であることを示す。
+
+**残る部品**(`Algebra.StandardEtalePresentation` まで完成させるには):
+(a) `x : S`(`lift` が bijective になる元)自体の降下——`S` 自体が
+「有限生成部分環上のある `S₀` の base change」であることも言う必要があり、
+これは `S`(有限エタール多元環)を `R[X]/(f)` のこの `x` による同型で
+"再定義" することで回避できる可能性がある(`x` を明示的に構成する必要が
+無くなる)、(b) 一般の有限エタール多元環は「至る所で」標準エタールとは
+限らず(`Algebra.basicOpen_subset_etaleLocus_iff_etale`)、**局所的に**
+しか標準エタール表示を持たない——`Z_K` 全体のアフィン開被覆
+(`exists_isOpenCover_and_isAffine`)の**各アフィン片**を、さらに
+étale-locus のレベルで細分してから、この降下を1片ずつ適用し、最後に
+`RingHom.EssFiniteType.exists_comp_map_eq_of_isColimit`(遷移射の一致の
+降下)で貼り合わせる、という二重の被覆の組み立てが要る。
