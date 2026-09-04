@@ -1461,3 +1461,27 @@ cocycleを構築したのと同種の困難を、Rレベル(FgSubalgebra ℚ ℝ
 ℝレベル部品の配線だけでは済まない。person-yearsスケールという評価を
 裏付ける、より正確な理解が得られた。corrhyp-goal.mdに詳細記録。
 集計10/24で変わらず——§4は引き続き0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04(続き15)
+★実質的な前進★ Rレベル層の実現可能性を試掘した結果、mathlibの新しい
+降下定理は不要と判明——既存部品だけで核心部品が完成した。
+
+piece_descends_iso_promote: piece_descends_isoの降下先Rを、より粗い
+共通段階R'(R≤R')へ昇格しても比較同型が保たれることを、
+standardEtalePairPullbackIso(既存)を2回+exists_fg_subalgebra_tensor_
+standardEtalePair_promote(既存)だけで証明できた——当初懸念した
+「cofiltered極限からの降下定理を新規適用」は不要だった。
+
+続けてpiece_descends_iso_R_of_proof(明示的証明版)・
+piece_descends_iso_R_upperBound(exists_fgSubalgebra_upperBoundで
+有限個のR_iを単一の共通上界R'へ合流)・
+piece_descends_iso_R_upperBound_spec(R'が実際に各R_iの上界)を完成、
+Rレベルの複数添字を単一の共通段階へ揃える核心部品が揃った。lake
+build(ExtLimit/ABC3とも)0エラー確認、コミット: `3816c246`・
+`e2e728af`。
+
+残る道筋: 族全体を実際にR'レベルへ揃え、transitionElem/gdT/cocycle
+一式のRレベル版の構築(層の制限写像の対応関係を精密に詰める必要あり、
+未着手)。person-years評価をさらに上方修正できる可能性を示す実質的な
+進展。corrhyp-goal.mdに詳細記録。集計10/24で変わらず——§4は引き続き
+0/2。

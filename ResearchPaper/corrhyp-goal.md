@@ -3137,3 +3137,41 @@ Lean特有の泥沼を伴っており、`R`段階でも同種の泥沼が再発�
 `R'`へ合流させる補題、(ii)mathlibの降下定理を`Spec(P₀_i.Ring)`へ
 実地に適用してみる試掘、のうち(ii)を次に試す。集計は10/24で変わらず
 ——§4は引き続き0/2。
+
+## 2026-09-04(続き15): ★実質的な前進★ `piece_descends_iso_promote`/`piece_descends_iso_R_upperBound`——`R`レベル層の核心部品が既存部品だけで完成
+
+(ii)を試掘した結果、**mathlibの新しい降下定理は不要だった**——
+より単純な既存部品の組み合わせで済むことが判明した:
+
+`piece_descends_iso_promote`(`ExtLimit.lean`): `piece_descends_iso`が
+与える降下先`R`を、より粗い共通段階`R'`(`R≤R'`)へ昇格しても
+`X.basicOpen f`との比較同型が保たれることを、`standardEtalePairPullback
+Iso`(`R`レベルの候補片は、より粗い段階へのbase changeでも`.map`の
+`Spec`として実現できる、既存の一般的事実)を2回+`exists_fg_subalgebra_
+tensor_standardEtalePair_promote`(既存、`FieldLimit.lean`)を組み合わ
+せるだけで示せた。当初懸念していた「mathlibのcofiltered極限からの
+降下定理(`Scheme.exists_hom_hom_comp_eq_comp_of_locallyOfFiniteType`
+等)を新規に適用する必要がある」という筋道は不要だった。
+
+続けて`piece_descends_iso_R_of_proof`(`IsStandardEtale`を明示的な
+証明として受け取る形、`descendPieceOfProof`と同じ理由)・
+`piece_descends_iso_R_upperBound`(`exists_fgSubalgebra_upperBound`を
+使って有限個の`R_i`を単一の共通上界`R'`へ合流させる)・
+`piece_descends_iso_R_upperBound_spec`(`R'`が実際に各`R_i`の上界で
+あること)を完成させ、`R`レベルの複数添字を単一の共通段階へ揃える
+核心部品がすべて揃った。すべて`lean_check`で検証後ファイルへ反映、
+`lake build`(ExtLimit/ABC3とも)0エラー確認、コミット(`3816c246`・
+`e2e728af`)。
+
+**残る道筋**: これらを組み合わせて族全体を単一の`R'`レベルへ実際に
+揃え(`piece_descends_iso_R_of_proof`と`piece_descends_iso_promote`の
+`(piece_descends_iso ...).choose`が定義的に一致することの確認が要る
+見込み)、その後`transitionElem`/`gdT`/`cocycle`一式の`R`レベル版の
+構築へ進む——ただし`ℝ`レベルの`transitionElem`は`X.presheaf.map`
+(層の制限写像)を使っており、`R`レベルでは対応する「層」が
+`extDiagram X`の段階`R`におけるアンビエントスキームの層になる見込み
+で、この対応を精密に詰める必要がある(まだ未着手)。それでも、
+今回の発見(`R`レベルの「昇格」がmathlibの新しい降下定理を要さず
+既存部品だけで済む)は、`person-years`評価をさらに上方修正できる
+可能性を示す実質的な進展である。集計は10/24で変わらず——§4は
+引き続き0/2。
