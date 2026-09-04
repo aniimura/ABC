@@ -2528,6 +2528,149 @@ theorem adjoinRootTensorEquivFwd_one_tmul_mk {R C : Type*} [CommRing R] [CommRin
   rw [AdjoinRoot.lift_mk, ← Polynomial.eval₂_map, eval2_root_eq_mk]
 
 /-!
+## `adjoinRootTensorEquivFwd` の全単射性(完成、2026-09-04)
+
+`adjoinRootTensorEquivFwd`の**逆写像を明示的に構成**し、両方向の
+往復が恒等写像になることを確認するだけで全単射性を示した——
+`AdjoinRoot`ネイティブAPI(`AdjoinRoot.lift`・`AdjoinRoot.induction_on`・
+`Polynomial.induction_on`)だけで閉じ、`Ideal.Quotient`側のinstance
+diamondには一度も触れない。 -/
+
+set_option maxHeartbeats 400000 in
+/-- **`adjoinRootTensorEquivFwd`の逆写像候補**: `root(g.map φ) ↦
+1⊗ₜ(root g)`・`C ↦ (c⊗ₜ1)`となる`AdjoinRoot.lift`。well-definedness
+(`g.map φ`が`1⊗ₜroot g`で消えること)は`aeval`のAlgHom越しの自然性
+(`Polynomial.aeval_algHom_apply`)+`AdjoinRoot.aeval_eq`(`aeval(root f)f
+=mk f f=0`)だけで閉じる。 -/
+noncomputable def adjoinRootTensorEquivInv {R C : Type*} [CommRing R] [CommRing C] [Algebra R C] (g : Polynomial R) :
+    AdjoinRoot (g.map (algebraMap R C)) →+* TensorProduct R C (AdjoinRoot g) := by
+  apply AdjoinRoot.lift (algebraMap C (TensorProduct R C (AdjoinRoot g))) ((1:C) ⊗ₜ[R] (AdjoinRoot.root g))
+  show Polynomial.eval₂ (algebraMap C (TensorProduct R C (AdjoinRoot g))) ((1:C) ⊗ₜ[R] (AdjoinRoot.root g)) (g.map (algebraMap R C)) = 0
+  rw [Polynomial.eval₂_map]
+  rw [show ((algebraMap C (TensorProduct R C (AdjoinRoot g))).comp (algebraMap R C)) =
+      (algebraMap R (TensorProduct R C (AdjoinRoot g))) from (IsScalarTower.algebraMap_eq R C (TensorProduct R C (AdjoinRoot g))).symm]
+  show Polynomial.aeval ((1:C) ⊗ₜ[R] (AdjoinRoot.root g)) g = 0
+  rw [show ((1:C) ⊗ₜ[R] (AdjoinRoot.root g)) =
+      (Algebra.TensorProduct.includeRight (R := R) (A := C) (B := AdjoinRoot g)) (AdjoinRoot.root g) from rfl]
+  rw [Polynomial.aeval_algHom_apply, AdjoinRoot.aeval_eq]
+  simp [AdjoinRoot.mk_self]
+
+set_option maxHeartbeats 400000 in
+/-- `adjoinRootTensorEquivInv`の`C·X^n`単項式での挙動(帰納の要となる
+明示形)。 -/
+theorem adjoinRootTensorEquivInv_monomial {R C : Type*} [CommRing R] [CommRing C] [Algebra R C] (g : Polynomial R)
+    (a : C) (n : ℕ) :
+    (adjoinRootTensorEquivInv (R := R) (C := C) g) (AdjoinRoot.mk (g.map (algebraMap R C)) (Polynomial.C a * Polynomial.X ^ n)) =
+      a ⊗ₜ[R] ((AdjoinRoot.root g) ^ n) := by
+  show Polynomial.eval₂ (algebraMap C (TensorProduct R C (AdjoinRoot g))) ((1:C) ⊗ₜ[R] (AdjoinRoot.root g)) (Polynomial.C a * Polynomial.X ^ n) = _
+  rw [Polynomial.eval₂_mul, Polynomial.eval₂_C, Polynomial.eval₂_X_pow]
+  rw [show (algebraMap C (TensorProduct R C (AdjoinRoot g)) a) = a ⊗ₜ[R] (1 : AdjoinRoot g) from rfl]
+  rw [show ((1:C) ⊗ₜ[R] (AdjoinRoot.root g)) ^ n = (1:C) ⊗ₜ[R] ((AdjoinRoot.root g) ^ n) by
+    induction n with
+    | zero => simp; rfl
+    | succ k ih => rw [pow_succ, pow_succ, ih, Algebra.TensorProduct.tmul_mul_tmul, mul_one]]
+  rw [Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
+
+set_option maxHeartbeats 400000 in
+/-- `adjoinRootTensorEquivInv`の`mk(g.map φ)(p.map φ)`での挙動(逆向き
+の往復で使う)。 -/
+theorem adjoinRootTensorEquivInv_mk_map {R C : Type*} [CommRing R] [CommRing C] [Algebra R C] (g p : Polynomial R) :
+    (adjoinRootTensorEquivInv (R := R) (C := C) g) (AdjoinRoot.mk (g.map (algebraMap R C)) (p.map (algebraMap R C))) =
+      (1:C) ⊗ₜ[R] (AdjoinRoot.mk g p) := by
+  show Polynomial.eval₂ (algebraMap C (TensorProduct R C (AdjoinRoot g))) ((1:C) ⊗ₜ[R] (AdjoinRoot.root g)) (p.map (algebraMap R C)) = _
+  rw [Polynomial.eval₂_map]
+  rw [show ((algebraMap C (TensorProduct R C (AdjoinRoot g))).comp (algebraMap R C)) =
+      (algebraMap R (TensorProduct R C (AdjoinRoot g))) from (IsScalarTower.algebraMap_eq R C (TensorProduct R C (AdjoinRoot g))).symm]
+  show Polynomial.aeval ((1:C) ⊗ₜ[R] (AdjoinRoot.root g)) p = _
+  rw [show ((1:C) ⊗ₜ[R] (AdjoinRoot.root g)) =
+      (Algebra.TensorProduct.includeRight (R := R) (A := C) (B := AdjoinRoot g)) (AdjoinRoot.root g) from rfl]
+  rw [Polynomial.aeval_algHom_apply, AdjoinRoot.aeval_eq]
+  rfl
+
+/-- `adjoinRootTensorEquivInv`は`C`線形(algebraMap Cとの両立性から)。 -/
+theorem adjoinRootTensorEquivInv_smul {R C : Type*} [CommRing R] [CommRing C] [Algebra R C] (g : Polynomial R)
+    (c : C) (y : AdjoinRoot (g.map (algebraMap R C))) :
+    (adjoinRootTensorEquivInv (R := R) (C := C) g) (c • y) = c • (adjoinRootTensorEquivInv (R := R) (C := C) g) y := by
+  rw [Algebra.smul_def, map_mul]
+  rw [show (adjoinRootTensorEquivInv (R := R) (C := C) g) (algebraMap C (AdjoinRoot (g.map (algebraMap R C))) c) =
+      algebraMap C (TensorProduct R C (AdjoinRoot g)) c by
+    rw [show (algebraMap C (AdjoinRoot (g.map (algebraMap R C))) c) = AdjoinRoot.of (g.map (algebraMap R C)) c from
+      (AdjoinRoot.algebraMap_eq' C (g.map (algebraMap R C))).symm ▸ rfl]
+    exact AdjoinRoot.lift_of _]
+  rw [← Algebra.smul_def]
+
+set_option maxHeartbeats 400000 in
+/-- **往復1: `fwd∘inv=id`**(`AdjoinRoot.induction_on`+`Polynomial.
+induction_on`による帰納法、`C`・`add`・`monomial`の3ケース)。 -/
+theorem adjoinRootTensorEquiv_roundtrip1 {R C : Type*} [CommRing R] [CommRing C] [Algebra R C] (g : Polynomial R) :
+    ∀ y : AdjoinRoot (g.map (algebraMap R C)),
+      (adjoinRootTensorEquivFwd (R := R) (C := C) g) ((adjoinRootTensorEquivInv (R := R) (C := C) g) y) = y := by
+  intro y
+  induction y using AdjoinRoot.induction_on with
+  | ih p =>
+    induction p using Polynomial.induction_on with
+    | C a =>
+        have h0 := adjoinRootTensorEquivInv_monomial (R := R) (C := C) g a 0
+        simp only [pow_zero, mul_one] at h0
+        rw [h0]
+        rw [show (a ⊗ₜ[R] (1 : AdjoinRoot g) : TensorProduct R C (AdjoinRoot g)) =
+            a • ((1:C) ⊗ₜ[R] (AdjoinRoot.mk g 1)) by
+          rw [map_one]; rw [TensorProduct.smul_tmul']; simp]
+        rw [map_smul, adjoinRootTensorEquivFwd_one_tmul_mk]
+        rw [show ((1:Polynomial R)).map (algebraMap R C) = (1 : Polynomial C) by simp]
+        rw [AdjoinRoot.mk_C]
+        rw [Algebra.smul_def, AdjoinRoot.algebraMap_eq, map_one, mul_one]
+    | add p1 p2 h1 h2 =>
+        rw [map_add, map_add, map_add, h1, h2]
+    | monomial n a _ih2 =>
+        rw [pow_succ, ← mul_assoc, map_mul, map_mul, adjoinRootTensorEquivInv_monomial]
+        have hInvX : (adjoinRootTensorEquivInv (R := R) (C := C) g) (AdjoinRoot.mk (g.map (algebraMap R C)) Polynomial.X) =
+            (1:C) ⊗ₜ[R] (AdjoinRoot.root g) := by
+          have h1 := adjoinRootTensorEquivInv_monomial (R := R) (C := C) g 1 1
+          simpa using h1
+        rw [hInvX, Algebra.TensorProduct.tmul_mul_tmul, mul_one, ← pow_succ]
+        rw [show (a ⊗ₜ[R] ((AdjoinRoot.root g)^(n+1)) : TensorProduct R C (AdjoinRoot g)) =
+            a • ((1:C) ⊗ₜ[R] (AdjoinRoot.mk g (Polynomial.X^(n+1)))) by
+          rw [TensorProduct.smul_tmul']; simp [← AdjoinRoot.mk_X, ← map_pow]]
+        rw [map_smul, adjoinRootTensorEquivFwd_one_tmul_mk, Polynomial.map_pow, Polynomial.map_X]
+        rw [← map_mul, Algebra.smul_def, AdjoinRoot.algebraMap_eq]
+        rw [← AdjoinRoot.mk_C, ← map_mul, mul_assoc, pow_succ]
+
+set_option maxHeartbeats 400000 in
+/-- **往復2: `inv∘fwd=id`**(`TensorProduct.induction_on`+
+`AdjoinRoot.induction_on`による帰納法、`adjoinRootTensorEquivInv_smul`
+で`C`線形性を経由)。 -/
+theorem adjoinRootTensorEquiv_roundtrip2 {R C : Type*} [CommRing R] [CommRing C] [Algebra R C] (g : Polynomial R) :
+    ∀ x : TensorProduct R C (AdjoinRoot g),
+      (adjoinRootTensorEquivInv (R := R) (C := C) g) ((adjoinRootTensorEquivFwd (R := R) (C := C) g) x) = x := by
+  have key : ∀ p : Polynomial R, (adjoinRootTensorEquivInv (R := R) (C := C) g)
+      ((adjoinRootTensorEquivFwd (R := R) (C := C) g) ((1:C) ⊗ₜ[R] (AdjoinRoot.mk g p))) =
+      (1:C) ⊗ₜ[R] (AdjoinRoot.mk g p) := by
+    intro p
+    rw [adjoinRootTensorEquivFwd_one_tmul_mk, adjoinRootTensorEquivInv_mk_map]
+  intro x
+  induction x using TensorProduct.induction_on with
+  | zero => simp
+  | tmul c z =>
+      induction z using AdjoinRoot.induction_on with
+      | ih p =>
+          rw [show (c ⊗ₜ[R] (AdjoinRoot.mk g p) : TensorProduct R C (AdjoinRoot g)) =
+              c • ((1:C) ⊗ₜ[R] (AdjoinRoot.mk g p)) by rw [TensorProduct.smul_tmul']; simp]
+          rw [map_smul, adjoinRootTensorEquivInv_smul, key]
+  | add x y hx hy => rw [map_add, map_add, hx, hy]
+
+/-- **`adjoinRootTensorEquivFwd`は全単射(完成)**: 両方向の往復
+(`adjoinRootTensorEquiv_roundtrip1`・`adjoinRootTensorEquiv_roundtrip2`)
+から`Function.bijective_iff_has_inverse`で直ちに従う——これで`Wₙ₊₁`が
+`Wₙ`と`AdjoinRoot f`(≃V1)の`V0`上のpushoutであること
+(`Algebra.IsPushout`)への接続にNear、`Ideal.Quotient`のinstance
+diamondを一切経由せずに到達できる。 -/
+theorem adjoinRootTensorEquivFwd_bijective {R C : Type*} [CommRing R] [CommRing C] [Algebra R C] (g : Polynomial R) :
+    Function.Bijective (adjoinRootTensorEquivFwd (R := R) (C := C) g) :=
+  Function.bijective_iff_has_inverse.mpr
+    ⟨adjoinRootTensorEquivInv (R := R) (C := C) g, adjoinRootTensorEquiv_roundtrip2 g, adjoinRootTensorEquiv_roundtrip1 g⟩
+
+/-!
 ## `V_1 → W_1` の橋渡し写像そのものが完成した(2026-09-04)
 
 `hspan_eq` の接続に必要な `Algebra V1 Wn1` インスタンスを、実際に構成
