@@ -448,6 +448,22 @@ standardEtalePair_baseChange`、という一直線の道筋が数学的にもLea
 コミット: `f2ecb1eb`(upperBound)・`0006665c`(map_map)・
 `283270db`(記録)。
 
+★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(スキーム→環の
+橋渡しを完全に結線、集計10/24で変わらず)。`ExtLimit.lean`に
+`piece_algebraEtale`→`pieceRingEquiv`(`piecePullbackIso`を`Scheme.
+Opens.topIso`・`Scheme.Γ.mapIso`・`Scheme.ΓSpecIso`で繋いだ環の同型)
+→`algebraEtale_transport`(`RingHom.Etale.respectsIso`で底環の同型に
+沿ってAlgebra.Etaleを輸送)→**`piece_algebraEtale_tensor`**を完成
+(★すべてsorry無し)。これで「`c.α`→アフィン片への制限→
+`Algebra.Etale(Γ(U,U)⊗ℚℝ)...`→`exists_finite_standardEtaleCover`→
+`exists_fg_subalgebra_tensor_standardEtalePair_baseChange`→有限段階
+への降下」という「1アフィン片の降下」の全行程が**実際に1つのLean宣言
+の連鎖として結線可能な状態**になった。残るのはこの連鎖を実際に呼び出す
+組み立て(標準エタール被覆の有限個の片を横断した合流を含む)・
+複数の`U_i`・`GlueData`貼り合わせ。
+
+コミット: `5d14a13e`(piece_algebraEtale_tensor完成)・`dc023618`(記録)。
+
 ★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(残作業4段階を総括、
 集計10/24で変わらず)。generic flatnessの標準的前提(Rネター整域・
 加群/多元環がR上有限表示)を確認したところ、`corrHypInstance4`の
