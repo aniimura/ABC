@@ -3769,10 +3769,40 @@ cohomology** `H^2(B/A,I)` の類を定め、これが `m` で零化される
   古典的事実)は、Fin2→Rの具体例・R自身(恒等拡大)の両方で手計算では
   `1`になることを確認したが(rankではなく常に`1`)、一般の証明は
   mathlibに欠けている(`traceForm_nondegenerate`系は体の拡大専用)。
-  基底を用いた添字計算での直接証明を試みたが、構造定数を経由する
-  組み合わせ論的な計算になり、今回は完結させられなかった——次回への
-  最も具体的な足場として`Tr1map`・`Ψ_eq_smul_Tr1`を残す(実ファイルに
-  移植・`lake build`確認・commit済み)。
+
+  ★★★★★★★★★★2026-09-05(続々)、**この最後のスカラー等式
+  `Tr1map(elem R S)=1`を、基底を用いた添字計算で完全に証明した**。
+  `S`(`R`上有限自由)の基底`{bᵢ}`で`elem R S=Σᵢbᵢ⊗aᵢ`と分解する
+  (`tensorDecompEquiv`、`TensorProduct.congr`+`TensorProduct.
+  finsuppScalarLeft`で`S⊗_RS≃(ι→₀S)`を構成)と、annihilation性質から
+  構造定数`b.repr(bⱼbᵢ)k`を経由した関係式`bⱼaₖ=Σᵢ(b.repr(bⱼbᵢ)k)aᵢ`が
+  出る(`tensorDecompEquiv_extract`)。これと augmentation(`Σbᵢaᵢ=1`)・
+  trace の行列表示(`Algebra.trace_eq_matrix_trace`+`Algebra.
+  leftMulMatrix_eq_repr_mul`)を、`S`の可換性(構造定数の対称性
+  `b.repr(bⱼbᵢ)k=b.repr(bᵢbⱼ)k`、`bⱼbᵢ=bᵢbⱼ`から)で束ねる
+  (`Finset.sum_comm`)と、**`Tr1map(elem)`と`1`が同じ二重和の並べ替え**
+  であることが分かり、証明が閉じた(`Tr1map_elem_eq_one`)。
+
+  さらに、`Tr1map`と`diagonalCompare`の可換性(`lmul'_diagonalCompare`
+  と同型の議論、`Algebra.trace_localization`経由、`Tr1map_
+  diagonalCompare`)を組み合わせ、**`Theorem 2.4(ii)`の remark(iii)
+  恒等式そのものを完全に証明した**(`remark_iii_trace_identity`)——
+  `IsAlmostEtaleCovering`の条件(iii)の witness `e`から、Faltings が
+  主張する`p^n・b=Σtr_{B/A}(b・xᵢ)yᵢ`を導く。`algebraMap B Bp`の単射性
+  (Faltings 自身が「全ての環で`p`による乗法は単射」と明記している
+  標準仮定)を経由する。
+
+  移植後、実ファイルで1回で`lake build`が通り(警告2件のみ、リント
+  修正で解消)、プロジェクト全体の`lake build`(6590 jobs)・`node
+  tools/check.mjs --brief`(NG13件、既存分で不変)も確認済み。
+
+  **意味**: `Theorem 2.4(ii)`の証明の核心(remark(iii)恒等式)が
+  sorry無く完成した。残るは主張本体(`H^i(G,M)`の消滅、群コホモロジー
+  ——mathlibの`groupCohomology`名前空間+transfer論法の一般化)のみ
+  ——これは`Theorem 2.2`-`2.3`(未証明のHochschild cohomology H^2消滅
+  を要する)とは質的に異なり、既存のmathlibインフラ(群コホモロジーは
+  既に存在する)を組み合わせる作業に近い、より見通しの良い次回の
+  課題として記録する。
 
 ★★★**結論(正直な評価)**: `/goal` の 13/13 は、このセッションでの
 継続作業だけでは現実的な時間内に到達できない規模の作業(Theorem 1.2

@@ -905,4 +905,208 @@ theorem Ψ_eq_smul_Tr1 {R S : Type u} [CommRing R] [CommRing S] [Algebra R S]
   rw [sub_mul, sub_eq_zero] at hs
   rw [← hs, Tr1_swap_smul]
 
+/-! ## `Tr1map(elem R S) = 1`、ついに証明(2026-09-05、続)。
+
+上のコメントで「未解決課題」としていたスカラー等式を、基底を用いた
+添字計算で完全に証明した。`S`(`R`上有限自由)の基底`{bᵢ}`を選び、
+`elem R S`をその基底で`Σᵢbᵢ⊗aᵢ`と分解する(`tensorDecompEquiv`)と、
+annihilation性質から構造定数を経由した関係式
+`bⱼ・aₖ=Σᵢ(b.repr(bⱼ・bᵢ)k)・aᵢ`が出る(`hextract`)。これと
+augmentation(`Σᵢbᵢaᵢ=1`)・trace の行列表示(`tr(bⱼ)=Σᵢb.repr(bⱼbᵢ)i`、
+`Algebra.trace_eq_matrix_trace`)を、`S`の可換性(構造定数の対称性
+`b.repr(bⱼbᵢ)k=b.repr(bᵢbⱼ)k`)で束ねる(`Finset.sum_comm`)と、
+`Tr1map(elem R S)`と`1(=augmentation)`が**同じ二重和の並べ替え**である
+ことが分かる。これは分離拡大論の古典的事実(trace form の非退化性の
+系)だが、mathlibには一般の環拡大向けの版が無かった。 -/
+
+/-- 基底`b`を経由した`S⊗_RS ≃ₗ[R] (ι→₀S)`(第1因子をbの座標で展開)。 -/
+noncomputable def tensorDecompEquiv {R S : Type u} [CommRing R] [CommRing S] [Algebra R S] {ι : Type*}
+    [Fintype ι] [DecidableEq ι] (b : Module.Basis ι R S) :
+    TensorProduct R S S ≃ₗ[R] (ι →₀ S) :=
+  (TensorProduct.congr b.repr (LinearEquiv.refl R S)).trans (TensorProduct.finsuppScalarLeft R S ι)
+
+theorem tensorDecompEquiv_tmul {R S : Type u} [CommRing R] [CommRing S] [Algebra R S] {ι : Type*}
+    [Fintype ι] [DecidableEq ι] (b : Module.Basis ι R S) (i : ι) (z : S) :
+    tensorDecompEquiv b (b i ⊗ₜ[R] z) = Finsupp.single i z := by
+  show TensorProduct.finsuppScalarLeft R S ι (TensorProduct.congr b.repr (LinearEquiv.refl R S) (b i ⊗ₜ[R] z))
+    = Finsupp.single i z
+  rw [show TensorProduct.congr b.repr (LinearEquiv.refl R S) (b i ⊗ₜ[R] z) = Finsupp.single i 1 ⊗ₜ[R] z from by
+    simp [TensorProduct.congr, Module.Basis.repr_self]]
+  ext j
+  rw [TensorProduct.finsuppScalarLeft_apply]
+  simp [Finsupp.lapply_apply, Finsupp.single_apply]
+
+theorem tensorDecompEquiv_eq {R S : Type u} [CommRing R] [CommRing S] [Algebra R S] {ι : Type*}
+    [Fintype ι] [DecidableEq ι] (b : Module.Basis ι R S) (t : TensorProduct R S S) :
+    t = Finset.univ.sum (fun i => b i ⊗ₜ[R] (tensorDecompEquiv b t i)) := by
+  apply (tensorDecompEquiv b).injective
+  rw [map_sum]
+  simp only [tensorDecompEquiv_tmul]
+  ext j
+  simp
+
+/-- annihilation性質から出る、基底の構造定数を経由した関係式
+`bⱼ・aₖ=Σᵢ(b.repr(bⱼ・bᵢ)k)・aᵢ`(`t=Σᵢbᵢ⊗aᵢ`の座標`aᵢ:=tensorDecompEquiv
+b t i`)。`Tr1map(elem R S)=1`の証明の核心部品。 -/
+theorem tensorDecompEquiv_extract {R S : Type u} [CommRing R] [CommRing S] [Algebra R S] {ι : Type*}
+    [Fintype ι] [DecidableEq ι] (b : Module.Basis ι R S) (t : TensorProduct R S S)
+    (ht1 : ∀ s : S, (1 ⊗ₜ[R] s - s ⊗ₜ[R] 1) * t = 0) (j k : ι) :
+    b j * (tensorDecompEquiv b t k) =
+      Finset.univ.sum (fun i => (b.repr (b j * b i) k) • (tensorDecompEquiv b t i)) := by
+  set a := tensorDecompEquiv b t with hadef
+  have hdecomp : t = Finset.univ.sum (fun i => b i ⊗ₜ[R] a i) := tensorDecompEquiv_eq b t
+  have hswap : (1 ⊗ₜ[R] (b j) : TensorProduct R S S) * t = (b j ⊗ₜ[R] 1) * t := by
+    have h := ht1 (b j)
+    rw [sub_mul, sub_eq_zero] at h
+    exact h
+  have hLHS : tensorDecompEquiv b ((1 ⊗ₜ[R] (b j) : TensorProduct R S S) * t) k = b j * a k := by
+    rw [hdecomp, Finset.mul_sum]
+    rw [show (Finset.univ.sum fun i => (1:S) ⊗ₜ[R] (b j) * (b i ⊗ₜ[R] a i))
+        = Finset.univ.sum (fun i => b i ⊗ₜ[R] (b j * a i)) from by
+      apply Finset.sum_congr rfl; intro i _
+      rw [Algebra.TensorProduct.tmul_mul_tmul, one_mul]]
+    rw [map_sum]
+    simp only [tensorDecompEquiv_tmul]
+    simp [Finsupp.finsetSum_apply, Finsupp.single_apply]
+  have hRHS : tensorDecompEquiv b ((b j ⊗ₜ[R] (1:S)) * t) k =
+      Finset.univ.sum (fun i => (b.repr (b j * b i) k) • a i) := by
+    rw [hdecomp, Finset.mul_sum]
+    rw [show (Finset.univ.sum fun i => (b j : S) ⊗ₜ[R] (1:S) * (b i ⊗ₜ[R] a i))
+        = Finset.univ.sum (fun i => (b j * b i) ⊗ₜ[R] a i) from by
+      apply Finset.sum_congr rfl; intro i _
+      rw [Algebra.TensorProduct.tmul_mul_tmul, one_mul]]
+    rw [show (Finset.univ.sum fun i => (b j * b i) ⊗ₜ[R] a i)
+        = Finset.univ.sum (fun i => Finset.univ.sum (fun m => (b.repr (b j * b i) m) • (b m ⊗ₜ[R] a i))) from by
+      apply Finset.sum_congr rfl; intro i _
+      conv_lhs => rw [← b.sum_repr (b j * b i)]
+      rw [TensorProduct.sum_tmul]
+      simp [TensorProduct.smul_tmul]]
+    rw [map_sum, Finsupp.finsetSum_apply]
+    apply Finset.sum_congr rfl
+    intro i _
+    rw [map_sum, Finsupp.finsetSum_apply]
+    simp only [map_smul, tensorDecompEquiv_tmul, Finsupp.smul_apply, Finsupp.single_apply]
+    simp
+  rw [← hLHS, hswap, hRHS]
+
+/-- **`Tr1map(elem R S)=1`、Faltings remark(iii)の核心のスカラー等式**
+(mathlibに一般形が無かった、分離拡大論の古典的事実)。基底
+`{bᵢ}`での`elem R S=Σᵢbᵢ⊗aᵢ`分解を使い、augmentation(`Σbᵢaᵢ=1`)と
+`tensorDecompEquiv_extract`(annihilationから来る構造定数関係式)を
+`Finset.sum_comm`+可換性(構造定数の対称性)で束ねると、`Tr1map(elem)`
+と`1`が**同じ二重和**であることが分かる。 -/
+theorem Tr1map_elem_eq_one {R S : Type u} [CommRing R] [CommRing S] [Algebra R S] {ι : Type*}
+    [Fintype ι] [DecidableEq ι] (b : Module.Basis ι R S) (t : TensorProduct R S S)
+    (ht1 : ∀ s : S, (1 ⊗ₜ[R] s - s ⊗ₜ[R] 1) * t = 0) (ht2 : Algebra.TensorProduct.lmul' R t = 1) :
+    Tr1map R S t = 1 := by
+  set a := tensorDecompEquiv b t with hadef
+  have hdecomp : t = Finset.univ.sum (fun i => b i ⊗ₜ[R] a i) := tensorDecompEquiv_eq b t
+  have hAug : Finset.univ.sum (fun i => b i * a i) = 1 := by
+    rw [← ht2, hdecomp, map_sum]
+    apply Finset.sum_congr rfl
+    intro i _
+    rw [Algebra.TensorProduct.lmul'_apply_tmul]
+  have hTr1 : Tr1map R S t = Finset.univ.sum (fun j => (Algebra.trace R S (b j)) • a j) := by
+    rw [hdecomp, map_sum]
+    apply Finset.sum_congr rfl
+    intro j _
+    exact Tr1map_tmul (b j) (a j)
+  have htrace : ∀ j, Algebra.trace R S (b j) =
+      Finset.univ.sum (fun i => b.repr (b j * b i) i) := by
+    intro j
+    rw [Algebra.trace_eq_matrix_trace b]
+    unfold Matrix.trace Matrix.diag
+    apply Finset.sum_congr rfl
+    intro i _
+    rw [Algebra.leftMulMatrix_eq_repr_mul]
+  have hSUM1 : Finset.univ.sum (fun j : ι => Finset.univ.sum
+      (fun i => (b.repr (b j * b i) j) • a i)) = 1 := by
+    rw [← hAug]
+    apply Finset.sum_congr rfl
+    intro j _
+    rw [← tensorDecompEquiv_extract b t ht1 j j]
+  have hTr1' : Tr1map R S t = Finset.univ.sum (fun j : ι => Finset.univ.sum
+      (fun i => (b.repr (b j * b i) i) • a j)) := by
+    rw [hTr1]
+    apply Finset.sum_congr rfl
+    intro j _
+    rw [htrace j, Finset.sum_smul]
+  rw [hTr1', ← hSUM1]
+  rw [Finset.sum_comm (s := (Finset.univ : Finset ι)) (t := (Finset.univ : Finset ι))]
+  apply Finset.sum_congr rfl
+  intro i _
+  apply Finset.sum_congr rfl
+  intro j _
+  rw [show b i * b j = b j * b i from mul_comm _ _]
+
+/-- `Tr1map`と`diagonalCompare`の可換性(`lmul'_diagonalCompare`と同型の
+議論、`Algebra.trace_localization`経由)。remark(iii)を局所化した先
+(`Ap`・`Bp`、honestに étale)から`A`・`B`側へ引き戻すのに使う。 -/
+theorem Tr1map_diagonalCompare {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [Module.Free A B] [Module.Finite A B] (p : A)
+    (x : TensorProduct A B B) :
+    letI := awayAlgebra p (A := A) (B := B)
+    haveI := awayScalarTower p (A := A) (B := B)
+    Tr1map (Localization.Away p) (Localization.Away (algebraMap A B p)) (diagonalCompare p x)
+      = algebraMap B (Localization.Away (algebraMap A B p)) (Tr1map A B x) := by
+  letI := awayAlgebra p (A := A) (B := B)
+  haveI := awayScalarTower p (A := A) (B := B)
+  induction x using TensorProduct.induction_on with
+  | zero => simp
+  | tmul b1 b2 =>
+    rw [diagonalCompare_tmul, Tr1map_tmul, Tr1map_tmul,
+      Algebra.trace_localization A (Submonoid.powers p) b1, Algebra.smul_def, Algebra.smul_def,
+      ← IsScalarTower.algebraMap_apply A (Localization.Away p) (Localization.Away (algebraMap A B p)),
+      IsScalarTower.algebraMap_apply A B (Localization.Away (algebraMap A B p)), map_mul]
+  | add x y hx hy => rw [map_add, map_add, hx, hy, map_add, map_add]
+
+/-- **`Theorem 2.4(ii)`の remark(iii)恒等式、完全に証明**(2026-09-05)。
+`IsAlmostEtaleCovering`の条件(iii)の witness `e`(`diagonalCompare p e
+= p^n・elem Ap Bp`)から、Faltings が主張する trace 恒等式
+`p^n・b = Σtr_{B/A}(b・xᵢ)yᵢ`(`Tr1map A B ((b⊗1)*e)`と同じ)を
+導く——`Tr1map_elem_eq_one`(局所化先`Ap,Bp`で)・`Ψ_eq_smul_Tr1`・
+`Tr1map_diagonalCompare`(局所化の可換性で`A,B`側へ引き戻す)を
+組み合わせる。`algebraMap B Bp`の単射性(Faltings 自身も「全ての環で
+`p`による乗法は単射」と明記している標準仮定)を経由する。 -/
+theorem remark_iii_trace_identity {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [Algebra.Etale A B] [Module.Finite A B] [Module.Free A B] (p : A) :
+    letI := awayAlgebra p (A := A) (B := B)
+    haveI := isAlmostEtaleCovering_of_etale_general (A := A) (B := B) p |>.2.2.1
+    haveI := (isAlmostEtaleCovering_of_etale_general (A := A) (B := B) p |>.2.1 : Module.Finite _ _)
+    Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))) →
+    ∀ (n : ℕ) (e : TensorProduct A B B) (b : B),
+    (diagonalCompare p e
+        = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p))) →
+    algebraMap A B (p ^ n) * b = Tr1map A B ((b ⊗ₜ[A] (1:B)) * e) := by
+  letI := awayAlgebra p (A := A) (B := B)
+  haveI := awayScalarTower p (A := A) (B := B)
+  haveI hEtale := isAlmostEtaleCovering_of_etale_general (A := A) (B := B) p |>.2.2.1
+  haveI hFinite := (isAlmostEtaleCovering_of_etale_general (A := A) (B := B) p |>.2.1 : Module.Finite _ _)
+  intro hf0inj n e b he
+  set Ap := Localization.Away p
+  set Bp := Localization.Away (algebraMap A B p)
+  set f0 := algebraMap B Bp with hf0def
+  haveI hFreeAp : Module.Free Ap Bp := isAlmostEtaleCovering_of_etale_general (A := A) (B := B) p |>.1
+  set bB := Module.Free.chooseBasis Ap Bp
+  have key1 : Tr1map Ap Bp ((f0 b ⊗ₜ[Ap] (1:Bp)) * (diagonalCompare p e)) = f0 (algebraMap A B (p^n) * b) := by
+    rw [he]
+    have hscale : (f0 b ⊗ₜ[Ap] (1:Bp)) * (p^n • Algebra.FormallyUnramified.elem Ap Bp)
+        = p^n • ((f0 b ⊗ₜ[Ap] (1:Bp)) * Algebra.FormallyUnramified.elem Ap Bp) := by
+      rw [mul_smul_comm]
+    rw [hscale, LinearMap.map_smul_of_tower,
+      Ψ_eq_smul_Tr1 _ (Algebra.FormallyUnramified.one_tmul_sub_tmul_one_mul_elem) (f0 b),
+      Tr1map_elem_eq_one bB _ (Algebra.FormallyUnramified.one_tmul_sub_tmul_one_mul_elem) (Algebra.FormallyUnramified.lmul_elem)]
+    rw [smul_eq_mul, mul_one]
+    show p^n • f0 b = f0 (algebraMap A B (p^n) * b)
+    rw [Algebra.smul_def, map_mul, ← IsScalarTower.algebraMap_apply A B Bp,
+      IsScalarTower.algebraMap_apply A Ap Bp]
+  have key2 : Tr1map Ap Bp ((f0 b ⊗ₜ[Ap] (1:Bp)) * (diagonalCompare p e))
+      = f0 (Tr1map A B ((b ⊗ₜ[A] (1:B)) * e)) := by
+    rw [show (f0 b ⊗ₜ[Ap] (1:Bp)) * (diagonalCompare p e)
+        = diagonalCompare p ((b ⊗ₜ[A] (1:B)) * e) from by
+      rw [map_mul, diagonalCompare_tmul, map_one]]
+    exact Tr1map_diagonalCompare p _
+  have := key1.symm.trans key2
+  exact hf0inj this
+
 end ABC3.Found.Falt1
