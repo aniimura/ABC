@@ -1557,6 +1557,44 @@ mathlib での正確な組み立て方は未確認)。
       ことが確認できた——両者が同値かは未確定だが無関係ではない。
       残るは右辺第1項`length(Wₙ₊₁⊗_{Wₙ}Ω¹_{Wₙ/V0})`(kernel側)の
       評価のみ——次回はこれに着手する。
+
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、
+      **右辺第1項(kernel側)も評価し終えた**
+      (`falt1_kaehler_length_exact_wn1_kernel`、commit `0292d557`、
+      `lake build`完走・sorry無し)。Lemma 1.1(`falt1CokernelIsoLinear`、
+      `Ω¹_{Wₙ/V0} ≃ₗ[Wₙ] Wₙ⧸differentIdeal V0 Wₙ`)を`Wₙ→Wₙ₊₁`へ
+      `LinearEquiv.baseChange`するだけで
+      `Wₙ₊₁⊗_{Wₙ}Ω¹_{Wₙ/V0} ≃ₗ[Wₙ₊₁] Wₙ₊₁⊗_{Wₙ}(Wₙ⧸differentIdeal V0 Wₙ)`
+      が出るが、これをさらに`Wₙ₊₁⧸(differentIdeal V0 Wₙ).map(...)`に
+      単純化する一般補題`A⊗[R](R⧸I)≃ₐ[A]A⧸I.map(algebraMap)`が
+      mathlibに直接無く(`Algebra.TensorProduct.tensorQuotientEquiv`
+      と`rid`を自分で合成する必要があった)、新規に
+      `falt1_tensorQuotientEquiv_algebraMap`として確立した。結果:
+      ```
+      length_{Wₙ₊₁}(Wₙ₊₁⊗_{Wₙ}Ω¹_{Wₙ/V0}) =
+        length_{Wₙ₊₁}(Wₙ₊₁ ⧸ (differentIdeal V0 Wₙ).map(algebraMap Wₙ Wₙ₊₁))
+      ```
+      **これで`falt1_kaehler_length_exact_wn1`の右辺2項がどちらも
+      `differentIdeal`の言葉に変換できた**:
+      ```
+      length_{Wₙ₊₁}(Ω¹_{Wₙ₊₁/V0}) =
+        length_{Wₙ₊₁}(Wₙ₊₁⧸(differentIdeal V0 Wₙ).map(algebraMap Wₙ Wₙ₊₁)) +
+        length_{Wₙ₊₁}(Wₙ₊₁⧸differentIdeal Wₙ Wₙ₊₁)
+      ```
+      **重要**: 右辺第1項の`Wₙ₊₁⧸(differentIdeal V0 Wₙ).map(algebraMap
+      Wₙ Wₙ₊₁)`は`cancel_conductor_delta`経由で既に確立していた
+      `hlen_eq`(`falt1_cancelConductorDelta_assembled`、簡約後:
+      `length(Wₙ₊₁⧸Ideal.map(algebraMap Wₙ Wₙ₊₁)(differentIdeal V0 Wₙ))
+      = length(Wₙ₊₁⧸differentIdeal V1 Wₙ₊₁)`)の**左辺そのもの**——
+      2つの証明経路が完全に噛み合う点まで来た。次回はこれを実際に
+      代入し、
+      ```
+      length_{Wₙ₊₁}(Ω¹_{Wₙ₊₁/V0}) =
+        length_{Wₙ₊₁}(Wₙ₊₁⧸differentIdeal V1 Wₙ₊₁) +
+        length_{Wₙ₊₁}(Wₙ₊₁⧸differentIdeal Wₙ Wₙ₊₁)
+      ```
+      という**完全に`differentIdeal`だけで書かれた閉じた式**を導出する
+      ——これがTheorem 1.2の再帰(`δ_n→0`)の核心になりうる。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
