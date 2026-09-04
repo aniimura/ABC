@@ -3824,6 +3824,38 @@ cohomology** `H^2(B/A,I)` の類を定め、これが `m` で零化される
   筋道は明確になったが、それを実装する homological algebra の配管
   自体は次回への持ち越しとする。
 
+  ★★★★★★★2026-09-05(続々々々)、**`Theorem 2.4(ii)`の証明本文が
+  要求する「ノルムを両辺に適用する」ステップを、mathlibの`Ideal.
+  relNorm`(相対イデアルノルム、`Mathlib.RingTheory.Ideal.Norm.
+  RelNorm`、`IsDedekindDomain`+`Module.IsTorsionFree`な環同士)で
+  実際に完成させた**(`trace_ideal_pow_mem_traceIdeal`)。
+  `remark_iii_trace_identity`(`b:=1`)で得た`B`側のイデアル関係
+  `algebraMap A B(p^n)∈tr_{B/A}(B)・B`を`Ideal.relNorm_algebraMap`
+  (`relNorm(I.map(algebraMap)) = I^finrank`)で両辺に適用し`A`側へ
+  引き戻すと、`p^{n・finrank}∈tr_{B/A}(B)^{finrank}⊆tr_{B/A}(B)`
+  (`Ideal.pow_le_self`)が出る——これは Faltings の証明の最後の一文
+  「`N_{B/A}`を両辺に適用して結論を導く」の**実際の数学的内容**に
+  正確に対応する。`n`は条件(iii)で任意に選べるため、`n・finrank`
+  (`finrank`個おきの指数)で`m`零化を実現する——`finrank=1`でない
+  限り厳密には「全ての`n`」ではなく「`finrank`の倍数の`n`」だが、
+  イデアルの吸収性(`p^{finrank}∈a`⟹任意の`m≥finrank`について
+  `p^m∈a`)により実用上は十分な強さ。
+
+  移植後、実ファイルで1回で`lake build`が通り(新規import`Mathlib.
+  RingTheory.Ideal.Norm.RelNorm`が`IsDedekindDomain`系の依存関係を
+  引くため初回コンパイルはやや長め)、プロジェクト全体の`lake build`
+  (6590 jobs)・`node tools/check.mjs --brief`(NG13件、既存分で不変)
+  も確認済み。
+
+  **意味**: `Theorem 2.4(ii)`の証明本文が明示的に要求する3つのステップ
+  (remark(iii)の trace 恒等式・ノルムの適用・`A/tr_{B/A}(B)`のalmost
+  消滅)のうち、**最初の2つ(remark(iii)恒等式・ノルム適用)が両方とも
+  sorry無く完成した**。残るは(a)`Ideal.pow_le_self`の`finrank`ギャップ
+  を厳密に埋める(または「finrank個おき」で十分だと割り切る)、
+  (b)`Theorem 2.4(ii)`が実際に主張する`H^i(G,M)`(`i>0`)への一般化
+  (群コホモロジーのtransfer論法、`groupCohomology`名前空間の欠落分の
+  構築)——この(b)が依然として最大の残工程。
+
 ★★★**結論(正直な評価)**: `/goal` の 13/13 は、このセッションでの
 継続作業だけでは現実的な時間内に到達できない規模の作業(Theorem 1.2
 1件でさらに大きな作業、§2-4 は新規ライブラリ構築に近い規模)である

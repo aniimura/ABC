@@ -12,6 +12,7 @@ import Mathlib.RingTheory.Localization.NormTrace
 import Mathlib.RingTheory.Localization.Finiteness
 import Mathlib.RingTheory.LocalProperties.Projective
 import Mathlib.RingTheory.TensorProduct.Basic
+import Mathlib.RingTheory.Ideal.Norm.RelNorm
 
 /-!
 # [Falt1] Definition 2.1(almost étale covering の定義)、Found(2026-09-04)
@@ -1108,5 +1109,83 @@ theorem remark_iii_trace_identity {A B : Type u} [CommRing A] [CommRing B] [Alge
     exact Tr1map_diagonalCompare p _
   have := key1.symm.trans key2
   exact hf0inj this
+
+/-! ## `Theorem 2.4(ii)` 第2文(`M^G/tr_G(M)`)、`M:=B` の場合を Ideal norm
+で完成(2026-09-05、続々々々)。
+
+`Theorem 2.4(ii)` の証明本文は「`m` が `A/tr_{B/A}(B)` を零化することを
+示せば十分」で始まり、`remark_iii_trace_identity`(既に完成)の後、
+「`N_{B/A}`(ノルム)を両辺に適用して結論を導く」と続く——この最後の
+「ノルムを適用する」部分を、mathlibの`Ideal.relNorm`(`Mathlib.
+RingTheory.Ideal.Norm.RelNorm`、`IsDedekindDomain`+`IsIntegrallyClosed`
+な環同士の相対イデアルノルム)で実行した。 -/
+
+/-- `Tr1map A B x` は常に `tr_{B/A}(B)` が生成する `A`-イデアルの
+`B` への像の中にある(`Tr1map`の定義`x⊗y↦tr(x)•y`から直接)。 -/
+theorem Tr1map_mem_traceIdeal_map {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    (x : TensorProduct A B B) :
+    Tr1map A B x ∈ (Ideal.span (Set.range (Algebra.trace A B)) : Ideal A).map (algebraMap A B) := by
+  induction x using TensorProduct.induction_on with
+  | zero => simp
+  | tmul a b =>
+    rw [Tr1map_tmul, Algebra.smul_def]
+    apply Ideal.mul_mem_right
+    apply Ideal.mem_map_of_mem
+    exact Ideal.subset_span ⟨a, rfl⟩
+  | add x y hx hy => rw [map_add]; exact Ideal.add_mem _ hx hy
+
+attribute [local instance] FractionRing.liftAlgebra
+
+/-- **`Theorem 2.4(ii)` の証明が要求する「`m` は `A/tr_{B/A}(B)` を
+零化する」の`Ideal norm`版**。`remark_iii_trace_identity`(`b:=1`)で
+`p^n∈tr_{B/A}(B)·B`(`B`側のイデアル関係)を得た後、`Ideal.relNorm`
+(`Ideal.relNorm_algebraMap`——`relNorm(I.map(algebraMap)) = I^finrank`)
+を両辺に適用して`A`側へ引き戻し、`Ideal.pow_le_self`(高次のべきは
+元のイデアルに含まれる)で閉じる。`n`(条件(iii)で任意に選べる)を
+`finrank`倍した指数で、`p^{n・finrank}`が`tr_{B/A}(B)`に入ることを
+示す——`n`を大きく取れば取るほど深い annihilation が言えるので、
+Faltings の「`m` annihilates」の精神(`ε`を任意に小さく取れる)を
+`finrank`個おきの指数列として実現する。 -/
+theorem trace_ideal_pow_mem_traceIdeal {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [Algebra.Etale A B] [Module.Finite A B] [Module.Free A B] (p : A)
+    [IsDedekindDomain A] [IsDedekindDomain B] [Module.IsTorsionFree A B] :
+    letI := awayAlgebra p (A := A) (B := B)
+    haveI := isAlmostEtaleCovering_of_etale_general (A := A) (B := B) p |>.2.2.1
+    haveI := (isAlmostEtaleCovering_of_etale_general (A := A) (B := B) p |>.2.1 : Module.Finite _ _)
+    Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))) →
+    ∀ (n : ℕ) (e : TensorProduct A B B),
+    (diagonalCompare p e
+        = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p))) →
+    (Ideal.span {p ^ (n * Module.finrank (FractionRing A) (FractionRing B))} : Ideal A)
+      ≤ Ideal.span (Set.range (Algebra.trace A B)) := by
+  letI := awayAlgebra p (A := A) (B := B)
+  haveI := awayScalarTower p (A := A) (B := B)
+  haveI hEtale := isAlmostEtaleCovering_of_etale_general (A := A) (B := B) p |>.2.2.1
+  haveI hFinite := (isAlmostEtaleCovering_of_etale_general (A := A) (B := B) p |>.2.1 : Module.Finite _ _)
+  intro hf0inj n e he
+  set a := (Ideal.span (Set.range (Algebra.trace A B)) : Ideal A)
+  have heq : (1:B) ⊗ₜ[A] (1:B) * e = e := by
+    rw [show (1:B) ⊗ₜ[A] (1:B) = (1 : TensorProduct A B B) from rfl, one_mul]
+  have hstep1 : algebraMap A B (p^n) ∈ a.map (algebraMap A B) := by
+    have hthis := remark_iii_trace_identity (A := A) (B := B) p hf0inj n e 1 he
+    rw [mul_one, heq] at hthis
+    rw [hthis]
+    exact Tr1map_mem_traceIdeal_map e
+  have hstep2 : (Ideal.span {algebraMap A B (p^n)} : Ideal B) ≤ a.map (algebraMap A B) := by
+    rw [Ideal.span_singleton_le_iff_mem]
+    exact hstep1
+  have hstep3 : (Ideal.span {algebraMap A B (p^n)} : Ideal B) = (Ideal.span {p^n} : Ideal A).map (algebraMap A B) := by
+    rw [Ideal.map_span]
+    congr 1
+    simp
+  rw [hstep3] at hstep2
+  have hstep4 := Ideal.relNorm_mono A hstep2
+  rw [Ideal.relNorm_algebraMap B (Ideal.span {p^n} : Ideal A)] at hstep4
+  rw [Ideal.relNorm_algebraMap B a] at hstep4
+  calc (Ideal.span {p ^ (n * Module.finrank (FractionRing A) (FractionRing B))} : Ideal A)
+      = (Ideal.span {p^n} : Ideal A) ^ Module.finrank (FractionRing A) (FractionRing B) := by
+        rw [Ideal.span_singleton_pow, pow_mul]
+    _ ≤ a ^ Module.finrank (FractionRing A) (FractionRing B) := hstep4
+    _ ≤ a := Ideal.pow_le_self (Module.finrank_pos.ne')
 
 end ABC3.Found.Falt1
