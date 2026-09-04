@@ -503,6 +503,20 @@ p進局所体`K:PAdicLocalField p`の付値環`𝒪[K.carrier]`は離散付値�
 担当)のコミット`f0646fd3`に混入したが、`git diff HEAD`で内容が完全に
 一致することを確認済み——既にorigin/masterへpush済み。)
 
+**続報(2026-09-04、★★★★★★★★★★ψ_n・ψ_mは互いに素+各々分離的——
+`D_n`分離性の最終部品)**: `no_common_root_iteratedLubinTatePsi`
+(Newton polygon)とは別の、より初等的な経路も見つけた——
+`isCoprime_iteratedLubinTatePsi`(`ψ_n・ψ_m`、`n≠m`は`IsCoprime`)は
+既約性+次数の違い(`torsionDegree_ne`)だけから直接出る(`ψ_n∣ψ_m`と
+仮定すると同伴→モニックなので等しい→次数矛盾)。さらに
+`separable_iteratedLubinTatePsi_map_carrier`(`ψ_n`は`K.carrier`上
+分離的、混標数なので`Irreducible.separable`)を確立した。これで
+`D_n=X・ψ_1・…・ψ_n`の各因子が分離的かつ互いに素であることの材料が
+出揃った——`D_n`全体の分離性(squarefree性)への組み立ては、
+`iteratedLubinTateDistinguished_eq_mul_psi`の反復適用と
+`Polynomial.separable_prod`(または`Separable.mul`の反復)で得られる
+見込み(組み立て自体は今後の課題)。
+
 **残る作業**: 節目(3)torsion点の構成本体(`D_n`の根を`Λ_n`として定義、
 `𝒪_K`加群構造、`K(Λ_n)/K`の完全分岐性)、節目(4)
 `L_n:=K(Λ_n)`が完全分岐かつ`Gal(L_n/K)≅(𝒪_K/π^n)^×`(Lubin-Tateの
