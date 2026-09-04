@@ -10,6 +10,8 @@ import Mathlib.RingTheory.Kaehler.TensorProduct
 import Mathlib.LinearAlgebra.TensorProduct.Prod
 import Mathlib.Analysis.SpecificLimits.Basic
 import Mathlib.RingTheory.Polynomial.Eisenstein.Basic
+import Mathlib.RingTheory.Polynomial.GaussLemma
+import Mathlib.RingTheory.DedekindDomain.IntegralClosure
 
 /-!
 # [Falt1] Chapter I §1 の補助補題群(`Found`、sorry 無し)
@@ -1828,5 +1830,18 @@ theorem eisenstein_X_pow_sub_C {R : Type*} [CommRing R] [IsDomain R] (π : R) (n
       simpa using hnotsq
   refine hei.irreducible hprime hmonic.isPrimitive ?_
   rw [hdeg]; exact hn
+
+/-- **`X^n-π` は分数体上でも既約**(Gauss の補題、`R` が整閉——Dedekind
+整域は自動的にそう——なら UFD を要さず成立)。これで `Vₙ₊₁` を
+`Frac(Vₙ)` 上の実際の**体**拡大として構成できる——`integralClosure.
+isDedekindDomain_fractionRing` を使うために必要な最後のピース。 -/
+theorem eisenstein_X_pow_sub_C_irreducible_map {R K : Type*} [CommRing R] [IsDomain R] [IsIntegrallyClosed R]
+    [Field K] [Algebra R K] [IsFractionRing R K] (π : R) (n : ℕ) (hn : 0 < n)
+    (hprime : (Ideal.span ({π} : Set R)).IsPrime) (hnotsq : π ∉ (Ideal.span ({π} : Set R))^2) :
+    Irreducible ((Polynomial.X ^ n - Polynomial.C π : Polynomial R).map (algebraMap R K)) := by
+  have hirr := eisenstein_X_pow_sub_C π n hn hprime hnotsq
+  have hmonic : (Polynomial.X ^ n - Polynomial.C π : Polynomial R).Monic :=
+    Polynomial.monic_X_pow_sub_C π hn.ne'
+  exact (hmonic.irreducible_iff_irreducible_map_fraction_map (K := K)).mp hirr
 
 end ABC3.Found.Falt1
