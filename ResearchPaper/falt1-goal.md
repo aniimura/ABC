@@ -382,6 +382,29 @@ mathlib での正確な組み立て方は未確認)。
     で `P/P^{n+1} ≅ S/P` を示し帰納する筋、`P` が可逆という事実を
     経由)方が、`relNorm`/`absNorm` 経由より見通しが良いかもしれない。
 
+    ★★★★★★★★★★★★2026-09-04、**核心の道具を発見した**:
+    `RingTheory/PicardGroup.lean` の `Module.Invertible`(可逆加群、
+    Picard群論のための typeclass、`contractLeft` の全単射性で定義)に、
+    まさに必要な「テンソルは完全性を保つ」補題群がある:
+    `Module.Invertible.rTensor_injective_iff`・`_surjective_iff`・
+    `_bijective_iff`(`[Module.Invertible R M]` のとき
+    `f.rTensor M` の単射性・全射性・全単射性は `f` 自身のそれと同値)。
+    これは「不変(=可逆)加群でテンソルすると完全列が完全列のまま」
+    という、`Module.length_eq_add_of_exact` と組み合わせれば
+    `length(M⊗N)=length(N)` を**帰納法で**導出できるはずの、
+    まさに探していた一般論——mathlib に無いと思っていたが、
+    「Picard群」という一見無関係な名前のファイルに実在した
+    (`measure-mathlib-before-skeleton` の教訓が今回も再現: 概念名
+    ではなく数学的内容で探すべきだった)。
+
+    ★残るブリッジ: `IsDedekindDomain S`(の nonzero イデアル `I`)から
+    `Module.Invertible S ↥I` インスタンスを得る経路——
+    `isDedekindDomain_iff_isDedekindDomainInv`(`RingTheory/
+    DedekindDomain/Ideal/Basic.lean`)経由で `I * I⁻¹ = 1`
+    (`FractionalIdeal` として)は出るが、これを `Module.Invertible`
+    の `contractLeft` 全単射性の形へ変換する配線はまだ未着手。
+    次のセッションの最有力候補。
+
 3c. **「非常に分岐した」`V_n` の族**そのものの形式化(具体例: `p^n`
     乗根と `1` のべき根を添加する塔、上の「典型例」段落)——まだ
     手つかず。抽象的な族の公理化(`Ω_{V_n/V_{n-1}}` が
