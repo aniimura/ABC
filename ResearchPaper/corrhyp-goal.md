@@ -1531,3 +1531,49 @@ Quotient.mk`を適用、という一手で`P.Ring`の実際の元(比較射の�
 集計は10/24で変わらず(§4は0/2のまま)。lake build 0エラー(ABC3全体、6590 jobs)。
 
 コミット: `8c96fa00`(exists_fg_subalgebra_tensor_bivariate_finset)。
+
+### 2026-09-04さらに続報: 作業単位1(b)完成——P.Ringの任意の元を有限段階へ降ろす(HEqでwhnf combinatorial explosionを回避)
+
+`exists_fg_subalgebra_tensor_standardEtale_elem`(`FieldLimit.lean`)を完成させた——
+`P : StandardEtalePair (A⊗[ℚ]ℝ)`の任意の元`z`について、ある有限段階`R`とその上の
+`P₀ : StandardEtalePair (A⊗[ℚ]R.1)`・`z₀ : P₀.Ring`が存在し、`P₀`のbase changeが`P`に
+一致し、`z₀`の像(`standardEtalePairMapRingHom`経由)が`z`に一致することを示した。
+★sorry無し、標準3公理のみ。
+
+**副産物として完成した3つの部品**:
+1. `exists_fg_subalgebra_tensor_standardEtalePair_mapEq`: `exists_fg_subalgebra_tensor_
+   standardEtalePair`(`.f`/`.g`の component-wise一致)を**構造体そのものの一致**
+   (`P₀.map φ = P`)まで強めた版——`_baseChange`の証明内部で使っていた技法
+   (`cases`+`subst`+`rfl`)を単独補題として抽出。
+2. `standardEtalePairMapRingHom {R S} (f : R→+*S) (P : StandardEtalePair R) : P.Ring →+*
+   (P.map f).Ring`: **`P.Ring →+* (P.map f).Ring`という自然な環準同型**を`Ideal.
+   quotientMap`で直接構成——`P.Ring`が`equivPolynomialQuotient`(`.refl`)により生の
+   `Bivariate`多項式環の商そのものだと分かれば、`equivMvPolynomialQuotient`
+   (`MvPolynomial`経由)を使う必要は無かった、という簡略化。
+3. `bivariateIsTwoSided`: `Ideal (Polynomial (Polynomial (A⊗[ℚ]ℝ)))`の`IsTwoSided`
+   (可換環では自動のはずの事実)が、`Polynomial`の2重ネスト+一般の底環`A⊗[ℚ]ℝ`の
+   組み合わせで`inferInstance`が**組み合わせ爆発により失敗する**という、この
+   セッションで新たに踏んだmathlibの罠を発見・解決した——`letI`で`CommRing`の連鎖を
+   1段ずつ明示してから`infer_instance`する手筋を、**global instanceとして事前登録**
+   しておくことで、以後この形の`Ideal`を扱う任意の場所(`Ideal.Quotient.mk_surjective`
+   等)で自動的に見つかるようになる。
+
+**配管の教訓が2つ増えた**(`tools/lean-idioms.md` #26に続き #27追加):
+- `Ideal.span{...}.IsTwoSided`の組み合わせ爆発(3重ネストのPolynomialや一般の底環との
+  組み合わせで顕在化、`letI`チェーンのglobal instance化で解決)。
+- 依存キャストの型不一致を`▸`で**文(statement)の中**に埋め込むと、`whnf`が
+  combinatorial explosionでtimeoutする——`HEq`(型の一致を要求しない等式)で述べ、
+  実際の値の一致は証明の中(`subst`)で示す方が桁違いに軽い。
+- `open ... in` / `set_option ... in`はdocstringの**前**に置く必要がある——後に置くと
+  「unexpected token 'open'; expected 'lemma'」という紛らわしいエラーになる
+  (`lean_check`は宣言単体検査のためこの手のファイル内前後関係バグを検出できず、
+  `lake build`で初めて発覚した)。
+
+**これで作業単位1(比較射の構成)の見通しが完成した**: (a) `D(f_l)∩D(f_m)=D(f_l·f_m)`
+という位相的事実(捩れ無関係、常に成立、前回訂正済み)、(b) `f_l`・`f_m`自体を有限段階
+`R'`の元として認識すること——`exists_fg_subalgebra_tensor_standardEtale_elem`により
+**(b)も完成**。残るのは実際の組み立て(`f_l`・`f_m`をこの補題で降ろし、`D(f_l·f_m)`の
+`D(f_l)`・`D(f_m)`への開埋め込みと組み合わせて`glueMorphisms`のpairwise条件を実際に
+構成する)のみ。集計は10/24で変わらず(§4は0/2のまま)。
+
+コミット: `8e605fff`(lean-idioms #27)・`fda225b4`(作業単位1(b)完成)。
