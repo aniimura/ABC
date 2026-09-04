@@ -564,6 +564,26 @@ GlueDataを直接使う方が見通しが良いと判断。
 
 コミット: `63ce023b`(piece_preimage_eq)。
 
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報
+(「単発では閉じない」を実際に越えた、集計10/24で変わらず)。前ターンで
+「作業単位1の第一歩は単発では閉じない」と記録した直後、実際に腰を
+据めて取り組み、`isLocalization_closure_away_mul`を完成させた
+(`FieldLimit.lean`、★sorry無し)——`Localization.Away(a*b)`が
+`Submonoid.closure{a,b}`に関しても局所化になっていることを、
+`IsLocalization.isLocalization_of_is_exists_mul_mem`+
+`closure_induction`(4ケース分解)で示した。作業単位1(重なりの比較)に
+要る最初の代数的補題が完成——残る「もう半分」(`Away(a)`をさらに`b`で
+局所化したものも同じ`closure{a,b}`に関する局所化になること、
+`localizationLocalizationSubmodule`経由)はまだ未完成、次の一手として
+記録。★教訓:「単発では閉じない」は正しかったが「引き継ぐしかない」を
+意味しなかった——腰を据めれば同じセッション内でも前進できた。
+
+コミット: `04c73661`(isLocalization_closure_away_mul)。★git注記:
+corrhyp-goal.mdへの記録コミットが並行セッションの`81e23290`
+(無関係なコミットメッセージ)に巻き込まれた——内容は正しく反映されて
+いるが帰属が不正確。並行セッションの活動が活発化しているため今後も
+`git diff --cached --stat`の確認を徹底する。
+
 ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報
 (技術ロードマップを統合版として記録、集計10/24で変わらず)。
 `corrhyp-goal.md`に、これまで断片的に記録してきた`Lemma 4.1`
