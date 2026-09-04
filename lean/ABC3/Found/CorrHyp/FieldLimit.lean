@@ -1067,4 +1067,82 @@ theorem isLocalization_closure_away_mul {R : Type} [CommRing R] (x y : R) :
     (powers_le_closure x y)
     (fun z => exists_mul_mem_powers_of_closure x y z.1 z.2)
 
+/-! ## `StandardEtalePair.Ring` の元を有限段階へ降ろす——作業単位1(b)の土台
+
+作業単位1(比較射の構成)で本当に要るのは「捩れの場合分け」ではなく、
+「重なりを指定する元(比較射の分母)自体を有限段階`R'`の元として認識
+すること」だと判明した(`corrhyp-goal.md`参照)。その第一歩として、
+`P.Ring`(`P : StandardEtalePair (A⊗[ℚ]ℝ)`、`Bivariate` 多項式環
+`(A⊗ℝ)[X][Y]` の商)の元を有限個同時に有限段階へ降ろす道具を用意する
+——`exists_fg_subalgebra_tensor_finset`の2変数多項式版。 -/
+
+open scoped TensorProduct in
+/-- `exists_fg_subalgebra_tensor_finset` の2変数多項式版——`Polynomial
+(Polynomial (A⊗[ℚ]ℝ))`(`StandardEtalePair.Ring`が経由する`Bivariate`
+多項式環そのもの)の有限個の元は、ある共通の`R : FgSubalgebra ℚ ℝ`から
+作った`Polynomial (Polynomial (A⊗[ℚ]R.1))`の元の像として同時に書ける。
+係数(各多項式の係数のさらに係数)を1つの`Finset (A⊗[ℚ]ℝ)`へ平坦化して
+`exists_fg_subalgebra_tensor_finset`に渡し、得られた降下先の係数から
+2重の`monomial`和で元の多項式を組み直す——`exists_fg_subalgebra_tensor_
+polynomial_family`と同じ手筋を1段深くしただけ。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_fg_subalgebra_tensor_bivariate_finset (A : Type) [CommRing A] [Algebra ℚ A]
+    (s : Finset (Polynomial (Polynomial (A ⊗[ℚ] ℝ)))) :
+    ∃ R : FgSubalgebra ℚ ℝ, ∀ q ∈ s, ∃ q₀ : Polynomial (Polynomial (A ⊗[ℚ] R.1)),
+      q₀.map (Polynomial.mapRingHom
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom) = q := by
+  classical
+  set allLeaves : Finset (A ⊗[ℚ] ℝ) :=
+    s.biUnion (fun q => q.support.biUnion
+      (fun i => (q.coeff i).support.image (fun j => (q.coeff i).coeff j))) with hallLeaves
+  obtain ⟨R, hR⟩ := exists_fg_subalgebra_tensor_finset A allLeaves
+  refine ⟨R, ?_⟩
+  intro q hq
+  set φ := (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom with hφ
+  choose c hc using fun t : Σ i : q.support, (q.coeff (i:ℕ)).support =>
+    hR ((q.coeff (t.1:ℕ)).coeff (t.2:ℕ)) (by
+      rw [hallLeaves]
+      refine Finset.mem_biUnion.mpr ⟨q, hq, ?_⟩
+      refine Finset.mem_biUnion.mpr ⟨(t.1 : ℕ), t.1.2, ?_⟩
+      exact Finset.mem_image_of_mem _ t.2.2)
+  refine ⟨q.support.attach.sum (fun i => Polynomial.monomial (i : ℕ)
+    ((q.coeff (i:ℕ)).support.attach.sum (fun j =>
+      Polynomial.monomial (j : ℕ) (c ⟨i, j⟩)))), ?_⟩
+  have key : ∀ i : q.support, (Polynomial.monomial (i : ℕ)
+      ((q.coeff (i:ℕ)).support.attach.sum (fun j => Polynomial.monomial (j : ℕ) (c ⟨i, j⟩)))).map
+      (Polynomial.mapRingHom φ) =
+      Polynomial.monomial (i : ℕ) (q.coeff (i : ℕ)) := by
+    intro i
+    rw [Polynomial.map_monomial]
+    have hcoe : (⇑(Polynomial.mapRingHom φ) : Polynomial (A ⊗[ℚ] R.1) → Polynomial (A ⊗[ℚ] ℝ))
+        = Polynomial.map φ := rfl
+    rw [hcoe]
+    congr 1
+    rw [Polynomial.map_sum]
+    have key2 : ∀ j : (q.coeff (i:ℕ)).support,
+        (Polynomial.monomial (j : ℕ) (c ⟨i, j⟩)).map φ =
+        Polynomial.monomial (j : ℕ) ((q.coeff (i:ℕ)).coeff (j : ℕ)) := by
+      intro j
+      rw [Polynomial.map_monomial]
+      exact congrArg (Polynomial.monomial (j : ℕ)) (hc ⟨i, j⟩)
+    rw [Finset.sum_congr rfl (fun j (_ : j ∈ (q.coeff (i:ℕ)).support.attach) => key2 j)]
+    rw [Finset.sum_attach (q.coeff (i:ℕ)).support
+      (fun j => Polynomial.monomial j ((q.coeff (i:ℕ)).coeff j))]
+    exact Polynomial.sum_monomial_eq (q.coeff (i:ℕ))
+  rw [Polynomial.map_sum]
+  rw [Finset.sum_congr rfl (fun i (_ : i ∈ q.support.attach) => key i)]
+  rw [Finset.sum_attach q.support (fun i => Polynomial.monomial i (q.coeff i))]
+  exact Polynomial.sum_monomial_eq q
+
+/- ★★次の一手(未着手): `exists_fg_subalgebra_tensor_bivariate_finset`を
+`StandardEtalePair.Ring`の実際の元(比較射の分母`g_l`等)へ接続するには、
+`StandardEtalePair.Ring`が`Bivariate`多項式環の商(`Ideal.Quotient.mk`、
+全射)であることを経由して、まず商から`Bivariate`多項式への持ち上げを
+取り(`Ideal.Quotient.mk_surjective`)、この補題で係数を降ろし、`Ideal.
+Quotient.mk`を有限段階側でも適用して`P₀.Ring`の元を作る、という一手が
+要る。`standardEtalePairRingBaseChange`は`equivMvPolynomialQuotient`
+(`MvPolynomial (Fin 2) R`経由)を使うため、`Bivariate.equivMvPolynomial`
+での往復も必要になる——`corrhyp-goal.md`に記録。 -/
+
 end ABC3.Found.CorrHyp
