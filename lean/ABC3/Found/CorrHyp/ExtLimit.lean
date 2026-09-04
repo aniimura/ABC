@@ -441,6 +441,13 @@ theorem toSchemeDiagramOver_hom_isAffineHom (R : (FgSubalgebra ℚ ℝ)ᵒᵖ) :
   show IsAffineHom (Spec.map (CommRingCat.ofHom (algebraMap ℚ R.unop.1)))
   infer_instance
 
+/-- `(toSchemeDiagramOver.obj R).left`(有限段階 `R` の台、`Spec R`)は
+アフィン——「1アフィン片の降下」で `arrowIsoSpecΓOfIsAffine`(mathlib)を
+使うための前提。 -/
+theorem toSchemeDiagramOver_obj_isAffine (R : (FgSubalgebra ℚ ℝ)ᵒᵖ) :
+    IsAffine (toSchemeDiagramOver.obj R).left := by
+  show IsAffine (Spec (CommRingCat.of R.unop.1)); infer_instance
+
 /-- `extDiagram X` の各段は `CompactSpace`——`(D R).hom` がアフィンなので
 その base change `pullback.fst` もアフィン、よって `X.left` が
 `CompactSpace` なら各段も `CompactSpace`。

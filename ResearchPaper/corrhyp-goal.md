@@ -966,3 +966,26 @@ pasting)——`f := X.hom`・`g := (toSchemeDiagramOver.obj R).hom`・
 3. `pullbackSpecIso`を適用して`Γ(U_j,U_j) ≅ Γ(V_j,V_j) ⊗[R] K`を得る。
 
 まだ未着手(道具の在庫確認のみ)。次のセッションの最初の一手として記録。
+
+### 2026-09-04さらに続報: 手順2を実測、かつ残作業の規模がもう1段階あることが判明
+
+手順2(`V.ι ≫ pullback.snd ... : V ⟶ Spec R` を `Spec.map` の形に書く)を
+実際に試し、`arrowIsoSpecΓOfIsAffine`(`g : X ⟶ Y` に `[IsAffine X]
+[IsAffine Y]` があれば `Arrow.mk g ≅ Arrow.mk (Spec.map g.appTop)`)が
+`V`(`hV : IsAffineOpen V` から `IsAffine ↥V`)と`(toSchemeDiagramOver.obj
+R).left`(新たに`toSchemeDiagramOver_obj_isAffine`で`IsAffine`を確認、
+`ExtLimit.lean`に追加・★sorry無し)の両方に対して直接使えることを確認
+——`Arrow.mk`の同型から`.hom.left`/`.hom.right`/`.hom.w`で実際の同型
+射・可換四角を取り出せることも確認した。手順1-3の**道具はすべて実在し
+使える**ことが実測で裏付けられた。
+
+一方、この過程で**残作業がもう1段階あること**に気づいた——
+`Γ(U_j,U_j) ≅ Γ(V_j,V_j) ⊗[R] K` を得たあとも、`exists_finite_
+standardEtaleCover`で得られる「`Γ(U_j,U_j)` 上の標準エタール対」を
+**この局所環 `Γ(V_j,V_j)` 上まで降ろす**という、これまでの
+`FieldLimit.lean`(`exists_fg_subalgebra_standardEtalePair`、`k=ℚ`・
+`K=ℝ`という原始の対でのみ構築済み)を**局所環 `Γ(V_j,V_j)` を新しい
+"底"とする版へ一般化する**作業がなお必要——手法(多項式係数の有限生成
+部分環への還元)自体は使い回せる見込みだが、宣言としては未着手。
+「見つからない数学の壁」ではない点は変わらないが、残工程が当初の想定
+より1段階多いことを正直に記録する。
