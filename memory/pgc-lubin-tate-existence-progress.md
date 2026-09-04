@@ -251,7 +251,35 @@ if i=0 then [a]_f else [b]_f`を`F_f`へ代入したもの)は`Unit`添字、
 へ向けた6節点ロードマップの節点(1)(2)(2b)がすべてsorry無しで確立
 された。
 
-**残る作業**: 節目(3)torsion点の構成(`Λ_n:=ker[π^n]_f`)、節目(4)
+**続報(2026-09-04、節目(3)への第一歩——`[π^n]_f` は `f` の `n` 回
+自己合成)**: `Found/PGC/LubinTateActionPiPow.lean`。`LubinTateAction_
+pi_eq_f`(`[π]_f=f`自身、`f`が「次数1係数π・自明な関数等式」を満たす
+ことから一意性で直ちに従う——ほとんど同語反復)・`LubinTateAction_
+one_eq_X`(`[1]_f=X`)・`LubinTateAction_pi_pow`(`[π^n]_f`は`f`の`n`回
+自己合成`iteratedLubinTate`、`Nat.rec`)を確立。3つとも乗法側の環準
+同型性(`LubinTateAction_comp`)・可換性(`LubinTateAction_functional_
+equation`)という既存の道具だけから帰納法で出た。★これで節目(3)
+(`Λ_n:=ker[π^n]_f`の構成)へ向けて、`[π^n]_f`が具体的に何であるか
+(`f`のn回自己合成)が確立された。
+
+**発見(mathlibにWeierstrass標準分解が存在)**: `node tools/decl-index.mjs
+--mathlib`での探索で、`RingTheory/PowerSeries/WeierstrassPreparation.lean`
+に`PowerSeries.weierstrassDistinguished`・`Polynomial.IsDistinguishedAt`・
+`PowerSeries.IsWeierstrassFactorization`等、完備局所環上の冪級数の
+Weierstrass標準分解(冪級数を「単数×distinguished多項式」に分解する
+古典的定理)が**既に整備されている**ことを確認した(2026-08-14時点の
+`blocked-leaves.json`項目8の調査ではこの発見はまだ無かった)。
+`Polynomial.IsEisensteinAt.irreducible`(Eisenstein判定法)も存在。
+★これは節目(3)で`[π^n]_f`(無限冪級数)から次数`q^n`の実際の多項式
+(distinguished多項式、Eisenstein判定で既約性も出る)を取り出す際の
+**大きな加速要因**になる見込み——Weierstrass標準分解そのものを自前で
+構築する必要がなくなった。次にここへ戻るときは、まず`[π^n]_f`の
+`IsWeierstrassFactorization`(または`IsDistinguishedAt`)条件の充足を
+示すところから着手する。
+
+**残る作業**: 節目(3)torsion点の構成(`Λ_n:=ker[π^n]_f`、上記の
+Weierstrass標準分解を使えば`[π^n]_f`から次数`q^n`のdistinguished
+多項式を取り出せる見込み)、節目(4)
 `L_n:=K(Λ_n)`が完全分岐かつ`Gal(L_n/K)≅(𝒪_K/π^n)^×`(Lubin-Tateの
 主定理)、節目(5)`L_π:=∪L_n`・`Gal(L_π/K)≅𝒪_K^×`、節目(6)不分岐部分と
 合わせた相互律写像`K^×→Gal(K^ab/K)`の構成——pGC の各項目
