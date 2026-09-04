@@ -1232,3 +1232,30 @@ QcqsSpace・Corrという実データ(c.C・c.α)にまで接続が完成した�
 比較、genuinely new、最大の残りタスク)・(d)c.Cの有限アフィン被覆+
 外側の貼り合わせ・(e)α・β脚と整合性の等式(β側はゼロから必要)。
 corrhyp-goal.mdに詳細記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04(続き4、自律ループ)
+続報(piecesOpenCover追加、項目(b)の第一歩、集計10/24で変わらず)。
+自律ループのtickでExploreエージェントが項目(b)の土台を調査。結論:
+mathlibに汎用の「2つの独立なGlueDataの成分ごと同型→.glued同士の同型」
+という比較補題は無い——Scheme.Cover.gluedCover+fromGlued(IsIso、
+既製)という特定の構成方法への結果のみ。corrHypGlueDataはgluedCoverの
+形では組まれていない(gdVがpullbackでなくZ i自身のbasicOpen)ため、
+新しい橋渡しがgenuinely newで必要(t_fac/cocycle同等以上の配線量、
+という以前からの評価と一致)。
+
+証明の道筋: corrHypGlueData_glued_iso : (corrHypGlueData f Z e).glued
+≅ (U:Scheme)という形で、piecesOpenCover(Zの族からmkOfCoversで直接
+構成したUのOpenCover、mathlibのgluedCover+fromGludedが既にU への同型
+を与える)を比較対象に、corrHypGlueDataの.diagramとの間のNatIsoを
+構成しHasColimit.isoOfNatIsoで合成する方針。U成分は恒等、V成分は
+pullbackHomIsoLeft+pullbackSymmetry+isPullback_opens_inf(いずれも
+既存)で組み立てられる見込み。
+
+piecesOpenCover(比較対象のUのOpenCover構成)をExtLimit.leanへ追加、
+lake build(ExtLimit/ABC3とも)0エラー確認、コミット: `9daf362d`。
+途中#31と同系統の罠(全射性証明の被覆不等式のインライン展開でwhnf
+heartbeat上限)にも当たり、独立theoremへの先出しで解消(既知教訓の
+再確認)。
+
+残る核心(未着手): V成分の同型構成とNatIso全体の組み立て。
+corrhyp-goal.mdに詳細記録。

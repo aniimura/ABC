@@ -2593,3 +2593,47 @@ GlueDataとその被覆条件を直接与える)を`Instance4.lean`へ追加
 (e) `α・β`脚と整合性の等式`h▸extCorr D c'=c`の構成——ここは
 `corrPieceGlueDataOfCorr`が触れていない`β`側もゼロから必要。
 集計は10/24で変わらず(インフラ、numbered itemではないため)。
+
+## 2026-09-04(続き4): 項目(b)の調査+第一歩(`piecesOpenCover`)
+
+自律ループのtickで、残る最大の項目(b)(`corrPieceGlueDataOfCorr(...).
+glued ≅ c.α⁻¹(piece)`の証明)へ向けてExploreエージェント(読み取り専用)
+を走らせ、mathlibの土台を調査した。
+
+**結論**: mathlibに直接使える汎用比較補題(「2つの独立な`GlueData`が
+成分ごとの同型を持てば`.glued`同士も同型」)は**存在しない**——
+存在するのは`Scheme.Cover.gluedCover`(`OpenCover`から`GlueData`を作る
+標準構成)+`Scheme.Cover.fromGlued`(そこから`X`への射が`IsIso`である
+という既製の証明、単射性→開埋め込み→全射性→`IsIso`という段階を踏む)
+という**特定の構成方法**に対する結果のみ。`corrHypGlueData`は
+`gluedCover`の形そのものでは組まれていない(`gdV`が`pullback`ではなく
+`Z i`自身の`basicOpen`として実現されている)ため、**新しい橋渡しの
+証明が要る**——ファイル自身の以前のコメント通り、genuinely newで
+`t_fac`/`cocycle`と同等以上の配線量になる見込み、という評価だった。
+
+**証明の道筋**(調査で固まった、実装はまだ): `corrHypGlueData`の
+レベルで`corrHypGlueData_glued_iso : (corrHypGlueData f Z e).glued ≅
+(U:Scheme)`(被覆条件`hcover`を仮定)という形の補題として書く。
+比較対象として`piecesOpenCover f Z e hcover : (U:Scheme).OpenCover`
+(`Z`の族から`Scheme.Cover.mkOfCovers`で直接構成、各`i`の写像は
+`(e i).inv ≫ X.homOfLE(…)`)を用意すれば、`Scheme.Cover.gluedCover`+
+`fromGlued`(mathlib既製の`IsIso`)がこの`OpenCover`から`U`への同型を
+すでに与える。残るのは`corrHypGlueData f Z e`の`.diagram`と
+`(piecesOpenCover ...).gluedCover.diagram`(どちらも`U`成分は`Z`その
+もの、`V`成分だけが違う——前者は`gdV(i,j)=(Z i).basicOpen(…)`、
+後者は`pullback (𝒰.f i)(𝒰.f j)`)の間の`NatIso`を構成し、
+`HasColimit.isoOfNatIso`で`.glued`同士の同型を得て合成すること
+——`U`成分は恒等(両者とも`Z`をそのまま使うため)、`V`成分の同型は
+`pullbackHomIsoLeft`+`pullbackSymmetry`+`isPullback_opens_inf`
+(いずれも既存)で組み立てられる見込み。
+
+`piecesOpenCover`(上記の`U`のOpenCover構成)を実際に`ExtLimit.lean`へ
+追加・検証(`lake build`(ExtLimit/ABC3とも)0エラー確認)・コミット
+(`9daf362d`)——項目(b)の**比較対象の用意**という第一歩。途中、
+`whnf`のheartbeat上限に達する`#31`と同系統の罠(全射性の証明に出る
+被覆条件不等式をインライン展開すると詰まる)に当たり、
+`basicOpen_le_of_iSup_eq`という独立した`theorem`に先出しして解消
+(既知の教訓の再確認、`lean-idioms.md`への新規追加はせず)。
+
+残る核心(未着手): `V`成分の同型(`pullback (𝒰.f i)(𝒰.f j) ≅ gdV(i,j)`)
+の構成と、それを使った`NatIso`全体の組み立て。集計は10/24で変わらず。
