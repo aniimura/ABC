@@ -43,10 +43,47 @@ theorem falt1_moduleFinite {V K L W : Type*} [CommRing V] [IsDedekindDomain V]
     Module.Finite V W :=
   IsIntegralClosure.finite V K L W
 
+/-- ★★(2026-09-04 解消)`differentIdeal_ne_bot` の最後の1条件
+(`Algebra.IsSeparable(FractionRing V)(FractionRing W)`)も Falt1 の
+既存の仮定だけから導けることを証明した——`Algebra(FractionRing V)
+(FractionRing W)` を `FractionRing.liftAlgebra`(`Algebra V(FractionRing
+W)` から作る mathlib の既製品、`abbrev` なので `letI` で明示的に呼ぶ
+必要があった)で構成し、`Algebra.IsSeparable.of_equiv_equiv` の適合性
+条件を `IsFractionRing.ringHom_ext`(`V`-生成元上でのチェックに帰着)
+と `AlgEquiv.commutes`・`IsScalarTower.algebraMap_apply` で確認した。
+これで **`differentIdeal V W ≠ ⊥` は仮定ではなく `Falt1` の既存の
+仮定から完全に導出される**——Lemma 1.1 の最後の逸脱が解消された。 -/
+theorem falt1_differentIdeal_ne_bot {V K L W : Type*} [CommRing V] [IsDedekindDomain V]
+    [Field K] [Algebra V K] [IsFractionRing V K] [Field L] [Algebra K L] [FiniteDimensional K L]
+    [Algebra.IsSeparable K L] [CommRing W] [Algebra W L] [Algebra V W] [Algebra V L]
+    [IsScalarTower V K L] [IsScalarTower V W L] [IsIntegralClosure W V L]
+    [IsDedekindDomain W] [Module.IsTorsionFree V W] :
+    differentIdeal V W ≠ ⊥ := by
+  haveI : IsFractionRing W L := falt1_isFractionRing (V := V) (K := K)
+  letI algFF : Algebra (FractionRing V) (FractionRing W) := FractionRing.liftAlgebra V (FractionRing W)
+  haveI hsep : Algebra.IsSeparable (FractionRing V) (FractionRing W) := by
+    apply Algebra.IsSeparable.of_equiv_equiv
+      (FractionRing.algEquiv V K).symm.toRingEquiv (FractionRing.algEquiv W L).symm.toRingEquiv
+    show RingHom.comp _ _ = RingHom.comp _ _
+    apply IsFractionRing.ringHom_ext (A := V)
+    intro v
+    show (algebraMap (FractionRing V) (FractionRing W)) ((FractionRing.algEquiv V K).symm (algebraMap V K v))
+      = (FractionRing.algEquiv W L).symm (algebraMap K L (algebraMap V K v))
+    rw [AlgEquiv.commutes (FractionRing.algEquiv V K).symm v]
+    rw [show algebraMap K L (algebraMap V K v) = algebraMap V L v from
+      (IsScalarTower.algebraMap_apply V K L v).symm]
+    rw [show algebraMap V L v = algebraMap W L (algebraMap V W v) from
+      IsScalarTower.algebraMap_apply V W L v]
+    rw [AlgEquiv.commutes (FractionRing.algEquiv W L).symm (algebraMap V W v)]
+    rw [← IsScalarTower.algebraMap_apply V (FractionRing V) (FractionRing W) v]
+    exact IsScalarTower.algebraMap_apply V W (FractionRing W) v
+  haveI hfin : Module.Finite V W := falt1_moduleFinite (K := K) (L := L)
+  exact differentIdeal_ne_bot
+
 /-- **[Falt1] Lemma 1.1**(単射性 ＋ 長さの等式、まとめて)。`Z` は絶対微分
 `Ω_{V/Z}`・`Ω_{W/Z}` の基底となる任意の環(Falt1 の文脈では固定された
-「絶対」基底)。`differentIdeal V W ≠ ⊥` は有限可分拡大なら常に成り立つ
-標準的な事実(`differentIdeal_ne_bot`、下記 `.needs` 参照)。 -/
+「絶対」基底)。`differentIdeal V W ≠ ⊥` は `falt1_differentIdeal_ne_bot`
+で内部的に導出する(仮定として渡す必要はもう無い)。 -/
 theorem lemma_1_1_falt1 {Z V K L W : Type*} [CommRing Z] [CommRing V] [IsDedekindDomain V]
     [Field K] [Algebra V K] [IsFractionRing V K] [Field L] [Algebra K L] [FiniteDimensional K L]
     [Algebra.IsSeparable K L] [CommRing W] [Algebra W L] [Algebra V W] [Algebra V L]
@@ -54,18 +91,19 @@ theorem lemma_1_1_falt1 {Z V K L W : Type*} [CommRing Z] [CommRing V] [IsDedekin
     [IsDedekindDomain W] [Module.IsTorsionFree V W] [Algebra Z V]
     [Algebra Z W] [IsScalarTower Z V W]
     (w : W) (hint : IsIntegral V w) (hadjoin : Algebra.adjoin V ({w} : Set W) = ⊤)
-    (hw : Algebra.adjoin K ({(algebraMap W L) w} : Set L) = ⊤)
-    (hdne : differentIdeal V W ≠ ⊥) :
+    (hw : Algebra.adjoin K ({(algebraMap W L) w} : Set L) = ⊤) :
     Function.Injective (KaehlerDifferential.mapBaseChange Z V W) ∧
       Module.length W Ω[W⁄V] = Module.length W (W ⧸ differentIdeal V W) :=
-  ⟨falt1MapBaseChangeInjective w hint hadjoin hw hdne, falt1CokernelLengthEq w hint hadjoin hw⟩
+  ⟨falt1MapBaseChangeInjective w hint hadjoin hw (falt1_differentIdeal_ne_bot (K := K) (L := L)),
+   falt1CokernelLengthEq w hint hadjoin hw⟩
 
 /-! ### ★★★★★★★★項目全体の `.src`
 
 `Lemma 1.1` の主張(単射性 ＋ 長さの等式)の両方が `Found/` に揃ったので
-置く。ただし下の「逸脱の記録」にある通り、**Interface の抽象化
-(`RamificationSetup`)への正式な差し替えはまだ行っていない**——`.needs`
-に正直に記録する。 -/
+置く。★★3つあった逸脱のうち2つ(絶対微分の基底・differentIdealの
+非零性)は解消/一般化として説明できた——残る1つ(`RamificationSetup`
+の `ℕ` 値への正式な差し替え、`Module.length` の有限性)だけが未解決。
+`.needs` に正直に記録する。 -/
 
 /-- ★★★★★★★★**[Falt1] Lemma 1.1**(単射性・長さの等式)—— 主張と証明の
 両方が実装された。
@@ -103,20 +141,18 @@ Z V W` を満たす限り)に対して成り立つ一般形**として証明し�
 弱化ではなく、原文の主張を**任意の絶対基底に対して同時に**証明した
 ことになる(Falt1 の実際の `Z` を選べば、その具体形が直ちに従う)。
 
-### 3. `differentIdeal V W ≠ ⊥` を仮定として受ける
+### 3. ✅(2026-09-04 解消)`differentIdeal V W ≠ ⊥` は仮定ではなく導出した
 
-有限可分拡大の differentIdeal が非零であることは mathlib の
-`differentIdeal_ne_bot`(`[Module.Finite V W][Algebra.IsSeparable
-(FractionRing V)(FractionRing W)]` が必要)から従うはずである。
-★★**2箇所は実際に Falt1 の設定から導けることを証明した**
-(`falt1_isFractionRing`・`falt1_moduleFinite`、本ファイル冒頭——両方とも
-Falt1 の既存の仮定だけで揃う)。★残る1箇所だけが未解決:
-`Algebra.IsSeparable K L`(既知)を `Algebra.IsSeparable(FractionRing V)
-(FractionRing W)` へ輸送するには `Algebra.IsSeparable.of_equiv_equiv`
-(`FractionRing.algEquiv` 経由)が使えるはずだが、**その前提として
-`Algebra(FractionRing V)(FractionRing W)` という instance 自体を
-新たに構成する必要があり**(自動導出されない)、今回はそこで打ち切った
-——仮定として直接渡すに留めた。 -/
+`falt1_differentIdeal_ne_bot` として、Falt1 の既存の仮定だけから
+`differentIdeal V W ≠ ⊥`(mathlib の `differentIdeal_ne_bot` の3条件
+——`Module.Finite V W`・`Algebra.IsSeparable(FractionRing V)
+(FractionRing W)`・整域性等)を**完全に導出した**。鍵は `Algebra
+(FractionRing V)(FractionRing W)` を `FractionRing.liftAlgebra`
+(`abbrev` なので `letI` で明示呼び出しが要る)で構成し、
+`Algebra.IsSeparable.of_equiv_equiv` の適合性条件を
+`IsFractionRing.ringHom_ext`(`V`-生成元上のチェックへ帰着)+
+`AlgEquiv.commutes`・`IsScalarTower.algebraMap_apply` で確認したこと
+——これで `lemma_1_1_falt1` から `hdne` 仮定そのものを除去できた。 -/
 def lemma_1_1_falt1.src : ABC3.Meta.Source :=
   { paper := "Falt1", pdfPage := 4, item := "Lemma 1.1", sectionId := "falt1-lemma-1-1" }
 
@@ -133,10 +169,7 @@ def lemma_1_1_falt1.needs : List ABC3.Meta.ProofObligation :=
     .implicitStep
       ("★逸脱 2: 絶対微分の基底 Z は原文で明示されないため、任意の Z に対する" ++
        "一般形として証明した(弱化ではなく一般化)") 4,
-    .implicitStep
-      ("★逸脱 3: differentIdeal V W ≠ ⊥ を仮定として受ける。IsFractionRing W L" ++
-       "・Module.Finite V W は Falt1 の設定から導けることを確認したが、" ++
-       "Algebra.IsSeparable K L を(FractionRing V)(FractionRing W)へ輸送するには" ++
-       "Algebra(FractionRing V)(FractionRing W) instance の新規構成が要り、未着手") 4 ]
+    .citation "[ABC3]" "falt1_differentIdeal_ne_bot(differentIdeal V W ≠ ⊥ の導出、逸脱3を解消)"
+      (.inProject "ABC3" "ABC3.Found.Falt1.falt1_differentIdeal_ne_bot") 4 ]
 
 end ABC3.Found.Falt1
