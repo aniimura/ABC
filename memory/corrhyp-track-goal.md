@@ -1356,3 +1356,34 @@ corrHypGlueData_compat+corrHypGlueData_toGluedCoverを完成、lake build
 合成が恒等射になることを確認)。(2)Iso.mkでまとめ、mathlibの
 fromGludedとの合成でcorrHypGlueData.glued≅(U:Scheme)(項目(b)そのもの)
 完成。corrhyp-goal.mdに詳細記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04(続き9)
+続報(**★★★ロードマップ項目(b)が完成★★★**、
+corrHypGlueData.glued≅(U:Scheme)、集計10/24で変わらず)。残る道筋2
+ステップを完了: gluedCover_compat(逆向きの整合条件、
+corrHypGlueDataのGlueData.glue_condition+piecesGluedCoverVIso_hom_fst/
+_hom_snd、φがisoであることでφ自体を打ち消す逆方向キャンセル)→
+gluedCover_toCorrHypGlueData(逆向きの射、Multicoequalizer.desc)→
+corrHypGlueData_toGluedCover_comp/gluedCover_toCorrHypGlueData_comp
+(両方向の合成が恒等射、Multicoequalizer.hom_ext+π_desc。calcのTrans
+自動解決が詰まりhave+.trans連鎖に切り替え)→corrHypGlueData_gluedIso
+(Iso.mk)→**corrHypGlueData_glued_iso**(mathlibのScheme.Cover.
+fromGludedとの合成、最終形)。
+
+gluedCover_compatも一度もrw/simpを使わずcalc+congrArg+Category.assoc
+だけで組み立てた(#31の壁の回避法の再現性を確認)。lake build
+(ExtLimit/ABC3とも)0エラー確認、コミット: `540a7a22`。
+
+**これで、corrHypGlueDataOfCover→corrHypGlueDataOfEtale→
+corrPieceGlueData→corrPieceGlueDataOfCorr(項目(a)(c)(c'))→
+piecesOpenCover→piecesGluedCoverVIso(項目(b)のNatIso比較)→
+corrHypGlueData_glued_iso、という一連の作業がすべて1本の線でつながり、
+「Corrの実データ(c.C・c.α)から具体的に構成した候補片の族が実際に
+元のスキームを再構成する」というLemma 4.1の構成的降下の中核部分が
+完全にsorry無しで証明された**。
+
+残る作業(項目(d)・(e)): C(c.C.1.left)自体の有限アフィン被覆+外側の
+貼り合わせ(二段階構成)、α・β脚と整合性の等式h▸extCorr D c'=cの構成
+(β側はまだ手つかず)。集計は10/24で変わらず(Lemma 4.1というnumbered
+item全体の内部構造であり、独立したnumbered itemとしてカウントされ
+ないため)。corrhyp-goal.mdに詳細記録。

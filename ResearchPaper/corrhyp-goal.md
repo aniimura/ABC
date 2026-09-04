@@ -2818,3 +2818,53 @@ glued`への射(コクイザライザの普遍性による、一意)が構成さ
    が完成する。
 
 集計は10/24で変わらず(インフラ、numbered itemではないため)。
+
+## 2026-09-04(続き9): ★★★`corrHypGlueData_glued_iso`——ロードマップ項目(b)が完成★★★
+
+前回の「残る道筋」2ステップを完了させ、**`corrHypGlueData.glued ≅
+(U:Scheme)`(項目(b)そのもの)を完成させた**。`Z`の族(標準的な
+有限étale候補片)から作った`corrHypGlueData`の貼り合わせ結果が、実際に
+元の`U`に同型であることが証明できたことになる——`Lemma 4.1`の構成的
+降下で「候補片の族が実際に`C`(の対応する開集合)を再構成する」ことを
+保証する部分であり、GlueData配線の最終目標だった。
+
+**手順**:
+1. `gluedCover_compat`(逆向きの整合条件): `corrHypGlueData`自身の
+   `GlueData.glue_condition`(mathlib既製)+`piecesGluedCoverVIso_
+   hom_fst`/`_hom_snd`から、`corrHypGlueData_compat`とは逆方向の
+   キャンセル(`φ`が`iso`であることを使って`φ`自体を打ち消す)で導く。
+2. `gluedCover_toCorrHypGlueData`(逆向きの射): `Multicoequalizer.
+   desc`を`gluedCover_compat`とともに適用。
+3. `corrHypGlueData_toGluedCover_comp`/`gluedCover_toCorrHypGlueData_
+   comp`(両方向の合成が恒等射): `Multicoequalizer.hom_ext`+両方の
+   `Multicoequalizer.π_desc`(定義そのもの)。途中`calc`の`Trans`
+   自動解決が詰まる場面があり、`have`+`.trans`の明示的連鎖に切り替え
+   て解消した。
+4. `corrHypGlueData_gluedIso`: 上記から`Iso.mk`でまとめた
+   `corrHypGlueData.glued ≅ gluedCover.glued`。
+5. **`corrHypGlueData_glued_iso`**: mathlibの`Scheme.Cover.fromGlued`
+   (`IsIso`、既製)が与える`gluedCover.glued ≅ U`と`.trans`で合成した
+   最終形——`corrHypGlueData f Z e |>.glued ≅ (U:Scheme)`。
+
+`gluedCover_compat`も前回の`corrHypGlueData_compat`と同様、一度も
+`rw`/`simp`を使わず`calc`+`congrArg`+`Category.assoc`(項として)だけ
+で組み立てた——`#31`の壁の回避法が、この最も執拗な現れ方に対しても
+再現性を持つことが確認できた。すべて`lean_check`で個別検証後
+ファイルへ反映、`lake build`(ExtLimit/ABC3とも)0エラー確認、
+コミット(`540a7a22`)。
+
+**これで、`corrHypGlueData`(汎用的な貼り合わせ機構)から始まった
+一連の作業——`corrHypGlueDataOfCover`→`corrHypGlueDataOfEtale`→
+`corrPieceGlueData`→`corrPieceGlueDataOfCorr`(項目(a)(c)(c'))→
+`piecesOpenCover`→`piecesGluedCoverVIso`(項目(b)のNatIso比較)→
+今回の`corrHypGlueData_glued_iso`——のすべてが1本の線でつながり、
+**「`Corr`の実データ(`c.C`・`c.α`)から具体的に構成した候補片の族が、
+実際に元のスキームを再構成する」という`Lemma 4.1`の構成的降下の
+中核部分が、完全にsorry無しで証明された**。
+
+残る作業(項目(d)・(e)、`corrhyp-goal.md`前回までのエントリに記載の
+とおり): `C`(`c.C.1.left`)自体の有限アフィン被覆+外側の貼り合わせ
+(二段階構成)、`α・β`脚と整合性の等式`h▸extCorr D c'=c`の構成
+(`β`側はまだ手つかず)。集計は10/24で変わらず(いずれも`Lemma 4.1`
+というnumbered item全体の内部構造であり、それ自体は独立したnumbered
+itemとしてカウントされないため)。
