@@ -2465,3 +2465,35 @@ timeoutが再現した**、具体的な式を経由すれば速い、という�
 逆極限`Gal(L_π/K)=lim Gal(L_n/K)`と`𝒪_K^×=lim(𝒪_K/π^n)^×`を構成し、
 両者の同型へ組み立てる、という**純粋な組み立て工程**(新しい数学的
 障害ではなく、mathlibのAPIをどう繋ぐかというLean工学の問題)。
+
+## 続報(同日、`Mathlib.FieldTheory.Galois.Infinite`/`Profinite`を
+実測——組み立て工程の具体的な設計方針を決めた、Leanコードはまだ
+無し): 一般論を経由せず`reciprocityMap`から直接逆極限へ写す方が軽い
+
+`InfiniteGalois`名前空間(`FieldTheory/Galois/Infinite.lean`・
+`Profinite.lean`)を実測した。`Gal(K/k)≃*limit(asProfiniteGaloisGroup
+Functor k K)`(`mulEquivToLimit`)等、副有限Galois群の一般論一式は
+存在するが、**`[IsGalois k K]`(`K`が`k`上Galois)を前提とし、
+`FiniteGaloisIntermediateField k K`全体(私の`L_n`の列だけでなく
+`K.carrier`上有限次Galoisな**あらゆる**中間体)にわたる極限として
+組まれている**——私が持っている「単一の列`L_n`」より遥かに一般的で
+重い枠組み。この一般論を経由して`Gal(K(Λ_∞)/K)`を作ってから
+`𝒪_K^×`と比較するのは遠回りと判断した。
+
+★より直接的な設計方針(次に着手する具体案): `Gal(K.closure/K.carrier)`
+から**直接**、各`n`の`reciprocityMap`(既出)を束ねた
+`reciprocityMapLimit:Gal(K.closure/K.carrier)→(𝒪_K)^×`(または
+`lim_n(𝒪_K/π^n)^×`)を構成する——`reciprocityMap_pred_eq_map_succ`
+(今回確立)がまさに「各`n`の値が射影系として矛盾なく束ねられる」
+ことを保証する形になっている。残る部品: (i)`𝒪_K^×≅lim_n(𝒪_K/π^n)^×`
+(完備環の単数群が商の単数群の逆極限に一致するという標準事実——
+mathlibを実測したが`IsAdicComplete`から単数群の逆極限性を直接与える
+既存補題は見当たらなかった。`A≃lim(A/I^n)`という環としての逆極限
+自体は`AdicCompletion`系にあるはずだが、単数群への遺伝は自分で示す
+必要がありそう)、(ii)このリミット写像の全射性・単射性(各`n`での
+`reciprocityMap`の全射性・単射性——後者は現状`reciprocityMap`自体の
+単射性をまだ確立していない、`unitActionQuotientBijOn_injective`から
+の帰結のはずだが要再確認——から`Mittag-Leffler`型の議論で持ち上げる)。
+見積り: (i)が未知数——mathlibに既存部品があるかを`node tools/
+decl-index.mjs --mathlib`+`AdicCompletion`まわりのキーワードで
+再捜索するのが次の一歩。
