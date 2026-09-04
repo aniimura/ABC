@@ -1182,3 +1182,26 @@ exists_finite_standardEtaleCover (A⊗[ℚ]ℝ) Γ(X,U)を再度書いて
 corrHypInstance4/Ext/Cへ接続(Aが何であるべきかをpiece_descends_iso
 の定義から逆算する必要あり)・(d)Cの有限アフィン被覆+外側の貼り合わせ
 ・(e)α・β脚と整合性の等式。corrhyp-goal.mdに詳細記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04(続き2)
+続報(corrPieceGlueData追加、項目(c)着手、集計10/24で変わらず)。
+調査エージェント(読み取り専用)で仮説検証した結果、必要な部品は
+すべて既存と判明: piece_algebraEtale_tensor(ExtLimit.lean:778、
+以前構築済み)の結論がcorrHypGlueDataOfEtaleの要求形にちょうど一致、
+piece_preimage_isAffineOpen(同:907)がhU(アフィン性)をIsFinite→
+IsAffineHom(mathlib自動instance)経由で既に用意していた。
+
+これらをそのまま代入するだけでcorrPieceGlueData(X:Over BaseK・
+U:X.leftのアフィン開・C:Scheme・α:C⟶(ExtF.obj X).left・
+[IsFinite α][Etale α]からScheme.GlueDataを得る)とその被覆条件
+corrPieceGlueData_coverを追加。lake build(ExtLimit/ABC3とも)0エラー
+確認、コミット: `71f72c2a`。
+
+**これでロードマップ項目(c)はOver BaseK/ExtFレベルで実質完了**——
+corrHypGlueDataOfEtaleが初めてExt/ExtFという実際のCorrHyp構成データに
+直接接続された。残る「Corrの実データ(corrHypInstance4・QcqsSpace)
+への代入」(項目(c'))はcorrPieceGlueDataのシグネチャがCorrのα
+フィールドの中身と既に形が一致しているため短い配線になる見込み
+(未着手)。残るのは(b)IsColimit比較(genuinely new)・(c')上記の代入
+・(d)Cの有限アフィン被覆+外側の貼り合わせ・(e)α・β脚と整合性の等式。
+corrhyp-goal.mdに詳細記録。

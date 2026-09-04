@@ -2508,3 +2508,46 @@ standard-étale被覆の存在、`FieldLimit.lean:755`)と
 (d) `C`自体の有限アフィン被覆+外側の貼り合わせ段階。
 (e) `α・β`脚と整合性の等式。
 集計は10/24で変わらず(インフラでnumbered itemではないため)。
+
+## 2026-09-04(続き2): `corrPieceGlueData`——項目(c)着手、既存部品だけで接続完了
+
+上記(c)「`A`・`X`・`U`・`[Algebra.Etale ...]`を実際の`corrHypInstance4`・
+`Ext`・`C`に接続する」を、まず`Over BaseK`/`ExtF`レベルで実行するため、
+調査エージェント(読み取り専用)を1件走らせて仮説を検証した。
+
+**結論: 必要な部品はすべて既に存在していた**。特に
+`piece_algebraEtale_tensor`(`ExtLimit.lean:778`、以前の作業単位で
+`Lemma 4.1`「1アフィン片の降下」のスキーム→環の橋渡しの完成形として
+構築済み)の結論——`X:Over BaseK`のアフィン開`U`由来の片へ`Ext X`から
+有限étaleに写る`C`を制限すると`Algebra.Etale (Γ(X.left,U)⊗[ℚ]ℝ)
+Γ(C,α⁻¹(piece))`になる——が、`corrHypGlueDataOfEtale`が要求する形
+にちょうど一致していた。さらに`piece_preimage_isAffineOpen`
+(`ExtLimit.lean:907`)が必要なアフィン性`hU`を、`IsFinite α →
+IsAffineHom α`(mathlib、`class IsFinite extends IsAffineHom`の
+自動instance)経由で既に与えていた。
+
+これらをそのまま代入するだけで`corrPieceGlueData`
+(`X:Over BaseK`・`U:X.left`のアフィン開・`C:Scheme`・
+`α:C⟶(ExtF.obj X).left`・`[IsFinite α][Etale α]`から`Scheme.GlueData`
+を直接得る)と、その被覆条件`corrPieceGlueData_cover`
+(`α⁻¹(piece)`を実際に覆うこと)を追加(`lean_check`で検証後ファイルへ
+反映、`lake build`(ExtLimit/ABC3とも)0エラー確認、コミット
+`71f72c2a`)。
+
+**これでロードマップ項目(c)は`Over BaseK`/`ExtF`レベルで実質完了**
+——`corrHypGlueDataOfEtale`という抽象部品が、初めて`Ext`/`ExtF`という
+CorrHyp論文の実際の構成データに直接接続された。残る「`Corr`の実データ
+(`corrHypInstance4`・`QcqsSpace`)への代入」(項目(c'))は、
+`corrPieceGlueData`のシグネチャ(`X:Over BaseK`・`C:Scheme`・
+`α:C⟶(ExtF.obj X).left`・`[IsFinite α][Etale α]`)が既に`Corr`の
+`α`フィールド(`D.FEt c.C (D.Ext X)`、`corrHypInstance4`下では
+`{f:C.1⟶(ExtF.obj X.1)//IsFinite f.left ∧ Etale f.left}`)の中身と
+形が一致しているため、`X:=X.1`・`C:=c.C.1.left`・`α:=c.α.1.left`
+という**短い配線**になる見込み(調査エージェントの評価)。
+
+残る作業の全体像(更新): (b) `corrPieceGlueData(...).glued ≅
+α⁻¹(piece)`の証明(`IsColimit`同士の比較、genuinely new、依然未着手)。
+(c') 上記の`Corr`実データへの代入(短い配線と見積もられるが未着手)。
+(d) `C`自体の有限アフィン被覆+外側の貼り合わせ、`X.left`の有限
+アフィン被覆との整合。(e) `α・β`脚と整合性の等式`h▸extCorr D c'=c`
+の構成。集計は10/24で変わらず。
