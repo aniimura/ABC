@@ -4088,3 +4088,79 @@ of_isLocalization`(mathlib、既存)により**自動的に開埋め込みにな
 構成を含む)はまだ未着手——次の一手として記録する。lake build
 (`FieldLimit`/`ABC3`)とも0エラー確認、コミット(`470da5b1`)・push
 完了。集計は引き続き10/24——§4は引き続き0/2。
+
+## 2026-09-05(続き18): §4以外の残り11項目を`Explore`エージェントで
+横断調査——**Lemma 4.1の優先が正しいことを独立に確認**、`Lemma 5.4`に
+新しいinterface設計ギャップを発見
+
+「§4に集中し続けるのが正しいか、他の11項目(§2の3件・§3の1件・§5の
+6件・§6の1件)に近道があるか」を確かめるため、`Explore`エージェントで
+全項目を横断調査した(依存関係・原典の記述・`hedge-index`の合図・
+既存スケルトン/Foundの状況)。結論: **§4を除く全項目が、mathlibに
+丸ごと不在の理論(代数群論・Galoisコホモロジー・被覆空間論の被覆数
+有限性・モジュライスタック理論・Teichmüller空間論)への依存か、
+§4自身への依存(`Lemma 5.1`が`Lemma 4.1`の降下論法を明示的に流用すると
+`.needs`に記録済み)のいずれかで、実質的に着手不可能**——`Definition
+2.2`(Margulis-arithmetic)は`ShimuraArithmeticData.lean`の末尾に既に
+「人年規模」と明記済みで(`Definition 2.3`の対照例と比較すると一段重い、
+Weil restriction・almost-simple分解を要する)、`Proposition 2.4`・
+`Theorem 2.5`・`Theorem 2.6`・`Theorem 6.1`は[Marg]・[Take]・[Gard]と
+いう外部文献の結果そのもの、`Lemma 5.6`・`Theorem 5.3`はモジュライ
+スタック理論(未構築)への依存。
+
+**唯一の意外な発見**: `Lemma 5.4`(`∃c>0,∀X,c≤e_Y`)は`hedge-index`の
+合図が0件・他項目への明示依存が無く一見有望に見えたが、精査した結果
+**現状の`StackType`型では原理的に証明不可能**であることが判明した——
+`StackType.i : Sigma → ℕ`に`≥2`という制約が型に無く(docstringに
+「常に≥2」と書かれているだけ)、`g r : ℕ`にも下限が無いため、`Sigma:=∅
+・g:=r:=0`という(型としては合法な)`StackType`を`D.stackType`が返す
+ことを何も禁じていない——この場合`e = 2·0-2+0 = -2`となり、`c>0`の
+下界は存在しえない(反例が構成できる)。`(i-1)/i`の各項はLeanの0除算
+規約(0除算→0)のおかげで常に`≥0`になる(`i=0`でも`(0-1)/0=0`)ため、
+`e ≥ 2g-2+r`は常に成り立つが、これは`c>0`を保証しない。**つまり
+`Lemma 5.4`を正しく証明するには`HyperbolicCurveData`のinterfaceに
+`stackType`の妥当性を保証する新しい公理(`i σ ≥ 2`や、`core`から来る
+`StackType`が退化しないこと等)を追加する必要がある**——これは
+`IsAffineOpen.inf`の分離性追加を見送った(`Nonempty C`と同種の後退
+リスク)のと同じ種類の判断が要る変更であり、拙速に追加しない。
+
+**正直な評価**: この調査により、§4への集中投資が誤った優先付けでは
+なく、現時点で唯一の現実的な前進経路であることが独立に確認できた
+——「§4が終われば`Lemma 5.1`が開く」「他の項目はmathlib本体の拡張
+(人年規模)かinterface設計の再検討を要する」という構造が明確になった。
+集計は引き続き10/24。
+
+## 2026-09-05(続き19): `Γ(C,piece)`の任意の元を`R`レベルへ持ち上げる
+補題を完成(`exists_fg_subalgebra_tensor_quotientMvPolynomial_lift`、
+`isLocalization_away_tensor_eq`の`h`を実際に構成する第二の核心部品)
+
+続き17の`isLocalization_away_tensor_eq`は「`h∈S₀`が既にあれば」局所化と
+底変換が可換であることを示したが、実際の`h`(=`piece_basicOpen_
+localizationElem`の`R`レベル持ち上げ)を**構成する**部品がまだ無かった
+——これを埋めた。`S₀⊗[B](A⊗ℝ)`(`pieceAlgebra_R_model_baseChange`が
+`Γ(C,piece)`と同一視する対象)の任意の元は、`quotient_mvPolynomial_
+baseChange`(既存)で多項式商として実現し、`Ideal.Quotient.mk_surjective`
+で多項式代表元を取り、その有限個の係数を`exists_fg_subalgebra_tensor_
+mvPolynomial_finset`(既存、`pieceAlgebra_relation_descend_q₀`が関係式の
+族に使ったのと同じ道具)で`R`を昇格して降ろすだけで、実際に`R'`レベルの
+`MvPolynomial`元として持ち上げられることを示した——数学的には新しい
+内容は無く、既存の技法を「関係式の束」から「単一の任意の元」へ転用した
+だけ。
+
+**新しい配管の発見(`tools/lean-idioms.md` #40 として記録)**: `MvPolynomial
+ι (A⊗[ℚ]R.1) ⧸ I`の`HasQuotient`自動探索が、最小例(`ℚ⊗[ℚ]ℝ`)でも
+失敗することを突き止めた——`Ideal`の`Semiring`インスタンス解決が
+`AddMonoidAlgebra.semiring`経由の別道を取ってしまうため。直し方は
+`descendPieceR`が最初から採用していた`letI hCR : CommRing (係数環) :=
+inferInstance`だが、**`MvPolynomial`自身**のインスタンスを先に確定
+させても効果が無く、**係数環自身**を確定させることが鍵だと判明した
+(このどちらを先に固定すべきかは自明ではなく、`descendPieceR`の実装が
+たまたま正しい方を選んでいたことに今回気づいた)。
+
+**残る作業(正直な記録)**: `isLocalization_away_tensor_eq`+`exists_fg_
+subalgebra_tensor_quotientMvPolynomial_lift`の2つの部品は揃ったが、
+これらを実際に`descendPieceR`(`ExtLimit.lean`)の**再構成**(`W:=D(f*g)`
+を`D(f)`側の環の局所化として直接定義し直す)に配線する作業自体は
+まだ未着手——これが次の一手。lake build(`FieldLimit`/`ABC3`)とも
+0エラー確認、コミット(`c7ec8748`)・push完了。集計は引き続き10/24
+——§4は引き続き0/2。

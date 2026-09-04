@@ -1814,3 +1814,29 @@ Immersion.of_isLocalization(mathlib)により自動的に開埋め込みにな�
 descendPieceR自体の再構成(ExtLimit.lean側)はまだ未着手。lake build
 (FieldLimit/ABC3)0エラー確認、push済み。集計は引き続き10/24——§4は
 引き続き0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05(続き18)
+Exploreエージェントで§4以外の残り11項目を横断調査——§4集中が正しい
+優先付けであることを独立確認。全項目がmathlib丸ごと不在の理論
+(代数群論・Galoisコホモロジー・被覆数有限性・モジュライスタック・
+Teichmüller空間論)かLemma 4.1自身への依存(Lemma 5.1)で着手不可能。
+唯一の意外な発見: Lemma 5.4(∃c>0,∀X,c≤e_Y)は一見有望だったが、現状の
+StackType型(i:Sigma→ℕに≥2制約なし、g,rに下限なし)では原理的に
+証明不可能と判明(g=r=0,Sigma=∅で反例)——interfaceに新公理を要する、
+IsAffineOpen.infの分離性追加見送りと同種の判断が必要。集計は10/24。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05(続き19)
+exists_fg_subalgebra_tensor_quotientMvPolynomial_lift(commit c7ec8748、
+FieldLimit.lean)——Γ(C,piece)の任意の元をRレベルへ持ち上げる補題を
+完成。quotient_mvPolynomial_baseChange+Ideal.Quotient.mk_surjective+
+exists_fg_subalgebra_tensor_mvPolynomial_finset(既存技法の転用)。
+
+新しい配管の発見(lean-idioms.md #40): MvPolynomial ι(テンソル積)⧸I の
+HasQuotient自動探索が失敗する場合、letI hCR:CommRing(...)で先に確定
+させるべきは係数環自身であってMvPolynomial本体ではない——descendPieceR
+の実装がたまたま正しい方を選んでいたと判明。
+
+isLocalization_away_tensor_eq+この補題で部品は揃ったが、descendPieceR
+自体の再構成(W:=D(f*g)をD(f)側の環の局所化として定義し直す配線)は
+まだ未着手。lake build(FieldLimit/ABC3)0エラー確認、push済み。集計は
+引き続き10/24——§4は引き続き0/2。

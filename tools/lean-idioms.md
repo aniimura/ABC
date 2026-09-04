@@ -4164,3 +4164,36 @@ exact someTheorem ... (fun i => 0) ...
 `falt1_pushoutKaehlerSplitStepOption_adjoinRoot_surjective_example`
 (`RAlgOver.lift`由来の`Algebra`instanceと`AdjoinRoot.instAlgebra`の
 diamond)。
+
+## 40. `MvPolynomial ι (テンソル積の型) ⧸ I`の`HasQuotient`自動探索が
+失敗する——`letI`で確定させるべきは**係数環自身**であって`MvPolynomial`
+本体ではない(2026-09-05)
+
+**症状**: `I : Ideal (MvPolynomial ι B)`(`B := A ⊗[ℚ] R.1`のような
+テンソル積型)を書いた後、`MvPolynomial ι B ⧸ I`という式(`⧸`記法単体、
+`descendPieceR`のような既存コードにも現れる形)が、
+```
+failed to synthesize instance of type class
+  HasQuotient (MvPolynomial ι B) (Ideal (MvPolynomial ι B))
+```
+で失敗することがある——単純な`B := ℚ ⊗[ℚ] ℝ`のような最小例でも再現する
+(`CommRing`型クラス自体ではなく`HasQuotient`のnotation展開が引く`Ideal`
+の`Semiring`インスタンスの解決だけが、`MvPolynomial`本来の`CommRing`
+インスタンスと非`defeq`に見える別の道(`AddMonoidAlgebra.semiring`
+経由)を取ってしまうため)。`CommRing (MvPolynomial ι B)`という直接の
+ゴールは`infer_instance`で普通に通る——`⧸`記法特有の失敗形。
+
+**直し方**: `letI hCR : CommRing (MvPolynomial ι B) := inferInstance`
+のように**`MvPolynomial`自身**のインスタンスを先に確定させても効果が
+無い——効くのは**係数環`B`自身**のインスタンスを先に確定させること:
+```lean
+letI hCR : CommRing (A ⊗[ℚ] R.1) := inferInstance  -- ← Bの方
+-- この後なら MvPolynomial ι (A ⊗[ℚ] R.1) ⧸ I が普通に通る
+```
+`descendPieceR`(`ExtLimit.lean`)がこのパターンを最初から採用していた
+理由がこれで判明した——`#1`「instances透明度」系の変種だが、「どちらの
+型のインスタンスを`letI`で確定させるべきか」を間違えると効かない、
+という一段具体的な教訓。
+
+実例: `lean/ABC3/Found/CorrHyp/FieldLimit.lean`の
+`exists_fg_subalgebra_tensor_quotientMvPolynomial_lift`。
