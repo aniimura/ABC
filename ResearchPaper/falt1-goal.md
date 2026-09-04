@@ -3440,6 +3440,40 @@ mathlib での正確な組み立て方は未確認)。
       壊れたものを残すより、この診断結果(2つの橋渡し補題+`A≠B`回避策)
       を正直に記録し、次回への持ち越しとした(commitは無し、Lean
       ファイルへの変更も無し)。
+
+      ★★2026-09-05、続けて`B:=Fin 2 → R`(`R×R`と本質的に同じだが
+      Pi型として扱うことでmathlibの一般論が直接使える)で、**`Etale
+      R (Fin 2 → R)`が実際に成り立つことをscratch fileで確認した**
+      (`lean/ABC3/Found/Falt1/AlmostEteleWitnessTest.lean`として
+      一時的に作成・`lake build`成功・6秒・確認後削除、commitはして
+      いない):
+      - `Algebra.FormallyUnramified.pi_iff`(`Mathlib.RingTheory.
+        Unramified.Pi`)+`Algebra.FormallySmooth.pi_iff`(`Mathlib.
+        RingTheory.Smooth.Pi`、この2ファイルは`KaehlerAux.lean`の
+        推移的importには含まれておらず`lean_check`のREPLでは見えない
+        ——実際の`lake build`でのみ検証できた)により、`FormallyUnramified
+        R (Fin 2→R)`・`FormallySmooth R (Fin 2→R)`はそれぞれ`∀i,
+        FormallyUnramified/FormallySmooth R R`(自明、`self`インスタンス)
+        に帰着する。
+      - `Algebra.FinitePresentation.pi`(`Mathlib.RingTheory.
+        Finiteness.FinitePresentationLocal`、`Mathlib.RingTheory.
+        FinitePresentation`とは**別ファイル**、要注意)で
+        `FinitePresentation R (Fin 2→R)`も同様に閉じる。
+      - `Algebra.Etale.iff_formallyUnramified_and_smooth`でこれらを
+        束ね、`Algebra.Etale R (Fin 2 → R)`が確立できた。
+      **残る作業**: (a) この`Etale R (Fin 2→R)`(および同様に閉じる
+      はずの`Module.Free`・`Module.Finite`)を、`awayAlgebra`が構成
+      する`Algebra (Localization.Away 1) (Localization.Away
+      (algebraMap R (Fin 2→R) 1))`という**具体的なinstance**の下へ、
+      `IsLocalization.atUnit`(`R ≃ₐ[R] Localization.Away p`、任意の
+      unit`p`版の`atOne`)経由で**移送する**作業(`Algebra.Etale.
+      of_equiv`等はBASE環が同じ場合のみを扱うため、BASE環自体が
+      `R→Localization.Away 1`と変わる今回は、両側を同時に移送する
+      追加の橋渡しが要る)、(b) trace写像の条件(ii)、(c) idempotentの
+      条件(iii)——これらは今回未着手。`Etale`性の核心部分(mathlibの
+      一般論だけで閉じる)が確認できたことは、Definition 2.1の
+      non-vacuous witnessが**原理的に到達可能**であることの具体的な
+      裏付けになった。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
