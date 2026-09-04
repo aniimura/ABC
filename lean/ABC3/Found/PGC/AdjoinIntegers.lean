@@ -466,4 +466,32 @@ theorem lubinTateActionAtTorsionPoint_one {p : ℕ} [Fact p.Prime]
   unfold lubinTateEvalAtTorsionPoint
   apply aeval_X_eq_self
 
+/-- ★**`0·x = 0`**——`LubinTateAction_zero_eq_zero`([0]_f=0、
+`Found/PGC/LubinTateActionPiPow.lean`)と`PowerSeries.aeval`が
+`AlgHom`(したがって`0`を`0`へ送る)であることを組み合わせるだけ。
+加群作用のもう1つの公理(零元の吸収律)を確認した。 -/
+theorem lubinTateActionAtTorsionPoint_zero {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))] :
+    lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem 0 = 0 := by
+  haveI := completeSpace_adjoinIntegers K x
+  haveI := isLinearTopology_adjoinIntegers K x
+  haveI := continuousSMul_adjoinIntegers K x
+  show lubinTateEvalAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem
+    (LubinTateAction hq hπmax f hf0 hf1 hf 0) = 0
+  rw [LubinTateAction_zero_eq_zero hq hπmax hπne0 f hf0 hf1 hf]
+  unfold lubinTateEvalAtTorsionPoint
+  exact map_zero _
+
 end ABC3.Found.PGC

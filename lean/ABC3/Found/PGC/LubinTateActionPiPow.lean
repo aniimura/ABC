@@ -79,6 +79,31 @@ theorem LubinTateAction_one_eq_X {A : Type*} [CommRing A] [IsLocalRing A] [IsDom
   · exact (LubinTateAction_functional_equation hq hπmax f hf0 hf1 hf 1).symm
   · rw [PowerSeries.subst_X hfHS, PowerSeries.X_subst]
 
+/-- **`[0]_f = 0`**——`LubinTateAction_one_eq_X`と同じ`powerSeries_
+uniqueness`の型で、`0`(定数項0を持つ)と`LubinTateAction ... 0`の
+両方が同じ次数1係数(`0`)・同じ関数等式を満たすことを示すだけ。
+`subst 0 f = 0`(`coeff_subst_zero_eq_zero_1var`、`f`の定数項が0
+であることから)が鍵。 -/
+theorem LubinTateAction_zero_eq_zero {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) :
+    LubinTateAction hq hπmax f hf0 hf1 hf 0 = 0 := by
+  have hzero_subst : PowerSeries.subst (0 : PowerSeries A) f = 0 :=
+    PowerSeries.ext (coeff_subst_zero_eq_zero_1var f hf0)
+  apply powerSeries_uniqueness hπmax hπne0
+    (PowerSeries.coeff_zero_eq_constantCoeff_apply f ▸ hf0) hf1
+    (constantCoeff_LubinTateAction hq hπmax f hf0 hf1 hf 0)
+    (map_zero PowerSeries.constantCoeff)
+  · rw [coeff_one_LubinTateAction hq hπmax f hf0 hf1 hf 0]
+    simp
+  · exact (LubinTateAction_functional_equation hq hπmax f hf0 hf1 hf 0).symm
+  · have hC : (0 : PowerSeries A) = PowerSeries.C (0 : A) := by simp
+    rw [hC, PowerSeries.subst_C, map_zero, ← hC]
+    exact hzero_subst.symm
+
 /-! ### 部品2: `[π^n]_f = f` の `n` 回自己合成 -/
 
 /-- ★★★★★★★**`[π^n]_f` は `f` の `n` 回自己合成**——古典的な Lubin-Tate
