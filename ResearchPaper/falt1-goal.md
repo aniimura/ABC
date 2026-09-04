@@ -40,9 +40,9 @@
 | §1 | Lemma 1.1 | ✅Found | (完成) |
 | §1 | Theorem 1.2 | ブロック | `Wₙ⊗_{Vₙ}Vₙ₊₁`の非正規性(`differentIdeal Wₙ Wₙ₊₁`)の評価が必要。`Vₙ`塔側の技術(Eisenstein多項式・differentIdeal計算)は完成済みだが`Wₙ`側(任意のalmost étale `W`)には転用できない(`differentIdeal_tower_diamond`のdocstring参照)。退化した`W`(非分岐)を使うと`δₙ≡0`は自明に出るが、原文の「任意の`W`」という全称量化を証明したことにはならない。 |
 | §2 | Definition 2.1 | ✅Found | (完成、`p`が単元でなくても任意のétale/finite/free拡大について成立する一般形まで) |
-| §2 | Theorem 2.2 | ブロック(honest 版は解消) | Hochschild cohomology `H²`の`m`零化。★訂正(2026-09-05): remark 2.1(v)はFaltings自身が完全な構成(縮約ホモトピー)を与えており未証明ではなかった。honest な場合(`elem`のannihilationがexactに成り立つ場合)は`hochschild_ext_eq_zero`で証明済み。残るはalmost版(`p^ε elem`のみ`B⊗AB`にある場合)への一般化——`hochSection`がalmost idempotentでは`S⊗_RS`線形にならないという技術的障壁を確認済み、`remark_iii_trace_identity`型の局所化descentを要する。 |
-| §2 | Theorem 2.3 | ブロック(honest 版は解消) | 同上(`H¹`版、`hochschild_ext_eq_zero`は次数nを問わず一般に証明済み) |
-| §2 | Theorem 2.4(i) | ブロック(honest 版は解消) | 同上(Hochschild cohomology全般) |
+| §2 | Theorem 2.2 | ブロック(honest 版は解消・almost 版は section まで前進) | Hochschild cohomology `H²`の`m`零化。★訂正(2026-09-05): remark 2.1(v)はFaltings自身が完全な構成(縮約ホモトピー)を与えており未証明ではなかった。honest な場合は`hochschild_ext_eq_zero`で証明済み。almost 版も**「swap-annihilation を`B⊗AB`へ降ろせない」という技術的障壁自体は`diagonalCompare_injective`で解消**——`IsAlmostEtaleCovering`のみ(`B/A`自体がhonestly unramifiedである必要なし)から`hochSectionAlmost_augment`(`μ∘s=`「`p^n`との掛け算」)まで到達した。残るは`Ext^k_T(-,M)`の関手性(pre/post-compositionがHom群に与える作用)を使って`p^n・Ext^k(B,M)=0`まで持ち上げる最後の1段——`CategoryTheory.Abelian.Ext`のこの向きのAPI調査が次の入口。 |
+| §2 | Theorem 2.3 | ブロック(同上) | 同上(`H¹`版) |
+| §2 | Theorem 2.4(i) | ブロック(同上) | 同上(Hochschild cohomology全般) |
 | §2 | Theorem 2.4(ii) | 2/3ステップ完成 | remark(iii)の trace 恒等式(`remark_iii_trace_identity`)・ノルム適用(`trace_ideal_pow_mem_traceIdeal`)は完成。残るは`H^i(G,M)`(`i>0`)への一般化——mathlibの`groupCohomology`(`Mathlib.RepresentationTheory.Homological.GroupCohomology.*`)に一般の transfer 定理(restriction-corestriction、`\|G\|`や重み付き版)が無く、`Rep k G`(k線形専用)を`B`上semilinearな`G`作用に対応させる枠組みも要構築。`Hilbert90.lean`は巡回群・単数表現専用で転用不可(確認済み)。 |
 | §3 | Theorem 3.1 | ブロック | `Theorem 2.2`-`2.4`の結果を直接使う(§2の壁がそのまま継承) |
 | §3 | Theorem 3.2 | ブロック | 同上 |
@@ -62,14 +62,27 @@ check.mjs --brief`で検証済み、mathlibに無かった一般定理):
 - `hochschild_ext_eq_zero`:**remark 2.1(v)honest版**——formally
   unramified拡大のHochschild cohomology(`Ext_{S⊗RS}(S,-)`として
   定式化)が正の次数で消える。以前「Faltings未証明」と誤認していた
-  事実を実際に証明で訂正した。`Theorem 2.2`-`2.4(i)`が要求する
-  almost版への一般化が次回の課題。
+  事実を実際に証明で訂正した。
+- `diagonalCompare_injective`:`B`が`A`上free・`algebraMap B Bp`が単射
+  という2条件だけから`diagonalCompare p`が単射(`Module.Flat`の
+  rTensor/lTensor保存性2回 + `IsLocalization.moduleTensorEquiv`)。
+- `almost_swap_annihilate`・`almost_swap_augment`・
+  `hochSectionOfWitness`・`hochSectionAlmost_augment`:
+  **remark 2.1(v)almost版への前進**——`IsAlmostEtaleCovering`のみ
+  (honest な`Algebra.FormallyUnramified A B`を要求しない)から、
+  `S`が`S⊗AS`の"almost direct summand"(`μ∘s=`「`p^n`との掛け算」)
+  であることを完全に形式化した。前回セッションで報告していた
+  「swap-annihilationを`B⊗AB`へ降ろせない」という技術的障壁は、
+  この`diagonalCompare_injective`によって解消済み。
 
-次回セッションへの最優先候補: (a) `hochschild_ext_eq_zero`のalmost版
-への一般化(`Theorem 2.2`-`2.4(i)`に直結、`remark_iii_trace_identity`
-型の局所化descentパターンが参考になる)、(b) `Theorem 2.4(ii)`の
-群コホモロジー部分(表の該当行参照)。(a)の方が明確な前例があり
-着手しやすい可能性がある。
+次回セッションへの最優先候補: (a) `hochSectionAlmost_augment`から
+`p^n・Ext^k(B,M)=0`まで持ち上げる——`Ext^k_T(-,M)`の`s:B→T`・`μ:T→B`
+に沿った pre/post-composition の関手性(合成が「`B`の元による掛け算」
+のpullbackに一致するという事実)を`CategoryTheory.Abelian.Ext`の
+既存APIでどこまで表現できるか調査するのがボトルネック。(b)
+`Theorem 2.4(ii)`の群コホモロジー部分(表の該当行参照)。(a)は
+`hochSectionAlmost_augment`という具体的な足場が既にあるため、
+着手しやすい可能性が高い。
 
 ## 0.1 `/goal Falt1 Chapter I Found` の進捗(2026-09-04)
 
@@ -3940,6 +3953,42 @@ lake build(プロジェクト全体、6590 jobs、新規importが
 idempotentでは`S⊗_RS`線形にならない(annihilation性質がexactに
 成り立たないため)という技術的な障壁を今回確認した——次回への
 具体的な課題として記録する。
+
+★★★★★2026-09-05(続々々々々々)、**上記の技術的障壁を解消した**:
+`diagonalCompare p : B⊗_AB → Bp⊗_ApBp`(`Ap:=Localization.Away p`・
+`Bp:=Localization.Away(algebraMap A B p)`)が、`B`が`A`上free・
+`algebraMap B Bp`が単射(Faltings自身が終始置く「p-torsion-free」
+標準仮定)という2条件だけから**単射**であることを証明した
+(`diagonalCompare_injective`)——`Module.Flat`の`rTensor`/`lTensor`
+`preserves_injective_linearMap`を2回使い`φ:=(rTensor Bp f₀)∘(lTensor
+B f₀)`の単射性を得て、`IsLocalization.moduleTensorEquiv`(「両成分が
+既に局所化された`Ap⊗_ApBpBp`から、さらなる局所化`Ap`を消して
+`A⊗Bp⊗Bp`に戻す」という mathlib の同型)経由で`diagonalCompare`を
+`e.symm∘φ`と分解するのが鍵。
+
+これにより、`Ap,Bp`レベルでのhonestなannihilation(`elem`の性質)を
+`diagonalCompare`で引き戻し、単射性で`B⊗AB`へそのまま降ろせる
+(`almost_swap_annihilate`・`almost_swap_mul_eq`)。augmentation側も
+同様に`algebraMap B Bp`の単射性で`μ(w)=p^n`(`B`の中で厳密に)まで
+降ろせた(`almost_swap_augment`)。`hochSection`自体を任意のwitness
+`w`とそのswap性質だけから構成できるよう一般化し(`hochSectionOfWitness`)、
+上記を組み合わせて`hochSectionAlmost_augment`——「`S`が`S⊗AS`の
+"almost direct summand"(`μ∘s=`「`p^n`との掛け算」)」という remark(v)
+のalmost版主張を、`IsAlmostEtaleCovering`のみ(`B/A`自体がhonestly
+unramifiedである必要なし、真に一般の almost 設定)から**完全に
+形式化**した。lake build(6590 jobs)・`node tools/check.mjs --brief`
+(NG13、既存と不変)で確認済み(コミット参照)。
+
+残るのは最後の1段——`hochSectionAlmost_augment`(モジュールレベルの
+almost split)から`p^n・Ext^k(B,M)=0`(Extレベルの almost 消滅)まで
+持ち上げる部分。原理は明快(`s:B→T`・`μ:T→B`(`T:=B⊗AB`)からの
+`Ext^k(s)`・`Ext^k(μ)`の合成が`μ∘s=`「`p^n`との掛け算」の pullback に
+一致し、`Ext^k(T,M)=0`(`T`が`T`上射影的なので、honest な場合と
+同じ理由で)経由でゼロに落ちることから`p^n`が`Ext^k(B,M)`の全ての
+元を零化する、という標準的な「almost projective ⟹ almost Ext消滅」
+論法)が、`CategoryTheory.Abelian.Ext`がこの向き(pre/post-composition
+がHom群に与える作用の関手性)のAPIをどこまで直接提供しているかは
+次回の調査事項として残す。
 
 ★★★**結論(正直な評価)**: `/goal` の 13/13 は、このセッションでの
 継続作業だけでは現実的な時間内に到達できない規模の作業(Theorem 1.2
