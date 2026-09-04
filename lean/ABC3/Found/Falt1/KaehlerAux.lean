@@ -5228,4 +5228,24 @@ theorem falt1_kaehler_length_tower_exact {An Bn Bn1 : Type*} [CommRing An] [Comm
     (KaehlerDifferential.map_surjective An Bn Bn1)
     (KaehlerDifferential.exact_mapBaseChange_map An Bn Bn1)
 
+/-- **Brinon-Conrad Exercise 13.7.4・step (1) の「`+1`」の出処**: `B`が
+離散付値環なら、剰余体上の cotangent space(`𝔪_B/𝔪_B²`)は1次元。
+`IsDiscreteValuationRing.TFAE`(mathlib既存、`(maximalIdeal R).
+IsPrincipal`との同値の一項目として`finrank(CotangentSpace)=1`が
+既に載っていた)から抽出しただけ。
+
+★残る接続(未完成、次回への課題): `KaehlerDifferential.
+exact_kerCotangentToTensor_mapBaseChange`(`B→k_B`への商、mathlib
+既存)から`(maximalIdeal B).Cotangent → Ω[B/An]⊗k_B → Ω[k_B/An]`の
+完全性は得られるが、`kerCotangentToTensor`が`B`-線形・`mapBaseChange`
+が`k_B`-線形であるため、両者の像・核を`Module.finrank`で直接比較
+しようとすると`Submodule B _`対`Submodule (ResidueField B) _`の
+scalar restriction越しの比較が必要になり、まだ閉じていない
+(`falt1_kaehler_spanFinrank_le`と組み合わせて`Ω[B/An]`が`d+1`個で
+生成されることを結論する、という最終目標にはこの接続が要る)。 -/
+theorem falt1_dvr_cotangentSpace_finrank_eq_one {B : Type*} [CommRing B] [IsDomain B] [IsNoetherianRing B]
+    [IsDiscreteValuationRing B] :
+    Module.finrank (IsLocalRing.ResidueField B) (IsLocalRing.CotangentSpace B) = 1 :=
+  ((IsDiscreteValuationRing.TFAE (R := B) (IsDiscreteValuationRing.not_isField B)).out 0 5).mp ‹_›
+
 end ABC3.Found.Falt1
