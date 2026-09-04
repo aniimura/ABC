@@ -2762,6 +2762,21 @@ mathlib での正確な組み立て方は未確認)。
       quotTensorEquivQuotSMul`越しの橋渡しがまだ残る、小さな仕上げ)・
       (3)(elementary divisor theorem)・(5)(discriminantの塔)の3つ。
 
+      ★この最終接続を同じセッションで試みたところ、`TensorProduct.
+      quotTensorEquivQuotSMul`(`M`に対し`TensorProduct R(R⧸I)M ≃ₗ[R]
+      M⧸I•⊤`、mathlib既存)自体は見つかったが、(a)これも`R`-線形
+      (`k_B`-線形ではない、同じ`extendScalarsOfSurjective`パターンで
+      対処できる見込み)、(b)`falt1_kaehler_spanFinrank_le`が
+      `N:=(⊤:Submodule B Ω[B/An])`という形で立てられており、
+      `↥⊤`と`Ω[B/An]`自体の同一視(`Submodule.topEquiv`)がもう1段
+      必要、という2つの小さな配線が残っており、`IsScalarTower B k_B
+      (TensorProduct B k_B ↥⊤)`のinstance探索でも小さくつまずいた
+      ——`falt1_kaehler_finrank_tensor_residueField_le`本体ほどの
+      深さの障害ではなく、次回落ち着いて配線すれば閉じる見込みが高い
+      (`falt1_kaehler_spanFinrank_le`を`N:=⊤`ではなく`Ω[B/An]`
+      直接の形に作り直す方が近道かもしれない、という選択肢も含めて
+      検討すること)。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
