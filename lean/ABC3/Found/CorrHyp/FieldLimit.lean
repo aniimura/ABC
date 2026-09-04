@@ -1173,6 +1173,53 @@ theorem exists_fg_subalgebra_tensor_mvPolynomial_finset (A : Type) [CommRing A] 
   rw [Finset.sum_congr rfl (fun m _ => key m), Finset.sum_attach q.support (fun m => MvPolynomial.monomial m (q.coeff m))]
   exact (q.support_sum_monomial_coeff)
 
+open scoped TensorProduct in
+/-- `MvPolynomial ι R ⊗[R] A ≃+* MvPolynomial ι A`の橋渡し(補助部品)
+——`Algebra.TensorProduct.comm`(係数順序を`A ⊗[R] MvPolynomial ι R`へ
+入れ替える)と`MvPolynomial.algebraTensorAlgEquiv`(mathlib、`A⊗
+MvPolynomial σ R ≃ₐ[A] MvPolynomial σ A`)の合成。`quotient_mvPolynomial_
+baseChange`の中核部品。 -/
+noncomputable def quotientMvPolynomialBaseChangeRingEquivAux (R A : Type) [CommRing R] [CommRing A] [Algebra R A]
+    (ι : Type) : MvPolynomial ι R ⊗[R] A ≃+* MvPolynomial ι A :=
+  (Algebra.TensorProduct.comm R (MvPolynomial ι R) A).toRingEquiv.trans
+    (MvPolynomial.algebraTensorAlgEquiv R A).toRingEquiv
+
+open scoped TensorProduct in
+/-- `quotientMvPolynomialBaseChangeRingEquivAux`が、`MvPolynomial ι R`
+の`algebraMap`による埋め込み(`x ↦ x⊗ₜ1`)を`MvPolynomial.map (algebraMap
+R A)`と両立させること——`Algebra.TensorProduct.algebraMap_apply`+
+`Algebra.TensorProduct.comm_tmul`+`MvPolynomial.algebraTensorAlgEquiv_
+symm_map`(いずれもmathlib)を繋ぐだけ。 -/
+theorem quotientMvPolynomialBaseChangeRingEquivAux_comp_algebraMap (R A : Type) [CommRing R] [CommRing A]
+    [Algebra R A] (ι : Type) (x : MvPolynomial ι R) :
+    quotientMvPolynomialBaseChangeRingEquivAux R A ι
+      (algebraMap (MvPolynomial ι R) (MvPolynomial ι R ⊗[R] A) x) = MvPolynomial.map (algebraMap R A) x := by
+  unfold quotientMvPolynomialBaseChangeRingEquivAux
+  rw [Algebra.TensorProduct.algebraMap_apply]
+  show (MvPolynomial.algebraTensorAlgEquiv R A)
+    ((Algebra.TensorProduct.comm R (MvPolynomial ι R) A) (x ⊗ₜ[R] 1)) = _
+  rw [Algebra.TensorProduct.comm_tmul]
+  exact (MvPolynomial.algebraTensorAlgEquiv_symm_map R A x) ▸ (AlgEquiv.apply_symm_apply _ _)
+
+open scoped TensorProduct in
+/-- **`MvPolynomial`の商とbase changeが可換であること**——`(MvPolynomial
+ι R ⧸ I) ⊗[R] A ≃+* MvPolynomial ι A ⧸ Ideal.map (MvPolynomial.map
+(algebraMap R A)) I`。`Algebra.TensorProduct.quotientTensorEquiv`
+(mathlib、商とテンソル積の可換性)を`quotientMvPolynomialBaseChange
+RingEquivAux`で`MvPolynomial ι A`の形へ書き換えたもの。`Γ(C,piece)`の
+`R`レベルモデル`S_0`(`pieceAlgebra_R_model`、`ExtLimit.lean`)のbase
+changeが実際に`Γ(C,piece)`を復元することを示す核心部品。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def quotient_mvPolynomial_baseChange (R A : Type) [CommRing R] [CommRing A] [Algebra R A] (ι : Type)
+    (I : Ideal (MvPolynomial ι R)) :
+    (MvPolynomial ι R ⧸ I) ⊗[R] A ≃+* MvPolynomial ι A ⧸ Ideal.map (MvPolynomial.map (algebraMap R A)) I := by
+  refine (Algebra.TensorProduct.quotientTensorEquiv (R := R) R A (MvPolynomial ι R) I).toRingEquiv.trans ?_
+  refine Ideal.quotientEquiv _ _ (quotientMvPolynomialBaseChangeRingEquivAux R A ι) ?_
+  rw [Ideal.map_map]
+  exact congrArg (Ideal.map · I)
+    (RingHom.ext (fun x => (quotientMvPolynomialBaseChangeRingEquivAux_comp_algebraMap R A ι x).symm))
+
 /-! ## `StandardEtalePair.Ring` の元を有限段階へ降ろす——作業単位1(b)の完成
 
 `exists_fg_subalgebra_tensor_bivariate_finset`を`StandardEtalePair.Ring`

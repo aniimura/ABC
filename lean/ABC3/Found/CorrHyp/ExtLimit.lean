@@ -918,6 +918,85 @@ noncomputable def pieceAlgebra_R_model (X : Over BaseK) (U : X.left.Opens) (hU :
       (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1) ⧸
     Ideal.span (Set.range (pieceAlgebra_relation_descend_q₀ X U hU C α))
 
+set_option maxHeartbeats 1000000 in
+open scoped Classical in
+/-- **`pieceAlgebra_R_model`(`S_0`)の base change が`Γ(C,piece)`を
+復元すること**——`quotient_mvPolynomial_baseChange`(`FieldLimit.lean`、
+汎用)を`R := Γ(U,U)⊗[ℚ]R.1`、`A := Γ(U,U)⊗[ℚ]ℝ`へ specialize すると、
+残る作業は「降ろした関係式`q₀ k`の像が元の関係式`P.relation k`に一致
+すること」(`pieceAlgebra_relation_descend_q₀`の定義そのもの、`choose_
+spec`で直接取り出せる)だけ。そこから`Ideal.map_span`で像の集合として
+のイデアルの一致に落とし、`Algebra.Presentation.span_range_relation_
+eq_ker`+`Algebra.Generators.ker_eq_ker_aeval_val`(いずれもmathlib)で
+`P.ker`(`= aeval P.val`の核)まで書き換え、最後に`RingHom.
+quotientKerEquivOfSurjective`(第一同型定理、mathlib)で`Γ(C,piece)`
+そのものに一致させる。`Γ(C,piece)`を`R`レベルへ一度に降ろす計画の
+「base changeで元へ戻ること」の完成——次の一手は、`S_0`を候補片
+(`descendPiece`の`R`レベル版)として使い、`transitionElem`/`gdT`/
+`cocycle`の`R`レベル版を組み立てること。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem pieceAlgebra_R_model_baseChange (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U)
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α] :
+    letI := pieceAlgebra X U hU
+    letI : Algebra (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+      ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+        (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.comp
+        (pieceRingEquiv X U hU).symm.toRingHom).toAlgebra
+    haveI : Algebra.Etale (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+      piece_algebraEtale_tensor X U hU C α
+    haveI : Algebra.FinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+      inferInstance
+    letI hCR : CommRing (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1) :=
+      inferInstance
+    letI : Algebra (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1)
+        (Γ(X.left, U) ⊗[ℚ] ℝ) :=
+      (Algebra.TensorProduct.map (AlgHom.id ℚ Γ(X.left, U))
+        (Subalgebra.val (pieceAlgebra_relation_descend_R X U hU C α).1)).toRingHom.toAlgebra
+    Nonempty (
+      (MvPolynomial (Fin (Algebra.Presentation.ofFinitePresentationVars (Γ(X.left, U) ⊗[ℚ] ℝ)
+          Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U))))
+          (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1) ⧸
+        Ideal.span (Set.range (pieceAlgebra_relation_descend_q₀ X U hU C α)))
+        ⊗[Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1] (Γ(X.left, U) ⊗[ℚ] ℝ)
+      ≃+* Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U))) := by
+  letI := pieceAlgebra X U hU
+  letI : Algebra (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+      (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.comp
+      (pieceRingEquiv X U hU).symm.toRingHom).toAlgebra
+  haveI : Algebra.Etale (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    piece_algebraEtale_tensor X U hU C α
+  haveI : Algebra.FinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    inferInstance
+  letI hCR : CommRing (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1) :=
+    inferInstance
+  letI : Algebra (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1)
+      (Γ(X.left, U) ⊗[ℚ] ℝ) :=
+    (Algebra.TensorProduct.map (AlgHom.id ℚ Γ(X.left, U))
+      (Subalgebra.val (pieceAlgebra_relation_descend_R X U hU C α).1)).toRingHom.toAlgebra
+  set P := Algebra.Presentation.ofFinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ)
+    Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) with hP
+  refine ⟨(quotient_mvPolynomial_baseChange (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1)
+    (Γ(X.left, U) ⊗[ℚ] ℝ) (Fin (Algebra.Presentation.ofFinitePresentationVars (Γ(X.left, U) ⊗[ℚ] ℝ)
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U))))
+    (Ideal.span (Set.range (pieceAlgebra_relation_descend_q₀ X U hU C α)))).trans ?_⟩
+  rw [Ideal.map_span]
+  have hq₀ : ∀ k, MvPolynomial.map (algebraMap (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1)
+      (Γ(X.left, U) ⊗[ℚ] ℝ)) (pieceAlgebra_relation_descend_q₀ X U hU C α k) = P.relation k := by
+    intro k
+    exact ((exists_fg_subalgebra_tensor_mvPolynomial_finset (Γ(X.left, U))
+      (Finset.image (Algebra.Presentation.ofFinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ)
+        Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U))).relation Finset.univ)).choose_spec
+      (P.relation k) (Finset.mem_image_of_mem _ (Finset.mem_univ k))).choose_spec
+  have himg : (MvPolynomial.map (algebraMap (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1)
+      (Γ(X.left, U) ⊗[ℚ] ℝ))) '' (Set.range (pieceAlgebra_relation_descend_q₀ X U hU C α))
+      = Set.range P.relation := by
+    rw [← Set.range_comp]
+    exact congrArg Set.range (funext hq₀)
+  rw [himg, P.span_range_relation_eq_ker, P.ker_eq_ker_aeval_val]
+  exact RingHom.quotientKerEquivOfSurjective P.aeval_val_surjective
+
 /-- **`piecePullbackIso` の有限段階版**——`Ext X` の代わりに有限段階
 `(extDiagram X).obj R'` を使うと、`U`(`X.left`のアフィン開)由来のアフィン
 片は `Spec(Γ(U,U) ⊗[ℚ] R'.1)` になる。証明の骨格は `piecePullbackIso`
