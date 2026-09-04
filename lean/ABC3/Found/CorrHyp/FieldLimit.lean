@@ -2836,4 +2836,23 @@ theorem localization_away_quotient_mvPolynomial_flat_equiv_of_map
   rw [hmap]
   exact localization_away_quotient_mvPolynomial_flat_equiv B' ι κ₀ (fun k => MvPolynomial.map φ (q₀ k)) p
 
+/-- **`IsLocalization`のインスタンスは環同型に沿って移送できる**——`S`が
+`R`の`M`による局所化なら、任意の環同型`e:S≃+*P`に対し、`e`を通じて
+定義した`P`上の`R`代数構造(`algebraMap R P := e∘algebraMap R S`、
+定義から自動的に`e`と両立する)のもとで`P`も同じ局所化になる。
+`AlgEquiv.ofRingEquiv`(mathlib、両立条件から`RingEquiv`を`AlgEquiv`へ
+格上げ)+`IsLocalization.isLocalization_of_algEquiv`(mathlib)を組み
+合わせるだけ——`localization_away_quotient_mvPolynomial_flat_equiv_of_map`
+が与える具体的な環同型を、`exists_descendPieceR_localization_baseChange`
+が要求する`IsLocalization.Away`インスタンスへ変換するための橋渡し。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem isLocalization_of_ringEquiv_transport (R S P : Type) [CommRing R] [CommRing S] [CommRing P]
+    (M : Submonoid R) [Algebra R S] [IsLocalization M S] (e : S ≃+* P) :
+    letI : Algebra R P := (e.toRingHom.comp (algebraMap R S)).toAlgebra
+    IsLocalization M P := by
+  letI : Algebra R P := (e.toRingHom.comp (algebraMap R S)).toAlgebra
+  have he : ∀ r, e (algebraMap R S r) = algebraMap R P r := fun r => rfl
+  exact IsLocalization.isLocalization_of_algEquiv M (AlgEquiv.ofRingEquiv (f := e) he)
+
 end ABC3.Found.CorrHyp
