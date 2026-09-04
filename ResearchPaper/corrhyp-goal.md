@@ -1834,3 +1834,26 @@ type-correctでなくなるという、本セッションで繰り返し遭遇�
 型の明示、または`TopologicalSpace.Opens.ext`を避けた別の経路(たとえば直接
 `Scheme.Hom.iSup_preimage_eq_top`を`hU.fromSpec`に適用する方向)で再挑戦する。
 集計は10/24で変わらず。
+
+### 2026-09-04さらに続報: ring→scheme被覆変換が完成——前回の詰まりを別経路で回避
+
+前回未完了だった「ring側の`PrimeSpectrum.basicOpen`被覆をscheme側の`X.basicOpen`
+被覆へ運ぶ」変換を、`hU.fromSpec`(`Spec Γ(X,U) ⟶ X`、値域がちょうど`U`)の
+`preimage_basicOpen`との可換性(`fromSpec_preimage_basicOpen`)+
+`image_preimage_eq_opensRange_inf`(開埋め込みの像と逆像の一般関係)を組み合わせる
+経路で完成させた(★sorry無し)。前回の詰まり(`⨆i∈t,X.basicOpen(f i)`と
+`⨆g:(f''t),X.basicOpen g`の同一視でinstances透明度のtype-correctness問題に当たった)
+を、添字づけを一切変えずに`fromSpec`一枚を経由するだけの構成に変えることで
+完全に回避できた——`Scheme.Hom.preimage_iSup`(preimageの一般的なiSup可換性)が
+`simp_rw`一発で使えたのが鍵。
+
+`ExtLimit.lean`に`exists_scheme_basicOpen_cover_of_ring`として完成。これで
+`exists_finite_standardEtaleCover`(`FieldLimit.lean`)が与える環レベルの被覆を、
+実際に`C`(または任意のアフィン開`U`を持つスキーム)内の開被覆として認識する
+橋渡しが完成した——`Scheme.openCoverOfIsOpenCover`と組み合わせれば`C`自身の
+`OpenCover`が作れ、`Scheme.Cover.gluedCover`(cocycle自動証明済み)を適用する
+道が開けた。GlueData組み立て戦略(前回記録)の(a)が完成し、残るのは(b)同型に
+よる移送の具体的な構成、(c)貼り合わせ後の有限性確認、の2点に整理された。
+集計は10/24で変わらず。
+
+コミット: `6e8ea04e`。
