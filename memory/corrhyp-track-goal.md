@@ -318,3 +318,23 @@ locallyOfFiniteType`等のHom集合の極限安定性補題で足りる可能性
 任意のアフィン開集合版として持ち上げる)、まだ未着手。
 
 コミット: `cdea5c8f`(§2却下の記録・rigidity精緻化、corrhyp-goal.md)。
+
+★★★★★★★★★★★★★★★★2026-09-04さらに続報(「Ext Xの射影=有限段階への
+base change」完成、§4の幾何学的な最後の穴が埋まった)。`pullbackSpecIso`
+特定を受けて実際に組み立てを進め、`ExtLimit.lean`に`extConeIso`・
+`extConePi_app_eq`を完成(★sorry無し)。`pullbackLeftPullbackSndIso`
+(mathlib、pullbackのpasting)+`phiR_comp`(`specKConeOver`のcone条件の
+一般形、`isLimit_specKConeOver`証明が特定代表元だけで使っていた事実の
+一般化)+`pullback.congrHom`で、「`Ext X`の台は有限段階`R`のP_Rを
+`Spec K→Spec R`に沿ってbase changeしたもの」という同型を構成し、
+`extConePi X .app R`がこの同型の下でP_Rへの射影そのものであることを
+`pullback.hom_ext`で示した。配管の教訓(lean-idioms.md #25):第22項の
+「have h' : <明示型> := h」技はTypeの値(Hom)には`have`ではなく`set`
+(型注釈つき)を使う必要がある——`have`はTypeの値の中身を消してしまう。
+
+これで「1アフィン片の降下」の純粋に幾何学的な部分が完成。残るのは
+`pullbackSpecIso`をアフィン片`V_j`に適用してΓ(U_j,U_j)≅Γ(V_j,V_j)⊗[R]K
+という環レベルの結論を引き出す最後の一手のみ。集計は10/24で変わらず。
+
+コミット: `1f249cd8`(pullbackSpecIso特定)・`e3ed6541`(extConeIso・
+extConePi_app_eq完成)。
