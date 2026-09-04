@@ -1,4 +1,5 @@
 import ABC3.Found.PGC.LubinTateDistinguishedSeparable
+import ABC3.Found.PGC.LubinTateActionEndomorphism
 
 /-!
 # `K.carrier⟮x⟯` の整数環を `Valued` を経由せず直接構成する(`sorry` 無し)
@@ -386,5 +387,37 @@ noncomputable def lubinTateEvalAtTorsionPoint {p : ℕ} [Fact p.Prime]
   PowerSeries.aeval (R := 𝒪[K.carrier])
     (hasEval_mem_adjoinIntegers_of_mem_iteratedLubinTateTorsionPoints
       K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem)
+
+/-- ★★★★★★★★★★★★★**Lubin-Tate の `𝒪_K` 作用そのもの——`a·x := [a]_f(x)`
+を実際の元として計算する**。`LubinTateAction`(`Found/PGC/
+LubinTateActionEndomorphism.lean`、`[a]_f` を表す形式冪級数、既に
+`sorry` 無しで確立済み)を、`lubinTateEvalAtTorsionPoint` で `Λ_n` の
+元 `x` へ評価するだけ。原典 [pGC] の Lubin-Tate 理論が `𝒪_K` 加群
+`Λ_n` を定義する、まさにその作用の**実装**。
+
+残る仕事(節目(3)の完成に向けて): この作用が実際に `Λ_∞:=∪Λ_n` に
+戻ること(`a·x ∈ Λ_∞`)、加法性(`(a+b)·x = F_f(a·x, b·x)`)・乗法性
+(`a·(b·x)=(ab)·x`)——これらは `LubinTateAction` 自身の関数等式
+(`LubinTateAction_functional_equation`)・準同型性(既に確立済みの
+`LubinTateAction_add`・`LubinTateAction_mul` 系)を、`PowerSeries.subst`
+(形式的代入)ベースの等式から `PowerSeries.aeval`(位相的評価)を
+経由した等式へ橋渡しする必要があり、次の一歩として残っている。 -/
+noncomputable def lubinTateActionAtTorsionPoint {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (a : 𝒪[K.carrier]) : adjoinIntegers K x :=
+  lubinTateEvalAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem
+    (LubinTateAction hq hπmax f hf0 hf1 hf a)
 
 end ABC3.Found.PGC
