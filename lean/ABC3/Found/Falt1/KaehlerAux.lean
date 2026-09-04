@@ -1661,4 +1661,95 @@ theorem cancel_conductor_delta {R : Type*} [CommRing R] [IsDedekindDomain R]
   rw [h2, h3] at h1
   exact mul_right_cancel₀ hIdiff_ne h1
 
+/-!
+## Theorem 1.2・3b(c): 単項イデアル倍の長さの加法性(2026-09-04、完成)
+
+`cancel_conductor_delta` の結論(イデアルの掛け算の等式)を `delta_
+tendsto_zero` が要求する `hrec`(長さの引き算の不等式)へ変換するには
+「`length(R/(I·J)) = length(R/I)+length(R/J)`」という長さの加法性が
+要る。一般の(必ずしも coprime でない)`I,J` に対するこの事実は
+mathlib に見当たらなかった(何度も探索・記録した——`Ideal.relNorm`・
+`Module.Invertible` 等、遠回りの経路はどれも別の一般補題を要した)。
+
+★ここでは**`I` が単項イデアル `(a)`(`a` は非零因子)の場合**に限定
+すれば、`Module.length_eq_add_of_exact`(SES の加法性)+
+`Submodule.quotientQuotientEquivQuotient`(第三同型定理)+
+`LinearMap.quotKerEquivRange`(第一同型定理)+ `a` による積が
+`R ≃ₗ (a)` を与えること、という**既存の道具の組み合わせだけ**で
+閉じることを発見した——`Module.Invertible`(可逆加群、局所化)の
+一般論は一切不要だった。多くの実際の場面(`differentIdeal_eq_span_
+derivative` 等、単一の生成元の微分で書ける場合)では `I` が単項なので、
+この特殊形で十分なことが多い。 -/
+
+/-- **単項イデアルで割った長さの分解**: `M` の部分加群 `S ≤ T` に対し
+`length(M/S) = length(T/S) + length(M/T)`(第三同型定理 +
+`Module.length_eq_add_of_exact`)。`length_quotient_span_singleton_mul`
+の骨格として使う、一般の(単項とは限らない)`S,T` に対する補助補題。 -/
+theorem length_quotient_of_le {R M : Type*} [CommRing R] [AddCommGroup M] [Module R M]
+    (S T : Submodule R M) (h : S ≤ T) :
+    Module.length R (M ⧸ S) =
+      Module.length R (↥T ⧸ (S.comap T.subtype)) + Module.length R (M ⧸ T) := by
+  set f : ↥T →ₗ[R] (M ⧸ S) := S.mkQ.comp T.subtype with hf
+  have hker : f.ker = S.comap T.subtype := by
+    ext x
+    simp [hf, LinearMap.mem_ker, Submodule.mkQ_apply, Submodule.mem_comap]
+  have hrange : f.range = Submodule.map S.mkQ T := by
+    ext x
+    simp [hf, LinearMap.mem_range, Submodule.mem_map]
+  have e1 : (↥T ⧸ f.ker) ≃ₗ[R] ↥f.range := LinearMap.quotKerEquivRange f
+  rw [hker, hrange] at e1
+  have e2 := (Submodule.quotientQuotientEquivQuotient S T h)
+  have hlen1 := LinearEquiv.length_eq e1
+  have hlen2 := LinearEquiv.length_eq e2
+  have hexact : Module.length R (M ⧸ S) = Module.length R (Submodule.map S.mkQ T) +
+      Module.length R ((M ⧸ S) ⧸ Submodule.map S.mkQ T) :=
+    Module.length_eq_add_of_exact (Submodule.map S.mkQ T).subtype (Submodule.map S.mkQ T).mkQ
+      (Submodule.map S.mkQ T).subtype_injective (Submodule.map S.mkQ T).mkQ_surjective
+      (LinearMap.exact_subtype_mkQ (Submodule.map S.mkQ T))
+  rw [hexact, ← hlen2, ← hlen1]
+
+theorem toSpanSingleton_injective_of_nzd {R : Type*} [CommRing R] (a : R) (ha : a ∈ nonZeroDivisors R) :
+    Function.Injective (LinearMap.toSpanSingleton R R a) := by
+  intro x y hxy
+  simp only [LinearMap.toSpanSingleton_apply, smul_eq_mul] at hxy
+  have h : (x - y) * a = 0 := by rw [sub_mul, hxy, mul_comm, sub_self]
+  exact sub_eq_zero.mp ((mul_right_mem_nonZeroDivisors_eq_zero_iff ha).mp h)
+
+/-- **長さの加法性(単項イデアル×任意のイデアル)**: `a` が非零因子のとき
+`length(R/((a)·J)) = length(R/(a)) + length(R/J)`。3b(c) の核心の
+gap を、単項の場合に限定して埋める。 -/
+theorem length_quotient_span_singleton_mul {R : Type*} [CommRing R] (a : R)
+    (ha : a ∈ nonZeroDivisors R) (J : Ideal R) :
+    Module.length R (R ⧸ (Ideal.span ({a}:Set R) * J)) =
+      Module.length R (R ⧸ Ideal.span ({a}:Set R)) + Module.length R (R ⧸ J) := by
+  set T : Submodule R R := Ideal.span ({a}:Set R) with hT
+  set S : Submodule R R := Ideal.span ({a}:Set R) * J with hS
+  have hle : S ≤ T := hS ▸ Ideal.mul_le_right
+  rw [length_quotient_of_le S T hle, add_comm]
+  congr 1
+  set f0 : R →ₗ[R] R := LinearMap.toSpanSingleton R R a with hf0
+  have hf0range : f0.range = T := by
+    rw [hf0, hT]
+    show (LinearMap.toSpanSingleton R R a).range = R ∙ a
+    rw [← LinearMap.span_singleton_eq_range]
+  set g : R ≃ₗ[R] ↥T := LinearEquiv.ofInjective f0 (toSpanSingleton_injective_of_nzd a ha)
+    |>.trans (LinearEquiv.ofEq _ _ hf0range) with hg
+  have hgapp : ∀ y : R, ((g y : ↥T) : R) = a * y := by
+    intro y
+    show f0 y = a * y
+    rw [hf0, LinearMap.toSpanSingleton_apply, smul_eq_mul, mul_comm]
+  apply (LinearEquiv.length_eq (Submodule.Quotient.equiv J (S.comap T.subtype) g ?_)).symm
+  ext x
+  simp only [Submodule.mem_map, Submodule.mem_comap, Submodule.coe_subtype]
+  constructor
+  · rintro ⟨y, hy, rfl⟩
+    show ((g y : ↥T) : R) ∈ S
+    rw [hgapp, hS, Submodule.span_singleton_mul]
+    exact ⟨y, hy, rfl⟩
+  · intro hx
+    rw [hS, Submodule.span_singleton_mul] at hx
+    obtain ⟨y, hy, hxy⟩ := hx
+    change a * y = (x : R) at hxy
+    exact ⟨y, hy, Subtype.ext ((hgapp y).trans hxy)⟩
+
 end ABC3.Found.Falt1
