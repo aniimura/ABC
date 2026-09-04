@@ -544,6 +544,30 @@ mathlib での正確な組み立て方は未確認)。
     の付値として `θ` の付値を得る、という順序の入れ替え)を検討する
     余地があるが、これは「`B` が Dedekind」という結論を仮定して使う
     ことになり得るため、循環を避ける組み立てが必要。
+
+    ★★★★★★★★★★★★★★★★★★★★2026-09-04、**戦略そのものを転換する
+    重要な発見をした**: そもそも `AdjoinRoot(f)` が「既に」整閉である
+    ことを Eisenstein 性から証明する必要は**無かった**。mathlib には
+    `integralClosure.isDedekindDomain_fractionRing`(`RingTheory/
+    DedekindDomain/IntegralClosure.lean`、**instance**)があり、
+    `A` が Dedekind・`L` が `FractionRing A` 上有限分離拡大なら
+    `integralClosure A L` は**自動的に** Dedekind になる
+    (`FractionRing A` を明示的に使うことが鍵——一般の `K` with
+    `IsFractionRing A K` では instance が発火しない、という
+    tools/lean-idioms.md #23 と同種の罠を実測で確認・回避した)。
+    **`Vₙ₊₁ := integralClosure Vₙ L` と定義すれば、Eisenstein 性・
+    付値の延長・整閉性の証明が一切不要になる**——`w`(`f` の根)が
+    `Vₙ₊₁` を「生成し切っているか」は問わなくてよい。なぜなら
+    `conductor_mul_differentIdeal`(**既に完成済み**)が、その
+    conductor を未知数のまま追跡できるよう作られているから——
+    `cancel_conductor_delta` はまさにこの「`w` が生成し切らない
+    かもしれない」場合を扱うために作った道具だった。★これで
+    3c の技術的な核心の壁(整閉性の証明)を**丸ごと迂回できる**
+    ことが判明した。次のセッションは `integralClosure.isDedekindDomain_
+    fractionRing` を使って実際に `V_1 := integralClosure V_0 L`
+    (`L:=FractionRing(AdjoinRoot(X^p-π))`)を組み立て、Falt1
+    RamificationSetup 系のインフラ(`falt1_isFractionRing` 等)を
+    再利用して具体的な最初の1段を完成させることから始めるとよい。
 4. ★★★★★2026-09-04、**完成した**(`delta_tendsto_zero`、commit
    `a9faa64e`)。長さの漸化不等式(上の逐語引用の通り: `δ_n-δ_{n+1}≥
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
