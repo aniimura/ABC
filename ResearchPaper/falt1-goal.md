@@ -3008,6 +3008,20 @@ mathlib での正確な組み立て方は未確認)。
       できた——今回の探索は空振りではなく、**探すべき場所を
       使い切った**という意味で意義がある。
 
+      ★step (3) の`d+1`因子版への配線も同じセッションで試みたところ、
+      **単一因子の全射性を`B`へ base change する**部分で新しい技術的な
+      詰まりに当たった(未解決、次回への課題として記録):
+      `falt1_omegaAdjoinRoot_surjective_quotient_p`は`≃+`
+      (`omegaAdjoinRootQuot`経由)ベースなので**加法群としての全射**
+      にすぎず、`LinearMap.lTensor`(`AdjoinRoot g`-線形写像を要求)へ
+      渡すには`AdjoinRoot g`-線形であることを別途示す必要がある——
+      `omegaAdjoinRootQuot`が実際に`AdjoinRoot g`-線形かどうかは
+      `exact?`では自動確認できず(未証明、おそらく真だが`omega_
+      quotient_eq_derivative_span`の構成まで遡って確認する必要が
+      ある)。次回はここ(`omegaAdjoinRootQuot`を`≃+`ではなく
+      `≃ₗ[AdjoinRoot g]`として再構成する、または全射性の証明を
+      最初から`LinearMap`ベースで書き直す)から再開すること。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
