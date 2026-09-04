@@ -235,4 +235,16 @@ theorem coeff_one_iteratedLubinTate {A : Type*} [CommRing A] [IsLocalRing A] [Is
       rw [coeff_one_subst_1var hiter0, hf1, ih, pow_succ]
       ring
 
+/-- `[π^1]_f = f` 自身——`iteratedLubinTate` の定義(`Nat.rec`)を1回
+展開し、`X.subst(f)=f`(`PowerSeries.X_subst`)で閉じる。 -/
+theorem iteratedLubinTate_one_eq_f {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) :
+    iteratedLubinTate f 1 = f := by
+  show PowerSeries.subst (PowerSeries.X : PowerSeries A) f = f
+  exact PowerSeries.X_subst f
+
 end ABC3.Found.PGC
