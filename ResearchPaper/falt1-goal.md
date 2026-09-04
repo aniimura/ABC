@@ -2909,6 +2909,40 @@ mathlib での正確な組み立て方は未確認)。
       まずこの「逐次構成での収束」が本当に成り立つか(定性的に:
       `d+1`回の逐次添加でも同じ`δ→0`の結論に到達できるか)を、
       小さな具体例か概算で検討することから始めるのが良い。
+
+      ★続けて`cancel_conductor_delta`(既存)の**完全に一般な形**
+      (`conductor(Wn,x)*differentIdeal(V1,Wn1) = Ideal.map(...)
+      (differentIdeal V0 Wn)`、`falt1_cancelConductorDelta_assembled`
+      で使った「`conductor=⊤`」という退化ケースは**この一般形の特殊
+      例に過ぎない**、と確認)を精読し、上記の「逐次構成」戦略を
+      1段深く分析した。結論: **discriminant の塔を完全に回避できる
+      わけではない**——`conductor(Wn,x)`の**サイズ**(=`length(Wn1/
+      conductor(Wn,x))`)を`δn`と関係づける下界評価が依然として
+      必要で、これが Faltings 原文の「`β`の評価」に相当する部分
+      (回避できなかった核心)。
+
+      ただし**朗報**もある: `conductor_mul_differentIdeal`の右辺
+      `span{aeval x(deriv(minpoly))}`は、「典型例」の生成元
+      (`X^p-T`型)に対しては**具体的に計算可能**(`deriv = p·X^{p-1}`
+      、Lemma 1.1 の`differentIdeal_eq_span_derivative`と全く同じ
+      パターン、このセッションで何度も使用済み)。つまり必要な
+      下界評価は、**外部の(大域体専用の)discriminant理論を移植する
+      のではなく**、この具体的な微分の計算+`differentIdeal(V0,V1)`
+      自身の計算(同じくEisenstein型多項式の微分から、既存の道具
+      だけで閉じる)を組み合わせるだけで**閉じる可能性が高い**——
+      これは「新しい独立の古典的整数論」ではなく、「このセッション
+      で既に確立した道具(`conductor_mul_differentIdeal`・
+      `differentIdeal_eq_span_derivative`・`falt1_length_quotient_
+      mul_of_ne_zero`)を、退化ケース(`conductor=⊤`)ではなく
+      **一般ケースで具体的に計算し切る**という、範囲は大きいが
+      質的には既知の道具の範囲内の作業**に帰着できる見込みが立った。
+
+      次回はこの「`X^p-T`型生成元に対する`conductor(Wn,x)`の具体的な
+      下界評価」を、小さな具体例(例えば`d=0`、`p`固定)で実際に
+      計算してみることから始めるのが最も見込みが高い——これが
+      成功すれば、Theorem 1.2 の残る核心的な困難(従来「discriminant
+      の塔」と呼んでいたもの)が、**このセッションの既存の道具の
+      範囲内で解決できる**ことが確定する。
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
       「菱形」版であって、対応物というより`falt1_differentIdeal_
