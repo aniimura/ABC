@@ -778,3 +778,15 @@ work unit 2(rigidity)・貼り合わせ後の有限性確認の3点。
 
 コミット: `2f34ca1f`(1ピース連結完成)・`3ee14950`(lean-idioms #28)・
 `d10ec816`(記録)。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(複数ピース
+比較への橋渡し、`standardEtalePresentation_exists_coord`完成、集計10/24で
+変わらず)。`FieldLimit.lean`に完成(★sorry無し)——`Pres`の任意の元は
+`equivRing`で運ぶと「`g^n`倍すれば`X`の多項式になる」座標表示を持つ。
+複数の標準エタール片`D(f_i)`・`D(f_j)`を貼り合わせるのに要る「`f_j`が
+`D(f_i)`の中でどんな元に対応するか」を得る第一歩——得られる多項式は
+1変数なので既存の`exists_fg_subalgebra_tensor_polynomial_family`で
+そのまま有限段階へ降ろせる。GlueDataの遷移射構成に直接使える次の一手。
+
+コミット: `43b30c97`(standardEtalePresentation_exists_coord)・
+`34f15083`(記録)。
