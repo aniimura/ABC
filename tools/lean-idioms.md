@@ -3572,3 +3572,25 @@ docstringの後に置くと「unexpected token 'open'; expected 'lemma'」
 宣言が通っても、ファイルへ実際に書き込んだ後は`lake build`(または
 該当ファイルだけの`lake build <module>`)で必ず再検査すること——
 この種のバグは`lean_check`だけでは検出できない。
+
+## 28. `letI` で導入した `Algebra` インスタンスの下で、既存の等式を
+`algebraMap` 形へ変換するときは `▸`/`show` ではなく**ただの `:=`**
+(defeq)で通す(2026-09-04)
+
+`letI : Algebra R K := φ.toAlgebra` としてから、別の場所で得た等式
+`h : P.map φ = Q`(`φ` を明示形で書いたもの)を`algebraMap R K` を使う
+補題(`standardEtalePairPullbackIso` 等)に食わせたいとき、`▸`で
+明示形↔`algebraMap`形の間を変換しようとすると(特に`Spec`/`Scheme`の
+ような重い型の値に対して)`whnf`がcombinatorial explosionでtimeoutする
+——第22・25・26項と同種だが、今回は**変換そのものを避けられる**のが
+教訓。`algebraMap R K`は`letI`の下で`φ`と**定義上ぴったり等しい**ので、
+`have h' : P.map (algebraMap R K) = Q := h`(型注釈つきの`:=`、`▸`を
+一切使わない)だけで通る——`▸`は「型を書き換える」操作としてより重い
+defeqチェックを要求するのに対し、`have ... : T := v`は「vがTを満たす
+ことを直接検査する」defeqチェックで済み、こちらのほうが軽い場面がある。
+
+**How to apply**: `letI`導入のインスタンスに依存する等式の「形の変換」
+が必要になったら、まず`▸`より先に「型注釈つきの`have`/`refine`で
+ただ代入できないか」を試す。実例:
+`lean/ABC3/Found/CorrHyp/ExtLimit.lean`の`onePieceSchemeIso`
+(`hP₀' : P₀.map (algebraMap ...) = Pres.P := hP₀`)。
