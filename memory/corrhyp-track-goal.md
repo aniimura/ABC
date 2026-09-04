@@ -413,6 +413,28 @@ standardEtalePair`(一般k,K)と並行だが`k:=ℚ`(体)・`K:=A⊗[ℚ]ℝ`版
 
 コミット: `3f130e87`(tensor降下補題群完成)・`ae94716a`(記録)。
 
+★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(base change復元完成、
+1片降下の核心が完全に揃った、集計10/24で変わらず)。`FieldLimit.lean`に
+`exists_fg_subalgebra_tensor_standardEtalePair_baseChange`を完成
+(★sorry無し)——「`StandardEtalePair (A⊗[ℚ]ℝ)`は、ある有限段階`R`上の
+`StandardEtalePair`のbase changeとして文字通り一致する」ことまで保証
+(`P₀.map(algebraMap...) = P`という構造体そのものの一致を経由)。
+
+**これで`Lemma 4.1`の「1アフィン片の降下」に要る核心が完全に揃った**:
+`piecePullbackIso`+`Etale.algebraEtale_appLE`+
+`exists_finite_standardEtaleCover`+`exists_fg_subalgebra_tensor_
+standardEtalePair_baseChange`、という一直線の道筋が数学的にもLean宣言
+としても揃った。残るのは(a)これらを実際に1つの`Found/`宣言として
+組み立てる作業、(b)複数のアフィン片・複数の標準エタール片を横断した
+細分段階の合流、(c)`GlueData`貼り合わせ、という3段階のエンジニア
+リングのみ。
+
+★★今回のセッション(圧縮後の全継続分)は§4にとって特に実り多い
+セッションだった——generic flatnessという壁を戦略転換で完全に回避し、
+「1アフィン片の降下」の数学的核心を完全に組み上げた。
+
+コミット: `0e023728`(base change復元完成)・`256670e0`(記録)。
+
 ★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(残作業4段階を総括、
 集計10/24で変わらず)。generic flatnessの標準的前提(Rネター整域・
 加群/多元環がR上有限表示)を確認したところ、`corrHypInstance4`の
