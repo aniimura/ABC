@@ -85,24 +85,29 @@ Lemma 1.1 1件の形式化がこのセッションの大半(数十回のラウ�
 作業**になる見込み。★急いで低品質な形式化を試みるより、正確に
 読み直した上でこう記録する方が誠実だと判断した。
 
-★★2026-09-04、「複数生成元版 Lemma 1.1」(`Ω_{W_{n+1}/V_n}` が `d+1`
-個の直和である、という上記の主張)に使えそうな mathlib の道具を
-下調べした(未実装、次に着手するならここから):
-`Algebra.IsPushout R S A B`(`B` が `S`・`A` の `R` 上の pushout=
-テンソル積 `S⊗_RA` であることの typeclass)+ `KaehlerDifferential.
-tensorKaehlerEquivBase R S A B [IsPushout R S A B] : S⊗_RΩ_{A/R}
-≃ₗ[S] Ω_{B/S}`(mathlib に既にある、**同型**であって完全列ではない)。
-`V_{n+1}` は独立な生成元(`T_i` の `p^n` 乗根が `d` 個、`1` のべき根が
-`1` 個)の**テンソル積**なので、`IsPushout` の枠組みにちょうど収まる
-はず。★ただし `tensorKaehlerEquivBase` は「相対的な」`Ω_{B/S}`
-(**片方の脚 `S` を基点とする**)を与えるだけで、私が欲しい
-`Ω_{B/R}`(**共通の基点 `R` を基点とする**、`d+1` 個の直和になる方)
-はこれ**だけでは**出ない——`B⊗_SΩ_{S/R}→Ω_{B/R}→Ω_{B/S}→0`
-(第二完全列)にこの結果を組み合わせ、**分裂性をどう示すか**が依然
-未解決(`polynomialKaehlerSplit` で使った「多項式環の retraction」
-に相当するものが、pushout の場合にどう構成できるかが鍵になりそう)。
-これ以上は今回深追いしなかった——次のセッションはここから始めれば
-探索の重複を避けられる。
+★★★2026-09-04、**「複数生成元版 Lemma 1.1」の核心(2生成元の場合)が
+完成した**(`Found/Falt1/KaehlerAux.lean` の `pushoutKaehlerSplit`)。
+`Algebra.IsPushout R C D B`(`B` が `C`・`D` の `R` 上の pushout=
+テンソル積)のとき、`Ω_{B/R} ≃ₗ[B] (B⊗_CΩ_{C/R}) × (B⊗_DΩ_{D/R})`
+(`mapBaseChange R C B` が単射という条件つき)——`polynomialKaehlerSplit`
+と全く同じ「`Function.Exact.splitSurjectiveEquiv` + 明示的セクション」
+のパターンで構成できた。**鍵になった発見**: `tensorKaehlerEquivBase`
+(片方の脚基点)ではなく **`tensorKaehlerEquiv`**(もう1つの、`B⊗_D
+Ω_{D/R} ≃ₗ[B] Ω_{B/C}` という形の mathlib 既製品)の方が正しい道具
+だった——`map R C B B ∘ mapBaseChange R D B = tensorKaehlerEquiv
+R C D B` という自然性(`tensorKaehlerEquiv_eq_map_mapBaseChange`、
+新規に証明)が、`polynomialEquiv` の代わりのセクションを直接与えた。
+
+★残る作業(次のセッションはここから):
+1. **`d+1` 個への一般化**(今は2個のみ)——`pushoutKaehlerSplit` を
+   `d+1` 回の pushout の反復に適用する帰納法(構造自体は難しくないはず)。
+2. **`mapBaseChange R C B` の単射性の条件**——`falt1MapBaseChangeInjective`
+   と同型の議論(`C` 側が monogenic かつ `f'` 非零因子)が要る。
+3. **「非常に分岐した」`V_n` の族**そのものの形式化(具体例: `p^n` 乗根
+   と `1` のべき根を添加する塔)——まだ手つかず。
+4. **`Module.length` の漸化不等式**(`δ_n-δ_{n+1}≥β-(d+1)(δ_n-δ_{n+1})`
+   等)——まだ手つかず。
+これ以上は今回深追いしなかった。
 
 **§2-4(11項目)**: 変化なし——「almost mathematics」が mathlib に
 存在しないため完全に未着手。
