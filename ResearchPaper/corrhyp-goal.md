@@ -1501,3 +1501,33 @@ closure_away_mul`という実際の前進を確定分として記録する。
 との対応づけ)。(b)は依然未着手だが、(a)の「捩れの場合分け」は不要と
 判明したので、作業単位1の見通しは**むしろ簡潔になった**。★このセッション
 通算で得た教訓が今回も生きた——深掘りすると回り道自体が見えてくる。
+
+### 2026-09-04さらに続報: 作業単位1(b)へ着手——`StandardEtalePair.Ring`の元を降ろす2変数多項式版descent
+
+`exists_fg_subalgebra_tensor_bivariate_finset`(`FieldLimit.lean`)を完成させた——
+`Polynomial (Polynomial (A⊗[ℚ]ℝ))`(`StandardEtalePair.Ring`が経由する`Bivariate`
+多項式環そのもの)の有限個の元を、ある共通の`R : FgSubalgebra ℚ ℝ`から作った
+`Polynomial (Polynomial (A⊗[ℚ]R.1))`の元の像として同時に書ける、という
+`exists_fg_subalgebra_tensor_finset`の2変数版。係数(各多項式の係数のさらに係数)を
+1つの`Finset (A⊗[ℚ]ℝ)`へ平坦化して既存の`_finset`に渡し、得られた降下先の係数から
+2重の`monomial`和で元の多項式を組み直す——`exists_fg_subalgebra_tensor_polynomial_family`
+と同じ手筋を1段深くしただけ。★sorry無し、標準3公理のみ。
+
+配管の詰まり: `Polynomial.mapRingHom φ`を`FunLike`で適用した形(`⇑(mapRingHom φ) x`)と
+`Polynomial.map φ x`(dot記法)が定義上等しい(`rfl`で確認済み)にもかかわらず構文上
+一致せず、`simp_rw`/`rw`が「instances 透明度で type-correct でない」エラーを出す場面が
+複数箇所であった——`have hcoe : ⇑(Polynomial.mapRingHom φ) = Polynomial.map φ := rfl`を
+明示的に挟んで`rw [hcoe]`することで解決。これも配管の教訓として`tools/lean-idioms.md`
+候補に加える価値がある(次回追記予定)。
+
+**残る接続**(未着手): `StandardEtalePair.Ring`は`Bivariate`多項式環の商
+(`Ideal.Quotient.mk`、全射)なので、商から代表元への持ち上げ
+(`Ideal.Quotient.mk_surjective`)→この補題で係数降下→有限段階側でも`Ideal.
+Quotient.mk`を適用、という一手で`P.Ring`の実際の元(比較射の分母`g_l`)を降ろせる
+はず。ただし`standardEtalePairRingBaseChange`自体は生の`Bivariate`商ではなく
+`equivMvPolynomialQuotient`(`MvPolynomial (Fin 2) R`経由)を使って組み立てられて
+いるため、両者の往復(`Bivariate.equivMvPolynomial`)も必要になる——次の一手。
+
+集計は10/24で変わらず(§4は0/2のまま)。lake build 0エラー(ABC3全体、6590 jobs)。
+
+コミット: `8c96fa00`(exists_fg_subalgebra_tensor_bivariate_finset)。
