@@ -409,4 +409,90 @@ noncomputable def omegaCongr {R A B : Type*} [CommRing R] [CommRing A] [CommRing
     ⟨Function.LeftInverse.injective (omegaCongr_leftInv e),
      fun y => ⟨KaehlerDifferential.map R R B A y, omegaCongr_rightInv e y⟩⟩
 
+/-! ## ①②③④ の貼り合わせ(完成) -/
+
+/-- `AdjoinRoot f`(`= Polynomial R ⧸ (f)`)には自動では見つからない
+`Algebra (Polynomial R) (AdjoinRoot f)` を明示的に登記する(`AdjoinRoot`
+が `def` で simp-reducible ではないため、instance 探索が定義を展開して
+既存の `Ideal.Quotient.algebra` を見つけられない——2026-09-04 に発見)。 -/
+noncomputable instance AdjoinRoot.instAlgebraPolynomial {R : Type*} [CommRing R] (f : Polynomial R) :
+    Algebra (Polynomial R) (AdjoinRoot f) :=
+  inferInstanceAs (Algebra (Polynomial R) (Polynomial R ⧸ Ideal.span ({f} : Set (Polynomial R))))
+
+instance AdjoinRoot.instIsScalarTowerPolynomial {R : Type*} [CommRing R] (f : Polynomial R) :
+    IsScalarTower R (Polynomial R) (AdjoinRoot f) :=
+  inferInstanceAs (IsScalarTower R (Polynomial R) (Polynomial R ⧸ Ideal.span ({f} : Set (Polynomial R))))
+
+/-- ①(`omega_quotient_eq_derivative_span`)を `AdjoinRoot f` に特殊化し、
+`≃+`(加法群としての同型)に弱めたもの。 -/
+noncomputable def omegaAdjoinRootQuot {R : Type*} [CommRing R] (f : Polynomial R) :
+    Ω[(AdjoinRoot f)⁄R] ≃+
+      (AdjoinRoot f) ⧸ Ideal.span
+        ({algebraMap (Polynomial R) (AdjoinRoot f) (Polynomial.derivative f)} : Set (AdjoinRoot f)) :=
+  (omega_quotient_eq_derivative_span f (ker_adjoinRoot_mk f) AdjoinRoot.mk_surjective).toAddEquiv
+
+/-- `IsAdjoinRootMonic.mkOfAdjoinEqTop hint hadjoin` の根は `w` そのもの。 -/
+theorem adjoinRootMinpolyEquiv_root {V W : Type*} [CommRing V] [CommRing W] [Algebra V W]
+    [IsDomain V] [IsDomain W] [Module.IsTorsionFree V W] [IsIntegrallyClosed V]
+    (w : W) (hint : IsIntegral V w) (hadjoin : Algebra.adjoin V ({w} : Set W) = ⊤) :
+    (IsAdjoinRootMonic.mkOfAdjoinEqTop hint hadjoin).toIsAdjoinRoot.root = w :=
+  IsAdjoinRoot.mkOfAdjoinEqTop_root (hα := hint) (hα₂ := hadjoin)
+
+/-- `adjoinRootMinpolyEquiv` は `Polynomial V` からの `algebraMap` の像を
+`w` での evaluation(`aeval`)に写す——`e` の構成(`IsAdjoinRoot.map` =
+`aeval` at `root`、`IsAdjoinRoot.aeval_root_eq_map`)と
+`adjoinRootMinpolyEquiv_root`(根が `w`)から従う。 -/
+theorem adjoinRootMinpolyEquiv_algebraMap {V W : Type*} [CommRing V] [CommRing W] [Algebra V W]
+    [IsDomain V] [IsDomain W] [Module.IsTorsionFree V W] [IsIntegrallyClosed V]
+    (w : W) (hint : IsIntegral V w) (hadjoin : Algebra.adjoin V ({w} : Set W) = ⊤) (p : Polynomial V) :
+    (adjoinRootMinpolyEquiv w hint hadjoin) (algebraMap (Polynomial V) (AdjoinRoot (minpoly V w)) p)
+      = Polynomial.aeval w p := by
+  unfold adjoinRootMinpolyEquiv
+  rw [show algebraMap (Polynomial V) (AdjoinRoot (minpoly V w)) p = AdjoinRoot.mk (minpoly V w) p from rfl,
+    IsAdjoinRoot.adjoinRootAlgEquiv_apply_mk]
+  conv_rhs => rw [← adjoinRootMinpolyEquiv_root w hint hadjoin]
+  exact (congrFun (congrArg _
+    (IsAdjoinRoot.aeval_root_eq_map (h := (IsAdjoinRootMonic.mkOfAdjoinEqTop hint hadjoin).toIsAdjoinRoot))) p).symm
+
+/-- **[Falt1] Lemma 1.1 の余核の主張(完成)**: `V` が Dedekind 整域、
+`w : W` が `V` 上整・`W` を生成し(かつ拡大体レベルでも生成する)なら、
+`Ω_{W/V} ≅ W ⧸ differentIdeal V W`(`≃+`、加法群としての同型)。
+
+これで Lemma 1.1「`Ω_{W/V}` の長さは `length(W/p^δW)` に等しい」の
+**余核側**(`Ω_{W/V}` が何であるかの特定)が完全に証明された——`p^δ` は
+`differentIdeal V W` の生成元(δ は Faltings の記法での different の
+指数)。①②③④(`omega_quotient_eq_derivative_span`・
+`differentIdeal_eq_span_derivative`・`adjoinRootMinpolyEquiv`・
+`omegaCongr`)を `adjoinRootMinpolyEquiv_algebraMap`(橋渡しの自然性)・
+`Ideal.map_span`・`Ideal.quotientEquiv` で貼り合わせた。
+
+★まだ残っている: (a) 「長さ」概念そのもの(`length(W/p^δW)`)を
+mathlib のどの道具で表すか(本定理は「同型」を与えるので、あとは
+「同型な加法群は同じ長さを持つ」という一般論を適用するだけのはず)、
+(b) Lemma 1.1 の**単射性**の主張(`Ω_V⊗_VW→Ω_W` の単射性、絶対微分の
+「第一完全列」——本定理とは独立な、別の議論)。 -/
+noncomputable def falt1CokernelIso {V K L W : Type*} [CommRing V] [IsDedekindDomain V]
+    [Field K] [Algebra V K] [IsFractionRing V K] [Field L] [Algebra K L] [FiniteDimensional K L]
+    [Algebra.IsSeparable K L] [CommRing W] [Algebra W L] [Algebra V W] [Algebra V L]
+    [IsScalarTower V K L] [IsScalarTower V W L] [IsIntegralClosure W V L]
+    [IsDedekindDomain W] [Module.IsTorsionFree V W]
+    (w : W) (hint : IsIntegral V w) (hadjoin : Algebra.adjoin V ({w} : Set W) = ⊤)
+    (hw : Algebra.adjoin K ({(algebraMap W L) w} : Set L) = ⊤) :
+    Ω[W⁄V] ≃+ (W ⧸ differentIdeal V W) := by
+  set e := adjoinRootMinpolyEquiv w hint hadjoin
+  set step1 := (omegaCongr e).symm.trans (omegaAdjoinRootQuot (minpoly V w))
+  set J := Ideal.map (e.toRingEquiv : AdjoinRoot (minpoly V w) →+* W)
+    (Ideal.span ({algebraMap (Polynomial V) (AdjoinRoot (minpoly V w))
+      (Polynomial.derivative (minpoly V w))} : Set (AdjoinRoot (minpoly V w))))
+  set step2 := Ideal.quotientEquiv _ J e.toRingEquiv rfl
+  have hJ : J = differentIdeal V W := by
+    show Ideal.map _ (Ideal.span _) = _
+    rw [Ideal.map_span, Set.image_singleton]
+    have heval : (e.toRingEquiv : AdjoinRoot (minpoly V w) →+* W)
+        (algebraMap (Polynomial V) (AdjoinRoot (minpoly V w)) (Polynomial.derivative (minpoly V w)))
+        = Polynomial.aeval w (Polynomial.derivative (minpoly V w)) :=
+      adjoinRootMinpolyEquiv_algebraMap w hint hadjoin (Polynomial.derivative (minpoly V w))
+    rw [heval, ← differentIdeal_eq_span_derivative w hw hadjoin]
+  exact step1.trans (hJ ▸ step2.toAddEquiv)
+
 end ABC3.Found.Falt1
