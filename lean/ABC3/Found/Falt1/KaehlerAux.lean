@@ -2755,6 +2755,76 @@ theorem falt1_isPushout_adjoinRoot {R C : Type*} [CommRing R] [CommRing C] [Alge
   exact falt1_isBaseChange_adjoinRoot g
 
 /-!
+## `pushoutKaehlerSplitStep` を具体的な `AdjoinRoot` の反復pushoutに
+繋ぐ(2026-09-05)
+
+`Algebra.IsPushout V0 Wn V1 Wn1`(`Wₙ→Wₙ₊₁`の橋)は Theorem 1.2 の
+証明原文(物理p.5第2文、falt1-goal.md 参照)自体がそのズレを測ることで
+成り立っていることが判明し、一般には偽——**本来の適用先は`Vₙ→Vₙ₊₁`
+の「`d+1`個の単一生成拡大の同時添加」の側**(falt1-goal.md 2026-09-05
+の記録参照)。この節では、その本来の適用先で実際に必要になる2つの道具
+(`Algebra.IsPushout`の具体形は既に`falt1_isPushout_adjoinRoot`で
+完成済み)を揃える: (1) `pushoutKaehlerSplit`系が要求する`hinj`を
+`AdjoinRoot(g.map φ)`の言葉で直接与える版、(2) 反復pushoutで`B1`を
+次の段の`C`として使うときに必要な`AlgEquiv`(`mapBaseChange_injective_
+transport`は`LinearEquiv`ではなく`AlgEquiv`を要求するため、
+`adjoinRootTensorEquiv`のinstance diamondを再導入せずに用意する)。 -/
+
+/-- `adjoinRootTensorEquivFwd`を`AlgHom`として再構成したもの
+(`Algebra.TensorProduct.lift`で`(c,x)↦c*ψ(x)`を持ち上げるだけ、
+`ψ=algHomAdjoinRootOfCompat'`)。 -/
+noncomputable def adjoinRootTensorAlgHom {R C : Type*} [CommRing R] [CommRing C] [Algebra R C] (g : Polynomial R) :
+    TensorProduct R C (AdjoinRoot g) →ₐ[C] AdjoinRoot (g.map (algebraMap R C)) :=
+  Algebra.TensorProduct.lift (Algebra.ofId C (AdjoinRoot (g.map (algebraMap R C))))
+    (algHomAdjoinRootOfCompat' (V0 := R) (Wn := C) g) (fun _ _ => mul_comm _ _)
+
+/-- `adjoinRootTensorAlgHom`の下請け関数は`adjoinRootTensorEquivFwd`と
+(pure tensorで一致するので`TensorProduct.induction_on`により)
+**至るところ**一致する。 -/
+theorem adjoinRootTensorAlgHom_eq_fwd {R C : Type*} [CommRing R] [CommRing C] [Algebra R C] (g : Polynomial R) :
+    ∀ z, (adjoinRootTensorAlgHom (R := R) (C := C) g) z = (adjoinRootTensorEquivFwd (R := R) (C := C) g) z := by
+  intro z
+  induction z using TensorProduct.induction_on with
+  | zero => simp
+  | tmul c x =>
+      show algebraMap C (AdjoinRoot (g.map (algebraMap R C))) c * (algHomAdjoinRootOfCompat' (V0 := R) (Wn := C) g) x = _
+      rw [← Algebra.smul_def]
+      rfl
+  | add x y hx hy => rw [map_add, map_add, hx, hy]
+
+/-- 上の一致から、`adjoinRootTensorAlgHom`の全単射性が
+`adjoinRootTensorEquivFwd_bijective`から直ちに従う。 -/
+theorem adjoinRootTensorAlgHom_bijective {R C : Type*} [CommRing R] [CommRing C] [Algebra R C] (g : Polynomial R) :
+    Function.Bijective (adjoinRootTensorAlgHom (R := R) (C := C) g) := by
+  have := adjoinRootTensorEquivFwd_bijective (R := R) (C := C) g
+  rwa [show (adjoinRootTensorAlgHom (R := R) (C := C) g : TensorProduct R C (AdjoinRoot g) → AdjoinRoot (g.map (algebraMap R C))) =
+    (adjoinRootTensorEquivFwd (R := R) (C := C) g : TensorProduct R C (AdjoinRoot g) → AdjoinRoot (g.map (algebraMap R C))) from
+    funext (adjoinRootTensorAlgHom_eq_fwd g)]
+
+/-- **`adjoinRootTensorEquiv`(instance diamond有り)の代わりに使える
+`AlgEquiv`**: `mapBaseChange_injective_transport`のような`AlgEquiv`を
+要求する道具にそのまま渡せる、`Ideal.Quotient`を経由しない版。 -/
+noncomputable def adjoinRootTensorAlgEquiv {R C : Type*} [CommRing R] [CommRing C] [Algebra R C] (g : Polynomial R) :
+    TensorProduct R C (AdjoinRoot g) ≃ₐ[C] AdjoinRoot (g.map (algebraMap R C)) :=
+  AlgEquiv.ofBijective (adjoinRootTensorAlgHom (R := R) (C := C) g) (adjoinRootTensorAlgHom_bijective g)
+
+/-- **`pushoutKaehlerSplitStep`の`hinj`を`AdjoinRoot(g.map φ)`の言葉で
+直接与える**: `mapBaseChange_injective_adjoinRoot_tensor`
+(`TensorProduct`版、Lemma 1.1型の非零因子条件から)を
+`adjoinRootTensorAlgEquiv`で`AdjoinRoot(g.map φ)`側へ移送するだけ。
+これで`pushoutKaehlerSplitStep`の`B := AdjoinRoot(g.map(algebraMap R
+B1))`という反復pushoutの各段で要る`hinj`が、Lemma 1.1と同じ「その段の
+最小多項式の微分が非零因子」という1つの仮定に帰着する。 -/
+theorem mapBaseChange_injective_adjoinRoot_direct {R C : Type*} [CommRing R] [CommRing C] [Algebra R C]
+    (g : Polynomial R)
+    (hnzd : algebraMap (Polynomial C) (AdjoinRoot (g.map (algebraMap R C)))
+        (Polynomial.derivative (g.map (algebraMap R C)))
+        ∈ nonZeroDivisors (AdjoinRoot (g.map (algebraMap R C)))) :
+    Function.Injective (KaehlerDifferential.mapBaseChange R C (AdjoinRoot (g.map (algebraMap R C)))) :=
+  mapBaseChange_injective_transport (adjoinRootTensorAlgEquiv (R := R) (C := C) g)
+    (mapBaseChange_injective_adjoinRoot_tensor g hnzd)
+
+/-!
 ## `V_1 → W_1` の橋渡し写像そのものが完成した(2026-09-04)
 
 `hspan_eq` の接続に必要な `Algebra V1 Wn1` インスタンスを、実際に構成
