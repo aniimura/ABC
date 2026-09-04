@@ -59,3 +59,4 @@
 - [pGC Theorem 4.2: 裸のΓ_K≅Γ_K′構成はsorry無しで完成、FilteredGroup.Isoへの持ち上げに要る自然性公理がRamificationFiltrationに無い](pgc-ramification-naturality-gap.md) — Found/PGC/GaloisTransfer.lean(galMulEquivOf・galMulEquivOf_indep、局所類体論不使用)。GvをGmulEquivが保つ保証はInterfaceに無い(Cor3.1/3.3と同根の穴)。2026-09-04。
 - [pGC 局所類体論: Lubin-Tate形式群法則3性質完成に続き、𝒪_K作用への拡張(節目1、[a]_fの1変数存在定理)もsorry無しで完成](pgc-lubin-tate-existence-progress.md) — Found/PGC/LubinTateEndoLimit.lean::LubinTateEndo_functional_equationが2026-09-04に完成。残るは節目(2)自己準同型性の仕上げ・torsion点・相互律写像そのものの構成という大きな仕事。
 - [ABC3b/cとは.git自体を共有——他セッションのcommitで自分のコミット内容が合流・作業ツリーが差し戻ることがある。.lake/buildキャッシュでも類似の再現性トラブルを観測](shared-git-repo-race-hazard.md) — commit直後は`git log -1 --stat`で自分のメッセージか確認、触る前は`git status`/`git diff`でHEADとの一致を確認してから編集する。多相化した補題は型注釈を省略しない。2026-09-04実測。
+- [Scheme等"大きな圏"のデータはType 1に住む——interfaceのSpace:Typeと衝突する](corrhyp-scheme-universe-mismatch.md) — HyperbolicCurveData.SpaceをType uに universe 多相化して解決。既存の具体化には無影響。エラーは後続フィールドの行に出ることがあるので孤立させて再現すること。

@@ -347,45 +347,80 @@ arithmetic で `Comm` の中で無限指数のはずだが、`corrHypInstance` �
 [[measure-mathlib-before-skeleton]] / [[genell-track-b]] / [[corrhyp-track-goal]] /
 [[stale-status-read-lean-first]] / [[no-wall-decompose-instead]]
 
-## 4. §4(`Lemma 4.1`・`Theorem 4.2`)の設計案(2026-09-04、未着手・計画のみ)
+## 4. §4(`Lemma 4.1`・`Theorem 4.2`)の設計案
 
 ★§4 は §2/§3/§5/§6 と性質が違う——**mathlib に無い外部定理は不要**
 (`isLimit_specKCone`、`Spec K = lim Spec R` が既に sorry 無しで完成しており、
-`AffineTransitionLimit.lean` の spreading-out 定理を直接呼べる)。ブロッカーは
-数学ではなく**`HyperbolicCurveData.Space` の設計**——「`k` 上の曲線」と
-「`K` 上の曲線」を同じ型で表し、`Ext` がその間を写す、という構造をまだ
-組んでいない。
+`AffineTransitionLimit.lean` の spreading-out 定理を直接呼べる)。
 
-### 検討した2案
+### 2026-09-04 前半: 関数体案を検討して頓挫(記録として残す)
 
-1. **Scheme 案**: `Space := Scheme`。有限エタール射・ファイバー積の圏論的な
-   整備一式が要る(`FEt` を実際の有限エタール射として組む必要がある)。
-2. **関数体案**(こちらを選択・着手): `Space := (k 上の関数体) ⊕ (K 上の関数体)`
-   のような和型。`FEt Y X`(有限エタール `X→Y`)は**逆向き**の有限次
-   分離拡大 `K(Y) ↪ K(X)` として実装できる(covering space の函数体の
-   包含関係、標準的な辞書)。mathlib の体拡大理論(`IsSeparable`・
-   `FiniteDimensional`)のほうが一般スキームの有限エタール射論より
-   遥かに厚い。
+「`Space := (k 上の関数体) ⊕ (K 上の関数体)`」という和型を検討したが、
+`Ext`(係数拡大)がテンソル積 `F ⊗_k K` に対応し、これが**一般には体に
+ならない**ことで頓挫した(`Space` 型を全称的に保つのが重くなる)。
 
-### 関数体案の詰まり(2026-09-04 実測)
+### 2026-09-04 後半: Scheme 案に転換、`FEt`/`Ext` を実装完了 ★★★
 
-`Ext`(`k` から `K` への係数拡大)は関数体のテンソル積 `F ⊗_k K` に対応するが、
-これは**一般には体にならない**(`F` が `k` 上代数的で `K` と線型無関係でない
-場合など)。1つの witness を作るだけなら「都合の良い `K`」(例えば `k` 上
-超越的な `K`)を選べば回避できる見込みだが、`Space` 型を**全称的に**正しく
-保つには「テンソル積が体にならない場合にどう振る舞うか」を設計に組み込む
-必要があり、これも軽くない。
+ユーザーから「工数が多いことで踏みとどまる必要はありません」との明示的な
+指示を受け、当初「有限エタール射・ファイバー積の圏論的な整備一式が要る」と
+見積もっていた **Scheme 案**に実際に着手したところ、mathlib の基盤が
+見積もりよりずっと厚く、**1セッションで完成した**:
 
-★★さらに、`Space` に載せる「1つの具体的な双曲曲線」自体
-(例えば `P¹ − {0,1,∞}` や種数1・穴1の曲線)を関数体としてどう表すかも
-未検討——`FieldLimit.lean` の資産(`FgSubalgebra`・`isLimit_specKCone`)は
-`Spec K` 側の極限操作にしか直接使えず、**曲線そのものの構成**(種数・穴の
-数を持つ具体的な関数体)は §5 のスタック理論と同じ「双曲幾何が mathlib に
-無い」という欠落に部分的に触れる——ただし §4 の主張自体(`Lemma 4.1`・
-`Theorem 4.2`)は種数を計算する必要はなく、**存在の記述**だけなので、
-`type`(`(g,r)`)を posit のまま(§1のように)扱えば回避できる可能性がある。
+- `Found/CorrHyp/SchemeFEt.lean`: `Space := Over BaseK`(`BaseK := Spec ℚ`)。
+  `FEt`(有限エタール射)は `AlgebraicGeometry.Etale`/`IsFinite`という
+  mathlib の `MorphismProperty` 基盤(合成・恒等・base change 安定性が
+  `instance` として自動)にそのまま乗り、`idFEt`/`comp`/`pullback`/`pbFst`/
+  `pbSnd` が `infer_instance` と `MorphismProperty.pullback_fst`/`pullback_snd`
+  だけで完成。
+- `Ext`(係数拡大 `(-)_K`、`K := ℝ`)は、手作りの `Limits.pullback.map` ではなく
+  **mathlib 自身の `Over.pullback f ⋙ Over.map f`**(`f : Spec ℝ ⟶ Spec ℚ`)
+  という関手の合成として構成すると、`CategoryTheory.MorphismProperty.
+  overPullbackMap` が base change 安定性からの遺伝を一発で与えてくれた
+  ——`extFEt`(`Ext` の射側の作用)がこれで完成。
+- `HyperbolicCurveData.Space : Type` を `Type u`(universe 多相)に変更
+  (逸脱、`HyperbolicCurve.lean` に記録)——`Over BaseK : Type 1` が
+  旧来の `Type`(`= Type 0`)固定と衝突したため。既存の `corrHypInstance`/
+  `corrHypInstance2`(`u=0`)には影響なし。
+- `Found/CorrHyp/Instance3.lean`: 上記を全部使い `corrHypInstance3 :
+  HyperbolicCurveData` を具体的に構成(`Lemma 4.1` が読まないフィールドは
+  安全な placeholder)。`Lemma 4.1` の statement が `corrHypInstance3` に
+  対して型検査を通ることを確認。
 
-**結論**: 数学的な核心(spreading-out)は完成済みなので §4 は §2/§3/§5/§6
-より近い——ただし `Space`/`FEt`/`Ext` の一貫した具体化には(関数体案でも)
-数日規模の設計・実装が要る。次にここへ戻るときは、まず「1つの具体的な
-双曲曲線を関数体としてどう表すか」から始めるのが良い出発点。
+**結論: `Space`/`FEt`/`Ext` の一貫した具体化という設計上のブロッカーは
+解消した。** 残るのは `Lemma 4.1` **本体**(spreading-out の実際の証明)。
+
+### `Lemma 4.1` 本体に向けた実測(2026-09-04、続き)
+
+`toSchemeDiagram ℚ ℝ : (FgSubalgebra ℚ ℝ)ᵒᵖ ⥤ Scheme`(`FieldLimit.lean`)は
+`AffineTransitionLimit.lean` が要求する前提を**両方とも自動で満たす**ことを
+確認した:
+```
+example : IsCofiltered (FgSubalgebra ℚ ℝ)ᵒᵖ := inferInstance   -- OK
+example {i j} (f : i ⟶ j) : IsAffineHom ((toSchemeDiagram ℚ ℝ).map f) := by
+  infer_instance   -- OK
+```
+`AffineTransitionLimit.lean` には「極限の中で2つの射が一致する⟹有限段階で
+一致する」型の spreading(`Scheme.exists_hom_hom_comp_eq_comp_of_
+locallyOfFiniteType` 等)・「アフィン開被覆は有限段階に降りる」
+(`Scheme.exists_isOpenCover_and_isAffine`)・「アフィン性は有限段階に降りる」
+(`Scheme.exists_isAffine_of_isLimit`)は**すでにある**。
+
+★★**まだ無いもの**(`lemma_4_1.needs` の1番目、EGA IV 8.8-8.10 相当の核心):
+「極限上の**新しいスキーム**(有限型・有限エタールという条件つき)が、
+ある有限段階の**新しいスキーム**の base change として存在する」という
+**構成的な**降下——上の3つはどれも「すでにある対象・射」の spreading で、
+「新しい対象を`Z_K`から`Z`へ**作る**」ものではない。組み立て方の見通し:
+`exists_isOpenCover_and_isAffine` でアフィン開被覆を有限段階に降ろし→
+各アフィン片を `RingHom.EssFiniteType.exists_eq_comp_ι_app_of_isColimit`
+(`Algebra/Category/Ring/FinitePresentation.lean`)型の環準同型の spreading で
+有限段階の環に降ろし→貼り合わせデータ(遷移射の一致)を
+`exists_hom_hom_comp_eq_comp_of_locallyOfFiniteType` で有限段階に降ろし→
+`Etale`/`IsFinite` の条件自体も有限段階で成り立つことを言う(これは
+`RingHom.Etale`/`FormallyEtale` の「有限生成部分環での近似」相当、
+未確認)。**これは1つの既存補題では閉じず、組み立てが要る**——
+`lemma_4_1.needs` の2番目(étale 剛性)・3番目(標数0接空間)は
+まだ手つかず。
+
+次にここへ戻るときの出発点: 上の「構成的な降下」を`FEtK`(有限エタール、
+`IsFinite ∧ Etale`)の場合に特化した1つの補題として切り出し、
+`exists_isOpenCover_and_isAffine` から着手する。

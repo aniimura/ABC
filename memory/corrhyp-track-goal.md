@@ -107,3 +107,36 @@ mathlib自身が使う`set_option backward.isDefEq.respectTransparency false`
 
 **最終集計: `CorrHyp §1 4/5, §2 2/6, §3 1/3, §4 0/2, §5 0/7, §6 0/1
 —— 合計7/24`**(このセッション開始時の1/24から7倍)。
+
+★★★★★★★2026-09-04さらに続報(第34-36件、§4のScheme基盤を完成)。
+ユーザーが「§4が使用している理論があり工数が多いという問題か」「著者が証明を
+畳んでおり後追いが困難か。工数が多いことで踏みとどまる必要はない」と明示的に
+指示。それまで関数体案(`F⊗_k K`が体にならず頓挫)で止まっていた`Space`/`FEt`/
+`Ext`の設計を、実際にScheme案(`Space:=Over BaseK`、`BaseK:=Spec ℚ`)へ転換して
+着手したところ、mathlibの`AlgebraicGeometry.Etale`/`IsFinite`
+(`MorphismProperty`基盤、合成・恒等・base change安定性が`instance`で自動)が
+見積もりよりずっと厚く、`FEt`一式(`idFEt`/`comp`/`pullback`/`pbFst`/`pbSnd`)が
+1セッションで完成。`Ext`(係数拡大、`K:=ℝ`)は手作りの`Limits.pullback.map`では
+なくmathlib自身の`Over.pullback f ⋙ Over.map f`の合成として組むと
+`CategoryTheory.MorphismProperty.overPullbackMap`が base change 安定性からの
+遺伝を一発で与える、という設計転換が鍵だった(`IsPullback.of_right`等の
+手作りpasting は遥かに長くなり撤回)。
+
+途中で`HyperbolicCurveData.Space:Type`(`Type 0`固定)と`Over BaseK:Type 1`
+(Schemeは大きな圏なので宿命的に1universe上)が衝突する**設計上の欠陥**を
+発見・修正——`Space`だけを`Type u`に universe 多相化した(`corrHypInstance`/
+`corrHypInstance2`は`u=0`で無傷)。`corrHypInstance3`(`Instance3.lean`)として
+具体化まで完成、`Lemma 4.1`のstatementが型検査を通ることも確認。
+
+`Lemma 4.1`本体は未証明のまま(集計は7/24で変わらず)——
+`AffineTransitionLimit.lean`の前提(`IsCofiltered`・`IsAffineHom`)は
+`k:=ℚ,K:=ℝ`について`infer_instance`で自動充足することを確認したが、
+「極限上の新しいスキームが有限段階のスキームのbase changeとして存在する」
+という構成的降下(EGA IV 8.8-8.10相当)はmathlibに1つの補題としては
+無く、組み立てが要る——`corrhyp-goal.md`§4に具体的な組み立て方の見通し
+(`exists_isOpenCover_and_isAffine`→環の spreading→貼り合わせ→étale条件の
+降下)を記録した。次に戻るときはここから。
+
+コミット: `2af0967d`(SchemeFEt.lean・universe多相化)・`1626cc06`
+(Instance3.lean)。[[corrhyp-scheme-universe-mismatch]] に universe の
+教訓を分離して記録予定。
