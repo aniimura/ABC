@@ -339,4 +339,48 @@ theorem spectralNorm_lt_one_of_mem_iteratedLubinTateTorsionPoints {p : ℕ} [Fac
         exact_mod_cast (by omega : 0 < (pp ^ ff) ^ (n + 1) - (pp ^ ff) ^ n)
       exact Real.rpow_lt_one hπpos.le hπlt1 (by positivity)
 
+open scoped Classical in
+/-- `Λ_n` の元は `𝒪_K` 上整——`D_n`(`𝒪_K` 係数、モニック)の根なので、
+`D_n` 自身が`IsIntegral`の定義に要求されるモニック多項式そのものと
+なる。 -/
+theorem isIntegral_of_mem_iteratedLubinTateTorsionPoints {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n) :
+    IsIntegral (𝒪[K.carrier]) x := by
+  rw [iteratedLubinTateTorsionPoints, Multiset.mem_toFinset, Polynomial.mem_roots'] at hx
+  obtain ⟨hne, hxroot⟩ := hx
+  refine ⟨iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n,
+    (isDistinguishedAt_iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n).monic, ?_⟩
+  rw [Polynomial.eval₂_eq_eval_map]
+  exact hxroot
+
+/-- `Λ_n` の元は `K.carrier`(局所体本体)上でも整——`𝒪_K` 上の整性
+(`isIntegral_of_mem_iteratedLubinTateTorsionPoints`)から
+`IsIntegral.tower_top` で中間の環 `K.carrier` へ持ち上げる。有限次拡大
+`K.carrier⟮x⟯`(`IntermediateField.adjoin.finiteDimensional`)を経由して、
+将来 `x` での冪級数評価に必要な完備性(有限次拡大は完備)へ繋がる。 -/
+theorem isIntegral_carrier_of_mem_iteratedLubinTateTorsionPoints {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n) :
+    IsIntegral K.carrier x :=
+  (isIntegral_of_mem_iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n x hx).tower_top
+
 end ABC3.Found.PGC
