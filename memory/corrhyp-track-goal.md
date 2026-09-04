@@ -338,3 +338,23 @@ base change」完成、§4の幾何学的な最後の穴が埋まった)。`pull
 
 コミット: `1f249cd8`(pullbackSpecIso特定)・`e3ed6541`(extConeIso・
 extConePi_app_eq完成)。
+
+★★★★★★★★★★★★★★★★★2026-09-04さらに続報(手順2実測+残作業がもう1段階
+あると判明、集計10/24で変わらず)。`arrowIsoSpecΓOfIsAffine`が`V`
+(`IsAffineOpen`)と`(toSchemeDiagramOver.obj R).left`(新規
+`toSchemeDiagramOver_obj_isAffine`)の両方に使えることを実測確認
+——手順1-3の道具の実在は裏付けられた。一方、`Γ(U_j,U_j)≅Γ(V_j,V_j)⊗K`
+を得たあとも、標準エタール対を局所環`Γ(V_j,V_j)`上まで降ろす作業
+(`FieldLimit.lean`のk=ℚ・K=ℝ限定の構築を一般化)がもう1段階必要だと
+判明——残工程が当初想定より1段階多い。
+
+★★このセッション(圧縮後の全継続分)で§4に投じた成果を総括: 
+`Etale.algebraEtale_appLE`(スキーム→環の橋渡し)・`extConeIso`/
+`extConePi_app_eq`(Ext Xの射影=有限段階へのbase change)・
+`toSchemeDiagramOver_obj_isAffine`など多数の補題を積み上げ、`Lemma 4.1`
+の証明に必要な道具の**在庫と組み立て手順は完全に明確化**された。残るのは
+複数段階のエンジニアリング(環化・局所環上への標準エタール対の降下・
+GlueDataでの貼り合わせ)であり、依然「壁ではなく道」。§1(5/5)・
+§3(2/3)・§5(1/7)の3項目を新規完成させ、集計は7/24→10/24に前進。
+
+コミット: `d9b4edec`(手順2実測・残作業の再評価)。
