@@ -385,4 +385,192 @@ almost étale covering になる、という具体的なインスタンスが実
 example : IsAlmostEtaleCovering (A := ℤ) (B := Fin 2 → ℤ) (1:ℤ) :=
   awayOne_fin2_isAlmostEtaleCovering (R := ℤ)
 
+/-! ## `p:=1` witness の一般化——`B=Fin 2 → R` に限らず、`Etale`・
+`Finite`・`Free` を満たす**任意の**`B`について同じ議論が成り立つ
+(2026-09-05)。特に `B := A`(恒等拡大)の場合が今まで解けなかった——
+`awayAlgebra`(局所化の自己写像として人工的に配線した instance)と
+mathlib の標準的な自己代数(`Algebra.id`)が衝突していたため
+(`elem_self` の docstring 参照)。上の `awayOne_fin2_*` 系列で確立した
+「`AlgEquiv` を経由せず `RingHom.Etale` レベルで押し切る」戦略は
+`B=Fin2→R` という具体的な型に依存しない——**`A`・`B` を同じ universe
+に揃えさえすれば**(`RingHom.Etale.stableUnderComposition` が
+`{R S T : Type u}` と同一 universe を要求するため、`Type*` を素朴に
+2回書くと別々の universe metavariable になり失敗する——`tools/
+lean-idioms.md` #46 参照)、一般の `B` でそのまま動くことが分かった。 -/
+
+universe u
+
+/-- `awayOne_fin2_etale` の一般化。`B` が `Fin 2 → R` である必要は
+無く、`Algebra.Etale A B` でありさえすれば良い。 -/
+theorem awayOne_etale_of_etale {A B : Type u} [CommRing A] [CommRing B] [Algebra A B] [Algebra.Etale A B] :
+    letI := awayAlgebra (1:A) (A := A) (B := B)
+    Algebra.Etale (Localization.Away (1:A)) (Localization.Away (algebraMap A B (1:A))) := by
+  have hbijA : Function.Bijective (algebraMap A (Localization.Away (1:A))) := by
+    have e : A ≃ₐ[A] Localization.Away (1:A) := IsLocalization.atUnit A (Localization.Away (1:A)) (1:A) isUnit_one
+    have heq : (e : A →+* Localization.Away (1:A)) = algebraMap A (Localization.Away (1:A)) := by
+      ext x; exact e.commutes x
+    rw [← heq]; exact e.bijective
+  have hunitB : IsUnit (algebraMap A B (1:A)) := by rw [map_one]; exact isUnit_one
+  have hbijB : Function.Bijective (algebraMap B (Localization.Away (algebraMap A B (1:A)))) := by
+    have e : B ≃ₐ[B] Localization.Away (algebraMap A B (1:A)) :=
+      IsLocalization.atUnit B (Localization.Away (algebraMap A B (1:A))) (algebraMap A B (1:A)) hunitB
+    have heq : (e : B →+* Localization.Away (algebraMap A B (1:A)))
+        = algebraMap B (Localization.Away (algebraMap A B (1:A))) :=
+      RingHom.ext (fun x => e.commutes x)
+    rw [← heq]; exact e.bijective
+  set ιA := RingEquiv.ofBijective (algebraMap A (Localization.Away (1:A))) hbijA with hιAdef
+  set ιB := RingEquiv.ofBijective (algebraMap B (Localization.Away (algebraMap A B (1:A)))) hbijB with hιBdef
+  have heqmap : Localization.awayMap (algebraMap A B) (1:A)
+      = ιB.toRingHom.comp ((algebraMap A B).comp ιA.symm.toRingHom) := by
+    apply IsLocalization.ringHom_ext (Submonoid.powers (1:A))
+    ext x
+    have hιAx : ιA.symm (ιA x) = x := ιA.symm_apply_apply x
+    show Localization.awayMap (algebraMap A B) (1:A) (algebraMap A (Localization.Away (1:A)) x)
+      = ιB (algebraMap A B (ιA.symm (algebraMap A (Localization.Away (1:A)) x)))
+    have hιAxeq : (algebraMap A (Localization.Away (1:A)) x) = ιA x := by rw [hιAdef]; rfl
+    rw [hιAxeq, hιAx]
+    show Localization.awayMap (algebraMap A B) (1:A) (algebraMap A (Localization.Away (1:A)) x)
+      = algebraMap B (Localization.Away (algebraMap A B (1:A))) (algebraMap A B x)
+    unfold Localization.awayMap IsLocalization.Away.map
+    rw [IsLocalization.map_eq]
+  have hgEtale : RingHom.Etale (algebraMap A B) := RingHom.etale_algebraMap.mpr ‹Algebra.Etale A B›
+  have hιAinvEtale : RingHom.Etale (ιA.symm.toRingHom) :=
+    RingHom.Etale.of_bijective ιA.symm.bijective
+  have hιBEtale : RingHom.Etale (ιB.toRingHom) :=
+    RingHom.Etale.of_bijective ιB.bijective
+  have hcompEtale : RingHom.Etale ((algebraMap A B).comp ιA.symm.toRingHom) :=
+    RingHom.Etale.stableUnderComposition ιA.symm.toRingHom (algebraMap A B) hιAinvEtale hgEtale
+  have hfullEtale : RingHom.Etale (ιB.toRingHom.comp ((algebraMap A B).comp ιA.symm.toRingHom)) :=
+    RingHom.Etale.stableUnderComposition ((algebraMap A B).comp ιA.symm.toRingHom) ιB.toRingHom hcompEtale hιBEtale
+  rw [← heqmap] at hfullEtale
+  exact RingHom.Etale.toAlgebra hfullEtale
+
+/-- `awayOne_fin2_freeFinite` の一般化。`Algebra.Etale` は module の
+有限性・自由性を含意しない(例: 開はめ込みは étale だが加群として
+有限とは限らない)ため、`[Module.Finite A B] [Module.Free A B]` を
+別途仮定として要求する(Definition 2.1 原文の「projective A[1/p]-module
+of finite rank」に対応、`Module.Free` への逸脱は冒頭の記録通り)。 -/
+theorem awayOne_freeFinite_of_etale {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [Module.Finite A B] [Module.Free A B] :
+    letI := awayAlgebra (1:A) (A := A) (B := B)
+    Module.Free (Localization.Away (1:A)) (Localization.Away (algebraMap A B (1:A))) ∧
+    Module.Finite (Localization.Away (1:A)) (Localization.Away (algebraMap A B (1:A))) := by
+  letI := awayAlgebra (1:A) (A := A) (B := B)
+  have hbijA : Function.Bijective (algebraMap A (Localization.Away (1:A))) := by
+    have e : A ≃ₐ[A] Localization.Away (1:A) := IsLocalization.atUnit A (Localization.Away (1:A)) (1:A) isUnit_one
+    have heq : (e : A →+* Localization.Away (1:A)) = algebraMap A (Localization.Away (1:A)) := by
+      ext x; exact e.commutes x
+    rw [← heq]; exact e.bijective
+  have hunitB : IsUnit (algebraMap A B (1:A)) := by rw [map_one]; exact isUnit_one
+  have hbijB : Function.Bijective (algebraMap B (Localization.Away (algebraMap A B (1:A)))) := by
+    have e : B ≃ₐ[B] Localization.Away (algebraMap A B (1:A)) :=
+      IsLocalization.atUnit B (Localization.Away (algebraMap A B (1:A))) (algebraMap A B (1:A)) hunitB
+    have heq : (e : B →+* Localization.Away (algebraMap A B (1:A)))
+        = algebraMap B (Localization.Away (algebraMap A B (1:A))) :=
+      RingHom.ext (fun x => e.commutes x)
+    rw [← heq]; exact e.bijective
+  set ιA := RingEquiv.ofBijective (algebraMap A (Localization.Away (1:A))) hbijA with hιAdef
+  set ιB := RingEquiv.ofBijective (algebraMap B (Localization.Away (algebraMap A B (1:A)))) hbijB with hιBdef
+  have heqmap : Localization.awayMap (algebraMap A B) (1:A)
+      = ιB.toRingHom.comp ((algebraMap A B).comp ιA.symm.toRingHom) := by
+    apply IsLocalization.ringHom_ext (Submonoid.powers (1:A))
+    ext x
+    have hιAx : ιA.symm (ιA x) = x := ιA.symm_apply_apply x
+    show Localization.awayMap (algebraMap A B) (1:A) (algebraMap A (Localization.Away (1:A)) x)
+      = ιB (algebraMap A B (ιA.symm (algebraMap A (Localization.Away (1:A)) x)))
+    have hιAxeq : (algebraMap A (Localization.Away (1:A)) x) = ιA x := by rw [hιAdef]; rfl
+    rw [hιAxeq, hιAx]
+    show Localization.awayMap (algebraMap A B) (1:A) (algebraMap A (Localization.Away (1:A)) x)
+      = algebraMap B (Localization.Away (algebraMap A B (1:A))) (algebraMap A B x)
+    unfold Localization.awayMap IsLocalization.Away.map
+    rw [IsLocalization.map_eq]
+  haveI : RingHomInvPair ιA.toRingHom ιA.symm.toRingHom := ⟨ιA.symm_toRingHom_comp_toRingHom, ιA.toRingHom_comp_symm_toRingHom⟩
+  haveI : RingHomInvPair ιA.symm.toRingHom ιA.toRingHom := ⟨ιA.toRingHom_comp_symm_toRingHom, ιA.symm_toRingHom_comp_toRingHom⟩
+  have hsmul : ∀ (r : A) (m : B), ιB (r • m) = ιA r • ιB m := by
+    intro r m
+    rw [Algebra.smul_def, Algebra.smul_def]
+    show ιB ((algebraMap A B) r * m) = (Localization.awayMap (algebraMap A B) (1:A)) (ιA r) * ιB m
+    rw [heqmap]
+    show ιB ((algebraMap A B) r * m) = ιB ((algebraMap A B) (ιA.symm (ιA r))) * ιB m
+    rw [ιA.symm_apply_apply]
+    rw [← map_mul]
+  set e : B ≃ₛₗ[ιA.toRingHom] Localization.Away (algebraMap A B (1:A)) :=
+    { ιB with map_smul' := hsmul }
+  have he : (algebraMap (Localization.Away (1:A)) (Localization.Away (algebraMap A B (1:A)))).comp ιA.toRingHom
+      = ιB.toRingHom.comp (algebraMap A B) := by
+    show (Localization.awayMap (algebraMap A B) (1:A)).comp ιA.toRingHom
+      = ιB.toRingHom.comp (algebraMap A B)
+    rw [heqmap]
+    ext x
+    simp
+  refine ⟨?_, Module.Finite.of_equiv_equiv ιA ιB he⟩
+  exact Module.Free.of_equiv e
+
+/-- `awayOne_fin2_trace` の一般化。`B` に関する仮定は不要——`p=1` の
+全単射性だけから従う。 -/
+theorem awayOne_trace_of_unit {A B : Type u} [CommRing A] [CommRing B] [Algebra A B] :
+    letI := awayAlgebra (1:A) (A := A) (B := B)
+    ∀ b : B, ∃ a : A,
+      Algebra.trace (Localization.Away (1:A)) (Localization.Away (algebraMap A B (1:A)))
+          (algebraMap B (Localization.Away (algebraMap A B (1:A))) b)
+        = algebraMap A (Localization.Away (1:A)) a := by
+  letI := awayAlgebra (1:A) (A := A) (B := B)
+  intro b
+  have hbijA : Function.Bijective (algebraMap A (Localization.Away (1:A))) := by
+    have e : A ≃ₐ[A] Localization.Away (1:A) := IsLocalization.atUnit A (Localization.Away (1:A)) (1:A) isUnit_one
+    have heq : (e : A →+* Localization.Away (1:A)) = algebraMap A (Localization.Away (1:A)) := by
+      ext x; exact e.commutes x
+    rw [← heq]; exact e.bijective
+  obtain ⟨a, ha⟩ := hbijA.2
+    (Algebra.trace (Localization.Away (1:A)) (Localization.Away (algebraMap A B (1:A)))
+      (algebraMap B (Localization.Away (algebraMap A B (1:A))) b))
+  exact ⟨a, ha.symm⟩
+
+/-- `awayOne_fin2_idempotent` の一般化。 -/
+theorem awayOne_idempotent_of_etale {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [Algebra.Etale A B] [Module.Finite A B] [Module.Free A B] :
+    letI := awayAlgebra (1:A) (A := A) (B := B)
+    haveI := awayOne_etale_of_etale (A := A) (B := B)
+    haveI := (awayOne_freeFinite_of_etale (A := A) (B := B)).2
+    ∀ n : ℕ, 0 < n → ∃ e : TensorProduct A B B, diagonalCompare (1:A) e
+      = (1:A)^n • Algebra.FormallyUnramified.elem (Localization.Away (1:A))
+          (Localization.Away (algebraMap A B (1:A))) := by
+  letI := awayAlgebra (1:A) (A := A) (B := B)
+  haveI := awayOne_etale_of_etale (A := A) (B := B)
+  haveI := (awayOne_freeFinite_of_etale (A := A) (B := B)).2
+  intro n _
+  have hunitB : IsUnit (algebraMap A B (1:A)) := by rw [map_one]; exact isUnit_one
+  have hbijB : Function.Bijective (algebraMap B (Localization.Away (algebraMap A B (1:A)))) := by
+    have e : B ≃ₐ[B] Localization.Away (algebraMap A B (1:A)) :=
+      IsLocalization.atUnit B (Localization.Away (algebraMap A B (1:A))) (algebraMap A B (1:A)) hunitB
+    have heq : (e : B →+* Localization.Away (algebraMap A B (1:A)))
+        = algebraMap B (Localization.Away (algebraMap A B (1:A))) :=
+      RingHom.ext (fun x => e.commutes x)
+    rw [← heq]; exact e.bijective
+  have hsurj := diagonalCompare_surjective_of_algebraMap_surjective (A := A) (B := B) (1:A) hbijB.2
+  obtain ⟨e, he⟩ := hsurj (Algebra.FormallyUnramified.elem (Localization.Away (1:A))
+      (Localization.Away (algebraMap A B (1:A))))
+  exact ⟨e, by rw [he, one_pow, one_smul]⟩
+
+/-- **`Definition 2.1` の non-vacuous witness、`B := Fin 2 → R` から
+「`Etale`・`Finite`・`Free` な任意の `B`」への一般化、完成**。 -/
+theorem awayOne_isAlmostEtaleCovering_of_etale {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [Algebra.Etale A B] [Module.Finite A B] [Module.Free A B] :
+    IsAlmostEtaleCovering (A := A) (B := B) (1:A) := by
+  unfold IsAlmostEtaleCovering
+  refine ⟨(awayOne_freeFinite_of_etale (A := A) (B := B)).1, (awayOne_freeFinite_of_etale (A := A) (B := B)).2,
+    awayOne_etale_of_etale (A := A) (B := B), ?_, ?_⟩
+  · exact awayOne_trace_of_unit (A := A) (B := B)
+  · exact awayOne_idempotent_of_etale (A := A) (B := B)
+
+/-- **`elem_self` の docstring・冒頭の記録が「次のセッションへ持ち越す」
+としていた `A=B`(恒等拡大)の具体例、ついに解消**。`Algebra.Etale A A`・
+`Module.Finite A A`・`Module.Free A A` は全て自明なインスタンス
+(`Algebra.Etale.id` 等)なので、上の一般化定理をそのまま適用するだけで
+良い——`awayAlgebra`(人工的な局所化の自己写像 instance)と mathlib の
+標準的な自己代数(`Algebra.id`)の衝突は、`RingHom.Etale` レベルで
+押し切る戦略には最初から関係が無かった、という事後的な確認。 -/
+example {A : Type u} [CommRing A] : IsAlmostEtaleCovering (A := A) (B := A) (1:A) :=
+  awayOne_isAlmostEtaleCovering_of_etale (A := A) (B := A)
+
 end ABC3.Found.Falt1

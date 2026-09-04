@@ -4422,3 +4422,49 @@ Unramified][EssFiniteType]`要求の項を**定理の型シグネチャ内**で�
 surjective`・`awayOne_fin2_idempotent`・`awayOne_fin2_
 isAlmostEtaleCovering`(`Definition 2.1`の non-vacuous witness、
 条件(iii)・最終組み立て)。
+
+## 46. 2つの `{A B : Type*}` が「同じ universe」だと思い込むと、
+`RingHom.StableUnderComposition` 系の補題(`{R S T : Type u}` と**単一の**
+universe 変数を要求)が意味不明な type mismatch で失敗する
+(2026-09-05)
+
+**症状**: `#44`の戦略(`RingHom.Etale.stableUnderComposition f g hf hg`)
+を、具体的な型(`R`・`Fin 2 → R`)ではなく**抽象的な2つの型変数**
+`{A B : Type*}`に一般化しようとすると、`f : ιA.symm.toRingHom`・
+`g := algebraMap A B`を渡しただけの、具体版と全く同じ形の呼び出しが
+```
+Type mismatch
+  RingHom.Etale.stableUnderComposition ιA.symm.toRingHom ?m.592 hιAinvEtale ?m.593
+has type
+  (fun {R S} [CommRing R] [CommRing S] => RingHom.Etale) (RingHom.comp ?m.592 ιA.symm.toRingHom)
+but is expected to have type
+  ((algebraMap A B).comp ιA.symm.toRingHom).Etale
+```
+という、`g`(`?m.592`)が最後まで決まらない type mismatch で失敗する
+——`(f := ...)`/`(g := ...)`という named argument をつけても変わらない。
+
+**原因**: `RingHom.StableUnderComposition`(`RingHom.Etale.
+stableUnderComposition`の型)は`∀ ⦃R S T : Type u⦄ ...`と**単一の
+universe 変数 `u`** を要求する。`{A B : Type*}`と素朴に書くと、Lean は
+`A`・`B`にそれぞれ**別々の** universe metavariable(`Type u_1`・
+`Type u_2`)を割り当てる——`stableUnderComposition`を`Localization.
+Away 1 : Type u_1`(`A`由来)と`B : Type u_2`の間の合成に使おうとした
+瞬間、`u_1 ≠ u_2`の可能性を排除できず、統一に失敗する(具体的な型
+`R`・`Fin 2 → R`ではこの2つが**たまたま同じ**universeだったため、
+一般化するまで症状が出なかった)。
+
+**直し方**: `{A B : Type*}`をやめ、`universe u`を宣言してから
+`{A B : Type u}`と**明示的に同じ**universe変数を使う。
+```lean
+universe u
+theorem foo {A B : Type u} [CommRing A] [CommRing B] [Algebra A B] ... := by
+  ...
+  exact RingHom.Etale.stableUnderComposition f g hf hg  -- これで通る
+```
+`AlgHom`/`RingHom`の合成安定性(`StableUnderComposition`)系の補題
+全般に共通する注意点——`Algebra.TensorProduct.lift`等、同一universeを
+要求しない多くのAPIでは`Type*`のままで問題ない。
+
+実例: `lean/ABC3/Found/Falt1/AlmostEtale.lean`の`awayOne_etale_of_etale`
+(`Definition 2.1`のwitnessを`B:=Fin2→R`から「`Etale`・`Finite`・`Free`
+な任意の`B`」へ一般化、`B:=A`(恒等拡大)の場合を含む)。

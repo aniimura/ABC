@@ -3597,6 +3597,37 @@ mathlib での正確な組み立て方は未確認)。
       に続く**2件目**。§2-4(11項目)の総ブロック状態に初めて風穴が
       開いた。`Theorem 2.2`-`2.4`・§3・§4は引き続き Hochschild
       cohomology を要し未着手のまま。
+
+      ★★★★★★★★★★★★2026-09-05(続々)、**同じ手法を`B:=Fin2→R`に限らず
+      一般化し、以前「次のセッションへ持ち越す」としていた`A=B`
+      (恒等拡大)の instance diamond も解消した**。`awayOne_fin2_*`の
+      証明本体は`B`が`Fin2→R`である具体的な事実を一切使っておらず、
+      `[Algebra.Etale A B][Module.Finite A B][Module.Free A B]`という
+      **仮定**だけで同じ議論が通ることに気づいた——`awayOne_etale_of_
+      etale`・`awayOne_freeFinite_of_etale`・`awayOne_trace_of_unit`・
+      `awayOne_idempotent_of_etale`・`awayOne_isAlmostEtaleCovering_
+      of_etale`として一般化し、`B:=A`(恒等拡大)を代入するだけで
+      `IsAlmostEtaleCovering (A:=A)(B:=A)(1:A)`が得られることを確認
+      した(`elem_self`の docstring が指していた本来の疑問への回答)。
+
+      一般化の途中で新しい罠に当たった: `{A B : Type*}`と素朴に書くと
+      `A`・`B`が**別々の**universe metavariableになり、`RingHom.Etale.
+      stableUnderComposition`(`{R S T : Type u}`と**単一**のuniverseを
+      要求)が意味不明な type mismatch で失敗する——`universe u`を
+      明示的に宣言して`{A B : Type u}`と揃えることで解決した(`tools/
+      lean-idioms.md` #46)。`Module.Free A B`/`Module.Finite A B`も
+      `Algebra.Etale`単独からは従わない(開はめ込み等の反例がある)ため
+      別途仮定として必要——`hsmul`の`show`が`rfl`で閉じなくなった箇所
+      は`Algebra.smul_def`を`rw`で挟むことで解決した。
+
+      移植後、実ファイルでも1回で`lake build`が通り、プロジェクト全体
+      の`lake build`(6590 jobs)・`node tools/check.mjs --brief`
+      (NG13件、既存分で不変)も確認済み。この一般化自体は新しい
+      Found項目を生むものではない(`Definition 2.1`は既にFound)が、
+      「`p=1`(単元)での almost étale covering は、étale・finite・free
+      でありさえすれば任意の`B`について成立する」という、以前
+      「解決困難」と記録していた具体的な gap を正式に閉じた、
+      infrastructure としての確実な前進。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
