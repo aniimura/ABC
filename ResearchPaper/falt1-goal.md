@@ -2016,6 +2016,45 @@ mathlib での正確な組み立て方は未確認)。
       PolynomialAlgEquiv`をRingHomとして扱う代わりに)AlgEquivの
       coercionで統一する形に書き直すことから始めるとよい。
 
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、
+      **上記の障害の真因を特定し、半分(定数の場合)を実際に解決した**
+      (REPLで確認、未commit)。真因は「RingHomとしてのcoercionと
+      AlgEquivの直接のcoercion」という単純な話ではなく、**`AdjoinRoot
+      h`と`Polynomial _ ⧸ Ideal.span{h}`が定義的には同じ型でも、
+      別々に定義された`Semiring`/`Algebra`インスタンス
+      (`AdjoinRoot.instAlgebra`系 vs `Ideal.Quotient.ring`/
+      `Ideal.instAlgebraQuotient`系)を持つ、という mathlib 自体の
+      構造的な instance diamond**だった(`unfold`すると`Ideal.quotientEquivAlg`
+      が`Ideal.Quotient`側のインスタンスで型付けされた項を返すが、
+      ゴールは`AdjoinRoot`側のインスタンスを要求する、という
+      「Application type mismatch」で確認)。
+
+      **回避策**: `unfold`して内部を直接いじるのではなく、
+      `adjoinRootTensorEquiv g`を**ブラックボックスのAlgEquivとして
+      扱い**、高レベルAPI(`AlgEquiv.commutes`・`.restrictScalars`)
+      だけで両立性を示す。`Polynomial.ringHom_ext'`(2つの`Polynomial
+      R →+* S`が`C`(定数)と`X`(生成元)の像で一致すれば等しい)で
+      問題を「定数の場合」と「`X`の場合」に分割し、**定数の場合は
+      完全に解決した**:
+      ```
+      adjoinRootTensorEquiv g (1⊗ₜ algebraMap R(AdjoinRoot g) r)
+        = algebraMap R(AdjoinRoot(g.map φ)) r
+      ```
+      は`AlgEquiv.commutes((adjoinRootTensorEquiv g).restrictScalars R) r`
+      (`unfold`不要、instance diamond を回避)+`1⊗ₜ(r•1) = algebraMap
+      R(TensorProduct...) r`という小さな計算(`TensorProduct.tmul_smul`・
+      `Algebra.TensorProduct.one_def`)だけで閉じた。
+
+      **残る`X`の場合**(生成元自体の像、`adjoinRootTensorEquiv g
+      (1⊗ₜ root g) = root(g.map φ)`)は、`AlgEquiv.commutes`のような
+      「algebraMapの像なら自動的に分かる」経路が使えない(`root`は
+      algebraMapの像ではない)ため、依然として`unfold`(=instance
+      diamond)を避けられず未解決。次回はこの`X`の場合を、
+      (a) instance diamond を明示的に`convert`/`cast`で橋渡しする、
+      (b) `AdjoinRoot`と`Ideal.Quotient`のインスタンスが実際に等しい
+      という一般的な橋渡し補題をまず用意する、のどちらかで攻める
+      ことから始める。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
