@@ -3423,3 +3423,50 @@ glued_iso`、約1526行)は`Scheme`について完全に一般的な形で書か
 いるため、`S_0`由来のスキームに対してそのまま再利用できる見込み。
 集計は10/24で変わらず——§4は引き続き0/2(`Lemma 4.1`はまだ完成に
 至っていないが、その完成に必要な部品が着実に積み上がっている)。
+
+## 2026-09-05(続き3): `descendPieceR_iso`——`Γ(C,piece)`の正真正銘
+`R`レベル候補片スキームを構成し、そのbase change先を証明
+
+前回の環レベルの結果(`pieceAlgebra_R_model_baseChange`)を、実際の
+**スキーム**として使える形へ仕上げた:
+
+- **`descendPieceR`**: `pieceAlgebra_R_model`(`S_0`)を`Spec`に渡す
+  だけの、正真正銘`R`レベル(`Spec(A⊗R.1)`上有限型)のスキーム。
+  `descendPiece`(`StandardEtalePair`経由、まだℝレベル、既存)とは
+  別物。
+- **`descendPieceR_toBase`**・**`descendPieceR_reBaseMap`**:
+  `algebraMap`を使う2本の構造射を、それぞれ**1回だけ**名前を
+  付けて確定させた独立`def`。
+- **`descendPieceR_iso`**: `pullback(descendPieceR_toBase)
+  (descendPieceR_reBaseMap) ≅ α⁻¹(piece)`。`pullbackSpecIso`
+  (mathlib)+`pieceAlgebra_R_model_baseChange`+`piecePreimageIso`の
+  合成。`standardEtalePairPullbackIso`と同じ形の主張が、正真正銘
+  `R`レベルの`descendPieceR`について成り立つ。
+
+配管の**新しい**罠: 同じ`algebraMap R S0`という生の式を型の`Nonempty
+(...)`本体と証明の`pullbackSpecIso`呼び出しの2箇所に書くと、`S0`
+(`Ideal.Quotient`商)の`CommRing`/`Semiring`インスタンスが場所ごとに
+非`defeq`に導出され、`pullbackSpecIso`との単一化に失敗する——`letI`で
+基底環の`CommRing`を先に固定しても直らず、`set S0 := ...`で名前を
+付けてもゴール側の出現が構文的に一致せず置換されない。★直し方:
+その`algebraMap`を使うスキーム射自体(`descendPieceR_toBase`・
+`descendPieceR_reBaseMap`)を**独立した`def`として1回だけ確定させ**、
+以降は名前だけを参照する(`standardEtalePairSpecMap`と同じパターン)。
+`tools/lean-idioms.md`の`#36`として記録した。
+
+`lake build ABC3.Found.CorrHyp.ExtLimit`・`ABC3`いずれも0エラーで
+確認。宣言の配置順序(`piecePreimageIso`より前方に置くと未定義エラー
+になる)の修正込みでコミット(`65fd0a77`)、push済み。
+
+**これで、`Γ(C,piece)`を`R`レベルへ一度に降ろす計画が、環レベル
+だけでなく実際の**スキーム**レベルで完成した**——各アフィン片ごとに
+正真正銘`R`レベルの候補スキーム`descendPieceR`が存在し、それを
+`ℝ`へbase changeすると元の`α⁻¹(piece)`に一致することが証明された。
+
+次の一手(未着手): 有限個の`descendPieceR`(各片ごとに異なる`R_i`を
+持つ)を、`C`内での重なり方に沿って`R`レベルで貼り合わせ、実際の
+`D.Space`元(`corrHypInstance4`)を構成する——`transitionElem`/`gdT`/
+`cocycle`の`R`レベル版、またはより直接的な貼り合わせ経路を検討する
+必要がある(異なる`R_i`を持つ片同士の遷移データが`R`レベルで
+literal に一致することを示す、descent理論的に本質的な部分)。集計は
+10/24で変わらず——§4は引き続き0/2。

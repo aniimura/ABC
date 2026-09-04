@@ -1545,3 +1545,24 @@ commit 863a5f73、push済み。
 corrHypGlueDataのRレベル版を組み立てる(ℝレベルGlueDataパイプライン
 はScheme一般の形で書かれているため再利用できる見込み)。集計は
 10/24で変わらず——§4は引き続き0/2。corrhyp-goal.mdに詳細記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05(続き2)
+descendPieceR/descendPieceR_toBase/descendPieceR_reBaseMap/
+descendPieceR_isoを構築(commit 65fd0a77)——S_0(pieceAlgebra_R_model)
+をSpecに渡した正真正銘RレベルのスキームdescendPieceRが、ℝへbase
+changeすると実際に元のα⁻¹(piece)に一致することを証明。pullbackSpecIso
+(mathlib)+pieceAlgebra_R_model_baseChange+piecePreimageIsoの合成。
+
+配管の新しい罠(lean-idioms.md #36として記録): 同じalgebraMap R S0の
+生の式を型と証明の2箇所に書くと、S0のCommRing/Semiringインスタンスが
+場所ごとに非defeqに導出されpullbackSpecIsoとの単一化に失敗する——letI
+で先に固定しても`set`で名前を付けても直らず、algebraMapを使う射自体を
+独立defとして1回だけ確定させる(standardEtalePairSpecMapと同じ
+パターン)ことで解消した。
+
+lake build(ExtLimit/ABC3)0エラー確認、push済み。**Γ(C,piece)をRレベル
+へ一度に降ろす計画が環レベルだけでなくスキームレベルで完成**。次の
+一手: 各片ごとに異なるR_iを持つ有限個のdescendPieceRを、Cでの重なり
+方に沿ってRレベルで貼り合わせ、実際のD.Space元を構成する(遷移データ
+がRレベルでliteralに一致することを示すdescent理論的な部分、未着手)。
+集計は10/24で変わらず。corrhyp-goal.mdに詳細記録。
