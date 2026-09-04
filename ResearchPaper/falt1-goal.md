@@ -1050,6 +1050,56 @@ mathlib での正確な組み立て方は未確認)。
     (`falt1BaseChangeAlgHom_generator_and_injective` 完成時と同じ
     教訓——instance を提供する事実は独立に名前を付けようとせず、
     使う場所で直接組み立てる)。
+
+    ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、**実際にこの方針で
+    `differentIdeal_tower_diamond` を1つの巨大な `example` で直接
+    呼び出してみた——`hsep` 以外の**約19個の instance は全て問題無く
+    組み上がる**ことを確認した**(sorry 無し、`hsep` を1つの仮定
+    として明示的に受け取る形なら`True`は達成、commit 未——named
+    theorem としては未パッケージ)。組み立て順序:
+    `isDedekindDomain_integralClosure_adjoinRoot_X_pow_sub_C`(V1・
+    Wₙ₊₁ 双方)→ `falt1ModuleIsTorsionFreeV0V1`・`falt1ModuleFiniteV0V1`
+    → `falt1ModuleIsTorsionFreeWnWn1`・`falt1ModuleFiniteWnWn1` →
+    `falt1ModuleFiniteV0Wn1`・`falt1ModuleIsTorsionFreeV0Wn1` →
+    `falt1BaseChangeAlgHom_generator_and_injective` で `ψ` を obtain
+    → `letI := ψ.toRingHom.toAlgebra` で `Algebra V1 Wₙ₊₁` →
+    `IsScalarTower V0 V1 Wₙ₊₁`(`ψ.commutes`)→
+    `moduleIsTorsionFree_of_injective hψinj` →
+    `Module.Finite.of_restrictScalars_finite`。**この順序で19個
+    全てが素直に通った**——大きな驚きは無く、既存の各ピースが
+    そのまま合成できることを確認できただけ、という意味で
+    「配線の仕上げ」段階に入ったことの実証。
+
+    ★ただし**`hsep` を最後に接続しようとした瞬間、mathlib 自身の
+    `FractionRing.liftAlgebra`(`abbrev`)との diamond
+    (tools/lean-idioms.md #23 と全く同じクラスの問題)に遭遇した**:
+    `differentIdeal_tower_diamond` が実際に要求する `Algebra
+    (FractionRing V0)(FractionRing Wₙ₊₁)` は `FractionRing.
+    liftAlgebra V0 (FractionRing Wₙ₊₁)`(`Algebra V0 Wₙ₊₁` から
+    自動的に持ち上げる mathlib の既製品)であり、これまでこの
+    セッションで組み立ててきた「`AdjoinRoot gK` 経由の手作りの
+    instance」とは**別の項**になる。#23 の教訓通り `letI :=
+    FractionRing.liftAlgebra V0 (FractionRing Wₙ₊₁)` を明示的に
+    呼び、`IsScalarTower V0 (FractionRing V0)(FractionRing Wₙ₊₁)`
+    が(このセッションで確認済み、`infer_instance` で自動的に
+    見つかる)ことを使って `IsLocalization.ringHom_ext`(mathlib、
+    局所化からの2つの準同型が底環上で一致すれば全体で一致する)で
+    `hcommutes` を再構成する、という**筋道までは特定した**——
+    ただし `algebraMap V0 Wₙ₊₁`(標準、`V0→Wₙ→Wₙ₊₁` 経由)と
+    `φ`(`AdjoinRoot gK` へ向かう、`V0→Wₙ→FractionRing Wₙ→AdjoinRoot
+    gK` 経由)が同じ元に対して一致する、という**もう1段の
+    diamond 解消**(`e_Wn1` を Wₙ の scalar でも可換にする議論)が
+    追加で必要と判明し、ここで打ち切った。
+
+    ★結論(正直な評価): `differentIdeal_tower_diamond` の**19/20
+    の instance は完全に組み上がることを実証した**——これは
+    Theorem 1.2・item 3c にとって非常に大きな前進。**残る `hsep`
+    1つ**は、数学的には完全に正しい(既に別の形で証明済み)ものの、
+    mathlib の `FractionRing.liftAlgebra` という**具体的な instance
+    と一致させる**という、既知のパターン(#23)の**入れ子になった
+    版**として立ちはだかっている——次回はこの「二重の diamond
+    解消」(`FractionRing.liftAlgebra` との一致 + `V0→Wₙ₊₁` の
+    2つの経路の一致)から始めるのが最短距離と見込む。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
