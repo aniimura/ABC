@@ -26,6 +26,7 @@ import ABC3.Found.CorrHyp.SchemeFEt
 namespace ABC3.Found.CorrHyp
 
 open CategoryTheory AlgebraicGeometry Limits
+open scoped TensorProduct
 
 set_option backward.isDefEq.respectTransparency false in
 /-- `toSchemeDiagram ℚ ℝ`(`(FgSubalgebra ℚ ℝ)ᵒᵖ ⥤ Scheme`)を `Over BaseK`
@@ -627,5 +628,75 @@ theorem extConePi_app_eq (X : Over BaseK) (R : (FgSubalgebra ℚ ℝ)ᵒᵖ) :
     · rw [hm', hn']
     · rw [hm'', hn'']
   rw [hm, hn]; exact heq
+
+/-! ## `Ext X` の `X.left` 由来のアフィン片は `Spec(Γ(U,U) ⊗[ℚ] ℝ)`
+——generic flatness を要らなくする戦略
+
+`X.left` の(**`R` に依らない、`X` 自身の**)アフィン開被覆 `{U_i}` を
+そのまま `Ext X = X.left ×_k Spec K` へ base change すれば、各片は
+`Spec(Γ(U_i,U_i) ⊗[ℚ] ℝ)` になる——`P_R`(有限段階のファイバー積)の
+**任意の**アフィン開`V_j`から出発する(`exists_extDiagram_finite_affine_
+descent`の戦略)と、後段で `Γ(V_j,V_j)` が `R` 上平坦とは限らないため
+generic flatness(EGA IV、mathlibに現状無い)が要る——`X.left`自身の
+アフィン開から出発すればテンソルが**常に `ℚ`(体)上**になり、
+`Γ(U_i,U_i) ⊗[ℚ] -` は自動的に完全関手(平坦)になるので、この問題が
+構造的に発生しない。`corrhyp-goal.md` §4 参照。 -/
+
+/-- `X.left` の affine open `U` 上の切断環を `ℚ`-代数にする標準的な
+環準同型(`BaseK = Spec ℚ` から `U.ι ≫ X.hom : U ⟶ BaseK` を
+`Spec.preimage` で環準同型に直したもの)。 -/
+noncomputable def pieceRingHom (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U) :
+    CommRingCat.of ℚ ⟶ Γ(X.left, U) :=
+  Spec.preimage (hU.isoSpec.inv ≫ (U.ι ≫ X.hom))
+
+/-- `pieceRingHom` の定義方程式——`hU.isoSpec.hom` で移せば `U.ι ≫ X.hom`
+と一致する。 -/
+theorem pieceRingHom_spec (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U) :
+    hU.isoSpec.hom ≫ Spec.map (pieceRingHom X U hU) = U.ι ≫ X.hom := by
+  unfold pieceRingHom
+  have heq : Spec.map (Spec.preimage (hU.isoSpec.inv ≫ (U.ι ≫ X.hom))) =
+      hU.isoSpec.inv ≫ (U.ι ≫ X.hom) := Spec.map_preimage _
+  rw [heq]
+  have hgoal : hU.isoSpec.hom ≫ hU.isoSpec.inv ≫ (U.ι ≫ X.hom) = U.ι ≫ X.hom := by
+    rw [Iso.hom_inv_id_assoc]
+  exact hgoal
+
+/-- `pullback (i.hom ≫ g) f ≅ pullback g f`(`i` が同型なら、片方の脚を
+同型で付け替えても pullback は変わらない)——mathlib に無かったので
+`pullback.map_isIso`(両側 `IsIso`)経由で補う。 -/
+noncomputable def pullbackHomIsoLeft {X Y Z W : Scheme} (i : X ≅ Y) (g : Y ⟶ Z) (f : W ⟶ Z) :
+    (Limits.pullback (i.hom ≫ g) f : Scheme) ≅ (Limits.pullback g f : Scheme) :=
+  asIso (pullback.map (i.hom ≫ g) f g f i.hom (𝟙 _) (𝟙 _) (by simp) (by simp))
+
+/-- `pieceRingHom` による `Γ(X.left,U)` の `ℚ`-代数構造。 -/
+noncomputable def pieceAlgebra (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U) :
+    Algebra ℚ Γ(X.left, U) :=
+  (pieceRingHom X U hU).hom.toAlgebra
+
+/-- **`Ext X` の `U`(`X.left` のアフィン開、`R` に依らない)上のアフィン片は
+`Spec(Γ(U,U) ⊗[ℚ] ℝ)`**——`Lemma 4.1` の構成的降下で generic flatness を
+回避する鍵となる構成(ファイル冒頭の節を見よ)。`pullbackRestrictIsoRestrict`
++`pullbackSymmetry`+`pullbackRightPullbackFstIso`(pullback の pasting)で
+`(pullback.fst X.hom toBaseK) ⁻¹ᵁ U` を `pullback (U.ι ≫ X.hom) toBaseK`
+と同一視し、`pieceRingHom_spec`+`pullbackHomIsoLeft` で `U.ι ≫ X.hom` を
+`Spec.map (pieceRingHom X U hU)` に付け替えてから `pullbackSpecIso` を
+適用する。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def piecePullbackIso (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U) :
+    letI := pieceAlgebra X U hU
+    ((pullback.fst X.hom toBaseK) ⁻¹ᵁ U : Scheme) ≅
+      Spec (CommRingCat.of (Γ(X.left, U) ⊗[ℚ] ℝ)) := by
+  letI := pieceAlgebra X U hU
+  calc ((pullback.fst X.hom toBaseK) ⁻¹ᵁ U : Scheme)
+      ≅ (Limits.pullback (pullback.fst X.hom toBaseK) U.ι : Scheme) :=
+        (pullbackRestrictIsoRestrict _ U).symm
+    _ ≅ (Limits.pullback U.ι (pullback.fst X.hom toBaseK) : Scheme) := pullbackSymmetry _ _
+    _ ≅ (Limits.pullback (U.ι ≫ X.hom) toBaseK : Scheme) := pullbackRightPullbackFstIso X.hom toBaseK U.ι
+    _ ≅ (Limits.pullback (hU.isoSpec.hom ≫ Spec.map (pieceRingHom X U hU)) toBaseK : Scheme) :=
+        (pieceRingHom_spec X U hU) ▸ Iso.refl _
+    _ ≅ (Limits.pullback (Spec.map (pieceRingHom X U hU)) toBaseK : Scheme) :=
+        pullbackHomIsoLeft hU.isoSpec (Spec.map (pieceRingHom X U hU)) toBaseK
+    _ ≅ Spec (CommRingCat.of (Γ(X.left, U) ⊗[ℚ] ℝ)) := pullbackSpecIso ℚ Γ(X.left, U) ℝ
 
 end ABC3.Found.CorrHyp
