@@ -1229,6 +1229,35 @@ noncomputable def quotient_mvPolynomial_baseChange (R A : Type) [CommRing R] [Co
   exact congrArg (Ideal.map · I)
     (RingHom.ext (fun x => (quotientMvPolynomialBaseChangeRingEquivAux_comp_algebraMap R A ι x).symm))
 
+open scoped TensorProduct in
+/-- **`quotient_mvPolynomial_baseChange`の「純テンソル」上での自然性**
+——`(mk I x) ⊗ₜ 1`という(`R`レベルの多項式`x`を単に底変換しただけの)
+元の上では、`quotient_mvPolynomial_baseChange`は単に`x`を`MvPolynomial.
+map (algebraMap R A)`で送るだけであること。`Algebra.TensorProduct.
+quotientTensorEquiv_apply_tmul`(mathlib)+`Ideal.quotientEquiv_mk`
+(mathlib)+`quotientMvPolynomialBaseChangeRingEquivAux_comp_algebraMap`
+(既存)を繋ぐだけ。`descendPieceR`(`ExtLimit.lean`)を`R`レベルから
+さらに昇格した際、局所化のパラメータが正しく対応することを示すための
+核心部品——`ideal_map_mvPolynomial_promote_baseChange_eq`と組み合わせて
+使う。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem quotient_mvPolynomial_baseChange_tmul_one (R A ι : Type) [CommRing R] [CommRing A] [Algebra R A]
+    (I : Ideal (MvPolynomial ι R)) (x : MvPolynomial ι R) :
+    quotient_mvPolynomial_baseChange R A ι I ((Ideal.Quotient.mk I x) ⊗ₜ[R] (1 : A)) =
+      Ideal.Quotient.mk (Ideal.map (MvPolynomial.map (algebraMap R A)) I) (MvPolynomial.map (algebraMap R A) x) := by
+  unfold quotient_mvPolynomial_baseChange
+  simp only [RingEquiv.trans_apply]
+  rw [show (Algebra.TensorProduct.quotientTensorEquiv (R := R) R A (MvPolynomial ι R) I).toRingEquiv
+      ((Ideal.Quotient.mk I x) ⊗ₜ[R] (1 : A)) =
+      (Algebra.TensorProduct.quotientTensorEquiv (R := R) R A (MvPolynomial ι R) I)
+        ((Ideal.Quotient.mk I x) ⊗ₜ[R] (1 : A)) from rfl,
+    Algebra.TensorProduct.quotientTensorEquiv_apply_tmul, Ideal.quotientEquiv_mk]
+  congr 1
+  show quotientMvPolynomialBaseChangeRingEquivAux R A ι
+      (algebraMap (MvPolynomial ι R) (MvPolynomial ι R ⊗[R] A) x) = MvPolynomial.map (algebraMap R A) x
+  exact quotientMvPolynomialBaseChangeRingEquivAux_comp_algebraMap R A ι x
+
 /-! ## `A ⊗[ℚ] R'.1 → A ⊗[ℚ] ℝ` は単射——「項目(d)の第二段」
 (遷移データのRレベル降下)の鍵
 
