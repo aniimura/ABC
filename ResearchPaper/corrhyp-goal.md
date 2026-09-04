@@ -2986,3 +2986,39 @@ needs := []`(`Definition 1.5`の`.needs`)がこれに依拠している——
 スケールの数学(あるいはHyperbolicCurveData interfaceの再設計という
 独立した大規模プロジェクト)を要する**という評価が妥当と判断した。
 集計は10/24で変わらず——§4は引き続き0/2。
+
+## 2026-09-04(続き12): `corrPieceGlueDataOfCorr_glued_iso`——単一アフィン片レベルの構成的降下が完結(Nonempty C/等式論点には非依存)
+
+設計論点(前回)は据え置いたまま、それに触れない**低リスクな**次の
+一歩として、項目(b)を一般形(`corrHypGlueData_glued_iso`)で完成させて
+おいた成果を、`Ext`/`ExtF`・`corrPieceGlueData`・実際の`Corr`データ
+(`corrPieceGlueDataOfCorr`)まで一直線に特殊化した。
+
+- `corrHypGlueDataOfEtale_glued_iso`: `corrHypGlueData_glued_iso`を
+  `corrHypGlueDataOfEtale`自身の内部構成へ適用。`Finset`添字の被覆
+  条件(`⨆i∈t,...`)を`iSup_subtype'`(mathlib)で部分型添字の形へ変換
+  するだけで繋がった。
+- `corrPieceGlueData_glued_iso`: `corrPieceGlueData = corrHypGlueDataOfEtale`
+  という定義の一致から特殊化。
+- `corrPieceGlueDataOfCorr_glued_iso`: さらに`Corr`の実データ(`c.C`・
+  `c.α`)へ特殊化——`corrPieceGlueDataOfCorr(...).glued ≅ c.α⁻¹(piece)`。
+
+以前「(b) `IsColimit`同士の比較、genuinely new」と見積もっていた
+作業(`ExtLimit.lean`/`Instance4.lean`の「次の一手」コメントに何度も
+現れていた)が、項目(b)を一般形で片付けておいたことで**新しい証明
+無しに特殊化だけで済んだ**——これは「まず抽象的に、CorrHyp非依存の
+形で完成させておく」という本プロジェクトの一貫した方針の価値が、
+まさにここで具体的に実った例と言える。
+
+**これで「`Corr`の実データから具体的に構成した候補片の族が、
+`X.1.left`の任意の1つのアフィン開について、実際に`c.C`の対応する
+部分を再構成する」という、単一アフィン片レベルの構成的降下の全工程
+(項目(a)〜(c')・項目(b)の特殊化)が完結した**。`lean_check`で検証後
+ファイルへ反映、`lake build`(ExtLimit/Instance4/ABC3とも)0エラー
+確認、コミット(`45ddff25`)。
+
+この作業は前回記録した`Nonempty C`/`h:=`対`h:≅`の設計論点には
+一切触れておらず、その解決がどちらの方向になっても再利用できる
+インフラである点を明記しておく。残る道筋は変わらず(d)の第二段
+(外側の貼り合わせ、約650行規模)と(e)(`α・β`脚、設計論点の解決が
+前提)。集計は10/24で変わらず——§4は引き続き0/2。

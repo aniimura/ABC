@@ -1420,3 +1420,24 @@ Instance3→4規模(数セッション)でもう一段作るか、のいずれ�
 person-yearsスケールの数学(またはHyperbolicCurveData interfaceの
 再設計という独立した大規模プロジェクト)を要すると評価。
 corrhyp-goal.mdに詳細記録(コミット`866db4e9`+今回分)。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04(続き12)
+続報(corrPieceGlueDataOfCorr_glued_iso完成、単一アフィン片レベルの
+構成的降下が完結、設計論点には非依存の低リスク進捗、集計10/24で
+変わらず)。項目(b)を一般形(corrHypGlueData_glued_iso)で完成させて
+おいた成果を、Ext/ExtF・corrPieceGlueData・実際のCorrデータまで
+一直線に特殊化: corrHypGlueDataOfEtale_glued_iso(iSup_subtype'で
+Finset添字→部分型添字変換)→corrPieceGlueData_glued_iso(定義の一致で
+特殊化)→corrPieceGlueDataOfCorr_glued_iso(Corrの実データへ特殊化、
+corrPieceGlueDataOfCorr(...).glued≅c.α⁻¹(piece))。
+
+以前「(b)IsColimit同士の比較、genuinely new」と見積もっていた作業が
+新しい証明無しに特殊化だけで済んだ——「まず抽象的にCorrHyp非依存の
+形で完成させておく」という方針の価値が実った。lake build
+(ExtLimit/Instance4/ABC3とも)0エラー確認、コミット: `45ddff25`。
+
+**これで単一アフィン片レベルの構成的降下の全工程(項目(a)〜(c')・
+項目(b)の特殊化)が完結**。この作業はNonempty C/等式vs同型の設計
+論点には一切触れておらず、どちらの解決を選んでも再利用できる
+インフラ。残る道筋は変わらず(d)第二段(約650行規模)と(e)(設計論点
+の解決が前提)。corrhyp-goal.mdに詳細記録。
