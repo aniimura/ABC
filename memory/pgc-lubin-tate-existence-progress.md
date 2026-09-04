@@ -1454,6 +1454,49 @@ K π n`が、古典的な`(𝒪_K/π^n)^×`と正式に同一視できるよう�
 Lubin-Tate固有の深い議論——`F_f`のキャンセレーションまたは
 successive approximationが要る)のみ。
 
+**続報(同日、★★★濃度の一致を達成、新規ファイル`Found/PGC/
+QuotientCardinality.lean`(333行)、commit`2c94e367`)**: 全射性・
+単射性の議論を直接攻めるのではなく、**両者を一発で結ぶ「濃度の
+一致」**を、`F_f`・`Λ_n`・`ψ_n`固有の議論を一切経由せず、**純粋に
+環論的な事実として**確立した:
+
+1. `gradedPieceMap`/`maxIdealCardMap`(`x↦π^n*x`・`x↦π*x`が誘導する
+   次数付き商の写像、`Submodule.mapQ`)とその核(`⊥`)・像(次数付き
+   ピース、`π^n𝒪_K/π^{n+1}𝒪_K`または`π𝒪_K/π^{n+1}𝒪_K`)を計算し、
+   `Submodule.card_quotient_mul_card_quotient`(第三同型定理の濃度版、
+   mathlib既存)で帰納法を回す。
+2. ★★★★★★★★★★★★★★★★★★★★★★★★**`card_quotient_span_pi_pow`**:
+   **`|𝒪_K/π^n𝒪_K| = q^n`**。
+3. ★★★★★★★★★★★★★★★★★★★★★★★★**`card_units_quotient_span_pi_pow`**:
+   **`|(𝒪_K/π^n𝒪_K)^×| = q^n-q^{n-1}`**——局所環`R=R^×⊔maximalIdeal R`
+   (集合として、`Equiv.sumCompl IsUnit`)の分解と`maxIdealCardMap`
+   (`maximalIdeal R`の濃度が`𝒪_K/π^{n-1}𝒪_K`に一致すること、
+   `IsLocalRing.map_maximalIdeal_of_surjective`で最大イデアルの像を
+   同定)を組み合わせる。
+4. ★★★★★★★★★★★★★★★★★★★★★★★★**`card_principalUnitsQuotient`**:
+   **`|(𝒪_K)^×⧸principalUnits K π n| = q^n-q^{n-1}`**——
+   `card_iteratedLubinTatePsiTorsionPoints`(`|ψ_nの根|=q^n-q^{n-1}`、
+   既出)と**ぴったり一致する濃度**。
+
+これで`unitActionQuotientLift`(定義域`(𝒪_K)^×⧸principalUnits K π n`、
+値域`ψ_nの根`を含む`adjoinIntegers K x`)が**単射・全射のどちらか
+一方さえ示せば**、有限集合・同じ濃度の写像は「単射⟺全射⟺全単射」
+という一般論だけでもう一方が自動的に従う——数え上げの土台が完成した。
+残る課題は「単射または全射のどちらか一方」に絞られた(以前は両方が
+独立した課題だった)。
+
+**教訓(技術的な罠)**: `n-1+1=n`が変数`n`に対して定義的に成り立たない
+(自然数減法は`omega`等の証明を要する、`rfl`では通らない)ことから、
+`LinearMap.range (何かK π (n-1))`のような式の周辺で`isDefEq`が
+**極端に遅くなる**(数十秒〜タイムアウト)罠に複数回はまった——
+今セッションで繰り返し遭遇してきた「`Valued`インスタンスの重複」
+と同じ「深くネストした型の再帰的unify」という根本原因のファミリー。
+回避策: 該当の補題を`n`ではなく`m+1`(`m:=n-1`)の形で最初から
+述べ、`n,hn:1≤n`版は最後に`Nat.exists_eq_add_of_le`で言い換える
+だけにする——型が最初から構文的に一致するので`isDefEq`のコストが
+かからない。次に似た「`n-1`が型に登場する」状況に当たったら、
+まずこの`m+1`書き直しを試す。
+
 これで「`a·x=0 ↔ π^n∣a`」(`x`が原始的なπ^n-捩れ点のとき)が
 sorry無しで確立された——`𝒪_K/π^n≅Λ_n`の**核**が確定。
 `|𝒪_K/π^n|=q^n=|Λ_n|`(既出`card_iteratedLubinTateTorsionPoints`)
