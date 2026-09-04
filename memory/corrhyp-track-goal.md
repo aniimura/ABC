@@ -713,3 +713,21 @@ statementへ`[Nonempty c.C]`を追加前提として持ち込む方が影響範�
 実際に`lemma_4_1`を書くときまで先送りするのが合理的と判断。
 
 コミット: `3b81c2b6`(作業単位1(a)確認の記録)。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(作業単位3
+「GlueData組み立て」に着手、候補局所片を実際のスキームとして実現、
+集計10/24で変わらず)。`ExtLimit.lean`に`standardEtalePairSpecMap`
+(`Spec P.Ring ⟶ Spec R`)・`standardEtalePairSpecMap_etale`(常にétale、
+`HasRingHomProperty.Spec_iff`+`RingHom.etale_algebraMap`)・
+`standardEtalePairPullbackIso`(候補局所片を`K`へbase changeすると実際の
+`K`段階の局所片に一致、`pullbackSpecIso`+`standardEtalePairRingBaseChange`)
+を完成(★すべてsorry無し)。`c'.C`の各局所片が実際にスキームとして構成
+でき、étaleかつbase changeで元の局所片に戻ることを保証する、GlueData
+組み立ての核心部品の第一歩。
+
+**新発見**: 標準エタール片はétaleだが有限とは限らない(局所化+商、
+properではない)——`FEt`が要求する`IsFinite`はGlueDataで貼り合わせた
+**後**に大域的な性質として別途確認する必要があると明示的に言語化した
+(当初のロードマップに暗黙に含まれていたが今回初めて明記)。
+
+コミット: `ca88ac3a`(standardEtalePairSpecMap等完成)・`c3ce0e9e`(記録)。
