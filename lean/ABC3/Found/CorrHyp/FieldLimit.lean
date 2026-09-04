@@ -2692,4 +2692,57 @@ theorem exists_ringEquiv_of_piece_lift (B B' T : Type) [CommRing B] [CommRing B'
   have e7 := IsLocalization.algEquiv (Submonoid.powers h₂) Wtarget (Localization.Away h₂)
   exact ⟨e4.trans (e6.symm.trans (e5.symm.trans e7.toRingEquiv.symm))⟩
 
+/-! ## `t`(`Lemma 4.1`の`GlueData`の遷移射)へ向けた第一歩——
+`Localization.Away`を`MvPolynomial`の商として実現する
+(`2026-09-05夜、続き10`)
+
+`M_ij`(`D(f)`側)・`M_ji`(`D(g)`側)を`exists_mvPolynomial_quotient_
+specIso_descend`(既存、`ψ・ψ'`による2つの独立な有限表示の比較)へ
+渡すには、両方を**`MvPolynomial`の関係式の族**として具体的に表す
+必要がある——`Localization.Away h`(`h`は`MvPolynomial n B⧸I`の元)の
+標準的な「逆元を1変数添加する」表示を確立する。 -/
+
+open scoped Classical in
+/-- **`MvPolynomial n B⧸I`の元`p`(のクラス)による`Away`局所化は、
+`MvPolynomial Unit(MvPolynomial n B)`を`I`の像と局所化関係式で割った
+商そのものと同一視できる**——`IsLocalization.Away.mvPolynomialQuotient
+Equiv`(mathlib、`S:=Localization.Away h`の場合に特殊化)と`MvPolynomial.
+quotientEquivQuotientMvPolynomial`(mathlib、`MvPolynomial σ(R⧸I)≃
+MvPolynomial σ R⧸(Iの像)`)を、両者が局所化関係式の定義元(`C(mk I p)`・
+`X()`)を同じ場所へ送ること(`hnat`・`hnat2`)を確認しながら`Ideal.
+quotientEquiv`で繋ぐ。`t`の構成(2つの独立な`R`レベル局所化を`MvPolynomial`
+の関係式の族として比較する)への第一歩——次の一手は、この「入れ子の
+商」を`MvPolynomial.sumAlgEquiv`で`MvPolynomial(n⊕Unit)B`という**1段の
+商**へ平坦化すること(`exists_mvPolynomial_quotient_specIso_descend`の
+`q`・`q₂`が要求する形)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem localization_away_quotient_mvPolynomial_equiv (B : Type) [CommRing B] (n : Type) [Fintype n]
+    (I : Ideal (MvPolynomial n B)) (p : MvPolynomial n B) :
+    Nonempty (Localization.Away (Ideal.Quotient.mk I p) ≃+*
+      (MvPolynomial Unit (MvPolynomial n B) ⧸ Ideal.map MvPolynomial.C I) ⧸
+        (Ideal.span {MvPolynomial.C p * MvPolynomial.X () - 1}).map (Ideal.Quotient.mk (Ideal.map MvPolynomial.C I))) := by
+  set e1 := IsLocalization.Away.mvPolynomialQuotientEquiv (Localization.Away (Ideal.Quotient.mk I p))
+    (Ideal.Quotient.mk I p) with he1
+  set e2 := MvPolynomial.quotientEquivQuotientMvPolynomial (σ := Unit) I with he2
+  have hnat : e2 (MvPolynomial.C (Ideal.Quotient.mk I p)) =
+      Ideal.Quotient.mk (Ideal.map MvPolynomial.C I) (MvPolynomial.C p) := by
+    simp [he2, MvPolynomial.quotientEquivQuotientMvPolynomial]
+  have hnat2 : e2 (MvPolynomial.X ()) = Ideal.Quotient.mk (Ideal.map MvPolynomial.C I) (MvPolynomial.X ()) := by
+    simp [he2, MvPolynomial.quotientEquivQuotientMvPolynomial]
+  have hIdealEq : (Ideal.span {MvPolynomial.C p * MvPolynomial.X () - 1}).map (Ideal.Quotient.mk (Ideal.map MvPolynomial.C I)) =
+      (Ideal.span {MvPolynomial.C (Ideal.Quotient.mk I p) * MvPolynomial.X () - 1}).map e2.toRingEquiv.toRingHom := by
+    rw [Ideal.map_span, Ideal.map_span, Set.image_singleton, Set.image_singleton]
+    have hval1 : Ideal.Quotient.mk (Ideal.map MvPolynomial.C I) (MvPolynomial.C p * MvPolynomial.X () - 1) =
+        Ideal.Quotient.mk (Ideal.map MvPolynomial.C I) (MvPolynomial.C p) *
+          Ideal.Quotient.mk (Ideal.map MvPolynomial.C I) (MvPolynomial.X ()) - 1 := by
+      rw [map_sub, map_mul, map_one]
+    have hval2 : e2.toRingEquiv.toRingHom (MvPolynomial.C (Ideal.Quotient.mk I p) * MvPolynomial.X () - 1) =
+        Ideal.Quotient.mk (Ideal.map MvPolynomial.C I) (MvPolynomial.C p) *
+          Ideal.Quotient.mk (Ideal.map MvPolynomial.C I) (MvPolynomial.X ()) - 1 := by
+      show e2 (MvPolynomial.C (Ideal.Quotient.mk I p) * MvPolynomial.X () - 1) = _
+      rw [map_sub, map_mul, map_one, hnat, hnat2]
+    rw [hval1, hval2]
+  exact ⟨e1.symm.toRingEquiv.trans (Ideal.quotientEquiv _ _ e2.toRingEquiv hIdealEq)⟩
+
 end ABC3.Found.CorrHyp
