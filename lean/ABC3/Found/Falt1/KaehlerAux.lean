@@ -761,4 +761,110 @@ noncomputable def polynomialKaehlerSplit (Z V : Type*) [CommRing Z] [CommRing V]
     ⟨_, hl⟩).1
   exact e.trans (LinearEquiv.refl (Polynomial V) _ |>.prodCongr (KaehlerDifferential.polynomialEquiv V))
 
+/-- `kerCotangentToTensor` の生成元計算(`range_kerCotangentToTensor_span` の
+一般化): 塔 `Z→V→(Polynomial V)→B` で(絶対基底 `Z` と多項式環の係数環 `V`
+が別々でよい)、`B = Polynomial V ⧸ (f)` なら
+`range(kerCotangentToTensor Z (Polynomial V) B) = (Polynomial V)-span{1⊗D_Z(f)}`。
+`Ω_V⊗_VW→Ω_W` の単射性(Lemma 1.1 の第一完全列)を仕上げる際、
+`W = AdjoinRoot f` の場合にこの一般化が必要になる
+(`range_kerCotangentToTensor_span` 自身は係数環と絶対基底が同じ場合しか
+扱えない)。 -/
+theorem range_kerCotangentToTensor_span_tower {Z V B : Type*} [CommRing Z] [CommRing V] [CommRing B]
+    [Algebra Z V] [Algebra (Polynomial V) B] [Algebra Z B] [Algebra V B]
+    [IsScalarTower Z (Polynomial V) B] [IsScalarTower V (Polynomial V) B] [IsScalarTower Z V B]
+    (f : Polynomial V)
+    (hB : RingHom.ker (algebraMap (Polynomial V) B) = Ideal.span ({f} : Set (Polynomial V))) :
+    LinearMap.range (KaehlerDifferential.kerCotangentToTensor Z (Polynomial V) B) =
+      Submodule.span (Polynomial V) {(1 : B) ⊗ₜ[Polynomial V] (KaehlerDifferential.D Z (Polynomial V) f)} := by
+  have hmem : ∀ x : Polynomial V, x * f ∈ RingHom.ker (algebraMap (Polynomial V) B) := by
+    intro x; rw [hB]; exact Ideal.mem_span_singleton'.mpr ⟨x, rfl⟩
+  set φ := (LinearMap.toSpanSingleton (Polynomial V) (Polynomial V) f).codRestrict _ hmem with hφdef
+  have hφsurj : Function.Surjective φ := by
+    intro y
+    have hy : (y : Polynomial V) ∈ Ideal.span ({f} : Set (Polynomial V)) := hB ▸ y.2
+    obtain ⟨x, hx⟩ := Ideal.mem_span_singleton'.mp hy
+    exact ⟨x, Subtype.ext hx⟩
+  have hcomp : Function.Surjective
+      ((RingHom.ker (algebraMap (Polynomial V) B)).toCotangent ∘ₗ φ) :=
+    (RingHom.ker (algebraMap (Polynomial V) B)).toCotangent_surjective.comp hφsurj
+  have hrange1 : LinearMap.range (KaehlerDifferential.kerCotangentToTensor Z (Polynomial V) B) =
+      LinearMap.range (KaehlerDifferential.kerCotangentToTensor Z (Polynomial V) B ∘ₗ
+        ((RingHom.ker (algebraMap (Polynomial V) B)).toCotangent ∘ₗ φ)) := by
+    rw [LinearMap.range_comp, LinearMap.range_eq_top.mpr hcomp, Submodule.map_top]
+  rw [hrange1]
+  have hfB : algebraMap (Polynomial V) B f = 0 := by
+    have : f ∈ RingHom.ker (algebraMap (Polynomial V) B) := hB ▸ Ideal.mem_span_singleton_self f
+    exact this
+  have heq : (KaehlerDifferential.kerCotangentToTensor Z (Polynomial V) B ∘ₗ
+      ((RingHom.ker (algebraMap (Polynomial V) B)).toCotangent ∘ₗ φ)) =
+      LinearMap.toSpanSingleton (Polynomial V) _
+        ((1:B) ⊗ₜ[Polynomial V] (KaehlerDifferential.D Z (Polynomial V) f)) := by
+    apply LinearMap.ext
+    intro x
+    show KaehlerDifferential.kerCotangentToTensor Z (Polynomial V) B
+      ((RingHom.ker (algebraMap (Polynomial V) B)).toCotangent (φ x)) = _
+    rw [KaehlerDifferential.kerCotangentToTensor_toCotangent]
+    show (1:B) ⊗ₜ[Polynomial V] (KaehlerDifferential.D Z (Polynomial V) (x*f))
+        = x • ((1:B) ⊗ₜ[Polynomial V] (KaehlerDifferential.D Z (Polynomial V) f))
+    rw [Derivation.leibniz, TensorProduct.tmul_add]
+    have hzero : (1:B) ⊗ₜ[Polynomial V] (f • KaehlerDifferential.D Z (Polynomial V) x) = 0 := by
+      rw [TensorProduct.tmul_smul]
+      show (f • (1:B)) ⊗ₜ[Polynomial V] (KaehlerDifferential.D Z (Polynomial V) x) = 0
+      rw [Algebra.smul_def, hfB, zero_mul, TensorProduct.zero_tmul]
+    rw [hzero, add_zero, TensorProduct.tmul_smul]
+  rw [heq, LinearMap.range_toSpanSingleton]
+
+/-- **`KaehlerDifferential.map` の3段の塔での合成則(完成)**: 塔
+`Z→V→A→B` で `map Z Z A B ∘ map Z Z V A = map Z Z V B`。mathlib には
+この合成則の既製品が見当たらなかった——`Ω[V⁄Z]` が `D Z V` の像で
+`V`-生成されること(`span_range_derivation`)を使い、生成元上で
+`map_D` を2回・スカラータワー`IsScalarTower V A B`の
+`algebraMap_apply`で確認し、`Submodule.span_induction` で加法・
+`V`-スカラー倍に持ち上げた(`LinearMap.map_smul_of_tower` が鍵——
+`map Z Z A B` は `A`-線形だが `V` を経由したスカラー倍とも両立する)。
+
+Lemma 1.1 の単射性(`Ω_V⊗_VW→Ω_W`)を`polynomialKaehlerSplit`
+(`Ω_{V[T]/Z}` の直和分解)から `W=AdjoinRoot f` へ橋渡しする際、
+`mapBaseChange Z V W` を `mapBaseChange Z (Polynomial V) W` 経由に
+factor する(`mapBaseChange_tmul` + 本補題)ために必要になる。 -/
+theorem map_comp_map_tower {Z V A B : Type*} [CommRing Z] [CommRing V] [CommRing A] [CommRing B]
+    [Algebra Z V] [Algebra V A] [Algebra Z A] [Algebra A B] [Algebra V B] [Algebra Z B]
+    [IsScalarTower Z V A] [IsScalarTower Z V B] [IsScalarTower Z A B] [IsScalarTower V A B] :
+    ∀ y : Ω[V⁄Z], (KaehlerDifferential.map Z Z A B) ((KaehlerDifferential.map Z Z V A) y) =
+      (KaehlerDifferential.map Z Z V B) y := by
+  have hspan := KaehlerDifferential.span_range_derivation (R := Z) (S := V)
+  intro y
+  have hy : y ∈ Submodule.span V (Set.range (KaehlerDifferential.D Z V)) := hspan ▸ Submodule.mem_top
+  induction hy using Submodule.span_induction with
+  | mem z hz =>
+      obtain ⟨v, rfl⟩ := hz
+      rw [KaehlerDifferential.map_D, KaehlerDifferential.map_D, KaehlerDifferential.map_D]
+      congr 1
+      show algebraMap A B (algebraMap V A v) = algebraMap V B v
+      rw [← IsScalarTower.algebraMap_apply]
+  | zero => simp
+  | add y z hy hz ihy ihz => simp only [map_add, ihy, ihz]
+  | smul c y hy ih =>
+      show (KaehlerDifferential.map Z Z A B) ((KaehlerDifferential.map Z Z V A) (c • y)) =
+        (KaehlerDifferential.map Z Z V B) (c • y)
+      rw [LinearMap.map_smul_of_tower (KaehlerDifferential.map Z Z V A) c y,
+        LinearMap.map_smul_of_tower (KaehlerDifferential.map Z Z A B) c
+          ((KaehlerDifferential.map Z Z V A) y),
+        LinearMap.map_smul_of_tower (KaehlerDifferential.map Z Z V B) c y, ih]
+
+/-!
+★残っている接続(未着手、次のラウンドへの見取り図):
+`ψ := id_B ⊗[V→(Polynomial V)] (mapBaseChange Z V (Polynomial V)) :
+B⊗_VΩ_V → B⊗_{Polynomial V}Ω_{Polynomial V/Z}` を作り(`mapBaseChange_tmul`
++ `map_comp_map_tower` で `mapBaseChange Z V B = mapBaseChange Z
+(Polynomial V) B ∘ ψ` を示す)、`ψ` が `polynomialKaehlerSplit` の
+split 性を base change しても保たれることから単射だと示し、最後に
+`range_kerCotangentToTensor_span_tower`(`= ker(mapBaseChange Z
+(Polynomial V) B)`)と `range(ψ) ∩ span{1⊗D_Z f} = {0}`(`f'(w)` が
+非零因子であることから、`(a,f'(w))` 型の生成元を `range(ψ)`= 第一成分
+のみの部分空間と交わらせても 0 しか出ない、という初等的だが未証明の
+議論)を貼り合わせれば `mapBaseChange Z V W` の単射性 = Lemma 1.1 の
+単射性の主張そのものが完成する。
+-/
+
 end ABC3.Found.Falt1
