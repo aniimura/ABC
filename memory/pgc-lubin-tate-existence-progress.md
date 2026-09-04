@@ -1095,3 +1095,41 @@ K x`の中で`aeval`を再度組み立てる——`norm_lubinTateActionAtTorsion
 lt_one`から`b·x`のHasEvalは既に得られている)には、コアーション
 (`adjoinIntegers K x`↔周囲の体)の慎重な追跡が必要で、まだ完成
 していない。
+
+**続報(2026-09-04・続き、★★★★★★★★★★★★★★★★節目達成——乗法性
+`a·(b·x)=(ab)·x`を確立)**: 上で予告した「コアーションの慎重な追跡」
+を実際にやり遂げた(commit`cb53f8ab`)。鍵となった追加補題:
+
+- `hasEval_iff_coe`: `adjoinIntegers K x`の元`z`の位相的冪零性は、
+  周囲の体での位相的冪零性と同値——`adjoinIntegers K x`の位相は
+  周囲の体からの**誘導位相**(部分環)なので、mathlibの
+  `tendsto_subtype_rng`(部分型での収束は包含写像を通した収束と
+  同値、という一般論)から**直ちに**従った——想定より簡単だった。
+- `hasEval_lubinTateActionAtTorsionPoint`: `b·x`は位相的冪零
+  (`norm_lubinTateActionAtTorsionPoint_lt_one`+上記から)。
+- `lubinTateEvalAtPoint`: `adjoinIntegers K x`の**任意**の位相的
+  冪零な元`z`を評価点として冪級数を評価する——`x`に特化していた
+  `lubinTateEvalAtTorsionPoint`の一般化。`CompleteSpace`・
+  `IsLinearTopology`・`ContinuousSMul`は`x`(座標系)のみに依存し
+  `z`には依存しないので、**座標変換無しでそのまま流用できた**
+  (これが「慎重な追跡」の実態——恐れていたほど複雑ではなかった)。
+
+そして本体:
+
+```
+★★★★★★★★★★★★★★★★lubinTateAction_mul: a·(b·x) = (ab)·x
+```
+
+証明は`LubinTateAction_comp`(`[ab]_f=subst([b]_f)([a]_f)`、既存)の
+両辺を`x`で評価し、前回構成した連鎖律`aeval_subst_eq_aeval_aeval`で
+右辺を`aeval(aeval x[b]_f)([a]_f)=a·(b·x)`へ変形するだけ——短い
+証明だが、これまで積み上げてきた全ての層(`adjoinIntegers`の構成・
+`IsLinearTopology`・連鎖律)が実際に噛み合って初めて可能になった。
+
+★これで前回の「理論的な突破」(連鎖律の構成)が単なる技術的達成に
+終わらず、**Lubin-Tate加群構造の核心的な性質(乗法性)の確立**に
+直結したことが実証された。次の一歩は加法性
+`(a+b)·x=F_f(a·x,b·x)`を、`LubinTateAction_add`と同じ連鎖律を
+組み合わせて確立すること——`formalGroupLaw`(2変数)を経由する分
+だけ乗法性より複雑になる見込みだが、基本戦略(既存の`subst`ベースの
+恒等式の両辺を`aeval`で評価し、連鎖律で変形する)は同じはず。
