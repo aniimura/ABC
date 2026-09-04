@@ -333,6 +333,23 @@ Primitive`、`natDegree_mul`+両辺非零)を示した。古典的理論で`φ_n
 保つこと(`PowerSeries.subst_mul`)を組み合わせるだけで出た——古典的
 理論で「`n≤m`ならば`Λ_n⊆Λ_m`」の由来になる事実。
 
+**続報(2026-09-04、★★★★★★★★★節目(3)への第七歩——`D_n`・`φ_n`の根は
+代数閉体で重複度込み`q^n`・`q^n-1`個)**: `iteratedLubinTateAlgClosure
+A:=AlgebraicClosure (FractionRing A)`(根を数える舞台、`A→`この
+代数閉体への`algebraMap`はmathlibのインスタンス解決で自動的に得られた)
+を固定し、`D_n`・`φ_n`をそこへ写した根の多重集合
+(`iteratedLubinTateDistinguishedRoots`・`iteratedLubinTatePrimitive
+Roots`)を定義。★`card_iteratedLubinTateDistinguishedRoots`
+(`D_n`の根は重複度込みでちょうど`q^n`個)・`card_iteratedLubinTate
+PrimitiveRoots`(`φ_n`の根は重複度込みで`q^n-1`個)——古典的理論の
+`|Λ_n|=q^n`に対応する事実を、分離性・既約性を一切使わずに確立した。
+鍵はmathlibの`IsAlgClosed.card_roots_eq_natDegree`(代数閉体上の
+多項式の根の個数は次数に一致、0多項式も含め無条件)と`Polynomial.
+Monic.natDegree_map`(モニック多項式の次数は任意の環準同型で保たれる)
+——この2つと既存の次数公式を組み合わせるだけで、新しい構成は一切
+不要だった。分離性(根が相異なること、`Λ_n`が真の`q^n`元集合になる
+ために必要)は別途の課題として残る。
+
 **残る作業**: 節目(3)torsion点の構成本体(`D_n`の根を`Λ_n`として定義、
 `𝒪_K`加群構造、`K(Λ_n)/K`の完全分岐性)、節目(4)
 `L_n:=K(Λ_n)`が完全分岐かつ`Gal(L_n/K)≅(𝒪_K/π^n)^×`(Lubin-Tateの
