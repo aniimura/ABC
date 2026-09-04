@@ -1,6 +1,7 @@
 import ABC3.Found.PGC.AdjoinIntegers
 import Mathlib.RingTheory.DedekindDomain.IntegralClosure
 import Mathlib.NumberTheory.RamificationInertia.Basic
+import Mathlib.RingTheory.Henselian
 
 /-!
 # 不分岐拡大への出発点(スケルトン、`sorry` 無し・現時点では定義のみ)
@@ -618,5 +619,43 @@ theorem isUnramifiedAdjoin_of_residueDegree {p : ℕ} [Fact p.Prime] (K : PAdicL
   have h2 := residueDegree_eq_residueCard_pow K x
   rw [h] at h2
   exact Nat.pow_right_injective (one_lt_residueCard K) h2.symm
+
+
+/-! ## ★訂正: Hensel の補題は mathlib に**ある**——`𝒪[K.carrier]` は Henselian
+
+`memory/pgc-unramified-extension-progress.md` に「完備局所環が
+Henselian であることに相当するインスタンスは mathlib に無い」と
+記録していたが、**これは誤りだった**。探し方が悪く、
+`HenselianLocalRing` を結論とする宣言(`Field.henselian` しか無い)
+だけを見ていた。正しい入口は **`HenselianRing R I`** の方で、
+
+```
+IsAdicComplete.henselianRing (R) (I) [IsAdicComplete I R] : HenselianRing R I
+```
+
+が存在する(`Mathlib/RingTheory/Henselian.lean`)。そして本プロジェクトは
+すでに `ABC3.Found.PGC.isAdicComplete_valuationRing`
+(`Found/PGC/ValuationRingComplete.lean`)を持っている——
+`𝒪[K.carrier]` は `maximalIdeal`-進完備。
+
+したがって `HenselianLocalRing 𝒪[K.carrier]` は**数行**で出る。
+`HenselianRing` の仮定が「`f'(a₀)` の剰余体での像が単元」なのに対し
+`HenselianLocalRing` は「`f'(a₀)` 自身が単元」なので、
+`IsUnit.map` を一つ挟むだけ。
+
+★測定の教訓(`Found/ResidueFieldFinite.lean` の docstring と同じ轍):
+「無い」という測定は**探索範囲を書かないと再現できない**。今回は
+`HenselianLocalRing` だけを引いて `HenselianRing` を引かなかった。 -/
+
+/-- **`𝒪[K.carrier]` は Henselian 局所環**——`isAdicComplete_
+valuationRing`(既存)に `IsAdicComplete.henselianRing` を当てるだけ。
+剰余体での単根が `𝒪[K.carrier]` へ持ち上がる。 -/
+instance henselianLocalRing_carrierIntegers {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) :
+    HenselianLocalRing 𝒪[K.carrier] := by
+  haveI := isAdicComplete_valuationRing K
+  haveI := IsAdicComplete.henselianRing 𝒪[K.carrier] (IsLocalRing.maximalIdeal 𝒪[K.carrier])
+  constructor
+  intro f hf a₀ h0 hu
+  exact HenselianRing.is_henselian f hf a₀ h0 (hu.map (Ideal.Quotient.mk _))
 
 end ABC3.Found.PGC

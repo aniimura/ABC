@@ -392,3 +392,53 @@ Henselian性の一般インスタンスは無いことを確認済み)が、
 ——`ℤ_[p]` 版 450 行より短くなる見込みは薄いが、
 `e·f=[L:K]` と剰余体判定がすでにあるぶん、
 「持ち上げたあと何を示すか」は明確になっている。
+
+## ★★★訂正(2026-09-05、同日中): Hensel の補題は mathlib に**ある**
+
+上で二度「完備局所環が Henselian であることに相当するものは mathlib
+に無い」と記録したが、**これは誤測定だった**。`HenselianLocalRing` を
+**結論とする**宣言だけを引いていた(`Field.henselian` しか無い)。
+正しい入口は **`HenselianRing R I`** の方で、
+
+```
+IsAdicComplete.henselianRing (R) (I) [IsAdicComplete I R] : HenselianRing R I
+```
+
+が `Mathlib/RingTheory/Henselian.lean` にある。そして本プロジェクトは
+すでに `ABC3.Found.PGC.isAdicComplete_valuationRing`
+(`Found/PGC/ValuationRingComplete.lean`)を持っていた。
+
+⟹ `HenselianLocalRing 𝒪[K.carrier]` は**6 行**で出た
+(`Found/PGC/UnramifiedExtension.lean::henselianLocalRing_carrierIntegers`、
+`IsUnit.map` を一つ挟むだけ)。`ℤ_[p]` 専用の 450 行は不要だった。
+
+★測定の教訓(`Found/ResidueFieldFinite.lean` の docstring と同じ轍):
+**「無い」という測定は探索範囲を書かないと再現できない**。今回は
+`grep -i henselian .cache/mathlib-index.txt` の 5 件だけを見て
+「インスタンスが無い」と結論したが、必要だったのは
+「その 5 件のうち `HenselianRing` という**別のクラス**を結論とする
+`IsAdicComplete.henselianRing` を実際に `#check` すること」だった。
+索引の grep は**宣言名**にしか当たらないので、
+`run_cmd` で「結論の head constant が C である宣言」を列挙する方が
+確実(今回はこれで一発だった)。
+
+## 不分岐拡大の存在——Hensel すら要らない筋が見えた
+
+`isUnramifiedAdjoin_of_inertiaDegree_eq_finrank`(`f=[L:K] ⟹ e=1`)が
+あるので、次数 `n` の不分岐拡大は次の手順で作れるはず(Hensel 不要):
+
+1. 剰余体 `𝓀` 上の**モニック既約** `n` 次多項式 `g` を取る。
+2. `Polynomial.lifts_and_degree_eq_and_monic` で `g` を
+   `𝒪[K.carrier]` 上のモニック `n` 次 `f` に持ち上げる。
+3. `Polynomial.Monic.irreducible_of_irreducible_map` で
+   `Irreducible f`(`𝒪_K` 上)。
+4. `Polynomial.Monic.irreducible_iff_irreducible_map_fraction_map`
+   (`IsIntegrallyClosed 𝒪_K` は既出)で `K.carrier` 上でも既約。
+5. `K.closure` の中の根 `x` を取る ⟹ `[K(x):K] = n`。
+6. `norm_le_one_of_isIntegral` で `‖x‖ ≤ 1`、剰余 `x̄` は `g` の根。
+7. `g` 既約モニックだから `minpoly 𝓀 x̄ = g`、よって
+   `n ≤ f = inertiaDegree K x`。`e·f=n` と `e≥1` から `f=n`・`e=1`。
+
+残る材料の所在: 1. の「有限体上の任意次数のモニック既約多項式の存在」
+——mathlib での名前は未確認(`GaloisField` の原始元の `minpoly` を
+使う経路が確実)。
