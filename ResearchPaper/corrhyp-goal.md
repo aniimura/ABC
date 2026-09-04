@@ -1692,3 +1692,20 @@ Spec P_i.Ring ≅ pullback(standardEtalePairSpecMap P₀_i)(Spec.map φ)`)を実
 集計は10/24で変わらず(§4は0/2のまま、numbered itemとしてはまだ)。
 
 コミット: `2f34ca1f`(1ピース連結完成)・`3ee14950`(lean-idioms #28)。
+
+### 2026-09-04さらに続報: Bの元をStandardEtalePresentationのRingへ座標として運ぶ(複数ピース比較への橋渡し)
+
+`FieldLimit.lean`に`standardEtalePresentation_exists_coord`を完成(★sorry無し)——
+`Pres : StandardEtalePresentation R S`の任意の元`x : S`は、`Pres.equivRing`で運ぶと
+「`g(X)^n`倍すれば`X`の多項式になる」という座標表示を持つ。mathlibの
+`exists_mul_aeval_x_g_pow_eq_aeval_x`を`Pres.equivRing`(AlgHom)で両辺に運び、
+`aeval`の自然性(`Polynomial.aeval_algHom_apply`)で処理するだけ。
+
+**位置づけ**: 複数の標準エタール片`D(f_i)`・`D(f_j)`を貼り合わせるには、`f_j`が
+`D(f_i)`(= `P_i.Ring`)の中でどんな元に対応するかを知る必要がある——`x := 
+algebraMap B (Localization.Away f_i) f_j`にこの補題を適用すれば、その座標
+(1変数多項式`p : Polynomial (A⊗ℝ)`)が得られ、既存の`exists_fg_subalgebra_tensor_
+polynomial_family`でそのまま有限段階へ降ろせる。GlueDataの遷移射(重なりの比較)
+構成に直接使える次の一手。集計は10/24で変わらず。
+
+コミット: `43b30c97`。
