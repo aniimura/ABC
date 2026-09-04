@@ -1599,13 +1599,349 @@ noncomputable def gdT' (i j k : J) :
     (X.isoOfEq (by rw [show f i * (f j * f k) = f j * (f k * f i) by ring])).trans <|
     (transitionElemIso (f j) (f k * f i) (e j)).trans (gdVpullbackIso f Z e j k i).symm
 
-/- ★★次の一手(未着手): 残る`t_fac`(`t' i j k ≫ pullback.snd(f j k,f j i)
-= pullback.fst(f i j,f i k) ≫ t i j`)・`cocycle`(`t' i j k ≫ t' j k i ≫
-t' k i j = 𝟙`)を埋めて`Scheme.GlueData`を完成させる。両方とも`gdT'`・
-`gdT`を定義する`isoImage`/`eqToIso`の塔が正しく合成することの検証
-(新しい数学は不要、`gdT_id`と同様の`simp`主体の計算になるはず)。その後
-`GD.glued`が`C`(または`Ext`後に`C`)に同型であることを、`C`自身の
-`OpenCover`の`gluedCover`との比較で示す——`Lemma 4.1`の`c'.C`の実体。
-`corrhyp-goal.md`に記録。 -/
+/-- **`gdT`を`transitionElemIso`だけで書き直した形**——`gdT`本来の定義
+(`isoImage`4段の塔)と、`transitionElemIso`(こちらも内部は同じ塔だが、
+自然性補題`transitionElemIso_inv/hom_naturality`をすでに持っている)が
+実は同じ射であることを`unfold`+`rfl`で直接確認する。`t_fac`で`gdT`の
+内部にもう一度立ち入らずに済むための橋渡し。
+
+★**sorry 無し**。標準3公理のみ。`unfold gdT transitionElemIso; rfl`が
+そのまま通る——`gdT`の`iso1`〜`iso4`は`transitionElemIso`内部の
+`iso1_TEI`/`iso2_TEI`と定義上完全に同じ組み立て方をしているため。 -/
+theorem gdT_eq_transitionElemIso (i j : J) :
+    (gdT f Z e i j).hom = (transitionElemIso (f i) (f j) (e i)).inv ≫
+      (X.isoOfEq (show X.basicOpen (f i * f j) = X.basicOpen (f j * f i) by rw [mul_comm])).hom ≫
+      (transitionElemIso (f j) (f i) (e j)).hom := by
+  unfold gdT transitionElemIso
+  rfl
+
+/-- `gdVpullbackIso`の`.hom`と`pullback.fst`の関係——`isPullback_opens_
+inf`が与える`isoPullback_inv_fst`を、`gdVpullbackIso`自身の構成
+(`hpb.trans(isoOfEq heq)`)と組み合わせて`(Z i).homOfLE`1つにまとめる。
+`t_fac`で`pullback.fst`を`gdVpullbackIso`側の言葉へ変換するための部品。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem gdVpullbackIso_hom_comp_homOfLE_fst (i j k : J) :
+    (gdVpullbackIso f Z e i j k).hom ≫
+      (Z i).homOfLE (show (Z i).basicOpen (transitionElem (f i) (f j * f k) (e i)) ≤
+        (Z i).basicOpen (transitionElem (f i) (f j) (e i)) by
+        rw [transitionElem_mul, Scheme.basicOpen_mul]; exact inf_le_left)
+      = pullback.fst (gdF f Z e i j) (gdF f Z e i k) := by
+  unfold gdVpullbackIso gdF
+  simp only [Iso.trans_hom, Category.assoc, Scheme.isoOfEq_hom, Scheme.homOfLE_homOfLE, id_eq,
+    Iso.symm_hom, IsPullback.isoPullback_inv_fst]
+
+/-- `gdVpullbackIso_hom_comp_homOfLE_fst`の`snd`版。 -/
+theorem gdVpullbackIso_hom_comp_homOfLE_snd (i j k : J) :
+    (gdVpullbackIso f Z e i j k).hom ≫
+      (Z i).homOfLE (show (Z i).basicOpen (transitionElem (f i) (f j * f k) (e i)) ≤
+        (Z i).basicOpen (transitionElem (f i) (f k) (e i)) by
+        rw [transitionElem_mul, Scheme.basicOpen_mul]; exact inf_le_right)
+      = pullback.snd (gdF f Z e i j) (gdF f Z e i k) := by
+  unfold gdVpullbackIso gdF
+  simp only [Iso.trans_hom, Category.assoc, Scheme.isoOfEq_hom, Scheme.homOfLE_homOfLE, id_eq,
+    Iso.symm_hom, IsPullback.isoPullback_inv_snd]
+
+/-- `gdVpullbackIso_hom_comp_homOfLE_snd`の`.inv`版(`.hom`を消して
+`pullback.snd`と`(Z i).homOfLE`だけの関係にする)——`gdT'`の末尾
+`(gdVpullbackIso …).inv ≫ pullback.snd(…)`をそのまま`(Z i).homOfLE`へ
+変換するための部品。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem gdVpullbackIso_inv_comp_pullback_snd (i j k : J) :
+    (gdVpullbackIso f Z e i j k).inv ≫ pullback.snd (gdF f Z e i j) (gdF f Z e i k)
+      = (Z i).homOfLE (show (Z i).basicOpen (transitionElem (f i) (f j * f k) (e i)) ≤
+        (Z i).basicOpen (transitionElem (f i) (f k) (e i)) by
+        rw [transitionElem_mul, Scheme.basicOpen_mul]; exact inf_le_right) := by
+  have h := gdVpullbackIso_hom_comp_homOfLE_snd f Z e i j k
+  have step := congrArg ((gdVpullbackIso f Z e i j k).inv ≫ ·) h
+  simp only [← Category.assoc, Iso.inv_hom_id, Category.id_comp] at step
+  exact step.symm
+
+/-! ### `transitionElemIso`の自然性、積の順序を入れ替えた版(`h·g`)
+
+`t_fac`の`j`側(`gdT'`が`transitionElemIso (f j) (f k * f i) (e j)`を
+使うのに対し、`gdT`は`transitionElemIso (f j) (f i) (e j)`を使う)では、
+生き残る元(`f i`)が積の**後ろ**に来る(`f k * f i`)。前に証明した
+`transitionElemIso_inv/hom_naturality`は生き残る元が**前**に来る形
+(`g * h`、`g`が生き残る)だったので、同じ補題は直接使えない——`h * g`
+(`h`が消え、`g`が生き残る)の場合を独立に証明し直す必要がある
+(`inf_le_left`/`inf_le_right`が入れ替わるだけで、証明の骨格は完全に
+同じ)。 -/
+
+theorem transitionElem_restrict_mul_le2 (f₁ h g : Γ(X, U)) :
+    (X.basicOpen f₁ : Scheme).basicOpen
+      ((ConcreteCategory.hom (X.basicOpen f₁).topIso.inv)
+        ((ConcreteCategory.hom (X.presheaf.map (homOfLE (X.basicOpen_le f₁)).op)) (h * g)))
+    ≤ (X.basicOpen f₁ : Scheme).basicOpen
+      ((ConcreteCategory.hom (X.basicOpen f₁).topIso.inv)
+        ((ConcreteCategory.hom (X.presheaf.map (homOfLE (X.basicOpen_le f₁)).op)) g)) := by
+  rw [map_mul, map_mul, Scheme.basicOpen_mul]; exact inf_le_right
+
+theorem transitionElemIso_step1' (f₁ h g : Γ(X, U)) {Z' : Scheme} (e' : (X.basicOpen f₁ : Scheme) ≅ Z') :
+    Z'.homOfLE (show Z'.basicOpen (transitionElem f₁ (h*g) e') ≤ Z'.basicOpen (transitionElem f₁ g e') by
+        rw [transitionElem_mul, Scheme.basicOpen_mul]; exact inf_le_right)
+      ≫ (eqToIso (congrArg (fun (V : Z'.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ g e').2)).inv
+    = (eqToIso (congrArg (fun (V : Z'.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ (h*g) e').2)).inv ≫
+      Z'.homOfLE (Scheme.Hom.image_mono e'.hom (transitionElem_restrict_mul_le2 f₁ h g)) :=
+  eqToIso_homOfLE_comm (transitionElem_basicOpen_eq f₁ g e').2 (transitionElem_basicOpen_eq f₁ (h*g) e').2
+    (Scheme.Hom.image_mono e'.hom (transitionElem_restrict_mul_le2 f₁ h g))
+    (show Z'.basicOpen (transitionElem f₁ (h*g) e') ≤ Z'.basicOpen (transitionElem f₁ g e') by
+      rw [transitionElem_mul, Scheme.basicOpen_mul]; exact inf_le_right)
+    (congrArg (fun (V : Z'.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ g e').2)
+    (congrArg (fun (V : Z'.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ (h*g) e').2)
+
+theorem transitionElemIso_step2' (f₁ h g : Γ(X, U)) {Z' : Scheme} (e' : (X.basicOpen f₁ : Scheme) ≅ Z') :
+    (Scheme.Hom.isoImage e'.hom _).inv ≫ (X.basicOpen f₁ : Scheme).homOfLE (transitionElem_restrict_mul_le2 f₁ h g)
+    = Z'.homOfLE (Scheme.Hom.image_mono e'.hom (transitionElem_restrict_mul_le2 f₁ h g)) ≫
+        (Scheme.Hom.isoImage e'.hom _).inv :=
+  Scheme.Hom.isoImage_inv_naturality e'.hom (transitionElem_restrict_mul_le2 f₁ h g)
+
+theorem transitionElemIso_step3' (f₁ h g : Γ(X, U)) :
+    (X.basicOpen f₁ : Scheme).homOfLE (transitionElem_restrict_mul_le2 f₁ h g) ≫
+        (Scheme.Hom.isoImage (X.basicOpen f₁).ι _).hom
+    = (Scheme.Hom.isoImage (X.basicOpen f₁).ι _).hom ≫
+        X.homOfLE (Scheme.Hom.image_mono (X.basicOpen f₁).ι (transitionElem_restrict_mul_le2 f₁ h g)) :=
+  Scheme.Hom.isoImage_naturality (X.basicOpen f₁).ι (transitionElem_restrict_mul_le2 f₁ h g)
+
+theorem transitionElemIso_step4' (f₁ h g : Γ(X, U)) {Z' : Scheme} (e' : (X.basicOpen f₁ : Scheme) ≅ Z') :
+    X.homOfLE (Scheme.Hom.image_mono (X.basicOpen f₁).ι (transitionElem_restrict_mul_le2 f₁ h g)) ≫
+      (eqToIso (congrArg (fun (V : X.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ g e').1)).hom
+    = (eqToIso (congrArg (fun (V : X.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ (h*g) e').1)).hom ≫
+      X.homOfLE (show X.basicOpen (f₁*(h*g)) ≤ X.basicOpen (f₁*g) by
+        rw [show f₁*(h*g) = (f₁*g)*h by ring, Scheme.basicOpen_mul]; exact inf_le_left) :=
+  eqToIso_homOfLE_comm' (transitionElem_basicOpen_eq f₁ g e').1 (transitionElem_basicOpen_eq f₁ (h*g) e').1
+    (Scheme.Hom.image_mono (X.basicOpen f₁).ι (transitionElem_restrict_mul_le2 f₁ h g))
+    (show X.basicOpen (f₁*(h*g)) ≤ X.basicOpen (f₁*g) by
+      rw [show f₁*(h*g) = (f₁*g)*h by ring, Scheme.basicOpen_mul]; exact inf_le_left)
+    (congrArg (fun (V : X.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ g e').1)
+    (congrArg (fun (V : X.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ (h*g) e').1)
+
+theorem transitionElemIso_step45' (f₁ h g : Γ(X, U)) {Z' : Scheme} (e' : (X.basicOpen f₁ : Scheme) ≅ Z') :
+    X.homOfLE (Scheme.Hom.image_mono (X.basicOpen f₁).ι (transitionElem_restrict_mul_le2 f₁ h g)) ≫
+      (eqToIso (congrArg (fun (V : X.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ g e').1)).hom ≫
+      (X.basicOpen (f₁*g)).ι
+    = (eqToIso (congrArg (fun (V : X.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ (h*g) e').1)).hom ≫
+      (X.basicOpen (f₁*(h*g))).ι := by
+  rw [← Category.assoc, transitionElemIso_step4' f₁ h g e', Category.assoc,
+    Scheme.homOfLE_ι X (show X.basicOpen (f₁*(h*g)) ≤ X.basicOpen (f₁*g) by
+      rw [show f₁*(h*g) = (f₁*g)*h by ring, Scheme.basicOpen_mul]; exact inf_le_left)]
+
+set_option maxHeartbeats 1000000 in
+/-- **`transitionElemIso`の自然性(積の順序`h·g`版)**——`transitionElemIso_
+inv_naturality`と同じ主張を、積の順序を入れ替えて示す。証明は完全に同じ
+term-mode の`calc`+`congrArg`+`(Category.assoc _ _ _).symm`パターン
+(`tools/lean-idioms.md` #31)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem transitionElemIso_inv_naturality2 (f₁ h g : Γ(X, U)) {Z' : Scheme} (e' : (X.basicOpen f₁ : Scheme) ≅ Z') :
+    Z'.homOfLE (show Z'.basicOpen (transitionElem f₁ (h*g) e') ≤ Z'.basicOpen (transitionElem f₁ g e') by
+        rw [transitionElem_mul, Scheme.basicOpen_mul]; exact inf_le_right)
+      ≫ (transitionElemIso f₁ g e').inv
+    = (transitionElemIso f₁ (h*g) e').inv ≫
+      X.homOfLE (show X.basicOpen (f₁*(h*g)) ≤ X.basicOpen (f₁*g) by
+        rw [show f₁*(h*g) = (f₁*g)*h by ring, Scheme.basicOpen_mul]; exact inf_le_left) := by
+  rw [← cancel_mono (X.basicOpen (f₁ * g)).ι]
+  unfold transitionElemIso
+  simp only [Iso.trans_hom, Iso.trans_inv, Iso.symm_hom, Iso.symm_inv, Category.assoc,
+    Scheme.Hom.isoImage_hom_ι, Scheme.Hom.isoImage_hom_ι_assoc,
+    Scheme.isoOfEq_hom, Scheme.homOfLE_ι, Scheme.homOfLE_ι_assoc]
+  calc _ = ((eqToIso (congrArg (fun (V : Z'.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ (h*g) e').2)).inv ≫
+        Z'.homOfLE (Scheme.Hom.image_mono e'.hom (transitionElem_restrict_mul_le2 f₁ h g))) ≫
+        (Scheme.Hom.isoImage e'.hom _).inv ≫ (Scheme.Hom.isoImage (X.basicOpen f₁).ι _).hom ≫
+        (eqToIso (congrArg (fun (V : X.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ g e').1)).hom ≫
+        (X.basicOpen (f₁*g)).ι :=
+      congrArg (· ≫ (Scheme.Hom.isoImage e'.hom _).inv ≫ (Scheme.Hom.isoImage (X.basicOpen f₁).ι _).hom ≫
+        (eqToIso (congrArg (fun (V : X.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ g e').1)).hom ≫
+        (X.basicOpen (f₁*g)).ι) (transitionElemIso_step1' f₁ h g e')
+    _ = (eqToIso (congrArg (fun (V : Z'.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ (h*g) e').2)).inv ≫
+        (Z'.homOfLE (Scheme.Hom.image_mono e'.hom (transitionElem_restrict_mul_le2 f₁ h g)) ≫
+          (Scheme.Hom.isoImage e'.hom _).inv) ≫
+        (Scheme.Hom.isoImage (X.basicOpen f₁).ι _).hom ≫
+        (eqToIso (congrArg (fun (V : X.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ g e').1)).hom ≫
+        (X.basicOpen (f₁*g)).ι :=
+      (Category.assoc _ _ _).symm
+    _ = (eqToIso (congrArg (fun (V : Z'.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ (h*g) e').2)).inv ≫
+        ((Scheme.Hom.isoImage e'.hom _).inv ≫ (X.basicOpen f₁ : Scheme).homOfLE (transitionElem_restrict_mul_le2 f₁ h g)) ≫
+        (Scheme.Hom.isoImage (X.basicOpen f₁).ι _).hom ≫
+        (eqToIso (congrArg (fun (V : X.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ g e').1)).hom ≫
+        (X.basicOpen (f₁*g)).ι :=
+      congrArg (fun x =>
+        (eqToIso (congrArg (fun (V : Z'.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ (h*g) e').2)).inv ≫ x ≫
+        (Scheme.Hom.isoImage (X.basicOpen f₁).ι _).hom ≫
+        (eqToIso (congrArg (fun (V : X.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ g e').1)).hom ≫
+        (X.basicOpen (f₁*g)).ι) (transitionElemIso_step2' f₁ h g e').symm
+    _ = (eqToIso (congrArg (fun (V : Z'.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ (h*g) e').2)).inv ≫
+        (Scheme.Hom.isoImage e'.hom _).inv ≫
+        ((X.basicOpen f₁ : Scheme).homOfLE (transitionElem_restrict_mul_le2 f₁ h g) ≫
+          (Scheme.Hom.isoImage (X.basicOpen f₁).ι _).hom) ≫
+        (eqToIso (congrArg (fun (V : X.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ g e').1)).hom ≫
+        (X.basicOpen (f₁*g)).ι :=
+      (Category.assoc _ _ _).symm
+    _ = (eqToIso (congrArg (fun (V : Z'.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ (h*g) e').2)).inv ≫
+        (Scheme.Hom.isoImage e'.hom _).inv ≫
+        ((Scheme.Hom.isoImage (X.basicOpen f₁).ι _).hom ≫
+          X.homOfLE (Scheme.Hom.image_mono (X.basicOpen f₁).ι (transitionElem_restrict_mul_le2 f₁ h g))) ≫
+        (eqToIso (congrArg (fun (V : X.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ g e').1)).hom ≫
+        (X.basicOpen (f₁*g)).ι :=
+      congrArg (fun x =>
+        (eqToIso (congrArg (fun (V : Z'.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ (h*g) e').2)).inv ≫
+        (Scheme.Hom.isoImage e'.hom _).inv ≫ x ≫
+        (eqToIso (congrArg (fun (V : X.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ g e').1)).hom ≫
+        (X.basicOpen (f₁*g)).ι) (transitionElemIso_step3' f₁ h g)
+    _ = (eqToIso (congrArg (fun (V : Z'.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ (h*g) e').2)).inv ≫
+        (Scheme.Hom.isoImage e'.hom _).inv ≫
+        (Scheme.Hom.isoImage (X.basicOpen f₁).ι _).hom ≫
+        (X.homOfLE (Scheme.Hom.image_mono (X.basicOpen f₁).ι (transitionElem_restrict_mul_le2 f₁ h g)) ≫
+          (eqToIso (congrArg (fun (V : X.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ g e').1)).hom ≫
+          (X.basicOpen (f₁*g)).ι) :=
+      (Category.assoc _ _ _).symm
+    _ = (eqToIso (congrArg (fun (V : Z'.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ (h*g) e').2)).inv ≫
+        (Scheme.Hom.isoImage e'.hom _).inv ≫
+        (Scheme.Hom.isoImage (X.basicOpen f₁).ι _).hom ≫
+        ((eqToIso (congrArg (fun (V : X.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ (h*g) e').1)).hom ≫
+          (X.basicOpen (f₁*(h*g))).ι) :=
+      congrArg (fun x =>
+        (eqToIso (congrArg (fun (V : Z'.Opens) => (V : Scheme)) (transitionElem_basicOpen_eq f₁ (h*g) e').2)).inv ≫
+        (Scheme.Hom.isoImage e'.hom _).inv ≫ (Scheme.Hom.isoImage (X.basicOpen f₁).ι _).hom ≫ x)
+        (transitionElemIso_step45' f₁ h g e')
+
+/-- `transitionElemIso_inv_naturality2`の`.hom`版(向きが逆)——`.inv`版
+から`cancel_epi`/`cancel_mono`相当の代数操作(`Iso.hom_inv_id`等)で導く。
+`gdT'_key`で`gdT'`のj側(`transitionElemIso (f j) (f k*f i) (e j)`)を
+`gdT`のj側(`transitionElemIso (f j) (f i) (e j)`)へ橋渡しするのに使う。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem transitionElemIso_hom_naturality2 (f₁ h g : Γ(X, U)) {Z' : Scheme} (e' : (X.basicOpen f₁ : Scheme) ≅ Z') :
+    (transitionElemIso f₁ (h*g) e').hom ≫
+      Z'.homOfLE (show Z'.basicOpen (transitionElem f₁ (h*g) e') ≤ Z'.basicOpen (transitionElem f₁ g e') by
+        rw [transitionElem_mul, Scheme.basicOpen_mul]; exact inf_le_right)
+    = X.homOfLE (show X.basicOpen (f₁*(h*g)) ≤ X.basicOpen (f₁*g) by
+        rw [show f₁*(h*g) = (f₁*g)*h by ring, Scheme.basicOpen_mul]; exact inf_le_left)
+      ≫ (transitionElemIso f₁ g e').hom := by
+  have hN := transitionElemIso_inv_naturality2 f₁ h g e'
+  have step1 := congrArg ((transitionElemIso f₁ (h*g) e').hom ≫ ·) hN
+  simp only [← Category.assoc, Iso.hom_inv_id, Category.id_comp] at step1
+  have step2 := congrArg (· ≫ (transitionElemIso f₁ g e').hom) step1
+  simp only [Category.assoc, Iso.inv_hom_id, Category.comp_id] at step2
+  exact step2
+
+/-- **`t_fac`の核心の等式**——`gdT'`のi側・j側それぞれで`transitionElemIso`
+の自然性(`_inv_naturality`・`_hom_naturality2`)を適用し、残った純粋な
+`X`レベルの結合律・可換律の等式(`isoOfEq`+`homOfLE`の合成、証明無関係性
+で自動的に閉じる)で橋渡しする。`gdVpullbackIso`の`.hom`をキャンセルした
+あとに残る本体。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem gdT'_key (i j k : J) :
+    (transitionElemIso (f i) (f j * f k) (e i)).inv ≫
+        (X.isoOfEq (show X.basicOpen (f i * (f j * f k)) = X.basicOpen (f j * (f k * f i)) by
+          rw [show f i * (f j * f k) = f j * (f k * f i) by ring])).hom ≫
+        (transitionElemIso (f j) (f k * f i) (e j)).hom ≫
+        (Z j).homOfLE (show (Z j).basicOpen (transitionElem (f j) (f k * f i) (e j)) ≤
+          (Z j).basicOpen (transitionElem (f j) (f i) (e j)) by
+          rw [transitionElem_mul, Scheme.basicOpen_mul]; exact inf_le_right)
+      = (Z i).homOfLE (show (Z i).basicOpen (transitionElem (f i) (f j * f k) (e i)) ≤
+          (Z i).basicOpen (transitionElem (f i) (f j) (e i)) by
+          rw [transitionElem_mul, Scheme.basicOpen_mul]; exact inf_le_left) ≫
+        (transitionElemIso (f i) (f j) (e i)).inv ≫
+        (X.isoOfEq (show X.basicOpen (f i * f j) = X.basicOpen (f j * f i) by rw [mul_comm])).hom ≫
+        (transitionElemIso (f j) (f i) (e j)).hom := by
+  have key3 : (X.isoOfEq (show X.basicOpen (f i * (f j * f k)) = X.basicOpen (f j * (f k * f i)) by
+        rw [show f i * (f j * f k) = f j * (f k * f i) by ring])).hom ≫
+      X.homOfLE (show X.basicOpen (f j * (f k * f i)) ≤ X.basicOpen (f j * f i) by
+        rw [show f j * (f k * f i) = (f j * f i) * f k by ring, Scheme.basicOpen_mul]; exact inf_le_left)
+    = X.homOfLE (show X.basicOpen (f i * (f j * f k)) ≤ X.basicOpen (f i * f j) by
+        rw [show f i * (f j * f k) = (f i * f j) * f k by ring, Scheme.basicOpen_mul]; exact inf_le_left) ≫
+      (X.isoOfEq (show X.basicOpen (f i * f j) = X.basicOpen (f j * f i) by rw [mul_comm])).hom := by
+    simp only [Scheme.isoOfEq_hom, Scheme.homOfLE_homOfLE]
+  have key2 : (X.isoOfEq (show X.basicOpen (f i * (f j * f k)) = X.basicOpen (f j * (f k * f i)) by
+        rw [show f i * (f j * f k) = f j * (f k * f i) by ring])).hom ≫
+      (transitionElemIso (f j) (f k * f i) (e j)).hom ≫
+      (Z j).homOfLE (show (Z j).basicOpen (transitionElem (f j) (f k * f i) (e j)) ≤
+        (Z j).basicOpen (transitionElem (f j) (f i) (e j)) by
+        rw [transitionElem_mul, Scheme.basicOpen_mul]; exact inf_le_right)
+    = X.homOfLE (show X.basicOpen (f i * (f j * f k)) ≤ X.basicOpen (f i * f j) by
+        rw [show f i * (f j * f k) = (f i * f j) * f k by ring, Scheme.basicOpen_mul]; exact inf_le_left) ≫
+      (X.isoOfEq (show X.basicOpen (f i * f j) = X.basicOpen (f j * f i) by rw [mul_comm])).hom ≫
+      (transitionElemIso (f j) (f i) (e j)).hom := by
+    have hbridge := transitionElemIso_hom_naturality2 (f j) (f k) (f i) (e j)
+    calc _ = (X.isoOfEq (show X.basicOpen (f i * (f j * f k)) = X.basicOpen (f j * (f k * f i)) by
+          rw [show f i * (f j * f k) = f j * (f k * f i) by ring])).hom ≫
+        (X.homOfLE (show X.basicOpen (f j * (f k * f i)) ≤ X.basicOpen (f j * f i) by
+          rw [show f j * (f k * f i) = (f j * f i) * f k by ring, Scheme.basicOpen_mul]; exact inf_le_left) ≫
+        (transitionElemIso (f j) (f i) (e j)).hom) :=
+      congrArg (fun x => (X.isoOfEq (show X.basicOpen (f i * (f j * f k)) = X.basicOpen (f j * (f k * f i)) by
+          rw [show f i * (f j * f k) = f j * (f k * f i) by ring])).hom ≫ x) hbridge
+    _ = ((X.isoOfEq (show X.basicOpen (f i * (f j * f k)) = X.basicOpen (f j * (f k * f i)) by
+          rw [show f i * (f j * f k) = f j * (f k * f i) by ring])).hom ≫
+        X.homOfLE (show X.basicOpen (f j * (f k * f i)) ≤ X.basicOpen (f j * f i) by
+          rw [show f j * (f k * f i) = (f j * f i) * f k by ring, Scheme.basicOpen_mul]; exact inf_le_left)) ≫
+        (transitionElemIso (f j) (f i) (e j)).hom :=
+      (Category.assoc _ _ _).symm
+    _ = (X.homOfLE (show X.basicOpen (f i * (f j * f k)) ≤ X.basicOpen (f i * f j) by
+        rw [show f i * (f j * f k) = (f i * f j) * f k by ring, Scheme.basicOpen_mul]; exact inf_le_left) ≫
+        (X.isoOfEq (show X.basicOpen (f i * f j) = X.basicOpen (f j * f i) by rw [mul_comm])).hom) ≫
+        (transitionElemIso (f j) (f i) (e j)).hom :=
+      congrArg (· ≫ (transitionElemIso (f j) (f i) (e j)).hom) key3
+    _ = _ := Category.assoc _ _ _
+  have hbridge2 := transitionElemIso_inv_naturality (f i) (f j) (f k) (e i)
+  calc _ = (transitionElemIso (f i) (f j * f k) (e i)).inv ≫
+      (X.homOfLE (show X.basicOpen (f i * (f j * f k)) ≤ X.basicOpen (f i * f j) by
+        rw [show f i * (f j * f k) = (f i * f j) * f k by ring, Scheme.basicOpen_mul]; exact inf_le_left) ≫
+      (X.isoOfEq (show X.basicOpen (f i * f j) = X.basicOpen (f j * f i) by rw [mul_comm])).hom ≫
+      (transitionElemIso (f j) (f i) (e j)).hom) :=
+    congrArg (fun x => (transitionElemIso (f i) (f j * f k) (e i)).inv ≫ x) key2
+  _ = ((transitionElemIso (f i) (f j * f k) (e i)).inv ≫
+      X.homOfLE (show X.basicOpen (f i * (f j * f k)) ≤ X.basicOpen (f i * f j) by
+        rw [show f i * (f j * f k) = (f i * f j) * f k by ring, Scheme.basicOpen_mul]; exact inf_le_left)) ≫
+      (X.isoOfEq (show X.basicOpen (f i * f j) = X.basicOpen (f j * f i) by rw [mul_comm])).hom ≫
+      (transitionElemIso (f j) (f i) (e j)).hom :=
+    (Category.assoc _ _ _).symm
+  _ = ((Z i).homOfLE (show (Z i).basicOpen (transitionElem (f i) (f j * f k) (e i)) ≤
+        (Z i).basicOpen (transitionElem (f i) (f j) (e i)) by
+        rw [transitionElem_mul, Scheme.basicOpen_mul]; exact inf_le_left) ≫
+      (transitionElemIso (f i) (f j) (e i)).inv) ≫
+      (X.isoOfEq (show X.basicOpen (f i * f j) = X.basicOpen (f j * f i) by rw [mul_comm])).hom ≫
+      (transitionElemIso (f j) (f i) (e j)).hom :=
+    congrArg (· ≫ (X.isoOfEq (show X.basicOpen (f i * f j) = X.basicOpen (f j * f i) by rw [mul_comm])).hom ≫
+      (transitionElemIso (f j) (f i) (e j)).hom) hbridge2.symm
+  _ = _ := Category.assoc _ _ _
+
+/-- **`t_fac`——`Scheme.GlueData`の11個目のフィールド**。`gdT'`(i側・j側
+それぞれで`gdVpullbackIso`+`transitionElemIso`を経由する)と`gdT`
+(`transitionElemIso`2つを`isoOfEq(可換律)`で橋渡し)が、`pullback.fst`・
+`pullback.snd`を経由して両立することを示す。`gdT'`を`gdT_eq_
+transitionElemIso`で書き換え、`pullback.fst`/`pullback.snd`を
+`gdVpullbackIso_hom_comp_homOfLE_fst`/`gdVpullbackIso_inv_comp_pullback_
+snd`で`(Z i).homOfLE`の言葉に変換し、共通の`(gdVpullbackIso i j k).hom`
+を`congrArg`でキャンセルすれば`gdT'_key`にちょうど一致する。
+
+これで`Scheme.GlueData`の12フィールド中11個
+(`J・U・V・f・t・t_id・f_mono・f_open・f_hasPullback・f_id・t'・t_fac`)
+が完成した。残るのは`cocycle`(`t' i j k ≫ t' j k i ≫ t' k i j = 𝟙`)
+のみ。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem gdT'_t_fac (i j k : J) :
+    (gdT' f Z e i j k).hom ≫ pullback.snd (gdF f Z e j k) (gdF f Z e j i)
+      = pullback.fst (gdF f Z e i j) (gdF f Z e i k) ≫ (gdT f Z e i j).hom := by
+  unfold gdT'
+  simp only [Iso.trans_hom, Iso.symm_hom, Category.assoc]
+  rw [gdT_eq_transitionElemIso, ← gdVpullbackIso_hom_comp_homOfLE_fst f Z e i j k]
+  rw [show (gdVpullbackIso f Z e j k i).inv ≫ pullback.snd (gdF f Z e j k) (gdF f Z e j i)
+      = (Z j).homOfLE (show (Z j).basicOpen (transitionElem (f j) (f k * f i) (e j)) ≤
+          (Z j).basicOpen (transitionElem (f j) (f i) (e j)) by
+        rw [transitionElem_mul, Scheme.basicOpen_mul]; exact inf_le_right)
+      from gdVpullbackIso_inv_comp_pullback_snd f Z e j k i]
+  rw [← Category.assoc]
+  exact congrArg ((gdVpullbackIso f Z e i j k).hom ≫ ·) (gdT'_key f Z e i j k)
+
+/- ★★次の一手(未着手): 残る`cocycle`(`t' i j k ≫ t' j k i ≫ t' k i j =
+𝟙`)を埋めて`Scheme.GlueData`を完成させる——新しい数学は不要で、`t_fac`と
+同様に`gdT'_key`型の等式へ帰着させる見込み(3つの`transitionElemIso`の
+往復が打ち消し合うことを示す)。その後`GD.glued`が`C`(または`Ext`後に
+`C`)に同型であることを、`C`自身の`OpenCover`の`gluedCover`との比較で
+示す——`Lemma 4.1`の`c'.C`の実体。`corrhyp-goal.md`に記録。 -/
 
 end ABC3.Found.CorrHyp
