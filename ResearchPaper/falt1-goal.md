@@ -2460,6 +2460,25 @@ mathlib での正確な組み立て方は未確認)。
       `left_inv`・`right_inv`を**別々の`have`として先に確立してから**
       `LinearEquiv.mk`に渡す、という手順で再開すること。
 
+      ★実際にこの手順(`have`を個別に確立→`LinearEquiv.mk
+      (LinearMap.mk (AddHom.mk toF hadd) hsmul) invF hleft hright`)
+      で組み立て直したところ、**anonymous constructorの`Prod`取り違え
+      は解消した**(`LinearEquiv.mk`という名前付きコンストラクタを
+      使うことで回避できた——`{...}`記法固有の問題だったと判明)。
+      しかし残る`Type mismatch`は解消しなかった——しかも今回は
+      **両辺の`pp`出力が文字どおり完全に同一**(1文字違わず一致)な
+      のに`Type mismatch`になる、という決定的な事実を確認した。
+      これは**pretty printerには表示されないレベルでの instance の
+      不一致**(`Module B (∀i,M i)`のような合成インスタンスが、
+      「私が構成した項」と「目標の型」とで異なる合成経路を通って
+      いる)であることの動かぬ証拠——`Option.elim`/`Option.casesOn`
+      の構文的な違いという当初の仮説は完全に排除された。次回は
+      `set_option pp.all`の出力(1780行、今回は読み切れず)を
+      `offset`/`limit`で分割して丹念に比較するか、あるいは
+      `Module B (∀i,M i)`の2つの経路をそれぞれ`(inferInstance :
+      Module B _)`で個別に取り出し`Eq`ではなく`HEq`や`Subsingleton`
+      経由で橋渡しする、という方針から始めること。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
