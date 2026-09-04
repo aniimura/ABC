@@ -2327,4 +2327,28 @@ noncomputable def falt1AdjoinRootEquivIntegralClosure
   rw [hPBgen] at hadjoinEq
   exact e1.trans (Subalgebra.equivOfEq _ _ hadjoinEq)
 
+/-- **`AdjoinRoot` の底環 base change に沿った `V0`-代数準同型
+(体を経由しない版)**: `falt1AdjoinRootEquivIntegralClosure` の発見
+(`V1 ≃ AdjoinRoot(X^n-π)`)を受けて、`algHomAdjoinRootOfCompat`
+(フラクション体 `K→+*K'` を経由する版)より遥かに単純な経路が
+見つかった——`V0[X]→Wn[X]` の底環 base change をそのまま使うだけ
+(フラクション体・`IsFractionRing.map` は一切不要)。 -/
+noncomputable def algHomAdjoinRootOfCompat' {V0 Wn : Type*} [CommRing V0] [CommRing Wn] [Algebra V0 Wn]
+    (f : Polynomial V0) :
+    AdjoinRoot f →ₐ[V0] AdjoinRoot (f.map (algebraMap V0 Wn)) :=
+  AlgHom.mk' (AdjoinRoot.map (algebraMap V0 Wn) f (f.map (algebraMap V0 Wn)) (dvd_refl _)) (by
+    intro c x
+    simp only [Algebra.smul_def]
+    rw [map_mul]
+    congr 1
+    rw [AdjoinRoot.algebraMap_eq]
+    rw [IsScalarTower.algebraMap_apply V0 Wn (AdjoinRoot (f.map (algebraMap V0 Wn))),
+      AdjoinRoot.algebraMap_eq, AdjoinRoot.map_of])
+
+/-- `algHomAdjoinRootOfCompat'` も根を根に送る。 -/
+theorem algHomAdjoinRootOfCompat'_root {V0 Wn : Type*} [CommRing V0] [CommRing Wn] [Algebra V0 Wn]
+    (f : Polynomial V0) :
+    algHomAdjoinRootOfCompat' (Wn := Wn) f (AdjoinRoot.root f) = AdjoinRoot.root (f.map (algebraMap V0 Wn)) :=
+  AdjoinRoot.map_root (algebraMap V0 Wn) f (f.map (algebraMap V0 Wn)) (dvd_refl _)
+
 end ABC3.Found.Falt1
