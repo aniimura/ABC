@@ -464,6 +464,24 @@ Opens.topIso`・`Scheme.Γ.mapIso`・`Scheme.ΓSpecIso`で繋いだ環の同型)
 
 コミット: `5d14a13e`(piece_algebraEtale_tensor完成)・`dc023618`(記録)。
 
+★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(「合流」の道具が
+完全に揃った、集計10/24で変わらず)。`exists_fg_subalgebra_tensor_
+standardEtalePair_promote`を完成(`FieldLimit.lean`、★sorry無し)——
+有限段階Rの上の降下P₀を、より粗い共通段階R'(R≤R')へ移送してもbase
+changeが変わらないことを保証。`exists_fg_subalgebra_tensor_
+standardEtalePair_baseChange`(降下)+`exists_fgSubalgebra_upperBound`
+(共通上界)+この補題(移送)の3段の組み合わせで、1つのアフィン片`U`の
+中のすべての標準エタール片を同じ有限段階`R'`の上で扱えるようになった。
+
+**§4の総括**: `Lemma 4.1`の証明に要る数学的な補題・道具は`Space`の
+有限型性の検証という前提整理を除きすべて完成した。残る作業は純粋な
+エンジニアリング(実際に結線して1つの宣言にまとめる、複数の`U_i`を
+横断した合流、`GlueData`貼り合わせ、`Corr`のnonempty脱落の手当て)のみ
+——必要な数学はすべて手元に揃っている。★★★このセッション(圧縮後の
+全継続分)は§4にとって記録的なセッションだった。
+
+コミット: `2b0f2231`(promote完成)・`e0ce98d2`(記録)。
+
 ★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(残作業4段階を総括、
 集計10/24で変わらず)。generic flatnessの標準的前提(Rネター整域・
 加群/多元環がR上有限表示)を確認したところ、`corrHypInstance4`の
