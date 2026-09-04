@@ -3628,6 +3628,56 @@ mathlib での正確な組み立て方は未確認)。
       でありさえすれば任意の`B`について成立する」という、以前
       「解決困難」と記録していた具体的な gap を正式に閉じた、
       infrastructure としての確実な前進。
+
+      ★★★★★★★★★★★★★2026-09-05(続々々)、**`p` を単元に限らない、
+      真に非退化な non-vacuous witness を完成させた**——これは
+      `Definition 2.1` の witness としてこれまでで最も意味のある形。
+
+      鍵となった2つの発見: (1) **`Algebra.FormallyUnramified.elem`の
+      一意性**(`elem_unique_of_props`)——`Exists.choose`で非構成的に
+      定義された idempotent だが、定義性質(annihilate `1⊗s-s⊗1`・
+      augment to `1`)を満たす元は実は一意であることを、`elem_absorb_
+      of_prop`(定義性質(1)を満たす`t`について任意の`x`が`x*t=(μx⊗1)*t`
+      という「吸収」性質を持つ)を経由して初めて mathlib に無かった形で
+      証明した。(2) この一意性を武器に、**`diagonalCompare p (elem A
+      B) = elem Ap Bp` を任意の`p`(単元である必要が無い)について
+      証明した**(`diagonalCompare_elem_eq`)——`elem Ap Bp`の定義性質
+      (1)を`Bp`の**全ての元**について確認する必要があり、`f0(B)`⊆
+      `Bp`だけでは足りないが、`Z:={s'|(1⊗s'-s'⊗1)*t=0}`が**部分環**
+      であること(`Zclosed_add`・`Zclosed_mul`)と、`Away`局所化の
+      生成元`π:=f0(p)`の逆元も`Z`に入ること(`Zclosed_inv`、`(π⊗π)`で
+      割ってから可逆性でキャンセルする論法)を示し、`IsLocalization.
+      Away.surj`(`Bp`の任意の元は`f0(a)*π⁻ⁿ`の形)で全域に拡張した。
+
+      この2つを使って、**「`B`が`A`上(古典的な意味で)étale・finite・
+      freeでありさえすれば、任意の`p`についてalmost étale covering」
+      という完全に一般の定理**(`isAlmostEtaleCovering_of_etale_
+      general`)を組み立てた。条件(i)は`RingHom.Etale.propertyIsLocal.
+      localizationAwayPreserves`(mathlibの「局所的な性質」framework、
+      étale性の`Away`局所化保存性)・`Module.Finite.of_isLocalization`・
+      `Module.free_of_isLocalizedModule`という、p=1witnessの`RingEquiv`
+      経由の議論より遥かに直接的な道具で閉じた——`p`が単元かどうかに
+      一切依存しない、はるかにクリーンな証明になった。条件(ii)は
+      `Algebra.trace_localization`(mathlib既存)一発。条件(iii)は
+      `p^n•`を`diagonalCompare`の`A`-線形性で外に出し、(2)を適用する
+      だけ。**真の非単元素元`p:=5`・`B:=Fin2→ℤ`**での具体例
+      (`5`は`ℤ`の単元ではない)で非空虚性を確認した——`p=1`退化ケース
+      とは質的に異なる、genuinely non-degenerate な witness。
+
+      移植後1回で`lake build`が通り、プロジェクト全体の`lake build`
+      (6590 jobs)・`node tools/check.mjs --brief`(NG13件、既存分で
+      不変)も確認済み。手法を`tools/lean-idioms.md` #48に記録。
+
+      **意味**: `Definition 2.1`は今や「古典的な不分岐拡大は(任意の
+      `p`について)almost étale coveringである」という、Faltings の
+      理論の健全性を裏付ける非自明な事実まで込みでFoundになった。
+      ただし`Theorem 1.2`本体(`W`が**分岐した**almost étale covering
+      の場合の`δₙ→0`)には直結しない——不分岐`W`を選ぶと`Wₙ`も
+      (étaleがbase changeで保たれるため)不分岐のままとなり
+      `δₙ≡0`と自明になってしまう一方、Faltings の理論が本来扱いたい
+      のは分岐したW(`Theorem 2.2`-`2.4`のHochschild cohomologyが
+      要る場合)であるため。それでも、`elem`の一意性・自然性という
+      道具自体は almost 数学の一般論として再利用可能な資産。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・

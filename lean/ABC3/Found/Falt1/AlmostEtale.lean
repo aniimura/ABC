@@ -8,6 +8,9 @@ import Mathlib.RingTheory.Flat.Basic
 import Mathlib.RingTheory.Finiteness.FinitePresentationLocal
 import Mathlib.RingTheory.Trace.Defs
 import Mathlib.RingTheory.Localization.Away.Basic
+import Mathlib.RingTheory.Localization.NormTrace
+import Mathlib.RingTheory.Localization.Finiteness
+import Mathlib.RingTheory.LocalProperties.Projective
 import Mathlib.RingTheory.TensorProduct.Basic
 
 /-!
@@ -572,5 +575,273 @@ theorem awayOne_isAlmostEtaleCovering_of_etale {A B : Type u} [CommRing A] [Comm
 押し切る戦略には最初から関係が無かった、という事後的な確認。 -/
 example {A : Type u} [CommRing A] : IsAlmostEtaleCovering (A := A) (B := A) (1:A) :=
   awayOne_isAlmostEtaleCovering_of_etale (A := A) (B := A)
+
+/-! ## `p` を単元に限らない一般化(2026-09-05、大幅な前進)。
+
+上の `awayOne_*` 系列は全て `p:=1`(単元)に依存していた——`Bp≅B`・
+`Ap≅A`(局所化が実質恒等)という**退化した**特殊ケースで、Faltings の
+理論が本来扱いたい「`p` が真の(単元でない)素元」の場合には触れて
+いなかった。ここでは、**`p` が単元かどうかに一切依存しない**形で、
+`B` が(古典的な意味で)`A` 上 étale・finite・free でありさえすれば
+`IsAlmostEtaleCovering A B p` が**任意の `p`** について成り立つことを
+示す——「非分岐拡大は(古典的な意味で既に)almost étale である」という
+Faltings の理論の健全性チェックであり、かつ非退化な non-vacuous witness
+そのもの。
+
+鍵となった発見は2つ:
+1. **`Algebra.FormallyUnramified.elem` の一意性**(`elem_unique_of_props`)
+   ——`Exists.choose` で非構成的に定義された idempotent だが、
+   その定義性質(`one_tmul_sub_tmul_one_mul_elem`・`lmul_elem`)を
+   満たす元は実は**一意**であることを示せる(`S⊗_RS`の元`t`が
+   `∀s,(1⊗s-s⊗1)*t=0`を満たすなら、任意の`x`について`x*t=(μx⊗1)*t`
+   という「吸収」性質を持つ——これだけから`t*t'=t=t'`が出る)。
+2. **`elem` の局所化に関する自然性**(`diagonalCompare_elem_eq`)
+   ——一意性を武器に、`diagonalCompare p (elem A B) = elem Ap Bp`
+   を**任意の `p`**(単元である必要が無い!)について示せる。
+   条件(iii)の「`s'∈Bp` 全体」への拡張は、`f0(B)` が(1)を満たす
+   ことから出発し、`Z:={s'|(1⊗s'-s'⊗1)*t=0}` が**部分環**になる
+   こと(`Zclosed_add`・`Zclosed_mul`)、`π:=f0(p)`(単元、`Away`
+   局所化の定義から)の逆元も`Z`に入ること(`Zclosed_inv`、
+   `(π⊗π)`で割ってから可逆性でキャンセルする論法)、`Bp`の任意の元が
+   `f0(a)*π⁻ⁿ`の形(`IsLocalization.Away.surj`)であることを組み合わせて
+   全射的に拡張する。 -/
+
+/-- `t` が `elem` の定義性質(1)を満たすなら、任意の `x` について
+`x*t` は `μ(x)⊗1` の形の元と `t` の積に等しい——`elem` 一意性の鍵。 -/
+theorem elem_absorb_of_prop {R S : Type u} [CommRing R] [CommRing S] [Algebra R S]
+    (t : TensorProduct R S S) (ht1 : ∀ s : S, (1 ⊗ₜ[R] s - s ⊗ₜ[R] 1) * t = 0) :
+    ∀ x : TensorProduct R S S, x * t = ((Algebra.TensorProduct.lmul' R) x ⊗ₜ[R] (1:S)) * t := by
+  have hswap : ∀ s : S, (1 ⊗ₜ[R] s : TensorProduct R S S) * t = (s ⊗ₜ[R] 1) * t := by
+    intro s
+    have h := ht1 s
+    rw [sub_mul] at h
+    exact sub_eq_zero.mp h
+  intro x
+  induction x using TensorProduct.induction_on with
+  | zero => simp
+  | tmul a b =>
+    have step1 : (a ⊗ₜ[R] b : TensorProduct R S S) = (a ⊗ₜ[R] (1:S)) * ((1:S) ⊗ₜ[R] b) := by
+      rw [Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
+    rw [step1, mul_assoc, hswap b, ← mul_assoc, Algebra.TensorProduct.tmul_mul_tmul, mul_one]
+    simp [Algebra.TensorProduct.lmul'_apply_tmul]
+  | add x y hx hy =>
+    rw [add_mul, hx, hy, map_add, TensorProduct.add_tmul, add_mul]
+
+/-- **`Algebra.FormallyUnramified.elem` の一意性**(mathlib に無かった
+事実)。定義性質(annihilate `1⊗s-s⊗1`・augment to `1`)を満たす元は
+一意——`elem_absorb_of_prop` を `1-t'`(定義性質(2)から `μ(1-t')=0`)
+に適用すると `(1-t')*t=0` すなわち `t=t'*t`、対称に `t'=t*t'`、
+可換性 `t*t'=t'*t` と合わせて `t=t'`。 -/
+theorem elem_unique_of_props {R S : Type u} [CommRing R] [CommRing S] [Algebra R S]
+    (t t' : TensorProduct R S S)
+    (ht1 : ∀ s : S, (1 ⊗ₜ[R] s - s ⊗ₜ[R] 1) * t = 0) (ht2 : (Algebra.TensorProduct.lmul' R) t = 1)
+    (ht1' : ∀ s : S, (1 ⊗ₜ[R] s - s ⊗ₜ[R] 1) * t' = 0) (ht2' : (Algebra.TensorProduct.lmul' R) t' = 1) :
+    t = t' := by
+  have h1 : (1 - t') * t = 0 := by
+    rw [elem_absorb_of_prop t ht1 (1 - t')]
+    rw [map_sub, map_one, ht2']
+    simp
+  have h2 : (1 - t) * t' = 0 := by
+    rw [elem_absorb_of_prop t' ht1' (1 - t)]
+    rw [map_sub, map_one, ht2]
+    simp
+  have e1 : t = t' * t := by
+    have := h1
+    rw [sub_mul, one_mul, sub_eq_zero] at this
+    exact this
+  have e2 : t' = t * t' := by
+    have := h2
+    rw [sub_mul, one_mul, sub_eq_zero] at this
+    exact this
+  rw [e1, mul_comm]
+  exact e2.symm
+
+/-- `Z := {s | (1⊗s-s⊗1)*t=0}` は加法について閉じる。 -/
+theorem Zclosed_add {Ap Bp : Type u} [CommRing Ap] [CommRing Bp] [Algebra Ap Bp] (t'' : TensorProduct Ap Bp Bp)
+    (s1 s2 : Bp)
+    (h1 : ((1:Bp) ⊗ₜ[Ap] s1 - s1 ⊗ₜ[Ap] (1:Bp)) * t'' = 0)
+    (h2 : ((1:Bp) ⊗ₜ[Ap] s2 - s2 ⊗ₜ[Ap] (1:Bp)) * t'' = 0) :
+    ((1:Bp) ⊗ₜ[Ap] (s1+s2) - (s1+s2) ⊗ₜ[Ap] (1:Bp)) * t'' = 0 := by
+  have expand : (1:Bp) ⊗ₜ[Ap] (s1+s2) - (s1+s2) ⊗ₜ[Ap] (1:Bp)
+      = ((1:Bp) ⊗ₜ[Ap] s1 - s1 ⊗ₜ[Ap] (1:Bp)) + ((1:Bp) ⊗ₜ[Ap] s2 - s2 ⊗ₜ[Ap] (1:Bp)) := by
+    rw [TensorProduct.tmul_add, TensorProduct.add_tmul]; ring
+  rw [expand, add_mul, h1, h2, add_zero]
+
+/-- `Z` は乗法についても閉じる(`1⊗(s1s2)-(s1s2)⊗1` を
+`(1⊗s1)*[(1⊗s2)-(s2⊗1)] + [(1⊗s1)-(s1⊗1)]*(s2⊗1)` に分解し、
+可換性で `t` を中に押し込んで両方消す)。 -/
+theorem Zclosed_mul {Ap Bp : Type u} [CommRing Ap] [CommRing Bp] [Algebra Ap Bp] (t'' : TensorProduct Ap Bp Bp)
+    (s1 s2 : Bp)
+    (h1 : ((1:Bp) ⊗ₜ[Ap] s1 - s1 ⊗ₜ[Ap] (1:Bp)) * t'' = 0)
+    (h2 : ((1:Bp) ⊗ₜ[Ap] s2 - s2 ⊗ₜ[Ap] (1:Bp)) * t'' = 0) :
+    ((1:Bp) ⊗ₜ[Ap] (s1*s2) - (s1*s2) ⊗ₜ[Ap] (1:Bp)) * t'' = 0 := by
+  have expand : (1:Bp) ⊗ₜ[Ap] (s1*s2) - (s1*s2) ⊗ₜ[Ap] (1:Bp)
+      = ((1:Bp) ⊗ₜ[Ap] s1) * ((1:Bp) ⊗ₜ[Ap] s2 - s2 ⊗ₜ[Ap] (1:Bp))
+        + ((1:Bp) ⊗ₜ[Ap] s1 - s1 ⊗ₜ[Ap] (1:Bp)) * (s2 ⊗ₜ[Ap] (1:Bp)) := by
+    simp only [mul_sub, sub_mul, Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
+    abel
+  rw [expand, add_mul]
+  have e1 : (1:Bp) ⊗ₜ[Ap] s1 * (((1:Bp) ⊗ₜ[Ap] s2 - s2 ⊗ₜ[Ap] (1:Bp)) * t'') = 0 := by rw [h2, mul_zero]
+  have e2 : (((1:Bp) ⊗ₜ[Ap] s1 - s1 ⊗ₜ[Ap] (1:Bp)) * t'') * (s2 ⊗ₜ[Ap] (1:Bp)) = 0 := by rw [h1, zero_mul]
+  rw [← mul_assoc] at e1
+  rw [mul_assoc] at e2
+  rw [e1, zero_add]
+  rw [show ((1:Bp) ⊗ₜ[Ap] s1 - s1 ⊗ₜ[Ap] (1:Bp)) * (s2 ⊗ₜ[Ap] (1:Bp)) * t''
+        = ((1:Bp) ⊗ₜ[Ap] s1 - s1 ⊗ₜ[Ap] (1:Bp)) * (t'' * (s2 ⊗ₜ[Ap] (1:Bp))) from by ring]
+  rw [e2]
+
+/-- `π` が単元で `Z` に入っているなら、`π⁻¹` も `Z` に入る
+(`(π⊗π)` で割ってから可逆性でキャンセル)。`Away` 局所化の
+`π:=f0(p)` は定義から単元なので、これで `Z` の生成元が揃う。 -/
+theorem Zclosed_inv {Ap Bp : Type u} [CommRing Ap] [CommRing Bp] [Algebra Ap Bp] (t'' : TensorProduct Ap Bp Bp)
+    (π : Bp) (hπunit : IsUnit π)
+    (hπZ : ((1:Bp) ⊗ₜ[Ap] π - π ⊗ₜ[Ap] (1:Bp)) * t'' = 0) :
+    ((1:Bp) ⊗ₜ[Ap] (↑hπunit.unit⁻¹ : Bp) - (↑hπunit.unit⁻¹ : Bp) ⊗ₜ[Ap] (1:Bp)) * t'' = 0 := by
+  set πinv : Bp := (↑hπunit.unit⁻¹ : Bp) with hπinvdef
+  have hmulinv : π * πinv = 1 := by
+    rw [hπinvdef]
+    exact_mod_cast hπunit.unit.mul_inv
+  have step : ((π:Bp) ⊗ₜ[Ap] π) * ((1:Bp) ⊗ₜ[Ap] πinv - πinv ⊗ₜ[Ap] (1:Bp))
+      = -(((1:Bp) ⊗ₜ[Ap] π - π ⊗ₜ[Ap] (1:Bp))) := by
+    simp only [mul_sub, Algebra.TensorProduct.tmul_mul_tmul, mul_one, hmulinv]
+    ring
+  have key : ((π:Bp) ⊗ₜ[Ap] π) * (((1:Bp) ⊗ₜ[Ap] πinv - πinv ⊗ₜ[Ap] (1:Bp)) * t'') = 0 := by
+    rw [← mul_assoc, step, neg_mul, hπZ, neg_zero]
+  have hunit2 : IsUnit ((π:Bp) ⊗ₜ[Ap] π : TensorProduct Ap Bp Bp) := by
+    refine IsUnit.of_mul_eq_one ((πinv:Bp) ⊗ₜ[Ap] πinv) ?_
+    rw [Algebra.TensorProduct.tmul_mul_tmul, hmulinv]; rfl
+  rw [← mul_zero ((π:Bp) ⊗ₜ[Ap] π : TensorProduct Ap Bp Bp)] at key
+  exact hunit2.mul_left_cancel key
+
+/-- `Algebra.TensorProduct.lmul'` と `diagonalCompare` の可換性
+(条件(iii)の性質(2)を移送するのに使う)。 -/
+theorem lmul'_diagonalCompare {A B : Type u} [CommRing A] [CommRing B] [Algebra A B] (p : A)
+    (x : TensorProduct A B B) :
+    letI := awayAlgebra p (A := A) (B := B)
+    haveI := awayScalarTower p (A := A) (B := B)
+    Algebra.TensorProduct.lmul' (Localization.Away p) (diagonalCompare p x)
+      = algebraMap B (Localization.Away (algebraMap A B p)) (Algebra.TensorProduct.lmul' A x) := by
+  letI := awayAlgebra p (A := A) (B := B)
+  haveI := awayScalarTower p (A := A) (B := B)
+  induction x using TensorProduct.induction_on with
+  | zero => simp
+  | tmul b1 b2 =>
+    rw [diagonalCompare_tmul, Algebra.TensorProduct.lmul'_apply_tmul, Algebra.TensorProduct.lmul'_apply_tmul, map_mul]
+  | add x y hx hy => rw [map_add, map_add, hx, hy, map_add, map_add]
+
+/-- **`elem` の局所化に関する自然性、任意の `p`(単元である必要は無い)
+について**。`diagonalCompare p` は idempotent `elem A B` を idempotent
+`elem Ap Bp` へ**厳密に**(`p^n` を掛けることなく)送る——`p=1` の
+witness で使った「全射性だけで押し切る」トリックとは異なり、こちらは
+`elem` の**一意性**(`elem_unique_of_props`)を武器に、`diagonalCompare
+p (elem A B)` が `Ap`・`Bp` に対する `elem` の定義性質を実際に満たす
+ことを示して結論する。性質(1)(`∀s'∈Bp`)は `f0(B)` から出発し `Z` が
+部分環であること・`π⁻¹∈Z`(`Zclosed_inv`)・`IsLocalization.Away.surj`
+(`Bp`の任意の元は`f0(a)*π⁻ⁿ`の形)を組み合わせて拡張する。 -/
+theorem diagonalCompare_elem_eq {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [Algebra.FormallyUnramified A B] [Algebra.EssFiniteType A B] (p : A) :
+    letI := awayAlgebra p (A := A) (B := B)
+    haveI := awayScalarTower p (A := A) (B := B)
+    [Algebra.FormallyUnramified (Localization.Away p) (Localization.Away (algebraMap A B p))] →
+    [Algebra.EssFiniteType (Localization.Away p) (Localization.Away (algebraMap A B p))] →
+    diagonalCompare p (Algebra.FormallyUnramified.elem A B)
+      = Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p)) := by
+  letI := awayAlgebra p (A := A) (B := B)
+  haveI := awayScalarTower p (A := A) (B := B)
+  intro _ _
+  set Bp := Localization.Away (algebraMap A B p)
+  set Ap := Localization.Away p
+  set t'' := diagonalCompare p (Algebra.FormallyUnramified.elem A B) with ht''def
+  set π : Bp := algebraMap B Bp (algebraMap A B p) with hπdef
+  have hZB : ∀ b : B, ((1:Bp) ⊗ₜ[Ap] (algebraMap B Bp b) - (algebraMap B Bp b) ⊗ₜ[Ap] (1:Bp)) * t'' = 0 := by
+    intro b
+    have h1 : (1 ⊗ₜ[A] b - b ⊗ₜ[A] 1) * Algebra.FormallyUnramified.elem A B = 0 :=
+      Algebra.FormallyUnramified.one_tmul_sub_tmul_one_mul_elem b
+    have h2 := congrArg (diagonalCompare p) h1
+    rw [map_zero, map_mul, map_sub, diagonalCompare_tmul, diagonalCompare_tmul, map_one] at h2
+    rw [ht''def]; exact h2
+  have hπunit : IsUnit π := IsLocalization.Away.algebraMap_isUnit (algebraMap A B p)
+  have hπZ : ((1:Bp) ⊗ₜ[Ap] π - π ⊗ₜ[Ap] (1:Bp)) * t'' = 0 := hZB (algebraMap A B p)
+  have hZpow : ∀ n : ℕ, ((1:Bp) ⊗ₜ[Ap] (π^n) - (π^n) ⊗ₜ[Ap] (1:Bp)) * t'' = 0 := by
+    intro n
+    induction n with
+    | zero => simp
+    | succ k ih => rw [pow_succ]; exact Zclosed_mul t'' (π^k) π ih hπZ
+  have hprop1 : ∀ s' : Bp, ((1:Bp) ⊗ₜ[Ap] s' - s' ⊗ₜ[Ap] (1:Bp)) * t'' = 0 := by
+    intro s'
+    obtain ⟨n, a, ha⟩ := IsLocalization.Away.surj (algebraMap A B p) s'
+    have hun : IsUnit (π ^ n) := hπunit.pow n
+    have hZinv : ((1:Bp) ⊗ₜ[Ap] (↑hun.unit⁻¹ : Bp) - (↑hun.unit⁻¹ : Bp) ⊗ₜ[Ap] (1:Bp)) * t'' = 0 :=
+      Zclosed_inv t'' (π^n) hun (hZpow n)
+    have hZa : ((1:Bp) ⊗ₜ[Ap] (algebraMap B Bp a) - (algebraMap B Bp a) ⊗ₜ[Ap] (1:Bp)) * t'' = 0 :=
+      hZB a
+    have hs'eq : s' = (algebraMap B Bp a) * (↑hun.unit⁻¹ : Bp) := by
+      have hmulinv : (π^n) * (↑hun.unit⁻¹ : Bp) = 1 := by exact_mod_cast hun.unit.mul_inv
+      calc s' = s' * (π^n) * (↑hun.unit⁻¹ : Bp) := by rw [mul_assoc, hmulinv, mul_one]
+        _ = (algebraMap B Bp a) * (↑hun.unit⁻¹ : Bp) := by rw [ha]
+    rw [hs'eq]
+    exact Zclosed_mul t'' (algebraMap B Bp a) (↑hun.unit⁻¹ : Bp) hZa hZinv
+  have hprop2 : Algebra.TensorProduct.lmul' Ap t'' = 1 := by
+    rw [ht''def, lmul'_diagonalCompare, Algebra.FormallyUnramified.lmul_elem, map_one]
+  exact elem_unique_of_props t'' (Algebra.FormallyUnramified.elem Ap Bp)
+    hprop1 hprop2
+    (Algebra.FormallyUnramified.one_tmul_sub_tmul_one_mul_elem) (Algebra.FormallyUnramified.lmul_elem)
+
+/-- **`Definition 2.1`(`IsAlmostEtaleCovering`)の non-vacuous witness、
+`p` を単元に限らず一般化して完成**。`B` が `A` 上(古典的な意味で)
+étale・finite・free でありさえすれば、**任意の `p : A`**(単元である
+必要は無い、真の非単元素元でも良い)について成り立つ。条件(i)は
+`RingHom.Etale.propertyIsLocal.localizationAwayPreserves`(étale性の
+`Away`局所化保存性、mathlibの「局所的な性質」framework)・`Module.
+Finite.of_isLocalization`・`Module.free_of_isLocalizedModule`という、
+p=1 witness の `IsLocalization.atUnit`/`RingEquiv` 経由の議論より
+遥かに直接的な道具で閉じる。条件(ii)は `Algebra.trace_localization`
+(mathlib既存、trace の局所化との可換性)一発。条件(iii)は`p^n •`を
+`diagonalCompare`の`A`-線形性で外に出し、`diagonalCompare_elem_eq`
+(`n`に依らない、`elem`の完全な自然性)を適用するだけ。 -/
+theorem isAlmostEtaleCovering_of_etale_general {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [Algebra.Etale A B] [Module.Finite A B] [Module.Free A B] (p : A) :
+    IsAlmostEtaleCovering (A := A) (B := B) p := by
+  letI := awayAlgebra p (A := A) (B := B)
+  haveI := awayScalarTower p (A := A) (B := B)
+  unfold IsAlmostEtaleCovering
+  have hFree : Module.Free (Localization.Away p) (Localization.Away (algebraMap A B p)) := by
+    have hM : Algebra.algebraMapSubmonoid B (Submonoid.powers p) = Submonoid.powers (algebraMap A B p) := by
+      rw [Algebra.algebraMapSubmonoid, Submonoid.map_powers]
+    have hIsLoc : IsLocalization (Algebra.algebraMapSubmonoid B (Submonoid.powers p)) (Localization.Away (algebraMap A B p)) := by
+      rw [hM]; infer_instance
+    have hIsLocMod : IsLocalizedModule (Submonoid.powers p)
+        (IsScalarTower.toAlgHom A B (Localization.Away (algebraMap A B p))).toLinearMap :=
+      instIsLocalizedModuleToLinearMapToAlgHomOfIsLocalizationAlgebraMapSubmonoid (Submonoid.powers p)
+    exact Module.free_of_isLocalizedModule (Submonoid.powers p)
+      (IsScalarTower.toAlgHom A B (Localization.Away (algebraMap A B p))).toLinearMap
+  have hFinite : Module.Finite (Localization.Away p) (Localization.Away (algebraMap A B p)) := by
+    have hM : Algebra.algebraMapSubmonoid B (Submonoid.powers p) = Submonoid.powers (algebraMap A B p) := by
+      rw [Algebra.algebraMapSubmonoid, Submonoid.map_powers]
+    have : IsLocalization (Algebra.algebraMapSubmonoid B (Submonoid.powers p)) (Localization.Away (algebraMap A B p)) := by
+      rw [hM]; infer_instance
+    exact Module.Finite.of_isLocalization A B (Submonoid.powers p)
+  have hEtale : Algebra.Etale (Localization.Away p) (Localization.Away (algebraMap A B p)) := by
+    have hf : RingHom.Etale (algebraMap A B) := RingHom.etale_algebraMap.mpr ‹Algebra.Etale A B›
+    have h2 : RingHom.Etale (IsLocalization.Away.map (Localization.Away p) (Localization.Away (algebraMap A B p)) (algebraMap A B) p) :=
+      RingHom.Etale.propertyIsLocal.localizationAwayPreserves (algebraMap A B) p (Localization.Away p) (Localization.Away (algebraMap A B p)) hf
+    have heq : IsLocalization.Away.map (Localization.Away p) (Localization.Away (algebraMap A B p)) (algebraMap A B) p
+        = Localization.awayMap (algebraMap A B) p := rfl
+    rw [heq] at h2
+    exact RingHom.Etale.toAlgebra h2
+  refine ⟨hFree, hFinite, hEtale, ?_, ?_⟩
+  · intro b
+    exact ⟨Algebra.trace A B b, Algebra.trace_localization A (Submonoid.powers p) b⟩
+  · intro n _
+    haveI := hEtale
+    haveI := hFinite
+    refine ⟨p^n • Algebra.FormallyUnramified.elem A B, ?_⟩
+    rw [map_smul, diagonalCompare_elem_eq]
+
+/-- 非空虚性の具体例——**真の非単元素元 `p:=5` で**、`B := Fin 2 → ℤ` が
+`ℤ` 上 almost étale covering になる。`5` はもちろん `ℤ` の単元ではない
+(`awayOne_*` 系列の `p:=1` 退化ケースとは質的に異なる)。 -/
+example : IsAlmostEtaleCovering (A := ℤ) (B := Fin 2 → ℤ) (5:ℤ) :=
+  isAlmostEtaleCovering_of_etale_general (A := ℤ) (B := Fin 2 → ℤ) 5
 
 end ABC3.Found.Falt1
