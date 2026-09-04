@@ -415,6 +415,21 @@ coeff_zero_notMem_sq`(`φ_1`の定数項は`𝔪²`に属さない——属す�
 1つ添加した拡大`K(α)/K(Λ_{n-1})`は次数`q^n-q^{n-1}`の完全分岐拡大)
 が任意の`n`で確立された。
 
+**続報(2026-09-04、★★★★★★★★★ψ_nの根を添加した体は次数`q^n-q^{n-1}`)**:
+`Found/PGC/LubinTateActionPsiField.lean`(新規)。`irreducible_
+iteratedLubinTatePsi`(`A`上の既約性)をGaussの補題
+(`Polynomial.IsPrimitive.irreducible_iff_irreducible_map_fraction_
+map`)で`FractionRing A`上の既約性へ橋渡しし、`AdjoinRoot`の標準基底
+(`PowerBasis`)の次元公式と組み合わせて、★`finrank_adjoinRoot_
+iteratedLubinTatePsi`(`AdjoinRoot(ψ_n)`の`Frac(A)`上の次元は
+`q^n-q^{n-1}`)を確立した——これで「原始`π^n`-捩れ点を1つ添加した
+拡大の次数」という古典的な結論が**体の言葉**で得られた。★逸脱の記録:
+Gaussの補題は`[UniqueFactorizationMonoid A]`を要求する——古典的
+Lubin-Tate理論では`A=𝒪_K`はDVRなので自動的に成り立つ性質だが、
+これまでの議論には含まれていなかった。既存の定理には一切触れず、
+このファイルの新しい定理だけに使うので後続への影響は無いことを
+確認済み(CLAUDE.md 逸脱の記録)。
+
 **残る作業**: 節目(3)torsion点の構成本体(`D_n`の根を`Λ_n`として定義、
 `𝒪_K`加群構造、`K(Λ_n)/K`の完全分岐性)、節目(4)
 `L_n:=K(Λ_n)`が完全分岐かつ`Gal(L_n/K)≅(𝒪_K/π^n)^×`(Lubin-Tateの
