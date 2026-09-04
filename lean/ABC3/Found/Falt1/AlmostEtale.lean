@@ -844,4 +844,65 @@ theorem isAlmostEtaleCovering_of_etale_general {A B : Type u} [CommRing A] [Comm
 example : IsAlmostEtaleCovering (A := ℤ) (B := Fin 2 → ℤ) (5:ℤ) :=
   isAlmostEtaleCovering_of_etale_general (A := ℤ) (B := Fin 2 → ℤ) 5
 
+/-! ## `Theorem 2.4` への足場(2026-09-05、部分的な前進)。
+
+`Theorem 2.4`(物理p.7-8=印字p.260-261、260dpi精読)は (i)(ii) で難度が
+質的に違う——(i)(`Ω_A⊗B→Ω_B` が almost isomorphism)は`Theorem 2.2`
+と同じ「Hochschild cohomology を使う」の一文で済まされ未着手のまま
+だが、(ii)(有限群`G`の semilinear 作用に関する`H^i(G,M)`の almost
+消滅)の証明は「`m` が `A/tr_{B/A}(B)` を零化する」ことに帰着し、これは
+Definition 2.1 直後の remark(iii)(物理p.6末尾)そのもの:「`p^ε・
+e_{B/A}=Σxᵢ⊗yᵢ`(条件(iii)の witness)なら**任意の`b∈B`について
+`p^ε・b=Σtr_{B/A}(b・xᵢ)・yᵢ`**」という trace 恒等式一発で閉じる。
+
+この恒等式を、`elem`の一意性の議論(`elem_absorb_of_prop`)と同じ
+「annihilation性質だけから出発する」流儀で**部分的に**証明した——
+`Ψ_s(t):=Σtr(s・xᵢ)yᵢ`(`t=Σxᵢ⊗yᵢ`の`Tr1map`版)が`s・Tr1map(t)`に
+等しいことまでは annihilation 性質だけから閉じる(`Ψ_eq_smul_Tr1`)。
+残るのは**`Tr1map(elem R S) = 1`という1個のスカラー等式**のみ——
+これは「trace form が非退化」という分離拡大論の古典的事実の系だが、
+mathlib の `traceForm_nondegenerate` 系は体の拡大専用(`Algebra.
+IsSeparable K L`)で、一般の有限自由な非分岐環拡大向けの版が無い
+ため、次回への未解決課題として残す。 -/
+
+/-- `Tr1map R S t := Σᵢtr(xᵢ)•yᵢ` for `t=Σxᵢ⊗yᵢ∈S⊗_RS`(`R`-線形に
+延長)。`Theorem 2.4(ii)`の remark(iii)恒等式の土台。 -/
+noncomputable def Tr1map (R S : Type u) [CommRing R] [CommRing S] [Algebra R S] :
+    TensorProduct R S S →ₗ[R] S :=
+  TensorProduct.lift
+    { toFun := fun x => (Algebra.trace R S x) • LinearMap.id (M := S)
+      map_add' := by intro x y; simp [add_smul]
+      map_smul' := by intro r x; simp [mul_smul] }
+
+theorem Tr1map_tmul {R S : Type u} [CommRing R] [CommRing S] [Algebra R S] (x y : S) :
+    Tr1map R S (x ⊗ₜ[R] y) = (Algebra.trace R S x) • y := by
+  simp [Tr1map]
+
+/-- `t`の annihilation 性質(`elem`の定義性質(1))から、`(1⊗s)*t`への
+`Tr1map`は`s`をそのまま外に出せる(`Tr1map`は第2因子への`s`倍と
+可換)。 -/
+theorem Tr1_swap_smul {R S : Type u} [CommRing R] [CommRing S] [Algebra R S]
+    (t : TensorProduct R S S) (s : S) :
+    Tr1map R S ((1:S) ⊗ₜ[R] s * t) = s • Tr1map R S t := by
+  induction t using TensorProduct.induction_on with
+  | zero => simp
+  | tmul x y =>
+    rw [Algebra.TensorProduct.tmul_mul_tmul, one_mul, Tr1map_tmul, Tr1map_tmul]
+    simp [Algebra.smul_def]; ring
+  | add x y hx hy => rw [mul_add, map_add, map_add, hx, hy, smul_add]
+
+/-- **`Theorem 2.4(ii)`の remark(iii)恒等式、核心部分**。`t`が
+annihilation 性質(`elem`の定義性質(1))を満たすなら、`Ψ_s(t):=
+Tr1map((s⊗1)*t)`(`t=Σxᵢ⊗yᵢ`なら`Σtr(s・xᵢ)yᵢ`に等しい)は
+`s・Tr1map(t)`に等しい——annihilation の swap 性質(`(1⊗s)*t=(s⊗1)*t`)
+と`Tr1_swap_smul`を貼り合わせるだけ。`t:=p^ε・elem A B`・`Tr1map
+(elem A B)=1`(未証明、上記コメント参照)が分かれば、`s・p^ε =
+Σtr(s・xᵢ)yᵢ`という remark(iii)の恒等式そのものが従う。 -/
+theorem Ψ_eq_smul_Tr1 {R S : Type u} [CommRing R] [CommRing S] [Algebra R S]
+    (t : TensorProduct R S S) (ht1 : ∀ s : S, (1 ⊗ₜ[R] s - s ⊗ₜ[R] 1) * t = 0) (s : S) :
+    Tr1map R S ((s ⊗ₜ[R] (1:S)) * t) = s • Tr1map R S t := by
+  have hs := ht1 s
+  rw [sub_mul, sub_eq_zero] at hs
+  rw [← hs, Tr1_swap_smul]
+
 end ABC3.Found.Falt1
