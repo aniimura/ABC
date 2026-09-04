@@ -2474,3 +2474,37 @@ standard-étale被覆の存在、`FieldLimit.lean:755`)と
 実際の`ι,t,f`と被覆条件の証明を`corrHypGlueDataOfCover`に与える形へ
 進める——ただしこれもまだ`A`/`X`/`U`が何であるべきかという項目(c)の
 接続無しには「実際のCorrHypデータ」にはならない。
+
+## 2026-09-04(続き): `corrHypGlueDataOfEtale`——(a)の仕上げ、被覆条件も自動化
+
+上記の「次の一手」を実行した。`exists_finite_standardEtaleCover`と
+`corrHypGlueDataOfCover`を合成し、`Γ(X,U)`が`A⊗[ℚ]ℝ`上étaleである
+という**1個の仮定だけ**からGlueDataを自動的に組み立てる
+`corrHypGlueDataOfEtale`を追加。あわせて、その族が実際に`U`を
+覆うことを`exists_scheme_basicOpen_cover_of_ring`で示す
+`corrHypGlueDataOfEtale_cover`も追加——ロードマップ項目(b)
+(`corrHypGlueData.glued ≅ U`)がまさに必要とする被覆条件そのもの
+がこれで用意できた。
+
+技術的な点: `corrHypGlueDataOfEtale`と`corrHypGlueDataOfEtale_cover`
+の両方で`exists_finite_standardEtaleCover (A ⊗[ℚ] ℝ) Γ(X, U)`という
+**同一の式**を再度書いて`.choose`する形にした(結果を`ι,t,f`として
+外に出さず、都度同じ式から取り出す)——同じ定理を同じ引数に適用した
+`Exists.choose`は定義的に等しいので、これで両者が指す`t`・`f`が
+一致することが保証される。`lean_check`で検証後(0.39秒)、ファイルへ
+反映して`lake build`(ExtLimit/ABC3とも)0エラーを確認、コミット
+(`ec21e781`)。
+
+**これで「étaleな環拡大 → GlueData + 被覆条件」という、CorrHyp非依存
+の一般的パッケージ化がすべて完了した**。残るのは:
+(b) `corrHypGlueData.glued ≅ U`——`corrHypGlueDataOfEtale_cover`が
+与える被覆条件と、`U`自身の`OpenCover`の`gluedCover`との比較
+(`IsColimit`同士の比較、genuinely new)。
+(c) `A`・`X`・`U`・`[Algebra (A⊗[ℚ]ℝ) Γ(X,U)]`・
+`[Algebra.Etale (A⊗[ℚ]ℝ) Γ(X,U)]`を実際の`corrHypInstance4`・
+`Ext`・`C`(の1個のアフィン開集合`U`)へ接続する——`A`が何であるべきか
+(`C`のアフィン片の「$k$-係数の芯」に相当する環)を`piece_descends_iso`
+の定義から逆算して具体的に特定する必要がある。
+(d) `C`自体の有限アフィン被覆+外側の貼り合わせ段階。
+(e) `α・β`脚と整合性の等式。
+集計は10/24で変わらず(インフラでnumbered itemではないため)。

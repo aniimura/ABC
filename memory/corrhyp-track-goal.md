@@ -1163,3 +1163,22 @@ corrHypGlueDataを実際に呼び出す——初めて抽象パラメータで�
 corrhyp-goal.mdに詳細記録(コミット`20db4512`)。次の一手:
 exists_finite_standardEtaleCover+exists_scheme_basicOpen_cover_of_ring
 で実際のι,t,fと被覆証明を得る方向。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04(続き)
+続報(corrHypGlueDataOfEtale追加、上記の次の一手を実行、集計10/24で
+変わらず)。exists_finite_standardEtaleCoverとcorrHypGlueDataOfCover
+を合成し、Γ(X,U)がA⊗[ℚ]ℝ上étaleという1個の仮定だけからGlueDataを
+自動組み立てるcorrHypGlueDataOfEtaleを追加。あわせて
+exists_scheme_basicOpen_cover_of_ringでその族が実際にUを覆うことを
+示すcorrHypGlueDataOfEtale_coverも追加(項目(b)が必要とする被覆条件
+そのもの)。両方の定義で同一式
+exists_finite_standardEtaleCover (A⊗[ℚ]ℝ) Γ(X,U)を再度書いて
+.chooseする形にし、定義的に同じt・fを指すようにした。lake build
+(ExtLimit/ABC3とも)0エラー確認、コミット: `ec21e781`。
+
+**これで「étaleな環拡大→GlueData+被覆条件」というCorrHyp非依存の
+一般的パッケージ化が完了**。残るのは(b)corrHypGlueData.glued≅Uの
+証明(IsColimit比較、genuinely new)・(c)A・X・U・Etale仮定を実際の
+corrHypInstance4/Ext/Cへ接続(Aが何であるべきかをpiece_descends_iso
+の定義から逆算する必要あり)・(d)Cの有限アフィン被覆+外側の貼り合わせ
+・(e)α・β脚と整合性の等式。corrhyp-goal.mdに詳細記録。
