@@ -1502,3 +1502,24 @@ promoteを適用するだけで完成。**Rレベルの複数添字を単一の�
 へ揃える」という前半部分が既存部品だけで完成したのは、person-years
 評価のさらなる見直しを裏付ける具体的な進捗。corrhyp-goal.mdに詳細
 記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04(続き17〜18)
+アーキテクチャ再考: R_iを個別に合流させるより、Γ(C,piece)全体
+(piece_algebraEtale_tensorによりA⊗ℝ上Etale=FinitePresentation)を
+Algebra.FinitePresentation.iff_quotient_mvPolynomial'(mathlib、
+MvPolynomial ι商としての表示)経由で**一度に**Rレベルへ降ろす方が
+筋が良いかもしれないという代替案に気づいた——Cはextdiagramのような
+R段階近似の塔を持たないため、個別のR_iを合流させるアプローチには
+限界がある。
+
+代替案を検証するため、exists_fg_subalgebra_tensor_bivariate_finset
+(既存、2変数多項式の係数降下)のMvPolynomial ι版
+exists_fg_subalgebra_tensor_mvPolynomial_finsetを実際に構築・検証
+した——全く同じ技法(係数を有限個ずつ共通Rへ降ろしてmonomialの和で
+再構成)が任意の変数集合ιへそのまま一般化できた。lake build
+(FieldLimit/ABC3とも)0エラー確認、コミット: `8b2a983b`。
+
+**これで代替案が仮説ではなく実際に動く部品を伴う具体的な作業計画に
+なった**。次の一手: (ker f).FGから有限個の生成元を取り出し、
+この補題を適用してΓ(C,piece)のRレベルモデルS_0を構成する
+(未着手)。corrhyp-goal.mdに詳細記録。
