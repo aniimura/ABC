@@ -388,4 +388,41 @@ theorem extDiagram_map_isAffineHom (X : Over BaseK) {R S : (FgSubalgebra ℚ ℝ
   exact MorphismProperty.pullbackMap hi1 hi2 (by simp)
     (by simpa using (toSchemeDiagramOver.map h).w.symm)
 
+/-!
+## 準コンパクトなスキームは有限アフィン開被覆を持つ
+
+`Lemma 4.1` の被覆の組み立て(`corrhyp-goal.md` §4)の最初の一手——
+`AffineTransitionLimit.lean` の `Scheme.exists_isOpenCover_and_isAffine`
+に渡す入力(有限アフィン開被覆)を用意する。`Scheme.affineCover`
+(mathlib既存、任意のスキームがアフィンスキームによる開被覆を持つ)の
+台の開集合が `CompactSpace` により有限部分被覆へ落ちることを、一般
+位相の `IsCompact.elim_finite_subcover` で示す——CorrHyp 固有の内容を
+一切使わない、任意のスキームに対する一般的な事実。 -/
+
+/-- **準コンパクトなスキームは(`affineCover` の中に)有限アフィン開被覆を
+持つ**——`isAffineOpen_opensRange`(アフィンからの開埋め込みの像はアフィン
+開)と一般位相の有限部分被覆の存在(`IsCompact.elim_finite_subcover`)を
+合成する。
+
+★**sorry 無し**。標準3公理のみ。CorrHyp に依存しない一般的な事実。 -/
+theorem Scheme.exists_finite_affineOpenCover (X : Scheme) [CompactSpace X] :
+    ∃ s : Finset X.affineCover.I₀,
+      TopologicalSpace.IsOpenCover (fun i : s => (X.affineCover.f i).opensRange) ∧
+      ∀ i : s, IsAffineOpen (X.affineCover.f i).opensRange := by
+  have hcov : ⋃ i, Set.range (X.affineCover.f i) = Set.univ := X.affineCover.iUnion_range
+  have hopen : ∀ i, IsOpen (Set.range (X.affineCover.f i)) :=
+    fun i => (X.affineCover.f i).isOpenEmbedding.isOpen_range
+  obtain ⟨s, hs⟩ := (isCompact_univ (X := X)).elim_finite_subcover
+    (fun i => Set.range (X.affineCover.f i)) hopen (by rw [hcov])
+  refine ⟨s, ?_, fun i => isAffineOpen_opensRange (X.affineCover.f i)⟩
+  show (⨆ i : s, (X.affineCover.f i).opensRange) = ⊤
+  apply TopologicalSpace.Opens.ext
+  rw [TopologicalSpace.Opens.coe_iSup, TopologicalSpace.Opens.coe_top]
+  apply Set.eq_univ_of_univ_subset
+  intro x _
+  have hx : x ∈ (⋃ i ∈ s, Set.range (X.affineCover.f i)) := hs (Set.mem_univ x)
+  simp only [Set.mem_iUnion] at hx ⊢
+  obtain ⟨i, hi, hxi⟩ := hx
+  exact ⟨⟨i, hi⟩, hxi⟩
+
 end ABC3.Found.CorrHyp
