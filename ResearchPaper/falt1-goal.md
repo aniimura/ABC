@@ -2943,6 +2943,30 @@ mathlib での正確な組み立て方は未確認)。
       成功すれば、Theorem 1.2 の残る核心的な困難(従来「discriminant
       の塔」と呼んでいたもの)が、**このセッションの既存の道具の
       範囲内で解決できる**ことが確定する。
+
+      ★★step (3) の「`d+1`因子版への拡張」に要る**残り**の一般論
+      (単一因子の全射性を`B`へ base change する部分)も確認した:
+      `LinearMap.rTensor_surjective`/`LinearMap.lTensor_surjective`
+      (mathlib既存、`f`が全射なら`f⊗id`も全射)——`Function.
+      Surjective.piMap`と合わせ、step (3) の`d+1`因子版に**必要な
+      一般論はすべてmathlibに既存**であることが確定した。残るのは
+      `pushoutKaehlerSplitStepOption`の`Option ι`出力・`falt1_
+      omegaAdjoinRoot_surjective_quotient_p`(単一因子)・これら3つの
+      一般論(`piMap`・`rTensor_surjective`・`lTensor_surjective`)を
+      実際に組み合わせる**配線作業のみ**——具体的な`V_n`塔(`X_i^p-T_i`
+      型`d`個+冪根型1個の生成元)を選んで初めて実行できる。
+
+      ★★★今セッションの到達点のまとめ(次回への引き継ぎ):
+      Theorem 1.2 の証明は Brinon-Conrad Exercise 13.7.4 の6ステップ
+      に分解でき、うち**(1)(2)(4)は完全に完成**、**(3)は単一因子版が
+      完成し、d+1因子版に要る一般論もすべて確認済み**(残るのは
+      具体的な`V_n`塔を選んでの配線のみ)、**(5)は「discriminantの塔」
+      という独立理論の移植ではなく、既存の`conductor_mul_
+      differentIdeal`・`differentIdeal_eq_span_derivative`による
+      **具体的な計算**に帰着する見込みが立った(まだ実行していない)。
+      残る2つの困難は、いずれも「新しい数学理論の輸入」ではなく
+      「具体的な`V_n`塔を選んでの計算・配線」という**質的に同じ
+      種類の作業**に帰着したことが、今セッション最大の戦略的成果。
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
       「菱形」版であって、対応物というより`falt1_differentIdeal_
