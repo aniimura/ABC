@@ -3628,10 +3628,28 @@ Theorem 1.2・3b/3c の中核の代数的関係式であり、item 3c の技術�
 Module.length Wₙ₊₁ (Wₙ₊₁ ⧸ Ideal.map (algebraMap Wₙ Wₙ₊₁) (differentIdeal V0 Wₙ))
   = Module.length Wₙ₊₁ (Wₙ₊₁ ⧸ conductor Wₙ x) + Module.length Wₙ₊₁ (Wₙ₊₁ ⧸ differentIdeal V1 Wₙ₊₁)
 ```
-という**長さの等式**(`hlen_eq`)まで得た。残るのは `delta_tendsto_zero` の `hrec` へ
-変換すること——右辺第1項(`conductor` の長さ)の**下界評価**が、以前から「独立の古典的
-整数論(discriminant の塔・conductor-discriminant の関係)を要する」と評価してきた
-核心の困難に対応する。 -/
+という**長さの等式**(`hlen_eq`)まで得た。
+
+★2026-09-04追加・重要な発見: `x` が `Wₙ₊₁` を `Wₙ`-**代数として**生成する
+(`hxadjoin : Wₙ[x] = ⊤`、既に確立済み)ため、`conductor_eq_top_iff_adjoin_eq_top`
+から`conductor(Wₙ,x) = ⊤`が直ちに従い、`length(Wₙ₊₁/conductor(Wₙ,x)) = 0`
+——右辺第1項が**消える**。得られる完全な等式:
+```
+Module.length Wₙ₊₁ (Wₙ₊₁ ⧸ Ideal.map (algebraMap Wₙ Wₙ₊₁) (differentIdeal V0 Wₙ))
+  = Module.length Wₙ₊₁ (Wₙ₊₁ ⧸ differentIdeal V1 Wₙ₊₁)
+```
+**★★これは`Wₙ₊₁`を`V1`と全く同じEisenstein多項式`gK`のbase changeから作る、という
+このセッションの構成固有の単純化である可能性が高い**——Faltings原論文の一般論
+(`Wₙ`が任意の代数拡大でもよい場合の「非正規性の評価」、conductor が非自明な
+場合)の全容を捉えているかは未確認。次回、この構成が Theorem 1.2 の再帰的な
+`V_n` 塔の構成として本当に十分か(あるいは「逸脱」として原文との対応を明記
+すべきか)を検討すること——CLAUDE.mdの「逸脱」の記録原則に従う。
+
+なお残る接続として、この等式の左辺を`δₙ`と結ぶ(a)については、`length_map_
+pow_of_ramificationIdx`・`IsLocalRing.length_baseChange`いずれも`Wₙ₊₁`の
+局所性(全分岐)を要求すると確認済み(近道は見つからなかった、falt1-goal.md
+参照)——`conductor`の項が消えたことで(c)の困難自体は解消したが、(a)の
+全分岐証明は依然として必要。 -/
 theorem falt1_cancelConductorDelta_assembled
     {V0 Wn : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
     [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
@@ -3773,6 +3791,21 @@ theorem falt1_cancelConductorDelta_assembled
   -- hlen_eq :
   --   Module.length Wn1 (Wn1 ⧸ Ideal.map (algebraMap Wn Wn1) (differentIdeal V0 Wn))
   --     = Module.length Wn1 (Wn1 ⧸ conductor Wn x) + Module.length Wn1 (Wn1 ⧸ differentIdeal V1 Wn1)
+  -- ★2026-09-04追加・重要な発見: `hxadjoin`(`Wn[x] = Wn1`、既に確立済み)から
+  -- `conductor Wn x = ⊤` が(`conductor_eq_top_iff_adjoin_eq_top`で)直ちに従う——
+  -- 「conductor の長さ」の項が消え、hlen_eq は**補正項の無い完全な等式**になる。
+  -- ★★この構成(Wₙ₊₁ を V1 と全く同じ Eisenstein 多項式 gK の base change から作る)
+  -- 固有の単純化である可能性が高く、Faltings の一般論(Wₙ が任意の代数拡大でもよい
+  -- 場合の「非正規性の評価」)の全容を捉えているかは未確認——次回、この構成が
+  -- Theorem 1.2 の再帰的な V_n 塔の構成として本当に十分か(あるいは「逸脱」として
+  -- 記録すべきか)を検討すること。 -/
+  have hcond_top : conductor Wn x = ⊤ := conductor_eq_top_iff_adjoin_eq_top.mpr hxadjoin
+  rw [hcond_top] at hlen_eq
+  have hzero : Module.length Wn1 (Wn1 ⧸ (⊤ : Ideal Wn1)) = 0 := Module.length_eq_zero
+  rw [hzero, zero_add] at hlen_eq
+  -- hlen_eq (簡約後):
+  --   Module.length Wn1 (Wn1 ⧸ Ideal.map (algebraMap Wn Wn1) (differentIdeal V0 Wn))
+  --     = Module.length Wn1 (Wn1 ⧸ differentIdeal V1 Wn1)
   trivial
 
 end ABC3.Found.Falt1
