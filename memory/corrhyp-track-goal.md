@@ -1736,3 +1736,24 @@ Presentationの生成元を仲立ちにψを構成する必要がある(「直�
 がアフィンであることの確認+piece_restrict_homを両方向に適用する
 配線(未着手)。lake build(ExtLimit/ABC3)0エラー確認、push済み。
 集計は10/24で変わらず。corrhyp-goal.mdに詳細記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05(続き12)
+★重要な簡略化★ 「共通の細分W」問題はX.basicOpen(基本開)の被覆を
+使えば分離性の仮定なしに解決する。IsAffineOpen.inf(mathlib)は
+分離性([IsAffineHom (pullback.diagonal (terminal.from X))])を要求
+するが、QcqsSpaceはCompactSpace・QuasiSeparatedSpaceのみで分離性を
+含まない——安易に足すとNonempty Cと同種のリスク。
+
+発見(朗報): U_i・U_jを任意のアフィン開ペアとして扱うのをやめ、単一の
+アフィン開Uの基本開被覆X.basicOpen f_iで覆う設計に切り替えれば解決
+する——Scheme.basicOpen_mul(mathlib、既存): 基本開同士の交わりは
+再び基本開(同じ環の別の元による局所化)なので常にアフィン、分離性
+不要。W := X.basicOpen(f_i*f_j)として具体的に取れる。これは実は
+corrHypGlueData(既存)が最初から採用していた設計そのもの。
+
+次の一手: descendPieceRをU:=X.basicOpen f_iの場合に適用し、
+piece_restrict_hom(D(f_i f_j)≤D(f_i)・D(f_i f_j)≤D(f_j)の2方向)
+で生成元をWへ制限、W自身のPresentationを仲立ちにψを構成する。
+分離性問題を回避できたことで、既存のcorrHypGlueDataOfEtaleの設計
+パターンをそのまま踏襲できる、より安全な道筋になった。集計は10/24
+で変わらず。corrhyp-goal.mdに詳細記録。
