@@ -2726,3 +2726,49 @@ Stop hookフィードバックへの応答として、項目(b)の残る核心(N
 が見込まれる)、それが済めば`U`成分(恒等)と合わせた`NatIso`全体の
 組み立て、`HasColimit.isoOfNatIso`での`.glued`比較、mathlibの
 `fromGlued`との合成。集計は10/24で変わらず。
+
+## 2026-09-04(続き7): `piecesGluedCoverVIso_hom_snd`——項目(b)のNatIso自然性が完全に確立
+
+引き続きStop hookフィードバックへの応答として、`snd`側(`gdT≫gdF`
+との可換性)を完成させた——**これでfst・sndともに揃い、項目(b)のNatIso
+自然性が完全に確立した**。
+
+鍵となったのは`gdT_eq_transitionElemIso`(既存)を`transitionElemIso_
+hom_ι`(前回確立)と組み合わせる`gdT_hom_comp_gdF`——「`(gdT i j).hom
+≫ gdF(j,i)`」を「`transitionElemIso(f i)(f j)(e i)`の`.inv`+
+`X.homOfLE`+`(e j).hom`」の形へ帰着させる補題。ここで**新しい配管の
+罠**に遭遇した: `rw[gdT_eq_transitionElemIso]`直後に`show`で式全体を
+再掲示しようとすると、`gdT_eq_transitionElemIso`が内部に埋め込む
+`X.isoOfEq`の証明項(`by rw[mul_comm]`)と、自分で書いた`show`内の
+FRESH な同種の証明項が(命題としては同じだが構文的には別物のため)
+`instances`透明度で照合できず`whnf`が終わらない(`#31`の新しい現れ方、
+`maxHeartbeats 1000000`でも76秒で打ち切り)。**修正**: `show`による
+式の再掲示を避け、代わりに`rw[Category.assoc, Category.assoc]`で
+結合だけを先に揃えてから`transitionElemIso_hom_ι`・`homOfLE_isoOfEq_
+comp'_assoc`を適用する——`rw`は元の証明項に一切触れず結合律だけを
+使うので、この壁を完全に回避できる。`gdT_hom_comp_gdF`自体は0.1秒台
+で通った。
+
+`homOfLE_isoOfEq_comp'`(`X.isoOfEq`の`.hom`と`X.homOfLE`の合成が単一
+の`X.homOfLE`にまとまる、CorrHyp非依存の一般的事実)を土台に用意し、
+`pullbackHomOfLE_gdV_iso_hom_snd`(`fst`版と同じ3段構成を`snd`向けに
+繰り返し、`transitionElemIso`の`hom≫inv`を`Iso.hom_inv_id_assoc`で
+相殺してから`pullbackHomOfLEIsoBasicOpen_hom_snd`/`pullbackEInvIso_
+hom_snd`を適用)・`piecesGluedCoverVIso_hom_snd`(mathlib既製の
+`pullbackSymmetry_hom_comp_fst`へ接続、最後は`rfl`で`piecesOpenCover_
+f_eq`のdefeqへ届く)を完成させた。すべて`lean_check`で個別検証後
+ファイルへ反映、`lake build`(ExtLimit/ABC3とも)0エラー確認、コミット
+(`0fe99493`)。
+
+**残る道筋(項目(b)の完成に向けて)**:
+1. `U`成分(恒等)と`V`成分(`piecesGluedCoverVIso`+
+   `piecesGluedCoverVIso_hom_fst`/`_hom_snd`)を`CategoryTheory.
+   NatIso.ofComponents`でまとめる。
+2. `CategoryTheory.Limits.HasColimit.isoOfNatIso`で`corrHypGlueData.
+   glued ≅ (piecesOpenCover ...).gluedCover.glued`を得る。
+3. mathlibの`Scheme.Cover.fromGlued`(`IsIso`、既製)が与える
+   `(piecesOpenCover ...).gluedCover.glued ≅ U`と合成する。
+
+この3ステップで`corrHypGlueData f Z e |>.glued ≅ (U:Scheme)`——項目(b)
+そのもの——が完成する見込み。集計は10/24で変わらず(インフラ、
+numbered itemではないため)。

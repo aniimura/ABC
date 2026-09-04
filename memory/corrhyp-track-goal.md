@@ -1304,3 +1304,28 @@ snd側(gdT≫gdFとの可換性、gdT_eq_transitionElemIso等が土台の見込�
 t_fac/cocycle同等の配線量)・U成分と合わせたNatIso全体の組み立て・
 HasColimit.isoOfNatIsoでの.glued比較・mathlibのfromGludedとの合成。
 corrhyp-goal.mdに詳細記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04(続き7)
+続報(piecesGluedCoverVIso_hom_snd完成、**項目(b)のNatIso自然性が
+fst・sndともに完全に確立**、集計10/24で変わらず)。gdT_eq_
+transitionElemIso+transitionElemIso_hom_ιを組み合わせるgdT_hom_
+comp_gdFが鍵。
+
+新しい配管の罠: rw[gdT_eq_transitionElemIso]直後にshowで式全体を
+再掲示すると、埋め込まれたX.isoOfEqの証明項同士(命題として同じだが
+構文的に別)の照合でinstances透明度の壁に当たりwhnfが終わらない
+(#31の新しい現れ方、maxHeartbeats 1000000でも76秒で打ち切り)。
+修正: showを避けrw[Category.assoc,Category.assoc]で結合だけ先に
+揃えてから適用(元の証明項に一切触れないので壁を回避)。
+
+homOfLE_isoOfEq_comp'(@[reassoc])・gdT_hom_comp_gdF・
+pullbackHomOfLE_gdV_iso_hom_snd・piecesGluedCoverVIso_hom_snd
+(mathlib既製pullbackSymmetry_hom_comp_fstへ接続)を完成。lake build
+(ExtLimit/ABC3とも)0エラー確認、コミット: `0fe99493`。
+
+**残る道筋(項目(b)完成に向けて)**: (1)U成分(恒等)+V成分を
+NatIso.ofComponentsでまとめる、(2)HasColimit.isoOfNatIsoで
+corrHypGlueData.glued≅piecesOpenCover(...).gluedCover.gluedを得る、
+(3)mathlibのfromGludedが与えるpiecesOpenCover(...).gluedCover.glued
+≅Uと合成する。この3ステップでcorrHypGlueData.glued≅(U:Scheme)
+(項目(b)そのもの)が完成する見込み。corrhyp-goal.mdに詳細記録。
