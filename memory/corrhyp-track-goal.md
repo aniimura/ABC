@@ -284,3 +284,21 @@ locallyOfFiniteType`等のHom集合の極限安定性補題で足りる可能性
 5/5に到達**、全体の集計は**7/24→8/24**。
 
 コミット: `04e0d2a3`(TrivialCorrExample.lean、§1完成)。
+
+★★★★★★★★★★★★★★2026-09-04さらに続報(§3・§5でも「命名段」定義項目を
+実現、集計10/24)。`Definition 3.1`(`hyperbolicCore`)・`Definition 5.2`
+(`hyperbolicCoreGeneral`)がどちらも「対象に名前を与えるだけ」
+(非arithmetic性の仮定はSkeleton自身が定義内で未使用と明言)であることに
+気づき、`corrHypInstance`(`core:=id`・`Ext:=id`)で`X:=FG_SL2Z`を使い
+両方実現(`HyperbolicCoreExample.lean`・`HyperbolicCoreGeneralExample.lean`、
+★sorry無し、witnessが定義的にFG_SL2Z自身に等しいことをdocstringで正直に
+明記)。一方`Theorem 6.1`(`Aut:=PUnit`等のplaceholder次第で形式的には
+閉じそうに見えたが、`Definition 1.2`をcorrHypInstanceでclaimしなかった
+のと同じ理由で却下——本物の自己同型群/モジュライスタックに未接続。
+`Theorem 3.3`も`Iso X Y:=X=Y`(本物の等号)により退化せず、Margulisの
+理論を要する本物の有限性の主張として残した。
+
+**§1が5/5、§3が2/3、§5が1/7に到達。全体の集計は7/24→10/24。**
+
+コミット: `04e0d2a3`(§1完成、既出)・`732953cc`(Definition 3.1)・
+`3f1af6a2`(Definition 5.2)。

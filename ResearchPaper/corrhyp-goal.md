@@ -816,3 +816,30 @@ Hom集合の安定性)・`exists_hom_comp_eq_comp_of_locallyOfFiniteType`
 `X=Y=C=basePt4`・`α=β=γ=idFEt`という最も単純な例で witness し
 (`Found/CorrHyp/TrivialCorrExample.lean`、★sorry無し)、
 §1(Definition 1.1–1.5)が**5/5に到達**。全体の集計は7/24→**8/24**。
+
+### 2026-09-04さらに続報: 「命名段」パターンの definition 項目を続けて実現
+
+`Definition 1.2` の解消をきっかけに、§1–§6 の残り項目を`Skeleton`の
+statement の**中身**まで見直したところ、`Definition 3.1`(`hyperbolicCore`)
+と `Definition 5.2`(`hyperbolicCoreGeneral`)が**どちらも「対象に名前を
+与えるだけ」**(非arithmetic性の仮定は定義本体で未使用、と各Skeletonの
+docstringが自ら明言している)であることに気づいた。`corrHypInstance`
+(`core := id`・`Ext := id`、`Instance.lean` 冒頭で明記済みの placeholder)
+で `X := FG_SL2Z`(モジュラー群、非arithmetic性は `MargulisArithmetic`/
+`ShimuraArithmetic` が恒偽であることから出る)を使い、両方を実現した
+(`HyperbolicCoreExample.lean`・`HyperbolicCoreGeneralExample.lean`、
+★どちらも sorry 無し)——`core := id` により witness は定義的に
+`FG_SL2Z` 自身に等しいことを、`ModularExample.lean` の透明性のスタイルを
+踏襲して docstring に明記した(隠していない)。
+
+一方、`Theorem 6.1`(§6)は`Aut _:=PUnit`・`IsGenericallyScheme _:=True`
+という**同じ placeholder パターン**を使えば形式的には閉じるように見えるが、
+これは `Definition 1.2` を `corrHypInstance` で claim しなかったのと
+**同じ理由で却下**した——`Aut`/`ModuliStack` が本物の自己同型群・
+モジュライスタックに結びついていないので、`Theorem 6.1` の主張
+(自明な自己同型・correspondence が無い)を実質的に検証したことには
+ならない。`Theorem 3.3`(§3)も `Iso X Y := X = Y`(`corrHypInstance`
+で本物の等号)により退化の余地が無く、Margulisの理論を要する本物の
+有限性の主張として残っている——これらは今回 claim しなかった。
+
+**§1が5/5、§3が2/3、§5が1/7に到達。全体の集計は7/24→10/24。**
