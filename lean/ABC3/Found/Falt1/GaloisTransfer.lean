@@ -249,6 +249,66 @@ theorem transfer_invariants_mem_trace {B M G : Type u} [CommRing B]
   refine Finset.sum_congr rfl (fun g _ => ?_)
   rw [hsemi, hm g]
 
+/-! ## remark(iii) と繋いだ `Theorem 2.4(ii)` 本体 -/
+
+attribute [local instance] FractionRing.liftAlgebra in
+open CategoryTheory in
+/-- **`Theorem 2.4(ii)` 本体**(Galois の仮定を trace 公式の形で置いた版)。
+
+`B` が `A` 上 étale・finite・free の Dedekind 環拡大で、有限群 `G` が
+`B` に作用し **trace 公式 `algebraMap A B (tr_{B/A} x) = Σ_{g∈G} g(x)`**
+(「`G` を群とする Galois 被覆である」ことの標準的な帰結)を満たすとする。
+`M` を `B`-加群で `G` が semilinear に作用するものとすると、
+`Definition 2.1` 条件(iii)の witness の指数 `n` に対して
+**`p^{n·[B:A]}` が全ての正次数 `H^{i+1}(G,M)` を零化する**。
+条件(iii)は任意の `n` について成り立つので、これは Faltings の
+「`m` annihilates all higher cohomology `H^i(G,M)`, `i>0`」そのものである。
+
+証明は2段:remark(iii)(`trace_ideal_pow_mem_traceIdeal`——`p^{n·[B:A]}`
+が `tr_{B/A}(B)` に入る)で `tr_{B/A}(b) = p^{n·[B:A]}` を満たす `b` を
+取り、trace 公式でそれを `Σ_{g∈G}g(b) = algebraMap A B (p^{n·[B:A]})` に
+読み替えて `transfer_groupCohomology_smul_eq_zero` に渡すだけ。
+
+**残る仮定について(正直な記録)**: 原典は「`B[1/p]` が `A[1/p]` の
+`G` を群とする Galois 被覆」と述べており、そこから trace 公式
+`tr = Σ_{g∈G} g` が従う——ただしこれは**可換環の Galois 拡大の理論**
+(Chase–Harrison–Rosenberg)の標準的な帰結であって、mathlib の
+`IsGalois` は体の拡大専用(`trace_eq_sum_automorphisms` も体版)なので、
+現時点ではその導出を仮定 `htr` として置いている。さらに原典は局所化
+`B[1/p]` の水準で Galois を仮定しているので、`B` の水準へ降ろすには
+`Algebra.trace_localization` と `algebraMap B B[1/p]` の単射性を使う
+descent がもう1段要る。この2点が `Theorem 2.4(ii)` に残っている全てである。 -/
+theorem thm_2_4_ii_of_trace_formula {A B M G : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [Algebra.Etale A B] [Module.Finite A B] [Module.Free A B]
+    [IsDedekindDomain A] [IsDedekindDomain B] [Module.IsTorsionFree A B]
+    [Group G] [Fintype G] [MulSemiringAction G B]
+    [AddCommGroup M] [Module B M] [Module A M] [IsScalarTower A B M]
+    [DistribMulAction G M] [SMulCommClass G A M]
+    (hsemi : ∀ (g : G) (b : B) (x : M), g • (b • x) = (g • b) • (g • x))
+    (htr : ∀ x : B, algebraMap A B (Algebra.trace A B x) = ∑ g : G, g • x)
+    (p : A)
+    (hf0inj : letI := awayAlgebra p (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))))
+    (n : ℕ) (e : TensorProduct A B B)
+    (he : letI := awayAlgebra p (A := A) (B := B)
+      haveI := isAlmostEtaleCovering_of_etale_general (A := A) (B := B) p |>.2.2.1
+      haveI := (isAlmostEtaleCovering_of_etale_general (A := A) (B := B) p |>.2.1 :
+        Module.Finite _ _)
+      diagonalCompare p e
+        = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p)
+            (Localization.Away (algebraMap A B p)))
+    (i : ℕ) (z : groupCohomology (Rep.ofDistribMulAction A G M) (i+1)) :
+    (p ^ (n * Module.finrank (FractionRing A) (FractionRing B))) • z = 0 := by
+  have hmem := trace_ideal_pow_mem_traceIdeal p hf0inj n e he (Ideal.mem_span_singleton_self _)
+  have hle : (Ideal.span (Set.range (Algebra.trace A B)) : Ideal A)
+      ≤ LinearMap.range (Algebra.trace A B) := by
+    rw [Ideal.span_le]
+    rintro x ⟨y, rfl⟩
+    exact ⟨y, rfl⟩
+  obtain ⟨b, hb⟩ := hle hmem
+  exact transfer_groupCohomology_smul_eq_zero (B := B) hsemi b _
+    (by rw [← hb]; exact htr b) i z
+
 /-! ## 非空虚性の対照——古典的な「`|G|` が `H^i(G,M)` を零化する」
 
 `B := k`(`G` は自明に作用)・`b := 1` と取ると `Σ_{g∈G} g(b) = |G|` に

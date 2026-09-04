@@ -43,7 +43,7 @@
 | §2 | Theorem 2.2 | 前提は完成・定理本体が残る | ★2026-09-05: **この3項目が使う入力(remark 2.1(v)、honest 版・almost 版とも)は完全に証明できた**——`hochschild_ext_eq_zero`(honest)・`hochschild_ext_almost_zero`(almost、`IsAlmostEtaleCovering`のみから`p^n`が`Ext^{k+1}_{B⊗_AB}(B,M)`を零化、非空虚性の対照つき)。以前「Faltings未証明」と誤認し、その後「almost 化が壁」と報告していた両方が解消済み。**残るのは`Theorem 2.2`本体の議論**——nilpotent ideal に沿った lifting(障害類が`H²`に住み、それが`m`で零化されることから almost 一意的に持ち上がる)を、mathlib の変形理論(`Algebra.FormallySmooth`系)と上記`Ext`消滅の間で繋ぐ部分。 |
 | §2 | Theorem 2.3 | 前提は完成・定理本体が残る | 同上(`H¹`版。`hochschild_ext_almost_zero`は次数`k`を問わず一般に証明済みなので、入力側は共通) |
 | §2 | Theorem 2.4(i) | 前提は完成・定理本体が残る | 同上(`Ω_A⊗B→Ω_B`が almost isomorphism。Kähler 微分と Hochschild cohomology の低次の関係を繋ぐ部分が残る) |
-| §2 | Theorem 2.4(ii) | 2/3ステップ完成 | remark(iii)の trace 恒等式(`remark_iii_trace_identity`)・ノルム適用(`trace_ideal_pow_mem_traceIdeal`)は完成。残るは`H^i(G,M)`(`i>0`)への一般化——mathlibの`groupCohomology`(`Mathlib.RepresentationTheory.Homological.GroupCohomology.*`)に一般の transfer 定理(restriction-corestriction、`\|G\|`や重み付き版)が無く、`Rep k G`(k線形専用)を`B`上semilinearな`G`作用に対応させる枠組みも要構築。`Hilbert90.lean`は巡回群・単数表現専用で転用不可(確認済み)。 |
+| §2 | Theorem 2.4(ii) | **Galois trace 公式を仮定すれば完成**(`thm_2_4_ii_of_trace_formula`) | ★2026-09-05: remark(iii)の trace 恒等式(`remark_iii_trace_identity`)・ノルム適用(`trace_ideal_pow_mem_traceIdeal`)に加え、**群コホモロジー側(transfer)を全次数`i>0`で証明**(`transfer_groupCohomology_smul_eq_zero`)、**後半の`M^G/tr_G(M)`も証明**(`transfer_invariants_mem_trace`)、**両者を繋いだ本体も証明**(`thm_2_4_ii_of_trace_formula`)。以前「mathlibに一般のtransfer定理が無い」と壁として報告していたが、必要なのはrestriction-corestrictionではなく「`Σ_g g(b)=c`なら`c`が`H^i`を零化する」という平均化だけで、coinduced加群への almost split + Shapiro(`groupCohomology.coindIso`)で閉じた。**残るのは`tr_{B/A}=Σ_{g∈G}g`(Galois trace公式)を仮定`htr`から導く部分だけ**——mathlibの`IsGalois`は体専用(`trace_eq_sum_automorphisms`も体版)で、可換環のGalois拡大論(Chase–Harrison–Rosenberg)が無い。加えて原典は`B[1/p]`の水準でGaloisを仮定するので`B`への descent(`Algebra.trace_localization`+単射性)が1段要る。 |
 | §3 | Theorem 3.1 | ブロック | `Theorem 2.2`-`2.4`の結果を直接使う(§2の壁がそのまま継承) |
 | §3 | Theorem 3.2 | ブロック | 同上 |
 | §4 | Theorem 4.1-4.3, 4.5 | ブロック | Galois cohomology・スペクトル系列のalmost退化(§2の壁の上にさらに層がある、§2完成が前提) |
@@ -82,13 +82,31 @@ check.mjs --brief`で検証済み、mathlibに無かった一般定理):
   m annihilates the Hochschild cohomology in positive degrees」
   そのもの。真の非単元`p:=5`・`B:=Fin 2 → ℤ`での非空虚性の対照つき。
 
-次回セッションへの最優先候補: **`Theorem 2.2`本体**(nilpotent ideal
-に沿った lifting——障害類が`H²`に住むこと、それが`m`零化されるので
-almost 一意に持ち上がること、を mathlib の変形理論
-(`Algebra.FormallySmooth`系のlifting API)と`hochschild_ext_almost_zero`
-の間で繋ぐ)。入力側(Hochschild cohomology の almost 消滅)は
-完成しているので、残るのは「障害類を実際に`Ext²`の元として取り出す」
-部分の設計。次点は`Theorem 2.4(ii)`の群コホモロジー部分(表の該当行)。
+- `transfer_H1`・`transfer_H2`(コサイクル水準の明示公式)・
+  `transfer_H1_smul_eq_zero`・`transfer_H2_smul_eq_zero`(mathlib の
+  `groupCohomology.H1`/`H2`に関する形)・
+  **`transfer_groupCohomology_smul_eq_zero`(全次数`i>0`)**・
+  `coind_almost_split`・`transfer_invariants_mem_trace`:
+  **`Theorem 2.4(ii)`の群コホモロジー的内容**——`Σ_{g∈G}g(b)=c`なら
+  `c`が`H^{i+1}(G,M)`を零化する。証明の骨格は remark 2.1(v) almost 版と
+  同じ「almost split ⟹ almost 消滅」(今セッションで確立したパターンの
+  2度目の適用)。非空虚性の対照として古典的な「`|G|`が正次数の群
+  コホモロジーを零化する」が系として出ることを確認済み。
+- `thm_2_4_ii_of_trace_formula`:上記と remark(iii)を繋いだ
+  **`Theorem 2.4(ii)`本体**(Galois trace 公式`tr_{B/A}=Σ_{g∈G}g`を
+  仮定`htr`として置いた版)。
+
+次回セッションへの最優先候補: (a) **`Theorem 2.4(ii)`の最後の1歩**——
+`htr`(Galois trace 公式)を「`B[1/p]`が`A[1/p]`の`G`-Galois被覆」から
+導く部分。可換環の Galois 拡大論(Chase–Harrison–Rosenberg)が mathlib
+に無いので、`B⊗_AB ≅ Map(G,B)`型の定義から trace 公式を出す小さな理論を
+自前で作るか、原典の意図を優先して`htr`を定義の一部として読む(逸脱記録)か
+の設計判断が要る。(b) **`Theorem 2.2`本体**(nilpotent ideal に沿った
+lifting——障害類が`H²`に住むこと、それが`m`零化されるので almost 一意に
+持ち上がること、を mathlib の変形理論(`Algebra.FormallySmooth`系の
+lifting API)と`hochschild_ext_almost_zero`の間で繋ぐ)。入力側
+(Hochschild cohomology の almost 消滅)は完成しているので、残るのは
+「障害類を実際に`Ext²`の元として取り出す」部分の設計。
 
 ## 0.1 `/goal Falt1 Chapter I Found` の進捗(2026-09-04)
 
