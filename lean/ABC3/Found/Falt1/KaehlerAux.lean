@@ -2221,4 +2221,26 @@ theorem algHomAdjoinRootOfCompat_root {V0 K K' : Type*} [CommRing V0] [Field K] 
     algHomAdjoinRootOfCompat φ0 hφ0 fK (AdjoinRoot.root fK) = AdjoinRoot.root (fK.map φ0) :=
   AdjoinRoot.map_root φ0 fK (fK.map φ0) (dvd_refl _)
 
+/-- **`algHomAdjoinRootOfCompat` を実際に使う `φ0`**:
+`V0 → Wn` が単射なら、`IsFractionRing.map` で `FractionRing V0 →+*
+FractionRing Wn` が作れる——これが `algHomAdjoinRootOfCompat` に渡す
+`φ0` の具体形。 -/
+noncomputable def fractionRingMapOfInjective {V0 Wn : Type*} [CommRing V0] [IsDomain V0]
+    [CommRing Wn] [IsDomain Wn] [Algebra V0 Wn] (hinj : Function.Injective (algebraMap V0 Wn)) :
+    FractionRing V0 →+* FractionRing Wn :=
+  IsFractionRing.map (B := Wn) hinj
+
+/-- `fractionRingMapOfInjective` は `V0` 上の algebraMap と両立する——
+`algHomAdjoinRootOfCompat` の `hφ0` としてそのまま渡せる。
+`IsLocalization.map_eq`(局所化の写像の定義性質)+
+`IsScalarTower.algebraMap_apply`(`V0→Wn→Frac(Wn)` の合成が
+`V0→Frac(Wn)` と一致する)で閉じる。 -/
+theorem fractionRingMapOfInjective_algebraMap {V0 Wn : Type*} [CommRing V0] [IsDomain V0]
+    [CommRing Wn] [IsDomain Wn] [Algebra V0 Wn] (hinj : Function.Injective (algebraMap V0 Wn))
+    (r : V0) :
+    fractionRingMapOfInjective hinj (algebraMap V0 (FractionRing V0) r)
+      = algebraMap V0 (FractionRing Wn) r := by
+  unfold fractionRingMapOfInjective IsFractionRing.map
+  rw [IsLocalization.map_eq, ← IsScalarTower.algebraMap_apply]
+
 end ABC3.Found.Falt1
