@@ -1057,6 +1057,62 @@ noncomputable def piece_descends_iso_promote {A : Type} [CommRing A] [Algebra �
   exact (standardEtalePairPullbackIso
     (P₀.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hle)).toRingHom)).symm
 
+/-- `piece_descends_iso`の降下先`R`を、`IsStandardEtale`を明示的な証明
+として受け取る形で取り出す——`Finset`の各元ごとに別々の証明を渡して
+族を組み立てるのに使う(`descendPieceOfProof`と同じ理由)。 -/
+noncomputable def piece_descends_iso_R_of_proof {A : Type} [CommRing A] [Algebra ℚ A]
+    {X : Scheme} {U : X.Opens} (hU : IsAffineOpen U) [Algebra (A ⊗[ℚ] ℝ) Γ(X, U)]
+    (f : Γ(X, U)) (hf : Algebra.IsStandardEtale (A ⊗[ℚ] ℝ) (Localization.Away f)) :
+    FgSubalgebra ℚ ℝ :=
+  letI := hf
+  (piece_descends_iso (A := A) hU f).choose
+
+open scoped Classical in
+/-- **有限個の`piece_descends_iso`の降下先`R_i`の共通上界`R'`**——
+`exists_fgSubalgebra_upperBound`(既存、`FieldLimit.lean`)を
+`piece_descends_iso_R_of_proof`の族へ適用するだけ。`R`レベルの複数
+添字を単一の共通段階へ合流させる際の第一歩。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def piece_descends_iso_R_upperBound {A : Type} [CommRing A] [Algebra ℚ A]
+    {X : Scheme} {U : X.Opens} (hU : IsAffineOpen U) [Algebra (A ⊗[ℚ] ℝ) Γ(X, U)]
+    {ι : Type} (t : Finset ι) (f : ι → Γ(X, U))
+    (hf : ∀ i ∈ t, Algebra.IsStandardEtale (A ⊗[ℚ] ℝ) (Localization.Away (f i))) :
+    FgSubalgebra ℚ ℝ :=
+  (exists_fgSubalgebra_upperBound t
+    (fun i => if h : i ∈ t then piece_descends_iso_R_of_proof (A := A) hU (f i) (hf i h)
+      else ⟨⊥, Subalgebra.fg_bot⟩)).choose
+
+open scoped Classical in
+/-- `piece_descends_iso_R_upperBound`が実際に各`R_i`の上界であること
+——`exists_fgSubalgebra_upperBound`の`.choose_spec`をそのまま呼ぶだけ。
+`piece_descends_iso_promote`の`hle`引数として使う。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem piece_descends_iso_R_upperBound_spec {A : Type} [CommRing A] [Algebra ℚ A]
+    {X : Scheme} {U : X.Opens} (hU : IsAffineOpen U) [Algebra (A ⊗[ℚ] ℝ) Γ(X, U)]
+    {ι : Type} (t : Finset ι) (f : ι → Γ(X, U))
+    (hf : ∀ i ∈ t, Algebra.IsStandardEtale (A ⊗[ℚ] ℝ) (Localization.Away (f i)))
+    (i : ι) (hi : i ∈ t) :
+    piece_descends_iso_R_of_proof (A := A) hU (f i) (hf i hi) ≤
+      piece_descends_iso_R_upperBound (A := A) hU t f hf := by
+  unfold piece_descends_iso_R_upperBound
+  have h := (exists_fgSubalgebra_upperBound t
+    (fun i => if h : i ∈ t then piece_descends_iso_R_of_proof (A := A) hU (f i) (hf i h)
+      else ⟨⊥, Subalgebra.fg_bot⟩)).choose_spec i hi
+  simpa [hi] using h
+
+/- ★★次の一手(未着手): `piece_descends_iso_R_upperBound_spec`が与える
+`hle`を使って、各`i∈t`について`piece_descends_iso_promote`を適用し、
+族全体を単一の共通`R'`レベルへ揃える(`piece_descends_iso_R_of_proof`
+と`piece_descends_iso_promote`の`(piece_descends_iso ...).choose`が
+定義的に一致することの確認が要る見込み)。揃った後、`transitionElem`/
+`gdT`/`cocycle`一式の`R`レベル版の構築へ進む——ただし`ℝ`レベルの
+`transitionElem`は`X.presheaf.map`(層の制限写像)を使っており、`R`
+レベルでは対応する「層」が`extDiagram X`の段階`R`におけるアンビエント
+スキームの層になる見込みで、この対応を精密に詰める必要がある。
+`corrhyp-goal.md`に記録。 -/
+
 /-! ## GlueDataの遷移射——`piece_descends_iso`を重なりへ制限する
 
 前回、遷移射(`D(f_i)`と`D(f_j)`の重なりの比較)を`Localization`の
