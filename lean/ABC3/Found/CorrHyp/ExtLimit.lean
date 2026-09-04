@@ -286,19 +286,74 @@ theorem extCone_fst_const {X : Over BaseK} (s : Cone (extDiagram X)) {R S : (FgS
     _ = s.π.app R ≫ pullback.fst X.hom (toSchemeDiagramOver.obj R).hom := by
         rw [extDiagram_map_fst h]
 
-/- ★★次の一手(未着手): `extCone X` が極限であることを示す
-(`isLimit_extCone : IsLimit (extCone X)`)——`s : Cone (extDiagram X)` から
-`pullback.lift (s.π.app R0 ≫ pullback.fst ...) ((isLimit_specKCone ℚ ℝ).lift
-(auxCone3 X s)) _` を構成する。互換性条件(`pullback.lift` の第三引数)は
-`pullback.condition`(`fst ≫ X.hom = snd ≫ (D R0).hom`)・`extCone_fst_const`
-非依存の `hfac`/`htoBaseK` の `calc` チェーンで**完全に閉じることを確認済み**
-(この commit の直前まで動作した)。残るのは `fac`(`lift ≫ π.app R = π_R`、
-`pullback.hom_ext` で fst/snd に割ってから `extCone_fst_const`/`(isLimit_
-specKCone).fac` で閉じる見込み)と `uniq`——`pullback.map`/`pullback.lift` が
-入れ子になった式で `Category.assoc`/`unfold Limits.pullback.map` の適用順を
-間違えると `(specKCone ℚ ℝ).pt` と `specK` の型不一致に化ける、という配管が
-最後まで残った。閉じれば `FieldLimit.lean` の
-`standardEtalePairRingBaseChange`(環側の base change)と合わせて
-`Lemma 4.1` の構成的降下に必要なスキーム側・環側の道具が完全に揃う。 -/
+set_option backward.isDefEq.respectTransparency false in
+/-- `extConePi X` の `app R` を `pullback.fst`/`pullback.snd` と合成した式の
+計算——`extDiagram_map_fst`/`_snd` と同じパターン(`simp only [extConePi]`
+で `.app` の定義を展開してから `pullback.lift_fst`/`_snd` 一発)。
+`isLimit_extCone` の `fac`/`uniq` 両方で使う。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem extConePi_app_fst (X : Over BaseK) (R : (FgSubalgebra ℚ ℝ)ᵒᵖ) :
+    (extConePi X).app R ≫ pullback.fst X.hom (toSchemeDiagramOver.obj R).hom =
+      pullback.fst X.hom toBaseK := by
+  simp only [extConePi]
+  rw [pullback.lift_fst, Category.comp_id]
+
+set_option backward.isDefEq.respectTransparency false in
+theorem extConePi_app_snd (X : Over BaseK) (R : (FgSubalgebra ℚ ℝ)ᵒᵖ) :
+    (extConePi X).app R ≫ pullback.snd X.hom (toSchemeDiagramOver.obj R).hom =
+      pullback.snd X.hom toBaseK ≫ (specKCone ℚ ℝ).π.app R := by
+  simp only [extConePi]
+  rw [pullback.lift_snd]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **`extCone X` は極限**——`Lemma 4.1` の構成的降下に必要なスキーム側の
+道具の最後のピース。`s : Cone (extDiagram X)` から `X.left` への射
+(`s.π.app R0 ≫ pullback.fst`、`R0 := ⊥`)と `specK` への射
+(`(isLimit_specKCone ℚ ℝ).lift` を `auxCone3` に適用)を `pullback.lift`
+で束ねる。互換性条件は `pullback.condition` + `(isLimit_specKCone).fac`。
+`fac`/`uniq` はどちらも `pullback.hom_ext` で fst/snd に割ってから
+`extConePi_app_fst`/`_snd`・`extCone_fst_const`・`(isLimit_specKCone).fac`/
+`.uniq` を適用するだけで閉じる——鍵は `hm : ∀ j, m ≫ (extCone X).π.app j =
+s.π.app j` を `have hm' : ∀ R, m ≫ (extConePi X).app R = s.π.app R := hm`
+のように**型を明示して再束縛する**ことで、`rw` の構文一致ではなく `have`
+の defeq チェック(`set_option backward.isDefEq.respectTransparency false`
+込み)を経由させる、という配管——ここまでの「`Functor.const` の配管」
+(第22項)の締めくくりとして `tools/lean-idioms.md` に追記予定。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def isLimit_extCone (X : Over BaseK) : IsLimit (extCone X) := by
+  set R0 : (FgSubalgebra ℚ ℝ)ᵒᵖ := Opposite.op ⟨⊥, Subalgebra.fg_bot⟩ with hR0
+  refine IsLimit.mk (fun s => pullback.lift
+    (s.π.app R0 ≫ pullback.fst X.hom (toSchemeDiagramOver.obj R0).hom)
+    ((isLimit_specKCone ℚ ℝ).lift (auxCone3 X s))
+    (by
+      have hfac : (isLimit_specKCone ℚ ℝ).lift (auxCone3 X s) ≫ (specKCone ℚ ℝ).π.app R0 =
+          s.π.app R0 ≫ pullback.snd X.hom (toSchemeDiagramOver.obj R0).hom :=
+        (isLimit_specKCone ℚ ℝ).fac (auxCone3 X s) R0
+      have htoBaseK : (specKCone ℚ ℝ).π.app R0 ≫ (toSchemeDiagramOver.obj R0).hom = toBaseK :=
+        (specKConeOver.π.app R0).w
+      rw [Category.assoc, pullback.condition, ← Category.assoc, ← hfac, Category.assoc,
+        htoBaseK])) ?_ ?_
+  · intro s R
+    show pullback.lift (s.π.app R0 ≫ pullback.fst X.hom (toSchemeDiagramOver.obj R0).hom)
+      ((isLimit_specKCone ℚ ℝ).lift (auxCone3 X s)) _ ≫ (extConePi X).app R = s.π.app R
+    apply pullback.hom_ext
+    · rw [Category.assoc, extConePi_app_fst, pullback.lift_fst]
+      exact (extCone_fst_const s (R0hom R))
+    · rw [Category.assoc, extConePi_app_snd, ← Category.assoc, pullback.lift_snd]
+      exact (isLimit_specKCone ℚ ℝ).fac (auxCone3 X s) R
+  · intro s m hm
+    have hm' : ∀ R, m ≫ (extConePi X).app R = s.π.app R := hm
+    show m = pullback.lift (s.π.app R0 ≫ pullback.fst X.hom (toSchemeDiagramOver.obj R0).hom)
+      ((isLimit_specKCone ℚ ℝ).lift (auxCone3 X s)) _
+    apply pullback.hom_ext
+    · rw [pullback.lift_fst, ← extConePi_app_fst X R0, ← Category.assoc, hm' R0]
+    · rw [pullback.lift_snd]
+      apply (isLimit_specKCone ℚ ℝ).uniq (auxCone3 X s)
+      intro R
+      show (m ≫ pullback.snd X.hom toBaseK) ≫ (specKCone ℚ ℝ).π.app R =
+        s.π.app R ≫ pullback.snd X.hom (toSchemeDiagramOver.obj R).hom
+      rw [Category.assoc, ← extConePi_app_snd X R, ← Category.assoc, hm' R]
 
 end ABC3.Found.CorrHyp
