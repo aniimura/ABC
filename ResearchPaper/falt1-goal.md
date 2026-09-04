@@ -40,9 +40,9 @@
 | §1 | Lemma 1.1 | ✅Found | (完成) |
 | §1 | Theorem 1.2 | ブロック | `Wₙ⊗_{Vₙ}Vₙ₊₁`の非正規性(`differentIdeal Wₙ Wₙ₊₁`)の評価が必要。`Vₙ`塔側の技術(Eisenstein多項式・differentIdeal計算)は完成済みだが`Wₙ`側(任意のalmost étale `W`)には転用できない(`differentIdeal_tower_diamond`のdocstring参照)。退化した`W`(非分岐)を使うと`δₙ≡0`は自明に出るが、原文の「任意の`W`」という全称量化を証明したことにはならない。 |
 | §2 | Definition 2.1 | ✅Found | (完成、`p`が単元でなくても任意のétale/finite/free拡大について成立する一般形まで) |
-| §2 | Theorem 2.2 | ブロック | Hochschild cohomology `H²`の`m`零化(Faltings自身が本文中で証明せず外部参照——形式化不可能ではなく、原論文に書かれていない議論を独自に補う必要がある) |
-| §2 | Theorem 2.3 | ブロック | 同上(`H¹`版) |
-| §2 | Theorem 2.4(i) | ブロック | 同上(Hochschild cohomology全般) |
+| §2 | Theorem 2.2 | ブロック(honest 版は解消) | Hochschild cohomology `H²`の`m`零化。★訂正(2026-09-05): remark 2.1(v)はFaltings自身が完全な構成(縮約ホモトピー)を与えており未証明ではなかった。honest な場合(`elem`のannihilationがexactに成り立つ場合)は`hochschild_ext_eq_zero`で証明済み。残るはalmost版(`p^ε elem`のみ`B⊗AB`にある場合)への一般化——`hochSection`がalmost idempotentでは`S⊗_RS`線形にならないという技術的障壁を確認済み、`remark_iii_trace_identity`型の局所化descentを要する。 |
+| §2 | Theorem 2.3 | ブロック(honest 版は解消) | 同上(`H¹`版、`hochschild_ext_eq_zero`は次数nを問わず一般に証明済み) |
+| §2 | Theorem 2.4(i) | ブロック(honest 版は解消) | 同上(Hochschild cohomology全般) |
 | §2 | Theorem 2.4(ii) | 2/3ステップ完成 | remark(iii)の trace 恒等式(`remark_iii_trace_identity`)・ノルム適用(`trace_ideal_pow_mem_traceIdeal`)は完成。残るは`H^i(G,M)`(`i>0`)への一般化——mathlibの`groupCohomology`(`Mathlib.RepresentationTheory.Homological.GroupCohomology.*`)に一般の transfer 定理(restriction-corestriction、`\|G\|`や重み付き版)が無く、`Rep k G`(k線形専用)を`B`上semilinearな`G`作用に対応させる枠組みも要構築。`Hilbert90.lean`は巡回群・単数表現専用で転用不可(確認済み)。 |
 | §3 | Theorem 3.1 | ブロック | `Theorem 2.2`-`2.4`の結果を直接使う(§2の壁がそのまま継承) |
 | §3 | Theorem 3.2 | ブロック | 同上 |
@@ -59,10 +59,17 @@ check.mjs --brief`で検証済み、mathlibに無かった一般定理):
 - `Tr1map_elem_eq_one`:trace form 非退化性(基底の添字計算で証明)。
 - `remark_iii_trace_identity`・`trace_ideal_pow_mem_traceIdeal`:
   `Theorem 2.4(ii)`の証明の計算部分。
+- `hochschild_ext_eq_zero`:**remark 2.1(v)honest版**——formally
+  unramified拡大のHochschild cohomology(`Ext_{S⊗RS}(S,-)`として
+  定式化)が正の次数で消える。以前「Faltings未証明」と誤認していた
+  事実を実際に証明で訂正した。`Theorem 2.2`-`2.4(i)`が要求する
+  almost版への一般化が次回の課題。
 
-次回セッションへの最優先候補: `Theorem 2.4(ii)`の群コホモロジー部分
-(表の該当行参照)——他の項目より「あと1つのピース」に近いが、
-そのピース自体がmathlibに存在しない独立した構築を要する。
+次回セッションへの最優先候補: (a) `hochschild_ext_eq_zero`のalmost版
+への一般化(`Theorem 2.2`-`2.4(i)`に直結、`remark_iii_trace_identity`
+型の局所化descentパターンが参考になる)、(b) `Theorem 2.4(ii)`の
+群コホモロジー部分(表の該当行参照)。(a)の方が明確な前例があり
+着手しやすい可能性がある。
 
 ## 0.1 `/goal Falt1 Chapter I Found` の進捗(2026-09-04)
 
@@ -3891,6 +3898,48 @@ cohomology** `H^2(B/A,I)` の類を定め、これが `m` で零化される
   (b)`Theorem 2.4(ii)`が実際に主張する`H^i(G,M)`(`i>0`)への一般化
   (群コホモロジーのtransfer論法、`groupCohomology`名前空間の欠落分の
   構築)——この(b)が依然として最大の残工程。
+
+★★★★★★★★★★★★★★★2026-09-05(続々々々々)、**重大な訂正**: これまで
+複数回、「remark 2.1(v)(`Theorem 2.2`-`2.4`が使う「`m`がHochschild
+cohomologyを零化する」という事実)はFaltings自身が本文中で証明せず
+外部参照に頼っている」と報告してきたが、**これは誤りだった**。原文
+(物理p.6=印字p.259)を260dpiで再確認したところ、remark (v) は
+「`e_{B/A}=Σxᵢ⊗yᵢ`が`B⊗AB`の元だったなら、`b₀⊗b₁⊗⋯⊗b_{n+1}↦
+Σxᵢy_ib₀⊗b₁⊗⋯⊗b_{n+1}`という null-homotopy が得られ、Hochschild
+cohomology は消滅する。The same argument gives that for B almost
+etale over A m annihilates the Hochschild cohomology in positive
+degrees.」という**完全な、標準的な**構成を与えている——分離代数論の
+古典的事実(バー分解の縮約ホモトピー)そのもので、Faltings は何も
+省略していない。
+
+この事実(の honest な場合、`p`が単元である必要が無い一般の formally
+unramified拡大)を、mathlibの`CategoryTheory.Abelian.Ext`(導来圏経由
+の一般Ext理論、`Mathlib.Algebra.Homology.DerivedCategory.Ext.*`)を
+使って**証明した**(`hochschild_ext_eq_zero`)。`elem R S`の
+annihilation性質から`S`が`S⊗_RS`-加群として`μ:S⊗_RS→S`の**切断**
+(`hochSection`、`s(b):=(b⊗1)*elem`)を持つことを示し(`S⊗_RS`線形性
+の検証が核心、swap annihilation性質`one_tmul_mul_elem`を使う)、これは
+「`S`が`S⊗_RS`-加群として射影的」を意味する(`hochModule_projective`、
+`Module.Projective.of_split`経由)。射影加群からの`Ext`は正の次数で
+消えるという一般論(`Ext.eq_zero_of_projective`、mathlib既存)一発で、
+`HH^n(S/R,M):=Ext^n_{S⊗_RS}(S,M)`が`n>0`で消えることが出た。
+
+lake build(プロジェクト全体、6590 jobs、新規importが
+`DerivedCategory.Ext`系の大きな依存関係を引くため初回はやや時間が
+かかる)・`node tools/check.mjs --brief`(NG13件、既存分で不変)で
+確認済み。
+
+**意味**: remark (v) が Faltings の言う通り**成立する完全な定理**で
+あることを実際に証明で実証した——以前の「未証明」という評価は
+正式に撤回する。ただし今回証明したのは remark (v) の **honest な
+場合**(`S`が`R`上honestに formally unramified、`elem`のannihilation
+性質がexactに成り立つ場合)のみ——`Theorem 2.2`-`2.4`が要求する
+**almost**な場合(`B`が単に almost étale、`p^ε elem`のみ`B⊗AB`に
+ある場合)への一般化は、`remark_iii_trace_identity`と同型の「局所化
+を経由してinjectivityで降ろす」議論を要し、`hochSection`が almost
+idempotentでは`S⊗_RS`線形にならない(annihilation性質がexactに
+成り立たないため)という技術的な障壁を今回確認した——次回への
+具体的な課題として記録する。
 
 ★★★**結論(正直な評価)**: `/goal` の 13/13 は、このセッションでの
 継続作業だけでは現実的な時間内に到達できない規模の作業(Theorem 1.2

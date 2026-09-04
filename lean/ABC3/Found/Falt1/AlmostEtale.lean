@@ -13,6 +13,8 @@ import Mathlib.RingTheory.Localization.Finiteness
 import Mathlib.RingTheory.LocalProperties.Projective
 import Mathlib.RingTheory.TensorProduct.Basic
 import Mathlib.RingTheory.Ideal.Norm.RelNorm
+import Mathlib.Algebra.Homology.DerivedCategory.Ext.EnoughProjectives
+import Mathlib.Algebra.Category.ModuleCat.Projective
 
 /-!
 # [Falt1] Definition 2.1(almost étale covering の定義)、Found(2026-09-04)
@@ -1187,5 +1189,138 @@ theorem trace_ideal_pow_mem_traceIdeal {A B : Type u} [CommRing A] [CommRing B] 
         rw [Ideal.span_singleton_pow, pow_mul]
     _ ≤ a ^ Module.finrank (FractionRing A) (FractionRing B) := hstep4
     _ ≤ a := Ideal.pow_le_self (Module.finrank_pos.ne')
+
+/-! ## remark 2.1(v)、Hochschild cohomology の消滅——**訂正**(2026-09-05、
+続々々々々)。
+
+これまで複数回、「remark 2.1(v)(`Theorem 2.2`-`2.4`が使う`m`が
+Hochschild cohomology を零化するという事実)はFaltings自身が本文中で
+証明せず外部参照に頼っている」と報告してきたが、**これは誤りだった**。
+原文(物理p.6=印字p.259、260dpi精読)を再確認したところ、remark (v) は
+「`e_{B/A}=Σxᵢ⊗yᵢ`が`B⊗AB`の元だったなら、`b₀⊗b₁⊗⋯⊗b_{n+1}↦Σxᵢ⊗
+yᵢb₀⊗b₁⊗⋯⊗b_{n+1}`という null-homotopy が得られ、Hochschild
+cohomology は消滅する」という**完全な、標準的な**構成を与えている——
+分離代数論の古典的事実(バー分解の縮約ホモトピー)そのもので、
+Faltings は省略していない。
+
+この事実を、mathlib の `CategoryTheory.Abelian.Ext`(導来圏経由の
+一般Ext理論、`Mathlib.Algebra.Homology.DerivedCategory.Ext.*`)を使って
+**証明した**——`elem R S`(annihilation性質)から`S`が`S⊗_RS`-加群として
+`μ:S⊗_RS→S`の**切断**を持つ(`hochSection`)ことを示し、これは
+「`S`が`S⊗_RS`-加群として射影的である」ことを意味する(`hochModule_
+projective`、`Module.Projective.of_split`経由)。射影加群からの`Ext`は
+正の次数で消える(`Ext.eq_zero_of_projective`、標準的な一般論)ので、
+`HH^n(S/R,M) := Ext^n_{S⊗_RS}(S,M)`(Theorem 15、`HHⁿ(A,M)≅Extⁿ_{Aᵉ}
+(A,M)`という標準的な同値な定式化を直接採用)が`n>0`で消える。
+
+★これは remark (v) の**honest な場合**(`S`が`R`上honestに formally
+unramified、`p`が単元でなくても良い、`elem`の annihilation 性質が
+exactに成り立つ場合)——`Theorem 2.2`-`2.4`が要求する**almost**な場合
+(`B`が単に almost étale、`p^ε elem`のみ`B⊗AB`にある場合)への一般化
+は、`remark_iii_trace_identity`と同型の「局所化を経由してinjectivity
+で降ろす」議論を要し、次回への課題として残す——ただし今回の honest な
+場合の完成により、remark (v) 自体が Faltings の言う通り**成立する
+完全な定理**であることが実証され、以前の「未証明」という評価は
+正式に撤回する。 -/
+
+open CategoryTheory in
+/-- annihilation 性質から、`elem R S` を使って`μ:S⊗_RS→S`の切断
+`s(b):=(b⊗1)*elem`を構成する。`S⊗_RS`-線形性の検証が核心(swap
+annihilation性質`one_tmul_mul_elem`を使う)。 -/
+noncomputable def hochSection (R S : Type u) [CommRing R] [CommRing S] [Algebra R S]
+    [Algebra.FormallyUnramified R S] [Algebra.EssFiniteType R S] :
+    letI : Algebra (TensorProduct R S S) S := (Algebra.TensorProduct.lmul' R).toRingHom.toAlgebra
+    S →ₗ[TensorProduct R S S] TensorProduct R S S := by
+  letI : Algebra (TensorProduct R S S) S := (Algebra.TensorProduct.lmul' R).toRingHom.toAlgebra
+  refine
+  { toFun := fun b => (b ⊗ₜ[R] (1:S)) * Algebra.FormallyUnramified.elem R S
+    map_add' := by intro x y; simp [TensorProduct.add_tmul, add_mul]
+    map_smul' := ?_ }
+  intro z b
+  simp only [RingHom.id_apply, Algebra.smul_def]
+  induction z using TensorProduct.induction_on with
+  | zero => simp
+  | tmul p q =>
+    show ((Algebra.TensorProduct.lmul' R (p ⊗ₜ[R] q) * b) ⊗ₜ[R] (1:S)) * Algebra.FormallyUnramified.elem R S
+      = (p ⊗ₜ[R] q) * ((b ⊗ₜ[R] (1:S)) * Algebra.FormallyUnramified.elem R S)
+    rw [Algebra.TensorProduct.lmul'_apply_tmul]
+    have hstep1 : ((p*q*b : S) ⊗ₜ[R] (1:S) : TensorProduct R S S)
+        = ((p*b : S) ⊗ₜ[R] (1:S)) * (q ⊗ₜ[R] (1:S)) := by
+      rw [Algebra.TensorProduct.tmul_mul_tmul]; ring_nf
+    rw [hstep1, mul_assoc]
+    have hstep2 : (q ⊗ₜ[R] (1:S) : TensorProduct R S S) * Algebra.FormallyUnramified.elem R S
+        = (1 ⊗ₜ[R] q) * Algebra.FormallyUnramified.elem R S :=
+      (Algebra.FormallyUnramified.one_tmul_mul_elem q).symm
+    rw [hstep2, ← mul_assoc, Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
+    rw [← mul_assoc, Algebra.TensorProduct.tmul_mul_tmul, mul_one]
+  | add x y hx hy =>
+    simp only [map_add, add_mul, TensorProduct.add_tmul]
+    rw [hx, hy]
+
+theorem hochSection_augment (R S : Type u) [CommRing R] [CommRing S] [Algebra R S]
+    [Algebra.FormallyUnramified R S] [Algebra.EssFiniteType R S] (b : S) :
+    Algebra.TensorProduct.lmul' R (hochSection R S b) = b := by
+  show Algebra.TensorProduct.lmul' R ((b ⊗ₜ[R] (1:S)) * Algebra.FormallyUnramified.elem R S) = b
+  rw [map_mul, Algebra.TensorProduct.lmul'_apply_tmul, mul_one, Algebra.FormallyUnramified.lmul_elem, mul_one]
+
+open CategoryTheory in
+/-- `μ:S⊗_RS→S`自身を`S⊗_RS`-線形写像として。`hochSection`と合わせて
+`S`が`S⊗_RS`-加群として`μ`の切断を持つことを示す。 -/
+noncomputable def hochSectionLmul (R S : Type u) [CommRing R] [CommRing S] [Algebra R S] :
+    letI : Algebra (TensorProduct R S S) S := (Algebra.TensorProduct.lmul' R).toRingHom.toAlgebra
+    TensorProduct R S S →ₗ[TensorProduct R S S] S := by
+  letI : Algebra (TensorProduct R S S) S := (Algebra.TensorProduct.lmul' R).toRingHom.toAlgebra
+  exact { toFun := Algebra.TensorProduct.lmul' R,
+          map_add' := map_add _,
+          map_smul' := fun z x => by
+            show Algebra.TensorProduct.lmul' R (z*x) = algebraMap (TensorProduct R S S) S z * Algebra.TensorProduct.lmul' R x
+            rw [map_mul]
+            rfl }
+
+open CategoryTheory in
+/-- **`S`は`S⊗_RS`-加群として射影的**(`hochSection`が`μ`の切断を
+与えることから、`Module.Projective.of_split`経由)。remark(v)の
+「`S`が`S⊗AS`のbimodule direct summand」という主張の honest な場合。 -/
+theorem hochModule_projective (R S : Type u) [CommRing R] [CommRing S] [Algebra R S]
+    [Algebra.FormallyUnramified R S] [Algebra.EssFiniteType R S] :
+    letI : Algebra (TensorProduct R S S) S := (Algebra.TensorProduct.lmul' R).toRingHom.toAlgebra
+    Module.Projective (TensorProduct R S S) S := by
+  letI : Algebra (TensorProduct R S S) S := (Algebra.TensorProduct.lmul' R).toRingHom.toAlgebra
+  apply Module.Projective.of_split (hochSection R S) (hochSectionLmul R S)
+  ext b
+  simp only [LinearMap.comp_apply, LinearMap.id_apply]
+  show Algebra.TensorProduct.lmul' R (hochSection R S b) = b
+  exact hochSection_augment R S b
+
+open CategoryTheory in
+theorem hochModule_catProjective (R S : Type u) [CommRing R] [CommRing S] [Algebra R S]
+    [Algebra.FormallyUnramified R S] [Algebra.EssFiniteType R S] :
+    letI : Algebra (TensorProduct R S S) S := (Algebra.TensorProduct.lmul' R).toRingHom.toAlgebra
+    Projective (ModuleCat.of (TensorProduct R S S) S) := by
+  letI : Algebra (TensorProduct R S S) S := (Algebra.TensorProduct.lmul' R).toRingHom.toAlgebra
+  haveI := hochModule_projective R S
+  exact ModuleCat.projective_of_categoryTheory_projective (ModuleCat.of (TensorProduct R S S) S)
+
+set_option maxHeartbeats 1000000 in
+open CategoryTheory in
+/-- **remark 2.1(v)、honest な場合、完全に証明**: `S`が`R`上formally
+unramified・ess finite typeなら(honestly「formally étale」、`p`が単元
+である必要は無い)、`HH^n(S/R,M) := Ext^n_{S⊗_RS}(S,M)`は`n>0`で
+消える——`S`が射影的な`S⊗_RS`-加群であることから、射影対象からの
+`Ext`は正の次数で消えるという一般論(`Ext.eq_zero_of_projective`)
+一発で閉じる。Faltings の remark(v)前半(「`e_{B/A}`が`B⊗AB`の元
+だったならHochschild cohomologyは消滅する」)の完全な形式化。 -/
+theorem hochschild_ext_eq_zero (R S : Type u) [CommRing R] [CommRing S] [Algebra R S]
+    [Algebra.FormallyUnramified R S] [Algebra.EssFiniteType R S]
+    (M : Type u) [AddCommGroup M] :
+    letI : Algebra (TensorProduct R S S) S := (Algebra.TensorProduct.lmul' R).toRingHom.toAlgebra
+    haveI := CategoryTheory.HasExt.standard (ModuleCat (TensorProduct R S S))
+    ∀ [Module (TensorProduct R S S) M] (n : ℕ) (e : CategoryTheory.Abelian.Ext
+        (ModuleCat.of (TensorProduct R S S) S) (ModuleCat.of (TensorProduct R S S) M) (n+1)), e = 0 := by
+  letI : Algebra (TensorProduct R S S) S := (Algebra.TensorProduct.lmul' R).toRingHom.toAlgebra
+  haveI := CategoryTheory.HasExt.standard (ModuleCat (TensorProduct R S S))
+  intro _ n e
+  haveI := hochModule_catProjective R S
+  exact CategoryTheory.Abelian.Ext.eq_zero_of_projective e
 
 end ABC3.Found.Falt1
