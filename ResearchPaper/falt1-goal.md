@@ -3242,6 +3242,38 @@ mathlib での正確な組み立て方は未確認)。
       pow_maximalIdeal`で`length(Wₙ₊₁⧸(x)^(n-1))=n-1`という`β`項の
       **具体的な下限**を確立する——これがstep (5)の最後の技術的な
       接続になる見込み。
+
+      ★★★★★★2026-09-05、続けてこの「最後の技術的な接続」を
+      **同じセッションで完成させた**。当初想定した`IsDiscreteValuation
+      Ring.TFAE`経由ではなく、**もっと直接的な経路**があると判明した:
+      mathlibの`class IsDiscreteValuationRing`は`extends IsPrincipal
+      IdealRing, IsLocalRing`に加え、**もう1つの隠れたフィールド**
+      `maximalIdeal ≠ ⊥`(体でないこと)を要求するだけ——`IsPrincipal
+      IdealRing`(既存の`falt1_isPrincipalIdealRing_of_finite_ext_of_
+      DVR`)+`IsLocalRing`(前段の結果)を`constructor`で組み合わせ、
+      残る`maximalIdeal≠⊥`を`x≠0`(`x^n=algebraMap π'≠0`、後者は
+      `Module.IsTorsionFree`から「`π'`が正則なら`Falt1Wn1...`上でも
+      正則に作用する」`Module.IsTorsionFree.isSMulRegular`経由)から
+      示すだけで**TFAEを経由せず直接閉じた**。
+      - `falt1_falt1Wn1_isDiscreteValuationRing`: `Falt1Wn1 Wn Wn
+        π' n`が`IsDiscreteValuationRing`であることの完全な証明
+        (前段の`uniqueMaximalIdeal`系2定理を呼ぶのではなく、`x`の
+        一貫性を保つため同じ構成を1つの証明にまとめて自己完結させた)。
+      - `falt1_falt1Wn1_length_quotient_maximalIdeal_pow`: 上記の
+        DVR instanceを使い、`IsDiscreteValuationRing.length_quotient_
+        pow_maximalIdeal`(mathlib既存)を直接適用して`length(Wₙ₊₁⧸
+        maximalIdeal^k)=k`(**任意の`k`で**)を得た——`k:=n-1`とすれば
+        まさに探していた`β`項の下限の土台。
+      これで**「Eisenstein拡大が全分岐である」という事実から、
+      具体的な長さの下限(`length(Wₙ₊₁⧸(x)^(n-1))=n-1`)までを、
+      完全にmathlib既存の道具(TFAEすら経由せず)で導き切った**——
+      Theorem 1.2 step (5)の技術的な核心はこれで確立できたと言える。
+      `lean_check`確認後`KaehlerAux.lean`に追記。残る接続作業
+      (`differentIdeal Wₙ Wₙ₊₁=span{n·x^(n-1)}`とこの`length(Wₙ₊₁⧸
+      maximalIdeal^(n-1))=n-1`を`falt1_length_quotient_mul_of_ne_zero`
+      で貼り合わせ`length(Wₙ₊₁⧸differentIdeal Wₙ Wₙ₊₁)=length(Wₙ₊₁⧸(n))
+      +(n-1)`という完全な等式にすること、さらにこれを`hrec`の`β`項へ
+      正式に接続すること)は次回に持ち越す。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
