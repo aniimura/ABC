@@ -1128,6 +1128,133 @@ noncomputable def piecePreimageIso (X : Over BaseK) (U : X.left.Opens) (hU : IsA
       Spec (CommRingCat.of Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U))) :=
   (piece_preimage_isAffineOpen X U hU C α).isoSpec
 
+set_option maxHeartbeats 1000000 in
+/-- **`Γ(C,piece)`の`R`レベル候補片そのもの**——`pieceAlgebra_R_model`
+(`S_0`)を`Spec`に渡すだけ。`descendPiece`(`StandardEtalePair`経由、
+`standardEtalePairSpecMap`のpullbackとして構成、まだℝレベル)とは
+異なり、こちらは**正真正銘`R`レベル**のアフィンスキーム(`Spec(A⊗R.1)`
+上有限型)である。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def descendPieceR (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U)
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α] : Scheme := by
+  letI := pieceAlgebra X U hU
+  letI : Algebra (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+      (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.comp
+      (pieceRingEquiv X U hU).symm.toRingHom).toAlgebra
+  haveI : Algebra.Etale (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    piece_algebraEtale_tensor X U hU C α
+  haveI : Algebra.FinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    inferInstance
+  letI hCR : CommRing (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1) :=
+    inferInstance
+  exact Spec (CommRingCat.of (MvPolynomial (Fin (Algebra.Presentation.ofFinitePresentationVars
+      (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U))))
+      (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1) ⧸
+    Ideal.span (Set.range (pieceAlgebra_relation_descend_q₀ X U hU C α))))
+
+set_option maxHeartbeats 1000000 in
+/-- `descendPieceR`から候補片の`R`レベル底`Spec(A⊗R.1)`への構造射——
+`algebraMap`をここで1回だけ名前を付けて確定させる。配管の注意:
+これを独立した`def`にせず`descendPieceR_iso`の証明中に生の`algebraMap`
+式を直接書くと、`Ideal.Quotient`商の`CommRing`インスタンスが場所ごとに
+別々に(非`defeq`に)導出されてしまい`pullbackSpecIso`との単一化に
+失敗する——`standardEtalePairSpecMap`と同じ「名前を1回だけ確定させる」
+パターンで解消した(新しい失敗形、`tools/lean-idioms.md`と同系統)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def descendPieceR_toBase (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U)
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α] :
+    letI := pieceAlgebra X U hU
+    descendPieceR X U hU C α ⟶
+      Spec (CommRingCat.of (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1)) := by
+  letI := pieceAlgebra X U hU
+  letI : Algebra (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+      (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.comp
+      (pieceRingEquiv X U hU).symm.toRingHom).toAlgebra
+  haveI : Algebra.Etale (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    piece_algebraEtale_tensor X U hU C α
+  haveI : Algebra.FinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    inferInstance
+  letI hCR : CommRing (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1) :=
+    inferInstance
+  unfold descendPieceR
+  exact Spec.map (CommRingCat.ofHom (algebraMap (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1)
+    (MvPolynomial (Fin (Algebra.Presentation.ofFinitePresentationVars (Γ(X.left, U) ⊗[ℚ] ℝ)
+        Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U))))
+        (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1) ⧸
+      Ideal.span (Set.range (pieceAlgebra_relation_descend_q₀ X U hU C α)))))
+
+set_option maxHeartbeats 1000000 in
+/-- `Spec(A⊗ℝ)`から候補片の`R`レベル底`Spec(A⊗R.1)`への構造射
+(`algebraMap (A⊗R.1)(A⊗ℝ)`のSpec)——`descendPieceR_toBase`と対にして
+`pullback`を取ると、`descendPieceR`が実際に`α⁻¹(piece)`のbase change先
+であることが言える(`descendPieceR_iso`)。 -/
+noncomputable def descendPieceR_reBaseMap (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U)
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α] :
+    letI := pieceAlgebra X U hU
+    Spec (CommRingCat.of (Γ(X.left, U) ⊗[ℚ] ℝ)) ⟶
+      Spec (CommRingCat.of (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1)) := by
+  letI := pieceAlgebra X U hU
+  letI : Algebra (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+      (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.comp
+      (pieceRingEquiv X U hU).symm.toRingHom).toAlgebra
+  haveI : Algebra.Etale (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    piece_algebraEtale_tensor X U hU C α
+  haveI : Algebra.FinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    inferInstance
+  letI hCR : CommRing (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1) :=
+    inferInstance
+  letI : Algebra (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1)
+      (Γ(X.left, U) ⊗[ℚ] ℝ) :=
+    (Algebra.TensorProduct.map (AlgHom.id ℚ Γ(X.left, U))
+      (Subalgebra.val (pieceAlgebra_relation_descend_R X U hU C α).1)).toRingHom.toAlgebra
+  exact Spec.map (CommRingCat.ofHom (algebraMap (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1)
+    (Γ(X.left, U) ⊗[ℚ] ℝ)))
+
+set_option maxHeartbeats 1000000 in
+/-- **`descendPieceR`は実際に`α⁻¹(piece)`のbase change先である**——
+`pullbackSpecIso`(mathlib、`pullback(Spec.map algebraMap R S)(Spec.map
+algebraMap R T) ≅ Spec(S⊗[R]T)`)と`pieceAlgebra_R_model_baseChange`
+(`S_0⊗[R](A⊗ℝ)≅Γ(C,piece)`)・`piecePreimageIso`(`Spec Γ(C,piece)≅
+α⁻¹(piece)`)を合成するだけ。`standardEtalePairPullbackIso`と全く同じ
+形の主張だが、こちらは**正真正銘`R`レベル**の`descendPieceR`について
+成り立つ——`Γ(C,piece)`を`R`レベルへ一度に降ろす計画の、スキーム
+レベルでの完成形。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem descendPieceR_iso (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U)
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α] :
+    Nonempty (pullback (descendPieceR_toBase X U hU C α) (descendPieceR_reBaseMap X U hU C α) ≅
+      (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U) : Scheme)) := by
+  letI := pieceAlgebra X U hU
+  letI : Algebra (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+      (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.comp
+      (pieceRingEquiv X U hU).symm.toRingHom).toAlgebra
+  haveI : Algebra.Etale (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    piece_algebraEtale_tensor X U hU C α
+  haveI : Algebra.FinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    inferInstance
+  letI hCR : CommRing (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1) :=
+    inferInstance
+  letI : Algebra (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1)
+      (Γ(X.left, U) ⊗[ℚ] ℝ) :=
+    (Algebra.TensorProduct.map (AlgHom.id ℚ Γ(X.left, U))
+      (Subalgebra.val (pieceAlgebra_relation_descend_R X U hU C α).1)).toRingHom.toAlgebra
+  unfold descendPieceR_toBase descendPieceR_reBaseMap descendPieceR
+  refine ⟨(pullbackSpecIso (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1)
+    (MvPolynomial (Fin (Algebra.Presentation.ofFinitePresentationVars (Γ(X.left, U) ⊗[ℚ] ℝ)
+        Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U))))
+        (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1) ⧸
+      Ideal.span (Set.range (pieceAlgebra_relation_descend_q₀ X U hU C α)))
+    (Γ(X.left, U) ⊗[ℚ] ℝ)).trans ?_⟩
+  refine (Scheme.Spec.mapIso (pieceAlgebra_R_model_baseChange X U hU C α).some.symm.toCommRingCatIso.op).trans ?_
+  exact (piecePreimageIso X U hU C α).symm
+
 /-- **アフィン開`U`上の基本開`X.basicOpen f`は`Spec(Localization.Away f)`
 そのものと同一視できる**——`mathlib`の`basicOpenIsoSpecAway`は`X := Spec R`
 の場合限定だったので、一般のアフィン開`U`(`X`自体はアフィンでなくてよい)
