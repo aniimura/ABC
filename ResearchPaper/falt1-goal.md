@@ -2310,6 +2310,35 @@ mathlib での正確な組み立て方は未確認)。
       追加の配線(`Algebra R (Option.elim i c f).carrier`をΣの
       フィールドとして運ぶ、等)が必要で、まだ試していない。
 
+      ★2026-09-05、**上記のΣ束ね方針を実際にREPLで検証し、核となる
+      部分は機能することを確認した**:
+      ```lean
+      structure RAlg (R : Type*) [CommRing R] where
+        carrier : Type*
+        [ring : CommRing carrier]
+        [alg : Algebra R carrier]
+      attribute [instance] RAlg.ring RAlg.alg
+      ```
+      とすると、`(C F : RAlg R)`・自由変数`i : Option ι`に対して
+      `CommRing (Option.elim i C F).carrier`・`Algebra R (Option.elim
+      i C F).carrier`が**`infer_instance`で即座に解決**し、
+      `Ω[(Option.elim i C F).carrier⁄R]`という型そのものも問題なく
+      elaborate できることを確認した——予想通り、射影(`.ring`/`.alg`
+      フィールド)は`i`の分岐無しに常に使えるため、地雷を回避できる。
+
+      ただし`pushoutKaehlerSplitStep`が要求する残りのinstance
+      (`∀i,Algebra(F i)B1`・`∀i,IsScalarTower R(F i)B1`等、**現在の
+      累積環`B1`/`B`との関係**を述べるもの)は、`RAlg`が`R`上の
+      代数であることしか記録していないため**この束ねだけではカバー
+      できない**——`B1`/`B`は帰納の段ごとに変わる対象であり、
+      「`i`番目の環が現在の累積環にどう埋め込まれるか」という情報は
+      別途(各段で`Fin.cases`的に具体的な`i`へ場合分けして手で
+      instance登録する、または`RAlg`をさらに拡張して「今までの塔への
+      整合的な埋め込み系」まで一緒に運ぶ、のいずれか)必要になる——
+      後者は事実上「圏論的な帰納系(directed system)」の随伴物になり、
+      本腰を入れた設計判断が要る規模の作業と判断し、ここでは着手を
+      保留する(次回以降の課題として明記のみ)。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
