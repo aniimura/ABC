@@ -694,3 +694,29 @@ Lubin-Tate理論でも`[a]_f`は「体」でなく「付値環」の間の写像
 組み立て、`K.carrier`からの埋め込みと両立することを示す)が次の
 節目——それができれば`PowerSeries.aeval`で`f`を`x`(`𝒪[L]`の元として)
 に評価し、`Λ_n`への`𝒪_K`加群構造へ到達できる見通し。
+
+**続報(2026-09-04・続き、★★★★★★★★★★見通していた再構成を実行)**:
+新規ファイル`AdjoinPAdicLocalField.lean`に`adjoinPAdicLocalField`を
+追加(commit`60ab7e35`)——`x:K.closure`を`K.carrier`に添加した単純
+拡大`K.carrier⟮x⟯`自身を、新たな`PAdicLocalField p`として組み立てる
+定義。予想通り`Field`・`Algebra ℚ_[p] _`は`AlgebraicClosure`/
+`IntermediateField`の一般論から**自動的に**手に入り(`infer_instance`
+で確認)、`FiniteDimensional ℚ_[p] _`だけ`FiniteDimensional.trans`で
+明示的に組み立てれば十分だった——想定より簡潔に済んだ。
+`LubinTateDistinguishedSeparable.lean`には
+`torsionPointAdjoinPAdicLocalField`(torsion-point版、`x∈Λ_n`から
+必要な`FiniteDimensional`を供給するだけ)を追加。
+
+★★★未解決のまま次に確かめるべき課題として記録: この`L=
+adjoinPAdicLocalField K x`を実際に使うと、`LocalFieldNorm.lean`の
+`normedField` scoped instance が `spectralNorm.normedField ℚ_[p] L.carrier`
+で**新しい**ノルム構造を`L.carrier`(=`K.carrier⟮x⟯`)に与える。一方
+`K.carrier⟮x⟯`は`K.closure`の部分体でもあるので、mathlibの一般論に
+より`K.closure`に載せた`NormedField`(`closureNormedField`)から**別の**
+自動的なノルム構造も持つ。両者は(スペクトルノルムの延長の一意性
+から)数学的には一致するはずだが、definitionally一致するとは限らず、
+両方が同時にスコープに入るとinstance diamondになりうる——次の一歩は
+①両者が一致することを示す橋渡し補題を用意するか、②片方だけを常に
+使うよう規律を決めるかのいずれか。これが解決すれば
+`Ideal.isLinearTopology`経由で`IsLinearTopology 𝒪[L] 𝒪[L]`が手に入り、
+`PowerSeries.aeval`で実際に`[a]_f`を評価できる見通し。
