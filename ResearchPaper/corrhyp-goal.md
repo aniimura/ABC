@@ -1154,3 +1154,25 @@ standardEtaleCond`→**`exists_fg_subalgebra_tensor_standardEtalePair`**
 という**一直線の道筋**が(数学的には)完成した。残るのは、この道筋を
 実際に1つの `Found/` 宣言として組み立てる作業と、複数のアフィン片を
 横断した整合性(rigidity)・`GlueData` 貼り合わせ。
+
+### 2026-09-04さらに続報: base change 復元まで完成——1片降下の核心が完全に揃った ★★★★★
+
+`exists_fg_subalgebra_tensor_standardEtalePair`(降下)と
+`standardEtalePairRingBaseChange`(base change 可換性、既存)を組み合わせ、
+**`exists_fg_subalgebra_tensor_standardEtalePair_baseChange`**を完成
+(`FieldLimit.lean`、★sorry無し・標準3公理のみ)。「`StandardEtalePair
+(A⊗[ℚ]ℝ)` は、ある有限段階 `R` 上の `StandardEtalePair` の base change
+として**文字通り一致する**」(`P₀.Ring` を `A⊗[ℚ]ℝ` へ係数拡大すると
+`P.Ring` に同型)ことまで保証した——`P₀.map(algebraMap...) = P` という
+**構造体そのものの一致**(`f`・`g` の一致から `monic_f`・`cond` は Prop
+無関係性で自動的に従う、`cases`+`subst`で示した)を経由。
+
+**これで`Lemma 4.1`の「1アフィン片の降下」に要る核心が完全に揃った**:
+`piecePullbackIso`(`Ext X`のアフィン片`=Spec(Γ(U,U)⊗[ℚ]ℝ)`)+
+`Etale.algebraEtale_appLE`(スキーム→環の橋渡し)+
+`exists_finite_standardEtaleCover`(étale-locus細分)+この補題(有限段階
+への降下+base change復元)、という一直線の道筋が**数学的にもLean宣言
+としても揃った**。残るのは(a)これらを実際に1つの`Found/`宣言として
+組み立てる作業、(b)複数のアフィン片(有限個のstandard-étale片、
+有限個の`U_i`)を横断した細分段階の合流、(c)`GlueData`貼り合わせ、
+という3段階のエンジニアリングのみ。
