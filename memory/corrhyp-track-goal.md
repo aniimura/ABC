@@ -670,3 +670,28 @@ ABC3全体(6590 jobs)0エラーを確認。
 
 コミット: `8c96fa00`(bivariate descent完成)・`8e78ac0f`(記録)・
 `5e2cb5ec`(lean-idioms #26)。
+
+★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(作業単位1(b)完成、
+`P.Ring`の任意の元を有限段階へ降ろせるようになった、集計10/24で
+変わらず)。`exists_fg_subalgebra_tensor_standardEtale_elem`
+(`FieldLimit.lean`、★sorry無し)完成——`P : StandardEtalePair(A⊗ℚℝ)`の
+任意の元`z`について、ある有限段階`R`・`P₀`・`z₀`が存在し、`P₀`のbase
+changeが`P`に一致し`z₀`の像が`z`に一致する。副産物として
+`standardEtalePairMapRingHom`(`P.Ring→+*(P.map f).Ring`、`Ideal.
+quotientMap`直接使用、`equivMvPolynomialQuotient`経由は不要と判明)・
+`exists_fg_subalgebra_tensor_standardEtalePair_mapEq`(構造体一致版)・
+`bivariateIsTwoSided`(組み合わせ爆発するIsTwoSided探索をletIチェーンの
+global instance化で解決)も完成。
+
+配管の教訓2件(`tools/lean-idioms.md` #26・#27): 依存キャスト`▸`を
+STATEMENT内に埋め込むと`whnf`がcombinatorial explosionでtimeoutする
+——`HEq`で述べると軽い。`open...in`/`set_option...in`はdocstringの
+**前**に置く必要がある(後だと「unexpected token; expected 'lemma'」、
+`lean_check`では検出できず`lake build`で発覚)。
+
+**これで作業単位1(比較射の構成)の見通しが完成した**: (a)位相的事実
+(捩れ無関係、前回訂正済み)+(b)`f_l`・`f_m`を有限段階の元として認識
+(今回完成)。残るのは実際の組み立てのみ。
+
+コミット: `8e605fff`(lean-idioms #27)・`fda225b4`(作業単位1(b)完成)・
+`52cb625c`(記録)。
