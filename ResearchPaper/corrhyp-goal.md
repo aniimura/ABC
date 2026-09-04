@@ -1895,3 +1895,25 @@ Finset版も同様に自明に確認、★sorry無し)。`Z_i.basicOpen(s_ij) �
 部品を`CategoryTheory.GlueData`の12フィールド(`J・U・V・f・t・t'・t_fac・
 cocycle`等)として実際に配線する」という、新しい数学を要さない(が分量のある)
 エンジニアリング作業のみに帰着した。集計は10/24で変わらず(§4は0/2のまま)。
+
+### 2026-09-04さらに続報: GlueDataの配線に着手——V・f・tフィールド(対象レベル)が完成
+
+`ExtLimit.lean`に`gdV`・`gdF`・`gdT`を完成させた(★すべてsorry無し)——これまでの
+部品(`piece_descends_iso`・`exists_transitionIso`)を実際に`CategoryTheory.GlueData`
+の対象レベルのフィールドへ流し込んだ:
+
+- `gdV (p : J×J) : Scheme` — 重なりの候補片、`Z p.1`の中の対応する基本開集合。
+- `gdF (i j) : gdV(i,j) ⟶ Z i` — 標準的な開埋め込み`.ι`。
+- `gdT (i j) : gdV(i,j) ≅ gdV(j,i)` — **遷移射そのもの**。`exists_transitionIso`を
+  `i`側・`j`側それぞれに適用して得た2つの同型を、`X.basicOpen(f_i·f_j) =
+  X.basicOpen(f_j·f_i)`(乗法の可換性)で繋ぐ。
+
+**残る作業**(次の一手): `f_mono`・`f_hasPullback`・`f_id`(`basicOpen.ι`の標準的性質
+から自動のはず、`instance`探索で片付く可能性が高い)・`t_id`(`i=j`のとき
+`exists_transitionIso`の同じ選択項を使うことから)・`t'`(`exists_transitionIso_finset`
+から)・`t_fac`・`cocycle`(`Classical.choice`で選んだ項の一致性の確認、最も技術的な
+段)。これらを埋めれば`Scheme.GlueData`が完成し、`GD.glued`が実際にCと同型で
+あることを`C`自身の`OpenCover`の`gluedCover`との比較で示す段へ進める。
+集計は10/24で変わらず(§4は0/2のまま)。
+
+コミット: `b79fab9b`。
