@@ -3779,3 +3779,26 @@ Rレベルで実際に同型であることを証明
 の構成(文字通り未着手、独立した課題)、(3) `h:ZK=D.Ext Z`の構造的
 懸念(既に「拙速に着手しない」と判断済み、`Lemma 4.1`のstatement
 自体の妥当性に関わる)。
+
+## 2026-09-05(続き10): `exists_mvPolynomial_quotient_specIso_descend`
+——遷移写像候補が環レベルからスキームレベルまで完全に配線された
+
+前回の`RingEquiv`(環レベル)を`Scheme.Spec.mapIso`で送るだけの1行の
+配線を追加した(commit `90c6342c`)。`descendPieceR`(`Spec(S_0)`の形)
+2つの間の実際の**スキーム**同型が、共通の精密化`R'`上で構成的に
+得られることを証明した——「項目(d)の第二段」が環レベルからスキーム
+レベルまで完全に配線された。
+
+`lake build ABC3.Found.CorrHyp.FieldLimit`・`ABC3`いずれも0エラーで
+確認、push済み。
+
+**正直な評価**: 集計は10/24で変わらず——§4は引き続き0/2。ここまでの
+一連の成果(commit `19121fe9`・`32a3d1fc`・`d7753ea6`・`fedca21f`・
+`90c6342c`)で、「Rレベルの候補片`descendPieceR`同士の遷移が実際の
+スキーム同型として得られる」という数学的核心のすべてが揃った。残る
+課題は変わらず: (1) この一般定理を`ExtLimit.lean`の実データ
+(`pieceAlgebra_relation_descend_R`等)へ`specialize`し、`corrHypGlueData`
+(既存のScheme一般GlueDataインフラ)へ実際に配線する作業、(2) `β`脚
+の構成(文字通り未着手)、(3) `h:ZK=D.Ext Z`の構造的懸念(既に判断
+済み)。(1)は今回で道具が完全に揃った——次のセッションでの実データ
+接続作業に直接使える状態にある。

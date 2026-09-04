@@ -1696,3 +1696,18 @@ Lemma 4.1のGlueData構成に必要な数学的核心のすべてが揃った(co
 (既存部品の組み合わせになる見込み)・(2)β脚(未着手)・(3)h:ZK=D.Ext Z
 の構造的懸念(既に判断済み)。集計は10/24で変わらず。corrhyp-goal.md
 に詳細記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05(続き9)
+exists_mvPolynomial_quotient_specIso_descend(commit 90c6342c)——前回
+のRingEquiv(環レベル)をScheme.Spec.mapIsoで送るだけの配線で、
+descendPieceR2つの間の実際のスキーム同型が共通の精密化R'上で構成的に
+得られることを証明。「項目(d)の第二段」が環レベルからスキームレベル
+まで完全に配線された。lake build(FieldLimit/ABC3)0エラー確認、
+push済み。
+
+正直な評価: 集計は10/24で変わらず。一連の成果(19121fe9・32a3d1fc・
+d7753ea6・fedca21f・90c6342c)で数学的核心のすべてが揃った——道具は
+完全に揃い、次のセッションでの実データ(ExtLimit.leanのpieceAlgebra_
+relation_descend_R等)への specialize+corrHypGlueDataへの配線作業に
+直接使える状態。残る課題(β脚・h:ZK=D.Ext Zの構造的懸念)は変わらず。
+corrhyp-goal.mdに詳細記録。
