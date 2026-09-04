@@ -790,6 +790,57 @@ theorem piece_algebraEtale_tensor (X : Over BaseK) (U : X.left.Opens) (hU : IsAf
       (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.toAlgebra
   exact algebraEtale_transport (pieceRingEquiv X U hU).symm (piece_algebraEtale X U hU C α)
 
+/-! ## `Γ(C,piece)`全体を一度に`R`レベルへ降ろす(設計の再考、2026-09-04)
+
+`corrHypGlueData`の`Z i`(`descendPiece`)は個別の標準的エタール元
+`f i`ごとに独立した`R_i`から`ℝ`へbase changeしたものであり、`R`
+レベルの候補片そのもの(`Spec(P₀.Ring)`)は使い捨てられている。`C`は
+`X`の`extDiagram`のような`R`段階近似の塔を持たないため、個別の`R_i`
+を`⊔`で合流させる(`piece_descends_iso_promote`/`_family_promote`、
+既存)よりも、`Γ(C,piece)`**全体**(`piece_algebraEtale_tensor`により
+`(A⊗ℝ)`上`Etale`=`FinitePresentation`)を、`Algebra.Presentation.
+ofFinitePresentation`(mathlib、有限表示から明示的な生成元・関係式を
+取り出す)+`exists_fg_subalgebra_tensor_mvPolynomial_finset`(既存、
+関係式の係数を単一の共通`R`へ降ろす)で**一度に**降ろす方が筋が良い
+かもしれない、という代替案を検証している。 -/
+
+open scoped Classical in
+/-- **`Γ(C,piece)`の有限表示が持つ関係式を単一の共通`R`へ降ろす**——
+`Algebra.Presentation.ofFinitePresentation`が与える関係式の族
+(`Fin m`個)に`exists_fg_subalgebra_tensor_mvPolynomial_finset`を
+適用するだけ。`Γ(C,piece)`全体を一度に`R`レベルへ降ろす計画の
+中核部品——次の一手は、この`R`のもとで`MvPolynomial(Fin n)(A⊗R.1)
+⧸ Ideal.span{降ろした関係式}`という`R`レベルの代数`S_0`を構成し、
+`S_0 ⊗_{A⊗R.1}(A⊗ℝ) ≅ Γ(C,piece)`を示すこと(`Algebra.TensorProduct.
+quotientTensorEquiv`(mathlib)+`Algebra.Presentation.baseChange`
+(mathlib)を組み合わせる見込み、まだ未着手)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def pieceAlgebra_relation_descend_R (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U)
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α] :
+    letI := pieceAlgebra X U hU
+    letI : Algebra (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+      ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+        (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.comp
+        (pieceRingEquiv X U hU).symm.toRingHom).toAlgebra
+    haveI : Algebra.Etale (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+      piece_algebraEtale_tensor X U hU C α
+    haveI : Algebra.FinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+      inferInstance
+    FgSubalgebra ℚ ℝ := by
+  letI := pieceAlgebra X U hU
+  letI : Algebra (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+      (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.comp
+      (pieceRingEquiv X U hU).symm.toRingHom).toAlgebra
+  haveI : Algebra.Etale (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    piece_algebraEtale_tensor X U hU C α
+  haveI : Algebra.FinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    inferInstance
+  exact (exists_fg_subalgebra_tensor_mvPolynomial_finset (Γ(X.left, U))
+    (Finset.image (Algebra.Presentation.ofFinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ)
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U))).relation Finset.univ)).choose
+
 /-- **`piecePullbackIso` の有限段階版**——`Ext X` の代わりに有限段階
 `(extDiagram X).obj R'` を使うと、`U`(`X.left`のアフィン開)由来のアフィン
 片は `Spec(Γ(U,U) ⊗[ℚ] R'.1)` になる。証明の骨格は `piecePullbackIso`
