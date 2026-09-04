@@ -511,3 +511,40 @@ preservesColimits`)よりずっと軽い道具で済む可能性が高い。
 見た「`instances` 透明度」問題の `Under` 版、未解決のまま持ち越し)——
 `corrhyp-goal.md` に記録だけして、上記のより軽い道(商環・局所化の base
 change)を先に試す方が近道と判断した。
+
+### 2026-09-04さらに続報: `StandardEtalePair.Ring` の base change が完成 ★★★★
+
+上記の見通しどおり、`S₀ := R[X]/(f)` を局所化する代わりに mathlib 自身の
+`StandardEtalePair.Ring`(`Polynomial (Polynomial R) ⧸ span {C f, X*C g-1}`、
+明示的な二変数多項式商)を直接使う道で、base change の同型を
+**完全に(sorry 無しで)構成した**:
+
+- `Bivariate_equivMvPolynomial_map`——`Polynomial.Bivariate.equivMvPolynomial`
+  (二変数多項式環 `≃ MvPolynomial (Fin 2)`)が係数の写像 `φ` と可換である
+  ことを、両辺が環準同型であることから `Polynomial.ringHom_ext'` を2回
+  (外側の変数・内側の変数)適用して示した。
+- `standardEtalePair_ring_baseChange`——`equivMvPolynomialQuotient` が使う
+  イデアル(`{C f, X*C g-1}` の span)の生成元の像が、`includeRight` →
+  `MvPolynomial.algebraTensorAlgEquiv`(多変数多項式環の base change、
+  mathlib 既存)で運ぶと、対応する `K` 側の生成元に**文字通り一致する**
+  ことを `Ideal.map_span` + 上の可換性で計算した。
+- `standardEtalePairRingBaseChange`——上の2つと
+  `Algebra.TensorProduct.tensorQuotientEquiv`(商環の base change)・
+  `Ideal.quotientEquivAlg`(イデアルの対応から商の同型を作る)を合成し、
+
+  **`TensorProduct R K P₀.Ring ≃ₐ[K] (P₀.map (algebraMap R K)).Ring`**
+
+  を得た。「余極限の保存」という一般論は不要で、mathlib の base change
+  補題(`MvPolynomial.algebraTensorAlgEquiv`・`tensorQuotientEquiv`・
+  `Ideal.quotientEquivAlg`)の組み合わせだけで閉じた。
+
+**これで `Lemma 4.1` の構成的降下のうち、最も技術的に重かった「1つの
+標準エタール表示の base change」が完全に閉じた。** 残るのは組み立てのみ:
+(a) 一般の有限エタール多元環は「至る所で」標準エタールとは限らないため
+(`Algebra.basicOpen_subset_etaleLocus_iff_etale`)、`Z_K` 全体のアフィン
+開被覆(`Scheme.exists_isOpenCover_and_isAffine`)の各片をさらに
+étale-locus のレベルで細分してから、この降下を1片ずつ適用すること、
+(b) 各片の降下結果を `Scheme.exists_hom_hom_comp_eq_comp_of_
+locallyOfFiniteType`(遷移射の一致の降下)で貼り合わせて `Z` 全体を
+構成すること。数学的な核心(base change の構成)は完成したので、残るのは
+**スキーム論の定型的な貼り合わせ作業**という段階に到達した。
