@@ -1466,6 +1466,29 @@ mathlib での正確な組み立て方は未確認)。
       必要がある——特に、私の`Wn1`が半局所(複数成分)の場合に
       `conductor(Wn,x)=⊤`が各成分ごとに成り立つか(`x`が各成分を
       個別に生成するか)は未確認。
+
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、
+      **Exercise 13.7.4 (4)の第一歩(完全列の左側の単射性)を確立
+      した**(`falt1_mapBaseChange_injective_adjoinRoot`、commit
+      `6c78b84c`、`lake build`・`#print axioms`確認済み・sorry無し)。
+      Lemma 1.1 の土台で既に完成していた`mapBaseChange_injective_
+      of_nzd`(`B=Polynomial V/(f)`かつ`f'`が非零因子の場合の
+      `mapBaseChange`単射性)を、`V0→Wn→AdjoinRoot g`
+      (`g:=X^n-Cπ'`、base changeする**前**のEisenstein多項式)に
+      直接適用するだけで、
+      ```
+      KaehlerDifferential.mapBaseChange V0 Wn (AdjoinRoot g) :
+        AdjoinRoot g ⊗_Wn Ω¹_{Wn/V0} → Ω¹_{AdjoinRoot g/V0}
+      ```
+      の単射性が得られた——これが Exercise 13.7.4 の完全列
+      `0 → Wₙ₊₁⊗_{Wₙ}Ω¹_{Wₙ/V0} → Ω¹_{Wₙ₊₁/V0} → Ω¹_{Wₙ₊₁/Wₙ} → 0`
+      の**左側**に相当する(`AdjoinRoot g ≃ₐ[Wₙ] Wₙ₊₁`という既存の
+      同型`falt1AdjoinRootEquivIntegralClosure`を経由すれば`Wₙ₊₁`
+      自身の単射性に持ち上がる見込み)。次回はこの transport
+      (`omegaCongr`、既存)から続け、右側の全射性(標準的、一般の
+      塔で成り立つはず)と合わせて完全列そのものを組み立て、
+      Nakayama+elementary divisors(step 4後半)・discriminantの塔
+      (step 5)へ進む。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
