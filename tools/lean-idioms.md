@@ -4077,3 +4077,16 @@ defeqチェック)で照合するため、構文的な一致は不要——`psiG
 
 実例: `lean/ABC3/Found/PGC/LubinTateReciprocityMapLimit.lean`の
 `reciprocityMapLimitFamily_step`(`m+1`の場合)。
+
+**追記(2026-09-05、CorrHyp側の別の実例)**: 同じ病の別の症状として、
+`rw [lemma1, lemma2]`のように**同じ補題を2回連鎖させる**場面でも
+起きる——`lemma1`が`Y ⁻¹ᵁ (Z.basicOpen r)`の形を`Y`(定義上の展開形、
+例えば`pullback X.hom toBaseK`)基準の項へ書き換えてしまい、2回目の
+`rw`が要求する`α : C ⟶ (ExtF.obj X).left`(構文上の別名)との一致
+チェックに失敗して「motive is not type correct」になる(`Scheme.
+preimage_basicOpen`を`pullback.fst`・`α`の2段に適用する場面、
+`ExtLimit.lean`の`piece_basicOpen_mul_eq`)。直し方は同じ:中間結果を
+**明示的に型注釈した`have`**として確定させ(`(... : (ExtF.obj X).left.
+Opens)`のように書きたい形を先に固定する)、`rw`ではなく`exact`(defeq
+判定)で個別に閉じる——`rw`の自動連鎖を諦めて1段ずつ`have`で刻むのが
+安全。

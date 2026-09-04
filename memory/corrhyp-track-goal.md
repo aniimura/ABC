@@ -1783,3 +1783,18 @@ descendが与えるのは抽象的な同型だが、GlueDataが要求するの�
 (IsOpenImmersion)——W=D(f_i*f_j)がD(f_i)の基本開であるというRレベル
 での実現(S_0の局所化としての実現)がまだ未構成。新しい技術的ギャップ
 として記録。集計は10/24で変わらず。corrhyp-goal.mdに詳細記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05(続き16)
+piece_basicOpen_mul_eq(commit 71807250、ExtLimit.lean)——piece(D(f*g))
+がpiece(D(f))の基本開そのものであることをCレベルで確立。Scheme.
+preimage_basicOpen(mathlib)をpullback.fst・αの2段の逆像へ押し出す
+だけだが、rwを2回連鎖させると「motive is not type correct」((ExtF.obj
+X).leftとpullback X.hom toBaseKの構文不一致)になったため、中間結果を
+明示的に型注釈したhave+exact(defeq判定)の2段構成で解消——新しい
+配管の失敗形。
+
+正直な評価: これはCという1つのアンビエントスキーム内での事実であり、
+続き15のギャップ本体(descendPieceRという独立に構成されたRレベルの
+抽象スキーム同士を実際の局所化として結びつける、Algebra.Presentation
+の選び方自体の制御が必要)はまだ未着手。lake build(ExtLimit/ABC3)
+0エラー確認、push済み。集計は引き続き10/24——§4は引き続き0/2。

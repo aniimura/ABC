@@ -4002,4 +4002,42 @@ specIso_descend`が与えるのは`V(i,j)`と`U i`の間の**抽象的な同型*
 解決したが、`GlueData`が要求する「開埋め込み」という**より強い**
 構造(単なる同型ではない)への橋渡しがまだ残っている——これは新しい、
 まだ解決していない技術的なギャップであり、正直に記録しておく。
+
+## 2026-09-05(続き16): `piece(D(f*g))`が`piece(D(f))`の基本開そのもの
+であることを`C`レベルで確立(`ExtLimit.lean`、`piece_basicOpen_mul_eq`)
+
+続き15で記録した「開埋め込みの実現」ギャップへの第一歩として、
+`mathlib`の`Scheme.preimage_basicOpen`(`f⁻¹ᵁ(Y.basicOpen r)=
+X.basicOpen(f.app r)`)を使い、`X.left`レベルの事実`X.basicOpen(f*g)=
+X.basicOpen(g|_{D(f)})`(`Scheme.basicOpen_mul`+`Scheme.basicOpen_res`、
+`rw`2つの自動`rfl`閉じで1行証明できることを続き15で確認済み)を、
+`pullback.fst`・`α`という2段の逆像を通して`C`側へ押し出した:
+
+```
+piece_basicOpen_mul_eq : α⁻¹ᵁ(pullback.fst⁻¹ᵁ(D(f*g))) =
+  C.basicOpen (piece_basicOpen_localizationElem X U f g C α)
+```
+
+(`piece_basicOpen_localizationElem`は`g`を`D(f)`へ制限してから`pullback.
+fst`・`α`の2段で`C`側へ押し出した、`Γ(C,piece(D(f)))`の元。)
+
+**新しい配管の失敗形**: `rw [Scheme.preimage_basicOpen, Scheme.
+preimage_basicOpen]`と2回連鎖させると「motive is not type correct」に
+なった——1回目の書き換えが`(ExtF.obj X).left`を`pullback X.hom toBaseK`
+(定義上のunfold形)に変えてしまい、2回目が`α : C ⟶ (ExtF.obj X).left`
+との構文一致チェックに失敗する。中間結果を`(ExtF.obj X).left.basicOpen`
+の形へ明示的に型注釈した`have`として確定させ、`exact`(defeqでの単一化、
+`rw`より緩い)で個別に閉じる2段構成に分けて解消した——`tools\lean-
+idioms.md`に追記する価値のある新しい失敗形。
+
+**意義と残る作業(正直な記録)**: これは`C`という**ひとつの大きな
+アンビエントスキーム**の中での事実であって、続き15のギャップ本体
+(`descendPieceR`という**独立に構成されたRレベルの抽象スキーム**同士を
+実際に局所化として結びつける)はまだ未着手——`W:=D(f*g)`の`descendPieceR`
+が`D(f)`の`descendPieceR`の`S_0`の(この元の`R`レベルへの持ち上げによる)
+`Localization.Away`として実現できることを示すには、`descendPieceR`の
+`Algebra.Presentation`の**選び方自体**を制御する必要があり、まだ新しい
+議論を要する。ビルド確認(`lake build ABC3.Found.CorrHyp.ExtLimit`・
+`lake build ABC3`とも0エラー)・コミット(`71807250`)・pushは完了。
+集計は引き続き10/24——§4は引き続き0/2。
 集計は10/24で変わらず——§4は引き続き0/2。
