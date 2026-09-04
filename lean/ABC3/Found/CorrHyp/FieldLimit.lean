@@ -989,4 +989,33 @@ theorem StandardEtalePair.map_map {R S T : Type} [CommRing R] [CommRing S] [Comm
       subst hf hg
       rfl
 
+open scoped TensorProduct in
+/-- **有限段階 `R` 上の降下 `P₀` は、より粗い共通段階 `R'`(`R ≤ R'`)へ
+移送しても base change が変わらない**——`StandardEtalePair.map_map`
+(合成との可換性)+`Algebra.TensorProduct.map_comp`(mathlib、`⊗`の関手性)
+で `algebraMap(A⊗R.1)(A⊗ℝ) = algebraMap(A⊗R'.1)(A⊗ℝ) ∘ (A⊗inclusion)`
+を示すだけ。`Lemma 4.1`の「複数の標準エタール片を横断した細分段階の合流」
+——`exists_fgSubalgebra_upperBound`で得た共通段階`R'`へ、個々の片の
+降下先`R_i`をこの補題で移送し、すべて同じ`R'`の上で扱えるようにする。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_fg_subalgebra_tensor_standardEtalePair_promote (A : Type) [CommRing A]
+    [Algebra ℚ A] (R R' : FgSubalgebra ℚ ℝ) (hle : R ≤ R') (P₀ : StandardEtalePair (A ⊗[ℚ] R.1))
+    (P : StandardEtalePair (A ⊗[ℚ] ℝ))
+    (hP : P₀.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom = P) :
+    (P₀.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hle)).toRingHom).map
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)).toRingHom = P := by
+  rw [StandardEtalePair.map_map]
+  rw [← hP]
+  have hval : (Subalgebra.val R'.1).comp (Subalgebra.inclusion hle) = Subalgebra.val R.1 := rfl
+  have hid : (AlgHom.id ℚ A).comp (AlgHom.id ℚ A) = AlgHom.id ℚ A := by ext; simp
+  have hcomp := Algebra.TensorProduct.map_comp (AlgHom.id ℚ A) (AlgHom.id ℚ A)
+    (Subalgebra.val R'.1) (Subalgebra.inclusion hle)
+  rw [hid, hval] at hcomp
+  have hcomp' : (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)).toRingHom.comp
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hle)).toRingHom =
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom :=
+    congrArg AlgHom.toRingHom hcomp.symm
+  rw [← hcomp']
+
 end ABC3.Found.CorrHyp
