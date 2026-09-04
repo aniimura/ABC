@@ -331,9 +331,25 @@ span{...}` の形で使う)
 
 という式で、目標の `Jₙ := differentIdeal Wₙ Wₙ₊₁` が
 `conductor Wₙ x` 経由で書ける。★「典型例」(`V_{n+1}/V_n` が
-`p`乗根の同時添加)なら `x` の具体的な選び方も明確——次のセッションの
-最有力候補: `conductor_mul_differentIdeal` を実際に `differentIdeal_
-tower_diamond` と組み合わせて `hrec` の構築を試みること。
+`p`乗根の同時添加)なら `x` の具体的な選び方も明確。
+
+★★★★★★★★★★2026-09-04、**実際に組み合わせて完成させた**
+(`cancel_conductor_delta`、`Found/Falt1/KaehlerAux.lean`、commit
+`bf0a3ea7`、sorry無し)。`differentIdeal_tower_diamond` と
+`conductor_mul_differentIdeal` の2つの等式を掛け合わせるだけで `Jₙ`
+が消え、**`conductor(Wₙ,x) · δₙ₊₁ = δₙ.map(...)` というきれいな
+関係式**が(「`conductor Wₙ x` と `differentIdeal Vₙ Vₙ₊₁` の
+base change が一致する」という `hspan_eq` 仮定のもとで)出ることを
+確認した。Dedekind整域の「0でないイデアルは消去可能」という性質
+だけで閉じる、純粋に代数的な議論。
+
+★残る作業: (a) `hspan_eq`(3c=「典型例」で `x` の最小多項式が base
+change と両立することの確認)、(b) `conductor(Wₙ,x)` 自体の下限
+評価(`p^{何か}` を含むことの証明、Brinon-Conrad step (5) 後半に
+対応)、(c) この関係式(掛け算の形)から `delta_tendsto_zero` が
+要求する `hrec`(引き算の不等式の形)への変換。(c) は「掛け算の
+式→長さを取って足し算の不等式」という標準的な変換のはずで、
+(a)(b)より軽いと見込む。
 
 3c. **「非常に分岐した」`V_n` の族**そのものの形式化(具体例: `p^n`
     乗根と `1` のべき根を添加する塔、上の「典型例」段落)——まだ
