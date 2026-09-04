@@ -558,6 +558,17 @@ theorem omegaCongr_symm_eq {R A B : Type*} [CommRing R] [CommRing A] [CommRing B
 ★3段とも「何を示せばよいか」は完全に特定できたが、`falt1CokernelIso`
 自体の書き換え(`Ideal.quotientEquivAlg` への差し替え含む)と、3段を
 `AddEquiv.trans` の下で合成する最終工程はまだ書いていない。
+
+★★**実測(2026-09-04)**: 3.の `Ideal.quotientEquivAlg` への差し替えを
+実際に試したところ、`Ideal.map (e : AdjoinRoot (minpoly V w) →+* W) ...`
+の型検査が `maxHeartbeats 1000000`(既定の5倍、44秒)でも
+`timeout at whnf` で止まる——`AlgEquiv` の `→+*` への強制が
+`RingEquiv` 版よりはるかに重い(代数構造の証明項を一緒に unfold する
+ため)。これは「何を示すべきか分かっているが Lean の elaborator が
+時間内に応じない」という**性能上の壁**であり、`ここまでの3段の道筋」
+は数学的には正しいと確信しているが、`quotientEquivAlg` を使わずに
+(例えば `Ideal.quotientEquiv` の構成そのものの `map_mul` 整合性を
+直接示す、等)別の経路を探す必要がある——未着手。
 -/
 
 end ABC3.Found.Falt1
