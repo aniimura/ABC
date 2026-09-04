@@ -2021,12 +2021,38 @@ theorem gdT'_cocycle (i j k : J) :
   have h := congrArg ((gdT' f Z e i j k).hom ≫ ·) (gdT'_pair f Z e i j k)
   simpa [Category.assoc] using h
 
-/- ★★次の一手(未着手): `Scheme.GlueData`の12フィールドすべてが揃ったので、
-実際に`Scheme.GlueData`の構造体インスタンス(`corrHypGlueData`のような
-名前)を組み立てる——ここまでの`gdV`・`gdF`・`gdT`・`gdT_id`・`gdF_mono`・
-`gdF_isOpenImmersion`(`f_open`)・`gdF_hasPullback`・`gdF_id`・`gdT'`・
-`gdT'_t_fac`・`gdT'_cocycle`をそのままフィールドとして渡すだけのはず。
-その後`GD.glued`が`C`(または`Ext`後に`C`)に同型であることを、`C`自身の
+/-- **`corrHypGlueData`——`Scheme.GlueData`の構造体インスタンス本体**。
+ここまで積み上げた12個の部品(`gdV`・`gdF`・`gdF_mono`・
+`gdF_hasPullback`・`gdF_id`・`gdT`・`gdT_id`・`gdT'`・`gdT'_t_fac`・
+`gdT'_cocycle`・`gdF_isOpenImmersion`)をそのままフィールドとして渡す
+だけで組み立てられる——`t`・`t'`は`Iso`(`gdT`・`gdT'`)の`.hom`を取る
+だけ、`t_id`は`gdT_id`(`gdT i i = Iso.refl _`)から`.hom`を取って
+`rfl`で閉じるだけ。
+
+これで**`Scheme.GlueData`(候補片`Z`の族から貼り合わせデータへ)が
+完全に組み立てられた**——`Lemma 4.1`の構成的降下のうち、GlueDataの
+配線という最大の技術的部分が完了した。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def corrHypGlueData : Scheme.GlueData where
+  toGlueData := {
+    J := J
+    U := Z
+    V := gdV f Z e
+    f := gdF f Z e
+    f_mono := gdF_mono f Z e
+    f_hasPullback := gdF_hasPullback f Z e
+    f_id := gdF_id f Z e
+    t := fun i j => (gdT f Z e i j).hom
+    t_id := fun i => by rw [gdT_id]; rfl
+    t' := fun i j k => (gdT' f Z e i j k).hom
+    t_fac := gdT'_t_fac f Z e
+    cocycle := gdT'_cocycle f Z e
+  }
+  f_open := gdF_isOpenImmersion f Z e
+
+/- ★★次の一手(未着手): `corrHypGlueData.glued`(貼り合わせてできる
+スキーム)が`C`(または`Ext`後に`C`)に同型であることを、`C`自身の
 `OpenCover`の`gluedCover`との比較で示す——`Lemma 4.1`の`c'.C`の実体。
 `corrhyp-goal.md`に記録。 -/
 
