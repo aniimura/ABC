@@ -1937,11 +1937,97 @@ theorem gdT'_t_fac (i j k : J) :
   rw [← Category.assoc]
   exact congrArg ((gdVpullbackIso f Z e i j k).hom ≫ ·) (gdT'_key f Z e i j k)
 
-/- ★★次の一手(未着手): 残る`cocycle`(`t' i j k ≫ t' j k i ≫ t' k i j =
-𝟙`)を埋めて`Scheme.GlueData`を完成させる——新しい数学は不要で、`t_fac`と
-同様に`gdT'_key`型の等式へ帰着させる見込み(3つの`transitionElemIso`の
-往復が打ち消し合うことを示す)。その後`GD.glued`が`C`(または`Ext`後に
-`C`)に同型であることを、`C`自身の`OpenCover`の`gluedCover`との比較で
-示す——`Lemma 4.1`の`c'.C`の実体。`corrhyp-goal.md`に記録。 -/
+/-! ### `cocycle`——`Scheme.GlueData`最後のフィールド
+
+**配管の教訓(`tools/lean-idioms.md`へ追記予定)**: `cocycle`は当初
+`t_fac`と同じ「`unfold gdT'`してから`calc`/`congrArg`で組み立てる」
+方法を試みたが、**`unfold gdT'`をゴールに含まれる`gdT'`の`2つ以上の
+出現に同時に適用する**と、それ以降のあらゆる型検査(`rw`・`simp`・
+`exact`・`refine`・`show`すべて)が極端に重くなる(`maxHeartbeats`を
+2000万まで上げても完走しない)ことが分かった——`t_fac`は`gdT'`の
+出現が常に1つだけだったので問題にならなかった。**回避策は`gdT'`を
+1つずつ`gdT'_hom_eq`/`gdT'_inv_eq`という名前付きの事実として先に
+確定させ、以降は`unfold`せず`rw`でこれらの名前を参照するだけにする**
+こと——これなら`gdT'`が何度出現しても軽い。
+
+もう1つの教訓: `congrArg`で式の一部を書き換えるとき、**書き換え対象を
+2つの合成の"間に挟む"**(`congrArg (fun x => A ≫ x ≫ B) h`)と極端に
+重くなることがある——`A`と`B`の型がジェネリックな`x`に対して整合する
+ことを確認する型検査が高くつくと見られる。**常に「前だけ」
+(`congrArg (· ≫ K) h`)か「後ろだけ」(`congrArg (K ≫ ·) h`)の
+`congrArg`を順番に適用する**(`t_fac`の`gdT'_key`と同じ流儀)ことで
+劇的に軽くなる。 -/
+
+/-- `(gdT' i j k).hom`を`unfold`せずに参照できる、明示的な形。`gdT'`は
+`gdVpullbackIso`+`transitionElemIso`+`isoOfEq`の`.trans`/`.symm`だけで
+組み立てられているので、`unfold`+`Iso.trans_hom`/`Iso.symm_hom`だけで
+安全に取り出せる(1つの`gdT'`だけを`unfold`するので軽い)。 -/
+theorem gdT'_hom_eq (i j k : J) :
+    (gdT' f Z e i j k).hom = (gdVpullbackIso f Z e i j k).hom ≫
+      (transitionElemIso (f i) (f j * f k) (e i)).inv ≫
+      (X.isoOfEq (show X.basicOpen (f i * (f j * f k)) = X.basicOpen (f j * (f k * f i)) by
+        rw [show f i * (f j * f k) = f j * (f k * f i) by ring])).hom ≫
+      (transitionElemIso (f j) (f k * f i) (e j)).hom ≫ (gdVpullbackIso f Z e j k i).inv := by
+  unfold gdT'
+  simp only [Iso.trans_hom, Iso.symm_hom, Category.assoc]
+
+/-- `gdT'_hom_eq`の`.inv`版。 -/
+theorem gdT'_inv_eq (i j k : J) :
+    (gdT' f Z e i j k).inv = (gdVpullbackIso f Z e j k i).hom ≫
+      (transitionElemIso (f j) (f k * f i) (e j)).inv ≫
+      (X.isoOfEq (show X.basicOpen (f i * (f j * f k)) = X.basicOpen (f j * (f k * f i)) by
+        rw [show f i * (f j * f k) = f j * (f k * f i) by ring])).inv ≫
+      (transitionElemIso (f i) (f j * f k) (e i)).hom ≫ (gdVpullbackIso f Z e i j k).inv := by
+  unfold gdT'
+  simp only [Iso.trans_inv, Iso.symm_inv, Iso.symm_hom, Category.assoc]
+
+/-- **`cocycle`の核心の等式**——残る2つの`gdT'`(`j k i`・`k i j`)の合成が
+1つ目(`i j k`)の逆射に一致する。`gdT'_hom_eq`/`gdT'_inv_eq`で3つの
+`gdT'`をそれぞれ独立に(`unfold`を経由せず)明示形へ変換し、共通の
+`gdVpullbackIso`・`transitionElemIso`の対をキャンセルすると、残るのは
+3つの結合律の`homOfLE`が1つに合成される等式(`Scheme.homOfLE_homOfLE`、
+証明無関係性で自動的に閉じる)だけになる。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem gdT'_pair (i j k : J) :
+    (gdT' f Z e j k i).hom ≫ (gdT' f Z e k i j).hom = (gdT' f Z e i j k).inv := by
+  rw [gdT'_hom_eq f Z e j k i, gdT'_hom_eq f Z e k i j, gdT'_inv_eq f Z e i j k]
+  simp only [Category.assoc, Iso.inv_hom_id_assoc, Iso.hom_inv_id_assoc,
+    Scheme.isoOfEq_hom, Scheme.isoOfEq_inv]
+  have hcombine : X.homOfLE (show X.basicOpen (f j * (f k * f i)) ≤ X.basicOpen (f k * (f i * f j)) by
+        rw [show f j * (f k * f i) = f k * (f i * f j) by ring]) ≫
+      X.homOfLE (show X.basicOpen (f k * (f i * f j)) ≤ X.basicOpen (f i * (f j * f k)) by
+        rw [show f k * (f i * f j) = f i * (f j * f k) by ring])
+    = X.homOfLE (show X.basicOpen (f j * (f k * f i)) ≤ X.basicOpen (f i * (f j * f k)) by
+        rw [show f j * (f k * f i) = f i * (f j * f k) by ring]) :=
+    Scheme.homOfLE_homOfLE X _ _
+  have step1 := congrArg (· ≫ (transitionElemIso (f i) (f j * f k) (e i)).hom ≫
+      (gdVpullbackIso f Z e i j k).inv) hcombine
+  have step2 := congrArg ((gdVpullbackIso f Z e j k i).hom ≫
+      (transitionElemIso (f j) (f k * f i) (e j)).inv ≫ ·) step1
+  simpa [Category.assoc] using step2
+
+/-- **`cocycle`——`Scheme.GlueData`の12個目、最後のフィールド**。
+`gdT'_pair`(残る2つの`gdT'`の合成が1つ目の逆射に一致する)と
+`Iso.hom_inv_id`から直ちに従う。
+
+これで`Scheme.GlueData`の**12フィールドすべて**
+(`J・U・V・f・f_mono・f_hasPullback・f_id・t・t_id・t'・t_fac・cocycle`)
+が完成した。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem gdT'_cocycle (i j k : J) :
+    (gdT' f Z e i j k).hom ≫ (gdT' f Z e j k i).hom ≫ (gdT' f Z e k i j).hom = 𝟙 _ := by
+  have h := congrArg ((gdT' f Z e i j k).hom ≫ ·) (gdT'_pair f Z e i j k)
+  simpa [Category.assoc] using h
+
+/- ★★次の一手(未着手): `Scheme.GlueData`の12フィールドすべてが揃ったので、
+実際に`Scheme.GlueData`の構造体インスタンス(`corrHypGlueData`のような
+名前)を組み立てる——ここまでの`gdV`・`gdF`・`gdT`・`gdT_id`・`gdF_mono`・
+`gdF_isOpenImmersion`(`f_open`)・`gdF_hasPullback`・`gdF_id`・`gdT'`・
+`gdT'_t_fac`・`gdT'_cocycle`をそのままフィールドとして渡すだけのはず。
+その後`GD.glued`が`C`(または`Ext`後に`C`)に同型であることを、`C`自身の
+`OpenCover`の`gluedCover`との比較で示す——`Lemma 4.1`の`c'.C`の実体。
+`corrhyp-goal.md`に記録。 -/
 
 end ABC3.Found.CorrHyp
