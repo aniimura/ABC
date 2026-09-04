@@ -3550,3 +3550,25 @@ Polynomial S) = Polynomial.map φ := rfl` を明示的に挟んで `rw [hcoe]` �
 ではなく`Polynomial.map_sum`を選ぶ)。実例:
 `lean/ABC3/Found/CorrHyp/FieldLimit.lean` の
 `exists_fg_subalgebra_tensor_bivariate_finset`。
+
+## 27. `open ... in` / `set_option ... in` はdocstringの**前**に置く——
+docstringの後に置くと「unexpected token 'open'; expected 'lemma'」
+(2026-09-04)
+
+`/-- docstring -/` の直後に `open X in` や `set_option foo in` を置くと
+(`docstring` → `open ... in` → `theorem` という順序)、次の宣言の手前で
+パーサが `open`(または `set_option`)を見て「'lemma' を期待している」と
+いう紛らわしいエラーを出す——docstringは宣言の**直前**にしか付けられず、
+`open ... in`/`set_option ... in` のような修飾コマンドは**その外側**
+(docstringより前)に置く必要がある。正しい順序は
+`open X in` → `/-- docstring -/` → `theorem ...`。file 内の既存箇所
+(`Bivariate_equivMvPolynomial_map` 等)は元々正しい順序だったが、
+新規追加時に順序を逆にしてしまい、`lake build` でしか検出されなかった
+(`lean_check` は宣言単体を独立に検査するため、この手のファイル内の
+前後関係バグは拾わない)。
+
+**How to apply**: `open`/`set_option`付きの宣言を追加するときは必ず
+「修飾コマンド→docstring→宣言」の順を確認する。`lean_check`で個々の
+宣言が通っても、ファイルへ実際に書き込んだ後は`lake build`(または
+該当ファイルだけの`lake build <module>`)で必ず再検査すること——
+この種のバグは`lean_check`だけでは検出できない。
