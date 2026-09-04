@@ -1206,11 +1206,21 @@ variable {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U)) (Z : J → S
   (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i)
 
 /-- 重なりの候補片(`V(i,j)`)——`i`側の候補片`Z i`の中の、`j`との重なりに
-対応する基本開集合。`transitionElem`をそのまま使う。 -/
+対応する基本開集合。`transitionElem`をそのまま使う。
+
+`@[reducible]`——`gdF`の`instances`透明度での展開に必要(`t_fac`・`cocycle`で
+`pullback.fst/snd (gdF …) (gdF …)`と`isPullback_opens_inf`由来の
+`pullback.fst/snd U.ι V.ι`を`simp`で結びつけるとき、`gdF`が不透明だと
+「`instances`透明度で型が合わない」という一見謎のエラーになる——`gdF`が
+`.ι`へ展開できないせいで、同じ`pullback`対象なのに別物として扱われて
+しまうため)。 -/
+@[reducible]
 noncomputable def gdV (p : J × J) : Scheme :=
   (Z p.1).basicOpen (transitionElem (f p.1) (f p.2) (e p.1))
 
-/-- `V(i,j) ⟶ U i`——基本開集合の標準的な開埋め込み`.ι`。 -/
+/-- `V(i,j) ⟶ U i`——基本開集合の標準的な開埋め込み`.ι`。`@[reducible]`の理由は
+`gdV`と同じ。 -/
+@[reducible]
 noncomputable def gdF (i j : J) : gdV f Z e (i, j) ⟶ Z i :=
   ((Z i).basicOpen (transitionElem (f i) (f j) (e i))).ι
 
@@ -1234,11 +1244,11 @@ noncomputable def gdT (i j : J) : gdV f Z e (i, j) ≅ gdV f Z e (j, i) :=
   let Wj := (X.basicOpen (f j)).toScheme.basicOpen
     ((X.basicOpen (f j)).topIso.inv (X.presheaf.map (homOfLE (X.basicOpen_le (f j))).op (f i)))
   let iso1 : (Wi : Scheme) ≅ gdV f Z e (i, j) :=
-    ((e i).hom.isoImage Wi).trans (eqToIso (by rw [h2i]; unfold gdV; rfl))
+    ((e i).hom.isoImage Wi).trans (eqToIso (by rw [h2i]))
   let iso2 : (Wi : Scheme) ≅ (X.basicOpen (f i * f j) : Scheme) :=
     ((X.basicOpen (f i)).ι.isoImage Wi).trans (eqToIso (by rw [h1i]))
   let iso3 : (Wj : Scheme) ≅ gdV f Z e (j, i) :=
-    ((e j).hom.isoImage Wj).trans (eqToIso (by rw [h2j]; unfold gdV; rfl))
+    ((e j).hom.isoImage Wj).trans (eqToIso (by rw [h2j]))
   let iso4 : (Wj : Scheme) ≅ (X.basicOpen (f j * f i) : Scheme) :=
     ((X.basicOpen (f j)).ι.isoImage Wj).trans (eqToIso (by rw [h1j]))
   let hcomm : X.basicOpen (f i * f j) = X.basicOpen (f j * f i) := by rw [mul_comm]
