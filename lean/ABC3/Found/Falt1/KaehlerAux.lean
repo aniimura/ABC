@@ -3165,4 +3165,201 @@ theorem falt1_differentIdeal_tower_diamond_assembled
     (Vn := V0) (Vn1 := V1) (Wn := Wn) (Wn1 := Wn1) hsep
   trivial
 
+/-!
+## `hspan_eq`(`cancel_conductor_delta`)接続への足場(2026-09-04、3つの補題完成)
+
+`cancel_conductor_delta` の `hspan_eq`(`conductor Wₙ x` 側の span と
+`differentIdeal_tower_diamond` の base change 側の span が一致する)を
+確立するための、3つの再利用可能な補題を用意した(いずれも `lake build`・
+`#print axioms` 確認済み・sorry 無し)。残る接続(`differentIdeal_eq_
+span_derivative`・`conductor_mul_differentIdeal` を実際に呼び出して
+`hspan_eq` そのものを閉じる)は、`w`・`x` の field-level 生成元性を
+`differentIdeal_eq_span_derivative`/`conductor_mul_differentIdeal` が
+要求する**正確な instance 経路**(`algebraMap V1 (AdjoinRoot fK)` 等)に
+一致させる作業で type mismatch に当たり、次回への持ち越しとした
+(falt1-goal.md 参照)。 -/
+
+/-- **有限次拡大で、剰余体レベルの生成が全体生成なら基礎体レベルでも
+全体生成**(単純な次元カウント)。`IsIntegral K x` かつ
+`(minpoly K x).natDegree = finrank K L` から `Algebra.adjoin K {x} = ⊤`
+を出す——`Algebra.adjoin.powerBasis'` の次元 `= (minpoly K x).natDegree`
+と、有限次元での「同次元の部分加群は全体」(`Submodule.eq_top_of_
+finrank_eq`)を組み合わせるだけ。 -/
+theorem falt1_adjoin_top_of_finrank_eq {K L : Type*} [Field K] [Field L] [Algebra K L]
+    [FiniteDimensional K L] (x : L) (hint : IsIntegral K x)
+    (hdeg : (minpoly K x).natDegree = Module.finrank K L) :
+    Algebra.adjoin K ({x} : Set L) = ⊤ := by
+  have h1 : Module.finrank K (Algebra.adjoin K ({x} : Set L)) = Module.finrank K L := by
+    rw [(Algebra.adjoin.powerBasis' hint).finrank, Algebra.adjoin.powerBasis'_dim hint, hdeg]
+  have h2 : Subalgebra.toSubmodule (Algebra.adjoin K ({x} : Set L)) = ⊤ := by
+    apply Submodule.eq_top_of_finrank_eq
+    rwa [Subalgebra.finrank_toSubmodule]
+  have h3 : Subalgebra.toSubmodule (⊤ : Subalgebra K L) = ⊤ := by simp
+  exact Subalgebra.toSubmodule_injective (h2.trans h3.symm)
+
+set_option maxHeartbeats 1000000 in
+/-- **`V_1`(または `Wₙ₊₁`)の元 `w0` の環レベル `minpoly` が
+`X^n-Cπ` に一致するなら、体レベル(`FractionRing V0` 上)でも
+`w0` が全体を生成する**——`minpoly.isIntegrallyClosed_eq_field_
+fractions'`(整閉環上の元の体への minpoly は係数を base change した
+もの)で体レベル minpoly を `fK` と同定し、`falt1_adjoin_top_of_
+finrank_eq` に渡す。`hspan_eq` が要求する `K[(algebraMap W L) w] = ⊤`
+の直接の供給源。 -/
+theorem falt1_fieldLevel_adjoin_top_of_ringLevel_minpoly {V0 : Type*} [CommRing V0] [IsDomain V0]
+    [IsDiscreteValuationRing V0] (π : V0) (n : ℕ)
+    (hn : (n : FractionRing V0) ≠ 0) (hπne0 : algebraMap V0 (FractionRing V0) π ≠ 0)
+    (hprime : (Ideal.span ({π} : Set V0)).IsPrime) (hnotsq : π ∉ (Ideal.span ({π} : Set V0)) ^ 2)
+    (hnpos : 0 < n)
+    [IsDedekindDomain (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    [Module.IsTorsionFree V0 (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    (w0 : integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))
+    (hw0minpoly : minpoly V0 w0 = Polynomial.X ^ n - Polynomial.C π) :
+    Algebra.adjoin (FractionRing V0) ({(algebraMap _
+        (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map (algebraMap V0 (FractionRing V0))))) w0} :
+      Set (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map (algebraMap V0 (FractionRing V0))))) = ⊤ := by
+  have hirr : Irreducible (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map (algebraMap V0 (FractionRing V0))) :=
+    ABC3.Found.Falt1.eisenstein_X_pow_sub_C_irreducible_map π n hnpos hprime hnotsq
+  haveI : Fact (Irreducible (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map (algebraMap V0 (FractionRing V0)))) := ⟨hirr⟩
+  have hmonicK : (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map (algebraMap V0 (FractionRing V0))).Monic :=
+    (Polynomial.monic_X_pow_sub_C π hnpos.ne').map _
+  have hsepK : (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map (algebraMap V0 (FractionRing V0))).Separable := by
+    have hmapeq : (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map (algebraMap V0 (FractionRing V0)))
+        = Polynomial.X ^ n - Polynomial.C (algebraMap V0 (FractionRing V0) π) := by simp
+    rw [hmapeq]; exact Polynomial.separable_X_pow_sub_C _ hn hπne0
+  haveI : Module.Finite (FractionRing V0) (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+      (algebraMap V0 (FractionRing V0)))) := hmonicK.finite_adjoinRoot
+  haveI : FiniteDimensional (FractionRing V0) (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+      (algebraMap V0 (FractionRing V0)))) := ‹Module.Finite _ _›
+  have hfmonic : (Polynomial.X ^ n - Polynomial.C π : Polynomial V0).Monic := Polynomial.monic_X_pow_sub_C π hnpos.ne'
+  have hw0int : IsIntegral V0 w0 := by
+    rw [← minpoly.ne_zero_iff, hw0minpoly]; exact hfmonic.ne_zero
+  have hw0int' : IsIntegral V0 (algebraMap _ (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+      (algebraMap V0 (FractionRing V0)))) w0) :=
+    hw0int.map (IsScalarTower.toAlgHom V0 _ (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+      (algebraMap V0 (FractionRing V0)))))
+  have hw0intK : IsIntegral (FractionRing V0) (algebraMap _ (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+      (algebraMap V0 (FractionRing V0)))) w0) :=
+    IsIntegral.of_finite (FractionRing V0) _
+  have hminpolycast : minpoly V0 (algebraMap _ (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+      (algebraMap V0 (FractionRing V0)))) w0) = minpoly V0 w0 :=
+    minpoly.algebraMap_eq (Subtype.val_injective) w0
+  have hminpolyL : minpoly (FractionRing V0) (algebraMap _ (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+      (algebraMap V0 (FractionRing V0)))) w0) = (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map (algebraMap V0 (FractionRing V0))) := by
+    rw [minpoly.isIntegrallyClosed_eq_field_fractions' (FractionRing V0) hw0int']
+    rw [hminpolycast, hw0minpoly]
+  apply falt1_adjoin_top_of_finrank_eq
+  · exact hw0intK
+  · rw [hminpolyL]
+    rw [(AdjoinRoot.powerBasis hirr.ne_zero).finrank, AdjoinRoot.powerBasis_dim hirr.ne_zero]
+
+set_option maxHeartbeats 1000000 in
+/-- **`falt1BaseChangeAlgHom_generator_and_injective` の `w`・`x` の
+生成元性(`falt1GeneratorPackage` 相当)を、`ψ w = x` と同時に手に入れる**
+——`hspan_eq` の接続には `w`・`x` が「同じ `e1`/`e2` 由来」であることが
+必須(別々に `falt1GeneratorPackage` を呼ぶと `obtain` した witness が
+一致する保証がない)ため、両方の証明を1つの `e1`・`e2` から一括して
+組み立てる。 -/
+theorem falt1BaseChangeGeneratorFull
+    {V0 Wn : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    (π : V0) (n : ℕ)
+    (hn : (n : FractionRing V0) ≠ 0) (hπne0 : algebraMap V0 (FractionRing V0) π ≠ 0)
+    (hprime : (Ideal.span ({π} : Set V0)).IsPrime) (hnotsq : π ∉ (Ideal.span ({π} : Set V0)) ^ 2)
+    (hnpos : 0 < n)
+    (hn' : (n : FractionRing Wn) ≠ 0)
+    (hπne0' : algebraMap Wn (FractionRing Wn) (algebraMap V0 Wn π) ≠ 0)
+    (hprime' : (Ideal.span ({algebraMap V0 Wn π} : Set Wn)).IsPrime)
+    (hnotsq' : algebraMap V0 Wn π ∉ (Ideal.span ({algebraMap V0 Wn π} : Set Wn)) ^ 2)
+    (hinjV0Wn : Function.Injective (algebraMap V0 Wn))
+    [IsDedekindDomain (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    [Module.IsTorsionFree V0 (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    [IsDedekindDomain (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))]
+    [Module.IsTorsionFree Wn (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))] :
+    ∃ (ψ : integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))) →ₐ[V0]
+      integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))
+      (w : integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))
+      (x : integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn))))),
+      ψ w = x ∧ Function.Injective ψ ∧
+      Algebra.adjoin V0 ({w} : Set _) = ⊤ ∧ minpoly V0 w = Polynomial.X ^ n - Polynomial.C π ∧
+      Algebra.adjoin Wn ({x} : Set _) = ⊤ ∧
+        minpoly Wn x = Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) := by
+  set f : Polynomial V0 := Polynomial.X ^ n - Polynomial.C π with hfdef
+  set π' : Wn := algebraMap V0 Wn π with hπ'def
+  set g : Polynomial Wn := Polynomial.X ^ n - Polynomial.C π' with hgdef
+  have hfg : f.map (algebraMap V0 Wn) = g := by rw [hfdef, hgdef, hπ'def]; simp
+  set e1 := ABC3.Found.Falt1.falt1AdjoinRootEquivIntegralClosure π n hn hπne0 hprime hnotsq hnpos
+  set e2 := ABC3.Found.Falt1.falt1AdjoinRootEquivIntegralClosure π' n hn' hπne0' hprime' hnotsq' hnpos
+  set step1 : AdjoinRoot f →ₐ[V0] AdjoinRoot g :=
+    hfg ▸ ABC3.Found.Falt1.algHomAdjoinRootOfCompat' (Wn := Wn) f with hstep1def
+  have hstep1root : step1 (AdjoinRoot.root f) = AdjoinRoot.root g := by
+    rw [hstep1def]; exact ABC3.Found.Falt1.algHomAdjoinRootOfCompat'_cast_root f g hfg
+  have hfmonic : f.Monic := Polynomial.monic_X_pow_sub_C π hnpos.ne'
+  have hstep1inj : Function.Injective step1 := by
+    rw [hstep1def]
+    exact ABC3.Found.Falt1.algHomAdjoinRootOfCompat'_cast_injective f g hfg hfmonic hinjV0Wn
+  have hwadjoin : Algebra.adjoin V0 ({e1 (AdjoinRoot.root f)} : Set _) = ⊤ := by
+    have h1 : Algebra.adjoin V0 ({AdjoinRoot.root f} : Set (AdjoinRoot f)) = ⊤ :=
+      AdjoinRoot.adjoinRoot_eq_top
+    have h2 := congrArg (Subalgebra.map e1.toAlgHom) h1
+    rw [AlgHom.map_adjoin_singleton, Algebra.map_top] at h2
+    rwa [show e1.toAlgHom.range = ⊤ from by rw [AlgHom.range_eq_top]; exact e1.surjective] at h2
+  have hwminpoly : minpoly V0 (e1 (AdjoinRoot.root f)) = f := by
+    have hmonic : f.Monic := hfmonic
+    have hroot_int : IsIntegral V0 (AdjoinRoot.root f) := ⟨_, hmonic, AdjoinRoot.eval₂_root _⟩
+    have hirr : Irreducible f := ABC3.Found.Falt1.eisenstein_X_pow_sub_C π n hnpos hprime hnotsq
+    have haeval_w : Polynomial.aeval (e1 (AdjoinRoot.root f)) f = 0 := by
+      rw [Polynomial.aeval_algHom_apply]
+      have h0 : Polynomial.aeval (AdjoinRoot.root f) f = 0 := by
+        show Polynomial.eval₂ (algebraMap V0 (AdjoinRoot f)) (AdjoinRoot.root f) f = 0
+        rw [AdjoinRoot.algebraMap_eq]; exact AdjoinRoot.eval₂_root f
+      rw [h0, map_zero]
+    have hw_int : IsIntegral V0 (e1 (AdjoinRoot.root f)) := hroot_int.map e1.toAlgHom
+    have hdvd : minpoly V0 (e1 (AdjoinRoot.root f)) ∣ f := minpoly.isIntegrallyClosed_dvd hw_int haeval_w
+    have hirr2 : Irreducible (minpoly V0 (e1 (AdjoinRoot.root f))) := minpoly.irreducible hw_int
+    exact Polynomial.eq_of_monic_of_associated (minpoly.monic hw_int) hmonic
+      (hirr2.associated_of_dvd hirr hdvd)
+  have hxadjoin : Algebra.adjoin Wn ({e2 (AdjoinRoot.root g)} : Set _) = ⊤ := by
+    have h1 : Algebra.adjoin Wn ({AdjoinRoot.root g} : Set (AdjoinRoot g)) = ⊤ :=
+      AdjoinRoot.adjoinRoot_eq_top
+    have h2 := congrArg (Subalgebra.map e2.toAlgHom) h1
+    rw [AlgHom.map_adjoin_singleton, Algebra.map_top] at h2
+    rwa [show e2.toAlgHom.range = ⊤ from by rw [AlgHom.range_eq_top]; exact e2.surjective] at h2
+  have hgmonic : g.Monic := Polynomial.monic_X_pow_sub_C π' hnpos.ne'
+  have hxminpoly : minpoly Wn (e2 (AdjoinRoot.root g)) = g := by
+    have hroot_int : IsIntegral Wn (AdjoinRoot.root g) := ⟨_, hgmonic, AdjoinRoot.eval₂_root _⟩
+    have hirr : Irreducible g := ABC3.Found.Falt1.eisenstein_X_pow_sub_C π' n hnpos hprime' hnotsq'
+    have haeval_x : Polynomial.aeval (e2 (AdjoinRoot.root g)) g = 0 := by
+      rw [Polynomial.aeval_algHom_apply]
+      have h0 : Polynomial.aeval (AdjoinRoot.root g) g = 0 := by
+        show Polynomial.eval₂ (algebraMap Wn (AdjoinRoot g)) (AdjoinRoot.root g) g = 0
+        rw [AdjoinRoot.algebraMap_eq]; exact AdjoinRoot.eval₂_root g
+      rw [h0, map_zero]
+    have hx_int : IsIntegral Wn (e2 (AdjoinRoot.root g)) := hroot_int.map e2.toAlgHom
+    have hdvd : minpoly Wn (e2 (AdjoinRoot.root g)) ∣ g := minpoly.isIntegrallyClosed_dvd hx_int haeval_x
+    have hirr2 : Irreducible (minpoly Wn (e2 (AdjoinRoot.root g))) := minpoly.irreducible hx_int
+    exact Polynomial.eq_of_monic_of_associated (minpoly.monic hx_int) hgmonic
+      (hirr2.associated_of_dvd hirr hdvd)
+  refine ⟨(e2.toAlgHom.restrictScalars V0).comp (step1.comp e1.symm.toAlgHom),
+    e1 (AdjoinRoot.root f), e2 (AdjoinRoot.root g), ?_, ?_, hwadjoin, hwminpoly, hxadjoin, hxminpoly⟩
+  · rw [AlgHom.comp_apply, AlgHom.comp_apply]
+    have h1 : e1.symm.toAlgHom (e1 (AdjoinRoot.root f)) = AdjoinRoot.root f := e1.symm_apply_apply _
+    rw [h1, hstep1root]
+    rfl
+  · intro a b hab
+    simp only [AlgHom.comp_apply] at hab
+    apply e1.symm.injective
+    apply hstep1inj
+    exact e2.injective hab
+
 end ABC3.Found.Falt1
