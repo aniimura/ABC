@@ -1026,3 +1026,23 @@ inf_le_left from …]`+`Iso.cancel_iso_inv_left`まで前進させた——
 突き合わせ。詳細は`corrhyp-goal.md`の該当節。
 
 コミット: `e41d967e`。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04
+続報(instances透明度の壁を突破、transitionElemIso_inv_naturality完成、
+t_facに必要な部品が全て揃った、集計10/24で変わらず)。3ターン連続で
+当たっていた「rw/simp/convで事実を差し込むとX.presheafの型不一致」
+という壁を突破した。鍵は2つ: (1) rwを一切使わずcalc+congrArg+
+(Category.assoc _ _ _).symmのterm-modeで組み立てる——congrArgは
+rwのようなmotive探索(kabstract)を経由しないため壁に当たらない。
+(2) 各部品をhaveとして内部に書くとそれだけでwhnfのheartbeat上限
+(400万でも不足)に達する——独立したtheorem(transitionElemIso_step1〜
+step45)として先に証明し切ってから本体のcalcでは名前を参照するだけに
+することで軽くなった。
+
+`transitionElemIso_inv_naturality`(t_facの核心——transitionElemIso
+f₁(g·h)eの.invを両側の基本開集合の包含を挟んでtransitionElemIso f₁ g e
+の.invへ橋渡しする自然性)が完成(sorry無し)。これでt_facに必要な数学的・
+技術的部品がすべて揃った——残るのはgdT'・gdTとの配線のみ、新しい未知の
+壁はもう残っていない。`tools/lean-idioms.md` #31に発見を記録。
+
+コミット: `c4172c85`。

@@ -2131,3 +2131,46 @@ Presheaf`自体の定義展開(`(Opens X)ᵒᵖ⥤C`への unfold)が`instances`
 置き換えるなどの手当てが要ると見込まれるが、今回はここで一旦区切る。
 `t_fac`の数学的内容(4補題の組み立て方)自体には不明な点が無いことは
 確定しているので、次に着手する際はこの`generalize`路線から始めるとよい。
+
+### 2026-09-04続報: `instances`透明度の壁をついに突破——`transitionElemIso_
+inv_naturality`完成、t_facに必要な数学的・技術的部品がすべて揃った
+
+3ターン連続で当たっていた「`rw`/`simp`/`conv`いずれで事実を差し込もう
+としても`X.presheaf`/`X.presheaf.obj`の型不一致エラー」という壁を、
+ついに突破した。突破口は2つ:
+
+1. **`rw`を一切使わず、`calc`+`congrArg`+`(Category.assoc _ _
+   _).symm`のterm-modeで組み立てる**——`congrArg`は`rw`のような
+   ゴール内パターン探索(`kabstract`)を経由せず、与えられた関数と
+   等式から直接新しい項を構成するだけなので、この壁に当たらない。
+   再結合(`Category.assoc`)も`rw`ではなくtermとして使う必要がある
+   (`rw [Category.assoc]`単体でも同じエラーになることがあった)。
+2. **各部品を`transitionElemIso_inv_naturality`内部の`have`として
+   書くと、それだけで`whnf`のheartbeat上限(400万・壁時計400秒でも
+   不足)に達する**——`eqToIso_homOfLE_comm`等の適用結果を先に独立した
+   `theorem`(`transitionElemIso_step1`〜`step4`)として証明し切って
+   から、本体の`calc`では名前を参照するだけにすることで初めて軽くなった
+   (閉じた項を`theorem`として確定させると、以降の`whnf`がそれを
+   不透明な定数として扱えるため)。さらに`step4`と`homOfLE_ι`を別々の
+   `calc`段にすると、その段だけが再びheartbeat上限に達したため、
+   `step45`として1つに合体する必要もあった。
+
+**`transitionElemIso_inv_naturality`(t_facの核心)が完成した**:
+`transitionElemIso f₁ (g·h) e`の`.inv`は、両側の基本開集合の包含
+(`Z.basicOpen(t_{f₁(gh)})≤Z.basicOpen(t_{f₁g})`・
+`X.basicOpen(f₁(gh))≤X.basicOpen(f₁g)`)を挟んで
+`transitionElemIso f₁ g e`の`.inv`へ橋渡しできる——`transitionElemIso
+f₁ (g·h) e`を`X.basicOpen(f₁g)`へ制限したものが`transitionElemIso f₁ g
+e`と一致するという自然性。`transitionElem_restrict_mul_le`(制限元が
+積の分解と両立する開集合の包含)・`transitionElemIso_step1`〜`step45`
+(部品)とあわせ、すべてsorry無しで完成・コミット(`c4172c85`)。
+
+これで`t_fac`(`gdT' i j k ≫ pullback.snd = pullback.fst ≫ gdT i j`)を
+組み立てるのに必要な数学的・技術的部品が**すべて揃った**。残るのは、
+`gdT'`(`gdVpullbackIso`+`transitionElemIso`で構成済み)と`gdT`
+(元々の`isoImage`4段の塔で構成済み、`transitionElemIso`経由の形と
+`Iso.trans`の結合律の違いを吸収すれば同じもの)を、この自然性を使って
+実際に橋渡しする配線のみ——新しい数学的内容もLeanの配管上の未知の
+壁も、もう残っていない。集計は10/24で変わらず(§4は0/2のまま)。
+
+コミット: `c4172c85`。`tools/lean-idioms.md` #31にこの発見を記録。

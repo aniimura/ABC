@@ -3715,3 +3715,58 @@ instance 検索を一切要求しない。呼び出し側は`.1`を`letI`で登�
 `.2`がその instance に対する証明として使える。
 実例: `falt1_hsep_bundled`(`Found/Falt1/KaehlerAux.lean`、
 コミット`cd7a95ec`)。
+
+## 31. `unfold`+`simp`で作った`Scheme.basicOpen`絡みの巨大な項に対して
+`rw`/`simp`/`conv`はすべて詰まる——`congrArg`+`(Category.assoc _ _
+_).symm`のterm-modeで組み立て、部品は独立した`theorem`に先出しする
+(2026-09-04)
+
+**症状**: `Scheme`の`isoImage`/`eqToIso`/`basicOpen`を何層も重ねた
+ゴール(`unfold <定義>`+`simp only […]`で作る)に対して、さらに別の
+事実(`have step := ...`で正しく型検査できる、ゴールと完全に一致する
+主張)を`rw [step]`・`simp only […, step]`・`conv => rw […]`のいずれで
+差し込もうとしても、判で押したように次のエラーになる:
+```
+Application type mismatch: The argument
+  X.presheaf
+has type
+  TopCat.Presheaf CommRingCat ↑X.toPresheafedSpace
+but is expected to have type
+  (TopologicalSpace.Opens ↥X)ᵒᵖ ⥤ CommRingCat
+in the application
+  X.presheaf.obj
+Note: The target expression is not type-correct under the `instances`
+transparency level, ...
+```
+`set_option backward.isDefEq.respectTransparency false`を足しても直ら
+ない。`Scheme.basicOpen`自体がmathlib側の定義で内部的に`X.presheaf`
+(`TopCat.Presheaf`、`instances`透明度では`Xᵒᵖ⥤C`へ展開されない)に
+依存しているため、`rw`/`simp`/`conv`共通の congruence motive構築
+(`kabstract`)がこの型を跨げないのが原因と見られる——挿入する事実自体は
+`have`単体なら常に正しく型検査できるのに、**ゴールへの適用だけ**が
+一貫して失敗する。
+
+**直し方(唯一有効だった方法)**: `rw`を一切使わず、`calc`+`congrArg`+
+`Category.assoc`を**termとして**(`by rw […]`ではなく`:=`で直接)
+組み立てる。`congrArg f step`は`step : a = b`と関数`f`から`f a = f b`
+を直接構成するだけで、`rw`のような「ゴールの中からパターンを探す」
+motive探索(`kabstract`)を経由しないため、この壁に当たらない。
+再結合(`(f≫g)≫h = f≫(g≫h)`)が必要な箇所も`rw [Category.assoc,…]`
+ではなく`(Category.assoc _ _ _).symm`(または`Category.assoc _ _ _`)
+を直接`calc`の等式の証明項として使う——`rw [Category.assoc]`単体でも
+同じ「`instances`透明度で型が合わない」エラーになることがある。
+
+**もう1つの罠**: 上の`calc`を1つの巨大な`theorem`の中で、必要な事実
+(`eqToIso_homOfLE_comm`の適用結果等)を`have step1 := …; have step2 :=
+…; …`と内部で構築しながら書くと、それだけで`whnf`のheartbeat上限
+(`set_option maxHeartbeats 4000000`でも、400秒の壁時計タイムアウトでも
+不足)に達することがある。**各部品を先に独立した`theorem`として証明し
+切ってから、本体の`calc`ではその名前を参照するだけにする**と、劇的に
+軽くなる(数十秒→1秒未満の部品もある)——閉じた項を`theorem`として
+確定させると、以降の`whnf`はそれを不透明な定数として扱えるため、
+`have`で毎回インライン展開されるのと違って計算が繰り返されない。
+
+実例: `lean/ABC3/Found/CorrHyp/ExtLimit.lean`の`transitionElemIso_
+inv_naturality`(および部品`transitionElemIso_step1`〜`step45`・
+`transitionElem_restrict_mul_le`)、コミット`c4172c85`。3ターン
+連続でこの壁に当たり続けた末にたどり着いた対処法。
