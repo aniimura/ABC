@@ -630,3 +630,37 @@ Lubin-Tate理論の`|Λ_n|=q^n`(真の集合として)そのものが完全に�
 `FiniteDimensional.complete`的な定理があるはず)で`K.carrier⟮x⟯`へ
 `CompleteSpace`を移し、そこで初めて`PowerSeries.aeval`による`[a]_f`
 の評価が可能になる。
+
+**続報(2026-09-04・続き、★★★★★★★★★★`K.closure`にもノルム延長・
+`K.carrier⟮x⟯`は完備)**: 予告した「有限次拡大は完備」の一般論は
+mathlibに`FiniteDimensional.complete`としてそのまま存在した
+(`Topology/Algebra/Module/FiniteDimension.lean:511`)。これを使うには
+`K.closure`自身にノルム体構造が要る——`LocalFieldNorm.lean`が
+`ℚ_[p]→K.carrier`に施した手順(`spectralNorm.normedField`)を、今度は
+`K.carrier→K.closure`に**そのまま繰り返せる**ことに気づいた。
+
+★鍵となる発見: `spectralNorm.normedField (K)(L)[NontriviallyNormedField K]
+[Algebra K L][Algebra.IsAlgebraic K L][IsUltrametricDist K][CompleteSpace K]`
+は**有限次拡大を要求しない**——基点`K`が完備でありさえすれば任意の
+代数拡大`L`に働く。`K.closure`は`K.carrier`上一般に無限次(代数閉包
+なので)だが、それでも`NormedField K.closure`が直接作れた。
+
+`LocalFieldNorm.lean`に追加(commit`652b4c61`):
+- `closureNormedField`・`closureNormedAlgebra`・`closureIsUltrametric`
+
+`LubinTateDistinguishedSeparable.lean`に追加(同commit):
+- `completeSpace_adjoin_of_mem_iteratedLubinTateTorsionPoints`:
+  `x∈Λ_n`ならば`K.carrier⟮x⟯`は**完備**。
+  `finiteDimensional_adjoin_of_mem_iteratedLubinTateTorsionPoints`・
+  `K.carrier`自身の完備性(既存)・上記`closureNormedField`等を
+  `FiniteDimensional.complete`に渡すだけ。
+
+★これで`PowerSeries.aeval`による`[a]_f`の`x`での評価が可能になる
+舞台が整った——`K.closure`自体は完備でないが(`ℚ_p`の代数閉包が
+完備でないのと同様)、`Λ_n`の各点`x`を添加した有限次拡大
+`K.carrier⟮x⟯`の中でなら評価できる。次の一歩は実際に`[a]_f`(または
+より一般に`f`)を`x`で評価し、`𝒪_K`加群構造を`Λ_n`に与えること
+(`PowerSeries.HasEval`=`IsTopologicallyNilpotent`の要件は
+`spectralNorm_lt_one_of_mem_iteratedLubinTateTorsionPoints`で既に
+満たされている——`K.carrier⟮x⟯`上の`spectralNorm`と`K.closure`上の
+`spectralNorm`が両立することの確認は必要かもしれない)。
