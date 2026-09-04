@@ -3415,3 +3415,32 @@ naturality の再証明が不要になる(`rfl` で確認できることが多�
 (独立補題)→ `extDiagramToSpecK`(独立 `NatTrans`、これは閉じた)。
 ただし `Cone` の**頂点側**(`π` の定義域が `(Functor.const J).obj pt`
 自体)をこの経路で完全に避けるのはまだ未解決——次の一手として残っている。
+
+## 23. `abbrev` で定義された `Algebra`/`Instance` は typeclass 探索が
+自力で見つけない——`letI := TheAbbrev args` で明示的に呼ぶ(2026-09-04)
+
+`differentIdeal_ne_bot`(mathlib)の暗黙引数 `[Algebra.IsSeparable
+(FractionRing A)(FractionRing B)]` を満たそうとして、`Algebra
+(FractionRing V)(FractionRing W)` を自分で `RingHom.toAlgebra` で
+手作りしたところ、`exact differentIdeal_ne_bot` が
+`Algebra.IsSeparable ...` を「見つからない」で落ちた——`haveI hsep :
+Algebra.IsSeparable (FractionRing V)(FractionRing W) := by ...` を
+直前に置いているのに、である。`@differentIdeal_ne_bot` で引数を
+全部埋めて調べると、mathlib 側が要求する `Algebra (FractionRing V)
+(FractionRing W)` は自作の instance ではなく
+**`FractionRing.liftAlgebra V (FractionRing W)`**(mathlib の
+`abbrev`、`Algebra V K → Algebra (FractionRing R) K` を localization
+の普遍性から作る既製品)だった——**同じ型でも別の項なので `hsep` が
+不一致になり instance search が失敗する**(diamond)。`abbrev` は
+`instance` と違い typeclass 探索が自動では見つけない(reducible では
+あるが登録されない)ため、**`letI := FractionRing.liftAlgebra ...` で
+明示的に呼んで先に `letI`/`haveI` チェーンに乗せる**必要がある。
+
+**How to apply**: mathlib の補題が要求する instance が
+`Unknown constant`ではなく「見つからない/型が合わない」で落ちるときは、
+まず `@lemma_name` に全引数を渡して**mathlib がどの instance を
+選んでいるか**を確認する(エラーメッセージの型注釈に出る)。それが
+`abbrev`(`#print` で `abbrev` と出る)なら、自分で `RingHom.toAlgebra`
+等を手作りするのではなく**その `abbrev` を `letI` で直接呼ぶ**。
+実例: `lean/ABC3/Found/Falt1/Lemma11.lean` の
+`falt1_differentIdeal_ne_bot`。
