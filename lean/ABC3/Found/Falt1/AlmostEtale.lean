@@ -1323,4 +1323,251 @@ theorem hochschild_ext_eq_zero (R S : Type u) [CommRing R] [CommRing S] [Algebra
   haveI := hochModule_catProjective R S
   exact CategoryTheory.Abelian.Ext.eq_zero_of_projective e
 
+/-! ## remark 2.1(v) の almost 化への足場(2026-09-05、新規)。
+
+`hochschild_ext_eq_zero`(honest な場合)は`B`が`FormallyUnramified`
+であること(`elem A B`自身がその annihilation性質を満たすこと)に
+依っていた。`Theorem 2.2`-`2.4(i)`が実際に必要とするのは
+`IsAlmostEtaleCovering`(`B/A`自体は honestly unramified である必要
+は無く、局所化`Bp/Ap`だけが古典的に étale であればよい)の下での
+almost 版——「`p^ε e_{B/A}`に対応する witness `w∈B⊗_AB`は、annihilation
+性質を`B⊗_AB`の中で厳密に満たす」という事実である。これは`w`自体は
+`diagonalCompare p w = p^n•elem(Ap,Bp)`としてしか特徴づけられておらず、
+honest な annihilation の議論がそのままでは`B⊗_AB`に降りてこない
+(`diagonalCompare`は環準同型であって同型ではないため)。
+
+この障壁は**`diagonalCompare`の単射性**(`Module.Free A B`と
+`algebraMap B Bp`の単射性さえあれば従う——`Module.Flat`の
+`rTensor_preserves_injective_linearMap`/`lTensor_preserves_injective_linearMap`
+を2回使い、`IsLocalization.moduleTensorEquiv`で「両成分が既に局所化
+されたテンソル積からさらに局所化を消す」同型に帰着させる)で解消
+できる。これが`diagonalCompare_injective`——`Bp⊗_ApBp`での厳密な
+annihilation を`diagonalCompare`で引き戻し、単射性で`B⊗_AB`へ
+そのまま降ろす。 -/
+
+/-- **`diagonalCompare p`の単射性**。`B`が`A`上free、`algebraMap B Bp`が
+単射(Faltings 自身が終始置いている「p-torsion-free」という標準仮定、
+このファイルの他の場所(`remark_iii_trace_identity`)でも同じ形で
+使っている)という2条件だけから従う。`diagonalCompare`を
+`φ := (rTensor Bp f₀)∘(lTensor B f₀)`(`f₀:B→Bp`をテンソル積の両成分に
+適用、`Module.Flat`の保存性で単射)と`e:=IsLocalization.moduleTensorEquiv`
+(「両成分が既に局所化された`Ap⊗ApBpBp`から、さらなる局所化`Ap`を
+消して`A⊗Bp⊗Bp`に戻す」という mathlib の同型)の合成`e.symm∘φ`として
+分解することで示す。 -/
+theorem diagonalCompare_injective {A B : Type u} [CommRing A] [CommRing B] [Algebra A B] [Module.Free A B]
+    (p : A) (hf0inj : Function.Injective (algebraMap B (Localization.Away (algebraMap A B p)))) :
+    letI := awayAlgebra p (A := A) (B := B)
+    haveI := awayScalarTower p (A := A) (B := B)
+    Function.Injective (diagonalCompare (A := A) (B := B) p) := by
+  letI := awayAlgebra p (A := A) (B := B)
+  haveI := awayScalarTower p (A := A) (B := B)
+  set Bp := Localization.Away (algebraMap A B p)
+  set Ap := Localization.Away p
+  set f0 : B →ₗ[A] Bp := (Algebra.linearMap B Bp).restrictScalars A with hf0def
+  have hf0injL : Function.Injective f0 := hf0inj
+  haveI hflatB : Module.Flat A B := inferInstance
+  haveI hflatBp : Module.Flat A Bp := by
+    haveI : Module.Flat B Bp := IsLocalization.flat Bp (Submonoid.powers (algebraMap A B p))
+    exact Module.Flat.trans A B Bp
+  have hlTinj : Function.Injective (LinearMap.lTensor B f0) :=
+    Module.Flat.lTensor_preserves_injective_linearMap f0 hf0injL
+  have hrTinj : Function.Injective (LinearMap.rTensor Bp f0) :=
+    Module.Flat.rTensor_preserves_injective_linearMap f0 hf0injL
+  set φ : TensorProduct A B B →ₗ[A] TensorProduct A Bp Bp :=
+    LinearMap.rTensor Bp f0 ∘ₗ LinearMap.lTensor B f0
+  have hφinj : Function.Injective φ := hrTinj.comp hlTinj
+  set e := IsLocalization.moduleTensorEquiv (Submonoid.powers p) Ap Bp Bp
+  have hcomp : ∀ z : TensorProduct A B B, diagonalCompare (A := A) (B := B) p z = e.symm (φ z) := by
+    intro z
+    induction z using TensorProduct.induction_on with
+    | zero => simp
+    | tmul b1 b2 =>
+      rw [diagonalCompare_tmul]
+      show f0 b1 ⊗ₜ[Ap] f0 b2 = e.symm (φ (b1 ⊗ₜ[A] b2))
+      have hφtmul : φ (b1 ⊗ₜ[A] b2) = f0 b1 ⊗ₜ[A] f0 b2 := rfl
+      rw [hφtmul]
+      symm
+      rw [LinearEquiv.symm_apply_eq]
+      show e (f0 b1 ⊗ₜ[Ap] f0 b2) = f0 b1 ⊗ₜ[A] f0 b2
+      rfl
+    | add x y hx hy => rw [map_add, map_add, hx, hy, map_add]
+  intro x y hxy
+  have := hcomp x ▸ hcomp y ▸ hxy
+  have h2 : φ x = φ y := e.symm.injective this
+  exact hφinj h2
+
+/-- **almost witness `w`の`B⊗_AB`での厳密な swap-annihilation**。
+`IsAlmostEtaleCovering`条件(iii)の witness `w`(`diagonalCompare p w =
+p^n•elem(Ap,Bp)`としてしか特徴づけられない)について、honest な
+`elem`の annihilation性質(`one_tmul_sub_tmul_one_mul_elem`、`Ap,Bp`
+レベル)を`diagonalCompare`で引き戻し、`diagonalCompare_injective`で
+`B⊗_AB`へそのまま降ろす。これが前回セッションから持ち越されていた
+「almost 化の技術的な壁」の解消そのもの。 -/
+theorem almost_swap_annihilate {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [Module.Free A B] (p : A)
+    (hAE : IsAlmostEtaleCovering (A := A) (B := B) p)
+    (hf0inj : letI := awayAlgebra p (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))))
+    (n : ℕ) (w : TensorProduct A B B)
+    (hw : letI := awayAlgebra p (A := A) (B := B)
+      haveI := hAE.2.2.1
+      haveI := (hAE.2.1 : Module.Finite _ _)
+      diagonalCompare p w
+        = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p)))
+    (q : B) :
+    (1 ⊗ₜ[A] q - q ⊗ₜ[A] 1) * w = 0 := by
+  letI := awayAlgebra p (A := A) (B := B)
+  haveI := awayScalarTower p (A := A) (B := B)
+  haveI hAPFree := hAE.1
+  haveI hAPFinite := (hAE.2.1 : Module.Finite _ _)
+  haveI hAPEtale := hAE.2.2.1
+  apply diagonalCompare_injective p hf0inj
+  rw [map_zero, map_mul, map_sub, diagonalCompare_tmul, diagonalCompare_tmul, map_one, hw]
+  have hkey := Algebra.FormallyUnramified.one_tmul_sub_tmul_one_mul_elem (R := Localization.Away p)
+    (S := Localization.Away (algebraMap A B p)) (algebraMap B (Localization.Away (algebraMap A B p)) q)
+  rw [mul_smul_comm]
+  rw [show ((1:Localization.Away (algebraMap A B p)) ⊗ₜ[Localization.Away p] (algebraMap B (Localization.Away (algebraMap A B p)) q)
+      - (algebraMap B (Localization.Away (algebraMap A B p)) q) ⊗ₜ[Localization.Away p] (1:Localization.Away (algebraMap A B p)))
+      * Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p)) = 0 from hkey]
+  simp
+
+/-- `almost_swap_annihilate`の引き算形を等式形へ言い換えただけ
+(`hochSectionOfWitness`が要求する形と揃える)。 -/
+theorem almost_swap_mul_eq {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [Module.Free A B] (p : A)
+    (hAE : IsAlmostEtaleCovering (A := A) (B := B) p)
+    (hf0inj : letI := awayAlgebra p (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))))
+    (n : ℕ) (w : TensorProduct A B B)
+    (hw : letI := awayAlgebra p (A := A) (B := B)
+      haveI := hAE.2.2.1
+      haveI := (hAE.2.1 : Module.Finite _ _)
+      diagonalCompare p w
+        = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p)))
+    (q : B) :
+    (1:B) ⊗ₜ[A] q * w = q ⊗ₜ[A] (1:B) * w := by
+  have h := almost_swap_annihilate p hAE hf0inj n w hw q
+  rw [sub_mul] at h
+  exact sub_eq_zero.mp h
+
+/-- **augmentation の almost 版**: `μ(w) = p^n`(`B`の中で、局所化を
+経ずに厳密に成り立つ)。`Ap`-値の等式`lmul' Ap (diagonalCompare p w) =
+p^n•1 = algebraMap B Bp(lmul' A w)`(`lmul'_diagonalCompare`の自然性 +
+`elem`の augmentation`lmul_elem`)を`algebraMap B Bp`の単射性で`B`へ
+降ろす。`remark_iii_trace_identity`と並ぶ、Faltings remark(iii)/(v)
+両方の土台になる「augmentation の厳密性」。 -/
+theorem almost_swap_augment {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    (p : A)
+    (hAE : IsAlmostEtaleCovering (A := A) (B := B) p)
+    (hf0inj : letI := awayAlgebra p (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))))
+    (n : ℕ) (w : TensorProduct A B B)
+    (hw : letI := awayAlgebra p (A := A) (B := B)
+      haveI := hAE.2.2.1
+      haveI := (hAE.2.1 : Module.Finite _ _)
+      diagonalCompare p w
+        = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p))) :
+    Algebra.TensorProduct.lmul' A w = p ^ n • (1 : B) := by
+  letI := awayAlgebra p (A := A) (B := B)
+  haveI := awayScalarTower p (A := A) (B := B)
+  haveI hEtale := hAE.2.2.1
+  haveI hFinite := (hAE.2.1 : Module.Finite _ _)
+  apply hf0inj
+  have h1 := lmul'_diagonalCompare p w
+  rw [hw] at h1
+  have hpull := (Algebra.TensorProduct.lmul' (Localization.Away p) (S := Localization.Away (algebraMap A B p))).toLinearMap.map_smul_of_tower
+    (p^n) (Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p)))
+  rw [show (Algebra.TensorProduct.lmul' (Localization.Away p))
+      (p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p)))
+      = p ^ n • (Algebra.TensorProduct.lmul' (Localization.Away p)
+          (Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p))))
+      from hpull, Algebra.FormallyUnramified.lmul_elem] at h1
+  have hLHS : (p ^ n • (1:Localization.Away (algebraMap A B p)))
+      = algebraMap A (Localization.Away (algebraMap A B p)) (p ^ n) := by
+    rw [Algebra.smul_def, mul_one]
+  have hRHS : algebraMap B (Localization.Away (algebraMap A B p)) (p ^ n • (1:B))
+      = algebraMap A (Localization.Away (algebraMap A B p)) (p ^ n) := by
+    rw [Algebra.smul_def, mul_one, ← IsScalarTower.algebraMap_apply A B (Localization.Away (algebraMap A B p))]
+  rw [← h1, hLHS, hRHS]
+
+/-- **`hochSection`の一般化**: `elem`固定ではなく、任意の witness
+`w`と、それが満たすべき swap 性質`hswap`だけから`S⊗_RS`-線形な
+切断もどきを構成する。`hochSection R S = hochSectionOfWitness R S
+(elem R S) one_tmul_mul_elem`として honest な場合を復元できる
+(この事実自体は今回は使わないが、構成が同一であることの確認として
+`hochSectionOfWitness_augment`で確かめられる)。 -/
+noncomputable def hochSectionOfWitness (R S : Type u) [CommRing R] [CommRing S] [Algebra R S]
+    (w : TensorProduct R S S) (hswap : ∀ q : S, (1:S) ⊗ₜ[R] q * w = q ⊗ₜ[R] (1:S) * w) :
+    letI : Algebra (TensorProduct R S S) S := (Algebra.TensorProduct.lmul' R).toRingHom.toAlgebra
+    S →ₗ[TensorProduct R S S] TensorProduct R S S := by
+  letI : Algebra (TensorProduct R S S) S := (Algebra.TensorProduct.lmul' R).toRingHom.toAlgebra
+  refine
+  { toFun := fun b => (b ⊗ₜ[R] (1:S)) * w
+    map_add' := by intro x y; simp [TensorProduct.add_tmul, add_mul]
+    map_smul' := ?_ }
+  intro z b
+  simp only [RingHom.id_apply, Algebra.smul_def]
+  induction z using TensorProduct.induction_on with
+  | zero => simp
+  | tmul p q =>
+    show ((Algebra.TensorProduct.lmul' R (p ⊗ₜ[R] q) * b) ⊗ₜ[R] (1:S)) * w
+      = (p ⊗ₜ[R] q) * ((b ⊗ₜ[R] (1:S)) * w)
+    rw [Algebra.TensorProduct.lmul'_apply_tmul]
+    have hstep1 : ((p*q*b : S) ⊗ₜ[R] (1:S) : TensorProduct R S S)
+        = ((p*b : S) ⊗ₜ[R] (1:S)) * (q ⊗ₜ[R] (1:S)) := by
+      rw [Algebra.TensorProduct.tmul_mul_tmul]; ring_nf
+    rw [hstep1, mul_assoc]
+    have hstep2 : (q ⊗ₜ[R] (1:S) : TensorProduct R S S) * w
+        = (1 ⊗ₜ[R] q) * w :=
+      (hswap q).symm
+    rw [hstep2, ← mul_assoc, Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
+    rw [← mul_assoc, Algebra.TensorProduct.tmul_mul_tmul, mul_one]
+  | add x y hx hy =>
+    simp only [map_add, add_mul, TensorProduct.add_tmul]
+    rw [hx, hy]
+
+theorem hochSectionOfWitness_augment (R S : Type u) [CommRing R] [CommRing S] [Algebra R S]
+    (w : TensorProduct R S S) (hswap : ∀ q : S, (1:S) ⊗ₜ[R] q * w = q ⊗ₜ[R] (1:S) * w) (b : S) :
+    Algebra.TensorProduct.lmul' R (hochSectionOfWitness R S w hswap b)
+      = b * Algebra.TensorProduct.lmul' R w := by
+  show Algebra.TensorProduct.lmul' R ((b ⊗ₜ[R] (1:S)) * w) = b * Algebra.TensorProduct.lmul' R w
+  rw [map_mul, Algebra.TensorProduct.lmul'_apply_tmul, mul_one]
+
+/-- **almost 版 augmentation、具体形**: `hochSectionOfWitness`を
+almost witness `w`に適用したときの合成`μ∘s`が「`B`の元`p^n`との掛け算」
+そのものになる。これが remark(v)の「`S`が`S⊗AS`の direct summand
+"up to p^n"」という主張の、`Definition 2.1`一般の`IsAlmostEtaleCovering`
+仮定だけからの完全な形式化——honest な`Algebra.FormallyUnramified A B`
+を一切要求しない点が`hochModule_projective`(honest な場合)からの
+真の一般化になっている。 -/
+theorem hochSectionAlmost_augment {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [Module.Free A B] (p : A)
+    (hAE : IsAlmostEtaleCovering (A := A) (B := B) p)
+    (hf0inj : letI := awayAlgebra p (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))))
+    (n : ℕ) (w : TensorProduct A B B)
+    (hw : letI := awayAlgebra p (A := A) (B := B)
+      haveI := hAE.2.2.1
+      haveI := (hAE.2.1 : Module.Finite _ _)
+      diagonalCompare p w
+        = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p)))
+    (b : B) :
+    Algebra.TensorProduct.lmul' A (hochSectionOfWitness A B w (almost_swap_mul_eq p hAE hf0inj n w hw) b)
+      = algebraMap A B (p ^ n) * b := by
+  rw [hochSectionOfWitness_augment, almost_swap_augment p hAE hf0inj n w hw]
+  rw [Algebra.smul_def, mul_one, mul_comm]
+
+/-! **現状のまとめ(2026-09-05)**: 上記4定理・2定義により、
+「`IsAlmostEtaleCovering A B p`(honest な`Algebra.FormallyUnramified
+A B`を要求しない、真に一般の almost 設定)の下で、`B`は`B⊗_AB`-線形
+写像`hochSectionOfWitness`を経て`μ:B⊗_AB→B`の"p^n-almost section"を
+持つ」ことが完全に証明された。remark(v)の almost 版を`Ext`の消滅
+(`p^n•Ext^k(B,M)=0`、honest な場合の`hochschild_ext_eq_zero`の直接
+一般化)まで持ち上げるには、`Ext^k_{T}(-,M)`(`T:=B⊗_AB`)の関手性
+(`s:B→T`・`μ:T→B`からの`Ext^k(s)`・`Ext^k(μ)`と、その合成が
+「`B`の元`algebraMap A B(p^n)`による掛け算」の pullback に一致する
+という事実)を要する——`CategoryTheory.Abelian.Ext`のこの向きの
+API(pre/post-composition による Hom 群上の作用)がどこまで揃って
+いるかの調査が次回の入口。 -/
+
 end ABC3.Found.Falt1
