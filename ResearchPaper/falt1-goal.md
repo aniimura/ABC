@@ -530,6 +530,20 @@ mathlib での正確な組み立て方は未確認)。
     `Valuation.extendToLocalization`(`RingTheory/Valuation/
     ExtendToLocalization.lean`)——`KaehlerAux.lean` の現在の import
     には含まれず、別途 import してから中身を調べる必要がある。
+
+    ★★★2026-09-04、中身を確認し、**`extendToLocalization` はこの
+    用途に使えないと判明した**——名前通り「局所化」への延長専用
+    (`S ≤ v.supp.primeCompl`・`IsLocalization S B` が要る)であり、
+    `B := AdjoinRoot(f)`(`A` の局所化ではなく、次数 `n` の有限拡大)
+    には適用できない。`Valuation.HasExtension` は延長の**存在**では
+    なく**両立性**(`vR` が `vA` の comap と同値)を述べる Prop で、
+    構成自体は別途必要。★「有限次拡大への付値の延長」という、まさに
+    必要な一般論の所在はまだ見つかっていない——次のセッションでは
+    `IsDedekindDomain.HeightOneSpectrum.valuation` 経由(`B` 自身が
+    Dedekind であることを**先に**示してから、その height-one spectrum
+    の付値として `θ` の付値を得る、という順序の入れ替え)を検討する
+    余地があるが、これは「`B` が Dedekind」という結論を仮定して使う
+    ことになり得るため、循環を避ける組み立てが必要。
 4. ★★★★★2026-09-04、**完成した**(`delta_tendsto_zero`、commit
    `a9faa64e`)。長さの漸化不等式(上の逐語引用の通り: `δ_n-δ_{n+1}≥
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
