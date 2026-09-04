@@ -1801,4 +1801,34 @@ noncomputable def principalUnitsQuotientEquiv {p : ℕ} [Fact p.Prime] (K : PAdi
     IsLocalRing.surjective_units_map_of_local_ringHom _ hφ ‹_›
   exact QuotientGroup.quotientKerEquivOfSurjective _ hsurj
 
+/-- **`spectralNorm`は`Gal(K.closure/K.carrier)`の作用で不変**——
+`σ : K.closure ≃ₐ[K.carrier] K.closure`に対し`‖σ x‖=‖x‖`。証明は
+`σ x`が`x`と同じ最小多項式`minpoly K.carrier x`の根であること
+(`Polynomial.aeval_algHom_apply`で`aeval`とσの可換性を得て
+`minpoly.aeval`で消える)を示し、mathlibの
+`spectralNorm.spectralMulAlgNorm_eq_of_mem_roots`(同じ最小多項式の
+根はすべて等しい`spectralMulAlgNorm`を持つ)を`E=L=K.closure`の
+退化した場合に適用するだけ——`algebraMap K.closure K.closure`は
+恒等写像なので`spectralMulAlgNorm_def`で展開した後は`simp`で閉じる。
+今後のGalois同変性(`σ(a·x)=a·σ(x)`)の前提条件として用意した。 -/
+theorem norm_algEquiv_eq {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    (σ : K.closure ≃ₐ[K.carrier] K.closure) (x : K.closure) :
+    spectralNorm K.carrier K.closure (σ x) = spectralNorm K.carrier K.closure x := by
+  have hroot : Polynomial.aeval (σ x) (minpoly K.carrier x) = 0 := by
+    have h := Polynomial.aeval_algHom_apply σ.toAlgHom x (minpoly K.carrier x)
+    rw [minpoly.aeval, map_zero] at h
+    exact h
+  have hmem : σ x ∈ (Polynomial.mapAlg K.carrier K.closure (minpoly K.carrier x)).roots := by
+    rw [Polynomial.mem_roots']
+    refine ⟨?_, ?_⟩
+    · rw [Ne, Polynomial.mapAlg_eq_map,
+        Polynomial.map_eq_zero_iff (algebraMap K.carrier K.closure).injective]
+      exact minpoly.ne_zero (IsAlgebraic.isIntegral (Algebra.IsAlgebraic.isAlgebraic x))
+    · show Polynomial.IsRoot _ (σ x)
+      rw [Polynomial.mapAlg_eq_map, Polynomial.IsRoot, Polynomial.eval_map, ← Polynomial.aeval_def]
+      exact hroot
+  have hkey := spectralNorm.spectralMulAlgNorm_eq_of_mem_roots K.carrier K.closure x hmem
+  rw [spectralMulAlgNorm_def, spectralMulAlgNorm_def] at hkey
+  simpa using hkey
+
 end ABC3.Found.PGC
