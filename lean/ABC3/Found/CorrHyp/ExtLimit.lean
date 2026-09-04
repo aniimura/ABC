@@ -1175,4 +1175,55 @@ noncomputable def gdT (i j : J) : gdV f Z e (i, j) ≅ gdV f Z e (j, i) := by
 `OpenCover`の`gluedCover`との比較で示す——`Lemma 4.1`の`c'.C`の実体。
 `corrhyp-goal.md`に記録。 -/
 
+/-- **`t_id`の完成**——`i=j`のとき`gdT`は自明な同型(恒等射)になる。
+`exists_transitionIso (f i)(f i)(e i)`の`.choose_spec.some`が2回とも
+**同じ項**なので、`e.symm.trans e = 𝟙`という一般論(`Iso.symm_self_id`)
+に帰着する。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem gdT_id {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U)) (Z : J → Scheme)
+    (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i) (i : J) :
+    gdT f Z e i i = Iso.refl _ := by
+  unfold gdT
+  simp only [show (X.isoOfEq (by rw [mul_comm] :
+    X.basicOpen (f i * f i) = X.basicOpen (f i * f i))) = Iso.refl _ from by simp]
+  exact Iso.symm_self_id _
+
+/-- `gdF`は常にmono(基本開集合の標準的な開埋め込み`.ι`の一般的性質)——
+GlueDataの`f_mono`フィールド。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem gdF_mono {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U)) (Z : J → Scheme)
+    (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i) (i j : J) : Mono (gdF f Z e i j) :=
+  inferInstanceAs (Mono
+    (((Z i).basicOpen (exists_transitionIso (f i) (f j) (e i)).choose).ι))
+
+/-- `gdF`は常に開埋め込み——GlueDataの`f_open`フィールド。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem gdF_isOpenImmersion {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
+    (Z : J → Scheme) (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i) (i j : J) :
+    IsOpenImmersion (gdF f Z e i j) :=
+  inferInstanceAs (IsOpenImmersion
+    (((Z i).basicOpen (exists_transitionIso (f i) (f j) (e i)).choose).ι))
+
+/-- `gdF i j`と`gdF i k`はpullbackを持つ(開埋め込みの一般的性質)——
+GlueDataの`f_hasPullback`フィールド。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem gdF_hasPullback {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U)) (Z : J → Scheme)
+    (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i) (i j k : J) :
+    HasPullback (gdF f Z e i j) (gdF f Z e i k) := by
+  unfold gdF; infer_instance
+
+/- ★★次の一手(未着手): `f_id`(`IsIso (gdF i i)`、対角成分が同型で
+あること)——`gdV(i,i) = ⊤`(つまり選択された座標`s`が単元であること)を
+示す必要があるが、`exists_transitionIso`の`.choose`はexistentialの
+証明項の中身を直接は見せない(`Classical.choice`)ため、`i=j`の場合に
+限定して「選ばれる`s`が単元である」ことまで主張する強化版の補題
+(`exists_transitionIso`の証明を辿れば`s := e.inv.app ⊤ (...)`という
+具体形が分かり、`RingedSpace.isUnit_res_basicOpen`(基本開集合の定義元は
+その基本開集合上で単元)+単元性がring同型で保たれることから示せるはず)
+を別途用意する必要がある。`corrhyp-goal.md`に記録。 -/
+
 end ABC3.Found.CorrHyp
