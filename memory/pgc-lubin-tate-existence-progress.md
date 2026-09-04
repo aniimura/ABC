@@ -1,6 +1,6 @@
 ---
 name: pgc-lubin-tate-existence-progress
-description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——濃度の一致まで確立、Galois 同変性の前提(spectralNorm の σ 不変性)も確立、残るは単射性/全射性(F_f の対数か Newton 法が要る)
+description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——濃度の一致まで確立、(𝒪_K)^× と Gal(K.closure/K.carrier) 双方がψ_nの根に閉じた作用を持つことも確立、残るは単射性/全射性(F_f の対数か Newton 法が要る)とGalois同変性そのもの
 metadata:
   type: project
 ---
@@ -1673,9 +1673,34 @@ K.closure x`)を証明した——`norm_algEquiv_eq`。
 
 このステップ自体は`a·x`(Lubin-Tate作用)に一切触れていない、純粋
 なノルムの話であり、単射性/全射性のどの経路を最終的に選んでも
-共通して要る土台になる。次の一歩は、これを使って`σ`が原始的な
-`ψ_n`の根の集合を保つこと(`spectralNorm`が保たれる⟹
-`spectralNorm_root_iteratedLubinTatePsi`の値が一致する⟹次数の
-一致から根の集合内に留まる、という筋)、そしてゆくゆくは
-`σ(a·x)=a·σ(x)`(Galois同変性)を、同じtruncation-limit手法で
-示すこと。
+共通して要る土台になる。
+
+## 続報(同日、`algEquiv_mem_iteratedLubinTatePsiTorsionPoints_of_mem`、
+`AdjoinIntegers.lean`、commit `fc845a9b`): Galois群が`ψ_n`の根を保つ
+——`spectralNorm`を経由しない、もっと直接的な経路
+
+上記で「`spectralNorm`が保たれる⟹次数の一致から根の集合内に留まる」
+という筋を検討していたが、実際にはもっと初等的な経路で足りると
+気づいた:**`ψ_n`自身が`𝒪[K.carrier]`(したがって`K.carrier`の像)
+に係数を持つ多項式である**ので、`σ:K.closure≃ₐ[K.carrier]
+K.closure`が`K.carrier`を固定するという定義そのものから、
+`x`が`ψ_n`の根なら`σ x`も同じ多項式の根になる——
+`Polynomial.aeval_algHom_apply`(σと`aeval`の可換性)だけで閉じる。
+`algebraMap 𝒪[K.carrier] K.closure`を`K.carrier`経由に分解する
+`IsScalarTower.algebraMap_eq`は、既存の
+`nodup_roots_iteratedLubinTatePsi_map`等と全く同じ手筋の再利用。
+
+これで**`(𝒪_K)^×`と`Gal(K.closure/K.carrier)`の双方が、独立に、
+「原始的な捩れ点全体」(`ψ_n`の根)という同じ有限集合上に閉じた
+作用を持つ**ことが確立された(単数側は`unit_action_mem_
+iteratedLubinTatePsiTorsionPoints`、既出)。`norm_algEquiv_eq`
+(spectralNormのσ不変性)は依然として、`σ(a·x)=a·σ(x)`という
+**Galois同変性そのもの**(2つの作用が可換であること)を示す際に
+truncation-limit手法の中で使う見込みで、無駄にはならない——ただし
+「σがψ_nの根の集合を保つ」という一歩自体は、それを経由せずに
+直接示せた、という発見。
+
+次の一歩:(a)`σ(a·x)=a·σ(x)`(Galois同変性そのもの)を
+truncation-limit手法で示す、(b)あるいは単射性/全射性(3経路の
+いずれか)を先に完成させる——どちらから手をつけても、最終的な
+`Gal(K(Λ_n)/K)≅(𝒪_K/π^n)^×`には両方必要になる見通し。
