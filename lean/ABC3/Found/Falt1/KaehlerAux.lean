@@ -3659,6 +3659,32 @@ theorem falt1_differentIdeal_tower_length_via_hlen_eq
   rw [hlen_eq] at h
   exact h
 
+/-- **`differentIdeal` の菱形公式を「長さ」の言葉に翻訳した版(2026-09-04)**:
+`differentIdeal_tower_diamond`(塔 `Vn→Vn1→Wn1` と `Vn→Wn→Wn1` の2通りで
+`differentIdeal Vn Wn1` を計算すると一致する、`Vn1`・`Wn`側の単項生成元は
+どちらも不要)の両辺に`falt1_length_quotient_mul_of_ne_zero`を適用する
+だけ——**`Wₙ₊₁`の`Vₙ`上の単項生成元を経由せずに**、`Jₙ:=differentIdeal
+Wₙ Wₙ₊₁`(現在の段の非正規性)と`Jₙ₊₁:=differentIdeal Vₙ₁ Wₙ₊₁`(次の段の
+非正規性)を結ぶ**長さの等式**が得られる——Theorem 1.2 の再帰
+(`δₙ→0`)に必要な「段をまたぐ関係式」の候補。`falt1_theorem12_
+differentIdeal_length`が抱えていた「左辺を`Ω¹`の長さに結びつけるには
+`Wₙ₊₁`の`V0`上の単項生成元が要る」という障害を回避する経路。 -/
+theorem falt1_differentIdeal_diamond_length {Vn Vn1 Wn Wn1 : Type*} [CommRing Vn] [CommRing Vn1] [CommRing Wn]
+    [CommRing Wn1] [IsDomain Vn] [IsIntegrallyClosed Vn] [IsDedekindDomain Vn1] [IsDedekindDomain Wn]
+    [IsDedekindDomain Wn1] [IsPrincipalIdealRing Wn1] [Algebra Vn Vn1] [Algebra Vn Wn] [Algebra Vn1 Wn1] [Algebra Wn Wn1]
+    [Algebra Vn Wn1] [IsScalarTower Vn Vn1 Wn1] [IsScalarTower Vn Wn Wn1]
+    [Module.IsTorsionFree Vn Vn1] [Module.IsTorsionFree Vn Wn] [Module.IsTorsionFree Vn Wn1]
+    [Module.IsTorsionFree Vn1 Wn1] [Module.IsTorsionFree Wn Wn1] [Module.Finite Vn Vn1]
+    [Module.Finite Vn Wn] [Module.Finite Vn Wn1] [Module.Finite Vn1 Wn1] [Module.Finite Wn Wn1]
+    (hsep : @Algebra.IsSeparable (FractionRing Vn) (FractionRing Wn1) _ _ (FractionRing.liftAlgebra Vn (FractionRing Wn1)))
+    (hneVn1Wn1 : differentIdeal Vn1 Wn1 ≠ 0) (hneWnWn1 : differentIdeal Wn Wn1 ≠ 0) :
+    Module.length Wn1 (Wn1 ⧸ differentIdeal Vn1 Wn1) + Module.length Wn1 (Wn1 ⧸ Ideal.map (algebraMap Vn1 Wn1) (differentIdeal Vn Vn1)) =
+      Module.length Wn1 (Wn1 ⧸ differentIdeal Wn Wn1) + Module.length Wn1 (Wn1 ⧸ Ideal.map (algebraMap Wn Wn1) (differentIdeal Vn Wn)) := by
+  have hdiamond := ABC3.Found.Falt1.differentIdeal_tower_diamond (Vn := Vn) (Vn1 := Vn1) (Wn := Wn) (Wn1 := Wn1) hsep
+  have h1 := ABC3.Found.Falt1.falt1_length_quotient_mul_of_ne_zero (differentIdeal Vn1 Wn1) (Ideal.map (algebraMap Vn1 Wn1) (differentIdeal Vn Vn1)) hneVn1Wn1
+  have h2 := ABC3.Found.Falt1.falt1_length_quotient_mul_of_ne_zero (differentIdeal Wn Wn1) (Ideal.map (algebraMap Wn Wn1) (differentIdeal Vn Wn)) hneWnWn1
+  rw [← h1, ← h2, hdiamond]
+
 /-!
 ## `Wₙ₊₁` を名前付き `def` で抽象化する(2026-09-04)
 
