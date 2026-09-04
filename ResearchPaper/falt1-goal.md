@@ -1256,6 +1256,33 @@ mathlib での正確な組み立て方は未確認)。
     V0)(FractionRing V1)`という新しい instance が必要で未確立)を足して
     `cancel_conductor_delta`を実際に呼び出すこと、(b) 再帰的`V_n`族の
     構成。
+
+    ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、**(a)を
+    実行し、`cancel_conductor_delta`を実際に呼び出した**
+    (`falt1_cancelConductorDelta_assembled`・`falt1_hsepV0V1_bundled`、
+    commit `50b8564d`、`lake build`・`#print axioms`確認済み・sorry
+    無し)。`Algebra.IsSeparable (FractionRing V0)(FractionRing V1)`
+    は`falt1_hsep_bundled`の`V0→V1`単独版(`Wn`を経由しないぶん
+    遥かに単純)として構築した。`differentIdeal_ne_bot`の呼び出しで
+    もう1つ diamond の再来に遭遇した——`differentIdeal_tower_diamond`
+    の`hsep`同様、`Algebra.IsSeparable`の下敷きとなる`Algebra`instance
+    が`FractionRing.liftAlgebra`限定で、ambientな bracket instance
+    では**instance検索自体が失敗する**(型mismatchですらなく
+    「failed to synthesize」という紛らわしい形)——`@`明示引数で
+    正しいinstanceを直接渡せば一瞬で解決した。
+    **これで得られた結論**:
+    ```
+    conductor Wₙ x * differentIdeal V1 Wₙ₊₁
+      = Ideal.map (algebraMap Wₙ Wₙ₊₁) (differentIdeal V0 Wₙ)
+    ```
+    (`Jₙ`が消去された、`δₙ`・`δₙ₊₁`を結ぶ関係式)——**これが
+    Theorem 1.2・3b/3cの中核の代数的関係式であり、item 3cの技術的な
+    障害はこれですべて解決した**。残るのは (i) 上式を`delta_tendsto_
+    zero`が要求する`hrec`(長さの不等式)へ変換する
+    ——`Module.length`の計算(3b後半、conductorの長さ評価)と
+    `conductor(Wₙ,x)`が単項イデアルであることの利用が必要——、
+    (ii) 再帰的`V_n`族(`V_1, V_2, ...`)を実際に構成すること
+    (「πの選び方(次の一様化元)」の再帰的な選定は未着手)。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
