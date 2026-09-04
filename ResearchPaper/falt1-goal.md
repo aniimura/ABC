@@ -523,6 +523,13 @@ mathlib での正確な組み立て方は未確認)。
     与える」という部品が使える形であるかは未確認——次のセッションの
     最有力候補としてこちらを先に調べる価値がある(`mem_adjoin_of_...`
     経由より見通しが良い可能性)。
+
+    ★★2026-09-04、上の「付値の延長」に使える可能性のある mathlib の
+    部品の**在り処だけ**確認した(中身は未検証):`Valuation.
+    HasExtension`(`RingTheory/Valuation/Extension.lean`)・
+    `Valuation.extendToLocalization`(`RingTheory/Valuation/
+    ExtendToLocalization.lean`)——`KaehlerAux.lean` の現在の import
+    には含まれず、別途 import してから中身を調べる必要がある。
 4. ★★★★★2026-09-04、**完成した**(`delta_tendsto_zero`、commit
    `a9faa64e`)。長さの漸化不等式(上の逐語引用の通り: `δ_n-δ_{n+1}≥
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
