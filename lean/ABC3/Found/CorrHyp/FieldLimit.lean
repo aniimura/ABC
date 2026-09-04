@@ -2864,7 +2864,7 @@ theorem isLocalization_of_ringEquiv_transport (R S P : Type) [CommRing R] [CommR
 (`Submodule.Quotient.instSMul'`)を持っており、環同型越しに移送した
 `Algebra B _`はそれに負ける(`IsScalarTower`の型が
 `Submodule.Quotient.instSMul'`で表示され、`of_algebraMap_eq`が返す
-`Algebra.toSMul`3本組と合わない)。`tools/lean-idioms.md`の`#51`。
+`Algebra.toSMul`3本組と合わない)。`tools/lean-idioms.md`の`#52`。
 
 そこで**最初から係数環`B`上の`AlgEquiv`として作る**。mathlibの部品は
 すべて`AlgEquiv`版が揃っている——`IsLocalization.Away.

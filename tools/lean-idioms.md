@@ -4688,7 +4688,7 @@ field notation(`Ext`を適用してからフィールドを取る)として解�
 実例: `lean/ABC3/Found/Falt1/AlmostEtale.lean`の
 `ext_smul_eq_zero_of_almost_split`・`hochschild_ext_almost_zero`。
 
-## 51. 商環(`... ⧸ I`)に`RingEquiv`越しの`Algebra`構造を載せる作戦は、
+## 52. 商環(`... ⧸ I`)に`RingEquiv`越しの`Algebra`構造を載せる作戦は、
 商環が**既に持っている**`Submodule.Quotient.instSMul'`に負けて破綻する
 ——最初から`AlgEquiv`(`≃ₐ[基底]`)を作るのが正解(2026-09-05)
 

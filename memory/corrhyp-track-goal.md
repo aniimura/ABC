@@ -2093,7 +2093,8 @@ of_algebraMap_eqのAlgebra.toSMul 3本組と合わない→letIでは勝てな�
 根本原因: 商環MvPolynomial ι B'⧸Jは係数環B'に対する自前のSMulを
 持っており、SMul探索でそちらが勝つ。環同型e'越しに移送したAlgebra
 B' Mとは一致しない。つまり「≃+*を作ってからAlgebraを後付け移送」
-という作戦自体が誤り(lean-idioms #51として記録)。
+という作戦自体が誤り(lean-idioms #52として記録——当初#51としたが
+並行セッションと衝突したため改番)。
 
 正しい方針: FieldLimit.lean の localization_away_quotient_
 mvPolynomial_equiv → flat_equiv → flat_equiv_of_map の3本を
@@ -2107,3 +2108,28 @@ ExtLimitの15〜20分ビルドを回すより遥かに速い。
 リポジトリ状態: 通らない定理はgit checkoutで差し戻し済み、
 lake build ABC3は0エラー(6590 jobs)確認。書きかけはscratchpadの
 wip-flat-baseChange.patchに保存。集計は引き続き10/24——§4は0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き14
+方針転換を実行。FieldLimit.leanに≃ₐ[B]版3本を追加(sorry無し、
+lake build ABC3 0エラー6590 jobs確認):
+- localization_away_quotient_mvPolynomial_algEquiv(Away局所化の任意の
+  実現SとMvPolynomial Unit(MvPolynomial n B)商のB-代数同型)
+- localization_away_quotient_mvPolynomial_flat_algEquiv(1段の
+  MvPolynomial(Unit⊕n)B商への平坦化)
+- localization_away_quotient_mvPolynomial_flat_algEquiv_of_eq
+  (イデアルを変数Iqで受けIq = span(range q₁)をsubstする形。呼び出し側の
+   インスタンスがIdeal.map(map φ)I₀の形でもrwと食い違わない)
+
+配管の罠(記録): Ideal.map (mkₐ B I') JのIsTwoSidedは係数環が入れ子の
+MvPolynomialだと自動で見つからない——CommRingを2本先に登録すると通る
+(#40と同型)。抽象的な(R : Type)[CommRing R]では起きないので最小例では
+見逃す種類の罠。
+
+次の一手: ExtLimit.lean側で(1)eを正準なM₀ := Localization.Away(mk I' p₀)
+で実体化(Algebra B' M₀とIsScalarTower B' Q M₀が正準に存在することは
+REPLで確認済み)、(2)flat_algEquiv_of_eqでM₀ ≃ₐ[B'] Fを得る、
+(3)Algebra.TensorProduct.congrでF⊗[B']T ≃ M₀⊗[B']Tへ移して合成。
+
+並行セッションとの衝突2件: (a)FieldLimit.leanへの追加はgit add直後に
+並行セッションのコミット7675ebd0に巻き込まれた(内容は正しく入っている)。
+(b)lean-idiomsの#51が衝突したのでこちらを#52へ改番。

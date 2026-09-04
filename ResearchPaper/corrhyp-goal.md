@@ -4747,7 +4747,8 @@ rename Sum.inr p₀ * MvPolynomial.X (Sum.inl ()) - 1`という式で、`*`
 そちらが勝つ。これは「係数への作用を商へ降ろしたもの」であり、環同型
 `e'`越しに移送した`Algebra B' M`(局所化の構造を経由する別の写像)とは
 一致しない。つまり**`≃+*`を作ってから`Algebra`を後付け移送する作戦
-そのものが筋が悪い**。`tools/lean-idioms.md`の`#51`として記録した。
+そのものが筋が悪い**。`tools/lean-idioms.md`の`#52`として記録した
+(当初`#51`としたが、並行セッションが同番号を使ったため`#52`へ改番)。
 
 **正しい方針(次の一手)**: `FieldLimit.lean`の
 `localization_away_quotient_mvPolynomial_equiv`→`flat_equiv`→
@@ -4767,3 +4768,48 @@ restrictScalars`で落とす。`FieldLimit.lean`側の補題は1本あたり
 が0エラー(6590 jobs)であることを確認済み。書きかけの定理は
 scratchpadに`wip-flat-baseChange.patch`として保存してある。
 集計は引き続き10/24——§4は引き続き0/2。
+
+## 2026-09-05夜さらに続き14: 方針転換を実行——平坦化を`≃ₐ[B]`で
+作り直した3本が完成
+
+続き13で決めた「`≃+*`ではなく`≃ₐ[B]`で作る」方針を実行し、
+`FieldLimit.lean`に3本を追加した(いずれも`sorry`無し、
+`lake build ABC3`0エラー6590 jobs確認済み):
+
+- `localization_away_quotient_mvPolynomial_algEquiv`:
+  `MvPolynomial n B⧸I`の元`p`による`Away`局所化の**任意の実現`S`**
+  (係数環`B`へのスカラー塔付き)が`MvPolynomial Unit(MvPolynomial n B)`
+  の商と`B`-代数同型であること。`≃+*`版と同じ道筋(`mvPolynomial
+  QuotientEquiv`+`quotientEquivQuotientMvPolynomial`、どちらも元から
+  `AlgEquiv`)を`restrictScalars B`で`B`上へ落とし、`Ideal.
+  quotientEquivAlg`で繋いだ。
+- `localization_away_quotient_mvPolynomial_flat_algEquiv`:
+  1段の`MvPolynomial(Unit⊕n)B`商への平坦化の`AlgEquiv`版。
+  `DoubleQuot.quotQuotEquivQuotSupₐ`+`MvPolynomial.sumAlgEquiv`。
+- `localization_away_quotient_mvPolynomial_flat_algEquiv_of_eq`:
+  イデアルを**変数`Iq`として受け取り**`Iq = Ideal.span(Set.range q₁)`
+  を`subst`する形。呼び出し側では`Algebra`・`IsLocalization.Away`・
+  `IsScalarTower`のインスタンスが`Ideal.map(map φ)I₀`という形で
+  付いており、`rw`はゴールしか書き換えないため食い違う——この
+  「等式を1本渡すだけ」の形なら綺麗に合流できる。
+
+**途中で見つけた配管の罠(記録)**: `Ideal.map (Ideal.Quotient.mkₐ B I') J`
+の`IsTwoSided`インスタンスは、係数環が入れ子の`MvPolynomial`だと自動では
+見つからない——`letI : CommRing (MvPolynomial n B)`と
+`letI : CommRing (MvPolynomial Unit (MvPolynomial n B))`を先に登録すると
+通る(`#40`と同型)。抽象的な`(R : Type)[CommRing R]`では何の問題も
+起きないので、最小例で再現しようとすると見逃す種類の罠。
+
+**残る作業(次の一手)**: `ExtLimit.lean`側で、
+(1)`e := exists_descendPieceR_localization_baseChange`を**正準な**
+`M₀ := Localization.Away (mk I' p₀)`で実体化する(`Algebra B' M₀`と
+`IsScalarTower B' Q M₀`が正準に存在することはREPLで確認済み)、
+(2)`flat_algEquiv_of_eq`で`M₀ ≃ₐ[B'] F`(`F`は平坦化した商)を得る、
+(3)`Algebra.TensorProduct.congr`で`F⊗[B']T ≃ₐ[B'] M₀⊗[B']T`へ移し、
+(1)の同型と合成する。これで`Γ(C,piece(D(f*g)))`が1段の`MvPolynomial`
+商のℝ底変換として書ける。集計は引き続き10/24——§4は引き続き0/2。
+
+**並行セッションとの衝突2件(記録)**: (a)`FieldLimit.lean`への今回の
+追加は、`git add`直後に並行セッションのコミット`7675ebd0`に巻き込まれて
+一緒にコミットされた(内容は正しく入っている)。(b)`tools/lean-idioms.md`
+の番号`#51`を並行セッションも同時に使ったため、こちら側を`#52`へ改番した。
