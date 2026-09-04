@@ -1405,3 +1405,11 @@ mathlibに存在することを確認したが、これは`𝒰.I₀`に圏構�
 完全な形式化は、複数セッションにまたがる継続的な取り組みとして扱う
 ——★依然「壁ではなく道」であり、今セッションでその道の**大部分**
 (数学的な核心と土台のほぼ全て)を切り開いた。
+
+作業単位1(比較射の構成)の最初の1ステップ(「重なり `D(f_l)∩D(f_m) =
+D(f_l·f_m)` 上で `Localization.Away f_l` と `Localization.Away f_m` を
+比較する」の代数的な素材)を実測した——mathlibに`IsLocalization.Away.
+awayToAwayLeft`/`awayToAwayRight`(`Localization.Away x →+*
+Localization.Away(x*y)`型の環準同型)が既にあることを確認した。ここから
+実際に使える形(両向きの同型・`P₀_l`/`P₀_m`の生成元との対応づけ)まで
+組み立てるのは次の一手として残す——今回はこの1ステップの実測のみ。
