@@ -1725,6 +1725,55 @@ mathlib での正確な組み立て方は未確認)。
       するか、証明の最初に`obtain`で`Wn1`を取り出してから`show`で
       書き直す、といった設計が必要——次回はここから続ける。
 
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、
+      **上記の設計を実際に成功させ、`differentIdeal`だけで書かれた
+      閉じた式を完成させた**(`falt1_theorem12_differentIdeal_length`、
+      commit `85a2e5fa`、`lake build`完走(224秒)・`#print axioms`確認・
+      sorry無し)。timeoutの根本原因は「`Wn1`(巨大な入れ子式)を
+      シグネチャに`set`なしで複数回ベタ書きすると、`differentIdeal`・
+      `Ideal.map`の型検査のたびにinstance探索をやり直す」ことだった
+      ——これを**名前付き`def`**(`Falt1Wn1 V0 Wn π n`)で解決した:
+      1. `Falt1Wn1`を1回だけ`def`として定義。
+      2. 必要な基本instance(`CommRing`・`Algebra Wn`・`Algebra V0`・
+         `IsScalarTower V0 Wn`)を`inferInstanceAs`で1回だけ登録
+         (`Falt1Wn1`は`noncomputable def`=半簡約なので自動では
+         unfoldされない、これが鍵)。
+      3. 定理のシグネチャで`Falt1Wn1 V0 Wn π n`を(何度書いても)
+         短い適用として型検査——実測で数秒(以前は479秒timeout)。
+      4. 証明の中では通常通り`set Wn1 := integralClosure Wn
+         (AdjoinRoot gK)`で局所展開し、`Falt1Wn1`側のinstance仮定は
+         `‹...›`(assumption)で`Wn1`側へ1回だけ変換。
+      5. 最後は`have hresult : (Wn1で書いた具体的な型) := ...`と
+         明示的に型注釈してから`exact hresult`——`exact`の型推論を
+         `hsep`(Wn1型を確定させる)に**先に**決めさせることで、
+         ゴール(`Falt1Wn1`型)との defeq 判定が(既に確定した局所
+         instanceの再利用だけで済むので)高速になる。`show`(ゴールを
+         生の式に書き換える)を使わない・型注釈付き`have`で先に確定
+         させる、という2点が今回の鍵だった。
+
+      得られた結果(`falt1_cancelConductorDelta_assembled`と同じ
+      導出を`falt1_differentIdeal_tower_length`で結んだだけ):
+      ```
+      length_{Wₙ₊₁}(Wₙ₊₁⧸differentIdeal V0 Wₙ₊₁) =
+        length_{Wₙ₊₁}(Wₙ₊₁⧸differentIdeal Wₙ Wₙ₊₁) +
+        length_{Wₙ₊₁}(Wₙ₊₁⧸Ideal.map(algebraMap Wₙ Wₙ₊₁)(differentIdeal V0 Wₙ))
+      ```
+      **これがTheorem 1.2・3b/3cの中核の代数的関係式の、`differentIdeal`
+      だけで書かれた完全な閉じた形**——`falt1_cancelConductorDelta_
+      assembled`が`True`しか返せなかった制約をついに解消した。
+
+      ★次回の残る作業: 左辺`differentIdeal V0 Wₙ₊₁`を`Ω¹_{Wₙ₊₁/V0}`の
+      長さ(Lemma 1.1、`falt1CokernelLengthEq`経由)と結びつけるには
+      `Wₙ₊₁`の`V0`上の単項生成元(体レベルでも生成する元)が要る——
+      これは以前発見した障害(`falt1_kaehler_length_exact_wn1_kernel`
+      をWnに適用しようとして遭遇したのと同じ種類の障害だが、今回は
+      `Wₙ₊₁`自身についてなので、実は`falt1BaseChangeGeneratorFull`の
+      `x`(`Wₙ`上の生成元)とは別に、`V0`上の生成元を別途探す必要が
+      ある)。あるいは、`Ω¹_{Wₙ₊₁/V0}`を経由せず`differentIdeal V0
+      Wₙ₊₁`という量そのものを直接評価する経路(discriminantの塔、
+      未着手)に切り替える方が近道の可能性もある——次回はどちらが
+      有望か検討することから始める。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
