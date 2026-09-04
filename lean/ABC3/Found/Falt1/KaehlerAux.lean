@@ -1547,6 +1547,64 @@ noncomputable def pushoutKaehlerSplitBase {R C0 : Type*} [CommRing R] [CommRing 
   (TensorProduct.lid C0 Ω[C0⁄R]).symm.trans (LinearEquiv.funUnique (Fin 1) C0 _).symm
 
 /-!
+## `Module.length` の `Pi` 型への加法性(2026-09-04)
+
+`pushoutKaehlerSplitStep` の結論(`LinearEquiv`)を実際に「長さ」の
+言葉に翻訳するには、`Module.length R (∀i,M i) = ∑i,Module.length R
+(M i)`(有限添字の`Pi`型で長さが和で分解する)という一般事実が要る
+——mathlibには`Module.length_prod`(2項の直積のみ)と`Module.length_pi`
+(**定数**族`ι→M`の場合のみ、`ENat.card ι * length M`)はあるが、
+**変動する族**に対する一般の`Pi`版は見当たらなかった。`Fin.consLinearEquiv`
+(`M 0 × (Π i,M(succ i)) ≃ₗ Π i,M i`)による`Fin n`上の帰納法+
+`LinearEquiv.piCongrLeft`(添字の付け替え)で、一般の`Fintype`へ
+証明した。 -/
+
+set_option maxHeartbeats 800000 in
+/-- `Module.length` の `Fin n` 上の `Pi` 型への加法性(帰納法の核)。 -/
+theorem module_length_pi_fin {R : Type*} [Ring R] : ∀ (n : ℕ) (M : Fin n → Type*) [∀ i, AddCommGroup (M i)]
+    [∀ i, Module R (M i)], Module.length R (∀ i, M i) = ∑ i, Module.length R (M i)
+  | 0, M, _, _ => by
+      simp only [Finset.univ_eq_empty, Finset.sum_empty]
+      have : Subsingleton (∀ i : Fin 0, M i) := by
+        constructor; intro a b; funext i; exact absurd i.2 (by omega)
+      exact Module.length_eq_zero
+  | (n+1), M, _, _ => by
+      have e := Fin.consLinearEquiv (R := R) M
+      rw [← LinearEquiv.length_eq e, Module.length_prod, module_length_pi_fin n (fun i => M i.succ)]
+      rw [Fin.sum_univ_succ]
+
+set_option maxHeartbeats 800000 in
+/-- `Module.length` の一般の `Fintype` 添字の `Pi` 型への加法性(`module_
+length_pi_fin` を `Fintype.equivFin` で添字の付け替えをするだけ)。 -/
+theorem module_length_pi {R : Type*} [Ring R] {ι : Type*} [Fintype ι] (M : ι → Type*)
+    [∀ i, AddCommGroup (M i)] [∀ i, Module R (M i)] :
+    Module.length R (∀ i, M i) = ∑ i, Module.length R (M i) := by
+  set e := (Fintype.equivFin ι).symm with he
+  have e2 := LinearEquiv.piCongrLeft R M e
+  rw [← LinearEquiv.length_eq e2]
+  rw [module_length_pi_fin (Fintype.card ι) (fun i' => M (e i'))]
+  rw [← Equiv.sum_comp e (fun i => Module.length R (M i))]
+
+set_option maxHeartbeats 800000 in
+/-- **`pushoutKaehlerSplitStep` の長さ版**: `module_length_pi` と
+`Module.length_prod` を `pushoutKaehlerSplitStep` の `LinearEquiv` に
+適用するだけ——帰納の1段で「前の因子たちの長さの和」に新しい因子`C`の
+長さを加えるという、`hrec`(Theorem 1.2の漸化不等式)へ向けた核心の
+道具。 -/
+theorem pushoutKaehlerSplitStep_length {R B1 C B : Type*} {ι : Type*} [Fintype ι] [DecidableEq ι] (F : ι → Type*)
+    [CommRing R] [CommRing B1] [CommRing C] [CommRing B] [∀ i, CommRing (F i)]
+    [Algebra R B1] [Algebra R C] [Algebra R B] [∀ i, Algebra R (F i)]
+    [Algebra B1 B] [Algebra C B] [IsScalarTower R B1 B] [IsScalarTower R C B] [Algebra.IsPushout R B1 C B]
+    [∀ i, Algebra (F i) B1] [∀ i, IsScalarTower R (F i) B1]
+    [∀ i, Algebra (F i) B] [∀ i, IsScalarTower R (F i) B] [∀ i, IsScalarTower (F i) B1 B]
+    (prev : Ω[B1⁄R] ≃ₗ[B1] (∀ i, TensorProduct (F i) B1 Ω[F i⁄R]))
+    (hinj : Function.Injective (KaehlerDifferential.mapBaseChange R B1 B)) :
+    Module.length B (Ω[B⁄R]) =
+      (∑ i, Module.length B (TensorProduct (F i) B Ω[F i⁄R])) + Module.length B (TensorProduct C B Ω[C⁄R]) := by
+  have e := ABC3.Found.Falt1.pushoutKaehlerSplitStep (R := R) (B1 := B1) (C := C) (B := B) F prev hinj
+  rw [LinearEquiv.length_eq e, Module.length_prod, module_length_pi]
+
+/-!
 ## Theorem 1.2 の4番目のピース: 長さの漸化不等式から `δ_n→0`(2026-09-04、完成)
 
 falt1-goal.md に逐語で記録した証明本文(物理p.5=印字p.258)の最後の一段
