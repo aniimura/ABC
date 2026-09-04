@@ -480,6 +480,29 @@ p進局所体`K:PAdicLocalField p`の付値環`𝒪[K.carrier]`は離散付値�
 そのまま適用できる**ことが検証された——原典[pGC]が前提する対象で
 理論全体が空虚でないと確定した、大きなマイルストーン。
 
+**続報(2026-09-04、★★★★★★★★★★★★大きな節目——Newton polygon論法
+完成、ψ_n・ψ_m(n≠m)は共通根を持たない)**: 前回のspectralNorm発見
+(`Found/PGC/LubinTatePsiNorm.lean`)を押し進め、古典的なLubin-Tate理論
+のNewton polygon論法を完全に確立した。`ψ_n.coeff0`のノルムが`‖π‖`
+(一定)であることと、`K`の代数閉包`K.closure`での`ψ_n`の**任意の**根
+`x`について(既約性から`minpoly K.carrier x=ψ_n`となるので)
+`spectralNorm K.carrier K.closure x = ‖π‖^(1/(q^n-q^{n-1}))`が成り立つ
+ことを示し(`spectralNorm_root_iteratedLubinTatePsi`)、`0<‖π‖<1`
+(`norm_pi_pos_lt_one`)なので指数`1/(q^n-q^{n-1})`が`n`ごとに異なる値
+を与えること(`torsionDegree_ne`・`rpow_ne_rpow_of_base_lt_one`)から、
+★★★★★★★★★★★★`no_common_root_iteratedLubinTatePsi`(`ψ_n`・`ψ_m`、
+`n≠m`は共通根を持たない)を結論した——共通根があればそのスペクトル
+ノルムが2つの異なる値に等しくなり矛盾、というNewton polygon論法
+そのもの。★これで「異なる段の捩れ点は互いに素な多項式の根である」
+という古典的Lubin-Tate理論の核心的な補題が完全に確立された。
+`D_n`全体の分離性(異なる`ψ_i`たちの積が互いに素な既約多項式の積で
+あることからsquarefreeが従う見込み)・正規性(`K(Λ_n)`が`ψ_n`の分解体
+と一致すること)への道が開いた。
+
+(記録: このファイル群はコミット時に共有git索引の競合でピア(第4章
+担当)のコミット`f0646fd3`に混入したが、`git diff HEAD`で内容が完全に
+一致することを確認済み——既にorigin/masterへpush済み。)
+
 **残る作業**: 節目(3)torsion点の構成本体(`D_n`の根を`Λ_n`として定義、
 `𝒪_K`加群構造、`K(Λ_n)/K`の完全分岐性)、節目(4)
 `L_n:=K(Λ_n)`が完全分岐かつ`Gal(L_n/K)≅(𝒪_K/π^n)^×`(Lubin-Tateの
