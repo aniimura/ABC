@@ -2364,3 +2364,65 @@ equal であることを確認させるだけ)でも同じ`whnf`のheartbeat上�
 普遍性を比較する必要がある。
 
 コミット: `923ad02b`。
+
+### 2026-09-04続報: `corrHypGlueData`から先の道筋を調査——`Lemma 4.1`の
+正確な主張と、残る作業の全体像
+
+`corrHypGlueData`完成を受け、`Lemma 4.1`の正確な主張・`C`/`Ext`の定義・
+`corrHypGlueData`が現状どこまで抽象的なままかを調査した(調査エージェント、
+読み取り専用)。
+
+**`Lemma 4.1`の正確な主張**(`lean/ABC3/Skeleton/CorrHyp/Section4.lean`、
+CorrHyp論文p.9を転記): 「$X_K$がある双曲的曲線$Z_K/K$と同種
+(isogenous)なら、$Z_K$はある双曲的曲線$Z/k$の$k$から$K$への係数拡大
+であり、しかも$X_K$から$Z_K$への任意の対応は$X$から$Z$への対応へ降下
+する」。Lean化:
+```lean
+theorem lemma_4_1 (X ZK : D.Space) (c : Corr D (D.Ext X) ZK) :
+    ∃ (Z : D.Space) (h : ZK = D.Ext Z) (c' : Corr D X Z), h ▸ extCorr D c' = c := sorry
+```
+`Corr X Y := ⟨C, α, β⟩`(`C`は媒介するスキーム、`α:D.FEt C X`・
+`β:D.FEt C Y`)。**`c'.C`が`Lemma 4.1`で構成すべき実体そのもの**——
+$K$上の媒介スキーム`c.C`の「$k$-form」(base extensionが`c.C`に一致
+する$k$-スキーム)。
+
+**`Ext`の定義**(`Found/CorrHyp/SchemeFEt.lean`): `Space := Over BaseK`
+(`BaseK:=Spec ℚ`)、`Ext X := X ×_{Spec ℚ} Spec ℝ`(`K:=ℝ`、非代数的に
+選んで`Fact(Irreducible p)`絡みの複雑さを回避)。`corrHypInstance4`
+(`Space:=QcqsSpace`、双曲的曲線は常に有限型なのでこの制約下で成立)が
+実働インスタンス。
+
+**`corrHypGlueData`は今なお完全に抽象的**——`X,U,J,f,Z,e`は
+`variable`宣言された汎用パラメータのままで、`corrHypInstance4`・`Ext`・
+`piece_descends_iso`のどれとも結び付けられていない(リポジトリ全体で
+`corrHypGlueData`を参照する箇所は他に無い)。
+
+**残る作業の全体像**(いずれも未着手、質の異なる大きな作業):
+(a) **具体化**: `X:=c.C`(またはその有限アフィン被覆の1片)、
+`f`は`exists_finite_standardEtaleCover`型の補題から、`Z i`は
+`piece_descends_iso`が返す**実存的witness**(`(R,P₀)`)から、`e i`は
+その補題が与える同型から——ただし`piece_descends_iso`は現状
+`Nonempty(...)`しか保証しないので、`transitionElem`のときと同じ
+「`Classical.choice`の不透明性」の罠に当たる可能性が高く、
+決定的な形へ作り直す必要が出るかもしれない。
+(b) **降下の整合性**: `corrHypGlueData.glued ≅ X`を示す——
+`Scheme.Cover.gluedCover`の普遍性(`IsColimit`)と`corrHypGlueData`の
+普遍性を比較する、**genuinely new**な(圏論的配線ではない)作業。
+(c) **`Ext`との橋渡し**: `piece_descends_iso`は環レベル
+(`A⊗[ℚ]R.1 → A⊗[ℚ]ℝ`)で働くのに対し、`Ext`/`ExtF`はスキーム/
+`Over BaseK`レベルで定義されている——両者の「base change」の記述が
+一致することを示す必要がある(`h:ZK=D.Ext Z`を結論するために必須)。
+(d) **2段階の被覆**: `C`自体がアフィンとは限らない(qcqsのみ)ので、
+1つの`U`に対する現状の貼り合わせ機構を適用する前に有限アフィン被覆が
+要り、さらにその上で複数のアフィン片の`GlueData`同士を貼り合わせる
+外側の段階も必要。
+(e) 最終的に`α・β:D.FEt c'.C X/Z`という2本の脚と、整合性の等式
+`h▸extCorr D c' = c`を組み立てる必要がある——これらもまだ何も無い。
+
+**要約**: 圏論的な「貼り合わせエンジン」(`corrHypGlueData`)は完成・
+sorry無しだが、それを`corrHypInstance4`・`Ext`・`C`へ結び付ける
+意味論的な配線は**まだ何も始まっていない**——プロジェクト自身の
+コメント(`ExtLimit.lean`末尾・本ファイル前回エントリ)もそう明記
+している。次に着手する際は(a)の具体化(特に`piece_descends_iso`を
+決定的な形へ作り直す必要があるかどうかの見極め)から始めるのが
+妥当と見られる。集計は10/24で変わらず(§4は0/2のまま)。
