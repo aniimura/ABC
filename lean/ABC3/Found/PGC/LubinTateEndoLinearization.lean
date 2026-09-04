@@ -113,4 +113,20 @@ theorem coeff_pow_self_eq_pow {A : Type*} [CommRing A] {g : PowerSeries A} {π :
   rw [hzz] at hz
   exact sub_eq_zero.mp hz
 
+/-- `coeff_pow_self_eq_pow` の対: `g^{n+1}` の次数 `e<n+1` の係数は0
+——`g` の次数が `≥1` なので `g^{n+1}` の次数は `≥n+1`、という単純な
+order 勘定だけで出る(`coeff_pow_self_eq_pow` の主張より簡単)。 -/
+theorem coeff_lt_pow_self_eq_zero {A : Type*} [CommRing A] {g : PowerSeries A}
+    (hg0 : PowerSeries.constantCoeff g = 0) (n : ℕ) {e : ℕ} (he : e < n + 1) :
+    PowerSeries.coeff e (g ^ (n + 1)) = 0 := by
+  have hgorder : (1 : ℕ∞) ≤ MvPowerSeries.order (g : PowerSeries A) :=
+    MvPowerSeries.one_le_order_iff_constCoeff_eq_zero.mpr hg0
+  have hpoworder : ((n + 1 : ℕ) : ℕ∞) ≤ MvPowerSeries.order (g ^ (n + 1) : PowerSeries A) := by
+    calc ((n + 1 : ℕ) : ℕ∞) = (n + 1) • (1 : ℕ∞) := by simp
+      _ ≤ (n + 1) • MvPowerSeries.order (g : PowerSeries A) := by gcongr
+      _ ≤ _ := MvPowerSeries.le_order_pow (n + 1)
+  have hpoworder' : ((n + 1 : ℕ) : ℕ∞) ≤ PowerSeries.order (g ^ (n + 1) : PowerSeries A) := by
+    rw [PowerSeries.order_eq_order]; exact hpoworder
+  exact PowerSeries.coeff_of_lt_order e (lt_of_lt_of_le (by exact_mod_cast he) hpoworder')
+
 end ABC3.Found.PGC
