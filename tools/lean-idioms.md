@@ -3997,3 +3997,44 @@ named引数でも症状は同じ。単純化した`ℤˣ`上の例でも同様�
 大域補題)・`principalUnitsQuotientEquiv_apply_mk`(それを使う自然性
 定理)、および`lean/ABC3/Found/PGC/AdjoinIntegers.lean`の
 `principalUnitsQuotientEquiv`(`rw`から`▸`への書き換え)。
+
+## 36. 同じ`algebraMap`/`CommRingCat.ofHom`の生の式を複数箇所に書くと
+`pullbackSpecIso`等との単一化に失敗する——名前を1回だけ確定させた
+独立`def`を経由する(2026-09-05)
+
+**症状**: `Ideal.Quotient`商(`MvPolynomial ... ⧸ I`)を`Algebra`の
+コドメインとして使う`algebraMap R (MvPolynomial ... ⧸ I)`を、ゴールの
+`letI`チェーンの中で**生の式のまま**2箇所以上(型の`Nonempty (...)`
+本体と証明の`refine ⟨(pullbackSpecIso R S T).trans ?_⟩`)に書くと、
+```
+Application type mismatch: The argument
+  algebraMap R S
+has type
+  @RingHom R S Algebra.TensorProduct.instCommSemiring.toNonAssocSemiring
+    (@Semiring.toNonAssocSemiring S (Ideal.Quotient.semiring I))
+but is expected to have type
+  @RingHom R (?m ...) CommRing.toCommSemiring.toNonAssocSemiring
+    (@Semiring.toNonAssocSemiring (?m ...) CommRing.toCommSemiring.toSemiring)
+```
+のような、**同じ`S`に対する2つの非`defeq`な`Semiring`/`CommRing`
+経路**が衝突するエラーになる。`letI hCR : CommRing (...) := inferInstance`
+で基底環の`CommRing`を先に固定しても直らない(`S`側の`CommRing`は
+別途その場で再導出されるため)——`#31`/`#33`(instances透明度の壁)の
+親戚だが、今回は`rw`ではなく`pullbackSpecIso`のような**強く型付けられた
+mathlib補題への直接適用**で起きる新しい失敗形。`set S0 := <式> with hS0`
+で名前だけ付けても、ゴール側の元の出現が構文的に一致しないため
+置換されず(`unfold`直後だと特に起きやすい)、症状は変わらない。
+
+**直し方**: その`algebraMap`を使うスキーム射自体を**独立した`def`として
+1回だけ確定させ**(`standardEtalePairSpecMap`が既にこのパターン)、
+以降はその`def`の名前だけを参照する——`pullbackSpecIso R S T`を直接
+呼ぶ側は、`S`の位置に生の`Ideal.Quotient`式ではなく、その`def`の
+`unfold`で出てくる**同じ1回だけ確定させた式**を使う。要するに
+「同じ複雑な式を離れた場所で2回書かない・1箇所で`def`にして名前で
+参照する」という原則を、`algebraMap`/`CommRingCat.ofHom`の場面にも
+適用する。
+
+実例: `lean/ABC3/Found/CorrHyp/ExtLimit.lean`の`descendPieceR_toBase`・
+`descendPieceR_reBaseMap`(`algebraMap`をそれぞれ1回だけ確定させた
+独立`def`)・`descendPieceR_iso`(それらの名前だけを参照して
+`pullbackSpecIso`を適用)、コミット`65fd0a77`。
