@@ -1427,6 +1427,33 @@ action_eq`はまさにこの`lift`が要求する「well-definedness」の
 が要る、これまでの最大の壁)、(c) `(𝒪_K)^×⧸principalUnits K π n`が
 実際に`(𝒪_K/π^n)^×`に同型であること(標準的だが未構築)。
 
+**続報(同日、(c)を解決、commit`563ccebb`)**: 課題(c)——
+`(𝒪_K)^×⧸principalUnits K π n`が古典的な`(𝒪_K/π^n)^×`に同型である
+こと——を、`F_f`・`Λ_n`・`ψ_n`固有の議論を一切経由せず、**純粋に
+環論的な事実**として解決した:
+
+1. `principalUnits_eq_ker`: `principalUnits K π n`は、剰余写像
+   `𝒪_K→𝒪_K/π^n𝒪_K`が誘導する単数群の写像`Units.map`の**核**に
+   一致する——`v↦v-1`の言葉での定義を`Ideal.Quotient.eq_zero_iff_
+   mem`で言い換えるだけ。
+2. `nontrivial_quotient_span_pi_pow`: `𝒪_K/π^n𝒪_K`は非自明
+   (`n≥1`のとき)——`π^n∈maximalIdeal`から`span{π^n}⊊⊤`。
+3. ★★★★★★★★★★**`principalUnitsQuotientEquiv`**: **`(𝒪_K)^×⧸
+   principalUnits K π n ≃* (𝒪_K/π^n𝒪_K)^×`**。鍵はmathlib
+   `IsLocalRing.surjective_units_map_of_local_ringHom`——**局所環
+   からの全射環準同型が誘導する単数群の写像は全射**、という
+   ドンピシャの既存定理が見つかったこと(`𝒪_K`が局所環であることと
+   `IsLocalHom.of_surjective`だけで適用できる)。あとは1.と組み合わせ
+   `QuotientGroup.quotientKerEquivOfSurjective`(第一同型定理)で
+   即座に結論した。
+
+これで`unitActionQuotientLift`の**定義域**`(𝒪_K)^×⧸principalUnits
+K π n`が、古典的な`(𝒪_K/π^n)^×`と正式に同一視できるようになった
+——`Gal(K(Λ_n)/K)≅(𝒪_K/π^n)^×`という主定理の**左辺**(定義域)が
+完全に確立された形。残る課題は(a)全射性・(b)単射性(いずれも
+Lubin-Tate固有の深い議論——`F_f`のキャンセレーションまたは
+successive approximationが要る)のみ。
+
 これで「`a·x=0 ↔ π^n∣a`」(`x`が原始的なπ^n-捩れ点のとき)が
 sorry無しで確立された——`𝒪_K/π^n≅Λ_n`の**核**が確定。
 `|𝒪_K/π^n|=q^n=|Λ_n|`(既出`card_iteratedLubinTateTorsionPoints`)
