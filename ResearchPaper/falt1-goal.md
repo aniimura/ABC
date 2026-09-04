@@ -3508,6 +3508,50 @@ mathlib での正確な組み立て方は未確認)。
       帰着する——無理に押し切らず、この正確なAPI調査結果(シグネチャ
       3つ)を次回への足場として記録し、今回はここで打ち切った
       (scratch fileはlake buildで検証後削除、commitは無し)。
+
+      ★★★★★★★★★★2026-09-05、**戦略を転換して(a)を完全に解決した**。
+      `AlgEquiv`/テンソル積の橋渡し(`tensorRightEquiv`等)を諦め、
+      **`RingHom.Etale`(bare ring homの性質、`Algebra`インスタンスを
+      一切参照しないため diamond がそもそも起こらない)のレベルまで
+      降りる**戦略に転換した:`Localization.awayMap (algebraMap R
+      (Fin2→R)) 1`(`awayAlgebra 1`が使う環準同型そのもの)を、`p=1`が
+      単元であることから得られる2つの全単射(`IsLocalization.atUnit`)
+      `ιR : R≃ₐ[R]Localization.Away1`・`ιB : (Fin2→R)≃ₐ[Fin2→R]
+      Localization.Away(algebraMap R(Fin2→R)1)`を使って`ιB∘algebraMap
+      R(Fin2→R)∘ιR.symm`に分解する式`heqmap`を、`AlgEquiv`ではなく
+      **`RingEquiv.ofBijective`+`IsLocalization.ringHom_ext`**(局所化
+      からの環準同型は台の乗法的集合上での値だけで一意に決まる、という
+      原理)で直接示した。これで`RingHom.Etale.of_bijective`(同型は
+      étale)・`RingHom.etale_algebraMap`(`etale_fin2`——`Fin2→R`が`R`
+      上étaleなことは`Algebra.FormallyUnramified.pi_iff`・`Algebra.
+      FormallySmooth.pi_iff`で各成分に帰着、自明)・`RingHom.Etale.
+      stableUnderComposition`(合成安定性)を貼り合わせるだけで
+      `Algebra.Etale(Localization.Away1)(Localization.Away(algebraMap
+      R(Fin2→R)1))`(`awayAlgebra 1`のもとで)が**sorry無く完成した**。
+      `Module.Free`・`Module.Finite`も同じ`heqmap`から、`ιB`を
+      半線形同値`(Fin2→R)≃ₛₗ[ιR.toRingHom]Localization.Away(...)`に
+      仕立てて`Module.Free.of_equiv`、`ιR`・`ιB`からの環準同型の可換
+      四角形を`he`として`heqmap`から直接示して`Module.Finite.
+      of_equiv_equiv`(`≃ₗ`を経由しない代数レベルの移送、`Module.
+      Finite.equiv`は同一環上の`≃ₗ`しか受け付けないため使えなかった)
+      に渡すことで完成させた。3本ともまずscratch file(`AlmostEtele
+      WitnessTest3.lean`、`lake build`で個別に検証)で確立してから、
+      実プロジェクトの`Found/Falt1/AlmostEtale.lean`(既存の
+      `awayAlgebra`をそのまま使うよう書き換え)へ移植し、**移植後も
+      1回で`lake build`が通った**(`awayAlgebra`が`@[reducible]`な
+      ため、scratch版の生の`(...).toAlgebra`表記との defeq が
+      自動的に効いた)。プロジェクト全体の`lake build`(6590 jobs)も
+      sorry無く成功、`node tools/check.mjs --brief`もNG13件(既存分)
+      で不変を確認。`awayOne_fin2_etale`・`awayOne_fin2_freeFinite`
+      として commit(`tools/lean-idioms.md` #44に手法を記録)。
+
+      **意味**: `Definition 2.1`(`IsAlmostEtaleCovering`)の non-vacuous
+      witness、条件(i)の3点(`Module.Free`・`Module.Finite`・`Algebra.
+      Etale`)が`A:=R`・`B:=Fin2→R`・`p:=1`について**すべて完成した**。
+      残るは条件(ii)(trace写像が`B`を`A`へ写す)・条件(iii)(idempotent
+      `p^n e_{B/A}`が`B⊗_AB`の像に入る)の2点のみ——これが埋まれば
+      §2(4項目)のうち`Definition 2.1`が初めて non-vacuous に Found と
+      なる、§2-4(11項目)の総ブロック状態への最初の穴になる。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・

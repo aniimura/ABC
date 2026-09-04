@@ -1,6 +1,11 @@
 import ABC3.Meta.Claim
 import Mathlib.RingTheory.Etale.Basic
 import Mathlib.RingTheory.Unramified.Finite
+import Mathlib.RingTheory.Unramified.Pi
+import Mathlib.RingTheory.Smooth.Pi
+import Mathlib.RingTheory.RingHom.Etale
+import Mathlib.RingTheory.Flat.Basic
+import Mathlib.RingTheory.Finiteness.FinitePresentationLocal
 import Mathlib.RingTheory.Trace.Defs
 import Mathlib.RingTheory.Localization.Away.Basic
 import Mathlib.RingTheory.TensorProduct.Basic
@@ -111,12 +116,22 @@ def isAlmostEtaleCovering.src : ABC3.Meta.Source :=
 (`Localization.Away 1 ≃ R` なので実質 `Ap=Bp=R` に帰着)で
 `Algebra.FormallyUnramified.elem R R = 1⊗ₜ1` であることの補助補題。
 `isAlmostEtaleCovering` の非空虚性の witness を作る際に使う想定
-(★2026-09-04 時点では `awayAlgebra`(局所化の自己写像)と mathlib の
-標準的な自己代数(`Algebra.id`)のインスタンス衝突により、`A=B` の
-具体例での完全な non-vacuous witness の構成は未完成——`Definition
-2.1` 自体(`isAlmostEtaleCovering`・`awayAlgebra`・`awayScalarTower`・
-`diagonalCompare`)は sorry 無しで完成しているが、続く witness は
-次のセッションへ持ち越す)。 -/
+(★2026-09-04 時点では `A=B`(恒等拡大)を witness に選ぶと `awayAlgebra`
+(局所化の自己写像)と mathlib の標準的な自己代数(`Algebra.id`)が
+衝突し行き詰まっていた)。
+
+★2026-09-05: witness を `A:=R`・`B:=Fin 2 → R`・`p:=1` に取り換える
+(`A≠B` なので上記の衝突する標準インスタンスがそもそも存在しない)
+ことで、条件 (i) の 3 点(`Module.Free`・`Module.Finite`・
+`Algebra.Etale`)を以下 `awayOne_fin2_etale`・`awayOne_fin2_freeFinite`
+で sorry 無しに完成させた。鍵となったのは `AlgEquiv`/インスタンス
+レベルの `▸`・`convert`・`Module.Finite.equiv` を諦め、
+`RingHom.Etale`(bare ring hom の性質、instance 衝突が起きようが
+ない)のレベルで `IsLocalization.ringHom_ext` により環準同型の等式を
+直接示し、`RingHom.Etale.stableUnderComposition`/`of_bijective`/
+`toAlgebra` で組み立てる戦略、および `Module.Finite.of_equiv_equiv`
+(`≃ₗ` を経由しない、環準同型の可換四角形からの推移)。条件 (ii)
+(trace)・(iii)(idempotent)は引き続き未着手。 -/
 theorem elem_self {R : Type*} [CommRing R] : Algebra.FormallyUnramified.elem R R = (1:R) ⊗ₜ[R] (1:R) := by
   have hinj : Function.Injective (Algebra.TensorProduct.lmul' R : TensorProduct R R R →ₐ[R] R) := by
     have h : (Algebra.TensorProduct.lmul' R : TensorProduct R R R →ₐ[R] R).toLinearMap
@@ -131,5 +146,131 @@ theorem elem_self {R : Type*} [CommRing R] : Algebra.FormallyUnramified.elem R R
     exact (TensorProduct.lid R R).injective hab'
   apply hinj
   rw [Algebra.FormallyUnramified.lmul_elem, Algebra.TensorProduct.lmul'_apply_tmul, mul_one]
+
+/-- `Fin 2 → R` は `R` 上 étale(`Algebra.FormallyUnramified.pi_iff`・
+`Algebra.FormallySmooth.pi_iff` で各成分 `R`(自明に unramified・smooth)
+に帰着)。`p:=1` の witness で `B := Fin 2 → R` として使う補題。 -/
+theorem etale_fin2 {R : Type*} [CommRing R] : Algebra.Etale R (Fin 2 → R) := by
+  rw [Algebra.Etale.iff_formallyUnramified_and_smooth]
+  refine ⟨?_, ?_, ?_⟩
+  · rw [Algebra.FormallyUnramified.pi_iff]; intro i; infer_instance
+  · rw [Algebra.FormallySmooth.pi_iff]; intro i; infer_instance
+  · infer_instance
+
+/-- **`A:=R`・`B:=Fin 2 → R`・`p:=1` での witness、条件 (i) の
+`Algebra.Etale` 部分**。`p=1` は単元なので `algebraMap R (Localization.
+Away 1)` と `algebraMap (Fin 2→R) (Localization.Away (algebraMap R
+(Fin2→R) 1))` はどちらも全単射(`IsLocalization.atUnit`)。この2つの
+`RingEquiv`(`ιR`・`ιB`)を用いて `awayAlgebra 1` の台になる環準同型
+`Localization.awayMap (algebraMap R (Fin2→R)) 1` を `ιB ∘ algebraMap R
+(Fin2→R) ∘ ιR.symm` に分解する式 `heqmap` を`IsLocalization.
+ringHom_ext`(局所化からの環準同型の一意性)で示し、`RingHom.Etale`
+(bare ring hom の étale 性、`AlgEquiv`/インスタンスの衝突が起こり
+ようがない)の合成安定性(`stableUnderComposition`)と全単射からの
+étale 性(`of_bijective`)を貼り合わせて結論する。 -/
+theorem awayOne_fin2_etale {R : Type*} [CommRing R] :
+    letI := awayAlgebra (1:R) (A := R) (B := Fin 2 → R)
+    Algebra.Etale (Localization.Away (1:R)) (Localization.Away (algebraMap R (Fin 2 → R) (1:R))) := by
+  have hbijR : Function.Bijective (algebraMap R (Localization.Away (1:R))) := by
+    have e : R ≃ₐ[R] Localization.Away (1:R) := IsLocalization.atUnit R (Localization.Away (1:R)) (1:R) isUnit_one
+    have heq : (e : R →+* Localization.Away (1:R)) = algebraMap R (Localization.Away (1:R)) := by
+      ext x; exact e.commutes x
+    rw [← heq]; exact e.bijective
+  have hunitB : IsUnit (algebraMap R (Fin 2 → R) (1:R)) := by rw [map_one]; exact isUnit_one
+  have hbijB : Function.Bijective (algebraMap (Fin 2 → R) (Localization.Away (algebraMap R (Fin 2 → R) (1:R)))) := by
+    have e : (Fin 2 → R) ≃ₐ[Fin 2 → R] Localization.Away (algebraMap R (Fin 2 → R) (1:R)) :=
+      IsLocalization.atUnit (Fin 2 → R) (Localization.Away (algebraMap R (Fin 2 → R) (1:R))) (algebraMap R (Fin 2 → R) (1:R)) hunitB
+    have heq : (e : (Fin 2 → R) →+* Localization.Away (algebraMap R (Fin 2 → R) (1:R)))
+        = algebraMap (Fin 2 → R) (Localization.Away (algebraMap R (Fin 2 → R) (1:R))) :=
+      RingHom.ext (fun x => e.commutes x)
+    rw [← heq]; exact e.bijective
+  set ιR := RingEquiv.ofBijective (algebraMap R (Localization.Away (1:R))) hbijR with hιRdef
+  set ιB := RingEquiv.ofBijective (algebraMap (Fin 2 → R) (Localization.Away (algebraMap R (Fin 2 → R) (1:R)))) hbijB with hιBdef
+  have heqmap : Localization.awayMap (algebraMap R (Fin 2 → R)) (1:R)
+      = ιB.toRingHom.comp ((algebraMap R (Fin 2 → R)).comp ιR.symm.toRingHom) := by
+    apply IsLocalization.ringHom_ext (Submonoid.powers (1:R))
+    ext x
+    have hιRx : ιR.symm (ιR x) = x := ιR.symm_apply_apply x
+    show Localization.awayMap (algebraMap R (Fin 2 → R)) (1:R) (algebraMap R (Localization.Away (1:R)) x)
+      = ιB (algebraMap R (Fin 2 → R) (ιR.symm (algebraMap R (Localization.Away (1:R)) x)))
+    have hιRxeq : (algebraMap R (Localization.Away (1:R)) x) = ιR x := by rw [hιRdef]; rfl
+    rw [hιRxeq, hιRx]
+    show Localization.awayMap (algebraMap R (Fin 2 → R)) (1:R) (algebraMap R (Localization.Away (1:R)) x)
+      = algebraMap (Fin 2 → R) (Localization.Away (algebraMap R (Fin 2 → R) (1:R))) (algebraMap R (Fin 2 → R) x)
+    unfold Localization.awayMap IsLocalization.Away.map
+    rw [IsLocalization.map_eq]
+  have hgEtale : RingHom.Etale (algebraMap R (Fin 2 → R)) := RingHom.etale_algebraMap.mpr etale_fin2
+  have hιRinvEtale : RingHom.Etale (ιR.symm.toRingHom) :=
+    RingHom.Etale.of_bijective ιR.symm.bijective
+  have hιBEtale : RingHom.Etale (ιB.toRingHom) :=
+    RingHom.Etale.of_bijective ιB.bijective
+  have hcompEtale : RingHom.Etale ((algebraMap R (Fin 2 → R)).comp ιR.symm.toRingHom) :=
+    RingHom.Etale.stableUnderComposition ιR.symm.toRingHom (algebraMap R (Fin 2 → R)) hιRinvEtale hgEtale
+  have hfullEtale : RingHom.Etale (ιB.toRingHom.comp ((algebraMap R (Fin 2 → R)).comp ιR.symm.toRingHom)) :=
+    RingHom.Etale.stableUnderComposition ((algebraMap R (Fin 2 → R)).comp ιR.symm.toRingHom) ιB.toRingHom hcompEtale hιBEtale
+  rw [← heqmap] at hfullEtale
+  exact RingHom.Etale.toAlgebra hfullEtale
+
+/-- **`A:=R`・`B:=Fin 2 → R`・`p:=1` での witness、条件 (i) の
+`Module.Free`・`Module.Finite` 部分**。`awayOne_fin2_etale` と同じ
+`ιR`・`ιB`・`heqmap` を再構成し、`ιB` を `R`-加群としての半線形同値
+`(Fin 2→R) ≃ₛₗ[ιR.toRingHom] Localization.Away (algebraMap R (Fin2→R)
+1)` に仕立てて `Module.Free.of_equiv`(半線形移送)、`ιR`・`ιB` からの
+環準同型の可換四角形 `he` を `heqmap` から直接示して
+`Module.Finite.of_equiv_equiv`(`≃ₗ` を経由しない代数レベルの移送)に
+渡す。 -/
+theorem awayOne_fin2_freeFinite {R : Type*} [CommRing R] :
+    letI := awayAlgebra (1:R) (A := R) (B := Fin 2 → R)
+    Module.Free (Localization.Away (1:R)) (Localization.Away (algebraMap R (Fin 2 → R) (1:R))) ∧
+    Module.Finite (Localization.Away (1:R)) (Localization.Away (algebraMap R (Fin 2 → R) (1:R))) := by
+  letI := awayAlgebra (1:R) (A := R) (B := Fin 2 → R)
+  have hbijR : Function.Bijective (algebraMap R (Localization.Away (1:R))) := by
+    have e : R ≃ₐ[R] Localization.Away (1:R) := IsLocalization.atUnit R (Localization.Away (1:R)) (1:R) isUnit_one
+    have heq : (e : R →+* Localization.Away (1:R)) = algebraMap R (Localization.Away (1:R)) := by
+      ext x; exact e.commutes x
+    rw [← heq]; exact e.bijective
+  have hunitB : IsUnit (algebraMap R (Fin 2 → R) (1:R)) := by rw [map_one]; exact isUnit_one
+  have hbijB : Function.Bijective (algebraMap (Fin 2 → R) (Localization.Away (algebraMap R (Fin 2 → R) (1:R)))) := by
+    have e : (Fin 2 → R) ≃ₐ[Fin 2 → R] Localization.Away (algebraMap R (Fin 2 → R) (1:R)) :=
+      IsLocalization.atUnit (Fin 2 → R) (Localization.Away (algebraMap R (Fin 2 → R) (1:R))) (algebraMap R (Fin 2 → R) (1:R)) hunitB
+    have heq : (e : (Fin 2 → R) →+* Localization.Away (algebraMap R (Fin 2 → R) (1:R)))
+        = algebraMap (Fin 2 → R) (Localization.Away (algebraMap R (Fin 2 → R) (1:R))) :=
+      RingHom.ext (fun x => e.commutes x)
+    rw [← heq]; exact e.bijective
+  set ιR := RingEquiv.ofBijective (algebraMap R (Localization.Away (1:R))) hbijR with hιRdef
+  set ιB := RingEquiv.ofBijective (algebraMap (Fin 2 → R) (Localization.Away (algebraMap R (Fin 2 → R) (1:R)))) hbijB with hιBdef
+  have heqmap : Localization.awayMap (algebraMap R (Fin 2 → R)) (1:R)
+      = ιB.toRingHom.comp ((algebraMap R (Fin 2 → R)).comp ιR.symm.toRingHom) := by
+    apply IsLocalization.ringHom_ext (Submonoid.powers (1:R))
+    ext x
+    have hιRx : ιR.symm (ιR x) = x := ιR.symm_apply_apply x
+    show Localization.awayMap (algebraMap R (Fin 2 → R)) (1:R) (algebraMap R (Localization.Away (1:R)) x)
+      = ιB (algebraMap R (Fin 2 → R) (ιR.symm (algebraMap R (Localization.Away (1:R)) x)))
+    have hιRxeq : (algebraMap R (Localization.Away (1:R)) x) = ιR x := by rw [hιRdef]; rfl
+    rw [hιRxeq, hιRx]
+    show Localization.awayMap (algebraMap R (Fin 2 → R)) (1:R) (algebraMap R (Localization.Away (1:R)) x)
+      = algebraMap (Fin 2 → R) (Localization.Away (algebraMap R (Fin 2 → R) (1:R))) (algebraMap R (Fin 2 → R) x)
+    unfold Localization.awayMap IsLocalization.Away.map
+    rw [IsLocalization.map_eq]
+  haveI : RingHomInvPair ιR.toRingHom ιR.symm.toRingHom := ⟨ιR.symm_toRingHom_comp_toRingHom, ιR.toRingHom_comp_symm_toRingHom⟩
+  haveI : RingHomInvPair ιR.symm.toRingHom ιR.toRingHom := ⟨ιR.toRingHom_comp_symm_toRingHom, ιR.symm_toRingHom_comp_toRingHom⟩
+  have hsmul : ∀ (r : R) (m : Fin 2 → R), ιB (r • m) = ιR r • ιB m := by
+    intro r m
+    show ιB ((algebraMap R (Fin 2 → R)) r * m) = (Localization.awayMap (algebraMap R (Fin 2 → R)) (1:R)) (ιR r) * ιB m
+    rw [heqmap]
+    show ιB ((algebraMap R (Fin 2 → R)) r * m) = ιB ((algebraMap R (Fin 2 → R)) (ιR.symm (ιR r))) * ιB m
+    rw [ιR.symm_apply_apply]
+    rw [← map_mul]
+  set e : (Fin 2 → R) ≃ₛₗ[ιR.toRingHom] Localization.Away (algebraMap R (Fin 2 → R) (1:R)) :=
+    { ιB with map_smul' := hsmul }
+  have he : (algebraMap (Localization.Away (1:R)) (Localization.Away (algebraMap R (Fin 2 → R) (1:R)))).comp ιR.toRingHom
+      = ιB.toRingHom.comp (algebraMap R (Fin 2 → R)) := by
+    show (Localization.awayMap (algebraMap R (Fin 2 → R)) (1:R)).comp ιR.toRingHom
+      = ιB.toRingHom.comp (algebraMap R (Fin 2 → R))
+    rw [heqmap]
+    ext x
+    simp
+  refine ⟨?_, Module.Finite.of_equiv_equiv ιR ιB he⟩
+  exact Module.Free.of_equiv e
 
 end ABC3.Found.Falt1

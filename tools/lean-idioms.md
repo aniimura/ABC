@@ -4308,3 +4308,57 @@ instMul`のような複合インスタンス)自体をelaboratorに一切見せ�
 
 実例: `lean/ABC3/Found/CorrHyp/FieldLimit.lean`の
 `ringEquiv_localization_of_apply_eq`・`exists_ringEquiv_localization_of_eq`。
+
+## 44. `Algebra.Etale`/`Module.Free`/`Module.Finite`のAlgEquiv移送で
+instance diamondに落ちる時は、**`RingHom.Etale`(bare ring homの性質)
+のレベルまで降りて`IsLocalization.ringHom_ext`で押し切る**と迂回できる
+(2026-09-05)
+
+**症状**: `awayAlgebra`のような`(f).toAlgebra`で人工的に配線した
+`Algebra`インスタンスに対して、自然に存在するはずの`AlgEquiv`
+(例: `R ≃ₐ[R] Localization.Away 1`・`Fin2→R ≃ₐ[Fin2→R] Localization.Away
+(algebraMap R (Fin2→R) 1)`)を使って`Algebra.Etale`を移送しようとすると、
+`▸`・`convert`・`AlgEquiv`合成のどこかで人工instanceと標準instanceが
+非`defeq`に見えて詰まる(`#1`・`#43`と同系統だが`Algebra.Etale`は
+`Prop`なので`convert`の残り目標が余計に混乱しやすい)。
+
+**直し方**: `Algebra`インスタンス・`AlgEquiv`を経由せず、**bare
+`RingHom`の性質`RingHom.Etale`(`Mathlib.RingTheory.RingHom.Etale`)の
+レベルで組み立てる**——`RingHom.Etale`はinstanceを一切参照しない
+「`f : R →+* S`の性質」なので diamond がそもそも起こらない:
+```lean
+-- 1. 目的の環準同型(`awayAlgebra`が使う`Localization.awayMap ...`)を、
+--    「全単射(=同型) ∘ 素の algebraMap ∘ 全単射(=同型)」に分解する式を、
+--    AlgEquiv ではなく RingEquiv.ofBijective + RingHom の等式として、
+--    IsLocalization.ringHom_ext(局所化からの環準同型の一意性)で示す:
+have heqmap : Localization.awayMap (algebraMap R (Fin2→R)) 1
+    = ιB.toRingHom.comp ((algebraMap R (Fin2→R)).comp ιR.symm.toRingHom) := by
+  apply IsLocalization.ringHom_ext (Submonoid.powers (1:R))
+  ext x; ...  -- unfold Localization.awayMap IsLocalization.Away.map; rw [IsLocalization.map_eq]
+-- 2. 各ピースをRingHom.Etaleで示し、stableUnderComposition/of_bijectiveで貼る:
+have hgEtale : RingHom.Etale (algebraMap R (Fin2→R)) := RingHom.etale_algebraMap.mpr etale_fin2
+have hιEtale : RingHom.Etale ιR.symm.toRingHom := RingHom.Etale.of_bijective ιR.symm.bijective
+have hcomp : RingHom.Etale (... .comp ...) :=
+  RingHom.Etale.stableUnderComposition ιR.symm.toRingHom (algebraMap R (Fin2→R)) hιEtale hgEtale
+-- 3. 最後に heqmap で書き換えてから Algebra インスタンスへ戻す:
+rw [← heqmap] at hfullEtale
+exact RingHom.Etale.toAlgebra hfullEtale
+```
+`Module.Free`/`Module.Finite`側は`AlgEquiv`ではなく**半線形同値**
+(`≃ₛₗ[σ]`、`σ`は`ιR.toRingHom`のような具体的なRingHom)を`heqmap`から
+組み立て、`Module.Free.of_equiv`(半線形移送)・`Module.Finite.
+of_equiv_equiv`(`≃ₗ`を経由しない、2つのRingEquivと可換四角形からの
+移送——`Module.Finite.equiv`は同じ環上の`≃ₗ`しか受け付けないため使えない)
+に渡す。
+
+**注意点2つ**: (a) `(e : R →+* S) = algebraMap R S := by ext x; exact
+e.commutes x`はドメインが`Fin2→R`のような`Pi`型だと`ext`が`Pi.single`
+方向に過分解して失敗する——`RingHom.ext (fun x => e.commutes x)`を使う。
+(b) `letI`が**定理の型**にしかない場合、証明本体の中で`Module.Free.
+of_equiv`等がinstance探索に失敗する——証明の最初の行で`letI`を
+再宣言する(`awayScalarTower`の証明が既にこの形)。
+
+実例: `lean/ABC3/Found/Falt1/AlmostEtale.lean`の
+`awayOne_fin2_etale`・`awayOne_fin2_freeFinite`(`Definition 2.1`の
+witness、`A:=R`・`B:=Fin2→R`・`p:=1`の場合の条件(i)の`Etale`・
+`Free`・`Finite`部分)。
