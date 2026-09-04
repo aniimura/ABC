@@ -592,4 +592,36 @@ theorem irreducible_iteratedLubinTatePrimitive_one {A : Type*} [CommRing A] [IsL
     omega
   exact heis.irreducible (IsLocalRing.maximalIdeal.isMaximal A).isPrime hmonic.isPrimitive hdegpos
 
+/-- `D_0 = X`——`[π^0]_f=[1]_f=X` 自身が既に distinguished(モニック・
+唯一の非最高次係数`coeff 0`が0)であり、`X=X・1` が Weierstrass 分解に
+なる(`1` は単元)ことから、一意性で結論する。`D_n=D_{n-1}・ψ_n`
+(`iteratedLubinTateDistinguished_eq_mul_psi`)の基底段になる。 -/
+theorem iteratedLubinTateDistinguished_zero {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) :
+    iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf 0 = Polynomial.X := by
+  have hne0 : PowerSeries.map (IsLocalRing.residue A) (iteratedLubinTate f 0) ≠ 0 :=
+    iteratedLubinTate_map_residue_ne_zero hq hπmax hπne0 f hf0 hf1 hf 0
+  have hfact : (iteratedLubinTate f 0).IsWeierstrassFactorization Polynomial.X 1 :=
+    { isDistinguishedAt := by
+        constructor
+        · constructor
+          intro k hk
+          simp only [Polynomial.natDegree_X] at hk
+          interval_cases k
+          simp
+        · exact Polynomial.monic_X
+      isUnit := isUnit_one
+      eq_mul := by
+        show iteratedLubinTate f 0 = (Polynomial.X : Polynomial A) * 1
+        show (PowerSeries.X : PowerSeries A) = (Polynomial.X : Polynomial A) * 1
+        simp [Polynomial.coe_X] }
+  have huniq := hfact.unique hne0
+  show (iteratedLubinTate f 0).weierstrassDistinguished hne0 = Polynomial.X
+  rw [← huniq.1]
+
 end ABC3.Found.PGC
