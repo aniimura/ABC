@@ -3337,3 +3337,35 @@ Ideal.span{降ろした関係式}`を実際に構成し、`S_0 ⊗_{A⊗R.1}(A�
 `transitionElem`/`gdT`/`cocycle`一式の`R`レベル版を(`ℝ`レベルと
 同じ道具を`S_0`の上で再利用する形で)構築できる見込み。集計は10/24
 で変わらず——§4は引き続き0/2。
+
+## 2026-09-05(続き): `pieceAlgebra_R_model`——`Γ(C,piece)`の`R`レベルモデル`S_0`を実際に構成
+
+前回の`pieceAlgebra_relation_descend_R`(共通`R`の取得)を拡張し、
+**実際に`R`レベルの候補モデル`S_0`を構成した**:
+
+- `pieceAlgebra_relation_descend_q₀`: `exists_fg_subalgebra_tensor_
+  mvPolynomial_finset`の`choose_spec`から`k`番目の降ろした関係式を
+  取り出す。
+- **`pieceAlgebra_R_model`**: 降ろした関係式による`MvPolynomial`商
+  ——`Γ(C,piece)`の`R`レベルモデル`S_0`そのもの。
+
+配管の注意(新しい、単純な発見): `MvPolynomial(...)( A⊗R.1)`に
+`Ideal`商(`⧸`)を適用しようとすると、`CommRing(A⊗R.1)`のインスタンス
+解決が(`FgSubalgebra`の`.1`が`@[reducible]`でないため)詰まる——
+`letI hCR : CommRing(A⊗R.1) := inferInstance`で明示的に名前を付けて
+から使うことで解消した(`#31`と同系統の教訓、今回も即座に検出・
+修正できた)。`lean_check`で検証後ファイルへ反映、`lake build`
+(ExtLimit/ABC3とも)0エラー確認、コミット(`fe100836`)。
+
+**これで、`Γ(C,piece)`の`R`レベルモデル(候補)`S_0`が、まったくの
+仮説ではなく実際にLeanの型として存在するところまで到達した**。
+
+残る道筋(次の一手、未着手): `S_0 ⊗_{A⊗R.1}(A⊗ℝ) ≅ Γ(C,piece)`を
+示すこと。以前確認した`MvPolynomial.algebraTensorAlgEquiv`(mathlib、
+`A⊗MvPolynomial σ R≃ₐ[A]MvPolynomial σ A`)+`Algebra.TensorProduct.
+quotientTensorEquiv`(mathlib)+`Algebra.Generators.ker_eq_ker_aeval_
+val`(mathlib、`P.ker`が`aeval`の核であること)を組み合わせて、
+「降ろした関係式が生成するイデアルを`base change`すると、元の
+`P.ker`に一致する」ことを示すのが核心になる見込み。これが完成すれば
+`transitionElem`/`gdT`/`cocycle`一式の`R`レベル版を`S_0`の上で
+構築する段階へ進める。集計は10/24で変わらず——§4は引き続き0/2。
