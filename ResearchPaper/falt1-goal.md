@@ -1815,6 +1815,51 @@ mathlib での正確な組み立て方は未確認)。
       Wₙ Wₙ₊₁`(`Jₙ`)自体の評価(step 5、discriminantの塔)へ進む
       ことを検討する。
 
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、
+      **`hrec`への接続を実際に調べ、残る障害を2つとも具体的に特定した**
+      (`delta_tendsto_zero`(line 1518近辺、完成済み)の`hrec : ∀n, δ(n+1)
+      ≤ δn - min(1,δn/(d+1))/(d+2)`へ接続する経路を検討):
+      1. **`δn`を実数として定義する経路そのものが2通りあり、どちらも
+         未完成の別の道具を要する**:
+         - (a) `δn := Module.length(...)`を`Ω¹`経由で定義する場合、
+           Lemma 1.1(`falt1CokernelLengthEq`)で`Wₙ₊₁`の`V0`上の
+           単項生成元が要る(既出の障害)。
+         - (b) `δn`を「`Wₙ₊₁`の極大イデアルの冪としての`differentIdeal`
+           の**指数**」(Faltings原文の記法)として定義する場合、
+           `length_map_pow_of_ramificationIdx`(完成済み、line 1775
+           近辺)が使えるが、これは`Wₙ₊₁`が**単一のDVR**(全分岐)
+           であることを要求する。mathlibで
+           `Polynomial.IsEisensteinAt`(既存)と「局所性・全分岐」を
+           結ぶ補題を探したが**見当たらなかった**(`grep`で確認、
+           `IsEisensteinAt`関連の補題はirreducibility・adjoin関連の
+           みで、Henselの補題やvaluation拡張を要する古典的事実
+           「Eisenstein多項式は完備局所体上で全分岐拡大を与える」は
+           mathlibに存在しない)——`Wₙ`の完備性(Henselian性)すら
+           このセッションの仮定に含まれていないことも確認した。
+      2. **原文が使う「`Ω¹_{Wₙ₊₁/Vₙ}`が`d+1`個の巡回加群の直和」という
+         事実(Nakayama+elementary divisors、`hrec`の`(d+1)`という
+         係数の由来)は、`pushoutKaehlerSplit`を`d+1`回反復すれば
+         得られるはずと分かっているが、実際に一般の`d`について
+         証明されているのは**3項(`d=2`)の場合の実証のみ**
+         (`pushoutKaehlerSplit3`、line 1468近辺)——任意の`d`への
+         一般化(`Fin(d+1)→Type*`で添字付けた塔の帰納法)は着手して
+         いない。
+
+      **結論(正直な評価)**: `hrec`への接続には、(1)`δn`を定義する
+      2つの経路のうち**どちらか一方を独立に完成させる**(単項生成元の
+      構成、または Eisenstein⟹全分岐という古典的整数論を mathlib に
+      無い状態から証明する)ことと、(2)`d+1`項の`pushoutKaehlerSplit`
+      の一般化、という**独立した2つの実質的な形式化タスク**が必要——
+      どちらも「軽い」ものではなく、このセッション内で追加的に完成
+      させるのは現実的でないと判断する。ここまでで確立した代数的な
+      骨格(`falt1_theorem12_differentIdeal_length`・`falt1_
+      differentIdeal_diamond_length`・`delta_tendsto_zero`・
+      `pushoutKaehlerSplit3`)は、これら2つのタスクが完成すれば
+      即座に組み合わさる形になっている——次回以降のセッションは
+      この2つのうちどちらか一方(特に(2)の`d+1`項化は純粋に代数的で
+      新しい整数論を要しないぶん、着手しやすい可能性がある)から
+      始めるとよい。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
