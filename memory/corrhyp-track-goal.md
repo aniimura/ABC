@@ -435,6 +435,19 @@ standardEtalePair_baseChange`、という一直線の道筋が数学的にもLea
 
 コミット: `0e023728`(base change復元完成)・`256670e0`(記録)。
 
+★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(「合流」の道具も
+出揃った、個々の数学的補題は全て完成、集計10/24で変わらず)。
+`exists_fgSubalgebra_upperBound`(有限個のFgSubalgebraは共通上界を持つ)
+・`StandardEtalePair.map_map`((P.map φ).map ψ = P.map(ψ.comp φ))を
+`FieldLimit.lean`に追加(★sorry無し)。これで(a)実際の組み立て・
+(c)GlueData貼り合わせを除き、`Lemma 4.1`の証明に要る個々の数学的補題は
+**すべて完成した**。残るのはこれらを1本の証明として結線する
+エンジニアリング(+`Corr`のnonempty脱落・`Space`の有限型性という
+独立した前提整理)のみ。
+
+コミット: `f2ecb1eb`(upperBound)・`0006665c`(map_map)・
+`283270db`(記録)。
+
 ★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(残作業4段階を総括、
 集計10/24で変わらず)。generic flatnessの標準的前提(Rネター整域・
 加群/多元環がR上有限表示)を確認したところ、`corrHypInstance4`の
