@@ -2700,3 +2700,48 @@ PsiGen K...m`を構成した——数学的な中身は前回の見積りどお�
 𝒪_K^×`(または`CompatibleUnits`)を定義し、その全射性・単射性を示す
 こと——次に戻るならここが具体的な出発点(単射性は`reciprocityMap`
 自体の単射性が前提になるはずで、まだ確認していない)。
+
+## 続報(2026-09-05、★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+大きな節目——(a)(b)を実際に橋渡しした、`Found/PGC/LubinTateReciprocity
+LimitCompat.lean`新規、commit準備中): (b)を無限列(a)の上で実際に
+評価する橋渡しが完成した
+
+`reciprocityMap_pred_eq_map_succ`(既出)は`x`(level`n+1`)を要求し、
+内部で`y:=π·x`を計算する形だったため、無限列`psiGenSeq`のフィールド
+を**直接**渡そうとすると、`y`が`(psiGenSeq(n-1)).pt`と**値として**
+等しいだけで構文的には一致しない、という橋渡しが必要になった。
+2つの補題で解決した:
+
+- `reciprocityMap_congr`: `reciprocityMap`は評価点`x`が値として一致
+  すれば証明項に依らず同じ値を返す——`x=x'`から`subst`+`rfl`で直ちに
+  従う(`Prop`の証明無関係性)。
+- `reciprocityMapLimitCompat`: `psiGenStepResult`の`hcompat`
+  (`π·(次の生成元)=(前の生成元)`、既出)を使い、`reciprocityMap_
+  pred_eq_map_succ`が要求する`y`についての事実(`hyψ`/`hyn`/`hymem`)
+  を`rw[g.hcompat]`で`(psiGenSeq m)`の対応する事実へ変換してから
+  適用し、`reciprocityMap_congr`で最終的な表現を`psiGenSeq`基準へ
+  載せ替えた。
+
+★躓いた点(`tools/lean-idioms.md` #34に追記): 今回は**逆に**「型
+注釈を省略すると通らない」場面に当たった——`#34`の教訓をそのまま
+適用して`reciprocityMapLimitCompat`の型を省略すると、`Eq.trans key
+hcongr`という単純な操作なのに`?m`という未解決メタ変数が残ったまま
+`exact`が失敗した(`Classical.choice`由来の罠とは別の、「型注釈
+なしの`def`+大きな`by`ブロック」が型推論に失敗するという平凡な
+現象)。対処は逆に**型注釈を省略せず明示的に書く**ことと、
+`reciprocityMap`が要求する`FiniteDimensional`インスタンス2つを
+`[...]`の明示的な引数として追加すること(`.hfd`経由でしか手に
+入らないため)——教訓: 「型注釈を省略する」も「明示的に書く」も
+どちらも銀の弾丸ではなく、罠の性質(型注釈側の深いchoose列か、
+項側にしか無いインスタンスか)で使い分けが要る。
+
+★★★★★これで節目(5)の(a)(b)は完全に橋渡しされた。残るのは:
+(i)`principalUnitsQuotientEquiv`が遷移写像(`unitReductionTransition`)
+と自然に交換すること(まだ未検証——`reciprocityMapLimitCompat`は
+`(𝒪_K)^×⧸principalUnits`のレベルでの両立性であり、`(𝒪_K/π^n)^×`
+のレベルに移すにはこの自然性が要る)、(ii)これらを組み合わせて
+`reciprocityMapLimit:Gal(K.closure/K.carrier)→CompatibleUnits`
+(または`unitReductionEquiv`経由で`𝒪_K^×`)を定義し`MonoidHom`である
+ことを示す(`reciprocityMap_mul`、既出、を使う見込み)、(iii)全射性・
+単射性(後者は`reciprocityMap`自体の単射性が前提、要確認)。次に
+戻るなら(i)(`principalUnitsQuotientEquiv`の自然性)が具体的な出発点。

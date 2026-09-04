@@ -3920,4 +3920,19 @@ corrPieceGlueData X.1 U hU c.C.1.left hα  -- hαを使う、c.α.1.leftを直�
 
 実例: `lean/ABC3/Found/PGC/LubinTateGeneratorSequence.lean`の
 `psiGenStep_compat`・`psiGenSeq_compat`(無限compatible列の構成、
-コミット準備中)。
+コミット`184a7d60`)。
+
+★★続報(2026-09-05、`LubinTateReciprocityLimitCompat.lean`):
+**逆に「型注釈を省略すると通らない」場面もある**——`#34`の教訓を
+そのまま適用して`reciprocityMapLimitCompat`の型を省略すると、今度は
+`Eq.trans key hcongr`という単純な操作にもかかわらず`?m`という未解決
+メタ変数が残ったまま`exact`が失敗した(`Classical.choice`由来の罠
+とは**別の**、単に「型注釈なしの`def`+大きな`by`ブロック」が型推論に
+失敗するという、より平凡な現象)。★対処: **型注釈を省略せず明示的に
+書き**、かつ`reciprocityMap`が要求する`FiniteDimensional`インスタンス
+2つを`[...]`の明示的な引数として追加する(`.hfd`経由でしか手に入らな
+いため)——これで独立に書いた型注釈が今度は問題なく通った。**教訓**:
+「型注釈を省略する」も「明示的に書く」もどちらも銀の弾丸ではない——
+`Classical.choice`由来の深いnested chooseが**型注釈の側**にある時は
+省略、`FiniteDimensional`インスタンスが**項の側**(`.hfd`)からしか
+出せない時は明示、と使い分けが要る。迷ったら両方試す。
