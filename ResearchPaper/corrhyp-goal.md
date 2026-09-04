@@ -1857,3 +1857,24 @@ type-correctでなくなるという、本セッションで繰り返し遭遇�
 集計は10/24で変わらず。
 
 コミット: `6e8ea04e`。
+
+### 2026-09-04さらに続報: 遷移射を実際のスキーム同型として取り出す完成(GlueDataのtフィールド材料)
+
+`ExtLimit.lean`に`exists_transitionIso`を完成(★sorry無し)——`exists_transitionOpen_
+eq_basicOpen`が与える**開集合の等式**を、`Scheme.Hom.isoImage`(開埋め込みの制限が
+同型であること)+`eqToIso`を使って**実際のスキーム同型**へ格上げした:重なり
+`X.basicOpen(f₁·f₂)`が候補片`Z`の対応する基本開集合`Z.basicOpen s`と直接同型。
+
+2つの標準エタール片`i`・`j`にこれを適用すると、どちらも同じ`X.basicOpen(f_i·f_j)`
+と同型になるので、それらを合成すれば`Z_i.basicOpen(s_i) ≅ Z_j.basicOpen(s_j)`という
+**遷移射そのもの**が直接得られる——GlueDataの`t`フィールドの構成材料が完成した。
+
+**現状整理**: GlueData組み立てに要る部品は
+(a)ring→scheme被覆変換(`exists_scheme_basicOpen_cover_of_ring`、完成)、
+(b)候補片の実現(`piece_descends_iso`、完成)、
+(c)遷移射(`exists_transitionIso`、今回完成)まで揃った。残るのは
+(d)これらを`Scheme.GlueData`の実際の12フィールド(`J・U・V・f・t・t'・cocycle`等)
+として組み立てる作業(`t'`・`cocycle`は3重の重なりでの整合性、まだ手つかず)、
+(e)貼り合わせ後の有限性確認、の2点。集計は10/24で変わらず。
+
+コミット: `925233b1`。
