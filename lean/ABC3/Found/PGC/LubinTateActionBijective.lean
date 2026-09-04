@@ -155,4 +155,49 @@ theorem unitActionQuotientBijOn_bijective
   obtain ⟨e⟩ := Fintype.card_eq.mp hcard
   exact ⟨hinj, Function.Injective.surjective_of_finite e hinj⟩
 
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**相互写像`σ↦u_σ`の存在と一意性**——`Gal(K.closure/K.carrier)`の
+各`σ`に対し、`u_σ·x=σ(x)`を満たす単数の類`u_σ`(法`principalUnits
+K π n`)がただ一つ存在する。`σ(x)`が`ψ_nの根`に留まること
+(`algEquiv_mem_iteratedLubinTatePsiTorsionPoints_of_mem`、既出)と
+`unitActionQuotientBijOn`の**全単射性**(直前の定理)を組み合わせる
+だけ——`Gal(K(Λ_n)/K)≅(𝒪_K/π^n)^×`という主定理の実体となる写像
+`σ↦u_σ`の、集合論的な存在・一意性がここに確立された。残るのは
+この対応が**準同型**であること(`u_{στ}=u_σ*u_τ`、Galois同変性
+`σ(a·x)=a·σ(x)`——cross-point instance bridgingという既知の
+難所——を要する見通し)。 -/
+theorem existsUnique_unitActionQuotient_eq_algEquiv
+    {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) (x : K.closure)
+    (hxψ : x ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn)
+    (hxn : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (σ : K.closure ≃ₐ[K.carrier] K.closure) :
+    ∃! U : (𝒪[K.carrier])ˣ ⧸ principalUnits K π n,
+      (↑(↑(unitActionQuotientLift K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem U) :
+          IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) = σ x := by
+  have hσxψ : σ x ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn :=
+    algEquiv_mem_iteratedLubinTatePsiTorsionPoints_of_mem K hq hπmax hπne0 f hf0 hf1 hf n hn σ x hxψ
+  obtain ⟨U, hU⟩ := (unitActionQuotientBijOn_bijective K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem).2
+    ⟨σ x, hσxψ⟩
+  refine ⟨U, congrArg Subtype.val hU, ?_⟩
+  intro U' hU'
+  apply unitActionQuotientBijOn_injective K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem
+  apply Subtype.ext
+  show (↑(↑(unitActionQuotientLift K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem U') :
+      IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) =
+    (↑(↑(unitActionQuotientLift K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem U) :
+      IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure)
+  rw [hU']
+  exact (congrArg Subtype.val hU).symm
+
 end ABC3.Found.PGC
