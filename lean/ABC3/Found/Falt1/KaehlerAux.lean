@@ -1759,6 +1759,31 @@ theorem pushoutKaehlerSplitStep_length {R B1 C B : Type*} {ι : Type*} [Fintype 
   have e := ABC3.Found.Falt1.pushoutKaehlerSplitStep (R := R) (B1 := B1) (C := C) (B := B) F prev hinj
   rw [LinearEquiv.length_eq e, Module.length_prod, module_length_pi]
 
+set_option maxHeartbeats 800000 in
+/-- **`pushoutKaehlerSplitStepOption` の長さ版**: `pushoutKaehlerSplitStep_length`
+の`Option ι`連鎖版。`module_length_pi`(`Option ι`添字のPi型にも
+無条件に適用できる)+`Fintype.sum_option`(`Option ι`上の和を
+`none`の項と`ι`上の和に分ける)を組み合わせるだけ——これで
+`pushoutKaehlerSplitStepOption`を`n`回反復適用した結果の長さが、
+各段で追加した因子の長さの和としてそのまま追跡できる。 -/
+theorem pushoutKaehlerSplitStepOption_length
+    {R : Type uFalt1R} {B1 : Type uFalt1T} {B : Type uFalt1B}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    [CommRing R] [CommRing B1] [CommRing B]
+    [Algebra R B1] [Algebra R B]
+    (C : RAlg.{uFalt1R, uFalt1Car} R) (F : ι → RAlgOver.{uFalt1R, uFalt1Car, uFalt1T} R B1)
+    [Algebra C.carrier B1] [Algebra B1 B] [Algebra C.carrier B] [IsScalarTower R B1 B] [IsScalarTower R C.carrier B]
+    [Algebra.IsPushout R B1 C.carrier B]
+    (prev : Ω[B1⁄R] ≃ₗ[B1] (∀ i, TensorProduct (F i).carrier B1 Ω[(F i).carrier⁄R]))
+    (hinj : Function.Injective (KaehlerDifferential.mapBaseChange R B1 B)) :
+    Module.length B (Ω[B⁄R]) =
+      Module.length B (TensorProduct C.carrier B Ω[C.carrier⁄R]) +
+      ∑ j, Module.length B (TensorProduct ((F j).lift (B := B)).carrier B
+        Ω[((F j).lift (B := B)).carrier⁄R]) := by
+  have e := pushoutKaehlerSplitStepOption (R := R) (B1 := B1) (B := B) C F prev hinj
+  rw [LinearEquiv.length_eq e, module_length_pi, Fintype.sum_option]
+  rfl
+
 /-!
 ## Theorem 1.2 の4番目のピース: 長さの漸化不等式から `δ_n→0`(2026-09-04、完成)
 
