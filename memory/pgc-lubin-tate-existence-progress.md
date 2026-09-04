@@ -2956,3 +2956,82 @@ Galois拡大なので矛盾なく定義できる)経由で見ているにすぎ�
 構造(可換性)を検算する**ことで、無駄な証明の試みを未然に防げた
 ——これも「進捗」として記録する(CLAUDE.mdの姿勢: 誤った道を検算で
 避けられたことは後退ではない)。
+
+## ★★★重要な発見(2026-09-05、`reciprocityMap`の**単一レベルnでの
+全射性**は既に確立済みだった——`reciprocityMapLimit`の全射性への
+具体的な道筋が見えた)
+
+上の軌道修正を受けて(iii)-1(全射性)の実現可能性を調べたところ、
+`reciprocityMap`が固定レベル`n`で**全射**であることは、
+`Found/PGC/LubinTateReciprocitySurjective.lean::reciprocityMap_
+surjective`として**既にsorry無しで確立されていた**(コミット
+`232b930c`、日時2026-09-04 21:41——今回のセッションの(i)(ii)より
+前、`git log`で確認: `086f3a7c`(今回作った`reciprocityMapLimit`)
+の92コミット前、ずっと以前に他の作業として完成していたが、今回
+`reciprocityMapLimit`ができるまで組み合わせる相手が無く「宙に
+浮いていた」形)。
+
+**`reciprocityMap_surjective`の証明の骨格**(読解結果): `ψ_n`が
+`𝒪_K`上既約(`irreducible_iteratedLubinTatePsi`、既出)ことから、
+2つの`ψ_n`の根`x,y`は同じ最小多項式を持つ——mathlibの`minpoly.
+exists_algEquiv_of_root'`(`K.closure`が代数閉包であることから
+`Normal K.carrier K.closure`を使う)により**直接**`σ(x)=y`となる
+`σ∈Gal(K.closure/K.carrier)`が存在する(`AdjoinRoot`/`IsAlgClosed.
+lift`を手作業で組む必要が無い、軽い経路)。これと`unitAction
+QuotientBijOn_bijective`(既出)を組み合わせるだけ。
+
+### `reciprocityMapLimit`の全射性への具体的な計画
+
+`v∈CompatibleUnits`を任意に取る。目標: `∃σ,reciprocityMapLimit σ=v`。
+
+1. **`v`を単一の大域単数`u:𝒪_K^×`へ持ち上げる**: `unitReductionHom_
+   surjective`(既出、`UnitsInverseLimit.lean`)で`u`を得る——
+   `unitReductionFamily K hπmax u = v`(すべての`n`で同時に両立する
+   持ち上げ)。これで「各`n`で別々の`σ_n`を選ぶと`n`ごとに矛盾しうる」
+   という問題は**回避できる**——`u`は`n`に依らない単一の単数。
+2. **`K_π:=⨆n,K.carrier⟮(psiGenSeq n).pt⟯`を定義**(新しい
+   スケルトン/構成要素、原文に無い暗黙の対象——古典的Lubin-Tate理論
+   の`K(Λ_∞)`)。
+3. **`Normal K.carrier K_π`を示す**: `IntermediateField.normal_iSup`
+   (mathlib、`instance normal_iSup {t:ι→IntermediateField F K}
+   [∀i,Normal F(t i)]:Normal F(⨆i,t i)`)により、**各n**での
+   `Normal K.carrier K.carrier⟮(psiGenSeq n).pt⟯`さえ示せば自動的に
+   従う。各nの正規性は、`separable_iteratedLubinTateDistinguished_
+   map`・`card_roots_iteratedLubinTatePsi_map`(既出、`LubinTate
+   DistinguishedSeparable.lean`——分離性・根の個数)と、`ψ_n`の根が
+   すべて`K.carrier⟮x⟯`に含まれること(Lubin-Tate形式群の作用で
+   `𝒪_K`が`x`の生成する拡大の中で全捩れ点を生成する、という古典的
+   事実——`lubinTateActionAtTorsionPoint`系のどれかから従うはずだが
+   **未検証**)を組み合わせて示す見込み。★この最後の一歩(全ての根が
+   `K(x)`に収まること)がまだ検証していない、次の具体的な検査点。
+4. **`τ:K_π≃ₐ[K.carrier]K_π`を構成**(`τ((psiGenSeq n).pt)=
+   u·(psiGenSeq n).pt`をすべての`n`で同時に満たす): 各`n`での
+   両立性(`u`が`n`に依らないので、`lubinTateActionAtTorsionPoint`
+   の`n`をまたぐ両立性——`LubinTateTowerCompatible.lean`の`π`版の
+   議論と類似の議論——を使えば`τ`が矛盾なくwell-definedになる見込み)
+   から、`K_π`(への値を持つ)整合的な代数自己同型として構成する。
+   ★これも未着手・未検証、おそらく本セッションの(ii)の`hstep`と
+   類似の技巧(隣接レベル間の両立性→`compatible_of_succ`型の一般化)
+   が要る。
+5. **`AlgEquiv.restrictNormalHom_surjective`(mathlib、`[Normal F K₁]
+   [Normal F E]`で`Gal(E/F)→(K₁≃ₐ[F]K₁)`が全射)を`τ`に適用**し、
+   `σ:K.closure≃ₐ[K.carrier]K.closure`で`K_π`への制限が`τ`に一致する
+   ものを得る。これで`σ((psiGenSeq n).pt)=u·(psiGenSeq n).pt`が
+   すべての`n`で成り立ち、一意性(`existsUnique_unitActionQuotient_
+   eq_algEquiv`)経由で`reciprocityMapLimit σ=v`が従う見込み。
+
+### 単射性(訂正後の正しい主張)への布石
+
+`K_π`が構成できれば、`ker(reciprocityMapLimit)`は`Gal(K̄/K_π)`
+(=`K_π.fixingSubgroup`、`IntermediateField.restrictNormalHom_ker`
+がまさにこの形——`(restrictNormalHom E).ker=E.fixingSubgroup`)に
+一致するはず、というのが訂正後の正しい主張(上の軌道修正を参照)。
+`K_π`さえ構成できれば、この核の特徴づけも射程に入る。
+
+**次に戻るときの最優先タスク**: 上記3(各`K(Λ_n)`の正規性、特に
+「`ψ_n`の全根が`K(x)`に収まる」という事実の所在確認)から着手する
+のが最も低リスクで具体的な出発点——`LubinTateActionPiPow.lean`か
+`LubinTateTowerCompatible.lean`の`lubinTateActionAtTorsionPoint`系
+を`grep`して、`𝒪_K`(または`(𝒪_K/π^n)^×`)の作用で得られる元がすべて
+`adjoinIntegers K x`(ひいては`K.carrier⟮x⟯`)に収まることを述べる
+既存の定理を探すところから。
