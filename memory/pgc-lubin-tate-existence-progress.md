@@ -363,6 +363,19 @@ Weierstrass分解であることを`Polynomial.IsDistinguishedAt.mul`
 多重集合版(`Λ_n⊆Λ_m`)も得た。これで`Λ_n`が`n`について単調に増大
 する族を成すことが確立された。
 
+**続報(2026-09-04、`0∈Λ_n`の整合性確認+次の壁の見立て)**:
+`zero_mem_iteratedLubinTateDistinguishedRoots`(`D_n(0)=0`の言い換え)。
+★節目(3)の次の壁は**分離性**(`Λ_n`が真に`q^n`個の相異なる元を持つ
+こと)——古典的な証明は導関数の付値評価(ramification-theoretic)を
+要し、本セッションでは未着手の新規の数学的内容と見立てた。副産物として
+mathlibに`RingTheory/PowerSeries/Evaluation.lean`(`PowerSeries.HasEval`・
+`aeval`・`eval₂`、位相環での冪級数の「点での評価」)があることを発見
+——将来`𝒪_K`加群作用を`Λ_n`の点に実際に作用させる際の加速要因になり
+うるが、代数閉包に適切な位相・付値を載せる作業が別途必要。代替案
+(`PowerSeries.weierstrassMod`経由の`A[X]/(D_n)`への純代数的な作用)も
+検討したが、well-defined性の証明が新たな作業として残る。詳細は
+`ResearchPaper/blocked-leaves.json`の`progress2026_09_04v`。
+
 **残る作業**: 節目(3)torsion点の構成本体(`D_n`の根を`Λ_n`として定義、
 `𝒪_K`加群構造、`K(Λ_n)/K`の完全分岐性)、節目(4)
 `L_n:=K(Λ_n)`が完全分岐かつ`Gal(L_n/K)≅(𝒪_K/π^n)^×`(Lubin-Tateの
