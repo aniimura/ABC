@@ -4090,3 +4090,42 @@ preimage_basicOpen`を`pullback.fst`・`α`の2段に適用する場面、
 Opens)`のように書きたい形を先に固定する)、`rw`ではなく`exact`(defeq
 判定)で個別に閉じる——`rw`の自動連鎖を諦めて1段ずつ`have`で刻むのが
 安全。
+
+## 38. `Option.elim i A B`のような**依存する`match`族**に対する
+`instance`は、`inferInstance`だけでは各枝で閉じない
+
+`Option.elim i QC Q`(`i:none`なら`QC`、`i:some j`なら`Q j`)という
+族に対して`∀ i, AddCommGroup (Option.elim i QC Q)`という`instance`を
+`match`で
+
+```lean
+instance : ∀ i : Option α, AddCommGroup (Option.elim i QC Q)
+  | none => inferInstance
+  | some j => inferInstance
+```
+
+のように書くと、`none`の枝で `failed to synthesize instance of type
+class AddCommGroup (none.elim QC Q)` のように**簡約前の形のまま**
+探索に失敗する——`match`の各枝で`Option.elim`が定義通り`QC`/`Q j`に
+簡約されることを、`inferInstance`(型クラス探索)は自動では認識
+しない(探索は構文的な頭部記号でインスタンスを絞り込むため、
+`Option.elim none QC Q`という頭部が`Option.elim`のままだと`QC`用の
+インスタンスが候補に挙がらない)。直し方は、`show`で先に**簡約後の
+型**へ変換してから`infer_instance`する:
+
+```lean
+instance : ∀ i : Option α, AddCommGroup (Option.elim i QC Q)
+  | none => by show AddCommGroup QC; infer_instance
+  | some j => by show AddCommGroup (Q j); infer_instance
+```
+
+`show`は`isDefEq`(kernelのdefeqチェック)で照合するので、
+`Option.elim none QC Q`と`QC`が定義上等しいことは問題無く通る——
+`#1`「instances透明度で型が合わない」・`#33`「型クラス**探索**にも
+起きる」と同根だが、今回は「探索対象の型そのものが未簡約」という、
+また別の症状。
+
+実例: `lean/ABC3/Found/Falt1/KaehlerAux.lean`の
+`falt1_optionElim_addCommGroup`/`falt1_optionElim_module`
+(`pushoutKaehlerSplitStepOption`の`Option ι`出力と、成分ごとの
+全射`φC`/`φ i`の像`QC`/`Q i`を束ねる場面)。

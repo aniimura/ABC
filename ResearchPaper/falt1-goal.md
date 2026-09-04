@@ -3058,6 +3058,42 @@ mathlib での正確な組み立て方は未確認)。
         無し)。これで Exercise 13.7.4 step (3) の**単一因子の線形
         base change**が完成し、残るは`pushoutKaehlerSplitStepOption`
         との統合による`d+1`因子版への配線のみ。
+
+      ★★2026-09-05、続けてその「配線」の**帰納の1段**を実際に確立
+      した。`pushoutKaehlerSplitStepOption`は`Ω[B/R] ≃ₗ[B] (∀i:Option
+      ι,...)`という`Option ι`添字の積への同型を与える——これと(a)
+      新規因子`C`についての全射`φC`(`falt1_omegaAdjoinRoot_surjective_
+      quotient_p_baseChange`を渡す想定)・(b)前段までの各因子`F i`に
+      ついて`B`へ運んだ後の全射`φ i`の**成分ごとの全射性**を
+      `LinearMap.piMap`(mathlibの、成分ごとの線形写像から積型の間の
+      線形写像を作る道具)+`Function.Surjective.piMap`(純粋な集合論の
+      「成分ごと全射→積全体で全射」)で束ね、`Ω[B/R]`から`(∀i:Option
+      ι, Option.elim i QC Q)`への全射を得る`falt1_pushoutKaehlerSplit
+      StepOption_surjective`を完成させた。副産物として:
+      - `falt1_piMap_surjective`: `LinearMap.piMap`の全射性
+        (`LinearMap.coe_piMap`で強制関数の記述を`Pi.map`に落とし、
+        `Function.Surjective.piMap`を適用するだけ)。
+      - `falt1_optionElim_addCommGroup`/`falt1_optionElim_module`:
+        `Option.elim i QC Q`という**依存する**族に対する`AddCommGroup`/
+        `Module`インスタンス。`match`の各枝で`Option.elim`が定義通り
+        簡約されることを型クラス探索は自動では認識しない
+        (`inferInstance`だけでは`AddCommGroup (none.elim QC Q)`が
+        解決できない)ため、`show`で先に簡約後の型へ変換してから
+        `infer_instance`する、という一手間が必要だった——新しい失敗形
+        として`tools/lean-idioms.md`に足す価値がある。
+      3定理とも`lean_check`で確認後、`KaehlerAux.lean`に追記・`lake
+      build`成功(sorry無し)。これで Exercise 13.7.4 step (3) の
+      「帰納の1段」が一般形で完成した。残る作業は、この帰納を
+      **実際の`V_n`塔**(`d+1`個のEisenstein型生成元を`pushoutKaehler
+      SplitStepOption`で`n`回連鎖)に対して`n`回回し、`falt1_omegaAdjoin
+      Root_surjective_quotient_p_baseChange`を各段の`φC`として実際に
+      渡す配線——`falt1_pushoutKaehlerSplitStepOption_adjoinRoot_
+      example`(具体例、`True`で終わる骨格のみ)を土台に、そこへ実際に
+      全射性の主張を載せる作業として次回に持ち越す。なお`pushoutKaehler
+      SplitBase`が使う`ι=Fin 1`の出発点(`R`自身をダミーの1因子とする)
+      は`Ω[R/R]=0`を寄与するだけなので、対応する`QC`/`Q`はダミーの
+      自明加群(例えば`PUnit`)を渡せば良いはずで、実質的な障害には
+      ならない見込み(未検証)。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・

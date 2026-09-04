@@ -5506,4 +5506,86 @@ theorem falt1_omegaAdjoinRoot_surjective_quotient_p_baseChange' {R B : Type*} [C
   refine ⟨(e0.toAddMonoidHom.comp (eComm.toAddMonoidHom.comp (LinearMap.baseChange B φ).toAddMonoidHom) : _ →+ _), ?_⟩
   exact e0.surjective.comp (eComm.surjective.comp (LinearMap.baseChange_surjective B hφ))
 
+/-!
+## `pushoutKaehlerSplitStepOption`と単一因子の全射性を組み合わせる
+(2026-09-05)
+
+`falt1_omegaAdjoinRoot_surjective_quotient_p_baseChange`は`d+1`個の
+生成元のうち**1個だけ**に関する主張である。ここでは、それを
+`pushoutKaehlerSplitStepOption`の`Option ι`分解と`LinearMap.piMap`
+(各成分の全射を束ねて積全体の全射にする一般道具)で組み合わせ、
+「各因子の全射性が分かっていれば全体`Ω[B/R]`から積への全射が
+従う」という**帰納の1段**を確立する。 -/
+
+universe uFalt1Q
+
+/-- `Option.elim`で束ねた2つの加法群の族が、成分ごとに`AddCommGroup`
+であれば全体としても`AddCommGroup`であること(`match`の各枝で
+`Option.elim`が定義通り簡約されることを`show`で明示するだけ)。 -/
+instance falt1_optionElim_addCommGroup {α : Type*} {QC : Type uFalt1Q} {Q : α → Type uFalt1Q}
+    [AddCommGroup QC] [∀ i, AddCommGroup (Q i)] : ∀ i : Option α, AddCommGroup (Option.elim i QC Q)
+  | none => by show AddCommGroup QC; infer_instance
+  | some j => by show AddCommGroup (Q j); infer_instance
+
+/-- 上と同様、`Module`版。 -/
+instance falt1_optionElim_module {α : Type*} {B : Type*} [Semiring B] {QC : Type uFalt1Q} {Q : α → Type uFalt1Q}
+    [AddCommGroup QC] [Module B QC] [∀ i, AddCommGroup (Q i)] [∀ i, Module B (Q i)] :
+    ∀ i : Option α, Module B (Option.elim i QC Q)
+  | none => by show Module B QC; infer_instance
+  | some j => by show Module B (Q j); infer_instance
+
+/-- **`LinearMap.piMap`の全射性**: mathlibの`LinearMap.piMap`(成分ごとの
+線形写像の族から積型の間の線形写像を作る)と`Function.Surjective.piMap`
+(成分ごとの全射から積全体の全射を作る、純粋な集合論の道具)を
+`LinearMap.coe_piMap`(強制関数の記述)で橋渡しするだけ。 -/
+theorem falt1_piMap_surjective {R : Type*} [Ring R] {ι : Type*}
+    {φ ψ : ι → Type*} [∀ i, AddCommGroup (φ i)] [∀ i, AddCommGroup (ψ i)]
+    [∀ i, Module R (φ i)] [∀ i, Module R (ψ i)]
+    (f : ∀ i, φ i →ₗ[R] ψ i) (hf : ∀ i, Function.Surjective (f i)) :
+    Function.Surjective (LinearMap.piMap f) := by
+  have hcoe : ⇑(LinearMap.piMap f) = Pi.map (fun i => f i) := LinearMap.coe_piMap f
+  rw [Function.Surjective, hcoe]
+  exact Function.Surjective.piMap hf
+
+/-- **帰納の1段、本節の到達点**: `pushoutKaehlerSplitStepOption`が
+与える`Ω[B/R] ≃ₗ[B] (∀i:Option ι,...)`と、(a)新しい因子`C`について
+の全射`φC`・(b)前段までの各因子`F i`について(`B`へ運んだ後の)
+全射`φ i`、この2種類の**成分ごとの全射性**さえ分かっていれば、
+`Ω[B/R]`から`(∀i:Option ι, Option.elim i QC Q)`への全射が従う。
+`falt1_omegaAdjoinRoot_surjective_quotient_p_baseChange`を`φC`として
+渡せば、Exercise 13.7.4 step (3)の`d+1`因子版がこの帰納法の各段で
+閉じる——残る作業は、具体的な`V_n`塔(`Eisenstein`型`d+1`個の生成元)
+についてこの帰納を実際に`n`回回すことのみ。 -/
+theorem falt1_pushoutKaehlerSplitStepOption_surjective
+    {R : Type uFalt1R} {B1 : Type uFalt1T} {B : Type uFalt1B}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    [CommRing R] [CommRing B1] [CommRing B]
+    [Algebra R B1] [Algebra R B]
+    (C : RAlg.{uFalt1R, uFalt1Car} R) (F : ι → RAlgOver.{uFalt1R, uFalt1Car, uFalt1T} R B1)
+    [Algebra B1 B] [Algebra C.carrier B] [IsScalarTower R B1 B] [IsScalarTower R C.carrier B]
+    [Algebra.IsPushout R B1 C.carrier B]
+    (prev : Ω[B1⁄R] ≃ₗ[B1] (∀ i, TensorProduct (F i).carrier B1 Ω[(F i).carrier⁄R]))
+    (hinj : Function.Injective (KaehlerDifferential.mapBaseChange R B1 B))
+    {QC : Type uFalt1Q} [AddCommGroup QC] [Module B QC]
+    (φC : TensorProduct C.carrier B Ω[C.carrier⁄R] →ₗ[B] QC) (hφC : Function.Surjective φC)
+    {Q : ι → Type uFalt1Q} [∀ i, AddCommGroup (Q i)] [∀ i, Module B (Q i)]
+    (φ : ∀ i, TensorProduct ((F i).lift (B := B)).carrier B Ω[((F i).lift (B := B)).carrier⁄R] →ₗ[B] Q i)
+    (hφ : ∀ i, Function.Surjective (φ i)) :
+    ∃ ρ : Ω[B⁄R] →ₗ[B] (∀ i : Option ι, Option.elim i QC Q), Function.Surjective ρ := by
+  set e := pushoutKaehlerSplitStepOption (R := R) (B1 := B1) (B := B) C F prev hinj with he
+  set f : ∀ i : Option ι, (TensorProduct (Option.elim i (⟨C.carrier⟩ : RAlgOver.{uFalt1R, uFalt1Car, uFalt1B} R B)
+        (fun j => (F j).lift (B := B))).carrier B
+        Ω[(Option.elim i (⟨C.carrier⟩ : RAlgOver.{uFalt1R, uFalt1Car, uFalt1B} R B)
+          (fun j => (F j).lift (B := B))).carrier⁄R]) →ₗ[B] Option.elim i QC Q :=
+    fun i => match i with
+      | none => φC
+      | some j => φ j with hf
+  have h1 : Function.Surjective (LinearMap.piMap f) :=
+    falt1_piMap_surjective f (by intro i; cases i with
+      | none => exact hφC
+      | some j => exact hφ j)
+  have h2 : Function.Surjective e.toLinearMap := e.surjective
+  refine ⟨(LinearMap.piMap f).comp e.toLinearMap, ?_⟩
+  exact h1.comp h2
+
 end ABC3.Found.Falt1
