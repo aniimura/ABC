@@ -1586,3 +1586,29 @@ lemma_4_1のh:ZK=D.Ext Z(文字通りの等号)構造的懸念は今回の調査
 (isIsogenous_refl回帰リスク)であり判断を変える新情報は無い——遷移
 データのRレベル降下という低リスクインフラ構築を優先。集計は10/24で
 変わらず。corrhyp-goal.mdに詳細記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05(続き4)
+★大きな前進★ exists_mvPolynomial_quotient_ringHom_descendを証明
+(commit 19121fe9)——「項目(d)の第二段」(遷移データのRレベル降下)の
+核心が完成した。RingHom.EssFiniteTypeのfiltered colimit機構より
+もっと直接的な道: ℚが体なのでA(ℚ-ベクトル空間)はModule.Flat——
+R'.1↪ℝという単射をAでテンソルしても単射性が保たれる
+(Module.Flat.lTensor_preserves_injective_linearMap)。これにより
+「ℝレベルで等しいなら、その場のR'で既に等しい」という強い主張が
+直接出る(commit 6e7c7734でalgebraTensorMap_val_injective系を構築)。
+
+MvPolynomial.mapとaevalの可換性(mvPolynomial_map_aeval_comm、
+mathlibに完成品が無かったので手で組んだ)を経て
+mvPolynomial_aeval_eq_zero_of_map_aeval_eq_zero(commit 0e1b9b33)、
+そしてexists_fgSubalgebra_upperBound2+algebraTensorMap_val_comp_
+inclusionを組み合わせ、exists_mvPolynomial_quotient_ringHom_descend
+を完成: ℝレベルで分かっている遷移写像の生成元の対応(有限個)から、
+実際にR'レベルの候補写像を構成的に取り出せることを証明した。
+
+transitionElem/gdT/cocycleのRレベル版に相当する遷移データの降下が、
+650行規模の個別GlueDataエンジニアリング再構築ではなく、この1つの
+補題へのPresentationデータのspecializeとして実現できる見込みが
+立った——見積もりの大幅な改善。次の一手: 実際に2つの隣接する
+descendPieceRの重なり部分へspecializeし、得られた候補写像が同型
+であることを確認する(未着手)。lake build(FieldLimit/ABC3)0エラー
+確認、push済み。集計は10/24で変わらず。corrhyp-goal.mdに詳細記録。

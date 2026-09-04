@@ -3526,3 +3526,59 @@ Rレベル精密化で既に定義されている」ことが示せる見込み�
 それを再度確認しただけで、判断を変える新情報は無い——遷移データの
 Rレベル降下という「低リスクな」インフラ構築を優先する方針は変わらず
 妥当。集計は10/24で変わらず——§4は引き続き0/2。
+
+## 2026-09-05(続き5): ★大きな前進★ 遷移写像のRレベル降下——`exists_
+mvPolynomial_quotient_ringHom_descend`を証明。`RingHom.EssFiniteType`の
+filtered colimit機構より**もっと直接的な**道筋が見つかった
+
+前回見積もった`RingHom.EssFiniteType.exists_comp_map_eq_of_isColimit`
+経由の道筋(`A⊗[ℚ]-`でテンソルした余極限を構成する必要があった)を
+実際に試みる前に、**もっと単純な道**に気づいた: `ℚ`が体なので任意の
+`ℚ`-加群(とくに`A`)は`Module.Flat`——`R'.1↪ℝ`という単射を`A`でテンソル
+しても単射性が保たれる(`Module.Flat.lTensor_preserves_injective_
+linearMap`、mathlib)。これにより「ℝレベルで等しいなら、共通の精密化を
+探すまでもなく**その場の`R'`で既に等しい**」という、filtered colimit
+の一般論より**強い**主張が体上のベクトル空間の平坦性から直接出る。
+
+これを軸に、以下を`FieldLimit.lean`へ実際に構築・検証した(すべて
+`lean_check`で個別検証後ファイルへ反映、`lake build`(FieldLimit/
+ABC3とも)0エラー確認):
+
+- `algebraTensorMap_val_injective`・`mvPolynomial_map_algebraTensorMap_
+  val_injective`・`mvPolynomial_algebraTensorMap_val_eq_zero_of_map_
+  eq_zero`: 上記の単射性とその`MvPolynomial`版・「ℝへbase changeして
+  `0`なら`R'`で既に`0`」の言い換え(commit `6e7c7734`)。
+- `mvPolynomial_map_aeval_comm`: `MvPolynomial.map`と`aeval`(生成元
+  代入)の可換性——`MvPolynomial.induction_on`の3ケースで直接計算
+  (mathlibに完成品が無かったので手で組んだ)。
+- `mvPolynomial_aeval_eq_zero_of_map_aeval_eq_zero`: 上記2つを合成
+  ——遷移写像の候補(`R'`レベルの`ev`)がℝレベルで関係式を満たすなら
+  `R'`レベルで既に満たす(commit `0e1b9b33`)。
+- `exists_fgSubalgebra_upperBound2`(`exists_fgSubalgebra_upperBound`
+  の2引数版)・`algebraTensorMap_val_comp_inclusion`(昇格とℝへ送る
+  写像の両立)を経て、**`exists_mvPolynomial_quotient_ringHom_
+  descend`**を完成させた(commit `19121fe9`)——`q:κ→MvPolynomial
+  ι(A⊗R.1)`(片1の関係式、`R`レベル)と`ψ:ι→MvPolynomial ι'(A⊗ℝ)`
+  (既知のℝレベルの遷移写像が生成元に送る値、有限個)から出発し、
+  `exists_fg_subalgebra_tensor_mvPolynomial_finset`で`ψ`の値を共通
+  の`R₀`へ降ろし、`R`と`R₀`を`exists_fgSubalgebra_upperBound2`で
+  合流させ、昇格した候補写像`ev`が実際に`ψ`を再現しかつ関係式を
+  満たすことを証明した。
+
+**これで、「ℝレベルで分かっている遷移写像の生成元の対応」から
+「実際に`R'`レベルの候補写像」を構成的に取り出せることが証明された**
+——`transitionElem`/`gdT`/`cocycle`のRレベル版に相当する遷移データの
+降下が、個別のGlueDataエンジニアリングの再構築(650行規模)ではなく、
+この1つの補題への`Presentation`データのspecializeとして実現できる
+見込みが立った。「項目(d)の第二段」の核心部品が完成した。
+
+次の一手(未着手): `exists_mvPolynomial_quotient_ringHom_descend`を、
+実際に2つの隣接する`descendPieceR`(異なる`R_i`)の重なり部分へ
+specialize する——重なり部分自身のℝレベルの遷移写像(既存の`gdT`/
+`transitionElem`インフラから取れる見込み)を`ψ`として与え、両方の
+`S_0`の関係式(`Algebra.Presentation.ofFinitePresentation`由来)を
+`q`として渡す配線。さらに、得られた`R'`レベルの候補写像が実際に
+**同型**であること(逆写像も同様に降ろし、往復合成が恒等になることを
+同じ単射性のトリックで示す)を確認する必要がある。集計は10/24で
+変わらず——§4は引き続き0/2、ただしLemma 4.1完成に必要な核心部品が
+実際に揃った。
