@@ -938,12 +938,34 @@ mathlib での正確な組み立て方は未確認)。
     `IsScalarTower V0 Wₙ Wₙ₊₁`)が揃った。残る(未着手):
     `Algebra V1 Wₙ₊₁`・`IsScalarTower V0 V1 Wₙ₊₁`(パターン確認済み、
     `letI`でインライン展開する方針)、`Module.Finite/IsTorsionFree
-    V1 Wₙ₊₁`(**`ψ:=falt1BaseChangeAlgHom` の単射性を要する、
-    まだ証明していない新しい数学的内容**——`ψ` は `AdjoinRoot.map`
-    経由で構成されており、`deg f = deg g = n`(同じ次数)という
-    構成から、基底 `{1,X,...,X^{n-1}}` を基底へ送ることに由来する
-    単射性が期待できる、が未検証)、`hsep`(`Algebra.IsSeparable
+    V1 Wₙ₊₁`(`ψ:=falt1BaseChangeAlgHom` の単射性を要する、
+    まだ証明していない新しい数学的内容)、`hsep`(`Algebra.IsSeparable
     (FractionRing V0)(FractionRing Wₙ₊₁)`)。
+
+    ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、**`ψ` の単射性が
+    完成した**(`adjoinRoot_map_mk`・`adjoinRoot_map_injective_of_map_eq`・
+    `algHomAdjoinRootOfCompat'_injective`・`_cast_injective`・
+    `falt1BaseChangeAlgHom_generator_and_injective`、commit `e3ae2da5`)
+    ——このセッション後半で唯一残っていた**新しい数学的内容**だった。
+    予想(基底 `{1,...,X^{n-1}}` の対応)通りだったが、実際には
+    **`PowerBasis` の基底展開を一切経由せず**、mathlib の
+    `Polynomial.map_dvd_map`(`x` が monic・係数写像が単射なら
+    `x.map f ∣ y.map f ↔ x ∣ y`——多項式の割り算アルゴリズムが monic
+    除数に対して任意の可換環上で機能することの帰結)を直接使うだけで
+    閉じた——`AdjoinRoot.map` の核が「`p∣r`」という単純な条件に
+    帰着することが、`AdjoinRoot.lift_mk`+`Polynomial.eval₂_map`+
+    `AdjoinRoot.aeval_eq` で `mk` への作用を計算し、`AdjoinRoot.mk_
+    eq_zero` へ橋渡しするだけで示せた。
+
+    ★★続けて **`Module.IsTorsionFree V1 Wₙ₊₁` も即座に完成した**
+    (`falt1ModuleIsTorsionFreeV1Wn1`、commit `ce9e4bc2`)——`ψ` の
+    単射性を `moduleIsTorsionFree_of_injective`(既存の汎用補題)に
+    直接渡すだけ。★これで約20個中**9個**+ `Algebra V1 Wₙ₊₁`・
+    `IsScalarTower V0 V1 Wₙ₊₁`(パターン確認済み)が揃った。
+    **残るのは `Module.Finite V1 Wₙ₊₁`(単射像の有限生成性の議論、
+    `ψ` が単射なのでおそらく `Submodule.fg_of_injective` 的な既製品
+    一発で閉じるはず)と `hsep` のみ**——`differentIdeal_tower_diamond`
+    の instance 整備は完成が視野に入った。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
