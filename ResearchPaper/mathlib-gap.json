@@ -1687,7 +1687,7 @@
     "partial": [],
     "absentPart": "almost étale covering の定義(射影性・トレース・idempotent近似)、almost isomorphism(核・余核がmで零化される、という圏論的な近似同型概念)、Hochschild cohomology のalmost版、m-torsion加群の一般論そのもの。"
    },
-   "minimalForm": "Definition 2.1(定義そのもの)は、対象を丸ごとpositせずに実際の3条件(projective module・trace map・idempotent近似)を書き下すことはできる(既存のProjective/Trace/Idempotent APIを使える可能性)。ただしTheorem 2.2以降(lifting・covering存在・almost isomorphism)は「almost」という近似同型の概念自体を扱う一般論が要るため、Definition止まりでは進めない。",
+   "minimalForm": "Definition 2.1(定義そのもの)は、対象を丸ごとpositせずに実際の3条件(projective module・trace map・idempotent近似)を書き下すことはできる(既存のProjective/Trace/Idempotent APIを使える可能性)。ただしTheorem 2.2以降(lifting・covering存在・almost isomorphism)は「almost」という近似同型の概念自体を扱う一般論が要るため、Definition止まりでは進めない。 ★★★★★2026-09-04(ABC3c)追記: 実際に Definition 2.1 の formalize に着手し、「思ったより速くは進まない」ことを実測した。(1) Algebra (Localization.Away p) (Localization.Away (algebraMap A B p)) はタダでは手に入らない——Localization.awayMap: Localization.Away r →+* Localization.Away (f r) (RingTheory/Localization/Away/Basic.lean)を RingHom.toAlgebra で手動配線する必要がある。(2) LinearMap.trace は「基底が存在する場合はその基底で計算・存在しなければ0」という定義(if H : ∃ s, Nonempty (Module.Basis s R M) then ... else 0)で、Algebra.trace (RingTheory/Trace/Defs.lean)も [Module.Free R S] を要求する——Definition 2.1 の「projective(有限階数)」条件を忠実に(free に限定せず)書くと、trace map 自体を定義するための「有限射影加群の trace」構成が mathlib に無く、自作するか(Module.Dual 経由の余評価写像で作れるはずだが未着手)、Module.Free を追加仮定する逸脱が要る。★結論: Definition 2.1 単独も「既存 API の組み合わせ」では閉じず、小さくとも新規の補題(localization の algebra 化・射影加群の trace)が要る。",
    "nodes": 11,
    "nodesNote": "§2(4項目)+§3(2項目)+§4(4.1-4.3・4.5の4項目、4.4は別途[LocProP]用の縮小形あり)= 11項目がこの理論1本の上に立つ。§1(2項目)だけがこれと独立(differentIdeal・KaehlerDifferentialというmathlib既存インフラで攻められる、falt1-lemma11-kaehler参照)。",
    "done": 0,
