@@ -2337,3 +2337,46 @@ K.carrier`なので同じ補題がそのまま適用できる)が出た。これ
 ノルムが`<1`に収まる」という非アルキメデス的な極限の見積もり
 (既存の`aeval_formalGroupLaw_eq_of_snd_eq_zero`と同系統の
 truncation-limit手法の再利用が見込めるが、まだ着手していない)。
+
+## 続報(2026-09-04、主定理 `galoisReciprocityEquiv` 完成後——
+節目(5)射影極限へ向けた最初の一歩、`LubinTateTowerCompatible.lean`、
+commit 準備中): 捩れ塔が compatible system をなすことを確立
+
+主定理(`galoisReciprocityEquiv`)は各 `n` ごとに独立に
+`Gal(K.carrier⟮x⟯/K.carrier)≃*(𝒪_K/π^n𝒪_K)^×` を与えるが、
+`Gal(L_π/K)≅𝒪_K^×`(節目(5)、射影極限)を組むには「`n` を跨いで
+生成元 `x_n` を compatible に選べる」という古典的な事実——
+`x_{n+1}` が `ψ_{n+1}` の根(原始的なπ^{n+1}-捩れ点)なら
+`π·x_{n+1}` が `ψ_n` の根(原始的なπ^n-捩れ点)である——が要る。
+これを2段階でsorry無しで確立した:
+
+1. `lubinTateActionAtTorsionPoint_pi_mem_pred`: `x∈Λ_{n+1}` ならば
+   `π·x∈Λ_n`(1段下がる)。`lubinTateActionAtTorsionPoint_mem`
+   (`AdjoinIntegers.lean`、同じ段に留まる事実)と全く同じ証明の
+   骨格(`lubinTateAction_mul`の乗法性→`pi_pow_action_eq_zero`→
+   `eq_zero_of_pi_pow_action_eq_zero`→`Polynomial.hom_eval₂`による
+   `adjoinIntegers K x`から`K.closure`への押し出し)を、段をひとつ
+   下げる形に流用しただけで、新しい数学的内容は無かった。
+2. `lubinTateActionAtTorsionPoint_pi_mem_iteratedLubinTatePsiTorsionPoints`:
+   原始性(`ψ_n`の根であること)も1段下がる。1.で`π·x∈Λ_n`は
+   分かっているので、`Λ_n\Λ_{n-1}=ψ_nの根`(既出の
+   `iteratedLubinTateTorsionPoints_sdiff_eq_iteratedLubinTatePsiTorsionPoints`)
+   により`π·x∉Λ_{n-1}`だけ背理法で示した——`π·x∈Λ_{n-1}`と仮定すると
+   同じ`Polynomial.hom_eval₂`の押し出しで`π^{n-1}·(π·x)=0`、乗法性で
+   `π^n·x=0`が出るが、これは`x`が`ψ_{n+1}`の根であること
+   (`lubinTateActionAtTorsionPoint_pi_pow_pred_ne_zero_of_mem_
+   iteratedLubinTatePsiTorsionPoints`)に矛盾する。
+
+これで「原始的な生成元の列 `x_n:=π^{N-n}·x_N`(`x_N`を`ψ_N`の根に
+1つ固定)が各段で本当に`ψ_n`の根になる」という、塔`L_n:=K(x_n)`
+(`L_n⊆L_{n+1}`が期待される)を実際に組む前提が整った。
+★次の段階(節目(5)の本体、まだ未着手): (a) この compatible system
+から`L_n⊆L_{n+1}`(体の包含、`x_n∈K.carrier⟮x_{n+1}⟯`——`x_n`が
+`x_{n+1}`の冪級数像であることから従うはず)を作る、(b) 制限写像
+`Gal(K.carrier⟮x_{n+1}⟯/K)→Gal(K.carrier⟮x_n⟯/K)`を構成し、
+`galoisUnitReciprocityEquiv`(各段の同型)と可換であることを示す
+(`reciprocityMap`の一意性から、おそらく既存の道具の組み合わせで
+出るが未検証)、(c) mathlibの`Mathlib/FieldTheory/Galois/Infinite.lean`
+(副有限Galois群の道具)を使って`L_π:=∪L_n`のGalois群を逆極限として
+実際に構成し、`𝒪_K^×=lim(𝒪_K/π^n)^×`との同型を組み立てる。
+(c)はまだ内容を調べていない新規のmathlib API調査が要る。
