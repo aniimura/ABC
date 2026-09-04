@@ -3620,3 +3620,73 @@ comp_aeval`、mathlib、`φ.comp(aeval f)=aeval(fun i↦φ(f i))`で1段の
 構成(文字通り未着手)」・「`h:ZK=D.Ext Z`の文字通りの等号という構造的
 懸念」という3つの大きな課題がまだ残っており、`Lemma 4.1`(§4)全体の
 完成にはまだ距離がある。
+
+## 2026-09-05(続き7): ★「項目(d)の第二段」の核心完成★
+`exists_mvPolynomial_quotient_ringHom_descend2`
+
+前回の「次の一手」(`MvPolynomial.comp_aeval`経由の配線)に着手し、
+当初の見積もりより一段深い一般化が必要だと分かったが、最終的に
+**「2つの異なるRレベル片(異なる`R`・`R₂`)の間の遷移写像が、共通の
+精密化`R'`へ構成的に降りる」**ことを完全に証明できた(commit
+`c97d226e`)。
+
+**気づいた問題**: `exists_mvPolynomial_quotient_ringHom_descend`
+(前回完成)の関係式条件は「`aeval ψ (map q k) = 0`」という**生の
+多項式環での厳密な等式**だったが、実際に2つの`descendPieceR`(それぞれ
+`quotient`環)を繋ぐ遷移写像では、関係式は「目標側のイデアルを法として
+`0`」(所属、厳密な等式ではない)にしかならない。この不一致を、
+前回完成させた`exists_mem_ideal_span_range_descend`(イデアル所属の
+降下)を経由して埋めた。
+
+**新規に構築した部品**(すべて`lean_check`で個別検証後ファイルへ反映):
+- `mem_ideal_span_range_promote`: イデアル所属の単調性(`Ideal.mem_map_
+  of_mem`+`Ideal.map_span`)——複数の`k`ごとに異なりうる精密化を1つの
+  共通`R'`へ揃えるのに使う。
+- `algebraTensorMap_inclusion_comp_inclusion`: 2段の昇格=1段の昇格
+  (`Subalgebra.inclusion_inclusion`+`Algebra.TensorProduct.map_comp`)
+  ——`rfl`で閉じる自明な事実だが、貼り合わせの配線でくり返し使うので
+  独立した補題として切り出した。
+- `mvPolynomial_map_aeval_comm_general`: 前回の`mvPolynomial_map_
+  aeval_comm`を、係数写像が`Algebra.TensorProduct.map`の形である
+  必要のない完全に一般な形へ拡張(証明は同一)。
+- `exists_mvPolynomial_eval_descend`: `ψ`の値だけから関係式を経由せず
+  Rレベル候補を取り出す純粋な存在部分(`exists_mvPolynomial_quotient_
+  ringHom_descend`から関係式条件を落としただけ)。
+- **`exists_mvPolynomial_quotient_ringHom_descend2`**(本体): 上記
+  すべてを組み合わせ、`ψ`の存在部分と関係式のイデアル所属部分を
+  独立に降ろし(前者は`R`・`R₂`と無関係な`R₀`から出発するので、まず
+  `R`・`R₂`・`R₀`を`exists_fgSubalgebra_upperBound2`を2回使って
+  共通の`R₁`へ合流させる)、関係式ごと(`κ`個、有限)に異なりうる
+  精密化`R'_k`を`exists_fgSubalgebra_upperBound`(`Finset`版)で単一の
+  `R'`へさらに合流させ、`mem_ideal_span_range_promote`で個別の結果を
+  `R'`へ昇格して揃えた。
+
+配管面では、`Subalgebra.FgSubalgebra`の`≤`が`Prop`(証明無関係)である
+ことを活かし、`(h1.trans h2)`と`hR₁R'`のような別々に構成された同じ
+命題の証明が**defeqで自動的に一致する**ことを繰り返し使った——
+`algebraTensorMap_inclusion_comp_inclusion`を適用した結果が、目標側の
+式と(証明項が構文的に異なっていても)そのまま`rw`で一致する場面が
+何度もあった。
+
+**これで「項目(d)の第二段」(遷移データのRレベル降下)の核心が完全に
+完成した**——2つの隣接する`descendPieceR`(異なる`R_i`)の重なり部分の
+遷移写像が、実際に共通のRレベル精密化上の候補写像として構成的に
+得られることが証明された。`transitionElem`/`gdT`/`cocycle`のRレベル
+版に相当する遷移データの降下という、当初「650行規模の再構築」と
+見積もっていた作業が、この1つの汎用定理(+周辺の補助補題群)として
+完成した。
+
+`lake build ABC3.Found.CorrHyp.FieldLimit`・`ABC3`いずれも0エラーで
+確認、push済み(commit `c97d226e`)。
+
+**正直な評価(引き続き)**: 集計は10/24で変わらず——§4は引き続き0/2。
+遷移データの降下という数学的内容の核心は完成したが、`Lemma 4.1`全体
+の完成には依然として: (1) 得られた候補写像が実際に**同型**である
+こと(往復合成が恒等になることの確認、今回の定理の`ψ`にφ⁻¹由来の
+データを渡せば同じ枠組みで示せる見込みだが未着手)、(2) Rレベルの
+候補片たちを実際に`corrHypGlueData`(既存、Scheme一般)として貼り
+合わせ、`D.Space`元`Z`を構成する配線、(3) `β`脚の構成(文字通り
+未着手)、(4) `h:ZK=D.Ext Z`の文字通りの等号という構造的懸念、という
+4つの課題が残っている。それでも、(1)は今回の枠組みの直接の応用に
+近く、(2)は既存の一般的なGlueDataインフラの再利用が主体になる見込み
+なので、`Lemma 4.1`完成への距離は着実に縮まっている。

@@ -1630,3 +1630,30 @@ lake build(FieldLimit/ABC3)0エラー確認、push済み。正直な評価: 遷�
 β脚(文字通り未着手)・h:ZK=D.Ext Zの構造的懸念という3つの大きな課題が
 残り、Lemma 4.1(§4)全体の完成にはまだ距離がある。集計は10/24で
 変わらず。corrhyp-goal.mdに詳細記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05(続き6)
+★「項目(d)の第二段」の核心完成★ exists_mvPolynomial_quotient_
+ringHom_descend2(commit c97d226e)——2つの異なるRレベル片(異なる
+R・R₂)の間の遷移写像が共通の精密化R'へ構成的に降りることを完全に
+証明した。exists_mvPolynomial_quotient_ringHom_descendの関係式条件
+(生の等式=0)を「イデアル所属」へ一般化(exists_mem_ideal_span_
+range_descend経由)し、目標側もquotient(genuineな片)である場合に
+対応させた。
+
+新規部品: mem_ideal_span_range_promote(所属の単調性)・
+algebraTensorMap_inclusion_comp_inclusion(2段昇格=1段昇格、rflで
+閉じる)・mvPolynomial_map_aeval_comm_general(完全一般版)・
+exists_mvPolynomial_eval_descend(純粋な存在部分)を組み合わせ、
+R・R₂・R₀(ψの存在部分が出す無関係なR)を2回のupperBound2で合流させ、
+関係式ごと(有限個)に異なる精密化をさらにupperBoundで揃えた。
+
+これでtransitionElem/gdT/cocycleのRレベル版に相当する遷移データの
+降下——当初650行規模と見積もっていた作業が完成した。lake build
+(FieldLimit/ABC3)0エラー確認、push済み。
+
+正直な評価: 集計は10/24で変わらず。Lemma 4.1完成にはまだ(1)候補
+写像が同型であることの確認(今回の枠組みの直接応用の見込み)・
+(2)GlueDataとしての貼り合わせ配線(既存インフラの再利用が主体)・
+(3)β脚(未着手)・(4)h:ZK=D.Ext Zの構造的懸念、という4課題が残るが、
+遷移データ降下という核心は完成し、距離は着実に縮まっている。
+corrhyp-goal.mdに詳細記録。
