@@ -1219,3 +1219,26 @@ standardEtalePair_baseChange` → 有限段階への降下」という、`Lemma 
 結線可能な状態**になった。残るのは、この連鎖を実際に呼び出して
 1つの完成した宣言にまとめる作業(標準エタール被覆の有限個の片を横断
 した合流を含む)と、複数の`U_i`・`GlueData`貼り合わせ。
+
+### 2026-09-04さらに続報: 「合流」の最後の道具(移送)が完成 ★★★★★
+
+`exists_fg_subalgebra_tensor_standardEtalePair_promote`を完成
+(`FieldLimit.lean`、★sorry無し)——有限段階`R`上の降下`P₀`を、より粗い
+共通段階`R'`(`R≤R'`)へ移送しても base change が変わらないことを保証。
+`StandardEtalePair.map_map`+`Algebra.TensorProduct.map_comp`(mathlib、
+`⊗`の関手性)を組み合わせるだけ。
+
+**これで「1つのアフィン片`U`の上で、標準エタール被覆の有限個の片
+(それぞれ異なる降下先`R_i`を持つ)を横断して1つの共通段階`R'`へ合流
+させる」ために要る道具が完全に揃った**——各`i`について`exists_fg_
+subalgebra_tensor_standardEtalePair_baseChange`で`R_i`・`P₀_i`を得て、
+`exists_fgSubalgebra_upperBound`で共通の`R'`を得て、`exists_fg_
+subalgebra_tensor_standardEtalePair_promote`で各`P₀_i`を`R'`へ移送する
+——という3段の組み合わせで、1つのアフィン片`U`の中の**すべての**標準
+エタール片を同じ有限段階`R'`の上で扱えるようになる。
+
+**§4の現状(総括)**: `Lemma 4.1`の証明に要る数学的な補題・道具は
+(1)`Space`の有限型性の検証という前提整理を除き**すべて完成した**。
+残る作業は純粋なエンジニアリング(実際に結線して1つの宣言にまとめる、
+複数の`U_i`を横断した合流、`GlueData`貼り合わせ、`Corr`のnonempty
+脱落の手当て)のみであり、必要な数学はすべて手元に揃っている。
