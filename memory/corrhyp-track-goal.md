@@ -2047,3 +2047,20 @@ quotient_specIso_descendが要求する1段のMvPolynomial(n⊕Unit)B商の形�
 MvPolynomial.sumAlgEquivでさらに1段変換する作業が残る。lake build
 (FieldLimit/ABC3)0エラー確認、push済み。集計は引き続き10/24——§4は
 引き続き0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き11
+localization_away_quotient_mvPolynomial_flat_equiv(commit afbb09e4、
+FieldLimit.lean)完成——入れ子の商をMvPolynomial(Unit⊕n)Bの1段の商へ
+平坦化した。MvPolynomial.sumAlgEquiv+DoubleQuot.quotQuotEquivQuotSup
+(側条件I≤J不要)を組み合わせ、生成元の対応はsumAlgEquiv_comp_rename_
+inl/inr(naturality)から具体的に計算(e2.symm(C x)=rename Sum.inr x、
+e2.symm(X())=X(Sum.inl()))。I=Ideal.span(Set.range q₀)(有限生成)の
+場合にexists_mvPolynomial_quotient_specIso_descendが要求するq・q₂の
+形そのものが得られることを確認した。「R↔ℝブリッジ」に続く「多項式
+表示の平坦化」問題が完成。lake build(FieldLimit/ABC3)0エラー確認、
+push済み。集計は引き続き10/24——§4は引き続き0/2。
+
+次の一手: flat_equivをD(f)側・D(g)側(M_ij・M_ji)双方に具体的に
+インスタンス化しq・q₂として渡す。ψ・ψ'は既存の「lift to R-level」
+技法(exists_fg_subalgebra_tensor_quotientMvPolynomial_lift)をM_jiの
+個々の生成元へ繰り返し適用する方針(続き9で確立済み)で進める。

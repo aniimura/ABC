@@ -4632,3 +4632,47 @@ specIso_descend`が要求する**1段の**`MvPolynomial(n⊕Unit)B`商の形へ�
 S1(MvPolynomial S2 R)`)でさらに1段変換する作業がまだ残る——次の一手
 として記録する。lake build(`FieldLimit`/`ABC3`)とも0エラー確認、
 push完了。集計は引き続き10/24——§4は引き続き0/2。
+
+## 2026-09-05夜さらに続き11: 入れ子の商を1段の商へ平坦化——
+`localization_away_quotient_mvPolynomial_flat_equiv`完成
+
+続き10で残した「次の一手」を実装した(`FieldLimit.lean`、
+commit `afbb09e4`)。`MvPolynomial.sumAlgEquiv`(mathlib、
+`MvPolynomial(S1⊕S2)R≃ₐ[R]MvPolynomial S1(MvPolynomial S2 R)`)と
+`DoubleQuot.quotQuotEquivQuotSup`(mathlib、`(R⧸I)⧸J.map(mk I)≃+*
+R⧸I⊔J`——側条件`I≤J`が不要な版、`quotQuotEquivQuotOfLE`より
+軽い)を組み合わせて完成させた:
+
+```
+theorem localization_away_quotient_mvPolynomial_flat_equiv (B : Type) [CommRing B]
+    (n : Type) [Fintype n] (κ₀ : Type) [Fintype κ₀]
+    (q₀ : κ₀ → MvPolynomial n B) (p : MvPolynomial n B) :
+    Nonempty (Localization.Away (Ideal.Quotient.mk (Ideal.span (Set.range q₀)) p) ≃+*
+      MvPolynomial (Unit ⊕ n) B ⧸ Ideal.span (Set.range
+        (Sum.elim (fun k => MvPolynomial.rename Sum.inr (q₀ k))
+          (fun _ : Unit => MvPolynomial.rename Sum.inr p * MvPolynomial.X (Sum.inl ()) - 1))))
+```
+
+証明の鍵は生成元の対応を具体的に計算すること——`sumAlgEquiv_comp_
+rename_inl`・`_inr`(いずれもmathlib、naturality)を`p`・`X()`という
+具体的な点へ適用し、`e2 := sumAlgEquiv B Unit n`の**逆向き**で
+`e2.symm(C x) = rename Sum.inr x`・`e2.symm(X()) = X(Sum.inl())`と
+いう2つの明示公式を導出、それを使って`Ideal.map e2.symm.toRingHom`
+がちょうど求める生成元の族(`q₀`側は`rename Sum.inr`で持ち上げ、
+局所化関係式は`rename Sum.inr p * X(Sum.inl()) - 1`)へ写ることを
+`Ideal.map_span`+`Set.image_union`+`Set.range_const`で確認した。
+
+これで`I = Ideal.span(Set.range q₀)`という**有限生成の**イデアルの
+場合、`Localization.Away(mk I p)`は`exists_mvPolynomial_quotient_
+specIso_descend`が要求する**1段の**`MvPolynomial(索引⊕Unit)B`商
+そのものとして表せることが分かった——`t`構成へ向けた「R↔ℝブリッジ」
+に続く「多項式表示の平坦化」問題が完成した。lake build(`FieldLimit`
+/`ABC3`)とも0エラー確認、push完了。集計は引き続き10/24——§4は
+引き続き0/2。
+
+**次の一手(正直な記録)**: この`flat_equiv`を`D(f)`側・`D(g)`側の
+両方(`M_ij`・`M_ji`、続き9で見積もった構図)に具体的にインスタンス化
+し、`exists_mvPolynomial_quotient_specIso_descend`の`q`・`q₂`として
+実際に渡す。`ψ`・`ψ'`(生成元同士の対応)の構成は、続き9で確立した
+方針(`exists_fg_subalgebra_tensor_quotientMvPolynomial_lift`を`M_ji`
+の個々の生成元へ繰り返し適用)のとおり進める。
