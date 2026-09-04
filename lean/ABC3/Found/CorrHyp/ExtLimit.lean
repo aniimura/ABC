@@ -1102,16 +1102,45 @@ theorem piece_descends_iso_R_upperBound_spec {A : Type} [CommRing A] [Algebra �
       else ⟨⊥, Subalgebra.fg_bot⟩)).choose_spec i hi
   simpa [hi] using h
 
-/- ★★次の一手(未着手): `piece_descends_iso_R_upperBound_spec`が与える
-`hle`を使って、各`i∈t`について`piece_descends_iso_promote`を適用し、
-族全体を単一の共通`R'`レベルへ揃える(`piece_descends_iso_R_of_proof`
-と`piece_descends_iso_promote`の`(piece_descends_iso ...).choose`が
-定義的に一致することの確認が要る見込み)。揃った後、`transitionElem`/
-`gdT`/`cocycle`一式の`R`レベル版の構築へ進む——ただし`ℝ`レベルの
+open scoped Classical in
+/-- **有限個の`piece_descends_iso`の族を、単一の共通段階`R'`
+(`piece_descends_iso_R_upperBound`)へ実際に揃える**——各`i∈t`ごとに
+`letI := hf i hi`の下で`piece_descends_iso_promote`を
+`piece_descends_iso_R_upperBound_spec`が与える`hle`とともに適用する
+だけ(`piece_descends_iso_R_of_proof`と`piece_descends_iso_promote`
+内部の`(piece_descends_iso ...).choose`は`rfl`で一致することを確認
+済み)。`R`レベルの複数添字を単一の共通段階`R'`へ合流させる最終形——
+これで`R`レベルの候補片`Spec(P₀_i'.Ring)`(`P₀_i'`は`R'`レベルへ
+昇格した後の`StandardEtalePair`)がすべて**同じ`R'`**の上に揃った。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def piece_descends_iso_family_promote {A : Type} [CommRing A] [Algebra ℚ A]
+    {X : Scheme} {U : X.Opens} (hU : IsAffineOpen U) [Algebra (A ⊗[ℚ] ℝ) Γ(X, U)]
+    {ι : Type} (t : Finset ι) (f : ι → Γ(X, U))
+    (hf : ∀ i ∈ t, Algebra.IsStandardEtale (A ⊗[ℚ] ℝ) (Localization.Away (f i)))
+    (i : ι) (hi : i ∈ t) :
+    letI := hf i hi
+    letI : Algebra (A ⊗[ℚ] (piece_descends_iso_R_upperBound (A := A) hU t f hf).1) (A ⊗[ℚ] ℝ) :=
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A)
+        (Subalgebra.val (piece_descends_iso_R_upperBound (A := A) hU t f hf).1)).toRingHom.toAlgebra
+    Nonempty ((X.basicOpen (f i) : Scheme) ≅
+      pullback (standardEtalePairSpecMap
+          ((piece_descends_iso (A := A) hU (f i)).choose_spec.choose.map
+            (Algebra.TensorProduct.map (AlgHom.id ℚ A)
+              (Subalgebra.inclusion (piece_descends_iso_R_upperBound_spec (A := A) hU t f hf i hi))).toRingHom))
+        (Spec.map (CommRingCat.ofHom (algebraMap (A ⊗[ℚ] (piece_descends_iso_R_upperBound (A := A) hU t f hf).1)
+          (A ⊗[ℚ] ℝ))))) := by
+  letI := hf i hi
+  exact piece_descends_iso_promote (A := A) hU (f i) (piece_descends_iso_R_upperBound (A := A) hU t f hf)
+    (piece_descends_iso_R_upperBound_spec (A := A) hU t f hf i hi)
+
+/- ★★次の一手(未着手): `piece_descends_iso_family_promote`で全員が
+揃った`R'`レベルの候補片`Spec(P₀_i'.Ring)`同士の**重なり**(`transitionElem`
+/`gdT`/`cocycle`の`R`レベル版)を構築する——ただし`ℝ`レベルの
 `transitionElem`は`X.presheaf.map`(層の制限写像)を使っており、`R`
-レベルでは対応する「層」が`extDiagram X`の段階`R`におけるアンビエント
-スキームの層になる見込みで、この対応を精密に詰める必要がある。
-`corrhyp-goal.md`に記録。 -/
+レベルでは対応する「層」が`extDiagram X`の段階`R'`におけるアンビエント
+スキームの層(`(extDiagram X).obj (op R')`)になる見込みで、この対応を
+精密に詰める必要がある(まだ未着手)。`corrhyp-goal.md`に記録。 -/
 
 /-! ## GlueDataの遷移射——`piece_descends_iso`を重なりへ制限する
 
