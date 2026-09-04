@@ -1176,3 +1176,23 @@ standardEtaleCond`→**`exists_fg_subalgebra_tensor_standardEtalePair`**
 組み立てる作業、(b)複数のアフィン片(有限個のstandard-étale片、
 有限個の`U_i`)を横断した細分段階の合流、(c)`GlueData`貼り合わせ、
 という3段階のエンジニアリングのみ。
+
+### 2026-09-04さらに続報: (b)「合流」に要る道具も出揃った
+
+`exists_fgSubalgebra_upperBound`(有限個の`FgSubalgebra k K`は共通の
+上界を持つ、`IsDirected`をFinset上の帰納法で拡張)・
+`StandardEtalePair.map_map`(`(P.map φ).map ψ = P.map(ψ.comp φ)`、
+`f`・`g`の一致から構造体の一致を出す)を`FieldLimit.lean`に追加
+(★どちらもsorry無し)。これで(b)「ある段階`R_i`で得た局所モデルを、
+より粗い共通段階`R'`(有限個の`R_i`の上界)へ移送してもbase changeが
+変わらない」ことを示す道具が揃った——`exists_fg_subalgebra_tensor_
+standardEtalePair_baseChange`の出力(段階`R_i`ごとに異なる)を、
+`exists_fgSubalgebra_upperBound`で得た共通`R'`へ`StandardEtalePair.
+map_map`で移送すれば、有限個の標準エタール片をすべて**同じ`R'`**の
+上で扱えるようになる。
+
+**§4の現状**: (a)実際の組み立て・(c)`GlueData`貼り合わせを除き、
+`Lemma 4.1`の証明に要る個々の数学的補題は**すべて完成した**。残るのは
+これらを実際に1本の証明として結線するエンジニアリング(かつ`Corr`の
+nonempty脱落・`Space`の有限型性という、独立に対処が要る2つの前提の
+整理)のみ。
