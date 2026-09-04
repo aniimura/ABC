@@ -28,6 +28,42 @@
 ★★★**2026-09-04、`/goal` で「Chapter I を Found(証明)にする」という
 より厳しい条件が設定された——その進捗と実現可能性の評価を追記する。**
 
+## 0.0 現在地サマリ(2026-09-05 セッション終了時点、次回の入口)
+
+`/goal` 条件(§1 2/2・§2 4/4・§3 2/2・§4 5/5、計13項目)に対し、
+**Found 2/13**(`Lemma 1.1`・`Definition 2.1`)。以下、13項目それぞれの
+状態と、次に何をすべきかを1箇所にまとめる(詳細な経緯は本文の★印
+エントリを参照、日付は全て2026-09)。
+
+| 節 | 項目 | 状態 | 次の一手 |
+|---|---|---|---|
+| §1 | Lemma 1.1 | ✅Found | (完成) |
+| §1 | Theorem 1.2 | ブロック | `Wₙ⊗_{Vₙ}Vₙ₊₁`の非正規性(`differentIdeal Wₙ Wₙ₊₁`)の評価が必要。`Vₙ`塔側の技術(Eisenstein多項式・differentIdeal計算)は完成済みだが`Wₙ`側(任意のalmost étale `W`)には転用できない(`differentIdeal_tower_diamond`のdocstring参照)。退化した`W`(非分岐)を使うと`δₙ≡0`は自明に出るが、原文の「任意の`W`」という全称量化を証明したことにはならない。 |
+| §2 | Definition 2.1 | ✅Found | (完成、`p`が単元でなくても任意のétale/finite/free拡大について成立する一般形まで) |
+| §2 | Theorem 2.2 | ブロック | Hochschild cohomology `H²`の`m`零化(Faltings自身が本文中で証明せず外部参照——形式化不可能ではなく、原論文に書かれていない議論を独自に補う必要がある) |
+| §2 | Theorem 2.3 | ブロック | 同上(`H¹`版) |
+| §2 | Theorem 2.4(i) | ブロック | 同上(Hochschild cohomology全般) |
+| §2 | Theorem 2.4(ii) | 2/3ステップ完成 | remark(iii)の trace 恒等式(`remark_iii_trace_identity`)・ノルム適用(`trace_ideal_pow_mem_traceIdeal`)は完成。残るは`H^i(G,M)`(`i>0`)への一般化——mathlibの`groupCohomology`(`Mathlib.RepresentationTheory.Homological.GroupCohomology.*`)に一般の transfer 定理(restriction-corestriction、`\|G\|`や重み付き版)が無く、`Rep k G`(k線形専用)を`B`上semilinearな`G`作用に対応させる枠組みも要構築。`Hilbert90.lean`は巡回群・単数表現専用で転用不可(確認済み)。 |
+| §3 | Theorem 3.1 | ブロック | `Theorem 2.2`-`2.4`の結果を直接使う(§2の壁がそのまま継承) |
+| §3 | Theorem 3.2 | ブロック | 同上 |
+| §4 | Theorem 4.1-4.3, 4.5 | ブロック | Galois cohomology・スペクトル系列のalmost退化(§2の壁の上にさらに層がある、§2完成が前提) |
+
+**このセッションで新規に確立した再利用可能な事実**(すべて
+`lean/ABC3/Found/Falt1/AlmostEtale.lean`、`lake build`・`node tools/
+check.mjs --brief`で検証済み、mathlibに無かった一般定理):
+- `elem_unique_of_props`:`Algebra.FormallyUnramified.elem`の一意性。
+- `diagonalCompare_elem_eq`:`elem`の局所化に関する自然性(`p`が単元
+  でなくても成立)。
+- `isAlmostEtaleCovering_of_etale_general`:`Definition 2.1`の
+  non-vacuous witness、任意の`p`・任意のétale/finite/free拡大。
+- `Tr1map_elem_eq_one`:trace form 非退化性(基底の添字計算で証明)。
+- `remark_iii_trace_identity`・`trace_ideal_pow_mem_traceIdeal`:
+  `Theorem 2.4(ii)`の証明の計算部分。
+
+次回セッションへの最優先候補: `Theorem 2.4(ii)`の群コホモロジー部分
+(表の該当行参照)——他の項目より「あと1つのピース」に近いが、
+そのピース自体がmathlibに存在しない独立した構築を要する。
+
 ## 0.1 `/goal Falt1 Chapter I Found` の進捗(2026-09-04)
 
 **Lemma 1.1**(§1 1/2): ★★★★★**完成**。`Found/Falt1/KaehlerAux.lean`・
