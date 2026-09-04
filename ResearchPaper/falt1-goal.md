@@ -1959,6 +1959,45 @@ mathlib での正確な組み立て方は未確認)。
       で`differentIdeal`に変換して和を取れば、`hrec`が要求する
       `δₙ`の実数化に到達できる見込み——ここから続ける。
 
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、
+      **`pushoutKaehlerSplitStep`をFalt1の具体的な`Wₙ₊₁`へ実際に
+      適用しようとして、鍵となる既存の道具を発見した**(未完成、
+      調査のみ・commit無し)。`pushoutKaehlerSplitStep`(`R B1 C B`)を
+      `R:=V0,B1:=Wₙ,C:=V1(≃AdjoinRoot f),B:=Wₙ₊₁`に使うには
+      `Algebra.IsPushout V0 Wₙ (AdjoinRoot f) Wₙ₊₁`(`Wₙ₊₁`が`Wₙ`と
+      `V1`の`V0`上のpushout=テンソル積であること)が要る。これを
+      示す道具は**このセッションより前に既に用意されていた**と判明
+      した:
+      - `adjoinRootTensorEquiv R C g : TensorProduct R C(AdjoinRoot g)
+        ≃ₐ[C] AdjoinRoot(g.map(algebraMap R C))`(既存、`KaehlerAux.lean`
+        line 1394近辺)——`R:=V0,C:=Wₙ,g:=f`とすれば`Wₙ⊗[V0]AdjoinRoot f
+        ≃ₐ[Wₙ] AdjoinRoot g`(=`Wₙ₊₁`)がまさにこれ。
+      - `algHomAdjoinRootOfCompat' f : AdjoinRoot f →ₐ[V0] AdjoinRoot
+        (f.map(algebraMap V0 Wₙ))`(既存、line 2450近辺)——`AdjoinRoot f`
+        (≃V1)から`AdjoinRoot g`(≃Wₙ₊₁)への自然な埋め込み。
+      - `Algebra.IsPushout.of_equiv`(mathlib既存)——標準の
+        `TensorProduct.isPushout`(`Algebra.IsPushout R C(AdjoinRoot f)
+        (TensorProduct R C(AdjoinRoot f))`、無条件のinstance)を
+        `adjoinRootTensorEquiv`で`AdjoinRoot g`へ運べば
+        `Algebra.IsPushout V0 Wₙ(AdjoinRoot f)(AdjoinRoot g)`が出る
+        ——ただし`e.toRingEquiv.toRingHom.comp(algebraMap(AdjoinRoot f)
+        (TensorProduct...)) = algebraMap(AdjoinRoot f)(AdjoinRoot g)`
+        という**両立性**を示す必要があり、これは`adjoinRootTensorEquiv`
+        の内部定義(`Algebra.TensorProduct.tensorQuotientEquiv`・
+        `tensorPolynomialAlgEquiv`・`Ideal.quotientEquivAlg`の合成)を
+        `AdjoinRoot.mk g p`の形の元に対して追跡する必要がある——
+        REPLで試みたが、複数層の unfold が絡み合い今回は閉じ切れな
+        かった(`sorry`のまま、commitしていない)。
+      **次回の具体的な着手点**: この両立性の証明(`AdjoinRoot.induction_on`
+      + `Polynomial.induction_on`、または`adjoinRootTensorEquiv`
+      自体に「`1⊗ₜ(AdjoinRoot.mk g p) ↦ AdjoinRoot.mk(g.map φ)(p.map φ)`」
+      という`simp`補題を先に用意しておく方が近道かもしれない)を完成
+      させれば、`Algebra.IsPushout V0 Wₙ(AdjoinRoot f)(AdjoinRoot g)`
+      が手に入り、`pushoutKaehlerSplitStep_length`が(`ι:=Fin 1`、
+      `F 0:=AdjoinRoot f`、`prev:=`自明な`Ω[Wₙ/V0]`の1点分解、という
+      **最初の1段**として)Falt1の具体的な対象に対して即座に適用できる
+      見込み。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
