@@ -2810,4 +2810,30 @@ theorem localization_away_quotient_mvPolynomial_flat_equiv (B : Type) [CommRing 
     rw [himg1, himg2]
   exact ⟨e0.trans (e1.trans (Ideal.quotientEquiv _ _ e2.symm.toRingEquiv hEq))⟩
 
+open scoped Classical in
+/-- **`localization_away_quotient_mvPolynomial_flat_equiv`を、生成元の
+係数が`φ : B→+*B'`で昇格された(`Ideal.map (MvPolynomial.map φ)`)場合へ
+一般化**——`exists_descendPieceR_localization_baseChange`が実際に扱う
+「`R`レベルの関係式`I`を`R'`レベルへ`algebraMap`で昇格したイデアル」
+という形にそのまま適用できるようにするための橋渡し。`Ideal.map_span`
+で`Ideal.map(map φ)(span(range q₀)) = span(range(map φ∘q₀))`と書き
+換えるだけで`flat_equiv`本体に帰着する。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem localization_away_quotient_mvPolynomial_flat_equiv_of_map
+    (B B' : Type) [CommRing B] [CommRing B'] (φ : B →+* B')
+    (κ₀ ι : Type) [Fintype κ₀] [Fintype ι] (q₀ : κ₀ → MvPolynomial ι B) (p : MvPolynomial ι B') :
+    Nonempty (Localization.Away (Ideal.Quotient.mk
+        (Ideal.map (MvPolynomial.map φ) (Ideal.span (Set.range q₀))) p) ≃+*
+      MvPolynomial (Unit ⊕ ι) B' ⧸ Ideal.span (Set.range
+        (Sum.elim (fun k => MvPolynomial.rename Sum.inr (MvPolynomial.map φ (q₀ k)))
+          (fun _ : Unit => MvPolynomial.rename Sum.inr p * MvPolynomial.X (Sum.inl ()) - 1)))) := by
+  have hmap : Ideal.map (MvPolynomial.map φ) (Ideal.span (Set.range q₀)) =
+      Ideal.span (Set.range (fun k => MvPolynomial.map φ (q₀ k))) := by
+    rw [Ideal.map_span]
+    congr 1
+    exact (Set.range_comp _ _).symm
+  rw [hmap]
+  exact localization_away_quotient_mvPolynomial_flat_equiv B' ι κ₀ (fun k => MvPolynomial.map φ (q₀ k)) p
+
 end ABC3.Found.CorrHyp
