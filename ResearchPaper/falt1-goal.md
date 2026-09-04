@@ -2861,6 +2861,17 @@ mathlib での正確な組み立て方は未確認)。
       積全体の全射性は形式的に従う見込み——`Pi.map`/`Function.
       Surjective.piMap`のような一般論で閉じる可能性が高い)。
 
+      ★確認: `Function.Surjective.piMap`(`Logic/Function/Basic.lean:
+      600`)は**実際にmathlibに既存**(`∀i,Surjective(f i) → Surjective
+      (Pi.map f)`)——自作する必要は無く、そのまま使える。これで
+      「`d+1`因子版への拡張」に必要な一般論はすべて揃っている
+      ことを確認した(残るのは`pushoutKaehlerSplitStepOption`の
+      `Option ι`添字族と`falt1_omegaAdjoinRoot_surjective_
+      quotient_p`(単一因子)を実際に組み合わせる**配線作業**のみ
+      ——具体的な`V_n`塔の生成元多項式(`X_i^p-T_i`型`d`個+
+      `1`の`p^{n+1}`乗根型1個)を選んで初めて実行できる、次回への
+      課題として残す)。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
