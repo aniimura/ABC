@@ -1646,23 +1646,43 @@ mathlib での正確な組み立て方は未確認)。
       未証明の一般事実)という、当初の想定より一段深い追加データ**が
       要ることが判明した——「軽い代入」という見立ては今回も誤りだった。
 
-      **有望な代替路も発見した**: mathlib に
-      `differentIdeal_eq_differentIdeal_mul_differentIdeal`
-      (`RingTheory/DedekindDomain/Different.lean`、`differentIdeal A C =
-      differentIdeal B C * (differentIdeal A B).map(algebraMap B C)`、
-      塔`A→B→C`に対する**directなideal等式**、`Module.Finite`3種+
-      `IsTorsionFree`2種+`Algebra.IsSeparable(FractionRing A)(FractionRing C)`
-      のみが条件)が存在する。これを`A:=V0,B:=Wn,C:=Wn1`に適用すれば
-      `differentIdeal V0 Wn1 = differentIdeal Wn Wn1 * (differentIdeal V0 Wn).map(...)`
-      が**Kähler微分の完全列を経由せず直接**得られ、`falt1_length_
-      quotient_mul_of_ne_zero`(PIDでの長さの加法性、既に確立済み)と
-      合わせるだけで目的の式に到達できる可能性がある——このほうが
-      `falt1CokernelIsoLinear`の単項生成元要求を回避できるかもしれない
-      (`differentIdeal V0 Wn1`自体をどう評価するかは別途要検討だが、
-      少なくとも`Wn`の単項生成元は不要になる)。次回はこちらを先に
-      試すこと。この定理の project 内での既存の対応物
-      `differentIdeal_tower_diamond`(`KaehlerAux.lean:1613`)との関係
-      (同じ主張の言い換えか、別の一般性か)も未確認——最初に確認すること。
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、
+      **上記の代替路を独立の一般補題として確立した**
+      (`falt1_differentIdeal_tower_length`、commit `ce3743b0`、
+      `lake build`完走・sorry無し)。`Wn`の単項生成元は一切不要——
+      塔`A→B→C`に対して
+      ```
+      length_C(C/differentIdeal A C) = length_C(C/differentIdeal B C) +
+        length_C(C/Ideal.map(algebraMap B C)(differentIdeal A B))
+      ```
+      が直接得られる、Kähler微分の完全列とは独立の経路。`A:=V0,B:=Wn,
+      C:=Wn1`に適用し`falt1_cancelConductorDelta_assembled`の`hlen_eq`
+      と組み合わせれば目的の式に到達できる見込みだが、**実際に
+      `falt1_cancelConductorDelta_assembled`へ組み込もうとして別の
+      障害に遭遇した**: この定理の結論(`differentIdeal A C`等)を
+      `falt1_cancelConductorDelta_assembled`の**型シグネチャ**に書こう
+      とすると、`IsDedekindDomain Wn1`・`Algebra V1 Wn1`等のインスタンス
+      が必要だが、これらは(`Fact(Irreducible gK)`や`ψ`など)**証明本体
+      の中でしか確立されない**ため、シグネチャの elaboration 時点では
+      見つからない(`failed to synthesize instance`、実際に`lake build`
+      で確認)。`Algebra V1 Wn1`は`ψ`(証明の中で`obtain`される)に依存
+      するため、これをシグネチャで別途仮定すると`letI`で内部に再導入
+      する`ψ`ベースの instance と**衝突しうる(diamond のリスク)**——
+      このセッションで繰り返し見た「証明の中の局所知識をシグネチャに
+      持ち上げようとして instance が壊れる」パターン。安全のため
+      `falt1_cancelConductorDelta_assembled`自体の変更は revert し
+      (`git diff`で無変更を確認)、`falt1_differentIdeal_tower_length`
+      だけを独立の一般補題として commit した。次回: 最終結論は`V1`を
+      経由しない形(`Ideal.map(algebraMap Wn Wn1)(differentIdeal V0 Wn)`
+      のまま)で組み立て、`hlen_eq`で`V1`側に変換する一歩は
+      `falt1_cancelConductorDelta_assembled`の**証明の中でだけ**行う
+      よう設計し直すこと。
+
+      (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
+      tower_length`として確立・commit済み——詳細は上記参照。project内
+      の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
+      「菱形」版であって、対応物というより`falt1_differentIdeal_
+      tower_length`の親戚にあたる、との理解で確認済み。)
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
