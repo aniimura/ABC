@@ -1,4 +1,5 @@
 import ABC3.Found.PGC.AdjoinIntegers
+import ABC3.Found.PGC.LubinTateTowerCompatible
 
 /-!
 # `𝒪_K^× ≅ lim_n(𝒪_K/π^n𝒪_K)^×`(`sorry` 無し)
@@ -244,5 +245,39 @@ theorem principalUnitsQuotientEquiv_apply_mk {p : ℕ} [Fact p.Prime] (K : PAdic
       unitReductionQuotientMap K π n u := by
   simp only [principalUnitsQuotientEquiv, unitReductionQuotientMap]
   exact quotientKerEquivOfSurjective_cast_apply _ _ (principalUnits_eq_ker K π n) u
+
+/-- **`principalUnitsQuotientEquiv`は遷移写像と可換**——`(𝒪_K)^×⧸
+principalUnits(n+1)→(𝒪_K)^×⧸principalUnits(n)`(`QuotientGroup.map`、
+`principalUnits_succ_le`由来)を先に取ってから`principalUnitsQuotient
+Equiv`で`(𝒪_K/π^n)^×`へ落としても、先に`(𝒪_K/π^(n+1))^×`へ落として
+から`unitReductionTransition`で`(𝒪_K/π^n)^×`へ落としても同じ。
+`QuotientGroup.induction_on`で`mk u`の場合に還元し、両辺を
+`principalUnitsQuotientEquiv_apply_mk`で`unitReductionQuotientMap`
+の言葉に翻訳した後は`Ideal.Quotient.factor_mk`(遷移写像と`mk`の
+可換性、`unitReductionFamily`の両立性証明と同じ道具)で閉じる。
+`reciprocityMapLimitCompat`(`(𝒪_K)^×⧸principalUnits`のレベルでの
+n跨ぎ両立性)を`CompatibleUnits`(`(𝒪_K/π^n)^×`のレベル)へ翻訳する
+最後の橋。 -/
+theorem principalUnitsQuotientEquiv_map_eq {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (n : ℕ) (hn : 1 ≤ n) (x : (𝒪[K.carrier])ˣ ⧸ principalUnits K π (n + 1)) :
+    principalUnitsQuotientEquiv K hπmax n hn
+        (QuotientGroup.map (principalUnits K π (n + 1)) (principalUnits K π n) (MonoidHom.id _)
+          (principalUnits_succ_le K π n) x) =
+      unitReductionTransition K hπmax (Nat.le_succ n)
+        (principalUnitsQuotientEquiv K hπmax (n + 1) (by omega) x) := by
+  induction x using QuotientGroup.induction_on with
+  | _ u =>
+    rw [QuotientGroup.map_mk, principalUnitsQuotientEquiv_apply_mk, principalUnitsQuotientEquiv_apply_mk,
+      MonoidHom.id_apply]
+    apply Units.ext
+    unfold unitReductionTransition unitReductionQuotientMap
+    show Ideal.Quotient.mk (Ideal.span ({π ^ n} : Set (𝒪[K.carrier]))) (u : 𝒪[K.carrier]) =
+      Ideal.Quotient.factor
+        (S := Ideal.span ({π ^ (n + 1)} : Set (𝒪[K.carrier])))
+        (T := Ideal.span ({π ^ n} : Set (𝒪[K.carrier])))
+        (by rw [Ideal.span_singleton_le_span_singleton]; exact pow_dvd_pow π (Nat.le_succ n))
+        (Ideal.Quotient.mk (Ideal.span ({π ^ (n + 1)} : Set (𝒪[K.carrier]))) (u : 𝒪[K.carrier]))
+    rw [Ideal.Quotient.factor_mk]
 
 end ABC3.Found.PGC

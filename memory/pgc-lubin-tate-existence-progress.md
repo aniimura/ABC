@@ -2797,3 +2797,43 @@ CompatibleUnits`(または`unitReductionEquiv`経由で`𝒪_K^×`)を定義し
 見込み)、(iii)全射性・単射性(後者は`reciprocityMap`自体の単射性が
 前提、要確認)。次に戻るなら(ii)(`reciprocityMapLimit`の定義)が
 具体的な出発点。
+
+## 続報(2026-09-05、`principalUnitsQuotientEquiv`が遷移写像とも可換
+であることを追加で確立、`UnitsInverseLimit.lean`にcommit済み)
+
+(i)の続き: `reciprocityMapLimitCompat`(`(𝒪_K)^×⧸principalUnits`の
+レベル、`QuotientGroup.map`で述べられている)を`CompatibleUnits`の
+レベル(`unitReductionTransition`)へ翻訳するための、もう1つの自然性
+`principalUnitsQuotientEquiv_map_eq`を証明した:
+
+```
+principalUnitsQuotientEquiv n (QuotientGroup.map (principalUnits(n+1))
+    (principalUnits n) (MonoidHom.id _) (principalUnits_succ_le) x) =
+  unitReductionTransition (Nat.le_succ n) (principalUnitsQuotientEquiv (n+1) x)
+```
+
+今回は前回(`principalUnitsQuotientEquiv_apply_mk`)で確立した罠回避
+済みの土台(`▸`ベースの定義・`quotientKerEquivOfSurjective_cast_apply`
+・大域定理)がそのまま使えたため、**新しい罠は無く**素直に証明できた:
+`QuotientGroup.induction_on`で`mk u`の場合に還元し、両辺を
+`principalUnitsQuotientEquiv_apply_mk`(前回)で`unitReductionQuotient
+Map`の言葉に翻訳すると、`Ideal.Quotient.factor_mk`(`unitReduction
+Family`の両立性証明で使ったのと同じ道具)一発で閉じる。
+
+副次的な発見: `principalUnits_succ_le`は`Found/PGC/LubinTateTower
+Compatible.lean`にあり、`UnitsInverseLimit.lean`はそれまで`Adjoin
+Integers`しかimportしていなかった——`import ABC3.Found.PGC.LubinTate
+TowerCompatible`を追加(循環import無し、`grep`で確認済み)。
+
+★★★★★これで節目(5)の(i)は**完全に**完成した: `reciprocityMapLimit
+Compat`(`(𝒪_K)^×⧸principalUnits`レベル)を`principalUnitsQuotient
+Equiv_apply_mk`+`principalUnitsQuotientEquiv_map_eq`の2つを使って
+`CompatibleUnits`レベルの主張へ翻訳する道具がすべて揃った。残るのは
+(ii)これらを実際に組み合わせて`reciprocityMapLimit:Gal(K.closure/
+K.carrier)→CompatibleUnits`(または`unitReductionEquiv`経由で
+`𝒪_K^×`)を定義し`MonoidHom`であることを示す(`reciprocityMap_mul`、
+既出、を使う見込み)、(iii)全射性・単射性(後者は`reciprocityMap`
+自体の単射性が前提、要確認)。次に戻るなら(ii)が具体的な出発点——
+`reciprocityMapLimit`本体の構成には、`n=0`(あるいは`hn:1≤n`の境界)
+の扱い(`reciprocityMap`は`hn:1≤n`を要求するため`n=0`成分は別扱いが
+要る見込み)を最初に決める必要がある。
