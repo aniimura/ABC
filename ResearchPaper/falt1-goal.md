@@ -2632,6 +2632,26 @@ mathlib での正確な組み立て方は未確認)。
       ——これが Theorem 1.2 の残る核心的な困難の**具体的な次の一手**
       として確定した。
 
+      ★続けて **step (4)(完全列)を完成させた**(`falt1_kaehler_
+      length_tower_exact`、commit分は次項)——`Aₙ→Bₙ→Bₙ₊₁`の塔に
+      対する`0→Bₙ₊₁⊗Ω[Bₙ/Aₙ]→Ω[Bₙ₊₁/Aₙ]→Ω[Bₙ₊₁/Bₙ]→0`の完全性から
+      直ちに長さの加法公式`length(Ω[Bₙ₊₁/Aₙ]) = length(Bₙ₊₁⊗Ω[Bₙ/Aₙ])
+      + length(Ω[Bₙ₊₁/Bₙ])`を得た。鍵は`Module.length_eq_add_of_exact`
+      (mathlib既存、探索して発見)——右半分の完全性(`KaehlerDifferential.
+      exact_mapBaseChange_map`)と全射性(`KaehlerDifferential.
+      map_surjective`)は**無条件**(mathlib既存)、`hinj`(左半分の
+      単射性)だけがFalt1固有の仮定として残る形にきれいに閉じた。
+
+      これで Exercise 13.7.4 の6ステップのうち、**(2)(=Lemma 1.1)・
+      (4)は完成、(1)は部分完成(Nakayama部分のみ)**——残るのは
+      (1)の残り(`dim_{k_B}(Ω¹_{k_B/k_A})=d`から`d+1`を導く部分)・
+      (3)(elementary divisor theoremでの`ker(b)⊇ker(p倍)`の導出)・
+      (5)(discriminantの塔、局所版が無い)の3つ。当初「独立した深い
+      部分が3つ」と評価していたが、実際に手を動かしてみると
+      **(4)は数行で閉じ**、`Module.length_eq_add_of_exact`のような
+      「探せば既にmathlibにある」道具が複数見つかった——引き続き
+      (1)(3)(5)の残りを1つずつ潰していく方針が有効と判断する。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
