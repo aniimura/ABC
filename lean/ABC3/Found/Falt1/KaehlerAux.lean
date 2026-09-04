@@ -11,85 +11,51 @@ import Mathlib.RingTheory.IsAdjoinRoot
 ★★これは `/goal Falt1 Chapter I Found` の一部として、Lemma 1.1
 (`Ω_V ⊗_V W → Ω_W` の単射性・余核の長さ)を実際に **証明** する試みの
 第一歩。**Lemma 1.1 そのものはまだ証明できていない**——ここにあるのは
-その途中で使う再利用可能な補題だけである(正直な進捗として記録する)。
+その途中で使う再利用可能な補題群である(正直な進捗として記録する)。
 
-`nzdCotangentEquivQuot`: 非零因子 `f` が生成する単項イデアル `I = (f)`
-に対し `I.Cotangent ≃ₗ[A'] A' ⧸ I` が成り立つ(`I.Cotangent = I/I²` の
-標準的な計算)。これは Falt1 Lemma 1.1 の証明の核——
-`W = V[T]/(f(T))` のとき `Ω_{W/V} ≅ W/(f'(w))`(mathlib の
-`KaehlerDifferential.exact_kerCotangentToTensor_mapBaseChange` と
-組み合わせて使う)——の1コンポーネント。
+## 完成した部分(2026-09-04、すべて sorry 無し)
 
-**進捗**(2026-09-04):
-1. ✅ `RingHom.ker (AdjoinRoot.mk f) = Ideal.span {f}`。
-2. ✅ `kerQuotEquivOmega`・`ker_mapBaseChange_eq_range_kerCotangentToTensor`
-   (第二完全列の商同型化・台集合の言い換え)。
-3. ✅ `tensorPolynomialOmegaEquiv`・`tensorPolynomialOmegaEquiv_D`
-   (`B⊗_A Ω_{A/R} ≃ₗ[B] B`、`1⊗ₜD(f) ↦ f'(root)`)。
-4. ✅ `range_kerCotangentToTensor_span`(値域 = `{1⊗ₜD(f)}` の張る加群、
-   `Derivation.leibniz` + `f∈ker(A→B)` を使う)。
-5. ✅ `map_ker_mapBaseChange_eq_span`(A-span から B-span への架け替え、
-   A→B 全射性を使う)。
-6. ✅✅✅ **`omega_quotient_eq_derivative_span`**: 上記すべてを貼り合わせ、
-   `Ω_{B/R} ≅ B ⧸ (f'(root))`(`B = Polynomial R ⧸ (f)`)を**完全に証明した
-   (sorry 無し)**。これは Faltings の原文の議論
-   「`Ω_W` は `Ω_V⊗W⊕WdT` を `f'(w)dT` で割った商」の核心計算そのもの。
+**① 余核 `Ω_{W/V}` の計算**(`R := V`・`B := W` と代入すれば Lemma 1.1
+の余核の主張そのもの): `B = Polynomial R ⧸ (f)` のとき
+`Ω_{B/R} ≅ B ⧸ (f'(root))` ——`omega_quotient_eq_derivative_span`
+(補助: `kerQuotEquivOmega`・`tensorPolynomialOmegaEquiv(_D)`・
+`range_kerCotangentToTensor_span`・`map_ker_mapBaseChange_eq_span`)。
+Faltings の原文「`Ω_W` は `Ω_V⊗W⊕WdT` を `f'(w)dT` で割った商」の
+核心計算そのものを検証した。
 
-**残っている作業**(正直な記録、Lemma 1.1 完成にはまだ遠い):
-7. 上の定理は "第二完全列"(`R[X]→B` という1段のモノジェニックな塔)の
-   計算であって、Lemma 1.1 が実際に要求している "第一完全列"
-   (`Ω_V ⊗_V W → Ω_W → Ω_{W/V} → 0`、V→W の塔に対するもの)とは別の
-   完全列である。Lemma 1.1 の**単射性**の主張(第一完全列の最初の射が
-   単射)は、この2つの完全列を貼り合わせる追加の議論(Faltings の原文
-   だと「f'(w)dT の係数が非零因子だから」という具体的な計算)が必要で、
-   まだ手を付けていない。
-8. `different(W/V) = (f'(w))` という事実(mathlib の
-   `aeval_derivative_mem_differentIdeal`・`conductor_mul_differentIdeal`
-   と接続)、および「W/p^δW の長さ」という古典的な「長さ」概念を
-   mathlib のどの道具(`Module.length`? 合成列?)で表現するかも未調査。
-9. Falt1 の `V,W` は一般の完備離散付値環の拡大(必ずしも `Polynomial R`
-   上の1変数多項式商とは限らない)——本ファイルの `B = Polynomial R ⧸ (f)`
-   という設定への帰着(原文では「W は1元 w で生成される」の一般化)も
-   まだ形式化していない。
+**② differentIdeal への接続**: `w` が `W` を `V`-代数として生成する
+(かつ拡大体レベルでも生成する)なら `differentIdeal V W = span{f'(w)}`
+——`differentIdeal_eq_span_derivative`(`conductor_mul_differentIdeal`+
+`conductor_eq_top_of_adjoin_eq_top`)。①と合わせれば
+`Ω_{W/V} ≅ W ⧸ differentIdeal V W` が見える。
 
-★★**訂正・再評価(2026-09-04)**: `R := V`(Falt1 の V)・`B := W`
-(Falt1 の W)と代入すれば、`omega_quotient_eq_derivative_span` は
-Falt1 Lemma 1.1 の**余核**の主張「`Ω_{W/V}`」を直接計算したものになる
-(Ω_{W/V} は定義から W が V 上の第二完全列の余核——単射性の仮定なしに
-定義される対象——なので、これは Lemma 1.1 の主張の一部を本当に得た
-ことになる。前回の報告で「第二完全列は Lemma 1.1 とは別物」と述べたのは
-過度に慎重だった)。残るのは (a) `Ω_V ⊗_V W → Ω_W` の単射性(絶対微分
-Ω_V:=Ω_{V/Z}・Ω_W:=Ω_{W/Z}、Z=絶対基底に対する「第一完全列」、
-Faltings の議論では `Ω_{V[T]/Z} ≅ Ω_V⊗V[T]⊕V[T]dT` の直和分解と
-f'(w)が非零因子であることを使う——別の議論、未着手)、(b) 長さの
-計算(下記)、(c) 一般の有限拡大への帰着(下記)。
+**③ 一般の `W` への橋渡し(1本目)**: `V` が整閉整域で `w` が `V` 上整
+かつ `W` を生成するなら `AdjoinRoot (minpoly V w) ≃ₐ[V] W`
+——`adjoinRootMinpolyEquiv`(`IsAdjoinRootMonic.mkOfAdjoinEqTop`、
+体限定の `AlgEquiv.adjoinSingletonEquivAdjoinRootMinpoly` ではなく
+一般整閉整域版を使った)。`AdjoinRoot f = Polynomial V ⧸ (f)` なので、
+①の具体形と Falt1 の一般の `W` を繋ぐ最初の橋。
 
-**differentIdeal への接続の道筋を発見**(2026-09-04): mathlib の
-`conductor_mul_differentIdeal`(`RingTheory/DedekindDomain/Different.lean`):
-`conductor A x * differentIdeal A B = span{aeval x (derivative (minpoly A x))}`。
-`x` が `B` を A-代数として生成するとき(`R[x]=⊤`)、
-`conductor_eq_top_of_adjoin_eq_top`より`conductor A x = ⊤`となり、
-`differentIdeal A B = span{f'(w)}`が直接出る(`AdjoinRoot.adjoinRoot_eq_top`
-で`R[root]=⊤`は確認済み)。★ただし`conductor_mul_differentIdeal`は
-Dedekind整域・体K,L・IsIntegralClosure等、本ファイルではまだ組み立てて
-いない仮定群を要求する——次の一歩として記録する。
+## 残っている作業(正直な記録、Lemma 1.1 完成にはまだ遠い)
 
-**単射性(第一完全列)の道筋を調査**(2026-09-04): 必要になるのは
-`Ω_{V[T]/Z} ≅ (Ω_{V/Z}⊗_VV[T]) ⊕ V[T]dT`という直和分解。
-`KaehlerDifferential.polynomialEquiv R`(R=Vとして)は`Ω_{V[T]/V}≃V[T]`
-(Vからの**相対**微分)を与えるので、これと「第一完全列」
-`V[T]⊗_VΩ_{V/Z}→Ω_{V[T]/Z}→Ω_{V[T]/V}→0`(`exact_mapBaseChange_map`、
-R:=Z,A:=V,B:=V[T])を組み合わせれば右完全列は出るが、**分裂すること**
-(= 直和になること)は別に要る——V→V[T]の smooth性から従うはずだが、
-`RingTheory/Kaehler/Polynomial.lean`には既製の分裂補題は無い
-(`polynomialEquiv`はZ=Vの自明底の場合のみ、mvPolynomialBasisも同様)。
-`Algebra.Extension.Algebra.FormallySmooth.iff_split_injection`
-(`RingTheory/Smooth/Basic.lean`)等のformally smooth機構を経由する
-必要がありそうだが、まだ組み立てていない——Lemma 1.1の残り部分の
-中でも最も骨が折れそうな箇所として記録する。
+1. **①②③の貼り合わせ**: ③の `AlgEquiv` に沿って①の `Ω` 同型を
+   `W` へ転送する必要があるが、**Kähler 微分を代数同型に沿って転送する
+   既製の mathlib 補題が無い**(`KaehlerDifferential.map` は代数の塔
+   `R→A→B` 用で、"同型 `A≃B`" 用ではない——`Algebra A B` インスタンスを
+   同型から作って両方向の `map` を合成する形で自分で構築する必要が
+   ありそうだが未着手。2026-09-04 に mathlib 検索して確認)。
+2. **単射性(Lemma 1.1 の本体の主張、第一完全列)**: `Ω_V ⊗_V W → Ω_W`
+   (絶対微分、Z=絶対基底とする塔 Z→V→W への「第一完全列」)の単射性。
+   Faltings の議論は `Ω_{V[T]/Z} ≅ Ω_V⊗V[T]⊕V[T]dT` という直和分解と
+   f'(w) が非零因子であることを使うが、この直和分解の既製品も mathlib
+   に無い(`polynomialEquiv`・`mvPolynomialBasis` は自明底のみ)——
+   Lemma 1.1 の残り部分の中でも最も骨が折れそうな箇所。
+3. 「長さ」(`length(W/p^δW)`)を mathlib のどの道具で表すか未調査。
+4. Falt1 の `V` は完備離散付値環(すべて `IsDedekindDomain` 等の一般論
+   でカバーされる保証はまだ無い、個別確認が必要)。
 
-★見積り: Lemma 1.1 だけでもこの規模の補題を10-20個組み合わせる必要が
-あり、数日〜数週間規模の作業になる可能性が高い。§2-4 は Faltings の
+★見積り: 上記4点だけでもさらに多くの補題を要し、Lemma 1.1 の完成には
+まだ日数単位の作業が必要と見られる。§2-4 は Faltings の
 "almost mathematics" 自体が mathlib に無い(`Almost`/`Malcev`/
 `Tannakian` を mathlib 全体検索して確認済み、2026-09-04)ため、
 Lemma 1.1 よりさらに大きな、ライブラリ新設に近い規模の作業になる。
