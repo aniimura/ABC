@@ -731,3 +731,15 @@ properではない)——`FEt`が要求する`IsFinite`はGlueDataで貼り合�
 (当初のロードマップに暗黙に含まれていたが今回初めて明記)。
 
 コミット: `ca88ac3a`(standardEtalePairSpecMap等完成)・`c3ce0e9e`(記録)。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(Cの局所片が
+アフィンであることを確認、work unit 3続き、集計10/24で変わらず)。
+`piece_preimage_isAffineOpen`・`piecePreimageIso`(`ExtLimit.lean`、
+★sorry無し)完成——`IsFinite α → IsAffineHom α`+`piece_isAffineOpen`+
+`IsAffineOpen.preimage`(mathlib)で`α⁻¹(piece)`がアフィンであること、
+`α⁻¹(piece) ≅ Spec Γ(C,α⁻¹(piece))`を確認。`piece_algebraEtale_tensor`
+の環レベルの主張が実際のスキーム構造を正しく捉えていることの土台。
+次の一手: `D(f_i) ≅ Spec(Localization.Away f_i)`(mathlib
+`basicOpenIsoSpecAway`)と`standardEtalePairPullbackIso`をつなげる。
+
+コミット: `8b4c1b2b`(piece_preimage_isAffineOpen等)・`2bdda863`(記録)。
