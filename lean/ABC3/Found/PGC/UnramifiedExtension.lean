@@ -1,4 +1,6 @@
 import ABC3.Found.PGC.AdjoinIntegers
+import Mathlib.RingTheory.DedekindDomain.IntegralClosure
+import Mathlib.NumberTheory.RamificationInertia.Basic
 
 /-!
 # 不分岐拡大への出発点(スケルトン、`sorry` 無し・現時点では定義のみ)
@@ -226,5 +228,252 @@ theorem isDiscreteValuationRing_adjoinIntegers {p : ℕ} [Fact p.Prime] (K : PAd
   haveI := isNontrivial_valued_adjoin K x
   exact Valued.integer.isDiscreteValuationRing_of_compactSpace
     (K := IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+
+
+/-! ## `Module.Finite` への道——スペクトルノルムで「ノルム≤1 ⟺ `𝒪_K`上整」を得る
+
+`Ideal.ramificationIdx_mul_inertiaDeg_of_isLocalRing`(`e·f=[L:K]`)を
+使うために最後に残っていた前提が `Module.Finite 𝒪[K.carrier]
+(adjoinIntegers K x)`。これは `IsIntegralClosure (adjoinIntegers K x)
+𝒪[K.carrier] K.carrier⟮x⟯`(=「`adjoinIntegers K x` はちょうど
+`𝒪[K.carrier]` の `K.carrier⟮x⟯` における整閉包」)から
+`IsIntegralClosure.finite` で出る。その核心が下の同値。
+
+★発見(2026-09-05): mathlib の **spectral norm** の道具立てで両方向とも
+数行で書ける。Hensel の補題も共役の対称式も自分で組む必要が無かった。
+
+* 難しい向き(ノルム≤1 ⟹ 整): `NormedAlgebra.norm_eq_spectralNorm`
+  (`‖y‖ = spectralNorm K L y`、`K`が完備なら成立)と、`spectralNorm`の
+  定義が `spectralValue (minpoly K y)` であること、そして
+  `spectralValue_le_one_iff`(monic なら `spectralValue P ≤ 1 ↔
+  ∀n, ‖P.coeff n‖ ≤ 1`)を繋ぐ。すなわち **`‖y‖≤1` なら最小多項式の
+  係数がすべて `𝒪_K` に入る**——古典的な「共役のノルムが等しい」議論が
+  mathlib 側に既に畳み込まれている。あとは `Polynomial.toSubring` で
+  係数を `𝒪_K` に落とすだけ。
+* 易しい向き(整 ⟹ ノルム≤1): `norm_root_le_spectralValue` に
+  `f := spectralAlgNorm K L` を与える(`spectralAlgNorm_isPowMul`・
+  `isNonarchimedean_spectralNorm` が揃っている)。
+
+★配管(記録): `rw [← NormedAlgebra.norm_eq_spectralNorm ...]` は
+**instance 経路の違いで発火しない**(`Valued`由来の`NormedField`と
+補題側のそれが syntactic に一致しない)。`exact`/`le_of_eq_of_le` に
+すると defeq で通る(`tools/lean-idioms.md` #37 の類型)。 -/
+
+/-- **ノルム≤1 ⟹ `𝒪[K.carrier]` 上整**(難しい向き)。最小多項式の
+係数がすべてノルム≤1 であることを `spectralValue_le_one_iff` から得て、
+`Polynomial.toSubring` で `𝒪[K.carrier]` 係数の monic 多項式に落とす。 -/
+theorem isIntegral_of_norm_le_one {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (y : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) (hy : ‖y‖ ≤ 1) :
+    IsIntegral 𝒪[K.carrier] y := by
+  have hmonic : (minpoly K.carrier y).Monic := minpoly.monic (IsIntegral.of_finite K.carrier y)
+  have hcoeff : ∀ n : ℕ, ‖(minpoly K.carrier y).coeff n‖ ≤ 1 := by
+    rw [← spectralValue_le_one_iff hmonic]
+    have h1 : spectralNorm K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) y
+        = spectralValue (minpoly K.carrier y) := rfl
+    rw [← h1]
+    exact le_of_eq_of_le (NormedAlgebra.norm_eq_spectralNorm K.carrier y).symm hy
+  have hsub : ↑(minpoly K.carrier y).coeffs ⊆ (𝒪[K.carrier] : Set K.carrier) := by
+    intro c hc
+    obtain ⟨n, _, rfl⟩ := Polynomial.mem_coeffs_iff.mp hc
+    show _ ∈ 𝒪[K.carrier]
+    rw [Valuation.mem_integer_iff]
+    have hv : Valued.v ((minpoly K.carrier y).coeff n)
+        = (‖(minpoly K.carrier y).coeff n‖₊ : NNReal) := NNReal.eq rfl
+    rw [hv]
+    exact_mod_cast hcoeff n
+  refine ⟨(minpoly K.carrier y).toSubring 𝒪[K.carrier] hsub, ?_, ?_⟩
+  · exact (Polynomial.monic_toSubring _ _ _).mpr hmonic
+  · have h2 : (algebraMap 𝒪[K.carrier]
+        (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))
+        = (algebraMap K.carrier
+            (IntermediateField.adjoin K.carrier ({x} : Set K.closure))).comp
+          (Subring.subtype 𝒪[K.carrier]) := rfl
+    rw [h2, ← Polynomial.eval₂_map, Polynomial.map_toSubring]
+    exact minpoly.aeval K.carrier y
+
+/-- **`𝒪[K.carrier]` 上整 ⟹ ノルム≤1**(易しい向き)。整方程式を
+`K.carrier` 係数に写し、`norm_root_le_spectralValue` を
+`spectralAlgNorm` に適用する。 -/
+theorem norm_le_one_of_isIntegral {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (y : IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    (hy : IsIntegral 𝒪[K.carrier] y) : ‖y‖ ≤ 1 := by
+  obtain ⟨q, hqm, hq⟩ := hy
+  have hmap : (q.map (Subring.subtype 𝒪[K.carrier])).Monic := hqm.map _
+  have hroot : Polynomial.aeval y (q.map (Subring.subtype 𝒪[K.carrier])) = 0 := by
+    rw [Polynomial.aeval_def, Polynomial.eval₂_map]
+    exact hq
+  have hcoeff : ∀ n : ℕ, ‖(q.map (Subring.subtype 𝒪[K.carrier])).coeff n‖ ≤ 1 := by
+    intro n
+    rw [Polynomial.coeff_map]
+    have h0 : Valued.v ((q.coeff n : K.carrier)) ≤ 1 := (q.coeff n).2
+    have hv : Valued.v ((q.coeff n : K.carrier))
+        = (‖(q.coeff n : K.carrier)‖₊ : NNReal) := NNReal.eq rfl
+    rw [hv] at h0
+    exact_mod_cast h0
+  have hsv : spectralValue (q.map (Subring.subtype 𝒪[K.carrier])) ≤ 1 :=
+    (spectralValue_le_one_iff hmap).mpr hcoeff
+  have hle : (spectralAlgNorm K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure))) y
+      ≤ spectralValue (q.map (Subring.subtype 𝒪[K.carrier])) :=
+    norm_root_le_spectralValue spectralAlgNorm_isPowMul isNonarchimedean_spectralNorm hmap hroot
+  rw [spectralAlgNorm_def] at hle
+  calc ‖y‖ = spectralNorm K.carrier
+        (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) y :=
+      NormedAlgebra.norm_eq_spectralNorm K.carrier y
+    _ ≤ _ := hle
+    _ ≤ 1 := hsv
+
+/-- **`adjoinIntegers K x` の元＝`𝒪[K.carrier]` 上整な元**——上の二つを
+まとめた同値。`IsIntegralClosure` を作るための材料。 -/
+theorem isIntegral_iff_norm_le_one {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (y : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :
+    IsIntegral 𝒪[K.carrier] y ↔ ‖y‖ ≤ 1 :=
+  ⟨norm_le_one_of_isIntegral K x y, isIntegral_of_norm_le_one K x y⟩
+
+
+/-! ## 分岐理論の基本等式 `e·f = [L:K]` ——不分岐性を定義できる地点
+
+上の同値から `IsIntegralClosure (adjoinIntegers K x) 𝒪[K.carrier]
+K.carrier⟮x⟯` が出て、`IsIntegralClosure.finite` が
+`Module.Finite 𝒪[K.carrier] (adjoinIntegers K x)` を与える——これが
+`Ideal.ramificationIdx_mul_inertiaDeg_of_isLocalRing` に残っていた
+最後の前提だった。これで **`e·f = [K(x):K]`** が本プロジェクトの
+設定でそのまま使える。
+
+★配管(記録): `Ideal.ramificationIdx`/`inertiaDeg` は
+`IsLocalRing (adjoinIntegers K x)` を**主張の型の段階で**要求する
+(`haveI` を証明の中に置いても遅い)。`residueDegree` と同じく
+`haveI := isLocalRing_adjoinIntegers K x` を **`def` の本体**に置いた
+薄いラッパー(`ramificationIndex`・`inertiaDegree`)を挟むことで、
+利用側にインスタンス束縛を波及させずに済む。 -/
+
+/-- 基礎体 `K.carrier` の付値も自明でない(`isNontrivial_valued_adjoin`
+の基礎体版)。 -/
+theorem isNontrivial_valued_carrier {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) :
+    (Valued.v (R := K.carrier)).IsNontrivial := by
+  haveI : CharZero K.carrier :=
+    charZero_of_injective_algebraMap (algebraMap ℚ_[p] K.carrier).injective
+  constructor
+  refine ⟨((p : ℕ) : K.carrier), ?_, ?_⟩
+  · rw [Valuation.ne_zero_iff]
+    exact_mod_cast (Nat.cast_ne_zero (R := K.carrier)).mpr (Nat.Prime.ne_zero Fact.out)
+  · have hv : Valued.v ((p : ℕ) : K.carrier) = (‖((p : ℕ) : K.carrier)‖₊ : NNReal) := NNReal.eq rfl
+    rw [hv]
+    intro hcon
+    have hone : ‖((p : ℕ) : K.carrier)‖ = 1 := by
+      have := congrArg NNReal.toReal hcon
+      simpa using this
+    have hlt := norm_natCast_p_lt_one K
+    rw [hone] at hlt
+    exact absurd hlt (lt_irrefl 1)
+
+/-- 基礎体の整数環 `𝒪[K.carrier]` は離散付値環。`IsNoetherianRing`・
+`IsDedekindDomain` はここから従う。 -/
+theorem isDiscreteValuationRing_carrierIntegers {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) :
+    IsDiscreteValuationRing 𝒪[K.carrier] :=
+  haveI := isNontrivial_valued_carrier K
+  Valued.integer.isDiscreteValuationRing_of_compactSpace (K := K.carrier)
+
+/-- **`adjoinIntegers K x` は `𝒪[K.carrier]` の `K.carrier⟮x⟯` における
+整閉包**——`isIntegral_iff_norm_le_one` をそのまま `IsIntegralClosure`
+の形に組み替えたもの。 -/
+theorem isIntegralClosure_adjoinIntegers {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))] :
+    IsIntegralClosure (adjoinIntegers K x) 𝒪[K.carrier]
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := by
+  constructor
+  · exact Subtype.val_injective
+  · intro z
+    rw [isIntegral_iff_norm_le_one K x z]
+    exact ⟨fun hz => ⟨⟨z, hz⟩, rfl⟩, fun ⟨w, hw⟩ => hw ▸ w.2⟩
+
+/-- **`adjoinIntegers K x` は `𝒪[K.carrier]` 上有限**——長らく残って
+いた最後の前提。`IsIntegralClosure.finite`(整閉包が有限であること、
+`A` が整閉Noetherianで `L/Frac(A)` が有限分離のとき)に上の
+`IsIntegralClosure` を与えるだけ。分離性は標数0から自動。 -/
+theorem module_finite_adjoinIntegers {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))] :
+    Module.Finite 𝒪[K.carrier] (adjoinIntegers K x) := by
+  haveI : IsScalarTower 𝒪[K.carrier] K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :=
+    IsScalarTower.of_algebraMap_eq (fun _ => rfl)
+  haveI : IsScalarTower 𝒪[K.carrier] (adjoinIntegers K x)
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :=
+    IsScalarTower.of_algebraMap_eq (fun _ => rfl)
+  haveI := isIntegralClosure_adjoinIntegers K x
+  haveI : IsFractionRing 𝒪[K.carrier] K.carrier :=
+    ValuationRing.instIsFractionRingInteger (K := K.carrier) Valued.v
+  haveI : CharZero K.carrier :=
+    charZero_of_injective_algebraMap (algebraMap ℚ_[p] K.carrier).injective
+  haveI := isDiscreteValuationRing_carrierIntegers K
+  exact IsIntegralClosure.finite 𝒪[K.carrier] K.carrier
+    (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) (adjoinIntegers K x)
+
+/-- **分岐指数 `e`**——`𝒪[K.carrier]` の極大イデアルが
+`adjoinIntegers K x` の極大イデアルの何乗まで入るか。 -/
+noncomputable def ramificationIndex {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))] : ℕ :=
+  haveI := isLocalRing_adjoinIntegers K x
+  (IsLocalRing.maximalIdeal 𝒪[K.carrier]).ramificationIdx
+    (IsLocalRing.maximalIdeal (adjoinIntegers K x))
+
+/-- **慣性次数 `f`**——剰余体の拡大次数。`residueDegree`(剰余体の
+**元の個数** `q^f`)とは別物なので注意。 -/
+noncomputable def inertiaDegree {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))] : ℕ :=
+  haveI := isLocalRing_adjoinIntegers K x
+  (IsLocalRing.maximalIdeal 𝒪[K.carrier]).inertiaDeg
+    (IsLocalRing.maximalIdeal (adjoinIntegers K x))
+
+/-- **分岐理論の基本等式 `e·f = [K(x):K]`**。局所体(完備離散付値体・
+剰余体有限)における古典的な等式が、本プロジェクトの
+`PAdicLocalField` 設定でそのまま使えるようになった。不分岐性
+(`e = 1`)・完全分岐(`f = 1`)を定義し、次数から一方を他方で決める
+ための土台。 -/
+theorem ramificationIndex_mul_inertiaDegree {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))] :
+    ramificationIndex K x * inertiaDegree K x
+      = Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := by
+  haveI := isDiscreteValuationRing_carrierIntegers K
+  haveI := isLocalRing_adjoinIntegers K x
+  haveI := isDiscreteValuationRing_adjoinIntegers K x
+  haveI : IsScalarTower 𝒪[K.carrier] K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :=
+    IsScalarTower.of_algebraMap_eq (fun _ => rfl)
+  haveI : IsScalarTower 𝒪[K.carrier] (adjoinIntegers K x)
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :=
+    IsScalarTower.of_algebraMap_eq (fun _ => rfl)
+  haveI : IsFractionRing 𝒪[K.carrier] K.carrier :=
+    ValuationRing.instIsFractionRingInteger (K := K.carrier) Valued.v
+  haveI : IsFractionRing (adjoinIntegers K x)
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :=
+    ValuationRing.instIsFractionRingInteger
+      (K := IntermediateField.adjoin K.carrier ({x} : Set K.closure)) Valued.v
+  haveI := module_finite_adjoinIntegers K x
+  exact Ideal.ramificationIdx_mul_inertiaDeg_of_isLocalRing (adjoinIntegers K x) K.carrier
+    (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    (IsDiscreteValuationRing.not_a_field 𝒪[K.carrier])
+
+/-- **不分岐**——分岐指数が `1`。 -/
+def IsUnramifiedAdjoin {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))] :
+    Prop :=
+  ramificationIndex K x = 1
+
+/-- 不分岐なら慣性次数が拡大次数そのもの——`e·f=[L:K]` の直接の帰結。 -/
+theorem inertiaDegree_eq_finrank_of_isUnramified {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (h : IsUnramifiedAdjoin K x) :
+    inertiaDegree K x
+      = Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := by
+  have := ramificationIndex_mul_inertiaDegree K x
+  rw [show ramificationIndex K x = 1 from h, one_mul] at this
+  exact this
 
 end ABC3.Found.PGC

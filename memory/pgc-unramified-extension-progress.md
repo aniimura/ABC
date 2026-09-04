@@ -254,3 +254,76 @@ K 0`(`IntermediateField.adjoin K.carrier {0}`上のSubringとして定義
 
 この3ステップが次数`n`の不分岐拡大1つを構成する核心。一意性・
 `K^ur`全体・Galois群の構造はその後。
+
+## ★★★ 2026-09-05 突破: 「ノルム≤1 ⟹ 整」はスペクトルノルムで数行、
+`e·f=[L:K]` まで一気に到達した(すべて`sorry`無し・全ゲート通過)
+
+上で「次に戻るときはこの1本に集中するのがよい」と書いた**難しい向き
+(ノルム≤1⟹整)**が、mathlib の **spectral norm** の道具立てで
+**数行**で書けた。Hensel の補題も共役の対称式も自前で組む必要が無い。
+
+### 使った鍵(すべて mathlib、`Analysis/Normed/Unbundled/SpectralNorm.lean`)
+
+* `NormedAlgebra.norm_eq_spectralNorm K x : ‖x‖ = spectralNorm K L x`
+  ——`[NontriviallyNormedField K][IsUltrametricDist K][NormedField L]
+  [NormedAlgebra K L][Algebra.IsAlgebraic K L][CompleteSpace K]`。
+  本プロジェクトの`K.carrier`・`K.carrier⟮x⟯`で**インスタンスが
+  すべて自動で揃う**(0.9秒で通る)。
+* `spectralNorm K L y = spectralValue (minpoly K y)` は**`rfl`**。
+* `spectralValue_le_one_iff (hP : P.Monic) :
+  spectralValue P ≤ 1 ↔ ∀ n, ‖P.coeff n‖ ≤ 1`。
+* 逆向きは `norm_root_le_spectralValue` に `f := spectralAlgNorm K L`
+  (`spectralAlgNorm_isPowMul`・`isNonarchimedean_spectralNorm`が既存)。
+* 係数を部分環に落とすのは `Polynomial.toSubring`・
+  `Polynomial.monic_toSubring`・`Polynomial.map_toSubring`。
+
+### この日に`Found/PGC/UnramifiedExtension.lean`へ入った定理(sorry無し)
+
+1. `isIntegral_of_norm_le_one` (難しい向き)
+2. `norm_le_one_of_isIntegral` (易しい向き)
+3. `isIntegral_iff_norm_le_one` : `IsIntegral 𝒪[K.carrier] y ↔ ‖y‖ ≤ 1`
+4. `isNontrivial_valued_carrier` / `isDiscreteValuationRing_carrierIntegers`
+   (基礎体版。`IsNoetherianRing 𝒪[K.carrier]`がここから出る)
+5. `isIntegralClosure_adjoinIntegers` :
+   `IsIntegralClosure (adjoinIntegers K x) 𝒪[K.carrier] K.carrier⟮x⟯`
+6. `module_finite_adjoinIntegers` :
+   **`Module.Finite 𝒪[K.carrier] (adjoinIntegers K x)`**
+   ——長らく最後の1点だった前提。`IsIntegralClosure.finite`に(5)を
+   与えるだけ(分離性は標数0から自動)。
+7. `ramificationIndex` / `inertiaDegree` (薄い`def`ラッパー)
+8. **`ramificationIndex_mul_inertiaDegree : e·f = [K(x):K]`**
+   ——`Ideal.ramificationIdx_mul_inertiaDeg_of_isLocalRing`が
+   そのまま使えるようになった。局所体の分岐理論の基本等式が
+   本プロジェクトの`PAdicLocalField`設定で**利用可能**になった。
+9. `IsUnramifiedAdjoin K x := (ramificationIndex K x = 1)` と
+   `inertiaDegree_eq_finrank_of_isUnramified`。
+
+### ★配管(記録、`tools/lean-idioms.md`の類型)
+
+* `rw [← NormedAlgebra.norm_eq_spectralNorm ...]`は**発火しない**
+  (`Valued`由来の`NormedField`インスタンス経路と補題側が syntactic
+  に一致しない)。`exact`/`le_of_eq_of_le`にすると defeq で通る(#37)。
+* `Ideal.ramificationIdx`/`inertiaDeg`は`IsLocalRing (adjoinIntegers
+  K x)`を**主張の型の段階**で要求する(`haveI`を証明の中に置いても
+  遅い)。`residueDegree`と同じく`haveI := isLocalRing_adjoinIntegers
+  K x`を**`def`の本体**に置いた薄いラッパーを挟むと、利用側に
+  インスタンス束縛を波及させずに済む。
+* `IsScalarTower 𝒪[K.carrier] K.carrier K.carrier⟮x⟯` と
+  `IsScalarTower 𝒪[K.carrier] (adjoinIntegers K x) K.carrier⟮x⟯` は
+  **インスタンス探索では見つからないが**
+  `IsScalarTower.of_algebraMap_eq (fun _ => rfl)` で即座に出る。
+  一方 `Algebra 𝒪[K.carrier] K.carrier⟮x⟯` と
+  `Algebra 𝒪[K.carrier] (adjoinIntegers K x)` は**自動で見つかる**。
+
+### 次の一歩(不分岐拡大の存在)
+
+`e·f=[L:K]`が手に入ったので、当初の見取り図の 2.→3. に進める:
+剰余体`F_q`の次数`n`拡大を`GaloisField`で構成し、その原始元の
+最小多項式を`𝒪_K`へ持ち上げ、根`x`に対して
+`IsUnramifiedAdjoin K x`(= `ramificationIndex K x = 1`)と
+`Module.finrank K.carrier K.carrier⟮x⟯ = n`を示す。
+持ち上げに Hensel が要る点は変わらない(mathlibに完備局所環の
+Henselian性の一般インスタンスは無いことを確認済み)が、
+**`e·f=[L:K]`があるので`e=1`を`f=n`から出す**という逆向きの
+経路も取れる——`f = inertiaDegree` の計算(剰余体の拡大次数)に
+持ち込めれば Hensel を迂回できる可能性がある。
