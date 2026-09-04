@@ -1791,3 +1791,30 @@ llsm`(証明済み)・`∀x∈llsm,∃m∈closure,m*x∈closure`(証明済み)�
 エタールは有限とは限らない)、という3段階。集計は10/24で変わらず(§4は0/2のまま)。
 
 コミット: `c9c711bd`。
+
+### 2026-09-04さらに続報: GlueData組み立ての戦略を簡略化——cocycle条件はmathlibの`gluedCover`を再利用できると判明(コード化は次回)
+
+GlueDataの`t'`・`cocycle`フィールドを自前で証明しようとして構造の大きさ
+(`CategoryTheory.GlueData`が要求する12個のフィールド、特に`t_fac`・`cocycle`という
+3重の重なりに関する可換性)を実測した結果、**自前で再証明する必要は無い**と判明した
+——mathlibの`Scheme.Cover.gluedCover : X.OpenCover → Scheme.GlueData`が、**既存の
+スキーム`X`の開被覆から作ったGlueDataについて`t'`・`cocycle`をすでに一般的に証明
+している**(`Scheme.Cover.gluedCoverT'`・`Scheme.Cover.glued_cover_cocycle`、
+`Gluing.lean`)。
+
+**戦略**: (1) `C`自身の開被覆`𝒰 : C.OpenCover`を`{C.basicOpen f_i}_{i∈t}`から
+`Scheme.openCoverOfIsOpenCover`で作る(`⨆i∈t, C.basicOpen f_i = (α⁻¹ piece)`を
+`TopologicalSpace.IsOpenCover`の形で示す必要がある——`exists_finite_
+standardEtaleCover`が与えるRing側の`PrimeSpectrum.basicOpen`の被覆をscheme側へ
+運ぶ一手が必要、まだ未着手)。(2) `GD := 𝒰.gluedCover`(cocycle等すべて自動)。
+(3) `piece_descends_iso`が与える同型`e_i : C.basicOpen f_i ≅ Spec P₀'_i.Ring`
+の族に沿って`GD`を**移送**し、`U i := Spec P₀'_i.Ring`を持つ新しいGlueData`GD'`を
+作る——`t'`・`cocycle`は同型による移送で保存される(圏論の一般論、`e_i`・`e_j`で
+共役するだけ)ので、**ここでも新たに検証する必要は無い**はず。
+
+これで「t'・cocycleを自前で証明する」という当初想定していた最大の技術的負債が
+解消される見通しが立った——残る実作業は(a)ring側の被覆をscheme側へ運ぶ一手、
+(b)同型による移送の具体的な構成(`GlueData`の12フィールドすべてを`e_i`で共役する
+という機械的だが分量のある作業)、(c)貼り合わせ後の有限性確認、の3点に整理された。
+本ターンはこの戦略の発見が主な成果で、新規のsorry無し宣言は追加していない
+(コード化は次回以降)。集計は10/24で変わらず。
