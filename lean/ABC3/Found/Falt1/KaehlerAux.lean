@@ -6,6 +6,7 @@ import Mathlib.RingTheory.AdjoinRoot
 import Mathlib.RingTheory.DedekindDomain.Different
 import Mathlib.RingTheory.IsAdjoinRoot
 import Mathlib.RingTheory.Smooth.Basic
+import Mathlib.RingTheory.Kaehler.TensorProduct
 
 /-!
 # [Falt1] Lemma 1.1 に向けた補助補題(`Found`、sorry 無し)
@@ -1242,18 +1243,86 @@ theorem falt1MapBaseChangeInjective {Z V K L W : Type*} [CommRing Z] [CommRing V
   exact Ideal.span_singleton_eq_bot.mpr heval
 
 /-!
-★★これで **Lemma 1.1(余核の特定・「長さ」の等式・単射性)の一般的な
-数学的内容がすべて Falt1 の実際の `W` に対して証明された**
-(`falt1CokernelIsoLinear`・`falt1CokernelLengthEq`・
-`falt1MapBaseChangeInjective`)。残っている作業(正直な記録):
-- `differentIdeal V W ≠ ⊥` を仮定ではなく `differentIdeal_ne_bot`
-  (mathlib、`[Module.Finite V W][Algebra.IsSeparable(FractionRing V)
-  (FractionRing W)]` が必要)から導く——`IsFractionRing W L` 等
-  Falt1 の設定から自然に従うはずの周辺事実の確認が必要。
-- 以上を `Skeleton/Falt1/ChapterI.lean` の `theorem_1_1`(原論文の
-  主張そのもの)に対応する1つの `Found` 定理として組み立て、
-  posit(Interface)を置き換える作業はまだ行っていない。
-- `Theorem 1.2`(§1 のもう1項目)には一切着手していない。
+★★これで **Lemma 1.1(余核の特定・「長さ」の等式・単射性、Interface
+統合込み)は `Found/Falt1/Lemma11.lean` で完成した**。以下は
+`Theorem 1.2`(§1 のもう1項目、未完成)へ向けた探索で見つけた新規の
+一般補題——「非常に分岐した拡大の列」の各段で使う**複数生成元版**の
+Lemma 1.1 に相当する「pushout(テンソル積)の Kähler 微分の直和分解」
+である。
 -/
+
+/-- `Algebra.IsPushout R C D B`(`B` は `C`・`D` の `R` 上の pushout=
+テンソル積)のとき、mathlib の `tensorKaehlerEquiv`(`D⊗_RΩ_{D... }`
+ではなく`TensorProduct D B Ω[D⁄R] ≃ₗ[B] Ω[B⁄C]`、**同型**)は、
+「`map R C B B` を経由した `mapBaseChange R D B` の像」と**一致する**
+——`map R C B B ∘ mapBaseChange R D B = tensorKaehlerEquiv R C D B`。
+この自然性が、`tensorKaehlerEquiv.symm` を経由した `mapBaseChange
+R D B` が `map R C B B` の**明示的なセクション**であることの鍵になる
+(`pushoutKaehlerSplit` で使う)。 -/
+theorem tensorKaehlerEquiv_eq_map_mapBaseChange {R C D B : Type*} [CommRing R] [CommRing C] [CommRing D]
+    [CommRing B] [Algebra R C] [Algebra R D] [Algebra R B] [Algebra C B] [Algebra D B]
+    [IsScalarTower R C B] [IsScalarTower R D B] [Algebra.IsPushout R C D B]
+    (x : TensorProduct D B Ω[D⁄R]) :
+    (KaehlerDifferential.map R C B B) (KaehlerDifferential.mapBaseChange R D B x)
+      = (KaehlerDifferential.tensorKaehlerEquiv R C D B) x := by
+  induction x using TensorProduct.induction_on with
+  | zero => simp
+  | tmul b y =>
+      have hspan := KaehlerDifferential.span_range_derivation (R := R) (S := D)
+      have hy : y ∈ Submodule.span D (Set.range (KaehlerDifferential.D R D)) := hspan ▸ Submodule.mem_top
+      induction hy using Submodule.span_induction with
+      | mem z hz =>
+          obtain ⟨d, rfl⟩ := hz
+          rw [KaehlerDifferential.mapBaseChange_tmul, KaehlerDifferential.tensorKaehlerEquiv_tmul_D]
+          show (KaehlerDifferential.map R C B B) (b • (KaehlerDifferential.map R R D B) (KaehlerDifferential.D R D d)) = _
+          rw [map_smul, KaehlerDifferential.map_D]
+          show b • (KaehlerDifferential.map R C B B) (KaehlerDifferential.D R B (algebraMap D B d)) = _
+          rw [KaehlerDifferential.map_D]
+          congr 2
+      | zero => simp
+      | add y z hy hz ihy ihz =>
+          rw [TensorProduct.tmul_add, map_add, map_add, ihy, ihz, map_add]
+      | smul d y hy ih =>
+          have h1 : (KaehlerDifferential.mapBaseChange R D B) (b ⊗ₜ[D] (d • y))
+              = d • (KaehlerDifferential.mapBaseChange R D B) (b ⊗ₜ[D] y) := by
+            rw [TensorProduct.tmul_smul]
+            exact LinearMap.map_smul_of_tower (KaehlerDifferential.mapBaseChange R D B) d (b ⊗ₜ[D] y)
+          have h2 : (KaehlerDifferential.tensorKaehlerEquiv R C D B) (b ⊗ₜ[D] (d • y))
+              = d • (KaehlerDifferential.tensorKaehlerEquiv R C D B) (b ⊗ₜ[D] y) := by
+            rw [TensorProduct.tmul_smul]
+            exact LinearMap.map_smul_of_tower (KaehlerDifferential.tensorKaehlerEquiv R C D B).toLinearMap d (b ⊗ₜ[D] y)
+          rw [h1, h2, LinearMap.map_smul_of_tower (KaehlerDifferential.map R C B B) d
+            ((KaehlerDifferential.mapBaseChange R D B) (b ⊗ₜ[D] y)), ih]
+  | add x y hx hy => simp only [map_add, hx, hy]
+
+/-- **Theorem 1.2 で使う「複数生成元版 Lemma 1.1」の核心(完成)**:
+`B` が `C`・`D`(ともに `R`-代数)の `R` 上の pushout(テンソル積)の
+とき、`mapBaseChange R C B` が単射なら(`falt1MapBaseChangeInjective`
+と同型の条件——`C` 側が `f'` 非零因子な monogenic 拡大なら成立)、
+`Ω_{B/R} ≃ₗ[B] (B⊗_CΩ_{C/R}) × (B⊗_DΩ_{D/R})`——`polynomialKaehlerSplit`
+と全く同じ「`Function.Exact.splitSurjectiveEquiv` + 明示的セクション」
+のパターンだが、セクションは `polynomialEquiv` ではなく
+`tensorKaehlerEquiv`(`tensorKaehlerEquiv_eq_map_mapBaseChange` の
+自然性)から得た。★★これを `d+1` 個の生成元(帰納的に `pushout` を
+繰り返す)へ拡張すれば Theorem 1.2 の「`Ω_{W_{n+1}/V_n}` は `d+1` 個の
+直和」という主張になるはずだが、その帰納・`V_n` の族の形式化・
+`Module.length` の漸化不等式は未着手。 -/
+noncomputable def pushoutKaehlerSplit {R C D B : Type*} [CommRing R] [CommRing C] [CommRing D] [CommRing B]
+    [Algebra R C] [Algebra R D] [Algebra R B] [Algebra C B] [Algebra D B]
+    [IsScalarTower R C B] [IsScalarTower R D B] [Algebra.IsPushout R C D B]
+    (hinj : Function.Injective (KaehlerDifferential.mapBaseChange R C B)) :
+    Ω[B⁄R] ≃ₗ[B] (TensorProduct C B Ω[C⁄R]) × (TensorProduct D B Ω[D⁄R]) := by
+  have hretr : (KaehlerDifferential.map R C B B) ∘ₗ
+      ((KaehlerDifferential.mapBaseChange R D B).comp
+        (KaehlerDifferential.tensorKaehlerEquiv R C D B).symm.toLinearMap) = LinearMap.id := by
+    apply LinearMap.ext
+    intro y
+    show (KaehlerDifferential.map R C B B)
+      ((KaehlerDifferential.mapBaseChange R D B) ((KaehlerDifferential.tensorKaehlerEquiv R C D B).symm y)) = y
+    rw [tensorKaehlerEquiv_eq_map_mapBaseChange]
+    exact (KaehlerDifferential.tensorKaehlerEquiv R C D B).apply_symm_apply y
+  set e := (Function.Exact.splitSurjectiveEquiv (KaehlerDifferential.exact_mapBaseChange_map R C B)
+    hinj ⟨_, hretr⟩).1
+  exact e.trans (LinearEquiv.refl B _ |>.prodCongr (KaehlerDifferential.tensorKaehlerEquiv R C D B).symm)
 
 end ABC3.Found.Falt1
