@@ -1548,7 +1548,7 @@ noncomputable def pushoutKaehlerSplitBase {R C0 : Type*} [CommRing R] [CommRing 
 
 /-!
 ## `pushoutKaehlerSplitStep` を`n`段連鎖させるための Σ 束ね基盤
-(2026-09-05、部分完成)
+(2026-09-05、**完成**)
 
 `pushoutKaehlerSplitStep`を繰り返し適用するには、「前段までの添字族
 `F : ι → Type*`」と「新しい1因子`C : Type*`」を`Option ι`(または
@@ -1572,23 +1572,29 @@ instanceを、自由変数`i`のままで供給できることを確認した
 `pushoutKaehlerSplitStep`自身の`∀i,Algebra(F i)B`等の要求は
 すべて解決する)。
 
-★2026-09-05時点で未完成の部分: 上記の束ねを実際に`Option ι`
-Pi型全体(`pushoutKaehlerSplitStepOption`という名の1段の
-組み替えラッパー)にまで組み立てる最後の接続(`LinearEquiv.
-piOptionEquivProd`との合成)で、`none.elim`/`(some i).elim`が
-期待通り`rfl`で潰れるはずの箇所が`Type mismatch`(instance
-スロットの不一致、原因未特定)を起こしており、まだ閉じていない
-——`RAlg`/`RAlgOver`/`RAlgOver.lift`/`RAlgOver.lift_isScalarTower`
-の4点(下記、すべてsorry無し・単独で動作確認済み)はそのまま次回
-使えるが、それらを`pushoutKaehlerSplitStep`の反復に実際に繋ぐ
-最後の1段はfalt1-goal.mdに記録の上、次回へ持ち越す。 -/
+**`RAlg`/`RAlgOver`の`carrier : Type*`には明示的なuniverse変数
+(`uFalt1R`・`uFalt1Car`・`uFalt1T`・`uFalt1B`)を与える**——これが
+最後まで残っていた本当の原因だった: `Type*`はその出現ごとに
+**独立の**universeメタ変数を生成するため、`Option.elim i C F`の
+ような式を(同じ`C`・`F`から)複数箇所に書くと、それぞれの出現が
+異なるuniverseメタ変数を持ちうる。両辺の`pp`出力が文字どおり
+完全一致するのに`Type mismatch`になる、という2026-09-05に観測した
+謎(instance diamond説を疑ったが違った)は、実はこの
+**見えないuniverse不一致**が原因だった——`set_option pp.universes
+true`で初めて可視化できた。さらに調べたところ、真の最終ブロッカーは
+**`(A × B) ≃ₗ[B] C`のような式で、明示的な外側の括弧を省略すると
+`A × (B ≃ₗ[B] C)`に誤って構文解析される**(`×`と`≃ₗ[·]`の優先順位)
+という**単純な構文の罠**だった——instance diamondでもuniverseの
+問題でもなく、自分の書いたコードの括弧不足が最後の障害物だった。 -/
+
+universe uFalt1R uFalt1Car uFalt1T uFalt1B
 
 /-- **Σ束ね(1)**: `R`上の代数を、それが運ぶ`CommRing`・`Algebra R`
 インスタンスごと1つのデータとして束ねたもの。`Option.elim`/
 `Fin.cons`等で型族を自由変数の添字で組み替えても、`.ring`・`.alg`
 という**射影**は分岐無しに使えるため、instance解決の壁を回避できる。 -/
-structure RAlg (R : Type*) [CommRing R] where
-  carrier : Type*
+structure RAlg (R : Type uFalt1R) [CommRing R] where
+  carrier : Type uFalt1Car
   [ring : CommRing carrier]
   [alg : Algebra R carrier]
 
@@ -1599,8 +1605,8 @@ attribute [instance] RAlg.ring RAlg.alg
 一緒に運ぶ。`pushoutKaehlerSplitStep`の反復で「前段までの各因子が
 今の累積環にどう埋め込まれているか」を自由変数の添字`i`のままで
 記録するために使う。 -/
-structure RAlgOver (R T : Type*) [CommRing R] [CommRing T] [Algebra R T] where
-  carrier : Type*
+structure RAlgOver (R : Type uFalt1R) (T : Type uFalt1T) [CommRing R] [CommRing T] [Algebra R T] where
+  carrier : Type uFalt1Car
   [ring : CommRing carrier]
   [algR : Algebra R carrier]
   [algT : Algebra carrier T]
@@ -1612,9 +1618,10 @@ attribute [instance] RAlgOver.ring RAlgOver.algR RAlgOver.algT RAlgOver.towerT
 1段の代数拡大越しに`B`への埋め込みへ運ぶ(合成`carrier→B1→B`を
 `RingHom.toAlgebra`で新しい`Algebra carrier B`として登録するだけ)。
 反復pushoutの各段で「前段の族を次の累積環へ運ぶ」ために使う。 -/
-noncomputable def RAlgOver.lift {R B1 B : Type*} [CommRing R] [CommRing B1] [CommRing B]
+noncomputable def RAlgOver.lift {R : Type uFalt1R} {B1 : Type uFalt1T} {B : Type uFalt1B}
+    [CommRing R] [CommRing B1] [CommRing B]
     [Algebra R B1] [Algebra R B] [Algebra B1 B] [IsScalarTower R B1 B]
-    (x : RAlgOver R B1) : RAlgOver R B :=
+    (x : RAlgOver.{uFalt1R, uFalt1Car, uFalt1T} R B1) : RAlgOver.{uFalt1R, uFalt1Car, uFalt1B} R B :=
   letI algT' : Algebra x.carrier B := ((algebraMap B1 B).comp (algebraMap x.carrier B1)).toAlgebra
   { carrier := x.carrier
     algT := algT'
@@ -1628,9 +1635,10 @@ noncomputable def RAlgOver.lift {R B1 B : Type*} [CommRing R] [CommRing B1] [Com
 `B1→B`拡大の合成そのものなので、`carrier→B1→B`という
 `IsScalarTower`をなす(`pushoutKaehlerSplitStep`の`∀i,IsScalarTower
 (F i) B1 B`要求に直接対応する)。 -/
-theorem RAlgOver.lift_isScalarTower {R B1 B : Type*} [CommRing R] [CommRing B1] [CommRing B]
+theorem RAlgOver.lift_isScalarTower {R : Type uFalt1R} {B1 : Type uFalt1T} {B : Type uFalt1B}
+    [CommRing R] [CommRing B1] [CommRing B]
     [Algebra R B1] [Algebra R B] [Algebra B1 B] [IsScalarTower R B1 B]
-    (x : RAlgOver R B1) :
+    (x : RAlgOver.{uFalt1R, uFalt1Car, uFalt1T} R B1) :
     letI : Algebra x.carrier B := (x.lift (B := B)).algT
     IsScalarTower x.carrier B1 B := by
   letI halgT : Algebra x.carrier B := (x.lift (B := B)).algT
@@ -1638,6 +1646,60 @@ theorem RAlgOver.lift_isScalarTower {R B1 B : Type*} [CommRing R] [CommRing B1] 
   intro r
   show algebraMap x.carrier B r = algebraMap B1 B (algebraMap x.carrier B1 r)
   rfl
+
+set_option maxHeartbeats 800000 in
+/-- **`pushoutKaehlerSplitStep`を`Option ι`で1段連鎖させる、本節の
+到達点**: `RAlg`/`RAlgOver`/`RAlgOver.lift`を使い、`pushoutKaehler
+SplitStep`の出力(`(∀i,...)×TensorProduct C B Ω[C/R]`という積の形)
+を、次の段の`prev`としてそのまま使える**単一のPi型**
+(`∀i:Option ι,...`)へ組み替える。この型を`toFun`/`invFun`から
+自前で組み立てる(`LinearEquiv.piOptionEquivProd`は使わない——
+`have`/`set`を1つずつ積む形で組み立てれば`Prod`優先順位の罠さえ
+避ければ問題無く閉じることが判明した)。 -/
+noncomputable def pushoutKaehlerSplitStepOption {R : Type uFalt1R} {B1 : Type uFalt1T} {B : Type uFalt1B}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    [CommRing R] [CommRing B1] [CommRing B]
+    [Algebra R B1] [Algebra R B]
+    (C : RAlg.{uFalt1R, uFalt1Car} R) (F : ι → RAlgOver.{uFalt1R, uFalt1Car, uFalt1T} R B1)
+    [Algebra C.carrier B1] [Algebra B1 B] [Algebra C.carrier B] [IsScalarTower R B1 B] [IsScalarTower R C.carrier B]
+    [Algebra.IsPushout R B1 C.carrier B]
+    (prev : Ω[B1⁄R] ≃ₗ[B1] (∀ i, TensorProduct (F i).carrier B1 Ω[(F i).carrier⁄R]))
+    (hinj : Function.Injective (KaehlerDifferential.mapBaseChange R B1 B)) :
+    Ω[B⁄R] ≃ₗ[B] (∀ i : Option ι,
+      TensorProduct (Option.elim i (⟨C.carrier⟩ : RAlgOver.{uFalt1R, uFalt1Car, uFalt1B} R B)
+        (fun j => (F j).lift (B := B))).carrier B
+        Ω[(Option.elim i (⟨C.carrier⟩ : RAlgOver.{uFalt1R, uFalt1Car, uFalt1B} R B)
+          (fun j => (F j).lift (B := B))).carrier⁄R]) := by
+  letI hAlgB : ∀ i, Algebra (F i).carrier B := fun i => (F i).lift (B := B) |>.algT
+  letI hTowB : ∀ i, IsScalarTower R (F i).carrier B := fun i => (F i).lift (B := B) |>.towerT
+  letI hTowB1B : ∀ i, IsScalarTower (F i).carrier B1 B := fun i => (F i).lift_isScalarTower (B := B)
+  have e := ABC3.Found.Falt1.pushoutKaehlerSplitStep (R := R) (B1 := B1) (C := C.carrier) (B := B)
+    (fun i => (F i).carrier) prev hinj
+  set eSwap := LinearEquiv.prodComm B (∀ i, TensorProduct (F i).carrier B Ω[(F i).carrier⁄R])
+    (TensorProduct C.carrier B Ω[C.carrier⁄R]) with heSwap
+  set FLifted : ι → RAlgOver.{uFalt1R, uFalt1Car, uFalt1B} R B := fun j => (F j).lift (B := B) with hFLifted
+  set toF : ((TensorProduct C.carrier B Ω[C.carrier⁄R]) × (∀ i, TensorProduct (F i).carrier B Ω[(F i).carrier⁄R])) →
+      (∀ i : Option ι, TensorProduct (Option.elim i (⟨C.carrier⟩ : RAlgOver.{uFalt1R, uFalt1Car, uFalt1B} R B) FLifted).carrier B
+        Ω[(Option.elim i (⟨C.carrier⟩ : RAlgOver.{uFalt1R, uFalt1Car, uFalt1B} R B) FLifted).carrier⁄R]) :=
+    fun p i => match i with
+      | none => p.1
+      | some j => p.2 j with htoF
+  have hadd : ∀ p q, toF (p + q) = toF p + toF q := by
+    intro p q; funext i; cases i <;> rfl
+  have hsmul : ∀ (c : B) p, toF (c • p) = (RingHom.id B) c • toF p := by
+    intro c p; funext i; cases i <;> rfl
+  set invF : (∀ i : Option ι, TensorProduct (Option.elim i (⟨C.carrier⟩ : RAlgOver.{uFalt1R, uFalt1Car, uFalt1B} R B) FLifted).carrier B
+        Ω[(Option.elim i (⟨C.carrier⟩ : RAlgOver.{uFalt1R, uFalt1Car, uFalt1B} R B) FLifted).carrier⁄R]) →
+      ((TensorProduct C.carrier B Ω[C.carrier⁄R]) × (∀ i, TensorProduct (F i).carrier B Ω[(F i).carrier⁄R])) :=
+    fun f => (f none, fun j => f (some j)) with hinvF
+  have hleft : ∀ p, invF (toF p) = p := fun p => rfl
+  have hright : ∀ f, toF (invF f) = f := by
+    intro f; funext i; cases i <;> rfl
+  set eProdOpt : ((TensorProduct C.carrier B Ω[C.carrier⁄R]) × (∀ i, TensorProduct (F i).carrier B Ω[(F i).carrier⁄R])) ≃ₗ[B]
+      (∀ i : Option ι, TensorProduct (Option.elim i (⟨C.carrier⟩ : RAlgOver.{uFalt1R, uFalt1Car, uFalt1B} R B) FLifted).carrier B
+        Ω[(Option.elim i (⟨C.carrier⟩ : RAlgOver.{uFalt1R, uFalt1Car, uFalt1B} R B) FLifted).carrier⁄R]) :=
+    LinearEquiv.mk (LinearMap.mk (AddHom.mk toF hadd) hsmul) invF hleft hright with heProdOpt
+  exact e.trans (eSwap.trans eProdOpt)
 
 /-!
 ## `Module.length` の `Pi` 型への加法性(2026-09-04)
