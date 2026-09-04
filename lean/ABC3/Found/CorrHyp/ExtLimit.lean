@@ -790,4 +790,39 @@ theorem piece_algebraEtale_tensor (X : Over BaseK) (U : X.left.Opens) (hU : IsAf
       (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.toAlgebra
   exact algebraEtale_transport (pieceRingEquiv X U hU).symm (piece_algebraEtale X U hU C α)
 
+/-- **`piecePullbackIso` の有限段階版**——`Ext X` の代わりに有限段階
+`(extDiagram X).obj R'` を使うと、`U`(`X.left`のアフィン開)由来のアフィン
+片は `Spec(Γ(U,U) ⊗[ℚ] R'.1)` になる。証明の骨格は `piecePullbackIso`
+と同一(`toBaseK` を `(toSchemeDiagramOver.obj R').hom` に置き換えた
+だけ)——`(toSchemeDiagramOver.obj R').hom` が最初から `Spec.map` の形
+なので、`piecePullbackIso` で必要だった`arrowIsoSpecΓOfIsAffine`相当の
+変換が不要になる分だけ簡潔。`Lemma 4.1`の「`c.C`(既存のスキーム)から
+有限段階への射を`glueMorphisms`で直接構成する」戦略の核となる部品。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def piecePullbackIsoStage (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U)
+    (R' : (FgSubalgebra ℚ ℝ)ᵒᵖ) :
+    letI := pieceAlgebra X U hU
+    ((pullback.fst X.hom (toSchemeDiagramOver.obj R').hom ⁻¹ᵁ U : Scheme)) ≅
+      Spec (CommRingCat.of (Γ(X.left, U) ⊗[ℚ] R'.unop.1)) := by
+  letI := pieceAlgebra X U hU
+  have step1 : ((pullback.fst X.hom (toSchemeDiagramOver.obj R').hom) ⁻¹ᵁ U : Scheme) ≅
+      (Limits.pullback (Spec.map (pieceRingHom X U hU)) (toSchemeDiagramOver.obj R').hom : Scheme) := by
+    calc ((pullback.fst X.hom (toSchemeDiagramOver.obj R').hom) ⁻¹ᵁ U : Scheme)
+        ≅ (Limits.pullback (pullback.fst X.hom (toSchemeDiagramOver.obj R').hom) U.ι : Scheme) :=
+          (pullbackRestrictIsoRestrict _ U).symm
+      _ ≅ (Limits.pullback U.ι (pullback.fst X.hom (toSchemeDiagramOver.obj R').hom) : Scheme) :=
+          pullbackSymmetry _ _
+      _ ≅ (Limits.pullback (U.ι ≫ X.hom) (toSchemeDiagramOver.obj R').hom : Scheme) :=
+          pullbackRightPullbackFstIso X.hom (toSchemeDiagramOver.obj R').hom U.ι
+      _ ≅ (Limits.pullback (hU.isoSpec.hom ≫ Spec.map (pieceRingHom X U hU))
+            (toSchemeDiagramOver.obj R').hom : Scheme) :=
+          (pieceRingHom_spec X U hU) ▸ Iso.refl _
+      _ ≅ (Limits.pullback (Spec.map (pieceRingHom X U hU)) (toSchemeDiagramOver.obj R').hom : Scheme) :=
+          pullbackHomIsoLeft hU.isoSpec (Spec.map (pieceRingHom X U hU)) (toSchemeDiagramOver.obj R').hom
+  refine step1.trans ?_
+  show (Limits.pullback (Spec.map (pieceRingHom X U hU))
+    (Spec.map (CommRingCat.ofHom (algebraMap ℚ R'.unop.1))) : Scheme) ≅ _
+  exact pullbackSpecIso ℚ Γ(X.left, U) R'.unop.1
+
 end ABC3.Found.CorrHyp
