@@ -232,10 +232,29 @@ lean::formalGroupLaw_endomorphism_of_action`——`F_f([a]X,[a]Y)=[a]F_f(X,Y)`
 済み)を4回組み合わせるだけで出た。新規の補助補題`coeff_one_subst_
 1var`(代入の次数1係数は係数の積になる、1変数版)も確立した。
 
-**残る作業**: 環準同型の加法側(`[a+b]_f=F_f([a]_f,[b]_f)`、2変数の
-一意性補題を要する——関数等式の導出に「代入の族との合成」というもう
-1段一般的な補題が要ると見立てている)、節目(3)torsion点の構成、
-節目(4)〜(6)Galois作用を経由した相互律写像の構成——pGC の各項目
+**続報(2026-09-04、★★★★★★★環準同型の加法側`[a+b]_f=F_f([a]_f,[b]_f)`
+が完成——節目2b全体が完成)**: `Found/PGC/LubinTateActionAdd.lean::
+LubinTateAction_add`。当初「2変数の一意性補題+もう1段一般的な補題が
+要る」と見立てていたが、実際には`δ:=F_f([a]_f,[b]_f)`(`family:=fun i=>
+if i=0 then [a]_f else [b]_f`を`F_f`へ代入したもの)は`Unit`添字、
+すなわち正真正銘**1変数**の冪級数だったので、乗法側と**同じ**1変数
+一意性補題(`powerSeries_uniqueness`)で足りた。新規の一般補題
+`subst_value_comp_family_general`(「1つの値の代入」と「代入の族」の
+合成則のもう半分——`subst_family_comp_value_general`の`c(v(p))=p(c(v))`
+に対し、こちらは`v(c(Φ))=Φ(fun i=>v(c_i))`の形、`PowerSeries.subst_def`
+で両側から`MvPowerSeries.subst_comp_subst_apply`に橋渡しするだけ)が
+鍵で、これと`subst_preserves_functional_equation`(結合律・節目2で
+確立済み)・各成分の可換性(`LubinTateAction_functional_equation`)を
+組み合わせて`δ`の関数等式を出した。新しい次数ごとの構成は一切不要
+だった。★★★★★★★これで**`a↦[a]_f : 𝒪_K → End(F_f)`が環準同型である
+こと(節目2b)が乗法側・加法側ともに完成**し、局所類体論の相互写像
+へ向けた6節点ロードマップの節点(1)(2)(2b)がすべてsorry無しで確立
+された。
+
+**残る作業**: 節目(3)torsion点の構成(`Λ_n:=ker[π^n]_f`)、節目(4)
+`L_n:=K(Λ_n)`が完全分岐かつ`Gal(L_n/K)≅(𝒪_K/π^n)^×`(Lubin-Tateの
+主定理)、節目(5)`L_π:=∪L_n`・`Gal(L_π/K)≅𝒪_K^×`、節目(6)不分岐部分と
+合わせた相互律写像`K^×→Gal(K^ab/K)`の構成——pGC の各項目
 (Prop 1.2・Cor 1.3・Prop 2.1・Prop 2.2・Theorem 4.2)を閉じるには、
 なお相互律写像そのものの構成・性質証明という大きな仕事が残っている。
 
