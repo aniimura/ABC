@@ -3470,3 +3470,59 @@ glued_iso`、約1526行)は`Scheme`について完全に一般的な形で書か
 必要がある(異なる`R_i`を持つ片同士の遷移データが`R`レベルで
 literal に一致することを示す、descent理論的に本質的な部分)。集計は
 10/24で変わらず——§4は引き続き0/2。
+
+## 2026-09-05(続き4): 「項目(d)の第二段」(遷移データのR-level降下)への
+具体的な道筋を発見——`RingHom.EssFiniteType`の filtered colimit 上の
+descent補題(mathlib、既存)が正確に必要な形をしている
+
+`descendPieceR`の貼り合わせ(項目(d)の第二段、約650行規模と見積もって
+いた)に着手する前に、まず「そもそも道具が揃っているか」を精査した
+——`AffineTransitionLimit.lean`(mathlib、既に`exists_extDiagram_finite_
+affine_descent`等で使用中)にはオブジェクト自体の降下(`c.C`のような
+scheme全体が有限段階へ降りること)を直接与える補題は無いが、
+**射の降下**(2つの射が余極限で一致するなら共通の精密化で既に一致する
+/余極限への射は有限段階からの射に factor する)を与える補題が
+`Mathlib/Algebra/Category/Ring/FinitePresentation.lean`に**正確に
+必要な形で**存在することを`#check`で確認した:
+
+- `RingHom.EssFiniteType.exists_comp_map_eq_of_isColimit`: (`f:R⟶S`
+  essentially finite type、`F:J⥤CommRingCat`が`filtered`圏上の余極限
+  `c`を持つとき)`S`から2つの有限段階`F.obj i`・`F.obj j`への射
+  `a`・`b`が余極限の中で一致するなら、**共通の精密化`k`で既に一致する**
+  ——遷移写像の一意性(descentの「重なりで矛盾しない」部分)に直結。
+- `RingHom.EssFiniteType.exists_eq_comp_ι_app_of_isColimit`: (`f:R⟶S`
+  finite presentation)`S`から余極限`c.pt`への射は、**ある有限段階
+  `F.obj i`からの射として factor する**——遷移写像の存在(descentの
+  「射自体がRレベルに降りる」部分)に直結。
+
+さらに、この2つを実際に使うのに必要な**余極限の土台**(`ℝ`が
+`FgSubalgebra ℚ ℝ`の有限生成部分環全体の余極限であること)は
+`FieldLimit.lean`の`isColimitToRingCatCocone (k K)`(`toRingCatCocone
+k K`が余極限、`k:=ℚ`・`K:=ℝ`で使う)として**既に完成済み**——
+`AffineTransitionLimit.lean`のspreading-out定理群を呼ぶための`Spec K`
+側の極限錐(`specKCone`/`isLimit_specKCone`相当)の**環側の対応物**
+そのもの。
+
+残る配線(未着手): `isColimitToRingCatCocone`の余錐を`A⊗[ℚ]-`で
+テンソルして(`- ⊗[ℚ] A`が随伴関手なので余極限を保つ)、`R↦A⊗R.1`
+という診断対象の図式の余極限が`A⊗ℝ`であることを示す一段——これが
+できれば`RingHom.EssFiniteType`の2補題を直接、`S:=S_0`(`Γ(C,piece)`
+のRレベルモデル)・`f:=algebraMap(A⊗R_i.1)S_0`(有限表示、
+`Algebra.FinitePresentation`は既に確立済み)として適用でき、
+「2つの隣接する`descendPieceR`片の間の遷移同型が、ある共通の
+Rレベル精密化で既に定義されている」ことが示せる見込み。これは
+「工数の多い道」(650行規模のGlueDataエンジニアリング再構築)ではなく、
+**既存のmathlib補題を正しい形へ specialize する配線作業**である
+可能性が高いという、有望な見積もりの修正——ただし配線自体(添字圏の
+`filtered`性・`PreservesColimit`インスタンス・`Cocone`の構成)は
+まだ何も書いていない。
+
+なお、`lemma_4_1`の`h:ZK=D.Ext Z`(文字通りの命題的等号)の妥当性に
+関する構造的懸念(2026-09-04続き10〜11に記録済み)は、今回の調査でも
+独立に再確認された——`QcqsSpace`が同型類の商ではない`Subtype`である
+ため、`descendPieceR`の貼り合わせで得られる`Z`は`ZK`と**同型**には
+なっても*文字通り等しく*なる保証は無い。この論点は既に「拙速には
+着手しない」と判断済み(`isIsogenous_refl`回帰リスク)であり、今回は
+それを再度確認しただけで、判断を変える新情報は無い——遷移データの
+Rレベル降下という「低リスクな」インフラ構築を優先する方針は変わらず
+妥当。集計は10/24で変わらず——§4は引き続き0/2。

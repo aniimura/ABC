@@ -1566,3 +1566,23 @@ lake build(ExtLimit/ABC3)0エラー確認、push済み。**Γ(C,piece)をRレベ
 方に沿ってRレベルで貼り合わせ、実際のD.Space元を構成する(遷移データ
 がRレベルでliteralに一致することを示すdescent理論的な部分、未着手)。
 集計は10/24で変わらず。corrhyp-goal.mdに詳細記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05(続き3)
+「項目(d)の第二段」(遷移データのRレベル降下)への具体的な道筋を発見。
+mathlib `Mathlib/Algebra/Category/Ring/FinitePresentation.lean`の
+`RingHom.EssFiniteType.exists_comp_map_eq_of_isColimit`(2つの射が
+余極限で一致するなら共通の精密化で既に一致する)・`exists_eq_comp_
+ι_app_of_isColimit`(余極限への射は有限段階からfactorする)が正確に
+必要な形。土台の余極限(ℝ=colim R.1)は`FieldLimit.lean`の
+`isColimitToRingCatCocone`として既に完成済み。残る配線: 余錐をA⊗[ℚ]-
+でテンソルしてR↦A⊗R.1の余極限がA⊗ℝであることを示す一段(未着手)。
+これが済めばS_0(Γ(C,piece)のRレベルモデル、finite presentation)へ
+直接適用でき、隣接pieceの遷移同型が共通のR-level精密化で既に定義
+されていることが示せる見込み——「650行規模の再構築」ではなく「既存
+補題のspecialize」に近い可能性が出てきた、有望な見積もり修正。
+
+lemma_4_1のh:ZK=D.Ext Z(文字通りの等号)構造的懸念は今回の調査でも
+独立に再確認されたが、既に「拙速には着手しない」と判断済み
+(isIsogenous_refl回帰リスク)であり判断を変える新情報は無い——遷移
+データのRレベル降下という低リスクインフラ構築を優先。集計は10/24で
+変わらず。corrhyp-goal.mdに詳細記録。
