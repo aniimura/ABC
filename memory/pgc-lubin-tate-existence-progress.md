@@ -1,6 +1,6 @@
 ---
 name: pgc-lubin-tate-existence-progress
-description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——★★★★★★★★★★★★★★★★★★★★ reciprocityMap の存在一意性・単数側全単射・群準同型は sorry 無しで完備。真に残る最後の柱は reciprocityMap の**全射性**(Galois が ψ_n の根に推移的に作用)——鍵となる irreducible_iteratedLubinTatePsi は既に確立済みで道筋は明確(AdjoinRoot 経由の共役構成 + IsAlgClosed.lift + Algebra.IsAlgebraic.bijective_of_isScalarTower')だが、K.closure に2つの Algebra 構造を与えようとして instance diamond に当たり未完成(型シノニムか AdjoinRoot を R に取る順序変更が次の一手)
+description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——★★★★★★★★★★★★★★★★★★★★★★★★★★★★ reciprocityMap: Gal(K.closure/K.carrier)→(𝒪_K)^×⧸principalUnits K π n が①存在一意性②群準同型③全射のすべて sorry 無しで完備(minpoly.exists_algEquiv_of_root' が鍵)。第一同型定理で Gal(K.closure/K.carrier)/ker ≅ (𝒪_K)^×⧸principalUnits がほぼ直接従う。残るは ker(reciprocityMap)=Gal(K.closure/K(Λ_n)) の同定という標準的な言い換えのみ
 metadata:
   type: project
 ---
@@ -2116,6 +2116,67 @@ K.closure`)経由で作る)を適用すれば、既存の`Algebra L K.closure`
 `R`として`IsAlgClosed.lift`を適用する」経路の実装。これが通れば
 `reciprocityMap`の全射性(ひいては`Gal(K(Λ_n)/K)≅(𝒪_K/π^n)^×`の
 完全な証明)に到達する見込み。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+続報(同日、さらに続き): **`reciprocityMap`の全射性が完成した**
+——手作業の`AdjoinRoot`/`IsAlgClosed.lift`構成は不要だった
+
+上の「instance diamondで行き詰まった」状況を、`apply?`で探索した
+ところ**もっと直接的な標準補題**が見つかり、即座に解決した
+(新ファイル`LubinTateReciprocitySurjective.lean`、commit
+`232b930c`)。
+
+**鍵となる発見**: mathlibに**`minpoly.exists_algEquiv_of_root'`**
+という補題が直接存在する——`IsAlgebraic F x`と
+`Polynomial.aeval y (minpoly F x) = 0`(+`Normal F E`インスタンス)
+から**直接**`∃σ:E≃ₐ[F]E, σ x = y`を与える。`AdjoinRoot`・
+`IsAlgClosed.lift`・`letI`での`Algebra`インスタンスの手作業構成は
+**一切不要**だった——`Normal K.carrier K.closure`は
+`IsAlgClosure.normal K.carrier K.closure`で即座に手に入る
+(`K.closure`は定義上`K.carrier`の代数閉包)。
+
+**新規に確立した内容(すべて`sorry`無し、ゲート通過済み)**:
+
+1. **`exists_algEquiv_of_mem_iteratedLubinTatePsiTorsionPoints`**:
+   `ψ_nの根`の任意の2元`x,y`に対し`σ(x)=y`となる
+   `σ∈Gal(K.closure/K.carrier)`が存在する。`irreducible_
+   iteratedLubinTatePsi`(既出)をGaussの補題
+   (`Polynomial.IsPrimitive.irreducible_iff_irreducible_map_
+   fraction_map`)で`K.carrier`上へ持ち上げ、`minpoly.eq_of_
+   irreducible_of_monic`で`x,y`の最小多項式がともに`ψ_n`自身に
+   一致することを示し、`minpoly.exists_algEquiv_of_root'`を適用
+   するだけ。
+
+2. **★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+   `reciprocityMap_surjective`**: `reciprocityMap`は**全射**。
+   任意の単数類`U`に対し`y:=U·x`(`ψ_nの根`、`unitActionQuotientLift`
+   の全射性から)へ上の共役の存在定理を適用し、一意性
+   (`existsUnique_unitActionQuotient_eq_algEquiv`)から
+   `reciprocityMap σ = U`を得る。
+
+**到達点の総括(このセッション全体・最終版)**: `reciprocityMap:
+Gal(K.closure/K.carrier)→(𝒪_K)^×⧸principalUnits K π n`が
+**①存在一意性②群準同型③全射**のすべてを`sorry`無しで満たす
+ことが完全に確立された。第一同型定理(mathlibの一般論、
+`QuotientGroup.quotientKerEquivOfSurjective`のような形)により
+`Gal(K.closure/K.carrier)/ker(reciprocityMap) ≅ (𝒪_K)^×⧸
+principalUnits K π n`が直接従う——`principalUnitsQuotientEquiv`
+と合わせれば`≅(𝒪_K/π^n)^×`も得られる。
+
+**真に残る最後の1点**: `ker(reciprocityMap) = Gal(K.closure/
+K(Λ_n))`(`K(Λ_n)`を固定する自己同型の部分群)という**同定**——
+これは新しい数学的困難ではなく、標準的なGalois対応の言い換え
+(`σ∈ker ↔ σ(x)=x ↔ σ`が`K.carrier⟮x⟯=K(Λ_n)`(要証明:`Λ_n`全体が
+`x`から生成されること、単数の作用の全射性からほぼ従うはず)を
+固定する)。ここまで来れば`Gal(K(Λ_n)/K)≅(𝒪_K/π^n)^×`という
+古典的なLubin-Tate理論の主定理そのものに到達する。
+
+**このセッション全体を通じて**、当初「大掛かりな新規構築が避け
+られない」「instance diamondが避けられない」と繰り返し警戒されて
+きたLubin-Tate相互律のすべての核心的な数学的内容(単射性・
+全単射性・準同型性・全射性)が、**いずれも当初の想定より遥かに
+軽い経路**で完成した——本プロジェクトのこのトラックにおける
+決定的な到達点。
 
 ## 続報(同日、`algEquiv_mem_iteratedLubinTateTorsionPoints_of_mem`、
 `AdjoinIntegers.lean`、commit `93108293`): `Λ_n`全体もσで保たれる
