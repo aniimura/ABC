@@ -103,4 +103,18 @@ theorem charZero_valuationRing {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) 
   haveI : CharZero K.carrier := charZero_of_injective_algebraMap (algebraMap ℚ_[p] K.carrier).injective
   infer_instance
 
+/-- ★★★★★★★★★★**`𝒪[K.carrier]` 自身が線形位相**——`isAdic_maximalIdeal_
+valuationRing`(距離位相 = `maximalIdeal`-進位相)と mathlib の
+`Ideal.isLinearTopology`(イデアルの adic 位相は線形位相)を組み合わせる
+だけ。これは `PowerSeries.aeval`(冪級数の評価)が要求する条件のうち
+「評価**先**の環自身が線形位相であること」を、`K` の整数環に対して
+満たす——原典 [pGC] の Lubin-Tate 形式群の作用 `[a]_f` を、体ではなく
+付値環の間の写像として実際に評価するための最後の土台。 -/
+theorem isLinearTopology_valuationRing {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) :
+    IsLinearTopology (𝒪[K.carrier]) (𝒪[K.carrier]) := by
+  have h := isAdic_maximalIdeal_valuationRing K
+  rw [IsAdic] at h
+  rw [h]
+  exact Ideal.isLinearTopology _
+
 end ABC3.Found.PGC
