@@ -3,6 +3,7 @@ import Mathlib.RingTheory.Kaehler.Polynomial
 import Mathlib.LinearAlgebra.Span.Basic
 import Mathlib.RingTheory.AdjoinRoot
 import Mathlib.RingTheory.DedekindDomain.Different
+import Mathlib.RingTheory.IsAdjoinRoot
 
 /-!
 # [Falt1] Lemma 1.1 に向けた補助補題(`Found`、sorry 無し)
@@ -304,5 +305,22 @@ theorem differentIdeal_eq_span_derivative {V K L W : Type*} [CommRing V] [IsDede
   have := conductor_mul_differentIdeal V K L w hw
   rw [hc, Ideal.top_mul] at this
   exact this
+
+/-- **一般の W への橋渡し(1本目)**: `V` が整閉整域(例: Dedekind整域)で
+`w : W` が `V` 上整かつ `W` を生成するなら、`AdjoinRoot (minpoly V w) ≃ₐ[V] W`。
+`IsAdjoinRootMonic.mkOfAdjoinEqTop`(体に限らず一般の整閉整域 `V` で成立、
+`AlgEquiv.adjoinSingletonEquivAdjoinRootMinpoly` は `V` が体の場合のみ
+なので使えない)経由。
+
+`AdjoinRoot f` は定義から `Polynomial V ⧸ (f)` なので、これで
+`omega_quotient_eq_derivative_span`(`Polynomial R ⧸ (f)` の具体形)と
+Falt1 の一般の `W` を繋ぐ最初の橋になる。★残る橋渡し: この AlgEquiv に
+沿って `Ω` 加群を実際に転送する(`KaehlerDifferential.map` の
+functoriality を使う、まだ組み立てていない)。 -/
+noncomputable def adjoinRootMinpolyEquiv {V W : Type*} [CommRing V] [CommRing W] [Algebra V W]
+    [IsDomain V] [IsDomain W] [Module.IsTorsionFree V W] [IsIntegrallyClosed V]
+    (w : W) (hint : IsIntegral V w) (hadjoin : Algebra.adjoin V ({w} : Set W) = ⊤) :
+    AdjoinRoot (minpoly V w) ≃ₐ[V] W :=
+  IsAdjoinRoot.adjoinRootAlgEquiv (IsAdjoinRootMonic.mkOfAdjoinEqTop hint hadjoin).toIsAdjoinRoot
 
 end ABC3.Found.Falt1
