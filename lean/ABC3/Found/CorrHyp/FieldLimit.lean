@@ -2046,6 +2046,125 @@ theorem exists_mvPolynomial_quotient_ringEquiv_descend (A : Type) [CommRing A] [
       rw [MvPolynomial.map_map, algebraTensorMap_inclusion_comp_inclusion]
     rwa [eR] at hp
 
+/-- **`exists_mvPolynomial_quotient_ringEquiv_descend`の生データから
+実際の`RingEquiv`を組み立てる**——`Ideal.Quotient.lift`で`ev`・`ev'`
+それぞれから商環の間のRingHom `f`・`g`を構成し(well-definedness は
+`hq`・`hq₂`から`Ideal.span_le`経由)、`RingEquiv.ofRingHom`で束ねる。
+往復が恒等であること(`f.comp g = id`・`g.comp f = id`)は
+`Ideal.Quotient.ringHom_ext`(商からの一致は`mk`との合成で十分)+
+`MvPolynomial.ringHom_ext`(`C`・`X`上の一致で十分)で`X`の場合に
+`hround1`・`hround2`(`Ideal.Quotient.eq`経由)を、`C`の場合に
+`aeval_C`(定数を保つ)を使うだけで閉じる。汎用的な純代数の補題
+——CorrHyp固有のデータには依存しない。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_mvPolynomial_quotient_ringEquiv_of_data {T : Type} [CommRing T]
+    {ι κ ι' κ' : Type} (q : κ → MvPolynomial ι T) (q₂ : κ' → MvPolynomial ι' T)
+    (ev : ι → MvPolynomial ι' T) (ev' : ι' → MvPolynomial ι T)
+    (hq : ∀ k, MvPolynomial.aeval ev (q k) ∈ Ideal.span (Set.range q₂))
+    (hq₂ : ∀ k', MvPolynomial.aeval ev' (q₂ k') ∈ Ideal.span (Set.range q))
+    (hround1 : ∀ i, MvPolynomial.aeval ev' (ev i) - MvPolynomial.X i ∈ Ideal.span (Set.range q))
+    (hround2 : ∀ j, MvPolynomial.aeval ev (ev' j) - MvPolynomial.X j ∈ Ideal.span (Set.range q₂)) :
+    Nonempty ((MvPolynomial ι T ⧸ Ideal.span (Set.range q)) ≃+*
+      (MvPolynomial ι' T ⧸ Ideal.span (Set.range q₂))) := by
+  have hwd1 : ∀ a ∈ Ideal.span (Set.range q), (Ideal.Quotient.mk (Ideal.span (Set.range q₂)))
+      ((MvPolynomial.aeval ev).toRingHom a) = 0 := by
+    intro a ha
+    rw [Ideal.Quotient.eq_zero_iff_mem]
+    have hle : Ideal.span (Set.range q) ≤
+        Ideal.comap (MvPolynomial.aeval ev).toRingHom (Ideal.span (Set.range q₂)) :=
+      Ideal.span_le.mpr (fun x hx => by obtain ⟨k, rfl⟩ := hx; exact hq k)
+    exact hle ha
+  have hwd2 : ∀ a ∈ Ideal.span (Set.range q₂), (Ideal.Quotient.mk (Ideal.span (Set.range q)))
+      ((MvPolynomial.aeval ev').toRingHom a) = 0 := by
+    intro a ha
+    rw [Ideal.Quotient.eq_zero_iff_mem]
+    have hle : Ideal.span (Set.range q₂) ≤
+        Ideal.comap (MvPolynomial.aeval ev').toRingHom (Ideal.span (Set.range q)) :=
+      Ideal.span_le.mpr (fun x hx => by obtain ⟨k, rfl⟩ := hx; exact hq₂ k)
+    exact hle ha
+  set f := Ideal.Quotient.lift (Ideal.span (Set.range q))
+    ((Ideal.Quotient.mk (Ideal.span (Set.range q₂))).comp (MvPolynomial.aeval ev).toRingHom) hwd1 with hf_def
+  set g := Ideal.Quotient.lift (Ideal.span (Set.range q₂))
+    ((Ideal.Quotient.mk (Ideal.span (Set.range q))).comp (MvPolynomial.aeval ev').toRingHom) hwd2 with hg_def
+  refine ⟨RingEquiv.ofRingHom f g ?_ ?_⟩
+  · apply Ideal.Quotient.ringHom_ext
+    apply MvPolynomial.ringHom_ext
+    · intro a
+      show f (g (Ideal.Quotient.mk (Ideal.span (Set.range q₂)) (MvPolynomial.C a))) =
+        Ideal.Quotient.mk (Ideal.span (Set.range q₂)) (MvPolynomial.C a)
+      rw [hg_def, Ideal.Quotient.lift_mk]
+      show f (Ideal.Quotient.mk (Ideal.span (Set.range q)) (MvPolynomial.aeval ev' (MvPolynomial.C a))) = _
+      rw [MvPolynomial.aeval_C, hf_def, Ideal.Quotient.lift_mk]
+      show Ideal.Quotient.mk (Ideal.span (Set.range q₂)) (MvPolynomial.aeval ev (MvPolynomial.C a)) = _
+      rw [MvPolynomial.aeval_C]
+      rfl
+    · intro i
+      show f (g (Ideal.Quotient.mk (Ideal.span (Set.range q₂)) (MvPolynomial.X i))) =
+        Ideal.Quotient.mk (Ideal.span (Set.range q₂)) (MvPolynomial.X i)
+      rw [hg_def, Ideal.Quotient.lift_mk]
+      show f (Ideal.Quotient.mk (Ideal.span (Set.range q)) (MvPolynomial.aeval ev' (MvPolynomial.X i))) = _
+      rw [MvPolynomial.aeval_X, hf_def, Ideal.Quotient.lift_mk]
+      show Ideal.Quotient.mk (Ideal.span (Set.range q₂)) (MvPolynomial.aeval ev (ev' i)) = _
+      rw [Ideal.Quotient.eq]
+      exact hround2 i
+  · apply Ideal.Quotient.ringHom_ext
+    apply MvPolynomial.ringHom_ext
+    · intro a
+      show g (f (Ideal.Quotient.mk (Ideal.span (Set.range q)) (MvPolynomial.C a))) =
+        Ideal.Quotient.mk (Ideal.span (Set.range q)) (MvPolynomial.C a)
+      rw [hf_def, Ideal.Quotient.lift_mk]
+      show g (Ideal.Quotient.mk (Ideal.span (Set.range q₂)) (MvPolynomial.aeval ev (MvPolynomial.C a))) = _
+      rw [MvPolynomial.aeval_C, hg_def, Ideal.Quotient.lift_mk]
+      show Ideal.Quotient.mk (Ideal.span (Set.range q)) (MvPolynomial.aeval ev' (MvPolynomial.C a)) = _
+      rw [MvPolynomial.aeval_C]
+      rfl
+    · intro j
+      show g (f (Ideal.Quotient.mk (Ideal.span (Set.range q)) (MvPolynomial.X j))) =
+        Ideal.Quotient.mk (Ideal.span (Set.range q)) (MvPolynomial.X j)
+      rw [hf_def, Ideal.Quotient.lift_mk]
+      show g (Ideal.Quotient.mk (Ideal.span (Set.range q₂)) (MvPolynomial.aeval ev (MvPolynomial.X j))) = _
+      rw [MvPolynomial.aeval_X, hg_def, Ideal.Quotient.lift_mk]
+      show Ideal.Quotient.mk (Ideal.span (Set.range q)) (MvPolynomial.aeval ev' (ev j)) = _
+      rw [Ideal.Quotient.eq]
+      exact hround1 j
+
+open scoped TensorProduct in
+/-- **「項目(d)の第二段」の実用形——遷移写像の候補が実際に`RingEquiv`
+として手に入る**。`exists_mvPolynomial_quotient_ringEquiv_descend`
+(生データ)を`exists_mvPolynomial_quotient_ringEquiv_of_data`(生データ
+から`RingEquiv`を組み立てる)へ渡すだけ——`Lemma 4.1`の`GlueData`構成
+(`Spec`を取れば2つの`descendPieceR`片の間の実際のスキーム同型になる)
+で直接使う最終形。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_mvPolynomial_quotient_ringEquiv_descend' (A : Type) [CommRing A] [Algebra ℚ A]
+    (R R₂ : FgSubalgebra ℚ ℝ) {ι κ ι' κ' : Type} [Fintype ι] [Fintype ι'] [Fintype κ] [Fintype κ']
+    (q : κ → MvPolynomial ι (A ⊗[ℚ] R.1)) (q₂ : κ' → MvPolynomial ι' (A ⊗[ℚ] R₂.1))
+    (ψ : ι → MvPolynomial ι' (A ⊗[ℚ] ℝ)) (ψ' : ι' → MvPolynomial ι (A ⊗[ℚ] ℝ))
+    (hψ : ∀ k, MvPolynomial.aeval ψ
+        (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom (q k)) ∈
+      Ideal.span (Set.range (fun k' => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R₂.1)).toRingHom (q₂ k'))))
+    (hψ' : ∀ k', MvPolynomial.aeval ψ'
+        (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R₂.1)).toRingHom (q₂ k')) ∈
+      Ideal.span (Set.range (fun k => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom (q k))))
+    (hround1 : ∀ i, MvPolynomial.aeval ψ' (ψ i) - MvPolynomial.X i ∈
+      Ideal.span (Set.range (fun k => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom (q k))))
+    (hround2 : ∀ j, MvPolynomial.aeval ψ (ψ' j) - MvPolynomial.X j ∈
+      Ideal.span (Set.range (fun k' => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R₂.1)).toRingHom (q₂ k')))) :
+    ∃ (R' : FgSubalgebra ℚ ℝ) (hR : R ≤ R') (hR₂ : R₂ ≤ R'),
+      Nonempty ((MvPolynomial ι (A ⊗[ℚ] R'.1) ⧸ Ideal.span (Set.range (fun k => MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR)).toRingHom (q k)))) ≃+*
+        (MvPolynomial ι' (A ⊗[ℚ] R'.1) ⧸ Ideal.span (Set.range (fun k' => MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR₂)).toRingHom (q₂ k'))))) := by
+  obtain ⟨R', hR, hR₂, ev, ev', hev, hev', hq, hq₂, hround1', hround2'⟩ :=
+    exists_mvPolynomial_quotient_ringEquiv_descend A R R₂ q q₂ ψ ψ' hψ hψ' hround1 hround2
+  exact ⟨R', hR, hR₂, exists_mvPolynomial_quotient_ringEquiv_of_data _ _ ev ev' hq hq₂ hround1' hround2'⟩
+
 /-! ## `StandardEtalePair.Ring` の元を有限段階へ降ろす——作業単位1(b)の完成
 
 `exists_fg_subalgebra_tensor_bivariate_finset`を`StandardEtalePair.Ring`
