@@ -3722,4 +3722,26 @@ theorem falt1_isPrincipalIdealRing_of_finite_ext_of_DVR
     exact ⟨hI.isPrime, Ideal.LiesOver.mk heq⟩
   exact Set.Finite.subset (IsDedekindDomain.primesOver_finite (IsLocalRing.maximalIdeal Wn) Wn1) hsub
 
+set_option maxHeartbeats 400000 in
+/-- **PID における長さの加法性(非零な単項イデアルの倍)**:
+`falt1_isPrincipalIdealRing_of_finite_ext_of_DVR` と
+`length_quotient_span_singleton_mul` を貼り合わせただけ——`I ≠ 0` から
+`IsPrincipalIdealRing.principal` で生成元 `a` を取り出し、`a ≠ 0`
+(ゆえに整域では非零因子)を確認して`length_quotient_span_singleton_mul`
+を適用する。`conductor(Wₙ,x)`(単項とは限らないと思われていたが、
+`Wₙ₊₁` が PID なので実は自動的に単項)に直接使える形。 -/
+theorem falt1_length_quotient_mul_of_ne_zero {R : Type*} [CommRing R] [IsDomain R] [IsPrincipalIdealRing R]
+    (I J : Ideal R) (hI : I ≠ 0) :
+    Module.length R (R ⧸ (I * J)) = Module.length R (R ⧸ I) + Module.length R (R ⧸ J) := by
+  obtain ⟨a, ha⟩ := IsPrincipalIdealRing.principal I
+  have ha0 : a ≠ 0 := by
+    intro h
+    apply hI
+    rw [ha, h]
+    simp
+  have hanzd : a ∈ nonZeroDivisors R := mem_nonZeroDivisors_of_ne_zero ha0
+  have hI' : I = Ideal.span ({a} : Set R) := ha
+  rw [hI']
+  exact ABC3.Found.Falt1.length_quotient_span_singleton_mul a hanzd J
+
 end ABC3.Found.Falt1
