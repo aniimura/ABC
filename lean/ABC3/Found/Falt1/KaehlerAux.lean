@@ -2554,4 +2554,43 @@ theorem falt1ModuleFiniteWnWn1
   haveI : Module.Finite Wn (AdjoinRoot g) := Module.Finite.of_basis pb.basis
   exact Module.Finite.equiv e2.toLinearEquiv
 
+/-- **`Wₙ₊₁` は `Wₙ` 上捩れ無し**: `Module.IsTorsionFree V0
+(integralClosure V0 (AdjoinRoot fK))`(`differentIdeal_eq_span_of_
+adjoinRoot_X_pow_sub_C` の中で使った議論)と全く同じパターンを
+`Wₙ`・`gK` に対して繰り返すだけ——`algebraMap Wₙ (AdjoinRoot gK)`
+の単射性(`IsFractionRing.injective` 経由)から
+`Module.IsTorsionFree Wₙ (AdjoinRoot gK)` を出し、
+`IsIntegralClosure.isTorsionFree` で `Wₙ₊₁` へ降ろす。 -/
+theorem falt1ModuleIsTorsionFreeWnWn1
+    {V0 Wn : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    (π : V0) (n : ℕ) (hnpos : 0 < n)
+    (hn' : (n : FractionRing Wn) ≠ 0)
+    (hπne0' : algebraMap Wn (FractionRing Wn) (algebraMap V0 Wn π) ≠ 0)
+    (hprime' : (Ideal.span ({algebraMap V0 Wn π} : Set Wn)).IsPrime)
+    (hnotsq' : algebraMap V0 Wn π ∉ (Ideal.span ({algebraMap V0 Wn π} : Set Wn)) ^ 2) :
+    Module.IsTorsionFree Wn (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn))))) := by
+  set π' : Wn := algebraMap V0 Wn π with hπ'def
+  set g : Polynomial Wn := Polynomial.X ^ n - Polynomial.C π' with hgdef
+  set gK : Polynomial (FractionRing Wn) := g.map (algebraMap Wn (FractionRing Wn)) with hgKdef
+  have hirr : Irreducible gK :=
+    eisenstein_X_pow_sub_C_irreducible_map π' n hnpos hprime' hnotsq'
+  haveI : Fact (Irreducible gK) := ⟨hirr⟩
+  have hL : Module.IsTorsionFree Wn (AdjoinRoot gK) := by
+    have hinj : Function.Injective (algebraMap Wn (AdjoinRoot gK)) := by
+      rw [IsScalarTower.algebraMap_eq Wn (FractionRing Wn) (AdjoinRoot gK)]
+      exact (algebraMap (FractionRing Wn) (AdjoinRoot gK)).injective.comp
+        (IsFractionRing.injective Wn (FractionRing Wn))
+    refine ⟨fun r hr => ?_⟩
+    have hr0 : r ≠ 0 := by
+      rintro rfl
+      exact zero_ne_one (hr.left (show (0:Wn) * 0 = 0 * 1 by simp))
+    have hr0' : algebraMap Wn (AdjoinRoot gK) r ≠ 0 := fun h => hr0 (hinj (by rw [h, map_zero]))
+    intro x y hxy
+    simp only [Algebra.smul_def] at hxy
+    exact mul_left_cancel₀ hr0' hxy
+  haveI := hL
+  exact IsIntegralClosure.isTorsionFree Wn (AdjoinRoot gK)
+
 end ABC3.Found.Falt1
