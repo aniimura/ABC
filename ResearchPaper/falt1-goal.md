@@ -313,6 +313,28 @@ step-by-step に書き下している**(Brinon-Conrad はスタンフォード/
 「思ったより深い」から「深いが具体的に何を調べればよいかが分かった」
 への前進である。
 
+★★★★★★★★★2026-09-04、続けて mathlib を調査し、**まさにこの
+「conductor via discriminant/微分」の道具そのもの**を発見した:
+`conductor_mul_differentIdeal`(`RingTheory/DedekindDomain/
+Different.lean`)—— `(conductor A x) * differentIdeal A B =
+Ideal.span {aeval x (derivative (minpoly A x))}`(`x : B` が
+`Frac(B)/Frac(A)` を生成する場合)。これは Lemma 1.1 で使った
+`differentIdeal_eq_span_derivative`(`conductor = (1)` の特殊形、
+`B` が `A` 上 monogenic な場合)の**一般化**であり、`conductor A x`
+が `A[x]`(= 私の `T_{n+1} = Wₙ⊗_{Vₙ}Vₙ₊₁` に相当、`x` が「典型例」
+の生成元(`p`乗根等)なら monogenic)が `B`(= `Wₙ₊₁`)からどれだけ
+離れているかを**まさに測る量**。つまり:
+
+`differentIdeal Wₙ Wₙ₊₁ = Ideal.span{aeval x (deriv(minpoly Wₙ x))}
+/ (conductor Wₙ x)`(概念的に——実際には `conductor * different =
+span{...}` の形で使う)
+
+という式で、目標の `Jₙ := differentIdeal Wₙ Wₙ₊₁` が
+`conductor Wₙ x` 経由で書ける。★「典型例」(`V_{n+1}/V_n` が
+`p`乗根の同時添加)なら `x` の具体的な選び方も明確——次のセッションの
+最有力候補: `conductor_mul_differentIdeal` を実際に `differentIdeal_
+tower_diamond` と組み合わせて `hrec` の構築を試みること。
+
 3c. **「非常に分岐した」`V_n` の族**そのものの形式化(具体例: `p^n`
     乗根と `1` のべき根を添加する塔、上の「典型例」段落)——まだ
     手つかず。抽象的な族の公理化(`Ω_{V_n/V_{n-1}}` が
