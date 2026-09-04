@@ -948,3 +948,22 @@ LubinTateActionEndomorphism.lean`で既に`sorry`無しで確立済み)を
 必要がある——`PowerSeries.substAlgHom_eq_aeval`(`DiscreteUniformity`
 の元でsubstとaevalが一致するという趣旨の補題、mathlibに存在を確認
 済み)がこの橋渡しの鍵になりそうだが、まだ実際には試していない。
+
+**続報(2026-09-04・続き、単位律`1·x=x`を確認)**: 深いsubst/aeval
+橋渡し理論を経由せずに得られる、もっと手前の具体的な事実を先に
+押さえた(commit`bc5cbe76`):
+
+- `aeval_X_eq_self`: `PowerSeries.aeval`は`X`を評価点そのものへ送る
+  (`X`を`Polynomial.X`の像として書き直し、`PowerSeries.aeval_coe`・
+  `Polynomial.aeval_X`と組み合わせるだけ。汎用的な事実)。
+- `lubinTateActionAtTorsionPoint_one`: **`1·x=x`**。既に確立済みの
+  `LubinTateAction_one_eq_X`(`[1]_f=X`)と`aeval_X_eq_self`を組み
+  合わせるだけで従った。
+
+★これは加群作用の公理のうち最初の1つ(単位律)が実際に成り立つ
+ことを確認した最初の具体例——`subst`/`aeval`の深い橋渡し理論は
+「加法性」「乗法性」(一般の`a,b`について)には依然として必要だが、
+`a=1`という特殊ケースは`[1]_f=X`という既存の具体的な等式だけで
+迂回できた。次に狙うべき比較的手前の目標: `a=0`の場合(`0·x=0`、
+`LubinTateAction`に`0`での挙動を示す既存補題があれば同様に迂回
+できるかもしれない)。
