@@ -2835,4 +2835,49 @@ theorem falt1BaseChangeAlgHom_generator_and_injective
     apply hstep1inj
     exact e2.injective hab
 
+/-- **`Module.IsTorsionFree V1 Wₙ₊₁` が完成した**——`falt1BaseChangeAlgHom_
+generator_and_injective` の単射性を `moduleIsTorsionFree_of_injective`
+に直接渡すだけ。`ψ` を `letI := ψ.toRingHom.toAlgebra` で `Algebra V1
+Wₙ₊₁` として登録した**その instance の下で**主張する(実際に
+`differentIdeal_tower_diamond` を呼ぶ際もこの `letI` を経由することに
+なる)。 -/
+theorem falt1ModuleIsTorsionFreeV1Wn1
+    {V0 Wn : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    (π : V0) (n : ℕ)
+    (hn : (n : FractionRing V0) ≠ 0) (hπne0 : algebraMap V0 (FractionRing V0) π ≠ 0)
+    (hprime : (Ideal.span ({π} : Set V0)).IsPrime) (hnotsq : π ∉ (Ideal.span ({π} : Set V0)) ^ 2)
+    (hnpos : 0 < n)
+    (hn' : (n : FractionRing Wn) ≠ 0)
+    (hπne0' : algebraMap Wn (FractionRing Wn) (algebraMap V0 Wn π) ≠ 0)
+    (hprime' : (Ideal.span ({algebraMap V0 Wn π} : Set Wn)).IsPrime)
+    (hnotsq' : algebraMap V0 Wn π ∉ (Ideal.span ({algebraMap V0 Wn π} : Set Wn)) ^ 2)
+    (hinjV0Wn : Function.Injective (algebraMap V0 Wn))
+    [IsDedekindDomain (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    [Module.IsTorsionFree V0 (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    [IsDedekindDomain (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))]
+    [Module.IsTorsionFree Wn (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))] :
+    ∃ (ψ : integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))) →ₐ[V0]
+      integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn))))),
+      letI := ψ.toRingHom.toAlgebra
+      Module.IsTorsionFree
+        (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+          (algebraMap V0 (FractionRing V0)))))
+        (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+          (algebraMap Wn (FractionRing Wn)))))
+    := by
+  obtain ⟨ψ, w, x, hwx, hψinj⟩ :=
+    falt1BaseChangeAlgHom_generator_and_injective π n hn hπne0 hprime hnotsq hnpos
+      hn' hπne0' hprime' hnotsq' hinjV0Wn
+  refine ⟨ψ, ?_⟩
+  letI := ψ.toRingHom.toAlgebra
+  apply moduleIsTorsionFree_of_injective
+  exact hψinj
+
 end ABC3.Found.Falt1
