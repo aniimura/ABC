@@ -1034,6 +1034,34 @@ theorem Scheme.hom_image_iso_eq_inv_preimage {X Z : Scheme} (e : X ≅ Z) (W : X
     simpa using this
   exact hinj (h1.trans h2.symm)
 
+/-- **開埋め込みの像への制限`isoImage`は部分開集合の包含と両立する**——
+`V ≤ W`のとき、`X.homOfLE(V≤W)`で`W`から`V`へ制限してから`isoImage W`で
+`Y`側へ渡すのと、先に`isoImage V`で`Y`側へ渡してから像の包含
+`Y.homOfLE(p''ᵁV≤p''ᵁW)`で制限するのとが一致する——`isoImage`の自然性。
+`t_fac`・`cocycle`(`transitionElemIso`が積の分解と両立すること)の核心
+部品。証明は`(p''ᵁW).ι`で両辺をキャンセルするだけ(`isoImage_hom_ι`+
+`homOfLE_ι`)。CorrHyp非依存の一般的事実。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem Scheme.Hom.isoImage_naturality {X Y : Scheme} (p : X ⟶ Y) [IsOpenImmersion p]
+    {V W : X.Opens} (h : V ≤ W) :
+    X.homOfLE h ≫ (p.isoImage W).hom = (p.isoImage V).hom ≫ Y.homOfLE (Scheme.Hom.image_mono p h) := by
+  rw [← cancel_mono (p ''ᵁ W).ι]
+  simp [Scheme.Hom.isoImage_hom_ι, Scheme.homOfLE_ι, Scheme.homOfLE_ι_assoc]
+
+/-- `Scheme.Hom.isoImage_naturality`の逆向き(`.inv`版)——`isoImage`の
+逆同型についての同じ自然性。`isoImage_naturality`から
+`cancel_epi (p.isoImage V).hom`で導く。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem Scheme.Hom.isoImage_inv_naturality {X Y : Scheme} (p : X ⟶ Y) [IsOpenImmersion p]
+    {V W : X.Opens} (h : V ≤ W) :
+    (p.isoImage V).inv ≫ X.homOfLE h = Y.homOfLE (Scheme.Hom.image_mono p h) ≫ (p.isoImage W).inv := by
+  rw [← cancel_epi (p.isoImage V).hom, Iso.hom_inv_id_assoc, ← Category.assoc,
+    ← Scheme.Hom.isoImage_naturality p h, Category.assoc, Iso.hom_inv_id, Category.comp_id]
+
+attribute [reassoc] Scheme.Hom.isoImage_naturality Scheme.Hom.isoImage_inv_naturality
+
 /-- **重なり`X.basicOpen(f₁·f₂)`を、`X.basicOpen f₁`とその「候補片」`Z`
 との任意の同型`e`(`piece_descends_iso`/`onePieceSchemeIso`が与える)の
 下で`Z`の基本開集合として実現する**——`W`(`X.basicOpen f₁`自身のスキーム
