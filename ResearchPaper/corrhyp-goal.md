@@ -4387,3 +4387,51 @@ away_tensor_eq`で既に使った経験がある)経由で構成し直すこと�
 と同じスタイル)の側で`IsLocalization.Away`インスタンスを直接構成する
 ことが有望に見える。lake build(`FieldLimit`/`ABC3`)とも0エラー確認、
 push完了。集計は引き続き10/24——§4は引き続き0/2。
+
+## 2026-09-05夜さらに続き5(完成): `R`↔ℝ橋渡しのinstance diamondを
+解消——`exists_ringEquiv_localization_of_eq`が完全に証明できた
+
+前回の`IsLocalization.ringEquivOfRingEquiv`呼び出しでのinstance
+diamond(`Algebra.TensorProduct.instMul`対`instDistribOfSemiring.
+toMul`が非`defeq`に見える問題)を、**最小の反例を切り出して原因を
+特定する**ことで解消した——`(A⊗[R]B)`のような具体的なテンソル積の
+型のまま`IsLocalization.ringEquivOfRingEquiv`を直接呼ぶと必ずこの
+diamondに当たるが、`A`・`B`を**まず抽象的な`CommRing`型として
+一般化した小さな補題**(`ringEquiv_localization_of_apply_eq`:環同型
+`e`が`a↦b`と対応させるなら`Localization.Away a ≃+* Localization.
+Away b`)を**別立てで**用意してから具体的な型を**代入**すれば、
+diamondは一切起きないと判明した——`letI`での事前登録(何度も試して
+失敗した)ではなく、「抽象化してから代入する」という一段違うレベルの
+配管の教訓。
+
+これにより`exists_ringEquiv_localization_of_eq`(`FieldLimit.lean`、
+commit `6aaaa280`)が完成した:
+
+```
+theorem exists_ringEquiv_localization_of_eq (B B' T ι : Type) [...]
+    (I : Ideal (MvPolynomial ι B)) (p₀ : MvPolynomial ι B') :
+    letI hIR' := Ideal.map (MvPolynomial.map (algebraMap B B')) I
+    ∀ (M : Type) [...] [IsLocalization.Away (Ideal.Quotient.mk hIR' p₀) M],
+    Nonempty (M ⊗[B'] T ≃+* Localization.Away (Ideal.Quotient.mk
+      (Ideal.map (MvPolynomial.map (algebraMap B T)) I) (MvPolynomial.map (algebraMap B' T) p₀)))
+```
+
+**意義(正直な評価)**: `descendPieceR`の`R'`レベル局所化(GlueDataの
+`V(i,j)`候補)が、`isLocalization_away_tensor_eq`・`ideal_map_
+mvPolynomial_promote_baseChange_eq`・`quotient_mvPolynomial_baseChange_
+tmul_one`・`ringEquiv_localization_of_apply_eq`という4つの部品の合成
+により、**実際にℝレベルで正しい対象(`Γ(C,piece(D(f*g)))`と対応する
+局所化)を実現していること**が数学的にもLeanの証明としても完成した。
+`descendPieceR_localization_isOpenImmersion`(開埋め込み性、続き19)と
+合わせれば、`GlueData`の`f i j`に要る**全データ**(開埋め込みであり、
+かつℝレベルで正しい対象を指す)が揃ったことになる——`Lemma 4.1`の
+最大の技術的ギャップ(続き15で発見)がついに解決した。
+
+**残る作業(正直な記録)**: これらの部品を実際に`Scheme.GlueData`の
+完全な構造(`J`(添字)・`U`(各片)・`V`(重なり)・`f`・`f_open`・`t`
+(遷移)・`t'`・`t_fac`・`cocycle`の約8データ)へ**配線する**作業自体は
+まだ未着手——特に`t`(`V(i,j)⟶V(j,i)`)の構成には`D(f)`↔`D(g)`の対称性
+(今回の部品を`f`・`g`を入れ替えて2回適用し、両者を比較する)が要る。
+lake build(`FieldLimit`/`ABC3`)とも0エラー確認、push完了。集計は
+引き続き10/24——§4は引き続き0/2だが、Lemma 4.1の数学的内容は
+ほぼ組み上がった。

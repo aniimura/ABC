@@ -4263,3 +4263,48 @@ docstring→宣言」の順で書かれており、今回はその逆順にし�
 
 実例: `lean/ABC3/Found/CorrHyp/ExtLimit.lean`の
 `descendPieceR_localization_isOpenImmersion`。
+
+## 43. `IsLocalization.ringEquivOfRingEquiv`等を具体的な型(テンソル積
+など)のまま直接呼ぶとinstance diamondに当たる——**先に抽象的な型変数
+の補題として切り出してから代入する**と回避できる(2026-09-05)
+
+**症状**: `e2 : (A⊗[R]B) ≃+* C`(具体的なテンソル積の型)を持っていて
+`IsLocalization.ringEquivOfRingEquiv S Q e2 proof`(局所化同士の同型を
+作る、`Localization.Away`に使う定番)を直接呼ぶと、
+```
+Application type mismatch: The argument e2 has type
+  RingEquiv ... Algebra.TensorProduct.instMul instDistribOfSemiring.toMul ...
+but is expected to have type
+  RingEquiv ... instDistribOfSemiring.toMul instDistribOfSemiring.toMul ...
+```
+という、`A⊗[R]B`の`Mul`/`Add`インスタンスが(`Algebra.TensorProduct.
+instMul`経由か`instDistribOfSemiring.toMul`経由かで)非`defeq`に見える
+instance diamondになる——最小の反例(`A⊗[R]B`を含む式で`Localization.
+Away`を直接構成しようとする式)でも再現する、`#1`「instances透明度」
+系の中でも特に頑固な変種。`letI`での事前登録(`#1`の定石)を`Mul`側・
+`Add`側それぞれに何度試しても解消しない。
+
+**直し方**: `IsLocalization.ringEquivOfRingEquiv`(や同種のAPI)を、
+**具体的な型(テンソル積等)のまま直接使わず**、まず**抽象的な
+`CommRing`型変数**だけを引数に取る小さな補題として**別立てで**用意
+してから、その補題へ具体的な型を**代入して使う**:
+```lean
+-- 抽象化した補題(具体的な型を一切知らない、diamondが起きない)
+theorem ringEquiv_localization_of_apply_eq (A B : Type) [CommRing A] [CommRing B]
+    (e : A ≃+* B) (a : A) (b : B) (hab : e a = b) :
+    Nonempty (Localization.Away a ≃+* Localization.Away b) :=
+  ⟨IsLocalization.ringEquivOfRingEquiv (Localization.Away a) (Localization.Away b) e
+    (hab ▸ Submonoid.map_powers e.toMonoidHom a)⟩
+
+-- 使う側: A・Bに具体的な型(テンソル積など)を代入するだけ、diamond無し
+obtain ⟨e3⟩ := ringEquiv_localization_of_apply_eq (A⊗[R]B) C e2 a b hab
+```
+`letI`で「同じ場所に」インスタンスを事前登録するのとは**違う対処**
+——`letI`は型を固定したまま探索順序だけを変えようとするが、抽象化は
+**型変数を経由させることで、具体的な型の内部構造(`Algebra.TensorProduct.
+instMul`のような複合インスタンス)自体をelaboratorに一切見せない**、
+という一段違うレベルの回避策。`Away`局所化に限らず、`IsLocalization`
+系のAPI全般で同じ手が効く可能性がある。
+
+実例: `lean/ABC3/Found/CorrHyp/FieldLimit.lean`の
+`ringEquiv_localization_of_apply_eq`・`exists_ringEquiv_localization_of_eq`。

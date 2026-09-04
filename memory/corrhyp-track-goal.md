@@ -1943,3 +1943,21 @@ instDistribOfSemiring.toMulの不一致)に当たり未完成——letIでの事
 Mの側でIsLocalization.Awayインスタンスを直接構成する。lake build
 (FieldLimit/ABC3)0エラー確認、push済み。集計は引き続き10/24——§4は
 引き続き0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き5(完成)
+instance diamondを解消——exists_ringEquiv_localization_of_eq(commit
+6aaaa280、FieldLimit.lean)が完全に証明できた。鍵: 最小反例を切り出して
+原因特定——具体的なテンソル積型のままIsLocalization.ringEquivOfRingEquiv
+を呼ぶと必ずdiamondに当たるが、A・Bを先に抽象的なCommRing型として
+一般化した補題(ringEquiv_localization_of_apply_eq)を別立てで用意して
+から具体的な型を代入すればdiamondは起きないと判明(letIでの事前登録
+ではなく「抽象化してから代入」という一段違うレベルの教訓)。
+
+意義: descendPieceRのR'レベル局所化が実際にℝレベルで正しい対象を
+実現することが数学的にもLeanの証明としても完成した。descendPieceR_
+localization_isOpenImmersion(開埋め込み性)と合わせれば、GlueDataの
+f i jに要る全データが揃った——続き15で発見した本丸のギャップがついに
+解決した。残るのはScheme.GlueDataの完全な構造への配線(特にtの構成に
+D(f)↔D(g)対称性が要る)。lake build(FieldLimit/ABC3)0エラー確認、
+push済み。集計は引き続き10/24——§4は引き続き0/2だがLemma 4.1の数学的
+内容はほぼ組み上がった。
