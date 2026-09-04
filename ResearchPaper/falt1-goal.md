@@ -243,6 +243,25 @@ R C D B` という自然性(`tensorKaehlerEquiv_eq_map_mapBaseChange`、
     (半局所 Dedekind 的環の塔での conductor/different の劣加法性)
     を要する**、という結論に達した。★安易な誤形式化を避けるため、
     この評価が固まるまで 3b への Lean 実装は保留する。
+
+    ★★★★★★2026-09-04、**有望な道具を発見した**(未検証・未使用):
+    mathlib に **`differentIdeal` の塔の公式**が既にある
+    (`differentIdeal_eq_differentIdeal_mul_differentIdeal`、
+    `RingTheory/DedekindDomain/Different.lean`)——`A→B→C` の塔に対し
+    `differentIdeal A C = differentIdeal B C * (differentIdeal A B).
+    map(algebraMap B C)`(`A` 整閉整域・`B,C` Dedekind・有限・捩れ無し・
+    `Algebra.IsSeparable (FractionRing A)(FractionRing C)` が仮定)。
+    これを `Vₙ→Vₙ₊₁→Wₙ₊₁` と `Vₙ→Wₙ→Wₙ₊₁` の2通りの塔に適用すると
+    `δₙ₊₁ · (differentIdeal Vₙ Vₙ₊₁).map(...) = (differentIdeal Wₙ
+    Wₙ₊₁) · δₙ.map(...)` という**厳密な等式**(原文の不等式より強い形)
+    が直接得られる——ただし残る未知数 `differentIdeal Wₙ Wₙ₊₁`
+    (`Wₙ⊗_{Vₙ}Vₙ₊₁` が正規化前の状態からどれだけ `Wₙ₊₁` と異なるかを
+    測る量)を評価する必要は結局残り、これが原文の「kernel・cokernel
+    の length 評価」の**まさにその部分**に相当する——つまりこの公式は
+    3b の**別の切り口**を与えるが、核心の困難(非正規性の評価)は
+    避けられない。ただし「厳密な等式」から出発できる分、不等式の
+    往復より見通しが良くなる可能性がある。次のセッションでの
+    検討候補として記録する(まだ Lean での検証・使用はしていない)。
 3c. **「非常に分岐した」`V_n` の族**そのものの形式化(具体例: `p^n`
     乗根と `1` のべき根を添加する塔、上の「典型例」段落)——まだ
     手つかず。抽象的な族の公理化(`Ω_{V_n/V_{n-1}}` が
