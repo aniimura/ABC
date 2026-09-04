@@ -790,3 +790,19 @@ work unit 2(rigidity)・貼り合わせ後の有限性確認の3点。
 
 コミット: `43b30c97`(standardEtalePresentation_exists_coord)・
 `34f15083`(記録)。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(重なりの
+遷移開集合をP.Ring内の基本開集合として同定、GlueData遷移射の核心が
+完成、集計10/24で変わらず)。`standardEtalePresentation_transitionOpen_eq`
+(`FieldLimit.lean`、★sorry無し)完成——`D(f_i)∩D(f_j)`が`P_i.Ring`の中の
+具体的な基本開集合(座標多項式`p`を`X`で評価した元)にちょうど一致する
+ことを示した。`g`が`P.Ring`の単元であること(標準エタール表示の定義
+そのもの)から`g^n`倍が`basicOpen`を変えないという事実を使う(副産物
+`PrimeSpectrum.basicOpen_eq_top_of_isUnit`・`basicOpen_mul_isUnit`も
+完成)。
+
+**これでGlueDataの遷移射構成の核心が完成した**——残るのは(i)この`p`を
+有限段階へ降ろす、(ii)`D(l→m)`・`D(m→l)`間の実際の環同型を構成する、
+(iii)複数ピースを`Scheme.GlueData`として組み立てる、の3段階。
+
+コミット: `e6e8c98f`(transitionOpen_eq完成)・`8ebf05cb`(記録)。
