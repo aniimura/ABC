@@ -542,6 +542,18 @@ rigidityを実際に使うには「重なり上で2つの局所モデルが一�
 
 コミット: `f6ce74ca`(簡略化の記録)。
 
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報
+(piecePullbackIsoStage完成・glueMorphisms評価の自己訂正、集計10/24で
+変わらず)。`piecePullbackIsoStage`(`piecePullbackIso`の有限段階版)を
+`ExtLimit.lean`に完成(★sorry無し)。一方、前回の「glueMorphismsで
+GlueDataが丸ごと不要」という評価を訂正——glueMorphismsは既存のスキーム
+から射を作る道具であり、新しいスキームC_{R'}を局所片から構成する段階
+そのものは依然GlueDataが要ると分かった。省ける範囲を正しく言い直した。
+`RelativeGluingData`(mathlib)も確認したが、今回の単純な場合には
+GlueDataを直接使う方が見通しが良いと判断。
+
+コミット: `46704c1d`(piecePullbackIsoStage)・`68ddc617`(訂正の記録)。
+
 ★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(残作業4段階を総括、
 集計10/24で変わらず)。generic flatnessの標準的前提(Rネター整域・
 加群/多元環がR上有限表示)を確認したところ、`corrHypInstance4`の
