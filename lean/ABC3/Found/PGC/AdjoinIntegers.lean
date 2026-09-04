@@ -1002,4 +1002,235 @@ theorem lubinTateAction_add {p : ℕ} [Fact p.Prime]
     · rfl
     · rfl
 
+/-! ### ★★★★★★★★★★★★★★★★★★★★★★★★節目——`Λ_n` は `𝒪_K` 作用で閉じている
+
+古典的な Lubin-Tate 理論の中核事実——`Λ_n` が実際に `𝒪_K`-加群である
+こと(`a·x ∈ Λ_n` for `x ∈ Λ_n`, `a ∈ 𝒪_K`)——を確立する。鍵となる
+2段階: (1) `x∈Λ_n ⟹ π^n·x=0`(`D_n∣[π^n]_f` から)、(2) `π^n·x=0`
+かつ乗法性・可換性から `π^n·(a·x)=a·(π^n·x)=a·0=0`、(3) 再び
+`[π^n]_f=D_n·U_n`(`U_n` は単位)の分解で `π^n·(a·x)=0` から
+`D_n(a·x)=0` を復元する——`D_n(x)=0⟹[π^n]_f(x)=0`(乗法のみ)は
+簡単だが、逆向き`[π^n]_f(a·x)=0⟹D_n(a·x)=0`には`U_n(a·x)`が単位
+であることを要する。 -/
+
+/-- `x∈Λ_n`ならば`D_n(x)=0`——`iteratedLubinTateTorsionPoints`の定義
+そのもの(`Multiset.mem_toFinset`+`Polynomial.mem_roots'`)を、
+`adjoinIntegers K x`から`K.closure`への環準同型`g`(単射)を通して
+`Polynomial.aeval`のレベルへ引き戻すだけ。 -/
+theorem aeval_iteratedLubinTateDistinguished_eq_zero {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :
+    Polynomial.aeval (⟨⟨x, hmem⟩, mem_adjoinIntegers_of_mem_iteratedLubinTateTorsionPoints
+        K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem⟩ : adjoinIntegers K x)
+      (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n) = 0 := by
+  set x' : adjoinIntegers K x := ⟨⟨x, hmem⟩, mem_adjoinIntegers_of_mem_iteratedLubinTateTorsionPoints
+        K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem⟩ with hx'_def
+  rw [iteratedLubinTateTorsionPoints, Multiset.mem_toFinset, Polynomial.mem_roots'] at hx
+  obtain ⟨_, hxroot⟩ := hx
+  set g : adjoinIntegers K x →+* K.closure :=
+    (algebraMap (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) K.closure).comp
+      (algebraMap (adjoinIntegers K x) (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))
+    with hg_def
+  have hgx' : g x' = x := rfl
+  have hgcomp : g.comp (algebraMap (𝒪[K.carrier]) (adjoinIntegers K x)) =
+      algebraMap (𝒪[K.carrier]) K.closure := by
+    apply RingHom.ext
+    intro y
+    rfl
+  have key := Polynomial.hom_eval₂ (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n)
+    (algebraMap (𝒪[K.carrier]) (adjoinIntegers K x)) g x'
+  rw [← Polynomial.aeval_def, hgcomp, hgx'] at key
+  have haevalx : Polynomial.eval₂ (algebraMap (𝒪[K.carrier]) K.closure) x
+      (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n) = 0 := by
+    rw [Polynomial.eval₂_eq_eval_map]
+    exact hxroot
+  rw [haevalx] at key
+  have hginj : Function.Injective g := fun a b h => Subtype.ext (Subtype.ext h)
+  apply hginj
+  rw [key, map_zero]
+
+/-- `x∈Λ_n`ならば`π^n·x=0`——`LubinTateAction_pi_pow`(`[π^n]_f=`
+`n`回自己合成)・`iteratedLubinTate_eq_distinguished_mul_unit`
+(`[π^n]_f=D_n*U_n`)・`aeval_iteratedLubinTateDistinguished_eq_zero`
+(`D_n(x)=0`)を組み合わせるだけ。 -/
+theorem pi_pow_action_eq_zero {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))] :
+    lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem (π ^ n) = 0 := by
+  haveI := completeSpace_adjoinIntegers K x
+  haveI := isLinearTopology_adjoinIntegers K x
+  haveI := continuousSMul_adjoinIntegers K x
+  show lubinTateEvalAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem
+    (LubinTateAction hq hπmax f hf0 hf1 hf (π ^ n)) = 0
+  rw [LubinTateAction_pi_pow hq hπmax hπne0 f hf0 hf1 hf n,
+    iteratedLubinTate_eq_distinguished_mul_unit hq hπmax hπne0 f hf0 hf1 hf n]
+  unfold lubinTateEvalAtTorsionPoint
+  rw [map_mul, PowerSeries.aeval_coe]
+  rw [aeval_iteratedLubinTateDistinguished_eq_zero K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem]
+  rw [zero_mul]
+
+/-- `g`の定数項が0なら、`adjoinIntegers K x`の`0`での評価は`0`——
+`X`分解トリック(`aeval_X_eq_self`と`map_mul`)だけ。 -/
+theorem lubinTateEvalAtPoint_zero {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p) (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (hz0 : PowerSeries.HasEval (0 : adjoinIntegers K x))
+    (g : PowerSeries (𝒪[K.carrier])) (hg0 : PowerSeries.constantCoeff g = 0) :
+    lubinTateEvalAtPoint K x 0 hz0 g = 0 := by
+  haveI := completeSpace_adjoinIntegers K x
+  haveI := isLinearTopology_adjoinIntegers K x
+  haveI := continuousSMul_adjoinIntegers K x
+  show PowerSeries.aeval hz0 g = 0
+  obtain ⟨h, hh⟩ := PowerSeries.X_dvd_iff.mpr hg0
+  rw [hh, map_mul]
+  show PowerSeries.aeval hz0 PowerSeries.X * PowerSeries.aeval hz0 h = 0
+  rw [aeval_X_eq_self]
+  simp
+
+/-- `lubinTateEvalAtPoint_zero`を、評価点が`0`と**等しい**(定義的に
+`0`そのものでなくても)場合へ一般化——`subst`で評価点を`0`に
+置き換えるだけ(`HasEval`が依存型なので、直接`rw`すると動機が
+型として正しくならない、という定型の回避策)。 -/
+theorem lubinTateEvalAtPoint_eq_zero_of_eq_zero {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p) (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    {z : adjoinIntegers K x} (hz : PowerSeries.HasEval z) (hz0 : z = 0)
+    (g : PowerSeries (𝒪[K.carrier])) (hg0 : PowerSeries.constantCoeff g = 0) :
+    lubinTateEvalAtPoint K x z hz g = 0 := by
+  subst hz0
+  exact lubinTateEvalAtPoint_zero K x hz g hg0
+
+/-- `x∈Λ_n`ならば`(a*π^n)·x=0`——`π^n·(a·x)=a·(π^n·x)`
+(`lubinTateAction_mul`を2回・可換律)と`π^n·x=0`
+(`pi_pow_action_eq_zero`)から。 -/
+theorem pi_pow_action_action_eq_zero {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (a : 𝒪[K.carrier]) :
+    lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem (a * π ^ n) = 0 := by
+  rw [← lubinTateAction_mul K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem a (π ^ n)]
+  exact lubinTateEvalAtPoint_eq_zero_of_eq_zero K x _
+    (pi_pow_action_eq_zero K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem)
+    (LubinTateAction hq hπmax f hf0 hf1 hf a)
+    (constantCoeff_LubinTateAction hq hπmax f hf0 hf1 hf a)
+
+/-- `[π^n]_f(z)=0`ならば`D_n(z)=0`(`z`は`adjoinIntegers K x`の
+**任意**の位相的冪零な元)——`[π^n]_f=D_n*U_n`と`U_n(z)`が単位
+(単位を環準同型で送った像は単位)であることから、単位を約分するだけ
+(`IsUnit.mul_left_eq_zero`)。`aeval_iteratedLubinTateDistinguished_
+eq_zero`の逆向きにあたる。 -/
+theorem eq_zero_of_pi_pow_action_eq_zero {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (z : adjoinIntegers K x) (hz : PowerSeries.HasEval z)
+    (hz0 : lubinTateEvalAtPoint K x z hz (LubinTateAction hq hπmax f hf0 hf1 hf (π ^ n)) = 0) :
+    Polynomial.aeval z (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n) = 0 := by
+  haveI := completeSpace_adjoinIntegers K x
+  haveI := isLinearTopology_adjoinIntegers K x
+  haveI := continuousSMul_adjoinIntegers K x
+  rw [LubinTateAction_pi_pow hq hπmax hπne0 f hf0 hf1 hf n,
+    iteratedLubinTate_eq_distinguished_mul_unit hq hπmax hπne0 f hf0 hf1 hf n] at hz0
+  unfold lubinTateEvalAtPoint at hz0
+  rw [map_mul, PowerSeries.aeval_coe] at hz0
+  rwa [IsUnit.mul_left_eq_zero] at hz0
+  exact (isUnit_iteratedLubinTateUnit hq hπmax hπne0 f hf0 hf1 hf n).map (PowerSeries.aeval hz)
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★**節目——`Λ_n` は `𝒪_K` 作用で閉じて
+いる**: `x∈Λ_n`・`a∈𝒪_K`ならば`a·x∈Λ_n`(実際の元として)。
+`pi_pow_action_action_eq_zero`(`(a*π^n)·x=0`、可換律で`π^n·(a·x)=0`
+と同値)と`eq_zero_of_pi_pow_action_eq_zero`(`[π^n]_f(a·x)=0⟹
+D_n(a·x)=0`)を組み合わせ、`D_n(a·x)=0`を`Polynomial.hom_eval₂`で
+`K.closure`のレベルへ押し出して`iteratedLubinTateTorsionPoints`の
+定義そのものに一致させる。これで古典的な Lubin-Tate 理論の
+`Λ_n`が真に`𝒪_K`-加群であるという中核事実が、実在の任意のp進局所体
+`K`について`sorry`無しで確立された。 -/
+theorem lubinTateActionAtTorsionPoint_mem {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (a : 𝒪[K.carrier]) :
+    (↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem a) :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) ∈
+      iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n := by
+  haveI := completeSpace_adjoinIntegers K x
+  haveI := isLinearTopology_adjoinIntegers K x
+  haveI := continuousSMul_adjoinIntegers K x
+  set z := lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem a with hz_def
+  have hz0 : lubinTateEvalAtPoint K x z
+      (hasEval_lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem a)
+      (LubinTateAction hq hπmax f hf0 hf1 hf (π ^ n)) = 0 := by
+    rw [lubinTateAction_mul K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem (π ^ n) a, mul_comm]
+    exact pi_pow_action_action_eq_zero K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem a
+  have hDn0 : Polynomial.aeval z (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n) = 0 :=
+    eq_zero_of_pi_pow_action_eq_zero K hq hπmax hπne0 f hf0 hf1 hf n x z _ hz0
+  rw [iteratedLubinTateTorsionPoints, Multiset.mem_toFinset, Polynomial.mem_roots']
+  refine ⟨(isDistinguishedAt_iteratedLubinTateDistinguished
+    hq hπmax hπne0 f hf0 hf1 hf n).monic.map _ |>.ne_zero, ?_⟩
+  set g : adjoinIntegers K x →+* K.closure :=
+    (algebraMap (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) K.closure).comp
+      (algebraMap (adjoinIntegers K x) (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))
+    with hg_def
+  have key := Polynomial.hom_eval₂ (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n)
+    (algebraMap (𝒪[K.carrier]) (adjoinIntegers K x)) g z
+  rw [← Polynomial.aeval_def] at key
+  have hgcomp : g.comp (algebraMap (𝒪[K.carrier]) (adjoinIntegers K x)) =
+      algebraMap (𝒪[K.carrier]) K.closure := by
+    apply RingHom.ext; intro y; rfl
+  rw [hgcomp, hDn0, map_zero] at key
+  show (Polynomial.map (algebraMap (𝒪[K.carrier]) K.closure)
+      (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n)).eval (g z) = 0
+  rw [Polynomial.eval_map]
+  exact key.symm
+
 end ABC3.Found.PGC
