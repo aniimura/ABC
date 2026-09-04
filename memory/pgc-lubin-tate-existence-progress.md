@@ -153,7 +153,20 @@ functional_equation`を「`swap`という特定の代入」から「任意の代
 自己準同型性・一意性補題と合わせ、この分野の形式化がひとつの節目に
 到達した。
 
-**残る作業**: torsion点の構成、Galois作用を経由した相互律写像の構成
+**続報(2026-09-04、𝒪_K作用への拡張・節目(1)の可除性が完成)**:
+残り工程(1)([a]_f:f∘[a]_f=[a]_f∘fを満たす1変数冪級数の存在)の
+可除性段を`Found/PGC/LubinTateEndoDivisibility.lean::residue_divides_
+R_endo`としてsorry無しで確立した。2変数版(`residue_divides_R`)と
+全く同じFrobenius恒等式の議論が、`PowerSeries R`が`MvPowerSeries
+Unit R`のabbrevであることを利用してほぼそのまま移植できた——
+`PowerSeries.expand`/`.map`/`.constantCoeff`はmathlibで文字通り
+`MvPowerSeries`の対応物として定義されているため、既存の
+`mvPowerSeries_pow_card_eq_expand`(σについて一般)を`σ:=Unit`で
+そのまま適用できた。残るは両側の線形化・1ステップの組み立て・
+近似列・極限という、2変数版と同型だが1変数へ作り直す工程。
+
+**残る作業**: 𝒪_K作用への拡張の残り(両側線形化・1ステップ・近似列・
+極限)、torsion点の構成、Galois作用を経由した相互律写像の構成
 ——pGC の各項目(Prop 1.2・Cor 1.3・Prop 2.1・Prop 2.2・Theorem 4.2)
 を閉じるには、なお相互律写像そのものの構成・性質証明という大きな
 仕事が残っている。
