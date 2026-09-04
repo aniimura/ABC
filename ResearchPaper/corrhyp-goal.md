@@ -2934,3 +2934,55 @@ QuasiSeparatedSpace X.left}`)は同型類による商ではない素朴な`Subty
 見てから、実際の修正に着手するかどうかを判断する。これは`Lemma 4.1`
 全体の証明可能性そのものに関わる根本的な論点であり、ここで正直に
 記録しておく——集計は10/24で変わらず。
+
+## 2026-09-04(続き11): ★(i)の影響範囲——`isIsogenous_refl`が既に達成済みの§1をregressするリスク、拙速な修正は見送り
+
+`Corr`に`Nonempty C`を足す修正(i)の影響範囲を見積もるExploreエージェ
+ント(読み取り専用)の報告が届いた。**結論: 拙速には着手しない**方が
+よいという判断に至った。理由を正直に記録する。
+
+**構成サイト(全8箇所)の内訳**:
+- `Corr.transpose`・`extCorr`・`corr_witness_transpose`(3箇所): 入力の
+  非空性証明を転用するだけで機械的に直る。
+- `Corr.comp'`・`corr_witness_comp`(2箇所): `D.pullback`(2つのFEt射の
+  ファイバー積)が非空性を保つという**新しい数学的事実**(あるいは
+  `HyperbolicCurveData`への新しい公理)が要り、4つの具体インスタンス
+  (`corrHypInstance`〜`4`)すべてに伝播する。
+- `corr_witness4`・`corr_witness`(2箇所、Found側の具体例): `basePt4=
+  Spec ℚ`・`FG_Gamma2`それぞれの「空でない」の意味付けを個別に証明・
+  設計し直す必要がある(中身自体は難しくなさそうだが新規の証明項)。
+
+**最も深刻な発見**: `isIsogenous_refl`(`Section1.lean:70`、
+`⟨X, D.idFEt X, D.idFEt X⟩`、`C:=X`)——`X`は**完全に任意の`D.Space`の
+元**であり、`HyperbolicCurveData`には「`Space`の全要素は非空」という
+保証が存在しない。しかも`corrHypInstance3`(`Space:=Over BaseK`)・
+`corrHypInstance4`(`Space:=QcqsSpace`)では**空スキームが普通に
+`Space`に属してしまう**(空集合はコンパクトかつ準分離)ため、
+「`Space`の全要素は非空」という汎用公理自体が**これらのインスタンス
+では偽になる**。
+
+`isIsogenous_refl`は現在**sorry無しで完成済み**であり、`IsIsogenous.
+needs := []`(`Definition 1.5`の`.needs`)がこれに依拠している——
+`Corr`に`Nonempty C`を足すと、`isIsogenous_refl`は**理論上証明不能に
+なる**。回避するには(a)`isIsogenous_refl`に`Nonempty X`という仮定を
+追加してSkeletonの主張自体を弱める(原論文の「isogenyは無条件に同値
+関係」という主張からの逸脱)、または(b)`Space`を「常に非空なスキーム」
+に絞った**新しい具体インスタンス**を`Instance3→4`の前例と同型の規模
+(数セッションかかった実績がある)でもう一段作る、のいずれかが必要
+——「フィールドを1つ足すだけ」では済まない中〜大規模な改修になる。
+
+さらに、この修正が波及すると`Skeleton/CorrHyp/Section3.lean`の
+`prop_3_2`(将来`Corr`を構成する形で実装する際)にも同じ非空性の証明
+義務が波及する見込み。
+
+**判断**: `Lemma 4.1`(§4)の証明可能性そのものに関わる根本的なギャップ
+であることは確定的だが、その修正(特に`isIsogenous_refl`絡み)は
+**既に達成済みの§1 5/5を後退させかねない**規模の設計変更であり、
+軽々に着手すべきではない。ここでは深追いせず、正直な現状として
+記録するにとどめる——`Lemma 4.1`本体(§4)は、GlueDataエンジニアリング
+(項目(a)〜(c')・(b))という「工数の多い道」は完走できたが、その先
+(項目(d)の第二段・項目(e)全体・そしてこの`h:ZK=D.Ext Z`の妥当性
+そのもの)は、既存のTheorem 3.3/Theorem 4.2と同様、**person-years
+スケールの数学(あるいはHyperbolicCurveData interfaceの再設計という
+独立した大規模プロジェクト)を要する**という評価が妥当と判断した。
+集計は10/24で変わらず——§4は引き続き0/2。
