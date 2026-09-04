@@ -1435,3 +1435,26 @@ Localization.Away(x*y)`型の環準同型)が既にあることを確認した�
 このセッションでこれ以上この特定の技術的スレッドを追うのではなく、
 腰を据えた専用の取り組み(改めてこの技術的な1点から着手する)として
 次回以降へ引き継ぐ。
+
+### 2026-09-04さらに続報: 「単発では閉じない」を実際に越えた——第一の代数的補題が完成 ★★★★
+
+上記を「次回以降へ引き継ぐ」と記録した直後、実際に腰を据えて取り組み、
+**`isLocalization_closure_away_mul`を完成させた**(`FieldLimit.lean`、
+★sorry無し・標準3公理のみ):`Localization.Away(a*b)`が
+`Submonoid.powers(ab)`だけでなく`Submonoid.closure{a,b}`に関しても
+局所化になっている、という事実。`IsLocalization.isLocalization_of_
+is_exists_mul_mem`(同じ飽和を持つ部分モノイド同士は同じ局所化を
+与える)を、`closure_induction`による4ケース分解(`a`・`b`・`1`・積)で
+実際に適用し切った。
+
+これは`D(a)∩D(b)=D(ab)`という重なりの比較(作業単位1)に要る**最初の
+代数的補題**——残るのは「`Away(a)`をさらに`b`で局所化したものも同じ
+`closure{a,b}`に関する局所化になる」という**もう半分**。こちらは
+`IsLocalization.localization_localization_isLocalization`
+(`localizationLocalizationSubmodule`という別の部分モノイドを経由)を
+使う見込みだが、`mem_localizationLocalizationSubmodule`の特徴づけ
+(`algebraMap`での**像としての**等式、`R`自身での文字通りの等式では
+ない)が`closure{a,b}`との対応を一段複雑にしており、まだ完成していない
+——次の一手として明記して記録する。★正直な教訓: 「単発では閉じない」
+という判断自体は正しかったが、それは「引き継ぐしかない」ことを意味
+しなかった——腰を据めれば同じセッション内でも前進できた。

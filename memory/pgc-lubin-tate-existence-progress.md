@@ -756,3 +756,42 @@ K.closure`の型クラス探索が**タイムアウトする**という、単独
 方が良い——今回は杞憂だったが、逆に`adjoinPAdicLocalField`側では
 本物の(未解決の)型クラス探索の詰まりに遭遇した。両方あり得るので、
 「試してみて確認する」を省略しない。
+
+**続報(2026-09-04・続き、★★★★★★★★★★★★★大きな節目——`PowerSeries.
+aeval`が`𝒪[K.carrier]`上で実際に組み立てられることを確認)**:
+残っていた`IsLinearTopology`の壁を突破した。`ValuationRingComplete.
+lean`の既出`isAdic_maximalIdeal_valuationRing`(距離位相=
+`maximalIdeal`-進位相)と mathlib の`Ideal.isLinearTopology`(イデアル
+の adic 位相は線形位相)を組み合わせるだけで
+`isLinearTopology_valuationRing : IsLinearTopology 𝒪[K.carrier]
+𝒪[K.carrier]`が3行で出た(commit`e290ad91`)。さらに
+`isAdicComplete_valuationRing`の証明に埋もれていた素の`CompleteSpace
+𝒪[K.carrier]`を`completeSpace_valuationRing`として独立の定理に抽出
+(commit`2835e7c2`)。
+
+これで実在の任意の p進局所体`K`について
+
+```
+PowerSeries.aeval (R := 𝒪[K.carrier]) hHasEval
+```
+
+が実際に型検査を通ることをREPLで確認した——mathlibの
+`PowerSeries.aeval`が要求する全条件(`UniformSpace`・
+`IsUniformAddGroup`・`IsTopologicalSemiring`・`T2Space`・
+`CompleteSpace`・`IsTopologicalRing`・`IsLinearTopology S S`・
+`ContinuousSMul`)が`𝒪[K.carrier]`について**すべて**揃うことの直接的な
+証拠——このセッションで数ヶ月?かけて積み上げてきた「体でなく付値環
+で評価する」という見通しが、ついに実際に動くコードとして確認できた
+瞬間。
+
+★次の一歩: `Λ_n`の元`x`(`K.closure`の元、`K.carrier⟮x⟯`上に住む)を
+実際に評価するには、`R:=𝒪[K.carrier]`・`S:=𝒪[K.carrier⟮x⟯]`として
+同じ機構を`K.carrier⟮x⟯`(`adjoinPAdicLocalField`経由、または直接
+構成)に適用する必要がある——`valuationRing_isDVR`・
+`completeSpace_valuationRing`・`isLinearTopology_valuationRing`は
+すべて`K : PAdicLocalField p`について証明した一般定理なので、
+`adjoinPAdicLocalField K x`(すでに`PAdicLocalField p`のインスタンス
+として構成済み!)にそのまま適用できるはず。残る課題は
+`Algebra 𝒪[K.carrier] 𝒪[(adjoinPAdicLocalField K x).carrier]`
+(`𝒪[K.carrier]`が`𝒪[L]`へ埋め込まれること)の確立——これができれば
+`f`(または`[a]_f`)を実際に`x`で評価できる。
