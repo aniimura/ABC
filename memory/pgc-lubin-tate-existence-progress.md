@@ -603,3 +603,20 @@ Lubin-Tate理論の`|Λ_n|=q^n`(真の集合として)そのものが完全に�
 `Real.rpow_lt_one`で`1`未満)。これは`Λ_n`への`𝒪_K`加群構造の構成
 (`PowerSeries.aeval`による`[a]_f`の評価が要求する
 `HasEval`/位相的冪零性の橋渡し)へ向けた前段。
+
+**続報(2026-09-04・続き、`Λ_n`の元は整)**: 同じファイルへ2つ追加
+(commit `71a0d276`):
+
+- `isIntegral_of_mem_iteratedLubinTateTorsionPoints`: `Λ_n`の元は
+  `𝒪_K`上整(`D_n`がモニックなので`IsIntegral`の定義そのものを直接
+  満たす)
+- `isIntegral_carrier_of_mem_iteratedLubinTateTorsionPoints`: `Λ_n`の
+  元は`K.carrier`(局所体本体)上でも整(`IsIntegral.tower_top`で
+  中間の環へ持ち上げるだけ)
+
+これは`K.carrier⟮x⟯`の有限次拡大性
+(`IntermediateField.adjoin.finiteDimensional`)、ひいては将来の
+`PowerSeries.aeval`による`[a]_f`の評価に必要な完備性(有限次拡大は
+完備)へ向けた土台——`K.closure`自体は完備でない(`Q_p`の代数閉包が
+完備でないのと同様)ので、`x`を含む有限次拡大`K.carrier⟮x⟯`の中で
+評価する、というのが見通している経路。
