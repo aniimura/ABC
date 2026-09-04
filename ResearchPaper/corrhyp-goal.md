@@ -1327,3 +1327,26 @@ rigidityは不要になる可能性が高い——必要なのは**同じ段階`
 `(toSchemeDiagramOver.obj R').hom`を使う、同じ pullback pasting 技法
 で作れる見込み)、(2)各`Spec(P₀_i.Ring)`からこの`R'`側の対応物への
 射、(3)pairwise 一致の rigidity 検証、という3点が残る。
+
+### 2026-09-04さらに続報: (1)を完成、(2)(3)の位置づけを訂正
+
+(1)を`piecePullbackIsoStage`として完成させた(`ExtLimit.lean`、
+★sorry無し)——`piecePullbackIso`の証明をそのまま`toBaseK`→
+`(toSchemeDiagramOver.obj R').hom`に置き換えるだけで通った
+(`(toSchemeDiagramOver.obj R').hom`が最初から`Spec.map`形なので、
+むしろ`piecePullbackIso`より簡潔)。
+
+一方、前回「`glueMorphisms`で`GlueData`が丸ごと不要になる」とした評価を
+**一部訂正**する——`glueMorphisms`は「**既存の**スキームの開被覆から
+射を作る」道具であり、`Z`(あるいは`C_{R'}`)という**新しいスキームを
+局所片から構成する**段階そのものは依然として`GlueData`(または同種の
+貼り合わせ機構)が要る。`glueMorphisms`が省けるのは「貼り合わせて
+できた新しいスキームと、既存のスキーム`c.C`を比較する」段(構成した
+`C_{R'}`が実際に`c.C`の記述と一致することを示す段)であって、
+構成そのものではない——構造的な簡略化の範囲を正しく言い直した。
+
+`AlgebraicGeometry.RelativeGluing`(`Scheme.Cover.RelativeGluingData`)
+という、より高度な「基底スキーム上の相対的な貼り合わせ」専用の機構も
+mathlibに存在することを確認したが、これは`𝒰.I₀`に圏構造(有向系)を
+要求する仕様で、今回の(有限個の片を貼るだけの)単純な場合には
+`Scheme.GlueData`を直接使う方が見通しが良いと判断した。
