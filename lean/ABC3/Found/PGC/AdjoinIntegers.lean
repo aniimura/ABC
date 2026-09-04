@@ -1831,4 +1831,52 @@ theorem norm_algEquiv_eq {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
   rw [spectralMulAlgNorm_def, spectralMulAlgNorm_def] at hkey
   simpa using hkey
 
+/-- **`σ`は`ψ_n`の根の集合(原始的な`π^n`-捩れ点)を保つ**——
+`spectralNorm`を経由する必要すら無い、もっと初等的な事実:`ψ_n`
+自身が`𝒪[K.carrier]`(したがって`K.carrier`の像)に係数を持つ
+多項式なので、`σ`が`K.carrier`を固定する(`AlgEquiv over K.carrier`)
+という定義そのものから、`x`が根なら`σ x`も同じ多項式の根になる
+(`Polynomial.aeval_algHom_apply`でσと`aeval`の可換性を得るだけ)。
+`IsScalarTower.algebraMap_eq`で`algebraMap 𝒪[K.carrier] K.closure`を
+`K.carrier`経由に分解するのは、既存の`nodup_roots_iteratedLubinTatePsi_map`
+等と同じ手筋。`Gal(K(Λ_n)/K)≅(𝒪_K/π^n)^×`に向けて、Galois群が
+「原始的な捩れ点全体」という有限集合上に(閉じた)作用を持つことを
+確立する——`unit_action_mem_iteratedLubinTatePsiTorsionPoints`
+(単数の作用がこの集合を保つ)のGalois版。 -/
+theorem algEquiv_mem_iteratedLubinTatePsiTorsionPoints_of_mem {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n)
+    (σ : K.closure ≃ₐ[K.carrier] K.closure) (x : K.closure)
+    (hx : x ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn) :
+    σ x ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn := by
+  set psiK : Polynomial K.carrier :=
+    (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn).map (algebraMap (𝒪[K.carrier]) K.carrier)
+    with hpsiK
+  have hmap : algebraMap (𝒪[K.carrier]) K.closure =
+      (algebraMap K.carrier K.closure).comp (algebraMap (𝒪[K.carrier]) K.carrier) :=
+    IsScalarTower.algebraMap_eq (𝒪[K.carrier]) K.carrier K.closure
+  have hrw : (Polynomial.map (algebraMap (𝒪[K.carrier]) K.closure)
+      (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn)) =
+      psiK.map (algebraMap K.carrier K.closure) := by
+    rw [hmap, ← Polynomial.map_map, hpsiK]
+  rw [iteratedLubinTatePsiTorsionPoints, Multiset.mem_toFinset, hrw, Polynomial.mem_roots'] at hx ⊢
+  refine ⟨hx.1, ?_⟩
+  have haeval : Polynomial.aeval x psiK = 0 := by
+    have hthis := hx.2
+    rw [Polynomial.IsRoot, Polynomial.eval_map, ← Polynomial.aeval_def] at hthis
+    exact hthis
+  show Polynomial.IsRoot _ (σ x)
+  rw [Polynomial.IsRoot, Polynomial.eval_map, ← Polynomial.aeval_def]
+  have h := Polynomial.aeval_algHom_apply σ.toAlgHom x psiK
+  rw [haeval, map_zero] at h
+  exact h
+
 end ABC3.Found.PGC
