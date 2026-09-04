@@ -1246,6 +1246,61 @@ noncomputable def transitionElemIso {X : Scheme} {U : X.Opens} (f₁ g : Γ(X, U
     (e.hom.isoImage W).trans (eqToIso (by rw [h2]))
   exact iso1.symm.trans iso2
 
+/-- `eqToIso`を、ある開集合の族の等式(`Opens`のまま)を`congrArg`で
+コード化されたスキームレベルの等式へ持ち上げたものへ適用すると、`.ι`
+と可換——`subst`すれば両辺とも`Iso.refl`になるだけの軽い事実だが、
+`transitionElemIso`(`eqToIso`を直接使う構成)の自然性を調べるのに
+必要になる(`Scheme.isoOfEq_hom_ι`の`eqToIso`版に相当)。 -/
+theorem eqToIso_congrArg_scheme_hom_ι {Z : Scheme} {V V' : Z.Opens} (hOpens : V = V') :
+    (eqToIso (congrArg (fun (W : Z.Opens) => (W : Scheme)) hOpens)).hom ≫ V'.ι = V.ι := by
+  subst hOpens
+  simp
+
+/-- **`transitionElemIso`の`.ι`との可換性**——`X.basicOpen(f₁*g)`から
+`X.basicOpen f₁`への制限(`X.homOfLE`)を`e`で転送すると、`Z.basicOpen
+(transitionElem f₁ g e)`から`Z`自身への包含(`gdF`そのもの)に一致する。
+`iso1`(`X`側、`.ι`)・`iso2`(`Z`側、`e.hom`の`isoImage`)それぞれを
+`Scheme.Hom.isoImage_hom_ι`+`eqToIso_congrArg_scheme_hom_ι`で開き、
+`(X.basicOpen f₁).ι`が単射(open immersionでmono)であることによる
+簡約(`cancel_mono`)で`iso1`側を`X.homOfLE`の形にまとめる。
+
+`piecesGluedCoverVIso`(`V`成分比較同型)の`gdF`(`corrHypGlueData`の
+`fst`)との自然性の核心部品——項目(b)のNatIso構成に向けた最後の
+ピース。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem transitionElemIso_hom_ι {X : Scheme} {U : X.Opens} (f₁ g : Γ(X, U))
+    {Z : Scheme} (e : (X.basicOpen f₁ : Scheme) ≅ Z) :
+    (transitionElemIso f₁ g e).hom ≫ (Z.basicOpen (transitionElem f₁ g e)).ι =
+      X.homOfLE (show X.basicOpen (f₁ * g) ≤ X.basicOpen f₁ by
+          rw [X.basicOpen_mul f₁ g]; exact inf_le_left) ≫ e.hom := by
+  set hle : X.basicOpen (f₁ * g) ≤ X.basicOpen f₁ := by
+    rw [X.basicOpen_mul f₁ g]; exact inf_le_left with hle_def
+  unfold transitionElemIso
+  simp only [Iso.trans_hom, Iso.symm_hom]
+  set h1 := (transitionElem_basicOpen_eq f₁ g e).1
+  set h2 := (transitionElem_basicOpen_eq f₁ g e).2
+  set W := (X.basicOpen f₁).toScheme.basicOpen
+    ((X.basicOpen f₁).topIso.inv (X.presheaf.map (homOfLE (X.basicOpen_le f₁)).op g)) with hW
+  set iso1 : (W : Scheme) ≅ (X.basicOpen (f₁ * g) : Scheme) :=
+    ((X.basicOpen f₁).ι.isoImage W).trans (eqToIso (by rw [h1])) with hiso1
+  have key1 : iso1.hom ≫ X.homOfLE hle = W.ι := by
+    rw [← cancel_mono (X.basicOpen f₁).ι]
+    rw [Category.assoc, Scheme.homOfLE_ι]
+    show ((X.basicOpen f₁).ι.isoImage W).hom ≫ (eqToIso (congrArg (fun (V:X.Opens) => (V:Scheme)) h1)).hom ≫
+      (X.basicOpen (f₁ * g)).ι = W.ι ≫ (X.basicOpen f₁).ι
+    rw [eqToIso_congrArg_scheme_hom_ι h1]
+    exact Scheme.Hom.isoImage_hom_ι _ _
+  have key2 : iso1.inv ≫ W.ι = X.homOfLE hle := by
+    rw [← key1, Iso.inv_hom_id_assoc]
+  have key3 : (Scheme.Hom.isoImage e.hom W).hom ≫ (eqToIso (congrArg (fun (V:Z.Opens) => (V:Scheme)) h2)).hom ≫
+      (Z.basicOpen (transitionElem f₁ g e)).ι = W.ι ≫ e.hom := by
+    rw [eqToIso_congrArg_scheme_hom_ι h2]
+    exact Scheme.Hom.isoImage_hom_ι _ _
+  show iso1.inv ≫ (Scheme.Hom.isoImage e.hom W).hom ≫ (eqToIso (congrArg (fun (V:Z.Opens) => (V:Scheme)) h2)).hom ≫
+    (Z.basicOpen (transitionElem f₁ g e)).ι = X.homOfLE hle ≫ e.hom
+  rw [key3, ← key2, Category.assoc]
+
 /-- `transitionElem`の座標を与える制限元は、積の分解と両立する
 (`X.presheaf.map`の乗法性+`basicOpen_mul`)——`t_fac`で`transitionElemIso`
 の自然性を組み立てるための土台となる開集合の包含。 -/
@@ -2139,12 +2194,51 @@ noncomputable def pullbackHomOfLEIso {X : Scheme} {U A B : X.Opens} (hA : A ≤ 
       A.ι B.ι := (Scheme.homOfLE_ι X hA) ▸ (Scheme.homOfLE_ι X hB) ▸ h1
   h2.isoIsPullback (A : Scheme) (B : Scheme) (isPullback_opens_inf A B)
 
+/-- `pullbackHomOfLEIso`の`fst`との可換性——`IsPullback.isoIsPullback_hom_fst`
+をそのまま呼ぶだけ。 -/
+theorem pullbackHomOfLEIso_hom_fst {X : Scheme} {U A B : X.Opens} (hA : A ≤ U) (hB : B ≤ U) :
+    (pullbackHomOfLEIso hA hB).hom ≫ X.homOfLE (inf_le_left : A ⊓ B ≤ A) =
+      pullback.fst (X.homOfLE hA) (X.homOfLE hB) := by
+  unfold pullbackHomOfLEIso
+  exact IsPullback.isoIsPullback_hom_fst _ _ _ _
+
+/-- `pullbackHomOfLEIso`の`snd`との可換性——同様。 -/
+theorem pullbackHomOfLEIso_hom_snd {X : Scheme} {U A B : X.Opens} (hA : A ≤ U) (hB : B ≤ U) :
+    (pullbackHomOfLEIso hA hB).hom ≫ X.homOfLE (inf_le_right : A ⊓ B ≤ B) =
+      pullback.snd (X.homOfLE hA) (X.homOfLE hB) := by
+  unfold pullbackHomOfLEIso
+  exact IsPullback.isoIsPullback_hom_snd _ _ _ _
+
 /-- `pullbackHomOfLEIso`を`Scheme.basicOpen_mul`で単一の基本開集合の形
 (`X.basicOpen (f₁*f₂)`)にまとめたもの。 -/
 noncomputable def pullbackHomOfLEIsoBasicOpen {X : Scheme} {U : X.Opens} (f₁ f₂ : Γ(X, U))
     (h1 : X.basicOpen f₁ ≤ U) (h2 : X.basicOpen f₂ ≤ U) :
     (pullback (X.homOfLE h1) (X.homOfLE h2) : Scheme) ≅ (X.basicOpen (f₁ * f₂) : Scheme) :=
   (pullbackHomOfLEIso h1 h2).trans (X.isoOfEq (X.basicOpen_mul f₁ f₂).symm)
+
+/-- `pullbackHomOfLEIsoBasicOpen`の`fst`との可換性——`Scheme.isoOfEq_hom`
+(`X.isoOfEq e`の`.hom`は`X.homOfLE`そのもの)+`Scheme.homOfLE_homOfLE`
+(合成が単一の`homOfLE`にまとまる)で`pullbackHomOfLEIso_hom_fst`へ帰着。 -/
+theorem pullbackHomOfLEIsoBasicOpen_hom_fst {X : Scheme} {U : X.Opens} (f₁ f₂ : Γ(X, U))
+    (h1 : X.basicOpen f₁ ≤ U) (h2 : X.basicOpen f₂ ≤ U) :
+    (pullbackHomOfLEIsoBasicOpen f₁ f₂ h1 h2).hom ≫
+      X.homOfLE (show X.basicOpen (f₁ * f₂) ≤ X.basicOpen f₁ by
+        rw [X.basicOpen_mul f₁ f₂]; exact inf_le_left) =
+      pullback.fst (X.homOfLE h1) (X.homOfLE h2) := by
+  unfold pullbackHomOfLEIsoBasicOpen
+  rw [Iso.trans_hom, Category.assoc, Scheme.isoOfEq_hom, Scheme.homOfLE_homOfLE]
+  exact pullbackHomOfLEIso_hom_fst h1 h2
+
+/-- `pullbackHomOfLEIsoBasicOpen`の`snd`との可換性——同様。 -/
+theorem pullbackHomOfLEIsoBasicOpen_hom_snd {X : Scheme} {U : X.Opens} (f₁ f₂ : Γ(X, U))
+    (h1 : X.basicOpen f₁ ≤ U) (h2 : X.basicOpen f₂ ≤ U) :
+    (pullbackHomOfLEIsoBasicOpen f₁ f₂ h1 h2).hom ≫
+      X.homOfLE (show X.basicOpen (f₁ * f₂) ≤ X.basicOpen f₂ by
+        rw [X.basicOpen_mul f₁ f₂]; exact inf_le_right) =
+      pullback.snd (X.homOfLE h1) (X.homOfLE h2) := by
+  unfold pullbackHomOfLEIsoBasicOpen
+  rw [Iso.trans_hom, Category.assoc, Scheme.isoOfEq_hom, Scheme.homOfLE_homOfLE]
+  exact pullbackHomOfLEIso_hom_snd h1 h2
 
 /-! ### 項目(b)の残り——`φ(i,j)`の自然性(`fst`/`snd`との可換性)
 
@@ -2248,6 +2342,30 @@ noncomputable def pullbackHomOfLE_gdV_iso {X : Scheme} {U : X.Opens} {J : Type} 
   (pullbackEInvIso f Z e h i j).trans
     ((pullbackHomOfLEIsoBasicOpen (f i) (f j) (h i) (h j)).trans (transitionElemIso (f i) (f j) (e i)))
 
+/-- **`pullbackHomOfLE_gdV_iso`の`fst`との可換性**——3段
+(`pullbackEInvIso`・`pullbackHomOfLEIsoBasicOpen`・`transitionElemIso`)
+それぞれの`fst`/`.ι`自然性(`pullbackEInvIso_hom_fst`・
+`pullbackHomOfLEIsoBasicOpen_hom_fst`・`transitionElemIso_hom_ι`)を
+内側から順に繋ぐ——「末尾に何も続かない」箇所は非`_assoc`版で
+書き換えてから、最後に`(e i).inv≫(e i).hom=𝟙`で閉じる。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem pullbackHomOfLE_gdV_iso_hom_fst {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
+    (Z : J → Scheme) (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i)
+    (h : ∀ i, X.basicOpen (f i) ≤ U) (i j : J) :
+    (pullbackHomOfLE_gdV_iso f Z e h i j).hom ≫ gdF f Z e i j =
+      pullback.fst ((e i).inv ≫ X.homOfLE (h i)) ((e j).inv ≫ X.homOfLE (h j)) := by
+  show (pullbackEInvIso f Z e h i j).hom ≫ (pullbackHomOfLEIsoBasicOpen (f i) (f j) (h i) (h j)).hom ≫
+      (transitionElemIso (f i) (f j) (e i)).hom ≫ gdF f Z e i j = _
+  unfold gdF
+  rw [transitionElemIso_hom_ι]
+  rw [show (pullbackHomOfLEIsoBasicOpen (f i) (f j) (h i) (h j)).hom ≫
+      (X.homOfLE (show X.basicOpen (f i * f j) ≤ X.basicOpen (f i) by
+        rw [X.basicOpen_mul (f i) (f j)]; exact inf_le_left) ≫ (e i).hom)
+    = pullback.fst (X.homOfLE (h i)) (X.homOfLE (h j)) ≫ (e i).hom from by
+      rw [← Category.assoc, pullbackHomOfLEIsoBasicOpen_hom_fst]]
+  rw [← Category.assoc, pullbackEInvIso_hom_fst, Category.assoc, Iso.inv_hom_id, Category.comp_id]
+
 /-- `piecesOpenCover`の`.f i`が定義どおりの明示形であること(単一
 出現の`unfold`なので軽い、`#31`/`#32`の教訓)。 -/
 theorem piecesOpenCover_f_eq {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
@@ -2263,16 +2381,7 @@ theorem piecesOpenCover_f_eq {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ
 本質的な方。`piecesOpenCover_f_eq`で`.f i`を明示形へ書き換えてから
 `pullbackHomOfLE_gdV_iso`を適用するだけ。
 
-★**sorry 無し**。標準3公理のみ。
-
-★★次の一手(未着手、項目(b)の残り): この`φ(i,j)`が`fst`/`snd`(`gdF`・
-`gdT≫gdF`・mathlibの`pullback.fst`・`pullbackSymmetry.hom≫pullback.fst`)
-と可換であること(NatIsoの自然性、`t_fac`/`cocycle`同等の配線量が
-見込まれる)を示し、`U`成分(恒等)と合わせて`.diagram`同士の`NatIso`を
-組み立て、`CategoryTheory.Limits.HasColimit.isoOfNatIso`で`.glued`
-同士の同型を得てから、mathlibの`Scheme.Cover.fromGlued`が与える
-`piecesOpenCover(...).gluedCover.glued ≅ U`と合成する。
-`corrhyp-goal.md`に記録。 -/
+★**sorry 無し**。標準3公理のみ。 -/
 noncomputable def piecesGluedCoverVIso {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
     (Z : J → Scheme) (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i)
     (hcover : ⨆ i, X.basicOpen (f i) = U) (i j : J) :
@@ -2280,6 +2389,29 @@ noncomputable def piecesGluedCoverVIso {X : Scheme} {U : X.Opens} {J : Type} (f 
       gdV f Z e (i, j) := by
   rw [piecesOpenCover_f_eq f Z e hcover i, piecesOpenCover_f_eq f Z e hcover j]
   exact pullbackHomOfLE_gdV_iso f Z e (basicOpen_le_of_iSup_eq f hcover) i j
+
+/-- **`piecesGluedCoverVIso`の`fst`との可換性(NatIso自然性の`fst`半分、
+完成)**——`pullbackHomOfLE_gdV_iso_hom_fst`と`piecesOpenCover_f_eq`
+(`rfl`による定義的一致なので`rw`を経由せず`show`+`exact`だけで届く、
+`#31`の「`rw`を避けdefeqで直接繋ぐ」教訓の別の現れ方)を合成するだけ。
+
+★**sorry 無し**。標準3公理のみ。
+
+★★次の一手(未着手、項目(b)の残り): この`φ(i,j)`が`snd`(`gdT≫gdF`・
+mathlibの`pullbackSymmetry.hom≫pullback.fst`)とも可換であることを示す
+(`gdT_eq_transitionElemIso`等の既存の`gdT`関連事実が土台になる見込み、
+`t_fac`/`cocycle`同等の配線量が見込まれる)。それが済めば`U`成分(恒等)
+と合わせて`.diagram`同士の`NatIso`を組み立て、`CategoryTheory.Limits.
+HasColimit.isoOfNatIso`で`.glued`同士の同型を得てから、mathlibの
+`Scheme.Cover.fromGlued`が与える`piecesOpenCover(...).gluedCover.glued
+≅ U`と合成する。`corrhyp-goal.md`に記録。 -/
+theorem piecesGluedCoverVIso_hom_fst {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
+    (Z : J → Scheme) (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i)
+    (hcover : ⨆ i, X.basicOpen (f i) = U) (i j : J) :
+    (piecesGluedCoverVIso f Z e hcover i j).hom ≫ gdF f Z e i j =
+      pullback.fst ((piecesOpenCover f Z e hcover).f i) ((piecesOpenCover f Z e hcover).f j) := by
+  show (pullbackHomOfLE_gdV_iso f Z e (basicOpen_le_of_iSup_eq f hcover) i j).hom ≫ gdF f Z e i j = _
+  exact pullbackHomOfLE_gdV_iso_hom_fst f Z e (basicOpen_le_of_iSup_eq f hcover) i j
 
 /-! ### `corrHypGlueData`の具体化(ロードマップ項目(a)の第一歩)
 
