@@ -87,6 +87,21 @@ HEAD 自体が壊れていた。
 ★`lake build` が赤のまま別のことを始めるのは、単独セッションなら許容範囲だが、
 ここでは**他人の commit を壊す**。
 
+★★★**2026-09-04、再発——今度は push 後に気づいた変種**(ABC3c)。
+`git add lean/…/KaehlerAux.lean` → `git commit`(パス無し)で、
+math-abc3-d3 が(おそらく `git add -A` で)ステージしていた
+`Found/PGC/LubinTateEndoDivisibility.lean`(sorry 入り・作業中)が
+自分の commit `20a2fe95` に巻き込まれ、**気づいた時点で既に push 済み**
+だった。この場合は上の「reset して取り直す」は使えない
+(push 済み=履歴の共有地点を越えている、force-push は更に危険)。
+
+**How to apply(追加)**: push 済みなら **reset は選択肢に無い**。
+「次のコミットで本体の場所を書く」ができないタイミング(直後に
+別の作業へ移る場合)は、代わりに `ListAgents` で該当セッションを探し
+`SendMessage` で「あなたのファイルが commit `<sha>` に巻き込まれて
+push 済みです、内容は失われていません」と直接伝える——コミット
+メッセージへの追記が難しい場面での代替チャネルとして機能した。
+
 ★★★★**2026-09-03、ABC3c が実測**——巻き込まれた側が `git commit --amend` で
 自分のコミットから巻き込んだファイルを除去したところ、**push が非 fast-forward
 で拒否された**。原因: amend は同じ `.git`(共有ワークツリー)の HEAD を即座に
