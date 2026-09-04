@@ -1133,3 +1133,53 @@ lt_one`から`b·x`のHasEvalは既に得られている)には、コアーシ�
 組み合わせて確立すること——`formalGroupLaw`(2変数)を経由する分
 だけ乗法性より複雑になる見込みだが、基本戦略(既存の`subst`ベースの
 恒等式の両辺を`aeval`で評価し、連鎖律で変形する)は同じはず。
+
+**続報(2026-09-04・続き、★★★★★★★★★★★★★★★★★★★★最大の節目——
+加法性を確立、𝒪_K加群公理が全て揃った)**: 予告通り、1変数連鎖律
+(`aeval_subst_eq_aeval_aeval`)を2変数(`MvPowerSeries`)へ拡張する
+だけで加法性も確立できた(commit`106726d7`)。想定していた複雑さは
+**実際には現れなかった**——鍵となった簡略化:
+
+★`family i = X * h_i`(各成分が1変数の冪級数)という事実のおかげで、
+`d.prod(family s)^(d s)`という2変数の積が、実は**1変数の積**
+`X^|d| * (h_0^(d 0) * h_1^(d 1))`に潰れる。これで「多変数`order`
+理論」を一切使わず、1変数版と**全く同じ`X`分解トリック**
+(`coeff_prod_pow_eq_zero_of_lt`)で係数の有限性が示せた——2変数化は
+見た目ほど本質的な難所ではなかった。
+
+追加した部品(1変数版の完全な2変数アナログ):
+- `coeff_prod_pow_eq_zero_of_lt`・`coeff_subst_family_trunc_eq`・
+  `tendsto_subst_family_trunc`: 上記の簡略化を使い、1変数版と同じ
+  「`finsum`の有限性→係数の安定性→収束」という論法をそのまま踏襲。
+- ★★★★★★★★★★★★★★★★`aeval_subst_family_eq_aeval_aeval`:
+  連鎖律の2変数版。`MvPolynomial.comp_aeval_apply`(1変数版
+  `Polynomial.aeval_algHom_apply`のmathlib既存の多変数アナログ、
+  探したらそのまま見つかった)・`MvPowerSeries.continuous_aeval`・
+  `MvPowerSeries.WithPiTopology.tendsto_trunc'_atTop`を組み合わせる。
+- `hasEval_actionFam2`: `family:=fun i=>if i=0 then a·x else b·x`が
+  `MvPowerSeries.HasEval`を満たすこと——`MvPowerSeries.HasEval`は
+  「各成分の位相的冪零性」+「`cofinite`フィルターでの`0`への収束」
+  の2条件からなるが、**`Fin 2`は有限型なので`cofinite`フィルターは
+  自動的に`⊥`になり**、`Tendsto _ ⊥ _`は常に真——第2条件は完全に
+  無償で手に入った。
+- `lubinTateEvalFormalGroupAt`: `formalGroupLaw`を`adjoinIntegers
+  K x`の点の族で評価する、`lubinTateEvalAtPoint`の2変数版。
+
+そして本体:
+
+```
+★★★★★★★★★★★★★★★★★★★★lubinTateAction_add: (a+b)·x = F_f(a·x,b·x)
+```
+
+★★★これで`lubinTateActionAtTorsionPoint`が満たすべき`𝒪_K`加群の
+構造公理——**単位律・零元の吸収律・乗法性・加法性のすべて**——が
+確立された。実在の任意のp進局所体`K`について、実在の捩れ点
+`x∈Λ_n`に対する古典的なLubin-Tate加群構造が、`sorry`無しで完全に
+構築されたことになる——このセッションを通じて積み上げてきた
+Lubin-Tate理論の実装が、ここで1つの大きな到達点に達した。
+
+**次の一歩**: この作用が実際に`Λ_∞(=∪Λ_n)`に戻ることを示す(現状、
+`a·x`は「`adjoinIntegers K x`のどこかの元」というだけで、それが
+既知の捩れ点の1つに一致することは未証明)。これができれば
+`K(Λ_n)`の正規性・Galois群計算`Gal(L_n/K)≅(𝒪_K/π^n)^×`(古典的な
+Lubin-Tate理論の主定理)へ進める見通し。
