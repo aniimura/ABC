@@ -1382,6 +1382,28 @@ action_eq_self`(`(1+cπ^n)·x=x`)の直接の系として、待望していた
 factor through することの正式な組み立てと、単射性(こちらは依然
 残された課題)。
 
+**続報(同日、`principalUnits`部分群、commit`ed578fe1`)**: 上の
+「正式な組み立て」の第一歩として、`1+π^n𝒪_K`の形の単数のなす
+`(𝒪_K)^×`の**部分群**を明示的に構成した:
+
+1. `principalUnits K π n : Subgroup (𝒪_K)^×`: `(v-1)`の式変形だけで
+   単位元・積・逆元の閉性が出る、純粋に環論的な構成
+   (`vw-1=v(w-1)+(v-1)`・`v⁻¹-1=-v⁻¹(v-1)`)——`F_f`・Lubin-Tate
+   固有の議論は一切不要。
+2. `mem_principalUnits_iff`: 定義の直接の言い換え(`v=1+cπ^n`の形)。
+3. ★★★**`mul_principalUnits_action_eq`**: `v∈principalUnits K π n`
+   ならば`(u*v)·x=u·x`——前回の`mul_one_add_pi_pow_action_eq`を
+   部分群の言葉で言い換えただけ。
+
+これで「`(𝒪_K)^×`の`Λ_n`への作用は`principalUnits K π n`を法として
+well-defined」ことが**群論的に正しい形**(`Subgroup`+その法での不変性)
+で定式化できた。次の一歩: `(𝒪_K)^×⧸principalUnits K π n`
+(標準的には`(𝒪_K/π^n)^×`に同型のはずだが、その同型自体はまだ
+構築していない)から`ψ_nの根`への**誘導された写像**
+(`QuotientGroup.lift`)を実際に構成すること——`mul_principalUnits_
+action_eq`はまさにこの`lift`が要求する「well-definedness」の
+証明そのものになっている。
+
 これで「`a·x=0 ↔ π^n∣a`」(`x`が原始的なπ^n-捩れ点のとき)が
 sorry無しで確立された——`𝒪_K/π^n≅Λ_n`の**核**が確定。
 `|𝒪_K/π^n|=q^n=|Λ_n|`(既出`card_iteratedLubinTateTorsionPoints`)
