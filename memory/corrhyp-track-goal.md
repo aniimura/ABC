@@ -139,4 +139,32 @@ mathlib自身が使う`set_option backward.isDefEq.respectTransparency false`
 
 コミット: `2af0967d`(SchemeFEt.lean・universe多相化)・`1626cc06`
 (Instance3.lean)。[[corrhyp-scheme-universe-mismatch]] に universe の
-教訓を分離して記録予定。
+教訓を分離して記録済み。
+
+★★★★★★★★2026-09-04さらに続報(第37-45件、`Lemma 4.1`構成の核心部品が
+完成)。同じセッション内で継続。`FieldLimit.lean`に多項式の係数降下
+一式(`exists_fg_subalgebra_polynomial`/`_pair`/`_pair_monic`/`_family`)→
+`StandardEtalePair`(有限エタール射の標準的表示)の降下
+(`exists_fg_subalgebra_standardEtaleCond`/`_standardEtalePair`/
+`_standardEtalePair_map`)→**`StandardEtalePair.Ring`のbase change**
+(`Bivariate_equivMvPolynomial_map`・`standardEtalePair_ring_baseChange`・
+`standardEtalePairRingBaseChange`:
+`TensorProduct R K P₀.Ring ≃ₐ[K] (P₀.map (algebraMap R K)).Ring`)
+まで、全9個の補題をsorry無しで積み上げた。
+
+途中、「テンソル積は余極限を保存する」という一般圏論(`Under.pushout`が
+left adjoint)を試みたが`Under.mk`のdefeq配管で頓挫し撤退——代わりに
+mathlib既存の`MvPolynomial.algebraTensorAlgEquiv`・
+`Algebra.TensorProduct.tensorQuotientEquiv`・`Ideal.quotientEquivAlg`を
+`StandardEtalePair.Ring`(mathlibの明示的な二変数多項式商)に直接適用する、
+より軽い道に乗り換えたのが鍵——一般論より具体構成のほうが速かった実例。
+
+**これでLemma 4.1の構成的降下のうち最も技術的に重い部品(環レベルの
+base change)が完成し、残るのはスキーム論の定型的な貼り合わせ
+(アフィン開被覆のétale-locusでの細分→各片への適用→遷移射の一致の降下)
+のみという段階に到達**。集計は7/24で変わらず(numbered itemとしての
+`Lemma 4.1`自体はまだ)だが、`corrhyp-goal.md`§4に組み立て方の全体像を
+記録済み。
+
+コミット: `b45a6655`(map接続)・`8c5a010a`(Ring base change完成、
+これが核心)・`57a9571c`(記録)。
