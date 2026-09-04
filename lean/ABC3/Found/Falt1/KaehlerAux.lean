@@ -3971,4 +3971,40 @@ theorem falt1_kaehler_length_exact_wn1
   exact Module.length_eq_add_of_exact (KaehlerDifferential.mapBaseChange V0 Wn Wn1)
     (KaehlerDifferential.map V0 Wn Wn1 Wn1) hinj hsurj hexact
 
+set_option maxHeartbeats 800000 in
+/-- **`falt1_kaehler_length_exact_wn1` の右辺第2項を Lemma 1.1
+(`falt1CokernelLengthEq`)で `differentIdeal` の言葉に置き換えた版**:
+`Ω¹_{Wₙ₊₁/Wₙ}` の長さは Lemma 1.1 により `Wₙ₊₁ ⧸ differentIdeal Wₙ Wₙ₊₁`
+の長さに等しい(`x` が `Wₙ₊₁` を(環・体どちらのレベルでも)生成する
+という Lemma 1.1 の前提を additional に要求する)。これで
+`cancel_conductor_delta` 経由の既存の等式(`differentIdeal` の言葉で
+書かれた `hlen_eq`)と、この Kähler 微分の完全列から来る等式とが
+**同じ `differentIdeal Wₙ Wₙ₊₁` の長さを共有する**ことが分かり、
+2つの証明経路が独立ではなく同じ量を経由して繋がっていることが
+確認できた。残るは第1項(`Wₙ₊₁⊗_{Wₙ}Ω¹_{Wₙ/V0}` の長さ、kernel 側
+=Exercise 13.7.4 step (4)後半の Nakayama+elementary divisors・
+step (5) の discriminant の塔に相当)の評価。 -/
+theorem falt1_kaehler_length_exact_wn1_cokernel
+    {V0 Wn Wn1 K L : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    [CommRing Wn1] [Algebra Wn Wn1] [Algebra V0 Wn1] [IsScalarTower V0 Wn Wn1]
+    [Field K] [Algebra Wn K] [IsFractionRing Wn K] [Field L] [Algebra K L]
+    [FiniteDimensional K L] [Algebra.IsSeparable K L]
+    [Algebra Wn1 L] [Algebra Wn L] [IsScalarTower Wn K L] [IsScalarTower Wn Wn1 L]
+    [IsIntegralClosure Wn1 Wn L] [IsDedekindDomain Wn1] [Module.IsTorsionFree Wn Wn1]
+    (π : V0) (n : ℕ)
+    (hn' : (n : FractionRing Wn) ≠ 0)
+    (hprime' : (Ideal.span ({algebraMap V0 Wn π} : Set Wn)).IsPrime)
+    (hnotsq' : algebraMap V0 Wn π ∉ (Ideal.span ({algebraMap V0 Wn π} : Set Wn)) ^ 2)
+    (hnpos : 0 < n)
+    (e2 : AdjoinRoot ((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)) ≃ₐ[Wn] Wn1)
+    (x : Wn1) (hint : IsIntegral Wn x) (hadjoin : Algebra.adjoin Wn ({x} : Set Wn1) = ⊤)
+    (hw : Algebra.adjoin K ({(algebraMap Wn1 L) x} : Set L) = ⊤) :
+    Module.length Wn1 (Ω[Wn1⁄V0]) =
+      Module.length Wn1 (TensorProduct Wn Wn1 Ω[Wn⁄V0]) +
+        Module.length Wn1 (Wn1 ⧸ differentIdeal Wn Wn1) := by
+  have hbase := ABC3.Found.Falt1.falt1_kaehler_length_exact_wn1 π n hn' hprime' hnotsq' hnpos e2
+  rw [ABC3.Found.Falt1.falt1CokernelLengthEq x hint hadjoin hw] at hbase
+  exact hbase
+
 end ABC3.Found.Falt1
