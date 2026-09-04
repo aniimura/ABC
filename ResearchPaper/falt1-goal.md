@@ -1513,6 +1513,28 @@ mathlib での正確な組み立て方は未確認)。
       事実のはず・未着手)を組み立てて完全列そのものを確立し、
       Nakayama+elementary divisors(step 4後半のkernel評価)・
       discriminantの塔(step 5のcokernel評価)へ進む。
+
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、
+      **完全列の残り2成分が実は無条件でmathlibに既にあると判明し、
+      長さの加法公式を確立した**(`falt1_kaehler_length_exact_wn1`、
+      commit `388c961e`、`lake build`完走・sorry無し)。第二基本完全列
+      `0 → Wₙ₊₁⊗_{Wₙ}Ω¹_{Wₙ/V0} → Ω¹_{Wₙ₊₁/V0} → Ω¹_{Wₙ₊₁/Wₙ} → 0`
+      の中央の完全性(`KaehlerDifferential.exact_mapBaseChange_map`)・
+      右側の全射性(`KaehlerDifferential.map_surjective`、`map R S B B`
+      の形——`Ω[B/R]→Ω[B/S]`が**任意の`R→S→B`の塔で無条件に全射**)は
+      分岐や分離性の仮定なしに成り立つ一般論としてmathlibに既にあった。
+      左側の単射性(直前のマイルストーン)と`Module.length_eq_add_of_exact`
+      を合わせるだけで
+      ```
+      length_{Wₙ₊₁}(Ω¹_{Wₙ₊₁/V0}) =
+        length_{Wₙ₊₁}(Wₙ₊₁⊗_{Wₙ}Ω¹_{Wₙ/V0}) + length_{Wₙ₊₁}(Ω¹_{Wₙ₊₁/Wₙ})
+      ```
+      が閉じた。これがExercise 13.7.4 step (4)-(6)の議論の土台
+      (kernel・cokernelの長さ評価に相当する右辺2項)——次回はこの
+      右辺2項をそれぞれ評価する: 第1項(kernel)はstep (4)後半の
+      Nakayama+elementary divisors(`Ω¹_{Wₙ/V0}`が`d+1`個の生成元を
+      持つことと組み合わせる)、第2項(`Ω¹_{Wₙ₊₁/Wₙ}`、cokernelに
+      相当)はstep (5)のdiscriminantの塔。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
