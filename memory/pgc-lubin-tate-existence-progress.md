@@ -1,6 +1,6 @@
 ---
 name: pgc-lubin-tate-existence-progress
-description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——★★★★★★★★★★★★★★★★★★★★★★★★★★★★ reciprocityMap: Gal(K.closure/K.carrier)→(𝒪_K)^×⧸principalUnits K π n が①存在一意性②群準同型③全射のすべて sorry 無しで完備(minpoly.exists_algEquiv_of_root' が鍵)。第一同型定理で Gal(K.closure/K.carrier)/ker ≅ (𝒪_K)^×⧸principalUnits がほぼ直接従う。残るは ker(reciprocityMap)=Gal(K.closure/K(Λ_n)) の同定という標準的な言い換えのみ
+description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★ 主定理 galoisReciprocityEquiv: Gal(K.carrier⟮x⟯/K.carrier) ≃* (𝒪_K/π^n𝒪_K)^× が完全に sorry 無しで完成した(LubinTateReciprocityIsomorphism.lean)。単射性・Galois同変性・準同型性・全射性のすべてを当初の想定より軽い経路で突破し、古典的な Lubin-Tate 理論の主定理そのものに到達した
 metadata:
   type: project
 ---
@@ -2177,6 +2177,115 @@ K(Λ_n))`(`K(Λ_n)`を固定する自己同型の部分群)という**同定**�
 全単射性・準同型性・全射性)が、**いずれも当初の想定より遥かに
 軽い経路**で完成した——本プロジェクトのこのトラックにおける
 決定的な到達点。
+
+## 続報(同日、最終段): 「`ker(reciprocityMap)`の同定」より軽い
+最終パッケージング経路を発見(次のセッションの具体的な着手点)
+
+`Gal(K.closure/K.carrier)/ker(reciprocityMap)`を明示的な部分群
+`Gal(K.closure/K(Λ_n))`と同定する代わりに、**`K.carrier⟮x⟯`の
+自己同型群**`Gal(K.carrier⟮x⟯/K.carrier):=K.carrier⟮x⟯≃ₐ[K.carrier]
+K.carrier⟮x⟯`(`algEquivRestrictSelf`の値の型そのもの)を経由する
+ほうが、既存の道具立てとの相性が良いと判明した——`K.carrier⟮x⟯
+=K(Λ_n)`という(未証明の)等式を経由せずに済む。
+
+**筋道**:
+1. **制限写像`res:Gal(K.closure/K.carrier)→Gal(K.carrier⟮x⟯/
+   K.carrier)`**(`σ↦algEquivRestrictSelf σ`、既出)は**全射**——
+   任意の`τ:K.carrier⟮x⟯≃ₐ[K.carrier]K.carrier⟮x⟯`について、
+   `τ(x)`は(`res`の全射性の証明の中で)`ψ_nの根`に入ることが
+   `exists_algEquiv_of_mem_iteratedLubinTatePsiTorsionPoints`の
+   証明と同様の議論(`τ`も`x`の共役を`x`の最小多項式の根に送る)
+   から出て、`exists_algEquiv_of_mem_iteratedLubinTatePsiTorsion
+   Points`で`σ(x)=τ(x)`となる大域的な`σ`を取り、
+   `algEquivRestrictSelf σ = τ`(ともに`x`を同じ場所へ送る
+   `K.carrier`-代数準同型で、`K.carrier⟮x⟯=K.carrier[x]`が`x`で
+   生成されることから、生成元での値が一致すれば全体で一致する
+   ——`AlgHom.ext`系の標準事実)であることを示せばよい。
+2. **`reciprocityMap`は`res`の各ファイバー上で定数**
+   (`res σ=res τ⟹σ(x)=τ(x)⟹reciprocityMap σ=reciprocityMap τ`
+   ——一意性から直接)、かつ**`res`のファイバーちょうどに一致**
+   (`reciprocityMap σ=reciprocityMap τ⟹u_σ·x=u_τ·x⟹σ(x)=τ(x)
+   ⟹res σ=res τ`——同じ「生成元で一致すれば全体で一致」の事実)。
+3. 1・2から、`reciprocityMap`は`res`(全射)を経由して
+   **`Gal(K.carrier⟮x⟯/K.carrier)`上へ全単射的に降りる**——
+   `QuotientGroup`の普遍性(`MonoidHom.liftOfSurjective`のような
+   形)で構成すれば、**`Gal(K.carrier⟮x⟯/K.carrier)≃*(𝒪_K)^×⧸
+   principalUnits K π n`という直接の群同型**が得られる見込み
+   (`K(Λ_n)`という別対象を経由する必要すら無い、`K.carrier⟮x⟯`
+   だけで完結する定式化)。
+
+**次のセッションで最初に試すべき具体的なステップ**: (a)「`K.carrier
+⟮x⟯=K.carrier[x]`は生成元`x`での値が一致すれば全体で一致する」
+という事実のmathlib名を探す(`AlgHom.ext`・`IntermediateField.
+algHom_ext_of_..`・`Algebra.adjoin`系の候補)、(b)`res`の全射性の
+証明(上記1、`exists_algEquiv_of_mem_iteratedLubinTatePsiTorsion
+Points`の使い回し)、(c)`reciprocityMap`のファイバーの同定(上記2、
+既存の`reciprocityMap_spec`・一意性だけで出る見込み)、(d)これらを
+`MonoidHom.liftOfSurjective`(または類似の「全射準同型を経由した
+普遍性」補題)で組み立てて最終的な群同型を得る。数学的内容は
+完全に揃っている——残るのはこの最後の組み立て(パッケージング)
+だけ。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+続報(同日、本セッション最終到達点): **主定理
+`Gal(K.carrier⟮x⟯/K.carrier) ≃* (𝒪_K/π^n)^×` が完成した**
+——`MonoidHom.liftOfSurjective`ではなく、`reciprocityMap`の構成を
+そのまま`τ`について再現する方が簡潔だった
+
+上の「(a)〜(d)」の計画のうち、実際には`(d)`を`MonoidHom.
+liftOfSurjective`で行う代わりに、**`reciprocityMap`自身の構成
+(`existsUnique`+`Classical.choose`)を、大域的な`σ`ではなく
+`τ∈Gal(K.carrier⟮x⟯/K.carrier)`に対して直接コピーして再現する**
+方がシンプルだと判明し、そちらで完成させた(新ファイル
+`LubinTateReciprocityIsomorphism.lean`、commit`450a69fe`)。
+
+**新規に確立した内容(すべて`sorry`無し、ゲート通過済み)**:
+
+1. `algEquivRestrictSelf_eq_of_eq`:「生成元`x`での値が一致すれば
+   `K.carrier⟮x⟯`の自己同型として一致する」——
+   `IntermediateField.algHom_ext_of_eq_adjoin`(mathlib、探していた
+   まさにその補題)から。
+2. `algEquivL_mem_iteratedLubinTatePsiTorsionPoints`:
+   `exists_algEquiv_of_mem_iteratedLubinTatePsiTorsionPoints`の
+   証明をそのまま`τ:K.carrier⟮x⟯≃ₐ...`について再現(大域的な`σ`を
+   経由しない)。
+3. `existsUnique_unitActionQuotient_eq_algEquivL`・
+   `galoisUnitReciprocityMap`(`_spec`): `reciprocityMap`の構成を
+   `τ`についてそのまま再現。**技術的な罠**: `unitActionQuotientBijOn`
+   の定義を`obtain`直後に`simp only [...]`で先に展開すると
+   `congrArg Subtype.val`が謎の型不一致を起こす——`Subtype.ext_iff.
+   mp`を**先に**適用してから`simp only [unitActionQuotientBijOn]`
+   で展開する(`unitActionQuotientBijOn_injective`の実装と同じ
+   順序)のが正しい手筋(逆順だと原因不明の`AlgHomClass`絡みの
+   エラーになる)。
+4. `algEquivRestrictSelf_mul`: `res:=algEquivRestrictSelf`は
+   群準同型(`(σ*σ')(z)=σ(σ'(z))`という定義+`coe_algEquivRestrictSelf`
+   だけから)。
+5. `galoisUnitReciprocityMap_eq_reciprocityMap`: `res`を経由すれば
+   `reciprocityMap`と一致する——両者とも「`x`での値」だけで一意に
+   定まることから。
+6. `galoisUnitReciprocityMap_mul`・`_injective`・`_surjective`:
+   上の橋渡し補題と`res`の全射性・群準同型性、`reciprocityMap`
+   自身の全射性・準同型性から、ほぼ機械的に移植される。
+7. ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+   **`galoisUnitReciprocityEquiv`**: `MulEquiv.ofBijective`+
+   `MonoidHom.mk'`で束ねた**`Gal(K.carrier⟮x⟯/K.carrier)≃*
+   (𝒪_K)^×⧸principalUnits K π n`**。
+8. ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+   **`galoisReciprocityEquiv`**: 既存の`principalUnitsQuotient
+   Equiv`と合成した**`Gal(K.carrier⟮x⟯/K.carrier)≃*(𝒪_K/π^n𝒪_K)^×`**
+   ——**古典的なLubin-Tate理論の主定理そのもの**。
+
+**本セッション全体の総括**: 開始時点で「大掛かりな新規構築(`F_f`の
+形式逆元・対数)かinstance diamondのどちらかが避けられない」と
+繰り返し警戒されていたLubin-Tate相互律が、単射性(加法公式+評価
+不等式)・Galois同変性(σ(x)自身が同じ座標系に留まる事実の活用)・
+準同型性・全射性(mathlibの`minpoly.exists_algEquiv_of_root'`)の
+いずれも**当初の想定より遥かに軽い経路**で突破され、最終的に
+主定理`Gal(K.carrier⟮x⟯/K.carrier)≃*(𝒪_K/π^n𝒪_K)^×`の完全な
+形式化として結実した。`K.carrier⟮x⟯=K(Λ_n)`という(証明していない)
+命名上の等式を除けば、これは古典的なLubin-Tate理論の主定理の
+完全な証明である。
 
 ## 続報(同日、`algEquiv_mem_iteratedLubinTateTorsionPoints_of_mem`、
 `AdjoinIntegers.lean`、commit `93108293`): `Λ_n`全体もσで保たれる
