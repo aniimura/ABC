@@ -1404,6 +1404,29 @@ well-defined」ことが**群論的に正しい形**(`Subgroup`+その法での�
 action_eq`はまさにこの`lift`が要求する「well-definedness」の
 証明そのものになっている。
 
+**続報(同日、`QuotientGroup.lift`の実現、commit`978198a6`)**: 予告
+通り、この誘導写像を実際に構成した:
+
+1. ★★★**`unitActionQuotientLift`**: `(𝒪_K)^×⧸principalUnits K π n
+   → adjoinIntegers K x`。`Quotient.lift`に`mul_principalUnits_
+   action_eq`をそのままwell-definedness証明として渡すだけ——
+   `QuotientGroup.leftRel_apply`(`a≈b ↔ a⁻¹*b∈N`)で`Quotient`の
+   同値関係`≈`を部分群の言葉へ変換する橋渡しが唯一の技術的な段
+   (`rw`では`≈`のパターンにマッチせず、`.mp`を項レベルで適用する
+   ことで解決——`change`によるdefeq判定でも通らなかった、また
+   1つの`if`の`Decidable`インスタンス不一致に似た軽い罠)。
+2. `unitActionQuotientLift_mk`: `QuotientGroup.mk u`での値が文字通り
+   `u·x`であること(`rfl`)——定義の直接の確認。
+
+これで「単数の作用が有限群`(𝒪_K)^×⧸principalUnits K π n`上の写像
+として矛盾なく定義できる」ことがmathlibの`QuotientGroup`インフラの
+上で明示的に構成された。次の一歩(いずれも本質的な数学的内容が
+要る、未解決): (a) この写像の**像**が本当に`ψ_nの根`全体
+(`iteratedLubinTatePsiTorsionPoints`)に一致すること(全射性)、
+(b) この写像が**単射**であること(`F_f`の引き算/キャンセレーション
+が要る、これまでの最大の壁)、(c) `(𝒪_K)^×⧸principalUnits K π n`が
+実際に`(𝒪_K/π^n)^×`に同型であること(標準的だが未構築)。
+
 これで「`a·x=0 ↔ π^n∣a`」(`x`が原始的なπ^n-捩れ点のとき)が
 sorry無しで確立された——`𝒪_K/π^n≅Λ_n`の**核**が確定。
 `|𝒪_K/π^n|=q^n=|Λ_n|`(既出`card_iteratedLubinTateTorsionPoints`)
