@@ -3210,6 +3210,38 @@ mathlib での正確な組み立て方は未確認)。
       `length(Wₙ₊₁⧸(x)^(n-1))=n-1`を得て、`length(Wₙ₊₁⧸differentIdeal
       Wₙ Wₙ₊₁) = length(Wₙ₊₁⧸(n)) + (n-1) ≥ n-1`という、`β`項の
       **具体的な下限**を確立することに進む。
+
+      ★★★★★2026-09-05、続けて(a)(b)を**同じセッションで完成させた**。
+      `falt1AdjoinRootEquivIntegralClosure`(既存、`AdjoinRoot g ≃ₐ[Wₙ]
+      Falt1Wn1 Wn Wn π' n`)で`falt1_adjoinRoot_quotient_root_isField`を
+      実際の`Wₙ₊₁`(`Falt1Wn1 Wn Wn π' n`、既存の名前付き`def`を
+      `V0:=Wn`で「自己適用」して再利用——巨大な入れ子式の再記述を
+      避けつつ独立の名前付き`def`を新設する必要が無かった)へ輸送し、
+      さらに**「唯一性」まで完全に証明した**:
+      - `falt1_falt1Wn1_uniqueMaximalIdeal`: 任意の極大イデアル`𝔪`に
+        ついて、`Ideal.isMaximal_comap_of_isIntegral_of_isMaximal`
+        (既存、整拡大では極大idealの引き戻しは極大)+`Wₙ`が局所環
+        であることから`𝔪`の`Wₙ`への引き戻しが`maximalIdeal Wₙ=(π')`
+        と一致し、`x^n=π'∈𝔪`(`x`=根の像)・`𝔪`が素なので`x∈𝔪`、
+        `(x)`が極大(前段の結果)なので`(x)⊆𝔪⊊Wₙ₊₁`から`(x)=𝔪`、と
+        いう初等的な議論で、`(x)`が**唯一の**極大イデアルであることを
+        示した。
+      - `falt1_falt1Wn1_isLocalRing`: 上記の系として`IsLocalRing.
+        of_unique_max_ideal`を適用し、`Falt1Wn1 Wn Wn π' n`(Falt1の
+        実際の`Wₙ₊₁`構成)が**局所環**であることを得た。
+      これで**「Eisenstein拡大は全分岐である」という、mathlibに
+      存在しないと確認済みだった古典的整数論の事実を、完全に自前で
+      証明し切った**——`tools/lean-idioms.md`の教訓(`Falt1Wn1 Wn Wn
+      π' n`の「自己適用」による巨大な入れ子式回避、`haveI ‹...›`
+      による名前付き`def`↔生の`integralClosure`式の instance 橋渡し)
+      以外は完全に見通し通りに閉じた。`lean_check`確認後
+      `KaehlerAux.lean`に追記。次回: `IsDedekindDomain + IsLocalRing
+      ⟹ IsDiscreteValuationRing`(TFAE経由、既に`IsDiscreteValuationRing.
+      TFAE`で確認済みの同値性)を適用して`Falt1Wn1 Wn Wn π' n`が実際に
+      DVRであることを導き、`IsDiscreteValuationRing.length_quotient_
+      pow_maximalIdeal`で`length(Wₙ₊₁⧸(x)^(n-1))=n-1`という`β`項の
+      **具体的な下限**を確立する——これがstep (5)の最後の技術的な
+      接続になる見込み。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・

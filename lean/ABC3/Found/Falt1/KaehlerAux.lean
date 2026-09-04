@@ -5339,6 +5339,100 @@ theorem falt1_adjoinRoot_quotient_root_isField {Wn : Type*} [CommRing Wn] [IsDom
     exact (Ideal.Quotient.maximal_ideal_iff_isField_quotient _).mp (IsLocalRing.maximalIdeal.isMaximal Wn)
   exact MulEquiv.isField hfield (falt1_adjoinRoot_quotient_root_eq_residue π' n hn).toRingEquiv.toMulEquiv
 
+/-- **`falt1_adjoinRoot_quotient_root_isField`をFalt1の実際の`Wₙ₊₁`
+(`Falt1Wn1 Wn Wn π' n`)へ輸送し、「根`x`が生成するイデアルが**唯一の**
+極大イデアルである」ことまで示した(全分岐の完全な言い換え)**:
+`falt1AdjoinRootEquivIntegralClosure`(既存、`AdjoinRoot g ≃ₐ[Wₙ] Wₙ₊₁`)
+で`IsField`をIdeal.quotientEquivAlg経由で輸送し、`(x)`が極大である
+ことを得る。**唯一性**は、任意の極大イデアル`𝔪`について
+`Ideal.isMaximal_comap_of_isIntegral_of_isMaximal`(既存、整拡大では
+極大idealの引き戻しは極大)+`Wₙ`が局所環であること(引き戻しは
+`maximalIdeal Wₙ=(π')`と一致)から`x^n=π'∈𝔪`、`𝔪`が素なので`x∈𝔪`、
+`(x)`が極大なので`(x)⊆𝔪⊊Wₙ₊₁`から`(x)=𝔪`、という初等的な議論で示す
+——これがEisenstein拡大が全分岐であることの**完全な**代数的証明。 -/
+noncomputable def falt1_falt1Wn1_uniqueMaximalIdeal {Wn : Type*} [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn]
+    (π' : Wn) (n : ℕ)
+    (hn : (n : FractionRing Wn) ≠ 0) (hπne0 : algebraMap Wn (FractionRing Wn) π' ≠ 0)
+    (hprime : (Ideal.span ({π'} : Set Wn)).IsPrime) (hnotsq : π' ∉ (Ideal.span ({π'} : Set Wn)) ^ 2)
+    (hnpos : 0 < n)
+    [IsDedekindDomain (Falt1Wn1 Wn Wn π' n)]
+    [Module.IsTorsionFree Wn (Falt1Wn1 Wn Wn π' n)]
+    [Algebra.IsIntegral Wn (Falt1Wn1 Wn Wn π' n)]
+    (hπ'unif : IsLocalRing.maximalIdeal Wn = Ideal.span ({π'} : Set Wn)) :
+    { x : Falt1Wn1 Wn Wn π' n // (Ideal.span ({x} : Set (Falt1Wn1 Wn Wn π' n))).IsMaximal ∧
+      ∀ 𝔪 : Ideal (Falt1Wn1 Wn Wn π' n), 𝔪.IsMaximal → 𝔪 = Ideal.span ({x} : Set (Falt1Wn1 Wn Wn π' n)) } := by
+  set g := Polynomial.X ^ n - Polynomial.C π' with hgdef
+  haveI hDed : IsDedekindDomain (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π' : Polynomial Wn)).map
+      (algebraMap Wn (FractionRing Wn))))) := ‹IsDedekindDomain (Falt1Wn1 Wn Wn π' n)›
+  haveI hTF : Module.IsTorsionFree Wn (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π' : Polynomial Wn)).map
+      (algebraMap Wn (FractionRing Wn))))) := ‹Module.IsTorsionFree Wn (Falt1Wn1 Wn Wn π' n)›
+  have e2 : AdjoinRoot g ≃ₐ[Wn] Falt1Wn1 Wn Wn π' n :=
+    falt1AdjoinRootEquivIntegralClosure (V0 := Wn) π' n hn hπne0 hprime hnotsq hnpos
+  set x : Falt1Wn1 Wn Wn π' n := e2 (AdjoinRoot.root g) with hxdef
+  have hfieldAR : IsField (AdjoinRoot g ⧸ Ideal.span ({AdjoinRoot.root g} : Set (AdjoinRoot g))) :=
+    falt1_adjoinRoot_quotient_root_isField π' hπ'unif n hnpos
+  have hmapeq : Ideal.span ({x} : Set (Falt1Wn1 Wn Wn π' n)) =
+      Ideal.map (e2 : AdjoinRoot g →+* Falt1Wn1 Wn Wn π' n) (Ideal.span ({AdjoinRoot.root g} : Set (AdjoinRoot g))) := by
+    rw [Ideal.map_span]
+    congr 1
+    simp [hxdef]
+  have equivQ : (AdjoinRoot g ⧸ Ideal.span ({AdjoinRoot.root g} : Set (AdjoinRoot g))) ≃ₐ[Wn]
+      (Falt1Wn1 Wn Wn π' n ⧸ Ideal.span ({x} : Set (Falt1Wn1 Wn Wn π' n))) :=
+    Ideal.quotientEquivAlg (Ideal.span ({AdjoinRoot.root g} : Set (AdjoinRoot g))) (Ideal.span ({x} : Set (Falt1Wn1 Wn Wn π' n))) e2 hmapeq
+  have hfieldx : IsField (Falt1Wn1 Wn Wn π' n ⧸ Ideal.span ({x} : Set (Falt1Wn1 Wn Wn π' n))) :=
+    MulEquiv.isField hfieldAR equivQ.symm.toRingEquiv.toMulEquiv
+  have hxmax : (Ideal.span ({x} : Set (Falt1Wn1 Wn Wn π' n))).IsMaximal :=
+    Ideal.Quotient.maximal_of_isField _ hfieldx
+  refine ⟨x, hxmax, ?_⟩
+  intro 𝔪 h𝔪max
+  haveI := h𝔪max
+  have hxnpow : x ^ n = algebraMap Wn (Falt1Wn1 Wn Wn π' n) π' := by
+    have hxn0 : (AdjoinRoot.root g) ^ n = algebraMap Wn (AdjoinRoot g) π' := by
+      have h0 : AdjoinRoot.mk g g = 0 := AdjoinRoot.mk_self
+      have hexp : AdjoinRoot.mk g g = (AdjoinRoot.root g) ^ n - algebraMap Wn (AdjoinRoot g) π' := by
+        show AdjoinRoot.mk g (Polynomial.X ^ n - Polynomial.C π') = _
+        rw [map_sub, map_pow, AdjoinRoot.mk_X, AdjoinRoot.mk_C]
+        rfl
+      rw [hexp] at h0
+      exact sub_eq_zero.mp h0
+    calc x ^ n = e2 (AdjoinRoot.root g) ^ n := by rw [hxdef]
+      _ = e2 ((AdjoinRoot.root g) ^ n) := by rw [map_pow]
+      _ = e2 (algebraMap Wn (AdjoinRoot g) π') := by rw [hxn0]
+      _ = algebraMap Wn (Falt1Wn1 Wn Wn π' n) π' := by rw [AlgEquiv.commutes]
+  have hcomap : (𝔪.comap (algebraMap Wn (Falt1Wn1 Wn Wn π' n))).IsMaximal :=
+    Ideal.isMaximal_comap_of_isIntegral_of_isMaximal 𝔪
+  have hcomapeq : 𝔪.comap (algebraMap Wn (Falt1Wn1 Wn Wn π' n)) = IsLocalRing.maximalIdeal Wn :=
+    IsLocalRing.eq_maximalIdeal hcomap
+  have hspaneq : Ideal.span ({π'} : Set Wn) = 𝔪.comap (algebraMap Wn (Falt1Wn1 Wn Wn π' n)) := by
+    rw [hcomapeq, hπ'unif]
+  have hxmem : x ^ n ∈ 𝔪 := by
+    rw [hxnpow]
+    have hmem : π' ∈ 𝔪.comap (algebraMap Wn (Falt1Wn1 Wn Wn π' n)) := hspaneq ▸ Ideal.subset_span rfl
+    exact Ideal.mem_comap.mp hmem
+  have hxin𝔪 : x ∈ 𝔪 := h𝔪max.isPrime.mem_of_pow_mem n hxmem
+  have hspanle : Ideal.span ({x} : Set (Falt1Wn1 Wn Wn π' n)) ≤ 𝔪 := by
+    rw [Ideal.span_le]; simpa using hxin𝔪
+  exact (hxmax.eq_of_le h𝔪max.ne_top hspanle).symm
+
+/-- **`falt1_falt1Wn1_uniqueMaximalIdeal`の系: `Wₙ₊₁`は局所環**
+(Eisenstein拡大が全分岐であることの最終形)。次回はこれと
+`IsDiscreteValuationRing.length_quotient_pow_maximalIdeal`(mathlib
+既存、DVRで`length(R/𝔪^k)=k`)を組み合わせ、`length(Wₙ₊₁⧸(x)^(n-1))=
+n-1`——差分イデアル`differentIdeal Wₙ Wₙ₊₁=span{n·x^(n-1)}`の長さの
+**具体的な下限**(step (5)の`β`項の由来)を確立することに進む。 -/
+theorem falt1_falt1Wn1_isLocalRing {Wn : Type*} [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn]
+    (π' : Wn) (n : ℕ)
+    (hn : (n : FractionRing Wn) ≠ 0) (hπne0 : algebraMap Wn (FractionRing Wn) π' ≠ 0)
+    (hprime : (Ideal.span ({π'} : Set Wn)).IsPrime) (hnotsq : π' ∉ (Ideal.span ({π'} : Set Wn)) ^ 2)
+    (hnpos : 0 < n)
+    [IsDedekindDomain (Falt1Wn1 Wn Wn π' n)]
+    [Module.IsTorsionFree Wn (Falt1Wn1 Wn Wn π' n)]
+    [Algebra.IsIntegral Wn (Falt1Wn1 Wn Wn π' n)]
+    (hπ'unif : IsLocalRing.maximalIdeal Wn = Ideal.span ({π'} : Set Wn)) :
+    IsLocalRing (Falt1Wn1 Wn Wn π' n) := by
+  obtain ⟨x, hxmax, huniq⟩ := falt1_falt1Wn1_uniqueMaximalIdeal π' n hn hπne0 hprime hnotsq hnpos hπ'unif
+  exact IsLocalRing.of_unique_max_ideal ⟨Ideal.span ({x} : Set (Falt1Wn1 Wn Wn π' n)), hxmax, huniq⟩
+
 /-!
 ## Theorem 1.2 の核心への別経路: Brinon-Conrad Exercise 13.7.4 の
 step (1) を Nakayama から立ち上げる(2026-09-05)
