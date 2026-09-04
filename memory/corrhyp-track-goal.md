@@ -1723,3 +1723,16 @@ corrhyp-goal.mdに詳細記録。
 (aevalの全射性経由の選択)。hround1/2は層の制限公理から従う見込み。
 配線作業(Scheme.Opens/TopCat.Presheaf API)がまだ残っている。集計は
 10/24で変わらず。corrhyp-goal.mdに詳細記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05(続き11)
+piece_le_of_le/piece_restrict_hom(commit e5250e76)——c.C側の片同士の
+制限写像を実装。同時に前回の道筋を訂正: overlap(U_i∩U_j)はU_j自体
+より真に小さいのでP_j.valがoverlap上で生成系とは限らない——正しくは
+共通のさらなる細分W(W≤U_i,U_j)を取り、両方をWへ制限してからW自身の
+Presentationの生成元を仲立ちにψを構成する必要がある(「直接比較」
+ではなく「共通の第三の片Wへ制限してから比較」という標準的な層の
+貼り合わせの形)。exists_mvPolynomial_quotient_specIso_descend自体の
+正しさには影響なし——配線側の設計ミスだった。次の一手: W:=U_i⊓U_j
+がアフィンであることの確認+piece_restrict_homを両方向に適用する
+配線(未着手)。lake build(ExtLimit/ABC3)0エラー確認、push済み。
+集計は10/24で変わらず。corrhyp-goal.mdに詳細記録。
