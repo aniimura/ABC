@@ -1048,3 +1048,50 @@ mathlib既存)を組み合わせる経路を検討した:
 別の(まだ見えていない)経路で組み立て直す、のいずれかが必要——
 どちらも本セッションの残り時間で片付く規模の作業ではなく、次回以降
 への持ち越しとして正直に記録する。
+
+**続報(2026-09-04・続き、★★★★★★★★★★★★★★★★理論的な突破——
+上記のギャップを実際に埋めた)**: 「次回以降への持ち越し」と記録した
+直後、実際に(a)の方向(独自の連続性議論)を、当初想定していた
+「`substAlgHom`自体の連続性」ではなく**トランケーション経由の
+別経路**で構成できた(commit`7f09476c`)。鍵となった発見の連鎖:
+
+1. `PowerSeries.coeff_subst'`の`finsum`公式`∑_d coeff d p •
+   coeff e(g^d)`は、`g`の定数項が`0`なら`g=X*h`と分解できることから
+   `coeff e(g^d)=0`(`d>e`のとき)——つまり**`d≤e`の有限個の項だけ**
+   で決まる(`coeff_pow_eq_zero_of_lt`)。
+2. これで`subst g p`の次数`e`の係数は`p`を次数`e+1`でトランケート
+   しても変わらない(`coeff_subst_trunc_eq`)——`subst`自身の連続性
+   ではなく、その**係数公式の有限性**を直接使っただけ。
+3. mathlibの`PowerSeries.WithPiTopology.tendsto_iff_coeff_tendsto`
+   (各次数の収束の言い換え)と組み合わせ、`subst g(trunc N p)`が
+   `N→∞`で`subst g p`へ収束することを示した(`tendsto_subst_trunc`)。
+4. 既存の`PowerSeries.continuous_aeval`をこの収束に適用して極限を
+   `aeval`の中へ運び、`Polynomial.aeval_algHom_apply`(代数準同型は
+   多項式評価と可換、mathlib既存)で**有限段(多項式)での等式**を
+   確立し、もう一度`PowerSeries.WithPiTopology.tendsto_trunc_atTop`
+   で極限に戻すことで結論した:
+
+```
+★★★★★★★★★★★★★aeval_subst_eq_aeval_aeval:
+  aeval x(subst g p) = aeval(aeval x g)p
+```
+
+★これで`subst`(形式的代入、`LubinTateAction`の構成に使われる)と
+`aeval`(位相的評価、`lubinTateEvalAtTorsionPoint`が使う)を繋ぐ
+**本物の連鎖律**が手に入った——`subst`自身の連続性は一切経由せず、
+その係数ごとの有限性だけを使う、当初想定より遥かに直接的な経路
+だった。教訓: 「ある操作Xの連続性」という入口で詰まったら、
+「Xの出力の各成分は有限個の入力成分だけで決まる」という**離散的な
+安定性**の議論で位相的な収束を回避できないか探す価値がある——
+このセッション序盤で得た「入口を1つに決め打ちしない」という教訓
+(`ValuationRingDVR.lean`の docstring)が、今回も別の形で当てはまった。
+
+**次の一歩**: `aeval_subst_eq_aeval_aeval`と既存の
+`LubinTateAction_comp`([ab]_f=subst([b]_f)([a]_f))を組み合わせて
+乗法性`a·(b·x)=(ab)·x`を、`LubinTateAction_add`と組み合わせて
+加法性`(a+b)·x=F_f(a·x,b·x)`を、それぞれ実際に証明すること。
+`a·(b·x)`の意味づけ(`b·x`を新たな評価点として、同じ`adjoinIntegers
+K x`の中で`aeval`を再度組み立てる——`norm_lubinTateActionAtTorsionPoint_
+lt_one`から`b·x`のHasEvalは既に得られている)には、コアーション
+(`adjoinIntegers K x`↔周囲の体)の慎重な追跡が必要で、まだ完成
+していない。
