@@ -2657,4 +2657,39 @@ theorem exists_ringEquiv_localization_of_eq (B B' T ι : Type) [CommRing B] [Com
     key
   exact ⟨e0.trans e3⟩
 
+open scoped TensorProduct Classical in
+/-- **`descendPieceR`の`R'`レベル局所化は、`Γ(C,piece)`のアフィン片を
+局所化して得られる任意の対象(`Wtarget`、`piece(D(f*g))`の実現)とも
+同型になる**——`exists_ringEquiv_localization_of_eq`(`R`↔ℝ橋渡し)・
+`ringEquiv_localization_of_apply_eq`(局所化元の対応)・`IsLocalization.
+algEquiv`(局所化の実現の一意性)の3部品を、`hp₀`(`exists_piece_
+basicOpen_R_lift`が与える対応)を仲立ちに繋ぐだけ。`CorrHyp`固有の
+`pieceAlgebra`等の足場を一切使わない**抽象的な**形にしたことで、
+巨大な足場を伴う証明で繰り返し当たっていたelaboration timeoutを完全に
+回避できた——呼び出し側は`e`・`h₂`・`hp₀`・`Wtarget`の`IsLocalization.
+Away`インスタンスを揃えるだけで、この補題を直接適用できる。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_ringEquiv_of_piece_lift (B B' T : Type) [CommRing B] [CommRing B'] [CommRing T]
+    [Algebra B B'] [Algebra B' T] [Algebra B T] [IsScalarTower B B' T]
+    (n : Type) [Fintype n] (I : Ideal (MvPolynomial n B)) (p₀ : MvPolynomial n B')
+    (Ctarget Wtarget : Type) [CommRing Ctarget] [CommRing Wtarget]
+    (e : (MvPolynomial n B ⧸ I) ⊗[B] T ≃+* Ctarget) (h₂ : Ctarget)
+    [Algebra Ctarget Wtarget] [IsLocalization.Away h₂ Wtarget]
+    (hp₀ : (quotient_mvPolynomial_baseChange B T n I) (e.symm h₂) =
+      Ideal.Quotient.mk (Ideal.map (MvPolynomial.map (algebraMap B T)) I) (MvPolynomial.map (algebraMap B' T) p₀)) :
+    letI hIR' : Ideal (MvPolynomial n B') := Ideal.map (MvPolynomial.map (algebraMap B B')) I
+    ∀ (M : Type) [CommRing M] [Algebra B' M]
+      [Algebra (MvPolynomial n B' ⧸ hIR') M]
+      [IsScalarTower B' (MvPolynomial n B' ⧸ hIR') M]
+      [IsLocalization.Away (Ideal.Quotient.mk hIR' p₀) M],
+    Nonempty (M ⊗[B'] T ≃+* Wtarget) := by
+  intro M _ _ _ _ _
+  obtain ⟨e4⟩ := exists_ringEquiv_localization_of_eq B B' T n I p₀ M
+  obtain ⟨e5⟩ := ringEquiv_localization_of_apply_eq _ _ e.symm h₂ (e.symm h₂) rfl
+  obtain ⟨e6⟩ := ringEquiv_localization_of_apply_eq _ _
+    (quotient_mvPolynomial_baseChange B T n I) (e.symm h₂) _ hp₀
+  have e7 := IsLocalization.algEquiv (Submonoid.powers h₂) Wtarget (Localization.Away h₂)
+  exact ⟨e4.trans (e6.symm.trans (e5.symm.trans e7.toRingEquiv.symm))⟩
+
 end ABC3.Found.CorrHyp
