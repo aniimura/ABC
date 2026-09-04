@@ -1261,3 +1261,23 @@ subalgebra_tensor_standardEtalePair_promote`で各`P₀_i`を`R'`へ移送する
 ——`AffineTransitionLimit.lean`のHom安定性——との組み合わせが必要)、
 (c)`Corr`のnonempty脱落の手当て(`Definition 1.1`への前提追加、または
 `Lemma 4.1`側での明示的な追加前提)。
+
+### 2026-09-04さらに続報: (b)の規模を実測——GlueDataは独立した規模の作業
+
+(b)へ実際に着手し、`Scheme.GlueData`の構造(`J`・`U`・`V`・`f`・`t`・
+`t'`・`t_fac`・`cocycle`・`f_open`)と、`exists_hom_hom_comp_eq_comp_
+of_locallyOfFiniteType`(rigidity候補)の正確なシグネチャを確認した。
+後者を実際に使うには、「重なり `V(i,j)` 上で2つの局所モデルが一致する
+射」を`D ⟶ (Functor.const I).obj S`という形の自然変換として明示的に
+セットアップする必要があり、これは**今回のセッションでまだ構築して
+いない、独立した準備作業**だと判明した——`GlueData`のcocycle条件
+(3重の整合性)の検証まで含めると、この一手だけで**今回の降下補題群
+一式(`FieldLimit.lean`・`ExtLimit.lean`に積み上げた分)に匹敵する規模**
+になる見通しである。
+
+**正直な結論**: §4は今セッションで(生地の面では)極めて大きく前進した
+——「1アフィン片の降下」の数学は完全に完成し、`Space`の有限型性という
+不要な前提も削ぎ落とせた。しかし(b)`GlueData`貼り合わせは、これまでの
+どの一手よりも大きい、**独立した1つの工程**であることが実測で確認できた
+——次のセッションの主要な取り組みとして引き継ぐ。★依然「壁ではなく道」
+だが、正直に言えば長い道である。
