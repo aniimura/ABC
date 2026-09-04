@@ -2675,6 +2675,47 @@ mathlib での正確な組み立て方は未確認)。
       finrank_range_add_finrank_ker`を`k_B`-線形版に作り直す)から
       再開すること。
 
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05、
+      **上記の接続を3セッション分の集中的な試行で追い詰めたが、
+      まだ閉じていない**——ここまでで判明した正確な障害点を記録する
+      (次回、同じ失敗を繰り返さないために):
+
+      - `LinearMap.extendScalarsOfSurjective`(`B→k_B`で`B`-線形写像を
+        `k_B`-線形へ持ち上げる、mathlib既存)自体は正しい道具で、
+        `kerCotangentToTensor An B k_B : (RingHom.ker(algebraMap B
+        k_B)).Cotangent →ₗ[B] k_B⊗[B]Ω[B/An]`を`k_B`-線形に持ち上げる
+        ところまでは単独では成功する。
+      - **真の障害**: `RingHom.ker(algebraMap B k_B) = maximalIdeal B`
+        (`IsLocalRing.ker_residue`から従う)は`rfl`では**ない**
+        (実測確認済み)——`algebraMap B (ResidueField B)`は
+        `IsLocalRing.residue B`と(`rfl`で)一致するが、`ResidueField
+        B`自体は`B⧸maximalIdeal B`と定義的に等しいにもかかわらず、
+        この合成全体が`RingHom.ker`を経由すると`rfl`にならない。
+      - この命題的な等式を使って`kerCotangentToTensor`の**型**
+        (`(RingHom.ker...).Cotangent`)を`CotangentSpace B`(=
+        `(maximalIdeal B).Cotangent`)へ書き換えようとすると:
+        - `rw [...] at h0`単独(`h0`だけ)は成功するが、
+        - **同じ書き換えを`hex0`(`Function.Exact ⇑h0 ⇑g`の形の
+          仮定)に対して行おうとすると`"motive is not type correct"`
+          で失敗する**(`Function.Exact`の第1引数の型が依存的に
+          `algebraMap`に依存するため、`rw`が安全に一般化できない)。
+        - `simp only [...] at h0 hex0`も試したが`"simp made no
+          progress"`(`hex0`の型のどこに書き換え対象があるか、simp
+          の輻輳マッチングでも見つけられない)。
+        - `▸`による`LinearEquiv`の手動構成も試したが、motiveの推論に
+          同種の理由で失敗した。
+
+      **今後の方針(次回への具体的な引き継ぎ)**: この手の「依存型を
+      跨ぐ書き換え」は`rw`/`simp`で押し通すのではなく、
+      `Eq.mpr`/`HEq`を明示的に経由するか、あるいは
+      `adjoinRootTensorEquivFwd`のときと同じ戦略(mathlibの既存の
+      補題を無理に再形成しようとせず、**このセッション固有の設定
+      向けに`kerCotangentToTensor`相当の写像を最初から`maximalIdeal
+      B`を使って自前で構成し直す**)を取るのが最も見込みが高いと
+      判断する——`KaehlerDifferential.kerCotangentToTensor`の証明
+      本体(`RingTheory/Kaehler/Basic.lean:775`付近)を読み、
+      `maximalIdeal B`版を直接組み立てる方針で次回は開始すること。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
