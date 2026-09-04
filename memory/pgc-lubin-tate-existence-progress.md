@@ -3109,3 +3109,53 @@ normal_iSup`を適用する準備が整った。
    (`[Normal F K₁][Normal F E]`、今回の`normal_adjoin_of_mem_...`
    +`IntermediateField.normal_iSup`で両方揃う)で`τ`を`K.closure`
    全体の`σ`へ拡張し、`reciprocityMapLimit`の全射性が閉じる見込み。
+
+## 続報(2026-09-05、上の最優先タスク1(`τ_n`のn跨ぎ両立性)の核心
+部分を完成、`Found/PGC/LubinTateReciprocityAlgEquivCompat.lean`新規)
+
+`algEquiv_eq_of_reciprocityMap_eq_of_map_eq`: **隣接レベルで両立する
+`reciprocityMap`の値を持つ`σ,σ'`(異なっていてよい)は、生成元の上で
+一致する**——`reciprocityMap_pred_eq_map_succ`(既出、同じσのn跨ぎ
+両立性)・`reciprocityMap_congr`(既出、値の一致だけで決まる)・
+`reciprocityMap_spec`(一意性の源、既出)を2回組み合わせるだけで
+証明できた。**新しい罠は無かった**——今回の(ii)で使った道具が
+そのまま使い回せた。
+
+証明の骨格: `σ`のレベル(m+2)での値をレベル(m+1)へ`QuotientGroup.
+map`で落とすと(`reciprocityMap_pred_eq_map_succ`)`σ`自身のレベル
+(m+1)での値に一致し、これが仮定(σ,σ'の値の両立)経由で`σ'`のレベル
+(m+1)での値に一致する——つまり`σ,σ'`は**同じレベル(m+1)での
+reciprocityMapの値**を持つ。`reciprocityMap_spec`(`unitAction
+QuotientLift(U)=σ(x)`)を`σ,σ'`それぞれに適用すれば、同じUから
+同じ`σ(x)=σ'(x)`が従う。
+
+### 次に戻るときの最優先タスク(更新)
+
+上の補題により、「`v∈CompatibleUnits`から`σ_n`の無限列を`Nat.rec`
+で構成する」という残りの作業の**両立性の証明部分**はほぼ解決した
+——残るのは:
+1. `v n`(`(𝒪_K/π^n)^×`の元)を`principalUnitsQuotientEquiv n`の
+   **逆**で`(𝒪_K)^×⧸principalUnits n`の元`U_n`へ引き戻す。
+2. `v`自身の両立性(`unitReductionTransition`)を`principalUnits
+   QuotientEquiv_map_eq`(既出、今回の(i))経由で`U_n`たちの
+   `QuotientGroup.map`両立性へ翻訳する(`principalUnitsQuotient
+   Equiv`の単射性から、これは形式的にすぐ従うはず)。
+3. `reciprocityMap_surjective`(既出)で各`U_n`から`σ_n`を選び、
+   `psiGenSeq`と同じ`Nat.rec`パターンで無限列として構成する
+   (`#34`の型注釈トラップに注意——型を省略した`noncomputable def`
+   にする可能性が高い)。
+4. 上の補題(`algEquiv_eq_of_reciprocityMap_eq_of_map_eq`)で
+   `σ_n`列が`(psiGenSeq n).pt`の上で両立することを結論する。
+5. 「両立する自己同型の無限列→`K_π`上の単一の自己同型」という
+   貼り合わせ(`IntermediateField`の`iSup`上でのAlgEquiv構成)を
+   行う——これがまだ残る最後の本質的な数学的難所(直接極限/colimitの
+   普遍性を使う見込み、`IntermediateField.iSupLift`のようなmathlib
+   道具の探索がまだ)。
+6. `AlgEquiv.restrictNormalHom_surjective`で`τ`を`σ:K.closure≃ₐ
+   [K.carrier]K.closure`へ拡張し、`reciprocityMapLimit`の全射性が
+   閉じる。
+
+ゲート: `lake build ABC3.Found.PGC.LubinTateReciprocityAlgEquivCompat`
+(個別)・`lake build ABC3`(6590 jobs, 成功)・`node tools/check.mjs
+--brief`(既存NG 13件のまま)・`node tools/mojibake.mjs`(文字化けなし)
+すべて確認済み。
