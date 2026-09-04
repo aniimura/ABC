@@ -133,4 +133,65 @@ noncomputable def extFEt {A B : Over BaseK} (f : FEtK A B) : FEtK (ExtF.obj A) (
   have := f.2.2
   ⟨ExtF.map f.1, ExtF.instFinite f.1, ExtF.instEtale f.1⟩
 
+/-!
+## qcqs(準コンパクト・準分離)性の伝播
+
+`Lemma 4.1` の構成的降下(`ExtLimit.lean`)に `AffineTransitionLimit.lean` の
+被覆補題群を適用するには、図式の各段が `CompactSpace`/`QuasiSeparatedSpace`
+であることが要る——これは `X.left` 自身がそうであることに帰着する(双曲曲線が
+常に有限型であることの反映)。ここでは `FEtK.pullback`/`ExtF` がこの性質を
+保つことを示す——`corrHypInstance3` の `Space` を qcqs スキームの部分型に
+絞る設計変更(`corrhyp-goal.md` §4 に記録)の土台。 -/
+
+/-- `toBaseK : Spec ℝ ⟶ Spec ℚ` はアフィン射(`Spec.map` は常にアフィン)。 -/
+theorem toBaseK_isAffineHom : IsAffineHom toBaseK := by
+  show IsAffineHom (Spec.map (CommRingCat.ofHom (algebraMap ℚ ℝ)))
+  infer_instance
+
+/-- `FEtK.pullback` は `CompactSpace` を保つ——`f.1.left` が有限(アフィン)
+なので、その base change `pullback.snd` も有限、よって `B.left` が
+`CompactSpace` なら `pullback` 全体も `CompactSpace`。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem FEtK_pullback_compactSpace {A B C : Over BaseK} (f : FEtK A C) (g : FEtK B C)
+    [CompactSpace B.left] : CompactSpace (FEtK.pullback f g).left := by
+  show CompactSpace (Limits.pullback f.1.left g.1.left : Scheme)
+  have : IsFinite (Limits.pullback.snd f.1.left g.1.left) :=
+    MorphismProperty.pullback_snd f.1.left g.1.left f.2.1
+  exact QuasiCompact.compactSpace_of_compactSpace (Limits.pullback.snd f.1.left g.1.left)
+
+/-- `FEtK.pullback` は `QuasiSeparatedSpace` を保つ(`FEtK_pullback_
+compactSpace` と同じ議論)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem FEtK_pullback_quasiSeparatedSpace {A B C : Over BaseK} (f : FEtK A C) (g : FEtK B C)
+    [QuasiSeparatedSpace B.left] : QuasiSeparatedSpace (FEtK.pullback f g).left := by
+  show QuasiSeparatedSpace (Limits.pullback f.1.left g.1.left : Scheme)
+  have : IsFinite (Limits.pullback.snd f.1.left g.1.left) :=
+    MorphismProperty.pullback_snd f.1.left g.1.left f.2.1
+  exact quasiSeparatedSpace_of_quasiSeparated (Limits.pullback.snd f.1.left g.1.left)
+
+/-- `ExtF`(係数拡大)は `CompactSpace` を保つ——`toBaseK` がアフィンなので
+その base change `pullback.fst` もアフィン(有限とは限らないが、アフィンで
+十分)、よって `X.left` が `CompactSpace` なら `(Ext X).left` も
+`CompactSpace`。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem ExtF_compactSpace (X : Over BaseK) [CompactSpace X.left] :
+    CompactSpace (ExtF.obj X).left := by
+  show CompactSpace (Limits.pullback X.hom toBaseK : Scheme)
+  have : IsAffineHom (Limits.pullback.fst X.hom toBaseK) :=
+    MorphismProperty.pullback_fst X.hom toBaseK toBaseK_isAffineHom
+  exact QuasiCompact.compactSpace_of_compactSpace (Limits.pullback.fst X.hom toBaseK)
+
+/-- `ExtF` は `QuasiSeparatedSpace` を保つ(`ExtF_compactSpace` と同じ議論)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem ExtF_quasiSeparatedSpace (X : Over BaseK) [QuasiSeparatedSpace X.left] :
+    QuasiSeparatedSpace (ExtF.obj X).left := by
+  show QuasiSeparatedSpace (Limits.pullback X.hom toBaseK : Scheme)
+  have : IsAffineHom (Limits.pullback.fst X.hom toBaseK) :=
+    MorphismProperty.pullback_fst X.hom toBaseK toBaseK_isAffineHom
+  exact quasiSeparatedSpace_of_quasiSeparated (Limits.pullback.fst X.hom toBaseK)
+
 end ABC3.Found.CorrHyp
