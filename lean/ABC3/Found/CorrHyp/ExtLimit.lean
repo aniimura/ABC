@@ -1008,6 +1008,55 @@ noncomputable def piece_descends_iso {A : Type} [CommRing A] [Algebra ℚ A]
   obtain ⟨R, P₀, ⟨e⟩⟩ := onePieceSchemeIso (A := A) f
   exact ⟨R, P₀, ⟨(IsAffineOpen.basicOpenIsoSpecAway hU f).trans e⟩⟩
 
+/-! ## `R`レベルの貼り合わせへ向けた第一歩——`piece_descends_iso`の
+降下先`R`を、より粗い共通段階`R'`へ昇格する
+
+`Lemma 4.1`の真の`k`(=`ℚ`)への降下には、`piece_descends_iso`が与える
+`R`レベルの候補片`Spec(P₀.Ring)`自体を、`R`レベル(`FgSubalgebra ℚ ℝ`
+の圏)で貼り合わせる必要がある(2026-09-04、`corrhyp-goal.md`に記録
+した訂正)。異なる添字`i`ごとに得られる`R_i`は一般に異なるため、
+比較の前に共通の粗い段階`R'`(`R_i ⊔ R_j`のような)へ揃える必要がある
+——ここではその**第一歩**(1つの`piece_descends_iso`の結果を任意の
+より粗い`R'`へ昇格する)を用意する。 -/
+
+/-- **`piece_descends_iso`が与える降下先`R`を、より粗い共通段階`R'`
+(`R≤R'`)へ昇格しても、`X.basicOpen f`との比較同型が保たれる**——
+`standardEtalePairPullbackIso`(`R`レベルの候補片は、より粗い段階への
+base changeでも`.map`の`Spec`として実現できる、既存の一般的事実)を
+2回+`exists_fg_subalgebra_tensor_standardEtalePair_promote`(既存、
+`FieldLimit.lean`)を組み合わせるだけ——**新しい`mathlib`の降下定理
+(cofiltered極限からの降下)は不要**だった。`R`レベルの複数添字を
+共通`R'`へ合流させる際の核心部品。
+
+★**sorry 無し**。標準3公理のみ。 -/
+@[reducible]
+noncomputable def piece_descends_iso_promote {A : Type} [CommRing A] [Algebra ℚ A]
+    {X : Scheme} {U : X.Opens} (hU : IsAffineOpen U) [Algebra (A ⊗[ℚ] ℝ) Γ(X, U)]
+    (f : Γ(X, U)) [Algebra.IsStandardEtale (A ⊗[ℚ] ℝ) (Localization.Away f)]
+    (R' : FgSubalgebra ℚ ℝ) (hle : (piece_descends_iso (A := A) hU f).choose ≤ R') :
+    letI : Algebra (A ⊗[ℚ] R'.1) (A ⊗[ℚ] ℝ) :=
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)).toRingHom.toAlgebra
+    Nonempty ((X.basicOpen f : Scheme) ≅
+      pullback (standardEtalePairSpecMap
+          ((piece_descends_iso (A := A) hU f).choose_spec.choose.map
+            (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hle)).toRingHom))
+        (Spec.map (CommRingCat.ofHom (algebraMap (A ⊗[ℚ] R'.1) (A ⊗[ℚ] ℝ))))) := by
+  set R := (piece_descends_iso (A := A) hU f).choose with hR
+  set P₀ := (piece_descends_iso (A := A) hU f).choose_spec.choose with hP₀
+  letI : Algebra (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ) :=
+    (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom.toAlgebra
+  letI : Algebra (A ⊗[ℚ] R'.1) (A ⊗[ℚ] ℝ) :=
+    (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)).toRingHom.toAlgebra
+  obtain ⟨e⟩ := (piece_descends_iso (A := A) hU f).choose_spec.choose_spec
+  refine ⟨e.trans ((standardEtalePairPullbackIso P₀).trans ?_)⟩
+  have hpromote : (P₀.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hle)).toRingHom).map
+      (algebraMap (A ⊗[ℚ] R'.1) (A ⊗[ℚ] ℝ)) = P₀.map (algebraMap (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ)) :=
+    exists_fg_subalgebra_tensor_standardEtalePair_promote A R R' hle P₀
+      (P₀.map (algebraMap (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ))) rfl
+  rw [← hpromote]
+  exact (standardEtalePairPullbackIso
+    (P₀.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hle)).toRingHom)).symm
+
 /-! ## GlueDataの遷移射——`piece_descends_iso`を重なりへ制限する
 
 前回、遷移射(`D(f_i)`と`D(f_j)`の重なりの比較)を`Localization`の
