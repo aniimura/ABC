@@ -1643,3 +1643,22 @@ GlueDataで貼り合わせた**後**、大域的な性質(properness等)とし�
 一直線につなげる。集計は10/24で変わらず。
 
 コミット: `8b4c1b2b`。
+
+### 2026-09-04さらに続報: 一般のアフィン開上の基本開をSpecと同一視(work unit 3続き、配管の詰まりも正直に記録)
+
+`ExtLimit.lean`に`IsAffineOpen.basicOpenIsoSpecAway`を完成(★sorry無し)——mathlibの
+`basicOpenIsoSpecAway`は`X := Spec R`限定だったが、一般のアフィン開`U`(`X`自体は
+アフィンでなくてよい)版として一般化した(`hU.isLocalization_basicOpen`+`isoSpec`)。
+
+「1ピース分の完全な連結」(`C.basicOpen f_i ≅ Spec(Localization.Away f_i) ≅
+Spec P_i.Ring ≅ pullback(standardEtalePairSpecMap P₀_i)(Spec.map φ)`)を実際に組み
+立てようとしたが、`letI`で導入した`Algebra (A⊗R.1)(A⊗ℝ)`インスタンスと`algebraMap`
+が構文的に一致しない場面(`standardEtalePairRingBaseChange`・`pullbackSpecIso`の
+引数順序を`Algebra.TensorProduct.comm`で合わせる過程)で複数回type mismatchに
+当たり、本セッションでは完成させられなかった——正直に未完了として記録する。
+個々の部品(`standardEtalePairPullbackIso`・`IsAffineOpen.basicOpenIsoSpecAway`・
+`exists_fg_subalgebra_tensor_standardEtalePair_mapEq`)はすべてsorry無しで完成
+しているので、次回はこの3つを慎重に(`show`で型を都度明示しながら)合成する
+ところから再開する。集計は10/24で変わらず。
+
+コミット: `0dc8dc74`。
