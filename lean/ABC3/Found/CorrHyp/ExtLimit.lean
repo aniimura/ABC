@@ -1131,4 +1131,48 @@ theorem exists_transitionIso_finset {X : Scheme} {U : X.Opens} (f₁ : Γ(X, U))
       ((X.basicOpen (f₁ * s.prod g) : Scheme) ≅ (Z.basicOpen s' : Scheme)) :=
   exists_transitionIso f₁ (s.prod g) e
 
+/-! ## `Scheme.GlueData`の配線——作業単位3の最終段
+
+これまで積み上げた部品(`piece_descends_iso`・`exists_transitionIso`)を
+使って、`CategoryTheory.GlueData`の12フィールドのうち、まず**対象レベルの
+データ**(`V`・`f`・`t`)を組み立てる。数学的な核心はすべて完成しているので、
+残りは純粋な配線(`f_mono`・`f_hasPullback`・`f_id`は`basicOpen`の`.ι`が
+標準的に持つ性質から自動、`t_id`・`t_fac`・`cocycle`は`Classical.choice`で
+選んだ項の一致性の確認という、より技術的な段——次の一手として残す)。 -/
+
+variable {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U)) (Z : J → Scheme)
+  (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i)
+
+/-- 重なりの候補片(`V(i,j)`)——`i`側の候補片`Z i`の中の、`j`との重なりに
+対応する基本開集合。`exists_transitionIso`が与える`Classical.choice`の
+選択項をそのまま使う。 -/
+noncomputable def gdV (p : J × J) : Scheme :=
+  (Z p.1).basicOpen (exists_transitionIso (f p.1) (f p.2) (e p.1)).choose
+
+/-- `V(i,j) ⟶ U i`——基本開集合の標準的な開埋め込み`.ι`。 -/
+noncomputable def gdF (i j : J) : gdV f Z e (i, j) ⟶ Z i :=
+  ((Z i).basicOpen (exists_transitionIso (f i) (f j) (e i)).choose).ι
+
+/-- **遷移射`t(i,j) : V(i,j) ≅ V(j,i)`**——`exists_transitionIso`を`i`側・
+`j`側それぞれに適用して得た2つの同型を、`X.basicOpen(f_i·f_j) =
+X.basicOpen(f_j·f_i)`(可換環の乗法の可換性)で繋ぐ。GlueDataの遷移射
+そのもの。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def gdT (i j : J) : gdV f Z e (i, j) ≅ gdV f Z e (j, i) := by
+  have hiso1 := (exists_transitionIso (f i) (f j) (e i)).choose_spec.some
+  have hiso2 := (exists_transitionIso (f j) (f i) (e j)).choose_spec.some
+  have hcomm : X.basicOpen (f i * f j) = X.basicOpen (f j * f i) := by rw [mul_comm]
+  exact hiso1.symm.trans ((X.isoOfEq hcomm).trans hiso2)
+
+/- ★★次の一手(未着手): `gdV`・`gdF`・`gdT`を`CategoryTheory.GlueData`の
+`V`・`f`・`t`フィールドへ実際に流し込み、残るフィールド
+(`f_mono`・`f_hasPullback`・`f_id`は`Scheme.Opens.ι`の標準的な性質から
+自動のはず、`t_id`は`i=j`のとき`exists_transitionIso`の同じ選択項を
+使うことから、`t'`は`exists_transitionIso_finset`から、`t_fac`・
+`cocycle`は選択項の一致性の確認)を埋めて`Scheme.GlueData`を完成させる。
+その後`GD.glued`が`C`(または`Ext`後に`C`)に同型であることを、`C`自身の
+`OpenCover`の`gluedCover`との比較で示す——`Lemma 4.1`の`c'.C`の実体。
+`corrhyp-goal.md`に記録。 -/
+
 end ABC3.Found.CorrHyp
