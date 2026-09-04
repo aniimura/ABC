@@ -1,6 +1,6 @@
 ---
 name: pgc-lubin-tate-existence-progress
-description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——濃度の一致まで確立、(𝒪_K)^× と Gal(K.closure/K.carrier) 双方がΛ_n・ψ_nの根に閉じた作用を持つことも確立、残るは単射性/全射性(F_f の対数か Newton 法が要る)。Galois同変性そのもの(σ(a·x)=a·σ(x))は cross-point instance bridging という既知の難所があるため後回しにした
+description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——濃度の一致まで確立、Gal(K.closure/K.carrier) が Λ_n・ψ_nの根を置換として保つことも確立、残るは単射性/全射性(F_f の対数か Y-線形係数か Newton 法が要る、後者は次数1部分=X+Yまで既にある)。Galois同変性そのもの(σ(a·x)=a·σ(x))は cross-point instance bridging という既知の難所があるため後回しにした
 metadata:
   type: project
 ---
@@ -1731,3 +1731,27 @@ Points`の証明で意図的に**避けてきた**技術的な難所(以前の`V
 ことが確立された。次の一歩は、単射性/全射性(3経路のいずれか)を
 先に完成させるほうが、Galois同変性(cross-point bridgingを要する)
 より安全な優先順位と判断する。
+
+## 続報(同日、`image_algEquiv_iteratedLubinTatePsiTorsionPoints`・
+`image_algEquiv_iteratedLubinTateTorsionPoints`、`AdjoinIntegers.lean`、
+commit `5a85063e`): 「保つ」を「並べ替える」に強化
+
+上の2つの「σは写像として保つ」(`⊆`)を、σとσ.symmの**両方**に
+適用して両側から挟むだけで、`Finset.image σ S = S`という強い形
+(単射性・濃度の議論は一切不要——`σ.symm`も同じ`AlgEquiv over
+K.carrier`なので同じ補題がそのまま適用できる)が出た。これで
+`Gal(K.closure/K.carrier)`が有限集合`ψ_nの根`・`Λ_n`上に**置換**
+として作用することが確立された——将来`Gal(K.closure/K.carrier)
+→ Equiv.Perm (ψ_nの根)`のような準同型を構成する際、直接使える形。
+
+これで今回のセッションでの「Galois側の作用の基礎固め」は
+ひとまず一区切りとし、次はcross-point bridgingを要するGalois
+同変性そのもの、または単射性/全射性(3経路)のどちらかに進む
+判断になる。後者(特にY-線形係数の経路)は、`F_f`の次数1部分が
+`X+Y`であること自体は既に`coeff_single01_formalGroupLaw`・
+`coeff_single10_formalGroupLaw`(`LubinTateIdentityLawSymm.lean`・
+`LubinTateCommutativity.lean`、既出)で確立済みと判明——形式的な
+土台の半分は既にある。残るのは「評価レベルでΣ_{i≥2}の項の
+ノルムが`<1`に収まる」という非アルキメデス的な極限の見積もり
+(既存の`aeval_formalGroupLaw_eq_of_snd_eq_zero`と同系統の
+truncation-limit手法の再利用が見込めるが、まだ着手していない)。
