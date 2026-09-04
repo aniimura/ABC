@@ -1539,4 +1539,57 @@ theorem one_add_mul_pi_pow_action_eq_self
   rw [aeval_formalGroupLaw_eq_of_snd_eq_zero hq hπmax f hf0 hf1 hf hπne0 _ (by simp)]
   rfl
 
+/-- `lubinTateEvalAtPoint`は評価点が(等式として)一致すれば同じ値を
+返す——`lubinTateEvalAtPoint_eq_zero_of_eq_zero`の`w=0`限定を一般化
+したもの。依存型(`HasEval`が評価点自身に依存する)への`rw`が
+「motive is not type correct」で失敗する定型の罠を、`subst`で
+回避する。 -/
+theorem lubinTateEvalAtPoint_congr {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p) (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    {z w : adjoinIntegers K x} (hz : PowerSeries.HasEval z) (hzw : z = w)
+    (g : PowerSeries (𝒪[K.carrier])) :
+    lubinTateEvalAtPoint K x z hz g = lubinTateEvalAtPoint K x w (hzw ▸ hz) g := by
+  subst hzw
+  rfl
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★**`a↦a·x`は`(1+π^n𝒪_K)`を法として
+乗法的に不変**: `(a*(1+cπ^n))·x = a·x`(任意の`a,c∈𝒪_K`)。
+`lubinTateAction_mul`(`a·((1+cπ^n)·x)=(a*(1+cπ^n))·x`)と
+`one_add_mul_pi_pow_action_eq_self`(`(1+cπ^n)·x=x`)を組み合わせる
+だけ——`lubinTateEvalAtPoint_congr`で依存型の書き換えを処理する。
+`(𝒪_K)^×`から`ψ_nの根`への作用(`unit_action_mem_iteratedLubinTate
+PsiTorsionPoints`)が`(𝒪_K/π^n)^×`を経由してwell-definedであること
+の直接の確認——`u`と`u*(1+cπ^n)`(同じ剰余類の代表元)が`x`に
+同じ値を与える。 -/
+theorem mul_one_add_pi_pow_action_eq
+    {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hxn : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (a c : 𝒪[K.carrier]) :
+    lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem (a * (1 + c * π ^ n)) =
+      lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem a := by
+  haveI := completeSpace_adjoinIntegers K x
+  haveI := isLinearTopology_adjoinIntegers K x
+  haveI := continuousSMul_adjoinIntegers K x
+  have hmul := lubinTateAction_mul K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem a (1 + c * π ^ n)
+  have hone : lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem
+      (1 + c * π ^ n) = ⟨⟨x, hmem⟩, mem_adjoinIntegers_of_mem_iteratedLubinTateTorsionPoints
+        K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem⟩ :=
+    one_add_mul_pi_pow_action_eq_self K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem c
+  rw [← hmul, lubinTateEvalAtPoint_congr K x
+    (hasEval_lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem (1 + c * π ^ n))
+    hone]
+  rfl
+
 end ABC3.Found.PGC
