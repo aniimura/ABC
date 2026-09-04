@@ -987,3 +987,29 @@ LubinTateActionEndomorphism.lean`で既に`sorry`無しで確立済み)を
 迂回できる**——このプロジェクトの膨大な既存資産(`LubinTateAction`
 関連ファイル群)には、探せばこの種の「特殊値での挙動」を示す補題が
 既に眠っていることが多い、と再確認した。
+
+**続報(2026-09-04・続き、★★★★★★★★★★定量的な事実`‖a·x‖≤‖x‖`を
+subst/aeval橋渡し無しで確立)**: 一般の`a,b`についての加法性・乗法性
+には依然として`subst`/`aeval`の深い橋渡しが必要だが、**「作用が
+ノルムを増やさない」という定量的な事実は全く別の、遥かに単純な
+経路で得られる**と気づいた(commit`b0cfe199`)。鍵:
+
+1. `[a]_f`の定数項が`0`(`constantCoeff_LubinTateAction`、既出)
+2. `PowerSeries.X_dvd_iff`(定数項`0`の冪級数は`X`で割り切れる、
+   mathlib既存)で`[a]_f = X * h`と分解
+3. `PowerSeries.aeval`が(積を保つ)**環準同型**であることから
+   `a·x = aeval x(X*h) = x * (aeval x h)`——ここは単なる`map_mul`、
+   `subst`は一切登場しない
+4. `aeval x h`はそもそも`aeval`の**値域**である`adjoinIntegers K x`
+   の元なので自動的にノルム`≤1`
+
+これで`‖a·x‖=‖x‖*‖aeval x h‖≤‖x‖*1=‖x‖`(`norm_
+lubinTateActionAtTorsionPoint_le`)、さらに`x`自身が位相的冪零
+(`‖x‖<1`)と合わせて`‖a·x‖<1`(`norm_
+lubinTateActionAtTorsionPoint_lt_one`)も得た。
+
+★これで`a·x`自身も位相的冪零(`PowerSeries.HasEval`の条件を満たす
+見込み)であることが分かり、**作用の反復適用**(`a·(b·x)`のような
+合成)への土台が整った——次の一歩は実際に`a·(b·x)`を意味づけて
+`a·(b·x)=(ab)·x`(乗法性)を、この反復可能性を使って狙うこと。
+加法性(`F_f`経由)は依然として`subst`/`aeval`橋渡しが必要な見通し。
