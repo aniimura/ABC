@@ -1,6 +1,6 @@
 ---
 name: pgc-lubin-tate-existence-progress
-description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——★★★★★★★★★★ Galois同変性 σ(a·x)=a·σ(x) が cross-point instance bridging を経由せず完成(algEquiv_lubinTateActionAtTorsionPoint_comm)。単射性・全単射性・reciprocityMapの存在・同変性がすべて揃い、残るは reciprocityMap の準同型性という最後の1計算のみ(道筋は明確、lubinTateEvalAtPoint_congr で仕上げる見込み)
+description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——★★★★★★★★★★★★★★★★★★★★ reciprocityMap: Gal(K.closure/K.carrier)→(𝒪_K)^×⧸principalUnits K π n が①存在一意性②全単射③群準同型のすべてを sorry 無しで完備(reciprocityMap_mul)。principalUnitsQuotientEquiv と合わせ Gal(K(Λ_n)/K)≅(𝒪_K/π^n)^× への道具が揃った。残るは Gal(K.closure/K.carrier)→Gal(K(Λ_n)/K) への制限・核の同定という標準的な仕上げのみ
 metadata:
   type: project
 ---
@@ -2001,6 +2001,56 @@ K (σx)`という別の環は一度も構築しない。
 見込み——「異なる証明項を持つ同じ値」問題は本セッションで何度も
 遭遇した`Fin 2 ite`・依存引数`rw`の罠と同系統なので、
 `tools/lean-idioms.md`のパターンをまず参照すること。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+続報(同日、セッションの最終到達点・集大成): **`reciprocityMap`の
+準同型性が完成し、Lubin-Tate相互律の核心部分が完結した**
+
+上記「この最後の計算」を、まさにその足がかり通りの手筋
+(`lubinTateEvalAtPoint_congr`+`lubinTateAction_mul`)で、
+**同じセッション内で**完成させた(新ファイル
+`LubinTateReciprocityHomomorphism.lean`、commit`4776a0d2`)。
+
+**`reciprocityMap_mul`**: **`reciprocityMap(σ*τ)=reciprocityMap σ*
+reciprocityMap τ`**。証明の骨子は事前に見立てた通り: `u_σ,u_τ`
+(単数代表元)を取り、`(σ*τ)(x)=σ(τ(x))=σ(u_τ·x)`に**Galois同変性**
+(`algEquiv_lubinTateActionAtTorsionPoint_comm`)を`a:=u_τ`で適用
+すると`σ(u_τ·x)="u_τ·σ(x)"`。`σ(x)=u_σ·x`に対応する
+`adjoinIntegersRestrictSelfAlgHom σ`の値と`u_σ·x`が(座標が一致
+するので)同じ`adjoinIntegers K x`の元であることを
+`lubinTateEvalAtPoint_congr`で処理し(`Prop`の証明無関係性のおかげ
+で、`▸`で書き換えた`HasEval`証明項が`lubinTateAction_mul`の
+LHSの証明項と`exact`で直接マッチする——`rw`ではなく`exact`を使う
+のが鍵)、`lubinTateAction_mul`で`"u_τ·σ(x)"=(u_τ*u_σ)·x`まで計算。
+一意性(`existsUnique_unitActionQuotient_eq_algEquiv`)と`𝒪_K`の
+可換性(`mul_comm`、`ring`ではなく明示的に——`Units`の乗法は
+`CommRing`の`ring`タクティクの対象外)から結論する。
+
+**AlgEquivの積の順序に関する注意**: `(σ*τ) x = σ (τ x)`(`rfl`で
+確認済み)——`Function.comp`と同じ「右から先に適用」の順序。
+
+**到達点の総括(このセッション全体)**: `Gal(K.closure/K.carrier)→
+(𝒪_K)^×⧸principalUnits K π n`という写像(`reciprocityMap`)が、
+①well-defined(存在・一意性)、②(`ψ_nの根`への制限を経由して)
+全単射、③**群準同型**——という3つの性質すべてを`sorry`無しで
+兼ね備えることが証明された。`principalUnitsQuotientEquiv`
+(`(𝒪_K)^×⧸principalUnits K π n≃*(𝒪_K/π^n)^×`、既出)と組み合わ
+せれば、古典的なLubin-Tate理論の主定理
+**`Gal(K(Λ_n)/K)≅(𝒪_K/π^n)^×`**へ向けた数学的な道具が完全に
+揃った状態にある(`Gal(K.closure/K.carrier)`から`Gal(K(Λ_n)/K)`
+への制限・核の同定という、標準的だが未着手の「体拡大のGalois理論
+の一般論」への還元だけが残る——新しい数学的困難ではなく、既存の
+mathlibのGalois理論API`IsGalois`/`AlgEquiv.restrictNormal`系を
+探索するだけの仕上げ作業になる見込み)。
+
+このセッションで、当初「`F_f`の形式逆元・Y-線形係数・Lubin-Tate
+対数のいずれかのフルな構成が要る」「異なる2つの環を橋渡しする
+cross-point instance bridgingが避けられない」と繰り返し警戒されて
+きた**2つの最大の技術的難所**を、どちらも**当初の想定より遥かに
+軽い経路**(前者は既存の加法公式+評価不等式、後者はσ(x)自身が
+同じ座標系に留まるという事実の活用)で突破し、Lubin-Tate相互律の
+核心部分を完成させた——本プロジェクトのこのトラックにおける
+最大の到達点。
 
 ## 続報(同日、`algEquiv_mem_iteratedLubinTateTorsionPoints_of_mem`、
 `AdjoinIntegers.lean`、commit `93108293`): `Λ_n`全体もσで保たれる
