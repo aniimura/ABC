@@ -2051,9 +2051,85 @@ noncomputable def corrHypGlueData : Scheme.GlueData where
   }
   f_open := gdF_isOpenImmersion f Z e
 
-/- ★★次の一手(未着手): `corrHypGlueData.glued`(貼り合わせてできる
-スキーム)が`C`(または`Ext`後に`C`)に同型であることを、`C`自身の
-`OpenCover`の`gluedCover`との比較で示す——`Lemma 4.1`の`c'.C`の実体。
+/-! ### `corrHypGlueData`の具体化(ロードマップ項目(a)の第一歩)
+
+`corrHypGlueData`はここまで完全に抽象的(`X,U,J,f,Z,e`は任意)だった。
+ここでは`piece_descends_iso`(既に存在する、単一のstandard-étale元
+`f`に対する有限段階スキームの存在命題)から`.choose`/`.choose_spec`で
+具体的な`Z i`・`e i`の族を取り出し、`corrHypGlueData`を実際に
+呼び出せる形に落とし込む。
+
+★重要な発見: `corrHypGlueData`の12個のフィールド(特に`t_fac`・
+`cocycle`)は`Z i`・`Z j`(異なる添字)を互いに比較する必要が一切ない
+——各`e i`は添字`i`ごとに独立に使われるだけなので、`.choose`由来の
+「アルゴリズム的に不透明な」`Z i`同士でも問題は起きない。これは
+以前`transitionElem`で「複数の`.choose`呼び出しが代数的に無関係に
+なってしまう」問題に苦しんだのとは対照的(`corrhyp-goal.md`参照)。 -/
+
+/-- `piece_descends_iso`の存在証明から、単一のstandard-étale元`f`に
+対応する有限段階スキームを`.choose`で取り出したもの。 -/
+noncomputable def descendPiece {A : Type} [CommRing A] [Algebra ℚ A]
+    {X : Scheme} {U : X.Opens} (hU : IsAffineOpen U) [Algebra (A ⊗[ℚ] ℝ) Γ(X, U)]
+    (f : Γ(X, U)) [Algebra.IsStandardEtale (A ⊗[ℚ] ℝ) (Localization.Away f)] : Scheme :=
+  letI R := (piece_descends_iso hU f).choose
+  letI P₀ := (piece_descends_iso hU f).choose_spec.choose
+  letI : Algebra (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ) :=
+    (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom.toAlgebra
+  pullback (standardEtalePairSpecMap P₀)
+    (Spec.map (CommRingCat.ofHom (algebraMap (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ))))
+
+/-- `descendPiece`が`X.basicOpen f`と同型であることの比較同型
+(`piece_descends_iso`の`Nonempty`成分から`.some`で取り出す)。 -/
+noncomputable def descendPieceIso {A : Type} [CommRing A] [Algebra ℚ A]
+    {X : Scheme} {U : X.Opens} (hU : IsAffineOpen U) [Algebra (A ⊗[ℚ] ℝ) Γ(X, U)]
+    (f : Γ(X, U)) [Algebra.IsStandardEtale (A ⊗[ℚ] ℝ) (Localization.Away f)] :
+    (X.basicOpen f : Scheme) ≅ descendPiece (A := A) hU f := by
+  unfold descendPiece
+  exact (piece_descends_iso hU f).choose_spec.choose_spec.some
+
+/-- `descendPiece`の instance 版(`[Algebra.IsStandardEtale ...]`を
+typeclass ではなく明示的な証明として受け取る)——`Finset`の添字ごとに
+`IsStandardEtale`証明を個別に渡して族を組み立てるのに使う。 -/
+noncomputable def descendPieceOfProof {A : Type} [CommRing A] [Algebra ℚ A]
+    {X : Scheme} {U : X.Opens} (hU : IsAffineOpen U) [Algebra (A ⊗[ℚ] ℝ) Γ(X, U)]
+    (f : Γ(X, U)) (hf : Algebra.IsStandardEtale (A ⊗[ℚ] ℝ) (Localization.Away f)) : Scheme :=
+  letI := hf
+  descendPiece (A := A) hU f
+
+/-- `descendPieceIso`の instance 版。 -/
+noncomputable def descendPieceIsoOfProof {A : Type} [CommRing A] [Algebra ℚ A]
+    {X : Scheme} {U : X.Opens} (hU : IsAffineOpen U) [Algebra (A ⊗[ℚ] ℝ) Γ(X, U)]
+    (f : Γ(X, U)) (hf : Algebra.IsStandardEtale (A ⊗[ℚ] ℝ) (Localization.Away f)) :
+    (X.basicOpen f : Scheme) ≅ descendPieceOfProof (A := A) hU f hf := by
+  unfold descendPieceOfProof
+  exact descendPieceIso (A := A) hU f
+
+/-- **`corrHypGlueData`をCorrHypの実際のデータへ具体化する**: `Γ(X,U)`
+上のstandard-étale元の有限族`f : ι → Γ(X,U)`(`Finset t`で添字づけ)が
+与えられたとき、各`f i`ごとに`descendPieceOfProof`で候補片を作り、
+`corrHypGlueData`をその族に適用する。
+
+★注意: これはまだ被覆条件`⨆ i∈t, X.basicOpen (f i) = U`を使っていない
+——それは`corrHypGlueData.glued ≅ U`(ロードマップ項目(b))で必要になる。
+また`A`・`X`・`U`と実際の`corrHypInstance4`・`Ext`・`C`との接続も未着手
+(ロードマップ項目(c))。ここは「有限standard-étale被覆→GlueData」という
+CorrHyp非依存の再利用可能な部品。
+
+★**sorry 無し**。 -/
+noncomputable def corrHypGlueDataOfCover {A : Type} [CommRing A] [Algebra ℚ A]
+    {X : Scheme} {U : X.Opens} (hU : IsAffineOpen U) [Algebra (A ⊗[ℚ] ℝ) Γ(X, U)]
+    {ι : Type} (t : Finset ι) (f : ι → Γ(X, U))
+    (hf : ∀ i ∈ t, Algebra.IsStandardEtale (A ⊗[ℚ] ℝ) (Localization.Away (f i))) :
+    Scheme.GlueData :=
+  corrHypGlueData (X := X) (U := U) (J := {i // i ∈ t}) (fun i => f i.1)
+    (fun i => descendPieceOfProof (A := A) hU (f i.1) (hf i.1 i.2))
+    (fun i => descendPieceIsoOfProof (A := A) hU (f i.1) (hf i.1 i.2))
+
+/- ★★次の一手(未着手): (b)`corrHypGlueData.glued`(貼り合わせてできる
+スキーム)が`U`(ひいては`C`)に同型であることを、`U`自身の`OpenCover`の
+`gluedCover`との比較で示す。(c)`A`・`X`・`U`を実際の`corrHypInstance4`・
+`Ext`・`C`に接続する——`exists_finite_standardEtaleCover`+
+`exists_scheme_basicOpen_cover_of_ring`で実際の`ι,t,f`を得る。
 `corrhyp-goal.md`に記録。 -/
 
 end ABC3.Found.CorrHyp
