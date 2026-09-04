@@ -4527,3 +4527,42 @@ theorem exists_descendPieceR_localization_baseChange (X U hU f g C α) [...] :
 (`α`脚と対称、丸ごと未着手)も残っている。lake build(`ExtLimit`/
 `ABC3`)とも0エラー確認、push完了。集計は引き続き10/24——§4は
 引き続き0/2だが、`Lemma 4.1`の核心的な数学的困難は解決した。
+
+## 2026-09-05夜さらに続き8: `t`(遷移射)の構成を精査——`ψ`構成が
+本当に必要で、避けて通れないことを確認(正直な記録、実装はまだ)
+
+`t : V(i,j) ⟶ V(j,i)`の構成方法をいくつか検討した。
+
+**検討したが不成立と分かった近道**: `exists_descendPieceR_localization_
+baseChange`を`(f,g)`・`(g,f)`の両方に適用すれば`M_ij⊗T ≃ Γ(C,piece
+(D(f*g))) ≃ M_ji⊗T`(`M_ij`・`M_ji`はそれぞれ`D(f)`・`D(g)`側から
+独立に構成した`R`レベルの局所化)という**ℝレベルでの**比較は直ちに
+得られる。しかし`GlueData`の`t`は**`R`レベルのスキーム射**でなければ
+ならず、「`⊗T`した後にだけ同型」では不十分——`M_ij ≃ M_ji`(または
+共通のより粗い段階へ昇格した上での同型)という**`R`レベルの**同型が
+要る。これは今セッション全体をかけて解決した「1つの`R`レベル局所化を
+正しいℝレベル対象へ結びつける」問題とは**別の**、独立に構成された
+**2つの`R`レベル対象同士**を結びつける問題であり、避けて通れない。
+
+**必要な道具は既に存在する(このセッションより前から)**:
+`exists_mvPolynomial_quotient_specIso_descend`(`FieldLimit.lean`)——
+2つの独立な有限表示`(q,q₂)`が、生成元同士の対応`ψ・ψ'`(4つの条件
+`hψ・hψ'・hround1・hround2`を満たす)を通じて、共通のより粗い段階
+`R'`上で実際にSpecの同型になることを示す一般的な機械。続き15で
+「`ψ`の数学的構成は解決した」と記録した内容(`D(f)`側の生成元を
+`piece_restrict_hom_basicOpen_left`で`W:=D(f*g)`へ制限し、`W`自身の
+別立ての`Presentation`の生成元の全射性(`aeval_val_surjective`)で
+多項式として表示する、という筋道)を、今回の`descendPieceR_localization_
+isOpenImmersion`等の具体的な部品を踏まえて再確認した——数学的な
+筋道は変わらず正しいが、**`W`自身の独立した`Algebra.Presentation`を
+新たに構成する必要があり**(`exists_finite_standardEtaleCover`+
+`Algebra.Presentation.ofFinitePresentation`という、`descendPieceR`
+自体の構成と同規模の足場)、今回のセッションで使った「局所化として
+直接構成する」設計(`descendPieceR_localization_isOpenImmersion`等)
+とは**別の**、独立した構成作業になる。
+
+**正直な評価**: `t`の構成は、今セッションで完成させた「1本の局所化
+とℝレベル対象の橋渡し」とは質的に異なる、新しい規模の作業(`W`の
+独立した`Presentation`の構成+`ψ・ψ'`の4条件の証明)を要する——
+拙速な近道は無いことを確認した上で、次のセッションへの明確な
+出発点として記録する。集計は引き続き10/24——§4は引き続き0/2。
