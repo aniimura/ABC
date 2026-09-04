@@ -530,11 +530,34 @@ distinguishedであることから一意性で結論)。`D_n=X・ψ_1・…・ψ
 そのものを先に(`D_n=X・∏_{k=1}^n ψ_k`という形で)確立し、そこから
 分離性を導く順序で組み立てるのが筋が良さそう。
 
-**残る作業**: 節目(3)torsion点の構成本体(`D_n`の根を`Λ_n`として定義、
-`𝒪_K`加群構造、`K(Λ_n)/K`の完全分岐性)、節目(4)
-`L_n:=K(Λ_n)`が完全分岐かつ`Gal(L_n/K)≅(𝒪_K/π^n)^×`(Lubin-Tateの
-主定理)、節目(5)`L_π:=∪L_n`・`Gal(L_π/K)≅𝒪_K^×`、節目(6)不分岐部分と
-合わせた相互律写像`K^×→Gal(K^ab/K)`の構成——pGC の各項目
+**続報(2026-09-04、★★★★★★★★★★★★★大きな節目——`D_n`は分離的、
+`Λ_n`は真に`q^n`個の相異なる元、節目(3)の核心部分が完成)**: 前回
+「循環で見送った」と記録した`D_n`全体の分離性を、実は循環ではなく
+`D_n=D_{n-1}・ψ_n`・`D_0=X`という漸化式を「分離性」と「将来の段の
+`ψ_j`(`j>n`)との互いの素性」を**同時に保つ**帰納法で押し進めるだけで
+完全に組み立てられると気づいた——前回見立てた「先に積表示を確立する
+必要がある」という判断は誤りで、より直接的な同時帰納法で十分だった。
+`Found/PGC/LubinTateDistinguishedSeparable.lean`(新規)で:
+
+- `X_isCoprime_iteratedLubinTatePsi`: `X`と`ψ_j`(`j≥1`)は互いに素
+  (`ψ_j`の定数項が非零`0<‖ψ_j.coeff0‖=‖π‖`から)
+- ★★★★★★★★★★★★★`separable_and_coprime_iteratedLubinTateDistinguished_
+  map`/`separable_iteratedLubinTateDistinguished_map`: `D_n`は分離的
+- `nodup_roots_iteratedLubinTateDistinguished_map`: `K.closure`での
+  `D_n`の根は互いに相異なる
+- `card_roots_iteratedLubinTateDistinguished_map`: 根の個数はちょうど
+  `q^n`
+
+★これで実在のp進局所体`K:PAdicLocalField p`について、古典的
+Lubin-Tate理論の`|Λ_n|=q^n`(真の集合として)そのものが完全に確立
+された——節目(3)(捩れ点構成)の核心部分がsorry無しで完成した。
+
+**残る作業**: 節目(3)の残り(`Λ_n`への`𝒪_K`加群構造の付与——`[a]_f`を
+実際に捩れ点へ作用させる、`PowerSeries.aeval`+`CompleteSpace`経由で
+見通しが立っている)、節目(4)`K(Λ_n)`の正規性(`ψ_n`の分解体と一致
+すること)・Galois群の具体的計算`Gal(L_n/K)≅(𝒪_K/π^n)^×`(Lubin-Tate
+の主定理)、節目(5)`L_π:=∪L_n`・`Gal(L_π/K)≅𝒪_K^×`、節目(6)不分岐
+部分と合わせた相互律写像`K^×→Gal(K^ab/K)`の構成——pGC の各項目
 (Prop 1.2・Cor 1.3・Prop 2.1・Prop 2.2・Theorem 4.2)を閉じるには、
 なお相互律写像そのものの構成・性質証明という大きな仕事が残っている。
 
