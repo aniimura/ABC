@@ -125,6 +125,20 @@ K 0`(`IntermediateField.adjoin K.carrier {0}`上のSubringとして定義
 1. `HenselianLocalRing (𝒪[K.carrier])`のinstanceを確認・構築する
    (`IsAdicComplete`から従う一般論を探すか、`IsDiscreteValuationRing`
    +完備性から直接示す)——これがまだ手つかず。
+
+   ★2026-09-05実測(重要): **mathlibには「完備局所環はHenselian」
+   という一般定理もinstanceも無い**——`Mathlib/RingTheory/Henselian.
+   lean`にあるのは`HenselianLocalRing`の**定義**と特徴づけ
+   (`HenselianLocalRing.TFAE`)のみで、instanceを生成する補題はゼロ件
+   (`grep "instance.*Henselian"`で確認)。一方`Mathlib/NumberTheory/
+   Padics/Hensel.lean`には**`ℤ_[p]`専用の**Hensel's lemma(Newton法の
+   収束、`newton_cau_seq`・`ih_gen`等の補助定義を含む約450行)がある
+   が、一般の`𝒪_K`には使えない。
+   **⟹ `𝒪[K.carrier]`のHensel's lemmaは、それ自体がmathlibの1ファイル
+   分に匹敵する独立した仕事**(`IsPrecomplete.prec`——本プロジェクトで
+   `unitReductionHom_surjective`に使った道具——を使ってNewton逐次近似を
+   自前で組む筋が有力)。不分岐拡大理論の中でも、これが最初の重い
+   関門になる。
 2. 剰余体`F_q`の次数`n`拡大`F_{q^n}`を`GaloisField p (f*n)`
    (`hq:Fintype.card(ResidueField 𝒪_K)=p^f`から`p^{f*n}=q^n`)として
    具体的に構成し、その原始元の最小多項式(次数`n`、分離的)を
