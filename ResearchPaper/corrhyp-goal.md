@@ -1917,3 +1917,25 @@ cocycle`等)として実際に配線する」という、新しい数学を要�
 集計は10/24で変わらず(§4は0/2のまま)。
 
 コミット: `b79fab9b`。
+
+### 2026-09-04さらに続報: GlueDataのt_id・f_mono・f_open・f_hasPullbackが完成
+
+`ExtLimit.lean`に`gdT_id`・`gdF_mono`・`gdF_isOpenImmersion`・`gdF_hasPullback`を
+完成させた(★すべてsorry無し)——これで`Scheme.GlueData`の12フィールドのうち
+`V`・`f`・`t`(前回)・`t_id`・`f_mono`・`f_open`・`f_hasPullback`(今回)が完成。
+
+- `gdT_id`: `i=j`のとき`gdT`は恒等射になる(`exists_transitionIso`の`.choose_spec.some`
+  が2回とも同じ項になることから`Iso.symm_self_id`に帰着)。
+- `gdF_mono`・`gdF_isOpenImmersion`・`gdF_hasPullback`: 基本開集合の標準的な
+  開埋め込み`.ι`の一般的性質(`inferInstanceAs`で直接)。
+
+**残る作業**: `f_id`(対角成分`gdF i i`が同型であること)は、選ばれる座標`s`が
+実際に単元であることを示す必要があるが、`exists_transitionIso`の`.choose`は
+`Classical.choice`経由なので証明項の中身を直接は見せない——`i=j`の場合に
+限定して「選ばれる`s`が単元である」ことまで主張する**強化版の補題**を別途
+用意する必要があると判明した(`RingedSpace.isUnit_res_basicOpen`(基本開集合の
+定義元はその基本開集合上で単元、確認済み)+単元性がring同型で保たれることから
+示せるはず)。`t'`(`exists_transitionIso_finset`から)・`t_fac`・`cocycle`
+(選択項の一致性の確認)も残る。集計は10/24で変わらず(§4は0/2のまま)。
+
+コミット: `5653409e`。
