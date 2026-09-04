@@ -1085,3 +1085,22 @@ exact/refine/calc)が`maxHeartbeats`2000万・タイムアウト590秒でも
 直す。ファイルには未反映(コミット無し)。
 
 コミット: `58c78aa6`(記録のみ)。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04
+続報(**cocycle完成——Scheme.GlueDataの12フィールドすべてが完成した**、
+集計10/24で変わらず)。前回の壁(unfold gdT'を複数出現に同時適用すると
+あらゆる型検査が極端に重い)を、「gdT'を1つずつ独立にunfoldせず名前
+参照できる事実(gdT'_hom_eq/gdT'_inv_eq)として先に確定させ、以降は
+rwでこれらの名前を参照するだけにする」ことで突破した。もう1つの鍵:
+congrArgで書き換え対象を2つの合成の"間に挟む"(fun x => A≫x≫B)と重く
+なる——常に「前だけ」/「後ろだけ」のcongrArgを順番に適用することで
+劇的に軽くなった(0.05秒未満)。
+
+gdT'_pair(残る2つのgdT'の合成が1つ目の逆射に一致する)+
+Iso.hom_inv_idからgdT'_cocycleが直ちに従った。**これで
+Scheme.GlueDataの12フィールドすべて(J・U・V・f・f_mono・
+f_hasPullback・f_id・t・t_id・t'・t_fac・cocycle)が完成した**。
+lake build ABC3で0エラー確認。tools/lean-idioms.md #32に発見を記録。
+次の一手はScheme.GlueDataの構造体インスタンスを実際に組み立てること。
+
+コミット: `9fc6c7ad`。

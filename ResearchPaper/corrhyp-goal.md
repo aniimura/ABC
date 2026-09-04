@@ -2298,3 +2298,43 @@ equal であることを確認させるだけ)でも同じ`whnf`のheartbeat上�
 `gdT'`2つだけを含む形で先に確立し(こちらも重ければ2つずつのペアで
 さらに分割)、`cocycle`本体は`Iso.hom_inv_id`一撃で閉じる、という
 段階を追加することを検討する。
+
+### 2026-09-04続報: **cocycle完成——`Scheme.GlueData`の12フィールド
+すべてが完成した**
+
+前回記録した「最有力候補」の方針(`gdT'`を同時に2つ以上ゴールへ登場
+させない)を実行し、`cocycle`を完成させた。突破口は2つ:
+
+1. **`gdT'_hom_eq`/`gdT'_inv_eq`**: `(gdT' i j k).hom`/`.inv`を、
+   `unfold gdT'`を(その`gdT'`の出現**1つだけ**に対して)適用し明示形
+   として確定させる——`gdT'`の出現が1つだけならこれは軽い(0.05〜
+   0.5秒)。以降このセッションでは**二度と`unfold gdT'`を使わない**。
+2. **`gdT'_pair`**: `(gdT' j k i).hom ≫ (gdT' k i j).hom = (gdT' i j
+   k).inv`——残る2つの`gdT'`の合成が1つ目の逆射に一致するという核心の
+   等式。`gdT'_hom_eq`/`gdT'_inv_eq`を`rw`で3回差し込み(`unfold`は
+   経由しない)、`gdVpullbackIso`・`transitionElemIso`の対をキャンセル
+   すると、残るのは3つの結合律の`homOfLE`が1つに合成される等式
+   (`Scheme.homOfLE_homOfLE`、証明無関係性で自動的に閉じる)だけ。
+   ここで**もう1つの鍵**——`congrArg`で式を書き換えるとき、対象を
+   2つの合成の"間に挟む"(`congrArg (fun x => A≫x≫B) h`)と重くなる
+   ことがあると判明した。常に「前だけ」/「後ろだけ」の`congrArg`を
+   順番に適用する(`t_fac`の`gdT'_key`と同じ流儀)ことで劇的に軽く
+   なった(0.05秒未満)。
+3. **`gdT'_cocycle`**: `gdT'_pair`+`Iso.hom_inv_id`から直ちに従う本体。
+
+**これで`Scheme.GlueData`の12フィールドすべて**
+(`J・U・V・f・f_mono・f_hasPullback・f_id・t・t_id・t'・t_fac・cocycle`)
+**が完成した**。`lake build ABC3`で0エラーを確認(sorry無し)。
+`tools/lean-idioms.md` #32にこの発見(`unfold`の複数出現同時適用の壁+
+`congrArg`の"挟み込み"の壁)を記録。集計は10/24で変わらず(§4は0/2の
+まま、GlueDataの配線は番号付き項目ではないため)。
+
+**次の一手**: `Scheme.GlueData`の構造体インスタンス(`corrHypGlueData`
+のような名前)を実際に組み立てる——ここまでの`gdV`・`gdF`・`gdT`・
+`gdT_id`・`gdF_mono`・`gdF_isOpenImmersion`・`gdF_hasPullback`・
+`gdF_id`・`gdT'`・`gdT'_t_fac`・`gdT'_cocycle`をそのままフィールドと
+して渡すだけのはず。その後`GD.glued`が`C`(または`Ext`後に`C`)に
+同型であることを、`C`自身の`OpenCover`の`gluedCover`との比較で示す
+——`Lemma 4.1`の`c'.C`の実体。
+
+コミット: `9fc6c7ad`。
