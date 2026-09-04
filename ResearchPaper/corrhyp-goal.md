@@ -1818,3 +1818,19 @@ standardEtaleCover`が与えるRing側の`PrimeSpectrum.basicOpen`の被覆をsc
 という機械的だが分量のある作業)、(c)貼り合わせ後の有限性確認、の3点に整理された。
 本ターンはこの戦略の発見が主な成果で、新規のsorry無し宣言は追加していない
 (コード化は次回以降)。集計は10/24で変わらず。
+
+### 2026-09-04さらに続報: ring側の被覆をscheme側へ運ぶ一手を試みたが未完了(正直な記録)
+
+上記戦略の(a)(ring側の`PrimeSpectrum.basicOpen`被覆をscheme側の`X.basicOpen`被覆へ
+運ぶ)を実際に試みた。`IsAffineOpen.iSup_basicOpen_eq_self_iff`(`⨆X.basicOpen=U ↔
+Ideal.span s=⊤`)と`PrimeSpectrum.iSup_basicOpen_eq_top_iff'`(同じspan条件で`Spec`側
+の被覆と同値)という、両方とも同じ代数的条件`Ideal.span=⊤`に帰着する2つの好都合な
+mathlib補題を見つけ、位相的な議論(`isoSpec`のhomeomorphism性)を経由せずに直接
+繋げられる見通しを立てたが、`⨆i∈t,X.basicOpen(f i)`と`⨆g:(f''t),X.basicOpen g`
+(添字づけの違う2つのsup)を同一視する段で、`Γ(X,U)`関連の型が`instances`透明度で
+type-correctでなくなるという、本セッションで繰り返し遭遇した詰まりに再度当たり、
+完成させられなかった。★正直に未完了として記録し、コミットはしていない
+(中途半端なsorry付きコードを残さない)。次回はこの詰まりを`set`/`show`による
+型の明示、または`TopologicalSpace.Opens.ext`を避けた別の経路(たとえば直接
+`Scheme.Hom.iSup_preimage_eq_top`を`hU.fromSpec`に適用する方向)で再挑戦する。
+集計は10/24で変わらず。
