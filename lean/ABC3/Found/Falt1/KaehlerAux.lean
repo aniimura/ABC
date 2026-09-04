@@ -7,6 +7,7 @@ import Mathlib.RingTheory.DedekindDomain.Different
 import Mathlib.RingTheory.IsAdjoinRoot
 import Mathlib.RingTheory.Smooth.Basic
 import Mathlib.RingTheory.Kaehler.TensorProduct
+import Mathlib.LinearAlgebra.TensorProduct.Prod
 
 /-!
 # [Falt1] Chapter I §1 の補助補題群(`Found`、sorry 無し)
@@ -1421,5 +1422,67 @@ theorem mapBaseChange_injective_adjoinRoot_tensor {R C : Type*} [CommRing R] [Co
   apply mapBaseChange_injective_transport (adjoinRootTensorEquiv g).symm
   exact mapBaseChange_injective_of_nzd (g.map (algebraMap R C)) (ker_adjoinRoot_mk _)
     AdjoinRoot.mk_surjective hnzd
+
+/-!
+## `pushoutKaehlerSplit` の `d+1` 項化(2026-09-04、3項の場合で実証)
+
+Theorem 1.2 の証明本体(物理p.5=印字p.258、falt1-goal.md に逐語で記録)は
+「`Ω_{V_{n+1}/V_n}⊗W_{n+1}` は `d+1` 個の巡回加群の直和」という事実を
+使う。これは `pushoutKaehlerSplit` を `d+1` 回反復する(2 項版を
+`B_k := C_0⊗_R⋯⊗_RC_k` の帰納法で繰り返す)ことで得られるはずと
+falt1-goal.md 3a に記した。ここでは**3項(`d=2`)の場合を実際に
+最後まで実行し、帰納の1ステップが機械的に閉じることを確認した**。 -/
+
+/-- **`pushoutKaehlerSplit` の3項版**: `B1` が `C0`・`C1` の pushout、
+`B` が `B1`・`C2` の pushout のとき(2段の反復)、
+`Ω[B/R] ≃ₗ[B] (B⊗_{C0}Ω[C0/R]) × (B⊗_{C1}Ω[C1/R]) × (B⊗_{C2}Ω[C2/R])`。
+`hinj1`(`C0,C1` 段)・`hinj2`(`B1,C2` 段)からの帰結。
+
+証明の骨格(`d+1` 項への一般化もこの2つの道具の反復のみで閉じる):
+1. `pushoutKaehlerSplit` を2回適用(`B1` の分解・`B` の分解)。
+2. `B1` の分解(`B1`-加群の直積)を `TensorProduct.AlgebraTensorModule.congr`
+   で `B` まで底変換し、`TensorProduct.prodRight` でテンソル積と直積の
+   可換性を使う。
+3. `TensorProduct.AlgebraTensorModule.cancelBaseChange`(「底変換の底変換
+   =直接の底変換」)で `B⊗_{B1}(B1⊗_{C0}Ω[C0/R])` を `B⊗_{C0}Ω[C0/R]`
+   まで潰す(`C1` も同様)。
+
+`Algebra C0 B`・`Algebra C1 B`・その `IsScalarTower` は**仮定として
+明示的に渡す**(`pushoutKaehlerSplit` 自身と同じ流儀)——`B1`・`B` を
+具体的な `TensorProduct` として書いてしまうと、この宣言の**型
+そのもの**(`TensorProduct C1 B Ω[C1/R]` に要る `Module C1 B`)が
+`Algebra.TensorProduct.rightAlgebra`(`abbrev`、tools/lean-idioms.md
+#23)を要求するのに対し、宣言の型は `by` ブロックの外(`letI` が使える
+前)で先に確定してしまうため、**具体的な `TensorProduct` に特殊化した
+補題を別途は書けない**(型それ自体が elaborate できない)ことを実測した
+——具体例への適用は、使用箇所ごとに `letI := Algebra.TensorProduct.
+rightAlgebra` を先に置いてから `pushoutKaehlerSplit3` を直接呼ぶ
+(実際に小さな例で `Module C1 B`・`Algebra.IsPushout` 等すべてが
+`inferInstance` で解決することを確認済み)。 -/
+noncomputable def pushoutKaehlerSplit3 {R C0 C1 C2 B1 B : Type*} [CommRing R] [CommRing C0] [CommRing C1]
+    [CommRing C2] [CommRing B1] [CommRing B]
+    [Algebra R C0] [Algebra R C1] [Algebra R C2]
+    [Algebra C0 B1] [Algebra C1 B1] [Algebra R B1] [IsScalarTower R C0 B1] [IsScalarTower R C1 B1]
+    [Algebra.IsPushout R C0 C1 B1]
+    [Algebra B1 B] [Algebra C2 B] [Algebra R B] [IsScalarTower R B1 B] [IsScalarTower R C2 B]
+    [Algebra.IsPushout R B1 C2 B]
+    [Algebra C0 B] [Algebra C1 B] [IsScalarTower C0 B1 B] [IsScalarTower C1 B1 B]
+    (hinj1 : Function.Injective (KaehlerDifferential.mapBaseChange R C0 B1))
+    (hinj2 : Function.Injective (KaehlerDifferential.mapBaseChange R B1 B)) :
+    Ω[B⁄R] ≃ₗ[B]
+      (TensorProduct C0 B Ω[C0⁄R]) × (TensorProduct C1 B Ω[C1⁄R]) × (TensorProduct C2 B Ω[C2⁄R]) := by
+  set e1 := pushoutKaehlerSplit (R := R) (C := B1) (D := C2) (B := B) hinj2 with he1
+  set e2 := pushoutKaehlerSplit (R := R) (C := C0) (D := C1) (B := B1) hinj1 with he2
+  set eC0 := TensorProduct.AlgebraTensorModule.cancelBaseChange C0 B1 B B (Ω[C0⁄R]) with heC0
+  set eC1 := TensorProduct.AlgebraTensorModule.cancelBaseChange C1 B1 B B (Ω[C1⁄R]) with heC1
+  set e2' : TensorProduct B1 B Ω[B1⁄R] ≃ₗ[B]
+      TensorProduct B1 B ((TensorProduct C0 B1 Ω[C0⁄R]) × (TensorProduct C1 B1 Ω[C1⁄R])) :=
+    TensorProduct.AlgebraTensorModule.congr (LinearEquiv.refl B B) e2 with he2'
+  set eProd := TensorProduct.prodRight B1 B B (TensorProduct C0 B1 Ω[C0⁄R]) (TensorProduct C1 B1 Ω[C1⁄R])
+    with heProd
+  set eStep : TensorProduct B1 B Ω[B1⁄R] ≃ₗ[B]
+      (TensorProduct C0 B Ω[C0⁄R]) × (TensorProduct C1 B Ω[C1⁄R]) :=
+    (e2'.trans eProd).trans (eC0.prodCongr eC1) with heStep
+  exact e1.trans (eStep.prodCongr (LinearEquiv.refl B _) |>.trans (LinearEquiv.prodAssoc B _ _ _))
 
 end ABC3.Found.Falt1
