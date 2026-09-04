@@ -1124,13 +1124,136 @@ theorem mapBaseChange_injective_of_nzd (f : Polynomial V)
   exact psiMap_injective (by rw [hpsi0, map_zero])
 
 /-!
-★これで Lemma 1.1「単射性」の**一般的な核心部分**(`B` が `Polynomial V`
-の商で `f'` が非零因子なら `mapBaseChange` は単射)が完成した。Falt1 の
-実際の `W`(`AdjoinRoot (minpoly V w)` に同型)へ具体的に適用するには、
-`ker_adjoinRoot_mk`・`AdjoinRoot.mk_surjective` で `hB`・`hsurj` を、
-`adjoinRootMinpolyEquiv_algebraMap` で `f'` の像を `differentIdeal` の
-生成元(`differentIdeal_eq_span_derivative`)に結びつければよい——
-`falt1CokernelIso` の組み立てとほぼ同じパターン(未着手、次のラウンドへ)。
+## Falt1 の実際の `W` への橋渡し(完成、2026-09-04)
+
+`mapBaseChange_injective_of_nzd` を `B := AdjoinRoot (minpoly V w)`・
+`f := minpoly V w` に適用し、`adjoinRootMinpolyEquiv` に沿って
+`mapBaseChange Z V (AdjoinRoot (minpoly V w))` の単射性を `mapBaseChange
+Z V W` の単射性へ輸送する——`falt1CokernelIso` と同じ橋渡しパターンだが、
+**輸送すべき対象が `Ω` ではなく `mapBaseChange`(2つの空間の間の写像)
+なので、`omegaCongr` とは別の transport 補題が必要**だった
+(`mapBaseChange_injective_transport`、下記)。
+-/
+
+/-- `KaehlerDifferential.map` の `B`-slot での自然性(点ごと): `e:A≃ₐ[V]B`
+のとき、`mapBaseChange Z V A` と `mapBaseChange Z V B` は `e` を挟んで
+両立する。`map_comp_map_tower`(3段の塔 `Z→V→A→B`)を鍵に使う。 -/
+theorem mapBaseChange_transport {Z V A B : Type*} [CommRing Z] [CommRing V] [CommRing A] [CommRing B]
+    [Algebra Z V] [Algebra V A] [Algebra Z A] [Algebra V B] [Algebra Z B]
+    [IsScalarTower Z V A] [IsScalarTower Z V B]
+    (e : A ≃ₐ[V] B) :
+    letI : Algebra A B := e.toRingHom.toAlgebra
+    letI : IsScalarTower V A B := isScalarTower_of_algEquiv e
+    letI : IsScalarTower Z A B := isScalarTower_of_algEquiv (e.restrictScalars Z)
+    ∀ (b : B) (v : Ω[V⁄Z]),
+      (KaehlerDifferential.map Z Z A B)
+        (KaehlerDifferential.mapBaseChange Z V A (e.symm b ⊗ₜ v)) =
+      KaehlerDifferential.mapBaseChange Z V B (b ⊗ₜ v) := by
+  letI : Algebra A B := e.toRingHom.toAlgebra
+  haveI : IsScalarTower V A B := isScalarTower_of_algEquiv e
+  haveI : IsScalarTower Z A B := isScalarTower_of_algEquiv (e.restrictScalars Z)
+  intro b v
+  rw [KaehlerDifferential.mapBaseChange_tmul (R := Z) (A := V) (B := A),
+    KaehlerDifferential.mapBaseChange_tmul (R := Z) (A := V) (B := B)]
+  have hmapsmul : (KaehlerDifferential.map Z Z A B) (e.symm b • KaehlerDifferential.map Z Z V A v) =
+      e.symm b • (KaehlerDifferential.map Z Z A B) (KaehlerDifferential.map Z Z V A v) :=
+    map_smul (KaehlerDifferential.map Z Z A B) (e.symm b) (KaehlerDifferential.map Z Z V A v)
+  rw [hmapsmul, map_comp_map_tower]
+  show algebraMap A B (e.symm b) • (KaehlerDifferential.map Z Z V B) v = b • (KaehlerDifferential.map Z Z V B) v
+  congr 1
+  show e (e.symm b) = b
+  exact e.apply_symm_apply b
+
+/-- **`mapBaseChange` の単射性は代数同型に沿って輸送できる**:
+`e:A≃ₐ[V]B` で `mapBaseChange Z V A` が単射なら `mapBaseChange Z V B`
+も単射。`φ := (e.symm)⊗id`(`TensorProduct.AlgebraTensorModule.congr`、
+全単射)と `mapBaseChange_transport`・`omegaCongr` の単射性を組み合わせた。 -/
+theorem mapBaseChange_injective_transport {Z V A B : Type*} [CommRing Z] [CommRing V] [CommRing A] [CommRing B]
+    [Algebra Z V] [Algebra V A] [Algebra Z A] [Algebra V B] [Algebra Z B]
+    [IsScalarTower Z V A] [IsScalarTower Z V B]
+    (e : A ≃ₐ[V] B) (hA : Function.Injective (KaehlerDifferential.mapBaseChange Z V A)) :
+    Function.Injective (KaehlerDifferential.mapBaseChange Z V B) := by
+  letI : Algebra A B := e.toRingHom.toAlgebra
+  haveI : IsScalarTower V A B := isScalarTower_of_algEquiv e
+  haveI : IsScalarTower Z A B := isScalarTower_of_algEquiv (e.restrictScalars Z)
+  set φ : TensorProduct V B Ω[V⁄Z] ≃ₗ[V] TensorProduct V A Ω[V⁄Z] :=
+    TensorProduct.AlgebraTensorModule.congr e.symm.toLinearEquiv (LinearEquiv.refl V Ω[V⁄Z]) with hφdef
+  have hkey : ∀ x : TensorProduct V B Ω[V⁄Z],
+      (KaehlerDifferential.map Z Z A B) (KaehlerDifferential.mapBaseChange Z V A (φ x)) =
+        KaehlerDifferential.mapBaseChange Z V B x := by
+    intro x
+    induction x using TensorProduct.induction_on with
+    | zero => simp
+    | tmul b v =>
+        show (KaehlerDifferential.map Z Z A B)
+          (KaehlerDifferential.mapBaseChange Z V A (e.symm b ⊗ₜ v)) =
+          KaehlerDifferential.mapBaseChange Z V B (b ⊗ₜ v)
+        exact mapBaseChange_transport e b v
+    | add x y hx hy => simp only [map_add, hx, hy]
+  have hmapAB_inj : Function.Injective (KaehlerDifferential.map Z Z A B) :=
+    (omegaCongr (e.restrictScalars Z)).injective
+  intro x y hxy
+  have hx0 : (KaehlerDifferential.map Z Z A B) (KaehlerDifferential.mapBaseChange Z V A (φ x)) =
+      (KaehlerDifferential.map Z Z A B) (KaehlerDifferential.mapBaseChange Z V A (φ y)) := by
+    rw [hkey, hkey]; exact hxy
+  have := hA (hmapAB_inj hx0)
+  exact φ.injective this
+
+/-- **[Falt1] Lemma 1.1「単射性」、Falt1 の実際の `W` に対して(完成)**:
+`V` が Dedekind 整域、`w:W` が `V` 上整・`W` を生成し(かつ拡大体レベル
+でも生成する)、`differentIdeal V W ≠ ⊥`(有限可分拡大なら常に成立——
+mathlib の `differentIdeal_ne_bot` から従うはずだが、本定理では
+仮定として直接渡す)なら、`mapBaseChange Z V W : W⊗_VΩ_{V/Z} → Ω_{W/Z}`
+は単射。
+
+証明: `AdjoinRoot(minpoly V w)` は `e`(`adjoinRootMinpolyEquiv`)を
+通じて `W`(整域)と同型なので整域。`mapBaseChange_injective_of_nzd`
+を `f:=minpoly V w` に適用するための非零因子性は、`e` の下で
+`f'(w)`(= `differentIdeal` の生成元、`differentIdeal_eq_span_derivative`)
+が非零であることから(`differentIdeal ≠ ⊥` ⟹ 生成元 ≠ 0 ⟹ 整域なので
+非零因子)。最後に `mapBaseChange_injective_transport` で `W` へ輸送。 -/
+theorem falt1MapBaseChangeInjective {Z V K L W : Type*} [CommRing Z] [CommRing V] [IsDedekindDomain V]
+    [Field K] [Algebra V K] [IsFractionRing V K] [Field L] [Algebra K L] [FiniteDimensional K L]
+    [Algebra.IsSeparable K L] [CommRing W] [Algebra W L] [Algebra V W] [Algebra V L]
+    [IsScalarTower V K L] [IsScalarTower V W L] [IsIntegralClosure W V L]
+    [IsDedekindDomain W] [Module.IsTorsionFree V W] [Algebra Z V]
+    [Algebra Z W] [IsScalarTower Z V W]
+    (w : W) (hint : IsIntegral V w) (hadjoin : Algebra.adjoin V ({w} : Set W) = ⊤)
+    (hw : Algebra.adjoin K ({(algebraMap W L) w} : Set L) = ⊤)
+    (hdne : differentIdeal V W ≠ ⊥) :
+    Function.Injective (KaehlerDifferential.mapBaseChange Z V W) := by
+  set e := adjoinRootMinpolyEquiv w hint hadjoin with he
+  haveI hdom : IsDomain (AdjoinRoot (minpoly V w)) := Function.Injective.isDomain e.toRingHom e.injective
+  haveI hZP : IsScalarTower Z (Polynomial V) (AdjoinRoot (minpoly V w)) := by
+    apply IsScalarTower.of_algebraMap_eq
+    intro x
+    rw [IsScalarTower.algebraMap_apply Z V (AdjoinRoot (minpoly V w)),
+      IsScalarTower.algebraMap_apply Z V (Polynomial V),
+      IsScalarTower.algebraMap_apply V (Polynomial V) (AdjoinRoot (minpoly V w))]
+  apply mapBaseChange_injective_transport e
+  apply mapBaseChange_injective_of_nzd (minpoly V w) (ker_adjoinRoot_mk (minpoly V w)) AdjoinRoot.mk_surjective
+  rw [mem_nonZeroDivisors_iff_ne_zero]
+  intro hcontra
+  have heval : e (algebraMap (Polynomial V) (AdjoinRoot (minpoly V w)) (Polynomial.derivative (minpoly V w))) = 0 := by
+    rw [hcontra, map_zero]
+  rw [adjoinRootMinpolyEquiv_algebraMap w hint hadjoin (Polynomial.derivative (minpoly V w))] at heval
+  apply hdne
+  rw [differentIdeal_eq_span_derivative w hw hadjoin]
+  exact Ideal.span_singleton_eq_bot.mpr heval
+
+/-!
+★★これで **Lemma 1.1(余核の特定・「長さ」の等式・単射性)の一般的な
+数学的内容がすべて Falt1 の実際の `W` に対して証明された**
+(`falt1CokernelIsoLinear`・`falt1CokernelLengthEq`・
+`falt1MapBaseChangeInjective`)。残っている作業(正直な記録):
+- `differentIdeal V W ≠ ⊥` を仮定ではなく `differentIdeal_ne_bot`
+  (mathlib、`[Module.Finite V W][Algebra.IsSeparable(FractionRing V)
+  (FractionRing W)]` が必要)から導く——`IsFractionRing W L` 等
+  Falt1 の設定から自然に従うはずの周辺事実の確認が必要。
+- 以上を `Skeleton/Falt1/ChapterI.lean` の `theorem_1_1`(原論文の
+  主張そのもの)に対応する1つの `Found` 定理として組み立て、
+  posit(Interface)を置き換える作業はまだ行っていない。
+- `Theorem 1.2`(§1 のもう1項目)には一切着手していない。
 -/
 
 end ABC3.Found.Falt1
