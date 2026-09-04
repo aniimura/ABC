@@ -2652,6 +2652,29 @@ mathlib での正確な組み立て方は未確認)。
       「探せば既にmathlibにある」道具が複数見つかった——引き続き
       (1)(3)(5)の残りを1つずつ潰していく方針が有効と判断する。
 
+      ★続けて step (1) の「`+1`」の出処を特定した(`falt1_dvr_
+      cotangentSpace_finrank_eq_one`、commit分は次項)——`Discrete
+      ValuationRing`は`IsDiscreteValuationRing.TFAE`(mathlib既存)の
+      同値な特徴付けの1つとして**既に`finrank(CotangentSpace)=1`が
+      載っていた**(探すまで気付いていなかった、これも「探せば
+      mathlibにある」の一例)。
+
+      **ただし残る接続で新しい障害に遭遇した(未解決)**:
+      `KaehlerDifferential.exact_kerCotangentToTensor_mapBaseChange`
+      から`(maximalIdeal B).Cotangent → Ω[B/An]⊗k_B → Ω[k_B/An]`の
+      完全性は得られるが、`kerCotangentToTensor`が`B`-線形・
+      `mapBaseChange`が`k_B`(=`ResidueField B`)-線形であるため、
+      両者の像・核を`Module.finrank`で比較しようとすると
+      `Submodule B _`対`Submodule(ResidueField B)_`という**scalar
+      restrictionを跨いだ比較**が必要になる——単純な`rank-nullity`
+      の適用では閉じない。これは Exercise 13.7.4 の議論が暗黙に
+      使っている「`k_B`上のベクトル空間として見た次元」と「完全列の
+      各項が実際に持つ`B`-加群構造」の食い違いを橋渡しする、もう1段
+      の配線が要ることを意味する——次回はここ(`Submodule.
+      restrictScalars`越しの`finrank`比較、または`LinearMap.
+      finrank_range_add_finrank_ker`を`k_B`-線形版に作り直す)から
+      再開すること。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
