@@ -1625,4 +1625,40 @@ theorem differentIdeal_tower_diamond {Vn Vn1 Wn Wn1 : Type*} [CommRing Vn] [Comm
     differentIdeal_eq_differentIdeal_mul_differentIdeal Vn Wn Wn1
   rw [← h1, ← h2]
 
+/-!
+## Theorem 1.2・3b: `differentIdeal Wₙ Wₙ₊₁`(`Jₙ`)を conductor で消去
+
+`differentIdeal_tower_diamond` の右辺に現れる未知数 `Jₙ := differentIdeal
+Wₙ Wₙ₊₁` を、mathlib の `conductor_mul_differentIdeal`(`conductor A x *
+differentIdeal A B = span{aeval x (deriv(minpoly A x))}`、Lemma 1.1 の
+`differentIdeal_eq_span_derivative` の一般化)と組み合わせて**消去**
+できることを発見した(`ResearchPaper/0_Source/Brinon Conrad - CMI
+Summer School Notes...` Exercise 13.7.4 の step (5) に対応する箇所、
+falt1-goal.md 参照)。2つの等式を掛け合わせて `Jₙ` を消すだけなので、
+Dedekind整域の「0でないイデアルで消去できる」性質だけで閉じる
+——`conductor Wₙ x`・`differentIdeal Vₙ Vₙ₊₁` の base change が一致する
+という仮定(`hspan_eq`、「典型例」で `x` の最小多項式が base change
+と両立することに相当、3c を通じて確認すべき事項として残す)のもとで、
+`conductor(Wₙ,x) · δₙ₊₁ = δₙ.map(...)` という**きれいな関係式**が
+出ることを確認した。 -/
+
+/-- **`Jₙ` を消去した後の `δₙ`・`δₙ₊₁` の関係**。`hdiamond` は
+`differentIdeal_tower_diamond` の結論、`hcond` は
+`conductor_mul_differentIdeal` の結論、`hspan_eq` は両者の右辺が
+一致するという(「典型例」で成り立つはずの、3c 経由で今後確認する)
+仮定。`Idiff ≠ 0`(Dedekind整域では0でないイデアルは消去可能)だけで
+`Jₙ` を消去できる。 -/
+theorem cancel_conductor_delta {R : Type*} [CommRing R] [IsDedekindDomain R]
+    (Idiff Jn condWnx spanDeriv deltaN1 deltaNmapped : Ideal R)
+    (hdiamond : deltaN1 * Idiff = Jn * deltaNmapped)
+    (hcond : condWnx * Jn = spanDeriv)
+    (hspan_eq : spanDeriv = Idiff)
+    (hIdiff_ne : Idiff ≠ 0) :
+    condWnx * deltaN1 = deltaNmapped := by
+  have h1 : condWnx * (deltaN1 * Idiff) = condWnx * (Jn * deltaNmapped) := by rw [hdiamond]
+  have h2 : condWnx * (deltaN1 * Idiff) = (condWnx * deltaN1) * Idiff := by ring
+  have h3 : condWnx * (Jn * deltaNmapped) = deltaNmapped * Idiff := by rw [← hspan_eq, ← hcond]; ring
+  rw [h2, h3] at h1
+  exact mul_right_cancel₀ hIdiff_ne h1
+
 end ABC3.Found.Falt1
