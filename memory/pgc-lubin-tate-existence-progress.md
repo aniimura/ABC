@@ -620,3 +620,13 @@ Lubin-Tate理論の`|Λ_n|=q^n`(真の集合として)そのものが完全に�
 完備)へ向けた土台——`K.closure`自体は完備でない(`Q_p`の代数閉包が
 完備でないのと同様)ので、`x`を含む有限次拡大`K.carrier⟮x⟯`の中で
 評価する、というのが見通している経路。
+
+**続報(2026-09-04・続き、`K.carrier⟮x⟯`は有限次)**: 同じファイルへ
+`finiteDimensional_adjoin_of_mem_iteratedLubinTateTorsionPoints`を
+追加(commit `ade9db4d`)——`x∈Λ_n`ならば`K.carrier⟮x⟯`は`K.carrier`
+上有限次。直前の`isIntegral_carrier_of_mem_iteratedLubinTateTorsionPoints`
+から`IntermediateField.adjoin.finiteDimensional`で直接従う(1行の
+帰結)。次の一歩は「有限次拡大は完備」という一般論(mathlibに
+`FiniteDimensional.complete`的な定理があるはず)で`K.carrier⟮x⟯`へ
+`CompleteSpace`を移し、そこで初めて`PowerSeries.aeval`による`[a]_f`
+の評価が可能になる。
