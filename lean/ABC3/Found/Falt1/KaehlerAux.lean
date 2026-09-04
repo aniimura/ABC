@@ -3808,4 +3808,69 @@ theorem falt1_cancelConductorDelta_assembled
   --     = Module.length Wn1 (Wn1 ⧸ differentIdeal V1 Wn1)
   trivial
 
+/-!
+## Exercise 13.7.4 (4)への足場: 第二基本完全列の単射性(2026-09-04)
+
+Brinon-Conrad Exercise 13.7.4 の step (4) は
+`0 → Wₙ₊₁⊗_{Wₙ}Ω¹_{Wₙ/V0} → Ω¹_{Wₙ₊₁/V0} → Ω¹_{Wₙ₊₁/Wₙ} → 0`
+という完全列を要求する。この左側の**単射性**が、Lemma 1.1 の土台で
+既に確立した `mapBaseChange_injective_of_nzd`(`B = Polynomial V/(f)`
+かつ `f'` が非零因子の場合の単射性)を、`V0→Wₙ→AdjoinRoot g`
+(`g := X^n-Cπ'`、base change **する前**の Eisenstein 多項式)に
+適用するだけで得られることを確認した——`AdjoinRoot g`(`Wₙ₊₁` への
+同型は `falt1AdjoinRootEquivIntegralClosure` 経由で既存)に対して
+直接使える。次回はこれを`omegaCongr`(既存、代数同型に沿った `Ω`
+の transport)で `Wₙ₊₁` 自身の単射性に持ち上げ、右側の全射性
+(一般に成り立つ標準的事実)と合わせて完全列そのものを組み立てる
+ところから続ける。 -/
+
+set_option maxHeartbeats 800000 in
+/-- **`Ω¹` の第二基本完全列・左側の単射性**(`AdjoinRoot g` 版、
+`Wₙ₊₁` への transport は次回)。`g` が Eisenstein なので `g'` は
+`AdjoinRoot g` の非零因子——`mapBaseChange_injective_of_nzd` を
+直接適用するだけで閉じる。 -/
+theorem falt1_mapBaseChange_injective_adjoinRoot
+    {V0 Wn : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    (π : V0) (n : ℕ)
+    (hn' : (n : FractionRing Wn) ≠ 0)
+    (hprime' : (Ideal.span ({algebraMap V0 Wn π} : Set Wn)).IsPrime)
+    (hnotsq' : algebraMap V0 Wn π ∉ (Ideal.span ({algebraMap V0 Wn π} : Set Wn)) ^ 2)
+    (hnpos : 0 < n) :
+    Function.Injective (KaehlerDifferential.mapBaseChange V0 Wn
+      (AdjoinRoot ((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)))) := by
+  set π' : Wn := algebraMap V0 Wn π with hπ'def
+  set gpoly : Polynomial Wn := Polynomial.X ^ n - Polynomial.C π' with hgdef
+  have hirr : Irreducible gpoly := ABC3.Found.Falt1.eisenstein_X_pow_sub_C π' n hnpos hprime' hnotsq'
+  have hB : RingHom.ker (algebraMap (Polynomial Wn) (AdjoinRoot gpoly)) = Ideal.span ({gpoly} : Set (Polynomial Wn)) :=
+    ABC3.Found.Falt1.ker_adjoinRoot_mk gpoly
+  have hsurj : Function.Surjective (algebraMap (Polynomial Wn) (AdjoinRoot gpoly)) := AdjoinRoot.mk_surjective
+  haveI : IsDomain (AdjoinRoot gpoly) := AdjoinRoot.isDomain_of_prime hirr.prime
+  have hnWn : (n : Wn) ≠ 0 := by
+    intro h
+    apply hn'
+    have : (algebraMap Wn (FractionRing Wn)) (n:Wn) = (n : FractionRing Wn) := by push_cast; ring
+    rw [← this, h, map_zero]
+  have hmonic : gpoly.Monic := Polynomial.monic_X_pow_sub_C π' hnpos.ne'
+  have hdeg : gpoly.natDegree = n := by
+    rw [hgdef, Polynomial.natDegree_sub_C]
+    exact Polynomial.natDegree_X_pow n
+  have hderivne : algebraMap (Polynomial Wn) (AdjoinRoot gpoly) (Polynomial.derivative gpoly) ≠ 0 := by
+    have hderiv : Polynomial.derivative gpoly = Polynomial.C (n : Wn) * Polynomial.X ^ (n-1) := by
+      rw [hgdef]
+      rw [Polynomial.derivative_sub, Polynomial.derivative_X_pow, Polynomial.derivative_C, sub_zero]
+    rw [hderiv]
+    show (AdjoinRoot.mk gpoly) (Polynomial.C (n:Wn) * Polynomial.X ^ (n-1)) ≠ 0
+    apply AdjoinRoot.mk_ne_zero_of_natDegree_lt hmonic
+    · exact mul_ne_zero (Polynomial.C_ne_zero.mpr hnWn) (pow_ne_zero _ Polynomial.X_ne_zero)
+    · rw [Polynomial.natDegree_mul (Polynomial.C_ne_zero.mpr hnWn) (pow_ne_zero _ Polynomial.X_ne_zero)]
+      rw [Polynomial.natDegree_C, Polynomial.natDegree_X_pow, zero_add, hdeg]
+      omega
+  haveI : IsScalarTower V0 (Polynomial Wn) (AdjoinRoot gpoly) := by
+    apply IsScalarTower.of_algebraMap_eq
+    intro x
+    rfl
+  exact ABC3.Found.Falt1.mapBaseChange_injective_of_nzd gpoly hB hsurj
+    (mem_nonZeroDivisors_of_ne_zero hderivne)
+
 end ABC3.Found.Falt1
