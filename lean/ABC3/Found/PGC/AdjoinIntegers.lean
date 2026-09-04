@@ -1731,4 +1731,74 @@ theorem unitActionQuotientLift_mk
         (QuotientGroup.mk (s := principalUnits K π n) u) =
       lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem (u : 𝒪[K.carrier]) := rfl
 
+/-! ## `(𝒪_K)^×⧸principalUnits K π n ≅ (𝒪_K/π^n𝒪_K)^×`(古典的な同一視)
+
+`Λ_n`・`ψ_n`・`F_f`固有の議論を一切経由しない、純粋に環論的な事実——
+`principalUnits K π n`(`1+π^n𝒪_K`の形の単数)が、ちょうど剰余写像
+`𝒪_K→𝒪_K/π^n𝒪_K`が誘導する単数群の写像の**核**に一致すること、
+およびこの写像が**全射**であること(`𝒪_K`が局所環であることから、
+mathlibの`IsLocalRing.surjective_units_map_of_local_ringHom`が
+直接使える)を組み合わせ、第一同型定理で結論する。 -/
+
+/-- `principalUnits K π n`は、剰余写像`𝒪_K→𝒪_K/π^n𝒪_K`が誘導する
+単数群の写像`Units.map`の**核**に一致する——`v↦v-1`の言葉での定義
+(`principalUnits`)と`Ideal.Quotient.eq_zero_iff_mem`の言い換え。 -/
+theorem principalUnits_eq_ker {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    (π : 𝒪[K.carrier]) (n : ℕ) :
+    principalUnits K π n =
+      (Units.map (Ideal.Quotient.mk (Ideal.span ({π ^ n} : Set (𝒪[K.carrier]))) |>.toMonoidHom)).ker := by
+  ext v
+  show (v : 𝒪[K.carrier]) - 1 ∈ Ideal.span ({π ^ n} : Set (𝒪[K.carrier])) ↔ _
+  rw [MonoidHom.mem_ker]
+  have hval : ((Units.map (Ideal.Quotient.mk (Ideal.span ({π ^ n} : Set (𝒪[K.carrier]))) |>.toMonoidHom)) v :
+      𝒪[K.carrier] ⧸ Ideal.span ({π ^ n} : Set (𝒪[K.carrier]))) =
+      Ideal.Quotient.mk _ (v : 𝒪[K.carrier]) := rfl
+  rw [← Ideal.Quotient.eq_zero_iff_mem, map_sub, map_one, sub_eq_zero, Units.ext_iff, hval, Units.val_one]
+
+/-- `𝒪_K/π^n𝒪_K`は非自明(`n≥1`のとき)——`π^n∈maximalIdeal`
+(`π^n`は`π`の倍数)から`span{π^n}⊆maximalIdeal⊊⊤`、よって
+`span{π^n}≠⊤`。純粋に環論的な事実、`f`・Lubin-Tate固有の議論は不要。 -/
+theorem nontrivial_quotient_span_pi_pow {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (n : ℕ) (hn : 1 ≤ n) :
+    Nontrivial (𝒪[K.carrier] ⧸ Ideal.span ({π ^ n} : Set (𝒪[K.carrier]))) := by
+  rw [Ideal.Quotient.nontrivial_iff]
+  intro hcon
+  have hle : Ideal.span ({π ^ n} : Set (𝒪[K.carrier])) ≤ Ideal.span ({π} : Set (𝒪[K.carrier])) := by
+    rw [Ideal.span_le]
+    intro x hx
+    simp only [Set.mem_singleton_iff] at hx
+    rw [hx]
+    exact Ideal.mem_span_singleton.mpr (dvd_pow_self π (by omega : n ≠ 0))
+  rw [hcon] at hle
+  rw [← hπmax] at hle
+  exact (IsLocalRing.maximalIdeal.isMaximal (𝒪[K.carrier])).ne_top (top_le_iff.mp hle)
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★**`(𝒪_K)^×⧸principalUnits K π n ≅
+(𝒪_K/π^n𝒪_K)^×`**——古典的なLubin-Tate理論で`(𝒪_K/π^n)^×`と呼ばれる
+対象の、本リポジトリでの実現。`principalUnits_eq_ker`(核の同定)と
+`IsLocalRing.surjective_units_map_of_local_ringHom`(局所環からの
+全射環準同型が誘導する単数群の写像は全射——`𝒪_K`が局所環であること
+だけから、`IsLocalHom.of_surjective`で局所準同型性を得て適用)を
+組み合わせ、`QuotientGroup.quotientKerEquivOfSurjective`(第一同型
+定理)で結論する。これで`unitActionQuotientLift`の定義域
+`(𝒪_K)^×⧸principalUnits K π n`が、古典的な`(𝒪_K/π^n)^×`と正式に
+同一視できるようになった——`Gal(K(Λ_n)/K)≅(𝒪_K/π^n)^×`という
+主定理の左辺(定義域)が完全に確立された形。 -/
+noncomputable def principalUnitsQuotientEquiv {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (n : ℕ) (hn : 1 ≤ n) :
+    (𝒪[K.carrier])ˣ ⧸ principalUnits K π n ≃*
+      (𝒪[K.carrier] ⧸ Ideal.span ({π ^ n} : Set (𝒪[K.carrier])))ˣ := by
+  haveI := nontrivial_quotient_span_pi_pow K hπmax n hn
+  rw [principalUnits_eq_ker]
+  have hφ : Function.Surjective (Ideal.Quotient.mk (Ideal.span ({π ^ n} : Set (𝒪[K.carrier])))) :=
+    Ideal.Quotient.mk_surjective
+  haveI : IsLocalHom (Ideal.Quotient.mk (Ideal.span ({π ^ n} : Set (𝒪[K.carrier])))) :=
+    IsLocalHom.of_surjective _ hφ
+  have hsurj : Function.Surjective (Units.map
+      (Ideal.Quotient.mk (Ideal.span ({π ^ n} : Set (𝒪[K.carrier]))) |>.toMonoidHom)) :=
+    IsLocalRing.surjective_units_map_of_local_ringHom _ hφ ‹_›
+  exact QuotientGroup.quotientKerEquivOfSurjective _ hsurj
+
 end ABC3.Found.PGC
