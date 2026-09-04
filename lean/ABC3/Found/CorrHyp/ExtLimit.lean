@@ -356,4 +356,36 @@ noncomputable def isLimit_extCone (X : Over BaseK) : IsLimit (extCone X) := by
         s.π.app R ≫ pullback.snd X.hom (toSchemeDiagramOver.obj R).hom
       rw [Category.assoc, ← extConePi_app_snd X R, ← Category.assoc, hm' R]
 
+/-- `extDiagram X` の遷移射はアフィン——`AffineTransitionLimit.lean` の被覆
+補題群(`Scheme.exists_isOpenCover_and_isAffine` 等)を `extDiagram X` に
+適用するための前提の1つ。`(extDiagram X).map h` を `pullback.map ... (𝟙
+X.left) φ (𝟙 BaseK) ...` の形に展開し、`CategoryTheory.MorphismProperty.
+pullbackMap`(`P i₁`・`P i₂` から `P (pullback.map ...)` を直接与える、
+`SchemeFEt.lean`/`ExtLimit.lean` の他の箇所で使った `Over.pullback`+
+`overPullbackMap` より単純な道)に `IsAffineHom` を適用する——`𝟙 X.left`
+は自明にアフィン、`φ`(`toSchemeDiagramOver` 自身の遷移射)は
+`toSchemeDiagram_isAffineHom`(`FieldLimit.lean`)から。
+
+★**sorry 無し**。標準3公理のみ。
+
+★★**残る前提(未確認・記録)**: 同じ被覆補題群は `∀ i, CompactSpace
+(D.obj i)`・`∀ i, QuasiSeparatedSpace (D.obj i)` も要求するが、
+`(extDiagram X).obj R = pullback X.hom (D R).hom` の `CompactSpace` は
+`infer_instance` では自動的に付かない(`(D R).hom` はアフィンだが `X.hom`
+は一般には何の制約も無いため、`X.left` 自身の準コンパクト性を要求する
+可能性が高い)。双曲曲線は常に有限型(⟹ qcqs)なので原文の意図とは合致するが、
+`corrHypInstance3` の `Space := Over BaseK` は一般のスキームを許すため、
+`Lemma 4.1` を厳密に述べるには `Space` を qcqs スキームに絞るか、
+`lemma_4_1` の統合先で `X` に有限型の仮定を追加する設計変更が要る——
+`corrhyp-goal.md` に記録。 -/
+theorem extDiagram_map_isAffineHom (X : Over BaseK) {R S : (FgSubalgebra ℚ ℝ)ᵒᵖ} (h : R ⟶ S) :
+    IsAffineHom ((extDiagram X).map h) := by
+  simp only [extDiagram]
+  have hi1 : IsAffineHom (𝟙 X.left) := inferInstance
+  have hi2 : IsAffineHom (toSchemeDiagramOver.map h).left := by
+    show IsAffineHom ((toSchemeDiagram ℚ ℝ).map h)
+    infer_instance
+  exact MorphismProperty.pullbackMap hi1 hi2 (by simp)
+    (by simpa using (toSchemeDiagramOver.map h).w.symm)
+
 end ABC3.Found.CorrHyp
