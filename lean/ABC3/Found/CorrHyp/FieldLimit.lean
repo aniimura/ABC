@@ -1220,6 +1220,62 @@ noncomputable def quotient_mvPolynomial_baseChange (R A : Type) [CommRing R] [Co
   exact congrArg (Ideal.map · I)
     (RingHom.ext (fun x => (quotientMvPolynomialBaseChangeRingEquivAux_comp_algebraMap R A ι x).symm))
 
+/-! ## `A ⊗[ℚ] R'.1 → A ⊗[ℚ] ℝ` は単射——「項目(d)の第二段」
+(遷移データのRレベル降下)の鍵
+
+`ℚ` が体なので任意の`ℚ`-加群(とくに`A`)は`Module.Flat`——`R'.1 ↪ ℝ`
+という単射を`A`で(左)テンソルしても単射性が保たれる
+(`Module.Flat.lTensor_preserves_injective_linearMap`、mathlib)。これは
+`corrhyp-goal.md`2026-09-05で見積もった`RingHom.EssFiniteType`の
+filtered colimit descent(`exists_comp_map_eq_of_isColimit`等)よりも
+**直接的**な道筋——「ℝレベルで等しいなら、共通の精密化を探すまでもなく
+**その場の`R'`で既に等しい**」という強い主張が、体上のベクトル空間の
+平坦性から即座に出る。遷移同型の**一意性**(貼り合わせの整合性)は、
+このまま`MvPolynomial`の係数ごとの単射性に直結する——2つの候補写像が
+ℝへbase changeすると一致するなら、生成元の像(有限個)を係数として
+持つ多項式として、その場で一致することが言える。 -/
+
+open scoped TensorProduct in
+/-- **`A ⊗[ℚ] R'.1 → A ⊗[ℚ] ℝ` は単射**——`ℚ`が体であること
+(`Module.Flat ℚ A`が自動)+`Subalgebra.val R'.1`の単射性+
+`Module.Flat.lTensor_preserves_injective_linearMap`(mathlib)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem algebraTensorMap_val_injective (A : Type) [CommRing A] [Algebra ℚ A] (R' : FgSubalgebra ℚ ℝ) :
+    Function.Injective (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)) := by
+  have hinj : Function.Injective (Subalgebra.val R'.1) := Subtype.val_injective
+  intro x y h
+  apply Module.Flat.lTensor_preserves_injective_linearMap (R := ℚ) (M := A)
+    (Subalgebra.val R'.1).toLinearMap hinj
+  show (LinearMap.lTensor A (Subalgebra.val R'.1).toLinearMap) x =
+    (LinearMap.lTensor A (Subalgebra.val R'.1).toLinearMap) y
+  rw [show (LinearMap.lTensor A (Subalgebra.val R'.1).toLinearMap) =
+    (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)).toLinearMap from rfl]
+  exact h
+
+open scoped TensorProduct in
+/-- `algebraTensorMap_val_injective`の`MvPolynomial`版——
+`MvPolynomial.map`(mathlib)は単射な係数写像を単射に保つ。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem mvPolynomial_map_algebraTensorMap_val_injective (A : Type) [CommRing A] [Algebra ℚ A]
+    (R' : FgSubalgebra ℚ ℝ) (ι : Type) :
+    Function.Injective (MvPolynomial.map (σ := ι)
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)).toRingHom) :=
+  MvPolynomial.map_injective _ (algebraTensorMap_val_injective A R')
+
+open scoped TensorProduct in
+/-- **`R'`レベルの多項式が`ℝ`へbase changeして`0`になれば、`R'`レベルで
+既に`0`だった**——`mvPolynomial_map_algebraTensorMap_val_injective`の
+言い換え。遷移同型の候補(`R'`レベル)が、生成元の関係式をℝレベルで
+満たすことが分かれば、それだけで`R'`レベルでも関係式を満たす
+(well-definedness)ことを保証する、貼り合わせの核心部品。 -/
+theorem mvPolynomial_algebraTensorMap_val_eq_zero_of_map_eq_zero (A : Type) [CommRing A] [Algebra ℚ A]
+    (R' : FgSubalgebra ℚ ℝ) (ι : Type) (p : MvPolynomial ι (A ⊗[ℚ] R'.1))
+    (h : MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)).toRingHom p = 0) :
+    p = 0 :=
+  (mvPolynomial_map_algebraTensorMap_val_injective A R' ι).eq_iff.mp (h.trans (map_zero _).symm)
+
 /-! ## `StandardEtalePair.Ring` の元を有限段階へ降ろす——作業単位1(b)の完成
 
 `exists_fg_subalgebra_tensor_bivariate_finset`を`StandardEtalePair.Ring`
