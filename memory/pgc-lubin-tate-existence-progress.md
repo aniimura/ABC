@@ -1292,3 +1292,38 @@ mod deg2`だが高次では異なる)。したがって「`a≡b mod π^n`なら
 `a·x=b·x`」(well-definedness)を示すには通常の減法ではなく`F_f`
 加法群としての逆元・結合律などの形式群公理を経由する必要があり、
 これは次の大きめの一歩になる見通し。
+
+**続報(同日、★核の確定、`AdjoinIntegers.lean`、commit`4e4499f4`)**:
+上の懸念(`F_f`加法の逆元・結合律が要る)を実際には**回避できる**
+ことが分かった——「`a≡b mod π^n`なら`a·x=b·x`」という**加法群
+としての**well-definednessではなく、写像`a↦a·x`(`𝒪_K→Λ_n`)の
+**核**を直接特徴づける、というより直接的な道筋で古典的な同型
+`𝒪_K/π^n≅Λ_n`に迫れる:
+
+1. `lubinTateActionAtTorsionPoint_pi_pow_pred_ne_zero_of_mem_
+   iteratedLubinTatePsiTorsionPoints`: 「原始的な」π^n-捩れ点
+   (`ψ_n`の根)は`π^{n-1}`で消えない——`x∉Λ_{n-1}`(前々回の非交和)
+   の対偶を、`aeval_iteratedLubinTateDistinguished_eq_zero`と同じ
+   `Polynomial.hom_eval₂`橋渡しで使う。
+2. `irreducible_of_maximalIdeal_eq_span`: `hπmax`から`π`が既約元
+   であること(`IsDiscreteValuationRing.exists_irreducible`+同伴)。
+3. ★★★**`lubinTateActionAtTorsionPoint_eq_zero_imp_dvd_of_mem_
+   iteratedLubinTatePsiTorsionPoints`**(核心、⟹方向): `a·x=0⟹
+   π^n∣a`。付値環の一意分解`a=u*π^k`(`u`単位、mathlib
+   `IsDiscreteValuationRing.eq_unit_mul_pow_irreducible`)を取り、
+   `k<n`と仮定して矛盾を導く——`lubinTateAction_mul`(乗法性)**だけ**
+   で`u⁻¹`を作用させて単位を約分し`π^k·x=0`を復元、さらに
+   `π^{n-1-k}`を掛けて`π^{n-1}·x=0`を導き1.に矛盾する。**`F_f`加法の
+   逆元・結合律は一切使わなかった**——乗法性のみで核の非自明な
+   半分が閉じた、という見立て違いの良い意味での訂正。
+4. ★**`lubinTateActionAtTorsionPoint_eq_zero_iff_dvd_of_mem_
+   iteratedLubinTatePsiTorsionPoints`**(iff): ⟸は既出
+   `pi_pow_action_action_eq_zero`そのもの、⟹は3.。
+
+これで「`a·x=0 ↔ π^n∣a`」(`x`が原始的なπ^n-捩れ点のとき)が
+sorry無しで確立された——`𝒪_K/π^n≅Λ_n`の**核**が確定。
+`|𝒪_K/π^n|=q^n=|Λ_n|`(既出`card_iteratedLubinTateTorsionPoints`)
+と組み合わせれば、有限集合間の単射写像は同じ濃度なら全単射、という
+一般論だけで**全単射性**(したがって同型そのもの)に到達できる
+見通し——次の一歩はこの「単射→全単射」の橋渡しと、`𝒪_K`の乗法群
+`(𝒪_K)^×`への制限、そして`Gal(K(Λ_n)/K)`との関係付け。
