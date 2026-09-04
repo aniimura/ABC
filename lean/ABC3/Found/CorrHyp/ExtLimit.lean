@@ -840,4 +840,50 @@ theorem piece_preimage_eq (X : Over BaseK) (U : X.left.Opens) (R' : (FgSubalgebr
   rw [← Scheme.Hom.comp_preimage, extConePi_app_fst]
   rfl
 
+/-! ## `StandardEtalePair.Ring` を実際のスキームの局所片として実現する
+——作業単位3(GlueData組み立て)の第一歩
+
+`FieldLimit.lean`の`exists_fg_subalgebra_tensor_standardEtale_elem`で
+「有限段階の候補局所片`P₀.Ring`」を環として構成できるようになった。
+ここでは`P₀.Ring`を実際の**スキーム**として実現し(`Spec P₀.Ring`)、
+それが有限段階の空間`Spec R`上で étale であること、かつ`K`へbase change
+すると元の(`Ext X`側の)局所片`Spec P.Ring`にちょうど一致することを示す
+——`c'.C`をGlueDataから組み立てる際の各ピースの実体になる。 -/
+
+/-- `StandardEtalePair.Ring`の`Spec`への持ち上げ——`Spec P.Ring ⟶ Spec R`
+という自然な射。`c'.C`の候補となる局所片の実体。 -/
+noncomputable def standardEtalePairSpecMap {R : Type} [CommRing R] (P : StandardEtalePair R) :
+    Spec (CommRingCat.of P.Ring) ⟶ Spec (CommRingCat.of R) :=
+  Spec.map (CommRingCat.ofHom (algebraMap R P.Ring))
+
+/-- **`standardEtalePairSpecMap`は常にétale**——`StandardEtalePair.Ring`に
+mathlibが自動で与える`Algebra.Etale R P.Ring`インスタンスを、
+`HasRingHomProperty.Spec_iff`(`AlgebraicGeometry.Etale`が`RingHom.Etale`
+の`Spec`への持ち上げとして特徴づけられること)+`RingHom.etale_algebraMap`
+で運ぶだけ。
+
+★**sorry 無し**。標準3公理のみ。 -/
+instance standardEtalePairSpecMap_etale {R : Type} [CommRing R] (P : StandardEtalePair R) :
+    Etale (standardEtalePairSpecMap P) := by
+  show Etale (Spec.map (CommRingCat.ofHom (algebraMap R P.Ring)))
+  rw [HasRingHomProperty.Spec_iff (P := @Etale)]
+  exact RingHom.etale_algebraMap.mpr inferInstance
+
+/-- **候補局所片`Spec P₀.Ring`を`K`へbase changeすると、実際に元の
+（`K`段階の）局所片`Spec P.Ring`(`P := P₀.map(algebraMap R K)`)に一致
+する**——`pullbackSpecIso`(pullbackの計算)と`standardEtalePairRingBaseChange`
+(環側のbase change)を`Algebra.TensorProduct.comm`で順序を合わせてから
+合成するだけ。`c'.C`の各ピースが、実際に`c.C`の対応するピースへbase
+changeで戻ることを保証する、GlueData組み立ての核心部品。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def standardEtalePairPullbackIso {R K : Type} [CommRing R] [CommRing K] [Algebra R K]
+    (P₀ : StandardEtalePair R) :
+    pullback (standardEtalePairSpecMap P₀) (Spec.map (CommRingCat.ofHom (algebraMap R K))) ≅
+      Spec (CommRingCat.of (P₀.map (algebraMap R K)).Ring) := by
+  have e : TensorProduct R P₀.Ring K ≃+* (P₀.map (algebraMap R K)).Ring :=
+    (Algebra.TensorProduct.comm R P₀.Ring K).toRingEquiv.trans
+      (standardEtalePairRingBaseChange P₀).toRingEquiv
+  exact (pullbackSpecIso R P₀.Ring K).trans (Scheme.Spec.mapIso e.symm.toCommRingCatIso.op)
+
 end ABC3.Found.CorrHyp
