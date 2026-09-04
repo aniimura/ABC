@@ -962,4 +962,31 @@ theorem exists_fg_subalgebra_tensor_standardEtalePair_baseChange (A : Type) [Com
         rfl
   exact ⟨hPeq ▸ standardEtalePairRingBaseChange (K := A ⊗[ℚ] ℝ) P₀⟩
 
+/-- **`StandardEtalePair.map` は合成と可換**——`(P.map φ).map ψ = P.map
+(ψ.comp φ)`。`f`・`g` の一致(`Polynomial.map_map`)から構造体そのものの
+一致を出す(`exists_fg_subalgebra_tensor_standardEtalePair_baseChange`と
+同じ技法)。`Lemma 4.1` の「複数の標準エタール片を横断した細分段階の
+合流」で、ある段階 `R_i` で得た局所モデルを、より粗い共通段階 `R'`
+(`R_i ≤ R'`)へ**移送しても base change が変わらない**ことを示すのに使う。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem StandardEtalePair.map_map {R S T : Type} [CommRing R] [CommRing S] [CommRing T]
+    (φ : R →+* S) (ψ : S →+* T) (P : StandardEtalePair R) :
+    (P.map φ).map ψ = P.map (ψ.comp φ) := by
+  have hf : ((P.map φ).map ψ).f = (P.map (ψ.comp φ)).f := by
+    rw [StandardEtalePair.map_f, StandardEtalePair.map_f, StandardEtalePair.map_f,
+      Polynomial.map_map]
+  have hg : ((P.map φ).map ψ).g = (P.map (ψ.comp φ)).g := by
+    rw [StandardEtalePair.map_g, StandardEtalePair.map_g, StandardEtalePair.map_g,
+      Polynomial.map_map]
+  cases hL : (P.map φ).map ψ with
+  | mk f' monic_f' g' cond' =>
+    cases hR : P.map (ψ.comp φ) with
+    | mk f monic_f g cond =>
+      rw [hL] at hf hg
+      rw [hR] at hf hg
+      simp only at hf hg
+      subst hf hg
+      rfl
+
 end ABC3.Found.CorrHyp
