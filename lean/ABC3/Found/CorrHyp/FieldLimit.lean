@@ -12,6 +12,7 @@ import Mathlib.Algebra.Polynomial.Monic
 import Mathlib.RingTheory.Etale.StandardEtale
 import Mathlib.RingTheory.TensorProduct.MvPolynomial
 import Mathlib.RingTheory.TensorProduct.Quotient
+import Mathlib.RingTheory.Unramified.LocalStructure
 
 /-!
 # [CorrHyp] `Lemma 4.1` へ向けた第一歩 —— `K` を有限生成 `k`-部分環の直極限として見る
@@ -711,5 +712,48 @@ noncomputable def standardEtalePairRingBaseChange {R K : Type*} [CommRing R] [Co
 `Scheme.exists_hom_hom_comp_eq_comp_of_locallyOfFiniteType`(遷移射の一致の
 降下)で貼り合わせて `Z` 全体を構成すること。`corrhyp-goal.md` §4 に記録した
 組み立て方の続き。 -/
+
+/-!
+## étale 多元環は有限個の基本開集合上で標準エタールになる
+
+`exists_extDiagram_finite_affine_descent`(`ExtLimit.lean`)で `Z_K` の
+アフィン開被覆を有限段階へ降ろした後に要る次の一手——各アフィン片の上の
+有限エタール多元環は「至る所で」標準エタールとは限らないため、
+`Algebra.IsEtaleAt.exists_isStandardEtale`(mathlib既存、各点で局所的に
+標準エタールになる)を各素点に適用し、`Spec S` の準コンパクト性で
+有限個の基本開集合に絞り込む——`ExtLimit.lean` の
+`Scheme.exists_finite_affineOpenCover` と同じ「点ごとの局所的な性質→
+準コンパクト性で有限化」というパターン。 -/
+
+/-- **étale な多元環は、有限個の基本開集合の上で標準エタールになる**——
+各素点で `Algebra.IsEtaleAt.exists_isStandardEtale` を適用し、得られる
+基本開被覆を `PrimeSpectrum S` の準コンパクト性(`PrimeSpectrum.
+compactSpace`)で有限部分被覆に絞り込む。CorrHyp に依存しない一般的な事実。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_finite_standardEtaleCover (R S : Type) [CommRing R] [CommRing S] [Algebra R S]
+    [Algebra.Etale R S] :
+    ∃ (ι : Type) (t : Finset ι) (f : ι → S),
+      (⨆ i ∈ t, PrimeSpectrum.basicOpen (f i)) = ⊤ ∧
+      ∀ i ∈ t, Algebra.IsStandardEtale R (Localization.Away (f i)) := by
+  have hfp : Algebra.FinitePresentation R S := inferInstance
+  choose f hf hstd using
+    fun Q : PrimeSpectrum S => Algebra.IsEtaleAt.exists_isStandardEtale (R := R) Q.asIdeal
+  have hcov : ⋃ Q : PrimeSpectrum S,
+      (PrimeSpectrum.basicOpen (f Q) : Set (PrimeSpectrum S)) = Set.univ := by
+    apply Set.eq_univ_of_forall
+    intro Q
+    exact Set.mem_iUnion.mpr ⟨Q, hf Q⟩
+  obtain ⟨t, ht⟩ := (isCompact_univ (X := PrimeSpectrum S)).elim_finite_subcover
+    (fun Q => (PrimeSpectrum.basicOpen (f Q) : Set (PrimeSpectrum S)))
+    (fun Q => (PrimeSpectrum.basicOpen (f Q)).isOpen) (by rw [hcov])
+  refine ⟨PrimeSpectrum S, t, f, ?_, fun i _ => hstd i⟩
+  apply TopologicalSpace.Opens.ext
+  rw [TopologicalSpace.Opens.coe_iSup]
+  simp only [TopologicalSpace.Opens.coe_top]
+  apply Set.eq_univ_of_univ_subset
+  intro x _
+  have hx := ht (Set.mem_univ x)
+  simpa using hx
 
 end ABC3.Found.CorrHyp
