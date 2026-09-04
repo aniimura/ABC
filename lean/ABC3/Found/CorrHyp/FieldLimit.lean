@@ -10,6 +10,8 @@ import Mathlib.AlgebraicGeometry.AffineTransitionLimit
 import Mathlib.Algebra.Polynomial.AlgebraMap
 import Mathlib.Algebra.Polynomial.Monic
 import Mathlib.RingTheory.Etale.StandardEtale
+import Mathlib.RingTheory.TensorProduct.MvPolynomial
+import Mathlib.RingTheory.TensorProduct.Quotient
 
 /-!
 # [CorrHyp] `Lemma 4.1` へ向けた第一歩 —— `K` を有限生成 `k`-部分環の直極限として見る
@@ -596,21 +598,118 @@ theorem exists_fg_subalgebra_standardEtalePair_map {k K : Type*} [CommRing k] [C
   subst hf hg
   rfl
 
-/- ★★次の一手(未着手): `Lemma 4.1` 本体へ——上の3instanceにより
-`Scheme.exists_hom_comp_eq_comp_of_locallyOfFiniteType`/
-`Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation` は
-`D := toSchemeDiagram k K`・`c := specKCone k K`・`hc := isLimit_specKCone k K`
-に対して**側条件抜きで直接呼べる**状態になった。`exists_fg_subalgebra_
-standardEtalePair_map` により、有限エタール射の標準的表示1枚は丸ごと
-有限段階へ降ろせるようになった——残るのは (a)
-`P₀.Ring ⊗[R] K ≃ₐ[K] P.Ring`(`P.Ring` は `mathlib` の明示的な二変数多項式
-商 `Polynomial (Polynomial R) ⧸ span {C f, X*C g - 1}` なので、
-`Algebra.TensorProduct.quotIdealMapEquivQuotTensor`/`tensorQuotientEquiv`
-(商環の base change)と二変数多項式環の base change を合成すればよい
-——一般の「余極限の保存」より軽い道具で済む見通し、`corrhyp-goal.md` に
-記録)、(b) 標準エタール表示1枚を降ろすだけでなく、`Z_K` 全体のアフィン
-開被覆(`Scheme.exists_isOpenCover_and_isAffine`)の**各片**にこの降下を
-適用してから貼り合わせること。`corrhyp-goal.md` §4 に記録した組み立て方の
-続き。 -/
+/-!
+## `StandardEtalePair.Ring` の base change
+
+`P₀.Ring`(`Polynomial (Polynomial R) ⧸ span {C f, X*C g - 1}`、mathlib の
+明示的な構成)が `K` へ係数拡大すると `(P₀.map φ).Ring` に一致することを示す
+——`StandardEtalePair.equivMvPolynomialQuotient`(`P.Ring` を `MvPolynomial
+(Fin 2) R` の商として書き直す)・`MvPolynomial.algebraTensorAlgEquiv`
+(多変数多項式環の base change)・`Algebra.TensorProduct.tensorQuotientEquiv`
+(商環の base change)を合成する。核心は「生成元の像が対応する生成元に写る」
+ことの確認(`Bivariate_equivMvPolynomial_map`)。 -/
+
+open Polynomial MvPolynomial Algebra.TensorProduct in
+/-- `Polynomial.Bivariate.equivMvPolynomial` は係数の写像と可換
+(`R[X][X] → MvPolynomial (Fin 2) R` という同型が、係数環の写像 `φ` と
+両立する)——両辺とも `R[X][X] → MvPolynomial (Fin 2) S` への環準同型なので
+`Polynomial.ringHom_ext'` を2回(外側の変数・内側の変数)適用して確認する。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem Bivariate_equivMvPolynomial_map {R S : Type*} [CommRing R] [CommRing S] (φ : R →+* S)
+    (p : R[X][X]) :
+    (Bivariate.equivMvPolynomial S) (p.map (Polynomial.mapRingHom φ)) =
+      MvPolynomial.map φ (Bivariate.equivMvPolynomial R p) := by
+  have hF : (RingHom.comp (Bivariate.equivMvPolynomial S).toRingHom
+        (Polynomial.mapRingHom (Polynomial.mapRingHom φ))) =
+      (RingHom.comp (MvPolynomial.map φ) (Bivariate.equivMvPolynomial R).toRingHom) := by
+    apply Polynomial.ringHom_ext'
+    · apply Polynomial.ringHom_ext'
+      · ext r
+        simp [Bivariate.equivMvPolynomial_C_C]
+      · simp [Bivariate.equivMvPolynomial_C_X]
+    · simp [Bivariate.equivMvPolynomial_X]
+  exact RingHom.congr_fun hF p
+
+open Polynomial MvPolynomial Algebra.TensorProduct in
+/-- `P₀.equivMvPolynomialQuotient` が使うイデアル(`{C f, X*C g - 1}` の
+span)は、`includeRight` で `K ⊗[R] MvPolynomial (Fin 2) R` へ送ってから
+`algebraTensorAlgEquiv R K`(`≃ₐ[K] MvPolynomial (Fin 2) K`)で運ぶと、
+`(P₀.map φ)` の対応するイデアルに**文字通り一致する**——`Ideal.map_span` で
+生成元の像を計算し、`Bivariate_equivMvPolynomial_map` で係数写像との可換性を
+使う。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem standardEtalePair_ring_baseChange {R K : Type*} [CommRing R] [CommRing K] [Algebra R K]
+    (P₀ : StandardEtalePair R) :
+    Ideal.map (algebraTensorAlgEquiv R K).toAlgHom.toRingHom
+        (Ideal.map (includeRight (R := R) (A := K) (B := MvPolynomial (Fin 2) R))
+          (Ideal.span {Bivariate.equivMvPolynomial R (Polynomial.C P₀.f),
+            Bivariate.equivMvPolynomial R (Polynomial.X * Polynomial.C P₀.g - 1)})) =
+      Ideal.span {Bivariate.equivMvPolynomial K (Polynomial.C (P₀.map (algebraMap R K)).f),
+        Bivariate.equivMvPolynomial K
+          (Polynomial.X * Polynomial.C (P₀.map (algebraMap R K)).g - 1)} := by
+  rw [show (Ideal.map (includeRight (R := R) (A := K) (B := MvPolynomial (Fin 2) R))
+          (Ideal.span {Bivariate.equivMvPolynomial R (Polynomial.C P₀.f),
+            Bivariate.equivMvPolynomial R (Polynomial.X * Polynomial.C P₀.g - 1)}) :
+          Ideal (TensorProduct R K (MvPolynomial (Fin 2) R))) =
+      Ideal.map (includeRight (R := R) (A := K) (B := MvPolynomial (Fin 2) R)).toRingHom
+          (Ideal.span {Bivariate.equivMvPolynomial R (Polynomial.C P₀.f),
+            Bivariate.equivMvPolynomial R (Polynomial.X * Polynomial.C P₀.g - 1)}) from rfl]
+  rw [Ideal.map_map, Ideal.map_span]
+  congr 1
+  simp only [Set.image_insert_eq, Set.image_singleton, StandardEtalePair.map_f,
+    StandardEtalePair.map_g]
+  congr 2
+  · show (algebraTensorAlgEquiv R K)
+      (includeRight (Bivariate.equivMvPolynomial R (Polynomial.C P₀.f))) = _
+    rw [show includeRight (Bivariate.equivMvPolynomial R (Polynomial.C P₀.f)) =
+      (1 : K) ⊗ₜ[R] (Bivariate.equivMvPolynomial R (Polynomial.C P₀.f)) from rfl,
+      algebraTensorAlgEquiv_tmul, one_smul,
+      ← Bivariate_equivMvPolynomial_map]
+    congr 1
+    simp [Polynomial.map_C]
+  · show (algebraTensorAlgEquiv R K) (includeRight (Bivariate.equivMvPolynomial R
+        (Polynomial.X * Polynomial.C P₀.g - 1))) = _
+    rw [show includeRight (Bivariate.equivMvPolynomial R
+        (Polynomial.X * Polynomial.C P₀.g - 1)) =
+      (1 : K) ⊗ₜ[R] (Bivariate.equivMvPolynomial R (Polynomial.X * Polynomial.C P₀.g - 1))
+        from rfl,
+      algebraTensorAlgEquiv_tmul, one_smul,
+      ← Bivariate_equivMvPolynomial_map]
+    congr 1
+    simp [Polynomial.map_sub, Polynomial.map_mul, Polynomial.map_C, Polynomial.map_X]
+
+open Polynomial MvPolynomial Algebra.TensorProduct in
+/-- **`StandardEtalePair.Ring` は base change と可換**——`P₀.Ring` を `K` へ
+係数拡大すると `(P₀.map (algebraMap R K)).Ring` に(`K`-代数として)同型。
+`Lemma 4.1` の構成的降下(`corrhyp-goal.md` §4)の核心部品:
+`exists_fg_subalgebra_standardEtalePair_map` で得た有限段階の `P₀` から
+`Z` の局所片 `Spec P₀.Ring` を作れば、この同型がまさに「その base change が
+元の有限エタール多元環に一致する」ことを保証する。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def standardEtalePairRingBaseChange {R K : Type*} [CommRing R] [CommRing K]
+    [Algebra R K] (P₀ : StandardEtalePair R) :
+    TensorProduct R K P₀.Ring ≃ₐ[K] (P₀.map (algebraMap R K)).Ring :=
+  (Algebra.TensorProduct.congr AlgEquiv.refl P₀.equivMvPolynomialQuotient).trans <|
+    (tensorQuotientEquiv K (MvPolynomial (Fin 2) R) K
+      (Ideal.span {Bivariate.equivMvPolynomial R (Polynomial.C P₀.f),
+        Bivariate.equivMvPolynomial R (Polynomial.X * Polynomial.C P₀.g - 1)})).trans <|
+    (Ideal.quotientEquivAlg _ _ (algebraTensorAlgEquiv R K)
+      (standardEtalePair_ring_baseChange P₀).symm).trans
+    (P₀.map (algebraMap R K)).equivMvPolynomialQuotient.symm
+
+/- ★★次の一手(未着手): `Lemma 4.1` 本体へ——`standardEtalePairRingBaseChange`
+により「有限段階の標準エタール表示 `P₀` から作った `Z` の局所片
+`Spec P₀.Ring` の base change が、元の `K`-代数に(標準的な同型で)一致する」
+という `Lemma 4.1` の構成的降下の核心部品が完成した。残るのは
+(a) 一般の有限エタール多元環は「至る所で」標準エタールとは限らないため、
+`Z_K` 全体のアフィン開被覆(`Scheme.exists_isOpenCover_and_isAffine`)の
+**各片**をさらに étale-locus のレベルで細分してからこの降下を適用すること、
+(b) 各片の降下結果を
+`Scheme.exists_hom_hom_comp_eq_comp_of_locallyOfFiniteType`(遷移射の一致の
+降下)で貼り合わせて `Z` 全体を構成すること。`corrhyp-goal.md` §4 に記録した
+組み立て方の続き。 -/
 
 end ABC3.Found.CorrHyp
