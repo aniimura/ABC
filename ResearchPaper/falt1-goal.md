@@ -2378,6 +2378,36 @@ mathlib での正確な組み立て方は未確認)。
       true`等でinstance引数を完全に表示させてから`convert`で1つずつ
       潰す、という方針で再開すること。
 
+      ★2026-09-05、**上記の診断を1段深く進めた**——原因は
+      `set_option pp.explicit`で見える表面的な引数の取り違えではない
+      ことを確認した。切り分けの結果:
+      - `(Option.elim none C F).carrier = C.carrier`(`none`のケース)・
+        `∀i,(Option.elim(some i)C F).carrier=(F i).carrier`(`some`の
+        ケース)は、`RAlg`/`RAlgOver`でラップした**同じ設定**で
+        **単独では**すべて`rfl`で通る(積の型・Pi型としてまとめても
+        `rfl`で通る)ことを確認した。
+      - ところが`LinearEquiv.piOptionEquivProd B (M:=...)).symm`を
+        `have h := ...`で受けた後、`exact h`・`cast (by rfl) h`・
+        `dsimp only [] at h`(空simpによる強制簡約、"no progress"の
+        結果)のいずれも`h`の型と目標の型を一致させられない——つまり
+        **単独の成分はすべてrflで潰れるのに、`LinearEquiv`として
+        束ねた瞬間に一致しなくなる**。
+      - これは「表面的な暗黙引数の取り違え」ではなく、
+        `LinearEquiv.piOptionEquivProd`自身の内部実装が(`M none`・
+        `M(some i)`を経由する際に)**目に見えない場所で追加の
+        instance変換**(例えば`Module`インスタンスの正規化や
+        `AddCommMonoid`側の別経路)を挟んでいる可能性を示唆する——
+        `set_option pp.all true`での完全ダンプは1780行に達し、
+        このセッション内での特定は断念した。
+      - 次回の再開方針(更新): `pp.explicit`ではなく、
+        `LinearEquiv.piOptionEquivProd`の**ソース定義**
+        (mathlib`Mathlib/Algebra/Module/Pi.lean`または近傍)を直接
+        読み、`M none`/`M(some i)`がどう扱われているかを確認する
+        ところから始める方が近道の見込み。あるいは`piOptionEquivProd`
+        を使わず、`Equiv.piOptionEquivProd`(型レベル)+
+        `LinearEquiv.ofLinear`で自前に組み立て直す方が、
+        instance変換の余地が無く安全かもしれない。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
