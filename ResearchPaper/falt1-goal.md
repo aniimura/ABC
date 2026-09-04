@@ -851,7 +851,25 @@ mathlib での正確な組み立て方は未確認)。
     残るのは `delta_tendsto_zero` の `hrec` への変換(3b(c)、既存の
     `length_quotient_span_singleton_mul` 等が使えるはず)と、V_n の
     **再帰族**(item 3c 本体、`V_1` の1段からの帰納)の構築のみ。
-   `a9faa64e`)。長さの漸化不等式(上の逐語引用の通り: `δ_n-δ_{n+1}≥
+
+    ★★2026-09-04、`differentIdeal_tower_diamond` の instance 整備
+    (上記(a))に着手した(commit `45ecea4c`)。**`Module.Finite Wₙ
+    Wₙ₊₁` を完成**(`falt1ModuleFiniteWnWn1`)——`AdjoinRoot.powerBasis'`
+    (**体でなく一般の可換環上でも** monic なら `PowerBasis` が取れる、
+    mathlib の既製品、`Polynomial.Monic.finite_adjoinRoot` の体限定
+    版より広い)+`falt1AdjoinRootEquivIntegralClosure` を貼り合わせる
+    だけで閉じた。★また **`Algebra V0 Wₙ₊₁`(合成 `V0→Wₙ→FractionRing
+    Wₙ→AdjoinRoot gK`)と `IsScalarTower V0 Wₙ Wₙ₊₁` は instance 探索
+    だけで自動的に見つかる**ことを実測で確認した(明示的な構成は不要)。
+    ★残る instance(未着手): `Module.IsTorsionFree Wₙ Wₙ₊₁`
+    (`falt1BaseChangeAlgHom_generator_correspondence` の証明内で
+    使った `Module.IsTorsionFree V0 (AdjoinRoot g)` の議論をほぼ
+    そのまま流用できる見込み)、`Algebra V1 Wₙ₊₁` を instance として
+    登録する(`falt1BaseChangeAlgHom.toRingHom.toAlgebra`)、
+    `IsScalarTower V0 V1 Wₙ₊₁`(`falt1BaseChangeAlgHom` が `→ₐ[V0]`で
+    あることから `ψ.commutes` 経由でほぼ自動のはず)、そして `Wₙ`
+    自身が `V0` 上有限・捩れ無しであること(`Wₙ` がどんな `V0`-拡大
+    として与えられるかに依存する、呼び出し側の仮定として要る)。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
