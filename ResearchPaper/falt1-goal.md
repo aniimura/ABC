@@ -1998,6 +1998,24 @@ mathlib での正確な組み立て方は未確認)。
       **最初の1段**として)Falt1の具体的な対象に対して即座に適用できる
       見込み。
 
+      ★★2026-09-04、上記の`simp`補題(「`1⊗ₜ(AdjoinRoot.mk g p) ↦
+      AdjoinRoot.mk(g.map φ)(p.map φ)`」)を実際にREPLで組み立てようと
+      したところ、より詳細な技術的障害を特定した(未解決): `unfold
+      ABC3.Found.Falt1.adjoinRootTensorEquiv`すると`have e1:=...;have
+      hpt:=...;have hIJ:=...;e1.trans(...)`という`let`鎖の形で展開
+      され、`dsimp only`でzeta簡約したあとも
+      `ABC3.Found.Falt1.tensorPolynomialAlgEquiv_one_tmul`を`rw`しよう
+      とすると「`↑tensorPolynomialAlgEquiv(1⊗ₜg)`(RingHomとしての
+      coercion、`hIJ`内部で使われている形)」と「`tensorPolynomialAlgEquiv
+      (1⊗ₜg)`(AlgEquivの直接のFunLike coercion、simp補題の形)」という
+      **2種類の異なるcoercion経路**が食い違い、「target expression is
+      not type-correct under the instances transparency level」という
+      エラーになる。次回はこの2つのcoercionを橋渡しする補題
+      (`AlgEquiv.coe_ringHom`的な、`norm_cast`用の橋渡し)を先に用意
+      するか、`adjoinRootTensorEquiv`自体を(`hIJ`の証明で`tensor
+      PolynomialAlgEquiv`をRingHomとして扱う代わりに)AlgEquivの
+      coercionで統一する形に書き直すことから始めるとよい。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
