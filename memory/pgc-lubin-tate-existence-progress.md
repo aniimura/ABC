@@ -1013,3 +1013,38 @@ lubinTateActionAtTorsionPoint_lt_one`)も得た。
 合成)への土台が整った——次の一歩は実際に`a·(b·x)`を意味づけて
 `a·(b·x)=(ab)·x`(乗法性)を、この反復可能性を使って狙うこと。
 加法性(`F_f`経由)は依然として`subst`/`aeval`橋渡しが必要な見通し。
+
+**続報(2026-09-04・続き、正直な記録: 乗法性への「近道」を探したが
+見つからず)**: `a·(b·x)=(ab)·x`を`subst`/`aeval`の一般論を経由せず
+得る近道として、`LubinTateAction_comp`(`[ab]_f=subst([b]_f)([a]_f)`、
+`Found/PGC/LubinTateActionMul.lean`に既存)と`PowerSeries.aeval_
+unique`(連続な`AlgHom`は`aeval`とその評価点で一意に特徴づけられる、
+mathlib既存)を組み合わせる経路を検討した:
+`ε:=(aeval x)∘(substAlgHom hg)`(`g:=[b]_f`、`hg:HasSubst g`は
+`constantCoeff g=0`から自動)が連続な`AlgHom`であれば、
+`aeval_unique`で`ε=aeval(ε X)`となり、`p:=[a]_f`で評価すれば
+`aeval x([ab]_f)=aeval x(subst g [a]_f)=ε([a]_f)=aeval(ε X)([a]_f)
+=aeval(aeval x g)([a]_f)=aeval(b·x)([a]_f)=a·(b·x)`(狙い通り)が
+出るはずだった。
+
+★しかし`ε`の**連続性**を示す段階で行き詰まった——mathlibで`subst`の
+連続性を保証する唯一の補題`MvPowerSeries.continuous_subst`は
+`[DiscreteUniformity R][DiscreteUniformity S]`(両側の環を**離散**
+位相として扱う)を要求する。これは`aeval`/`HasEval`の枠組みが前提
+とする「値付き体の位相」(非離散、`IsLinearTopology`)とは**別物**
+——`subst`は元来「離散(=formal/代数的)」な設定でしか連続性が
+保証されていない。したがって`substAlgHom hg`が`aeval`の使う
+標準位相(次数ごとの収束による位相)について連続であることを示す
+既存の道具はmathlibに見当たらなかった。
+
+★これは「探せば近道が見つかる」という前回までの楽観的なパターンが
+**今回は当てはまらなかった**という正直な記録——`subst`(形式的・
+代数的)と`aeval`(位相的・収束による評価)を繋ぐ一般的な「連鎖律」
+は、この特定のケース(値付き体への評価)について、mathlibにはまだ
+無い**本物の理論的ギャップ**であり、埋めるには(a)`substAlgHom`が
+次数ごとの収束位相について連続であることを独自に証明する(`subst`
+の係数ごとの有限和公式から直接、`DiscreteUniformity`を経由せず)、
+または(b)加法性・乗法性の証明を`subst`/`aeval`の一般論を経由しない
+別の(まだ見えていない)経路で組み立て直す、のいずれかが必要——
+どちらも本セッションの残り時間で片付く規模の作業ではなく、次回以降
+への持ち越しとして正直に記録する。
