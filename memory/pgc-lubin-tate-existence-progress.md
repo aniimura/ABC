@@ -3220,3 +3220,57 @@ mem_iteratedLubinTatePsiTorsionPoints`(前々回)は、このコンパクト性
 しないこの経路では不要になった)——ただし両方とも他の文脈
 (例えば`galoisReciprocityEquiv`系や将来の核の特徴づけ)で有用な
 可能性があるので、削除はしない。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+大きな節目(2026-09-05): **`reciprocityMapLimit`の全射性を完成**
+(`Found/PGC/LubinTateReciprocityMapLimitSurjective.lean`新規)——
+節目(5)(射影極限`Gal(L_π/K)≅𝒪_K^×`)の部品(iii)の前半が完成した
+
+上のコンパクト性論法を実際に組み立て切り、`reciprocityMapLimit:
+Gal(K.closure/K.carrier)→*CompatibleUnits K hπmax`が**全射**である
+ことをsorry無しで証明した。新しい数学的な難所は無かった——既に
+確立済みの部品を「配管」で組み合わせるだけで届いた。
+
+### 証明の骨格(実際に組み立てた形)
+
+`v∈CompatibleUnits`を任意に取る:
+1. `unitReductionHom_surjective`(既出)で`v`を単一の大域単数`u`
+   へ持ち上げる(`hu:unitReductionHom u=v`)。
+2. **`reciprocityMap_eq_mk_of_apply_eq`**(新規、`reciprocityMap_
+   spec`の逆方向): `σ(x)=u·x`ならば`reciprocityMap(x)(σ)=Quotient
+   Group.mk u`——`unitActionQuotientLift_injective`(既出)+
+   `unitActionQuotientLift_mk`(既出)から。
+3. **`exists_algEquiv_apply_eq`**(新規): 各`m`で`C m:={σ:σ((psiGen
+   Seq m).pt)=u·(psiGenSeq m).pt}`が非空——`reciprocityMap_
+   surjective`(既出、前回発見)+`reciprocityMap_spec`+`unitAction
+   QuotientLift_mk`から。
+4. **`algEquiv_apply_eq_of_succ_apply_eq`**(新規): `C(m+1)⊆C m`
+   (入れ子性)——`reciprocityMap_eq_mk_of_apply_eq`で両者の値を
+   `mk u`に翻訳してから、前回の`algEquiv_eq_of_reciprocityMap_eq_
+   of_map_eq`を`QuotientGroup.map_mk`(`mk u`は`mk u`自身へ送られる、
+   `rfl`)と組み合わせて適用するだけ。
+5. `isClosed_algEquiv_eq`(既出、前回)で各`C m`が閉、`compact
+   Space_algEquiv`(既出、前回)+閉部分集合のコンパクト性で`C 0`が
+   コンパクト、`IsCompact.nonempty_iInter_of_sequence_nonempty_
+   isCompact_isClosed`(mathlib)で`⋂C m`が空でないと結論。
+6. その交わりの元`σ`が全ての`m`で条件を満たすので、`reciprocityMap_
+   eq_mk_of_apply_eq`+`principalUnitsQuotientEquiv_apply_mk`(既出、
+   (i))で`reciprocityMapLimitFamily σ(m+1)=unitReductionQuotientMap
+   (m+1)(u)=v(m+1)`(`hu`から)。`n=0`成分は自明群なので自動的に
+   一致(`Subsingleton.elim`)。**`reciprocityMapLimit σ=v`**。
+
+ゲート: `lake build ABC3.Found.PGC.LubinTateReciprocityMapLimit
+Surjective`(個別)・`lake build ABC3`(6590 jobs, 成功)・`node
+tools/check.mjs --brief`(既存NG 13件のまま)・`node tools/mojibake.mjs`
+(文字化けなし)すべて確認済み。
+
+### 残る作業(更新)
+
+節目(5)の(i)(ii)(iii-前半・全射性)が完成した。残るのは**単射性
+に代わる、核の特徴づけ**——`ker(reciprocityMapLimit)`の記述
+(軌道修正の記録を参照: 単射性そのものは`Gal(K̄/K)`が非可換である
+限り成り立たない)。これは`/goal`の残り8項目(特にProposition 1.2
+の`Γ_K^ab≅(K^×)^∧`)が実際に何を要求するかを見極めてから優先度を
+決めるのが良い——全射性だけで十分な可能性もある。次に戻るなら、
+まず`/goal`側(`lean/ABC3/Skeleton/PGC/Section1.lean`の
+`residueCard_and_degree_recoverable.needs`)を再確認するところから。
