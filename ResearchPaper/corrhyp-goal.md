@@ -1709,3 +1709,23 @@ polynomial_family`でそのまま有限段階へ降ろせる。GlueDataの遷移
 構成に直接使える次の一手。集計は10/24で変わらず。
 
 コミット: `43b30c97`。
+
+### 2026-09-04さらに続報: 重なりの遷移開集合をP.Ring内の基本開集合として同定(GlueData遷移射の核心)
+
+`FieldLimit.lean`に`standardEtalePresentation_transitionOpen_eq`を完成(★sorry無し)——
+`D(f_i)∩D(f_j)`(`Spec B`内、`f_i`・`f_j`は標準エタール被覆の2つの局所化元)が、
+`P_i.Ring`の中の**具体的な基本開集合**`PrimeSpectrum.basicOpen(aeval P_i.X p)`
+(`p`は座標多項式、前回の`standardEtalePresentation_exists_coord`で得られる)に
+ちょうど一致することを示した。鍵は`g`が`P.Ring`の単元であること(標準エタール
+表示の定義そのもの、`hasMap_X.2`)から、座標の`g^n`倍が`basicOpen`を変えない
+という事実(副産物として`PrimeSpectrum.basicOpen_eq_top_of_isUnit`・
+`basicOpen_mul_isUnit`も完成、mathlibに直接の名前が見当たらなかったので自作)。
+
+**位置づけ**: これでGlueDataの遷移射構成の核心——「重なりを`P_i.Ring`内の
+具体的な元の基本開集合として特定する」——が完成した。残るのは(i)この`p`
+(1変数多項式)を`exists_fg_subalgebra_tensor_polynomial_family`で有限段階へ
+降ろす、(ii)`D(l→m)`と`D(m→l)`の間の実際の環同型(局所化同士の比較)を構成する、
+(iii)複数ピースを`Scheme.GlueData`として組み立てる、という3段階。
+集計は10/24で変わらず(§4は0/2のまま)。
+
+コミット: `e6e8c98f`。
