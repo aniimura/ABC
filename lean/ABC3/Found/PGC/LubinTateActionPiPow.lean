@@ -211,4 +211,28 @@ theorem iteratedLubinTate_dvd_of_le {A : Type*} [CommRing A] [IsLocalRing A] [Is
   rw [← hk, add_comm]
   exact iteratedLubinTate_dvd_iteratedLubinTate_add hq hπmax hπne0 f hf0 hf1 hf k n
 
+/-! ### 部品5: `[π^n]_f` の次数1係数は `π^n` -/
+
+/-- ★★★★★★★**`[π^n]_f` の次数1の係数は `π^n`**——`f'(0)=π`(仮定`hf1`)
+の連鎖律を `n` 回適用するだけ(`coeff_one_subst_1var`、乗法側で確立
+済み)。古典的な Lubin-Tate 理論で `φ_1` の Eisenstein 性(既約性)を
+示す鍵になる事実。 -/
+theorem coeff_one_iteratedLubinTate {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n : ℕ) :
+    PowerSeries.coeff 1 (iteratedLubinTate f n) = π ^ n := by
+  induction n with
+  | zero =>
+      show PowerSeries.coeff 1 (PowerSeries.X : PowerSeries A) = π ^ 0
+      simp
+  | succ n ih =>
+      have hiter0 : PowerSeries.constantCoeff (iteratedLubinTate f n) = 0 :=
+        constantCoeff_iteratedLubinTate hq hπmax hπne0 f hf0 hf1 hf n
+      show PowerSeries.coeff 1 (PowerSeries.subst (iteratedLubinTate f n) f) = π ^ (n + 1)
+      rw [coeff_one_subst_1var hiter0, hf1, ih, pow_succ]
+      ring
+
 end ABC3.Found.PGC

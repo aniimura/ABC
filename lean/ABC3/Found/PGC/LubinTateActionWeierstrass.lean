@@ -463,4 +463,133 @@ theorem zero_mem_iteratedLubinTateDistinguishedRoots {A : Type*} [CommRing A] [I
   rw [iteratedLubinTateDistinguished_coeff_zero hq hπmax hπne0 f hf0 hf1 hf n]
   simp
 
+/-! ### 部品8: `φ_1` は既約(Eisenstein の判定法)——`Λ_1\{0}` の生成体は次数 `q-1` -/
+
+/-- 冪級数の積の次数1の係数——`p.coeff 0 * q.coeff 1 + p.coeff 1 * q.coeff 0`
+(次数1になる `(i,j)` の組は `(0,1)`・`(1,0)` の2通りだけ)。 -/
+theorem coeff_one_mul_eq {A : Type*} [CommRing A] (p q : PowerSeries A) :
+    PowerSeries.coeff 1 (p * q) = PowerSeries.coeff 0 p * PowerSeries.coeff 1 q +
+      PowerSeries.coeff 1 p * PowerSeries.coeff 0 q := by
+  rw [PowerSeries.coeff_mul]
+  simp [Finset.Nat.sum_antidiagonal_eq_sum_range_succ (fun i j => PowerSeries.coeff i p * PowerSeries.coeff j q),
+    Finset.sum_range_succ, PowerSeries.coeff_zero_eq_constantCoeff]
+
+/-- `D_n` の次数1の係数と `U_n` の定数項の積は `π^n`——`[π^n]_f=D_n・U_n`
+の次数1の係数を比較し、`D_n` の定数項が0であること(既出)で
+簡約するだけ。 -/
+theorem iteratedLubinTateDistinguished_coeff_one_mul {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n : ℕ) :
+    (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n).coeff 1 *
+      PowerSeries.constantCoeff (iteratedLubinTateUnit hq hπmax hπne0 f hf0 hf1 hf n) = π ^ n := by
+  have hcoeff1 : PowerSeries.coeff 1 (iteratedLubinTate f n) = π ^ n :=
+    coeff_one_iteratedLubinTate hq hπmax hπne0 f hf0 hf1 hf n
+  have heq := iteratedLubinTate_eq_distinguished_mul_unit hq hπmax hπne0 f hf0 hf1 hf n
+  rw [heq, coeff_one_mul_eq, Polynomial.coeff_coe, Polynomial.coeff_coe] at hcoeff1
+  rw [iteratedLubinTateDistinguished_coeff_zero hq hπmax hπne0 f hf0 hf1 hf n, zero_mul, zero_add,
+    PowerSeries.coeff_zero_eq_constantCoeff_apply] at hcoeff1
+  exact hcoeff1
+
+/-- `φ_n` の次数 `k` の係数は `D_n` の次数 `k+1` の係数——`D_n=X・φ_n`
+の係数シフト。 -/
+theorem iteratedLubinTatePrimitive_coeff_eq {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n k : ℕ) :
+    (iteratedLubinTatePrimitive hq hπmax hπne0 f hf0 hf1 hf n).coeff k =
+      (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n).coeff (k + 1) := by
+  rw [iteratedLubinTateDistinguished_eq_X_mul_primitive hq hπmax hπne0 f hf0 hf1 hf n,
+    Polynomial.coeff_X_mul]
+
+/-- `φ_n` は弱 Eisenstein(`IsWeaklyEisensteinAt`、次数未満の係数がすべて
+`maximalIdeal A` に属す)——`D_n` 自身が distinguished(弱 Eisenstein
+込み)であることと、上の係数シフトから従う。 -/
+theorem isWeaklyEisensteinAt_iteratedLubinTatePrimitive {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n : ℕ) :
+    (iteratedLubinTatePrimitive hq hπmax hπne0 f hf0 hf1 hf n).IsWeaklyEisensteinAt
+      (IsLocalRing.maximalIdeal A) := by
+  constructor
+  intro k hk
+  rw [iteratedLubinTatePrimitive_coeff_eq hq hπmax hπne0 f hf0 hf1 hf n k]
+  apply (isDistinguishedAt_iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n).mem
+  have hdegeq : (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n).natDegree =
+      (iteratedLubinTatePrimitive hq hπmax hπne0 f hf0 hf1 hf n).natDegree + 1 := by
+    conv_lhs => rw [iteratedLubinTateDistinguished_eq_X_mul_primitive hq hπmax hπne0 f hf0 hf1 hf n]
+    rw [Polynomial.natDegree_mul Polynomial.X_ne_zero
+      (monic_iteratedLubinTatePrimitive hq hπmax hπne0 f hf0 hf1 hf n).ne_zero, Polynomial.natDegree_X]
+    ring
+  omega
+
+/-- ★★★★★★★★★**`φ_1` の定数項は `maximalIdeal A ^ 2` に属さない**——
+`D_1.coeff 1 * U_1.constantCoeff = π`(`iteratedLubinTateDistinguished_
+coeff_one_mul`、`φ_1.coeff0=D_1.coeff1`)から、もし `φ_1.coeff0∈𝔪²`
+なら `π` 自身が単元になってしまい(`π=π²・(単元)` から `π・(単元)=1`)、
+`π∈𝔪` と矛盾する——という背理法。古典的な Lubin-Tate 理論で `φ_1` が
+**Eisenstein 多項式**であることの核心部分。 -/
+theorem iteratedLubinTatePrimitive_coeff_zero_notMem_sq {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) :
+    (iteratedLubinTatePrimitive hq hπmax hπne0 f hf0 hf1 hf 1).coeff 0 ∉
+      IsLocalRing.maximalIdeal A ^ 2 := by
+  intro hmem
+  rw [hπmax, Ideal.span_singleton_pow] at hmem
+  obtain ⟨w, hw⟩ := Ideal.mem_span_singleton'.mp hmem
+  set U := PowerSeries.constantCoeff (iteratedLubinTateUnit hq hπmax hπne0 f hf0 hf1 hf 1) with hU_def
+  have hone : (iteratedLubinTatePrimitive hq hπmax hπne0 f hf0 hf1 hf 1).coeff 0 * U = π := by
+    have := iteratedLubinTateDistinguished_coeff_one_mul hq hπmax hπne0 f hf0 hf1 hf 1
+    rwa [pow_one, ← iteratedLubinTatePrimitive_coeff_eq hq hπmax hπne0 f hf0 hf1 hf 1 0] at this
+  rw [← hw] at hone
+  have hcancel : π * (π * (w * U)) = π * 1 := by rw [mul_one]; linear_combination hone
+  have hπv : π * (w * U) = 1 := mul_left_cancel₀ hπne0 hcancel
+  have hπunit : IsUnit π := IsUnit.of_mul_eq_one (w * U) hπv
+  have hπmem : π ∈ IsLocalRing.maximalIdeal A := by
+    rw [hπmax]; exact Ideal.subset_span rfl
+  exact (IsLocalRing.maximalIdeal.isMaximal A).ne_top
+    (Ideal.eq_top_of_isUnit_mem _ hπmem hπunit)
+
+/-- ★★★★★★★★★★**`φ_1` は既約**——Eisenstein の判定法
+(`Polynomial.IsEisensteinAt.irreducible`)を、上で確立した3条件
+(モニックなので最高次係数は単元・弱Eisenstein・定数項が`𝔪²`に
+属さない)に適用する。古典的な Lubin-Tate 理論の核心的な帰結:
+`φ_1` の根が生成する拡大 `K(α)/K` は次数 `q-1` の**完全分岐拡大**
+(Eisenstein 拡大)である——原始 `π`-捩れ点 `Λ_1\{0}` を1つ添加すると
+そういう拡大になる、という基本定理の多項式版。 -/
+theorem irreducible_iteratedLubinTatePrimitive_one {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) :
+    Irreducible (iteratedLubinTatePrimitive hq hπmax hπne0 f hf0 hf1 hf 1) := by
+  have hmonic := monic_iteratedLubinTatePrimitive hq hπmax hπne0 f hf0 hf1 hf 1
+  have heis : (iteratedLubinTatePrimitive hq hπmax hπne0 f hf0 hf1 hf 1).IsEisensteinAt
+      (IsLocalRing.maximalIdeal A) := by
+    constructor
+    · rw [hmonic.leadingCoeff]
+      exact fun h => (IsLocalRing.maximalIdeal.isMaximal A).ne_top (Ideal.eq_top_of_isUnit_mem _ h isUnit_one)
+    · exact fun {k} hk => (isWeaklyEisensteinAt_iteratedLubinTatePrimitive hq hπmax hπne0 f hf0 hf1 hf 1).mem hk
+    · exact iteratedLubinTatePrimitive_coeff_zero_notMem_sq hq hπmax hπne0 f hf0 hf1 hf
+  have hdegpos : 0 < (iteratedLubinTatePrimitive hq hπmax hπne0 f hf0 hf1 hf 1).natDegree := by
+    rw [natDegree_iteratedLubinTatePrimitive hq hπmax hπne0 f hf0 hf1 hf 1, pow_one]
+    have h2 : 1 < pp ^ ff := hq ▸ Fintype.one_lt_card
+    omega
+  exact heis.irreducible (IsLocalRing.maximalIdeal.isMaximal A).isPrime hmonic.isPrimitive hdegpos
+
 end ABC3.Found.PGC
