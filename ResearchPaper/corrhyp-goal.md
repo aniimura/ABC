@@ -604,3 +604,31 @@ pullback g f`)で埋める見込み。埋まれば、`FieldLimit.lean` の
 locallyOfFiniteType`(遷移射の一致の降下)で貼り合わせて `Z` 全体を構成
 すること。数学的な核心はすべて完成した——残るのはスキーム論の定型的な
 貼り合わせという最終段階。
+
+### 2026-09-04さらに続報: `AffineTransitionLimit.lean` 適用に要る追加の前提を発見
+
+上の (a)/(b)(アフィン開被覆の細分・遷移射の貼り合わせ)は
+`AffineTransitionLimit.lean` の `Scheme.exists_isOpenCover_and_isAffine`
+等を `isLimit_extCone`(`extDiagram X` の極限)に**そのまま**適用すれば
+済むと想定していたが、これらの補題は `[∀ {i j} (f : i ⟶ j), IsAffineHom
+(D.map f)]`(図式の遷移射がアフィン)・`[∀ i, CompactSpace (D.obj i)]`・
+`[∀ i, QuasiSeparatedSpace (D.obj i)]` を要求する。`toSchemeDiagram ℚ ℝ`
+自身については(`Spec R`が常にアフィン・準コンパクトなので)これらは
+`FieldLimit.lean` で既に確立済みだが、**`extDiagram X`(`X.hom` に沿って
+base change した図式)については未確認**——`(extDiagram X).map h`
+(`Limits.pullback.map` で組んだ射)は `infer_instance` では
+`IsAffineHom` が自動的に付かない(`SchemeFEt.lean` の `Ext`/`extFEt` で
+`pullback.map` ではなく `Over.pullback`+`overPullbackMap` に乗り換えて
+解決したのと同じ理由——`pullback.map` は `MorphismProperty.pullback_fst`/
+`pullback_snd` の形に直接一致しない)。
+
+数学的には真(アフィン射の base change はアフィン、という標準事実)なので
+**証明できるはずだが未着手**——`(extDiagram X).map h` を `pullback.fst`/
+`pullback.snd` の合成として書き直すか、`extDiagram` 自体を
+`Over.pullback`(`X.hom` 側)ベースで組み直す(`Ext`/`extFEt` で使った
+設計)必要がある。さらに `CompactSpace`/`QuasiSeparatedSpace` は `X.left`
+自身にこれらの性質を要求する可能性があり(`X` が一般の `Over BaseK` の
+元では保証されない)、`corrHypInstance3` の `Space` を「有限型
+(qcqs)なスキームに限る」よう絞る設計変更が要るかもしれない——双曲曲線は
+常に有限型なので原文の意図には合致するが、`Interface` 側の変更が要る。
+次にここへ戻るときの具体的な出発点。
