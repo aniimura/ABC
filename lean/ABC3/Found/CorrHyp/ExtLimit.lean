@@ -1320,6 +1320,59 @@ noncomputable def piece_restrict_hom_basicOpen_right (X : Over BaseK) (U : X.lef
   piece_restrict_hom X (X.left.basicOpen g) (X.left.basicOpen (f * g))
     (by rw [Scheme.basicOpen_mul]; exact inf_le_right) C α
 
+/-! ### `C`側の片`piece(D(f*g))`を`piece(D(f))`の基本開として実現する
+(`2026-09-05続き16`)
+
+`descendPieceR`(`R`レベル)を実際の局所化として貼り合わせるための
+足がかり——`piece(D(f*g))`(`α⁻¹(pullback.fst⁻¹(D(f*g)))`)が、`C`の
+なかで**`piece(D(f))`のある元による基本開そのもの**であることを示す。
+`X.left`レベルの事実`X.basicOpen(f*g)=X.basicOpen(g|_{D(f)})`
+(`Scheme.basicOpen_mul`+`Scheme.basicOpen_res`、`rw`の自動`rfl`閉じで
+1行で証明できることを`2026-09-05続き15`で確認済み)を、`mathlib`の
+`Scheme.preimage_basicOpen`(`f⁻¹ᵁ(Y.basicOpen r)=X.basicOpen(f.app r)`)
+で`pullback.fst`・`α`の2段の逆像へ**別々の`have`として**押し出す
+——`rw`を2回連鎖させると「motive is not type correct」(`(ExtF.obj X).left`
+と`pullback X.hom toBaseK`が`rw`の構文一致チェックでは同一視されない)
+になったため、中間結果を`(ExtF.obj X).left.basicOpen`の形で明示的に
+型注釈した`have`として確定させ、`exact`(defeq判定)で個別に閉じる
+という2段構成にして解消した(新しい失敗形、配管の一種)。 -/
+
+open CategoryTheory AlgebraicGeometry Limits in
+/-- **`piece(D(f*g))=piece(D(f)).basicOpen(...)`の局所化パラメータ**——
+`g`を`D(f)`へ制限してから`pullback.fst`・`α`の2段で`C`側へ押し出した元。
+`Γ(C,piece(D(f)))`の元として、次の`piece_basicOpen_mul_eq`のRHSに現れる。 -/
+noncomputable def piece_basicOpen_localizationElem (X : Over BaseK) (U : X.left.Opens) (f g : Γ(X.left, U))
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) :
+    Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))) :=
+  α.app (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))
+    ((pullback.fst X.hom toBaseK).app (X.left.basicOpen f)
+      (X.left.presheaf.map (homOfLE (X.left.basicOpen_le f)).op g))
+
+open CategoryTheory AlgebraicGeometry Limits in
+/-- **`C`側の片`piece(D(f*g))`は`piece(D(f))`の基本開そのものである**——
+`piece_basicOpen_localizationElem`を局所化パラメータとする。`R`レベルの
+`descendPieceR`側で、`D(f*g)`の`S_0`を`D(f)`の`S_0`のこの元(の`R`レベル
+持ち上げ)による`Localization.Away`として実際に構成するための、
+スキームレベルでの根拠——`GlueData.f i j`が開埋め込みであることを
+`Spec`の左では言えたが、`descendPieceR`(`Spec`の右、`R`レベルの抽象
+モデル)側でも同じ開埋め込みが実現できることを、この事実が保証する
+土台になる(まだ`R`レベルへの引き上げ自体は未着手)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem piece_basicOpen_mul_eq (X : Over BaseK) (U : X.left.Opens) (f g : Γ(X.left, U))
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) :
+    (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen (f * g))) : C.Opens) =
+      C.basicOpen (piece_basicOpen_localizationElem X U f g C α) := by
+  have hcore : X.left.basicOpen (f * g) = X.left.basicOpen
+      (X.left.presheaf.map (homOfLE (X.left.basicOpen_le f)).op g) := by
+    rw [Scheme.basicOpen_mul, Scheme.basicOpen_res]
+  have h1 : (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen (f * g)) : (ExtF.obj X).left.Opens) =
+      (ExtF.obj X).left.basicOpen ((pullback.fst X.hom toBaseK).app (X.left.basicOpen f)
+        (X.left.presheaf.map (homOfLE (X.left.basicOpen_le f)).op g)) := by
+    rw [hcore]; exact Scheme.preimage_basicOpen _ _
+  rw [h1]
+  exact Scheme.preimage_basicOpen _ _
+
 /-- **アフィン開`U`上の基本開`X.basicOpen f`は`Spec(Localization.Away f)`
 そのものと同一視できる**——`mathlib`の`basicOpenIsoSpecAway`は`X := Spec R`
 の場合限定だったので、一般のアフィン開`U`(`X`自体はアフィンでなくてよい)
