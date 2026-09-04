@@ -12,6 +12,7 @@ import Mathlib.Analysis.SpecificLimits.Basic
 import Mathlib.RingTheory.Polynomial.Eisenstein.Basic
 import Mathlib.RingTheory.Polynomial.GaussLemma
 import Mathlib.RingTheory.DedekindDomain.IntegralClosure
+import ABC3.Found.GenEll.TameRamification
 
 /-!
 # [Falt1] Chapter I §1 の補助補題群(`Found`、sorry 無し)
@@ -1803,6 +1804,32 @@ theorem coeff_X_pow_sub_C' {R : Type*} [CommRing R] (π : R) (n m : ℕ) (hn : 0
   simp [Polynomial.coeff_X_pow, Polynomial.coeff_C]
   split_ifs <;> simp_all
 
+/-- **`X^n - π` は `(π)` を基準に Eisenstein**(`IsEisensteinAt` の
+構造そのもの)。`eisenstein_X_pow_sub_C`(既約性)と、後の単項生成性
+(`adjoin_eq_top_of_isEisensteinAt` 系)の両方がこの1つの事実から
+出るので、独立した部品として切り出した(2026-09-04)。 -/
+theorem isEisensteinAt_X_pow_sub_C {R : Type*} [CommRing R] [IsDomain R] (π : R) (n : ℕ) (hn : 0 < n)
+    (hprime : (Ideal.span ({π} : Set R)).IsPrime) (hnotsq : π ∉ (Ideal.span ({π} : Set R))^2) :
+    (Polynomial.X ^ n - Polynomial.C π : Polynomial R).IsEisensteinAt (Ideal.span ({π}:Set R)) := by
+  have hmonic : (Polynomial.X ^ n - Polynomial.C π : Polynomial R).Monic :=
+    Polynomial.monic_X_pow_sub_C π hn.ne'
+  have hdeg : (Polynomial.X ^ n - Polynomial.C π : Polynomial R).natDegree = n :=
+    Polynomial.natDegree_X_pow_sub_C
+  apply hmonic.isEisensteinAt_of_mem_of_notMem
+  · exact hprime.ne_top
+  · intro m hm
+    rw [hdeg] at hm
+    rw [coeff_X_pow_sub_C' π n m hn]
+    have hmn : m ≠ n := by omega
+    simp only [if_neg hmn]
+    split_ifs with h0
+    · simp
+    · simp
+  · rw [coeff_X_pow_sub_C' π n 0 hn]
+    have hn0 : (0:ℕ) ≠ n := by omega
+    simp only [if_neg hn0]
+    simpa using hnotsq
+
 /-- **`X^n - π` は `(π)` が非自乗な素イデアルなら既約**(Eisenstein の
 判定法の直接の帰結)。「非常に分岐した」`V_n` 族の各段(`p` 乗根の
 逐次添加)の生成多項式がこの形——`Vₙ₊₁` を構成する第一歩。 -/
@@ -1813,21 +1840,7 @@ theorem eisenstein_X_pow_sub_C {R : Type*} [CommRing R] [IsDomain R] (π : R) (n
     Polynomial.monic_X_pow_sub_C π hn.ne'
   have hdeg : (Polynomial.X ^ n - Polynomial.C π : Polynomial R).natDegree = n :=
     Polynomial.natDegree_X_pow_sub_C
-  have hei : (Polynomial.X ^ n - Polynomial.C π : Polynomial R).IsEisensteinAt (Ideal.span ({π}:Set R)) := by
-    apply hmonic.isEisensteinAt_of_mem_of_notMem
-    · exact hprime.ne_top
-    · intro m hm
-      rw [hdeg] at hm
-      rw [coeff_X_pow_sub_C' π n m hn]
-      have hmn : m ≠ n := by omega
-      simp only [if_neg hmn]
-      split_ifs with h0
-      · simp
-      · simp
-    · rw [coeff_X_pow_sub_C' π n 0 hn]
-      have hn0 : (0:ℕ) ≠ n := by omega
-      simp only [if_neg hn0]
-      simpa using hnotsq
+  have hei := isEisensteinAt_X_pow_sub_C π n hn hprime hnotsq
   refine hei.irreducible hprime hmonic.isPrimitive ?_
   rw [hdeg]; exact hn
 
@@ -1908,5 +1921,153 @@ theorem isDedekindDomain_integralClosure_adjoinRoot_X_pow_sub_C
       (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map (algebraMap V0 (FractionRing V0)))) :=
     algIsSeparable_adjoinRoot_of_separable _ hmonicK hsepK
   infer_instance
+
+/-!
+## Theorem 1.2・3c: `V_1` の単項生成性(monogenicity)が完成した(2026-09-04)
+
+`falt1CokernelLengthEq`(Lemma 1.1「長さ」)・`cancel_conductor_delta`
+(3b)がともに要求する「`W` は単一の元 `w` で生成される」(`hadjoin :
+Algebra.adjoin V ({w}:Set W) = ⊤`)を、上の `V_1 := integralClosure V0
+L` の構成に対して**実際に確認した**——これで 3c の技術的な核心
+(Eisenstein 拡大の古典的な「単項生成性」定理)を、`AdjoinRoot(f)` の
+整閉性を直接証明することなく手に入れた。
+
+★決定的な発見: `ABC3.Found.GenEll.TameRamification`(Mochizuki
+[GenEll] の馴分岐の形式化、別の論文トラックだが純粋な可換環論)に、
+まさにこの用途の部品が**既に完成していた**——
+`mem_adjoin_of_pow_smul_of_isEisensteinAt`(Eisenstein なら `π^k•z∈
+adjoin` から `z∈adjoin` が出る、`k` 回の帰納)と
+`exists_smul_mem_adjoin_powerBasis`(`L` の任意の元は、ある `0≠d∈R`
+倍すれば `adjoin` に入る、`IsLocalization.exist_integer_multiples`
+経由)。`R` が DVR なら「任意の `d≠0` は `π^k×単元`」
+(`IsDiscreteValuationRing.eq_unit_mul_pow_irreducible`)なので、
+この2つを合成するだけで「**任意の整な `z` は `adjoin R {gen}` に
+入る**」——つまり `adjoin R {gen} = integralClosure R L` が出る。 -/
+
+/-- **Eisenstein なら生成元が整閉包全体を生成する(DVR上、核心の一歩)**:
+`R` が DVR、`PB.gen` の(`R` 上の)最小多項式が `π` を基準に
+Eisenstein なら、`L` の**任意の整な元** `z` は `Algebra.adjoin R
+{PB.gen}` に入る。`ABC3.Found.GenEll.mem_adjoin_of_pow_smul_of_
+isEisensteinAt`(帰納の芯)と `ABC3.Found.GenEll.exists_smul_mem_
+adjoin_powerBasis`(分母を払う)を、`d=π^k×単元` という DVR 特有の
+分解(`IsDiscreteValuationRing.eq_unit_mul_pow_irreducible`)で
+橋渡しする。 -/
+theorem adjoin_eq_top_of_isEisensteinAt {R K L : Type*}
+    [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    [Field K] [Field L] [Algebra K L] [Algebra R L] [Algebra R K]
+    [IsScalarTower R K L] [IsFractionRing R K]
+    {PB : PowerBasis K L} (hBint : IsIntegral R PB.gen)
+    {pi : R} (hpi : Irreducible pi)
+    (hEis : (minpoly R PB.gen).IsEisensteinAt (Ideal.span {pi})) :
+    ∀ z : L, IsIntegral R z → z ∈ Algebra.adjoin R {PB.gen} := by
+  intro z hz
+  obtain ⟨d, hd0, hdz⟩ := ABC3.Found.GenEll.exists_smul_mem_adjoin_powerBasis (R := R) PB z
+  obtain ⟨n, u, hu⟩ := IsDiscreteValuationRing.eq_unit_mul_pow_irreducible hd0 hpi
+  have hu2 : d = pi ^ n * (u : R) := by rw [hu]; ring
+  have huz_int : IsIntegral R ((u : R) • z) := by
+    rw [Algebra.smul_def]
+    exact (isIntegral_algebraMap).mul hz
+  have hdz' : pi ^ n • ((u : R) • z) ∈ Algebra.adjoin R {PB.gen} := by
+    rw [smul_smul, ← hu2]; exact hdz
+  have huz_mem : (u : R) • z ∈ Algebra.adjoin R {PB.gen} :=
+    ABC3.Found.GenEll.mem_adjoin_of_pow_smul_of_isEisensteinAt hpi.prime hBint hEis n
+      ((u : R) • z) huz_int hdz'
+  have h2 : ((u⁻¹ : Rˣ) : R) • ((u : R) • z) = z := by
+    rw [smul_smul]
+    simp
+  rw [← h2]
+  exact Subalgebra.smul_mem _ huz_mem _
+
+/-- **`adjoin_eq_top_of_isEisensteinAt` の等式版**: `adjoin R {PB.gen}
+= integralClosure R L`(Subalgebra として)。`≤` は生成元が整である
+ことから、`≥` が上の定理そのもの。 -/
+theorem adjoin_eq_integralClosure_of_isEisensteinAt {R K L : Type*}
+    [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    [Field K] [Field L] [Algebra K L] [Algebra R L] [Algebra R K]
+    [IsScalarTower R K L] [IsFractionRing R K]
+    {PB : PowerBasis K L} (hBint : IsIntegral R PB.gen)
+    {pi : R} (hpi : Irreducible pi)
+    (hEis : (minpoly R PB.gen).IsEisensteinAt (Ideal.span {pi})) :
+    Algebra.adjoin R ({PB.gen} : Set L) = integralClosure R L := by
+  apply le_antisymm
+  · rw [Algebra.adjoin_le_iff]
+    intro x hx
+    simp only [Set.mem_singleton_iff] at hx
+    subst hx
+    exact hBint
+  · intro z hz
+    exact adjoin_eq_top_of_isEisensteinAt hBint hpi hEis z hz
+
+/-- **`falt1CokernelLengthEq`/`cancel_conductor_delta` が要求する形**:
+`W := integralClosure R L` の中で、`w := PB.gen`(整閉包の元として)が
+`Algebra.adjoin R {w} = ⊤` を満たす。`Subalgebra.map_injective`(単射な
+`AlgHom` による像の単射性)+ `AlgHom.map_adjoin_singleton` +
+`Subalgebra.range_val` で、`L` の中での等式(上の定理)を `W` 自身の
+中での「`⊤` 生成」に変換する。 -/
+theorem adjoin_eq_top_in_integralClosure_of_isEisensteinAt {R K L : Type*}
+    [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    [Field K] [Field L] [Algebra K L] [Algebra R L] [Algebra R K]
+    [IsScalarTower R K L] [IsFractionRing R K]
+    {PB : PowerBasis K L} (hBint : IsIntegral R PB.gen)
+    {pi : R} (hpi : Irreducible pi)
+    (hEis : (minpoly R PB.gen).IsEisensteinAt (Ideal.span {pi})) :
+    Algebra.adjoin R ({(⟨PB.gen, hBint⟩ : integralClosure R L)} : Set (integralClosure R L)) = ⊤ := by
+  have hS : Algebra.adjoin R ({PB.gen} : Set L) = integralClosure R L :=
+    adjoin_eq_integralClosure_of_isEisensteinAt hBint hpi hEis
+  apply Subalgebra.map_injective (f := (integralClosure R L).val) Subtype.val_injective
+  rw [AlgHom.map_adjoin_singleton, Algebra.map_top, Subalgebra.range_val]
+  show Algebra.adjoin R ({PB.gen} : Set L) = integralClosure R L
+  exact hS
+
+/-- **「非常に分岐した」`V_n` 族の1段の単項生成性(完成)**:
+`isDedekindDomain_integralClosure_adjoinRoot_X_pow_sub_C` の `V_1 :=
+integralClosure V0 L` に対し、`AdjoinRoot.root fK` を整閉包の元とみた
+`w` が `Algebra.adjoin V0 {w} = ⊤` を満たす。`minpoly V0 w = f`
+(`X^n-π` そのもの、`minpoly.isIntegrallyClosed_eq_field_fractions'` +
+`Polynomial.map_injective` で `K` 上の minpoly から降ろす)を経由して
+`adjoin_eq_top_in_integralClosure_of_isEisensteinAt` を適用する。 -/
+theorem adjoin_eq_top_integralClosure_adjoinRoot_X_pow_sub_C
+    {V0 : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0] (π : V0) (n : ℕ)
+    (hn : (n : FractionRing V0) ≠ 0) (hπne0 : algebraMap V0 (FractionRing V0) π ≠ 0)
+    (hprime : (Ideal.span ({π} : Set V0)).IsPrime) (hnotsq : π ∉ (Ideal.span ({π} : Set V0)) ^ 2)
+    (hnpos : 0 < n) :
+    ∃ w : integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))),
+      Algebra.adjoin V0 ({w} : Set _) = ⊤ := by
+  set f : Polynomial V0 := Polynomial.X ^ n - Polynomial.C π with hfdef
+  set fK : Polynomial (FractionRing V0) := f.map (algebraMap V0 (FractionRing V0)) with hfKdef
+  have hirr : Irreducible fK :=
+    eisenstein_X_pow_sub_C_irreducible_map π n hnpos hprime hnotsq
+  haveI : Fact (Irreducible fK) := ⟨hirr⟩
+  have hmonicK : fK.Monic := (Polynomial.monic_X_pow_sub_C π hnpos.ne').map _
+  set PB := AdjoinRoot.powerBasis hirr.ne_zero with hPBdef
+  have hPBgen : PB.gen = AdjoinRoot.root fK := AdjoinRoot.powerBasis_gen hirr.ne_zero
+  have hBint : IsIntegral V0 PB.gen := by
+    rw [hPBgen]
+    have hmonic : f.Monic := Polynomial.monic_X_pow_sub_C π hnpos.ne'
+    refine ⟨f, hmonic, ?_⟩
+    show Polynomial.aeval (AdjoinRoot.root fK) f = 0
+    rw [← Polynomial.aeval_map_algebraMap (A := FractionRing V0)]
+    rw [Polynomial.aeval_def, AdjoinRoot.algebraMap_eq]
+    exact AdjoinRoot.eval₂_root fK
+  have hminpolyK : minpoly (FractionRing V0) PB.gen = fK := by
+    rw [hPBgen]
+    have h := AdjoinRoot.minpoly_root hirr.ne_zero (f := fK)
+    rw [hmonicK.leadingCoeff, inv_one, Polynomial.C_1, mul_one] at h
+    exact h
+  have hEqmin : minpoly V0 PB.gen = f := by
+    have hEq : minpoly (FractionRing V0) PB.gen = (minpoly V0 PB.gen).map (algebraMap V0 (FractionRing V0)) :=
+      minpoly.isIntegrallyClosed_eq_field_fractions' (FractionRing V0) hBint
+    rw [hminpolyK] at hEq
+    have hEq2 : f.map (algebraMap V0 (FractionRing V0)) = (minpoly V0 PB.gen).map (algebraMap V0 (FractionRing V0)) := hEq
+    exact (Polynomial.map_injective _ (IsFractionRing.injective V0 (FractionRing V0)) hEq2).symm
+  have hEis : (minpoly V0 PB.gen).IsEisensteinAt (Ideal.span ({π} : Set V0)) := by
+    rw [hEqmin]; exact isEisensteinAt_X_pow_sub_C π n hnpos hprime hnotsq
+  have hπ0 : π ≠ 0 := by
+    intro h; apply hπne0; rw [h]; simp
+  have hprimeπ : Prime π := (Ideal.span_singleton_prime hπ0).mp hprime
+  have hpiirr : Irreducible π := hprimeπ.irreducible
+  refine ⟨⟨PB.gen, hBint⟩, ?_⟩
+  exact adjoin_eq_top_in_integralClosure_of_isEisensteinAt hBint hpiirr hEis
 
 end ABC3.Found.Falt1
