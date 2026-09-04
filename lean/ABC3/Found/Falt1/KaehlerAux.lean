@@ -1492,6 +1492,61 @@ noncomputable def pushoutKaehlerSplit3 {R C0 C1 C2 B1 B : Type*} [CommRing R] [C
   exact e1.trans (eStep.prodCongr (LinearEquiv.refl B _) |>.trans (LinearEquiv.prodAssoc B _ _ _))
 
 /-!
+## `pushoutKaehlerSplit` の任意個への一般化: 帰納の1段(2026-09-04)
+
+`pushoutKaehlerSplit3`(3項=`d=2`の場合の実証)を見て、「前の状態」を
+`2つの決まった因子の直積`ではなく**任意の`Fintype`で添字付けられた
+族**として抽象化すれば、帰納の**1段**を切り出せることに気づいた——
+`TensorProduct.piRight`(`N⊗[R](∀i,M i) ≃ ∀i,N⊗[R]M i`、任意の
+`Fintype`添字で無条件に成立、mathlib既存)と`LinearEquiv.piCongrRight`
+(各成分ごとの同型をPi型全体の同型に持ち上げる、mathlib既存)を使えば、
+`pushoutKaehlerSplit3`の「2段目」の議論がそのまま**任意個の「前の
+因子」**に対して機械的に一般化できる。これにより「`Fin(d+1)`版を
+1本の定理として書く」代わりに、**「1個追加する」という帰納の1段を
+汎用的な補題として確立**した——実際の使用(Theorem 1.2 の`V_n`塔の
+構成)ではこの1段を`n`回繰り返し適用することになるはずで、それ自体が
+`V_n`の帰納的構成と自然に噛み合う形。`Fin.snoc`等での添字の付け替え
+を経た「`Fin(d+1)`全体を1つの定理として閉じる」ラッパーはここでは
+作らない(次回以降の課題として残す、falt1-goal.md参照)。 -/
+
+set_option maxHeartbeats 800000 in
+/-- **`pushoutKaehlerSplit` の帰納の1段**: 「`Ω[B1/R]`が(`Fintype`
+`ι`で添字付けられた)族`F`に関して`∀i,TensorProduct(F i)B1 Ω[F i/R]`
+に分解している」という前提(`prev`)のもとで、`B`が`B1`と`C`の
+pushoutなら、`Ω[B/R]`はその族に`C`を1個追加した形に分解する。
+`pushoutKaehlerSplit`(1段の分解)と`TensorProduct.piRight`・
+`TensorProduct.AlgebraTensorModule.cancelBaseChange`(各成分ごとの
+底変換の解消)を組み合わせるだけ。 -/
+noncomputable def pushoutKaehlerSplitStep {R B1 C B : Type*} {ι : Type*} [Fintype ι] [DecidableEq ι] (F : ι → Type*)
+    [CommRing R] [CommRing B1] [CommRing C] [CommRing B] [∀ i, CommRing (F i)]
+    [Algebra R B1] [Algebra R C] [Algebra R B] [∀ i, Algebra R (F i)]
+    [Algebra B1 B] [Algebra C B] [IsScalarTower R B1 B] [IsScalarTower R C B] [Algebra.IsPushout R B1 C B]
+    [∀ i, Algebra (F i) B1] [∀ i, IsScalarTower R (F i) B1]
+    [∀ i, Algebra (F i) B] [∀ i, IsScalarTower R (F i) B] [∀ i, IsScalarTower (F i) B1 B]
+    (prev : Ω[B1⁄R] ≃ₗ[B1] (∀ i, TensorProduct (F i) B1 Ω[F i⁄R]))
+    (hinj : Function.Injective (KaehlerDifferential.mapBaseChange R B1 B)) :
+    Ω[B⁄R] ≃ₗ[B] (∀ i, TensorProduct (F i) B Ω[F i⁄R]) × TensorProduct C B Ω[C⁄R] := by
+  set e1 := ABC3.Found.Falt1.pushoutKaehlerSplit (R := R) (C := B1) (D := C) (B := B) hinj with he1
+  set e2 : TensorProduct B1 B Ω[B1⁄R] ≃ₗ[B] TensorProduct B1 B (∀ i, TensorProduct (F i) B1 Ω[F i⁄R]) :=
+    TensorProduct.AlgebraTensorModule.congr (LinearEquiv.refl B B) prev with he2
+  set ePi := TensorProduct.piRight B1 B B (fun i => TensorProduct (F i) B1 Ω[F i⁄R]) with hePi
+  set eCancel : ∀ i, TensorProduct B1 B (TensorProduct (F i) B1 Ω[F i⁄R]) ≃ₗ[B] TensorProduct (F i) B Ω[F i⁄R] :=
+    fun i => TensorProduct.AlgebraTensorModule.cancelBaseChange (F i) B1 B B (Ω[F i⁄R]) with heCancel
+  set eStep : TensorProduct B1 B Ω[B1⁄R] ≃ₗ[B] (∀ i, TensorProduct (F i) B Ω[F i⁄R]) :=
+    (e2.trans ePi).trans (LinearEquiv.piCongrRight eCancel) with heStep
+  exact e1.trans (eStep.prodCongr (LinearEquiv.refl B _))
+
+set_option maxHeartbeats 400000 in
+/-- **帰納の起点**: `Ω[C0/R]`は「`Fin 1`で添字付けられた、`C0`だけの
+族」に(自明に)分解している——`TensorProduct.lid`(`C0⊗[C0]M≃M`)と
+`LinearEquiv.funUnique`(単元集合上のPi型≃その1点での値)を組み合わせる
+だけ。`pushoutKaehlerSplitStep`を繰り返し適用する帰納の`prev`の
+出発点として使う。 -/
+noncomputable def pushoutKaehlerSplitBase {R C0 : Type*} [CommRing R] [CommRing C0] [Algebra R C0] :
+    Ω[C0⁄R] ≃ₗ[C0] (∀ _ : Fin 1, TensorProduct C0 C0 Ω[C0⁄R]) :=
+  (TensorProduct.lid C0 Ω[C0⁄R]).symm.trans (LinearEquiv.funUnique (Fin 1) C0 _).symm
+
+/-!
 ## Theorem 1.2 の4番目のピース: 長さの漸化不等式から `δ_n→0`(2026-09-04、完成)
 
 falt1-goal.md に逐語で記録した証明本文(物理p.5=印字p.258)の最後の一段
