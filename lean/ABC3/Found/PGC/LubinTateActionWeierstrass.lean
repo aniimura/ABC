@@ -345,4 +345,102 @@ theorem card_iteratedLubinTatePrimitiveRoots {A : Type*} [CommRing A] [IsLocalRi
       (algebraMap A (iteratedLubinTateAlgClosure A)),
     natDegree_iteratedLubinTatePrimitive hq hπmax hπne0 f hf0 hf1 hf n]
 
+/-! ### 部品7: `n≤m` ならば `D_n∣D_m`(`Λ_n⊆Λ_m` の多項式版) -/
+
+/-- `[π^n]_f∣[π^m]_f` の商 `r` の mod `π` の像は `X^(q^m-q^n)`——両辺の
+mod `π` の像(`iteratedLubinTate_map_residue`)を比較し、`X^{q^n}` で
+簡約するだけ。 -/
+theorem iteratedLubinTate_dvd_map_residue {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) {n m : ℕ} (hnm : n ≤ m)
+    (r : PowerSeries A) (hr : iteratedLubinTate f m = iteratedLubinTate f n * r) :
+    PowerSeries.map (IsLocalRing.residue A) r = PowerSeries.X ^ ((pp ^ ff) ^ m - (pp ^ ff) ^ n) := by
+  have hle : (pp ^ ff) ^ n ≤ (pp ^ ff) ^ m := Nat.pow_le_pow_right (by
+    have := (hq ▸ Fintype.card_pos : 0 < pp ^ ff); omega) hnm
+  have hmapmul : PowerSeries.map (IsLocalRing.residue A) (iteratedLubinTate f m) =
+      PowerSeries.map (IsLocalRing.residue A) (iteratedLubinTate f n) *
+        PowerSeries.map (IsLocalRing.residue A) r := by
+    rw [hr, map_mul]
+  rw [iteratedLubinTate_map_residue hq hπmax hπne0 f hf0 hf1 hf m,
+    iteratedLubinTate_map_residue hq hπmax hπne0 f hf0 hf1 hf n] at hmapmul
+  have hXne0 : (PowerSeries.X : PowerSeries (IsLocalRing.ResidueField A)) ^ (pp ^ ff) ^ n ≠ 0 :=
+    pow_ne_zero _ PowerSeries.X_ne_zero
+  have hsplit : (PowerSeries.X : PowerSeries (IsLocalRing.ResidueField A)) ^ (pp ^ ff) ^ m =
+      PowerSeries.X ^ (pp ^ ff) ^ n * PowerSeries.X ^ ((pp ^ ff) ^ m - (pp ^ ff) ^ n) := by
+    rw [← pow_add]
+    congr 1
+    omega
+  rw [hsplit] at hmapmul
+  exact mul_left_cancel₀ hXne0 hmapmul.symm
+
+/-- ★★★★★★★★★**`n≤m` ならば `D_n∣D_m`**——古典的な Lubin-Tate 理論で
+`Λ_n⊆Λ_m` の由来になる、多項式レベルの整除関係。`[π^n]_f∣[π^m]_f`
+(冪級数、`iteratedLubinTate_dvd_of_le`)の商 `r` を、mod `π` の像が
+非零(`X^{q^m-q^n}`)なことから自身も Weierstrass 分解
+(`r=D'・U'`)し、`(D_n・D')・(U_n・U')` が `[π^m]_f` の**もう1つの**
+Weierstrass 分解であることを`Polynomial.IsDistinguishedAt.mul`
+(distinguished多項式の積は distinguished)で確認し、一意性
+(`IsWeierstrassFactorization.unique`)から `D_m=D_n・D'` を結論する
+——`D_n∣D_m` が直ちに従う。 -/
+theorem iteratedLubinTateDistinguished_dvd_of_le {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) {n m : ℕ} (hnm : n ≤ m) :
+    iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n ∣
+      iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf m := by
+  obtain ⟨r, hr⟩ := iteratedLubinTate_dvd_of_le hq hπmax hπne0 f hf0 hf1 hf hnm
+  have hrmap : PowerSeries.map (IsLocalRing.residue A) r =
+      PowerSeries.X ^ ((pp ^ ff) ^ m - (pp ^ ff) ^ n) :=
+    iteratedLubinTate_dvd_map_residue hq hπmax hπne0 f hf0 hf1 hf hnm r hr
+  have hrne0 : PowerSeries.map (IsLocalRing.residue A) r ≠ 0 := by
+    rw [hrmap]; exact pow_ne_zero _ PowerSeries.X_ne_zero
+  obtain ⟨D', U', hfact'⟩ := PowerSeries.exists_isWeierstrassFactorization hrne0
+  have hDdist' : D'.IsDistinguishedAt (IsLocalRing.maximalIdeal A) := hfact'.isDistinguishedAt
+  have hUunit' : IsUnit U' := hfact'.isUnit
+  have heq' : r = (D' : PowerSeries A) * U' := hfact'.eq_mul
+  have hcombined : iteratedLubinTate f m =
+      ((iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n * D' : Polynomial A) : PowerSeries A) *
+        (iteratedLubinTateUnit hq hπmax hπne0 f hf0 hf1 hf n * U') := by
+    rw [hr, iteratedLubinTate_eq_distinguished_mul_unit hq hπmax hπne0 f hf0 hf1 hf n, heq']
+    push_cast
+    ring
+  have hfactcombined : (iteratedLubinTate f m).IsWeierstrassFactorization
+      (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n * D')
+      (iteratedLubinTateUnit hq hπmax hπne0 f hf0 hf1 hf n * U') :=
+    { isDistinguishedAt := (isDistinguishedAt_iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n).mul hDdist'
+      isUnit := (isUnit_iteratedLubinTateUnit hq hπmax hπne0 f hf0 hf1 hf n).mul hUunit'
+      eq_mul := hcombined }
+  have huniq := hfactcombined.unique (iteratedLubinTate_map_residue_ne_zero hq hπmax hπne0 f hf0 hf1 hf m)
+  exact ⟨D', huniq.1.symm⟩
+
+/-- `n≤m` ならば `Λ_n⊆Λ_m` の多重集合版——`D_n∣D_m` を代数閉体へ写し、
+`Polynomial.roots.le_of_dvd` を適用する。 -/
+theorem iteratedLubinTateDistinguishedRoots_le_of_le {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) {n m : ℕ} (hnm : n ≤ m) :
+    iteratedLubinTateDistinguishedRoots hq hπmax hπne0 f hf0 hf1 hf n ≤
+      iteratedLubinTateDistinguishedRoots hq hπmax hπne0 f hf0 hf1 hf m := by
+  have hdvd : iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n ∣
+      iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf m :=
+    iteratedLubinTateDistinguished_dvd_of_le hq hπmax hπne0 f hf0 hf1 hf hnm
+  have hdvdmap : Polynomial.map (algebraMap A (iteratedLubinTateAlgClosure A))
+      (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n) ∣
+      Polynomial.map (algebraMap A (iteratedLubinTateAlgClosure A))
+        (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf m) :=
+    Polynomial.map_dvd _ hdvd
+  have hmne0 : Polynomial.map (algebraMap A (iteratedLubinTateAlgClosure A))
+      (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf m) ≠ 0 :=
+    (monic_iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf m).map _ |>.ne_zero
+  exact Polynomial.roots.le_of_dvd hmne0 hdvdmap
+
 end ABC3.Found.PGC
