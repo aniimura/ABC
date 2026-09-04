@@ -2557,6 +2557,60 @@ mathlib での正確な組み立て方は未確認)。
       pushoutとして構成する」という道が、**具体例のレベルで完全に
       実証された**——残るのは`n`段(または`d+1`段)の一般化のみ。
 
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05、
+      **決定的な発見**: Brinon-Conrad Exercise 13.7.4(本ファイル
+      2026-09-04の記録で存在は把握していたが、精読していなかった)
+      の全文(6ステップ)を実際に読んだところ、Theorem 1.2 の証明の
+      核心部分について**上記の`pushoutKaehlerSplitStepOption`(明示的
+      なAdjoinRootの同時添加構成)よりもっと直接的な経路**が判明した:
+
+      - **step (1)**: `Ω¹_{B1/A}`が`d+1`個の元で生成される、という
+        事実は「second fundamental exact sequence + Nakayama」
+        (原文のヒント)で出す——**`B1`を明示的に`d+1`個の生成元の
+        AdjoinRoot反復テンソル積として構成する必要は無い**。
+        `dim_{k_B}(Ω¹_{k_B/k_A}) = d`(剰余体の`p`-基底の次元、仮定)
+        から Nakayama で直接出るので、**どんな有限拡大`B/A`にも
+        機械的に適用できる一般命題**になる(構成に依存しない分、
+        むしろ`pushoutKaehlerSplitStepOption`より本質的)。
+      - **step (2)**: `length_B(Ω¹_{B1/A}) = length_B(B/p^{δ_{B1/A}}B)`
+        ——これは Lemma 1.1 そのもの(`falt1CokernelLengthEq`、
+        既に**完成・Found**)と同一。
+      - **step (4)**: `0→Bₙ₊₁⊗Ω¹_{Bₙ/Aₙ}→Ω¹_{Bₙ₊₁/Aₙ}→Ω¹_{Bₙ₊₁/Aₙ₊₁}→0`
+        (完全)+ (1) + elementary divisor theorem から`ker(b)⊇ker(p
+        倍写像)`、`length(ker(b∘a))≥length(Bₙ₊₁/p^{βₙ}Bₙ₊₁)`
+        (`βₙ=min(1,δₙ/(d+1))`)。左半分の完全性は`KaehlerDifferential.
+        exact_mapBaseChange_map`(既存、`falt1_kaehler_length_exact_
+        wn1`等で使用済み)+ Lemma 1.1型の単射性条件(`mapBaseChange_
+        injective_adjoinRoot_direct`等、既存)でカバーできる見込み。
+      - **step (5)**: 判別式の定義から`p^{δₙ-δₙ₊₁}·(Bₙ⊗ₐₙAₙ₊₁)⊆Bₙ₊₁`
+        を示し、`coker(b∘a)`が`p^{δₙ-δₙ₊₁}`で消えることを導く——
+        これが2026-09-04に記録した「discriminant の塔の乗法性」
+        (`Algebra.discr`系、未調査)に相当する、依然として**独立の
+        古典的整数論**を要する箇所。
+      - **step (6)**: (4)(5)から`δₙ-δₙ₊₁ ≥ βₙ-(d+1)(δₙ-δₙ₊₁)`——
+        これは`delta_tendsto_zero`(既に**完成**)の`hrec`仮定と
+        厳密に一致する形。
+
+      **`falt1_kaehler_spanFinrank_le`を追加した**(commit分は次項)
+      ——step (1) の Nakayama 部分だけを抽出した抽象補題
+      (`IsLocalRing.spanFinrank_eq_finrank_quotient`を`Ω[B/A]`に
+      適用しただけ)。`Ω[B/A]⊗k_B`の次元が`d+1`以下という**仮定**から
+      `Ω[B/A]`が`d+1`個以下で生成されることを結論する——`dim_{k_B}
+      (Ω¹_{k_B/k_A})=d`から`Ω[B/A]⊗k_B`の次元が`d+1`以下であることを
+      導く部分(局所環のcotangent space理論、`IsLocalRing.
+      spanFinrank_maximalIdeal_eq_finrank_cotangentSpace_of_fg`が
+      `+1`の出処になる見込み——DVRの`𝔪`は単項なので`spanFinrank 𝔪=1`)
+      は次回への課題として残した。
+
+      ★結論(更新): Theorem 1.2 の核心的な困難は、**依然として
+      3つの独立した深い部分**(1: Nakayama連鎖の完成、4: 完全列の
+      具体的な接続、5: 判別式の塔の乗法性)に分解できることが
+      判明した——うち(4)は既存の道具でほぼカバーできる見込みが
+      立ち、(1)は今回Nakayama部分だけ切り出せた。(5)(discriminant
+      の塔)が依然として**唯一手つかずの独立した古典的整数論**として
+      残っている——次回はここ(`Algebra.discr`系のmathlib資産調査)
+      から着手するのが最も効率的と判断する。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
