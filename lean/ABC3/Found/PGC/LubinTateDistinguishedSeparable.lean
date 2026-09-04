@@ -739,4 +739,79 @@ theorem iteratedLubinTateTorsionPoints_sdiff_eq_iteratedLubinTatePsiTorsionPoint
     (iteratedLubinTateTorsionPoints_disjoint_iteratedLubinTatePsiTorsionPoints
       K hq hπmax hπne0 f hf0 hf1 hf n hn)
 
+open scoped Classical in
+/-- `ψ_n` の根のなす `Finset` は空でない——濃度 `q^n-q^{n-1}=q^{n-1}(q-1)`
+(既出)が正であること(`q>1`、`Fintype.one_lt_card`)から。「原始的な」
+π^n-捩れ点が実際に**存在する**ことの確認——今後「生成元を1つ選ぶ」
+議論(単純推移性・`Gal(K(Λ_n)/K)`の構造)の前提になる。 -/
+theorem iteratedLubinTatePsiTorsionPoints_nonempty {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) :
+    (iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn).Nonempty := by
+  rw [← Finset.card_pos, card_iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn]
+  have h2 : 1 < pp ^ ff := hq ▸ Fintype.one_lt_card
+  have hlt : (pp ^ ff) ^ (n - 1) < (pp ^ ff) ^ n := Nat.pow_lt_pow_right h2 (by omega)
+  omega
+
+/-- `ψ_n` の定数項(`𝒪[K.carrier]` の元)は非零——`norm_iteratedLubinTatePsi_
+coeff_zero`(定数項のノルムは `‖π‖`)と `‖π‖≠0`(`hπne0`)から。
+`X_isCoprime_iteratedLubinTatePsi`(K.carrier レベル、`X∤ψ_n`)と同じ
+論拠を、コメント無しの単独の事実として取り出したもの。 -/
+theorem coeff_zero_iteratedLubinTatePsi_ne_zero {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) :
+    (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn).coeff 0 ≠ 0 := by
+  intro hcoeffzero
+  have hnormcoeff := norm_iteratedLubinTatePsi_coeff_zero K hq hπmax hπne0 f hf0 hf1 hf n hn
+  rw [hcoeffzero, norm_zero] at hnormcoeff
+  obtain ⟨hπpos, _⟩ := norm_pi_pos_lt_one K hπmax hπne0
+  rw [← hnormcoeff] at hπpos
+  exact lt_irrefl 0 hπpos
+
+open scoped Classical in
+/-- ★★★★★★**`0` は `ψ_n` の根ではない**——`ψ_n` の定数項が非零
+(`coeff_zero_iteratedLubinTatePsi_ne_zero`)ことと、`𝒪[K.carrier]→
+K.closure` の単射性(`K.carrier` への包含+`K.carrier→K.closure` の
+体射)から。`Λ_0={0}`(唯一の元は `0`、`D_0=X` の根)なので、
+これは「`Λ_n\Λ_{n-1}` の元(=`ψ_n` の根)は`Λ_0`の元(`0`)とは
+決して重ならない」——「原始的な」捩れ点が本当に非自明であることの
+確認。 -/
+theorem zero_not_mem_iteratedLubinTatePsiTorsionPoints {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) :
+    (0 : K.closure) ∉ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn := by
+  rw [iteratedLubinTatePsiTorsionPoints, Multiset.mem_toFinset]
+  intro hmem
+  have hinj : Function.Injective (algebraMap (𝒪[K.carrier]) K.closure) := by
+    rw [IsScalarTower.algebraMap_eq (𝒪[K.carrier]) K.carrier K.closure]
+    exact (algebraMap K.carrier K.closure).injective.comp Subtype.coe_injective
+  have hne0 : (Polynomial.map (algebraMap (𝒪[K.carrier]) K.closure)
+      (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn)) ≠ 0 :=
+    (isDistinguishedAt_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn).monic.map _ |>.ne_zero
+  rw [Polynomial.mem_roots hne0, Polynomial.IsRoot, Polynomial.eval_map,
+    Polynomial.eval₂_at_zero] at hmem
+  exact coeff_zero_iteratedLubinTatePsi_ne_zero K hq hπmax hπne0 f hf0 hf1 hf n hn
+    (hinj (hmem.trans (map_zero _).symm))
+
 end ABC3.Found.PGC
