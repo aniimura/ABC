@@ -127,18 +127,21 @@ theorem lemma_1_1_falt1 {Z V K L W : Type*} [CommRing Z] [CommRing V] [IsDedekin
 **有限であることの証明**はまだ行っていない——一般の Dedekind 整域 `V`
 に対しては `IsArtinian W W` すら成り立たない(`W` 自身は自分自身上の
 アルティン加群ではない)ため、`Submodule.length_quotient_lt` の直接
-適用はできない。★★具体的な道筋は特定した(未実装): `Module.
-length_ne_top_iff`(`≠⊤ ↔ IsFiniteLength`)+ `isArtinianRing_iff_
-isNoetherianRing_krullDimLE_zero`(mathlib)+ `Ideal.IsPrime.isMaximal`
-(`[Ring.DimensionLEOne W]` から、`differentIdeal V W` を含む素イデアルは
-非零なので極大)を貼り合わせれば `IsArtinianRing(W⧸differentIdeal V W)`
-——ただし「含む素イデアルが極大」から「商環の Krull 次元 0」への橋渡し
-(`PrimeSpectrum` の対応)は別途要る。もう1つの経路(標準的な証明):
-Dedekind 整域の非零イデアルは極大イデアルの積に一意分解するので、CRT
-で `W⧸I` を局所因子の積に分解し、各因子の有限性を
-`IsDiscreteValuationRing.length_quotient_pow_maximalIdeal`(既に mathlib
-にある、DVR での `length(R⧸m^n)=n`)から得る——いずれの経路も
-Lemma 1.1 の核心とは独立な、可換環論の一般論としてもう1本分の作業。
+適用はできない。★★最も具体的な道筋(mathlib の既製品の組み合わせを
+特定した、未実装): `IsDedekindDomain.quotientEquivPiFactors`
+(`differentIdeal V W ≠ ⊥` の素分解に沿って `W⧸differentIdeal V W ≃+*
+∀ P∈(factors I).toFinset, W⧸P^(count P)` という有限直積への CRT 分解、
+mathlib に既にある)+ `Module.length_pi_of_fintype`(有限直積の長さは
+各成分の和)+ `IsDiscreteValuationRing.length_quotient_pow_maximalIdeal`
+(DVR での `length(R⧸m^n)=n`、既にある)を貼り合わせれば
+`Module.length W(W⧸differentIdeal V W) = ∑_P count_P(differentIdeal V W)`
+という**具体的な有限値の公式**が得られるはず——ただし
+`length_quotient_pow_maximalIdeal` は `R` 自身が DVR(局所)の場合の
+主張であり、`W`(大域的な Dedekind 整域)の局所因子 `W⧸P^n` へそのまま
+適用するには「`W⧸P^n` の `W` 上の長さ」と「`W` を `P` で局所化した
+DVR 上での同じ計算」が一致するという橋渡し(局所化による長さの不変性)
+がもう1つ要る。★これも Lemma 1.1 の核心(単射性・余核の特定)とは
+独立な、可換環論の一般論としてもう1本分の作業と判断した。
 
 ### 2. `Z`(絶対微分の基底)は Falt1 の原文で明示されていない
 
