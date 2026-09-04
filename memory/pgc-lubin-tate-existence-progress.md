@@ -430,6 +430,21 @@ Lubin-Tate理論では`A=𝒪_K`はDVRなので自動的に成り立つ性質だ
 このファイルの新しい定理だけに使うので後続への影響は無いことを
 確認済み(CLAUDE.md 逸脱の記録)。
 
+**続報(2026-09-04、★★★★★★★★★★分離性——ψ_nの根は混標数の場合に
+相異なる、`Λ_n`ギャップの解消)**: `[CharZero A]`を追加(古典的
+Lubin-Tate理論の混標数の場合——`K`は`ℚ_p`の有限次拡大——に対応、
+CLAUDE.md逸脱の記録)。標数0では既約多項式は自動的に分離的
+(`Irreducible.separable`)なので、`separable_iteratedLubinTatePsi_
+map_fractionRing`(`ψ_n`は`FractionRing A`上で分離的)を経て、
+★`nodup_iteratedLubinTatePsiRoots`(`ψ_n`の根は互いに相異なる——
+分離性を`iteratedLubinTateAlgClosure A`へ持ち上げ`Polynomial.nodup_
+roots`を適用)を確立した。既出の`card_iteratedLubinTatePsiRoots`
+(個数は`q^n-q^{n-1}`)と合わせて、混標数の場合には「原始`π^n`-捩れ点
+が真に`q^n-q^{n-1}`個の**相異なる**元からなる」という古典的な
+Lubin-Tate理論の帰結が完成した——数セッション前に「分離性は導関数の
+付値評価を要する新規の数学的内容」と見立てていたギャップが、
+混標数という自然な設定限定で完全に解消された。
+
 **残る作業**: 節目(3)torsion点の構成本体(`D_n`の根を`Λ_n`として定義、
 `𝒪_K`加群構造、`K(Λ_n)/K`の完全分岐性)、節目(4)
 `L_n:=K(Λ_n)`が完全分岐かつ`Gal(L_n/K)≅(𝒪_K/π^n)^×`(Lubin-Tateの
