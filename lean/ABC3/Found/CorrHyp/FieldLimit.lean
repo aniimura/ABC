@@ -1408,6 +1408,54 @@ theorem exists_mvPolynomial_quotient_ringHom_descend (A : Type) [CommRing A] [Al
   rw [MvPolynomial.map_map, algebraTensorMap_val_comp_inclusion]
   exact hψ k
 
+open scoped TensorProduct in
+/-- **イデアル所属もRレベルへ降りる**——`p`がℝへbase changeした後
+`Ideal.span(range map q)`に属するなら、ある共通の精密化`R'`で、
+`p`自身(`R'`へ昇格したもの)が`Ideal.span(range 昇格q)`に属する。
+`Ideal.mem_span_range_iff_exists_fun`(mathlib、`Fintype`添字の場合の
+所属の明示的表示、係数の和)でℝレベルの witness 係数(有限個)を取り出し、
+それ自体を`exists_fg_subalgebra_tensor_mvPolynomial_finset`で共通の
+`R₀`へ降ろしてから、`exists_mvPolynomial_quotient_ringHom_descend`と
+同じ「単射性で等式を`R'`レベルへ押し戻す」パターンを適用する。
+
+`exists_mvPolynomial_quotient_ringHom_descend`が示す「遷移写像の存在の
+降下」を、さらに**2つの候補写像の往復が恒等になること**(同型である
+ことの確認)まで押し進めるのに使う——遷移**同型**のRレベル降下に必要な
+最後のピース。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_mem_ideal_span_range_descend (A : Type) [CommRing A] [Algebra ℚ A]
+    (R : FgSubalgebra ℚ ℝ) {ι κ : Type} [Fintype κ]
+    (q : κ → MvPolynomial ι (A ⊗[ℚ] R.1)) (p : MvPolynomial ι (A ⊗[ℚ] R.1))
+    (h : MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom p ∈
+      Ideal.span (Set.range (fun k => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom (q k)))) :
+    ∃ (R' : FgSubalgebra ℚ ℝ) (hR : R ≤ R'),
+      MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR)).toRingHom p ∈
+      Ideal.span (Set.range (fun k => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR)).toRingHom (q k))) := by
+  classical
+  rw [Ideal.mem_span_range_iff_exists_fun] at h
+  obtain ⟨c, hc⟩ := h
+  obtain ⟨R₀, hR₀spec⟩ := exists_fg_subalgebra_tensor_mvPolynomial_finset A (Finset.image c Finset.univ)
+  choose c₀ hc₀ using fun k : κ => hR₀spec (c k) (Finset.mem_image_of_mem _ (Finset.mem_univ k))
+  obtain ⟨R', hR, hR₀⟩ := exists_fgSubalgebra_upperBound2 R R₀
+  refine ⟨R', hR, ?_⟩
+  rw [Ideal.mem_span_range_iff_exists_fun]
+  refine ⟨fun k => MvPolynomial.map
+    (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR₀)).toRingHom (c₀ k), ?_⟩
+  rw [← sub_eq_zero]
+  apply mvPolynomial_algebraTensorMap_val_eq_zero_of_map_eq_zero A R' ι
+  rw [map_sub, map_sum, MvPolynomial.map_map, algebraTensorMap_val_comp_inclusion, ← hc]
+  have e1 : ∀ k, MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)).toRingHom
+      ((MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR₀)).toRingHom (c₀ k)) *
+       (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR)).toRingHom (q k))) =
+      (c k) * (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom (q k)) := by
+    intro k
+    rw [map_mul, MvPolynomial.map_map, MvPolynomial.map_map, algebraTensorMap_val_comp_inclusion,
+      algebraTensorMap_val_comp_inclusion, hc₀ k]
+  rw [Finset.sum_congr rfl (fun k _ => e1 k), sub_self]
+
 /-! ## `StandardEtalePair.Ring` の元を有限段階へ降ろす——作業単位1(b)の完成
 
 `exists_fg_subalgebra_tensor_bivariate_finset`を`StandardEtalePair.Ring`
