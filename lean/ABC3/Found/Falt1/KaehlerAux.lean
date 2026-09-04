@@ -2516,4 +2516,42 @@ theorem falt1BaseChangeAlgHom_generator_correspondence
   rw [h1, hstep1root]
   rfl
 
+/-!
+## `differentIdeal_tower_diamond` の instance 整備、第一弾(2026-09-04)
+
+`differentIdeal_tower_diamond` を `Vn:=V0, Vn1:=V1, Wn:=Wn, Wn1:=Wn₁`
+に適用するには約20個の instance を揃える必要がある——ここではまず
+`Module.Finite Wn Wn1` を片付ける。`Algebra V0 Wn1`(合成: `V0→Wn→
+FractionRing Wn→AdjoinRoot gK`)と `IsScalarTower V0 Wn Wn1` は
+**instance 探索だけで自動的に見つかる**ことも確認した(実測、
+2026-09-04)——明示的に構成する必要は無い。 -/
+
+/-- **`Wₙ₊₁` は `Wₙ` 上有限**: `falt1AdjoinRootEquivIntegralClosure`
+(`Wₙ₊₁ ≃ AdjoinRoot g`、`g`= base change 前の `X^n-π'`)と
+`AdjoinRoot.powerBasis'`(**体でなく一般の可換環 `R` 上でも**、`g`
+monic なら `PowerBasis R (AdjoinRoot g)` が取れる、mathlib の
+既製品)を貼り合わせるだけ——`Polynomial.Monic.finite_adjoinRoot`
+(体上限定)を経由する必要はなかった。 -/
+theorem falt1ModuleFiniteWnWn1
+    {V0 Wn : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    (π : V0) (n : ℕ) (hnpos : 0 < n)
+    (hn' : (n : FractionRing Wn) ≠ 0)
+    (hπne0' : algebraMap Wn (FractionRing Wn) (algebraMap V0 Wn π) ≠ 0)
+    (hprime' : (Ideal.span ({algebraMap V0 Wn π} : Set Wn)).IsPrime)
+    (hnotsq' : algebraMap V0 Wn π ∉ (Ideal.span ({algebraMap V0 Wn π} : Set Wn)) ^ 2)
+    [IsDedekindDomain (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))]
+    [Module.IsTorsionFree Wn (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))] :
+    Module.Finite Wn (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn))))) := by
+  set π' : Wn := algebraMap V0 Wn π with hπ'def
+  set g : Polynomial Wn := Polynomial.X ^ n - Polynomial.C π' with hgdef
+  have hmonic : g.Monic := Polynomial.monic_X_pow_sub_C π' hnpos.ne'
+  have e2 := falt1AdjoinRootEquivIntegralClosure π' n hn' hπne0' hprime' hnotsq' hnpos
+  have pb := AdjoinRoot.powerBasis' hmonic
+  haveI : Module.Finite Wn (AdjoinRoot g) := Module.Finite.of_basis pb.basis
+  exact Module.Finite.equiv e2.toLinearEquiv
+
 end ABC3.Found.Falt1
