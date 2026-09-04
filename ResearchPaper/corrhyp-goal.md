@@ -2174,3 +2174,49 @@ e`と一致するという自然性。`transitionElem_restrict_mul_le`(制限元
 壁も、もう残っていない。集計は10/24で変わらず(§4は0/2のまま)。
 
 コミット: `c4172c85`。`tools/lean-idioms.md` #31にこの発見を記録。
+
+### 2026-09-04続報: **t_fac完成——Scheme.GlueDataの12フィールド中11個達成**
+
+前回揃えた部品を実際に組み立て、`t_fac`を完成させた。追加で必要だった
+部品:
+
+- `gdT_eq_transitionElemIso`: `gdT`(`isoImage`4段の塔として定義済み)が
+  実は`transitionElemIso`2つを`isoOfEq`(可換律)で橋渡ししただけの形と
+  **完全に一致する**ことを`unfold gdT transitionElemIso; rfl`で直接
+  確認できた——`gdT`の`iso1`〜`iso4`は`transitionElemIso`内部の構成と
+  定義上同じ組み立て方をしているため。これで`gdT`の内部に二度立ち入らず
+  済むようになった。
+- `gdVpullbackIso_hom_comp_homOfLE_fst`/`snd`・`gdVpullbackIso_inv_
+  comp_pullback_snd`: `pullback.fst`/`pullback.snd`を`gdVpullbackIso.
+  hom ≫ (Z i).homOfLE`の言葉に変換する部品(`isPullback_opens_inf`が
+  与える`isoPullback_inv_fst`/`_snd`+`Scheme.homOfLE_homOfLE`で1つの
+  `homOfLE`にまとめる)。
+- **`transitionElemIso`の自然性、積の順序を入れ替えた版**
+  (`transitionElem_restrict_mul_le2`・`transitionElemIso_step1'`〜
+  `step45'`・`transitionElemIso_inv/hom_naturality2`): `gdT'`の`j`側
+  は`transitionElemIso (f j) (f k*f i) (e j)`(生き残る元`f i`が積の
+  **後ろ**)を使うのに対し、`gdT`の`j`側は`transitionElemIso (f j)
+  (f i) (e j)`を使う——前回の自然性(生き残る元が**前**に来る`g*h`型)
+  では直接橋渡しできず、`h*g`型(`h`が消え`g`が生き残る)を独立に証明し
+  直す必要があった。証明の骨格は`inf_le_left`/`inf_le_right`が入れ替わる
+  だけで前回と完全に同じ(`tools/lean-idioms.md` #31のterm-modeパターン
+  がそのまま通用した)。
+- `gdT'_key`: `i`側・`j`側それぞれで自然性補題を適用し、残った純粋な
+  `X`レベルの結合律・可換律の等式(`isoOfEq`+`homOfLE`の合成、**証明
+  無関係性で自動的に閉じる**——`simp only [Scheme.isoOfEq_hom, Scheme.
+  homOfLE_homOfLE]`だけで通った)で橋渡しする、`t_fac`の核心の等式。
+  1秒程度で通った(部品がすべて揃っていれば組み立て自体は軽い)。
+- `gdT'_t_fac`: 上記すべてを組み立てた`t_fac`本体。`gdT'`を`gdT_eq_
+  transitionElemIso`で書き換え、`pullback.fst`/`pullback.snd`を
+  `gdVpullbackIso`側の`homOfLE`の言葉に変換し、共通の`(gdVpullbackIso
+  i j k).hom`を`congrArg`でキャンセルすれば`gdT'_key`にちょうど一致する。
+
+**これで`Scheme.GlueData`の12フィールド中11個**(`J・U・V・f・t・t_id・
+f_mono・f_open・f_hasPullback・f_id・t'・t_fac`)**が完成した**。残るのは
+`cocycle`(`t' i j k ≫ t' j k i ≫ t' k i j = 𝟙`)のみ——新しい数学は不要
+で、`t_fac`と同様に`gdT'_key`型の等式へ帰着させる見込み(3つの
+`transitionElemIso`の往復が打ち消し合うことを示す)。`lake build ABC3`
+で0エラーを確認(sorry無し)。集計は10/24で変わらず(§4は0/2のまま、
+GlueDataの配線は番号付き項目ではないため)。
+
+コミット: `dfbc99a0`。

@@ -1046,3 +1046,24 @@ f₁(g·h)eの.invを両側の基本開集合の包含を挟んでtransitionElem
 壁はもう残っていない。`tools/lean-idioms.md` #31に発見を記録。
 
 コミット: `c4172c85`。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04
+続報(**t_fac完成——GlueDataの12フィールド中11個達成**、集計10/24で
+変わらず)。前回揃えた部品を実際に組み立てた。追加で必要だった部品:
+`gdT_eq_transitionElemIso`(`gdT`が`transitionElemIso`2つの橋渡しと
+`unfold;rfl`で直接一致)・`gdVpullbackIso_hom_comp_homOfLE_fst/snd`・
+`gdVpullbackIso_inv_comp_pullback_snd`(pullback.fst/sndをhomOfLEの
+言葉に変換)・**積の順序を入れ替えた自然性版**(`transitionElemIso_
+inv/hom_naturality2`——`gdT'`のj側は生き残る元が積の後ろ(`h*g`)に
+来るため、前回の`g*h`型では直接使えず独立に証明し直した。骨格は
+`inf_le_left/right`が入れ替わるだけで完全に同じ)・`gdT'_key`(i側・
+j側で自然性を適用後、残る純粋なXレベルの結合律・可換律の等式——
+`simp only [Scheme.isoOfEq_hom, Scheme.homOfLE_homOfLE]`だけで証明
+無関係性により自動的に閉じた)・`gdT'_t_fac`(本体)。
+
+**これで`Scheme.GlueData`の12フィールド中11個(`J・U・V・f・t・t_id・
+f_mono・f_open・f_hasPullback・f_id・t'・t_fac`)が完成した**。残るは
+`cocycle`のみ(新しい数学は不要、`gdT'_key`型の等式へ帰着させる見込み)。
+`lake build ABC3`で0エラー確認。
+
+コミット: `dfbc99a0`。
