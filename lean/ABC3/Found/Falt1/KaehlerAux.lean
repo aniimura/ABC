@@ -1582,4 +1582,47 @@ theorem delta_tendsto_zero (d : ℕ) (δ : ℕ → ℝ) (hδ0 : ∀ n, 0 ≤ δ 
     · simpa using Filter.Tendsto.const_mul (δ N) (tendsto_pow_atTop_nhds_zero_of_lt_one hcpos.le hclt1)
   rwa [Filter.tendsto_add_atTop_iff_nat N] at htail
 
+/-!
+## Theorem 1.2・3b の代数的骨格: `differentIdeal` の塔の等式(2026-09-04)
+
+falt1-goal.md 3b に記録した通り、`delta_tendsto_zero` の前提 `hrec` を
+実際の `V_n`・`W_n` から導くには「`Wₙ⊗_{Vₙ}Vₙ₊₁` が正規化前にどれだけ
+`Wₙ₊₁` と異なるか」という核心の困難が残る——ここではその困難とは
+**独立に**、`Vₙ→Vₙ₊₁→Wₙ₊₁` と `Vₙ→Wₙ→Wₙ₊₁` という2つの塔に
+mathlib 既存の `differentIdeal_eq_differentIdeal_mul_differentIdeal`
+(`RingTheory/DedekindDomain/Different.lean`)を適用して得られる、
+**厳密な等式**(原文の不等式より強い形)を切り出した。 -/
+
+/-- **`differentIdeal` の菱形(diamond)公式**: `Vₙ→Vₙ₊₁→Wₙ₊₁` と
+`Vₙ→Wₙ→Wₙ₊₁` の2通りの塔で `differentIdeal Vₙ Wₙ₊₁` を計算すると
+一致することから、`δₙ₊₁ := differentIdeal Vₙ₁ Wₙ₁` と
+`δₙ := differentIdeal Vₙ Wₙ` を結ぶ等式が出る。`Algebra.IsSeparable`
+の引数は `FractionRing.liftAlgebra` に明示的に固定している
+(tools/lean-idioms.md #23 と同じ理由——固定しないと2回目の適用で
+`Algebra (FractionRing Vₙ) (FractionRing Wₙ₁)` の探索が食い違う)。
+
+★残る課題(未解決、falt1-goal.md 3b 参照): 右辺の
+`differentIdeal Wₙ Wₙ₊₁`(`Wₙ⊗_{Vₙ}Vₙ₊₁` の非正規性を測る量)を
+評価する部分は、この等式だけでは閉じない——原文の kernel・cokernel
+の length 評価と本質的に同じ困難が残る。 -/
+theorem differentIdeal_tower_diamond {Vn Vn1 Wn Wn1 : Type*} [CommRing Vn] [CommRing Vn1] [CommRing Wn]
+    [CommRing Wn1] [IsDomain Vn] [IsIntegrallyClosed Vn] [IsDedekindDomain Vn1] [IsDedekindDomain Wn]
+    [IsDedekindDomain Wn1] [Algebra Vn Vn1] [Algebra Vn Wn] [Algebra Vn1 Wn1] [Algebra Wn Wn1] [Algebra Vn Wn1]
+    [IsScalarTower Vn Vn1 Wn1] [IsScalarTower Vn Wn Wn1]
+    [Module.IsTorsionFree Vn Vn1] [Module.IsTorsionFree Vn Wn] [Module.IsTorsionFree Vn Wn1]
+    [Module.IsTorsionFree Vn1 Wn1] [Module.IsTorsionFree Wn Wn1]
+    [Module.Finite Vn Vn1] [Module.Finite Vn Wn] [Module.Finite Vn Wn1]
+    [Module.Finite Vn1 Wn1] [Module.Finite Wn Wn1]
+    (hsep : @Algebra.IsSeparable (FractionRing Vn) (FractionRing Wn1) _ _
+      (FractionRing.liftAlgebra Vn (FractionRing Wn1))) :
+    differentIdeal Vn1 Wn1 * Ideal.map (algebraMap Vn1 Wn1) (differentIdeal Vn Vn1)
+      = differentIdeal Wn Wn1 * Ideal.map (algebraMap Wn Wn1) (differentIdeal Vn Wn) := by
+  letI := FractionRing.liftAlgebra Vn (FractionRing Wn1)
+  haveI := hsep
+  have h1 : differentIdeal Vn Wn1 = differentIdeal Vn1 Wn1 * Ideal.map (algebraMap Vn1 Wn1) (differentIdeal Vn Vn1) :=
+    differentIdeal_eq_differentIdeal_mul_differentIdeal Vn Vn1 Wn1
+  have h2 : differentIdeal Vn Wn1 = differentIdeal Wn Wn1 * Ideal.map (algebraMap Wn Wn1) (differentIdeal Vn Wn) :=
+    differentIdeal_eq_differentIdeal_mul_differentIdeal Vn Wn Wn1
+  rw [← h1, ← h2]
+
 end ABC3.Found.Falt1
