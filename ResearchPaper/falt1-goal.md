@@ -1535,6 +1535,28 @@ mathlib での正確な組み立て方は未確認)。
       Nakayama+elementary divisors(`Ω¹_{Wₙ/V0}`が`d+1`個の生成元を
       持つことと組み合わせる)、第2項(`Ω¹_{Wₙ₊₁/Wₙ}`、cokernelに
       相当)はstep (5)のdiscriminantの塔。
+
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、
+      **右辺第2項を実際に`differentIdeal`の言葉に変換した**
+      (`falt1_kaehler_length_exact_wn1_cokernel`、commit `84793b74`、
+      `lake build`完走・sorry無し)。Lemma 1.1(`falt1CokernelLengthEq`、
+      `Ω_{W/V}`の長さ`=W⧸differentIdeal V W`の長さ)を`V:=Wₙ`・
+      `W:=Wₙ₊₁`に適用するだけで
+      ```
+      length_{Wₙ₊₁}(Ω¹_{Wₙ₊₁/V0}) =
+        length_{Wₙ₊₁}(Wₙ₊₁⊗_{Wₙ}Ω¹_{Wₙ/V0}) +
+        length_{Wₙ₊₁}(Wₙ₊₁ ⧸ differentIdeal Wₙ Wₙ₊₁)
+      ```
+      **重要な発見**: この右辺第2項`length(Wₙ₊₁⧸differentIdeal Wₙ Wₙ₊₁)`
+      は、`cancel_conductor_delta`経由で既に確立していた`hlen_eq`
+      (`falt1_cancelConductorDelta_assembled`)にも**全く同じ量**
+      `differentIdeal V1 Wn1`(`≠ Wₙ Wₙ₊₁`だが同一のもの、`V1 ≃ₐ[V0] Wₙ`
+      の下で表現が違うだけ——要再確認)として現れる。つまり
+      **2つの証明経路(conductor経由・Kähler微分の完全列経由)は
+      独立ではなく、同じ`differentIdeal`の長さを介して繋がっている**
+      ことが確認できた——両者が同値かは未確定だが無関係ではない。
+      残るは右辺第1項`length(Wₙ₊₁⊗_{Wₙ}Ω¹_{Wₙ/V0})`(kernel側)の
+      評価のみ——次回はこれに着手する。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
