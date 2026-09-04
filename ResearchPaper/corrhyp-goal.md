@@ -1196,3 +1196,26 @@ map_map`で移送すれば、有限個の標準エタール片をすべて**同�
 これらを実際に1本の証明として結線するエンジニアリング(かつ`Corr`の
 nonempty脱落・`Space`の有限型性という、独立に対処が要る2つの前提の
 整理)のみ。
+
+### 2026-09-04さらに続報: スキーム→環の橋渡しを完全に結線 ★★★★★
+
+(a)(実際の組み立て)を一段進め、`c.α : C ⟶ Ext X`(有限エタール)を
+`X.left` 由来のアフィン片へ制限すると `exists_finite_standardEtaleCover`
+・`exists_fg_subalgebra_tensor_standardEtalePair_baseChange` が**直接
+読める形**(`Γ(U,U)⊗[ℚ]ℝ` 上の `Algebra.Etale`)になる、というところまで
+`ExtLimit.lean` に結線した(`piece_algebraEtale_tensor`、★sorry無し)。
+
+鍵は3つの補題の合成: `piece_algebraEtale`(スキーム→環、環は
+`Γ((ExtF.obj X).left,V)`のまま)→`pieceRingEquiv`(`piecePullbackIso`
+を`Scheme.Opens.topIso`・`Scheme.Γ.mapIso`・`Scheme.ΓSpecIso`で繋いで
+環の同型に変換)→`algebraEtale_transport`(`RingHom.Etale.respectsIso`
+で底環の同型に沿って`Algebra.Etale`を輸送、mathlib既存の道具の新しい
+組み合わせ)。
+
+**これで「`c.α` → アフィン片への制限 → `Algebra.Etale (Γ(U,U)⊗ℚℝ) ...`
+→ `exists_finite_standardEtaleCover` → `exists_fg_subalgebra_tensor_
+standardEtalePair_baseChange` → 有限段階への降下」という、`Lemma 4.1`
+の「1アフィン片の降下」の**全行程が実際に1つのLean宣言の連鎖として
+結線可能な状態**になった。残るのは、この連鎖を実際に呼び出して
+1つの完成した宣言にまとめる作業(標準エタール被覆の有限個の片を横断
+した合流を含む)と、複数の`U_i`・`GlueData`貼り合わせ。
