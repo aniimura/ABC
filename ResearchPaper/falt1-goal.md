@@ -1774,6 +1774,47 @@ mathlib での正確な組み立て方は未確認)。
       未着手)に切り替える方が近道の可能性もある——次回はどちらが
       有望か検討することから始める。
 
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、
+      **単項生成元を経由しない代替路を実際に見つけ、確立した**
+      (`falt1_differentIdeal_diamond_length`、commit `408f3081`、
+      `lake build`完走・sorry無し)。`differentIdeal V0 Wₙ₊₁`を`Ω¹`の
+      長さに結びつけようとして単項生成元の壁にぶつかったが、そもそも
+      **その必要が無い**ことに気づいた: `differentIdeal_tower_diamond`
+      は`differentIdeal V0 Wₙ₊₁`を`V1`経由・`Wₙ`経由の**2通り**で
+      計算した結果が一致するという主張(`Vₙ₁`・`Wₙ`側の単項生成元は
+      どちらも既に不要)なので、その**両辺**に`falt1_length_quotient_
+      mul_of_ne_zero`を適用するだけで、`Ω¹_{Wₙ₊₁/V0}`を一切経由せず
+      直接
+      ```
+      length_{Wₙ₊₁}(Wₙ₊₁/differentIdeal V1 Wₙ₊₁) +
+        length_{Wₙ₊₁}(Wₙ₊₁/Ideal.map(algebraMap V1 Wₙ₊₁)(differentIdeal V0 V1))
+        =
+      length_{Wₙ₊₁}(Wₙ₊₁/differentIdeal Wₙ Wₙ₊₁) +
+        length_{Wₙ₊₁}(Wₙ₊₁/Ideal.map(algebraMap Wₙ Wₙ₊₁)(differentIdeal V0 Wₙ))
+      ```
+      という等式が出た。これは`Jₙ:=differentIdeal Wₙ Wₙ₊₁`(現在の段の
+      非正規性)と`Jₙ₊₁:=differentIdeal V1 Wₙ₊₁`(次の段の非正規性、
+      このセッションの単段indexingでは`V1`が`Vₙ₊₁`役)を結ぶ、
+      **段をまたぐ長さの等式**——Theorem 1.2の再帰(`δₙ→0`)に必要と
+      見込まれる関係式そのものである可能性が高い。
+
+      **設計上の判断**: この定理は`Vₙ,Vₙ₁,Wₙ,Wₙ₁`すべてを抽象的な
+      型変数のまま(`falt1_differentIdeal_tower_length`と同じ抽象化
+      レベルで)確立した。`falt1_theorem12_differentIdeal_length`の
+      ように具体的な`Falt1V1`/`Falt1Wn1`へ具体化した「閉じた」版を
+      作ろうとすると、`Algebra V1 Wn1`(`ψ`という非自明な選択に依存)を
+      シグネチャに固定する必要があり、これは`ψ`が証明本体でしか
+      手に入らない(多くの補助仮定を要する)ため、`falt1_theorem12_
+      differentIdeal_length`で最初に遭遇したのと同じ instance 衝突の
+      罠に落ちる。**抽象的なままにしておくのが正しい設計**だと判断
+      した——将来、再帰的な`V_n`塔を実際に構成するときには、各段が
+      自前の自然な`Algebra Vₙ₁ Wₙ₁`インスタンスを持つはずなので、
+      この一般補題をそのまま各段に適用できる。次回: この関係式を
+      実際に「`δₙ`が減少する」という主張(3bの実数列の不等式、既に
+      証明済みの`hrec`前提部分)へどう繋げるか、また`differentIdeal
+      Wₙ Wₙ₊₁`(`Jₙ`)自体の評価(step 5、discriminantの塔)へ進む
+      ことを検討する。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
