@@ -664,3 +664,33 @@ mathlibに`FiniteDimensional.complete`としてそのまま存在した
 `spectralNorm_lt_one_of_mem_iteratedLubinTateTorsionPoints`で既に
 満たされている——`K.carrier⟮x⟯`上の`spectralNorm`と`K.closure`上の
 `spectralNorm`が両立することの確認は必要かもしれない)。
+
+**続報(2026-09-04・続き、`hasEval`は確立・★重要な構造的発見)**:
+`hasEval_of_mem_iteratedLubinTateTorsionPoints`(`x∈Λ_n`ならば
+`PowerSeries.HasEval x`)を追加(commit`0b9f3b2c`)——
+`spectralNorm_lt_one_...`とmathlibの
+`tendsto_pow_atTop_nhds_zero_of_norm_lt_one`を組み合わせるだけ。
+
+★★★重要な発見(REPLで`PowerSeries.aeval`を実際に組み立てようとして
+判明、ファイル未反映): `PowerSeries.aeval`が要求するもう片方の条件
+`IsLinearTopology S S`(評価先`S`自身の位相がイデアルで生成される
+「線形位相」)は、**体**`K.closure`や`K.carrier⟮x⟯`それ自身では
+成り立たない——体のイデアルは`{0}`と全体しかないので、非自明な位相
+とは両立しない。mathlibでこの条件が出る自然な形は
+`Ideal.isLinearTopology`(付値環の極大イデアルによるadic位相)であり、
+これは**付値環**(体でなく)に対して成り立つ。実際、古典的な
+Lubin-Tate理論でも`[a]_f`は「体」でなく「付値環」の間の写像として
+評価される——`Λ_n`の元は`𝒪_K`上整(既出の`isIntegral_..._carrier_...`)
+なので、そもそも付値環の中に住んでいるはずのものを、うっかり体の
+レベルで評価しようとしていた。
+
+★見通している次の一歩: `L:=K.carrier⟮x⟯`は`K.carrier`上有限次
+(推移律で`ℚ_[p]`上も有限次)なので、**`L`自身を新たな
+`PAdicLocalField p`として再構成**すれば、`Found/PGC/LocalFieldNorm.lean`・
+`Found/PGC/ValuationRingDVR.lean`・`ValuationRingComplete.lean`の
+機構(`𝒪[L]`・`Valued L`・その adic 完備性)が**そのまま流用**でき、
+`IsLinearTopology 𝒪[L] 𝒪[L]`が`Ideal.isLinearTopology`から従うはず。
+この再構成(`L`を`PAdicLocalField p`のインスタンスとして正しく
+組み立て、`K.carrier`からの埋め込みと両立することを示す)が次の
+節目——それができれば`PowerSeries.aeval`で`f`を`x`(`𝒪[L]`の元として)
+に評価し、`Λ_n`への`𝒪_K`加群構造へ到達できる見通し。
