@@ -406,4 +406,31 @@ theorem finiteDimensional_adjoin_of_mem_iteratedLubinTateTorsionPoints {p : ℕ}
   IntermediateField.adjoin.finiteDimensional
     (isIntegral_carrier_of_mem_iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n x hx)
 
+open scoped Classical in
+/-- ★★★★★★★★★★**`Λ_n` の元を添加した単純拡大 `K.carrier⟮x⟯` は完備**
+——`K.carrier` 上有限次
+(`finiteDimensional_adjoin_of_mem_iteratedLubinTateTorsionPoints`)・
+`K.carrier` 自身が完備(`ℚ_[p]` の有限次拡大)・`K.closure` にスペクトル
+ノルムで与えたノルム体構造(`LocalFieldNorm.lean::closureNormedField`
+等)を組み合わせて、mathlib の一般論
+`FiniteDimensional.complete`(完備な体上の有限次ノルム空間は完備)を
+適用する。これで初めて `PowerSeries.aeval` による `[a]_f` の `x` での
+評価が可能になる舞台が整った。 -/
+theorem completeSpace_adjoin_of_mem_iteratedLubinTateTorsionPoints {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n) :
+    CompleteSpace (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :=
+  haveI := finiteDimensional_adjoin_of_mem_iteratedLubinTateTorsionPoints
+    K hq hπmax hπne0 f hf0 hf1 hf n x hx
+  FiniteDimensional.complete K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+
 end ABC3.Found.PGC

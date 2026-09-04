@@ -135,4 +135,31 @@ theorem residueCard_isPrimePow (K : PAdicLocalField p) :
     ∃ f : ℕ, 0 < f ∧ residueCard K = p ^ f :=
   card_residueField_eq_prime_pow (K := K.carrier) Fact.out (norm_natCast_p_lt_one K)
 
+/-! ### `K.closure`(代数閉包)にもスペクトルノルムでノルム体構造を与える
+
+`K.carrier` に `ℚ_[p]` から延長したのと同じ手順を、今度は `K.carrier` を
+基点として `K.closure := AlgebraicClosure K.carrier` へ繰り返す。
+`spectralNorm.normedField`/`normedAlgebra` は基点が完備でありさえすれば
+有限次拡大に限らず**任意の代数拡大**に対して働くので、`K.closure` が
+`K.carrier` 上有限次でなくても(実際、代数閉包は一般に無限次)問題ない。
+これは `Λ_n` の元(`K.carrier` 上有限次拡大 `K.carrier⟮x⟯` を張る)を
+`PowerSeries.aeval` で実際に評価するのに必要な `CompleteSpace` へ
+繋がる一歩。 -/
+
+/-- スペクトルノルムによる `K.closure` のノルム体構造。 -/
+@[implicit_reducible] noncomputable scoped instance closureNormedField (K : PAdicLocalField p) :
+    NormedField K.closure :=
+  spectralNorm.normedField K.carrier K.closure
+
+/-- `K.closure` は `K.carrier` 上のノルム代数。 -/
+@[implicit_reducible] noncomputable scoped instance closureNormedAlgebra (K : PAdicLocalField p) :
+    NormedAlgebra K.carrier K.closure :=
+  spectralNorm.normedAlgebra K.carrier K.closure
+
+/-- `K.closure` 上のスペクトルノルムも非アルキメデス的。 -/
+noncomputable scoped instance closureIsUltrametric (K : PAdicLocalField p) :
+    IsUltrametricDist K.closure :=
+  IsUltrametricDist.isUltrametricDist_of_forall_norm_add_le_max_norm
+    (isNonarchimedean_spectralNorm (K := K.carrier) (L := K.closure))
+
 end ABC3.Found.PGC
