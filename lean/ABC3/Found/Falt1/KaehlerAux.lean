@@ -3362,4 +3362,108 @@ theorem falt1BaseChangeGeneratorFull
     apply hstep1inj
     exact e2.injective hab
 
+set_option maxHeartbeats 1000000 in
+/-- **`cancel_conductor_delta` の `hspan_eq` を確立した**——`falt1BaseChangeGeneratorFull`
+の `ψ`・`w`・`x` を使って、`conductor Wₙ x * differentIdeal Wₙ Wₙ₊₁ = span{aeval x
+(deriv(minpoly Wₙ x))}`(`conductor_mul_differentIdeal`)の右辺と、
+`Ideal.map ψ (differentIdeal V0 V1)`(`differentIdeal_tower_diamond` の `Idiff` に
+相当)が**文字通り同じ式**(`span{n·x^(n-1)}`)に簡約されることを示す。
+
+配線上の教訓(新規): `differentIdeal_eq_span_derivative`/`conductor_mul_differentIdeal`
+を`AdjoinRoot fK`(条件付きで体になる型)を経由する具体的な `w`・`x` に対して呼び出す前に、
+`Fact (Irreducible fK)`・`FiniteDimensional (FractionRing V0)(AdjoinRoot fK)`・
+`Algebra.IsSeparable (FractionRing V0)(AdjoinRoot fK)` を**呼び出し側の文脈で明示的に
+再構築**しておく必要がある——これらは `falt1BaseChangeGeneratorFull` 等のヘルパー内部で
+`haveI` されるだけで外に漏れないため、呼び出し側にこれが無いと `AdjoinRoot fK` の
+`Field`/`FiniteDimensional` 構造が(条件付き instance のため)見えず、`Application
+type mismatch` + `whnf`/`isDefEq` timeout という紛らわしい形で症状が出る。 -/
+theorem falt1_hspan_eq
+    {V0 Wn : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    (π : V0) (n : ℕ)
+    (hn : (n : FractionRing V0) ≠ 0) (hπne0 : algebraMap V0 (FractionRing V0) π ≠ 0)
+    (hprime : (Ideal.span ({π} : Set V0)).IsPrime) (hnotsq : π ∉ (Ideal.span ({π} : Set V0)) ^ 2)
+    (hnpos : 0 < n)
+    (hn' : (n : FractionRing Wn) ≠ 0)
+    (hπne0' : algebraMap Wn (FractionRing Wn) (algebraMap V0 Wn π) ≠ 0)
+    (hprime' : (Ideal.span ({algebraMap V0 Wn π} : Set Wn)).IsPrime)
+    (hnotsq' : algebraMap V0 Wn π ∉ (Ideal.span ({algebraMap V0 Wn π} : Set Wn)) ^ 2)
+    (hinjV0Wn : Function.Injective (algebraMap V0 Wn))
+    [IsDedekindDomain (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    [Module.IsTorsionFree V0 (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    [IsDedekindDomain (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))]
+    [Module.IsTorsionFree Wn (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))] :
+    ∃ (ψ : integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))) →ₐ[V0]
+      integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))
+      (x : integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn))))),
+      Ideal.span {(Polynomial.aeval x) (Polynomial.derivative (minpoly Wn x))}
+        = Ideal.map ψ.toRingHom (differentIdeal V0 (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+            (algebraMap V0 (FractionRing V0)))))) := by
+  have hirrf : Irreducible (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map (algebraMap V0 (FractionRing V0))) :=
+    ABC3.Found.Falt1.eisenstein_X_pow_sub_C_irreducible_map π n hnpos hprime hnotsq
+  haveI : Fact (Irreducible (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map (algebraMap V0 (FractionRing V0)))) := ⟨hirrf⟩
+  have hirrg : Irreducible (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map (algebraMap Wn (FractionRing Wn))) :=
+    ABC3.Found.Falt1.eisenstein_X_pow_sub_C_irreducible_map (algebraMap V0 Wn π) n hnpos hprime' hnotsq'
+  haveI : Fact (Irreducible (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map (algebraMap Wn (FractionRing Wn)))) := ⟨hirrg⟩
+  have hmonicf : (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map (algebraMap V0 (FractionRing V0))).Monic :=
+    (Polynomial.monic_X_pow_sub_C π hnpos.ne').map _
+  haveI : Module.Finite (FractionRing V0) (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+      (algebraMap V0 (FractionRing V0)))) := hmonicf.finite_adjoinRoot
+  haveI : FiniteDimensional (FractionRing V0) (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+      (algebraMap V0 (FractionRing V0)))) := ‹Module.Finite _ _›
+  have hmonicg : (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map (algebraMap Wn (FractionRing Wn))).Monic :=
+    (Polynomial.monic_X_pow_sub_C (algebraMap V0 Wn π) hnpos.ne').map _
+  haveI : Module.Finite (FractionRing Wn) (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+      (algebraMap Wn (FractionRing Wn)))) := hmonicg.finite_adjoinRoot
+  haveI : FiniteDimensional (FractionRing Wn) (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+      (algebraMap Wn (FractionRing Wn)))) := ‹Module.Finite _ _›
+  have hsepf : (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map (algebraMap V0 (FractionRing V0))).Separable := by
+    have hmapeq : (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map (algebraMap V0 (FractionRing V0)))
+        = Polynomial.X ^ n - Polynomial.C (algebraMap V0 (FractionRing V0) π) := by simp
+    rw [hmapeq]; exact Polynomial.separable_X_pow_sub_C _ hn hπne0
+  haveI : Algebra.IsSeparable (FractionRing V0) (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+      (algebraMap V0 (FractionRing V0)))) :=
+    ABC3.Found.Falt1.algIsSeparable_adjoinRoot_of_separable _ hmonicf hsepf
+  have hsepg : (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map (algebraMap Wn (FractionRing Wn))).Separable := by
+    have hmapeq : (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map (algebraMap Wn (FractionRing Wn)))
+        = Polynomial.X ^ n - Polynomial.C (algebraMap Wn (FractionRing Wn) (algebraMap V0 Wn π)) := by simp
+    rw [hmapeq]; exact Polynomial.separable_X_pow_sub_C _ hn' hπne0'
+  haveI : Algebra.IsSeparable (FractionRing Wn) (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+      (algebraMap Wn (FractionRing Wn)))) :=
+    ABC3.Found.Falt1.algIsSeparable_adjoinRoot_of_separable _ hmonicg hsepg
+  obtain ⟨ψ, w, x, hwx, hψinj, hwadjoin, hwminpoly, hxadjoin, hxminpoly⟩ :=
+    ABC3.Found.Falt1.falt1BaseChangeGeneratorFull π n hn hπne0 hprime hnotsq hnpos hn' hπne0' hprime' hnotsq' hinjV0Wn
+  have hwfield := ABC3.Found.Falt1.falt1_fieldLevel_adjoin_top_of_ringLevel_minpoly π n hn hπne0 hprime hnotsq hnpos w hwminpoly
+  have hdiffV1 := ABC3.Found.Falt1.differentIdeal_eq_span_derivative w hwfield hwadjoin
+  rw [hwminpoly] at hdiffV1
+  refine ⟨ψ, x, ?_⟩
+  have hderivV0 : Polynomial.aeval w (Polynomial.derivative (Polynomial.X ^ n - Polynomial.C π : Polynomial V0))
+      = (n : integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+          (algebraMap V0 (FractionRing V0))))) * w ^ (n-1) := by
+    have hderiv : Polynomial.derivative (Polynomial.X ^ n - Polynomial.C π : Polynomial V0)
+        = Polynomial.C (n : V0) * Polynomial.X ^ (n-1) := by
+      rw [Polynomial.derivative_sub, Polynomial.derivative_X_pow, Polynomial.derivative_C, sub_zero]
+    rw [hderiv]
+    simp [Polynomial.aeval_mul, Polynomial.aeval_X_pow]
+  have hderivWn : Polynomial.aeval x (Polynomial.derivative (Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn))
+      = (n : integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+          (algebraMap Wn (FractionRing Wn))))) * x ^ (n-1) := by
+    have hderiv : Polynomial.derivative (Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)
+        = Polynomial.C (n : Wn) * Polynomial.X ^ (n-1) := by
+      rw [Polynomial.derivative_sub, Polynomial.derivative_X_pow, Polynomial.derivative_C, sub_zero]
+    rw [hderiv]
+    simp [Polynomial.aeval_mul, Polynomial.aeval_X_pow]
+  rw [hxminpoly, hderivWn, hdiffV1, hderivV0, Ideal.map_span]
+  congr 1
+  simp only [Set.image_singleton]
+  congr 1
+  rw [map_mul, map_pow, map_natCast, show ψ.toRingHom w = ψ w from rfl, hwx]
+
 end ABC3.Found.Falt1
