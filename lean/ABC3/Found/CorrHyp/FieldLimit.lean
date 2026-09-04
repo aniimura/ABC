@@ -1299,4 +1299,34 @@ theorem exists_fg_subalgebra_tensor_standardEtale_elem (A : Type) [CommRing A] [
   subst hP₁'
   rw [hq]
 
+/-! ## `B`の元を`StandardEtalePresentation`のRingへ座標として運ぶ
+——複数ピースの重なりの比較(work unit 3の続き)への橋渡し
+
+複数の標準エタール片`D(f_i)`を貼り合わせるには、`f_j`(別の局所化元)が
+`D(f_i)`(つまり`P_i.Ring`)の中でどんな元に対応するかを知る必要がある。
+`StandardEtalePresentation.exists_mul_aeval_x_g_pow_eq_aeval_x`(mathlib、
+「`S`の任意の元は`g(X)`のベキを掛ければ`X`の多項式になる」)を
+`Pres.equivRing`で両辺に運ぶだけで、この「座標」を取り出せる。 -/
+
+/-- **`StandardEtalePresentation`の元は、そのRing上で「`g`のベキ倍すれば
+Xの多項式になる」という座標表示を持つ**——`exists_mul_aeval_x_g_pow_eq_
+aeval_x`(mathlib)を`Pres.equivRing`(AlgHom)で両辺に運び、`aeval`の
+自然性(`Polynomial.aeval_algHom_apply`)で`Pres.x`を`Pres.X`へ変換する
+だけ。`D(f_i)`・`D(f_j)`の重なりを`P_i.Ring`の中の基本開集合として
+記述するための第一歩——ここで得られる`p`(1変数多項式、`Polynomial R`)は
+`exists_fg_subalgebra_tensor_polynomial_family`でそのまま有限段階へ
+降ろせる。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem standardEtalePresentation_exists_coord {R S : Type} [CommRing R] [CommRing S] [Algebra R S]
+    (Pres : StandardEtalePresentation R S) (x : S) :
+    ∃ (p : Polynomial R) (n : ℕ),
+      Pres.equivRing x * (Polynomial.aeval Pres.P.X Pres.P.g) ^ n = Polynomial.aeval Pres.P.X p := by
+  obtain ⟨p, n, hpn⟩ := Pres.exists_mul_aeval_x_g_pow_eq_aeval_x x
+  refine ⟨p, n, ?_⟩
+  have h2 := congrArg Pres.equivRing hpn
+  rw [map_mul, map_pow, ← Polynomial.aeval_algHom_apply, ← Polynomial.aeval_algHom_apply,
+    Pres.equivRing_x] at h2
+  exact h2
+
 end ABC3.Found.CorrHyp
