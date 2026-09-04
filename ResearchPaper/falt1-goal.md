@@ -2479,6 +2479,52 @@ mathlib での正確な組み立て方は未確認)。
       Module B _)`で個別に取り出し`Eq`ではなく`HEq`や`Subsingleton`
       経由で橋渡しする、という方針から始めること。
 
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05、
+      **真の原因が判明し、`pushoutKaehlerSplitStepOption`が完全に
+      完成した**(commit分は次項参照)。instance diamondではなかった
+      ——原因は2つ、どちらも今回のセッションで初めて可視化できた:
+
+      1. **`RAlg`/`RAlgOver`の`carrier : Type*`が明示的なuniverse
+         変数を持たなかったこと**。`Type*`は出現ごとに独立した
+         universeメタ変数を生成するため、`F : ι → RAlgOver R B`と
+         別の場所での`RAlgOver R B`の使用とで、`carrier`のuniverseが
+         食い違いうる。`(inferInstance : Module B (∀i, ...))`を
+         `Pi.module`経由の項と比較する診断コードを書いたところ、
+         「`F`の型`ι → RAlgOver.{u_1,u_2,u_5}R B`が期待される型
+         `ι → RAlgOver.{u_1,u_2,u_4}R B`と一致しない」という
+         **universe添字の食い違いそのもの**がエラーとして出た
+         (`set_option pp.universes true`で可視化)。修正:
+         `universe uFalt1R uFalt1Car uFalt1T uFalt1B`を明示的に
+         宣言し、`RAlg (R : Type uFalt1R)`・`RAlgOver (R : Type
+         uFalt1R)(T : Type uFalt1T)`・`carrier : Type uFalt1Car`と、
+         使用箇所すべてで`RAlgOver.{uFalt1R, uFalt1Car, uFalt1T}`の
+         ように**明示的にuniverse引数を揃える**。
+      2. **さらに深い、真の最終ブロッカー**: 上記のuniverse修正を
+         入れても`Type mismatch`は消えなかった——理由は
+         `(A × B) ≃ₗ[B] C`という式を書く際、**外側の括弧を省略する
+         と`A × (B ≃ₗ[B] C)`に構文解析される**(`×`が`≃ₗ[·]`より
+         結合が弱い/優先順位が異なる)という**単純な構文の罠**
+         だった。実際、`pp.universes`で完全一致するように直した後の
+         `Type mismatch`のエラーメッセージをよく読むと、「私の項の
+         型」は`(A×B)≃ₗC`なのに「期待される型」は`A×(B≃ₗC)`(`Prod`
+         が一番外側)になっていた——これがセッション全体を通して
+         「表面上は同一なのに`Type mismatch`」に見えていた**真の
+         原因**。修正は単純: `((TensorProduct C.carrier B Ω[C.carrier
+         ⁄R]) × (∀i,...))≃ₗ[B](...)`と**外側の積全体を明示的に
+         括弧で囲む**だけ。
+
+      これで`prodOptionPiEquivFresh`(のちに`pushoutKaehlerSplit
+      StepOption`に統合)が`have`/`set`の個別確立
+      (`toF`・`hadd`・`hsmul`・`invF`・`hleft`・`hright`)+
+      `LinearEquiv.mk (LinearMap.mk (AddHom.mk toF hadd) hsmul) invF
+      hleft hright`(`{...}`匿名コンストラクタは`Prod`側と誤って
+      マッチする別のバグがあったため、名前付きコンストラクタで回避)
+      で完全に`lake build`を通った。`pushoutKaehlerSplitStepOption`
+      は`pushoutKaehlerSplitStep`の出力(積の形)を次段の`prev`に
+      そのまま使える`Option ι`のPi型へ変換する——これで`d+1`個の
+      因子を`n`回繰り返し適用してVₙ₊₁を構成する、という3aで構想した
+      道が**工学的には完全に開通した**。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
