@@ -1711,3 +1711,15 @@ d7753ea6・fedca21f・90c6342c)で数学的核心のすべてが揃った——�
 relation_descend_R等)への specialize+corrHypGlueDataへの配線作業に
 直接使える状態。残る課題(β脚・h:ZK=D.Ext Zの構造的懸念)は変わらず。
 corrhyp-goal.mdに詳細記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05(続き10)
+実データへのspecialize前に「何をψ・ψ'として渡すべきか」を精査。重要な
+気づき: ℝレベルの貼り合わせは自明(α⁻¹(U_i)は全てc.C自身の開集合、
+層構造が既に自動的に貼り合わせデータを与える)——Rレベルで初めて
+非自明になる(descendPieceRはc.Cの開集合そのものではなくbase change
+して初めて同型になる抽象的なスキーム)。実際のψの構成に要る3部品:
+(1)P_i.val(Algebra.Generators.val、生成元の実際の環の元)・
+(2)層の制限写像でoverlapへ送る・(3)P_jの生成元の多項式として表示
+(aevalの全射性経由の選択)。hround1/2は層の制限公理から従う見込み。
+配線作業(Scheme.Opens/TopCat.Presheaf API)がまだ残っている。集計は
+10/24で変わらず。corrhyp-goal.mdに詳細記録。
