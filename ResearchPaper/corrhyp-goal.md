@@ -4341,3 +4341,49 @@ baseChange_eq`)として確定させることに専念した——次に試す�
 elaboration timeoutを回避できる可能性がある。lake build(`FieldLimit`/
 `ABC3`)とも0エラー確認、push完了。集計は引き続き10/24——§4は引き続き
 0/2。
+
+## 2026-09-05夜さらに続き4: 「個別の`have`への分割」を実行——
+数学的な論証は完成、最後の1手でinstance diamondに阻まれる
+
+上記の分割方針を実行し、`CorrHyp`非依存の**純粋な代数の補題**
+`exists_ringEquiv_localization_of_eq`(`B,B',T,ι,I,p₀`のみを引数に取る、
+`pieceAlgebra`等の足場を一切使わない)として組み立てたところ、
+elaboration timeoutは完全に解消した(各段が数秒で通る)。
+
+**数学的な論証は完成した**——途中、`quotient_mvPolynomial_baseChange`
+が「純テンソル」`(mk I x)⊗ₜ1`の上でどう振る舞うかを示す自然性
+(`quotient_mvPolynomial_baseChange_tmul_one`、`FieldLimit.lean`、
+commit `901f7362`)を新たに確立する必要があった——`Algebra.TensorProduct.
+quotientTensorEquiv_apply_tmul`+`Ideal.quotientEquiv_mk`(いずれも
+mathlib)+既存の`quotientMvPolynomialBaseChangeRingEquivAux_comp_
+algebraMap`を繋ぐだけ。これと`ideal_map_mvPolynomial_promote_baseChange_
+eq`(前回)を組み合わせれば、`key`という等式(`e2`を局所化パラメータへ
+適用した結果が正しい対応先に一致すること)まで**完全に証明できた**。
+
+**最後の1手でinstance diamondに阻まれた(正直な記録)**: `key`から
+最終的な環同型(`Nonempty(M⊗[B']T ≃+* Localization.Away(...))`)を
+組み立てる際、`IsLocalization.ringEquivOfRingEquiv`(mathlib、環同型
+`e2`から局所化同士の同型を作る)を呼ぶと、
+```
+Application type mismatch: The argument e2 has type
+  RingEquiv ... Algebra.TensorProduct.instMul instDistribOfSemiring.toMul ...
+but is expected to have type
+  RingEquiv ... instDistribOfSemiring.toMul instDistribOfSemiring.toMul ...
+```
+という、`(MvPolynomial ι B'⧸IR')⊗[B']T`の`Mul`インスタンスが`Algebra.
+TensorProduct.instMul`経由(`e2`が実際に持つもの)と`instDistribOfSemiring.
+toMul`経由(`Localization.Away(...)`の暗黙の`R`引数として推論される
+もの)とで**非`defeq`に見える**という、新しいinstance diamondに当たった
+——`letI`での事前登録(`#1`の定石)を複数回試したが解消しなかった。
+`T`(部分モノイド)の推論も別に`(T := Submonoid.powers ...)`という明示
+指定が必要だった(こちらは解消済み)。
+
+**正直な評価**: 数学的な内容(`key`の等式)は完全に確立できており、
+残るのは`IsLocalization`のAPIレベルでの配管の問題であることが明確に
+なった——次に試すべき道は、`IsLocalization.ringEquivOfRingEquiv`を
+使わず、`IsLocalization.algEquiv`(2つの実現の一意性、`isLocalization_
+away_tensor_eq`で既に使った経験がある)経由で構成し直すこと、または
+`Localization.Away`ではなく一般の`M`(`isLocalization_away_tensor_eq`
+と同じスタイル)の側で`IsLocalization.Away`インスタンスを直接構成する
+ことが有望に見える。lake build(`FieldLimit`/`ABC3`)とも0エラー確認、
+push完了。集計は引き続き10/24——§4は引き続き0/2。

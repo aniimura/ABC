@@ -1926,3 +1926,20 @@ mvPolynomial_baseChangeを2回適用して比較する道の核心部品)。
 として先に確立してから引数として渡す小さな最終補題に分割する(足場の
 再構築を1回で済ませる)。lake build(FieldLimit/ABC3)0エラー確認、
 push済み。集計は引き続き10/24——§4は引き続き0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き4
+分割方針を実行——elaboration timeoutは完全解消、数学的論証も完成した
+がinstance diamondで最後の1手に阻まれる。quotient_mvPolynomial_
+baseChange_tmul_one(commit 901f7362、FieldLimit.lean、「純テンソル」
+上での自然性)を新たに確立し、ideal_map_mvPolynomial_promote_
+baseChange_eqと組み合わせてkeyという等式(局所化パラメータの正しい
+対応)を完全に証明できた。
+
+最後にIsLocalization.ringEquivOfRingEquiv(e2から局所化同士の同型を
+作る)を呼ぶとinstance diamond(Algebra.TensorProduct.instMul対
+instDistribOfSemiring.toMulの不一致)に当たり未完成——letIでの事前
+登録を複数回試したが解消せず。次の道: IsLocalization.algEquiv経由で
+構成し直す、またはisLocalization_away_tensor_eqと同じスタイルで一般の
+Mの側でIsLocalization.Awayインスタンスを直接構成する。lake build
+(FieldLimit/ABC3)0エラー確認、push済み。集計は引き続き10/24——§4は
+引き続き0/2。
