@@ -1000,6 +1000,56 @@ mathlib での正確な組み立て方は未確認)。
     tools/lean-idioms.md #29 の教訓(cast を避け、`IsFractionRing`
     の一意性補題 `IsFractionRing.algEquivOfIsFractionRing` 等を
     使って明示的な同型として扱う)が活きる場面のはず。
+
+    ★★★★★★★2026-09-04、**`hsep` の数学的内容そのものは完全に検証
+    できた**(未commit・named theorem へのパッケージ化は断念)。
+    予想通りの筋(分離性の推移律 + `IsFractionRing` の一意性による
+    同型 transport)で完全に閉じることを、**独立した `example` ブロック
+    内で sorry 無く実証した**:
+
+    1. `IsLocalization.algEquiv`(mathlib)で `FractionRing Wₙ₊₁ ≃ₐ[Wₙ₊₁]
+       AdjoinRoot gK` を得る(`integralClosure.isFractionRing_of_
+       finite_extension` が与える `IsFractionRing Wₙ₊₁ (AdjoinRoot gK)`
+       から)。
+    2. **驚きの発見**: `Algebra (FractionRing V0)(FractionRing Wₙ)`
+       が(`fractionRingMapOfInjective` 経由で)一度 `letI` で入って
+       さえいれば、`Algebra (FractionRing V0)(AdjoinRoot gK)` と
+       `IsScalarTower (FractionRing V0)(FractionRing Wₙ)(AdjoinRoot
+       gK)` は**instance 探索だけで自動的に見つかる**(`φ` を手で
+       組み立てる必要は無かった)。
+    3. `Algebra.IsSeparable.trans`(mathlib、分離性の推移律)で
+       `Algebra.IsSeparable (FractionRing V0)(AdjoinRoot gK)` を
+       `Algebra.IsSeparable (FractionRing V0)(FractionRing Wₙ)`
+       (新たな仮定)+ `Algebra.IsSeparable (FractionRing Wₙ)
+       (AdjoinRoot gK)`(`algIsSeparable_adjoinRoot_of_separable`、
+       既存)から得る。
+    4. `AlgEquiv.ofRingEquiv`(mathlib)で(1)の同型を`FractionRing
+       V0` 上の `AlgEquiv` に昇格させ(`e_Wn1.apply_symm_apply` から
+       `rfl` 級の可換性証明)、`AlgEquiv.Algebra.isSeparable_iff`
+       (mathlib)で(3)を transport すれば `hsep` そのものが出る。
+
+    ★★ただし**この4ステップを1つの named theorem として綺麗に
+    パッケージ化しようとすると**(`Algebra.IsSeparable (FractionRing
+    V0)(FractionRing Wₙ)` を instance 前提として要求する形にすると)、
+    (2)の自動発見が**named theorem の中では効かなくなる**という
+    新しい instance-search の脆さに遭遇した——`letI`で導入した
+    ローカルな `Algebra` インスタンスと、`hsep` 系の仮定の型が
+    参照する(別途 `def` で名指しされた)同じ値が、**instance 探索の
+    観点では別物として扱われる**らしく、複数回の書き方の変更でも
+    再現し続けた。★これは`falt1BaseChangeAlgHom_generator_and_
+    injective`パッケージ化の際に遭遇したものとも異なる**新しい**
+    パターン——tools/lean-idioms.md への追記候補(次回、実際に
+    追記する前にもう少し原因を特定する価値がある)。
+
+    ★結論: **`hsep` は数学的には解決済み**(4ステップの筋は完全に
+    正しく、個別に sorry 無く確認できた)。残るのは Lean の配線上の
+    問題(named theorem 化)のみ——次回は、`differentIdeal_tower_
+    diamond` を**直接呼び出す箇所**で、このセッションの `example`
+    ブロックとまったく同じ順序で `letI`/`haveI` を並べてインライン
+    展開する(named theorem を経由しない)方針を試すのが良い
+    (`falt1BaseChangeAlgHom_generator_and_injective` 完成時と同じ
+    教訓——instance を提供する事実は独立に名前を付けようとせず、
+    使う場所で直接組み立てる)。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
