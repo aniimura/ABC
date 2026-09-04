@@ -1373,6 +1373,88 @@ theorem piece_basicOpen_mul_eq (X : Over BaseK) (U : X.left.Opens) (f g : Γ(X.l
   rw [h1]
   exact Scheme.preimage_basicOpen _ _
 
+/-! ## `piece_basicOpen_localizationElem`の`R`レベルへの持ち上げ
+(`2026-09-05夜、続き20`)
+
+`isLocalization_away_tensor_eq`(`FieldLimit.lean`)を実際に使うための、
+`descendPieceR`(`D(f)`側、`R`レベルの環`S_0`)の元として`piece_basicOpen_
+localizationElem`(`Γ(C,piece(D(f)))`の元)を持ち上げる——`pieceAlgebra_R_
+model_baseChange`(`S_0⊗[B](A⊗ℝ)≅Γ(C,piece(D(f)))`)の逆像を`exists_fg_
+subalgebra_tensor_quotientMvPolynomial_lift`(`FieldLimit.lean`)へ渡すだけ。
+
+配管の教訓(2件、新しい失敗形、`tools/lean-idioms.md`に追記の価値あり):
+(1) 型注釈の中の`letI`/`haveI`(インスタンス用)は証明本体で`intro`する
+必要がない(自動的にゼータ簡約される)一方、**同じ場所の無名の`let`
+(インスタンスでない、通常の値)は`intro`で明示的に消費しないと、後続の
+`∀`/`∃`の束縛変数の名前と衝突する**——今回`let n := ...`と`let I := ...`
+を`∀ e`の直前に置いたところ、証明側で最初の`intro e`が(`n`が`let`の
+まま残っていたため)`n`を誤って消費してしまい(`e : ℕ`という誤った
+文脈になった)、`e.symm`が`Nat.symm`を探して失敗するという分かりにくい
+エラーになった——`intro n I e`と3つとも明示的に消費して解消した。
+(2) 巨大な依存型(`Fin(Algebra.Presentation.ofFinitePresentationVars
+(...))`等)を`∀`の中で複数回書くと`maxHeartbeats`が(1000000はおろか
+4000000でも)尽きるという以前の観測は、実は上記(1)の`intro`忘れが
+真因だった可能性が高い——`let`で共有した上で`intro`を正しく行えば、
+`maxHeartbeats 4000000`(81.91秒)で通った。「`∀e`は環同型の一意性が
+一般に成り立たないから数学的に誤り」という前回セッションの結論も誤り
+だった(訂正、正直な記録)——`∀e, ∃R' hR p₀, eq(e,R',p₀)`は、`R'`・`p₀`
+が`e`ごとに異なってよいので数学的に正しい主張だった。
+
+★**sorry 無し**。標準3公理のみ。 -/
+set_option maxHeartbeats 4000000 in
+open scoped TensorProduct Classical in
+theorem exists_piece_basicOpen_R_lift (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U)
+    (f g : Γ(X.left, U)) (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α] :
+    letI hUf := hU.basicOpen f
+    letI := pieceAlgebra X (X.left.basicOpen f) hUf
+    letI : Algebra (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ)
+        Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))) :=
+      ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))
+        (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))) le_rfl).hom.comp
+        (pieceRingEquiv X (X.left.basicOpen f) hUf).symm.toRingHom).toAlgebra
+    haveI : Algebra.Etale (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ)
+        Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))) :=
+      piece_algebraEtale_tensor X (X.left.basicOpen f) hUf C α
+    haveI : Algebra.FinitePresentation (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ)
+        Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))) :=
+      inferInstance
+    letI hCRR : CommRing (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] (pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α).1) :=
+      inferInstance
+    letI : Algebra (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] (pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α).1)
+        (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ) :=
+      (Algebra.TensorProduct.map (AlgHom.id ℚ Γ(X.left, X.left.basicOpen f))
+        (Subalgebra.val (pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α).1)).toRingHom.toAlgebra
+    let n := Algebra.Presentation.ofFinitePresentationVars (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ)
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f)))
+    let I := Ideal.span (Set.range (pieceAlgebra_relation_descend_q₀ X (X.left.basicOpen f) hUf C α))
+    ∀ (e : (MvPolynomial (Fin n) (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] (pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α).1) ⧸ I)
+        ⊗[Γ(X.left, X.left.basicOpen f) ⊗[ℚ] (pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α).1]
+          (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ)
+      ≃+* Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f)))),
+    ∃ (R' : FgSubalgebra ℚ ℝ) (_hR : pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α ≤ R')
+      (p₀ : MvPolynomial (Fin n) (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1)),
+      (quotient_mvPolynomial_baseChange
+          (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] (pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α).1)
+          (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ) (Fin n) I)
+        (e.symm (piece_basicOpen_localizationElem X U f g C α)) =
+      Ideal.Quotient.mk (Ideal.map (MvPolynomial.map (algebraMap
+          (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] (pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α).1)
+          (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ))) I)
+        (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ Γ(X.left, X.left.basicOpen f))
+          (Subalgebra.val R'.1)).toRingHom p₀) := by
+  have hUf : IsAffineOpen (X.left.basicOpen f) := hU.basicOpen f
+  letI := pieceAlgebra X (X.left.basicOpen f) hUf
+  set R := pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α with hRdef
+  letI hCR : CommRing (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R.1) := inferInstance
+  letI : Algebra (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R.1) (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ) :=
+    (Algebra.TensorProduct.map (AlgHom.id ℚ Γ(X.left, X.left.basicOpen f)) (Subalgebra.val R.1)).toRingHom.toAlgebra
+  intro n I e
+  set h₂ := piece_basicOpen_localizationElem X U f g C α with hh₂def
+  set z := e.symm h₂ with hzdef
+  obtain ⟨R', hR', p₀, hp₀⟩ := exists_fg_subalgebra_tensor_quotientMvPolynomial_lift
+    Γ(X.left, X.left.basicOpen f) R I z
+  exact ⟨R', hR', p₀, hp₀⟩
+
 /-- **アフィン開`U`上の基本開`X.basicOpen f`は`Spec(Localization.Away f)`
 そのものと同一視できる**——`mathlib`の`basicOpenIsoSpecAway`は`X := Spec R`
 の場合限定だったので、一般のアフィン開`U`(`X`自体はアフィンでなくてよい)
