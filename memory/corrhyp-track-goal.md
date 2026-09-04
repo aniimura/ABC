@@ -1880,3 +1880,19 @@ p₀として持ち上げられることを示した。lake build(ExtLimit/ABC3)
 として直接構成し直す配線(Spec(Localization.Away h)として書き、
 IsOpenImmersion.of_isLocalizationで自動的に開埋め込みになることを
 示す)——まだ未着手。集計は引き続き10/24——§4は引き続き0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き
+descendPieceR_localization_isOpenImmersion(commit 96f66baf、ExtLimit.
+lean)完成——descendPieceRの環をR'レベルへ昇格したものを任意の元p₀で
+局所化すればIsOpenImmersion.of_isLocalizationにより自動的に開埋め込み
+になることを示した(f,gに依存しない一般的な事実)。配管の教訓:
+open...in・set_option...inはdocstringの前に置く必要がある(後に置くと
+「unexpected token 'open'」構文エラー)。
+
+意義: exists_piece_basicOpen_R_liftが与える具体的なR'・p₀と組み合わせ
+れば、GlueDataのf i jに要る開埋め込みが直接得られる——続き15で発見した
+本丸のギャップへの直接の答えが揃った。残るのはScheme.GlueDataの完全な
+構造(J・U・V・f・f_open・t・t'・t_fac・cocycleの約8データ)への組み立て
+——特にtの構成にD(f)↔D(g)対称性のRレベル実現が要る。lake build
+(ExtLimit/ABC3)0エラー確認、push済み。集計は引き続き10/24——§4は
+引き続き0/2。

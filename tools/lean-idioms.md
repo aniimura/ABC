@@ -4231,3 +4231,35 @@ intro I; intro e`と分けて)消費する。証明側で`set R := ...`のよう
 
 実例: `lean/ABC3/Found/CorrHyp/ExtLimit.lean`の
 `exists_piece_basicOpen_R_lift`。
+
+## 42. `open ... in`・`set_option ... in`は`/-- docstring -/`より
+**前**に置く——後に置くと構文エラーになる(2026-09-05)
+
+**症状**: `/-- 説明文 -/`の直後に`open scoped X in`を置き、その次の行に
+`theorem ...`を書くと、
+```
+error: unexpected token 'open'; expected 'lemma'
+```
+という構文エラーになる——`open`という単語自体は正しいのに、パーサーが
+`lemma`(または`theorem`/`def`)を期待している場所に来てしまう。
+
+**直し方**: 修飾子コマンド(`open ... in`・`set_option ... in`)は
+**docstringより前**に置く:
+```lean
+-- 良い例
+open scoped TensorProduct in
+/-- 説明文 -/
+theorem foo ... := ...
+
+-- 悪い例(構文エラー)
+/-- 説明文 -/
+open scoped TensorProduct in
+theorem foo ... := ...
+```
+`docstring`は直後の宣言キーワード(`theorem`/`def`/`lemma`等)に直接
+くっつく必要があり、間に`open ... in`のような修飾子コマンドを挟めない
+——ファイル内の既存コード(`piece_le_of_le`等)はすべて「修飾子→
+docstring→宣言」の順で書かれており、今回はその逆順にしてしまった。
+
+実例: `lean/ABC3/Found/CorrHyp/ExtLimit.lean`の
+`descendPieceR_localization_isOpenImmersion`。

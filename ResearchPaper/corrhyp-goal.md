@@ -4250,3 +4250,36 @@ Away h)`として`descendPieceR`の新しい構成を`def`として書き、そ�
 かつそのℝへの底変換が`Γ(C,piece(D(f*g)))`に正しく一致すること
 (`isLocalization_away_tensor_eq`+今回の持ち上げ補題を組み合わせる)を
 示す——まだ未着手。集計は引き続き10/24——§4は引き続き0/2。
+
+## 2026-09-05夜さらに続き: `descendPieceR_localization_isOpenImmersion`
+完成——`GlueData`の`f i j`が開埋め込みであることを直接示す事実が揃った
+
+続き19で予告した「`Spec(Localization.Away h)`が自動的に開埋め込みに
+なる」ことを、`descendPieceR`の環を`R'`レベルへ昇格したものへ`IsOpen
+Immersion.of_isLocalization`(mathlib)を直接適用するだけで示した
+(`descendPieceR_localization_isOpenImmersion`、commit `96f66baf`)——
+`piece_basicOpen_localizationElem`や`f,g`に依存しない、**任意の**局所化
+元`p₀`について成り立つ一般的な事実として書いた(`exists_piece_
+basicOpen_R_lift`より弱い代わりに一般的、両者を組み合わせれば`D(f)`・
+`D(g)`の具体的なペアに特殊化できる)。
+
+途中、`open scoped ... in`の位置を(既存コードの慣習と逆に)`/-- 
+docstring -/`の**後**に置いてしまい、「unexpected token 'open';
+expected 'lemma'」という構文エラーになった——`open ... in`・`set_option
+... in`のような修飾子コマンドは**docstringより前**に置く必要がある
+(docstringは直後の宣言キーワードに直接くっつく必要があり、間に修飾子
+コマンドを挟めない)、という新しい配管の教訓。
+
+**意義(正直な評価)**: これで`Lemma 4.1`のGlueData構築に必要な
+「`f i j`が開埋め込みである」という、続き15で発見した本丸のギャップ
+に対する**直接の答え**が揃った——`exists_piece_basicOpen_R_lift`が
+与える`R'`・`p₀`(具体的、`h₂`と互換性のある元)を`descendPieceR_
+localization_isOpenImmersion`(任意の元について開埋め込みになる一般
+事実)へ渡せば、`D(f)`→`D(f*g)`の開埋め込みが直接得られる。ただし
+これらを実際に**`Scheme.GlueData`の完全な構造**(`J`・`U`・`V`・`f`・
+`f_open`・`t`・`t'`・`t_fac`・`cocycle`の約8データ)へ組み立てる作業
+自体はまだ未着手——`t`(`V(i,j)⟶V(j,i)`の遷移)の構成には`D(f)`↔`D(g)`
+の対称性(`ψ`構成、続き15で数学的には解決済み)を実際にRレベルで
+実現する必要があり、次の一手として記録する。lake build(`ExtLimit`/
+`ABC3`)とも0エラー確認、push完了。集計は引き続き10/24——§4は引き続き
+0/2。
