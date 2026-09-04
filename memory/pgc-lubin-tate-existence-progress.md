@@ -720,3 +720,39 @@ adjoinPAdicLocalField K x`を実際に使うと、`LocalFieldNorm.lean`の
 使うよう規律を決めるかのいずれか。これが解決すれば
 `Ideal.isLinearTopology`経由で`IsLinearTopology 𝒪[L] 𝒪[L]`が手に入り、
 `PowerSeries.aeval`で実際に`[a]_f`を評価できる見通し。
+
+**続報(2026-09-04・続き、★★★★★★★★★★訂正: 上記の懸念は杞憂だった)**:
+実際にREPLで検証したところ、上で懸念した①(体レベルでの
+instance diamond)は**存在しなかった**——
+`IntermediateField.adjoin K.carrier {x}`が`K.closure`の部分体として
+mathlibの一般論から自動的に持つ`NormedField`構造は、そのままの定義で
+
+```
+‖(⟨x,_⟩ : K.carrier⟮x⟯)‖ = spectralNorm K.carrier K.closure x  -- `rfl` で成立
+```
+
+を満たす(部分体の`NormedField`は単に周囲のノルムの制限として定義
+されているため)。`hasEval_mem_adjoin_of_mem_iteratedLubinTateTorsionPoints`
+(commit`0f687b3d`)として、`Λ_n`の元を`K.carrier⟮x⟯`の元として見た
+ときも`PowerSeries.HasEval`(位相的冪零性)が成り立つことを記録した。
+
+一方、`adjoinPAdicLocalField`(`ℚ_[p]`から`K.carrier⟮x⟯`を再構成する
+経路)の方は、実際に`spectralNorm ℚ_[p] K.closure`と
+`spectralNorm K.carrier K.closure`の一致(
+`NormedAlgebra.norm_eq_spectralNorm`+`NormedAlgebra.restrictScalars`
+で試みた)を証明しようとしたところ、`Algebra.IsAlgebraic ℚ_[p]
+K.closure`の型クラス探索が**タイムアウトする**という、単独では速く
+解決するのに文脈内では詰まるという厄介な現象に遭遇した(原因は
+未特定——恐らく`ℚ_[p]→K.carrier→K.closure`の`Algebra`構造が2通りの
+経路(既存の自動導出 vs `NormedAlgebra.restrictScalars`が内部で
+作るもの)で非defeqになり、探索が迷走している)。しかし体レベルの
+上記`rfl`一致で目的(`HasEval`の`K.carrier⟮x⟯`版)は既に達成できた
+ので、この`adjoinPAdicLocalField`経由のℚ_p再構成ルートは**今のところ
+不要**——依然として残る`IsLinearTopology`(付値環が要る)の解決には
+有用かもしれないが、優先度を下げて良い。
+
+★教訓: 「instance diamond になりうる」という懸念は、実際に`rfl`や
+`decide`で試してみるまでは確定した事実として記録・行動指針にしない
+方が良い——今回は杞憂だったが、逆に`adjoinPAdicLocalField`側では
+本物の(未解決の)型クラス探索の詰まりに遭遇した。両方あり得るので、
+「試してみて確認する」を省略しない。
