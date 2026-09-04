@@ -2401,4 +2401,119 @@ noncomputable def falt1BaseChangeAlgHom
   have step1 : AdjoinRoot f →ₐ[V0] AdjoinRoot g := hfg ▸ algHomAdjoinRootOfCompat' (Wn := Wn) f
   exact (e2.toAlgHom.restrictScalars V0).comp (step1.comp e1.symm.toAlgHom)
 
+/-!
+## `V_1` の生成元パッケージと `ψ(w)=x` の生成元対応(2026-09-04)
+
+`falt1AdjoinRootEquivIntegralClosure`(`V1 ≃ AdjoinRoot f`)を手に入れた
+おかげで、「`w`(`V1` の生成元)の主要な性質」を、以前のように
+`PowerBasis`・`Eisenstein` の詳細を経由せず、**同型の自然性だけ**から
+再導出できると判明した(`w := e1 (root f)` と定義するのが鍵——opaque
+な `noncomputable def` を後から `unfold` して中の値を計算しようとする
+より、最初から「後で使う値」を定義に組み込む方が遥かに簡単だった、
+tools/lean-idioms.md #29 参照)。 -/
+
+/-- **`V_1` の生成元パッケージ**: `w := e1(root f)`(`e1` は
+`falt1AdjoinRootEquivIntegralClosure`)に対し、整性・単項生成性・
+minpoly が `f` に一致することを、同型の自然性だけから示す。 -/
+theorem falt1GeneratorPackage
+    {V0 : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0] (π : V0) (n : ℕ)
+    (hn : (n : FractionRing V0) ≠ 0) (hπne0 : algebraMap V0 (FractionRing V0) π ≠ 0)
+    (hprime : (Ideal.span ({π} : Set V0)).IsPrime) (hnotsq : π ∉ (Ideal.span ({π} : Set V0)) ^ 2)
+    (hnpos : 0 < n)
+    [IsDedekindDomain (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    [Module.IsTorsionFree V0 (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))] :
+    ∃ w : integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))),
+      IsIntegral V0 w ∧ Algebra.adjoin V0 ({w} : Set _) = ⊤ ∧ minpoly V0 w = Polynomial.X ^ n - Polynomial.C π := by
+  set f : Polynomial V0 := Polynomial.X ^ n - Polynomial.C π with hfdef
+  set e1 := falt1AdjoinRootEquivIntegralClosure π n hn hπne0 hprime hnotsq hnpos
+  refine ⟨e1 (AdjoinRoot.root f), ?_, ?_, ?_⟩
+  · have hmonic : f.Monic := Polynomial.monic_X_pow_sub_C π hnpos.ne'
+    have hroot_int : IsIntegral V0 (AdjoinRoot.root f) := ⟨_, hmonic, AdjoinRoot.eval₂_root _⟩
+    exact hroot_int.map e1.toAlgHom
+  · have h1 : Algebra.adjoin V0 ({AdjoinRoot.root f} : Set (AdjoinRoot f)) = ⊤ :=
+      AdjoinRoot.adjoinRoot_eq_top
+    have h2 := congrArg (Subalgebra.map e1.toAlgHom) h1
+    rw [AlgHom.map_adjoin_singleton, Algebra.map_top] at h2
+    rwa [show e1.toAlgHom.range = ⊤ from by rw [AlgHom.range_eq_top]; exact e1.surjective] at h2
+  · have hmonic : f.Monic := Polynomial.monic_X_pow_sub_C π hnpos.ne'
+    have hroot_int : IsIntegral V0 (AdjoinRoot.root f) := ⟨_, hmonic, AdjoinRoot.eval₂_root _⟩
+    have hirr : Irreducible f := eisenstein_X_pow_sub_C π n hnpos hprime hnotsq
+    have haeval_w : Polynomial.aeval (e1 (AdjoinRoot.root f)) f = 0 := by
+      rw [Polynomial.aeval_algHom_apply]
+      have h0 : Polynomial.aeval (AdjoinRoot.root f) f = 0 := by
+        show Polynomial.eval₂ (algebraMap V0 (AdjoinRoot f)) (AdjoinRoot.root f) f = 0
+        rw [AdjoinRoot.algebraMap_eq]; exact AdjoinRoot.eval₂_root f
+      rw [h0, map_zero]
+    have hw_int : IsIntegral V0 (e1 (AdjoinRoot.root f)) := hroot_int.map e1.toAlgHom
+    have hdvd : minpoly V0 (e1 (AdjoinRoot.root f)) ∣ f := minpoly.isIntegrallyClosed_dvd hw_int haeval_w
+    have hirr2 : Irreducible (minpoly V0 (e1 (AdjoinRoot.root f))) := minpoly.irreducible hw_int
+    exact Polynomial.eq_of_monic_of_associated (minpoly.monic hw_int) hmonic
+      (hirr2.associated_of_dvd hirr hdvd)
+
+/-- `algHomAdjoinRootOfCompat'` の codomain を(多項式の等式に沿って)
+cast したものの、根での値。`g` を**自由変数のまま**保つのが鍵——
+`subst hfg` が素直に効く(`set`-束縛された `g` に対して `subst` すると
+「invalid equality proof」で失敗する、tools/lean-idioms.md #29 の
+続報)。 -/
+theorem algHomAdjoinRootOfCompat'_cast_root {V0 Wn : Type*} [CommRing V0] [CommRing Wn] [Algebra V0 Wn]
+    (f : Polynomial V0) (g : Polynomial Wn) (hfg : f.map (algebraMap V0 Wn) = g) :
+    (hfg ▸ algHomAdjoinRootOfCompat' (Wn := Wn) f : AdjoinRoot f →ₐ[V0] AdjoinRoot g)
+      (AdjoinRoot.root f) = AdjoinRoot.root g := by
+  subst hfg
+  exact algHomAdjoinRootOfCompat'_root f
+
+/-- **`ψ` の下での生成元対応**: `V1 → Wn1` の橋渡し(`falt1BaseChangeAlgHom`
+と同じ構成、`w`(`V1` の `root f` 由来の生成元)を `x`(`Wn1` の
+`root g` 由来の生成元)に送る)。`falt1BaseChangeAlgHom` という名前の
+opaque な `def` を後から `unfold` して調べるのは時間対効果が悪いと
+判明した(tools/lean-idioms.md #29)ため、同じ構成をここで直接書き
+下して(名前を経由せず)対応を証明する。 -/
+theorem falt1BaseChangeAlgHom_generator_correspondence
+    {V0 Wn : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    (π : V0) (n : ℕ)
+    (hn : (n : FractionRing V0) ≠ 0) (hπne0 : algebraMap V0 (FractionRing V0) π ≠ 0)
+    (hprime : (Ideal.span ({π} : Set V0)).IsPrime) (hnotsq : π ∉ (Ideal.span ({π} : Set V0)) ^ 2)
+    (hnpos : 0 < n)
+    (hn' : (n : FractionRing Wn) ≠ 0)
+    (hπne0' : algebraMap Wn (FractionRing Wn) (algebraMap V0 Wn π) ≠ 0)
+    (hprime' : (Ideal.span ({algebraMap V0 Wn π} : Set Wn)).IsPrime)
+    (hnotsq' : algebraMap V0 Wn π ∉ (Ideal.span ({algebraMap V0 Wn π} : Set Wn)) ^ 2)
+    [IsDedekindDomain (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    [Module.IsTorsionFree V0 (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    [IsDedekindDomain (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))]
+    [Module.IsTorsionFree Wn (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))] :
+    ∃ (ψ : integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))) →ₐ[V0]
+      integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))
+      (w : integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))
+      (x : integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn))))),
+      ψ w = x := by
+  set f : Polynomial V0 := Polynomial.X ^ n - Polynomial.C π with hfdef
+  set π' : Wn := algebraMap V0 Wn π with hπ'def
+  set g : Polynomial Wn := Polynomial.X ^ n - Polynomial.C π' with hgdef
+  have hfg : f.map (algebraMap V0 Wn) = g := by rw [hfdef, hgdef, hπ'def]; simp
+  set e1 := falt1AdjoinRootEquivIntegralClosure π n hn hπne0 hprime hnotsq hnpos
+  set e2 := falt1AdjoinRootEquivIntegralClosure π' n hn' hπne0' hprime' hnotsq' hnpos
+  set step1 : AdjoinRoot f →ₐ[V0] AdjoinRoot g := hfg ▸ algHomAdjoinRootOfCompat' (Wn := Wn) f
+    with hstep1def
+  have hstep1root : step1 (AdjoinRoot.root f) = AdjoinRoot.root g := by
+    rw [hstep1def]; exact algHomAdjoinRootOfCompat'_cast_root f g hfg
+  refine ⟨(e2.toAlgHom.restrictScalars V0).comp (step1.comp e1.symm.toAlgHom),
+    e1 (AdjoinRoot.root f), e2 (AdjoinRoot.root g), ?_⟩
+  rw [AlgHom.comp_apply, AlgHom.comp_apply]
+  have h1 : e1.symm.toAlgHom (e1 (AdjoinRoot.root f)) = AdjoinRoot.root f := e1.symm_apply_apply _
+  rw [h1, hstep1root]
+  rfl
+
 end ABC3.Found.Falt1
