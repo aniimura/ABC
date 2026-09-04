@@ -272,6 +272,47 @@ R C D B` という自然性(`tensorKaehlerEquiv_eq_map_mapBaseChange`、
     避けられない。ただし「厳密な等式」から出発できる分、不等式の
     往復より見通しが良くなる可能性がある。次のセッションでの
     検討候補として記録する(まだ Lean での検証・使用はしていない)。
+★★★★★★★★2026-09-04、**決定的な発見**: `ResearchPaper/0_Source/Brinon
+Conrad - CMI Summer School Notes on p-adic Hodge Theory.txt` の
+Exercise 13.7.4 が、Faltings のこの証明を**教科書レベルの精密さで
+step-by-step に書き下している**(Brinon-Conrad はスタンフォード/
+プリンストンで定番の CMI サマースクールノート)。原文(Faltings 自身
+の1988年の論文)の圧縮された記述より遥かに読みやすく、以下の疑問点
+が解消した:
+
+- (1) `Ω¹_{B1/A}` が `d+1` 個の元で生成される、という事実は
+  **「second fundamental exact sequence + Nakayama」で出す**(具体的な
+  手法が明示されている——`pushoutKaehlerSplit` 系ではなく、もっと
+  直接的な「単項生成の完全列」の議論)。
+- (2) **`length_B(Ω¹_{B/A}) = length_B(B/p^{δ_{B/A}}B)`**(`δ_{B/A}`
+  は different `D_{B/A} = p^{δ_{B/A}}B` の指数)——これは
+  `Found/Falt1/Lemma11.lean` の `falt1CokernelLengthEq` と**本質的に
+  同じ計算**(Lemma 1.1 そのもの)であることが確認できた。
+- (4) `ker(b) ⊇ ker(p 倍写像)` の正確な意味と根拠が判明:
+  「(1)(=d+1個生成)+ elementary divisor theorem」から出る——
+  `Ω¹_{An+1/An}⊗Bn+1` が(有限生成 torsion 加群の構造定理により)
+  `d+1` 個の巡回加群の直和に分解でき、各巡回加群の位数が `p^{何か}`
+  なので、"合成 `b∘a` の kernel は `p` 倍写像の kernel を含む"
+  という主張の正確な機構が判明した(★私が「よく分からない」と記録
+  していた箇所)。
+- (5) **鍵となる未解決の箇所の出典が判明**: 「using the definition of
+  the discriminant, show `p^{δn-δn+1}·(Bn⊗_{An}An+1) ⊆ Bn+1`」——
+  これは**判別式(discriminant)の塔での乗法性 + 非極大な order の
+  conductor が判別式の比較から評価できる、という古典的整数論**
+  (conductor-discriminant の関係)を使う、と明記されている。
+  `differentIdeal_tower_diamond`(different の塔の公式)ではなく
+  **discriminant の塔の公式**が本来の道具だった可能性が高い——
+  次のセッションでは mathlib の `Algebra.discr`/`NumberField.discr`
+  周りの資産を調査すること(未着手)。
+
+★結論(更新): 核心の困難(非正規性の評価)は依然として**独立の
+古典的整数論(conductor-discriminant の関係)を要する**という
+これまでの評価は変わらないが、**その具体的な形(discriminant の
+塔の乗法性)が判明した**ことで、次にどの mathlib 資産
+(`Algebra.discr` 系)を調査すべきかが明確になった。これは
+「思ったより深い」から「深いが具体的に何を調べればよいかが分かった」
+への前進である。
+
 3c. **「非常に分岐した」`V_n` の族**そのものの形式化(具体例: `p^n`
     乗根と `1` のべき根を添加する塔、上の「典型例」段落)——まだ
     手つかず。抽象的な族の公理化(`Ω_{V_n/V_{n-1}}` が
