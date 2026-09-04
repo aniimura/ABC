@@ -2182,4 +2182,43 @@ theorem differentIdeal_eq_span_of_adjoinRoot_X_pow_sub_C
   rw [hderiv]
   simp [Polynomial.aeval_mul, Polynomial.aeval_X_pow]
 
+/-!
+## Theorem 1.2・3c → 3b 接続の第一歩: `V_n → W_n` 塔の base change 写像(2026-09-04)
+
+`hspan_eq`(`cancel_conductor_delta`)を検証するには、`differentIdeal_tower_
+diamond` の `Vₙ→Vₙ₊₁` と `Vₙ→Wₙ→Wₙ₊₁` が**同じ生成元を共有する**必要がある
+——`Wₙ₊₁` を `Vₙ₊₁` と同じ多項式 `X^n-π` を `Wₙ` へ base change して構成
+すれば、`AdjoinRoot fK →ₐ[V0] AdjoinRoot (fK.map φ0)`(`φ0` は係数体の
+base change)という橋渡しの写像が要る。以下はその最初の(一般的な)
+部品——具体的な Eisenstein 多項式にはまだ特化していない。 -/
+
+/-- **`AdjoinRoot` の係数体の base change に沿った `V0`-代数準同型**:
+`φ0 : K →+* K'` が `V0` 上の algebraMap と両立する(`hφ0`)なら、
+`AdjoinRoot fK →ₐ[V0] AdjoinRoot (fK.map φ0)` が(`AdjoinRoot.map` を
+`AlgHom.mk'` で `V0`-線形性を確認して)得られる。`K`・`K'` が `V0`
+上の**異なる**代数(例: `FractionRing V0`・`FractionRing Wn`)である
+一般の場合を扱う——`AdjoinRoot.mapAlgHom`(mathlib)は同じ底環上の
+場合のみなので使えない。 -/
+noncomputable def algHomAdjoinRootOfCompat {V0 K K' : Type*} [CommRing V0] [Field K] [Field K']
+    [Algebra V0 K] [Algebra V0 K'] (φ0 : K →+* K')
+    (hφ0 : ∀ r : V0, φ0 (algebraMap V0 K r) = algebraMap V0 K' r) (fK : Polynomial K) :
+    AdjoinRoot fK →ₐ[V0] AdjoinRoot (fK.map φ0) :=
+  AlgHom.mk' (AdjoinRoot.map φ0 fK (fK.map φ0) (dvd_refl _)) (by
+    intro c x
+    simp only [Algebra.smul_def]
+    rw [map_mul]
+    congr 1
+    rw [IsScalarTower.algebraMap_apply V0 K (AdjoinRoot fK),
+      IsScalarTower.algebraMap_apply V0 K' (AdjoinRoot (fK.map φ0)),
+      AdjoinRoot.algebraMap_eq, AdjoinRoot.algebraMap_eq,
+      AdjoinRoot.map_of, hφ0])
+
+/-- `algHomAdjoinRootOfCompat` は根を根に送る——`w`(`V1` の生成元)の像が、
+`Wₙ₊₁` 側で「同じ構成をした」根 `x` に一致することの鍵になる定義性質。 -/
+theorem algHomAdjoinRootOfCompat_root {V0 K K' : Type*} [CommRing V0] [Field K] [Field K']
+    [Algebra V0 K] [Algebra V0 K'] (φ0 : K →+* K')
+    (hφ0 : ∀ r : V0, φ0 (algebraMap V0 K r) = algebraMap V0 K' r) (fK : Polynomial K) :
+    algHomAdjoinRootOfCompat φ0 hφ0 fK (AdjoinRoot.root fK) = AdjoinRoot.root (fK.map φ0) :=
+  AdjoinRoot.map_root φ0 fK (fK.map φ0) (dvd_refl _)
+
 end ABC3.Found.Falt1

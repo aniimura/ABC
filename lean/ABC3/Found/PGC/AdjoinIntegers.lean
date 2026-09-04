@@ -1,5 +1,6 @@
 import ABC3.Found.PGC.LubinTateDistinguishedSeparable
 import ABC3.Found.PGC.LubinTateActionEndomorphism
+import Mathlib.RingTheory.PowerSeries.PiTopology
 
 /-!
 # `K.carrier⟮x⟯` の整数環を `Valued` を経由せず直接構成する(`sorry` 無し)
@@ -568,5 +569,111 @@ theorem norm_lubinTateActionAtTorsionPoint_lt_one {p : ℕ} [Fact p.Prime]
   lt_of_le_of_lt (norm_lubinTateActionAtTorsionPoint_le K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem a)
     (by show spectralNorm K.carrier K.closure x < 1
         exact spectralNorm_lt_one_of_mem_iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n x hx)
+
+/-! ### ★★★★★★★★★★★★★★★★`subst`(形式的代入)と`aeval`(位相的評価)を
+繋ぐ連鎖律——mathlib に無かった橋渡しを直接構成する
+
+これまで「一般の`a,b`についての加法性・乗法性には`subst`/`aeval`の
+深い橋渡し理論が要る」と記録し、mathlib唯一の`subst`連続性補題
+(`MvPowerSeries.continuous_subst`)が`DiscreteUniformity`を要求する
+ため直接使えないと判明していた。ここでは**トランケーション(次数
+ごとの多項式近似)を経由する別の経路**でこの橋渡しを直接構成する:
+
+1. `coeff_pow_eq_zero_of_lt`: `g`の定数項が`0`なら`g=X*h`と分解でき、
+   `g^d`の次数`e`未満の係数は`d>e`のとき`0`。
+2. `coeff_subst_trunc_eq`: `subst g p`の次数`e`の係数は、`p`の次数
+   `e`より大きい部分を切り捨てても変わらない(`coeff_subst'`の
+   `finsum`公式が`d≤e`の項だけで決まることから、1.を使って)。
+3. `tendsto_subst_trunc`: 2.から、`subst g (trunc N p)`は`N→∞`で
+   `subst g p`へ収束する(`PowerSeries.WithPiTopology.tendsto_iff_
+   coeff_tendsto`+各次数で最終的に一定という議論)。
+4. `aeval_subst_eq_aeval_aeval`(★本体): `PowerSeries.continuous_
+   aeval`(既存)を3.に適用して極限を`aeval`の中へ運び、`Polynomial.
+   aeval_algHom_apply`(代数準同型は多項式評価と可換)で有限段
+   (トランケーション)での等式を得て、もう一度極限に戻す
+   (`PowerSeries.WithPiTopology.tendsto_trunc_atTop`)ことで結論する。
+
+`subst`自身の連続性は一切使わない——`subst`の**係数ごとの有限性**
+(`finsum`が有限和に潰れること)だけを使う、より直接的な経路。 -/
+
+/-- `g`の定数項が`0`のとき、`g^d`の次数`e`未満(`e<d`)の係数は`0`。 -/
+theorem coeff_pow_eq_zero_of_lt {A : Type*} [CommRing A] (g : PowerSeries A)
+    (hg0 : PowerSeries.constantCoeff g = 0) (d e : ℕ) (hde : e < d) :
+    PowerSeries.coeff e (g ^ d) = 0 := by
+  obtain ⟨h, hh⟩ := PowerSeries.X_dvd_iff.mpr hg0
+  rw [hh, mul_pow, PowerSeries.coeff_X_pow_mul']
+  simp [Nat.not_le.mpr hde]
+
+/-- `subst g p`の次数`e`の係数は、`p`を次数`N>e`でトランケートしても
+変わらない——`coeff_subst'`の`finsum`公式(`∑_d coeff d p • coeff e
+(g^d)`)が`coeff_pow_eq_zero_of_lt`により`d≤e`の項だけで決まる
+ことから。 -/
+theorem coeff_subst_trunc_eq {A : Type*} [CommRing A] {g : PowerSeries A}
+    (hg : PowerSeries.HasSubst g) (hg0 : PowerSeries.constantCoeff g = 0)
+    (p : PowerSeries A) (e N : ℕ) (hN : e < N) :
+    PowerSeries.coeff e (PowerSeries.subst g ((PowerSeries.trunc N p : Polynomial A) : PowerSeries A)) =
+      PowerSeries.coeff e (PowerSeries.subst g p) := by
+  rw [PowerSeries.coeff_subst' hg, PowerSeries.coeff_subst' hg]
+  apply finsum_congr
+  intro d
+  by_cases hd : d < N
+  · congr 1
+    rw [Polynomial.coeff_coe, PowerSeries.coeff_trunc]
+    simp [hd]
+  · rw [show PowerSeries.coeff d ((PowerSeries.trunc N p : Polynomial A) : PowerSeries A) = 0 from by
+      rw [Polynomial.coeff_coe, PowerSeries.coeff_trunc]; simp [Nat.not_lt.mp hd], zero_smul]
+    have hdN : N ≤ d := Nat.not_lt.mp hd
+    have hed : e < d := lt_of_lt_of_le hN hdN
+    rw [coeff_pow_eq_zero_of_lt g hg0 d e hed, smul_zero]
+
+open scoped PowerSeries.WithPiTopology in
+/-- `subst g (trunc N p)`は`N→∞`で`subst g p`へ収束する
+(次数ごとの標準位相について)——`coeff_subst_trunc_eq`により各次数
+`e`で`N>e`以降は値が一定になることから。 -/
+theorem tendsto_subst_trunc {A : Type*} [CommRing A] [TopologicalSpace A] {g : PowerSeries A}
+    (hg : PowerSeries.HasSubst g) (hg0 : PowerSeries.constantCoeff g = 0) (p : PowerSeries A) :
+    Filter.Tendsto (fun N => PowerSeries.subst g ((PowerSeries.trunc N p : Polynomial A) : PowerSeries A))
+      Filter.atTop (nhds (PowerSeries.subst g p)) := by
+  rw [PowerSeries.WithPiTopology.tendsto_iff_coeff_tendsto]
+  intro e
+  apply tendsto_atTop_of_eventually_const (i₀ := e + 1)
+  intro N hN
+  exact coeff_subst_trunc_eq hg hg0 p e N (by omega)
+
+open scoped PowerSeries.WithPiTopology in
+/-- ★★★★★★★★★★★★★**`subst`と`aeval`を繋ぐ連鎖律**——
+`aeval x (subst g p) = aeval (aeval x g) p`。`subst`自身の連続性
+(mathlibには`DiscreteUniformity`版しか無く直接使えない)を経由せず、
+`tendsto_subst_trunc`(トランケーション経由の収束)・
+`PowerSeries.continuous_aeval`(既存)・`Polynomial.aeval_algHom_
+apply`(代数準同型は多項式評価と可換)だけを組み合わせて構成する。
+Lubin-Tate作用の加法性・乗法性(`(a+b)·x=F_f(a·x,b·x)`・
+`a·(b·x)=(ab)·x`)を`LubinTateAction_add`・`LubinTateAction_comp`
+(既存)と組み合わせて示すための、探していた本物の橋渡し。 -/
+theorem aeval_subst_eq_aeval_aeval {A S : Type*} [CommRing A] [CommRing S] [Algebra A S]
+    [UniformSpace A] [UniformSpace S] [IsUniformAddGroup A] [IsTopologicalSemiring A]
+    [IsUniformAddGroup S] [T2Space S] [CompleteSpace S] [IsTopologicalRing S]
+    [IsLinearTopology S S] [ContinuousSMul A S]
+    {g p : PowerSeries A} (hg : PowerSeries.HasSubst g) (hg0 : PowerSeries.constantCoeff g = 0)
+    {x : S} (hx : PowerSeries.HasEval x)
+    {y : S} (hy : PowerSeries.HasEval y) (hxy : PowerSeries.aeval hx g = y) :
+    PowerSeries.aeval hx (PowerSeries.subst g p) = PowerSeries.aeval hy p := by
+  have h1 : Filter.Tendsto (fun N => PowerSeries.aeval hx
+      (PowerSeries.subst g ((PowerSeries.trunc N p : Polynomial A) : PowerSeries A)))
+      Filter.atTop (nhds (PowerSeries.aeval hx (PowerSeries.subst g p))) :=
+    (PowerSeries.continuous_aeval hx).continuousAt.tendsto.comp (tendsto_subst_trunc hg hg0 p)
+  have h2 : ∀ N, PowerSeries.aeval hx
+      (PowerSeries.subst g ((PowerSeries.trunc N p : Polynomial A) : PowerSeries A)) =
+      PowerSeries.aeval hy ((PowerSeries.trunc N p : Polynomial A) : PowerSeries A) := by
+    intro N
+    rw [PowerSeries.subst_coe hg, PowerSeries.aeval_coe, ← hxy]
+    exact (Polynomial.aeval_algHom_apply (PowerSeries.aeval hx) g (PowerSeries.trunc N p)).symm
+  rw [funext h2] at h1
+  have h3 : Filter.Tendsto (fun N => PowerSeries.aeval hy
+      ((PowerSeries.trunc N p : Polynomial A) : PowerSeries A))
+      Filter.atTop (nhds (PowerSeries.aeval hy p)) :=
+    (PowerSeries.continuous_aeval hy).continuousAt.tendsto.comp
+      (PowerSeries.WithPiTopology.tendsto_trunc_atTop (R := A) p)
+  exact tendsto_nhds_unique h1 h3
 
 end ABC3.Found.PGC
