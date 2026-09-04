@@ -2437,4 +2437,49 @@ theorem standardEtalePresentation_transitionOpen_eq {R S : Type} [CommRing R] [C
   refine ⟨p, ?_⟩
   rw [← hpn, PrimeSpectrum.basicOpen_mul_isUnit _ (Pres.P.hasMap_X.2.pow n)]
 
+/-! ## `descendPieceR`(`ExtLimit.lean`)を実際の局所化として貼り合わせる
+ための代数的な核心事実(`2026-09-05続き17`)
+
+`ExtLimit.lean`の`piece_basicOpen_mul_eq`で確立した「`C`側の片
+`piece(D(f*g))`は`piece(D(f))`の基本開そのもの」という事実を、
+`descendPieceR`(`R`レベルの抽象スキーム)側の**実際の開埋め込み**へ
+橋渡しするための、`CorrHyp`非依存の一般的な可換環論の事実——
+「`S₀`を`h`で局所化してから`B`上で`T`とテンソルする」のと「先に`B`上で
+`T`とテンソルしてから、その中の`h`の像で局所化する」のが一致する
+(`Localization.Away`は底変換と可換)。 -/
+
+open scoped TensorProduct in
+/-- **`Localization.Away`は底変換と可換**——`M`が`S₀`の`h`による局所化
+(`IsLocalization.Away h M`)のとき、`M`を`B`上で`T`とテンソルしたもの
+(`M ⊗[B] T`)は、先に`S₀`自体を`B`上で`T`とテンソルしてから、その中の
+`h`の像であらためて局所化したもの(`Localization.Away (algebraMap S₀
+(S₀⊗[B]T) h)`)に等しい。証明は`Algebra.TensorProduct.cancelBaseChange`
+(結合律・簡約)+`IsLocalization.Away.tensorRight`(局所化とテンソルの
+可換性、mathlibのインスタンス)+`IsLocalization.algEquiv`(同じ部分集合
+による局所化の一意性)を合成するだけ——`Algebra.TensorProduct.
+rightAlgebra`は`abbrev`(自動探索されない)なので`letI`で明示的に
+供給する必要があった、新しい配管の一手。
+
+`descendPieceR`を`W := X.basicOpen(f*g)`について「`D(f)`側の`descendPieceR`
+の環をある元で局所化したもの」として**直接構成**すれば、この事実により
+そのℝへの底変換が正しく`Γ(C,piece(W))`に一致することが従い、かつ
+`Spec`への言い換え(`Spec.map (algebraMap S₀ M)`)は`IsOpenImmersion.
+of_isLocalization`(mathlib)により**自動的に開埋め込みになる**——
+`Lemma 4.1`のGlueDataで要求される`f i j : V(i,j) ⟶ U i`の開埋め込み性を、
+独立に選んだ2つの`Presentation`を事後的に比較するのではなく**構成に
+よって保証する**という設計転換の核心部品。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem isLocalization_away_tensor_eq (B S₀ T M : Type) [CommRing B] [CommRing S₀] [CommRing T] [CommRing M]
+    [Algebra B S₀] [Algebra B T] [Algebra B M] [Algebra S₀ M] [IsScalarTower B S₀ M]
+    (h : S₀) [IsLocalization.Away h M] :
+    Nonempty (M ⊗[B] T ≃+* Localization.Away (algebraMap S₀ (S₀ ⊗[B] T) h)) := by
+  letI : Algebra (S₀ ⊗[B] T) (M ⊗[S₀] (S₀ ⊗[B] T)) := Algebra.TensorProduct.rightAlgebra
+  have e1 : M ⊗[S₀] (S₀ ⊗[B] T) ≃ₐ[S₀] M ⊗[B] T := Algebra.TensorProduct.cancelBaseChange B S₀ S₀ M T
+  haveI : IsLocalization.Away (algebraMap S₀ (S₀ ⊗[B] T) h) (M ⊗[S₀] (S₀ ⊗[B] T)) :=
+    IsLocalization.Away.tensorRight (S := S₀ ⊗[B] T) h M
+  have e2 := IsLocalization.algEquiv (Submonoid.powers (algebraMap S₀ (S₀ ⊗[B] T) h))
+    (M ⊗[S₀] (S₀ ⊗[B] T)) (Localization.Away (algebraMap S₀ (S₀ ⊗[B] T) h))
+  exact ⟨e1.toRingEquiv.symm.trans e2.toRingEquiv⟩
+
 end ABC3.Found.CorrHyp
