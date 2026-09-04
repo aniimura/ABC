@@ -82,10 +82,24 @@ metadata:
 carrier]`の構築)が最も具体的で低リスクな次の一歩。3(Henselian
 instance)と並行して進められる見込み。
 
-★2026-09-05続報: 上記2で要る「`K.closure`上のspectralNormが
-`K.carrier`上の元では元のノルムに一致する」という橋渡しは、
-**既に`norm_algebraMap' K.closure k : ‖algebraMap K.carrier K.closure
-k‖ = ‖k‖`としてmathlibに存在する**(`exact?`で即発見、
+★2026-09-05続報(完成): 退化した基点`x=0`の不分岐性チェックが
+**sorry無しで完成した**——`Found/PGC/UnramifiedExtension.lean`に
+`adjoinIntegersZeroRingHom`・`adjoinIntegersZeroRingHom_bijective`・
+`adjoinIntegersZeroEquiv`(`𝒪[K.carrier]≃+*adjoinIntegers K 0`)・
+`residueDegree_zero`(`residueDegree K 0=Nat.card(ResidueField 𝒪_K)`)
+をすべて確立しcommit済み。`[K(0):K]=1`(`finiteDimensional_adjoin_
+zero`、既出)と合わせ、退化した基点が「剰余次数`=`剰余体濃度の
+`[K(x):K]`乗」という不分岐性の条件を自明に満たすことが確認できた。
+新しい罠は無かった——唯一、`residueDegree K x`の定義が`[FiniteDimensional
+...]`を暗黙のinstance引数に取るため、`residueDegree_zero`の**主張
+自体**にも同じinstance引数を明示的に添える必要があった(本セッション
+で何度も遭遇した「STATEMENT自身の型検査にinstanceが要る」パターン、
+`haveI`では手遅れ)。
+
+以下は当時の発見の記録(上記の完成に使われた): 「`K.closure`上の
+spectralNormが`K.carrier`上の元では元のノルムに一致する」という
+橋渡しは、**既に`norm_algebraMap' K.closure k : ‖algebraMap K.carrier
+K.closure k‖ = ‖k‖`としてmathlibに存在する**(`exact?`で即発見、
 `spectralNorm_extends`を経由する必要すら無かった)ことを確認した。
 これで`adjoinIntegers K 0`(`{y:K.carrier⟮0⟯|‖y‖≤1}`)と`𝒪[K.carrier]`
 (`{y:K.carrier|‖y‖≤1}`)が、`IntermediateField.botEquiv K.carrier
@@ -98,3 +112,27 @@ K 0`(`IntermediateField.adjoin K.carrier {0}`上のSubringとして定義
 組み立てのみ(本セッションのLubin-Tate作業で何度も遭遇した「型注釈と
 既存の項の食い違い」と同種の罠が予想される——`tools/lean-idioms.md`
 の該当エントリを先に見直すこと)。
+
+★上記は完成した(冒頭の「続報(完成)」参照)——予想された罠は
+**実際には起きなかった**(直接`RingHom`を構成する方式を採ったため、
+`Subring`同士の`cast`という難しい経路を最初から避けられた)。
+
+## 次に戻るときの最優先タスク(更新、2026-09-05)
+
+退化した基点(`x=0`、次数1)の健全性チェックが完成したので、次は
+**次数`n≥2`の不分岐拡大の存在性**——本格的な数学的内容が要る最初の
+関門:
+1. `HenselianLocalRing (𝒪[K.carrier])`のinstanceを確認・構築する
+   (`IsAdicComplete`から従う一般論を探すか、`IsDiscreteValuationRing`
+   +完備性から直接示す)——これがまだ手つかず。
+2. 剰余体`F_q`の次数`n`拡大`F_{q^n}`を`GaloisField p (f*n)`
+   (`hq:Fintype.card(ResidueField 𝒪_K)=p^f`から`p^{f*n}=q^n`)として
+   具体的に構成し、その原始元の最小多項式(次数`n`、分離的)を
+   `Henselian`で`𝒪_K`へ持ち上げる、という筋を検討する。
+3. 持ち上げた多項式の`K.closure`内での根`x`が実際に`residueDegree
+   K x=q^n`(不分岐性の条件)を満たすことを確認する——ここで
+   `Ideal.ramificationIdx`・`Algebra.isUnramifiedAt_iff_map_eq`
+   (mathlib、既出)の適用を試す。
+
+この3ステップが次数`n`の不分岐拡大1つを構成する核心。一意性・
+`K^ur`全体・Galois群の構造はその後。
