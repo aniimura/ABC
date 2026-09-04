@@ -756,4 +756,153 @@ theorem exists_finite_standardEtaleCover (R S : Type) [CommRing R] [CommRing S] 
   have hx := ht (Set.mem_univ x)
   simpa using hx
 
+/-! ## `StandardEtalePair` の `A ⊗[ℚ] ℝ` からの降下——generic flatness 回避版
+
+`Lemma 4.1` の「1アフィン片の降下」(`corrhyp-goal.md` §4、`piecePullbackIso`
+と組み合わせて使う)向けの専用版。上の `exists_fg_subalgebra_standardEtalePair`
+(一般の `k K`)と同型の構成だが、`k := ℚ`(体)に固定し、`K` の代わりに
+`A ⊗[ℚ] ℝ`(`A` は任意の `ℚ`-代数、`Ext X` のアフィン片の切断環)を使う。
+`ℚ` は体なので `A ⊗[ℚ] -` が自動的に平坦(`Module.Flat` が `infer_instance`
+一発)——generic flatness(EGA IV、mathlib に無い)が不要になる鍵。 -/
+
+open scoped TensorProduct in
+/-- `A ⊗[ℚ] ℝ` の有限個の元は、ある `R : FgSubalgebra ℚ ℝ` を使って
+`A ⊗[ℚ] R.1` からの像として同時に書ける——`exists_fg_subalgebra_mem_finset`
+を各元のテンソル分解(`TensorProduct.exists_finset`)の係数へ適用する。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_fg_subalgebra_tensor_finset (A : Type) [CommRing A] [Algebra ℚ A]
+    (s : Finset (A ⊗[ℚ] ℝ)) :
+    ∃ R : FgSubalgebra ℚ ℝ, ∀ x ∈ s, ∃ y : A ⊗[ℚ] R.1,
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)) y = x := by
+  classical
+  choose S hS using fun x : s => TensorProduct.exists_finset (R := ℚ) (M := A) (N := ℝ) x.1
+  set allR : Finset ℝ := s.attach.biUnion (fun x => (S x).image Prod.snd) with hallR
+  obtain ⟨R, hRfg, hRmem⟩ := exists_fg_subalgebra_mem_finset (k := ℚ) allR
+  refine ⟨⟨R, hRfg⟩, ?_⟩
+  intro x hx
+  set xs : s := ⟨x, hx⟩ with hxs
+  have hmem : ∀ i ∈ S xs, i.2 ∈ R := by
+    intro i hi
+    apply hRmem
+    rw [hallR]
+    exact Finset.mem_biUnion.mpr ⟨xs, s.mem_attach xs, Finset.mem_image_of_mem Prod.snd hi⟩
+  refine ⟨∑ i ∈ (S xs).attach, i.1.1 ⊗ₜ[ℚ] (⟨i.1.2, hmem i.1 i.2⟩ : R), ?_⟩
+  rw [map_sum]
+  simp only [Algebra.TensorProduct.map_tmul, AlgHom.id_apply, Subalgebra.coe_val]
+  rw [Finset.sum_attach (S xs) (fun i => i.1 ⊗ₜ[ℚ] i.2)]
+  exact (hS xs).symm
+
+open Polynomial in
+open scoped TensorProduct in
+/-- `exists_fg_subalgebra_tensor_finset` の有限族版(多項式の係数)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_fg_subalgebra_tensor_polynomial_family (A : Type) [CommRing A] [Algebra ℚ A]
+    {ι : Type} [Fintype ι] [DecidableEq (A ⊗[ℚ] ℝ)] (p : ι → Polynomial (A ⊗[ℚ] ℝ)) :
+    ∃ (R : FgSubalgebra ℚ ℝ) (p₀ : ι → Polynomial (A ⊗[ℚ] R.1)),
+      ∀ i, (p₀ i).map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom
+        = p i := by
+  classical
+  obtain ⟨R, hR⟩ := exists_fg_subalgebra_tensor_finset A
+    (Finset.univ.biUnion (fun i => (p i).support.image (p i).coeff))
+  choose c hc using fun q : Σ i, (p i).support => hR ((p q.1).coeff q.2)
+    (Finset.mem_biUnion.mpr ⟨q.1, Finset.mem_univ q.1, Finset.mem_image_of_mem (p q.1).coeff q.2.2⟩)
+  refine ⟨R, fun i => (p i).support.attach.sum (fun j => Polynomial.monomial (j : ℕ) (c ⟨i, j⟩)),
+    fun i => ?_⟩
+  rw [Polynomial.map_sum]
+  have key : ∀ j : {x // x ∈ (p i).support}, (Polynomial.monomial (j : ℕ) (c ⟨i, j⟩)).map
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom =
+      Polynomial.monomial (j : ℕ) ((p i).coeff (j : ℕ)) := by
+    intro j
+    rw [Polynomial.map_monomial]
+    exact congrArg (Polynomial.monomial (j : ℕ)) (hc ⟨i, j⟩)
+  simp_rw [key]
+  rw [Finset.sum_attach (p i).support (fun j => Polynomial.monomial j ((p i).coeff j))]
+  exact Polynomial.sum_monomial_eq (p i)
+
+open scoped TensorProduct in
+/-- `A ⊗[ℚ] R.1 → A ⊗[ℚ] ℝ`(`R.1 ↪ ℝ` に沿った base change)は常に単射
+——`ℚ` は体なので `Module.Flat ℚ A` が任意の `A` で自動的に成り立つ
+(`infer_instance`)ことから、`Module.Flat.iff_lTensor_preserves_
+injective_linearMap` で移す。generic flatness を要らなくする核心。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem tensor_map_injective_of_flat (A : Type) [CommRing A] [Algebra ℚ A]
+    (R : FgSubalgebra ℚ ℝ) :
+    Function.Injective (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)) := by
+  haveI : Module.Flat ℚ A := inferInstance
+  have hinj : Function.Injective (Subalgebra.val R.1) := Subtype.coe_injective
+  have hrT := Module.Flat.iff_lTensor_preserves_injective_linearMap.mp this
+    (Subalgebra.val R.1).toLinearMap hinj
+  have hcomm : ∀ z : A ⊗[ℚ] R.1, (Subalgebra.val R.1).toLinearMap.lTensor A z =
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)) z := by
+    intro z
+    induction z using TensorProduct.induction_on with
+    | zero => simp
+    | tmul a r => simp
+    | add z1 z2 h1 h2 => simp [LinearMap.map_add, h1, h2]
+  intro x y hxy
+  apply hrT
+  rw [hcomm, hcomm, hxy]
+
+open Polynomial in
+open scoped TensorProduct in
+/-- `exists_fg_subalgebra_standardEtaleCond` のtensor版——`A ⊗[ℚ] ℝ` 上の
+`StandardEtalePair` の `cond` を `A ⊗[ℚ] R.1` へ降ろす。単射性の根拠が
+(元の版の `Polynomial R` の自由性ではなく)`tensor_map_injective_of_flat`
+(`ℚ`-平坦性)になる点だけが違う。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_fg_subalgebra_tensor_standardEtaleCond (A : Type) [CommRing A] [Algebra ℚ A]
+    (f g p₁ p₂ : Polynomial (A ⊗[ℚ] ℝ)) (n : ℕ)
+    (hcond : Polynomial.derivative f * p₁ + f * p₂ = g ^ n) :
+    ∃ (R : FgSubalgebra ℚ ℝ) (f₀ g₀ p₁₀ p₂₀ : Polynomial (A ⊗[ℚ] R.1)),
+      f₀.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom = f ∧
+      g₀.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom = g ∧
+      p₁₀.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom = p₁ ∧
+      p₂₀.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom = p₂ ∧
+      Polynomial.derivative f₀ * p₁₀ + f₀ * p₂₀ = g₀ ^ n := by
+  classical
+  obtain ⟨R, q, hq⟩ := exists_fg_subalgebra_tensor_polynomial_family A
+    (![f, g, p₁, p₂] : Fin 4 → Polynomial (A ⊗[ℚ] ℝ))
+  have hf : (q 0).map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom
+      = f := by simpa using hq 0
+  have hg : (q 1).map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom
+      = g := by simpa using hq 1
+  have hp1 : (q 2).map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom
+      = p₁ := by simpa using hq 2
+  have hp2 : (q 3).map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom
+      = p₂ := by simpa using hq 3
+  refine ⟨R, q 0, q 1, q 2, q 3, hf, hg, hp1, hp2, ?_⟩
+  have hinj : Function.Injective
+      (Polynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom) :=
+    Polynomial.map_injective _ (tensor_map_injective_of_flat A R)
+  apply hinj
+  rw [Polynomial.map_add, Polynomial.map_mul, Polynomial.map_mul, Polynomial.map_pow,
+    ← Polynomial.derivative_map, hf, hg, hp1, hp2, hcond]
+
+open scoped TensorProduct in
+/-- **`StandardEtalePair` は `A ⊗[ℚ] ℝ` から `A ⊗[ℚ] R.1`(ある
+`R : FgSubalgebra ℚ ℝ`)へ降ろせる**——`exists_fg_subalgebra_
+standardEtalePair` のtensor版。`Lemma 4.1` の「1アフィン片の降下」構成の
+核となる部品(`ExtLimit.lean` の `piecePullbackIso` と組み合わせて使う)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_fg_subalgebra_tensor_standardEtalePair (A : Type) [CommRing A] [Algebra ℚ A]
+    (P : StandardEtalePair (A ⊗[ℚ] ℝ)) :
+    ∃ (R : FgSubalgebra ℚ ℝ) (P₀ : StandardEtalePair (A ⊗[ℚ] R.1)),
+      P₀.f.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom = P.f ∧
+      P₀.g.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom = P.g := by
+  obtain ⟨p₁, p₂, n, hcond⟩ := P.cond
+  obtain ⟨R, f₀, g₀, p₁₀, p₂₀, hf, hg, hp1, hp2, hcond₀⟩ :=
+    exists_fg_subalgebra_tensor_standardEtaleCond A P.f P.g p₁ p₂ n hcond
+  have hinj : Function.Injective
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom :=
+    tensor_map_injective_of_flat A R
+  have hmonic : f₀.Monic := by
+    refine (hinj.monic_map_iff (p := f₀)).mpr ?_
+    rw [hf]; exact P.monic_f
+  exact ⟨R, ⟨f₀, hmonic, g₀, ⟨p₁₀, p₂₀, n, hcond₀⟩⟩, hf, hg⟩
+
 end ABC3.Found.CorrHyp
