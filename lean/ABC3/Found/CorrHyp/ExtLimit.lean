@@ -1455,6 +1455,64 @@ theorem exists_piece_basicOpen_R_lift (X : Over BaseK) (U : X.left.Opens) (hU : 
     Γ(X.left, X.left.basicOpen f) R I z
   exact ⟨R', hR', p₀, hp₀⟩
 
+open scoped TensorProduct Classical in
+/-- **`descendPieceR`の`R'`レベルへの昇格を、その中の任意の元で局所化した
+スキームは、自動的に開埋め込みになる**——`IsOpenImmersion.of_isLocalization`
+(mathlib、既存)を`descendPieceR`の環(`R'`レベルへ昇格したもの)へ直接
+適用するだけ。`piece_basicOpen_localizationElem`とは無関係に、**任意の**
+`p₀`について成り立つ一般的な事実(`g`に依存しない、`exists_piece_
+basicOpen_R_lift`より弱い代わりに一般的)——`exists_piece_basicOpen_R_
+lift`が与える具体的な`R'`・`p₀`と組み合わせれば、`Lemma 4.1`の`GlueData`
+が要求する`f i j : V(i,j) ⟶ U i`の開埋め込み性が**直接**得られる。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem descendPieceR_localization_isOpenImmersion (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U)
+    (f : Γ(X.left, U)) (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α] :
+    letI hUf := hU.basicOpen f
+    letI := pieceAlgebra X (X.left.basicOpen f) hUf
+    letI : Algebra (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ)
+        Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))) :=
+      ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))
+        (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))) le_rfl).hom.comp
+        (pieceRingEquiv X (X.left.basicOpen f) hUf).symm.toRingHom).toAlgebra
+    haveI : Algebra.Etale (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ)
+        Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))) :=
+      piece_algebraEtale_tensor X (X.left.basicOpen f) hUf C α
+    haveI : Algebra.FinitePresentation (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ)
+        Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))) :=
+      inferInstance
+    let n := Algebra.Presentation.ofFinitePresentationVars (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ)
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f)))
+    let I := Ideal.span (Set.range (pieceAlgebra_relation_descend_q₀ X (X.left.basicOpen f) hUf C α))
+    ∀ (R' : FgSubalgebra ℚ ℝ) (hR : pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α ≤ R')
+      (p₀ : MvPolynomial (Fin n) (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1)),
+    letI _hCR' : CommRing (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1) := inferInstance
+    letI : Algebra (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] (pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α).1)
+        (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1) :=
+      (Algebra.TensorProduct.map (AlgHom.id ℚ Γ(X.left, X.left.basicOpen f)) (Subalgebra.inclusion hR)).toRingHom.toAlgebra
+    letI _hCRp : CommRing (MvPolynomial (Fin n) (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1) ⧸
+        Ideal.map (MvPolynomial.map (algebraMap
+          (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] (pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α).1)
+          (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1))) I) := inferInstance
+    IsOpenImmersion (Spec.map (CommRingCat.ofHom (algebraMap
+      (MvPolynomial (Fin n) (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1) ⧸
+        Ideal.map (MvPolynomial.map (algebraMap
+          (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] (pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α).1)
+          (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1))) I)
+      (Localization.Away (Ideal.Quotient.mk (Ideal.map (MvPolynomial.map (algebraMap
+          (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] (pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α).1)
+          (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1))) I) p₀))))) := by
+  have hUf : IsAffineOpen (X.left.basicOpen f) := hU.basicOpen f
+  letI := pieceAlgebra X (X.left.basicOpen f) hUf
+  intro n I R' hR p₀
+  letI _hCR' : CommRing (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1) := inferInstance
+  letI : Algebra (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] (pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α).1)
+      (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1) :=
+    (Algebra.TensorProduct.map (AlgHom.id ℚ Γ(X.left, X.left.basicOpen f)) (Subalgebra.inclusion hR)).toRingHom.toAlgebra
+  exact IsOpenImmersion.of_isLocalization (Ideal.Quotient.mk (Ideal.map (MvPolynomial.map (algebraMap
+      (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] (pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α).1)
+      (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1))) I) p₀)
+
 /-- **アフィン開`U`上の基本開`X.basicOpen f`は`Spec(Localization.Away f)`
 そのものと同一視できる**——`mathlib`の`basicOpenIsoSpecAway`は`X := Spec R`
 の場合限定だったので、一般のアフィン開`U`(`X`自体はアフィンでなくてよい)
