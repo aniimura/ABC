@@ -572,3 +572,35 @@ toSchemeDiagram ℚ ℝ` が `rfl` で成り立つ(持ち上げが「余計な�
 pullback g f`)で埋める見込み。埋まれば、`FieldLimit.lean` の
 `standardEtalePairRingBaseChange`(環側の base change)と合わせて、
 `Lemma 4.1` の構成的降下に必要な**スキーム側・環側の両方の道具が揃う**。
+
+### 2026-09-04さらに続報: `isLimit_extCone` 完成 ★★★★★——スキーム側の道具が完全に揃った
+
+`pullbackSymmetry` を経由する代わりに、`Ext X` の定義そのものと**同じ
+引数順**(`pullback X.hom (D R).hom`)で図式 `extDiagram X`(`Over.pullback`
+を経由しない、`Limits.pullback.map` を直接使う手作りの図式)を組み直し、
+その頂点 `Limits.pullback X.hom toBaseK`(= `(Ext X).left`)が極限である
+ことを**完全に(sorry 無しで)証明した**(`isLimit_extCone`):
+
+- `extConePi`(頂点への `π`)・`extCone`(cone 本体)・`auxCone3`
+  (`Cone.postcompose` 経由で `toSchemeDiagram ℚ ℝ` の cone へ変換)・
+  `R0hom`(`⊥` を代表元に取るための射)・`extCone_fst_const`(`X.left` への
+  射影が代表元に依らず一定)という6個の補題を積み上げた上で、
+  `IsLimit.mk` の `lift`/`fac`/`uniq` を直接構成。
+- 配管上の最終ブレークスルーは2つ: (1) `Cone` の `π` フィールドには
+  **独立に作った `NatTrans`(`extConePi`)をそのまま代入**し、`naturality`
+  を再証明しない、(2) `IsLimit.mk` の `uniq` が与える仮定 `hm` を
+  `have hm' : ∀ R, m ≫ (extConePi X).app R = s.π.app R := hm` のように
+  **型を明示して再束縛**することで `rw` の構文一致ではなく `have` 自体の
+  defeq チェックを経由させる——これで `Functor.const` の配管(`tools/
+  lean-idioms.md` 第22項)が完全解決した。
+
+**これで `Lemma 4.1` の構成的降下に必要な道具が完全に揃った**:
+`standardEtalePairRingBaseChange`(環側の base change、`FieldLimit.lean`)
++ `isLimit_extCone`(スキーム側の極限表示、`ExtLimit.lean`)。残るのは
+純粋な組み立て作業のみ: (a) 一般の有限エタール多元環は「至る所で」標準
+エタールとは限らないため、`Z_K` のアフィン開被覆を étale-locus のレベルで
+細分してから各片に `exists_fg_subalgebra_standardEtalePair_map` を適用する
+こと、(b) 各片の降下結果を `Scheme.exists_hom_hom_comp_eq_comp_of_
+locallyOfFiniteType`(遷移射の一致の降下)で貼り合わせて `Z` 全体を構成
+すること。数学的な核心はすべて完成した——残るのはスキーム論の定型的な
+貼り合わせという最終段階。
