@@ -4159,6 +4159,97 @@ theorem falt1_theorem12_differentIdeal_length
   exact hresult
 
 /-!
+## Theorem 1.2: `Ω¹` の長さと `differentIdeal` の閉じた式を接続(2026-09-04、条件付き完成)
+
+`falt1_theorem12_differentIdeal_length` の左辺 `differentIdeal V0 Wₙ₊₁`
+を `Ω¹_{Wₙ₊₁/V0}` の長さと結びつけるには Lemma 1.1(`falt1CokernelLengthEq`)
+を `V0→Wₙ₊₁` に適用する必要があるが、これには`Wₙ₊₁`の**`V0`上の単項
+生成元**が要る——falt1-goal.md に記録した通り、これが一般に存在するか
+(`Wₙ₊₁`が半局所環でも成り立つか)は未確認。ここでは、その生成元の
+存在を**仮定として明示的に受け取る**条件付きの版を確立した——
+`Wₙ₊₁`が`V0`上局所的(全分岐)であることは要求しない(`falt1CokernelLengthEq`
+自体がそれを要求しないため)。 -/
+
+set_option maxHeartbeats 3000000 in
+set_option synthInstance.maxHeartbeats 3000000 in
+/-- **`falt1CokernelLengthEq`(Lemma 1.1)を`V0→Wₙ₊₁`に適用した版**:
+`Wₙ₊₁`の`V0`上の単項生成元`y`(環・体どちらのレベルでも生成する)が
+与えられれば、`Ω¹_{Wₙ₊₁/V0}`の長さは`Wₙ₊₁⧸differentIdeal V0 Wₙ₊₁`の
+長さに等しい。`IsIntegralClosure Wₙ₊₁ V0 (FractionRing Wₙ₊₁)`は
+`falt1_theorem12_differentIdeal_length`の証明で使ったのと同じ
+`IsIntegralClosure.of_isIntegrallyClosed`で無条件に得られる。 -/
+theorem falt1_theorem12_kaehler_length
+    {V0 Wn : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    (π : V0) (n : ℕ)
+    [Module.Finite V0 (Falt1Wn1 V0 Wn π n)]
+    [Algebra (FractionRing V0) (FractionRing (Falt1Wn1 V0 Wn π n))]
+    [IsScalarTower V0 (FractionRing V0) (FractionRing (Falt1Wn1 V0 Wn π n))]
+    [FiniteDimensional (FractionRing V0) (FractionRing (Falt1Wn1 V0 Wn π n))]
+    [Algebra.IsSeparable (FractionRing V0) (FractionRing (Falt1Wn1 V0 Wn π n))]
+    [IsDedekindDomain (Falt1Wn1 V0 Wn π n)]
+    [Module.IsTorsionFree V0 (Falt1Wn1 V0 Wn π n)]
+    (y : Falt1Wn1 V0 Wn π n) (hint : IsIntegral V0 y)
+    (hadjoin : Algebra.adjoin V0 ({y} : Set (Falt1Wn1 V0 Wn π n)) = ⊤)
+    (hw : Algebra.adjoin (FractionRing V0)
+      ({(algebraMap (Falt1Wn1 V0 Wn π n) (FractionRing (Falt1Wn1 V0 Wn π n))) y} :
+        Set (FractionRing (Falt1Wn1 V0 Wn π n))) = ⊤) :
+    Module.length (Falt1Wn1 V0 Wn π n) (Ω[(Falt1Wn1 V0 Wn π n)⁄V0]) =
+      Module.length (Falt1Wn1 V0 Wn π n) ((Falt1Wn1 V0 Wn π n) ⧸ differentIdeal V0 (Falt1Wn1 V0 Wn π n)) := by
+  haveI : Algebra.IsIntegral V0 (Falt1Wn1 V0 Wn π n) := Algebra.IsIntegral.of_finite V0 (Falt1Wn1 V0 Wn π n)
+  haveI hIC : IsIntegralClosure (Falt1Wn1 V0 Wn π n) V0 (FractionRing (Falt1Wn1 V0 Wn π n)) :=
+    IsIntegralClosure.of_isIntegrallyClosed (Falt1Wn1 V0 Wn π n) V0 (FractionRing (Falt1Wn1 V0 Wn π n))
+  exact ABC3.Found.Falt1.falt1CokernelLengthEq y hint hadjoin hw
+
+set_option maxHeartbeats 3000000 in
+set_option synthInstance.maxHeartbeats 3000000 in
+/-- **Theorem 1.2・3b/3c の中核関係式(`Ω¹` 版、条件付き完成)**:
+`falt1_theorem12_kaehler_length`(Lemma 1.1経由)と`falt1_theorem12_
+differentIdeal_length`(differentIdealの塔経由)を合わせるだけで、
+`Ω¹_{Wₙ₊₁/V0}`の長さが**完全に`differentIdeal`だけで書かれた式**に
+等しいことが分かる——`Wₙ₊₁`の`V0`上の単項生成元`y`さえ与えられれば、
+Kähler微分の完全列(Exercise 13.7.4)と`differentIdeal`の塔公式という
+2つの独立した経路がここで合流する。 -/
+theorem falt1_theorem12_kaehler_length_eq_differentIdeal
+    {V0 Wn : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    (π : V0) (n : ℕ)
+    (hn : (n : FractionRing V0) ≠ 0) (hπne0 : algebraMap V0 (FractionRing V0) π ≠ 0)
+    (hprime : (Ideal.span ({π} : Set V0)).IsPrime) (hnotsq : π ∉ (Ideal.span ({π} : Set V0)) ^ 2)
+    (hnpos : 0 < n)
+    (hn' : (n : FractionRing Wn) ≠ 0)
+    (hπne0' : algebraMap Wn (FractionRing Wn) (algebraMap V0 Wn π) ≠ 0)
+    (hprime' : (Ideal.span ({algebraMap V0 Wn π} : Set Wn)).IsPrime)
+    (hnotsq' : algebraMap V0 Wn π ∉ (Ideal.span ({algebraMap V0 Wn π} : Set Wn)) ^ 2)
+    (hinjV0Wn : Function.Injective (algebraMap V0 Wn))
+    [Module.Finite V0 Wn]
+    [Module.IsTorsionFree V0 Wn]
+    [Algebra (FractionRing V0) (FractionRing Wn)]
+    [IsScalarTower V0 (FractionRing V0) (FractionRing Wn)]
+    [Algebra.IsSeparable (FractionRing V0) (FractionRing Wn)]
+    [IsDedekindDomain (Falt1Wn1 V0 Wn π n)]
+    [Module.IsTorsionFree V0 (Falt1Wn1 V0 Wn π n)]
+    [Module.IsTorsionFree Wn (Falt1Wn1 V0 Wn π n)]
+    [Module.Finite V0 (Falt1Wn1 V0 Wn π n)]
+    [Algebra (FractionRing V0) (FractionRing (Falt1Wn1 V0 Wn π n))]
+    [IsScalarTower V0 (FractionRing V0) (FractionRing (Falt1Wn1 V0 Wn π n))]
+    [FiniteDimensional (FractionRing V0) (FractionRing (Falt1Wn1 V0 Wn π n))]
+    [Algebra.IsSeparable (FractionRing V0) (FractionRing (Falt1Wn1 V0 Wn π n))]
+    (y : Falt1Wn1 V0 Wn π n) (hint : IsIntegral V0 y)
+    (hadjoin : Algebra.adjoin V0 ({y} : Set (Falt1Wn1 V0 Wn π n)) = ⊤)
+    (hw : Algebra.adjoin (FractionRing V0)
+      ({(algebraMap (Falt1Wn1 V0 Wn π n) (FractionRing (Falt1Wn1 V0 Wn π n))) y} :
+        Set (FractionRing (Falt1Wn1 V0 Wn π n))) = ⊤) :
+    Module.length (Falt1Wn1 V0 Wn π n) (Ω[(Falt1Wn1 V0 Wn π n)⁄V0]) =
+      Module.length (Falt1Wn1 V0 Wn π n) ((Falt1Wn1 V0 Wn π n) ⧸ differentIdeal Wn (Falt1Wn1 V0 Wn π n)) +
+      Module.length (Falt1Wn1 V0 Wn π n) ((Falt1Wn1 V0 Wn π n) ⧸
+        Ideal.map (algebraMap Wn (Falt1Wn1 V0 Wn π n)) (differentIdeal V0 Wn)) := by
+  have h1 := ABC3.Found.Falt1.falt1_theorem12_kaehler_length π n y hint hadjoin hw
+  have h2 := ABC3.Found.Falt1.falt1_theorem12_differentIdeal_length π n hn hπne0 hprime hnotsq hnpos
+    hn' hπne0' hprime' hnotsq' hinjV0Wn
+  rw [h1, h2]
+
+/-!
 ## Exercise 13.7.4 (4)への足場: 第二基本完全列の単射性(2026-09-04)
 
 Brinon-Conrad Exercise 13.7.4 の step (4) は
