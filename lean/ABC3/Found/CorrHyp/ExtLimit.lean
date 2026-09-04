@@ -1118,4 +1118,17 @@ theorem exists_transitionIso {X : Scheme} {U : X.Opens} (f₁ f₂ : Γ(X, U))
     (e.hom.isoImage W).trans (eqToIso (by rw [h2]))
   exact iso1.symm.trans iso2
 
+/-- **`exists_transitionIso`は3重(以上)の重なりも同じ1回の適用でカバー
+する**——`f₂`に任意の元(たとえば`f_j*f_k`という積)を渡せるので、GlueDataの
+`t'`(3重の重なりでの整合性)構成に新しい数学的内容は不要と分かる。
+`s.prod g`(有限個の元の積)を渡すだけ。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_transitionIso_finset {X : Scheme} {U : X.Opens} (f₁ : Γ(X, U))
+    {κ : Type} (s : Finset κ) (g : κ → Γ(X, U))
+    {Z : Scheme} (e : (X.basicOpen f₁ : Scheme) ≅ Z) :
+    ∃ s' : Γ(Z, ⊤), Nonempty
+      ((X.basicOpen (f₁ * s.prod g) : Scheme) ≅ (Z.basicOpen s' : Scheme)) :=
+  exists_transitionIso f₁ (s.prod g) e
+
 end ABC3.Found.CorrHyp
