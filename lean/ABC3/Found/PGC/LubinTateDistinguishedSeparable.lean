@@ -433,4 +433,43 @@ theorem completeSpace_adjoin_of_mem_iteratedLubinTateTorsionPoints {p : ℕ} [Fa
     K hq hπmax hπne0 f hf0 hf1 hf n x hx
   FiniteDimensional.complete K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
 
+/-- ★★★★★★★★★★**`Λ_n` の元は位相的冪零(`PowerSeries.HasEval`)**——
+`spectralNorm_lt_one_of_mem_iteratedLubinTateTorsionPoints`(ノルムが
+`1`未満)と mathlib の
+`tendsto_pow_atTop_nhds_zero_of_norm_lt_one`(ノルム`1`未満の元の冪は
+`0`へ収束)を組み合わせるだけ。`PowerSeries.HasEval`は定義的に
+`IsTopologicallyNilpotent`なので、これで `PowerSeries.aeval` に渡す
+「評価点の条件」の**片方**(位相的冪零性)が揃った。
+
+★注記(2026-09-04 の発見、次の一歩の見通し): 残るもう片方の条件
+`IsLinearTopology S S`(評価先 `S` 自身の位相がイデアルで生成される
+「線形位相」であること)は、体 `K.closure` や `K.carrier⟮x⟯` それ自身
+では**成り立たない**(体のイデアルは `{0}` と全体しかないので、非自明な
+位相と両立しない)。この条件は mathlib では
+`Ideal.isLinearTopology`(付値環の極大イデアルによる adic 位相)から
+出るのが自然で、古典的な Lubin-Tate 理論でも `[a]_f` は実際には
+「体」でなく「付値環」の間の写像として評価される。見通している次の
+一歩: `L:=K.carrier⟮x⟯` は `K.carrier` 上有限次(かつ `ℚ_[p]` 上も
+有限次、推移律で)なので、**`L` 自身を新たな `PAdicLocalField p` として
+再構成**すれば、`Found/PGC/LocalFieldNorm.lean`・
+`Found/PGC/ValuationRingDVR.lean`・`ValuationRingComplete.lean` の
+機構(`𝒪[L]`・`Valued L`・その adic 完備性)がそのまま流用でき、
+`IsLinearTopology 𝒪[L] 𝒪[L]` が `Ideal.isLinearTopology` から従う
+はず。 -/
+theorem hasEval_of_mem_iteratedLubinTateTorsionPoints {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n) :
+    PowerSeries.HasEval x :=
+  tendsto_pow_atTop_nhds_zero_of_norm_lt_one
+    (spectralNorm_lt_one_of_mem_iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n x hx)
+
 end ABC3.Found.PGC
