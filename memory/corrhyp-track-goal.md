@@ -1679,3 +1679,20 @@ ABC3)0エラー確認、push済み。
 (1)GlueDataとしての貼り合わせ配線(今回の同型データが核心材料)・
 (2)β脚(未着手)・(3)h:ZK=D.Ext Zの構造的懸念、の3つ。corrhyp-goal.md
 に詳細記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05(続き8)
+exists_mvPolynomial_quotient_ringEquiv_descend'(commit fedca21f)——
+前回の生データ(ev・ev'がψ・ψ'を再現・関係式が互いのイデアルへ写る・
+往復が恒等射)を実際の1個のRingEquiv項として組み立てる実用形が完成。
+exists_mvPolynomial_quotient_ringEquiv_of_data(Ideal.Quotient.lift×2
++RingEquiv.ofRingHom、Ideal.Quotient.ringHom_ext+MvPolynomial.
+ringHom_extで往復恒等を確認、CorrHyp非依存の汎用補題)を生データへ
+適用するだけの配線。lake build(FieldLimit/ABC3)0エラー確認、push済み。
+
+これで「Rレベルの候補片の遷移写像が実際に同型として得られる」という
+Lemma 4.1のGlueData構成に必要な数学的核心のすべてが揃った(commit
+19121fe9・32a3d1fc・d7753ea6・fedca21fの一連の成果)。残る課題:
+(1)descendPieceR実データへの specialize+corrHypGlueDataへの配線
+(既存部品の組み合わせになる見込み)・(2)β脚(未着手)・(3)h:ZK=D.Ext Z
+の構造的懸念(既に判断済み)。集計は10/24で変わらず。corrhyp-goal.md
+に詳細記録。

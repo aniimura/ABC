@@ -3738,3 +3738,44 @@ Rレベルで実際に同型であることを証明
 構造的懸念(既に「拙速に着手しない」と判断済み)。`Lemma 4.1`の数学的
 核心部分(RレベルでC全体を再構成できること)への距離は、今回で
 大きく縮まった。
+
+## 2026-09-05(続き9): `exists_mvPolynomial_quotient_ringEquiv_descend'`
+——遷移写像の候補を実際の`RingEquiv`として取り出せる実用形が完成
+
+前回完成させた「候補写像が実際に同型であること」の**生データ**
+(`ev`・`ev'`が`ψ`・`ψ'`を再現し、関係式が互いのイデアルへ写り、往復が
+恒等射である、という4つの命題の連言)を、実際に1個の`RingEquiv`項
+として組み立てる最終形を完成させた(commit `fedca21f`)。
+
+- `exists_mvPolynomial_quotient_ringEquiv_of_data`: 汎用の純代数補題
+  ——`Ideal.Quotient.lift`で`ev`・`ev'`それぞれから商環間の`RingHom`
+  `f`・`g`を構成し(well-definedness は`Ideal.span_le`経由)、
+  `RingEquiv.ofRingHom`で束ねる。往復が恒等であることは`Ideal.
+  Quotient.ringHom_ext`(商からの一致は`mk`との合成で十分)+
+  `MvPolynomial.ringHom_ext`(`C`・`X`上の一致で十分)で、`X`の場合に
+  往復合成の恒等性(`Ideal.Quotient.eq`経由)を、`C`の場合に`aeval_C`
+  (定数を保つ)を使うだけで閉じた。CorrHyp固有データに一切依存しない
+  汎用補題。
+- `exists_mvPolynomial_quotient_ringEquiv_descend'`: 上記を
+  `exists_mvPolynomial_quotient_ringEquiv_descend`の生データへ適用
+  するだけの配線。
+
+`lake build ABC3.Found.CorrHyp.FieldLimit`・`ABC3`いずれも0エラーで
+確認、push済み。
+
+**これで「項目(d)の第二段」の実用形が完成した**——遷移写像の候補が
+実際に1個の`RingEquiv`として手に入る。`Spec`を取れば2つの
+`descendPieceR`片の間の実際のスキーム同型になる、`Lemma 4.1`の
+`GlueData`構成で直接使える最終形である。
+
+**正直な評価**: 集計は10/24で変わらず——§4は引き続き0/2。今回の
+一連の作業(commit `19121fe9`・`32a3d1fc`・`d7753ea6`・`fedca21f`)
+で、「Rレベルの候補片の遷移写像が実際に同型として得られる」という、
+`Lemma 4.1`の`GlueData`構成に必要な数学的核心のすべてが揃った。
+残る課題は: (1) `descendPieceR`(`ExtLimit.lean`の実データ)へこの
+汎用定理を実際に specialize し、`Spec`を取って`corrHypGlueData`
+(既存のScheme一般GlueDataインフラ)へ配線する作業(数学的発想は
+出尽くしており、既存部品の組み合わせ配線になる見込み)、(2) `β`脚
+の構成(文字通り未着手、独立した課題)、(3) `h:ZK=D.Ext Z`の構造的
+懸念(既に「拙速に着手しない」と判断済み、`Lemma 4.1`のstatement
+自体の妥当性に関わる)。
