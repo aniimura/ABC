@@ -1018,4 +1018,53 @@ theorem exists_fg_subalgebra_tensor_standardEtalePair_promote (A : Type) [CommRi
     congrArg AlgHom.toRingHom hcomp.symm
   rw [← hcomp']
 
+/-! ## 重なりの比較(作業単位1)へ向けた第一歩——`Away(x*y)` の特徴づけ
+
+`Lemma 4.1`の「比較射の構成」(`corrhyp-goal.md` §4のロードマップ、
+作業単位1)最初の代数的補題:`D(x)∩D(y) = D(xy)`を、
+`Localization.Away(x*y)`が(`Submonoid.powers(xy)`だけでなく)
+`Submonoid.closure{x,y}`に関しても局所化になっている、という形で
+特徴づける——`Away(x)`をさらに`y`で局所化したものとの比較の土台。 -/
+
+/-- `Submonoid.powers(x*y) ≤ Submonoid.closure{x,y}`——`(xy)^n = x^n·y^n`
+は明らかに`x,y`から生成される部分モノイドに入る。 -/
+theorem powers_le_closure {R : Type} [CommRing R] (x y : R) :
+    Submonoid.powers (x * y) ≤ (Submonoid.closure ({x, y} : Set R)) := by
+  rw [Submonoid.powers_le]
+  exact Submonoid.mul_mem _ (Submonoid.subset_closure (by simp)) (Submonoid.subset_closure (by simp))
+
+/-- `closure{x,y}`の任意の元`z`について、ある`m`で`m*z`が`powers(xy)`に
+入る——`closure_induction`で`x`・`y`・`1`・積の4ケースに分解するだけ。 -/
+theorem exists_mul_mem_powers_of_closure {R : Type} [CommRing R] (x y : R) (z : R)
+    (hz : z ∈ Submonoid.closure ({x, y} : Set R)) :
+    ∃ m : R, m * z ∈ Submonoid.powers (x * y) := by
+  induction hz using Submonoid.closure_induction with
+  | mem a ha =>
+      rcases ha with rfl | rfl
+      · exact ⟨y, 1, by ring⟩
+      · exact ⟨x, 1, by ring⟩
+  | one => exact ⟨1, 0, by ring⟩
+  | mul a b ha hb iha ihb =>
+      obtain ⟨ma, na, hna⟩ := iha
+      obtain ⟨mb, nb, hnb⟩ := ihb
+      simp only at hna hnb
+      refine ⟨ma * mb, na + nb, ?_⟩
+      show (x*y) ^ (na + nb) = ma * mb * (a * b)
+      rw [pow_add, hna, hnb]
+      ring
+
+/-- **`Localization.Away(x*y)` は `Submonoid.closure{x,y}` に関しても
+局所化になっている**——`powers(xy)`と`closure{x,y}`が同じ飽和
+(saturation)を持つことから(`IsLocalization.isLocalization_of_is_
+exists_mul_mem`)。`Away(x)`をさらに`y`で局所化したものとの比較の
+第一歩(作業単位1)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem isLocalization_closure_away_mul {R : Type} [CommRing R] (x y : R) :
+    IsLocalization (Submonoid.closure ({x, y} : Set R)) (Localization.Away (x * y)) :=
+  IsLocalization.isLocalization_of_is_exists_mul_mem (Localization.Away (x*y))
+    (Submonoid.powers (x*y)) (Submonoid.closure ({x, y} : Set R))
+    (powers_le_closure x y)
+    (fun z => exists_mul_mem_powers_of_closure x y z.1 z.2)
+
 end ABC3.Found.CorrHyp
