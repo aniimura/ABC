@@ -1729,3 +1729,37 @@ polynomial_family`でそのまま有限段階へ降ろせる。GlueDataの遷移
 集計は10/24で変わらず(§4は0/2のまま)。
 
 コミット: `e6e8c98f`。
+
+### 2026-09-04さらに続報: 重要な発見——遷移射に「抽象的な環同型」は再び不要と判明(2度目の確認、今度は根拠つき)
+
+GlueDataの遷移射(`D(f_i)`と`D(f_j)`の重なりの比較)を構成しようと、`Localization.Away
+x_ij`(`D(f_i)`をさらに`f_j`で局所化)と`Localization.Away x_ji`(逆順)が抽象的に同型で
+あることを`IsLocalization.localizationLocalizationSubmodule`(mathlib、局所化の局所化を
+元の環の部分モノイドの局所化として特徴づける)経由で示そうと試みた。`closure{a,b} ≤
+llsm`(証明済み)・`∀x∈llsm,∃m∈closure,m*x∈closure`(証明済み)までは到達したが、
+**`isLocalization_of_is_exists_mul_mem`の向き**(「小さい既知の部分モノイドから
+大きい部分モノイドへ拡張する」)が、今回必要な向き(`llsm`という**大きい**既知の
+部分モノイドから`closure`という**小さい**部分モノイドを得たい)と**逆**であることに
+気づいた——`llsm(powers a)(powers(algebraMap b))`と`llsm(powers b)(powers(algebraMap a))`
+が本当に同じ集合かという問い自体が、以前記録した「捩れ」の問題そのものであり、
+一般には自明でないと再確認した。
+
+**しかし、この抽象的な環同型は今回のセッションで完成した`piece_descends_iso`の
+おかげで実は不要だと判明した(以前の訂正と同じ結論に、今回は具体的な根拠つきで
+到達)。**理由: `piece_descends_iso`は`X.basicOpen f_i`(**既存のスキームC内の
+具体的な開集合**)から候補局所片`pullback(P₀_i,φ)`への同型を与える。重なり
+`X.basicOpen(f_i·f_j) = X.basicOpen f_i ⊓ X.basicOpen f_j`(`Scheme.basicOpen_mul`)への
+**制限**として、i側・j側それぞれの候補局所片の対応する開部分への同型が得られ、その
+**合成**(i側の逆・j側)が遷移射そのものになる——これは自動的に整合的(cocycle条件も
+自動)である。なぜなら両方とも**同じ`C`の同じ開集合**を経由して定義されるから、
+抽象的な環レベルでの独立検証(`llsm`同士の比較)は一切不要。GlueDataの構成は
+「ゼロから貼り合わせる」のではなく「既存の`C`を道しるべにして各片の同型を制限・
+合成する」だけでよい——`Scheme.Cover.glueMorphisms`(既存スキームへの比較射構成)の
+枠組みがまさにこの構造に対応する。
+
+**教訓**: 同じ「捩れ」の壁に2回目にぶつかったが、今回は「なぜ本当に不要か」を
+`piece_descends_iso`の存在という具体的根拠まで遡って確認できた——単なる勘ではなく、
+既存のCの同型による制限・合成という構成的な理由づけができた。次の一手:
+`piece_descends_iso`の同型を`X.basicOpen(f_i·f_j)`へ制限する具体的な構成
+(`IsOpenImmersion`のrestrict機構、または`Scheme.Opens`の交わりへの制限)。
+集計は10/24で変わらず。
