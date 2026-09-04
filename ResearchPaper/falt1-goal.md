@@ -462,6 +462,23 @@ mathlib での正確な組み立て方は未確認)。
     Lemma 1.1 インフラをそのまま使える)・3b(a)(Eisenstein の既約性
     で自動)の両方を回避できる有望な入口**と判断する——次のセッション
     はここから始めるのが良い。
+
+    ★★★★★★★★★★★★★★★★2026-09-04、**「Eisenstein ⟹ 整閉」の道具を
+    さらに調査した**: `RingTheory/Polynomial/Eisenstein/IsIntegral.lean`
+    に、まさにこの classical な証明の**部品**(`mem_adjoin_of_smul_
+    prime_pow_smul_of_minpoly_isEisensteinAt`:「`p^n•z` が
+    `adjoin R{gen}` に入れば `z` も入る」)が既にあることを発見した
+    ——これは教科書の証明(Eisenstein 多項式の根で生成される拡大が
+    極大整環であることの証明)の**核心の帰納法ステップ**そのもの。
+    ただし**「任意の整な `z` に対しある `n` で `p^n•z∈adjoin`」という
+    近似の議論(教科書証明のもう半分)へつなぐ具体的な組み立ては
+    まだ行っていない**——これも classical だが、mathlib に「Eisenstein
+    ⟹ 整閉」という完成形の定理としては見つからなかった(`totally
+    ramified`という語もmathlibに無い)。★これで3cの技術的な下ごしらえ
+    (Eisenstein 既約性・整閉性それぞれの部品の所在)はかなり明確に
+    なった——次のセッションは `mem_adjoin_of_smul_prime_pow_smul_of_
+    minpoly_isEisensteinAt` を軸に「整閉性」の証明を完成させることから
+    始めるとよい。
 4. ★★★★★2026-09-04、**完成した**(`delta_tendsto_zero`、commit
    `a9faa64e`)。長さの漸化不等式(上の逐語引用の通り: `δ_n-δ_{n+1}≥
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
