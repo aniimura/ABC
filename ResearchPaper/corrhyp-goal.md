@@ -2220,3 +2220,42 @@ f_mono・f_open・f_hasPullback・f_id・t'・t_fac`)**が完成した**。残�
 GlueDataの配線は番号付き項目ではないため)。
 
 コミット: `dfbc99a0`。
+
+### 2026-09-04続報: `cocycle`は数学的には解決済みだが、Leanの計算コストの
+壁に当たる——`hcombine`・汎用補題は速いのに、組み立てが極端に重い
+
+`cocycle`(`t' i j k ≫ t' j k i ≫ t' k i j = 𝟙`)に着手した。`unfold gdT';
+simp only […, Iso.inv_hom_id_assoc, Iso.hom_inv_id_assoc, Scheme.isoOfEq_
+hom]`だけで、3つの`gdT'`をすべて展開したあと**ほぼ全部が自動的に打ち消し
+合い**、残るのは
+`(gdVpullbackIso i j k).hom ≫ BIG.inv ≫ (H1≫H2≫H3) ≫ BIG.hom ≫
+(gdVpullbackIso i j k).inv = 𝟙`
+という形だけだと分かった(`BIG = transitionElemIso (f i)(f j*f k)(e i)`、
+`H1・H2・H3`は3つの結合律の`homOfLE`)。これは`t_fac`よりずっと単純な
+残余で、`H1≫H2≫H3=𝟙`(3つの結合律の等式を合成すると出発点へ戻る自明な
+自己同型になる、証明無関係性で自動的に閉じる)さえ示せば、あとは
+「共通の同型を挟んだ2つの逆射の対消滅」という一般的な圏論の事実
+(**`hcombine`単体も、`iso_conj_cocycle_generic`という完全に一般的な
+補題単体も、いずれも1秒未満で証明できた**)で閉じるはずだった。
+
+ところが**組み立て(`exact`/`refine`でこの一般補題を適用する、あるいは
+`calc`で同じ手順を直接組む)が極端に重い**——`set_option maxHeartbeats`
+を200万→400万→2000万と上げ、タイムアウトを最大590秒まで伸ばしても
+**完走しなかった**(`t_fac`のときは同じ`calc`+`congrArg`パターンが
+74秒で通ったのと対照的)。`t_fac`のときに当たった「`instances`透明度で
+型が合わない」というエラーメッセージすら出ず、純粋に計算が終わらない
+(または非常に長時間かかる)という形で止まる——3つの`gdT'`を同時に
+`unfold`することで生じる項の大きさが、`t_fac`(`gdT'`1つ+`gdT`1つ)より
+本質的に重いと見られる。
+
+**数学的内容には一切不明な点が無い**(`hcombine`・`iso_conj_cocycle_
+generic`の証明でそれを示した)——残っているのは純粋にLeanの計算資源の
+壁。次に着手する際の候補: (a) 3つの`gdT'`を**同時に`unfold`しない**
+で1つずつ段階的に処理する(`t_fac`の`gdT'_key`のように、各段階を
+別々の`theorem`として先に確定させる粒度をさらに細かくする)、(b)
+`gdT'`自体を`t_fac`のときのように`transitionElemIso`ベースの明示的な
+橋渡し補題として書き直し、`cocycle`をその橋渡し補題の言葉だけで
+(生の`unfold`を経由せず)組み立てる、(c) より大きな`timeoutSeconds`
+(10分超)を許容できるバックグラウンド実行で気長に待つ。集計は10/24で
+変わらず(§4は0/2のまま)。ファイルには反映していない(コミット無し、
+探索のみ)。
