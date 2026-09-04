@@ -1577,3 +1577,19 @@ Quotient.mk`を適用、という一手で`P.Ring`の実際の元(比較射の�
 構成する)のみ。集計は10/24で変わらず(§4は0/2のまま)。
 
 コミット: `8e605fff`(lean-idioms #27)・`fda225b4`(作業単位1(b)完成)。
+
+### 2026-09-04さらに続報: 作業単位1の(a)もmathlibにそのまま存在すると確認(新規補題は不要)
+
+作業単位1の残り(a)「`D(f_l)∩D(f_m)=D(f_l·f_m)`という位相的事実」を
+実際にLeanで書こうとして確認したところ、**mathlibに`AlgebraicGeometry.
+Scheme.basicOpen_mul : X.basicOpen (f*g) = X.basicOpen f ⊓ X.basicOpen g`
+としてそのまま存在**しており、ABC3側で新しい補題を書く必要は無いと判明
+(`X.basicOpen`はスキームの開`U`上の切断`f`に対する基本開集合)。
+
+**これで作業単位1(比較射の構成)は完全に「道具が出揃った」状態になった**:
+(a)`Scheme.basicOpen_mul`(mathlib既存)、(b)`exists_fg_subalgebra_tensor_
+standardEtale_elem`(今回完成)。残るのはこれらを実際に組み合わせて
+`glueMorphisms`のpairwise条件を構成する実装のみ——これ自体は数十〜
+百行規模の組み立て作業になる見込みで、work unit 2(rigidity)・
+work unit 3(GlueData/glueMorphisms組み立て)と合わせて複数セッションに
+またがる継続タスクとして引き継ぐ。集計は10/24で変わらず。
