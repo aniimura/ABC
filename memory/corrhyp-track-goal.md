@@ -383,6 +383,22 @@ GlueDataでの貼り合わせ)であり、依然「壁ではなく道」。§1(5
 
 コミット: `5b73f21f`(flatness難点の発見・記録)。
 
+★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(大きな前進——generic
+flatnessを完全に回避する戦略が実現、集計10/24で変わらず)。`P_R`の
+任意のアフィン開から出発する戦略ではなく、**`X.left`自身の(`R`に
+依らない)アフィン開被覆`{U_i}`をそのまま`Ext X`へbase changeする**
+戦略に転換——各片は必ず`Spec(Γ(U_i,U_i) ⊗[ℚ] ℝ)`になり、`ℚ`が体
+なので`Γ(U_i,U_i)⊗[ℚ]-`は自動的に平坦になる。`piecePullbackIso`
+(`ExtLimit.lean`、★sorry無し)として完成。さらに(3)複数片の合流に
+要る単射性も`Module.Flat ℚ A`(infer_instance一発)+
+`Module.Flat.iff_rTensor_preserves_injective_linearMap`で確認済み。
+**Lemma 4.1に要る「見つからない数学」は無くなり、残るのは
+(1)Spaceの有限型性の検証・(3)の実際の組み立て・(4)GlueData貼り合わせ、
+というエンジニアリングのみ**——今セッション最大級の発見。
+
+コミット: `80eb752a`(piecePullbackIso完成)・`084fef0b`(戦略記録)・
+`835beb44`(単射性確認の記録)。
+
 ★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(残作業4段階を総括、
 集計10/24で変わらず)。generic flatnessの標準的前提(Rネター整域・
 加群/多元環がR上有限表示)を確認したところ、`corrHypInstance4`の
