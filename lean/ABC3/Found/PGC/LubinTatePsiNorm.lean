@@ -240,4 +240,79 @@ theorem no_common_root_iteratedLubinTatePsi {p : ℕ} [Fact p.Prime] (K : PAdicL
   apply hne
   rw [← hnorm_n, ← hnorm_m]
 
+/-! ### `ψ_n`・`ψ_m`(`n≠m`)は互いに素・各々分離的(混標数) -/
+
+/-- ★★★★★★★★★★**`ψ_n`・`ψ_m`(`n≠m`)は互いに素(`IsCoprime`)**——
+`no_common_root_iteratedLubinTatePsi` を経由せずとも、既約性と次数の
+違いだけから直接出る、より初等的な経路: `ψ_n∣ψ_m` と仮定すると
+(`ψ_m` も既約なので)`ψ_n`・`ψ_m` は同伴(`Associated`)になり、両者が
+モニックなので `ψ_n=ψ_m`——次数が等しくなってしまうが、これは
+`torsionDegree_ne` に矛盾する。 -/
+theorem isCoprime_iteratedLubinTatePsi {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    {n m : ℕ} (hn : 1 ≤ n) (hm : 1 ≤ m) (hnm : n ≠ m) :
+    IsCoprime (Polynomial.map (algebraMap (𝒪[K.carrier]) K.carrier)
+        (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn))
+      (Polynomial.map (algebraMap (𝒪[K.carrier]) K.carrier)
+        (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf m hm)) := by
+  haveI := valuationRing_isDVR K
+  haveI : UniqueFactorizationMonoid (𝒪[K.carrier]) := uniqueFactorizationMonoid_valuationRing K
+  set gn := Polynomial.map (algebraMap (𝒪[K.carrier]) K.carrier)
+    (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn) with hgn_def
+  set gm := Polynomial.map (algebraMap (𝒪[K.carrier]) K.carrier)
+    (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf m hm) with hgm_def
+  have hmonicn : gn.Monic := (isDistinguishedAt_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn).monic.map _
+  have hmonicm : gm.Monic := (isDistinguishedAt_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf m hm).monic.map _
+  have hirrn : Irreducible gn :=
+    (Polynomial.IsPrimitive.irreducible_iff_irreducible_map_fraction_map
+      (isDistinguishedAt_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn).monic.isPrimitive).mp
+      (irreducible_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn)
+  have hirrm : Irreducible gm :=
+    (Polynomial.IsPrimitive.irreducible_iff_irreducible_map_fraction_map
+      (isDistinguishedAt_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf m hm).monic.isPrimitive).mp
+      (irreducible_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf m hm)
+  rw [hirrn.coprime_iff_not_dvd]
+  intro hdvd
+  have hassoc : Associated gn gm := (Irreducible.dvd_irreducible_iff_associated hirrn hirrm).mp hdvd
+  have heq : gn = gm := Polynomial.eq_of_monic_of_associated hmonicn hmonicm hassoc
+  have hdegeq : gn.natDegree = gm.natDegree := by rw [heq]
+  rw [hgn_def, hgm_def,
+    (isDistinguishedAt_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn).monic.natDegree_map,
+    (isDistinguishedAt_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf m hm).monic.natDegree_map,
+    natDegree_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn,
+    natDegree_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf m hm] at hdegeq
+  exact torsionDegree_ne (hq ▸ Fintype.one_lt_card) hn hm hnm hdegeq
+
+/-- `ψ_n` は `K.carrier` 上分離的(混標数、`K:PAdicLocalField p` は
+常に `ℚ_p` の有限次拡大なので標数0)——既約多項式は標数0で自動的に
+分離的(`Irreducible.separable`)。 -/
+theorem separable_iteratedLubinTatePsi_map_carrier {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) :
+    (Polynomial.map (algebraMap (𝒪[K.carrier]) K.carrier)
+      (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn)).Separable := by
+  haveI := valuationRing_isDVR K
+  haveI : UniqueFactorizationMonoid (𝒪[K.carrier]) := uniqueFactorizationMonoid_valuationRing K
+  haveI : CharZero K.carrier := charZero_of_injective_algebraMap (algebraMap ℚ_[p] K.carrier).injective
+  have hirr : Irreducible (Polynomial.map (algebraMap (𝒪[K.carrier]) K.carrier)
+      (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn)) :=
+    (Polynomial.IsPrimitive.irreducible_iff_irreducible_map_fraction_map
+      (isDistinguishedAt_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn).monic.isPrimitive).mp
+      (irreducible_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn)
+  exact hirr.separable
+
 end ABC3.Found.PGC
