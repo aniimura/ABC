@@ -1,6 +1,6 @@
 ---
 name: pgc-lubin-tate-existence-progress
-description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——★★★★★★★★★★★★★★★★★★★★ reciprocityMap: Gal(K.closure/K.carrier)→(𝒪_K)^×⧸principalUnits K π n が①存在一意性②全単射③群準同型のすべてを sorry 無しで完備(reciprocityMap_mul)。principalUnitsQuotientEquiv と合わせ Gal(K(Λ_n)/K)≅(𝒪_K/π^n)^× への道具が揃った。残るは Gal(K.closure/K.carrier)→Gal(K(Λ_n)/K) への制限・核の同定という標準的な仕上げのみ
+description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——★★★★★★★★★★★★★★★★★★★★ reciprocityMap の存在一意性・単数側全単射・群準同型は sorry 無しで完備。真に残る最後の柱は reciprocityMap の**全射性**(Galois が ψ_n の根に推移的に作用)——鍵となる irreducible_iteratedLubinTatePsi は既に確立済みで道筋は明確(AdjoinRoot 経由の共役構成 + IsAlgClosed.lift + Algebra.IsAlgebraic.bijective_of_isScalarTower')だが、K.closure に2つの Algebra 構造を与えようとして instance diamond に当たり未完成(型シノニムか AdjoinRoot を R に取る順序変更が次の一手)
 metadata:
   type: project
 ---
@@ -2051,6 +2051,71 @@ cross-point instance bridgingが避けられない」と繰り返し警戒され
 同じ座標系に留まるという事実の活用)で突破し、Lubin-Tate相互律の
 核心部分を完成させた——本プロジェクトのこのトラックにおける
 最大の到達点。
+
+## 続報(同日、さらに続き): `reciprocityMap`の**全射性**——真に残る
+最後の柱を特定、道筋は明確化したが instance diamond で今回は
+完成に至らず(honest記録)
+
+上で「残るはGalois理論の標準的な仕上げ」と書いたが、より正確に
+掘り下げると、真に欠けている事実は**`reciprocityMap`の全射性**
+(同値に:`Gal(K.closure/K.carrier)`が`ψ_nの根`に**推移的**に作用
+すること)だと判明した——これは`unitActionQuotientBijOn`の全単射性
+(単数側)とは**独立**の、Galois側だけの追加の事実で、まだ確立
+していない。
+
+**朗報**: この全射性を出すのに必要な核心的な事実——**`ψ_n`が
+`𝒪_K`上既約**——は、実は**既に確立済み**だった
+(`irreducible_iteratedLubinTatePsi`、`LubinTateActionPsi.lean`、
+以前のセッションで完成)。`LubinTatePsiNorm.lean`(`spectralNorm_
+root_iteratedLubinTatePsi`の証明)には、これをGaussの補題で
+`K.carrier`上へ持ち上げ(`Polynomial.IsPrimitive.irreducible_iff_
+irreducible_map_fraction_map`)、`minpoly.eq_of_irreducible_of_
+monic`で「`ψ_n`の根`x`の`minpoly K.carrier x`は`ψ_n`自身に一致
+する」ところまで**既に橋渡し済み**のコードがある。
+
+**残る論証**: `x,y`が`ψ_n`の(異なる)根なら`minpoly K.carrier x =
+ψ_n = minpoly K.carrier y`(同じ既約多項式)なので、標準的なGalois
+理論により`σ(x)=y`となる`σ∈Gal(K.closure/K.carrier)`が存在する
+(「同じ最小多項式を持つ2元は共役」という古典的事実)。
+
+**この標準的事実に要るmathlib補題を特定した(すべて実在確認済み)**:
+- `AdjoinRoot.liftAlgHom p (i:R→ₐ[S]T) (x:T) (heval) : AdjoinRoot p→ₐ[S]T`
+  (根を`y`に送る準同型)
+- `IntermediateField.adjoinRootEquivAdjoin F hx : AdjoinRoot(minpoly F x)
+  ≃ₐ[F] F⟮x⟯`(`AdjoinRoot`と`F⟮x⟯`の同一視)
+- 上記2つを合成して`φ0:K.carrier⟮x⟯→ₐ[K.carrier]K.closure`
+  (`x↦y`)を得る
+- `IsAlgClosed.lift`(algebraic拡大からalg閉体への埋め込みの存在)
+  で`φ0`を`K.closure`全体へ延長する
+- **`Algebra.IsAlgebraic.bijective_of_isScalarTower' φ`**:
+  `K.carrier`-代数自己準同型`φ:K.closure→ₐ[K.carrier]K.closure`は
+  **自動的に全単射**(algebraic拡大の自己埋め込みは常に全単射、
+  という一般論)——これで`AlgEquiv.ofBijective`により目的の`σ`を
+  作れる。
+
+**今回ぶつかった技術的な壁(instance diamond、未解決)**: `φ0`を
+使って`K.closure`に`Algebra K.carrier⟮x⟯ K.closure`という
+(φ0経由の)**別の**代数構造を`letI`で局所的に与えようとしたが、
+`K.closure`は`IntermediateField K.carrier K.closure`の元として
+`K.carrier⟮x⟯`から**既に自然な`Algebra`インスタンスを持つ**ため、
+`letI`で上書きしようとすると型クラス解決が衝突する(本セッション
+序盤で対処した`CompleteSpace`インスタンス絡みの罠や、過去セッション
+の`Valued`インスタンスダイアモンドと同系統の問題)。`IsAlgClosed.
+lift`を`R:=K.carrier⟮x⟯`で直接使おうとする代わりに、**`K.carrier⟮x⟯`
+と可換な、独立な型シノニム**(あるいは`AdjoinRoot(minpoly K.carrier
+x)`自身をRとして使い、`IntermediateField.adjoinRootEquivAdjoin`の
+合成を`IsAlgClosed.lift`の**後**に行う、という順序の入れ替え)を
+検討すべき——`AdjoinRoot p`は`K.closure`の部分型ではない独立した
+型なので、それを`R`として`IsAlgClosed.lift`(`S:=AdjoinRoot p`、
+`M:=K.closure`、`Algebra R M`は`φ0'`(`AdjoinRoot p→ₐ[K.carrier]
+K.closure`)経由で作る)を適用すれば、既存の`Algebra L K.closure`
+インスタンスと衝突しない可能性が高い——次回はこちらから試すこと。
+
+**現状**: ファイルへの書き込み・コミットは無し(REPL内の探索のみ、
+正直に記録)。次のセッションでの最有力候補は、この「`AdjoinRoot`を
+`R`として`IsAlgClosed.lift`を適用する」経路の実装。これが通れば
+`reciprocityMap`の全射性(ひいては`Gal(K(Λ_n)/K)≅(𝒪_K/π^n)^×`の
+完全な証明)に到達する見込み。
 
 ## 続報(同日、`algEquiv_mem_iteratedLubinTateTorsionPoints_of_mem`、
 `AdjoinIntegers.lean`、commit `93108293`): `Λ_n`全体もσで保たれる
