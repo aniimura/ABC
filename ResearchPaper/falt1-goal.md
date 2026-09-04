@@ -1618,6 +1618,51 @@ mathlib での正確な組み立て方は未確認)。
       次回へ引き継ぐ——次回はまず
       `IsIntegralClosure Wn V0 (FractionRing Wn)`のインスタンスを
       独立に確立することから始めること。
+
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、
+      上記のインスタンス自体は**独立に解決できた**(REPL で確認済み、
+      未コミット・調査のみ): `IsIntegralClosure.of_isIntegrallyClosed`
+      (mathlib、`[IsIntegrallyClosed R][Algebra S R][Algebra S K]
+      [IsScalarTower S R K][Algebra.IsIntegral S R]⟹IsIntegralClosure R S K`)
+      を`R:=Wn, S:=V0, K:=FractionRing Wn`に適用するだけで
+      `IsIntegralClosure Wn V0 (FractionRing Wn)`が(`hinjV0Wn`すら
+      使わず)閉じた。`Wn1`側はさらに簡単で、`Wn1:=integralClosure Wn
+      (AdjoinRoot gK)`という**構成そのもの**から`integralClosure.
+      isIntegralClosure`(mathlib、常に成立)で無条件に`IsIntegralClosure
+      Wn1 Wn (AdjoinRoot gK)`が出る。
+
+      **しかし、着手して`falt1_kaehler_length_exact_wn1_kernel`を実際に
+      `Wn`に適用しようとして、より深い構造的な障害を発見した**:
+      Lemma 1.1(`falt1CokernelIsoLinear`/`LengthEq`)は`W`が`V`上
+      **単項生成**(`w:W`で`hadjoin:V[w]=⊤`かつ`hw:K(w)=L`)であることを
+      本質的に要求する。`Wn1`(`V1`上・`Wn`上どちらも)は`falt1BaseChange
+      GeneratorFull`で生成元`x`が明示的に手に入るが、**`falt1_cancelConductorDelta_
+      assembled`の中で`Wn`自体は`V0`上の抽象的な有限拡大として与えられて
+      おり、単項生成元は用意されていない**(`Wn`は構成的に`Vₙ`として
+      逐次構築されるはずだが、この定理はそこまで遡らず`Wn`を不透明な
+      仮定として扱っている)。つまり kernel 項の評価には**`Wn/V0`の
+      単項生成元(と、原始生成元の環レベル⟹体レベルの生成の遺伝、
+      `falt1_fieldLevel_adjoin_top_of_ringLevel_minpoly`のWn版に相当する
+      未証明の一般事実)という、当初の想定より一段深い追加データ**が
+      要ることが判明した——「軽い代入」という見立ては今回も誤りだった。
+
+      **有望な代替路も発見した**: mathlib に
+      `differentIdeal_eq_differentIdeal_mul_differentIdeal`
+      (`RingTheory/DedekindDomain/Different.lean`、`differentIdeal A C =
+      differentIdeal B C * (differentIdeal A B).map(algebraMap B C)`、
+      塔`A→B→C`に対する**directなideal等式**、`Module.Finite`3種+
+      `IsTorsionFree`2種+`Algebra.IsSeparable(FractionRing A)(FractionRing C)`
+      のみが条件)が存在する。これを`A:=V0,B:=Wn,C:=Wn1`に適用すれば
+      `differentIdeal V0 Wn1 = differentIdeal Wn Wn1 * (differentIdeal V0 Wn).map(...)`
+      が**Kähler微分の完全列を経由せず直接**得られ、`falt1_length_
+      quotient_mul_of_ne_zero`(PIDでの長さの加法性、既に確立済み)と
+      合わせるだけで目的の式に到達できる可能性がある——このほうが
+      `falt1CokernelIsoLinear`の単項生成元要求を回避できるかもしれない
+      (`differentIdeal V0 Wn1`自体をどう評価するかは別途要検討だが、
+      少なくとも`Wn`の単項生成元は不要になる)。次回はこちらを先に
+      試すこと。この定理の project 内での既存の対応物
+      `differentIdeal_tower_diamond`(`KaehlerAux.lean:1613`)との関係
+      (同じ主張の言い換えか、別の一般性か)も未確認——最初に確認すること。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
