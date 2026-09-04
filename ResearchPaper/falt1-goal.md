@@ -1892,6 +1892,41 @@ mathlib での正確な組み立て方は未確認)。
       `falt1-goal.md`の他の箇所で未着手と記録済み)に着手できる状態に
       なった。
 
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、
+      **残る(1)も部分的に前進させた**(`falt1_theorem12_kaehler_length`・
+      `falt1_theorem12_kaehler_length_eq_differentIdeal`、commit
+      `69478240`、`lake build`完走(165秒)・sorry無し)。`falt1CokernelLengthEq`
+      (Lemma 1.1)を`V0→Wₙ₊₁`へ直接適用してみたところ、**`Wₙ₊₁`が
+      `V0`上局所的(全分岐)であることは要求しない**と判明した
+      (`falt1CokernelLengthEq`自体、任意のDedekind整域`W`が`V`上
+      単項生成であれば成り立つ一般論——局所性は`length_map_pow_of_
+      ramificationIdx`側だけの要求だった)。つまり option (b)
+      (Eisenstein⟹全分岐、mathlibに無い)は不要で、**option (a)
+      (単項生成元)だけが本質的な残る前提**だと確認できた。
+
+      `IsIntegralClosure Wₙ₊₁ V0 (FractionRing Wₙ₊₁)`も
+      `falt1_theorem12_differentIdeal_length`の証明で既に使った
+      `IsIntegralClosure.of_isIntegrallyClosed`で無条件に得られる
+      (`Wₙ₊₁`のDedekind性・`V0`上有限であることだけで十分)。
+
+      これで、`Wₙ₊₁`の`V0`上の単項生成元`y`(環・体どちらのレベルでも
+      生成)**さえ与えられれば**、
+      ```
+      length_{Wₙ₊₁}(Ω¹_{Wₙ₊₁/V0}) =
+        length_{Wₙ₊₁}(Wₙ₊₁/differentIdeal Wₙ Wₙ₊₁) +
+        length_{Wₙ₊₁}(Wₙ₊₁/Ideal.map(algebraMap Wₙ Wₙ₊₁)(differentIdeal V0 Wₙ))
+      ```
+      という、Kähler微分の完全列(Exercise 13.7.4)経由と`differentIdeal`
+      の塔公式経由という**2つの独立した証明経路が合流する式**が得られた
+      ——これがTheorem 1.2の目標そのものに極めて近い形。
+
+      **唯一残る条件**: `Wₙ₊₁`の`V0`上の単項生成元`y`の存在。これは
+      「`Wₙ₊₁`が半局所環でも成り立つか」という問いであり、まだ
+      検証していない——次回、実際の`V_n`塔構成(3c、`pushoutKaehler
+      SplitStep`が使えるようになった)の中でこの生成元をどう構成する
+      か、あるいは一般に存在しない場合の代替(`y`無しで済む形への
+      式変形)を検討することから始める。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
