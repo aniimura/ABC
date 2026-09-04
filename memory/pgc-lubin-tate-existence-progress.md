@@ -1360,6 +1360,28 @@ mod deg2`だが高次では異なる)。したがって「`a≡b mod π^n`なら
 気づいてから一気に片付いた。次に似た「`if`の入った関数の等式」に
 当たったら、まずこちらを試す。
 
+**続報(同日、乗法的不変性、commit`0bd61b30`)**: `one_add_mul_pi_pow_
+action_eq_self`(`(1+cπ^n)·x=x`)の直接の系として、待望していた
+「well-definedness」の**乗法版**をすぐに確立できた:
+
+1. `lubinTateEvalAtPoint_congr`: `lubinTateEvalAtPoint`は評価点が
+   (等式として)一致すれば同じ値を返す——既存の`lubinTateEvalAtPoint_
+   eq_zero_of_eq_zero`の`w=0`限定を一般の`w`へ広げた、再利用可能な
+   補題(依存型の`rw`が失敗する箇所をすべて`subst`で回避できる)。
+2. ★★★**`mul_one_add_pi_pow_action_eq`**: **`(a*(1+cπ^n))·x = a·x`**
+   (任意の`a,c∈𝒪_K`)。`lubinTateAction_mul`+`one_add_mul_pi_pow_
+   action_eq_self`+`lubinTateEvalAtPoint_congr`を組み合わせるだけ。
+
+これで「`a↦a·x`は`a`を`(1+π^n𝒪_K)`を法として見たとき不変」——
+`(𝒪_K)^×`から`ψ_nの根`への作用が`(𝒪_K/π^n)^×`を経由してwell-defined
+であることの**乗法版のwell-definedness**が確立された。残る壁は
+「加法版」(`a≡b mod π^n`ならば`a·x=b·x`、こちらは依然`F_f`の
+引き算が要る)だけであり、`(𝒪_K)^×`(乗法群)に限った話であれば
+この乗法版だけで十分な場合が多い——次の一歩は`(𝒪_K)^×→ψ_nの根`
+の写像が本当に`(𝒪_K/π^n)^×→ψ_nの根`の写像として well-defined に
+factor through することの正式な組み立てと、単射性(こちらは依然
+残された課題)。
+
 これで「`a·x=0 ↔ π^n∣a`」(`x`が原始的なπ^n-捩れ点のとき)が
 sorry無しで確立された——`𝒪_K/π^n≅Λ_n`の**核**が確定。
 `|𝒪_K/π^n|=q^n=|Λ_n|`(既出`card_iteratedLubinTateTorsionPoints`)
