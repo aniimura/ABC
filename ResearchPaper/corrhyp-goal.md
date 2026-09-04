@@ -2338,3 +2338,29 @@ equal であることを確認させるだけ)でも同じ`whnf`のheartbeat上�
 ——`Lemma 4.1`の`c'.C`の実体。
 
 コミット: `9fc6c7ad`。
+
+### 2026-09-04続報: **`corrHypGlueData`完成——`Scheme.GlueData`構造体
+インスタンスを組み立てた**
+
+予想通り、揃った12個の部品をそのままフィールドとして渡すだけで
+`Scheme.GlueData`構造体インスタンス`corrHypGlueData`が組み立てられた
+(0.12秒)——`t`・`t'`は`gdT`・`gdT'`(`Iso`)の`.hom`を取るだけ、
+`t_id`も`gdT_id`(`gdT i i = Iso.refl _`)から`.hom`を取って`rfl`で
+閉じるだけ。新しい数学もLeanの配管上の障害も一切無かった。
+
+**これで`Lemma 4.1`の構成的降下のうち、GlueDataの配線という最大の
+技術的部分が完了した**。`lake build ABC3`で0エラーを確認(sorry無し)。
+集計は10/24で変わらず(§4は0/2のまま、GlueDataの配線は番号付き項目
+ではないため)。
+
+**次の一手(まだ未着手、規模が異なる)**: `corrHypGlueData.glued`
+(貼り合わせてできるスキーム)が`C`(または`Ext`後に`C`)に同型で
+あることを、`C`自身の`OpenCover`の`gluedCover`との比較で示す——
+これが`Lemma 4.1`の`c'.C`の実体を与える。ここまでの部品(`gdV`・
+`gdF`等)は純粋な圏論的配線だったのに対し、この段階は「候補片の族
+`Z`が実際に`C`を覆う」という**降下データの普遍性**に関わる、質の
+異なる作業になる見込み——`Scheme.Cover.gluedCover`の普遍性
+(`CategoryTheory.Limits.IsColimit`相当)と`corrHypGlueData`の
+普遍性を比較する必要がある。
+
+コミット: `923ad02b`。
