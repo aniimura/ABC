@@ -1205,3 +1205,30 @@ corrHypGlueDataOfEtaleが初めてExt/ExtFという実際のCorrHyp構成デー�
 (未着手)。残るのは(b)IsColimit比較(genuinely new)・(c')上記の代入
 ・(d)Cの有限アフィン被覆+外側の貼り合わせ・(e)α・β脚と整合性の等式。
 corrhyp-goal.mdに詳細記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04(続き3)
+続報(corrPieceGlueDataOfCorr追加、項目(c')完了、集計10/24で変わらず)。
+Instance4.leanでcorrPieceGlueDataをCorr corrHypInstance4 (QcqsExt X) ZK
+の実データ(c.C・c.α)へ実際に代入した。QcqsFEt A B:=FEtK A.1 B.1
+なのでc.α.1.left/c.α.2.1/c.α.2.2をそのままcorrPieceGlueDataの
+α/[IsFinite α]/[Etale α]へ渡すだけの短い配線になる見込みだった。
+
+実行時、#31「instances透明度の壁」の新しい現れ方に当たった:
+haveI:=c.α.2.1を直前に置いても、[IsFinite α]の型クラス探索が
+(QcqsExt X).1.leftと(ExtF.obj X.1).left(QcqsExtが@[reducible]でない
+defのため区別されてしまう)を見分けられずfailed to synthesize
+instanceで失敗。修正: letI hα : c.C.1.left ⟶ (ExtF.obj X.1).left :=
+c.α.1.leftという呼び出し先の期待する型をそのまま構文に書いたletIで
+hαを作り、以降hαだけを使うことで解消(元の式に型注釈を付けるのでは
+なく「期待される型で包み直す」のが鍵)。lean-idioms.md#33に記録。
+
+corrPieceGlueDataOfCorr/corrPieceGlueDataOfCorr_coverを追加、lake
+build(Instance4/ABC3とも)0エラー確認、コミット: `2471cb91`。
+
+**これでロードマップ項目(c')完了**——corrHypGlueDataOfEtaleという
+抽象部品から出発し、Ext/ExtF(項目(c))を経て、corrHypInstance4・
+QcqsSpace・Corrという実データ(c.C・c.α)にまで接続が完成した。残るは
+(b)corrPieceGlueDataOfCorr(...).glued≅c.α⁻¹(piece)の証明(IsColimit
+比較、genuinely new、最大の残りタスク)・(d)c.Cの有限アフィン被覆+
+外側の貼り合わせ・(e)α・β脚と整合性の等式(β側はゼロから必要)。
+corrhyp-goal.mdに詳細記録。

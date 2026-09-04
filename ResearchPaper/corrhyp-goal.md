@@ -2551,3 +2551,45 @@ CorrHyp論文の実際の構成データに直接接続された。残る「`Cor
 (d) `C`自体の有限アフィン被覆+外側の貼り合わせ、`X.left`の有限
 アフィン被覆との整合。(e) `α・β`脚と整合性の等式`h▸extCorr D c'=c`
 の構成。集計は10/24で変わらず。
+
+## 2026-09-04(続き3): `corrPieceGlueDataOfCorr`——項目(c')完了、新しい配管の罠を1つ発見
+
+上記(c')「`corrPieceGlueData`を`corrHypInstance4`・`QcqsSpace`・`Corr`
+の実データへ実際に代入する」を`Instance4.lean`で実行した。
+`QcqsFEt A B := FEtK A.1 B.1`なので`c.α : QcqsFEt c.C (QcqsExt X)`は
+`{f : c.C.1 ⟶ (QcqsExt X).1 // IsFinite f.left ∧ Etale f.left}`の
+要素——`c.α.1.left`・`c.α.2.1`・`c.α.2.2`を`corrPieceGlueData`の
+`α`・`[IsFinite α]`・`[Etale α]`へそのまま渡すだけの、短い配線に
+なる見込みだった(Exploreエージェントの事前評価どおり)。
+
+実際に試すと、`#31`の「`instances`透明度の壁」の**新しい現れ方**に
+当たった: `haveI := c.α.2.1`(型注釈の有無を問わず)を直前に置いても、
+`corrPieceGlueData`側の`[IsFinite α]`の型クラス**探索**が
+`(QcqsExt X).1.left`と`(ExtF.obj X.1).left`(`QcqsExt`が
+`@[reducible]`でない`def`のため`instances`透明度では同一視されない)
+を見分けられず`failed to synthesize instance`で失敗した。**修正**:
+`letI hα : c.C.1.left ⟶ (ExtF.obj X.1).left := c.α.1.left`という、
+**呼び出し先が要求する型をそのまま構文に書いた`letI`**で`hα`を作り、
+以降`c.α.1.left`を直接使わず`hα`だけを使うことで解消した——
+`元の式`自身に型注釈を付けるのではなく「期待される型で包み直す」のが
+鍵だった。`lean-idioms.md`#33として記録。
+
+これで`corrPieceGlueDataOfCorr`/`corrPieceGlueDataOfCorr_cover`
+(`X ZK:QcqsSpace`・`c:Corr corrHypInstance4 (QcqsExt X) ZK`・
+`U:X.1.left`のアフィン開`hU`から、`c.C`側で対応する`c.α⁻¹(piece)`の
+GlueDataとその被覆条件を直接与える)を`Instance4.lean`へ追加
+(`lean_check`で検証後ファイルへ反映、`lake build`
+(Instance4/ABC3とも)0エラー確認、コミット`2471cb91`)。
+
+**これでロードマップ項目(c')が完了**——`corrHypGlueDataOfEtale`という
+抽象部品から出発し、`Ext`/`ExtF`(項目(c))を経て、ついに
+`corrHypInstance4`・`QcqsSpace`・`Corr`という`Lemma 4.1`が実際に読む
+データそのもの(`c.C`・`c.α`)にまで接続が完成した。残る作業:
+(b) `corrPieceGlueDataOfCorr(...).glued ≅ c.α⁻¹(piece)`の証明
+(`IsColimit`比較、genuinely new、最大の残りタスク)。
+(d) `c.C.1.left`自体の有限アフィン被覆(`X.1.left`の各アフィン片`U`
+ごとの`corrPieceGlueDataOfCorr`を外側でさらに貼り合わせる二段階構成)、
+`X.1.left`の有限アフィン被覆との整合。
+(e) `α・β`脚と整合性の等式`h▸extCorr D c'=c`の構成——ここは
+`corrPieceGlueDataOfCorr`が触れていない`β`側もゼロから必要。
+集計は10/24で変わらず(インフラ、numbered itemではないため)。

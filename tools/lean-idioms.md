@@ -3842,3 +3842,44 @@ only […]`だけで証明する——これは`A`の出現が1つだけなの�
 `9fc6c7ad`)。`gdT'_hom_eq`/`gdT'_inv_eq`(`gdT'`の出現1つだけを
 `unfold`して確定させた明示形)を用意してから`gdT'_pair`を`rw`だけで
 組み立て、`congrArg`は常に「前だけ」/「後ろだけ」で適用した。
+
+## 33. `instances`透明度の壁(`#31`)は型クラス**探索**にも起きる——
+`def`(`@[reducible]`でない)越しの射を渡すと`haveI`が効かない、
+明示的な型注釈付き`letI`で正規化してから渡す(2026-09-04)
+
+**症状**: `QcqsFEt A B := FEtK A.1 B.1`のような、`@[reducible]`でない
+`def`で包んだsubtype(`{f : A.1 ⟶ B.1 // IsFinite f.left ∧ Etale
+f.left}`)の要素`c.α`について、`c.α.1.left`(射の中身)を`corrPieceGlueData
+X.1 U hU c.C.1.left c.α.1.left`のように`[IsFinite α][Etale α]`を要求
+する関数へ**直接**渡すと、たとえ直前に`haveI := c.α.2.1`(または
+`haveI : IsFinite c.α.1.left := c.α.2.1`という型注釈付きの形)で局所
+instanceを登録しても、
+```
+failed to synthesize instance of type class
+  IsFinite (Over.Hom.left ↑c.α)
+```
+で失敗する。原因は`#31`と同じ透明度の壁——`c.α.1.left`の「自然な」型
+(`c.C.1.left ⟶ (QcqsExt X).1.left`)と、呼び出し先が要求する型
+(`c.C.1.left ⟶ (ExtF.obj X.1).left`、`QcqsExt X := ⟨ExtF.obj X.1,…⟩`
+の`.1`を`delta`展開しないと一致しない)が`instances`透明度では別物
+に見え、型クラス**探索**(`synthInstance`)が局所instanceを見つけられ
+ない——`have`の型注釈を書いても、ELABORATION自体は`default`透明度で
+成功するので気づきにくい(型注釈の`have`は素通りし、その`have`を
+**使う側**の型クラス探索だけが失敗する)。
+
+**直し方**: 呼び出し先が要求する型を**そのまま構文として書いた**
+`letI 変数名 : 要求される型 := 元の式`を用意し、以降はその変数名だけ
+を使う——`元の式`自身の型注釈ではなく、**呼び出し先の期待する型で
+包み直す**のが鍵:
+```lean
+letI hα : c.C.1.left ⟶ (ExtF.obj X.1).left := c.α.1.left  -- ここで正規化
+letI : IsFinite hα := c.α.2.1
+letI : Etale hα := c.α.2.2
+corrPieceGlueData X.1 U hU c.C.1.left hα  -- hαを使う、c.α.1.leftを直接使わない
+```
+これで`hα`の**構文上の型**が呼び出し先と完全一致するので、局所instance
+が即座に見つかる。
+
+実例: `lean/ABC3/Found/CorrHyp/Instance4.lean`の`corrPieceGlueDataOfCorr`
+/`corrPieceGlueDataOfCorr_cover`(`corrHypInstance4`の`Corr`実データを
+`ExtLimit.lean`の`corrPieceGlueData`へ接続する配線、コミット`2471cb91`)。
