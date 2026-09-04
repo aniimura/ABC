@@ -4007,4 +4007,67 @@ theorem falt1_kaehler_length_exact_wn1_cokernel
   rw [ABC3.Found.Falt1.falt1CokernelLengthEq x hint hadjoin hw] at hbase
   exact hbase
 
+/-!
+## 長さの加法公式・右辺第1項(kernel側)の評価(2026-09-04)
+
+`Wₙ₊₁⊗_{Wₙ}Ω¹_{Wₙ/V0}`(kernel 側)は、`Wₙ ⊗_{Wₙ}` ではなく素朴な
+「`Ω¹_{Wₙ/V0}` を `Wₙ₊₁` へ base change しただけ」の項なので、Lemma 1.1
+(`falt1CokernelIsoLinear`、`Ω¹_{Wₙ/V0} ≃ₗ[Wₙ] Wₙ⧸differentIdeal V0 Wₙ`)を
+`V0→Wₙ` にそのまま適用し、`LinearEquiv.baseChange` で `Wₙ₊₁` へ base
+change するだけで評価できる——ただし `Wₙ₊₁⊗_{Wₙ}(Wₙ⧸I)` を
+`Wₙ₊₁⧸I.map(algebraMap)` に単純化する一般補題(`Algebra.TensorProduct.
+tensorQuotientEquiv` と `rid` の合成)がmathlibに直接無かったので
+`falt1_tensorQuotientEquiv_algebraMap` として新規に用意した。 -/
+
+set_option maxHeartbeats 1000000 in
+/-- **`A ⊗[R] (R ⧸ I) ≃ₐ[A] A ⧸ I.map(algebraMap R A)`(一般補題、新規)**:
+`Algebra.TensorProduct.tensorQuotientEquiv`(`A⊗[R](T⧸I)≃(A⊗[R]T)⧸...`)を
+`T:=R`の場合に適用し、`Algebra.TensorProduct.rid`(`A⊗[R]R≃A`)で
+右辺のテンソル積を消す。 -/
+noncomputable def falt1_tensorQuotientEquiv_algebraMap
+    {Wn Wn1 : Type*} [CommRing Wn] [CommRing Wn1] [Algebra Wn Wn1] (I : Ideal Wn) :
+    TensorProduct Wn Wn1 (Wn ⧸ I) ≃ₐ[Wn1] Wn1 ⧸ (I.map (algebraMap Wn Wn1)) := by
+  set e1 := Algebra.TensorProduct.tensorQuotientEquiv (R := Wn) Wn1 Wn Wn1 I with he1
+  set e2 := Algebra.TensorProduct.rid Wn Wn1 Wn1 with he2
+  set f1 : Wn →+* TensorProduct Wn Wn1 Wn :=
+    (Algebra.TensorProduct.includeRight : Wn →ₐ[Wn] TensorProduct Wn Wn1 Wn).toRingHom with hf1
+  set g1 : TensorProduct Wn Wn1 Wn →+* Wn1 := e2.toRingEquiv.toRingHom with hg1
+  have hcomp : g1.comp f1 = algebraMap Wn Wn1 := by
+    apply RingHom.ext
+    intro w
+    show (e2 : TensorProduct Wn Wn1 Wn →+* Wn1) ((Algebra.TensorProduct.includeRight : Wn →ₐ[Wn] TensorProduct Wn Wn1 Wn) w) = algebraMap Wn Wn1 w
+    rw [Algebra.TensorProduct.includeRight_apply]
+    show e2 ((1:Wn1) ⊗ₜ[Wn] w) = algebraMap Wn Wn1 w
+    rw [he2, Algebra.TensorProduct.rid_tmul, ← Algebra.algebraMap_eq_smul_one]
+  have hmapeq : (I.map (algebraMap Wn Wn1) : Ideal Wn1) = Ideal.map g1 (Ideal.map f1 I) := by
+    rw [Ideal.map_map, hcomp]
+  set e3 := Ideal.quotientEquivAlg (Ideal.map f1 I) (I.map (algebraMap Wn Wn1)) e2 hmapeq with he3
+  exact e1.trans e3
+
+set_option maxHeartbeats 1000000 in
+/-- **長さの加法公式の右辺第1項(kernel側)を`differentIdeal V0 Wₙ`の
+言葉に変換(完成)**: Lemma 1.1(`falt1CokernelIsoLinear`、`V0→Wₙ`)を
+`Wₙ₊₁`へ base change し、`falt1_tensorQuotientEquiv_algebraMap`で
+単純化するだけ。これで `falt1_kaehler_length_exact_wn1` の右辺2項が
+どちらも`differentIdeal`の言葉に変換できた——次はこの結果と
+`cancel_conductor_delta`経由の`hlen_eq`(`falt1_cancelConductorDelta_
+assembled`)を組み合わせ、`Ω¹_{Wₙ₊₁/V0}`の長さを`differentIdeal V1 Wₙ₊₁`・
+`differentIdeal Wₙ Wₙ₊₁`という2つの「小さい」different ideal の長さの
+和として書き切ることに進む(Theorem 1.2 の再帰の核心になる可能性)。 -/
+theorem falt1_kaehler_length_exact_wn1_kernel
+    {V0 K L Wn Wn1 : Type*} [CommRing V0] [IsDedekindDomain V0]
+    [Field K] [Algebra V0 K] [IsFractionRing V0 K] [Field L] [Algebra K L] [FiniteDimensional K L]
+    [Algebra.IsSeparable K L] [CommRing Wn] [Algebra Wn L] [Algebra V0 Wn] [Algebra V0 L]
+    [IsScalarTower V0 K L] [IsScalarTower V0 Wn L] [IsIntegralClosure Wn V0 L]
+    [IsDedekindDomain Wn] [Module.IsTorsionFree V0 Wn]
+    [CommRing Wn1] [Algebra Wn Wn1]
+    (w : Wn) (hint : IsIntegral V0 w) (hadjoin : Algebra.adjoin V0 ({w} : Set Wn) = ⊤)
+    (hw : Algebra.adjoin K ({(algebraMap Wn L) w} : Set L) = ⊤) :
+    Module.length Wn1 (TensorProduct Wn Wn1 Ω[Wn⁄V0]) =
+      Module.length Wn1 (Wn1 ⧸ (differentIdeal V0 Wn).map (algebraMap Wn Wn1)) := by
+  set fbase := ABC3.Found.Falt1.falt1CokernelIsoLinear w hint hadjoin hw with hfbase
+  set ftensor := LinearEquiv.baseChange Wn Wn1 Ω[Wn⁄V0] (Wn ⧸ differentIdeal V0 Wn) fbase with hftensor
+  set fquot := falt1_tensorQuotientEquiv_algebraMap (Wn := Wn) (Wn1 := Wn1) (differentIdeal V0 Wn) with hfquot
+  exact LinearEquiv.length_eq (ftensor.trans fquot.toLinearEquiv)
+
 end ABC3.Found.Falt1
