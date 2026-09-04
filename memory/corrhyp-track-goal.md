@@ -1329,3 +1329,30 @@ corrHypGlueData.glued≅piecesOpenCover(...).gluedCover.gluedを得る、
 (3)mathlibのfromGludedが与えるpiecesOpenCover(...).gluedCover.glued
 ≅Uと合成する。この3ステップでcorrHypGlueData.glued≅(U:Scheme)
 (項目(b)そのもの)が完成する見込み。corrhyp-goal.mdに詳細記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04(続き8)
+続報(corrHypGlueData_toGluedCover完成、項目(b)の射が構成できた、
+集計10/24で変わらず)。当初計画のNatIso.ofComponents+HasColimit.
+isoOfNatIsoの代わりに、Multicoequalizer.desc(コクイザライザの普遍性)
+を直接使うより直接的なルートを採用——corrHypGlueDataのU成分がZ(=
+piecesOpenCoverのX成分)と文字通り同じなのでπ i:=gluedCover.ι iが
+そのまま使え、整合条件(corrHypGlueData_compat)はpiecesGluedCoverVIso_
+hom_fst/_hom_snd+GlueData.glue_condition(mathlib既製)から従う。
+
+これまでで最も執拗な#31の壁に遭遇: gluedCover.J(piecesOpenCover.I₀、
+定義的にはJに等しい)がinstances透明度でJと一致せず、rwはおろか
+simp only[…] at hのようなローカル仮定への書き換えでも同じ壁に当たった
+(set/letIでも解消しないケースがあった)。唯一有効だった方法: 中間の
+haveを一切rw/simpで後から書き換えず、最初からcalc+congrArg+
+Category.assoc(項として)だけで組み立てる——一度もrw/simpを使わずに
+完走(1.82秒)。
+
+corrHypGlueData_compat+corrHypGlueData_toGluedCoverを完成、lake build
+(ExtLimit/ABC3とも)0エラー確認、コミット: `423e7d61`。
+
+**これでcorrHypGlueData.gluedからgluedCover.gluedへの射が構成された**。
+残る道筋(項目(b)最終段): (1)この射がIsIsoであることを示す(逆向きの
+射をMulticoequalizer.descで構成、Multicoequalizer.hom_extで両方向の
+合成が恒等射になることを確認)。(2)Iso.mkでまとめ、mathlibの
+fromGludedとの合成でcorrHypGlueData.glued≅(U:Scheme)(項目(b)そのもの)
+完成。corrhyp-goal.mdに詳細記録。

@@ -2772,3 +2772,49 @@ f_eq`のdefeqへ届く)を完成させた。すべて`lean_check`で個別検証
 この3ステップで`corrHypGlueData f Z e |>.glued ≅ (U:Scheme)`——項目(b)
 そのもの——が完成する見込み。集計は10/24で変わらず(インフラ、
 numbered itemではないため)。
+
+## 2026-09-04(続き8): `corrHypGlueData_toGluedCover`——項目(b)の射が完成
+
+自然性完全確立(前回)を受け、最終組み立てへ進んだ。当初計画していた
+「`NatIso.ofComponents`+`HasColimit.isoOfNatIso`」ルートの代わりに、
+`Multicoequalizer.desc`(コクイザライザの普遍性)を直接使う**より
+直接的なルート**を採用した——`corrHypGlueData`の`U`成分が`Z`(=
+`piecesOpenCover`の`X`成分)と**文字通り同じ**なので、`π i :=
+gluedCover.ι i`をそのまま使え、唯一の整合条件(`corrHypGlueData_
+compat`)は`piecesGluedCoverVIso_hom_fst`/`_hom_snd`+`Scheme.Cover.
+gluedCover`自身の`GlueData.glue_condition`(mathlib既製)から従う。
+
+この整合条件の証明で**これまでで最も執拗な`#31`の壁**に遭遇した:
+`gluedCover.J`(`piecesOpenCover.I₀`、定義的には`J`に等しい)が
+`instances`透明度で`J`と一致しないため、`rw`はおろか
+「`simp only […] at h`のようなローカル仮定への書き換え」でも同じ壁
+に当たった(`set 𝒢 := …`で名前を付けても、`letI`で型注釈しても解消
+しないケースがあった——`piecesGluedCoverVIso_hom_fst`のような外部
+補題を`rw`で適用した直後の項が、`set`で作ったローカル略称と再度
+シンタックス上ズレるため)。**唯一有効だった方法**: 中間の`have`
+(`hglue`・`hgdF`・`hgdTF`)を一切`rw`/`simp`で後から書き換えず、
+**最初から`calc`+`congrArg`+`Category.assoc`(項として)だけで
+組み立てる**——`Iso.inv_hom_id_assoc`と`.trans`で直接合成し、最終的な
+`calc`チェーンも`congrArg (· ≫ …)`/`Category.assoc _ _ _`(`.symm`込み)
+だけで積み上げる。これで一度も`rw`/`simp`を使わずに完走できた
+(1.82秒)。
+
+`corrHypGlueData_compat`(整合条件)+`corrHypGlueData_toGluedCover`
+(`Multicoequalizer.desc`で射を構成)を完成させた。`lean_check`で
+検証後ファイルへ反映、`lake build`(ExtLimit/ABC3とも)0エラー確認、
+コミット(`423e7d61`)。
+
+**これで`corrHypGlueData.glued`から`(piecesOpenCover ...).gluedCover.
+glued`への射(コクイザライザの普遍性による、一意)が構成された**。
+残る道筋(項目(b)の最終段):
+1. この射が`IsIso`であることを示す——逆向きの射(`gluedCover.
+   diagram`から`corrHypGlueData.glued`への`Multicoequalizer.desc`、
+   同様の整合条件が`corrHypGlueData_compat`の`i,j`を入れ替えるか
+   `gdT`の対称性から従う見込み)を構成し、`Multicoequalizer.hom_ext`
+   で両方向の合成が恒等射になることを確認する。
+2. それができれば`Iso.mk`でまとめ、mathlibの`Scheme.Cover.fromGlued`
+   (`IsIso`、既製)が与える`gluedCover.glued ≅ U`と合成して
+   `corrHypGlueData f Z e |>.glued ≅ (U:Scheme)`(項目(b)そのもの)
+   が完成する。
+
+集計は10/24で変わらず(インフラ、numbered itemではないため)。
