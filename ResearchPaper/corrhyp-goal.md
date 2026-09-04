@@ -3198,3 +3198,46 @@ tensor_standardEtalePair_promote`(既存、`FieldLimit.lean`)を組み合わ
 (新しいmathlib降下定理を要さず)完成した——`person-years`評価の
 さらなる見直しを裏付ける、具体的な進捗。集計は10/24で変わらず——
 §4は引き続き0/2。
+
+## 2026-09-04(続き17): ★アーキテクチャ上の重要な再考★——「候補片を個別に昇格」より「`Γ(C,piece)`全体を一度に降ろす」方が筋が良いかもしれない
+
+「揃った候補片同士の重なり(`transitionElem`/`gdT`/`cocycle`の`R`
+レベル版)」に着手しようとして、`transitionElem`が本来必要とする
+「アンビエントスキームの層」が`R`レベルには存在しないことに気づいた
+——正直に記録する。
+
+`transitionElem`(`ℝ`レベル)は`X.presheaf.map`(`C`自身の層の制限
+写像)を使うが、`C`自体は`Ext(X)`上の任意の有限étaleスキームであり、
+`X`(`Over BaseK`)のような`extDiagram`(`R`段階近似の塔)を**持たない**
+——`C`を`R`レベルへ降ろす既製の塔は無い。mathlibにも「cofiltered
+極限への有限étale射が有限段階で既に有限étaleとして実現される」という
+**単一の完成した定理は無い**(`AffineTransitionLimit.lean`にある道具
+群——`exists_isAffineOpen_preimage_eq`・`exists_appTop_π_eq_of_isLimit`
+等——から**組み立てる**必要があり、これ自体もそれなりの作業量になる
+見込み)。
+
+**より筋が良いかもしれない別の道筋**: `piece_algebraEtale_tensor`
+(既存)により`Γ(C,piece)`は`(A⊗ℚℝ)`上**étale**(有限表示)である。
+「有限表示な代数は、係数環が余極限(ここでは`ℝ = colim R`)のとき、
+ある有限段階`R''`まで**降ろせる**」という標準的な可換環論の事実
+(EGA IV §8、Artin近似の初等版)を使えば、`piece_descends_iso`のように
+**元ごとに**`R_i`をバラバラに得てから合流させるのではなく、
+**`Γ(C,piece)`全体を一度に**`S_0 ⊗_{A⊗R''.1} (A⊗ℝ)`(`S_0`は
+`(A⊗R''.1)`-代数)の形に降ろせる可能性がある。これが成り立てば、
+`transitionElem`/`gdT`/`cocycle`一式を`S_0`(`R''`レベルの単一の環)
+の上でそのまま(`ℝ`レベルと**全く同じ道具**を使って)再構築でき、
+「複数の`R_i`を`⊔`で合流させる」という今回の`piece_descends_iso_
+promote`/`family_promote`の労力が**丸ごと不要になる**可能性がある。
+
+**正直な評価**: これは未検証の代替案であり、(1)この「有限表示な
+代数は有限段階へ降ろせる」という一般論がmathlibに存在するか
+(`Algebra.FinitePresentation`+`Ring.DirectLimit`または類似の名前を
+今後調査する必要がある)、(2)`S_0`が実際に`corrPieceGlueData`の
+`α:C⟶(ExtF.obj X).left`の**制限**として意味を持つか、は未確認。
+今回完成させた`piece_descends_iso_promote`/`_family_promote`
+(コミット`3816c246`・`e2e728af`・`bf24a796`)は、この代替案を採用
+した場合でも**個別の元を扱う場面で引き続き使える一般的な事実**
+として無駄にはならないが、「`R`レベル層全体の設計」については、
+次に着手する際はこの「`Γ(C,piece)`全体を一度に降ろす」方針を先に
+検証するのが妥当と判断する。集計は10/24で変わらず——§4は引き続き
+0/2。
