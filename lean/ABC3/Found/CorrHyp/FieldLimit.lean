@@ -2482,4 +2482,68 @@ theorem isLocalization_away_tensor_eq (B S₀ T M : Type) [CommRing B] [CommRing
     (M ⊗[S₀] (S₀ ⊗[B] T)) (Localization.Away (algebraMap S₀ (S₀ ⊗[B] T) h))
   exact ⟨e1.toRingEquiv.symm.trans e2.toRingEquiv⟩
 
+/-! ## `Γ(C,piece(D(f)))`の任意の元を`R`レベルへ持ち上げる(`2026-09-05続き18`)
+
+`isLocalization_away_tensor_eq`を実際に使う(`descendPieceR`をD(f*g)`に
+ついて`D(f)`側の局所化として直接構成する)には、局所化パラメータ
+`piece_basicOpen_localizationElem`(`Γ(C,piece(D(f)))`の元、`ExtLimit.lean`)
+自体を`descendPieceR`の`R`レベルの環`S₀`の元として持ち上げる必要がある
+——`S₀⊗[B](A⊗ℝ) ≅ Γ(C,piece(D(f)))`(`pieceAlgebra_R_model_baseChange`)
+の**逆像**を、`quotient_mvPolynomial_baseChange`(`S₀⊗[B](A⊗ℝ)`を
+`MvPolynomial(A⊗ℝ)`商として実現)+`exists_fg_subalgebra_tensor_
+mvPolynomial_finset`(既存、多項式の係数を`R`レベルへ降ろす)で構成する
+——`pieceAlgebra_relation_descend_q₀`が「関係式の族」を降ろしたのと
+同じ技法を、「単一の任意の元」に適用しただけ。 -/
+
+open scoped TensorProduct Classical in
+/-- **商`MvPolynomial`商⊗ℝの任意の元は、`R`を昇格すれば`MvPolynomial`
+係数として`R`レベルへ持ち上げられる**——`Ideal.Quotient.mk_surjective`
+で多項式の代表元を取り、その有限個の係数を`exists_fg_subalgebra_tensor_
+mvPolynomial_finset`で降ろすだけ。`descendPieceR`の`S₀`(`MvPolynomial
+(Fin n)(A⊗R.1)⧸I`型)の元を、`Γ(C,piece)`側の任意の元から実際に構成する
+ための核心部品——`isLocalization_away_tensor_eq`の`h`をこれで得る。
+
+配管の注意(新しい失敗形、`tools/lean-idioms.md`に追記の価値あり):
+`MvPolynomial ι (A⊗[ℚ]R.1) ⧸ I`という「`TensorProduct`係数の
+`MvPolynomial`の商」を書くと、`HasQuotient`の自動探索が(`Ideal`の
+`Semiring`インスタンスを`AddMonoidAlgebra.semiring`経由で解決しようと
+して)`MvPolynomial`本来の`CommRing`インスタンスと非`defeq`に見える形で
+失敗する——`descendPieceR`と同じく`letI hCR : CommRing (A⊗[ℚ]R.1) :=
+inferInstance`で**係数環自身**のインスタンスを先に確定させておくと解消
+する(`MvPolynomial`側を先に確定させても効果が無い、係数環側が鍵)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_fg_subalgebra_tensor_quotientMvPolynomial_lift (A : Type) [CommRing A] [Algebra ℚ A]
+    (R : FgSubalgebra ℚ ℝ) {ι : Type} [Fintype ι] :
+    letI hCR : CommRing (A ⊗[ℚ] R.1) := inferInstance
+    letI : Algebra (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ) :=
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom.toAlgebra
+    ∀ (I : Ideal (MvPolynomial ι (A ⊗[ℚ] R.1)))
+      (z : (MvPolynomial ι (A ⊗[ℚ] R.1) ⧸ I) ⊗[A ⊗[ℚ] R.1] (A ⊗[ℚ] ℝ)),
+    ∃ (R' : FgSubalgebra ℚ ℝ) (_hR : R ≤ R') (p₀ : MvPolynomial ι (A ⊗[ℚ] R'.1)),
+      (quotient_mvPolynomial_baseChange (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ) ι I) z =
+        Ideal.Quotient.mk (Ideal.map (MvPolynomial.map (algebraMap (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ))) I)
+          (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)).toRingHom p₀) := by
+  letI hCR : CommRing (A ⊗[ℚ] R.1) := inferInstance
+  letI : Algebra (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ) :=
+    (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom.toAlgebra
+  intro I z
+  obtain ⟨p, hp⟩ := Ideal.Quotient.mk_surjective
+    ((quotient_mvPolynomial_baseChange (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ) ι I) z)
+  obtain ⟨R'', hR''⟩ := exists_fg_subalgebra_tensor_mvPolynomial_finset A ({p} : Finset (MvPolynomial ι (A ⊗[ℚ] ℝ)))
+  obtain ⟨p₀, hp₀⟩ := hR'' p (Finset.mem_singleton_self p)
+  obtain ⟨R', hRR', hR''R'⟩ := exists_fgSubalgebra_upperBound2 R R''
+  refine ⟨R', hRR', MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A)
+    (Subalgebra.inclusion hR''R')).toRingHom p₀, ?_⟩
+  rw [← hp, ← hp₀, MvPolynomial.map_map]
+  have h1 : (Subalgebra.val R'.1).comp (Subalgebra.inclusion hR''R') = Subalgebra.val R''.1 := rfl
+  have h2 := Algebra.TensorProduct.map_comp (S := ℚ) (R := ℚ) (AlgHom.id ℚ A) (AlgHom.id ℚ A)
+    (Subalgebra.val R'.1) (Subalgebra.inclusion hR''R')
+  rw [AlgHom.id_comp, h1] at h2
+  have h3 : (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)).toRingHom.comp
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR''R')).toRingHom =
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R''.1)).toRingHom :=
+    congrArg AlgHom.toRingHom h2.symm
+  rw [h3]
+
 end ABC3.Found.CorrHyp
