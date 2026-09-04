@@ -872,3 +872,20 @@ X.OpenCover → Scheme.GlueData`が既存のスキームの開被覆からのGlu
 完成させられなかった——正直に未完了として記録、コミットはせず。
 
 コミット: `b661e01e`(戦略簡略化の記録)・`fd443564`(未完了の記録)。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報
+(ring→scheme被覆変換が完成、前回の詰まりを別経路で回避、集計10/24で
+変わらず)。前回未完了だった変換を`hU.fromSpec`(`Spec Γ(X,U) ⟶ X`)
+経由で完成させた——`fromSpec_preimage_basicOpen`+`image_preimage_eq_
+opensRange_inf`を組み合わせるだけ、添字づけを変える必要が無いので前回
+当たったinstances透明度の詰まりを完全に回避できた。
+`exists_scheme_basicOpen_cover_of_ring`(`ExtLimit.lean`、★sorry無し)
+完成。
+
+**これで`exists_finite_standardEtaleCover`の環レベルの被覆を`C`内の
+開被覆として認識する橋渡しが完成**——`Scheme.openCoverOfIsOpenCover`
++`Scheme.Cover.gluedCover`(cocycle自動証明済み)を適用する道が開けた。
+GlueData組み立て戦略の(a)が完成、残るは(b)同型による移送の具体的な
+構成、(c)貼り合わせ後の有限性確認、の2点。
+
+コミット: `6e8ea04e`(cover変換完成)・`6d9b1db1`(記録)。
