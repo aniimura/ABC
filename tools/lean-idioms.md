@@ -3360,3 +3360,31 @@ angle bracket + 期待型の指定が無いと通らない)。
 projection として自動的に(インスタンス込みで)決まるので、独立な型注釈も
 インスタンス探索も不要になる。実例: `lean/ABC3/Skeleton/Falt1/Section4.lean`
 の `theorem_4_1`/`theorem_4_3`/`theorem_4_5`。
+
+## 21. `Over` 圏の base change を手作りしない——`Over.pullback ⋙ Over.map` +
+`overPullbackMap` が MorphismProperty の遺伝を一発で与える(2026-09-04)
+
+`f : A ⟶ B`(`Over S` の射)に対し、ある `MorphismProperty` `P`(有限性・
+étale 性等)を保つ base change された射(`(-)_K` のような係数拡大の
+射側の作用)を構成したいとき、`Limits.pullback.map`(`pullback.lift` 経由)
+で手作りすると、`IsFinite`/`Etale` の遺伝を示すのに
+`IsPullback.of_right`/`paste_horiz`/`isoIsPullback` 等の pullback 貼り合わせを
+自分で組み立てる必要があり、非常に長くなる(1回失敗して撤回した)。
+
+**代わりに mathlib 自身の `CategoryTheory.Over.pullback (f : X ⟶ Y) :
+Over Y ⥤ Over X`(base change の関手)と `CategoryTheory.Over.map (f : X ⟶ Y)
+: Over X ⥤ Over Y`(構造射との後合成、`.left` を変えない)を合成して使うと、
+`CategoryTheory.MorphismProperty.overPullbackMap`
+`(f : S' ⟶ S) [P.IsStableUnderBaseChange] {X Y : Over S} (g : X ⟶ Y)
+(H : P g.left) : P ((Over.pullback f).map g).left` が
+base change 安定性からの遺伝を1行で与える。** `Over.map` 側は
+`(Over.map f).map g).left = g.left`(`simp [Over.map]` で示せる)ので、
+合成関手 `Over.pullback f ⋙ Over.map f`(対象では `X ↦ X ×_Y S' →(post f)→
+Y` のような「base change してまた元の圏に戻す」係数拡大そのもの)の
+射側の性質遺伝もこれだけで閉じる。
+
+**How to apply**: `Over` 圏で base change を伴う関手を構成するときは、まず
+`Over.pullback`/`Over.map`(と `overPullbackMap`)で書けないか確認してから
+`Limits.pullback.map`/`IsPullback` の手作りに進む。実例:
+`lean/ABC3/Found/CorrHyp/SchemeFEt.lean` の `ExtF`/`extFEt`
+(`AlgebraicGeometry.Etale`/`IsFinite` の base change 安定性を利用)。
