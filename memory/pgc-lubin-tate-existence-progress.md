@@ -849,3 +849,34 @@ PowerSeries.aeval (R := 𝒪[K.carrier]) hHasEval
     来る一意化元の存在)は`isAdic_maximalIdeal_valuationRing`の証明
     でのみ使われていた——`CompleteSpace`は`Valued.integer`の
     コンパクト性を経由しない別証明があるかもしれない)。
+
+**続報(2026-09-04・続き、★★★★★★★★★原因を特定し回避——`Valued`を
+避ければ全部速い)**: 上記(c)の勘が当たった。`Valued`を一切使わず
+`Subring.mk`で`{y | ‖y‖ ≤ 1}`を素朴に構成したところ
+(`AdjoinIntegers.lean`(新規)、commit`5cc2332e`)、
+`CompactSpace`・`IsClosed`・`CompleteSpace`のすべてが**1秒未満**で
+確認できた——`Valued`特有の位相と既存の`NormedField`由来の位相の
+一致検査のコストが詰まりの原因だったと確定できた。
+
+- `adjoinIntegers`: `K.carrier⟮x⟯`の「整数環」(ノルム`≤1`の部分環、
+  `Valued`不使用)
+- `algebraMap_mem_adjoinIntegers`: `𝒪[K.carrier]`の元は`algebraMap`
+  を通して`adjoinIntegers K x`に入る(`spectralNorm_extends`——
+  基点の元のスペクトルノルムはもとのノルムそのもの、という完全に
+  汎用的な補題——から)。★これが`𝒪[K.carrier]`を`𝒪[K.carrier⟮x⟯]`へ
+  埋め込む、何段階も前から見通していた課題の核心部分。
+- `mem_adjoinIntegers_of_mem_iteratedLubinTateTorsionPoints`: `Λ_n`の
+  元`x`自身も`adjoinIntegers K x`に入る
+- `isClosed_adjoinIntegers`・`completeSpace_adjoinIntegers`・
+  `compactSpace_adjoinIntegers`: 閉・完備・コンパクト、すべて確立
+
+★残る課題(narrower になった): `IsDiscreteValuationRing`(ひいては
+`Ideal.isLinearTopology`経由の`IsLinearTopology`)を`Valued`を経由
+せずに得る経路。`Valued.integer.isDiscreteValuationRing_of_
+compactSpace`は`Valued`型クラスを要求するので、この素朴な`Subring`
+には直接使えない——mathlibに`Valued`を経由しない「コンパクトな
+付値環はDVR」に相当する定理があるか、無ければ`IsPrincipalIdealRing`
+を直接(コンパクト性+非アルキメデス距離から)証明する必要がある。
+これが解決すれば`Algebra 𝒪[K.carrier] (adjoinIntegers K x)`
+(`algebraMap_mem_adjoinIntegers`から`RingHom.toAlgebra`的に構成可能)
+と組み合わせて、`PowerSeries.aeval`で実際に`f`を`x`で評価できる。
