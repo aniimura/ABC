@@ -9,6 +9,7 @@ import Mathlib.AlgebraicGeometry.GammaSpecAdjunction
 import Mathlib.AlgebraicGeometry.AffineTransitionLimit
 import Mathlib.Algebra.Polynomial.AlgebraMap
 import Mathlib.Algebra.Polynomial.Monic
+import Mathlib.RingTheory.Etale.StandardEtale
 
 /-!
 # [CorrHyp] `Lemma 4.1` へ向けた第一歩 —— `K` を有限生成 `k`-部分環の直極限として見る
@@ -499,18 +500,92 @@ theorem exists_fg_subalgebra_polynomial_pair_monic {k K : Type*} [CommRing k] [C
   refine (hinj.monic_map_iff (p := p₀)).mpr ?_
   rw [hp₀]; exact hp
 
+open Polynomial in
+/-- `exists_fg_subalgebra_polynomial` の有限族版——有限個の多項式をまとめて
+1つの有限生成部分環に同時に降ろす(`StandardEtalePair` の `cond` が要求する
+4つの多項式 `f, g, p₁, p₂` を同時に降ろすのに使う)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_fg_subalgebra_polynomial_family {k K : Type*} [CommRing k] [CommRing K]
+    [Algebra k K] {ι : Type*} [Fintype ι] [DecidableEq K] (p : ι → Polynomial K) :
+    ∃ (R : FgSubalgebra k K) (p₀ : ι → Polynomial R.1),
+      ∀ i, (p₀ i).map (algebraMap R.1 K) = p i := by
+  classical
+  obtain ⟨R, hRfg, hRmem⟩ := exists_fg_subalgebra_mem_finset (k := k)
+    (Finset.univ.biUnion (fun i => (p i).support.image (p i).coeff))
+  have hmem : ∀ i (x : ℕ), x ∈ (p i).support → (p i).coeff x ∈ R := fun i x hx =>
+    hRmem ((p i).coeff x) (Finset.mem_biUnion.mpr ⟨i, Finset.mem_univ i,
+      Finset.mem_image_of_mem (p i).coeff hx⟩)
+  refine ⟨⟨R, hRfg⟩, fun i => (p i).support.attach.sum (fun j =>
+    Polynomial.monomial (j : ℕ) (⟨(p i).coeff (j : ℕ), hmem i j j.2⟩ : R)), fun i => ?_⟩
+  rw [Polynomial.map_sum]
+  have key : ∀ j : {x // x ∈ (p i).support}, (Polynomial.monomial (j : ℕ)
+      (⟨(p i).coeff (j : ℕ), hmem i j j.2⟩ : R)).map (algebraMap ↥R K) =
+      Polynomial.monomial (j : ℕ) ((p i).coeff (j : ℕ)) := by
+    intro j; rw [Polynomial.map_monomial]; rfl
+  simp_rw [key]
+  rw [Finset.sum_attach (p i).support (fun j => Polynomial.monomial j ((p i).coeff j))]
+  exact Polynomial.sum_monomial_eq (p i)
+
+open Polynomial in
+/-- `Algebra.StandardEtalePair` の `cond`(`f' * p₁ + f * p₂ = g^n` を満たす
+`p₁, p₂, n` の存在)は、`f`・`g`・`p₁`・`p₂` の係数が有限個であることから、
+ある有限生成 `k`-部分環上ですでに成り立つ形に降ろせる——4つの多項式を
+`exists_fg_subalgebra_polynomial_family` で同時に降ろし、`Polynomial.map`
+の単射性(`algebraMap R K` が単射なので)で等式そのものを引き戻す。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_fg_subalgebra_standardEtaleCond {k K : Type*} [CommRing k] [CommRing K]
+    [Algebra k K] (f g p₁ p₂ : Polynomial K) (n : ℕ)
+    (hcond : Polynomial.derivative f * p₁ + f * p₂ = g ^ n) :
+    ∃ (R : FgSubalgebra k K) (f₀ g₀ p₁₀ p₂₀ : Polynomial R.1),
+      f₀.map (algebraMap R.1 K) = f ∧ g₀.map (algebraMap R.1 K) = g ∧
+      p₁₀.map (algebraMap R.1 K) = p₁ ∧ p₂₀.map (algebraMap R.1 K) = p₂ ∧
+      Polynomial.derivative f₀ * p₁₀ + f₀ * p₂₀ = g₀ ^ n := by
+  classical
+  obtain ⟨R, q, hq⟩ := exists_fg_subalgebra_polynomial_family (k := k)
+    (![f, g, p₁, p₂] : Fin 4 → Polynomial K)
+  have hf : (q 0).map (algebraMap R.1 K) = f := by simpa using hq 0
+  have hg : (q 1).map (algebraMap R.1 K) = g := by simpa using hq 1
+  have hp1 : (q 2).map (algebraMap R.1 K) = p₁ := by simpa using hq 2
+  have hp2 : (q 3).map (algebraMap R.1 K) = p₂ := by simpa using hq 3
+  refine ⟨R, q 0, q 1, q 2, q 3, hf, hg, hp1, hp2, ?_⟩
+  have hinj : Function.Injective (Polynomial.map (algebraMap R.1 K)) :=
+    Polynomial.map_injective _ Subtype.coe_injective
+  apply hinj
+  rw [Polynomial.map_add, Polynomial.map_mul, Polynomial.map_mul, Polynomial.map_pow,
+    ← Polynomial.derivative_map, hf, hg, hp1, hp2, hcond]
+
+/-- **`Algebra.StandardEtalePair` は有限段階へ降ろせる**——`f`(monic)・`g`・
+`cond` の証拠 `p₁, p₂, n` の係数がすべて有限個であることから、ある有限生成
+`k`-部分環 `R` 上の `StandardEtalePair` の像として書ける。`Lemma 4.1` の
+構成的降下(`corrhyp-goal.md` §4)の核となる部品——有限エタール射の
+標準的表示が丸ごと有限段階に降りることを保証する。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_fg_subalgebra_standardEtalePair {k K : Type*} [CommRing k] [CommRing K]
+    [Algebra k K] (P : StandardEtalePair K) :
+    ∃ (R : FgSubalgebra k K) (P₀ : StandardEtalePair R.1),
+      P₀.f.map (algebraMap R.1 K) = P.f ∧ P₀.g.map (algebraMap R.1 K) = P.g := by
+  obtain ⟨p₁, p₂, n, hcond⟩ := P.cond
+  obtain ⟨R, f₀, g₀, p₁₀, p₂₀, hf, hg, hp1, hp2, hcond₀⟩ :=
+    exists_fg_subalgebra_standardEtaleCond (k := k) P.f P.g p₁ p₂ n hcond
+  have hinj : Function.Injective (algebraMap R.1 K) := Subtype.coe_injective
+  have hmonic : f₀.Monic := by
+    refine (hinj.monic_map_iff (p := f₀)).mpr ?_
+    rw [hf]; exact P.monic_f
+  exact ⟨R, ⟨f₀, hmonic, g₀, ⟨p₁₀, p₂₀, n, hcond₀⟩⟩, hf, hg⟩
+
 /- ★★次の一手(未着手): `Lemma 4.1` 本体へ——上の3instanceにより
 `Scheme.exists_hom_comp_eq_comp_of_locallyOfFiniteType`/
 `Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation` は
 `D := toSchemeDiagram k K`・`c := specKCone k K`・`hc := isLimit_specKCone k K`
 に対して**側条件抜きで直接呼べる**状態になった。`exists_fg_subalgebra_
-polynomial_pair_monic` により、有限エタール射の標準的表示
-(`Algebra.StandardEtalePresentation`、`f`(monic)・`g` の2多項式)の
-**係数**は有限段階へ降ろせるようになった——残るのは (a) その `cond`
-(`f' * p₁ + f * p₂ = g^n` を満たす `p₁, p₂, n` の存在)も同様に有限段階へ
-降ろすこと、(b) 標準エタール表示1枚を降ろすだけでなく、`Z_K` 全体の
-アフィン開被覆(`Scheme.exists_isOpenCover_and_isAffine`)の**各片**に
-この降下を適用してから貼り合わせること。`corrhyp-goal.md` §4 に記録した
-組み立て方の続き。 -/
+standardEtalePair` により、有限エタール射の標準的表示1枚は丸ごと有限段階
+へ降ろせるようになった——残るのは (a) `x : S`(`StandardEtalePresentation`
+の残りのフィールド、`lift` が bijective になる元)も同様に降ろすこと、
+(b) 標準エタール表示1枚を降ろすだけでなく、`Z_K` 全体のアフィン開被覆
+(`Scheme.exists_isOpenCover_and_isAffine`)の**各片**にこの降下を適用して
+から貼り合わせること。`corrhyp-goal.md` §4 に記録した組み立て方の続き。 -/
 
 end ABC3.Found.CorrHyp
