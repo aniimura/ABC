@@ -2855,4 +2855,180 @@ theorem isLocalization_of_ringEquiv_transport (R S P : Type) [CommRing R] [CommR
   have he : ∀ r, e (algebraMap R S r) = algebraMap R P r := fun r => rfl
   exact IsLocalization.isLocalization_of_algEquiv M (AlgEquiv.ofRingEquiv (f := e) he)
 
+/-! ## 平坦化の`AlgEquiv`版——`≃+*`ではなく`≃ₐ[B]`で作り直す
+(`2026-09-05夜、続き14`)
+
+`localization_away_quotient_mvPolynomial_equiv`系は`≃+*`(環同型)として
+作ったが、これを`ExtLimit.lean`側で使おうとすると破綻する:商環
+`MvPolynomial ι B ⧸ J`は係数環`B`に対する**自前の**`SMul`
+(`Submodule.Quotient.instSMul'`)を持っており、環同型越しに移送した
+`Algebra B _`はそれに負ける(`IsScalarTower`の型が
+`Submodule.Quotient.instSMul'`で表示され、`of_algebraMap_eq`が返す
+`Algebra.toSMul`3本組と合わない)。`tools/lean-idioms.md`の`#51`。
+
+そこで**最初から係数環`B`上の`AlgEquiv`として作る**。mathlibの部品は
+すべて`AlgEquiv`版が揃っている——`IsLocalization.Away.
+mvPolynomialQuotientEquiv`(`≃ₐ[R]`)・`MvPolynomial.
+quotientEquivQuotientMvPolynomial`(`≃ₐ[R]`)・`DoubleQuot.
+quotQuotEquivQuotSupₐ`(`≃ₐ[R]`)・`Ideal.quotientEquivAlg`・
+`Ideal.quotientEquivAlgOfEq`・`MvPolynomial.sumAlgEquiv`。基底が
+途中で変わる箇所は`AlgEquiv.restrictScalars`で下の基底へ落とす。 -/
+
+open scoped Classical in
+/-- **`localization_away_quotient_mvPolynomial_equiv`の`AlgEquiv`版**——
+`MvPolynomial n B⧸I`の元`p`による`Away`局所化の任意の実現`S`(係数環`B`
+上のスカラー塔付き)が、`MvPolynomial Unit(MvPolynomial n B)`を`I`の像と
+局所化関係式で割った商と`B`-代数として同型であること。証明は`≃+*`版と
+同じ道筋(`mvPolynomialQuotientEquiv`+`quotientEquivQuotientMvPolynomial`
+を`Ideal.quotientEquivAlg`で繋ぐ)を`restrictScalars B`で`B`上へ落として
+行うだけ。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem localization_away_quotient_mvPolynomial_algEquiv (B : Type) [CommRing B] (n : Type) [Fintype n]
+    (I : Ideal (MvPolynomial n B)) (p : MvPolynomial n B)
+    (S : Type) [CommRing S] [Algebra (MvPolynomial n B ⧸ I) S]
+    [IsLocalization.Away (Ideal.Quotient.mk I p) S]
+    [Algebra B S] [IsScalarTower B (MvPolynomial n B ⧸ I) S] :
+    Nonempty (S ≃ₐ[B]
+      (MvPolynomial Unit (MvPolynomial n B) ⧸ Ideal.map MvPolynomial.C I) ⧸
+        (Ideal.span {MvPolynomial.C p * MvPolynomial.X () - 1}).map
+          (Ideal.Quotient.mk (Ideal.map MvPolynomial.C I))) := by
+  letI hCRQ : CommRing (MvPolynomial n B ⧸ I) := inferInstance
+  haveI h2 : IsScalarTower B (MvPolynomial n B ⧸ I) (MvPolynomial Unit (MvPolynomial n B ⧸ I) ⧸
+      Ideal.span {MvPolynomial.C (Ideal.Quotient.mk I p) * MvPolynomial.X () - 1}) := inferInstance
+  set e1 : (MvPolynomial Unit (MvPolynomial n B ⧸ I) ⧸
+      Ideal.span {MvPolynomial.C (Ideal.Quotient.mk I p) * MvPolynomial.X () - 1}) ≃ₐ[B] S :=
+    (IsLocalization.Away.mvPolynomialQuotientEquiv S (Ideal.Quotient.mk I p)).restrictScalars B with he1
+  set e2 : MvPolynomial Unit (MvPolynomial n B ⧸ I) ≃ₐ[B]
+      (MvPolynomial Unit (MvPolynomial n B) ⧸ Ideal.map MvPolynomial.C I) :=
+    (MvPolynomial.quotientEquivQuotientMvPolynomial (σ := Unit) I).restrictScalars B with he2
+  have hnat : e2 (MvPolynomial.C (Ideal.Quotient.mk I p)) =
+      Ideal.Quotient.mk (Ideal.map MvPolynomial.C I) (MvPolynomial.C p) := by
+    simp [he2, MvPolynomial.quotientEquivQuotientMvPolynomial]
+  have hnat2 : e2 (MvPolynomial.X ()) =
+      Ideal.Quotient.mk (Ideal.map MvPolynomial.C I) (MvPolynomial.X ()) := by
+    simp [he2, MvPolynomial.quotientEquivQuotientMvPolynomial]
+  have hIdealEq : (Ideal.span {MvPolynomial.C p * MvPolynomial.X () - 1}).map
+        (Ideal.Quotient.mk (Ideal.map MvPolynomial.C I)) =
+      (Ideal.span {MvPolynomial.C (Ideal.Quotient.mk I p) * MvPolynomial.X () - 1}).map
+        (e2 : MvPolynomial Unit (MvPolynomial n B ⧸ I) →ₐ[B]
+          (MvPolynomial Unit (MvPolynomial n B) ⧸ Ideal.map MvPolynomial.C I)) := by
+    rw [Ideal.map_span, Ideal.map_span, Set.image_singleton, Set.image_singleton]
+    have hval1 : Ideal.Quotient.mk (Ideal.map MvPolynomial.C I)
+        (MvPolynomial.C p * MvPolynomial.X () - 1) =
+        Ideal.Quotient.mk (Ideal.map MvPolynomial.C I) (MvPolynomial.C p) *
+          Ideal.Quotient.mk (Ideal.map MvPolynomial.C I) (MvPolynomial.X ()) - 1 := by
+      rw [map_sub, map_mul, map_one]
+    have hval2 : (e2 : MvPolynomial Unit (MvPolynomial n B ⧸ I) →ₐ[B] _)
+        (MvPolynomial.C (Ideal.Quotient.mk I p) * MvPolynomial.X () - 1) =
+        Ideal.Quotient.mk (Ideal.map MvPolynomial.C I) (MvPolynomial.C p) *
+          Ideal.Quotient.mk (Ideal.map MvPolynomial.C I) (MvPolynomial.X ()) - 1 := by
+      show e2 (MvPolynomial.C (Ideal.Quotient.mk I p) * MvPolynomial.X () - 1) = _
+      rw [map_sub, map_mul, map_one, hnat, hnat2]
+    rw [hval1, hval2]
+  exact ⟨e1.symm.trans (Ideal.quotientEquivAlg _ _ e2 hIdealEq)⟩
+
+open scoped Classical in
+/-- **平坦化した1段の`MvPolynomial(Unit⊕n)B`商との`B`-代数同型**——
+`localization_away_quotient_mvPolynomial_flat_equiv`の`AlgEquiv`版。
+`DoubleQuot.quotQuotEquivQuotSupₐ`(`≃ₐ[B]`版、ただしイデアルが
+`Ideal.map (Ideal.Quotient.mkₐ B I') J`という`mkₐ`の形なので
+`Ideal.quotientEquivAlgOfEq`で`mk`の形へ橋渡しする)と
+`MvPolynomial.sumAlgEquiv`(元から`≃ₐ[B]`)を使う。
+
+配管の注意: `Ideal.map (Ideal.Quotient.mkₐ B I') J`の`IsTwoSided`
+インスタンスは、係数環が入れ子の`MvPolynomial`のとき自動では見つからない
+——`letI : CommRing (MvPolynomial n B)`と
+`letI : CommRing (MvPolynomial Unit (MvPolynomial n B))`を先に登録する
+(`tools/lean-idioms.md`の`#40`と同型)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem localization_away_quotient_mvPolynomial_flat_algEquiv (B : Type) [CommRing B]
+    (n : Type) [Fintype n] (κ₀ : Type) [Fintype κ₀]
+    (q₀ : κ₀ → MvPolynomial n B) (p : MvPolynomial n B)
+    (S : Type) [CommRing S] [Algebra (MvPolynomial n B ⧸ Ideal.span (Set.range q₀)) S]
+    [IsLocalization.Away (Ideal.Quotient.mk (Ideal.span (Set.range q₀)) p) S]
+    [Algebra B S] [IsScalarTower B (MvPolynomial n B ⧸ Ideal.span (Set.range q₀)) S] :
+    Nonempty (S ≃ₐ[B] MvPolynomial (Unit ⊕ n) B ⧸ Ideal.span (Set.range
+        (Sum.elim (fun k => MvPolynomial.rename Sum.inr (q₀ k))
+          (fun _ : Unit => MvPolynomial.rename Sum.inr p * MvPolynomial.X (Sum.inl ()) - 1)))) := by
+  obtain ⟨e0⟩ := localization_away_quotient_mvPolynomial_algEquiv B n (Ideal.span (Set.range q₀)) p S
+  letI hCRn : CommRing (MvPolynomial n B) := inferInstance
+  letI hCRUn : CommRing (MvPolynomial Unit (MvPolynomial n B)) := inferInstance
+  set I := Ideal.span (Set.range q₀) with hI
+  set I' := Ideal.map MvPolynomial.C I with hI'def
+  set J := Ideal.span {MvPolynomial.C p * MvPolynomial.X () - 1} with hJdef
+  have hmkₐ : Ideal.map (Ideal.Quotient.mk I') J = Ideal.map (Ideal.Quotient.mkₐ B I') J := by
+    rw [Ideal.map, Ideal.map, Ideal.Quotient.mkₐ_eq_mk]
+  set e1 : ((MvPolynomial Unit (MvPolynomial n B) ⧸ I') ⧸ Ideal.map (Ideal.Quotient.mk I') J) ≃ₐ[B]
+      MvPolynomial Unit (MvPolynomial n B) ⧸ I' ⊔ J :=
+    (Ideal.quotientEquivAlgOfEq B hmkₐ).trans (DoubleQuot.quotQuotEquivQuotSupₐ B I' J) with he1
+  set e2 := MvPolynomial.sumAlgEquiv B Unit n with he2
+  have hI'span : I' = Ideal.span (Set.range (fun k => MvPolynomial.C (q₀ k))) := by
+    rw [hI'def, hI, Ideal.map_span]
+    congr 1
+    exact (Set.range_comp _ _).symm
+  have hJ : I' ⊔ J = Ideal.span (Set.range (fun k => MvPolynomial.C (q₀ k)) ∪
+      {MvPolynomial.C p * MvPolynomial.X () - 1}) := by
+    rw [hI'span, hJdef, Ideal.span_union]
+  have he2symC : ∀ x : MvPolynomial n B, e2.symm (MvPolynomial.C x) = MvPolynomial.rename Sum.inr x := by
+    intro x
+    have h := congrFun (congrArg DFunLike.coe (MvPolynomial.sumAlgEquiv_comp_rename_inr B Unit n)) x
+    simp only [AlgHom.comp_apply, AlgEquiv.coe_algHom, IsScalarTower.coe_toAlgHom',
+      MvPolynomial.algebraMap_eq] at h
+    rw [← h, he2, AlgEquiv.symm_apply_apply]
+  have he2symX : e2.symm (MvPolynomial.X () : MvPolynomial Unit (MvPolynomial n B)) =
+      MvPolynomial.X (Sum.inl ()) := by
+    have h := congrFun (congrArg DFunLike.coe (MvPolynomial.sumAlgEquiv_comp_rename_inl B Unit n))
+      (MvPolynomial.X ())
+    simp only [AlgHom.comp_apply, AlgEquiv.coe_algHom, MvPolynomial.mapAlgHom_apply,
+      MvPolynomial.map_X, MvPolynomial.rename_X] at h
+    rw [← h, he2, AlgEquiv.symm_apply_apply]
+  have hEq : Ideal.span (Set.range
+        (Sum.elim (fun k => MvPolynomial.rename Sum.inr (q₀ k))
+          (fun _ : Unit => MvPolynomial.rename Sum.inr p * MvPolynomial.X (Sum.inl ()) - 1))) =
+      Ideal.map (e2.symm : MvPolynomial Unit (MvPolynomial n B) →ₐ[B] MvPolynomial (Unit ⊕ n) B)
+        (I' ⊔ J) := by
+    rw [hJ, Ideal.map_span, Set.Sum.elim_range]
+    congr 1
+    rw [Set.image_union, Set.image_singleton, Set.range_const]
+    have himg1 : (e2.symm : MvPolynomial Unit (MvPolynomial n B) →ₐ[B] MvPolynomial (Unit ⊕ n) B) ''
+        Set.range (fun k => MvPolynomial.C (q₀ k)) =
+        Set.range (fun k => MvPolynomial.rename Sum.inr (q₀ k)) := by
+      rw [← Set.range_comp]
+      congr 1
+      funext k
+      exact he2symC (q₀ k)
+    have himg2 : (e2.symm : MvPolynomial Unit (MvPolynomial n B) →ₐ[B] MvPolynomial (Unit ⊕ n) B)
+        (MvPolynomial.C p * MvPolynomial.X () - 1) =
+        MvPolynomial.rename Sum.inr p * MvPolynomial.X (Sum.inl ()) - 1 := by
+      show e2.symm (MvPolynomial.C p * MvPolynomial.X () - 1) = _
+      rw [map_sub, map_mul, map_one, he2symC, he2symX]
+    rw [himg1, himg2]
+  exact ⟨e0.trans (e1.trans (Ideal.quotientEquivAlg _ _ e2.symm hEq))⟩
+
+open scoped Classical in
+/-- **`flat_algEquiv`を「イデアルが別の形で与えられている」場合へ橋渡し**
+——呼び出し側(`ExtLimit.lean`)では局所化の底のイデアルが
+`Ideal.map (MvPolynomial.map φ) I₀`という形で与えられており、
+インスタンス(`Algebra`・`IsLocalization.Away`・`IsScalarTower`)も
+その形で付いている。`rw`はゴールしか書き換えないためインスタンス側と
+食い違ってしまうので、イデアルを変数`Iq`として受け取り、
+`Iq = Ideal.span (Set.range q₁)`という等式を仮定して`subst`する形に
+しておく——こうすると呼び出し側は等式を1本渡すだけで済む。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem localization_away_quotient_mvPolynomial_flat_algEquiv_of_eq (B' : Type) [CommRing B']
+    (ι : Type) [Fintype ι] (κ₀ : Type) [Fintype κ₀]
+    (Iq : Ideal (MvPolynomial ι B')) (q₁ : κ₀ → MvPolynomial ι B')
+    (hIq : Iq = Ideal.span (Set.range q₁)) (p : MvPolynomial ι B')
+    (S : Type) [CommRing S] [Algebra (MvPolynomial ι B' ⧸ Iq) S]
+    [IsLocalization.Away (Ideal.Quotient.mk Iq p) S]
+    [Algebra B' S] [IsScalarTower B' (MvPolynomial ι B' ⧸ Iq) S] :
+    Nonempty (S ≃ₐ[B'] MvPolynomial (Unit ⊕ ι) B' ⧸ Ideal.span (Set.range
+        (Sum.elim (fun k => MvPolynomial.rename Sum.inr (q₁ k))
+          (fun _ : Unit => MvPolynomial.rename Sum.inr p * MvPolynomial.X (Sum.inl ()) - 1)))) := by
+  subst hIq
+  exact localization_away_quotient_mvPolynomial_flat_algEquiv B' ι κ₀ q₁ p S
+
 end ABC3.Found.CorrHyp

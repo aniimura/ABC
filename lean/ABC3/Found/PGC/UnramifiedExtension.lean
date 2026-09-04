@@ -157,4 +157,74 @@ theorem residueDegree_zero {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
   unfold residueDegree
   rw [(Nat.card_congr (IsLocalRing.ResidueField.mapEquiv (adjoinIntegersZeroEquiv K)).toEquiv).symm]
 
+/-! ## 拡大体の整数環の分岐理論への地ならし
+
+`adjoinIntegers K x`は、実は**拡大体`K.carrier⟮x⟯`に同じ`𝒪[...]`記法を
+適用したものと`rfl`で一致する**(実測済み)——これにより`Valued`系の
+mathlib機構がそのまま使える。以下はその活用で、mathlibの分岐理論
+(`Ideal.ramificationIdx_mul_inertiaDeg_of_isLocalRing`、基本等式
+`e·f=[L:K]`)を`𝒪[K.carrier]→adjoinIntegers K x`に適用するために要る
+instanceを順に埋めていく作業(Hensel's lemmaの自作——mathlibの
+`ℤ_[p]`版は約450行——を回避する筋)。 -/
+
+/-- **拡大体`K.carrier⟮x⟯`の付値は非自明**——`p`の像のノルムが`1`未満
+(`norm_natCast_p_lt_one`+`norm_algebraMap'`)かつ`0`でない
+(`Valuation.ne_zero_iff`+標数`0`)ことから。基礎体では
+`(rankOne K).toIsNontrivial`が自動的に見つかるが、拡大体では
+instance探索が届かないため明示的に構成する。 -/
+theorem isNontrivial_valued_adjoin {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))] :
+    (Valued.v (R := IntermediateField.adjoin K.carrier ({x} : Set K.closure))).IsNontrivial := by
+  haveI : CharZero K.carrier := charZero_of_injective_algebraMap (algebraMap ℚ_[p] K.carrier).injective
+  haveI : CharZero (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :=
+    charZero_of_injective_algebraMap
+      (algebraMap K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))).injective
+  have hpcast : ((p : ℕ) : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) =
+      algebraMap K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) ((p : ℕ) : K.carrier) := by
+    push_cast; rfl
+  have hnormlt : ‖((p : ℕ) : IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖ < 1 := by
+    rw [hpcast,
+      show ‖algebraMap K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) ((p : ℕ) : K.carrier)‖ =
+        ‖((p : ℕ) : K.carrier)‖ from
+        norm_algebraMap' (↥(IntermediateField.adjoin K.carrier ({x} : Set K.closure))) ((p : ℕ) : K.carrier)]
+    exact norm_natCast_p_lt_one K
+  constructor
+  refine ⟨((p : ℕ) : IntermediateField.adjoin K.carrier ({x} : Set K.closure)), ?_, ?_⟩
+  · rw [Valuation.ne_zero_iff]
+    exact_mod_cast (Nat.cast_ne_zero (R := IntermediateField.adjoin K.carrier ({x} : Set K.closure))).mpr
+      (Nat.Prime.ne_zero Fact.out)
+  · have hv : Valued.v ((p : ℕ) : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) =
+        ‖((p : ℕ) : IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖₊ := NNReal.eq rfl
+    rw [hv]
+    intro hcon
+    have hone : ‖((p : ℕ) : IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖ = 1 := by
+      have := congrArg NNReal.toReal hcon
+      simpa using this
+    rw [hone] at hnormlt
+    exact absurd hnormlt (lt_irrefl 1)
+
+/-- **`adjoinIntegers K x`は離散付値環**——基礎体での`valuationRing_isDVR`
+と同じ`Valued.integer.isDiscreteValuationRing_of_compactSpace`に、
+`compactSpace_adjoinIntegers`(既出)と上の`isNontrivial_valued_adjoin`
+を与えるだけ。これで`IsDedekindDomain (adjoinIntegers K x)`も従い、
+分岐理論の基本等式を使う準備の半分が整う(残るは
+`Module.Finite (𝒪[K.carrier]) (adjoinIntegers K x)`)。
+
+★配管(記録): `compactSpace_adjoinIntegers K x`は`CompactSpace
+(adjoinIntegers K x)`という形だが、補題側が要求するのは
+`CompactSpace 𝒪[K.carrier⟮x⟯]`——両者は`rfl`で一致するのに**instance
+探索は`def`の壁を越えられない**(`tools/lean-idioms.md` #23/#31 の
+類型)。`haveI : CompactSpace 𝒪[...] := compactSpace_adjoinIntegers K x`
+と**補題側の形で書いて`:=`で渡す**(defeqは`exact`が受け入れる)ことで
+解決する。 -/
+theorem isDiscreteValuationRing_adjoinIntegers {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))] :
+    IsDiscreteValuationRing (adjoinIntegers K x) := by
+  haveI : CompactSpace (𝒪[IntermediateField.adjoin K.carrier ({x} : Set K.closure)]) :=
+    compactSpace_adjoinIntegers K x
+  haveI := isNontrivial_valued_adjoin K x
+  exact Valued.integer.isDiscreteValuationRing_of_compactSpace
+    (K := IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+
 end ABC3.Found.PGC

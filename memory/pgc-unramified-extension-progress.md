@@ -197,6 +197,32 @@ K 0`(`IntermediateField.adjoin K.carrier {0}`上のSubringとして定義
    と`Module.Finite`)。これらが埋まれば`Ideal.ramificationIdx_mul_
    inertiaDeg_of_isLocalRing`(基本等式`e·f=[L:K]`)が使えるようになり、
    Hensel's lemmaを自作せずに不分岐拡大の理論を進められる見込み。
+
+   ★★★★2026-09-05(2つの障害のうち**1つを解消**、commit済み):
+   - **`isNontrivial_valued_adjoin`**(新規、sorry無し): 拡大体
+     `K.carrier⟮x⟯`の付値の非自明性。`p`の像のノルムが`1`未満
+     (`norm_natCast_p_lt_one`+`norm_algebraMap'`)かつ`0`でない
+     (`Valuation.ne_zero_iff`+標数`0`)ことから構成した。★鍵になった
+     発見: **`Valued.v y = ‖y‖₊`が`NNReal.eq rfl`で成り立つ**
+     (基礎体でも拡大体でも)——`NormedField.v_eq_valuation`経由の
+     `rw`は(instance経路の違いで)効かないが、この`rfl`一発で済む。
+   - **`isDiscreteValuationRing_adjoinIntegers`**(新規、sorry無し):
+     `adjoinIntegers K x`が離散付値環——基礎体の`valuationRing_isDVR`と
+     同じ`Valued.integer.isDiscreteValuationRing_of_compactSpace`に
+     `compactSpace_adjoinIntegers`(既出)と上を与えるだけ。これで
+     `IsDedekindDomain (adjoinIntegers K x)`も従う。
+     ★配管の罠(記録): `compactSpace_adjoinIntegers K x`は
+     `CompactSpace (adjoinIntegers K x)`という形だが補題側は
+     `CompactSpace 𝒪[K.carrier⟮x⟯]`を要求する——`rfl`で一致するのに
+     **instance探索は`def`の壁を越えられない**(lean-idioms #23/#31)。
+     `haveI : CompactSpace 𝒪[...] := compactSpace_adjoinIntegers K x`と
+     **補題側の形で書いて`:=`で渡す**ことで解決(defeqは`exact`が受ける)。
+
+   ⟹ **残る障害は`Module.Finite (𝒪[K.carrier]) (adjoinIntegers K x)`
+   ただ1つ**(`exact?`では見つからない——`adjoinIntegers K x`が
+   `𝒪[K.carrier]`の`K.carrier⟮x⟯`における整閉包であることを経由して
+   `IsIntegralClosure.finite`系の補題を使う筋が有力だが未着手)。
+   これが埋まれば分岐理論の基本等式が使える。
 2. 剰余体`F_q`の次数`n`拡大`F_{q^n}`を`GaloisField p (f*n)`
    (`hq:Fintype.card(ResidueField 𝒪_K)=p^f`から`p^{f*n}=q^n`)として
    具体的に構成し、その原始元の最小多項式(次数`n`、分離的)を
