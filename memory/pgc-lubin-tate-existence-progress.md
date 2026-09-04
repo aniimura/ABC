@@ -1,6 +1,6 @@
 ---
 name: pgc-lubin-tate-existence-progress
-description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——濃度の一致まで確立、残るは単射性/全射性(F_f の対数か Newton 法が要る)
+description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——濃度の一致まで確立、Galois 同変性の前提(spectralNorm の σ 不変性)も確立、残るは単射性/全射性(F_f の対数か Newton 法が要る)
 metadata:
   type: project
 ---
@@ -1648,3 +1648,34 @@ Distinguished_eq_zero`と同じ`Polynomial.hom_eval₂`橋渡しで
 (b) 軌道の濃度(`|(𝒪_K)^×の軌道|=|(𝒪_K)^×|/|安定化群|`)を安定化群の
 評価だけで`q^{n-1}(q-1)`に持ち上げられないか検討する(単射性を全射性
 無しで済ませられる可能性)、のいずれか。
+
+## 続報(2026-09-04、`norm_algEquiv_eq`、`AdjoinIntegers.lean`、
+commit `277510eb`): Galois同変性の前提を独立に確立
+
+単射性/全射性の3経路(`F_f`の形式逆元、Y-線形係数、Lubin-Tate対数)
+のどれを選ぶにせよ、いずれ`Gal(K.closure/K.carrier)`が`Λ_n`に
+どう作用するかという話に合流する。その最初の一歩として、**単射性/
+全射性の議論そのものとは独立に**、`σ:K.closure≃ₐ[K.carrier]
+K.closure`が`spectralNorm`の等長写像であること
+(`spectralNorm K.carrier K.closure (σ x) = spectralNorm K.carrier
+K.closure x`)を証明した——`norm_algEquiv_eq`。
+
+証明の骨子: `σ x`は`x`と同じ`minpoly K.carrier x`の根になる
+(`Polynomial.aeval_algHom_apply`で`aeval`とσの可換性を得てから
+`minpoly.aeval`で`0`に潰す)。mathlibの
+`spectralNorm.spectralMulAlgNorm_eq_of_mem_roots`(同じ最小多項式の
+根はすべて等しい`spectralMulAlgNorm`を持つ、一般に`K⊆L⊆E`の3層で
+書かれている)を`E=L=K.closure`という退化した場合に適用すると、
+`algebraMap K.closure K.closure`が恒等写像になるので
+`spectralMulAlgNorm_def`で展開したあと`simp`だけで閉じる——
+`AlgEquiv.commutes'`のような一般の`E≠L`用の補題は不要だった
+(最初の試みではこれを使おうとして失敗した——退化ケース特有の罠)。
+
+このステップ自体は`a·x`(Lubin-Tate作用)に一切触れていない、純粋
+なノルムの話であり、単射性/全射性のどの経路を最終的に選んでも
+共通して要る土台になる。次の一歩は、これを使って`σ`が原始的な
+`ψ_n`の根の集合を保つこと(`spectralNorm`が保たれる⟹
+`spectralNorm_root_iteratedLubinTatePsi`の値が一致する⟹次数の
+一致から根の集合内に留まる、という筋)、そしてゆくゆくは
+`σ(a·x)=a·σ(x)`(Galois同変性)を、同じtruncation-limit手法で
+示すこと。
