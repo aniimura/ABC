@@ -851,3 +851,24 @@ mathlib既存の自然性補題3つを合成するだけで閉じた。
 (iii)貼り合わせ後の有限性確認、の3段階。
 
 コミット: `c9c711bd`(遷移射構成完成)・`fb049a13`(記録)。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報
+(GlueData組み立て戦略を簡略化、cocycle条件はmathlibの`gluedCover`を
+再利用できると判明、集計10/24で変わらず、新規sorry無し宣言は今回は
+無し)。`CategoryTheory.GlueData`の全フィールド(`t'`・`cocycle`等)を
+自前で証明しようとしたが、**mathlibの`Scheme.Cover.gluedCover :
+X.OpenCover → Scheme.GlueData`が既存のスキームの開被覆からのGlueData
+についてcocycleをすでに一般的に証明している**と判明。戦略:
+(1)`C`自身の開被覆を`Scheme.openCoverOfIsOpenCover`で作る、
+(2)`gluedCover`(cocycle自動)、(3)`piece_descends_iso`の同型族に沿って
+移送——移送されたGlueDataもcocycleを自動的に保つ(圏論の一般論)ので
+再検証不要。「t'・cocycleを自前で証明する」という最大の技術的負債が
+解消される見通し。
+
+続けて戦略の(1)(ring側の`PrimeSpectrum.basicOpen`被覆をscheme側の
+`X.basicOpen`被覆へ運ぶ)を試みたが、`⨆i∈t,X.basicOpen(f i)`と
+`⨆g:(f''t),X.basicOpen g`の同一視で`Γ(X,U)`関連の型がinstances透明度
+でtype-correctでなくなるという本セッションで繰り返す詰まりに再度当たり
+完成させられなかった——正直に未完了として記録、コミットはせず。
+
+コミット: `b661e01e`(戦略簡略化の記録)・`fd443564`(未完了の記録)。
