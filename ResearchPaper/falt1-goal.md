@@ -758,6 +758,38 @@ cohomology** `H^2(B/A,I)` の類を定め、これが `m` で零化される
 `subsingleton_H1Cotangent_self`・`polynomialKaehlerSplit`)は Theorem
 1.2 の帰納法でも再利用できる見込みがあり、**無駄になっていない**。
 
+★★★★2026-09-04、**§3・§4 の主張そのものを初めて実際に読んだ**
+(`lean/ABC3/Skeleton/Falt1/Section3.lean`・`Section4.lean`、既存の
+Interface posit を精読、新規の 260dpi 目視は不要——既にファイル内に
+逐語が写してあった)。これまで「§2 が Hochschild cohomology を要する
+ので恐らく §3・§4 も同様に重い」という**推測**だったが、今回**§3・§4
+自身の主張を具体的に確認**して評価を裏付けた:
+
+- **§3(Theorem 3.1・3.2、2項目)**: `S⊗_R R_∞` の正規化が `R_∞` の
+  almost étale covering であること——`Interface/Falt1/GoodReduction.lean`
+  の `GoodReductionSetup` が既に `AlmostEtaleSetup.isAlmostEtale`
+  (旧い posit 述語、**まだ `Found/Falt1/AlmostEtale.lean` の実際の
+  `IsAlmostEtaleCovering` に差し替えられていない**)を参照する形で
+  スケルトン化済み。証明そのものは Theorem 2.2-2.4(Hochschild
+  cohomology による持ち上げ)の結果を使う——**§2 の壁がそのまま
+  継承される**ことを確認した。
+- **§4(Theorem 4.1-4.3・4.5、5項目)**: `H^i(Δ,R̂)` という Galois
+  コホモロジー(`Δ` = Galois 群、`R̂` = 完備化された環)の計算、
+  スペクトル系列 `E_2^{a,b}=H^a(Δ,H^b(I,R̂))⇒H^{a+b}(Δ,R̂)` の
+  almost 退化、cup 積による Hodge-Tate 型の同型——これは**§2 より
+  さらに深い**、p進 Hodge 理論の核心部分そのもの(周期環の Galois
+  コホモロジー・スペクトル系列)。mathlib には(1)almost mathematics
+  だけでなく(2)この種の Galois コホモロジー計算の対象となる周期環
+  `R̂` の理論も存在しない——**2重に新規ライブラリ構築が要る**。
+
+★結論(確定・更新): §2-4 のブロッカーは**単一の Hochschild
+cohomology だけではなく**、§4 では独立にもう1段深い(周期環の
+Galois コホモロジー・スペクトル系列)理論を要することが**具体的に
+確認**できた——「推測」から「該当ページを読んで確認した事実」への
+格上げ。これで §2-4(11項目)全てについて、着手前の偵察は完了した
+と見なしてよい——次に必要なのは実際の mathlib 開発であり、この
+セッション規模の作業ではない。
+
 ## 1. 構造(2026-09-04 確定——旧版の3つの未確認点をすべて解消した)
 
 ★★**Chapter見出しは"CHAPTER"の語を伴わない裸のローマ数字**("I""II""III"
