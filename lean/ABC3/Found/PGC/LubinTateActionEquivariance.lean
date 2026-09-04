@@ -237,4 +237,209 @@ theorem coe_adjoinIntegersRestrictSelf
       (z : IntermediateField.adjoin K.carrier ({x} : Set K.closure))) : K.closure) = _
   rw [coe_algEquivRestrictSelf]
 
+/-- **`adjoinIntegersRestrictSelf`は`𝒪_K`-代数準同型**——加法・乗法・
+単位元・`algebraMap`との可換性は、いずれも`coe_adjoinIntegersRestrictSelf`
++`L`(`K.carrier⟮x⟯`)の中での`σ`自身の準同型性(`map_add`・`map_mul`
+等)に帰着するだけ。 -/
+noncomputable def adjoinIntegersRestrictSelfAlgHom
+    {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) (x : K.closure)
+    (hxψ : x ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn)
+    (hxn : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (σ : K.closure ≃ₐ[K.carrier] K.closure) :
+    adjoinIntegers K x →ₐ[𝒪[K.carrier]] adjoinIntegers K x where
+  toFun := adjoinIntegersRestrictSelf K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem σ
+  map_one' := by
+    apply Subtype.ext; apply Subtype.ext
+    rw [coe_adjoinIntegersRestrictSelf]; simp
+  map_mul' a b := by
+    apply Subtype.ext; apply Subtype.ext
+    rw [coe_adjoinIntegersRestrictSelf]
+    show σ (↑(↑(a * b) : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) = _
+    push_cast
+    rw [map_mul]
+    congr 1
+  map_zero' := by
+    apply Subtype.ext; apply Subtype.ext
+    rw [coe_adjoinIntegersRestrictSelf]; simp
+  map_add' a b := by
+    apply Subtype.ext; apply Subtype.ext
+    rw [coe_adjoinIntegersRestrictSelf]
+    show σ (↑(↑(a + b) : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) = _
+    push_cast
+    rw [map_add]
+    congr 1
+  commutes' c := by
+    apply Subtype.ext; apply Subtype.ext
+    rw [coe_adjoinIntegersRestrictSelf]
+    show σ (↑(↑((algebraMap (𝒪[K.carrier]) (adjoinIntegers K x)) c) :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) = _
+    rw [show (↑(↑((algebraMap (𝒪[K.carrier]) (adjoinIntegers K x)) c) :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) =
+        algebraMap K.carrier K.closure (c : K.carrier) from rfl]
+    rw [AlgEquiv.commutes]
+
+/-- `algEquivRestrictSelf`は連続——`K.carrier⟮x⟯`が`K.carrier`上
+有限次元なので、その上の`K.carrier`-線形自己写像は自動的に連続
+(`LinearMap.continuous_of_finiteDimensional`)、無限次元でありうる
+`K.closure`自身の連続性(`norm_algEquiv_eq`経由の等長性)を経由する
+必要すら無い。 -/
+theorem continuous_algEquivRestrictSelf
+    {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) (x : K.closure)
+    (hxψ : x ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn)
+    (hxn : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (σ : K.closure ≃ₐ[K.carrier] K.closure) :
+    Continuous (algEquivRestrictSelf K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem σ) :=
+  LinearMap.continuous_of_finiteDimensional
+    (algEquivRestrictSelf K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem σ).toLinearMap
+
+/-- `adjoinIntegersRestrictSelfAlgHom`も連続——`algEquivRestrictSelf`
+の連続性を`adjoinIntegers K x`の部分空間位相へ制限するだけ
+(`Continuous.subtype_mk`+`continuous_subtype_val`)。 -/
+theorem continuous_adjoinIntegersRestrictSelfAlgHom
+    {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) (x : K.closure)
+    (hxψ : x ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn)
+    (hxn : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (σ : K.closure ≃ₐ[K.carrier] K.closure) :
+    Continuous (adjoinIntegersRestrictSelfAlgHom K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem σ) := by
+  apply Continuous.subtype_mk
+  exact (continuous_algEquivRestrictSelf K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem σ).comp
+    continuous_subtype_val
+
+/-- `adjoinIntegersRestrictSelfAlgHom σ`は`x`自身を位相的冪零な点へ
+写す——`σ(x)`も`Λ_n`の元(Galoisが`Λ_n`を保つ、既出)であること
+から、`hasEval_mem_adjoinIntegers_of_mem_iteratedLubinTateTorsionPoints`
+と同じ議論。`lubinTateActionAtAlgEquivPoint`の評価が well-defined
+であるために要る。 -/
+theorem hasEval_adjoinIntegersRestrictSelfAlgHom_mk
+    {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) (x : K.closure)
+    (hxψ : x ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn)
+    (hxn : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (σ : K.closure ≃ₐ[K.carrier] K.closure) :
+    PowerSeries.HasEval (adjoinIntegersRestrictSelfAlgHom K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem σ
+      (⟨⟨x, hmem⟩, mem_adjoinIntegers_of_mem_iteratedLubinTateTorsionPoints
+        K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem⟩ : adjoinIntegers K x)) := by
+  apply tendsto_pow_atTop_nhds_zero_of_norm_lt_one
+  show spectralNorm K.carrier K.closure
+    (↑(↑(adjoinIntegersRestrictSelf K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem σ
+      (⟨⟨x, hmem⟩, mem_adjoinIntegers_of_mem_iteratedLubinTateTorsionPoints
+        K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem⟩ : adjoinIntegers K x)) :
+      IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) < 1
+  rw [coe_adjoinIntegersRestrictSelf]
+  exact spectralNorm_lt_one_of_mem_iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n (σ x)
+    (algEquiv_mem_iteratedLubinTateTorsionPoints_of_mem K hq hπmax hπne0 f hf0 hf1 hf n σ x hxn)
+
+/-- **`a`を`σ(x)`で評価したもの——`x`自身の座標系(`adjoinIntegers
+K x`)の中だけで計算する**。`adjoinIntegers K (σx)`という別の環を
+一切構築しない——`σ(x)`を`adjoinIntegersRestrictSelfAlgHom σ`で
+`x`自身の環の中の1点として表現し、そこで`[a]_f`を評価するだけ。 -/
+noncomputable def lubinTateActionAtAlgEquivPoint
+    {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) (x : K.closure)
+    (hxψ : x ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn)
+    (hxn : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (σ : K.closure ≃ₐ[K.carrier] K.closure) (a : 𝒪[K.carrier]) : adjoinIntegers K x :=
+  haveI := completeSpace_adjoinIntegers K x
+  haveI := isLinearTopology_adjoinIntegers K x
+  haveI := continuousSMul_adjoinIntegers K x
+  PowerSeries.aeval
+    (hasEval_adjoinIntegersRestrictSelfAlgHom_mk K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem σ)
+    (LubinTateAction hq hπmax f hf0 hf1 hf a)
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**Galois同変性そのもの**: `σ(a·x) = a·σ(x)`(右辺は
+`lubinTateActionAtAlgEquivPoint`——`x`自身の座標系で計算した値)。
+`algHom_aeval_powerSeries_comm`(`PowerSeriesAevalComm.lean`、
+連続な代数準同型は`aeval`と可換)を`adjoinIntegersRestrictSelfAlgHom`
+に適用するだけ——これで`adjoinIntegers K x`と`adjoinIntegers
+K (σx)`という異なる2つの環を橋渡しする「cross-point instance
+bridging」を一切経由せず、Galois同変性が確立された。 -/
+theorem algEquiv_lubinTateActionAtTorsionPoint_comm
+    {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) (x : K.closure)
+    (hxψ : x ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn)
+    (hxn : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (σ : K.closure ≃ₐ[K.carrier] K.closure) (a : 𝒪[K.carrier]) :
+    σ (↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem a) :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) =
+      (↑(↑(lubinTateActionAtAlgEquivPoint K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem σ a) :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) := by
+  haveI := completeSpace_adjoinIntegers K x
+  haveI := isLinearTopology_adjoinIntegers K x
+  haveI := continuousSMul_adjoinIntegers K x
+  have hkey := algHom_aeval_powerSeries_comm
+    (adjoinIntegersRestrictSelfAlgHom K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem σ)
+    (continuous_adjoinIntegersRestrictSelfAlgHom K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem σ)
+    (LubinTateAction hq hπmax f hf0 hf1 hf a)
+    (hasEval_mem_adjoinIntegers_of_mem_iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem)
+    (hasEval_adjoinIntegersRestrictSelfAlgHom_mk K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem σ)
+  have hcoe := coe_adjoinIntegersRestrictSelf K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem σ
+    (lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem a)
+  rw [← hcoe]
+  exact congrArg (fun z : adjoinIntegers K x =>
+    (↑(↑z : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure)) hkey
+
 end ABC3.Found.PGC
