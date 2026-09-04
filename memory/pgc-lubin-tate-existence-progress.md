@@ -316,6 +316,14 @@ residue`から従う非零性のみで、Weierstrass標準分解そのものはm
 Distinguished`)。これは古典的な`D_n(X)=X・φ_n(X)`(`φ_n`が原始
 `π^n`-捩れ点を統べる多項式)という構造の出発点。
 
+**続報(2026-09-04、節目(3)への第五歩——`φ_n:=D_n/X`の次数は`q^n-1`)**:
+`D_n=X・φ_n`(`X∣D_n`から選択関数で抽出、`iteratedLubinTateDistinguished_
+eq_X_mul_primitive`)を確立し、`D_n`・`φ_n`ともモニックであること
+(`monic_iteratedLubinTateDistinguished`・`monic_iteratedLubinTate
+Primitive`)、★`φ_n`の次数は`q^n-1`(`natDegree_iteratedLubinTate
+Primitive`、`natDegree_mul`+両辺非零)を示した。古典的理論で`φ_n`の根
+が非零な`π^n`-捩れ点`Λ_n\{0}`を統べることの由来になる事実。
+
 **残る作業**: 節目(3)torsion点の構成本体(`D_n`の根を`Λ_n`として定義、
 `𝒪_K`加群構造、`K(Λ_n)/K`の完全分岐性)、節目(4)
 `L_n:=K(Λ_n)`が完全分岐かつ`Gal(L_n/K)≅(𝒪_K/π^n)^×`(Lubin-Tateの
