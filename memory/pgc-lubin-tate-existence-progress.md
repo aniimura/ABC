@@ -195,12 +195,26 @@ order`と`MvPowerSeries.order`はdefeq」という前回の見積りが誤りだ
 手続き部分すべて**(可除性・両側線形化・1ステップ・出発点・近似列)が
 sorry無しで完成した。
 
-**残る作業**: この列の極限`φ_∞`を構成し関数等式`f.subst(φ_∞)=
-φ_∞.subst(g)`をexactに満たすことを示す最後の1段(2変数版のLubinTateLimit.
-leanと同型だが1変数へ作り直す)、torsion点の構成、Galois作用を経由した
-相互律写像の構成——pGC の各項目(Prop 1.2・Cor 1.3・Prop 2.1・Prop 2.2・
-Theorem 4.2)を閉じるには、なお相互律写像そのものの構成・性質証明という
-大きな仕事が残っている。
+**続報(2026-09-04、★★★★★★★★節目(1)完成——𝒪_K作用への拡張の1変数
+存在定理そのものがsorry無しで完成)**: `Found/PGC/LubinTateEndoLimit.lean::
+LubinTateEndo_functional_equation`——近似列`φSeq_endo`の極限
+`LubinTateEndo`を構成し、関数等式`f.subst(LubinTateEndo)=LubinTateEndo.
+subst(g)`(`f(φ(X))=φ(g(X))`)をexactに満たすことを証明した。2変数版
+`LubinTateF`(存在補題本体)と完全に並行する議論(係数の安定性・g側/f側
+の安定性・最終的な関数等式)。副産物として`constantCoeff_LubinTateEndo=0`・
+`coeff_one_LubinTateEndo=a`(出発点のパラメータ`a`が実際に次数1係数として
+実現されること)も確立した。★★★★★★★★これで**𝒪_K作用への拡張(節目1、
+a↦[a]_fの存在)は1変数存在定理そのものが完全にsorry無しで完成した**
+——可除性・両側線形化・1ステップ・出発点・近似列・極限という全工程が
+揃った。前回(§9-1340)確立した通り、自己準同型性`F_f([a]X,[a]Y)=
+[a]F_f(X,Y)`(節目2)はこの`LubinTateEndo`と`mvPowerSeries_uniqueness`
+から既存の道具だけで形式的に出る見込み。
+
+**残る作業**: 節目(2)の仕上げ(g:=f・a:=変数として`[a]_f:=LubinTateEndo`
+を実際に定義し自己準同型性を確立)、節目(3)torsion点の構成、節目(4)〜(6)
+Galois作用を経由した相互律写像の構成——pGC の各項目(Prop 1.2・Cor 1.3・
+Prop 2.1・Prop 2.2・Theorem 4.2)を閉じるには、なお相互律写像そのものの
+構成・性質証明という大きな仕事が残っている。
 
 詳細な発見の経緯は `ResearchPaper/blocked-leaves.json` の
 `[pGC] Proposition 1.2 / ... —— 局所類体論の相互律` エントリの
