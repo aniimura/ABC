@@ -738,7 +738,17 @@ mathlib での正確な組み立て方は未確認)。
     Wₙ`・`Module.Finite Wₙ Wₙ₊₁`・`IsScalarTower V0 Wₙ Wₙ₊₁` 等)を
     実際に組み立てて `cancel_conductor_delta` を適用する——これが
     3b・3c を実際に閉じる最終組み立てとして残っている。
-4. ★★★★★2026-09-04、**完成した**(`delta_tendsto_zero`、commit
+
+    ★★★2026-09-04、**`φ0` 自体も完成した**(`fractionRingMapOfInjective`・
+    `fractionRingMapOfInjective_algebraMap`、commit `fb2396c6`)——
+    `IsFractionRing.map`(mathlib)+ `IsLocalization.map_eq` +
+    `IsScalarTower.algebraMap_apply` で、`algebraMap V0 Wₙ` が単射
+    という1つの仮定だけから `φ0:FractionRing V0→+*FractionRing Wₙ` と
+    その `V0` 上の algebraMap との両立を得た。これで
+    `algHomAdjoinRootOfCompat`(前段)に実際に渡す `φ0`・`hφ0` の
+    両方が揃った——**base change 写像の構成は完全に完成**、残る
+    作業は上記の「`π'` が引き続き Eisenstein であることの仮定の
+    もとでの多項式の一致」と「フル仮説束の組み立て」のみ。
    `a9faa64e`)。長さの漸化不等式(上の逐語引用の通り: `δ_n-δ_{n+1}≥
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
