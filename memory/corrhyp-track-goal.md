@@ -830,3 +830,24 @@ glueMorphisms`(既存スキームへの比較射構成)の枠組みが対応す�
 具体的な構成(`IsOpenImmersion`のrestrict機構)。
 
 コミット: `e72e98f3`(発見の記録)。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報
+(GlueDataの遷移射構成が完成——「捩れ」の壁を今度は完全に迂回できた、
+集計10/24で変わらず)。前回の発見(抽象的な環同型は不要、
+`piece_descends_iso`の制限で足りるはず)を実際に構成し切った。
+`Scheme.hom_image_iso_eq_inv_preimage`(スキーム同型`e:X≅Z`で
+`e.hom''ᵁW=e.inv⁻¹ᵁW`)・`exists_transitionOpen_eq_basicOpen`
+(重なり`X.basicOpen(f₁·f₂)`が`X.basicOpen f₁`とその候補片`Z`の任意の
+同型`e`の下で`Z`の基本開集合として実現される)を`ExtLimit.lean`に
+完成(★すべてsorry無し)——`Scheme.basicOpen_res`・`Scheme.Opens.
+ι_image_basicOpen_topIso_inv`・`Scheme.preimage_basicOpen`という
+mathlib既存の自然性補題3つを合成するだけで閉じた。
+
+**これでGlueDataの遷移射構成の核心部品が完成した**——2つの標準エタール
+片をそれぞれの候補片へ写したとき、両方とも同じ`X`内の開集合を経由する
+ので、遷移射は各々の同型のこの記述を合成するだけで得られ、抽象的な
+環レベルの独立検証は本当に不要だった。残るのは(i)複数片を横断した
+実際の組み立て(`Scheme.GlueData`)、(ii)cocycle条件の確認、
+(iii)貼り合わせ後の有限性確認、の3段階。
+
+コミット: `c9c711bd`(遷移射構成完成)・`fb049a13`(記録)。
