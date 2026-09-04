@@ -1100,6 +1100,51 @@ mathlib での正確な組み立て方は未確認)。
     版**として立ちはだかっている——次回はこの「二重の diamond
     解消」(`FractionRing.liftAlgebra` との一致 + `V0→Wₙ₊₁` の
     2つの経路の一致)から始めるのが最短距離と見込む。
+
+    ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、**`hsep` を完全に
+    解決した**(`falt1_hsep_bundled`、`KaehlerAux.lean`、commit
+    `cd7a95ec`、`lake build`・`#print axioms` 確認済み・sorry 無し)。
+    上で「もう1段の diamond」と呼んでいた懸念——`algebraMap V0 Wₙ₊₁`
+    (標準経路)と `φ`(`AdjoinRoot gK` 経由の経路)が一致するか——は
+    実は**`rfl` で即座に解消する**ことが判明した(`Wₙ₊₁ =
+    integralClosure Wₙ (AdjoinRoot gK)` への代入が `Subalgebra` の
+    値そのものなので、`Subtype.val` の展開が両辺で完全に一致する)。
+    残る本体は次の二段構成:
+    (1) V0-level: `hinjV0Wn1`(`V0→Wₙ₊₁` の単射性、`Polynomial.
+    map_dvd_map` 経由の`hinjV0Wn`から)→ `FaithfulSMul V0 (FractionRing
+    Wₙ₊₁)`(`faithfulSMul_iff_algebraMap_injective`)→ `letI :=
+    FractionRing.liftAlgebra V0 (FractionRing Wₙ₊₁)` で mathlib
+    純正の instance を得る(`IsScalarTower V0 (FractionRing
+    V0)(FractionRing Wₙ₊₁)` は`infer_instance`で自動的に出る)。
+    (2) Wₙ-level でも全く同じパターンを1段繰り返す(`FaithfulSMul Wₙ
+    (FractionRing Wₙ₊₁)` → `letI := FractionRing.liftAlgebra Wₙ
+    (FractionRing Wₙ₊₁)`)——ここから `FractionRing Wₙ₊₁ ≃ₐ[Wₙ₊₁]
+    AdjoinRoot gK`(`IsLocalization.algEquiv`)を`Wₙ`のscalar
+    でも可換にする(`e_Wn1.commutes` + 上記`rfl`)ことで
+    `Algebra.IsSeparable (FractionRing Wₙ)(FractionRing Wₙ₊₁)` を
+    `hsepAdjoin`(`AdjoinRoot gK`側、既存)から移送する
+    (`AlgEquiv.ofRingEquiv` + `AlgEquiv.Algebra.isSeparable_iff`)。
+    最後に `IsScalarTower (FractionRing V0)(FractionRing
+    Wₙ)(FractionRing Wₙ₊₁)`(2つの `FractionRing.liftAlgebra`
+    instance 間の両立性、`IsScalarTower.of_algebraMap_eq'` +
+    `IsLocalization.ringHom_ext (nonZeroDivisors V0)` で pointwise に
+    `IsScalarTower.algebraMap_apply` を繋いで示す)を経て
+    `Algebra.IsSeparable.trans` で `(FractionRing V0)→(FractionRing
+    Wₙ)→(FractionRing Wₙ₊₁)` を1本に繋いだ。
+    ★パッケージング上の教訓(新規): `theorem` の**戻り値の型**
+    (ここでは結論)の中で `FractionRing.liftAlgebra V0 (...)` を
+    直接使おうとすると、型検査の時点(証明本体に入る前)で
+    `FaithfulSMul`・`Fact (Irreducible gK)` 等の instance が要求され、
+    シグネチャ側だけでは間に合わない(または `whnf`/`isDefEq` が
+    数十秒〜timeoutする)。**`Σ' (inst : Algebra ...), Algebra.
+    IsSeparable ... inst` で instance そのものを戻り値として束ね、
+    `theorem` ではなく `def`(戻り値が `Type`)にする**ことで、
+    シグネチャの型検査が instance 検索を一切要求しない形になり、
+    問題が消えた(`lean-idioms.md` に追記候補)。
+    これで `differentIdeal_tower_diamond` の**20/20 instance が
+    全て揃った**——次回はこの `falt1_hsep_bundled` の `.1`・`.2` を
+    上記19-instance の組み立てに接続し、`differentIdeal_tower_diamond`
+    を実際に1回呼び出して diamond 等式そのものを得ることが最短距離。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・

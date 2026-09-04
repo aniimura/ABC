@@ -3692,3 +3692,26 @@ transparency level, which may have triggered the failure.
 ("no goals")として現れるので、その`unfold …; rfl`を消せばよい。
 実例: `lean/ABC3/Found/CorrHyp/ExtLimit.lean`の`gdV`・`gdF`
 (コミット`e41d967e`)。
+
+## 戻り値の型が特定の`Algebra`instanceを直接使う`theorem`は型検査の
+## 時点で詰まる——`Σ'`で instance ごと束ねて`def`にする(2026-09-04)
+
+**症状**: `theorem foo ... : @Algebra.IsSeparable R A _ _
+(FractionRing.liftAlgebra ...) := by ...`のように、**戻り値の型**
+(結論)の中で`FractionRing.liftAlgebra`(または他の`[FaithfulSMul ...]`
+等の非自明な instance を要求する構成子)を直接使うと、証明本体
+(`by ...`)に入る**前**——シグネチャそのものの型検査の時点——で
+`FaithfulSMul`・`Fact (Irreducible ...)`等の instance 検索が走る。
+シグネチャの仮定だけではこれらを満たせない場合、
+`failed to synthesize instance` や(仮に満たせても)`whnf`/`isDefEq`
+の timeout(数十秒〜)に化ける。`mcp__abc3-lean__lean_check`の
+断片テストでは(仮定を後から`haveI`で足せてしまうので)気付きにくい。
+
+**直し方**: 結論を`Σ' (inst : Algebra R A), @Algebra.IsSeparable R A _ _
+inst`のように、**instance そのものを戻り値として束ねる**
+(`Prop`ではなく`Type`になるので`theorem`ではなく`noncomputable def`
+にする)。こうすると`inst`は単なる束縛変数になり、シグネチャの型検査は
+instance 検索を一切要求しない。呼び出し側は`.1`を`letI`で登録すれば
+`.2`がその instance に対する証明として使える。
+実例: `falt1_hsep_bundled`(`Found/Falt1/KaehlerAux.lean`、
+コミット`cd7a95ec`)。
