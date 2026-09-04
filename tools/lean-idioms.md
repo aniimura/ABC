@@ -3487,6 +3487,26 @@ has type ... but is expected to have type Algebra.Etale ...` という、
 必ず明示的に渡す(`Etale.etale_appLE α hU hV le_rfl`)。
 実例: `lean/ABC3/Found/CorrHyp/ExtLimit.lean` の `Etale.algebraEtale_appLE`。
 
+## 25. 第22項の追加教訓——型を合わせるための再束縛は `have` ではなく
+`set`(型注釈つき)でやる(2026-09-04)
+
+第22項の「`have h' : <明示的に展開した型> := h` で defeq チェックに
+迂回する」という技を、`pullback.hom_ext` に渡す2つの射(`m`・`n`、
+`Functor.const`/`extDiagram.obj` 越しの非簡約な型を持つ)に適用しようと
+したところ、`have hmty : <明示型> := m` という束縛**自体は通る**のに、
+直後に `exact hm'`(`hm' : m ≫ ... = ...`、`m` について述べた既存の証明)
+を `hmty ≫ ... = ...` の証明として使おうとすると型不一致になった——
+`have` は(`Prop` では証明無関係性で問題にならないが)**`Type`(ここでは
+`Hom`)の値については中身を消してしまう**(`let`/`set` と違い透明ではない)
+ため、`hmty` と `m` が同じ値であることを後続の項が使えない。
+
+**How to apply**: 型注釈つきで再束縛したい対象が `Prop` の証明ではなく
+**データ(`Hom` 等の `Type` の項)**のときは、`have x : T := v` ではなく
+**`set x : T := v with hx`** を使う(`hx : x = v` が付き、かつ `x` は
+`v` に対して透明)。実例: `lean/ABC3/Found/CorrHyp/ExtLimit.lean` の
+`extConePi_app_eq`(`m`/`n` を `set ... : <明示型> := ... with h` で
+束縛してから `pullback.hom_ext` に渡した)。
+
 ## 25. `PUnit`(引数無しの型パラメータ)を補助的に使う定義を `Type*` 化すると、
 `PUnit` 自身の宇宙だけが解決不能なメタ変数として残る(2026-09-04)
 

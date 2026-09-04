@@ -918,3 +918,33 @@ Spec (S ⊗[R] T)`——アフィン同士の pullback がテンソル積の Spe
 Γ(V_j,V_j) ⊗_R K` を得る——`extConePi_app_fst`/`_snd`(`ExtLimit.lean`
 既存)がこの pullback square の脚をすでに与えているはずなので、
 そこから `IsPullback` の四角を組み立てる作業になる。まだ書いていない。
+
+### 2026-09-04さらに続報: 「`Ext X` の射影 = 有限段階への base change」を完成 ★★★★★
+
+上記の残作業のうち、**pullback square の存在そのもの**を完成させた
+(`ExtLimit.lean`、`extConePi_app_eq`、★sorry無し・標準3公理のみ)。
+
+鍵は mathlib の `CategoryTheory.Limits.pullbackLeftPullbackSndIso`
+(`pullback (pullback.snd f g) g' ≅ pullback f (g' ≫ g)`、pullback の
+pasting)——`f := X.hom`・`g := (toSchemeDiagramOver.obj R).hom`・
+`g' := phiR R`(`Spec K → Spec R` の遷移射、`specKCone` の射影)とおき、
+`phiR R ≫ (toSchemeDiagramOver.obj R).hom = toBaseK`(`phiR_comp`、
+`specKConeOver` の cone 条件そのもの、`isLimit_specKConeOver` の証明が
+特定の代表元 `R0` だけで使っていた事実の一般形)で右辺を `toBaseK`
+に付け替えると(`pullback.congrHom`)、**`Ext X` の台 = 有限段階 `R`
+のファイバー積 `P_R` を `Spec K → Spec R` に沿って base change したもの**
+という同型 `extConeIso` が得られる。さらに**`extConePi X .app R`
+(`Ext X` の `R` への射影)が、この同型の下で「`P_R` への射影」そのもの**
+であること(`extConePi_app_eq`)を、`extConePi_app_fst`/`_snd`(定義)と
+`pullback.hom_ext` の照合で示した。
+
+配管の教訓(`tools/lean-idioms.md` 第25項に追記): 第22項の「`have h' :
+<明示型> := h` で defeq を迂回する」技を **`Type` の値(`Hom`)**に適用する
+ときは `have` ではなく **`set`(型注釈つき)** を使う必要がある——`have`
+は`Prop`では問題にならないが、`Type`の値の中身を後続の項から見えなく
+してしまうため。
+
+**これで「1アフィン片の降下」に必要な純粋に幾何学的な部分が完成した**
+——残るのは `pullbackSpecIso`(mathlib既存)を`V_j`(アフィン)に適用して
+`Γ(U_j,U_j) ≅ Γ(V_j,V_j) ⊗[R] K` という**環レベルの結論**を引き出す
+最後の一手(`extConeIso`の`V_j`への制限、まだ未着手)。

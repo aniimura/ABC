@@ -515,4 +515,110 @@ theorem Etale.algebraEtale_appLE {C Y : Scheme} (α : C ⟶ Y) [IsFinite α] [Et
   have hV : IsAffineOpen (α ⁻¹ᵁ U) := IsAffineHom.isAffine_preimage U hU
   exact Etale.etale_appLE α hU hV le_rfl
 
+/-! ## `Ext X` の台を、有限段階でのbase changeとして特定する
+
+`Lemma 4.1` の「1アフィン片の降下」に要る最後の鍵——`Ext X`(=`extCone X`
+の頂点)の有限段階 `R` への射影 `(extConePi X).app R` が、**まさに
+`Spec K → Spec R` に沿った base change の射影そのもの**であることを示す。
+これにより `V ⊆ (extDiagram X).obj R` がアフィンなら、`Γ(preimage of V,
+preimage of V)` が `pullbackSpecIso`(mathlib既存)経由で `Γ(V,V) ⊗[R] K`
+と書けるようになる——`standardEtalePairRingBaseChange`(`FieldLimit.lean`)
+を実際に適用するための土台。 -/
+
+/-- `pullback.congrHom` の `.hom` と `pullback.fst`/`pullback.snd` の関係
+(`.inv` 版の `congrHom_inv` から)——mathlib に `.hom` 版が無かったので補う。 -/
+theorem pullback_congrHom_hom_fst {C : Type*} [CategoryTheory.Category C]
+    [CategoryTheory.Limits.HasPullbacks C] {X Y Z : C} {f₁ f₂ : X ⟶ Z} {g₁ g₂ : Y ⟶ Z}
+    (h₁ : f₁ = f₂) (h₂ : g₁ = g₂) :
+    (Limits.pullback.congrHom h₁ h₂).hom ≫ Limits.pullback.fst f₂ g₂ =
+      Limits.pullback.fst f₁ g₁ := by
+  rw [← Iso.eq_inv_comp, Limits.pullback.congrHom_inv, Limits.pullback.lift_fst, Category.comp_id]
+
+/-- `pullback_congrHom_hom_fst` の snd 版。 -/
+theorem pullback_congrHom_hom_snd {C : Type*} [CategoryTheory.Category C]
+    [CategoryTheory.Limits.HasPullbacks C] {X Y Z : C} {f₁ f₂ : X ⟶ Z} {g₁ g₂ : Y ⟶ Z}
+    (h₁ : f₁ = f₂) (h₂ : g₁ = g₂) :
+    (Limits.pullback.congrHom h₁ h₂).hom ≫ Limits.pullback.snd f₂ g₂ =
+      Limits.pullback.snd f₁ g₁ := by
+  rw [← Iso.eq_inv_comp, Limits.pullback.congrHom_inv, Limits.pullback.lift_snd, Category.comp_id]
+
+/-- `Spec K → Spec R`(有限段階 `R` への遷移射)——`specKCone ℚ ℝ` の
+射影そのもの。 -/
+noncomputable def phiR (R : (FgSubalgebra ℚ ℝ)ᵒᵖ) : specK ⟶ (toSchemeDiagramOver.obj R).left :=
+  (specKCone ℚ ℝ).π.app R
+
+/-- `phiR R` は `toBaseK`(`Spec K → Spec ℚ`)を `Spec R` 経由で分解する
+——`specKConeOver`(`Over BaseK` の中のcone)の `.w` そのもの、任意の `R`
+で成り立つ(`isLimit_specKConeOver` の証明が `R0` という特定の代表元
+だけで使っていたのと同じ事実の一般形)。 -/
+theorem phiR_comp (R : (FgSubalgebra ℚ ℝ)ᵒᵖ) :
+    phiR R ≫ (toSchemeDiagramOver.obj R).hom = toBaseK :=
+  (specKConeOver.π.app R).w
+
+/-- **`Ext X` の台は、有限段階 `R` のファイバー積 `(extDiagram X).obj R`
+を `Spec K → Spec R` に沿って base change したものに同型**——
+`pullbackLeftPullbackSndIso`(mathlib、pullback の pasting)を
+`phiR_comp` で `toBaseK` に付け替えるだけ。 -/
+noncomputable def extConeIso (X : Over BaseK) (R : (FgSubalgebra ℚ ℝ)ᵒᵖ) :
+    Limits.pullback (pullback.snd X.hom (toSchemeDiagramOver.obj R).hom) (phiR R) ≅
+      Limits.pullback X.hom toBaseK :=
+  (pullbackLeftPullbackSndIso X.hom (toSchemeDiagramOver.obj R).hom (phiR R)) ≪≫
+    pullback.congrHom rfl (phiR_comp R)
+
+/-- **`extConePi X .app R`(`Ext X` の `R` への射影)は、`extConeIso` の
+下で「`P_R` への射影」そのもの**——`Lemma 4.1` の「1アフィン片の降下」
+構成の核となる事実。`extConePi_app_fst`/`_snd`(定義そのもの)を
+`pullback.hom_ext` で照合するだけだが、`m`/`n` の型を `set` で明示的に
+`pullback X.hom toBaseK ⟶ pullback X.hom (toSchemeDiagramOver.obj R).hom`
+に固定しておかないと `Functor.const`/`extDiagram.obj` の非簡約な展開で
+`pullback.hom_ext` が「instances 透明度で型が合わない」を起こす
+(`tools/lean-idioms.md` 第22項の教訓、`have` ではなく `set` で型注釈つきの
+束縛をするのが鍵——`have` は非 `Prop` の値を消してしまうので後段で `rw`
+できなくなる、という追加の教訓も得た)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem extConePi_app_eq (X : Over BaseK) (R : (FgSubalgebra ℚ ℝ)ᵒᵖ) :
+    (extConePi X).app R = (extConeIso X R).inv ≫
+      Limits.pullback.fst (pullback.snd X.hom (toSchemeDiagramOver.obj R).hom) (phiR R) := by
+  set m : Limits.pullback X.hom toBaseK ⟶ Limits.pullback X.hom (toSchemeDiagramOver.obj R).hom :=
+    (extConePi X).app R with hm
+  set n : Limits.pullback X.hom toBaseK ⟶ Limits.pullback X.hom (toSchemeDiagramOver.obj R).hom :=
+    (extConeIso X R).inv ≫
+      Limits.pullback.fst (pullback.snd X.hom (toSchemeDiagramOver.obj R).hom) (phiR R) with hn
+  have hm' : m ≫ pullback.fst X.hom (toSchemeDiagramOver.obj R).hom = pullback.fst X.hom toBaseK := by
+    rw [hm]; exact extConePi_app_fst X R
+  have hm'' : m ≫ pullback.snd X.hom (toSchemeDiagramOver.obj R).hom =
+      pullback.snd X.hom toBaseK ≫ phiR R := by
+    rw [hm]; exact extConePi_app_snd X R
+  have hn' : n ≫ pullback.fst X.hom (toSchemeDiagramOver.obj R).hom = pullback.fst X.hom toBaseK := by
+    rw [hn, Category.assoc]
+    have h1 : (extConeIso X R).hom ≫ pullback.fst X.hom toBaseK =
+        Limits.pullback.fst (pullback.snd X.hom (toSchemeDiagramOver.obj R).hom) (phiR R) ≫
+          pullback.fst X.hom (toSchemeDiagramOver.obj R).hom := by
+      show ((pullbackLeftPullbackSndIso X.hom (toSchemeDiagramOver.obj R).hom (phiR R)) ≪≫
+          pullback.congrHom rfl (phiR_comp R)).hom ≫ pullback.fst X.hom toBaseK = _
+      rw [Iso.trans_hom, Category.assoc, pullback_congrHom_hom_fst]
+      exact pullbackLeftPullbackSndIso_hom_fst X.hom (toSchemeDiagramOver.obj R).hom (phiR R)
+    rw [← h1, ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+  have hn'' : n ≫ pullback.snd X.hom (toSchemeDiagramOver.obj R).hom =
+      pullback.snd X.hom toBaseK ≫ phiR R := by
+    rw [hn, Category.assoc]
+    have hcond : Limits.pullback.fst (pullback.snd X.hom (toSchemeDiagramOver.obj R).hom) (phiR R) ≫
+        pullback.snd X.hom (toSchemeDiagramOver.obj R).hom =
+        Limits.pullback.snd (pullback.snd X.hom (toSchemeDiagramOver.obj R).hom) (phiR R) ≫ phiR R :=
+      Limits.pullback.condition
+    rw [hcond]
+    have h2 : (extConeIso X R).hom ≫ pullback.snd X.hom toBaseK =
+        Limits.pullback.snd (pullback.snd X.hom (toSchemeDiagramOver.obj R).hom) (phiR R) := by
+      show ((pullbackLeftPullbackSndIso X.hom (toSchemeDiagramOver.obj R).hom (phiR R)) ≪≫
+          pullback.congrHom rfl (phiR_comp R)).hom ≫ pullback.snd X.hom toBaseK = _
+      rw [Iso.trans_hom, Category.assoc, pullback_congrHom_hom_snd]
+      exact pullbackLeftPullbackSndIso_hom_snd X.hom (toSchemeDiagramOver.obj R).hom (phiR R)
+    rw [← h2, ← Category.assoc, ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+  have heq : m = n := by
+    apply pullback.hom_ext
+    · rw [hm', hn']
+    · rw [hm'', hn'']
+  rw [hm, hn]; exact heq
+
 end ABC3.Found.CorrHyp
