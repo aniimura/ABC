@@ -1,9 +1,11 @@
 import Mathlib.RingTheory.Kaehler.Basic
 import Mathlib.RingTheory.Kaehler.Polynomial
+import Mathlib.RingTheory.Kaehler.JacobiZariski
 import Mathlib.LinearAlgebra.Span.Basic
 import Mathlib.RingTheory.AdjoinRoot
 import Mathlib.RingTheory.DedekindDomain.Different
 import Mathlib.RingTheory.IsAdjoinRoot
+import Mathlib.RingTheory.Smooth.Basic
 
 /-!
 # [Falt1] Lemma 1.1 に向けた補助補題(`Found`、sorry 無し)
@@ -78,10 +80,15 @@ Module.length W (W ⧸ differentIdeal V W)` を得た——Lemma 1.1 の
    (余核の特定+それが長さの等式まで持ち上がること)が証明された。
 2. **単射性(Lemma 1.1 の本体の主張、第一完全列)**: `Ω_V ⊗_V W → Ω_W`
    (絶対微分、Z=絶対基底とする塔 Z→V→W への「第一完全列」)の単射性。
-   Faltings の議論は `Ω_{V[T]/Z} ≅ Ω_V⊗V[T]⊕V[T]dT` という直和分解と
-   f'(w) が非零因子であることを使うが、この直和分解の既製品も mathlib
-   に無い(`polynomialEquiv`・`mvPolynomialBasis` は自明底のみ)——
-   Lemma 1.1 の残り部分の中でも最も骨が折れそうな箇所。
+   ✅(2026-09-04 部分解消)Faltings の議論が使う直和分解
+   `Ω_{V[T]/Z} ≅ (V[T]⊗_VΩ_V) ⊕ V[T]dT` 自体は `polynomialKaehlerSplit`
+   として完成した(最難関だった箇所——`mapBaseChange` の単射性を
+   `H1Cotangent` の消滅から示す一般論`subsingleton_H1Cotangent_self`
+   を新たに証明した、下の節参照)。★まだ Lemma 1.1 本体には届いて
+   いない——残り: (a) `f'(w)` が `D_Z(f)` の直和分解での「`dT` 成分」
+   であることの明示計算、(b) `W` への base change、(c) 非零因子で
+   割っても他の直和成分の単射性は保たれるという初等的な議論、の
+   3ステップが未着手(下の節末尾に記録)。
 3. ✅(2026-09-04 解消)Falt1 の `V` は完備離散付値環——mathlib の
    `IsDiscreteValuationRing V`(`[IsDomain V]` 付き)は `IsDedekindDomain V`
    を自動で含意する(`infer_instance` で確認済み、PID⟹Dedekind経由)。
@@ -650,5 +657,108 @@ theorem falt1CokernelLengthEq {V K L W : Type*} [CommRing V] [IsDedekindDomain V
     (hw : Algebra.adjoin K ({(algebraMap W L) w} : Set L) = ⊤) :
     Module.length W Ω[W⁄V] = Module.length W (W ⧸ differentIdeal V W) :=
   LinearEquiv.length_eq (falt1CokernelIsoLinear w hint hadjoin hw)
+
+/-!
+## Lemma 1.1「単射性」への一歩(第一完全列の直和分解、完成、2026-09-04)
+
+Faltings の議論は塔 `Z → V → V[T] → W(=V[T]/(f))` を使い、`Ω_{V[T]/Z} ≅
+(V[T]⊗_VΩ_{V/Z}) ⊕ V[T]dT` という直和分解と `f'(w)` が非零因子であること
+から `Ω_V⊗_VW → Ω_W` の単射性を導く。★★この直和分解そのもの
+(`polynomialKaehlerSplit`)を今回 mathlib の道具だけで組み立てた——
+mathlib には**既製品が無かった**(`polynomialEquiv`・`mvPolynomialBasis`は
+`R[X]/R` の自明底のみで、2段の塔 `Z→V→V[T]` は扱わない)。
+
+鍵になった発見:
+1. `Function.Exact.splitSurjectiveEquiv`(`Algebra/Exact/Basic.lean`)——
+   完全列 `f,g` で `f` 単射・`g` にセクション `l` があれば
+   `N ≃ₗ[R] M × P` を直接与える既製品(探すまで知らなかった)。
+2. **`mapBaseChange` の単射性(一般の塔 `Z→V→V[T]` で常に成立)**:
+   `Algebra.H1Cotangent.exact_δ_mapBaseChange`(Jacobi-Zariski 完全列の
+   境界写像 `δ`)+ `Subsingleton (H1Cotangent V (Polynomial V))` から従う。
+   後者は mathlib に無かったので `subsingleton_H1Cotangent_self` として
+   一般に証明した(**`FormallySmooth R S` ⟹ `Subsingleton (H1Cotangent R S)`**
+   ——`S` 自身を「関係式 0 個の自明な presentation」`Extension.ofSurjective
+   (AlgHom.id R S)` とみなし、その `Cotangent` が `(⊥:Ideal S).Cotangent`
+   に一致して自明であることと `equivH1CotangentOfFormallySmooth` を貼り
+   合わせた)。`Polynomial V` は `FormallySmooth V (Polynomial V)`
+   (mathlib に既製品`Algebra.Extension.Algebra.FormallySmooth.polynomial`)
+   なので直ちに使える。
+3. **`g`(`Ω_{V[T]/Z}→Ω_{V[T]/V}`)のセクション**: `polynomialEquiv V :
+   Ω_{V[T]/V}≃ₗ[V[T]]V[T]` と `D_Z(T)` から `y ↦ (polynomialEquiv V y)•D_Z(T)`
+   という明示的な `V[T]`-線形写像を作り、`map_D`(自然性)で
+   セクションであることを直接計算で確認した。
+
+★これは Lemma 1.1 の単射性の**最難関の前提**(直和分解そのもの)だが、
+Lemma 1.1 本体にはまだ届いていない——残る作業(未着手):
+(a) `f'(w)` が `D_Z(f)` の「`dT` 成分」であることの明示計算
+    (`polynomialKaehlerSplit` の下で `D_Z(f)` を書き下す)、
+(b) `W` への base change(`V[T]⊗_{V[T]}W = W` 経由で直和分解を `W` に
+    移す)、(c) 「自由な直和成分に非零因子で割ると他の成分の単射性は
+    保たれる」という初等的だが未証明の議論。これらは (a)(b)(c) の
+    3ステップとして構造は見えているが、まだ1行も書いていない。
+-/
+
+theorem subsingleton_H1Cotangent_self {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
+    [Algebra.FormallySmooth R S] : Subsingleton (Algebra.H1Cotangent R S) := by
+  have h1 : Subsingleton (Algebra.Extension.ofSurjective (AlgHom.id R S) Function.surjective_id).H1Cotangent := by
+    have hcot : Subsingleton (Algebra.Extension.ofSurjective (AlgHom.id R S) Function.surjective_id).Cotangent := by
+      show Subsingleton (RingHom.ker (algebraMap
+        (Algebra.Extension.ofSurjective (AlgHom.id R S) Function.surjective_id).Ring S)).Cotangent
+      have hker : RingHom.ker (algebraMap
+          (Algebra.Extension.ofSurjective (AlgHom.id R S) Function.surjective_id).Ring S) = ⊥ := by
+        show RingHom.ker (algebraMap S S) = ⊥
+        simp [RingHom.ker_eq_bot_iff_eq_zero]
+      rw [hker]
+      have hsurj := (⊥ : Ideal S).toCotangent_surjective
+      constructor
+      intro a b
+      obtain ⟨a', rfl⟩ := hsurj a
+      obtain ⟨b', rfl⟩ := hsurj b
+      congr 1
+      exact Subsingleton.elim a' b'
+    exact Subsingleton.intro (fun a b => Subtype.ext (Subsingleton.elim a.1 b.1))
+  haveI : Algebra.FormallySmooth R
+      (Algebra.Extension.ofSurjective (AlgHom.id R S) Function.surjective_id).Ring := by
+    show Algebra.FormallySmooth R S; infer_instance
+  exact (Algebra.Extension.equivH1CotangentOfFormallySmooth
+    (Algebra.Extension.ofSurjective (AlgHom.id R S) Function.surjective_id)).symm.injective.subsingleton
+
+/-- 塔 `Z → V → V[T]` に対し、`mapBaseChange`(`V[T]⊗_VΩ_{V/Z}→Ω_{V[T]/Z}`)は
+常に単射(`V→V[T]` が多項式拡大であることから、`H1Cotangent V (Polynomial V)`
+が自明になるため)。 -/
+theorem mapBaseChange_injective_polynomial {Z V : Type*} [CommRing Z] [CommRing V] [Algebra Z V] :
+    Function.Injective (KaehlerDifferential.mapBaseChange Z V (Polynomial V)) := by
+  haveI := subsingleton_H1Cotangent_self (R := V) (S := Polynomial V)
+  rw [← LinearMap.ker_eq_bot]
+  have hex := Algebra.H1Cotangent.exact_δ_mapBaseChange Z V (Polynomial V)
+  rw [LinearMap.exact_iff] at hex
+  rw [hex, eq_bot_iff]
+  rintro y ⟨x, rfl⟩
+  simp [Subsingleton.elim x 0]
+
+/-- **Falt1 Lemma 1.1 の「第一完全列」直和分解(完成)**: `Ω_{V[T]/Z} ≅
+(V[T]⊗_V Ω_{V/Z}) × V[T]`(`dT` 方向を素朴な直積の第二成分として表す)。
+`mapBaseChange_injective_polynomial`(単射性)と、`polynomialEquiv` から
+作った明示的なセクション(`Function.Exact.splitSurjectiveEquiv` に渡す)
+を貼り合わせた。 -/
+noncomputable def polynomialKaehlerSplit (Z V : Type*) [CommRing Z] [CommRing V] [Algebra Z V] :
+    Ω[(Polynomial V)⁄Z] ≃ₗ[Polynomial V]
+      (TensorProduct V (Polynomial V) Ω[V⁄Z]) × Polynomial V := by
+  have hl : (KaehlerDifferential.map Z V (Polynomial V) (Polynomial V)) ∘ₗ
+      (LinearMap.smulRight (KaehlerDifferential.polynomialEquiv V).toLinearMap
+        (KaehlerDifferential.D Z (Polynomial V) Polynomial.X)) = LinearMap.id := by
+    apply LinearMap.ext
+    intro y
+    show (KaehlerDifferential.map Z V (Polynomial V) (Polynomial V))
+      ((KaehlerDifferential.polynomialEquiv V y) • (KaehlerDifferential.D Z (Polynomial V) Polynomial.X)) = y
+    rw [map_smul]
+    have hmapD := KaehlerDifferential.map_D Z V (Polynomial V) (Polynomial V) Polynomial.X
+    rw [show algebraMap (Polynomial V) (Polynomial V) Polynomial.X = Polynomial.X from rfl] at hmapD
+    rw [hmapD, ← KaehlerDifferential.polynomialEquiv_symm]
+    exact (KaehlerDifferential.polynomialEquiv V).symm_apply_apply y
+  set e := (Function.Exact.splitSurjectiveEquiv (KaehlerDifferential.exact_mapBaseChange_map Z V (Polynomial V))
+    (mapBaseChange_injective_polynomial (Z := Z) (V := V))
+    ⟨_, hl⟩).1
+  exact e.trans (LinearEquiv.refl (Polynomial V) _ |>.prodCongr (KaehlerDifferential.polynomialEquiv V))
 
 end ABC3.Found.Falt1
