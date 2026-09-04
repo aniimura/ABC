@@ -685,6 +685,32 @@ mathlib での正確な組み立て方は未確認)。
     V0 V1) = Ideal.map(...) (span{n·w^{n-1}})`)に対して実際に
     代入・検証する接続作業(3b と 3c を本当に繋ぐ最後の1ピース)、
     および上記(a)(V_n 再帰族)・(c)(`pushoutKaehlerSplit` との接続)。
+
+    ★★★★★★2026-09-04、**`hspan_eq` 接続の具体的な設計図が見えた**
+    (未着手・次回の最有力候補)。`differentIdeal_tower_diamond` の
+    `Wₙ→Wₙ₊₁` 側を、`Vₙ→Vₙ₊₁`(=今回の `V0→V1`)と**同じ多項式
+    `X^n-π` を `Wₙ` へ base change したもの**で作れば
+    (`Wₙ₊₁ := integralClosure Wₙ (AdjoinRoot((X^n-C π).map(V0→Wₙ→
+    Frac(Wₙ))))`)、`hspan_eq` に必要な「`x`(`Wₙ₊₁` の生成元)の
+    `algebraMap V1 Wₙ₊₁` による `w` の像との一致」は、**今セッション
+    の前半で作った `adjoinRootTensorEquiv`**(`C⊗[R]AdjoinRoot g
+    ≃ₐ[C] AdjoinRoot(g.map(algebraMap R C))`、`pushoutKaehlerSplit`
+    のために構築したもの)を `R:=V0`・`C:=Frac(Wₙ)`・`g:=fK` で適用
+    すれば**ほぼ自動的に従う**——`w⊗1` の像が `AdjoinRoot` 側の
+    `root(fK.map(...))` に対応するという、`adjoinRootTensorEquiv` の
+    定義性質そのもの。つまり **`Wₙ₊₁` 側の全ての情報
+    (Dedekind・単項生成・differentIdeal の値)も、`differentIdeal_
+    eq_span_of_adjoinRoot_X_pow_sub_C` 系の3定理を**そのまま
+    `V0` の代わりに `Wₙ` に適用するだけ**で再利用できる**(3定理は
+    すでに一般の `[IsDiscreteValuationRing V0]` に対して書いてある
+    ので、`Wₙ` が DVR でありさえすれば即座に適用できる)。
+    残るのは(i)`Wₙ` が DVR で `algebraMap V0 Wₙ π` が引き続き
+    prime・非自乗であること(`Wₙ/V0` が今考えている素での不分岐、
+    という自然な仮定)を明示的な仮説として立てること、
+    (ii)`adjoinRootTensorEquiv` の像が `integralClosure` の元として
+    振る舞うことの橋渡し(`IsIntegral` が base change で保たれる、
+    という一般に易しいはずの事実)、の2点——(ii)は次回最初に
+    着手するのに適した、比較的小さい補題だと見込む。
 4. ★★★★★2026-09-04、**完成した**(`delta_tendsto_zero`、commit
    `a9faa64e`)。長さの漸化不等式(上の逐語引用の通り: `δ_n-δ_{n+1}≥
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
