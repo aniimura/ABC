@@ -1844,4 +1844,69 @@ theorem eisenstein_X_pow_sub_C_irreducible_map {R K : Type*} [CommRing R] [IsDom
     Polynomial.monic_X_pow_sub_C π hn.ne'
   exact (hmonic.irreducible_iff_irreducible_map_fraction_map (K := K)).mp hirr
 
+/-- `AdjoinRoot f` は `f` が monic既約かつ分離的なら分離拡大——
+`IntermediateField.isSeparable_adjoin_simple_iff_isSeparable`
+(根 `x` で生成される中間体が分離的 ⟺ `x` が分離的)と
+`IntermediateField.adjoin_root_eq_top`(その中間体が `⊤`)を貼り合わせる。 -/
+theorem algIsSeparable_adjoinRoot_of_separable {K : Type*} [Field K] (f : Polynomial K) [Fact (Irreducible f)]
+    (hmonic : f.Monic) (hsep : f.Separable) : Algebra.IsSeparable K (AdjoinRoot f) := by
+  have hne0 : f ≠ 0 := (Fact.out : Irreducible f).ne_zero
+  have hminpoly : minpoly K (AdjoinRoot.root f) = f * Polynomial.C f.leadingCoeff⁻¹ :=
+    AdjoinRoot.minpoly_root hne0
+  rw [hmonic.leadingCoeff, inv_one, Polynomial.C_1, mul_one] at hminpoly
+  have hrootsep : IsSeparable K (AdjoinRoot.root f) := by
+    show (minpoly K (AdjoinRoot.root f)).Separable
+    rw [hminpoly]; exact hsep
+  have h1 := (IntermediateField.isSeparable_adjoin_simple_iff_isSeparable K (AdjoinRoot f)).mpr hrootsep
+  rw [IntermediateField.adjoin_root_eq_top f] at h1
+  haveI := h1
+  exact AlgEquiv.Algebra.isSeparable (e := IntermediateField.topEquiv (F := K) (E := AdjoinRoot f))
+
+/-!
+## Theorem 1.2・3c: `V_1` の構成が完成した(2026-09-04)
+
+falt1-goal.md に記録した戦略転換(`Vₙ₊₁ := integralClosure Vₙ L`、
+`AdjoinRoot` 自体の整閉性は証明しない)を、実際に「非常に分岐した」
+族の最初の1段(`X^n-π` 型の Eisenstein 拡大)に対して**最後まで
+実行し、sorry 無しで完成させた**——`integralClosure.isDedekindDomain_
+fractionRing`(instance)が要求する `FiniteDimensional`・`Algebra.
+IsSeparable` を含む全ての条件を、上で構築した部品
+(`eisenstein_X_pow_sub_C_irreducible_map`・`Polynomial.
+separable_X_pow_sub_C`・`algIsSeparable_adjoinRoot_of_separable`・
+`Polynomial.Monic.finite_adjoinRoot`)だけで満たせることを確認した。
+局所化・付値延長という mathlib の薄い領域は一切不要だった。 -/
+
+/-- **「非常に分岐した」`V_n` 族の1段の構成が Dedekind であることの
+証明**: `V_0` が Dedekind、`π` が `(π)` を非自乗な素イデアルとして
+生成し、`n` が `Frac(V_0)` で可逆(標数が `n` を割らない)なら、
+`X^n-π` の根を添加した `Frac(V_0)` の拡大体の(`V_0` における)整閉包
+は Dedekind 整域になる。`V_n → V_{n+1}` の1段分の具体的なモデル。 -/
+theorem isDedekindDomain_integralClosure_adjoinRoot_X_pow_sub_C
+    {V0 : Type*} [CommRing V0] [IsDedekindDomain V0] (π : V0) (n : ℕ)
+    (hn : (n : FractionRing V0) ≠ 0) (hπne0 : algebraMap V0 (FractionRing V0) π ≠ 0)
+    (hprime : (Ideal.span ({π} : Set V0)).IsPrime) (hnotsq : π ∉ (Ideal.span ({π} : Set V0)) ^ 2)
+    (hnpos : 0 < n) :
+    IsDedekindDomain (integralClosure V0
+      (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0))))) := by
+  have hirr : Irreducible (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map (algebraMap V0 (FractionRing V0))) :=
+    eisenstein_X_pow_sub_C_irreducible_map π n hnpos hprime hnotsq
+  haveI : Fact (Irreducible (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map (algebraMap V0 (FractionRing V0)))) := ⟨hirr⟩
+  have hmonicK : (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map (algebraMap V0 (FractionRing V0))).Monic :=
+    (Polynomial.monic_X_pow_sub_C π hnpos.ne').map _
+  have hmapeq : (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map (algebraMap V0 (FractionRing V0)))
+      = Polynomial.X ^ n - Polynomial.C (algebraMap V0 (FractionRing V0) π) := by simp
+  have hsepK : (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map (algebraMap V0 (FractionRing V0))).Separable := by
+    rw [hmapeq]; exact Polynomial.separable_X_pow_sub_C _ hn hπne0
+  haveI : Module.Finite (FractionRing V0)
+      (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map (algebraMap V0 (FractionRing V0)))) :=
+    hmonicK.finite_adjoinRoot
+  haveI : FiniteDimensional (FractionRing V0)
+      (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map (algebraMap V0 (FractionRing V0)))) :=
+    ‹Module.Finite _ _›
+  haveI : Algebra.IsSeparable (FractionRing V0)
+      (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map (algebraMap V0 (FractionRing V0)))) :=
+    algIsSeparable_adjoinRoot_of_separable _ hmonicK hsepK
+  infer_instance
+
 end ABC3.Found.Falt1
