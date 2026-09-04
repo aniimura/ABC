@@ -2408,6 +2408,58 @@ mathlib での正確な組み立て方は未確認)。
         `LinearEquiv.ofLinear`で自前に組み立て直す方が、
         instance変換の余地が無く安全かもしれない。
 
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05、
+      **原因を`LinearEquiv.piOptionEquivProd`のソース
+      (`Mathlib/LinearAlgebra/Pi.lean:527`)まで実際に読み、当たりを
+      さらに絞り込んだ**:
+      ```lean
+      def piOptionEquivProd {ι} {M : Option ι → Type*} [...] :
+          ((i : Option ι) → M i) ≃ₗ[R] M none × ((i : ι) → M (some i)) :=
+        { Equiv.piOptionEquivProd with map_add' := ...; map_smul' := ... }
+      ```
+      で、`Equiv.piOptionEquivProd`(`#print`で確認)の`invFun`は
+      `fun x a => Option.casesOn a x.1 x.2`——**`Option.elim`ではなく
+      `Option.casesOn`**を使っている。そこで`Option.casesOn`に
+      統一して(`motive`を明示して)再試行したが、**それでも同じ
+      `Type mismatch`が残った**——つまり`Option.elim`対`Option.
+      casesOn`という表面的な構文の違いが原因ではなかった。
+
+      さらに、`Fintype ι`・`DecidableEq ι`を含めて元の状況を完全に
+      再現した上でも「`(Option.casesOn none C F).carrier = C.carrier`」
+      という**型の等式そのもの**は単独では`rfl`で通ることを再確認
+      した。これは、**型レベルでは一致しているのに、`LinearEquiv`
+      として束ねると一致しなくなる**ことを意味する——`≃ₗ[B]`は
+      `Module B`インスタンスを暗黙に運ぶため、`TensorProduct C.carrier
+      B Ω[C.carrier/R]`の`AddCommMonoid`/`Module B`インスタンスが、
+      (a)私の文脈で直接得られる経路と(b)`piOptionEquivProd`内部で
+      `M none`として間接的に得られる経路とで、**型としては等しくても
+      instanceとしては異なる経路で解決されている**(instance
+      diamond)可能性が高い、という診断に至った。
+
+      **これは今回のセッション序盤に発見・解決した`AdjoinRoot`/
+      `Ideal.Quotient`のinstance diamond(`adjoinRootTensorEquivFwd`
+      節参照)と同種の構造の問題**であり、あのときと同じ処方箋
+      (「diamondと戦うのではなく、自前で新しい写像を組み立てて
+      diamondを経由しない」)が有効な見込みが高い——次回は
+      `piOptionEquivProd`を再利用しようとするのをやめ、`Equiv.
+      piOptionEquivProd`(型レベルの土台)の上に**自分の文脈の
+      instanceだけ**を使って`map_add'`/`map_smul'`を直接証明する、
+      という`adjoinRootTensorEquivFwd`と同じ戦略で組み立て直す
+      ことから始めるとよい。
+
+      ★実際にこの「自前で組み立て直す」経路を試みたところ(`refine
+      LinearEquiv.mk (toLinearMap := LinearMap.mk (AddHom.mk ...) ...)
+      ...`を1つの式で書く形)、依存的な`match`を含む式を1つの`refine`
+      に詰め込みすぎたことが原因と見られるuniverse制約の停留
+      (`stuck at solving universe constraint`)に遭遇した——
+      `adjoinRootTensorEquivFwd`のときのように**小さな`have`/`set`を
+      1つずつ積む**(1つの巨大な`refine`にしない)形へ分解すれば
+      解決できる見込みが高いが、このセッションでは完了できなかった。
+      次回はここ(`prodOptionPiEquivFresh`という仮の名で試作開始
+      済み)から、`toFun`・`map_add'`・`map_smul'`・`invFun`・
+      `left_inv`・`right_inv`を**別々の`have`として先に確立してから**
+      `LinearEquiv.mk`に渡す、という手順で再開すること。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
