@@ -565,3 +565,29 @@ Lubin-Tate理論の`|Λ_n|=q^n`(真の集合として)そのものが完全に�
 `[pGC] Proposition 1.2 / ... —— 局所類体論の相互律` エントリの
 `progress2026_09_04a`〜`j` に記録。[[padic-log-additivity-blocked]]・
 [[pgc-ramification-naturality-gap]] は同じ blocked エントリの別方向の前進。
+
+**続報(2026-09-04・続き、`Λ_n`を`Finset`として梱包)**: 上記の
+`card_roots_iteratedLubinTateDistinguished_map`(個数)・
+`nodup_roots_iteratedLubinTateDistinguished_map`(重複無し)を、実際に
+使いやすい`Finset`のレベルへ梱包した(同じ
+`LubinTateDistinguishedSeparable.lean`に追加、commit `1630ebdc`):
+
+- `iteratedLubinTateTorsionPoints`: `D_n`(`K.closure`へ写したもの)の
+  根の`Finset`(`Multiset.toFinset`、`Classical`で`DecidableEq`供給)
+- `card_iteratedLubinTateTorsionPoints`: `|Λ_n|=q^n`
+  (`Multiset.toFinset_card_of_nodup`で上記2定理から)
+- `zero_mem_iteratedLubinTateTorsionPoints`: `0∈Λ_n`
+  (`D_n`の定数項が`0`であることから`Polynomial.eval₂_at_zero`経由)
+- `iteratedLubinTateTorsionPoints_subset_of_le`: `n≤m`ならば`Λ_n⊆Λ_m`
+  (`D_n∣D_m`から`Polynomial.roots.le_of_dvd`で根の`Multiset`の包含が
+  出て、`Multiset.mem_of_le`で個々の元の所属に落とす)
+
+★命名の教訓: 当初`torsionPoints`という短い名前で書いたところ、
+`check.mjs`のG1検査(出典`.src`の検証)がバケット横断で宣言名を
+フラットに突き合わせるため、既存の無関係な
+`ABC3.Interface.GaloisRep.torsionPoints`(楕円曲線のn-捩れ点、`.src`
+付き)と名前が衝突し、「`torsionPoints.src`の中身を読めなかった」と
+いう偽陽性のNGが出た——`iteratedLubinTateTorsionPoints`へ改名して
+解消。この文脈で新しい短い名前(`torsionPoints`・`kernel`・`image`等
+プロジェクト内で使われがちな一般名)を付ける前に、`grep`で既存の
+`.src`付き宣言との衝突を確認するとよい。
