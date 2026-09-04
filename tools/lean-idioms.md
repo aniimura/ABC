@@ -3486,3 +3486,24 @@ has type ... but is expected to have type Algebra.Etale ...` という、
 を確認する**。明示引数が `[instance]` より前にあるなら、それを省略せず
 必ず明示的に渡す(`Etale.etale_appLE α hU hV le_rfl`)。
 実例: `lean/ABC3/Found/CorrHyp/ExtLimit.lean` の `Etale.algebraEtale_appLE`。
+
+## 25. `PUnit`(引数無しの型パラメータ)を補助的に使う定義を `Type*` 化すると、
+`PUnit` 自身の宇宙だけが解決不能なメタ変数として残る(2026-09-04)
+
+`MvPolynomial.uniqueAlgEquiv R σ : MvPolynomial σ R ≃ₐ[R] R[X]`(`[Unique σ]`)
+を経由して「単変数版」の同型を作る際、`σ := PUnit`(具体の `Type` = 宇宙 0)
+で書いている間は問題ないが、囲む定義の `R C` を `Type*`(宇宙変数化)に
+した瞬間、`PUnit` の宇宙が**それとは独立の**メタ変数 `?u.48` として残り、
+`declaration ... contains universe level metavariables` で失敗する——
+`R C` の宇宙をいくら具体化・注釈しても直らない(`PUnit` 自体の宇宙が
+別変数だから)。
+
+**How to apply**: `PUnit` を補助的な添字型として使う箇所では、
+`(PUnit : Type)`(または必要な宇宙を明示した `PUnit.{0}`)と**書いた
+その場で宇宙を固定する**。`σ` を暗黙引数に取る補題(`uniqueAlgEquiv`・
+`algebraTensorAlgEquiv` 等)を呼ぶときは `(σ := (PUnit : Type))` で
+明示すること。囲む定義の他の型変数(`R C`)を `Type*` にしても、
+`PUnit` の宇宙は他と無関係にずっと `Type` に固定されたままでよい
+——実際に混在させて(`R C : Type*` かつ `PUnit : Type`)問題なく
+`lean_check` が通ることを確認済み。
+実例: `lean/ABC3/Found/Falt1/KaehlerAux.lean` の `tensorPolynomialAlgEquiv`。
