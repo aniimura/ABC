@@ -699,4 +699,31 @@ noncomputable def piecePullbackIso (X : Over BaseK) (U : X.left.Opens) (hU : IsA
         pullbackHomIsoLeft hU.isoSpec (Spec.map (pieceRingHom X U hU)) toBaseK
     _ ≅ Spec (CommRingCat.of (Γ(X.left, U) ⊗[ℚ] ℝ)) := pullbackSpecIso ℚ Γ(X.left, U) ℝ
 
+/-- `Ext X` の `U`(`X.left` のアフィン開)由来のアフィン片はアフィン
+——`piecePullbackIso`の頂点が`IsIso`であることから。 -/
+theorem piece_isAffineOpen (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U) :
+    IsAffineOpen (pullback.fst X.hom toBaseK ⁻¹ᵁ U : ((ExtF.obj X).left).Opens) := by
+  show IsAffine (pullback.fst X.hom toBaseK ⁻¹ᵁ U : Scheme)
+  haveI : IsIso (piecePullbackIso X U hU).hom := (piecePullbackIso X U hU).isIso_hom
+  exact IsAffine.of_isIso (piecePullbackIso X U hU).hom
+
+/-- **`Ext X` へ有限エタールに写る `C` を、`X.left` のアフィン開 `U`
+由来のアフィン片へ制限すると、環レベルの `Algebra.Etale` になる**——
+`Etale.algebraEtale_appLE` を `piece_isAffineOpen` と組み合わせるだけ。
+`Lemma 4.1` の「1アフィン片の降下」で `exists_finite_standardEtaleCover`
+(`FieldLimit.lean`)を呼び出す直前の、スキーム→環の最後の接続点。
+残る一手(未着手): `Γ((ExtF.obj X).left, V)` を `piecePullbackIso` 経由
+で `Γ(U,U) ⊗[ℚ] ℝ`(`exists_fg_subalgebra_tensor_standardEtalePair_
+baseChange` が読む形)へ変換すること——`Scheme.ΓSpecIso` を介した
+環レベルの同型の輸送が要る。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem piece_algebraEtale (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U)
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α] :
+    letI V := (pullback.fst X.hom toBaseK ⁻¹ᵁ U : ((ExtF.obj X).left).Opens)
+    letI : Algebra Γ((ExtF.obj X).left, V) Γ(C, α ⁻¹ᵁ V) :=
+      (Scheme.Hom.appLE α V (α ⁻¹ᵁ V) le_rfl).hom.toAlgebra
+    Algebra.Etale Γ((ExtF.obj X).left, V) Γ(C, α ⁻¹ᵁ V) :=
+  Etale.algebraEtale_appLE α _ (piece_isAffineOpen X U hU)
+
 end ABC3.Found.CorrHyp
