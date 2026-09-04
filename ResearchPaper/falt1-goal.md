@@ -190,13 +190,30 @@ R C D B` という自然性(`tensorKaehlerEquiv_eq_map_mapBaseChange`、
 3a. **`pushoutKaehlerSplit` の `d+1` 項化**——`Fin (d+1)` 添字族
     `D : Fin (d+1) → Type*`(各 `R`-代数、`Algebra.IsPushout` の
     反復合成で `B := D 0 ⊗_R D 1 ⊗_R ⋯ ⊗_R D d` を構成)に対し
-    `Ω_{B/R} ≃ₗ[B] ⊕ᵢ (B ⊗_{D i} Ω_{D i/R})`。`TensorProduct.isPushout`
-    (mathlib、`Algebra R S T → IsPushout R S T (S⊗[R]T)` を自動的に
-    与える)を鍵に、`pushoutKaehlerSplit` を `ℕ` 上の帰納法で繰り返す
-    ——各段で `Algebra (D i) (B n)` の scalar tower を手で構成する
-    必要がある(`isScalarTower_of_algEquiv` と同じパターン)。
-    ★この段階では純粋にKähler微分の代数——`V_n`族そのものへの
-    依存は無い、汎用インフラとして先に作れる。
+    `Ω_{B/R} ≃ₗ[B] ⊕ᵢ (B ⊗_{D i} Ω_{D i/R})`。★この段階では純粋に
+    Kähler微分の代数——`V_n`族そのものへの依存は無い、汎用インフラ
+    として先に作れる。
+
+    ★★★★2026-09-04、**`d=2`(3項)の場合を最後まで実行し、帰納の
+    1ステップが機械的に閉じることを実証した**(`pushoutKaehlerSplit3`、
+    commit `d8341aab`)。`pushoutKaehlerSplit` を2回・
+    `TensorProduct.AlgebraTensorModule.cancelBaseChange`(「反復底変換
+    =直接底変換」)・`TensorProduct.prodRight`(テンソル積と直積の
+    可換性)の組み合わせで構成できた——`d+1` 項への一般化もこの2つの
+    道具の反復のみで閉じる見込みが実証された。`Algebra C0 B`・
+    `Algebra C1 B` とその `IsScalarTower` は(`pushoutKaehlerSplit`
+    自身と同じ流儀で)**仮定として明示的に渡す**必要がある——`B1`・`B`
+    を具体的な `TensorProduct` として書いた特殊化版は、宣言の**型
+    そのもの**が `Algebra.TensorProduct.rightAlgebra`(`abbrev`、
+    tools/lean-idioms.md #23)を要求するため別途書けないことも実測した
+    (使用箇所ごとに `letI := Algebra.TensorProduct.rightAlgebra` を
+    先に置いてから直接呼ぶ必要がある)。
+    次のセッションへ: `Fin (d+1)` 一般の帰納は、**型族を再帰的に
+    構成する**部分(`B : ℕ → Type*` を `TensorProduct` で再帰定義し、
+    各段の `CommRing`/`Algebra` インスタンスを同時に構成する)が
+    Lean4 では地雷("recursive Type-valued def with dependent
+    instances")——`structure RAlg (R) where carrier; [ring];[alg]`
+    のような Σ 束ねを検討すること(未着手)。
 3b. **`Ω_{V_{n+1}/V_n}⊗W_{n+1}` が `d+1` 個の巡回加群の直和という
     事実そのものを `V_n` 族の定義に接続**(3a の適用)。
 3c. **「非常に分岐した」`V_n` の族**そのものの形式化(具体例: `p^n`
