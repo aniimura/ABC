@@ -3388,3 +3388,30 @@ Y` のような「base change してまた元の圏に戻す」係数拡大そ�
 `Limits.pullback.map`/`IsPullback` の手作りに進む。実例:
 `lean/ABC3/Found/CorrHyp/SchemeFEt.lean` の `ExtF`/`extFEt`
 (`AlgebraicGeometry.Etale`/`IsFinite` の base change 安定性を利用)。
+
+## 22. `Cone`/`Cocone` の `naturality` フィールドを直接埋めると `Functor.const`
+の配管で詰まる——`NatTrans` を独立に作ってから束ねる(2026-09-04)
+
+`Cone D`(`D : J ⥤ C`)を構造体リテラル `{ pt := ..., π := { app := ...,
+naturality := ... } }` で直接組み立てるとき、`naturality` フィールドの型が
+`((Functor.const J).obj pt).map f ≫ π.app j' = π.app j ≫ D.map f`
+(`Functor.const` で包まれた形、実質 `𝟙 pt ≫ π.app j' = π.app j ≫ D.map f`)
+であるため、`pt` が `Limits.pullback`/`Over.mk` 等の「重い」項のとき、
+`𝟙 pt`・`π.app j` 等が「`instances` 透明度で型が合わない」で `rw`/`simp`/
+`show`/`congr 1` のどれもが詰まることがある——1箇所直しても**別の項で
+同じ症状が再発する**(`Over.mk` 単体の既知の罠より根が深い、複合的な配管)。
+
+**How to apply**: `Cone` の `π` を**直接埋めずに**、まず独立した
+`NatTrans ((Functor.const J).obj pt) D`(あるいは `D₁ ⟶ D₂` という
+関手間の自然変換)として構成する——`Functor.const` の包みが**そこにしか
+出てこない**ぶん配管が軽くなり、`show`(展開後の生の等式)+ 個々の補題
+(例: `pullback.lift_snd`)で素直に閉じることが多い。それでも `Cone`
+リテラルの `naturality` フィールド自体に埋め込む段でまた詰まるなら、
+`CategoryTheory.Limits.Cone.postcompose`(`NatTrans (D₁ ⟶ D₂) → Cone D₁ ⥤
+Cone D₂`)経由で `Cone` を**自動的に**変換する道を検討する——独立に作った
+`NatTrans` を `(Cone.postcompose η).obj s` に渡せば、`Cone` 側の
+naturality の再証明が不要になる(`rfl` で確認できることが多い)。
+実例: `lean/ABC3/Found/CorrHyp/ExtLimit.lean` の `extDiagram_map_snd`
+(独立補題)→ `extDiagramToSpecK`(独立 `NatTrans`、これは閉じた)。
+ただし `Cone` の**頂点側**(`π` の定義域が `(Functor.const J).obj pt`
+自体)をこの経路で完全に避けるのはまだ未解決——次の一手として残っている。
