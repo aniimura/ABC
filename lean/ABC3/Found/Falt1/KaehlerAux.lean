@@ -2593,4 +2593,60 @@ theorem falt1ModuleIsTorsionFreeWnWn1
   haveI := hL
   exact IsIntegralClosure.isTorsionFree Wn (AdjoinRoot gK)
 
+/-- **`V_1` は `V_0` 上有限**: `falt1ModuleFiniteWnWn1` と全く同じ議論
+(`AdjoinRoot.powerBasis'` + `falt1AdjoinRootEquivIntegralClosure`)を
+`V_0`・`f` に対して繰り返すだけ。 -/
+theorem falt1ModuleFiniteV0V1
+    {V0 : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0] (π : V0) (n : ℕ)
+    (hn : (n : FractionRing V0) ≠ 0) (hπne0 : algebraMap V0 (FractionRing V0) π ≠ 0)
+    (hprime : (Ideal.span ({π} : Set V0)).IsPrime) (hnotsq : π ∉ (Ideal.span ({π} : Set V0)) ^ 2)
+    (hnpos : 0 < n)
+    [IsDedekindDomain (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    [Module.IsTorsionFree V0 (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))] :
+    Module.Finite V0 (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0))))) := by
+  set f : Polynomial V0 := Polynomial.X ^ n - Polynomial.C π with hfdef
+  have hmonic : f.Monic := Polynomial.monic_X_pow_sub_C π hnpos.ne'
+  have e1 := falt1AdjoinRootEquivIntegralClosure π n hn hπne0 hprime hnotsq hnpos
+  have pb := AdjoinRoot.powerBasis' hmonic
+  haveI : Module.Finite V0 (AdjoinRoot f) := Module.Finite.of_basis pb.basis
+  exact Module.Finite.equiv e1.toLinearEquiv
+
+/-- **`V_1` は `V_0` 上捩れ無しであることは(instance 前提でなく)
+実際に導出できる**——`falt1ModuleIsTorsionFreeWnWn1` と全く同じ議論
+(`algebraMap V0 (AdjoinRoot fK)` の単射性 → `IsIntegralClosure.
+isTorsionFree`)を `V_0`・`fK` に対して繰り返すだけ。★これまでの
+多くの定理が `[Module.IsTorsionFree V0 (...)]` を**明示的な instance
+前提**として要求していたが、実は毎回この議論で導出可能だったと判明
+した(既存の証明済み定理群は変更しない——影響範囲を数える余裕が
+無いため今回は追加のみに留める)。 -/
+theorem falt1ModuleIsTorsionFreeV0V1
+    {V0 : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0] (π : V0) (n : ℕ)
+    (hprime : (Ideal.span ({π} : Set V0)).IsPrime) (hnotsq : π ∉ (Ideal.span ({π} : Set V0)) ^ 2)
+    (hnpos : 0 < n) :
+    Module.IsTorsionFree V0 (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0))))) := by
+  set f : Polynomial V0 := Polynomial.X ^ n - Polynomial.C π with hfdef
+  set fK : Polynomial (FractionRing V0) := f.map (algebraMap V0 (FractionRing V0)) with hfKdef
+  have hirr : Irreducible fK :=
+    eisenstein_X_pow_sub_C_irreducible_map π n hnpos hprime hnotsq
+  haveI : Fact (Irreducible fK) := ⟨hirr⟩
+  have hL : Module.IsTorsionFree V0 (AdjoinRoot fK) := by
+    have hinj : Function.Injective (algebraMap V0 (AdjoinRoot fK)) := by
+      rw [IsScalarTower.algebraMap_eq V0 (FractionRing V0) (AdjoinRoot fK)]
+      exact (algebraMap (FractionRing V0) (AdjoinRoot fK)).injective.comp
+        (IsFractionRing.injective V0 (FractionRing V0))
+    refine ⟨fun r hr => ?_⟩
+    have hr0 : r ≠ 0 := by
+      rintro rfl
+      exact zero_ne_one (hr.left (show (0:V0) * 0 = 0 * 1 by simp))
+    have hr0' : algebraMap V0 (AdjoinRoot fK) r ≠ 0 := fun h => hr0 (hinj (by rw [h, map_zero]))
+    intro x y hxy
+    simp only [Algebra.smul_def] at hxy
+    exact mul_left_cancel₀ hr0' hxy
+  haveI := hL
+  exact IsIntegralClosure.isTorsionFree V0 (AdjoinRoot fK)
+
 end ABC3.Found.Falt1
