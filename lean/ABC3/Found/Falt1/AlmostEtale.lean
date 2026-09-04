@@ -1707,4 +1707,101 @@ example (M : Type) [AddCommGroup M] :
   obtain ⟨w, hw⟩ := hAE.2.2.2.2 1 one_pos
   exact hochschild_ext_almost_zero 5 hAE hf0inj 1 w hw M k e
 
+/-! ## `Theorem 2.4(ii)` の群コホモロジー側——transfer 補題(2026-09-05)。
+
+`Theorem 2.4(ii)`(有限群`G`が`B`に作用し`B[1/p]/A[1/p]`が`G`を群とする
+Galois 被覆のとき、`m`は`B`-加群`M`(semilinear な`G`作用つき)の
+`H^i(G,M)`(`i>0`)を零化する)の証明は、Faltings 自身の言葉では
+「`m`が`A/tr_{B/A}(B)`を零化することを示せば十分」に帰着する——
+これは`remark_iii_trace_identity`・`trace_ideal_pow_mem_traceIdeal`
+(既証)そのもの。そこから先は**古典的な transfer(平均化)の議論**:
+`Σ_{g∈G}g(b) = c`を満たす`b∈B`があれば、`c`は`H^i(G,M)`を零化する
+(Galois の場合`tr_{B/A} = Σ_{g∈G}g`なので、remark(iii)の
+`p^ε ∈ tr_{B/A}(B)`がまさにこの形の`b`を与える)。
+
+以前のセッションで「mathlib の`groupCohomology`に一般の transfer
+定理(restriction-corestriction)が無い」ことを確認して壁として
+報告していたが、**必要なのは restriction-corestriction ではなく
+この特定の平均化の議論だけ**であり、それはコサイクルの水準で
+明示的に書ける。以下`H^1`・`H^2`(`Theorem 2.2`・`2.3`が使う次数)
+について、`Rep`の枠組みを経由しない自己完結な形で証明する
+(コサイクル条件は mathlib の`groupCohomology.mem_cocycles₁_iff`・
+`mem_cocycles₂_iff`と同じ規約、コバウンダリは`d₀₁`・`d₁₂`と同じ)。
+一般次数`i`への拡張は次回の課題。 -/
+
+/-- **`H^1`の transfer**: `M`が`B`-加群で`G`が`B`にも`M`にも作用し
+両立(semilinear)しているとき、任意の1-コサイクル`f`について
+`(Σ_{g∈G}g(b))•f`はコバウンダリ。したがって`Σ_{g∈G}g(b)`は
+`H^1(G,M)`を零化する。証明は`m := Σ_h (h(b))•f(h)`と置いて
+`g•m = m - (Σ_h h(b))•f(g)`を直接計算するだけ(コサイクル条件
+`f(gh) = f(g) + g•f(h)`と、和の`h ↦ gh`による並べ替え)。 -/
+theorem transfer_H1 {B M G : Type u} [CommRing B]
+    [Group G] [Fintype G] [MulSemiringAction G B]
+    [AddCommGroup M] [Module B M] [DistribMulAction G M]
+    (hsemi : ∀ (g : G) (b : B) (x : M), g • (b • x) = (g • b) • (g • x))
+    (b : B) (f : G → M) (hf : ∀ g h : G, f (g * h) = f g + g • f h) :
+    ∃ m : M, ∀ g : G, (∑ h : G, h • b) • f g = g • m - m := by
+  refine ⟨-(∑ h : G, (h • b) • f h), fun g => ?_⟩
+  have hgm : g • (∑ h : G, (h • b) • f h)
+      = (∑ h : G, (h • b) • f h) - (∑ h : G, h • b) • f g := by
+    rw [Finset.smul_sum]
+    have hterm : ∀ h : G, g • ((h • b) • f h) = ((g * h) • b) • (f (g * h) - f g) := by
+      intro h
+      rw [hsemi, ← mul_smul]
+      congr 1
+      rw [hf g h]
+      abel
+    rw [Finset.sum_congr rfl (fun h _ => hterm h)]
+    have hreindex : (∑ h : G, ((g * h) • b) • (f (g * h) - f g))
+        = ∑ h' : G, (h' • b) • (f h' - f g) :=
+      Fintype.sum_equiv (Equiv.mulLeft g) _ _ (fun h => rfl)
+    rw [hreindex]
+    simp only [smul_sub]
+    rw [Finset.sum_sub_distrib, ← Finset.sum_smul]
+  rw [smul_neg, hgm]
+  abel
+
+/-- **`H^2`の transfer**(`Theorem 2.2`の障害類が住む次数)。1-コチェイン
+`x(g) := Σ_k ((gk)(b))•f(g,k)`を作ると`(Σ_k k(b))•f = d₁₂ x`になる。
+コサイクル条件は mathlib と同じ規約
+`f(gh,j) + f(g,h) = g•f(h,j) + f(g,hj)`、コバウンダリも同じ規約
+`(d₁₂ x)(g,h) = g•x(h) - x(gh) + x(g)`。 -/
+theorem transfer_H2 {B M G : Type u} [CommRing B]
+    [Group G] [Fintype G] [MulSemiringAction G B]
+    [AddCommGroup M] [Module B M] [DistribMulAction G M]
+    (hsemi : ∀ (g : G) (b : B) (x : M), g • (b • x) = (g • b) • (g • x))
+    (b : B) (f : G × G → M)
+    (hf : ∀ g h j : G, f (g * h, j) + f (g, h) = g • f (h, j) + f (g, h * j)) :
+    ∃ x : G → M, ∀ g h : G, (∑ k : G, k • b) • f (g, h) = g • x h - x (g * h) + x g := by
+  refine ⟨fun g => ∑ k : G, ((g * k) • b) • f (g, k), fun g h => ?_⟩
+  show (∑ k : G, k • b) • f (g, h)
+    = g • (∑ k : G, ((h * k) • b) • f (h, k))
+      - (∑ k : G, ((g * h * k) • b) • f (g * h, k))
+      + (∑ k : G, ((g * k) • b) • f (g, k))
+  have hre1 : (∑ k : G, (g * h * k) • b) = ∑ k : G, k • b :=
+    Fintype.sum_equiv (Equiv.mulLeft (g * h))
+      (fun k : G => (g * h * k) • b) (fun k : G => k • b) (fun k => rfl)
+  have hre2 : (∑ k : G, ((g * h * k) • b) • f (g, h * k))
+      = ∑ k : G, ((g * k) • b) • f (g, k) :=
+    Fintype.sum_equiv (Equiv.mulLeft h)
+      (fun k : G => ((g * h * k) • b) • f (g, h * k))
+      (fun k : G => ((g * k) • b) • f (g, k)) (fun k => by rw [mul_assoc]; rfl)
+  have hgx : g • (∑ k : G, ((h * k) • b) • f (h, k))
+      = (∑ k : G, ((g * h * k) • b) • f (g * h, k))
+        + (∑ k : G, k • b) • f (g, h)
+        - (∑ k : G, ((g * k) • b) • f (g, k)) := by
+    rw [Finset.smul_sum]
+    have hterm : ∀ k : G, g • (((h * k) • b) • f (h, k))
+        = ((g * h * k) • b) • (f (g * h, k) + f (g, h) - f (g, h * k)) := by
+      intro k
+      rw [hsemi, ← mul_smul, ← mul_assoc]
+      congr 1
+      rw [hf g h k]
+      abel
+    rw [Finset.sum_congr rfl (fun k _ => hterm k)]
+    simp only [smul_add, smul_sub]
+    rw [Finset.sum_sub_distrib, Finset.sum_add_distrib, ← Finset.sum_smul, hre1, hre2]
+  rw [hgx]
+  abel
+
 end ABC3.Found.Falt1
