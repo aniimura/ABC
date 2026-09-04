@@ -2671,6 +2671,90 @@ theorem adjoinRootTensorEquivFwd_bijective {R C : Type*} [CommRing R] [CommRing 
     ⟨adjoinRootTensorEquivInv (R := R) (C := C) g, adjoinRootTensorEquiv_roundtrip2 g, adjoinRootTensorEquiv_roundtrip1 g⟩
 
 /-!
+## `Algebra.IsPushout` への接続が完成した(2026-09-04)
+
+`Algebra.IsPushout R S R' S'` は mathlib で単に
+`IsBaseChange S (IsScalarTower.toAlgHom R R' S').toLinearMap` の
+ラッパー(`Algebra.IsPushout.out`)であると判明した——つまり
+`adjoinRootTensorEquivFwd_bijective` から直接
+`IsBaseChange`を経由して`Algebra.IsPushout`に落とせる、迂回路無しの
+最短経路。 -/
+
+/-- `algHomAdjoinRootOfCompat'` の `AdjoinRoot.mk` での挙動(点ごとの
+完全な計算、`adjoinRootTensorEquivFwd_one_tmul_mk` の証明の後半部分を
+単独の補題として抽出したもの)。 -/
+theorem algHomAdjoinRootOfCompat'_mk {R C : Type*} [CommRing R] [CommRing C] [Algebra R C] (g p : Polynomial R) :
+    algHomAdjoinRootOfCompat' (V0 := R) (Wn := C) g (AdjoinRoot.mk g p) =
+      AdjoinRoot.mk (g.map (algebraMap R C)) (p.map (algebraMap R C)) := by
+  unfold algHomAdjoinRootOfCompat'
+  show (AdjoinRoot.map (algebraMap R C) g (g.map (algebraMap R C)) (dvd_refl _)) (AdjoinRoot.mk g p) = _
+  rw [show AdjoinRoot.map (algebraMap R C) g (g.map (algebraMap R C)) (dvd_refl _) =
+    AdjoinRoot.lift ((AdjoinRoot.of (g.map (algebraMap R C))).comp (algebraMap R C)) (AdjoinRoot.root (g.map (algebraMap R C))) (by
+      show Polynomial.eval₂ ((AdjoinRoot.of (g.map (algebraMap R C))).comp (algebraMap R C)) (AdjoinRoot.root (g.map (algebraMap R C))) g = 0
+      rw [← Polynomial.eval₂_map]
+      exact AdjoinRoot.eval₂_root (g.map (algebraMap R C))) from rfl]
+  rw [AdjoinRoot.lift_mk, ← Polynomial.eval₂_map, eval2_root_eq_mk]
+
+/-- **`algHomAdjoinRootOfCompat'`(=`V1 → W1`の橋渡し写像)が`C`上の
+base change である**: `adjoinRootTensorEquivFwd`の全単射性
+(`adjoinRootTensorEquivFwd_bijective`)から`LinearEquiv.ofBijective`で
+線形同型を作り、その`1⊗ₜ-`での挙動が`algHomAdjoinRootOfCompat'`と
+一致すること(`adjoinRootTensorEquivFwd_one_tmul_mk`+
+`algHomAdjoinRootOfCompat'_mk`)を`AdjoinRoot.induction_on`で確認する
+だけで`IsBaseChange.of_equiv`が適用できる。 -/
+theorem falt1_isBaseChange_adjoinRoot {R C : Type*} [CommRing R] [CommRing C] [Algebra R C] (g : Polynomial R) :
+    IsBaseChange C (algHomAdjoinRootOfCompat' (V0 := R) (Wn := C) g).toLinearMap := by
+  apply IsBaseChange.of_equiv (LinearEquiv.ofBijective (adjoinRootTensorEquivFwd (R := R) (C := C) g)
+    (adjoinRootTensorEquivFwd_bijective g))
+  intro y
+  induction y using AdjoinRoot.induction_on with
+  | ih p =>
+    show adjoinRootTensorEquivFwd (R := R) (C := C) g ((1:C) ⊗ₜ[R] AdjoinRoot.mk g p) = _
+    rw [adjoinRootTensorEquivFwd_one_tmul_mk]
+    exact (algHomAdjoinRootOfCompat'_mk g p).symm
+
+/-- **`AdjoinRoot(g.map φ)`を`AdjoinRoot g`-代数と見る自然な構造**:
+橋渡し写像`algHomAdjoinRootOfCompat' g : AdjoinRoot g →ₐ[R] AdjoinRoot
+(g.map φ)`を`RingHom.toAlgebra`で`Algebra`インスタンスへ変換したもの。
+(`instance`ではなく`def`のまま保つ——`Falt1`の具体的なオブジェクトに
+適用する際、既存の`Algebra V1 Wn1`インスタンスとの衝突を避けるため。) -/
+@[reducible]
+noncomputable def falt1AdjoinRootAlgebra {R C : Type*} [CommRing R] [CommRing C] [Algebra R C] (g : Polynomial R) :
+    Algebra (AdjoinRoot g) (AdjoinRoot (g.map (algebraMap R C))) :=
+  (algHomAdjoinRootOfCompat' (V0 := R) (Wn := C) g).toRingHom.toAlgebra
+
+/-- `falt1AdjoinRootAlgebra`の下で`R → AdjoinRoot g → AdjoinRoot(g.map φ)`
+が`IsScalarTower`をなす(`algHomAdjoinRootOfCompat'`が`R`上の`AlgHom`
+であること、すなわち`.commutes`から直ちに従う)。 -/
+theorem falt1AdjoinRoot_isScalarTower {R C : Type*} [CommRing R] [CommRing C] [Algebra R C] (g : Polynomial R) :
+    letI := falt1AdjoinRootAlgebra (R := R) (C := C) g
+    IsScalarTower R (AdjoinRoot g) (AdjoinRoot (g.map (algebraMap R C))) := by
+  letI := falt1AdjoinRootAlgebra (R := R) (C := C) g
+  apply IsScalarTower.of_algebraMap_eq
+  intro x
+  show algebraMap R (AdjoinRoot (g.map (algebraMap R C))) x =
+    algHomAdjoinRootOfCompat' (V0 := R) (Wn := C) g (algebraMap R (AdjoinRoot g) x)
+  exact ((algHomAdjoinRootOfCompat' (V0 := R) (Wn := C) g).commutes x).symm
+
+/-- **本節の到達点**: `AdjoinRoot(g.map φ)`は`R`上、`C`と`AdjoinRoot g`
+の pushout である(`Algebra.IsPushout`)。`Algebra.IsPushout`が
+mathlib で単なる`IsBaseChange`のラッパーだと判明した
+(`Algebra.IsPushout.out`)ため、`falt1_isBaseChange_adjoinRoot`から
+`constructor`一発で閉じる——`Ideal.Quotient`のinstance diamondを
+一度も経由していない。`pushoutKaehlerSplitStep`/`_length`が要求する
+`[Algebra.IsPushout R B1 C B]`インスタンスに、`B1 = AdjoinRoot g`
+(=`V1`)・`B = AdjoinRoot(g.map φ)`(=`Wn1`)として直接対応する。 -/
+theorem falt1_isPushout_adjoinRoot {R C : Type*} [CommRing R] [CommRing C] [Algebra R C] (g : Polynomial R) :
+    letI := falt1AdjoinRootAlgebra (R := R) (C := C) g
+    letI := falt1AdjoinRoot_isScalarTower (R := R) (C := C) g
+    Algebra.IsPushout R C (AdjoinRoot g) (AdjoinRoot (g.map (algebraMap R C))) := by
+  letI := falt1AdjoinRootAlgebra (R := R) (C := C) g
+  letI := falt1AdjoinRoot_isScalarTower (R := R) (C := C) g
+  constructor
+  show IsBaseChange C (algHomAdjoinRootOfCompat' (V0 := R) (Wn := C) g).toLinearMap
+  exact falt1_isBaseChange_adjoinRoot g
+
+/-!
 ## `V_1 → W_1` の橋渡し写像そのものが完成した(2026-09-04)
 
 `hspan_eq` の接続に必要な `Algebra V1 Wn1` インスタンスを、実際に構成
