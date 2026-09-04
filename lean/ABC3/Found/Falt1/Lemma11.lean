@@ -124,13 +124,21 @@ theorem lemma_1_1_falt1 {Z V K L W : Type*} [CommRing Z] [CommRing V] [IsDedekin
 `Interface/Falt1/Ramification.lean` の `RamificationSetup` は
 `cokerLength quotientLength : ℕ`(自然数)を要求するが、本実装の
 `Module.length` は `ℕ∞`(無限を許す拡張自然数)値である。★これらが
-**有限であることの証明**(`W` が完備離散付値環上有限で `differentIdeal`
-が非零イデアルなら `W⧸differentIdeal V W` は有限加群になるはず)は
-まだ行っていない——一般の Dedekind 整域 `V` に対しては `IsArtinian
-W W` すら成り立たない(`W` 自身は自分自身上のアルティン加群ではない)
-ため、`Submodule.length_quotient_lt` の直接適用もできない。Falt1 の
-実際の設定(`V` が完備離散付値環、多くの場合剰余体が有限)に特化すれば
-閉じられる可能性が高いが、未着手。
+**有限であることの証明**はまだ行っていない——一般の Dedekind 整域 `V`
+に対しては `IsArtinian W W` すら成り立たない(`W` 自身は自分自身上の
+アルティン加群ではない)ため、`Submodule.length_quotient_lt` の直接
+適用はできない。★★具体的な道筋は特定した(未実装): `Module.
+length_ne_top_iff`(`≠⊤ ↔ IsFiniteLength`)+ `isArtinianRing_iff_
+isNoetherianRing_krullDimLE_zero`(mathlib)+ `Ideal.IsPrime.isMaximal`
+(`[Ring.DimensionLEOne W]` から、`differentIdeal V W` を含む素イデアルは
+非零なので極大)を貼り合わせれば `IsArtinianRing(W⧸differentIdeal V W)`
+——ただし「含む素イデアルが極大」から「商環の Krull 次元 0」への橋渡し
+(`PrimeSpectrum` の対応)は別途要る。もう1つの経路(標準的な証明):
+Dedekind 整域の非零イデアルは極大イデアルの積に一意分解するので、CRT
+で `W⧸I` を局所因子の積に分解し、各因子の有限性を
+`IsDiscreteValuationRing.length_quotient_pow_maximalIdeal`(既に mathlib
+にある、DVR での `length(R⧸m^n)=n`)から得る——いずれの経路も
+Lemma 1.1 の核心とは独立な、可換環論の一般論としてもう1本分の作業。
 
 ### 2. `Z`(絶対微分の基底)は Falt1 の原文で明示されていない
 
