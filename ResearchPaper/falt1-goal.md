@@ -3474,6 +3474,40 @@ mathlib での正確な組み立て方は未確認)。
       一般論だけで閉じる)が確認できたことは、Definition 2.1の
       non-vacuous witnessが**原理的に到達可能**であることの具体的な
       裏付けになった。
+
+      ★2026-09-05、続けて上記(a)(BASE環の移送)に着手し、正確な
+      API シグネチャを`#check`で確定させたが、**完全には閉じなかった**
+      ——次回のために詳細を記録する:
+      ```
+      Algebra.Etale.baseChange (R A B : Type*) [...] [Etale R A] :
+        Etale B (B ⊗[R] A)
+      IsLocalization.Away.tensorRightEquiv {R} (S) [...] (r:R) (A)
+        [IsLocalization.Away r A] : A ⊗[R] S ≃ₐ[S] Localization.Away (algebraMap R S r)
+      IsLocalization.Away.tensorEquiv {R} (S) [...] (r:R) (A)
+        [IsLocalization.Away r A] : S ⊗[R] A ≃ₐ[S] Localization.Away (algebraMap R S r)
+      ```
+      `Algebra.Etale.baseChange R (Fin 2→R) (Localization.Away 1)`で
+      `Etale (Localization.Away 1) (Localization.Away 1 ⊗[R] (Fin 2→R))`
+      は直接得られる(BASE環が`Localization.Away 1`に**正しく**なる)。
+      しかし、これを`Localization.Away(algebraMap R (Fin2→R) 1)`に
+      接続する`tensorRightEquiv`(`S:=Fin2→R,r:=1,A:=Localization.Away
+      1`で`Localization.Away1 ⊗[R] Fin2R ≃ₐ[Fin2R] Localization.Away
+      (algebraMap R Fin2R 1)`)は**`≃ₐ[Fin2R]`(右因子側)であって
+      `≃ₐ[Localization.Away 1]`ではない**——欲しい向き(`tensorEquiv`、
+      `S:=Localization.Away1`側を左因子・base双方にする)は
+      `[IsLocalization.Away r A]`(`A:=Fin2R`)を要求するが、これは
+      一般に**成立しない**(`algebraMap R (Fin2→R)`は単射だが全射でない
+      ため、`Fin2→R`はそもそも`R`の局所化ではない)。すなわち、
+      `tensorRightEquiv`/`tensorEquiv`のどちらも「欲しい向き
+      (`Localization.Away 1`が base **かつ** 左因子)」を直接与えない
+      ——`AlgEquiv.ofRingEquiv`で`tensorRightEquiv`の**土台となる
+      RingEquiv**を取り出し、それが`awayAlgebra`の`algebraMap`
+      (`Localization.awayMap`)と可換であることを別途示す経路は
+      残っているが、これは結局「`awayAlgebra`のinstanceと自然な
+      instanceを橋渡しする」という**当初の困難と同型の作業**に
+      帰着する——無理に押し切らず、この正確なAPI調査結果(シグネチャ
+      3つ)を次回への足場として記録し、今回はここで打ち切った
+      (scratch fileはlake buildで検証後削除、commitは無し)。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
