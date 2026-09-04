@@ -806,3 +806,27 @@ work unit 2(rigidity)・貼り合わせ後の有限性確認の3点。
 (iii)複数ピースを`Scheme.GlueData`として組み立てる、の3段階。
 
 コミット: `e6e8c98f`(transitionOpen_eq完成)・`8ebf05cb`(記録)。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(重要な
+発見——遷移射に抽象的な環同型は再び不要と判明、今度は根拠つき、集計
+10/24で変わらず、新規sorry無し宣言は無し)。GlueDataの遷移射を
+`IsLocalization.localizationLocalizationSubmodule`経由の抽象的な環同型
+(`llsm(powers a)(powers algebraMap b)` vs逆順が同じ部分モノイドか)で
+構成しようとしたが、`isLocalization_of_is_exists_mul_mem`の向きが
+逆(既知の小さい部分モノイドから大きいへ拡張する形で、今回欲しい
+向きと逆)であることに気づいた——これは以前記録した「捩れ」の問題と
+同じ壁だった。
+
+**しかし今回`piece_descends_iso`(前ターン完成)のおかげでこの抽象的な
+環同型は不要と判明した**——`piece_descends_iso`は既存のスキーム`C`の
+具体的な開集合からの同型を与えるので、重なり`X.basicOpen(f_i·f_j)`
+への**制限**として各片の対応する開部分への同型が得られ、その**合成**
+が遷移射そのものになる(cocycle条件も自動、両方とも同じ`C`を経由する
+ため)。以前の「不要」という訂正と同じ結論だが、今回は`piece_descends_
+iso`という具体的根拠まで遡って確認できた点が違う——`Scheme.Cover.
+glueMorphisms`(既存スキームへの比較射構成)の枠組みが対応する。
+
+次の一手: `piece_descends_iso`の同型を`X.basicOpen(f_i·f_j)`へ制限する
+具体的な構成(`IsOpenImmersion`のrestrict機構)。
+
+コミット: `e72e98f3`(発見の記録)。
