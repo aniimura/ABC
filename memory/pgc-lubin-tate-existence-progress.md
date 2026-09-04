@@ -177,8 +177,17 @@ order`と`MvPowerSeries.order`はdefeq」という前回の見積りが誤りだ
 ★これで節目(1)の1変数存在定理に要る3部品(可除性・f側線形化・g側
 線形化)が全て揃った。
 
-**残る作業**: 𝒪_K作用への拡張の残り(実際の1ステップの組み立て・
-Nat.recによる近似列・極限、2変数版と同型だが1変数へ作り直す)、
+**続報(2026-09-04、次数ごとの1ステップの組み立てが完成)**:
+`Found/PGC/LubinTateEndoStepAssembly.lean::exists_next_step_endo`——
+3部品(可除性・f側線形化・g側線形化)を組み合わせ、「φの障害が次数≤n
+で消えている」→「φ+c•X^{n+1}(cはスカラー)の障害が次数≤n+1で消える」
+という1ステップ全体をsorry無しで完成させた。2変数版よりも簡略化された
+——次数n+1の「斉次式」が単なるスカラーcなので、`homogeneousComponent`
+を「取り出す」操作が一切不要だった。スカラー方程式`c(π-π^{n+1})=-r`は
+`exists_step_solution`と全く同じ機構(単数の逆元)で解けた。
+
+**残る作業**: Nat.recによる近似列の構成・極限の2工程(2変数版の
+LubinTateSequence.lean・LubinTateLimit.leanと同型だが1変数へ作り直す)、
 torsion点の構成、Galois作用を経由した相互律写像の構成
 ——pGC の各項目(Prop 1.2・Cor 1.3・Prop 2.1・Prop 2.2・Theorem 4.2)
 を閉じるには、なお相互律写像そのものの構成・性質証明という大きな
