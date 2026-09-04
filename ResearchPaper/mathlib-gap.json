@@ -1693,6 +1693,28 @@
    "done": 0,
    "doneNote": "★2026-09-04(ABC3c): /goal Falt1 Chapter I Found達成の一環で実測。全11項目はInterface(posit、証明していない)のまま——Found化にはalmost ring theoryをmathlib流に一から構築する必要がある(GenEllのAbelianVariety・LocProPのMalčev-Tannakianと同種の、mathlib本体への貢献に近い規模の作業)。"
   },
+  "falt1-galois-trace-rings": {
+   "what": "可換環の G-Galois 拡大に対する trace 公式 `algebraMap A B (tr_{B/A} x) = Σ_{g∈G} g(x)`。体の場合の `trace_eq_sum_automorphisms` の環版。",
+   "whereUsed": [
+    "[Falt1] Theorem 2.4(ii) —— 「B[1/p] が A[1/p] の G を群とする Galois 被覆」という仮定から、remark(iii) が与える `p^ε ∈ tr_{B/A}(B)` を「Σ_{g∈G} g(b) = p^ε を満たす b が存在する」へ読み替える段。この読み替えさえ済めば、群コホモロジー側は Found/Falt1/GaloisTransfer.lean の transfer_groupCohomology_smul_eq_zero(全次数 i>0、2026-09-05 に証明済み)で閉じる。"
+   ],
+   "mathlibStatus": {
+    "verdict": "absent",
+    "searched": "2026-09-05 実測。(1) decl-index(.cache/mathlib-index.txt、23 万行)を trace_eq_sum_of_isGalois / trace.*galois / IsGalois.*trace / trace.*fixedPoints / Algebra.IsInvariant で grep。(2) FieldTheory/Galois/IsGaloisGroup.lean(環でも使える IsGaloisGroup G A B = faithful + SMulCommClass + Algebra.IsInvariant)と RingTheory/Invariant/Basic.lean の全宣言を確認。",
+    "partial": [
+     "trace_eq_sum_automorphisms —— 体の Galois 拡大版([Field K] [Field L] [FiniteDimensional K L] [IsGalois K L])。環には使えない。",
+     "IsGaloisGroup G A B —— 環でも使えるが、内容は「作用が忠実で不変環が A」だけ。trace 公式は含まれず、そこから導く補題も無い。",
+     "Algebra.IsInvariant.charpoly_mem_lifts —— ∏_g (X - g•b) が A に降りることは言えるが、それが mult-by-b の特性多項式に一致すること(= trace 公式の本体)は無い。"
+    ],
+    "absentPart": "Chase–Harrison–Rosenberg 型の「可換環の G-Galois 拡大」の定義(B ⊗_A B ≅ Map(G,B))と、そこからの trace 公式の導出。"
+   },
+   "minimalForm": "『B が A 上 finite free で G-Galois なら algebraMap A B (tr_{B/A} x) = Σ_{g∈G} g(x)』。フルの CHR 理論は要らない——Falt1 2.4(ii) が使うのはこの 1 本だけである。",
+   "nodes": 3,
+   "nodesNote": "節点は (1) CHR 型 Galois 拡大の定義、(2) B⊗_AB ≅ Map(G,B) から base change 後の trace 計算、(3) 忠実平坦降下で A へ戻す、の 3 段。加えて原典は B[1/p] の水準で Galois を仮定するので、Algebra.trace_localization と algebraMap B B[1/p] の単射性による B への descent が 1 段(これは既存の道具で書けるので節点には数えない)。",
+   "done": 0,
+   "doneNote": "★2026-09-05 時点で未着手。ただし**この 1 本を仮定 htr として置けば Theorem 2.4(ii) は完成する**ことは確認済み——Found/Falt1/GaloisTransfer.lean の thm_2_4_ii_of_trace_formula(lake build 済み、sorry 無し)。",
+   "measuredAt": "2026-09-05"
+  },
   "falt1-lemma11-kaehler-composition": {
    "what": "[Falt1] Lemma 1.1(Ω_V⊗_V W→Ω_Wの単射性・余核Ω_{W/V}の長さ=length(W/p^δW))・Theorem 1.2(differentの列の収束)の証明そのもの。mathlibに個々の道具(differentIdeal・KaehlerDifferential)は実在するが、組み合わせた完成形の補題は無い。",
    "whereUsed": [

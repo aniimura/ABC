@@ -4737,3 +4737,80 @@ of_algebraMap_eq (fun _ => rfl)`で出そうとすると、`lake build`のたび
 ビルドして3回とも別の場所で落ち、`FieldLimit.lean`の
 `localization_away_quotient_mvPolynomial_flat_equiv`系を`≃ₐ[B']`へ
 作り直す方針に切り替えた)。
+
+## 53. `lake build ABC3` は `CorrHyp/` を**ビルドしない**——検証の的を
+間違えると「0エラー」が何の証拠にもならない(2026-09-05)
+
+**事実**: `lean/lakefile.toml` の `[[lean_lib]] name = "ABC3"` には
+glob 指定が無いので、`lake build ABC3` が作るのは **`ABC3.lean`
+(ルート)から `import` で辿れるモジュールだけ**である。ルートは
+`Meta.Claim / Meta.Calibration / Interface / Skeleton / Found / Gap /
+Check` の7本を import するが、`ABC3/Found.lean` には `CorrHyp` の行が
+1つも無く、`ABC3/Found/CorrHyp.lean` という集約モジュールも存在しない。
+つまり `Found/CorrHyp/*.lean` は**ルートから到達できない**。
+
+**症状**: `lake build ABC3` が「Build completed successfully (6590
+jobs)」と言っても、`CorrHyp/FieldLimit.lean` や `ExtLimit.lean` に
+書いた定理は**一度もコンパイルされていない**。それどころか、明示
+ターゲットのビルドに失敗した直後は `ExtLimit.olean` が**消えたまま**に
+なり、`lake build ABC3` は何事も無かったかのように成功する。この状態で
+MCP の `lean_start(["ABC3.Found.CorrHyp.ExtLimit"])` を呼ぶと、
+3秒ほどで「読み込んだ」と返るのに中身は空で、
+`unknown namespace AlgebraicGeometry` や `Γ(X, U)` の parse error
+(`unexpected token '('; expected ')'`)という**一見無関係な**エラーに
+なる——「環境が壊れた」ように見えるが、実体は olean が無いだけ。
+
+**正しい検証の的**: `CorrHyp` を触ったら
+`lake build ABC3.Found.CorrHyp.Instance4`(この系列で最も深いモジュール、
+`ExtLimit → FieldLimit → SchemeFEt / QcqsSpace` を全部含む)を明示的に
+叩く。`lake build ABC3` は**それ以外**の部分の回帰検査として併用する。
+
+**関連**: `lake build` 実行中に MCP の `lean_start`/`lean_check` を
+並行で走らせると、書き換え途中の olean を読んで同じ「空の環境」症状に
+なる。ビルド中は REPL を触らないこと。
+
+実例: 2026-09-05 のセッションで、`ExtLimit.lean` の巨大定理が3回失敗
+した直後、`lake build ABC3` は 0 エラーのままだったが `ExtLimit.olean`
+は存在せず、REPL が空環境になっていた。
+
+## 54. **「almost split ⟹ almost 消滅」**——`c•𝟙` が消える対象を経由する
+と分かれば、コホモロジーの `c` 零化は関手性だけで出る(2026-09-05、
+1 セッションで 2 回使えた再利用パターン)
+
+**状況**: 「`m`(あるいは `p^ε`)が `H^*(…)` を零化する」型の主張
+(almost mathematics で頻出。Faltings の remark 2.1(v) の Hochschild
+cohomology、Theorem 2.4(ii) の群コホモロジーの両方がこの形)。
+
+**やらなくてよいこと**: コチェイン複体の水準で縮約ホモトピーを書く
+(`inhomogeneousCochains` の `Fin.contractNth` を相手にする)。低次
+(`H^1`・`H^2`)なら明示公式で押せるが、一般次数では相当重い。
+
+**やること**: 対象 `M` が「`c` 倍だけずれた直和因子」であること、
+すなわち **`s : M ⟶ N`・`μ : N ⟶ M` で `s ≫ μ = c • 𝟙 M`** を作り、
+`N` 側のコホモロジーが消えることを言う。あとは関手性だけ:
+`F(s) ≫ F(μ) = F(s ≫ μ) = F(c•𝟙) = c•𝟙` が `F(N) = 0` を経由するので
+`c•𝟙 = 0`。**「`c` で消える」は `c•𝟙` が零射になる、と読み替えるのが鍵**。
+
+適用例(どちらも `lean/ABC3/Found/Falt1/`):
+- `ext_smul_eq_zero_of_almost_split`(`AlmostEtale.lean`):
+  `N := T`(可換環 `T` 自身、`T` 上射影的)、`Ext^{k+1}(T,M)=0` を
+  `Ext.eq_zero_of_projective` で。`Ext.mk₀`・`Ext.mk₀_comp_mk₀_assoc`・
+  `Ext.smul_comp`・`Ext.mk₀_smul` だけで閉じる。
+- `transfer_groupCohomology_smul_eq_zero`(`GaloisTransfer.lean`):
+  `N := Coind_1^G(M)`、`H^{n+1}(G,N)=0` を Shapiro の補題
+  (`groupCohomology.coindIso`)+ 自明群の消滅
+  (`isZero_groupCohomology_succ_of_subsingleton`)で。
+
+**関手が `Linear` インスタンスを持たないとき**(`groupCohomology.functor`
+も `HomologicalComplex.homologyFunctor` も持っていない、2026-09-05 実測):
+`F(c•𝟙) = c•𝟙` が直接は言えない。そのときは**元の水準に降りて**、
+`π`(コサイクル → コホモロジー)の自然性(`groupCohomology.π_map_apply`)と
+`cocyclesMap` が `c•𝟙` を `c•` に送ること(`iCocycles` が mono なので
+`HomologicalComplex.cyclesMap_i` で確かめられる)を使う。この2つで
+「`c • π x = F(c•𝟙)(π x)`」が言えるので、あとは `F(c•𝟙) = 0` を
+morphism の水準で示せばよい(`map_id_comp` + `IsZero.eq_zero_of_tgt`)。
+
+**教訓**: almost mathematics の「`m` が零化する」は、ホモロジー代数
+としては**射影性/入射性の `c` 倍版**である。対象そのものの分解を
+探すより、`s ≫ μ = c • 𝟙` という 1 本の等式に落とすと、あとは
+mathlib の既存の関手性 API に載る。
