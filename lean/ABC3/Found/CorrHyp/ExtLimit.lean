@@ -825,4 +825,19 @@ noncomputable def piecePullbackIsoStage (X : Over BaseK) (U : X.left.Opens) (hU 
     (Spec.map (CommRingCat.ofHom (algebraMap ℚ R'.unop.1))) : Scheme) ≅ _
   exact pullbackSpecIso ℚ Γ(X.left, U) R'.unop.1
 
+/-- **`Ext X` 側の`U`のアフィン片は、`R'`側の同じアフィン片の
+`extConePi X .app R'` による preimage そのもの**——`piecePullbackIso`
+(`Ext X`側)と`piecePullbackIsoStage`(`R'`側)が「同じ`U`」を指して
+いることの位相的な裏付け。`extConePi_app_fst`(定義)+`Scheme.Hom.
+comp_preimage`(preimageの合成則)だけで閉じる。`C`の局所片を
+`R'`側へ降ろす際、`Ext X`側の記述と`R'`側の記述が同じ場所を指している
+ことを保証するのに使う。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem piece_preimage_eq (X : Over BaseK) (U : X.left.Opens) (R' : (FgSubalgebra ℚ ℝ)ᵒᵖ) :
+    (extConePi X).app R' ⁻¹ᵁ (pullback.fst X.hom (toSchemeDiagramOver.obj R').hom ⁻¹ᵁ U) =
+      pullback.fst X.hom toBaseK ⁻¹ᵁ U := by
+  rw [← Scheme.Hom.comp_preimage, extConePi_app_fst]
+  rfl
+
 end ABC3.Found.CorrHyp
