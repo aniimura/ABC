@@ -2339,6 +2339,45 @@ mathlib での正確な組み立て方は未確認)。
       本腰を入れた設計判断が要る規模の作業と判断し、ここでは着手を
       保留する(次回以降の課題として明記のみ)。
 
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05、
+      **「後者」(`RAlg`を現在の累積環`B`への埋め込みごと運ぶ拡張)を
+      実際に実装し、`pushoutKaehlerSplitStep`が要求する`B1`関係・`B`
+      関係のinstance両方を自由変数の添字`i`のままで供給できることを
+      確認した**(`RAlg`/`RAlgOver`/`RAlgOver.lift`/`RAlgOver.lift_
+      isScalarTower`の4点、`lake build`完走・sorry無しで
+      `Found/Falt1/KaehlerAux.lean`に追加済み):
+      - `RAlgOver (R T)`: `RAlg R`に加え、具体的な「現在の累積環`T`」
+        への埋め込み(`Algebra carrier T`・`IsScalarTower R carrier
+        T`)まで一緒に運ぶΣ束ね。
+      - `RAlgOver.lift`: `B1`への埋め込みを、`B1↪B`という1段の拡大
+        越しに`B`への埋め込みへ運ぶ(合成`carrier→B1→B`を
+        `RingHom.toAlgebra`で新しい`Algebra carrier B`として登録)。
+      - `RAlgOver.lift_isScalarTower`: 運んだ埋め込みが
+        `carrier→B1→B`という`IsScalarTower`をなすこと。
+
+      **鍵となった実装上の教訓**(次回、この種の「Σ束ねの値をtermで
+      運ぶ」パターンを書く際に直接使える): `letI`(値の透明性を保つ)
+      と`haveI`(値を消してしまう、命題には無害だが**データ**の
+      instanceには不可)の違いが決定的だった——`haveI hAlgB := fun i
+      => (F i).lift.algT`のように`haveI`で登録すると、後で`(F i).
+      lift.towerT`のような**別の場所から来る同じデータ**と`hAlgB i`
+      が(命題上は等しくても)**構文的に区別**されて`Type mismatch`に
+      なる。`letI`に変えるだけで、透明な`let`束縛として`hAlgB i`が
+      `(F i).lift.algT`へ展開可能になり、この不一致がすべて消えた。
+
+      **残る未完成部分**(次回への持ち越し、正確に特定できている):
+      上記4点を実際に`Option ι`のPi型全体へ組み立てる最後の1段
+      (`LinearEquiv.piOptionEquivProd`との合成、`pushoutKaehlerSplit
+      StepOption`という名を予定)で、`none.elim`/`(some i).elim`が
+      `rfl`で潰れるはずの`Option.elim i C F`絡みの式が`Type mismatch`
+      (instanceスロットの不一致)を起こす。原因はおそらく
+      `LinearEquiv.piOptionEquivProd`の`M`が**暗黙引数**であることに
+      気付かず最初は位置引数で渡していた(`(M := ...)`と明示して
+      解決した)のと同種の、まだ特定しきれていない別の暗黙引数の
+      取り違えである可能性が高い——次回は`set_option pp.explicit
+      true`等でinstance引数を完全に表示させてから`convert`で1つずつ
+      潰す、という方針で再開すること。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
