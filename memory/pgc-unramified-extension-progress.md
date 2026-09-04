@@ -223,6 +223,26 @@ K 0`(`IntermediateField.adjoin K.carrier {0}`上のSubringとして定義
    `𝒪[K.carrier]`の`K.carrier⟮x⟯`における整閉包であることを経由して
    `IsIntegralClosure.finite`系の補題を使う筋が有力だが未着手)。
    これが埋まれば分岐理論の基本等式が使える。
+
+   ★★★★★2026-09-05(残る1つの障害の**正体を特定**): mathlibに
+   **`IsIntegralClosure.finite [IsIntegrallyClosed A][IsNoetherianRing A]
+   : Module.Finite A C`**(`RingTheory/DedekindDomain/IntegralClosure.
+   lean:174`)がある——`A:=𝒪[K.carrier]`(DVRなので両hypothesisとも
+   自動)に適用できれば`Module.Finite`が即座に出る。必要なのは
+   **`IsIntegralClosure (adjoinIntegers K x) (𝒪[K.carrier])
+   K.carrier⟮x⟯`**、すなわち「`adjoinIntegers K x`(ノルム≤1の元)が
+   ちょうど`𝒪_K`上整な元全体である」という特徴づけ。
+   - 易しい向き(整⟹ノルム≤1): 付値の乗法性+モニック方程式から。
+   - **難しい向き(ノルム≤1⟹整)**: これが本丸。完備非アルキメデス体の
+     標準的な事実だが、mathlibに直接の補題は見当たらない
+     (`Valuation.Integers.isIntegrallyClosed_integers`は「`v.integer`
+     が自分の商体で整閉」であって別物)。使えそうな材料:
+     `spectralNorm.spectralNorm_eq_norm_coeff_zero_rpow`
+     (`spectralNorm K L x=‖(minpoly K x).coeff 0‖^(1/deg)`、mathlib)
+     ・`norm_root_le_spectralValue`・Gauss補題/Newton多角形の議論。
+   ⟹ 次に戻るときは**この「ノルム≤1⟹整」1本に集中する**のがよい
+   ——これさえ示せれば`IsIntegralClosure`→`Module.Finite`→分岐理論の
+   基本等式、と一気に繋がる。
 2. 剰余体`F_q`の次数`n`拡大`F_{q^n}`を`GaloisField p (f*n)`
    (`hq:Fintype.card(ResidueField 𝒪_K)=p^f`から`p^{f*n}=q^n`)として
    具体的に構成し、その原始元の最小多項式(次数`n`、分離的)を
