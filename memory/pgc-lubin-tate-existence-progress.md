@@ -210,11 +210,24 @@ a↦[a]_fの存在)は1変数存在定理そのものが完全にsorry無しで�
 [a]F_f(X,Y)`(節目2)はこの`LubinTateEndo`と`mvPowerSeries_uniqueness`
 から既存の道具だけで形式的に出る見込み。
 
-**残る作業**: 節目(2)の仕上げ(g:=f・a:=変数として`[a]_f:=LubinTateEndo`
-を実際に定義し自己準同型性を確立)、節目(3)torsion点の構成、節目(4)〜(6)
-Galois作用を経由した相互律写像の構成——pGC の各項目(Prop 1.2・Cor 1.3・
-Prop 2.1・Prop 2.2・Theorem 4.2)を閉じるには、なお相互律写像そのものの
-構成・性質証明という大きな仕事が残っている。
+**続報(2026-09-04、★★★★★★★★節目(2)完成——`[a]_f`が`F_f`の自己準同型
+であることがsorry無しで確立)**: `Found/PGC/LubinTateActionEndomorphism.
+lean::formalGroupLaw_endomorphism_of_action`——`F_f([a]X,[a]Y)=[a]F_f(X,Y)`
+を確立した。§9-1340で見立てた通り、`LubinTateEndo_functional_equation`
+(g:=f特殊化=`LubinTateAction`)と可換律・結合律で確立済みの道具だけから
+形式的に出た——新しい次数ごとの構成は一切不要だった。`Ψ_1:=F_f([a]X,
+[a]Y)`・`Ψ_2:=[a]F_f(X,Y)`が同じ次数1係数(全て`a`)・同じ関数等式を
+満たすことから、既存の2変数一意性補題で`Ψ_1=Ψ_2`を結論した。新たに得た
+鍵の道具`subst_comp_subst_single_gen`(1変数どうしの代入の合成規則)は
+今後も再利用できる見込み。★★★★★★★★これで**節目(1)(1変数存在定理)・
+節目(2)(自己準同型性)の両方が完成**し、𝒪_K全体への作用拡張という
+大きな節目が実質完了に近づいた。
+
+**残る作業**: 節目(2)の残り(`a↦[a]_f`が実際に環準同型であること、
+`[a+b]=F_f([a]-,[b]-)`・`[ab]=[a]∘[b]`)、節目(3)torsion点の構成、
+節目(4)〜(6)Galois作用を経由した相互律写像の構成——pGC の各項目
+(Prop 1.2・Cor 1.3・Prop 2.1・Prop 2.2・Theorem 4.2)を閉じるには、
+なお相互律写像そのものの構成・性質証明という大きな仕事が残っている。
 
 詳細な発見の経緯は `ResearchPaper/blocked-leaves.json` の
 `[pGC] Proposition 1.2 / ... —— 局所類体論の相互律` エントリの
