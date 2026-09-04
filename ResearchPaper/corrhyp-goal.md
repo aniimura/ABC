@@ -898,3 +898,23 @@ Yes(ただし貼り合わせ段でのみ使う)**という、より正確な答�
 ...)` の `K` への base change であることを、`isLimit_extCone` の
 Γ(大域切断)版ではなく**任意のアフィン開集合版**として持ち上げる必要が
 あり、まだ書いていない——次のセッションの最初の一手として記録する。
+
+### 2026-09-04さらに続報: 「1片のΓをbase changeとして書く」ための鍵の道具を特定
+
+上記の欠けている環同型(`Γ(U_j,U_j) ≅ Γ(V_j,V_j) ⊗_R K`、`U_j` は
+`(extCone X).π.app R` による `V_j` の preimage)を実際に作る道具として
+**`AlgebraicGeometry.pullbackSpecIso`**(mathlib 既存)を特定した:
+`pullback (Spec.map (algebraMap R S)) (Spec.map (algebraMap R T)) ≅
+Spec (S ⊗[R] T)`——アフィン同士の pullback がテンソル積の Spec そのもの
+であることを直接与える。`AffineTransitionLimit.lean` 側は「Hom集合・
+大域切断の安定性」しか持たないので、この橋渡し自体は**mathlibのpullback
+理論から**(`AffineTransitionLimit.lean`からではなく)持ってくる必要が
+あった、という発見。
+
+残る作業: `U_j = π.app R ⁻¹ᵁ V_j` が実際に `V_j ×_{Spec R} Spec K`
+(pullback square)であることを`extConePi`/`extDiagram`の構成
+(`Limits.pullback.map` ベース)から示し、`V_j` がアフィン
+(`hVprop j`)なので `pullbackSpecIso` を適用して `Γ(U_j,U_j) ≅
+Γ(V_j,V_j) ⊗_R K` を得る——`extConePi_app_fst`/`_snd`(`ExtLimit.lean`
+既存)がこの pullback square の脚をすでに与えているはずなので、
+そこから `IsPullback` の四角を組み立てる作業になる。まだ書いていない。
