@@ -1311,4 +1311,115 @@ noncomputable def pushoutKaehlerSplit {R C D B : Type*} [CommRing R] [CommRing C
     hinj ⟨_, hretr⟩).1
   exact e.trans (LinearEquiv.refl B _ |>.prodCongr (KaehlerDifferential.tensorKaehlerEquiv R C D B).symm)
 
+/-!
+## `pushoutKaehlerSplit` の仮定 `hinj` を満たす具体例(2026-09-04、完成)
+
+`pushoutKaehlerSplit` を実際に使うには `mapBaseChange R C B` の単射性
+(`hinj`)が要る。「非常に分岐した拡大の列」の各段では
+`B = C ⊗[R] AdjoinRoot g`(`D := AdjoinRoot g`、`g` は次の生成元の
+最小多項式)という形になるので、この特別な場合に `hinj` を
+`mapBaseChange_injective_of_nzd`(Lemma 1.1 の証明で使った補題)へ
+帰着させる——**単変数の場合の「テンソル積は商と可換」
+(`Algebra.TensorProduct.tensorQuotientEquiv`)経由で
+`C ⊗[R] AdjoinRoot g ≃ₐ[C] AdjoinRoot (g.map (algebraMap R C))` を
+構成し、`mapBaseChange_injective_transport` で輸送する**。
+falt1-goal.md で「3つ目(AdjoinRoot基底変換)」と呼んでいた経路。
+-/
+
+/-- `C ⊗[R] Polynomial R ≃ₐ[C] Polynomial C`(単変数版の
+`MvPolynomial.algebraTensorAlgEquiv`)。`MvPolynomial PUnit` を経由して
+構成する(`Polynomial R ≃ₐ[R] MvPolynomial PUnit R` の `uniqueAlgEquiv`
+を挟む)。`PUnit` 自身の宇宙を `Type`(宇宙 0)に固定しないと `R C` を
+`Type*` にした瞬間に解決不能な宇宙メタ変数が残る(実測済み)。 -/
+noncomputable def tensorPolynomialAlgEquiv {R C : Type*} [CommRing R] [CommRing C] [Algebra R C] :
+    TensorProduct R C (Polynomial R) ≃ₐ[C] Polynomial C :=
+  (Algebra.TensorProduct.congr (AlgEquiv.refl : C ≃ₐ[C] C)
+    (MvPolynomial.uniqueAlgEquiv R (PUnit : Type)).symm).trans
+  ((MvPolynomial.algebraTensorAlgEquiv R C (σ := (PUnit : Type))).trans
+    (MvPolynomial.uniqueAlgEquiv C (PUnit : Type)))
+
+theorem tensorPolynomialAlgEquiv_one_tmul_X {R C : Type*} [CommRing R] [CommRing C] [Algebra R C] :
+    (tensorPolynomialAlgEquiv (R := R) (C := C)) ((1:C) ⊗ₜ[R] (Polynomial.X : Polynomial R)) = Polynomial.X := by
+  unfold tensorPolynomialAlgEquiv
+  simp only [AlgEquiv.trans_apply, Algebra.TensorProduct.congr_apply,
+    Algebra.TensorProduct.map_tmul, AlgEquiv.coe_algHom,
+    MvPolynomial.algebraTensorAlgEquiv_tmul]
+  rw [show (AlgEquiv.refl : C ≃ₐ[C] C) 1 = 1 from rfl, one_smul]
+  have hX : (Polynomial.X : Polynomial R)
+      = Polynomial.monomial (Finsupp.single (default : PUnit) 1 default) 1 := by
+    rw [Finsupp.single_eq_same]; rfl
+  rw [hX, MvPolynomial.uniqueAlgEquiv_symm_monomial, MvPolynomial.map_monomial, map_one,
+    MvPolynomial.uniqueAlgEquiv_monomial, Finsupp.single_eq_same]
+  rfl
+
+/-- `tensorPolynomialAlgEquiv` は基底変換と両立する:
+`1 ⊗ₜ g ↦ g.map (algebraMap R C)`。`X` での一致(上)から
+`Polynomial.algHom_ext` で `R`-代数準同型として一意性を使う。 -/
+theorem tensorPolynomialAlgEquiv_one_tmul {R C : Type*} [CommRing R] [CommRing C] [Algebra R C]
+    (g : Polynomial R) :
+    (tensorPolynomialAlgEquiv (R := R) (C := C)) ((1:C) ⊗ₜ[R] g) = g.map (algebraMap R C) := by
+  set φ : Polynomial R →ₐ[R] Polynomial C :=
+    ((tensorPolynomialAlgEquiv (R := R) (C := C)).toAlgHom.restrictScalars R).comp
+      (Algebra.TensorProduct.includeRight) with hφ
+  set ψ : Polynomial R →ₐ[R] Polynomial C := Polynomial.mapAlgHom (Algebra.ofId R C) with hψ
+  have hφX : φ Polynomial.X = Polynomial.X := tensorPolynomialAlgEquiv_one_tmul_X
+  have hψX : ψ Polynomial.X = Polynomial.X := by
+    rw [hψ]
+    show Polynomial.map (Algebra.ofId R C : R →+* C) Polynomial.X = Polynomial.X
+    simp
+  have heq : φ = ψ := Polynomial.algHom_ext (hφX.trans hψX.symm)
+  have hg : φ g = ψ g := by rw [heq]
+  rw [hψ] at hg
+  show φ g = _
+  rw [hg]
+  rfl
+
+theorem includeRight_tmul_eq {R C : Type*} [CommRing R] [CommRing C] [Algebra R C] (g : Polynomial R) :
+    (Algebra.TensorProduct.includeRight : Polynomial R →ₐ[R] TensorProduct R C (Polynomial R)) g
+      = (1:C) ⊗ₜ[R] g := rfl
+
+/-- **`C ⊗[R] AdjoinRoot g ≃ₐ[C] AdjoinRoot (g.map (algebraMap R C))`**:
+テンソル積と商の可換性(`Algebra.TensorProduct.tensorQuotientEquiv`)を
+`AdjoinRoot g = Polynomial R ⧸ span {g}` に適用し、`tensorPolynomialAlgEquiv`
+で `Polynomial R` の係数を `C` へ運ぶと、イデアルは
+`span {g.map (algebraMap R C)}` に写る(`tensorPolynomialAlgEquiv_one_tmul`
+が鍵)。`Ideal.quotientEquivAlg` で結合する。 -/
+noncomputable def adjoinRootTensorEquiv {R C : Type*} [CommRing R] [CommRing C] [Algebra R C]
+    (g : Polynomial R) :
+    TensorProduct R C (AdjoinRoot g) ≃ₐ[C] AdjoinRoot (g.map (algebraMap R C)) := by
+  have e1 := Algebra.TensorProduct.tensorQuotientEquiv (R := R) C (Polynomial R) C
+    (Ideal.span ({g} : Set (Polynomial R)))
+  have hpt : (tensorPolynomialAlgEquiv (R := R) (C := C) : TensorProduct R C (Polynomial R) →+* Polynomial C)
+      ((1:C) ⊗ₜ[R] g) = g.map (algebraMap R C) := tensorPolynomialAlgEquiv_one_tmul g
+  have hIJ : Ideal.span ({g.map (algebraMap R C)} : Set (Polynomial C))
+      = (Ideal.map Algebra.TensorProduct.includeRight (Ideal.span ({g} : Set (Polynomial R)))).map
+        (tensorPolynomialAlgEquiv (R := R) (C := C) : TensorProduct R C (Polynomial R) →+* Polynomial C) := by
+    rw [Ideal.map_span, Set.image_singleton, Ideal.map_span, Set.image_singleton,
+      includeRight_tmul_eq, hpt]
+  exact e1.trans (Ideal.quotientEquivAlg _ _ (tensorPolynomialAlgEquiv (R := R) (C := C)) hIJ)
+
+/-- **`pushoutKaehlerSplit` の `hinj` を `B = C ⊗[R] AdjoinRoot g` の場合に
+Lemma 1.1 型の非零因子条件へ帰着**: `adjoinRootTensorEquiv` で `B` を
+`AdjoinRoot (g.map (algebraMap R C))` に同一視し、
+`mapBaseChange_injective_of_nzd`(`falt1MapBaseChangeInjective` と同じ
+補題)を適用してから `mapBaseChange_injective_transport` で `B` へ戻す。
+これで Theorem 1.2 の各帰納段の `hinj` は、Lemma 1.1 とまったく同じ形
+——「その段の最小多項式の微分が(基底変換後も)非零因子」——の
+仮定 1 つに帰着する。 -/
+theorem mapBaseChange_injective_adjoinRoot_tensor {R C : Type*} [CommRing R] [CommRing C] [Algebra R C]
+    (g : Polynomial R)
+    (hnzd : algebraMap (Polynomial C) (AdjoinRoot (g.map (algebraMap R C)))
+        (Polynomial.derivative (g.map (algebraMap R C)))
+        ∈ nonZeroDivisors (AdjoinRoot (g.map (algebraMap R C)))) :
+    Function.Injective (KaehlerDifferential.mapBaseChange R C (TensorProduct R C (AdjoinRoot g))) := by
+  haveI hRP : IsScalarTower R (Polynomial C) (AdjoinRoot (g.map (algebraMap R C))) := by
+    apply IsScalarTower.of_algebraMap_eq
+    intro x
+    rw [IsScalarTower.algebraMap_apply R C (AdjoinRoot (g.map (algebraMap R C))),
+      IsScalarTower.algebraMap_apply R C (Polynomial C),
+      IsScalarTower.algebraMap_apply C (Polynomial C) (AdjoinRoot (g.map (algebraMap R C)))]
+  apply mapBaseChange_injective_transport (adjoinRootTensorEquiv g).symm
+  exact mapBaseChange_injective_of_nzd (g.map (algebraMap R C)) (ker_adjoinRoot_mk _)
+    AdjoinRoot.mk_surjective hnzd
+
 end ABC3.Found.Falt1
