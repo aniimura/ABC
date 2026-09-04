@@ -201,4 +201,86 @@ theorem X_dvd_iteratedLubinTateDistinguished {A : Type*} [CommRing A] [IsLocalRi
     Polynomial.X ∣ iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n :=
   Polynomial.X_dvd_iff.mpr (iteratedLubinTateDistinguished_coeff_zero hq hπmax hπne0 f hf0 hf1 hf n)
 
+/-! ### 部品5: `φ_n:=D_n/X`(原始 `π^n`-捩れ点を統べる多項式)、次数 `q^n-1` -/
+
+/-- `D_n = X・φ_n` の `φ_n`(`X∣D_n` からの選択関数による抽出)。古典的な
+Lubin-Tate 理論では、この `φ_n` の根が原始 `π^n`-捩れ点(`Λ_n\Λ_{n-1}`)
+を統べる。 -/
+noncomputable def iteratedLubinTatePrimitive {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n : ℕ) :
+    Polynomial A :=
+  (X_dvd_iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n).choose
+
+theorem iteratedLubinTateDistinguished_eq_X_mul_primitive {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n : ℕ) :
+    iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n =
+      Polynomial.X * iteratedLubinTatePrimitive hq hπmax hπne0 f hf0 hf1 hf n :=
+  (X_dvd_iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n).choose_spec
+
+/-- `D_n` はモニック(`IsDistinguishedAt` の定義の一部)。 -/
+theorem monic_iteratedLubinTateDistinguished {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n : ℕ) :
+    (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n).Monic :=
+  (isDistinguishedAt_iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n).monic
+
+/-- `φ_n` もモニック——`D_n=X・φ_n` の両辺がモニック、`X` もモニック
+なので `Polynomial.Monic.of_mul_monic_left` から従う。 -/
+theorem monic_iteratedLubinTatePrimitive {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n : ℕ) :
+    (iteratedLubinTatePrimitive hq hπmax hπne0 f hf0 hf1 hf n).Monic := by
+  have hXmonic : (Polynomial.X : Polynomial A).Monic := Polynomial.monic_X
+  have hsplitMonic : (Polynomial.X * iteratedLubinTatePrimitive hq hπmax hπne0 f hf0 hf1 hf n : Polynomial A).Monic := by
+    rw [← iteratedLubinTateDistinguished_eq_X_mul_primitive hq hπmax hπne0 f hf0 hf1 hf n]
+    exact monic_iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n
+  exact Polynomial.Monic.of_mul_monic_left hXmonic hsplitMonic
+
+/-- ★★★★★★★★**`φ_n` の次数は `q^n-1`**——`D_n=X・φ_n`、`D_n` の次数が
+`q^n`(`natDegree_iteratedLubinTateDistinguished`)であることと
+`natDegree_mul`(両辺とも非零、`A` は整域)から従う。古典的な
+Lubin-Tate 理論で「原始 `π^n`-捩れ点の個数は `q^n-q^{n-1}`」——ではなく
+まず「非零な `π^n`-捩れ点の個数は `q^n-1`」の由来になる事実
+(`φ_n` の根が `Λ_n\{0}` そのもの)。 -/
+theorem natDegree_iteratedLubinTatePrimitive {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n : ℕ) :
+    (iteratedLubinTatePrimitive hq hπmax hπne0 f hf0 hf1 hf n).natDegree = (pp ^ ff) ^ n - 1 := by
+  have hDne0 : iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n ≠ 0 :=
+    (monic_iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n).ne_zero
+  have hsplit := iteratedLubinTateDistinguished_eq_X_mul_primitive hq hπmax hπne0 f hf0 hf1 hf n
+  have hφne0 : iteratedLubinTatePrimitive hq hπmax hπne0 f hf0 hf1 hf n ≠ 0 := by
+    intro h
+    rw [h, mul_zero] at hsplit
+    exact hDne0 hsplit
+  have hdegsplit : (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n).natDegree =
+      (Polynomial.X : Polynomial A).natDegree + (iteratedLubinTatePrimitive hq hπmax hπne0 f hf0 hf1 hf n).natDegree := by
+    rw [hsplit]
+    exact Polynomial.natDegree_mul Polynomial.X_ne_zero hφne0
+  rw [natDegree_iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n,
+    Polynomial.natDegree_X (R := A)] at hdegsplit
+  omega
+
 end ABC3.Found.PGC
