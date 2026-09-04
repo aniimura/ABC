@@ -4676,3 +4676,39 @@ specIso_descend`が要求する**1段の**`MvPolynomial(索引⊕Unit)B`商
 実際に渡す。`ψ`・`ψ'`(生成元同士の対応)の構成は、続き9で確立した
 方針(`exists_fg_subalgebra_tensor_quotientMvPolynomial_lift`を`M_ji`
 の個々の生成元へ繰り返し適用)のとおり進める。
+
+## 2026-09-05夜さらに続き12: `flat_equiv`を`algebraMap`昇格形へ一般化+
+`IsLocalization`環同型移送補題を完成、`D(f)`側の具体的インスタンス化を
+試み、正直な行き詰まりを記録
+
+続き11の「次の一手」の前半を実装した。`exists_descendPieceR_
+localization_baseChange`が実際に扱うイデアルは`Ideal.map(MvPolynomial.
+map φ)(Ideal.span(range q₀))`(`R`レベルの関係式`φ`で`R'`レベルへ
+昇格した形)であり、`flat_equiv`をそのまま適用できない——これを
+橋渡しする`localization_away_quotient_mvPolynomial_flat_equiv_of_map`
+(`FieldLimit.lean`、commit `99071c6e`)を`Ideal.map_span`だけで完成
+させた。
+
+続いて、`flat_equiv_of_map`が与える環同型を、`exists_descendPieceR_
+localization_baseChange`が要求する`IsLocalization.Away`**インスタンス**
+へ変換する一般補題`isLocalization_of_ringEquiv_transport`(`FieldLimit.
+lean`、commit `02eb897c`)を完成させた——鍵は「移送先の`Algebra`構造を
+環同型`e`そのものとして(`e∘algebraMap`として)定義すれば両立条件が
+`rfl`で落ちる」という気づき(`AlgEquiv.ofRingEquiv`+`IsLocalization.
+isLocalization_of_algEquiv`、いずれもmathlib、後者は`decl-index`の
+検索では見つからず`exact?`で発見)。`tools/lean-idioms.md`の`#49`
+として記録した。
+
+**正直な行き詰まり(このセッションでは未解決)**: この2つを`D(f)`側
+(`exists_descendPieceR_localization_baseChange`の`f`)へ具体的に
+インスタンス化する巨大定理`exists_descendPieceR_flat_mvPolynomial_
+baseChange`を試みたが、`Nonempty(M_flat⊗[B']T ≃+* Γ(C,piece(D(f*g))))`
+という**主張の型を書く段階**で`letI`の不足(`Algebra(A⊗R.1)(A⊗R'.1)`
+・`Algebra(A⊗R'.1)(A⊗ℝ)`・`CommRing(平坦化した商)`)による停留変数
+(stuck metavariable)エラーに繰り返し当たり、このセッション内では
+未完成のまま終わった——force しない。次の一手としては、この巨大な
+主張をインラインで書くのではなく、`descendPieceR`等の既存パターン
+(`noncomputable def`として先に名前を付ける)に倣い、平坦化した
+イデアル自体を独立した`def`として先に切り出してから使う設計に
+変えるのが筋が良いと見積もっている。集計は引き続き10/24——§4は
+引き続き0/2。

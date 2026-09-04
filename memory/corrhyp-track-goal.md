@@ -2064,3 +2064,18 @@ push済み。集計は引き続き10/24——§4は引き続き0/2。
 インスタンス化しq・q₂として渡す。ψ・ψ'は既存の「lift to R-level」
 技法(exists_fg_subalgebra_tensor_quotientMvPolynomial_lift)をM_jiの
 個々の生成元へ繰り返し適用する方針(続き9で確立済み)で進める。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き12
+localization_away_quotient_mvPolynomial_flat_equiv_of_map(commit
+99071c6e)+isLocalization_of_ringEquiv_transport(commit02eb897c、
+FieldLimit.lean)完成。前者はflat_equivをalgebraMap昇格イデアルの形
+へ橋渡し、後者は「移送先のAlgebra構造を環同型eそのものとして定義
+すれば両立条件がrflで落ちる」という一般的な移送パターン(lean-idioms
+#49として記録)。
+
+正直な行き詰まり: D(f)側への具体的インスタンス化(exists_
+descendPieceR_flat_mvPolynomial_baseChange)を試みたが、主張の型を
+書く段階でletI不足による停留変数エラーに繰り返し当たり未完成。
+force しない。次はdescendPieceR等の既存パターンに倣い、平坦化した
+イデアルを独立defとして先に切り出す設計に変える。集計は引き続き
+10/24——§4は引き続き0/2。

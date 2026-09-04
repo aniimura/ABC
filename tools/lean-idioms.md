@@ -4534,3 +4534,48 @@ Away.surj`(`Bp`の任意の元は`f0(a)*π⁻ⁿ`の形)で「`f0(B)`と`π⁻¹
 実例: `lean/ABC3/Found/CorrHyp/ExtLimit.lean`の
 `exists_descendPieceR_localization_baseChange`(`maxHeartbeats
 40000000`、227秒)。
+
+## 49. `IsLocalization`インスタンスを環同型に沿って移送したいとき、
+「両立する`Algebra`構造を`e∘algebraMap`として定義する」だけで
+`AlgEquiv`化でき、そのまま`IsLocalization.isLocalization_of_algEquiv`
+へ渡せる(2026-09-05)
+
+**状況**: `IsLocalization M S`が分かっていて、別の環`P`と環同型
+`e : S ≃+* P`があるとき、「`P`もまた`M`による局所化である」ことを
+示したい。`P`にはまだ`R`上の`Algebra`構造が無い(または、あっても
+`e`と両立する保証が無い)ことが多い。
+
+**やってはいけないこと**: `e`と既存の`Algebra R P`インスタンス(もし
+既にあれば)が両立することを別途証明しようとする、あるいは
+`IsLocalization`の定義(3条件:単元性・全射性・核の同値関係)を素朴に
+展開して`e`越しに1つずつ確認する——長く、事故りやすい。
+
+**正しいやり方**: `letI : Algebra R P := (e.toRingHom.comp
+(algebraMap R S)).toAlgebra`で`P`の`Algebra R P`構造を**`e`を通した
+ものとして定義**すると、`algebraMap R P`の定義がまさに`e∘algebraMap
+R S`になるので、両立条件`∀r, e(algebraMap R S r) = algebraMap R P r`
+は`rfl`で終わる。あとは`AlgEquiv.ofRingEquiv (f:=e) he`(mathlib、
+両立条件から`RingEquiv`を`AlgEquiv`へ格上げ)+`IsLocalization.
+isLocalization_of_algEquiv`(mathlib、`AlgEquiv`越しに`IsLocalization`
+インスタンスを移送)を合成するだけ。
+
+```lean
+theorem isLocalization_of_ringEquiv_transport (R S P : Type) [CommRing R] [CommRing S] [CommRing P]
+    (M : Submonoid R) [Algebra R S] [IsLocalization M S] (e : S ≃+* P) :
+    letI : Algebra R P := (e.toRingHom.comp (algebraMap R S)).toAlgebra
+    IsLocalization M P := by
+  letI : Algebra R P := (e.toRingHom.comp (algebraMap R S)).toAlgebra
+  have he : ∀ r, e (algebraMap R S r) = algebraMap R P r := fun r => rfl
+  exact IsLocalization.isLocalization_of_algEquiv M (AlgEquiv.ofRingEquiv (f := e) he)
+```
+
+**教訓**: 「環同型越しにインスタンスを移送したい」系の問題は、まず
+「移送先の`Algebra`/加群構造を環同型の**定義そのものとして**構成
+できないか」を考えると、両立条件が`rfl`で落ちて一気に軽くなる。
+`decl-index.txt`の検索結果(`isLocalization_iff_of_ringEquiv`等)が
+実際には見つからない(namespace違い、または版違い)ことがあるので、
+見つからないときは`exact?`で型から直接引く(`IsLocalization.
+isLocalization_of_algEquiv`はこの方法で発見した)。
+
+実例: `lean/ABC3/Found/CorrHyp/FieldLimit.lean`の
+`isLocalization_of_ringEquiv_transport`。
