@@ -476,4 +476,147 @@ theorem inertiaDegree_eq_finrank_of_isUnramified {p : ℕ} [Fact p.Prime] (K : P
   rw [show ramificationIndex K x = 1 from h, one_mul] at this
   exact this
 
+
+/-! ## 剰余体の側から不分岐性を判定する
+
+`e·f = [L:K]` が手に入ったので、**`f` を下から押さえれば `e = 1` が
+出る**。これは不分岐拡大の存在を示す際に Hensel の補題を迂回できる
+可能性のある経路——「剰余体が十分大きい」ことさえ言えれば
+`f = [L:K]` となり、`e·f = [L:K]` から `e = 1` が従う。
+
+そのために本節では
+* `adjoinIntegers K x` の剰余体が**有限**であること
+  (`Found/ResidueFieldFinite.lean` の一般結果を拡大体に適用)、
+* `inertiaDegree K x` が**剰余体の拡大次数**そのものであること、
+* したがって `residueDegree K x`(剰余体の**元の個数**)が `q^f` で
+  あること
+を示し、最後に判定条件
+`residueDegree K x = q^[L:K] ⟹ IsUnramifiedAdjoin K x` を得る。 -/
+
+/-- `IsLocalRing (adjoinIntegers K x)` をインスタンスとして登録する。
+`Ideal.inertiaDeg` や `IsLocalRing.ResidueField` は**主張の型の段階**で
+これを要求するので、`theorem` のままだと利用側が毎回
+インスタンス束縛を書く羽目になる。 -/
+instance instIsLocalRingAdjoinIntegers {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    (x : K.closure) : IsLocalRing (adjoinIntegers K x) :=
+  isLocalRing_adjoinIntegers K x
+
+/-- **`𝒪[K.carrier] → adjoinIntegers K x` は局所準同型**——ノルムが
+`algebraMap` で保たれる(`norm_algebraMap'`)ことから、非単元は非単元へ
+写る。`Ideal.LiesOver`(したがって `Ideal.inertiaDeg_algebraMap`)と
+剰余体の間の `Algebra` 構造がこれで出る。 -/
+instance isLocalHom_adjoinIntegersAlgebraMap {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    (x : K.closure) :
+    IsLocalHom (algebraMap 𝒪[K.carrier] (adjoinIntegers K x)) := by
+  constructor
+  intro a ha
+  by_contra hcon
+  rw [Valuation.Integer.not_isUnit_iff_valuation_lt_one] at hcon
+  refine absurd ha ((Valuation.Integer.not_isUnit_iff_valuation_lt_one
+    (v := (Valued.v : Valuation (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) NNReal))
+    (x := (algebraMap 𝒪[K.carrier] (adjoinIntegers K x) a))).mpr ?_)
+  show Valued.v ((algebraMap K.carrier
+    (IntermediateField.adjoin K.carrier ({x} : Set K.closure))) (a : K.carrier)) < 1
+  have e1 : Valued.v ((algebraMap K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure))) (a : K.carrier))
+      = (‖(algebraMap K.carrier
+        (IntermediateField.adjoin K.carrier ({x} : Set K.closure))) (a : K.carrier)‖₊ : NNReal) :=
+    NNReal.eq rfl
+  have e2 : Valued.v ((a : K.carrier)) = (‖(a : K.carrier)‖₊ : NNReal) := NNReal.eq rfl
+  have e3 : (‖(algebraMap K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure))) (a : K.carrier)‖₊ : NNReal)
+      = (‖(a : K.carrier)‖₊ : NNReal) := NNReal.eq (norm_algebraMap' _ _)
+  rw [e1, e3, ← e2]
+  exact hcon
+
+/-- 拡大体 `K.carrier⟮x⟯` も自明でないノルム体。基礎体の
+`NormedField.exists_one_lt_norm` の元を `algebraMap` で送るだけ。
+
+★配管(記録): `@[implicit_reducible]` を**必ず付ける**。付けないと
+`letI` で入れた瞬間に `IsUltrametricDist ↥K.carrier⟮x⟯` の
+インスタンス探索が(ノルム構造の経路が変わって)失敗する。 -/
+@[implicit_reducible] noncomputable def nontriviallyNormedField_adjoin {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p) (x : K.closure) :
+    NontriviallyNormedField (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :=
+  { (inferInstance : NormedField (IntermediateField.adjoin K.carrier ({x} : Set K.closure))) with
+    non_trivial := by
+      obtain ⟨y, hy⟩ := NormedField.exists_one_lt_norm K.carrier
+      exact ⟨algebraMap K.carrier
+        (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) y,
+        lt_of_lt_of_eq hy (norm_algebraMap' _ y).symm⟩ }
+
+/-- **拡大体の剰余体も有限**——`Found/ResidueFieldFinite.lean` の
+一般結果 `finite_residueField`(完備・proper な非アルキメデスノルム体)
+を `K.carrier⟮x⟯` に適用する。`ProperSpace` は有限次元性から。 -/
+instance finite_residueField_adjoinIntegers {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))] :
+    Finite (IsLocalRing.ResidueField (adjoinIntegers K x)) := by
+  letI := nontriviallyNormedField_adjoin K x
+  haveI : ProperSpace (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :=
+    FiniteDimensional.proper K.carrier _
+  exact finite_residueField (K := IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+
+/-- **慣性次数は剰余体の拡大次数**。`Ideal.inertiaDeg_algebraMap` に
+`Ideal.LiesOver`(局所準同型から自動)を与えるだけ。 -/
+theorem inertiaDegree_eq_finrank_residueField {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))] :
+    inertiaDegree K x = Module.finrank (IsLocalRing.ResidueField 𝒪[K.carrier])
+      (IsLocalRing.ResidueField (adjoinIntegers K x)) := by
+  unfold inertiaDegree
+  exact Ideal.inertiaDeg_algebraMap _ _
+
+/-- **`q_L = q^f`**——拡大体の剰余体の元の個数は、基礎体のそれの
+慣性次数乗。有限体上の有限次元ベクトル空間の元の個数
+(`Module.card_eq_pow_finrank`)そのもの。 -/
+theorem residueDegree_eq_residueCard_pow {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))] :
+    residueDegree K x
+      = Nat.card (IsLocalRing.ResidueField 𝒪[K.carrier]) ^ inertiaDegree K x := by
+  haveI : Fintype (IsLocalRing.ResidueField 𝒪[K.carrier]) := Fintype.ofFinite _
+  haveI : Fintype (IsLocalRing.ResidueField (adjoinIntegers K x)) := Fintype.ofFinite _
+  unfold residueDegree
+  rw [inertiaDegree_eq_finrank_residueField K x, Nat.card_eq_fintype_card,
+    Nat.card_eq_fintype_card, Module.card_eq_pow_finrank
+      (K := IsLocalRing.ResidueField 𝒪[K.carrier])
+      (V := IsLocalRing.ResidueField (adjoinIntegers K x))]
+
+/-- **不分岐性の判定(慣性次数版)**——`f = [L:K]` なら `e = 1`。
+`e·f = [L:K]` と `[L:K] > 0` から。 -/
+theorem isUnramifiedAdjoin_of_inertiaDegree_eq_finrank {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p) (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (h : inertiaDegree K x
+      = Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))) :
+    IsUnramifiedAdjoin K x := by
+  have hmul := ramificationIndex_mul_inertiaDegree K x
+  rw [h] at hmul
+  have hpos : 0 < Module.finrank K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := Module.finrank_pos
+  unfold IsUnramifiedAdjoin
+  nlinarith [hmul, hpos]
+
+/-- 剰余体は有限体なので元の個数は `2` 以上。指数の一意性
+(`Nat.pow_right_injective`)に要る。 -/
+theorem one_lt_residueCard {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) :
+    1 < Nat.card (IsLocalRing.ResidueField 𝒪[K.carrier]) := by
+  haveI : Finite (IsLocalRing.ResidueField 𝒪[K.carrier]) := residueField_finite K
+  exact Finite.one_lt_card
+
+/-- **不分岐性の判定(剰余体の元の個数版)**——`q_L = q^{[L:K]}` なら
+不分岐。**Hensel の補題を使わずに不分岐拡大を作る**ときの目標形:
+剰余体が `q^n` 個の元を持つことさえ言えれば、`e=1` が自動的に出る。 -/
+theorem isUnramifiedAdjoin_of_residueDegree {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (h : residueDegree K x = Nat.card (IsLocalRing.ResidueField 𝒪[K.carrier])
+      ^ Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))) :
+    IsUnramifiedAdjoin K x := by
+  apply isUnramifiedAdjoin_of_inertiaDegree_eq_finrank
+  have h2 := residueDegree_eq_residueCard_pow K x
+  rw [h] at h2
+  exact Nat.pow_right_injective (one_lt_residueCard K) h2.symm
+
 end ABC3.Found.PGC

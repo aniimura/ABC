@@ -327,3 +327,68 @@ Henselian性の一般インスタンスは無いことを確認済み)が、
 **`e·f=[L:K]`があるので`e=1`を`f=n`から出す**という逆向きの
 経路も取れる——`f = inertiaDegree` の計算(剰余体の拡大次数)に
 持ち込めれば Hensel を迂回できる可能性がある。
+
+## 2026-09-05(続き): 剰余体側からの不分岐判定まで到達
+
+`e·f=[L:K]` に続けて、**剰余体の側から `e=1` を判定する**道具を
+`Found/PGC/UnramifiedExtension.lean` に入れた(すべて`sorry`無し、
+`lake build ABC3` 6590 jobs 成功・`check.mjs` NG 13 件・文字化けなし)。
+
+* `instIsLocalRingAdjoinIntegers`(インスタンス化)
+* `isLocalHom_adjoinIntegersAlgebraMap` :
+  `IsLocalHom (algebraMap 𝒪[K.carrier] (adjoinIntegers K x))`
+  ——`norm_algebraMap'` でノルムが保たれるので非単元は非単元へ。
+  これで `Ideal.LiesOver` と剰余体間の `Algebra` が自動で出る。
+* `nontriviallyNormedField_adjoin`(`@[implicit_reducible]` 必須)
+* `finite_residueField_adjoinIntegers` : 拡大体の剰余体も有限
+  ——`Found/ResidueFieldFinite.lean` の一般結果を拡大体に適用。
+* `inertiaDegree_eq_finrank_residueField` : `f` は剰余体の拡大次数
+* `residueDegree_eq_residueCard_pow` : `q_L = q^f`
+* `isUnramifiedAdjoin_of_inertiaDegree_eq_finrank` : `f=[L:K] ⟹ e=1`
+* `one_lt_residueCard` : `q ≥ 2`
+* `isUnramifiedAdjoin_of_residueDegree` :
+  **`q_L = q^{[L:K]}` ⟹ 不分岐**
+
+### ★配管(記録)
+
+* `nontriviallyNormedField_adjoin` に `@[implicit_reducible]` を
+  付けないと、`letI` で入れた瞬間に
+  `IsUltrametricDist ↥K.carrier⟮x⟯` の探索が失敗する
+  (ノルム構造の経路が変わるため)。
+* `Valuation.Integer.not_isUnit_iff_valuation_lt_one` は
+  `adjoinIntegers K x` の元に対して `apply` では unify しない
+  (`↥(adjoinIntegers K x)` と `↥v.integer` の `def` の壁)。
+  `(v := ...)` と `(x := ...)` を**明示**して `refine` すると通る。
+* `‖·‖₊`(nnnorm)版の `norm_algebraMap'` は無いので
+  `NNReal.eq (norm_algebraMap' _ _)` で作る。
+
+### 次の一歩と、そこで見えている選択
+
+不分岐拡大の**存在**(次数`n`ごとに1つ)には、
+`isUnramifiedAdjoin_of_residueDegree` の仮定
+`q_L = q^{[L:K]}` を満たす `x` を作ればよい。古典的な作り方は
+`x = ζ_{q^n-1}`(1の`q^n-1`乗根)だが、
+`[K(ζ):K] ≤ n` を出す段で結局 Hensel の補題(`X^m-1` の
+`𝒪_K` 上での分解が剰余体上の分解を持ち上げること)が要る。
+
+★2026-09-05 実測(再確認): mathlib の `RingTheory/Henselian.lean`
+には `HenselianLocalRing` の**定義と TFAE** はあるが、
+`.cache/mathlib-index.txt` を "henselian" で引いた結果は
+`HenselianLocalRing`(class)・`HenselianRing`(class)・
+`HenselianLocalRing.TFAE`・
+`IsLocalRing.eq_of_eval_eq_zero_of_not_isUnit_sub`・
+`isLocalHom_of_le_jacobson_bot` の**5 件のみ**——
+「完備局所環は Henselian」に相当するインスタンスは**無い**。
+`ℤ_[p]` 専用の Hensel(`NumberTheory/Padics/Hensel.lean`、約450行)
+は一般化しない。
+
+したがって不分岐拡大の存在を出すには
+(a) `𝒪[K.carrier]` が `HenselianLocalRing` であることを
+    自分で示す(完備性+極大イデアルでの逐次近似、Newton法)、
+(b) それを避けて別経路を探す、
+のどちらか。(a) は `HenselianLocalRing.TFAE` の 2 番目
+(「剰余体での単根は持ち上がる」)を目標にすれば、
+`𝒪[K.carrier]` の完備性(既存)と極大イデアル進の収束で書けるはず
+——`ℤ_[p]` 版 450 行より短くなる見込みは薄いが、
+`e·f=[L:K]` と剰余体判定がすでにあるぶん、
+「持ち上げたあと何を示すか」は明確になっている。
