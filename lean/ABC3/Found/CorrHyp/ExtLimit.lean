@@ -425,4 +425,73 @@ theorem Scheme.exists_finite_affineOpenCover (X : Scheme) [CompactSpace X] :
   obtain ⟨i, hi, hxi⟩ := hx
   exact ⟨⟨i, hi⟩, hxi⟩
 
+/-!
+## `Ext X` の有限アフィン開被覆を有限段階へ降ろす
+
+`Scheme.exists_finite_affineOpenCover`(`Ext X` は `CompactSpace` なので
+有限アフィン開被覆を持つ)と `isLimit_extCone`(`Ext X` の台は `extDiagram X`
+の極限)を `AffineTransitionLimit.lean` の `Scheme.exists_isOpenCover_and_
+isAffine` に渡し、この被覆がある有限段階 `R`(`X.left ×_{BaseK} Spec R`)の
+有限アフィン開被覆から来ることを示す——`Lemma 4.1` の構成的降下で最も
+中心的な一手。 -/
+
+/-- `(toSchemeDiagramOver.obj R).hom`(`Spec R → BaseK`)はアフィン射。 -/
+theorem toSchemeDiagramOver_hom_isAffineHom (R : (FgSubalgebra ℚ ℝ)ᵒᵖ) :
+    IsAffineHom (toSchemeDiagramOver.obj R).hom := by
+  show IsAffineHom (Spec.map (CommRingCat.ofHom (algebraMap ℚ R.unop.1)))
+  infer_instance
+
+/-- `extDiagram X` の各段は `CompactSpace`——`(D R).hom` がアフィンなので
+その base change `pullback.fst` もアフィン、よって `X.left` が
+`CompactSpace` なら各段も `CompactSpace`。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem extDiagram_obj_compactSpace (X : Over BaseK) [CompactSpace X.left]
+    (R : (FgSubalgebra ℚ ℝ)ᵒᵖ) : CompactSpace ((extDiagram X).obj R) := by
+  show CompactSpace (Limits.pullback X.hom (toSchemeDiagramOver.obj R).hom : Scheme)
+  have : IsAffineHom (Limits.pullback.fst X.hom (toSchemeDiagramOver.obj R).hom) :=
+    MorphismProperty.pullback_fst X.hom (toSchemeDiagramOver.obj R).hom
+      (toSchemeDiagramOver_hom_isAffineHom R)
+  exact QuasiCompact.compactSpace_of_compactSpace
+    (Limits.pullback.fst X.hom (toSchemeDiagramOver.obj R).hom)
+
+/-- `extDiagram X` の各段は `QuasiSeparatedSpace`(`extDiagram_obj_
+compactSpace` と同じ議論)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem extDiagram_obj_quasiSeparatedSpace (X : Over BaseK) [QuasiSeparatedSpace X.left]
+    (R : (FgSubalgebra ℚ ℝ)ᵒᵖ) : QuasiSeparatedSpace ((extDiagram X).obj R) := by
+  show QuasiSeparatedSpace (Limits.pullback X.hom (toSchemeDiagramOver.obj R).hom : Scheme)
+  have : IsAffineHom (Limits.pullback.fst X.hom (toSchemeDiagramOver.obj R).hom) :=
+    MorphismProperty.pullback_fst X.hom (toSchemeDiagramOver.obj R).hom
+      (toSchemeDiagramOver_hom_isAffineHom R)
+  exact quasiSeparatedSpace_of_quasiSeparated
+    (Limits.pullback.fst X.hom (toSchemeDiagramOver.obj R).hom)
+
+/-- **`Ext X` の有限アフィン開被覆はある有限段階から来る**——`Lemma 4.1`
+の構成的降下の核心部品。`ExtF.obj X = (Ext X)`(qcqs、`X` が qcqs のとき)
+の有限アフィン開被覆(`Scheme.exists_finite_affineOpenCover`)を
+`isLimit_extCone`(`Ext X` の台は `extDiagram X` の極限)経由で
+`Scheme.exists_isOpenCover_and_isAffine` に渡し、`X.left ×_{BaseK} Spec R`
+(ある有限生成 `k`-部分環 `R`)の有限アフィン開被覆に降ろす。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_extDiagram_finite_affine_descent (X : Over BaseK) [CompactSpace X.left]
+    [QuasiSeparatedSpace X.left] :
+    ∃ (R : (FgSubalgebra ℚ ℝ)ᵒᵖ) (J : Type) (t : Finset J)
+      (V : t → ((extDiagram X).obj R).Opens),
+      TopologicalSpace.IsOpenCover V ∧ ∀ j, IsAffineOpen (V j) := by
+  haveI hcompact : CompactSpace (ExtF.obj X).left := ExtF_compactSpace X
+  haveI hqs : QuasiSeparatedSpace (ExtF.obj X).left := ExtF_quasiSeparatedSpace X
+  obtain ⟨s, hcov, haff⟩ := Scheme.exists_finite_affineOpenCover (ExtF.obj X).left
+  haveI hRcompact : ∀ R, CompactSpace ((extDiagram X).obj R) := extDiagram_obj_compactSpace X
+  haveI hRqs : ∀ R, QuasiSeparatedSpace ((extDiagram X).obj R) :=
+    extDiagram_obj_quasiSeparatedSpace X
+  haveI hRaff : ∀ {R S : (FgSubalgebra ℚ ℝ)ᵒᵖ} (f : R ⟶ S), IsAffineHom ((extDiagram X).map f) :=
+    fun f => extDiagram_map_isAffineHom X f
+  obtain ⟨i, t, V, hVcov, hVprop⟩ := Scheme.exists_isOpenCover_and_isAffine
+    (extDiagram X) (extCone X) (isLimit_extCone X)
+    (fun j : s => (((ExtF.obj X).left).affineCover.f j).opensRange) hcov (fun j => haff j)
+  exact ⟨i, s, t, V, hVcov, fun j => (hVprop j).1⟩
+
 end ABC3.Found.CorrHyp
