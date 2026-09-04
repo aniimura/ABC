@@ -1497,4 +1497,46 @@ theorem unit_action_mem_iteratedLubinTatePsiTorsionPoints
   exact lubinTateActionAtTorsionPoint_pi_pow_pred_ne_zero_of_mem_iteratedLubinTatePsiTorsionPoints
     K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hmem hxn hkey
 
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★**主単数`1+cπ^n`は`x`を固定する**:
+`(1+c*π^n)·x = x`(`x∈Λ_n`ならば任意の`n`・任意の`c∈𝒪_K`について)。
+`lubinTateAction_add`(`(1+cπ^n)·x=F_f(1·x,(cπ^n)·x)`)・
+`lubinTateActionAtTorsionPoint_one`(`1·x=x`)・
+`pi_pow_action_action_eq_zero`(`(cπ^n)·x=0`)を代入し、
+`aeval_formalGroupLaw_eq_of_snd_eq_zero`(`Found/PGC/LubinTateIdentityLaw.lean`、
+`F_f(y₀,0)=y₀`)で結論する。`F_f`加法の逆元・結合律は一切使わず、
+単位元則の評価版だけで閉じる——単射性一般には引き算が要る
+(前々回の記録)が、**この特別な場合**(主単数が`x`を固定すること)
+は避けられた。`Gal(K(Λ_n)/K)`の作用が`(𝒪_K/π^n)^×`を経由して
+well-defined であることの一部——`(𝒪_K)^×`から`Λ_n`への作用が
+`1+π^n𝒪_K`を法として不変であることの直接の確認。 -/
+theorem one_add_mul_pi_pow_action_eq_self
+    {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hxn : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (c : 𝒪[K.carrier]) :
+    lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem (1 + c * π ^ n) =
+      ⟨⟨x, hmem⟩, mem_adjoinIntegers_of_mem_iteratedLubinTateTorsionPoints
+        K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem⟩ := by
+  haveI := completeSpace_adjoinIntegers K x
+  haveI := isLinearTopology_adjoinIntegers K x
+  haveI := continuousSMul_adjoinIntegers K x
+  have hadd := lubinTateAction_add K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem 1 (c * π ^ n)
+  have hcpi0 : lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem
+      (c * π ^ n) = 0 := pi_pow_action_action_eq_zero K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem c
+  simp only [lubinTateActionAtTorsionPoint_one, hcpi0] at hadd
+  rw [hadd]
+  show MvPowerSeries.aeval _ (formalGroupLaw hq hπmax f hf0 hf1 hf) = _
+  rw [aeval_formalGroupLaw_eq_of_snd_eq_zero hq hπmax f hf0 hf1 hf hπne0 _ (by simp)]
+  rfl
+
 end ABC3.Found.PGC

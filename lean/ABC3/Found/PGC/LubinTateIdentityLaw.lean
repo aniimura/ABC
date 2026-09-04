@@ -354,4 +354,106 @@ theorem formalGroupLaw_identity (hπne0 : π ≠ 0) :
   · exact psi_functional_equation hq hπmax f hf0 hf1 hfres
   · rw [PowerSeries.X_subst, PowerSeries.subst_X hHSf]
 
+/-! ## 単位元則を評価レベルへ持ち上げる(`sorry` 無し)
+
+`formalGroupLaw_identity`(`ψ=X`、`restrictR` による形式的な代入の
+レベルでの単位元則)を、実際の評価点での事実——`F_f(y₀,0)=y₀`——へ
+持ち上げる。`restrictR`・`psi` を経由せず、`coeff_restrictR_eq_of_
+e1_zero`(既出)と`formalGroupLaw_identity`だけから`F_f`の
+「`X_0` のみの係数」を直接取り出し(`coeff_single0_formalGroupLaw`)、
+そこから`aeval`のtruncation極限による評価(このセッションの
+`Found/PGC/AdjoinIntegers.lean::aeval_subst_eq_aeval_aeval`と同じ
+手法)で評価レベルの等式に橋渡しする。`Y`成分が`0`の点で`F_f`を
+評価すると、次数`≥1`の`Y`を含む項がすべて消え(`0`の非負冪)、
+残る「`X_0`のみ」の項が`coeff_single0_formalGroupLaw`によって
+ちょうど`X_0`自身の係数と一致するので、極限は`y₀`そのものになる。 -/
+
+/-- `F_f`の「`X_0`のみ」の係数(`X_1`の次数`0`)は`X`自身の係数と一致
+する——`psi`の定義(`coeff_restrictR_eq_of_e1_zero`により`X_1↦0`の
+代入が`X_1`次数`0`の係数を保つ)と`formalGroupLaw_identity`(`psi=X`)
+を組み合わせるだけ。`restrictR`・`psi`を経由しない直接の評価に使う。 -/
+theorem coeff_single0_formalGroupLaw (hπne0 : π ≠ 0) (n : ℕ) :
+    MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) n) (formalGroupLaw hq hπmax f hf0 hf1 hfres) =
+      if n = 1 then 1 else 0 := by
+  have hpsi_coeff : (psi hq hπmax f hf0 hf1 hfres).coeff n =
+      MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) n) (formalGroupLaw hq hπmax f hf0 hf1 hfres) := by
+    rw [psi, PowerSeries.coeff_mk, coeff_restrictR_eq_of_e1_zero]
+    simp [Finsupp.single_eq_of_ne' (by decide : (0:Fin 2) ≠ 1)]
+  rw [← hpsi_coeff, formalGroupLaw_identity hq hπmax f hf0 hf1 hfres hπne0]
+  rw [PowerSeries.coeff_X]
+
+open scoped MvPowerSeries.WithPiTopology in
+/-- ★★★★★★★★★★★★★★★★**単位元則(評価レベル)**: `F_f(y₀,0)=y₀`。
+`y₁=0`のとき、`F_f`のtruncation(`trunc' A n`、`n₀≥1`)を`y`で評価した
+値は常に`y₀`——`d₁≥1`の項は`y₁^{d₁}=0`で消え、`d₁=0`の項は
+`coeff_single0_formalGroupLaw`により`d₀=1`の項(係数1)以外すべて0
+だから(`Finset.sum_eq_single`で単項だけ残す)。この「一定値」の
+列が`aeval`の定義そのもの(truncationの極限)に収束することと
+組み合わせて、極限も`y₀`に等しいと結論する
+(`MvPowerSeries.continuous_aeval`+`tendsto_atTop_of_eventually_const`)。 -/
+theorem aeval_formalGroupLaw_eq_of_snd_eq_zero {S : Type*} [CommRing S] [Algebra A S]
+    (hπne0 : π ≠ 0)
+    [UniformSpace A] [UniformSpace S] [IsUniformAddGroup A] [IsTopologicalSemiring A]
+    [IsUniformAddGroup S] [T2Space S] [CompleteSpace S] [IsTopologicalRing S]
+    [IsLinearTopology S S] [ContinuousSMul A S]
+    {y : Fin 2 → S} (hy : MvPowerSeries.HasEval y) (hy1 : y 1 = 0) :
+    MvPowerSeries.aeval hy (formalGroupLaw hq hπmax f hf0 hf1 hfres) = y 0 := by
+  have htrunc : ∀ n : Fin 2 →₀ ℕ, 1 ≤ n 0 →
+      MvPowerSeries.aeval hy
+        ((MvPowerSeries.trunc' A n (formalGroupLaw hq hπmax f hf0 hf1 hfres) : MvPolynomial (Fin 2) A) :
+          MvPowerSeries (Fin 2) A) = y 0 := by
+    intro n hn0
+    rw [MvPowerSeries.aeval_coe, MvPolynomial.aeval_def, MvPolynomial.eval₂_eq']
+    have hterm : ∀ d ∈ (MvPowerSeries.trunc' A n (formalGroupLaw hq hπmax f hf0 hf1 hfres)).support,
+        d ≠ Finsupp.single (0 : Fin 2) 1 →
+        (algebraMap A S) (MvPolynomial.coeff d
+          (MvPowerSeries.trunc' A n (formalGroupLaw hq hπmax f hf0 hf1 hfres))) *
+          ∏ i, y i ^ d i = 0 := by
+      intro d hmem hdne
+      by_cases hd1 : d 1 = 0
+      · exfalso
+        apply hdne
+        have hd0 : d = Finsupp.single (0 : Fin 2) (d 0) := by
+          ext i; fin_cases i
+          · simp
+          · simpa using hd1
+        rw [MvPolynomial.mem_support_iff, MvPowerSeries.coeff_trunc'] at hmem
+        by_cases hled : d ≤ n
+        · rw [if_pos hled, hd0, coeff_single0_formalGroupLaw hq hπmax f hf0 hf1 hfres hπne0] at hmem
+          by_cases hd00 : d 0 = 1
+          · rw [hd0, hd00]
+          · simp [hd00] at hmem
+        · rw [if_neg hled] at hmem
+          exact (hmem rfl).elim
+      · rw [Fin.prod_univ_two]
+        have hzero : y 1 ^ d 1 = 0 := by rw [hy1]; exact zero_pow hd1
+        rw [hzero, mul_zero, mul_zero]
+    rw [Finset.sum_eq_single (Finsupp.single (0 : Fin 2) 1) (fun d hd hdne => hterm d hd hdne)]
+    · rw [MvPowerSeries.coeff_trunc']
+      rw [if_pos]
+      · rw [coeff_single0_formalGroupLaw hq hπmax f hf0 hf1 hfres hπne0]
+        simp [Fin.prod_univ_two, hy1]
+      · intro i; fin_cases i
+        · simpa using hn0
+        · simp
+    · intro hnotin
+      simp only [MvPolynomial.mem_support_iff, not_not] at hnotin
+      simp [hnotin]
+  have h1 : Filter.Tendsto (fun n => MvPowerSeries.aeval hy
+      ((MvPowerSeries.trunc' A n (formalGroupLaw hq hπmax f hf0 hf1 hfres) : MvPolynomial (Fin 2) A) :
+        MvPowerSeries (Fin 2) A))
+      Filter.atTop (nhds (MvPowerSeries.aeval hy (formalGroupLaw hq hπmax f hf0 hf1 hfres))) :=
+    (MvPowerSeries.continuous_aeval hy).continuousAt.tendsto.comp
+      (MvPowerSeries.WithPiTopology.tendsto_trunc'_atTop (formalGroupLaw hq hπmax f hf0 hf1 hfres))
+  have h2 : Filter.Tendsto (fun n => MvPowerSeries.aeval hy
+      ((MvPowerSeries.trunc' A n (formalGroupLaw hq hπmax f hf0 hf1 hfres) : MvPolynomial (Fin 2) A) :
+        MvPowerSeries (Fin 2) A))
+      Filter.atTop (nhds (y 0)) := by
+    apply tendsto_atTop_of_eventually_const (i₀ := Finsupp.single (0 : Fin 2) 1)
+    intro n hn
+    apply htrunc
+    have := hn 0
+    simpa using this
+  exact tendsto_nhds_unique h1 h2
+
 end ABC3.Found.PGC
