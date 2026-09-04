@@ -2649,4 +2649,76 @@ theorem falt1ModuleIsTorsionFreeV0V1
   haveI := hL
   exact IsIntegralClosure.isTorsionFree V0 (AdjoinRoot fK)
 
+/-- **`Module.IsTorsionFree` は `T` が整域で `algebraMap R T` が単射なら
+自動的に成り立つ**——`falt1ModuleIsTorsionFreeWnWn1`・`falt1ModuleIsTorsionFreeV0V1`
+で3回繰り返した議論(正則元 `r` が非零 → `algebraMap` の単射性で像も
+非零 → 整域での非零元倍は単射)を、独立の汎用補題として切り出した。 -/
+theorem moduleIsTorsionFree_of_injective {R T : Type*} [CommRing R] [Nontrivial R] [CommRing T] [IsDomain T]
+    [Algebra R T] (hinj : Function.Injective (algebraMap R T)) : Module.IsTorsionFree R T := by
+  refine ⟨fun r hr => ?_⟩
+  have hr0 : r ≠ 0 := by
+    rintro rfl
+    exact zero_ne_one (hr.left (show (0:R) * 0 = 0 * 1 by simp))
+  have hr0' : algebraMap R T r ≠ 0 := fun h => hr0 (hinj (by rw [h, map_zero]))
+  intro x y hxy
+  simp only [Algebra.smul_def] at hxy
+  exact mul_left_cancel₀ hr0' hxy
+
+/-- **`Wₙ₊₁` は `V0` 上有限**(`Module.Finite V0 Wₙ` + `Module.Finite Wₙ
+Wₙ₊₁` の合成、`Module.Finite.trans`)。 -/
+theorem falt1ModuleFiniteV0Wn1
+    {V0 Wn : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    (π : V0) (n : ℕ) (hnpos : 0 < n)
+    (hn' : (n : FractionRing Wn) ≠ 0)
+    (hπne0' : algebraMap Wn (FractionRing Wn) (algebraMap V0 Wn π) ≠ 0)
+    (hprime' : (Ideal.span ({algebraMap V0 Wn π} : Set Wn)).IsPrime)
+    (hnotsq' : algebraMap V0 Wn π ∉ (Ideal.span ({algebraMap V0 Wn π} : Set Wn)) ^ 2)
+    [IsDedekindDomain (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))]
+    [Module.IsTorsionFree Wn (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))]
+    [Module.Finite V0 Wn] :
+    Module.Finite V0 (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn))))) := by
+  haveI := falt1ModuleFiniteWnWn1 π n hnpos hn' hπne0' hprime' hnotsq'
+  exact Module.Finite.trans Wn _
+
+/-- **`Wₙ₊₁` は `V0` 上捩れ無し**——`algebraMap V0 Wₙ₊₁` の単射性を
+`algebraMap V0 Wₙ`(仮定)・`algebraMap Wₙ Wₙ₊₁`(`Wₙ₊₁` が
+`AdjoinRoot gK` の整閉包という構成から)それぞれの単射性の合成で
+示し、`moduleIsTorsionFree_of_injective` を適用する。 -/
+theorem falt1ModuleIsTorsionFreeV0Wn1
+    {V0 Wn : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    (π : V0) (n : ℕ)
+    (hprime' : (Ideal.span ({algebraMap V0 Wn π} : Set Wn)).IsPrime)
+    (hnotsq' : algebraMap V0 Wn π ∉ (Ideal.span ({algebraMap V0 Wn π} : Set Wn)) ^ 2)
+    (hnpos : 0 < n) (hinjV0Wn : Function.Injective (algebraMap V0 Wn))
+    [IsDedekindDomain (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))] :
+    Module.IsTorsionFree V0 (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn))))) := by
+  apply moduleIsTorsionFree_of_injective
+  rw [IsScalarTower.algebraMap_eq V0 Wn (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))]
+  simp only [RingHom.coe_comp]
+  apply Function.Injective.comp _ hinjV0Wn
+  set π' : Wn := algebraMap V0 Wn π with hπ'def
+  set g : Polynomial Wn := Polynomial.X ^ n - Polynomial.C π' with hgdef
+  set gK : Polynomial (FractionRing Wn) := g.map (algebraMap Wn (FractionRing Wn)) with hgKdef
+  have hirr : Irreducible gK :=
+    eisenstein_X_pow_sub_C_irreducible_map π' n hnpos hprime' hnotsq'
+  haveI : Fact (Irreducible gK) := ⟨hirr⟩
+  show Function.Injective (algebraMap Wn (integralClosure Wn (AdjoinRoot gK)))
+  intro a b hab
+  have heq : (algebraMap Wn (AdjoinRoot gK)) a = (algebraMap Wn (AdjoinRoot gK)) b := by
+    have := congrArg (Subtype.val) hab
+    simpa using this
+  have hinj2 : Function.Injective (algebraMap Wn (AdjoinRoot gK)) := by
+    rw [IsScalarTower.algebraMap_eq Wn (FractionRing Wn) (AdjoinRoot gK)]
+    exact (algebraMap (FractionRing Wn) (AdjoinRoot gK)).injective.comp
+      (IsFractionRing.injective Wn (FractionRing Wn))
+  exact hinj2 heq
+
 end ABC3.Found.Falt1
