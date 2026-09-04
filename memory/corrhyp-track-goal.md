@@ -202,3 +202,26 @@ defeqチェックを経由させる——これが「配管の万能薬」だっ
 
 コミット: `e3fe42f3`(extCone完成)・`49e984e5`(isLimit_extCone完成、
 これが本セッション最大の山)・`16f166ac`・`f6ce8cda`(記録)。
+
+★★★★★★★★★★2026-09-04さらに続報(第53-58件、corrHypInstance4完成
+——qcqs前提を満たす具体的instance)。`isLimit_extCone`の実適用時、
+`AffineTransitionLimit.lean`の被覆補題群が`CompactSpace`/
+`QuasiSeparatedSpace`を要求し、`corrHypInstance3`(`Space:=Over BaseK`、
+一般のスキーム)ではこれが保証されないことを発見。`SchemeFEt.lean`に
+`FEtK_pullback_compactSpace`等5個のqcqs-transfer補題(FEt/Extがqcqs性を
+保つこと)を証明した上で、`QcqsSpace.lean`(`Space`をqcqsスキームの部分型
+に絞る)・`Instance4.lean`(`corrHypInstance4`、`Lemma 4.1`のstatementが
+型検査を通ることを確認)を完成させた——すべてsorry無し。
+
+**§4関連、本セッション通算で約35個の新しい補題・構成が積み上がった**
+(`FieldLimit.lean`の多項式降下・`StandardEtalePair`降下・Ring base change、
+`SchemeFEt.lean`のqcqs-transfer、`ExtLimit.lean`の`isLimit_extCone`、
+`QcqsSpace.lean`・`Instance4.lean`)。`Lemma 4.1`本体の証明に必要な道具
+(環側のbase change・スキーム側の極限表示・qcqs前提を満たすSpace)は
+出揃ったが、**残る「アフィン開被覆のétale-locus細分→各片への標準エタール
+降下の適用→遷移射の一致による貼り合わせ」という最終組み立て自体は
+まだ着手できていない**——`Lemma 4.1`はnumbered itemとして依然未証明
+(集計7/24で変わらず)。
+
+コミット: `c399ea22`(qcqs-transfer)・`b65776a6`(QcqsSpace)・
+`575ce5b8`(corrHypInstance4)。
