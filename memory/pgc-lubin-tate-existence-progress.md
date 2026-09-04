@@ -1,6 +1,6 @@
 ---
 name: pgc-lubin-tate-existence-progress
-description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——★単射性(a·x=b·x⟹π^n∣(a-b))が F_f の逆元・対数を経由せず完成(加法公式+評価不等式のみ)、unitActionQuotientLift も単射。濃度は既に一致済みなので残るは有限組合せ論の仕上げ(単射+濃度一致⟹全単射)のみ。Galois同変性そのもの(σ(a·x)=a·σ(x))は cross-point instance bridging という既知の難所があるため後回しにした
+description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——★★★★★(𝒪_K)^×⧸principalUnits K π n ≃ ψ_nの根(全単射)が確立、単数側の道は完結。残る唯一の柱は Galois 側の同変性(σ(a·x)=a·σ(x)、cross-point instance bridging という既知の難所)——σ↦u_σ の一意存在は全単射から従うが、それが準同型であることの証明にこの同変性が要る見通し
 metadata:
   type: project
 ---
@@ -1803,6 +1803,69 @@ Lubin-Tate対数)はすべて不要になった**——このセッションで�
 だけの、遥かに軽い第4の道だった。今後Galois同変性の完成や他の
 局面で同様の「大掛かりな構成を避ける軽い道」がないか、まず疑って
 みる価値がある教訓。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★ 続報
+(2026-09-04、同日、セッション最終到達点): 「残る最後の一歩」も
+即日で完成——`(𝒪_K)^×⧸principalUnits K π n ≃ ψ_nの根`(全単射)
+
+上で「次のセッションへ」と記録した「単射+濃度一致⟹全単射」の
+純粋な有限組合せ論の仕上げは、**同じセッション内で**完成した。
+懸念していた「`Nat.card`と`Finset.card`の橋渡し」も、実際には
+`Fintype.card_coe`+`Nat.card_eq_fintype_card`の2つの標準補題を
+並べるだけで、想定より遥かに軽かった。
+
+**新規に確立した内容(すべて`sorry`無し、ゲート通過済み)**:
+
+1. **`finite_principalUnitsQuotient`**(`QuotientCardinality.lean`、
+   commit`c1ff72c8`): `(𝒪_K)^×⧸principalUnits K π n`が有限。
+   `principalUnitsQuotientEquiv`経由で`(𝒪_K/π^n)^×`の有限性
+   (`Finite Rˣ`は`Finite R`から自動、`infer_instance`一発)を
+   移すだけ(`Finite.of_equiv`)。
+
+2. **`unitActionQuotientLift_mem_iteratedLubinTatePsiTorsionPoints`・
+   `unitActionQuotientBijOn`**(新ファイル`LubinTateActionBijective.lean`、
+   commit`c1ff72c8`): `unitActionQuotientLift`の値域を`ψ_nの根`
+   (`Finset`の`Sort`強制)へ制限した写像。値域の制限は既出の
+   `unit_action_mem_iteratedLubinTatePsiTorsionPoints`を
+   `QuotientGroup.induction_on`で一般の`U`へ持ち上げるだけ。
+
+3. **`unitActionQuotientBijOn_injective`**: 上の制限写像の単射性
+   ——`unitActionQuotientLift_injective`+「`adjoinIntegers K x→
+   K.carrier⟮x⟯→K.closure`の二重coeが単射」(`Subtype.coe_
+   injective`を2回)。
+
+4. **★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+   `unitActionQuotientBijOn_bijective`**: **`(𝒪_K)^×⧸
+   principalUnits K π n ≃ ψ_nの根`という全単射**。
+   `Fintype.card_eq.mp`(濃度が等しければ`Nonempty(α≃β)`)+
+   `Function.Injective.surjective_of_finite`(そのequivの証拠が
+   あれば単射⟹全射)を組み合わせるだけ——`card_principalUnits
+   Quotient`=`card_iteratedLubinTatePsiTorsionPoints`
+   (ともに`q^n-q^{n-1}`、既出)を`Fintype.card_coe`+
+   `Nat.card_eq_fintype_card`で橋渡しする。
+
+**到達点のまとめ**: `principalUnitsQuotientEquiv`
+(`(𝒪_K)^×⧸principalUnits K π n≃*(𝒪_K/π^n)^×`、既出)と組み合わせ
+れば、**`(𝒪_K/π^n)^×≃ψ_nの根`**——古典的なLubin-Tate理論の核心的な
+事実(原始的な`π^n`-捩れ点の全体が`(𝒪_K/π^n)^×`と自然に一対一
+対応すること)が完全に確立された。`Gal(K(Λ_n)/K)≅(𝒪_K/π^n)^×`
+という主定理に向けて、**単数側の道はここで完結**した。
+
+**残る唯一の大きな柱**: Galois側——`Gal(K.closure/K.carrier)`が
+`ψ_nの根`を置換として保つこと(`image_algEquiv_iteratedLubinTatePsi
+TorsionPoints`、既出)は分かっているが、`Gal(K.closure/K.carrier)`
+の各`σ`に対して「`σ(x)=u_σ·x`となる一意な単数`u_σ`」を対応させる
+写像(これが目的の同型`Gal(K(Λ_n)/K)≅(𝒪_K/π^n)^×`の実体)を構成
+するには、いま確立した全単射(単数の作用が`ψ_nの根`上で単純推移的)
+を使えばよい——`u_σ`の一意存在性は今回の全単射から直ちに従う
+(`ψ_nの根`上の`(𝒪_K)^×`の作用が全単射的なので、任意の2点間に
+一意な単数が存在する)。真に残っているのは、この対応`σ↦u_σ`が
+**準同型**であること(`u_{στ}=u_σ*u_τ`)を示す部分——これには
+`σ(a·x)=a·σ(x)`(Galois同変性そのもの、cross-point instance
+bridgingという既知の難所)が必要になる見通し。次のセッションでは
+まずこの同変性の構成、あるいはそれを回避する別の道が無いか
+(このセッションで単射性の壁を回避できたのと同様に)を最初に
+検討する価値がある。
 
 ## 続報(同日、`algEquiv_mem_iteratedLubinTateTorsionPoints_of_mem`、
 `AdjoinIntegers.lean`、commit `93108293`): `Λ_n`全体もσで保たれる
