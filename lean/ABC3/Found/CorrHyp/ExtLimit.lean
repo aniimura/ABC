@@ -2146,6 +2146,36 @@ noncomputable def pullbackHomOfLEIsoBasicOpen {X : Scheme} {U : X.Opens} (f₁ f
     (pullback (X.homOfLE h1) (X.homOfLE h2) : Scheme) ≅ (X.basicOpen (f₁ * f₂) : Scheme) :=
   (pullbackHomOfLEIso h1 h2).trans (X.isoOfEq (X.basicOpen_mul f₁ f₂).symm)
 
+/-! ### 項目(b)の残り——`φ(i,j)`の自然性(`fst`/`snd`との可換性)
+
+`piecesGluedCoverVIso`(`V`成分比較同型)がNatIsoの1成分として使える
+ためには、`fst`/`snd`(`corrHypGlueData`側の`gdF`・`gdT≫gdF`、
+`piecesOpenCover.gluedCover`側の`pullback.fst`・
+`pullbackSymmetry.hom≫pullback.fst`)と可換であることを示す必要がある。
+`φ(i,j)`は`pullbackEInvIso`(`e`を追い出す)→`pullbackHomOfLEIsoBasicOpen`
+(`⊓`を`basicOpen`にまとめる)→`transitionElemIso`(`X`側から`Z i`側へ
+転送)の3段構成なので、各段の自然性を個別に示してから繋ぐ。ここでは
+まず`pullbackHomIsoLeft`(mathlibに無かったので既存で補った一般的事実)
+自身の`fst`/`snd`自然性(`pullback.map`の定義から`pullback.lift_fst`/
+`_snd`で直ちに従う)を確立する。 -/
+
+/-- `pullbackHomIsoLeft`の`fst`との可換性——`pullback.map`の定義
+(`pullback.lift`)から`pullback.lift_fst`で直ちに従う。`@[reassoc]`
+を付け、`pullbackEInvIso`の自然性の証明で「末尾に何かが続く」形の
+書き換えにも使えるようにする。 -/
+@[reassoc]
+theorem pullbackHomIsoLeft_hom_fst' {X Y Z W : Scheme} (i : X ≅ Y) (g : Y ⟶ Z) (f : W ⟶ Z) :
+    (pullbackHomIsoLeft i g f).hom ≫ pullback.fst g f = pullback.fst (i.hom ≫ g) f ≫ i.hom := by
+  unfold pullbackHomIsoLeft
+  exact pullback.lift_fst _ _ _
+
+/-- `pullbackHomIsoLeft`の`snd`との可換性——同様。 -/
+@[reassoc]
+theorem pullbackHomIsoLeft_hom_snd' {X Y Z W : Scheme} (i : X ≅ Y) (g : Y ⟶ Z) (f : W ⟶ Z) :
+    (pullbackHomIsoLeft i g f).hom ≫ pullback.snd g f = pullback.snd (i.hom ≫ g) f := by
+  unfold pullbackHomIsoLeft pullback.map
+  exact pullback.lift_snd _ _ _
+
 /-- `piecesOpenCover`の脚`(e i).inv ≫ X.homOfLE (h i)`同士のpullbackは、
 `e i`・`e j`をpullbackの脚から追い出す(`pullbackHomIsoLeft`+
 `pullbackSymmetry`、いずれも既存の一般的事実)ことで、`X.homOfLE`同士
@@ -2159,6 +2189,50 @@ noncomputable def pullbackEInvIso {X : Scheme} {U : X.Opens} {J : Type} (f : J �
     ((pullbackSymmetry (X.homOfLE (h i)) ((e j).inv ≫ X.homOfLE (h j))).trans
       ((pullbackHomIsoLeft (e j).symm (X.homOfLE (h j)) (X.homOfLE (h i))).trans
         (pullbackSymmetry (X.homOfLE (h j)) (X.homOfLE (h i)))))
+
+/-- **`pullbackEInvIso`の`fst`との可換性**——`(e i).symm.hom`(`show`で
+明示形へ)に対し、内側から順に`pullbackSymmetry_hom_comp_fst`・
+`pullbackHomIsoLeft_hom_snd'`・`pullbackSymmetry_hom_comp_snd`・
+`pullbackHomIsoLeft_hom_fst'`(すべて非`_assoc`版、末尾に何も続かない
+ので)を`rw`で辿るだけ。
+
+★配管の注意(`#31`の新しい現れ方): `(e i).inv`をそのまま`show`に
+書くと、`pullbackHomIsoLeft`が内部で使う`(e i).symm.hom`との型不一致
+(`instances`透明度では見分けられない)で`rw`が失敗する——`show`の
+中では`(e i).inv`ではなく`(e i).symm.hom`で統一して書くことで解消。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem pullbackEInvIso_hom_fst {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
+    (Z : J → Scheme) (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i)
+    (h : ∀ i, X.basicOpen (f i) ≤ U) (i j : J) :
+    (pullbackEInvIso f Z e h i j).hom ≫ pullback.fst (X.homOfLE (h i)) (X.homOfLE (h j)) =
+      pullback.fst ((e i).inv ≫ X.homOfLE (h i)) ((e j).inv ≫ X.homOfLE (h j)) ≫ (e i).inv := by
+  show (pullbackHomIsoLeft (e i).symm (X.homOfLE (h i)) ((e j).symm.hom ≫ X.homOfLE (h j))).hom ≫
+      (pullbackSymmetry (X.homOfLE (h i)) ((e j).symm.hom ≫ X.homOfLE (h j))).hom ≫
+      (pullbackHomIsoLeft (e j).symm (X.homOfLE (h j)) (X.homOfLE (h i))).hom ≫
+      (pullbackSymmetry (X.homOfLE (h j)) (X.homOfLE (h i))).hom ≫
+      pullback.fst (X.homOfLE (h i)) (X.homOfLE (h j)) =
+    pullback.fst ((e i).symm.hom ≫ X.homOfLE (h i)) ((e j).symm.hom ≫ X.homOfLE (h j)) ≫ (e i).symm.hom
+  rw [pullbackSymmetry_hom_comp_fst, pullbackHomIsoLeft_hom_snd',
+    pullbackSymmetry_hom_comp_snd, pullbackHomIsoLeft_hom_fst']
+
+/-- **`pullbackEInvIso`の`snd`との可換性**——`fst`版と対称、ただし
+「末尾に`(e j).symm.hom`が続く」形になる2段は`_assoc`版を使う。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem pullbackEInvIso_hom_snd {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
+    (Z : J → Scheme) (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i)
+    (h : ∀ i, X.basicOpen (f i) ≤ U) (i j : J) :
+    (pullbackEInvIso f Z e h i j).hom ≫ pullback.snd (X.homOfLE (h i)) (X.homOfLE (h j)) =
+      pullback.snd ((e i).inv ≫ X.homOfLE (h i)) ((e j).inv ≫ X.homOfLE (h j)) ≫ (e j).inv := by
+  show (pullbackHomIsoLeft (e i).symm (X.homOfLE (h i)) ((e j).symm.hom ≫ X.homOfLE (h j))).hom ≫
+      (pullbackSymmetry (X.homOfLE (h i)) ((e j).symm.hom ≫ X.homOfLE (h j))).hom ≫
+      (pullbackHomIsoLeft (e j).symm (X.homOfLE (h j)) (X.homOfLE (h i))).hom ≫
+      (pullbackSymmetry (X.homOfLE (h j)) (X.homOfLE (h i))).hom ≫
+      pullback.snd (X.homOfLE (h i)) (X.homOfLE (h j)) =
+    pullback.snd ((e i).symm.hom ≫ X.homOfLE (h i)) ((e j).symm.hom ≫ X.homOfLE (h j)) ≫ (e j).symm.hom
+  rw [pullbackSymmetry_hom_comp_snd, pullbackHomIsoLeft_hom_fst',
+    pullbackSymmetry_hom_comp_fst_assoc, pullbackHomIsoLeft_hom_snd'_assoc]
 
 /-- **`V`成分の比較同型(`h`を任意に取った、`piecesOpenCover`非依存の
 中間形)**——`pullbackEInvIso`(`e`を追い出す)+`pullbackHomOfLEIsoBasicOpen`
