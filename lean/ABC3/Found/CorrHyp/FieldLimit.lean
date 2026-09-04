@@ -1329,4 +1329,42 @@ theorem standardEtalePresentation_exists_coord {R S : Type} [CommRing R] [CommRi
     Pres.equivRing_x] at h2
   exact h2
 
+/-- 単元の`PrimeSpectrum.basicOpen`は全体——mathlibに直接の名前が
+見当たらなかったので自作(CorrHyp非依存の一般的事実)。 -/
+theorem PrimeSpectrum.basicOpen_eq_top_of_isUnit {R : Type} [CommRing R] {u : R} (hu : IsUnit u) :
+    PrimeSpectrum.basicOpen u = ⊤ := by
+  apply TopologicalSpace.Opens.ext
+  simp only [TopologicalSpace.Opens.coe_top]
+  rw [Set.eq_univ_iff_forall]
+  intro p
+  rw [SetLike.mem_coe, PrimeSpectrum.mem_basicOpen]
+  intro hmem
+  exact p.2.ne_top (p.asIdeal.eq_top_of_isUnit_mem hmem hu)
+
+/-- 単元倍しても`basicOpen`は変わらない——`basicOpen_mul`+
+`basicOpen_eq_top_of_isUnit`から。重なりの遷移開集合を同定する
+`standardEtalePresentation_transitionOpen_eq`の核心部品。 -/
+theorem PrimeSpectrum.basicOpen_mul_isUnit {R : Type} [CommRing R] (a : R) {u : R} (hu : IsUnit u) :
+    PrimeSpectrum.basicOpen (a * u) = PrimeSpectrum.basicOpen a := by
+  rw [PrimeSpectrum.basicOpen_mul, PrimeSpectrum.basicOpen_eq_top_of_isUnit hu, inf_top_eq]
+
+/-- **重なりの比較射に要る「遷移開集合」の同定**——`Pres`の元`x`
+(たとえば`f_j`の`Localization.Away f_i`への像)を`Pres.equivRing`で
+`Pres.P.Ring`へ運んだ像の基本開集合は、座標多項式`p`(`standardEtalePresentation_
+exists_coord`で得た)を`X`で評価した元の基本開集合にちょうど一致する
+——`g`が`P.Ring`の単元であること(`hasMap_X.2`、標準エタール表示の
+定義そのもの)から、`g^n`倍は基本開集合を変えない
+(`PrimeSpectrum.basicOpen_mul_isUnit`)。`D(f_i)∩D(f_j)`(`Spec B`内)を
+`P_i.Ring`の中の基本開集合として実際に特定する、GlueDataの遷移射構成の
+核心。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem standardEtalePresentation_transitionOpen_eq {R S : Type} [CommRing R] [CommRing S]
+    [Algebra R S] (Pres : StandardEtalePresentation R S) (x : S) :
+    ∃ p : Polynomial R, PrimeSpectrum.basicOpen (Pres.equivRing x) =
+      PrimeSpectrum.basicOpen (Polynomial.aeval Pres.P.X p) := by
+  obtain ⟨p, n, hpn⟩ := standardEtalePresentation_exists_coord Pres x
+  refine ⟨p, ?_⟩
+  rw [← hpn, PrimeSpectrum.basicOpen_mul_isUnit _ (Pres.P.hasMap_X.2.pow n)]
+
 end ABC3.Found.CorrHyp
