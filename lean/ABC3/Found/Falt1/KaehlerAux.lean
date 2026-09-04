@@ -5588,4 +5588,45 @@ theorem falt1_pushoutKaehlerSplitStepOption_surjective
   refine ⟨(LinearMap.piMap f).comp e.toLinearMap, ?_⟩
   exact h1.comp h2
 
+/-- **`falt1_pushoutKaehlerSplitStepOption_surjective`の具体例**:
+`falt1_pushoutKaehlerSplitStepOption_adjoinRoot_example`(骨格のみ)を
+実際に「全射性」まで実装した版。`AdjoinRoot g1`という1個の
+Eisenstein型生成元(step (3)の新規因子)と、`pushoutKaehlerSplitBase`
+が出発点として使う`ι=Fin 1`のダミー因子(`R`自身、`Ω[R/R]=0`を
+寄与するだけ)を組み合わせ、`Ω[B2/R]`から`(Option.elim i QC (fun_
+=>PUnit))`への全射を実際に構成する。
+
+**ここで実際に踏んだ罠**(`tools/lean-idioms.md`への追記候補):
+ダミー因子の全射`φ`/`hφ`を`have`で**独立に型注釈して**渡すと、
+`(F i).lift (B:=B2)).algT`(理論側が要求する、合成`RingHom`経由の
+`Algebra`instance)と、`B2`が自然に持つ`AdjoinRoot.instAlgebra`
+(型クラス探索が独自に見つけてしまう`Algebra`instance)が**instance
+diamond**として衝突し、`letI`で明示登録しても解消しなかった——
+これは`#1`の典型例が最も単純なケースでも起きることの実例。
+**直し方**: `φ`/`hφ`を独立に`have`せず、`falt1_pushoutKaehlerSplit
+StepOption_surjective`呼び出しの**引数の位置に無名関数として直接
+書く**(`fun i => 0`・`fun i y => ⟨0, Subsingleton.elim _ _⟩`)ことで、
+型を**呼び出し先の期待する型から直接推論**させ、独立な型注釈による
+instance探索の分岐を避けた。 -/
+theorem falt1_pushoutKaehlerSplitStepOption_adjoinRoot_surjective_example
+    {R : Type uFalt1R} [CommRing R] (p : ℕ) (a1 : R)
+    (hnzd1 : algebraMap (Polynomial R) (AdjoinRoot ((Polynomial.X ^ p - Polynomial.C a1).map (algebraMap R R)))
+        (Polynomial.derivative ((Polynomial.X ^ p - Polynomial.C a1).map (algebraMap R R)))
+        ∈ nonZeroDivisors (AdjoinRoot ((Polynomial.X ^ p - Polynomial.C a1).map (algebraMap R R)))) :
+    True := by
+  set g1 := Polynomial.X ^ p - Polynomial.C a1 with hg1
+  letI hAlg1 : Algebra (AdjoinRoot g1) (AdjoinRoot (g1.map (algebraMap R R))) := falt1AdjoinRootAlgebra g1
+  letI hST1 : IsScalarTower R (AdjoinRoot g1) (AdjoinRoot (g1.map (algebraMap R R))) := falt1AdjoinRoot_isScalarTower g1
+  letI hPush1 : Algebra.IsPushout R R (AdjoinRoot g1) (AdjoinRoot (g1.map (algebraMap R R))) := falt1_isPushout_adjoinRoot g1
+  have hinj1 : Function.Injective (KaehlerDifferential.mapBaseChange R R (AdjoinRoot (g1.map (algebraMap R R)))) :=
+    mapBaseChange_injective_adjoinRoot_direct g1 hnzd1
+  set B2 := AdjoinRoot (g1.map (algebraMap R R)) with hB2def
+  obtain ⟨φC, hφC⟩ := falt1_omegaAdjoinRoot_surjective_quotient_p_baseChange (R := R) (B := B2) p a1
+  set Fdummy : Fin 1 → RAlgOver.{uFalt1R, uFalt1R, uFalt1R} R R := fun _ => (⟨R⟩ : RAlgOver.{uFalt1R, uFalt1R, uFalt1R} R R) with hFdummy
+  obtain ⟨ρ, hρ⟩ := falt1_pushoutKaehlerSplitStepOption_surjective (R := R) (B1 := R) (B := B2)
+    (⟨AdjoinRoot g1⟩ : RAlg.{uFalt1R, uFalt1R} R) Fdummy
+    pushoutKaehlerSplitBase hinj1 (Q := fun _ : Fin 1 => PUnit.{uFalt1R+1}) φC hφC
+    (fun i => 0) (fun i y => ⟨0, Subsingleton.elim _ _⟩)
+  trivial
+
 end ABC3.Found.Falt1

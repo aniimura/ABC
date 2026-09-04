@@ -3123,6 +3123,27 @@ mathlib での正確な組み立て方は未確認)。
       ものを残すより、`falt1_pushoutKaehlerSplitStepOption_surjective`
       という**一般形の帰納の1段**(既に`lake build`で確認済み・commit
       済み)を確実な到達点として確定させる方を優先した。
+
+      ★★★2026-09-05、続けてこのinstance diamondを**実際に解消した**。
+      原因は診断通りではなく、もう1段単純だった: `φ`/`hφ`を`have`で
+      **独立に型注釈してから**渡すと、その型注釈の elaboration が
+      (`letI`で明示登録したにも関わらず)`AdjoinRoot.instAlgebra`を
+      独自に見つけてしまい、理論側が期待する`.lift.algT`と食い違う。
+      **直し方**: `φ`/`hφ`を独立に`have`/`set`せず、`falt1_pushoutKaehler
+      SplitStepOption_surjective`の呼び出しの**引数の位置に無名関数
+      として直接書く**(`fun i => 0`・`fun i y => ⟨0, Subsingleton.elim
+      _ _⟩`)——こうすると型が**呼び出し先(理論の`φ`引数の型)から
+      直接推論**され、独立した型注釈によるinstance探索の分岐が
+      そもそも発生しない。`falt1_pushoutKaehlerSplitStepOption_
+      adjoinRoot_surjective_example`として`KaehlerAux.lean`に追記・
+      `lean_check`確認後`lake build`成功。これで Exercise 13.7.4
+      step (3) の帰納の1段が、**実際のAdjoinRoot具体例(1生成元+
+      ダミー因子)に対して動くことを end-to-end で確認**できた——
+      `d+1`個の実生成元への拡張(`Fdummy`側を本物の前段の族に
+      置き換えて`n`回連鎖する)への道筋がこれで裏付けられた。
+      新しい教訓として`tools/lean-idioms.md`にも追記した(「独立
+      `have`型注釈 vs 呼び出し引数位置での無名関数」という、既存の
+      `#1`/`#33`とは別角度の直し方)。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・

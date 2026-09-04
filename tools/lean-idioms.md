@@ -4129,3 +4129,38 @@ instance : ∀ i : Option α, AddCommGroup (Option.elim i QC Q)
 `falt1_optionElim_addCommGroup`/`falt1_optionElim_module`
 (`pushoutKaehlerSplitStepOption`の`Option ι`出力と、成分ごとの
 全射`φC`/`φ i`の像`QC`/`Q i`を束ねる場面)。
+
+## 39. instance diamondの回避策として、`have`/`set`で独立に型注釈
+するのではなく**呼び出し引数の位置に無名関数を直接書く**
+
+`#1`「instances透明度で型が合わない」の一種だが、直し方が別角度:
+`letI`で望む`Algebra`instanceを明示登録しても、その**後**に
+`have φ : (…その instance が要求される型…) := ...` のように
+`φ`を**独立に型注釈して`have`/`set`する**と、その型注釈自体の
+elaborationが型クラス探索を独自に再実行し、`letI`で登録した
+instanceではなく別の(グローバルな)instanceを見つけてしまうことが
+ある——`letI`の登録は「後続のtermのinstance探索で優先される」とは
+限らず、**新しい型注釈のスコープでの独立した探索**では負けうる。
+
+直し方: `φ`を独立に`have`/`set`せず、**それを引数として渡す関数
+呼び出しの引数位置に無名関数のまま直接書く**:
+
+```lean
+-- 悪い例(instance diamondで失敗する):
+have φ : (期待される具体的な型) := fun i => 0
+exact someTheorem ... φ ...
+
+-- 良い例(呼び出し先の期待する型から直接推論させる):
+exact someTheorem ... (fun i => 0) ...
+```
+
+こうすると`φ`の型は独立に決まらず、`someTheorem`の**仮引数の型**
+(=呼び出し先が実際に要求する、正しいinstanceを含む型)から直接
+推論されるため、独立した型注釈によるinstance探索の分岐がそもそも
+発生しない。`#1`の対処法(`letI`で明示登録)がうまくいかない場面で、
+まず試す価値がある軽量な代替。
+
+実例: `lean/ABC3/Found/Falt1/KaehlerAux.lean`の
+`falt1_pushoutKaehlerSplitStepOption_adjoinRoot_surjective_example`
+(`RAlgOver.lift`由来の`Algebra`instanceと`AdjoinRoot.instAlgebra`の
+diamond)。
