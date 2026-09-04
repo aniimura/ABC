@@ -1752,4 +1752,28 @@ theorem length_quotient_span_singleton_mul {R : Type*} [CommRing R] (a : R)
     change a * y = (x : R) at hxy
     exact ⟨y, hy, Subtype.ext ((hgapp y).trans hxy)⟩
 
+/-!
+## Theorem 1.2・3b: 次数スケーリングは分岐指数(2026-09-04、検算で訂正)
+
+`cancel_conductor_delta` を `delta_tendsto_zero` の `hrec` へ接続する
+には「`Wₙ₊₁` へ写したイデアルの長さ」を `Wₙ` 側の長さと結ぶ必要がある。
+当初「`[Wₙ₊₁:Wₙ]` 倍」という素朴な式を疑ったが、**不分岐拡大での検算
+(両辺とも `1` になり矛盾)で誤りと判明した**——正しい係数は次数
+全体ではなく**分岐指数 `e`** のみ。以下でこれを(`Wₙ₊₁` が DVR の
+場合に)確認した。 -/
+
+/-- **素イデアルの冪の像の長さは分岐指数倍**: `S`(DVR)の極大イデアルが
+`Wₙ` のイデアル `P` の像として `𝔪^e` と書けるとき(`e` = 分岐指数)、
+`P^k` の像で割った長さは `e·k`——`[Wₙ₊₁:Wₙ]`(次数、分岐指数×残余次数)
+ではなく分岐指数のみに比例する。`IsDiscreteValuationRing.length_
+quotient_pow_maximalIdeal` から直接従う。 -/
+theorem length_map_pow_of_ramificationIdx {S : Type*} [CommRing S] [IsDomain S] [IsDiscreteValuationRing S]
+    (Wn : Type*) [CommRing Wn] [Algebra Wn S] (P : Ideal Wn) (e k : ℕ)
+    (he : Ideal.map (algebraMap Wn S) P = (IsLocalRing.maximalIdeal S) ^ e) :
+    Module.length S (S ⧸ Ideal.map (algebraMap Wn S) (P^k)) = (e:ℕ∞) * k := by
+  rw [Ideal.map_pow, he, ← pow_mul]
+  rw [IsDiscreteValuationRing.length_quotient_pow_maximalIdeal]
+  push_cast
+  ring
+
 end ABC3.Found.Falt1
