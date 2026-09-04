@@ -880,3 +880,50 @@ compactSpace`は`Valued`型クラスを要求するので、この素朴な`Subr
 これが解決すれば`Algebra 𝒪[K.carrier] (adjoinIntegers K x)`
 (`algebraMap_mem_adjoinIntegers`から`RingHom.toAlgebra`的に構成可能)
 と組み合わせて、`PowerSeries.aeval`で実際に`f`を`x`で評価できる。
+
+**続報(2026-09-04・続き、★★★★★★★★★★★★★このセッションの最大の
+節目——冪級数を`Λ_n`の元で実際に評価する`lubinTateEvalAtTorsionPoint`
+が完成した)**: 上記の課題を、当初計画していた
+「`IsDiscreteValuationRing`を`Valued`抜きで得る」というルートとは
+**違う、もっと直接的な2つの経路**で解決した(commit`88879620`):
+
+1. **`ValuationRing`(付値環)**: `adjoinIntegers K x`の任意の2元
+   `a,b`について、ノルムの大小で場合分けし、小さい方を大きい方で
+   割った商(ノルム`≤1`なので`adjoinIntegers K x`自身の元)を
+   `PreValuationRing`の定義`∃c,a*c=b∨b*c=a`の証人として**直接**
+   与えるだけ——`Valued`・コンパクト性のどちらも不要だった。
+   `ValuationRing.iff_local_bezout_domain`で`IsLocalRing`も従う。
+2. **`IsLinearTopology`(★これが本当の鍵だった)**: 半径`ε>0`の
+   閉球`{y|‖y‖≤ε}`が、非アルキメデス三角不等式(`add_mem'`)と
+   ノルム`≤1`の元によるスカラー倍(`smul_mem'`)から**そのまま
+   イデアルの公理を満たす**ことに気づいた(`adjoinIntegersBall`)。
+   `Metric.nhds_basis_closedBall`(距離空間の一般論)と組み合わせて
+   `IsLinearTopology.mk_of_hasBasis`を直接適用——`Ideal.
+   isLinearTopology`(adic位相経由、`IsDiscreteValuationRing`が要る)
+   も`Valued`も一切経由しない、**当初想定より遥かに直接的な経路**
+   だった。「一意化元1本で割り切れる」という DVR 特有の構造は
+   実は不要で、ノルムがバナッハ空間的に閉球=イデアルを作るという
+   より初等的な事実だけで十分だった。
+
+さらに:
+- `adjoinIntegersAlgebraMap`・`adjoinIntegersAlgebra`: `𝒪[K.carrier]`
+  から`adjoinIntegers K x`への環準同型・代数構造
+  (`algebraMap_mem_adjoinIntegers`から)——**`𝒪[K.carrier]`が
+  `𝒪[K.carrier⟮x⟯]`へ埋め込まれる**という何段階も前から見通していた
+  課題がついに解決した。
+- `continuous_algebraMap_adjoinIntegers`・`continuousSMul_
+  adjoinIntegers`: 上記の埋め込みの連続性(`continuousSMul_of_
+  algebraMap`から)。
+
+これらすべてを組み合わせ、
+**`lubinTateEvalAtTorsionPoint : PowerSeries (𝒪[K.carrier]) →ₐ[𝒪[K.
+carrier]] adjoinIntegers K x`**——`PowerSeries.aeval`で任意の冪級数
+(特に`iteratedLubinTate`系列、`[a]_f`を表すもの)を`Λ_n`の実際の元
+`x`で評価する代数準同型——を完成させた。★これは`sorry`無しで、
+実在の任意のp進局所体`K`について成り立つ、完全に一般的な結果。
+
+**次の一歩**: `lubinTateEvalAtTorsionPoint`を`iteratedLubinTate`系列
+(具体的に`[a]_f`を表すもの)に適用し、評価結果が再び`Λ_∞=∪Λ_n`に
+戻ることを示して、`Λ_n`への`𝒪_K`加群構造(`a·x := [a]_f(x)`)を
+実際に定義すること。これができれば節目(3)が完全に完成し、節目(4)
+(`K(Λ_n)`の正規性・Galois群計算)へ進める。
