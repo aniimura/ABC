@@ -2103,16 +2103,109 @@ noncomputable def piecesOpenCover {X : Scheme} {U : X.Opens} {J : Type} (f : J �
       apply Subtype.ext
       simp)
 
-/- ★★次の一手(未着手、項目(b)の核心): `piecesOpenCover f Z e hcover`
-の`gluedCover`(mathlib既製、`.glued ≅ U`が`Scheme.Cover.fromGlued`の
-`IsIso`性からすでに得られる)と`corrHypGlueData f Z e`(独自配線)の
-`.diagram`(`MultispanIndex`)同士の`NatIso`を構成し、
-`CategoryTheory.Limits.HasColimit.isoOfNatIso`で`.glued`同士の同型を
-得てから合成する——`U`成分は恒等(`piecesOpenCover`が`Z`をそのまま
-objectに使うため)、`V`成分(`pullback (𝒰.f i)(𝒰.f j) ≅ gdV f Z e (i,j)`)
-は`pullbackHomIsoLeft`+`pullbackSymmetry`+`isPullback_opens_inf`で
-組み立てられる見込み(Exploreエージェントの調査、`corrhyp-goal.md`に
-記録)。 -/
+/-! ### 項目(b)の核心部品——`V`成分の比較同型
+
+`piecesOpenCover f Z e hcover`の`gluedCover`(mathlib既製、`.glued ≅ U`
+が`Scheme.Cover.fromGlued`の`IsIso`性からすでに得られる)と
+`corrHypGlueData f Z e`(独自配線)の`.diagram`(`MultispanIndex`)同士の
+`NatIso`を構成するには、`U`成分(恒等——両者とも`Z`をそのままobjectに
+使う)と`V`成分(`pullback (𝒰.f i)(𝒰.f j) ≅ gdV f Z e (i,j)`)の比較が
+要る。ここでは`V`成分の比較同型を組み立てる——3段の`calc`:
+`pullback (𝒰.f i)(𝒰.f j) ≅ pullback (X.homOfLE hi)(X.homOfLE hj)`
+(`e i`・`e j`をpullbackの脚から追い出す、`pullbackHomIsoLeft`+
+`pullbackSymmetry`)→`≅ (X.basicOpen (f i) ⊓ X.basicOpen (f j) :
+X.Opens)`(`U`への埋め込みを経由するpullbackは`⊓`に一致する——
+`isPullback_opens_inf`の`U`版、`pullbackIsPullbackOfCompMono`
+(mathlib、mono後合成してもpullbackが変わらない)+一意性で得る)
+→`≅ X.basicOpen (f i * f j)`(`Scheme.basicOpen_mul`)→
+`≅ (Z i).basicOpen (transitionElem (f i)(f j)(e i)) = gdV f Z e (i,j)`
+(`transitionElemIso`、既存)。 -/
+
+/-- `A,B ≤ U`のとき、`X.homOfLE`同士のpullbackは`A⊓B`に一致する——
+`isPullback_opens_inf`の`U`相対版。`pullbackIsPullbackOfCompMono`
+(mathlib、`Mono i`のとき`pullback f g`は`pullback (f≫i)(g≫i)`の
+極限錐でもある)を`U.ι`(常にmono、開埋め込み)に適用し、
+`Scheme.homOfLE_ι`(`X.homOfLE e ≫ V.ι = U.ι`)で`.ι`へ書き換えてから
+`isPullback_opens_inf`と一意性(`IsPullback.isoIsPullback`)で比較する。
+CorrHyp非依存の一般的事実。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def pullbackHomOfLEIso {X : Scheme} {U A B : X.Opens} (hA : A ≤ U) (hB : B ≤ U) :
+    (pullback (X.homOfLE hA) (X.homOfLE hB) : Scheme) ≅ (A ⊓ B : X.Opens) :=
+  have h1 : IsPullback (pullback.fst (X.homOfLE hA) (X.homOfLE hB)) (pullback.snd (X.homOfLE hA) (X.homOfLE hB))
+      (X.homOfLE hA ≫ U.ι) (X.homOfLE hB ≫ U.ι) :=
+    IsPullback.of_isLimit (pullbackIsPullbackOfCompMono (X.homOfLE hA) (X.homOfLE hB) U.ι)
+  have h2 : IsPullback (pullback.fst (X.homOfLE hA) (X.homOfLE hB)) (pullback.snd (X.homOfLE hA) (X.homOfLE hB))
+      A.ι B.ι := (Scheme.homOfLE_ι X hA) ▸ (Scheme.homOfLE_ι X hB) ▸ h1
+  h2.isoIsPullback (A : Scheme) (B : Scheme) (isPullback_opens_inf A B)
+
+/-- `pullbackHomOfLEIso`を`Scheme.basicOpen_mul`で単一の基本開集合の形
+(`X.basicOpen (f₁*f₂)`)にまとめたもの。 -/
+noncomputable def pullbackHomOfLEIsoBasicOpen {X : Scheme} {U : X.Opens} (f₁ f₂ : Γ(X, U))
+    (h1 : X.basicOpen f₁ ≤ U) (h2 : X.basicOpen f₂ ≤ U) :
+    (pullback (X.homOfLE h1) (X.homOfLE h2) : Scheme) ≅ (X.basicOpen (f₁ * f₂) : Scheme) :=
+  (pullbackHomOfLEIso h1 h2).trans (X.isoOfEq (X.basicOpen_mul f₁ f₂).symm)
+
+/-- `piecesOpenCover`の脚`(e i).inv ≫ X.homOfLE (h i)`同士のpullbackは、
+`e i`・`e j`をpullbackの脚から追い出す(`pullbackHomIsoLeft`+
+`pullbackSymmetry`、いずれも既存の一般的事実)ことで、`X.homOfLE`同士
+のpullbackへ帰着する。 -/
+noncomputable def pullbackEInvIso {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
+    (Z : J → Scheme) (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i)
+    (h : ∀ i, X.basicOpen (f i) ≤ U) (i j : J) :
+    (pullback ((e i).inv ≫ X.homOfLE (h i)) ((e j).inv ≫ X.homOfLE (h j)) : Scheme) ≅
+      (pullback (X.homOfLE (h i)) (X.homOfLE (h j)) : Scheme) :=
+  (pullbackHomIsoLeft (e i).symm (X.homOfLE (h i)) ((e j).inv ≫ X.homOfLE (h j))).trans
+    ((pullbackSymmetry (X.homOfLE (h i)) ((e j).inv ≫ X.homOfLE (h j))).trans
+      ((pullbackHomIsoLeft (e j).symm (X.homOfLE (h j)) (X.homOfLE (h i))).trans
+        (pullbackSymmetry (X.homOfLE (h j)) (X.homOfLE (h i)))))
+
+/-- **`V`成分の比較同型(`h`を任意に取った、`piecesOpenCover`非依存の
+中間形)**——`pullbackEInvIso`(`e`を追い出す)+`pullbackHomOfLEIsoBasicOpen`
+(`⊓`を単一の`basicOpen`にまとめる)+`transitionElemIso`(`X`側から`Z i`
+側への転送、既存)を繋ぐだけ。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def pullbackHomOfLE_gdV_iso {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
+    (Z : J → Scheme) (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i)
+    (h : ∀ i, X.basicOpen (f i) ≤ U) (i j : J) :
+    (pullback ((e i).inv ≫ X.homOfLE (h i)) ((e j).inv ≫ X.homOfLE (h j)) : Scheme) ≅
+      gdV f Z e (i, j) :=
+  (pullbackEInvIso f Z e h i j).trans
+    ((pullbackHomOfLEIsoBasicOpen (f i) (f j) (h i) (h j)).trans (transitionElemIso (f i) (f j) (e i)))
+
+/-- `piecesOpenCover`の`.f i`が定義どおりの明示形であること(単一
+出現の`unfold`なので軽い、`#31`/`#32`の教訓)。 -/
+theorem piecesOpenCover_f_eq {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
+    (Z : J → Scheme) (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i)
+    (hcover : ⨆ i, X.basicOpen (f i) = U) (i : J) :
+    (piecesOpenCover f Z e hcover).f i = (e i).inv ≫ X.homOfLE (basicOpen_le_of_iSup_eq f hcover i) := by
+  unfold piecesOpenCover
+  rfl
+
+/-- **`piecesOpenCover`の`gluedCover`(mathlib)の`V`成分と
+`corrHypGlueData`の`V`成分(`gdV`)を比較する同型**——項目(b)のNatIso
+構成に必要な2つの成分(`U`成分は恒等、`V`成分がこれ)のうち、より
+本質的な方。`piecesOpenCover_f_eq`で`.f i`を明示形へ書き換えてから
+`pullbackHomOfLE_gdV_iso`を適用するだけ。
+
+★**sorry 無し**。標準3公理のみ。
+
+★★次の一手(未着手、項目(b)の残り): この`φ(i,j)`が`fst`/`snd`(`gdF`・
+`gdT≫gdF`・mathlibの`pullback.fst`・`pullbackSymmetry.hom≫pullback.fst`)
+と可換であること(NatIsoの自然性、`t_fac`/`cocycle`同等の配線量が
+見込まれる)を示し、`U`成分(恒等)と合わせて`.diagram`同士の`NatIso`を
+組み立て、`CategoryTheory.Limits.HasColimit.isoOfNatIso`で`.glued`
+同士の同型を得てから、mathlibの`Scheme.Cover.fromGlued`が与える
+`piecesOpenCover(...).gluedCover.glued ≅ U`と合成する。
+`corrhyp-goal.md`に記録。 -/
+noncomputable def piecesGluedCoverVIso {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
+    (Z : J → Scheme) (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i)
+    (hcover : ⨆ i, X.basicOpen (f i) = U) (i j : J) :
+    (pullback ((piecesOpenCover f Z e hcover).f i) ((piecesOpenCover f Z e hcover).f j) : Scheme) ≅
+      gdV f Z e (i, j) := by
+  rw [piecesOpenCover_f_eq f Z e hcover i, piecesOpenCover_f_eq f Z e hcover j]
+  exact pullbackHomOfLE_gdV_iso f Z e (basicOpen_le_of_iSup_eq f hcover) i j
 
 /-! ### `corrHypGlueData`の具体化(ロードマップ項目(a)の第一歩)
 
