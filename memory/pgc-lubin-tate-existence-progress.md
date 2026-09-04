@@ -138,10 +138,25 @@ stuck」で再現性をもって落ちる現象を発見し、`(σ := Fin 2)`の
 解消した——原因(前回のフルビルド成功時は通っていた)は未特定のまま
 (並行セッションと`.lake/build`キャッシュを共有する環境固有の可能性)。
 
-**残る作業**: 結合律の最後の2段(G・Hの次数1係数の一致・関数等式)、
-torsion点の構成、Galois作用を経由した相互律写像の構成——pGC の各項目
-(Prop 1.2・Cor 1.3・Prop 2.1・Prop 2.2・Theorem 4.2)を閉じるには、
-なお相互律写像そのものの構成・性質証明という大きな仕事が残っている。
+**続報(2026-09-04、結合律 F_f(F_f(X,Y),Z)=F_f(X,F_f(Y,Z)) が完成)**:
+`Found/PGC/LubinTateAssociativity.lean::formalGroupLaw_associative`——
+`G:=F_f(F_f(X,Y),Z)`・`H:=F_f(X,F_f(Y,Z))`を3変数の`MvPowerSeries`
+として構成し、3変数一意性補題(`mvPowerSeries_uniqueness_general`、
+`σ:=Fin 3`)を適用して`G=H`を確立した。鍵になった2つの新しい一般補題:
+(1)`subst_preserves_functional_equation`——可換律の`swap_preserves_
+functional_equation`を「`swap`という特定の代入」から「任意の代入族」
+へ一般化したもの、(2)`coeff_single_subst_degree_one`——代入の次数1
+係数についての一般公式(次数勘定で「次数≥2の項は効かない」ことから
+出る)。この2つでG・Hそれぞれの関数等式・次数1係数(いずれも全て`1`)
+がほぼ機械的に出た。★★★★★これで**古典的なLubin-Tate形式群法則の3性質
+(単位元則2つ・可換律・結合律)が全てsorry無しで揃った**——存在補題・
+自己準同型性・一意性補題と合わせ、この分野の形式化がひとつの節目に
+到達した。
+
+**残る作業**: torsion点の構成、Galois作用を経由した相互律写像の構成
+——pGC の各項目(Prop 1.2・Cor 1.3・Prop 2.1・Prop 2.2・Theorem 4.2)
+を閉じるには、なお相互律写像そのものの構成・性質証明という大きな
+仕事が残っている。
 
 詳細な発見の経緯は `ResearchPaper/blocked-leaves.json` の
 `[pGC] Proposition 1.2 / ... —— 局所類体論の相互律` エントリの
