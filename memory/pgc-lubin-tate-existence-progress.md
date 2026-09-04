@@ -927,3 +927,24 @@ carrier]] adjoinIntegers K x`**——`PowerSeries.aeval`で任意の冪級数
 戻ることを示して、`Λ_n`への`𝒪_K`加群構造(`a·x := [a]_f(x)`)を
 実際に定義すること。これができれば節目(3)が完全に完成し、節目(4)
 (`K(Λ_n)`の正規性・Galois群計算)へ進める。
+
+**続報(2026-09-04・続き、`a·x`の実装が完成)**: `AdjoinIntegers.
+lean`に`lubinTateActionAtTorsionPoint`を追加(commit`eab1c178`)——
+`Λ_n`の元`x`について`a·x:=[a]_f(x)`を実際の元として計算する。
+`LubinTateAction`(`[a]_f`を表す形式冪級数、`Found/PGC/
+LubinTateActionEndomorphism.lean`で既に`sorry`無しで確立済み)を
+`lubinTateEvalAtTorsionPoint`で`x`へ評価するだけ——新しい数学的
+内容は要らない、純粋な「代入」。
+
+**残る仕事(正直な記録、まだ手を付けていない)**: この作用`a·x`が
+①`Λ_∞`(または少なくとも`Λ_n`自身)に**戻ること**(まだ示していない
+——`a·x`は現状ただ「`adjoinIntegers K x`のどこかの元」というだけで、
+それが実は既知の捩れ点の1つに一致することは未証明)、②加法性
+`(a+b)·x = F_f(a·x,b·x)`(形式群の加法)、③乗法性`a·(b·x)=(ab)·x`
+——これらはいずれも`LubinTateAction`自身の既に確立済みの関数
+等式・準同型性を、`PowerSeries.subst`(形式的代入、`[a]_f`の構成に
+使われた)ベースの等式から`PowerSeries.aeval`(位相的評価、
+`lubinTateEvalAtTorsionPoint`が使う)を経由した等式へ**橋渡し**する
+必要がある——`PowerSeries.substAlgHom_eq_aeval`(`DiscreteUniformity`
+の元でsubstとaevalが一致するという趣旨の補題、mathlibに存在を確認
+済み)がこの橋渡しの鍵になりそうだが、まだ実際には試していない。
