@@ -1242,3 +1242,22 @@ subalgebra_tensor_standardEtalePair_promote`で各`P₀_i`を`R'`へ移送する
 残る作業は純粋なエンジニアリング(実際に結線して1つの宣言にまとめる、
 複数の`U_i`を横断した合流、`GlueData`貼り合わせ、`Corr`のnonempty
 脱落の手当て)のみであり、必要な数学はすべて手元に揃っている。
+
+### 2026-09-04さらに続報: 訂正——`Space`の有限型性は実は不要だった
+
+「要再検証」と記していた(1)を実際に確認した。今回のセッションで
+組み立てた`exists_fg_subalgebra_tensor_finset`〜`_promote`の**全ての
+補題**が `{A : Type} [CommRing A] [Algebra ℚ A]` という**完全に一般の
+`A`**で書かれており、`A`(=`Γ(U_i,U_i)`)が`ℚ`上有限生成であることを
+**どこにも要求していない**——generic flatnessが要らなくなったのと同じ
+理由(`ℚ`は体なので`A⊗[ℚ]-`が自動的に完全関手)で、有限型性も最初から
+不要だった。これで**「(1)`Space`の有限型性」は残作業リストから除外できる**
+——`corrHypInstance4`(`Space:=QcqsSpace`、compact/準分離のみ要求)を
+そのまま使えばよく、新しいinstanceを作る必要は無い。
+
+**§4の残作業は、これで純粋に3点**: (a)実際に結線して1つの宣言にまとめる
+作業(複数の`U_i`・複数の標準エタール片を横断した合流を含む、道具は
+全て完成済み)、(b)`GlueData`貼り合わせ(在庫確認済み、rigidity
+——`AffineTransitionLimit.lean`のHom安定性——との組み合わせが必要)、
+(c)`Corr`のnonempty脱落の手当て(`Definition 1.1`への前提追加、または
+`Lemma 4.1`側での明示的な追加前提)。
