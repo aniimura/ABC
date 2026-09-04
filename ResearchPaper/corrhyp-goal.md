@@ -1968,3 +1968,45 @@ choose_spec`を分解すると、生成される項に`And.rec`が残り、後�
 `t_fac`・`cocycle`のみ。集計は10/24で変わらず(§4は0/2のまま)。
 
 コミット: `d787b8e3`(訂正・f_id完成)・`ef3b03ce`(lean-idioms #29)。
+
+### 2026-09-04さらに続報: transitionElem導入——GlueDataのt'完成、12フィールド中11個達成
+
+`t'`(3重の重なりの整合性を保証する`GlueData`のフィールド)に取り組む中で、
+前回`f_id`を直した`exists_transitionOpen_eq_basicOpen`の`.choose`ベースの設計
+**もまた限界に当たる**ことを発見した。`t'`の構成には「`(i,j)`用に選ばれた座標
+`s_ij`」と「`(i,k)`用に選ばれた座標`s_ik`」を掛け合わせたものが「`(i,j*k)`用に
+選ばれた座標`s_i(jk)`」に一致することを示す必要があるが、これは**異なる
+`.choose`呼び出し同士を比較する**要求であり、`Classical.choice`の不透明性の下
+では原理的に不可能——トイ例(`example (w:ℕ)(h:w=w) : (⟨w,h⟩:∃x,x=w).choose = w
+:= by rfl`)がまさに`rfl`で失敗することで実測確認した。
+
+**修正**: `∃`を一切経由しない**決定的な定義**`transitionElem (f₁ f₂ : Γ(X,U))
+{Z}(e : X.basicOpen f₁ ≅ Z) : Γ(Z,⊤) := e.inv.app ⊤ (topIso.inv (制限写像 f₂))`
+を導入した——これは`exists_transitionOpen_eq_basicOpen`の証明が実際に witness を
+構成するのに使っていた式をそのまま剥き出しの`def`にしたもの。存在命題を経由し
+ないので、`transitionElem_mul`(乗法性: `transitionElem f₁ (f₂·f₃) e =
+transitionElem f₁ f₂ e · transitionElem f₁ f₃ e`)が`map_mul`の3回適用+`rfl`
+だけで証明できる——これが`t'`の構成に必須の代数的性質だった。
+
+`gdV`・`gdF`・`gdT`(前回`d787b8e3`で確定した内容)を`transitionElem`の上に
+作り直し、新たに`gdVpullbackIso`(候補片内の重なり`pullback(gdF i j,gdF i k)`が
+`Z i`の基本開集合として実現できること——`isPullback_opens_inf`+
+`transitionElem_mul`)・`gdT'`(`t'`フィールドそのもの、`gdVpullbackIso`+
+`transitionElemIso`+乗法の可換性・結合性(`ring`)で`i`側・`j`側を橋渡し)を完成
+させた(★すべてsorry無し)。
+
+**配管の教訓**: `transitionElem`とその周辺4補題(`transitionElem_mul`・
+`transitionElem_basicOpen_eq`・`transitionElemIso`)は、`GlueData`の族`f・Z・e`
+を導入する`variable`宣言より**前に**、単体の`X・U・Z・e`について自己完結的に
+定義する必要がある(`exists_transitionIso`と同じ流儀)——`variable {f Z e} in`
+で族の変数を個別の宣言だけ除外しようとしたところ、section全体の変数解決が
+壊れ、以降の`gdV`・`gdF`・`gdT`等すべてが"Unknown identifier"エラーになる
+という配管の罠に当たった。名前衝突は最初から避けるのが正解だった。
+
+**これでScheme.GlueDataの12フィールド中11個**(`J`・`U`・`V`・`f`・`t`・`t_id`・
+`f_mono`・`f_open`・`f_hasPullback`・`f_id`・`t'`)**が完成した**。残るのは
+`t_fac`・`cocycle`(`t'`が満たす2つの可換性の等式)のみ——新しい数学は不要で、
+`gdT_id`と同様の`simp`主体の計算になる見込み。`lake build ABC3`で0エラーを
+確認(sorry無し)。集計は10/24で変わらず(§4は0/2のまま)。
+
+コミット: `21aea8c6`。

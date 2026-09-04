@@ -980,3 +980,31 @@ f_mono・f_open・f_hasPullback・f_id`)が完成した**。残るは`t'`・
 
 コミット: `d787b8e3`(訂正・f_id完成)・`ef3b03ce`(lean-idioms #29)・
 `f070dbfb`(記録)。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに
+続報(transitionElem導入——GlueDataのt'完成、12フィールド中11個達成、
+集計10/24で変わらず)。`t'`(3重の重なりの整合性)に取り組む中で、
+`f_id`を直した`.choose`ベースの設計もまた限界に当たった——`t'`は
+「異なる`.choose`呼び出し同士を比較する」ことを要求するが、
+`Classical.choice`の不透明性の下ではこれが原理的に不可能(トイ例で
+`rfl`が失敗することを実測確認: `(⟨w,h⟩:∃x,x=w).choose = w`は`rfl`
+で通らない)。
+
+**修正**: `∃`を一切経由しない決定的な定義`transitionElem`(`e.inv`・
+`topIso.inv`・制限写像の合成——witnessを構成する式をそのまま`def`に
+した)を導入した。存在命題を経由しないので`transitionElem_mul`(乗法性、
+`map_mul`3回+`rfl`)が自由に示せ、これが`t'`の構成を可能にした。
+`gdV`・`gdF`・`gdT`を`transitionElem`の上に作り直し、新規に
+`gdVpullbackIso`・`gdT'`(`t'`そのもの)を完成させた(★すべてsorry無し)。
+
+配管の教訓: `transitionElem`と周辺補題は、族`f・Z・e`を導入する
+`variable`宣言より前に単体の`X・U・Z・e`で自己完結的に定義する必要が
+ある——`variable {f Z e} in`で個別除外を試みたところsection全体の
+変数解決が壊れる罠に当たった。
+
+**これで`Scheme.GlueData`の12フィールド中11個(`J・U・V・f・t・t_id・
+f_mono・f_open・f_hasPullback・f_id・t'`)が完成した**。残るは`t_fac`・
+`cocycle`のみ(新しい数学は不要、`gdT_id`同様の`simp`主体の計算の見込み)。
+`lake build ABC3`で0エラー確認。
+
+コミット: `21aea8c6`。
