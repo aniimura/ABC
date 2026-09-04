@@ -678,3 +678,31 @@ comp_eq_comp_of_locallyOfFiniteType`(遷移射の一致の降下)で貼り合わ
 `Z` 全体を構成すること。`Lemma 4.1` の証明に使う道具はほぼすべて揃った
 ——残るのは「一般の有限エタール射を局所的に標準エタールへ帰着する」という
 最後の理論的なピースと、その後の純粋な貼り合わせ作業。
+
+### 2026-09-04さらに続報: étale-locus 細分(最後の理論的ピース)も完成 ★★★★★
+
+上で「最後の理論的なピース」と記した (a) の étale-locus 細分——
+「一般の有限エタール多元環は至る所で標準エタールとは限らない」という
+ギャップ——を `exists_finite_standardEtaleCover`(`FieldLimit.lean`)として
+完全に解決した:
+
+**étale な多元環は、有限個の基本開集合の上で標準エタールになる。**
+
+`Algebra.IsEtaleAt.exists_isStandardEtale`(mathlib既存、各点で局所的に
+標準エタールになる)を `PrimeSpectrum S` の各点に適用し、その準コンパクト性
+(`PrimeSpectrum.compactSpace`、任意の環に対して常に成り立つ)で有限部分
+被覆に絞り込む——`Scheme.exists_finite_affineOpenCover` と全く同じ
+「点ごとの局所性→準コンパクト性で有限化」というパターンが、スキームの
+開被覆でも環の基本開被覆でも同様に機能することを確認した。CorrHyp に
+一切依存しない一般的な事実。
+
+**これで `Lemma 4.1` の局所的な構成的降下(1つのアフィン片について)に
+使う道具がすべて揃った**: `exists_extDiagram_finite_affine_descent`
+(被覆の降下)→ `exists_finite_standardEtaleCover`(étale-locus細分)→
+`exists_fg_subalgebra_standardEtalePair_map`+`standardEtalePairRingBase
+Change`(各標準エタール片の環レベル降下)。残るのは、これらを実際に
+組み合わせて1つのアフィン片について局所的な `Z` の構成を完成させること、
+そして複数の片を `Scheme.exists_hom_hom_comp_eq_comp_of_
+locallyOfFiniteType`(遷移射の一致の降下)で貼り合わせることの2つ——
+どちらも「新しい道具を探す」段階ではなく「既存の道具を組み合わせる」
+段階に入った。
