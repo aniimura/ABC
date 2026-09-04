@@ -1121,3 +1121,21 @@ C自身のOpenCoverのgluedCoverとの比較で示す——Lemma 4.1のc'.Cの�
 Cを覆う」という降下データの普遍性に関わる、質の異なる作業になる見込み。
 
 コミット: `923ad02b`。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04
+続報(corrHypGlueDataから先の道筋を調査・記録、集計10/24で変わらず)。
+lemma_4_1の正確な主張(Skeleton/CorrHyp/Section4.lean)・Corr構造体
+(⟨C,α,β⟩)・Extの定義(Over BaseK上のX×_{Spec ℚ}Spec ℝ、
+corrHypInstance4がQcqsSpace版の実働インスタンス)を確認。
+corrHypGlueDataはX,U,J,f,Z,eが今なお完全に汎用パラメータのままで、
+corrHypInstance4/Ext/piece_descends_isoのどれとも未接続と判明。
+
+残る作業(いずれも未着手、質の異なる大きな作業): (a)具体化
+(X:=c.C、piece_descends_isoの実存的witnessから決定的なZ,eを作る
+必要があるかもしれない——transitionElemのときと同じClassical.choice
+の罠の可能性)・(b)corrHypGlueData.glued≅Xという降下の整合性
+(IsColimit同士の比較、genuinely new)・(c)piece_descends_iso(環
+レベル)とExt(スキームレベル)のbase changeの記述の一致・(d)Cの
+有限アフィン被覆+外側の貼り合わせ・(e)Corrのα・β脚と整合性の等式。
+corrhyp-goal.mdに詳細を記録(コミット`b1c9414b`)。次に着手する際は
+(a)から始めるのが妥当。
