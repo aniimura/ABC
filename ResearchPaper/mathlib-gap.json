@@ -1706,13 +1706,13 @@
      "KaehlerDifferential.exact_mapBaseChange_map / exact_kerCotangentToTensor_mapBaseChange(RingTheory/Kaehler/Basic.lean)—— 一般の環の塔R→A→Bに対する「第一完全列」B⊗_AΩ_{A/R}→Ω_{B/R}→Ω_{B/A}→0、および全射A→Bに対する「第二完全列」(I/I²→B⊗_AΩ_{A/R}→Ω_{B/R}→0)がどちらも実在",
      "KaehlerDifferential.polynomialEquiv(RingTheory/Kaehler/Polynomial.lean)—— Ω_{R[T]/R}≃R[T]の計算"
     ],
-    "absentPart": "上記3つを実際に合成してLemma 1.1の主張(単射性+余核の長さ)を導く証明そのもの。特に「第一完全列の最初の射が単射である」という事実はFaltingsの具体的な議論(f'(w)dTの係数が非零因子)に依るもので、一般論からは出ない——組み立てるのに10-20個規模の補題が必要と見積もる(2026-09-04時点の実測)。「長さ」概念(length(W/p^δW))をmathlibのどの道具(合成列・Module.length等)で表すかも未調査。"
+    "absentPart": "上記3つを実際に合成してLemma 1.1の主張(単射性+余核の長さ)を導く証明そのもの。特に「第一完全列の最初の射が単射である」という事実はFaltingsの具体的な議論(f'(w)dTの係数が非零因子)に依るもので、一般論からは出ない——組み立てるのに10-20個規模の補題が必要と見積もる(2026-09-04時点の実測)。「長さ」概念(length(W/p^δW))をmathlibのどの道具(合成列・Module.length等)で表すかも未調査。 ★2026-09-04訂正: Lemma 1.1 部分(単射性・余核の長さ)はこの後 mathlib 側の道具だけで完成した(推定10-20個規模の見積もりは概ね妥当だった)。Theorem 1.2 の残り(V_n 族への接続、conductor/different の劣加水性)は未見積もりの新規の量。"
    },
    "minimalForm": "まず「モノジェニックな商のΩ計算」(W=A[T]/(f)のΩ_{W/A}≅W/(f'(w))、第二完全列の応用)を独立に完成させ、そのあと第一完全列との貼り合わせ(単射性)に進むのが筋が良さそうという見立て(未検証)。",
    "nodes": 2,
    "nodesNote": "Lemma 1.1・Theorem 1.2の2項目。Theorem 1.2はLemma 1.1のdifferentの評価を使う列の議論なので、Lemma 1.1が先。",
-   "done": 0,
-   "doneNote": "★2026-09-04(ABC3c): Found/Falt1/KaehlerAux.leanに再利用可能な最初の補題(nzdCotangentEquivQuot: 非零因子fが生成する単項イデアルのcotangent加群が商環に同型)をsorry無しで証明・登記した。Lemma 1.1本体はまだ未完成——正直な進捗として記録する。"
+   "done": 1,
+   "doneNote": "★★★★★2026-09-04(ABC3c): Lemma 1.1 は完成した(Found/Falt1/Lemma11.lean、falt1RamificationSetup が Interface.Falt1.RamificationSetup を満たす、sorry無し)——余核の特定・length の等式・単射性(mapBaseChange_injective_of_nzd 経由)まで全て証明。Theorem 1.2 は未完成だが実質的な新規インフラが揃った: pushoutKaehlerSplit(pushout=テンソル積の Kähler 微分が2成分の直和に分解、mathlib未収載の新規結果)、その3項版 pushoutKaehlerSplit3(d+1項化のパターンを実証)、mapBaseChange_injective_adjoinRoot_tensor(hinj 条件を Lemma 1.1 と同じ非零因子条件へ帰着)、delta_tendsto_zero(証明終盤の長さの漸化不等式→極限0、純粋な実数列の補題として独立に完成)。残るのは「V_n 族への接続」(3b)——原文証明の中段落(半局所環の塔での conductor/different の劣加水性)は Lemma 1.1 と同等の深さの独立した数学的補題を要すると判明し、まだ手つかず(詳細: ResearchPaper/falt1-goal.md 3b)。"
   }
  },
  "summary": {
