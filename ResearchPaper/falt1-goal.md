@@ -3144,6 +3144,36 @@ mathlib での正確な組み立て方は未確認)。
       新しい教訓として`tools/lean-idioms.md`にも追記した(「独立
       `have`型注釈 vs 呼び出し引数位置での無名関数」という、既存の
       `#1`/`#33`とは別角度の直し方)。
+
+      ★★★2026-09-05、続けて`falt1_kaehler_length_exact_wn1_kernel`の
+      docstringが「次はこれに進む」と記録していた**合流**を実際に
+      実行した。`falt1_kaehler_length_exact_wn1_cokernel`(右辺第2項=
+      `Wₙ₊₁⧸differentIdeal Wₙ Wₙ₊₁`)+`falt1_kaehler_length_exact_wn1_
+      kernel`(右辺第1項=`Wₙ₊₁⧸(differentIdeal V0 Wₙ).map(...)`)を
+      合わせると、`length Ω¹_{Wₙ₊₁/V0}`が`falt1_differentIdeal_tower_
+      length`(differentIdealの塔公式)の右辺と**完全に同じ2項の和**
+      になっていることに気づき、`falt1_kaehler_length_exact_wn1_full`
+      として3つを貼り合わせた(`add_comm`+`rw`のみ、`lean_check`一発
+      でOK)。結論:
+      ```
+      length Wₙ₊₁ Ω¹_{Wₙ₊₁/V0} = length Wₙ₊₁ (Wₙ₊₁⧸differentIdeal V0 Wₙ₊₁)
+      ```
+      これは`falt1CokernelLengthEq`(Lemma 1.1)を`V0→Wₙ₊₁`に直接適用
+      した場合と**同じ結論**だが、**異なる経路**——`falt1_theorem12_
+      kaehler_length`が要求していた「`Wₙ₊₁`の`V0`上の単項生成元`y`
+      (一般に存在するか未確認、と記録していた仮定)」が**そもそも
+      不要**で、代わりに`Wₙ`の`V0`上の生成元`w`と`Wₙ₊₁`の`Wₙ`上の
+      生成元`x`という、**それぞれの帰納的構成が自動的に供給する
+      弱い前提**だけで足りる。これで falt1_theorem12_kaehler_length_
+      eq_differentIdeal が抱えていた「一般存在性が未確認」という
+      条件付き完成の障害を、この経路では回避できることが分かった
+      ——`lake build`で確認後、次回はこれを実際の`V_n`/`W_n`帰納
+      (`w`・`x`を各段の具体的な生成元に、`hsep`・`hne`を各段で確認)
+      に接続し、δ_n の漸化式(`hrec`)の**左側**(`length Ω¹`から
+      `differentIdeal`への変換)を完全に埋める作業に進む。残る
+      核心の困難(step 5、`differentIdeal Wₙ Wₙ₊₁`の**下からの評価**、
+      すなわち`β`項の由来)は、この合流だけでは解消しない——引き続き
+      新しい局所分岐理論を要する。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・

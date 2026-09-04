@@ -5158,6 +5158,65 @@ theorem falt1_kaehler_length_exact_wn1_kernel
   exact LinearEquiv.length_eq (ftensor.trans fquot.toLinearEquiv)
 
 /-!
+## 長さの加法公式の右辺2項を`falt1_differentIdeal_tower_length`と
+合流させる(2026-09-05、上の「次はこれに進む」を実行)
+
+`falt1_kaehler_length_exact_wn1_cokernel`(右辺第2項=`Wₙ₊₁⧸differentIdeal
+Wₙ Wₙ₊₁`)と`falt1_kaehler_length_exact_wn1_kernel`(右辺第1項=
+`Wₙ₊₁⧸(differentIdeal V0 Wₙ).map(...)`)を合わせると、`length Ω¹_{Wₙ₊₁/V0}`
+が**`falt1_differentIdeal_tower_length`(differentIdealの塔公式)の右辺と
+完全に同じ2項の和**になっている——これは`falt1CokernelLengthEq`
+(Lemma 1.1)を`V0→Wₙ₊₁`へ直接適用した場合と**同じ結論**に、しかし
+**異なる経路**(`Wₙ₊₁`の`V0`上の単項生成元は不要、代わりに`Wₙ`の`V0`上の
+生成元`w`と`Wₙ₊₁`の`Wₙ`上の生成元`x`という、それぞれの構成が自動的に
+供給する**弱い**前提だけで足りる)で到達する。falt1_theorem12_kaehler_
+length_eq_differentIdealが抱えていた「`Wₙ₊₁`のV0上の単項生成元が一般に
+存在するか未確認」という障害は、この経路では**そもそも発生しない**。 -/
+
+set_option maxHeartbeats 1000000 in
+/-- **`Ω¹_{Wₙ₊₁/V0}`の長さが`differentIdeal V0 Wₙ₊₁`の長さに等しい
+ことを、`Wₙ₊₁`のV0上の単項生成元を経由せずに示した版**:
+`falt1_kaehler_length_exact_wn1_cokernel`+`falt1_kaehler_length_exact_
+wn1_kernel`+`falt1_differentIdeal_tower_length`を貼り合わせるだけ。
+`K1,L1`は`x`(`Wₙ`上の`Wₙ₊₁`の生成元)の分離拡大を確認するための
+補助体、`K2,L2`は`w`(`V0`上の`Wₙ`の生成元)についての同様の補助体
+——互いに独立(同じ体である必要は無い)。 -/
+theorem falt1_kaehler_length_exact_wn1_full
+    {V0 K1 L1 K2 L2 Wn Wn1 : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    [CommRing Wn1] [Algebra Wn Wn1] [Algebra V0 Wn1] [IsScalarTower V0 Wn Wn1]
+    [Field K1] [Algebra Wn K1] [IsFractionRing Wn K1] [Field L1] [Algebra K1 L1]
+    [FiniteDimensional K1 L1] [Algebra.IsSeparable K1 L1]
+    [Algebra Wn1 L1] [Algebra Wn L1] [IsScalarTower Wn K1 L1] [IsScalarTower Wn Wn1 L1]
+    [IsIntegralClosure Wn1 Wn L1] [IsDedekindDomain Wn1] [Module.IsTorsionFree Wn Wn1]
+    [Field K2] [Algebra V0 K2] [IsFractionRing V0 K2] [Field L2] [Algebra K2 L2] [FiniteDimensional K2 L2]
+    [Algebra.IsSeparable K2 L2] [Algebra Wn L2] [Algebra V0 L2]
+    [IsScalarTower V0 K2 L2] [IsScalarTower V0 Wn L2] [IsIntegralClosure Wn V0 L2]
+    [Module.IsTorsionFree V0 Wn]
+    [IsPrincipalIdealRing Wn1] [Module.IsTorsionFree V0 Wn1]
+    [Module.Finite V0 Wn] [Module.Finite V0 Wn1] [Module.Finite Wn Wn1]
+    (π : V0) (n : ℕ)
+    (hn' : (n : FractionRing Wn) ≠ 0)
+    (hprime' : (Ideal.span ({algebraMap V0 Wn π} : Set Wn)).IsPrime)
+    (hnotsq' : algebraMap V0 Wn π ∉ (Ideal.span ({algebraMap V0 Wn π} : Set Wn)) ^ 2)
+    (hnpos : 0 < n)
+    (e2 : AdjoinRoot ((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)) ≃ₐ[Wn] Wn1)
+    (x : Wn1) (hintx : IsIntegral Wn x) (hadjoinx : Algebra.adjoin Wn ({x} : Set Wn1) = ⊤)
+    (hwx : Algebra.adjoin K1 ({(algebraMap Wn1 L1) x} : Set L1) = ⊤)
+    (w : Wn) (hintw : IsIntegral V0 w) (hadjoinw : Algebra.adjoin V0 ({w} : Set Wn) = ⊤)
+    (hww : Algebra.adjoin K2 ({(algebraMap Wn L2) w} : Set L2) = ⊤)
+    (hsep : @Algebra.IsSeparable (FractionRing V0) (FractionRing Wn1) _ _ (FractionRing.liftAlgebra V0 (FractionRing Wn1)))
+    (hne : differentIdeal Wn Wn1 ≠ 0) :
+    Module.length Wn1 (Ω[Wn1⁄V0]) = Module.length Wn1 (Wn1 ⧸ differentIdeal V0 Wn1) := by
+  have h1 := ABC3.Found.Falt1.falt1_kaehler_length_exact_wn1_cokernel (V0 := V0) (Wn := Wn) (Wn1 := Wn1)
+    (K := K1) (L := L1) π n hn' hprime' hnotsq' hnpos e2 x hintx hadjoinx hwx
+  have h2 := ABC3.Found.Falt1.falt1_kaehler_length_exact_wn1_kernel (V0 := V0) (K := K2) (L := L2)
+    (Wn := Wn) (Wn1 := Wn1) w hintw hadjoinw hww
+  rw [h2] at h1
+  have h3 := ABC3.Found.Falt1.falt1_differentIdeal_tower_length (A := V0) (B := Wn) (C := Wn1) hsep hne
+  rw [h1, add_comm, ← h3]
+
+/-!
 ## Theorem 1.2 の核心への別経路: Brinon-Conrad Exercise 13.7.4 の
 step (1) を Nakayama から立ち上げる(2026-09-05)
 
