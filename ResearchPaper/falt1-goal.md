@@ -1705,6 +1705,26 @@ mathlib での正確な組み立て方は未確認)。
       の事実だけ**を引数として渡す設計にすること——巨大な具象型を
       シグネチャに繰り返し書く設計そのものを避けるのが本筋。
 
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、
+      この方針を実行し、`falt1_differentIdeal_tower_length_via_hlen_eq`
+      (commit `c4006562`、`lake build`完走・sorry無し)として確立した
+      ——`falt1_differentIdeal_tower_length`を、「`Ideal.map(...)`の項が
+      既に別のイデアル`E`の長さと一致することが分かっている」場合に
+      特化した3行のコロラリー(`hlen_eq`を渡すだけ)。抽象的な型変数
+      `A,B,C`のまま(具象の`integralClosure`式を経由しない)なので、
+      前回のelaboration timeout(479秒)の原因(巨大な式をシグネチャに
+      繰り返し書く)を回避——今回は数秒で`lake build`が通った。
+      **残る作業**: これを実際に`falt1_cancelConductorDelta_assembled`
+      の**証明の中で**(シグネチャではなく)`A:=V0,B:=Wn,C:=Wn1,
+      E:=differentIdeal V1 Wn1`として適用するのは可能なはず(証明の
+      中なら`Wn1`は`set`で略記済みで高速)。ただし`falt1_
+      cancelConductorDelta_assembled`自体の**戻り値の型**(現在
+      `True`)を意味のある式に変える際は、今回と同じelaboration
+      timeoutの罠に注意すること——`V0,Wn`だけを引数に取り、戻り値の
+      型で`Wn1`に触れる必要がある場合は`∃ Wn1, ...`のような存在型に
+      するか、証明の最初に`obtain`で`Wn1`を取り出してから`show`で
+      書き直す、といった設計が必要——次回はここから続ける。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
