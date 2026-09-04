@@ -1067,3 +1067,21 @@ f_mono・f_open・f_hasPullback・f_id・t'・t_fac`)が完成した**。残る�
 `lake build ABC3`で0エラー確認。
 
 コミット: `dfbc99a0`。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04
+続報(cocycleは数学的には解決済み、Leanの計算コストの壁で未完成、集計
+10/24で変わらず)。`cocycle`に着手し、`unfold gdT';simp[…,Iso.inv_hom_
+id_assoc,Iso.hom_inv_id_assoc,Scheme.isoOfEq_hom]`だけでほぼ全部が
+自動的に打ち消し合い、残りは「3つの結合律のhomOfLEが自明な自己同型に
+なる(hcombine、1秒未満で証明)」+「共通の同型を挟んだ逆射の対消滅
+(iso_conj_cocycle_generic、完全に一般的、1秒未満で証明)」だけで閉じる
+はずと確認した。しかし**組み立て**(この2つを実際にゴールへ適用する
+exact/refine/calc)が`maxHeartbeats`2000万・タイムアウト590秒でも
+完走しない——t_facのときの同じcalc+congrArgパターンは74秒で通ったのと
+対照的で、3つの`gdT'`を同時に`unfold`することで生じる項の重さが本質的に
+大きいと見られる。数学的内容には一切不明な点が無く、純粋にLeanの計算
+資源の壁。次の候補: 3つの`gdT'`を同時にunfoldせず段階的に処理する、
+または`gdT'`自体をtransitionElemIsoベースの明示的橋渡し補題として書き
+直す。ファイルには未反映(コミット無し)。
+
+コミット: `58c78aa6`(記録のみ)。
