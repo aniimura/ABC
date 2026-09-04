@@ -168,3 +168,37 @@ base change)が完成し、残るのはスキーム論の定型的な貼り合�
 
 コミット: `b45a6655`(map接続)・`8c5a010a`(Ring base change完成、
 これが核心)・`57a9571c`(記録)。
+
+★★★★★★★★★2026-09-04さらに続報(第46-52件、`isLimit_extCone`完成——
+スキーム側・環側の道具が完全に揃った)。`ExtLimit.lean`で`Spec K = lim
+Spec R`(裸のScheme)を`Over BaseK`へ持ち上げる作業を継続。
+`toSchemeDiagramOver`・`specKConeOver`・`isLimit_specKConeOver`まで完成した
+後、`Ext X`自身への接続で`Functor.const`に包まれた`Cone`の`naturality`
+フィールドの配管に何度も阻まれ(前回セッションの複数の試みが失敗)続けたが、
+今回ついに完全解決した。
+
+鍵となった2つの技(`tools/lean-idioms.md`第22項に追記):
+(1) `Cone`を組み立てる`π`フィールドには**独立に作った`NatTrans`をそのまま
+代入**し、`naturality`を再証明しない、
+(2) `IsLimit.mk`の`uniq`が与える仮定`hm`を`have hm' : ... := hm`のように
+**型を明示して再束縛**することで、`rw`の構文一致ではなく`have`自体の
+defeqチェックを経由させる——これが「配管の万能薬」だった。
+
+`extConePi`・`extCone`・`auxCone3`・`R0hom`・`extCone_fst_const`・
+`extConePi_app_fst/snd`という6個の補題を積み上げた上で
+**`isLimit_extCone : IsLimit (extCone X)`**——`(Ext X).left`が
+`X.left ×_{BaseK} Spec R_i`というbase changeされた図式の極限であることの
+**完全な証明**が完成した。
+
+**これで`Lemma 4.1`の構成的降下に必要な道具が完全に揃った**:
+`standardEtalePairRingBaseChange`(環側)+`isLimit_extCone`(スキーム側)。
+残るのは(a) 有限エタール多元環をétale-locusで細分してから標準エタール
+表示を各片に適用する被覆の組み立て、(b) 遷移射の一致の降下による貼り合わせ、
+という純粋な組み立て段階のみ。数学的な核心はすべて完成した。
+
+集計は7/24で変わらず(numbered itemとしての`Lemma 4.1`自体はまだ未証明)
+——ただし今回のセッション(§4関連だけで約20個の新しい補題・構成)で
+`Lemma 4.1`の証明に必要なほぼ全ての道具が揃った。
+
+コミット: `e3fe42f3`(extCone完成)・`49e984e5`(isLimit_extCone完成、
+これが本セッション最大の山)・`16f166ac`・`f6ce8cda`(記録)。
