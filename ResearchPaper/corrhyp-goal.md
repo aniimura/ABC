@@ -4164,3 +4164,26 @@ subalgebra_tensor_quotientMvPolynomial_lift`の2つの部品は揃ったが、
 まだ未着手——これが次の一手。lake build(`FieldLimit`/`ABC3`)とも
 0エラー確認、コミット(`c7ec8748`)・push完了。集計は引き続き10/24
 ——§4は引き続き0/2。
+
+**配線第一歩の試行(2026-09-05夜、自律ループの1ティック、ファイルには
+何も書き込んでいない・REPL検証のみ)**: `piece_basicOpen_localizationElem`
+を`exists_fg_subalgebra_tensor_quotientMvPolynomial_lift`へ実際に適用する
+`exists_piece_basicOpen_R_lift`(仮称)を試みた。`letI`足場(`pieceAlgebra_
+R_model_baseChange`と同じ形)を`intro`ではなく`have`/`letI`で証明本体
+**内で再構成**する(型注釈内の`letI`は`intro`できない——ゼータ簡約済みに
+なる、という新しい発見)ところまでは`set_option maxHeartbeats 1000000`
+で通った(結論を`True`にした「存在するだけ」版)。しかし結論を実際の
+等式(`quotient_mvPolynomial_baseChange`の値が`Ideal.Quotient.mk`の像に
+等しい)に差し替えると、`e.symm (piece_basicOpen_localizationElem ...)`
+の型検査だけで`maxHeartbeats 4000000`でも`whnf`がタイムアウトする——
+巨大な`Fin(Algebra.Presentation.ofFinitePresentationVars(...))`型や
+`Ideal.span(Set.range(pieceAlgebra_relation_descend_q₀ ...))`を**1つの
+型注釈の中で4〜5回繰り返し書いた**ことが原因と見立てている(既存の
+`pieceAlgebra_relation_descend_R`/`_q₀`は、正しさの等式を**どの`def`の
+型にも埋め込まず**、後続の証明の中で`.choose_spec`から都度取り出す
+設計になっており、この重複を最初から避けていた)。**次に試すべき道**:
+`R'`・`p₀`をまず「`True`しか主張しない存在」から`.choose`で名前付きの
+`def`として取り出し(型は軽い)、正しさの等式は**別立ての小さな
+theorem**として、名前付き定数を参照する形で**1回だけ**書く——今回は
+時間の都合(自律ループの1ティック分)でここまでで打ち切った。集計は
+引き続き10/24。
