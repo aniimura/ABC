@@ -1,5 +1,8 @@
 import ABC3.Found.PGC.LubinTateActionPiPow
 import Mathlib.RingTheory.PowerSeries.WeierstrassPreparation
+import Mathlib.RingTheory.Localization.FractionRing
+import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
+import Mathlib.FieldTheory.IsAlgClosed.Basic
 
 /-!
 # `[π^n]_f` の Weierstrass 標準分解(`sorry` 無し)
@@ -270,5 +273,76 @@ theorem natDegree_iteratedLubinTatePrimitive {A : Type*} [CommRing A] [IsLocalRi
   rw [natDegree_iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n,
     Polynomial.natDegree_X (R := A)] at hdegsplit
   omega
+
+/-! ### 部品6: 代数閉体での根の個数(重複度込みで `q^n`・`q^n-1`) -/
+
+/-- `D_n`(あるいは `φ_n`)の根を数える舞台として、`A` の分数体の代数閉包
+`AlgebraicClosure (FractionRing A)` を固定する——`A↦AlgebraicClosure
+(FractionRing A)` への `algebraMap` は mathlib のインスタンス解決で
+自動的に得られる(`FractionRing.algebra`・`AlgebraicClosure.instAlgebra`
+の合成)。 -/
+noncomputable abbrev iteratedLubinTateAlgClosure (A : Type*) [CommRing A] [IsDomain A] : Type _ :=
+  AlgebraicClosure (FractionRing A)
+
+/-- `D_n` の根(`iteratedLubinTateAlgClosure A` の中、重複度込み)。 -/
+noncomputable def iteratedLubinTateDistinguishedRoots {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n : ℕ) :
+    Multiset (iteratedLubinTateAlgClosure A) :=
+  (Polynomial.map (algebraMap A (iteratedLubinTateAlgClosure A))
+    (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n)).roots
+
+/-- `φ_n` の根(`iteratedLubinTateAlgClosure A` の中、重複度込み)——
+古典的には非零な `π^n`-捩れ点 `Λ_n\{0}` にあたる。 -/
+noncomputable def iteratedLubinTatePrimitiveRoots {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n : ℕ) :
+    Multiset (iteratedLubinTateAlgClosure A) :=
+  (Polynomial.map (algebraMap A (iteratedLubinTateAlgClosure A))
+    (iteratedLubinTatePrimitive hq hπmax hπne0 f hf0 hf1 hf n)).roots
+
+/-- ★★★★★★★★★**`D_n` の根は重複度込みでちょうど `q^n` 個**——古典的な
+Lubin-Tate 理論の `|Λ_n|=q^n` に対応する事実(分離性は未証明なので
+「重複度込み」の多重集合として)。代数閉体上の多項式の根の個数は
+(0多項式を除き)次数に一致する(`IsAlgClosed.card_roots_eq_natDegree`)
+ことと、モニック多項式の次数は任意の環準同型で保たれる
+(`Polynomial.Monic.natDegree_map`)ことを、`natDegree_
+iteratedLubinTateDistinguished`(`D_n`の次数`=q^n`)と組み合わせる
+だけで出る——分離性・既約性は一切使わなかった。 -/
+theorem card_iteratedLubinTateDistinguishedRoots {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n : ℕ) :
+    Multiset.card (iteratedLubinTateDistinguishedRoots hq hπmax hπne0 f hf0 hf1 hf n) = (pp ^ ff) ^ n := by
+  rw [iteratedLubinTateDistinguishedRoots, IsAlgClosed.card_roots_eq_natDegree,
+    Polynomial.Monic.natDegree_map (monic_iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n)
+      (algebraMap A (iteratedLubinTateAlgClosure A)),
+    natDegree_iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n]
+
+/-- `φ_n` の根は重複度込みでちょうど `q^n-1` 個——`card_
+iteratedLubinTateDistinguishedRoots` と全く同じ議論を `φ_n` に適用。 -/
+theorem card_iteratedLubinTatePrimitiveRoots {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n : ℕ) :
+    Multiset.card (iteratedLubinTatePrimitiveRoots hq hπmax hπne0 f hf0 hf1 hf n) = (pp ^ ff) ^ n - 1 := by
+  rw [iteratedLubinTatePrimitiveRoots, IsAlgClosed.card_roots_eq_natDegree,
+    Polynomial.Monic.natDegree_map (monic_iteratedLubinTatePrimitive hq hπmax hπne0 f hf0 hf1 hf n)
+      (algebraMap A (iteratedLubinTateAlgClosure A)),
+    natDegree_iteratedLubinTatePrimitive hq hπmax hπne0 f hf0 hf1 hf n]
 
 end ABC3.Found.PGC
