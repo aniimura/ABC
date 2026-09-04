@@ -8,6 +8,7 @@ import Mathlib.RingTheory.IsAdjoinRoot
 import Mathlib.RingTheory.Smooth.Basic
 import Mathlib.RingTheory.Kaehler.TensorProduct
 import Mathlib.LinearAlgebra.TensorProduct.Prod
+import Mathlib.Analysis.SpecificLimits.Basic
 
 /-!
 # [Falt1] Chapter I §1 の補助補題群(`Found`、sorry 無し)
@@ -1484,5 +1485,101 @@ noncomputable def pushoutKaehlerSplit3 {R C0 C1 C2 B1 B : Type*} [CommRing R] [C
       (TensorProduct C0 B Ω[C0⁄R]) × (TensorProduct C1 B Ω[C1⁄R]) :=
     (e2'.trans eProd).trans (eC0.prodCongr eC1) with heStep
   exact e1.trans (eStep.prodCongr (LinearEquiv.refl B _) |>.trans (LinearEquiv.prodAssoc B _ _ _))
+
+/-!
+## Theorem 1.2 の4番目のピース: 長さの漸化不等式から `δ_n→0`(2026-09-04、完成)
+
+falt1-goal.md に逐語で記録した証明本文(物理p.5=印字p.258)の最後の一段
+落を、`V_n`・`W_n` の具体的な構成に一切依存しない、純粋な実数列の
+不等式として抽出し形式化した:
+
+> We derive that δ_n-δ_{n+1} ≥ β-(d+1)(δ_n-δ_{n+1}). So if δ_n ≥ d+1,
+> then δ_{n+1} ≤ δ_n-1/(d+2), and otherwise δ_{n+1} ≤
+> (1-1/((d+1)(d+2)))δ_n. In any case δ_n → 0 for n→∞.
+
+原文の不等式 `δ_n-δ_{n+1} ≥ β-(d+1)(δ_n-δ_{n+1})`(`β=min{1,δ_n/(d+1)}`)
+を整理すると `δ_{n+1} ≤ δ_n - β/(d+2)` になる(これが `hrec` の形)。
+証明は2段: (1) `δ_n≥d+1` が続く限り固定量 `1/(d+2)` ずつ減るので、
+非負性(`hδ0`)と合わせるとどこかで `δ_N<d+1` になる(有限回で脱出)。
+(2) 一旦 `δ_n<d+1` になれば、比 `1-1/((d+1)(d+2))∈(0,1)` の等比的減衰
+が続く(その領域に留まることも同時に示す)。以上を `squeeze_zero` と
+`tendsto_pow_atTop_nhds_zero_of_lt_one` で結ぶ。 -/
+
+/-- **Theorem 1.2 の長さの漸化不等式 → `δ_n→0`**(物理p.5の証明最終段落、
+`V_n`・`W_n` の具体的構成に依存しない抽象形)。`δ n` は `W_n` の
+(半局所環の各成分ごとの)different の「長さ」に相当する実数列
+(非負・`hδ0`)で、`hrec` は原文の不等式を整理した形
+`δ_{n+1} ≤ δ_n - min{1,δ_n/(d+1)}/(d+2)`。 -/
+theorem delta_tendsto_zero (d : ℕ) (δ : ℕ → ℝ) (hδ0 : ∀ n, 0 ≤ δ n)
+    (hrec : ∀ n, δ (n+1) ≤ δ n - (min 1 (δ n / (d+1))) / (d+2)) :
+    Filter.Tendsto δ Filter.atTop (nhds 0) := by
+  have hpos : (0:ℝ) < (d:ℝ)+2 := by positivity
+  have hpos1 : (0:ℝ) < (d:ℝ)+1 := by positivity
+  have hminnn : ∀ n, 0 ≤ min 1 (δ n / (d+1)) := fun n => le_min zero_le_one (div_nonneg (hδ0 n) hpos1.le)
+  have hstepA : ∀ n, (d:ℝ)+1 ≤ δ n → δ (n+1) ≤ δ n - 1/((d:ℝ)+2) := by
+    intro n hge
+    have hmin1 : min (1:ℝ) (δ n / ((d:ℝ)+1)) = 1 := by
+      apply min_eq_left; rw [le_div_iff₀ hpos1]; linarith
+    have h1 := hrec n
+    rw [hmin1] at h1
+    exact h1
+  set c : ℝ := 1 - 1/(((d:ℝ)+1)*((d:ℝ)+2)) with hc
+  have hcpos : 0 < c := by
+    rw [hc]; rw [sub_pos, div_lt_one (by positivity)]; nlinarith
+  have hclt1 : c < 1 := by
+    rw [hc]; have : 0 < 1/(((d:ℝ)+1)*((d:ℝ)+2)) := by positivity
+    linarith
+  have hstepB : ∀ n, δ n < (d:ℝ)+1 → δ (n+1) ≤ δ n * c := by
+    intro n hlt
+    have hmin2 : min (1:ℝ) (δ n / ((d:ℝ)+1)) = δ n / ((d:ℝ)+1) := by
+      apply min_eq_right; rw [div_le_one hpos1]; linarith
+    have h1 := hrec n
+    rw [hmin2] at h1
+    have heq : δ n - (δ n / ((d:ℝ)+1)) / ((d:ℝ)+2) = δ n * c := by
+      rw [hc]; field_simp
+    linarith [heq]
+  -- 第1段: δ_n≥d+1 が永遠には続かない(有限回で δ_N<d+1 に到達)
+  obtain ⟨N, hN⟩ : ∃ N, δ N < (d:ℝ)+1 := by
+    by_contra hcon
+    push Not at hcon
+    have hbound : ∀ n, δ n ≤ δ 0 - n / ((d:ℝ)+2) := by
+      intro n
+      induction n with
+      | zero => simp
+      | succ k ih =>
+          have hs := hstepA k (hcon k)
+          have hsplit : ((k:ℝ)+1)/((d:ℝ)+2) = (k:ℝ)/((d:ℝ)+2) + 1/((d:ℝ)+2) := by ring
+          push_cast
+          linarith [hsplit]
+    obtain ⟨n, hn⟩ := exists_nat_gt (δ 0 * ((d:ℝ)+2))
+    have hb := hbound n
+    have h0 := hδ0 n
+    have hfinal : (n:ℝ) / ((d:ℝ)+2) > δ 0 := by
+      rw [gt_iff_lt, lt_div_iff₀ hpos]; linarith
+    linarith
+  -- 第2段: δ_N<d+1 以降は比 c∈(0,1) の等比的減衰(その領域に留まることも同時に示す)
+  have hbelow : ∀ k, δ (k+N) < (d:ℝ)+1 ∧ δ (k+N) ≤ δ N * c^k := by
+    intro k
+    induction k with
+    | zero => constructor <;> simp [hN]
+    | succ j ih =>
+        obtain ⟨ihlt, ihle⟩ := ih
+        have hstep := hstepB (j+N) ihlt
+        constructor
+        · have : δ (j+N) * c < (d:ℝ)+1 := by nlinarith [hδ0 (j+N)]
+          calc δ (j+1+N) = δ (j+N+1) := by ring_nf
+            _ ≤ δ (j+N) * c := hstep
+            _ < (d:ℝ)+1 := this
+        · calc δ (j+1+N) = δ (j+N+1) := by ring_nf
+            _ ≤ δ (j+N) * c := hstep
+            _ ≤ (δ N * c^j) * c := by
+                apply mul_le_mul_of_nonneg_right ihle hcpos.le
+            _ = δ N * c^(j+1) := by ring
+  have htail : Filter.Tendsto (fun k => δ (k+N)) Filter.atTop (nhds 0) := by
+    apply squeeze_zero (f := fun k => δ (k+N)) (g := fun k => δ N * c^k)
+    · intro k; exact hδ0 (k+N)
+    · intro k; exact (hbelow k).2
+    · simpa using Filter.Tendsto.const_mul (δ N) (tendsto_pow_atTop_nhds_zero_of_lt_one hcpos.le hclt1)
+  rwa [Filter.tendsto_add_atTop_iff_nat N] at htail
 
 end ABC3.Found.Falt1
