@@ -2721,4 +2721,118 @@ theorem falt1ModuleIsTorsionFreeV0Wn1
       (IsFractionRing.injective Wn (FractionRing Wn))
   exact hinj2 heq
 
+/-!
+## `V_1 → W_1` の橋渡し写像の単射性(2026-09-04、新しい数学的内容)
+
+`Module.Finite/IsTorsionFree V1 Wₙ₊₁` に要る最後のピース——`ψ:=
+falt1BaseChangeAlgHom` が**単射**であることを、初めて実際に証明した。
+鍵は `Polynomial.map_dvd_map`(mathlib、`x` が monic かつ係数の写像が
+単射なら `x.map f ∣ y.map f ↔ x ∣ y`)——多項式の割り算アルゴリズムが
+monic 除数に対して任意の可換環上で機能することの帰結。これで
+`AdjoinRoot.map φ p (p.map φ) _` の**核**が自明であることが、
+「`AdjoinRoot p` の元 `mk p r` が 0 に写る ⟺ `p.map φ ∣ r.map φ` ⟺
+(単射性+monic) `p ∣ r` ⟺ 元から 0」という計算だけで閉じる——
+`PowerBasis` の基底展開等は一切不要だった。 -/
+
+/-- `AdjoinRoot.map` の `mk` への作用——`AdjoinRoot.lift`(`map` の定義)
++ `Polynomial.eval₂_map` + `AdjoinRoot.aeval_eq` から。 -/
+theorem adjoinRoot_map_mk {R S : Type*} [CommRing R] [CommRing S] (φ : R →+* S) (p : Polynomial R)
+    (q : Polynomial S) (h : q ∣ p.map φ) (r : Polynomial R) :
+    AdjoinRoot.map φ p q h (AdjoinRoot.mk p r) = AdjoinRoot.mk q (r.map φ) := by
+  unfold AdjoinRoot.map
+  rw [AdjoinRoot.lift_mk, ← Polynomial.eval₂_map]
+  rw [← AdjoinRoot.algebraMap_eq, ← Polynomial.aeval_def]
+  exact AdjoinRoot.aeval_eq _
+
+/-- **`AdjoinRoot.map` は `q = p.map φ`(base change そのもの)の場合、
+`p` が monic・`φ` が単射なら単射**——`Polynomial.map_dvd_map` を
+`AdjoinRoot.mk_eq_zero` に橋渡しするだけ。 -/
+theorem adjoinRoot_map_injective_of_map_eq {R S : Type*} [CommRing R] [CommRing S] (φ : R →+* S)
+    (hφinj : Function.Injective φ) (p : Polynomial R) (hpmonic : p.Monic) :
+    Function.Injective (AdjoinRoot.map φ p (p.map φ) (dvd_refl _)) := by
+  rw [injective_iff_map_eq_zero]
+  intro a ha
+  obtain ⟨r, rfl⟩ := AdjoinRoot.mk_surjective a
+  rw [adjoinRoot_map_mk] at ha
+  rw [AdjoinRoot.mk_eq_zero] at ha ⊢
+  exact (Polynomial.map_dvd_map φ hφinj hpmonic).mp ha
+
+/-- `algHomAdjoinRootOfCompat'` の単射性(`AdjoinRoot.map` の単射性を
+そのまま流用——`AlgHom.mk'` は同じ関数を包むだけなので変わらない)。 -/
+theorem algHomAdjoinRootOfCompat'_injective {V0 Wn : Type*} [CommRing V0] [CommRing Wn] [Algebra V0 Wn]
+    (f : Polynomial V0) (hfmonic : f.Monic) (hinj : Function.Injective (algebraMap V0 Wn)) :
+    Function.Injective (algHomAdjoinRootOfCompat' (Wn := Wn) f) :=
+  adjoinRoot_map_injective_of_map_eq (algebraMap V0 Wn) hinj f hfmonic
+
+/-- `algHomAdjoinRootOfCompat'_injective` の(多項式の等式に沿って)
+cast したもの版——`g` を自由変数のまま保つのが鍵(tools/lean-idioms.md
+#29 と同じ理由)。 -/
+theorem algHomAdjoinRootOfCompat'_cast_injective {V0 Wn : Type*} [CommRing V0] [CommRing Wn] [Algebra V0 Wn]
+    (f : Polynomial V0) (g : Polynomial Wn) (hfg : f.map (algebraMap V0 Wn) = g)
+    (hfmonic : f.Monic) (hinj : Function.Injective (algebraMap V0 Wn)) :
+    Function.Injective (hfg ▸ algHomAdjoinRootOfCompat' (Wn := Wn) f : AdjoinRoot f →ₐ[V0] AdjoinRoot g) := by
+  subst hfg
+  exact algHomAdjoinRootOfCompat'_injective f hfmonic hinj
+
+/-- **`V_1 → W_1` の橋渡しが生成元を対応させ、かつ単射である**
+(`falt1BaseChangeAlgHom_generator_correspondence` の拡張版)。単射性は
+`algHomAdjoinRootOfCompat'_cast_injective`(base change の芯)と
+`e1.symm`・`e2` の全単射性の合成——これで `Module.Finite/IsTorsionFree
+V1 Wₙ₊₁` を `moduleIsTorsionFree_of_injective`(単射性から直接)と
+「単射像は有限生成」型の議論で得る道が開けた。 -/
+theorem falt1BaseChangeAlgHom_generator_and_injective
+    {V0 Wn : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    (π : V0) (n : ℕ)
+    (hn : (n : FractionRing V0) ≠ 0) (hπne0 : algebraMap V0 (FractionRing V0) π ≠ 0)
+    (hprime : (Ideal.span ({π} : Set V0)).IsPrime) (hnotsq : π ∉ (Ideal.span ({π} : Set V0)) ^ 2)
+    (hnpos : 0 < n)
+    (hn' : (n : FractionRing Wn) ≠ 0)
+    (hπne0' : algebraMap Wn (FractionRing Wn) (algebraMap V0 Wn π) ≠ 0)
+    (hprime' : (Ideal.span ({algebraMap V0 Wn π} : Set Wn)).IsPrime)
+    (hnotsq' : algebraMap V0 Wn π ∉ (Ideal.span ({algebraMap V0 Wn π} : Set Wn)) ^ 2)
+    (hinjV0Wn : Function.Injective (algebraMap V0 Wn))
+    [IsDedekindDomain (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    [Module.IsTorsionFree V0 (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    [IsDedekindDomain (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))]
+    [Module.IsTorsionFree Wn (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))] :
+    ∃ (ψ : integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))) →ₐ[V0]
+      integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))
+      (w : integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))
+      (x : integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn))))),
+      ψ w = x ∧ Function.Injective ψ := by
+  set f : Polynomial V0 := Polynomial.X ^ n - Polynomial.C π with hfdef
+  set π' : Wn := algebraMap V0 Wn π with hπ'def
+  set g : Polynomial Wn := Polynomial.X ^ n - Polynomial.C π' with hgdef
+  have hfg : f.map (algebraMap V0 Wn) = g := by rw [hfdef, hgdef, hπ'def]; simp
+  set e1 := falt1AdjoinRootEquivIntegralClosure π n hn hπne0 hprime hnotsq hnpos
+  set e2 := falt1AdjoinRootEquivIntegralClosure π' n hn' hπne0' hprime' hnotsq' hnpos
+  set step1 : AdjoinRoot f →ₐ[V0] AdjoinRoot g := hfg ▸ algHomAdjoinRootOfCompat' (Wn := Wn) f
+    with hstep1def
+  have hstep1root : step1 (AdjoinRoot.root f) = AdjoinRoot.root g := by
+    rw [hstep1def]; exact algHomAdjoinRootOfCompat'_cast_root f g hfg
+  have hfmonic : f.Monic := Polynomial.monic_X_pow_sub_C π hnpos.ne'
+  have hstep1inj : Function.Injective step1 := by
+    rw [hstep1def]
+    exact algHomAdjoinRootOfCompat'_cast_injective f g hfg hfmonic hinjV0Wn
+  refine ⟨(e2.toAlgHom.restrictScalars V0).comp (step1.comp e1.symm.toAlgHom),
+    e1 (AdjoinRoot.root f), e2 (AdjoinRoot.root g), ?_, ?_⟩
+  · rw [AlgHom.comp_apply, AlgHom.comp_apply]
+    have h1 : e1.symm.toAlgHom (e1 (AdjoinRoot.root f)) = AdjoinRoot.root f := e1.symm_apply_apply _
+    rw [h1, hstep1root]
+    rfl
+  · intro a b hab
+    simp only [AlgHom.comp_apply] at hab
+    apply e1.symm.injective
+    apply hstep1inj
+    exact e2.injective hab
+
 end ABC3.Found.Falt1
