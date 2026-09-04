@@ -43,25 +43,35 @@ Faltings の原文「`Ω_W` は `Ω_V⊗W⊕WdT` を `f'(w)dT` で割った商�
 両方向の `map` を組み立てて互いに逆写像であることを示した、
 `omegaCongr_leftInv`/`_rightInv`・`isScalarTower_of_algEquiv`)。
 
+**①②③④の貼り合わせ(完成)**: `falt1CokernelIso` として1つの定理に
+組み立てた——`V` が Dedekind 整域、`w:W` が `V` 上整・`W` を生成し
+(かつ拡大体レベルでも生成する)なら
+`Ω_{W/V} ≅ W ⧸ differentIdeal V W`(`≃+`)。Lemma 1.1 の「`Ω_{W/V}` が
+何であるか」の特定が完全に証明された。途中で見つけた鍵:
+`AdjoinRoot f` は `Polynomial V ⧸ (f)` と定義的に等しいのに
+`Algebra (Polynomial V) (AdjoinRoot f)` が自動では見つからない
+(`AdjoinRoot` が `def` で simp-reducible ではないため)——
+`AdjoinRoot.instAlgebraPolynomial`(`inferInstanceAs` で明示登記)で
+解決した。
+
 ## 残っている作業(正直な記録、Lemma 1.1 完成にはまだ遠い)
 
-1. **①②③④の貼り合わせ**: 個々の道具は揃ったが、`AdjoinRoot f` が
-   `Polynomial V ⧸ (f)` と**定義的に**等しいのに `Algebra (Polynomial V)
-   (AdjoinRoot f)` が自動では見つからない(`AdjoinRoot` が `def` で
-   simp-reducible ではないため)、`Ideal.quotientEquiv` で `e` に沿って
-   イデアルを転送する際に「`e` が微分の像をどこへ送るか」
-   (`e(algebraMap (Polynomial V) (AdjoinRoot f) p) = aeval w p` の形の
-   自然性)を別途示す必要がある、等の**接着剤としての補題**がまだ複数
-   要る——数学的な内容は尽きたが、Lean の配管がまだ残っている
-   (2026-09-04 に実測)。
+1. **「長さ」への接続**: `Module.length`(`RingTheory/Length.lean`)は
+   `LinearEquiv.length_eq (e : M ≃ₗ[R] N) : length R M = length R N`
+   という形で不変性を持つ——**`LinearEquiv`(線形同型)を要求する**、
+   `AddEquiv`(加法群としての同型)では直接使えない。`falt1CokernelIso`
+   はシグネチャでの instance 解決順の問題を避けるため意図的に `≃+` に
+   弱めていた(`omegaCongr` 等の内部の `KaehlerDifferential.map` 自体は
+   本来 A-線形だが、型としては落としてある)——`≃ₗ[W]` まで持ち上げる
+   作業がまだ残っている(2026-09-04 に `Module.length` の存在と
+   `LinearEquiv.length_eq` の要件を確認)。
 2. **単射性(Lemma 1.1 の本体の主張、第一完全列)**: `Ω_V ⊗_V W → Ω_W`
    (絶対微分、Z=絶対基底とする塔 Z→V→W への「第一完全列」)の単射性。
    Faltings の議論は `Ω_{V[T]/Z} ≅ Ω_V⊗V[T]⊕V[T]dT` という直和分解と
    f'(w) が非零因子であることを使うが、この直和分解の既製品も mathlib
    に無い(`polynomialEquiv`・`mvPolynomialBasis` は自明底のみ)——
    Lemma 1.1 の残り部分の中でも最も骨が折れそうな箇所。
-3. 「長さ」(`length(W/p^δW)`)を mathlib のどの道具で表すか未調査。
-4. Falt1 の `V` は完備離散付値環(すべて `IsDedekindDomain` 等の一般論
+3. Falt1 の `V` は完備離散付値環(すべて `IsDedekindDomain` 等の一般論
    でカバーされる保証はまだ無い、個別確認が必要)。
 
 ★見積り: 上記4点だけでもさらに多くの補題を要し、Lemma 1.1 の完成には
