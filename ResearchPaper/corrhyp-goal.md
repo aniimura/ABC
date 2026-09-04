@@ -1878,3 +1878,20 @@ eq_basicOpen`が与える**開集合の等式**を、`Scheme.Hom.isoImage`(開�
 (e)貼り合わせ後の有限性確認、の2点。集計は10/24で変わらず。
 
 コミット: `925233b1`。
+
+### 2026-09-04さらに続報: 三重の重なり(t'・cocycle)も新しい数学を要さないと判明
+
+GlueDataの`t'`・`cocycle`フィールド(3重の重なりでの整合性)に着手する前に、
+そもそも3重の重なりが`exists_transitionIso`だけで扱えるか確認したところ、
+**新しい数学的内容は一切要らない**と判明した——`exists_transitionIso f₁ f₂ e`は
+`f₂`に**任意の元**(たとえば`f_j * f_k`という積)を渡せるので、3重の重なり
+`X.basicOpen(f_i·f_j·f_k)`も`exists_transitionIso f_i (f_j*f_k) e_i`という
+**同じ補題の1回の適用**でカバーされる(`exists_transitionIso_finset`として
+Finset版も同様に自明に確認、★sorry無し)。`Z_i.basicOpen(s_ij) ⊓ Z_i.basicOpen(s_ik)
+= Z_i.basicOpen(s_ij·s_ik)`(`Scheme.basicOpen_mul`)と、環準同型の乗法性から
+`s_ij·s_ik`がこの「1回適用」の`s'`に一致することも(直接の議論で)確認できる。
+
+**これでGlueDataの数学的な核心はすべて完成した**——残る作業は純粋に「これらの
+部品を`CategoryTheory.GlueData`の12フィールド(`J・U・V・f・t・t'・t_fac・
+cocycle`等)として実際に配線する」という、新しい数学を要さない(が分量のある)
+エンジニアリング作業のみに帰着した。集計は10/24で変わらず(§4は0/2のまま)。
