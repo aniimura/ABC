@@ -632,3 +632,24 @@ base change した図式)については未確認**——`(extDiagram X).map h`
 (qcqs)なスキームに限る」よう絞る設計変更が要るかもしれない——双曲曲線は
 常に有限型なので原文の意図には合致するが、`Interface` 側の変更が要る。
 次にここへ戻るときの具体的な出発点。
+
+### 2026-09-04さらに続報: `IsAffineHom` は解決、`qcqs` 前提の必要性は確定
+
+`extDiagram_map_isAffineHom`(`ExtLimit.lean`)として、`extDiagram X` の
+遷移射がアフィンであることを**sorry 無しで証明した**——
+`CategoryTheory.MorphismProperty.pullbackMap`(`P i₁`・`P i₂` から
+`P (pullback.map f g f' g' i₁ i₂ (𝟙 _) ...)` を直接与える、`Over.pullback`
++`overPullbackMap` より単純な道)に `IsAffineHom`(`isAffineHom_
+isStableUnderBaseChange` が mathlib 既存)を適用するだけで閉じた。
+
+一方 `CompactSpace ((extDiagram X).obj R)` は `infer_instance` で自動的に
+付かないことを直接確認——`(D R).hom`(`Spec R → BaseK`)はアフィンだが
+`X.hom` 自身には何の制約も無いため、**`X.left` 自身の準コンパクト性
+(=有限型性の一部)を要求する**ことが確定した。これは数学的な困難ではなく
+**設計上の要求**(双曲曲線は原文の定義から常に有限型なので、`Lemma 4.1`
+を正しく述べるには本来 `X` にこの仮定が必要——mathlibが要求しているのは
+paper自身が暗黙に仮定している事実そのもの)。次にここへ戻るときは、
+`corrHypInstance3` の `Space` を qcqs スキームの部分型に絞るか、
+`lemma_4_1` を適用する具体的な文脈で `X` に `CompactSpace X.left`/
+`QuasiSeparatedSpace X.left` を仮定として追加する、のどちらかを選ぶ
+設計判断から始める。
