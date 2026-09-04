@@ -537,4 +537,132 @@ theorem hasEval_mem_adjoin_of_mem_iteratedLubinTateTorsionPoints {p : ℕ} [Fact
   show spectralNorm K.carrier K.closure x < 1
   exact spectralNorm_lt_one_of_mem_iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n x hx
 
+/-! ## `Λ_n = Λ_{n-1} ∪ (ψ_n の根)`——「原始的な」π^n 捩れ点の切り出し
+
+`D_n = D_{n-1}・ψ_n`(`iteratedLubinTateDistinguished_eq_mul_psi`)を
+`K.closure` へ写した上で `Polynomial.roots_mul` を適用するだけで、
+`Λ_n`(`iteratedLubinTateTorsionPoints`)が `Λ_{n-1}` と「`ψ_n` の根の
+なす集合」の(集合としての)和集合に分解されることが分かる——
+`Gal(K(Λ_n)/K)≅(𝒪_K/π^n)^×` へ向けての足がかり:「原始的な」
+π^n-捩れ点(`Λ_n` から `Λ_{n-1}` を除いたもの)がちょうど `ψ_n` の根に
+対応する、という古典的な事実の Finset レベルでの定式化。 -/
+
+open scoped Classical in
+/-- `ψ_n`(`K.closure` へ写したもの)の根のなす `Finset`——
+「原始的な」π^n-捩れ点全体。`iteratedLubinTateTorsionPoints`(`Λ_n`)
+と同じパターン(`Multiset.toFinset`)で定義する。 -/
+noncomputable def iteratedLubinTatePsiTorsionPoints {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) : Finset K.closure :=
+  (Polynomial.map (algebraMap (𝒪[K.carrier]) K.closure)
+    (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn)).roots.toFinset
+
+/-- `ψ_n`(`K.closure` へ写したもの)の根は相異なる——`D_n` の分離性の
+証明(`separable_iteratedLubinTatePsi_map_carrier`、`LubinTatePsiNorm.lean`
+既出)を `card_roots_iteratedLubinTateDistinguished_map` と同じ手筋
+(`algebraMap` の分解・`Polynomial.map_map`)で `K.closure` レベルへ運ぶ。 -/
+theorem nodup_roots_iteratedLubinTatePsi_map {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) :
+    (Polynomial.map (algebraMap (𝒪[K.carrier]) K.closure)
+      (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn)).roots.Nodup := by
+  apply Polynomial.nodup_roots
+  rw [show algebraMap (𝒪[K.carrier]) K.closure =
+      (algebraMap K.carrier K.closure).comp (algebraMap (𝒪[K.carrier]) K.carrier) from
+    IsScalarTower.algebraMap_eq (𝒪[K.carrier]) K.carrier K.closure, ← Polynomial.map_map]
+  exact (separable_iteratedLubinTatePsi_map_carrier K hq hπmax hπne0 f hf0 hf1 hf n hn).map
+
+/-- `ψ_n`(`K.closure` へ写したもの)の根の個数は `q^n-q^{n-1}`——
+代数閉体上の分離多項式の根の個数(`IsAlgClosed.card_roots_eq_
+natDegree`)と次数の公式(`natDegree_iteratedLubinTatePsi`、既出)から。 -/
+theorem card_roots_iteratedLubinTatePsi_map {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) :
+    Multiset.card (Polynomial.map (algebraMap (𝒪[K.carrier]) K.closure)
+      (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn)).roots
+      = (pp ^ ff) ^ n - (pp ^ ff) ^ (n - 1) := by
+  rw [IsAlgClosed.card_roots_eq_natDegree,
+    (isDistinguishedAt_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn).monic.natDegree_map,
+    natDegree_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn]
+
+open scoped Classical in
+/-- ★★★★★★★★★★**`Λ_n = Λ_{n-1} ∪ (ψ_n の根)`**——`D_n=D_{n-1}・ψ_n`
+(`iteratedLubinTateDistinguished_eq_mul_psi`)を `K.closure` へ写して
+`Polynomial.roots_mul`(積の根はそれぞれの根の合併、multiset の加法)
+を適用し、`Multiset.toFinset` の言葉に戻すだけ。`Gal(K(Λ_n)/K)≅
+(𝒪_K/π^n)^×` へ向けて、「原始的な」π^n-捩れ点(`ψ_n` の根)を
+`Λ_n` の中に位置づける最初の一歩。 -/
+theorem iteratedLubinTateTorsionPoints_eq_union {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) :
+    iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n =
+      iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf (n - 1) ∪
+        iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn := by
+  have hmul : (Polynomial.map (algebraMap (𝒪[K.carrier]) K.closure)
+      (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n)) =
+      (Polynomial.map (algebraMap (𝒪[K.carrier]) K.closure)
+        (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf (n - 1))) *
+      (Polynomial.map (algebraMap (𝒪[K.carrier]) K.closure)
+        (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn)) := by
+    rw [← Polynomial.map_mul]
+    congr 1
+    exact iteratedLubinTateDistinguished_eq_mul_psi hq hπmax hπne0 f hf0 hf1 hf n hn
+  ext y
+  simp only [iteratedLubinTateTorsionPoints, iteratedLubinTatePsiTorsionPoints,
+    Multiset.mem_toFinset, Finset.mem_union]
+  rw [hmul, Polynomial.roots_mul, Multiset.mem_add]
+  rw [← hmul]
+  exact (isDistinguishedAt_iteratedLubinTateDistinguished
+    hq hπmax hπne0 f hf0 hf1 hf n).monic.map _ |>.ne_zero
+
+open scoped Classical in
+/-- `ψ_n` の根のなす `Finset` の濃度は `q^n-q^{n-1}`——
+`nodup_roots_iteratedLubinTatePsi_map`(重複なし)と
+`card_roots_iteratedLubinTatePsi_map`(multiset としての濃度)から。
+`|Λ_n|=|Λ_{n-1}|+|(ψ_n の根)|`(`card_iteratedLubinTateTorsionPoints`
+の `q^n=q^{n-1}+(q^n-q^{n-1})` としての分解)の後半にあたる。 -/
+theorem card_iteratedLubinTatePsiTorsionPoints {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) :
+    (iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn).card =
+      (pp ^ ff) ^ n - (pp ^ ff) ^ (n - 1) := by
+  rw [iteratedLubinTatePsiTorsionPoints, Multiset.toFinset_card_of_nodup
+    (nodup_roots_iteratedLubinTatePsi_map K hq hπmax hπne0 f hf0 hf1 hf n hn),
+    card_roots_iteratedLubinTatePsi_map K hq hπmax hπne0 f hf0 hf1 hf n hn]
+
 end ABC3.Found.PGC
