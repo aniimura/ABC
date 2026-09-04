@@ -665,4 +665,78 @@ theorem card_iteratedLubinTatePsiTorsionPoints {p : ℕ} [Fact p.Prime] (K : PAd
     (nodup_roots_iteratedLubinTatePsi_map K hq hπmax hπne0 f hf0 hf1 hf n hn),
     card_roots_iteratedLubinTatePsi_map K hq hπmax hπne0 f hf0 hf1 hf n hn]
 
+open scoped Classical in
+/-- ★★★★★★★★★★**`Λ_{n-1}` と「`ψ_n` の根」は交わらない**——`D_n`
+(`K.closure` へ写したもの)が重複無しの根を持つ(`nodup_roots_
+iteratedLubinTateDistinguished_map`)ことから、`D_n=D_{n-1}・ψ_n` の
+両因子に共通の根はありえない(あれば `D_n` の根としての重複度が
+`≥2` になり `Nodup` に反する)。`iteratedLubinTateTorsionPoints_eq_union`
+の「合併」を「非交和」に強め、`Λ_n\Λ_{n-1}=(ψ_n の根)`
+(次の `iteratedLubinTateTorsionPoints_sdiff_eq_iteratedLubinTatePsiTorsionPoints`)
+への土台になる。 -/
+theorem iteratedLubinTateTorsionPoints_disjoint_iteratedLubinTatePsiTorsionPoints
+    {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) :
+    Disjoint (iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf (n - 1))
+      (iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn) := by
+  rw [Finset.disjoint_left]
+  intro x hx1 hx2
+  have hmul : (Polynomial.map (algebraMap (𝒪[K.carrier]) K.closure)
+      (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n)) =
+      (Polynomial.map (algebraMap (𝒪[K.carrier]) K.closure)
+        (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf (n - 1))) *
+      (Polynomial.map (algebraMap (𝒪[K.carrier]) K.closure)
+        (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn)) := by
+    rw [← Polynomial.map_mul]
+    congr 1
+    exact iteratedLubinTateDistinguished_eq_mul_psi hq hπmax hπne0 f hf0 hf1 hf n hn
+  have hne0 := (isDistinguishedAt_iteratedLubinTateDistinguished
+    hq hπmax hπne0 f hf0 hf1 hf n).monic.map (algebraMap (𝒪[K.carrier]) K.closure) |>.ne_zero
+  rw [hmul] at hne0
+  have hnodup := nodup_roots_iteratedLubinTateDistinguished_map K hq hπmax hπne0 f hf0 hf1 hf n
+  rw [hmul, Polynomial.roots_mul hne0, Multiset.nodup_iff_count_le_one] at hnodup
+  have hc1 : 1 ≤ Multiset.count x (Polynomial.map (algebraMap (𝒪[K.carrier]) K.closure)
+      (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf (n - 1))).roots :=
+    Multiset.count_pos.mpr (Multiset.mem_toFinset.mp hx1)
+  have hc2 : 1 ≤ Multiset.count x (Polynomial.map (algebraMap (𝒪[K.carrier]) K.closure)
+      (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn)).roots :=
+    Multiset.count_pos.mpr (Multiset.mem_toFinset.mp hx2)
+  have := hnodup x
+  rw [Multiset.count_add] at this
+  omega
+
+open scoped Classical in
+/-- ★★★★★★★★★★**`Λ_n \ Λ_{n-1} = (ψ_n の根)`**——「原始的な」
+π^n-捩れ点(`n-1`段までの捩れ点を除いた `Λ_n` の元)が**ちょうど**
+`ψ_n` の根に一致する、という古典的な特徴づけの Finset レベルでの
+確定版。`iteratedLubinTateTorsionPoints_eq_union`(合併)と
+`iteratedLubinTateTorsionPoints_disjoint_iteratedLubinTatePsiTorsionPoints`
+(非交和)を `Finset.union_sdiff_cancel_left` で組み合わせるだけ。 -/
+theorem iteratedLubinTateTorsionPoints_sdiff_eq_iteratedLubinTatePsiTorsionPoints
+    {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) :
+    iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n \
+        iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf (n - 1) =
+      iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn := by
+  rw [iteratedLubinTateTorsionPoints_eq_union K hq hπmax hπne0 f hf0 hf1 hf n hn]
+  exact Finset.union_sdiff_cancel_left
+    (iteratedLubinTateTorsionPoints_disjoint_iteratedLubinTatePsiTorsionPoints
+      K hq hπmax hπne0 f hf0 hf1 hf n hn)
+
 end ABC3.Found.PGC
