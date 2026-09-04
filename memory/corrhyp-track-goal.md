@@ -695,3 +695,21 @@ STATEMENT内に埋め込むと`whnf`がcombinatorial explosionでtimeoutする
 
 コミット: `8e605fff`(lean-idioms #27)・`fda225b4`(作業単位1(b)完成)・
 `52cb625c`(記録)。
+
+★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(作業単位1が完全に
+「道具が出揃った」状態に、集計10/24で変わらず)。作業単位1の残り(a)
+「`D(f_l)∩D(f_m)=D(f_l·f_m)`」を実際に書こうとしたところ、mathlibに
+`AlgebraicGeometry.Scheme.basicOpen_mul`としてそのまま存在しており
+ABC3側で新規補題は不要と判明。**これで作業単位1(比較射の構成)は
+(a)(b)とも完成**——残るのはこれらを組み合わせた実装(数十〜百行規模)・
+work unit 2(rigidity)・work unit 3(GlueData/glueMorphisms組み立て)、
+という複数セッションにまたがる継続タスクのみ。
+
+Corrのnonempty脱落(item(4))も再検討: `Corr.comp'`が`D.pullback`を使う
+ため、一般には(2つのFEt射が連結な底上で必ずしも交わらないなら)C の
+非空性は自動保存されず、`Corr`構造体全体への追加は`comp'`/`transpose`/
+`extCorr`すべてに波及する大きめの変更になると判明——`lemma_4_1`自体の
+statementへ`[Nonempty c.C]`を追加前提として持ち込む方が影響範囲が狭く、
+実際に`lemma_4_1`を書くときまで先送りするのが合理的と判断。
+
+コミット: `3b81c2b6`(作業単位1(a)確認の記録)。
