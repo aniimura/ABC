@@ -1531,6 +1531,119 @@ theorem descendPieceR_localization_isOpenImmersion (X : Over BaseK) (U : X.left.
       (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] (pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α).1)
       (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1))) I) p₀)
 
+/-! ## `Lemma 4.1`——`descendPieceR`の`R'`レベル局所化のℝへの底変換が
+`Γ(C,piece(D(f*g)))`に一致することの完成(`2026-09-05夜、続き6`)
+
+`exists_piece_basicOpen_R_lift`(具体的な`R'`・`p₀`と対応の等式`hp₀`)・
+`piece_isLocalization_basicOpen_mul`(`Γ(C,piece(D(f*g)))`が局所化の
+実現であること)・`exists_ringEquiv_of_piece_lift`(`FieldLimit.lean`、
+純粋代数の合成補題)・`piece_basicOpen_mul_eq`(開集合の等式による
+移送)という4つの既存部品を1つの証明に組み立てた——`CorrHyp`固有の
+`pieceAlgebra`等の足場を伴うため、`maxHeartbeats`を大幅に上げる必要が
+あった(`4000000`では足りず`40000000`で227秒かけて通った)。 -/
+
+set_option maxHeartbeats 40000000 in
+open scoped TensorProduct Classical in
+/-- **`descendPieceR`の`R'`レベル局所化を`ℝ`へ底変換すると、実際に
+`Γ(C,piece(D(f*g)))`そのものになる**——`Lemma 4.1`のGlueData構築に
+おける「`R`レベルの局所化と正しいℝレベルの対象を結びつける」核心部分
+の完成形。`descendPieceR_localization_isOpenImmersion`(開埋め込み性)
+と合わせれば、`GlueData`の`f i j`に要る全データ(開埋め込みであり、
+かつℝレベルで正しい対象を指す)が揃う。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_descendPieceR_localization_baseChange (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U)
+    (f g : Γ(X.left, U)) (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α] :
+    letI hUf := hU.basicOpen f
+    letI := pieceAlgebra X (X.left.basicOpen f) hUf
+    letI : Algebra (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ)
+        Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))) :=
+      ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))
+        (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))) le_rfl).hom.comp
+        (pieceRingEquiv X (X.left.basicOpen f) hUf).symm.toRingHom).toAlgebra
+    haveI : Algebra.Etale (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ)
+        Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))) :=
+      piece_algebraEtale_tensor X (X.left.basicOpen f) hUf C α
+    haveI : Algebra.FinitePresentation (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ)
+        Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))) :=
+      inferInstance
+    let n := Algebra.Presentation.ofFinitePresentationVars (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ)
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f)))
+    let I := Ideal.span (Set.range (pieceAlgebra_relation_descend_q₀ X (X.left.basicOpen f) hUf C α))
+    ∃ (R' : FgSubalgebra ℚ ℝ) (hR : pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α ≤ R')
+      (p₀ : MvPolynomial (Fin n) (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1)),
+    letI hCR' : CommRing (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1) := inferInstance
+    letI : Algebra (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] (pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α).1)
+        (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1) :=
+      (Algebra.TensorProduct.map (AlgHom.id ℚ Γ(X.left, X.left.basicOpen f)) (Subalgebra.inclusion hR)).toRingHom.toAlgebra
+    letI algB'T : Algebra (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1) (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ) :=
+      (Algebra.TensorProduct.map (AlgHom.id ℚ Γ(X.left, X.left.basicOpen f)) (Subalgebra.val R'.1)).toRingHom.toAlgebra
+    letI hCRp : CommRing (MvPolynomial (Fin n) (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1) ⧸
+        Ideal.map (MvPolynomial.map (algebraMap
+          (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] (pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α).1)
+          (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1))) I) := inferInstance
+    ∀ (M : Type) [CommRing M] [Algebra (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1) M]
+      [Algebra (MvPolynomial (Fin n) (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1) ⧸
+          Ideal.map (MvPolynomial.map (algebraMap
+            (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] (pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α).1)
+            (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1))) I) M]
+      [IsScalarTower (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1)
+        (MvPolynomial (Fin n) (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1) ⧸
+          Ideal.map (MvPolynomial.map (algebraMap
+            (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] (pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α).1)
+            (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1))) I) M]
+      [IsLocalization.Away (Ideal.Quotient.mk (Ideal.map (MvPolynomial.map (algebraMap
+          (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] (pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α).1)
+          (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1))) I) p₀) M],
+    Nonempty (M ⊗[Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1] (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ)
+      ≃+* Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen (f * g))))) := by
+  have hUf : IsAffineOpen (X.left.basicOpen f) := hU.basicOpen f
+  letI := pieceAlgebra X (X.left.basicOpen f) hUf
+  letI : Algebra (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ)
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))) :=
+    ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))
+      (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))) le_rfl).hom.comp
+      (pieceRingEquiv X (X.left.basicOpen f) hUf).symm.toRingHom).toAlgebra
+  haveI : Algebra.Etale (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ)
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))) :=
+    piece_algebraEtale_tensor X (X.left.basicOpen f) hUf C α
+  haveI : Algebra.FinitePresentation (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ)
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))) :=
+    inferInstance
+  set R := pieceAlgebra_relation_descend_R X (X.left.basicOpen f) hUf C α with hRdef
+  letI hCR : CommRing (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R.1) := inferInstance
+  letI algBT : Algebra (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R.1) (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ) :=
+    (Algebra.TensorProduct.map (AlgHom.id ℚ Γ(X.left, X.left.basicOpen f)) (Subalgebra.val R.1)).toRingHom.toAlgebra
+  set n := Fin (Algebra.Presentation.ofFinitePresentationVars (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ)
+    Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f)))) with hndef
+  obtain ⟨e⟩ := pieceAlgebra_R_model_baseChange X (X.left.basicOpen f) hUf C α
+  set h₂ := piece_basicOpen_localizationElem X U f g C α with hh₂def
+  set I := Ideal.span (Set.range (pieceAlgebra_relation_descend_q₀ X (X.left.basicOpen f) hUf C α)) with hIdef
+  obtain ⟨R', hR, p₀, hp₀⟩ := exists_piece_basicOpen_R_lift X U hU f g C α e
+  haveI hWloc : IsLocalization.Away h₂ Γ(C, C.basicOpen h₂) :=
+    piece_isLocalization_basicOpen_mul X U hU f g C α
+  refine ⟨R', hR, p₀, ?_⟩
+  letI hCR' : CommRing (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1) := inferInstance
+  letI algBB' : Algebra (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R.1) (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1) :=
+    (Algebra.TensorProduct.map (AlgHom.id ℚ Γ(X.left, X.left.basicOpen f)) (Subalgebra.inclusion hR)).toRingHom.toAlgebra
+  letI algB'T : Algebra (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1) (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ) :=
+    (Algebra.TensorProduct.map (AlgHom.id ℚ Γ(X.left, X.left.basicOpen f)) (Subalgebra.val R'.1)).toRingHom.toAlgebra
+  haveI hTower : IsScalarTower (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R.1) (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1)
+      (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ) := by
+    apply IsScalarTower.of_algebraMap_eq
+    intro x
+    have h1 : (Subalgebra.val R'.1).comp (Subalgebra.inclusion hR) = Subalgebra.val R.1 := rfl
+    have h2 := Algebra.TensorProduct.map_comp (S := ℚ) (R := ℚ) (AlgHom.id ℚ Γ(X.left, X.left.basicOpen f))
+      (AlgHom.id ℚ Γ(X.left, X.left.basicOpen f)) (Subalgebra.val R'.1) (Subalgebra.inclusion hR)
+    rw [AlgHom.id_comp, h1] at h2
+    exact RingHom.congr_fun (congrArg AlgHom.toRingHom h2.symm).symm x
+  intro M _ _ _ _ _
+  obtain ⟨e8⟩ := exists_ringEquiv_of_piece_lift
+    (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R.1) (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] R'.1) (Γ(X.left, X.left.basicOpen f) ⊗[ℚ] ℝ)
+    n I p₀ Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))) Γ(C, C.basicOpen h₂) e h₂ hp₀ M
+  rw [piece_basicOpen_mul_eq]
+  exact ⟨e8⟩
+
 /-- **アフィン開`U`上の基本開`X.basicOpen f`は`Spec(Localization.Away f)`
 そのものと同一視できる**——`mathlib`の`basicOpenIsoSpecAway`は`X := Spec R`
 の場合限定だったので、一般のアフィン開`U`(`X`自体はアフィンでなくてよい)
