@@ -5548,6 +5548,74 @@ theorem falt1_falt1Wn1_length_quotient_maximalIdeal_pow {Wn : Type*} [CommRing W
   letI hdvr := falt1_falt1Wn1_isDiscreteValuationRing π' n hn hπne0 hprime hnotsq hnpos hπ'unif
   exact IsDiscreteValuationRing.length_quotient_pow_maximalIdeal (R := Falt1Wn1 Wn Wn π' n) k
 
+set_option maxHeartbeats 1000000 in
+/-- **Theorem 1.2 step (5): `differentIdeal Wₙ Wₙ₊₁`の閉じた式(到達点)**:
+`differentIdeal_eq_span_derivative`(既存)+`falt1BaseChangeGeneratorFull`
+(既存、`hxadjoin`・`hxminpoly`込みの生成元`x`を直接供給)+`falt1_field
+Level_adjoin_top_of_ringLevel_minpoly`(既存、体レベルのadjoin条件への
+橋渡し)を組み合わせ、`differentIdeal Wₙ Wₙ₊₁ = span{n·x^(n-1)}`を
+直接示した——直前の記録(commit `09090c57`)で`isDefEq`timeoutに当たった
+原因は、`falt1_hspan_eq`が内部で毎回行っていた`Fact(Irreducible ...)`・
+`FiniteDimensional`・`Algebra.IsSeparable`の事前登録(`g`側、field
+level)を**省略していた**ことだった——これらを`differentIdeal_eq_span_
+derivative`呼び出しの**前**に明示的に`haveI`すれば、暗黙のinstance
+探索が正しく解決し、timeoutせず高速(3秒程度)に閉じる。 -/
+theorem falt1_differentIdeal_Wn_Wn1_eq_span_deriv
+    {V0 Wn : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    (π : V0) (n : ℕ)
+    (hn : (n : FractionRing V0) ≠ 0) (hπne0 : algebraMap V0 (FractionRing V0) π ≠ 0)
+    (hprime : (Ideal.span ({π} : Set V0)).IsPrime) (hnotsq : π ∉ (Ideal.span ({π} : Set V0)) ^ 2)
+    (hnpos : 0 < n)
+    (hn' : (n : FractionRing Wn) ≠ 0)
+    (hπne0' : algebraMap Wn (FractionRing Wn) (algebraMap V0 Wn π) ≠ 0)
+    (hprime' : (Ideal.span ({algebraMap V0 Wn π} : Set Wn)).IsPrime)
+    (hnotsq' : algebraMap V0 Wn π ∉ (Ideal.span ({algebraMap V0 Wn π} : Set Wn)) ^ 2)
+    (hinjV0Wn : Function.Injective (algebraMap V0 Wn))
+    [IsDedekindDomain (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    [Module.IsTorsionFree V0 (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    [IsDedekindDomain (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))]
+    [Module.IsTorsionFree Wn (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))] :
+    ∃ x : integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))),
+      differentIdeal Wn (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn))))) =
+      Ideal.span ({(n : integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn))))) * x ^ (n - 1)} :
+        Set (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))) := by
+  set g : Polynomial Wn := Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) with hgdef
+  have hirrg : Irreducible (g.map (algebraMap Wn (FractionRing Wn))) :=
+    ABC3.Found.Falt1.eisenstein_X_pow_sub_C_irreducible_map (algebraMap V0 Wn π) n hnpos hprime' hnotsq'
+  haveI : Fact (Irreducible (g.map (algebraMap Wn (FractionRing Wn)))) := ⟨hirrg⟩
+  have hmonicg : (g.map (algebraMap Wn (FractionRing Wn))).Monic :=
+    (Polynomial.monic_X_pow_sub_C (algebraMap V0 Wn π) hnpos.ne').map _
+  haveI : Module.Finite (FractionRing Wn) (AdjoinRoot (g.map (algebraMap Wn (FractionRing Wn)))) := hmonicg.finite_adjoinRoot
+  haveI : FiniteDimensional (FractionRing Wn) (AdjoinRoot (g.map (algebraMap Wn (FractionRing Wn)))) := ‹Module.Finite _ _›
+  have hsepg : (g.map (algebraMap Wn (FractionRing Wn))).Separable := by
+    have hmapeq : g.map (algebraMap Wn (FractionRing Wn))
+        = Polynomial.X ^ n - Polynomial.C (algebraMap Wn (FractionRing Wn) (algebraMap V0 Wn π)) := by
+      rw [hgdef]; simp
+    rw [hmapeq]; exact Polynomial.separable_X_pow_sub_C _ hn' hπne0'
+  haveI : Algebra.IsSeparable (FractionRing Wn) (AdjoinRoot (g.map (algebraMap Wn (FractionRing Wn)))) :=
+    ABC3.Found.Falt1.algIsSeparable_adjoinRoot_of_separable _ hmonicg hsepg
+  obtain ⟨ψ, w, x, hwx, hψinj, hwadjoin, hwminpoly, hxadjoin, hxminpoly⟩ :=
+    ABC3.Found.Falt1.falt1BaseChangeGeneratorFull π n hn hπne0 hprime hnotsq hnpos hn' hπne0' hprime' hnotsq' hinjV0Wn
+  have hxfield := ABC3.Found.Falt1.falt1_fieldLevel_adjoin_top_of_ringLevel_minpoly
+    (V0 := Wn) (algebraMap V0 Wn π) n hn' hπne0' hprime' hnotsq' hnpos x hxminpoly
+  have hdiff := ABC3.Found.Falt1.differentIdeal_eq_span_derivative x hxfield hxadjoin
+  rw [hxminpoly] at hdiff
+  have hderiv : Polynomial.derivative (Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)
+      = Polynomial.C (n : Wn) * Polynomial.X ^ (n-1) := by
+    rw [Polynomial.derivative_sub, Polynomial.derivative_X_pow, Polynomial.derivative_C, sub_zero]
+  rw [hderiv] at hdiff
+  simp only [Polynomial.aeval_mul, Polynomial.aeval_X_pow, map_natCast] at hdiff
+  exact ⟨x, hdiff⟩
+
 /-!
 ## Theorem 1.2 の核心への別経路: Brinon-Conrad Exercise 13.7.4 の
 step (1) を Nakayama から立ち上げる(2026-09-05)

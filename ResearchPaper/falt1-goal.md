@@ -3299,6 +3299,30 @@ mathlib での正確な組み立て方は未確認)。
       falt1Wn1_length_quotient_maximalIdeal_pow`という確実な到達点
       (共にcommit済み)を維持する方を優先し、この接続作業自体は
       コミットしなかった。
+
+      ★★★2026-09-05、続けてこの`isDefEq`timeoutを**実際に解消した**。
+      原因は診断通りだった: `differentIdeal_eq_span_derivative`を
+      呼ぶ**前**に、`falt1_hspan_eq`が内部で毎回行っていた`Fact
+      (Irreducible ...)`・`FiniteDimensional`・`Algebra.IsSeparable`
+      の事前登録(`g`側=`Wₙ→Wₙ₊₁`のfield level)を**省略していた**
+      ことが原因だった——これらを呼び出し前に明示的に`haveI`すれば、
+      暗黙のinstance探索が正しく解決し、`maxHeartbeats 1000000`でも
+      timeoutせず**3秒程度**で閉じた(`set_option maxHeartbeats`
+      すら実質不要なレベル)。`falt1_differentIdeal_Wn_Wn1_eq_span_
+      deriv`として
+      ```
+      differentIdeal Wₙ Wₙ₊₁ = Ideal.span {n · x^(n-1)}
+      ```
+      を`lean_check`で確認後`KaehlerAux.lean`に追記した——これで
+      step (5)の`β`項の由来(`differentIdeal`の閉じた式)と、
+      前々回確立した具体的な長さの下限(`length(Wₙ₊₁⧸maximalIdeal^k)
+      =k`)の**両方**が、同じ`x`(`falt1BaseChangeGeneratorFull`が
+      供給する生成元)を経由して**言葉が揃った**。残る最後の接続
+      (`Ideal.span{n·x^(n-1)}=Ideal.span{n}*Ideal.span{x}^(n-1)`
+      への分解+`falt1_length_quotient_mul_of_ne_zero`で`length(Wₙ₊₁⧸
+      differentIdeal Wₙ Wₙ₊₁)=length(Wₙ₊₁⧸(n))+(n-1)`という完全な
+      等式にまとめること)は次回に持ち越すが、必要な材料は**すべて
+      揃った**。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
