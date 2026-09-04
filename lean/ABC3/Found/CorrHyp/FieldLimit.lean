@@ -1276,6 +1276,54 @@ theorem mvPolynomial_algebraTensorMap_val_eq_zero_of_map_eq_zero (A : Type) [Com
     p = 0 :=
   (mvPolynomial_map_algebraTensorMap_val_injective A R' ι).eq_iff.mp (h.trans (map_zero _).symm)
 
+open scoped TensorProduct in
+/-- **`MvPolynomial.map`と`MvPolynomial.aeval`が可換であること**——
+`ψ := algebraMap (A⊗R'.1)(A⊗ℝ)`による係数拡大と、生成元への代入
+(`aeval`)の順序を入れ替えても同じ結果になる。`MvPolynomial.induction_on`
+での3ケース(定数・和・単項式の積)による直接計算——mathlibに完成品の
+1つの補題として無かったので手で組んだ。「候補の遷移写像(`R'`レベルの
+`ev`)が、ℝへbase changeした後に関係式を満たす」ことと「`R'`レベルで
+関係式を満たす」ことを結ぶ橋渡し。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem mvPolynomial_map_aeval_comm (A : Type) [CommRing A] [Algebra ℚ A] (R' : FgSubalgebra ℚ ℝ) (ι ι' : Type)
+    (p : MvPolynomial ι (A ⊗[ℚ] R'.1)) (ev : ι → MvPolynomial ι' (A ⊗[ℚ] R'.1)) :
+    MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)).toRingHom
+        (MvPolynomial.aeval ev p) =
+      MvPolynomial.aeval (fun i => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)).toRingHom (ev i))
+        (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)).toRingHom p) := by
+  induction p using MvPolynomial.induction_on with
+  | C a =>
+    simp only [MvPolynomial.aeval_C, MvPolynomial.algebraMap_eq, MvPolynomial.map_C]
+  | add p q hp hq =>
+    rw [map_add, map_add, map_add, hp, hq, map_add]
+  | mul_X p i hp =>
+    simp only [map_mul, MvPolynomial.aeval_X, MvPolynomial.map_X]
+    rw [hp]
+
+open scoped TensorProduct in
+/-- **遷移写像の候補(`R'`レベルの`ev`)がℝレベルで関係式`p`を満たすなら、
+`R'`レベルで既に満たしている**——`mvPolynomial_map_aeval_comm`(係数拡大
+とaevalの可換性)+`mvPolynomial_algebraTensorMap_val_eq_zero_of_map_eq_zero`
+(単射性)を合成するだけ。「項目(d)の第二段」(遷移データのRレベル降下)
+で実際に使う核心の補題——`ev`(候補の生成元の像、`exists_fg_subalgebra_
+tensor_mvPolynomial_finset`で降ろしたもの)が、既知のℝレベルの遷移
+写像が満たす関係式を、ℝへbase changeするまでもなく`R'`レベルで
+すでに満たすことを保証する(well-definedness)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem mvPolynomial_aeval_eq_zero_of_map_aeval_eq_zero (A : Type) [CommRing A] [Algebra ℚ A]
+    (R' : FgSubalgebra ℚ ℝ) (ι ι' : Type) (p : MvPolynomial ι (A ⊗[ℚ] R'.1))
+    (ev : ι → MvPolynomial ι' (A ⊗[ℚ] R'.1))
+    (h : MvPolynomial.aeval (fun i => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)).toRingHom (ev i))
+      (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)).toRingHom p) = 0) :
+    MvPolynomial.aeval ev p = 0 := by
+  apply mvPolynomial_algebraTensorMap_val_eq_zero_of_map_eq_zero
+  rw [mvPolynomial_map_aeval_comm]
+  exact h
+
 /-! ## `StandardEtalePair.Ring` の元を有限段階へ降ろす——作業単位1(b)の完成
 
 `exists_fg_subalgebra_tensor_bivariate_finset`を`StandardEtalePair.Ring`
