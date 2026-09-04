@@ -1139,3 +1139,27 @@ corrHypInstance4/Ext/piece_descends_isoのどれとも未接続と判明。
 有限アフィン被覆+外側の貼り合わせ・(e)Corrのα・β脚と整合性の等式。
 corrhyp-goal.mdに詳細を記録(コミット`b1c9414b`)。次に着手する際は
 (a)から始めるのが妥当。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04
+続報(corrHypGlueDataOfCover追加、項目(a)着手、集計10/24で変わらず)。
+懸念していた「piece_descends_isoを決定的な形へ作り直す必要」は
+**不要と判明**——corrHypGlueDataの12フィールドは異なる添字i,jの
+Z i・Z jを互いに比較する場面が無く、各e iは添字ごとに独立に使われる
+だけなので、.choose由来の不透明なZ i同士でも支障なし(transitionElem
+のときの「複数.choose結果の代数的関係」問題とは構造的に別物)。
+
+ExtLimit.leanに5定義を追加・lake build(ExtLimit/ABC3とも)0エラー
+確認済みでコミット: descendPiece/descendPieceIso(piece_descends_iso
+の.choose/.choose_specで単一fの候補片と比較同型を取得)・
+descendPieceOfProof/descendPieceIsoOfProof(IsStandardEtaleを
+typeclassでなく明示的証明として受け取るFinset用instance版)・
+corrHypGlueDataOfCover(有限族f:ι→Γ(X,U)からJ:={i//i∈t}として
+corrHypGlueDataを実際に呼び出す——初めて抽象パラメータでなく具体的
+構成データでの呼び出し)。
+
+正直な現状: 被覆条件⨆i∈t,X.basicOpen(f i)=Uはまだ未使用(項目(b)で
+必要)、A/X/Uと実際のcorrHypInstance4/Ext/Cとの接続(項目(c))も未着手
+——corrHypGlueDataOfCoverは依然CorrHyp非依存の再利用可能な部品。
+corrhyp-goal.mdに詳細記録(コミット`20db4512`)。次の一手:
+exists_finite_standardEtaleCover+exists_scheme_basicOpen_cover_of_ring
+で実際のι,t,fと被覆証明を得る方向。

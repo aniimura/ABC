@@ -2426,3 +2426,51 @@ sorry無しだが、それを`corrHypInstance4`・`Ext`・`C`へ結び付ける
 している。次に着手する際は(a)の具体化(特に`piece_descends_iso`を
 決定的な形へ作り直す必要があるかどうかの見極め)から始めるのが
 妥当と見られる。集計は10/24で変わらず(§4は0/2のまま)。
+
+## 2026-09-04: `corrHypGlueDataOfCover`——項目(a)着手、`.choose`は安全と判明
+
+上記(a)で懸念していた「`piece_descends_iso`を決定的な形へ作り直す
+必要があるかもしれない」という点を実際に検証した。結論: **不要**
+だった。`corrHypGlueData`の12フィールド(`t_fac`・`cocycle`含む)は
+異なる添字`i,j`の`Z i`・`Z j`を互いに比較する場面が一切無く、各`e i`
+は添字ごとに独立に使われるだけなので、`.choose`由来の「アルゴリズム
+的に不透明な」`Z i`同士でも支障は起きない。以前`transitionElem`で
+複数の`.choose`呼び出しが代数的に無関係になってしまい苦労した状況
+とは構造的に異なる(あちらは異なる`.choose`結果同士の**代数的な
+関係**が必要だったが、`corrHypGlueData`は各`i`について`e i`を
+1回使うだけで閉じる)。
+
+`ExtLimit.lean`に5個の定義を追加(`lean_check`で個別検証後、ファイル
+へ反映・`lake build ABC3.Found.CorrHyp.ExtLimit`/`lake build ABC3`
+とも0エラーを確認・コミット):
+- `descendPiece`/`descendPieceIso`: 単一のstandard-étale元`f`に対し
+  `piece_descends_iso hU f`の`.choose`/`.choose_spec`で候補片`R,P₀`
+  を取り出し、`pullback (standardEtalePairSpecMap P₀) (Spec.map ...)`
+  として具体的なスキームを構成、その比較同型を`.choose_spec`の
+  `Nonempty`成分の`.some`で得る。
+- `descendPieceOfProof`/`descendPieceIsoOfProof`: 上と同じだが
+  `IsStandardEtale`をtypeclassでなく明示的な証明として受け取る
+  ——`Finset`の各元ごとに別々の証明を渡して族を作るのに必要
+  (typeclass解決だと添字ごとに違うインスタンスを同時に持てない)。
+- `corrHypGlueDataOfCover`: 有限族`f : ι → Γ(X,U)`(`Finset t`で
+  添字づけ、各`f i`に`IsStandardEtale`証明`hf i`が付随)から
+  `J := {i // i ∈ t}`として`corrHypGlueData`を実際に呼び出す
+  ——**`corrHypGlueData`が初めて抽象パラメータでなく具体的な構成
+  データで呼び出された**。
+
+★注意(まだ未着手、正直な現状): `corrHypGlueDataOfCover`は被覆条件
+`⨆ i∈t, X.basicOpen (f i) = U`をまだ使っていない(型に現れない)
+——これは項目(b)(`corrHypGlueData.glued ≅ U`)で初めて必要になる。
+また`A`・`X`・`U`と実際の`corrHypInstance4`・`Ext`・`C`との接続
+(項目(c))も未着手——`corrHypGlueDataOfCover`は依然として
+CorrHyp非依存の「有限standard-étale族→GlueData」という再利用可能な
+部品にすぎない。集計は10/24で変わらず(インフラであり、numbered
+itemではないため)。
+
+次の一手: `exists_finite_standardEtaleCover`(環レベルの有限
+standard-étale被覆の存在、`FieldLimit.lean:755`)と
+`exists_scheme_basicOpen_cover_of_ring`(それをスキームレベルの被覆
+`⨆i∈t,X.basicOpen(f i)=U`へ変換、`ExtLimit.lean:1133`)を組み合わせ、
+実際の`ι,t,f`と被覆条件の証明を`corrHypGlueDataOfCover`に与える形へ
+進める——ただしこれもまだ`A`/`X`/`U`が何であるべきかという項目(c)の
+接続無しには「実際のCorrHypデータ」にはならない。
