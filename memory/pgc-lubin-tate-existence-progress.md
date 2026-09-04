@@ -2420,3 +2420,48 @@ adjoinIntegers K x`(ノルム保存の埋め込みの制限)を構成し、有�
 核だった道具)を**自己同型でなく単なる埋め込みに**適用する、という
 `LubinTateActionEquivariance.lean`と同型だが独立した構築が必要——
 新しい深い数学的内容ではなく、同じ技法をもう一度組み立てる作業。
+
+## 続報(同日、★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★大きな節目——cross-point
+bridgingを実際に突破し、`reciprocityMap`の`n`跨ぎの可換性を完成
+させた、`LubinTateActionInclusion.lean`(新規)・`LubinTateTower
+Compatible.lean`(拡張)、commit準備中): 節目(5)の核心が確立された
+
+前回「cross-point bridgingが要る、LubinTateActionEquivarianceが
+自己同型限定の技法で回避した障害と同じ種類」と記録した壁を、
+**実際に正面から解決した**。鍵は`algHom_aeval_powerSeries_comm`
+(`PowerSeriesAevalComm.lean`、連続な代数準同型は`PowerSeries.aeval`
+と可換、これまで`σ:S→ₐ[A]S`という**自己**準同型限定だった)が、
+実は始域`S₁`・終域`S₂`が異なってもproof全体が一字一句同じで通る
+ことに気づいた点——`algHom_aeval_powerSeries_comm'`として一般化
+した(既存の証明をコピーしてS₁/S₂に分けるだけ、新しい数学的内容
+ゼロ)。これを`L_n≤L_{n+1}`から誘導される環準同型
+`adjoinIntegersInclusion:adjoinIntegers K y→+*adjoinIntegers K x`
+(`IntermediateField.inclusion`の制限、ノルム保存は`IntermediateField.
+coe_inclusion`から`rfl`ではなく明示的な`rw`で示す必要があった——
+`x,y`を抽象変数のまま`rfl`を試みると**kernelのdeterministic
+timeoutが再現した**、具体的な式を経由すれば速い、という新しい
+罠を発見・記録した)に適用し、`lubinTateEvalAtPoint_inclusion_comm`
+(cross-point bridgingそのもの: `y`自身の座標系での評価と`x`の座標系
+で`y`を1点として評価したものが同じ`K.closure`の値を与える)を確立
+した(`Found/PGC/LubinTateActionInclusion.lean`、新規)。
+
+これを土台に、`Found/PGC/LubinTateTowerCompatible.lean`へ2定理を
+追加した: `lubinTateActionAtTorsionPoint_pi_mul_eq_pred`
+(`(a*π)·x`(level`n+1`)と`a·y`(level`n`)が同じ値)、そして
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`reciprocityMap_pred_eq_map_succ`——`reciprocityMap`の`n`跨ぎの
+可換性そのもの**: 同じ大域的`σ`について、level`n+1`での
+`reciprocityMap`を`principalUnits K π n`まで落とした
+(`QuotientGroup.map`)ものがlevel`n`での`reciprocityMap`に一致する。
+証明は「`u_σ·y=u_σ·(π·x)=(u_σ*π)·x=π·(u_σ·x)=π·σ(x)=σ(π·x)=σ(y)`」
+という等式の連鎖(乗法性2回+Galois同変性、`reciprocityMap_mul`の
+証明と全く同じ組み立て技法)を、cross-point bridgingを実際に経由
+して完成させたもの。
+
+★★★★★これで節目(5)(射影極限`Gal(L_π/K)≅𝒪_K^×`)の**核心的な数学的
+内容はすべて解決した**——各段の`galoisReciprocityEquiv`が射影系を
+なすことが確立された。残るのは`Mathlib.FieldTheory.Galois.Infinite`
+(副有限Galois群の道具、まだ内容を調べていない)を使って実際に
+逆極限`Gal(L_π/K)=lim Gal(L_n/K)`と`𝒪_K^×=lim(𝒪_K/π^n)^×`を構成し、
+両者の同型へ組み立てる、という**純粋な組み立て工程**(新しい数学的
+障害ではなく、mathlibのAPIをどう繋ぐかというLean工学の問題)。

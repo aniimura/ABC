@@ -1,4 +1,6 @@
 import ABC3.Found.PGC.AdjoinIntegers
+import ABC3.Found.PGC.LubinTateActionInclusion
+import ABC3.Found.PGC.LubinTateActionEquivariance
 
 /-!
 # 捩れ塔が compatible system をなす(`sorry` 無し)
@@ -21,13 +23,38 @@ Lubin-Tate 理論で `L_n:=K(Λ_n)` の塔が意味を持つのは、`Λ_n` の
 4. `principalUnits_succ_le`: `principalUnits K π (n+1)≤principalUnits
    K π n`——単位群側の「モジュラス」の単調性、純環論的事実。
 
-いずれも新しい数学的内容は無く、`AdjoinIntegers.lean` で確立済みの
-部品(`lubinTateAction_mul`(乗法性)・`pi_pow_action_eq_zero`/
+1〜4はいずれも新しい数学的内容は無く、`AdjoinIntegers.lean` で
+確立済みの部品(`lubinTateAction_mul`(乗法性)・`pi_pow_action_eq_zero`/
 `eq_zero_of_pi_pow_action_eq_zero`(`π^n·x=0⟺D_n(x)=0`の橋渡し)・
 `lubinTateActionAtTorsionPoint_pi_pow_pred_ne_zero_of_mem_
 iteratedLubinTatePsiTorsionPoints`(原始性の特徴づけ)・
 `iteratedLubinTateTorsionPoints_sdiff_eq_iteratedLubinTatePsiTorsionPoints`
 (`Λ_n\Λ_{n-1}=ψ_nの根`))の組み立てのみで閉じる。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★節目——`reciprocityMap`の`n`跨ぎの可換性(cross-point bridging を突破)
+
+続く2定理は`LubinTateActionInclusion.lean`(体の包含に沿った冪級数
+評価のcross-point bridging、新規)を使って、当初「壁」として記録
+されていた障害を実際に突破する:
+
+5. `lubinTateActionAtTorsionPoint_pi_mul_eq_pred`: `(a*π)·x`(`x`の
+   座標系、level `n+1`)と`a·y`(`y:=π·x`自身の座標系、level `n`)が
+   同じ`K.closure`の値を与える——`lubinTateEvalAtPoint_inclusion_comm`
+   (cross-point bridging)と`lubinTateAction_mul`(乗法性)の組み合わせ。
+6. `reciprocityMap_pred_eq_map_succ`: **`reciprocityMap`の`n`跨ぎの
+   可換性**——同じ大域的`σ`について、level `n+1`での`reciprocityMap`
+   を`principalUnits K π n`まで落とした(`QuotientGroup.map`)ものが
+   level `n`での`reciprocityMap`に一致する。5・Galois同変性
+   (`algEquiv_lubinTateActionAtTorsionPoint_comm`)・一意性
+   (`existsUnique_unitActionQuotient_eq_algEquiv`)を組み合わせ、
+   「`u_σ·y=u_σ·(π·x)=(u_σ*π)·x=π·(u_σ·x)=π·σ(x)=σ(π·x)=σ(y)`」
+   という等式の連鎖(乗法性2回+Galois同変性)を実際に完成させた。
+
+これで節目(5)(射影極限`Gal(L_π/K)≅𝒪_K^×`)の核心的な数学的内容
+——各段の`reciprocityMap`(ひいては`galoisReciprocityEquiv`)が
+射影系をなすこと——が確立された。残るのは`Mathlib.FieldTheory.
+Galois.Infinite`を使って実際に逆極限を組み立てる、というAPI調査・
+組み立て工程。
 -/
 
 namespace ABC3.Found.PGC
@@ -207,5 +234,172 @@ theorem principalUnits_succ_le {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
   rw [mem_principalUnits_iff] at hv ⊢
   obtain ⟨c, hc⟩ := hv
   exact ⟨c * π, by rw [hc, pow_succ]; ring⟩
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★**cross-point bridging の初めての実戦
+投入**: `(a*π)·x`(`x`の座標系、level `n+1`)と`a·y`(`y:=π·x`自身の
+座標系、level `n`)は同じ`K.closure`の値。`w:=⟨⟨y,hymem⟩,_⟩:
+adjoinIntegers K y`(`y`自身の座標系での基準点)と`z:=π·x:adjoinIntegers
+K x`(`x`の座標系での同じ点)が、`adjoinIntegersInclusionAlgHom`を
+経由すると一致すること(`coe_adjoinIntegersInclusion`)を`hwz`として
+確立し、`lubinTateEvalAtPoint_inclusion_comm`(cross-point bridging)
+・`lubinTateEvalAtPoint_congr`(証明項の違いの吸収)・`lubinTateAction_
+mul`(乗法性)を繋ぐだけ。 -/
+theorem lubinTateActionAtTorsionPoint_pi_mul_eq_pred {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx1 : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf (n + 1))
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (hyn : (↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem π) :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) ∈
+      iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hymem : (↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem π) :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) ∈
+      IntermediateField.adjoin K.carrier
+        ({(↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem π) :
+          IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure)} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier
+        ({(↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem π) :
+          IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure)} : Set K.closure))]
+    (a : 𝒪[K.carrier]) :
+    (↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem (a * π)) :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) =
+    (↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n
+        (↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem π) :
+          IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) hyn hymem a) :
+        IntermediateField.adjoin K.carrier
+        ({(↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem π) :
+          IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure)} : Set K.closure)) :
+        K.closure) := by
+  haveI := completeSpace_adjoinIntegers K x
+  haveI := isLinearTopology_adjoinIntegers K x
+  haveI := continuousSMul_adjoinIntegers K x
+  set y : K.closure := (↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem π) :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) with hy_def
+  haveI := completeSpace_adjoinIntegers K y
+  haveI := isLinearTopology_adjoinIntegers K y
+  haveI := continuousSMul_adjoinIntegers K y
+  set hle := adjoin_pi_mem_pred_le K hq hπmax hπne0 f hf0 hf1 hf n x hx1 hmem with hle_def
+  set z : adjoinIntegers K x := lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem π
+    with hz_def
+  set w : adjoinIntegers K y := ⟨⟨y, hymem⟩,
+      mem_adjoinIntegers_of_mem_iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n y hyn hymem⟩
+    with hw_def
+  have hwz : adjoinIntegersInclusionAlgHom K x y hle w = z := by
+    apply Subtype.ext; apply Subtype.ext
+    show (↑(↑((adjoinIntegersInclusion K x y hle) w) :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) = _
+    rw [coe_adjoinIntegersInclusion]
+  have hw : PowerSeries.HasEval w :=
+    hasEval_mem_adjoinIntegers_of_mem_iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n y hyn hymem
+  have hw' : PowerSeries.HasEval (adjoinIntegersInclusionAlgHom K x y hle w) := by
+    rw [hwz]; exact hasEval_lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem π
+  have hcomm := lubinTateEvalAtPoint_inclusion_comm K x y hle w hw hw'
+    (LubinTateAction hq hπmax f hf0 hf1 hf a)
+  rw [lubinTateEvalAtPoint_congr K x hw' hwz (LubinTateAction hq hπmax f hf0 hf1 hf a)] at hcomm
+  have hcanon : lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n y hyn hymem a =
+      lubinTateEvalAtPoint K y w hw (LubinTateAction hq hπmax f hf0 hf1 hf a) := rfl
+  rw [hcanon, ← hcomm]
+  have hmul := lubinTateAction_mul K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem a π
+  exact congrArg (fun v : adjoinIntegers K x =>
+    (↑(↑v : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure)) hmul.symm
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`reciprocityMap`の`n`跨ぎの可換性**: 同じ大域的`σ`について、
+level `n+1`での`reciprocityMap`を`principalUnits K π n`まで落とした
+(`QuotientGroup.map`)ものが level `n`での`reciprocityMap`に一致する。
+`u_σ`(level `n+1`での`reciprocityMap σ`の代表元)を取り、
+`u_σ·y=u_σ·(π·x)=(u_σ*π)·x`(`lubinTateActionAtTorsionPoint_pi_mul_
+eq_pred`)`=π·(u_σ·x)`(`lubinTateAction_mul`)`=π·σ(x)`
+(`reciprocityMap_spec`)`=σ(π·x)=σ(y)`(Galois同変性
+`algEquiv_lubinTateActionAtTorsionPoint_comm`)という等式の連鎖から
+`u_σ·y=σ(y)`を導き、一意性(`existsUnique_unitActionQuotient_eq_
+algEquiv`)で`reciprocityMap`(level `n`)`=mk(u_σ)=QuotientGroup.map
+(mk(u_σ)at level n+1)`を結論する。 -/
+theorem reciprocityMap_pred_eq_map_succ {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) (x : K.closure)
+    (hxψ1 : x ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf (n + 1) (by omega))
+    (hx1 : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf (n + 1))
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (hyψ : (↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem π) :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) ∈
+      iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn)
+    (hyn : (↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem π) :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) ∈
+      iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hymem : (↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem π) :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) ∈
+      IntermediateField.adjoin K.carrier
+        ({(↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem π) :
+          IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure)} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier
+        ({(↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem π) :
+          IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure)} : Set K.closure))]
+    (σ : K.closure ≃ₐ[K.carrier] K.closure) :
+    QuotientGroup.map (principalUnits K π (n + 1)) (principalUnits K π n) (MonoidHom.id _)
+        (principalUnits_succ_le K π n)
+        (reciprocityMap K hq hπmax hπne0 f hf0 hf1 hf (n + 1) (by omega) x hxψ1 hx1 hmem σ) =
+      reciprocityMap K hq hπmax hπne0 f hf0 hf1 hf n hn
+        (↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem π) :
+          IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) hyψ hyn hymem σ := by
+  set y : K.closure := (↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem π) :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) with hy_def
+  have hn1 : 1 ≤ n + 1 := by omega
+  obtain ⟨uσ, huσ⟩ := QuotientGroup.mk_surjective
+    (reciprocityMap K hq hπmax hπne0 f hf0 hf1 hf (n + 1) hn1 x hxψ1 hx1 hmem σ)
+  have hspecσ : (↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem
+        (uσ : 𝒪[K.carrier])) : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) = σ x := by
+    have h := reciprocityMap_spec K hq hπmax hπne0 f hf0 hf1 hf (n + 1) hn1 x hxψ1 hx1 hmem σ
+    rw [← huσ, unitActionQuotientLift_mk] at h
+    exact h
+  have hw : adjoinIntegersRestrictSelfAlgHom K hq hπmax hπne0 f hf0 hf1 hf (n + 1) hn1 x hxψ1 hx1 hmem σ
+      (⟨⟨x, hmem⟩, mem_adjoinIntegers_of_mem_iteratedLubinTateTorsionPoints
+        K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem⟩ : adjoinIntegers K x) =
+      lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem (uσ : 𝒪[K.carrier]) := by
+    show adjoinIntegersRestrictSelf K hq hπmax hπne0 f hf0 hf1 hf (n + 1) hn1 x hxψ1 hx1 hmem σ _ = _
+    apply Subtype.ext; apply Subtype.ext
+    rw [coe_adjoinIntegersRestrictSelf, hspecσ]
+  have hval : lubinTateActionAtAlgEquivPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) hn1 x hxψ1 hx1 hmem σ π =
+      lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem
+        (π * (uσ : 𝒪[K.carrier])) := by
+    show lubinTateEvalAtPoint K x _
+      (hasEval_adjoinIntegersRestrictSelfAlgHom_mk K hq hπmax hπne0 f hf0 hf1 hf (n + 1) hn1 x hxψ1 hx1 hmem σ)
+      (LubinTateAction hq hπmax f hf0 hf1 hf π) = _
+    rw [lubinTateEvalAtPoint_congr K x
+      (hasEval_adjoinIntegersRestrictSelfAlgHom_mk K hq hπmax hπne0 f hf0 hf1 hf (n + 1) hn1 x hxψ1 hx1 hmem σ)
+      hw (LubinTateAction hq hπmax f hf0 hf1 hf π)]
+    exact lubinTateAction_mul K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem π (uσ : 𝒪[K.carrier])
+  have hcomm := algEquiv_lubinTateActionAtTorsionPoint_comm K hq hπmax hπne0 f hf0 hf1 hf (n + 1) hn1
+    x hxψ1 hx1 hmem σ π
+  rw [hval, mul_comm] at hcomm
+  have hbridge := lubinTateActionAtTorsionPoint_pi_mul_eq_pred K hq hπmax hπne0 f hf0 hf1 hf n x hx1 hmem
+    hyn hymem (uσ : 𝒪[K.carrier])
+  rw [hbridge] at hcomm
+  have hspecy := reciprocityMap_spec K hq hπmax hπne0 f hf0 hf1 hf n hn y hyψ hyn hymem σ
+  have hspecmk : (↑(↑(unitActionQuotientLift K hq hπmax hπne0 f hf0 hf1 hf n y hyn hymem
+      (QuotientGroup.mk (s := principalUnits K π n) uσ)) :
+      IntermediateField.adjoin K.carrier ({y} : Set K.closure)) : K.closure) = σ y := by
+    rw [unitActionQuotientLift_mk]; exact hcomm.symm
+  have hfinal := (existsUnique_unitActionQuotient_eq_algEquiv K hq hπmax hπne0 f hf0 hf1 hf n hn
+    y hyψ hyn hymem σ).unique hspecy hspecmk
+  rw [hfinal, ← huσ, QuotientGroup.map_mk]
+  rfl
 
 end ABC3.Found.PGC
