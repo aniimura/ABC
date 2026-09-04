@@ -3027,6 +3027,37 @@ mathlib での正確な組み立て方は未確認)。
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
       「菱形」版であって、対応物というより`falt1_differentIdeal_
       tower_length`の親戚にあたる、との理解で確認済み。)
+
+      ★★2026-09-05、上記の「次回はここから」を実際に再開し、**解決
+      した**。`omegaAdjoinRootQuot`(`≃+`のみ)を直接`AdjoinRoot g`-線形
+      と示す代わりに、既に`≃ₗ[AdjoinRoot g]`である`omega_quotient_eq_
+      derivative_span`を土台に**同じ定理を線形版として再構築**する
+      方針に切り替えた:
+      - `falt1_omegaAdjoinRoot_surjective_quotient_p_lin`:
+        `Ω[AdjoinRoot g⁄R] →ₗ[AdjoinRoot g] AdjoinRoot g⧸(p)`への全射。
+        `Submodule.mapQ`+`Submodule.factor_surjective`で`Ideal.
+        Quotient.factor`の線形版を構成(`hle`の証明は`≃+`版と同一の
+        微分計算)。
+      - `falt1_omegaAdjoinRoot_surjective_quotient_p_baseChange`:
+        上記を`LinearMap.baseChange B`で`B`へ base change し、
+        `TensorProduct (AdjoinRoot g) B Ω[AdjoinRoot g⁄R] →ₗ[B]
+        TensorProduct (AdjoinRoot g) B (AdjoinRoot g⧸(p))`への全射
+        (`LinearMap.baseChange_surjective`)を得た。
+      - `falt1_omegaAdjoinRoot_surjective_quotient_p_baseChange'`:
+        右辺のテンソル積を`TensorProduct.quotTensorEquivQuotSMul`+
+        `TensorProduct.comm`(因子の順序が`quotTensorEquivQuotSMul`の
+        想定と逆だったため)で`B⧸(I•⊤ : Submodule (AdjoinRoot g) B)`
+        (単なる`B`の商加群)に繋ぎ直した。`Module`インスタンスは
+        `Module.isTorsionBySet_quotient_ideal_smul`から`letI`でその場
+        構成(グローバル登録はしない)。一度`Nonempty (... →+ ...)`
+        という誤った目標形で`⟨map, ?_⟩`のanonymous constructorが
+        「加法性の証明」枠に誤マッチする(先の`Prod`誤マッチと同種の
+        バグ)エラーに当たったが、`∃ ρ, Function.Surjective ρ`という
+        既に機能していた形に戻すことで解決した。3定理とも`lean_check`
+        で確認後、`KaehlerAux.lean`に追記・`lake build`成功(sorry
+        無し)。これで Exercise 13.7.4 step (3) の**単一因子の線形
+        base change**が完成し、残るは`pushoutKaehlerSplitStepOption`
+        との統合による`d+1`因子版への配線のみ。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・

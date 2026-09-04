@@ -5434,4 +5434,76 @@ theorem falt1_omegaAdjoinRoot_surjective_quotient_p {R : Type*} [CommRing R] (p 
   refine ⟨(Ideal.Quotient.factor hle).toAddMonoidHom.comp (omegaAdjoinRootQuot g).toAddMonoidHom, ?_⟩
   exact (Ideal.Quotient.factor_surjective hle).comp (omegaAdjoinRootQuot g).surjective
 
+/-- `falt1_omegaAdjoinRoot_surjective_quotient_p`の**`AdjoinRoot g`線形版**。
+`omegaAdjoinRootQuot`(`≃+`のみ)ではなく、`≃ₗ[AdjoinRoot g]`である
+`omega_quotient_eq_derivative_span`を土台にすることで、`≃+`の壁を
+超えて`B`への base change(`LinearMap.baseChange`)が可能になる——
+これが本節の目的である「`d+1`個の同時添加」への拡張の前提条件。 -/
+theorem falt1_omegaAdjoinRoot_surjective_quotient_p_lin {R : Type*} [CommRing R] (p : ℕ) (a : R) :
+    let g := Polynomial.X ^ p - Polynomial.C a
+    ∃ φ : Ω[(AdjoinRoot g)⁄R] →ₗ[AdjoinRoot g] AdjoinRoot g ⧸ Ideal.span ({algebraMap R (AdjoinRoot g) (p : R)} : Set (AdjoinRoot g)),
+      Function.Surjective φ := by
+  intro g
+  have hle : Ideal.span ({algebraMap (Polynomial R) (AdjoinRoot g) (Polynomial.derivative g)} : Set (AdjoinRoot g)) ≤
+      Submodule.comap (LinearMap.id (R := AdjoinRoot g)) (Ideal.span ({algebraMap R (AdjoinRoot g) (p : R)} : Set (AdjoinRoot g))) := by
+    show Ideal.span _ ≤ Ideal.span _
+    rw [Ideal.span_singleton_le_span_singleton]
+    set x := AdjoinRoot.root g with hx
+    have hderiv : Polynomial.derivative g = Polynomial.C (p : R) * Polynomial.X ^ (p - 1) := by
+      show Polynomial.derivative (Polynomial.X ^ p - Polynomial.C a) = _
+      rw [Polynomial.derivative_sub, Polynomial.derivative_X_pow, Polynomial.derivative_C, sub_zero]
+    have heval : algebraMap (Polynomial R) (AdjoinRoot g) (Polynomial.derivative g) =
+        algebraMap R (AdjoinRoot g) (p : R) * x ^ (p - 1) := by
+      rw [hderiv]
+      show AdjoinRoot.mk g (Polynomial.C (p:R) * Polynomial.X ^ (p-1)) = _
+      rw [map_mul, AdjoinRoot.mk_C, map_pow, AdjoinRoot.mk_X, hx]
+      rfl
+    rw [heval]
+    exact Dvd.intro (x ^ (p - 1)) rfl
+  refine ⟨(Submodule.mapQ _ _ (LinearMap.id (R := AdjoinRoot g)) hle).comp
+    (omega_quotient_eq_derivative_span g (ker_adjoinRoot_mk g) AdjoinRoot.mk_surjective).toLinearMap, ?_⟩
+  exact (Submodule.factor_surjective hle).comp
+    (omega_quotient_eq_derivative_span g (ker_adjoinRoot_mk g) AdjoinRoot.mk_surjective).surjective
+
+/-- `falt1_omegaAdjoinRoot_surjective_quotient_p_lin`を`B`へ base change
+したもの(`LinearMap.baseChange`)。`d+1`個の同時添加への拡張では、
+この`B`線形な全射を`pushoutKaehlerSplitStepOption`の`Option ι`添字
+分解と組み合わせて`Function.Surjective.piMap`で積を取る予定。 -/
+theorem falt1_omegaAdjoinRoot_surjective_quotient_p_baseChange {R B : Type*} [CommRing R] [CommRing B]
+    (p : ℕ) (a : R) [Algebra (AdjoinRoot (Polynomial.X ^ p - Polynomial.C a)) B] :
+    let g := Polynomial.X ^ p - Polynomial.C a
+    ∃ ψ : TensorProduct (AdjoinRoot g) B Ω[(AdjoinRoot g)⁄R] →ₗ[B]
+        TensorProduct (AdjoinRoot g) B (AdjoinRoot g ⧸ Ideal.span ({algebraMap R (AdjoinRoot g) (p : R)} : Set (AdjoinRoot g))),
+      Function.Surjective ψ := by
+  intro g
+  obtain ⟨φ, hφ⟩ := falt1_omegaAdjoinRoot_surjective_quotient_p_lin (R := R) p a
+  exact ⟨LinearMap.baseChange B φ, LinearMap.baseChange_surjective B hφ⟩
+
+/-- `falt1_omegaAdjoinRoot_surjective_quotient_p_baseChange`の右辺
+`TensorProduct (AdjoinRoot g) B (quotient)`を、`TensorProduct.comm`と
+`TensorProduct.quotTensorEquivQuotSMul`で`B ⧸ (I•⊤)`という、より
+扱いやすい形(単なる`B`の商加群)に繋ぎ直したもの。`Module`インス
+タンスは`Module.isTorsionBySet_quotient_ideal_smul`から`letI`で
+その場限りに構成する(グローバルインスタンスとしては登録しない
+——`KaehlerAux.lean`冒頭の教訓通り)。 -/
+theorem falt1_omegaAdjoinRoot_surjective_quotient_p_baseChange' {R B : Type*} [CommRing R] [CommRing B]
+    (p : ℕ) (a : R) [Algebra (AdjoinRoot (Polynomial.X ^ p - Polynomial.C a)) B] :
+    let g := Polynomial.X ^ p - Polynomial.C a
+    letI : Module (AdjoinRoot g ⧸ Ideal.span ({algebraMap R (AdjoinRoot g) (p : R)} : Set (AdjoinRoot g)))
+        (B ⧸ (Ideal.span ({algebraMap R (AdjoinRoot g) (p : R)} : Set (AdjoinRoot g)) : Ideal (AdjoinRoot g)) • (⊤ : Submodule (AdjoinRoot g) B)) :=
+      (Module.isTorsionBySet_quotient_ideal_smul B (Ideal.span ({algebraMap R (AdjoinRoot g) (p : R)} : Set (AdjoinRoot g)))).module
+    ∃ ρ : TensorProduct (AdjoinRoot g) B Ω[(AdjoinRoot g)⁄R] →+
+        B ⧸ (Ideal.span ({algebraMap R (AdjoinRoot g) (p : R)} : Set (AdjoinRoot g)) : Ideal (AdjoinRoot g)) • (⊤ : Submodule (AdjoinRoot g) B),
+      Function.Surjective ρ := by
+  intro g
+  letI : Module (AdjoinRoot g ⧸ Ideal.span ({algebraMap R (AdjoinRoot g) (p : R)} : Set (AdjoinRoot g)))
+      (B ⧸ (Ideal.span ({algebraMap R (AdjoinRoot g) (p : R)} : Set (AdjoinRoot g)) : Ideal (AdjoinRoot g)) • (⊤ : Submodule (AdjoinRoot g) B)) :=
+    (Module.isTorsionBySet_quotient_ideal_smul B (Ideal.span ({algebraMap R (AdjoinRoot g) (p : R)} : Set (AdjoinRoot g)))).module
+  obtain ⟨φ, hφ⟩ := falt1_omegaAdjoinRoot_surjective_quotient_p_lin (R := R) p a
+  set e0 := TensorProduct.quotTensorEquivQuotSMul B (Ideal.span ({algebraMap R (AdjoinRoot g) (p : R)} : Set (AdjoinRoot g))) with he0
+  set eComm := TensorProduct.comm (AdjoinRoot g) B
+    (AdjoinRoot g ⧸ Ideal.span ({algebraMap R (AdjoinRoot g) (p : R)} : Set (AdjoinRoot g))) with heComm
+  refine ⟨(e0.toAddMonoidHom.comp (eComm.toAddMonoidHom.comp (LinearMap.baseChange B φ).toAddMonoidHom) : _ →+ _), ?_⟩
+  exact e0.surjective.comp (eComm.surjective.comp (LinearMap.baseChange_surjective B hφ))
+
 end ABC3.Found.Falt1
