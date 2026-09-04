@@ -905,4 +905,40 @@ theorem exists_fg_subalgebra_tensor_standardEtalePair (A : Type) [CommRing A] [A
     rw [hf]; exact P.monic_f
   exact ⟨R, ⟨f₀, hmonic, g₀, ⟨p₁₀, p₂₀, n, hcond₀⟩⟩, hf, hg⟩
 
+open scoped TensorProduct in
+/-- **`exists_fg_subalgebra_tensor_standardEtalePair` と
+`standardEtalePairRingBaseChange` を組み合わせた完成形**——
+`StandardEtalePair (A ⊗[ℚ] ℝ)` は、ある有限段階 `R` 上の
+`StandardEtalePair (A ⊗[ℚ] R.1)` の**base change として文字通り
+一致する**(`P₀.Ring` を `A ⊗[ℚ] ℝ` へ係数拡大すると `P.Ring` に同型)。
+`Lemma 4.1` の「1アフィン片の降下」で、`c.α` の局所片(標準エタール表示)
+を有限段階へ降ろし、かつ「降ろした先の base change が元の局所片に一致
+する」ことまで保証する、核心の完成形。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_fg_subalgebra_tensor_standardEtalePair_baseChange (A : Type) [CommRing A]
+    [Algebra ℚ A] (P : StandardEtalePair (A ⊗[ℚ] ℝ)) :
+    ∃ (R : FgSubalgebra ℚ ℝ) (P₀ : StandardEtalePair (A ⊗[ℚ] R.1)),
+      letI : Algebra (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ) :=
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom.toAlgebra
+      Nonempty (TensorProduct (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ) P₀.Ring ≃ₐ[A ⊗[ℚ] ℝ] P.Ring) := by
+  obtain ⟨R, P₀, hf, hg⟩ := exists_fg_subalgebra_tensor_standardEtalePair A P
+  letI : Algebra (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ) :=
+    (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom.toAlgebra
+  refine ⟨R, P₀, ?_⟩
+  have hPeq : P₀.map (algebraMap (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ)) = P := by
+    have hf' : (P₀.map (algebraMap (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ))).f = P.f := by
+      rw [StandardEtalePair.map_f]; exact hf
+    have hg' : (P₀.map (algebraMap (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ))).g = P.g := by
+      rw [StandardEtalePair.map_g]; exact hg
+    cases hpm : P₀.map (algebraMap (A ⊗[ℚ] R.1) (A ⊗[ℚ] ℝ)) with
+    | mk f' monic_f' g' cond' =>
+      cases P with
+      | mk f monic_f g cond =>
+        rw [hpm] at hf' hg'
+        simp only at hf' hg'
+        subst hf' hg'
+        rfl
+  exact ⟨hPeq ▸ standardEtalePairRingBaseChange (K := A ⊗[ℚ] ℝ) P₀⟩
+
 end ABC3.Found.CorrHyp
