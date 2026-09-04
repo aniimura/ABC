@@ -2351,4 +2351,54 @@ theorem algHomAdjoinRootOfCompat'_root {V0 Wn : Type*} [CommRing V0] [CommRing W
     algHomAdjoinRootOfCompat' (Wn := Wn) f (AdjoinRoot.root f) = AdjoinRoot.root (f.map (algebraMap V0 Wn)) :=
   AdjoinRoot.map_root (algebraMap V0 Wn) f (f.map (algebraMap V0 Wn)) (dvd_refl _)
 
+/-!
+## `V_1 → W_1` の橋渡し写像そのものが完成した(2026-09-04)
+
+`hspan_eq` の接続に必要な `Algebra V1 Wn1` インスタンスを、実際に構成
+できる `AlgHom` として手に入れた——`differentIdeal_tower_diamond` を
+このインスタンスの下で呼び出す準備が整った。組み立ては:
+`V1 ≃ₐ[V0] AdjoinRoot f`(`falt1AdjoinRootEquivIntegralClosure`、symm)
+→ `AdjoinRoot f →ₐ[V0] AdjoinRoot g`(`algHomAdjoinRootOfCompat'`、
+`g:=f.map(algebraMap V0 Wn)`、多項式として `X^n-Cπ'` に等しい)
+→ `AdjoinRoot g ≃ₐ[Wn] Wn1`(`falt1AdjoinRootEquivIntegralClosure` を
+`Wn`・`π'` に対して再適用、`AlgHom.restrictScalars V0` で `V0`-線形
+写像とみなす)、の3段の合成。 -/
+
+/-- **`V_1 → W_1` の橋渡し写像**: `Wn` が(`V0` と同じ形の)Eisenstein
+拡大の基点になる場合、`V1 := integralClosure V0 (AdjoinRoot(X^n-π の
+base change))` から `Wn1 := integralClosure Wn (AdjoinRoot(X^n-π' の
+base change))`(`π':=algebraMap V0 Wn π`)への `V0`-代数準同型が
+存在する。 -/
+noncomputable def falt1BaseChangeAlgHom
+    {V0 Wn : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    (π : V0) (n : ℕ)
+    (hn : (n : FractionRing V0) ≠ 0) (hπne0 : algebraMap V0 (FractionRing V0) π ≠ 0)
+    (hprime : (Ideal.span ({π} : Set V0)).IsPrime) (hnotsq : π ∉ (Ideal.span ({π} : Set V0)) ^ 2)
+    (hnpos : 0 < n)
+    (hn' : (n : FractionRing Wn) ≠ 0)
+    (hπne0' : algebraMap Wn (FractionRing Wn) (algebraMap V0 Wn π) ≠ 0)
+    (hprime' : (Ideal.span ({algebraMap V0 Wn π} : Set Wn)).IsPrime)
+    (hnotsq' : algebraMap V0 Wn π ∉ (Ideal.span ({algebraMap V0 Wn π} : Set Wn)) ^ 2)
+    [IsDedekindDomain (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    [Module.IsTorsionFree V0 (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    [IsDedekindDomain (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))]
+    [Module.IsTorsionFree Wn (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))] :
+    integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))) →ₐ[V0]
+    integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))) := by
+  set f : Polynomial V0 := Polynomial.X ^ n - Polynomial.C π with hfdef
+  set π' : Wn := algebraMap V0 Wn π with hπ'def
+  set g : Polynomial Wn := Polynomial.X ^ n - Polynomial.C π' with hgdef
+  have hfg : f.map (algebraMap V0 Wn) = g := by rw [hfdef, hgdef, hπ'def]; simp
+  have e1 := falt1AdjoinRootEquivIntegralClosure π n hn hπne0 hprime hnotsq hnpos
+  have e2 := falt1AdjoinRootEquivIntegralClosure π' n hn' hπne0' hprime' hnotsq' hnpos
+  have step1 : AdjoinRoot f →ₐ[V0] AdjoinRoot g := hfg ▸ algHomAdjoinRootOfCompat' (Wn := Wn) f
+  exact (e2.toAlgHom.restrictScalars V0).comp (step1.comp e1.symm.toAlgHom)
+
 end ABC3.Found.Falt1
