@@ -2625,3 +2625,40 @@ inclusion_comm`(既出、`LubinTateActionInclusion.lean`)の**再利用**
 点が異なる)。その後にようやく`reciprocityMapLimit`本体の定義・
 全射性・単射性(`reciprocityMap`自体の単射性が前提、要再確認)に
 進める。次に戻るなら「1段分の全射性」の完成が具体的な出発点。
+
+## 続報(同日、★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+節目——「1段分の全射性」を完成、`LubinTateActionInclusion.lean`・
+`LubinTateTowerCompatible.lean`拡張、commit準備中): 見積りどおり
+既存の道具の再利用だけで完成した
+
+前回の見積りどおり実際に組んだ。**もう1段のcross-point bridging**
+(`π`を任意の`a`へ一般化)を`LubinTateActionInclusion.lean`に追加:
+
+- `adjoin_action_mem_le`: `K.carrier⟮a·x⟯≤K.carrier⟮x⟯`(任意の`a`)
+  ——`adjoin_pi_mem_pred_le`の`π`を`a`に一般化しただけ、証明は一字
+  一句同じ。
+- `lubinTateActionAtTorsionPoint_mul_eq_of_action`: `(b*a)·x`(`x`
+  の座標系)と`b·(a·x)`(`a·x`自身の座標系)が同じ`K.closure`の値。
+  `lubinTateActionAtTorsionPoint_pi_mul_eq_pred`(`a:=π`固定版)と
+  全く同じ証明の骨格を任意の`a`へ一般化しただけ。
+
+これを使って`LubinTateTowerCompatible.lean`に
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**`exists_pi_mul_eq_of_mem_iteratedLubinTatePsiTorsionPoints`——
+「1段分の全射性」そのもの**を確立した: level`n`の任意の`ψ_n`の根
+`y`に対し、`π·x'=y`(`x'`自身の座標系で)を満たすlevel`n+1`の`ψ_{n+1}`
+の根`x'`が存在する。証明: `z:=π·x`(既知の`ψ_n`の根)と`y`はどちらも
+`ψ_n`の根なので、`z`を基点にした単数作用の全単射性
+(`unitActionQuotientBijOn_bijective`、既出)から`u·z=y`となる`u`が
+取れる。`x':=u·x`は原始性を保ち(`unitActionQuotientLift_mem_
+iteratedLubinTatePsiTorsionPoints`、既出)、`lubinTateActionAtTorsion
+Point_mul_eq_of_action`(今回)で`x'`自身の座標系での`π·x'`を`x`の
+座標系での`(u*π)·x`に結び、`lubinTateActionAtTorsionPoint_pi_mul_
+eq_pred`(既出)で`u·z`に結んで`y`に至る。★躓いた点無し——見積り
+どおり既存部品の組み合わせだけで、新しい罠は出なかった。
+
+★★これで無限compatible列`(x_n)_{n≥1}`を`Nat.rec`で実際に構成する
+準備が整った——残る作業は純粋な依存再帰の組み立て(`LubinTate
+Sequence.lean::ΦSeq`と同じ型)と、その後の`reciprocityMapLimit`
+本体・全射性・単射性のみで、新しい数学的困難は今のところ見当たって
+いない。次に戻るなら`Nat.rec`での無限列構成が具体的な出発点。

@@ -402,4 +402,84 @@ theorem reciprocityMap_pred_eq_map_succ {p : ℕ} [Fact p.Prime] (K : PAdicLocal
   rw [hfinal, ← huσ, QuotientGroup.map_mk]
   rfl
 
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+**「1段分の全射性」——無限compatible列の構成に要る最後の部品**:
+level `n` の任意の原始的π^n-捩れ点 `y`(`ψ_n` の根)に対し、
+`π·x'=y` を満たす level `n+1` の原始的π^{n+1}-捩れ点 `x'`(`x'`自身
+の座標系で)が存在する。証明: `z:=π·x`(既知の`ψ_n`の根)と`y`は
+どちらも`ψ_n`の根なので、`z`を基点にした単数作用の全単射性
+(`unitActionQuotientBijOn_bijective`)から`u·z=y`となる`u`が取れる。
+`x':=u·x`(`x`自身の座標系での値)は原始性を保ち
+(`unitActionQuotientLift_mem_iteratedLubinTatePsiTorsionPoints`)、
+`lubinTateActionAtTorsionPoint_mul_eq_of_action`(`LubinTateAction
+Inclusion.lean`、cross-point bridgingの任意`a`版)で`x'`**自身**の
+座標系での`π·x'`を`x`の座標系での`(u*π)·x`に結び、これを
+`lubinTateActionAtTorsionPoint_pi_mul_eq_pred`(既出)で`u·z`に
+結んで`y`に至る。 -/
+theorem exists_pi_mul_eq_of_mem_iteratedLubinTatePsiTorsionPoints {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) (x : K.closure)
+    (hxψ1 : x ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf (n + 1) (by omega))
+    (hx1 : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf (n + 1))
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (y : K.closure) (hyψ : y ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn) :
+    ∃ (x' : K.closure) (hx'ψ1 : x' ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf (n + 1)
+        (by omega))
+      (hx'1 : x' ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf (n + 1))
+      (hx'mem : x' ∈ IntermediateField.adjoin K.carrier ({x'} : Set K.closure))
+      (_ : FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x'} : Set K.closure))),
+      (↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x' hx'1 hx'mem π) :
+          IntermediateField.adjoin K.carrier ({x'} : Set K.closure)) : K.closure) = y := by
+  set z : K.closure := (↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem π) :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) with hz_def
+  have hzψ : z ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn :=
+    lubinTateActionAtTorsionPoint_pi_mem_iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn
+      x hxψ1 hx1 hmem
+  have hzn : z ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n :=
+    lubinTateActionAtTorsionPoint_pi_mem_pred K hq hπmax hπne0 f hf0 hf1 hf n x hx1 hmem
+  have hzmem : z ∈ IntermediateField.adjoin K.carrier ({z} : Set K.closure) :=
+    IntermediateField.mem_adjoin_simple_self K.carrier z
+  haveI hzfd : FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({z} : Set K.closure)) :=
+    finiteDimensional_adjoin_of_mem_iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n z hzn
+  obtain ⟨U, hU⟩ := (unitActionQuotientBijOn_bijective K hq hπmax hπne0 f hf0 hf1 hf n hn z hzψ hzn hzmem).2
+    ⟨y, hyψ⟩
+  obtain ⟨u, hu⟩ := QuotientGroup.mk_surjective U
+  have hyu : (↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n z hzn hzmem (u : 𝒪[K.carrier])) :
+      IntermediateField.adjoin K.carrier ({z} : Set K.closure)) : K.closure) = y := by
+    have h1 := congrArg Subtype.val hU
+    unfold unitActionQuotientBijOn at h1
+    rw [← unitActionQuotientLift_mk K hq hπmax hπne0 f hf0 hf1 hf n z hzn hzmem u, hu]
+    exact h1
+  set x' : K.closure := (↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem
+        (u : 𝒪[K.carrier])) : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) with hx'_def
+  have hx'ψ1 : x' ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf (n + 1) (by omega) := by
+    have h2 := unitActionQuotientLift_mem_iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf
+      (n + 1) (by omega) x hxψ1 hx1 hmem (QuotientGroup.mk u)
+    rwa [unitActionQuotientLift_mk] at h2
+  have hx'1 : x' ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf (n + 1) := by
+    rw [iteratedLubinTateTorsionPoints_eq_union K hq hπmax hπne0 f hf0 hf1 hf (n + 1) (by omega)]
+    exact Finset.mem_union_right _ hx'ψ1
+  have hx'mem : x' ∈ IntermediateField.adjoin K.carrier ({x'} : Set K.closure) :=
+    IntermediateField.mem_adjoin_simple_self K.carrier x'
+  haveI hx'fd : FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x'} : Set K.closure)) :=
+    finiteDimensional_adjoin_of_mem_iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x' hx'1
+  refine ⟨x', hx'ψ1, hx'1, hx'mem, hx'fd, ?_⟩
+  have hkey := lubinTateActionAtTorsionPoint_mul_eq_of_action K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx1 hmem
+    (u : 𝒪[K.carrier]) π hx'1 hx'mem
+  rw [mul_comm] at hkey
+  rw [← hkey]
+  have hbridge := lubinTateActionAtTorsionPoint_pi_mul_eq_pred K hq hπmax hπne0 f hf0 hf1 hf n x hx1 hmem
+    hzn hzmem (u : 𝒪[K.carrier])
+  rw [hbridge]
+  exact hyu
+
 end ABC3.Found.PGC
