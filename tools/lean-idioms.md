@@ -3413,8 +3413,27 @@ Cone D₂`)経由で `Cone` を**自動的に**変換する道を検討する—
 naturality の再証明が不要になる(`rfl` で確認できることが多い)。
 実例: `lean/ABC3/Found/CorrHyp/ExtLimit.lean` の `extDiagram_map_snd`
 (独立補題)→ `extDiagramToSpecK`(独立 `NatTrans`、これは閉じた)。
-ただし `Cone` の**頂点側**(`π` の定義域が `(Functor.const J).obj pt`
-自体)をこの経路で完全に避けるのはまだ未解決——次の一手として残っている。
+
+★★★**2026-09-04、頂点側(`π` の定義域が `(Functor.const J).obj pt` 自体)も
+含めて完全解決**(`isLimit_extCone`)。残っていた2つの追加の技:
+
+1. **`Cone` を組み立てる `π` フィールド自体は、独立に作った `NatTrans`
+   (`extConePi` のように)をそのまま代入する**(`{ pt := ..., π :=
+   myNatTrans }`)——構造体リテラルの中で `naturality` を**再度**証明し
+   直さない。
+2. **`IsLimit.mk` の `uniq` で渡される仮定
+   `hm : ∀ j, m ≫ t.π.app j = s.π.app j` は、`rw`/`simp` で直接使おうとすると
+   同じ配管に当たる**——`have hm' : ∀ R, m ≫ (myNatTrans).app R = s.π.app R
+   := hm` のように**展開後の型を明示して再束縛する**と、`rw` の構文一致
+   ではなく `have` 自体の defeq チェック(`set_option backward.isDefEq.
+   respectTransparency false` と組み合わせる)を経由するため通る。これは
+   「配管の万能薬」と呼べる型の技——`rw`/`simp`/`congr 1`/`show` のどれもが
+   `Functor.const` 絡みで詰まったときは、まずこの「`have` で型を明示して
+   再束縛」を試す。
+
+実例: `lean/ABC3/Found/CorrHyp/ExtLimit.lean` の `isLimit_extCone`
+(`extCone X` が `Ext X` の極限表示であることの完全な証明、§4 `Lemma 4.1`
+の構成的降下の核心部品)。
 
 ## 23. `abbrev` で定義された `Algebra`/`Instance` は typeclass 探索が
 自力で見つけない——`letI := TheAbbrev args` で明示的に呼ぶ(2026-09-04)
