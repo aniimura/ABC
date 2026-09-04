@@ -494,4 +494,79 @@ theorem lubinTateActionAtTorsionPoint_zero {p : ℕ} [Fact p.Prime]
   unfold lubinTateEvalAtTorsionPoint
   exact map_zero _
 
+/-- ★★★★★★★★★★**作用はノルムを増やさない: `‖a·x‖ ≤ ‖x‖`**——
+`[a]_f` の定数項が `0`(`constantCoeff_LubinTateAction`)であることから
+`[a]_f = X * h` と分解し(`PowerSeries.X_dvd_iff`)、`PowerSeries.aeval`
+が(積を保つ)環準同型であることから
+`a·x = aeval x (X*h) = x * (aeval x h)`。`aeval x h` は
+`adjoinIntegers K x` の元(ノルム`≤1`)なので `‖a·x‖=‖x‖*‖aeval x h‖
+≤‖x‖*1=‖x‖`。`subst`/`aeval` の一般的な橋渡し理論を一切経由しない、
+より直接的な経路。 -/
+theorem norm_lubinTateActionAtTorsionPoint_le {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (a : 𝒪[K.carrier]) :
+    ‖(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem a) :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖ ≤ ‖x‖ := by
+  haveI := completeSpace_adjoinIntegers K x
+  haveI := isLinearTopology_adjoinIntegers K x
+  haveI := continuousSMul_adjoinIntegers K x
+  obtain ⟨h, hh⟩ := PowerSeries.X_dvd_iff.mpr (constantCoeff_LubinTateAction hq hπmax f hf0 hf1 hf a)
+  show ‖(↑(lubinTateEvalAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem
+      (LubinTateAction hq hπmax f hf0 hf1 hf a)) :
+      IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖ ≤ ‖x‖
+  rw [hh, map_mul]
+  unfold lubinTateEvalAtTorsionPoint
+  rw [aeval_X_eq_self]
+  set y := PowerSeries.aeval (hasEval_mem_adjoinIntegers_of_mem_iteratedLubinTateTorsionPoints
+    K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem) h with hy_def
+  set xmem := (⟨⟨x, hmem⟩, mem_adjoinIntegers_of_mem_iteratedLubinTateTorsionPoints
+      K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem⟩ : adjoinIntegers K x) with hxmem_def
+  show ‖(↑(xmem * y) : IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖ ≤ ‖x‖
+  rw [Subring.coe_mul]
+  calc ‖(↑xmem : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) * (↑y : _)‖
+      = ‖(↑xmem : IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖ * ‖(↑y : _)‖ :=
+        norm_mul _ _
+    _ ≤ ‖x‖ * 1 := by
+        apply mul_le_mul_of_nonneg_left _ (norm_nonneg _)
+        exact y.2
+    _ = ‖x‖ := mul_one _
+
+/-- `‖a·x‖ < 1`——`norm_lubinTateActionAtTorsionPoint_le`(`‖a·x‖≤‖x‖`)
+と`x`自身が位相的冪零(`spectralNorm_lt_one_of_mem_
+iteratedLubinTateTorsionPoints`、`‖x‖<1`)であることを組み合わせる
+だけ。これで`a·x`自身も`PowerSeries.HasEval`を満たす見込みが立ち、
+作用を反復適用できる土台が整う。 -/
+theorem norm_lubinTateActionAtTorsionPoint_lt_one {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (a : 𝒪[K.carrier]) :
+    ‖(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem a) :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖ < 1 :=
+  lt_of_le_of_lt (norm_lubinTateActionAtTorsionPoint_le K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem a)
+    (by show spectralNorm K.carrier K.closure x < 1
+        exact spectralNorm_lt_one_of_mem_iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n x hx)
+
 end ABC3.Found.PGC
