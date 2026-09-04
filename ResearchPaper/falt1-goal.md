@@ -2839,6 +2839,28 @@ mathlib での正確な組み立て方は未確認)。
       塔の構成)という、このセッションで構築した2つの独立した
       道具を**ここで初めて統合する**局面になる見込み。
 
+      ★続けて、この全射性の**単一因子版**を実際に構築した
+      (`falt1_omegaAdjoinRoot_surjective_quotient_p`、commit分は
+      次項)。Faltings の「典型例」に現れる各因子は`X^p - C a`
+      という形の Eisenstein 型多項式——この形の多項式は
+      `derivative(X^p-Ca) = C(p)*X^(p-1)`が**常に`p`の倍数**になる
+      という一般的な性質を持つ。これと`omegaAdjoinRootQuot`
+      (`Ω[AdjoinRoot g/R] ≅ AdjoinRoot g/(derivative)`、既存)を
+      組み合わせるだけで、`Ω[AdjoinRoot(X^p-Ca)/R]`が
+      `AdjoinRoot(X^p-Ca)/(p)`へ**全射する**ことが直接示せた
+      (`Ideal.span_singleton_le_span_singleton`による`(p·x^{p-1})⊆
+      (p)`の確認+`Ideal.Quotient.factor`/`factor_surjective`、
+      mathlib既存)。
+
+      これで「`d+1`個の同時添加の**各因子**が`(W/p)`へ全射する」
+      という、step (3) の全射性要件の**単一因子版**は完成した——
+      残るのは、これを`pushoutKaehlerSplitStepOption`(または
+      `d+1`因子分解の直和構造)と組み合わせ、「**すべての**因子が
+      同時に`(W/p)^{d+1}`へ全射する」という`d+1`因子版へ拡張する
+      ことのみ(直和分解された各成分が独立に全射することから、
+      積全体の全射性は形式的に従う見込み——`Pi.map`/`Function.
+      Surjective.piMap`のような一般論で閉じる可能性が高い)。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
