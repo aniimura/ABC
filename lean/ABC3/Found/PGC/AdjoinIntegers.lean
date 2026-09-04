@@ -1879,4 +1879,48 @@ theorem algEquiv_mem_iteratedLubinTatePsiTorsionPoints_of_mem {p : ℕ} [Fact p.
   rw [haeval, map_zero] at h
   exact h
 
+/-- **`σ`は`Λ_n`(`π^n`-捩れ点全体)そのものを保つ**——上の
+`algEquiv_mem_iteratedLubinTatePsiTorsionPoints_of_mem`と全く同じ
+証明を、`ψ_n`の代わりに`D_n`(`iteratedLubinTateDistinguished`、
+これも`𝒪[K.carrier]`に係数を持つ)に対して行うだけ。`Λ_n`が
+`ψ_n`の根の(帰納的な)合併であること(`iteratedLubinTateTorsionPoints_
+eq_union`)を経由せず、`D_n`自身の係数がGalois固定であることから
+直接出る。`Gal(K.closure/K.carrier)`が有限集合`Λ_n`上に(閉じた)
+作用を持つという、`K(Λ_n)/K`がGalois拡大であることの土台。 -/
+theorem algEquiv_mem_iteratedLubinTateTorsionPoints_of_mem {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ)
+    (σ : K.closure ≃ₐ[K.carrier] K.closure) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n) :
+    σ x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n := by
+  set dK : Polynomial K.carrier :=
+    (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n).map (algebraMap (𝒪[K.carrier]) K.carrier)
+    with hdK
+  have hmap : algebraMap (𝒪[K.carrier]) K.closure =
+      (algebraMap K.carrier K.closure).comp (algebraMap (𝒪[K.carrier]) K.carrier) :=
+    IsScalarTower.algebraMap_eq (𝒪[K.carrier]) K.carrier K.closure
+  have hrw : (Polynomial.map (algebraMap (𝒪[K.carrier]) K.closure)
+      (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n)) =
+      dK.map (algebraMap K.carrier K.closure) := by
+    rw [hmap, ← Polynomial.map_map, hdK]
+  rw [iteratedLubinTateTorsionPoints, Multiset.mem_toFinset, hrw, Polynomial.mem_roots'] at hx ⊢
+  refine ⟨hx.1, ?_⟩
+  have haeval : Polynomial.aeval x dK = 0 := by
+    have hthis := hx.2
+    rw [Polynomial.IsRoot, Polynomial.eval_map, ← Polynomial.aeval_def] at hthis
+    exact hthis
+  show Polynomial.IsRoot _ (σ x)
+  rw [Polynomial.IsRoot, Polynomial.eval_map, ← Polynomial.aeval_def]
+  have h := Polynomial.aeval_algHom_apply σ.toAlgHom x dK
+  rw [haeval, map_zero] at h
+  exact h
+
 end ABC3.Found.PGC
