@@ -30,20 +30,26 @@
 
 ## 0.1 `/goal Falt1 Chapter I Found` の進捗(2026-09-04)
 
-**Lemma 1.1**(§1 1/2): `Found/Falt1/KaehlerAux.lean`・`Found/Falt1/
-Lemma11.lean` として数学的内容(単射性・余核の長さの等式)を**完全に
-sorry無しで証明した**(`falt1MapBaseChangeInjective`・
+**Lemma 1.1**(§1 1/2): ★★★★★**完成**。`Found/Falt1/KaehlerAux.lean`・
+`Found/Falt1/Lemma11.lean` として数学的内容(単射性・余核の長さの等式)
+を**完全に sorry無しで証明した**(`falt1MapBaseChangeInjective`・
 `falt1CokernelLengthEq`・`lemma_1_1_falt1`)。途中で作った再利用可能な
 一般補題(mathlib に無かったもの): `subsingleton_H1Cotangent_self`
 (`FormallySmooth R S ⟹ Subsingleton(H1Cotangent R S)`)・
 `polynomialKaehlerSplit`(`Ω_{V[T]/Z} ≅ (V[T]⊗_VΩ_V)×V[T]` の直和分解)・
 `mapBaseChange_injective_transport`(`mapBaseChange` の単射性を代数同型
-に沿って輸送)。★★(2026-09-04 追加解消)`differentIdeal_ne_bot` の
-最後の1条件(分離性の輸送)も `falt1_differentIdeal_ne_bot` で解決——
-`lemma_1_1_falt1` から `differentIdeal V W ≠ ⊥` の仮定を完全に除去
-できた。★残る逸脱は `Interface.RamificationSetup`(`ℕ` 値の長さ)への
-正式な差し替えのみ(`Module.length` は `ℕ∞` 値で有限性の証明が要る)、
-`.needs` に正直に記録済み。
+に沿って輸送)。`differentIdeal_ne_bot` の全条件を `falt1_
+differentIdeal_ne_bot` で導出——`differentIdeal V W ≠ ⊥` は仮定では
+なく定理になった。★★★(2026-09-04 完成)`Interface.RamificationSetup`
+への正式な差し替えも完了した(`falt1RamificationSetup`)——`Module.
+length` の `ℕ∞→ℕ` 有限性は当初の見積り(CRT+局所化不変性)より単純に
+出た(`Ring.DimensionLEOne`+`Ideal.krullDimLE_zero_quotient_iff_
+forall_minimalPrimes_isMaximal`経由)。`RamificationSetup` の全
+フィールドを本物のデータで埋め、`lemma_1_1 (falt1RamificationSetup
+w hint hadjoin hw)` が型検査を通ることを確認した——Skeleton の posit
+(`RamificationSetup.example`)を初めて実データに置き換えた例。
+残る記録事項は「絶対微分の基底 `Z`」を一般化(`Z:=ℤ` を正準に選択)
+として証明したことのみ(弱化ではない、`.needs` に記録)。
 
 **Theorem 1.2**(§1 2/2): ★★**未着手。260dpi で物理p.5(印字p.258)を
 直接読み(pdftotext の OCR は数式記号を激しく壊すため、上記 .txt 行
