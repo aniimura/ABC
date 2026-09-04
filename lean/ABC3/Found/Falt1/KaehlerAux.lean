@@ -89,7 +89,16 @@ Module.length W (W ⧸ differentIdeal V W)` を得た——Lemma 1.1 の
    への具体的な適用のみ——`ker_adjoinRoot_mk`・`AdjoinRoot.mk_surjective`
    ・`adjoinRootMinpolyEquiv`・`differentIdeal_eq_span_derivative` を
    `falt1CokernelIso` と同じパターンで貼り合わせれば良いはずだが、
-   まだ実装していない(次のラウンドへ)。
+   まだ実装していない(次のラウンドへ)。★具体的な部品も特定済み:
+   (i) NZD 性は `differentIdeal_ne_bot`(mathlib、`[Module.Finite A B]
+   [Algebra.IsSeparable (FractionRing A)(FractionRing B)]` が必要——
+   Falt1 の `K,L` が本当に `FractionRing V,FractionRing W` に一致する
+   ことの確認が必要かもしれない)+ `differentIdeal_eq_span_derivative`
+   +「整域で非零⟺非零因子」(`mem_nonZeroDivisors_iff_ne_zero`)から。
+   (ii) `mapBaseChange` を `e:AdjoinRoot f≃ₐ[V]W` に沿って輸送するには
+   `omegaCongr` と同型の議論(`map` の B-slot での自然性)がもう1本
+   必要——`e.restrictScalars Z`(`V`-代数同型は自動的に `Z`-代数同型)
+   を経由すれば `omegaCongr` パターンがそのまま使えるはず。
 3. ✅(2026-09-04 解消)Falt1 の `V` は完備離散付値環——mathlib の
    `IsDiscreteValuationRing V`(`[IsDomain V]` 付き)は `IsDedekindDomain V`
    を自動で含意する(`infer_instance` で確認済み、PID⟹Dedekind経由)。
