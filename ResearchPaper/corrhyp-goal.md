@@ -1662,3 +1662,33 @@ Spec P_i.Ring ≅ pullback(standardEtalePairSpecMap P₀_i)(Spec.map φ)`)を実
 ところから再開する。集計は10/24で変わらず。
 
 コミット: `0dc8dc74`。
+
+### 2026-09-04さらに続報: 「1ピース分の完全な連結」が完成——前回の詰まりを解消
+
+前回記録した詰まり(`algebraMap (A⊗R.1)(A⊗ℝ)`と`letI`導入の`Algebra`インスタンスの
+構文不一致)を解消した。鍵は「変換をそもそも避ける」ことだった——
+`exists_fg_subalgebra_tensor_standardEtalePair_mapEq`が返す等式(明示的なtensorMap形)
+を、`letI`のスコープ内で`algebraMap`形へ**`▸`ではなくただの`:=`(defeq)**で
+代入できることに気づき、`standardEtalePairPullbackIso`を再証明せずそのまま使えた。
+
+`ExtLimit.lean`に完成(★すべてsorry無し):
+- `onePieceSchemeIso`: `Localization.Away f`が有限段階の候補スキームのbase changeと
+  同型。
+- `piece_descends_iso`: **任意のスキーム`X`のアフィン開`U`上の標準エタール元`f`に
+  ついて、`X.basicOpen f`が有限段階の候補局所片のbase changeにちょうど一致する**——
+  作業単位1・3の核心の合流点。`exists_finite_standardEtaleCover`が返す各`f_i`にこれを
+  適用すれば、`C`の対応する開集合が有限段階スキームのbase changeと一致することが
+  **直接**得られる。
+
+配管の教訓(`tools/lean-idioms.md` #28): `letI`導入のインスタンスに依存する等式の
+「形の変換」が必要なときは、`▸`より先に型注釈つきの`have`/`:=`(defeq)を試す——
+こちらのほうが軽いことがある。
+
+**これで`Lemma 4.1`の「1アフィン片・1標準エタール片」の完全な降下が数学的に
+確立した**——GlueDataの各ピース構成に直接使える段階に到達。残るのは
+(i)複数ピースの貼り合わせ(GlueData本体、遷移射・cocycle条件)、
+(ii)work unit 2(rigidity、複数片の一致の検証)、
+(iii)貼り合わせ後の有限性(properness)の確認、という3点。
+集計は10/24で変わらず(§4は0/2のまま、numbered itemとしてはまだ)。
+
+コミット: `2f34ca1f`(1ピース連結完成)・`3ee14950`(lean-idioms #28)。
