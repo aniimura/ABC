@@ -1145,6 +1145,55 @@ mathlib での正確な組み立て方は未確認)。
     全て揃った**——次回はこの `falt1_hsep_bundled` の `.1`・`.2` を
     上記19-instance の組み立てに接続し、`differentIdeal_tower_diamond`
     を実際に1回呼び出して diamond 等式そのものを得ることが最短距離。
+
+    ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、**接続を実行し、
+    `differentIdeal_tower_diamond` を Falt1 の `V0→V1`・`Wn→Wn1`
+    構成に対して初めて実際に呼び出した**(`falt1_differentIdeal_tower_
+    diamond_assembled`、`KaehlerAux.lean`、commit `03a485fa`、
+    `lake build`・`#print axioms` 確認済み・sorry 無し)。20個の
+    instance(`IsDedekindDomain`×2・`Module.IsTorsionFree`×5・
+    `Module.Finite`×5・`Algebra`×5・`IsScalarTower`×2・`hsep`)を
+    既存の `falt1Module*` 群 +
+    `falt1BaseChangeAlgHom_generator_and_injective`(`ψ` を得る)+
+    `falt1_hsep_bundled` から機械的に組み立て、
+    `differentIdeal_tower_diamond hsep` を実際に適用して
+    ```
+    differentIdeal V1 Wn1 * Ideal.map (algebraMap V1 Wn1) (differentIdeal V0 V1)
+      = differentIdeal Wn Wn1 * Ideal.map (algebraMap Wn Wn1) (differentIdeal V0 Wn)
+    ```
+    (`V1 := integralClosure V0 (AdjoinRoot fK)`、`Wn1 := integralClosure
+    Wn (AdjoinRoot gK)`、`Algebra V1 Wn1 := ψ.toRingHom.toAlgebra`)を
+    型検査済みの項として得た——**これが Theorem 1.2・item 3c の
+    中核道具(different の塔の公式)の初めての具体的インスタンス化**。
+
+    ★パッケージング上の限界(記録): この定理の**戻り値**を(呼び出し側が
+    再利用しやすいよう)`∃ ψ, letI := ψ.toRingHom.toAlgebra;
+    <diamond 等式>` の形で直接書こうとしたところ、`differentIdeal V1
+    Wn1` が要求する `Module.IsTorsionFree V1 Wn1`(`ψ` の単射性からしか
+    出ない、`ψ` 選択**後**にしか証明できない事実)の instance 検索が、
+    `∃`/`letI` を含む**シグネチャの型検査自体**(証明本体に入る前)で
+    走ってしまい、`maxHeartbeats 2000000`(168秒)でも終わらないことを
+    実測した。`hsep` で使った「`Σ'` で instance ごと束ねる」策も、
+    今回は `Module.IsTorsionFree V1 Wn1` が `ψ`(存在文の中の束縛変数)
+    に依存するため使えない(`ψ` を `Prop` の `∃` から取り出す
+    `obtain` は目標が `Type` だと `Exists.casesOn` の
+    `Prop`-限定に阻まれる、というさらに別の障害も確認した)。
+    **結論: 戻り値は `True` のまま(内部で `hdiamond` という名の
+    genuine な項を構築し、その型を docstring に逐語で記録する)方式
+    に倒した**——数学的内容は完全に確立しているが、「他の証明から
+    直接呼び出せる補題」としての再パッケージングは未解決のまま次回に
+    持ち越す(方針候補: `ψ` の単射性を含む**全ての ψ 依存 instance を
+    シグネチャの外側の明示的仮定として渡してもらう**——
+    `differentIdeal_tower_diamond` 自身がそうしているのと同じ形——か、
+    非 instance の明示引数として `@` で全て手渡しする、のいずれか)。
+
+    ★これで Theorem 1.2 の証明骨格(3a: monogenicity・3b: 長さの評価・
+    3c: `V_n` 塔の構成)のうち、**「different の塔の公式」という中核
+    道具は完全に具体化できた**。残るのは (i) `cancel_conductor_delta`
+    の `hspan_eq` をこの具体的 diamond 等式から導く接続、(ii) 再帰的な
+    `V_n` 族(`V_1, V_2, ...`)を実際に構成すること——このセッションで
+    確立した `V0→V1` の1ステップを繰り返し適用する形になるはずだが、
+    「πの選び方(次の一様化元)」の再帰的な選定は未着手。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
