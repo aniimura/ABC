@@ -2777,6 +2777,41 @@ mathlib での正確な組み立て方は未確認)。
       直接の形に作り直す方が近道かもしれない、という選択肢も含めて
       検討すること)。
 
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05、
+      **この最終接続を同じセッションで完成させ、Exercise 13.7.4 step
+      (1) が全体として閉じた**(`falt1_kaehler_spanFinrank_le'`・
+      `falt1_kaehler_generatedBy_dplus1`、commit分は次項)。上で予告
+      した2つの小さな配線(`quotTensorEquivQuotSMul`の`k_B`線形化・
+      `Submodule.topEquiv`越しの同一視)を実際に組み立てたところ、
+      さらに2つの細かい instance の壁(`Module.IsTorsionBySet.module`
+      が自動導出されないため`letI`が要ること、その`IsScalarTower`
+      companionが`Module.IsTorsionBySet.isScalarTower`という別名の
+      補題として存在すること)に当たったが、いずれも1-2行の`letI`
+      追加で解消した。最後に`TensorProduct.quotTensorEquivQuotSMul`
+      の型注釈で明示的に`k_B`(`B⧸maximalIdeal B`の代わりに)を
+      指定することで`Module kB (TensorProduct B kB Ω[B/A])`の
+      instance探索の失敗も解消した。
+
+      **`where`節での結合は`(deterministic) timeout at isDefEq`
+      (maxHeartbeats 800000到達)を起こした**——2つの定理を`where`
+      で1つの巨大な項にまとめようとすると、依存的なメタ変数の絡み
+      合いでelaborationが爆発する(このセッションで既に何度も見た
+      パターン、`Falt1Wn1`の名前付きdefパターンと同種の教訓)。
+      **2つの独立したtop-level定理として書き、単純な関数適用で
+      結ぶだけ**にすると1秒未満で通った——`where`/巨大な結合定理を
+      避け、小さな定理を組み合わせるという、このセッション全体を
+      通じて繰り返し確認されたLean高速化の鉄則が、ここでも再確認
+      された。
+
+      これで Exercise 13.7.4 の6ステップのうち **(1)(2)(4)の3つが
+      完全に完成**(以前は(1)が部分完成だったが、今回で本体まで
+      到達した)。`falt1_kaehler_generatedBy_dplus1`は
+      「`Ω[B/An]`が離散付値環`B`の有限拡大として`d+1`個の元で
+      生成される」という、Faltings 原文の該当箇所そのものの
+      Lean形式化として単独で成立している。残るは(3)(elementary
+      divisor theoremによる`ker(b)⊇ker(p倍)`の導出)・(5)
+      (discriminantの塔、局所版)の2つのみ。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
