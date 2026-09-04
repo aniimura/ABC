@@ -726,4 +726,68 @@ theorem piece_algebraEtale (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpe
     Algebra.Etale Γ((ExtF.obj X).left, V) Γ(C, α ⁻¹ᵁ V) :=
   Etale.algebraEtale_appLE α _ (piece_isAffineOpen X U hU)
 
+/-- **`Algebra.Etale` は底環の同型に沿って輸送できる**——`RingHom.Etale.
+respectsIso`(mathlib、pre-compose で保たれる)+`RingHom.etale_
+algebraMap`(mathlib、`Algebra.Etale` との往復)を組み合わせるだけ。
+`piece_algebraEtale`(環が`Γ((ExtF.obj X).left,V)`のまま)を
+`pieceRingEquiv`が与える同型で`Γ(U,U)⊗[ℚ]ℝ`へ書き換えるのに使う。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem algebraEtale_transport {R R' S : Type} [CommRing R] [CommRing R'] [CommRing S]
+    [Algebra R S] (e : R' ≃+* R) (h : Algebra.Etale R S) :
+    letI : Algebra R' S := ((algebraMap R S).comp e.toRingHom).toAlgebra
+    Algebra.Etale R' S := by
+  letI : Algebra R' S := ((algebraMap R S).comp e.toRingHom).toAlgebra
+  have h1 : (algebraMap R S).Etale := RingHom.etale_algebraMap.mpr h
+  have h2 : ((algebraMap R S).comp e.toRingHom).Etale :=
+    RingHom.Etale.respectsIso.2 (algebraMap R S) e h1
+  have h3 : (algebraMap R' S) = (algebraMap R S).comp e.toRingHom := rfl
+  rw [← RingHom.etale_algebraMap, h3]
+  exact h2
+
+/-- **`Ext X` の `U`(`X.left`のアフィン開)由来のアフィン片は
+`Γ(U,U) ⊗[ℚ] ℝ` に(環として)同型**——`piecePullbackIso`(スキームの
+同型)を `Scheme.Opens.topIso`(`Γ(↥U,⊤) ≅ Γ(X,U)`)・`Scheme.Γ.mapIso`
+(スキーム圏の同型を`Γ`関手で送る)・`Scheme.ΓSpecIso`(`Γ(Spec R,⊤)≅R`)
+で繋いで環レベルの同型に変換したもの。`piece_algebraEtale_tensor`の
+核となる部品。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def pieceRingEquiv (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U) :
+    letI := pieceAlgebra X U hU
+    Γ((ExtF.obj X).left, pullback.fst X.hom toBaseK ⁻¹ᵁ U) ≃+* Γ(X.left, U) ⊗[ℚ] ℝ := by
+  letI := pieceAlgebra X U hU
+  set V := (pullback.fst X.hom toBaseK ⁻¹ᵁ U : ((ExtF.obj X).left).Opens) with hVdef
+  have e1 : Γ((ExtF.obj X).left, V) ≃+* Γ((V : Scheme), ⊤) :=
+    (Scheme.Opens.topIso V).symm.commRingCatIsoToRingEquiv
+  have e2 : Γ((V : Scheme), ⊤) ≃+* Γ(Spec (CommRingCat.of (Γ(X.left, U) ⊗[ℚ] ℝ)), ⊤) :=
+    (Scheme.Γ.mapIso (piecePullbackIso X U hU).symm.op).commRingCatIsoToRingEquiv
+  have e3 : Γ(Spec (CommRingCat.of (Γ(X.left, U) ⊗[ℚ] ℝ)), ⊤) ≃+* Γ(X.left, U) ⊗[ℚ] ℝ :=
+    (Scheme.ΓSpecIso (CommRingCat.of (Γ(X.left, U) ⊗[ℚ] ℝ))).commRingCatIsoToRingEquiv
+  exact e1.trans (e2.trans e3)
+
+/-- **`Lemma 4.1`「1アフィン片の降下」の、スキーム→環の橋渡しの完成形**
+——`C` を `Ext X` の `X.left` 由来のアフィン片へ制限すると、
+`exists_finite_standardEtaleCover`・`exists_fg_subalgebra_tensor_
+standardEtalePair_baseChange`(`FieldLimit.lean`)が直接読める形
+(`Γ(U,U) ⊗[ℚ] ℝ` 上の `Algebra.Etale`)になる。`piece_algebraEtale`
+(環はまだ `Γ((ExtF.obj X).left,V)`)を `pieceRingEquiv`+
+`algebraEtale_transport` で輸送しただけ。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem piece_algebraEtale_tensor (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U)
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α] :
+    letI := pieceAlgebra X U hU
+    letI : Algebra (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+      ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+        (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.comp
+        (pieceRingEquiv X U hU).symm.toRingHom).toAlgebra
+    Algebra.Etale (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) := by
+  letI := pieceAlgebra X U hU
+  letI : Algebra Γ((ExtF.obj X).left, pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    (Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+      (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.toAlgebra
+  exact algebraEtale_transport (pieceRingEquiv X U hU).symm (piece_algebraEtale X U hU C α)
+
 end ABC3.Found.CorrHyp
