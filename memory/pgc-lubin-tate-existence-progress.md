@@ -289,9 +289,27 @@ map_residue`——`n=1`の場合が仮定`hf`そのものである、古典的�
 近道は無かった)。プロジェクト内の既存補題`substXpow_eq_pow`
 (`subst v (X^q)=v^q`)も再利用できた。
 
-**残る作業**: 節目(3)torsion点の構成(`Λ_n:=ker[π^n]_f`、上記の
-Weierstrass標準分解を使えば`[π^n]_f`から次数`q^n`のdistinguished
-多項式を取り出せる見込み)、節目(4)
+**続報(2026-09-04、★★★★★★★★節目(3)への第三歩——`[π^n]_f` の
+Weierstrass標準分解、次数`q^n`のdistinguished多項式)**: `Found/PGC/
+LubinTateActionWeierstrass.lean`。`A`が`π`-進完備(`[IsAdicComplete
+(maximalIdeal A) A]`、古典的Lubin-Tate理論の標準設定`A=𝒪_K`、この節目
+で新たに必要になった仮定)のもとで、mathlibのWeierstrass標準分解定理
+をそのまま適用: `iteratedLubinTate_eq_distinguished_mul_unit`
+(`[π^n]_f=D_n·U_n`)・`isDistinguishedAt_iteratedLubinTateDistinguished`
+(`D_n`はdistinguished)・`isUnit_iteratedLubinTateUnit`(`U_n`は単元)・
+★`natDegree_iteratedLubinTateDistinguished`(`D_n`の次数は`q^n`——古典的
+理論で`|Λ_n|=q^n`の由来になる事実)。前提は`iteratedLubinTate_map_
+residue`から従う非零性のみで、Weierstrass標準分解そのものはmathlibの
+`exists_isWeierstrassFactorization`等をそのまま使い、自前で構築する
+必要は一切無かった——前回の「大きな加速要因」という見立てが的中した。
+次数の計算は`Polynomial.IsDistinguishedAt.coe_natDegree_eq_order_map`
+をℕ∞値のまま比較する形で行い(`ENat.lift`の依存書き換え問題を回避)。
+★これで節目(3)の核——`[π^n]_f`から次数`q^n`の具体的な多項式`D_n`を
+取り出すこと——が完成し、次は`D_n`の根の集合を`Λ_n`として定義し、
+`𝒪_K`加群構造・`K(Λ_n)/K`が完全分岐であることへ進む見込み。
+
+**残る作業**: 節目(3)torsion点の構成本体(`D_n`の根を`Λ_n`として定義、
+`𝒪_K`加群構造、`K(Λ_n)/K`の完全分岐性)、節目(4)
 `L_n:=K(Λ_n)`が完全分岐かつ`Gal(L_n/K)≅(𝒪_K/π^n)^×`(Lubin-Tateの
 主定理)、節目(5)`L_π:=∪L_n`・`Gal(L_π/K)≅𝒪_K^×`、節目(6)不分岐部分と
 合わせた相互律写像`K^×→Gal(K^ab/K)`の構成——pGC の各項目
