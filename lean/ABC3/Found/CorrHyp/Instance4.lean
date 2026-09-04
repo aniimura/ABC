@@ -144,11 +144,39 @@ theorem corrPieceGlueDataOfCorr_cover (X ZK : QcqsSpace)
   letI : Etale hα := c.α.2.2
   exact corrPieceGlueData_cover X.1 U hU c.C.1.left hα
 
-/- ★★次の一手(未着手): (b)`corrPieceGlueDataOfCorr(...).glued`が
-`c.α⁻¹(piece)`に同型であることを示す(`IsColimit`比較、genuinely new)。
-(d)`c.C.1.left`自体の有限アフィン被覆(`X.1.left`の有限アフィン被覆の
-各`U`ごとに得られる`corrPieceGlueDataOfCorr`を、外側でさらに貼り合わせる)。
-(e)`α・β`脚と整合性の等式`h▸extCorr D c'=c`の構成。`corrhyp-goal.md`に
-記録。 -/
+open scoped TensorProduct in
+open ABC3.Skeleton.CorrHyp CategoryTheory.Limits in
+/-- **`corrPieceGlueDataOfCorr(...).glued`が`c.α⁻¹(piece)`(`c.C`側で
+`X.1.left`のアフィン開`U`に対応する片)に実際に同型である**——
+`corrPieceGlueData_glued_iso`(`ExtLimit.lean`、既に一般に確立済み)を
+`corrPieceGlueDataOfCorr`自身の定義(`corrPieceGlueData`をそのまま
+呼ぶだけ)からそのまま特殊化する。これで`Corr`の実データ(`c.C`・
+`c.α`)から具体的に構成した候補片の族が、`X.1.left`の**任意の1つの
+アフィン開**について、実際に`c.C`の対応する部分を再構成することが
+証明できたことになる——`Lemma 4.1`の構成的降下のうち「単一アフィン片
+レベル」の全工程(項目(a)〜(c')・項目(b)の特殊化)がこれで完結した。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def corrPieceGlueDataOfCorr_glued_iso (X ZK : QcqsSpace)
+    (c : Corr corrHypInstance4 (QcqsExt X) ZK)
+    (U : X.1.left.Opens) (hU : IsAffineOpen U) :
+    (corrPieceGlueDataOfCorr X ZK c U hU).glued ≅
+      (c.α.1.left ⁻¹ᵁ (pullback.fst X.1.hom toBaseK ⁻¹ᵁ U) : Scheme) := by
+  letI hα : c.C.1.left ⟶ (ExtF.obj X.1).left := c.α.1.left
+  letI : IsFinite hα := c.α.2.1
+  letI : Etale hα := c.α.2.2
+  show (corrPieceGlueData X.1 U hU c.C.1.left hα).glued ≅ _
+  exact corrPieceGlueData_glued_iso X.1 U hU c.C.1.left hα
+
+/- ★★次の一手(未着手): (d)`c.C.1.left`自体の有限アフィン被覆
+(`Scheme.exists_finite_affineOpenCover`、既存)+`X.1.left`の有限アフィン
+被覆の各片ごとに得られる`corrPieceGlueDataOfCorr`を、外側でさらに
+貼り合わせる段階(約650行規模の新規エンジニアリングが要る見込み)。
+(e)`α・β`脚と整合性の等式`h▸extCorr D c'=c`の構成——ただし
+`h:ZK=D.Ext Z`という文字通りの命題的等号は、`Corr`定義の`Nonempty C`
+欠落および`QcqsSpace`が同型類の商でないことと組み合わさると証明不可能
+(あるいは偽)になりうるという構造的懸念が判明している(`corrhyp-
+goal.md`2026-09-04の該当エントリに詳細記録、拙速な`Corr`修正は既に
+完成済みの§1 5/5を後退させかねないため見送り中)。 -/
 
 end ABC3.Found.CorrHyp

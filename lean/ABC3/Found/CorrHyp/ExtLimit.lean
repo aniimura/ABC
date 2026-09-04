@@ -2825,6 +2825,27 @@ theorem corrHypGlueDataOfEtale_cover {A : Type} [CommRing A] [Algebra ℚ A]
   exact exists_scheme_basicOpen_cover_of_ring hU _ _
     (exists_finite_standardEtaleCover (A ⊗[ℚ] ℝ) Γ(X, U)).choose_spec.choose_spec.choose_spec.1
 
+/-- **`corrHypGlueDataOfEtale`の`.glued`が実際に`U`に同型である**——
+`corrHypGlueData_glued_iso`(項目(b)、完成済み)を、`corrHypGlueDataOfEtale`
+自身の内部構成(`corrHypGlueDataOfCover`経由で`corrHypGlueData`を
+`J:={i//i∈t}`として呼ぶ)へそのまま適用するだけ。`corrHypGlueDataOfEtale_
+cover`が与える`Finset`添字の被覆条件(`⨆i∈t,...`)を`iSup_subtype'`
+(mathlib、`⨆i∈t,f i = ⨆i:{x//x∈t},f i.1`)で`corrHypGlueData_glued_iso`
+が要求する部分型添字の形へ変換する。
+
+これで「étaleな環拡大から作ったGlueDataの貼り合わせ結果が実際に元の
+`U`を再構成する」ことが、抽象的な`corrHypGlueDataOfEtale`のレベルで
+確立された——項目(b)で示した`IsColimit`比較を、この特殊化された文脈
+でもう一度示す必要は無い(まさに一般化しておいた価値がここで出る)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def corrHypGlueDataOfEtale_glued_iso {A : Type} [CommRing A] [Algebra ℚ A]
+    {X : Scheme} {U : X.Opens} (hU : IsAffineOpen U) [Algebra (A ⊗[ℚ] ℝ) Γ(X, U)]
+    [Algebra.Etale (A ⊗[ℚ] ℝ) Γ(X, U)] :
+    (corrHypGlueDataOfEtale (A := A) hU).glued ≅ (U : Scheme) := by
+  unfold corrHypGlueDataOfEtale corrHypGlueDataOfCover
+  exact corrHypGlueData_glued_iso _ _ _ (iSup_subtype'.symm.trans (corrHypGlueDataOfEtale_cover (A := A) hU))
+
 /-! ### ロードマップ項目(c)への配線: `Ext X`へ有限étaleに写る実際の`C`
 
 `piece_algebraEtale_tensor`(既存、`Lemma 4.1`「1アフィン片の降下」の
@@ -2886,15 +2907,36 @@ theorem corrPieceGlueData_cover (X : Over BaseK) (U : X.left.Opens) (hU : IsAffi
     piece_algebraEtale_tensor X U hU C α
   exact corrHypGlueDataOfEtale_cover (A := Γ(X.left, U)) (piece_preimage_isAffineOpen X U hU C α)
 
-/- ★★次の一手(未着手): (b)`corrPieceGlueData ... |>.glued`(貼り合わせて
-できるスキーム)が`α⁻¹(piece)`に同型であることを、`corrPieceGlueData_cover`
-が与える被覆条件と`α⁻¹(piece)`自身の`OpenCover`の`gluedCover`との比較
-で示す(`IsColimit`同士の比較、genuinely new)。(c')`corrPieceGlueData`
-を`corrHypInstance4`・`QcqsSpace`・`Corr`の実データへ実際に代入する
-(`X:=X.1`・`C:=c.C.1.left`・`α:=c.α.1.left`、`c.α.2.1`/`c.α.2.2`から
-`[IsFinite α][Etale α]`を取り出す)。(d)`C`(`c.C.1.left`)自体の有限
-アフィン被覆+外側の貼り合わせ段階、`X.1.left`の有限アフィン被覆との
-整合。(e)`α・β`脚と整合性の等式`h▸extCorr D c'=c`の構成。
-`corrhyp-goal.md`に記録。 -/
+/-- **`corrPieceGlueData ... |>.glued`が`α⁻¹(piece)`に同型である**——
+`corrHypGlueDataOfEtale_glued_iso`(既に一般に確立済み)を、
+`corrPieceGlueData = corrHypGlueDataOfEtale (A:=Γ(X.left,U)) ...`という
+定義の一致(`show`で明示)からそのまま特殊化するだけ。以前の
+「(b)IsColimit同士の比較、genuinely new」という見積もりは、項目(b)を
+一般形(`corrHypGlueData_glued_iso`)で片付けておいたことで、この
+特殊化ではもう新しい証明を要さない。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def corrPieceGlueData_glued_iso (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U)
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α] :
+    (corrPieceGlueData X U hU C α).glued ≅ (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U) : Scheme) := by
+  letI := pieceAlgebra X U hU
+  letI : Algebra (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+      (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.comp
+      (pieceRingEquiv X U hU).symm.toRingHom).toAlgebra
+  haveI : Algebra.Etale (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    piece_algebraEtale_tensor X U hU C α
+  show (corrHypGlueDataOfEtale (A := Γ(X.left, U)) (piece_preimage_isAffineOpen X U hU C α)).glued ≅ _
+  exact corrHypGlueDataOfEtale_glued_iso (piece_preimage_isAffineOpen X U hU C α)
+
+/- ★★次の一手(未着手): (d)`c.C.1.left`自体の有限アフィン被覆
+(`Scheme.exists_finite_affineOpenCover`、既存)+`corrPieceGlueDataOfCorr`
+を各片へ適用したものの外側の貼り合わせ段階、`X.1.left`の有限アフィン
+被覆との整合。(e)`α・β`脚と整合性の等式`h▸extCorr D c'=c`の構成
+——ただし`h:ZK=D.Ext Z`という文字通りの命題的等号は、`Corr`定義の
+`Nonempty C`欠落および`QcqsSpace`が同型類の商でないことと組み合わさる
+と証明不可能(あるいは偽)になりうるという構造的懸念が判明している
+(`corrhyp-goal.md`2026-09-04の該当エントリに詳細記録、拙速な
+`Corr`修正は既に完成済みの§1 5/5を後退させかねないため見送り中)。 -/
 
 end ABC3.Found.CorrHyp
