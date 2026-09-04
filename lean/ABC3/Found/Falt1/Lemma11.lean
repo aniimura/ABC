@@ -25,6 +25,24 @@ has the same length as W/p^δW.
 
 namespace ABC3.Found.Falt1
 
+/-- `differentIdeal_ne_bot`(mathlib)適用の2条件のうち、Falt1 の既存の
+仮定だけから導けることを確認した1つ目: `L` は `W` の分数体そのもの。 -/
+theorem falt1_isFractionRing {V K L W : Type*} [CommRing V] [IsDedekindDomain V]
+    [Field K] [Algebra V K] [IsFractionRing V K] [Field L] [Algebra K L] [FiniteDimensional K L]
+    [CommRing W] [Algebra W L] [Algebra V W] [Algebra V L]
+    [IsScalarTower V K L] [IsScalarTower V W L] [IsIntegralClosure W V L] [IsDedekindDomain W] :
+    IsFractionRing W L :=
+  IsIntegralClosure.isFractionRing_of_finite_extension V K L W
+
+/-- `differentIdeal_ne_bot` 適用のもう1つの条件: `W` は `V` 上有限生成
+(整閉 + Noether + 有限次分離拡大から)。 -/
+theorem falt1_moduleFinite {V K L W : Type*} [CommRing V] [IsDedekindDomain V]
+    [Field K] [Algebra V K] [IsFractionRing V K] [Field L] [Algebra K L] [FiniteDimensional K L]
+    [Algebra.IsSeparable K L] [CommRing W] [Algebra W L] [Algebra V W] [Algebra V L]
+    [IsScalarTower V K L] [IsScalarTower V W L] [IsIntegralClosure W V L] :
+    Module.Finite V W :=
+  IsIntegralClosure.finite V K L W
+
 /-- **[Falt1] Lemma 1.1**(単射性 ＋ 長さの等式、まとめて)。`Z` は絶対微分
 `Ω_{V/Z}`・`Ω_{W/Z}` の基底となる任意の環(Falt1 の文脈では固定された
 「絶対」基底)。`differentIdeal V W ≠ ⊥` は有限可分拡大なら常に成り立つ
@@ -89,10 +107,16 @@ Z V W` を満たす限り)に対して成り立つ一般形**として証明し�
 
 有限可分拡大の differentIdeal が非零であることは mathlib の
 `differentIdeal_ne_bot`(`[Module.Finite V W][Algebra.IsSeparable
-(FractionRing V)(FractionRing W)]` が必要)から従うはずだが、
-Falt1 の `K,L` が本当に `FractionRing V,FractionRing W` に一致する
-ことの確認(`IsFractionRing W L` の導出等)はまだ行っていない——
-仮定として直接渡すに留めた。 -/
+(FractionRing V)(FractionRing W)]` が必要)から従うはずである。
+★★**2箇所は実際に Falt1 の設定から導けることを証明した**
+(`falt1_isFractionRing`・`falt1_moduleFinite`、本ファイル冒頭——両方とも
+Falt1 の既存の仮定だけで揃う)。★残る1箇所だけが未解決:
+`Algebra.IsSeparable K L`(既知)を `Algebra.IsSeparable(FractionRing V)
+(FractionRing W)` へ輸送するには `Algebra.IsSeparable.of_equiv_equiv`
+(`FractionRing.algEquiv` 経由)が使えるはずだが、**その前提として
+`Algebra(FractionRing V)(FractionRing W)` という instance 自体を
+新たに構成する必要があり**(自動導出されない)、今回はそこで打ち切った
+——仮定として直接渡すに留めた。 -/
 def lemma_1_1_falt1.src : ABC3.Meta.Source :=
   { paper := "Falt1", pdfPage := 4, item := "Lemma 1.1", sectionId := "falt1-lemma-1-1" }
 
@@ -110,7 +134,9 @@ def lemma_1_1_falt1.needs : List ABC3.Meta.ProofObligation :=
       ("★逸脱 2: 絶対微分の基底 Z は原文で明示されないため、任意の Z に対する" ++
        "一般形として証明した(弱化ではなく一般化)") 4,
     .implicitStep
-      ("★逸脱 3: differentIdeal V W ≠ ⊥ を仮定として受ける。" ++
-       "differentIdeal_ne_bot から導くには IsFractionRing W L 等の確認が要る") 4 ]
+      ("★逸脱 3: differentIdeal V W ≠ ⊥ を仮定として受ける。IsFractionRing W L" ++
+       "・Module.Finite V W は Falt1 の設定から導けることを確認したが、" ++
+       "Algebra.IsSeparable K L を(FractionRing V)(FractionRing W)へ輸送するには" ++
+       "Algebra(FractionRing V)(FractionRing W) instance の新規構成が要り、未着手") 4 ]
 
 end ABC3.Found.Falt1
