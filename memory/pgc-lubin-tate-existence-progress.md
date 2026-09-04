@@ -1183,3 +1183,40 @@ Lubin-Tate理論の実装が、ここで1つの大きな到達点に達した。
 既知の捩れ点の1つに一致することは未証明)。これができれば
 `K(Λ_n)`の正規性・Galois群計算`Gal(L_n/K)≅(𝒪_K/π^n)^×`(古典的な
 Lubin-Tate理論の主定理)へ進める見通し。
+
+**続報(2026-09-04・続き、★★★★★★★★★★★★★★★★★★★★節目達成——
+予告した「作用が`Λ_n`に戻る」ことを実際に確立した)**: commit
+`4744a07a`。鍵となった証明の筋(古典的な議論をそのまま形式化した):
+
+1. **`x∈Λ_n⟹π^n·x=0`**(`pi_pow_action_eq_zero`): `D_n(x)=0`
+   (`Λ_n`の定義そのもの、`adjoinIntegers K x`から`K.closure`への
+   単射環準同型`g`を通して`Polynomial.aeval`のレベルへ引き戻す
+   ——`aeval_iteratedLubinTateDistinguished_eq_zero`)と
+   `[π^n]_f=D_n*U_n`(既存)を掛け合わせるだけ(`D_n(x)*U_n(x)=
+   0*U_n(x)=0`、`U_n`が単位かどうかは不要——**この向きは簡単**)。
+2. **`π^n·(a·x)=a·(π^n·x)=a·0=0`**(`pi_pow_action_action_eq_zero`):
+   乗法性(`lubinTateAction_mul`)を2回・可換律を使うだけ。
+3. **`[π^n]_f(z)=0⟹D_n(z)=0`**(`eq_zero_of_pi_pow_action_eq_zero`、
+   **逆向きはここが本質的に難しい**): `[π^n]_f=D_n*U_n`の`U_n(z)`
+   が**単位**であること(単位を環準同型`aeval`で送った像は自動的に
+   単位)を使い、`D_n(z)*U_n(z)=0`から単位`U_n(z)`を約分
+   (`IsUnit.mul_left_eq_zero`)して`D_n(z)=0`を得る。
+4. 3.の結果(`D_n(a·x)=0`、`adjoinIntegers K x`の中での話)を
+   `Polynomial.hom_eval₂`で`K.closure`のレベルへ押し出し
+   (同じ単射環準同型`g`を使う、1.の逆向きの計算)、
+   `iteratedLubinTateTorsionPoints`の定義そのものに一致させる
+   ——**`lubinTateActionAtTorsionPoint_mem`**: `a·x∈Λ_n`。
+
+★★★これで、実在の任意のp進局所体`K`について、古典的なLubin-Tate
+理論の**`Λ_n`が真に`𝒪_K`-加群である**という中核事実が`sorry`無しで
+完全に確立された——単位律・零元律・乗法性・加法性(前コミット)に
+続き、作用が実際に`Λ_n`自身に留まることまで示せたことになる。
+`Λ_n`の`𝒪_K`加群としての構造は、これで数学的に完全な形になった。
+
+**次の一歩**: `K(Λ_n)`(`Λ_n`の元をすべて`K`に添加した体)の
+`K`上の正規性、そしてGalois群の具体的計算
+`Gal(K(Λ_n)/K)≅(𝒪_K/π^n)^×`(古典的なLubin-Tate理論の主定理)。
+これは今回確立した「`Λ_n`は`𝒪_K`-加群」という事実と、既に確立済みの
+`|Λ_n|=q^n`(`card_iteratedLubinTateTorsionPoints`)を組み合わせて
+狙う——`𝒪_K/π^n`が`Λ_n`に(単位元`ζ`を1つ選べば)**単純推移的に**
+作用することを示せば、Galois群の計算に繋がる見通し。
