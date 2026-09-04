@@ -814,8 +814,43 @@ mathlib での正確な組み立て方は未確認)。
     替える**方向で両者を統一すれば、cast を剥がす作業そのものが
     不要になる可能性が高い。★この種の「opaque な tactic-mode `def`
     を後から `unfold` して cast まみれの中身を分析する」パターンは
-    時間対効果が悪いと判明した——tools/lean-idioms.md に追記の価値
-    あり(次回)。
+    時間対効果が悪いと判明した——tools/lean-idioms.md #29 に記録した。
+
+    ★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、**この推奨迂回路を
+    実行し、生成元の対応が完成した**(`falt1GeneratorPackage`・
+    `falt1BaseChangeAlgHom_generator_correspondence`、commit
+    `cc34f441`)。予想通り `w := e1 (root f)` と最初から定義する
+    ことで、以前 `PowerBasis`・Eisenstein の詳細を経由していた
+    「整性・単項生成性・`minpoly=f`」の3点セット
+    (`falt1GeneratorPackage`)が、**同型の自然性だけ**
+    (`IsIntegral.map`・`AlgHom.map_adjoin_singleton`・
+    `minpoly.isIntegrallyClosed_dvd`+`Irreducible.associated_of_dvd`)
+    から出ることを確認した——`isDedekindDomain_...`・`adjoin_eq_top_
+    ...` 系の元の証明より遥かに短い代替ルート。さらに `falt1BaseChangeAlgHom`
+    という名前を経由して `w↦x` を証明しようとする(`unfold` して中身を
+    調べる)アプローチは何度試みても50〜75秒ずつタイムアウトし続けた
+    ため、**同じ構成をその場で直接書き下す**(named def を経由しない)
+    ことで解決した——`algHomAdjoinRootOfCompat'_cast_root`(`g` を
+    自由変数のまま保つのが鍵、`set`束縛された変数に対する `subst`
+    は「invalid equality proof」で失敗する)を独立補題として切り出し、
+    それを直接使うことで `hstep1root` が一瞬(1秒未満)で通った。
+
+    ★★これで **item 3c → 3b 接続に必要な技術的ピースが全て揃った**
+    (Dedekind・単項生成・differentIdeal の具体式・base change 写像・
+    生成元対応)。残る作業は純粋な「組み立て」段階: (a) `Module.Finite
+    Wₙ Wₙ₊₁`・`IsScalarTower V0 Wₙ Wₙ₊₁`・`IsScalarTower V0 V1 Wₙ₊₁`
+    等の残りの instance を整備する(これも `falt1AdjoinRootEquivIntegralClosure`
+    経由で「`Wₙ₊₁` も結局 `AdjoinRoot` そのもの」という単純化が使える
+    はず、`Module.Finite` は `Polynomial.Monic.finite_adjoinRoot` から
+    ほぼ自明)、(b) `differentIdeal_tower_diamond` の `hsep`
+    (`Algebra.IsSeparable (FractionRing V0)(FractionRing Wₙ₊₁)`)を
+    示す、(c) `conductor_mul_differentIdeal` を `Wₙ→Wₙ₊₁` に適用して
+    `Jₙ`(`differentIdeal Wₙ Wₙ₊₁`)を conductor で書く、(d) 最終的に
+    `cancel_conductor_delta` を適用して `condWnx * deltaN1 =
+    deltaNmapped` を得る——ここまで来れば 3b・3c は技術的には閉じ、
+    残るのは `delta_tendsto_zero` の `hrec` への変換(3b(c)、既存の
+    `length_quotient_span_singleton_mul` 等が使えるはず)と、V_n の
+    **再帰族**(item 3c 本体、`V_1` の1段からの帰納)の構築のみ。
    `a9faa64e`)。長さの漸化不等式(上の逐語引用の通り: `δ_n-δ_{n+1}≥
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
