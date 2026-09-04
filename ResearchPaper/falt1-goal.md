@@ -711,6 +711,33 @@ mathlib での正確な組み立て方は未確認)。
     振る舞うことの橋渡し(`IsIntegral` が base change で保たれる、
     という一般に易しいはずの事実)、の2点——(ii)は次回最初に
     着手するのに適した、比較的小さい補題だと見込む。
+
+    ★★★★★★★★★2026-09-04、**base change 写像そのものが完成した**
+    (`algHomAdjoinRootOfCompat`・`algHomAdjoinRootOfCompat_root`、
+    commit `7f09476c`、他セッションに巻き込まれてコミット——上と
+    同じ状況、内容は sorry 無し・push 済み確認済み)。当初
+    `adjoinRootTensorEquiv`(テンソル積経由)を使う計画だったが、
+    実装時により直接的な経路を発見した: `AdjoinRoot.map`(mathlib、
+    係数の ring hom `φ0:K→+*K'` から `AdjoinRoot fK→+*AdjoinRoot
+    (fK.map φ0)` を作る)を `AlgHom.mk'` で `V0`-線形性
+    (`φ0` が `V0` 上の algebraMap と両立するという1つの仮定
+    `hφ0` から、`IsScalarTower.algebraMap_apply` +
+    `AdjoinRoot.algebraMap_eq` + `AdjoinRoot.map_of` で従う)を
+    確認するだけで足りた——`adjoinRootTensorEquiv` も
+    `AdjoinRoot.mapAlgHom`(mathlib、同じ底環上のみ)も不要だった。
+    `algHomAdjoinRootOfCompat_root` で「根は根に写る」ことも確認
+    済み(`w` の像が `Wₙ₊₁` 側の `x` と一致することの鍵)。
+
+    ★残る作業(上記(i)相当、未着手): `φ0 := IsFractionRing.map
+    (algebraMap V0 Wₙ の単射性)`(mathlib、`FractionRing V0 →+*
+    FractionRing Wₙ`)を実際に構成し、`fK.map φ0` が「`Wₙ` を底環に
+    直接構成した `X^n-π'`(`π':=algebraMap V0 Wₙ π`)の Eisenstein
+    多項式」と一致すること(`π'` が引き続き prime・非自乗という
+    仮定のもとで)を示し、`differentIdeal_tower_diamond`・
+    `conductor_mul_differentIdeal` のフル仮説束(`IsDedekindDomain
+    Wₙ`・`Module.Finite Wₙ Wₙ₊₁`・`IsScalarTower V0 Wₙ Wₙ₊₁` 等)を
+    実際に組み立てて `cancel_conductor_delta` を適用する——これが
+    3b・3c を実際に閉じる最終組み立てとして残っている。
 4. ★★★★★2026-09-04、**完成した**(`delta_tendsto_zero`、commit
    `a9faa64e`)。長さの漸化不等式(上の逐語引用の通り: `δ_n-δ_{n+1}≥
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
