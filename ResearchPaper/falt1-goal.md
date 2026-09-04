@@ -2995,6 +2995,18 @@ mathlib での正確な組み立て方は未確認)。
       の塔公式を繰り返し適用しながら`x`の最小多項式の次数・分岐指数
       を直接追跡する、という原始的だが着実な道)を検討することから
       始めるのが誠実だと判断する。
+
+      ★念のため`ramificationIdx`と`differentIdeal`(または`discr`)を
+      結ぶ定量的な補題(古典的な「`e-1 ≤ v(𝔡) ≤ e-1+v(e)`」型の
+      different指数の公式)が mathlib に無いか`.cache/mathlib-index.
+      txt`で最終確認したが、`ramificationIdx`に言及する92件の中に
+      `differentIdeal`/`discr`との連携は1件も見当たらなかった——
+      これでmathlibにこの定量的な橋渡しが無いことを複数の角度から
+      確認済み(discriminant系・conductor系・ramificationIdx系の
+      いずれからも同じ結論)。Theorem 1.2 の残る核心は、確かに
+      「mathlibに無い独立した古典的整数論」であることが最終確認
+      できた——今回の探索は空振りではなく、**探すべき場所を
+      使い切った**という意味で意義がある。
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
       「菱形」版であって、対応物というより`falt1_differentIdeal_
