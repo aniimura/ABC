@@ -1247,9 +1247,22 @@ LubinTateDistinguishedSeparable.lean`、commit`12d4b722`)**: 上の
 これで「原始的な」π^n-捩れ点(`Λ_n`にあって`Λ_{n-1}`に無いもの)が
 ちょうど`ψ_n`の根であることが、Finsetの言葉で明示された——
 `Gal(K(Λ_n)/K)`の作用が原始的捩れ点上どう振る舞うか(単純推移性)
-を調べるための土台。**注意**: このセッションでは`Λ_n\Λ_{n-1}=ψ_nの根`
-(交わりが無いこと)までは示していない——`Finset.mem_union`止まりで、
-`Finset.disjoint`の形は次の一歩として残っている(ただし濃度
-`q^n=q^{n-1}+(q^n-q^{n-1})`が既に両立しているので、実際には交わりが
-無いことは`card`の観点からは自動的——`Finset.card_union_of_disjoint`
-の逆を使うか、`D_n`の分離性(全根が相異なる)から直接言える見通し)。
+を調べるための土台。
+
+**続報(同日、非交和として確定、commit`11d5e24b`)**: 上で残した課題
+(交わりが無いことの明示)をすぐに解消した:
+
+1. ★**`iteratedLubinTateTorsionPoints_disjoint_iteratedLubinTatePsiTorsionPoints`**:
+   `Λ_{n-1}`と`ψ_nの根`は交わらない。`D_n=D_{n-1}・ψ_n`が重複無しの根を
+   持つ(`nodup_roots_iteratedLubinTateDistinguished_map`)ことから、
+   両因子に共通根`x`があれば`Multiset.count x`が両側から`≥1`ずつ足し
+   合わさって`(D_n).roots`での重複度`≥2`になり`Nodup`に矛盾——という
+   `Multiset.count_add`+`omega`だけの短い議論。
+2. **`iteratedLubinTateTorsionPoints_sdiff_eq_iteratedLubinTatePsiTorsionPoints`**:
+   合併(前コミット)+非交和を`Finset.union_sdiff_cancel_left`で
+   組み合わせ、`Λ_n\Λ_{n-1}=ψ_nの根`を確定。
+
+これで「原始的なπ^n-捩れ点=`ψ_n`の根」という特徴づけがFinsetレベルで
+完全に閉じた——次は`Λ_n`(あるいは`ψ_nの根`)への`𝒪_K/π^n`(あるいは
+`(𝒪_K/π^n)^×`)の作用の単純推移性、そしてそこから`Gal(K(Λ_n)/K)`の
+構造への橋渡しに進む。
