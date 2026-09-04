@@ -1864,3 +1864,19 @@ defとして取り出し、正しさの等式は別立ての小さなtheoremと�
 重複回避にはstructureで束ねるか頻出部分式を独立defにする方向性が次の
 候補。腰を据えた1セッションを要する局面と判断しここで打ち切り。集計は
 引き続き10/24。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜続き(訂正・完成)
+前回の「∀eは数学的に誤り」は誤った推論だった——訂正。実際の原因は
+単純な配管バグ: 型注釈中の無名let(let n:=...・let I:=...)を証明側で
+introせずにintro eを呼んでいたため、introが誤ってletの方を消費し
+(e:ℕになる)、e.symmがNat.symmを探すという分かりにくいエラーになって
+いた。intro n I eと3つとも明示的に消費して解消——maxHeartbeats
+4000000(実測82秒)で無事通った。lean-idioms.md #41に記録。
+
+exists_piece_basicOpen_R_lift(commit 05b66144、ExtLimit.lean)完成
+——piece_basicOpen_localizationElemを任意のeに対してR'レベルの多項式
+p₀として持ち上げられることを示した。lake build(ExtLimit/ABC3)0エラー
+確認、push済み。次はdescendPieceR自体をD(f*g)についてD(f)側の局所化
+として直接構成し直す配線(Spec(Localization.Away h)として書き、
+IsOpenImmersion.of_isLocalizationで自動的に開埋め込みになることを
+示す)——まだ未着手。集計は引き続き10/24——§4は引き続き0/2。

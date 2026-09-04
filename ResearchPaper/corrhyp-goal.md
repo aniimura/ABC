@@ -4218,3 +4218,35 @@ baseChange`が与える環同型)を`∀ e, ...`と**全称量化**する形に�
 どちらも今回は未着手。丁寧な設計時間を要する段階に来ており、自律
 ループでの試行錯誤よりも腰を据えた1セッションで取り組むべき局面だと
 判断し、ここで打ち切る。集計は引き続き10/24。
+
+## 2026-09-05夜続き(訂正・完成): `exists_piece_basicOpen_R_lift`が
+無事完成した——前回の「`∀e`は数学的に誤り」という結論は**誤りだった**
+
+前回セッション(自律ループ2ティック目)で「`e`(環同型)を`∀e`で全称
+量化するのは環同型の一意性が一般に成り立たないので数学的に誤り」と
+結論したが、これは**誤った推論だった**——`∀e, ∃R' hR p₀, eq(e,R',p₀)`
+は`R'`・`p₀`が`e`ごとに異なってよい(依存させてよい)ので数学的には
+何も問題が無い。実際の原因は単純な**配管のバグ**だった: 型注釈の中に
+置いた無名の`let n := ...`・`let I := ...`(巨大な式の共有のため)を
+証明側で`intro`せずに`intro e`と呼んでいたため、`intro e`が実際には
+`let n`の方を(束縛の出現順どおりに)誤って消費してしまい、`e`が
+`ℕ`型になって`e.symm`が`Nat.symm`を探すという分かりにくいエラーに
+なっていた——`intro n I e`と3つとも明示的に消費することで解消した。
+`maxHeartbeats`のタイムアウトも同じ`intro`忘れが真因だった可能性が
+高く、直したところ`maxHeartbeats 4000000`(実測82秒)で普通に通った。
+`tools/lean-idioms.md` #41として記録した。
+
+**完成した部品**: `exists_piece_basicOpen_R_lift`(`ExtLimit.lean`、
+commit `05b66144`)——`piece_basicOpen_localizationElem`(`Γ(C,piece
+(D(f)))`の元)を、任意の環同型`e`(`pieceAlgebra_R_model_baseChange`が
+与える)に対して、対応する`R'`レベルの多項式`p₀`として持ち上げられる
+ことを示した。lake build(`ExtLimit`/`ABC3`)とも0エラー確認、push済み。
+
+**残る作業(正直な記録)**: これで`isLocalization_away_tensor_eq`の
+`h`を実際に構成する部品が揃った。次は`descendPieceR`自体を`D(f*g)`
+について`D(f)`側の局所化として直接構成し直す配線——`Spec(Localization.
+Away h)`として`descendPieceR`の新しい構成を`def`として書き、それが
+`IsOpenImmersion.of_isLocalization`により自動的に開埋め込みになること、
+かつそのℝへの底変換が`Γ(C,piece(D(f*g)))`に正しく一致すること
+(`isLocalization_away_tensor_eq`+今回の持ち上げ補題を組み合わせる)を
+示す——まだ未着手。集計は引き続き10/24——§4は引き続き0/2。

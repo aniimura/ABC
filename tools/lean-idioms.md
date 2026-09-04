@@ -4197,3 +4197,37 @@ letI hCR : CommRing (A ⊗[ℚ] R.1) := inferInstance  -- ← Bの方
 
 実例: `lean/ABC3/Found/CorrHyp/FieldLimit.lean`の
 `exists_fg_subalgebra_tensor_quotientMvPolynomial_lift`。
+
+## 41. 型注釈中の**無名の`let`(インスタンス以外)**は、証明本体で
+`intro`しないと後続の`∀`/`∃`束縛と名前が衝突する——`letI`/`haveI`
+(インスタンス用)とは違って**自動ではゼータ簡約されない**(2026-09-05)
+
+**症状**: `letI := ...`(インスタンス)は型注釈の中に置いておけば証明
+本体で`intro`しなくても(自動的にゼータ簡約されて)そのまま使える
+(`descendPieceR_toBase`等、既存コードの標準パターン)。ところが**同じ
+型注釈の中に、インスタンスではない普通の値を束縛する無名の`let`**
+(例: `let n := Algebra.Presentation.ofFinitePresentationVars ...`)を
+置き、その**後**に`∀ (e : ... n ...), ...`のように`n`を参照する束縛を
+続けると、証明側でこの`let`は自動簡約**されない**——`intro e`を最初に
+呼ぶと、実際には`∀e`ではなく**この`let n`を`e`という名前で消費して
+しまう**(束縛の順序どおりに`intro`は`let`も1個ずつ数える)。結果、
+`e`が本来の型ではなく`let`の値の型(この例では`ℕ`)を持つことになり、
+`e.symm`のような呼び出しが`Nat.symm`を探して失敗するという、原因が
+非常に分かりにくいエラーになる(`intro`自体はエラーを出さず`成功`
+してしまうため、型不一致のエラーが**ずっと後**の行に出る)。
+
+**直し方**: 型注釈中に置いた無名の`let`は、宣言された**順番どおりに
+全部**`intro`で明示的に消費する——`let n := ...`・`let I := ...`の後に
+`∀ e : ...`があるなら、`intro n I e`と1回で3つとも(または`intro n;
+intro I; intro e`と分けて)消費する。証明側で`set R := ...`のような
+別名を与えていても、それは**別の`have`/`letI`**であって型注釈中の
+`let`の`intro`を代替しない。
+
+**波及**: 「巨大な依存型を`∀`の中で複数回書くと`maxHeartbeats`が
+(4000000でも)尽きる」という、以前(`#40`寄りの文脈)観測した現象は、
+実際にはこの`intro`忘れが真因だった可能性が高いと判明した——`let`で
+式を共有した上で`intro`を正しい個数・順序で行えば、`maxHeartbeats
+4000000`(実測82秒)で普通に通った。
+
+実例: `lean/ABC3/Found/CorrHyp/ExtLimit.lean`の
+`exists_piece_basicOpen_R_lift`。
