@@ -103,11 +103,25 @@ R C D B` という自然性(`tensorKaehlerEquiv_eq_map_mapBaseChange`、
    `d+1` 回の pushout の反復に適用する帰納法(構造自体は難しくないはず)。
 2. **`mapBaseChange R C B` の単射性の条件**——`falt1MapBaseChangeInjective`
    と同型の議論(`C` 側が monogenic かつ `f'` 非零因子)が要る。
+   ★★2026-09-04、経路を検討・部分的に実測した(未完成): `Algebra.
+   Extension.cotangentComplex_injective_iff P [FormallySmooth R P.Ring]
+   : Function.Injective P.cotangentComplex ↔ Subsingleton(H1Cotangent
+   R A)`(mathlib)を `P := Extension.ofSurjective(algebraMap
+   (Polynomial V)(AdjoinRoot g))` に適用すれば `[FormallySmooth V
+   (Polynomial V)]`(既にある)から `Subsingleton(H1Cotangent V
+   (AdjoinRoot g)) ↔ Function.Injective P.cotangentComplex` が出る
+   はず——問題は **`P.cotangentComplex` が既存の `kerCotangentToTensor`
+   と型レベルで(`rfl` でも)一致しないこと**(`P.Cotangent` は定義上
+   `P.ker.Cotangent` で `P.ker` も定義上 `RingHom.ker(algebraMap
+   P.Ring S)` のはずだが、`Extension.ofSurjective` の内部実装が
+   `algebraMap` を直接使わないため、期待通りに簡約されない)。両者を
+   **関数として**(`⇑` レベルで)結びつける橋渡しが未解決——`Extension`
+   の内部実装(`RingTheory/Extension/Cotangent/Basic.lean` 等)を
+   もう少し詳しく調べる必要がある。今回はここで打ち切った。
 3. **「非常に分岐した」`V_n` の族**そのものの形式化(具体例: `p^n` 乗根
    と `1` のべき根を添加する塔)——まだ手つかず。
 4. **`Module.length` の漸化不等式**(`δ_n-δ_{n+1}≥β-(d+1)(δ_n-δ_{n+1})`
    等)——まだ手つかず。
-これ以上は今回深追いしなかった。
 
 **§2-4(11項目)**: 変化なし——「almost mathematics」が mathlib に
 存在しないため完全に未着手。
