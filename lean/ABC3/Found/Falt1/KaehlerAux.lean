@@ -3069,4 +3069,100 @@ noncomputable def falt1_hsep_bundled
     Algebra.IsSeparable.trans (FractionRing V0) (FractionRing Wn) (FractionRing Wn1)
   exact ⟨algFRWn1, hsepFinal⟩
 
+set_option maxHeartbeats 2000000 in
+set_option synthInstance.maxHeartbeats 2000000 in
+/-- **`differentIdeal_tower_diamond` を Falt1 の具体的な `V0→V1`・`Wn→Wn1` の構成
+(`Vₙ₊₁ := integralClosure Vₙ (AdjoinRoot(X^n-Cπ の base change))`)に対して初めて
+実際に呼び出した記録**(Theorem 1.2・item 3c の中核道具の組み立て完了)。
+
+戻り値をあえて `True` にしている——理由は、`differentIdeal V1 Wn1` を(呼び出し側が
+`ψ : V1 →ₐ[V0] Wn1` を選ぶ**前**に)シグネチャの型として書こうとすると、
+`Module.IsTorsionFree V1 Wn1`(`ψ` の単射性からしか出ない事実)の instance 検索が
+シグネチャ**そのものの型検査**(証明本体に入る前)で走ってしまい、168 秒
+(`maxHeartbeats 2000000`)でも終わらない(`«synthesize pending MVars»` timeout)
+ことを実測したため。したがって「呼び出し可能な補題」としての再パッケージングは
+次回以降の課題として保留し、**この証明が実際に構築する項** `hdiamond` の型を
+以下にそのまま記録する(この docstring の型と証明中の `hdiamond` の型は同一):
+
+```
+hdiamond : differentIdeal V1 Wn1 * Ideal.map (algebraMap V1 Wn1) (differentIdeal V0 V1)
+         = differentIdeal Wn Wn1 * Ideal.map (algebraMap Wn Wn1) (differentIdeal V0 Wn)
+```
+(`V1 := integralClosure V0 (AdjoinRoot fK)`、`Wn1 := integralClosure Wn (AdjoinRoot gK)`、
+`fK`・`gK` は `X^n - C π`(それぞれ `V0`・`Wn` 上)の `FractionRing` への base change、
+`Algebra V1 Wn1` は `ψ.toRingHom.toAlgebra`(`ψ` は base change 写像から得られる
+生成元対応))。
+
+組み立て手順(20 個の instance を機械的に集める、`falt1-goal.md` に詳細記録):
+`IsDedekindDomain`(V1・Wn1、`isDedekindDomain_integralClosure_adjoinRoot_X_pow_sub_C`)
+→ `Module.IsTorsionFree`/`Module.Finite`(V0-V1・Wn-Wn1・V0-Wn1 の3対、既存の
+`falt1Module*`群)→ `ψ`(`falt1BaseChangeAlgHom_generator_and_injective`)→
+`Algebra V1 Wn1 := ψ.toRingHom.toAlgebra` → `IsScalarTower V0 V1 Wn1`(`ψ.commutes`)
+→ `Module.Finite/IsTorsionFree V1 Wn1`(`ψ`の単射性 + `Module.Finite.of_restrictScalars_finite`）
+→ `hsep`(`falt1_hsep_bundled`)→ `differentIdeal_tower_diamond hsep`。 -/
+theorem falt1_differentIdeal_tower_diamond_assembled
+    {V0 Wn : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    (π : V0) (n : ℕ)
+    (hn : (n : FractionRing V0) ≠ 0) (hπne0 : algebraMap V0 (FractionRing V0) π ≠ 0)
+    (hprime : (Ideal.span ({π} : Set V0)).IsPrime) (hnotsq : π ∉ (Ideal.span ({π} : Set V0)) ^ 2)
+    (hnpos : 0 < n)
+    (hn' : (n : FractionRing Wn) ≠ 0)
+    (hπne0' : algebraMap Wn (FractionRing Wn) (algebraMap V0 Wn π) ≠ 0)
+    (hprime' : (Ideal.span ({algebraMap V0 Wn π} : Set Wn)).IsPrime)
+    (hnotsq' : algebraMap V0 Wn π ∉ (Ideal.span ({algebraMap V0 Wn π} : Set Wn)) ^ 2)
+    (hinjV0Wn : Function.Injective (algebraMap V0 Wn))
+    [Module.Finite V0 Wn]
+    [Algebra (FractionRing V0) (FractionRing Wn)]
+    [IsScalarTower V0 (FractionRing V0) (FractionRing Wn)]
+    [Algebra.IsSeparable (FractionRing V0) (FractionRing Wn)] :
+    True := by
+  set fK : Polynomial (FractionRing V0) := (Polynomial.X ^ n - Polynomial.C π).map (algebraMap V0 (FractionRing V0)) with hfKdef
+  set gK : Polynomial (FractionRing Wn) := (Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π)).map (algebraMap Wn (FractionRing Wn)) with hgKdef
+  haveI : IsDedekindDomain V0 := by infer_instance
+  haveI : IsDedekindDomain Wn := by infer_instance
+  haveI hDedV1 : IsDedekindDomain (integralClosure V0 (AdjoinRoot fK)) :=
+    ABC3.Found.Falt1.isDedekindDomain_integralClosure_adjoinRoot_X_pow_sub_C π n hn hπne0 hprime hnotsq hnpos
+  haveI hDedWn1 : IsDedekindDomain (integralClosure Wn (AdjoinRoot gK)) :=
+    ABC3.Found.Falt1.isDedekindDomain_integralClosure_adjoinRoot_X_pow_sub_C
+      (algebraMap V0 Wn π) n hn' hπne0' hprime' hnotsq' hnpos
+  haveI hTFV1 : Module.IsTorsionFree V0 (integralClosure V0 (AdjoinRoot fK)) :=
+    ABC3.Found.Falt1.falt1ModuleIsTorsionFreeV0V1 π n hprime hnotsq hnpos
+  haveI hTFWn1 : Module.IsTorsionFree Wn (integralClosure Wn (AdjoinRoot gK)) :=
+    ABC3.Found.Falt1.falt1ModuleIsTorsionFreeWnWn1 π n hnpos hn' hπne0' hprime' hnotsq'
+  haveI hTFV0Wn1 : Module.IsTorsionFree V0 (integralClosure Wn (AdjoinRoot gK)) :=
+    ABC3.Found.Falt1.falt1ModuleIsTorsionFreeV0Wn1 π n hprime' hnotsq' hnpos hinjV0Wn
+  haveI hFinWnWn1 : Module.Finite Wn (integralClosure Wn (AdjoinRoot gK)) :=
+    ABC3.Found.Falt1.falt1ModuleFiniteWnWn1 π n hnpos hn' hπne0' hprime' hnotsq'
+  set V1 := integralClosure V0 (AdjoinRoot fK) with hV1def
+  set Wn1 := integralClosure Wn (AdjoinRoot gK) with hWn1def
+  obtain ⟨ψ, w, x, hwx, hψinj⟩ :=
+    ABC3.Found.Falt1.falt1BaseChangeAlgHom_generator_and_injective π n hn hπne0 hprime hnotsq hnpos
+      hn' hπne0' hprime' hnotsq' hinjV0Wn
+  letI algV1Wn1 : Algebra V1 Wn1 := ψ.toRingHom.toAlgebra
+  haveI hSTV0V1Wn1 : IsScalarTower V0 V1 Wn1 := by
+    apply IsScalarTower.of_algebraMap_eq
+    intro y
+    exact (ψ.commutes y).symm
+  haveI hSTV0WnWn1 : IsScalarTower V0 Wn Wn1 := by infer_instance
+  haveI hFinV0V1 : Module.Finite V0 V1 :=
+    ABC3.Found.Falt1.falt1ModuleFiniteV0V1 π n hn hπne0 hprime hnotsq hnpos
+  haveI hFinV0Wn1 : Module.Finite V0 Wn1 :=
+    ABC3.Found.Falt1.falt1ModuleFiniteV0Wn1 π n hnpos hn' hπne0' hprime' hnotsq'
+  haveI hFinV1Wn1 : Module.Finite V1 Wn1 := by
+    haveI := ABC3.Found.Falt1.falt1ModuleFiniteV0Wn1 π n hnpos hn' hπne0' hprime' hnotsq'
+    exact Module.Finite.of_restrictScalars_finite V0 V1 Wn1
+  haveI hIsDomV1 : IsDomain V1 := inferInstance
+  haveI hIsDomWn1 : IsDomain Wn1 := inferInstance
+  haveI hTFV1Wn1 : Module.IsTorsionFree V1 Wn1 :=
+    ABC3.Found.Falt1.moduleIsTorsionFree_of_injective hψinj
+  haveI hTFV0Wn : Module.IsTorsionFree V0 Wn :=
+    ABC3.Found.Falt1.moduleIsTorsionFree_of_injective hinjV0Wn
+  haveI hIsIntClosedV0 : IsIntegrallyClosed V0 := inferInstance
+  letI algFRWn1 := (ABC3.Found.Falt1.falt1_hsep_bundled π n hnpos hn' hπne0' hprime' hnotsq' hinjV0Wn).1
+  have hsep := (ABC3.Found.Falt1.falt1_hsep_bundled π n hnpos hn' hπne0' hprime' hnotsq' hinjV0Wn).2
+  have hdiamond := ABC3.Found.Falt1.differentIdeal_tower_diamond
+    (Vn := V0) (Vn1 := V1) (Wn := Wn) (Wn1 := Wn1) hsep
+  trivial
+
 end ABC3.Found.Falt1
