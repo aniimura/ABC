@@ -513,4 +513,51 @@ noncomputable def falt1CokernelIso {V K L W : Type*} [CommRing V] [IsDedekindDom
     rw [heval, ← differentIdeal_eq_span_derivative w hw hadjoin]
   exact step1.trans (hJ ▸ step2.toAddEquiv)
 
+/-- `(omegaCongr e).symm` は具体的に `map R R B A` そのもの(一意性から)。
+`map R R B A` は `B`-線形(=元の `omegaCongr` の定義で `B := W` のとき
+`W`-線形)なので、`falt1CokernelIso` を `≃ₗ[W]` へ持ち上げる際の第一段の
+スムル整合性はこれで手に入る(`map_smul` を直接使えばよい)。 -/
+theorem omegaCongr_symm_eq {R A B : Type*} [CommRing R] [CommRing A] [CommRing B]
+    [Algebra R A] [Algebra R B] (e : A ≃ₐ[R] B) :
+    letI : Algebra A B := e.toRingHom.toAlgebra
+    letI : IsScalarTower R A B := isScalarTower_of_algEquiv e
+    letI : Algebra B A := e.symm.toRingHom.toAlgebra
+    letI : IsScalarTower R B A := isScalarTower_of_algEquiv e.symm
+    ∀ x, (omegaCongr e).symm x = KaehlerDifferential.map R R B A x := by
+  letI : Algebra A B := e.toRingHom.toAlgebra
+  haveI : IsScalarTower R A B := isScalarTower_of_algEquiv e
+  letI : Algebra B A := e.symm.toRingHom.toAlgebra
+  haveI : IsScalarTower R B A := isScalarTower_of_algEquiv e.symm
+  intro x
+  apply (omegaCongr e).injective
+  rw [AddEquiv.apply_symm_apply]
+  show x = (KaehlerDifferential.map R R A B) ((KaehlerDifferential.map R R B A) x)
+  exact (omegaCongr_rightInv e x).symm
+
+/-!
+## `falt1CokernelIso` の `≃ₗ[W]` への格上げ(道筋を確定、未完成)
+
+`AddEquiv.toLinearEquiv` にスムル整合性の証明を渡せば型を書き直さずに
+済む。`falt1CokernelIso = step1.trans (hJ ▸ step2.toAddEquiv)`、
+`step1 = (omegaCongr e).symm.trans (omegaAdjoinRootQuot ...)` の構造に
+沿って、3段のスムル整合性がすべて具体的な mathlib の道具に帰着する
+ことを確認した(2026-09-04):
+
+1. `(omegaCongr e).symm` の段: 上の `omegaCongr_symm_eq` により
+   `map R R W (AdjoinRoot ...)` そのもの——`map_smul` で `W`-線形性が
+   直接出る。
+2. `omegaAdjoinRootQuot (minpoly V w)` の段: `omega_quotient_eq_derivative_span`
+   は本物の `LinearEquiv`(`AdjoinRoot(minpoly V w)`-線形)なので
+   `map_smul` がそのまま使える。
+3. `step2 = Ideal.quotientEquiv ...` の段: **`Ideal.quotientEquiv` を
+   `Ideal.quotientEquivAlg`(`RingTheory/Ideal/Quotient/Operations.lean`)
+   に差し替えれば**、`e` が `V`-代数同型であることから商同士の環準同型
+   としての整合性(`map_mul`)がそのまま自己作用(=環の乗法)との
+   両立性を与える——発見済みだが未実装。
+
+★3段とも「何を示せばよいか」は完全に特定できたが、`falt1CokernelIso`
+自体の書き換え(`Ideal.quotientEquivAlg` への差し替え含む)と、3段を
+`AddEquiv.trans` の下で合成する最終工程はまだ書いていない。
+-/
+
 end ABC3.Found.Falt1
