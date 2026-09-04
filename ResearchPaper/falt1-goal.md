@@ -870,6 +870,27 @@ mathlib での正確な組み立て方は未確認)。
     あることから `ψ.commutes` 経由でほぼ自動のはず)、そして `Wₙ`
     自身が `V0` 上有限・捩れ無しであること(`Wₙ` がどんな `V0`-拡大
     として与えられるかに依存する、呼び出し側の仮定として要る)。
+
+    ★★2026-09-04、**`Module.IsTorsionFree Wₙ Wₙ₊₁` も完成した**
+    (`falt1ModuleIsTorsionFreeWnWn1`、commit `addad6e1`)——予想通り
+    `differentIdeal_eq_span_of_adjoinRoot_X_pow_sub_C` の中で使った
+    `Module.IsTorsionFree V0 (integralClosure V0 (AdjoinRoot fK))`
+    の議論(`algebraMap Wₙ (AdjoinRoot gK)` の単射性 →
+    `IsIntegralClosure.isTorsionFree`)を `Wₙ`・`gK` に対して**そのまま
+    繰り返すだけ**で閉じた——新しい発見は無かったが、既存パターンの
+    再利用が効くことを確認できた。★これで約20個中、`Module.Finite
+    Wₙ Wₙ₊₁`・`Module.IsTorsionFree Wₙ Wₙ₊₁`・`Algebra V0 Wₙ₊₁`・
+    `IsScalarTower V0 Wₙ Wₙ₊₁`(自動発見)の4つが揃った。残る
+    (未着手・次回): `Algebra V1 Wₙ₊₁` を instance として登録する
+    (`falt1BaseChangeAlgHom.toRingHom.toAlgebra`)、`IsScalarTower
+    V0 V1 Wₙ₊₁`、`Module.Finite V0 V1`・`Module.IsTorsionFree V0 V1`
+    (`V1` 自身、既存の `falt1ModuleFiniteWnWn1`・`falt1ModuleIsTorsionFreeWnWn1`
+    と同じパターンを `V0`・`fK` に戻して適用するだけのはず——まだ
+    やっていないが機械的)、`Module.Finite V0 Wₙ`・`Module.IsTorsionFree
+    V0 Wₙ`(`Wₙ` 自身、呼び出し側の仮定として要る)、`Module.Finite
+    V1 Wₙ₊₁`・`Module.IsTorsionFree V1 Wₙ₊₁`(`ψ` 経由の有限性、
+    `Module.Finite.trans`的な議論が要りそう)、`Module.Finite V0 Wₙ₊₁`・
+    `Module.IsTorsionFree V0 Wₙ₊₁`(`Wₙ→Wₙ₊₁` と `V0→Wₙ` の合成)。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
