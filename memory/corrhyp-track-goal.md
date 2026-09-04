@@ -1612,3 +1612,21 @@ transitionElem/gdT/cocycleのRレベル版に相当する遷移データの降�
 descendPieceRの重なり部分へspecializeし、得られた候補写像が同型
 であることを確認する(未着手)。lake build(FieldLimit/ABC3)0エラー
 確認、push済み。集計は10/24で変わらず。corrhyp-goal.mdに詳細記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05(続き5)
+exists_mem_ideal_span_range_descendを完成(commit 32a3d1fc)——イデアル
+所属もRレベルへ降りることの証明。「同型であることの確認」(往復合成が
+恒等になること)に要る最後の核心部品。exists_mvPolynomial_quotient_
+ringHom_descendと全く同じ「単射性で等式をR'レベルへ押し戻す」パターン
+の別対象への適用——新しい数学的発想は不要だった。
+
+残る配線(未着手): ev(片1→片2)・ev'(片2→片1)を共通R'''へ揃え、合成
+ev'∘ev(MvPolynomial.comp_aevalで1段のaevalに潰せる)が恒等射と片1の
+関係式イデアルを法として一致することをexists_mem_ideal_span_range_
+descendで示す。3つの核心補題を組み合わせるだけの配線になった。
+
+lake build(FieldLimit/ABC3)0エラー確認、push済み。正直な評価: 遷移
+データの降下自体は前進しているが、これが完成してもGlueData構成・
+β脚(文字通り未着手)・h:ZK=D.Ext Zの構造的懸念という3つの大きな課題が
+残り、Lemma 4.1(§4)全体の完成にはまだ距離がある。集計は10/24で
+変わらず。corrhyp-goal.mdに詳細記録。

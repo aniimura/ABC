@@ -3582,3 +3582,41 @@ specialize する——重なり部分自身のℝレベルの遷移写像(既�
 同じ単射性のトリックで示す)を確認する必要がある。集計は10/24で
 変わらず——§4は引き続き0/2、ただしLemma 4.1完成に必要な核心部品が
 実際に揃った。
+
+## 2026-09-05(続き6): `exists_mem_ideal_span_range_descend`——「同型で
+あることの確認」に要る最後のピースを完成
+
+前回の「次の一手」(同型の往復合成が恒等になることの確認)に着手し、
+その核心部品を先に切り出して完成させた——**イデアル所属もRレベルへ
+降りる**こと: `p`がℝへbase changeした後`Ideal.span(range map q)`に
+属するなら、ある共通の精密化`R'`で`p`自身(`R'`へ昇格したもの)が
+`Ideal.span(range 昇格q)`に属する(commit `32a3d1fc`)。
+
+`Ideal.mem_span_range_iff_exists_fun`(mathlib、`Fintype`添字の場合の
+所属の明示的表示、`x∈span(range v) ↔ ∃c,∑ᵢ c i * v i = x`)でℝレベルの
+witness係数(有限個)を取り出し、それ自体を`exists_fg_subalgebra_
+tensor_mvPolynomial_finset`で共通の`R₀`へ降ろしてから、
+`exists_mvPolynomial_quotient_ringHom_descend`と全く同じ「単射性で
+等式を`R'`レベルへ押し戻す」パターンを適用するだけで証明できた——
+新しい数学的発想は不要で、既に確立した技法の別の対象への適用だった。
+
+**残る配線(未着手、次の一手)**: 2つの候補写像`ev`(片1→片2)・`ev'`
+(片2→片1、`exists_mvPolynomial_quotient_ringHom_descend`をφ⁻¹へも
+適用して得る)を共通の`R'''`へ揃えたのち、合成`ev'∘ev`(`MvPolynomial.
+comp_aeval`、mathlib、`φ.comp(aeval f)=aeval(fun i↦φ(f i))`で1段の
+`aeval`に潰せる)が恒等射(`X i`)と、片1の関係式イデアルを法として
+一致することを`exists_mem_ideal_span_range_descend`で示す——これで
+「候補写像が実際に同型である」ことの証明が完成する見込み。ここまでの
+3つの核心補題(`exists_mvPolynomial_quotient_ringHom_descend`・
+`exists_mem_ideal_span_range_descend`・`MvPolynomial.comp_aeval`)を
+組み合わせるだけの配線作業になったので、新しい数学的発想は既に
+出尽くしている。
+
+`lake build ABC3.Found.CorrHyp.FieldLimit`・`ABC3`いずれも0エラーで
+確認、push済み。集計は10/24で変わらず——§4は引き続き0/2。正直な評価:
+遷移データの降下という数学的内容そのものは着実に前進しているが、
+これが完成しても「Rレベルの候補片`descendPieceR`たちを実際に
+`GlueData`として貼り合わせてΣ`D.Space`元`Z`を構成する」・「`β`脚の
+構成(文字通り未着手)」・「`h:ZK=D.Ext Z`の文字通りの等号という構造的
+懸念」という3つの大きな課題がまだ残っており、`Lemma 4.1`(§4)全体の
+完成にはまだ距離がある。
