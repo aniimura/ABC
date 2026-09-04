@@ -3594,3 +3594,31 @@ defeqチェックを要求するのに対し、`have ... : T := v`は「vがTを
 ただ代入できないか」を試す。実例:
 `lean/ABC3/Found/CorrHyp/ExtLimit.lean`の`onePieceSchemeIso`
 (`hP₀' : P₀.map (algebraMap ...) = Pres.P := hP₀`)。
+
+## 29. opaque な tactic-mode `def`(`AlgEquiv`等)を後から `unfold` して
+中の `rw […] at h` 由来の cast を剥がすのは時間対効果が悪い——最初から
+「後で使う値」を定義に組み込む(2026-09-04)
+
+`noncomputable def e : A ≃ₐ[R] B := by ... have h := ...; rw [heq] at h;
+... exact h.trans ...` のように、`rw [heq] at h`(`heq : x = y`、`x`・`y`
+が defeq でない genuine な命題的等式)で中間結果の**型**を書き換えてから
+`.trans`/`.comp`する構成をした場合、生成される項には `cast`(`Eq.mpr`/
+`Eq.mp` 経由)が埋め込まれる。この `e` を**後から** `unfold e; simp only
+[eq_mpr_eq_cast, eq_mp_eq_cast, cast_eq, ...]` で剥がして「`e` を具体的な
+元(例: 生成元)に当てた値」を計算しようとすると、外側の(`set`由来の)
+cast は`cast_eq`で消せても、`heq`由来の**内側の**cast(関数型`A ≃ₐ[R] B`
+自体への cast)は`cast_eq`・`AlgEquiv.trans_apply`・`Subtype.ext_iff`の
+どれでも綺麗に剥がせず、`subst`/`generalize`も(`x`が`set`由来のletだと)
+「motive is not type correct」で効かない——各試行が**50〜75秒**かかる
+(`whnf`が巨大な項を舐める)のに、複数回試みても収束しなかった
+(実例: `falt1AdjoinRootEquivIntegralClosure`から`e(root f)=root g`を
+取り出そうとした試み、falt1-goal.mdの2026-09-04分に詳細記録)。
+
+**How to apply**: `e (具体的な元)` の値を**後で**知りたいなら、`e`の
+構成そのものを変えて「その値が欲しい形にあらかじめ定義する」方を選ぶ
+——例えば `w := e (root f)` と**先に定義してから** `e`のstatementの
+方を`w`を使って書き直せば、対応する等式は`rfl`で済む(cast を通す
+必要が最初から無い)。「まず抽象的な同型を作ってから、後で `unfold`
+して具体的な元での挙動を調べる」という順序そのものが罠——`rw […] at h`
+で型を書き換える構成をする**前に**、後で必要になる具体的な等式が
+何かを見極め、それが`rfl`になるように定義の**順序**を選ぶこと。

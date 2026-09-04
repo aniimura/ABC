@@ -790,6 +790,32 @@ mathlib での正確な組み立て方は未確認)。
     示すこと、(d) 最終的に `conductor_mul_differentIdeal` +
     `cancel_conductor_delta` を実際に適用すること——これで item 3c は
     技術的な核心を越え、残りは「組み立て」の段階に入った。
+
+    ★★★2026-09-04、**(a) に着手し、Lean の配線上の教訓を得た**
+    (未完成——`falt1AdjoinRootEquivIntegralClosure` 自体は既に完成・
+    push 済みで、以下は「その値を `AdjoinRoot.root f` で評価した式を
+    後から取り出す」という**別の**作業)。`unfold` + `simp only
+    [eq_mpr_eq_cast, eq_mp_eq_cast, cast_eq]` で `rw […] at e1` が
+    生んだ**入れ子の cast の大半は消せる**(外側の2つ、`set f`・
+    `set fK` に由来するもの)——ただし `hEqmin`(`minpoly V0 PB.gen =
+    f`)由来の**内側の cast**(`AlgEquiv` という関数型そのものへの
+    cast)だけは `cast_eq`・`AlgEquiv.trans_apply`・`Subtype.ext_iff`
+    のどれでも綺麗に剥がせず、`subst`/`generalize` も(`f` が `set`
+    由来の let で「motive is not type correct」)効かなかった——
+    各試行が **50〜75秒**かかる中で複数回失敗し、時間対効果が悪化した
+    ため一旦中断。
+
+    ★★推奨する迂回路(次回、これを最初に試すこと): **後から `e1
+    (AdjoinRoot.root f) = w` を証明しようとするのではなく、`w` を
+    最初から `w := e1 (AdjoinRoot.root f)` と定義すればこの等式は
+    `rfl` になる**——`differentIdeal_eq_span_of_adjoinRoot_X_pow_
+    sub_C` 側の `w`(`⟨PB.gen, hBint⟩` として個別に構成したもの)を、
+    `falt1AdjoinRootEquivIntegralClosure` から得られる `w` に**差し
+    替える**方向で両者を統一すれば、cast を剥がす作業そのものが
+    不要になる可能性が高い。★この種の「opaque な tactic-mode `def`
+    を後から `unfold` して cast まみれの中身を分析する」パターンは
+    時間対効果が悪いと判明した——tools/lean-idioms.md に追記の価値
+    あり(次回)。
    `a9faa64e`)。長さの漸化不等式(上の逐語引用の通り: `δ_n-δ_{n+1}≥
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
