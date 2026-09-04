@@ -4639,6 +4639,55 @@ M→ₐ[R] N) x`(AlgHomのcoe適用)と`f.toLinearMap x`(LinearMapのcoe
 `diagonalCompare_injective`(a)・`almost_swap_annihilate`(b)・
 `almost_swap_augment`(c)。
 
+## 51. `Ext X Y n`の`R`-加群構造は`Ext/Linear.lean`(別 import)にある。
+かつ`@Foo.bar`が「unknown identifier」ではなく**インスタンス探索の
+タイムアウト**を返すせいで、名前の存在確認自体が誤誘導される
+(2026-09-05)
+
+**状況**: `CategoryTheory.Abelian.Ext`(導来圏経由の一般 Ext)で
+`r • e = 0`(`r`は係数環の元、`e : Ext X Y n`)のような**加群構造を
+使う**主張を書こうとすると、`Module R (Ext X Y n)`のインスタンス
+探索が失敗する。`Linear R C`(例:`ModuleCat.instLinear`で
+`Linear T (ModuleCat T)`)も`HasExt C`も個別には`infer_instance`で
+出るのに、`Module R (Ext X Y n)`だけが出ない。
+
+**原因**: その`Module`インスタンスは
+`Mathlib/Algebra/Homology/DerivedCategory/Ext/Linear.lean`にある
+無名インスタンスで、`Ext/Basic.lean`や`Ext/EnoughProjectives.lean`
+からは**推移的に import されない**。`import Mathlib.Algebra.Homology.
+DerivedCategory.Ext.Linear`を1行足すだけで解決する。同ファイルには
+`Ext.smul_comp`・`Ext.comp_smul`・`Ext.mk₀_smul`・
+`Ext.smul_eq_comp_mk₀`・`Ext.linearEquiv₀`も入っている。
+
+**なぜ気づきにくいか(ここが本題)**: import されていないことを
+確認しようとして`#check @CategoryTheory.Abelian.Ext.mk₀_smul`と
+書くと、**「unknown identifier」ではなく**
+`Localization.HasSmallLocalizedHom`のインスタンス探索
+タイムアウトが返る。`Ext`が`def`なので`Ext.mk₀_smul`が generalized
+field notation(`Ext`を適用してからフィールドを取る)として解釈され、
+`Ext`の暗黙引数の解決に入ってしまうため。実際、**存在しない名前**
+`@CategoryTheory.Abelian.Ext.this_name_does_not_exist`でも
+**同じエラー**が出る——つまりこのエラーは名前の有無について何も
+語らない。
+
+**確認の仕方**: 名前空間が`def`と衝突する場合は、`#check`ではなく
+`have h := @Foo.bar`(タクティクブロック内)や、そもそも
+`node tools/decl-index.mjs --mathlib`で作った`.cache/mathlib-index.txt`
+を grep して**宣言がどのファイルにあるか**を見る(この索引は
+ファイルパス付きなので、import の要否が同時に分かる)。今回は
+`grep "Ext/Linear.lean" .cache/mathlib-index.txt`で一発だった。
+
+**ついでに**: `set_option maxHeartbeats N` は**インスタンス探索の
+上限を上げない**(そちらは`synthInstance.maxHeartbeats`、既定
+20000)。`Ext`まわりは`HasSmallLocalizedHom`の探索が重く、
+抽象的な環だと既定を超えることがあるので、
+`set_option synthInstance.maxHeartbeats 400000 in`も併せて覚えておく
+(ただし「探索が速く失敗する」場合は上限ではなくインスタンス不在
+——今回のように import 漏れを疑う)。
+
+実例: `lean/ABC3/Found/Falt1/AlmostEtale.lean`の
+`ext_smul_eq_zero_of_almost_split`・`hochschild_ext_almost_zero`。
+
 ## 51. 商環(`... ⧸ I`)に`RingEquiv`越しの`Algebra`構造を載せる作戦は、
 商環が**既に持っている**`Submodule.Quotient.instSMul'`に負けて破綻する
 ——最初から`AlgEquiv`(`≃ₐ[基底]`)を作るのが正解(2026-09-05)

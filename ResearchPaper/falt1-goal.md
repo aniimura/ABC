@@ -40,9 +40,9 @@
 | §1 | Lemma 1.1 | ✅Found | (完成) |
 | §1 | Theorem 1.2 | ブロック | `Wₙ⊗_{Vₙ}Vₙ₊₁`の非正規性(`differentIdeal Wₙ Wₙ₊₁`)の評価が必要。`Vₙ`塔側の技術(Eisenstein多項式・differentIdeal計算)は完成済みだが`Wₙ`側(任意のalmost étale `W`)には転用できない(`differentIdeal_tower_diamond`のdocstring参照)。退化した`W`(非分岐)を使うと`δₙ≡0`は自明に出るが、原文の「任意の`W`」という全称量化を証明したことにはならない。 |
 | §2 | Definition 2.1 | ✅Found | (完成、`p`が単元でなくても任意のétale/finite/free拡大について成立する一般形まで) |
-| §2 | Theorem 2.2 | ブロック(honest 版は解消・almost 版は section まで前進) | Hochschild cohomology `H²`の`m`零化。★訂正(2026-09-05): remark 2.1(v)はFaltings自身が完全な構成(縮約ホモトピー)を与えており未証明ではなかった。honest な場合は`hochschild_ext_eq_zero`で証明済み。almost 版も**「swap-annihilation を`B⊗AB`へ降ろせない」という技術的障壁自体は`diagonalCompare_injective`で解消**——`IsAlmostEtaleCovering`のみ(`B/A`自体がhonestly unramifiedである必要なし)から`hochSectionAlmost_augment`(`μ∘s=`「`p^n`との掛け算」)まで到達した。残るは`Ext^k_T(-,M)`の関手性(pre/post-compositionがHom群に与える作用)を使って`p^n・Ext^k(B,M)=0`まで持ち上げる最後の1段——`CategoryTheory.Abelian.Ext`のこの向きのAPI調査が次の入口。 |
-| §2 | Theorem 2.3 | ブロック(同上) | 同上(`H¹`版) |
-| §2 | Theorem 2.4(i) | ブロック(同上) | 同上(Hochschild cohomology全般) |
+| §2 | Theorem 2.2 | 前提は完成・定理本体が残る | ★2026-09-05: **この3項目が使う入力(remark 2.1(v)、honest 版・almost 版とも)は完全に証明できた**——`hochschild_ext_eq_zero`(honest)・`hochschild_ext_almost_zero`(almost、`IsAlmostEtaleCovering`のみから`p^n`が`Ext^{k+1}_{B⊗_AB}(B,M)`を零化、非空虚性の対照つき)。以前「Faltings未証明」と誤認し、その後「almost 化が壁」と報告していた両方が解消済み。**残るのは`Theorem 2.2`本体の議論**——nilpotent ideal に沿った lifting(障害類が`H²`に住み、それが`m`で零化されることから almost 一意的に持ち上がる)を、mathlib の変形理論(`Algebra.FormallySmooth`系)と上記`Ext`消滅の間で繋ぐ部分。 |
+| §2 | Theorem 2.3 | 前提は完成・定理本体が残る | 同上(`H¹`版。`hochschild_ext_almost_zero`は次数`k`を問わず一般に証明済みなので、入力側は共通) |
+| §2 | Theorem 2.4(i) | 前提は完成・定理本体が残る | 同上(`Ω_A⊗B→Ω_B`が almost isomorphism。Kähler 微分と Hochschild cohomology の低次の関係を繋ぐ部分が残る) |
 | §2 | Theorem 2.4(ii) | 2/3ステップ完成 | remark(iii)の trace 恒等式(`remark_iii_trace_identity`)・ノルム適用(`trace_ideal_pow_mem_traceIdeal`)は完成。残るは`H^i(G,M)`(`i>0`)への一般化——mathlibの`groupCohomology`(`Mathlib.RepresentationTheory.Homological.GroupCohomology.*`)に一般の transfer 定理(restriction-corestriction、`\|G\|`や重み付き版)が無く、`Rep k G`(k線形専用)を`B`上semilinearな`G`作用に対応させる枠組みも要構築。`Hilbert90.lean`は巡回群・単数表現専用で転用不可(確認済み)。 |
 | §3 | Theorem 3.1 | ブロック | `Theorem 2.2`-`2.4`の結果を直接使う(§2の壁がそのまま継承) |
 | §3 | Theorem 3.2 | ブロック | 同上 |
@@ -68,21 +68,27 @@ check.mjs --brief`で検証済み、mathlibに無かった一般定理):
   rTensor/lTensor保存性2回 + `IsLocalization.moduleTensorEquiv`)。
 - `almost_swap_annihilate`・`almost_swap_augment`・
   `hochSectionOfWitness`・`hochSectionAlmost_augment`:
-  **remark 2.1(v)almost版への前進**——`IsAlmostEtaleCovering`のみ
-  (honest な`Algebra.FormallyUnramified A B`を要求しない)から、
-  `S`が`S⊗AS`の"almost direct summand"(`μ∘s=`「`p^n`との掛け算」)
-  であることを完全に形式化した。前回セッションで報告していた
-  「swap-annihilationを`B⊗AB`へ降ろせない」という技術的障壁は、
-  この`diagonalCompare_injective`によって解消済み。
+  `IsAlmostEtaleCovering`のみ(honest な`Algebra.FormallyUnramified
+  A B`を要求しない)から、`S`が`S⊗AS`の"almost direct summand"
+  (`μ∘s=`「`p^n`との掛け算」)であることの形式化。前回セッションで
+  報告していた「swap-annihilationを`B⊗AB`へ降ろせない」という技術的
+  障壁は、`diagonalCompare_injective`によって解消済み。
+- `ext_smul_eq_zero_of_almost_split`:圏論だけで書ける一般補題——
+  `s≫μ=τ•𝟙`(almost split)なら`τ`は`Ext^{k+1}(S,M)`を零化する。
+- `hochschild_ext_almost_zero`:**remark 2.1(v)almost版、完成**——
+  `IsAlmostEtaleCovering A B p`+`Module.Free A B`+`algebraMap B
+  B[1/p]`の単射性から、`p^n`が`Ext^{k+1}_{B⊗_AB}(B,M)`の全ての元を
+  零化する。Faltings の remark(v)最終文「for B almost etale over A,
+  m annihilates the Hochschild cohomology in positive degrees」
+  そのもの。真の非単元`p:=5`・`B:=Fin 2 → ℤ`での非空虚性の対照つき。
 
-次回セッションへの最優先候補: (a) `hochSectionAlmost_augment`から
-`p^n・Ext^k(B,M)=0`まで持ち上げる——`Ext^k_T(-,M)`の`s:B→T`・`μ:T→B`
-に沿った pre/post-composition の関手性(合成が「`B`の元による掛け算」
-のpullbackに一致するという事実)を`CategoryTheory.Abelian.Ext`の
-既存APIでどこまで表現できるか調査するのがボトルネック。(b)
-`Theorem 2.4(ii)`の群コホモロジー部分(表の該当行参照)。(a)は
-`hochSectionAlmost_augment`という具体的な足場が既にあるため、
-着手しやすい可能性が高い。
+次回セッションへの最優先候補: **`Theorem 2.2`本体**(nilpotent ideal
+に沿った lifting——障害類が`H²`に住むこと、それが`m`零化されるので
+almost 一意に持ち上がること、を mathlib の変形理論
+(`Algebra.FormallySmooth`系のlifting API)と`hochschild_ext_almost_zero`
+の間で繋ぐ)。入力側(Hochschild cohomology の almost 消滅)は
+完成しているので、残るのは「障害類を実際に`Ext²`の元として取り出す」
+部分の設計。次点は`Theorem 2.4(ii)`の群コホモロジー部分(表の該当行)。
 
 ## 0.1 `/goal Falt1 Chapter I Found` の進捗(2026-09-04)
 
@@ -3979,16 +3985,37 @@ unramifiedである必要なし、真に一般の almost 設定)から**完全�
 形式化**した。lake build(6590 jobs)・`node tools/check.mjs --brief`
 (NG13、既存と不変)で確認済み(コミット参照)。
 
-残るのは最後の1段——`hochSectionAlmost_augment`(モジュールレベルの
-almost split)から`p^n・Ext^k(B,M)=0`(Extレベルの almost 消滅)まで
-持ち上げる部分。原理は明快(`s:B→T`・`μ:T→B`(`T:=B⊗AB`)からの
-`Ext^k(s)`・`Ext^k(μ)`の合成が`μ∘s=`「`p^n`との掛け算」の pullback に
-一致し、`Ext^k(T,M)=0`(`T`が`T`上射影的なので、honest な場合と
-同じ理由で)経由でゼロに落ちることから`p^n`が`Ext^k(B,M)`の全ての
-元を零化する、という標準的な「almost projective ⟹ almost Ext消滅」
-論法)が、`CategoryTheory.Abelian.Ext`がこの向き(pre/post-composition
-がHom群に与える作用の関手性)のAPIをどこまで直接提供しているかは
-次回の調査事項として残す。
+★★★★★★2026-09-05(続々々々々々々)、**残っていた最後の1段も閉じた
+——remark 2.1(v)の almost 版が完成した**(`hochschild_ext_almost_zero`)。
+
+「almost projective ⟹ almost Ext消滅」の論法(`s:B→T`・`μ:T→B`
+(`T:=B⊗AB`)について`s≫μ=τ•𝟙`なら、`Ext^{k+1}(T,M)=0`(`T`は`T`上
+射影的)を経由して`τ`が`Ext^{k+1}(B,M)`を零化する)は、mathlib の
+`Ext.mk₀`(射から`Ext ⋯ 0`)・`Ext.mk₀_comp_mk₀_assoc`(合成の関手性)
+・`Ext.smul_comp`/`Ext.mk₀_smul`(`R`-線形圏での`Ext`の`R`-加群構造)
+・`Ext.eq_zero_of_projective`だけで**そのまま書ける**ことが分かった
+(`ext_smul_eq_zero_of_almost_split`、圏論の言葉だけの一般補題として
+切り出した)。
+
+**配管上の落とし穴を1つ発見**: `Ext X Y n`の`R`-加群構造は
+`Mathlib/Algebra/Homology/DerivedCategory/Ext/Linear.lean`にあり、
+`Ext/EnoughProjectives.lean`(honest 版で使っていた import)からは
+**推移的に import されない**。これに気づかない間は
+`Module T (Ext S M (k+1))`のインスタンス探索が静かに失敗し続け、
+しかも`#check @CategoryTheory.Abelian.Ext.<未知の名前>`が
+「unknown identifier」ではなく`HasSmallLocalizedHom`の探索
+タイムアウトを返す(`Ext`が`def`なので generalized field notation
+として解釈されるため)ので、**名前の存在確認自体が誤誘導される**。
+`tools/lean-idioms.md #51`に登記した。
+
+非空虚性の対照も付けた——真の非単元`p:=5`・`A:=ℤ`・`B:=Fin 2 → ℤ`で
+仮定4つ(almost étale covering・`Module.Free`・`algebraMap B B[1/5]`の
+単射性・条件(iii)の witness)がすべて実際に成り立つ。
+
+**残るのは`Theorem 2.2`-`2.4(i)`の"定理本体"**——「Hochschild
+cohomology が`m`で零化される」という**入力**は完成したので、次は
+それを使う議論(nilpotent ideal に沿った lifting の障害類を実際に
+`Ext²`の元として取り出す部分)の設計になる。
 
 ★★★**結論(正直な評価)**: `/goal` の 13/13 は、このセッションでの
 継続作業だけでは現実的な時間内に到達できない規模の作業(Theorem 1.2
