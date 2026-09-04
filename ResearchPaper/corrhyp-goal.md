@@ -4283,3 +4283,27 @@ localization_isOpenImmersion`(任意の元について開埋め込みになる�
 実現する必要があり、次の一手として記録する。lake build(`ExtLimit`/
 `ABC3`)とも0エラー確認、push完了。集計は引き続き10/24——§4は引き続き
 0/2。
+
+## 2026-09-05夜さらに続き2: `piece_isLocalization_basicOpen_mul`——
+ℝレベル側の土台を完成、`R`↔ℝの橋渡しは複数の同型合成を要すると判明
+
+`descendPieceR_localization_isOpenImmersion`(前回)は**`R`レベル**で
+局所化が開埋め込みになることを示したが、それが**ℝレベルで正しい対象
+(`Γ(C,piece(D(f*g)))`)を実現している**ことを確認するℝレベル側の土台
+が無かった——これを`piece_isLocalization_basicOpen_mul`(`ExtLimit.lean`、
+commit `326f50d1`)で埋めた。`piece(D(f))`のアフィン性(`piece_preimage_
+isAffineOpen`)に`IsAffineOpen.isLocalization_basicOpen`(mathlib)を直接
+適用するだけで、`Γ(C,C.basicOpen(piece_basicOpen_localizationElem))`
+(`piece_basicOpen_mul_eq`と組み合わせれば`Γ(C,piece(D(f*g)))`そのもの)
+が`Localization.Away h₂`の実現であることが分かる。
+
+**残る橋渡し(正直な記録)**: `descendPieceR`の局所化(`R`レベル)の
+ℝへの底変換が実際に`Γ(C,piece(D(f*g)))`に一致することを示すには、
+`isLocalization_away_tensor_eq`(局所化と底変換の可換性)・`Algebra.
+TensorProduct.cancelBaseChange`(`R`から`R'`への昇格が`S₀⊗T`を保つ
+こと)・`exists_piece_basicOpen_R_lift`の`hp₀`(`p₀`と`h₂`の対応)・
+今回の`piece_isLocalization_basicOpen_mul`という**4つの既存の部品を
+1本の同型の鎖として繋ぐ**必要があり、まだ未完成——複数の同型の合成を
+慎重に追跡する作業で、次の一手として記録する。lake build(`ExtLimit`/
+`ABC3`)とも0エラー確認、push完了。集計は引き続き10/24——§4は引き続き
+0/2。

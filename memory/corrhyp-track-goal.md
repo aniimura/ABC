@@ -1896,3 +1896,17 @@ open...in・set_option...inはdocstringの前に置く必要がある(後に置�
 ——特にtの構成にD(f)↔D(g)対称性のRレベル実現が要る。lake build
 (ExtLimit/ABC3)0エラー確認、push済み。集計は引き続き10/24——§4は
 引き続き0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き2
+piece_isLocalization_basicOpen_mul(commit 326f50d1、ExtLimit.lean)完成
+——descendPieceR_localization_isOpenImmersion(Rレベル)がℝレベルで
+正しい対象を実現していることを確認するℝレベル側の土台。piece(D(f))の
+アフィン性にIsAffineOpen.isLocalization_basicOpen(mathlib)を直接適用
+するだけ。
+
+残る橋渡し: descendPieceRの局所化のℝへの底変換が実際にΓ(C,piece
+(D(f*g)))に一致することを示すには、isLocalization_away_tensor_eq・
+cancelBaseChange・exists_piece_basicOpen_R_liftのhp₀・今回の補題という
+4つの既存部品を1本の同型の鎖として繋ぐ必要があり、まだ未完成——複数の
+同型合成を慎重に追跡する作業、次の一手。lake build(ExtLimit/ABC3)
+0エラー確認、push済み。集計は引き続き10/24——§4は引き続き0/2。
