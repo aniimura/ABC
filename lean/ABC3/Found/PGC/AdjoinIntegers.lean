@@ -1791,7 +1791,6 @@ noncomputable def principalUnitsQuotientEquiv {p : ℕ} [Fact p.Prime] (K : PAdi
     (𝒪[K.carrier])ˣ ⧸ principalUnits K π n ≃*
       (𝒪[K.carrier] ⧸ Ideal.span ({π ^ n} : Set (𝒪[K.carrier])))ˣ := by
   haveI := nontrivial_quotient_span_pi_pow K hπmax n hn
-  rw [principalUnits_eq_ker]
   have hφ : Function.Surjective (Ideal.Quotient.mk (Ideal.span ({π ^ n} : Set (𝒪[K.carrier])))) :=
     Ideal.Quotient.mk_surjective
   haveI : IsLocalHom (Ideal.Quotient.mk (Ideal.span ({π ^ n} : Set (𝒪[K.carrier])))) :=
@@ -1799,7 +1798,15 @@ noncomputable def principalUnitsQuotientEquiv {p : ℕ} [Fact p.Prime] (K : PAdi
   have hsurj : Function.Surjective (Units.map
       (Ideal.Quotient.mk (Ideal.span ({π ^ n} : Set (𝒪[K.carrier]))) |>.toMonoidHom)) :=
     IsLocalRing.surjective_units_map_of_local_ringHom _ hφ ‹_›
-  exact QuotientGroup.quotientKerEquivOfSurjective _ hsurj
+  -- ★逸脱(記録): `rw [principalUnits_eq_ker]`(tactic mode)ではなく
+  -- 項モードの`▸`で構成する。理由: `principalUnitsQuotientEquiv_apply_mk`
+  -- (自然性、`UnitsInverseLimit`系列で必要)を`subst`一発で示すには、
+  -- ここでの cast が`key`風の単純な`Eq.mpr`形になっている必要があり、
+  -- `rw`タクティクが生成する cast とは動機(motive)の形が食い違う
+  -- (`generalize_proofs`+`induction`で追跡しても解消しない)。
+  -- `▸`に統一すれば両者が同じ elaboration 経路を通り、`subst`だけで
+  -- 自然性が閉じる。詳細は`tools/lean-idioms.md`#34系列。
+  exact principalUnits_eq_ker K π n ▸ QuotientGroup.quotientKerEquivOfSurjective _ hsurj
 
 /-- **`spectralNorm`は`Gal(K.closure/K.carrier)`の作用で不変**——
 `σ : K.closure ≃ₐ[K.carrier] K.closure`に対し`‖σ x‖=‖x‖`。証明は

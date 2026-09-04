@@ -210,4 +210,39 @@ noncomputable def unitReductionEquiv {p : ℕ} [Fact p.Prime] (K : PAdicLocalFie
   MulEquiv.ofBijective (unitReductionHom K hπmax)
     ⟨unitReductionHom_injective K hπmax, unitReductionHom_surjective K hπmax⟩
 
+/-- **群論の補助事実**: `S=φ.ker`という等式で得られる第一同型定理の
+`≃*`(`h▸(quotientKerEquivOfSurjective φ hsurj) : G⧸S≃*H`)は、`mk`の
+上では`φ`そのものとして計算できる——`h`を`subst`すれば`rfl`。
+
+★配管(記録): この事実自体は`subst h; rfl`で一瞬で閉じるが、**大域宣言
+として**切り出すことが本質的に重要だった。`have`でこの補題を証明した
+まま、直後にそれを`principalUnitsQuotientEquiv`側の具体的な`φ,hsurj,h,u`
+に適用しようとすると(`exact key φ hsurj h u`のように4引数すべてを
+明示しても)、`h`を型検査する時点で`φ`がまだメタ変数のまま残り、
+「型`Eq.{u+1} ?m (MonoidHom.ker ?φ)`だが実際は`Eq.{1} ...`」という
+食い違いで失敗する——ローカルな`have`束縛の依存関数適用に特有の
+エラボレーション順序の癖(具体例は`tools/lean-idioms.md`)。**大域
+定理として**切り出す(`theorem ... := by ...`で環境に積む)と、同じ
+4引数の適用が一発で通る。 -/
+theorem quotientKerEquivOfSurjective_cast_apply {G H : Type*} [CommGroup G] [Group H]
+    (φ : G →* H) (hsurj : Function.Surjective φ) {S : Subgroup G} (h : S = φ.ker) (g : G) :
+    (h ▸ (QuotientGroup.quotientKerEquivOfSurjective φ hsurj) : G ⧸ S ≃* H)
+      (QuotientGroup.mk g) = φ g := by
+  subst h
+  rfl
+
+/-- **`principalUnitsQuotientEquiv`の自然性**——`(𝒪_K)^×⧸principalUnits(n)`
+から`(𝒪_K/π^n)^×`への第一同型定理由来の同型が、`mk`の上では単なる
+還元写像`unitReductionQuotientMap`そのものとして計算できる。節目(5)
+の最終組み立てに要る部品(ii)への布石: これで`reciprocityMapLimitCompat`
+(`(𝒪_K)^×⧸principalUnits(n)`のレベルで述べられている)を
+`(𝒪_K/π^n)^×`/`CompatibleUnits`のレベルの主張へ翻訳できる。 -/
+theorem principalUnitsQuotientEquiv_apply_mk {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (n : ℕ) (hn : 1 ≤ n) (u : (𝒪[K.carrier])ˣ) :
+    principalUnitsQuotientEquiv K hπmax n hn (QuotientGroup.mk u) =
+      unitReductionQuotientMap K π n u := by
+  simp only [principalUnitsQuotientEquiv, unitReductionQuotientMap]
+  exact quotientKerEquivOfSurjective_cast_apply _ _ (principalUnits_eq_ker K π n) u
+
 end ABC3.Found.PGC

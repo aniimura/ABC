@@ -2745,3 +2745,55 @@ hcongr`という単純な操作なのに`?m`という未解決メタ変数が残
 ことを示す(`reciprocityMap_mul`、既出、を使う見込み)、(iii)全射性・
 単射性(後者は`reciprocityMap`自体の単射性が前提、要確認)。次に
 戻るなら(i)(`principalUnitsQuotientEquiv`の自然性)が具体的な出発点。
+
+## 続報(2026-09-05、(i)`principalUnitsQuotientEquiv`の自然性が完成、
+`Found/PGC/UnitsInverseLimit.lean`に追記・commit済み)
+
+目標: `principalUnitsQuotientEquiv K hπmax n hn (QuotientGroup.mk u)
+= unitReductionQuotientMap K π n u`(第一同型定理由来の同型が`mk`の
+上では単なる還元写像そのものとして計算できる)。素朴には`subst`一発
+で終わりそうな主張だったが、実際には3段の罠が絡んでおり、解決には
+**`principalUnitsQuotientEquiv`自体の定義の書き換え**まで必要だった
+(`tools/lean-idioms.md` #35に詳細を記録)。
+
+1. **罠その1**: `principalUnitsQuotientEquiv`は元々tactic-modeの
+   `rw [principalUnits_eq_ker]`でゴールの型を書き換えてから
+   `quotientKerEquivOfSurjective`を`exact`していた。この構成のまま
+   自然性を攻めると、`rw`が生成したcastの`motive`と、独立に書いた
+   `h▸e`(TERM-modeの`▸`)のmotiveが**形として食い違う**——命題として
+   同じ`h`でも、`Eq.rec`は`h`が`rfl`に簡約されない限り計算で潰れない
+   ため、この食い違いを`exact`のdefeqチェックが飲み込めない。★直し方:
+   `principalUnitsQuotientEquiv`**自体の定義**を`rw`ではなく
+   `principalUnits_eq_ker K π n ▸ QuotientGroup.quotientKerEquivOf
+   Surjective _ hsurj`という項モードの`▸`に書き換えた(型は完全に
+   同じなので下流の`QuotientCardinality.lean`等の利用箇所に影響ゼロ、
+   `lake build ABC3`で確認済み)。
+2. **罠その2**: 橋渡し補題を`{S:Subgroup G}[S.Normal](h:S=φ.ker)`と
+   書くと、`▸`のmotive推論が`[S.Normal]`という別の局所仮定まで巻き
+   込んで複雑化し、実際のゴール(`(𝒪_K)^×`はアーベル群なので`Normal`
+   は`∀x,x.Normal`という値に依らない一様なインスタンスから来る)と
+   噛み合わない。★直し方: `[Group G]`ではなく**`[CommGroup G]`**で
+   書く——アーベル群の部分群はすべて自動的に`Normal`なので、
+   `[S.Normal]`を独立引数にする必要が最初から無くなる。
+3. **罠その3**: 罠1・2を修正した補題を**ローカルな`have`**として
+   立てて4引数すべて具体的な項で適用しても、後ろの引数を型検査する
+   段階で前の引数(`φ`)が`?m`のまま残り、宇宙不一致で失敗する——
+   `ℤˣ`上の最小例でも再現した。★直し方: `have`をやめて**大域
+   `theorem`として環境に積む**(`quotientKerEquivOfSurjective_cast_
+   apply`)。同じ4引数の適用が、大域宣言に対してなら一発で通る。
+
+結果、`quotientKerEquivOfSurjective_cast_apply`(大域・群論一般)と
+`principalUnitsQuotientEquiv_apply_mk`(それを使う自然性定理)を
+`UnitsInverseLimit.lean`に追加。`lake build ABC3`(6590 jobs)・
+`node tools/check.mjs --brief`(既存NG 13件のまま)・
+`node tools/mojibake.mjs`(文字化けなし)すべて確認済み。
+
+★★★★★これで節目(5)の(i)(ii)への布石が完成した。残るのは:
+(ii)`reciprocityMapLimitCompat`(`(𝒪_K)^×⧸principalUnits`のレベル)
+と今回の自然性(`(𝒪_K/π^n)^×`/`CompatibleUnits`のレベル)を実際に
+組み合わせて`reciprocityMapLimit:Gal(K.closure/K.carrier)→
+CompatibleUnits`(または`unitReductionEquiv`経由で`𝒪_K^×`)を定義し
+`MonoidHom`であることを示す(`reciprocityMap_mul`、既出、を使う
+見込み)、(iii)全射性・単射性(後者は`reciprocityMap`自体の単射性が
+前提、要確認)。次に戻るなら(ii)(`reciprocityMapLimit`の定義)が
+具体的な出発点。

@@ -3936,3 +3936,64 @@ corrPieceGlueData X.1 U hU c.C.1.left hα  -- hαを使う、c.α.1.leftを直�
 `Classical.choice`由来の深いnested chooseが**型注釈の側**にある時は
 省略、`FiniteDimensional`インスタンスが**項の側**(`.hfd`)からしか
 出せない時は明示、と使い分けが要る。迷ったら両方試す。
+
+## 35. 第一同型定理の`≃*`を`mk`の上で計算する自然性——`rw`ではなく`▸`で
+構成し直し、橋渡しの補題は**大域`theorem`として**切り出す(2026-09-05)
+
+**目的**: `principalUnitsQuotientEquiv K hπmax n hn (QuotientGroup.mk u)
+= unitReductionQuotientMap K π n u`(`(𝒪_K)^×⧸principalUnits(n)≃*
+(𝒪_K/π^n)^×`という第一同型定理由来の同型が、`mk`の上では単なる還元
+写像そのものとして計算できる、という自然性)を示したい場面。
+
+**罠その1(`rw`と`▸`は同じ結論でも違う項を作る)**: `principalUnits
+QuotientEquiv`はもともとtactic-modeの`rw [principalUnits_eq_ker]`で
+ゴールの型を書き換えてから`quotientKerEquivOfSurjective`を`exact`して
+いた。この構成のまま`unfold`+`generalize_proofs`+`induction`/`cases`
+で自然性を攻めると、`Eq.mpr (congrArg (fun S => ...) h) e`という
+cast項の**motive**が`rw`の`kabstract`が選んだものになり、独立に書いた
+`h ▸ e`の項(TERM-modeの`▸`が推論するmotive)と**形が食い違う**
+(前者は単純、後者はTypeclass引数まで巻き込んだ複雑なΠ型になったり
+する)。両者は命題として同じ`h`を使っていて**命題としては同一**でも、
+`Eq.rec`は`h`が`rfl`に簡約されない限り計算で潰れないため、`exact`の
+defeqチェックがこの食い違いを飲み込めない。★直し方: `principalUnits
+QuotientEquiv`**自体の定義**を`rw`ではなく`principalUnits_eq_ker K π n
+▸ QuotientGroup.quotientKerEquivOfSurjective _ hsurj`という項モードの
+`▸`に書き換える(型は完全に同じなので下流に影響ゼロ)。これで定義側と
+橋渡し補題側が**同じelaboration経路**を通るようになり、`subst`一発の
+議論が届くようになる。
+
+**罠その2(`Subgroup.Normal`をtelescopeの独立引数にすると`▸`の
+motiveが余計に太る)**: 橋渡し補題を`{S:Subgroup G}[S.Normal](h:S=φ.ker)`
+という形で書くと、`h▸e : G⧸S≃*H`の型注釈のmotive推論が`[S.Normal]`
+という**別の局所仮定**まで一緒に汎化してしまい(`S`に依存する仮定は
+`▸`が自動的に道連れにする)、`Eq.ndrec (motive:=fun {S}=>[S.Normal]→
+S=φ.ker→G⧸S≃*H) ...`という複雑な形になって、実際のゴール(`(𝒪_K)^×`
+はアーベル群なので`Normal`は`∀x,x.Normal`という**値に依らない一様な
+インスタンス**から来る)と噛み合わない。★直し方: `[Group G]`ではなく
+**`[CommGroup G]`で書く**——アーベル群の部分群はすべて自動的に`Normal`
+になる(一様なインスタンス)ので、`[S.Normal]`を独立引数として書く
+必要が最初から無くなり、`▸`のmotiveが単純なまま保たれる。
+
+**罠その3(ローカルな`have`束縛の依存関数は、位置引数を明示的に全部
+与えても前の引数がメタ変数のまま残る)**: 罠1・2を修正した補題を
+```lean
+have key : ∀ {G H:Type*}[CommGroup G][Group H](φ:G→*H)(hsurj:...)
+    {S:Subgroup G}(h:S=φ.ker)(g:G), (h▸...) (QuotientGroup.mk g) = φ g := ...
+exact key φ₀ hsurj₀ h₀ u   -- 4引数すべて具体的な項
+```
+のように**ローカルな`have`**として立てて4引数すべて明示的な項で
+適用しても、`h₀`を型検査する段階で`φ`が`?m`のまま残り、「期待型
+`Eq.{u+1} ?m (MonoidHom.ker ?φ)`だが実際は`Eq.{1} ...`」という宇宙
+不一致で失敗する——`refine key ?_ ?_ h₀ ?_`でも`(φ:=...)`という
+named引数でも症状は同じ。単純化した`ℤˣ`上の例でも同様に再現する
+(最小再現は本entryのコミットの差分を参照)。★直し方: **`have`を
+やめて大域`theorem`として環境に積む**(あるいはファイルに`theorem`
+として書く)。同じ4引数の適用が、大域宣言に対してなら一発で通る——
+ローカルな依存関数適用のエラボレーション順序に特有の癖で、宣言を
+大域化するだけで消える。
+
+実例: `lean/ABC3/Found/PGC/UnitsInverseLimit.lean`の
+`quotientKerEquivOfSurjective_cast_apply`(罠1・2・3すべてを踏まえた
+大域補題)・`principalUnitsQuotientEquiv_apply_mk`(それを使う自然性
+定理)、および`lean/ABC3/Found/PGC/AdjoinIntegers.lean`の
+`principalUnitsQuotientEquiv`(`rw`から`▸`への書き換え)。
