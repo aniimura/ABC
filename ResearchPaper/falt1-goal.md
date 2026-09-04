@@ -1489,6 +1489,30 @@ mathlib での正確な組み立て方は未確認)。
       塔で成り立つはず)と合わせて完全列そのものを組み立て、
       Nakayama+elementary divisors(step 4後半)・discriminantの塔
       (step 5)へ進む。
+
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、
+      **上記の transport を実際に完了し、`Wₙ₊₁`自身の単射性を確立
+      した**(`falt1_mapBaseChange_injective_wn1`・
+      `falt1_mapBaseChange_injective_wn1_concrete`、
+      `Found/Falt1/KaehlerAux.lean`、commit `fe7520bd`、`lake build`
+      完走・sorry無し)。`KaehlerDifferential.mapBaseChange_comp`・
+      `map_comp_der`のような直接の自然性補題はmathlibに存在しない
+      と確認済みだったが、自前でその自然性を証明し直す必要は無かった
+      ——Lemma 1.1の土台で既に`falt1MapBaseChangeInjective`のために
+      組み立てていた`mapBaseChange_injective_transport`(代数同型
+      `e:A≃ₐ[V]B`に沿って`mapBaseChange`の単射性を輸送する、
+      `omegaCongr`を内部で使う既存の補題)を、`A:=AdjoinRoot g`・
+      `B:=Wₙ₊₁`・`e:=falt1AdjoinRootEquivIntegralClosure`として
+      そのまま適用するだけで閉じた。「既存の資産を掘り直す前に
+      在庫を確認すべきだった」という教訓——`tools/decl-index.mjs`
+      でのgrepを`mapBaseChange_injective`という結論の語で先に
+      引いていれば1手で見つかっていた。
+      これでExercise 13.7.4 step (4)の完全列の**左側**(単射性)が
+      Falt1の実際の`Wₙ₊₁`に対して完成した。次回: 右側の全射性
+      (`KaehlerDifferential.mapBaseChange_surjective`等、標準的な
+      事実のはず・未着手)を組み立てて完全列そのものを確立し、
+      Nakayama+elementary divisors(step 4後半のkernel評価)・
+      discriminantの塔(step 5のcokernel評価)へ進む。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
