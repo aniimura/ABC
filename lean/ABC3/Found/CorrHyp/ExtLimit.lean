@@ -1008,4 +1008,61 @@ noncomputable def piece_descends_iso {A : Type} [CommRing A] [Algebra ℚ A]
   obtain ⟨R, P₀, ⟨e⟩⟩ := onePieceSchemeIso (A := A) f
   exact ⟨R, P₀, ⟨(IsAffineOpen.basicOpenIsoSpecAway hU f).trans e⟩⟩
 
+/-! ## GlueDataの遷移射——`piece_descends_iso`を重なりへ制限する
+
+前回、遷移射(`D(f_i)`と`D(f_j)`の重なりの比較)を`Localization`の
+局所化の局所化という抽象的な環同型で構成しようとして「捩れ」の壁に
+再度当たったが、`piece_descends_iso`(既に完成)を重なり
+`X.basicOpen(f_i·f_j)`へ**制限**するだけで済むと判明した——抽象的な
+環レベルの独立検証は一切不要。ここではその制限を実際に構成する。 -/
+
+/-- スキームの同型`e : X ≅ Z`について、`e.hom`による像は`e.inv`による
+逆像に一致する——`e.hom ⁻¹ᵁ`の単射性(`preimage_image_eq`+`e.hom≫e.inv
+=𝟙`)から。同型の下での開集合の像を「逆側の射の逆像」として計算する
+ための一般的な橋渡し(CorrHyp非依存)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem Scheme.hom_image_iso_eq_inv_preimage {X Z : Scheme} (e : X ≅ Z) (W : X.Opens) :
+    e.hom ''ᵁ W = e.inv ⁻¹ᵁ W := by
+  have h1 : e.hom ⁻¹ᵁ (e.hom ''ᵁ W) = W := e.hom.preimage_image_eq W
+  have h2 : e.hom ⁻¹ᵁ (e.inv ⁻¹ᵁ W) = W := by
+    rw [← Scheme.Hom.comp_preimage, Iso.hom_inv_id]; simp
+  have hinj : Function.Injective (fun (V : Z.Opens) => e.hom ⁻¹ᵁ V) := by
+    intro V₁ V₂ hV
+    have := congrArg (fun (V : X.Opens) => e.inv ⁻¹ᵁ V) hV
+    simp only [← Scheme.Hom.comp_preimage] at this
+    simpa using this
+  exact hinj (h1.trans h2.symm)
+
+/-- **重なり`X.basicOpen(f₁·f₂)`を、`X.basicOpen f₁`とその「候補片」`Z`
+との任意の同型`e`(`piece_descends_iso`/`onePieceSchemeIso`が与える)の
+下で`Z`の基本開集合として実現する**——`W`(`X.basicOpen f₁`自身のスキーム
+の中の対応する開集合)を経由して、(a) `(X.basicOpen f₁).ι`で`X`側の
+`X.basicOpen(f₁·f₂)`に戻ることと、(b) `e.hom`で`Z`側の基本開集合
+`Z.basicOpen s`に写ることの両方を保証する。`s`は具体的な切断として
+与えられる。
+
+2つの標準エタール片`D(f_i)`・`D(f_j)`をそれぞれの候補片`Z_i`・`Z_j`へ
+写したとき、両方とも`X.basicOpen(f_i·f_j)`という**同じ`X`内の開集合**
+を経由するので、遷移射(`Z_i`の対応する開集合と`Z_j`の対応する開集合の
+同型)は`e_i.hom`・`e_j.hom`のこの記述を合成するだけで得られる——
+抽象的な環レベルの独立検証(`Localization`の局所化の局所化の比較)は
+不要になる。GlueDataの遷移射構成の核心。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_transitionOpen_eq_basicOpen {X : Scheme} {U : X.Opens} (f₁ f₂ : Γ(X, U))
+    {Z : Scheme} (e : (X.basicOpen f₁ : Scheme) ≅ Z) :
+    ∃ s : Γ(Z, ⊤),
+      (X.basicOpen f₁).ι ''ᵁ ((X.basicOpen f₁).toScheme.basicOpen
+          ((X.basicOpen f₁).topIso.inv
+            (X.presheaf.map (homOfLE (X.basicOpen_le f₁)).op f₂))) = X.basicOpen (f₁ * f₂) ∧
+      e.hom ''ᵁ ((X.basicOpen f₁).toScheme.basicOpen
+          ((X.basicOpen f₁).topIso.inv
+            (X.presheaf.map (homOfLE (X.basicOpen_le f₁)).op f₂))) = Z.basicOpen s := by
+  refine ⟨e.inv.app ⊤ ((X.basicOpen f₁).topIso.inv
+    (X.presheaf.map (homOfLE (X.basicOpen_le f₁)).op f₂)), ?_, ?_⟩
+  · rw [Scheme.Opens.ι_image_basicOpen_topIso_inv, Scheme.basicOpen_res, Scheme.basicOpen_mul]
+  · rw [Scheme.hom_image_iso_eq_inv_preimage, Scheme.preimage_basicOpen]
+    rfl
+
 end ABC3.Found.CorrHyp
