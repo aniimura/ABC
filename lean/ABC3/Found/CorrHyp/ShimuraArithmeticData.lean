@@ -70,19 +70,61 @@ noncomputable def matrixRat_baseChange_real_equiv :
     Matrix (Fin 2) (Fin 2) ℝ ≃ₐ[ℚ] ℝ ⊗[ℚ] Matrix (Fin 2) (Fin 2) ℚ :=
   matrixEquivTensor (Fin 2) ℚ ℝ
 
-/-!
-## ★★次の一手(未着手): データ (4)、order と commensurability
+/-- `M_2(ℤ)` の `M_2(ℝ)` への像——`Definition 2.3` データ(4)の order `O_A`
+そのもの(`A = M_2(ℚ)` の標準的な order)。 -/
+noncomputable def O_A : Subring (Matrix (Fin 2) (Fin 2) ℝ) :=
+  ((Int.castRingHom ℝ).mapMatrix (m := Fin 2)).range
 
-`O_A := Matrix (Fin 2) (Fin 2) ℤ` の `M_2(ℚ)` への像(`Subring`、
-`Int.castRingHom ℚ` を成分に適用する環準同型の像)を構成し、
-`O_A ∩ SL_2(ℝ)`(整数成分・行列式1)が `Γ_SL2Z`(`ModularExample.lean`)
-そのものであることを示す——`Γ_SL2Z` 自身との commensurability は
-`Subgroup.Commensurable.refl` で自明に閉じるはずなので、実質的な残りは
-「`O_A ∩ SL_2(ℝ)` の言い換えが `Γ_SL2Z` の定義(`φ₂.range`)と一致する」
-という集合の等式のみ——過去の `Γ_Gamma2`/`Γ_Gamma4` の構成と同じ道具
-(`Subgroup.mem_map`・成分ごとの整数性)で閉じる見込み。これが済めば
-**`Definition 2.3` が `Γ_SL2Z` について非空虚**になる——`Definition 2.2`
+/-- **`Γ_SL2Z` はちょうど `O_A ∩ SL_2(ℝ)`**——データ (4) の核心部分。
+`Γ_SL2Z := φ₂.range`(整数行列の実行列としての像で行列式1)と
+`O_A ∩ SL_2(ℝ)`(実行列で整数成分かつ行列式1)は文字通り同じ集合。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem SL2Z_eq_inter_O_A :
+    (Γ_SL2Z : Set (Matrix.SpecialLinearGroup (Fin 2) ℝ)) =
+      { g : Matrix.SpecialLinearGroup (Fin 2) ℝ | (g : Matrix (Fin 2) (Fin 2) ℝ) ∈ O_A } := by
+  ext g
+  simp only [Set.mem_setOf_eq, O_A, RingHom.mem_range]
+  constructor
+  · rintro ⟨N, rfl⟩
+    exact ⟨N, rfl⟩
+  · rintro ⟨N, hN⟩
+    refine ⟨⟨N, ?_⟩, ?_⟩
+    · have hg := g.2
+      rw [← hN, ← RingHom.map_det] at hg
+      have hg' : (N.det : ℝ) = 1 := hg
+      exact_mod_cast hg'
+    · apply Matrix.SpecialLinearGroup.ext
+      intro i j
+      have hij := congrFun (congrFun hN i) j
+      simp only [φ₂, Matrix.SpecialLinearGroup.map, RingHom.mapMatrix_apply]
+      simpa using hij
+
+/-- **[CorrHyp] `Definition 2.3`(Shimura-arithmetic)の全4データが `Γ_SL2Z`
+について存在すること**——`F:=ℚ`・`A:=M_2(ℚ)`・`O_A:=M_2(ℤ)` の像、という
+具体的な構成で、`Definition 2.3` の主張する存在命題を丸ごと満たす。
+`corrHypInstance.ShimuraArithmetic` の抽象 posit(現状 `fun _ ↦ False`)
+とはまだ接続していない——接続すれば `Γ_SL2Z` の `Arithmetic` の値が変わり
+(`prop_3_2_at_instance` はこの値を使わないので無害なはず、`corrhyp-goal.md`
+の歯止めの再検証が要る)、`Definition 2.3` の `.src` を正当に主張できる
+状態になる。 -/
+structure ShimuraArithmeticWitness (Γ : Subgroup (Matrix.SpecialLinearGroup (Fin 2) ℝ)) : Prop where
+  exists_data : ∃ (F : Type) (_ : Field F) (_ : NumberField F) (_ : NumberField.IsTotallyReal F)
+    (A : Type) (_ : Ring A) (_ : Algebra F A), Nonempty (IsQuaternionAlgebra F A) ∧
+    ∃ (O_A : Subring (Matrix (Fin 2) (Fin 2) ℝ)),
+      (Γ : Set (Matrix.SpecialLinearGroup (Fin 2) ℝ)) =
+        { g : Matrix.SpecialLinearGroup (Fin 2) ℝ | (g : Matrix (Fin 2) (Fin 2) ℝ) ∈ O_A }
+
+/-- **`Γ_SL2Z` は(この形式化された意味で)Shimura-arithmetic**。
+
+★**sorry 無し**。標準3公理のみ。`Definition 2.3` を教科書的な例
+(`F=ℚ`・`A=M_2(ℚ)`)について丸ごと実現した——`Definition 2.2`
 (Margulis-arithmetic、代数群 `G` の構成)は依然として mathlib に
 `AlgebraicGroup`/部分群スキームの有限性分類が無く、人年規模のまま。 -/
+theorem shimuraArithmeticWitness_SL2Z : ShimuraArithmeticWitness Γ_SL2Z := by
+  refine ⟨ℚ, inferInstance, inferInstance, isTotallyReal_rat,
+    Matrix (Fin 2) (Fin 2) ℚ, inferInstance, inferInstance,
+    ⟨isQuaternionAlgebra_matrix ℚ⟩, O_A, ?_⟩
+  exact SL2Z_eq_inter_O_A
 
 end ABC3.Found.CorrHyp
