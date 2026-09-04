@@ -4579,3 +4579,62 @@ isLocalization_of_algEquiv`はこの方法で発見した)。
 
 実例: `lean/ABC3/Found/CorrHyp/FieldLimit.lean`の
 `isLocalization_of_ringEquiv_transport`。
+
+## 50. `B⊗_AB`から`Bp⊗_ApBp`への比較写像の単射性・「後続の仮説の型が
+参照している仮説」を`obtain`/`unfold ... at`で壊す罠・`AlgHom`越しの
+`map_smul`が`map_smul_of_tower`を要る場面、の3点セット(2026-09-05)
+
+**(a) 局所化を2回経由したテンソル積を1回に戻す同型**: `M₁,M₂`が
+`R`-代数`A`(`IsLocalization S A`)上の加群のとき、`TensorProduct A M₁
+M₂ ≃ₗ[A] TensorProduct R M₁ M₂`という「`A`上のテンソルは、実は`R`上の
+テンソルと(`M₁,M₂`が既に局所化されている分)同じ」という同型が
+`IsLocalization.moduleTensorEquiv (S) (A) (M₁) (M₂)`として存在する
+(pure tensorを pure tensor に送るだけ、`exact?`で`e(x⊗y)=x⊗y`が
+確認できる)。`TensorProduct.AlgebraTensorModule.cancelBaseChange`や
+`IsLocalization.Away.tensorRightEquiv`/`tensorEquiv`ではこの形の
+同型は得られない(仮定の噛み合わせ・向きが合わない)——この形が
+必要なら`moduleTensorEquiv`を先に探す。
+
+これを使うと、環準同型`f : B⊗_AB→Bp⊗_ApBp`(`Bp,Ap`は`p`による
+局所化)が`φ:=(rTensor Bp f₀)∘(lTensor B f₀)`(`f₀:B→Bp`をテンソル積の
+両成分に適用するだけ)と`e:=moduleTensorEquiv`の合成`e.symm∘φ`に
+分解できるとき、`φ`の単射性(`Module.Flat`の`rTensor`/`lTensor`
+`preserves_injective_linearMap`を2回、`f₀`の単射性から)だけで`f`の
+単射性が言える——`Module.Flat A B`は`Module.Free A B`から`inferInstance`、
+`Module.Flat A Bp`は`IsLocalization.flat`+`Module.Flat.trans`。
+
+**(b) `obtain ⟨...⟩ := h`(または`unfold ... at h`)は、後続の仮説の
+型が`h`を参照していると、その仮説を静かに消す**: `theorem foo (h :
+∃ x, P x) (hw : (h.2.1 を使う型)) : ... := by obtain ⟨x, hx⟩ := h; ...`
+のような形で、証明中に`h`を`obtain`で分解すると、`hw`の型が(古い)`h`
+という自由変数を参照しているため、Lean は`hw`を revert してから`h`を
+分解する。この revert-and-reintroduce が期待通りに`hw`という名前の
+まま戻ってくると思い込むと、`lake build`で`Unknown identifier hw`や
+`unsolved goals`(その少し手前の行)として現れる——**しかも`lean_check`
+(REPL)では検出できず`lake build`で初めて再現することがある**(今回
+実際に踏んだ:REPLでは`OK`、ファイルへ書いて`lake build`したら失敗)。
+**直し方**: `h`を`obtain`で壊さず、`haveI := h.1`・`haveI := h.2.1`
+のように**射影(`.1`/`.2.1`等)をそのまま`haveI`/`have`に渡す**(`h`
+自体は生かしたまま)。これなら`hw`の型が参照している`h`はそのまま
+残るので何も壊れない。`h`の型が`def ... : Prop := ∃ ...`のような
+略記(`IsAlmostEtaleCovering`等)でも、射影記法は定義展開して普通に
+使える。**教訓: REPLでの`OK`は`lake build`の代わりにならない
+(このファイルの「作業効率」条項の通り)——依存する仮説の型が絡む
+局面では特に、最終確認を省略しない。**
+
+**(c) `AlgHom R S`(`R`線形にしか型付けされていない)を`A`-scalar
+(`IsScalarTower A R S`で`R`より"下"にある環)越しに`map_smul`したい
+とき、生の`map_smul`は`MulActionHomClass`探索に失敗する**——`AlgHom`
+は`R`-linearであることしか型に持たないため。`(f : M →ₐ[R] N).
+toLinearMap.map_smul_of_tower (a : A) (x : M)`(`LinearMap.
+map_smul_of_tower`、`IsScalarTower A R M`・`IsScalarTower A R N`を
+使う版)に切り替えると通る。ただし`rw`で直接使おうとすると`(f :
+M→ₐ[R] N) x`(AlgHomのcoe適用)と`f.toLinearMap x`(LinearMapのcoe
+適用)が構文的に一致せずパターンが見つからないことがある——`have hpull
+:= f.toLinearMap.map_smul_of_tower a x`を単独の項として取り出し、
+`rw [show (f x) = a•(f y) from hpull]`のように`show ... from`で
+包んで目的の構文形に揃えてから使うと安定する。
+
+実例: `lean/ABC3/Found/Falt1/AlmostEtale.lean`の
+`diagonalCompare_injective`(a)・`almost_swap_annihilate`(b)・
+`almost_swap_augment`(c)。
