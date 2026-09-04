@@ -271,3 +271,16 @@ locallyOfFiniteType`等のHom集合の極限安定性補題で足りる可能性
 エンジニアリング」である点は変わらない。集計は7/24で変わらず。
 
 コミット: `4d5713fc`(Etale橋渡し + 発見の記録、corrhyp-goal.md)。
+
+★★★★★★★★★★★★★2026-09-04さらに続報(§1が5/5に到達、集計8/24)。
+`Corr`のnonempty脱落を調査中の副産物として、`ModularExample.lean`が
+`.src`を付けずに「正直な限界」として記録していた`Definition 1.2`
+(`Corr.IsTrivial`)を`corrHypInstance4`(`FEt := QcqsFEt`、本物のスキーム
+射の部分型)で非空虚に実現した(`TrivialCorrExample.lean`、
+`X=Y=C=basePt4`・`α=β=γ=idFEt`、★sorry無し)。`corrHypInstance`では
+証明無関係性により`IsTrivial`が任意cで自動的に真になっていたが、
+`QcqsFEt`は一般に`A≠B`間で空にも複数元にもなり得るので非自明な述語
+になる、という構造的な違いによる。これで**§1(Definition 1.1-1.5)が
+5/5に到達**、全体の集計は**7/24→8/24**。
+
+コミット: `04e0d2a3`(TrivialCorrExample.lean、§1完成)。

@@ -802,3 +802,17 @@ Hom集合の安定性)・`exists_hom_comp_eq_comp_of_locallyOfFiniteType`
 ——これらは「見つからない数学の壁」ではなく「まだ組み立てていない
 エンジニアリング」に分類される点は変わらないが、(a)は原典との
 整合性を先に直す必要がある独立した issue として扱う。
+
+### 2026-09-04さらに続報: §1が5/5に到達(`Definition 1.2`を非空虚に実現)
+
+発見1(`Corr`のnonempty脱落)の調査中に見つけた副産物——
+`ModularExample.lean` が `.src` を付けずに「正直な限界」として記録して
+いた `Definition 1.2`(`Corr.IsTrivial`)の未達成を、`corrHypInstance4`
+(`FEt := QcqsFEt`、本物のスキーム射の部分型)で解消した。`corrHypInstance`
+(`FEt := PLift ∘ IsFiniteIndexIn`)では証明無関係性により`IsTrivial`が
+任意のcorrespondenceについて自動的に真になってしまっていたが、
+`QcqsFEt`は本物の射の部分型なので一般には`A≠B`間の`FEt A B`が空にも
+複数元にもなり得、`IsTrivial`はcごとに真偽が変わる非自明な述語になる。
+`X=Y=C=basePt4`・`α=β=γ=idFEt`という最も単純な例で witness し
+(`Found/CorrHyp/TrivialCorrExample.lean`、★sorry無し)、
+§1(Definition 1.1–1.5)が**5/5に到達**。全体の集計は7/24→**8/24**。
