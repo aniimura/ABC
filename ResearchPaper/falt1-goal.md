@@ -749,6 +749,47 @@ mathlib での正確な組み立て方は未確認)。
     両方が揃った——**base change 写像の構成は完全に完成**、残る
     作業は上記の「`π'` が引き続き Eisenstein であることの仮定の
     もとでの多項式の一致」と「フル仮説束の組み立て」のみ。
+
+    ★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、**驚きの単純化と、
+    3c→3b接続の核心が完成した**(commit `2ec2215c`・`865622c8`・
+    `f43ae887`)。実装を進める中で、`adjoinRootTensorEquiv`(テンソル積
+    経由)や `algHomAdjoinRootOfCompat`(フラクション体経由)より
+    **遥かに単純な経路**を発見した:
+
+    1. **`falt1AdjoinRootEquivIntegralClosure`**: `V_1 := integralClosure
+       V0 (AdjoinRoot(X^n-π の base change))` は、実は**base change
+       する前の** `AdjoinRoot(X^n-π)`(`V0[X]` 上そのままの多項式の商)
+       と `V0`-代数として**同型**——`minpoly.equivAdjoin` + monogenicity
+       (`adjoin_eq_integralClosure_of_isEisensteinAt`)を貼り合わせる
+       だけ。★配線上の罠(記録): `PowerBasis` の暗黙引数を伴う定理を
+       裸の `w` に対して呼ぶと高階単一化が `whnf` タイムアウトする
+       ——常に `PB.gen` の形を経由すること。
+    2. **`algHomAdjoinRootOfCompat'`**: (1)のおかげで、`Vₙ→Vₙ₊₁` の
+       橋渡しは **`V0[X]→Wₙ[X]` の底環 base change だけ**(`AdjoinRoot.
+       map` + `AlgHom.mk'`)で済むと判明——フラクション体・
+       `IsFractionRing.map` は一切不要だった。
+    3. **`falt1BaseChangeAlgHom`**: 上記2つを**3段合成**
+       (`V1≃ₐ[V0]AdjoinRoot f → AdjoinRoot f→ₐ[V0]AdjoinRoot g
+       (`g:=f.map(algebraMap V0 Wₙ)`、多項式として `X^n-Cπ'` に等しい)
+       → AdjoinRoot g≃ₐ[Wₙ]Wₙ₊₁`、最後の等式を `AlgHom.restrictScalars
+       V0` で `V0`-線形とみなして繋ぐ)して、**`V1 →ₐ[V0] Wₙ₊₁` の
+       実際の `AlgHom` を構成した**——`differentIdeal_tower_diamond`
+       が要求する `Algebra Vn1 Wn1` インスタンスがこれで手に入る。
+
+    `#print axioms` で全定理 sorry 無し確認、`lake build` 2837/2837
+    成功、`node tools/check.mjs --brief` は新規リグレッション無し。
+    ★★これで **3c→3b 接続の最大の技術的な壁(「同じ生成元を共有する
+    塔をどう構成するか」)を実際に越えた**。残る作業:
+    (a) `falt1BaseChangeAlgHom` の下で生成元の対応(`ψ(w)=x` 相当)を
+    明示的に確認すること、(b) `Module.Finite Wₙ Wₙ₊₁`・
+    `IsScalarTower V0 Wₙ Wₙ₊₁`・`IsScalarTower V0 V1 Wₙ₊₁` 等の残りの
+    instance を(これも `falt1AdjoinRootEquivIntegralClosure` 経由で
+    「`Wₙ₊₁` も結局 `AdjoinRoot` そのもの」という単純化が使えるはず)
+    整備すること、(c) `differentIdeal_tower_diamond` の `hsep`
+    (`Algebra.IsSeparable (FractionRing V0)(FractionRing Wₙ₊₁)`)を
+    示すこと、(d) 最終的に `conductor_mul_differentIdeal` +
+    `cancel_conductor_delta` を実際に適用すること——これで item 3c は
+    技術的な核心を越え、残りは「組み立て」の段階に入った。
    `a9faa64e`)。長さの漸化不等式(上の逐語引用の通り: `δ_n-δ_{n+1}≥
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
