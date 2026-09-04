@@ -1593,3 +1593,40 @@ standardEtale_elem`(今回完成)。残るのはこれらを実際に組み合�
 百行規模の組み立て作業になる見込みで、work unit 2(rigidity)・
 work unit 3(GlueData/glueMorphisms組み立て)と合わせて複数セッションに
 またがる継続タスクとして引き継ぐ。集計は10/24で変わらず。
+
+### 2026-09-04さらに続報: 作業単位3(GlueData組み立て)に着手——候補局所片を実際のスキームとして実現
+
+`ExtLimit.lean`に`standardEtalePairSpecMap`・`standardEtalePairSpecMap_etale`・
+`standardEtalePairPullbackIso`を完成させた(★すべてsorry無し)——`FieldLimit.lean`の
+`exists_fg_subalgebra_tensor_standardEtale_elem`で環として構成できるようになった
+「候補局所片`P₀.Ring`」を、実際に**スキーム**として実現する第一歩。
+
+- `standardEtalePairSpecMap {R} (P : StandardEtalePair R) : Spec P.Ring ⟶ Spec R`
+  ——`c'.C`の候補となる局所片の実体。
+- `standardEtalePairSpecMap_etale`: この射が常にétaleであること
+  ——`HasRingHomProperty.Spec_iff`(mathlib、`AlgebraicGeometry.Etale`が
+  `RingHom.Etale`の`Spec`への持ち上げとして特徴づけられること、この
+  セッションで新たに特定)+`RingHom.etale_algebraMap`+`StandardEtalePair.Ring`
+  に自動で付く`Algebra.Etale`インスタンスから。
+- `standardEtalePairPullbackIso`: 候補局所片`Spec P₀.Ring`を`K`へbase change
+  すると、実際の`K`段階の局所片`Spec P.Ring`(`P := P₀.map(algebraMap R K)`)に
+  **ちょうど一致する**——`pullbackSpecIso`(mathlib、pullbackの計算)と
+  `standardEtalePairRingBaseChange`(既存、環側のbase change)を
+  `Algebra.TensorProduct.comm`で順序を合わせてから合成するだけ。
+
+**位置づけ**: これで「作業単位3(GlueData/glueMorphisms組み立て)」の最初の一手
+——各標準エタール片が実際にスキームとして構成でき、étaleであり、base changeで
+元の`K`段階の局所片に戻ることの3点が保証された。残るのは(i)複数の局所片を
+実際に`GlueData`として貼り合わせる(遷移射・cocycle条件)、(ii)貼り合わせた
+スキームが`X`上でFEt(有限+étale、特に「有限」の部分は未対処——標準エタールは
+étaleだが一般には有限ではない点に注意、properness/有限性は別途要る)であることの
+確認、(iii)work unit 2(rigidity、複数片の一致の検証)、という3段階。
+集計は10/24で変わらず(§4は0/2のまま)。
+
+**新発見(finiteness注意)**: 標準エタール片`Localization.Away(f_i)`はétaleだが
+**有限とは限らない**(局所化+商、properではない)——`FEt`が要求する`IsFinite`は
+GlueDataで貼り合わせた**後**、大域的な性質(properness等)として別途確認する
+必要がある。これは当初のロードマップに暗黙のうちに含まれていたが、今回
+明示的に言語化できた——次のセッションへの引き継ぎ事項として記録。
+
+コミット: `ca88ac3a`(standardEtalePairSpecMap等完成)。
