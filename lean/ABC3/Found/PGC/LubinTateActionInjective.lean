@@ -102,4 +102,45 @@ theorem lubinTateActionAtTorsionPoint_injective_of_eq
       _ = ‖cx‖ := one_mul _
   exact absurd this (lt_irrefl _)
 
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★**`unitActionQuotientLift`
+の単射性**——上の`lubinTateActionAtTorsionPoint_injective_of_eq`を
+`u,v:(𝒪_K)^×`(単数)に適用し、`π^n∣(u-v)`から`u⁻¹*v∈principalUnits
+K π n`(`QuotientGroup.eq`+`mem_principalUnits_iff`+`u⁻¹*u=1`だけの
+純代数計算)を導くだけ。既存の濃度の一致
+(`card_principalUnitsQuotient`=`card_iteratedLubinTatePsiTorsionPoints`、
+`QuotientCardinality.lean`)と合わせれば、この単射写像は有限集合
+`(𝒪_K)^×⧸principalUnits K π n`から同じ濃度の集合への単射——
+すなわち**全単射**であることまであと僅かの距離になった。 -/
+theorem unitActionQuotientLift_injective
+    {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) (x : K.closure)
+    (hxψ : x ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn)
+    (hxn : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))] :
+    Function.Injective (unitActionQuotientLift K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem) := by
+  intro U V
+  induction U using QuotientGroup.induction_on with
+  | H u =>
+    induction V using QuotientGroup.induction_on with
+    | H v =>
+      intro heq
+      rw [unitActionQuotientLift_mk, unitActionQuotientLift_mk] at heq
+      obtain ⟨d, hd⟩ := lubinTateActionAtTorsionPoint_injective_of_eq K hq hπmax hπne0 f hf0 hf1 hf
+        n hn x hxψ hxn hmem (u : 𝒪[K.carrier]) (v : 𝒪[K.carrier]) heq
+      rw [QuotientGroup.eq, mem_principalUnits_iff]
+      have hinv : (↑u⁻¹ * ↑u : 𝒪[K.carrier]) = 1 := by
+        exact_mod_cast u.inv_mul
+      refine ⟨-(d * (↑u⁻¹ : 𝒪[K.carrier])), ?_⟩
+      show (↑u⁻¹ * ↑v : 𝒪[K.carrier]) = 1 + -(d * ↑u⁻¹) * π ^ n
+      linear_combination -(↑u⁻¹ : 𝒪[K.carrier]) * hd + hinv
+
 end ABC3.Found.PGC
