@@ -843,3 +843,58 @@ docstringが自ら明言している)であることに気づいた。`corrHypIn
 有限性の主張として残っている——これらは今回 claim しなかった。
 
 **§1が5/5、§3が2/3、§5が1/7に到達。全体の集計は7/24→10/24。**
+
+### 2026-09-04さらに続報: §2の残り3項目が現状の instance では届かないことを確認
+
+`Definition 1.2`/`3.1`/`5.2` の勢いで §2 の残り(`Proposition 2.4`・
+`Theorem 2.5`・`Theorem 2.6`)も同じ手が使えないか検討し、**使えない**
+ことを確認した(却下の記録)。
+
+- `Proposition 2.4`(`MargulisArithmetic ↔ ShimuraArithmetic`): `corrHypInstance`
+  ではどちらも恒偽なので `False ↔ False` で形式的には閉じるが、これは
+  `Definition 1.2` を却下したのと同じ理由(内容を持たない placeholder 同士の
+  同値)で claim しない。`corrHypInstance2`(`ShimuraArithmetic` が本物、
+  `MargulisArithmetic` は依然恒偽)では `Γ_SL2Z` について
+  `False ↔ True` となり**主張が真に偽**——証明できないのは当然で、
+  `Definition 2.2`(Margulis-arithmetic の本物の構成)が無い限り届かない。
+- `Theorem 2.5`(`Arithmetic ↔ InfinitelyManyCorr`): `Instance.lean` 冒頭の
+  docstring がすでに「この instance では成り立たない」と明言済み
+  (`InfinitelyManyCorr` 側は非自明になりうるため)——今回の探索で追認しただけ。
+- `Theorem 2.6`(有限性): `corrHypInstance` では `Arithmetic` が恒偽なので
+  述語 `type X = gr ∧ Arithmetic Γ` が恒偽になり `S := ∅` で**空虚に**閉じて
+  しまう——これも `Definition 1.2` 却下と同種の退化なので claim しない。
+
+結論: §2 を実際に前進させるには `Definition 2.2`(代数群 `G` の構成)の
+本物の実装が要る——`ShimuraArithmeticData.lean` 自身が「代数群/部分群
+スキームの有限性分類が mathlib に無く人年規模」とすでに記録済みの
+評価を、今回の探索でも覆せなかった(再確認のみ)。
+
+### 2026-09-04さらに続報: §4の「rigidity」の役割を精緻化
+
+`AffineTransitionLimit.lean` の
+`Scheme.exists_hom_hom_comp_eq_comp_of_locallyOfFiniteType` の完全な
+シグネチャを確認した:`D : I ⥤ Scheme`・`t : D ⟶ (Functor.const I).obj S`・
+`f : X ⟶ S`・`c : Cone D`・`hc : IsLimit c` の下で、`a : D.obj i ⟶ X`・
+`b : D.obj j ⟶ X` が「`t` と両立し」かつ「`c` の極限で一致する」なら、
+ある共通の細分段階 `k` で両者が一致する、という主張——**これは
+「スキーム`C`自体を極限の外から貼り合わせる」道具ではなく、「極限の
+頂点上ですでに一致している2つの候補射が、より細かい有限段階で
+すでに一致する」という道具**だと判明した。
+
+つまり `Lemma 4.1` の組み立てにおけるこの補題の役回りは、**貼り合わせの
+初手(`c.C` 自体を有限段階へ降ろす)ではなく、貼り合わせの整合性検査
+(オーバーラップ上で2つの局所モデルが一致することの確認)**である
+——初手は`StandardEtalePair`の道具(`exists_finite_standardEtaleCover`+
+`standardEtalePairRingBaseChange`)がすでに担っている。これで
+「rigidity は既存道具で足りるか」という前回の疑問に、**役割としては
+Yes(ただし貼り合わせ段でのみ使う)**という、より正確な答えが出た。
+
+**次の具体的な一手**(まだ未着手): `exists_extDiagram_finite_affine_descent`
+が返す1つのアフィン片について、`c.α` をその片へ制限した先の
+`Algebra.Etale` 環(`Etale.algebraEtale_appLE`)を
+`exists_finite_standardEtaleCover` で標準エタール片に細分し、各片を
+`standardEtalePairRingBaseChange` で有限段階まで降ろす——この「1片の
+降下」を実際に組み立てるには、`Γ(その片, ...)` が `Γ(有限段階の対応する片,
+...)` の `K` への base change であることを、`isLimit_extCone` の
+Γ(大域切断)版ではなく**任意のアフィン開集合版**として持ち上げる必要が
+あり、まだ書いていない——次のセッションの最初の一手として記録する。

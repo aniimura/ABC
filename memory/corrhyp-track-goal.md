@@ -302,3 +302,19 @@ locallyOfFiniteType`等のHom集合の極限安定性補題で足りる可能性
 
 コミット: `04e0d2a3`(§1完成、既出)・`732953cc`(Definition 3.1)・
 `3f1af6a2`(Definition 5.2)。
+
+★★★★★★★★★★★★★★★2026-09-04さらに続報(§2の残り3項目は届かないと確認
++ §4のrigidityの役割を精緻化)。§2の`Proposition 2.4`/`Theorem 2.5`/
+`Theorem 2.6`も同じ手(placeholder依存)が使えないか検討したが、
+全て却下(Prop 2.4はcorrHypInstance2で真に偽・Thm 2.5はInstance.lean
+既述の通り不成立・Thm 2.6は空虚な退化)——`Definition 2.2`(代数群の
+本物の構成、人年規模と既述)が無い限り§2は届かないと再確認。
+
+§4では`exists_hom_hom_comp_eq_comp_of_locallyOfFiniteType`の完全な
+シグネチャを確認し、その役回りが「c.C自体を極限の外から貼り合わせる」
+道具ではなく「貼り合わせのオーバーラップ整合性検査」用であると判明
+(初手はStandardEtalePairの道具が担う)。次の一手は「1つのアフィン片の
+降下」(`Γ`が有限段階の対応する片のKへのbase changeであることを
+任意のアフィン開集合版として持ち上げる)、まだ未着手。
+
+コミット: `cdea5c8f`(§2却下の記録・rigidity精緻化、corrhyp-goal.md)。
