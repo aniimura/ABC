@@ -9,6 +9,7 @@ import Mathlib.RingTheory.Smooth.Basic
 import Mathlib.RingTheory.Kaehler.TensorProduct
 import Mathlib.LinearAlgebra.TensorProduct.Prod
 import Mathlib.Analysis.SpecificLimits.Basic
+import Mathlib.RingTheory.Polynomial.Eisenstein.Basic
 
 /-!
 # [Falt1] Chapter I §1 の補助補題群(`Found`、sorry 無し)
@@ -1775,5 +1776,57 @@ theorem length_map_pow_of_ramificationIdx {S : Type*} [CommRing S] [IsDomain S] 
   rw [IsDiscreteValuationRing.length_quotient_pow_maximalIdeal]
   push_cast
   ring
+
+/-!
+## Theorem 1.2・3c: 戦略転換——`AdjoinRoot` の整閉性の証明は不要(2026-09-04)
+
+3c(「非常に分岐した」`V_n` 族の構成)で、`Vₙ₊₁ := AdjoinRoot(f)` が
+Eisenstein 性から**既に**整閉であることを証明しようとして、局所化・
+付値延長という mathlib にまだ薄い領域に何度も突き当たった。★戦略を
+転換した: `Vₙ₊₁ := integralClosure Vₙ L` と**定義**すれば、mathlib の
+`integralClosure.isDedekindDomain_fractionRing`(`RingTheory/
+DedekindDomain/IntegralClosure.lean`、**instance**、`L` が
+`FractionRing Vₙ` 上有限分離拡大なら自動的に成立)から整閉性・
+Dedekind性が**タダで手に入る**——`f` の根 `w` が `Vₙ₊₁` を「生成し
+切っているか」は問う必要がない。なぜなら `conductor_mul_
+differentIdeal`(既に完成済み)・`cancel_conductor_delta`(既に完成
+済み)が、その conductor を未知数として追跡できるよう作られている
+から。★「`FractionRing Vₙ` を明示的に使う」ことが鍵(一般の `K`
+with `IsFractionRing Vₙ K` では instance が発火しない——
+tools/lean-idioms.md #23 と同種の罠、実測で確認・回避した)。 -/
+
+theorem coeff_X_pow_sub_C' {R : Type*} [CommRing R] (π : R) (n m : ℕ) (hn : 0 < n) :
+    (Polynomial.X ^ n - Polynomial.C π : Polynomial R).coeff m
+      = if m = n then 1 else if m = 0 then -π else 0 := by
+  simp [Polynomial.coeff_X_pow, Polynomial.coeff_C]
+  split_ifs <;> simp_all
+
+/-- **`X^n - π` は `(π)` が非自乗な素イデアルなら既約**(Eisenstein の
+判定法の直接の帰結)。「非常に分岐した」`V_n` 族の各段(`p` 乗根の
+逐次添加)の生成多項式がこの形——`Vₙ₊₁` を構成する第一歩。 -/
+theorem eisenstein_X_pow_sub_C {R : Type*} [CommRing R] [IsDomain R] (π : R) (n : ℕ) (hn : 0 < n)
+    (hprime : (Ideal.span ({π} : Set R)).IsPrime) (hnotsq : π ∉ (Ideal.span ({π} : Set R))^2) :
+    Irreducible (Polynomial.X ^ n - Polynomial.C π) := by
+  have hmonic : (Polynomial.X ^ n - Polynomial.C π : Polynomial R).Monic :=
+    Polynomial.monic_X_pow_sub_C π hn.ne'
+  have hdeg : (Polynomial.X ^ n - Polynomial.C π : Polynomial R).natDegree = n :=
+    Polynomial.natDegree_X_pow_sub_C
+  have hei : (Polynomial.X ^ n - Polynomial.C π : Polynomial R).IsEisensteinAt (Ideal.span ({π}:Set R)) := by
+    apply hmonic.isEisensteinAt_of_mem_of_notMem
+    · exact hprime.ne_top
+    · intro m hm
+      rw [hdeg] at hm
+      rw [coeff_X_pow_sub_C' π n m hn]
+      have hmn : m ≠ n := by omega
+      simp only [if_neg hmn]
+      split_ifs with h0
+      · simp
+      · simp
+    · rw [coeff_X_pow_sub_C' π n 0 hn]
+      have hn0 : (0:ℕ) ≠ n := by omega
+      simp only [if_neg hn0]
+      simpa using hnotsq
+  refine hei.irreducible hprime hmonic.isPrimitive ?_
+  rw [hdeg]; exact hn
 
 end ABC3.Found.Falt1
