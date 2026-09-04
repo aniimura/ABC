@@ -3634,6 +3634,31 @@ theorem falt1_differentIdeal_tower_length {A B C : Type*} [CommRing A] [IsDomain
   exact ABC3.Found.Falt1.falt1_length_quotient_mul_of_ne_zero (differentIdeal B C)
     (Ideal.map (algebraMap B C) (differentIdeal A B)) hne
 
+/-- **`falt1_differentIdeal_tower_length` を「`Ideal.map(...)`の項が別の
+イデアル`E`の長さと既に一致することが分かっている」場合に特化した版**:
+`hlen_eq`(`cancel_conductor_delta`経由で確立される長さの等式、典型的には
+`E := differentIdeal Vₙ₁ Wₙ₊₁`)を渡すだけで、`differentIdeal`だけで
+書かれた閉じた式が出る。抽象的な型変数のまま(具体的な`integralClosure`
+式を経由しない)なので、シグネチャの elaboration が高速——具体的な
+Falt1 の `Wₙ₊₁` への適用は呼び出し側(証明の中、`Wₙ₊₁`が`set`で略記
+された文脈)で行うことを想定している。 -/
+theorem falt1_differentIdeal_tower_length_via_hlen_eq
+    {A B C : Type*} [CommRing A] [IsDomain A] [IsIntegrallyClosed A]
+    [CommRing B] [IsDedekindDomain B] [Algebra A B]
+    [CommRing C] [IsDedekindDomain C] [IsPrincipalIdealRing C]
+    [Algebra B C] [Algebra A C] [IsScalarTower A B C]
+    [Module.IsTorsionFree A B] [Module.IsTorsionFree A C] [Module.IsTorsionFree B C]
+    [Module.Finite A B] [Module.Finite A C] [Module.Finite B C]
+    (hsep : @Algebra.IsSeparable (FractionRing A) (FractionRing C) _ _ (FractionRing.liftAlgebra A (FractionRing C)))
+    (hne : differentIdeal B C ≠ 0)
+    (E : Ideal C)
+    (hlen_eq : Module.length C (C ⧸ Ideal.map (algebraMap B C) (differentIdeal A B)) = Module.length C (C ⧸ E)) :
+    Module.length C (C ⧸ differentIdeal A C) =
+      Module.length C (C ⧸ differentIdeal B C) + Module.length C (C ⧸ E) := by
+  have h := ABC3.Found.Falt1.falt1_differentIdeal_tower_length hsep hne
+  rw [hlen_eq] at h
+  exact h
+
 set_option maxHeartbeats 3000000 in
 set_option synthInstance.maxHeartbeats 3000000 in
 /-- **Theorem 1.2・item 3c の中核道具の完全な組み立て**:
