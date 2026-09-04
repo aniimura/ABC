@@ -1131,54 +1131,104 @@ theorem exists_transitionIso_finset {X : Scheme} {U : X.Opens} (f₁ : Γ(X, U))
       ((X.basicOpen (f₁ * s.prod g) : Scheme) ≅ (Z.basicOpen s' : Scheme)) :=
   exists_transitionIso f₁ (s.prod g) e
 
+/-- **遷移射の座標を`Classical.choice`を経由せず直接の式として定義する**
+——`e.inv`・`topIso.inv`・制限写像という3つの環準同型の合成を`f₂`に
+適用するだけ。`Classical.choice`の不透明性を経由しないので、乗法性等の
+代数的性質を自由に示せるようになる(`t'`の構成に必須)。`GlueData`の族
+`f`・`Z`・`e`を導入する前に、単体の`X`・`U`・`Z`・`e`について自己完結的に
+定義しておく(`exists_transitionIso`と同じ流儀)——族の`f`・`Z`・`e`との
+名前衝突を避けるため。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def transitionElem {X : Scheme} {U : X.Opens} (f₁ f₂ : Γ(X, U))
+    {Z : Scheme} (e : (X.basicOpen f₁ : Scheme) ≅ Z) : Γ(Z, ⊤) :=
+  e.inv.app ⊤ ((X.basicOpen f₁).topIso.inv (X.presheaf.map (homOfLE (X.basicOpen_le f₁)).op f₂))
+
+/-- **`transitionElem`の乗法性**——3つの環準同型の合成が乗法的である
+ことから`map_mul`を3回適用するだけ。`t'`(3重の重なり)の構成の核心。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem transitionElem_mul {X : Scheme} {U : X.Opens} (f₁ f₂ f₃ : Γ(X, U))
+    {Z : Scheme} (e : (X.basicOpen f₁ : Scheme) ≅ Z) :
+    transitionElem f₁ (f₂ * f₃) e = transitionElem f₁ f₂ e * transitionElem f₁ f₃ e := by
+  unfold transitionElem
+  rw [map_mul, map_mul, map_mul]
+  rfl
+
+/-- **`transitionElem`が満たす精密な等式**——`exists_transitionOpen_eq_
+basicOpen`の証明をそのまま`transitionElem`について直接示したもの(存在
+命題を経由しない)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem transitionElem_basicOpen_eq {X : Scheme} {U : X.Opens} (f₁ f₂ : Γ(X, U))
+    {Z : Scheme} (e : (X.basicOpen f₁ : Scheme) ≅ Z) :
+    (X.basicOpen f₁).ι ''ᵁ ((X.basicOpen f₁).toScheme.basicOpen
+        ((X.basicOpen f₁).topIso.inv (X.presheaf.map (homOfLE (X.basicOpen_le f₁)).op f₂)))
+      = X.basicOpen (f₁ * f₂) ∧
+    e.hom ''ᵁ ((X.basicOpen f₁).toScheme.basicOpen
+        ((X.basicOpen f₁).topIso.inv (X.presheaf.map (homOfLE (X.basicOpen_le f₁)).op f₂)))
+      = Z.basicOpen (transitionElem f₁ f₂ e) := by
+  unfold transitionElem
+  refine ⟨?_, ?_⟩
+  · rw [Scheme.Opens.ι_image_basicOpen_topIso_inv, Scheme.basicOpen_res, Scheme.basicOpen_mul]
+  · rw [Scheme.hom_image_iso_eq_inv_preimage, Scheme.preimage_basicOpen]
+    rfl
+
+/-- **`transitionElem`版の遷移同型**——`X.basicOpen(f₁·g) ≅ Z.basicOpen
+(transitionElem f₁ g e)`。`exists_transitionIso`の`transitionElem`版。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def transitionElemIso {X : Scheme} {U : X.Opens} (f₁ g : Γ(X, U))
+    {Z : Scheme} (e : (X.basicOpen f₁ : Scheme) ≅ Z) :
+    (X.basicOpen (f₁ * g) : Scheme) ≅ (Z.basicOpen (transitionElem f₁ g e) : Scheme) := by
+  have h1 := (transitionElem_basicOpen_eq f₁ g e).1
+  have h2 := (transitionElem_basicOpen_eq f₁ g e).2
+  set W := (X.basicOpen f₁).toScheme.basicOpen
+    ((X.basicOpen f₁).topIso.inv (X.presheaf.map (homOfLE (X.basicOpen_le f₁)).op g))
+    with hW
+  have iso1 : (W : Scheme) ≅ (X.basicOpen (f₁ * g) : Scheme) :=
+    ((X.basicOpen f₁).ι.isoImage W).trans (eqToIso (by rw [h1]))
+  have iso2 : (W : Scheme) ≅ (Z.basicOpen (transitionElem f₁ g e) : Scheme) :=
+    (e.hom.isoImage W).trans (eqToIso (by rw [h2]))
+  exact iso1.symm.trans iso2
+
 /-! ## `Scheme.GlueData`の配線——作業単位3の最終段
 
-これまで積み上げた部品(`piece_descends_iso`・`exists_transitionIso`)を
-使って、`CategoryTheory.GlueData`の12フィールドのうち、まず**対象レベルの
-データ**(`V`・`f`・`t`)を組み立てる。数学的な核心はすべて完成しているので、
-残りは純粋な配線(`f_mono`・`f_hasPullback`・`f_id`は`basicOpen`の`.ι`が
-標準的に持つ性質から自動、`t_id`・`t_fac`・`cocycle`は`Classical.choice`で
-選んだ項の一致性の確認という、より技術的な段——次の一手として残す)。 -/
+これまで積み上げた部品(`piece_descends_iso`・`exists_transitionIso`・
+`transitionElem`)を使って、`CategoryTheory.GlueData`の12フィールドの
+うち、まず**対象レベルのデータ**(`V`・`f`・`t`・`t'`)を組み立てる。
+数学的な核心はすべて完成しているので、残りは純粋な配線(`f_mono`・
+`f_hasPullback`・`f_id`は`basicOpen`の`.ι`が標準的に持つ性質から自動、
+`t_id`は`gdT`が対角成分で打ち消し合うことから、`t'`は`transitionElem`の
+乗法性から構成できる)。残る`t_fac`・`cocycle`は次の一手として残す。 -/
 
 variable {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U)) (Z : J → Scheme)
   (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i)
 
-/-! ★訂正(2026-09-04): `gdV`・`gdF`・`gdT`は当初`exists_transitionIso`
-(`Nonempty`で包んだ弱い実存)を使って定義していたが、これだと`f_id`
-(対角成分`i=j`が同型であること)の証明に要る「選ばれた座標`s`が単元で
-ある」という事実を、`Classical.choice`の不透明性のせいで`.choose`から
-引き出せないと判明した——`Nonempty`へ包む段階で「`e.hom''ᵁW = Z.basicOpen
-s`」という**精密な等式**が失われてしまうため。修正: `exists_transitionIso`
-ではなく、その等式をそのまま保持する`exists_transitionOpen_eq_basicOpen`
-の`.choose`を直接使うように定義し直した——`.choose_spec`から常に精密な
-等式が引けるので、`f_id`はもちろんのこと`t_id`・`f_mono`等すべて
-同じ`.choose`から一貫して証明できる。 -/
-
 /-- 重なりの候補片(`V(i,j)`)——`i`側の候補片`Z i`の中の、`j`との重なりに
-対応する基本開集合。`exists_transitionOpen_eq_basicOpen`が与える
-`Classical.choice`の選択項をそのまま使う。 -/
+対応する基本開集合。`transitionElem`をそのまま使う。 -/
 noncomputable def gdV (p : J × J) : Scheme :=
-  (Z p.1).basicOpen (exists_transitionOpen_eq_basicOpen (f p.1) (f p.2) (e p.1)).choose
+  (Z p.1).basicOpen (transitionElem (f p.1) (f p.2) (e p.1))
 
 /-- `V(i,j) ⟶ U i`——基本開集合の標準的な開埋め込み`.ι`。 -/
 noncomputable def gdF (i j : J) : gdV f Z e (i, j) ⟶ Z i :=
-  ((Z i).basicOpen (exists_transitionOpen_eq_basicOpen (f i) (f j) (e i)).choose).ι
+  ((Z i).basicOpen (transitionElem (f i) (f j) (e i))).ι
 
-/-- **遷移射`t(i,j) : V(i,j) ≅ V(j,i)`**——`exists_transitionOpen_eq_
-basicOpen`の`.choose_spec`(精密な等式)を`i`側・`j`側それぞれで使い、
-`isoImage`(開埋め込みの制限が同型)+`eqToIso`で組み立てた2つの同型を、
-`X.basicOpen(f_i·f_j) = X.basicOpen(f_j·f_i)`(可換環の乗法の可換性)で
-繋ぐ。GlueDataの遷移射そのもの。
+/-- **遷移射`t(i,j) : V(i,j) ≅ V(j,i)`**——`transitionElem_basicOpen_eq`
+(精密な等式)を`i`側・`j`側それぞれで使い、`isoImage`(開埋め込みの制限が
+同型)+`eqToIso`で組み立てた2つの同型を、`X.basicOpen(f_i·f_j) =
+X.basicOpen(f_j·f_i)`(可換環の乗法の可換性)で繋ぐ。GlueDataの遷移射
+そのもの。
 
 ★**sorry 無し**。標準3公理のみ。`let`(`obtain`ではなく)で`.choose_spec`
-を束縛しているのが鍵——`obtain`(内部で`And.rec`を生成)だと後で`unfold`
-しても`rec`が簡約されずスタックするが、`let`+`.1`/`.2`射影なら
-`unfold`後に`simp`で素直に簡約できる(`tools/lean-idioms.md`に追記予定)。 -/
+相当の等式を束縛しているのが鍵——`obtain`(内部で`And.rec`を生成)だと
+後で`unfold`しても`rec`が簡約されずスタックするが、`let`+`.1`/`.2`射影
+なら`unfold`後に`simp`で素直に簡約できる(`tools/lean-idioms.md` #29)。 -/
 noncomputable def gdT (i j : J) : gdV f Z e (i, j) ≅ gdV f Z e (j, i) :=
-  let h1i := (exists_transitionOpen_eq_basicOpen (f i) (f j) (e i)).choose_spec.1
-  let h2i := (exists_transitionOpen_eq_basicOpen (f i) (f j) (e i)).choose_spec.2
-  let h1j := (exists_transitionOpen_eq_basicOpen (f j) (f i) (e j)).choose_spec.1
-  let h2j := (exists_transitionOpen_eq_basicOpen (f j) (f i) (e j)).choose_spec.2
+  let h1i := (transitionElem_basicOpen_eq (f i) (f j) (e i)).1
+  let h2i := (transitionElem_basicOpen_eq (f i) (f j) (e i)).2
+  let h1j := (transitionElem_basicOpen_eq (f j) (f i) (e j)).1
+  let h2j := (transitionElem_basicOpen_eq (f j) (f i) (e j)).2
   let Wi := (X.basicOpen (f i)).toScheme.basicOpen
     ((X.basicOpen (f i)).topIso.inv (X.presheaf.map (homOfLE (X.basicOpen_le (f i))).op (f j)))
   let Wj := (X.basicOpen (f j)).toScheme.basicOpen
@@ -1212,15 +1262,13 @@ GlueDataの`f_mono`フィールド。
 
 ★**sorry 無し**。標準3公理のみ。 -/
 theorem gdF_mono (i j : J) : Mono (gdF f Z e i j) :=
-  inferInstanceAs (Mono
-    (((Z i).basicOpen (exists_transitionOpen_eq_basicOpen (f i) (f j) (e i)).choose).ι))
+  inferInstanceAs (Mono (((Z i).basicOpen (transitionElem (f i) (f j) (e i))).ι))
 
 /-- `gdF`は常に開埋め込み——GlueDataの`f_open`フィールド。
 
 ★**sorry 無し**。標準3公理のみ。 -/
 theorem gdF_isOpenImmersion (i j : J) : IsOpenImmersion (gdF f Z e i j) :=
-  inferInstanceAs (IsOpenImmersion
-    (((Z i).basicOpen (exists_transitionOpen_eq_basicOpen (f i) (f j) (e i)).choose).ι))
+  inferInstanceAs (IsOpenImmersion (((Z i).basicOpen (transitionElem (f i) (f j) (e i))).ι))
 
 /-- `gdF i j`と`gdF i k`はpullbackを持つ(開埋め込みの一般的性質)——
 GlueDataの`f_hasPullback`フィールド。
@@ -1250,8 +1298,8 @@ theorem isIso_ι_of_eq_top {X : Scheme} (V : X.Opens) (h : V = ⊤) : IsIso V.ι
 
 ★**sorry 無し**。標準3公理のみ。 -/
 theorem gdV_diag_eq_top (i : J) :
-    (Z i).basicOpen (exists_transitionOpen_eq_basicOpen (f i) (f i) (e i)).choose = ⊤ := by
-  have h2 := ((exists_transitionOpen_eq_basicOpen (f i) (f i) (e i)).choose_spec).2
+    (Z i).basicOpen (transitionElem (f i) (f i) (e i)) = ⊤ := by
+  have h2 := (transitionElem_basicOpen_eq (f i) (f i) (e i)).2
   have hunit : IsUnit (X.presheaf.map (homOfLE (X.basicOpen_le (f i))).op (f i)) :=
     AlgebraicGeometry.RingedSpace.isUnit_res_basicOpen X.toRingedSpace (f i)
   have hWtop : (X.basicOpen (f i)).toScheme.basicOpen
@@ -1262,20 +1310,59 @@ theorem gdV_diag_eq_top (i : J) :
 
 /-- **`f_id`の完成**——`gdF`の対角成分(`i=i`)は同型。`gdV_diag_eq_top`
 (候補片の対角成分が`⊤`であること)+`isIso_ι_of_eq_top`から直ちに従う。
-これで`Scheme.GlueData`の`f_mono`・`f_hasPullback`・`f_id`・`f_open`・
-`t_id`と対象レベルのデータ(`J`・`U`・`V`・`f`・`t`)がすべて完成した。
 
 ★**sorry 無し**。標準3公理のみ。 -/
 theorem gdF_id (i : J) : IsIso (gdF f Z e i i) := by
-  show IsIso ((Z i).basicOpen
-    (exists_transitionOpen_eq_basicOpen (f i) (f i) (e i)).choose).ι
+  show IsIso ((Z i).basicOpen (transitionElem (f i) (f i) (e i))).ι
   exact isIso_ι_of_eq_top _ (gdV_diag_eq_top f Z e i)
 
-/- ★★次の一手(未着手): 残る`t'`(`exists_transitionIso_finset`から、
-3重の重なりも同じ手筋で構成できるはず)・`t_fac`・`cocycle`(選択項の
-一致性の確認)を埋めて`Scheme.GlueData`を完成させる。その後`GD.glued`が
-`C`(または`Ext`後に`C`)に同型であることを、`C`自身の`OpenCover`の
-`gluedCover`との比較で示す——`Lemma 4.1`の`c'.C`の実体。
+/-- **候補片内の重なり(`pullback(gdF i j, gdF i k)`)は基本開集合として
+実現できる**——`pullback U.ι V.ι ≅ U⊓V`(`isPullback_opens_inf`)+
+`transitionElem_mul`(逆向き、`basicOpen_mul`と組み合わせて`⊓`を単一の
+`basicOpen`にまとめる)。`t'`の構成の核心部品。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def gdVpullbackIso (i j k : J) :
+    pullback (gdF f Z e i j) (gdF f Z e i k) ≅
+      (Z i).basicOpen (transitionElem (f i) (f j * f k) (e i)) := by
+  have hpb : pullback (gdF f Z e i j) (gdF f Z e i k) ≅
+      (((Z i).basicOpen (transitionElem (f i) (f j) (e i))) ⊓
+        ((Z i).basicOpen (transitionElem (f i) (f k) (e i))) : (Z i).Opens) := by
+    unfold gdF
+    exact (isPullback_opens_inf _ _).isoPullback.symm
+  have heq : (((Z i).basicOpen (transitionElem (f i) (f j) (e i))) ⊓
+        ((Z i).basicOpen (transitionElem (f i) (f k) (e i))) : (Z i).Opens) =
+      (Z i).basicOpen (transitionElem (f i) (f j * f k) (e i)) := by
+    rw [transitionElem_mul, Scheme.basicOpen_mul]
+  exact hpb.trans ((Z i).isoOfEq heq)
+
+/-- **`t'(i,j,k) : pullback(f i j, f i k) ≅ pullback(f j k, f j i)`
+——GlueDataの`t'`フィールドそのもの**。`gdVpullbackIso`(候補片内の重なり
+を基本開集合として実現)+`transitionElemIso`(基本開集合を`X`の対応する
+基本開集合に戻す)+乗法の可換性・結合性(`ring`)で`i`側・`j`側を橋渡し
+する。3重の重なりに新しい数学的内容は不要——`transitionElem`が任意の
+積を受け付けることから`exists_transitionIso_finset`で確認したとおり。
+
+これで`Scheme.GlueData`の12フィールド中11個
+(`J・U・V・f・t・t_id・f_mono・f_open・f_hasPullback・f_id・t'`)が
+完成した。残るのは`t_fac`・`cocycle`(`t'`が満たす2つの可換性の等式)
+のみ。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def gdT' (i j k : J) :
+    pullback (gdF f Z e i j) (gdF f Z e i k) ≅ pullback (gdF f Z e j k) (gdF f Z e j i) :=
+  (gdVpullbackIso f Z e i j k).trans <|
+    (transitionElemIso (f i) (f j * f k) (e i)).symm.trans <|
+    (X.isoOfEq (by rw [show f i * (f j * f k) = f j * (f k * f i) by ring])).trans <|
+    (transitionElemIso (f j) (f k * f i) (e j)).trans (gdVpullbackIso f Z e j k i).symm
+
+/- ★★次の一手(未着手): 残る`t_fac`(`t' i j k ≫ pullback.snd(f j k,f j i)
+= pullback.fst(f i j,f i k) ≫ t i j`)・`cocycle`(`t' i j k ≫ t' j k i ≫
+t' k i j = 𝟙`)を埋めて`Scheme.GlueData`を完成させる。両方とも`gdT'`・
+`gdT`を定義する`isoImage`/`eqToIso`の塔が正しく合成することの検証
+(新しい数学は不要、`gdT_id`と同様の`simp`主体の計算になるはず)。その後
+`GD.glued`が`C`(または`Ext`後に`C`)に同型であることを、`C`自身の
+`OpenCover`の`gluedCover`との比較で示す——`Lemma 4.1`の`c'.C`の実体。
 `corrhyp-goal.md`に記録。 -/
 
 end ABC3.Found.CorrHyp
