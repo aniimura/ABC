@@ -2837,3 +2837,56 @@ K.carrier)→CompatibleUnits`(または`unitReductionEquiv`経由で
 `reciprocityMapLimit`本体の構成には、`n=0`(あるいは`hn:1≤n`の境界)
 の扱い(`reciprocityMap`は`hn:1≤n`を要求するため`n=0`成分は別扱いが
 要る見込み)を最初に決める必要がある。
+
+## 続報(2026-09-05、★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+大きな節目——(ii)`reciprocityMapLimit : Gal(K.closure/K.carrier)→*
+CompatibleUnits K hπmax`を**群準同型として完成**、`Found/PGC/LubinTate
+ReciprocityMapLimit.lean`新規、commit済み)
+
+節目(5)の最終組み立て、部品(ii)が完成した。既に確立済みの部品
+(`reciprocityMapLimitCompat`・`psiGenSeq`・`principalUnitsQuotient
+Equiv_apply_mk`/`_map_eq`・`reciprocityMap_mul`/`_one`)を実際に
+組み合わせるだけで、**新しい数学的な難所は無かった**——今回の作業は
+「部品を繋ぐ配管」に徹した。
+
+### 構成の骨格
+
+1. `reciprocityMapLimitFamily σ n`: `n=0`は自明群`(𝒪_K/π^0)^×`
+   (`π^0=1`から`Ideal.span{1}=⊤`、`R⧸⊤`は`Subsingleton`)への`1`、
+   `n=m+1`は`psiGenSeq m`(level`m+1`の生成元)上で評価した
+   `reciprocityMap`を`principalUnitsQuotientEquiv`で落としたもの。
+   ★逸脱として記録: 原典は暗黙に`n≥1`だけを扱うが、`CompatibleUnits`
+   の台が`∀n:ℕ,...`である以上`n=0`成分を明示的に決める必要があった
+   ——後続の証明に影響しないので軽微な逸脱として扱う。
+2. `reciprocityMapLimitFamily_step`(隣接するnの間の両立性):
+   `n=0`は自明群どうしなので`Subsingleton.elim`、`n=m+1`は
+   `principalUnitsQuotientEquiv_map_eq`+`reciprocityMapLimitCompat`
+   の合成。★踏んだ小さな罠: `reciprocityMapLimitCompat`は生成元を
+   `psiGenStepResult m (psiGenSeq m)`という形で参照するが、
+   `reciprocityMapLimitFamily`は`psiGenSeq (m+1)`という形で参照する
+   ——両者は`rfl`で一致する(`psiGenSeq`の定義から)が、`rw`は構文的
+   一致しか見ないため素通りする。**`rw`ではなく`congrArg`(defeq
+   チェックで通る)を使う**ことで解決した。
+3. `compatible_of_succ`(汎用補題、`unitReductionTransition`に限らず
+   再利用できる形): ℕ添字付き族の遷移写像`tr`が合成規則・恒等規則
+   を満たし、隣接する添字の間で両立系と両立するなら、**任意の
+   `m≤n`**についても両立する——`Nat.le_induction`で直ちに従う。
+   `unitReductionTransition`自身の合成規則(`unitReductionTransition_
+   trans`)・恒等規則(`unitReductionTransition_refl`)は
+   `Ideal.Quotient.factor_mk`だけから素直に示せた(新しい罠無し)。
+4. `reciprocityMapLimitFamily_one`/`_mul`: `principalUnitsQuotient
+   Equiv`が`MulEquiv`(`map_one`/`map_mul`を自動的に持つ)であること
+   と、既出の`reciprocityMap_one`/`reciprocityMap_mul`を組み合わせる
+   だけ。
+5. `reciprocityMapLimit`: 上記すべてを束ねた`MonoidHom`
+   (`toFun`・`map_one'`・`map_mul'`)。
+
+`lake build ABC3`(6590 jobs)・`node tools/check.mjs --brief`(既存NG
+13件のまま)・`node tools/mojibake.mjs`(文字化けなし)すべて確認済み。
+
+★★★★★これで節目(5)の(i)(ii)が**完全に**完成した。残るのは
+(iii)`reciprocityMapLimit`の全射性・単射性のみ。単射性は
+`reciprocityMap`自体の単射性(各レベル`n`での`Gal(K.closure/K.carrier)
+→(𝒪_K)^×⧸principalUnits(n)`の単射性、まだ未確認)が前提になる見込み
+——次に戻るならここ(まず`reciprocityMap`自体の単射性の有無を
+`.cache/decl-index.txt`で確認するところから)が具体的な出発点。

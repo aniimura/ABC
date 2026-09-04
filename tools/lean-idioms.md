@@ -4038,3 +4038,42 @@ mathlib補題への直接適用**で起きる新しい失敗形。`set S0 := <�
 `descendPieceR_reBaseMap`(`algebraMap`をそれぞれ1回だけ確定させた
 独立`def`)・`descendPieceR_iso`(それらの名前だけを参照して
 `pullbackSpecIso`を適用)、コミット`65fd0a77`。
+
+## 37. 「別の構造体経由の表現」と「直接の表現」が`rfl`で一致する
+ときは、`rw`ではなく`congrArg`/`exact`(defeqチェック)で橋渡しする
+(2026-09-05)
+
+**症状**: `PsiGenStepResult`(`#34`で導入した、`Classical.choice`由来の
+中間構造体)の`.pt`フィールド経由で書かれた既存の定理(例:
+`reciprocityMapLimitCompat`)を、`psiGenSeq (m+1)`という**別の(だが
+定義から`rfl`で一致する)**表現で書かれた新しいゴールに`rw`で適用
+しようとすると、
+```
+Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  ...(psiGenStepResult K...m (psiGenSeq K...m)).pt...
+in the target expression
+  ...(psiGenSeq K...(m+1)).pt...
+```
+で失敗する。`rw`(`kabstract`)は**構文的な一致**しか見ないため、両者が
+`rfl`で等しいという事実(`psiGenSeq`の定義展開だけで従う、`#34`で
+既に確認済みの事実)を素通りしてしまう。
+
+**直し方**: その箇所だけ`rw`ではなく、ゴールの形に**すでに一致する
+型**を持つ項として引用する——`exact 定理名 引数...`、または(ゴールが
+`f (…左辺…) = f (…右辺…)`のように**片側の関数適用として**書ける
+場合は`congrArg f (定理名 引数...)`。どちらも`isDefEq`(kernelの
+defeqチェック)で照合するため、構文的な一致は不要——`psiGenStepResult`
+経由の型と`psiGenSeq`経由の型が(`rfl`で)同じである限り、そのまま
+通る。今回は後者(`congrArg (principalUnitsQuotientEquiv K hπmax
+(m+1) _)`で`reciprocityMapLimitCompat`を橋渡し)で解決した。
+
+**教訓の一般化**: `#34`が教えた「個々の射影は`rfl`で軽いが、複数の
+射影を組み合わせた**独立な型注釈**との照合は別問題として重い」と
+表裏一体——今回は逆に、**個々の射影が`rfl`で一致する**という事実を
+`rw`(構文照合)ではなく`exact`/`congrArg`(defeq照合)に**乗せ換える
+だけ**で、新しい罠を踏むことなく橋渡しできた。`rw`で詰まったら、
+まず「両辺は本当に`rfl`で一致するはずでは?」と疑い、`exact`/
+`congrArg`に持ち替えてみるのが低コストな次の一手になる。
+
+実例: `lean/ABC3/Found/PGC/LubinTateReciprocityMapLimit.lean`の
+`reciprocityMapLimitFamily_step`(`m+1`の場合)。
