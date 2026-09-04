@@ -175,24 +175,130 @@ noncomputable def extDiagramToSpecK (X : Over BaseK) : extDiagram X ⟶ toScheme
       pullback.snd X.hom (toSchemeDiagramOver.obj R).hom ≫ (toSchemeDiagramOver.map h).left
     exact extDiagram_map_snd h
 
-/- ★★次の一手(未着手): `extDiagram X` の頂点 `Limits.pullback X.hom toBaseK`
-(= `(Ext X).left`)が極限であることを示す——`isLimit_specKCone` の
-`lift`/`fac`/`uniq` を土台に(`isLimit_specKConeOver` と同じ直接構成の
-パターン)、`s : Cone (extDiagram X)` の頂点から `X.left` への射と `specK`
-への射を `pullback.lift` で束ねる。**この `Cone` 自体を作る段**(頂点
-`pullback X.hom toBaseK` からの `π` を `Cone` の `naturality` フィールドに
-直接埋める段)で、`extDiagram_map_snd`/`extDiagramToSpecK` を独立に作った
-のと同じ配管(`Functor.const` で包まれた goal の中で `𝟙 pt`/`(specKCone
-ℚ ℝ).π.app R` 等の項の型が食い違う)に**複数箇所で**当たり、
-`set_option backward.isDefEq.respectTransparency false` を足しても
-(場所によっては)解消しなかった——今回は保留、`corrhyp-goal.md` に記録。
-`Cone.postcompose`/`Cones.postcompose`(`NatTrans` を経由して `Cone` を
-変換する mathlib の道具)を使えば `extDiagramToSpecK` から `Cone
-(toSchemeDiagram ℚ ℝ)` を自動的に作れることは確認済み
-(`(Cones.postcompose (extDiagramToSpecK X)).obj s` が期待通りに `rfl`
-で計算できることを確認)——次に戻るときは、頂点側の `Cone` も同様に
-`Cone.postcompose`/`NatTrans` 経由で組む方向で試すとよい。閉じれば
-`FieldLimit.lean` の `standardEtalePairRingBaseChange`(環側の base change)
-と合わせて `Lemma 4.1` の構成的降下に必要な道具が完全に揃う。 -/
+/-- `(extDiagram X).map h` を `pullback.fst` と合成した式の naturality——
+`extDiagram_map_snd` の fst 版。標準射影 `𝟙 X.left` 側は `Category.comp_id`
+一発で閉じる。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem extDiagram_map_fst {X : Over BaseK} {R S : (FgSubalgebra ℚ ℝ)ᵒᵖ} (h : R ⟶ S) :
+    (extDiagram X).map h ≫ pullback.fst X.hom (toSchemeDiagramOver.obj S).hom =
+      pullback.fst X.hom (toSchemeDiagramOver.obj R).hom := by
+  simp only [extDiagram]
+  rw [pullback.lift_fst, Category.comp_id]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **`extDiagram X` の頂点候補 `Limits.pullback X.hom toBaseK`(= `(Ext X).left`)
+への `π`**——`specKCone ℚ ℝ` の各射影を `pullback.map` で `X.hom` に沿って
+base change したもの。前段(`auxCone2`/`extConePi` の失敗した試み)との違い:
+`𝟙 pt`・`(extDiagram X).map h` 等を `set ... with h...` で**先に名前を
+つけてから**扱うと、`Category.assoc`/`pullback.lift_fst`/`pullback.lift_snd`
+が「型が合わない」を起こさずに済む——`Functor.const` の配管(第22項)を
+避けるだけでなく、この「`set` で名前を固定してから計算する」こと自体が
+鍵だった(`tools/lean-idioms.md` に追記予定)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def extConePi (X : Over BaseK) :
+    (Functor.const (FgSubalgebra ℚ ℝ)ᵒᵖ).obj (Limits.pullback X.hom toBaseK) ⟶ extDiagram X where
+  app R := Limits.pullback.map X.hom toBaseK X.hom (toSchemeDiagramOver.obj R).hom
+      (𝟙 X.left) ((specKCone ℚ ℝ).π.app R) (𝟙 BaseK) (by simp)
+      (by rw [Category.comp_id]; exact (specKConeOver.π.app R).w.symm)
+  naturality R S h := by
+    simp only [Functor.const_obj_map]
+    set mR := Limits.pullback.map X.hom toBaseK X.hom (toSchemeDiagramOver.obj R).hom
+      (𝟙 X.left) ((specKCone ℚ ℝ).π.app R) (𝟙 BaseK) (by simp)
+      (by rw [Category.comp_id]; exact (specKConeOver.π.app R).w.symm) with hmR
+    set mS := Limits.pullback.map X.hom toBaseK X.hom (toSchemeDiagramOver.obj S).hom
+      (𝟙 X.left) ((specKCone ℚ ℝ).π.app S) (𝟙 BaseK) (by simp)
+      (by rw [Category.comp_id]; exact (specKConeOver.π.app S).w.symm) with hmS
+    show 𝟙 (Limits.pullback X.hom toBaseK) ≫ mS = mR ≫ (extDiagram X).map h
+    rw [Category.id_comp]
+    have hRfst : mR ≫ pullback.fst X.hom (toSchemeDiagramOver.obj R).hom = pullback.fst X.hom toBaseK := by
+      rw [hmR]; unfold Limits.pullback.map; rw [pullback.lift_fst, Category.comp_id]
+    have hSfst : mS ≫ pullback.fst X.hom (toSchemeDiagramOver.obj S).hom = pullback.fst X.hom toBaseK := by
+      rw [hmS]; unfold Limits.pullback.map; rw [pullback.lift_fst, Category.comp_id]
+    have hRsnd : mR ≫ pullback.snd X.hom (toSchemeDiagramOver.obj R).hom =
+        pullback.snd X.hom toBaseK ≫ (specKCone ℚ ℝ).π.app R := by
+      rw [hmR]; unfold Limits.pullback.map; rw [pullback.lift_snd]
+    have hSsnd : mS ≫ pullback.snd X.hom (toSchemeDiagramOver.obj S).hom =
+        pullback.snd X.hom toBaseK ≫ (specKCone ℚ ℝ).π.app S := by
+      rw [hmS]; unfold Limits.pullback.map; rw [pullback.lift_snd]
+    have key : (specKCone ℚ ℝ).π.app R ≫ (toSchemeDiagramOver.map h).left =
+        (specKCone ℚ ℝ).π.app S := by
+      have h2 := congrArg Over.Hom.left (specKConeOver.π.naturality h)
+      simp only [Functor.const_obj_map, Over.comp_left, Over.id_left] at h2
+      exact h2.symm
+    simp only [extDiagram]
+    apply pullback.hom_ext
+    · conv_rhs => rw [Category.assoc, pullback.lift_fst]
+      rw [Category.comp_id, hSfst, hRfst]
+    · conv_rhs => rw [Category.assoc, pullback.lift_snd]
+      rw [← Category.assoc, hRsnd, Category.assoc, key, hSsnd]
+
+/-- **`extDiagram X` の頂点候補**——`(Ext X).left` を頂点とする
+`Cone (extDiagram X)`。`extConePi` により `π` は完成しているので、あとは
+これが極限であること(`isLimit_extCone`、未着手)を示せば `Lemma 4.1` の
+スキーム側の道具が揃う。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def extCone (X : Over BaseK) : Cone (extDiagram X) where
+  pt := Limits.pullback X.hom toBaseK
+  π := extConePi X
+
+/-- `s : Cone (extDiagram X)` を `extDiagramToSpecK` で `toSchemeDiagram ℚ ℝ`
+の cone へ変換したもの——`Cone.postcompose` を使うと naturality の再証明が
+不要になる(`Cones.postcompose`/`Cone.postcompose` は deprecated 警告が出るが
+mathlib 側の名称変更のみで機能は同じ)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def auxCone3 (X : Over BaseK) (s : Cone (extDiagram X)) :
+    Cone (toSchemeDiagram ℚ ℝ) :=
+  (Cone.postcompose (extDiagramToSpecK X)).obj s
+
+/-- `⊥ : FgSubalgebra ℚ ℝ`(常に有限生成)から任意の `R` への射
+(`(FgSubalgebra ℚ ℝ)ᵒᵖ` の中、`⊥ ≤ R.unop` を `homOfLE` で持ち上げてから
+`.op` する)——`isLimit_extCone` で「代表元」として使う基点を用意する。 -/
+theorem R0_le (R : (FgSubalgebra ℚ ℝ)ᵒᵖ) :
+    (⟨⊥, Subalgebra.fg_bot⟩ : FgSubalgebra ℚ ℝ) ≤ R.unop := by
+  show (⊥ : Subalgebra ℚ ℝ) ≤ R.unop.1
+  exact bot_le
+
+noncomputable def R0hom (R : (FgSubalgebra ℚ ℝ)ᵒᵖ) :
+    R ⟶ Opposite.op (⟨⊥, Subalgebra.fg_bot⟩ : FgSubalgebra ℚ ℝ) :=
+  (CategoryTheory.homOfLE (R0_le R)).op
+
+set_option backward.isDefEq.respectTransparency false in
+/-- `s : Cone (extDiagram X)` の `s.π.app R ≫ pullback.fst`(`X.left` への
+射影)は `R` に依らず一定——`extDiagram_map_fst` と `s` 自身の cone
+naturality(`Cone.w`)から。`isLimit_extCone` の `lift`/`fac`/`uniq` すべてで
+使う核心の補題。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem extCone_fst_const {X : Over BaseK} (s : Cone (extDiagram X)) {R S : (FgSubalgebra ℚ ℝ)ᵒᵖ}
+    (h : R ⟶ S) :
+    s.π.app S ≫ pullback.fst X.hom (toSchemeDiagramOver.obj S).hom =
+      s.π.app R ≫ pullback.fst X.hom (toSchemeDiagramOver.obj R).hom := by
+  have hs : s.π.app R ≫ (extDiagram X).map h = s.π.app S := s.w h
+  calc s.π.app S ≫ pullback.fst X.hom (toSchemeDiagramOver.obj S).hom
+      = (s.π.app R ≫ (extDiagram X).map h) ≫ pullback.fst X.hom (toSchemeDiagramOver.obj S).hom := by
+        rw [hs]
+    _ = s.π.app R ≫ (extDiagram X).map h ≫ pullback.fst X.hom (toSchemeDiagramOver.obj S).hom := by
+        rw [Category.assoc]
+    _ = s.π.app R ≫ pullback.fst X.hom (toSchemeDiagramOver.obj R).hom := by
+        rw [extDiagram_map_fst h]
+
+/- ★★次の一手(未着手): `extCone X` が極限であることを示す
+(`isLimit_extCone : IsLimit (extCone X)`)——`s : Cone (extDiagram X)` から
+`pullback.lift (s.π.app R0 ≫ pullback.fst ...) ((isLimit_specKCone ℚ ℝ).lift
+(auxCone3 X s)) _` を構成する。互換性条件(`pullback.lift` の第三引数)は
+`pullback.condition`(`fst ≫ X.hom = snd ≫ (D R0).hom`)・`extCone_fst_const`
+非依存の `hfac`/`htoBaseK` の `calc` チェーンで**完全に閉じることを確認済み**
+(この commit の直前まで動作した)。残るのは `fac`(`lift ≫ π.app R = π_R`、
+`pullback.hom_ext` で fst/snd に割ってから `extCone_fst_const`/`(isLimit_
+specKCone).fac` で閉じる見込み)と `uniq`——`pullback.map`/`pullback.lift` が
+入れ子になった式で `Category.assoc`/`unfold Limits.pullback.map` の適用順を
+間違えると `(specKCone ℚ ℝ).pt` と `specK` の型不一致に化ける、という配管が
+最後まで残った。閉じれば `FieldLimit.lean` の
+`standardEtalePairRingBaseChange`(環側の base change)と合わせて
+`Lemma 4.1` の構成的降下に必要なスキーム側・環側の道具が完全に揃う。 -/
 
 end ABC3.Found.CorrHyp
