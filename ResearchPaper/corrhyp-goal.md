@@ -485,3 +485,29 @@ Prop のままにするか、witness 付きの構造体に変えるかは要検�
 étale-locus のレベルで細分してから、この降下を1片ずつ適用し、最後に
 `RingHom.EssFiniteType.exists_comp_map_eq_of_isColimit`(遷移射の一致の
 降下)で貼り合わせる、という二重の被覆の組み立てが要る。
+
+### 2026-09-04さらに続報: (a) の見通しを精緻化——「テンソル積の余極限保存」は不要
+
+`exists_fg_subalgebra_standardEtalePair` で得た `f₀, g₀ : Polynomial R.1`
+(`f₀.map = f`・`g₀.map = g`)から、**`S₀ := (R.1[X]/(f₀))` を `g₀` で局所化
+したもの**を直接定義すればよい——これが「有限生成部分環上のある `S₀`」の
+候補で、`x` を明示的に探す必要は無い(原文の `x`・`hasMap`・`lift_bijective`
+は「`S` が既にこの形をしている」ことの確認用データであり、**こちらから
+`S₀` を作る側では不要**)。
+
+残る唯一の作業は「`S₀ ⊗_R K ≅ S`」——これは
+`(R[X]/(f₀)) ⊗_R K ≅ K[X]/(f₀.map) = K[X]/(f)`(商環の base change、
+`Ideal.map`/`Polynomial.quotientEquiv` 相当)と、局所化の base change
+(`IsLocalization.baseChangeEquiv` 相当)を合成すればよい、**標準的な
+可換環論の事実**——これは一般の「余極限の保存」(`Under.pushout` が
+left adjoint であることを使う圏論的な議論、`Adjunction.leftAdjoint_
+preservesColimits`)よりずっと軽い道具で済む可能性が高い。
+
+★`Under.pushout`(`CategoryTheory.Under.pushoutIsLeftAdjoint`、
+`PreservesColimit` が `infer_instance` で自動的に付くことは確認済み)による
+「テンソル積は左随伴だから余極限を保存する」という一般論も**筋は良い**が、
+`toRingCat k K` を `Under (CommRingCat.of k)` へ持ち上げる段で
+`Under.mk`/`Under.homMk` の defeq 周りの配管が詰まった(`Over.mk` で
+見た「`instances` 透明度」問題の `Under` 版、未解決のまま持ち越し)——
+`corrhyp-goal.md` に記録だけして、上記のより軽い道(商環・局所化の base
+change)を先に試す方が近道と判断した。

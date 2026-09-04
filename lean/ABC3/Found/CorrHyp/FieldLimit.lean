@@ -576,16 +576,41 @@ theorem exists_fg_subalgebra_standardEtalePair {k K : Type*} [CommRing k] [CommR
     rw [hf]; exact P.monic_f
   exact ⟨R, ⟨f₀, hmonic, g₀, ⟨p₁₀, p₂₀, n, hcond₀⟩⟩, hf, hg⟩
 
+/-- `exists_fg_subalgebra_standardEtalePair` を mathlib の
+`StandardEtalePair.map`(係数写像による像、`(P.map φ).f = P.f.map φ` 等)の
+言葉で言い換えたもの——`P` は、ある有限生成部分環上の `P₀` の
+`.map (algebraMap R K)` に**文字通り一致する**(`f`・`g` が一致すれば、
+`monic_f`・`cond` は `Prop` なので自動的に一致する)。`P₀.Ring`
+(`Polynomial (Polynomial R) ⧸ span {C f, X*C g - 1}`、mathlib の明示的な
+構成)を使って `Z` の局所片を直接定義する際の橋渡しに使う。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_fg_subalgebra_standardEtalePair_map {k K : Type*} [CommRing k] [CommRing K]
+    [Algebra k K] (P : StandardEtalePair K) :
+    ∃ (R : FgSubalgebra k K) (P₀ : StandardEtalePair R.1), P₀.map (algebraMap R.1 K) = P := by
+  obtain ⟨R, P₀, hf, hg⟩ := exists_fg_subalgebra_standardEtalePair (k := k) P
+  refine ⟨R, P₀, ?_⟩
+  obtain ⟨f, hfmonic, g, hcond⟩ := P
+  obtain ⟨f₀, hfmonic₀, g₀, hcond₀⟩ := P₀
+  simp only [StandardEtalePair.map] at hf hg ⊢
+  subst hf hg
+  rfl
+
 /- ★★次の一手(未着手): `Lemma 4.1` 本体へ——上の3instanceにより
 `Scheme.exists_hom_comp_eq_comp_of_locallyOfFiniteType`/
 `Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation` は
 `D := toSchemeDiagram k K`・`c := specKCone k K`・`hc := isLimit_specKCone k K`
 に対して**側条件抜きで直接呼べる**状態になった。`exists_fg_subalgebra_
-standardEtalePair` により、有限エタール射の標準的表示1枚は丸ごと有限段階
-へ降ろせるようになった——残るのは (a) `x : S`(`StandardEtalePresentation`
-の残りのフィールド、`lift` が bijective になる元)も同様に降ろすこと、
-(b) 標準エタール表示1枚を降ろすだけでなく、`Z_K` 全体のアフィン開被覆
-(`Scheme.exists_isOpenCover_and_isAffine`)の**各片**にこの降下を適用して
-から貼り合わせること。`corrhyp-goal.md` §4 に記録した組み立て方の続き。 -/
+standardEtalePair_map` により、有限エタール射の標準的表示1枚は丸ごと
+有限段階へ降ろせるようになった——残るのは (a)
+`P₀.Ring ⊗[R] K ≃ₐ[K] P.Ring`(`P.Ring` は `mathlib` の明示的な二変数多項式
+商 `Polynomial (Polynomial R) ⧸ span {C f, X*C g - 1}` なので、
+`Algebra.TensorProduct.quotIdealMapEquivQuotTensor`/`tensorQuotientEquiv`
+(商環の base change)と二変数多項式環の base change を合成すればよい
+——一般の「余極限の保存」より軽い道具で済む見通し、`corrhyp-goal.md` に
+記録)、(b) 標準エタール表示1枚を降ろすだけでなく、`Z_K` 全体のアフィン
+開被覆(`Scheme.exists_isOpenCover_and_isAffine`)の**各片**にこの降下を
+適用してから貼り合わせること。`corrhyp-goal.md` §4 に記録した組み立て方の
+続き。 -/
 
 end ABC3.Found.CorrHyp
