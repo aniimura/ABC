@@ -4566,3 +4566,34 @@ isOpenImmersion`等の具体的な部品を踏まえて再確認した——数�
 独立した`Presentation`の構成+`ψ・ψ'`の4条件の証明)を要する——
 拙速な近道は無いことを確認した上で、次のセッションへの明確な
 出発点として記録する。集計は引き続き10/24——§4は引き続き0/2。
+
+## 2026-09-05夜さらに続き9: `ψ`構成の**設計を1つ具体化**——
+`exists_finite_standardEtaleCover`からの新規構成ではなく、既存の
+「持ち上げ」技法の転用でよいと判明(実装はまだ、正直な記録)
+
+続き8で「`W`の独立した`Presentation`を新たに構成する必要がある」と
+記録したが、これを**より正確に検討し直した**結果、実は**もっと軽い
+道がある**と判明した。
+
+**気づいたこと**: `M_ij`(`D(f)`側)・`M_ji`(`D(g)`側)は、`exists_
+descendPieceR_localization_baseChange`を`(f,g)`・`(g,f)`の両方に
+適用すれば、どちらも`Γ(C,piece(D(f*g)))`(=`Wtarget`)への**ℝレベルの
+同型**をすでに持っている。`ψ`が要求するのは「`M_ji`の生成元(有限個)
+を`M_ij`の生成元の多項式として表す」ことだが、これは**まさに`exists_
+fg_subalgebra_tensor_quotientMvPolynomial_lift`(`exists_piece_
+basicOpen_R_lift`が内部で使ったのと同じ技法)を、`M_ji`の**個々の
+生成元**(ℝレベルでの像を`M_ij⊗T`側へ、上記2つの同型の合成で送った
+もの)に**繰り返し適用するだけ**で得られる——`exists_finite_
+standardEtaleCover`から`W`の`Presentation`を丸ごと新規構成する
+必要はない。`hround1`・`hround2`(往復の恒等性)も、両方向の持ち上げが
+**同じℝレベルの同型**を経由することから、一意性(`quotient_
+mvPolynomial_baseChange`の単射性)により従う見込み。
+
+**残る作業(正直な記録、実装は次のセッションへ)**: `M_ij`・`M_ji`
+自体を`MvPolynomial(添字⊕Unit)(底)⧸(拡張したイデアル)`という
+**`q`・`q₂`が要求する形の関係式の族**として具体的に表す必要がある
+——`M_ij`(`= Localization.Away h`、`h`は`D(f)`の`Presentation`の商)
+の標準的な「逆元を1変数添加する」表示(`Localization.awayEquivAdjoin`
+は`Polynomial`/`AdjoinRoot`の形で存在するが、`MvPolynomial(Fin n⊕Unit)`
+の形への書き換えがまだ要る)を確立する、という**具体的だが軽い**次の
+一歩として記録する。集計は引き続き10/24——§4は引き続き0/2。

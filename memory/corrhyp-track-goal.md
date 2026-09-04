@@ -2019,3 +2019,17 @@ Presentationを新たに構成する必要があり(descendPieceR自体の構成
 同規模の足場)、今回の「局所化として直接構成する」設計とは別の独立した
 作業になる。拙速な近道は無いことを確認した上で、次のセッションへの
 明確な出発点として記録。集計は引き続き10/24——§4は引き続き0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き9
+ψ構成の設計を1つ具体化——exists_finite_standardEtaleCoverからの新規
+構成ではなく、既存の「持ち上げ」技法(exists_fg_subalgebra_tensor_
+quotientMvPolynomial_lift)の転用でよいと判明(実装はまだ)。M_ij・M_ji
+はどちらもΓ(C,piece(D(f*g)))へのℝレベル同型を既に持つ——ψはM_jiの
+生成元(有限個)をこの同型経由でM_ij側へ持ち上げるだけで構成できる、
+Wの独立したPresentationを新規構成する必要はない。
+
+残る作業: M_ij・M_ji自体をMvPolynomial(添字⊕Unit)(底)⧸(拡張イデアル)
+という関係式の族として具体的に表す必要がある——Localization.
+awayEquivAdjoin(Polynomial/AdjoinRoot形)は既存だがMvPolynomial(Fin n
+⊕Unit)形への書き換えがまだ要る、具体的だが軽い次の一歩。集計は引き
+続き10/24——§4は引き続き0/2。
