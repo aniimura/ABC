@@ -81,3 +81,20 @@ metadata:
 上記2(退化した基点の不分岐性確認、`adjoinIntegers K 0≃+*𝒪[K.
 carrier]`の構築)が最も具体的で低リスクな次の一歩。3(Henselian
 instance)と並行して進められる見込み。
+
+★2026-09-05続報: 上記2で要る「`K.closure`上のspectralNormが
+`K.carrier`上の元では元のノルムに一致する」という橋渡しは、
+**既に`norm_algebraMap' K.closure k : ‖algebraMap K.carrier K.closure
+k‖ = ‖k‖`としてmathlibに存在する**(`exact?`で即発見、
+`spectralNorm_extends`を経由する必要すら無かった)ことを確認した。
+これで`adjoinIntegers K 0`(`{y:K.carrier⟮0⟯|‖y‖≤1}`)と`𝒪[K.carrier]`
+(`{y:K.carrier|‖y‖≤1}`)が、`IntermediateField.botEquiv K.carrier
+K.closure`(`(⊥:IntermediateField K.carrier K.closure)≃ₐ[K.carrier]
+K.carrier`、既存)とノルムの両立性を組み合わせれば対応することの
+**数学的な裏付けは揃った**——残るのは`IntermediateField.adjoin
+K.carrier {0}=⊥`という**型レベルの書き換え**を経由して`adjoinIntegers
+K 0`(`IntermediateField.adjoin K.carrier {0}`上のSubringとして定義
+されている)を`⊥`上のSubringとして正しく`show`/`cast`する技術的な
+組み立てのみ(本セッションのLubin-Tate作業で何度も遭遇した「型注釈と
+既存の項の食い違い」と同種の罠が予想される——`tools/lean-idioms.md`
+の該当エントリを先に見直すこと)。
