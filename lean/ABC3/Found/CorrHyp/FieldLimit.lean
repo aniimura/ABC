@@ -2745,4 +2745,69 @@ theorem localization_away_quotient_mvPolynomial_equiv (B : Type) [CommRing B] (n
     rw [hval1, hval2]
   exact ⟨e1.symm.toRingEquiv.trans (Ideal.quotientEquiv _ _ e2.toRingEquiv hIdealEq)⟩
 
+open scoped Classical in
+/-- `localization_away_quotient_mvPolynomial_equiv`の入れ子の商
+(`MvPolynomial Unit(MvPolynomial n B)`の商をさらに商)を、
+`exists_mvPolynomial_quotient_specIso_descend`が要求する**1段の**
+`MvPolynomial(Unit⊕n)B`の商へ平坦化する。`DoubleQuot.quotQuotEquivQuotSup`
+(mathlib)で入れ子の商を`I'⊔span{...}`単独の商へ、`MvPolynomial.sumAlgEquiv`
+(mathlib)で索引を`Unit⊕n`単独へ、それぞれ変換する。生成元の対応は
+`sumAlgEquiv_comp_rename_inl`・`_inr`(いずれもmathlib、naturality)から
+具体的に計算できる:
+`e2.symm(C x) = rename Sum.inr x`、`e2.symm(X()) = X(Sum.inl())`。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem localization_away_quotient_mvPolynomial_flat_equiv (B : Type) [CommRing B]
+    (n : Type) [Fintype n] (κ₀ : Type) [Fintype κ₀]
+    (q₀ : κ₀ → MvPolynomial n B) (p : MvPolynomial n B) :
+    Nonempty (Localization.Away (Ideal.Quotient.mk (Ideal.span (Set.range q₀)) p) ≃+*
+      MvPolynomial (Unit ⊕ n) B ⧸ Ideal.span (Set.range
+        (Sum.elim (fun k => MvPolynomial.rename Sum.inr (q₀ k))
+          (fun _ : Unit => MvPolynomial.rename Sum.inr p * MvPolynomial.X (Sum.inl ()) - 1)))) := by
+  set I := Ideal.span (Set.range q₀) with hI
+  obtain ⟨e0⟩ := localization_away_quotient_mvPolynomial_equiv B n I p
+  set I' := Ideal.map MvPolynomial.C I with hI'def
+  set e1 := DoubleQuot.quotQuotEquivQuotSup I' (Ideal.span {MvPolynomial.C p * MvPolynomial.X () - 1}) with he1
+  set e2 := MvPolynomial.sumAlgEquiv B Unit n with he2
+  have hI'span : I' = Ideal.span (Set.range (fun k => MvPolynomial.C (q₀ k))) := by
+    rw [hI'def, hI, Ideal.map_span]
+    congr 1
+    exact (Set.range_comp _ _).symm
+  have hJ : I' ⊔ Ideal.span {MvPolynomial.C p * MvPolynomial.X () - 1} =
+      Ideal.span (Set.range (fun k => MvPolynomial.C (q₀ k)) ∪ {MvPolynomial.C p * MvPolynomial.X () - 1}) := by
+    rw [hI'span, Ideal.span_union]
+  have he2symC : ∀ x : MvPolynomial n B, e2.symm (MvPolynomial.C x) = MvPolynomial.rename Sum.inr x := by
+    intro x
+    have h := congrFun (congrArg DFunLike.coe (MvPolynomial.sumAlgEquiv_comp_rename_inr B Unit n)) x
+    simp only [AlgHom.comp_apply, AlgEquiv.coe_algHom, IsScalarTower.coe_toAlgHom',
+      MvPolynomial.algebraMap_eq] at h
+    rw [← h, he2, AlgEquiv.symm_apply_apply]
+  have he2symX : e2.symm (MvPolynomial.X () : MvPolynomial Unit (MvPolynomial n B)) = MvPolynomial.X (Sum.inl ()) := by
+    have h := congrFun (congrArg DFunLike.coe (MvPolynomial.sumAlgEquiv_comp_rename_inl B Unit n)) (MvPolynomial.X ())
+    simp only [AlgHom.comp_apply, AlgEquiv.coe_algHom, MvPolynomial.mapAlgHom_apply, MvPolynomial.map_X,
+      MvPolynomial.rename_X] at h
+    rw [← h, he2, AlgEquiv.symm_apply_apply]
+  have hEq : Ideal.span (Set.range
+        (Sum.elim (fun k => MvPolynomial.rename Sum.inr (q₀ k))
+          (fun _ : Unit => MvPolynomial.rename Sum.inr p * MvPolynomial.X (Sum.inl ()) - 1))) =
+      Ideal.map e2.symm.toRingEquiv.toRingHom
+        (I' ⊔ Ideal.span {MvPolynomial.C p * MvPolynomial.X () - 1}) := by
+    rw [hJ, Ideal.map_span, Set.Sum.elim_range]
+    congr 1
+    rw [Set.image_union, Set.image_singleton, Set.range_const]
+    have himg1 : (e2.symm.toRingEquiv.toRingHom : MvPolynomial Unit (MvPolynomial n B) →+* MvPolynomial (Unit ⊕ n) B) ''
+        Set.range (fun k => MvPolynomial.C (q₀ k)) =
+        Set.range (fun k => MvPolynomial.rename Sum.inr (q₀ k)) := by
+      rw [← Set.range_comp]
+      congr 1
+      funext k
+      exact he2symC (q₀ k)
+    have himg2 : (e2.symm.toRingEquiv.toRingHom : MvPolynomial Unit (MvPolynomial n B) →+* MvPolynomial (Unit ⊕ n) B)
+        (MvPolynomial.C p * MvPolynomial.X () - 1) =
+        MvPolynomial.rename Sum.inr p * MvPolynomial.X (Sum.inl ()) - 1 := by
+      show e2.symm (MvPolynomial.C p * MvPolynomial.X () - 1) = _
+      rw [map_sub, map_mul, map_one, he2symC, he2symX]
+    rw [himg1, himg2]
+  exact ⟨e0.trans (e1.trans (Ideal.quotientEquiv _ _ e2.symm.toRingEquiv hEq))⟩
+
 end ABC3.Found.CorrHyp
