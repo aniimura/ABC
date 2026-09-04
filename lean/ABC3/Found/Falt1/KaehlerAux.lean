@@ -3545,6 +3545,66 @@ noncomputable def falt1_hsepV0V1_bundled
     (AlgEquiv.Algebra.isSeparable_iff e1').mpr hsepAdjoin
   exact ⟨algFRV1, hsepFinal⟩
 
+/-!
+## Theorem 1.2・3b(i)への足場: `Wₙ₊₁` は PID(2026-09-04)
+
+`length_quotient_span_singleton_mul`(既存、単項イデアルの場合の長さの
+加法性)を`conductor(Wₙ,x)`に適用するには`conductor(Wₙ,x) : Ideal Wₙ₊₁`
+が単項である必要がある——**`Wₙ₊₁` が PID なら自動的に成り立つ**。
+`Wₙ₊₁` が「全分岐(totally ramified)」であることを直接示す(「3c:
+戦略転換」節が「mathlib にまだ薄い領域」と記録した経路)必要は無い、
+と判明した: `IsPrincipalIdealRing.of_finite_maximals`(既存、Dedekind
+整域で極大イデアルが有限個なら PID)+ `IsDedekindDomain.primesOver_
+finite`(既存、有限拡大では上にある素イデアルは有限個)+
+`Ideal.isMaximal_comap_of_isIntegral_of_isMaximal`(既存、整拡大では
+極大イデアルの引き戻しは極大)を組み合わせるだけで、`Wₙ₊₁` の極大
+イデアル全体が「`Wₙ` の(唯一の)極大イデアルの上にある素イデアル」
+という**有限集合の部分集合**であることが分かり、単純な部分集合の
+有限性だけで閉じる——`Wₙ` が DVR で唯一の極大イデアルしか持たない
+ことだけを使い、「全分岐」という強い主張自体は一切不要だった。 -/
+
+set_option maxHeartbeats 800000 in
+/-- **DVR の有限拡大で(捩れ無しの)Dedekind整域になるものは PID**。
+`conductor(Wₙ,x)` が単項イデアルであることの直接の供給源。 -/
+theorem falt1_isPrincipalIdealRing_of_finite_ext_of_DVR
+    {Wn Wn1 : Type*} [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn]
+    [CommRing Wn1] [IsDedekindDomain Wn1] [Algebra Wn Wn1]
+    [Module.Finite Wn Wn1] [Module.IsTorsionFree Wn Wn1] :
+    IsPrincipalIdealRing Wn1 := by
+  apply IsPrincipalIdealRing.of_finite_maximals
+  have hsub : {I : Ideal Wn1 | I.IsMaximal} ⊆ (IsLocalRing.maximalIdeal Wn).primesOver Wn1 := by
+    intro I hI
+    haveI : I.IsMaximal := hI
+    haveI : Algebra.IsIntegral Wn Wn1 := Algebra.IsIntegral.of_finite Wn Wn1
+    have hcomap : (I.comap (algebraMap Wn Wn1)).IsMaximal :=
+      Ideal.isMaximal_comap_of_isIntegral_of_isMaximal I
+    have heq : IsLocalRing.maximalIdeal Wn = Ideal.under Wn I :=
+      (IsLocalRing.eq_maximalIdeal hcomap).symm
+    exact ⟨hI.isPrime, Ideal.LiesOver.mk heq⟩
+  exact Set.Finite.subset (IsDedekindDomain.primesOver_finite (IsLocalRing.maximalIdeal Wn) Wn1) hsub
+
+set_option maxHeartbeats 400000 in
+/-- **PID における長さの加法性(非零な単項イデアルの倍)**:
+`falt1_isPrincipalIdealRing_of_finite_ext_of_DVR` と
+`length_quotient_span_singleton_mul` を貼り合わせただけ——`I ≠ 0` から
+`IsPrincipalIdealRing.principal` で生成元 `a` を取り出し、`a ≠ 0`
+(ゆえに整域では非零因子)を確認して`length_quotient_span_singleton_mul`
+を適用する。`conductor(Wₙ,x)`(単項とは限らないと思われていたが、
+`Wₙ₊₁` が PID なので実は自動的に単項)に直接使える形。 -/
+theorem falt1_length_quotient_mul_of_ne_zero {R : Type*} [CommRing R] [IsDomain R] [IsPrincipalIdealRing R]
+    (I J : Ideal R) (hI : I ≠ 0) :
+    Module.length R (R ⧸ (I * J)) = Module.length R (R ⧸ I) + Module.length R (R ⧸ J) := by
+  obtain ⟨a, ha⟩ := IsPrincipalIdealRing.principal I
+  have ha0 : a ≠ 0 := by
+    intro h
+    apply hI
+    rw [ha, h]
+    simp
+  have hanzd : a ∈ nonZeroDivisors R := mem_nonZeroDivisors_of_ne_zero ha0
+  have hI' : I = Ideal.span ({a} : Set R) := ha
+  rw [hI']
+  exact ABC3.Found.Falt1.length_quotient_span_singleton_mul a hanzd J
+
 set_option maxHeartbeats 3000000 in
 set_option synthInstance.maxHeartbeats 3000000 in
 /-- **Theorem 1.2・item 3c の中核道具の完全な組み立て**:
@@ -3558,7 +3618,20 @@ conductor Wₙ x * differentIdeal V1 Wₙ₊₁ = Ideal.map (algebraMap Wₙ W�
 Theorem 1.2・3b/3c の中核の代数的関係式であり、item 3c の技術的な障害はこれで**すべて
 解決した**。戻り値を `True` にしている理由は `falt1_differentIdeal_tower_diamond_assembled`
 と同じ(`ψ` 選択前に `Module.IsTorsionFree`/`Algebra.IsSeparable` 系の instance 検索が
-シグネチャの型検査自体で走ってしまう)。 -/
+シグネチャの型検査自体で走ってしまう)。
+
+★2026-09-04追記: さらに `conductor(Wₙ,x) ≠ 0`(`hcond`・`hspan_eq`・`hIdiff_ne` から
+——`conductor(Wₙ,x)*differentIdeal Wₙ Wₙ₊₁ = Ideal.map ψ (differentIdeal V0 V1) ≠ 0` の
+積が非零なら整域では両因子とも非零)と `falt1_isPrincipalIdealRing_of_finite_ext_of_DVR`
+(`Wₙ₊₁` は PID)を足し、`falt1_length_quotient_mul_of_ne_zero` を適用して
+```
+Module.length Wₙ₊₁ (Wₙ₊₁ ⧸ Ideal.map (algebraMap Wₙ Wₙ₊₁) (differentIdeal V0 Wₙ))
+  = Module.length Wₙ₊₁ (Wₙ₊₁ ⧸ conductor Wₙ x) + Module.length Wₙ₊₁ (Wₙ₊₁ ⧸ differentIdeal V1 Wₙ₊₁)
+```
+という**長さの等式**(`hlen_eq`)まで得た。残るのは `delta_tendsto_zero` の `hrec` へ
+変換すること——右辺第1項(`conductor` の長さ)の**下界評価**が、以前から「独立の古典的
+整数論(discriminant の塔・conductor-discriminant の関係)を要する」と評価してきた
+核心の困難に対応する。 -/
 theorem falt1_cancelConductorDelta_assembled
     {V0 Wn : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
     [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
@@ -3682,66 +3755,24 @@ theorem falt1_cancelConductorDelta_assembled
     (conductor Wn x) (Ideal.span {Polynomial.aeval x (Polynomial.derivative (Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn))})
     (differentIdeal V1 Wn1) (Ideal.map (algebraMap Wn Wn1) (differentIdeal V0 Wn))
     hdiamond hcond hspan_eq hIdiff_ne
-  trivial
-
-/-!
-## Theorem 1.2・3b(i)への足場: `Wₙ₊₁` は PID(2026-09-04)
-
-`length_quotient_span_singleton_mul`(既存、単項イデアルの場合の長さの
-加法性)を`conductor(Wₙ,x)`に適用するには`conductor(Wₙ,x) : Ideal Wₙ₊₁`
-が単項である必要がある——**`Wₙ₊₁` が PID なら自動的に成り立つ**。
-`Wₙ₊₁` が「全分岐(totally ramified)」であることを直接示す(「3c:
-戦略転換」節が「mathlib にまだ薄い領域」と記録した経路)必要は無い、
-と判明した: `IsPrincipalIdealRing.of_finite_maximals`(既存、Dedekind
-整域で極大イデアルが有限個なら PID)+ `IsDedekindDomain.primesOver_
-finite`(既存、有限拡大では上にある素イデアルは有限個)+
-`Ideal.isMaximal_comap_of_isIntegral_of_isMaximal`(既存、整拡大では
-極大イデアルの引き戻しは極大)を組み合わせるだけで、`Wₙ₊₁` の極大
-イデアル全体が「`Wₙ` の(唯一の)極大イデアルの上にある素イデアル」
-という**有限集合の部分集合**であることが分かり、単純な部分集合の
-有限性だけで閉じる——`Wₙ` が DVR で唯一の極大イデアルしか持たない
-ことだけを使い、「全分岐」という強い主張自体は一切不要だった。 -/
-
-set_option maxHeartbeats 800000 in
-/-- **DVR の有限拡大で(捩れ無しの)Dedekind整域になるものは PID**。
-`conductor(Wₙ,x)` が単項イデアルであることの直接の供給源。 -/
-theorem falt1_isPrincipalIdealRing_of_finite_ext_of_DVR
-    {Wn Wn1 : Type*} [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn]
-    [CommRing Wn1] [IsDedekindDomain Wn1] [Algebra Wn Wn1]
-    [Module.Finite Wn Wn1] [Module.IsTorsionFree Wn Wn1] :
-    IsPrincipalIdealRing Wn1 := by
-  apply IsPrincipalIdealRing.of_finite_maximals
-  have hsub : {I : Ideal Wn1 | I.IsMaximal} ⊆ (IsLocalRing.maximalIdeal Wn).primesOver Wn1 := by
-    intro I hI
-    haveI : I.IsMaximal := hI
-    haveI : Algebra.IsIntegral Wn Wn1 := Algebra.IsIntegral.of_finite Wn Wn1
-    have hcomap : (I.comap (algebraMap Wn Wn1)).IsMaximal :=
-      Ideal.isMaximal_comap_of_isIntegral_of_isMaximal I
-    have heq : IsLocalRing.maximalIdeal Wn = Ideal.under Wn I :=
-      (IsLocalRing.eq_maximalIdeal hcomap).symm
-    exact ⟨hI.isPrime, Ideal.LiesOver.mk heq⟩
-  exact Set.Finite.subset (IsDedekindDomain.primesOver_finite (IsLocalRing.maximalIdeal Wn) Wn1) hsub
-
-set_option maxHeartbeats 400000 in
-/-- **PID における長さの加法性(非零な単項イデアルの倍)**:
-`falt1_isPrincipalIdealRing_of_finite_ext_of_DVR` と
-`length_quotient_span_singleton_mul` を貼り合わせただけ——`I ≠ 0` から
-`IsPrincipalIdealRing.principal` で生成元 `a` を取り出し、`a ≠ 0`
-(ゆえに整域では非零因子)を確認して`length_quotient_span_singleton_mul`
-を適用する。`conductor(Wₙ,x)`(単項とは限らないと思われていたが、
-`Wₙ₊₁` が PID なので実は自動的に単項)に直接使える形。 -/
-theorem falt1_length_quotient_mul_of_ne_zero {R : Type*} [CommRing R] [IsDomain R] [IsPrincipalIdealRing R]
-    (I J : Ideal R) (hI : I ≠ 0) :
-    Module.length R (R ⧸ (I * J)) = Module.length R (R ⧸ I) + Module.length R (R ⧸ J) := by
-  obtain ⟨a, ha⟩ := IsPrincipalIdealRing.principal I
-  have ha0 : a ≠ 0 := by
+  -- 追加(2026-09-04): conductor(Wn,x) ≠ 0 を示し、PID での長さの加法性
+  -- (falt1_length_quotient_mul_of_ne_zero)を hfinal に適用して長さの等式を得る。
+  have hcondprod_ne : conductor Wn x * differentIdeal Wn Wn1 ≠ 0 := by
+    rw [hcond, hspan_eq]
+    exact hIdiff_ne
+  have hcond_ne : conductor Wn x ≠ 0 := by
     intro h
-    apply hI
-    rw [ha, h]
-    simp
-  have hanzd : a ∈ nonZeroDivisors R := mem_nonZeroDivisors_of_ne_zero ha0
-  have hI' : I = Ideal.span ({a} : Set R) := ha
-  rw [hI']
-  exact ABC3.Found.Falt1.length_quotient_span_singleton_mul a hanzd J
+    apply hcondprod_ne
+    rw [h, zero_mul]
+  haveI hPIDWn1 : IsPrincipalIdealRing Wn1 :=
+    ABC3.Found.Falt1.falt1_isPrincipalIdealRing_of_finite_ext_of_DVR (Wn := Wn) (Wn1 := Wn1)
+  have hlen_eq : Module.length Wn1 (Wn1 ⧸ (conductor Wn x * differentIdeal V1 Wn1)) =
+      Module.length Wn1 (Wn1 ⧸ conductor Wn x) + Module.length Wn1 (Wn1 ⧸ differentIdeal V1 Wn1) :=
+    ABC3.Found.Falt1.falt1_length_quotient_mul_of_ne_zero (conductor Wn x) (differentIdeal V1 Wn1) hcond_ne
+  rw [hfinal] at hlen_eq
+  -- hlen_eq :
+  --   Module.length Wn1 (Wn1 ⧸ Ideal.map (algebraMap Wn Wn1) (differentIdeal V0 Wn))
+  --     = Module.length Wn1 (Wn1 ⧸ conductor Wn x) + Module.length Wn1 (Wn1 ⧸ differentIdeal V1 Wn1)
+  trivial
 
 end ABC3.Found.Falt1
