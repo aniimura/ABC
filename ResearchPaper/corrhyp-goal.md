@@ -3369,3 +3369,57 @@ val`(mathlib、`P.ker`が`aeval`の核であること)を組み合わせて、
 `P.ker`に一致する」ことを示すのが核心になる見込み。これが完成すれば
 `transitionElem`/`gdT`/`cocycle`一式の`R`レベル版を`S_0`の上で
 構築する段階へ進める。集計は10/24で変わらず——§4は引き続き0/2。
+
+## 2026-09-05(続き2): `pieceAlgebra_R_model_baseChange`——`S_0`の
+base changeが`Γ(C,piece)`を実際に復元することを証明
+
+前回書いた「次の一手」を完成させた。まず**汎用の商・base change
+可換性補題**を`FieldLimit.lean`に追加:
+
+- `quotientMvPolynomialBaseChangeRingEquivAux`: `MvPolynomial ι R
+  ⊗[R] A ≃+* MvPolynomial ι A`(`Algebra.TensorProduct.comm`で係数
+  順序を`A ⊗[R] MvPolynomial ι R`へ入れ替えてから`MvPolynomial.
+  algebraTensorAlgEquiv`(mathlib)を適用する合成)。
+- `quotientMvPolynomialBaseChangeRingEquivAux_comp_algebraMap`:
+  上が`MvPolynomial ι R`の`algebraMap`埋め込みと`MvPolynomial.map
+  (algebraMap R A)`を両立させること。
+- **`quotient_mvPolynomial_baseChange`**: `(MvPolynomial ι R ⧸ I)
+  ⊗[R] A ≃+* MvPolynomial ι A ⧸ Ideal.map (MvPolynomial.map
+  (algebraMap R A)) I`。`Algebra.TensorProduct.quotientTensorEquiv`
+  (mathlib)を上の同型で書き換えるだけ。
+
+これを`R := Γ(U,U)⊗R.1`、`A := Γ(U,U)⊗ℝ`へ specialize したのが
+**`pieceAlgebra_R_model_baseChange`**(`ExtLimit.lean`)——降ろした
+関係式`q₀ k`の像が元の関係式`P.relation k`に一致すること
+(`pieceAlgebra_relation_descend_q₀`の定義そのもの、`choose_spec`
+で直接取り出せる)から`Ideal.map_span`でイデアルの一致に落とし、
+`Algebra.Presentation.span_range_relation_eq_ker`+`Algebra.
+Generators.ker_eq_ker_aeval_val`(いずれもmathlib)で`P.ker`まで
+書き換え、`RingHom.quotientKerEquivOfSurjective`(第一同型定理、
+mathlib)で`Γ(C,piece)`そのものに一致させた。
+
+配管の注意(新しい発見): この証明は素朴には`maxHeartbeats`の既定値
+(200000)を超える(`.choose`と`pieceAlgebra_relation_descend_q₀`の
+defeq照合が letI チェーン全体の展開を要求し重い)——ファイル中の
+既存の前例(`set_option maxHeartbeats 1000000 in`、L2080/L2430)に
+倣って同じ値を付けたところ通った(既知の対処法、新しい失敗形では
+ない)。
+
+`lean_check`で個別に検証後、`lake build ABC3.Found.CorrHyp.
+FieldLimit`・`ExtLimit`・`ABC3`いずれも0エラーで確認。`git diff
+--cached --stat`で対象2ファイルのみに絞ってからコミット(`863a5f73`)、
+push済み。
+
+**これで、`Γ(C,piece)`を`R`レベルへ一度に降ろす計画の核心
+(「`S_0`が本当に`Γ(C,piece)`のbase changeで復元できる」こと)が
+証明として完成した**。`S_0`は単なる型としての存在だけでなく、実際に
+候補片として使える裏付けを得た。
+
+次の一手(未着手): `S_0`を「`R`レベルの候補片」として`descendPiece`
+の代わりに使い、`transitionElem`/`gdT`/`gdT'`/`cocycle`/
+`corrHypGlueData`の`R`レベル版を組み立てる。`ExtLimit.lean`の
+`ℝ`レベルGlueDataパイプライン(`transitionElem`→`corrHypGlueData_
+glued_iso`、約1526行)は`Scheme`について完全に一般的な形で書かれて
+いるため、`S_0`由来のスキームに対してそのまま再利用できる見込み。
+集計は10/24で変わらず——§4は引き続き0/2(`Lemma 4.1`はまだ完成に
+至っていないが、その完成に必要な部品が着実に積み上がっている)。

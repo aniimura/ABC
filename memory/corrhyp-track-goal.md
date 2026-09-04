@@ -1523,3 +1523,25 @@ exists_fg_subalgebra_tensor_mvPolynomial_finsetを実際に構築・検証
 なった**。次の一手: (ker f).FGから有限個の生成元を取り出し、
 この補題を適用してΓ(C,piece)のRレベルモデルS_0を構成する
 (未着手)。corrhyp-goal.mdに詳細記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05(続き)
+pieceAlgebra_relation_descend_R/_q₀/pieceAlgebra_R_model(S_0本体)を
+構築(commit fe100836)。続けて**pieceAlgebra_R_model_baseChange**を
+証明——S_0 ⊗[A⊗R.1] (A⊗ℝ) ≅ Γ(C,piece)。汎用補題
+quotient_mvPolynomial_baseChange(FieldLimit.lean、(MvPolynomial ι R
+⧸ I)⊗[R]A ≃+* MvPolynomial ι A ⧸ Ideal.map(MvPolynomial.map
+(algebraMap R A))I)をAlgebra.TensorProduct.quotientTensorEquiv+
+MvPolynomial.algebraTensorAlgEquivから構成し、CorrHyp設定へ
+specialize。q₀の定義(choose_spec)+Algebra.Presentation.
+span_range_relation_eq_ker+Algebra.Generators.ker_eq_ker_aeval_val+
+RingHom.quotientKerEquivOfSurjective(第一同型定理)で閉じた。
+配管注意: 素朴にはmaxHeartbeats既定値超過——既存の前例
+(set_option maxHeartbeats 1000000 in)を踏襲して解消(新しい失敗形
+ではない)。lake build(FieldLimit/ExtLimit/ABC3)0エラー確認、
+commit 863a5f73、push済み。
+
+**S_0が「Rレベルの候補片」として実際に使える裏付けが完成**。次の
+一手: S_0をdescendPieceの代わりに使い、transitionElem/gdT/cocycle/
+corrHypGlueDataのRレベル版を組み立てる(ℝレベルGlueDataパイプライン
+はScheme一般の形で書かれているため再利用できる見込み)。集計は
+10/24で変わらず——§4は引き続き0/2。corrhyp-goal.mdに詳細記録。
