@@ -501,4 +501,40 @@ noncomputable def torsionPointAdjoinPAdicLocalField {p : ℕ} [Fact p.Prime]
     K hq hπmax hπne0 f hf0 hf1 hf n x hx
   adjoinPAdicLocalField K x
 
+/-- ★★★★★★★★★★**訂正・前進**: `AdjoinPAdicLocalField.lean` の docstring
+で「`K.carrier⟮x⟯` に `LocalFieldNorm.lean` のノルムを適用すると
+instance diamond になりうる」と記した懸念は、**単純拡大の体そのもの
+のレベルでは杞憂だった**——`IntermediateField.adjoin K.carrier {x}` が
+`K.closure` の部分体として mathlib の一般論から自動的に持つ
+`NormedField` 構造は、**そのままの定義で**
+`‖(⟨x,_⟩ : K.carrier⟮x⟯)‖ = spectralNorm K.carrier K.closure x` を
+`rfl` で満たす(部分体の `NormedField` は単に周囲のノルムの制限として
+定義されているため)。したがって `spectralNorm_lt_one_of_mem_
+iteratedLubinTateTorsionPoints` が直接この体自身のノルムについての
+事実になり、`Λ_n` の元を `K.carrier⟮x⟯` の元として見たときも
+`PowerSeries.HasEval`(位相的冪零性)が成り立つ。
+
+(`adjoinPAdicLocalField`——`K.carrier⟮x⟯` を新たな `PAdicLocalField p`
+として`ℚ_[p]`から再構成する経路——はこの体レベルの事実には不要
+だったが、`IsLinearTopology`(評価先が付値**環**であることを要求する
+`PowerSeries.aeval` の残る条件)を得るには依然として有用な見通しで
+ある——体でなく付値環の話であることに変わりはない。) -/
+theorem hasEval_mem_adjoin_of_mem_iteratedLubinTateTorsionPoints {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :
+    PowerSeries.HasEval (⟨x, hmem⟩ : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := by
+  apply tendsto_pow_atTop_nhds_zero_of_norm_lt_one
+  show spectralNorm K.carrier K.closure x < 1
+  exact spectralNorm_lt_one_of_mem_iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n x hx
+
 end ABC3.Found.PGC
