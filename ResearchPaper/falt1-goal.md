@@ -1595,6 +1595,29 @@ mathlib での正確な組み立て方は未確認)。
       ```
       という**完全に`differentIdeal`だけで書かれた閉じた式**を導出する
       ——これがTheorem 1.2の再帰(`δ_n→0`)の核心になりうる。
+
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、
+      実際に`falt1_cancelConductorDelta_assembled`の結論を`True`から
+      この最終式に置き換えようとしたが、**着手して初めて分かった
+      追加の障害**を記録する: `falt1_kaehler_length_exact_wn1_kernel`/
+      `_cokernel`(Lemma 1.1 の`falt1CokernelIsoLinear`/`LengthEq`を
+      経由)を呼ぶには、`[IsIntegralClosure Wn V0 (FractionRing Wn)]`
+      (`Wn`が`V0`の`FractionRing Wn`内での整閉包であること)・
+      `[IsIntegralClosure Wn1 Wn (AdjoinRoot gK)]`という**この
+      assembled定理では まだ確立していないインスタンス**が要る
+      ——`Wn`は一般に与えられた`IsDiscreteValuationRing`(それ自体が
+      積分閉整域)で`Module.Finite V0 Wn`も仮定にあるので、一般論
+      (整閉整域+有限次数拡大⟹整閉包)から出るはずだが、mathlibでの
+      具体的な組み立て方(`IsIntegralClosure.of_isIntegrallyClosed`
+      のような名前の補題を探すところから)は未確認。**「軽い代入で
+      閉じる」という見立ては誤りで、独立の一歩(この整閉包インスタンス
+      の確立)が要る**——このセッションで繰り返し見たパターン
+      (`length(R/(I·J))=...`の加法性の時と同型)がここでも再現した。
+      安全のため`falt1_cancelConductorDelta_assembled`の型は`True`の
+      まま(変更を revert 済み、`git diff`で無変更を確認)にして
+      次回へ引き継ぐ——次回はまず
+      `IsIntegralClosure Wn V0 (FractionRing Wn)`のインスタンスを
+      独立に確立することから始めること。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
