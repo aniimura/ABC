@@ -149,10 +149,66 @@ R C D B` という自然性(`tensorKaehlerEquiv_eq_map_mapBaseChange`、
    なかった**——この時点ではここで打ち切った。
    →★★★★続きは同日内、上の「完成した」を見よ:3つ目
    (AdjoinRoot 基底変換)を実際に最後まで実行し、閉じた。
-3. **「非常に分岐した」`V_n` の族**そのものの形式化(具体例: `p^n` 乗根
-   と `1` のべき根を添加する塔)——まだ手つかず。
-4. **`Module.length` の漸化不等式**(`δ_n-δ_{n+1}≥β-(d+1)(δ_n-δ_{n+1})`
-   等)——まだ手つかず。
+★★★★★2026-09-04、**Theorem 1.2 の証明全文(物理p.5=印字p.258)を
+260dpi で precisely 読み直した**(OCR ではなく目視)。以下、逐語に近い
+形で構造を記録する(今後の形式化がここから始められるように)。
+
+> Proof. Replacing V by some V_n we may assume that all W_n are integral
+> domains. Look at the sequence of maps Ω_{W_n/V_n}⊗_{W_n}W_{n+1} →
+> Ω_{W_{n+1}/V_n} → Ω_{W_{n+1}/V_{n+1}}. The kernel of the second map
+> contains Ω_{V_{n+1}/V_n}⊗_{V_{n+1}}W_{n+1}, which has (W_{n+1}/pW_{n+1})^{d+1}
+> as quotient. As Ω_{V_{n+1}/V_n}⊗_{V_{n+1}}W_{n+1} is the direct sum of
+> d+1 modules of the form W_{n+1}/p^αW_{n+1}, the kernel of the second
+> map contains the kernel of multiplication by p on Ω_{W_n/V_n}⊗_{W_n}W_{n+1},
+> and hence the composition of the two maps annihilates the kernel by
+> p-multiplication on Ω_{W_n/V_n}⊗_{W_n}W_{n+1}. If we denote the different
+> of W_n over V_n by δ_n, this kernel has length at least equal to that
+> of W_{n+1}/p^βW_{n+1}, where β = min{1, δ_n/(d+1)}. Also it is clear
+> that p^{δ_n-δ_{n+1}} annihilates W_{n+1}/(W_n⊗_{V_n}V_{n+1}), and hence
+> the cokernel of the composition of the two maps is annihilated by
+> p^{δ_n-δ_{n+1}}. So its length is at most equal to that of W_{n+1}
+> divided by the (d+1)st power of this. We derive that
+> δ_n-δ_{n+1} ≥ β-(d+1)(δ_n-δ_{n+1}). So if δ_n ≥ d+1, then
+> δ_{n+1} ≤ δ_n-1/(d+2), and otherwise δ_{n+1} ≤ (1-1/((d+1)(d+2)))δ_n.
+> In any case δ_n → 0 for n→∞. □
+
+直後の「典型例」段落: `V = W(k)(T_1,...,T_d)` の完備化(`W(k)` は完全体
+`k` の Witt ベクトル)、`V_n` は「`T_i` の `p^n` 乗根 + `1` の `p^{n+1}`
+乗根」で生成される拡大——つまり **`V_{n+1}/V_n` は `d+1` 個の
+単生成拡大(各 `T_i` の追加の `p` 乗根 1 個 + 冪根 1 個)の
+**同時**添加**(逐次ではない)。これは `pushoutKaehlerSplit` の
+`d+1` 項版が直接与える「`Ω_{V_{n+1}/V_n}` は `d+1` 個の巡回加群の
+直和」という一文と**厳密に一致する**——★上の「3つの経路」で
+確立した `mapBaseChange_injective_adjoinRoot_tensor` と合わせて、
+`pushoutKaehlerSplit` は当初の想定通り Theorem 1.2 の証明の**まさに
+その箇所**(第3文)で使われるべき道具であることが、憶測ではなく
+原文の記述と照合して確認できた。
+
+★以上を踏まえ、残りの形式化作業を(既存の(3)(4)を置き換えて)
+以下のように精緻化する:
+
+3a. **`pushoutKaehlerSplit` の `d+1` 項化**——`Fin (d+1)` 添字族
+    `D : Fin (d+1) → Type*`(各 `R`-代数、`Algebra.IsPushout` の
+    反復合成で `B := D 0 ⊗_R D 1 ⊗_R ⋯ ⊗_R D d` を構成)に対し
+    `Ω_{B/R} ≃ₗ[B] ⊕ᵢ (B ⊗_{D i} Ω_{D i/R})`。`TensorProduct.isPushout`
+    (mathlib、`Algebra R S T → IsPushout R S T (S⊗[R]T)` を自動的に
+    与える)を鍵に、`pushoutKaehlerSplit` を `ℕ` 上の帰納法で繰り返す
+    ——各段で `Algebra (D i) (B n)` の scalar tower を手で構成する
+    必要がある(`isScalarTower_of_algEquiv` と同じパターン)。
+    ★この段階では純粋にKähler微分の代数——`V_n`族そのものへの
+    依存は無い、汎用インフラとして先に作れる。
+3b. **`Ω_{V_{n+1}/V_n}⊗W_{n+1}` が `d+1` 個の巡回加群の直和という
+    事実そのものを `V_n` 族の定義に接続**(3a の適用)。
+3c. **「非常に分岐した」`V_n` の族**そのものの形式化(具体例: `p^n`
+    乗根と `1` のべき根を添加する塔、上の「典型例」段落)——まだ
+    手つかず。抽象的な族の公理化(`Ω_{V_n/V_{n-1}}` が
+    `(V_n/pV_n)^{d+1}` を商に持つ、という条件だけを構造として
+    持たせる)なら 3a・3b より軽い可能性がある。
+4. **長さの漸化不等式**(上の逐語引用の通り: `δ_n-δ_{n+1}≥
+   β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)とその帰結
+   `δ_n→0`——まだ手つかず。`Module.length` の(半局所環の各成分ごと
+   の)劣加法性・完全列に沿った評価が必要で、Lemma 1.1 の
+   `falt1CokernelLengthEq` で使った技法の拡張になる見込み。
 
 **§2-4(11項目)**: 変化なし——「almost mathematics」が mathlib に
 存在しないため完全に未着手。
