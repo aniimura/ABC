@@ -1320,6 +1320,46 @@ mod deg2`だが高次では異なる)。したがって「`a≡b mod π^n`なら
    iteratedLubinTatePsiTorsionPoints`**(iff): ⟸は既出
    `pi_pow_action_action_eq_zero`そのもの、⟹は3.。
 
+**続報(同日、単位元則の評価版+主単数がxを固定、commit`736f086c`)**:
+「単射性一般には`F_f`の引き算が要る」という壁は残るが、**特別な
+場合**(主単数`1+π^n𝒪_K`が`x`を固定すること)は`F_f`の**単位元則
+だけ**で示せることを発見し、実際に確立した:
+
+1. `Found/PGC/LubinTateIdentityLaw.lean`に**単位元則を評価レベルへ
+   持ち上げる**新しい章を追加:
+   - `coeff_single0_formalGroupLaw`: `F_f`の「`X_0`のみ」の係数
+     (`X_1`次数`0`)は`X`自身の係数と一致——`psi`の定義(`coeff_
+     restrictR_eq_of_e1_zero`が`X_1↦0`の代入で`X_1`次数`0`の係数を
+     保つことを保証)と`formalGroupLaw_identity`(`psi=X`)を組み合わ
+     せるだけ、`restrictR`/`psi`自体を経由した「形式的な」代入の
+     世界を出ずに得られる係数レベルの帰結。
+   - ★★★**`aeval_formalGroupLaw_eq_of_snd_eq_zero`**: `F_f(y₀,0)=y₀`
+     (`y₁=0`のとき)。`y₁=0`だと`d₁≥1`の項は`y₁^{d₁}=0`で消え、
+     `d₁=0`の項は`coeff_single0_formalGroupLaw`により`d₀=1`(係数`1`)
+     以外すべて`0`——`Finset.sum_eq_single`で単項だけ残る。
+     truncationの評価値が(`n₀≥1`である限り)**常に**`y₀`という
+     「一定値」の列になることと、`aeval`の定義そのもの(truncationの
+     極限)への収束を`tendsto_nhds_unique`で結びつける——このセッションで
+     `aeval_subst_eq_aeval_aeval`を作った時と全く同じtruncation-limit
+     手法の再利用。
+2. `Found/PGC/AdjoinIntegers.lean`に★★★**`one_add_mul_pi_pow_action_eq_self`**:
+   **`(1+c*π^n)·x = x`**(`x∈Λ_n`、任意の`n`・`c∈𝒪_K`)。
+   `lubinTateAction_add`(`(1+cπ^n)·x=F_f(1·x,(cπ^n)·x)`)・
+   `lubinTateActionAtTorsionPoint_one`(`1·x=x`)・`pi_pow_action_
+   action_eq_zero`(`(cπ^n)·x=0`)を代入し、上の評価レベル単位元則
+   `F_f(x,0)=x`で結論する。**`F_f`加法の逆元・結合律は一切不要**
+   ——単位元則だけで閉じた。
+
+**教訓(証明の作り方)**: 「`hfam_eq : family1=family2`を`have`で
+別立てし`congr 1`で橋渡しする」という当初の方針は、`Fin 2`の
+`if i=0`の`Decidable`インスタンスが箇所ごとに一致しない(`rw`/
+`simp only [if_pos rfl]`では閉じない、`exact`の defeq 判定でしか
+閉じない場合がある)という技術的な罠にはまり続けた。最終的に
+`simp only [lubinTateActionAtTorsionPoint_one, hcpi0] at hadd`
+——**既存の等式を直接書き換える**——という遥かに単純な経路に
+気づいてから一気に片付いた。次に似た「`if`の入った関数の等式」に
+当たったら、まずこちらを試す。
+
 これで「`a·x=0 ↔ π^n∣a`」(`x`が原始的なπ^n-捩れ点のとき)が
 sorry無しで確立された——`𝒪_K/π^n≅Λ_n`の**核**が確定。
 `|𝒪_K/π^n|=q^n=|Λ_n|`(既出`card_iteratedLubinTateTorsionPoints`)
