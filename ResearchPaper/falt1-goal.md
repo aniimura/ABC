@@ -101,9 +101,22 @@ R C D B` という自然性(`tensorKaehlerEquiv_eq_map_mapBaseChange`、
 ★残る作業(次のセッションはここから):
 1. **`d+1` 個への一般化**(今は2個のみ)——`pushoutKaehlerSplit` を
    `d+1` 回の pushout の反復に適用する帰納法(構造自体は難しくないはず)。
-2. **`mapBaseChange R C B` の単射性の条件**——`falt1MapBaseChangeInjective`
-   と同型の議論(`C` 側が monogenic かつ `f'` 非零因子)が要る。
-   ★★2026-09-04、経路を検討・部分的に実測した(未完成): `Algebra.
+2. ★★★★**2026-09-04、`mapBaseChange R C B` の単射性の条件——
+   完成した**(`mapBaseChange_injective_adjoinRoot_tensor`)。下の
+   「3つ目(AdjoinRoot基底変換)」の経路が閉じた: `tensorPolynomialAlgEquiv
+   (C⊗[R]Polynomial R ≃ₐ[C] Polynomial C)` → `adjoinRootTensorEquiv
+   (C⊗[R]AdjoinRoot g ≃ₐ[C] AdjoinRoot(g.map(algebraMap R C)))` →
+   `mapBaseChange_injective_of_nzd` + `mapBaseChange_injective_transport`
+   で結ぶ。**`B = C⊗[R]AdjoinRoot g` の場合、`pushoutKaehlerSplit` の
+   `hinj` は Lemma 1.1 とまったく同じ形の非零因子条件 1 つ
+   (`g.map(algebraMap R C)` の微分が `AdjoinRoot(g.map(algebraMap R C))`
+   で非零因子)に帰着する。** lake build 済み・sorry 皆無確認済み
+   (commit `f45fa30b`)。残る技術的な下ごしらえ: `PUnit` の宇宙を
+   `Type`(宇宙0)に固定する必要があった(`R C` を `Type*` にした瞬間
+   宇宙メタ変数 `?u` が解決不能になる実測——`tools/lean-idioms.md` へ
+   追記の価値あり)。
+   ★★2026-09-04(この項目は上で解消済み、経緯として残す)経路を検討・
+   部分的に実測した: `Algebra.
    Extension.cotangentComplex_injective_iff P [FormallySmooth R P.Ring]
    : Function.Injective P.cotangentComplex ↔ Subsingleton(H1Cotangent
    R A)`(mathlib)を `P := Extension.ofSurjective(algebraMap
@@ -133,8 +146,9 @@ R C D B` という自然性(`tensorKaehlerEquiv_eq_map_mapBaseChange`、
    `Polynomial` へ specialize する下ごしらえが要る)。**3つの経路
    (H1Cotangent+平坦底変換・Extension.cotangentComplex 橋渡し・
    AdjoinRoot 基底変換の同一視)を検討し、いずれも即座には閉じ
-   なかった**——今回はここで打ち切った。次のセッションは3つ目
-   (AdjoinRoot 基底変換)が最も具体的で有望と判断する。
+   なかった**——この時点ではここで打ち切った。
+   →★★★★続きは同日内、上の「完成した」を見よ:3つ目
+   (AdjoinRoot 基底変換)を実際に最後まで実行し、閉じた。
 3. **「非常に分岐した」`V_n` の族**そのものの形式化(具体例: `p^n` 乗根
    と `1` のべき根を添加する塔)——まだ手つかず。
 4. **`Module.length` の漸化不等式**(`δ_n-δ_{n+1}≥β-(d+1)(δ_n-δ_{n+1})`
