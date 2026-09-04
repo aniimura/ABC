@@ -954,3 +954,29 @@ basicOpen`で基本開集合の定義元がその上で単元であることは�
 `t'`・`t_fac`・`cocycle`(5フィールド)も残る。
 
 コミット: `5653409e`(t_id等4フィールド完成)・`abc47300`(記録)。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに
+続報(訂正——gdV/gdF/gdTを精密な等式を保つ形に作り直し、f_id完成、
+10/12フィールドが揃った、集計10/24で変わらず)。`f_id`に取り組む中で
+**設計上の不備**を発見した——`gdV`/`gdF`/`gdT`は`exists_transitionIso`
+(`Nonempty`で包んだ弱い実存)で定義していたが、これだと「選ばれた座標`s`
+が単元である」という`f_id`に要る事実を`Classical.choice`の不透明性
+のせいで`.choose`から引き出せない(`obtain`と`.choose`が定義上等しく
+ないことも実測確認)。
+
+**修正**: `exists_transitionOpen_eq_basicOpen`(精密な等式`e.hom''ᵁW=
+Z.basicOpen s`をそのまま保持)の`.choose`を直接使うように`gdV`・`gdF`・
+`gdT`を定義し直した。配管の教訓(`tools/lean-idioms.md` #29):`def`内で
+`obtain`を使うと`And.rec`が残り後の`unfold`+`simp`がスタックする——
+`let`+`.1`/`.2`射影を使えば通る。
+
+新規完成(★すべてsorry無し): `gdV_diag_eq_top`・`gdF_id`(f_idそのもの)・
+`Scheme.hom_image_top_eq_top`・`isIso_ι_of_eq_top`・再証明した`gdT_id`・
+`gdF_mono`・`gdF_isOpenImmersion`・`gdF_hasPullback`。
+
+**これで`Scheme.GlueData`の12フィールド中10個(`J・U・V・f・t・t_id・
+f_mono・f_open・f_hasPullback・f_id`)が完成した**。残るは`t'`・
+`t_fac`・`cocycle`のみ。
+
+コミット: `d787b8e3`(訂正・f_id完成)・`ef3b03ce`(lean-idioms #29)・
+`f070dbfb`(記録)。
