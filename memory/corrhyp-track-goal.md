@@ -743,3 +743,17 @@ properではない)——`FEt`が要求する`IsFinite`はGlueDataで貼り合�
 `basicOpenIsoSpecAway`)と`standardEtalePairPullbackIso`をつなげる。
 
 コミット: `8b4c1b2b`(piece_preimage_isAffineOpen等)・`2bdda863`(記録)。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(一般の
+アフィン開上のbasicOpen-Spec同一視完成、1ピース分の完全な連結は
+配管の詰まりで未完了、集計10/24で変わらず)。`IsAffineOpen.
+basicOpenIsoSpecAway`(`ExtLimit.lean`、★sorry無し)完成——mathlibの
+`basicOpenIsoSpecAway`(`X:=Spec R`限定)を一般のアフィン開版へ一般化。
+これで「1ピース分の完全な連結」に要る個々の部品(`standardEtalePairPullbackIso`・
+`IsAffineOpen.basicOpenIsoSpecAway`・`_mapEq`)はすべて完成したが、実際に
+3つを合成しようとしたところ`letI`導入の`Algebra`インスタンスと
+`algebraMap`の構文不一致で複数回type mismatchに当たり、本セッションでは
+完成させられず——正直に未完了として記録(ファイル内コメント+
+corrhyp-goal.mdに詳細)。次回は`show`で型を都度明示しながら再開する。
+
+コミット: `0dc8dc74`(basicOpenIsoSpecAway完成)・`48ad5c26`(記録)。
