@@ -335,4 +335,23 @@ theorem formalGroupLaw_identity_left (hπne0 : π ≠ 0) :
   · exact psiL_functional_equation hq hπmax f hf0 hf1 hfres
   · rw [PowerSeries.X_subst, PowerSeries.subst_X hHSf]
 
+include hq hπmax hf0 hf1 hfres in
+/-- **`F_f`の「`X_1`のみ」の係数(`X_0`の次数`0`)は`X`自身の係数と一致
+する**——`coeff_single0_formalGroupLaw`(`Found/PGC/LubinTateIdentityLaw.lean`)
+の`X_0↔X_1`対称版。`psiL`の定義(`coeff_restrictL_eq_of_e0_zero`により
+`X_0↦0`の代入が`X_0`次数`0`の係数を保つ)と`formalGroupLaw_identity_left`
+(`psiL=X`)を組み合わせるだけ。`n=1`の場合だけを述べる
+`coeff_single10_formalGroupLaw`(既出)の一般`n`版——「`ψ_n`の根を
+Galois群・単数群が保つ」の先の、`F_f`の次数`≥2`部分の評価
+(`norm_aeval_formalGroupLaw_sub_le`)に要る。 -/
+theorem coeff_single1_formalGroupLaw (hπne0 : π ≠ 0) (n : ℕ) :
+    MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) n) (formalGroupLaw hq hπmax f hf0 hf1 hfres) =
+      if n = 1 then 1 else 0 := by
+  have hpsiL_coeff : (psiL hq hπmax f hf0 hf1 hfres).coeff n =
+      MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) n) (formalGroupLaw hq hπmax f hf0 hf1 hfres) := by
+    rw [psiL, PowerSeries.coeff_mk, coeff_restrictL_eq_of_e0_zero]
+    simp [Finsupp.single_eq_of_ne' (by decide : (1 : Fin 2) ≠ 0)]
+  rw [← hpsiL_coeff, formalGroupLaw_identity_left hq hπmax f hf0 hf1 hfres hπne0]
+  rw [PowerSeries.coeff_X]
+
 end ABC3.Found.PGC
