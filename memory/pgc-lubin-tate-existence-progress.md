@@ -453,6 +453,33 @@ Lubin-Tate理論の帰結が完成した——数セッション前に「分離�
 だけの体)と一致すること(𝒪_K作用による他の根への言及を要する、
 古典的Lubin-Tate理論の実質的な内容)は別途の課題として残る。
 
+**続報(2026-09-04、★★★★★★★★★大きな節目——実在のp進局所体でLubin-Tate
+理論一式がすべて空虚でないと確定)**: 分離性の議論(付値拡大)で行き詰まった
+ため、方針を転換し、これまで抽象的な`A`について構築してきたLubin-Tate
+理論一式が**実在の対象に適用できるか**を確認した。3つの発見があった:
+
+①`Found/PGC/ValuationRingDVR.lean::valuationRing_isDVR`(既出、任意の
+p進局所体`K:PAdicLocalField p`の付値環`𝒪[K.carrier]`は離散付値環)を
+起点に、★`Found/PGC/ValuationRingComplete.lean`(新規)で
+`IsAdicComplete (maximalIdeal) (𝒪[K.carrier])`(コンパクト性→
+`CompleteSpace`+距離位相が`maximalIdeal`-進位相と一致すること`IsAdic`
+の確認、`Irreducible.maximalIdeal_pow_eq_closedBall_pow`・
+`IsUltrametricDist.isOpen_closedBall`・`exists_pow_lt_of_lt_one`を
+組み合わせる)・`UniqueFactorizationMonoid`(DVR→PID→UFD)・`CharZero`
+(ℚ_pからの単射)を確立した。
+
+②`Found/PGC/LocalFieldNorm.lean`(既出)が既に`Fintype (ResidueField)`・
+`ExpChar ... p`・`hq`(`residueCard_isPrimePow`)を提供していたと判明。
+
+③`Found/PGC/LubinTateSeriesExists.lean`(新規)で、`f(X):=πX+X^q`が
+`f≡πX(mod deg2)`・`f≡X^q(mod π)`を満たすこと(`exists_lubinTateSeries`)
+——Lubin-Tate級数`f`の存在そのもの——を確立した。
+
+★これで**このセッションのLubin-Tate理論一式(節目1・2・2b・3の全定理)
+が実在のp進局所体`K:PAdicLocalField p`の整数環`𝒪[K.carrier]`に対して
+そのまま適用できる**ことが検証された——原典[pGC]が前提する対象で
+理論全体が空虚でないと確定した、大きなマイルストーン。
+
 **残る作業**: 節目(3)torsion点の構成本体(`D_n`の根を`Λ_n`として定義、
 `𝒪_K`加群構造、`K(Λ_n)/K`の完全分岐性)、節目(4)
 `L_n:=K(Λ_n)`が完全分岐かつ`Gal(L_n/K)≅(𝒪_K/π^n)^×`(Lubin-Tateの
