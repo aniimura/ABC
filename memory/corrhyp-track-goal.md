@@ -1961,3 +1961,22 @@ f i jに要る全データが揃った——続き15で発見した本丸のギ�
 D(f)↔D(g)対称性が要る)。lake build(FieldLimit/ABC3)0エラー確認、
 push済み。集計は引き続き10/24——§4は引き続き0/2だがLemma 4.1の数学的
 内容はほぼ組み上がった。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き6
+exists_ringEquiv_localization_of_eqを実際のX,U,hU,f,g,C,αへ適用して
+一体化しようとしたところ再びelaboration timeout(maxHeartbeats
+4000000で123秒)——足場のletIが増えるほど遅くなる現象が再現。
+
+解決: exists_ringEquiv_of_piece_lift(commit 8c437650、FieldLimit.lean)
+としてさらに一段抽象化——Ctarget・Wtarget・e・h₂まですべて抽象的な型
+変数として扱い、pieceAlgebra等を一切参照しない形にしたところ2.18秒で
+通った。elaboration timeoutは巨大な証明そのものではなく、CorrHyp固有
+の型を証明の中に持ち込むこと自体が原因だったと判明。
+
+意義: Lemma 4.1のGlueData構築に必要な「Rレベルの局所化とℝレベルの
+正しい対象を結びつける」核心部分の代数的な部品はすべて揃った。呼び
+出し側はe・h₂・hp₀・WtargetのIsLocalization.Awayインスタンスを揃えて
+渡すだけで適用できる形になったが、「揃えて渡す」配線自体(pieceAlgebra
+等の足場を伴う)はまだelaboration timeoutで未完成——次はこの配線側も
+さらに細かく分割する。lake build(FieldLimit/ABC3)0エラー確認、
+push済み。集計は引き続き10/24——§4は引き続き0/2。

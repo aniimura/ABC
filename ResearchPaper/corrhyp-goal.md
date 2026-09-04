@@ -4435,3 +4435,50 @@ tmul_one`・`ringEquiv_localization_of_apply_eq`という4つの部品の合成
 lake build(`FieldLimit`/`ABC3`)とも0エラー確認、push完了。集計は
 引き続き10/24——§4は引き続き0/2だが、Lemma 4.1の数学的内容は
 ほぼ組み上がった。
+
+## 2026-09-05夜さらに続き6: `exists_ringEquiv_of_piece_lift`で
+「Rレベル橋渡し」の代数的な部品を完全に1本化——ただし「一体化」も
+elaboration timeoutに当たり、抽象化を一段深める必要があった
+
+前回完成した`exists_ringEquiv_localization_of_eq`を実際の`X,U,hU,f,g,
+C,α`(`pieceAlgebra`等の巨大な足場)へ適用し、`piece(D(f*g))`との
+接続まで**1つの証明として一体化**しようとしたところ、**再び
+elaboration timeoutに当たった**(`maxHeartbeats 4000000`で123秒
+待った上でも)——足場の`letI`の数が増えるほど型クラス探索が遅くなる
+という、続き4で観測した現象がここでも再現した。
+
+**解決**: `exists_ringEquiv_of_piece_lift`(`FieldLimit.lean`、commit
+`8c437650`)として、**さらに一段抽象化**した——`B`・`B'`・`T`だけで
+なく、`Ctarget`(`Γ(C,piece(D(f)))`に相当)・`Wtarget`(`Γ(C,piece
+(D(f*g)))`に相当)・`e`(`Ctarget`との同型)・`h₂`まで**すべて抽象的な
+型変数**として扱い、`CorrHyp`固有の`pieceAlgebra`等を一切参照しない
+形にしたところ、**2.18秒で通った**。続き5の教訓(「抽象化してから
+代入する」)が、`descendPieceR`一式全体の橋渡しという、より大きな
+スケールでも通用することを確認した——**elaboration timeoutは巨大な
+証明そのものではなく、`CorrHyp`固有の型(`pieceAlgebra`由来の`Algebra`
+instance等)を証明の中に持ち込むこと自体が原因**だったと判明した。
+
+```
+theorem exists_ringEquiv_of_piece_lift (B B' T : Type) [...]
+    (n : Type) [Fintype n] (I : Ideal (MvPolynomial n B)) (p₀ : MvPolynomial n B')
+    (Ctarget Wtarget : Type) [CommRing Ctarget] [CommRing Wtarget]
+    (e : (MvPolynomial n B ⧸ I) ⊗[B] T ≃+* Ctarget) (h₂ : Ctarget)
+    [Algebra Ctarget Wtarget] [IsLocalization.Away h₂ Wtarget]
+    (hp₀ : ...) :
+    ∀ (M : Type) [...] [IsLocalization.Away (mk hIR' p₀) M],
+    Nonempty (M ⊗[B'] T ≃+* Wtarget)
+```
+
+**意義(正直な評価)**: `Lemma 4.1`のGlueData構築に必要な「`R`レベルの
+局所化と`ℝ`レベルの正しい対象を結びつける」核心部分の**代数的な部品は
+すべて揃った**。呼び出し側(実際の`X,U,hU,f,g,C,α`)は、`e`(`pieceAlgebra_
+R_model_baseChange`)・`h₂`(`piece_basicOpen_localizationElem`)・`hp₀`
+(`exists_piece_basicOpen_R_lift`)・`Wtarget`の`IsLocalization.Away`
+インスタンス(`piece_isLocalization_basicOpen_mul`)を**揃えて渡すだけ**
+でこの補題を適用できる形になった——ただし「揃えて渡す」配線自体
+(呼び出し側の証明)は、前回・今回とも`pieceAlgebra`等の足場を伴うと
+elaboration timeoutに当たっており、まだ**未完成**。次の一手は、
+配線側もさらに細かく分割する(例えば`hp₀`を導出する部分と、それを
+この補題へ渡す部分を別々の宣言にする)ことで、個々の断片が軽く保たれる
+よう工夫すること。lake build(`FieldLimit`/`ABC3`)とも0エラー確認、
+push完了。集計は引き続き10/24——§4は引き続き0/2。
