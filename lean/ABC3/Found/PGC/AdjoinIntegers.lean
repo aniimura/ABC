@@ -420,4 +420,50 @@ noncomputable def lubinTateActionAtTorsionPoint {p : ℕ} [Fact p.Prime]
   lubinTateEvalAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem
     (LubinTateAction hq hπmax f hf0 hf1 hf a)
 
+/-- `PowerSeries.aeval` は `X` を評価点そのものへ送る——`X`を
+`Polynomial.X`の冪級数への係数込みの像として書き直し、
+`PowerSeries.aeval_coe`・`Polynomial.aeval_X`と組み合わせるだけの、
+`PowerSeries.aeval`の最も基本的な性質(汎用、`AdjoinIntegers`
+固有ではない)。 -/
+theorem aeval_X_eq_self {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
+    [UniformSpace R] [UniformSpace S] [IsUniformAddGroup R] [IsTopologicalSemiring R]
+    [IsUniformAddGroup S] [T2Space S] [CompleteSpace S] [IsTopologicalRing S]
+    [IsLinearTopology S S] [ContinuousSMul R S]
+    {a : S} (ha : PowerSeries.HasEval a) :
+    PowerSeries.aeval ha (PowerSeries.X : PowerSeries R) = a := by
+  have h1 : (PowerSeries.X : PowerSeries R) = ((Polynomial.X : Polynomial R) : PowerSeries R) := by
+    simp
+  rw [h1, PowerSeries.aeval_coe]
+  simp
+
+/-- ★**`1·x = x`**——Lubin-Tate の `𝒪_K` 作用の単位律。`LubinTateAction_
+one_eq_X`(`[1]_f = X`、既に確立済み)と`aeval_X_eq_self`(`aeval`は
+`X`を評価点そのものへ送る)を組み合わせるだけ。加群作用の公理の
+1つが実際に成り立つことを確認した、最初の具体例。 -/
+theorem lubinTateActionAtTorsionPoint_one {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))] :
+    lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem 1 =
+      ⟨⟨x, hmem⟩, mem_adjoinIntegers_of_mem_iteratedLubinTateTorsionPoints
+          K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem⟩ := by
+  haveI := completeSpace_adjoinIntegers K x
+  haveI := isLinearTopology_adjoinIntegers K x
+  haveI := continuousSMul_adjoinIntegers K x
+  show lubinTateEvalAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem
+    (LubinTateAction hq hπmax f hf0 hf1 hf 1) = _
+  rw [LubinTateAction_one_eq_X hq hπmax hπne0 f hf0 hf1 hf]
+  unfold lubinTateEvalAtTorsionPoint
+  apply aeval_X_eq_self
+
 end ABC3.Found.PGC
