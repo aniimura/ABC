@@ -62,19 +62,27 @@ Faltings の原文「`Ω_W` は `Ω_V⊗W⊕WdT` を `f'(w)dT` で割った商�
    `AddEquiv`(加法群としての同型)では直接使えない。`falt1CokernelIso`
    はシグネチャでの instance 解決順の問題を避けるため意図的に `≃+` に
    弱めていた(`omegaCongr` 等の内部の `KaehlerDifferential.map` 自体は
-   本来 A-線形だが、型としては落としてある)——`≃ₗ[W]` まで持ち上げる
-   作業がまだ残っている(2026-09-04 に `Module.length` の存在と
-   `LinearEquiv.length_eq` の要件を確認)。
+   本来 A-線形だが、型としては落としてある)。★アップグレードの道筋:
+   `AddEquiv.toLinearEquiv (e : M ≃+ N) (h : ∀ c x, e (c•x) = c•e x) :
+   M ≃ₗ[R] N` が既にある(2026-09-04 に発見)ので、型を書き直す必要は
+   なく `falt1CokernelIso` の**スムル可換性を別命題として証明**すれば
+   よい——ただし合成の各段(`omegaCongr` の逆写像・`Ideal.quotientEquiv`
+   経由の transport)を辿って W-作用との整合性を確認する必要があり、
+   まだ完成していない。
 2. **単射性(Lemma 1.1 の本体の主張、第一完全列)**: `Ω_V ⊗_V W → Ω_W`
    (絶対微分、Z=絶対基底とする塔 Z→V→W への「第一完全列」)の単射性。
    Faltings の議論は `Ω_{V[T]/Z} ≅ Ω_V⊗V[T]⊕V[T]dT` という直和分解と
    f'(w) が非零因子であることを使うが、この直和分解の既製品も mathlib
    に無い(`polynomialEquiv`・`mvPolynomialBasis` は自明底のみ)——
    Lemma 1.1 の残り部分の中でも最も骨が折れそうな箇所。
-3. Falt1 の `V` は完備離散付値環(すべて `IsDedekindDomain` 等の一般論
-   でカバーされる保証はまだ無い、個別確認が必要)。
+3. ✅(2026-09-04 解消)Falt1 の `V` は完備離散付値環——mathlib の
+   `IsDiscreteValuationRing V`(`[IsDomain V]` 付き)は `IsDedekindDomain V`
+   を自動で含意する(`infer_instance` で確認済み、PID⟹Dedekind経由)。
+   `falt1CokernelIso` の `[IsDedekindDomain V]` 要求は Falt1 の設定に
+   そのまま適用できる——他の細かい設定(`IsIntegralClosure W V L` 等)は
+   `W` が「`L` における `V` の整閉包」という定義そのものから通常従う。
 
-★見積り: 上記4点だけでもさらに多くの補題を要し、Lemma 1.1 の完成には
+★見積り: 上記2点だけでもさらに補題を要し、Lemma 1.1 の完成には
 まだ日数単位の作業が必要と見られる。§2-4 は Faltings の
 "almost mathematics" 自体が mathlib に無い(`Almost`/`Malcev`/
 `Tannakian` を mathlib 全体検索して確認済み、2026-09-04)ため、
