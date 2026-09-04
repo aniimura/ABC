@@ -200,4 +200,87 @@ theorem existsUnique_unitActionQuotient_eq_algEquiv
   rw [hU']
   exact (congrArg Subtype.val hU).symm
 
+/-- **相互写像`σ↦u_σ`**——`existsUnique_unitActionQuotient_eq_algEquiv`
+の`Classical.choose`による具体的な定義。`Gal(K(Λ_n)/K)≅(𝒪_K/π^n)^×`
+という主定理の実体。 -/
+noncomputable def reciprocityMap
+    {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) (x : K.closure)
+    (hxψ : x ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn)
+    (hxn : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (σ : K.closure ≃ₐ[K.carrier] K.closure) :
+    (𝒪[K.carrier])ˣ ⧸ principalUnits K π n :=
+  (existsUnique_unitActionQuotient_eq_algEquiv K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem σ).choose
+
+/-- `reciprocityMap`の定義性質: `reciprocityMap σ · x = σ(x)`。 -/
+theorem reciprocityMap_spec
+    {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) (x : K.closure)
+    (hxψ : x ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn)
+    (hxn : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (σ : K.closure ≃ₐ[K.carrier] K.closure) :
+    (↑(↑(unitActionQuotientLift K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem
+        (reciprocityMap K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem σ)) :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) = σ x :=
+  (existsUnique_unitActionQuotient_eq_algEquiv K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem σ).choose_spec.1
+
+/-- **整合性の確認**: 恒等写像は単位元類に対応する
+(`reciprocityMap (AlgEquiv.refl) = 1`)——`1·x=x`
+(`lubinTateActionAtTorsionPoint_one`、既出)と一意性
+(`existsUnique_unitActionQuotient_eq_algEquiv`の`.unique`)から。
+準同型性(`u_{στ}=u_σ*u_τ`)の完全な証明には依然としてGalois
+同変性(`σ(a·x)=a·σ(x)`)が要るが、この基点でのチェックは同変性
+抜きでも独立に示せる。 -/
+theorem reciprocityMap_one
+    {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) (x : K.closure)
+    (hxψ : x ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn)
+    (hxn : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))] :
+    reciprocityMap K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem (AlgEquiv.refl) = 1 := by
+  have h1 : (↑(↑(unitActionQuotientLift K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem
+      (1 : (𝒪[K.carrier])ˣ ⧸ principalUnits K π n)) :
+      IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) =
+      (AlgEquiv.refl : K.closure ≃ₐ[K.carrier] K.closure) x := by
+    show (↑(↑(unitActionQuotientLift K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem
+        (QuotientGroup.mk (s := principalUnits K π n) 1)) :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure) = x
+    rw [unitActionQuotientLift_mk]
+    show (↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem
+      ((1 : (𝒪[K.carrier])ˣ) : 𝒪[K.carrier])) :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) = x
+    rw [Units.val_one, lubinTateActionAtTorsionPoint_one]
+  exact (existsUnique_unitActionQuotient_eq_algEquiv K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem
+    AlgEquiv.refl).unique (reciprocityMap_spec K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem
+      AlgEquiv.refl) h1
+
 end ABC3.Found.PGC
