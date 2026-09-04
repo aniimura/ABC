@@ -2535,6 +2535,28 @@ mathlib での正確な組み立て方は未確認)。
       これで反復pushoutを`n`回適用した結果の**長さ**も、各段で
       追加した因子の長さの和として追跡できる基盤が揃った。
 
+      ★さらに、不要な仮定`[Algebra C.carrier B1]`(`pushoutKaehler
+      SplitStep`自身は要求しておらず、証明本文でも一度も使っていな
+      かった——新しい因子`C`が前段の累積環`B1`に埋め込まれる必要は
+      無い、むしろ一般には逆方向)を発見・削除した(commit分は次項)。
+
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05、
+      **`AdjoinRoot`因子2個の反復pushoutを実際にend-to-endで構築した**
+      (`falt1_pushoutKaehlerSplitStepOption_adjoinRoot_example`、
+      `pushoutKaehlerSplit3`と同じ役割の小さな具体例)。`falt1_
+      isPushout_adjoinRoot`+`mapBaseChange_injective_adjoinRoot_
+      direct`+`pushoutKaehlerSplitStepOption`を2回連鎖させ、
+      `V_0=R → V_1=AdjoinRoot g1 → V_2=AdjoinRoot g2`という
+      **`d+1`個の単一生成拡大の同時添加**(Faltings の「典型例」
+      段落と一致する構成)が実際に組み立てられることを確認した。
+      副産物として、2段目の添字族`F`は`e1`(1段目の結果)の型から
+      `_`で自動推論させれば明示的に書き下す必要が無いことも分かった
+      ——これは`n`段への一般化(`F`をn段分手で書き下す代わりに、
+      各段で`_`推論に任せる)の実装コストを大きく下げる発見でもある。
+      これで3aで構想した「`V_{n+1}`を`d+1`個の単一生成拡大の反復
+      pushoutとして構成する」という道が、**具体例のレベルで完全に
+      実証された**——残るのは`n`段(または`d+1`段)の一般化のみ。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
