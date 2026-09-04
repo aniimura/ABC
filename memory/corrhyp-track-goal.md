@@ -1910,3 +1910,19 @@ cancelBaseChange・exists_piece_basicOpen_R_liftのhp₀・今回の補題とい
 4つの既存部品を1本の同型の鎖として繋ぐ必要があり、まだ未完成——複数の
 同型合成を慎重に追跡する作業、次の一手。lake build(ExtLimit/ABC3)
 0エラー確認、push済み。集計は引き続き10/24——§4は引き続き0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き3
+ideal_map_mvPolynomial_promote_baseChange_eq(commit d27f4b80、FieldLimit.
+lean)完成——IをB→B'→Tと2段で底変換したものがB→Tと1段で底変換したもの
+に一致することを示した(cancelBaseChange経由より単純な設計、quotient_
+mvPolynomial_baseChangeを2回適用して比較する道の核心部品)。
+
+正直な記録: この事実を含む完全な同型の鎖を、descendPieceRの全letI
+足場を伴った1つの巨大な証明として組み立てようとしたが、maxHeartbeats
+4000000(約85秒待った上で)でもタイムアウトした——letIの数が増えるほど
+型クラス探索が遅くなる現象を観測(Etale/FinitePresentationのhaveIを
+追加しただけで、それより前のAlgebra instanceのletI自体が新たに
+タイムアウトするように)。次の道: e1・e2・hIdealEq・hp₀を個別のhave
+として先に確立してから引数として渡す小さな最終補題に分割する(足場の
+再構築を1回で済ませる)。lake build(FieldLimit/ABC3)0エラー確認、
+push済み。集計は引き続き10/24——§4は引き続き0/2。

@@ -4307,3 +4307,37 @@ TensorProduct.cancelBaseChange`(`R`から`R'`への昇格が`S₀⊗T`を保つ
 慎重に追跡する作業で、次の一手として記録する。lake build(`ExtLimit`/
 `ABC3`)とも0エラー確認、push完了。集計は引き続き10/24——§4は引き続き
 0/2。
+
+## 2026-09-05夜さらに続き3: 橋渡しの中核部品を1つ確定
+(`ideal_map_mvPolynomial_promote_baseChange_eq`)、完全な組み立ては
+elaboration timeoutで次回に持ち越し
+
+上記の「4つの部品を繋ぐ」実装に着手した。`cancelBaseChange`経由の道は
+複雑すぎると判断し、代わりに**`quotient_mvPolynomial_baseChange`を
+`R`レベル・`R'`レベルの両方に適用し、対応するイデアルが一致することを
+示してから2つの結果を直接比較する**という、より単純な設計に切り替えた
+——このために必要な唯一の新しい代数的事実`I`を`B→B'→T`と2段で底変換
+したものが`B→T`と1段で底変換したものに一致すること(`Ideal.map_map`+
+`IsScalarTower.algebraMap_eq`+`MvPolynomial.ringHom_ext`)を`ideal_map_
+mvPolynomial_promote_baseChange_eq`(`FieldLimit.lean`、commit
+`d27f4b80`)として確立した。
+
+**正直な記録(elaboration timeoutで打ち切り)**: この事実を含む完全な
+同型の鎖(`quotient_mvPolynomial_baseChange`を2回適用+`IsScalarTower`
+の構成+`exists_piece_basicOpen_R_lift`の`hp₀`との突き合わせ)を、
+`descendPieceR`の全`letI`足場(`pieceAlgebra`・`appLE`・`Etale`・
+`FinitePresentation`等)を伴った**1つの巨大な証明として組み立てよう**
+としたところ、`maxHeartbeats 4000000`(約85秒待った上で)でも
+`whnf`タイムアウトになった——`letI`の数が増えるほど型クラス探索の
+候補が増え、以前は通っていた箇所まで遅くなるという現象を観測した
+(具体的には、`Algebra.Etale`/`Algebra.FinitePresentation`の`haveI`を
+追加しただけで、それより前にあった`Algebra`instanceの`letI`自体が
+新たにタイムアウトするようになった)。今回はこの巨大な組み立てを
+断念し、**スコープを絞った一般補題**(`ideal_map_mvPolynomial_promote_
+baseChange_eq`)として確定させることに専念した——次に試すべき道は、
+「完全な組み立て」を1つの巨大な証明にせず、`e1`・`e2`・`hIdealEq`・
+`hp₀`を**個別の`have`として先に確立してから**それらを**引数として
+渡す**小さな最終補題に分割する(足場の再構築を1回で済ませる)ことで、
+elaboration timeoutを回避できる可能性がある。lake build(`FieldLimit`/
+`ABC3`)とも0エラー確認、push完了。集計は引き続き10/24——§4は引き続き
+0/2。
