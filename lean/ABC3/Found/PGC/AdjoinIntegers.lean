@@ -1,6 +1,7 @@
 import ABC3.Found.PGC.LubinTateDistinguishedSeparable
 import ABC3.Found.PGC.LubinTateActionEndomorphism
 import Mathlib.RingTheory.PowerSeries.PiTopology
+import Mathlib.RingTheory.MvPowerSeries.PiTopology
 
 /-!
 # `K.carrier⟮x⟯` の整数環を `Valued` を経由せず直接構成する(`sorry` 無し)
@@ -785,5 +786,220 @@ theorem lubinTateAction_mul {p : ℕ} [Fact p.Prime]
     rw [constantCoeff_LubinTateAction]; exact IsNilpotent.zero
   · exact constantCoeff_LubinTateAction hq hπmax f hf0 hf1 hf b
   · rfl
+
+/-! ### ★★★★★★★★★★★★★★★★★★★★節目——Lubin-Tate 作用の加法性
+`(a+b)·x = F_f(a·x,b·x)`
+
+`aeval_subst_eq_aeval_aeval`(1変数の連鎖律)の**2変数版**を同じ
+トランケーション経由の手法で構成し、既存の`LubinTateAction_add`
+(`[a+b]_f=subst(family)(F_f)`)と組み合わせて加法性を確立する。 -/
+
+/-- `family i = X * h_i` と分解できるとき、`d.prod` の次数`e`未満の
+係数は`0`(`coeff_pow_eq_zero_of_lt`の2変数版)——各成分を`X`で
+くくり出し、積全体が`X^|d|`で割り切れることから。 -/
+theorem coeff_prod_pow_eq_zero_of_lt {A : Type*} [CommRing A] (family : Fin 2 → PowerSeries A)
+    (hfamily : ∀ i, PowerSeries.constantCoeff (family i) = 0)
+    (d : Fin 2 →₀ ℕ) (e : ℕ) (hde : e < d.sum (fun _ ee => ee)) :
+    MvPowerSeries.coeff (Finsupp.single () e) (d.prod (fun s ee => (family s) ^ ee)) = 0 := by
+  show PowerSeries.coeff e (d.prod (fun s ee => (family s) ^ ee)) = 0
+  have hfact : ∀ i, ∃ h : PowerSeries A, family i = PowerSeries.X * h :=
+    fun i => PowerSeries.X_dvd_iff.mpr (hfamily i)
+  choose h hh using hfact
+  have heq : d.prod (fun s ee => (family s) ^ ee) =
+      PowerSeries.X ^ (d.sum (fun _ ee => ee)) * d.prod (fun s ee => (h s) ^ ee) := by
+    rw [Finsupp.prod, Finsupp.prod, Finsupp.sum]
+    rw [← Finset.prod_pow_eq_pow_sum]
+    rw [← Finset.prod_mul_distrib]
+    apply Finset.prod_congr rfl
+    intro s _
+    rw [hh s, mul_pow]
+  rw [heq, PowerSeries.coeff_X_pow_mul']
+  simp [Nat.not_le.mpr hde]
+
+/-- `subst family Φ`の次数`e`の係数は、`Φ`を多重次数`n`でトランケート
+(`trunc'`)しても変わらない——`n`が`d`のすべての成分を覆っているか、
+`d`の総次数が`e`を超えるかのいずれかであれば十分
+(`coeff_prod_pow_eq_zero_of_lt`と`MvPowerSeries.coeff_subst`の
+`finsum`公式から)。 -/
+theorem coeff_subst_family_trunc_eq {A : Type*} [CommRing A] {family : Fin 2 → PowerSeries A}
+    (hfamily : MvPowerSeries.HasSubst family) (hfamily0 : ∀ i, PowerSeries.constantCoeff (family i) = 0)
+    (Φ : MvPowerSeries (Fin 2) A) (e : ℕ) (n : Fin 2 →₀ ℕ)
+    (hn : ∀ d : Fin 2 →₀ ℕ, e < d.sum (fun _ ee => ee) ∨ d ≤ n) :
+    PowerSeries.coeff e (MvPowerSeries.subst family
+        ((MvPowerSeries.trunc' A n Φ : MvPolynomial (Fin 2) A) : MvPowerSeries (Fin 2) A)) =
+      PowerSeries.coeff e (MvPowerSeries.subst family Φ) := by
+  show MvPowerSeries.coeff (Finsupp.single () e) _ = MvPowerSeries.coeff (Finsupp.single () e) _
+  rw [MvPowerSeries.coeff_subst hfamily, MvPowerSeries.coeff_subst hfamily]
+  apply finsum_congr
+  intro d
+  rcases hn d with hd | hd
+  · rw [coeff_prod_pow_eq_zero_of_lt family hfamily0 d e hd, smul_zero, smul_zero]
+  · have hcoeff : MvPowerSeries.coeff d ((MvPowerSeries.trunc' A n Φ : MvPolynomial (Fin 2) A) :
+        MvPowerSeries (Fin 2) A) = MvPowerSeries.coeff d Φ := by
+      show (MvPowerSeries.trunc' A n Φ).coeff d = MvPowerSeries.coeff d Φ
+      rw [MvPowerSeries.coeff_trunc']
+      simp [hd]
+    rw [hcoeff]
+
+open scoped MvPowerSeries.WithPiTopology in
+/-- `subst family(trunc' A n Φ)`は`n→∞`で`subst family Φ`へ収束する
+(1変数版`tendsto_subst_trunc`の2変数版)——各出力次数`e`について、
+`n:=`(定数`e`)を境に`coeff_subst_family_trunc_eq`が値の一定性を
+保証することから。 -/
+theorem tendsto_subst_family_trunc {A : Type*} [CommRing A] [TopologicalSpace A]
+    {family : Fin 2 → PowerSeries A}
+    (hfamily : MvPowerSeries.HasSubst family) (hfamily0 : ∀ i, PowerSeries.constantCoeff (family i) = 0)
+    (Φ : MvPowerSeries (Fin 2) A) :
+    Filter.Tendsto (fun n => MvPowerSeries.subst family
+        ((MvPowerSeries.trunc' A n Φ : MvPolynomial (Fin 2) A) : MvPowerSeries (Fin 2) A))
+      Filter.atTop (nhds (MvPowerSeries.subst family Φ)) := by
+  rw [PowerSeries.WithPiTopology.tendsto_iff_coeff_tendsto]
+  intro e
+  apply tendsto_atTop_of_eventually_const (i₀ := Finsupp.equivFunOnFinite.symm (fun _ : Fin 2 => e))
+  intro n hn
+  apply coeff_subst_family_trunc_eq hfamily hfamily0 Φ e n
+  intro d
+  have hsum : d.sum (fun _ ee => ee) = d 0 + d 1 := by
+    rw [Finsupp.sum_fintype]
+    · rw [Fin.sum_univ_two]
+    · intro; rfl
+  have hn0 : e ≤ n 0 := by have := hn 0; simpa using this
+  have hn1 : e ≤ n 1 := by have := hn 1; simpa using this
+  by_cases hd0 : d 0 ≤ e
+  · by_cases hd1 : d 1 ≤ e
+    · right
+      intro i
+      fin_cases i
+      · simpa using le_trans hd0 hn0
+      · simpa using le_trans hd1 hn1
+    · left; omega
+  · left; omega
+
+open scoped MvPowerSeries.WithPiTopology in
+/-- ★★★★★★★★★★★★★★★★**`subst`と`aeval`を繋ぐ連鎖律の2変数版**——
+`aeval x(subst family Φ) = aeval y Φ`(`y i := aeval x(family i)`)。
+`aeval_subst_eq_aeval_aeval`と全く同じ手法(トランケーション経由の
+収束・`PowerSeries.continuous_aeval`/`MvPowerSeries.continuous_aeval`
+・`MvPolynomial.comp_aeval_apply`)を2変数へ拡張しただけ。 -/
+theorem aeval_subst_family_eq_aeval_aeval {A S : Type*} [CommRing A] [CommRing S] [Algebra A S]
+    [UniformSpace A] [UniformSpace S] [IsUniformAddGroup A] [IsTopologicalSemiring A]
+    [IsUniformAddGroup S] [T2Space S] [CompleteSpace S] [IsTopologicalRing S]
+    [IsLinearTopology S S] [ContinuousSMul A S]
+    {family : Fin 2 → PowerSeries A} {Φ : MvPowerSeries (Fin 2) A}
+    (hfamily : MvPowerSeries.HasSubst family) (hfamily0 : ∀ i, PowerSeries.constantCoeff (family i) = 0)
+    {x : S} (hx : PowerSeries.HasEval x)
+    {y : Fin 2 → S} (hy : MvPowerSeries.HasEval y)
+    (hxy : ∀ i, PowerSeries.aeval hx (family i) = y i) :
+    PowerSeries.aeval hx (MvPowerSeries.subst family Φ) = MvPowerSeries.aeval hy Φ := by
+  have h1 : Filter.Tendsto (fun n => PowerSeries.aeval hx
+      (MvPowerSeries.subst family ((MvPowerSeries.trunc' A n Φ : MvPolynomial (Fin 2) A) :
+        MvPowerSeries (Fin 2) A)))
+      Filter.atTop (nhds (PowerSeries.aeval hx (MvPowerSeries.subst family Φ))) :=
+    (PowerSeries.continuous_aeval hx).continuousAt.tendsto.comp (tendsto_subst_family_trunc hfamily hfamily0 Φ)
+  have h2 : ∀ n, PowerSeries.aeval hx
+      (MvPowerSeries.subst family ((MvPowerSeries.trunc' A n Φ : MvPolynomial (Fin 2) A) :
+        MvPowerSeries (Fin 2) A)) =
+      MvPowerSeries.aeval hy ((MvPowerSeries.trunc' A n Φ : MvPolynomial (Fin 2) A) :
+        MvPowerSeries (Fin 2) A) := by
+    intro n
+    rw [MvPowerSeries.subst_coe, MvPolynomial.comp_aeval_apply, MvPowerSeries.aeval_coe,
+      funext hxy]
+  rw [funext h2] at h1
+  have h3 : Filter.Tendsto (fun n => MvPowerSeries.aeval hy
+      ((MvPowerSeries.trunc' A n Φ : MvPolynomial (Fin 2) A) : MvPowerSeries (Fin 2) A))
+      Filter.atTop (nhds (MvPowerSeries.aeval hy Φ)) :=
+    (MvPowerSeries.continuous_aeval hy).continuousAt.tendsto.comp
+      (MvPowerSeries.WithPiTopology.tendsto_trunc'_atTop Φ)
+  exact tendsto_nhds_unique h1 h3
+
+/-- `family:=fun i=>if i=0 then a·x else b·x`は位相的冪零な族——
+`Fin 2`は有限型なので`cofinite`フィルターが`⊥`になり、
+`Tendsto _ ⊥ _`は自動的に成り立つ(`MvPowerSeries.HasEval`のもう
+片方の条件)。各成分の位相的冪零性は`hasEval_lubinTateActionAtTorsionPoint`
+から。 -/
+theorem hasEval_actionFam2 {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (a b : 𝒪[K.carrier]) :
+    MvPowerSeries.HasEval (fun i : Fin 2 =>
+      if i = 0 then (lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem a : adjoinIntegers K x)
+      else (lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem b : adjoinIntegers K x)) := by
+  constructor
+  · intro i
+    split
+    · exact hasEval_lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem a
+    · exact hasEval_lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem b
+  · rw [show (Filter.cofinite : Filter (Fin 2)) = ⊥ from by rw [Filter.cofinite_eq_bot_iff]; infer_instance]
+    exact Filter.tendsto_bot
+
+/-- `adjoinIntegers K x`の中で2変数の冪級数(特に`formalGroupLaw`)を
+位相的冪零な点`y : Fin 2 → adjoinIntegers K x`で評価する——
+`lubinTateEvalAtPoint`の2変数版、同じ`CompleteSpace`等をそのまま
+流用する。 -/
+noncomputable def lubinTateEvalFormalGroupAt {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p) (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (y : Fin 2 → adjoinIntegers K x) (hy : MvPowerSeries.HasEval y)
+    (Φ : MvPowerSeries (Fin 2) (𝒪[K.carrier])) : adjoinIntegers K x :=
+  haveI := completeSpace_adjoinIntegers K x
+  haveI := isLinearTopology_adjoinIntegers K x
+  haveI := continuousSMul_adjoinIntegers K x
+  MvPowerSeries.aeval hy Φ
+
+/-- ★★★★★★★★★★★★★★★★★★★★**節目——Lubin-Tate 作用の加法性**:
+`(a+b)·x = F_f(a·x,b·x)`。既存の`LubinTateAction_add`
+(`[a+b]_f=subst(family)(F_f)`、`family i:=if i=0 then[a]_f else[b]_f`)
+の両辺を`x`で評価し、`aeval_subst_family_eq_aeval_aeval`(2変数の
+連鎖律)で右辺を`aeval(fun i=>aeval x(family i))(F_f)
+=F_f(a·x,b·x)`へ変形するだけ。これで`𝒪_K`加群の構造公理——単位律・
+零元の吸収律・乗法性・加法性——が**すべて**確立された。 -/
+theorem lubinTateAction_add {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (a b : 𝒪[K.carrier]) :
+    lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem (a + b) =
+      lubinTateEvalFormalGroupAt K x
+        (fun i => if i = 0 then lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem a
+          else lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem b)
+        (hasEval_actionFam2 K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem a b)
+        (formalGroupLaw hq hπmax f hf0 hf1 hf) := by
+  haveI := completeSpace_adjoinIntegers K x
+  haveI := isLinearTopology_adjoinIntegers K x
+  haveI := continuousSMul_adjoinIntegers K x
+  show lubinTateEvalAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem
+    (LubinTateAction hq hπmax f hf0 hf1 hf (a + b)) = _
+  unfold lubinTateEvalAtTorsionPoint lubinTateEvalFormalGroupAt
+  rw [LubinTateAction_add hq hπmax hπne0 f hf0 hf1 hf a b]
+  apply aeval_subst_family_eq_aeval_aeval (hasSubst_actionFam2 hq hπmax f hf0 hf1 hf a b)
+  · intro i
+    split
+    · exact constantCoeff_LubinTateAction hq hπmax f hf0 hf1 hf a
+    · exact constantCoeff_LubinTateAction hq hπmax f hf0 hf1 hf b
+  · intro i
+    split
+    · rfl
+    · rfl
 
 end ABC3.Found.PGC
