@@ -36,14 +36,24 @@ Faltings の原文「`Ω_W` は `Ω_V⊗W⊕WdT` を `f'(w)dT` で割った商�
 一般整閉整域版を使った)。`AdjoinRoot f = Polynomial V ⧸ (f)` なので、
 ①の具体形と Falt1 の一般の `W` を繋ぐ最初の橋。
 
+**④ 代数同型に沿った `Ω` の転送(完成)**: 環同型 `e : A ≃ₐ[R] B` は
+`Ω[A⁄R] ≃+ Ω[B⁄R]` を誘導する——`omegaCongr`(mathlib には代数の**塔**
+用の `KaehlerDifferential.map` はあるが、代数**同型**用の transport の
+既製品が無かったため、`e`・`e.symm` から作った局所インスタンスで
+両方向の `map` を組み立てて互いに逆写像であることを示した、
+`omegaCongr_leftInv`/`_rightInv`・`isScalarTower_of_algEquiv`)。
+
 ## 残っている作業(正直な記録、Lemma 1.1 完成にはまだ遠い)
 
-1. **①②③の貼り合わせ**: ③の `AlgEquiv` に沿って①の `Ω` 同型を
-   `W` へ転送する必要があるが、**Kähler 微分を代数同型に沿って転送する
-   既製の mathlib 補題が無い**(`KaehlerDifferential.map` は代数の塔
-   `R→A→B` 用で、"同型 `A≃B`" 用ではない——`Algebra A B` インスタンスを
-   同型から作って両方向の `map` を合成する形で自分で構築する必要が
-   ありそうだが未着手。2026-09-04 に mathlib 検索して確認)。
+1. **①②③④の貼り合わせ**: 個々の道具は揃ったが、`AdjoinRoot f` が
+   `Polynomial V ⧸ (f)` と**定義的に**等しいのに `Algebra (Polynomial V)
+   (AdjoinRoot f)` が自動では見つからない(`AdjoinRoot` が `def` で
+   simp-reducible ではないため)、`Ideal.quotientEquiv` で `e` に沿って
+   イデアルを転送する際に「`e` が微分の像をどこへ送るか」
+   (`e(algebraMap (Polynomial V) (AdjoinRoot f) p) = aeval w p` の形の
+   自然性)を別途示す必要がある、等の**接着剤としての補題**がまだ複数
+   要る——数学的な内容は尽きたが、Lean の配管がまだ残っている
+   (2026-09-04 に実測)。
 2. **単射性(Lemma 1.1 の本体の主張、第一完全列)**: `Ω_V ⊗_V W → Ω_W`
    (絶対微分、Z=絶対基底とする塔 Z→V→W への「第一完全列」)の単射性。
    Faltings の議論は `Ω_{V[T]/Z} ≅ Ω_V⊗V[T]⊕V[T]dT` という直和分解と
