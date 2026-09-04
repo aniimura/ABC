@@ -1923,4 +1923,60 @@ theorem algEquiv_mem_iteratedLubinTateTorsionPoints_of_mem {p : ℕ} [Fact p.Pri
   rw [haeval, map_zero] at h
   exact h
 
+/-- **`σ`は`ψ_n`の根の集合を(全射的に)並べ替える**——
+`algEquiv_mem_iteratedLubinTatePsiTorsionPoints_of_mem`を`σ`と
+`σ.symm`の両方に適用するだけで、包含関係が両側から出て
+`Finset.image`としての等号(`⊆`の反対称性)になる——単射性・
+濃度の議論は一切不要(`σ`は常に単射だが、有限集合の自己写像として
+全単射であることまでは要らず、この「両側から`⊆`」だけで十分)。
+`Gal(K.closure/K.carrier)`が有限集合`ψ_nの根`の**置換**として
+作用することの直接の系。 -/
+theorem image_algEquiv_iteratedLubinTatePsiTorsionPoints {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) (σ : K.closure ≃ₐ[K.carrier] K.closure) :
+    Finset.image σ (iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn) =
+      iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn := by
+  apply Finset.Subset.antisymm
+  · intro y hy
+    obtain ⟨x, hx, rfl⟩ := Finset.mem_image.mp hy
+    exact algEquiv_mem_iteratedLubinTatePsiTorsionPoints_of_mem K hq hπmax hπne0 f hf0 hf1 hf n hn σ x hx
+  · intro x hx
+    rw [Finset.mem_image]
+    refine ⟨σ.symm x, ?_, by simp⟩
+    have hσx := algEquiv_mem_iteratedLubinTatePsiTorsionPoints_of_mem
+      K hq hπmax hπne0 f hf0 hf1 hf n hn σ.symm x hx
+    simpa using hσx
+
+/-- `Λ_n`版——上と全く同じ議論。 -/
+theorem image_algEquiv_iteratedLubinTateTorsionPoints {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (σ : K.closure ≃ₐ[K.carrier] K.closure) :
+    Finset.image σ (iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n) =
+      iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n := by
+  apply Finset.Subset.antisymm
+  · intro y hy
+    obtain ⟨x, hx, rfl⟩ := Finset.mem_image.mp hy
+    exact algEquiv_mem_iteratedLubinTateTorsionPoints_of_mem K hq hπmax hπne0 f hf0 hf1 hf n σ x hx
+  · intro x hx
+    rw [Finset.mem_image]
+    refine ⟨σ.symm x, ?_, by simp⟩
+    have hσx := algEquiv_mem_iteratedLubinTateTorsionPoints_of_mem K hq hπmax hπne0 f hf0 hf1 hf n σ.symm x hx
+    simpa using hσx
+
 end ABC3.Found.PGC
