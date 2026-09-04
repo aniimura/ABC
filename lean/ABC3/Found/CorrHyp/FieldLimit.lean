@@ -126,6 +126,15 @@ theorem exists_fgSubalgebra_upperBound {k K : Type} [CommRing k] [CommRing K] [A
     · exact hR1
     · exact le_trans (hR' i hi) hR2
 
+/-- `exists_fgSubalgebra_upperBound`の2引数版(`Bool`添字の`Finset.univ`
+経由)——「2つのRレベル段階の共通の上界」を毎回`Finset`/添字型を
+書かずに直接呼べる、使い勝手のための特殊化。 -/
+theorem exists_fgSubalgebra_upperBound2 {k K : Type} [CommRing k] [CommRing K] [Algebra k K]
+    (R S : FgSubalgebra k K) : ∃ R', R ≤ R' ∧ S ≤ R' := by
+  obtain ⟨R', hR'⟩ := exists_fgSubalgebra_upperBound (Finset.univ : Finset Bool)
+    (fun b => if b then R else S)
+  exact ⟨R', hR' true (Finset.mem_univ _), hR' false (Finset.mem_univ _)⟩
+
 open CategoryTheory in
 /-- `FgSubalgebra k K` は filtered(`IsDirected` から——2つの対象は `⊔` を
 共通の余錐に持ち、薄い圏なので平行射の coequalize は自明)。
@@ -1323,6 +1332,81 @@ theorem mvPolynomial_aeval_eq_zero_of_map_aeval_eq_zero (A : Type) [CommRing A] 
   apply mvPolynomial_algebraTensorMap_val_eq_zero_of_map_eq_zero
   rw [mvPolynomial_map_aeval_comm]
   exact h
+
+open scoped TensorProduct in
+/-- **`R₀→R'`への昇格と、両方を`ℝ`へ送る写像が両立すること**——
+`(A⊗R'.1へ)∘(R₀→R'への昇格) = (A⊗R₀.1からℝへ)`。`Algebra.TensorProduct.
+map_comp`(mathlib、テンソル関手性)+`Subalgebra.val_comp_inclusion`
+(mathlib、`T.val∘(inclusion h)=S.val`)を繋ぐだけ。`R'`レベルへ昇格した
+元が、実際に元の`R₀`レベルでの値をℝへ送ったものと一致することを保証
+する、貼り合わせの配線でくり返し使う基本事実。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem algebraTensorMap_val_comp_inclusion (A : Type) [CommRing A] [Algebra ℚ A] {R₀ R' : FgSubalgebra ℚ ℝ}
+    (h : R₀ ≤ R') :
+    (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)).toRingHom.comp
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion h)).toRingHom =
+    (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R₀.1)).toRingHom := by
+  apply RingHom.ext
+  intro x
+  show (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1))
+      ((Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion h)) x) = _
+  rw [← AlgHom.comp_apply, ← Algebra.TensorProduct.map_comp, Subalgebra.val_comp_inclusion, AlgHom.id_comp]
+  rfl
+
+open scoped TensorProduct in
+/-- **「項目(d)の第二段」の核心——ℝレベルで定義された生成元の対応
+(有限個)が関係式を満たすなら、それは`R`レベルの候補写像の`R'`レベル
+への昇格として実際に実現される**。`q:κ→MvPolynomial ι(A⊗R.1)`(片1の
+関係式、`R`レベル)と`ψ:ι→MvPolynomial ι'(A⊗ℝ)`(既知のℝレベルの
+遷移写像が生成元に送る値)から出発し、
+1. `exists_fg_subalgebra_tensor_mvPolynomial_finset`で`ψ`の**有限個**の
+   値(`ι`が`Fintype`)を共通の`R₀`へ降ろす(`ev₀`)。
+2. `exists_fgSubalgebra_upperBound2`で`R`と`R₀`を共通の`R'`へ合流
+   させる。
+3. `ev₀`を`R'`へ昇格した`ev`が、実際に`ψ`を再現すること
+   (`algebraTensorMap_val_comp_inclusion`)と、`q`(`R'`へ昇格したもの)
+   の関係式を`R'`レベルで満たすこと(`mvPolynomial_aeval_eq_zero_of_
+   map_aeval_eq_zero`、単射性経由)の両方を確認する。
+
+これで、「ℝレベルで分かっている遷移写像の生成元の対応」から「実際に
+`R'`レベルの候補写像」を**構成的に**取り出せる——`transitionElem`/
+`gdT`/`cocycle`のRレベル版に相当する遷移データの降下が、個別の
+GlueDataエンジニアリングの再構築ではなく、この1つの補題への
+`Presentation`データの specialize として実現できる見込みが立った。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_mvPolynomial_quotient_ringHom_descend (A : Type) [CommRing A] [Algebra ℚ A]
+    (R : FgSubalgebra ℚ ℝ) {ι κ ι' : Type} [Fintype ι]
+    (q : κ → MvPolynomial ι (A ⊗[ℚ] R.1)) (ψ : ι → MvPolynomial ι' (A ⊗[ℚ] ℝ))
+    (hψ : ∀ k, MvPolynomial.aeval ψ
+      (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom (q k)) = 0) :
+    ∃ (R' : FgSubalgebra ℚ ℝ) (hR : R ≤ R') (ev : ι → MvPolynomial ι' (A ⊗[ℚ] R'.1)),
+      (∀ i, MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)).toRingHom (ev i)
+        = ψ i) ∧
+      (∀ k, MvPolynomial.aeval ev (MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR)).toRingHom (q k)) = 0) := by
+  classical
+  obtain ⟨R₀, hR₀spec⟩ := exists_fg_subalgebra_tensor_mvPolynomial_finset A (Finset.image ψ Finset.univ)
+  choose ev₀ hev₀ using fun i : ι => hR₀spec (ψ i) (Finset.mem_image_of_mem _ (Finset.mem_univ i))
+  obtain ⟨R', hR, hR₀⟩ := exists_fgSubalgebra_upperBound2 R R₀
+  have hcomm : ∀ i, MvPolynomial.map
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)).toRingHom
+      (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR₀)).toRingHom
+        (ev₀ i)) = ψ i := by
+    intro i
+    rw [MvPolynomial.map_map, algebraTensorMap_val_comp_inclusion]
+    exact hev₀ i
+  refine ⟨R', hR, fun i => MvPolynomial.map
+    (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR₀)).toRingHom (ev₀ i), hcomm, ?_⟩
+  intro k
+  apply mvPolynomial_aeval_eq_zero_of_map_aeval_eq_zero
+  rw [show (fun i => MvPolynomial.map
+      (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R'.1)).toRingHom
+      (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR₀)).toRingHom
+        (ev₀ i))) = ψ from funext hcomm]
+  rw [MvPolynomial.map_map, algebraTensorMap_val_comp_inclusion]
+  exact hψ k
 
 /-! ## `StandardEtalePair.Ring` の元を有限段階へ降ろす——作業単位1(b)の完成
 
