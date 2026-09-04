@@ -13,6 +13,7 @@ import Mathlib.RingTheory.Polynomial.Eisenstein.Basic
 import Mathlib.RingTheory.Polynomial.GaussLemma
 import Mathlib.RingTheory.DedekindDomain.IntegralClosure
 import Mathlib.RingTheory.DedekindDomain.PID
+import Mathlib.Algebra.Module.SpanRankOperations
 import ABC3.Found.GenEll.TameRamification
 
 /-!
@@ -5155,5 +5156,56 @@ theorem falt1_kaehler_length_exact_wn1_kernel
   set ftensor := LinearEquiv.baseChange Wn Wn1 Ω[Wn⁄V0] (Wn ⧸ differentIdeal V0 Wn) fbase with hftensor
   set fquot := falt1_tensorQuotientEquiv_algebraMap (Wn := Wn) (Wn1 := Wn1) (differentIdeal V0 Wn) with hfquot
   exact LinearEquiv.length_eq (ftensor.trans fquot.toLinearEquiv)
+
+/-!
+## Theorem 1.2 の核心への別経路: Brinon-Conrad Exercise 13.7.4 の
+step (1) を Nakayama から立ち上げる(2026-09-05)
+
+`ResearchPaper/0_Source/Brinon Conrad - CMI Summer School Notes on
+p-adic Hodge Theory.txt`(12700行目)の Exercise 13.7.4 が、Faltings
+の Theorem 1.2 の証明を教科書レベルで6ステップに分解している。この
+節では**step (1)**(`Ω¹_{B1/A}`が`d+1`個の元で生成される、という
+事実)を`AdjoinRoot`による明示的な同時添加構成を経由せず、
+「second fundamental exact sequence + Nakayama」という原文の
+ヒント通りの経路で立ち上げる第一歩を記録する。
+
+**鍵となるmathlibの道具**(探索済み、まだ完全には繋げていない):
+- `IsLocalRing.spanFinrank_eq_finrank_quotient`(`Algebra/Module/
+  SpanRankOperations.lean`): 局所環上の有限生成加群`N`について
+  `N.spanFinrank = finrank_{R/𝔪}(N⧸𝔪N)`(生成元の最小個数 = 剰余体
+  上の次元、Nakayama の標準的な系)。
+- `IsLocalRing.spanFinrank_maximalIdeal_eq_finrank_cotangentSpace_of_fg`:
+  `𝔪`自身にこの補題を適用すると`spanFinrank 𝔪 = finrank(cotangent
+  space)`——DVRなら`𝔪`は単項なので`spanFinrank 𝔪 = 1`、これが
+  Exercise 13.7.4 の「`+1`」(付値方向の1個)の出処になる見込み。
+- `KaehlerDifferential.exact_mapBaseChange_map`(既存、`falt1_kaehler_
+  length_exact_wn1`等で既に使用済み): step (4) の「second fundamental
+  exact sequence」そのもの。
+
+下の`falt1_kaehler_spanFinrank_le`は、`Ω[B/A]⊗k_B`の次元が`n`以下
+という仮定から`Ω[B/A]`が`B`上`n`個以下で生成されることを結論する、
+**Nakayama部分のみを抽出した抽象形**——`Ω¹_{k_B/k_A}`の次元が`d`で
+あることから`n=d+1`を導く(残りの)部分は次回以降の課題として
+`falt1-goal.md`に記録する。 -/
+
+/-- `IsLocalRing.spanFinrank_eq_finrank_quotient`を`Ω[B/A]`(局所環
+`B`上の加群として)に適用しただけの補題: `Ω[B/A]⊗_B(B/𝔪_B)`の
+`B/𝔪_B`上の次元が`n`以下なら、`Ω[B/A]`は`B`上`n`個以下の元で生成
+される。Brinon-Conrad Exercise 13.7.4 step (1) の Nakayama 部分。 -/
+theorem falt1_kaehler_spanFinrank_le {A B : Type*} [CommRing A] [CommRing B] [Algebra A B] [IsLocalRing B]
+    (n : ℕ) (hfg : (⊤ : Submodule B Ω[B⁄A]).FG) :
+    letI : Module (IsLocalRing.ResidueField B)
+        (↥(⊤ : Submodule B Ω[B⁄A]) ⧸ IsLocalRing.maximalIdeal B • (⊤ : Submodule B ↥(⊤ : Submodule B Ω[B⁄A]))) :=
+      (Module.isTorsionBySet_quotient_ideal_smul (↥(⊤ : Submodule B Ω[B⁄A])) (IsLocalRing.maximalIdeal B)).module
+    (Module.finrank (IsLocalRing.ResidueField B)
+        (↥(⊤ : Submodule B Ω[B⁄A]) ⧸ IsLocalRing.maximalIdeal B • (⊤ : Submodule B ↥(⊤ : Submodule B Ω[B⁄A])))
+        ≤ n) →
+    (⊤ : Submodule B Ω[B⁄A]).spanFinrank ≤ n := by
+  letI : Module (IsLocalRing.ResidueField B)
+      (↥(⊤ : Submodule B Ω[B⁄A]) ⧸ IsLocalRing.maximalIdeal B • (⊤ : Submodule B ↥(⊤ : Submodule B Ω[B⁄A]))) :=
+    (Module.isTorsionBySet_quotient_ideal_smul (↥(⊤ : Submodule B Ω[B⁄A])) (IsLocalRing.maximalIdeal B)).module
+  intro hdim
+  rw [IsLocalRing.spanFinrank_eq_finrank_quotient _ hfg]
+  exact hdim
 
 end ABC3.Found.Falt1
