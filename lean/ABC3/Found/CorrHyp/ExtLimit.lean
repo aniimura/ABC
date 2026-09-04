@@ -1065,4 +1065,30 @@ theorem exists_transitionOpen_eq_basicOpen {X : Scheme} {U : X.Opens} (f₁ f₂
   · rw [Scheme.hom_image_iso_eq_inv_preimage, Scheme.preimage_basicOpen]
     rfl
 
+/-- **`Spec Γ(X,U)`側の基本開被覆(環レベル、`PrimeSpectrum.basicOpen`)は
+`X`側の基本開被覆(`X.basicOpen`)にそのまま運べる**——`hU.fromSpec`
+(`Spec Γ(X,U) ⟶ X`、値域がちょうど`U`)の`preimage_basicOpen`との可換性
++`image_preimage_eq_opensRange_inf`(開埋め込みの像と逆像の関係)を
+組み合わせるだけ。`exists_finite_standardEtaleCover`(`FieldLimit.lean`)
+が与える環レベルの被覆を、実際に`C`(または任意のスキーム)内の開被覆
+として認識するための橋渡し——`Scheme.openCoverOfIsOpenCover`と組み合わ
+せれば`C`自身の`OpenCover`が作れ、`Scheme.Cover.gluedCover`(cocycle
+自動証明済み)を適用する道が開ける。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_scheme_basicOpen_cover_of_ring {X : Scheme} {U : X.Opens} (hU : IsAffineOpen U)
+    {ι : Type} (t : Finset ι) (f : ι → Γ(X, U))
+    (hcov : (⨆ i ∈ t, PrimeSpectrum.basicOpen (f i)) = ⊤) :
+    (⨆ i ∈ t, X.basicOpen (f i)) = U := by
+  have hpre : hU.fromSpec ⁻¹ᵁ (⨆ i ∈ t, X.basicOpen (f i)) = ⊤ := by
+    simp_rw [Scheme.Hom.preimage_iSup, hU.fromSpec_preimage_basicOpen]
+    exact hcov
+  have hrange : hU.fromSpec.opensRange = U := by
+    apply TopologicalSpace.Opens.ext; exact hU.range_fromSpec
+  have himg := Scheme.Hom.image_preimage_eq_opensRange_inf hU.fromSpec (⨆ i ∈ t, X.basicOpen (f i))
+  rw [hpre, Scheme.Hom.image_top_eq_opensRange, hrange] at himg
+  apply le_antisymm
+  · exact iSup₂_le (fun i _ => X.basicOpen_le (f i))
+  · exact himg.le.trans inf_le_right
+
 end ABC3.Found.CorrHyp
