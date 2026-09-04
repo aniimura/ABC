@@ -117,7 +117,24 @@ R C D B` という自然性(`tensorKaehlerEquiv_eq_map_mapBaseChange`、
    `algebraMap` を直接使わないため、期待通りに簡約されない)。両者を
    **関数として**(`⇑` レベルで)結びつける橋渡しが未解決——`Extension`
    の内部実装(`RingTheory/Extension/Cotangent/Basic.lean` 等)を
-   もう少し詳しく調べる必要がある。今回はここで打ち切った。
+   もう少し詳しく調べる必要がある。
+
+   ★★★2026-09-04、**別の(より具体的な)経路も検討した**: `B = C⊗_R
+   D`(`D=AdjoinRoot g`)は `C⊗_RPoly R ≅ Poly C`(`MvPolynomial.
+   algebraTensorAlgEquiv`、単変数の場合に相当)+ テンソル積が商と
+   可換という事実を経由すれば **`B ≅ AdjoinRoot(g.map(algebraMap R C))`
+   ——つまり `B` は `C` 上の monogenic 拡大そのもの**になるはず。
+   これが成り立てば `mapBaseChange R C B` の単射性は
+   `mapBaseChange_injective_of_nzd`(`V:=C`・`f:=g.map(algebraMap R C)`)
+   を**そのまま再利用できる**(H1Cotangent 経由の抽象論より遥かに
+   具体的)——ただし `C⊗_RPoly R ≅ Poly C` の同型と「テンソル積は
+   商と可換」を貼り合わせて `B ≅ AdjoinRoot(...)` を確立する作業
+   自体は未着手(`MvPolynomial.algebraTensorAlgEquiv` を単変数
+   `Polynomial` へ specialize する下ごしらえが要る)。**3つの経路
+   (H1Cotangent+平坦底変換・Extension.cotangentComplex 橋渡し・
+   AdjoinRoot 基底変換の同一視)を検討し、いずれも即座には閉じ
+   なかった**——今回はここで打ち切った。次のセッションは3つ目
+   (AdjoinRoot 基底変換)が最も具体的で有望と判断する。
 3. **「非常に分岐した」`V_n` の族**そのものの形式化(具体例: `p^n` 乗根
    と `1` のべき根を添加する塔)——まだ手つかず。
 4. **`Module.length` の漸化不等式**(`δ_n-δ_{n+1}≥β-(d+1)(δ_n-δ_{n+1})`
