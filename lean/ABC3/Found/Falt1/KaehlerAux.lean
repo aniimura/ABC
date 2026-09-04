@@ -5234,18 +5234,108 @@ theorem falt1_kaehler_length_tower_exact {An Bn Bn1 : Type*} [CommRing An] [Comm
 IsPrincipal`との同値の一項目として`finrank(CotangentSpace)=1`が
 既に載っていた)から抽出しただけ。
 
-★残る接続(未完成、次回への課題): `KaehlerDifferential.
-exact_kerCotangentToTensor_mapBaseChange`(`B→k_B`への商、mathlib
-既存)から`(maximalIdeal B).Cotangent → Ω[B/An]⊗k_B → Ω[k_B/An]`の
-完全性は得られるが、`kerCotangentToTensor`が`B`-線形・`mapBaseChange`
-が`k_B`-線形であるため、両者の像・核を`Module.finrank`で直接比較
-しようとすると`Submodule B _`対`Submodule (ResidueField B) _`の
-scalar restriction越しの比較が必要になり、まだ閉じていない
-(`falt1_kaehler_spanFinrank_le`と組み合わせて`Ω[B/An]`が`d+1`個で
-生成されることを結論する、という最終目標にはこの接続が要る)。 -/
+★2026-09-05、以前ここに記録していた「残る接続」の障害(`kerCotangent
+ToTensor`が`B`-線形・`mapBaseChange`が`k_B`-線形であるため
+scalar restrictionを跨いだ比較が必要、という問題)は、以下の3つの
+定理で**完全に解消した**——鍵は`Ideal.mapCotangent`(`AlgHom.id`+
+2つの`≤`から構成した**全単射**、`RingHom.ker(algebraMap B k_B)`と
+`maximalIdeal B`を`rw`/`simp`ではなく明示的な写像として橋渡しする)
+と`LinearMap.extendScalarsOfSurjective`(`B`-線形写像を`k_B`-線形へ
+持ち上げる)の組み合わせ。詳細は`falt1_kaehler_finrank_tensor_
+residueField_le`のdocstring参照。 -/
 theorem falt1_dvr_cotangentSpace_finrank_eq_one {B : Type*} [CommRing B] [IsDomain B] [IsNoetherianRing B]
     [IsDiscreteValuationRing B] :
     Module.finrank (IsLocalRing.ResidueField B) (IsLocalRing.CotangentSpace B) = 1 :=
   ((IsDiscreteValuationRing.TFAE (R := B) (IsDiscreteValuationRing.not_isField B)).out 0 5).mp ‹_›
+
+/-- **`RingHom.ker(algebraMap B k_B)`と`maximalIdeal B`を橋渡しする
+全単射**: `rw`/`simp`は`Function.Exact`のような依存型を跨ぐと
+「motive not type correct」/「no progress」で失敗する(3セッション分
+実測済み、`falt1-goal.md`参照)——代わりに`Ideal.mapCotangent`
+(`AlgHom.id`+2つの`≤`包含から作れる、`R`-線形写像)を両方向に構成し、
+`Ideal.toCotangent`の全射性(mathlib既存)を経由して互いに逆写像で
+あることを示すことで、**書き換えを一切経由せず**橋渡しできる。 -/
+theorem falt1_mapCotangent_maximalIdeal_bijective {B : Type*} [CommRing B] [IsLocalRing B] :
+    Function.Bijective (Ideal.mapCotangent (IsLocalRing.maximalIdeal B) (RingHom.ker (algebraMap B (IsLocalRing.ResidueField B)))
+      (AlgHom.id B B) (by
+        show IsLocalRing.maximalIdeal B ≤ RingHom.ker (algebraMap B (IsLocalRing.ResidueField B))
+        rw [show (algebraMap B (IsLocalRing.ResidueField B)) = IsLocalRing.residue B from rfl, IsLocalRing.ker_residue])) := by
+  set kB := IsLocalRing.ResidueField B
+  set hle1 : IsLocalRing.maximalIdeal B ≤ (RingHom.ker (algebraMap B kB)).comap (AlgHom.id B B) := by
+    show IsLocalRing.maximalIdeal B ≤ RingHom.ker (algebraMap B kB)
+    rw [show (algebraMap B kB) = IsLocalRing.residue B from rfl, IsLocalRing.ker_residue]
+  set hle2 : RingHom.ker (algebraMap B kB) ≤ (IsLocalRing.maximalIdeal B).comap (AlgHom.id B B) := by
+    show RingHom.ker (algebraMap B kB) ≤ IsLocalRing.maximalIdeal B
+    rw [show (algebraMap B kB) = IsLocalRing.residue B from rfl, IsLocalRing.ker_residue]
+  set fwd := Ideal.mapCotangent (IsLocalRing.maximalIdeal B) (RingHom.ker (algebraMap B kB)) (AlgHom.id B B) hle1 with hfwd
+  set bwd := Ideal.mapCotangent (RingHom.ker (algebraMap B kB)) (IsLocalRing.maximalIdeal B) (AlgHom.id B B) hle2 with hbwd
+  have hsurj1 : Function.Surjective (IsLocalRing.maximalIdeal B).toCotangent := by
+    rw [← LinearMap.range_eq_top]; exact Ideal.toCotangent_range _
+  have hsurj2 : Function.Surjective (RingHom.ker (algebraMap B kB)).toCotangent := by
+    rw [← LinearMap.range_eq_top]; exact Ideal.toCotangent_range _
+  apply Function.bijective_iff_has_inverse.mpr
+  refine ⟨bwd, ?_, ?_⟩
+  · intro x
+    obtain ⟨y, rfl⟩ := hsurj1 x
+    rw [hfwd, hbwd, Ideal.mapCotangent_toCotangent, Ideal.mapCotangent_toCotangent]
+    rfl
+  · intro x
+    obtain ⟨y, rfl⟩ := hsurj2 x
+    rw [hbwd, hfwd, Ideal.mapCotangent_toCotangent, Ideal.mapCotangent_toCotangent]
+    rfl
+
+set_option maxHeartbeats 800000 in
+/-- **Brinon-Conrad Exercise 13.7.4・step (1) の本体(完成)**:
+`Ω[B/An]⊗_B k_B`(`k_B`上のベクトル空間として見た次元)は`d+1`以下
+——ここで`d = finrank(Ω[k_B/An])`(剰余体拡大の次元)。証明は
+「second fundamental exact sequence + Nakayama」という原文のヒント
+通りの経路: `kerCotangentToTensor`(`falt1_mapCotangent_maximalIdeal_
+bijective`で`CotangentSpace B`型に橋渡し)+`extendScalarsOfSurjective`
+(`B`-線形から`k_B`-線形へ持ち上げ)で完全列`CotangentSpace B →ₗ[k_B]
+Ω[B/An]⊗k_B →ₗ[k_B] Ω[k_B/An]`(`KaehlerDifferential.exact_
+kerCotangentToTensor_mapBaseChange`、mathlib既存)を`k_B`線形の
+まま得て、rank-nullity(`LinearMap.finrank_range_add_finrank_ker`)+
+`falt1_dvr_cotangentSpace_finrank_eq_one`(核の次元≤1)+
+`Submodule.finrank_le`(像の次元≤`d`)を組み合わせるだけ。 -/
+theorem falt1_kaehler_finrank_tensor_residueField_le {An B : Type*} [CommRing An] [CommRing B] [Algebra An B]
+    [IsDomain B] [IsNoetherianRing B] [IsDiscreteValuationRing B]
+    [Module.Finite (IsLocalRing.ResidueField B) (TensorProduct B (IsLocalRing.ResidueField B) Ω[B⁄An])]
+    [Module.Finite (IsLocalRing.ResidueField B) Ω[(IsLocalRing.ResidueField B)⁄An]]
+    (d : ℕ) (hd : Module.finrank (IsLocalRing.ResidueField B) Ω[(IsLocalRing.ResidueField B)⁄An] = d) :
+    Module.finrank (IsLocalRing.ResidueField B) (TensorProduct B (IsLocalRing.ResidueField B) Ω[B⁄An]) ≤ d + 1 := by
+  set kB := IsLocalRing.ResidueField B with hkB
+  show Module.finrank kB (TensorProduct B kB Ω[B⁄An]) ≤ d + 1
+  set fwd := Ideal.mapCotangent (IsLocalRing.maximalIdeal B) (RingHom.ker (algebraMap B kB))
+    (AlgHom.id B B) (by
+      show IsLocalRing.maximalIdeal B ≤ RingHom.ker (algebraMap B kB)
+      rw [show (algebraMap B kB) = IsLocalRing.residue B from rfl, IsLocalRing.ker_residue]) with hfwd
+  set fwd_equiv := LinearEquiv.ofBijective fwd falt1_mapCotangent_maximalIdeal_bijective with hfwd_equiv
+  set h0 := KaehlerDifferential.kerCotangentToTensor An B kB with hh0
+  set h0' : IsLocalRing.CotangentSpace B →ₗ[B] TensorProduct B kB Ω[B⁄An] :=
+    h0 ∘ₗ fwd_equiv.toLinearMap with hh0'
+  set f' : IsLocalRing.CotangentSpace B →ₗ[kB] TensorProduct B kB Ω[B⁄An] :=
+    LinearMap.extendScalarsOfSurjective IsLocalRing.residue_surjective h0' with hf'
+  set g := KaehlerDifferential.mapBaseChange An B kB with hg
+  have hrange_eq : Set.range ⇑f' = Set.range ⇑h0 := by
+    show Set.range ⇑h0' = Set.range ⇑h0
+    rw [hh0']
+    exact Function.Surjective.range_comp fwd_equiv.surjective ⇑h0
+  have hex0 := KaehlerDifferential.exact_kerCotangentToTensor_mapBaseChange (R := An) (A := B) (B := kB)
+    IsLocalRing.residue_surjective
+  have hex : Function.Exact f' g := by
+    intro y
+    rw [hrange_eq]
+    exact hex0 y
+  have h1 : Module.finrank kB (LinearMap.ker g) ≤ 1 := by
+    rw [(Function.Exact.linearMap_ker_eq hex)]
+    calc Module.finrank kB (LinearMap.range f') ≤ Module.finrank kB (IsLocalRing.CotangentSpace B) :=
+          LinearMap.finrank_range_le f'
+      _ = 1 := falt1_dvr_cotangentSpace_finrank_eq_one
+  have h2 : Module.finrank kB (LinearMap.range g) ≤ d := by
+    calc Module.finrank kB (LinearMap.range g) ≤ Module.finrank kB Ω[kB⁄An] :=
+          Submodule.finrank_le _
+      _ = d := hd
+  have hrn := LinearMap.finrank_range_add_finrank_ker g
+  omega
 
 end ABC3.Found.Falt1
