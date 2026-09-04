@@ -346,3 +346,46 @@ arithmetic で `Comm` の中で無限指数のはずだが、`corrHypInstance` �
 関連: [[leaf-first-with-graph-feedback]] / [[leaves-are-measured-not-guessed]] /
 [[measure-mathlib-before-skeleton]] / [[genell-track-b]] / [[corrhyp-track-goal]] /
 [[stale-status-read-lean-first]] / [[no-wall-decompose-instead]]
+
+## 4. §4(`Lemma 4.1`・`Theorem 4.2`)の設計案(2026-09-04、未着手・計画のみ)
+
+★§4 は §2/§3/§5/§6 と性質が違う——**mathlib に無い外部定理は不要**
+(`isLimit_specKCone`、`Spec K = lim Spec R` が既に sorry 無しで完成しており、
+`AffineTransitionLimit.lean` の spreading-out 定理を直接呼べる)。ブロッカーは
+数学ではなく**`HyperbolicCurveData.Space` の設計**——「`k` 上の曲線」と
+「`K` 上の曲線」を同じ型で表し、`Ext` がその間を写す、という構造をまだ
+組んでいない。
+
+### 検討した2案
+
+1. **Scheme 案**: `Space := Scheme`。有限エタール射・ファイバー積の圏論的な
+   整備一式が要る(`FEt` を実際の有限エタール射として組む必要がある)。
+2. **関数体案**(こちらを選択・着手): `Space := (k 上の関数体) ⊕ (K 上の関数体)`
+   のような和型。`FEt Y X`(有限エタール `X→Y`)は**逆向き**の有限次
+   分離拡大 `K(Y) ↪ K(X)` として実装できる(covering space の函数体の
+   包含関係、標準的な辞書)。mathlib の体拡大理論(`IsSeparable`・
+   `FiniteDimensional`)のほうが一般スキームの有限エタール射論より
+   遥かに厚い。
+
+### 関数体案の詰まり(2026-09-04 実測)
+
+`Ext`(`k` から `K` への係数拡大)は関数体のテンソル積 `F ⊗_k K` に対応するが、
+これは**一般には体にならない**(`F` が `k` 上代数的で `K` と線型無関係でない
+場合など)。1つの witness を作るだけなら「都合の良い `K`」(例えば `k` 上
+超越的な `K`)を選べば回避できる見込みだが、`Space` 型を**全称的に**正しく
+保つには「テンソル積が体にならない場合にどう振る舞うか」を設計に組み込む
+必要があり、これも軽くない。
+
+★★さらに、`Space` に載せる「1つの具体的な双曲曲線」自体
+(例えば `P¹ − {0,1,∞}` や種数1・穴1の曲線)を関数体としてどう表すかも
+未検討——`FieldLimit.lean` の資産(`FgSubalgebra`・`isLimit_specKCone`)は
+`Spec K` 側の極限操作にしか直接使えず、**曲線そのものの構成**(種数・穴の
+数を持つ具体的な関数体)は §5 のスタック理論と同じ「双曲幾何が mathlib に
+無い」という欠落に部分的に触れる——ただし §4 の主張自体(`Lemma 4.1`・
+`Theorem 4.2`)は種数を計算する必要はなく、**存在の記述**だけなので、
+`type`(`(g,r)`)を posit のまま(§1のように)扱えば回避できる可能性がある。
+
+**結論**: 数学的な核心(spreading-out)は完成済みなので §4 は §2/§3/§5/§6
+より近い——ただし `Space`/`FEt`/`Ext` の一貫した具体化には(関数体案でも)
+数日規模の設計・実装が要る。次にここへ戻るときは、まず「1つの具体的な
+双曲曲線を関数体としてどう表すか」から始めるのが良い出発点。
