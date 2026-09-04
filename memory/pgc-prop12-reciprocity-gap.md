@@ -1,6 +1,6 @@
 ---
 name: pgc-prop12-reciprocity-gap
-description: 節目(5)(Lubin-Tate相互律の射影極限、sorry無しで完成)からProposition 1.2(Γ_K^ab≅(K^×)^∧)へ橋渡しするために追加で要るもの——未着手・未構築であることを確認(2026-09-05)
+description: 節目(5)(Lubin-Tate相互律の射影極限、sorry無しで完成)からProposition 1.2/2.1へ橋渡しするために追加で要るもの(不分岐拡大理論、mathlib・本プロジェクトともに未着手)を確認——原文精読の結果Prop 2.1も節目(5)から独立ではないと訂正(2026-09-05)
 metadata:
   type: project
 ---
@@ -75,18 +75,53 @@ CLAUDE.mdの姿勢(工数の山を「壁」と呼ばない・既知数学のpers
 筋(依存グラフを更新してから、層番号の低い葉から着手するという通常の
 進め方)。
 
-一方、Proposition 1.2以外の`/goal`残り項目(Corollary 1.3はProp 1.2に
-依存・Proposition 2.1/2.2はp進対数+Verlagerungの経路で節目(5)とは
-**別系統**・Corollary 3.1/3.3はHodge-Tate/uniformizing加群でこれも
-別系統・Theorem 4.2は最終組み立て)は、節目(5)を直接には必要としない
-可能性がある——特にProposition 2.1(`Section2.lean::prop_2_1`)は
-`.needs`によればp進対数の3性質(準同型性・単射性・全射性)がすべて
-本プロジェクトで**既に確立済み**(`Found/PGC/PadicLogMul.lean`・
-`PadicLogInjective.lean`・`PadicLogSurjective.lean`)・Verlagerungも
-mathlibに存在(`MonoidHom.transfer`)——境界外入力がほぼ解消済みで、
-残るのは`prop_2_1.needs`の3番目`.implicitStep`(これらを組み合わせて
-`RecoverableAsAddModule`を結論する段)のみという状態。**次にLubin-Tate
-方面から離れて`/goal`側へ直接戻るなら、節目(5)より先にProposition 2.1
-の方が近い可能性がある**——ただし原典の証明文が「独立したproofブロック
-を持たず、直前の地の文がそのまま論拠になっている」ため、まず原典の
-該当箇所(pGC p.4冒頭)を精読して論拠を正確に再構成する必要がある。
+## ★訂正(2026-09-05、原文精読の結果): Proposition 2.1も実は
+`Γ_K^ab≅(K^×)^∧`(または少なくとも`U_K`が`Γ_K^ab`の部分群として
+実現されること)に依存する——節目(5)から独立ではない
+
+上の初稿では「Proposition 2.1はp進対数+Verlagerungの経路で節目(5)
+とは別系統」と楽観的に書いたが、`ResearchPaper/1_Structured/...
+/section-2.html`(pGC原文p.4冒頭)を精読した結果、**この評価は誤り**
+だったと判明したので訂正する。
+
+原文の実際の論拠(§2冒頭〜Proposition 2.1):
+1. p進対数が`U_K⊗Q_p≅K`(加法的同型)を与え、これが有限次拡大
+   `L/K`(`Γ_L⊆Γ_K`)との可換図式(`U_K⊗Q_p→U_L⊗Q_p`、対数で`K→L`
+   に降りる)を持つ。
+2. **"if we regard U_K as a subgroup of Γ_K^ab"**——ここが核心:
+   `U_K`を`Γ_K^ab`の**部分群として見る**という操作自体が、
+   古典的局所類体論の相互律`Γ_K^ab≅(K^×)^∧`(の`U_K`部分への制限)
+   を**前提にしている**。これが無ければ「`U_K→U_L`の射をVerlagerung
+   で回復する」という次の一段(`Γ_K^ab→Γ_L^ab`のtransferと`U_K→U_L`
+   の対応)が意味を持たない。
+3. Verlagerung(`MonoidHom.transfer`、既存)でこの射を回復する。
+
+すなわちProposition 2.1も**`Γ_K^ab≅(K^×)^∧`という同じ核心的な
+相互律に依存**しており、上に記録した(1)不分岐拡大理論(mathlib・
+本プロジェクトともに未着手)が必要になる点は**Proposition 1.2と
+共通**。「Proposition 2.1の方が節目(5)より近い」という初稿の判断は
+撤回する——p進対数・Verlagerungという2つの境界外入力が解消済みで
+あることは事実だが、それだけでは閉じない。
+
+## 結論(更新)
+
+§1・§2のこれまで調べた命題(Proposition 1.1・1.2・Proposition 2.1)
+は、いずれも根っこの部分で古典的局所類体論の**完全な**相互律
+`Γ_K^ab≅(K^×)^∧`(不分岐部分込み)を必要とする、という構造が見えて
+きた——これは`/goal`の複数項目に共通する、真に中心的な依存先。
+節目(5)(完全分岐アーベル拡大の部分)はこの相互律の**半分**を
+厳密に実現したが、残る半分(不分岐拡大理論、`Gal(K^ur/K)≅Ẑ`)は
+mathlib・本プロジェクトともに完全に未着手であり、これがCLAUDE.mdの
+言う「既知数学のperson-years」の具体的な所在だと分かった——これも
+「進捗」として記録する(誤った近道を検算・原文精読で確認できた
+ことは後退ではない)。
+
+次に戻るときの選択肢: (a) 不分岐拡大理論のスケルトンを新規に立てる
+(`Interface/PGC/LocalFieldData.lean`への追加、または`Skeleton`新規
+ファイル)——節目(5)に匹敵する規模の新しい仕事、(b) Corollary 3.1/
+3.3・Theorem 4.2(Hodge-Tate/uniformizing加群・最終組み立て、これも
+別系統かもしれないが未精読)の原文を同様に精読し、本当に独立した
+経路があるか確認する、(c) Proposition 1.1(局所Tate双対性)も同様に
+不在なので、これも避けられない。いずれも新規スケルトンの追加を伴う
+「次の層」——CLAUDE.mdの進め方(スケルトン→依存グラフ更新→葉から
+着手)に従うのが筋。
