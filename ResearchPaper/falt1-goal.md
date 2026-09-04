@@ -3395,6 +3395,51 @@ mathlib での正確な組み立て方は未確認)。
       length_quotient_n_add`系)を明示的に「Theorem 1.2の`V_n`塔
       構成部品」として文書化した上で、`Wₙ`側(almost étale)への
       本格着手が必要になる時点まで、この事実を正直に記録しておく。
+
+      ★2026-09-05、続けて**§2への迂回路を検討した**: `[Falt1]
+      Definition 2.1`(`isAlmostEtaleCovering`)は`Found/Falt1/
+      AlmostEtale.lean`に既に`IsAlmostEtaleCovering`として sorry無く
+      formalizeされている(commit `d1f92c36`、以前のセッション)が、
+      **skeletonの`isAlmostEtaleCovering`は依然として`Interface.
+      AlmostEtaleSetup.isAlmostEtale : Prop`という posit を指しており、
+      本物の`IsAlmostEtaleCovering`に差し替えられていない**——差し替え
+      て`AlmostEtaleSetup.example`の`isAlmostEtale := True`という
+      **空虚な**instantiationを、本物の非空虚な witness に置き換え
+      られれば、Definition 2.1(§2の4項目の1つ)が正直に Found になる
+      可能性があると考え、その non-vacuous witness の構成に着手した
+      (`Found/Falt1/AlmostEtale.lean`自身のdocstringが「A=Bの具体例
+      でのwitness構成は未完成」と記録していた箇所)。
+
+      **診断**: `A=B=R`(恒等拡大)の場合、`awayAlgebra`が構成する
+      `Algebra (Localization.Away 1) (Localization.Away (algebraMap
+      R R 1))` instanceと、mathlibが自動的に見つける標準の
+      `Algebra.id`(自己代数)instanceが**衝突**する——`Localization.
+      awayMap (algebraMap R R) 1 = RingHom.id _`(`IsLocalization.
+      ringHom_ext`で証明可能、確認済み)+`(RingHom.id S).toAlgebra =
+      Algebra.id S`(`rfl`)という**2つの橋渡し補題は確立できた**が、
+      これを`Module.Free`等の**instance引数**として埋め込まれた
+      ゴールへ実際に反映させる(`▸`/`rw`が instance引数には直接効かない
+      ため、`convert`や明示的な `@`付き項に頼る必要がある)段階で、
+      このセッションで初めて遭遇する種類の詰まりに当たった
+      (`Module.Free.of_equiv`系の補題は`LinearEquiv`の型引数解決で
+      別のエラーになった)。
+
+      **回避策の発見**: `A=B`という**自己拡大**が衝突の根本原因だと
+      気づいた——`B:=R×R`(`A≠B`の本物の非自明拡大、`p:=(1,1)`が
+      unit)を使えば、`awayAlgebra`が構成する`Algebra (Localization.
+      Away 1) (Localization.Away (1,1))`と**競合する標準instanceは
+      そもそも存在しない**(`Localization.Away 1`と`Localization.
+      Away (1,1)`は無関係な抽象型なので、`Algebra.id`のような自動
+      発見される代替が無い)。この場合`Module.Free`等は`IsLocalization.
+      atUnit`(`R ≃ₐ[R] Localization.Away p`、任意のunit`p`に一般化
+      された`atOne`)経由で`R×R`が`R`上free・finite・étaleであること
+      (mathlibに標準的にあるはず)へ帰着できる見込みだが、**trace
+      写像の条件(ii)・idempotentの条件(iii)を含む完全なwitnessは
+      今回は完成しなかった**——`A=B`の衝突を回避する方針は見えたが、
+      残る作業量(4条件すべての具体的な証明)を考慮し、無理に押し切って
+      壊れたものを残すより、この診断結果(2つの橋渡し補題+`A≠B`回避策)
+      を正直に記録し、次回への持ち越しとした(commitは無し、Lean
+      ファイルへの変更も無し)。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
