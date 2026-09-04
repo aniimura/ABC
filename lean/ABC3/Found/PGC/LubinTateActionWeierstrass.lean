@@ -443,4 +443,24 @@ theorem iteratedLubinTateDistinguishedRoots_le_of_le {A : Type*} [CommRing A] [I
     (monic_iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf m).map _ |>.ne_zero
   exact Polynomial.roots.le_of_dvd hmne0 hdvdmap
 
+/-- `0∈Λ_n`(`D_n` の根の多重集合に `0` が含まれる)——`D_n(0)=0`
+(`iteratedLubinTateDistinguished_coeff_zero`)の言い換え、整合性の
+確認。 -/
+theorem zero_mem_iteratedLubinTateDistinguishedRoots {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n : ℕ) :
+    (0 : iteratedLubinTateAlgClosure A) ∈
+      iteratedLubinTateDistinguishedRoots hq hπmax hπne0 f hf0 hf1 hf n := by
+  rw [iteratedLubinTateDistinguishedRoots, Polynomial.mem_roots']
+  refine ⟨(monic_iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n).map _ |>.ne_zero, ?_⟩
+  show (Polynomial.map (algebraMap A (iteratedLubinTateAlgClosure A))
+    (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n)).eval 0 = 0
+  rw [Polynomial.eval_map, Polynomial.eval₂_at_zero]
+  rw [iteratedLubinTateDistinguished_coeff_zero hq hπmax hπne0 f hf0 hf1 hf n]
+  simp
+
 end ABC3.Found.PGC
