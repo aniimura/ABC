@@ -5338,4 +5338,57 @@ theorem falt1_kaehler_finrank_tensor_residueField_le {An B : Type*} [CommRing An
   have hrn := LinearMap.finrank_range_add_finrank_ker g
   omega
 
+set_option maxHeartbeats 800000 in
+/-- **`falt1_kaehler_spanFinrank_le`の仮定を`TensorProduct B k_B
+Ω[B/A]`の言葉で直接与える版**: `Ω[B/A] ⧸ 𝔪_B•⊤`(元の仮定の形)と
+`TensorProduct B k_B Ω[B/A]`(`falt1_kaehler_finrank_tensor_
+residueField_le`の結論の形)を、`TensorProduct.quotTensorEquivQuot
+SMul`(mathlib既存、`M⊗(R⧸I)≃M⧸I•⊤`)+`Submodule.topEquiv`+
+`Submodule.Quotient.equiv`で繋ぎ、`extendScalarsOfSurjective`で
+`k_B`線形へ持ち上げて`finrank`を移送するだけ。 -/
+theorem falt1_kaehler_spanFinrank_le' {A B : Type*} [CommRing A] [CommRing B] [Algebra A B] [IsLocalRing B]
+    (n : ℕ) (hfg : (⊤ : Submodule B Ω[B⁄A]).FG)
+    (hdim : Module.finrank (IsLocalRing.ResidueField B) (TensorProduct B (IsLocalRing.ResidueField B) Ω[B⁄A]) ≤ n) :
+    (⊤ : Submodule B Ω[B⁄A]).spanFinrank ≤ n := by
+  set kB := IsLocalRing.ResidueField B with hkB
+  set N := (⊤ : Submodule B Ω[B⁄A]) with hN
+  have htorsion : Module.IsTorsionBySet B (↥N ⧸ IsLocalRing.maximalIdeal B • (⊤ : Submodule B ↥N)) (IsLocalRing.maximalIdeal B : Set B) :=
+    Module.isTorsionBySet_quotient_ideal_smul (↥N) (IsLocalRing.maximalIdeal B)
+  letI hmod1 : Module kB (↥N ⧸ IsLocalRing.maximalIdeal B • (⊤ : Submodule B ↥N)) := htorsion.module
+  letI hST1 : IsScalarTower B kB (↥N ⧸ IsLocalRing.maximalIdeal B • (⊤ : Submodule B ↥N)) := htorsion.isScalarTower
+  apply falt1_kaehler_spanFinrank_le (A := A) (B := B) n hfg
+  have hmap_eq : Submodule.map (Submodule.topEquiv (R := B) (M := Ω[B⁄A]) : ↥N →ₗ[B] Ω[B⁄A])
+      (IsLocalRing.maximalIdeal B • (⊤ : Submodule B ↥N)) =
+      IsLocalRing.maximalIdeal B • N := by
+    rw [Submodule.map_smul'']
+    congr 1
+    rw [Submodule.map_top]
+    exact LinearMap.range_eq_top.mpr (Submodule.topEquiv (R := B) (M := Ω[B⁄A])).surjective
+  set eQ : (↥N ⧸ IsLocalRing.maximalIdeal B • (⊤ : Submodule B ↥N))
+      ≃ₗ[B] (Ω[B⁄A] ⧸ IsLocalRing.maximalIdeal B • N) :=
+    Submodule.Quotient.equiv _ _ (Submodule.topEquiv (R := B) (M := Ω[B⁄A])) hmap_eq with heQ
+  set e0 : TensorProduct B kB Ω[B⁄A] ≃ₗ[B] (Ω[B⁄A] ⧸ IsLocalRing.maximalIdeal B • N) :=
+    TensorProduct.quotTensorEquivQuotSMul Ω[B⁄A] (IsLocalRing.maximalIdeal B) with he0
+  set eComb := eQ.trans e0.symm with heComb
+  set eComb' := LinearMap.extendScalarsOfSurjective IsLocalRing.residue_surjective eComb.toLinearMap with heComb'
+  have hbij : Function.Bijective eComb' := eComb.bijective
+  have hfin_eq : Module.finrank kB (↥N ⧸ IsLocalRing.maximalIdeal B • (⊤ : Submodule B ↥N))
+      = Module.finrank kB (TensorProduct B kB Ω[B⁄A]) := (LinearEquiv.ofBijective eComb' hbij).finrank_eq
+  rw [hfin_eq]
+  exact hdim
+
+/-- **Brinon-Conrad Exercise 13.7.4・step (1) の完成形**: `Ω[B/A]`
+(`B`が離散付値環)が`d+1`個の元で`B`上生成される——ここで`d =
+finrank(Ω[k_B/A])`(剰余体拡大の次元)。`falt1_kaehler_spanFinrank_le'`
+と`falt1_kaehler_finrank_tensor_residueField_le`を結ぶだけの、
+Exercise 13.7.4 step (1) **全体の到達点**。 -/
+theorem falt1_kaehler_generatedBy_dplus1 {An B : Type*} [CommRing An] [CommRing B] [Algebra An B]
+    [IsDomain B] [IsNoetherianRing B] [IsDiscreteValuationRing B]
+    [Module.Finite (IsLocalRing.ResidueField B) (TensorProduct B (IsLocalRing.ResidueField B) Ω[B⁄An])]
+    [Module.Finite (IsLocalRing.ResidueField B) Ω[(IsLocalRing.ResidueField B)⁄An]]
+    (hfg : (⊤ : Submodule B Ω[B⁄An]).FG)
+    (d : ℕ) (hd : Module.finrank (IsLocalRing.ResidueField B) Ω[(IsLocalRing.ResidueField B)⁄An] = d) :
+    (⊤ : Submodule B Ω[B⁄An]).spanFinrank ≤ d + 1 :=
+  falt1_kaehler_spanFinrank_le' (d+1) hfg (falt1_kaehler_finrank_tensor_residueField_le d hd)
+
 end ABC3.Found.Falt1
