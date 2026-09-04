@@ -421,6 +421,38 @@ locallyOfFiniteType` 等)・「アフィン開被覆は有限段階に降りる�
 `lemma_4_1.needs` の2番目(étale 剛性)・3番目(標数0接空間)は
 まだ手つかず。
 
+★★★2026-09-04さらに続報: `RingHom.Etale`(`FormallyUnramified ∧ Flat ∧
+FinitePresentation` に分解可能、`Algebra.Etale.iff_flat_and_
+formallyUnramified`)が余極限に沿って spreading する**汎用**定理は
+mathlib のインデックスに見当たらない——`FinitePresentation` 部分は
+`EssFiniteType.exists_eq_comp_ι_app_of_isColimit` を使い回せるが、
+`Flat`/`FormallyUnramified` 部分は個別に確認が要る(未着手)。
+
+★★★★**設計上の発見(2026-09-04、`corrHypInstance3` で `lemma_4_1` を
+直接 `intro` して発覚)**: `Skeleton/CorrHyp/Section4.lean` の `lemma_4_1` は
+結論を `∃ Z, ∃ (h : ZK = D.Ext Z), ...`(**命題的な等号 `=`**)で書いている。
+一方 `HyperbolicCurveData.Iso : Space → Space → Prop` は witness(実際の
+同型射)を一切持たない**裸の Prop**。`FuchsianGroup`(`Subgroup`、
+extensional な等号を持つ)モデルではこの `=` は無害だったが、**`Scheme`
+モデルでは一般に強すぎる**——`ZK` が `Ext X` と同型な**別の構成**
+(例: 環を `ULift`/`Spec` で作り直したもの)であっても、finite étale な
+correspondence 自体は(同型射も finite étale なので)問題なく存在しうる。
+このとき結論の「`ZK = D.Ext Z` を満たす `Z` が存在する」は、`ZK` が
+`Ext(-)` の形に**命題的に**一致する保証が無い限り**偽になりうる**——
+これは EGA IV の降下理論を組んでも解決しない、**独立した形式化上のギャップ**
+(数学的な困難ではなく、`Iso` が witness を持たないという Interface 設計の
+issue)。
+
+**次への示唆**: この issue の解消(`Iso` に実際の同型射データを持たせる、
+または `lemma_4_1` の結論を `D.Iso` ベースに書き換える)は `Lemma 4.1` の
+**構成**そのものを不要にはしない(`Z` を実際に作る EGA IV の仕事は
+`=` でも `Iso` でも変わらず必要)——ただし構成できた後の「一致」の
+証明が `rfl`/構成的等号ではなく同型の構成で済むようになる、という点で
+後工程を楽にする。`Interface/CorrHyp/HyperbolicCurve.lean` を触る前に、
+他の numbered item(`FinitelyManyUpTo` 経由で `Iso` を使う `Theorem 3.3`・
+`Theorem 4.2`・`Theorem 2.6`)への影響も見る必要がある——`Iso` を
+Prop のままにするか、witness 付きの構造体に変えるかは要検討。
+
 次にここへ戻るときの出発点: 上の「構成的な降下」を`FEtK`(有限エタール、
 `IsFinite ∧ Etale`)の場合に特化した1つの補題として切り出し、
 `exists_isOpenCover_and_isAffine` から着手する。
