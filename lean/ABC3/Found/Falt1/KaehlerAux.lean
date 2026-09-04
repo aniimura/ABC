@@ -78,17 +78,18 @@ Module.length W (W ⧸ differentIdeal V W)` を得た——Lemma 1.1 の
    naturality を直接使う——下の実測ノート参照)。これで Lemma 1.1
    「`Ω_{W/V}` の長さは `length(W/p^δW)` に等しい」の**全体**
    (余核の特定+それが長さの等式まで持ち上がること)が証明された。
-2. **単射性(Lemma 1.1 の本体の主張、第一完全列)**: `Ω_V ⊗_V W → Ω_W`
-   (絶対微分、Z=絶対基底とする塔 Z→V→W への「第一完全列」)の単射性。
-   ✅(2026-09-04 部分解消)Faltings の議論が使う直和分解
-   `Ω_{V[T]/Z} ≅ (V[T]⊗_VΩ_V) ⊕ V[T]dT` 自体は `polynomialKaehlerSplit`
-   として完成した(最難関だった箇所——`mapBaseChange` の単射性を
-   `H1Cotangent` の消滅から示す一般論`subsingleton_H1Cotangent_self`
-   を新たに証明した、下の節参照)。★まだ Lemma 1.1 本体には届いて
-   いない——残り: (a) `f'(w)` が `D_Z(f)` の直和分解での「`dT` 成分」
-   であることの明示計算、(b) `W` への base change、(c) 非零因子で
-   割っても他の直和成分の単射性は保たれるという初等的な議論、の
-   3ステップが未着手(下の節末尾に記録)。
+2. ✅(2026-09-04 解消)**単射性(Lemma 1.1 の本体の主張、第一完全列)**:
+   `Ω_V ⊗_V W → Ω_W`(絶対微分、Z=絶対基底とする塔 Z→V→W への「第一
+   完全列」)の単射性。`mapBaseChange_injective_of_nzd` として、
+   一般の「`B = Polynomial V ⧸ (f)` で `f'` の像が `B` の非零因子」
+   という設定で**完全に証明した**(最難関だった `polynomialKaehlerSplit`
+   の直和分解を土台に、`ψ`(base change)・`π`(`dT` 成分の取り出し)
+   ・`kerCotangentToTensor` の値域計算を貼り合わせた、下の節参照)。
+   ★残るのは Falt1 の実際の `W`(`AdjoinRoot(minpoly V w)` に同型)
+   への具体的な適用のみ——`ker_adjoinRoot_mk`・`AdjoinRoot.mk_surjective`
+   ・`adjoinRootMinpolyEquiv`・`differentIdeal_eq_span_derivative` を
+   `falt1CokernelIso` と同じパターンで貼り合わせれば良いはずだが、
+   まだ実装していない(次のラウンドへ)。
 3. ✅(2026-09-04 解消)Falt1 の `V` は完備離散付値環——mathlib の
    `IsDiscreteValuationRing V`(`[IsDomain V]` 付き)は `IsDedekindDomain V`
    を自動で含意する(`infer_instance` で確認済み、PID⟹Dedekind経由)。
@@ -853,18 +854,274 @@ theorem map_comp_map_tower {Z V A B : Type*} [CommRing Z] [CommRing V] [CommRing
         LinearMap.map_smul_of_tower (KaehlerDifferential.map Z Z V B) c y, ih]
 
 /-!
-★残っている接続(未着手、次のラウンドへの見取り図):
-`ψ := id_B ⊗[V→(Polynomial V)] (mapBaseChange Z V (Polynomial V)) :
-B⊗_VΩ_V → B⊗_{Polynomial V}Ω_{Polynomial V/Z}` を作り(`mapBaseChange_tmul`
-+ `map_comp_map_tower` で `mapBaseChange Z V B = mapBaseChange Z
-(Polynomial V) B ∘ ψ` を示す)、`ψ` が `polynomialKaehlerSplit` の
-split 性を base change しても保たれることから単射だと示し、最後に
-`range_kerCotangentToTensor_span_tower`(`= ker(mapBaseChange Z
-(Polynomial V) B)`)と `range(ψ) ∩ span{1⊗D_Z f} = {0}`(`f'(w)` が
-非零因子であることから、`(a,f'(w))` 型の生成元を `range(ψ)`= 第一成分
-のみの部分空間と交わらせても 0 しか出ない、という初等的だが未証明の
-議論)を貼り合わせれば `mapBaseChange Z V W` の単射性 = Lemma 1.1 の
-単射性の主張そのものが完成する。
+## Lemma 1.1「単射性」の完成(2026-09-04)
+
+前節の見取り図の3ステップ(ψ の構成・split 性の base change による
+単射性・NZD からの初等的な議論)をすべて実装できた。鍵になったのは
+`ψ` を **`LinearMap.baseChange`(スカラー拡大)+ `cancelBaseChange`
+(結合律)の合成として明示的に構成する**ことで、「`polynomialKaehlerSplit`
+の split 性を base change する」という抽象的な議論を、`LinearMap.
+baseChange_comp`/`baseChange_id` という具体的な関手性の等式に
+還元できたこと。`ψ` 自身の像が「第一成分のみ」であることを直接
+確かめる代わりに、**`ψ` の像の上で `baseChange(map Z V (Polynomial V)
+(Polynomial V))` が恒等的に 0 になる**という(より弱いが十分な)事実を
+使い、そこから「NZD で割ったら 0 しか残らない」という議論に繋げた。
+-/
+
+/-- `mapBaseChange Z V (Polynomial V)` の split 性から作った、
+`Ω[(Polynomial V)⁄Z]` の直和分解の(`polynomialKaehlerSplit` と同じ
+`Function.Exact.splitSurjectiveEquiv` の呼び出しから作った)版。
+以降の補題群では `Ω[(Polynomial V)⁄V]` を`polynomialEquiv` で
+`Polynomial V` に単純化する前の形が必要になるため、`polynomialKaehlerSplit`
+とは別に用意した。 -/
+noncomputable def polyKaehlerSplitEquiv (Z V : Type*) [CommRing Z] [CommRing V] [Algebra Z V] :
+    Ω[(Polynomial V)⁄Z] ≃ₗ[Polynomial V]
+      (TensorProduct V (Polynomial V) Ω[V⁄Z]) × Ω[(Polynomial V)⁄V] := by
+  have hl : (KaehlerDifferential.map Z V (Polynomial V) (Polynomial V)) ∘ₗ
+      (LinearMap.smulRight (KaehlerDifferential.polynomialEquiv V).toLinearMap
+        (KaehlerDifferential.D Z (Polynomial V) Polynomial.X)) = LinearMap.id := by
+    apply LinearMap.ext
+    intro y
+    show (KaehlerDifferential.map Z V (Polynomial V) (Polynomial V))
+      ((KaehlerDifferential.polynomialEquiv V y) • (KaehlerDifferential.D Z (Polynomial V) Polynomial.X)) = y
+    rw [map_smul]
+    have hmapD := KaehlerDifferential.map_D Z V (Polynomial V) (Polynomial V) Polynomial.X
+    rw [show algebraMap (Polynomial V) (Polynomial V) Polynomial.X = Polynomial.X from rfl] at hmapD
+    rw [hmapD, ← KaehlerDifferential.polynomialEquiv_symm]
+    exact (KaehlerDifferential.polynomialEquiv V).symm_apply_apply y
+  exact (Function.Exact.splitSurjectiveEquiv (KaehlerDifferential.exact_mapBaseChange_map Z V (Polynomial V))
+    (mapBaseChange_injective_polynomial (Z := Z) (V := V))
+    ⟨_, hl⟩).1
+
+/-- `polyKaehlerSplitEquiv` の定義性質: `mapBaseChange Z V (Polynomial V)`
+は `polyKaehlerSplitEquiv` の下で「第一成分への埋め込み `inl`」そのもの
+——`Function.Exact.splitSurjectiveEquiv` の返す組の1つ目の性質。 -/
+theorem polyKaehlerSplitEquiv_prop (Z V : Type*) [CommRing Z] [CommRing V] [Algebra Z V] :
+    KaehlerDifferential.mapBaseChange Z V (Polynomial V) =
+      (polyKaehlerSplitEquiv Z V).symm.toLinearMap ∘ₗ LinearMap.inl (Polynomial V) _ _ := by
+  have hl : (KaehlerDifferential.map Z V (Polynomial V) (Polynomial V)) ∘ₗ
+      (LinearMap.smulRight (KaehlerDifferential.polynomialEquiv V).toLinearMap
+        (KaehlerDifferential.D Z (Polynomial V) Polynomial.X)) = LinearMap.id := by
+    apply LinearMap.ext
+    intro y
+    show (KaehlerDifferential.map Z V (Polynomial V) (Polynomial V))
+      ((KaehlerDifferential.polynomialEquiv V y) • (KaehlerDifferential.D Z (Polynomial V) Polynomial.X)) = y
+    rw [map_smul]
+    have hmapD := KaehlerDifferential.map_D Z V (Polynomial V) (Polynomial V) Polynomial.X
+    rw [show algebraMap (Polynomial V) (Polynomial V) Polynomial.X = Polynomial.X from rfl] at hmapD
+    rw [hmapD, ← KaehlerDifferential.polynomialEquiv_symm]
+    exact (KaehlerDifferential.polynomialEquiv V).symm_apply_apply y
+  exact (Function.Exact.splitSurjectiveEquiv (KaehlerDifferential.exact_mapBaseChange_map Z V (Polynomial V))
+    (mapBaseChange_injective_polynomial (Z := Z) (V := V))
+    ⟨_, hl⟩).2.1
+
+/-- `mapBaseChange Z V (Polynomial V)` の明示的な**左逆**(retraction)——
+`polyKaehlerSplitEquiv` の第一成分への射影。 -/
+noncomputable def polyMapBaseChangeRetraction (Z V : Type*) [CommRing Z] [CommRing V] [Algebra Z V] :
+    Ω[(Polynomial V)⁄Z] →ₗ[Polynomial V] TensorProduct V (Polynomial V) Ω[V⁄Z] :=
+  LinearMap.fst (Polynomial V) _ _ ∘ₗ (polyKaehlerSplitEquiv Z V).toLinearMap
+
+theorem polyMapBaseChangeRetraction_comp (Z V : Type*) [CommRing Z] [CommRing V] [Algebra Z V] :
+    (polyMapBaseChangeRetraction Z V) ∘ₗ (KaehlerDifferential.mapBaseChange Z V (Polynomial V)) = LinearMap.id := by
+  unfold polyMapBaseChangeRetraction
+  rw [polyKaehlerSplitEquiv_prop]
+  ext x
+  simp
+
+/-- `KaehlerDifferential.map` の合成 `Ω[V⁄Z] → Ω[(Polynomial V)⁄Z] →
+Ω[(Polynomial V)⁄V]` は常に 0(`Ω[V⁄Z]` から来た元は「定数」なので
+`Ω[(Polynomial V)⁄V]`(`V` 上の微分)では消える——`Derivation.
+map_algebraMap`)。`mapBaseChange Z V B` の単射性の証明で、`ψ` の像が
+`kerCotangentToTensor` の値域(NZD 方向)と横断的に交わることを示す
+ときの鍵。 -/
+theorem map_map_tower_eq_zero (Z V : Type*) [CommRing Z] [CommRing V] [Algebra Z V] :
+    ∀ v : Ω[V⁄Z], (KaehlerDifferential.map Z V (Polynomial V) (Polynomial V))
+      ((KaehlerDifferential.map Z Z V (Polynomial V)) v) = 0 := by
+  intro v
+  have hspan := KaehlerDifferential.span_range_derivation (R := Z) (S := V)
+  have hv : v ∈ Submodule.span V (Set.range (KaehlerDifferential.D Z V)) := hspan ▸ Submodule.mem_top
+  induction hv using Submodule.span_induction with
+  | mem z hz =>
+      obtain ⟨w, rfl⟩ := hz
+      rw [KaehlerDifferential.map_D, KaehlerDifferential.map_D]
+      exact Derivation.map_algebraMap (KaehlerDifferential.D V (Polynomial V)) w
+  | zero => simp
+  | add y z hy hz ihy ihz => rw [map_add, map_add, ihy, ihz, add_zero]
+  | smul c y hy ih =>
+      show (KaehlerDifferential.map Z V (Polynomial V) (Polynomial V))
+        ((KaehlerDifferential.map Z Z V (Polynomial V)) (c • y)) = 0
+      rw [LinearMap.map_smul_of_tower (KaehlerDifferential.map Z Z V (Polynomial V)) c y,
+        LinearMap.map_smul_of_tower (KaehlerDifferential.map Z V (Polynomial V) (Polynomial V)) c
+          ((KaehlerDifferential.map Z Z V (Polynomial V)) y), ih, smul_zero]
+
+variable {Z V B : Type*} [CommRing Z] [CommRing V] [CommRing B] [Algebra Z V]
+  [Algebra (Polynomial V) B] [Algebra V B] [Algebra Z B]
+  [IsScalarTower V (Polynomial V) B] [IsScalarTower Z V B] [IsScalarTower Z (Polynomial V) B]
+  [SMulCommClass (Polynomial V) B B]
+
+/-- **`ψ`(`mapBaseChange Z V (Polynomial V)` の `B` への base change、
+結合律で書き直したもの)**: `B⊗_VΩ_V → B⊗_{Polynomial V}Ω_{Polynomial V/Z}`。
+`LinearMap.baseChange`(スカラー拡大)と `cancelBaseChange`
+(`B⊗_{PolyV}((PolyV)⊗_VM) ≅ B⊗_VM`、結合律)の合成として構成した——
+これにより「split 性が base change で保たれる」という主張が
+`LinearMap.baseChange_comp`/`baseChange_id` という具体的な関手性の
+等式に帰着する(下の `psiMap_injective` 参照)。 -/
+noncomputable def psiMap :
+    TensorProduct V B Ω[V⁄Z] →ₗ[B]
+      TensorProduct (Polynomial V) B Ω[(Polynomial V)⁄Z] :=
+  (LinearMap.baseChange B (KaehlerDifferential.mapBaseChange Z V (Polynomial V))) ∘ₗ
+    (TensorProduct.AlgebraTensorModule.cancelBaseChange V (Polynomial V) B (M := B) (N := Ω[V⁄Z])).symm.toLinearMap
+
+omit [Algebra Z B] [IsScalarTower Z V B] [IsScalarTower Z (Polynomial V) B] in
+theorem psiMap_tmul (b : B) (v : Ω[V⁄Z]) :
+    psiMap (Z := Z) (V := V) (B := B) (b ⊗ₜ v) =
+      b ⊗ₜ[Polynomial V] (KaehlerDifferential.map Z Z V (Polynomial V) v) := by
+  show (LinearMap.baseChange B (KaehlerDifferential.mapBaseChange Z V (Polynomial V)))
+    ((TensorProduct.AlgebraTensorModule.cancelBaseChange V (Polynomial V) B (M := B) (N := Ω[V⁄Z])).symm (b ⊗ₜ v)) = _
+  rw [TensorProduct.AlgebraTensorModule.cancelBaseChange_symm_tmul]
+  show b ⊗ₜ[Polynomial V] (KaehlerDifferential.mapBaseChange Z V (Polynomial V) ((1:Polynomial V) ⊗ₜ[V] v)) = _
+  rw [KaehlerDifferential.mapBaseChange_tmul, one_smul]
+
+omit [Algebra Z B] [IsScalarTower Z V B] [IsScalarTower Z (Polynomial V) B] in
+/-- `ψ` は単射——`mapBaseChange Z V (Polynomial V)` の split 性
+(`polyMapBaseChangeRetraction`)を `LinearMap.baseChange` で `B` へ
+運んでも split 性が保たれること(`baseChange_comp`/`baseChange_id`)
+と、`cancelBaseChange` が同型であることから。 -/
+theorem psiMap_injective : Function.Injective (psiMap (Z := Z) (V := V) (B := B)) := by
+  have hretr : (LinearMap.baseChange B (polyMapBaseChangeRetraction Z V)) ∘ₗ
+      (LinearMap.baseChange B (KaehlerDifferential.mapBaseChange Z V (Polynomial V))) = LinearMap.id := by
+    rw [← LinearMap.baseChange_comp, polyMapBaseChangeRetraction_comp, LinearMap.baseChange_id]
+  have h1 : Function.Injective (LinearMap.baseChange B (KaehlerDifferential.mapBaseChange Z V (Polynomial V))) := by
+    intro a b hab
+    have := congrArg (LinearMap.baseChange B (polyMapBaseChangeRetraction Z V)) hab
+    simp only [← LinearMap.comp_apply, hretr, LinearMap.id_apply] at this
+    exact this
+  unfold psiMap
+  exact h1.comp
+    (TensorProduct.AlgebraTensorModule.cancelBaseChange V (Polynomial V) B (M := B) (N := Ω[V⁄Z])).symm.injective
+
+/-- `mapBaseChange Z V B` は `mapBaseChange Z (Polynomial V) B ∘ ψ` に
+factor する(`mapBaseChange_tmul` + `map_comp_map_tower` を単純テンソル
+上で確認し、線形性で拡張)。 -/
+theorem mapBaseChange_eq_comp_psiMap :
+    KaehlerDifferential.mapBaseChange Z V B =
+      (KaehlerDifferential.mapBaseChange Z (Polynomial V) B) ∘ₗ (psiMap (Z := Z) (V := V) (B := B)) := by
+  apply LinearMap.ext
+  intro x
+  induction x using TensorProduct.induction_on with
+  | zero => simp
+  | tmul b v =>
+      rw [LinearMap.comp_apply, psiMap_tmul, KaehlerDifferential.mapBaseChange_tmul,
+        KaehlerDifferential.mapBaseChange_tmul, map_comp_map_tower]
+  | add x y hx hy => simp [map_add, hx, hy]
+
+omit [Algebra Z B] [IsScalarTower Z V B] [IsScalarTower Z (Polynomial V) B] in
+/-- `ψ` の像の上では `map Z V (Polynomial V)(Polynomial V)`(の `B` への
+base change)は恒等的に 0(`map_map_tower_eq_zero` を単純テンソル上で
+適用し、線形性で拡張)。 -/
+theorem baseChange_map_comp_psiMap_eq_zero (x : TensorProduct V B Ω[V⁄Z]) :
+    (LinearMap.baseChange B (KaehlerDifferential.map Z V (Polynomial V) (Polynomial V)))
+      (psiMap (Z := Z) (V := V) (B := B) x) = 0 := by
+  induction x using TensorProduct.induction_on with
+  | zero => simp
+  | tmul b v =>
+      rw [psiMap_tmul]
+      show b ⊗ₜ[Polynomial V] (KaehlerDifferential.map Z V (Polynomial V) (Polynomial V)
+        (KaehlerDifferential.map Z Z V (Polynomial V) v)) = 0
+      rw [map_map_tower_eq_zero, TensorProduct.tmul_zero]
+  | add x y hx hy => rw [map_add, map_add, hx, hy, add_zero]
+
+/-- `π : B⊗_{Polynomial V}Ω_{Polynomial V/V} →ₗ[B] B`(`polynomialEquiv`
+を `B` へ base change し、`rid` で `B⊗_{PolyV}(PolyV)≅B` と同一視した
+もの)。`1⊗D_Z(f)` の「`dT` 成分」を `f'(w)` として取り出す道具。 -/
+noncomputable def piMap : TensorProduct (Polynomial V) B Ω[(Polynomial V)⁄V] →ₗ[B] B :=
+  (TensorProduct.AlgebraTensorModule.rid (Polynomial V) B B).toLinearMap ∘ₗ
+    (LinearMap.baseChange B (KaehlerDifferential.polynomialEquiv V).toLinearMap)
+
+omit [Algebra V B] [IsScalarTower V (Polynomial V) B] in
+theorem piMap_tmul (b : B) (y : Ω[(Polynomial V)⁄V]) :
+    piMap (V := V) (B := B) (b ⊗ₜ y) = b * (algebraMap (Polynomial V) B (KaehlerDifferential.polynomialEquiv V y)) := by
+  show (TensorProduct.AlgebraTensorModule.rid (Polynomial V) B B)
+    (LinearMap.baseChange B (KaehlerDifferential.polynomialEquiv V).toLinearMap (b ⊗ₜ y)) = _
+  rw [LinearMap.baseChange_tmul]
+  show (TensorProduct.AlgebraTensorModule.rid (Polynomial V) B B) (b ⊗ₜ (KaehlerDifferential.polynomialEquiv V y)) = _
+  rw [TensorProduct.AlgebraTensorModule.rid_tmul, Algebra.smul_def, mul_comm]
+
+/-- **[Falt1] Lemma 1.1「単射性」(第一完全列、完成)**: `B = Polynomial V ⧸ (f)`
+(`hB`・`hsurj`)で `f'` の像(Falt1 の `f'(w)`)が `B` の非零因子なら、
+`mapBaseChange Z V B : B⊗_VΩ_{V/Z} → Ω_{B/Z}` は単射。
+
+証明の流れ: `z ∈ ker(mapBaseChange Z V B)` とすると
+`mapBaseChange_eq_comp_psiMap` より `ψ(z) ∈ ker(mapBaseChange Z(PolyV)B)`。
+`range_kerCotangentToTensor_span_tower` + mathlib の
+`range_kerCotangentToTensor`(`kerCotangentToTensor` の値域が `ker
+(mapBaseChange)` の scalar 制限に一致)を貼り合わせて
+`ψ(z) = c•(1⊗D_Zf)`(`c:Polynomial V`)と書く。`baseChange_map_comp_
+psiMap_eq_zero` で左辺に `baseChange(map)` を当てると 0、右辺は
+`π`(`piMap`)を経由して計算すると `algebraMap(c) * f'(w)`——NZD なので
+`algebraMap(c)=0`、したがって `ψ(z)=c•(1⊗D_Zf)=0`。最後に `ψ` の単射性
+(`psiMap_injective`)から `z=0`。 -/
+theorem mapBaseChange_injective_of_nzd (f : Polynomial V)
+    (hB : RingHom.ker (algebraMap (Polynomial V) B) = Ideal.span ({f} : Set (Polynomial V)))
+    (hsurj : Function.Surjective (algebraMap (Polynomial V) B))
+    (hnzd : algebraMap (Polynomial V) B (Polynomial.derivative f) ∈ nonZeroDivisors B) :
+    Function.Injective (KaehlerDifferential.mapBaseChange Z V B) := by
+  rw [← LinearMap.ker_eq_bot, eq_bot_iff]
+  intro z hz
+  rw [LinearMap.mem_ker, mapBaseChange_eq_comp_psiMap, LinearMap.comp_apply] at hz
+  have hrange_eq : LinearMap.range (KaehlerDifferential.kerCotangentToTensor Z (Polynomial V) B) =
+      Submodule.span (Polynomial V) {(1 : B) ⊗ₜ[Polynomial V] (KaehlerDifferential.D Z (Polynomial V) f)} :=
+    range_kerCotangentToTensor_span_tower f hB
+  have hrange_eq2 : LinearMap.range (KaehlerDifferential.kerCotangentToTensor Z (Polynomial V) B) =
+      Submodule.restrictScalars (Polynomial V) (KaehlerDifferential.mapBaseChange Z (Polynomial V) B).ker :=
+    KaehlerDifferential.range_kerCotangentToTensor Z (Polynomial V) B hsurj
+  have hmem : psiMap (Z := Z) (V := V) (B := B) z ∈
+      Submodule.span (Polynomial V) {(1 : B) ⊗ₜ[Polynomial V] (KaehlerDifferential.D Z (Polynomial V) f)} := by
+    rw [← hrange_eq, hrange_eq2, Submodule.restrictScalars_mem]
+    exact hz
+  obtain ⟨c, hc⟩ := Submodule.mem_span_singleton.mp hmem
+  have hc' : (algebraMap (Polynomial V) B c) • ((1 : B) ⊗ₜ[Polynomial V] (KaehlerDifferential.D Z (Polynomial V) f))
+      = psiMap (Z := Z) (V := V) (B := B) z := by
+    rw [Algebra.algebraMap_eq_smul_one, smul_assoc, one_smul]
+    exact hc
+  have h0 : (0:B) = piMap (V := V) (B := B)
+      ((LinearMap.baseChange B (KaehlerDifferential.map Z V (Polynomial V) (Polynomial V)))
+        (psiMap (Z := Z) (V := V) (B := B) z)) := by
+    rw [baseChange_map_comp_psiMap_eq_zero]; simp
+  rw [← hc'] at h0
+  have hstep : (LinearMap.baseChange B (KaehlerDifferential.map Z V (Polynomial V) (Polynomial V)))
+      ((algebraMap (Polynomial V) B c) • ((1 : B) ⊗ₜ[Polynomial V] (KaehlerDifferential.D Z (Polynomial V) f))) =
+      (algebraMap (Polynomial V) B c) •
+        (LinearMap.baseChange B (KaehlerDifferential.map Z V (Polynomial V) (Polynomial V)))
+        ((1 : B) ⊗ₜ[Polynomial V] (KaehlerDifferential.D Z (Polynomial V) f)) := map_smul _ _ _
+  rw [hstep] at h0
+  rw [LinearMap.baseChange_tmul] at h0
+  have hval : (KaehlerDifferential.map Z V (Polynomial V) (Polynomial V)) (KaehlerDifferential.D Z (Polynomial V) f)
+      = KaehlerDifferential.D V (Polynomial V) f := by
+    have := KaehlerDifferential.map_D Z V (Polynomial V) (Polynomial V) f
+    rwa [show algebraMap (Polynomial V) (Polynomial V) f = f from rfl] at this
+  rw [hval] at h0
+  have hpi : piMap (V := V) (B := B)
+      ((algebraMap (Polynomial V) B c) • ((1:B) ⊗ₜ[Polynomial V] (KaehlerDifferential.D V (Polynomial V) f)))
+      = (algebraMap (Polynomial V) B c) •
+        (piMap (V := V) (B := B) ((1:B) ⊗ₜ[Polynomial V] (KaehlerDifferential.D V (Polynomial V) f))) :=
+    map_smul _ _ _
+  rw [hpi] at h0
+  rw [piMap_tmul, KaehlerDifferential.polynomialEquiv_D, one_mul, smul_eq_mul] at h0
+  have hc0 : algebraMap (Polynomial V) B c = 0 :=
+    (mul_right_mem_nonZeroDivisors_eq_zero_iff hnzd).mp h0.symm
+  have hpsi0 : psiMap (Z := Z) (V := V) (B := B) z = 0 := by
+    rw [← hc', hc0, zero_smul]
+  exact psiMap_injective (by rw [hpsi0, map_zero])
+
+/-!
+★これで Lemma 1.1「単射性」の**一般的な核心部分**(`B` が `Polynomial V`
+の商で `f'` が非零因子なら `mapBaseChange` は単射)が完成した。Falt1 の
+実際の `W`(`AdjoinRoot (minpoly V w)` に同型)へ具体的に適用するには、
+`ker_adjoinRoot_mk`・`AdjoinRoot.mk_surjective` で `hB`・`hsurj` を、
+`adjoinRootMinpolyEquiv_algebraMap` で `f'` の像を `differentIdeal` の
+生成元(`differentIdeal_eq_span_derivative`)に結びつければよい——
+`falt1CokernelIso` の組み立てとほぼ同じパターン(未着手、次のラウンドへ)。
 -/
 
 end ABC3.Found.Falt1
