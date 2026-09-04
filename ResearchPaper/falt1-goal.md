@@ -3274,6 +3274,31 @@ mathlib での正確な組み立て方は未確認)。
       で貼り合わせ`length(Wₙ₊₁⧸differentIdeal Wₙ Wₙ₊₁)=length(Wₙ₊₁⧸(n))
       +(n-1)`という完全な等式にすること、さらにこれを`hrec`の`β`項へ
       正式に接続すること)は次回に持ち越す。
+
+      ★2026-09-05、この「残る接続作業」に着手し、`differentIdeal_eq_
+      span_derivative`(既存)+`falt1BaseChangeGeneratorFull`(既存、
+      `hxadjoin`・`hxminpoly`込みの生成元`x`を直接供給)+`falt1_
+      fieldLevel_adjoin_top_of_ringLevel_minpoly`(既存、体レベルの
+      adjoin条件への橋渡し)を組み合わせて`differentIdeal Wₙ Wₙ₊₁=
+      span{n·x^(n-1)}`を直接示そうとしたが、`differentIdeal_eq_span_
+      derivative`の`hw`引数(体レベルのadjoin条件)が要求する暗黙の
+      `[IsIntegralClosure Wₙ₊₁ Wₙ L]`等のinstanceと、`falt1_fieldLevel_
+      adjoin_top_of_ringLevel_minpoly`が実際に供給する**具体的な**
+      `L:=AdjoinRoot(g.map(FractionRing Wₙ))`に対するinstanceとが
+      自動では繋がらず、`isDefEq`が`maxHeartbeats 1000000`でも
+      timeoutする(このファイルが`falt1_cancelConductorDelta_
+      assembled`等で繰り返し記録してきた「巨大な入れ子式」由来の
+      elaboration負荷の**同じ症状**、しかし今回は表示だけでなく
+      実際の型検査自体が重い、より深刻なケース)。`falt1_hspan_eq`
+      (既存)がまさにこの橋渡しを内部で行っているので、そちらの
+      instance登録の手順(`haveI`の並び)を精読して踏襲すれば解決
+      できる可能性が高いが、この手順を正確に再現するには
+      `falt1_hspan_eq`の証明全体(150行超)をもう一段精読する時間が
+      必要——次回はそこから再開する。無理に押し切って壊れたものを
+      残すより、`falt1_falt1Wn1_isDiscreteValuationRing`・`falt1_
+      falt1Wn1_length_quotient_maximalIdeal_pow`という確実な到達点
+      (共にcommit済み)を維持する方を優先し、この接続作業自体は
+      コミットしなかった。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
