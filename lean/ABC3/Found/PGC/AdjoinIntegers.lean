@@ -1592,4 +1592,90 @@ theorem mul_one_add_pi_pow_action_eq
     hone]
   rfl
 
+/-! ## 主単数のなす部分群
+
+`1+π^n𝒪_K` の形の単数(「主単数」)全体が `(𝒪_K)^×` の部分群を
+なすこと(標準的な事実)を明示的に構成し、`mul_one_add_pi_pow_
+action_eq` をこの部分群の言葉で言い換える——`(𝒪_K)^×` の`Λ_n`
+への作用が `(𝒪_K)^×/(1+π^n𝒪_K)`(古典的には`(𝒪_K/π^n)^×`と同型)
+を経由してwell-definedであることの、群論的に正しい形での定式化。 -/
+
+/-- `1+π^n𝒪_K` の形の単数(「主単数」、level `n` の principal units)
+のなす `(𝒪_K)^×` の部分群。単位元・積・逆元での閉性は、いずれも
+`(v-1)` の形の式変形(`(vw-1)=v(w-1)+(v-1)`・`(v⁻¹-1)=-v⁻¹(v-1)`)
+だけで出る——`F_f`・Lubin-Tate 固有の議論は一切不要な、純粋に環論的
+な事実。 -/
+noncomputable def principalUnits {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    (π : 𝒪[K.carrier]) (n : ℕ) : Subgroup (𝒪[K.carrier])ˣ where
+  carrier := {v | (v : 𝒪[K.carrier]) - 1 ∈ Ideal.span ({π ^ n} : Set (𝒪[K.carrier]))}
+  one_mem' := by simp
+  mul_mem' := by
+    intro v w hv hw
+    simp only [Set.mem_setOf_eq] at *
+    have hcalc : ((v * w : (𝒪[K.carrier])ˣ) : 𝒪[K.carrier]) - 1 =
+        (v : 𝒪[K.carrier]) * ((w : 𝒪[K.carrier]) - 1) + ((v : 𝒪[K.carrier]) - 1) := by
+      push_cast; ring
+    rw [hcalc]
+    exact Ideal.add_mem _ (Ideal.mul_mem_left _ _ hw) hv
+  inv_mem' := by
+    intro v hv
+    simp only [Set.mem_setOf_eq] at *
+    have hvv : ((v⁻¹ : (𝒪[K.carrier])ˣ) : 𝒪[K.carrier]) * (v : 𝒪[K.carrier]) = 1 := by
+      rw [← Units.val_mul, inv_mul_cancel, Units.val_one]
+    have hcalc : ((v⁻¹ : (𝒪[K.carrier])ˣ) : 𝒪[K.carrier]) - 1 =
+        -((v⁻¹ : (𝒪[K.carrier])ˣ) : 𝒪[K.carrier]) * ((v : 𝒪[K.carrier]) - 1) := by
+      have hexpand : -((v⁻¹ : (𝒪[K.carrier])ˣ) : 𝒪[K.carrier]) * ((v : 𝒪[K.carrier]) - 1) =
+          -(((v⁻¹ : (𝒪[K.carrier])ˣ) : 𝒪[K.carrier]) * (v : 𝒪[K.carrier])) +
+            ((v⁻¹ : (𝒪[K.carrier])ˣ) : 𝒪[K.carrier]) := by ring
+      rw [hexpand, hvv]
+      ring
+    rw [hcalc]
+    exact Ideal.mul_mem_left _ _ hv
+
+/-- `principalUnits` の元とは、まさに `1+cπ^n`(`c∈𝒪_K`)の形の単数
+のこと——定義の直接の言い換え(`Ideal.mem_span_singleton'`)。 -/
+theorem mem_principalUnits_iff {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    (π : 𝒪[K.carrier]) (n : ℕ) (v : (𝒪[K.carrier])ˣ) :
+    v ∈ principalUnits K π n ↔ ∃ c : 𝒪[K.carrier], (v : 𝒪[K.carrier]) = 1 + c * π ^ n := by
+  show (v : 𝒪[K.carrier]) - 1 ∈ Ideal.span ({π ^ n} : Set (𝒪[K.carrier])) ↔ _
+  rw [Ideal.mem_span_singleton']
+  constructor
+  · rintro ⟨c, hc⟩
+    exact ⟨c, by rw [hc]; ring⟩
+  · rintro ⟨c, hc⟩
+    exact ⟨c, by rw [hc]; ring⟩
+
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★**`(𝒪_K)^×` の`Λ_n`への作用は
+`principalUnits K π n`(主単数の部分群)を法としてwell-defined**:
+`v∈principalUnits K π n`ならば`(u*v)·x=u·x`(任意の`u∈(𝒪_K)^×`)。
+`mem_principalUnits_iff`で`v=1+cπ^n`と書き直し、
+`mul_one_add_pi_pow_action_eq`を適用するだけ。`Gal(K(Λ_n)/K)≅
+(𝒪_K/π^n)^×`の構成へ向けて、単位群のレベルでの「モジュラス」が
+`π^n`(のべき)であることの群論的に正しい定式化——次は
+`(𝒪_K)^×⧸principalUnits K π n`から`ψ_nの根`への**誘導された**
+写像(`QuotientGroup.lift`)の構成へ進む見通し。 -/
+theorem mul_principalUnits_action_eq
+    {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hxn : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (u : (𝒪[K.carrier])ˣ) {v : (𝒪[K.carrier])ˣ} (hv : v ∈ principalUnits K π n) :
+    lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem
+        ((u * v : (𝒪[K.carrier])ˣ) : 𝒪[K.carrier]) =
+      lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem (u : 𝒪[K.carrier]) := by
+  obtain ⟨c, hc⟩ := (mem_principalUnits_iff K π n v).mp hv
+  have heq : ((u * v : (𝒪[K.carrier])ˣ) : 𝒪[K.carrier]) = (u : 𝒪[K.carrier]) * (1 + c * π ^ n) := by
+    rw [Units.val_mul, hc]
+  rw [heq]
+  exact mul_one_add_pi_pow_action_eq K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem u c
+
 end ABC3.Found.PGC
