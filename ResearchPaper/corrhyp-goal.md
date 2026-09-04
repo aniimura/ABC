@@ -3241,3 +3241,22 @@ promote`/`family_promote`の労力が**丸ごと不要になる**可能性があ
 次に着手する際はこの「`Γ(C,piece)`全体を一度に降ろす」方針を先に
 検証するのが妥当と判断する。集計は10/24で変わらず——§4は引き続き
 0/2。
+
+**追記(裏付けの確認)**: 上記の代替案を支える一般論(「有限表示な
+代数はfiltered colimitからある有限段階へ降ろせる」)が、mathlibに
+実在することを確認した——`Mathlib/Algebra/Category/Ring/
+FinitePresentation.lean`(タイトル: "Finitely presented algebras are
+finitely presentable in `Under R`, i.e. `Hom_R(S,-)` preserves
+filtered colimits")。ここに`RingHom.EssFiniteType.exists_comp_map_
+eq_of_isColimit`・`RingHom.EssFiniteType.exists_eq_comp_ι_app_of_
+isColimit`(`:45`,`:81`)という、まさに「射がfiltered colimitで
+一致するならある有限段階で既に一致する」という形の定理群が存在する。
+「有限表示なオブジェクトは(colimitの下の圏で)compactである」という
+標準的な圏論的事実と組み合わせれば、`S`(有限表示な`(A⊗ℝ)`-代数)が
+`Under(A⊗ℝ) ≅ colim Under(A⊗R_i.1)`の中でcompactであることから、
+ある有限段階`R''`を経由することが従う**はず**——ただし「`S`自身が
+ある有限段階の代数の base change として実現される」という、私が
+本当に必要とする形の定理そのもの(morphismではなくobjectの降下)は
+まだ特定できていない。それでも、**必要な一般論の存在自体は確認
+できた**——これは代替案が絵に描いた餅ではなく、現実的な道筋である
+ことの裏付けになる。集計は10/24で変わらず——§4は引き続き0/2。
