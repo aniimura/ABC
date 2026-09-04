@@ -5208,4 +5208,24 @@ theorem falt1_kaehler_spanFinrank_le {A B : Type*} [CommRing A] [CommRing B] [Al
   rw [IsLocalRing.spanFinrank_eq_finrank_quotient _ hfg]
   exact hdim
 
+/-- **Brinon-Conrad Exercise 13.7.4・step (4) の長さ版(完成)**:
+`Aₙ→Bₙ→Bₙ₊₁`の塔に対し、`0→Bₙ₊₁⊗_{Bₙ}Ω[Bₙ/Aₙ]→Ω[Bₙ₊₁/Aₙ]→
+Ω[Bₙ₊₁/Bₙ]→0`という「second fundamental exact sequence」が
+(`hinj`の下で)完全であることから、直ちに長さの加法公式が従う。
+右半分の完全性(`KaehlerDifferential.exact_mapBaseChange_map`)と
+`Ω[Bₙ₊₁/Bₙ]`への全射性(`KaehlerDifferential.map_surjective`)は
+**無条件**(mathlib既存)——`hinj`(左半分の単射性、Lemma 1.1型の
+非零因子条件から出る、`mapBaseChange_injective_adjoinRoot_direct`等)
+だけが Falt1 固有の仮定として残る。`Module.length_eq_add_of_exact`
+(mathlib既存)に3つの事実を渡すだけで閉じた。 -/
+theorem falt1_kaehler_length_tower_exact {An Bn Bn1 : Type*} [CommRing An] [CommRing Bn] [CommRing Bn1]
+    [Algebra An Bn] [Algebra Bn Bn1] [Algebra An Bn1] [IsScalarTower An Bn Bn1]
+    (hinj : Function.Injective (KaehlerDifferential.mapBaseChange An Bn Bn1)) :
+    Module.length Bn1 Ω[Bn1⁄An] =
+      Module.length Bn1 (TensorProduct Bn Bn1 Ω[Bn⁄An]) + Module.length Bn1 Ω[Bn1⁄Bn] :=
+  Module.length_eq_add_of_exact (KaehlerDifferential.mapBaseChange An Bn Bn1)
+    (KaehlerDifferential.map An Bn Bn1 Bn1) hinj
+    (KaehlerDifferential.map_surjective An Bn Bn1)
+    (KaehlerDifferential.exact_mapBaseChange_map An Bn Bn1)
+
 end ABC3.Found.Falt1
