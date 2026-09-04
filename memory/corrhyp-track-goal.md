@@ -91,5 +91,19 @@ mathlib自身が使う`set_option backward.isDefEq.respectTransparency false`
 「`set A := (M:Matrix...)`で台のMatrixを先に1回だけ取り出す」という
 具体的な回避策で解決——`tools/lean-idioms.md`に記録済み。
 
-**最終集計: `CorrHyp §1 4/5, §2 1/6, §3 1/3, §4 0/2, §5 0/7, §6 0/1
-—— 合計6/24`**(このセッション開始時の1/24から6倍)。
+★★★★★★2026-09-04さらに続報(第31-33件、Definition 2.3を完成)。
+ユーザーが「§2本体(Margulis/Shimura)に取り組む」を選択。調査の結果
+`Definition 2.2`(Margulis-arithmetic、代数群の部分群スキーム分類・実点の
+リー群構造がmathlibに丸ごと不在)は依然として人年規模と確認したが、
+`Definition 2.3`(Shimura-arithmetic)は`F:=ℚ`(無限素点1個、「他で
+非自明」が空虚に真)・`A:=M_2(ℚ)`(`Algebra.IsCentral.matrix`・
+`IsSimpleRing.matrix`・`Module.finrank_matrix`で「4次元中心的単純多元環」
+という四元数環の特徴づけを満たす)・`matrixEquivTensor`(唯一の無限
+素点で自明)・`O_A:=M_2(ℤ)`(`Γ_SL2Z=O_A∩SL_2(ℝ)`を成分レベルで証明)
+という4データすべてを`Found/CorrHyp/ShimuraArithmeticData.lean`で構成し、
+`corrHypInstance`の`ShimuraArithmetic:=fun _↦False`placeholderを本物の
+述語に差し替えた`corrHypInstance2`(`Instance2.lean`)へ接続、`.src`を
+正当に登記した——`Proposition 3.2`が壊れないことも確認済み(安全な差し替え)。
+
+**最終集計: `CorrHyp §1 4/5, §2 2/6, §3 1/3, §4 0/2, §5 0/7, §6 0/1
+—— 合計7/24`**(このセッション開始時の1/24から7倍)。
