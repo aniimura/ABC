@@ -1350,3 +1350,58 @@ rigidityは不要になる可能性が高い——必要なのは**同じ段階`
 mathlibに存在することを確認したが、これは`𝒰.I₀`に圏構造(有向系)を
 要求する仕様で、今回の(有限個の片を貼るだけの)単純な場合には
 `Scheme.GlueData`を直接使う方が見通しが良いと判断した。
+
+`Scheme.Spec`の相対版(「有限射=有限型の準連接代数層のSpec」という
+一般の同値)がmathlibに packaged されていないかも探したが該当無し
+——`α`(`c.C ⟶ Ext X`、有限)を`α_* O_C`という層として降ろす経路も
+無い。手作りの`GlueData`構成が唯一の道であることを再確認した。
+
+### `Lemma 4.1`(`corrHypInstance4`)残作業の技術ロードマップ(2026-09-04時点の統合版)
+
+これまで断片的に記録してきた残作業を、ここで1箇所に統合する
+——次にこの節点へ戻るときの出発点。
+
+**すでに完成した部品**(すべて`ExtLimit.lean`・`FieldLimit.lean`、
+★sorry無し):
+- 幾何側: `piecePullbackIso`(`Ext X`の`U`片`=Spec(Γ(U,U)⊗ℚℝ)`)・
+  `piecePullbackIsoStage`(有限段階`R'`版)・`piece_preimage_eq`
+  (両者が同じ`U`を指すことの位相的裏付け)。
+- 橋渡し: `piece_algebraEtale_tensor`(`c.α`をアフィン片へ制限すると
+  `Γ(U,U)⊗ℚℝ`上の`Algebra.Etale`になる)。
+- 降下: `exists_finite_standardEtaleCover`(étale-locus細分)→
+  `exists_fg_subalgebra_tensor_standardEtalePair_baseChange`(有限段階
+  への降下+base change復元)。
+- 合流: `exists_fgSubalgebra_upperBound`(有限個の段階の共通上界)+
+  `exists_fg_subalgebra_tensor_standardEtalePair_promote`(共通段階への
+  移送)。
+
+**残る3つの作業単位**(まだ未着手):
+1. **比較射の構成**: 1つの`U_i`内(標準エタール片どうし)、および複数の
+   `U_i`を横断した(異なる`U_i`のアフィン片どうし)、重なり上での局所
+   モデルの比較射を、`c.C`自身の位相構造(`Scheme.Hom.appLE`・開集合の
+   共通部分)から具体的に取り出す。まだ着手していない、最初の新規
+   construction。
+2. **rigidity検証**: 1の比較射が`Ext X`側で一致する(`c.C`自身の
+   スキームとしての整合性から自動)ことを確認し、
+   `exists_hom_comp_eq_comp_of_locallyOfFiniteType`(単一段階版、
+   `AffineTransitionLimit.lean`)へ渡して、より細かい共通段階で
+   **既に**一致することを結論する。
+3. **`GlueData`組み立て**: 1・2で得た比較射を`Scheme.GlueData`の
+   `t`(可逆性の確認を含む)・`t'`・`cocycle`フィールドへ、
+   `Scheme.Cover.glueMorphisms`(または`GlueData.glued`)経由で
+   実際に組み込み、`C_{R'} ⟶ (extDiagram X).obj R'`という有限エタール射
+   を完成させる。
+
+加えて、`Lemma 4.1`の完全な陳述には(4)`Corr`のnonempty脱落の手当て
+(`prop_3_2`の前例に倣い`Lemma 4.1`インスタンスへ明示的な追加前提と
+して導入)・(5)`c`のもう一方の脚(`β : c.C ⟶ ZK`)にも同じ議論を適用し
+`Z`と`ZK = Ext Z`を確定する対称的な作業、も要る——1-3は`α`側の議論の
+型を示したものであり、`β ↦ Z`の構成自体はまだ影も形もない。
+
+★★正直な見積もり: 1-3(特に1)は、今セッションで積み上げた降下補題群
+一式(`FieldLimit.lean`・`ExtLimit.lean`の合計)に**匹敵するか、それ
+以上の**分量になる可能性が高い。4は小さい(数行)。5は1-3とほぼ対称の
+構成の**繰り返し**になる見込みだが、それでも軽くはない。`Lemma 4.1`の
+完全な形式化は、複数セッションにまたがる継続的な取り組みとして扱う
+——★依然「壁ではなく道」であり、今セッションでその道の**大部分**
+(数学的な核心と土台のほぼ全て)を切り開いた。
