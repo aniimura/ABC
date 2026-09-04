@@ -186,12 +186,21 @@ order`と`MvPowerSeries.order`はdefeq」という前回の見積りが誤りだ
 を「取り出す」操作が一切不要だった。スカラー方程式`c(π-π^{n+1})=-r`は
 `exists_step_solution`と全く同じ機構(単数の逆元)で解けた。
 
-**残る作業**: Nat.recによる近似列の構成・極限の2工程(2変数版の
-LubinTateSequence.lean・LubinTateLimit.leanと同型だが1変数へ作り直す)、
-torsion点の構成、Galois作用を経由した相互律写像の構成
-——pGC の各項目(Prop 1.2・Cor 1.3・Prop 2.1・Prop 2.2・Theorem 4.2)
-を閉じるには、なお相互律写像そのものの構成・性質証明という大きな
-仕事が残っている。
+**続報(2026-09-04、出発点・近似列が完成——手続き部分すべて完了)**:
+`Found/PGC/LubinTateEndoBaseCase.lean`(出発点`a•X`が次数≤1まで解けて
+いることを確認)と`Found/PGC/LubinTateEndoSequence.lean::φSeq_endo`
+(`Nat.rec`による近似列)をsorry無しで完成させた。2変数版`ΦSeq`と同じ
+構造だが、各段の補正がスカラー`c`そのものなので`homogeneousComponent`
+の抽出が不要という簡略化。★これで節目(1)の1変数存在定理は**次数ごとの
+手続き部分すべて**(可除性・両側線形化・1ステップ・出発点・近似列)が
+sorry無しで完成した。
+
+**残る作業**: この列の極限`φ_∞`を構成し関数等式`f.subst(φ_∞)=
+φ_∞.subst(g)`をexactに満たすことを示す最後の1段(2変数版のLubinTateLimit.
+leanと同型だが1変数へ作り直す)、torsion点の構成、Galois作用を経由した
+相互律写像の構成——pGC の各項目(Prop 1.2・Cor 1.3・Prop 2.1・Prop 2.2・
+Theorem 4.2)を閉じるには、なお相互律写像そのものの構成・性質証明という
+大きな仕事が残っている。
 
 詳細な発見の経緯は `ResearchPaper/blocked-leaves.json` の
 `[pGC] Proposition 1.2 / ... —— 局所類体論の相互律` エントリの
