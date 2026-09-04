@@ -757,3 +757,24 @@ basicOpenIsoSpecAway`(`ExtLimit.lean`、★sorry無し)完成——mathlibの
 corrhyp-goal.mdに詳細)。次回は`show`で型を都度明示しながら再開する。
 
 コミット: `0dc8dc74`(basicOpenIsoSpecAway完成)・`48ad5c26`(記録)。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(「1ピース分の
+完全な連結」が完成、前回の詰まりを解消、集計10/24で変わらず)。前回の
+詰まり(`algebraMap`と`letI`導入の`Algebra`インスタンスの構文不一致)を
+解消——`exists_fg_subalgebra_tensor_standardEtalePair_mapEq`が返す等式を
+`letI`のスコープ内で`▸`ではなく**ただの`:=`(defeq)**で`algebraMap`形へ
+代入できると気づき、`standardEtalePairPullbackIso`を再証明せずそのまま
+使えた。`onePieceSchemeIso`・`piece_descends_iso`(`ExtLimit.lean`、
+★sorry無し)完成——**任意のスキームのアフィン開上の標準エタール元`f`に
+ついて、`X.basicOpen f`が有限段階の候補局所片のbase changeにちょうど
+一致する**という、作業単位1・3の核心の合流点。
+
+配管の教訓(`tools/lean-idioms.md` #28): `letI`導入のインスタンスに
+依存する等式の形変換は`▸`より先に型注釈つきの`:=`(defeq)を試す。
+
+**これで`Lemma 4.1`の「1アフィン片・1標準エタール片」の完全な降下が
+数学的に確立した**——残るのは複数ピースの貼り合わせ(GlueData本体)・
+work unit 2(rigidity)・貼り合わせ後の有限性確認の3点。
+
+コミット: `2f34ca1f`(1ピース連結完成)・`3ee14950`(lean-idioms #28)・
+`d10ec816`(記録)。
