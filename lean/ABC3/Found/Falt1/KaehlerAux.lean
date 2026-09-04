@@ -2880,4 +2880,62 @@ theorem falt1ModuleIsTorsionFreeV1Wn1
   apply moduleIsTorsionFree_of_injective
   exact hψinj
 
+set_option maxHeartbeats 400000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **`Module.Finite V1 Wₙ₊₁` が完成した**——`Module.Finite.of_
+restrictScalars_finite`(`R→A→M` のタワーで `M` が `R` 上有限なら
+`A` 上でも有限、「小さい環上の有限生成は大きい環上でも有限生成」)を
+`R:=V0, A:=V1, M:=Wₙ₊₁` に適用するだけ。`IsScalarTower V0 V1 Wₙ₊₁`
+(`ψ.commutes` から)と `Module.Finite V0 Wₙ₊₁`(既存の
+`falt1ModuleFiniteV0Wn1`)の2つを揃えれば機械的に閉じる——`ψ` の
+単射性は不要だった(有限性には使わない、`IsTorsionFree` の方でのみ
+必要だった)。 -/
+theorem falt1ModuleFiniteV1Wn1
+    {V0 Wn : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    (π : V0) (n : ℕ)
+    (hn : (n : FractionRing V0) ≠ 0) (hπne0 : algebraMap V0 (FractionRing V0) π ≠ 0)
+    (hprime : (Ideal.span ({π} : Set V0)).IsPrime) (hnotsq : π ∉ (Ideal.span ({π} : Set V0)) ^ 2)
+    (hnpos : 0 < n)
+    (hn' : (n : FractionRing Wn) ≠ 0)
+    (hπne0' : algebraMap Wn (FractionRing Wn) (algebraMap V0 Wn π) ≠ 0)
+    (hprime' : (Ideal.span ({algebraMap V0 Wn π} : Set Wn)).IsPrime)
+    (hnotsq' : algebraMap V0 Wn π ∉ (Ideal.span ({algebraMap V0 Wn π} : Set Wn)) ^ 2)
+    (hinjV0Wn : Function.Injective (algebraMap V0 Wn))
+    [IsDedekindDomain (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    [Module.IsTorsionFree V0 (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    [IsDedekindDomain (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))]
+    [Module.IsTorsionFree Wn (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))]
+    [Module.Finite V0 Wn] :
+    ∃ (ψ : integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))) →ₐ[V0]
+      integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn))))),
+      letI := ψ.toRingHom.toAlgebra
+      Module.Finite
+        (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+          (algebraMap V0 (FractionRing V0)))))
+        (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+          (algebraMap Wn (FractionRing Wn)))))
+    := by
+  obtain ⟨ψ, w, x, hwx, hψinj⟩ :=
+    falt1BaseChangeAlgHom_generator_and_injective π n hn hπne0 hprime hnotsq hnpos
+      hn' hπne0' hprime' hnotsq' hinjV0Wn
+  refine ⟨ψ, ?_⟩
+  letI := ψ.toRingHom.toAlgebra
+  haveI : IsScalarTower V0
+      (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))
+      (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn))))) := by
+    apply IsScalarTower.of_algebraMap_eq
+    intro y
+    exact (ψ.commutes y).symm
+  haveI := falt1ModuleFiniteV0Wn1 π n hnpos hn' hπne0' hprime' hnotsq'
+  exact Module.Finite.of_restrictScalars_finite V0 _ _
+
 end ABC3.Found.Falt1
