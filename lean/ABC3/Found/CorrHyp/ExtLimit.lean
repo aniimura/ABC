@@ -1288,6 +1288,38 @@ noncomputable def piece_restrict_hom (X : Over BaseK) (U V : X.left.Opens) (hV :
     Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) ⟶ Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V)) :=
   C.presheaf.map (homOfLE (piece_le_of_le X U V hV C α)).op
 
+/-! ### `piece_restrict_hom`を基本開の被覆(`2026-09-05続き13`の簡略化)へ
+特殊化する
+
+「共通の細分`W`」問題は、`U_i`・`U_j`を任意のアフィン開のペアとして
+扱うのではなく、単一のアフィン開`U`の基本開被覆`X.basicOpen f_i`で
+覆う設計に切り替えれば、`Scheme.basicOpen_mul`(mathlib、既存)により
+`W := X.basicOpen (f*g) = X.basicOpen f ⊓ X.basicOpen g`が自動的に
+アフィンになり(基本開同士の交わりは再び基本開)、分離性の仮定が
+一切不要になる——`corrHypGlueData`(既存のℝレベル版)が最初から
+採用していた設計そのもの。 -/
+
+open CategoryTheory AlgebraicGeometry Limits in
+/-- **`piece_restrict_hom`の基本開特殊化(左側)**——`D(f)`側の片から
+`D(f*g) = D(f)⊓D(g)`側の片への制限写像。`Scheme.basicOpen_mul`
+(mathlib)+`inf_le_left`で`D(f*g) ≤ D(f)`を得るだけ。 -/
+noncomputable def piece_restrict_hom_basicOpen_left (X : Over BaseK) (U : X.left.Opens) (f g : Γ(X.left, U))
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) :
+    Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen f))) ⟶
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen (f * g)))) :=
+  piece_restrict_hom X (X.left.basicOpen f) (X.left.basicOpen (f * g))
+    (by rw [Scheme.basicOpen_mul]; exact inf_le_left) C α
+
+open CategoryTheory AlgebraicGeometry Limits in
+/-- **`piece_restrict_hom`の基本開特殊化(右側)**——`D(g)`側の片から
+`D(f*g)`側の片への制限写像(左側の対)。 -/
+noncomputable def piece_restrict_hom_basicOpen_right (X : Over BaseK) (U : X.left.Opens) (f g : Γ(X.left, U))
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) :
+    Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen g))) ⟶
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen (f * g)))) :=
+  piece_restrict_hom X (X.left.basicOpen g) (X.left.basicOpen (f * g))
+    (by rw [Scheme.basicOpen_mul]; exact inf_le_right) C α
+
 /-- **アフィン開`U`上の基本開`X.basicOpen f`は`Spec(Localization.Away f)`
 そのものと同一視できる**——`mathlib`の`basicOpenIsoSpecAway`は`X := Spec R`
 の場合限定だったので、一般のアフィン開`U`(`X`自体はアフィンでなくてよい)
