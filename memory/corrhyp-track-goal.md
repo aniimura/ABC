@@ -1280,3 +1280,27 @@ pullback.fst・pullbackSymmetry.hom≫pullback.fst)と可換であることの
 の残りタスク)・U成分(恒等)と合わせたNatIso全体の組み立て・
 HasColimit.isoOfNatIsoでの.glued比較・mathlibのfromGludedとの合成。
 corrhyp-goal.mdに詳細記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04(続き6)
+続報(piecesGluedCoverVIso_hom_fst完成、fst自然性完全確立、集計10/24で
+変わらず)。φ(i,j)の3段構成それぞれのfst自然性を個別確立してから
+内側から順に繋いだ: pullbackHomIsoLeft_hom_fst'/_hom_snd'(@[reassoc]、
+pullback.lift_fst/_sndから直ちに従う)→pullbackEInvIso_hom_fst/_hom_snd
+(pullbackSymmetry_hom_comp_fst/_snd既製と組み合わせ、show内は
+(e i).symm.homで統一・非_assoc版と_assoc版を紙の計算に対応させて
+使い分ける、という2つの配管の教訓を得た)→pullbackHomOfLEIso_hom_fst/
+_hom_snd(IsPullback.isoIsPullback_hom_fst/_hom_snd既製)→
+pullbackHomOfLEIsoBasicOpen_hom_fst/_hom_snd(Scheme.isoOfEq_hom+
+Scheme.homOfLE_homOfLE)→eqToIso_congrArg_scheme_hom_ι(subst一発)→
+transitionElemIso_hom_ι(核心、haveチェーンをsetで掴み直し、
+cancel_monoで組み立てる新技法)→pullbackHomOfLE_gdV_iso_hom_fst/
+piecesGluedCoverVIso_hom_fst(show+exactでdefeq経由、instances透明度
+の壁を回避)。
+
+lake build(ExtLimit/ABC3とも)0エラー確認、コミット: `402c3d7b`。
+
+**これで項目(b)のNatIso自然性のうちfst側が完全に確立**。残るは
+snd側(gdT≫gdFとの可換性、gdT_eq_transitionElemIso等が土台の見込み、
+t_fac/cocycle同等の配線量)・U成分と合わせたNatIso全体の組み立て・
+HasColimit.isoOfNatIsoでの.glued比較・mathlibのfromGludedとの合成。
+corrhyp-goal.mdに詳細記録。

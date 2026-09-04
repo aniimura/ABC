@@ -2676,3 +2676,53 @@ glued ≅ c.α⁻¹(piece)`の証明)へ向けてExploreエージェント(読�
   `piecesOpenCover(...).gluedCover.glued ≅ U`と合成する。
 
 集計は10/24で変わらず(インフラ、numbered itemではないため)。
+
+## 2026-09-04(続き6): `piecesGluedCoverVIso_hom_fst`——fst自然性が完全に確立
+
+Stop hookフィードバックへの応答として、項目(b)の残る核心(NatIsoの
+自然性)のうち`fst`(`gdF`)側を最初から最後まで完全に証明した。
+`φ(i,j)`の3段構成(`pullbackEInvIso`→`pullbackHomOfLEIsoBasicOpen`→
+`transitionElemIso`)それぞれの`fst`自然性を個別に確立してから内側
+から順に繋ぐ、という方針で進めた:
+
+1. **`pullbackHomIsoLeft_hom_fst'`/`_hom_snd'`**(`@[reassoc]`付き):
+   `pullbackHomIsoLeft`(mathlibに無く既存で補っていた一般的事実)
+   自身の`fst`/`snd`自然性——`pullback.map`の定義から`pullback.lift_fst`
+   /`_snd`で直ちに従う。
+2. **`pullbackEInvIso_hom_fst`/`_hom_snd`**: `pullbackSymmetry_hom_comp_
+   fst`/`_snd`(mathlib既製)と組み合わせて4段の`.trans`チェーンを
+   内側から順に計算。ここで新しい配管の罠に遭遇: `show`の中で`(e i).inv`
+   をそのまま書くと、`pullbackHomIsoLeft`が内部で使う`(e i).symm.hom`
+   との型不一致(`instances`透明度では見分けられない)で`rw`が失敗する
+   ——`show`では`(e i).symm.hom`で統一して書くことで解消。また`rw`の
+   順序は「末尾に何も続かない」箇所は非`_assoc`版、「末尾に何か続く」
+   箇所は`_assoc`版を使う必要があった——simpの自動associativity処理
+   には頼らず、紙の上の手計算と正確に対応させることで解決した。
+3. **`pullbackHomOfLEIso_hom_fst`/`_hom_snd`**: `IsPullback.
+   isoIsPullback_hom_fst`/`_hom_snd`(mathlib既製)をそのまま呼ぶだけ。
+4. **`pullbackHomOfLEIsoBasicOpen_hom_fst`/`_hom_snd`**: `Scheme.
+   isoOfEq_hom`(`X.isoOfEq e`の`.hom`は`X.homOfLE`そのもの)+`Scheme.
+   homOfLE_homOfLE`(合成が単一の`homOfLE`にまとまる)で(3)へ帰着。
+5. **`eqToIso_congrArg_scheme_hom_ι`**: `eqToIso`(開集合の等式を
+   `congrArg`でスキームレベルへ持ち上げたもの)の`.ι`との可換性——
+   `subst`一発(両辺とも`Iso.refl`になるだけ)。
+6. **`transitionElemIso_hom_ι`**(核心): `transitionElemIso`は`have`の
+   チェーンによるtacticで定義されているため、`unfold`後も`set`で
+   `W`・`iso1`・`iso2`を名前で掴み直す必要があった。`(X.basicOpen f₁).ι`
+   のmono性による`cancel_mono`で`iso1`側を`X.homOfLE`の形にまとめる、
+   という新しい技法を要した。
+7. **`pullbackHomOfLE_gdV_iso_hom_fst`/`piecesGluedCoverVIso_hom_fst`**:
+   上記すべてを合成した最終形——`piecesOpenCover_f_eq`との接続は
+   `rw`ではなく`show`+`exact`でdefeq経由にすることで、`pullback.fst`
+   の2引数同時依存による`instances`透明度の壁を回避した(`#31`の
+   別の現れ方)。
+
+すべて`lean_check`で個別検証後ファイルへ反映、`lake build`
+(ExtLimit/ABC3とも)0エラー確認、コミット(`402c3d7b`)。
+
+**これで項目(b)のNatIso自然性のうち`fst`側が完全に確立した**。残る
+のは`snd`側(`gdT≫gdF`との可換性——`gdT_eq_transitionElemIso`等の
+既存の`gdT`関連事実が土台になる見込み、`t_fac`/`cocycle`同等の配線量
+が見込まれる)、それが済めば`U`成分(恒等)と合わせた`NatIso`全体の
+組み立て、`HasColimit.isoOfNatIso`での`.glued`比較、mathlibの
+`fromGlued`との合成。集計は10/24で変わらず。
