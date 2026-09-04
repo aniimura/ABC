@@ -1283,6 +1283,26 @@ mathlib での正確な組み立て方は未確認)。
     `conductor(Wₙ,x)`が単項イデアルであることの利用が必要——、
     (ii) 再帰的`V_n`族(`V_1, V_2, ...`)を実際に構成すること
     (「πの選び方(次の一様化元)」の再帰的な選定は未着手)。
+
+    ★(i)の下調べ(2026-09-04、未着手のまま次回に持ち越し):
+    `length_quotient_span_singleton_mul`(既存、単項イデアルの場合の
+    長さの加法性)を`conductor Wₙ x * differentIdeal V1 Wₙ₊₁`に適用
+    するには`conductor Wₙ x`(`Ideal Wₙ₊₁`)が**単項**である必要がある
+    ——これは`Wₙ₊₁`が**PID(局所化すれば DVR)**であれば任意のイデアルが
+    単項なので自動的に満たされる。`Wₙ₊₁ := integralClosure Wₙ
+    (AdjoinRoot gK)`は`gK`が Eisenstein なので古典的には**全分岐
+    (totally ramified)**——`Wₙ`上唯一の素イデアルしか持たず、
+    Dedekind整域+局所 ⟹ DVR、のはず——だが、これを mathlib で示す
+    経路は未調査。★このファイル既存の教訓(「3c: 戦略転換」の節)が
+    まさにこの種の「Eisenstein ⟹ 整閉・全分岐」を直接示そうとして
+    「局所化・付値延長という mathlib にまだ薄い領域」に何度も
+    突き当たったと記録している——**同じ壁が(i)でも予想される**。
+    次回はまず`IsDiscreteValuationRing (integralClosure Wₙ
+    (AdjoinRoot gK))`(または同値な「唯一の極大イデアル」)が
+    mathlibの既存資産だけで示せるか、`node tools/decl-index.mjs
+    --mathlib`で`ramificationIdx`・`IsDedekindDomain.isPrincipalIdealRing_
+    of_...`・`IsLocalRing`周りを先に調査することから始めるのが
+    効率的(証明を試す前に在庫を確認する、CLAUDE.mdの「在庫」原則)。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
