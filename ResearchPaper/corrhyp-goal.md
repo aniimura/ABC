@@ -2072,3 +2072,62 @@ inv`・`basicOpen_res`・`basicOpen_mul`のような**自然性の具体的な�
 両辺に個別に適用して同じ正規形へ落とす、地道な照合作業になる見込み
 (新しい数学的内容は不要、`gdT_id`より一段複雑な配管)。今回はここで
 一旦区切り、この完全展開形を次の一手の出発点として記録する。
+
+### 2026-09-04さらに続報: t_facの4部品が出揃うも、`rw`/`simp`の一致判定が
+またも詰まる——`isoImage_naturality`系4補題を確立、組み立てはまだ
+
+前回の「完全展開形」を実際に閉じるため、`transitionElemIso f₁ (g*h) e`と
+`transitionElemIso f₁ g e`の関係を示す一般補題`transitionElemIso_inv_
+naturality`の構成に着手した。必要な部品を4つ、すべて**sorry無しで独立に
+証明**した(コミット`aecf1ef5`・`8a7e68d8`でCorrHyp非依存の一般事実として
+`ExtLimit.lean`に追加済み):
+
+- `Scheme.Hom.isoImage_naturality`/`isoImage_inv_naturality`: `isoImage`
+  (開埋め込みの像への制限)が部分開集合の包含と両立する(`.hom`版・`.inv`版)。
+- `eqToIso_homOfLE_comm`/`eqToIso_homOfLE_comm'`: `eqToIso`(`Eq`から作る
+  同型)が`homOfLE`と両立する。`eqToIso`の引数は`Eq`(`Prop`)なので証明の
+  中身は問わない(証明無関係性)——`subst`+`simp`で機械的に示せる。
+
+この4つを`Z.homOfLE(le_Z)≫(transitionElemIso f₁ g e).inv`側と
+`(transitionElemIso f₁ (g*h) e).inv≫X.homOfLE(le_X)`側それぞれに適用して
+橋渡しする**計画自体は正しい**ことを、各`have`ステップが個別に(型検査
+だけなら)通ることで確認した。しかし実際に`rw [step1]`/`simp only
+[step1,...]`でゴールへ適用しようとすると、以前`gdF`(`@[reducible]`化で
+解決)で当たったのと**同種の「`instances`透明度で型が合わない」エラー**
+に再度当たった——今回は`X.presheaf`/`X.presheaf.obj`の不一致という形で
+現れる。`step1`単体は`have`で正しく型検査できる(ゴールと完全に同じ
+主張であることを確認済み)のに、`rw`/`simp`でゴールへ適用しようとした
+瞬間に失敗する——`rw`/`simp`の**書き換え一致判定(congruenceのmotive
+構築)が、`unfold transitionElemIso`+前段の`simp`で作られた深くネストした
+`Scheme.Opens.basicOpen`項の中まで`instances`透明度で辿れない**という、
+`gdF`のときと表面上は違うが根が同じ配管の壁に当たっていると見られる
+(`Scheme.basicOpen`自体はmathlib側の定義なので`@[reducible]`を勝手に
+付けるわけにいかない)。
+
+4部品すべてが揃い、組み立てる「計画」自体は検証済みなので、`t_fac`の
+数学的内容に不明な点は無い——残るのは純粋にLeanの配管(`rw`/`simp`を
+経由しない`calc`・`conv`での局所的な書き換え、あるいは`Eq.trans`を
+直接組む term-mode 証明を試す必要がある)。集計は10/24で変わらず
+(§4は0/2のまま)。
+
+コミット: `aecf1ef5`(isoImage_naturality系)・`8a7e68d8`
+(eqToIso_homOfLE_comm系)。
+
+**追記(切り分けの結果)**: `conv_lhs => rw […]`・`set_option backward.
+isDefEq.respectTransparency false`・4補題を1回の`simp only`にまとめる、
+などいくつかの回避策を試したが、いずれも同じ「`instances`透明度で
+`X.presheaf`/`X.presheaf.obj`が型不一致」というエラーに当たった——
+`step1`(4補題の1つ)は`have`単体では正しく型検査できる(ゴールと完全に
+一致する主張であることを確認済み)のに、`rw`/`simp`/`conv`いずれでこの
+ゴールへ適用しようとしても失敗する。エラーが一貫して`X.presheaf`
+(`TopCat.Presheaf CommRingCat _`)対`X.presheaf.obj`が要求する
+`(Opens X)ᵒᵖ ⥤ CommRingCat`の不一致であることから、**`TopCat.
+Presheaf`自体の定義展開(`(Opens X)ᵒᵖ⥤C`への unfold)が`instances`
+透明度では起こらない**ために、`ConcreteCategory.hom (X.presheaf.map
+…)`を含む部分式にまたがる congruence motive の構築(`rw`/`simp`/`conv`
+共通の内部機構)が失敗している、と見られる——`gdF`の`@[reducible]`化
+(前々回)とは別の、より深い(mathlib側の`TopCat.Presheaf`に起因する)
+配管の壁。回避には`generalize`で該当部分式を先に不透明な変数へ
+置き換えるなどの手当てが要ると見込まれるが、今回はここで一旦区切る。
+`t_fac`の数学的内容(4補題の組み立て方)自体には不明な点が無いことは
+確定しているので、次に着手する際はこの`generalize`路線から始めるとよい。

@@ -1678,4 +1678,57 @@ theorem mul_principalUnits_action_eq
   rw [heq]
   exact mul_one_add_pi_pow_action_eq K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem u c
 
+/-- ★★★★★★★★★★★★★★★★★★★★★★★★**単数の作用は`(𝒪_K)^×⧸principalUnits
+K π n`上の写像として誘導される**——`mul_principalUnits_action_eq`
+(コセットが一致すれば作用の値も一致)が`Quotient.lift`が要求する
+well-definedness の証明そのものになっている。`QuotientGroup.
+leftRel_apply`(`a≈b ↔ a⁻¹*b∈N`)で`Quotient`の同値関係を部分群の
+言葉へ変換するだけ。`Gal(K(Λ_n)/K)≅(𝒪_K/π^n)^×`の構成へ向けて、
+「単数の作用が有限群`(𝒪_K)^×⧸principalUnits K π n`上の写像として
+本当に定義できる」ことを、mathlibの`QuotientGroup`インフラの上で
+明示的に構成した——単射性・全射性は依然として残る課題だが、
+「作用が矛盾なく定義できる」という土台がこれで揃った。 -/
+noncomputable def unitActionQuotientLift
+    {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hxn : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))] :
+    (𝒪[K.carrier])ˣ ⧸ principalUnits K π n → adjoinIntegers K x :=
+  Quotient.lift (fun u => lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem (u : 𝒪[K.carrier]))
+    (fun a b hab => by
+      have hab' : (a⁻¹ * b : (𝒪[K.carrier])ˣ) ∈ principalUnits K π n := QuotientGroup.leftRel_apply.mp hab
+      have hkey := mul_principalUnits_action_eq K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem a hab'
+      simp only [mul_inv_cancel_left] at hkey
+      exact hkey.symm)
+
+/-- `unitActionQuotientLift`は定義通りの値を返す——`QuotientGroup.mk u`
+での値は文字通り`u·x`(`Quotient.lift`の定義から`rfl`)。 -/
+theorem unitActionQuotientLift_mk
+    {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hxn : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (u : (𝒪[K.carrier])ˣ) :
+    unitActionQuotientLift K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem
+        (QuotientGroup.mk (s := principalUnits K π n) u) =
+      lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hxn hmem (u : 𝒪[K.carrier]) := rfl
+
 end ABC3.Found.PGC
