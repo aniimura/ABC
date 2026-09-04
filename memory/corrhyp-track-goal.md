@@ -554,6 +554,16 @@ GlueDataを直接使う方が見通しが良いと判断。
 
 コミット: `46704c1d`(piecePullbackIsoStage)・`68ddc617`(訂正の記録)。
 
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報
+(piece_preimage_eq完成、集計10/24で変わらず)。`ExtLimit.lean`に
+`piece_preimage_eq`(Ext X側のUのアフィン片=R'側の同じアフィン片の
+`extConePi X .app R'`によるpreimage、★sorry無し)を追加——
+`piecePullbackIso`と`piecePullbackIsoStage`が「同じU」を指している
+ことの位相的な裏付け。`extConePi_app_fst`+`Scheme.Hom.comp_preimage`
+だけで閉じた。
+
+コミット: `63ce023b`(piece_preimage_eq)。
+
 ★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(残作業4段階を総括、
 集計10/24で変わらず)。generic flatnessの標準的前提(Rネター整域・
 加群/多元環がR上有限表示)を確認したところ、`corrHypInstance4`の
