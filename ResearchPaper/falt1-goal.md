@@ -920,6 +920,30 @@ mathlib での正確な組み立て方は未確認)。
     としてインラインに展開する**のが正攻法——次回はこの方針で
     直接 `differentIdeal_tower_diamond` の呼び出しに挑むとよい
     (単独の instance-provider theorem を目指さない)。
+
+    ★★2026-09-04、**`Module.Finite/IsTorsionFree V0 Wₙ₊₁` も完成した**
+    (`falt1ModuleFiniteV0Wn1`・`falt1ModuleIsTorsionFreeV0Wn1`、commit
+    `d739bbed`)。`Module.Finite` は `Module.Finite.trans`(`V0→Wₙ→
+    Wₙ₊₁` の合成、`Module.Finite V0 Wₙ` を仮定として要求)で機械的。
+    `Module.IsTorsionFree` は `algebraMap V0 Wₙ₊₁` の単射性を
+    `algebraMap V0 Wₙ`(仮定)・`algebraMap Wₙ Wₙ₊₁`(構成から)の
+    合成で示した。★これまで3回繰り返していた「正則元→非零→
+    `algebraMap` 単射性→整域での非零元倍は単射」という議論を、
+    **汎用補題 `moduleIsTorsionFree_of_injective`**(`T` が整域で
+    `algebraMap R T` 単射なら `Module.IsTorsionFree R T`)として
+    独立に切り出した——今後同種の場面ではこれを直接呼べばよい。
+
+    ★これで約20個中**8個**(`Module.Finite`/`IsTorsionFree` の
+    `(Wₙ,Wₙ₊₁)`・`(V0,V1)`・`(V0,Wₙ₊₁)` の3ペア分、`Algebra V0 Wₙ₊₁`・
+    `IsScalarTower V0 Wₙ Wₙ₊₁`)が揃った。残る(未着手):
+    `Algebra V1 Wₙ₊₁`・`IsScalarTower V0 V1 Wₙ₊₁`(パターン確認済み、
+    `letI`でインライン展開する方針)、`Module.Finite/IsTorsionFree
+    V1 Wₙ₊₁`(**`ψ:=falt1BaseChangeAlgHom` の単射性を要する、
+    まだ証明していない新しい数学的内容**——`ψ` は `AdjoinRoot.map`
+    経由で構成されており、`deg f = deg g = n`(同じ次数)という
+    構成から、基底 `{1,X,...,X^{n-1}}` を基底へ送ることに由来する
+    単射性が期待できる、が未検証)、`hsep`(`Algebra.IsSeparable
+    (FractionRing V0)(FractionRing Wₙ₊₁)`)。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
