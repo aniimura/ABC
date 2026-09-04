@@ -2125,11 +2125,42 @@ noncomputable def corrHypGlueDataOfCover {A : Type} [CommRing A] [Algebra ℚ A]
     (fun i => descendPieceOfProof (A := A) hU (f i.1) (hf i.1 i.2))
     (fun i => descendPieceIsoOfProof (A := A) hU (f i.1) (hf i.1 i.2))
 
+/-- **`corrHypGlueDataOfCover`をさらに`Algebra.Etale`という1個の仮定
+だけから自動的に得る**: `Γ(X,U)`が`A⊗[ℚ]ℝ`上étaleであれば
+(`exists_finite_standardEtaleCover`で)有限standard-étale被覆
+`ι,t,f`が自動的に存在するので、それを`corrHypGlueDataOfCover`に
+渡すだけでよい。`ι,t,f`自体は`Exists.choose`で取り出した不透明な値
+のまま外へは出さない(`corrHypGlueDataOfEtale_cover`が使う場面でも
+同じ式`exists_finite_standardEtaleCover (A ⊗[ℚ] ℝ) Γ(X, U)`を再度
+書くことで、定義的に同じ`.choose`結果を指すようにしている)。
+
+★**sorry 無し**。 -/
+noncomputable def corrHypGlueDataOfEtale {A : Type} [CommRing A] [Algebra ℚ A]
+    {X : Scheme} {U : X.Opens} (hU : IsAffineOpen U) [Algebra (A ⊗[ℚ] ℝ) Γ(X, U)]
+    [Algebra.Etale (A ⊗[ℚ] ℝ) Γ(X, U)] : Scheme.GlueData :=
+  letI h := exists_finite_standardEtaleCover (A ⊗[ℚ] ℝ) Γ(X, U)
+  corrHypGlueDataOfCover (A := A) hU h.choose_spec.choose h.choose_spec.choose_spec.choose
+    h.choose_spec.choose_spec.choose_spec.2
+
+/-- `corrHypGlueDataOfEtale`が使う族`(ι,t,f)`は実際に`U`を覆う——
+`exists_finite_standardEtaleCover`の被覆条件(環レベル、
+`PrimeSpectrum.basicOpen`)を`exists_scheme_basicOpen_cover_of_ring`で
+スキームレベル(`X.basicOpen`)へ変換するだけ。ロードマップ項目(b)
+(`corrHypGlueData.glued ≅ U`)で必要になる被覆条件そのもの。 -/
+theorem corrHypGlueDataOfEtale_cover {A : Type} [CommRing A] [Algebra ℚ A]
+    {X : Scheme} {U : X.Opens} (hU : IsAffineOpen U) [Algebra (A ⊗[ℚ] ℝ) Γ(X, U)]
+    [Algebra.Etale (A ⊗[ℚ] ℝ) Γ(X, U)] :
+    letI h := exists_finite_standardEtaleCover (A ⊗[ℚ] ℝ) Γ(X, U)
+    (⨆ i ∈ h.choose_spec.choose, X.basicOpen (h.choose_spec.choose_spec.choose i)) = U := by
+  exact exists_scheme_basicOpen_cover_of_ring hU _ _
+    (exists_finite_standardEtaleCover (A ⊗[ℚ] ℝ) Γ(X, U)).choose_spec.choose_spec.choose_spec.1
+
 /- ★★次の一手(未着手): (b)`corrHypGlueData.glued`(貼り合わせてできる
-スキーム)が`U`(ひいては`C`)に同型であることを、`U`自身の`OpenCover`の
-`gluedCover`との比較で示す。(c)`A`・`X`・`U`を実際の`corrHypInstance4`・
-`Ext`・`C`に接続する——`exists_finite_standardEtaleCover`+
-`exists_scheme_basicOpen_cover_of_ring`で実際の`ι,t,f`を得る。
+スキーム)が`U`(ひいては`C`)に同型であることを、`corrHypGlueDataOfEtale_cover`
+が与える被覆条件と`U`自身の`OpenCover`の`gluedCover`との比較で示す。
+(c)`A`・`X`・`U`・`[Algebra.Etale ...]`を実際の`corrHypInstance4`・
+`Ext`・`C`に接続する——ここまでは「étaleな環拡大→GlueData+被覆条件」
+というCorrHyp非依存の一般的パッケージ化がすべて完了した状態。
 `corrhyp-goal.md`に記録。 -/
 
 end ABC3.Found.CorrHyp
