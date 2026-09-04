@@ -67,13 +67,14 @@ theorem isAdic_maximalIdeal_valuationRing {p : ℕ} [Fact p.Prime] (K : PAdicLoc
         ⊆ Metric.ball (0 : 𝒪[K.carrier]) ε := Metric.closedBall_subset_ball hn
       _ ⊆ s := hεsub
 
-/-- ★★★★★★★★★**`𝒪[K.carrier]` は `maximalIdeal`-進完備**——
-`Found/PGC/LubinTateAction*.lean` が要求する `[IsAdicComplete
-(maximalIdeal A) A]` が、実際の p進局所体 `K` の整数環 `A:=𝒪[K.carrier]`
-に対して**自動的に**成り立つ。コンパクト性(既出)から `CompleteSpace`
-を取り出し、`isAdic_maximalIdeal_valuationRing` と組み合わせるだけ。 -/
-theorem isAdicComplete_valuationRing {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) :
-    IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier]) := by
+/-- `𝒪[K.carrier]` は(距離位相について)完備——`𝒪[K.carrier]` が
+`Metric.closedBall 0 1` としてコンパクトであることから
+`Valued.integer.compactSpace_iff_completeSpace_and_
+isDiscreteValuationRing_and_finite_residueField` で取り出す。
+`isAdicComplete_valuationRing`(進完備)とは別の、素の距離完備性
+——`PowerSeries.aeval` が要求する `[CompleteSpace S]` に直接使える形。 -/
+theorem completeSpace_valuationRing {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) :
+    CompleteSpace (𝒪[K.carrier]) := by
   have hcs : CompactSpace (𝒪[K.carrier]) := by
     have hset : (𝒪[K.carrier] : Set K.carrier) = Metric.closedBall 0 1 := by
       ext x
@@ -81,10 +82,18 @@ theorem isAdicComplete_valuationRing {p : ℕ} [Fact p.Prime] (K : PAdicLocalFie
       exact Valued.integer.mem_iff
     have hcompact : IsCompact (𝒪[K.carrier] : Set K.carrier) := hset ▸ isCompact_closedBall 0 1
     exact isCompact_iff_compactSpace.mp hcompact
-  have hcomplete : CompleteSpace (𝒪[K.carrier]) :=
-    (Valued.integer.compactSpace_iff_completeSpace_and_isDiscreteValuationRing_and_finite_residueField.mp
-      hcs).1
-  exact (isAdic_maximalIdeal_valuationRing K).isAdicComplete_iff.mpr ⟨hcomplete, inferInstance⟩
+  exact (Valued.integer.compactSpace_iff_completeSpace_and_isDiscreteValuationRing_and_finite_residueField.mp
+    hcs).1
+
+/-- ★★★★★★★★★**`𝒪[K.carrier]` は `maximalIdeal`-進完備**——
+`Found/PGC/LubinTateAction*.lean` が要求する `[IsAdicComplete
+(maximalIdeal A) A]` が、実際の p進局所体 `K` の整数環 `A:=𝒪[K.carrier]`
+に対して**自動的に**成り立つ。`completeSpace_valuationRing`(既出)と
+`isAdic_maximalIdeal_valuationRing` と組み合わせるだけ。 -/
+theorem isAdicComplete_valuationRing {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) :
+    IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier]) :=
+  (isAdic_maximalIdeal_valuationRing K).isAdicComplete_iff.mpr
+    ⟨completeSpace_valuationRing K, inferInstance⟩
 
 /-- `𝒪[K.carrier]` は一意分解整域——`IsDiscreteValuationRing` が
 `IsPrincipalIdealRing` を含意し、PID は UFD であることから。
