@@ -889,3 +889,19 @@ GlueData組み立て戦略の(a)が完成、残るは(b)同型による移送の
 構成、(c)貼り合わせ後の有限性確認、の2点。
 
 コミット: `6e8ea04e`(cover変換完成)・`6d9b1db1`(記録)。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報
+(遷移射を実際のスキーム同型として取り出す完成、GlueDataのtフィールド
+材料が揃った、集計10/24で変わらず)。`exists_transitionIso`
+(`ExtLimit.lean`、★sorry無し)完成——`exists_transitionOpen_eq_
+basicOpen`が与える開集合の等式を、`Scheme.Hom.isoImage`+`eqToIso`で
+**実際のスキーム同型**へ格上げした。2つの片`i`・`j`に適用すれば、両方
+とも同じ`X.basicOpen(f_i·f_j)`と同型になるので合成で遷移射
+`Z_i.basicOpen(s_i)≅Z_j.basicOpen(s_j)`が直接得られる。
+
+**現状整理**: GlueData部品(a)ring→scheme被覆変換・(b)候補片の実現・
+(c)遷移射、まで揃った。残るは(d)これらを`Scheme.GlueData`の実際の
+12フィールドとして組み立てる作業(`t'`・`cocycle`は3重の重なりでの
+整合性、まだ手つかず)、(e)貼り合わせ後の有限性確認、の2点。
+
+コミット: `925233b1`(exists_transitionIso完成)・`63edfedc`(記録)。
