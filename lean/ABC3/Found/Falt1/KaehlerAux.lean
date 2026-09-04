@@ -5217,6 +5217,129 @@ theorem falt1_kaehler_length_exact_wn1_full
   rw [h1, add_comm, ← h3]
 
 /-!
+## Theorem 1.2 step (5) への第一歩: Eisenstein拡大の根が生成する
+イデアルが剰余体商と一致する(2026-09-05)
+
+`differentIdeal Wₙ Wₙ₊₁`を`n`・`x`(`Wₙ₊₁`の`Wₙ`上の生成元)だけで
+具体的に評価する(step (5)の核心、`β`項の由来)には、`Ideal.span{x}`
+が`Wₙ₊₁`の極大イデアルそのものであること(=`x`が一様化元であること
+=Eisenstein拡大が全分岐であること)を要する。ここでは、その**最初の
+構成要素**として、`g:=X^n-Cπ'`(Eisenstein型)の`AdjoinRoot`において
+`AdjoinRoot g ⧸ (root g) ≃ₐ[Wₙ] Wₙ⧸(π')`(根が生成するイデアルで
+割ると、ちょうど`Wₙ`の`π'`による商に戻る)ことを、`AdjoinRoot`の
+第一同型定理から直接構成した——`(root g)`の生成関係`(root g)^n=π'`
+と、多項式の次数0の項を`X`で括り出す初等的な議論のみで閉じる
+(mathlibに直接の道具が見当たらなかったため自前で構成)。 -/
+
+set_option maxHeartbeats 800000 in
+/-- **`AdjoinRoot(X^n-Cπ')⧸(root)`が`Wₙ⧸(π')`と同型(新規)**:
+`AdjoinRoot.liftAlgHom`で構成した`ψ' : AdjoinRoot g →ₐ[Wₙ] Wₙ⧸(π')`
+(根を`0`へ送る)が全射・核が`(root g)`ちょうどであることを示し、
+第一同型定理(`Ideal.quotientKerAlgEquivOfSurjective`)を適用する。
+核の計算は、`p ∈ ker ψ'`なら`p.coeff 0 ∈ (π')`(定数項が`π'`の倍数)
+であることから、`p = C(p.coeff 0) + X*q`という分解と`(root g)^n=π'`
+(`Eisenstein`関係式そのもの)を組み合わせて`p ∈ (root g)`を導く。 -/
+noncomputable def falt1_adjoinRoot_quotient_root_eq_residue {Wn : Type*} [CommRing Wn] (π' : Wn) (n : ℕ) (hn : 0 < n) :
+    let g := Polynomial.X ^ n - Polynomial.C π'
+    (AdjoinRoot g ⧸ Ideal.span ({AdjoinRoot.root g} : Set (AdjoinRoot g))) ≃ₐ[Wn] (Wn ⧸ Ideal.span ({π'} : Set Wn)) := by
+  intro g
+  set Q := Wn ⧸ Ideal.span ({π'} : Set Wn) with hQdef
+  set i : Wn →ₐ[Wn] Q := Algebra.ofId Wn Q with hidef
+  set z0 : Q := 0 with hz0def
+  have heval : Polynomial.eval₂ (i : Wn →+* Q) z0 g = 0 := by
+    show Polynomial.eval₂ _ z0 (Polynomial.X ^ n - Polynomial.C π') = 0
+    rw [Polynomial.eval₂_sub, Polynomial.eval₂_pow, Polynomial.eval₂_X, hz0def,
+      zero_pow hn.ne', Polynomial.eval₂_C, zero_sub, neg_eq_zero]
+    show Ideal.Quotient.mk _ π' = 0
+    rw [Ideal.Quotient.eq_zero_iff_mem]
+    exact Ideal.subset_span rfl
+  set ψ' : AdjoinRoot g →ₐ[Wn] Q := AdjoinRoot.liftAlgHom (p := g) i z0 heval with hψ'def
+  have hψ'apply : ∀ p : Polynomial Wn, ψ' (AdjoinRoot.mk g p) = Polynomial.eval₂ (i : Wn →+* Q) z0 p := by
+    intro p; rw [hψ'def]; simp [AdjoinRoot.liftAlgHom_mk]
+  have hψ'surj : Function.Surjective ψ' := by
+    intro y
+    obtain ⟨w, hw⟩ := Ideal.Quotient.mk_surjective y
+    refine ⟨AdjoinRoot.mk g (Polynomial.C w), ?_⟩
+    rw [hψ'apply, Polynomial.eval₂_C]
+    show Ideal.Quotient.mk _ w = y
+    rw [hw]
+  have hxn : (AdjoinRoot.root g) ^ n = algebraMap Wn (AdjoinRoot g) π' := by
+    have h0 : AdjoinRoot.mk g g = 0 := AdjoinRoot.mk_self
+    have hexp : AdjoinRoot.mk g g = (AdjoinRoot.root g) ^ n - algebraMap Wn (AdjoinRoot g) π' := by
+      show AdjoinRoot.mk g (Polynomial.X ^ n - Polynomial.C π') = _
+      rw [map_sub, map_pow, AdjoinRoot.mk_X, AdjoinRoot.mk_C]
+      rfl
+    rw [hexp] at h0
+    exact sub_eq_zero.mp h0
+  have hker : RingHom.ker (ψ' : AdjoinRoot g →+* Q) = Ideal.span ({AdjoinRoot.root g} : Set (AdjoinRoot g)) := by
+    apply le_antisymm
+    · intro z hz
+      obtain ⟨p, hp⟩ := AdjoinRoot.mk_surjective z
+      subst hp
+      rw [RingHom.mem_ker] at hz
+      have hz' : Polynomial.eval₂ (i : Wn →+* Q) z0 p = 0 := by rw [← hψ'apply]; exact hz
+      have hcoeff0 : Ideal.Quotient.mk (Ideal.span ({π'} : Set Wn)) (p.coeff 0) = 0 := by
+        have heval0 : Polynomial.eval₂ (i : Wn →+* Q) z0 p = (i : Wn →+* Q) (p.coeff 0) := by
+          rw [Polynomial.eval₂_eq_sum_range]
+          rw [Finset.sum_eq_single 0]
+          · simp
+          · intro j _ hj0; rw [hz0def]; simp [zero_pow hj0]
+          · intro h0'; simp at h0'
+        rw [heval0] at hz'
+        exact hz'
+      have hdvd : Polynomial.X ∣ (p - Polynomial.C (p.coeff 0)) := by
+        rw [Polynomial.X_dvd_iff]; simp
+      obtain ⟨q, hq⟩ := hdvd
+      have hpeq : p = Polynomial.C (p.coeff 0) + Polynomial.X * q := by
+        rw [← hq]; ring
+      have hcoeff0mem : p.coeff 0 ∈ Ideal.span ({π'} : Set Wn) := by
+        rwa [Ideal.Quotient.eq_zero_iff_mem] at hcoeff0
+      obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp hcoeff0mem
+      rw [hpeq, map_add, map_mul, AdjoinRoot.mk_X]
+      apply Submodule.add_mem
+      · show AdjoinRoot.mk g (Polynomial.C (p.coeff 0)) ∈ Ideal.span ({AdjoinRoot.root g} : Set (AdjoinRoot g))
+        rw [← hc]
+        show AdjoinRoot.mk g (Polynomial.C (c * π')) ∈ _
+        rw [map_mul]
+        show algebraMap Wn (AdjoinRoot g) c * algebraMap Wn (AdjoinRoot g) π' ∈ _
+        rw [← hxn]
+        refine Ideal.mem_span_singleton'.mpr ⟨algebraMap Wn (AdjoinRoot g) c * (AdjoinRoot.root g)^(n-1), ?_⟩
+        have hnn : n - 1 + 1 = n := Nat.sub_add_cancel hn
+        rw [mul_assoc, ← pow_succ, hnn]
+      · exact Ideal.mem_span_singleton'.mpr ⟨AdjoinRoot.mk g q, by ring⟩
+    · rw [Ideal.span_le]
+      intro z hz
+      simp only [Set.mem_singleton_iff] at hz
+      subst hz
+      rw [SetLike.mem_coe, RingHom.mem_ker]
+      show ψ' (AdjoinRoot.root g) = 0
+      rw [hψ'def]
+      rw [AdjoinRoot.liftAlgHom_root]
+  have e1 : (AdjoinRoot g ⧸ RingHom.ker (ψ' : AdjoinRoot g →+* Q)) ≃ₐ[Wn] Q :=
+    Ideal.quotientKerAlgEquivOfSurjective hψ'surj
+  have e2 := Ideal.quotientEquivAlgOfEq Wn hker
+  exact e2.symm.trans e1
+
+/-- **`falt1_adjoinRoot_quotient_root_eq_residue`の系**: `Wₙ`が DVR で
+`π'`がその一様化元(`(π')=maximalIdeal Wₙ`)なら、`Wₙ⧸(π')`は体(剰余体)
+——ゆえに`AdjoinRoot g⧸(root g)`も体、すなわち`(root g)`は`AdjoinRoot g`
+の**極大イデアル**。これが Eisenstein 拡大の「全分岐」の核心(根が
+一様化元になる)の代数的な言い換え——次回、`AdjoinRoot g`(または
+`Wₙ₊₁ ≃ₐ[Wₙ] AdjoinRoot g`経由で`Wₙ₊₁`自身)が局所環であることと
+合わせて`(root g) = maximalIdeal`を導き、`IsDiscreteValuationRing.
+length_quotient_pow_maximalIdeal`で`length(Wₙ₊₁⧸(x)^(n-1))=n-1`を
+得ることに進む(step (5)の`β`項の下限)。 -/
+theorem falt1_adjoinRoot_quotient_root_isField {Wn : Type*} [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn]
+    (π' : Wn) (hπ' : IsLocalRing.maximalIdeal Wn = Ideal.span ({π'} : Set Wn)) (n : ℕ) (hn : 0 < n) :
+    let g := Polynomial.X ^ n - Polynomial.C π'
+    IsField (AdjoinRoot g ⧸ Ideal.span ({AdjoinRoot.root g} : Set (AdjoinRoot g))) := by
+  intro g
+  have hfield : IsField (Wn ⧸ Ideal.span ({π'} : Set Wn)) := by
+    rw [← hπ']
+    exact (Ideal.Quotient.maximal_ideal_iff_isField_quotient _).mp (IsLocalRing.maximalIdeal.isMaximal Wn)
+  exact MulEquiv.isField hfield (falt1_adjoinRoot_quotient_root_eq_residue π' n hn).toRingEquiv.toMulEquiv
+
+/-!
 ## Theorem 1.2 の核心への別経路: Brinon-Conrad Exercise 13.7.4 の
 step (1) を Nakayama から立ち上げる(2026-09-05)
 

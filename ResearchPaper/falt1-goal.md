@@ -3174,6 +3174,42 @@ mathlib での正確な組み立て方は未確認)。
       核心の困難(step 5、`differentIdeal Wₙ Wₙ₊₁`の**下からの評価**、
       すなわち`β`項の由来)は、この合流だけでは解消しない——引き続き
       新しい局所分岐理論を要する。
+
+      ★★★★2026-09-05、続けて**step (5)の核心(`β`項の由来)に
+      初めて実際に着手した**。`conductor_mul_differentIdeal`+
+      `conductor_eq_top_of_adjoin_eq_top`(既存、`differentIdeal_eq_
+      span_derivative`として既にwrapされていた)から`differentIdeal
+      Wₙ Wₙ₊₁ = span{n·x^(n-1)}`(`x`=Eisenstein型`g=X^n-Cπ'`の根、
+      微分の計算は`falt1_hspan_eq`の証明に既に現れていたが、独立の
+      定理としては未抽出だった)——ここまでは既存の断片の組み合わせ。
+      **新規に構成したのは**、「`x`が`Wₙ₊₁`の一様化元である」
+      (Eisenstein拡大が全分岐であることの核心、mathlibに無いと
+      確認済みの事実)の**代数的な言い換え**を、mathlibに直接の道具が
+      無いため**自前で証明した**こと:
+      - `falt1_adjoinRoot_quotient_root_eq_residue`:
+        `AdjoinRoot(X^n-Cπ')⧸(root) ≃ₐ[Wₙ] Wₙ⧸(π')`(第一同型定理を
+        自前の`AlgHom`(`AdjoinRoot.liftAlgHom`、根を`0`へ送る)に
+        適用。核の計算は`p∈ker`なら`p=C(p.coeff 0)+X·q`という初等
+        分解と`x^n=π'`(Eisenstein関係式そのもの)を組み合わせて
+        `p∈(root)`を導く、という完全に初等的な議論のみで閉じた)。
+      - `falt1_adjoinRoot_quotient_root_isField`: 上記の系として、
+        `Wₙ`が DVR で`π'`が一様化元なら`Wₙ⧸(π')`が体(剰余体)——
+        ゆえに`AdjoinRoot g⧸(root g)`も体、すなわち`(root g)`が
+        `AdjoinRoot g`の**極大イデアル**であることを得た
+        (`MulEquiv.isField`で体の性質を同型で輸送するだけ)。
+      これは「根が生成するイデアルは極大」という、全分岐の**核心
+      部分**を初めて実際に証明したもの——`tools/lean-idioms.md`の
+      教訓通り`AdjoinRoot.liftAlgHom`の`0`引数で数回宇宙/型推論の
+      罠に当たったが(`z0`を`set`で独立に固定することで解決)、
+      それ以外は完全に見通し通りに閉じた。`lean_check`確認後、
+      `KaehlerAux.lean`に追記。次回: (a) `Wₙ₊₁ ≃ₐ[Wₙ] AdjoinRoot g`
+      経由でこの結果を実際の`Wₙ₊₁`へ輸送し、(b) `Wₙ₊₁`が局所環である
+      ことと合わせて`(root g)=maximalIdeal Wₙ₊₁`(極大ideal→
+      局所環の**唯一の**極大idealなので一致)を導き、(c)
+      `IsDiscreteValuationRing.length_quotient_pow_maximalIdeal`で
+      `length(Wₙ₊₁⧸(x)^(n-1))=n-1`を得て、`length(Wₙ₊₁⧸differentIdeal
+      Wₙ Wₙ₊₁) = length(Wₙ₊₁⧸(n)) + (n-1) ≥ n-1`という、`β`項の
+      **具体的な下限**を確立することに進む。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
