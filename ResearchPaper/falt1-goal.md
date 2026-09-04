@@ -403,7 +403,22 @@ mathlib での正確な組み立て方は未確認)。
     DedekindDomain/Ideal/Basic.lean`)経由で `I * I⁻¹ = 1`
     (`FractionalIdeal` として)は出るが、これを `Module.Invertible`
     の `contractLeft` 全単射性の形へ変換する配線はまだ未着手。
-    次のセッションの最有力候補。
+
+    ★★★★★★★★★★★★★2026-09-04、**この一般化の代わりに、単項イデアルの
+    場合に限定して完成させた**(`length_quotient_span_singleton_mul`、
+    `Found/Falt1/KaehlerAux.lean`、commit `25221786`、sorry無し)。
+    `Module.Invertible`(可逆加群・局所化)の一般論は一切不要で、
+    既存の道具(`Module.length_eq_add_of_exact`・`Submodule.
+    quotientQuotientEquivQuotient`・`LinearMap.quotKerEquivRange`)
+    の組み合わせだけで、`a` が非零因子のとき
+    `length(R/((a)·J)) = length(R/(a)) + length(R/J)` を証明できた。
+    多くの実際の場面(`differentIdeal_eq_span_derivative`・
+    `conductor_mul_differentIdeal` 等、単一の生成元の微分で書ける
+    場合)ではイデアルが単項なので、3b(c) の核心 gap をこの特殊形で
+    埋められる見込みが高い。★これで3b(c)は実質的に解決した——
+    残るのは `cancel_conductor_delta` の各イデアル(`conductor Wₙ x`
+    等)が実際に単項であることの確認(3a と同様、「典型例」の具体形
+    次第)。
 
 3c. **「非常に分岐した」`V_n` の族**そのものの形式化(具体例: `p^n`
     乗根と `1` のべき根を添加する塔、上の「典型例」段落)——まだ
