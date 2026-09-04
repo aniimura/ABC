@@ -3463,3 +3463,26 @@ Algebra.IsSeparable (FractionRing V)(FractionRing W) := by ...` を
 等を手作りするのではなく**その `abbrev` を `letI` で直接呼ぶ**。
 実例: `lean/ABC3/Found/Falt1/Lemma11.lean` の
 `falt1_differentIdeal_ne_bot`。
+
+## 24. `class` の `field : ∀ (explicit) [instance] {implicit} ...` で
+「明示引数」を渡し忘れると全引数が1つずつズレる(2026-09-04)
+
+`AlgebraicGeometry.Etale.etale_appLE` のシグネチャは `∀ {X Y : Scheme}
+(f : X ⟶ Y) [self : Etale f] {U : Y.Opens}, IsAffineOpen U → ∀ {V :
+X.Opens}, IsAffineOpen V → ∀ (e : V ≤ f ⁻¹ᵁ U), (f.appLE U V e).hom.Etale`
+——`f` が `[self : Etale f]`(instance)より**前の明示引数**になっている。
+`Etale.etale_appLE hU hV le_rfl`(`f` を省略、`[Etale f]` を Lean が
+勝手に unify してくれると期待)と書くと、`hU` が `f` の位置の
+メタ変数を単一化しようとして失敗し、以降 `hV`→`U` の `IsAffineOpen` 引数、
+`le_rfl`→`V` の `IsAffineOpen` 引数、という具合に**全部の引数が1つずつ
+ズレた場所に入る**——結果、`Type mismatch: Etale.etale_appLE ?m hV ?m
+has type ... but is expected to have type Algebra.Etale ...` という、
+一見無関係に見える型エラーになる。
+
+**How to apply**: `∀ (explicit) [instance] ...` の並びを持つ `class` の
+フィールドを `open` 済みの短い名前(`Etale.etale_appLE` 等)で呼ぶときは、
+エラーメッセージが「型が合わない」を返してきたら**まず `#check
+@full.name` でシグネチャの引数の並び(どれが明示・インスタンス・暗黙か)
+を確認する**。明示引数が `[instance]` より前にあるなら、それを省略せず
+必ず明示的に渡す(`Etale.etale_appLE α hU hV le_rfl`)。
+実例: `lean/ABC3/Found/CorrHyp/ExtLimit.lean` の `Etale.algebraEtale_appLE`。

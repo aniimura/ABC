@@ -225,3 +225,31 @@ defeqチェックを経由させる——これが「配管の万能薬」だっ
 
 コミット: `c399ea22`(qcqs-transfer)・`b65776a6`(QcqsSpace)・
 `575ce5b8`(corrHypInstance4)。
+
+★★★★★★★★★★★2026-09-04さらに続報(§4、残りの理論的ピースが完成)。
+`ExtLimit.lean`に`Scheme.exists_finite_affineOpenCover`(一般のコンパクト
+スキームの有限アフィン開被覆の存在、CorrHyp非依存の一般事実)・
+`exists_extDiagram_finite_affine_descent`(`Ext X`の有限アフィン開被覆を
+`isLimit_extCone`経由である有限段階`Spec R`まで降ろす。降ろした先の各片が
+元の片の引き戻しそのものであることも保持)を完成。`FieldLimit.lean`に
+`exists_finite_standardEtaleCover`(有限エタール環をétale-locusで
+標準エタール表示の被覆に細分する、`Algebra.IsEtaleAt.exists_isStandardEtale`
++コンパクト性の被覆補題)を完成。さらに`ExtLimit.lean`に
+`Etale.algebraEtale_appLE`(スキームレベルの`[Etale α]`をアフィン開`U`へ
+制限すると環レベルの`Algebra.Etale`が成り立つ、という最後の橋渡し)を完成
+——`Etale.etale_appLE`の引数順(`f`が`[instance]`より前の明示引数)を
+誤ったことによる型エラーを`@`での確認で解決(`tools/lean-idioms.md` #24)。
+`Scheme.GlueData`等、貼り合わせに使うmathlib既存機構の在庫も確認済み。
+
+**これで`Lemma 4.1`の証明に必要な数学的道具は文字通りすべて揃った**
+(環側base change・スキーム側極限表示・qcqs前提を満たすSpace・
+étale-locus細分・スキーム→環の橋渡し・貼り合わせ機構)。残るのは
+これらを1本の証明として実際に組み立てるエンジニアリング作業のみ——
+「必要な数学が見つからない」壁は存在しない。集計は7/24で変わらず
+(`Lemma 4.1`自体は依然未証明、numbered itemとしてはまだ0/2のまま)。
+
+コミット: `5952d0b6`(exists_finite_affineOpenCover)・`3b4e8fcd`
+(exists_extDiagram_finite_affine_descent)・`0d96a0ad`
+(exists_finite_standardEtaleCover)・`c090560b`(descent強化)・
+`dd56de05`(GlueData在庫確認の記録)・今回のセッション
+(Etale.algebraEtale_appLE、コミット待ち)。

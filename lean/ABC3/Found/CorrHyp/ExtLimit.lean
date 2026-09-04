@@ -498,4 +498,21 @@ theorem exists_extDiagram_finite_affine_descent (X : Over BaseK) [CompactSpace X
     (fun j : s => (((ExtF.obj X).left).affineCover.f j).opensRange) hcov (fun j => haff j)
   exact ⟨i, s, t, V, hVcov, hVprop⟩
 
+/-- **スキームレベルの `Etale` から環レベルの `Algebra.Etale` への橋渡し**——
+`Lemma 4.1` の構成的降下の最後の接続部品。`[Etale α]` なスキーム射を
+アフィン開 `U`(target 側)へ制限すると、誘導される環準同型
+`α.appLE U (α ⁻¹ᵁ U) le_rfl` による代数構造で `Algebra.Etale` が成り立つ
+——`α ⁻¹ᵁ U` がアフィンなのは `[IsFinite α]`(→ `IsAffineHom`)から
+(`IsAffineHom.isAffine_preimage`)。これで各アフィン片の上で
+`exists_finite_standardEtaleCover`(`FieldLimit.lean`)が使える。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem Etale.algebraEtale_appLE {C Y : Scheme} (α : C ⟶ Y) [IsFinite α] [Etale α]
+    (U : Y.Opens) (hU : IsAffineOpen U) :
+    letI : Algebra Γ(Y, U) Γ(C, α ⁻¹ᵁ U) :=
+      (Scheme.Hom.appLE α U (α ⁻¹ᵁ U) le_rfl).hom.toAlgebra
+    Algebra.Etale Γ(Y, U) Γ(C, α ⁻¹ᵁ U) := by
+  have hV : IsAffineOpen (α ⁻¹ᵁ U) := IsAffineHom.isAffine_preimage U hU
+  exact Etale.etale_appLE α hU hV le_rfl
+
 end ABC3.Found.CorrHyp

@@ -723,3 +723,30 @@ change、スキーム側の極限表示・被覆の降下・étale-locus 細分�
 存在しない。組み立て自体の分量はなお大きく、複数の作業単位(1つのアフィン
 片の局所構成→複数片の整合性→貼り合わせ→`Z` の全体像の確認)に分解して
 段階的に進める必要がある。
+
+### 2026-09-04さらに続報: 「スキームレベル→環レベル」の最後の橋渡しが完成
+
+`ExtLimit.lean` に `Etale.algebraEtale_appLE` を追加(★sorry 無し・標準3
+公理のみ)。`[Etale α] [IsFinite α]` なスキーム射 `α : C ⟶ Y` をアフィン開
+`U ⊆ Y` へ制限すると、誘導される環準同型 `α.appLE U (α ⁻¹ᵁ U) le_rfl` の
+`toAlgebra` により `Algebra.Etale Γ(Y,U) Γ(C, α⁻¹U)` が成り立つ、という
+補題——`α ⁻¹ᵁ U` のアフィン性は `IsAffineHom.isAffine_preimage` から
+(`[IsFinite α]` → `IsAffineHom`)。
+
+つまずいた点: `Etale.etale_appLE` の実際のシグネチャは
+`∀ {X Y} (f : X ⟶ Y) [Etale f] {U} (hU : IsAffineOpen U) {V} (hV : IsAffineOpen V)
+(e : V ≤ f⁻¹ᵁU), (f.appLE U V e).hom.Etale` で、射 `f` 自身が(instance
+引数より前に)**明示引数**になっている。これを渡さず `Etale.etale_appLE
+hU hV le_rfl` と書くと `hU`/`hV`/`le_rfl` がそれぞれ 1 つずつズレた
+引数スロットに入ってしまい意味不明な型エラーになる——`Etale.etale_appLE
+α hU hV le_rfl` と `α` を明示すれば解決(`tools/lean-idioms.md` に追記
+予定)。また `(f.appLE U V e).hom.Etale`(`RingHom.Etale`)は
+`Algebra.Etale`(`f.hom.toAlgebra` の下)と単なる `def` の展開で defeq
+なので、`letI` で同じ `toAlgebra` インスタンスを立てておけば `exact` が
+そのまま通る——追加の変換補題は不要だった。
+
+これで「相関 `c.α`(スキームレベルの有限エタール射)→ アフィン片への
+制限 → 環レベルの `Algebra.Etale`」という、`exists_finite_standardEtaleCover`
+を実際に呼び出すために必要だった最後の理論的ギャップが埋まった。
+`Lemma 4.1` の証明を組み立てるのに必要な道具は、これで**文字通りすべて
+Lean の宣言として存在する**状態になった。
