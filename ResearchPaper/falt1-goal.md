@@ -2525,6 +2525,16 @@ mathlib での正確な組み立て方は未確認)。
       因子を`n`回繰り返し適用してVₙ₊₁を構成する、という3aで構想した
       道が**工学的には完全に開通した**。
 
+      ★続けて`pushoutKaehlerSplitStepOption_length`(長さ版)も
+      即座に完成させた(commit分は次項)——`module_length_pi`
+      (`Option ι`添字のPi型にも無条件成立)+`Fintype.sum_option`
+      (`∑i:Option ι,f i = f none + ∑j:ι,f(some j)`)を組み合わせる
+      だけで、`Module.length B(Ω[B/R]) = Module.length B(新因子の
+      寄与) + ∑ⱼ Module.length B(前段の各因子の寄与)`という、
+      `pushoutKaehlerSplitStep_length`の`Option ι`連鎖版が得られた。
+      これで反復pushoutを`n`回適用した結果の**長さ**も、各段で
+      追加した因子の長さの和として追跡できる基盤が揃った。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
