@@ -1135,6 +1135,44 @@ theorem exists_fg_subalgebra_tensor_bivariate_finset (A : Type) [CommRing A] [Al
   rw [Finset.sum_attach q.support (fun i => Polynomial.monomial i (q.coeff i))]
   exact Polynomial.sum_monomial_eq q
 
+open scoped TensorProduct in
+/-- **`exists_fg_subalgebra_tensor_bivariate_finset`の`MvPolynomial ι`
+版**——`ι`変数多項式(有限個の族)を、その係数(有限個、`support`+`coeff`
+で取り出せる)を`exists_fg_subalgebra_tensor_finset`で共通の`R`へ
+降ろしてから`monomial`の和で再構成することで、単一の`R`へ降ろす。
+`Algebra.FinitePresentation`が与える`MvPolynomial`商としての表示
+(`Algebra.FinitePresentation.iff_quotient_mvPolynomial'`、mathlib)を
+`R`レベルへ降ろす計画(`Γ(C,piece)`のような有限表示な代数を、個別の
+元ごとではなく一度に降ろす、2026-09-04の設計再考)の核心部品。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_fg_subalgebra_tensor_mvPolynomial_finset (A : Type) [CommRing A] [Algebra ℚ A]
+    {ι : Type} (s : Finset (MvPolynomial ι (A ⊗[ℚ] ℝ))) :
+    ∃ R : FgSubalgebra ℚ ℝ, ∀ q ∈ s, ∃ q₀ : MvPolynomial ι (A ⊗[ℚ] R.1),
+      MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom q₀ = q := by
+  classical
+  set allCoeffs : Finset (A ⊗[ℚ] ℝ) :=
+    s.biUnion (fun q => q.support.image (fun m => q.coeff m)) with hallCoeffs
+  obtain ⟨R, hR⟩ := exists_fg_subalgebra_tensor_finset A allCoeffs
+  refine ⟨R, ?_⟩
+  intro q hq
+  choose c hc using fun m : q.support => hR (q.coeff (m : ι →₀ ℕ)) (by
+    rw [hallCoeffs]
+    exact Finset.mem_biUnion.mpr ⟨q, hq, Finset.mem_image_of_mem _ m.2⟩)
+  refine ⟨q.support.attach.sum (fun m => MvPolynomial.monomial (m : ι →₀ ℕ) (c m)), ?_⟩
+  rw [map_sum]
+  have key : ∀ m : q.support,
+      MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom
+        (MvPolynomial.monomial (m : ι →₀ ℕ) (c m)) =
+      MvPolynomial.monomial (m : ι →₀ ℕ) (q.coeff (m : ι →₀ ℕ)) := by
+    intro m
+    rw [MvPolynomial.map_monomial]
+    show MvPolynomial.monomial (m : ι →₀ ℕ) ((Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)) (c m))
+      = _
+    rw [hc m]
+  rw [Finset.sum_congr rfl (fun m _ => key m), Finset.sum_attach q.support (fun m => MvPolynomial.monomial m (q.coeff m))]
+  exact (q.support_sum_monomial_coeff)
+
 /-! ## `StandardEtalePair.Ring` の元を有限段階へ降ろす——作業単位1(b)の完成
 
 `exists_fg_subalgebra_tensor_bivariate_finset`を`StandardEtalePair.Ring`
