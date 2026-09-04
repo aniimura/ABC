@@ -277,6 +277,18 @@ Weierstrass標準分解(冪級数を「単数×distinguished多項式」に分�
 `IsWeierstrassFactorization`(または`IsDistinguishedAt`)条件の充足を
 示すところから着手する。
 
+**続報(2026-09-04、節目(3)への第二歩——`[π^n]_f` は mod `π` で
+`X^(q^n)`)**: `Found/PGC/LubinTateActionPiPow.lean::iteratedLubinTate_
+map_residue`——`n=1`の場合が仮定`hf`そのものである、古典的な基本事実。
+`PowerSeries.map_subst`(写像は代入と可換)を軸に`f`のmod `π`での姿を
+`n`回適用する帰納法で出た。途中、`PowerSeries.subst`の元の環が
+`map(residue A)`経由で`ResidueField A`になっていることに気づかず`A`
+のままと誤認し、`rw`が「パターンが見つからない」で数回落ちる罠に
+はまった——`tools/lean-idioms.md`の「instances透明度」系ではなく、
+単純な型の取り違えだったと後で判明(ゴールを注意深く読み直す以外に
+近道は無かった)。プロジェクト内の既存補題`substXpow_eq_pow`
+(`subst v (X^q)=v^q`)も再利用できた。
+
 **残る作業**: 節目(3)torsion点の構成(`Λ_n:=ker[π^n]_f`、上記の
 Weierstrass標準分解を使えば`[π^n]_f`から次数`q^n`のdistinguished
 多項式を取り出せる見込み)、節目(4)
