@@ -103,4 +103,49 @@ theorem LubinTateAction_pi_pow {A : Type*} [CommRing A] [IsLocalRing A] [IsDomai
       (LubinTateAction_functional_equation hq hπmax f hf0 hf1 hf (π ^ n)).symm, ih]
     rfl
 
+/-! ### 部品3: `iteratedLubinTate f n` は mod `π` で `X^(q^n)` -/
+
+/-- ★★★★★★★**`[π^n]_f` は mod `π` で `X^(q^n)`**——古典的な Lubin-Tate
+理論の基本事実(`n=1` の場合が仮定 `hf` そのもの)。捩れ点 `Λ_n` の
+議論で `[π^n]_f` を distinguished 多項式として扱う際の出発点になる
+見込み(`RingTheory/PowerSeries/WeierstrassPreparation.lean` の
+`PowerSeries.IsWeierstrassFactorization` 等)。`PowerSeries.map_subst`
+(写像は代入と可換)を軸に、`f` の mod `π` での姿(仮定 `hf`)を
+`n` 回適用するだけの帰納法——新しい構成は一切不要だった。 -/
+theorem iteratedLubinTate_map_residue {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n : ℕ) :
+    PowerSeries.map (IsLocalRing.residue A) (iteratedLubinTate f n) = PowerSeries.X ^ (pp ^ ff) ^ n := by
+  have hf0c : PowerSeries.constantCoeff f = 0 := by
+    rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply]; exact hf0
+  have hppffpos : 0 < pp ^ ff := hq ▸ Fintype.card_pos
+  induction n with
+  | zero =>
+      show PowerSeries.map (IsLocalRing.residue A) PowerSeries.X = PowerSeries.X ^ (pp ^ ff) ^ 0
+      rw [pow_zero, pow_one, PowerSeries.map_X]
+  | succ n ih =>
+      have hiter0 : PowerSeries.constantCoeff (iteratedLubinTate f n) = 0 := by
+        rw [← LubinTateAction_pi_pow hq hπmax hπne0 f hf0 hf1 hf n]
+        exact constantCoeff_LubinTateAction hq hπmax f hf0 hf1 hf (π ^ n)
+      have hvHS : PowerSeries.HasSubst (iteratedLubinTate f n) := by
+        show IsNilpotent (PowerSeries.constantCoeff (iteratedLubinTate f n))
+        rw [hiter0]; exact IsNilpotent.zero
+      have hstep : PowerSeries.map (IsLocalRing.residue A) (PowerSeries.subst (iteratedLubinTate f n) f) =
+          PowerSeries.subst (PowerSeries.map (IsLocalRing.residue A) (iteratedLubinTate f n))
+            (PowerSeries.map (IsLocalRing.residue A) f) :=
+        PowerSeries.map_subst hvHS f
+      show PowerSeries.map (IsLocalRing.residue A) (PowerSeries.subst (iteratedLubinTate f n) f) =
+        PowerSeries.X ^ (pp ^ ff) ^ (n + 1)
+      rw [hstep, hf, ih]
+      have hXHS : PowerSeries.HasSubst
+          (PowerSeries.X ^ (pp ^ ff) ^ n : PowerSeries (IsLocalRing.ResidueField A)) := by
+        show IsNilpotent (PowerSeries.constantCoeff
+          (PowerSeries.X ^ (pp ^ ff) ^ n : PowerSeries (IsLocalRing.ResidueField A)))
+        rw [map_pow, PowerSeries.constantCoeff_X, zero_pow (pow_ne_zero n hppffpos.ne')]
+        exact IsNilpotent.zero
+      rw [substXpow_eq_pow hXHS, ← pow_mul, pow_succ]
+
 end ABC3.Found.PGC
