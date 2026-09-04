@@ -7,6 +7,8 @@ import Mathlib.CategoryTheory.Category.Preorder
 import Mathlib.AlgebraicGeometry.Scheme
 import Mathlib.AlgebraicGeometry.GammaSpecAdjunction
 import Mathlib.AlgebraicGeometry.AffineTransitionLimit
+import Mathlib.Algebra.Polynomial.AlgebraMap
+import Mathlib.Algebra.Polynomial.Monic
 
 /-!
 # [CorrHyp] `Lemma 4.1` へ向けた第一歩 —— `K` を有限生成 `k`-部分環の直極限として見る
@@ -409,17 +411,106 @@ instance toSchemeDiagram_quasiSeparatedSpace {k K : Type*} [CommRing k] [CommRin
   show QuasiSeparatedSpace (Scheme.Spec.obj ((toRingCat k K).op.obj i))
   infer_instance
 
+/-!
+## 多項式の係数を有限段階へ降ろす
+
+`Lemma 4.1` の構成的な降下(`corrhyp-goal.md` §4 に記録した見通し)の最初の
+歯車: 有限エタール射の標準的な表示(`Algebra.StandardEtalePresentation`、
+`f`・`g : Polynomial K` という2つの多項式データ)は、係数が有限個しかないので、
+ある有限生成 `k`-部分環 `R` 上の多項式に必ず降ろせる——`monic` 性も
+`algebraMap R K` の単射性から遺伝する。 -/
+
+open Polynomial in
+/-- `K` の多項式 `p` は、ある有限生成 `k`-部分環 `R` 上の多項式の像として書ける
+——`p` の(有限個の)係数がすべてある `R` に同時に属することから。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_fg_subalgebra_polynomial {k K : Type*} [CommRing k] [CommRing K] [Algebra k K]
+    (p : Polynomial K) :
+    ∃ (R : FgSubalgebra k K) (p₀ : Polynomial R.1), p₀.map (algebraMap R.1 K) = p := by
+  classical
+  obtain ⟨R, hRfg, hRmem⟩ :=
+    exists_fg_subalgebra_mem_finset (k := k) (p.support.image p.coeff)
+  have hmem : ∀ x ∈ p.support, p.coeff x ∈ R :=
+    fun x hx => hRmem (p.coeff x) (Finset.mem_image_of_mem p.coeff hx)
+  refine ⟨⟨R, hRfg⟩, p.support.attach.sum (fun i =>
+    Polynomial.monomial (i : ℕ) (⟨p.coeff (i : ℕ), hmem i i.2⟩ : R)), ?_⟩
+  rw [Polynomial.map_sum]
+  have key : ∀ i : {x // x ∈ p.support}, (Polynomial.monomial (i : ℕ)
+      (⟨p.coeff (i : ℕ), hmem i i.2⟩ : R)).map (algebraMap ↥R K) =
+      Polynomial.monomial (i : ℕ) (p.coeff (i : ℕ)) := by
+    intro i
+    rw [Polynomial.map_monomial]
+    rfl
+  simp_rw [key]
+  rw [Finset.sum_attach p.support (fun i => Polynomial.monomial i (p.coeff i))]
+  exact Polynomial.sum_monomial_eq p
+
+open Polynomial in
+/-- `exists_fg_subalgebra_polynomial` の2変数版——`p`・`q` の係数をまとめて
+1つの有限生成部分環に降ろす(標準エタール表示の `f`・`g` を同時に降ろすのに使う)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_fg_subalgebra_polynomial_pair {k K : Type*} [CommRing k] [CommRing K] [Algebra k K]
+    (p q : Polynomial K) :
+    ∃ (R : FgSubalgebra k K) (p₀ q₀ : Polynomial R.1),
+      p₀.map (algebraMap R.1 K) = p ∧ q₀.map (algebraMap R.1 K) = q := by
+  classical
+  obtain ⟨R, hRfg, hRmem⟩ :=
+    exists_fg_subalgebra_mem_finset (k := k) (p.support.image p.coeff ∪ q.support.image q.coeff)
+  have hpmem : ∀ x ∈ p.support, p.coeff x ∈ R := fun x hx =>
+    hRmem (p.coeff x) (Finset.mem_union_left _ (Finset.mem_image_of_mem p.coeff hx))
+  have hqmem : ∀ x ∈ q.support, q.coeff x ∈ R := fun x hx =>
+    hRmem (q.coeff x) (Finset.mem_union_right _ (Finset.mem_image_of_mem q.coeff hx))
+  refine ⟨⟨R, hRfg⟩,
+    p.support.attach.sum (fun i => Polynomial.monomial (i : ℕ) (⟨p.coeff (i : ℕ), hpmem i i.2⟩ : R)),
+    q.support.attach.sum (fun i => Polynomial.monomial (i : ℕ) (⟨q.coeff (i : ℕ), hqmem i i.2⟩ : R)),
+    ?_, ?_⟩
+  · rw [Polynomial.map_sum]
+    have key : ∀ i : {x // x ∈ p.support}, (Polynomial.monomial (i : ℕ)
+        (⟨p.coeff (i : ℕ), hpmem i i.2⟩ : R)).map (algebraMap ↥R K) =
+        Polynomial.monomial (i : ℕ) (p.coeff (i : ℕ)) := by
+      intro i; rw [Polynomial.map_monomial]; rfl
+    simp_rw [key]
+    rw [Finset.sum_attach p.support (fun i => Polynomial.monomial i (p.coeff i))]
+    exact Polynomial.sum_monomial_eq p
+  · rw [Polynomial.map_sum]
+    have key : ∀ i : {x // x ∈ q.support}, (Polynomial.monomial (i : ℕ)
+        (⟨q.coeff (i : ℕ), hqmem i i.2⟩ : R)).map (algebraMap ↥R K) =
+        Polynomial.monomial (i : ℕ) (q.coeff (i : ℕ)) := by
+      intro i; rw [Polynomial.map_monomial]; rfl
+    simp_rw [key]
+    rw [Finset.sum_attach q.support (fun i => Polynomial.monomial i (q.coeff i))]
+    exact Polynomial.sum_monomial_eq q
+
+open Polynomial in
+/-- `exists_fg_subalgebra_polynomial_pair` に「`p` が monic なら `p₀` も monic」を
+足した版——`algebraMap R K`(部分環の包含)が単射であることから
+(`Function.Injective.monic_map_iff`)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_fg_subalgebra_polynomial_pair_monic {k K : Type*} [CommRing k] [CommRing K]
+    [Algebra k K] (p q : Polynomial K) (hp : p.Monic) :
+    ∃ (R : FgSubalgebra k K) (p₀ q₀ : Polynomial R.1),
+      p₀.map (algebraMap R.1 K) = p ∧ q₀.map (algebraMap R.1 K) = q ∧ p₀.Monic := by
+  obtain ⟨R, p₀, q₀, hp₀, hq₀⟩ := exists_fg_subalgebra_polynomial_pair (k := k) p q
+  refine ⟨R, p₀, q₀, hp₀, hq₀, ?_⟩
+  have hinj : Function.Injective (algebraMap R.1 K) := Subtype.coe_injective
+  refine (hinj.monic_map_iff (p := p₀)).mpr ?_
+  rw [hp₀]; exact hp
+
 /- ★★次の一手(未着手): `Lemma 4.1` 本体へ——上の3instanceにより
 `Scheme.exists_hom_comp_eq_comp_of_locallyOfFiniteType`/
 `Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation` は
 `D := toSchemeDiagram k K`・`c := specKCone k K`・`hc := isLimit_specKCone k K`
-に対して**側条件抜きで直接呼べる**状態になった。残るのは数学的な内容:
-`X_K`・`Z_K`(`HyperbolicCurveData` の `Ext`/`Space` を実際に `Spec K` 上の
-スキームとして実現したもの)と、両者の間の correspondence を
-`f : X ⟶ (Functor.const _).obj (Spec k)`(構造射)の形に持ち込み、
-`LocallyOfFinitePresentation f`(hyperbolic curve は有限型なので成り立つはず)
-を示すこと。これは `HyperbolicCurveData` の `IsGenericallyScheme`/
-`ModuliStack` 関連フィールドの**具体的な実現**を要する——§5(モジュライ
-スタック・Gauss–Bonnet)が mathlib に不在という既知の欠落と直結する。 -/
+に対して**側条件抜きで直接呼べる**状態になった。`exists_fg_subalgebra_
+polynomial_pair_monic` により、有限エタール射の標準的表示
+(`Algebra.StandardEtalePresentation`、`f`(monic)・`g` の2多項式)の
+**係数**は有限段階へ降ろせるようになった——残るのは (a) その `cond`
+(`f' * p₁ + f * p₂ = g^n` を満たす `p₁, p₂, n` の存在)も同様に有限段階へ
+降ろすこと、(b) 標準エタール表示1枚を降ろすだけでなく、`Z_K` 全体の
+アフィン開被覆(`Scheme.exists_isOpenCover_and_isAffine`)の**各片**に
+この降下を適用してから貼り合わせること。`corrhyp-goal.md` §4 に記録した
+組み立て方の続き。 -/
 
 end ABC3.Found.CorrHyp
