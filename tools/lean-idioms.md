@@ -4638,3 +4638,53 @@ M→ₐ[R] N) x`(AlgHomのcoe適用)と`f.toLinearMap x`(LinearMapのcoe
 実例: `lean/ABC3/Found/Falt1/AlmostEtale.lean`の
 `diagonalCompare_injective`(a)・`almost_swap_annihilate`(b)・
 `almost_swap_augment`(c)。
+
+## 51. 商環(`... ⧸ I`)に`RingEquiv`越しの`Algebra`構造を載せる作戦は、
+商環が**既に持っている**`Submodule.Quotient.instSMul'`に負けて破綻する
+——最初から`AlgEquiv`(`≃ₐ[基底]`)を作るのが正解(2026-09-05)
+
+**症状(3段のドミノ)**: `e : S ≃+* M`(`M`は`MvPolynomial ι B ⧸ J`)から
+`letI : Algebra Q M := (e.toRingHom.comp (algebraMap Q S)).toAlgebra`と
+インスタンスを移送し、さらに`letI : Algebra B M := ((algebraMap Q M).comp
+(algebraMap B Q)).toAlgebra`と合成して`IsScalarTower B Q M`を`IsScalarTower.
+of_algebraMap_eq (fun _ => rfl)`で出そうとすると、`lake build`のたびに
+エラーが**1行ずつ先へ進む**:
+
+1. `Algebra Q M`を作る行で`M`の`Semiring`が`Ideal.Quotient.semiring`と
+   `CommSemiring.toSemiring`の2経路に割れる → `set M := ...`の**直後**に
+   `letI hCRM : CommRing M := inferInstance`を置くと解消(`#40`と同型)。
+2. 次に`Q`側で同じ割れ方をする → `set Q := ...`の直後にも
+   `letI hCRQ : CommRing Q := inferInstance`が要る。
+3. そして`IsScalarTower B Q M`の**型そのもの**が
+   `@IsScalarTower B Q M (Submodule.Quotient.instSMul' I) algQM.toSMul
+   (Submodule.Quotient.instSMul' J)`と表示され、`of_algebraMap_eq`が返す
+   `Algebra.toSMul`3本組と合わない。
+
+**根本原因**: 商環`MvPolynomial ι B ⧸ J`は、`B`が係数環である以上
+**自前の**`SMul B _`(`Submodule.Quotient.instSMul'`)を持っており、
+`SMul`のインスタンス探索ではこちらが勝つ。こちらは「係数への作用を
+商へ降ろしたもの」であり、`e`越しに移送した`Algebra B M`(局所化の
+構造を経由する別の写像)とは**構文的にも定義的にも一致しない**。
+ローカルの`letI`で上書きしても`SMul`の層で負けるので勝てない。
+
+**正しいやり方**: 移送で誤魔化さず、**最初から`AlgEquiv`を作る**。
+つまり`S ≃+* M`ではなく`S ≃ₐ[B] M`を構成する。mathlibの部品は
+たいてい`AlgEquiv`版が揃っている:
+`IsLocalization.Away.mvPolynomialQuotientEquiv`(`≃ₐ[R]`)・
+`MvPolynomial.quotientEquivQuotientMvPolynomial`(`≃ₐ[R]`)・
+`DoubleQuot.quotQuotEquivQuotSupₐ`(`≃ₐ[R]`、`R`は明示引数)・
+`Ideal.quotientEquivAlg`(`Ideal.quotientEquiv`の`≃ₐ`版)・
+`MvPolynomial.sumAlgEquiv`(元から`≃ₐ`)。基底が途中で変わる箇所は
+`AlgEquiv.restrictScalars`で下の基底へ落とす。
+
+**教訓**: 商環・局所化のように「既定のインスタンスを自前で持っている」
+型へインスタンスを後付け移送するのは、`Semiring`の割れ(1)(2)を潰しても
+`SMul`の層(3)で必ず詰む。`≃+*`を作った時点で「あとで`Algebra`を移送
+すればいい」と考えないこと——**基底を決めて`≃ₐ`で作る**のが唯一の
+安定路線。
+
+実例: `lean/ABC3/Found/CorrHyp/ExtLimit.lean`の
+`exists_descendPieceR_flat_mvPolynomial_baseChange`(この作戦で3回
+ビルドして3回とも別の場所で落ち、`FieldLimit.lean`の
+`localization_away_quotient_mvPolynomial_flat_equiv`系を`≃ₐ[B']`へ
+作り直す方針に切り替えた)。

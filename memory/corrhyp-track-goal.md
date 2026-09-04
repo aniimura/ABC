@@ -2079,3 +2079,31 @@ descendPieceR_flat_mvPolynomial_baseChange)を試みたが、主張の型を
 force しない。次はdescendPieceR等の既存パターンに倣い、平坦化した
 イデアルを独立defとして先に切り出す設計に変える。集計は引き続き
 10/24——§4は引き続き0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き13
+exists_descendPieceR_flat_mvPolynomial_baseChangeの主張の型は完成
+(停留変数の真因は `rename Sum.inr p₀ * X (Sum.inl ()) - 1` のHMul
+探索でSum.inrの左成分Unitが決まらないこと——両因子に型注釈で解消)。
+証明骨格も抽象型変数の最小例では動く。しかしlake build(1回15〜20分)
+を3回まわして3回とも別の場所で落ちた:(1)M_flatのSemiringが2経路に
+割れる→letI hCRMで解消、(2)同じ割れがQ側→letI hCRQで解消、
+(3)IsScalarTower B' Q Mの型がSubmodule.Quotient.instSMul'で表示され
+of_algebraMap_eqのAlgebra.toSMul 3本組と合わない→letIでは勝てない。
+
+根本原因: 商環MvPolynomial ι B'⧸Jは係数環B'に対する自前のSMulを
+持っており、SMul探索でそちらが勝つ。環同型e'越しに移送したAlgebra
+B' Mとは一致しない。つまり「≃+*を作ってからAlgebraを後付け移送」
+という作戦自体が誤り(lean-idioms #51として記録)。
+
+正しい方針: FieldLimit.lean の localization_away_quotient_
+mvPolynomial_equiv → flat_equiv → flat_equiv_of_map の3本を
+≃ₐ[B'](AlgEquiv)として作り直す。mathlibにAlgEquiv版の部品が全部
+揃っていることは確認済み(mvPolynomialQuotientEquiv・
+quotientEquivQuotientMvPolynomial・quotQuotEquivQuotSupₐ・
+Ideal.quotientEquivAlg・sumAlgEquiv、基底の変更はAlgEquiv.
+restrictScalars)。FieldLimit側は1本2〜3秒で反復できるので、
+ExtLimitの15〜20分ビルドを回すより遥かに速い。
+
+リポジトリ状態: 通らない定理はgit checkoutで差し戻し済み、
+lake build ABC3は0エラー(6590 jobs)確認。書きかけはscratchpadの
+wip-flat-baseChange.patchに保存。集計は引き続き10/24——§4は0/2。

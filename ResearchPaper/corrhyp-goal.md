@@ -4712,3 +4712,58 @@ baseChange`を試みたが、`Nonempty(M_flat⊗[B']T ≃+* Γ(C,piece(D(f*g))))
 イデアル自体を独立した`def`として先に切り出してから使う設計に
 変えるのが筋が良いと見積もっている。集計は引き続き10/24——§4は
 引き続き0/2。
+
+## 2026-09-05夜さらに続き13: 主張の型は完成、証明は3回のビルドで
+3回とも別の場所で落ちた——`≃+*`移送作戦そのものが誤りだと判明
+
+続き12で「主張の型を書く段階で詰まった」と記録した停留変数エラーの
+**真因**を突き止め、主張の型自体は完成させた。真因は`MvPolynomial.
+rename Sum.inr p₀ * MvPolynomial.X (Sum.inl ()) - 1`という式で、`*`
+(`HMul`)のインスタンス探索が両辺の型を確定させる前に走り、`Sum.inr`
+の行き先(左成分`Unit`)が決まらないまま停留すること——両方の因子に
+明示的な型注釈を付けるだけで解消した。これで
+`exists_descendPieceR_flat_mvPolynomial_baseChange`の**主張**
+(`Nonempty(M_flat⊗[B']T ≃+* Γ(C,piece(D(f*g))))`、`M_flat`は
+`MvPolynomial(Unit⊕Fin n)(A⊗R'.1)⧸Ideal.span(range q)`という
+1段の具体的な商)はクリーンに型検査を通るようになった。
+
+証明の骨格(`exists_descendPieceR_localization_baseChange`で
+`R'`・`p₀`・`e`を取り、`flat_equiv_of_map`で環同型`e'`を得、
+`isLocalization_of_ringEquiv_transport`でインスタンスを移送して
+`e M_flat`を適用する)も、抽象的な型変数だけの最小例では正しく
+動くことを確認した(0.07秒)。
+
+**しかし`lake build`(1回15〜20分)を3回まわして3回とも別の場所で
+落ちた**——そしてその落ち方の並びが、作戦自体の誤りを教えてくれた:
+
+1. `M_flat`の`Semiring`が2経路に割れる → `letI hCRM : CommRing M`で解消
+2. 同じ割れが`Q`側で起きる → `letI hCRQ : CommRing Q`で解消
+3. `IsScalarTower B' Q M`の**型そのもの**が
+   `Submodule.Quotient.instSMul'`を使って表示され、`of_algebraMap_eq`
+   が返す`Algebra.toSMul`3本組と合わない → **ここは`letI`では勝てない**
+
+**根本原因(重要)**: 商環`MvPolynomial ι B' ⧸ J`は、`B'`が係数環である
+以上**自前の**`SMul B' _`を持っており、`SMul`のインスタンス探索では
+そちらが勝つ。これは「係数への作用を商へ降ろしたもの」であり、環同型
+`e'`越しに移送した`Algebra B' M`(局所化の構造を経由する別の写像)とは
+一致しない。つまり**`≃+*`を作ってから`Algebra`を後付け移送する作戦
+そのものが筋が悪い**。`tools/lean-idioms.md`の`#51`として記録した。
+
+**正しい方針(次の一手)**: `FieldLimit.lean`の
+`localization_away_quotient_mvPolynomial_equiv`→`flat_equiv`→
+`flat_equiv_of_map`の3つを、`≃+*`ではなく**`≃ₐ[B']`(係数環上の
+`AlgEquiv`)**として作り直す。必要な部品はmathlibに`AlgEquiv`版が
+すべて揃っていることを確認済み——`IsLocalization.Away.
+mvPolynomialQuotientEquiv`(`≃ₐ[R]`)・`MvPolynomial.
+quotientEquivQuotientMvPolynomial`(`≃ₐ[R]`)・`DoubleQuot.
+quotQuotEquivQuotSupₐ`(`≃ₐ[R]`、`R`明示)・`Ideal.quotientEquivAlg`・
+`MvPolynomial.sumAlgEquiv`。基底が変わる箇所は`AlgEquiv.
+restrictScalars`で落とす。`FieldLimit.lean`側の補題は1本あたり
+2〜3秒でコンパイルできる(REPLで確認済み)ので、`ExtLimit.lean`の
+15〜20分ビルドを何度もまわすより遥かに速く反復できる。
+
+**リポジトリの状態**: 通らない定理を`Found`に残さないため、
+`ExtLimit.lean`への追加は`git checkout`で差し戻し、`lake build ABC3`
+が0エラー(6590 jobs)であることを確認済み。書きかけの定理は
+scratchpadに`wip-flat-baseChange.patch`として保存してある。
+集計は引き続き10/24——§4は引き続き0/2。
