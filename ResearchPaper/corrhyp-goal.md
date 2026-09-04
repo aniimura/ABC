@@ -3081,3 +3081,59 @@ Ofcorr_glued_iso`が示すとおり`c.α⁻¹(piece)`(`c.C`側、**`ℝ`レベ�
 組み合わせるだけの「配線」ではない。これまでの`person-years`スケール
 という評価を裏付ける、より正確な理解が得られたことを記録しておく。
 集計は10/24で変わらず——§4は引き続き0/2。
+
+## 2026-09-04(続き14): ★見直し★ `person-years`評価は再考の余地あり——`R`レベル層の実現可能性を調査
+
+前回の`person-years`評価を検証するため、`R`レベル貼り合わせ層の
+実現可能性を調べるExploreエージェント(読み取り専用)を走らせた。
+結果、**評価を上方修正できる根拠**が見つかった——ただし未実証の
+仮説を含む、正直な報告として記録する。
+
+**最重要の発見**: `ExtLimit.lean`の`transitionElem`から
+`corrHypGlueData_glued_iso`までの1526行(`ℝ`レベルのGlueDataパイプ
+ライン全体)は、**完全にスキーム一般で書かれており、`A⊗[ℚ]ℝ`にも
+`FgSubalgebra ℚ ℝ`にも一切依存していない**(型シグネチャは
+`{X:Scheme}{U:X.Opens}(f:J→Γ(X,U))(Z:J→Scheme)(e:∀i,X.basicOpen(f i)
+≅Z i)`のみ)。しかも`corrHypGlueData`の12フィールドは異なる添字`i,j`
+の`Z i`・`Z j`を直接比較する場面が一度も無く、重なりはすべて
+**単一のアンビエント`X`の`basicOpen`交叉**として処理される
+(以前から把握していた設計)。これは「`R`レベルでもう一段丸ごと
+繰り返す」のではなく、**この1526行のパイプラインを`X`の`R`段階近似
+`X_R`(`ExtLimit.lean`の`toSchemeDiagramOver`/`extDiagram`が既に
+提供)へそのまま再適用できる可能性**を意味する。
+
+真に新しく必要なのは1点だけ: `X_R.basicOpen(f_i^0) ≅ Spec(P₀_i.Ring)`
+という**base changeを経ない**同型を`R`段階で直接示すこと
+(`piece_descends_iso`はℝへbase changeした後の同型しか与えない)。
+これはmathlib`AlgebraicGeometry/AffineTransitionLimit.lean`の一般
+降下定理(`Scheme.exists_hom_hom_comp_eq_comp_of_locallyOfFiniteType`
+等、「limitで一致する2つの射は、ある共通の有限段階で既に一致する」)
+を適用すれば得られる**可能性**があり、本プロジェクトは既に
+`exists_extDiagram_finite_affine_descent`(`ExtLimit.lean:490`)で
+同種の降下定理を`extDiagram`へ適用した実績がある。加えて、
+`R_i⊔R_j`という共通精密化パターン自体は`exists_fg_subalgebra_
+tensor_standardEtale_elem`(`FieldLimit.lean:1261`)の証明中に
+既に実例があり(`exists_fg_subalgebra_tensor_standardEtalePair_
+promote`と`exists_fgSubalgebra_upperBound`を使う)、標準的な手順として
+確立済み。`J`が有限(`exists_finite_standardEtaleCover`により)なので、
+一般の余極限論法ではなく**有限個の`R_i`を一発で共通上界へ合流させる
+だけ**で済む。
+
+**留保(正直に記録)**: 上記は調査エージェント自身が「実証していない
+仮説」と明言している。`P₀_i.Ring`が必要な仮定(`LocallyOfFiniteType`
+等)を満たすか、`X_R.basicOpen(f_i^0)`が実際にqcqsか、`f_i^0`自体を
+`Γ(-,U)`版として下ろす議論がmathlibの「Sections of the limit」節
+(`Γ(-,⊤)`中心)にそのまま転用できるか、は**未検証**。また
+`Instance4.lean`の既存コメント(今日付)は「新しい独立した規模」と
+評価しており、これは前セッションの実地の手触りに基づく可能性がある。
+`ℝ`レベル自体、単純な配線ではなく多数の`whnf`heartbeat問題等の
+Lean特有の泥沼を伴っており、`R`段階でも同種の泥沼が再発する可能性
+は高い。
+
+**結論(見直し)**: 「根本的に新しい数学的アイデアが要る」とまでは
+言えず、**現実的に着手可能な規模**という、より楽観的な評価に修正
+する。ただし「1セッションで完了する」規模かは未検証——次の一歩として
+提案された(i)`exists_fgSubalgebra_upperBound`で複数の`R_i`を単一の
+`R'`へ合流させる補題、(ii)mathlibの降下定理を`Spec(P₀_i.Ring)`へ
+実地に適用してみる試掘、のうち(ii)を次に試す。集計は10/24で変わらず
+——§4は引き続き0/2。
