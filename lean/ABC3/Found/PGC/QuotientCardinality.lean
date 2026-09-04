@@ -330,4 +330,19 @@ theorem card_principalUnitsQuotient {p : ℕ} [Fact p.Prime] (K : PAdicLocalFiel
   rw [Nat.card_congr (principalUnitsQuotientEquiv K hπmax n hn).toEquiv]
   exact card_units_quotient_span_pi_pow K hq hπmax hπne0 n hn
 
+/-- **`(𝒪_K)^×⧸principalUnits K π n` は有限**——`principalUnits_
+eq_ker`ではなく`principalUnitsQuotientEquiv`(第一同型定理による
+`≃*(𝒪_K/π^n)^×`)を経由し、`𝒪_K/π^n`自身の有限性(`finite_quotient_
+span_pi_pow`)から`(𝒪_K/π^n)^×`の有限性(`Finite Rˣ`はmathlibで
+`Finite R`から自動)を移すだけ。単射性から全単射性へ橋渡しする
+(`Function.Injective.surjective_of_finite`が要求する)`Finite`
+インスタンスの土台。 -/
+theorem finite_principalUnitsQuotient {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (n : ℕ) (hn : 1 ≤ n) :
+    Finite ((𝒪[K.carrier])ˣ ⧸ principalUnits K π n) := by
+  haveI := finite_quotient_span_pi_pow K hπmax n
+  haveI := nontrivial_quotient_span_pi_pow K hπmax n hn
+  exact Finite.of_equiv _ (principalUnitsQuotientEquiv K hπmax n hn).toEquiv.symm
+
 end ABC3.Found.PGC
