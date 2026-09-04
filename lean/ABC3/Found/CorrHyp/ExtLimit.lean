@@ -1062,6 +1062,32 @@ theorem Scheme.Hom.isoImage_inv_naturality {X Y : Scheme} (p : X ⟶ Y) [IsOpenI
 
 attribute [reassoc] Scheme.Hom.isoImage_naturality Scheme.Hom.isoImage_inv_naturality
 
+/-- **`eqToIso`は`homOfLE`と両立する**(`.inv`版)——`A=A'`・`B=B'`のとき、
+「`B'≤A'`に沿って制限してから`A'`を`A`へ同一視する」のと「先に`B'`を`B`へ
+同一視してから`B≤A`に沿って制限する」のが一致する。`eqToIso`の引数は
+`Eq`(`Prop`)なので証明の中身は問わない(証明無関係性)——`subst`+`simp`で
+機械的に示せる。`t_fac`(`transitionElemIso`の自然性)で、精密な等式
+(`transitionElem_basicOpen_eq`)を経由した2つの異なる`homOfLE`を
+橋渡しするために使う。CorrHyp非依存の一般的事実。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem eqToIso_homOfLE_comm {X : Scheme} {A A' B B' : X.Opens} (hA : A = A') (hB : B = B')
+    (h : B ≤ A) (h' : B' ≤ A')
+    (eA : (A : Scheme) = (A' : Scheme)) (eB : (B : Scheme) = (B' : Scheme)) :
+    X.homOfLE h' ≫ (eqToIso eA).inv = (eqToIso eB).inv ≫ X.homOfLE h := by
+  subst hA; subst hB
+  simp
+
+/-- `eqToIso_homOfLE_comm`の`.hom`版(向きが逆)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem eqToIso_homOfLE_comm' {X : Scheme} {A A' B B' : X.Opens} (hA : A = A') (hB : B = B')
+    (h : B ≤ A) (h' : B' ≤ A')
+    (eA : (A : Scheme) = (A' : Scheme)) (eB : (B : Scheme) = (B' : Scheme)) :
+    X.homOfLE h ≫ (eqToIso eA).hom = (eqToIso eB).hom ≫ X.homOfLE h' := by
+  subst hA; subst hB
+  simp
+
 /-- **重なり`X.basicOpen(f₁·f₂)`を、`X.basicOpen f₁`とその「候補片」`Z`
 との任意の同型`e`(`piece_descends_iso`/`onePieceSchemeIso`が与える)の
 下で`Z`の基本開集合として実現する**——`W`(`X.basicOpen f₁`自身のスキーム
