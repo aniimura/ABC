@@ -4041,3 +4041,50 @@ idioms.md`に追記する価値のある新しい失敗形。
 `lake build ABC3`とも0エラー)・コミット(`71807250`)・pushは完了。
 集計は引き続き10/24——§4は引き続き0/2。
 集計は10/24で変わらず——§4は引き続き0/2。
+
+## 2026-09-05(続き17): 開埋め込みギャップへの設計転換——`descendPieceR`を
+「独立に選んだPresentationの事後比較」ではなく「局所化として直接構成」
+する方針へ(`FieldLimit.lean`、`isLocalization_away_tensor_eq`)
+
+続き15・続き16で正直に記録した「`descendPieceR`が独立に構成された`R`
+レベルの抽象スキームである」というギャップに対する、根本的な設計転換
+に気づいた。従来の計画は「`D(f)`・`D(f*g)`それぞれについて`exists_
+finite_standardEtaleCover`で得た**独立な**`Algebra.Presentation`を、
+事後的に`exists_mvPolynomial_quotient_specIso_descend`で比較・同一視
+する」というものだったが、これだと得られるのは**抽象的な同型**であり
+`GlueData`が要求する**開埋め込み**にはならない(続き15の記録どおり)。
+
+**新方針**: `W := D(f*g)`の`descendPieceR`を、`D(f)`の`descendPieceR`
+から**独立に**構成するのではなく、`D(f)`の`descendPieceR`の環`S₀`を
+(`piece_basicOpen_localizationElem`の`R`レベルへの持ち上げ`h`による)
+`Localization.Away h`として**直接定義**する。この方針の下で必要になる
+唯一の代数的事実——「`S₀`を`h`で局所化してから`B`上で`T`(`=A⊗ℝ`)と
+テンソルする」のと「先に`S₀`を`B`上で`T`とテンソルしてから、その中の
+`h`の像で局所化する」が一致すること——を`isLocalization_away_tensor_eq`
+として証明した:
+
+```
+theorem isLocalization_away_tensor_eq (B S₀ T M : Type) [CommRing B] [CommRing S₀]
+    [CommRing T] [CommRing M] [Algebra B S₀] [Algebra B T] [Algebra B M] [Algebra S₀ M]
+    [IsScalarTower B S₀ M] (h : S₀) [IsLocalization.Away h M] :
+    Nonempty (M ⊗[B] T ≃+* Localization.Away (algebraMap S₀ (S₀ ⊗[B] T) h))
+```
+
+証明は`Algebra.TensorProduct.cancelBaseChange`(結合律の簡約)+
+`IsLocalization.Away.tensorRight`(mathlibのインスタンス、局所化と
+テンソルの可換性)+`IsLocalization.algEquiv`(同じ部分集合による局所化
+の一意性)の合成——新しい数学は不要、既存のmathlib道具の組み合わせで
+閉じた。配管上の新しい一手: `Algebra.TensorProduct.rightAlgebra`は
+`abbrev`であり(`leftAlgebra`と違って)`instance`タグが付いていないため
+自動探索されず、`letI`で明示的に供給する必要があった。
+
+**この方針転換がもたらす利点(正直な評価)**: この構成の下では、
+`Spec.map (algebraMap S₀ M) : Spec M ⟶ Spec S₀`が`IsOpenImmersion.
+of_isLocalization`(mathlib、既存)により**自動的に開埋め込みになる**
+——「2つの独立なPresentationが実は局所化の関係にあることを証明する」
+という(本質的に困難な)問題を、「最初から局所化として構成する」ことで
+**回避**できる設計になっている。ただし`descendPieceR`自体をこの新方針
+で**再構成する**作業(`ExtLimit.lean`側、`h`の`R`レベルへの持ち上げの
+構成を含む)はまだ未着手——次の一手として記録する。lake build
+(`FieldLimit`/`ABC3`)とも0エラー確認、コミット(`470da5b1`)・push
+完了。集計は引き続き10/24——§4は引き続き0/2。

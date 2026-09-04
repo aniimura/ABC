@@ -1798,3 +1798,19 @@ X).leftとpullback X.hom toBaseKの構文不一致)になったため、中間�
 抽象スキーム同士を実際の局所化として結びつける、Algebra.Presentation
 の選び方自体の制御が必要)はまだ未着手。lake build(ExtLimit/ABC3)
 0エラー確認、push済み。集計は引き続き10/24——§4は引き続き0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05(続き17)
+設計転換に気づいた——descendPieceRを「独立なPresentationの事後比較」
+ではなく「D(f)側のS₀をhで局所化したものとして直接構成」する方針へ。
+isLocalization_away_tensor_eq(commit 470da5b1、FieldLimit.lean):
+S₀をhで局所化してからB上でTとテンソルするのと、先にB上でTとテンソル
+してからhの像で局所化するのが一致することを証明(cancelBaseChange+
+tensorRight+algEquivの合成、新しい数学は不要)。
+
+この方針の利点: この構成の下ではSpec.map(algebraMap S₀ M)がIsOpen
+Immersion.of_isLocalization(mathlib)により自動的に開埋め込みになる
+——独立な2つのPresentationが局所化関係にあることを事後証明するという
+困難な問題を、最初から局所化として構成することで回避できる。ただし
+descendPieceR自体の再構成(ExtLimit.lean側)はまだ未着手。lake build
+(FieldLimit/ABC3)0エラー確認、push済み。集計は引き続き10/24——§4は
+引き続き0/2。
