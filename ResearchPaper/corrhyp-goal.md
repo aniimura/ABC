@@ -3295,3 +3295,45 @@ elementaryな技法**——多項式の**係数を直接、有限個ずつ**共�
 **これで代替案(`Γ(C,piece)`全体を一度に降ろす)が、単なる仮説では
 なく実際に動く部品を伴う具体的な作業計画になった**。集計は10/24で
 変わらず——§4は引き続き0/2。
+
+## 2026-09-05: `pieceAlgebra_relation_descend_R`——`Γ(C,piece)`全体を降ろす計画を実際に接続
+
+代替案を実際にCorrHypの実データへ接続した。mathlibで
+**`Algebra.Presentation.ofFinitePresentation`**(有限表示`[Algebra.
+FinitePresentation R S]`から明示的な生成元・関係式(`Fin n`変数・
+`Fin m`関係式)を取り出す)を発見——これがまさに探していた
+「`Γ(C,piece)`の有限表示を具体的な多項式の族として取り出す」道具
+だった。
+
+`piece_algebraEtale_tensor`(既存)→`Algebra.Etale`→`Algebra.
+FinitePresentation`(mathlib、`Etale ⟹ FinitePresentation`)→
+`Algebra.Presentation.ofFinitePresentation`という連鎖で、
+`Γ(C,piece)`の有限個の関係式(`P.relation : Fin m → MvPolynomial
+(Fin n)(A⊗ℝ)`)を取り出し、前回完成させた`exists_fg_subalgebra_
+tensor_mvPolynomial_finset`で単一の共通`R`へ降ろす
+**`pieceAlgebra_relation_descend_R`**を構成した。`lean_check`で
+検証後ファイルへ反映、`lake build`(ExtLimit/ABC3とも)0エラー確認、
+コミット(`bca25683`)。
+
+さらに、この先の道筋を支えるmathlibの部品も確認できた:
+`Algebra.TensorProduct.quotientTensorEquiv`(`(A/I)⊗_R T ≅
+(A⊗_R T)/I.map(...)`、商とbase changeの可換性)・`Algebra.Presentation.
+baseChange`(`Presentation`自体のbase change)・`Algebra.Presentation.
+span_range_relation_eq_ker_baseChange`(関係式のbase changeと核の
+一致)——これらを組み合わせれば、`R`レベルの代数`S_0`(降ろした関係式
+による`MvPolynomial`商)を構成し、`S_0`のbase changeが実際に
+`Γ(C,piece)`を復元することを示せる見込みが立った。
+
+配管の注意(新しい、単純だが重要な発見): `open scoped Classical in`
+は**docstring(`/-- ... -/`)の前**に置く必要がある——後に置くと
+`unexpected token 'open'; expected 'lemma'`という構文エラーになる。
+今回一度この順序を間違えて即座に検出・修正した(既存の`piece_
+descends_iso_R_upperBound`等の並びを確認して正しい順序を確定)。
+
+**次の一手(未着手)**: `S_0 := MvPolynomial(Fin n)(A⊗R.1) ⧸
+Ideal.span{降ろした関係式}`を実際に構成し、`S_0 ⊗_{A⊗R.1}(A⊗ℝ) ≅
+Γ(C,piece)`を示す。これが完成すれば、`Γ(C,piece)`(≒`C`の1アフィン片)
+の**genuine な`R`レベルモデル**が手に入り、この`S_0`を使って
+`transitionElem`/`gdT`/`cocycle`一式の`R`レベル版を(`ℝ`レベルと
+同じ道具を`S_0`の上で再利用する形で)構築できる見込み。集計は10/24
+で変わらず——§4は引き続き0/2。
