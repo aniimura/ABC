@@ -3933,4 +3933,42 @@ theorem falt1_mapBaseChange_injective_wn1_concrete
   set e2 := ABC3.Found.Falt1.falt1AdjoinRootEquivIntegralClosure (algebraMap V0 Wn π) n hn' hπne0' hprime' hnotsq' hnpos
   exact falt1_mapBaseChange_injective_wn1 π n hn' hprime' hnotsq' hnpos e2
 
+/-!
+## Exercise 13.7.4 (4)完全列そのもの・長さの加法性(2026-09-04)
+
+第二基本完全列 `0 → Wₙ₊₁⊗_{Wₙ}Ω¹_{Wₙ/V0} → Ω¹_{Wₙ₊₁/V0} → Ω¹_{Wₙ₊₁/Wₙ} → 0`
+の**残り2つの成分**(中央の完全性・右側の全射性)は、実は
+**mathlib に無条件で(=分岐や分離性の仮定なしに)既に存在する**と
+判明した: `KaehlerDifferential.exact_mapBaseChange_map`(中央の完全性、
+任意の塔 `R→A→B` で成立)・`KaehlerDifferential.map_surjective`
+(`map R S B B : Ω[B⁄R]→Ω[B⁄S]` の全射性、任意の塔で成立)。左側の
+単射性(`falt1_mapBaseChange_injective_wn1`、上で確立済み)と合わせ、
+`Module.length_eq_add_of_exact` を適用するだけで**長さの加法公式**
+(Brinon-Conrad step (4)-(6) の議論の土台)が閉じる。 -/
+
+set_option maxHeartbeats 800000 in
+/-- **`Ω¹` の第二基本完全列から従う長さの加法公式(完成)**:
+`length_{Wₙ₊₁}(Ω¹_{Wₙ₊₁/V0}) = length_{Wₙ₊₁}(Wₙ₊₁⊗_{Wₙ}Ω¹_{Wₙ/V0}) +
+length_{Wₙ₊₁}(Ω¹_{Wₙ₊₁/Wₙ})`。Exercise 13.7.4 step (4)-(6) の
+kernel/cokernel 評価(Nakayama+elementary divisors・discriminant の塔)
+はこの等式の右辺の2項をそれぞれ評価することに相当する——次回はそちら
+へ進む。 -/
+theorem falt1_kaehler_length_exact_wn1
+    {V0 Wn Wn1 : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    [CommRing Wn1] [Algebra Wn Wn1] [Algebra V0 Wn1] [IsScalarTower V0 Wn Wn1]
+    (π : V0) (n : ℕ)
+    (hn' : (n : FractionRing Wn) ≠ 0)
+    (hprime' : (Ideal.span ({algebraMap V0 Wn π} : Set Wn)).IsPrime)
+    (hnotsq' : algebraMap V0 Wn π ∉ (Ideal.span ({algebraMap V0 Wn π} : Set Wn)) ^ 2)
+    (hnpos : 0 < n)
+    (e2 : AdjoinRoot ((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)) ≃ₐ[Wn] Wn1) :
+    Module.length Wn1 (Ω[Wn1⁄V0]) =
+      Module.length Wn1 (TensorProduct Wn Wn1 Ω[Wn⁄V0]) + Module.length Wn1 (Ω[Wn1⁄Wn]) := by
+  have hinj := ABC3.Found.Falt1.falt1_mapBaseChange_injective_wn1 π n hn' hprime' hnotsq' hnpos e2
+  have hsurj := KaehlerDifferential.map_surjective V0 Wn Wn1
+  have hexact := KaehlerDifferential.exact_mapBaseChange_map V0 Wn Wn1
+  exact Module.length_eq_add_of_exact (KaehlerDifferential.mapBaseChange V0 Wn Wn1)
+    (KaehlerDifferential.map V0 Wn Wn1 Wn1) hinj hsurj hexact
+
 end ABC3.Found.Falt1
