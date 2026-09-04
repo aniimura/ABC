@@ -2812,6 +2812,33 @@ mathlib での正確な組み立て方は未確認)。
       divisor theoremによる`ker(b)⊇ker(p倍)`の導出)・(5)
       (discriminantの塔、局所版)の2つのみ。
 
+      ★★続けて(3)に着手する前に、その**正確な要件**を原文
+      (「...which has `(W_{n+1}/pW_{n+1})^{d+1}` as quotient」)まで
+      遡って精密に再確認したところ、重要な事実が判明した:
+      (3)は`Ω_{V_{n+1}/V_n}⊗W_{n+1}`が**単に**`d+1`個以下で生成
+      される(=`falt1_kaehler_generatedBy_dplus1`が与える事実)
+      だけでは閉じない——「`(W_{n+1}/pW_{n+1})^{d+1}`への**全射**を
+      持つ」という、**`V_n`塔の具体的構成(`d+1`個の同時添加)に
+      固有の追加事実**が必要になる(生成元の個数が`≤d+1`であること
+      と、剰余体上の次元がちょうど`d+1`であることの両方が揃って
+      初めて、直和分解の各因子`W_{n+1}/p^{α_i}`のすべてで`α_i≥1`が
+      出る——単なる抽象的なDVR上の加群論だけでは足りない)。
+
+      これは、(3)が**抽象的なDVR一般論として独立に閉じる部分**
+      (`falt1_kaehler_generatedBy_dplus1`まで)と、**具体的な`V_n`
+      塔の構成(`pushoutKaehlerSplitStepOption`系)に固有の部分**
+      (全射性の確認)とに、当初の想定より明確に分かれることを
+      意味する——後者は、このセッションで既に構築した
+      `pushoutKaehlerSplitStepOption`(`d+1`個の同時添加そのものを
+      構成する)と組み合わせて初めて出せる見込みが高い。次回は
+      `pushoutKaehlerSplitStepOption`の出力(`Ω[V_{n+1}/V_n}`の
+      `d+1`因子分解の**存在**)から、この全射性(`Ω_{Vn+1/Vn}⊗Wn+1`
+      が`(Wn+1/p)^{d+1}`へ全射する)を実際に導出することから
+      再開するのが筋が良い——`falt1_kaehler_generatedBy_dplus1`
+      (抽象DVR一般論)と`pushoutKaehlerSplitStepOption`(具体的な
+      塔の構成)という、このセッションで構築した2つの独立した
+      道具を**ここで初めて統合する**局面になる見込み。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
