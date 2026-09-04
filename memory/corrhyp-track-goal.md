@@ -399,6 +399,20 @@ flatnessを完全に回避する戦略が実現、集計10/24で変わらず)。
 コミット: `80eb752a`(piecePullbackIso完成)・`084fef0b`(戦略記録)・
 `835beb44`(単射性確認の記録)。
 
+★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(「1アフィン片の降下」の
+核が全て揃った、集計10/24で変わらず)。`FieldLimit.lean`に
+`exists_fg_subalgebra_tensor_finset`→`_polynomial_family`→
+`tensor_map_injective_of_flat`→`_standardEtaleCond`→
+**`exists_fg_subalgebra_tensor_standardEtalePair`**という一連の補題を
+完成(★すべてsorry無し・標準3公理のみ)——既存の`exists_fg_subalgebra_
+standardEtalePair`(一般k,K)と並行だが`k:=ℚ`(体)・`K:=A⊗[ℚ]ℝ`版。
+`piecePullbackIso`(前回)+この一連の補題で、`c.α`→`Algebra.Etale`→
+`exists_finite_standardEtaleCover`→有限段階降下、という「1アフィン片の
+降下」に要る一直線の道筋が数学的には完成した。残るのは複数片の合流
+(rigidity)・`GlueData`貼り合わせという組み立てのみ。
+
+コミット: `3f130e87`(tensor降下補題群完成)・`ae94716a`(記録)。
+
 ★★★★★★★★★★★★★★★★★★★★2026-09-04さらに続報(残作業4段階を総括、
 集計10/24で変わらず)。generic flatnessの標準的前提(Rネター整域・
 加群/多元環がR上有限表示)を確認したところ、`corrHypInstance4`の
