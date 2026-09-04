@@ -264,8 +264,32 @@ R C D B` という自然性(`tensorKaehlerEquiv_eq_map_mapBaseChange`、
    評価)——これは 3b と一体で、`V_n` 族の具体形(3c)が定まってから
    でないと着手しづらい。
 
-**§2-4(11項目)**: 変化なし——「almost mathematics」が mathlib に
-存在しないため完全に未着手。
+**§2-4(11項目)**: ★★★★★2026-09-04、`Definition 2.1`(almost étale
+covering の定義)は `Found/Falt1/AlmostEtale.lean` で sorry 無く
+formalize できた(`IsAlmostEtaleCovering`、commit `d1f92c36`)——
+「projective・trace・idempotent」は個別には mathlib の道具(dual basis
+の補題・`Algebra.trace`・`Algebra.FormallyUnramified.elem`)で書け、
+特に「`B⊗_AB` の像」を捉える比較写像は局所化とテンソル積の可換性の
+同一視を経由せず `Algebra.TensorProduct.lift` で直接構成できることを
+発見した(想定より遥かに単純だった)。
+
+★★★★★★★続けて `Theorem 2.2`(nilpotent ideal 上の lifting)の証明全文
+(物理p.7=印字p.260)を260dpiで精読した。証明は: (1) `B` の almost
+射影性から任意の `ε>0` で `p^εφ` を `A` 加群写像として持ち上げる、
+(2) 積の非可換性の障害
+`b_0(p^εφ_ε(b_1b_2)-φ_ε(b_1)φ_ε(b_2))b_3` が **Hochschild
+cohomology** `H^2(B/A,I)` の類を定め、これが `m` で零化される
+(remark 2.1(v)、証明は「同様の議論」とだけ書かれ本文中では未証明)
+ことから `ε` を倍にして消せる、(3) 持ち上げの一意性は `H^1(B/A,I)`
+(これも `m` 零化)まで、`C` が `p` 捩れ無しなのでちょうど一意に決まる、
+(4) `mB→C` への拡張は `p^ε` の2乗関係から。
+
+**結論**: Definition 2.1 とは質的に異なり、`Theorem 2.2`-`2.4`・`§3`・
+`§4` は **Hochschild cohomology(`B⊗_AB⊗_A⋯⊗_AB→M` の複体としてremark
+(v)で定義される)の理論そのもの・その almost 消滅性・一般の変形理論
+(`H^2`=障害・`H^1`=分類)** という、mathlib に存在しない独立した理論を
+要する。Definition 2.1 で見つかった「見た目より簡単だった」という
+僥倖はここでは再現しない見込み——引き続き完全に未着手。
 
 ★★★**結論(正直な評価)**: `/goal` の 13/13 は、このセッションでの
 継続作業だけでは現実的な時間内に到達できない規模の作業(Theorem 1.2
