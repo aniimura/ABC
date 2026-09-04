@@ -66,4 +66,78 @@ theorem finrank_adjoinRoot_iteratedLubinTatePsi {A : Type*} [CommRing A] [IsLoca
     (isDistinguishedAt_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn).monic.natDegree_map,
     natDegree_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn]
 
+/-! ### 分離性: `ψ_n` の根は代数閉体で相異なる `q^n-q^{n-1}` 個(混標数の場合)
+
+`[CharZero A]` を追加する(古典的な Lubin-Tate 理論の**混標数**の場合
+——`K` は `ℚ_p` の有限次拡大——に対応する仮定、CLAUDE.md 逸脱の記録:
+既存の定理には一切触れず、この節の新しい定理だけに使う)。標数0の体
+では既約多項式は自動的に分離的(`Irreducible.separable`)なので、
+`ψ_n` の根が**相異なる**(重複度が無い)ことまで結論できる——前回
+`card_iteratedLubinTateDistinguishedRoots` 等で「重複度込み」としか
+言えなかったギャップが、混標数の場合には解消される。 -/
+
+/-- `ψ_n` は `FractionRing A` 上で分離的——標数0では既約多項式は
+自動的に分離的(`Irreducible.separable`)。 -/
+theorem separable_iteratedLubinTatePsi_map_fractionRing {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A] [UniqueFactorizationMonoid A] [CharZero A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n : ℕ) (hn : 1 ≤ n) :
+    (Polynomial.map (algebraMap A (FractionRing A))
+      (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn)).Separable :=
+  (irreducible_iteratedLubinTatePsi_map_fractionRing hq hπmax hπne0 f hf0 hf1 hf n hn).separable
+
+/-- `ψ_n` の根(`iteratedLubinTateAlgClosure A` の中、重複度込み)。 -/
+noncomputable def iteratedLubinTatePsiRoots {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n : ℕ) (hn : 1 ≤ n) :
+    Multiset (iteratedLubinTateAlgClosure A) :=
+  (Polynomial.map (algebraMap A (iteratedLubinTateAlgClosure A))
+    (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn)).roots
+
+/-- `ψ_n` の根は重複度込みでちょうど `q^n-q^{n-1}` 個——
+`card_iteratedLubinTateDistinguishedRoots` と全く同じ議論。 -/
+theorem card_iteratedLubinTatePsiRoots {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n : ℕ) (hn : 1 ≤ n) :
+    Multiset.card (iteratedLubinTatePsiRoots hq hπmax hπne0 f hf0 hf1 hf n hn) =
+      (pp ^ ff) ^ n - (pp ^ ff) ^ (n - 1) := by
+  rw [iteratedLubinTatePsiRoots, IsAlgClosed.card_roots_eq_natDegree,
+    Polynomial.Monic.natDegree_map (isDistinguishedAt_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn).monic
+      (algebraMap A (iteratedLubinTateAlgClosure A)),
+    natDegree_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn]
+
+/-- ★★★★★★★★★★**`ψ_n` の根は互いに相異なる**(混標数、`[CharZero A]`
+のとき)——`ψ_n` の `FractionRing A` 上の分離性
+(`separable_iteratedLubinTatePsi_map_fractionRing`)を
+`iteratedLubinTateAlgClosure A` へ持ち上げ(`Polynomial.Separable.map`、
+代入の合成 `IsScalarTower.algebraMap_eq`)、`Polynomial.nodup_roots`
+を適用する。`card_iteratedLubinTatePsiRoots`(個数は`q^n-q^{n-1}`)と
+合わせて、混標数の場合には**原始 `π^n`-捩れ点が真に `q^n-q^{n-1}` 個の
+相異なる元からなる**という古典的な Lubin-Tate 理論の帰結が完成する。 -/
+theorem nodup_iteratedLubinTatePsiRoots {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A] [UniqueFactorizationMonoid A] [CharZero A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n : ℕ) (hn : 1 ≤ n) :
+    (iteratedLubinTatePsiRoots hq hπmax hπne0 f hf0 hf1 hf n hn).Nodup := by
+  show (Polynomial.map (algebraMap A (iteratedLubinTateAlgClosure A))
+    (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn)).roots.Nodup
+  apply Polynomial.nodup_roots
+  rw [IsScalarTower.algebraMap_eq A (FractionRing A) (iteratedLubinTateAlgClosure A),
+    ← Polynomial.map_map]
+  exact (separable_iteratedLubinTatePsi_map_fractionRing hq hπmax hπne0 f hf0 hf1 hf n hn).map
+
 end ABC3.Found.PGC
