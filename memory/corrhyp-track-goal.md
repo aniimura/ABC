@@ -1008,3 +1008,21 @@ f_mono・f_open・f_hasPullback・f_id・t'`)が完成した**。残るは`t_fac
 `lake build ABC3`で0エラー確認。
 
 コミット: `21aea8c6`。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04さらに
+続報(t_facに向けた配管の罠を特定・修正、証明を途中まで前進、集計10/24
+で変わらず)。`t_fac`に着手し、`isPullback_opens_inf`系のsimp補題が
+`gdF`(不透明な`def`)を使った`pullback.fst/snd`に一切効かないという
+罠に当たった——原因は`gdF`が`instances`透明度で展開されないこと(simpの
+書き換え一致判定はその透明度を使うため)。`gdV`・`gdF`に`@[reducible]`
+を付けて解消(コミット`e41d967e`、`tools/lean-idioms.md` #30)。
+
+この修正の上で`t_fac`を`cancel_mono`+明示的な`rw [show pullback.fst
+… = (isPullback_opens_inf _ _).isoPullback.inv ≫ (Z i).homOfLE
+inf_le_left from …]`+`Iso.cancel_iso_inv_left`まで前進させた——
+`pullback`/`isoPullback`が完全に消えた「純粋に`transitionElemIso`・
+`isoImage`・`eqToIso`・`homOfLE`の塔同士の一致」という等式まで還元
+できている(まだ`sorry`、Foundには未反映)。次の一手はこの塔同士の
+突き合わせ。詳細は`corrhyp-goal.md`の該当節。
+
+コミット: `e41d967e`。

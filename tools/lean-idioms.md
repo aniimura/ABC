@@ -3647,3 +3647,48 @@ h2 => ...) someProp.choose_spec`という形の**簡約されないパターン�
 同じファイルで`set`が`.choose_spec`由来の仮定への`rw`と噛み合わない
 場面にも当たった(第25項の亜種)——`.choose_spec`を扱うときは`set`より
 先に「`have`を使わず生の式のまま`rw`する」を試すとよい。
+
+## 30. 不透明な`def`で包んだ射を`pullback.fst/snd`等の引数に渡すと、
+`isPullback_opens_inf`系のsimp補題が「未使用」のまま一切効かない——
+`@[reducible]`を付けて`instances`透明度で展開できるようにする
+(2026-09-04)
+
+`gdF (i j : J) : gdV i j ⟶ Z i := (…).ι`のような**不透明な`def`**(`gdV`・
+`gdF`とも普通の`noncomputable def`)を`pullback.fst (gdF i j) (gdF i k)`
+のように使うと、`IsPullback.isoPullback_hom_fst`・`_hom_snd`・`_inv_fst`・
+`_inv_snd`(と`_assoc`版)を`simp only […]`にいくら渡しても**すべて
+「未使用」**になる。`rw`で直接試すと理由が分かる:
+```
+Application type mismatch: The argument
+  pullback.snd (gdF …) (gdF …)
+has type
+  … (pullback (gdF …) (gdF …)) …
+but is expected to have type
+  … (pullback U.ι V.ι) …
+Note: The target expression is not type-correct under the `instances`
+transparency level, which may have triggered the failure.
+```
+`gdF i j`と`U.ι`は`default`透明度では definitionally equal(`gdF`を
+展開すれば同じ)だが、simpの書き換え一致判定は`instances`透明度を使う
+ため、`gdF`のような**通常の`def`はそこで展開されない**——結果、
+`pullback (gdF i j)(gdF i k)`と`pullback U.ι V.ι`が「別の型」として
+扱われ、書き換え全体が失敗する。`unfold gdF`をゴールに対して先に
+行っても直らない(`unfold`は表面のシンタックスを書き換えるだけで、
+`HasPullback`インスタンス経由で決まる`pullback`対象そのものの
+「同じ透明度で同じに見えるか」という判定には影響しない)。
+
+**How to apply**: このように**後で`isPullback_opens_inf`系(または他の
+`instances`透明度前提のsimp補題)と組み合わせて使うつもりの`def`**
+(特に開埋め込み`.ι`をラップするようなもの)は、最初から`@[reducible]`
+を付けておく。トイ例で先に確認してから本体に適用するとよい:
+```lean
+@[reducible] noncomputable def testF {X : Scheme} (U : X.Opens) :
+    (U:Scheme) ⟶ X := U.ι
+```
+これで`isoPullback_hom_snd`等が問題なく`simp`で適用できるようになる。
+副作用: `@[reducible]`化すると、他の場所の`unfold gdV; rfl`のような
+明示的な展開ステップが不要になる(自動的に`instances`透明度で展開
+されるため`rfl`が`rw`の中で自動的に成立する)——ビルドエラー
+("no goals")として現れるので、その`unfold …; rfl`を消せばよい。
+実例: `lean/ABC3/Found/CorrHyp/ExtLimit.lean`の`gdV`・`gdF`
+(コミット`e41d967e`)。

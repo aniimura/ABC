@@ -2010,3 +2010,53 @@ transitionElem f₁ f₂ e · transitionElem f₁ f₃ e`)が`map_mul`の3回適
 確認(sorry無し)。集計は10/24で変わらず(§4は0/2のまま)。
 
 コミット: `21aea8c6`。
+
+### 2026-09-04さらに続報: t_facに向けた配管の罠を特定・修正——`@[reducible]`が鍵
+
+`t_fac`(`t' i j k ≫ pullback.snd _ _ = pullback.fst _ _ ≫ t i j`)の証明に
+着手し、**新しい配管の罠**を発見・修正した。`unfold gdT' gdVpullbackIso gdT
+gdF`した後、`isPullback_opens_inf`が与える`isoPullback_hom_fst`・
+`isoPullback_hom_snd`(および`_assoc`版)を`simp`に渡しても**一切適用され
+ない**(simpの「未使用」警告で確認)——`rw`で明示的に試すと
+「`Application type mismatch`...`Note: The target expression is not
+type-correct under the 'instances' transparency level`」というエラーに
+なることが分かった。原因: `gdF`が不透明な`def`だと、`pullback (gdF i j)
+(gdF i k)`と`pullback (…).ι (…).ι`が`instances`透明度(simpの書き換え
+一致判定が使う透明度)では**別物**として扱われる——両者は`default`透明度
+では definitionally equal(`gdF`を展開すれば同じ)なのに、simpの一致判定
+はそこまで展開しない。
+
+**修正**: `gdV`・`gdF`に`@[reducible]`を付けた(トイ例`testF5`で確認して
+から本体に適用、コミット`e41d967e`)。副作用として`gdT`内の`unfold gdV;
+rfl`が`rw`だけで自動的に閉じるようになったので削除。`lake build ABC3`で
+0エラー(数学的内容の変更は無い、純粋な配管修正)。
+
+**t_facの証明を途中まで前進させた**(まだ`sorry`、Foundには置いていない):
+1. `cancel_mono (gdF j i)`で`gdV(j,i)`への写像の一致に帰着(`gdF_mono`)。
+2. `unfold`+上記`isoPullback`系simpで、LHSの`pullback.snd(...)≫((Z j)....)ι`
+   部分が`((Z j).basicOpen(t_jk) ⊓ (Z j).basicOpen(t_ji)).ι`に簡約される
+   (`isoPullback_hom_snd_assoc`+`Scheme.homOfLE_ι`)。
+3. RHSの`pullback.fst(gdF ij,gdF ik)`は`rw [show ... = (isPullback_opens_
+   inf _ _).isoPullback.inv ≫ (Z i).homOfLE inf_le_left from
+   (IsPullback.isoPullback_inv_fst _).symm]`で明示的に書き換える(simpの
+   後方書き換えは`h`・`fst`・`snd`が未決定のため効かないので、`rw`+`show`
+   で具体的な項を与える必要がある)。
+4. `rw [Category.assoc, Iso.cancel_iso_inv_left]`で両辺に共通する
+   `(isPullback_opens_inf _ _).isoPullback.inv`を消去。
+
+**残る目標**(次の一手): 消去後の等式
+`(Z i).homOfLE ⋯ ≫ (transitionElemIso (f i)(f j*f k)(e i)).inv ≫
+X.homOfLE ⋯ ≫ (transitionElemIso (f j)(f k*f i)(e j)).hom ≫
+((Z j).isoOfEq ⋯).inv ≫ ((Z j).basicOpen(t_jk)⊓(Z j).basicOpen(t_ji)).ι
+= (Z i).homOfLE ⋯ ≫ [gdTのiso1..iso4の塔] ≫ ((Z j).basicOpen(t_ji)).ι`
+——`pullback`/`isoPullback`は完全に消えた、純粋に`transitionElemIso`・
+`isoImage`・`eqToIso`・`homOfLE`の塔同士の一致を問う等式。両辺とも
+「`X.basicOpen(f_i·f_j·f_k)`を`e_i`経由で`Z_i`へ、あるいは直接`e_j`経由で
+`Z_j`へ送る」という**2つの異なる経路が同じ制限写像に一致する**という
+自然性の主張——`transitionElem_basicOpen_eq`・`isoImage_hom_ι`・
+`homOfLE_ι`の組み合わせでさらに展開できるはずだが、`gdT`側の4段の塔
+(iso1..iso4)との突き合わせが必要で、まだ`sorry`のまま。集計は10/24で
+変わらず(§4は0/2のまま)。
+
+コミット: `e41d967e`(`@[reducible]`修正のみ、t_fac本体はまだFoundに
+置いていない)。
