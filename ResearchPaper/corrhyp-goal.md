@@ -291,6 +291,29 @@ instances-transparency 問題)は「`set A := (M : Matrix ...)` で台の
 `Matrix` を先に1回だけ取り出し、以後 `A` だけで計算する」という
 具体的な回避策で解決した——`tools/lean-idioms.md` に追記済み。
 
+★★★★★★**2026-09-04続報(第31-32件)、`Definition 2.3`
+(Shimura-arithmetic)を `Γ_SL2Z` について完全に実現した**。
+`Found/CorrHyp/ShimuraArithmeticData.lean`: `F:=ℚ`(無限素点1個、
+「他で非自明」が空虚に真)・`A:=M_2(ℚ)`(`Algebra.IsCentral.matrix`・
+`IsSimpleRing.matrix`・`Module.finrank_matrix` で「4次元中心的単純多元環」
+=四元数環という特徴づけを直接満たす、mathlib の基底つき
+`QuaternionAlgebra` を経由しない逸脱)・`matrixEquivTensor` で
+「唯一の無限素点で自明」・`O_A:=M_2(ℤ)`(`Γ_SL2Z = O_A ∩ SL_2(ℝ)` を
+成分レベルで証明)という4データすべてを構成し、`Γ_SL2Z` が
+Shimura-arithmetic であることを丸ごと証明した(sorry無し、標準3公理)。
+`Definition 2.2`(Margulis-arithmetic)は代数群の部分群スキーム分類・
+実点のリー群構造という mathlib に丸ごと不在の理論を要し、引き続き
+人年規模。
+
+★次の一手(未着手): `corrHypInstance.ShimuraArithmetic`(現状
+`fun _ ↦ False` の placeholder)を `ShimuraArithmeticWitness` へ差し替え
+れば、`Definition 2.3` の `.src` を正当に主張できる(道具の集計を
+6/24→7/24 に動かせる見込み)。`Instance.lean`(先)→`ModularExample.lean`
+→`ShimuraArithmeticData.lean`(後)というimport順のため、差し替えには
+ファイル構成の見直しが要る——`prop_3_2_at_instance` 等が
+`MargulisArithmetic`/`ShimuraArithmetic` の値を使わないことは確認済み
+なので安全なはずだが、未検証。
+
 `Definition 3.1`(`hyperbolicCore`)は今の `core := id` placeholder では
 実装にならない(本物の商構成、`Lemma 5.1` の内容)。`Theorem 3.3` は
 引き続き Riemann–Hurwitz/Gauss–Bonnet(mathlib 不在)待ち。
