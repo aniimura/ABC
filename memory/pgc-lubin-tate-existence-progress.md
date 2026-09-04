@@ -445,6 +445,14 @@ Lubin-Tate理論の帰結が完成した——数セッション前に「分離�
 付値評価を要する新規の数学的内容」と見立てていたギャップが、
 混標数という自然な設定限定で完全に解消された。
 
+**続報(2026-09-04、`ψ_n`の分解体は`Frac(A)`上Galois)**:
+`isGalois_iteratedLubinTatePsi_splittingField`——分離多項式の分解体は
+自動的にGalois(`IsGalois.of_separable_splitting_field`)という一般
+事実を`separable_iteratedLubinTatePsi_map_fractionRing`に適用する
+だけの軽量な追加。この分解体が`AdjoinRoot ψ_n`(1つの根を添加する
+だけの体)と一致すること(𝒪_K作用による他の根への言及を要する、
+古典的Lubin-Tate理論の実質的な内容)は別途の課題として残る。
+
 **残る作業**: 節目(3)torsion点の構成本体(`D_n`の根を`Λ_n`として定義、
 `𝒪_K`加群構造、`K(Λ_n)/K`の完全分岐性)、節目(4)
 `L_n:=K(Λ_n)`が完全分岐かつ`Gal(L_n/K)≅(𝒪_K/π^n)^×`(Lubin-Tateの
