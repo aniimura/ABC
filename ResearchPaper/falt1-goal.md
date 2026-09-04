@@ -1194,6 +1194,52 @@ mathlib での正確な組み立て方は未確認)。
     `V_n` 族(`V_1, V_2, ...`)を実際に構成すること——このセッションで
     確立した `V0→V1` の1ステップを繰り返し適用する形になるはずだが、
     「πの選び方(次の一様化元)」の再帰的な選定は未着手。
+
+    ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、**(i) `hspan_eq`
+    接続に向けて3つの補題を確立した**(`falt1_adjoin_top_of_finrank_eq`・
+    `falt1_fieldLevel_adjoin_top_of_ringLevel_minpoly`・
+    `falt1BaseChangeGeneratorFull`、`KaehlerAux.lean`、commit
+    `53152c9d`、`lake build`・`#print axioms` 確認済み・sorry 無し)。
+    道筋の確認(数学的には閉じている):
+    - `hspan_eq : spanDeriv = Idiff` は、両辺とも
+      `Ideal.span {n · x^(n-1)}`(`x` は `Wₙ₊₁` の生成元、`ψ w = x`)
+      に簡約されることを確認した——`Idiff = Ideal.map ψ (differentIdeal
+      V0 V1) = Ideal.map ψ (span{n·w^(n-1)})`(`differentIdeal_eq_
+      span_derivative` を `w` に適用)`= span{n·ψ(w)^(n-1)} =
+      span{n·x^(n-1)}`(環準同型なので `n·(-)^(n-1)` を素通しする)、
+      `spanDeriv = span{aeval x (deriv(minpoly Wₙ x))} =
+      span{n·x^(n-1)}`(`conductor_mul_differentIdeal` を `x` に適用、
+      `minpoly Wₙ x = X^n-Cπ'` なので微分は `n·X^{n-1}`)——**両辺が
+      文字通り同じ式に簡約される**ので `rfl` に近いはずだと判明した。
+    - `differentIdeal_eq_span_derivative`/`conductor_mul_differentIdeal`
+      を実際に**呼び出す**には、`w`(`falt1BaseChangeGeneratorFull` の
+      生成元)が field-level(`FractionRing V0` 上)でも全体を生成する
+      ことを要求する——ring-level の `Algebra.adjoin V0 {w} = ⊤`
+      だけでは足りない(これが `hspan_eq` 接続の技術的な核心だった)。
+      これを `falt1_fieldLevel_adjoin_top_of_ringLevel_minpoly` で解決:
+      `minpoly.isIntegrallyClosed_eq_field_fractions'` で ring-level
+      `minpoly V0 w = X^n-Cπ` を field-level `minpoly (FractionRing V0)
+      (w:L) = fK` に持ち上げ、`falt1_adjoin_top_of_finrank_eq`(次元
+      カウント: `Algebra.adjoin.powerBasis'` の次元 `=
+      (minpoly K x).natDegree` と `Submodule.eq_top_of_finrank_eq`)
+      で `Algebra.adjoin (FractionRing V0) {(w:L)} = ⊤` を得た。
+    - `w`・`x` が「同じ `e1`・`e2` 由来」であることを保証するため
+      (別々に `falt1GeneratorPackage` を呼ぶと `obtain` した witness
+      の一致が保証されない)、`falt1BaseChangeGeneratorFull` で `ψ`・
+      `w`・`x`・両方の生成元性を1つの証明にまとめた。
+
+    ★残る障害(未解決、次回持ち越し): `differentIdeal_eq_span_
+    derivative w hwfield hwadjoin` を実際に呼ぶと、`hwfield`(私が
+    構築した field-level 生成元性の項)の型が、この定理が要求する
+    型と**instance 経路のレベルで**一致しない(`Application type
+    mismatch`、`isDefEq` timeout)——`Algebra (integralClosure V0
+    (AdjoinRoot fK)) (AdjoinRoot fK)` の instance が2通りの経路
+    (私の構築と、定理呼び出し時の instance 検索)で一致しないという、
+    このセッション全体を通じて繰り返し出てきた「diamond」の再来と
+    見られる。次回の方針候補: `differentIdeal_eq_span_derivative` を
+    `@` で明示引数呼び出しにして instance を手渡しで揃える、または
+    `show` で `hwfield`/`hwadjoin` の型を定理の期待する形に強制的に
+    書き換えてから渡す。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
