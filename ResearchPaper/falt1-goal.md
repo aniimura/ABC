@@ -3007,6 +3007,8 @@ mathlib での正確な組み立て方は未確認)。
       「mathlibに無い独立した古典的整数論」であることが最終確認
       できた——今回の探索は空振りではなく、**探すべき場所を
       使い切った**という意味で意義がある。
+
+      (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
       「菱形」版であって、対応物というより`falt1_differentIdeal_
