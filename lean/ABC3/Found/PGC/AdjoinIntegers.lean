@@ -676,4 +676,114 @@ theorem aeval_subst_eq_aeval_aeval {A S : Type*} [CommRing A] [CommRing S] [Alge
       (PowerSeries.WithPiTopology.tendsto_trunc_atTop (R := A) p)
   exact tendsto_nhds_unique h1 h3
 
+/-! ### ★★★★★★★★★★★★★★★★節目——Lubin-Tate 作用の乗法性
+`a·(b·x)=(ab)·x`
+
+`aeval_subst_eq_aeval_aeval`(連鎖律)と既存の`LubinTateAction_comp`
+(`[ab]_f=subst([b]_f)([a]_f)`)を組み合わせて、`𝒪_K` 加群作用の
+乗法性を確立する。`b·x`(`adjoinIntegers K x` の元)を新たな評価点
+として、同じ`adjoinIntegers K x`(座標変換無し、`CompleteSpace`・
+`IsLinearTopology`・`ContinuousSMul` はすべて `x` にのみ依存し
+`b·x` には依存しない)へ`aeval`を組み立て直すのが鍵。 -/
+
+/-- `adjoinIntegers K x` の元 `z` の位相的冪零性は、周囲の体での
+位相的冪零性と同値——`adjoinIntegers K x` の位相は周囲の体からの
+誘導位相(部分環)なので、`tendsto_subtype_rng`(部分型での収束は
+包含写像を通した収束と同値、mathlib一般論)から直ちに従う。 -/
+theorem hasEval_iff_coe {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure)
+    (z : adjoinIntegers K x) :
+    PowerSeries.HasEval z ↔
+      PowerSeries.HasEval (↑z : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := by
+  show Filter.Tendsto (fun n => z ^ n) Filter.atTop (nhds 0) ↔
+    Filter.Tendsto (fun n => (↑z : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) ^ n)
+      Filter.atTop (nhds 0)
+  rw [tendsto_subtype_rng]
+  have heq : (fun n => (↑(z ^ n) :
+      IntermediateField.adjoin K.carrier ({x} : Set K.closure))) =
+      (fun n => (↑z : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) ^ n) := by
+    funext n; exact SubmonoidClass.coe_pow z n
+  rw [heq]
+  simp
+
+/-- `b·x`(`lubinTateActionAtTorsionPoint`の値)は位相的冪零——
+`norm_lubinTateActionAtTorsionPoint_lt_one`と`hasEval_iff_coe`から
+直ちに従う。これで`b·x`自身を評価点として`[a]_f`を再評価できる。 -/
+theorem hasEval_lubinTateActionAtTorsionPoint {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (b : 𝒪[K.carrier]) :
+    PowerSeries.HasEval (lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem b) := by
+  rw [hasEval_iff_coe]
+  apply tendsto_pow_atTop_nhds_zero_of_norm_lt_one
+  exact norm_lubinTateActionAtTorsionPoint_lt_one K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem b
+
+/-- `adjoinIntegers K x` の**任意の**位相的冪零な元 `z` を評価点として
+冪級数を評価する——`x` 自身に特化していた`lubinTateEvalAtTorsionPoint`
+の一般化。`CompleteSpace`・`IsLinearTopology`・`ContinuousSMul` は
+`x`(座標系)のみに依存し `z` には依存しないので、そのまま流用できる。 -/
+noncomputable def lubinTateEvalAtPoint {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p) (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (z : adjoinIntegers K x) (hz : PowerSeries.HasEval z) :
+    PowerSeries (𝒪[K.carrier]) →ₐ[𝒪[K.carrier]] adjoinIntegers K x :=
+  haveI := completeSpace_adjoinIntegers K x
+  haveI := isLinearTopology_adjoinIntegers K x
+  haveI := continuousSMul_adjoinIntegers K x
+  PowerSeries.aeval hz
+
+/-- ★★★★★★★★★★★★★★★★**節目——Lubin-Tate 作用の乗法性**:
+`a·(b·x) = (ab)·x`。既存の`LubinTateAction_comp`
+(`[ab]_f=subst([b]_f)([a]_f)`)の両辺を`x`で評価し、
+`aeval_subst_eq_aeval_aeval`(連鎖律)で右辺を
+`aeval(aeval x [b]_f)([a]_f) = a·(b·x)` へ変形するだけ。`𝒪_K`
+加群の構造公理のうち最も本質的な1つ(乗法性、`(ab)·x=a·(b·x)`)を
+初めて確立した。 -/
+theorem lubinTateAction_mul {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (a b : 𝒪[K.carrier]) :
+    lubinTateEvalAtPoint K x (lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem b)
+        (hasEval_lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem b)
+        (LubinTateAction hq hπmax f hf0 hf1 hf a) =
+      lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem (a * b) := by
+  haveI := completeSpace_adjoinIntegers K x
+  haveI := isLinearTopology_adjoinIntegers K x
+  haveI := continuousSMul_adjoinIntegers K x
+  show PowerSeries.aeval (hasEval_lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem b)
+      (LubinTateAction hq hπmax f hf0 hf1 hf a) = _
+  show PowerSeries.aeval (hasEval_lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem b)
+      (LubinTateAction hq hπmax f hf0 hf1 hf a) =
+    lubinTateEvalAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf n x hx hmem
+      (LubinTateAction hq hπmax f hf0 hf1 hf (a * b))
+  rw [LubinTateAction_comp hq hπmax hπne0 f hf0 hf1 hf a b]
+  unfold lubinTateEvalAtTorsionPoint
+  symm
+  apply aeval_subst_eq_aeval_aeval
+  · show IsNilpotent (PowerSeries.constantCoeff (LubinTateAction hq hπmax f hf0 hf1 hf b))
+    rw [constantCoeff_LubinTateAction]; exact IsNilpotent.zero
+  · exact constantCoeff_LubinTateAction hq hπmax f hf0 hf1 hf b
+  · rfl
+
 end ABC3.Found.PGC
