@@ -109,18 +109,52 @@ noncomputable def isLimit_specKConeOver : IsLimit specKConeOver := by
     intro R
     exact congrArg Over.Hom.left (hm R)
 
-/- ★★次の一手(未着手): `X : Over BaseK`(`Lemma 4.1` の `X`)を固定し、
-`Over.pullback X.hom : Over BaseK ⥤ Over X.left`(`X.hom` に沿った base
-change の関手、`Over.mapPullbackAdj` の右随伴なので `PreservesLimit` が
-`infer_instance` で自動的に付くことを確認済み)を `specKConeOver`/
-`isLimit_specKConeOver` に適用すれば、`X.left ×_{BaseK} Spec K` の極限表示
-(`X.left ×_{BaseK} Spec K = lim (X.left ×_{BaseK} Spec R)`)が得られる。
-唯一の詰まりは `Limits.pullback X.hom toBaseK`(`Ext X` の定義に使う順序)と
-`Limits.pullback toBaseK X.hom`(`Over.pullback X.hom` が自然に与える順序)の
-**引数の順序が入れ替わっている**こと——`pullbackSymmetry`(mathlib既存の
-`pullback f g ≅ pullback g f`)で埋める必要がある。埋まれば
-`FieldLimit.lean` の `standardEtalePairRingBaseChange` と組み合わせて
-`Lemma 4.1` の構成的降下の全体(スキーム側の極限表示+環側の base change)が
-揃う。 -/
+/-- `X : Over BaseK`(`Lemma 4.1` の `X`)を固定したとき、`Over.pullback X.hom`
+(`Over.mapPullbackAdj` の右随伴なので `PreservesLimit` が `infer_instance` で
+自動的に付く)を `specKConeOver`/`isLimit_specKConeOver` に適用すれば、
+`X.left ×_{BaseK} Spec K` の極限表示が(`Over X.left` の中の極限として)
+得られる——`pullback toBaseK X.hom`(`Over.pullback X.hom` が自然に与える
+引数順)の形で。`Ext X` 自身の定義(`SchemeFEt.lean`、`pullback X.hom
+toBaseK` という逆順)との接続には `Limits.pullbackSymmetry` が要る(未着手、
+下記)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def extConeOver (X : Over BaseK) :
+    IsLimit ((Over.pullback X.hom).mapCone specKConeOver) :=
+  isLimitOfPreserves (Over.pullback X.hom) isLimit_specKConeOver
+
+set_option backward.isDefEq.respectTransparency false in
+/-- `toSchemeDiagram ℚ ℝ` を `X.hom`(`X : Over BaseK`)に沿って base change
+した図式——`i ↦ X.left ×_{BaseK} Spec R_i`(裸の `Scheme` の中、`Ext X` の
+定義(`pullback X.hom toBaseK`)と**同じ引数順**で作ってあるので、
+`pullbackSymmetry` を経由せずに直接 `Ext X` の極限表示の土台になる。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def extDiagram (X : Over BaseK) : (FgSubalgebra ℚ ℝ)ᵒᵖ ⥤ Scheme where
+  obj R := Limits.pullback X.hom (toSchemeDiagramOver.obj R).hom
+  map {R S} h := Limits.pullback.map X.hom (toSchemeDiagramOver.obj R).hom X.hom
+    (toSchemeDiagramOver.obj S).hom (𝟙 X.left) (toSchemeDiagramOver.map h).left (𝟙 BaseK)
+    (by simp) (by simpa using (toSchemeDiagramOver.map h).w.symm)
+  map_id R := by
+    apply pullback.hom_ext <;> simp
+  map_comp {R S T} f g := by
+    rw [pullback.map_comp]
+    congr 1
+    simp
+
+/- ★★次の一手(未着手): `extDiagram X` の頂点 `Limits.pullback X.hom toBaseK`
+(= `(Ext X).left`、`extDiagram` を `pullback X.hom toBaseK` を法として自然に
+`Cone` にしたもの)が極限であることを示す——`isLimit_specKCone` の
+`lift`/`fac`/`uniq` を土台に(`isLimit_specKConeOver` と同じ直接構成の
+パターン)、`s : Cone (extDiagram X)` の頂点から `X.left` への射(全ての `R`
+で一致する定数、`s.π.app R ≫ pullback.fst` として得る)と `specK` への射
+(`s.π.app R ≫ pullback.snd` を束ねた cone に `isLimit_specKCone` の `lift`
+を適用)を `pullback.lift` で束ねる。cone の naturality 証明
+(`pullback.map ... ≫ pullback.snd = pullback.snd ... ≫ φ`、
+`unfold pullback.map; rw [pullback.lift_snd]` で閉じる形)を組む途中で
+`congr 1` が Over/pullback の defeq 周りで型レベルの余計な goal を作る配管
+に当たり、今回は保留——`corrhyp-goal.md` に記録。閉じれば
+`FieldLimit.lean` の `standardEtalePairRingBaseChange`(環側の base change)
+と合わせて `Lemma 4.1` の構成的降下に必要な道具が完全に揃う。 -/
 
 end ABC3.Found.CorrHyp
