@@ -1255,6 +1255,39 @@ theorem descendPieceR_iso (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen
   refine (Scheme.Spec.mapIso (pieceAlgebra_R_model_baseChange X U hU C α).some.symm.toCommRingCatIso.op).trans ?_
   exact (piecePreimageIso X U hU C α).symm
 
+/-! ## 「項目(d)の第二段」実データ接続への第一歩——`X.left`の異なる
+アフィン開`U`・`V`(`V≤U`)にまたがる`c.C`側の片同士の制限写像
+
+`2026-09-05(続き11)`の精査で判明した通り、ℝレベルでは`α⁻¹(U)`・`α⁻¹(V)`
+は共に`c.C`自身の開集合なので、両者の重なりの貼り合わせデータは
+`c.C`の層構造が既に自動的に与える(非自明な遷移同型は不要)——非自明に
+なるのは、これを`descendPieceR`(Rレベル、抽象的なスキーム)側で
+比較するときだけである。この制限写像`piece_restrict_hom`は、
+`exists_mvPolynomial_quotient_specIso_descend`の`ψ`(2つの`Presentation`
+の生成元同士の対応)を実際に構成するための第一部品——`Algebra.
+Presentation.ofFinitePresentation`の生成元(`P.val`)をこの写像で送り、
+overlap上の元として実現するのに使う。 -/
+
+open CategoryTheory AlgebraicGeometry Limits in
+/-- `V≤U`のとき、`c.C`側の対応する片も同じ向きの包含になること
+(`α⁻¹`・`pullback.fst⁻¹`という2段の逆像がどちらも単調であることから
+直ちに従う)。 -/
+theorem piece_le_of_le (X : Over BaseK) (U V : X.left.Opens) (hV : V ≤ U)
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) :
+    (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V) : C.Opens) ≤
+      (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U) : C.Opens) :=
+  fun _ hx => hV hx
+
+open CategoryTheory AlgebraicGeometry Limits in
+/-- **`C`側の片`α⁻¹(piece)`の、`X.left`側の開集合の包含`V≤U`に沿った
+制限写像**——標準的な層の制限(`C.presheaf.map (homOfLE ...).op`)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def piece_restrict_hom (X : Over BaseK) (U V : X.left.Opens) (hV : V ≤ U)
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) :
+    Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) ⟶ Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V)) :=
+  C.presheaf.map (homOfLE (piece_le_of_le X U V hV C α)).op
+
 /-- **アフィン開`U`上の基本開`X.basicOpen f`は`Spec(Localization.Away f)`
 そのものと同一視できる**——`mathlib`の`basicOpenIsoSpecAway`は`X := Spec R`
 の場合限定だったので、一般のアフィン開`U`(`X`自体はアフィンでなくてよい)
