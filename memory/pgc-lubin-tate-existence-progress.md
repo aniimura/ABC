@@ -1,6 +1,6 @@
 ---
 name: pgc-lubin-tate-existence-progress
-description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——濃度の一致まで確立、(𝒪_K)^× と Gal(K.closure/K.carrier) 双方がψ_nの根に閉じた作用を持つことも確立、残るは単射性/全射性(F_f の対数か Newton 法が要る)とGalois同変性そのもの
+description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——濃度の一致まで確立、(𝒪_K)^× と Gal(K.closure/K.carrier) 双方がΛ_n・ψ_nの根に閉じた作用を持つことも確立、残るは単射性/全射性(F_f の対数か Newton 法が要る)。Galois同変性そのもの(σ(a·x)=a·σ(x))は cross-point instance bridging という既知の難所があるため後回しにした
 metadata:
   type: project
 ---
@@ -1704,3 +1704,30 @@ truncation-limit手法の中で使う見込みで、無駄にはならない—�
 truncation-limit手法で示す、(b)あるいは単射性/全射性(3経路の
 いずれか)を先に完成させる——どちらから手をつけても、最終的な
 `Gal(K(Λ_n)/K)≅(𝒪_K/π^n)^×`には両方必要になる見通し。
+
+## 続報(同日、`algEquiv_mem_iteratedLubinTateTorsionPoints_of_mem`、
+`AdjoinIntegers.lean`、commit `93108293`): `Λ_n`全体もσで保たれる
+
+上の`ψ_n`の根版と全く同じ証明パターン(`D_n`も`𝒪[K.carrier]`に
+係数を持つので、σがK.carrierを固定することから直接出る)を
+`iteratedLubinTateDistinguished`(`D_n`)に適用するだけで、
+`Gal(K.closure/K.carrier)`が`Λ_n`(π^n-捩れ点全体、`ψ_nの根の
+帰納的合併`を経由する必要すら無い)そのものを保つことが出た。
+
+**(a)の`σ(a·x)=a·σ(x)`(Galois同変性そのもの)についての判断**:
+`a·x`は`x`固有の`adjoinIntegers K x`という座標系で定義されており、
+`a·σ(x)`は`adjoinIntegers K (σ x)`という別の座標系になる——
+これらをK.closure経由で橋渡しする「cross-point instance bridging」
+は、本セッション中に`unit_action_mem_iteratedLubinTatePsiTorsion
+Points`の証明で意図的に**避けてきた**技術的な難所(以前の`Valued`
+インスタンス衝突と同系統のリスク)であり、着手すると長時間の
+不生産的な格闘になる可能性が高いと判断し、今回は見送った。
+代わりに(σがψ_n根・Λ_n全体を保つという)より安全に完成できる
+2つの補題を確立した——これらは「cross-point bridging」を一切
+要さない、`x`自身の中だけで閉じる議論だったため。
+
+現状のまとめ: `(𝒪_K)^×`と`Gal(K.closure/K.carrier)`の双方が、
+独立に、`Λ_n`・`ψ_nの根`という同じ有限集合上に閉じた作用を持つ
+ことが確立された。次の一歩は、単射性/全射性(3経路のいずれか)を
+先に完成させるほうが、Galois同変性(cross-point bridgingを要する)
+より安全な優先順位と判断する。
