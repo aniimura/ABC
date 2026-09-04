@@ -3260,3 +3260,38 @@ isColimit`(`:45`,`:81`)という、まさに「射がfiltered colimitで
 まだ特定できていない。それでも、**必要な一般論の存在自体は確認
 できた**——これは代替案が絵に描いた餅ではなく、現実的な道筋である
 ことの裏付けになる。集計は10/24で変わらず——§4は引き続き0/2。
+
+## 2026-09-04(続き18): `exists_fg_subalgebra_tensor_mvPolynomial_finset`——代替案の核心部品を実際に検証・完成
+
+抽象的な圏論(「有限表示なオブジェクトはcompact」)を経由する代わりに、
+このリポジトリが既に`StandardEtalePair`の降下(`exists_fg_subalgebra_
+tensor_standardEtalePair`、`FieldLimit.lean:913`)で使っている**より
+elementaryな技法**——多項式の**係数を直接、有限個ずつ**共通の`R`へ
+降ろしてから多項式を再構成する——を`MvPolynomial ι`(`ι`変数、`ι`は
+任意の型)へ一般化できるか実際に試し、**成功した**。
+
+`exists_fg_subalgebra_tensor_mvPolynomial_finset(A)(s:Finset(MvPolynomial
+ι(A⊗ℝ))) : ∃R, ∀q∈s,∃q₀:MvPolynomial ι(A⊗R.1), q₀.map(...)=q`——
+`s`の全ての多項式の係数(`support`+`coeff`で取り出せる、有限個)を
+`exists_fg_subalgebra_tensor_finset`(既存)で単一の共通`R`へ降ろして
+から、`monomial`の和で各多項式を再構成する。証明は
+`exists_fg_subalgebra_tensor_bivariate_finset`(2変数版、既存)と
+**全く同じ構造**——変数の個数が`2`(`Polynomial(Polynomial(-))`)
+から任意の`ι`(`MvPolynomial ι`)へ一般化しただけ。
+
+これは`Algebra.FinitePresentation.iff_quotient_mvPolynomial'`
+(mathlib、有限表示な代数を`∃ι x f, Surjective f ∧ (ker f).FG`という
+`MvPolynomial ι`商の形で表示する)と組み合わせれば、`Γ(C,piece)`
+(`piece_algebraEtale_tensor`により`(A⊗ℝ)`上`Etale`、ゆえに
+`FinitePresentation`)を**個別の元ごとにではなく一度に**、単一の
+`R`レベルへ降ろす計画の**核心部品**になる——次の一手は、
+`(ker f).FG`から有限個の生成元(`Ideal.FG`の定義から`Finset`として
+取り出す)を得て、それらの係数(`MvPolynomial`として)にこの補題を
+適用し、`R`レベルの`MvPolynomial ι(A⊗R.1)`商として`Γ(C,piece)`の
+`R`レベルモデル`S_0`を構成すること(まだ未着手)。`lean_check`で
+検証後ファイルへ反映、`lake build`(FieldLimit/ABC3とも)0エラー
+確認、コミット(`8b2a983b`)。
+
+**これで代替案(`Γ(C,piece)`全体を一度に降ろす)が、単なる仮説では
+なく実際に動く部品を伴う具体的な作業計画になった**。集計は10/24で
+変わらず——§4は引き続き0/2。
