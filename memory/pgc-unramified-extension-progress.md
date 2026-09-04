@@ -139,6 +139,64 @@ K 0`(`IntermediateField.adjoin K.carrier {0}`上のSubringとして定義
    `unitReductionHom_surjective`に使った道具——を使ってNewton逐次近似を
    自前で組む筋が有力)。不分岐拡大理論の中でも、これが最初の重い
    関門になる。
+
+   ★★2026-09-05さらに実測(Hensel回避ルートの検討結果): Hensel's
+   lemmaを**回避する**ルートとして、mathlibの**分岐理論の基本等式**
+   `Ideal.ramificationIdx_mul_inertiaDeg_of_isLocalRing`
+   (`e·f=[L:K]`、`NumberTheory/RamificationInertia/Basic.lean:650`)を
+   使う筋を検討した(「剰余次数`f≥n`さえ言えれば`e=1,f=n`が従う」)。
+   しかしこの補題が要求するinstanceを実測したところ:
+   - `IsDedekindDomain (𝒪[K.carrier])`: **OK**(`valuationRing_isDVR`
+     から`infer_instance`で自動)。
+   - `IsFractionRing (𝒪[K.carrier]) K.carrier`: **OK**だが自動では
+     見つからない——`ValuationRing.instIsFractionRingInteger Valued.v`
+     を明示的に与える必要がある(`exact?`で発見)。
+   - `IsFractionRing (adjoinIntegers K x) K.carrier⟮x⟯`: **`exact?`が
+     `isDefEq`でタイムアウト**(200000 heartbeats)——`adjoinIntegers`が
+     `{y|‖y‖≤1}`という**ノルムでの定義**であり、`Valued.v`由来の
+     `v.integer`と構文的に一致しないためと思われる。橋渡しが要る。
+   - `Module.Finite (𝒪[K.carrier]) (adjoinIntegers K x)`: **`exact?`
+     で見つからない**——別途証明が要る。
+   - 他に`IsDedekindDomain (adjoinIntegers K x)`・各種`IsScalarTower`
+     も要る(未確認)。
+
+   ⟹ **Hensel回避ルートも「instanceの地ならし」という別種の重い作業**
+   を伴う。どちらの筋を選ぶにせよ、不分岐拡大理論は節目(5)と同等以上の
+   規模になることが実測から確認できた。
+
+   ★★★2026-09-05さらに実測(instance地ならしの詳細な現状——次に
+   戻る人はここから読むこと):
+   - **`adjoinIntegers K x = 𝒪[K.carrier⟮x⟯]`は`rfl`で成り立つ**
+     (実測済み、重要な発見)——つまり`adjoinIntegers`は拡大体に同じ
+     `𝒪[...]`記法を適用したものと**定義的に同一**であり、`Valued`系の
+     mathlib機構がそのまま適用できる可能性が開けた。
+   - `IsFractionRing (adjoinIntegers K x) K.carrier⟮x⟯`: **OK**——
+     ただし`ValuationRing.instIsFractionRingInteger (K := K.carrier⟮x⟯)
+     Valued.v`のように**体を明示的に指定**する必要がある。指定しないと
+     `exact?`も明示適用も`whnf`/`isDefEq`でタイムアウトする(200000
+     heartbeats)が、指定すれば**0.3秒**で通る。★この「体を明示すれば
+     速い」という違いは大きい——`𝒪[...]`絡みのinstanceを扱うときは
+     まず体を明示すること。
+   - `IsDiscreteValuationRing (adjoinIntegers K x)`: **未達**。
+     `Valued.integer.isDiscreteValuationRing_of_compactSpace`
+     (`valuationRing_isDVR`が基礎体で使っているのと同じ補題)に
+     `compactSpace_adjoinIntegers`(既出)を与えるところまでは進むが、
+     最後に**`Valued.v.IsNontrivial`(拡大体の付値の非自明性)**の
+     instanceが無くて止まる。基礎体`K.carrier`では自動的に見つかって
+     いる(`valuationRing_isDVR`が通っている)ので、その導出経路を
+     追って拡大体版を作るのが次の一歩。
+   - `Module.Finite (𝒪[K.carrier]) (adjoinIntegers K x)`: **未達**
+     (`exact?`で見つからない)。
+   - `adjoinPAdicLocalField K x`(既存)の`.carrier`は`K.carrier⟮x⟯`と
+     `rfl`で一致するが、**`𝒪[(adjoinPAdicLocalField K x).carrier]`と
+     `adjoinIntegers K x`は`rfl`では一致しない**(instance diamond、
+     `tools/lean-idioms.md` #31/#33の類型)——この経路でDVR性を借りて
+     くるのは避けたほうがよい。
+
+   ⟹ 残る具体的な障害は**2つだけ**(`Valued.v.IsNontrivial`の拡大体版
+   と`Module.Finite`)。これらが埋まれば`Ideal.ramificationIdx_mul_
+   inertiaDeg_of_isLocalRing`(基本等式`e·f=[L:K]`)が使えるようになり、
+   Hensel's lemmaを自作せずに不分岐拡大の理論を進められる見込み。
 2. 剰余体`F_q`の次数`n`拡大`F_{q^n}`を`GaloisField p (f*n)`
    (`hq:Fintype.card(ResidueField 𝒪_K)=p^f`から`p^{f*n}=q^n`)として
    具体的に構成し、その原始元の最小多項式(次数`n`、分離的)を
