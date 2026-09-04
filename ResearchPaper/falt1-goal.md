@@ -2125,6 +2125,46 @@ mathlib での正確な組み立て方は未確認)。
       確立、`pushoutKaehlerSplitStep`/`_length`を実際の`V_n`/`W_n`の塔に
       接続する。
 
+      ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04(続々)、
+      **`Algebra.IsPushout`への接続そのものが完成した**(commit分は
+      次項で記録)。決定的な近道が判明: `Algebra.IsPushout R S R' S'`は
+      mathlibで単に`IsBaseChange S (IsScalarTower.toAlgHom R R' S').
+      toLinearMap`のラッパー(唯一のフィールド`Algebra.IsPushout.out`)
+      だと`#print`で確認できた——つまり`TensorProduct.isPushout'`
+      経由で「既知のpushout」を`of_equiv`で移送する回り道は不要で、
+      `adjoinRootTensorEquivFwd_bijective`から**直接**`IsBaseChange`を
+      経て`constructor`一発で`Algebra.IsPushout`に落ちる:
+      - `falt1_isBaseChange_adjoinRoot`: `IsBaseChange.of_equiv`に
+        `LinearEquiv.ofBijective adjoinRootTensorEquivFwd
+        adjoinRootTensorEquivFwd_bijective`を渡し、tmul整合性条件を
+        `adjoinRootTensorEquivFwd_one_tmul_mk`+新規補題
+        `algHomAdjoinRootOfCompat'_mk`(`algHomAdjoinRootOfCompat'`の
+        `AdjoinRoot.mk`での挙動)で確認。
+      - `falt1AdjoinRootAlgebra`: `algHomAdjoinRootOfCompat' g`
+        (=`V1→W1`の橋渡し写像)を`RingHom.toAlgebra`で
+        `Algebra(AdjoinRoot g)(AdjoinRoot(g.map φ))`インスタンスに
+        変換。`instance`ではなく`def`(`@[reducible]`)のまま保った——
+        `Falt1`の具体的オブジェクトへ適用する際、既存の`Algebra V1 Wn1`
+        インスタンスとの衝突(前回セッションで診断済みの問題)を
+        避けるため。
+      - `falt1AdjoinRoot_isScalarTower`: `IsScalarTower.of_algebraMap_eq`
+        +`algHomAdjoinRootOfCompat'`の`.commutes`(`R`上の`AlgHom`である
+        こと)から直ちに従う。
+      - `falt1_isPushout_adjoinRoot`(到達点): `constructor`+`show`+
+        `falt1_isBaseChange_adjoinRoot`の3行で`Algebra.IsPushout R C
+        (AdjoinRoot g)(AdjoinRoot(g.map φ))`が確立。`AdjoinRoot`/
+        `Ideal.Quotient`のinstance diamondには最後まで一度も触れて
+        いない。
+
+      これで`pushoutKaehlerSplitStep`/`_length`が要求する`[Algebra.
+      IsPushout R B1 C B]`インスタンスに、`B1=AdjoinRoot g`(=`V1`)・
+      `B=AdjoinRoot(g.map φ)`(=`Wn1`)として直接対応する一般形が
+      手に入った。残る仕事は、この抽象形を具体的な`Falt1`の`V_n`・
+      `W_n`の塔(`falt1AdjoinRootGeneratorFull`等で既に構成済みの
+      オブジェクト)に**実際にインスタンス化**すること——ここで
+      「`Algebra V1 Wn1`インスタンス衝突」(前回セッションで診断済み)
+      に再度注意しながら進める必要がある。
+
       (この段落で構想した代替路は上で実際に`falt1_differentIdeal_
       tower_length`として確立・commit済み——詳細は上記参照。project内
       の`differentIdeal_tower_diamond`は同じmathlib補題を2回使う
