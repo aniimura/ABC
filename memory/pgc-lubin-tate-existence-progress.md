@@ -591,3 +591,15 @@ Lubin-Tate理論の`|Λ_n|=q^n`(真の集合として)そのものが完全に�
 解消。この文脈で新しい短い名前(`torsionPoints`・`kernel`・`image`等
 プロジェクト内で使われがちな一般名)を付ける前に、`grep`で既存の
 `.src`付き宣言との衝突を確認するとよい。
+
+**続報(2026-09-04・続き、`Λ_n`の元は位相的冪零)**: 同じファイルへ
+`spectralNorm_lt_one_of_mem_iteratedLubinTateTorsionPoints`を追加
+(commit `4b02a6b7`)——`Λ_n`の任意の元`x`について
+`spectralNorm K.carrier K.closure x < 1`。`D_n=D_{n-1}・ψ_n`・`D_0=X`
+の漸化式に沿った帰納法(基底: `D_0=X`の根は`0`のみ、
+`spectralNorm 0=0`。帰納段: `D_{n+1}`の根は`D_n`の根(IH)か
+`ψ_{n+1}`の根で、後者は既出の`spectralNorm_root_iteratedLubinTatePsi`
+により`‖π‖^(1/(q^{n+1}-q^n))`に等しく`0<‖π‖<1`かつ指数が正なので
+`Real.rpow_lt_one`で`1`未満)。これは`Λ_n`への`𝒪_K`加群構造の構成
+(`PowerSeries.aeval`による`[a]_f`の評価が要求する
+`HasEval`/位相的冪零性の橋渡し)へ向けた前段。
