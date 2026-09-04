@@ -921,4 +921,32 @@ noncomputable def piecePreimageIso (X : Over BaseK) (U : X.left.Opens) (hU : IsA
       Spec (CommRingCat.of Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U))) :=
   (piece_preimage_isAffineOpen X U hU C α).isoSpec
 
+/-- **アフィン開`U`上の基本開`X.basicOpen f`は`Spec(Localization.Away f)`
+そのものと同一視できる**——`mathlib`の`basicOpenIsoSpecAway`は`X := Spec R`
+の場合限定だったので、一般のアフィン開`U`(`X`自体はアフィンでなくてよい)
+版として一般化した。`hU.isLocalization_basicOpen`(`Γ(X,X.basicOpen f)`が
+`Localization.Away f`の実現になっていること)+`(hU.basicOpen f).isoSpec`
+を合成するだけ。`exists_finite_standardEtaleCover`が返す基本開被覆
+`D(f_i)`(`C`内、`piece_preimage_isAffineOpen`で得たアフィン開の上)を、
+実際に`Spec(Localization.Away f_i)`として認識するのに使う——CorrHyp
+に依存しない一般的な事実。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def IsAffineOpen.basicOpenIsoSpecAway {X : Scheme} {U : X.Opens} (hU : IsAffineOpen U)
+    (f : Γ(X, U)) :
+    (X.basicOpen f : Scheme) ≅ Spec (CommRingCat.of (Localization.Away f)) := by
+  haveI := hU.isLocalization_basicOpen (f := f)
+  have e : Γ(X, X.basicOpen f) ≃ₐ[Γ(X, U)] Localization.Away f :=
+    IsLocalization.algEquiv (Submonoid.powers f) _ _
+  exact (hU.basicOpen f).isoSpec.trans (Scheme.Spec.mapIso e.symm.toRingEquiv.toCommRingCatIso.op)
+
+/- ★★次の一手(未着手): `IsAffineOpen.basicOpenIsoSpecAway`(今回完成)・
+`standardEtalePairPullbackIso`・`exists_fg_subalgebra_tensor_
+standardEtalePair_mapEq`を実際に合成し、「`C`の標準エタール片`C.basicOpen
+f_i`が、有限段階の候補局所片のbase changeにちょうど一致する」という
+1ピース分の完全な連結を示す——`algebraMap (A⊗R.1)(A⊗ℝ)`と`letI`で
+導入した`Algebra`インスタンスが構文的に一致しない場面で`▸`/`show`が
+必要になる配管が残っている(試みたが本セッションでは完了せず)。
+`corrhyp-goal.md`に記録。 -/
+
 end ABC3.Found.CorrHyp
