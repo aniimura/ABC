@@ -142,18 +142,56 @@ noncomputable def extDiagram (X : Over BaseK) : (FgSubalgebra ℚ ℝ)ᵒᵖ ⥤
     congr 1
     simp
 
+/-- `(extDiagram X).map h` を `pullback.snd` と合成した式の naturality——
+`extDiagram X` の頂点候補が `Ext X` の極限であることを示す際、`Cone` の
+`naturality` フィールド(`Functor.const` で包まれた形)を直接埋めようとすると
+`instances` 透明度の配管に当たる(`Over.mk` で見た問題の再発)ため、まず
+**独立した補題として**(`Functor.const` を経由せずに)証明しておく。
+`simp only [extDiagram]` で `.map` の定義を展開してから `pullback.lift_snd`
+一発で閉じる——`unfold`+`show` より `simp only [<def名>]` の方がこの手の
+配管に強いことを再確認。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem extDiagram_map_snd {X : Over BaseK} {R S : (FgSubalgebra ℚ ℝ)ᵒᵖ} (h : R ⟶ S) :
+    (extDiagram X).map h ≫ pullback.snd X.hom (toSchemeDiagramOver.obj S).hom =
+      pullback.snd X.hom (toSchemeDiagramOver.obj R).hom ≫ (toSchemeDiagramOver.map h).left := by
+  simp only [extDiagram]
+  rw [pullback.lift_snd]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- `extDiagram X` から `toSchemeDiagram ℚ ℝ` への自然変換——各段階を
+`pullback.snd`(`X.left ×_{BaseK} Spec R → Spec R` への射影)で送る。
+`Cone` の中に直接埋め込まず**独立した `NatTrans` として**構成すると
+(`extDiagram_map_snd` を直接使うだけで)`instances` 透明度の配管に
+当たらずに閉じる——`Functor.const` で包まれた `Cone.π` の naturality
+フィールドの中で同じ主張を証明しようとすると詰まる(下記の「次の一手」)、
+という配管上の教訓。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def extDiagramToSpecK (X : Over BaseK) : extDiagram X ⟶ toSchemeDiagram ℚ ℝ where
+  app R := pullback.snd X.hom (toSchemeDiagramOver.obj R).hom
+  naturality R S h := by
+    show (extDiagram X).map h ≫ pullback.snd X.hom (toSchemeDiagramOver.obj S).hom =
+      pullback.snd X.hom (toSchemeDiagramOver.obj R).hom ≫ (toSchemeDiagramOver.map h).left
+    exact extDiagram_map_snd h
+
 /- ★★次の一手(未着手): `extDiagram X` の頂点 `Limits.pullback X.hom toBaseK`
-(= `(Ext X).left`、`extDiagram` を `pullback X.hom toBaseK` を法として自然に
-`Cone` にしたもの)が極限であることを示す——`isLimit_specKCone` の
+(= `(Ext X).left`)が極限であることを示す——`isLimit_specKCone` の
 `lift`/`fac`/`uniq` を土台に(`isLimit_specKConeOver` と同じ直接構成の
-パターン)、`s : Cone (extDiagram X)` の頂点から `X.left` への射(全ての `R`
-で一致する定数、`s.π.app R ≫ pullback.fst` として得る)と `specK` への射
-(`s.π.app R ≫ pullback.snd` を束ねた cone に `isLimit_specKCone` の `lift`
-を適用)を `pullback.lift` で束ねる。cone の naturality 証明
-(`pullback.map ... ≫ pullback.snd = pullback.snd ... ≫ φ`、
-`unfold pullback.map; rw [pullback.lift_snd]` で閉じる形)を組む途中で
-`congr 1` が Over/pullback の defeq 周りで型レベルの余計な goal を作る配管
-に当たり、今回は保留——`corrhyp-goal.md` に記録。閉じれば
+パターン)、`s : Cone (extDiagram X)` の頂点から `X.left` への射と `specK`
+への射を `pullback.lift` で束ねる。**この `Cone` 自体を作る段**(頂点
+`pullback X.hom toBaseK` からの `π` を `Cone` の `naturality` フィールドに
+直接埋める段)で、`extDiagram_map_snd`/`extDiagramToSpecK` を独立に作った
+のと同じ配管(`Functor.const` で包まれた goal の中で `𝟙 pt`/`(specKCone
+ℚ ℝ).π.app R` 等の項の型が食い違う)に**複数箇所で**当たり、
+`set_option backward.isDefEq.respectTransparency false` を足しても
+(場所によっては)解消しなかった——今回は保留、`corrhyp-goal.md` に記録。
+`Cone.postcompose`/`Cones.postcompose`(`NatTrans` を経由して `Cone` を
+変換する mathlib の道具)を使えば `extDiagramToSpecK` から `Cone
+(toSchemeDiagram ℚ ℝ)` を自動的に作れることは確認済み
+(`(Cones.postcompose (extDiagramToSpecK X)).obj s` が期待通りに `rfl`
+で計算できることを確認)——次に戻るときは、頂点側の `Cone` も同様に
+`Cone.postcompose`/`NatTrans` 経由で組む方向で試すとよい。閉じれば
 `FieldLimit.lean` の `standardEtalePairRingBaseChange`(環側の base change)
 と合わせて `Lemma 4.1` の構成的降下に必要な道具が完全に揃う。 -/
 
