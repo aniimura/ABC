@@ -1,6 +1,6 @@
 ---
 name: pgc-lubin-tate-existence-progress
-description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——★★★★★ reciprocityMap: Gal(K.closure/K.carrier)→(𝒪_K)^×⧸principalUnits K π n が sorry無しで具体的に構成された(existsUnique_unitActionQuotient_eq_algEquiv 経由)。残るは準同型性のみ——単数限定のGalois同変性(σ(u·x)=u·σ(x))が要る見通し、cross-point instance bridging という既知の難所
+description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——★★★★★★★★★★ Galois同変性 σ(a·x)=a·σ(x) が cross-point instance bridging を経由せず完成(algEquiv_lubinTateActionAtTorsionPoint_comm)。単射性・全単射性・reciprocityMapの存在・同変性がすべて揃い、残るは reciprocityMap の準同型性という最後の1計算のみ(道筋は明確、lubinTateEvalAtPoint_congr で仕上げる見込み)
 metadata:
   type: project
 ---
@@ -1905,6 +1905,102 @@ instance bridging)が必要になる見通し(全単射から`u_σ`の存在は
 限定のGalois同変性」だけで十分なので、一般の`a∈𝒪_K`に対する
 フルな同変性より的を絞った、より軽い経路がないか(単射性で
 そうだったように)を最初に検討する価値がある。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+続報(同日、セッション最大の到達点): **Galois同変性 `σ(a·x)=a·σ(x)`
+が cross-point instance bridging を一切経由せず完成した**
+
+上で「一般のaに対するフルな同変性より的を絞った軽い経路」を検討
+すると書いたが、実際には**一般の`a∈𝒪_K`に対する完全な同変性**が、
+cross-point bridgingという壁ごと回避する形で、丸ごと確立できた。
+
+**鍵となる洞察**: `adjoinIntegers K x`と`adjoinIntegers K (σx)`
+という異なる2つの環を橋渡しする必要があると警戒されてきたが、実は
+**σ(x)自身がK.carrier⟮x⟯の中に留まる**(単数の作用の全射性、
+`unitActionQuotientBijOn`、既出)という事実だけで、この「2つの環」
+問題自体が消える——`σ`は`K.carrier⟮x⟯`を自分自身へ写す自己同型に
+制限でき(単射性+有限次元性から)、その制限された自己同型を
+`adjoinIntegers K x`自身への自己写像として扱えば、`σ(x)`を
+「`x`自身の座標系の中の1点」として直接扱える。`adjoinIntegers
+K (σx)`という別の環は一度も構築しない。
+
+**新規に確立した内容(すべて`sorry`無し、ゲート通過済み、commit
+`1341fcfd`・`b6c1c88e`)**:
+
+1. **`algHom_aeval_powerSeries_comm`**(新ファイル`PowerSeriesAeval
+   Comm.lean`): 連続な代数準同型`σ:S→ₐ[A]S`は`PowerSeries.aeval`と
+   可換(`σ(aeval hz g)=aeval hz' g`)。Lubin-Tate理論に一切依存
+   しない純粋な位相環論の一般補題——`Polynomial.aeval_algHom_apply`
+   (多項式レベルの可換性)+`PowerSeries.WithPiTopology.tendsto_
+   trunc_atTop`(truncationの収束)+`tendsto_nhds_unique`。
+   `aeval_formalGroupLaw_eq_of_snd_eq_zero`と同じ手法の、より単純な
+   (等式のみ、不等式を経由しない)版。
+
+2. **`iteratedLubinTatePsiTorsionPoints_subset_adjoin`**(新ファイル
+   `LubinTateActionEquivariance.lean`): `ψ_nの根`は`K.carrier⟮x⟯`
+   に含まれる——単数の作用の全射性から、任意の`ψ_nの根`の元は
+   `u·x`の形に書け、常に`adjoinIntegers K x⊆K.carrier⟮x⟯`に入る。
+
+3. **`algEquiv_map_adjoin_eq`**: `IntermediateField.map σ.toAlgHom
+   K.carrier⟮x⟯=K.carrier⟮x⟯`。`σ(x)∈K.carrier⟮x⟯`
+   (上記+Galois保存性)から`≤`が`IntermediateField.adjoin_map`+
+   `IntermediateField.adjoin_simple_le_iff`で出て、単射性+有限
+   次元の次元の等式(`IntermediateField.eq_of_le_of_finrank_eq`)
+   で`=`まで持ち上がる。
+
+4. **`algEquivRestrictSelf`**: `σ`を`K.carrier⟮x⟯`自身への自己
+   同型に制限したもの(`IntermediateField.equivMap`+
+   `IntermediateField.equivOfEq`の合成)。`coe_algEquivRestrictSelf`
+   (座標は`σ`そのもの、`rfl`)・`norm_algEquivRestrictSelf`
+   (`norm_algEquiv_eq`からノルムを保つ)も確立。
+
+5. **`adjoinIntegersRestrictSelf`・`adjoinIntegersRestrictSelfAlgHom`**:
+   ノルムを保つことから`adjoinIntegers K x`(ノルム`≤1`の部分環)
+   への制限が構成でき、加法・乗法・単位元・`algebraMap`との可換性
+   (いずれも`K.carrier⟮x⟯`の中でのσ自身の準同型性に帰着)から
+   `𝒪_K`-代数準同型として束ねられる。
+
+6. **`continuous_algEquivRestrictSelf`・`continuous_adjoinIntegers
+   RestrictSelfAlgHom`**: `K.carrier⟮x⟯`が`K.carrier`上有限次元
+   なので、その上の`K.carrier`-線形自己写像は自動的に連続
+   (`LinearMap.continuous_of_finiteDimensional`)——`K.closure`
+   自身の無限次元性を経由する必要が無い。
+
+7. **`hasEval_adjoinIntegersRestrictSelfAlgHom_mk`**: `σ(x)`も
+   位相的冪零(Galoisが捩れ点全体を保つことから)。
+
+8. **`lubinTateActionAtAlgEquivPoint`**: `a`を`σ(x)`で評価した
+   もの——`adjoinIntegers K (σx)`を一切経由せず、`x`自身の座標系の
+   中だけで計算する。
+
+9. **★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+   `algEquiv_lubinTateActionAtTorsionPoint_comm`**: **`σ(a·x)=
+   a·σ(x)`**(Galois同変性そのもの)。`algHom_aeval_powerSeries_comm`
+   を`adjoinIntegersRestrictSelfAlgHom`に適用するだけで閉じる。
+
+**到達点のまとめ**: `Gal(K(Λ_n)/K)≅(𝒪_K/π^n)^×`という主定理を
+証明するための数学的道具が**すべて**揃った——単射性・全単射性・
+`reciprocityMap`の存在・そしてGalois同変性。残るのは
+`reciprocityMap`の**準同型性**という最後の1つの計算だけ:
+`(στ)(x)=σ(τ(x))=σ(u_τ·x)`(τ(x)=u_τ·x、`reciprocityMap_spec`)
+`=u_τ·σ(x)`(**新しい同変性定理**、`a:=u_τ`)`=u_τ·(u_σ·x)`
+(`σ(x)=u_σ·x`、`reciprocityMap_spec`)`=(u_τ*u_σ)·x`
+(`lubinTateAction_mul`)`=(u_σ*u_τ)·x`(`𝒪_K`の可換性)。
+`existsUnique_unitActionQuotient_eq_algEquiv`の一意性から
+`reciprocityMap(στ)=u_σ*u_τ=reciprocityMap σ*reciprocityMap τ`。
+
+**この最後の計算に要る技術的な注意点**(次のセッションで着手する際
+の具体的な足がかり): (a) `lubinTateActionAtAlgEquivPoint K...σ u_τ`
+(σ(x)での`u_τ`の評価)を`lubinTateActionAtTorsionPoint K...u_σ`
+(すなわち`u_σ·x`、`x`自身での評価)へ書き換える必要があるが、
+これは両者の**coeが等しい**(ともに`σ(x)`)ことから
+`Subtype.coe_injective`で「`adjoinIntegers K x`の元として等しい」
+へ持ち上げてから、`lubinTateEvalAtPoint`側の`HasEval`証明項の
+食い違いを`lubinTateEvalAtPoint_congr`(既出、まさにこの用途の
+ために用意されていた補題)で吸収する、という手筋が必要になる
+見込み——「異なる証明項を持つ同じ値」問題は本セッションで何度も
+遭遇した`Fin 2 ite`・依存引数`rw`の罠と同系統なので、
+`tools/lean-idioms.md`のパターンをまず参照すること。
 
 ## 続報(同日、`algEquiv_mem_iteratedLubinTateTorsionPoints_of_mem`、
 `AdjoinIntegers.lean`、commit `93108293`): `Λ_n`全体もσで保たれる
