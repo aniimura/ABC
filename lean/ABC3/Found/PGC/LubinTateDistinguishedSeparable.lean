@@ -181,4 +181,90 @@ theorem card_roots_iteratedLubinTateDistinguished_map {p : ℕ} [Fact p.Prime] (
     (isDistinguishedAt_iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n).monic.natDegree_map,
     natDegree_iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n]
 
+
+open scoped Classical in
+/-- `n`-段の全捩れ点 `Λ_n`——`D_n`(`K.closure` へ写したもの)の根の
+`Finset`。`card_iteratedLubinTateTorsionPoints` によりその濃度はちょうど `q^n`。 -/
+noncomputable def iteratedLubinTateTorsionPoints {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) : Finset K.closure :=
+  (Polynomial.map (algebraMap (𝒪[K.carrier]) K.closure)
+    (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n)).roots.toFinset
+
+open scoped Classical in
+/-- ★★★★★★★★★★★★★**`|Λ_n| = q^n`**——`iteratedLubinTateTorsionPoints` の濃度。
+`card_roots_iteratedLubinTateDistinguished_map`(根の個数)と
+`nodup_roots_iteratedLubinTateDistinguished_map`(重複無し)から
+`Multiset.toFinset_card_of_nodup` で従う。 -/
+theorem card_iteratedLubinTateTorsionPoints {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) :
+    (iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n).card = (pp ^ ff) ^ n := by
+  rw [iteratedLubinTateTorsionPoints, Multiset.toFinset_card_of_nodup
+    (nodup_roots_iteratedLubinTateDistinguished_map K hq hπmax hπne0 f hf0 hf1 hf n),
+    card_roots_iteratedLubinTateDistinguished_map K hq hπmax hπne0 f hf0 hf1 hf n]
+
+open scoped Classical in
+/-- `0 ∈ Λ_n`——`D_n` の定数項が `0` であること
+(`iteratedLubinTateDistinguished_coeff_zero`)から。 -/
+theorem zero_mem_iteratedLubinTateTorsionPoints {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) : (0 : K.closure) ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n := by
+  haveI := valuationRing_isDVR K
+  rw [iteratedLubinTateTorsionPoints, Multiset.mem_toFinset, Polynomial.mem_roots']
+  refine ⟨(isDistinguishedAt_iteratedLubinTateDistinguished
+    hq hπmax hπne0 f hf0 hf1 hf n).monic.map _ |>.ne_zero, ?_⟩
+  show (Polynomial.map (algebraMap (𝒪[K.carrier]) K.closure)
+      (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n)).eval 0 = 0
+  rw [Polynomial.eval_map, Polynomial.eval₂_at_zero,
+    iteratedLubinTateDistinguished_coeff_zero hq hπmax hπne0 f hf0 hf1 hf n, map_zero]
+
+open scoped Classical in
+/-- `Λ_n ⊆ Λ_m`(`n≤m`)——`D_n ∣ D_m`(`iteratedLubinTateDistinguished_
+dvd_of_le`)から `D_n` の根がすべて `D_m` の根であることが
+`Polynomial.roots.le_of_dvd` で従う。 -/
+theorem iteratedLubinTateTorsionPoints_subset_of_le {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    {n m : ℕ} (hnm : n ≤ m) :
+    iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n ⊆ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf m := by
+  haveI := valuationRing_isDVR K
+  intro x hx
+  rw [iteratedLubinTateTorsionPoints, Multiset.mem_toFinset] at hx ⊢
+  have hdvd : Polynomial.map (algebraMap (𝒪[K.carrier]) K.closure)
+      (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf n) ∣
+      Polynomial.map (algebraMap (𝒪[K.carrier]) K.closure)
+        (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf m) :=
+    Polynomial.map_dvd _ (iteratedLubinTateDistinguished_dvd_of_le hq hπmax hπne0 f hf0 hf1 hf hnm)
+  have hmne0 : Polynomial.map (algebraMap (𝒪[K.carrier]) K.closure)
+      (iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf m) ≠ 0 :=
+    (isDistinguishedAt_iteratedLubinTateDistinguished hq hπmax hπne0 f hf0 hf1 hf m).monic.map _ |>.ne_zero
+  exact Multiset.mem_of_le (Polynomial.roots.le_of_dvd hmne0 hdvd) hx
 end ABC3.Found.PGC
