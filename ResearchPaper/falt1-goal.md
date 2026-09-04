@@ -367,6 +367,21 @@ length を変えないという事実、局所化して「可逆イデアルは�
 先に確立すること(Dedekind整域論のごく基本的な事実のはずだが、
 mathlib での正確な組み立て方は未確認)。
 
+    ★★2026-09-04、この長さの加法性を埋める手がかりを追加調査した。
+    `Ideal.relNorm : Ideal S →*₀ Ideal R`(`RingTheory/Ideal/Norm/
+    RelNorm.lean`、**任意の Dedekind 底環 `R`** に対する相対ノルム、
+    `→*₀` として bundled——`ℤ` 限定の `Ideal.absNorm` と違い一般の塔
+    に使える)は型として乗法的性なので `relNorm(IJ)=relNorm(I)*
+    relNorm(J)` はタダで手に入る。ただしこれは `S` 上の長さではなく
+    `R` の**イデアルへ**写す不変量なので、`length_S(S/I)` を直接
+    与えるには別途「`length_S(S/I) = length_R(R/relNorm I)`」的な
+    比較公式が要り、それ自体が `R` 側で**同じ加法性**を要求する
+    (循環)——この経路は今回は閉じなかった。次のセッションへ:
+    「単一の素イデアル `P` に対し `length_S(S/P^n) = n·length_S(S/P)`」
+    を最初の一段として直接攻める(`TensorProduct.tensorQuotEquivQuotSMul`
+    で `P/P^{n+1} ≅ S/P` を示し帰納する筋、`P` が可逆という事実を
+    経由)方が、`relNorm`/`absNorm` 経由より見通しが良いかもしれない。
+
 3c. **「非常に分岐した」`V_n` の族**そのものの形式化(具体例: `p^n`
     乗根と `1` のべき根を添加する塔、上の「典型例」段落)——まだ
     手つかず。抽象的な族の公理化(`Ω_{V_n/V_{n-1}}` が
