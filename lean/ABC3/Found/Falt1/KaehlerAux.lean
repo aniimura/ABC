@@ -9,14 +9,16 @@ import Mathlib.RingTheory.Smooth.Basic
 import Mathlib.RingTheory.Kaehler.TensorProduct
 
 /-!
-# [Falt1] Lemma 1.1 に向けた補助補題(`Found`、sorry 無し)
+# [Falt1] Chapter I §1 の補助補題群(`Found`、sorry 無し)
 
-★★これは `/goal Falt1 Chapter I Found` の一部として、Lemma 1.1
-(`Ω_V ⊗_V W → Ω_W` の単射性・余核の長さ)を実際に **証明** する試みの
-第一歩。**Lemma 1.1 そのものはまだ証明できていない**——ここにあるのは
-その途中で使う再利用可能な補題群である(正直な進捗として記録する)。
+★★★これは `/goal Falt1 Chapter I Found` の一部。**Lemma 1.1(§1
+1/2)は `Found/Falt1/Lemma11.lean`(`lemma_1_1_falt1`・
+`falt1RamificationSetup`)で数学的内容+Interface統合ともに完成した**
+——本ファイルはその土台(①〜⑤、下記)と、**Theorem 1.2(§1 2/2、
+まだ未完成)** に向けた新たな補助補題群(`pushoutKaehlerSplit` 等)を
+両方含む(正直な進捗として記録する)。
 
-## 完成した部分(2026-09-04、すべて sorry 無し)
+## Lemma 1.1 の土台(2026-09-04、すべて sorry 無し。完成)
 
 **① 余核 `Ω_{W/V}` の計算**(`R := V`・`B := W` と代入すれば Lemma 1.1
 の余核の主張そのもの): `B = Polynomial R ⧸ (f)` のとき
@@ -69,49 +71,33 @@ naturality——`Ideal.quotientEquivAlg` の重い `AlgEquiv→+*` 強制を
 Module.length W (W ⧸ differentIdeal V W)` を得た——Lemma 1.1 の
 「長さ」の主張そのものが完成した。
 
-## 残っている作業(正直な記録、Lemma 1.1 完成にはまだ遠い)
+## Lemma 1.1(§1 1/2)は完成した(2026-09-04)
 
-1. ✅(2026-09-04 解消)**「長さ」への接続**: `falt1CokernelIsoLinear`
-   (`falt1CokernelIso` を `≃ₗ[W]` へ格上げしたもの)と
-   `falt1CokernelLengthEq`(`LinearEquiv.length_eq` を適用しただけ)で
-   完成した。鍵は `Ideal.quotientEquiv_mk`(`Ideal.quotientEquivAlg` の
-   重い `AlgEquiv→+*` 強制を避け、`Ideal.quotientEquiv` 自身の
-   naturality を直接使う——下の実測ノート参照)。これで Lemma 1.1
-   「`Ω_{W/V}` の長さは `length(W/p^δW)` に等しい」の**全体**
-   (余核の特定+それが長さの等式まで持ち上がること)が証明された。
-2. ✅(2026-09-04 解消)**単射性(Lemma 1.1 の本体の主張、第一完全列)**:
-   `Ω_V ⊗_V W → Ω_W`(絶対微分、Z=絶対基底とする塔 Z→V→W への「第一
-   完全列」)の単射性。`mapBaseChange_injective_of_nzd` として、
-   一般の「`B = Polynomial V ⧸ (f)` で `f'` の像が `B` の非零因子」
-   という設定で**完全に証明した**(最難関だった `polynomialKaehlerSplit`
-   の直和分解を土台に、`ψ`(base change)・`π`(`dT` 成分の取り出し)
-   ・`kerCotangentToTensor` の値域計算を貼り合わせた、下の節参照)。
-   ★残るのは Falt1 の実際の `W`(`AdjoinRoot(minpoly V w)` に同型)
-   への具体的な適用のみ——`ker_adjoinRoot_mk`・`AdjoinRoot.mk_surjective`
-   ・`adjoinRootMinpolyEquiv`・`differentIdeal_eq_span_derivative` を
-   `falt1CokernelIso` と同じパターンで貼り合わせれば良いはずだが、
-   まだ実装していない(次のラウンドへ)。★具体的な部品も特定済み:
-   (i) NZD 性は `differentIdeal_ne_bot`(mathlib、`[Module.Finite A B]
-   [Algebra.IsSeparable (FractionRing A)(FractionRing B)]` が必要——
-   Falt1 の `K,L` が本当に `FractionRing V,FractionRing W` に一致する
-   ことの確認が必要かもしれない)+ `differentIdeal_eq_span_derivative`
-   +「整域で非零⟺非零因子」(`mem_nonZeroDivisors_iff_ne_zero`)から。
-   (ii) `mapBaseChange` を `e:AdjoinRoot f≃ₐ[V]W` に沿って輸送するには
-   `omegaCongr` と同型の議論(`map` の B-slot での自然性)がもう1本
-   必要——`e.restrictScalars Z`(`V`-代数同型は自動的に `Z`-代数同型)
-   を経由すれば `omegaCongr` パターンがそのまま使えるはず。
-3. ✅(2026-09-04 解消)Falt1 の `V` は完備離散付値環——mathlib の
-   `IsDiscreteValuationRing V`(`[IsDomain V]` 付き)は `IsDedekindDomain V`
-   を自動で含意する(`infer_instance` で確認済み、PID⟹Dedekind経由)。
-   `falt1CokernelIso` の `[IsDedekindDomain V]` 要求は Falt1 の設定に
-   そのまま適用できる——他の細かい設定(`IsIntegralClosure W V L` 等)は
-   `W` が「`L` における `V` の整閉包」という定義そのものから通常従う。
+上の①〜⑤(余核の特定・differentIdeal への接続・一般の `W` への橋渡し・
+`Ω` の代数同型に沿った転送・`≃ₗ[W]` への格上げ)に加え、本ファイル後半
+で**単射性**(`falt1MapBaseChangeInjective`、`mapBaseChange_injective_
+of_nzd`・`mapBaseChange_injective_transport` 等を経由)と
+**`differentIdeal V W ≠ ⊥` の導出**(`falt1_differentIdeal_ne_bot`、
+`FractionRing.liftAlgebra` 経由)も完成し、`Found/Falt1/Lemma11.lean`
+で **`Interface.RamificationSetup` への正式な差し替え**
+(`falt1RamificationSetup`、`Module.length` の `ℕ∞→ℕ` 有限性込み)まで
+仕上げた。`lemma_1_1 (falt1RamificationSetup w hint hadjoin hw)` が
+型検査を通ることを確認済み——Lemma 1.1 は数学的内容・Interface統合
+ともに完成している。詳細な逸脱の記録は `Lemma11.lean` を参照。
 
-★見積り: 上記2点だけでもさらに補題を要し、Lemma 1.1 の完成には
-まだ日数単位の作業が必要と見られる。§2-4 は Faltings の
-"almost mathematics" 自体が mathlib に無い(`Almost`/`Malcev`/
-`Tannakian` を mathlib 全体検索して確認済み、2026-09-04)ため、
-Lemma 1.1 よりさらに大きな、ライブラリ新設に近い規模の作業になる。
+## Theorem 1.2(§1 2/2)へ向けた新たな補助補題(2026-09-04、未完成)
+
+原文(Falt1 p.5、260dpi 目視で読み直し済み、`ResearchPaper/falt1-goal.md`
+参照)は「非常に分岐した拡大の列 `V_n`」に対する differentIdeal の
+収束を Lemma 1.1 の繰り返し適用で示す——その核心である**複数生成元版
+Lemma 1.1**(`Ω_{W_{n+1}/V_n}` が `d+1` 個の直和、という主張)の
+**2生成元の場合**を `pushoutKaehlerSplit` として完成した(下記の節)。
+★残っている作業(`ResearchPaper/falt1-goal.md` に詳細): `d+1` 個への
+一般化・`mapBaseChange` 単射性の具体的な条件・「非常に分岐した」`V_n`
+の族そのものの形式化・`Module.length` の漸化不等式。§2-4 は Faltings
+の "almost mathematics" 自体が mathlib に無い(`Almost`/`Malcev`/
+`Tannakian` を mathlib 全体検索して確認済み)ため、ライブラリ新設に
+近い規模の作業になる。
 -/
 
 namespace ABC3.Found.Falt1
