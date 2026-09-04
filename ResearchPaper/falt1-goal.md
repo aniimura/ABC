@@ -3094,6 +3094,35 @@ mathlib での正確な組み立て方は未確認)。
       は`Ω[R/R]=0`を寄与するだけなので、対応する`QC`/`Q`はダミーの
       自明加群(例えば`PUnit`)を渡せば良いはずで、実質的な障害には
       ならない見込み(未検証)。
+
+      ★2026-09-05、続けてこの「未検証」を実際にREPLで試したところ、
+      **`PUnit`自体は問題無く動いた**(`Subsingleton`な`Ω[R/R]`から
+      `PUnit`への零写像が全射であることは`⟨0,Subsingleton.elim _ _⟩`
+      で即座に閉じる、`PUnit.{u+1}:Type u`という宇宙も明示すれば
+      問題無い)が、**別の箇所で本物のinstance diamondに当たった**:
+      `falt1_pushoutKaehlerSplitStepOption_surjective`の`φ`が要求する
+      型は`(F i).lift (B:=B2)).carrier`上の`Algebra`(`RAlgOver.lift`が
+      `((algebraMap B1 B).comp (algebraMap x.carrier B1)).toAlgebra`
+      として構成する、合成RingHom経由の instance)だが、`(F i).carrier
+      = R`・`B2 = AdjoinRoot(g1.map(algebraMap R R))`という具体例では
+      `B2`に**既に`AdjoinRoot.instAlgebra`という自然な`Algebra R B2`
+      instanceが存在**しており、両者は`algebraMap R R = RingHom.id R`
+      (`Algebra.algebraMap_self`、命題として真だが`rfl`ではない)経由
+      でしか繋がらない——`letI`で`.lift.algT`を明示的に登録しても
+      `synthesized type class instance is not definitionally equal`
+      で弾かれた(`tools/lean-idioms.md` #1「instances透明度で型が
+      合わない」の**まさに典型例**が、今回はダミー因子`R`という
+      最も単純なケースでさえ発生することを確認)。これは`falt1AdjoinRoot
+      Algebra`(`def`として分離、「衝突を避けるため意図的に」と明記
+      されている)が対処したのと同種の壁——**本物の直し方**は、
+      `algebraMap R R = RingHom.id R`の証明を経由して`φ`を`cast`する
+      か、あるいは`Fdummy`を`⟨R⟩`ではなく最初から`AdjoinRoot.instAlgebra`
+      と同じ経路で構成される項に取り替える(ダミー因子であっても
+      「本物の`AdjoinRoot`」として扱う)ことだと考えられるが、
+      いずれも次回への持ち越しとする——ここで無理に押し切って壊れた
+      ものを残すより、`falt1_pushoutKaehlerSplitStepOption_surjective`
+      という**一般形の帰納の1段**(既に`lake build`で確認済み・commit
+      済み)を確実な到達点として確定させる方を優先した。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
