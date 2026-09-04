@@ -647,6 +647,44 @@ mathlib での正確な組み立て方は未確認)。
     derivative`(Lemma 1.1 自身の道具)で計算し、`cancel_conductor_
     delta` の等式と突き合わせる)に取り組むのが、3b と 3c を実際に
     接続する最短経路と見込む。
+
+    ★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、**(b) を実行し、
+    `differentIdeal V0 V1` の具体式が完成した**(`differentIdeal_eq_
+    span_of_adjoinRoot_X_pow_sub_C`)。`differentIdeal_eq_span_
+    derivative`(Lemma 1.1 自身の道具、`w` が単項生成なら `differentIdeal
+    V W = span{f'(w)}`)と、前段の monogenicity を貼り合わせるだけで、
+    `differentIdeal V0 V1 = span{n·w^{n-1}}`(`w`=根の像、`n·X^{n-1}`
+    は `X^n-π` の微分)という**古典的な Eisenstein 拡大の判別式の公式
+    そのもの**が閉じた。★配管上の教訓(新パターン、tools/lean-idioms.md
+    に追記の価値あり): `differentIdeal A B` は `[IsDedekindDomain B]`・
+    `[Module.IsTorsionFree A B]` を引数に持つため、これらを証明内部で
+    `infer_instance` で揃えようとすると、**結論(goal)自体が同じ2つの
+    instance を要求する**ことで先に走る instance 探索の失敗が
+    キャッシュされ、後から `haveI` で正しく揃えても失敗し続けるという
+    罠に嵌った(`set` 起因ではない、新しい失敗形)——解決策はこれら2つを
+    **定理の引数として明示的に要求する**ことで goal 自体の instance
+    探索を迂回すること。
+
+    ★★委員会メモ(作業の帰属について): この commit は**共有
+    worktree で並行して動いていた別セッション**(Lubin-Tate/pGC の
+    冪級数評価に取り組んでいたセッション)が `git commit -a`(または
+    同等の非pathspec制限のコミット)を実行した際に、**このセッションが
+    ステージ済みだった `KaehlerAux.lean` の変更を巻き込んで一緒に
+    コミットした**——commit hash は `88879620`(コミットメッセージは
+    「冪級数を Λ_n の元で実際に評価する」という無関係な内容だが、
+    diff には本節で述べた `differentIdeal_eq_span_of_adjoinRoot_
+    X_pow_sub_C`(112行)が含まれている、実測で確認済み)。sorry 無し・
+    `lake build` 成功・push 済みであることは確認済みなので**内容自体は
+    無事**——今後 `git log -- lean/ABC3/Found/Falt1/KaehlerAux.lean`
+    でこの完成を辿る際は `88879620` を見ること。
+
+    ★これで item 3c の V_1 について、**Dedekind・単項生成・
+    differentIdeal の具体値**の3点セットが揃った。残る作業:
+    `cancel_conductor_delta` の `hspan_eq` 仮定(`spanDeriv = Idiff`)を
+    この具体式(`Idiff = Ideal.map (algebraMap V1 W1) (differentIdeal
+    V0 V1) = Ideal.map(...) (span{n·w^{n-1}})`)に対して実際に
+    代入・検証する接続作業(3b と 3c を本当に繋ぐ最後の1ピース)、
+    および上記(a)(V_n 再帰族)・(c)(`pushoutKaehlerSplit` との接続)。
 4. ★★★★★2026-09-04、**完成した**(`delta_tendsto_zero`、commit
    `a9faa64e`)。長さの漸化不等式(上の逐語引用の通り: `δ_n-δ_{n+1}≥
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
