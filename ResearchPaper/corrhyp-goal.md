@@ -548,3 +548,27 @@ change)を先に試す方が近道と判断した。
 locallyOfFiniteType`(遷移射の一致の降下)で貼り合わせて `Z` 全体を
 構成すること。数学的な核心(base change の構成)は完成したので、残るのは
 **スキーム論の定型的な貼り合わせ作業**という段階に到達した。
+
+### 2026-09-04さらに続報: `Spec K = lim Spec R` を `Over BaseK` へ持ち上げ完成
+
+`Found/CorrHyp/ExtLimit.lean`(新規): `isLimit_specKCone`(裸の `Scheme` での
+極限)を **`Over BaseK`**(`k`-スキーム全体の圏)へ持ち上げた
+(`isLimit_specKConeOver`)。`toSchemeDiagramOver ⋙ Over.forget BaseK =
+toSchemeDiagram ℚ ℝ` が `rfl` で成り立つ(持ち上げが「余計な情報を足して
+いない」ことの直接確認)ことを利用し、`isLimit_specKCone` 自身の
+`lift`/`fac`/`uniq` から `Over` 版の `IsLimit` を直接構成した(一般の
+「`Over.forget` は連結図式の極限を creates する」という instance
+(`CostructuredArrow.Over.createsLimitsOfShapeForgetOfIsConnected` 等)を
+`infer_instance` で探したが見つからず、直接構成に切り替えた——これも
+「一般論より具体構成」という今回のセッションの教訓の再確認)。
+
+**残る唯一の詰まり**: `Over.pullback X.hom`(`X.hom` に沿った base change、
+`Over.mapPullbackAdj` の右随伴なので `PreservesLimit` が `infer_instance`
+で自動的に付くことは確認済み)を `specKConeOver` に適用すれば
+`Ext X` の極限表示が得られるはずだが、`Limits.pullback X.hom toBaseK`
+(`Ext X` の定義で使う引数順)と `Limits.pullback toBaseK X.hom`
+(`Over.pullback X.hom` が自然に与える引数順)が入れ替わっている——
+`CategoryTheory.Limits.pullbackSymmetry`(mathlib既存、`pullback f g ≅
+pullback g f`)で埋める見込み。埋まれば、`FieldLimit.lean` の
+`standardEtalePairRingBaseChange`(環側の base change)と合わせて、
+`Lemma 4.1` の構成的降下に必要な**スキーム側・環側の両方の道具が揃う**。
