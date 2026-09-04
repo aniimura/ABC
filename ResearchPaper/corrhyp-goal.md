@@ -1075,3 +1075,38 @@ qcqsへさらに絞る、(2) generic flatness(またはその代替)を形式化
 1回のセッションで詰め切れる規模を超えており、複数セッションにまたがる
 取り組みとして継続する。★★引き続き「壁ではなく道」——今回のセッション
 で「道の残り距離」が具体的に測れるようになったこと自体が前進である。
+
+### 2026-09-04さらに続報: 大きな前進——generic flatnessを完全に回避する戦略が実現 ★★★★★
+
+(2)(generic flatness)を実際に回避する**戦略の転換**を見つけ、
+`ExtLimit.lean` に `piecePullbackIso` として完成させた(★sorry無し・
+標準3公理のみ、コミット `80eb752a`)。
+
+**転換の核心**: これまでの戦略(`exists_extDiagram_finite_affine_
+descent`)は、`P_R`(有限段階 `R` のファイバー積 `X.left ×_k Spec R`)の
+**任意の**アフィン開`V_j`から出発していた——この`V_j`の切断環`Γ(V_j,V_j)`
+は`R`上一般には平坦とは限らず、これが generic flatness を要求する
+根本原因だった。代わりに、**`X.left` 自身の(`R` に依らない)アフィン
+開被覆 `{U_i}`** をそのまま `Ext X = X.left ×_k Spec K` へ base change
+すれば、各片は必ず `Spec(Γ(U_i,U_i) ⊗[ℚ] ℝ)` になる——**`ℚ` は体**
+なので `Γ(U_i,U_i) ⊗[ℚ] -` は**自動的に完全関手(平坦)**になり、
+generic flatness が構造的に不要になる。
+
+**証明の骨格**(`piecePullbackIso`): `pullbackRestrictIsoRestrict`+
+`pullbackSymmetry`+`pullbackRightPullbackFstIso`(pullback の pasting、
+`extConeIso`で確立した技法の再利用)で `(pullback.fst X.hom toBaseK)
+⁻¹ᵁ U` を `pullback (U.ι ≫ X.hom) toBaseK` と同一視し、`Spec.preimage`
+(`Spec.homEquiv`の逆写像)で作った環準同型`pieceRingHom`(定義方程式
+`pieceRingHom_spec`)+`pullbackHomIsoLeft`(mathlibに無かった「片方の
+脚を同型で付け替えても pullback は変わらない」、`pullback.map_isIso`
+から補った)で `Spec.map` 形に付け替えてから `pullbackSpecIso` を適用。
+
+**これで残作業4段階のうち(2)generic flatnessが不要になった**——
+残るのは(1)`Space`の有限型性(この`piecePullbackIso`アプローチでは
+`Γ(U_i,U_i)`が`ℚ`上有限生成であることまでは要らない、`X.left`のみが
+compact/qcqsであれば足りる可能性が高い、要再検証)・(3)複数`U_i`の
+細分段階の合流(こちらは`ℚ`上のテンソル分解なので既存の
+`exists_fg_subalgebra_polynomial_family`パターンがそのまま使える見込み)
+・(4)`GlueData`貼り合わせ、の3段階に縮小した。★★これは今セッション
+の中でも特に価値の高い発見——「壁だと思っていた場所に、実は回り道が
+あった」という好例。
