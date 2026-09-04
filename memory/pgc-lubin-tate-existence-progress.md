@@ -1220,3 +1220,36 @@ Lubin-Tate理論の主定理)へ進める見通し。
 `|Λ_n|=q^n`(`card_iteratedLubinTateTorsionPoints`)を組み合わせて
 狙う——`𝒪_K/π^n`が`Λ_n`に(単位元`ζ`を1つ選べば)**単純推移的に**
 作用することを示せば、Galois群の計算に繋がる見通し。
+
+**続報(2026-09-04、`Λ_n=Λ_{n-1}∪(ψ_nの根)`、`Found/PGC/
+LubinTateDistinguishedSeparable.lean`、commit`12d4b722`)**: 上の
+「次の一歩」への最初の具体的な布石として、`D_n`の`K.closure`上の
+分解`D_n=D_{n-1}・ψ_n`(既出`iteratedLubinTateDistinguished_eq_mul_psi`)
+を`Λ_n`自身のFinsetレベルへ運んだ:
+
+1. `iteratedLubinTatePsiTorsionPoints`: `ψ_n`(`K.closure`へ写したもの)
+   の根のなす`Finset`——「原始的な」π^n-捩れ点全体。`Λ_n`
+   (`iteratedLubinTateTorsionPoints`)と同じ`Multiset.toFinset`パターン。
+2. `nodup_roots_iteratedLubinTatePsi_map`・`card_roots_iteratedLubinTatePsi_map`:
+   `D_n`について確立済みの2定理(`nodup_roots_iteratedLubinTateDistinguished_map`・
+   `card_roots_iteratedLubinTateDistinguished_map`)と**全く同じ手筋**
+   (`algebraMap`の分解+`Polynomial.map_map`、`separable_iteratedLubinTatePsi_map_carrier`
+   は`LubinTatePsiNorm.lean`に既出)を`ψ_n`へ複製するだけ——
+   `|ψ_nの根|=q^n-q^{n-1}`。
+3. ★**`iteratedLubinTateTorsionPoints_eq_union`**: `Λ_n=Λ_{n-1}∪
+   (ψ_nの根)`。`D_n=D_{n-1}・ψ_n`を`K.closure`へ写して
+   `Polynomial.roots_mul`(積の根はmultisetの加法)を適用し、
+   `Multiset.toFinset`の言葉に戻すだけ——新しい数学的道具は不要、
+   既出の事実の組み合わせのみ。
+4. `card_iteratedLubinTatePsiTorsionPoints`: `|ψ_nの根|=q^n-q^{n-1}`
+   (Finsetの濃度版、`nodup`+`card_roots`から)。
+
+これで「原始的な」π^n-捩れ点(`Λ_n`にあって`Λ_{n-1}`に無いもの)が
+ちょうど`ψ_n`の根であることが、Finsetの言葉で明示された——
+`Gal(K(Λ_n)/K)`の作用が原始的捩れ点上どう振る舞うか(単純推移性)
+を調べるための土台。**注意**: このセッションでは`Λ_n\Λ_{n-1}=ψ_nの根`
+(交わりが無いこと)までは示していない——`Finset.mem_union`止まりで、
+`Finset.disjoint`の形は次の一歩として残っている(ただし濃度
+`q^n=q^{n-1}+(q^n-q^{n-1})`が既に両立しているので、実際には交わりが
+無いことは`card`の観点からは自動的——`Finset.card_union_of_disjoint`
+の逆を使うか、`D_n`の分離性(全根が相異なる)から直接言える見通し)。
