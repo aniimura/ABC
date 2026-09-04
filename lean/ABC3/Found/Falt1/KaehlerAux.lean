@@ -5391,4 +5391,47 @@ theorem falt1_kaehler_generatedBy_dplus1 {An B : Type*} [CommRing An] [CommRing 
     (⊤ : Submodule B Ω[B⁄An]).spanFinrank ≤ d + 1 :=
   falt1_kaehler_spanFinrank_le' (d+1) hfg (falt1_kaehler_finrank_tensor_residueField_le d hd)
 
+/-!
+## Brinon-Conrad Exercise 13.7.4・step (3) への第一歩:
+単一因子の全射性(2026-09-05)
+
+step (3) は「`Ω_{V_{n+1}/V_n}⊗W_{n+1}`が`(W_{n+1}/p)^{d+1}`へ全射する」
+という、`V_n`塔の具体的構成(`d+1`個の同時添加)に固有の事実を要する
+(`falt1_kaehler_generatedBy_dplus1`だけでは閉じない、`falt1-goal.md`
+2026-09-05の記録参照)。Faltings の「典型例」(`T_i`の`p`乗根+`1`の
+`p^{n+1}`乗根の同時添加)に現れる**各因子**は`X^p - C a`という形の
+Eisenstein型多項式——この節では、そのような**単一因子**について
+`Ω[AdjoinRoot(X^p-Ca)/R]`が`AdjoinRoot(X^p-Ca)/(p)`へ全射することを
+示す(`d+1`個の同時添加への拡張は`pushoutKaehlerSplitStepOption`
+との統合が要る、次回への課題)。 -/
+
+set_option maxHeartbeats 400000 in
+/-- **`X^p - C a`型の単一因子の全射性**: `Ω[AdjoinRoot(X^p-Ca)/R]`
+(`omegaAdjoinRootQuot`により`AdjoinRoot(X^p-Ca)/(derivative)`と同型)
+から`AdjoinRoot(X^p-Ca)/(p)`への全射が存在する——`derivative(X^p-Ca)
+= C(p)*X^(p-1)`が常に`p`の倍数であること(`Eisenstein`型多項式の
+微分の一般的な性質)から、`Ideal.Quotient.factor`で直接得られる。 -/
+theorem falt1_omegaAdjoinRoot_surjective_quotient_p {R : Type*} [CommRing R] (p : ℕ) (a : R) :
+    let g := Polynomial.X ^ p - Polynomial.C a
+    ∃ φ : Ω[(AdjoinRoot g)⁄R] →+ AdjoinRoot g ⧸ Ideal.span ({algebraMap R (AdjoinRoot g) (p : R)} : Set (AdjoinRoot g)),
+      Function.Surjective φ := by
+  intro g
+  have hle : Ideal.span ({algebraMap (Polynomial R) (AdjoinRoot g) (Polynomial.derivative g)} : Set (AdjoinRoot g)) ≤
+      Ideal.span ({algebraMap R (AdjoinRoot g) (p : R)} : Set (AdjoinRoot g)) := by
+    rw [Ideal.span_singleton_le_span_singleton]
+    set x := AdjoinRoot.root g with hx
+    have hderiv : Polynomial.derivative g = Polynomial.C (p : R) * Polynomial.X ^ (p - 1) := by
+      show Polynomial.derivative (Polynomial.X ^ p - Polynomial.C a) = _
+      rw [Polynomial.derivative_sub, Polynomial.derivative_X_pow, Polynomial.derivative_C, sub_zero]
+    have heval : algebraMap (Polynomial R) (AdjoinRoot g) (Polynomial.derivative g) =
+        algebraMap R (AdjoinRoot g) (p : R) * x ^ (p - 1) := by
+      rw [hderiv]
+      show AdjoinRoot.mk g (Polynomial.C (p:R) * Polynomial.X ^ (p-1)) = _
+      rw [map_mul, AdjoinRoot.mk_C, map_pow, AdjoinRoot.mk_X, hx]
+      rfl
+    rw [heval]
+    exact Dvd.intro (x ^ (p - 1)) rfl
+  refine ⟨(Ideal.Quotient.factor hle).toAddMonoidHom.comp (omegaAdjoinRootQuot g).toAddMonoidHom, ?_⟩
+  exact (Ideal.Quotient.factor_surjective hle).comp (omegaAdjoinRootQuot g).surjective
+
 end ABC3.Found.Falt1
