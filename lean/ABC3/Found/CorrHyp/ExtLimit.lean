@@ -1373,6 +1373,24 @@ theorem piece_basicOpen_mul_eq (X : Over BaseK) (U : X.left.Opens) (f g : Γ(X.l
   rw [h1]
   exact Scheme.preimage_basicOpen _ _
 
+/-- **`Γ(C,piece(D(f*g)))`(を`C.basicOpen`の形で見たもの)は
+`piece_basicOpen_localizationElem`による局所化そのもの**——`piece(D(f))`
+のアフィン性(`piece_preimage_isAffineOpen`)に`IsAffineOpen.
+isLocalization_basicOpen`(mathlib)を直接適用するだけ。`piece_basicOpen_
+mul_eq`と組み合わせれば(`▸`で開集合の等式を渡す)、`piece(D(f*g))`
+自体についての`IsLocalization.Away`が得られる——`R`レベルの局所化
+(`descendPieceR_localization_isOpenImmersion`)がℝレベルで正しい対象
+(`piece(D(f*g))`)を実現していることを示すための、ℝレベル側の土台。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem piece_isLocalization_basicOpen_mul (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U)
+    (f g : Γ(X.left, U)) (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] :
+    IsLocalization.Away (piece_basicOpen_localizationElem X U f g C α)
+      Γ(C, C.basicOpen (piece_basicOpen_localizationElem X U f g C α)) := by
+  have hUf : IsAffineOpen (X.left.basicOpen f) := hU.basicOpen f
+  exact (piece_preimage_isAffineOpen X (X.left.basicOpen f) hUf C α).isLocalization_basicOpen
+    (piece_basicOpen_localizationElem X U f g C α)
+
 /-! ## `piece_basicOpen_localizationElem`の`R`レベルへの持ち上げ
 (`2026-09-05夜、続き20`)
 
