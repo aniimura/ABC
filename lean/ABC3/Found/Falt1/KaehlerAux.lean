@@ -3873,4 +3873,64 @@ theorem falt1_mapBaseChange_injective_adjoinRoot
   exact ABC3.Found.Falt1.mapBaseChange_injective_of_nzd gpoly hB hsurj
     (mem_nonZeroDivisors_of_ne_zero hderivne)
 
+/-!
+## Exercise 13.7.4 (4)への足場・続き: `Wₙ₊₁` 自身への輸送(2026-09-04)
+
+`falt1_mapBaseChange_injective_adjoinRoot`(`AdjoinRoot g` 版)を、
+既存の `mapBaseChange_injective_transport`(代数同型に沿った単射性の
+transport、`falt1MapBaseChangeInjective` で既に使ったのと同じ道具)
+と `falt1AdjoinRootEquivIntegralClosure`(`AdjoinRoot g ≃ₐ[Wₙ] Wₙ₊₁`)
+を組み合わせるだけで `Wₙ₊₁` 自身の単射性が得られた——`omegaCongr` を
+経由した自前の自然性証明は不要だった(`mapBaseChange_injective_transport`
+の中で既に `omegaCongr` が使われている)。 -/
+
+set_option maxHeartbeats 800000 in
+/-- **第二基本完全列・左側の単射性、`Wₙ₊₁` 自身に対して(完成)**:
+`e2 : AdjoinRoot g ≃ₐ[Wₙ] Wₙ₊₁` があれば、`falt1_mapBaseChange_injective_adjoinRoot`
+の結果を `mapBaseChange_injective_transport` で `Wₙ₊₁` に輸送できる。
+`Wₙ₊₁` は抽象的に(`e2` の存在だけを仮定して)扱う——具体的な
+`integralClosure` 版は `falt1_mapBaseChange_injective_wn1_concrete`。 -/
+theorem falt1_mapBaseChange_injective_wn1
+    {V0 Wn Wn1 : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    [CommRing Wn1] [Algebra Wn Wn1] [Algebra V0 Wn1] [IsScalarTower V0 Wn Wn1]
+    (π : V0) (n : ℕ)
+    (hn' : (n : FractionRing Wn) ≠ 0)
+    (hprime' : (Ideal.span ({algebraMap V0 Wn π} : Set Wn)).IsPrime)
+    (hnotsq' : algebraMap V0 Wn π ∉ (Ideal.span ({algebraMap V0 Wn π} : Set Wn)) ^ 2)
+    (hnpos : 0 < n)
+    (e2 : AdjoinRoot ((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)) ≃ₐ[Wn] Wn1) :
+    Function.Injective (KaehlerDifferential.mapBaseChange V0 Wn Wn1) := by
+  have hA := ABC3.Found.Falt1.falt1_mapBaseChange_injective_adjoinRoot π n hn' hprime' hnotsq' hnpos
+  haveI hSTA : IsScalarTower V0 Wn (AdjoinRoot ((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn))) := by
+    apply IsScalarTower.of_algebraMap_eq
+    intro x
+    rfl
+  exact ABC3.Found.Falt1.mapBaseChange_injective_transport e2 hA
+
+set_option maxHeartbeats 800000 in
+/-- `falt1_mapBaseChange_injective_wn1` の**具体版**: `Wₙ₊₁` を
+`integralClosure Wn (AdjoinRoot(baseChange g))`(Falt1 の実際の構成)
+として、`falt1AdjoinRootEquivIntegralClosure` で `e2` を構成してから
+適用する。これで Exercise 13.7.4 step (4) の完全列の**左側**
+(単射性)が Falt1 の具体的な `Wₙ₊₁` に対して完成した。 -/
+theorem falt1_mapBaseChange_injective_wn1_concrete
+    {V0 Wn : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0]
+    [CommRing Wn] [IsDomain Wn] [IsDiscreteValuationRing Wn] [Algebra V0 Wn]
+    (π : V0) (n : ℕ)
+    (hn' : (n : FractionRing Wn) ≠ 0)
+    (hπne0' : algebraMap Wn (FractionRing Wn) (algebraMap V0 Wn π) ≠ 0)
+    (hprime' : (Ideal.span ({algebraMap V0 Wn π} : Set Wn)).IsPrime)
+    (hnotsq' : algebraMap V0 Wn π ∉ (Ideal.span ({algebraMap V0 Wn π} : Set Wn)) ^ 2)
+    (hnpos : 0 < n)
+    [IsDedekindDomain (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))]
+    [Module.IsTorsionFree Wn (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))] :
+    Function.Injective (KaehlerDifferential.mapBaseChange V0 Wn
+      (integralClosure Wn (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C (algebraMap V0 Wn π) : Polynomial Wn)).map
+        (algebraMap Wn (FractionRing Wn)))))) := by
+  set e2 := ABC3.Found.Falt1.falt1AdjoinRootEquivIntegralClosure (algebraMap V0 Wn π) n hn' hπne0' hprime' hnotsq' hnpos
+  exact falt1_mapBaseChange_injective_wn1 π n hn' hprime' hnotsq' hnpos e2
+
 end ABC3.Found.Falt1
