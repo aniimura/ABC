@@ -15,8 +15,13 @@ Lubin-Tate 理論で `L_n:=K(Λ_n)` の塔が意味を持つのは、`Λ_n` の
    `x` が「原始的な」π^{n+1}-捩れ点(`ψ_{n+1}` の根)ならば、`π·x` も
    「原始的な」π^n-捩れ点(`ψ_n` の根)——原始性(生成元であること)も
    1段下がる。
+3. `adjoin_pi_mem_pred_le`: 体の言葉での言い換え——
+   `K.carrier⟮π·x⟯≤K.carrier⟮x⟯`。すなわち塔 `L_n:=K.carrier⟮π·x⟯≤
+   L_{n+1}:=K.carrier⟮x⟯` が実際に体の包含として成り立つ。
+4. `principalUnits_succ_le`: `principalUnits K π (n+1)≤principalUnits
+   K π n`——単位群側の「モジュラス」の単調性、純環論的事実。
 
-どちらも新しい数学的内容は無く、`AdjoinIntegers.lean` で確立済みの
+いずれも新しい数学的内容は無く、`AdjoinIntegers.lean` で確立済みの
 部品(`lubinTateAction_mul`(乗法性)・`pi_pow_action_eq_zero`/
 `eq_zero_of_pi_pow_action_eq_zero`(`π^n·x=0⟺D_n(x)=0`の橋渡し)・
 `lubinTateActionAtTorsionPoint_pi_pow_pred_ne_zero_of_mem_
@@ -160,5 +165,47 @@ theorem lubinTateActionAtTorsionPoint_pi_mem_iteratedLubinTatePsiTorsionPoints
     K hq hπmax hπne0 f hf0 hf1 hf (n + 1) (by omega) x hxψ hmem hx
   rw [show n + 1 - 1 = n by omega] at hne
   exact hne hπnx
+
+/-- ★★★★★★★★★★**`L_n:=K(π·x) ≤ L_{n+1}:=K(x)`**——塔の体としての
+包含。`π·x`(`x` 自身の座標系での値、`lubinTateActionAtTorsionPoint`)
+は定義から常に`adjoinIntegers K x ⊆ K.carrier⟮x⟯`の元なので、
+`IntermediateField.adjoin_simple_le_iff`(生成元が属せば adjoin は
+包含される)を適用するだけ。`algEquiv_map_adjoin_eq`
+(`LubinTateActionEquivariance.lean`)で使った「`SetLike.coe_mem`+
+`adjoin_simple_le_iff`」と全く同じ型の議論。 -/
+theorem adjoin_pi_mem_pred_le {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal (𝒪[K.carrier])) (𝒪[K.carrier])]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField (𝒪[K.carrier])) pp]
+    [Fintype (IsLocalRing.ResidueField (𝒪[K.carrier]))]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField (𝒪[K.carrier])) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal (𝒪[K.carrier]) = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries (𝒪[K.carrier])) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue (𝒪[K.carrier])) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (x : K.closure)
+    (hx : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf (n + 1))
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))] :
+    IntermediateField.adjoin K.carrier
+        ({(↑(↑(lubinTateActionAtTorsionPoint K hq hπmax hπne0 f hf0 hf1 hf (n + 1) x hx hmem π) :
+          IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure)} : Set K.closure) ≤
+      IntermediateField.adjoin K.carrier ({x} : Set K.closure) := by
+  apply IntermediateField.adjoin_simple_le_iff.mpr
+  exact SetLike.coe_mem _
+
+/-- **`principalUnits K π (n+1) ≤ principalUnits K π n`**——単位群の
+「モジュラス」`π^n`が`n`について単調に細かくなること。`v-1∈span{π^{n+1}}
+⟹ v-1∈span{π^n}`を`mem_principalUnits_iff`で`v=1+cπ^{n+1}=1+(cπ)π^n`
+と書き直すだけの、純粋に環論的な事実——`Gal(L_π/K)≅𝒪_K^×`への射影
+極限で、`(𝒪_K)^×⧸principalUnits K π (n+1)→(𝒪_K)^×⧸principalUnits K π n`
+という自然な射影(`QuotientGroup.map`)を定義するために要る。 -/
+theorem principalUnits_succ_le {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    (π : 𝒪[K.carrier]) (n : ℕ) :
+    principalUnits K π (n + 1) ≤ principalUnits K π n := by
+  intro v hv
+  rw [mem_principalUnits_iff] at hv ⊢
+  obtain ⟨c, hc⟩ := hv
+  exact ⟨c * π, by rw [hc, pow_succ]; ring⟩
 
 end ABC3.Found.PGC

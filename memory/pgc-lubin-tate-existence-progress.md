@@ -2380,3 +2380,43 @@ commit 準備中): 捩れ塔が compatible system をなすことを確立
 (副有限Galois群の道具)を使って`L_π:=∪L_n`のGalois群を逆極限として
 実際に構成し、`𝒪_K^×=lim(𝒪_K/π^n)^×`との同型を組み立てる。
 (c)はまだ内容を調べていない新規のmathlib API調査が要る。
+
+## 続報(同日、(a)完成+(b)の壁を特定、`LubinTateTowerCompatible.lean`
+に追加、commit `1a396e0a`の直後): (a)を完成、(b)の核心的な障害を
+cross-point bridgingとして特定
+
+(a) `adjoin_pi_mem_pred_le`: `K.carrier⟮π·x⟯≤K.carrier⟮x⟯`を
+sorry無しで確立した——`π·x`が定義から常に`adjoinIntegers K x⊆
+K.carrier⟮x⟯`の元であることと`IntermediateField.adjoin_simple_
+le_iff`を組み合わせるだけ(`algEquiv_map_adjoin_eq`で使ったのと
+全く同じ型の議論)。付随して`principalUnits_succ_le`
+(`principalUnits K π (n+1)≤principalUnits K π n`、純環論的事実、
+`(𝒪_K)^×⧸principalUnits`側の自然な射影`QuotientGroup.map`を
+定義するのに要る)も確立した。
+
+(b)(`reciprocityMap`の`n`を跨いだ可換性、同じ大域的`σ`について
+`reciprocityMap_{n+1}(σ)`を`principalUnits(n)`まで落としたものが
+`reciprocityMap_n(σ)`に一致すること)を実際に組もうとして、
+**核心的な障害を特定した(未解決)**: 証明の筋は「`u_σ·y=u_σ·(π·x)
+=(u_σ*π)·x=π·(u_σ·x)=π·σ(x)=σ(π·x)=σ(y)`」(乗法性2回+Galois
+同変性)まではよいが、この式の左端`u_σ·y`は**`y`自身の座標系
+(`adjoinIntegers K y`)で**計算する必要がある一方、右端までの計算は
+**`x`の座標系(`adjoinIntegers K x`)で**行われる——`reciprocityMap_n`
+の定義が`y`自身の`lubinTateActionAtTorsionPoint K ... n y hyn hmemy`
+を使うため、両者を結ぶには「`adjoinIntegers K y`での評価」と
+「`adjoinIntegers K x`での評価(`y`をその中の点として)」が同じ
+`K.closure`の値を与えることを示す**cross-point bridging**が要る。
+これは`LubinTateActionEquivariance.lean`の冒頭ドキュメントが
+Galois同変性について「壁」として警戒し、「σ(x)がK.carrier⟮x⟯自身
+に留まる」という工夫で**回避した**のと全く同じ種類の障害——今回は
+σでなく`L_n≤L_{n+1}`という体の包含に対して同じ種類の橋渡しが必要に
+なる。`lubinTateEvalAtPoint_congr`(既出)は同じ`adjoinIntegers K x`
+の中での「値は同じだが証明項が違う」場合しか扱えず、今回のケース
+(環そのものが違う)には使えないと確認した。★次にここへ戻るなら:
+`L_n≤L_{n+1}`から自然に誘導される環準同型`adjoinIntegers K y→+*
+adjoinIntegers K x`(ノルム保存の埋め込みの制限)を構成し、有限次元性
+から連続性を示し、`algHom_aeval_powerSeries_comm`(既出、連続代数
+準同型はPowerSeries.aevalと可換という一般論、Galois同変性の証明の
+核だった道具)を**自己同型でなく単なる埋め込みに**適用する、という
+`LubinTateActionEquivariance.lean`と同型だが独立した構築が必要——
+新しい深い数学的内容ではなく、同じ技法をもう一度組み立てる作業。
