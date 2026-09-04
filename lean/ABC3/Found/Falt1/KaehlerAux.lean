@@ -2466,6 +2466,68 @@ theorem algHomAdjoinRootOfCompat'_root {V0 Wn : Type*} [CommRing V0] [CommRing W
   AdjoinRoot.map_root (algebraMap V0 Wn) f (f.map (algebraMap V0 Wn)) (dvd_refl _)
 
 /-!
+## `adjoinRootTensorEquiv` の点ごとの挙動・別経路での構成(2026-09-04)
+
+`adjoinRootTensorEquiv`(`Algebra.TensorProduct.tensorQuotientEquiv`+
+`Ideal.quotientEquivAlg`経由)の点ごとの挙動(`1⊗ₜ(AdjoinRoot.mk g p)`
+の像)を計算しようとすると、`AdjoinRoot h`と`Polynomial _⧸Ideal.span{h}`
+が定義的には同じ型でも**別々に定義された`Semiring`/`Algebra`インスタンス**
+(`AdjoinRoot.instAlgebra`系 vs `Ideal.Quotient.ring`系)を持つという
+mathlib自体の instance diamond に当たり、`unfold`後の`rw`が
+「target expression is not type-correct」で失敗することが分かった。
+
+**回避策**: `Ideal.Quotient`側のAPIを一切経由せず、`AdjoinRoot`
+ネイティブのAPI(`TensorProduct.AlgebraTensorModule.lift`・
+`algHomAdjoinRootOfCompat'`・`AdjoinRoot.lift_mk`・`Polynomial.
+induction_on`)だけで**別経路の**線形写像を構成し、その点ごとの挙動を
+証明した。この写像は`adjoinRootTensorEquiv`と同じ役割(`C⊗[R]AdjoinRoot
+g → AdjoinRoot(g.map φ)`)を果たすはずだが、**全単射性はまだ示して
+いない**(次回の課題、falt1-goal.md参照)。 -/
+
+/-- `eval₂ (AdjoinRoot.of q) (AdjoinRoot.root q) h = AdjoinRoot.mk q h`
+(`AdjoinRoot.map`の点ごとの挙動を計算する鍵、`Polynomial.induction_on`
+による3行の帰納法)。 -/
+theorem eval2_root_eq_mk {R : Type*} [CommRing R] (q h : Polynomial R) :
+    Polynomial.eval₂ (AdjoinRoot.of q) (AdjoinRoot.root q) h = AdjoinRoot.mk q h := by
+  induction h using Polynomial.induction_on with
+  | C a => rw [Polynomial.eval₂_C, AdjoinRoot.mk_C]
+  | add p1 p2 h1 h2 => rw [Polynomial.eval₂_add, h1, h2, map_add]
+  | monomial n a ih =>
+      rw [pow_succ, ← mul_assoc, Polynomial.eval₂_mul, Polynomial.eval₂_X, map_mul, AdjoinRoot.mk_X, ih]
+
+/-- **`adjoinRootTensorEquiv`と同じ役割を果たす、`Ideal.Quotient`の
+instance diamondを回避した線形写像**: `TensorProduct.AlgebraTensorModule.
+lift`で`(c,x) ↦ c • algHomAdjoinRootOfCompat' g x`という双線形写像を
+持ち上げるだけ。全単射性はまだ示していない。 -/
+noncomputable def adjoinRootTensorEquivFwd {R C : Type*} [CommRing R] [CommRing C] [Algebra R C]
+    (g : Polynomial R) :
+    TensorProduct R C (AdjoinRoot g) →ₗ[C] AdjoinRoot (g.map (algebraMap R C)) := by
+  apply TensorProduct.AlgebraTensorModule.lift
+  exact {
+    toFun := fun c => c • (algHomAdjoinRootOfCompat' (V0 := R) (Wn := C) g).toLinearMap
+    map_add' := by intro x y; ext z; simp [add_smul]
+    map_smul' := by intro x y; ext z; simp [mul_smul] }
+
+/-- **`adjoinRootTensorEquivFwd`の点ごとの挙動(完成)**:
+`AdjoinRoot.lift_mk`(`AdjoinRoot.map`の内部構成)と`eval2_root_eq_mk`
+を組み合わせるだけ——`Ideal.Quotient`のinstance diamondを一切経由
+しない。 -/
+theorem adjoinRootTensorEquivFwd_one_tmul_mk {R C : Type*} [CommRing R] [CommRing C] [Algebra R C] (g p : Polynomial R) :
+    (adjoinRootTensorEquivFwd (R := R) (C := C) g) ((1:C) ⊗ₜ[R] (AdjoinRoot.mk g p)) =
+      AdjoinRoot.mk (g.map (algebraMap R C)) (p.map (algebraMap R C)) := by
+  show (1:C) • (algHomAdjoinRootOfCompat' (V0 := R) (Wn := C) g) (AdjoinRoot.mk g p) = _
+  rw [one_smul]
+  show algHomAdjoinRootOfCompat' (V0 := R) (Wn := C) g (AdjoinRoot.mk g p) = _
+  unfold algHomAdjoinRootOfCompat'
+  show (AdjoinRoot.map (algebraMap R C) g (g.map (algebraMap R C)) (dvd_refl _)) (AdjoinRoot.mk g p) = _
+  rw [show AdjoinRoot.map (algebraMap R C) g (g.map (algebraMap R C)) (dvd_refl _) =
+    AdjoinRoot.lift ((AdjoinRoot.of (g.map (algebraMap R C))).comp (algebraMap R C)) (AdjoinRoot.root (g.map (algebraMap R C))) (by
+      show Polynomial.eval₂ ((AdjoinRoot.of (g.map (algebraMap R C))).comp (algebraMap R C)) (AdjoinRoot.root (g.map (algebraMap R C))) g = 0
+      rw [← Polynomial.eval₂_map]
+      exact AdjoinRoot.eval₂_root (g.map (algebraMap R C))) from rfl]
+  rw [AdjoinRoot.lift_mk, ← Polynomial.eval₂_map, eval2_root_eq_mk]
+
+/-!
 ## `V_1 → W_1` の橋渡し写像そのものが完成した(2026-09-04)
 
 `hspan_eq` の接続に必要な `Algebra V1 Wn1` インスタンスを、実際に構成
