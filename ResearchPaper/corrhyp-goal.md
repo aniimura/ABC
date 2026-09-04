@@ -1763,3 +1763,31 @@ llsm`(証明済み)・`∀x∈llsm,∃m∈closure,m*x∈closure`(証明済み)�
 `piece_descends_iso`の同型を`X.basicOpen(f_i·f_j)`へ制限する具体的な構成
 (`IsOpenImmersion`のrestrict機構、または`Scheme.Opens`の交わりへの制限)。
 集計は10/24で変わらず。
+
+### 2026-09-04さらに続報: GlueDataの遷移射構成が完成——「捩れ」の壁を今度は完全に迂回
+
+前回記録した発見(抽象的な環同型は不要、`piece_descends_iso`の制限で足りるはず)を
+実際にLeanで構成し、完成させた(★すべてsorry無し)。`ExtLimit.lean`に:
+
+- `Scheme.hom_image_iso_eq_inv_preimage`: スキームの同型`e:X≅Z`について
+  `e.hom''ᵁW = e.inv⁻¹ᵁW`(`e.hom⁻¹ᵁ`の単射性から、CorrHyp非依存の一般的事実)。
+- `exists_transitionOpen_eq_basicOpen`: **重なり`X.basicOpen(f₁·f₂)`が、
+  `X.basicOpen f₁`とその候補片`Z`との任意の同型`e`の下で`Z`の基本開集合として
+  実現される**——`Scheme.basicOpen_res`(制限との可換性)・`Scheme.Opens.
+  ι_image_basicOpen_topIso_inv`(開部分スキームの`ι`との可換性)・
+  `Scheme.preimage_basicOpen`(射との自然性)を合成するだけ。
+
+2つの標準エタール片`D(f_i)`・`D(f_j)`をそれぞれの候補片`Z_i`・`Z_j`へ写したとき、
+両方とも`X.basicOpen(f_i·f_j)`という**同じX内の開集合**を経由するので、遷移射
+(`Z_i`の対応する開集合と`Z_j`の対応する開集合の同型)は`e_i.hom`・`e_j.hom`の
+この記述を合成するだけで得られる——`isLocalization_closure_of_awayAway`のような
+抽象的な環レベルの独立検証は本当に不要だった。
+
+**これでGlueDataの遷移射構成の核心部品が完成した**。残るのは(i)複数の標準エタール片
+`{f_i}_{i∈t}`を横断してこの遷移射を実際に組み立てる(`Scheme.GlueData`の`t`・`t'`
+フィールド)、(ii)cocycle条件の確認(3つの片が重なる場合の整合性、上記の構成が
+「同じXを経由する」ことから自動的に従うはずだが明示的な確認が要る)、(iii)貼り合わせ
+後のスキームが実際に有限(`IsFinite`)であることの確認(前回記録した注意点、標準
+エタールは有限とは限らない)、という3段階。集計は10/24で変わらず(§4は0/2のまま)。
+
+コミット: `c9c711bd`。
