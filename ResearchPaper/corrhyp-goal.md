@@ -2637,3 +2637,42 @@ glued ≅ c.α⁻¹(piece)`の証明)へ向けてExploreエージェント(読�
 
 残る核心(未着手): `V`成分の同型(`pullback (𝒰.f i)(𝒰.f j) ≅ gdV(i,j)`)
 の構成と、それを使った`NatIso`全体の組み立て。集計は10/24で変わらず。
+
+## 2026-09-04(続き5): `piecesGluedCoverVIso`——項目(b)のV成分比較同型が完成
+
+引き続き自律ループのtickで、上記「残る核心」の`V`成分比較同型
+(`pullback (𝒰.f i)(𝒰.f j) ≅ gdV f Z e (i,j)`、`𝒰 := piecesOpenCover`)
+を実際に構成した。鍵となったのはmathlibの
+`pullbackIsPullbackOfCompMono`(`Mono i`のとき`pullback f g`は
+`pullback (f≫i)(g≫i)`の極限錐でもある、という一般事実、
+`CategoryTheory/Limits/Shapes/Pullback/Mono.lean:145`)——これを
+`isPullback_opens_inf`(既存、`pullback U.ι V.ι ≅ U⊓V`)と組み合わせる
+ことで、「`A,B ≤ U`のとき`X.homOfLE`同士のpullbackも`A⊓B`に一致する」
+という`isPullback_opens_inf`の`U`相対版(`pullbackHomOfLEIso`)が得られた
+——`node tools/decl-index.mjs --mathlib`+grepで発見(CLAUDE.mdの
+「在庫」の手順どおり)。
+
+これを`Scheme.basicOpen_mul`(`⊓`を単一の`basicOpen`にまとめる)・
+`pullbackHomIsoLeft`+`pullbackSymmetry`(`e i`・`e j`をpullbackの脚
+から追い出す、既存)・`transitionElemIso`(`X`側から`Z i`側への転送、
+既存)と3段の`calc`で繋ぎ、最終的に`piecesGluedCoverVIso : pullback
+((piecesOpenCover f Z e hcover).f i)((...).f j) ≅ gdV f Z e (i,j)`
+を完成させた。途中`piecesOpenCover`の`.f i`を明示形へ書き換える
+`piecesOpenCover_f_eq`(単一出現の`unfold`、`#31`/`#32`の教訓どおり
+軽い)も用意した。すべて`lean_check`で個別検証後ファイルへ反映、
+`lake build`(ExtLimit/ABC3とも)0エラー確認、コミット(`8717ce70`)。
+
+**これで項目(b)のNatIso構成に必要な2成分(`U`成分・`V`成分)のうち、
+より本質的な`V`成分が完成した**。残る核心(未着手):
+- この`φ(i,j) := piecesGluedCoverVIso f Z e hcover i j`が`fst`/`snd`
+  (`corrHypGlueData`側の`gdF`・`gdT≫gdF`、mathlibの`gluedCover`側の
+  `pullback.fst`・`pullbackSymmetry.hom≫pullback.fst`)と可換で
+  あることの証明——これがNatIsoの自然性条件そのもので、`gdT'_t_fac`/
+  `gdT'_cocycle`と同等の配線量が見込まれる、最大の残りタスク。
+- `U`成分(恒等、`piecesOpenCover`が`Z`をそのままobjectに使うため
+  自明)と合わせて`.diagram`同士の`NatIso`全体を組み立てる。
+- `CategoryTheory.Limits.HasColimit.isoOfNatIso`で`.glued`同士の同型
+  を得てから、mathlibの`Scheme.Cover.fromGlued`(`IsIso`、既製)が与える
+  `piecesOpenCover(...).gluedCover.glued ≅ U`と合成する。
+
+集計は10/24で変わらず(インフラ、numbered itemではないため)。

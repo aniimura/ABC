@@ -1259,3 +1259,24 @@ heartbeat上限)にも当たり、独立theoremへの先出しで解消(既知�
 
 残る核心(未着手): V成分の同型構成とNatIso全体の組み立て。
 corrhyp-goal.mdに詳細記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04(続き5、自律ループ)
+続報(piecesGluedCoverVIso完成、V成分比較同型、集計10/24で変わらず)。
+mathlibのpullbackIsPullbackOfCompMono(Mono iのときpullback f gは
+pullback(f≫i)(g≫i)の極限錐でもある)をisPullback_opens_infと組み合わせ、
+isPullback_opens_infのU相対版(A,B≤UのときX.homOfLE同士のpullbackも
+A⊓Bに一致、pullbackHomOfLEIso)を発見(decl-index.mjs --mathlib+grep)。
+
+Scheme.basicOpen_mul・pullbackHomIsoLeft+pullbackSymmetry(e追い出し、
+既存)・transitionElemIso(既存)と3段のcalcで繋ぎ、
+piecesGluedCoverVIso: pullback(𝒰.f i)(𝒰.f j)≅gdV f Z e (i,j)
+(𝒰:=piecesOpenCover)を完成。lake build(ExtLimit/ABC3とも)0エラー
+確認、コミット: `8717ce70`。
+
+**これで項目(b)のNatIso構成に必要なU成分・V成分のうち、より本質的な
+V成分が完成**。残る核心: φ(i,j)がfst/snd(gdF・gdT≫gdF vs
+pullback.fst・pullbackSymmetry.hom≫pullback.fst)と可換であることの
+証明(NatIsoの自然性、gdT'_t_fac/cocycle同等の配線量が見込まれる最大
+の残りタスク)・U成分(恒等)と合わせたNatIso全体の組み立て・
+HasColimit.isoOfNatIsoでの.glued比較・mathlibのfromGludedとの合成。
+corrhyp-goal.mdに詳細記録。
