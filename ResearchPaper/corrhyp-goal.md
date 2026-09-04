@@ -1129,3 +1129,28 @@ compact/qcqsであれば足りる可能性が高い、要再検証)・(3)複数`
 `exists_fg_subalgebra_mem_finset`適用、という具体的な配管)、
 (4)`GlueData`貼り合わせ、という**エンジニアリングのみ**。数学的な
 見通しとしてはこのセッションで大きく前進した。
+
+### 2026-09-04さらに続報: (3)を実際に完成——「1アフィン片の降下」の核が揃った ★★★★★
+
+上記(3)を実際に`FieldLimit.lean`へ書き切った。`exists_fg_subalgebra_
+tensor_finset`(`A ⊗[ℚ] ℝ` の有限個の元は、ある `R : FgSubalgebra ℚ ℝ`
+を使って `A ⊗[ℚ] R.1` からの像として同時に書ける)→
+`exists_fg_subalgebra_tensor_polynomial_family`(多項式の係数版)→
+`tensor_map_injective_of_flat`(`Module.Flat ℚ A` が `infer_instance`
+一発で通ることから単射性を得る)→`exists_fg_subalgebra_tensor_
+standardEtaleCond`→**`exists_fg_subalgebra_tensor_standardEtalePair`**
+(`StandardEtalePair (A ⊗[ℚ] ℝ)` は、ある `R` を使って
+`StandardEtalePair (A ⊗[ℚ] R.1)` の像として書ける)という、既存の
+`exists_fg_subalgebra_standardEtalePair`(一般の`k K`)と**完全に並行な
+構成**を、`k := ℚ`(体)・`K := A ⊗[ℚ] ℝ` という特殊化で書き切った。
+★**すべてsorry無し・標準3公理のみ**。
+
+**これで「`piecePullbackIso`(`Ext X` のアフィン片は `Spec(Γ(U,U)⊗[ℚ]ℝ)`)
++ この一連の降下補題」を組み合わせれば、`Lemma 4.1`の「1アフィン片の
+降下」に要る核となる部品がすべて揃った**——`c.α`(相関の有限エタール射)
+をアフィン片へ制限 → `Etale.algebraEtale_appLE` で `Algebra.Etale` →
+`exists_finite_standardEtaleCover` で標準エタール片に細分 →
+`exists_fg_subalgebra_tensor_standardEtalePair` で有限段階 `R` へ降下、
+という**一直線の道筋**が(数学的には)完成した。残るのは、この道筋を
+実際に1つの `Found/` 宣言として組み立てる作業と、複数のアフィン片を
+横断した整合性(rigidity)・`GlueData` 貼り合わせ。
