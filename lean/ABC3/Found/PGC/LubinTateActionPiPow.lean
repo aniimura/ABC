@@ -148,4 +148,67 @@ theorem iteratedLubinTate_map_residue {A : Type*} [CommRing A] [IsLocalRing A] [
         exact IsNilpotent.zero
       rw [substXpow_eq_pow hXHS, ← pow_mul, pow_succ]
 
+/-! ### 部品4: `[π^n]_f ∣ [π^m]_f`(`n≤m`)——`Λ_n⊆Λ_m` の由来 -/
+
+/-- `[π^n]_f` 自身の定数項は0(`LubinTateAction_pi_pow` 経由で
+`constantCoeff_LubinTateAction` に帰着)。 -/
+theorem constantCoeff_iteratedLubinTate {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n : ℕ) :
+    PowerSeries.constantCoeff (iteratedLubinTate f n) = 0 := by
+  rw [← LubinTateAction_pi_pow hq hπmax hπne0 f hf0 hf1 hf n]
+  exact constantCoeff_LubinTateAction hq hπmax f hf0 hf1 hf (π ^ n)
+
+/-- **`[π^{a+b}]_f = [π^a]_f∘[π^b]_f`**(合成として)——`LubinTateAction_
+comp` を `π^a・π^b=π^{a+b}` に適用するだけ。 -/
+theorem iteratedLubinTate_add {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (a b : ℕ) :
+    iteratedLubinTate f (a + b) =
+      PowerSeries.subst (iteratedLubinTate f b) (iteratedLubinTate f a) := by
+  rw [← LubinTateAction_pi_pow hq hπmax hπne0 f hf0 hf1 hf (a + b),
+    ← LubinTateAction_pi_pow hq hπmax hπne0 f hf0 hf1 hf a,
+    ← LubinTateAction_pi_pow hq hπmax hπne0 f hf0 hf1 hf b,
+    pow_add, LubinTateAction_comp hq hπmax hπne0 f hf0 hf1 hf (π ^ a) (π ^ b)]
+
+/-- ★★★★★★★**`[π^b]_f ∣ [π^{a+b}]_f`**——古典的な Lubin-Tate 理論で
+`Λ_b⊆Λ_{a+b}`(捩れ点の包含)の由来になる事実。`[π^a]_f` の定数項が0
+(`X∣[π^a]_f`)であることと `iteratedLubinTate_add` を組み合わせ、
+`subst` が積を保つ(`PowerSeries.subst_mul`)ことから従う——新しい
+次数ごとの構成は一切不要だった。 -/
+theorem iteratedLubinTate_dvd_iteratedLubinTate_add {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (a b : ℕ) :
+    iteratedLubinTate f b ∣ iteratedLubinTate f (a + b) := by
+  obtain ⟨ra, hra⟩ := PowerSeries.X_dvd_iff.mpr (constantCoeff_iteratedLubinTate hq hπmax hπne0 f hf0 hf1 hf a)
+  have hbHS : PowerSeries.HasSubst (iteratedLubinTate f b) := by
+    show IsNilpotent (PowerSeries.constantCoeff (iteratedLubinTate f b))
+    rw [constantCoeff_iteratedLubinTate hq hπmax hπne0 f hf0 hf1 hf b]
+    exact IsNilpotent.zero
+  refine ⟨PowerSeries.subst (iteratedLubinTate f b) ra, ?_⟩
+  rw [iteratedLubinTate_add hq hπmax hπne0 f hf0 hf1 hf a b, hra,
+    PowerSeries.subst_mul hbHS, PowerSeries.subst_X hbHS]
+
+/-- `n≤m` ならば `[π^n]_f ∣ [π^m]_f`——`iteratedLubinTate_dvd_
+iteratedLubinTate_add` を `m=k+n` の形に書き直すだけ。 -/
+theorem iteratedLubinTate_dvd_of_le {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) {n m : ℕ} (hnm : n ≤ m) :
+    iteratedLubinTate f n ∣ iteratedLubinTate f m := by
+  obtain ⟨k, hk⟩ := Nat.le.dest hnm
+  rw [← hk, add_comm]
+  exact iteratedLubinTate_dvd_iteratedLubinTate_add hq hπmax hπne0 f hf0 hf1 hf k n
+
 end ABC3.Found.PGC

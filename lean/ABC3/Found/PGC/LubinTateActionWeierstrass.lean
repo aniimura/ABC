@@ -151,18 +151,6 @@ theorem natDegree_iteratedLubinTateDistinguished {A : Type*} [CommRing A] [IsLoc
 
 /-! ### 部品4: `D_n` の定数項は0(`X ∣ D_n`) -/
 
-/-- `[π^n]_f` 自身の定数項が0であること(`LubinTateAction_pi_pow` 経由で
-`constantCoeff_LubinTateAction` に帰着)。 -/
-theorem constantCoeff_iteratedLubinTate {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
-    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
-    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
-    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
-    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
-    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n : ℕ) :
-    PowerSeries.constantCoeff (iteratedLubinTate f n) = 0 := by
-  rw [← LubinTateAction_pi_pow hq hπmax hπne0 f hf0 hf1 hf n]
-  exact constantCoeff_LubinTateAction hq hπmax f hf0 hf1 hf (π ^ n)
-
 /-- ★★★★★★★**`D_n` の定数項は正確に0**——`[π^n]_f` 自身の定数項が0で、
 `U_n` の定数項が単元(`≠0`、`A` は整域)であることから、
 `[π^n]_f = D_n·U_n` の定数項を比較して直ちに従う。これは
