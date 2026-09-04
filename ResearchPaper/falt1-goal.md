@@ -25,6 +25,54 @@
   等は mathlib に対応物が無いため全項目が posit ベース(`sorry` は無いが
   `Found`(証明)ではない)。数学的に**証明した**わけではない。
 
+★★★**2026-09-04、`/goal` で「Chapter I を Found(証明)にする」という
+より厳しい条件が設定された——その進捗と実現可能性の評価を追記する。**
+
+## 0.1 `/goal Falt1 Chapter I Found` の進捗(2026-09-04)
+
+**Lemma 1.1**(§1 1/2): `Found/Falt1/KaehlerAux.lean`・`Found/Falt1/
+Lemma11.lean` として数学的内容(単射性・余核の長さの等式)を**完全に
+sorry無しで証明した**(`falt1MapBaseChangeInjective`・
+`falt1CokernelLengthEq`・`lemma_1_1_falt1`)。途中で作った再利用可能な
+一般補題(mathlib に無かったもの): `subsingleton_H1Cotangent_self`
+(`FormallySmooth R S ⟹ Subsingleton(H1Cotangent R S)`)・
+`polynomialKaehlerSplit`(`Ω_{V[T]/Z} ≅ (V[T]⊗_VΩ_V)×V[T]` の直和分解)・
+`mapBaseChange_injective_transport`(`mapBaseChange` の単射性を代数同型
+に沿って輸送)。★ただし `Interface.RamificationSetup`(`ℕ` 値の長さ)
+への正式な差し替えは未完了(`Module.length` は `ℕ∞` 値で有限性の証明が
+要る、`differentIdeal_ne_bot` の最後の1条件——分離性の輸送——が未解決)、
+`.needs` に正直に記録済み。
+
+**Theorem 1.2**(§1 2/2): ★★**未着手、かつ実現可能性の評価を行った
+結果、Lemma 1.1 より明確に難しいことが分かった。**原文(Falt1 p.5、
+`0_Source/Faltings - p-adic Hodge theory.txt` 223-235行)を読むと:
+
+- 設定: `V=V_0⊂V_1⊂V_2⊂...` という「非常に分岐した」拡大の列で、
+  `Ω_{V_n/V}` が `(V_n/pV_n)^{d+1}` を商に持つという特定の条件を満たす
+  もの(典型例: `V_n = V(T_i^{1/p^n}, ζ_{p^{n+1}})`、perfectoid 系列の
+  原型)。
+- 主張: `W_n :=` `V_n⊗_VW` の正規化として、`W_n/V_n` の different
+  `δ_n` が `n→∞` で `0` に収束する。
+- 証明: **Lemma 1.1 を繰り返し使う帰納法**(`V_n→V_{n+1}` の各段で
+  Lemma 1.1 の余核の長さ評価を適用し、`δ_{n+1} < δ_n - 1/(d+2)` 等の
+  不等式を積み上げる)。
+
+★★★**この構造から、Theorem 1.2 は Lemma 1.1 と同等かそれ以上の
+新規の長さ計算インフラ(`Module.length` の不等式操作の連鎖、「非常に
+分岐した」列の定義そのものの形式化)を要求する**——Lemma 1.1 1件の
+形式化がこのセッションの大半(数十回のラウンド)を要したことを踏まえると、
+Theorem 1.2 は**単独でさらに同程度以上の作業**になる見込み。
+
+**§2-4(11項目)**: 変化なし——「almost mathematics」が mathlib に
+存在しないため完全に未着手。
+
+★★★**結論(正直な評価)**: `/goal` の 13/13 は、このセッションでの
+継続作業だけでは現実的な時間内に到達できない規模の作業(Theorem 1.2
+1件でさらに大きな作業、§2-4 は新規ライブラリ構築に近い規模)である
+可能性が高い。ただし Lemma 1.1 で確立した一般補題(especially
+`subsingleton_H1Cotangent_self`・`polynomialKaehlerSplit`)は Theorem
+1.2 の帰納法でも再利用できる見込みがあり、**無駄になっていない**。
+
 ## 1. 構造(2026-09-04 確定——旧版の3つの未確認点をすべて解消した)
 
 ★★**Chapter見出しは"CHAPTER"の語を伴わない裸のローマ数字**("I""II""III"
