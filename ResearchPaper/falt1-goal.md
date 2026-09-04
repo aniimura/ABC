@@ -1303,6 +1303,27 @@ mathlib での正確な組み立て方は未確認)。
     --mathlib`で`ramificationIdx`・`IsDedekindDomain.isPrincipalIdealRing_
     of_...`・`IsLocalRing`周りを先に調査することから始めるのが
     効率的(証明を試す前に在庫を確認する、CLAUDE.mdの「在庫」原則)。
+
+    ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、**予想は
+    外れた——「同じ壁」には当たらなかった**(`falt1_
+    isPrincipalIdealRing_of_finite_ext_of_DVR`、commit `a110a169`、
+    `lake build`・`#print axioms`確認済み・sorry無し)。「全分岐
+    (唯一の極大イデアル)」を**直接**示す必要は無く、**もっと弱い
+    「極大イデアルが有限個」で十分**(`IsPrincipalIdealRing.of_
+    finite_maximals`)と気づいたのが鍵だった。`Wₙ`が DVR(唯一の
+    極大イデアル)であることと、有限拡大では上にある素イデアルが
+    有限個であること(`IsDedekindDomain.primesOver_finite`)・整拡大
+    では極大イデアルの引き戻しが極大であること(`Ideal.isMaximal_
+    comap_of_isIntegral_of_isMaximal`)を組み合わせるだけで、`Wₙ₊₁`
+    の極大イデアル全体が「有限集合の部分集合」だと分かり、部分集合の
+    有限性だけで`IsPrincipalIdealRing Wₙ₊₁`が閉じた——「全分岐」という
+    (証明がずっと重い)強い主張を経由しない近道が見つかったことになる。
+    `Mathlib.RingTheory.DedekindDomain.PID`の import を追加した。
+    次回はこの`IsPrincipalIdealRing`から`conductor(Wₙ,x)`の生成元を
+    実際に取り出し(`IsPrincipalIdealRing`は存在の主張なので`obtain`で
+    生成元を得る)、それが非零因子であること(`Wₙ₊₁`は整域なので
+    非零⟹非零因子)を確認し、`length_quotient_span_singleton_mul`を
+    実際に適用して長さの等式を得るところから続ける。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
