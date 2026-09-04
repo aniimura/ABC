@@ -3770,3 +3770,35 @@ motive探索(`kabstract`)を経由しないため、この壁に当たらない�
 inv_naturality`(および部品`transitionElemIso_step1`〜`step45`・
 `transitionElem_restrict_mul_le`)、コミット`c4172c85`。3ターン
 連続でこの壁に当たり続けた末にたどり着いた対処法。
+
+## ヘルパー補題内部の`haveI`は外に漏れない——`AdjoinRoot f`(条件付き
+## `Field`)経由の定理を呼ぶ前に自分でも同じ instance を再構築する(2026-09-04)
+
+**症状**: `AdjoinRoot fK`(`fK`の既約性に依存して`Field`になる型)上の
+元`w`について、ヘルパー補題`foo`(内部で`haveI : Fact (Irreducible
+fK) := …`等を使って`w`の性質を証明する)を呼んで得た事実`hw`を、
+**別の**定理`bar w hw ...`(`bar`もまた`AdjoinRoot fK`が体であることを
+要求する)に渡すと、`Application type mismatch`(`hw`の型が`bar`の
+期待する型と合わない)+ `(deterministic) timeout at whnf` という
+紛らわしい形で失敗する。`hw`の型を目視で見比べても完全に一致して
+見えるので「instance の diamond だ」と誤診断しやすい
+(実際にこのセッションでも一度そう誤診断した)。
+
+**真因**: `foo`の内部で`haveI : Fact (Irreducible fK) := …`等を
+した instance は`foo`の**証明の中だけ**で有効で、`foo`の**戻り値の
+型**に現れない限り呼び出し側には伝播しない。呼び出し側(`bar`を呼ぶ
+その場所)には`Fact (Irreducible fK)`が存在しないので、`AdjoinRoot
+fK`がそもそも`Field`だと分からず、`bar`が要求する
+`FiniteDimensional`・`Algebra.IsSeparable`等の instance 探索が
+(存在しない前提から)非常に高価な/失敗する探索に迷い込む。
+
+**直し方**: `bar`を呼ぶ**その場所でも**、`Fact (Irreducible fK)`・
+`FiniteDimensional K (AdjoinRoot fK)`・`Algebra.IsSeparable K
+(AdjoinRoot fK)`を(ヘルパー内部と同じ手順で)`haveI`で再構築してから
+呼ぶ。これだけで(`isDefEq`timeoutという症状のわりに)一瞬で解決する
+——`@`明示引数や`show`での型強制は的外れな対症療法だった。
+
+実例: `falt1_hspan_eq`(`Found/Falt1/KaehlerAux.lean`、コミット
+`ea63551e`)——`differentIdeal_eq_span_derivative`/
+`conductor_mul_differentIdeal`を呼ぶ前に3つの instance を
+再構築して解決した。

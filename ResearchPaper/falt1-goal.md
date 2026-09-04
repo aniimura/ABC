@@ -1228,18 +1228,34 @@ mathlib での正確な組み立て方は未確認)。
       の一致が保証されない)、`falt1BaseChangeGeneratorFull` で `ψ`・
       `w`・`x`・両方の生成元性を1つの証明にまとめた。
 
-    ★残る障害(未解決、次回持ち越し): `differentIdeal_eq_span_
-    derivative w hwfield hwadjoin` を実際に呼ぶと、`hwfield`(私が
-    構築した field-level 生成元性の項)の型が、この定理が要求する
-    型と**instance 経路のレベルで**一致しない(`Application type
-    mismatch`、`isDefEq` timeout)——`Algebra (integralClosure V0
-    (AdjoinRoot fK)) (AdjoinRoot fK)` の instance が2通りの経路
-    (私の構築と、定理呼び出し時の instance 検索)で一致しないという、
-    このセッション全体を通じて繰り返し出てきた「diamond」の再来と
-    見られる。次回の方針候補: `differentIdeal_eq_span_derivative` を
-    `@` で明示引数呼び出しにして instance を手渡しで揃える、または
-    `show` で `hwfield`/`hwadjoin` の型を定理の期待する形に強制的に
-    書き換えてから渡す。
+    ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-04、**上記の
+    instance mismatch を解決し、`hspan_eq` を完全に確立した**
+    (`falt1_hspan_eq`、commit `ea63551e`、`lake build`・
+    `#print axioms` 確認済み・sorry 無し)。**真因は診断が違っていた**
+    ——`@`明示引数や`show`強制ではなく、`differentIdeal_eq_span_
+    derivative`/`conductor_mul_differentIdeal`を`AdjoinRoot fK`
+    (条件付きで体になる型)経由の`w`・`x`に呼び出す**呼び出し側の
+    文脈**に、`Fact (Irreducible fK)`・`FiniteDimensional
+    (FractionRing V0)(AdjoinRoot fK)`・`Algebra.IsSeparable
+    (FractionRing V0)(AdjoinRoot fK)`が**存在しなかった**ことが原因
+    だった——これらは`falt1BaseChangeGeneratorFull`等のヘルパー内部で
+    `haveI`されるだけで外に漏れないため、呼び出し側で**同じ3つを
+    再構築**するだけで(`isDefEq`timeoutという紛らわしい症状のわりに)
+    一瞬(3秒)で解決した。
+    `conductor_mul_differentIdeal`の右辺`span{aeval x (deriv(minpoly
+    Wₙ x))}`と`differentIdeal_tower_diamond`の`Idiff`
+    (`Ideal.map ψ (differentIdeal V0 V1)`)が、両方とも
+    `span{n·x^(n-1)}`に簡約されることを示した——
+    `differentIdeal_eq_span_derivative`を`w`に適用して`differentIdeal
+    V0 V1 = span{n·w^(n-1)}`を得て、環準同型`ψ`でmapし`ψ(w)=x`を使う
+    だけ。**これでTheorem 1.2 item 3cの中核技術的障害は解決した。**
+    残る接続: (a) `Idiff≠0`(`differentIdeal_ne_bot`——
+    `[Module.Finite A B][Algebra.IsSeparable (FractionRing A)
+    (FractionRing B)]`から`differentIdeal A B≠⊥`、`Ideal.map`の単射性
+    保存と合わせれば出せる見込み、`Algebra.IsSeparable (FractionRing
+    V0)(FractionRing V1)`という新しい instance が必要で未確立)を足して
+    `cancel_conductor_delta`を実際に呼び出すこと、(b) 再帰的`V_n`族の
+    構成。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
