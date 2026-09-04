@@ -1,6 +1,6 @@
 ---
 name: pgc-lubin-tate-existence-progress
-description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——★★★★★(𝒪_K)^×⧸principalUnits K π n ≃ ψ_nの根(全単射)が確立、単数側の道は完結。残る唯一の柱は Galois 側の同変性(σ(a·x)=a·σ(x)、cross-point instance bridging という既知の難所)——σ↦u_σ の一意存在は全単射から従うが、それが準同型であることの証明にこの同変性が要る見通し
+description: pGC の局所類体論(Prop 1.2・Cor 1.3・Prop 2.1・Cor 3.3・Theorem 4.2 が共通に依存)に要る Lubin-Tate 相互律——★★★★★ reciprocityMap: Gal(K.closure/K.carrier)→(𝒪_K)^×⧸principalUnits K π n が sorry無しで具体的に構成された(existsUnique_unitActionQuotient_eq_algEquiv 経由)。残るは準同型性のみ——単数限定のGalois同変性(σ(u·x)=u·σ(x))が要る見通し、cross-point instance bridging という既知の難所
 metadata:
   type: project
 ---
@@ -1866,6 +1866,45 @@ bridgingという既知の難所)が必要になる見通し。次のセッシ�
 まずこの同変性の構成、あるいはそれを回避する別の道が無いか
 (このセッションで単射性の壁を回避できたのと同様に)を最初に
 検討する価値がある。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★ 続報
+(同日、さらに続き): 相互写像`σ↦u_σ`が集合論的に完成——
+`reciprocityMap`として具体的な名前付き対象になった
+
+上の「`u_σ`の一意存在性」を実際に定理として仕上げ、さらに
+`Classical.choose`で具体的な写像として定義した(すべて`sorry`無し、
+ゲート通過済み、commit`a988ffda`・`82c3f6bd`):
+
+1. **`existsUnique_unitActionQuotient_eq_algEquiv`**
+   (`LubinTateActionBijective.lean`): `∀σ, ∃!U, U·x=σ(x)`。
+   `σ(x)∈ψ_nの根`(`algEquiv_mem_iteratedLubinTatePsiTorsionPoints_
+   of_mem`、既出)+`unitActionQuotientBijOn`の全単射性(直前)を
+   組み合わせるだけ——新しい数学的困難は無い、既存結果の直接の系。
+
+2. **`reciprocityMap`**: 上の`ExistsUnique`の`Classical.choose`に
+   よる定義——`Gal(K.closure/K.carrier)→(𝒪_K)^×⧸principalUnits
+   K π n`という、目的の同型の実体となる具体的な写像。
+
+3. **`reciprocityMap_spec`**: 定義性質`reciprocityMap σ · x = σ(x)`。
+
+4. **`reciprocityMap_one`**: 整合性チェック
+   `reciprocityMap (AlgEquiv.refl) = 1`——`1·x=x`(既出)と一意性
+   から、Galois同変性を一切経由せず独立に示せる。
+
+**現状のまとめ**: `Gal(K(Λ_n)/K)≅(𝒪_K/π^n)^×`という主定理の
+**写像そのもの**(`reciprocityMap`)が、`sorry`無しで具体的に
+構成された。残るのは**準同型性**
+(`reciprocityMap(σ*τ)=reciprocityMap σ * reciprocityMap τ`)の
+証明だけ——これにはGalois同変性`σ(a·x)=a·σ(x)`(cross-point
+instance bridging)が必要になる見通し(全単射から`u_σ`の存在は
+出るが、`u_{στ}=u_σ*u_τ`を出すには`σ(u_τ·x)=u_τ·σ(x)`という
+同変性の1インスタンスが要る——`lubinTateAction_mul`(乗法性、既出)
+と組み合わせれば`(στ)(x)=σ(u_τ·x)=u_τ·σ(x)=u_τ·(u_σ·x)=(u_τ*u_σ)·x`
+となり、単数群の可換性で`u_{στ}=u_σ*u_τ`が出る、という計算の
+筋道自体は明確)。次のセッションでは、この「`a=u_τ`という**単数**
+限定のGalois同変性」だけで十分なので、一般の`a∈𝒪_K`に対する
+フルな同変性より的を絞った、より軽い経路がないか(単射性で
+そうだったように)を最初に検討する価値がある。
 
 ## 続報(同日、`algEquiv_mem_iteratedLubinTateTorsionPoints_of_mem`、
 `AdjoinIntegers.lean`、commit `93108293`): `Λ_n`全体もσで保たれる
