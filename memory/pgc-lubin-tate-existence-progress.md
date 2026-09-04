@@ -2585,3 +2585,43 @@ Equiv`経由で`CompatibleUnits`から`𝒪_K^×`へ戻す)の構成、そして
 要再確認)。これが完成すれば`galoisReciprocityEquiv`(既出、各段の
 主定理)と組み合わせて`Gal(K.closure/K.carrier)`の完全に分岐した
 部分の相互律が閉じる。
+
+## 続報(同日、部品(ii)の第一歩——`reciprocityMapLimit`を組むための
+「無限に続く compatible な生成元の列」構成に要る**もう1つの
+cross-point bridging**を事前に特定した、Leanコードはまだ無し):
+原始的生成元の無限列を`Nat.rec`で組む際の障害を先読みした
+
+`reciprocityMapLimit`を実際に定義するには、`(x_n)_{n≥1}`という
+**無限に続く**compatibleな原始的生成元の列(`x_n=π·x_{n+1}`が全`n`
+で成り立つ)がまず要る——現状確立済みなのは「与えられた`x_{n+1}`
+から`π·x_{n+1}`が`ψ_n`の根になる」(1段分、`lubinTateActionAtTorsion
+Point_pi_mem_iteratedLubinTatePsiTorsionPoints`)だけで、**逆方向**
+(与えられた`x_n`から`π·x_{n+1}=x_n`を満たす`x_{n+1}`の**存在**)は
+未確立。この逆方向(1段分の全射性)を検討した結果、**既存の
+`unitActionQuotientBijOn_bijective`(各段の単数作用の全単射性、既出)
+から出せる**と分かった: 目標`y`(`ψ_n`の根)と`z:=π·x_{n+1}`(`ψ_n`
+の根、既知)はどちらも`ψ_n`の根なので、`z`を基点にした`unitAction
+QuotientBijOn`の全射性から`u·z=y`となる`u`が取れ、`lubinTateAction_
+pi_mul_eq_pred`(既出)経由で`u·z=(u*π)·x_{n+1}=π·(u·x_{n+1})`という
+式変形ができる——したがって`x_{n+1}':=u·x_{n+1}`が`π·x_{n+1}'=y`を
+満たす候補になる。
+
+★★ただし**もう1段のcross-point bridgingが要る**と判明した:
+`x_{n+1}'`が`π·x_{n+1}'=y`を満たすことを`x_{n+1}'`**自身の**座標系
+(`adjoinIntegers K x_{n+1}'`、次の帰納段でこの生成元を使い回すために
+必要)で言えるかが問題——`u·x_{n+1}`は`x_{n+1}`の座標系
+(`adjoinIntegers K x_{n+1}`)の元として自然に得られるが、`x_{n+1}'`
+自身の座標系での評価に翻訳するには`adjoinIntegers K x_{n+1}'≤
+adjoinIntegers K x_{n+1}`(`adjoin_pi_mem_pred_le`と全く同じ型の
+包含、`π`の代わりに`u`を使うだけ)を経由した`lubinTateEvalAtPoint_
+inclusion_comm`(既出、`LubinTateActionInclusion.lean`)の**再利用**
+が要る——新しいbridging機構の発明ではなく、既存の道具を`u`について
+もう一度使うだけのはずだが、今回はまだコードに落としていない。
+
+★見積り: 上記が組めれば「1段分の全射性」補題(`∃x_{n+1},...`)が
+完成し、それを`Nat.rec`(または強い帰納法)で積み重ねて無限列
+`(x_n)`を構成する(`LubinTateSequence.lean::ΦSeq`と同じ型の依存
+再帰、ただし今回は各段が独立した新しい体`K.carrier⟮x_n⟯`を要る
+点が異なる)。その後にようやく`reciprocityMapLimit`本体の定義・
+全射性・単射性(`reciprocityMap`自体の単射性が前提、要再確認)に
+進める。次に戻るなら「1段分の全射性」の完成が具体的な出発点。
