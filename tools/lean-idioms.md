@@ -3622,3 +3622,28 @@ cast は`cast_eq`で消せても、`heq`由来の**内側の**cast(関数型`A �
 して具体的な元での挙動を調べる」という順序そのものが罠——`rw […] at h`
 で型を書き換える構成をする**前に**、後で必要になる具体的な等式が
 何かを見極め、それが`rfl`になるように定義の**順序**を選ぶこと。
+
+## 29. `noncomputable def`の中で`Exists.choose_spec`を分解するときは
+`obtain`ではなく`let`+`.1`/`.2`射影を使う——`obtain`の`And.rec`は後で
+`unfold`しても簡約されずスタックする(2026-09-04)
+
+`def foo := by obtain ⟨h1, h2⟩ := someProp.choose_spec; ...`のように
+`def`(または`noncomputable def`)の中で`obtain`を使って`Exists.choose_
+spec`(`Prop`の`And`)を分解すると、生成される項の内部に`And.rec (fun h1
+h2 => ...) someProp.choose_spec`という形の**簡約されないパターンマッチ**
+が残る——`someProp.choose_spec`は`Classical.choice`経由の**不透明な証明
+項**なので、`And.rec`は(具体的な`⟨_,_⟩`構成子に対してしか)β簡約できず、
+後で別の場所からこの`def`を`unfold`して`simp`で内部を書き換えようとしても、
+`And.rec (fun ... => 巨大な式) ⋯`という形のまま止まってしまい、`simp`が
+中の`Iso.trans`等の構造に一切触れられない。
+
+**How to apply**: `def`の中で`Exists.choose_spec`(や`Iff`・`And`一般)を
+分解する必要があるときは、`obtain ⟨h1,h2⟩ := ...`ではなく
+`let h1 := (...).choose_spec.1`・`let h2 := (...).choose_spec.2`
+(フィールド射影)を使う。後で`unfold`+`simp`する予定があるなら**必ず**
+こちらを使うこと——射影は`And.rec`のような`rec`を経由しないため、
+`unfold`後に`simp`がそのまま構造の中へ入っていける。実例:
+`lean/ABC3/Found/CorrHyp/ExtLimit.lean`の`gdT`(`GlueData`の遷移射)。
+同じファイルで`set`が`.choose_spec`由来の仮定への`rw`と噛み合わない
+場面にも当たった(第25項の亜種)——`.choose_spec`を扱うときは`set`より
+先に「`have`を使わず生の式のまま`rw`する」を試すとよい。
