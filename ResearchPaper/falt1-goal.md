@@ -568,6 +568,47 @@ mathlib での正確な組み立て方は未確認)。
     (`L:=FractionRing(AdjoinRoot(X^p-π))`)を組み立て、Falt1
     RamificationSetup 系のインフラ(`falt1_isFractionRing` 等)を
     再利用して具体的な最初の1段を完成させることから始めるとよい。
+
+    ★★★★★★★★★★★★★★★★★★★★★2026-09-04、**上記の戦略転換を実装し、
+    「非常に分岐した」`V_n` 族の1段の構成が sorry 無く完成した**
+    (commit `9998b221`)。`isDedekindDomain_integralClosure_adjoinRoot_
+    X_pow_sub_C`: `V0` を Dedekind、`π` を(平方でない)素元とし
+    `f := X^n - C π`(`V0[X]`上)とすると、`integralClosure V0
+    (AdjoinRoot (f.map (algebraMap V0 (FractionRing V0))))` が
+    Dedekind であることを証明。組み立ての鍵:
+    - `f` の `V0[X]` 上の Eisenstein 既約性(既存の
+      `eisenstein_X_pow_sub_C_irreducible_map`)を**Gauss の補題**
+      (`Polynomial.Monic.irreducible_iff_irreducible_map_fraction_map`
+      、`IsIntegrallyClosed R` だけで足り **UFD は不要**——Dedekind
+      整域は自動的に整閉なのでこれで賄える)で `FractionRing(V0)[X]`
+      上の既約性に転送する。これで「`AdjoinRoot(f)` が整域か」という
+      (UFD でない一般の Dedekind 整域上では自明でない)問いを完全に
+      回避できた。
+    - 分離性は `Polynomial.separable_X_pow_sub_C` を直接使う(自作の
+      Bezout 係数計算は不要と判明し破棄)。
+    - `AdjoinRoot(f_K)`(`f_K:=f.map(...)`、`FractionRing(V0)` 上)が
+      有限次分離拡大であることを、`Module.Finite`
+      (`Polynomial.Monic.finite_adjoinRoot`)と新設の補題
+      `algIsSeparable_adjoinRoot_of_separable`(単既約 monic 分離
+      多項式の `AdjoinRoot` は分離拡大——
+      `IntermediateField.isSeparable_adjoin_simple_iff_isSeparable`
+      + `adjoin_root_eq_top` + `topEquiv` を貼り合わせて構成)から得る。
+    - 最後に `integralClosure.isDedekindDomain_fractionRing`
+      (instance)を `infer_instance` で発火させるだけで結論が出る。
+
+    `#print axioms` で両定理とも `[propext, Classical.choice,
+    Quot.sound]` のみ(sorry 無し)を確認済み、`lake build`
+    2656/2656 成功、`node tools/check.mjs --brief` は新規リグレッション
+    無し(既存 13 件の NG のみ)。★これで item 3c の「`V_n` 族の各段が
+    Dedekind であること」という核心のボトルネックが、**`n=0→1` の
+    1段について**完全に解消した。残る作業: (a) この構成を `V_0`
+    自身にも再帰的に適用して `V_n`(`n` 段目)の族を作る(`induction`
+    で回すだけのはずだが、各段で「一様化元」を選び直す必要があり
+    未着手)、(b) `cancel_conductor_delta` の `hspan_eq` 仮定
+    (「conductor が単項で書ける」)をこの具体的な `V_1` 構成に対して
+    実際に検証する(3b との接続、まだ着手していない)、(c) `Ω¹_{V1/V0}`
+    が `pushoutKaehlerSplit` 系の枠組みに乗ることの確認(生成元の個数
+    `d+1` との対応)。
 4. ★★★★★2026-09-04、**完成した**(`delta_tendsto_zero`、commit
    `a9faa64e`)。長さの漸化不等式(上の逐語引用の通り: `δ_n-δ_{n+1}≥
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
