@@ -1670,6 +1670,39 @@ theorem gdT_eq_transitionElemIso (i j : J) :
   unfold gdT transitionElemIso
   rfl
 
+/-- `X.isoOfEq`の`.hom`と`X.homOfLE`の合成が単一の`X.homOfLE`にまとまる
+——`Scheme.isoOfEq_hom`+`Scheme.homOfLE_homOfLE`を繋ぐだけ。`@[reassoc]`
+を付け、末尾に何か続く形の書き換えにも使えるようにする
+(`gdT_hom_comp_gdF`で使う)。CorrHyp非依存の一般的事実。 -/
+@[reassoc]
+theorem homOfLE_isoOfEq_comp' {X : Scheme} {A B C : X.Opens} (heq : A = B) (hBC : B ≤ C) (hAC : A ≤ C) :
+    (X.isoOfEq heq).hom ≫ X.homOfLE hBC = X.homOfLE hAC := by
+  rw [Scheme.isoOfEq_hom, Scheme.homOfLE_homOfLE]
+
+/-- **`gdT`(項目(b)のNatIso自然性の`snd`側で必要)と`gdF`(反対側)の
+合成——`transitionElemIso`だけの式へ帰着**——`gdT_eq_transitionElemIso`
++`transitionElemIso_hom_ι`(`j`側)+`homOfLE_isoOfEq_comp'`で
+「`(gdT i j).hom ≫ gdF(j,i)`」を「`transitionElemIso(f i)(f j)(e i)`の
+`.inv`(`i`側はそのまま)+`X.homOfLE`+`(e j).hom`」の形へ書き直す。
+
+★配管の注意: `rw[gdT_eq_transitionElemIso]`直後に`show`で式全体を
+再掲示すると、埋め込まれた`(X.isoOfEq ...)`の証明項同士の(命題として
+等しいが構文的には別の)照合で`instances`透明度の壁に当たり
+`whnf`が終わらない(`#31`の新しい現れ方)——`show`を避け、代わりに
+`rw[Category.assoc, Category.assoc]`で結合を先に揃えてから
+`transitionElemIso_hom_ι`・`homOfLE_isoOfEq_comp'_assoc`を適用する
+ことで回避した(元の証明項に一切触れないので壁に当たらない)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem gdT_hom_comp_gdF (i j : J) :
+    (gdT f Z e i j).hom ≫ gdF f Z e j i =
+      (transitionElemIso (f i) (f j) (e i)).inv ≫
+      X.homOfLE (show X.basicOpen (f i * f j) ≤ X.basicOpen (f j) by
+        rw [X.basicOpen_mul (f i) (f j)]; exact inf_le_right) ≫ (e j).hom := by
+  show (gdT f Z e i j).hom ≫ ((Z j).basicOpen (transitionElem (f j) (f i) (e j))).ι = _
+  rw [gdT_eq_transitionElemIso, Category.assoc, Category.assoc, transitionElemIso_hom_ι,
+    homOfLE_isoOfEq_comp'_assoc]
+
 /-- `gdVpullbackIso`の`.hom`と`pullback.fst`の関係——`isPullback_opens_
 inf`が与える`isoPullback_inv_fst`を、`gdVpullbackIso`自身の構成
 (`hpb.trans(isoOfEq heq)`)と組み合わせて`(Z i).homOfLE`1つにまとめる。
@@ -2366,6 +2399,29 @@ theorem pullbackHomOfLE_gdV_iso_hom_fst {X : Scheme} {U : X.Opens} {J : Type} (f
       rw [← Category.assoc, pullbackHomOfLEIsoBasicOpen_hom_fst]]
   rw [← Category.assoc, pullbackEInvIso_hom_fst, Category.assoc, Iso.inv_hom_id, Category.comp_id]
 
+/-- **`pullbackHomOfLE_gdV_iso`の`snd`との可換性**——`fst`版と対称、
+`gdF f Z e i j`の代わりに`(gdT f Z e i j).hom ≫ gdF f Z e j i`
+(`GlueData.diagram`の`snd`フィールドそのもの)を使う。`gdT_hom_comp_gdF`
+で`transitionElemIso(f i)(f j)(e i))`の`.inv`まで帰着させてから、
+同じ`transitionElemIso(f i)(f j)(e i))`の`.hom`(`φ`の最終段)と
+`Iso.hom_inv_id_assoc`で相殺するのが`fst`版との違い。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem pullbackHomOfLE_gdV_iso_hom_snd {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
+    (Z : J → Scheme) (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i)
+    (h : ∀ i, X.basicOpen (f i) ≤ U) (i j : J) :
+    (pullbackHomOfLE_gdV_iso f Z e h i j).hom ≫ (gdT f Z e i j).hom ≫ gdF f Z e j i =
+      pullback.snd ((e i).inv ≫ X.homOfLE (h i)) ((e j).inv ≫ X.homOfLE (h j)) := by
+  show (pullbackEInvIso f Z e h i j).hom ≫ (pullbackHomOfLEIsoBasicOpen (f i) (f j) (h i) (h j)).hom ≫
+      (transitionElemIso (f i) (f j) (e i)).hom ≫ (gdT f Z e i j).hom ≫ gdF f Z e j i = _
+  rw [gdT_hom_comp_gdF, Iso.hom_inv_id_assoc]
+  rw [show (pullbackHomOfLEIsoBasicOpen (f i) (f j) (h i) (h j)).hom ≫
+      (X.homOfLE (show X.basicOpen (f i * f j) ≤ X.basicOpen (f j) by
+        rw [X.basicOpen_mul (f i) (f j)]; exact inf_le_right) ≫ (e j).hom)
+    = pullback.snd (X.homOfLE (h i)) (X.homOfLE (h j)) ≫ (e j).hom from by
+      rw [← Category.assoc, pullbackHomOfLEIsoBasicOpen_hom_snd]]
+  rw [← Category.assoc, pullbackEInvIso_hom_snd, Category.assoc, Iso.inv_hom_id, Category.comp_id]
+
 /-- `piecesOpenCover`の`.f i`が定義どおりの明示形であること(単一
 出現の`unfold`なので軽い、`#31`/`#32`の教訓)。 -/
 theorem piecesOpenCover_f_eq {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
@@ -2395,16 +2451,7 @@ noncomputable def piecesGluedCoverVIso {X : Scheme} {U : X.Opens} {J : Type} (f 
 (`rfl`による定義的一致なので`rw`を経由せず`show`+`exact`だけで届く、
 `#31`の「`rw`を避けdefeqで直接繋ぐ」教訓の別の現れ方)を合成するだけ。
 
-★**sorry 無し**。標準3公理のみ。
-
-★★次の一手(未着手、項目(b)の残り): この`φ(i,j)`が`snd`(`gdT≫gdF`・
-mathlibの`pullbackSymmetry.hom≫pullback.fst`)とも可換であることを示す
-(`gdT_eq_transitionElemIso`等の既存の`gdT`関連事実が土台になる見込み、
-`t_fac`/`cocycle`同等の配線量が見込まれる)。それが済めば`U`成分(恒等)
-と合わせて`.diagram`同士の`NatIso`を組み立て、`CategoryTheory.Limits.
-HasColimit.isoOfNatIso`で`.glued`同士の同型を得てから、mathlibの
-`Scheme.Cover.fromGlued`が与える`piecesOpenCover(...).gluedCover.glued
-≅ U`と合成する。`corrhyp-goal.md`に記録。 -/
+★**sorry 無し**。標準3公理のみ。 -/
 theorem piecesGluedCoverVIso_hom_fst {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
     (Z : J → Scheme) (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i)
     (hcover : ⨆ i, X.basicOpen (f i) = U) (i j : J) :
@@ -2412,6 +2459,35 @@ theorem piecesGluedCoverVIso_hom_fst {X : Scheme} {U : X.Opens} {J : Type} (f : 
       pullback.fst ((piecesOpenCover f Z e hcover).f i) ((piecesOpenCover f Z e hcover).f j) := by
   show (pullbackHomOfLE_gdV_iso f Z e (basicOpen_le_of_iSup_eq f hcover) i j).hom ≫ gdF f Z e i j = _
   exact pullbackHomOfLE_gdV_iso_hom_fst f Z e (basicOpen_le_of_iSup_eq f hcover) i j
+
+/-- **`piecesGluedCoverVIso`の`snd`との可換性(NatIso自然性の`snd`半分、
+完成)**——`pullbackHomOfLE_gdV_iso_hom_snd`+`pullbackSymmetry_hom_comp_
+fst`(mathlib既製、`(pullbackSymmetry f g).hom≫pullback.fst g f=
+pullback.snd f g`)を合成、`piecesOpenCover_f_eq`への接続は最後の`rfl`
+(定義的一致)で閉じる。**これで`fst`・`snd`ともに揃い、項目(b)のNatIso
+自然性が完全に確立した**。
+
+★**sorry 無し**。標準3公理のみ。
+
+★★次の一手(未着手、項目(b)の残り): `U`成分(恒等、`piecesOpenCover`
+が`Z`をそのままobjectに使うため)と`V`成分(`piecesGluedCoverVIso`+
+`piecesGluedCoverVIso_hom_fst`/`_hom_snd`)を`NatIso`(`CategoryTheory.
+NatIso.ofComponents`)としてまとめ、`CategoryTheory.Limits.
+HasColimit.isoOfNatIso`で`corrHypGlueData.glued ≅ (piecesOpenCover ...)
+.gluedCover.glued`を得てから、mathlibの`Scheme.Cover.fromGlued`
+(`IsIso`、既製)が与える`(piecesOpenCover ...).gluedCover.glued ≅ U`
+と合成する——これで`corrHypGlueData f Z e |>.glued ≅ (U:Scheme)`が
+完成する見込み。`corrhyp-goal.md`に記録。 -/
+theorem piecesGluedCoverVIso_hom_snd {X : Scheme} {U : X.Opens} {J : Type} (f : J → Γ(X, U))
+    (Z : J → Scheme) (e : ∀ i, (X.basicOpen (f i) : Scheme) ≅ Z i)
+    (hcover : ⨆ i, X.basicOpen (f i) = U) (i j : J) :
+    (piecesGluedCoverVIso f Z e hcover i j).hom ≫ (gdT f Z e i j).hom ≫ gdF f Z e j i =
+      (pullbackSymmetry ((piecesOpenCover f Z e hcover).f i) ((piecesOpenCover f Z e hcover).f j)).hom ≫
+        pullback.fst ((piecesOpenCover f Z e hcover).f j) ((piecesOpenCover f Z e hcover).f i) := by
+  show (pullbackHomOfLE_gdV_iso f Z e (basicOpen_le_of_iSup_eq f hcover) i j).hom ≫
+      (gdT f Z e i j).hom ≫ gdF f Z e j i = _
+  rw [pullbackHomOfLE_gdV_iso_hom_snd, pullbackSymmetry_hom_comp_fst]
+  rfl
 
 /-! ### `corrHypGlueData`の具体化(ロードマップ項目(a)の第一歩)
 
