@@ -1770,3 +1770,16 @@ push済み。
 Presentationの生成元を仲立ちに、両側の生成元をaevalの全射性経由で
 Wの生成元の多項式として表示し、実際のψ・hround1・hround2を構成する
 (未着手)。集計は10/24で変わらず。corrhyp-goal.mdに詳細記録。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05(続き14)
+ψ構成の数学的筋道を確定(MvPolynomial.comp_aeval+ker_eq_ker_aeval_val+
+span_range_relation_eq_kerで解決、hround1/2は不要——D(f)・D(g)を直接
+比較せずWと2回比較すればよい)。Scheme.GlueData(mathlib)の構造も精査:
+J・U・V・f(開埋め込み)・t・t'・t_fac・cocycleの約8データ。V(i,j):=
+D(f_i*f_j)を対称定義すればt:=idで済む簡略化に気づいた。
+
+残るギャップ(正直な記録): exists_mvPolynomial_quotient_specIso_
+descendが与えるのは抽象的な同型だが、GlueDataが要求するのは開埋め込み
+(IsOpenImmersion)——W=D(f_i*f_j)がD(f_i)の基本開であるというRレベル
+での実現(S_0の局所化としての実現)がまだ未構成。新しい技術的ギャップ
+として記録。集計は10/24で変わらず。corrhyp-goal.mdに詳細記録。

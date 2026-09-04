@@ -3958,3 +3958,48 @@ quotient_specIso_descend`の前提が実際に満たせる見込み。分離性�
 ・`hround2`、層の制限公理から従う見込み)を構成する——`exists_
 mvPolynomial_quotient_specIso_descend`の前提を実際に満たす最後の
 ステップ。集計は10/24で変わらず——§4は引き続き0/2。
+
+## 2026-09-05(続き15): `ψ`構成の数学的な筋道を確定、および`Scheme.
+GlueData`本体の構造を精査——「650行規模」の中身がより具体的になった
+
+**`ψ`の構成(数学的には解決、配線は未着手)**: `MvPolynomial.comp_aeval`
+(mathlib、`φ.comp(aeval f) = aeval(fun i↦φ(f i))`)+`Algebra.Generators.
+ker_eq_ker_aeval_val`+`Algebra.Presentation.span_range_relation_eq_ker`
+(いずれもmathlib、既存の道具)を組み合わせれば、`D(f)`側の生成元
+`P_f.val i`を`piece_restrict_hom_basicOpen_left`で`W`(`=D(f*g)`)へ
+送った値を、`P_W.val`の**全射性**(`aeval_val_surjective`)で`W`の
+生成元の多項式として**選択**するだけで`ψ`が構成でき、関係式条件
+(`hq`)は`comp_aeval`による自然性の計算だけで**証明できる**ことを
+確認した——`hround1`・`hround2`(往復の恒等性)は不要になる**設計の
+単純化**にも気づいた:`D(f)`・`D(g)`を直接比較するのではなく、両方を
+`W`と比較する(`exists_mvPolynomial_quotient_specIso_descend`を2回、
+`D(f)`↔`W`・`D(g)`↔`W`)ことにすれば、`W`を仲立ちにした合成で
+`D(f)`↔`D(g)`の同型が得られる——数学的な内容としては完全に解決した。
+
+**`Scheme.GlueData`本体の構造を精査**(`AlgebraicGeometry.Scheme.
+GlueData`、mathlib): `J`(添字)・`U:J→Scheme`(各片)・`V:J×J→Scheme`
+(重なり)・`f:V(i,j)⟶U i`(**開埋め込み**であることが要る、`f_open`)・
+`t:V(i,j)⟶V(j,i)`(遷移)・`t'`・`t_fac`・`cocycle`(3つ組の整合性)、
+という約8個のデータの束——これが「650行規模」の中身である。
+
+**気づいた簡略化**: `V(i,j) := D(f_i*f_j)`(`i`・`j`に依らず対称、
+`f_i*f_j=f_j*f_i`)と**対称に定義**すれば、`t i j := 𝟙 _`(恒等射)
+で済み、`t_id`・`t_fac`・`cocycle`が大幅に単純化する見込み。
+
+**残るギャップ(正直な記録)**: 今回の`exists_mvPolynomial_quotient_
+specIso_descend`が与えるのは`V(i,j)`と`U i`の間の**抽象的な同型**
+(`RingEquiv`→`Iso`)であって、`GlueData`が要求する**開埋め込み**
+(`f i j : V(i,j) ⟶ U i`、`IsOpenImmersion`)ではない——`W=D(f_i*f_j)`
+が`D(f_i)`の**基本開**であるというRレベルでの実現(`S_0`の局所化と
+しての実現)は、まだ構成していない。これは「同型を与える」ことより
+一段強い要求(構造射自体を、単なる同型の存在ではなく**具体的な開
+埋め込み**として構成する必要がある)であり、次の一手として記録する
+——`descendPieceR`の`S_0`(`MvPolynomial`商)に対して、`W`側の`S_0`が
+`D(f)`側の`S_0`の**ある元による局所化**として実現できることを示す
+必要がある見込み(`Localization.Away`スタイル)。
+
+**正直な評価**: `ψ`の数学的構成(生成元の対応の選択+関係式の証明)は
+解決したが、`GlueData`が要求する「開埋め込み」という**より強い**
+構造(単なる同型ではない)への橋渡しがまだ残っている——これは新しい、
+まだ解決していない技術的なギャップであり、正直に記録しておく。
+集計は10/24で変わらず——§4は引き続き0/2。
