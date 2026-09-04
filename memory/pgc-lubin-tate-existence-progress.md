@@ -2497,3 +2497,91 @@ mathlibを実測したが`IsAdicComplete`から単数群の逆極限性を直接
 見積り: (i)が未知数——mathlibに既存部品があるかを`node tools/
 decl-index.mjs --mathlib`+`AdicCompletion`まわりのキーワードで
 再捜索するのが次の一歩。
+
+## 続報(同日、(i)の再捜索——`AdicCompletion`一般論より軽い自前構成
+の設計を確定、Leanコードはまだ無し): `𝒪_K^×≅lim_n(𝒪_K/π^n)^×`を
+`AdicCompletion`のring/algebra一般論を経由せず直接示す方針
+
+`AdicCompletion I M`は定義から`{f:Πn,M⧸I^n•⊤ // 両立性}`(まさに
+「lim_n M/I^n」そのもの)・`AdicCompletion.of_bijective`
+`[IsAdicComplete I M]→Function.Bijective(AdicCompletion.of I M)`
+が既存で見つかった。ただし`AdicCompletion I R`を**環**として`𝒪_K`と
+同一視する経路(`AdicCompletion.ofAlgEquiv`らしき定義がmathlib-index
+には見えるが`#check`では未解決——別ファイルの`import`が要る見込み、
+未確認)は一般的すぎて経由するのが重いと判断し、**単位群だけを狙う
+自前の構成**に設計を切り替えた:
+
+1. `CompatibleUnits K hπmax : Subgroup (Πn,(𝒪[K.carrier]⧸Ideal.span
+   {π^n})ˣ)` を、`Ideal.Quotient.factor`(`m≤n`のとき`span{π^n}≤
+   span{π^m}`から`R⧸span{π^n}→+*R⧸span{π^m}`、mathlib既存)を
+   `Units.map`で持ち上げた遷移写像に関する両立性で切り出す。
+2. `φ:(𝒪[K.carrier])ˣ→*CompatibleUnits K hπmax`(各`u`をその
+   商への像の族へ)を構成する——遷移写像との可換性は`Ideal.Quotient.
+   factor`の合成則から自動。
+3. **単射性**: `IsHausdorff`(`IsAdicComplete`の一部、既存インスタンス)
+   ——`∀n,x≡0[SMODπ^n]⟹x=0`——を`x:=u-1`(`u∈ker φ`)に直接適用する
+   だけ。新しい数学的内容は無い。
+4. **全射性**: 与えられた両立系`(v_n)`をまず**単位性を忘れて元の族**
+   として見て、`IsPrecomplete`(同じく`IsAdicComplete`の一部)を適用し
+   極限元`L∈𝒪_K`を得る(`L≡v_n mod π^n`が全`n`で成り立つ)。次に
+   `n=1`の場合(`L mod π=v_1`、`v_1`は仮定より単位=剰余体の非零元)
+   から`L∉maximalIdeal`、局所環の標準事実「極大イデアルに属さない
+   元は単位」(`IsLocalRing`まわりに既存のはず)で`L`自身が`𝒪_K`の
+   単位であることを結論し、`φ(L)=(v_n)`を確認する。
+
+★見積り: 1〜4はどれも「既存の一般論(Hausdorff・Precomplete・
+局所環の単位判定)を直接呼ぶだけ」で、新しい数学的困難は無いと
+見ている。次に戻るなら1(`CompatibleUnits`の定義)から着手するのが
+具体的な出発点——4の「極大イデアルに属さない元は単位」の正確な
+補題名(`IsLocalRing.isUnit_of_...`系のはず)の確認が必要。
+
+その先(まだ設計止まり、未着手): `CompatibleUnits`と
+`principalUnitsQuotientEquiv`(既出、`(𝒪_K)^×⧸principalUnits K π n
+≃*(𝒪_K/π^n)^×`)を各`n`で自然に繋ぐ可換四角形を示し、
+`reciprocityMap_pred_eq_map_succ`(既出)と合わせて
+`reciprocityMapLimit:Gal(K.closure/K.carrier)→CompatibleUnits`
+(あるいは`≃*(𝒪_K)^×`)を組み立てる、という最終工程が残る。
+
+## 続報(同日、★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+節目——(i)`𝒪_K^×≅lim_n(𝒪_K/π^n)^×`を完成、`Found/PGC/UnitsInverseLimit.lean`
+新規、commit準備中): 設計どおり自前構成でsorry無しに確立した
+
+前回の設計方針(`AdicCompletion`の一般論を経由せず、単数群だけを
+直接構成する)を実際に組んだ。`unitReductionTransition`(遷移写像、
+`Ideal.Quotient.factor`+`Units.map`)・`CompatibleUnits`(両立系の
+なす`Subgroup`)・`unitReductionHom`(`𝒪_K^×→CompatibleUnits`)を
+定義し、以下を確立:
+
+- **単射性**(`unitReductionHom_injective`): 核の元`u`について
+  `u-1≡0[SMOD(maximalIdeal)^n•⊤]`が全`n`で成り立つことを示し、
+  `IsHausdorff.haus`(`IsAdicComplete`の一部、既存インスタンス)に
+  直接渡すだけ。
+- **全射性**(`unitReductionHom_surjective`): 与えられた両立系の各
+  成分を`Ideal.Quotient.mk_surjective`で(単位性を忘れて)`𝒪_K`の
+  元へ持ち上げ、両立性を`Ideal.Quotient.factor_mk`で言い換えて
+  `IsPrecomplete.prec`に渡し、極限元`L`を得る。`n=1`の場合(仮定の
+  単位性、剰余体が非零)から`L∉maximalIdeal`を示し、局所環の標準
+  事実(`IsLocalRing.notMem_maximalIdeal`)で`L`自身が単位である
+  ことを結論した。
+
+`unitReductionEquiv:𝒪_K^×≃*CompatibleUnits K hπmax`
+(`MulEquiv.ofBijective`)としてまとめた——これで節目(5)の部品(i)が
+完全に解決した。★躓いた点(小さいが記録に値する): `SModEq.zero`
+(`x≡0`専用)では`f m≡f n`型の関係を直接扱えず`SModEq.sub_mem`
+(`x≡y↔x-y∈U`)に切り替える必要があった。`I^n•⊤`は`Ideal`として見た
+`I^n`にdefeqだが`simp only[smul_eq_mul,Ideal.mul_top]`で明示的に
+均さないと`Ideal.Quotient.eq`とのパターンマッチが噛み合わない場面が
+複数あった。`not_isUnit_zero`には剰余環の`Nontrivial`インスタンスが
+自動では出ず、`Submodule.Quotient.nontrivial_iff`+
+`Ideal.IsPrime.ne_top'`で明示的に用意する必要があった。
+
+★次の段階(節目(5)の残り、部品(ii)): `CompatibleUnits`と
+`principalUnitsQuotientEquiv`を各`n`で自然に繋ぐ可換四角形、
+`reciprocityMap_pred_eq_map_succ`と合わせた
+`reciprocityMapLimit:Gal(K.closure/K.carrier)→𝒪_K^×`(`unitReduction
+Equiv`経由で`CompatibleUnits`から`𝒪_K^×`へ戻す)の構成、そして
+その全射性・単射性(後者は`reciprocityMap`自体の単射性が前提——
+現状未確立、`unitActionQuotientBijOn_injective`からの帰結のはずだが
+要再確認)。これが完成すれば`galoisReciprocityEquiv`(既出、各段の
+主定理)と組み合わせて`Gal(K.closure/K.carrier)`の完全に分岐した
+部分の相互律が閉じる。
