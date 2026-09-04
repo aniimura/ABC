@@ -273,4 +273,116 @@ theorem awayOne_fin2_freeFinite {R : Type*} [CommRing R] :
   refine ⟨?_, Module.Finite.of_equiv_equiv ιR ιB he⟩
   exact Module.Free.of_equiv e
 
+/-- **`A:=R`・`B:=Fin 2 → R`・`p:=1` での witness、条件 (ii)(trace が
+`B` を `A` へ写す)**。`p=1` の場合は自明——`algebraMap R (Localization.
+Away 1)` 自体が全単射(`IsLocalization.atUnit`)なので、**どんな元でも**
+その原像が `R` に存在する。trace の値そのものを計算する必要すら無い。 -/
+theorem awayOne_fin2_trace {R : Type*} [CommRing R] :
+    letI := awayAlgebra (1:R) (A := R) (B := Fin 2 → R)
+    ∀ b : Fin 2 → R, ∃ a : R,
+      Algebra.trace (Localization.Away (1:R)) (Localization.Away (algebraMap R (Fin 2 → R) (1:R)))
+          (algebraMap (Fin 2 → R) (Localization.Away (algebraMap R (Fin 2 → R) (1:R))) b)
+        = algebraMap R (Localization.Away (1:R)) a := by
+  letI := awayAlgebra (1:R) (A := R) (B := Fin 2 → R)
+  intro b
+  have hbijR : Function.Bijective (algebraMap R (Localization.Away (1:R))) := by
+    have e : R ≃ₐ[R] Localization.Away (1:R) := IsLocalization.atUnit R (Localization.Away (1:R)) (1:R) isUnit_one
+    have heq : (e : R →+* Localization.Away (1:R)) = algebraMap R (Localization.Away (1:R)) := by
+      ext x; exact e.commutes x
+    rw [← heq]; exact e.bijective
+  obtain ⟨a, ha⟩ := hbijR.2
+    (Algebra.trace (Localization.Away (1:R)) (Localization.Away (algebraMap R (Fin 2 → R) (1:R)))
+      (algebraMap (Fin 2 → R) (Localization.Away (algebraMap R (Fin 2 → R) (1:R))) b))
+  exact ⟨a, ha.symm⟩
+
+/-- `diagonalCompare p` の純テンソルでの値。`f0 := algebraMap B Bp` を
+両成分に施すだけ(`f0` は `B` の局所化への自然な写像そのもの——
+`IsScalarTower.toAlgHom A B Bp` を `IsScalarTower.toAlgHom_apply` で
+`algebraMap B Bp` に戻す)。条件 (iii) の witness 構成の土台。 -/
+theorem diagonalCompare_tmul {A B : Type*} [CommRing A] [CommRing B] [Algebra A B] (p : A) (b1 b2 : B) :
+    letI := awayAlgebra p (A := A) (B := B)
+    haveI := awayScalarTower p (A := A) (B := B)
+    diagonalCompare p (b1 ⊗ₜ[A] b2)
+      = (algebraMap B (Localization.Away (algebraMap A B p)) b1) ⊗ₜ[Localization.Away p]
+        (algebraMap B (Localization.Away (algebraMap A B p)) b2) := by
+  letI := awayAlgebra p (A := A) (B := B)
+  haveI := awayScalarTower p (A := A) (B := B)
+  unfold diagonalCompare
+  simp only [Algebra.TensorProduct.lift_tmul, AlgHom.comp_apply, Algebra.TensorProduct.includeLeft_apply,
+    IsScalarTower.toAlgHom_apply, AlgHom.coe_restrictScalars', Algebra.TensorProduct.includeRight_apply]
+  rw [Algebra.TensorProduct.tmul_mul_tmul]
+  simp
+
+/-- **`algebraMap B Bp` が全射ならば `diagonalCompare p` も全射**。
+`Bp ⊗_{Ap} Bp` の任意の元は純テンソルの有限和(`TensorProduct.
+induction_on`)なので、各純テンソル `x⊗y` を `algebraMap B Bp` の全射性
+で `f0(b1)⊗f0(b2)`(`diagonalCompare_tmul` より `diagonalCompare p
+(b1⊗ₜb2)` に等しい)の形に引き戻し、和で閉じる。条件 (iii) は
+`p^n • elem Ap Bp` という**特定の1点**への到達可能性を要求するだけ
+なので、全射性さえ言えれば `elem` の値そのものを計算する必要が無い
+(`elem` が `Exists.choose` で非構成的に定義されているため、これは
+本質的な簡略化——値を計算せず全射性だけで押し切る)。 -/
+theorem diagonalCompare_surjective_of_algebraMap_surjective {A B : Type*} [CommRing A] [CommRing B] [Algebra A B]
+    (p : A) (hsurj : Function.Surjective (algebraMap B (Localization.Away (algebraMap A B p)))) :
+    letI := awayAlgebra p (A := A) (B := B)
+    Function.Surjective (diagonalCompare (A := A) (B := B) p) := by
+  letI := awayAlgebra p (A := A) (B := B)
+  haveI := awayScalarTower p (A := A) (B := B)
+  intro z
+  refine TensorProduct.induction_on z ⟨0, map_zero _⟩ ?_ ?_
+  · intro x y
+    obtain ⟨b1, hb1⟩ := hsurj x
+    obtain ⟨b2, hb2⟩ := hsurj y
+    exact ⟨b1 ⊗ₜ[A] b2, by rw [diagonalCompare_tmul, hb1, hb2]⟩
+  · rintro x y ⟨ex, hex⟩ ⟨ey, hey⟩
+    exact ⟨ex + ey, by rw [map_add, hex, hey]⟩
+
+/-- **`A:=R`・`B:=Fin 2 → R`・`p:=1` での witness、条件 (iii)
+(idempotent `p^n e_{B/A}` が `B⊗_AB` の像に入る)**。`p=1` なので
+`p^n=1`・`1•x=x`——`elem Ap Bp` の値そのものを問わず、
+`algebraMap B Bp` の全射性(`p=1`単元なので `hbijB`)から
+`diagonalCompare_surjective_of_algebraMap_surjective` で`elem Ap Bp`
+自体の原像を直接引けば良い。 -/
+theorem awayOne_fin2_idempotent {R : Type*} [CommRing R] :
+    letI := awayAlgebra (1:R) (A := R) (B := Fin 2 → R)
+    haveI := awayOne_fin2_etale (R := R)
+    haveI := (awayOne_fin2_freeFinite (R := R)).2
+    ∀ n : ℕ, 0 < n → ∃ e : TensorProduct R (Fin 2 → R) (Fin 2 → R), diagonalCompare (1:R) e
+      = (1:R)^n • Algebra.FormallyUnramified.elem (Localization.Away (1:R))
+          (Localization.Away (algebraMap R (Fin 2 → R) (1:R))) := by
+  letI := awayAlgebra (1:R) (A := R) (B := Fin 2 → R)
+  haveI := awayOne_fin2_etale (R := R)
+  haveI := (awayOne_fin2_freeFinite (R := R)).2
+  intro n _
+  have hunitB : IsUnit (algebraMap R (Fin 2 → R) (1:R)) := by rw [map_one]; exact isUnit_one
+  have hbijB : Function.Bijective (algebraMap (Fin 2 → R) (Localization.Away (algebraMap R (Fin 2 → R) (1:R)))) := by
+    have e : (Fin 2 → R) ≃ₐ[Fin 2 → R] Localization.Away (algebraMap R (Fin 2 → R) (1:R)) :=
+      IsLocalization.atUnit (Fin 2 → R) (Localization.Away (algebraMap R (Fin 2 → R) (1:R))) (algebraMap R (Fin 2 → R) (1:R)) hunitB
+    have heq : (e : (Fin 2 → R) →+* Localization.Away (algebraMap R (Fin 2 → R) (1:R)))
+        = algebraMap (Fin 2 → R) (Localization.Away (algebraMap R (Fin 2 → R) (1:R))) :=
+      RingHom.ext (fun x => e.commutes x)
+    rw [← heq]; exact e.bijective
+  have hsurj := diagonalCompare_surjective_of_algebraMap_surjective (A := R) (B := Fin 2 → R) (1:R) hbijB.2
+  obtain ⟨e, he⟩ := hsurj (Algebra.FormallyUnramified.elem (Localization.Away (1:R))
+      (Localization.Away (algebraMap R (Fin 2 → R) (1:R))))
+  exact ⟨e, by rw [he, one_pow, one_smul]⟩
+
+/-- **`Definition 2.1`(`isAlmostEtaleCovering`)の non-vacuous witness、
+完成**。`A:=R`・`B:=Fin 2 → R`・`p:=1` を選ぶと条件 (i)(ii)(iii) が
+全て成立する——`awayOne_fin2_freeFinite`・`awayOne_fin2_etale`
+(条件 (i))・`awayOne_fin2_trace`(条件 (ii))・`awayOne_fin2_idempotent`
+(条件 (iii))を貼り合わせるだけ。 -/
+theorem awayOne_fin2_isAlmostEtaleCovering {R : Type*} [CommRing R] :
+    IsAlmostEtaleCovering (A := R) (B := Fin 2 → R) (1:R) := by
+  unfold IsAlmostEtaleCovering
+  refine ⟨(awayOne_fin2_freeFinite (R := R)).1, (awayOne_fin2_freeFinite (R := R)).2,
+    awayOne_fin2_etale (R := R), ?_, ?_⟩
+  · exact awayOne_fin2_trace (R := R)
+  · exact awayOne_fin2_idempotent (R := R)
+
+/-- 非空虚性の具体例(`R := ℤ`)。`Fin 2 → ℤ` が `ℤ` 上 `p:=1` で
+almost étale covering になる、という具体的なインスタンスが実在する。 -/
+example : IsAlmostEtaleCovering (A := ℤ) (B := Fin 2 → ℤ) (1:ℤ) :=
+  awayOne_fin2_isAlmostEtaleCovering (R := ℤ)
+
 end ABC3.Found.Falt1

@@ -4362,3 +4362,63 @@ of_equiv`等がinstance探索に失敗する——証明の最初の行で`letI`
 `awayOne_fin2_etale`・`awayOne_fin2_freeFinite`(`Definition 2.1`の
 witness、`A:=R`・`B:=Fin2→R`・`p:=1`の場合の条件(i)の`Etale`・
 `Free`・`Finite`部分)。
+
+## 45. `Exists.choose`で非構成的に定義された的の元(`elem`等)への到達を
+示す時、**その元を計算しようとせず、経由する写像の全射性だけを示す**
+と、`Exists.choose`の中身を一切知らずに済む(2026-09-05)
+
+**症状**: `Algebra.FormallyUnramified.elem R S : S⊗[R]S`(diagonal
+idempotent)のような、`(iff_exists_tensorProduct.mp inferInstance)
+.choose`で定義された元は、**mathlibに具体的な計算式が無い**
+(存在と一意特徴付けの性質——`lmul_elem`・`one_tmul_sub_tmul_one_mul_
+elem`——しか使えない)。`∃e, f e = elem R' S'`(`f`は何らかの環準同型
+から誘導されるテンソル積上の写像)を示したい時、素朴には「`elem R S`
+を明示的な元(`e1⊗e1+e2⊗e2`等)だと特定してから`f`で送る」という
+経路を考えがちだが、これは`elem R' S'`が「たまたまその元と等しい」
+ことを`Exists.choose`の非構成性のせいで**別途、一意性補題を経由して
+証明する**必要が生じ、大掛かりになる(一意性補題自体もmathlibに無い)。
+
+**直し方**: 目的の元(`elem R' S'`)を計算・特定しようとせず、
+**`f`が全射であることだけを示す**——全射なら`elem R' S'`が何であれ
+(値を一切知らなくても)`∃e, f e = elem R' S'`は`f`の全射性の定義
+そのものから直ちに従う。全射性は`TensorProduct.induction_on`
+(`zero`・`tmul`・`add`の3ケース)で、`tmul`ケースだけ「土台の環準同型
+`f0:B→Bp`が全射」という**遥かに単純な事実**(今回は`p`が単元である
+ことからの`IsLocalization.atUnit`の全単射性)に帰着させれば良い。
+```lean
+-- f0 が全射なら、f0を両成分に施すだけの写像も全射
+theorem diagonalCompare_surjective_of_algebraMap_surjective ... (hsurj : Function.Surjective f0) :
+    Function.Surjective (diagonalCompare p) := by
+  intro z
+  refine TensorProduct.induction_on z ⟨0, map_zero _⟩ ?_ ?_
+  · intro x y
+    obtain ⟨b1, hb1⟩ := hsurj x; obtain ⟨b2, hb2⟩ := hsurj y
+    exact ⟨b1 ⊗ₜ b2, by rw [diagonalCompare_tmul, hb1, hb2]⟩
+  · rintro x y ⟨ex, hex⟩ ⟨ey, hey⟩
+    exact ⟨ex + ey, by rw [map_add, hex, hey]⟩
+-- 使う側: elem の値を一切知らずに existence が出る
+obtain ⟨e, he⟩ := hsurj (Algebra.FormallyUnramified.elem Ap Bp)
+```
+注意点: `letI`/`haveI`を型シグネチャに埋め込んだ定理(`diagonalCompare`
+本体等)を`Function.Surjective (diagonalCompare p)`のように**引数無し
+で関数として渡す**と、`diagonalCompare`の暗黙引数`{A B}`のうち`p`の
+型からだけでは決まらない方(`B`)が推論できず`typeclass instance
+problem is stuck`になる——`diagonalCompare (A := A) (B := B) p`と
+**明示的に埋める**必要がある(`#1`の変種、関数を値として渡す時は
+暗黙引数を推論に任せきらない)。
+
+もう1点: `Algebra.FormallyUnramified.elem Ap Bp`のような`[Formally
+Unramified][EssFiniteType]`要求の項を**定理の型シグネチャ内**で使う
+時、`Algebra.Etale`・`Module.Finite`からこれらを`infer_instance`で
+導出できても、その導出元の`haveI`は**シグネチャ自身の中で**(証明
+本体の中ではなく)`letI := ...; haveI := ...; <本体の型>`の形で先に
+宣言しておく必要がある——証明本体内の`haveI`は「型を検査する時点」
+より後に実行されるため、型そのものの中の`elem`の要求するインスタンス
+解決には間に合わない(`IsAlmostEtaleCovering`・`diagonalCompare`
+自身が既にこの`letI`/`haveI`前置パターンを使っている理由)。
+
+実例: `lean/ABC3/Found/Falt1/AlmostEtale.lean`の
+`diagonalCompare_tmul`・`diagonalCompare_surjective_of_algebraMap_
+surjective`・`awayOne_fin2_idempotent`・`awayOne_fin2_
+isAlmostEtaleCovering`(`Definition 2.1`の non-vacuous witness、
+条件(iii)・最終組み立て)。

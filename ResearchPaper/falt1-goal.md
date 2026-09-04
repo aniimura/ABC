@@ -3552,6 +3552,51 @@ mathlib での正確な組み立て方は未確認)。
       `p^n e_{B/A}`が`B⊗_AB`の像に入る)の2点のみ——これが埋まれば
       §2(4項目)のうち`Definition 2.1`が初めて non-vacuous に Found と
       なる、§2-4(11項目)の総ブロック状態への最初の穴になる。
+
+      ★★★★★★★★★★★2026-09-05(続)、**残る条件(ii)(trace)・条件(iii)
+      (idempotent)も同じセッションで完成させ、`Definition 2.1`の
+      non-vacuous witness を`awayOne_fin2_isAlmostEtaleCovering`として
+      完全に組み立てた**。
+
+      条件(ii)は**驚くほど自明だった**——`p=1`なので`algebraMap R
+      (Localization.Away 1)`自体が全単射(条件(i)の`hbijR`と同じ事実)、
+      すなわち**どんな元にも原像がある**。trace の値を計算する必要すら
+      無く、単に`hbijR.2`(全射性)を trace の値に適用するだけ。
+
+      条件(iii)は`p^n=1`(`p=1`なので)・`1•x=x`より`∃e, diagonalCompare
+      1 e = elem Ap Bp`に帰着する。ここで鍵となる発見: **`elem Ap Bp`
+      の値を計算・特定しようとせず、`diagonalCompare 1`の全射性だけを
+      示せば良い**(`elem`は`Exists.choose`で非構成的に定義されており、
+      具体的な計算式がmathlibに無いため、値を特定する経路は一意性補題
+      を要し大掛かりになる——全射性経由はこれを完全に回避する)。
+      `diagonalCompare p`の純テンソルでの値を`diagonalCompare_tmul`
+      (`f0 := algebraMap B Bp`を両成分に施すだけ、と直接計算で確認)
+      として切り出し、`f0`が全射なら`diagonalCompare p`も全射
+      (`TensorProduct.induction_on`の3ケースで、`tmul`ケースだけ`f0`の
+      全射性に帰着させる)ことを`diagonalCompare_surjective_of_
+      algebraMap_surjective`として一般に証明した。`p=1`の場合`f0`は
+      単元での局所化写像なので全単射(条件(i)の`hbijB`と同じ)——これを
+      適用して`elem Ap Bp`自体への原像を直接引くだけで条件(iii)が
+      閉じた。
+
+      最後に`awayOne_fin2_isAlmostEtaleCovering : IsAlmostEtaleCovering
+      (A:=R)(B:=Fin2→R)(1:R)`として(i)(ii)(iii)を`refine ⟨_,_,_,?_,?_⟩`
+      で貼り合わせ、`R:=ℤ`での具体例(`example : IsAlmostEtaleCovering
+      (A:=ℤ)(B:=Fin2→ℤ)(1:ℤ) := ...`)で非空虚性を確認した。まずmcp
+      REPL(`lean_check`)で全パーツを個別に検証してから実ファイルへ
+      移植し、**移植後も1回で`lake build`が通った**。プロジェクト全体
+      の`lake build`(6590 jobs)・`node tools/check.mjs --brief`
+      (NG13件、既存分で不変)も確認済み。手法を`tools/lean-idioms.md`
+      #45に記録(「`Exists.choose`の元への到達は、値を計算せず経由する
+      写像の全射性だけで示す」という一般に使える戦略)。
+
+      **結論**: `Definition 2.1`(`IsAlmostEtaleCovering`)は、定義の
+      formalization(sorry無し、既に完成済みだった)に加えて、**その
+      定義を満たす具体的な非空虚な実例が実在することまで含めて完全に
+      Found になった**——`Falt1 Chapter I`の13項目のうち、`Lemma 1.1`
+      に続く**2件目**。§2-4(11項目)の総ブロック状態に初めて風穴が
+      開いた。`Theorem 2.2`-`2.4`・§3・§4は引き続き Hochschild
+      cohomology を要し未着手のまま。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
