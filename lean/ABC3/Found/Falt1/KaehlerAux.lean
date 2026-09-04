@@ -2243,4 +2243,88 @@ theorem fractionRingMapOfInjective_algebraMap {V0 Wn : Type*} [CommRing V0] [IsD
   unfold fractionRingMapOfInjective IsFractionRing.map
   rw [IsLocalization.map_eq, ← IsScalarTower.algebraMap_apply]
 
+/-!
+## `V_1 ≃ AdjoinRoot(X^n-π)` そのもの(2026-09-04、驚きの単純化)
+
+`hspan_eq` を接続するには `Algebra V1 Wn1` が実際の instance として要る
+——`integralClosure` の一般の functoriality(`AlgHom.mapIntegralClosure`
++ `IsIntegral.tower_top` の合成)を経由するより、**`V1` が実は
+`AdjoinRoot(X^n-π)`(元の多項式、`FractionRing` へ base change する
+「前」の形)そのものと同型**であることを示す方が遥かに単純だと判明した
+——`minpoly.equivAdjoin`(`AdjoinRoot(minpoly R x) ≃ₐ[R] adjoin R {x}`)
+と monogenicity(`adjoin_eq_integralClosure_of_isEisensteinAt`、`adjoin
+= integralClosure`)を貼り合わせるだけ。これで `Vₙ→Vₙ₊₁` の橋渡しは
+`AdjoinRoot.map`(`V0` 上の**多項式環**の間の写像、体を経由しない)
+だけで済み、`algHomAdjoinRootOfCompat`(フラクション体を経由する版)
+すら不要になる可能性がある——次回はこちらを軸に組み立て直すとよい。 -/
+
+set_option maxHeartbeats 400000 in
+/-- **`V_1 := integralClosure V0 (AdjoinRoot(X^n-π の base change))` は
+`AdjoinRoot(X^n-π)`(base change する前の、`V0[X]` 上そのままの
+多項式の商)と `V0`-代数として同型**。`minpoly.equivAdjoin` +
+monogenicity の合成。 -/
+noncomputable def falt1AdjoinRootEquivIntegralClosure
+    {V0 : Type*} [CommRing V0] [IsDomain V0] [IsDiscreteValuationRing V0] (π : V0) (n : ℕ)
+    (hn : (n : FractionRing V0) ≠ 0) (hπne0 : algebraMap V0 (FractionRing V0) π ≠ 0)
+    (hprime : (Ideal.span ({π} : Set V0)).IsPrime) (hnotsq : π ∉ (Ideal.span ({π} : Set V0)) ^ 2)
+    (hnpos : 0 < n)
+    [IsDedekindDomain (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))]
+    [Module.IsTorsionFree V0 (integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))))] :
+    AdjoinRoot (Polynomial.X ^ n - Polynomial.C π : Polynomial V0) ≃ₐ[V0]
+      integralClosure V0 (AdjoinRoot (((Polynomial.X ^ n - Polynomial.C π : Polynomial V0)).map
+        (algebraMap V0 (FractionRing V0)))) := by
+  set f : Polynomial V0 := Polynomial.X ^ n - Polynomial.C π with hfdef
+  set fK : Polynomial (FractionRing V0) := f.map (algebraMap V0 (FractionRing V0)) with hfKdef
+  have hirr : Irreducible fK :=
+    eisenstein_X_pow_sub_C_irreducible_map π n hnpos hprime hnotsq
+  haveI : Fact (Irreducible fK) := ⟨hirr⟩
+  have hmonicK : fK.Monic := (Polynomial.monic_X_pow_sub_C π hnpos.ne').map _
+  set PB := AdjoinRoot.powerBasis hirr.ne_zero with hPBdef
+  have hPBgen : PB.gen = AdjoinRoot.root fK := AdjoinRoot.powerBasis_gen hirr.ne_zero
+  have hBint : IsIntegral V0 PB.gen := by
+    rw [hPBgen]
+    have hmonic : f.Monic := Polynomial.monic_X_pow_sub_C π hnpos.ne'
+    refine ⟨f, hmonic, ?_⟩
+    show Polynomial.aeval (AdjoinRoot.root fK) f = 0
+    rw [← Polynomial.aeval_map_algebraMap (A := FractionRing V0)]
+    rw [Polynomial.aeval_def, AdjoinRoot.algebraMap_eq]
+    exact AdjoinRoot.eval₂_root fK
+  have hminpolyK : minpoly (FractionRing V0) PB.gen = fK := by
+    rw [hPBgen]
+    have h := AdjoinRoot.minpoly_root hirr.ne_zero (f := fK)
+    rw [hmonicK.leadingCoeff, inv_one, Polynomial.C_1, mul_one] at h
+    exact h
+  have hEqmin : minpoly V0 PB.gen = f := by
+    have hEq : minpoly (FractionRing V0) PB.gen = (minpoly V0 PB.gen).map (algebraMap V0 (FractionRing V0)) :=
+      minpoly.isIntegrallyClosed_eq_field_fractions' (FractionRing V0) hBint
+    rw [hminpolyK] at hEq
+    have hEq2 : f.map (algebraMap V0 (FractionRing V0)) = (minpoly V0 PB.gen).map (algebraMap V0 (FractionRing V0)) := hEq
+    exact (Polynomial.map_injective _ (IsFractionRing.injective V0 (FractionRing V0)) hEq2).symm
+  have hπ0 : π ≠ 0 := fun h => hπne0 (by rw [h]; simp)
+  have hprimeπ : Prime π := (Ideal.span_singleton_prime hπ0).mp hprime
+  have hEis : (minpoly V0 PB.gen).IsEisensteinAt (Ideal.span ({π} : Set V0)) := by
+    rw [hEqmin]; exact isEisensteinAt_X_pow_sub_C π n hnpos hprime hnotsq
+  have hadjoinEq : Algebra.adjoin V0 ({PB.gen} : Set (AdjoinRoot fK)) = integralClosure V0 (AdjoinRoot fK) :=
+    adjoin_eq_integralClosure_of_isEisensteinAt hBint hprimeπ.irreducible hEis
+  have hL : Module.IsTorsionFree V0 (AdjoinRoot fK) := by
+    have hinj : Function.Injective (algebraMap V0 (AdjoinRoot fK)) := by
+      rw [IsScalarTower.algebraMap_eq V0 (FractionRing V0) (AdjoinRoot fK)]
+      exact (algebraMap (FractionRing V0) (AdjoinRoot fK)).injective.comp
+        (IsFractionRing.injective V0 (FractionRing V0))
+    refine ⟨fun r hr => ?_⟩
+    have hr0 : r ≠ 0 := by
+      rintro rfl
+      exact zero_ne_one (hr.left (show (0:V0) * 0 = 0 * 1 by simp))
+    have hr0' : algebraMap V0 (AdjoinRoot fK) r ≠ 0 := fun h => hr0 (hinj (by rw [h, map_zero]))
+    intro x y hxy
+    simp only [Algebra.smul_def] at hxy
+    exact mul_left_cancel₀ hr0' hxy
+  haveI := hL
+  have e1 := minpoly.equivAdjoin hBint
+  rw [hEqmin] at e1
+  rw [hPBgen] at hadjoinEq
+  exact e1.trans (Subalgebra.equivOfEq _ _ hadjoinEq)
+
 end ABC3.Found.Falt1
