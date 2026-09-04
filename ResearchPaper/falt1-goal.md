@@ -891,6 +891,35 @@ mathlib での正確な組み立て方は未確認)。
     V1 Wₙ₊₁`・`Module.IsTorsionFree V1 Wₙ₊₁`(`ψ` 経由の有限性、
     `Module.Finite.trans`的な議論が要りそう)、`Module.Finite V0 Wₙ₊₁`・
     `Module.IsTorsionFree V0 Wₙ₊₁`(`Wₙ→Wₙ₊₁` と `V0→Wₙ` の合成)。
+
+    ★★2026-09-04、**`Module.Finite/IsTorsionFree V0 V1` も完成した**
+    (`falt1ModuleFiniteV0V1`・`falt1ModuleIsTorsionFreeV0V1`、commit
+    `331b1d9d`)——`Wₙ`側と全く同じ議論を `V0`・`f` に戻すだけ。
+    ★★重要な発見: `Module.IsTorsionFree V0 V1` はこれまで**多くの
+    定理が instance 前提として明示的に要求していた**が、実は毎回
+    この議論で導出可能だったと判明した(既存の証明済み定理群は
+    変更せず、影響範囲を数える余裕が無いため追加のみに留めた——
+    次回、余裕があれば `[Module.IsTorsionFree V0 (...)]` の前提を
+    削って引数を減らすリファクタリングを検討する価値がある)。
+
+    ★★★`Algebra V1 Wₙ₊₁`・`IsScalarTower V0 V1 Wₙ₊₁` も**パターンとしては
+    確認できた**(未commit・named theorem としてのパッケージ化は
+    断念)——`letI := (falt1BaseChangeAlgHom ...).toRingHom.toAlgebra`
+    としてから `IsScalarTower.of_algebraMap_eq` + `ψ.commutes` で
+    `IsScalarTower V0 V1 Wₙ₊₁` が出ることを、1つの大きな `example`
+    ブロック内で実際に確認した(約19秒、sorry 無し)。★ただしこれを
+    **独立した named theorem として `∃`-wrap してパッケージ化しよう
+    とすると**(`Algebra` インスタンスを存在型で包んで返す形)、
+    `refine ⟨inferInstance, ?_⟩` の instance 探索が
+    `«synthesize pending MVars»` でタイムアウトし続けた——
+    tools/lean-idioms.md #29 と同種だが、今回は「instance を戻り値と
+    して`∃`で包む」という**新しい**失敗パターン。★推奨: この種の
+    「これから使う instance を用意する」系の事実は、独立した
+    theorem として証明・命名しようとせず、**実際に
+    `differentIdeal_tower_diamond` を呼び出す箇所で `letI`/`haveI`
+    としてインラインに展開する**のが正攻法——次回はこの方針で
+    直接 `differentIdeal_tower_diamond` の呼び出しに挑むとよい
+    (単独の instance-provider theorem を目指さない)。
    β-(d+1)(δ_n-δ_{n+1})`、`β=min{1,δ_n/(d+1)}`)を整理した形
    `δ_{n+1}≤δ_n-min{1,δ_n/(d+1)}/(d+2)` から `δ_n→0` を、`V_n`・`W_n`
    の具体的構成に一切依存しない**純粋な実数列の不等式**として抽出・
