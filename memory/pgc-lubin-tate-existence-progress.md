@@ -2662,3 +2662,41 @@ eq_pred`(既出)で`u·z`に結んで`y`に至る。★躓いた点無し——�
 Sequence.lean::ΦSeq`と同じ型)と、その後の`reciprocityMapLimit`
 本体・全射性・単射性のみで、新しい数学的困難は今のところ見当たって
 いない。次に戻るなら`Nat.rec`での無限列構成が具体的な出発点。
+
+## 続報(2026-09-05、★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+大きな節目——無限compatible列`(x_n)_{n≥1}`を実際に`Nat.rec`で構成
+した、`Found/PGC/LubinTateGeneratorSequence.lean`新規、commit準備
+中): 数学的には見積りどおりだったが、**新しい配管の罠**を1つ踏み、
+解決した
+
+`PsiGen`(level`m+1`の`ψ_{m+1}`の根を束ねる構造)・`psiGenBase`
+(`m=0`、`ψ_1`の非空性から)・`psiGenStep`(`exists_pi_mul_eq_of_mem_
+iteratedLubinTatePsiTorsionPoints`を適用する1ステップ)を組み、
+`Nat.rec`(パターンマッチの等式コンパイラ経由)で`psiGenSeq:(m:ℕ)→
+PsiGen K...m`を構成した——数学的な中身は前回の見積りどおり、既存の
+`exists_pi_mul_eq_of_mem_iteratedLubinTatePsiTorsionPoints`を積み
+重ねるだけ。
+
+★★★ただし**新しい配管の罠**を1つ踏んだ(`tools/lean-idioms.md`
+#34に記録): 1ステップの「compat性」(`π·(次の生成元)=(前の生成元)`)
+を`theorem foo:<型>:=proof`という通常の形で書こうとすると、
+`Classical.choice`由来の深い(5段)nested`Exists.choose`を経由する
+`proof`の型を、**独立に書いた型注釈と照合させる**段で`whnf`が
+`maxHeartbeats`を100万(既定の5倍)まで上げても止まらなかった——
+個々の射影の等式(`(psiGenStep...).pt=(psiGenStepResult...).pt`
+等)は`rfl`で0.3秒程度で通るのに、**組み合わせて独立に書き直した
+型**との照合だけが刺さるという非対称な挙動を実測した。★解決策:
+型注釈を省略し`noncomputable def foo:=proof`と書いてLeanに型を
+**推論**させることで、独立な型を照合させる工程そのものを消した
+(`psiGenStep_compat`・`psiGenSeq_compat`)——得られる型は見た目
+やや遠回り(`psiGenStepResult`のフィールドを経由する形)になるが、
+個々の射影は必要な瞬間に軽い`rfl`で橋渡しできることを確認済み。
+
+★★★★★これで節目(5)(射影極限`Gal(L_π/K)≅𝒪_K^×`)の**構成的な部品は
+ほぼすべて出揃った**: (a)無限compatible列(今回)、(b)`reciprocityMap`
+のn跨ぎ可換性(`reciprocityMap_pred_eq_map_succ`、既出)、(c)単数群の
+逆極限(`unitReductionEquiv`、既出)。残る最終工程は、これら3つを
+実際に組み合わせて`reciprocityMapLimit:Gal(K.closure/K.carrier)→
+𝒪_K^×`(または`CompatibleUnits`)を定義し、その全射性・単射性を示す
+こと——次に戻るならここが具体的な出発点(単射性は`reciprocityMap`
+自体の単射性が前提になるはずで、まだ確認していない)。

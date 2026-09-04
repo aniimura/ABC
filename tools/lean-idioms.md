@@ -3883,3 +3883,41 @@ corrPieceGlueData X.1 U hU c.C.1.left hα  -- hαを使う、c.α.1.leftを直�
 実例: `lean/ABC3/Found/CorrHyp/Instance4.lean`の`corrPieceGlueDataOfCorr`
 /`corrPieceGlueDataOfCorr_cover`(`corrHypInstance4`の`Corr`実データを
 `ExtLimit.lean`の`corrPieceGlueData`へ接続する配線、コミット`2471cb91`)。
+
+## 34. `Classical.choice`由来の深いnested `Exists.choose`を経由する項は、
+**独立に書いた型注釈と照合させる**(`theorem`+`exact`)と`whnf`が
+`maxHeartbeats`を100万まで上げても止まらない——型注釈を省略し
+`noncomputable def`でLeanに**推論させる**と一瞬で通る(2026-09-05)
+
+**症状**: `Nat.rec`で無限列を組む際、各段で`Classical.choice`
+(`Exists.choose`)を5段ほどネストして使う構成(`「1段分の全射性」
+定理の返す∃を5個choose_specで剥がしてstructure literalへ詰める`)
+から得た値`v := {pt:=hex.choose, ...}`について、「`v`(または`v`を
+経由してさらに別のstructureへ詰め替えたもの)の`.pt`/`.hn`/`.hmem`
+を使った**独立な型注釈**を`theorem foo : <型> := v.hcompat`のように
+書くと、
+```
+(deterministic) timeout at `whnf`, maximum number of heartbeats
+(1000000) has been reached
+```
+で刺さる。`set_option maxHeartbeats`を100万(既定の5倍)まで上げても
+解決しない——単なる「遅い」ではなく、この形の照合自体が実質的に
+終わらない。★★紛らわしい点: **個々の射影の等式**(例:
+`(psiGenStep K...).pt = (psiGenStepResult K...).pt`)は`rfl`で
+0.3秒程度で通る。刺さるのは「複数の射影を組み合わせた独立な型注釈
+を書いて、既存の項がそれに一致するとELABORATORに照合させる」局面
+だけ——個々の部品はいくら軽くても、**組み合わせて独立に書き直した
+型**との照合は別問題として重い、という非対称な挙動。
+
+**直し方**: 型注釈を**省略**する。`theorem foo : <型> := proof`を
+やめて`noncomputable def foo := proof`と書き、Leanに`proof`自身の
+型を**そのまま推論**させる(`#check`で見ると`v.hcompat`が実際に
+証明している`v`自身のフィールドを経由した型になる——見た目は
+遠回りだが、独立な型を照合させる工程が丸ごと消える)。ダウン
+ストリームで「もっと素直な形の型」が要る場面が来たら、そこで
+初めて**個々の射影の`rfl`**(こちらは軽い)で橋渡しする——大きな
+組み合わせ型を一度に照合させようとしないのが鍵。
+
+実例: `lean/ABC3/Found/PGC/LubinTateGeneratorSequence.lean`の
+`psiGenStep_compat`・`psiGenSeq_compat`(無限compatible列の構成、
+コミット準備中)。
