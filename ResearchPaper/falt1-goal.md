@@ -38,9 +38,11 @@ sorry無しで証明した**(`falt1MapBaseChangeInjective`・
 (`FormallySmooth R S ⟹ Subsingleton(H1Cotangent R S)`)・
 `polynomialKaehlerSplit`(`Ω_{V[T]/Z} ≅ (V[T]⊗_VΩ_V)×V[T]` の直和分解)・
 `mapBaseChange_injective_transport`(`mapBaseChange` の単射性を代数同型
-に沿って輸送)。★ただし `Interface.RamificationSetup`(`ℕ` 値の長さ)
-への正式な差し替えは未完了(`Module.length` は `ℕ∞` 値で有限性の証明が
-要る、`differentIdeal_ne_bot` の最後の1条件——分離性の輸送——が未解決)、
+に沿って輸送)。★★(2026-09-04 追加解消)`differentIdeal_ne_bot` の
+最後の1条件(分離性の輸送)も `falt1_differentIdeal_ne_bot` で解決——
+`lemma_1_1_falt1` から `differentIdeal V W ≠ ⊥` の仮定を完全に除去
+できた。★残る逸脱は `Interface.RamificationSetup`(`ℕ` 値の長さ)への
+正式な差し替えのみ(`Module.length` は `ℕ∞` 値で有限性の証明が要る)、
 `.needs` に正直に記録済み。
 
 **Theorem 1.2**(§1 2/2): ★★**未着手。260dpi で物理p.5(印字p.258)を
