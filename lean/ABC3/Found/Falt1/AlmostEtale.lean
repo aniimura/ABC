@@ -1073,10 +1073,11 @@ theorem Tr1map_diagonalCompare {A B : Type u} [CommRing A] [CommRing B] [Algebra
 組み合わせる。`algebraMap B Bp`の単射性(Faltings 自身も「全ての環で
 `p`による乗法は単射」と明記している標準仮定)を経由する。 -/
 theorem remark_iii_trace_identity {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
-    [Algebra.Etale A B] [Module.Finite A B] [Module.Free A B] (p : A) :
+    [Module.Finite A B] [Module.Free A B] (p : A)
+    (hAE : IsAlmostEtaleCovering (A := A) (B := B) p) :
     letI := awayAlgebra p (A := A) (B := B)
-    haveI := isAlmostEtaleCovering_of_etale_general (A := A) (B := B) p |>.2.2.1
-    haveI := (isAlmostEtaleCovering_of_etale_general (A := A) (B := B) p |>.2.1 : Module.Finite _ _)
+    haveI := hAE.2.2.1
+    haveI := (hAE.2.1 : Module.Finite _ _)
     Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))) →
     ∀ (n : ℕ) (e : TensorProduct A B B) (b : B),
     (diagonalCompare p e
@@ -1084,13 +1085,13 @@ theorem remark_iii_trace_identity {A B : Type u} [CommRing A] [CommRing B] [Alge
     algebraMap A B (p ^ n) * b = Tr1map A B ((b ⊗ₜ[A] (1:B)) * e) := by
   letI := awayAlgebra p (A := A) (B := B)
   haveI := awayScalarTower p (A := A) (B := B)
-  haveI hEtale := isAlmostEtaleCovering_of_etale_general (A := A) (B := B) p |>.2.2.1
-  haveI hFinite := (isAlmostEtaleCovering_of_etale_general (A := A) (B := B) p |>.2.1 : Module.Finite _ _)
+  haveI hEtale := hAE.2.2.1
+  haveI hFinite := (hAE.2.1 : Module.Finite _ _)
   intro hf0inj n e b he
   set Ap := Localization.Away p
   set Bp := Localization.Away (algebraMap A B p)
   set f0 := algebraMap B Bp with hf0def
-  haveI hFreeAp : Module.Free Ap Bp := isAlmostEtaleCovering_of_etale_general (A := A) (B := B) p |>.1
+  haveI hFreeAp : Module.Free Ap Bp := hAE.1
   set bB := Module.Free.chooseBasis Ap Bp
   have key1 : Tr1map Ap Bp ((f0 b ⊗ₜ[Ap] (1:Bp)) * (diagonalCompare p e)) = f0 (algebraMap A B (p^n) * b) := by
     rw [he]
@@ -1150,11 +1151,12 @@ attribute [local instance] FractionRing.liftAlgebra
 Faltings の「`m` annihilates」の精神(`ε`を任意に小さく取れる)を
 `finrank`個おきの指数列として実現する。 -/
 theorem trace_ideal_pow_mem_traceIdeal {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
-    [Algebra.Etale A B] [Module.Finite A B] [Module.Free A B] (p : A)
+    [Module.Finite A B] [Module.Free A B] (p : A)
+    (hAE : IsAlmostEtaleCovering (A := A) (B := B) p)
     [IsDedekindDomain A] [IsDedekindDomain B] [Module.IsTorsionFree A B] :
     letI := awayAlgebra p (A := A) (B := B)
-    haveI := isAlmostEtaleCovering_of_etale_general (A := A) (B := B) p |>.2.2.1
-    haveI := (isAlmostEtaleCovering_of_etale_general (A := A) (B := B) p |>.2.1 : Module.Finite _ _)
+    haveI := hAE.2.2.1
+    haveI := (hAE.2.1 : Module.Finite _ _)
     Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))) →
     ∀ (n : ℕ) (e : TensorProduct A B B),
     (diagonalCompare p e
@@ -1163,14 +1165,14 @@ theorem trace_ideal_pow_mem_traceIdeal {A B : Type u} [CommRing A] [CommRing B] 
       ≤ Ideal.span (Set.range (Algebra.trace A B)) := by
   letI := awayAlgebra p (A := A) (B := B)
   haveI := awayScalarTower p (A := A) (B := B)
-  haveI hEtale := isAlmostEtaleCovering_of_etale_general (A := A) (B := B) p |>.2.2.1
-  haveI hFinite := (isAlmostEtaleCovering_of_etale_general (A := A) (B := B) p |>.2.1 : Module.Finite _ _)
+  haveI hEtale := hAE.2.2.1
+  haveI hFinite := (hAE.2.1 : Module.Finite _ _)
   intro hf0inj n e he
   set a := (Ideal.span (Set.range (Algebra.trace A B)) : Ideal A)
   have heq : (1:B) ⊗ₜ[A] (1:B) * e = e := by
     rw [show (1:B) ⊗ₜ[A] (1:B) = (1 : TensorProduct A B B) from rfl, one_mul]
   have hstep1 : algebraMap A B (p^n) ∈ a.map (algebraMap A B) := by
-    have hthis := remark_iii_trace_identity (A := A) (B := B) p hf0inj n e 1 he
+    have hthis := remark_iii_trace_identity (A := A) (B := B) p hAE hf0inj n e 1 he
     rw [mul_one, heq] at hthis
     rw [hthis]
     exact Tr1map_mem_traceIdeal_map e

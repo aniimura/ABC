@@ -279,27 +279,27 @@ open CategoryTheory in
 `Algebra.trace_localization` と `algebraMap B B[1/p]` の単射性を使う
 descent がもう1段要る。この2点が `Theorem 2.4(ii)` に残っている全てである。 -/
 theorem thm_2_4_ii_of_trace_formula {A B M G : Type u} [CommRing A] [CommRing B] [Algebra A B]
-    [Algebra.Etale A B] [Module.Finite A B] [Module.Free A B]
+    [Module.Finite A B] [Module.Free A B]
     [IsDedekindDomain A] [IsDedekindDomain B] [Module.IsTorsionFree A B]
     [Group G] [Fintype G] [MulSemiringAction G B]
     [AddCommGroup M] [Module B M] [Module A M] [IsScalarTower A B M]
     [DistribMulAction G M] [SMulCommClass G A M]
     (hsemi : ∀ (g : G) (b : B) (x : M), g • (b • x) = (g • b) • (g • x))
     (htr : ∀ x : B, algebraMap A B (Algebra.trace A B x) = ∑ g : G, g • x)
-    (p : A)
+    (p : A) (hAE : IsAlmostEtaleCovering (A := A) (B := B) p)
     (hf0inj : letI := awayAlgebra p (A := A) (B := B)
       Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))))
     (n : ℕ) (e : TensorProduct A B B)
     (he : letI := awayAlgebra p (A := A) (B := B)
-      haveI := isAlmostEtaleCovering_of_etale_general (A := A) (B := B) p |>.2.2.1
-      haveI := (isAlmostEtaleCovering_of_etale_general (A := A) (B := B) p |>.2.1 :
-        Module.Finite _ _)
+      haveI := hAE.2.2.1
+      haveI := (hAE.2.1 : Module.Finite _ _)
       diagonalCompare p e
         = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p)
             (Localization.Away (algebraMap A B p)))
     (i : ℕ) (z : groupCohomology (Rep.ofDistribMulAction A G M) (i+1)) :
     (p ^ (n * Module.finrank (FractionRing A) (FractionRing B))) • z = 0 := by
-  have hmem := trace_ideal_pow_mem_traceIdeal p hf0inj n e he (Ideal.mem_span_singleton_self _)
+  have hmem := trace_ideal_pow_mem_traceIdeal p hAE hf0inj n e he
+    (Ideal.mem_span_singleton_self _)
   have hle : (Ideal.span (Set.range (Algebra.trace A B)) : Ideal A)
       ≤ LinearMap.range (Algebra.trace A B) := by
     rw [Ideal.span_le]
@@ -308,6 +308,152 @@ theorem thm_2_4_ii_of_trace_formula {A B M G : Type u} [CommRing A] [CommRing B]
   obtain ⟨b, hb⟩ := hle hmem
   exact transfer_groupCohomology_smul_eq_zero (B := B) hsemi b _
     (by rw [← hb]; exact htr b) i z
+
+/-! ## Galois 被覆の仮定から trace 公式へ(可換環版、mathlib に無い)
+
+`Theorem 2.4(ii)` の「`B[1/p]` は `A[1/p]` の `G` を群とする Galois 被覆」
+という仮定を、Chase–Harrison–Rosenberg 流の標準的な形
+**`B ⊗_A B ≅ Map(G,B)`(`b⊗b' ↦ (g ↦ b·g(b'))`)**で表し、そこから
+trace 公式 `algebraMap A B (tr_{B/A} x) = Σ_{g∈G} g(x)` を導く。
+mathlib の `trace_eq_sum_automorphisms` は体の Galois 拡大専用なので、
+ここが `ResearchPaper/mathlib-gap.json` の `falt1-galois-trace-rings`
+に登記したギャップである。 -/
+
+/-- `Algebra.trace R (ι → R)` は成分の和(対角行列の trace)。
+`Pi.basisFun` で `leftMulMatrix` が対角行列になることから。 -/
+theorem trace_pi {R : Type u} [CommRing R] {ι : Type u} [Fintype ι] [DecidableEq ι] (x : ι → R) :
+    Algebra.trace R (ι → R) x = ∑ i : ι, x i := by
+  rw [Algebra.trace_eq_matrix_trace (Pi.basisFun R ι), Matrix.trace]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [Matrix.diag_apply, Algebra.leftMulMatrix_eq_repr_mul]
+  simp [Pi.basisFun_apply]
+
+/-- **可換環の Galois 拡大に対する trace 公式**(体版
+`trace_eq_sum_automorphisms` の環版、mathlib に無い)。
+Chase–Harrison–Rosenberg の同型 `B ⊗_A B ≃ₐ[B] Map(G,B)`
+(`b⊗b' ↦ (g ↦ b·g(b'))`)から `algebraMap A B (tr_{B/A} x) = Σ_{g∈G} g(x)`
+が出る。証明は3手:(1)`LinearMap.trace_baseChange`で
+`tr_B(B⊗_AB)(1⊗x) = algebraMap A B (tr_{B/A} x)`、(2)`Algebra.trace_eq_of_algEquiv`
+で同型に沿って移す、(3)`trace_pi`で `Map(G,B)` 側の trace を成分和として
+計算する。 -/
+theorem trace_eq_sum_of_chr {A B G : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [Module.Free A B] [Module.Finite A B] [Group G] [Fintype G] [DecidableEq G]
+    [MulSemiringAction G B]
+    (e : TensorProduct A B B ≃ₐ[B] (G → B))
+    (he : ∀ b b' : B, e (b ⊗ₜ[A] b') = fun g => b * g • b') (x : B) :
+    algebraMap A B (Algebra.trace A B x) = ∑ g : G, g • x := by
+  have hlmul : (Algebra.lmul B (TensorProduct A B B) ((1 : B) ⊗ₜ[A] x)).restrictScalars B
+      = LinearMap.baseChange B (Algebra.lmul A B x) := by
+    ext y
+    show (1 : B) ⊗ₜ[A] x * ((1:B) ⊗ₜ[A] y) = _
+    rw [Algebra.TensorProduct.tmul_mul_tmul, mul_one]
+    rfl
+  have h1 : LinearMap.trace B (TensorProduct A B B) (LinearMap.baseChange B (Algebra.lmul A B x))
+      = algebraMap A B (Algebra.trace A B x) := LinearMap.trace_baseChange _ B
+  have h2 : Algebra.trace B (TensorProduct A B B) ((1:B) ⊗ₜ[A] x)
+      = algebraMap A B (Algebra.trace A B x) := by
+    rw [Algebra.trace_apply, ← h1, ← hlmul]
+    rfl
+  have h3 : Algebra.trace B (G → B) (e ((1:B) ⊗ₜ[A] x))
+      = Algebra.trace B (TensorProduct A B B) ((1:B) ⊗ₜ[A] x) :=
+    Algebra.trace_eq_of_algEquiv e _
+  rw [← h2, ← h3, he, trace_pi]
+  exact Finset.sum_congr rfl (fun g _ => one_mul _)
+
+/-- **trace 公式の `B[1/p]` から `B` への descent**。原典は Galois の仮定を
+局所化 `B[1/p]/A[1/p]` の水準で置くので、`B` の水準の trace 公式へ
+降ろす必要がある。`Algebra.trace_localization`(trace の局所化との可換性、
+mathlib)と `algebraMap B B[1/p]` の単射性(Faltings 自身の標準仮定)で
+閉じる。`G` の作用が局所化と両立すること(`hcompat`)は別途要る。 -/
+theorem trace_formula_of_localized {A B G : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [Module.Free A B] [Module.Finite A B] [Group G] [Fintype G]
+    [MulSemiringAction G B] (p : A)
+    [MulSemiringAction G (Localization.Away (algebraMap A B p))]
+    (hcompat : ∀ (g : G) (x : B),
+      g • (algebraMap B (Localization.Away (algebraMap A B p)) x)
+        = algebraMap B (Localization.Away (algebraMap A B p)) (g • x))
+    (hf0inj : Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))))
+    (hloc : letI := awayAlgebra p (A := A) (B := B)
+      ∀ y : Localization.Away (algebraMap A B p),
+        algebraMap (Localization.Away p) (Localization.Away (algebraMap A B p))
+          (Algebra.trace (Localization.Away p) (Localization.Away (algebraMap A B p)) y)
+          = ∑ g : G, g • y)
+    (x : B) :
+    algebraMap A B (Algebra.trace A B x) = ∑ g : G, g • x := by
+  letI := awayAlgebra p (A := A) (B := B)
+  haveI := awayScalarTower p (A := A) (B := B)
+  apply hf0inj
+  have h := hloc (algebraMap B (Localization.Away (algebraMap A B p)) x)
+  rw [Algebra.trace_localization A (Submonoid.powers p) x] at h
+  rw [← IsScalarTower.algebraMap_apply A (Localization.Away p)
+    (Localization.Away (algebraMap A B p))] at h
+  rw [IsScalarTower.algebraMap_apply A B (Localization.Away (algebraMap A B p))] at h
+  rw [h, map_sum]
+  exact Finset.sum_congr rfl (fun g _ => hcompat g x)
+
+attribute [local instance] FractionRing.liftAlgebra in
+open CategoryTheory in
+/-- **`Theorem 2.4(ii)` 前半、原典の仮定の形のまま**。
+
+`B[1/p]` が `A[1/p]` の `G` を群とする Galois 被覆
+(Chase–Harrison–Rosenberg の同型 `e`——**原典の仮定そのもの**)であり、
+`G` の作用が局所化と両立し、`algebraMap B B[1/p]` が単射(Faltings 自身の
+標準仮定)であれば、`Definition 2.1` 条件(iii)の witness の指数 `n` に
+対して `p^{n·[B:A]}` が全ての正次数 `H^{i+1}(G,M)` を零化する。
+条件(iii)は任意の `n` について成り立つので、これは
+「`m` annihilates all higher cohomology `H^i(G,M)`, `i>0`」そのものである。
+
+**almost 性について**: `B` に課しているのは `IsAlmostEtaleCovering A B p`
+(`Definition 2.1` そのもの)だけであり、**`B` 自体が `A` 上 étale である
+必要は無い**——2026-09-05 に `remark_iii_trace_identity`・
+`trace_ideal_pow_mem_traceIdeal` を `IsAlmostEtaleCovering` 仮定の形へ
+一般化した(`almost_swap_annihilate` と同じリファクタ)ことで、
+Faltings の設定(almost étale であって étale ではない)のままで回る。
+
+**逸脱の記録(CLAUDE.md の「逸脱」条項)**: 残る追加仮定は
+(1) `Module.Free A B`・`Module.Finite A B`(原典は `B[1/p]` が
+`A[1/p]` 上 projective としか言わない——`Algebra.trace` が mathlib で
+`Module.Free` を要求することに由来する、このファイル冒頭で既に記録済みの
+逸脱)、(2) `IsDedekindDomain A`/`B`・`Module.IsTorsionFree A B`
+(`trace_ideal_pow_mem_traceIdeal` が `Ideal.relNorm` を使うため)。
+群コホモロジー側(`transfer_groupCohomology_smul_eq_zero`)には
+そのような仮定は一切無い。 -/
+theorem thm_2_4_ii {A B M G : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [Module.Finite A B] [Module.Free A B]
+    [IsDedekindDomain A] [IsDedekindDomain B] [Module.IsTorsionFree A B]
+    [Group G] [Fintype G] [DecidableEq G] [MulSemiringAction G B]
+    [AddCommGroup M] [Module B M] [Module A M] [IsScalarTower A B M]
+    [DistribMulAction G M] [SMulCommClass G A M]
+    (hsemi : ∀ (g : G) (b : B) (x : M), g • (b • x) = (g • b) • (g • x))
+    (p : A) (hAE : IsAlmostEtaleCovering (A := A) (B := B) p)
+    [MulSemiringAction G (Localization.Away (algebraMap A B p))]
+    (hcompat : ∀ (g : G) (x : B),
+      g • (algebraMap B (Localization.Away (algebraMap A B p)) x)
+        = algebraMap B (Localization.Away (algebraMap A B p)) (g • x))
+    (hf0inj : Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))))
+    (e : letI := awayAlgebra p (A := A) (B := B)
+      TensorProduct (Localization.Away p) (Localization.Away (algebraMap A B p))
+        (Localization.Away (algebraMap A B p))
+        ≃ₐ[Localization.Away (algebraMap A B p)] (G → Localization.Away (algebraMap A B p)))
+    (he : letI := awayAlgebra p (A := A) (B := B)
+      ∀ b b' : Localization.Away (algebraMap A B p),
+        e (b ⊗ₜ[Localization.Away p] b') = fun g => b * g • b')
+    (n : ℕ) (t : TensorProduct A B B)
+    (ht : letI := awayAlgebra p (A := A) (B := B)
+      haveI := hAE.2.2.1
+      haveI := (hAE.2.1 : Module.Finite _ _)
+      diagonalCompare p t
+        = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p)
+            (Localization.Away (algebraMap A B p)))
+    (i : ℕ) (z : groupCohomology (Rep.ofDistribMulAction A G M) (i+1)) :
+    (p ^ (n * Module.finrank (FractionRing A) (FractionRing B))) • z = 0 := by
+  letI := awayAlgebra p (A := A) (B := B)
+  haveI := awayScalarTower p (A := A) (B := B)
+  haveI := hAE.1
+  haveI := (hAE.2.1 : Module.Finite _ _)
+  exact thm_2_4_ii_of_trace_formula hsemi
+    (trace_formula_of_localized p hcompat hf0inj (fun y => trace_eq_sum_of_chr e he y))
+    p hAE hf0inj n t ht i z
 
 /-! ## 非空虚性の対照——古典的な「`|G|` が `H^i(G,M)` を零化する」
 

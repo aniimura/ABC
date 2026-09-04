@@ -1711,8 +1711,8 @@
    "minimalForm": "『B が A 上 finite free で G-Galois なら algebraMap A B (tr_{B/A} x) = Σ_{g∈G} g(x)』。フルの CHR 理論は要らない——Falt1 2.4(ii) が使うのはこの 1 本だけである。",
    "nodes": 3,
    "nodesNote": "節点は (1) CHR 型 Galois 拡大の定義、(2) B⊗_AB ≅ Map(G,B) から base change 後の trace 計算、(3) 忠実平坦降下で A へ戻す、の 3 段。加えて原典は B[1/p] の水準で Galois を仮定するので、Algebra.trace_localization と algebraMap B B[1/p] の単射性による B への descent が 1 段(これは既存の道具で書けるので節点には数えない)。",
-   "done": 0,
-   "doneNote": "★2026-09-05 時点で未着手。ただし**この 1 本を仮定 htr として置けば Theorem 2.4(ii) は完成する**ことは確認済み——Found/Falt1/GaloisTransfer.lean の thm_2_4_ii_of_trace_formula(lake build 済み、sorry 無し)。",
+   "done": 3,
+   "doneNote": "★2026-09-05 に 3/3 完成した。Found/Falt1/GaloisTransfer.lean の trace_eq_sum_of_chr —— CHR の同型 B ⊗_A B ≃ₐ[B] Map(G,B) から trace 公式を導く。証明は3手: (1) LinearMap.trace_baseChange(mathlib)で tr_B(B⊗_AB)(1⊗x) = algebraMap A B (tr_{B/A} x)、(2) Algebra.trace_eq_of_algEquiv で同型に沿って移す、(3) 自作の trace_pi(Pi.basisFun で leftMulMatrix が対角行列になる)で Map(G,B) 側の trace を成分和として計算。局所化からの descent も trace_formula_of_localized で閉じた(Algebra.trace_localization + algebraMap B B[1/p] の単射性)。結果として Theorem 2.4(ii) は原典の仮定の形(Galois は B[1/p] の水準)のまま thm_2_4_ii として証明済み。",
    "measuredAt": "2026-09-05"
   },
   "falt1-lemma11-kaehler-composition": {
