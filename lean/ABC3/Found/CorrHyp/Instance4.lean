@@ -78,4 +78,77 @@ theorem lemma_4_1_at_instance4_statement :
     (∀ (X ZK : corrHypInstance4.Space) (_c : Corr corrHypInstance4
       (corrHypInstance4.Ext X) ZK), True) := fun _ _ _ => trivial
 
+/-! ## ロードマップ項目(c')——`corrPieceGlueData`を`Corr`の実データへ代入する
+
+`ExtLimit.lean`の`corrPieceGlueData`(`X:Over BaseK`・`C:Scheme`・
+`α:C⟶(ExtF.obj X).left`・`[IsFinite α][Etale α]`からGlueDataを直接
+与える)を、`corrHypInstance4`の下での`Corr corrHypInstance4 (QcqsExt X) ZK`
+の実データ(`c.C`・`c.α`)へ実際に代入する。`QcqsFEt A B := FEtK A.1 B.1`
+なので`c.α : QcqsFEt c.C (QcqsExt X)`は`{f : c.C.1 ⟶ (QcqsExt X).1 //
+IsFinite f.left ∧ Etale f.left}`の要素——`c.α.1.left`・`c.α.2.1`・
+`c.α.2.2`がそのまま`corrPieceGlueData`の`α`・`[IsFinite α]`・`[Etale α]`
+に対応する。
+
+★配管の罠(新発見、`lean-idioms.md`#31「instances透明度の壁」の新しい
+現れ方): `c.α.1.left`を型注釈なしでそのまま`corrPieceGlueData`へ渡すと、
+`[IsFinite α][Etale α]`の型クラス探索が`(QcqsExt X).1.left`と
+`(ExtF.obj X.1).left`(定義的には等しいが`QcqsExt`は`@[reducible]`でない
+`def`)を`instances`透明度で見分けられず失敗する
+(`failed to synthesize instance ... IsFinite (Over.Hom.left ↑c.α)`、
+たとえ`haveI := c.α.2.1`が直前に効いていても)。**修正**:
+`letI hα : c.C.1.left ⟶ (ExtF.obj X.1).left := c.α.1.left`という
+**明示的な型注釈付きの`letI`**で`hα`の型を構文的に望む形へ固定して
+から使う——これで`instances`透明度でも一致が見える。 -/
+
+open scoped TensorProduct in
+open ABC3.Skeleton.CorrHyp CategoryTheory.Limits in
+/-- **`corrPieceGlueData`を`Corr corrHypInstance4 (QcqsExt X) ZK`の実データ
+(`c.α`)へ接続する**: `X.1.left`のアフィン開`U`ごとに、`c.C`側で対応する
+`c.α⁻¹(piece)`のGlueDataを直接与える——`Lemma 4.1`の`c'.C`構成に向けた、
+`corrHypInstance4`・`QcqsSpace`・`Corr`の実データへの初めての接続。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def corrPieceGlueDataOfCorr (X ZK : QcqsSpace)
+    (c : Corr corrHypInstance4 (QcqsExt X) ZK)
+    (U : X.1.left.Opens) (hU : IsAffineOpen U) : Scheme.GlueData :=
+  letI hα : c.C.1.left ⟶ (ExtF.obj X.1).left := c.α.1.left
+  letI : IsFinite hα := c.α.2.1
+  letI : Etale hα := c.α.2.2
+  corrPieceGlueData X.1 U hU c.C.1.left hα
+
+open scoped TensorProduct in
+open ABC3.Skeleton.CorrHyp CategoryTheory.Limits in
+/-- `corrPieceGlueDataOfCorr`が使う族は、実際に`c.α⁻¹(piece)`(`c.C`側で
+`X.1.left`のアフィン開`U`に対応する片)を覆う——`corrPieceGlueData_cover`
+をそのまま呼ぶだけ。 -/
+theorem corrPieceGlueDataOfCorr_cover (X ZK : QcqsSpace)
+    (c : Corr corrHypInstance4 (QcqsExt X) ZK)
+    (U : X.1.left.Opens) (hU : IsAffineOpen U) :
+    letI hα : c.C.1.left ⟶ (ExtF.obj X.1).left := c.α.1.left
+    letI : IsFinite hα := c.α.2.1
+    letI : Etale hα := c.α.2.2
+    letI := pieceAlgebra X.1 U hU
+    letI : Algebra (Γ(X.1.left, U) ⊗[ℚ] ℝ) Γ(c.C.1.left, hα ⁻¹ᵁ (pullback.fst X.1.hom toBaseK ⁻¹ᵁ U)) :=
+      ((Scheme.Hom.appLE hα (pullback.fst X.1.hom toBaseK ⁻¹ᵁ U)
+        (hα ⁻¹ᵁ (pullback.fst X.1.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.comp
+        (pieceRingEquiv X.1 U hU).symm.toRingHom).toAlgebra
+    haveI : Algebra.Etale (Γ(X.1.left, U) ⊗[ℚ] ℝ) Γ(c.C.1.left, hα ⁻¹ᵁ (pullback.fst X.1.hom toBaseK ⁻¹ᵁ U)) :=
+      piece_algebraEtale_tensor X.1 U hU c.C.1.left hα
+    letI h := exists_finite_standardEtaleCover (Γ(X.1.left, U) ⊗[ℚ] ℝ)
+      Γ(c.C.1.left, hα ⁻¹ᵁ (pullback.fst X.1.hom toBaseK ⁻¹ᵁ U))
+    (⨆ i ∈ h.choose_spec.choose,
+      c.C.1.left.basicOpen (h.choose_spec.choose_spec.choose i))
+      = hα ⁻¹ᵁ (pullback.fst X.1.hom toBaseK ⁻¹ᵁ U) := by
+  letI hα : c.C.1.left ⟶ (ExtF.obj X.1).left := c.α.1.left
+  letI : IsFinite hα := c.α.2.1
+  letI : Etale hα := c.α.2.2
+  exact corrPieceGlueData_cover X.1 U hU c.C.1.left hα
+
+/- ★★次の一手(未着手): (b)`corrPieceGlueDataOfCorr(...).glued`が
+`c.α⁻¹(piece)`に同型であることを示す(`IsColimit`比較、genuinely new)。
+(d)`c.C.1.left`自体の有限アフィン被覆(`X.1.left`の有限アフィン被覆の
+各`U`ごとに得られる`corrPieceGlueDataOfCorr`を、外側でさらに貼り合わせる)。
+(e)`α・β`脚と整合性の等式`h▸extCorr D c'=c`の構成。`corrhyp-goal.md`に
+記録。 -/
+
 end ABC3.Found.CorrHyp
