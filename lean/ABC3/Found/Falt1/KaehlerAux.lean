@@ -1661,7 +1661,7 @@ noncomputable def pushoutKaehlerSplitStepOption {R : Type uFalt1R} {B1 : Type uF
     [CommRing R] [CommRing B1] [CommRing B]
     [Algebra R B1] [Algebra R B]
     (C : RAlg.{uFalt1R, uFalt1Car} R) (F : ι → RAlgOver.{uFalt1R, uFalt1Car, uFalt1T} R B1)
-    [Algebra C.carrier B1] [Algebra B1 B] [Algebra C.carrier B] [IsScalarTower R B1 B] [IsScalarTower R C.carrier B]
+    [Algebra B1 B] [Algebra C.carrier B] [IsScalarTower R B1 B] [IsScalarTower R C.carrier B]
     [Algebra.IsPushout R B1 C.carrier B]
     (prev : Ω[B1⁄R] ≃ₗ[B1] (∀ i, TensorProduct (F i).carrier B1 Ω[(F i).carrier⁄R]))
     (hinj : Function.Injective (KaehlerDifferential.mapBaseChange R B1 B)) :
@@ -1772,7 +1772,7 @@ theorem pushoutKaehlerSplitStepOption_length
     [CommRing R] [CommRing B1] [CommRing B]
     [Algebra R B1] [Algebra R B]
     (C : RAlg.{uFalt1R, uFalt1Car} R) (F : ι → RAlgOver.{uFalt1R, uFalt1Car, uFalt1T} R B1)
-    [Algebra C.carrier B1] [Algebra B1 B] [Algebra C.carrier B] [IsScalarTower R B1 B] [IsScalarTower R C.carrier B]
+    [Algebra B1 B] [Algebra C.carrier B] [IsScalarTower R B1 B] [IsScalarTower R C.carrier B]
     [Algebra.IsPushout R B1 C.carrier B]
     (prev : Ω[B1⁄R] ≃ₗ[B1] (∀ i, TensorProduct (F i).carrier B1 Ω[(F i).carrier⁄R]))
     (hinj : Function.Injective (KaehlerDifferential.mapBaseChange R B1 B)) :
