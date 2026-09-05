@@ -4919,3 +4919,41 @@ AlgebraicGeometry`、`Γ(X, U)`のparse error)になる。
 **次の一手**: 「`g⊗1`の像が`F₁`で単元」を、`hp₀`+今回の降下補題で
 実際に証明する。そこまで行けば`F₁`が`A₃⊗R''`-代数になり、`D(g)`側も
 同様に扱えて、両側が共通の底`A₃`の上に乗る。
+
+## 2026-09-05夜さらに続き17: 単元性の**半分**を完成——残る半分の
+障害を特定した
+
+続き16の「次の一手」に着手し、**半分**を完成させた
+(`isUnit_rename_of_flat_relation`、`FieldLimit.lean`、commit
+`bc903fff`、`sorry`無し):
+
+```
+IsUnit (Ideal.Quotient.mk (Ideal.span (Set.range (Sum.elim … ))) (rename Sum.inr p))
+```
+
+つまり**平坦化した商`F`の中では、局所化の分母`p`の像が単元である**。
+これは関係式の族に`rename Sum.inr p * X (Sum.inl ()) - 1`が入っている
+ことから直ちに従う(`X (Sum.inl ())`のクラスがそのまま逆元)。
+
+**残る半分と、その障害(正直な記録)**: 欲しいのは
+「`algebraMap (A_f⊗R') F (g⊗1)`が単元」であり、上で得たのは
+「`mk J (rename Sum.inr p₀)`が単元」である。両者を繋ぐには
+`C (g⊗1)`と`rename Sum.inr p₀`のクラスが`F`で一致する(あるいは
+互いに単元倍で移り合う)ことが要る。`hp₀`はその一致を**ℝへ底変換
+した後**で与えるので、続き16の降下補題で有限段階へ降ろせる——
+**はずだが**、そこに1つ障害がある:
+
+`hp₀`が言っているのは「`p₀`のクラスの底変換 = `e.symm h₂`」であり、
+`h₂`(=`g`の像)が`e`を通して`C(g⊗1)`のクラスに対応することを使うには、
+`e`(=`pieceAlgebra_R_model_baseChange`が与える同型)が
+**`Γ(X.left,U)⊗ℝ`-代数同型**でなければならない。ところが現状の
+`pieceAlgebra_R_model_baseChange`の結論は`Nonempty (… ≃+* …)`という
+**環同型**である。中身(`quotient_mvPolynomial_baseChange`+第一同型定理
+`RingHom.quotientKerEquivOfSurjective`)はどちらも底環上の代数写像なので
+`AlgEquiv`へ格上げできるはずだが、その作業がまだ済んでいない——
+これは続き13〜14で`flat_equiv`を`≃ₐ`へ作り直したのと**同じ種類の作業**
+であり、同じ手順(部品の`AlgEquiv`版を使い`restrictScalars`で底を揃える)
+で片付く見込み。
+
+集計は引き続き10/24——§4は引き続き0/2。次の一手は
+`pieceAlgebra_R_model_baseChange`の`AlgEquiv`版を作ること。

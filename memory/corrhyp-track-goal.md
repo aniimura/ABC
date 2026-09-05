@@ -2188,3 +2188,21 @@ hp₀の一致はℝ底変換後なので有限段階へ降ろす必要がある
 効く道具。集計は引き続き10/24——§4は0/2。
 
 次の一手: 「g⊗1の像がF₁で単元」をhp₀+今回の降下補題で証明する。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き17
+isUnit_rename_of_flat_relation完成(commit bc903fff、sorry無し)——
+平坦化した商Fの中では局所化の分母pの像が単元(関係式rename Sum.inr p *
+X(Sum.inl()) - 1からX(Sum.inl())のクラスが逆元)。
+
+残る半分と障害: 欲しいのは「algebraMap (A_f⊗R') F (g⊗1)が単元」。繋ぐには
+C(g⊗1)とrename Sum.inr p₀のクラスがFで一致することが要る。hp₀はそれを
+ℝ底変換後に与えるので続き16の降下補題で降ろせる——はずだが障害が1つ:
+h₂(gの像)がeを通してC(g⊗1)のクラスに対応することを使うには、e(=
+pieceAlgebra_R_model_baseChange)がΓ(X.left,U)⊗ℝ-代数同型でなければ
+ならないが、現状の結論はNonempty(… ≃+* …)という環同型である。中身
+(quotient_mvPolynomial_baseChange+第一同型定理)はどちらも底環上の代数
+写像なのでAlgEquivへ格上げできるはず——続き13〜14でflat_equivを≃ₐへ
+作り直したのと同種の作業。
+
+次の一手: pieceAlgebra_R_model_baseChangeのAlgEquiv版を作る。
+集計は引き続き10/24——§4は0/2。
