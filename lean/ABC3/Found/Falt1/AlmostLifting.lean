@@ -194,4 +194,63 @@ theorem sqZero_act_eq {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
   rw [hbz, Algebra.smul_def]
   linear_combination hzero
 
+/-- **障害は honest な Hochschild 2-コサイクルである**。
+`obstruction_identity`(仮定なしの `c` 倍された恒等式)を `sqZero_act_eq`
+(`ψ(b)·x = c·(b•x)`)で `I` の `B`-加群構造の言葉に翻訳し、`C` の
+`p` 捩れ無し(`htors`)で `c` を落とす。これで
+`HochschildLowDegree.hochschild_H2_almost_coboundary` を実際の障害に
+適用できるようになった——`Theorem 2.2` の存在側で残っていた
+「障害を本当にコサイクルとして扱う」部分の橋である。 -/
+theorem obstruction_isCocycle {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C]
+    (I : Ideal C) (hsq : ∀ u ∈ I, ∀ v ∈ I, u * v = 0)
+    (φ : B →ₐ[A] (C ⧸ I)) (c : A) (ψ : B →ₗ[A] C)
+    (hψ : ∀ b : B, Ideal.Quotient.mk I (ψ b) = c • φ b)
+    (htors : ∀ x : C, (algebraMap A C) c * x = 0 → x = 0) :
+    letI : Module (C ⧸ I) I := sqZeroModule I hsq
+    letI : Module B I := Module.compHom _ (φ.toRingHom : B →+* (C ⧸ I))
+    ∀ (Ob : B →ₗ[A] B →ₗ[A] I),
+      (∀ b₁ b₂ : B, ((Ob b₁ b₂ : I) : C) = c • ψ (b₁ * b₂) - ψ b₁ * ψ b₂) →
+      ∀ v b₁ b₂ : B, v • Ob b₁ b₂ - Ob (v * b₁) b₂ + Ob v (b₁ * b₂) - b₂ • Ob v b₁ = 0 := by
+  letI : Module (C ⧸ I) I := sqZeroModule I hsq
+  letI : Module B I := Module.compHom _ (φ.toRingHom : B →+* (C ⧸ I))
+  intro Ob hOb v b₁ b₂
+  have hact := sqZero_act_eq I hsq φ c ψ hψ
+  apply Subtype.ext
+  apply htors
+  have hid := obstruction_identity c ψ v b₁ b₂
+  have e1 := (hact v (Ob b₁ b₂)).symm
+  have e2 := (hact b₂ (Ob v b₁)).symm
+  have h1 := hOb b₁ b₂
+  have h2 := hOb (v * b₁) b₂
+  have h3 := hOb v (b₁ * b₂)
+  have h4 := hOb v b₁
+  simp only [Submodule.coe_sub, Submodule.coe_add, Algebra.smul_def] at hid e1 e2 h1 h2 h3 h4 ⊢
+  rw [← mul_assoc v b₁ b₂] at hid h3
+  rw [mul_sub, mul_add, mul_sub, e1, e2, h1, h2, h3, h4]
+  linear_combination hid
+
+/-! ## `Theorem 2.2` 存在側の組み立て——残りの見取り図
+
+上で `obstruction_isCocycle` が閉じたので、**1つの水準での存在**は
+以下の連鎖で機械的に出る(スカラーの帳簿だけが残る作業):
+
+1. `AlmostProjective.almost_lift_of_isAlmostEtale`:
+   `ψ : B →ₗ[A] C` で `π∘ψ = c·φ`。
+2. `HochschildLowDegree.obstruction_mem_ker`:
+   `Ob(b₁,b₂) := c·ψ(b₁b₂) - ψ(b₁)ψ(b₂)` は `I` に値を取る
+   (`A`-双線形なので `B →ₗ[A] B →ₗ[A] I` にまとめられる)。
+3. `obstruction_isCocycle`(本ファイル):`Ob` は honest な 2-コサイクル。
+4. `HochschildLowDegree.hochschild_H2_almost_coboundary`:
+   水準 `t` の witness から `t·Ob = d h`。
+5. `HochschildLowDegree.rescale_obstruction`:`ψ₁ := t·ψ`(水準 `c·t`)の
+   障害は `t²·Ob = d(t·h)` ——**ちょうどコバウンダリ**になる。
+6. `HochschildLowDegree.doubling_multiplicative`:
+   `ψ₂ := (c·t)·ψ₁ + (t·h)` が水準 `(c·t)²` で**厳密に乗法的**。
+
+その先の「`ε` 族の極限を取って honest な `φ₀ : mB → C` を得る」段は
+`AlmostBase.lean` の塔(`PDivTower`)の上で書く必要がある——
+`m² = m` が効くのはそこ(`mB` の元の積がまた `mB` に入る)である。
+-/
+
 end ABC3.Found.Falt1
