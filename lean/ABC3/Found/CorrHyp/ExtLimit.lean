@@ -735,68 +735,10 @@ noncomputable def piecePullbackIso (X : Over BaseK) (U : X.left.Opens) (hU : IsA
     _ ≅ (Limits.pullback U.ι (pullback.fst X.hom toBaseK) : Scheme) := pullbackSymmetry _ _
     _ ≅ (Limits.pullback (U.ι ≫ X.hom) toBaseK : Scheme) := pullbackRightPullbackFstIso X.hom toBaseK U.ι
     _ ≅ (Limits.pullback (hU.isoSpec.hom ≫ Spec.map (pieceRingHom X U hU)) toBaseK : Scheme) :=
-        Limits.pullback.congrHom (pieceRingHom_spec X U hU).symm rfl
+        (pieceRingHom_spec X U hU) ▸ Iso.refl _
     _ ≅ (Limits.pullback (Spec.map (pieceRingHom X U hU)) toBaseK : Scheme) :=
         pullbackHomIsoLeft hU.isoSpec (Spec.map (pieceRingHom X U hU)) toBaseK
     _ ≅ Spec (CommRingCat.of (Γ(X.left, U) ⊗[ℚ] ℝ)) := pullbackSpecIso ℚ Γ(X.left, U) ℝ
-
-open CategoryTheory AlgebraicGeometry Limits in
-/-- `pullbackHomIsoLeft`の`inv`と`fst`の可換性——既存の`_hom_fst'`から
-`Iso.inv_comp_eq`で導く。`piecePullbackIso_inv_fst`の追跡で使う。
-
-★**sorry 無し**。標準3公理のみ。 -/
-theorem pullbackHomIsoLeft_inv_fst' {A B Z W T : Scheme} (i : A ≅ B) (g : B ⟶ Z) (f : W ⟶ Z)
-    (h : A ⟶ T) :
-    (pullbackHomIsoLeft i g f).inv ≫ pullback.fst (i.hom ≫ g) f ≫ h
-      = pullback.fst g f ≫ i.inv ≫ h := by
-  rw [← Category.assoc, ← Category.assoc]
-  congr 1
-  rw [Iso.inv_comp_eq, ← Category.assoc, pullbackHomIsoLeft_hom_fst', Category.assoc,
-    i.hom_inv_id, Category.comp_id]
-
-set_option maxHeartbeats 1000000 in
-open CategoryTheory AlgebraicGeometry Limits in
-open scoped TensorProduct in
-/-- **`piecePullbackIso`の値の特徴づけ**——`Spec(Γ(U,U)⊗[ℚ]ℝ)`から
-`X.left`への「片を経由する射」は、`includeLeft`(`a ↦ a ⊗ₜ 1`)の`Spec`と
-`hU.isoSpec.inv ≫ U.ι`の合成に一致する。
-
-これは`pieceRingEquiv`の`U`についての自然性(`Lemma 4.1`の`GlueData`を
-「`V (i,j) := U_i ⊓ U_j`の片」で組む新設計で`f i j`を降ろすのに要る)の
-**核心部分**である——`pieceRingEquiv`は`piecePullbackIso`を`Γ`で送った
-だけの同型なので、値についての情報はこの等式から取り出すほかない。
-
-証明は6段の`calc`を右から潰すだけ:
-`pullbackRestrictIsoRestrict_hom_ι`→`pullbackSymmetry_inv_comp_fst`→
-`pullbackRightPullbackFstIso_inv_snd_fst`→`pullback.congrHom_inv`+
-`pullback.lift_fst`→`pullbackHomIsoLeft_inv_fst'`→`pullbackSpecIso_inv_fst`。
-
-配管の注意(2点、`tools/lean-idioms.md`に登記):
-- 4段目をもとの`(pieceRingHom_spec) ▸ Iso.refl`のままにすると`show`が
-  `motive`計算に失敗して**追跡できない**。`pullback.congrHom`へ書き換えると
-  `unfold`+`simp`で合成が完全に露出する(型は変わらないので利用箇所に影響なし)。
-- 最後の2段は`rw`が使えない——ゴールに埋まっている`HasPullback`インスタンス
-  (定義由来)と補題側(インスタンス探索由来)が食い違い、**表示が同一なのに**
-  パターンが見つからないと言われる。`congrArg`+`Eq.trans`で組み立てて
-  `exact`(defeqで通る)にすると解決する。
-
-★**sorry 無し**。標準3公理のみ。 -/
-theorem piecePullbackIso_inv_fst (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U) :
-    letI := pieceAlgebra X U hU
-    (piecePullbackIso X U hU).inv ≫
-      (pullback.fst X.hom toBaseK ⁻¹ᵁ U).ι ≫ pullback.fst X.hom toBaseK
-    = Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom (R := ℚ)
-        (A := Γ(X.left, U)) (B := ℝ))) ≫ hU.isoSpec.inv ≫ U.ι := by
-  letI := pieceAlgebra X U hU
-  unfold piecePullbackIso
-  simp only [Iso.trans_inv, Iso.symm_inv, Category.assoc,
-    pullbackRestrictIsoRestrict_hom_ι_assoc, pullbackSymmetry_inv_comp_fst_assoc,
-    pullbackRightPullbackFstIso_inv_snd_fst, pullback.congrHom_inv, pullback.lift_fst_assoc,
-    Category.id_comp]
-  refine Eq.trans (congrArg (fun t => (pullbackSpecIso ℚ Γ(X.left, U) ℝ).inv ≫ t)
-    (pullbackHomIsoLeft_inv_fst' hU.isoSpec (Spec.map (pieceRingHom X U hU)) toBaseK U.ι)) ?_
-  exact (Category.assoc _ _ _).symm.trans
-    (congrArg (fun t => t ≫ (hU.isoSpec.inv ≫ U.ι)) (pullbackSpecIso_inv_fst ℚ Γ(X.left, U) ℝ))
 
 /-- `Ext X` の `U`(`X.left` のアフィン開)由来のアフィン片はアフィン
 ——`piecePullbackIso`の頂点が`IsIso`であることから。 -/
