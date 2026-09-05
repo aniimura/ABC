@@ -156,7 +156,7 @@ import {
   readFileSync, readdirSync, statSync, existsSync,
   mkdtempSync, mkdirSync, writeFileSync, rmSync,
 } from 'node:fs';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { join, dirname, relative, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -400,6 +400,139 @@ const PDF_MODES = [
 ];
 
 /**
+ * ★★**`pdftotext` の実装を固定する**(2026-09-05、メタ台帳 M8)。
+ *
+ * この機械には `pdftotext` が **2 つ**入っている:
+ *
+ * | 呼び出し元 | 解決先 | 版 |
+ * |---|---|---|
+ * | Git Bash | `C:\Program Files\Git\mingw64\bin` | **Xpdf 4.00** |
+ * | PowerShell | winget の poppler | **poppler 25.07.0** |
+ *
+ * **出力が違う。** Xpdf は `≅` を `∼=` と出すので上の `normalize` が畳めるが、
+ * poppler は別の符号位置を出して畳めない。`Ẑ` は poppler では `Z` になり、
+ * `≝` の分解順も違う(`ΓKd=ef` 対 `defΓK=`)。結果、**同じ木・同じ PDF・
+ * 同じ check.mjs で NG 13 件(Bash)対 NG 176 件(PowerShell)**になる
+ * ——差の 163 件はすべて S4 逐語照合(29)と Lean コメントの引用照合(134)である。
+ *
+ * ★**頁キャッシュがこれを洗浄する**のが本当の罠だった。鍵は
+ * `パス#頁#mtime#size` で、**どちらの実装で抽出したかを持っていない**。
+ * いちど poppler で作り直すと、以後 Git Bash から走らせても poppler の
+ * テキストが再利用され続ける。しかも鍵には `check.mjs` 自身のハッシュが
+ * 入っているので、**この関数を触るたびにキャッシュは必ず捨てられる**
+ * ——作り直しがどちらの実装で起きるかは、そのときのシェル次第だった。
+ *
+ * ここでやることは 3 つだけで、**どちらの抽出が正か**は決めない
+ * (それは照合規約の問題であって道具の問題ではない):
+ *   1. 実装を**同定する**(`-v` の 1 行目)
+ *   2. 較正済みの実装を**探して固定する**——PATH の**順序**に頼らない
+ *   3. 実装を**キャッシュの鍵に入れる**——黙って混ざらないようにする
+ *
+ * 較正済みが見つからないときは**止めずに鳴らす**。poppler しか無い環境でも
+ * 走れなければ困るし、鳴ってさえいれば 163 件の正体は 1 行で分かる。
+ * `ABC3_PDFTOTEXT` に絶対パスを置けば、その指定が最優先される
+ * (較正済みでなくても従う——別の抽出を試すための口)。
+ *
+ * ★較正済みを載せ替えるときは、この定数を書き換えるだけでよい。
+ * ただし S4 と引用照合の期待値は Xpdf の出力で較正されているので、
+ * **載せ替えは 163 件の作り直しを伴う**。
+ */
+const PDFTOTEXT_CALIBRATED = 'Xpdf 4.00';
+
+/**
+ * `pdftotext -v` の出力から `Xpdf 4.00` / `poppler 25.07.0` を作る。読めなければ null。
+ *
+ * ★**`execFileSync` では読めない**。poppler は `-v` を **stderr** に出したうえで
+ * 終了コード 0 で返るので、`execFileSync` の戻り値(stdout だけ)は空文字になり、
+ * catch にも入らない——**poppler だけが同定できない**という、この修理が
+ * 防ごうとしているのとちょうど同じ形の穴になる。両方の口を読むため
+ * `spawnSync` を使う(実測でここに落ちた)。
+ */
+function pdftotextIdent(bin) {
+  const r = spawnSync(bin, ['-v'], { encoding: 'utf8' });
+  if (r.error) return null;
+  return pdftotextIdentOf(`${r.stdout || ''}${r.stderr || ''}`);
+}
+
+/** `-v` の本文 → 同定名。純関数(selftest D44 が直接叩く)。 */
+function pdftotextIdentOf(out) {
+  const m = /pdftotext\s+version\s+(\S+)/i.exec(out);
+  if (!m) return null;
+  // ★poppler の著作権表示にも "Glyph & Cog" が出るので、**poppler を先に見る**。
+  return `${/poppler/i.test(out) ? 'poppler' : 'Xpdf'} ${m[1]}`;
+}
+
+/**
+ * `pdftotext` の候補を列挙する。**PATH の順序では選ばない**——順序こそが
+ * シェルによって変わるものだから。列挙してから版で選ぶ。
+ */
+function pdftotextCandidates() {
+  const seen = new Set();
+  const out = [];
+  const push = (p) => { if (p && !seen.has(p) && existsSync(p)) { seen.add(p); out.push(p); } };
+  const win = process.platform === 'win32';
+  // (1) PATH 上のもの全部
+  for (const dir of String(process.env.PATH || '').split(win ? ';' : ':')) {
+    if (!dir) continue;
+    for (const ext of (win ? ['.exe', '.cmd', ''] : [''])) push(join(dir, `pdftotext${ext}`));
+  }
+  // (2) PATH に無い既知の設置場所。★PowerShell から走らせると Git の mingw64 は
+  //     PATH に載らない。ここを見ないと「PowerShell だと poppler になる」が直らない。
+  const progs = [process.env.ProgramFiles, process.env['ProgramFiles(x86)'],
+    process.env.LOCALAPPDATA && join(process.env.LOCALAPPDATA, 'Programs')];
+  for (const base of progs) if (base) push(join(base, 'Git', 'mingw64', 'bin', 'pdftotext.exe'));
+  return out;
+}
+
+/** 解決した実装(遅延・1 回だけ)。PDF を読まない段では走らせない。 */
+let PDFTOTEXT = null;
+function pdftotext() {
+  if (PDFTOTEXT) return PDFTOTEXT;
+  const pinned = process.env.ABC3_PDFTOTEXT;
+  const found = [];
+  for (const bin of (pinned ? [pinned] : pdftotextCandidates())) {
+    const ident = pdftotextIdent(bin);
+    if (ident !== null) found.push({ bin, ident });
+  }
+  const hit = pinned ? found[0]
+    : (found.find((f) => f.ident === PDFTOTEXT_CALIBRATED) || found[0]);
+  // ★`ABC3_PDFTOTEXT` が指すものが動かないときに **PATH へ落ちない**。
+  //   落ちると「固定したつもりが別物で走っていた」——直そうとしている事故そのものになる。
+  //   指定されたパスのまま持ち、`execFileSync` が ENOENT で落ちるのに任せる。
+  PDFTOTEXT = hit
+    ? { ...hit, calibrated: hit.ident === PDFTOTEXT_CALIBRATED, found, pinned: !!pinned }
+    : {
+      bin: pinned || 'pdftotext', calibrated: false, found, pinned: !!pinned,
+      ident: pinned ? '(ABC3_PDFTOTEXT が実行できない)' : '(実行できるものが無い)',
+    };
+  if (!PDFTOTEXT.calibrated) {
+    // ★`--brief` は console.log だけを絞る。ここは **stderr** なので必ず出る。
+    console.error([
+      '',
+      '!! pdftotext の実装が較正済みと違う',
+      `!!   使うもの : ${PDFTOTEXT.ident}  (${PDFTOTEXT.bin})`,
+      `!!   較正済み : ${PDFTOTEXT_CALIBRATED}`,
+      '!! 抽出が違うため S4 逐語照合と Lean コメントの引用照合が大量に落ちる',
+      '!! (実測: 同じ木・同じ PDF で NG 13 件 → 176 件。差の 163 件はすべてこれ)。',
+      '!! 直し方: Git Bash から走らせる / ABC3_PDFTOTEXT に較正済みの絶対パスを置く。',
+      `!! 見えている候補: ${found.length ? found.map((f) => `${f.ident} (${f.bin})`).join(' / ') : 'なし'}`,
+      '',
+    ].join('\n'));
+  }
+  return PDFTOTEXT;
+}
+
+/** `--pdftotext`: どれを使うのかだけを見る口(PDF は読まない)。 */
+function printPdftotextInfo() {
+  const p = pdftotext();
+  console.log(`較正済み  : ${PDFTOTEXT_CALIBRATED}`);
+  console.log(`使うもの  : ${p.ident}${p.calibrated ? '  (一致)' : '  ★不一致'}`);
+  console.log(`  実体    : ${p.bin}${p.pinned ? '  (ABC3_PDFTOTEXT で固定)' : ''}`);
+  console.log(`候補 ${p.found.length} 件:`);
+  for (const f of p.found) console.log(`  ${f.ident.padEnd(18)} ${f.bin}`);
+}
+
+/**
  * ★★**ディスク上のページキャッシュ**(2026-08-21 追加)。
  *
  * 実測: `pdftotext` の呼び出しが検査時間のほぼ全部だった
@@ -411,6 +544,9 @@ const PDF_MODES = [
  * * **`check.mjs` 自身のハッシュ**も鍵に入れる —— `normalize` / `squash` /
  *   `PDF_MODES` を触ったら必ず外れる。★これを忘れると
  *   「正規化を変えたのに古いテキストで通る」という**器具の穴**になる。
+ * * ★**`pdftotext` の実装**も鍵に入れる(2026-09-05、M8)—— 抽出器が違えば
+ *   テキストが違う。入れないと、いちど別実装で作り直したキャッシュが
+ *   **正しいシェルから走らせても再利用され続ける**。
  *
  * キャッシュが壊れていても最悪 `pdftotext` を呼び直すだけで、
  * 検査結果は変わらない。
@@ -431,7 +567,8 @@ function loadDiskCache() {
   if (diskCache) return diskCache;
   try {
     const j = JSON.parse(readFileSync(PDF_CACHE, 'utf8'));
-    diskCache = (j && j.self === SELF_HASH && j.pages) ? j.pages : {};
+    diskCache = (j && j.self === SELF_HASH && j.pdftotext === pdftotext().ident && j.pages)
+      ? j.pages : {};
   } catch { diskCache = {}; }
   return diskCache;
 }
@@ -439,7 +576,8 @@ function saveDiskCache() {
   if (!diskDirty || !diskCache) return;
   try {
     mkdirSync(CACHE_DIR, { recursive: true });
-    writeFileSync(PDF_CACHE, JSON.stringify({ self: SELF_HASH, pages: diskCache }), 'utf8');
+    writeFileSync(PDF_CACHE,
+      JSON.stringify({ self: SELF_HASH, pdftotext: pdftotext().ident, pages: diskCache }), 'utf8');
   } catch { /* キャッシュは書けなくてよい */ }
 }
 process.on('exit', saveDiskCache);
@@ -461,7 +599,7 @@ function pdfPageTexts(pdfPath, page) {
   const out = [];
   for (const [name, flags] of PDF_MODES) {
     try {
-      out.push([name, squash(execFileSync('pdftotext',
+      out.push([name, squash(execFileSync(pdftotext().bin,
         ['-enc', 'UTF-8', ...flags, '-f', String(page), '-l', String(page), pdfPath, '-'],
         { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 }))]);
     } catch { /* このモードは使えない */ }
@@ -1650,8 +1788,28 @@ function selftest() {
     if (good) passed++;
   }
 
+  // ★D44: `pdftotext` の同定(M8)。**器具そのものの較正**であって入力の検査ではない。
+  //   ここを置いた理由: 実装中に「poppler が同定できない」という穴に実際に落ちた
+  //   (poppler は `-v` を stderr に出して終了コード 0 で返るので、
+  //   `execFileSync` の戻り値では空文字になる)。同定が黙って null になると
+  //   **較正済みでない実装が較正済みのふりをして通る**——防ぎたい事故そのものになる。
+  const identCases = [
+    ['Xpdf', 'pdftotext version 4.00\nCopyright 1996-2017 Glyph & Cog, LLC\n', 'Xpdf 4.00'],
+    ['poppler', 'pdftotext version 25.07.0\nCopyright 2005-2025 The Poppler Developers'
+      + ' - http://poppler.freedesktop.org\nCopyright 1996-2011, 2022 Glyph & Cog, LLC\n',
+      'poppler 25.07.0'],
+    ['読めない出力', 'command not found\n', null],
+  ];
+  for (const [label, text, want] of identCases) {
+    const got = pdftotextIdentOf(text);
+    const good = got === want;
+    console.log(`  ${good ? 'ok ' : 'NG '} D44 pdftotext 同定(${label}) → `
+      + `${JSON.stringify(got)}${good ? '' : ` ★期待 ${JSON.stringify(want)}`}`);
+    if (good) passed++;
+  }
+
   rmSync(tmp, { recursive: true, force: true });
-  const total = cases.length + 1 + leanCases.length;
+  const total = cases.length + 1 + leanCases.length + identCases.length;
   IN_SELFTEST = false;
   console.log(`\n  selftest: ${passed}/${total} PASS`);
   if (passed !== total) NG++;
@@ -1668,6 +1826,17 @@ const only = (f) => args.includes(f);
 const all = args.length === 0;
 
 console.log(`Math_ABC3 check — ${new Date().toISOString().slice(0, 19).replace('T', ' ')}`);
+
+// ★`--pdftotext`: どの抽出器を使うのかだけを見る(PDF は読まない。M8)。
+//   `--brief` の絞り込みを避けるため生の stdout に出す。
+if (only('--pdftotext')) {
+  const raw = process.stdout.write.bind(process.stdout);
+  const saved = console.log;
+  console.log = (...a) => raw(`${a.map(String).join(' ')}\n`);
+  printPdftotextInfo();
+  console.log = saved;
+  process.exit(0);
+}
 
 if (all || only('--selftest')) selftest();
 if (all || only('--structured')) { h1('1_Structured'); checkStructured(); }
