@@ -1118,3 +1118,27 @@ Lubin-Tate 級数 `f`)は**すべて本リポジトリで既に構築済みだ�
 (階数 `[K:ℚ_p]`)+ `UnitsSplit.lean`(`ℤ` の分)で揃っている。
 **残るのは商の標準性——相互律 `Γ_K^ab ≅ (K^×)^∧` そのもの**
 (`Γ_K ≅ Γ_{K'}` から `𝒪_K^× ≅ 𝒪_{K'}^×` を導く一手)。
+
+## ★★★★★★★2026-09-05: Prop 1.2 の未解決部分が「相互律ちょうど一つ」に絞れた
+
+`Found/PGC/UnitsGroupInvariants.lean`(新規)
+
+- **`smallPrincipalUnitsEquivPi`** :
+  `smallPrincipalUnits K ≃* Multiplicative (Fin [K:ℚ_p] → ℤ_[p])`
+  (p進対数 `padicLogUnitsEquiv` + `module_free_smallBall` の基底)
+- `index_powRange_pi` : `ℤ_p^d` の `p` 乗部分群の指数は `p^d`
+  (`PadicInt.ker_toZMod` + `maximalIdeal_eq_span_p` を成分ごとに)
+- **`index_powRange_smallPrincipalUnits`** :
+  `[(1+𝔪_K) : (1+𝔪_K)^p] = p^{[K:ℚ_p]}`
+- **`finrank_eq_of_smallPrincipalUnits_mulEquiv`** :
+  `1+𝔪_K ≃* 1+𝔪_{K'}` ⟹ `[K:ℚ_p] = [K':ℚ_p]`
+- **`residueCard_eq_of_units_mulEquiv`** :
+  `𝒪_K^× ≃* 𝒪_{K'}^×` ⟹ `q_K = q_{K'}`
+
+### 距離の記録
+
+`Γ_K ↠ 𝒪_K^×` は無条件(第 962)。`𝒪_K^×`(および主単数群)の**同型類**
+から `q` と `[K:ℚ_p]` が出ることも確定した。**残るのは商の標準性**
+——`Γ_K ≅ Γ_{K'}`(位相群)から `𝒪_K^× ≃* 𝒪_{K'}^×` を導く一手だけで、
+それがまさに相互律 `Γ_K^ab ≅ (K^×)^∧`。Prop 1.2 の未解決部分は
+**相互律ちょうど一つ**に絞り込まれた。
