@@ -329,6 +329,110 @@ theorem pi_witness {A : Type u} [CommRing A] {ι : Type u} [Fintype ι] [Decidab
           Finset.sum_congr rfl (fun i _ => by funext j; by_cases h : j = i <;> simp [h])
       _ = 1 := hsum
 
+/-! ## ★almost étale は塔で合成できる(2026-09-05)
+
+Faltings は `A → B → C` の塔を常用する(§3 の `Rₙ ⊂ Sₙ`・`R∞ ⊂ A∞ ⊂ B∞`
+等)。その基礎になるのが「almost étale の合成」である。
+
+古典的なエタールの合成は分離冪等元の積 `e_{C/A} = e_{C/B}·ι(e_{B/A})`
+で作る。almost 版でも同じ式が効く——鍵は
+
+    `C ⊗_A C → C ⊗_B C` の核(= `B` の元による相対対角イデアル
+     `relDiag`)が `ι(w_B)` で消える
+
+ことで、これは `(1⊗b − b⊗1)·w_B = 0` を `ι` で送るだけである。
+水準は `c_B·c_C` になる(塔があるので回収できる)。 -/
+
+/-- **相対対角イデアル**——`C ⊗_A C → C ⊗_B C` の核を生成する元たち。 -/
+def relDiag (A B C : Type u) [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra B C] [Algebra A C] [IsScalarTower A B C] :
+    Ideal (TensorProduct A C C) :=
+  Ideal.span {x | ∃ b : B, x = (1 : C) ⊗ₜ[A] (algebraMap B C b)
+    - (algebraMap B C b) ⊗ₜ[A] (1 : C)}
+
+/-- **相対対角イデアルは `ι(w_B)` で消える**——`(1⊗b − b⊗1)·w_B = 0` を
+`ι` で送るだけ。 -/
+theorem relDiag_mul_eq_zero (A B C : Type u) [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra B C] [Algebra A C] [IsScalarTower A B C]
+    (wB : TensorProduct A B B)
+    (hB_ann : ∀ b : B, ((1 : B) ⊗ₜ[A] b - b ⊗ₜ[A] (1 : B)) * wB = 0)
+    (x : TensorProduct A C C) (hx : x ∈ relDiag A B C) :
+    x * (Algebra.TensorProduct.map (IsScalarTower.toAlgHom A B C)
+      (IsScalarTower.toAlgHom A B C) wB) = 0 := by
+  refine Submodule.span_induction ?_ ?_ ?_ ?_ hx
+  · rintro _ ⟨b, rfl⟩
+    have h : ((1 : C) ⊗ₜ[A] (algebraMap B C b) - (algebraMap B C b) ⊗ₜ[A] (1 : C))
+        = Algebra.TensorProduct.map (IsScalarTower.toAlgHom A B C)
+            (IsScalarTower.toAlgHom A B C) ((1 : B) ⊗ₜ[A] b - b ⊗ₜ[A] (1 : B)) := by
+      rw [map_sub, Algebra.TensorProduct.map_tmul, Algebra.TensorProduct.map_tmul]
+      simp
+    rw [h, ← map_mul, hB_ann b, map_zero]
+  · rw [zero_mul]
+  · intro y z _ _ hy hz; rw [add_mul, hy, hz, add_zero]
+  · intro a y _ hy; rw [smul_mul_assoc, hy, smul_zero]
+
+/-- **★almost étale は塔で合成できる**(witness 版)——
+`w := w_C · ι(w_B)` が `C/A` の witness(水準 `c_B·c_C`)。
+
+`hC_ann` は「`w_C` が `C/B` の witness を `C ⊗_A C` へ持ち上げたもの」
+という条件で、`C ⊗_A C → C ⊗_B C` の核の記述を使わずに済む形にしてある。 -/
+theorem witness_comp (A B C : Type u) [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra B C] [Algebra A C] [IsScalarTower A B C]
+    (cB cC : A) (wB : TensorProduct A B B) (wC : TensorProduct A C C)
+    (hB_ann : ∀ b : B, ((1 : B) ⊗ₜ[A] b - b ⊗ₜ[A] (1 : B)) * wB = 0)
+    (hB_aug : Algebra.TensorProduct.lmul' A wB = cB • (1 : B))
+    (hC_ann : ∀ c : C, ((1 : C) ⊗ₜ[A] c - c ⊗ₜ[A] (1 : C)) * wC ∈ relDiag A B C)
+    (hC_aug : Algebra.TensorProduct.lmul' A wC = cC • (1 : C)) :
+    (∀ c : C, ((1 : C) ⊗ₜ[A] c - c ⊗ₜ[A] (1 : C)) *
+        (wC * Algebra.TensorProduct.map (IsScalarTower.toAlgHom A B C)
+          (IsScalarTower.toAlgHom A B C) wB) = 0)
+    ∧ Algebra.TensorProduct.lmul' A
+        (wC * Algebra.TensorProduct.map (IsScalarTower.toAlgHom A B C)
+          (IsScalarTower.toAlgHom A B C) wB) = (cB * cC) • (1 : C) := by
+  constructor
+  · intro c
+    rw [← mul_assoc]
+    exact relDiag_mul_eq_zero A B C wB hB_ann _ (hC_ann c)
+  · rw [map_mul, hC_aug, lmul'_map, hB_aug, map_smul, map_one,
+      Algebra.smul_def, Algebra.smul_def, Algebra.smul_def, map_mul]
+    ring
+
+/-- **witness の族も塔で合成できる**——水準は `ϖ(k+1)² ∣ ϖ k` で回収する。 -/
+theorem hasAlmostWitnesses_comp {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra B C] [Algebra A C] [IsScalarTower A B C]
+    {q : ℕ} (hq : 2 ≤ q) (T : PDivTower A q)
+    (hB : T.HasAlmostWitnesses B)
+    (hC : ∀ k : ℕ, ∃ wC : TensorProduct A C C,
+      (∀ c : C, ((1 : C) ⊗ₜ[A] c - c ⊗ₜ[A] (1 : C)) * wC ∈ relDiag A B C) ∧
+      Algebra.TensorProduct.lmul' A wC = T.ϖ k • (1 : C)) :
+    T.HasAlmostWitnesses C := by
+  intro k
+  obtain ⟨wB, hBann, hBaug⟩ := hB (k + 1)
+  obtain ⟨wC, hCann, hCaug⟩ := hC (k + 1)
+  have hdvd : (T.ϖ (k + 1) * T.ϖ (k + 1)) ∣ T.ϖ k := by
+    refine ⟨(T.ϖ (k + 1)) ^ (q - 2), ?_⟩
+    rw [← T.ϖ_succ k, ← pow_two, ← pow_add]
+    congr 1
+    omega
+  obtain ⟨e, he⟩ := hdvd
+  obtain ⟨h1, h2⟩ := witness_comp A B C (T.ϖ (k + 1)) (T.ϖ (k + 1)) wB wC
+    hBann hBaug hCann hCaug
+  refine ⟨e • (wC * Algebra.TensorProduct.map (IsScalarTower.toAlgHom A B C)
+    (IsScalarTower.toAlgHom A B C) wB), ?_, ?_⟩
+  · intro c
+    rw [mul_smul_comm, h1 c, smul_zero]
+  · rw [map_smul, h2, smul_smul, he, mul_comm]
+
+/-- `B = A` のときは相対対角イデアルは `⊥`——合成則がもとの witness を
+そのまま返すことの対照(非空虚性)。 -/
+theorem relDiag_self (A C : Type u) [CommRing A] [CommRing C] [Algebra A C] :
+    relDiag A A C = ⊥ := by
+  rw [relDiag, Ideal.span_eq_bot]
+  rintro _ ⟨a, rfl⟩
+  have h : ((1 : C) ⊗ₜ[A] (algebraMap A C a)) = ((algebraMap A C a) ⊗ₜ[A] (1 : C)) := by
+    rw [Algebra.algebraMap_eq_smul_one, TensorProduct.tmul_smul, TensorProduct.smul_tmul']
+  rw [h, sub_self]
+
 /-! ## 塔の言葉へ——「`ε` は任意に小さくできる」
 
 `PDivTower.HasAlmostWitnesses` は「**各 `k` について** 水準 `ϖ k` の
