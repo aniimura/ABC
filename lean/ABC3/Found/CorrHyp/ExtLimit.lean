@@ -3536,6 +3536,73 @@ theorem piecePullbackIso_inv_isoSpec_appLE (X : Over BaseK) (U : X.left.Opens)
     (piece_isAffineOpen X U hU).isoSpec.hom ≫ t) hB) ?_
   exact congrArg (fun t => (piecePullbackIso X U hU).inv ≫ t) h3
 
+set_option maxHeartbeats 1000000 in
+open scoped TensorProduct in
+/-- **`piecePullbackIso`と`isoSpec`の差はちょうど`pieceRingEquiv`である**——
+`pieceRingEquiv`の3成分(`topIso`・`Γ.mapIso piecePullbackIso.symm.op`・
+`ΓSpecIso`)が、それぞれ`IsAffineOpen.isoSpec`の定義・
+`Scheme.isoSpec_hom_naturality`・`Scheme.isoSpec_Spec_hom`に対応することを
+使って示す(`Spec.map`の反変性で順序が逆になる)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem piecePullbackIso_inv_isoSpec_hom (X : Over BaseK) (U : X.left.Opens)
+    (hU : IsAffineOpen U) :
+    letI := pieceAlgebra X U hU
+    (piecePullbackIso X U hU).inv ≫ (piece_isAffineOpen X U hU).isoSpec.hom
+    = Spec.map (CommRingCat.ofHom (pieceRingEquiv X U hU).toRingHom) := by
+  letI := pieceAlgebra X U hU
+  haveI hAff : IsAffine (pullback.fst X.hom toBaseK ⁻¹ᵁ U : Scheme) := piece_isAffineOpen X U hU
+  unfold IsAffineOpen.isoSpec
+  rw [Iso.trans_hom]
+  refine Eq.trans (Category.assoc _ _ _).symm ?_
+  refine Eq.trans (congrArg
+    (fun t => t ≫ (Scheme.Spec.mapIso (pullback.fst X.hom toBaseK ⁻¹ᵁ U).topIso.symm.op).hom)
+    (Scheme.isoSpec_hom_naturality (piecePullbackIso X U hU).inv).symm) ?_
+  simp only [Scheme.isoSpec_Spec_hom, Functor.mapIso_hom, Iso.op_hom]
+  have hspec : Scheme.Spec.map (pullback.fst X.hom toBaseK ⁻¹ᵁ U).topIso.symm.hom.op
+      = Spec.map (pullback.fst X.hom toBaseK ⁻¹ᵁ U).topIso.symm.hom := rfl
+  rw [hspec, ← Spec.map_comp]
+  refine Eq.trans (Spec.map_comp (pullback.fst X.hom toBaseK ⁻¹ᵁ U).topIso.symm.hom
+    (Scheme.Hom.appTop (piecePullbackIso X U hU).inv ≫
+      (Scheme.ΓSpecIso (CommRingCat.of (Γ(X.left, U) ⊗[ℚ] ℝ))).hom)).symm ?_
+  rfl
+
+set_option maxHeartbeats 1000000 in
+open scoped TensorProduct in
+/-- **自然性の四角形(ii)の環レベルでの完成形**——`pieceRingEquiv`は
+`appLE a`(標準写像による`Γ(X.left,U)`の元の像)を純テンソル`a ⊗ₜ 1`へ送る:
+
+```
+appLE ≫ pieceRingEquiv = includeLeftRingHom
+```
+
+`piecePullbackIso_inv_isoSpec_appLE`(`Spec`側の最終形)と
+`piecePullbackIso_inv_isoSpec_hom`(`piecePullbackIso`と`isoSpec`の差が
+`pieceRingEquiv`であること)を合成し、`Spec.map_injective`(`Spec`の忠実性、
+mathlib)で環レベルへ落とすだけ。
+
+これで`piece_appLE_naturality`(四角形の(i))と合わせて
+**`pieceRingEquiv`の`U`についての自然性の四角形が閉じる**——
+`Lemma 4.1`の`GlueData`を「`V (i,j) := U_i ⊓ U_j`の片」で組む新設計で
+`f i j`を`exists_mvPolynomial_quotient_ringHom_descend2_of_map`により
+降ろすのに要る、最後の前提であった。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem pieceRingEquiv_appLE (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U) :
+    letI := pieceAlgebra X U hU
+    ((pullback.fst X.hom toBaseK).appLE U (pullback.fst X.hom toBaseK ⁻¹ᵁ U) le_rfl) ≫
+      CommRingCat.ofHom (pieceRingEquiv X U hU).toRingHom
+    = CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom (R := ℚ)
+        (A := Γ(X.left, U)) (B := ℝ)) := by
+  letI := pieceAlgebra X U hU
+  apply Spec.map_injective
+  refine Eq.trans (Spec.map_comp _ _) ?_
+  refine Eq.trans (congrArg (fun t => t ≫
+    Spec.map ((pullback.fst X.hom toBaseK).appLE U (pullback.fst X.hom toBaseK ⁻¹ᵁ U) le_rfl))
+    (piecePullbackIso_inv_isoSpec_hom X U hU).symm) ?_
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  exact piecePullbackIso_inv_isoSpec_appLE X U hU
+
 /-- `piecesOpenCover`の脚`(e i).inv ≫ X.homOfLE (h i)`同士のpullbackは、
 `e i`・`e j`をpullbackの脚から追い出す(`pullbackHomIsoLeft`+
 `pullbackSymmetry`、いずれも既存の一般的事実)ことで、`X.homOfLE`同士
