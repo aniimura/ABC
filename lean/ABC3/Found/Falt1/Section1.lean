@@ -1539,14 +1539,24 @@ def thm_1_2.needs : List ABC3.Meta.ProofObligation :=
       (.inProject "ABC3" "ABC3.Found.Falt1.quot_annihilated_of_conductor_subalgebra") 5,
     .citation "[ABC3]" "thm12StepData_zmod4(非空虚性、非退化)"
       (.inProject "ABC3" "ABC3.Found.Falt1.thm12StepData_zmod4") 5,
+    .citation "[ABC3]" "thm_1_2_of_ring_tower(環の塔から直接。δ は長さから定義)"
+      (.inProject "ABC3" "ABC3.Found.Falt1.thm_1_2_of_ring_tower") 5,
+    .citation "[ABC3]" "thm_1_2_of_ring_tower_monogenic(原始的な塔の仮定から)"
+      (.inProject "ABC3" "ABC3.Found.Falt1.thm_1_2_of_ring_tower_monogenic") 5,
+    .citation "[ABC3]" "kaehler_cyclic_of_adjoin(単項生成なら Ω は巡回——原文の「d+1 個の直和」の実体)"
+      (.inProject "ABC3" "ABC3.Found.Falt1.kaehler_cyclic_of_adjoin") 5,
+    .citation "[ABC3]" "length_tensor_kaehler_eq_quot_map(Lemma 1.1 の底変換版、hMlen)"
+      (.inProject "ABC3" "ABC3.Found.Falt1.length_tensor_kaehler_eq_quot_map") 5,
+    .citation "[ABC3]" "hbl_of_conductor_eq(節点 B2 の算術)"
+      (.inProject "ABC3" "ABC3.Found.Falt1.hbl_of_conductor_eq") 5,
     .implicitStep
-      ("★残: 実際の塔(Vₙ の列と Wₙ = Vₙ⊗W の正規化)が各段で " ++
-       "Thm12StepData を供給する段。証明の骨格・不等式・長さの算術は" ++
-       "すべて閉じているので、残るのは塔の構成のみ") 5,
-    .implicitStep
-      ("★残(節点 B の B2): b := p^{δₙ−δ_{n+1}} が導手に入ること。" ++
+      ("★残(節点 B の B2): イデアルの等式 conductor·δ_{n+1} = δₙ。" ++
        "cancel_conductor_delta(既証)+ conductor_mul_differentIdeal(mathlib)" ++
-       "から出るが、hspan_eq(最小多項式の base change 両立)の確認が残る") 5 ]
+       "から出るが、hspan_eq(最小多項式の base change 両立)の確認が残る") 5,
+    .implicitStep
+      ("★残: 原文の「典型例」(V = W(k)⟨T₁…T_d⟩ の完備化、Vₙ は Tᵢ の p^n 乗根と" ++
+       "1 の p^{n+1} 乗根を添加)を Lean で構成して " ++
+       "thm_1_2_of_ring_tower_monogenic に食わせる段(仮定が空虚でないことの対照)") 5 ]
 
 /-! ## ★1 ステップ分を 1 本の定理にまとめる(2026-09-05)
 
