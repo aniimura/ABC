@@ -705,6 +705,31 @@ theorem lenR_le_nsmul {R M N : Type*} [Ring R] [AddCommGroup M] [Module R M]
   unfold lenR
   exact_mod_cast hle
 
+open IsLocalRing in
+/-- **事実 (b) の使う形**——`a` が `𝔪^e` を生成し、部分加群 `K` が
+`a` 倍の核を含むなら `min(length M, e) ≤ length K`。
+原文の *"the composition of the two maps annihilates the kernel by
+`p`-multiplication ... this kernel has length at least ..."* に対応。
+`ker_comp_contains_pTorsion` が `K := ker(g∘f)` に対する仮定 `hK` を与える。 -/
+theorem min_le_length_of_torsion_le {R M : Type*} [CommRing R] [IsLocalRing R]
+    [IsNoetherianRing R] [AddCommGroup M] [Module R M] [Module.Finite R M]
+    [IsArtinian R M] [IsNoetherian R M]
+    (e : ℕ) (a : R) (ha : Ideal.span ({a} : Set R) = (maximalIdeal R)^e)
+    (K : Submodule R M)
+    (hK : LinearMap.ker (a • (LinearMap.id : M →ₗ[R] M)) ≤ K) :
+    min (Module.length R M) (e : ℕ∞) ≤ Module.length R K := by
+  have hrange : LinearMap.range (a • (LinearMap.id : M →ₗ[R] M))
+      = (maximalIdeal R)^e • (⊤ : Submodule R M) := by
+    rw [← ha, Submodule.ideal_span_singleton_smul, ← Submodule.map_top]
+    rfl
+  have hker : Module.length R (LinearMap.ker (a • (LinearMap.id : M →ₗ[R] M)))
+      = Module.length R (M ⧸ (maximalIdeal R)^e • (⊤ : Submodule R M)) := by
+    rw [length_ker_eq_length_coker _ (Module.length_ne_top), hrange]
+  have h1 := min_le_length_quot_smul_pow (R := R) (M := M) e
+  rw [← hker] at h1
+  exact le_trans h1 (Module.length_le_of_injective
+    (Submodule.inclusion hK) (Submodule.inclusion_injective hK))
+
 /-! ## 最終配線——加群の 3 事実から `δₙ → 0` へ -/
 
 /-- **加群の 3 事実(実数化済み)から原文の鍵の不等式へ**。
