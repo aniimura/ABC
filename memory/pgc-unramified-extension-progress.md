@@ -2094,3 +2094,30 @@ mathlib に「`E₁ ⊓ E₂ = ⊥` かつ `E₁/F` Galois ⟹ `[E₁E₂:E₂] 
 書き込み中と思われる過渡的失敗)。**そのまま commit/push してしまった**。
 直後の再実行で 6914 jobs 成功を確認したのでコミットメッセージの主張自体は
 正しいが、**確認前に push した順序が誤り**。ゲートは push の前に通すこと。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05: `[K(Λ_n)·K_{ur,m}:K] = (q^n−q^{n−1})·m`
+
+`Found/PGC/RamifiedUnramifiedDisjoint.lean`(新規)。
+
+- `adjoin_le_unramifiedClosure_of_isUnramifiedAdjoin`
+- `inf_eq_bot_of_isUnramified_of_isTotallyRamified`(`K(y) ⊓ K(α) = ⊥`)
+- `finrank_sup_of_isUnramified_of_isTotallyRamified`(合成体の次数は積)
+- `exists_finrank_sup_lubinTate_unramified`(Lubin-Tate と不分岐の具体形)
+
+★`IsGalois` を要求されるのは**不分岐側**でよい——不分岐拡大は常に Galois
+なので、完全分岐側に正規性を要求しなくて済む。向きの選択が要点。
+
+### ★★★配管の重要な発見: 在庫検索は「木に無い」と「import していない」を混同する
+
+`IntermediateField.LinearDisjoint.of_inf_eq_bot` を使ったら
+`Unknown constant`。`mcp__abc3-lean__lean_check` でも Unknown。
+しかし `.cache/mathlib-index.txt` には**確かにある**
+(`FieldTheory/LinearDisjoint.lean:157`)。
+
+**原因**: mathlib の当該ファイルを ABC3 のどこも import していなかっただけ。
+`import Mathlib.FieldTheory.LinearDisjoint` を 1 行足したら通った。
+
+**教訓**: `Unknown constant` が出たとき、`.cache/mathlib-index.txt` に
+名前があるなら「mathlib に無い」ではなく「**import していない**」。
+MCP REPL も ABC3 の import 集合で動くので同じ嘘をつく。
+まず index を引き、あれば import を足す。

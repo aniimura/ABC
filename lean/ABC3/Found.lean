@@ -1700,6 +1700,7 @@ import ABC3.Found.PGC.UnitsGroupInvariants
 import ABC3.Found.PGC.UnramifiedSubextension
 import ABC3.Found.PGC.AbsGalUnitsSurjective
 import ABC3.Found.PGC.GaloisTransferContinuous
+import ABC3.Found.PGC.RamifiedUnramifiedDisjoint
 /-!
 # Found — 実装済みの基礎
 
