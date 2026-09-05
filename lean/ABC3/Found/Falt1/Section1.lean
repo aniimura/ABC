@@ -792,6 +792,29 @@ example : Filter.Tendsto (fun n : ℕ => (1/2 : ℝ)^n) Filter.atTop (nhds 0) :=
     rw [mul_one, min_eq_left hle]
   · rw [Nat.cast_zero, zero_add, pow_succ]; ring_nf; linarith
 
+open Filter Topology in
+/-- **`Theorem 1.2`——Skeleton の `thm12`(ε-N 形)にそのまま繋いだ形**。
+
+`Skeleton/Falt1/Section1.lean` の
+`theorem_1_2 (E : RamificationSetup) := E.thm12` は
+`∀ ε > 0, ∃ N, ∀ n ≥ N, δ n < ε` という形をしている。
+加群の 3 事実からこれが**証明できる**——つまり `Theorem 1.2` を
+`Found` にするには、実際の塔からこの 3 事実を出すだけでよい。 -/
+theorem thm_1_2_eps_delta (d : ℕ) (δ e Lker Lcoker : ℕ → ℝ)
+    (h0 : ∀ n, 0 ≤ δ n) (he : ∀ n, 0 < e n)
+    (hidx : ∀ n, Lker n + δ (n+1) * e n = δ n * e n + Lcoker n)
+    (hb : ∀ n, min (δ n * e n) (e n) ≤ Lker n)
+    (hc : ∀ n, Lcoker n ≤ ((d:ℝ)+1) * (δ n - δ (n+1)) * e n) :
+    ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ n ≥ N, δ n < ε := by
+  intro ε hε
+  have htend := thm_1_2_of_module_facts d δ e Lker Lcoker h0 he hidx hb hc
+  rw [Metric.tendsto_atTop] at htend
+  obtain ⟨N, hN⟩ := htend ε hε
+  refine ⟨N, fun n hn => ?_⟩
+  have hd := hN n hn
+  rw [Real.dist_eq, sub_zero, abs_of_nonneg (h0 n)] at hd
+  exact hd
+
 /-! ## 1 ステップ分の橋——加群レベルの入力から実数の 3 事実へ -/
 
 theorem lenR_add_eq_add {R A B C D : Type*} [Ring R]
