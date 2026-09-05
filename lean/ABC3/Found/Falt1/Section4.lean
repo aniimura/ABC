@@ -120,6 +120,68 @@ theorem thm_4_1_i_localized {R A B : Type u} [CommRing R] [CommRing A] [CommRing
   · rw [map_mul, mul_smul]
     exact Submodule.smul_mem _ _ (hc x)
 
+/-! ## ★§4(b) の「`dlog(uᵢ)` を基底とする自由加群」(2026-09-05)
+
+原文 §4(b):
+
+> *The direct sums `R̄^d`, `R̄[1/p]^d`, etc. are free modules with the
+> `dlog(uᵢ)` as basis.*
+
+その根拠は「`V[T₁…T_d] → R` がエタール」という §4(a) の設定である。
+一般に**形式的エタールなら微分は底変換で同型**になり、多項式環の微分は
+自由(mathlib の `KaehlerDifferential.mvPolynomialBasis`)なので、
+`Ω[R⁄V]` は `d` 個の `d(uᵢ)` を基底とする自由加群になる。 -/
+
+/-- **形式的エタールなら微分は底変換で同型**——Jacobi–Zariski の
+2 本の完全列(`H1Cotangent` 側と `Ω` 側)で両端が消えることから。 -/
+theorem mapBaseChange_bijective_of_formallyEtale (R S T : Type u) [CommRing R] [CommRing S]
+    [CommRing T] [Algebra R S] [Algebra S T] [Algebra R T] [IsScalarTower R S T]
+    [Algebra.FormallyEtale S T] :
+    Function.Bijective (KaehlerDifferential.mapBaseChange R S T) := by
+  constructor
+  · rw [injective_iff_map_eq_zero]
+    intro x hx
+    obtain ⟨y, hy⟩ := ((Algebra.H1Cotangent.exact_δ_mapBaseChange R S T) x).mp hx
+    rw [← hy, Subsingleton.elim y 0, map_zero]
+  · intro y
+    exact ((KaehlerDifferential.exact_mapBaseChange_map R S T) y).mp (Subsingleton.elim _ _)
+
+/-- **`Ω[R⁄V]` は `d(uᵢ)` を基底とする自由加群**——`V[Tᵢ] → R` が
+形式的エタールなら。原文 §4(b) の *"free modules with the `dlog(uᵢ)`
+as basis"* の内容(`uᵢ` が単元なら `d(uᵢ)` と `dlog(uᵢ)` は単元倍で
+移り合う)。 -/
+noncomputable def kaehlerBasisOfEtale (V : Type u) [CommRing V] (σ : Type u) (R : Type u)
+    [CommRing R] [Algebra V R] [Algebra (MvPolynomial σ V) R]
+    [IsScalarTower V (MvPolynomial σ V) R]
+    [Algebra.FormallyEtale (MvPolynomial σ V) R] :
+    Module.Basis σ R (Ω[R⁄V]) :=
+  ((KaehlerDifferential.mvPolynomialBasis V σ).baseChange R).map
+    (LinearEquiv.ofBijective (KaehlerDifferential.mapBaseChange V (MvPolynomial σ V) R)
+      (mapBaseChange_bijective_of_formallyEtale V (MvPolynomial σ V) R))
+
+/-- 基底の元はちょうど `d(uᵢ)`(`uᵢ := Tᵢ` の像)。 -/
+theorem kaehlerBasisOfEtale_apply (V : Type u) [CommRing V] (σ : Type u) (R : Type u)
+    [CommRing R] [Algebra V R] [Algebra (MvPolynomial σ V) R]
+    [IsScalarTower V (MvPolynomial σ V) R]
+    [Algebra.FormallyEtale (MvPolynomial σ V) R] (i : σ) :
+    kaehlerBasisOfEtale V σ R i
+      = KaehlerDifferential.D V R (algebraMap (MvPolynomial σ V) R (MvPolynomial.X i)) := by
+  rw [kaehlerBasisOfEtale, Module.Basis.map_apply, Module.Basis.baseChange_apply,
+    KaehlerDifferential.mvPolynomialBasis_apply]
+  simp [KaehlerDifferential.mapBaseChange_tmul, KaehlerDifferential.map_D]
+
+/-- 非空虚性——`V = ℤ`、`σ = Fin 1`、`R = Fin 2 → ℤ[X]`
+(`ℤ[X]` 上分裂エタール、`Algebra.FormallyEtale.pi_iff`)。
+`Ω[R⁄ℤ]` は階数 1 の自由 `R`-加群になる。 -/
+noncomputable example :
+    Module.Basis (Fin 1) (Fin 2 → MvPolynomial (Fin 1) ℤ)
+      (Ω[(Fin 2 → MvPolynomial (Fin 1) ℤ)⁄ℤ]) := by
+  haveI : Algebra.FormallyEtale (MvPolynomial (Fin 1) ℤ)
+      (Fin 2 → MvPolynomial (Fin 1) ℤ) :=
+    (Algebra.FormallyEtale.pi_iff (R := MvPolynomial (Fin 1) ℤ)
+      (A := fun _ : Fin 2 => MvPolynomial (Fin 1) ℤ)).mpr (fun _ => inferInstance)
+  exact kaehlerBasisOfEtale ℤ (Fin 1) (Fin 2 → MvPolynomial (Fin 1) ℤ)
+
 /-! ## 非空虚性の対照
 
 `R = ℤ`、`A = ℤ[X]`(**`Ω[A⁄R] ≠ 0`** なので主張が退化しない)、
