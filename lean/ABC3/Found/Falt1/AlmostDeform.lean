@@ -574,6 +574,75 @@ theorem commutator_leibniz {A N : Type u} [CommRing A] [AddCommGroup N] [Module 
   rw [hassoc x a y, hassoc x y a, hassoc a x y]
   abel
 
+/-! ## ★補正した積から**本物の環**を作る(2026-09-05)
+
+`associativity_correction` は「補正した積 `ν = t·μ − h` が**厳密に**
+結合的」を与えた。可換性と単位元が揃えば、これで加群 `N` に
+**本物の可換環構造**が入り、`A`-代数になる——原文の `B_ε` の構成
+そのものである(`B_ε = A^r/(p^ε−e)(A^r)` は加群としては商加群で、
+積は持ち上げた `m_ε` を補正したもの)。
+
+Lean で「双線形写像から環を作る」道具は mathlib に無いので置く。 -/
+
+/-- **双線形写像から可換環**——結合的・可換・単位元つきの双線形写像
+`μ` は `N` に可換環構造を与える(積は `x * y = μ x y`)。 -/
+@[reducible] noncomputable def commRingOfBilin {A N : Type u} [CommRing A] [AddCommGroup N]
+    [Module A N] (μ : N →ₗ[A] N →ₗ[A] N) (one : N)
+    (hassoc : ∀ x y z : N, μ x (μ y z) = μ (μ x y) z)
+    (hcomm : ∀ x y : N, μ x y = μ y x)
+    (hone : ∀ x : N, μ one x = x) : CommRing N :=
+  { (inferInstance : AddCommGroup N) with
+    mul := fun x y => μ x y
+    mul_assoc := fun x y z => (hassoc x y z).symm
+    one := one
+    one_mul := hone
+    mul_one := fun x => by show μ x one = x; rw [hcomm]; exact hone x
+    left_distrib := fun x y z => by show μ x (y + z) = μ x y + μ x z; rw [map_add]
+    right_distrib := fun x y z => by
+      show μ (x + y) z = μ x z + μ y z
+      rw [map_add]; rfl
+    zero_mul := fun x => by show μ 0 x = 0; rw [map_zero]; rfl
+    mul_zero := fun x => by show μ x 0 = 0; rw [map_zero]
+    mul_comm := hcomm }
+
+/-- **その環は `A`-代数**——`μ` が `A`-双線形なので
+`Algebra.ofModule` がそのまま通る。 -/
+@[reducible] noncomputable def algebraOfBilin {A N : Type u} [CommRing A] [AddCommGroup N]
+    [Module A N] (μ : N →ₗ[A] N →ₗ[A] N) (one : N)
+    (hassoc : ∀ x y z : N, μ x (μ y z) = μ (μ x y) z)
+    (hcomm : ∀ x y : N, μ x y = μ y x)
+    (hone : ∀ x : N, μ one x = x) :
+    letI := commRingOfBilin μ one hassoc hcomm hone
+    Algebra A N :=
+  letI := commRingOfBilin μ one hassoc hcomm hone
+  Algebra.ofModule
+    (fun r x y => by show μ (r • x) y = r • μ x y; rw [map_smul]; rfl)
+    (fun r x y => by show μ x (r • y) = r • μ x y; rw [map_smul])
+
+/-- **★補正した積から環を作る**——`Theorem 2.3` 第 4 段の帰結を
+そのまま環にする。`hcob` は `hochschild_H3_almost_coboundary_act` が
+与えるコバウンダリ表示、`hv1`/`hv2` は `associator_eq_zero_of_act(')`
+から出る「`h` が二次で消える」性質。 -/
+@[reducible] noncomputable def commRingOfCorrectedMul {A N : Type u} [CommRing A]
+    [AddCommGroup N] [Module A N]
+    (μ : N →ₗ[A] N →ₗ[A] N) (t : A) (h : N →ₗ[A] N →ₗ[A] N) (one : N)
+    (hv2 : ∀ x y z : N, h x (h y z) = 0)
+    (hv1 : ∀ x y z : N, h (h x y) z = 0)
+    (hcob : ∀ x y z : N, t • (μ x (μ y z) - μ (μ x y) z)
+      = μ x (h y z) - h (μ x y) z + h x (μ y z) - μ (h x y) z)
+    (hcomm : ∀ x y : N, (t • μ - h) x y = (t • μ - h) y x)
+    (hone : ∀ x : N, (t • μ - h) one x = x) : CommRing N :=
+  commRingOfBilin (t • μ - h) one
+    (associativity_correction μ t h hv2 hv1 hcob) hcomm hone
+
+/-- 非空虚性——`N := A`、`μ := (· * ·)`、`one := 1` で
+`commRingOfBilin` はもとの可換環をそのまま与える。仮定が空虚に
+真になっていないことの対照。 -/
+example : (1 : Polynomial ℤ) = 1 := by
+  letI := commRingOfBilin (LinearMap.mul (Polynomial ℤ) (Polynomial ℤ)) (1 : Polynomial ℤ)
+    (fun x y z => (mul_assoc x y z).symm) mul_comm one_mul
+  rfl
+
 /-! ## 最終段——`C_σ = A + p^{5σ}·B_σ` の増大列とその合併
 
 原文の
