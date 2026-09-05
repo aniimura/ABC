@@ -1680,6 +1680,14 @@ import ABC3.Found.GenEll.PrimeOverL
 import ABC3.Found.GenEll.VeluGoodPrimeJ
 import ABC3.Found.GenEll.VeluSemistableAll
 import ABC3.Found.GenEll.VeluSemistableJ
+-- ★[Falt1] almost étale——これまで `Found.lean` に登録し忘れていたため
+-- 既定の `lake build` の対象外だった(2026-09-05 に判明・修正)。
+-- `AlmostLifting` が `AlmostBase`/`AlmostDifferentials`/`AlmostEtale`/
+-- `AlmostProjective`/`HochschildLowDegree` を、`Lemma11` が `KaehlerAux` を
+-- 推移的に含む。
+import ABC3.Found.Falt1.AlmostLifting
+import ABC3.Found.Falt1.GaloisTransfer
+import ABC3.Found.Falt1.Lemma11
 /-!
 # Found — 実装済みの基礎
 
