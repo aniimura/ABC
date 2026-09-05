@@ -1842,3 +1842,24 @@ Gauss の補題(`Monic.irreducible_iff_irreducible_map_fraction_map`)で
 (慣性次数の乗法性 `f(M/K) = f(M/L)·f(L/K)`)が要る。
 mathlib の `Ideal.inertiaDeg_algebra_tower` を使うか、剰余体の
 `finrank` の塔則(`Module.finrank_mul_finrank`)で出すのが素直。
+
+## 2026-09-05(続き): 完全分岐が塔を「登る」条件
+
+`Found/PGC/TotallyRamified.lean` に追加。
+
+第 979 の `isTotallyRamified_of_le` は完全分岐が**部分拡大へ降りる**ことを
+言っていた。逆に**登る**方は剰余体が伸びないという情報が要る:
+
+- `residueFieldHom` / `residueFieldHom_injective` :
+  部分拡大に沿った包含が誘導する `𝓀_{K(x)} ↪ 𝓀_{K(y)}`
+- **`isTotallyRamifiedAdjoin_of_residueDegree_le`** :
+  `K(x) ≤ K(y)`・`K(x)/K` 完全分岐・`q_{K(y)} ≤ q_{K(x)}`
+  ⟹ `K(y)/K` も完全分岐
+  (単調性 `card_residueField_le_of_adjoin_le` と合わせて `q` は不変)
+
+### Lubin-Tate 塔に残っているもの
+
+各段で `q_{K(Λ_n)} ≤ q_{K(Λ_{n-1})}` を言えばよい。これは `ψ_n` が
+`𝒪_{K(Λ_{n-1})}` 上の Eisenstein であることから出るはずだが、
+`ψ_n` の根が生成する拡大を `K.closure` の中の中間体として捉え直す
+(= 代数閉包の同一視)配管がまだ無い。

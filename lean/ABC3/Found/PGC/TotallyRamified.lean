@@ -633,4 +633,45 @@ theorem exists_isTotallyRamifiedAdjoin_of_eisenstein (K : PAdicLocalField p)
   rw [← Polynomial.map_map]
   exact hα
 
+/-! ## 塔の一段: 剰余体が伸びなければ完全分岐は登る
+
+`isTotallyRamified_of_le`(第 979)は完全分岐が**部分拡大へ降りる**ことを
+言っていた。逆に**登る**方は、剰余体が伸びないという情報が要る。
+`card_residueField_le_of_adjoin_le`(単調性)と合わせると、
+「上の剰余体が下より大きくない」だけで足りる。 -/
+
+/-- 剰余体の間の写像(部分拡大に沿った包含が誘導する)。 -/
+noncomputable def residueFieldHom (K : PAdicLocalField p) {x y : K.closure}
+    (hle : IntermediateField.adjoin K.carrier ({x} : Set K.closure)
+      ≤ IntermediateField.adjoin K.carrier ({y} : Set K.closure)) :
+    IsLocalRing.ResidueField (adjoinIntegers K x) →+*
+      IsLocalRing.ResidueField (adjoinIntegers K y) := by
+  haveI := isLocalRing_adjoinIntegers K x
+  haveI := isLocalRing_adjoinIntegers K y
+  exact IsLocalRing.ResidueField.map (adjoinIntegersRingHom K hle)
+
+theorem residueFieldHom_injective (K : PAdicLocalField p) {x y : K.closure}
+    (hle : IntermediateField.adjoin K.carrier ({x} : Set K.closure)
+      ≤ IntermediateField.adjoin K.carrier ({y} : Set K.closure)) :
+    Function.Injective (residueFieldHom K hle) := by
+  haveI := isLocalRing_adjoinIntegers K x
+  haveI := isLocalRing_adjoinIntegers K y
+  exact (residueFieldHom K hle).injective
+
+/-- **★★★★★完全分岐は「剰余体が伸びない」限り塔を登る**——
+`K(x) ≤ K(y)`、`K(x)/K` 完全分岐、`q_{K(y)} ≤ q_{K(x)}` なら `K(y)/K` も完全分岐。
+(単調性と合わせて `q_{K(y)} = q_{K(x)} = q_K` になる。) -/
+theorem isTotallyRamifiedAdjoin_of_residueDegree_le (K : PAdicLocalField p) {x y : K.closure}
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({y} : Set K.closure))]
+    (hle : IntermediateField.adjoin K.carrier ({x} : Set K.closure)
+      ≤ IntermediateField.adjoin K.carrier ({y} : Set K.closure))
+    (hx : IsTotallyRamifiedAdjoin K x)
+    (h : residueDegree K y ≤ residueDegree K x) : IsTotallyRamifiedAdjoin K y := by
+  have hmono := card_residueField_le_of_adjoin_le K hle
+  have heq : residueDegree K y = residueDegree K x := le_antisymm h hmono
+  rw [isTotallyRamifiedAdjoin_iff_residueDegree] at hx ⊢
+  rw [heq]
+  exact hx
+
 end ABC3.Found.PGC
