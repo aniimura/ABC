@@ -792,6 +792,56 @@ example : Filter.Tendsto (fun n : ℕ => (1/2 : ℝ)^n) Filter.atTop (nhds 0) :=
     rw [mul_one, min_eq_left hle]
   · rw [Nat.cast_zero, zero_add, pow_succ]; ring_nf; linarith
 
+/-! ## 1 ステップ分の橋——加群レベルの入力から実数の 3 事実へ -/
+
+theorem lenR_add_eq_add {R A B C D : Type*} [Ring R]
+    [AddCommGroup A] [Module R A] [AddCommGroup B] [Module R B]
+    [AddCommGroup C] [Module R C] [AddCommGroup D] [Module R D]
+    (h : Module.length R A + Module.length R B = Module.length R C + Module.length R D)
+    (hA : Module.length R A ≠ ⊤) (hB : Module.length R B ≠ ⊤)
+    (hC : Module.length R C ≠ ⊤) (hD : Module.length R D ≠ ⊤) :
+    lenR R A + lenR R B = lenR R C + lenR R D := by
+  unfold lenR
+  have h1 : (Module.length R A + Module.length R B).toNat
+      = (Module.length R A).toNat + (Module.length R B).toNat := ENat.toNat_add hA hB
+  have h2 : (Module.length R C + Module.length R D).toNat
+      = (Module.length R C).toNat + (Module.length R D).toNat := ENat.toNat_add hC hD
+  have h3 := congrArg ENat.toNat h
+  rw [h1, h2] at h3
+  exact_mod_cast h3
+
+open IsLocalRing in
+/-- **`Theorem 1.2` の 1 ステップ分の橋**——加群レベルの入力から
+`thm_1_2_of_module_facts` が要求する実数の 3 事実を作る。
+
+* `hker`——原文の *"the composition of the two maps annihilates the kernel
+  by `p`-multiplication"*(`a` は `𝔪^e` の生成元)。
+  `ker_comp_contains_pTorsion` がこの仮定を供給する。
+* `g`/`hspan`/`hbann`——余核が `r` 個の元で生成され `b` で零化される
+  (原文の *"it is clear that `p^{δₙ−δ_{n+1}}` annihilates
+  `W_{n+1}/(Wₙ ⊗_{Vₙ} V_{n+1})`"*)。
+
+★ここまでで `Theorem 1.2` は「実際の `Ω`・差積・塔をこの入力に
+当てはめる」だけになる。 -/
+theorem step_facts_of_modules {R M N : Type*} [CommRing R] [IsLocalRing R] [IsNoetherianRing R]
+    [AddCommGroup M] [Module R M] [Module.Finite R M] [IsArtinian R M] [IsNoetherian R M]
+    [AddCommGroup N] [Module R N] [IsArtinian R N] [IsNoetherian R N]
+    (F : M →ₗ[R] N) (e : ℕ) (a : R) (ha : Ideal.span ({a} : Set R) = (maximalIdeal R)^e)
+    (hker : LinearMap.ker (a • (LinearMap.id : M →ₗ[R] M)) ≤ LinearMap.ker F)
+    (r : ℕ) (g : Fin r → (N ⧸ LinearMap.range F))
+    (hspan : Submodule.span R (Set.range g) = ⊤)
+    (b : R) (hbann : ∀ x : (N ⧸ LinearMap.range F), b • x = 0)
+    (hbfin : Module.length R (R ⧸ Ideal.span ({b} : Set R)) ≠ ⊤) :
+    (lenR R (LinearMap.ker F) + lenR R N
+        = lenR R M + lenR R (N ⧸ LinearMap.range F))
+    ∧ (min (lenR R M) (e : ℝ) ≤ lenR R (LinearMap.ker F))
+    ∧ (lenR R (N ⧸ LinearMap.range F) ≤ (r : ℝ) * lenR R (R ⧸ Ideal.span ({b} : Set R))) := by
+  refine ⟨?_, ?_, ?_⟩
+  · exact lenR_add_eq_add (length_ker_add_target F)
+      Module.length_ne_top Module.length_ne_top Module.length_ne_top Module.length_ne_top
+  · exact lenR_min_le e (min_le_length_of_torsion_le e a ha _ hker) Module.length_ne_top
+  · exact lenR_le_nsmul r (length_le_of_span_and_annihilator r g hspan b hbann) hbfin
+
 /-! ## `Theorem 1.2` の残りの手順(2026-09-05 時点の確定版)
 
 解析部分(`thm_1_2_of_length_bounds`)と 3 事実 (a)(b)(c) の**材料**は
