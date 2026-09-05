@@ -5207,3 +5207,43 @@ specialize して`f i j`を構成すること。その後に残るのは**開埋
 `piece_isAffineOpen`など既存の利用箇所に影響しない(型が同じ)。
 
 集計は引き続き10/24——§4は引き続き0/2。
+
+## 2026-09-05夜さらに続き25: `▸`を`pullback.congrHom`へ置き換える案は
+**動く**ことを確認——残る障害は`(ExtF.obj X).left`の畳み方
+
+続き24で特定した直し方を実際に試した(REPL、`piecePullbackIso'`として
+複製して検証):
+
+**(1) 置き換えは成功**。4段目を
+`pullback.congrHom (pieceRingHom_spec X U hU).symm rfl`に替えた定義は
+型検査を通り(0.10秒)、`unfold`+`simp only [Iso.trans_inv, Iso.symm_inv,
+Category.assoc]`で**合成が完全に露出する**:
+
+```
+(pullbackSpecIso ℚ Γ(X.left,U) ℝ).inv ≫ (pullbackHomIsoLeft …).inv ≫
+  (pullback.congrHom … ).inv ≫ (pullbackRightPullbackFstIso X.hom toBaseK U.ι).inv ≫
+    (pullbackSymmetry …).inv ≫ (pullbackRestrictIsoRestrict …).hom ≫ ι ≫ pullback.fst
+```
+
+これは`▸`版では`show`が`motive`計算に失敗して**到達できなかった**状態である。
+
+**(2) しかし各段の書き換えが発火しない**。`pullbackRestrictIsoRestrict_hom_
+ι_assoc`・`pullbackSymmetry_inv_comp_fst_assoc`・`pullbackRightPullbackFst
+Iso_inv_snd_fst`のいずれも「未使用」と報告される。原因は
+**`(ExtF.obj X).left`と`pullback X.hom toBaseK`の構文的なずれ**だと見ている
+——`ExtF := Over.pullback toBaseK ⋙ Over.map toBaseK`なので両者は定義的には
+等しいが、`simp`の照合は`Over.pullback`の定義を展開しない。
+
+**次の一手(具体的)**:
+1. `piecePullbackIso`の4段目を`pullback.congrHom (pieceRingHom_spec X U hU).symm rfl`
+   へ置き換える(型は変わらないので既存の利用箇所に影響しない)。
+2. 追跡の前に`(ExtF.obj X).left`を`pullback X.hom toBaseK`へ畳む
+   (`show`か、`ExtF_obj_left`のような`simp`補題を1本立てる)。
+3. その上で
+   `pullbackRestrictIsoRestrict_hom_ι_assoc`→`pullbackSymmetry_inv_comp_fst_assoc`
+   →`pullbackRightPullbackFstIso_inv_snd_fst`→`pullback.congrHom_inv`+
+   `pullback.lift_fst`→`pullbackHomIsoLeft_hom_fst'`の`inv`版(既存の`hom`版
+   から導ける)→`pullbackSpecIso_inv_fst`の順で潰す。
+
+各段に対応する補題が**すべて存在すること**は確認済みなので、(2)さえ片付けば
+機械的に終わる見込みである。集計は引き続き10/24——§4は引き続き0/2。

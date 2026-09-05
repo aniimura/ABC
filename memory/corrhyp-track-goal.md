@@ -2336,3 +2336,20 @@ invalid ▸ notation, failed to compute motiveになり、unfold+simpも進ま�
 特徴づけがあるので合成の値が計算できる。残作業は「定義を▸抜きへ書き換え」
 +「6段の追跡」の2段構え。書き換えは型が同じなので既存利用箇所に影響しない。
 集計は10/24——§4は0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き25
+続き24の直し方を実際に検証(REPLでpiecePullbackIso'として複製):
+(1)置き換えは成功——4段目をpullback.congrHom (pieceRingHom_spec).symm rflに
+替えた定義は型検査を通り、unfold+simp only [Iso.trans_inv, Iso.symm_inv,
+Category.assoc]で合成が完全に露出する(▸版ではshowがmotive計算に失敗して
+到達できなかった状態)。
+(2)しかし各段の書き換えが発火しない。原因は(ExtF.obj X).leftと
+pullback X.hom toBaseKの構文的ずれと見ている(ExtF := Over.pullback toBaseK ⋙
+Over.map toBaseKなので定義的には等しいがsimpは展開しない)。
+
+次の一手: 1.piecePullbackIsoの4段目をcongrHomへ置換(型不変なので影響なし)、
+2.(ExtF.obj X).leftをpullback X.hom toBaseKへ畳む(showかExtF_obj_leftの
+simp補題)、3.pullbackRestrictIsoRestrict_hom_ι_assoc→pullbackSymmetry_inv_
+comp_fst_assoc→pullbackRightPullbackFstIso_inv_snd_fst→pullback.congrHom_inv
++lift_fst→pullbackHomIsoLeft_hom_fst'のinv版→pullbackSpecIso_inv_fstの順。
+各段の補題の存在は確認済み。集計は10/24——§4は0/2。
