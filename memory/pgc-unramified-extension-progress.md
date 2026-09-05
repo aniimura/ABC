@@ -699,3 +699,34 @@ normal で `f_K` が分裂するから `z ∈ K(y)`、同様に `K(z) = K(y)`。
 組み上げる段。mathlib に `Ẑ` があるか(`ZHat`?)は未確認——無ければ
 `lim_n ℤ/n!` を自前で組むか、`Gal(K^ur/K)` の位相群としての構造
 (profinite、`InfiniteGalois` 周辺)経由で述べる。
+
+## ★★★★★★★★★★2026-09-05: `K^ur/K` は Galois、そして **`Γ_K ↠ ℤ/n`**
+
+`Found/PGC/UnramifiedExtension.lean`(sorry 無し):
+- `normal_unramifiedClosure` : `K^ur/K` は normal
+  (`IntermediateField.normal_iSup`——normal な単項拡大の上限)
+- `isGalois_unramifiedClosure` : **`K^ur/K` は Galois**
+- **`exists_surjective_absGal_to_zmod`** : 任意の `n ≥ 1` に対し
+  `Γ_K = Gal(K̄/K)` から `Multiplicative (ZMod n)` への**全射**準同型が
+  存在する。制限射 `Γ_K →* Gal(K_n/K)` が全射
+  (`AlgEquiv.restrictNormalHom_surjective`、`K_n` は normal)で、
+  `Gal(K_n/K) ≃ ℤ/n` だから。
+
+★2026-09-05 実測: mathlib に `Ẑ`(`ZHat`)は**無い**
+(`.cache/mathlib-index.txt` を "ZHat"/"Zhat" で引いて 0 件)。
+そこで `Gal(K^ur/K) ≅ Ẑ` を「各 `n` で `ℤ/n` へ全射」という形に
+言い換えて述べた。射影極限としての `Ẑ` を作るなら
+`lim_n ℤ/n!` を自前で組む必要がある。
+
+### この節の到達点(まとめ)
+
+古典的局所類体論の**不分岐半分**は、次の形で本プロジェクトに入った:
+1. `e·f=[L:K]`(分岐理論の基本等式)
+2. 不分岐拡大の**存在**(各次数)・**一意性**
+3. `Gal(K_n/K) ≃ Gal(𝓀_n/𝓀) ≃ ℤ/n`
+4. `K^ur` の構成と Galois 性
+5. `Γ_K ↠ ℤ/n`(各 `n`)
+
+残るのは「完全分岐部分(節目(5)、既に完成)と不分岐部分を**組み合わせて**
+`Γ_K^ab ≅ (K^×)^∧` を出す」段——`pgc-prop12-reciprocity-gap.md` の
+(2)(3)(4) にあたる。
