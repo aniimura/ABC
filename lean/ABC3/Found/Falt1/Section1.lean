@@ -200,4 +200,62 @@ example : Filter.Tendsto (fun n : ℕ => (1/2 : ℝ)^n) Filter.atTop (nhds 0) :=
   ring_nf
   linarith
 
+/-! ## 第 2〜6 段(長さの評価)の骨組み
+
+残るのは原文の
+
+> *... the kernel of the second map contains the kernel of multiplication
+> by `p` on `Ω_{W_{n+1}/Vₙ}`, and hence **the composition of the two maps
+> annihilates the kernel by `p`-multiplication** on `Ω_{Wₙ/Vₙ} ⊗_{Wₙ}
+> W_{n+1}`. ... this kernel has **length at least** equal to that of
+> `W_{n+1}/p^β W_{n+1}` ... the cokernel of the composition of the two maps
+> is annihilated by `p^{δₙ−δ_{n+1}}`. So its **length is at most** ...*
+
+の部分である。ここで効くのは「核と余核の長さの差が源と標的の長さの差に
+等しい」という**指数の加法性**で、それを先に置いておく。 -/
+
+/-- **長さの「指数」加法性**——任意の線形写像 `f : M → N` について
+
+    length(ker f) + length N = length M + length(coker f)
+
+`Theorem 1.2` の長さの評価はこの恒等式に核・余核の上下からの評価を
+入れて `δₙ − δ_{n+1}` の不等式を出す、という形をしている。 -/
+theorem length_ker_add_target {R M N : Type*} [Ring R] [AddCommGroup M] [Module R M]
+    [AddCommGroup N] [Module R N] (f : M →ₗ[R] N) :
+    Module.length R (LinearMap.ker f) + Module.length R N
+      = Module.length R M + Module.length R (N ⧸ LinearMap.range f) := by
+  have hM : Module.length R M
+      = Module.length R (LinearMap.ker f) + Module.length R (LinearMap.range f) := by
+    refine Module.length_eq_add_of_exact (LinearMap.ker f).subtype f.rangeRestrict
+      Subtype.val_injective f.surjective_rangeRestrict ?_
+    intro x
+    constructor
+    · intro hx
+      exact ⟨⟨x, by simpa [LinearMap.mem_ker] using congrArg Subtype.val hx⟩, rfl⟩
+    · rintro ⟨y, rfl⟩
+      exact Subtype.ext y.2
+  have hN : Module.length R N
+      = Module.length R (LinearMap.range f) + Module.length R (N ⧸ LinearMap.range f) := by
+    refine Module.length_eq_add_of_exact (LinearMap.range f).subtype (LinearMap.range f).mkQ
+      Subtype.val_injective (Submodule.mkQ_surjective _) ?_
+    intro x
+    constructor
+    · intro hx
+      exact ⟨⟨x, (Submodule.Quotient.mk_eq_zero _).mp hx⟩, rfl⟩
+    · rintro ⟨y, rfl⟩
+      exact (Submodule.Quotient.mk_eq_zero _).mpr y.2
+  rw [hM, hN]
+  ring
+
+/-- **原文の *"the composition of the two maps annihilates the kernel by
+`p`-multiplication"***。第 2 写像の核が `p` 倍の核を含むなら、合成の核は
+源の `p` 倍の核を含む。 -/
+theorem ker_comp_contains_pTorsion {R M N P : Type*} [Ring R] [AddCommGroup M] [Module R M]
+    [AddCommGroup N] [Module R N] [AddCommGroup P] [Module R P]
+    (f : M →ₗ[R] N) (g : N →ₗ[R] P) (p : R)
+    (hg : ∀ y : N, p • y = 0 → g y = 0)
+    (x : M) (hx : p • x = 0) : g (f x) = 0 := by
+  refine hg (f x) ?_
+  rw [← map_smul, hx, map_zero]
+
 end ABC3.Found.Falt1
