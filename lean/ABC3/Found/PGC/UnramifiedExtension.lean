@@ -1270,4 +1270,56 @@ theorem exists_mulEquiv_residueGal {p : ℕ} [Fact p.Prime] (K : PAdicLocalField
   obtain ⟨x, hrank, hu, _, hbij⟩ := exists_isUnramifiedAdjoin K n hn
   exact ⟨x, hrank, hu, ⟨MulEquiv.ofBijective (residueGalHom K x) hbij⟩⟩
 
+
+/-! ## 不分岐拡大の Galois 群は `ℤ/n`
+
+`Gal(K(x)/K) ≃* Gal(𝓀_{K(x)}/𝓀)` と、**有限体の Galois 群は巡回群**
+(mathlib のインスタンス `IsCyclic (E ≃ₐ[F] E)`——Frobenius が生成する)
+を合わせると、次数 `n` の不分岐拡大の Galois 群は位数 `n` の巡回群、
+すなわち `ℤ/n` と同型。
+
+`Gal(K^ur/K) ≅ Ẑ` は、これらを `n` について射影極限に組み上げたもの
+——残る仕事は一意性(次数 `n` の不分岐拡大が `K.closure` の中で一意)と
+極限の構成。 -/
+
+/-- **次数 `n` の不分岐拡大の Galois 群は位数 `n` の巡回群**。 -/
+theorem exists_isCyclic_gal {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (n : ℕ)
+    (hn : n ≠ 0) :
+    ∃ x : K.closure,
+      Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) = n
+        ∧ IsUnramifiedAdjoin K x
+        ∧ IsCyclic ((IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+            ≃ₐ[K.carrier] (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))
+        ∧ Nat.card ((IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+            ≃ₐ[K.carrier] (IntermediateField.adjoin K.carrier ({x} : Set K.closure))) = n := by
+  obtain ⟨x, hrank, hu, hnor, hbij⟩ := exists_isUnramifiedAdjoin K n hn
+  haveI := module_finite_adjoinIntegers K x
+  haveI : Finite 𝓀[K.carrier] := residueField_finite K
+  haveI : CharZero K.carrier :=
+    charZero_of_injective_algebraMap (algebraMap ℚ_[p] K.carrier).injective
+  haveI := hnor
+  haveI : Algebra.IsSeparable K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :=
+    IntermediateField.isSeparable_tower_bot K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+  haveI : IsGalois K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := ⟨⟩
+  refine ⟨x, hrank, hu, ?_, ?_⟩
+  · exact (MulEquiv.isCyclic (MulEquiv.ofBijective (residueGalHom K x) hbij).symm).mp
+      inferInstance
+  · rw [IsGalois.card_aut_eq_finrank, hrank]
+
+/-- **★★★次数 `n` の不分岐拡大の Galois 群は `ℤ/n`**。 -/
+theorem exists_gal_mulEquiv_zmod {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (n : ℕ)
+    (hn : n ≠ 0) :
+    ∃ x : K.closure,
+      Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) = n
+        ∧ IsUnramifiedAdjoin K x
+        ∧ Nonempty (((IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+            ≃ₐ[K.carrier] (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))
+          ≃* Multiplicative (ZMod n)) := by
+  obtain ⟨x, hrank, hu, hcyc, hcard⟩ := exists_isCyclic_gal K n hn
+  haveI := hcyc
+  refine ⟨x, hrank, hu, ⟨?_⟩⟩
+  exact (hcard ▸ (zmodCyclicMulEquiv hcyc)).symm
+
 end ABC3.Found.PGC

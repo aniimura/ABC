@@ -612,3 +612,17 @@ Galois 性が付いたので、同じ次数の不分岐拡大が一致するこ�
    Galois 群の巡回性はあるはず(`FiniteField`/`GaloisField` 周辺)。
 2. 一意性(同じ次数の不分岐拡大は `K.closure` の中で一致)。
 3. `K^ur` の構成と `Gal(K^ur/K) ≅ Ẑ`(射影極限)。
+
+## 2026-09-05: 不分岐拡大の Galois 群は `ℤ/n`
+
+`Found/PGC/UnramifiedExtension.lean`:
+- `exists_isCyclic_gal` : 次数 `n` の不分岐拡大の Galois 群は
+  **位数 `n` の巡回群**(mathlib のインスタンス
+  `IsCyclic (E ≃ₐ[F] E)`(有限体)を `residueGalHom` の同型で移す)
+- `exists_gal_mulEquiv_zmod` : したがって
+  **`Gal(K(x)/K) ≃* Multiplicative (ZMod n)`**
+  (`zmodCyclicMulEquiv`)
+
+`Gal(K^ur/K) ≅ Ẑ` は、これらを `n` について射影極限に組み上げたもの
+——残る仕事は (a) 一意性(次数 `n` の不分岐拡大が `K.closure` の中で
+一意)と (b) 極限の構成。
