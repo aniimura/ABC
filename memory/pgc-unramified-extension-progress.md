@@ -2172,3 +2172,27 @@ kernel を止める(idioms #59)。代わりに **`Γ_K` の側で閉じた**:
 ### 記録: `lake build ABC3` の初回失敗→再実行成功が今日 2 度あった
 
 並行セッションの書き込みと衝突していると思われる。**必ず再実行して確認**する。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05: `Γ_K ↠ ℤ/m × (𝒪_K/π^n)^×`
+
+`Found/PGC/CompositumSurjection.lean::exists_surjective_absGal_zmod_prod_units`。
+**相互律 `Γ_K ↠ 𝒪_K^× × Ẑ` の、有限段での完全な形**。
+
+- `absGalQuotFixingSubgroupEquiv : Γ_K / Gal(K̄/E) ≃* Gal(E/K)`(`E` 正規)
+  ——`IntermediateField.restrictNormalHom_ker` +
+  `AlgEquiv.restrictNormalHom_surjective`。
+  ★`E.fixingSubgroup.Normal` は**インスタンス引数**にしないと商群が作れない
+  (`Normal K.carrier E` からは自動で出ない)。呼ぶ側で
+  `haveI := normal_fixingSubgroup_of_isGalois K _`。
+- 第一成分 `Γ_K ↠ Gal(K(y)/K) ≃* ℤ/m`(`exists_gal_mulEquiv_zmod` +
+  `normal_of_isUnramifiedAdjoin`)
+- 第二成分 `Γ_K ↠ Gal(K(Λ_n)/K) ≃* (𝒪_K/π^n)^×`(`galoisReciprocityEquiv`)
+- 同時全射性は第 999(次数が積)+ 第 1001(群論)
+
+### 残り
+
+1. **極限**: `n, m → ∞` の逆極限で `Γ_K ↠ 𝒪_K^× × Ẑ`
+2. **`K^ab = K_π · K^ur`**(これが本丸。Lubin-Tate による局所類体論の最難所)
+3. そこから `Γ_K^ab ≅ 𝒪_K^× × Ẑ` が出れば、第 962・第 963 の数え上げ
+   (`card_primeToPTorsion` で `q−1`、`finrank_eq_of_smallPrincipalUnits_mulEquiv`
+   で `[K:ℚ_p]`)がそのまま Prop 1.2 になる。

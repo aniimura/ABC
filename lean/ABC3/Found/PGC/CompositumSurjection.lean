@@ -164,4 +164,83 @@ theorem surjective_absGal_prod_lubinTate_unramified (K : PAdicLocalField p)
     surjective_absGal_prod_quotient K _ _
       (finrank_sup_of_isUnramified_of_isTotallyRamified K hyu hx)⟩
 
+/-- **`Γ_K / Gal(K̄/E) ≃* Gal(E/K)`**——`E` が `K` 上正規なら。
+`IntermediateField.restrictNormalHom_ker` と
+`AlgEquiv.restrictNormalHom_surjective` を繋いだだけ
+(`InertiaIdentification.lean::absGalQuotKerEquivUnramifiedGal` の一般化)。 -/
+noncomputable def absGalQuotFixingSubgroupEquiv (K : PAdicLocalField p)
+    (E : IntermediateField K.carrier K.closure) [Normal K.carrier E]
+    [E.fixingSubgroup.Normal] :
+    (K.absGal ⧸ E.fixingSubgroup) ≃* (E ≃ₐ[K.carrier] E) := by
+  haveI := IsAlgClosure.normal K.carrier K.closure
+  exact (QuotientGroup.quotientMulEquivOfEq
+      (IntermediateField.restrictNormalHom_ker E).symm).trans
+    (QuotientGroup.quotientKerEquivOfSurjective _
+      (AlgEquiv.restrictNormalHom_surjective (F := K.carrier) (K₁ := E) (E := K.closure)))
+
+/-- **★★★★★★★★★★★★★★★★★★★★★★★★★★`Γ_K ↠ ℤ/m × (𝒪_K/π^n)^×`**
+
+**相互律 `Γ_K ↠ 𝒪_K^× × Ẑ` の、有限段での完全な形**。
+
+* 第一成分: `Γ_K ↠ Gal(K(y)/K) ≃* ℤ/m`(`y` は次数 `m` の不分岐拡大の生成元、
+  `exists_gal_mulEquiv_zmod`)
+* 第二成分: `Γ_K ↠ Gal(K(Λ_n)/K) ≃* (𝒪_K/π^n)^×`(`galoisReciprocityEquiv`)
+* 同時全射性: 第 999(次数が積)+ 第 1001(群論) -/
+theorem exists_surjective_absGal_zmod_prod_units (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal 𝒪[K.carrier]) 𝒪[K.carrier]]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField 𝒪[K.carrier]) pp]
+    [Fintype (IsLocalRing.ResidueField 𝒪[K.carrier])] {ff : ℕ}
+    (hq : Fintype.card (IsLocalRing.ResidueField 𝒪[K.carrier]) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal 𝒪[K.carrier] = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries 𝒪[K.carrier]) (hf0 : PowerSeries.coeff 0 f = 0)
+    (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue 𝒪[K.carrier]) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) (x : K.closure)
+    (hxψ : x ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn)
+    (hxn : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (m : ℕ) (hm : m ≠ 0) :
+    ∃ F : K.absGal → (Multiplicative (ZMod m)
+        × (𝒪[K.carrier] ⧸ Ideal.span ({π ^ n} : Set 𝒪[K.carrier]))ˣ),
+      Function.Surjective F := by
+  classical
+  haveI : CharZero K.carrier :=
+    charZero_of_injective_algebraMap (algebraMap ℚ_[p] K.carrier).injective
+  obtain ⟨y, hym, hyu, ⟨ezm⟩⟩ := exists_gal_mulEquiv_zmod K m hm
+  haveI : Normal K.carrier (IntermediateField.adjoin K.carrier ({y} : Set K.closure)) :=
+    normal_of_isUnramifiedAdjoin K y hyu
+  haveI : Algebra.IsSeparable K.carrier
+      (IntermediateField.adjoin K.carrier ({y} : Set K.closure)) :=
+    IntermediateField.isSeparable_tower_bot K.carrier
+      (IntermediateField.adjoin K.carrier ({y} : Set K.closure))
+  haveI : IsGalois K.carrier (IntermediateField.adjoin K.carrier ({y} : Set K.closure)) := ⟨⟩
+  haveI : Normal K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :=
+    normal_adjoin_of_mem_iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn x
+      hxψ hxn hmem
+  haveI : Algebra.IsSeparable K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :=
+    IntermediateField.isSeparable_tower_bot K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+  haveI : IsGalois K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := ⟨⟩
+  have hx := isTotallyRamifiedAdjoin_iteratedLubinTatePsi K hq hπmax hπne0 f hf0 hf1 hf n hn x
+    hxψ hxn hmem
+  have hsurj := surjective_absGal_prod_quotient K
+    (IntermediateField.adjoin K.carrier ({y} : Set K.closure))
+    (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    (finrank_sup_of_isUnramified_of_isTotallyRamified K hyu hx)
+  haveI := normal_fixingSubgroup_of_isGalois K
+    (IntermediateField.adjoin K.carrier ({y} : Set K.closure))
+  haveI := normal_fixingSubgroup_of_isGalois K
+    (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+  refine ⟨(MulEquiv.prodCongr
+      ((absGalQuotFixingSubgroupEquiv K
+        (IntermediateField.adjoin K.carrier ({y} : Set K.closure))).trans ezm)
+      ((absGalQuotFixingSubgroupEquiv K
+        (IntermediateField.adjoin K.carrier ({x} : Set K.closure))).trans
+        (galoisReciprocityEquiv K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem)))
+    ∘ (fun g : K.absGal => ((QuotientGroup.mk g : _), (QuotientGroup.mk g : _))), ?_⟩
+  exact (MulEquiv.surjective _).comp hsurj
+
 end ABC3.Found.PGC
