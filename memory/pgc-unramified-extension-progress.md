@@ -1799,3 +1799,23 @@ f.natDegree = [K(x):K],  f の根 x  ⟹  K(x)/K は完全分岐
 
 `n = 1` の `φ_1` は `𝒪_K` 上の Eisenstein なので、
 **`K(Λ_1)/K` が完全分岐(次数 q-1)** は今すぐ言える。
+
+## 2026-09-05(続き): `φ_1` の Eisenstein 性も独立した定理に
+
+`Found/PGC/LubinTateActionWeierstrass.lean::isEisensteinAt_iteratedLubinTatePrimitive_one`
+
+`ψ_n`(第 985)と同じ形で、`irreducible_iteratedLubinTatePrimitive_one` の証明の
+中に埋まっていた Eisenstein 性を取り出した。
+
+★重要な違い: **`φ_1` は `𝒪_K` 上の Eisenstein**(`ψ_n`(n≥2)は
+`𝒪_{K(Λ_{n-1})}` 上)。したがって塔を要さず、
+`TotallyRamified.lean::isTotallyRamifiedAdjoin_of_eisenstein` に**そのまま
+渡せる**——`K(Λ_1)/K` が次数 `q-1` の完全分岐拡大であることが言える。
+
+### 次(`K(Λ_1)/K` 完全分岐を実際に言うのに要るもの)
+
+1. `φ_1` の根 `α ∈ K.closure` を取る(`IsAlgClosed.exists_root`)
+2. `minpoly = φ_1`(既約+monic、`minpoly.eq_of_irreducible_of_monic`)
+   ⟹ `[K(α):K] = φ_1.natDegree = q-1`
+3. `isTotallyRamifiedAdjoin_of_eisenstein` を適用
+——第 974 の `exists_root_pow_eq_p` と同じ型の議論。
