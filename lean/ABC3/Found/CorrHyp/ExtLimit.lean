@@ -1641,6 +1641,25 @@ theorem piece_isLocalization_basicOpen (X : Over BaseK) (U : X.left.Opens) (hU :
       Γ(C, C.basicOpen (piece_basicOpen_elem X U g C α)) :=
   (piece_preimage_isAffineOpen X U hU C α).isLocalization_basicOpen _
 
+open CategoryTheory AlgebraicGeometry Limits in
+/-- ★**ℝレベルの`f_open`**——`V = D(g) ≤ U`のとき、`piece(V) ⟶ piece(U)`は
+開埋め込みである。`piece_isLocalization_basicOpen`に mathlib の
+`IsOpenImmersion.of_isLocalization`を当てるだけ。
+
+`R'`レベルの対応物は`descendPieceR_localization_isOpenImmersion`(既存)で、
+両者が揃うと`GlueData`の`f_open`が「`V (i,j)`を`U i`の基本開集合として
+取れる被覆」の下で得られる。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem piece_basicOpen_isOpenImmersion (X : Over BaseK) (U : X.left.Opens)
+    (hU : IsAffineOpen U) (g : Γ(X.left, U)) (C : Scheme) (α : C ⟶ (ExtF.obj X).left)
+    [IsFinite α] :
+    IsOpenImmersion (Spec.map (CommRingCat.ofHom (algebraMap
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U))
+      Γ(C, C.basicOpen (piece_basicOpen_elem X U g C α))))) := by
+  haveI := piece_isLocalization_basicOpen X U hU g C α
+  exact IsOpenImmersion.of_isLocalization (piece_basicOpen_elem X U g C α)
+
 /-! ## `piece_basicOpen_localizationElem`の`R`レベルへの持ち上げ
 (`2026-09-05夜、続き20`)
 

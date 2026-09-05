@@ -2781,3 +2781,27 @@ descendPieceR_localization_isOpenImmersion(既存)で R' レベルの Spec が
 続き48 の exists_basicOpen_le_affine_inter がその材料。
 
 集計は10/24——§4は0/2。
+
+## 2026-09-05夜さらに続き50 — §2/§5/§6 の残り項目を点検(「安い勝ち」は全て退化)
+
+corrHypInstance4 のプレースホルダ(Iso := (=), IsOpenDenseIn := True,
+IsConstructibleIn := True, IsGenericallyScheme := True, deg := 0,
+core := id, Aut := PUnit, ModuliStack := basePt4, stackType := 定数)に
+照らして残り14件を点検した:
+- thm_5_3 / lemma_5_6 / lemma_5_4: True や定数なので形式的に閉じるが中身ゼロ
+- thm_6_1: basePt4 = Over.mk (𝟙 BaseK) は Over BaseK の終対象なので α = β は
+  本当に成り立つ。ただし「M_{g,r} が…」ではなく「終対象が…」であって
+  Royden の定理とは無関係
+- lemma_5_5: type が定数なので空集合か1点集合。退化
+- thm_5_7: deg _ := 0 と deg = 4/2 が矛盾するので偽(退化すらできない)
+- Def 2.2 / Prop 2.4 / Thm 2.5 / Thm 2.6 / Thm 3.3 / Lemma 5.1: 実質的な数学
+  (Margulis 超剛性、Royden、Galois 閉包と剛性、Lemma 4.1 の降下)が要る
+
+結論: 数を増やす道はプレースホルダの True に trivial を入れることでしか
+存在せず、それは形式化の目的を無効にする。§4 の実体を積み続ける判断を維持。
+以後同じ検討を繰り返さないために記録した。
+
+将来の設計メモ: Iso を ≅ に、ModuliStack を実物に、IsOpenDenseIn を位相的
+条件に置き換える必要がある。Iso の変更は lemma_4_1 の h : ZK = D.Ext Z
+(命題的等号、transport に使用)と衝突し、Corr と lemma_4_1 の statement
+同時変更が要る。§1 の完成済み 5/5 への波及評価が必要で、ユーザー判断事項。

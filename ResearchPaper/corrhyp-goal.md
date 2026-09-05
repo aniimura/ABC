@@ -6113,3 +6113,62 @@ Found側sorry 0件。集計は引き続き10/24——§4は引き続き0/2。
 
 検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
 Found側sorry 0件。集計は引き続き10/24——§4は引き続き0/2。
+
+### 2026-09-05夜さらに続き50 — ★§2/§5/§6の残り項目を点検した(「安い勝ち」は全て退化である)
+
+§4だけを掘り続けるのが正しいかを確かめるため、残り14件を
+`corrHypInstance4`(`Instance4.lean`)の定義に照らして点検した。結論は
+**「形式的に閉じられるものはあるが、いずれも退化であり入れてはならない」**。
+
+`corrHypInstance4`のプレースホルダ(`Lemma 4.1`の主張が読まないフィールド
+として意図的に置かれたもの):
+
+```
+Iso X Y := X = Y            type _ := (0, 0)
+IsOpenDenseIn _ _ _ := True IsConstructibleIn _ _ _ := True
+IsGenericallyScheme _ := True   deg _ := 0
+core := id                  coreMap X := QcqsFEt.idFEt X
+Aut _ := PUnit              idAut _ := PUnit.unit
+ModuliStack _ _ := basePt4  stackType _ := ⟨0, 0, Empty, _, Empty.elim⟩
+MargulisArithmetic _ := False   ShimuraArithmetic _ := False
+```
+
+これに照らすと:
+
+- **`thm_5_3`** — `∃ U, IsOpenDenseIn U g r ∧ ∀ X ∈ U, Iso (core X) X` は
+  `⟨Set.univ, trivial, fun _ _ => rfl⟩`で閉じる。だが`IsOpenDenseIn := True`・
+  `core := id`なので、**主張の中身(モジュライ空間の開稠密部分стек)は
+  一切ない**。
+- **`lemma_5_6`** — `IsConstructibleIn … := True`なので`trivial`。同断。
+- **`lemma_5_4`** — `stackType`が定数なので`.e`も定数、`c`を選べば閉じる。同断。
+- **`thm_6_1`** — `IsGenericallyScheme := True`、`Aut := PUnit`なので前2つは
+  自明。第3の「非自明なcorrespondenceを持たない」も、`ModuliStack := basePt4
+  = Over.mk (𝟙 BaseK)`が`Over BaseK`の**終対象**なので`α = β`が本当に成り立つ
+  ——が、これは「M_{g,r}が非自明なcorrespondenceを持たない」ではなく
+  「終対象が非自明なcorrespondenceを持たない」であって、Roydenの定理
+  (`thm_6_1.needs`に登記済み、Teichmüller空間の構成が本プロジェクトに無い)
+  とは無関係である。
+- **`lemma_5_5`** — `type X = (g,r)`が`(0,0) = (g,r)`なので`g=r=0`以外では
+  条件を満たす`X`が無く空集合、`(0,0)`でも`deg`・`stackType`が定数なので
+  1点集合。やはり退化。
+- **`thm_5_7`** — `stackType`が定数なので`.g = 0`は成り立つが
+  `deg (coreMap X) = deg`(4や2)は`deg _ := 0`と矛盾するため**偽**。
+  つまりこれはプレースホルダのままでは証明できない(退化すらできない)。
+- **`Definition 2.2`(Margulis-arithmetic)** — 代数群の機械(mathlib に無い)が
+  要る。既に`ShimuraArithmeticData.lean`のdocstringに記録済み。
+- **`Proposition 2.4`・`Theorem 2.5`・`Theorem 2.6`・`Theorem 3.3`・
+  `Lemma 5.1`** — いずれも実質的な数学(Margulis超剛性、Roydenの定理、
+  Galois閉包と剛性、`Lemma 4.1`の降下)を要求する。
+
+**したがって**: 数を14件増やす道は「プレースホルダの`True`に`trivial`を
+入れる」ことでしか存在せず、それは**この形式化の目的を無効にする**。
+CLAUDE.mdの「姿勢」に照らしても、工数の山は壁ではないが、**山を迂回して
+数字だけ取ることは進捗ではない**。よって§4(`Lemma 4.1`)の実体を積み続ける
+判断を維持する。この点検結果を記録に残し、以後同じ検討を繰り返さない。
+
+**プレースホルダを本物にする道**(将来の設計メモ): `corrHypInstance4`の
+`Iso`を`≅`(スキームの同型)に、`ModuliStack`を実際のモジュライ、
+`IsOpenDenseIn`を位相的な条件に置き換える必要がある。`Iso`の変更は
+`lemma_4_1`の`h : ZK = D.Ext Z`(命題的等号、transport に使われている)と
+衝突するため、`Corr`と`lemma_4_1`のstatement同時変更が要る——§1の完成済み
+5/5への波及を評価してから行うべきで、**ユーザー判断を要する事項**である。
