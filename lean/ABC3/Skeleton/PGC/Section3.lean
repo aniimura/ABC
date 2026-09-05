@@ -174,7 +174,27 @@ Corollary 3.1 と同じ理由(原文「the filtered group Γ_K」、裸の同型
 - [1] Serre, Chapter III, Appendix §5(d_V(i) による uniformizing の判定条件式)。
 - Corollary 3.1 への直接依存(d_V(i) が回復できることを使う)。
 
-## ★★検討中の懸念(2026-09-04、訂正込み)
+## ★★★2026-09-05: `ρ` と `ρ'` が無関係なのは**やはり罠だった**(訂正)
+
+下の 2026-09-04 の見立て(「反証はやはり効かない」)は**誤りだった**。
+`K' = K`・`α = 恒等` を取ると、旧形は「どんな2つの表現も uniformizing 性が
+一致する」と言っていることになる。そして一致しない2つは実際に作れる:
+
+* **真になる側**: `E := K`・`ι := id`・`I := U_K` とし、
+  `Γ_K ↠ 𝒪_K^×`(`Found/PGC/AbsGalUnitsSurjective.lean`、Lubin-Tate 相互律を
+  無条件化したもの)から `ρ := Γ_K ↠ 𝒪_K^× ↪ K^×`、`toGal := その切断`。
+* **偽になる側**: 自明な表現 `ρ' = 1`(`Check/PGC/Def32Degenerate.lean::
+  not_isUniformizing_one`)。
+
+証明は `Check/PGC/Cor33Degenerate.lean::cor_3_3_statement_false`(`sorry` 無し)。
+2026-09-04 の見立てが外れたのは、当時「真になる `ρ` を作るには相互律相当が
+要る」ところで止まっていたからで、その相互律の半分が構築された今は作れる。
+
+**修理**: 原文は**ひとつの** `V` を `α` で移して見比べるのだから、
+`ρ'` を `α` で `ρ` と結ぶ条件 `∀ g, ρ' (α.equiv g) = ρ g` を課した。
+`K' = K`・`α = 恒等` では `ρ' = ρ` が強制されるので反例は塞がる。
+
+## ★★検討中の懸念(2026-09-04、訂正込み——上のとおり**この見立ては外れた**)
 
 `ρ : K.absGal →* Eˣ`・`ρ' : K'.absGal →* Eˣ` が `_α` と無関係に自由に
 選べる点は一見 `Cor 3.1` と同じ罠に見えるが、精査すると**反証はやはり
@@ -194,8 +214,9 @@ theorem cor_3_3 (RF : RamificationFiltration p)
     (E : Type*) [Field E] [Algebra ℚ_[p] E]
     (toGal : ∀ K : PAdicLocalField p, {x : K.carrier // ‖x‖ = (1 : ℝ)} → K.absGal) :
     ∀ {K K' : PAdicLocalField p}
-      (_α : FilteredGroup.Iso (filteredGroupOf RF K) (filteredGroupOf RF K'))
-      (ρ : K.absGal →* Eˣ) (ρ' : K'.absGal →* Eˣ),
+      (α : FilteredGroup.Iso (filteredGroupOf RF K) (filteredGroupOf RF K'))
+      (ρ : K.absGal →* Eˣ) (ρ' : K'.absGal →* Eˣ)
+      (_hρ : ∀ g : K.absGal, ρ' (α.equiv g) = ρ g),
       IsUniformizing K E (toGal K) ρ ↔ IsUniformizing K' E (toGal K') ρ' := sorry
 
 def cor_3_3.src : Source :=
