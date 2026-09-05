@@ -3836,6 +3836,49 @@ theorem pieceRingEquiv_symm_naturality (X : Over BaseK) (U V : X.left.Opens)
         ≤ pullback.fst X.hom toBaseK ⁻¹ᵁ U from fun _ hx => hVU hx)).op))
       ((Scheme.ΓSpecIso (CommRingCat.of ℝ)).inv.hom r)
 
+set_option maxHeartbeats 1000000 in
+open scoped TensorProduct in
+/-- **`Γ(C,piece(U))`の代数構造は開集合の制限と可換**——`Lemma 4.1`の新設計
+(`V (i,j) := U_i ⊓ U_j`の片、`corrhyp-goal.md`の`続き19`)で`f i j`を
+`exists_mvPolynomial_quotient_ringHom_descend2_of_map`(`FieldLimit.lean`)に
+より降ろすとき、その仮説`hψ`の検証に要る**核心の可換性**である。
+
+`Γ(C,piece(U))`の`Γ(X.left,U)⊗[ℚ]ℝ`-代数構造は定義から
+`α.appLE ∘ pieceRingEquiv.symm`なので、
+- `pieceRingEquiv.symm`の自然性(`pieceRingEquiv_symm_naturality`)
+- `α`側の`appLE`の自然性(`Scheme.Hom.appLE_preimage_naturality`)
+
+の2本を合成するだけでよい。純テンソル`a ⊗ₜ r`の形で述べてあるが、
+テンソル積からの環準同型は純テンソル上で決まるので、これで代数構造の
+可換性としては十分である。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem pieceAlgebraMap_naturality (X : Over BaseK) (U V : X.left.Opens)
+    (hU : IsAffineOpen U) (hV : IsAffineOpen V) (hVU : V ≤ U)
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) (a : Γ(X.left, U)) (r : ℝ) :
+    letI := pieceAlgebra X U hU
+    letI := pieceAlgebra X V hV
+    (C.presheaf.map (homOfLE (piece_le_of_le X U V hVU C α)).op).hom
+      ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+          (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom
+        ((pieceRingEquiv X U hU).symm (a ⊗ₜ[ℚ] r)))
+    = (Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ V)
+        (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V)) le_rfl).hom
+        ((pieceRingEquiv X V hV).symm
+          ((X.left.presheaf.map (homOfLE hVU).op).hom a ⊗ₜ[ℚ] r)) := by
+  letI := pieceAlgebra X U hU
+  letI := pieceAlgebra X V hV
+  refine Eq.trans (congrFun (congrArg
+    (fun (t : Γ((ExtF.obj X).left, pullback.fst X.hom toBaseK ⁻¹ᵁ U) ⟶
+        Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V)))
+      => (CommRingCat.Hom.hom t : _ → _))
+    (Scheme.Hom.appLE_preimage_naturality α (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+      (pullback.fst X.hom toBaseK ⁻¹ᵁ V) (fun _ hx => hVU hx)))
+    ((pieceRingEquiv X U hU).symm (a ⊗ₜ[ℚ] r))) ?_
+  exact congrArg (Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ V)
+      (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V)) le_rfl).hom
+    (pieceRingEquiv_symm_naturality X U V hU hV hVU a r)
+
 /-- `piecesOpenCover`の脚`(e i).inv ≫ X.homOfLE (h i)`同士のpullbackは、
 `e i`・`e j`をpullbackの脚から追い出す(`pullbackHomIsoLeft`+
 `pullbackSymmetry`、いずれも既存の一般的事実)ことで、`X.homOfLE`同士
