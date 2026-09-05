@@ -108,13 +108,13 @@ theorem hochH2_identity {A B M : Type u} [CommRing A] [CommRing B] [Algebra A B]
 その homotopy は `h := TensorProduct.lift (hochH2Bil c) w` で**陽に**与えられる。 -/
 theorem hochschild_H2_almost_coboundary {A B M : Type u} [CommRing A] [CommRing B] [Algebra A B]
     [AddCommGroup M] [Module B M] [Module A M] [IsScalarTower A B M]
-    (p : A) (n : ℕ) (w : TensorProduct A B B)
+    (t : A) (w : TensorProduct A B B)
     (hw_ann : ∀ q : B, (1 ⊗ₜ[A] q - q ⊗ₜ[A] 1) * w = 0)
-    (hw_aug : Algebra.TensorProduct.lmul' A w = p ^ n • (1 : B))
+    (hw_aug : Algebra.TensorProduct.lmul' A w = t • (1 : B))
     (c : B →ₗ[A] B →ₗ[A] M)
     (hc : ∀ v b₁ b₂ : B, v • c b₁ b₂ - c (v*b₁) b₂ + c v (b₁*b₂) - b₂ • c v b₁ = 0) :
     ∃ h : B →ₗ[A] M, ∀ b₁ b₂ : B,
-      (p ^ n) • c b₁ b₂ = b₁ • h b₂ - h (b₁*b₂) + b₂ • h b₁ := by
+      t • c b₁ b₂ = b₁ • h b₂ - h (b₁*b₂) + b₂ • h b₁ := by
   refine ⟨TensorProduct.lift (hochH2Bil c) w, fun b₁ b₂ => ?_⟩
   have hid := hochH2_identity c hc b₁ b₂ w
   have hcancel : ((b₁ ⊗ₜ[A] (1:B)) * w) = (((1:B) ⊗ₜ[A] b₁) * w) := by
@@ -122,7 +122,7 @@ theorem hochschild_H2_almost_coboundary {A B M : Type u} [CommRing A] [CommRing 
     rw [sub_mul, sub_eq_zero] at h0
     exact h0.symm
   rw [hcancel, hw_aug] at hid
-  rw [hid, Algebra.smul_def, mul_one, ← algebraMap_smul B (p ^ n) (c b₁ b₂)]
+  rw [hid, Algebra.smul_def, mul_one, ← algebraMap_smul B t (c b₁ b₂)]
   abel
 
 /-- `Definition 2.1` の仮定から直接述べた形。 -/
@@ -143,7 +143,7 @@ theorem hochschild_H2_almost_coboundary_of_isAlmostEtale {A B M : Type u}
     (hc : ∀ v b₁ b₂ : B, v • c b₁ b₂ - c (v*b₁) b₂ + c v (b₁*b₂) - b₂ • c v b₁ = 0) :
     ∃ h : B →ₗ[A] M, ∀ b₁ b₂ : B,
       (p ^ n) • c b₁ b₂ = b₁ • h b₂ - h (b₁*b₂) + b₂ • h b₁ :=
-  hochschild_H2_almost_coboundary p n w
+  hochschild_H2_almost_coboundary (p ^ n) w
     (fun q => almost_swap_annihilate p hAE hf0inj n w hw q)
     (almost_swap_augment p hAE hf0inj n w hw) c hc
 
@@ -160,9 +160,9 @@ theorem hochschild_H2_almost_coboundary_of_isAlmostEtale {A B M : Type u}
 - p^{2n}φ(b₁)φ(b₂) = 0`。 -/
 theorem obstruction_mem_ker {A B C D : Type u} [CommRing A] [CommRing B] [CommRing C] [CommRing D]
     [Algebra A B] [Algebra A C] [Algebra A D]
-    (p : A) (n : ℕ) (π : C →ₐ[A] D) (φ : B →ₐ[A] D) (ψ : B →ₗ[A] C)
-    (hψ : ∀ b : B, π (ψ b) = (p ^ n) • φ b) (b₁ b₂ : B) :
-    π ((p ^ n) • ψ (b₁ * b₂) - ψ b₁ * ψ b₂) = 0 := by
+    (c : A) (π : C →ₐ[A] D) (φ : B →ₐ[A] D) (ψ : B →ₗ[A] C)
+    (hψ : ∀ b : B, π (ψ b) = c • φ b) (b₁ b₂ : B) :
+    π (c • ψ (b₁ * b₂) - ψ b₁ * ψ b₂) = 0 := by
   rw [map_sub, map_smul, map_mul π (ψ b₁) (ψ b₂), hψ, hψ, hψ, map_mul φ]
   simp only [Algebra.smul_def]
   ring
@@ -175,11 +175,11 @@ theorem obstruction_mem_ker {A B C D : Type u} [CommRing A] [CommRing B] [CommRi
 `c` は honest な 2-コサイクルであり、`hochschild_H2_almost_coboundary` を
 適用できる。 -/
 theorem obstruction_identity {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
-    [Algebra A B] [Algebra A C] (p : A) (n : ℕ) (ψ : B →ₗ[A] C) (b₁ b₂ b₃ : B) :
-    ψ b₁ * ((p ^ n) • ψ (b₂ * b₃) - ψ b₂ * ψ b₃)
-      - (p ^ n) • ((p ^ n) • ψ (b₁ * b₂ * b₃) - ψ (b₁ * b₂) * ψ b₃)
-      + (p ^ n) • ((p ^ n) • ψ (b₁ * (b₂ * b₃)) - ψ b₁ * ψ (b₂ * b₃))
-      - ψ b₃ * ((p ^ n) • ψ (b₁ * b₂) - ψ b₁ * ψ b₂) = 0 := by
+    [Algebra A B] [Algebra A C] (c : A) (ψ : B →ₗ[A] C) (b₁ b₂ b₃ : B) :
+    ψ b₁ * (c • ψ (b₂ * b₃) - ψ b₂ * ψ b₃)
+      - c • (c • ψ (b₁ * b₂ * b₃) - ψ (b₁ * b₂) * ψ b₃)
+      + c • (c • ψ (b₁ * (b₂ * b₃)) - ψ b₁ * ψ (b₂ * b₃))
+      - ψ b₃ * (c • ψ (b₁ * b₂) - ψ b₁ * ψ b₂) = 0 := by
   rw [mul_assoc b₁ b₂ b₃]
   simp only [Algebra.smul_def]
   ring
@@ -198,10 +198,10 @@ multiplicative, i.e. such that `p^ε φ_ε(xy) = φ_ε(x)φ_ε(y)`."*
 **`p^d ψ` の障害 `p^{2d}c = d(p^d h)` はちょうどコバウンダリになる**
 (= class が消える)。 -/
 theorem rescale_obstruction {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
-    [Algebra A B] [Algebra A C] (p : A) (n d : ℕ) (ψ : B →ₗ[A] C) (b₁ b₂ : B) :
-    (p ^ (n + d)) • (((p ^ d) • ψ) (b₁ * b₂)) - (((p ^ d) • ψ) b₁) * (((p ^ d) • ψ) b₂)
-      = (p ^ (2 * d)) • ((p ^ n) • ψ (b₁ * b₂) - ψ b₁ * ψ b₂) := by
-  simp only [LinearMap.smul_apply, Algebra.smul_def, map_pow]
+    [Algebra A B] [Algebra A C] (c t : A) (ψ : B →ₗ[A] C) (b₁ b₂ : B) :
+    (c * t) • ((t • ψ) (b₁ * b₂)) - ((t • ψ) b₁) * ((t • ψ) b₂)
+      = (t * t) • (c • ψ (b₁ * b₂) - ψ b₁ * ψ b₂) := by
+  simp only [LinearMap.smul_apply, Algebra.smul_def, map_mul]
   ring
 
 /-- **「`ε` を倍にする」段——Faltings の `Theorem 2.2` の核心**。
@@ -217,17 +217,17 @@ theorem rescale_obstruction {A B C : Type u} [CommRing A] [CommRing B] [CommRing
 `q := algebraMap A C p`)——`h(b₁)h(b₂)=0` と コバウンダリ関係で
 すべての項が打ち消し合う。 -/
 theorem doubling_multiplicative {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
-    [Algebra A B] [Algebra A C] (p : A) (n : ℕ) (ψ h : B →ₗ[A] C)
+    [Algebra A B] [Algebra A C] (c : A) (ψ h : B →ₗ[A] C)
     (hIsq : ∀ b₁ b₂ : B, h b₁ * h b₂ = 0)
-    (hcob : ∀ b₁ b₂ : B, (p ^ n) • ((p ^ n) • ψ (b₁ * b₂) - ψ b₁ * ψ b₂)
-        = ψ b₁ * h b₂ - (p ^ n) • h (b₁ * b₂) + ψ b₂ * h b₁)
+    (hcob : ∀ b₁ b₂ : B, c • (c • ψ (b₁ * b₂) - ψ b₁ * ψ b₂)
+        = ψ b₁ * h b₂ - c • h (b₁ * b₂) + ψ b₂ * h b₁)
     (b₁ b₂ : B) :
-    (p ^ (2 * n)) • (((p ^ n) • ψ + h) (b₁ * b₂))
-      = (((p ^ n) • ψ + h) b₁) * (((p ^ n) • ψ + h) b₂) := by
+    (c * c) • ((c • ψ + h) (b₁ * b₂))
+      = ((c • ψ + h) b₁) * ((c • ψ + h) b₂) := by
   have hc := hcob b₁ b₂
   have hsq := hIsq b₁ b₂
-  simp only [LinearMap.add_apply, LinearMap.smul_apply, Algebra.smul_def, map_pow] at hc ⊢
-  linear_combination ((algebraMap A C) p ^ n) * hc - hsq
+  simp only [LinearMap.add_apply, LinearMap.smul_apply, Algebra.smul_def, map_mul] at hc ⊢
+  linear_combination ((algebraMap A C) c) * hc - hsq
 
 /-- **一意性の代数的な核**(Faltings の *"Such a lifting is unique up to
 `H¹(B/A,I)`"*)。水準 `n` の乗法的持ち上げが2つあれば、その差
@@ -237,12 +237,12 @@ theorem doubling_multiplicative {A B C : Type u} [CommRing A] [CommRing B] [Comm
 honest な導分になり、`Ω[B⁄A]` の almost 消滅
 (`AlmostDifferentials.kaehler_almost_zero`)から `d` は `p` 冪で消える。 -/
 theorem uniqueness_derivation_eq {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
-    [Algebra A B] [Algebra A C] (p : A) (n : ℕ) (ψ ψ' : B →ₗ[A] C)
-    (hmul : ∀ x y : B, (p ^ n) • ψ (x * y) = ψ x * ψ y)
-    (hmul' : ∀ x y : B, (p ^ n) • ψ' (x * y) = ψ' x * ψ' y)
+    [Algebra A B] [Algebra A C] (c : A) (ψ ψ' : B →ₗ[A] C)
+    (hmul : ∀ x y : B, c • ψ (x * y) = ψ x * ψ y)
+    (hmul' : ∀ x y : B, c • ψ' (x * y) = ψ' x * ψ' y)
     (hsq : ∀ x y : B, (ψ' x - ψ x) * (ψ' y - ψ y) = 0)
     (x y : B) :
-    (p ^ n) • ((ψ' - ψ) (x * y)) = ψ x * ((ψ' - ψ) y) + ψ y * ((ψ' - ψ) x) := by
+    c • ((ψ' - ψ) (x * y)) = ψ x * ((ψ' - ψ) y) + ψ y * ((ψ' - ψ) x) := by
   have h1 := hmul x y
   have h2 := hmul' x y
   have h3 := hsq x y
@@ -254,12 +254,12 @@ together"*)。水準 `n` の乗法的持ち上げ `ψ` を `p^k` 倍したもの
 水準 `n+k` の乗法的持ち上げになる。したがって一意性と合わせると
 `ψ_{n+k} = p^k·ψ_n` が従い、族が整合する。 -/
 theorem rescale_multiplicative {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
-    [Algebra A B] [Algebra A C] (p : A) (n k : ℕ) (ψ : B →ₗ[A] C)
-    (hmul : ∀ x y : B, (p ^ n) • ψ (x * y) = ψ x * ψ y) (x y : B) :
-    (p ^ (n + k)) • (((p ^ k) • ψ) (x * y)) = (((p ^ k) • ψ) x) * (((p ^ k) • ψ) y) := by
+    [Algebra A B] [Algebra A C] (c t : A) (ψ : B →ₗ[A] C)
+    (hmul : ∀ x y : B, c • ψ (x * y) = ψ x * ψ y) (x y : B) :
+    (c * t) • ((t • ψ) (x * y)) = ((t • ψ) x) * ((t • ψ) y) := by
   have h := hmul x y
-  simp only [LinearMap.smul_apply, Algebra.smul_def, map_pow] at h ⊢
-  linear_combination ((algebraMap A C) p ^ k * (algebraMap A C) p ^ k) * h
+  simp only [LinearMap.smul_apply, Algebra.smul_def, map_mul] at h ⊢
+  linear_combination ((algebraMap A C) t * (algebraMap A C) t) * h
 
 /-! ## `Theorem 2.2` の残り(正直な記録)
 

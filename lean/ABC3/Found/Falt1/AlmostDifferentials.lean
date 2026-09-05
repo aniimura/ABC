@@ -50,14 +50,14 @@ universe u
 `w` を条件(iii)の witness とし、`v := w - p^n` と置くと `v∈I` かつ
 `(1⊗b-b⊗1)·w = 0` なので `p^n·x = -(v·x) ∈ I²`。 -/
 theorem kaehler_key {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
-    (p : A) (n : ℕ) (w : TensorProduct A B B)
+    (c : A) (w : TensorProduct A B B)
     (hw_ann : ∀ q : B, (1 ⊗ₜ[A] q - q ⊗ₜ[A] 1) * w = 0)
-    (hw_aug : Algebra.TensorProduct.lmul' A w = p ^ n • (1 : B)) (b : B) :
-    (algebraMap A (TensorProduct A B B) (p ^ n)) * ((1:B) ⊗ₜ[A] b - b ⊗ₜ[A] (1:B))
+    (hw_aug : Algebra.TensorProduct.lmul' A w = c • (1 : B)) (b : B) :
+    (algebraMap A (TensorProduct A B B) c) * ((1:B) ⊗ₜ[A] b - b ⊗ₜ[A] (1:B))
       ∈ (KaehlerDifferential.ideal A B) ^ 2 := by
   set I := KaehlerDifferential.ideal A B with hI
   set x : TensorProduct A B B := (1:B) ⊗ₜ[A] b - b ⊗ₜ[A] (1:B) with hx
-  set v : TensorProduct A B B := w - algebraMap A (TensorProduct A B B) (p ^ n) with hv
+  set v : TensorProduct A B B := w - algebraMap A (TensorProduct A B B) c with hv
   have hxI : x ∈ I := by
     rw [hI, hx]
     show Algebra.TensorProduct.lmul' A ((1:B) ⊗ₜ[A] b - b ⊗ₜ[A] (1:B)) = 0
@@ -65,9 +65,9 @@ theorem kaehler_key {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
     ring
   have hvI : v ∈ I := by
     rw [hI, hv]
-    show Algebra.TensorProduct.lmul' A (w - algebraMap A (TensorProduct A B B) (p ^ n)) = 0
+    show Algebra.TensorProduct.lmul' A (w - algebraMap A (TensorProduct A B B) c) = 0
     rw [map_sub, hw_aug, AlgHom.commutes, Algebra.smul_def, mul_one, sub_self]
-  have hkey : (algebraMap A (TensorProduct A B B) (p ^ n)) * x = -(v * x) := by
+  have hkey : (algebraMap A (TensorProduct A B B) c) * x = -(v * x) := by
     have h1 : w * x = 0 := by rw [mul_comm]; exact hw_ann b
     rw [hv, sub_mul, h1]
     ring
@@ -78,38 +78,38 @@ theorem kaehler_key {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
 `Ω[B⁄A]` は `D b` たちで `B`-生成される(`span_range_derivation`)ので、
 生成元について `kaehler_key` + `Ideal.toCotangent_eq_zero` で示せばよい。 -/
 theorem kaehler_almost_zero {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
-    (p : A) (n : ℕ) (w : TensorProduct A B B)
+    (c : A) (w : TensorProduct A B B)
     (hw_ann : ∀ q : B, (1 ⊗ₜ[A] q - q ⊗ₜ[A] 1) * w = 0)
-    (hw_aug : Algebra.TensorProduct.lmul' A w = p ^ n • (1 : B))
-    (x : Ω[B⁄A]) : (p ^ n) • x = 0 := by
-  have hbridge : ∀ (z : Ω[B⁄A]), (algebraMap A B (p ^ n)) • z
-      = (algebraMap A (TensorProduct A B B) (p ^ n)) • z := by
+    (hw_aug : Algebra.TensorProduct.lmul' A w = c • (1 : B))
+    (x : Ω[B⁄A]) : c • x = 0 := by
+  have hbridge : ∀ (z : Ω[B⁄A]), (algebraMap A B c) • z
+      = (algebraMap A (TensorProduct A B B) c) • z := by
     intro z; rw [algebraMap_smul, algebraMap_smul]
-  have hgen : ∀ b : B, (algebraMap A B (p ^ n)) • (KaehlerDifferential.D A B b) = 0 := by
+  have hgen : ∀ b : B, (algebraMap A B c) • (KaehlerDifferential.D A B b) = 0 := by
     intro b
     have hmem : (1:B) ⊗ₜ[A] b - b ⊗ₜ[A] (1:B) ∈ KaehlerDifferential.ideal A B := by
       show Algebra.TensorProduct.lmul' A ((1:B) ⊗ₜ[A] b - b ⊗ₜ[A] (1:B)) = 0
       rw [map_sub, Algebra.TensorProduct.lmul'_apply_tmul,
         Algebra.TensorProduct.lmul'_apply_tmul]
       ring
-    have hzero : (algebraMap A (TensorProduct A B B) (p ^ n)) •
+    have hzero : (algebraMap A (TensorProduct A B B) c) •
         ((KaehlerDifferential.ideal A B).toCotangent
           (⟨(1:B) ⊗ₜ[A] b - b ⊗ₜ[A] (1:B), hmem⟩ : KaehlerDifferential.ideal A B)) = 0 := by
       rw [← map_smul, Ideal.toCotangent_eq_zero]
-      show (algebraMap A (TensorProduct A B B) (p ^ n)) • ((1:B) ⊗ₜ[A] b - b ⊗ₜ[A] (1:B))
+      show (algebraMap A (TensorProduct A B B) c) • ((1:B) ⊗ₜ[A] b - b ⊗ₜ[A] (1:B))
         ∈ (KaehlerDifferential.ideal A B) ^ 2
       rw [Algebra.smul_def]
-      exact kaehler_key p n w hw_ann hw_aug b
+      exact kaehler_key c w hw_ann hw_aug b
     rw [hbridge, KaehlerDifferential.D_apply]
     exact hzero
   have hsub : Submodule.span B (Set.range (KaehlerDifferential.D A B))
-      ≤ LinearMap.ker (LinearMap.lsmul B (Ω[B⁄A]) (algebraMap A B (p ^ n))) := by
+      ≤ LinearMap.ker (LinearMap.lsmul B (Ω[B⁄A]) (algebraMap A B c)) := by
     rw [Submodule.span_le]
     rintro _ ⟨b, rfl⟩
     exact hgen b
   rw [KaehlerDifferential.span_range_derivation] at hsub
   have hx := hsub (Submodule.mem_top (x := x))
-  rw [← algebraMap_smul B (p ^ n) x]
+  rw [← algebraMap_smul B c x]
   exact hx
 
 /-- `Definition 2.1` の仮定から直接述べた形(`almost_swap_annihilate`・
@@ -127,7 +127,7 @@ theorem kaehler_almost_zero_of_isAlmostEtale {A B : Type u} [CommRing A] [CommRi
         = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p)
             (Localization.Away (algebraMap A B p)))
     (x : Ω[B⁄A]) : (p ^ n) • x = 0 :=
-  kaehler_almost_zero p n w
+  kaehler_almost_zero (p ^ n) w
     (fun q => almost_swap_annihilate p hAE hf0inj n w hw q)
     (almost_swap_augment p hAE hf0inj n w hw) x
 
@@ -137,14 +137,14 @@ Jacobi–Zariski 完全列(`KaehlerDifferential.range_mapBaseChange`——
 像がちょうど `Ω[B⁄R] → Ω[B⁄A]` の核)と `kaehler_almost_zero` から。 -/
 theorem thm_2_4_i_cokernel {R A B : Type u} [CommRing R] [CommRing A] [CommRing B]
     [Algebra R A] [Algebra A B] [Algebra R B] [IsScalarTower R A B]
-    (p : A) (n : ℕ) (w : TensorProduct A B B)
+    (c : A) (w : TensorProduct A B B)
     (hw_ann : ∀ q : B, (1 ⊗ₜ[A] q - q ⊗ₜ[A] 1) * w = 0)
-    (hw_aug : Algebra.TensorProduct.lmul' A w = p ^ n • (1 : B))
+    (hw_aug : Algebra.TensorProduct.lmul' A w = c • (1 : B))
     (x : Ω[B⁄R]) :
-    (algebraMap A B (p ^ n)) • x ∈ LinearMap.range (KaehlerDifferential.mapBaseChange R A B) := by
+    (algebraMap A B c) • x ∈ LinearMap.range (KaehlerDifferential.mapBaseChange R A B) := by
   rw [KaehlerDifferential.range_mapBaseChange, LinearMap.mem_ker, map_smul]
-  have h := kaehler_almost_zero p n w hw_ann hw_aug (KaehlerDifferential.map R A B B x)
-  rw [← algebraMap_smul B (p ^ n) (KaehlerDifferential.map R A B B x)] at h
+  have h := kaehler_almost_zero c w hw_ann hw_aug (KaehlerDifferential.map R A B B x)
+  rw [← algebraMap_smul B c (KaehlerDifferential.map R A B B x)] at h
   exact h
 
 /-- **`Theorem 2.4(i)` の核側は `H1Cotangent` の almost 消滅にちょうど
@@ -154,11 +154,11 @@ theorem thm_2_4_i_cokernel {R A B : Type u} [CommRing R] [CommRing A] [CommRing 
 である(= `B` が `A` 上 almost formally smooth であること)。 -/
 theorem thm_2_4_i_kernel_of_h1Cotangent {R A B : Type u} [CommRing R] [CommRing A] [CommRing B]
     [Algebra R A] [Algebra A B] [Algebra R B] [IsScalarTower R A B]
-    (p : A) (n : ℕ)
-    (hH1 : ∀ y : Algebra.H1Cotangent A B, (algebraMap A B (p ^ n)) • y = 0)
+    (c : A)
+    (hH1 : ∀ y : Algebra.H1Cotangent A B, (algebraMap A B c) • y = 0)
     (y : TensorProduct A B (Ω[A⁄R]))
     (hy : KaehlerDifferential.mapBaseChange R A B y = 0) :
-    (algebraMap A B (p ^ n)) • y = 0 := by
+    (algebraMap A B c) • y = 0 := by
   obtain ⟨z, rfl⟩ := (Algebra.H1Cotangent.exact_δ_mapBaseChange R A B) y |>.mp hy
   rw [← map_smul, hH1 z, map_zero]
 

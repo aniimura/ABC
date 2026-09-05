@@ -51,9 +51,9 @@ universe u
 `tools/lean-idioms.md` #50(c)。) -/
 theorem derivation_almost_zero {A B M : Type u} [CommRing A] [CommRing B] [Algebra A B]
     [AddCommGroup M] [Module B M] [Module A M] [IsScalarTower A B M]
-    (p : A) (n : ℕ) (hΩ : ∀ x : Ω[B⁄A], (p ^ n) • x = 0)
-    (D : Derivation A B M) (b : B) : (p ^ n) • D b = 0 := by
-  have h := D.liftKaehlerDifferential.map_smul_of_tower (p ^ n) (KaehlerDifferential.D A B b)
+    (c : A) (hΩ : ∀ x : Ω[B⁄A], c • x = 0)
+    (D : Derivation A B M) (b : B) : c • D b = 0 := by
+  have h := D.liftKaehlerDifferential.map_smul_of_tower c (KaehlerDifferential.D A B b)
   rw [hΩ (KaehlerDifferential.D A B b), map_zero] at h
   rw [← Derivation.liftKaehlerDifferential_comp_D D b, ← h]
 
@@ -62,8 +62,8 @@ theorem derivation_almost_zero {A B M : Type u} [CommRing A] [CommRing B] [Algeb
 ような2つの `A`-代数写像 `ψ, ψ' : B →ₐ[A] C` は一致する。 -/
 theorem thm_2_2_uniqueness {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
     [Algebra A B] [Algebra A C]
-    (p : A) (n : ℕ) (hΩ : ∀ x : Ω[B⁄A], (p ^ n) • x = 0)
-    (htors : ∀ x : C, (algebraMap A C) (p ^ n) * x = 0 → x = 0)
+    (c : A) (hΩ : ∀ x : Ω[B⁄A], c • x = 0)
+    (htors : ∀ x : C, (algebraMap A C) c * x = 0 → x = 0)
     (ψ ψ' : B →ₐ[A] C) (hsq : ∀ x y : B, (ψ' x - ψ x) * (ψ' y - ψ y) = 0) :
     ψ = ψ' := by
   letI : Algebra B C := ψ.toRingHom.toAlgebra
@@ -84,7 +84,7 @@ theorem thm_2_2_uniqueness {A B C : Type u} [CommRing A] [CommRing B] [CommRing 
   have hzero : ∀ b : B, D b = 0 := by
     intro b
     apply htors
-    have h := derivation_almost_zero p n hΩ D b
+    have h := derivation_almost_zero c hΩ D b
     rwa [Algebra.smul_def] at h
   ext b
   have hb := hzero b
@@ -112,7 +112,7 @@ theorem thm_2_2_uniqueness_of_isAlmostEtale {A B C D : Type u} [CommRing A] [Com
     (htors : ∀ x : C, (algebraMap A C) (p ^ n) * x = 0 → x = 0)
     (ψ ψ' : B →ₐ[A] C) (hlift : ∀ b : B, π (ψ b) = π (ψ' b)) :
     ψ = ψ' := by
-  refine thm_2_2_uniqueness p n
+  refine thm_2_2_uniqueness (p ^ n)
     (fun x => kaehler_almost_zero_of_isAlmostEtale p hAE hf0inj n w hw x)
     htors ψ ψ' (fun x y => ?_)
   refine hIsq _ _ ?_ ?_ <;>
