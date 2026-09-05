@@ -163,3 +163,41 @@
   Skeleton の 6 sorry は Found の項で埋まる(`ordAtDiv` ← `ordPt` ほか)。
   **これは「未解決の数学」ではなく「配線されていない既済の数学」である。**
 - **決定**: —
+
+## D9. [GenEll] Lemma 3.5 —— 高さの鎖から半安定性を落とす statement 変更
+
+- **状態**: **保留**(2026-09-05 発見。`autonomy-policy.md` §2 に該当)
+- **★測定で判明したこと**: `∀ p, SemistableAt p E′` が実際に消費されるのは **2 か所だけ**。
+  1. `Found/GaloisRep/Lemma35Ineq.lean:143` `minDeltaExp_le_of_jExp_bad` ——
+     ★**`jExp p E < 0` の枝でしか使わない**(良い素点の枝は `minDeltaExp p E = 0` と
+     `minDeltaExp_nonneg` だけ)。呼び出し側も既に `hb : jExp p E < 0` の下にある
+  2. 同 `:110–121` `lemma_3_5_of_isogeny_estimate_le` —— ★**結論は既に無条件で在庫にある**
+     (`exists_degInfOf_le_htFalt` + `exists_htFalt_bddBelow`、`HtFaltBounds.lean`、sorry 0)。
+     `degInfOf E′ ≤ 12·ht + A ≤ 12(1+ε)·ht + (A − 12εB)` で閉じる
+  → **高さの鎖からは `∀ p, SemistableAt p E′` を丸ごと落とせる。**
+- **★ただし全部は消えない**: `IsQuotClassJ`(`Found/GenEll/EllModuliObjects.lean:997`)は
+  `quotSSCurve` を作るために `hss` を**定義に埋め込んでいる**ので、
+  `Skeleton/GenEll/QuotClassExistence.lean:108` の枝だけは括弧の全体を要求し続ける。
+- **要る statement 変更**(9 か所の機械的置換。人の判断待ち):
+  `lemma_3_5_velu_le` → `_local_le` → `_bad_delta/_bad_only` → `_defect_K` → `_K` →
+  `lemma_3_5_height_ineq` → `_over_extension` → `_descend` → `_stableLine` の
+  `(∀ p, SemistableAt p E')` を `(∀ p, jExp p E < 0 → SemistableAt p E')` に置換。
+  `isMuAtBadPrimes_of_veluQuotient_of_coprime_K` も同様。
+  さらに `VeluQuotOK`(`Found/GenEll/Lemma37Hdag/Lemma35.lean:60`)の後半を弱める。
+- ★**弱めた `VeluQuotOK` は自明にならない**ことを確認済み(悪い素点の枝、第 1388・1436 が
+  実質的内容を持つ)。ただし**原文の括弧より真に弱い**ので逸脱として記録が要る。
+- **先に無人で進めたこと**(新規 `Found` 補題のみ。既存 statement は触らない):
+  `exists_degInf_le_htFalt_eps` / `lemma_3_5_of_isogeny_estimate_le_free` /
+  `semistableAt_veluQuot_badPrime_free_all`
+- **残る真の数学**: `p ∣ l` かつ `0 ≤ jExp p E`(良還元)で `0 ≤ jExp p E′`。
+  ★**退化していない**。道は 3 つでどれも新しい理論の塊
+  (A: Néron–Ogg–Shafarevich ——★mathlib に**同種すら無い**(2026-09-05 実測 0 件)/
+   B: モジュラー多項式 `Φ_l` の単項性 —— `X₀(l)` を建てる /
+   C: 対偶(Tate 曲線)—— 在庫は厚いが**双対同種**と剰余標数 `l` での `μ_l` が新規)
+- **★`.needs` の穴**: 原文の角括弧の第 3 主張(**半アーベルスキームへの延長**)が
+  どの `.needs` にも写っていない。`htFaltOf ≝ degInfOf/12 − archSum/(12d)` という
+  定義がそれを迂回していることを `.implicitStep` として明記すべき。
+- **★危険信号(退化)**: 「`p ∤ l` を仮定に足して閉じる」は**退化**。
+  `hlu : IsUnit (l : primeSubring p)` を statement に足すと残った場合が空になり、
+  `VeluQuotOK` の `∀ M` が回収できなくなる。**現行 statement はこれを避けている(正しい)**。
+- **決定**: —
