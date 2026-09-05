@@ -1750,3 +1750,31 @@ x^n + ∑_{i<n} a_i x^i = 0,  ∀ i<n, ‖a_i‖ ≤ ‖a_0‖,  ‖a_0‖ = ‖
 - `coeff 0 ∉ 𝔪²` ⟹ `coeff 0 = π·c` で `c ∉ 𝔪`(単数)⟹ `‖coeff 0‖ = ‖π‖`
 - 多項式の評価を `x^n + ∑_{i<n} a_i x^i` の形にするのは
   `Polynomial.eval_eq_sum_range` + `Finset.sum_range_succ`(monic なので最高次係数 1)
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05: **「Eisenstein 多項式の根 ⟹ 完全分岐」完成**
+
+`Found/PGC/TotallyRamified.lean::isTotallyRamifiedAdjoin_of_eisenstein`
+
+`Polynomial.IsEisensteinAt` を直接受け取る形に到達した:
+
+```
+f : Polynomial 𝒪_K, monic, IsEisensteinAt (maximalIdeal 𝒪_K),
+f.natDegree = [K(x):K],  f の根 x  ⟹  K(x)/K は完全分岐
+```
+
+翻訳の部品:
+- `monic_root_sum_form` : monic の根は `x^n + ∑_{i<n} φ(a_i) x^i = 0` の形
+  (`Polynomial.eval_eq_sum_range` + `Finset.sum_range_succ`)
+- `norm_le_of_mem_span` : `z ∈ (π)` ⟹ `‖z‖ ≤ ‖π‖`
+- `norm_eq_of_not_mem_sq` : `z ∈ (π)` かつ `z ∉ (π)²` ⟹ `‖z‖ = ‖π‖`
+  (`z = c·π` の `c` が単数だから)
+- `norm_intAlgebraMap` : `‖φ z‖ = ‖(z : K)‖`
+
+★配管: `Polynomial.IsEisensteinAt` のフィールドは `mem` と **`notMem`**
+(`not_mem` ではない——mathlib が camelCase に改名済み)。
+
+### 残り
+
+`LubinTateActionPsi.lean::heis` に渡すだけ。必要な追加は
+`f.natDegree = [K(α):K]`(`ψ_n` の既約性から minpoly = ψ_n)と、
+根の形を `eval x (f.map φ) = 0` に整えること。

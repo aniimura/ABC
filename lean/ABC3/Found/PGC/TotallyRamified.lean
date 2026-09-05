@@ -504,4 +504,91 @@ theorem isTotallyRamifiedAdjoin_of_root_norm (K : PAdicLocalField p) (x : K.clos
   have hkey := norm_pow_eq_of_monic_root hnpos a hroot hle (by rw [ha0]; exact hπlt) ha0ne
   exact isTotallyRamifiedAdjoin_of_norm_pow_eq K x hπ0 hπmax (by rw [hkey, ha0])
 
+/-! ## `IsEisensteinAt` からノルム条件への翻訳 -/
+
+/-- モニック多項式の根は `x^n + ∑_{i<n} φ(a_i) x^i = 0` の形に書ける。 -/
+theorem monic_root_sum_form {R F : Type*} [CommRing R] [Field F] (φ : R →+* F)
+    (f : Polynomial R) (hm : f.Monic) (x : F)
+    (h : Polynomial.eval x (f.map φ) = 0) :
+    x ^ f.natDegree + ∑ i ∈ Finset.range f.natDegree, φ (f.coeff i) * x ^ i = 0 := by
+  have hdeg : (f.map φ).natDegree = f.natDegree := hm.natDegree_map φ
+  rw [Polynomial.eval_eq_sum_range, hdeg, Finset.sum_range_succ] at h
+  simp only [Polynomial.coeff_map] at h
+  rw [show f.coeff f.natDegree = 1 from hm.coeff_natDegree, map_one, one_mul] at h
+  linear_combination h
+
+/-- `z ∈ (π)` なら `‖z‖ ≤ ‖π‖`。 -/
+theorem norm_le_of_mem_span (K : PAdicLocalField p) {π z : 𝒪[K.carrier]}
+    (h : z ∈ Ideal.span ({π} : Set 𝒪[K.carrier])) :
+    ‖(z : K.carrier)‖ ≤ ‖(π : K.carrier)‖ := by
+  obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp h
+  have hcz : (z : K.carrier) = (c : K.carrier) * (π : K.carrier) := by rw [← hc]; rfl
+  have hcle : ‖(c : K.carrier)‖ ≤ 1 := by
+    have hh := c.2; rw [Valued.integer.mem_iff] at hh; exact hh
+  rw [hcz, norm_mul]
+  nlinarith [norm_nonneg (π : K.carrier), norm_nonneg (c : K.carrier)]
+
+/-- `z ∈ (π)` かつ `z ∉ (π)^2` なら `‖z‖ = ‖π‖`——`z = c·π` の `c` が単数だから。 -/
+theorem norm_eq_of_not_mem_sq (K : PAdicLocalField p) {π z : 𝒪[K.carrier]}
+    (hmax : IsLocalRing.maximalIdeal 𝒪[K.carrier] = Ideal.span ({π} : Set 𝒪[K.carrier]))
+    (h : z ∈ Ideal.span ({π} : Set 𝒪[K.carrier]))
+    (h2 : z ∉ (Ideal.span ({π} : Set 𝒪[K.carrier])) ^ 2) :
+    ‖(z : K.carrier)‖ = ‖(π : K.carrier)‖ := by
+  obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp h
+  have hcz : (z : K.carrier) = (c : K.carrier) * (π : K.carrier) := by rw [← hc]; rfl
+  have hcunit : IsUnit c := by
+    by_contra hcn
+    apply h2
+    have hcm : c ∈ IsLocalRing.maximalIdeal 𝒪[K.carrier] := by
+      rw [IsLocalRing.mem_maximalIdeal, mem_nonunits_iff]; exact hcn
+    rw [hmax] at hcm
+    obtain ⟨d, hd⟩ := Ideal.mem_span_singleton'.mp hcm
+    rw [← hc, ← hd, Ideal.span_singleton_pow]
+    exact Ideal.mem_span_singleton'.mpr ⟨d, by ring⟩
+  have hcn1 : ‖(c : K.carrier)‖ = 1 := by
+    rw [Valued.integer.isUnit_iff_norm_eq_one] at hcunit
+    exact hcunit
+  rw [hcz, norm_mul, hcn1, one_mul]
+
+theorem norm_intAlgebraMap (K : PAdicLocalField p) (z : 𝒪[K.carrier]) :
+    ‖(((algebraMap K.carrier K.closure).comp (Subring.subtype 𝒪[K.carrier])) z)‖
+      = ‖(z : K.carrier)‖ := by
+  show ‖algebraMap K.carrier K.closure (z : K.carrier)‖ = _
+  exact norm_algebraMap' _ _
+
+/-- **★★★★★★★Eisenstein 多項式の根が生成する拡大は完全分岐**。
+
+`Found/PGC/LubinTateActionPsi.lean::heis`(`ψ_n` は Eisenstein)にそのまま
+渡せる形。これで Lubin-Tate 塔 `K_π,n` の完全分岐性が言える。 -/
+theorem isTotallyRamifiedAdjoin_of_eisenstein (K : PAdicLocalField p) (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    {π : 𝒪[K.carrier]} (hπ0 : (π : K.carrier) ≠ 0)
+    (hπmax : IsLocalRing.maximalIdeal 𝒪[K.carrier] = Ideal.span {π})
+    (f : Polynomial 𝒪[K.carrier]) (hmonic : f.Monic)
+    (heis : f.IsEisensteinAt (IsLocalRing.maximalIdeal 𝒪[K.carrier]))
+    (hdeg : f.natDegree = Module.finrank K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))
+    (hroot : Polynomial.eval x (f.map ((algebraMap K.carrier K.closure).comp
+      (Subring.subtype 𝒪[K.carrier]))) = 0) :
+    IsTotallyRamifiedAdjoin K x := by
+  have hnpos : 0 < f.natDegree := by rw [hdeg]; exact Module.finrank_pos
+  have hc0 : ‖((f.coeff 0 : 𝒪[K.carrier]) : K.carrier)‖ = ‖(π : K.carrier)‖ := by
+    refine norm_eq_of_not_mem_sq K hπmax ?_ ?_
+    · rw [← hπmax]; exact heis.mem hnpos
+    · rw [← hπmax]; exact heis.notMem
+  have hsum := monic_root_sum_form
+    ((algebraMap K.carrier K.closure).comp (Subring.subtype 𝒪[K.carrier])) f hmonic x hroot
+  rw [hdeg] at hsum
+  refine isTotallyRamifiedAdjoin_of_root_norm K x hπ0 hπmax
+    (fun i => ((algebraMap K.carrier K.closure).comp (Subring.subtype 𝒪[K.carrier])) (f.coeff i))
+    hsum ?_ ?_
+  · intro i hi
+    show ‖_‖ ≤ ‖_‖
+    rw [norm_intAlgebraMap, norm_intAlgebraMap, hc0]
+    refine norm_le_of_mem_span K ?_
+    rw [← hπmax]
+    exact heis.mem (by rw [hdeg]; exact hi)
+  · show ‖_‖ = _
+    rw [norm_intAlgebraMap, hc0]
+
 end ABC3.Found.PGC
