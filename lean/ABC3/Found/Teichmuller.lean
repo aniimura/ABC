@@ -167,4 +167,37 @@ theorem teichmuller_injective (A : Type*) [CommRing A] [HenselianLocalRing A]
   have h := congrArg (Units.map (IsLocalRing.residue A : A →* IsLocalRing.ResidueField A)) hab
   rwa [residue_teichmuller, residue_teichmuller] at h
 
+
+/-! ## 分裂する全射は直積を与える(可換群)
+
+`f : G →* H` が群としての切断 `s` を持てば `G ≃* H × ker f`。
+可換群なので半直積でなく**直積**。Teichmüller 持ち上げと組み合わせて
+`Aˣ ≃* 𝓀_Aˣ × (1 + 𝔪_A)` を出すのに使う。 -/
+
+/-- 切断を持つ準同型は直積分解を与える(可換群)。 -/
+noncomputable def prodKerOfRightInverse {G H : Type*} [CommGroup G] [CommGroup H]
+    (f : G →* H) (s : H →* G) (hs : Function.RightInverse s f) : G ≃* H × f.ker where
+  toFun g := (f g, ⟨g * (s (f g))⁻¹, by
+    rw [MonoidHom.mem_ker, map_mul, map_inv, hs (f g), mul_inv_cancel]⟩)
+  invFun q := s q.1 * (q.2 : G)
+  left_inv g := by
+    simp only
+    rw [mul_comm, mul_assoc, inv_mul_cancel, mul_one]
+  right_inv q := by
+    obtain ⟨h, k, hk⟩ := q
+    have hfk : f (k : G) = 1 := hk
+    apply Prod.ext
+    · simp only
+      rw [map_mul, hs h, hfk, mul_one]
+    · apply Subtype.ext
+      simp only
+      rw [map_mul, hs h, hfk, mul_one, mul_comm (s h) (k : G), mul_assoc, mul_inv_cancel, mul_one]
+  map_mul' a b := by
+    apply Prod.ext
+    · simp
+    · apply Subtype.ext
+      show a * b * (s (f (a * b)))⁻¹ = (a * (s (f a))⁻¹) * (b * (s (f b))⁻¹)
+      rw [map_mul, map_mul, mul_inv]
+      simp only [mul_assoc, mul_left_comm]
+
 end ABC3.Found

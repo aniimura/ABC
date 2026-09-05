@@ -1787,4 +1787,32 @@ theorem exists_teichmuller_section {p : ℕ} [Fact p.Prime] (K : PAdicLocalField
     ABC3.Found.residue_teichmuller 𝒪[K.carrier],
     ABC3.Found.teichmuller_injective 𝒪[K.carrier]⟩
 
+
+/-! ## `𝒪_K^× ≅ 𝓀^× × (1+𝔪_K)`——単数群の直積分解
+
+Teichmüller 切断(`exists_teichmuller_section`)と
+`ABC3.Found.prodKerOfRightInverse`(切断を持つ準同型は直積分解を与える)を
+合わせるだけ。第二因子(剰余が `1` の単数=主単数 `1+𝔪_K`)は pro-p 群で、
+その `ℤ_p`-階数が `[K:ℚ_p]` に対応する——[pGC] Proposition 1.2 が
+`Γ_K^ab` の群構造から `q` と `[K:ℚ_p]` を読み取る二つの入口のうち、
+第一因子から `q`(=`|𝓀|`、`𝓀^×` の位数 +1)が読める。 -/
+
+/-- **単数群の直積分解** `𝒪_K^× ≅ 𝓀^× × ker(還元)`。 -/
+theorem nonempty_units_mulEquiv_prod {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) :
+    Nonempty ((𝒪[K.carrier])ˣ ≃* (𝓀[K.carrier])ˣ ×
+      (Units.map (IsLocalRing.residue 𝒪[K.carrier] :
+        𝒪[K.carrier] →* 𝓀[K.carrier])).ker) := by
+  obtain ⟨ω, hsec, -⟩ := exists_teichmuller_section K
+  exact ⟨ABC3.Found.prodKerOfRightInverse
+    (Units.map (IsLocalRing.residue 𝒪[K.carrier] : 𝒪[K.carrier] →* 𝓀[K.carrier])) ω hsec⟩
+
+/-- 第二因子は「剰余が `1` の単数」——すなわち主単数 `1+𝔪_K`。 -/
+theorem mem_ker_units_map_residue_iff {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    (u : (𝒪[K.carrier])ˣ) :
+    u ∈ (Units.map (IsLocalRing.residue 𝒪[K.carrier] :
+        𝒪[K.carrier] →* 𝓀[K.carrier])).ker
+      ↔ IsLocalRing.residue 𝒪[K.carrier] (u : 𝒪[K.carrier]) = 1 := by
+  rw [MonoidHom.mem_ker, Units.ext_iff]
+  rfl
+
 end ABC3.Found.PGC

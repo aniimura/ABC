@@ -748,3 +748,19 @@ normal で `f_K` が分裂するから `z ∈ K(y)`、同様に `K(z) = K(y)`。
 ——[pGC] Proposition 1.2 が `Γ_K^ab` の群構造から `q` を読み取るときの
 入口にあたる。残る第二因子 `1+𝔪_K`(pro-p 部分、`ℤ_p`-階数が
 `[K:ℚ_p]`)は未着手。
+
+## 2026-09-05: `𝒪_K^× ≅ 𝓀^× × (1+𝔪_K)`——単数群の直積分解
+
+`Found/Teichmuller.lean`:
+- `prodKerOfRightInverse` : 可換群で、切断を持つ準同型は
+  `G ≃* H × ker f` を与える(半直積でなく直積)
+
+`Found/PGC/UnramifiedExtension.lean`:
+- `nonempty_units_mulEquiv_prod` :
+  **`𝒪_K^× ≅ 𝓀^× × ker(還元)`**
+- `mem_ker_units_map_residue_iff` : 第二因子は「剰余が `1` の単数」
+  ——すなわち主単数 `1+𝔪_K`
+
+これで [pGC] Proposition 1.2 が `Γ_K^ab` の群構造から読み取る二つの量の
+うち、**`q`(=`|𝓀|` = `𝓀^×` の位数 +1)** の入口が付いた。残るのは
+第二因子 `1+𝔪_K`(pro-p 群)の `ℤ_p`-階数が `[K:ℚ_p]` であること。
