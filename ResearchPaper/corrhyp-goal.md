@@ -5907,3 +5907,34 @@ theorem descend2_relation_promote (φ : A →ₐ[ℚ] A')
 
 検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
 Found側sorry 0件。集計は引き続き10/24——§4は引き続き0/2。
+
+### 2026-09-05夜さらに続き44 — ★`GlueData`が要求する形にした(`_ge`版)
+
+`exists_descendPieceR_ringHom`は対`(U,V)`ごとに自分の`R'`を返すので、
+`GlueData`(全添字対に**共通の1つ**の`R'`を要求)には直接使えない。
+続き43の`descend2_relation_promote`を使って、**閾値の形**に書き換えた
+(`ExtLimit.lean`の`exists_descendPieceR_ringHom_ge`、12.6秒):
+
+```
+∃ R₀ (h₀U : R_U ≤ R₀) (h₀V : R_V ≤ R₀),
+  ∀ (R' : FgSubalgebra ℚ ℝ) (h : R₀ ≤ R'),
+    Nonempty (U の R' レベルモデル →+* V の R' レベルモデル)
+```
+
+「ある閾値`R₀`があって、**それ以上のすべての`R'`について**`f i j`が
+存在する」。これなら有限個の対の閾値を
+`exists_fgSubalgebra_upperBound`(既存)で1つにまとめ、その共通段階で
+**すべての対の`f i j`を同時に**取れる——`GlueData`の`f`成分の
+前提がこれで整った。
+
+証明は続き41と同じ骨格で、`descend2_of_map`の生データ`(ev, hrel)`を
+`descend2_relation_promote`で`R'`へ持ち上げてから
+`mvPolynomial_quotient_ringHom_of_data`に渡すだけ。
+
+検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
+Found側sorry 0件(`ExtLimit` 388秒)。
+
+**次の一手**: 添字集合(`exists_finite_standardEtaleCover`が与える`Finset`)
+にわたって閾値を`exists_fgSubalgebra_upperBound`でまとめ、
+`∃ R', ∀ i j, Nonempty (f i j)`の形にする。
+集計は引き続き10/24——§4は引き続き0/2。

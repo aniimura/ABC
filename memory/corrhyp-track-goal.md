@@ -2665,3 +2665,17 @@ AffineTransitionLimit.lean の在庫確認: Scheme.exists_isOpenCover_and_isAffi
 Lemma 4.1 は Z_R(= D.obj i)を作る問題なのでそのままでは使えない(循環)。
 
 集計は10/24——§4は0/2。
+
+## 2026-09-05夜さらに続き44 — GlueData が要求する形にした(_ge 版)
+
+ExtLimit.lean の exists_descendPieceR_ringHom_ge(12.6秒):
+  ∃ R₀ (h₀U) (h₀V), ∀ R' (h : R₀ ≤ R'),
+    Nonempty (U の R' レベルモデル →+* V の R' レベルモデル)
+「閾値 R₀ 以上のすべての R' で f i j が存在する」形。これなら有限個の対の
+閾値を exists_fgSubalgebra_upperBound で合流させ、共通段階ですべての対の
+f i j を同時に取れる。証明は続き41 と同じ骨格＋続き43 の
+descend2_relation_promote。
+
+次の一手: 添字集合(exists_finite_standardEtaleCover の Finset)にわたって
+閾値をまとめ、∃ R', ∀ i j, Nonempty (f i j) の形にする。
+集計は10/24——§4は0/2。
