@@ -397,4 +397,39 @@ theorem length_le_of_surjective_pi {R M N : Type*} [Ring R] [AddCommGroup M] [Mo
   rw [← length_pi (R := R) (N := N) r]
   exact Module.length_le_of_surjective f hf
 
+/-! ### 事実 (b) の材料——`β = min{1, δₙ/(d+1)}` の由来
+
+原文は *"this kernel has length at least equal to that of
+`W_{n+1}/p^β W_{n+1}`, where `β = min{1, δₙ/(d+1)}`"* と言う。
+
+`Ω_{Wₙ/Vₙ} ⊗ W_{n+1}` が `r ≤ d+1` 個の巡回加群 `W'/π^{m_i}W'`
+(`Σ m_i = δₙ·e`)の直和で、`p = (unit)·π^e` とすると:
+
+* 巡回加群 `W'/π^m W'` の `p` 捩れ部分の長さは `min(m, e)`
+* 直和なので全体では `Σ min(m_i, e)`
+* **最大の `m_j` が平均 `(Σ m_i)/r` 以上**なので
+  `Σ min(m_i, e) ≥ min((Σ m_i)/r, e) = min(δₙ·e/r, e) = min(δₙ/r, 1)·e`
+
+——最後が `β = min{1, δₙ/(d+1)}` の正体である。その数値的な核を置く。 -/
+
+/-- **`β = min{1, δₙ/(d+1)}` の由来**——最大の `m_j` が平均以上だから
+`Σ min(m_i, e) ≥ min((Σ m_i)/r, e)`。 -/
+theorem min_avg_le_sum_min {r : ℕ} (hr : 0 < r) (m : Fin r → ℝ) (hm : ∀ i, 0 ≤ m i)
+    (e : ℝ) (he : 0 ≤ e) :
+    min ((∑ i, m i) / (r:ℝ)) e ≤ ∑ i, min (m i) e := by
+  haveI : NeZero r := ⟨hr.ne'⟩
+  obtain ⟨j, -, hj⟩ := Finset.exists_max_image Finset.univ m ⟨0, Finset.mem_univ 0⟩
+  have hsum : ∑ i, m i ≤ (r:ℝ) * m j := by
+    calc ∑ i : Fin r, m i ≤ ∑ _i : Fin r, m j :=
+          Finset.sum_le_sum (fun i _ => hj i (Finset.mem_univ i))
+      _ = (r:ℝ) * m j := by simp [Finset.sum_const, mul_comm]
+  have hdiv : (∑ i, m i) / (r:ℝ) ≤ m j := by
+    rw [div_le_iff₀ (by exact_mod_cast hr)]
+    linarith
+  have h1 : min ((∑ i, m i) / (r:ℝ)) e ≤ min (m j) e := min_le_min hdiv (le_refl e)
+  have h2 : min (m j) e ≤ ∑ i, min (m i) e := by
+    refine Finset.single_le_sum (f := fun i => min (m i) e) (fun i _ => ?_) (Finset.mem_univ j)
+    exact le_min (hm i) he
+  linarith
+
 end ABC3.Found.Falt1
