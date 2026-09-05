@@ -1647,3 +1647,28 @@ normal でない有限拡大 ⟹ 固定部分群が**正規でない開部分群
 Lubin-Tate 塔 `K_π,n` が**完全分岐**(`inertiaDegree = 1`)であることを示せば、
 `K_π,∞ ∩ K^ur = K` が出て `Γ_K ↠ 𝒪_K^× × Ẑ` の線型無関係性が揃う。
 `LubinTateActionPsi.lean` は `ψ_n` の Eisenstein 性(既約性)まで出している。
+
+## ★★★★★★★★★★★★★★★★★★★★★★2026-09-05: Eisenstein の根のノルム(Newton 多角形の一段)
+
+`Found/PGC/TotallyRamified.lean` に追加。
+
+- **`isTotallyRamifiedAdjoin_iff_residueDegree`** :
+  完全分岐 ⟺ `residueDegree K x = q`(`isUnramifiedAdjoin_iff_residueDegree` の双対)
+- `norm_lt_one_of_monic_root` : 低次係数がすべて `‖a_0‖ < 1` 以下なら根は開単位球に入る
+- **`norm_pow_eq_of_monic_root`** : **`‖α‖^n = ‖a_0‖`**
+  (`a_0` の項が一意に最大——他は `‖a_0‖·‖α‖ < ‖a_0‖`)
+
+どちらも一般の超距離ノルム体で成り立つ形にしてある
+(`{F} [NormedField F] [IsUltrametricDist F]`)。
+
+### 次の段(手順)
+
+Lubin-Tate 塔 `K_π,n` が完全分岐であることを示す:
+1. `LubinTateActionPsi.lean::heis`(`ψ_n` は Eisenstein)から
+   `‖α‖^n = ‖a_0‖ = ‖π‖`(上の補題)
+2. `‖π‖ = ‖ϖ‖^e`(`ϖ` は `K(α)` の一意化元、`e = ramificationIndex`)と
+   `‖α‖ = ‖ϖ‖^k`(k ≥ 1)から `e = kn ≥ n`
+3. `e ≤ e·f = n` と合わせて `e = n`・`f = 1`
+
+★2 の橋(`Ideal.ramificationIdx` を付値の言葉に翻訳する)がまだ無い。
+DVR なので `𝔪^k = {z | ‖z‖ ≤ ‖ϖ‖^k}` を経由するのが素直。

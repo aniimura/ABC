@@ -238,4 +238,83 @@ theorem finrank_eq_one_of_mem_unramifiedClosure_of_le (K : PAdicLocalField p) {x
     ((mem_unramifiedClosure_iff_isUnramified K x).mp hx)
     (isTotallyRamified_of_le K hle hty)
 
+/-! ## 完全分岐の判定条件 -/
+
+/-- **完全分岐 ⟺ 剰余体が伸びない**——`residueDegree = q`。
+`isUnramifiedAdjoin_iff_residueDegree`(不分岐 ⟺ `residueDegree = q^{[K(x):K]}`)の双対。 -/
+theorem isTotallyRamifiedAdjoin_iff_residueDegree (K : PAdicLocalField p) (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))] :
+    IsTotallyRamifiedAdjoin K x ↔ residueDegree K x = Nat.card 𝓀[K.carrier] := by
+  rw [residueDegree_eq_residueCard_pow K x]
+  have hq2 : 2 ≤ Nat.card 𝓀[K.carrier] := by
+    haveI : Fintype 𝓀[K.carrier] := Fintype.ofFinite _
+    have h1 : 1 < Fintype.card 𝓀[K.carrier] := Fintype.one_lt_card
+    rw [Nat.card_eq_fintype_card]
+    omega
+  constructor
+  · intro h; rw [show inertiaDegree K x = 1 from h, pow_one]
+  · intro h
+    nth_rewrite 2 [← pow_one (Nat.card 𝓀[K.carrier])] at h
+    exact Nat.pow_right_injective hq2 h
+
+/-! ## Newton 多角形の一段: Eisenstein の根のノルム
+
+★一般の超距離ノルム体で成り立つ補題。次の段(Lubin-Tate 塔が完全分岐である
+ことの証明)で使う: `‖α‖^n = ‖a_0‖ = ‖π‖` から値群の指数が `n` 以上になり、
+`e ≤ e·f = n` と合わせて `e = n`・`f = 1` が出る。 -/
+
+/-- モニック多項式の根で、低次係数がすべて `‖a_0‖ < 1` 以下なら、根は開単位球に入る。 -/
+theorem norm_lt_one_of_monic_root {F : Type*} [NormedField F] [IsUltrametricDist F]
+    {n : ℕ} (_hn : 0 < n) (a : ℕ → F) {α : F}
+    (hroot : α ^ n + ∑ i ∈ Finset.range n, a i * α ^ i = 0)
+    (hle : ∀ i, i < n → ‖a i‖ ≤ ‖a 0‖) (hlt : ‖a 0‖ < 1) (hne : a 0 ≠ 0) :
+    ‖α‖ < 1 := by
+  by_contra hge
+  rw [not_lt] at hge
+  have hα0 : α ≠ 0 := by
+    intro h0
+    rw [h0, norm_zero] at hge
+    linarith
+  have hαpos : (0:ℝ) < ‖α‖ ^ n := by positivity
+  have hbound : ‖∑ i ∈ Finset.range n, a i * α ^ i‖ ≤ ‖a 0‖ * ‖α‖ ^ n := by
+    refine IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg (by positivity) ?_
+    intro i hi
+    rw [Finset.mem_range] at hi
+    rw [norm_mul, norm_pow]
+    refine mul_le_mul (hle i hi) ?_ (by positivity) (norm_nonneg _)
+    exact pow_le_pow_right₀ hge (le_of_lt hi)
+  have hkey : ‖α ^ n‖ = ‖∑ i ∈ Finset.range n, a i * α ^ i‖ := by
+    have h : α ^ n = -(∑ i ∈ Finset.range n, a i * α ^ i) := by linear_combination hroot
+    rw [h, norm_neg]
+  rw [norm_pow] at hkey
+  nlinarith [norm_nonneg (∑ i ∈ Finset.range n, a i * α ^ i)]
+
+/-- **★★★★★Eisenstein の根のノルム**——`‖α‖^n = ‖a_0‖`。
+`a_0` の項が一意に最大になる(他の項は `‖a_0‖·‖α‖ < ‖a_0‖`)ことによる。 -/
+theorem norm_pow_eq_of_monic_root {F : Type*} [NormedField F] [IsUltrametricDist F]
+    {n : ℕ} (hn : 0 < n) (a : ℕ → F) {α : F}
+    (hroot : α ^ n + ∑ i ∈ Finset.range n, a i * α ^ i = 0)
+    (hle : ∀ i, i < n → ‖a i‖ ≤ ‖a 0‖) (hlt : ‖a 0‖ < 1) (hne : a 0 ≠ 0) :
+    ‖α‖ ^ n = ‖a 0‖ := by
+  have hα1 : ‖α‖ < 1 := norm_lt_one_of_monic_root hn a hroot hle hlt hne
+  have ha0pos : (0:ℝ) < ‖a 0‖ := norm_pos_iff.mpr hne
+  rw [Finset.range_eq_Ico, Finset.sum_eq_sum_Ico_succ_bot hn] at hroot
+  simp only [pow_zero, mul_one, zero_add] at hroot
+  set S := ∑ i ∈ Finset.Ico 1 n, a i * α ^ i with hS
+  have hSbound : ‖S‖ ≤ ‖a 0‖ * ‖α‖ := by
+    refine IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg (by positivity) ?_
+    intro i hi
+    rw [Finset.mem_Ico] at hi
+    rw [norm_mul, norm_pow]
+    refine mul_le_mul (hle i hi.2) ?_ (by positivity) (norm_nonneg _)
+    calc ‖α‖ ^ i ≤ ‖α‖ ^ 1 := pow_le_pow_of_le_one (norm_nonneg _) (le_of_lt hα1) hi.1
+      _ = ‖α‖ := pow_one _
+  have hSlt : ‖S‖ < ‖a 0‖ := by nlinarith [norm_nonneg α]
+  have hdec : α ^ n = -(a 0) + -S := by linear_combination hroot
+  have hne2 : ‖(-S : F)‖ ≠ ‖(-(a 0) : F)‖ := by
+    rw [norm_neg, norm_neg]; exact ne_of_lt hSlt
+  rw [← norm_pow α n, hdec, add_comm, IsUltrametricDist.norm_add_eq_max_of_norm_ne_norm hne2,
+    norm_neg, norm_neg]
+  exact max_eq_right (le_of_lt hSlt)
+
 end ABC3.Found.PGC
