@@ -73,4 +73,71 @@ theorem isUnramifiedAdjoin_iff_residueDegree_interface (K : PAdicLocalField p) (
         ^ Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :=
   isUnramifiedAdjoin_iff_residueDegree K x
 
+
+/-! ## ★二つのノルムの一致——`adjoinField` と `adjoinIntegers` の橋
+
+上の docstring で「未解決の配管」として記録した点を解消する。
+
+`(adjoinField K x).carrier` に載るのは `LocalFieldNorm.lean` の
+`normedField`(= `spectralNorm ℚ_[p] ↥K⟮x⟯`)、`adjoinIntegers K x` が
+使うのは `K.closure` の部分体として `↥K⟮x⟯` が継ぐノルム
+(= `spectralNorm K.carrier K.closure` の制限)。**基点の体が違う**
+(`ℚ_[p]` と `K.carrier`)ので definitional には別物だが、どちらも
+`ℚ_[p]` のノルムを延長する体ノルムなので、完備体からのノルム延長の
+一意性(`spectralNorm_unique_field_norm_ext`)で一致する。
+
+結果として整数環が**部分環として等しい**:
+`𝒪[(adjoinField K x).carrier] = adjoinIntegers K x`。
+これで `adjoinIntegers` について本ファイル群で積み上げた事実
+(`e·f`・不分岐性・Frobenius など)が、そのまま `adjoinField K x` を
+`PAdicLocalField p` として見たときの事実になる。 -/
+
+/-- **ノルムの一致**——`(adjoinField K x).carrier` のノルム(`ℚ_[p]` 上の
+スペクトルノルム)は、`K.closure` から継いだノルムに等しい。 -/
+theorem norm_adjoinField_eq (K : PAdicLocalField p) (x : K.closure)
+    (y : (adjoinField K x).carrier) : ‖y‖ = ‖(y.1 : K.closure)‖ := by
+  haveI hfin : FiniteDimensional ℚ_[p]
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := (adjoinField K x).isFinite
+  haveI : Algebra.IsAlgebraic ℚ_[p] (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :=
+    Algebra.IsAlgebraic.of_finite ℚ_[p] _
+  have hext : ∀ a : ℚ_[p],
+      NormedField.toAbsoluteValue (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+        (algebraMap ℚ_[p] (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) a) = ‖a‖ := by
+    intro a
+    have h1 : ((algebraMap ℚ_[p] (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) a).1
+        : K.closure) = algebraMap K.carrier K.closure (algebraMap ℚ_[p] K.carrier a) := rfl
+    show ‖((algebraMap ℚ_[p] (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) a).1
+      : K.closure)‖ = ‖a‖
+    rw [h1, norm_algebraMap' K.closure (algebraMap ℚ_[p] K.carrier a), norm_algebraMap K a]
+  have hkey := spectralNorm_unique_field_norm_ext (K := ℚ_[p])
+    (L := (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))
+    (f := NormedField.toAbsoluteValue _) hext y
+  rw [NormedAlgebra.norm_eq_spectralNorm ℚ_[p] y]
+  exact hkey.symm
+
+/-- 整数環の元は一致する。 -/
+theorem mem_adjoinIntegers_iff_mem_integers (K : PAdicLocalField p) (x : K.closure)
+    (y : (adjoinField K x).carrier) :
+    y ∈ 𝒪[(adjoinField K x).carrier]
+      ↔ (y : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) ∈ adjoinIntegers K x := by
+  rw [Valuation.mem_integer_iff]
+  have hv : Valued.v y = (‖y‖₊ : NNReal) := NNReal.eq rfl
+  rw [hv]
+  constructor
+  · intro h
+    have h1 : ‖y‖ ≤ 1 := by exact_mod_cast h
+    rw [norm_adjoinField_eq K x y] at h1
+    exact h1
+  · intro h
+    have h1 : ‖(y.1 : K.closure)‖ ≤ 1 := h
+    rw [← norm_adjoinField_eq K x y] at h1
+    exact_mod_cast h1
+
+/-- **★整数環は部分環として等しい**——`adjoinIntegers` の理論全体が
+`adjoinField K x` を `PAdicLocalField p` として見たときの理論になる。 -/
+theorem integers_eq_adjoinIntegers (K : PAdicLocalField p) (x : K.closure) :
+    𝒪[(adjoinField K x).carrier] = adjoinIntegers K x := by
+  ext y
+  exact mem_adjoinIntegers_iff_mem_integers K x y
+
 end ABC3.Found.PGC

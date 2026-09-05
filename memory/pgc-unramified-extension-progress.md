@@ -986,3 +986,29 @@ Frobenius、`coe_...` で `z ↦ z^{Fintype.card 𝓀}`、`orderOf_...` で
 **definitional には別物**なので
 `Nat.card 𝓀[(adjoinField K x).carrier] = residueDegree K x` は `rfl` で
 通らない。橋渡しには `spectralNorm_unique_field_norm_ext` を使う。
+
+## ★★★★2026-09-05: 二つのノルムの一致——`adjoinField` と `adjoinIntegers` の橋
+
+前項で「未解決の配管」として記録した点を**解消した**
+(`Found/PGC/AdjoinFieldConstruction.lean`、sorry 無し):
+
+- **`norm_adjoinField_eq`** : `(adjoinField K x).carrier` のノルム
+  (`spectralNorm ℚ_[p] ↥K⟮x⟯`)= `K.closure` から継いだノルム
+  (`spectralNorm K.carrier K.closure` の制限)。**基点の体が違う**ので
+  definitional には別物だが、どちらも `ℚ_[p]` のノルムを延長する体ノルム
+  なので `spectralNorm_unique_field_norm_ext`(完備体からのノルム延長の
+  一意性)で一致する。
+- `mem_adjoinIntegers_iff_mem_integers`
+- **`integers_eq_adjoinIntegers : 𝒪[(adjoinField K x).carrier]
+  = adjoinIntegers K x`**(部分環として**等しい**)
+
+これで `adjoinIntegers` について積み上げた事実(`e·f`・不分岐性・
+Frobenius・Teichmüller など)が、そのまま `adjoinField K x` を
+`PAdicLocalField p` として見たときの事実になる。
+
+★残った小さな配管: `Nat.card 𝓀[(adjoinField K x).carrier]
+= residueDegree K x` は上の部分環の等式から「道徳的には」出るが、
+`rw` の motive 検査が `IsLocalRing` インスタンス(Prop クラス)の
+依存で通らない。`RingEquiv.subringCongr` 経由も
+`Subring ((adjoinField K x).carrier)` と `Subring ↥K⟮x⟯` の
+`CommRing` 経路の違いで詰まる。次に必要になったときの課題。
