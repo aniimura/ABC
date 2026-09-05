@@ -439,6 +439,27 @@ theorem min_avg_le_sum_min {r : ℕ} (hr : 0 < r) (m : Fin r → ℝ) (hm : ∀ 
     exact le_min (hm i) he
   linarith
 
+/-- 有限個の直積の長さは各因子の長さの和(`Module.length_prod` の
+`Fin r` 版、`Fin.consLinearEquiv` で帰納)。構造定理
+`Module.equiv_directSum_of_isTorsion` の出力(`⨁ i : ι, R ⧸ R∙p^e`)の
+長さを計算するのに使う。 -/
+theorem length_pi_fin {R : Type*} [Ring R] :
+    ∀ (r : ℕ) (N : Fin r → Type v) (_ : ∀ i, AddCommGroup (N i)) (_ : ∀ i, Module R (N i)),
+      Module.length R (∀ i, N i) = ∑ i, Module.length R (N i) := by
+  intro r
+  induction r with
+  | zero =>
+    intro N _ _
+    haveI : Subsingleton (∀ i : Fin 0, N i) := ⟨fun a b => funext (fun i => absurd i.2 (by omega))⟩
+    rw [Module.length_eq_zero]
+    simp
+  | succ k ih =>
+    intro N hN hM
+    have e : (∀ i : Fin (k+1), N i) ≃ₗ[R] (N 0 × ∀ i : Fin k, N i.succ) :=
+      (Fin.consLinearEquiv (R := R) N).symm
+    rw [e.length_eq, Module.length_prod, ih (fun i : Fin k => N i.succ)
+      (fun i => hN i.succ) (fun i => hM i.succ), Fin.sum_univ_succ]
+
 /-- DVR ではイデアルの冪は全順序なので、和は指数の `min`。 -/
 theorem pow_sup_pow {R : Type*} [CommRing R] (I : Ideal R) (k e : ℕ) :
     I^k ⊔ I^e = I^(min k e) := by
