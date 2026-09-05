@@ -528,4 +528,112 @@ theorem exists_honest_lift_on_ideal {A B C : Type u} [CommRing A] [CommRing B] [
   · intro b b'
     rw [← smul_add, hkey, hkey, hkey, map_add]
 
+/-! ## 族の貼り合わせ——一意性と整合性
+
+`ε` 族を貼り合わせるには「各水準で持ち上げが一意」であることが要る
+(Faltings: *"Such a lifting is unique up to `H¹(B/A,I)`, hence up to
+`p`-torsion"*)。`thm_2_2_uniqueness` は **`A`-代数写像**の一意性だったが、
+族の各項は「水準 `s` で乗法的」なだけなので、その版が別に要る。 -/
+
+/-- **水準 `s` の乗法的持ち上げの一意性**。差 `d := ψ' - ψ` は `I` に値を取り、
+`uniqueness_derivation_eq` と `sqZero_act_eq` から `s·d(xy) = s·(x•dy + y•dx)`、
+`C` の `s` 捩れ無しで honest な導分になる。あとは `Ω[B⁄A]` の almost 消滅
+(`hΩ`)と `c` 捩れ無しで `d = 0`。 -/
+theorem uniqueness_level_lift {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C]
+    (I : Ideal C) (hsq : ∀ u ∈ I, ∀ v ∈ I, u * v = 0) (φ : B →ₐ[A] (C ⧸ I))
+    (s : A) (ψ ψ' : B →ₗ[A] C)
+    (hψ : ∀ b, Ideal.Quotient.mk I (ψ b) = s • φ b)
+    (hψ' : ∀ b, Ideal.Quotient.mk I (ψ' b) = s • φ b)
+    (hmul : ∀ x y : B, s • ψ (x * y) = ψ x * ψ y)
+    (hmul' : ∀ x y : B, s • ψ' (x * y) = ψ' x * ψ' y)
+    (c : A) (hΩ : ∀ x : Ω[B⁄A], c • x = 0)
+    (hstors : ∀ x : C, (algebraMap A C) s * x = 0 → x = 0)
+    (hctors : ∀ x : C, (algebraMap A C) c * x = 0 → x = 0) :
+    ψ = ψ' := by
+  letI : Module (C ⧸ I) I := sqZeroModule I hsq
+  letI : Module B I := Module.compHom _ (φ.toRingHom : B →+* (C ⧸ I))
+  haveI : IsScalarTower A B I := sqZeroTower I hsq φ
+  have hmem : ∀ b : B, ψ' b - ψ b ∈ I := by
+    intro b
+    rw [← Ideal.Quotient.eq_zero_iff_mem, map_sub, hψ b, hψ' b, sub_self]
+  have hsq2 : ∀ x y : B, (ψ' x - ψ x) * (ψ' y - ψ y) = 0 :=
+    fun x y => hsq _ (hmem x) _ (hmem y)
+  set dI : B →ₗ[A] I :=
+    { toFun := fun b => ⟨ψ' b - ψ b, hmem b⟩
+      map_add' := by intro x y; apply Subtype.ext; show ψ' (x+y) - ψ (x+y) = _; simp; abel
+      map_smul' := by
+        intro a x; apply Subtype.ext
+        show ψ' (a • x) - ψ (a • x) = ((a • ⟨ψ' x - ψ x, hmem x⟩ : I) : C)
+        rw [Submodule.coe_smul_of_tower, map_smul, map_smul, smul_sub] } with hdI
+  have hact := sqZero_act_eq I hsq φ s ψ hψ
+  have hder : ∀ x y : B, dI (x * y) = x • dI y + y • dI x := by
+    intro x y
+    apply Subtype.ext
+    rw [← sub_eq_zero]
+    apply hstors
+    have h1 := uniqueness_derivation_eq s ψ ψ' hmul hmul' hsq2 x y
+    have h2 := hact x (dI y)
+    have h3 := hact y (dI x)
+    have hd1 : ((dI (x*y) : I) : C) = ψ' (x*y) - ψ (x*y) := rfl
+    have hd2 : ((dI y : I) : C) = ψ' y - ψ y := rfl
+    have hd3 : ((dI x : I) : C) = ψ' x - ψ x := rfl
+    simp only [Submodule.coe_add, LinearMap.sub_apply, Algebra.smul_def, hd1, hd2, hd3]
+      at h1 h2 h3 ⊢
+    linear_combination h1 + h2 + h3
+  set D : Derivation A B I :=
+    { toLinearMap := dI
+      map_one_eq_zero' := by
+        have h := hder 1 1
+        rw [one_mul, one_smul] at h
+        have h3 : (0 : I) + dI 1 = dI 1 + dI 1 := by rw [zero_add]; exact h
+        exact (add_right_cancel h3).symm
+      leibniz' := hder } with hD
+  have hzero : ∀ b : B, dI b = 0 := by
+    intro b
+    apply Subtype.ext
+    apply hctors
+    have h := derivation_almost_zero c hΩ D b
+    have hc : ((c • D b : I) : C) = 0 := by rw [h]; rfl
+    rw [Submodule.coe_smul_of_tower, Algebra.smul_def] at hc
+    exact hc
+  ext b
+  have hb := hzero b
+  have hbb : ψ' b - ψ b = 0 := congrArg (fun x : I => (x : C)) hb
+  linear_combination -hbb
+
+/-- **族の整合性**: 水準 `s·d` の持ち上げは、水準 `s` の持ち上げの `d` 倍に
+一致する(`rescale_multiplicative` で `d·ψ` が水準 `s·d` の持ち上げに
+なることを見て、`uniqueness_level_lift` を適用するだけ)。 -/
+theorem lift_compat {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C]
+    (I : Ideal C) (hsq : ∀ u ∈ I, ∀ v ∈ I, u * v = 0) (φ : B →ₐ[A] (C ⧸ I))
+    (s d : A) (ψ ψ' : B →ₗ[A] C)
+    (hψ : ∀ b, Ideal.Quotient.mk I (ψ b) = s • φ b)
+    (hmul : ∀ x y : B, s • ψ (x * y) = ψ x * ψ y)
+    (hψ' : ∀ b, Ideal.Quotient.mk I (ψ' b) = (s * d) • φ b)
+    (hmul' : ∀ x y : B, (s * d) • ψ' (x * y) = ψ' x * ψ' y)
+    (c : A) (hΩ : ∀ x : Ω[B⁄A], c • x = 0)
+    (hsdtors : ∀ x : C, (algebraMap A C) (s * d) * x = 0 → x = 0)
+    (hctors : ∀ x : C, (algebraMap A C) c * x = 0 → x = 0) :
+    ψ' = d • ψ := by
+  refine uniqueness_level_lift I hsq φ (s * d) ψ' (d • ψ) hψ' ?_ hmul' ?_ c hΩ hsdtors hctors
+  · intro b
+    show Ideal.Quotient.mk I (d • ψ b) = (s * d) • φ b
+    have hmk : ∀ x : A, Ideal.Quotient.mk I (algebraMap A C x) = algebraMap A (C ⧸ I) x :=
+      fun _ => rfl
+    simp only [Algebra.smul_def, map_mul, hmk, hψ b]
+    ring
+  · exact fun x y => rescale_multiplicative s d ψ hmul x y
+
+/-- **貼り合わせの整合性、`φ₀` の言葉で**: `ψ' = d • ψ` なら、`sB` 上の
+honest な持ち上げ `φ₀^s` と `(sd)B` 上の `φ₀^{sd}` は重なり `(sd)B` の上で
+一致する——`(sd)•b = s•(d•b)` なので、両辺とも `ψ (d • b)` になる。
+これで族 `{φ₀^{ϖk}}` が貼り合わさり `φ₀ : mB → C` が定まる。 -/
+theorem honest_lift_agree {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C] (d : A) (ψ ψ' : B →ₗ[A] C) (hcompat : ψ' = d • ψ) (b : B) :
+    ψ (d • b) = ψ' b := by
+  rw [hcompat, map_smul]
+  rfl
+
 end ABC3.Found.Falt1
