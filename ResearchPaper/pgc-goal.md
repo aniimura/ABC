@@ -68,18 +68,50 @@ Kummer 双対(全射性は Hilbert 90、mathlib 在庫)+ `unitsSplitEquiv` +
 `ker(Γ_K → Γ_K^ab/(p−1))` に落として戻す(部分群対応は在庫、第 1000 前後)。
 **Cor 1.3 を使わないので循環しない。**
 
-### C のノード(未着手は `node tools/frontier.mjs` が拾えるよう Skeleton に置く)
+### ★不変量の定義(2026-09-05 決定)
 
-1. `units_isNthPow_unramifiedClosure` —— `p∤n` なら `𝒪_{K^ur}^×` の元は n 乗数(Hensel)
-2. `kummer_unramifiedClosure` —— `K^ur` 上の指数 n アーベル拡大の双対
-3. `card_absGalAb_mod_n` —— `N_n(Γ_K) = n·gcd(n,q−1)`
-4. `residueCard_eq_of_absGal_equiv` —— `q−1 = max{…}` の移送
-5. `index_pow_units` —— `[𝒪_K^× : (𝒪_K^×)^p] = p^d·#μ_p(K)`
-6. `kummer_card_hom_of_mem_mu` —— `μ_p ⊆ F` での `N_p(Γ_F)`
-7. `finrank_eq_of_absGal_equiv_of_mem_mu`
-8. `finrank_eq_of_absGal_equiv` —— 特性的開部分群への帰着
-9. `ResidueCardinality.card_congr` —— 第 1012 の修理(同型不変性)
-10. Prop 1.2 の証明を 4・8 に接続
+`N_n(Γ) := Nat.card {f : Γ →* Multiplicative (ZMod n) // IsOpen (ker f)}`。
+
+- ✗ `ContinuousMonoidHom` —— **mathlib に `TopologicalSpace (ZMod n)` が無い**(実測)
+- ✗ `Abelianization Γ` の `(powMonoidHom n).range.index` —— **偽になりうる**。
+  `Abelianization` は代数的交換子群による商で位相的閉包を取らない。
+  副有限群では有限指数部分群が開とは限らない
+- ✓ `IsOpen (ker f)` —— 離散位相を持ち込まずに済み、移送は α が開写像であることだけ
+
+### C のノード(★`Found/PGC/` に置く。原典の項目ではないので `.src` を持てない——D1)
+
+| | ファイル | 内容 | 見積 | 依存 |
+|---|---|---|---|---|
+| **A** | `ContinuousHomCount.lean` | `contHom` / `contHomCard` / `contHomCard_congr` | 小 | — |
+| **B** | `UnitsPowPrimeToP.lean` | `p∤n` で `[𝒪^×:(𝒪^×)^n] = gcd(n,q−1)`、`[K^×:(K^×)^n] = n·gcd` | 中 | — |
+| **C** | `KummerDuality.lean` | `contHomCard Γ_F n = [F^×:(F^×)^n]`(★**要石**) | 大 | — |
+| **D** | `HerbrandIndex.lean` + `UnitsPowP.lean` | 有限指数での Herbrand 商の不変性、`[𝒪^×:(𝒪^×)^p] = p^d·#μ_p` | 中〜大 | — |
+| **E** | `UnramifiedClosureRoots.lean` | `K^ur` のノルム 1 の元は `p∤n` 乗根を持つ | 中〜大 | — |
+| **F** | `InertiaKummer.lean` | 惰性群からの連続準同型、Frobenius の余不変量 | 大 | C, E |
+| **G** | `ResidueCardTransport.lean` | (C-q) 総組み立て、`residueCard_eq_of_absGal_equiv` | 中 | A,B,C,E,F |
+| **H** | `DegreeTransport.lean` | (C-d) 本体、`finrank_eq_of_absGal_equiv` | 中 | A,C,D |
+| **I** | `Interface` の修理 | `ResidueCardinality.card_congr`(第 1012、7 例目) | 中 | — |
+| **J** | Skeleton 接続 | Prop 1.2 を `⟨G,H⟩` で埋める。★**Cor 1.3 も同時に落ちる** | 小 | G,H,I |
+
+★**A〜E と I は互いに依存しない**ので同時に配れる。
+
+### ★落とし穴 2 つと、その回避(2026-09-05 実測)
+
+1. **Hilbert 90 は `[FiniteDimensional K L]` 必須**で `Γ_F` に当たらない
+   (mathlib 自身が無限次への拡張を TODO にしている)。
+   → **使わない。** `exists_root_adjoin_eq_top_of_isCyclic` を、各 `f` が切る
+   **有限次**巡回拡大に当てる。Γ_F は無限次のままでよい。
+2. **`X^n − C a` の既約判定が奇数 `n` 限定**(`TODO: criteria for even n`)。
+   → **既約性をどこでも使わない。** Kummer 指標を素手で定義する
+   (`κ_a(σ) := σ(α)/α`、α は任意の根)。**これで `p = 2` も素通しできる。**
+   ★`autEquivZmod` / `autEquivRootsOfUnity` を使う設計にすると偶数の壁に当たる。
+
+### ★残るリスク
+
+**F1**(`Γ_{K^ur} ≃ₜ* (unramifiedClosure K).fixingSubgroup`)。在庫の
+`fixingSubgroupContinuousMulEquiv`(第 995)は有限次限定で、`K^ur` は無限次。
+両方向とも作り直しになる(順方向は塔、逆方向は `finiteDimensional_sup` が
+有限性を要求する)。**波 2 の前に小ノードで測ること**(`decisions-pending.md` D3)。
 
 ## 済んだ土台(2026-09-05 までに sorry 無しで構成)
 
