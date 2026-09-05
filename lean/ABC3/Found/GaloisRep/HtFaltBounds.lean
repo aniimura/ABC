@@ -98,6 +98,34 @@ theorem exists_htFalt_bddBelow :
   have h := hA L E
   linarith
 
+/-! ## ★★★★★★★★★★`deg∞ ≤ 12(1+ε)·ht^Falt + C`——★半安定性は要らない -/
+
+/-- ★★★★★★★★★★**`deg∞ ≤ 12(1+ε)·ht^Falt + C`**——★**無条件**。
+
+原文 (GenEll p.18):
+> First, observe that if v is any local height of EL, then d · deg∞([EL]) ≥
+
+★`prop_3_4_chain_semistable`（`Found/GaloisRep/SemistableFin.lean`）は同じ形の
+評価を **`∀ p, SemistableAt p E` を受けて**出していたが、
+☆上の 2 本（`deg∞ ≤ 12·ht^Falt + A` と `B ≤ ht^Falt`、どちらも無条件）を並べれば
+
+    `deg∞ ≤ 12·ht^Falt + A ≤ 12(1+ε)·ht^Falt + (A − 12εB)`
+
+となり、**半安定性を使わずに**同じ形の結論が出る。
+
+★★★これが `Lemma 3.5` の鎖から「良い素点の半安定性」を外す鍵である
+（`Found/GaloisRep/Lemma35Ineq.lean` の `lemma_3_5_of_isogeny_estimate_le_free`）。 -/
+theorem exists_degInf_le_htFalt_eps (eps : ℝ) (heps : 0 < eps) :
+    ∃ C : ℝ, ∀ (L : Type) [Field L] [NumberField L] (E : WeierstrassCurve L),
+      degInfOf L E ≤ 12 * (1 + eps) * htFaltOf L E + C := by
+  obtain ⟨A, hA0, hA⟩ := exists_degInfOf_le_htFalt
+  obtain ⟨B, hB⟩ := exists_htFalt_bddBelow
+  refine ⟨A - 12 * eps * B, fun L _ _ E => ?_⟩
+  have h1 := hA L E
+  have h2 : eps * B ≤ eps * htFaltOf L E :=
+    mul_le_mul_of_nonneg_left (hB L E) heps.le
+  nlinarith
+
 /-! ## ★★★★★★★局所高さと素であること -/
 
 variable {L : Type} [Field L] [NumberField L]
@@ -197,6 +225,11 @@ def exists_degInfOf_le_htFalt.src : ABC3.Meta.Source :=
 def exists_htFalt_bddBelow.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 18,
     item := "Lemma 3.7(ht^Falt は下に有界——★無条件。界面の faltingsHeight_bddBelow の中身)",
+    sectionId := "genell-lemma-3-7" }
+
+def exists_degInf_le_htFalt_eps.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 18,
+    item := "Lemma 3.7(deg∞ ≤ 12(1+ε)·ht^Falt + C——★無条件。半安定性を受けない)",
     sectionId := "genell-lemma-3-7" }
 
 def coprime_minDeltaExp.src : ABC3.Meta.Source :=

@@ -131,6 +131,47 @@ theorem lemma_3_5_of_isogeny_estimate_le (eps : ℝ) (heps : 0 < eps) :
   have hC' : C / (12 * (1 + eps)) * (12 * (1 + eps)) = C := by field_simp
   nlinarith [hstep, hC']
 
+/-! ## ★★★★★★★★★★★★★★半安定性を受けない組み立て -/
+
+/-- ★★★★★★★★★★★★★★
+**[GenEll] Lemma 3.5 —— `deg∞` を不等号で受ける形。★`E′` の半安定性を受けない**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+★上の `lemma_3_5_of_isogeny_estimate_le` から **`∀ p, SemistableAt p E′` を外した形**である。
+
+☆半安定性が使われていたのは `prop_3_4_chain_semistable`
+（`deg∞(E′) ≤ 12(1+ε)·ht^Falt(E′) + C`）の 1 箇所だけであり、
+その結論は `exists_degInf_le_htFalt_eps`（`Found/GaloisRep/HtFaltBounds.lean`）で
+**無条件に**得られている。
+★★★したがって `Lemma 3.5` の高さの鎖は
+**良い素点を含む全素点での `E′` の半安定性を全く要求しない**。
+
+☆既存の `lemma_3_5_of_isogeny_estimate_le` は下流が呼んでいるので残してある
+（鎖の差し替えは `ResearchPaper/decisions-pending.md` D9 の判断待ち）。 -/
+theorem lemma_3_5_of_isogeny_estimate_le_free (eps : ℝ) (heps : 0 < eps) :
+    ∃ C : ℝ, ∀ (L : Type) [Field L] [NumberField L] (E E' : WeierstrassCurve L)
+      [E.IsElliptic] [E'.IsElliptic] (l : ℕ),
+      (l : ℝ) * degInfOf L E ≤ degInfOf L E' →
+      htFaltOf L E' ≤ htFaltOf L E + 2 * Real.log l →
+      (1 / (12 * (1 + eps))) * (l : ℝ) * degInfOf L E
+        ≤ htFaltOf L E + 2 * Real.log l + C := by
+  obtain ⟨C, hC⟩ := exists_degInf_le_htFalt_eps eps heps
+  have hpos : (0:ℝ) < 12 * (1 + eps) := by linarith
+  refine ⟨C / (12 * (1 + eps)), fun L _ _ E E' _ _ l hdeg hfalt => ?_⟩
+  have hkey : degInfOf L E' ≤ 12 * (1 + eps) * htFaltOf L E' + C := hC L E'
+  have hstep : (l : ℝ) * degInfOf L E
+      ≤ 12 * (1 + eps) * (htFaltOf L E + 2 * Real.log l) + C := by
+    refine le_trans (le_trans hdeg hkey) ?_
+    have := mul_le_mul_of_nonneg_left hfalt hpos.le
+    linarith
+  rw [show (1 / (12 * (1 + eps))) * (l : ℝ) * degInfOf L E
+      = ((l : ℝ) * degInfOf L E) / (12 * (1 + eps)) by ring,
+    div_le_iff₀ hpos]
+  have hC' : C / (12 * (1 + eps)) * (12 * (1 + eps)) = C := by field_simp
+  nlinarith [hstep, hC']
+
 /-! ## ★★★★★★★★★★悪い素点だけで足りる -/
 
 /-- ★★**良い素点では不等式は自動的に成り立つ**。
@@ -431,6 +472,11 @@ def lemma_3_5_velu_bad_only.src : ABC3.Meta.Source :=
 def degInfOf_ge_of_local.src : ABC3.Meta.Source :=
   { paper := "GenEll", pdfPage := 17,
     item := "Lemma 3.5(局所の不等式を deg∞ に足し上げる。★無条件)",
+    sectionId := "genell-lemma-3-5" }
+
+def lemma_3_5_of_isogeny_estimate_le_free.src : ABC3.Meta.Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(deg∞ を不等号で受ける形——★E′ の半安定性を受けない)",
     sectionId := "genell-lemma-3-5" }
 
 def lemma_3_5_of_isogeny_estimate_le.src : ABC3.Meta.Source :=

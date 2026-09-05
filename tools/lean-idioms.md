@@ -5708,3 +5708,60 @@ sub-agent によっては MCP が `lean_check` だけを見せていて、`lean_
 `OfNat (IsNormalScheme x → … → WeilDiv x) 0` のように**別のフィールドで**出る。
 → フィールドの `∀` を数え、`[…]` も 1 個ずつ数えて下線を合わせる。
 `Check/FrdI/Ex61OrdDegenerate.lean::zeroWeilOrd`（`ord _ _ _ _ := 0`、`div _ _ _ _ := 0`）が実例。
+
+## Python で Lean ファイルを書き換えるときは、**encode してから開く**（2026-09-05）
+
+`𝓞`（U+1D4DE、BMP 外）を Python のリテラルで `\ud835\udcde` と書くと
+**サロゲート対**になり、`utf-8` で encode できない。ところが
+
+    io.open(path, "w", encoding="utf-8").write(out)   # ← これが危険
+
+は **開いた時点でファイルを 0 バイトにし**、そのあと `write` で
+`UnicodeEncodeError: surrogates not allowed` を投げる。結果は
+**`Found/` のファイルが中身を失ったまま残る**
+（実測 2026-09-05: `Found/GenEll/VeluSemistableJ.lean` 117 行 → 0 行。`git checkout --` で復旧）。
+
+→ 直し方は 2 つ。リテラルは **`\U0001D4DE`**（大文字 U の 8 桁）で書くか、
+変数に入れて `.replace("𝓞", O)` で差し込む。そのうえで
+
+    data = out.encode("utf-8")        # ★encode してから初めて開く
+    with open(path, "wb") as f: f.write(data)
+
+の順にすれば、失敗してもファイルは無傷である。
+★先頭に `assert len(src) > 1000` を置いておくと、一度空にしたファイルを
+再度上書きして履歴ごと失うのを止められる。
+★★heredoc の中の `\\u` は 1 本に潰れて届くことがあるので、
+文中にエスケープを書きたいときは `BS = chr(92)` を組み立てて差し込む。
+
+## agent からの 1 循環は `tools/leanfile.mjs` が一番安い（2026-09-05）
+
+`lean_start` がツール一覧に無い sub-agent では、スクラッチパッドに `.lean` を書いて
+
+    node tools/leanfile.mjs <スクラッチの絶対パス>
+
+とする。`lake env lean` を直叩くのと違い `lakefile.toml` の `[leanOptions]`
+（`autoImplicit=false` 等）を渡すので `lake build` と食い違わず、**olean を書かない**ので
+並行セッションと同じワークツリーでも安全である。
+実測: `Found/GaloisRep/Lemma35Ineq` と `Found/GenEll/VeluSemistableJ` を import した
+スクラッチ 1 枚で **11〜13 秒**。同じ内容を `lake build` で確かめると
+**6 分 45 秒**（4539 ジョブ）だった。
+★ただし olean を読むので、**先に直したファイルの新しい宣言**は `lake build` するまで見えない。
+新宣言を使う側を検査するときは、両方を 1 枚のスクラッチに並べて書く。
+
+## `haveI : Field ↥E := inferInstance` を先に置くと、直後の `Algebra ↥E Ω` が見つからなくなる（2026-09-06、pGC ノード F で実測）
+
+```lean
+example (K : PAdicLocalField p) : True := by
+  haveI : Field ↥(unramifiedClosure K) := inferInstance      -- 無害に見える
+  haveI : Algebra ↥(unramifiedClosure K) K.closure := inferInstance
+  -- failed to synthesize  Algebra (↥(unramifiedClosure K)) K.closure
+```
+
+`haveI` はローカル文脈に**新しい fvar のインスタンス**を積む。`IntermediateField.toAlgebra`
+は `E` の体構造(標準のもの)に合わせて `Algebra ↥E L` を作るので、
+探索がローカルの `Field` を先に拾うと合わなくなる。2 つ目以降でも同じことが起きる
+（`haveI : Algebra …` の直後に `Algebra.IsAlgebraic …` が落ちる）。
+
+★対処: **確認のための `haveI` を並べない**。1 宣言に 1 つずつ `example` で試す。
+本番でも「すでにインスタンスがあるもの」を `haveI` で置き直さない。
+`open scoped NormedField Valued` のせいだと誤診しやすい（実際は無関係）。

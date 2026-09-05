@@ -87,7 +87,39 @@ theorem semistableAt_veluQuot_all_of_jExp [inst : DecidableEq L]
         Q hQ (hjE' hlu hj)
     · exact semistableAt_veluQuot_badPrime_all p E hss (by omega) hl hodd h48 h864 Q hQ
 
+/-! ## ★★★★★★★★★★★★★★悪い素点だけなら仮定は残らない -/
+
+/-- ★★★★★★★★★★★★★★
+**[GenEll] 悪い素点では Vélu の商は半安定**——★**全素点を一度に、仮定なし**。
+
+原文 (GenEll p.17):
+> Lemma 3.5. (Global Rank One Subgroups of l-Torsion) Let
+
+☆`semistableAt_veluQuot_all_of_goodMem`（第 1436）に残っていた仮定 `hmem` は
+**`p ∣ l` かつ良い素点（`0 ≤ jExp p E`）のときだけ**のものだったので、
+結論を悪い素点（`jExp p E < 0`）に限れば**空に充たせる**。
+
+★★★これで、`Lemma 3.5` の高さの鎖が実際に消費する側——
+**悪い素点での `E′` の半安定性**——が**仮定なしで在庫になる**。
+☆良い素点の側（`j(E′)` の整性）は `semistableAt_veluQuot_all_of_jExp` に残るが、
+高さの鎖は `exists_degInf_le_htFalt_eps`（無条件）を経由すればそれを使わない。 -/
+theorem semistableAt_veluQuot_badPrime_free_all [inst : DecidableEq L]
+    (E : WeierstrassCurve L) [E.IsElliptic]
+    (hss : ∀ p : HeightOneSpectrum (𝓞 L), SemistableAt p E)
+    {l : ℕ} (hl : l.Prime) (hl5 : 5 ≤ l)
+    (Q : E.toAffine.Point) (hQ : addOrderOf Q = l) :
+    ∀ p : HeightOneSpectrum (𝓞 L), jExp p E < 0 →
+      SemistableAt p (veluQuotientFull E
+        (((range l).erase 0).image (fun k : ℕ => pointCoords (k • Q)))) :=
+  fun p hj => semistableAt_veluQuot_all_of_goodMem p E (hss p) hl hl5 Q hQ
+    (fun _ hj' => absurd hj' (by omega))
+
 /-! ## ★出典の紐付け(`.src`) -/
+
+def semistableAt_veluQuot_badPrime_free_all.src : Source :=
+  { paper := "GenEll", pdfPage := 17,
+    item := "Lemma 3.5(悪い素点では Vélu の商は半安定——★全素点を一度に、仮定なし)",
+    sectionId := "genell-lemma-3-5" }
 
 def semistableAt_veluQuot_all_of_jExp.src : Source :=
   { paper := "GenEll", pdfPage := 17,

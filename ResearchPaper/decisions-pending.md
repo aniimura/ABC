@@ -186,9 +186,15 @@
   さらに `VeluQuotOK`(`Found/GenEll/Lemma37Hdag/Lemma35.lean:60`)の後半を弱める。
 - ★**弱めた `VeluQuotOK` は自明にならない**ことを確認済み(悪い素点の枝、第 1388・1436 が
   実質的内容を持つ)。ただし**原文の括弧より真に弱い**ので逸脱として記録が要る。
-- **先に無人で進めたこと**(新規 `Found` 補題のみ。既存 statement は触らない):
+- **先に無人で進めたこと**(新規 `Found` 補題のみ。既存 statement は触らない、第 1032):
   `exists_degInf_le_htFalt_eps` / `lemma_3_5_of_isogeny_estimate_le_free` /
-  `semistableAt_veluQuot_badPrime_free_all`
+  `semistableAt_veluQuot_badPrime_free_all` —— **3 本とも `sorry` ゼロで完成**
+- ★★**この置換の見返りが測定で確定した**: 鎖を `_free` 版に差し替えると、
+  `E′` の半安定性のうち残るのは**悪い素点での半安定性だけ**になり、
+  それは `semistableAt_veluQuot_badPrime_free_all` が**仮定なしで供給する**。
+  すなわち良い素点側の `j(E′)` の整性 —— **Néron–Ogg–Shafarevich か
+  モジュラー多項式 `Φ_l`(どちらも mathlib に同種すら無い person-years の塊)** ——
+  が**経路外になる**。9 か所の機械的置換で、新規理論の塊が 1 つ critical path から外れる。
 - **残る真の数学**: `p ∣ l` かつ `0 ≤ jExp p E`(良還元)で `0 ≤ jExp p E′`。
   ★**退化していない**。道は 3 つでどれも新しい理論の塊
   (A: Néron–Ogg–Shafarevich ——★mathlib に**同種すら無い**(2026-09-05 実測 0 件)/

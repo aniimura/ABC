@@ -15,8 +15,11 @@ tools: Read, Edit, Write, Grep, Glob, Bash, mcp__abc3-lean__lean_check, mcp__abc
    ★`lean_check` が「まだ `lean_start` を呼んでいない」と返したら
    **`mcp__abc3-lean__lean_start` を先に呼ぶ**(2026-09-05 まで役割定義に
    `lean_start` が無く、agent が自力で起動できずに逃げ道を使っていた)。
-   それでも駄目なら逃げ道はスクラッチに小さい `.lean` を書いて `lake env lean`
-   (ガード R1 は `#full-check` で抜ける)——8〜10 秒で戻る。
+   それでも駄目なら逃げ道は **`node tools/leanfile.mjs <絶対パス>`**
+   ——スクラッチパッドに小さい `.lean` を書いて投げると **11〜13 秒/往復**で戻る
+   (同内容の `lake build` は 6 分 45 秒)。★**olean を書かないので
+   並行セッションと安全に共存する**。`lake env lean` 直打ちでもよい
+   (ガード R1 は `#full-check` で抜ける)。
 2. 通ったら **Write/Edit でファイルに書く**。
    ★解析用のスクリプトが要るならシェルに埋めず `.mjs`/`.py` に書く（多重エスケープで壊れる）。
    Python は `C:\Users\Aruta\miniforge3\envs\py311env\python.exe`、`PYTHONIOENCODING=utf-8`。
