@@ -317,3 +317,200 @@
   `tools/paper-items.mjs` の「各自 `pdftotext -layout` で作る」→ PyMuPDF の記述へ訂正。
   `memory/pdftotext-two-implementations-hazard.md` も 2 経路を分けて書き直した。
 - **決定**: —
+
+## D13. ★★★[pGC] Proposition 1.2 —— **修理が強すぎた**(10 例目の退化、新種)
+
+- **状態**: **保留**(2026-09-06)。★**数学は完成している。残るのは statement の判断だけ**
+- **★数学の側は閉じた**: `Found/PGC/Prop12Transport.lean`
+  `residueCard_and_degree_recoverable_real : (residueCardAndDegreeObject (realResidueCardinality p)).RecoverableFromAbsGal`
+  —— **無条件・sorry 0**。`#print axioms` は `[propext, Classical.choice, Quot.sound]` のみ。
+  証明は 2 行(q 側 `residueCard_eq_of_absGal_equiv` + 次数側 `finrank_eq_of_absGal_equiv`)。
+  ★**橋は 1 本も要らなかった** —— `realResidueCardinality.card = residueCard` は `rfl`、
+  `residueCard K = Nat.card 𝓀[K.carrier]` は定義そのもの。
+- **★★問題**: `Skeleton/PGC/Section1.lean:166` は `∀ RD : ResidueCardinality p` の形をしている。
+  `Check/PGC/Prop12ForallRD.lean` で**同値が Lean で証明された**(sorry 0):
+
+  ```
+  (∀ RD, (residueCardAndDegreeObject RD).RecoverableFromAbsGal) ↔
+    ∀ {K K'}, (K.absGal ≃ₜ* K'.absGal) → Nonempty (K.carrier ≃ₐ[ℚ_[p]] K'.carrier)
+  ```
+
+  ★**右辺は原典 Introduction が明示的に偽と述べている命題**である:
+  - p.1「the Grothendieck Conjecture cannot hold in the naive sense
+    (i.e., if one removes the condition of "compatibility with the filtrations" … see, e.g., [8])」
+  - p.1 Historical Remark「I originally set out to prove the naive version of the above Theorem,
+    only to discover that this was, in fact, false.」
+  - [8] = M. Jarden, J. Ritter,
+    *On the Characterization of Local Fields by their Absolute Galois Groups*
+- **★なぜそうなったか**: `ResidueCardinality` の場は `card` / `isPrimePow` / `card_congr` の 3 つで、
+  **`card K = 剰余体の実際の濃度` という場が無い**。`card` は「ℚ_p-代数同型類の任意の関数」でよい。
+  反例的な項が実際に作れる —— `isoIndicatorRD`(同型類の指示関数、3 場すべて充足)。
+  ★「`q = p^f`・`[K:ℚ_p] = e·f` で挟む」線も**閉じた**:
+  `exponent_not_determined` —— 同じ体 `ℚ_[p]` に対し許される 2 つの `ResidueCardinality` が
+  別の値(`p` と `p^2`)を割り当てられる。`isPrimePow` の `f` は剰余次数と**何の場でも結ばれていない**。
+- **★★10 例目の退化。しかも新種**: 9 例目(D10)は「素朴な**修復が偽の主張を作る**」だったが、
+  今回は「**修復が強すぎる主張を作った**」。第 1012 の修理(`card_congr` を足す)は
+  安い反例を消しただけで、正しい主張にしたのではなく、**主定理より強い**
+  (フィルター両立を課さない)命題にしてしまった。
+- ★**正直な区切り**: `∀ RD` 版を Lean の中で**偽と証明した訳ではない**。
+  それには Jarden–Ritter の反例(非同型な 2 体で Γ が位相群として同型)が要り、在庫に無い。
+  接続点だけ置いた —— `not_forall_RD_recoverable_of_nonisomorphic`。
+  今日確定したのは「**`∀ RD` 版 ⟺ 原典が偽と述べている命題**」までである。
+- **要る判断**(どちらかを選ぶ):
+  - ★**(a) 推奨** —— `∀ RD` をやめ、`realResidueCardinality` に固定する。
+    **本日の無条件版がそのまま証明になる**(既に sorry 0 で在る)。
+    `Interface` の `ResidueCardinality` は「まだ構築できていないから仮説に取る」ためのものだったが、
+    ★**構築は既に在る**(`Found/PGC/ResidueCardinality.lean:98`、第 1012 で作った)ので、
+    仮説に取る理由がもう無い。
+  - (b) `ResidueCardinality` に `card_eq : card K = Nat.card 𝓀[K.carrier]` の場を足す。
+    ★`Interface` を実物に固定することになるので `Interface` の意味が薄れる。
+    しかも方針書 §2 の「`Interface` への場の追加」に当たる。
+- ★**Corollary 1.3 も同じ判断の下流にある**(`Skeleton/PGC/Section1Cor13.lean:147`)。
+- **決定**: —
+
+## D14. [メタ] `tools/unwired.mjs` を取り込むか(メタ第 7 回、隔離 worktree)
+
+- **状態**: **保留**(2026-09-06)。★ただし**測定結果は既に使い始めている**
+- **中身**: 「**配線されていない既存の数学**」を機械で見つける新規 1 本(394 行)。
+  `Skeleton` の `sorry` 宣言の**結論**を鍵集合(識別子・末尾成分・camel/snake 部分語・記号)にし、
+  `sorry` 無しの在庫 16,182 宣言へ idf 重みで当てる。`--dead` で**空撃ち**も出す。
+- **★本体で実測して確認済み(2026-09-06)**:
+  - `node tools/unwired.mjs --selftest` → **較正 6/6、2.9 秒**。
+    既知の 6 組(第 1036 の `weilPairing_nondeg → exists_pairing_ne_one` を含む)がすべて上位 3 件に入る。
+  - `--node Skeleton/Divisor/SchemeWeil.lean` → `isDiscreteValuationRing_stalk_of_codimOne` が
+    **同名・同結論・一致率 100%・情報量 49** で `Found/Divisor/SchemeWeil.lean:112` を当てる。
+  - `--dead` → 空撃ち 303 本 / 消費者なし 250 本、★**そのうち `sorry` を持つもの 8 本**
+    (前線 23 ノードの **35%**)。3 件目の `NumberField/cheb` が第 1 位にそのまま出る。
+- **★なぜ効くと言えるか**: この型は今日までに **4 件**出ているが、
+  **どれも「たまたま在庫調査をした agent が気づいた」**だけで機械が見つけたものは 0 件だった。
+  `frontier.mjs` は「`sorry` があるノード」を出すが、
+  **その `sorry` が既に `Found` で解けているか**は見ていない。
+- **測定の副産物(重要)**:
+  - ★`sorry` の実体は「ノード 23」ではなく **宣言 57**(Skeleton 56 / `Meta/Calibration` 1)。
+    素朴に `\bsorry\b` を grep すると **114** に見えるが、
+    差の 57 件は **`.needs` の本文に日本語で「sorry」と書いてあるだけ**。
+  - `Found`/`Interface`/`Gap`/`Check` の `sorry` は **0**。
+- **効かなかったことも報告されている(隠していない)**:
+  - `Check/` を在庫に入れると雑音の主因になる(退化例・反証は**わざと同じ形**)→ 既定で除外。
+  - 結論が短いと 100% が出るが無意味(`ℝ` / `WeilDiv X` / `Nonempty …`)→ 情報量を併記。
+    **引けない問いが 2 件**(`degArith`・`ordAtDiv`)。適用できるのは 54/56。
+  - モジュール単位の素朴な「どこからも参照されない」は 179 本出て使えなかった。
+- **★巻き添え範囲はゼロと確認済み**: 新規ファイル 1 本のみ。
+  `check.mjs` が `tools/` を読むのは `selftest-fixtures` のみ、`graph.mjs` は `lean/` のみ。
+  worktree で `node tools/graph.mjs` がノード 2,146 / 辺 6,124 / sorry 23 で master と一致、
+  `check.mjs` の selftest 46/46 PASS。
+- **なぜ人を待つか**: 方針書 §2「メタ提案のマージ(隔離 worktree からの取り込み)」。
+- ★**取り込みとは独立に、測定結果は今日使った** —— `Skeleton/Divisor/SchemeWeil.lean` の
+  `isDiscreteValuationRing_stalk_of_codimOne` は **Skeleton 側の方が仮定が多い**
+  (`IsDomain (stalk)` を余分に持つ)ので、`Found` の定理が**逸脱なしでそのまま効く**ことを
+  本体が手で確認し、配線の agent を出した。
+- **決定**: —
+
+## D15. [メタ] `check.mjs` の G6 と `decl-index.mjs` の `statementOf` の同じ壊れ方(未対応)
+
+- **状態**: **保留**(2026-09-06)
+- **(1) G6 の区切りが文字列の中まで走る**(backlog M15、第 1036 で実害)。
+  `.needs` の本文に先頭ドット付きで綴りを書くと区切りが増え、`stripStr` が引用符の対応を失い、
+  本文中の数値が頁番号として拾われる。★メタ第 7 回が**直し方まで測った**:
+  **長さを保つマスク**にすると 前 3 件/(null,19,19) → 後 2 件/(19,19)。パッチは 1 行。
+  ★ただし `check.mjs` は巻き添えが広いので selftest を必ず足すこと。
+- **(2) `decl-index.mjs` の `statementOf` が素朴に `:=` で切る**ため、
+  **5 件で結論を壊す**(`f (p := p)` のような名前付き引数)。★第 1036 で名前欄は直したが、
+  **statement 欄はいまも同じ壊れ方をしている**。
+- **決定**: —
+
+## D16. ★★★[FrdI] Theorem 6.4 (i) 末尾 —— **名前が約束した半分が型に無く、足すと偽**(11 例目の候補)
+
+- **状態**: **保留**(2026-09-06)
+- **場所**: `Skeleton/Divisor/ArithDivisor/Theorem64.lean` の
+  `degArith_surjective_and_kernel_eq_image`
+- **★★退化 その 1(名前と statement の乖離)**: 宣言名は「全射**かつ**核 = 像」だが、
+  statement は `Function.Surjective (degArith L)` **だけ**。核の等式は `.needs` の
+  `.derivation` に書かれているだけで**型に無い**。
+  ★しかも**全射性は易しい半分**(`Found` 側でも「無限素点で任意の値が取れる」で終わる)。
+  原文が `well-known Dirichlet unit theorem` の 1 語で畳んだ内容は**落とされた側**である。
+- **★★★退化 その 2(素直に強めると偽になる。D13 と同じ新種)**:
+  Skeleton の `ArithPhiGp L = (FinitePlace →₀ ℤ) × (InfinitePlace →₀ ℝ)` は
+  **実現化していない** Φ^gp である。この型で「核 = 主因子の像」を足すと**偽**になる ——
+  ★`L = ℚ(√2)` では次数 0 のアルキメデス因子の空間が 1 次元、単数の格子が階数 1 なので、
+  **商に円が残る**。原文が `C^rlf`(実現化)と書き、`Found` が `Submodule.span ℝ`
+  (`principalSpan`)を取っているのはそのためである。
+  ⇒ **「名前どおりに核の条を足す」修復は False を作り込む。**
+- **★数学は既に閉じている**: `Found/Divisor/Ex63RlfPic.lean` の
+  `rlfDeltaA : (Φ^rlf(A)^gp ⧸ Φ^birat) ≃+ ℝ`(sorry 0)が**結論そのもの**。
+  中身は `Found/Divisor/ArithPicR.lean`(sorry 0、459 行)の
+  `principalSpan_eq_ker`(Dirichlet 単数定理 + 類数有限)と `arithDegreeLin_surjective`。
+- **副次的**: `degArith` は `Example63.lean` の `sorry` 本体の `def` なので、
+  `Theorem64.lean` の `sorry` は**そのままでは原理的に閉じない**(不透明定数についての主張)。
+  `Check/FrdI/Ex63DegDegenerate.lean` は `degArith ≡ 0` で #7-#9 が通ることを既に構成済み(9 例目)。
+- **推奨**: **畳む** —— `Found.Divisor.rlfDeltaA` への薄い橋に置き換え、`.needs` に
+  「Skeleton の非実現化 `ArithPhiGp` では核の等式は偽。実現化 `Φ^rlf` の水準
+  (`Ex63RlfPic.lean`)が原典に忠実」と記録する。
+- ★あわせて `Check/FrdI/Thm64PicDegenerate.lean` を書く価値がある
+  (`L = ℚ(√2)` で商に円が残ることの証明 = **11 例目の退化検査**)。
+- **決定**: —
+
+## D17. ★★[CorrHyp] Theorem 6.1 —— `∀ D` 量化が**反証可能**(★CorrHyp は不可触なので報告のみ)
+
+- **状態**: **保留**(2026-09-06)。★**この持ち場は不可触の指示があるので手を触れていない**
+- **場所**: `Skeleton/CorrHyp/Section6.lean` の `thm_6_1`
+- **★問題**: `variable (D : HyperbolicCurveData)` で**すべての `D` について**主張しているが、
+  `Interface/CorrHyp/HyperbolicCurve.lean` の `HyperbolicCurveData` は
+  **Prop 値の公理フィールドが `Gamma_isDiscrete` 1 本だけ**で、
+  `Aut` / `idAut` / `IsGenericallyScheme` は**無制約のデータ**である。
+  ⇒ `Aut _ := Bool`, `idAut _ := true`(あるいは `IsGenericallyScheme := fun _ => False`)と取れば
+  `thm_6_1` は**偽**になる。「証明できない」ではなく**「反証できる」**形。
+- ★**D13(Prop 1.2)と同じ構図**である —— `Interface` の構造体に場が足りず、
+  `∀`(その構造体) が原典より強い/偽の主張になっている。
+  ★D13 は「強すぎる」、こちらは「**偽**」。
+- **★誰も気づかなかった理由が 2 つある**:
+  1. **消費者が 0**(`Section6.lean` はどのモジュールからも import されていない)
+  2. ★**ビルドの import 閉包の外**にある —— `lean/ABC3.lean` → `Skeleton.lean` / `Found.lean` の
+     どちらも `CorrHyp` を 1 行も含まない(`lakefile.toml` は `defaultTargets = ["ABC3"]`)。
+     ⇒ `lake build ABC3` は CorrHyp を**コンパイルしていない可能性が高い**。
+     ★これはテキスト上の確認で、実ビルドでの検証は未実施。
+- **`Check/CorrHyp/` は現在 0 ファイル**なので、この species は未記録である。
+- **要る判断**: CorrHyp 担当へ渡すか、`Check/CorrHyp/corrHypData_thm61_refutable` を書くか。
+  ★どちらも**不可触の範囲に触れる**ので人の判断が要る。
+- **決定**: —
+
+## D18. [FrdI] Theorem 6.2 (i) —— `IsDominant` が無いので正直な定義が付けられない(D8 の追補)
+
+- **状態**: **保留**(2026-09-06)。★**D8 と同じ束の追加測定**
+- **場所**: `Skeleton/Divisor/Cartier/Theorem62.lean`(sorry 4 個)
+- **★測定 1**: Skeleton 側は `(_ψ : Y ⟶ X)` に **`IsDominant` が無い**。
+  `Found` 側は `variable {X Y} (g : X ⟶ Y) [IsDominant g]`。
+  支配性が無いと `ffMap ψ`(関数体の射)が存在しないので、
+  **Skeleton の `pullbackCartier` には正直な定義が付けられない**。
+- **★測定 2**: Skeleton 側は `IsNormalScheme` も `CompactSpace` も
+  `hdim`(`ringKrullDim (stalk) ≤ 1`)も落としている。Found 側は 4 つとも要求する。
+  薄い橋を架けるなら**仮定を 4 つ足す逸脱**が要る。
+- **数学は閉じている**: `Found/Divisor/SchemeCartierPull.lean`(sorry 0、345 行)に
+  `cartierPullback` / `isCartierDiv_cartierPullback` / `pullCoeff_add` / `pullCoeff_nonneg` の
+  **4 つとも実物がある**。底が動く版は `Found/Divisor/Thm62Pull.lean`(sorry 0、635 行)。
+- **退化は既知**: `Check/FrdI/Ex61OrdDegenerate.lean` の
+  `theorem_6_2_pullback_satisfied_by_zero` が「`pullbackCartier ≡ 0` で 4 つとも通る」を構成済み(8 例目)。
+- **決定**: —
+
+## D19. [GenEll] Lemma 3.2 (ii) の σ 恒等式 —— 真だが**消費者ごと死んでいる**
+
+- **状態**: **保留**(2026-09-06)
+- **場所**: `Skeleton/GenEll/SigmaConvolution.lean`
+- ★**原文はラマヌジャンの恒等式を述べていない**。[GenEll] Lemma 3.2, (ii) は
+  「`q_{E'} = q_E^l`、ゆえに `deg∞(E') = l·deg∞(E)`」である。
+  この σ 恒等式は**我々が Vélu の明示計算という道を選んだために生じた節点**である。
+- **★主張は真**: `12·Σ_{m<n} σ₁(m)σ₁(n−m) = 5σ₃(n) − (6n−1)σ₁(n)` を
+  **n = 0…299 で数値検証、反例 0**(既存記録は n ≤ 11)。`hn : 2 ≤ n` は不要だが無害。退化なし。
+- **★消費者が二重に死んでいる**: `.needs` が挙げる消費側
+  `Found/GaloisRep/VeluMuSum/Lemma35.lean:281 veluV_coeff_of_ne_zero` **自身に消費者がいない**。
+  `veluVC` / `muConv` / `twoYplusXC` / `a4C` / `tateYC` を
+  `Found/GaloisRep/VeluMuSum/` と `MuGraded` の外で使う行は **0 件**。
+  一方 Lemma 3.2 (ii) の `j` の一致は
+  `Skeleton/GenEll/TateIsogeny/GlobalVelu/Lemma32.lean` の `j_veluQuot_eq_j_tate_pow`(sorry 0、第 996)が
+  **`v`・`w` を定義式のまま自由変数で受ける**ことで閉じており、σ での明示評価を要求していない。
+- **推奨**: **前線から外す(畳む)** —— `.needs` に「μ-等級付き係数の道(`VeluMuSum`)は
+  `j_velu_tate_mu_map` 経路に置き換わった。この恒等式は現行の道では消費されない」と記録。
+  ★**削除ではなく保留**。`Found/GaloisRep/VeluMuSum/` に **12 件超の sorry-free な資産**が眠っている。
+- ★**分からなかったこと**: `VeluMuSum` を**将来使う計画があるのか**は判定できなかった。
+  Lemma 3.5 の本線(`minDeltaExp_eq_mul_*`)は既に sorry 0 だが、Lemma 3.7 以降で再登場する設計かもしれない。
+- **決定**: —
