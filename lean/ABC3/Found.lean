@@ -1706,6 +1706,7 @@ import ABC3.Found.PGC.RamifiedUnramifiedDisjoint
 import ABC3.Found.PGC.CompositumSurjection
 import ABC3.Found.PGC.UnramifiedRootsOfUnity
 import ABC3.Found.PGC.UnramifiedFrobenius
+import ABC3.Found.PGC.UnramifiedClosureRoots
 /-!
 # Found — 実装済みの基礎
 
