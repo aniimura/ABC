@@ -858,6 +858,34 @@ theorem length_baseChange_kaehler {Z V K L W W' : Type*} [CommRing Z] [CommRing 
   rw [IsLocalRing.length_baseChange W W' Ω[W⁄V],
     (lemma_1_1_falt1 (Z := Z) w hint hadjoin hw).2]
 
+/-- **★`Lemma 1.1` の底変換版(イデアル形)**——
+`length_{W'}(W' ⊗_W Ω[W⁄V]) = length_{W'}(W'/𝔡·W')`。
+
+`Lemma 1.1` の同型 `Ω[W⁄V] ≅ W/𝔡`(`falt1CokernelIsoLinear`)を
+`W'` へ底変換し、mathlib の
+`Algebra.TensorProduct.quotIdealMapEquivTensorQuot`
+(`B/(I·B) ≅ B ⊗_A (A/I)`)で貼るだけ。
+
+★これで節点 B2 の `hbl_of_conductor_eq` が要求する `hMlen`
+(`length(M) = length(R/Jₙ)`)が**`Lemma 1.1` から直接出る**。 -/
+theorem length_tensor_kaehler_eq_quot_map {V K L W W' : Type*} [CommRing V]
+    [IsDedekindDomain V] [Field K] [Algebra V K] [IsFractionRing V K] [Field L] [Algebra K L]
+    [FiniteDimensional K L] [Algebra.IsSeparable K L] [CommRing W] [Algebra W L] [Algebra V W]
+    [Algebra V L] [IsScalarTower V K L] [IsScalarTower V W L] [IsIntegralClosure W V L]
+    [IsDedekindDomain W] [Module.IsTorsionFree V W]
+    [CommRing W'] [Algebra W W']
+    (w : W) (hint : IsIntegral V w) (hadjoin : Algebra.adjoin V ({w} : Set W) = ⊤)
+    (hw : Algebra.adjoin K ({(algebraMap W L) w} : Set L) = ⊤) :
+    Module.length W' (TensorProduct W W' (Ω[W⁄V]))
+      = Module.length W' (W' ⧸ Ideal.map (algebraMap W W') (differentIdeal V W)) := by
+  have e1 : TensorProduct W W' (Ω[W⁄V]) ≃ₗ[W'] TensorProduct W W' (W ⧸ differentIdeal V W) :=
+    TensorProduct.AlgebraTensorModule.congr (LinearEquiv.refl W' W')
+      (falt1CokernelIsoLinear w hint hadjoin hw)
+  have e2 : (W' ⧸ Ideal.map (algebraMap W W') (differentIdeal V W))
+      ≃ₗ[W'] TensorProduct W W' (W ⧸ differentIdeal V W) :=
+    (Algebra.TensorProduct.quotIdealMapEquivTensorQuot W' (differentIdeal V W)).toLinearEquiv
+  rw [e1.length_eq, ← e2.length_eq]
+
 /-! ### 事実 (c) の材料——「`d+1` 個の生成元」の効き方
 
 原文の *"So its length is at most equal to that of `W_{n+1}` divided by
