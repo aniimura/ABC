@@ -36,7 +36,7 @@ if (pathIdx >= 0) {
   path = join(ROOT, 'ResearchPaper', '0_Source', `${entry.file}.txt`);
 }
 if (!existsSync(path)) {
-  console.error(`.txt が無い(0_Source は再配布しないので各自 pdftotext -layout で作る): ${path}`);
+  console.error(`.txt が無い(0_Source は再配布しない。★作り方は **PyMuPDF 1.27 の page.get_text() + 合字正規化 + ===== [page N] ===== の包み**である。pdftotext ではない——2026-09-06 実測で旧記述は誤りだった): ${path}`);
   process.exit(1);
 }
 

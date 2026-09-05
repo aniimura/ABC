@@ -1,9 +1,36 @@
 ---
 name: pdftotext-two-implementations-hazard
-description: pdftotext が 2 実装ある。★罠はシェルではなくキャッシュ。第 1024 で check.mjs 側が対策済み
+description: check.mjs は PDF を pdftotext で読む(2実装の罠・キャッシュが本命、第1024で対策済)。★0_Source の .txt は pdftotext 製ではなく PyMuPDF 製——別物である
 metadata:
   type: reference
 ---
+
+## ★★★まず区別すること(2026-09-06 の訂正。ここを混ぜると測定が壊れる)
+
+**この木には原文を読む経路が 2 本あり、読んでいる文字列が違う。**
+
+| 経路 | 誰が使うか | 実体 |
+|---|---|---|
+| **PDF 直読** | `check.mjs` **1 本だけ** | `pdftotext`(較正済み **Xpdf 4.00**) |
+| **`.txt` 経由** | **他の 7 本** —— `hedge-index` / `bibmap` / `cycle-probe` / `full-graph` / `frdi-progress` / `genell-progress` / `paper-items` | **PyMuPDF 1.27.2(`fitz`)の `page.get_text()`** + 合字正規化(`ﬁ`→`fi`)+ `===== [page N] =====` の包み |
+
+★**`.txt` は `pdftotext` 製ではない。** `paper-items.mjs` が書いていた契約
+「各自 `pdftotext -layout` で作る」は**誤り**だった(2026-09-06、メタ第 6 回の実測)。
+FrdI p.25 を Xpdf 4.00 で抽出すると `φ` 0 / `∈` 0 / `→` 0 個だが、`.txt` の同じ頁には
+`φ` 17 / `∈` 6 / `→` 10 ある。6 通り(Xpdf/poppler × 既定/`-layout`/`-raw`)どれも不一致で、
+PyMuPDF が一致した(標本 458 頁中 244 頁が完全一致、31 本は標本 5 頁すべて一致)。
+
+★**したがって `CLAUDE.md` の「着手前に `hedge-index` で数える」の分母は PyMuPDF 産である。**
+`check.mjs` の逐語照合が見ている文字列とは別物なので、
+「`check.mjs` が通ったから `.txt` も正しい」とは**言えない**。
+
+★★★**撤回**: 2026-09-05 のメタ第 3 回が書いた「`.txt` は Xpdf 風 111 本 / poppler 風 3 本」は
+**原典 PDF 側の符号位置を見ていただけ**で、抽出実装の指紋ではなかった。数字も再現しない。
+実際の混ざり方は**世代**である —— `page-marker` 式 114 本(PyMuPDF 世代)/ `formfeed` 式 22 本。
+★**UTF-8 として復号できない `.txt` が 21 本**あり、formfeed 式とほぼ一致する
+(EGA1 に U+FFFD 15,758 個、EGA2 14,206、BC 1,520)。
+
+## `check.mjs` 側の話(ここは正しいまま。第 1024 で対策済み)
 
 この機械には `pdftotext` が 2 つある(2026-09-05 実測):
 
@@ -12,49 +39,23 @@ metadata:
 | Git Bash の PATH 先頭 | **Xpdf 4.00**(較正済み) | `C:\Program Files\Git\mingw64\bin\pdftotext.exe` |
 | PowerShell の PATH 先頭 | poppler 25.07.0 | WinGet の Poppler |
 
-**2,157 頁のうち 1,718 頁(79.6%)で違うテキストが出る。**
-最多は `´etale`(Xpdf・分解)対 `étale`(poppler・合成)。
-`Ŝ` は poppler では `U+0002`+`S`(制御文字が本文に入る)。
-NG が 163 件しか鳴らなかったのは**逐語照合が原文のごく一部しか見ていない**からで、
-**照合を増やすほど地雷は大きくなる**。
+2,157 頁のうち 1,718 頁(79.6%)で違うテキストが出る。最多は `´etale`(Xpdf・分解)対
+`étale`(poppler・合成)。`Ŝ` は poppler では `U+0002`+`S`。
 
-## ★本当の罠はシェルではなくキャッシュだった(2026-09-05 の訂正)
+**★本当の罠はシェルではなくキャッシュだった。** `.cache/pdf-pages.json` の鍵が
+`パス#頁#mtime#size` で実装を持っていなかったため、**正しいシェルで正しい実装を使っていても
+poppler 産のキャッシュが残っていれば NG 175 件**になり、しかも 2 秒で返るので
+「速い＝正常」に見えた。第 1024 で (1) `-v` から実装を同定(★poppler は `-v` を **stderr** に
+終了コード 0 で出すので `spawnSync` が要る)、(2) PATH に無い既知の設置場所も含めて**版で選ぶ**、
+(3) **キャッシュの鍵に実装を入れる**、の 3 点で塞いだ。
 
-当初この欄には「Git Bash から走らせること」と書いていた。**不十分だった。**
-`.cache/pdf-pages.json` の鍵が `パス#頁#mtime#size` で**実装を持っていなかった**ため:
+**How to apply:**
 
-| `pdftotext` | 頁キャッシュ | NG | 時間 |
-|---|---|---|---|
-| Xpdf(**正しい**) | poppler 産 | **175** | **2 秒** |
-
-**正しいシェルで正しい実装を使っていても 175 件**になり、しかも 2 秒で返るので
-「速い＝正常」に見える。**シェルを直しても直らない。**
-
-## 第 1024 で `check.mjs` 側が対策済み
-
-1. `pdftotext -v` から実装を**同定**する
-   (★poppler は `-v` を **stderr** に出して**終了コード 0** で返るので `execFileSync` では
-   同定できない。`spawnSync` が要る。selftest D44 で固定)
-2. `PDFTOTEXT_CALIBRATED = 'Xpdf 4.00'` を、PATH 全体 **+ PATH に無い既知の設置場所**
-   (`%ProgramFiles%\Git\mingw64\bin`)から**版で選ぶ**(順序では選ばない)
-3. **キャッシュの鍵に実装を入れる**(`{ self, pdftotext, pages }`)
-
-→ PowerShell から走らせても NG 14 のまま。poppler 産キャッシュが残っていても作り直す。
-
-**How to apply:** `node tools/check.mjs --pdftotext` でどれを使うか見られる(0.17 秒)。
-較正済みが無ければ stderr に警告が出る(止まりはしない)。
-`ABC3_PDFTOTEXT` で明示指定でき、指定が壊れていても PATH へは落ちない。
-
-## ★同じ穴が `0_Source/*.txt` にも開いている(未対策、backlog M11)
-
-`check.mjs` は PDF を直読するが、**他のツールは `.txt` を読む**(137 本)。
-`hedge-index` / `paper-items` / `bibmap` / `cycle-probe` / `full-graph` /
-`frdi-progress` / `genell-progress` が消費し、★`hedge-index` は
-**CLAUDE.md が「着手前に必ず数える」と定めている道具**。
-アクセントの指紋で仕分けると **Xpdf 風 111 / poppler 風 3 / 判定不能 23** ——
-**既に混ざっている**。`.txt` は人が手で作るので第 1024 の修理の外。
-
-## ★おまけ: `find` は junction を降りない
-
-`.txt` を 0 件と答えるが実際は 137 本ある。**「無い」を `find` で判定しない**
-——[[mathlib-cohomology-inventory-2026-09-05]] と同じ「不在の誤り」を道具側で踏む。
+- 「原文にこう書いてある」と言う前に、**どちらの経路で読んだか**を意識する。
+- `.txt` を作り直すときは **PyMuPDF** を使う。`pdftotext` で作り直すと
+  7 本の道具の分母が黙って変わる。★再現する道具は**まだ無い**
+  (`===== [page` を grep すると読む側 7 本・書く側 0 本。手順が外部にしか無い)。
+- ★`0_Source/*.txt` の壊れ(孤立括弧・UTF-8 不能)を測る道具は
+  メタ第 6 回が `tools/source-health.mjs` として書いたが、**取り込みは保留中**
+  (`decisions-pending.md` の D12)。[[mathlib-index-nonascii-truncation]] と同じ
+  「測定器そのものが壊れていた」系である。

@@ -291,3 +291,29 @@
   (`ULift.field` / `continuousCohomology` / `Ẑ` / `CompactSpace Gal` / `FrobeniusElement`)。
   第 1019 の G11 と `absent-recheck.mjs` はこれを機械化するために入れた。
 - **決定**: —
+
+## D12. [メタ] `tools/source-health.mjs` を取り込むか(メタ第 6 回、隔離 worktree)
+
+- **状態**: **保留**(2026-09-06)
+- **中身**: `.txt`(原文テキスト)の健全性を機械的に見る新規 1 本 + 基準 1 本。
+  - `tools/source-health.mjs`(292 行)/ `ResearchPaper/source-health.json`(251 行)
+  - `--`(既定)登記 49 本の表 / `--all` 137 本 / `--paper <鍵>` 1 本の詳細
+    (**壊れた括弧の行番号を出す**)/ `--json` / `--baseline`
+  - 見るもの: `.txt` の有無・**UTF-8 として復号できるか**・改頁の様式と枚数 vs
+    `papers.json.pdfPages`・**孤立 `[` / `]` の行番号**・600 字超の対と**沈んだ傍注**
+  - 既知の壊れは基準に畳んで黙り、**基準から増えた分だけ NG**。終了コードで鳴る。
+- **★実測(本体で走らせて確認済み、2026-09-06)**: **0.41 秒**で 49 本の表が出る。
+  BC 沈んだ傍注 45 / GS 11 / RayHt 4 / Del 4、UTF-8 不能が多数。
+- **なぜ人を待つか**: 方針書 §2「メタ提案のマージ(隔離 worktree からの取り込み)」。
+- **判断の材料**:
+  - ★**独立させる設計になっている**(`check.mjs` に足していない)。理由は
+    `check.mjs --brief` が内部で `lake build` を回すので **510 秒**かかり、
+    1 秒の検査をそこに縛ると**誰も回さなくなる**方に効くから。この判断は妥当に見える。
+  - ★新規ファイル 2 本のみで、**既存の道具の挙動を一切変えない**。巻き添え範囲は最小。
+  - ★測っているものは「測定器の壊れ」であり、[[mathlib-index-nonascii-truncation]]
+    (索引の名前欄が非 ASCII で切れていた)と同じ系統。今日 1 件実害が出たばかり。
+  - 反対材料: 道具が 1 本増える。ただし `--baseline` で黙らせる設計なので運用負荷は低い。
+- **★取り込みとは独立に、本体で既に直したもの**(手順書の嘘なので待たなかった):
+  `tools/paper-items.mjs` の「各自 `pdftotext -layout` で作る」→ PyMuPDF の記述へ訂正。
+  `memory/pdftotext-two-implementations-hazard.md` も 2 経路を分けて書き直した。
+- **決定**: —

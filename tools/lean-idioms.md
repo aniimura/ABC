@@ -5803,3 +5803,63 @@ theorem not_countable_nnreal : ¬ Countable NNReal := by
 ★対処: **並行セッションだと分かっているときは最初から `node tools/leanfile.mjs` を使う**。
 1 往復 11〜13 秒だが、環境を横取りされない。`lean_check` が急に基本語彙を見失ったら
 バグを疑う前に `lean_status` の `imports:` を見る。
+
+## `rw [← ker_π]` が motive not type correct になる——書き換え先が**別の宣言の型**に現れている（2026-09-06、Found/PGC/InertiaKummerBound で実測）
+
+```lean
+-- ker_restrictUnramified : (restrictUnramified K).ker = (unramifiedClosure K).fixingSubgroup
+have hkerle : ∀ f : ↥((restrictInertia K n).ker), (restrictUnramified K).ker ≤ (↑↑f).ker := …
+-- 目標: (unramifiedClosure K).fixingSubgroup ≤ (↑↑f).ker
+rw [← ker_restrictUnramified]     -- motive is not type correct
+```
+
+`f` の型 `↥((restrictInertia K n).ker)` の中に `(unramifiedClosure K).fixingSubgroup` が
+**型として**入っている（`restrictInertia` の余域が `contHom ↥(…fixingSubgroup) _`）ので、
+その出現まで抽象化しようとして motive が壊れる。`occs` で絞るより
+
+★対処: **書き換えずに、包含を要素ごとに適用する**。
+
+```lean
+refine isOpen_ker_of_factors K f.1.2 (fun σ hσ => hkerle f ?_) (hgf f)
+rw [ker_restrictUnramified]       -- 目標が `σ ∈ (restrictUnramified K).ker` なら依存が無く通る
+exact hσ
+```
+
+同じファイルで踏んだ 2 つ目:`congrArg Subtype.val hab`（`hab` が `(fun f => …) a = (fun f => …) b`）は
+**β 簡約されない**まま `h1` に入るので、後の `rw [h1]` が「パターンが見つからない」で落ちる。
+`have h1 : <明示的な型> := congrArg Subtype.val hab` と型を書けば β 簡約された形で入る。
+
+## `NumberField ↥(⊥ : IntermediateField ℚ ℂ)` は `infer_instance` で出ないが `⟨⟩` で出る（2026-09-06、Check/GenEll/SSCurveNonvacuous で実測）
+
+```lean
+example : NumberField (⊥ : IntermediateField ℚ ℂ) := by infer_instance   -- failed to synthesize
+example : NumberField (⊥ : IntermediateField ℚ ℂ) := ⟨⟩                  -- 通る
+```
+
+`NumberField` は `[to_charZero]` `[to_finiteDimensional]` を**インスタンス暗黙のフィールド**に
+持つ `Prop` クラスなので、クラス探索の対象になっていない。中身の 2 つ
+（`CharZero ↥⊥`・`FiniteDimensional ℚ ↥⊥`）は `infer_instance` で出るので、
+**匿名コンストラクタ `⟨⟩` を書けばよい**。★数体の witness を作るときに毎回踏む。
+
+同じ場面の 2 つ目: `abbrev Kb : IntermediateField ℚ ℂ := ⊥` は
+`Complex.instField` が noncomputable なので **`noncomputable abbrev`** と書く要がある
+（`def` だけ noncomputable にしても、`abbrev` の側で落ちる）。
+
+## 部分体の中の数値リテラルを `ℂ` へ落とすのは `norm_num`／`push_cast`／`simp` が**全部無力**（2026-09-06 実測）
+
+```lean
+example : ((4096 : ↥(⊥ : IntermediateField ℚ ℂ)) : ℂ) = 4096 := by norm_num   -- ⊢ ↑4096 = 4096 が残る
+example : … := by push_cast; ring                                            -- 同上
+example : … := by simp                                                       -- `simp` made no progress
+```
+
+`SubringClass` には `coe_ofNat` に当たる simp 補題が無い（`natCast_mem`・`ofNat_mem` は在る）。
+★対処: **包含を環準同型として書いて `map_ofNat` を当てる**。
+
+```lean
+example : ((4096 : ↥K) : ℂ) = 4096 := map_ofNat (K.val.toRingHom) 4096
+example : (((11 : 𝓞 L)) : L) = 11 := map_ofNat (algebraMap (𝓞 L) L) 11
+```
+
+`↑x` と `K.val.toRingHom x` は defeq なので `exact` で通る（`rw` は形が違うので通らない）。
+`push_cast` は `neg`・`div` までは押せるので、残った数値リテラルだけこの手で潰すのが速い。
