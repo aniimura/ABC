@@ -1300,3 +1300,48 @@ Lubin-Tate 級数 `f`)は**すべて本リポジトリで既に構築済みだ�
 するかのどちらかになる**。同じ疑いを `cor_3_1`・`cor_3_3`
 (`isHodgeTate` が自由な述語)・`prop_2_2`(`IntKbar`/`CompKbar` が
 自由な型族)にも向けるべき。ただしそちらは `K ≠ K′` の witness が要る。
+
+## ★★★★★★★★★★★★2026-09-05: 連続性の穴が埋まった——`galContinuousMulEquiv`
+
+`Found/PGC/GaloisTransferContinuous.lean`(新規)
+
+`GaloisTransfer.lean` の docstring が「continuity(`ContinuousMulEquiv` に
+するための Krull 位相の連続性)も未確認」と記録していた穴を埋めた。
+
+- `mem_fixingSubgroup_adjoin_simple` : 生成元を固定する自己同型は生成体を固定
+- **`continuous_galMulEquivOf`** : `α : K ≃ₐ[ℚ_p] K′` から誘導される
+  `Γ_K ≃* Γ_{K′}` は連続
+- `continuous_galMulEquivOf_symm` : ★`galMulEquivOf` の `invFun` が
+  `conjGalOfEquiv α.symm ᾱ.symm _` そのものなので、証明項が**そのまま**通る
+- **`galContinuousMulEquivOf` / `galContinuousMulEquiv`** :
+  `ContinuousMulEquiv K.absGal K'.absGal`
+
+証明: 群準同型なので `1` での連続性でよい。`krullTopology_mem_nhds_one_iff`
+で有限次 `E'` を取り、原始元定理(`exists_adjoin_eq_of_finiteDimensional`)で
+`E' = K'⟮y⟯`、`x := ᾱ⁻¹ y` として `K⟮x⟯.fixingSubgroup` を使う。
+
+### Theorem 4.2 の修理(次の一手、経路は確定)
+
+自然な射の部品は **`map_Gv` を除いて全部揃った**:
+延長 `extendToClosure` / 共役 `galMulEquivOf` / 選択非依存
+`galMulEquivOf_indep` / **連続性(本コミット)**。
+
+残る `map_Gv` は `Interface.PGC.RamificationFiltration` に自然性の公理が
+無いことに帰着するので、**明示的な仮説として切り出す**のが正しい形:
+
+```
+def RamificationFiltration.IsNatural (RF) : Prop :=
+  ∀ {K K'} (α : K.carrier ≃ₐ[ℚ_[p]] K'.carrier) (v : ℝ),
+    Subgroup.map (galContinuousMulEquiv α).toMulEquiv (RF.Gv K v) = RF.Gv K' v
+
+noncomputable def naturalOuterIso (RF) (hnat : RF.IsNatural) (α) :
+    FilteredGroup.OuterIso (filtOf RF K) (filtOf RF K') := Quotient.mk _ ⟨galContinuousMulEquiv α, hnat α⟩
+
+theorem theorem_4_2 (RF) (hnat : RF.IsNatural) (K K') :
+    Function.Bijective (naturalOuterIso RF hnat (K := K) (K' := K')) := sorry
+```
+
+★import の向きは通る: `Skeleton/PGC/Section4.lean` が新しい `Found` ファイルを
+import してよい(`Section1Cor13` までしか遡らないので循環しない)。
+`filtOf` は `Section3.lean::filteredGroupOf` / `Section4.lean::RF.filt` と
+**定義的に等しい**(同じ構造体リテラル)ので型は合う。
