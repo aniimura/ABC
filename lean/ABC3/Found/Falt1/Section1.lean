@@ -1873,6 +1873,84 @@ theorem hspanc_of_cyclic {R M : Type*} [CommRing R] [AddCommGroup M] [Module R M
     · rintro rfl; exact ⟨ω, rfl, rfl⟩
   rw [← this, hω, Submodule.map_top, Submodule.range_mkQ]
 
+/-! ### ★`Ω_{W_{n+1}/Vₙ}` の生成元を完全列から作る(2026-09-05)
+
+原文の *"`Ω_{W_{n+1}/Vₙ}` is the direct sum of `d+1` modules"* が
+必要としているのは**生成元の個数**だけだった(節点 A、
+`length_pTorsion_le_of_span`)。その個数は Jacobi–Zariski の完全列
+
+    Ω_{V_{n+1}/Vₙ} ⊗ W_{n+1} → Ω_{W_{n+1}/Vₙ} → Ω_{W_{n+1}/V_{n+1}} → 0
+
+から、両端の生成元の個数の**和**として出る。 -/
+
+/-- **完全列の中央の生成元**——`M → N → P → 0` が完全で `M` が `r` 個、
+`P` が `s` 個で生成されるなら、`N` は `r+s` 個で生成される
+(`f(gM i)` たちと `gP i` の持ち上げ)。 -/
+theorem span_of_exact {R M N P : Type*} [CommRing R] [AddCommGroup M] [Module R M]
+    [AddCommGroup N] [Module R N] [AddCommGroup P] [Module R P]
+    (f : M →ₗ[R] N) (g : N →ₗ[R] P) (hex : Function.Exact f g)
+    (r s : ℕ) (gM : Fin r → M) (hM : Submodule.span R (Set.range gM) = ⊤)
+    (gP : Fin s → P) (hP : Submodule.span R (Set.range gP) = ⊤)
+    (lift : Fin s → N) (hlift : ∀ i, g (lift i) = gP i) :
+    Submodule.span R (Set.range (Fin.append (fun i => f (gM i)) lift)) = ⊤ := by
+  set S := Submodule.span R (Set.range (Fin.append (fun i => f (gM i)) lift)) with hS
+  have hmem1 : ∀ i : Fin r, f (gM i) ∈ S := by
+    intro i
+    refine Submodule.subset_span ⟨Fin.castAdd s i, ?_⟩
+    simp [Fin.append_left]
+  have hmem2 : ∀ i : Fin s, lift i ∈ S := by
+    intro i
+    refine Submodule.subset_span ⟨Fin.natAdd r i, ?_⟩
+    simp [Fin.append_right]
+  refine Submodule.eq_top_iff'.mpr (fun x => ?_)
+  have h1 : g x ∈ Submodule.span R (Set.range gP) := hP ▸ Submodule.mem_top
+  obtain ⟨c, hc⟩ := (Submodule.mem_span_range_iff_exists_fun R).mp h1
+  set y := ∑ i, c i • lift i with hy
+  have hgy : g y = g x := by
+    rw [hy, map_sum]
+    simp only [map_smul, hlift]
+    exact hc
+  have hxy : x - y ∈ LinearMap.ker g := by
+    simp [LinearMap.mem_ker, map_sub, hgy]
+  rw [hex.linearMap_ker_eq] at hxy
+  obtain ⟨m, hm⟩ := hxy
+  have hmspan : m ∈ Submodule.span R (Set.range gM) := hM ▸ Submodule.mem_top
+  obtain ⟨a, ha⟩ := (Submodule.mem_span_range_iff_exists_fun R).mp hmspan
+  have hfm : f m ∈ S := by
+    rw [← ha, map_sum]
+    refine Submodule.sum_mem _ (fun i _ => ?_)
+    rw [map_smul]
+    exact Submodule.smul_mem _ _ (hmem1 i)
+  have hyS : y ∈ S := by
+    rw [hy]
+    exact Submodule.sum_mem _ (fun i _ => Submodule.smul_mem _ _ (hmem2 i))
+  have hx : x = f m + y := by rw [hm]; abel
+  rw [hx]
+  exact Submodule.add_mem _ hfm hyS
+
+/-- 全射があれば持ち上げは選べる。 -/
+theorem exists_span_of_exact {R M N P : Type*} [CommRing R] [AddCommGroup M] [Module R M]
+    [AddCommGroup N] [Module R N] [AddCommGroup P] [Module R P]
+    (f : M →ₗ[R] N) (g : N →ₗ[R] P) (hex : Function.Exact f g) (hg : Function.Surjective g)
+    (r s : ℕ) (gM : Fin r → M) (hM : Submodule.span R (Set.range gM) = ⊤)
+    (gP : Fin s → P) (hP : Submodule.span R (Set.range gP) = ⊤) :
+    ∃ gN : Fin (r + s) → N, Submodule.span R (Set.range gN) = ⊤ :=
+  ⟨Fin.append (fun i => f (gM i)) (fun i => (hg (gP i)).choose),
+    span_of_exact f g hex r s gM hM gP hP _ (fun i => (hg (gP i)).choose_spec)⟩
+
+/-- **`Ω_{W_{n+1}/Vₙ}` の生成元**——Jacobi–Zariski の完全列から、
+`Ω_{V_{n+1}/Vₙ} ⊗ W_{n+1}` の `r` 個と `Ω_{W_{n+1}/V_{n+1}}` の `s` 個で
+`r+s` 個。 -/
+theorem exists_span_kaehler_mid {Vn Vn1 Wn1 : Type*} [CommRing Vn] [CommRing Vn1]
+    [CommRing Wn1] [Algebra Vn Vn1] [Algebra Vn1 Wn1] [Algebra Vn Wn1]
+    [IsScalarTower Vn Vn1 Wn1]
+    (r s : ℕ) (gM : Fin r → TensorProduct Vn1 Wn1 (Ω[Vn1⁄Vn]))
+    (hM : Submodule.span Wn1 (Set.range gM) = ⊤)
+    (gP : Fin s → Ω[Wn1⁄Vn1]) (hP : Submodule.span Wn1 (Set.range gP) = ⊤) :
+    ∃ gN : Fin (r + s) → Ω[Wn1⁄Vn], Submodule.span Wn1 (Set.range gN) = ⊤ :=
+  exists_span_of_exact _ _ (KaehlerDifferential.exact_mapBaseChange_map Vn Vn1 Wn1)
+    (KaehlerDifferential.map_surjective Vn Vn1 Wn1) r s gM hM gP hP
+
 /-- **★環の塔の 1 段から `Thm12StepData` を作る**——原文の 2 本の写像を
 Kähler 微分の標準写像に取り、節点 B は**環のレベルの導手条件**
 (`hbA`・`hb`)だけで済む(`hbann_of_conductor_tower`)。
