@@ -115,4 +115,89 @@ example : Filter.Tendsto (fun n : ℕ => (1/2 : ℝ)^n) Filter.atTop (nhds 0) :=
   ring_nf
   rfl
 
+/-! ## 原文の鍵の不等式(260dpi 目視確認、物理 p.5 = 印字 p.258)
+
+★2026-09-05 に原典を 260dpi で描画して逐語確認した。OCR では潰れて
+いた末尾の 3 行は正確には次のとおりである:
+
+> *We derive that `δₙ − δ_{n+1} ≥ β − (d+1)(δₙ − δ_{n+1})`.
+> So if `δₙ ≥ d+1`, then `δ_{n+1} ≤ δₙ − 1/(d+2)`, and otherwise
+> `δ_{n+1} ≤ (1 − 1/((d+1)(d+2)))δₙ`. In any case `δₙ → 0` for `n → ∞`.*
+
+ここで `β = min{1, δₙ/(d+1)}`(こちらも 260dpi で確認)。
+
+★以前の記録では第 2 の場合を `(1 − 1/(d+2))δₙ` と書いていたが、
+正しくは **`(1 − 1/((d+1)(d+2)))δₙ`** である(OCR の潰れによる誤り)。
+
+導出は初等的:`Δ := δₙ − δ_{n+1}` と置くと鍵の不等式は `(d+2)Δ ≥ β`。
+`δₙ ≥ d+1` なら `β = 1` で `Δ ≥ 1/(d+2)`、そうでなければ
+`β = δₙ/(d+1)` で `Δ ≥ δₙ/((d+1)(d+2))`。 -/
+
+/-- **原文の鍵の不等式から 2 領域の再帰へ**。 -/
+theorem delta_two_regime_of_key (d : ℕ) (δ : ℕ → ℝ)
+    (hkey : ∀ n, min 1 (δ n / ((d:ℝ)+1)) - ((d:ℝ)+1) * (δ n - δ (n+1)) ≤ δ n - δ (n+1))
+    (n : ℕ) :
+    δ (n+1) ≤ δ n - 1/((d:ℝ)+2)
+      ∨ δ (n+1) ≤ (1 - 1/(((d:ℝ)+1)*((d:ℝ)+2))) * δ n := by
+  have hd1 : (0:ℝ) < (d:ℝ)+1 := by positivity
+  have hd2 : (0:ℝ) < (d:ℝ)+2 := by positivity
+  have hk := hkey n
+  have hΔ : min 1 (δ n / ((d:ℝ)+1)) ≤ ((d:ℝ)+2) * (δ n - δ (n+1)) := by linarith
+  rcases le_or_gt ((d:ℝ)+1) (δ n) with h | h
+  · left
+    have hb : min 1 (δ n / ((d:ℝ)+1)) = 1 := by
+      apply min_eq_left
+      rw [le_div_iff₀ hd1]
+      linarith
+    rw [hb] at hΔ
+    have hgoal : 1/((d:ℝ)+2) ≤ δ n - δ (n+1) := by
+      rw [div_le_iff₀ hd2]
+      nlinarith
+    linarith
+  · right
+    have hb : min 1 (δ n / ((d:ℝ)+1)) = δ n / ((d:ℝ)+1) := by
+      apply min_eq_right
+      rw [div_le_one hd1]
+      linarith
+    rw [hb, div_le_iff₀ hd1] at hΔ
+    have hexp : (1 - 1/(((d:ℝ)+1)*((d:ℝ)+2))) * δ n
+        = δ n - δ n / (((d:ℝ)+1)*((d:ℝ)+2)) := by ring
+    have h3 : δ n / (((d:ℝ)+1)*((d:ℝ)+2)) ≤ δ n - δ (n+1) := by
+      rw [div_le_iff₀ (by positivity)]
+      nlinarith
+    linarith [hexp, h3]
+
+/-- **`Theorem 1.2` の解析部分・完成形**——原文の鍵の不等式から
+*"In any case `δₙ → 0` for `n → ∞`"* が出る。
+
+★これで `Theorem 1.2` は**その 1 つの不等式**(長さの評価、原文の
+第 2〜6 段)に完全に帰着した。残りは:
+
+* `Ω_{V_{n+1}/Vₙ}` が `V_{n+1}/p^a V_{n+1}` 型の `d+1` 個の直和である
+  という塔の仮定から、`p` 倍の核が第 2 写像の核に入ること
+* `Lemma 1.1`(証明済み)で差積 `δₙ` を `Ω` の余核の長さに翻訳し、
+  核の長さ `≥ length(W_{n+1}/p^β W_{n+1})`(`β = min{1, δₙ/(d+1)}`)
+* 余核が `p^{δₙ−δ_{n+1}}` で零化される(原文の *"it is clear that"*)
+-/
+theorem thm_1_2_tendsto_zero (d : ℕ) (δ : ℕ → ℝ) (h0 : ∀ n, 0 ≤ δ n)
+    (hkey : ∀ n, min 1 (δ n / ((d:ℝ)+1)) - ((d:ℝ)+1) * (δ n - δ (n+1)) ≤ δ n - δ (n+1)) :
+    Filter.Tendsto δ Filter.atTop (nhds 0) := by
+  refine tendsto_zero_of_two_regime δ (1/((d:ℝ)+2)) (1 - 1/(((d:ℝ)+1)*((d:ℝ)+2)))
+    (by positivity) ?_ h0 (fun n => delta_two_regime_of_key d δ hkey n)
+  have hp : (0:ℝ) < 1/(((d:ℝ)+1)*((d:ℝ)+2)) := by positivity
+  linarith
+
+/-- 非空虚性——`d = 0`、`δₙ := (1/2)^n` は原文の鍵の不等式を
+**等号で**満たす(`β = min{1, δₙ} = δₙ`、`δₙ − δ_{n+1} = δₙ/2`)。
+仮定が空虚に真になっていないことの対照。 -/
+example : Filter.Tendsto (fun n : ℕ => (1/2 : ℝ)^n) Filter.atTop (nhds 0) := by
+  refine thm_1_2_tendsto_zero 0 _ (fun n => by positivity) (fun n => ?_)
+  have hle : ((1:ℝ)/2)^n ≤ 1 := pow_le_one₀ (by norm_num) (by norm_num)
+  have hmin : min 1 (((1:ℝ)/2)^n / (((0:ℕ):ℝ) + 1)) = ((1:ℝ)/2)^n := by
+    rw [Nat.cast_zero, zero_add, div_one]
+    exact min_eq_right hle
+  rw [hmin, Nat.cast_zero, zero_add, one_mul, pow_succ]
+  ring_nf
+  linarith
+
 end ABC3.Found.Falt1
