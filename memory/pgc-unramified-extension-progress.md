@@ -1922,3 +1922,32 @@ Lubin-Tate 塔は `K(Λ_n)/K(Λ_{n-1})` という**相対的な**拡大の連な
 これで `Interface/PGC` の自由データ 3 つのうち **2 つが実物として完成**
 (`ResidueCardinality`・`SubgroupCorrespondence`)。残るのは
 `RamificationFiltration`(Herbrand の定理、mathlib 本体の TODO)だけ。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05: **Cor 1.3 は Prop 1.2 に帰着する**(形式化)
+
+`Found/PGC/InertiaTransport.lean`(新規)
+
+原文 (pGC p.3) の Cor 1.3 の論拠「By applying Proposition 1.2 to L and H」を
+形式化した。`Section1Cor13.lean::inertia_recoverable.needs` が
+`.derivation "Proposition 1.2 を (L, H) に適用して q_L を得る段"` として
+記録していた段。
+
+- `isOpen_map_of_continuousMulEquiv` / `isOpen_comap_of_continuousMulEquiv` :
+  位相群の同型は開部分群を開部分群に移す
+- **`transport_inertia_of_residueCard_transport`** :
+  `q_K = q_{K'}` かつ `q_{L_H} = q_{L_{α(H)}}`(すべての開部分群で)ならば
+  `α(I_K) = I_{K'}`
+- **`inertia_recoverable_of_residueCard_transport`** :
+  上を全 `K,K',α` について仮定すれば
+  `(inertiaObject (residueCardinality p) (subgroupCorrespondence p)).RecoverableFromAbsGal`
+  ——すなわち **Cor 1.3**
+
+筋: 判定条件 `q_{L_H} = q_K^{[Γ_K:H]}` の三つの量がすべて `α` で保たれる
+(`q_K`・`q_{L_H}` は仮定、指数は `Subgroup.index_map_of_bijective`)ので、
+`α` は「判定条件を満たす開部分群」の集合を全単射に移し、`sInf` も移る。
+
+★`AdjoinFieldClosure.lean::absGalFixedFieldEquiv`(`Γ_{L_H} ≅ H`、第 990)が
+あるので、第二の仮定は「Prop 1.2 を `L_H` と `L_{α(H)}` に適用する」ことに
+ほかならない。ただし `Γ_{L_H} ≅ H` を**位相群の同型**として使うには
+Krull 位相の比較(`fixingSubgroupEquiv` が同相であること)がもう一段要る
+——次の課題。
