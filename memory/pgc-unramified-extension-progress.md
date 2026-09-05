@@ -1731,3 +1731,22 @@ DVR なので `𝔪^k = {z | ‖z‖ ≤ ‖ϖ‖^k}` を経由するのが素�
 `LubinTateActionPsi.lean::heis` が `ψ_n` の Eisenstein 性を出しているので、
 残りの適用は「`ψ_n` の根 `α` について `‖α‖^{deg} = ‖π‖`」を
 `norm_pow_eq_of_monic_root` から引くだけ。
+
+## 2026-09-05(続き): Eisenstein 条件のノルム版インタフェース
+
+`Found/PGC/TotallyRamified.lean::isTotallyRamifiedAdjoin_of_root_norm`
+
+```
+x^n + ∑_{i<n} a_i x^i = 0,  ∀ i<n, ‖a_i‖ ≤ ‖a_0‖,  ‖a_0‖ = ‖π‖
+  ⟹ K(x)/K は完全分岐
+```
+(`n = [K(x):K]`)。`norm_pow_eq_of_monic_root`(第 980)と
+`isTotallyRamifiedAdjoin_of_norm_pow_eq`(第 982)を繋ぐだけ。
+
+これが Lubin-Tate 塔へ渡すインタフェース——`LubinTateActionPsi.lean::heis`
+(`ψ_n` は Eisenstein)から係数のノルム条件を読み替えて渡せばよい。
+`IsEisensteinAt` からノルム条件への翻訳:
+- `coeff i ∈ 𝔪 = (π)` ⟹ `coeff i = π·c` ⟹ `‖coeff i‖ ≤ ‖π‖`
+- `coeff 0 ∉ 𝔪²` ⟹ `coeff 0 = π·c` で `c ∉ 𝔪`(単数)⟹ `‖coeff 0‖ = ‖π‖`
+- 多項式の評価を `x^n + ∑_{i<n} a_i x^i` の形にするのは
+  `Polynomial.eval_eq_sum_range` + `Finset.sum_range_succ`(monic なので最高次係数 1)

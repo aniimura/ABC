@@ -468,4 +468,40 @@ theorem isTotallyRamifiedAdjoin_of_norm_pow_eq (K : PAdicLocalField p) (x : K.cl
   exact isTotallyRamifiedAdjoin_of_finrank_le K x
     (le_ramificationIdx_of_map_le_pow (ramificationIndex_ne_zero K x) hmap)
 
+/-- **★★★★★★根の低次係数が `‖a_0‖ = ‖π‖` で頭打ちなら完全分岐**
+——Eisenstein 条件のノルム版。`norm_pow_eq_of_monic_root` と
+`isTotallyRamifiedAdjoin_of_norm_pow_eq` を繋ぐだけ。
+
+Lubin-Tate 塔に使うときは、`LubinTateActionPsi.lean::heis`
+(`ψ_n` は Eisenstein)から係数のノルム条件を読み替えて渡す。 -/
+theorem isTotallyRamifiedAdjoin_of_root_norm (K : PAdicLocalField p) (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    {π : 𝒪[K.carrier]} (hπ0 : (π : K.carrier) ≠ 0)
+    (hπmax : IsLocalRing.maximalIdeal 𝒪[K.carrier] = Ideal.span {π})
+    (a : ℕ → K.closure)
+    (hroot : x ^ (Module.finrank K.carrier
+        (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))
+      + ∑ i ∈ Finset.range (Module.finrank K.carrier
+        (IntermediateField.adjoin K.carrier ({x} : Set K.closure))), a i * x ^ i = 0)
+    (hle : ∀ i, i < Module.finrank K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) → ‖a i‖ ≤ ‖a 0‖)
+    (ha0 : ‖a 0‖ = ‖(π : K.carrier)‖) :
+    IsTotallyRamifiedAdjoin K x := by
+  have hnpos : 0 < Module.finrank K.carrier
+    (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := Module.finrank_pos
+  have hπle : ‖(π : K.carrier)‖ ≤ 1 := by
+    have h := π.2; rw [Valued.integer.mem_iff] at h; exact h
+  have hπmem : π ∈ IsLocalRing.maximalIdeal 𝒪[K.carrier] := by
+    rw [hπmax]; exact Ideal.mem_span_singleton_self π
+  have hπlt : ‖(π : K.carrier)‖ < 1 := by
+    rw [IsLocalRing.mem_maximalIdeal, mem_nonunits_iff,
+      Valued.integer.isUnit_iff_norm_eq_one] at hπmem
+    exact lt_of_le_of_ne hπle hπmem
+  have ha0ne : a 0 ≠ 0 := by
+    intro h
+    rw [h, norm_zero] at ha0
+    exact hπ0 (norm_eq_zero.mp ha0.symm)
+  have hkey := norm_pow_eq_of_monic_root hnpos a hroot hle (by rw [ha0]; exact hπlt) ha0ne
+  exact isTotallyRamifiedAdjoin_of_norm_pow_eq K x hπ0 hπmax (by rw [hkey, ha0])
+
 end ABC3.Found.PGC
