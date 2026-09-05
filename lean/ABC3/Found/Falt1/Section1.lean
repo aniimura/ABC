@@ -267,6 +267,169 @@ theorem ker_comp_contains_pTorsion {R M N P : Type*} [Ring R] [AddCommGroup M] [
   refine hg (f x) ?_
   rw [← map_smul, hx, map_zero]
 
+/-! ### ★節点 A —— 「第 2 写像の核は `p` 倍の核を含む」(2026-09-05)
+
+原文(物理 p.4 = 印字 p.257、260dpi 確認):
+
+> *The kernel of the second map contains `Ω_{V_{n+1}/Vₙ} ⊗_{V_{n+1}} W_{n+1}`,
+> which has `(W_{n+1}/p W_{n+1})^{d+1}` as quotient. **As `Ω_{W_{n+1}/Vₙ}`
+> is the direct sum of `d+1` modules of the form `W_{n+1}/p^α W_{n+1}`,
+> the kernel of the second map contains the kernel of multiplication by
+> `p` on `Ω_{W_{n+1}/Vₙ}`.***
+
+Faltings は「どちらも `(W'/pW')^{d+1}` の大きさだから」という**大きさの
+議論**で畳んでいる。ここではそれを、構造定理(巡回分解)を一切使わない
+**長さの算術だけ**で完全に閉じる:
+
+1. 任意の有限長 `L` について `length(L[p]) = length(L/pL)`
+   ——`0 → L[p] → L →ᵖ L → L/pL → 0` の 2 本の完全列から
+   (`length_ker_eq_length_coker` を `f := p·` に適用するだけ)。
+2. `L` が `p` で消える `Q` を商に持てば `length Q ≤ length(L/pL) = length(L[p])`。
+3. `L[p] ⊆ N[p]` で、`length(N[p]) ≤ length Q ≤ length(L[p])` なら
+   有限長の部分加群の比較で `L[p] = N[p]`、ゆえに `N[p] ⊆ L`。
+
+★原典は `Ω_{W_{n+1}/Vₙ}` の**巡回分解**(`d+1` 個の `W'/p^α W'`)を
+使うが、上の論法はそれを使わない——必要なのは
+`length(N[p]) ≤ length((W'/pW')^{d+1})` という**大きさの比較だけ**である。
+この意味で原典より弱い仮定で足りる。 -/
+
+/-- 部分加群 `A ≤ B` で `length B ≤ length A` なら `A = B`。 -/
+theorem eq_of_le_of_length_le {R M : Type*} [Ring R] [AddCommGroup M] [Module R M]
+    [IsArtinian R M] [IsNoetherian R M]
+    {A B : Submodule R M} (h : A ≤ B)
+    (hlen : Module.length R ↥B ≤ Module.length R ↥A) : A = B := by
+  by_contra hne
+  set A' : Submodule R ↥B := Submodule.comap B.subtype A with hA'
+  have hA'ne : A' ≠ ⊤ := by
+    intro htop
+    refine hne (le_antisymm h ?_)
+    intro x hxB
+    have : (⟨x, hxB⟩ : ↥B) ∈ A' := htop ▸ Submodule.mem_top
+    exact this
+  have hlt := Submodule.length_lt (R := R) (M := ↥B) hA'ne
+  have heq : Module.length R ↥A' = Module.length R ↥A :=
+    (Submodule.comapSubtypeEquivOfLe h).length_eq
+  rw [heq] at hlt
+  exact absurd hlen (not_le.mpr hlt)
+
+/-- `L` が `p` で消える加群 `Q` を商に持つなら `length Q ≤ length(L/pL)`。 -/
+theorem length_le_length_quot_smul_of_surjective {R L Q : Type*} [CommRing R]
+    [AddCommGroup L] [Module R L] [AddCommGroup Q] [Module R Q]
+    (p : R) (hQ : ∀ y : Q, p • y = 0)
+    (φ : L →ₗ[R] Q) (hφ : Function.Surjective φ) :
+    Module.length R Q ≤ Module.length R (L ⧸ LinearMap.range (LinearMap.lsmul R L p)) := by
+  have hker : LinearMap.range (LinearMap.lsmul R L p) ≤ LinearMap.ker φ := by
+    rintro _ ⟨x, rfl⟩
+    simp only [LinearMap.mem_ker, LinearMap.lsmul_apply, map_smul]
+    exact hQ (φ x)
+  refine Module.length_le_of_surjective (Submodule.liftQ _ φ hker) ?_
+  intro y
+  obtain ⟨x, rfl⟩ := hφ y
+  exact ⟨Submodule.Quotient.mk x, rfl⟩
+
+/-- **節点 A の代数的核**——`length(N[p]) ≤ length(L/pL)` なら
+`N[p] ⊆ L`。構造定理は使わない。 -/
+theorem pTorsion_le_of_length_le {R N : Type*} [CommRing R] [AddCommGroup N] [Module R N]
+    [IsArtinian R N] [IsNoetherian R N] (p : R) (L : Submodule R N)
+    (hge : Module.length R ↥(LinearMap.ker (LinearMap.lsmul R N p))
+      ≤ Module.length R (↥L ⧸ LinearMap.range (LinearMap.lsmul R ↥L p))) :
+    LinearMap.ker (LinearMap.lsmul R N p) ≤ L := by
+  set S : Submodule R ↥L := LinearMap.ker (LinearMap.lsmul R ↥L p) with hS
+  set A : Submodule R N := S.map L.subtype with hA
+  have hAle : A ≤ LinearMap.ker (LinearMap.lsmul R N p) := by
+    rintro _ ⟨x, hx, rfl⟩
+    simp only [hS] at hx
+    simp only [LinearMap.mem_ker, LinearMap.lsmul_apply, Submodule.subtype_apply]
+    exact congrArg Subtype.val hx
+  have hlenA : Module.length R ↥A = Module.length R ↥S :=
+    ((Submodule.equivMapOfInjective L.subtype Subtype.val_injective S)).length_eq.symm
+  have h1 : Module.length R ↥S
+      = Module.length R (↥L ⧸ LinearMap.range (LinearMap.lsmul R ↥L p)) :=
+    length_ker_eq_length_coker _ (Module.length_ne_top)
+  have h2 : Module.length R ↥(LinearMap.ker (LinearMap.lsmul R N p)) ≤ Module.length R ↥A := by
+    rw [hlenA, h1]; exact hge
+  have h3 := eq_of_le_of_length_le hAle h2
+  rw [← h3, hA]
+  exact Submodule.map_subtype_le L S
+
+/-- **節点 A 本体**——`L` が `p` で消える `Q` を商に持ち、`Q` が
+`N` の `p`-捩れ以上の長さを持つなら、`N[p] ⊆ L`。
+
+原文の `L := Ω_{V_{n+1}/Vₙ} ⊗ W_{n+1}` の像、`Q := (W'/pW')^{d+1}`、
+`N := Ω_{W_{n+1}/Vₙ}` に対応する。 -/
+theorem ker_contains_pTorsion_of_quotient {R N Q : Type*} [CommRing R]
+    [AddCommGroup N] [Module R N] [IsArtinian R N] [IsNoetherian R N]
+    [AddCommGroup Q] [Module R Q]
+    (p : R) (L : Submodule R N)
+    (hQ : ∀ y : Q, p • y = 0)
+    (hlen : Module.length R ↥(LinearMap.ker (LinearMap.lsmul R N p)) ≤ Module.length R Q)
+    (φ : ↥L →ₗ[R] Q) (hφ : Function.Surjective φ) :
+    LinearMap.ker (LinearMap.lsmul R N p) ≤ L :=
+  pTorsion_le_of_length_le p L
+    (le_trans hlen (length_le_length_quot_smul_of_surjective p hQ φ hφ))
+
+/-- **節点 A を `ker_comp_contains_pTorsion` の入力の形へ**——
+`L := ker g` と取ると、原文の *"the composition of the two maps
+annihilates the kernel by `p`-multiplication"* の前提
+`hg : ∀ y, p·y = 0 → g y = 0` がそのまま出る。 -/
+theorem hg_of_quotient {R N P Q : Type*} [CommRing R]
+    [AddCommGroup N] [Module R N] [IsArtinian R N] [IsNoetherian R N]
+    [AddCommGroup P] [Module R P] [AddCommGroup Q] [Module R Q]
+    (p : R) (g : N →ₗ[R] P)
+    (hQ : ∀ y : Q, p • y = 0)
+    (hlen : Module.length R ↥(LinearMap.ker (LinearMap.lsmul R N p)) ≤ Module.length R Q)
+    (φ : ↥(LinearMap.ker g) →ₗ[R] Q) (hφ : Function.Surjective φ) :
+    ∀ y : N, p • y = 0 → g y = 0 := by
+  intro y hy
+  have := ker_contains_pTorsion_of_quotient p (LinearMap.ker g) hQ hlen φ hφ
+  exact this (by simpa [LinearMap.mem_ker] using hy)
+
+/-- **原文の literal な形**——`Q = (R/pR)^r`(原文の `(W'/pW')^{d+1}`)。 -/
+theorem ker_contains_pTorsion_of_pi_quotient {R N : Type*} [CommRing R]
+    [AddCommGroup N] [Module R N] [IsArtinian R N] [IsNoetherian R N]
+    (p : R) (r : ℕ) (L : Submodule R N)
+    (hlen : Module.length R ↥(LinearMap.ker (LinearMap.lsmul R N p))
+      ≤ (r : ℕ∞) * Module.length R (R ⧸ Ideal.span ({p} : Set R)))
+    (φ : ↥L →ₗ[R] (Fin r → R ⧸ Ideal.span ({p} : Set R))) (hφ : Function.Surjective φ) :
+    LinearMap.ker (LinearMap.lsmul R N p) ≤ L := by
+  refine ker_contains_pTorsion_of_quotient p L (fun y => ?_) ?_ φ hφ
+  · funext i
+    have : p • (y i) = (0 : R ⧸ Ideal.span ({p} : Set R)) := by
+      obtain ⟨z, hz⟩ := Submodule.Quotient.mk_surjective (Ideal.span ({p} : Set R)) (y i)
+      rw [← hz, ← Submodule.Quotient.mk_smul, Submodule.Quotient.mk_eq_zero, smul_eq_mul]
+      exact Ideal.mul_mem_right _ _ (Ideal.subset_span rfl)
+    simpa using this
+  · have hpi : Module.length R (Fin r → R ⧸ Ideal.span ({p} : Set R))
+        = (r : ℕ∞) * Module.length R (R ⧸ Ideal.span ({p} : Set R)) := by
+      have e : (Fin r → (R ⧸ Ideal.span ({p} : Set R)))
+          ≃ₗ[R] (Fin r →₀ (R ⧸ Ideal.span ({p} : Set R))) :=
+        (Finsupp.linearEquivFunOnFinite R _ (Fin r)).symm
+      rw [e.length_eq, Module.length_finsupp]
+      congr 1
+      simp
+    rw [hpi]; exact hlen
+
+/-- 非空虚性——`R = ℤ`、`N = ZMod 4`、`p = 2`。
+`L := 2·N = {0,2}` は**真の非零部分加群**で、`Q := L` 自身(`2` で消える)を
+商に持つ。節点 A の仮定がこの非退化な場合に実際に満たされ、結論
+`N[2] ⊆ L` が得られる。 -/
+example : LinearMap.ker (LinearMap.lsmul ℤ (ZMod 4) 2)
+    ≤ LinearMap.range (LinearMap.lsmul ℤ (ZMod 4) 2) := by
+  have hLK : LinearMap.range (LinearMap.lsmul ℤ (ZMod 4) 2)
+      = LinearMap.ker (LinearMap.lsmul ℤ (ZMod 4) 2) := by
+    ext x
+    simp only [LinearMap.mem_range, LinearMap.mem_ker, LinearMap.lsmul_apply]
+    revert x
+    decide
+  refine ker_contains_pTorsion_of_quotient (2 : ℤ)
+    (LinearMap.range (LinearMap.lsmul ℤ (ZMod 4) 2))
+    (Q := ↥(LinearMap.range (LinearMap.lsmul ℤ (ZMod 4) 2))) (fun y => ?_) ?_
+    LinearMap.id Function.surjective_id
+  · refine Subtype.ext ?_
+    have hy : (y : ZMod 4) ∈ LinearMap.ker (LinearMap.lsmul ℤ (ZMod 4) 2) := hLK ▸ y.2
+    simpa [LinearMap.mem_ker] using hy
+  · rw [hLK]
+
 /-! ### `length(W/p^α W)` の線型性
 
 原文(物理 p.4 = 印字 p.257、260dpi 確認)は
