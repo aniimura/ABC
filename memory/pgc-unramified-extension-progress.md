@@ -2047,3 +2047,26 @@ Krull 位相の比較(`fixingSubgroupEquiv` が同相であること)がもう�
 import されない葉**(`InertiaTransport`・`LubinTateDegree` 等)は
 `lake build ABC3` の対象外だった。7 ファイルを追加(6905 → 6914 jobs)。
 今後 `Found/` に葉を作ったら `Found.lean` への追加を忘れないこと。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05: `K(Λ_n)/K` は全 `n` で完全分岐
+
+`Found/PGC/LubinTateTotallyRamified.lean::exists_isTotallyRamifiedAdjoin_lubinTate_psi`。
+
+★**前の見立ては誤りだった**。同ファイルには「`n ≥ 2` の `ψ_n` は
+`𝒪_{K(Λ_{n-1})}` 上の Eisenstein なので、塔の合成が別途要る」と書いていたが、
+`isEisensteinAt_iteratedLubinTatePsi` は **`𝒪_K`(一般の `A`)上**の
+Eisenstein 性を主張していた。**塔は要らなかった**。
+
+理由: `ψ_n(X) = ψ_1(φ_{n-1}(X))`。`𝔪` を法として
+`φ_{n-1}(X) ≡ X^{q^{n-1}}`・`ψ_1(Y) ≡ Y^{q-1}` だから
+`ψ_n(X) ≡ X^{q^{n-1}(q-1)}`、定数項は `ψ_n(0) = ψ_1(0) = π ∉ 𝔪²`。
+
+→ **`K(Λ_n)/K` は次数 `q^n − q^{n−1}` の完全分岐拡大**(全 `n ≥ 1`)。
+第 996 の `finrank_adjoin_iteratedLubinTatePsi` が同じ次数を Galois 群の側
+(`Gal ≅ (𝒪_K/π^n)^×`)から出しているので、両者は一致する。
+
+### 教訓
+
+**「塔が要る」という見立ては、実際に補題の型を読む前に書いてはいけない。**
+在庫(`isEisensteinAt_iteratedLubinTatePsi` の base ring が `A` だったこと)を
+確かめれば一行で済んだ。
