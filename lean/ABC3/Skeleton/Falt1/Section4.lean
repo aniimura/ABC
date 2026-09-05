@@ -18,10 +18,17 @@ open ABC3.Interface.Falt1
 
 /-- **`[Falt1] Theorem 4.1`**。
 
-内容 (Falt1 p.13-14、260dpi 目視): (i) The map Ω_{R/V} → Ω̄_{R/V}
-induces almost isomorphisms Ω_{R/V}⊗_R R̄[1/p] ≅ Ω̄_{R/V} and
-Ω_{R/V}⊗_R(R̄[1/p]/R̄) ≅ Ω̄_{R/R⊗_V V̄}. (ii) The sequence
-0→Ω_{V̄/V}⊗_V̄ R̄→Ω̄_{R̄/R}→Ω̄_{R̄/R⊗_V V̄}→0 is exact. -/
+内容 (Falt1 p.13-14 = 印字 p.266-267): (i) The map `Ω_{R/V} → Ω_{R̄/V̄}`
+induces almost isomorphisms `Ω_{R/V} ⊗_R R̄[1/p] ≅ Ω_{R̄/V̄}` and
+`Ω_{R/V} ⊗_R (R̄[1/p]/R̄) ≅ Ω_{R̄/(R⊗_V V̄)}`. (ii) The sequence
+`0 → Ω_{V̄/V} ⊗_V̄ R̄ → Ω_{R̄/R} → Ω_{R̄/(R⊗_V V̄)} → 0` is exact.
+
+★**2026-09-05 に 260dpi で描画して逐語再確認し、転記を訂正した**。
+以前の記述は `Ω̄_{R/V}`(`Ω` の上に bar)と書いていたが、原典の bar は
+**`Ω` ではなく添字の `R`・`V` に付いている**——すなわち `Ω_{R̄/V̄}` であり、
+`p` 進**完備化ではない**。この違いは形式化の難易度を大きく変える
+(完備化の枠組みが不要で、通常の Kähler 微分と局所化 `R̄[1/p]` だけで
+書ける)。(ii) の第 2 項も `Ω̄_{R̄/R}` ではなく `Ω_{R̄/R}` である。 -/
 def theorem_4_1 (E : DifferentialsSetup) :=
   PProd.mk E.thm41i1_ker <| PProd.mk E.thm41i1_coker <| PProd.mk E.thm41i2_ker <|
   PProd.mk E.thm41i2_coker <| PProd.mk E.thm41ii_injective <|
