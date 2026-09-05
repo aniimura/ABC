@@ -156,6 +156,42 @@ theorem thm_3_2_descent {A B M N : Type u} [CommRing A] [CommRing B] [Algebra A 
   obtain ⟨z, hz⟩ := exists_trace_eq_pow p hAE hf0inj n e he
   exact almost_descent_range_of_trace _ z hz f x hx
 
+/-! ## witness の押し出し——almost étale 性を別の環へ移す
+
+`Theorem 3.2` の *"`B∞` is almost isomorphic to `S∞ ⊗_{R∞} A∞` as this is
+almost étale over `S∞`"* のように、almost étale 性を別の環へ移す段で使う。
+`Definition 2.1` 条件(iii)の内容(annihilation と augmentation)は
+**全射 `A`-代数写像で押し出せる**。 -/
+
+/-- `lmul'` は `A`-代数写像と可換。 -/
+theorem lmul'_map {A B B' : Type u} [CommRing A] [CommRing B] [CommRing B']
+    [Algebra A B] [Algebra A B'] (f : B →ₐ[A] B') (w : TensorProduct A B B) :
+    Algebra.TensorProduct.lmul' A (Algebra.TensorProduct.map f f w)
+      = f (Algebra.TensorProduct.lmul' A w) := by
+  induction w using TensorProduct.induction_on with
+  | zero => simp
+  | tmul u v =>
+    rw [Algebra.TensorProduct.map_tmul, Algebra.TensorProduct.lmul'_apply_tmul,
+      Algebra.TensorProduct.lmul'_apply_tmul, map_mul]
+  | add x y hx hy => rw [map_add, map_add, map_add, hx, hy, map_add]
+
+/-- **witness は全射 `A`-代数写像で押し出せる**。`f : B ↠ B'` が全射なら
+`w' := (f ⊗ f)(w)` は**同じ水準で** annihilation と augmentation を満たす。 -/
+theorem witness_pushforward {A B B' : Type u} [CommRing A] [CommRing B] [CommRing B']
+    [Algebra A B] [Algebra A B'] (f : B →ₐ[A] B') (hf : Function.Surjective f)
+    (c : A) (w : TensorProduct A B B)
+    (hw_ann : ∀ q : B, (1 ⊗ₜ[A] q - q ⊗ₜ[A] 1) * w = 0)
+    (hw_aug : Algebra.TensorProduct.lmul' A w = c • (1 : B)) :
+    (∀ q' : B', (1 ⊗ₜ[A] q' - q' ⊗ₜ[A] 1) * (Algebra.TensorProduct.map f f w) = 0)
+    ∧ Algebra.TensorProduct.lmul' A (Algebra.TensorProduct.map f f w) = c • (1 : B') := by
+  refine ⟨fun q' => ?_, ?_⟩
+  · obtain ⟨q, rfl⟩ := hf q'
+    have h := congrArg (Algebra.TensorProduct.map f f) (hw_ann q)
+    rw [map_mul, map_zero, map_sub, Algebra.TensorProduct.map_tmul,
+      Algebra.TensorProduct.map_tmul, map_one] at h
+    exact h
+  · rw [lmul'_map f w, hw_aug, map_smul, map_one]
+
 /-- 非空虚性——`R = ℤ[X]`、`A = Fin 2 → R`(非自明な有限自由拡大)、
 `τ =` 第 0 成分への射影(`τ 1 = 1`)。仮定が空虚に真になっていないことの対照。 -/
 example : (1 : Polynomial ℤ) • (1 : Polynomial ℤ) ∈
