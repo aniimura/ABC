@@ -3136,4 +3136,38 @@ theorem exists_mvPolynomial_quotient_ringHom_descend2_of_map
   rw [hcompval R' hR (q k)] at hk
   exact hk
 
+/-- **制限写像が代数構造と可換なら、関係式は「移した先」でも消える**——
+`Lemma 4.1`の新設計で`f i j`を`exists_mvPolynomial_quotient_ringHom_descend2_of_map`
+により降ろすとき、その仮説`hψ`(関係式の像がイデアルに入ること)を検証する
+**計算の核**である。`CorrHyp`に依存しない純粋な多項式環の事実として書いた。
+
+読み方: `𝔸 = A_U⊗ℝ`・`𝔹 = A_V⊗ℝ`・`S = Γ(C,piece(U))`・`T = Γ(C,piece(V))`、
+`φ'`が底の写像、`algU`/`algV`が代数構造、`restr`が制限、`valU`/`valV`が
+`Presentation`の生成元、`ψ`が「`valU`の像を`𝔹`係数の多項式へ持ち上げたもの」。
+`hcomm`(代数構造の可換性、`ExtLimit.lean`の`pieceAlgebraMap_naturality`)と
+`hψval`(`ψ`の作り方)から、`U`側で消える関係式`p`は`V`側でも消える。
+
+証明はmathlibの`eval₂_comp_left`(環準同型を`eval₂`の中へ入れる)と
+`eval₂_map`(係数写像を`eval₂`へ吸収する)を2回ずつ使うだけ。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem eval₂_map_aeval_eq_zero {𝔸 𝔹 S T : Type} [CommRing 𝔸] [CommRing 𝔹] [CommRing S] [CommRing T]
+    (φ' : 𝔸 →+* 𝔹) (algU : 𝔸 →+* S) (algV : 𝔹 →+* T) (restr : S →+* T)
+    (hcomm : restr.comp algU = algV.comp φ')
+    {ι ι' : Type} (valU : ι → S) (valV : ι' → T) (ψ : ι → MvPolynomial ι' 𝔹)
+    (hψval : ∀ i, MvPolynomial.eval₂ algV valV (ψ i) = restr (valU i))
+    (p : MvPolynomial ι 𝔸) (hp : MvPolynomial.eval₂ algU valU p = 0) :
+    MvPolynomial.eval₂ algV valV
+      (MvPolynomial.eval₂ (MvPolynomial.C : 𝔹 →+* MvPolynomial ι' 𝔹) ψ (MvPolynomial.map φ' p)) = 0 := by
+  show (MvPolynomial.eval₂Hom algV valV)
+    (MvPolynomial.eval₂ (MvPolynomial.C : 𝔹 →+* MvPolynomial ι' 𝔹) ψ (MvPolynomial.map φ' p)) = 0
+  rw [MvPolynomial.eval₂_comp_left (MvPolynomial.eval₂Hom algV valV)]
+  have hC : (MvPolynomial.eval₂Hom algV valV).comp (MvPolynomial.C : 𝔹 →+* MvPolynomial ι' 𝔹) = algV := by
+    ext b
+    simp
+  have hfun : ((MvPolynomial.eval₂Hom algV valV : MvPolynomial ι' 𝔹 →+* T) ∘ ψ)
+      = (⇑restr ∘ valU) := funext hψval
+  rw [hC, hfun, MvPolynomial.eval₂_map, ← hcomm,
+    ← MvPolynomial.eval₂_comp_left restr algU valU p, hp, map_zero]
+
 end ABC3.Found.CorrHyp

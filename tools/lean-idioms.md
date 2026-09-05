@@ -5089,3 +5089,36 @@ theorem foo {R : Type*} [Ring R] :
 具体例)。
 
 (2026-09-05、`Found/Falt1/Section1.lean` の `length_pi_fin` で踏んだ。)
+
+## 63. `MvPolynomial.eval₂_comp_left` が「パターンが見つからない」——ゴールが素の `eval₂`、補題は `RingHom` 適用形
+
+`eval₂_comp_left (k : S →+* T) (f) (g) (p) : k (eval₂ f g p) = eval₂ (k.comp f) (k ∘ g) p`
+の左辺は **`k` の coe 適用**である。一方、ゴールに現れる外側は
+`MvPolynomial.eval₂ algV valV (…)` という**素の関数適用**で書かれていることが多い。
+`eval₂ f g = ⇑(eval₂Hom f g)` は `rfl` だが**構文が違う**ので `rw` は噛まない。
+
+```
+error: Did not find an occurrence of the pattern
+  (MvPolynomial.eval₂Hom algV valV) (MvPolynomial.eval₂ ?f ?g ?p)
+in the target expression
+  MvPolynomial.eval₂ algV valV (MvPolynomial.eval₂ MvPolynomial.C ψ (...)) = 0
+```
+
+**直し方**: `show` で頭を `eval₂Hom` の適用形に揃えてから `rw`。defeq なので通る。
+
+```lean
+show (MvPolynomial.eval₂Hom algV valV) (MvPolynomial.eval₂ MvPolynomial.C ψ …) = 0
+rw [MvPolynomial.eval₂_comp_left (MvPolynomial.eval₂Hom algV valV)]
+```
+
+**同じ回の第2の穴**: 続けて `rw [← eval₂_comp_left restr algU valU p]` が
+`(fun i => restr (valU i))` と `(⇑restr ∘ valU)` の食い違いで落ちた。
+`funext` で作る補助等式の**型の方を `⇑restr ∘ valU` で書く**と一発で揃う
+(項は同じなので `funext hψval` はそのまま通る)。
+
+```lean
+have hfun : ((MvPolynomial.eval₂Hom algV valV : MvPolynomial ι' 𝔹 →+* T) ∘ ψ)
+    = (⇑restr ∘ valU) := funext hψval   -- 型を ∘ の形で書くのがコツ
+```
+
+実例: `Found/CorrHyp/FieldLimit.lean` の `eval₂_map_aeval_eq_zero`。

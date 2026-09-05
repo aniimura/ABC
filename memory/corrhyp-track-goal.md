@@ -2520,3 +2520,25 @@ Spec側の特徴づけ(fst・snd)→環レベル→純テンソル2成分→自�
 
 次の一手: この可換性でdescend2_of_mapのhψを実際に検証し、f i j(R'レベルの
 環準同型のSpec)を構成する。集計は10/24——§4は0/2。
+
+## 2026-09-05夜さらに続き36 — hψ検証の計算核 eval₂_map_aeval_eq_zero
+
+FieldLimit.lean に純粋計算の補題を追加(error 0件・EXIT:0、Found側sorry 0件):
+  eval₂_map_aeval_eq_zero
+    (hcomm : restr.comp algU = algV.comp φ')
+    (hψval : ∀ i, eval₂ algV valV (ψ i) = restr (valU i))
+    (hp : eval₂ algU valU p = 0) :
+    eval₂ algV valV (eval₂ C ψ (map φ' p)) = 0
+= descend2_of_map の hψ そのもの。hcomm には続き35の
+pieceAlgebraMap_naturality がそのまま入る。証明は eval₂_comp_left と
+eval₂_map を各2回だけ。
+
+詰まり2つ:
+(1) rw [eval₂_comp_left ...] がパターン不一致。ゴールが素の eval₂ f g x、
+    補題は (eval₂Hom f g) x の適用形。→ show で頭を eval₂Hom に揃える。
+(2) (fun i => restr (valU i)) vs (⇑restr ∘ valU) の食い違い。
+    → have の型の方を ⇑restr ∘ valU で書き funext hψval で作る。
+
+次の一手: この補題に pieceAlgebraMap_naturality を hcomm として食わせ、
+descend2_of_map を呼んで f i j : V (i,j) ⟶ U i を構成する。
+集計は10/24——§4は0/2。

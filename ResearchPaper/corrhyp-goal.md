@@ -5580,3 +5580,49 @@ theorem pieceAlgebraMap_naturality … (a : Γ(X.left,U)) (r : ℝ) :
 **次の一手**: この可換性を使って`descend2_of_map`の`hψ`を実際に検証し、
 `f i j : V (i,j) ⟶ U i`(`R'`レベルの環準同型の`Spec`)を構成する。
 集計は引き続き10/24——§4は引き続き0/2。
+
+### 2026-09-05夜さらに続き36 — `hψ`検証の計算核 `eval₂_map_aeval_eq_zero`
+
+続き35で得た「代数構造と制限の可換性」を、実際に
+`exists_mvPolynomial_quotient_ringHom_descend2_of_map`の仮説`hψ`へ
+つなぐための**純粋計算の補題**を`FieldLimit.lean`に追加した
+(`error` 0件・`EXIT:0`、Found側sorry 0件)。
+
+```
+theorem eval₂_map_aeval_eq_zero
+    (φ' : 𝔸 →+* 𝔹) (algU : 𝔸 →+* S) (algV : 𝔹 →+* T) (restr : S →+* T)
+    (hcomm : restr.comp algU = algV.comp φ')
+    (valU : ι → S) (valV : ι' → T) (ψ : ι → MvPolynomial ι' 𝔹)
+    (hψval : ∀ i, eval₂ algV valV (ψ i) = restr (valU i))
+    (p : MvPolynomial ι 𝔸) (hp : eval₂ algU valU p = 0) :
+    eval₂ algV valV (eval₂ C ψ (map φ' p)) = 0
+```
+
+**読み方**: `𝔸 = A_U⊗ℝ`・`𝔹 = A_V⊗ℝ`・`S = Γ(C,piece(U))`・
+`T = Γ(C,piece(V))`、`φ'`が底の写像、`algU`/`algV`が代数構造
+(続き35の`pieceAlgebraMap_naturality`がまさに`hcomm`)、`restr`が制限、
+`valU`/`valV`が`Presentation`の生成元、`ψ`が「`valU`の像を`𝔹`係数の
+多項式へ持ち上げたもの」。結論は「`U`側で消える関係式`p`は、`𝔹`へ
+係数変換して`ψ`を代入しても`V`側で消える」——これが`hψ`そのものである。
+
+**証明**: mathlibの`eval₂_comp_left`(環準同型を`eval₂`の中へ入れる)と
+`eval₂_map`(係数写像を`eval₂`へ吸収する)を各2回。
+`eval₂ algV valV (aeval ψ (map φ' p))`
+= `eval₂ (eval₂Hom∘C) (eval₂∘ψ) (map φ' p)`
+= `eval₂ algV (restr∘valU) (map φ' p)`
+= `eval₂ (algV∘φ') (restr∘valU) p`
+= `eval₂ (restr∘algU) (restr∘valU) p`
+= `restr (eval₂ algU valU p)` = `restr 0` = `0`。
+
+**詰まり2つと直し方**:
+1. `rw [eval₂_comp_left (eval₂Hom algV valV)]`が「パターンが見つからない」
+   で落ちた。ゴールが`eval₂ algV valV (…)`と素の形で書かれており、
+   補題側は`(eval₂Hom algV valV) (…)`と`RingHom`の適用形だったため。
+   → `show (eval₂Hom algV valV) (…) = 0`で頭を揃えてから`rw`。
+2. 最後の`rw`で`(fun i => restr (valU i))`と`(⇑restr ∘ valU)`が
+   食い違った。→ `hfun`の**型の方を`(⇑restr ∘ valU)`で書いて**
+   `funext hψval`で作る(項は同じなので`funext`がそのまま通る)。
+
+**次の一手**: この補題に`pieceAlgebraMap_naturality`を`hcomm`として
+食わせ、`descend2_of_map`を呼んで`f i j : V (i,j) ⟶ U i`を構成する。
+集計は引き続き10/24——§4は引き続き0/2。
