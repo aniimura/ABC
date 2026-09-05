@@ -1626,3 +1626,24 @@ normal でない有限拡大 ⟹ 固定部分群が**正規でない開部分群
 
 `K(x) ≤ K(y)`・`K(y)` 完全分岐 ⟹ `K(x)` も完全分岐(慣性次数の塔)。
 これには剰余体の包含 `𝓀_x ↪ 𝓀_y` が要り、上の配管の壁がそこにある。
+
+## ★★★★★★★★★★★★★★★★★★★★★2026-09-05: 「完全分岐 ∩ K^ur = K」が付いた
+
+`Found/PGC/TotallyRamified.lean` に追加。★上で記録した配管の壁の**回避策が効いた**:
+`def` の中で membership を defeq に頼らせず、ノルム保存 `norm_mk_of_le` を
+**先に**補題として用意して `rw` で渡すと、**60 秒の kernel timeout が 0.12 秒**に。
+
+- `norm_mk_of_le` : 中間体をまたぐノルムの保存(1 層なので `rfl` が速い)
+- `adjoinIntegersIncl` / `adjoinIntegersRingHom` : 部分拡大に沿った整数環の包含
+- `isLocalHom_adjoinIntegersRingHom` : ノルムを保つので局所準同型
+- `card_residueField_le_of_adjoin_le` : `𝓀_x ↪ 𝓀_y`
+- **`inertiaDegree_le_of_adjoin_le`** : 慣性次数の単調性
+- **`isTotallyRamified_of_le`** : 完全分岐は部分拡大に遺伝
+- **`finrank_eq_one_of_mem_unramifiedClosure_of_le`** :
+  **「完全分岐 ∩ K^ur = K」**——相互律の全体像に必要な線型無関係性
+
+### 次
+
+Lubin-Tate 塔 `K_π,n` が**完全分岐**(`inertiaDegree = 1`)であることを示せば、
+`K_π,∞ ∩ K^ur = K` が出て `Γ_K ↠ 𝒪_K^× × Ẑ` の線型無関係性が揃う。
+`LubinTateActionPsi.lean` は `ψ_n` の Eisenstein 性(既約性)まで出している。

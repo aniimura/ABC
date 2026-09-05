@@ -12,6 +12,9 @@ import ABC3.Found.PGC.UnramifiedSubextension
   不分岐かつ完全分岐なら次数 1(`e·f = [K(x):K]` の直接の帰結)
 * `isUnit_adjoinIntegers_iff`——`adjoinIntegers K x` の単数はノルム 1 の元。
   部分拡大に沿った整数環の包含が局所準同型であることを示すのに要る。
+* `inertiaDegree_le_of_adjoin_le`——慣性次数の単調性(剰余体は伸びる一方)
+* **`isTotallyRamified_of_le`**——完全分岐は部分拡大に遺伝する
+* **`finrank_eq_one_of_mem_unramifiedClosure_of_le`**——「完全分岐 ∩ K^ur = K」
 
 ## ★配管の記録: 中間体をまたぐ `rfl` は kernel を止める
 
@@ -26,10 +29,18 @@ import ABC3.Found.PGC.UnramifiedSubextension
 * ところが `adjoinIntegers`(中間体の部分環)の元は**2 層**なので、
   同じ形の `def` でも kernel が落ちる(実測 60 秒)。
 
-つまり「1 層は速い・2 層は落ちる」。次に触るときは、
-`adjoinIntegers` を経由せず `𝒪[(adjoinField K x).carrier]` 側で組む
-(`AdjoinFieldConstruction.lean::integers_eq_adjoinIntegers` で移せる)か、
-ノルム保存を明示補題として先に用意してから `def` を書くこと。
+つまり「1 層は速い・2 層は落ちる」。
+
+**★回避策が効いた**: `def` の中で membership を defeq に頼らせず、
+ノルム保存 `norm_mk_of_le` を**先に**補題として用意して `rw` で渡すと、
+60 秒の kernel timeout が **0.12 秒**になる。これで包含
+`adjoinIntegersIncl` / `adjoinIntegersRingHom` が作れ、剰余体の比較
+`𝓀_x ↪ 𝓀_y` から**慣性次数の単調性**が出て、目標の
+
+**`finrank_eq_one_of_mem_unramifiedClosure_of_le`
+(= 完全分岐拡大の中の不分岐な部分は自明 = 「完全分岐 ∩ K^ur = K」)**
+
+まで届いた。
 -/
 
 namespace ABC3.Found.PGC
@@ -102,5 +113,129 @@ theorem isUnit_adjoinIntegers_iff (K : PAdicLocalField p) (x : K.closure)
       show ((z : IntermediateField.adjoin K.carrier ({x} : Set K.closure)))⁻¹
         * ((z : IntermediateField.adjoin K.carrier ({x} : Set K.closure))) = 1
       exact inv_mul_cancel₀ hz0
+
+/-! ## 部分拡大に沿った整数環の包含
+
+★上の docstring に書いた壁の**回避策が効いた**: `def` の中で membership を
+defeq に頼らせず、ノルム保存 `norm_mk_of_le` を**先に**補題として用意して
+`rw` で渡すと、60 秒の kernel timeout が **0.12 秒**になる。 -/
+
+/-- 中間体をまたぐノルムの保存(1 層なので `rfl` が速い)。 -/
+theorem norm_mk_of_le (K : PAdicLocalField p) {x y : K.closure}
+    (hle : IntermediateField.adjoin K.carrier ({x} : Set K.closure)
+      ≤ IntermediateField.adjoin K.carrier ({y} : Set K.closure))
+    (w : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :
+    ‖(⟨(w : K.closure), hle w.2⟩ : IntermediateField.adjoin K.carrier
+      ({y} : Set K.closure))‖ = ‖w‖ := rfl
+
+/-- `K(x) ≤ K(y)` に沿った整数環の包含(写像)。 -/
+noncomputable def adjoinIntegersIncl (K : PAdicLocalField p) {x y : K.closure}
+    (hle : IntermediateField.adjoin K.carrier ({x} : Set K.closure)
+      ≤ IntermediateField.adjoin K.carrier ({y} : Set K.closure))
+    (z : adjoinIntegers K x) : adjoinIntegers K y :=
+  ⟨⟨((z : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure),
+      hle (z : IntermediateField.adjoin K.carrier ({x} : Set K.closure)).2⟩,
+    by
+      show ‖(⟨((z : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) : K.closure),
+        hle (z : IntermediateField.adjoin K.carrier ({x} : Set K.closure)).2⟩ :
+          IntermediateField.adjoin K.carrier ({y} : Set K.closure))‖ ≤ 1
+      rw [norm_mk_of_le K hle]
+      exact z.2⟩
+
+@[simp] theorem norm_adjoinIntegersIncl (K : PAdicLocalField p) {x y : K.closure}
+    (hle : IntermediateField.adjoin K.carrier ({x} : Set K.closure)
+      ≤ IntermediateField.adjoin K.carrier ({y} : Set K.closure))
+    (z : adjoinIntegers K x) :
+    ‖((adjoinIntegersIncl K hle z : adjoinIntegers K y)
+      : IntermediateField.adjoin K.carrier ({y} : Set K.closure))‖
+      = ‖((z : IntermediateField.adjoin K.carrier ({x} : Set K.closure)))‖ :=
+  norm_mk_of_le K hle _
+
+/-- 環準同型としての包含。 -/
+noncomputable def adjoinIntegersRingHom (K : PAdicLocalField p) {x y : K.closure}
+    (hle : IntermediateField.adjoin K.carrier ({x} : Set K.closure)
+      ≤ IntermediateField.adjoin K.carrier ({y} : Set K.closure)) :
+    adjoinIntegers K x →+* adjoinIntegers K y where
+  toFun := adjoinIntegersIncl K hle
+  map_one' := by apply Subtype.ext; apply Subtype.ext; rfl
+  map_mul' _ _ := by apply Subtype.ext; apply Subtype.ext; rfl
+  map_zero' := by apply Subtype.ext; apply Subtype.ext; rfl
+  map_add' _ _ := by apply Subtype.ext; apply Subtype.ext; rfl
+
+@[simp] theorem adjoinIntegersRingHom_apply (K : PAdicLocalField p) {x y : K.closure}
+    (hle : IntermediateField.adjoin K.carrier ({x} : Set K.closure)
+      ≤ IntermediateField.adjoin K.carrier ({y} : Set K.closure))
+    (z : adjoinIntegers K x) :
+    adjoinIntegersRingHom K hle z = adjoinIntegersIncl K hle z := rfl
+
+/-- 包含は局所準同型(ノルムを保つから)。 -/
+instance isLocalHom_adjoinIntegersRingHom (K : PAdicLocalField p) {x y : K.closure}
+    (hle : IntermediateField.adjoin K.carrier ({x} : Set K.closure)
+      ≤ IntermediateField.adjoin K.carrier ({y} : Set K.closure)) :
+    IsLocalHom (adjoinIntegersRingHom K hle) := by
+  refine ⟨fun z hz => ?_⟩
+  rw [isUnit_adjoinIntegers_iff] at hz ⊢
+  rw [adjoinIntegersRingHom_apply, norm_adjoinIntegersIncl] at hz
+  exact hz
+
+/-! ## 慣性次数の単調性、そして「完全分岐 ∩ K^ur = K」 -/
+
+/-- **剰余体は伸びる一方**——`K(x) ≤ K(y)` なら `𝓀_x ↪ 𝓀_y`。 -/
+theorem card_residueField_le_of_adjoin_le (K : PAdicLocalField p) {x y : K.closure}
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({y} : Set K.closure))]
+    (hle : IntermediateField.adjoin K.carrier ({x} : Set K.closure)
+      ≤ IntermediateField.adjoin K.carrier ({y} : Set K.closure)) :
+    residueDegree K x ≤ residueDegree K y := by
+  haveI := isLocalRing_adjoinIntegers K x
+  haveI := isLocalRing_adjoinIntegers K y
+  exact Nat.card_le_card_of_injective _
+    (IsLocalRing.ResidueField.map (adjoinIntegersRingHom K hle)).injective
+
+/-- **慣性次数は単調**。 -/
+theorem inertiaDegree_le_of_adjoin_le (K : PAdicLocalField p) {x y : K.closure}
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({y} : Set K.closure))]
+    (hle : IntermediateField.adjoin K.carrier ({x} : Set K.closure)
+      ≤ IntermediateField.adjoin K.carrier ({y} : Set K.closure)) :
+    inertiaDegree K x ≤ inertiaDegree K y := by
+  have h := card_residueField_le_of_adjoin_le K hle
+  rw [residueDegree_eq_residueCard_pow K x, residueDegree_eq_residueCard_pow K y] at h
+  have hq2 : 1 < Nat.card 𝓀[K.carrier] := by
+    haveI : Fintype 𝓀[K.carrier] := Fintype.ofFinite _
+    rw [Nat.card_eq_fintype_card]
+    exact Fintype.one_lt_card
+  exact (Nat.pow_le_pow_iff_right hq2).mp h
+
+/-- **★★★★★完全分岐は部分拡大に遺伝する**。 -/
+theorem isTotallyRamified_of_le (K : PAdicLocalField p) {x y : K.closure}
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({y} : Set K.closure))]
+    (hle : IntermediateField.adjoin K.carrier ({x} : Set K.closure)
+      ≤ IntermediateField.adjoin K.carrier ({y} : Set K.closure))
+    (hty : IsTotallyRamifiedAdjoin K y) : IsTotallyRamifiedAdjoin K x := by
+  have hle' := inertiaDegree_le_of_adjoin_le K hle
+  rw [show inertiaDegree K y = 1 from hty] at hle'
+  have hpos : 0 < inertiaDegree K x := by
+    have h := ramificationIndex_mul_inertiaDegree K x
+    have hn : 0 < Module.finrank K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := Module.finrank_pos
+    rcases Nat.eq_zero_or_pos (inertiaDegree K x) with h0 | h0
+    · rw [h0, Nat.mul_zero] at h; omega
+    · exact h0
+  show inertiaDegree K x = 1
+  omega
+
+/-- **★★★★★★「完全分岐 ∩ K^ur = K」**——完全分岐拡大の中の不分岐な部分は自明。
+相互律の全体像(`Γ_K^ab ≅ (K^×)^∧`)に必要な線型無関係性。 -/
+theorem finrank_eq_one_of_mem_unramifiedClosure_of_le (K : PAdicLocalField p) {x y : K.closure}
+    (hle : IntermediateField.adjoin K.carrier ({x} : Set K.closure)
+      ≤ IntermediateField.adjoin K.carrier ({y} : Set K.closure))
+    (hx : x ∈ unramifiedClosure K) (hty : IsTotallyRamifiedAdjoin K y) :
+    Module.finrank K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) = 1 :=
+  finrank_eq_one_of_isUnramified_of_isTotallyRamified K x
+    ((mem_unramifiedClosure_iff_isUnramified K x).mp hx)
+    (isTotallyRamified_of_le K hle hty)
 
 end ABC3.Found.PGC

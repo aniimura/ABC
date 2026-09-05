@@ -5202,10 +5202,20 @@ example (z : ↥K⟮x⟯) : ‖(⟨(z : K.closure), hle z.2⟩ : ↥K⟮y⟯)‖
 `maxHeartbeats 2000000` を付ければ `def` 自体は 30 秒で通るが、
 そこから `norm ... = norm ...` を `rfl` で出そうとするとまた落ちる。
 
-**回避策**:
-- `adjoinIntegers` を経由せず `𝒪[(adjoinField K x).carrier]` 側で組む
-  (`Found/PGC/AdjoinFieldConstruction.lean::integers_eq_adjoinIntegers` で移せる)
-- または、ノルム保存を**明示補題として先に**用意してから `def` を書く
-  (`def` の中で `z.2` を defeq に頼らせない)
+**回避策(実測で効いた)**: ノルム保存を**明示補題として先に**用意し、
+`def` の中では `rw` でそれを使う——`z.2` を defeq に頼らせない。
+
+```lean
+theorem norm_mk_of_le (w : ↥K⟮x⟯) : ‖(⟨(w : K.closure), hle w.2⟩ : ↥K⟮y⟯)‖ = ‖w‖ := rfl  -- 1 層、速い
+
+noncomputable def adjoinIntegersIncl (z : adjoinIntegers K x) : adjoinIntegers K y :=
+  ⟨⟨((z : ↥K⟮x⟯) : K.closure), hle _⟩,
+   by show ‖(⟨_, _⟩ : ↥K⟮y⟯)‖ ≤ 1
+      rw [norm_mk_of_le K hle]      -- ★ここが要
+      exact z.2⟩
+```
+
+**60 秒 → 0.12 秒**。同じ形で `RingHom` にすると 3.3 秒(defeq に頼る版は
+maxHeartbeats 2000000 でも 30 秒)。
 
 実例: `Found/PGC/TotallyRamified.lean` の docstring(2026-09-05)。
