@@ -2438,3 +2438,19 @@ piece_appLE_naturality((i))と合わせて四角形が閉じた。
 
 次の一手: 揃った材料(四角形+descend2_of_map)で新設計のf i jを実際に構成する。
 t i jはeqToHomで済むのでGlueDataの主要部が組める。集計は10/24——§4は0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き31
+piecePullbackIso_inv_snd完成(commit 6ba403da、sorry無し、Instance4ビルド
+error 0件・EXIT:0、Found側sorry 0件):
+  (piecePullbackIso).inv ≫ (piece U).ι ≫ pullback.snd = Spec.map (ofHom includeRight)
+続き30のfst側(includeLeft)の相方。テンソル積からの環準同型は a⊗ₜ1 と 1⊗ₜr の
+値で決まるので、pieceRingEquiv.symmの自然性にはこの2成分が要る。両方揃った。
+
+証明はfst側と同じ6段で、最後だけpullbackSpecIso_inv_snd・
+pullbackRightPullbackFstIso_inv_snd_snd・pullbackHomIsoLeft_inv_snd'(今回追加)
+に差し替えるだけだった。
+
+次の一手: ℝ側も環レベルへ落とし(Spec.map_injective+SpecMap_appLE_fromSpec、
+⊤のfromSpecはIsAffineOpen.fromSpec_top)、2成分からpieceRingEquiv.symmの
+自然性を組み立てる。そこまで行けば新設計のf i jをdescend2_of_mapで降ろす前提が
+すべて揃う。集計は10/24——§4は0/2。

@@ -5418,3 +5418,35 @@ transparency level`という警告が出る)。
 `f i j : V (i,j) ⟶ U i`(`V (i,j) := U_i ⊓ U_j`の片)を実際に構成する。
 `t i j`は`eqToHom`で済むので、そこまで行けば`GlueData`の主要部が組める。
 集計は引き続き10/24——§4は引き続き0/2。
+
+## 2026-09-05夜さらに続き31: 純テンソルの**2成分が揃った**——
+`piecePullbackIso`のℝ側も特徴づけた
+
+続き30で`A_U`側(`a ⊗ₜ 1`)を押さえたので、その相方であるℝ側
+(`1 ⊗ₜ r`)も押さえた(`ExtLimit.lean`、commit `6ba403da`、`sorry`無し、
+`lake build ABC3.Found.CorrHyp.Instance4`は`error`0件・`EXIT:0`、
+`Found`側の`sorry`は0件):
+
+```
+theorem piecePullbackIso_inv_snd … :
+    (piecePullbackIso X U hU).inv ≫ (piece U).ι ≫ pullback.snd X.hom toBaseK
+    = Spec.map (ofHom includeRight.toRingHom)
+```
+
+**なぜ2本要るか**: テンソル積`A_U ⊗[ℚ] ℝ`からの環準同型は、`a ⊗ₜ 1`と
+`1 ⊗ₜ r`での値で完全に決まる(`a ⊗ₜ r = (a ⊗ₜ 1)(1 ⊗ₜ r)`)。したがって
+`pieceRingEquiv.symm`の自然性(制限写像との可換性)を示すには、この2成分
+それぞれでの一致を言えばよい。続き30の`fst`側と今回の`snd`側で、その
+**両方の材料が揃った**。
+
+証明は`fst`側と同じ6段の追跡で、最後だけ`pullbackSpecIso_inv_snd`・
+`pullbackRightPullbackFstIso_inv_snd_snd`・`pullbackHomIsoLeft_inv_snd'`
+(既存の`_hom_snd'`から`Iso.inv_comp_eq`で導出、今回追加)に差し替えるだけ
+だった——`fst`側で道を通しておいた効果である。
+
+**次の一手**: ℝ側も`fst`側と同様に環レベルへ落とし
+(`Spec.map_injective`+`SpecMap_appLE_fromSpec`、`⊤`の`fromSpec`は
+`IsAffineOpen.fromSpec_top`)、2成分から`pieceRingEquiv.symm`の自然性を
+組み立てる。そこまで行けば、新設計の`f i j`を
+`descend2_of_map`で降ろす前提がすべて揃う。
+集計は引き続き10/24——§4は引き続き0/2。
