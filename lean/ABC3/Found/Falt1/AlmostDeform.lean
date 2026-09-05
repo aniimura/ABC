@@ -445,4 +445,44 @@ theorem reduction_of_idem_lift {A S S' : Type u} [CommRing A] [Ring S] [Ring S']
   congr 2
   ring
 
+/-- **`Theorem 2.3` の第 3・4 段(まとめ)**——`I² = 0` の上で
+almost 冪等行列 `ē`(`ē² = s·ē`)は `e`(`e² = s³·e`)に持ち上がり、
+しかも `s³·1 − e` の還元がちょうど `s²·(s·1 − ē)` になる。
+
+前者が原文の *"Tripling `ε` we may assume that `ē` lifts to an `r×r`
+matrix `e` with `e² = p^ε e`"*、後者が `quot_comparison_kernel` と
+合わせて *"`B_ε` contains `B ⊗_Ā A/(p-torsion)`, the quotient being
+annihilated by `p^ε`"* に当たる。 -/
+theorem thm_2_3_lift_and_compare {A : Type u} [CommRing A] {ι : Type u} [Fintype ι]
+    [DecidableEq ι]
+    (I : Ideal A) (hI : ∀ u ∈ I, ∀ v ∈ I, u * v = 0)
+    (s : A) (ebar : Matrix ι ι (A ⧸ I))
+    (hebar : ebar^2 = algebraMap A (Matrix ι ι (A ⧸ I)) s * ebar) :
+    ∃ e : Matrix ι ι A,
+      e^2 = algebraMap A (Matrix ι ι A) (s^3) * e ∧
+      (Ideal.Quotient.mkₐ A I).mapMatrix (algebraMap A (Matrix ι ι A) (s^3) - e)
+        = algebraMap A (Matrix ι ι (A ⧸ I)) (s^2)
+          * (algebraMap A (Matrix ι ι (A ⧸ I)) s - ebar) := by
+  obtain ⟨e, he2, hered⟩ := exists_matrix_almost_idem_lift I hI s ebar hebar
+  exact ⟨e, he2, reduction_of_idem_lift (Ideal.Quotient.mkₐ A I).mapMatrix s e ebar hered⟩
+
+/-- 非空虚性——`A = ℤ/4`、`I = (2)`(**`I ≠ 0` かつ `I² = 0`**)、
+`s = 1`、`ē = 1`。仮定(特に平方零イデアル)が空虚に真になっていない
+ことの対照。 -/
+example :
+    ∃ e : Matrix (Fin 1) (Fin 1) (ZMod 4),
+      e^2 = algebraMap (ZMod 4) (Matrix (Fin 1) (Fin 1) (ZMod 4)) ((1 : ZMod 4)^3) * e ∧
+      (Ideal.Quotient.mkₐ (ZMod 4) (Ideal.span {(2 : ZMod 4)})).mapMatrix
+          (algebraMap (ZMod 4) (Matrix (Fin 1) (Fin 1) (ZMod 4)) ((1 : ZMod 4)^3) - e)
+        = algebraMap (ZMod 4) (Matrix (Fin 1) (Fin 1) (ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)}))
+            ((1 : ZMod 4)^2)
+          * (algebraMap (ZMod 4) (Matrix (Fin 1) (Fin 1) (ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)}))
+              (1 : ZMod 4) - 1) := by
+  refine thm_2_3_lift_and_compare (Ideal.span {(2 : ZMod 4)}) ?_ 1 1 (by simp)
+  intro u hu v hv
+  obtain ⟨a, rfl⟩ := Ideal.mem_span_singleton.mp hu
+  obtain ⟨b, rfl⟩ := Ideal.mem_span_singleton.mp hv
+  have h4 : (4 : ZMod 4) = 0 := rfl
+  linear_combination (a * b) * h4
+
 end ABC3.Found.Falt1
