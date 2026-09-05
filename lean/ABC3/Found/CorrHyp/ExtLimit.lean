@@ -673,6 +673,47 @@ noncomputable def pieceAlgebra (X : Over BaseK) (U : X.left.Opens) (hU : IsAffin
     Algebra ℚ Γ(X.left, U) :=
   (pieceRingHom X U hU).hom.toAlgebra
 
+/-! ### `piece` の `U` についての自然性(`2026-09-05夜、続き23`)
+
+`Lemma 4.1` の `GlueData` を「`V (i,j) := U_i ⊓ U_j` の片」で組む新設計
+(`corrhyp-goal.md` の `続き19`)では、`f i j : V (i,j) ⟶ U i` を
+`exists_mvPolynomial_quotient_ringHom_descend2_of_map`(`FieldLimit.lean`、
+`続き21`)で降ろす。その仮説 `hψ` を検証するには、次の四角形の可換性が要る:
+
+```
+Γ(ExtX, piece(U)) --(制限)--> Γ(ExtX, piece(V))
+      | pieceRingEquiv              | pieceRingEquiv
+   A_U ⊗ ℝ ------ φ⊗id --------> A_V ⊗ ℝ
+```
+
+この四角形は2つの部分に分かれる:
+- **(i) 標準写像の側の自然性**——`pullback.fst` の `appLE`(`A_U` から
+  `Γ(ExtX,piece(U))` への標準写像)が制限と可換であること。これは
+  mathlib の `Scheme.Hom.appLE_map`・`map_appLE` だけで従う(直後の
+  `piece_appLE_naturality`、**完成済み**)。
+- **(ii) `pieceRingEquiv` と標準写像の一致**——`pieceRingEquiv.symm` が
+  純テンソル `a ⊗ₜ 1` を `appLE a` へ送ること。`pieceRingEquiv` は
+  `piecePullbackIso`(6段の `calc`)を `Γ` で送っただけの同型なので、
+  値についての補題が無い。**ここが未完**。mathlib の
+  `pullbackSpecIso_inv_fst`・`_hom_snd` など特徴づけの補題が使える見込み。 -/
+
+open CategoryTheory AlgebraicGeometry Limits in
+/-- **`pullback.fst` の `appLE`(片への標準写像)は開集合の制限と可換**——
+`Scheme.Hom.map_appLE` で右辺を、`Scheme.Hom.appLE_map` で左辺を潰すだけ。
+上の四角形の (i)。`pieceRingEquiv` を経由しない**標準写像の側**の自然性は
+これで完全に押さえられる。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem piece_appLE_naturality (X : Over BaseK) (U V : X.left.Opens) (hV : V ≤ U) :
+    (pullback.fst X.hom toBaseK).appLE U (pullback.fst X.hom toBaseK ⁻¹ᵁ U) le_rfl ≫
+      ((ExtF.obj X).left).presheaf.map (homOfLE (show
+        (pullback.fst X.hom toBaseK ⁻¹ᵁ V : ((ExtF.obj X).left).Opens)
+        ≤ pullback.fst X.hom toBaseK ⁻¹ᵁ U from fun _ hx => hV hx)).op
+    = X.left.presheaf.map (homOfLE hV).op ≫
+      (pullback.fst X.hom toBaseK).appLE V (pullback.fst X.hom toBaseK ⁻¹ᵁ V) le_rfl := by
+  rw [Scheme.Hom.map_appLE]
+  exact Scheme.Hom.appLE_map _ _ _
+
 /-- **`Ext X` の `U`(`X.left` のアフィン開、`R` に依らない)上のアフィン片は
 `Spec(Γ(U,U) ⊗[ℚ] ℝ)`**——`Lemma 4.1` の構成的降下で generic flatness を
 回避する鍵となる構成(ファイル冒頭の節を見よ)。`pullbackRestrictIsoRestrict`
