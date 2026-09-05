@@ -1186,4 +1186,104 @@ theorem thm_2_2_tower {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
     · intro x hx; rw [← hd] at hx; exact hlevtors k x hx
   exact thm_2_2_lift_of_family I hsq φ lev Ψ hdvd hcompat hlevBtors hψ hmul hlevtors hdecomp
 
+/-- **`Theorem 2.2` の一意性側・塔版**。`Ω[B⁄A]` が almost 零であることから
+2つの持ち上げの差は導分になり、消える(`thm_2_2_uniqueness`)。 -/
+theorem thm_2_2_uniqueness_tower {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C] [Module.Free A B]
+    {q : ℕ} (T : PDivTower A q)
+    (hAET : IsAlmostEtaleCoveringTower (A := A) (B := B) T)
+    (hf0inj : letI := awayAlgebra (T.ϖ 0) (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B (T.ϖ 0)))))
+    (I : Ideal C) (hsq : ∀ u ∈ I, ∀ v ∈ I, u * v = 0)
+    (htors : ∀ (k : ℕ) (x : C), (algebraMap A C) (T.ϖ k) * x = 0 → x = 0)
+    (ψ ψ' : B →ₐ[A] C)
+    (hlift : ∀ b : B, Ideal.Quotient.mk I (ψ b) = Ideal.Quotient.mk I (ψ' b)) :
+    ψ = ψ' := by
+  refine thm_2_2_uniqueness (T.ϖ 0)
+    (fun x => kaehler_isAlmostZero_of_tower T hAET hf0inj 0 x) (htors 0) ψ ψ' (fun x y => ?_)
+  refine hsq _ ?_ _ ?_ <;>
+  · rw [← Ideal.Quotient.eq_zero_iff_mem, map_sub, hlift, sub_self]
+
+/-- **`Theorem 2.2`(Faltings, *p-Adic Hodge Theory* Ch.I §2)——存在と一意性**。
+
+> *Theorem 2.2. ... any `A`-algebra map `φ : B → C/I` lifts uniquely to an
+> `A`-algebra map `B → C`.*(物理 p.6-7 = 印字 p.259-260)
+
+存在は `thm_2_2_tower`、一意性は `thm_2_2_uniqueness_tower`。 -/
+theorem thm_2_2 {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C] [Module.Finite A B] [Module.Free A B]
+    {q : ℕ} (hq : 1 ≤ q) (T : PDivTower A q)
+    (hAET : IsAlmostEtaleCoveringTower (A := A) (B := B) T)
+    (hf0inj : letI := awayAlgebra (T.ϖ 0) (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B (T.ϖ 0)))))
+    (I : Ideal C) (hsq : ∀ u ∈ I, ∀ v ∈ I, u * v = 0) (φ : B →ₐ[A] (C ⧸ I))
+    (htors : ∀ (k : ℕ) (x : C), (algebraMap A C) (T.ϖ k) * x = 0 → x = 0)
+    (hBtors : ∀ (k : ℕ) (b : B), T.ϖ k • b = 0 → b = 0)
+    (hdecomp : ∀ b : B, ∃ (a : A) (z : B),
+      (∃ (k : ℕ) (b' : B), ((T.ϖ k * T.ϖ k) * (T.ϖ k * T.ϖ k)) • b' = z)
+        ∧ b = a • (1 : B) + z) :
+    ∃! ψ : B →ₐ[A] C, ∀ b : B, Ideal.Quotient.mk I (ψ b) = φ b := by
+  obtain ⟨ψ, hψ⟩ := thm_2_2_tower hq T hAET hf0inj I hsq φ htors hBtors hdecomp
+  refine ⟨ψ, hψ, fun ψ' hψ' => ?_⟩
+  exact thm_2_2_uniqueness_tower T hAET hf0inj I hsq htors ψ' ψ
+    (fun b => by rw [hψ' b, hψ b])
+
+/-! ## `Theorem 2.2` の非空虚性
+
+仮定が空虚に真になっていないことを、実際に成り立つ具体例で示す。
+2つの軸(「`p` が真の非単元か」と「`B/A` が非自明か」)を別々に埋める
+——`AlmostEtale.lean` の `awayOne_*` 系列と同じ流儀。 -/
+
+/-- 古典的に étale・finite・free な `B/A` は、**任意の**塔 `T` について
+almost étale covering tower になる。 -/
+theorem isAlmostEtaleCoveringTower_of_etale {A B : Type u} [CommRing A] [CommRing B]
+    [Algebra A B] [Algebra.Etale A B] [Module.Finite A B] [Module.Free A B]
+    {q : ℕ} (T : PDivTower A q) :
+    IsAlmostEtaleCoveringTower (A := A) (B := B) T := by
+  letI := awayAlgebra (T.ϖ 0) (A := A) (B := B)
+  haveI := awayScalarTower (T.ϖ 0) (A := A) (B := B)
+  obtain ⟨hF, hFin, hEt, htr, _⟩ :=
+    isAlmostEtaleCovering_of_etale_general (A := A) (B := B) (T.ϖ 0)
+  refine ⟨hF, hFin, hEt, htr, fun k => ?_⟩
+  refine ⟨T.ϖ k • Algebra.FormallyUnramified.elem A B, ?_⟩
+  rw [map_smul, diagonalCompare_elem_eq]
+
+/-- 定数塔 `ϖ ≡ p`(`q = 1`)。`AlmostBase.lean` の退化例に対応する。 -/
+def constTower {A : Type u} [CommRing A] (p : A) : PDivTower A 1 :=
+  { ϖ := fun _ => p, ϖ_succ := fun _ => by ring }
+
+/-- **非空虚性(その1)——真の非単元 `p = 5`**。`A = B = C = ℤ`、`I = ⊥`、
+塔は定数塔 `ϖ ≡ 5`。`5` は `ℤ` の単元ではない。 -/
+example : ∃! ψ : ℤ →ₐ[ℤ] ℤ, ∀ b : ℤ,
+    Ideal.Quotient.mk (⊥ : Ideal ℤ) (ψ b) = (Ideal.Quotient.mkₐ ℤ (⊥ : Ideal ℤ)) b := by
+  refine thm_2_2 (A := ℤ) (B := ℤ) (C := ℤ) le_rfl (constTower (5:ℤ))
+    (isAlmostEtaleCoveringTower_of_etale _) ?_ ⊥ ?_ (Ideal.Quotient.mkₐ ℤ ⊥) ?_ ?_ ?_
+  · show Function.Injective (algebraMap ℤ (Localization.Away ((algebraMap ℤ ℤ) (5:ℤ))))
+    refine IsLocalization.injective (M := Submonoid.powers ((algebraMap ℤ ℤ) (5:ℤ))) _ ?_
+    rw [Submonoid.powers_le]
+    simp only [map_ofNat]
+    exact mem_nonZeroDivisors_of_ne_zero (by norm_num)
+  · intro u hu v _; rw [Ideal.mem_bot.mp hu, zero_mul]
+  · intro k x hx; have h : (5:ℤ) * x = 0 := hx; omega
+  · intro k b hb; have h : (5:ℤ) * b = 0 := hb; omega
+  · intro b; exact ⟨b, 0, ⟨0, 0, smul_zero _⟩, by rw [smul_eq_mul, mul_one, add_zero]⟩
+
+/-- **非空虚性(その2)——階数 2 の非自明な被覆 `B = Fin 2 → ℤ`**。
+`p = 1`(単元)だが `B/A` は自明でない有限エタール拡大。 -/
+example : ∃! ψ : (Fin 2 → ℤ) →ₐ[ℤ] (Fin 2 → ℤ), ∀ b : Fin 2 → ℤ,
+    Ideal.Quotient.mk (⊥ : Ideal (Fin 2 → ℤ)) (ψ b)
+      = (Ideal.Quotient.mkₐ ℤ (⊥ : Ideal (Fin 2 → ℤ))) b := by
+  refine thm_2_2 (A := ℤ) (B := Fin 2 → ℤ) (C := Fin 2 → ℤ) le_rfl (constTower (1:ℤ))
+    (isAlmostEtaleCoveringTower_of_etale _) ?_ ⊥ ?_ (Ideal.Quotient.mkₐ ℤ ⊥) ?_ ?_ ?_
+  · show Function.Injective (algebraMap (Fin 2 → ℤ)
+      (Localization.Away ((algebraMap ℤ (Fin 2 → ℤ)) (1:ℤ))))
+    refine IsLocalization.injective
+      (M := Submonoid.powers ((algebraMap ℤ (Fin 2 → ℤ)) (1:ℤ))) _ ?_
+    rw [Submonoid.powers_le, map_one]
+    exact one_mem _
+  · intro u hu v _; rw [Ideal.mem_bot.mp hu, zero_mul]
+  · intro k x hx; have h : (1 : Fin 2 → ℤ) * x = 0 := hx; rwa [one_mul] at h
+  · intro k b hb; have h : (1:ℤ) • b = 0 := hb; rwa [one_smul] at h
+  · intro b; exact ⟨0, b, ⟨0, b, one_smul _ _⟩, by rw [zero_smul, zero_add]⟩
+
 end ABC3.Found.Falt1
