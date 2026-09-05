@@ -5636,3 +5636,21 @@ instance で繋がるので `inferInstance` で通る。
 `(_root_.mem_fixingSubgroup_iff _).mp hf` と書く。`_root_.` を落とすと
 `IntermediateField.mem_fixingSubgroup_iff` に取られ、`_` を落とすと
 `Unknown constant mem_fixingSubgroup_iff.mp` という**紛らわしいエラー**になる。
+
+## MCP `lean_check` は通るのに `lake build` が `unknown tactic`(2026-09-05)
+
+MCP の基準環境は mathlib を丸ごと読んでいるので `group` / `ring` / `nlinarith` などが
+いつでも使える。ところが**自分のファイルの import が狭い**と、ディスクに書いて
+`lake build` した瞬間に
+
+```
+error: unknown tactic
+error: unsolved goals      ← 直後にこれが続く(タクティクが無いので何もしていない)
+```
+
+になる。`Found/` 直下に「mathlib だけを import する一般補題」を置くときに必ず踏む。
+→ 使ったタクティクの分だけ `import Mathlib.Tactic.Group` / `Mathlib.Tactic.Ring` などを
+足す。★`Unknown constant`(#68)の**タクティク版**だが、症状が
+「名前が無い」ではなく「unknown tactic + 直後の unsolved goals」なので気づきにくい。
+逆に言えば、`lean_check` が通った証明は import を足すだけで必ず通る。
+(2026-09-05、`Found/HerbrandIndex.lean`(Herbrand 商)で実測。)
