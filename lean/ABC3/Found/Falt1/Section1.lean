@@ -2061,6 +2061,34 @@ noncomputable def thm12StepData_of_tower_len
     (by rw [div_mul_cancel₀ _ hene])
     (by rw [sub_mul, div_mul_cancel₀ _ hene, div_mul_cancel₀ _ hene]; exact hbl)
 
+/-- **★節点 B2 の算術**——既証の `cancel_conductor_delta` の結論
+`conductor · δ_{n+1} = δₙ`(base change)から、`hbl`
+
+    length(R/(b)) = length(M) − length(N)
+
+が出る。使うのは既証の `length_quotient_span_singleton_mul`
+(単項イデアルでの長さの加法性)だけ。
+
+`hMlen`・`hNlen` は `Lemma 1.1`(既に Found)——差積 ↔ `Ω` の長さ——
+がそのまま与える。 -/
+theorem hbl_of_conductor_eq {R : Type*} [CommRing R]
+    (b : R) (hbnzd : b ∈ nonZeroDivisors R) (Jn1 Jn : Ideal R)
+    (hmul : Ideal.span ({b} : Set R) * Jn1 = Jn)
+    (hfin : Module.length R (R ⧸ Ideal.span ({b} : Set R)) ≠ ⊤)
+    (hfin1 : Module.length R (R ⧸ Jn1) ≠ ⊤)
+    {M N : Type*} [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
+    (hMlen : Module.length R M = Module.length R (R ⧸ Jn))
+    (hNlen : Module.length R N = Module.length R (R ⧸ Jn1)) :
+    lenR R (R ⧸ Ideal.span ({b} : Set R)) = lenR R M - lenR R N := by
+  have hsum : Module.length R (R ⧸ Jn)
+      = Module.length R (R ⧸ Ideal.span ({b} : Set R)) + Module.length R (R ⧸ Jn1) := by
+    rw [← hmul]
+    exact length_quotient_span_singleton_mul b hbnzd Jn1
+  unfold lenR
+  rw [hMlen, hNlen, hsum, ENat.toNat_add hfin hfin1]
+  push_cast
+  ring
+
 /-- **非空虚性(非退化)**——`Thm12StepData 0 1 0` の実例。
 `R = ZMod 4`、`k = R/(2)`、`M = N₀ = k`、`N = 0`、`b = 2`。
 ★節点 A の 2 つの入力はどちらも非退化に満たされる。 -/
