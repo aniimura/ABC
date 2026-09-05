@@ -1914,4 +1914,47 @@ theorem adjoin_le_iff_dvd {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x y 
           (IntermediateField.adjoin K.carrier ({y} : Set K.closure)) :=
   ⟨fun hle => finrank_dvd_of_adjoin_le K hle, adjoin_le_of_dvd K x y hux huy⟩
 
+
+/-! ## Frobenius——不分岐拡大の Galois 群の標準的な生成元
+
+剰余体側の Frobenius `z ↦ z^q`(mathlib の
+`FiniteField.frobeniusAlgEquivOfAlgebraic`、位数は剰余体の拡大次数)を
+`residueGalHom` の同型で引き戻すと、`Gal(K_n/K)` の位数 `n` の元
+——すなわち**生成元**——が得られる。これが不分岐拡大の Frobenius。
+
+`Gal(K^ur/K) ≅ Ẑ` の「生成元」の側:`Ẑ` は Frobenius が位相的に生成する。 -/
+
+/-- **★★不分岐拡大の Frobenius**——次数 `n` の不分岐拡大には、剰余体で
+`z ↦ z^q` として作用し位数がちょうど `n` の(したがって `Gal(K_n/K)` を
+生成する)`K`-自己同型がある。 -/
+theorem exists_frobenius {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (n : ℕ) (hn : n ≠ 0) :
+    ∃ x : K.closure,
+      Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) = n
+        ∧ IsUnramifiedAdjoin K x
+        ∧ ∃ σ : (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+            ≃ₐ[K.carrier] (IntermediateField.adjoin K.carrier ({x} : Set K.closure)),
+          (∀ z : IsLocalRing.ResidueField (adjoinIntegers K x),
+              residueAlgEquiv K x σ z = z ^ (Nat.card 𝓀[K.carrier]))
+            ∧ orderOf σ = n := by
+  obtain ⟨x, hrank, hu, hnor, hbij⟩ := exists_isUnramifiedAdjoin K n hn
+  haveI := module_finite_adjoinIntegers K x
+  haveI : Finite 𝓀[K.carrier] := residueField_finite K
+  haveI : Fintype 𝓀[K.carrier] := Fintype.ofFinite _
+  haveI : Finite (IsLocalRing.ResidueField (adjoinIntegers K x)) := by infer_instance
+  haveI : Algebra.IsAlgebraic 𝓀[K.carrier] (IsLocalRing.ResidueField (adjoinIntegers K x)) := by
+    infer_instance
+  set Frob := FiniteField.frobeniusAlgEquivOfAlgebraic 𝓀[K.carrier]
+    (IsLocalRing.ResidueField (adjoinIntegers K x)) with hFrob
+  obtain ⟨σ, hσ⟩ := hbij.2 Frob
+  refine ⟨x, hrank, hu, σ, ?_, ?_⟩
+  · intro z
+    have h0 : residueAlgEquiv K x σ = Frob := hσ
+    have hq : Nat.card 𝓀[K.carrier] = Fintype.card 𝓀[K.carrier] := Nat.card_eq_fintype_card
+    rw [h0, hq, hFrob, FiniteField.coe_frobeniusAlgEquivOfAlgebraic]
+  · have h1 : orderOf (residueGalHom K x σ) = orderOf σ := orderOf_injective _ hbij.1 σ
+    rw [hσ] at h1
+    rw [← h1, hFrob, FiniteField.orderOf_frobeniusAlgEquivOfAlgebraic,
+      ← inertiaDegree_eq_finrank_residueField K x, inertiaDegree_eq_finrank_of_isUnramified K x hu,
+      hrank]
+
 end ABC3.Found.PGC

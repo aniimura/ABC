@@ -931,3 +931,17 @@ K^×  ≅  ℤ × 𝓀^× × (1+𝔪_K)
 
 `K^ur` の内部構造が `(ℕ, ∣)` の順序で完全に記述される——
 `Gal(K^ur/K) ≅ Ẑ = lim ℤ/n` の「順序系」の側にあたる。
+
+## ★★★2026-09-05: Frobenius——不分岐拡大の Galois 群の生成元
+
+`Found/PGC/UnramifiedExtension.lean::exists_frobenius`(sorry 無し):
+次数 `n` の不分岐拡大には、剰余体で `z ↦ z^q` として作用し**位数がちょうど
+`n`**(したがって `Gal(K_n/K)` を生成する)`K`-自己同型がある。
+
+mathlib の `FiniteField.frobeniusAlgEquivOfAlgebraic`(剰余体側の
+Frobenius、`coe_...` で `z ↦ z^{Fintype.card 𝓀}`、`orderOf_...` で
+位数 = 剰余体の拡大次数)を `residueGalHom` の全単射で引き戻すだけ。
+位数の一致は `orderOf_injective`。
+
+これで `Gal(K^ur/K) ≅ Ẑ` の「生成元」の側も形になった
+——`Ẑ` は Frobenius が位相的に生成する。
