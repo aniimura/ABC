@@ -119,4 +119,79 @@ theorem thm_2_2_uniqueness_of_isAlmostEtale {A B C D : Type u} [CommRing A] [Com
   · rw [map_sub, hlift]
     ring
 
+/-! ## 存在側への配線——二乗零イデアルの加群構造
+
+`Theorem 2.2` の存在側で `Hochschild H²` の機械
+(`HochschildLowDegree.hochschild_H2_almost_coboundary`)を実際の障害
+`Ob(b₁,b₂) := c·ψ(b₁b₂) - ψ(b₁)ψ(b₂)` に適用するには、`I := ker π` を
+`B`-加群と見なす必要がある。`I² = 0` なので `C` の作用は `C ⧸ I` を
+経由し、`φ : B →ₐ[A] C ⧸ I` で `B` が作用する。mathlib には
+「二乗零イデアル上の `C ⧸ I`-加群構造」がそのままの形では無いので
+ここで作る(`Ideal.Cotangent` は `I ⧸ I²` なので、`I² = 0` のときは
+同型だが、同一視の手間を避けて直接構成する)。 -/
+
+/-- **二乗零イデアル `I` 上の `C ⧸ I`-加群構造**。`mk c ⋆ x := c * x` が
+well-defined なのは `I·I = 0` だから。 -/
+@[reducible] noncomputable def sqZeroModule {C : Type u} [CommRing C] (I : Ideal C)
+    (hsq : ∀ u ∈ I, ∀ v ∈ I, u * v = 0) : Module (C ⧸ I) I where
+  smul := fun d x => Quotient.liftOn d (fun c => (⟨c * (x : C), I.mul_mem_left c x.2⟩ : I))
+    (by
+      intro c₁ c₂ h
+      have hI : c₁ - c₂ ∈ I := by rwa [← Submodule.quotientRel_def]
+      apply Subtype.ext
+      show c₁ * (x : C) = c₂ * (x : C)
+      have hz := hsq _ hI _ x.2
+      linear_combination hz)
+  one_smul := by intro x; apply Subtype.ext; show (1 : C) * (x : C) = x; ring
+  mul_smul := by
+    intro d₁ d₂ x
+    induction d₁ using Quotient.inductionOn with
+    | _ c₁ =>
+      induction d₂ using Quotient.inductionOn with
+      | _ c₂ => apply Subtype.ext; show (c₁ * c₂) * (x : C) = c₁ * (c₂ * (x : C)); ring
+  smul_zero := by
+    intro d
+    induction d using Quotient.inductionOn with
+    | _ c => apply Subtype.ext; show c * (0 : C) = 0; ring
+  smul_add := by
+    intro d x y
+    induction d using Quotient.inductionOn with
+    | _ c => apply Subtype.ext; show c * ((x : C) + y) = c * x + c * y; ring
+  add_smul := by
+    intro d₁ d₂ x
+    induction d₁ using Quotient.inductionOn with
+    | _ c₁ =>
+      induction d₂ using Quotient.inductionOn with
+      | _ c₂ => apply Subtype.ext; show (c₁ + c₂) * (x : C) = c₁ * x + c₂ * x; ring
+  zero_smul := by intro x; apply Subtype.ext; show (0 : C) * (x : C) = 0; ring
+
+/-- **`ψ` による乗法と `φ` 経由の `B`-作用の関係**: `π∘ψ = c·φ` なら
+`x ∈ I` について `ψ(b)·x = c·(b • x)`。これが「障害 `Ob` の `c` 倍された
+コサイクル恒等式(`obstruction_identity`)を、`I` の `B`-加群構造に関する
+honest なコサイクル条件へ翻訳する」ための橋である(`C` の `p` 捩れ
+無しで `c` を落とす)。 -/
+theorem sqZero_act_eq {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C]
+    (I : Ideal C) (hsq : ∀ u ∈ I, ∀ v ∈ I, u * v = 0)
+    (φ : B →ₐ[A] (C ⧸ I)) (c : A) (ψ : B →ₗ[A] C)
+    (hψ : ∀ b : B, Ideal.Quotient.mk I (ψ b) = c • φ b) :
+    letI : Module (C ⧸ I) I := sqZeroModule I hsq
+    letI : Module B I := Module.compHom _ (φ.toRingHom : B →+* (C ⧸ I))
+    ∀ (b : B) (z : I), ψ b * (z : C) = c • ((b • z : I) : C) := by
+  letI : Module (C ⧸ I) I := sqZeroModule I hsq
+  letI : Module B I := Module.compHom _ (φ.toRingHom : B →+* (C ⧸ I))
+  intro b z
+  obtain ⟨y, hy⟩ := Ideal.Quotient.mk_surjective (φ b)
+  have hbz : ((b • z : I) : C) = y * (z : C) := by
+    show ((φ b • z : I) : C) = y * (z : C)
+    rw [← hy]
+    rfl
+  have hmem : ψ b - (algebraMap A C c) * y ∈ I := by
+    rw [← Ideal.Quotient.eq_zero_iff_mem, map_sub, hψ b, map_mul, hy]
+    show c • φ b - (algebraMap A (C ⧸ I) c) * φ b = 0
+    rw [Algebra.smul_def, sub_self]
+  have hzero : (ψ b - (algebraMap A C c) * y) * (z : C) = 0 := hsq _ hmem _ z.2
+  rw [hbz, Algebra.smul_def]
+  linear_combination hzero
+
 end ABC3.Found.Falt1
