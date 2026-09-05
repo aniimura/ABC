@@ -493,6 +493,58 @@ theorem coker_mapBaseChange_annihilated (R : Type*) [CommRing R] (A B : Type*)
   rw [← hω, ← Submodule.Quotient.mk_smul, Submodule.Quotient.mk_eq_zero]
   exact smul_mem_range_mapBaseChange R A B b hb ω
 
+/-! #### ★(B2) への接続——導手の元が (B1) の仮定を与える
+
+mathlib の `conductor R x = {b : S | ∀ y : S, b·y ∈ R[x]}` は
+**まさに (B1) の仮定の形**である。したがって
+
+* `hb_of_mem_conductor`——`b ∈ conductor R x` から (B1) の `hb` が出る。
+
+そして `KaehlerAux.lean` の `cancel_conductor_delta`(既証)が、
+`differentIdeal_tower_diamond`(既証)と mathlib の
+`conductor_mul_differentIdeal` から
+
+    conductor(Wₙ, y) · δₙ₊₁ = δₙ(base change)
+
+を与える——すなわち**導手はちょうど `p^{δₙ − δ_{n+1}}`** である。
+これが原文の *"it is clear that"* の中身であり、(B2) は
+「この導手の生成元を `b` に取る」ことに帰着する。 -/
+
+/-- **導手の元は (B1) の仮定の形を与える**——mathlib の
+`mem_conductor_iff`(`b ∈ conductor R x ↔ ∀ y, b·y ∈ R[x]`)そのもの。 -/
+theorem hb_of_mem_conductor {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
+    (x : S) (b : S) (hb : b ∈ conductor R x) :
+    ∀ y : S, ∃ a : ↥(Algebra.adjoin R ({x} : Set S)),
+      (⟨b, conductor_subset_adjoin hb⟩ : ↥(Algebra.adjoin R ({x} : Set S))) • y
+        = algebraMap ↥(Algebra.adjoin R ({x} : Set S)) S a :=
+  fun y => ⟨⟨b * y, mem_conductor_iff.mp hb y⟩, rfl⟩
+
+/-- **導手の元は `Ω[S⁄R[x]]` を零化する**——(B1) と `hb_of_mem_conductor`
+の合成。原文の *"`p^{δₙ−δ_{n+1}}` annihilates `W_{n+1}/(Wₙ ⊗ V_{n+1})`,
+and so the cokernel ... is annihilated by `p^{δₙ−δ_{n+1}}`"* の
+「and so」の部分。 -/
+theorem kaehler_annihilated_of_mem_conductor {R S : Type*} [CommRing R] [CommRing S]
+    [Algebra R S] (x : S) (b : S) (hb : b ∈ conductor R x) :
+    ∀ ω : Ω[S⁄↥(Algebra.adjoin R ({x} : Set S))],
+      (⟨b, conductor_subset_adjoin hb⟩ : ↥(Algebra.adjoin R ({x} : Set S))) • ω = 0 :=
+  kaehler_annihilated_of_conductor _ (hb_of_mem_conductor x b hb)
+
+open Polynomial in
+/-- 非空虚性——`R[x] = S` なら導手は `⊤`(`conductor_eq_top_of_adjoin_eq_top`)
+なので `1 ∈ conductor`、したがって `Ω[S⁄R[x]] = 0`。
+`R = ℤ`、`S = ℤ[X]`、`x = X` で確かめる。 -/
+example : ∀ ω : Ω[(Polynomial ℤ)⁄↥(Algebra.adjoin ℤ ({(X : Polynomial ℤ)} : Set (Polynomial ℤ)))],
+    ω = 0 := by
+  intro ω
+  have htop : conductor ℤ (X : Polynomial ℤ) = ⊤ :=
+    conductor_eq_top_of_adjoin_eq_top (Polynomial.adjoin_X (R := ℤ))
+  have hb : (1 : Polynomial ℤ) ∈ conductor ℤ (X : Polynomial ℤ) := htop ▸ Submodule.mem_top
+  have h := kaehler_annihilated_of_mem_conductor (X : Polynomial ℤ) 1 hb ω
+  have h1 : (⟨1, conductor_subset_adjoin hb⟩ :
+      ↥(Algebra.adjoin ℤ ({(X : Polynomial ℤ)} : Set (Polynomial ℤ)))) = 1 := rfl
+  rw [h1, one_smul] at h
+  exact h
+
 open Polynomial in
 /-- 非空虚性——全射な代数写像 `A ↠ B` では `b = 1` が導手に入るので
 `Ω[B⁄A] = 0` が出る。`A = ℤ[X]`、`B = ℤ[X]/(X)` で確かめる
