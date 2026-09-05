@@ -485,4 +485,23 @@ example :
   have h4 : (4 : ZMod 4) = 0 := rfl
   linear_combination (a * b) * h4
 
+/-- **交換子は導分**(Faltings `Theorem 2.3`: *"It also follows that the
+product is commutative, as **the commutator with a fixed element of `B_ε`
+is a derivation**"*)。結合律だけから出る:
+
+    c_a(xy) = a(xy) − (xy)a = x·c_a(y) + c_a(x)·y
+
+これと「導分が almost 消える」(`Ω[B⁄A]` の almost 消滅、
+`AlmostDifferentials.kaehler_almost_zero`)を合わせると
+`μ` の almost 可換性が出る。 -/
+theorem commutator_leibniz {A N : Type u} [CommRing A] [AddCommGroup N] [Module A N]
+    (μ : N →ₗ[A] N →ₗ[A] N)
+    (hassoc : ∀ x y z : N, μ x (μ y z) = μ (μ x y) z)
+    (a x y : N) :
+    μ a (μ x y) - μ (μ x y) a
+      = μ x (μ a y - μ y a) + μ (μ a x - μ x a) y := by
+  rw [map_sub, map_sub, LinearMap.sub_apply]
+  rw [hassoc x a y, hassoc x y a, hassoc a x y]
+  abel
+
 end ABC3.Found.Falt1
