@@ -49,6 +49,27 @@
 | §4 | Theorem 4.1 | **(ii)は✅証明済み**(`thm_4_1_ii`、非空虚性つき) | ★2026-09-05: `Found/Falt1/Section4.lean`。**§2の壁を継承していなかった**——原文の証明は3行で、入力は**`Theorem 2.4(i)`の核側**だけである: *"We only have to show that the first map of the exact sequence in (ii) is injective. We already know that its kernel is annihilated by m. But Ω_{V̄/V}⊗_V R̄ has no m-torsion."* `thm_2_4_i`(証明済み)から**単射性**が出て、中央の完全性と右の全射性は Jacobi–Zariski(mathlibの`exact_mapBaseChange_map`・`map_surjective`)で形式的に従う。非空虚性は`R=ℤ`・`A=ℤ[X]`(`Ω[A⁄R]≠0`)・`B=Fin 2→A`・`p=5`。**残るのは(i)**——`Ω̄`(`p`進完備化した微分)と`R̄[1/p]`を含むので完備化の枠組みが別途要る(抽象的な内容自体は`thm_2_4_i`そのもの)。 |
 | §4 | Theorem 4.2, 4.3, 4.5 | ブロック | Galois cohomology・スペクトル系列のalmost退化。★4.1と同様に`2.2`/`2.3`ではなく`2.4`と`3.1`/`3.2`に依存する可能性が高い(未精読)。 |
 
+## 0.05 2026-09-05(後半)の到達点——一覧
+
+**Found 2/13 → 4/13**。加えて、Found には至らないが**証明済みの本体**が
+以下のとおり増えた。
+
+| 項目 | 到達点 | ファイル |
+|---|---|---|
+| `Theorem 2.2` | **✅Found**(`thm_2_2`、`∃!`、非空虚性2件) | `AlmostLifting.lean` |
+| `Theorem 2.4` | **✅Found**((i)(ii)とも、非空虚性つき) | `AlmostDerivation.lean` + `GaloisTransfer.lean` |
+| `Theorem 4.1(ii)` | **✅証明済み**(非空虚性つき) | `Section4.lean` |
+| `Theorem 1.2` 第7段 | **✅証明済み**(`δₙ → 0` の解析部分) | `Section1.lean` |
+| `Theorem 3.2` の代数的核 | **✅証明済み**(almost 直和因子からの降下) | `Section3.lean` |
+| `Theorem 2.3` 第2・3・4段 | **✅証明済み**("Tripling ε"・`B_ε` の almost 射影性) | `AlmostDeform.lean` |
+| `H³` の almost 消滅(明示形) | **✅証明済み** | `HochschildLowDegree.lean` |
+| "five-term identity" | **✅証明済み** | `AlmostDeform.lean` |
+
+**インフラの修正**: `lean/ABC3/Found/Falt1/*.lean` は `Found.lean` に
+登録されておらず、既定の `lake build` の対象外だった(6590 jobs には
+含まれていない)。登録して 6803 jobs になった——それまでのコミットの
+「lake build 成功」は Falt1 の回帰検出になっていなかった。
+
 ## 0.1 `Theorem 2.2` の逸脱の記録(2026-09-05)
 
 原典 Chapter I §2 Theorem 2.2 の形式化(`lean/ABC3/Found/Falt1/
