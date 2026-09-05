@@ -6286,3 +6286,35 @@ descendPieceRModel X U hU C α R' h ≃+*
 
 検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
 Found側sorry 0件。集計は引き続き10/24——§4は引き続き0/2。
+
+### 2026-09-05夜さらに続き56 — `f_open`の移送は「使う場所で」——独立した statement は`whnf`が尽きる
+
+続き55の環同型で`f_open`を`descendPieceRModel`の言葉へ移す道具として、
+汎用の補題を追加した(`ExtLimit.lean`の
+`isOpenImmersion_specMap_comp_ringEquiv`、0.10秒):
+
+```
+(φ : A →+* B) (e : C ≃+* A) (h : IsOpenImmersion (Spec.map (ofHom φ))) :
+  IsOpenImmersion (Spec.map (ofHom (φ.comp e.toRingHom)))
+```
+
+`Spec`は反変なので`Spec.map (ofHom (φ.comp e)) = Spec.map (ofHom e) ≫
+Spec.map (ofHom φ)`、`e`が環同型なら前者は同型、開埋め込みとの合成は
+開埋め込み。
+
+**そして正直な報告**: 「移した形」そのもの
+(`descendPieceR_localization_isOpenImmersion`の結論に
+`.comp (…ringEquivQuotientMap …).toRingHom`を足した statement)を
+**独立した定理として書こうとしたが、型の`whnf`が
+`maxHeartbeats 4000000`でも尽きた**(264秒で timeout、実測)。原因は
+`descendPieceRModel_ringEquivQuotientMap`自身の型が`letI`を何段も
+抱えていること。
+
+**結論**: この移送は**使う場所で適用する**(証明の中なら項が既に文脈に
+あるので安い)。独立した「移した形」の定理は作らない。これは
+`lean-idioms` #65(巨大な型では`rw`が`whnf`を食い尽くす)の系であり、
+**「statement を書くこと自体が高い」**という新しい現れ方なので
+`#68`として登記した。
+
+検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
+Found側sorry 0件。集計は引き続き10/24——§4は引き続き0/2。

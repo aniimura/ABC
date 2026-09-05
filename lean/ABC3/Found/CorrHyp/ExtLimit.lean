@@ -4583,6 +4583,33 @@ noncomputable def descendPieceRModel_ringEquivQuotientMap (X : Over BaseK) (U : 
       (Subalgebra.inclusion h)).toRingHom
     (pieceAlgebra_relation_descend_q₀ X U hU C α)).symm
 
+/-- **環同型を前に合成しても開埋め込みのまま**——`Spec`は反変なので
+`Spec.map (ofHom (φ.comp e)) = Spec.map (ofHom e) ≫ Spec.map (ofHom φ)`、
+`e`が環同型なら前者は同型、開埋め込みとの合成は開埋め込み。
+
+`descendPieceRModel_ringEquivQuotientMap`(続き55)で`f_open`を
+`descendPieceRModel`の言葉へ移すときに使う。
+
+**なぜ「移した形」を独立した定理として書かないか**(記録、`lean-idioms` #65
+の系): `descendPieceR_localization_isOpenImmersion`の結論に
+`.comp (…ringEquivQuotientMap …).toRingHom`を足した**statement を書くと、
+その型の`whnf`が`maxHeartbeats 4000000`でも尽きる**(264秒で timeout、
+実測)。`descendPieceRModel_ringEquivQuotientMap`自身の型が`letI`を
+何段も抱えているためである。したがってこの補題は**使う場所で適用する**
+(証明の中なら項が既に文脈にあるので安い)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem isOpenImmersion_specMap_comp_ringEquiv {A B C : Type} [CommRing A] [CommRing B]
+    [CommRing C] (φ : A →+* B) (e : C ≃+* A)
+    (h : IsOpenImmersion (Spec.map (CommRingCat.ofHom φ))) :
+    IsOpenImmersion (Spec.map (CommRingCat.ofHom (φ.comp e.toRingHom))) := by
+  haveI : IsIso (CommRingCat.ofHom (e : C →+* A)) := (e.toCommRingCatIso).isIso_hom
+  have hcomp : (CommRingCat.ofHom (φ.comp e.toRingHom))
+      = CommRingCat.ofHom (e : C →+* A) ≫ CommRingCat.ofHom φ := rfl
+  rw [hcomp, Spec.map_comp]
+  haveI := h
+  infer_instance
+
 open scoped TensorProduct in
 open scoped Classical in
 set_option maxHeartbeats 1000000 in

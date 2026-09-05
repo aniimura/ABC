@@ -5289,3 +5289,30 @@ node tools/decl-index.mjs && grep "aeval.*map\|map.*aeval" .cache/decl-index.txt
 3. **無ければ**そのとき初めて「mathlib 不在」と記録する。
 
 ★「不在」の測定を誤ると、既にある数学を数百行書き直すことになる。
+
+## 68. 「補題を適用した形」を**独立した statement として書くこと自体**が高い
+
+#65 は「`rw` が `whnf` を食い尽くす」だったが、同じ族のより厄介な現れ方が
+ある——**証明ではなく statement の型検査だけで heartbeats が尽きる**。
+
+実測: `descendPieceR_localization_isOpenImmersion` の結論に
+`.comp (e : C ≃+* A).toRingHom` を足しただけの定理を書いたところ、
+`maxHeartbeats 4000000` で **264 秒かけて timeout**。証明は
+`exact isOpenImmersion_specMap_comp_ringEquiv _ _ (既存定理 …)` の 1 行で
+済むのに、**その型を書き下ろすと `e` の型(`letI` を何段も抱えている)を
+`whnf` する羽目になる**。
+
+**直し方**: 「適用した形」を独立の定理にしない。汎用の移送補題
+
+```lean
+theorem isOpenImmersion_specMap_comp_ringEquiv (φ : A →+* B) (e : C ≃+* A)
+    (h : IsOpenImmersion (Spec.map (CommRingCat.ofHom φ))) :
+    IsOpenImmersion (Spec.map (CommRingCat.ofHom (φ.comp e.toRingHom)))
+```
+
+だけを置き、**使う場所(証明の中)で適用する**——そこでは項がすでに文脈に
+あるので `whnf` が要らず安い。
+
+**見分け方**: `letI` を 5 段以上抱えた定義(ここでは
+`descendPieceRModel_ringEquivQuotientMap`)を**型の中で合成**しようとして
+いるなら、この罠に入っている。

@@ -2870,3 +2870,17 @@ ExtLimit.lean の descendPieceRModel_ringEquivQuotientMap(6.4秒)。
 descendPieceRModel の言葉へ同型で移せる。
 
 集計は10/24——§4は0/2。
+
+## 2026-09-05夜さらに続き56 — f_open の移送は「使う場所で」
+
+ExtLimit.lean に isOpenImmersion_specMap_comp_ringEquiv(0.10秒):
+  (φ : A →+* B) (e : C ≃+* A) (h : IsOpenImmersion (Spec.map (ofHom φ))) :
+    IsOpenImmersion (Spec.map (ofHom (φ.comp e.toRingHom)))
+
+正直な報告: 「移した形」そのものを独立した定理として書こうとしたが、型の
+whnf が maxHeartbeats 4000000 でも尽きた(264秒 timeout、実測)。原因は
+descendPieceRModel_ringEquivQuotientMap 自身の型が letI を何段も抱えること。
+結論: 移送は使う場所で適用する。独立した「移した形」の定理は作らない。
+idiom #68 に登記(statement を書くこと自体が高い、という #65 の新しい現れ方)。
+
+集計は10/24——§4は0/2。
