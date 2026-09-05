@@ -252,6 +252,13 @@ theorem length_ker_add_target {R M N : Type*} [Ring R] [AddCommGroup M] [Module 
 /-- **原文の *"the composition of the two maps annihilates the kernel by
 `p`-multiplication"***。第 2 写像の核が `p` 倍の核を含むなら、合成の核は
 源の `p` 倍の核を含む。 -/
+theorem length_ker_eq_length_coker {R M : Type*} [Ring R] [AddCommGroup M] [Module R M]
+    (f : M →ₗ[R] M) (hfin : Module.length R M ≠ ⊤) :
+    Module.length R (LinearMap.ker f) = Module.length R (M ⧸ LinearMap.range f) := by
+  have h := length_ker_add_target f
+  rw [add_comm (Module.length R M)] at h
+  exact WithTop.add_right_cancel hfin h
+
 theorem ker_comp_contains_pTorsion {R M N P : Type*} [Ring R] [AddCommGroup M] [Module R M]
     [AddCommGroup N] [Module R N] [AddCommGroup P] [Module R P]
     (f : M →ₗ[R] N) (g : N →ₗ[R] P) (p : R)
