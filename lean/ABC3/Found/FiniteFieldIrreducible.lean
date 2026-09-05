@@ -82,4 +82,20 @@ theorem exists_root_of_finrank_eq (F : Type*) [Field F] [Finite F] (g : Polynomi
   refine ⟨φ (AdjoinRoot.root g), ?_⟩
   rw [Polynomial.aeval_algHom_apply, AdjoinRoot.aeval_eq, AdjoinRoot.mk_self, map_zero]
 
+
+/-- **次数を割り切る既約多項式は根を持つ**——`exists_root_of_finrank_eq` の
+可除版。`AdjoinRoot g`(次数 `deg g`)から `E` への `F`-代数準同型が
+`FiniteField.nonempty_algHom_of_finrank_dvd` で取れる。 -/
+theorem exists_root_of_natDegree_dvd (F : Type*) [Field F] [Finite F] (g : Polynomial F)
+    (hgi : Irreducible g) (E : Type*) [Field E] [Finite E] [Algebra F E]
+    (hdvd : g.natDegree ∣ Module.finrank F E) :
+    ∃ b : E, Polynomial.aeval b g = 0 := by
+  haveI : Fact (Irreducible g) := ⟨hgi⟩
+  have h1 : Module.finrank F (AdjoinRoot g) = g.natDegree := by
+    rw [(AdjoinRoot.powerBasis (f := g) hgi.ne_zero).finrank, AdjoinRoot.powerBasis_dim]
+  obtain ⟨φ⟩ := FiniteField.nonempty_algHom_of_finrank_dvd (F := F) (K := AdjoinRoot g) (L := E)
+    (by rw [h1]; exact hdvd)
+  refine ⟨φ (AdjoinRoot.root g), ?_⟩
+  rw [Polynomial.aeval_algHom_apply, AdjoinRoot.aeval_eq, AdjoinRoot.mk_self, map_zero]
+
 end ABC3.Found

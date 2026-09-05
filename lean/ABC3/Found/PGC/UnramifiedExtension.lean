@@ -1582,4 +1582,115 @@ theorem exists_unique_adjoin_isUnramified {p : ℕ} [Fact p.Prime] (K : PAdicLoc
   refine ⟨x, hrank, hu, fun y huy hranky => ?_⟩
   exact adjoin_eq_of_isUnramified K y x huy hu (by rw [hranky, hrank])
 
+
+/-! ## ★最大不分岐拡大 `K^ur`
+
+存在・一意性が揃ったので、不分岐拡大の全体は**有向系**になる:
+次数 `m`・`n` の不分岐拡大は、次数 `m*n` の不分岐拡大に両方とも含まれる
+(`adjoin_le_of_dvd`——次数が割り切れば包含する)。したがって
+`K^ur := ⨆ {K(x) | x は不分岐}` は「有向和」であり、`z ∈ K^ur` は
+「ある不分岐 `x` について `z ∈ K(x)`」と同値。
+
+`Gal(K^ur/K) ≅ Ẑ` は、`Gal(K_n/K) ≅ ℤ/n`(`exists_gal_mulEquiv_zmod`)を
+`n` について射影極限に組み上げたもの——次の段。 -/
+
+/-- **次数が割り切れば包含する**——`[K(x):K] ∣ [K(y):K]` なら `K(x) ⊆ K(y)`。
+`f̄` の根が `𝓀_{K(y)}` にあること(`exists_root_of_natDegree_dvd`)を
+Hensel で持ち上げ、一意性で `K(x)` と同定する。 -/
+theorem adjoin_le_of_dvd {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x y : K.closure)
+    (hux : IsUnramifiedAdjoin K x) (huy : IsUnramifiedAdjoin K y)
+    (hdvd : Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+      ∣ Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({y} : Set K.closure))) :
+    IntermediateField.adjoin K.carrier ({x} : Set K.closure)
+      ≤ IntermediateField.adjoin K.carrier ({y} : Set K.closure) := by
+  obtain ⟨θ, f, hfm, hgi, haev, hadj⟩ := exists_integral_generator K x hux
+  obtain ⟨hrankθ, -, -, -⟩ := isUnramifiedAdjoin_of_lift K θ f hfm hgi haev
+  haveI := module_finite_adjoinIntegers K y
+  haveI : Finite 𝓀[K.carrier] := residueField_finite K
+  have hdvd' : (f.map (IsLocalRing.residue 𝒪[K.carrier])).natDegree
+      ∣ Module.finrank 𝓀[K.carrier] (IsLocalRing.ResidueField (adjoinIntegers K y)) := by
+    rw [hfm.natDegree_map, ← inertiaDegree_eq_finrank_residueField K y,
+      inertiaDegree_eq_finrank_of_isUnramified K y huy, ← hrankθ, hadj]
+    exact hdvd
+  obtain ⟨b, hb⟩ := ABC3.Found.exists_root_of_natDegree_dvd 𝓀[K.carrier]
+    (f.map (IsLocalRing.residue 𝒪[K.carrier])) hgi
+    (IsLocalRing.ResidueField (adjoinIntegers K y)) hdvd'
+  obtain ⟨zA, haevz⟩ := exists_root_lift_of_residue_root K y f hfm hgi b hb
+  obtain ⟨hrankz, huz, -, -⟩ := isUnramifiedAdjoin_of_lift K
+    ((zA : IntermediateField.adjoin K.carrier ({y} : Set K.closure)) : K.closure) f hfm hgi haevz
+  have hzx : IntermediateField.adjoin K.carrier
+      ({((zA : IntermediateField.adjoin K.carrier ({y} : Set K.closure)) : K.closure)}
+        : Set K.closure)
+      = IntermediateField.adjoin K.carrier ({x} : Set K.closure) := by
+    refine adjoin_eq_of_isUnramified K _ x huz hux ?_
+    rw [hrankz, ← hrankθ, hadj]
+  rw [← hzx, IntermediateField.adjoin_simple_le_iff]
+  exact (zA : IntermediateField.adjoin K.carrier ({y} : Set K.closure)).2
+
+/-- **不分岐拡大は有向系をなす**——次数 `m*n` の不分岐拡大が両方を含む。 -/
+theorem exists_isUnramified_ge {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x y : K.closure)
+    (hux : IsUnramifiedAdjoin K x) (huy : IsUnramifiedAdjoin K y) :
+    ∃ z : K.closure, IsUnramifiedAdjoin K z
+      ∧ IntermediateField.adjoin K.carrier ({x} : Set K.closure)
+          ≤ IntermediateField.adjoin K.carrier ({z} : Set K.closure)
+      ∧ IntermediateField.adjoin K.carrier ({y} : Set K.closure)
+          ≤ IntermediateField.adjoin K.carrier ({z} : Set K.closure) := by
+  have hmpos : 0 < Module.finrank K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := Module.finrank_pos
+  have hnpos : 0 < Module.finrank K.carrier
+      (IntermediateField.adjoin K.carrier ({y} : Set K.closure)) := Module.finrank_pos
+  obtain ⟨z, hrankz, huz, -, -⟩ := exists_isUnramifiedAdjoin K
+    (Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+      * Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({y} : Set K.closure)))
+    (by positivity)
+  exact ⟨z, huz,
+    adjoin_le_of_dvd K x z hux huz (by rw [hrankz]; exact Dvd.intro _ rfl),
+    adjoin_le_of_dvd K y z huy huz (by rw [hrankz]; exact Dvd.intro_left _ rfl)⟩
+
+/-- **`K` の最大不分岐拡大 `K^ur`**——不分岐な単項拡大すべての上限。 -/
+noncomputable def unramifiedClosure {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) :
+    IntermediateField K.carrier K.closure :=
+  ⨆ x : {x : K.closure // IsUnramifiedAdjoin K x},
+    IntermediateField.adjoin K.carrier ({(x : K.closure)} : Set K.closure)
+
+/-- 不分岐な元は存在する(次数 1、すなわち `K` 自身)。 -/
+theorem nonempty_isUnramifiedAdjoin {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) :
+    Nonempty {x : K.closure // IsUnramifiedAdjoin K x} := by
+  obtain ⟨x, -, hu, -, -⟩ := exists_isUnramifiedAdjoin K 1 one_ne_zero
+  exact ⟨⟨x, hu⟩⟩
+
+/-- 不分岐な単項拡大の族は有向。 -/
+theorem directed_isUnramifiedAdjoin {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) :
+    Directed (· ≤ ·) (fun x : {x : K.closure // IsUnramifiedAdjoin K x} =>
+      IntermediateField.adjoin K.carrier ({(x : K.closure)} : Set K.closure)) := by
+  rintro ⟨a, ha⟩ ⟨b, hb⟩
+  obtain ⟨z, huz, h1, h2⟩ := exists_isUnramified_ge K a b ha hb
+  exact ⟨⟨z, huz⟩, h1, h2⟩
+
+/-- **`K^ur` の元の特徴づけ**——`z ∈ K^ur` ⟺ ある不分岐 `x` について
+`z ∈ K(x)`。有向性(`directed_isUnramifiedAdjoin`)から上限が和集合になる。 -/
+theorem mem_unramifiedClosure_iff {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    (z : K.closure) :
+    z ∈ unramifiedClosure K ↔ ∃ x : K.closure, IsUnramifiedAdjoin K x
+      ∧ z ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure) := by
+  haveI := nonempty_isUnramifiedAdjoin K
+  constructor
+  · intro hz
+    have hcoe := IntermediateField.coe_iSup_of_directed (directed_isUnramifiedAdjoin K)
+    have hz' : z ∈ (⋃ i : {x : K.closure // IsUnramifiedAdjoin K x},
+        ((IntermediateField.adjoin K.carrier ({(i : K.closure)} : Set K.closure) :
+          IntermediateField K.carrier K.closure) : Set K.closure)) := hcoe ▸ hz
+    obtain ⟨i, hzi⟩ := Set.mem_iUnion.mp hz'
+    exact ⟨(i : K.closure), i.2, hzi⟩
+  · rintro ⟨x, hx, hz⟩
+    exact le_iSup (fun x : {x : K.closure // IsUnramifiedAdjoin K x} =>
+      IntermediateField.adjoin K.carrier ({(x : K.closure)} : Set K.closure)) ⟨x, hx⟩ hz
+
+/-- 不分岐な単項拡大は `K^ur` に含まれる。 -/
+theorem adjoin_le_unramifiedClosure {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    {x : K.closure} (hx : IsUnramifiedAdjoin K x) :
+    IntermediateField.adjoin K.carrier ({x} : Set K.closure) ≤ unramifiedClosure K :=
+  le_iSup (fun x : {x : K.closure // IsUnramifiedAdjoin K x} =>
+    IntermediateField.adjoin K.carrier ({(x : K.closure)} : Set K.closure)) ⟨x, hx⟩
+
 end ABC3.Found.PGC

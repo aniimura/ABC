@@ -674,3 +674,28 @@ normal で `f_K` が分裂するから `z ∈ K(y)`、同様に `K(z) = K(y)`。
 存在・一意性・`Gal ≃ ℤ/n` が揃ったので、あとは `n` について
 `K_n`(次数 `n` の不分岐拡大)を選び、`K^ur := ⨆ n, K_n` を作って
 `Gal(K^ur/K) ≅ lim ℤ/n! = Ẑ` を出す段。
+
+## ★★★★★★★★★2026-09-05: 最大不分岐拡大 `K^ur` を構成
+
+`Found/PGC/UnramifiedExtension.lean`(sorry 無し):
+- `adjoin_le_of_dvd` : **次数が割り切れば包含する**
+  (`[K(x):K] ∣ [K(y):K] ⟹ K(x) ⊆ K(y)`)。`f̄` の根が `𝓀_{K(y)}` にある
+  こと(`exists_root_of_natDegree_dvd`)を Hensel で持ち上げ、一意性で
+  `K(x)` と同定する。
+- `exists_isUnramified_ge` : 不分岐拡大は**有向系**をなす
+  (次数 `m*n` の不分岐拡大が両方を含む)
+- `unramifiedClosure`(**`K^ur`**): 不分岐な単項拡大すべての上限
+- `nonempty_isUnramifiedAdjoin` / `directed_isUnramifiedAdjoin`
+- **`mem_unramifiedClosure_iff`** : `z ∈ K^ur ⟺ ∃ 不分岐 x, z ∈ K(x)`
+  (`IntermediateField.coe_iSup_of_directed`)
+- `adjoin_le_unramifiedClosure`
+
+`Found/FiniteFieldIrreducible.lean`:
+- `exists_root_of_natDegree_dvd`(`exists_root_of_finrank_eq` の可除版)
+
+### 残り: `Gal(K^ur/K) ≅ Ẑ`
+
+`Gal(K_n/K) ≅ ℤ/n`(`exists_gal_mulEquiv_zmod`)を `n` について射影極限に
+組み上げる段。mathlib に `Ẑ` があるか(`ZHat`?)は未確認——無ければ
+`lim_n ℤ/n!` を自前で組むか、`Gal(K^ur/K)` の位相群としての構造
+(profinite、`InfiniteGalois` 周辺)経由で述べる。
