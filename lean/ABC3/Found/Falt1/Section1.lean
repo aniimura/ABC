@@ -631,6 +631,80 @@ theorem length_quot_quot_pow {R : Type*} [CommRing R] [IsDomain R] [IsDiscreteVa
   rw [(quotQuotLinearEquiv (maximalIdeal R ^ k) (maximalIdeal R ^ e)).length_eq,
     pow_sup_pow, IsDiscreteValuationRing.length_quotient_pow_maximalIdeal]
 
+/-! ## 翻訳層——`Module.length`(`ℕ∞`)から実数へ
+
+`thm_1_2_of_length_bounds` は実数で述べてあるが(`δₙ − δ_{n+1}` や
+`min{1, δₙ/(d+1)}` に引き算と割り算が要るため)、加群側の 3 事実は
+`Module.length`(`ℕ∞`)で出る。その橋を架ける。 -/
+
+/-- 有限な長さを実数として取り出す。 -/
+noncomputable def lenR (R : Type*) [Ring R] (M : Type*) [AddCommGroup M] [Module R M] : ℝ :=
+  ((Module.length R M).toNat : ℝ)
+
+theorem lenR_nonneg (R : Type*) [Ring R] (M : Type*) [AddCommGroup M] [Module R M] :
+    0 ≤ lenR R M := by
+  unfold lenR; positivity
+
+theorem lenR_mono {R M N : Type*} [Ring R] [AddCommGroup M] [Module R M]
+    [AddCommGroup N] [Module R N] (h : Module.length R M ≤ Module.length R N)
+    (hN : Module.length R N ≠ ⊤) : lenR R M ≤ lenR R N := by
+  unfold lenR
+  exact_mod_cast ENat.toNat_le_toNat h hN
+
+/-- 事実 (a) の翻訳——`length M = length N + length P` を実数へ。 -/
+theorem lenR_add_of_eq {R M N P : Type*} [Ring R] [AddCommGroup M] [Module R M]
+    [AddCommGroup N] [Module R N] [AddCommGroup P] [Module R P]
+    (h : Module.length R M = Module.length R N + Module.length R P)
+    (hN : Module.length R N ≠ ⊤) (hP : Module.length R P ≠ ⊤) :
+    lenR R M = lenR R N + lenR R P := by
+  unfold lenR
+  rw [h, ENat.toNat_add hN hP]
+  push_cast
+  ring
+
+/-- 事実 (b) の翻訳——`min (length M) e ≤ length Q` を実数へ。 -/
+theorem lenR_min_le {R M Q : Type*} [Ring R] [AddCommGroup M] [Module R M]
+    [AddCommGroup Q] [Module R Q] (e : ℕ)
+    (h : min (Module.length R M) (e : ℕ∞) ≤ Module.length R Q)
+    (hQ : Module.length R Q ≠ ⊤) :
+    min (lenR R M) (e : ℝ) ≤ lenR R Q := by
+  by_cases hM : Module.length R M = ⊤
+  · have h0 : lenR R M = 0 := by unfold lenR; rw [hM]; simp
+    rw [h0, min_eq_left (by positivity : (0:ℝ) ≤ (e:ℝ))]
+    exact lenR_nonneg R Q
+  · have hmin : ((min (Module.length R M) (e : ℕ∞)).toNat : ℝ)
+        = min (lenR R M) (e : ℝ) := by
+      unfold lenR
+      rcases le_total (Module.length R M) (e : ℕ∞) with hle | hle
+      · rw [min_eq_left hle, min_eq_left]
+        exact_mod_cast ENat.toNat_le_toNat hle (by simp)
+      · rw [min_eq_right hle, min_eq_right, ENat.toNat_coe]
+        exact_mod_cast ENat.toNat_le_toNat hle hM
+    rw [← hmin]
+    unfold lenR
+    exact_mod_cast ENat.toNat_le_toNat h hQ
+
+theorem enat_nsmul_ne_top (r : ℕ) {a : ℕ∞} (ha : a ≠ ⊤) : ((r : ℕ∞) * a) ≠ ⊤ := by
+  lift a to ℕ using ha
+  rw [← Nat.cast_mul]
+  exact ENat.coe_ne_top _
+
+theorem enat_toNat_nsmul (r : ℕ) {a : ℕ∞} (ha : a ≠ ⊤) :
+    ((r : ℕ∞) * a).toNat = r * a.toNat := by
+  lift a to ℕ using ha
+  rw [← Nat.cast_mul, ENat.toNat_coe, ENat.toNat_coe]
+
+/-- 事実 (c) の翻訳——`length M ≤ r · length N` を実数へ。 -/
+theorem lenR_le_nsmul {R M N : Type*} [Ring R] [AddCommGroup M] [Module R M]
+    [AddCommGroup N] [Module R N] (r : ℕ)
+    (h : Module.length R M ≤ (r : ℕ∞) * Module.length R N)
+    (hN : Module.length R N ≠ ⊤) :
+    lenR R M ≤ (r : ℝ) * lenR R N := by
+  have hle := ENat.toNat_le_toNat h (enat_nsmul_ne_top r hN)
+  rw [enat_toNat_nsmul r hN] at hle
+  unfold lenR
+  exact_mod_cast hle
+
 /-! ## `Theorem 1.2` の残りの手順(2026-09-05 時点の確定版)
 
 解析部分(`thm_1_2_of_length_bounds`)と 3 事実 (a)(b)(c) の**材料**は
