@@ -497,6 +497,31 @@ example :
 の 2 段。前段は `B_ε ⊗_A B_ε` の almost 射影性を全射 `ρ : B_ε ↠ B` に
 沿って使うだけ、後段は `B` の結合律だけから出る。 -/
 
+/-- **`ρ : B_ε ↠ B` の構成**——`red(g x) = c·f(red x)` なら、還元 `red` は
+`coker g → coker f` を誘導し、全射になる。
+
+`Theorem 2.3` では `g := s³·1 − e`(`A` 上)、`f := s·1 − ē`(`Ā` 上)、
+`c := s²` と取る——`reduction_of_idem_lift` がちょうど `hrel` を与える。
+これで乗法の持ち上げ `thm_2_3_mul_lift` に渡す全射 `ρ` が手に入る。 -/
+theorem exists_quot_map {A M N : Type u} [CommRing A] [AddCommGroup M] [Module A M]
+    [AddCommGroup N] [Module A N]
+    (g : M →ₗ[A] M) (f : N →ₗ[A] N) (red : M →ₗ[A] N) (c : A)
+    (hrel : ∀ x, red (g x) = c • f (red x)) (hsurj : Function.Surjective red) :
+    ∃ ρ : (M ⧸ LinearMap.range g) →ₗ[A] (N ⧸ LinearMap.range f),
+      Function.Surjective ρ
+      ∧ ∀ x, ρ (Submodule.Quotient.mk x) = Submodule.Quotient.mk (red x) := by
+  have hle : LinearMap.range g ≤ LinearMap.ker ((LinearMap.range f).mkQ ∘ₗ red) := by
+    rintro _ ⟨x, rfl⟩
+    show (LinearMap.range f).mkQ (red (g x)) = 0
+    rw [hrel x, Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero]
+    exact Submodule.smul_mem _ c ⟨red x, rfl⟩
+  refine ⟨Submodule.liftQ _ ((LinearMap.range f).mkQ ∘ₗ red) hle, ?_, fun x => rfl⟩
+  intro y
+  induction y using Submodule.Quotient.induction_on with
+  | H n =>
+    obtain ⟨x, rfl⟩ := hsurj n
+    exact ⟨Submodule.Quotient.mk x, rfl⟩
+
 /-- **`Theorem 2.3` の乗法の持ち上げ**——原文の
 *"`p^{3ε}·m` lifts to `m_ε : B_ε ⊗_A B_ε → B_ε`"*。 -/
 theorem thm_2_3_mul_lift {A B : Type u} [CommRing A] [AddCommGroup B] [Module A B]
