@@ -192,6 +192,156 @@ theorem witness_pushforward {A B B' : Type u} [CommRing A] [CommRing B] [CommRin
     exact h
   · rw [lmul'_map f w, hw_aug, map_smul, map_one]
 
+/-! ## witness の底変換——almost étale 性は `⊗_R` で保たれる
+
+`Theorem 3.2` の *"It follows that `B∞` is almost isomorphic to
+`S∞ ⊗_{R∞} A∞` **as this is almost étale over `S∞`**"* の括弧内が
+これである:`A∞/R∞` が almost étale なら、その底変換
+`S∞ ⊗_{R∞} A∞` は `S∞` 上 almost étale。
+
+`witness_pushforward`(全射で押し出す)と対になる操作で、こちらは
+**任意の** `A`-代数 `A'` へ移せる。水準 `c` は
+`algebraMap A A' c` に移るだけで悪化しない。 -/
+
+open scoped TensorProduct in
+/-- 底変換 `B ⊗_A B → (A' ⊗_A B) ⊗_{A'} (A' ⊗_A B)`。
+`b₁ ⊗ b₂ ↦ (1 ⊗ b₁) ⊗ (1 ⊗ b₂)`。 -/
+noncomputable def bcWitnessMap (A A' B : Type u) [CommRing A] [CommRing A'] [CommRing B]
+    [Algebra A A'] [Algebra A B] :
+    (TensorProduct A B B) →ₐ[A]
+      (TensorProduct A' (TensorProduct A A' B) (TensorProduct A A' B)) :=
+  Algebra.TensorProduct.lift
+    (((Algebra.TensorProduct.includeLeft :
+        (TensorProduct A A' B) →ₐ[A']
+          TensorProduct A' (TensorProduct A A' B) (TensorProduct A A' B)).restrictScalars A).comp
+      (Algebra.TensorProduct.includeRight : B →ₐ[A] TensorProduct A A' B))
+    (((Algebra.TensorProduct.includeRight :
+        (TensorProduct A A' B) →ₐ[A']
+          TensorProduct A' (TensorProduct A A' B) (TensorProduct A A' B)).restrictScalars A).comp
+      (Algebra.TensorProduct.includeRight : B →ₐ[A] TensorProduct A A' B))
+    (fun _ _ => Commute.all _ _)
+
+open scoped TensorProduct in
+@[simp] theorem bcWitnessMap_tmul (A A' B : Type u) [CommRing A] [CommRing A'] [CommRing B]
+    [Algebra A A'] [Algebra A B] (b₁ b₂ : B) :
+    bcWitnessMap A A' B (b₁ ⊗ₜ[A] b₂)
+      = ((1 : A') ⊗ₜ[A] b₁) ⊗ₜ[A'] ((1 : A') ⊗ₜ[A] b₂) := by
+  simp [bcWitnessMap, Algebra.TensorProduct.includeLeft_apply,
+    Algebra.TensorProduct.includeRight_apply, Algebra.TensorProduct.tmul_mul_tmul]
+
+open scoped TensorProduct in
+/-- augmentation は底変換と可換——`lmul'` を取ってから `A'` を足しても、
+足してから `lmul'` を取っても同じ。 -/
+theorem bcWitnessMap_lmul' (A A' B : Type u) [CommRing A] [CommRing A'] [CommRing B]
+    [Algebra A A'] [Algebra A B] (w : TensorProduct A B B) :
+    Algebra.TensorProduct.lmul' A' (bcWitnessMap A A' B w)
+      = Algebra.TensorProduct.includeRight (Algebra.TensorProduct.lmul' A w) := by
+  induction w using TensorProduct.induction_on with
+  | zero => simp
+  | tmul b₁ b₂ =>
+    rw [bcWitnessMap_tmul, Algebra.TensorProduct.lmul'_apply_tmul,
+      Algebra.TensorProduct.lmul'_apply_tmul, Algebra.TensorProduct.tmul_mul_tmul,
+      Algebra.TensorProduct.includeRight_apply, one_mul]
+  | add x y hx hy => rw [map_add, map_add, hx, hy, map_add, map_add]
+
+open scoped TensorProduct in
+/-- **witness は任意の底変換で押し出せる**——`Definition 2.1` 条件(iii)の
+内容(annihilation と augmentation)は `A → A'` で移り、水準は
+`c ↦ algebraMap A A' c` になるだけ。
+
+原文 *"`B∞` is almost isomorphic to `S∞ ⊗_{R∞} A∞` **as this is almost
+étale over `S∞`**"* の括弧内。 -/
+theorem witness_baseChange (A A' B : Type u) [CommRing A] [CommRing A'] [CommRing B]
+    [Algebra A A'] [Algebra A B]
+    (c : A) (w : TensorProduct A B B)
+    (hw_ann : ∀ q : B, ((1 : B) ⊗ₜ[A] q - q ⊗ₜ[A] (1 : B)) * w = 0)
+    (hw_aug : Algebra.TensorProduct.lmul' A w = c • (1 : B)) :
+    (∀ q' : TensorProduct A A' B,
+        ((1 : TensorProduct A A' B) ⊗ₜ[A'] q'
+          - q' ⊗ₜ[A'] (1 : TensorProduct A A' B)) * bcWitnessMap A A' B w = 0)
+    ∧ Algebra.TensorProduct.lmul' A' (bcWitnessMap A A' B w)
+        = (algebraMap A A' c) • (1 : TensorProduct A A' B) := by
+  constructor
+  · intro q'
+    induction q' using TensorProduct.induction_on with
+    | zero => simp
+    | tmul a' b =>
+      have hq : (a' ⊗ₜ[A] b : TensorProduct A A' B) = a' • ((1 : A') ⊗ₜ[A] b) := by
+        rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one]
+      have h0 : ((1 : TensorProduct A A' B) ⊗ₜ[A'] ((1 : A') ⊗ₜ[A] b)
+            - ((1 : A') ⊗ₜ[A] b) ⊗ₜ[A'] (1 : TensorProduct A A' B))
+          * bcWitnessMap A A' B w = 0 := by
+        have e1 : bcWitnessMap A A' B ((1 : B) ⊗ₜ[A] b)
+            = (1 : TensorProduct A A' B) ⊗ₜ[A'] ((1 : A') ⊗ₜ[A] b) := by
+          rw [bcWitnessMap_tmul]; rfl
+        have e2 : bcWitnessMap A A' B (b ⊗ₜ[A] (1 : B))
+            = ((1 : A') ⊗ₜ[A] b) ⊗ₜ[A'] (1 : TensorProduct A A' B) := by
+          rw [bcWitnessMap_tmul]; rfl
+        rw [← e1, ← e2, ← map_sub, ← map_mul, hw_ann b, map_zero]
+      have hE : ((1 : TensorProduct A A' B) ⊗ₜ[A'] (a' ⊗ₜ[A] b)
+            - (a' ⊗ₜ[A] b) ⊗ₜ[A'] (1 : TensorProduct A A' B))
+          = a' • ((1 : TensorProduct A A' B) ⊗ₜ[A'] ((1 : A') ⊗ₜ[A] b)
+            - ((1 : A') ⊗ₜ[A] b) ⊗ₜ[A'] (1 : TensorProduct A A' B)) := by
+        rw [smul_sub,
+          ← TensorProduct.tmul_smul a' (1 : TensorProduct A A' B) ((1 : A') ⊗ₜ[A] b),
+          TensorProduct.smul_tmul' a' ((1 : A') ⊗ₜ[A] b) (1 : TensorProduct A A' B),
+          ← hq]
+      rw [hE, smul_mul_assoc, h0, smul_zero]
+    | add x y hx hy =>
+      have hsplit : ((1 : TensorProduct A A' B) ⊗ₜ[A'] (x + y)
+            - (x + y) ⊗ₜ[A'] (1 : TensorProduct A A' B))
+          = ((1 : TensorProduct A A' B) ⊗ₜ[A'] x - x ⊗ₜ[A'] (1 : TensorProduct A A' B))
+            + ((1 : TensorProduct A A' B) ⊗ₜ[A'] y
+              - y ⊗ₜ[A'] (1 : TensorProduct A A' B)) := by
+        rw [TensorProduct.tmul_add, TensorProduct.add_tmul]; ring
+      rw [hsplit, add_mul, hx, hy, add_zero]
+  · rw [bcWitnessMap_lmul', hw_aug, map_smul, map_one, algebraMap_smul]
+
+open scoped TensorProduct in
+/-- **分裂エタール代数 `ι → A` の分離冪等元**——`Definition 2.1` の
+witness 条件(annihilation・augmentation)を `c = 1` で満たす具体例。
+
+`w = Σᵢ eᵢ ⊗ eᵢ`(`eᵢ = Pi.single i 1`)。`q·eᵢ = q(i)·eᵢ` なので
+`eᵢ ⊗ (q·eᵢ) = q(i)·(eᵢ ⊗ eᵢ) = (q·eᵢ) ⊗ eᵢ`。
+
+★これは Falt1 全体で「almost étale の仮定が空虚でない」ことを示すための
+**具体的な witness の在庫**であり、非空虚性の対照に繰り返し使える。 -/
+theorem pi_witness {A : Type u} [CommRing A] {ι : Type u} [Fintype ι] [DecidableEq ι] :
+    (∀ q : ι → A, ((1 : ι → A) ⊗ₜ[A] q - q ⊗ₜ[A] (1 : ι → A))
+        * (∑ i : ι, (Pi.single i (1 : A)) ⊗ₜ[A] (Pi.single i (1 : A))) = 0)
+    ∧ Algebra.TensorProduct.lmul' A
+        (∑ i : ι, (Pi.single i (1 : A)) ⊗ₜ[A] (Pi.single i (1 : A)))
+      = (1 : A) • (1 : ι → A) := by
+  have hmul : ∀ (q : ι → A) (i : ι), q * Pi.single i 1 = q i • Pi.single i (1 : A) := by
+    intro q i; funext j; by_cases h : j = i <;> simp [h]
+  have hsum : ∑ i : ι, Pi.single i (1 : A) = 1 := by
+    funext j; simp [Finset.sum_apply]
+  constructor
+  · intro q
+    rw [Finset.mul_sum]
+    refine Finset.sum_eq_zero (fun i _ => ?_)
+    rw [sub_mul, Algebra.TensorProduct.tmul_mul_tmul, Algebra.TensorProduct.tmul_mul_tmul,
+      one_mul, hmul q i, TensorProduct.tmul_smul, ← TensorProduct.smul_tmul', sub_self]
+  · rw [map_sum, one_smul]
+    simp only [Algebra.TensorProduct.lmul'_apply_tmul]
+    calc ∑ i : ι, Pi.single i (1 : A) * Pi.single i (1 : A)
+        = ∑ i : ι, Pi.single i (1 : A) :=
+          Finset.sum_congr rfl (fun i _ => by funext j; by_cases h : j = i <;> simp [h])
+      _ = 1 := hsum
+
+open scoped TensorProduct in
+/-- 非空虚性——`A = ℤ[X]`、`B = Fin 2 → A`(分裂エタール、`pi_witness`)を
+`A' = A[Y]` へ底変換する。`witness_baseChange` の仮定が空虚に真に
+なっていないことの対照。 -/
+example :
+    Algebra.TensorProduct.lmul' (Polynomial (Polynomial ℤ))
+      (bcWitnessMap (Polynomial ℤ) (Polynomial (Polynomial ℤ)) (Fin 2 → Polynomial ℤ)
+        (∑ i : Fin 2, (Pi.single i (1 : Polynomial ℤ)) ⊗ₜ[Polynomial ℤ]
+          (Pi.single i (1 : Polynomial ℤ))))
+      = algebraMap (Polynomial ℤ) (Polynomial (Polynomial ℤ)) 1 • 1 :=
+  (witness_baseChange (Polynomial ℤ) (Polynomial (Polynomial ℤ)) (Fin 2 → Polynomial ℤ)
+    1 _ pi_witness.1 pi_witness.2).2
+
 /-- 非空虚性——`R = ℤ[X]`、`A = Fin 2 → R`(非自明な有限自由拡大)、
 `τ =` 第 0 成分への射影(`τ 1 = 1`)。仮定が空虚に真になっていないことの対照。 -/
 example : (1 : Polynomial ℤ) • (1 : Polynomial ℤ) ∈
