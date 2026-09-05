@@ -1292,4 +1292,97 @@ example : ∃! ψ : (Fin 2 → ℤ) →ₐ[ℤ] (Fin 2 → ℤ), ∀ b : Fin 2 �
   · intro k b hb; have h : (1:ℤ) • b = 0 := hb; rwa [one_smul] at h
   · intro b; exact ⟨0, b, ⟨0, b, one_smul _ _⟩, by rw [zero_smul, zero_add]⟩
 
+/-! ## 冪零 → 平方零の還元(原文の *"We may assume that `I² = 0`"*)
+
+原文 `Theorem 2.2` は *"`I ⊂ C` a **nilpotent** ideal"* と述べ、証明の
+冒頭で *"We may assume that `I² = 0`"* と平方零に帰着している。
+その還元を**純粋に形式的な dévissage** として切り出す。
+
+`J := I^{k+1}` と置くと `J² = I^{2k+2} = 0`(`I^{k+2} = 0` より)なので
+`J` は平方零であり、`C/J` の中で `I` の像は `(k+1)` 乗して消える。
+したがって
+
+* 帰納法の仮定を `C/J` に適用して `φ : B → C/I ≅ (C/J)/(I/J)` を
+  `C/J` まで持ち上げ、
+* 平方零の場合を `C ↠ C/J` に適用してさらに `C` まで持ち上げる。
+
+★注意:この還元は「平方零の場合が**任意の `A`-代数 `C`** について
+成り立つ」ことを仮定として要求する。我々の `thm_2_2` は `C` に
+`htors`(`ϖ k` 捩れ無し)等を課しているので、そのまま合成はできない
+——原文も `2.1` 直前で *"Divide `C/I²` by its `p`-torsion, etc."* と
+断っており、冪零の場合には捩れの扱いに手当てが要ることを認めている。
+本補題はその手当てを除いた**骨格**を与える。 -/
+
+/-- **冪零 → 平方零の還元**。平方零の場合が任意の `A`-代数について
+成り立てば、冪零の場合も出る。 -/
+theorem lift_nilpotent_of_lift_sq {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    (H : ∀ (C : Type u) (_ : CommRing C) (_ : Algebra A C) (J : Ideal C),
+      (∀ u ∈ J, ∀ v ∈ J, u * v = 0) →
+      ∀ φ : B →ₐ[A] (C ⧸ J), ∃ ψ : B →ₐ[A] C, ∀ b, Ideal.Quotient.mk J (ψ b) = φ b) :
+    ∀ (k : ℕ) (C : Type u) (_ : CommRing C) (_ : Algebra A C) (I : Ideal C),
+      I^(k+1) = 0 →
+      ∀ φ : B →ₐ[A] (C ⧸ I), ∃ ψ : B →ₐ[A] C, ∀ b, Ideal.Quotient.mk I (ψ b) = φ b := by
+  intro k
+  induction k with
+  | zero =>
+    intro C hC hA I hI φ
+    have hsq : ∀ u ∈ I, ∀ v ∈ I, u * v = 0 := by
+      intro u hu v hv
+      rw [pow_one] at hI
+      rw [hI] at hu
+      simp only [Submodule.zero_eq_bot, Ideal.mem_bot] at hu
+      rw [hu, zero_mul]
+    exact H C hC hA I hsq φ
+  | succ m ih =>
+    intro C hC hA I hI φ
+    set J : Ideal C := I^(m+1) with hJ
+    have hJle : J ≤ I := by
+      rw [hJ]
+      calc I^(m+1) ≤ I^1 := Ideal.pow_le_pow_right (by omega)
+        _ = I := pow_one I
+    have hJsq : ∀ u ∈ J, ∀ v ∈ J, u * v = 0 := by
+      intro u hu v hv
+      have hmem : u * v ∈ I^(m+1) * I^(m+1) := Ideal.mul_mem_mul hu hv
+      have hle : I^(m+1) * I^(m+1) ≤ I^(m+2) := by
+        rw [← pow_add]
+        exact Ideal.pow_le_pow_right (by omega)
+      rw [hI] at hle
+      have hb := hle hmem
+      simpa only [Submodule.zero_eq_bot, Ideal.mem_bot] using hb
+    have hIm : (Ideal.map (Ideal.Quotient.mk J) I)^(m+1) = 0 := by
+      rw [← Ideal.map_pow, ← hJ, Ideal.map_quotient_self]
+      rfl
+    obtain ⟨ψ', hψ'⟩ := ih (C ⧸ J) inferInstance inferInstance
+      (Ideal.map (Ideal.Quotient.mk J) I) hIm
+      ((DoubleQuot.quotQuotEquivQuotOfLEₐ A hJle).symm.toAlgHom.comp φ)
+    obtain ⟨ψ, hψ⟩ := H C hC hA J hJsq ψ'
+    refine ⟨ψ, fun b => ?_⟩
+    have h1 : Ideal.Quotient.mk (Ideal.map (Ideal.Quotient.mk J) I)
+        (Ideal.Quotient.mk J (ψ b))
+        = (DoubleQuot.quotQuotEquivQuotOfLEₐ A hJle).symm (φ b) := by
+      rw [hψ b]; exact hψ' b
+    have h3 : (DoubleQuot.quotQuotEquivQuotOfLE hJle)
+        (Ideal.Quotient.mk (Ideal.map (Ideal.Quotient.mk J) I) (Ideal.Quotient.mk J (ψ b)))
+        = Ideal.Quotient.mk I (ψ b) :=
+      DoubleQuot.quotQuotEquivQuotOfLE_quotQuotMk (ψ b) hJle
+    have hagree : ∀ x, (DoubleQuot.quotQuotEquivQuotOfLE hJle) x
+        = (DoubleQuot.quotQuotEquivQuotOfLEₐ A hJle) x := fun _ => rfl
+    rw [h1, hagree, AlgEquiv.apply_symm_apply] at h3
+    exact h3.symm
+
+/-- 非空虚性——`B = A` のとき仮定 `H` は成り立つ(`A`-代数写像 `A → X` は
+`algebraMap` ただ 1 つ)。したがって冪零の場合の結論も実際に得られる。 -/
+example (A : Type u) [CommRing A] :
+    ∀ (k : ℕ) (C : Type u) (_ : CommRing C) (_ : Algebra A C) (I : Ideal C),
+      I^(k+1) = 0 →
+      ∀ φ : A →ₐ[A] (C ⧸ I), ∃ ψ : A →ₐ[A] C, ∀ b, Ideal.Quotient.mk I (ψ b) = φ b := by
+  refine lift_nilpotent_of_lift_sq (A := A) (B := A) ?_
+  intro C hC hA J _ φ
+  refine ⟨Algebra.ofId A C, fun b => ?_⟩
+  have h1 : φ b = algebraMap A (C ⧸ J) b := by
+    have hc := φ.commutes b
+    simpa using hc
+  rw [h1]
+  rfl
+
 end ABC3.Found.Falt1
