@@ -127,4 +127,21 @@ theorem exists_adjoin_eq_fixedField (K : PAdicLocalField p) (H : Subgroup K.absG
   haveI := finiteDimensional_fixedField_of_isOpen K H hH
   exact exists_adjoin_eq_of_finiteDimensional K (IntermediateField.fixedField H)
 
+
+/-- **開部分群の指数 = 固定体の次数**——無限次 Galois 対応
+(`IntermediateField.finrank_eq_fixingSubgroup_index` と
+`InfiniteGalois.fixingSubgroup_fixedField`、開部分群は閉)。
+原文の判定条件 `q_L = q^{[Γ_K:H]}` の指数 `[Γ_K:H]` が
+`[L_H : K]` であることの型的な裏付け。 -/
+theorem finrank_fixedField_eq_index (K : PAdicLocalField p) (H : Subgroup K.absGal)
+    (hH : IsOpen (H : Set K.absGal)) :
+    Module.finrank K.carrier (IntermediateField.fixedField H) = H.index := by
+  haveI := isGalois_closure K
+  have hclosed : IsClosed (H : Set K.absGal) := Subgroup.isClosed_of_isOpen H hH
+  have h1 := IntermediateField.finrank_eq_fixingSubgroup_index
+    (k := K.carrier) (K := K.closure) (IntermediateField.fixedField H)
+  have h2 : (IntermediateField.fixedField H).fixingSubgroup = H :=
+    InfiniteGalois.fixingSubgroup_fixedField (⟨H, hclosed⟩ : ClosedSubgroup K.absGal)
+  rw [h1, h2]
+
 end ABC3.Found.PGC

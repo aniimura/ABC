@@ -1056,3 +1056,24 @@ Frobenius・Teichmüller など)が、そのまま `adjoinField K x` を
 (`e·f`・不分岐性・Frobenius・一意性)が、開部分群の固定体
 `L_H = fixedField H` にもそのまま適用できる——原文が
 「Proposition 1.2 を `(L, H)` に適用する」と書く操作の土台。
+
+## ★★★★★2026-09-05: 残っていた配管も解消——剰余体の個数と指数の対応
+
+`Found/PGC/AdjoinFieldConstruction.lean`:
+- `integersEquivAdjoinIntegers` : `𝒪[(adjoinField K x).carrier] ≃+*
+  adjoinIntegers K x`。★配管: `RingEquiv.subringCongr` は
+  `Subring ((adjoinField K x).carrier)` と `Subring ↥K⟮x⟯` の `CommRing`
+  経路の違いで詰まる。**手で書くと通る**——各成分を `Subtype.ext rfl` に
+  すること(`rfl` 単独だと kernel が deterministic timeout)。
+- **`card_residueField_adjoinField`** :
+  `Nat.card 𝓀[(adjoinField K x).carrier] = residueDegree K x`
+- `residueCardinality_adjoinField` : `Interface` の言葉で同じこと
+
+`Found/PGC/SubgroupCorrespondenceConstruction.lean`:
+- **`finrank_fixedField_eq_index`** : `[L_H : K] = [Γ_K : H]`
+  (`IntermediateField.finrank_eq_fixingSubgroup_index` +
+  `InfiniteGalois.fixingSubgroup_fixedField`、開部分群は閉)
+  ——原文の判定条件 `q_L = q^{[Γ_K:H]}` の指数の型的な裏付け。
+
+残るのは `fixedField H` と `K(x)`(`exists_adjoin_eq_fixedField` で
+一致する)の間で `q_L` を移す一手だけ。

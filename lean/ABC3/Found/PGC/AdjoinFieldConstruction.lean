@@ -140,4 +140,32 @@ theorem integers_eq_adjoinIntegers (K : PAdicLocalField p) (x : K.closure) :
   ext y
   exact mem_adjoinIntegers_iff_mem_integers K x y
 
+
+/-- 整数環の環同型(部分環としての等式を、`Subtype.ext rfl` で書いた同型に
+したもの)。★配管: `RingEquiv.subringCongr` は
+`Subring ((adjoinField K x).carrier)` と `Subring ↥K⟮x⟯` の `CommRing` の
+経路の違いで詰まる。手で書くと通る(各成分は `Subtype.ext rfl`——
+`rfl` 単独だと kernel が deterministic timeout する)。 -/
+noncomputable def integersEquivAdjoinIntegers (K : PAdicLocalField p) (x : K.closure) :
+    𝒪[(adjoinField K x).carrier] ≃+* adjoinIntegers K x where
+  toFun z := ⟨z.1, (mem_adjoinIntegers_iff_mem_integers K x z.1).mp z.2⟩
+  invFun z := ⟨z.1, (mem_adjoinIntegers_iff_mem_integers K x z.1).mpr z.2⟩
+  left_inv _ := Subtype.ext rfl
+  right_inv _ := Subtype.ext rfl
+  map_mul' _ _ := Subtype.ext rfl
+  map_add' _ _ := Subtype.ext rfl
+
+/-- **★剰余体の元の個数も一致**——`adjoinField K x` を `PAdicLocalField p`
+として見たときの `q_L` は、`adjoinIntegers` で計算した `residueDegree K x`
+に等しい。これで `Interface` の `residueCardinality` が拡大体側でも
+本ファイル群の量と繋がる。 -/
+theorem card_residueField_adjoinField (K : PAdicLocalField p) (x : K.closure) :
+    Nat.card 𝓀[(adjoinField K x).carrier] = residueDegree K x :=
+  Nat.card_congr (IsLocalRing.ResidueField.mapEquiv (integersEquivAdjoinIntegers K x)).toEquiv
+
+/-- `Interface` の `residueCardinality` で書いた形。 -/
+theorem residueCardinality_adjoinField (K : PAdicLocalField p) (x : K.closure) :
+    (residueCardinality p).card (adjoinField K x) = residueDegree K x :=
+  card_residueField_adjoinField K x
+
 end ABC3.Found.PGC
