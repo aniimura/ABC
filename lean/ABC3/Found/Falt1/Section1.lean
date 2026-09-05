@@ -439,6 +439,39 @@ theorem min_avg_le_sum_min {r : ℕ} (hr : 0 < r) (m : Fin r → ℝ) (hm : ∀ 
     exact le_min (hm i) he
   linarith
 
+/-- DVR ではイデアルの冪は全順序なので、和は指数の `min`。 -/
+theorem pow_sup_pow {R : Type*} [CommRing R] (I : Ideal R) (k e : ℕ) :
+    I^k ⊔ I^e = I^(min k e) := by
+  rcases le_total k e with h | h
+  · rw [min_eq_left h, sup_eq_left]
+    exact Ideal.pow_le_pow_right h
+  · rw [min_eq_right h, sup_eq_right]
+    exact Ideal.pow_le_pow_right h
+
+/-- `(R/I)/(J·) ≅ R/(I ⊔ J)` を `R`-線型同型として
+(mathlib の `DoubleQuot.quotQuotEquivQuotSup` は `RingEquiv`)。 -/
+noncomputable def quotQuotLinearEquiv {R : Type*} [CommRing R] (I J : Ideal R) :
+    ((R ⧸ I) ⧸ Ideal.map (Ideal.Quotient.mk I) J) ≃ₗ[R] (R ⧸ (I ⊔ J)) :=
+  { DoubleQuot.quotQuotEquivQuotSup I J with
+    map_smul' := by
+      intro r x
+      induction x using Submodule.Quotient.induction_on with
+      | H y =>
+        induction y using Submodule.Quotient.induction_on with
+        | H z => rfl }
+
+open IsLocalRing in
+/-- **`length((R/𝔪^k)/(𝔪^e·)) = min(k,e)`**——事実 (b) の各巡回因子の計算。
+`length_ker_eq_length_coker` と合わせると、巡回加群 `R/𝔪^k` 上の
+`𝔪^e` 倍の**核**の長さがちょうど `min(k,e)` だと分かる。 -/
+theorem length_quot_quot_pow {R : Type*} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+    (k e : ℕ) :
+    Module.length R ((R ⧸ maximalIdeal R ^ k) ⧸
+      Ideal.map (Ideal.Quotient.mk (maximalIdeal R ^ k)) (maximalIdeal R ^ e))
+      = (min k e : ℕ) := by
+  rw [(quotQuotLinearEquiv (maximalIdeal R ^ k) (maximalIdeal R ^ e)).length_eq,
+    pow_sup_pow, IsDiscreteValuationRing.length_quotient_pow_maximalIdeal]
+
 /-! ## `Theorem 1.2` の残りの手順(2026-09-05 時点の確定版)
 
 解析部分(`thm_1_2_of_length_bounds`)と 3 事実 (a)(b)(c) の**材料**は
