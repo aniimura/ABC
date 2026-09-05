@@ -2318,3 +2318,21 @@ Instance4ビルド0エラー):
 
 分解自体をExtLimit.leanの節見出しに書いたので、次に触る者は四角形のどちら側が
 残っているかを読むだけで分かる。次の一手は(ii)。集計は10/24——§4は0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き24
+(ii)の追跡に着手し、piecePullbackIsoの定義の形が障害だと判明。
+目標: (piecePullbackIso).inv ≫ (piece U).ι ≫ pullback.fst
+     = Spec.map (ofHom includeLeftRingHom) ≫ hU.isoSpec.inv ≫ U.ι
+mathlibに各段の特徴づけ補題が揃っていることは確認
+(pullbackRestrictIsoRestrict_inv_fst・pullbackSymmetry_hom_comp_fst・
+pullbackRightPullbackFstIso_inv_fst・pullbackSpecIso_inv_fstなど)。
+
+しかし#printで見るとpiecePullbackIsoの6段はTrans.transの左結合の入れ子で、
+4段目が (pieceRingHom_spec) ▸ Iso.refl _ という等式輸送。showで書き直すと
+invalid ▸ notation, failed to compute motiveになり、unfold+simpも進まない。
+
+直し方(特定済み): 4段目をpullback.congrHom (pieceRingHom_spec X U hU) rfl
+で書き直す。mathlibにpullback.congrHom_inv(= pullback.map … 𝟙 𝟙 𝟙 …)の
+特徴づけがあるので合成の値が計算できる。残作業は「定義を▸抜きへ書き換え」
++「6段の追跡」の2段構え。書き換えは型が同じなので既存利用箇所に影響しない。
+集計は10/24——§4は0/2。

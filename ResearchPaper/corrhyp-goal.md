@@ -5169,3 +5169,41 @@ specialize して`f i j`を構成すること。その後に残るのは**開埋
 
 集計は引き続き10/24——§4は引き続き0/2。次の一手は(ii)、すなわち
 `piecePullbackIso`の値(純テンソルの行き先)を`Spec`側で特徴づけること。
+
+## 2026-09-05夜さらに続き24: (ii)の追跡に着手——`piecePullbackIso`の
+**定義の形**が障害だと判明(直し方も特定)
+
+続き23の(ii)(`pieceRingEquiv.symm`が`a ⊗ₜ 1`を`appLE a`へ送ること)を
+`Spec`側で追跡しようとした。目標は
+
+```
+(piecePullbackIso X U hU).inv ≫ (piece U).ι ≫ pullback.fst X.hom toBaseK
+  = Spec.map (ofHom includeLeftRingHom) ≫ hU.isoSpec.inv ≫ U.ι
+```
+
+で、mathlibには各段の特徴づけ補題が揃っていることを確認した
+(`pullbackRestrictIsoRestrict_inv_fst`・`pullbackSymmetry_hom_comp_fst`・
+`pullbackRightPullbackFstIso_inv_fst`・`pullbackSpecIso_inv_fst`など)。
+
+**しかし追跡できなかった。理由は`piecePullbackIso`の定義の形である**:
+`#print`で見ると6段は`Trans.trans`の**左結合**の入れ子で、4段目が
+
+```
+(pieceRingHom_spec X U hU) ▸ CategoryTheory.Iso.refl _
+```
+
+という**`▸`(等式による輸送)**になっている。`show`で同じ形を書き直そうと
+すると`invalid ▸ notation, failed to compute motive for the substitution`
+となり、`unfold`+`simp`も`Trans.trans`が畳まれていて進まない。
+
+**直し方(特定済み、次の一手)**: この4段目を`▸`ではなく
+**`CategoryTheory.Limits.pullback.congrHom (pieceRingHom_spec X U hU) rfl`**
+で書き直す。mathlibには`pullback.congrHom_inv`(=`pullback.map … 𝟙 𝟙 𝟙 …`)
+という**特徴づけ**があるので、`pullback.fst`と合成したときの値が計算できる
+——これで6段すべてが特徴づけ可能になり、追跡が機械的になる。
+
+つまり残作業は「`piecePullbackIso`の定義を`▸`を使わない形へ書き換える
+(振る舞いは同じ)」+「6段の合成を追跡する」の2段構えである。前者は
+`piece_isAffineOpen`など既存の利用箇所に影響しない(型が同じ)。
+
+集計は引き続き10/24——§4は引き続き0/2。
