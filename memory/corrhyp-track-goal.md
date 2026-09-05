@@ -2271,3 +2271,17 @@ descend2をA := A'で使えば無料で一般化できる(根拠:
 次の一手: descend2の「底が動く版」を薄いラッパとして書き、descendPieceRの
 Uについての関手性(V ⊆ Uに沿った制限写像のRレベル版)を構成する。
 集計は引き続き10/24——§4は0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き21
+exists_mvPolynomial_quotient_ringHom_descend2_of_map完成(commit f0d4f0fb、
+FieldLimit.lean、sorry無し、Instance4ビルド0エラー)。descend2の「底環が
+動く版」で、証明は関係式を先にφで押し出して既存descend2へ帰着するだけ(15行)。
+
+これで新設計(続き19)のf i jを作る材料が揃った: 生成元の行き先ψはℝレベルの
+制限写像Γ(C,piece(U_i))→Γ(C,piece(U_i⊓U_j))から取り、関係式が落ちることは
+ℝレベルで自明、この補題で有限段階R'へ降ろすとR'レベルの環準同型が得られ、
+Specを取ればf i j : V (i,j) ⟶ U iになる。
+
+次の一手: この補題へdescendPieceRのデータ(pieceAlgebra_relation_descend_q₀)
+をspecializeしてf i jを構成する。その後に残るのは開埋め込み性(U_i⊓U_jが
+U_iの基本開の場合は局所化の議論で押さえられる見込み)。集計は10/24——§4は0/2。

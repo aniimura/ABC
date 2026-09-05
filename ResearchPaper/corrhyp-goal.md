@@ -5072,3 +5072,39 @@ baseChange`(1段の`MvPolynomial`表示)も、`f i j`の生成元の行き先を
 集計は引き続き10/24——§4は引き続き0/2。次の一手は、`descend2`の
 「底が動く版」を薄いラッパとして書き、`descendPieceR`の`U`についての
 関手性(`V ⊆ U`に沿った制限写像の`R`レベル版)を構成すること。
+
+## 2026-09-05夜さらに続き21: 新設計の`f i j`に要る「底環が動く版」の
+降下補題を完成
+
+続き20で見立てたとおり、`exists_mvPolynomial_quotient_ringHom_descend2`の
+**底環が動く版**を薄いラッパとして完成させた(`FieldLimit.lean`、
+commit `f0d4f0fb`、`sorry`無し、`lake build ABC3.Found.CorrHyp.Instance4`
+0エラー):
+
+```
+theorem exists_mvPolynomial_quotient_ringHom_descend2_of_map
+    (A A' : Type) … (φ : A →ₐ[ℚ] A') (R R₂ : FgSubalgebra ℚ ℝ)
+    (q : κ → MvPolynomial ι (A ⊗[ℚ] R.1)) (q₂ : κ' → MvPolynomial ι' (A' ⊗[ℚ] R₂.1))
+    (ψ : ι → MvPolynomial ι' (A' ⊗[ℚ] ℝ))
+    (hψ : ∀ k, aeval ψ (map (φ ⊗ val R) (q k)) ∈ span (range (map (id ⊗ val R₂) ∘ q₂))) :
+    ∃ R' (hR : R ≤ R') (hR₂ : R₂ ≤ R') (ev : ι → MvPolynomial ι' (A' ⊗[ℚ] R'.1)),
+      (∀ i, map (id ⊗ val R') (ev i) = ψ i) ∧
+      (∀ k, aeval ev (map (φ ⊗ inclusion hR) (q k)) ∈ span (range (map (id ⊗ inclusion hR₂) ∘ q₂)))
+```
+
+証明は見立てどおり**関係式を先に`φ`で押し出して既存の`descend2`へ帰着**
+するだけ(15行)。鍵の恒等式は
+`(map (id A') (val R)) ∘ (map φ (id R)) = map φ (val R)`。
+
+**これで新設計(続き19)の`f i j`を作る材料が揃った**:
+- 生成元の行き先`ψ`(ℝレベル)は、`Γ(C,piece(U_i))→Γ(C,piece(U_i ⊓ U_j))`
+  の制限写像から取る。
+- その`ψ`が関係式を落とすことはℝレベルで自明(制限写像は環準同型だから)。
+- この補題で有限段階`R'`へ降ろすと、`R'`レベルの環準同型
+  `MvPolynomial ι (A⊗R'.1)⧸(q) → MvPolynomial ι' (A'⊗R'.1)⧸(q₂)`が得られ、
+  `Spec`を取れば`f i j : V (i,j) ⟶ U i`になる。
+
+集計は引き続き10/24——§4は引き続き0/2。次の一手は、この補題へ
+`descendPieceR`のデータ(`pieceAlgebra_relation_descend_q₀`)を実際に
+specialize して`f i j`を構成すること。その後に残るのは**開埋め込み性**
+(`U_i ⊓ U_j`が`U_i`の基本開である場合は局所化の議論で押さえられる見込み)。
