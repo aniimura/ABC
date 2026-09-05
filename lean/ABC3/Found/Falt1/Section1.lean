@@ -1,6 +1,7 @@
 import ABC3.Found.Falt1.Lemma11
 import Mathlib.Analysis.SpecificLimits.Basic
 import Mathlib.RingTheory.DiscreteValuationRing.Basic
+import Mathlib.RingTheory.LocalRing.Length
 
 /-!
 # [Falt1] Chapter I §1 —— `Theorem 1.2` の最終段(`δₙ → 0`)(2026-09-05)
@@ -334,5 +335,38 @@ example : Filter.Tendsto (fun n : ℕ => (1/2 : ℝ)^n) Filter.atTop (nhds 0) :=
   · have hle : ((1:ℝ)/2)^n ≤ 1 := pow_le_one₀ (by norm_num) (by norm_num)
     rw [Nat.cast_zero, zero_add, div_one, min_eq_right hle, mul_one]
   · rw [Nat.cast_zero, zero_add, pow_succ]; ring_nf; linarith
+
+/-! ### 事実 (a) の材料——`Lemma 1.1` を基底変換する
+
+事実 (a)(`length(ker) − length(coker) = (δₙ − δ_{n+1})·e`)は
+
+* 指数の加法性 `length_ker_add_target`(上)
+* 源 `M₁ = Ω_{Wₙ/Vₙ} ⊗_{Wₙ} W_{n+1}` の長さ = `δₙ·e`
+* 標的 `M₃ = Ω_{W_{n+1}/V_{n+1}}` の長さ = `δ_{n+1}·e`
+
+の 3 つで出る。真ん中が本節の `length_baseChange_kaehler` で、
+`Lemma 1.1`(証明済み)と mathlib の `IsLocalRing.length_baseChange`
+(**在庫にあった**)を繋ぐだけである。標的の方は `Lemma 1.1` を
+そのまま `(V_{n+1}, W_{n+1})` に適用すればよい。 -/
+
+open IsLocalRing in
+/-- **`Lemma 1.1` を基底変換した形**。
+`length_{W'}(W' ⊗_W Ω[W⁄V]) = length_W(W/𝔡) · length_{W'}(W'/𝔪_W W')`。
+右の因子が `α ↦ length(W'/p^α W')` の比例定数 `e` に当たる。 -/
+theorem length_baseChange_kaehler {Z V K L W W' : Type*} [CommRing Z] [CommRing V]
+    [IsDedekindDomain V] [Field K] [Algebra V K] [IsFractionRing V K] [Field L] [Algebra K L]
+    [FiniteDimensional K L] [Algebra.IsSeparable K L] [CommRing W] [Algebra W L] [Algebra V W]
+    [Algebra V L] [IsScalarTower V K L] [IsScalarTower V W L] [IsIntegralClosure W V L]
+    [IsDedekindDomain W] [Module.IsTorsionFree V W] [Algebra Z V] [Algebra Z W]
+    [IsScalarTower Z V W]
+    [IsLocalRing W] [CommRing W'] [IsLocalRing W'] [Algebra W W']
+    [IsLocalHom (algebraMap W W')] [Module.Flat W W']
+    (w : W) (hint : IsIntegral V w) (hadjoin : Algebra.adjoin V ({w} : Set W) = ⊤)
+    (hw : Algebra.adjoin K ({(algebraMap W L) w} : Set L) = ⊤) :
+    Module.length W' (TensorProduct W W' Ω[W⁄V])
+      = Module.length W (W ⧸ differentIdeal V W)
+        * Module.length W' (W' ⧸ Ideal.map (algebraMap W W') (maximalIdeal W)) := by
+  rw [IsLocalRing.length_baseChange W W' Ω[W⁄V],
+    (lemma_1_1_falt1 (Z := Z) w hint hadjoin hw).2]
 
 end ABC3.Found.Falt1
