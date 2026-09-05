@@ -5346,7 +5346,57 @@ theorem tst (w : 𝒪[(adjoinField K x).carrier]) :
 展開しきれない。#59 の「1 層なら速い」の**外側**にある。
 
 **対処**: 越えようとしない。**片側に寄せて書き直す**。
-例: `Gal(K(x)/K)` の整数環への作用は、`algEquivIntegers`(`adjoinIntegers` 側)
-と合成せず、`Found/PGC/UnramifiedFrobenius.lean::integersEquivOf` のように
-`𝒪[(adjoinField K x).carrier]` 側で**直接**書けば通る。
-`adjoinIntegers` 側の定理を使いたければ、その定理自体を書き直すこと。
+
+### ★訂正(2026-09-05 追記): 寄せる先は `adjoinIntegers` 側
+
+上の表(212 秒 / 126 秒)は実測そのままで正しい。しかし当初ここには
+「`𝒪[(adjoinField K x).carrier]` 側で直接書けば通る」と書いていた——
+**寄せる側が逆だった**。
+
+`Gal(K(x)/K)` の整数環・剰余体への作用は、`UnramifiedExtension.lean` に
+`algEquivIntegers`・`residueAlgEquiv`・`residueGalHom` として
+**すでに `adjoinIntegers` 側で完結して存在する**。`exists_frobenius` が
+与える性質(`residueAlgEquiv K x σ z = z ^ q`)も `adjoinIntegers` 側。
+それを `𝒪[·]` 側で作り直したのが旧 `UnramifiedFrobenius.lean::integersEquivOf`
+/ `residueEquivOf` で、**二重化はそこで発生し、橋を渡ろうとした瞬間に
+kernel が止まっていた**。橋は渡る必要が無かった。
+
+**判定法**: 越えられない境界に見えたら、「どちらが橋を必要としないか」を
+先に数える。**`𝒪[·]` を一度も書かなければこの壁は発生しない。**
+旧 `integersEquivOf` / `residueEquivOf` は削除し、
+`Found/PGC/UnramifiedFrobenius.lean` は `algEquivIntegers` /
+`residueAlgEquiv` だけで書き直した(`𝒪[(adjoinField K x).carrier]` を
+一度も書かない)。書き直した結果は
+`algEquivIntegers_eq_pow_of_pow_eq_one` まで通っている。
+
+## 70. `linarith` / `norm_num at h` は**文脈全体**を前処理する——巨大な型の項が居ると止まる
+
+`↥K⟮x⟯`(スペクトルノルム由来の `NormedField` インスタンス)の元が
+文脈に居るゴールで、最後の 1 行が算数でも次のように書くと**返って来ない**:
+
+```lean
+· have h2 : (0:ℝ) ≤ ‖ζ‖ := norm_nonneg ζ
+  rw [h.1] at h2      -- h2 : (0:ℝ) ≤ -1
+  linarith            -- ← 400 秒経っても返らない(REPL を落とすしかない)
+```
+
+`norm_num at h2` でも同じ(600 秒で打ち切り、2026-09-05 実測)。
+`h2 : (0:ℝ) ≤ -1` は自明なのに止まるのは、`linarith` / `norm_num at` が
+**ゴールだけでなく文脈の全仮説を前処理する**ため——同じ文脈に
+`ζ : ↥K⟮x⟯`・`hζ : ζ ^ m = 1`・`h1 : ‖ζ‖ ^ m = 1` が居ると、
+そこで `whnf` が爆発する。
+
+**対処**: 文脈を見ないで済む形、つまり**項**で書く。同じ枝が **0.82 秒**になる:
+
+```lean
+· exact absurd (h.1 ▸ norm_nonneg ζ) (by norm_num)
+```
+
+`by norm_num` のゴールは `¬ ((0:ℝ) ≤ -1)` だけで、`at` が付いていないので
+文脈を触らない。#65(巨大な型では `rw` が heartbeats を食う)の
+「自動化タクティクは文脈のサイズに比例して重い」という同じ話の、
+決定手続き側の現れ。
+
+**目印**: `Found/PGC/` の `↥K⟮x⟯`・`K.closure`・`𝒪[·]` が文脈に居る証明で
+`linarith` / `nlinarith` / `positivity` / `norm_num at` / `omega` を
+書こうとしたら、まず項で書けないかを見る。
