@@ -1,0 +1,106 @@
+import ABC3.Found.Falt1.AlmostDerivation
+import Mathlib.Data.ZMod.Basic
+
+/-!
+# [Falt1] `Theorem 2.3` への第 1 段——almost 冪等元の持ち上げ(2026-09-05)
+
+原典: G. Faltings, *p-Adic Hodge Theory*(1988)、Chapter I §2、
+`Theorem 2.3`(物理 p.7-8 = 印字 p.260-261)。
+
+> *2.3. Theorem. Suppose `I ⊂ A` is a nilpotent ideal, `B` an almost étale
+> covering of `Ā = A/I`, `B = Ā + mB`. Then there exists an almost étale
+> covering `B̃` of `A` such that `B̃ ⊗_A Ā ≅ B` modulo `p`-torsion.*
+
+原文の証明は 5 段からなる:
+
+1. `I² = 0` としてよい。
+2. **`B` は自由加群 `Ā^r` の直和因子「`p^ε` を除いて」**——`ē² = p^ε ē` を
+   満たす `r×r` 行列 `ē` があって `B = Ā^r/(p^ε − ē)(Ā^r)`(`p`-捩れを除く)。
+3. **"Tripling `ε`"**——`ē` は `A` 上の行列 `e` に `e² = p^ε e` を満たす形で
+   持ち上がる。★**本ファイルはこの段を閉じる。**
+4. `B_ε := A^r/(p^ε − e)(A^r)` は `p^ε` を除いて `A`-射影的、
+   乗法 `m` は `m_ε : B_ε ⊗_A B_ε → B_ε` に持ち上がる。
+5. 結合律の障害は `H³(B/Ā)` の類。`ε` を細かくした `C_σ := A + p^σ B_ε` の
+   増大列の合併が求める `B̃`。
+
+## 本ファイルの内容(第 3 段)
+
+鍵は **可換環 `A[X]` の 1 つの恒等式**である:
+
+    (3sX² − 2X³)² − s³·(3sX² − 2X³) = (4X² − 4sX − 3s²)·(X² − sX)²
+
+つまり `e := 3s·u² − 2u³`(古典的な冪等元持ち上げ `3u² − 2u³` に `s` を
+掛けたもの)は、「冪等からのずれ」`n := u² − s·u` の**平方**を法として
+`e² = s³·e` を満たす。`I² = 0` なら `n² = 0` なので、これは厳密な等式になる
+——`s = p^ε` と取れば、これがまさに Faltings の *"Tripling `ε`"* である
+(指数が `ε` から `3ε` に増える)。
+
+`u` は行列環(非可換)の元なので、恒等式は `Polynomial.eval₂RingHom'`
+(係数と可換な元での評価)を通して移す。
+-/
+
+namespace ABC3.Found.Falt1
+
+universe u
+
+open Polynomial in
+/-- `e := 3sX² − 2X³` について
+`e² − s³e = (4X²−4sX−3s²)·(X²−sX)²`。可換環 `A[X]` での恒等式。 -/
+theorem almost_idem_poly {A : Type u} [CommRing A] (s : A) :
+    (3 * C s * X^2 - 2 * X^3)^2 - C s^3 * (3 * C s * X^2 - 2 * X^3)
+      = (4 * X^2 - 4 * C s * X - 3 * C s^2) * (X^2 - C s * X)^2 := by
+  ring
+
+open Polynomial in
+/-- **almost 冪等元の持ち上げ(核心の計算)**。`u` の「冪等からのずれ」
+`n := u² − s·u` が `n² = 0` を満たすなら、`e := 3s·u² − 2u³` は
+`e² = s³·e` を**厳密に**満たす。`S` は非可換でよい(行列環)。 -/
+theorem almost_idem_lift {A S : Type u} [CommRing A] [Ring S] [Algebra A S]
+    (s : A) (u : S) (hn : (u^2 - algebraMap A S s * u)^2 = 0) :
+    (3 * algebraMap A S s * u^2 - 2 * u^3)^2
+      = algebraMap A S (s^3) * (3 * algebraMap A S s * u^2 - 2 * u^3) := by
+  set φ : Polynomial A →+* S :=
+    Polynomial.eval₂RingHom' (algebraMap A S) u
+      (fun r => Algebra.commute_algebraMap_left r u) with hφ
+  have h := congrArg φ (almost_idem_poly (A := A) s)
+  simp only [hφ, Polynomial.eval₂RingHom'_apply, map_sub, map_mul, map_pow, map_ofNat,
+    Polynomial.eval₂_C, Polynomial.eval₂_X] at h
+  rw [hn, mul_zero, sub_eq_zero] at h
+  rw [h, map_pow]
+
+/-- **almost 冪等元は平方零イデアルに沿って持ち上がる**——Faltings の
+*"Tripling `ε`"*(物理 p.7 = 印字 p.260)。
+
+`ē² = s·ē` を満たす `ē` は、`e² = s³·e` を満たす `e` に持ち上がり、
+`e` の像はちょうど `s²·ē` になる。`s = p^ε` と取れば「`ε` を 3 倍すれば
+`ē` は持ち上がる」という原文の主張そのもの。 -/
+theorem exists_almost_idem_lift {A S S' : Type u} [CommRing A] [Ring S] [Ring S']
+    [Algebra A S] [Algebra A S'] (π : S →ₐ[A] S') (hπ : Function.Surjective π)
+    (hker : ∀ x y : S, π x = 0 → π y = 0 → x * y = 0)
+    (s : A) (ebar : S') (hebar : ebar^2 = algebraMap A S' s * ebar) :
+    ∃ e : S, e^2 = algebraMap A S (s^3) * e
+      ∧ π e = algebraMap A S' (s^2) * ebar := by
+  obtain ⟨u, hu⟩ := hπ ebar
+  have hn0 : π (u^2 - algebraMap A S s * u) = 0 := by
+    rw [map_sub, map_pow, map_mul, AlgHom.commutes, hu, hebar, sub_self]
+  have hn : (u^2 - algebraMap A S s * u)^2 = 0 := by
+    rw [sq]; exact hker _ _ hn0 hn0
+  refine ⟨3 * algebraMap A S s * u^2 - 2 * u^3, almost_idem_lift s u hn, ?_⟩
+  have h3 : ebar^3 = (algebraMap A S' s)^2 * ebar := by
+    rw [pow_succ, hebar, mul_assoc, ← sq, hebar, ← mul_assoc, ← sq]
+  simp only [map_sub, map_mul, map_pow, map_ofNat, AlgHom.commutes, hu]
+  rw [hebar, h3]
+  simp only [sq, mul_assoc]
+  rw [← sub_mul, show (3:S') - 2 = 1 by norm_num, one_mul]
+
+/-- 非空虚性——`ℤ/4 ↠ ℤ/2`(核 `(2)` は平方零)。 -/
+example : ∃ e : ZMod 4, e^2 = algebraMap ℤ (ZMod 4) ((1:ℤ)^3) * e
+    ∧ (ZMod.castHom (by norm_num) (ZMod 2)).toIntAlgHom e
+      = algebraMap ℤ (ZMod 2) ((1:ℤ)^2) * (1 : ZMod 2) := by
+  refine exists_almost_idem_lift ((ZMod.castHom (by norm_num) (ZMod 2)).toIntAlgHom)
+    ?_ ?_ 1 1 (by decide)
+  · intro x
+    exact ⟨(ZMod.val x : ZMod 4), by revert x; decide⟩
+  · decide
+
+end ABC3.Found.Falt1
