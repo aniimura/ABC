@@ -3730,6 +3730,112 @@ theorem pieceRingEquiv_appLE_snd (X : Over BaseK) (U : X.left.Opens) (hU : IsAff
   refine Eq.trans (Category.assoc _ _ _) ?_
   exact piecePullbackIso_inv_isoSpec_appLE_snd X U hU
 
+set_option maxHeartbeats 1000000 in
+open scoped TensorProduct in
+/-- `pieceRingEquiv.symm`の`a ⊗ₜ 1`での値(元レベル)——`pieceRingEquiv_appLE`
+(`CommRingCat`の射の等式)を元へ適用して`symm`で移しただけ。 -/
+theorem pieceRingEquiv_symm_tmul_one (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U)
+    (a : Γ(X.left, U)) :
+    letI := pieceAlgebra X U hU
+    (pieceRingEquiv X U hU).symm (a ⊗ₜ[ℚ] (1 : ℝ))
+      = ((pullback.fst X.hom toBaseK).appLE U (pullback.fst X.hom toBaseK ⁻¹ᵁ U) le_rfl).hom a := by
+  letI := pieceAlgebra X U hU
+  have h := pieceRingEquiv_appLE X U hU
+  have h2 := congrArg (fun (t : Γ(X.left, U) ⟶ CommRingCat.of (Γ(X.left, U) ⊗[ℚ] ℝ)) => t.hom a) h
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h2
+  refine Eq.trans (congrArg (pieceRingEquiv X U hU).symm h2.symm) ?_
+  exact (pieceRingEquiv X U hU).symm_apply_apply _
+
+set_option maxHeartbeats 1000000 in
+open scoped TensorProduct in
+/-- `pieceRingEquiv.symm`の`1 ⊗ₜ r`での値(元レベル)——`pieceRingEquiv_appLE_snd`
+を元へ適用し、`ΓSpecIso`の逆で`r`を`Γ(specK,⊤)`の元へ持ち上げてから移す。 -/
+theorem pieceRingEquiv_symm_one_tmul (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U)
+    (r : ℝ) :
+    letI := pieceAlgebra X U hU
+    (pieceRingEquiv X U hU).symm ((1 : Γ(X.left, U)) ⊗ₜ[ℚ] r)
+      = ((pullback.snd X.hom toBaseK).appLE ⊤ (pullback.fst X.hom toBaseK ⁻¹ᵁ U) le_top).hom
+          ((Scheme.ΓSpecIso (CommRingCat.of ℝ)).inv.hom r) := by
+  letI := pieceAlgebra X U hU
+  have h := pieceRingEquiv_appLE_snd X U hU
+  have h2 := congrArg (fun (t : Γ(specK, ⊤) ⟶ CommRingCat.of (Γ(X.left, U) ⊗[ℚ] ℝ)) =>
+    t.hom ((Scheme.ΓSpecIso (CommRingCat.of ℝ)).inv.hom r)) h
+  have hiso : (Scheme.ΓSpecIso (CommRingCat.of ℝ)).hom.hom
+      ((Scheme.ΓSpecIso (CommRingCat.of ℝ)).inv.hom r) = r := by
+    have := congrArg (fun (t : CommRingCat.of ℝ ⟶ CommRingCat.of ℝ) => t.hom r)
+      (Scheme.ΓSpecIso (CommRingCat.of ℝ)).inv_hom_id
+    simpa using this
+  have hRHS : ((Scheme.ΓSpecIso (CommRingCat.of ℝ)).hom ≫
+      CommRingCat.ofHom (Algebra.TensorProduct.includeRight (R := ℚ)
+        (A := Γ(X.left, U)) (B := ℝ)).toRingHom).hom
+      ((Scheme.ΓSpecIso (CommRingCat.of ℝ)).inv.hom r)
+      = (1 : Γ(X.left, U)) ⊗ₜ[ℚ] r := by
+    show (Algebra.TensorProduct.includeRight (R := ℚ) (A := Γ(X.left, U)) (B := ℝ)).toRingHom
+      ((Scheme.ΓSpecIso (CommRingCat.of ℝ)).hom.hom
+        ((Scheme.ΓSpecIso (CommRingCat.of ℝ)).inv.hom r)) = _
+    rw [hiso]
+    rfl
+  refine Eq.trans (congrArg (pieceRingEquiv X U hU).symm (h2.trans hRHS).symm) ?_
+  exact (pieceRingEquiv X U hU).symm_apply_apply _
+
+set_option maxHeartbeats 1000000 in
+open scoped TensorProduct in
+/-- **`pieceRingEquiv.symm`の`U`についての自然性(完成形)**——
+`V ≤ U`のとき、`Γ(ExtX,piece(U))`への同一視と制限写像が可換:
+
+```
+restr_ExtX (pieceRingEquiv_U.symm (a ⊗ₜ r)) = pieceRingEquiv_V.symm ((restr_X a) ⊗ₜ r)
+```
+
+証明は純テンソルを`a ⊗ₜ r = (a ⊗ₜ 1)(1 ⊗ₜ r)`と分解し、2成分それぞれに
+`pieceRingEquiv_symm_tmul_one`・`pieceRingEquiv_symm_one_tmul`を当ててから、
+`appLE`側の自然性(`piece_appLE_naturality`と`Scheme.Hom.appLE_map`)で移すだけ。
+
+これで`Lemma 4.1`の`GlueData`を「`V (i,j) := U_i ⊓ U_j`の片」で組む新設計
+(`corrhyp-goal.md`の`続き19`)において、`f i j`を
+`exists_mvPolynomial_quotient_ringHom_descend2_of_map`(`FieldLimit.lean`)で
+降ろすのに要る**代数構造の可換性**が手に入る——`Γ(C,piece(U))`の
+`A_U⊗ℝ`-代数構造は`α.appLE ∘ pieceRingEquiv.symm`なので、この自然性と
+`Scheme.Hom.appLE_preimage_naturality`(`α`側)を合わせればよい。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem pieceRingEquiv_symm_naturality (X : Over BaseK) (U V : X.left.Opens)
+    (hU : IsAffineOpen U) (hV : IsAffineOpen V) (hVU : V ≤ U)
+    (a : Γ(X.left, U)) (r : ℝ) :
+    letI := pieceAlgebra X U hU
+    letI := pieceAlgebra X V hV
+    (((ExtF.obj X).left).presheaf.map (homOfLE (show
+        (pullback.fst X.hom toBaseK ⁻¹ᵁ V : ((ExtF.obj X).left).Opens)
+        ≤ pullback.fst X.hom toBaseK ⁻¹ᵁ U from fun _ hx => hVU hx)).op).hom
+      ((pieceRingEquiv X U hU).symm (a ⊗ₜ[ℚ] r))
+    = (pieceRingEquiv X V hV).symm
+        ((X.left.presheaf.map (homOfLE hVU).op).hom a ⊗ₜ[ℚ] r) := by
+  letI := pieceAlgebra X U hU
+  letI := pieceAlgebra X V hV
+  have hsplitU : (a ⊗ₜ[ℚ] r : Γ(X.left, U) ⊗[ℚ] ℝ)
+      = (a ⊗ₜ[ℚ] (1:ℝ)) * ((1 : Γ(X.left, U)) ⊗ₜ[ℚ] r) := by
+    rw [Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
+  have hsplitV : ((X.left.presheaf.map (homOfLE hVU).op).hom a ⊗ₜ[ℚ] r : Γ(X.left, V) ⊗[ℚ] ℝ)
+      = ((X.left.presheaf.map (homOfLE hVU).op).hom a ⊗ₜ[ℚ] (1:ℝ)) *
+        ((1 : Γ(X.left, V)) ⊗ₜ[ℚ] r) := by
+    rw [Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
+  rw [hsplitU, hsplitV, map_mul, map_mul,
+    pieceRingEquiv_symm_tmul_one, pieceRingEquiv_symm_one_tmul,
+    pieceRingEquiv_symm_tmul_one, pieceRingEquiv_symm_one_tmul]
+  refine Eq.trans (((ExtF.obj X).left.presheaf.map (homOfLE (show
+      (pullback.fst X.hom toBaseK ⁻¹ᵁ V : ((ExtF.obj X).left).Opens)
+      ≤ pullback.fst X.hom toBaseK ⁻¹ᵁ U from fun _ hx => hVU hx)).op).hom.map_mul _ _) ?_
+  congr 1
+  · exact congrFun (congrArg (fun (t : Γ(X.left, U) ⟶ Γ((ExtF.obj X).left,
+      pullback.fst X.hom toBaseK ⁻¹ᵁ V)) => (CommRingCat.Hom.hom t : Γ(X.left, U) → _))
+      (piece_appLE_naturality X U V hVU)) a
+  · exact congrFun (congrArg (fun (t : Γ(specK, ⊤) ⟶ Γ((ExtF.obj X).left,
+      pullback.fst X.hom toBaseK ⁻¹ᵁ V)) => (CommRingCat.Hom.hom t : Γ(specK, ⊤) → _))
+      (Scheme.Hom.appLE_map (pullback.snd X.hom toBaseK) (le_top) (homOfLE (show
+        (pullback.fst X.hom toBaseK ⁻¹ᵁ V : ((ExtF.obj X).left).Opens)
+        ≤ pullback.fst X.hom toBaseK ⁻¹ᵁ U from fun _ hx => hVU hx)).op))
+      ((Scheme.ΓSpecIso (CommRingCat.of ℝ)).inv.hom r)
+
 /-- `piecesOpenCover`の脚`(e i).inv ≫ X.homOfLE (h i)`同士のpullbackは、
 `e i`・`e j`をpullbackの脚から追い出す(`pullbackHomIsoLeft`+
 `pullbackSymmetry`、いずれも既存の一般的事実)ことで、`X.homOfLE`同士
