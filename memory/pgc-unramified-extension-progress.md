@@ -1382,3 +1382,29 @@ import していた(docstring で `FilteredGroup` に言及するだけで、**�
 
 `IsNaturalFiltration` の仮説は、Herbrand の定理が入って
 `RamificationFiltration` が本物として構成された時点で落ちる。
+
+## ★★★★★★★★★★★★★★2026-09-05: Definition 3.2 も空虚だった——「開**部分群**」の条件が落ちていた
+
+`Check/PGC/Def32Degenerate.lean`(新規)+ `Skeleton/PGC/Section3.lean` の
+`IsUniformizing` 修理。
+
+原文は "some open **subgroup** I of U_K" だが、旧形は `I : Set K.carrier` に
+`IsOpen I` と `I ⊆ U_K` しか課しておらず **`I = ∅` が許されていた**。
+空集合では `∀ x ∈ I, …` が空虚に真なので、`E := K.carrier`・`ι := id` と
+取れば **`IsUniformizing` はどんな `ρ` でも常に成り立つ**
+(`isUniformizingOld_trivial`、sorry 無し)。Cor 3.3 の `↔` も自明に真になる。
+
+**修理**: `1 ∈ I`・積で閉じる・逆元で閉じる を追加(Lemma 4.1 が `1 ∈ I` を
+課していたのと同じ形)。
+
+**識別力の確認**: `not_isUniformizing_one` ——自明な表現 `ρ = 1` は
+uniformizing に**ならない**。`I` が開で `1 ∈ I` なら `1` の近傍を含み、
+体準同型 `ι` は単射なので `ι x = 1` は `x = 1` を強いるが、`K` は非離散
+(`NormedField.exists_norm_lt`)。
+
+★これで **落とした条件が主張を偽にするか自明にするかのどちらかになる** 例は
+3 つ目(`InertiaDegeneracy`・`Theorem42Degenerate`・本件)。
+
+★配管の罠: `Check/` の docstring に原文を引用するとき、`check.mjs` が
+PDF と**逐語照合**する。強調の `**` を引用文の中に入れると照合が落ちる
+(「layout で 69/162 文字まで一致」と出た)。強調は引用の**外**に書くこと。

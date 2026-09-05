@@ -126,10 +126,28 @@ U_K は本来 K^× の部分群であり、Γ_K の部分群ではない。
 
 ここでは相互律を明示的なパラメータ `toGal : U_K → Γ_K`(未構築の辞書、まだ本物には
 なっていない)として受け取ることで、定義全体を条件付きで well-typed にする
-——`toGal` が本物になれば(Interface が実装されれば)この定義はそのまま使える。 -/
+——`toGal` が本物になれば(Interface が実装されれば)この定義はそのまま使える。
+
+## ★★★2026-09-05: 「開**部分群**」の条件が落ちていた(修理)
+
+原文は "some open **subgroup** I of U_K" と言っているが、以前の形は
+`I : Set K.carrier` に `IsOpen I` と `I ⊆ U_K` しか課しておらず、
+**`I = ∅` が許されていた**。空集合では `∀ x ∈ I, …` が空虚に真になるので、
+`E := K.carrier`・`ι := id` と取れば `IsUniformizing` は**どんな `ρ` でも
+常に成り立つ**——定義が内容を失っていた
+(`Check/PGC/Def32Degenerate.lean::isUniformizingOld_trivial`、`sorry` 無し)。
+
+**修理**: 原文どおり `I` が `U_K` の**部分群**であること
+(`1 ∈ I`・積で閉じる・逆元で閉じる)を課した。これで定義は識別力を持つ
+——例えば自明な表現 `ρ = 1` は uniformizing に**ならない**
+(`Check/PGC/Def32Degenerate.lean::not_isUniformizing_one`)。
+`Lemma 4.1`(`Section4.lean`)が `1 ∈ I` を課していたのと同じ形。 -/
 def IsUniformizing (K : PAdicLocalField p) (E : Type*) [Field E] [Algebra ℚ_[p] E]
     (toGal : {x : K.carrier // ‖x‖ = (1 : ℝ)} → K.absGal) (ρ : K.absGal →* Eˣ) : Prop :=
   ∃ (I : Set K.carrier) (hIU : I ⊆ {x : K.carrier | ‖x‖ = 1}) (_hopen : IsOpen I)
+    (_hone : (1 : K.carrier) ∈ I)
+    (_hmul : ∀ a ∈ I, ∀ b ∈ I, a * b ∈ I)
+    (_hinv : ∀ a ∈ I, a⁻¹ ∈ I)
     (ι : K.carrier →+* E), ∀ x (hx : x ∈ I), ((ρ (toGal ⟨x, hIU hx⟩) : Eˣ) : E) = ι x
 
 def IsUniformizing.src : Source :=
