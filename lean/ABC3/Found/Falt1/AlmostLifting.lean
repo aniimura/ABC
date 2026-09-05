@@ -693,4 +693,497 @@ theorem thm_2_2_honest_lift_on_ideal {A B C : Type u}
     exists_honest_lift_on_ideal I φ s ψ hψ hmul hsBtors
   exact ⟨s, hsm, φ₀, hmulφ, haddφ, hliftφ⟩
 
+/-! ## 族の貼り合わせ——**`φ₀ : mB → C` の構成**
+
+Faltings の *"the different `φ_ε` glue together to give a multiplicative
+`A`-linear map `φ₀ : mB → C`"*(物理 p.7)を実行する段。
+
+`mB` の元は `{z | ∃ k b, lev k • b = z}` として表す。塔 `PDivTower` では
+水準が整除で全順序なので、2つの元は常に**共通の水準**の代表元に書き直せる
+(`exists_common_level`)——これが「有限和を1つの積に書ける」ことに当たり、
+貼り合わせを純粋に集合論的な操作にしている。 -/
+
+open Classical in
+/-- **貼り合わせ本体**。整合な族 `{Ψ k}`(水準 `lev k`、`k ≤ k'` のとき
+`lev k' ∣ lev k`)から、`Φ (lev k • b) = Ψ k b` を全ての `k` について
+満たす関数 `Φ` を得る。交差水準での well-defined 性は整合性 `hcompat` と
+`B` の捩れ無し `hBtors` から出る。 -/
+theorem exists_glued_lift {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C]
+    (lev : ℕ → A) (Ψ : ℕ → (B →ₗ[A] C))
+    (hdvd : ∀ k k' : ℕ, k ≤ k' → ∃ d : A, lev k = lev k' * d)
+    (hcompat : ∀ (k k' : ℕ) (d : A), k ≤ k' → lev k = lev k' * d → Ψ k = d • Ψ k')
+    (hBtors : ∀ (k : ℕ) (b : B), lev k • b = 0 → b = 0) :
+    ∃ Φ : B → C, ∀ (k : ℕ) (b : B), Φ (lev k • b) = Ψ k b := by
+  have hwd_le : ∀ (k₁ k₂ : ℕ) (b₁ b₂ : B), k₁ ≤ k₂ →
+      lev k₁ • b₁ = lev k₂ • b₂ → Ψ k₁ b₁ = Ψ k₂ b₂ := by
+    intro k₁ k₂ b₁ b₂ hle heq
+    obtain ⟨d, hd⟩ := hdvd k₁ k₂ hle
+    have hΨ := hcompat k₁ k₂ d hle hd
+    have hsm : lev k₂ • (d • b₁) = lev k₂ • b₂ := by
+      rw [smul_smul, ← hd]; exact heq
+    have hsub : lev k₂ • (d • b₁ - b₂) = 0 := by rw [smul_sub, hsm, sub_self]
+    have hb : d • b₁ - b₂ = 0 := hBtors k₂ _ hsub
+    have hb2 : d • b₁ = b₂ := by linear_combination hb
+    rw [hΨ]
+    show d • Ψ k₂ b₁ = Ψ k₂ b₂
+    rw [← map_smul, hb2]
+  have hwd : ∀ (k₁ k₂ : ℕ) (b₁ b₂ : B),
+      lev k₁ • b₁ = lev k₂ • b₂ → Ψ k₁ b₁ = Ψ k₂ b₂ := by
+    intro k₁ k₂ b₁ b₂ heq
+    rcases le_total k₁ k₂ with h | h
+    · exact hwd_le k₁ k₂ b₁ b₂ h heq
+    · exact (hwd_le k₂ k₁ b₂ b₁ h heq.symm).symm
+  refine ⟨fun z => if h : ∃ (k : ℕ) (b : B), lev k • b = z then
+    Ψ h.choose (h.choose_spec.choose) else 0, ?_⟩
+  intro k b
+  have hex : ∃ (k' : ℕ) (b' : B), lev k' • b' = lev k • b := ⟨k, b, rfl⟩
+  show (if h : ∃ (k' : ℕ) (b' : B), lev k' • b' = lev k • b then
+    Ψ h.choose (h.choose_spec.choose) else 0) = Ψ k b
+  rw [dif_pos hex]
+  exact hwd _ k _ b hex.choose_spec.choose_spec
+
+/-- 2つの元を**共通の水準**の代表元で書き直す(`k := max k₁ k₂` を取るだけ)。 -/
+theorem exists_common_level {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    (lev : ℕ → A) (hdvd : ∀ k k' : ℕ, k ≤ k' → ∃ d : A, lev k = lev k' * d)
+    (k₁ k₂ : ℕ) (b₁ b₂ : B) :
+    ∃ (k : ℕ) (c₁ c₂ : B), lev k • c₁ = lev k₁ • b₁ ∧ lev k • c₂ = lev k₂ • b₂ := by
+  obtain ⟨d₁, hd₁⟩ := hdvd k₁ (max k₁ k₂) (le_max_left _ _)
+  obtain ⟨d₂, hd₂⟩ := hdvd k₂ (max k₁ k₂) (le_max_right _ _)
+  refine ⟨max k₁ k₂, d₁ • b₁, d₂ • b₂, ?_, ?_⟩
+  · rw [smul_smul, ← hd₁]
+  · rw [smul_smul, ← hd₂]
+
+/-- 同一水準での加法性。 -/
+theorem glued_lift_add {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C] (lev : ℕ → A) (Ψ : ℕ → (B →ₗ[A] C)) (Φ : B → C)
+    (hΦ : ∀ (k : ℕ) (b : B), Φ (lev k • b) = Ψ k b) (k : ℕ) (b b' : B) :
+    Φ (lev k • b + lev k • b') = Φ (lev k • b) + Φ (lev k • b') := by
+  rw [← smul_add, hΦ, hΦ, hΦ, map_add]
+
+/-- 同一水準での乗法性(`lift_mul_rep` を経由する)。 -/
+theorem glued_lift_mul {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C] (lev : ℕ → A) (Ψ : ℕ → (B →ₗ[A] C)) (Φ : B → C)
+    (hΦ : ∀ (k : ℕ) (b : B), Φ (lev k • b) = Ψ k b)
+    (hmul : ∀ (k : ℕ) (x y : B), lev k • Ψ k (x * y) = Ψ k x * Ψ k y)
+    (k : ℕ) (b b' : B) :
+    Φ ((lev k • b) * (lev k • b')) = Φ (lev k • b) * Φ (lev k • b') := by
+  rw [lift_mul_rep, hΦ, hΦ, hΦ, map_smul, hmul]
+
+/-- 同一水準で `φ` の持ち上げになっていること。 -/
+theorem glued_lift_quot {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C] (I : Ideal C) (φ : B →ₐ[A] (C ⧸ I))
+    (lev : ℕ → A) (Ψ : ℕ → (B →ₗ[A] C)) (Φ : B → C)
+    (hΦ : ∀ (k : ℕ) (b : B), Φ (lev k • b) = Ψ k b)
+    (hψ : ∀ (k : ℕ) (b : B), Ideal.Quotient.mk I (Ψ k b) = lev k • φ b)
+    (k : ℕ) (b : B) :
+    Ideal.Quotient.mk I (Φ (lev k • b)) = φ (lev k • b) := by
+  rw [hΦ, hψ, map_smul]
+
+/-- 任意の2元での加法性——共通水準に落としてから `glued_lift_add`。 -/
+theorem glued_lift_add_general {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C] (lev : ℕ → A) (Ψ : ℕ → (B →ₗ[A] C)) (Φ : B → C)
+    (hΦ : ∀ (k : ℕ) (b : B), Φ (lev k • b) = Ψ k b)
+    (hdvd : ∀ k k' : ℕ, k ≤ k' → ∃ d : A, lev k = lev k' * d)
+    (z z' : B) (hz : ∃ (k : ℕ) (b : B), lev k • b = z)
+    (hz' : ∃ (k : ℕ) (b : B), lev k • b = z') :
+    Φ (z + z') = Φ z + Φ z' := by
+  obtain ⟨k₁, b₁, rfl⟩ := hz
+  obtain ⟨k₂, b₂, rfl⟩ := hz'
+  obtain ⟨k, c₁, c₂, h1, h2⟩ := exists_common_level lev hdvd k₁ k₂ b₁ b₂
+  rw [← h1, ← h2]
+  exact glued_lift_add lev Ψ Φ hΦ k c₁ c₂
+
+/-- 任意の2元での乗法性——共通水準に落としてから `glued_lift_mul`。 -/
+theorem glued_lift_mul_general {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C] (lev : ℕ → A) (Ψ : ℕ → (B →ₗ[A] C)) (Φ : B → C)
+    (hΦ : ∀ (k : ℕ) (b : B), Φ (lev k • b) = Ψ k b)
+    (hmul : ∀ (k : ℕ) (x y : B), lev k • Ψ k (x * y) = Ψ k x * Ψ k y)
+    (hdvd : ∀ k k' : ℕ, k ≤ k' → ∃ d : A, lev k = lev k' * d)
+    (z z' : B) (hz : ∃ (k : ℕ) (b : B), lev k • b = z)
+    (hz' : ∃ (k : ℕ) (b : B), lev k • b = z') :
+    Φ (z * z') = Φ z * Φ z' := by
+  obtain ⟨k₁, b₁, rfl⟩ := hz
+  obtain ⟨k₂, b₂, rfl⟩ := hz'
+  obtain ⟨k, c₁, c₂, h1, h2⟩ := exists_common_level lev hdvd k₁ k₂ b₁ b₂
+  rw [← h1, ← h2]
+  exact glued_lift_mul lev Ψ Φ hΦ hmul k c₁ c₂
+
+/-- 任意の元で `φ` の持ち上げになっていること。 -/
+theorem glued_lift_quot_general {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C] (I : Ideal C) (φ : B →ₐ[A] (C ⧸ I))
+    (lev : ℕ → A) (Ψ : ℕ → (B →ₗ[A] C)) (Φ : B → C)
+    (hΦ : ∀ (k : ℕ) (b : B), Φ (lev k • b) = Ψ k b)
+    (hψ : ∀ (k : ℕ) (b : B), Ideal.Quotient.mk I (Ψ k b) = lev k • φ b)
+    (z : B) (hz : ∃ (k : ℕ) (b : B), lev k • b = z) :
+    Ideal.Quotient.mk I (Φ z) = φ z := by
+  obtain ⟨k, b, rfl⟩ := hz
+  exact glued_lift_quot I φ lev Ψ Φ hΦ hψ k b
+
+/-- **Faltings の `φ₀ : mB → C`**——整合な族を貼り合わせて得られる、
+`mB` 全体の上で加法的・乗法的な honest な持ち上げ。
+ここで `mB` の元は `{z | ∃ k b, lev k • b = z}` として表している。
+
+これで `Theorem 2.2` の存在側に残るのは **`B = A + mB` を使う最後の拡張**
+(原文の *"`φ₀` maps `p^ε` to an element `x = p^ε + y`(`y ∈ I`)satisfying
+`x² = p^ε x`, hence `p^ε y = 0`"*)だけである。 -/
+theorem exists_lift_on_mB {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C] (I : Ideal C) (φ : B →ₐ[A] (C ⧸ I))
+    (lev : ℕ → A) (Ψ : ℕ → (B →ₗ[A] C))
+    (hdvd : ∀ k k' : ℕ, k ≤ k' → ∃ d : A, lev k = lev k' * d)
+    (hcompat : ∀ (k k' : ℕ) (d : A), k ≤ k' → lev k = lev k' * d → Ψ k = d • Ψ k')
+    (hBtors : ∀ (k : ℕ) (b : B), lev k • b = 0 → b = 0)
+    (hψ : ∀ (k : ℕ) (b : B), Ideal.Quotient.mk I (Ψ k b) = lev k • φ b)
+    (hmul : ∀ (k : ℕ) (x y : B), lev k • Ψ k (x * y) = Ψ k x * Ψ k y) :
+    ∃ Φ : B → C,
+      (∀ (k : ℕ) (b : B), Φ (lev k • b) = Ψ k b) ∧
+      (∀ z z' : B, (∃ (k : ℕ) (b : B), lev k • b = z) → (∃ (k : ℕ) (b : B), lev k • b = z') →
+        Φ (z + z') = Φ z + Φ z') ∧
+      (∀ z z' : B, (∃ (k : ℕ) (b : B), lev k • b = z) → (∃ (k : ℕ) (b : B), lev k • b = z') →
+        Φ (z * z') = Φ z * Φ z') ∧
+      (∀ z : B, (∃ (k : ℕ) (b : B), lev k • b = z) → Ideal.Quotient.mk I (Φ z) = φ z) := by
+  obtain ⟨Φ, hΦ⟩ := exists_glued_lift lev Ψ hdvd hcompat hBtors
+  exact ⟨Φ, hΦ,
+    fun z z' hz hz' => glued_lift_add_general lev Ψ Φ hΦ hdvd z z' hz hz',
+    fun z z' hz hz' => glued_lift_mul_general lev Ψ Φ hΦ hmul hdvd z z' hz hz',
+    fun z hz => glued_lift_quot_general I φ lev Ψ Φ hΦ hψ z hz⟩
+
+/-! ## `B = A·1 + mB` による最後の拡張
+
+Faltings の *"`φ₀` maps `p^ε` to an element `x = p^ε + y`(`y ∈ I`)satisfying
+`x² = p^ε x`, hence `p^ε y = 0`"*(物理 p.7)。これで `φ₀ : mB → C` は
+`A·1` 上で `algebraMap` に一致することが分かり、`B = A·1 + mB` から
+`B` 全体への `A`-代数準同型が一意に決まる。 -/
+
+/-- `mB` は差について閉じている(共通水準に落とすだけ)。 -/
+theorem mem_mB_sub {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    (lev : ℕ → A) (hdvd : ∀ k k' : ℕ, k ≤ k' → ∃ d : A, lev k = lev k' * d)
+    (z z' : B) (hz : ∃ (k : ℕ) (b : B), lev k • b = z)
+    (hz' : ∃ (k : ℕ) (b : B), lev k • b = z') :
+    ∃ (k : ℕ) (b : B), lev k • b = z - z' := by
+  obtain ⟨k₁, b₁, rfl⟩ := hz
+  obtain ⟨k₂, b₂, rfl⟩ := hz'
+  obtain ⟨k, c₁, c₂, h1, h2⟩ := exists_common_level lev hdvd k₁ k₂ b₁ b₂
+  exact ⟨k, c₁ - c₂, by rw [smul_sub, h1, h2]⟩
+
+/-- `mB` は和について閉じている。 -/
+theorem mem_mB_add {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    (lev : ℕ → A) (hdvd : ∀ k k' : ℕ, k ≤ k' → ∃ d : A, lev k = lev k' * d)
+    (z z' : B) (hz : ∃ (k : ℕ) (b : B), lev k • b = z)
+    (hz' : ∃ (k : ℕ) (b : B), lev k • b = z') :
+    ∃ (k : ℕ) (b : B), lev k • b = z + z' := by
+  obtain ⟨k₁, b₁, rfl⟩ := hz
+  obtain ⟨k₂, b₂, rfl⟩ := hz'
+  obtain ⟨k, c₁, c₂, h1, h2⟩ := exists_common_level lev hdvd k₁ k₂ b₁ b₂
+  exact ⟨k, c₁ + c₂, by rw [smul_add, h1, h2]⟩
+
+/-- `mB` は `A` 倍について閉じている。 -/
+theorem mem_mB_smul {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    (lev : ℕ → A) (a : A) (z : B) (hz : ∃ (k : ℕ) (b : B), lev k • b = z) :
+    ∃ (k : ℕ) (b : B), lev k • b = a • z := by
+  obtain ⟨k, b, rfl⟩ := hz
+  exact ⟨k, a • b, by rw [smul_comm]⟩
+
+/-- `mB` はイデアルなので積について閉じている。 -/
+theorem mem_mB_mul {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    (lev : ℕ → A) (hdvd : ∀ k k' : ℕ, k ≤ k' → ∃ d : A, lev k = lev k' * d)
+    (z z' : B) (hz : ∃ (k : ℕ) (b : B), lev k • b = z)
+    (hz' : ∃ (k : ℕ) (b : B), lev k • b = z') :
+    ∃ (k : ℕ) (b : B), lev k • b = z * z' := by
+  obtain ⟨k₁, b₁, rfl⟩ := hz
+  obtain ⟨k₂, b₂, rfl⟩ := hz'
+  obtain ⟨k, c₁, c₂, h1, h2⟩ := exists_common_level lev hdvd k₁ k₂ b₁ b₂
+  exact ⟨k, lev k • (c₁ * c₂), by rw [smul_smul, ← smul_mul_smul_comm, h1, h2]⟩
+
+theorem mem_mB_zero {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    (lev : ℕ → A) : ∃ (k : ℕ) (b : B), lev k • b = 0 :=
+  ⟨0, 0, smul_zero _⟩
+
+/-- `φ₀` は `mB` 上で `A`-線型(各水準の `Ψ k` が `A`-線型だから)。 -/
+theorem glued_lift_smul {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C] (lev : ℕ → A) (Ψ : ℕ → (B →ₗ[A] C)) (Φ : B → C)
+    (hΦ : ∀ (k : ℕ) (b : B), Φ (lev k • b) = Ψ k b)
+    (a : A) (z : B) (hz : ∃ (k : ℕ) (b : B), lev k • b = z) :
+    Φ (a • z) = a • Φ z := by
+  obtain ⟨k, b, rfl⟩ := hz
+  rw [smul_comm, hΦ, hΦ, map_smul]
+
+/-- **Faltings の `x² = p^ε x ⟹ p^ε y = 0` の段**。`φ₀(p^ε·1)` は
+`x² = p^ε x` を満たし、かつ `x ≡ p^ε mod I` なので、`I` が平方零で
+`p^ε` が非零因子なら `x = p^ε` ちょうど。 -/
+theorem glued_lift_one {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C] (I : Ideal C) (hsq : ∀ u ∈ I, ∀ v ∈ I, u * v = 0)
+    (φ : B →ₐ[A] (C ⧸ I))
+    (lev : ℕ → A) (Ψ : ℕ → (B →ₗ[A] C)) (Φ : B → C)
+    (hΦ : ∀ (k : ℕ) (b : B), Φ (lev k • b) = Ψ k b)
+    (hψ : ∀ (k : ℕ) (b : B), Ideal.Quotient.mk I (Ψ k b) = lev k • φ b)
+    (hmul : ∀ (k : ℕ) (x y : B), lev k • Ψ k (x * y) = Ψ k x * Ψ k y)
+    (htors : ∀ (k : ℕ) (x : C), (algebraMap A C) (lev k) * x = 0 → x = 0)
+    (k : ℕ) :
+    Φ (lev k • (1 : B)) = (algebraMap A C) (lev k) := by
+  set x : C := Φ (lev k • (1 : B)) with hx
+  have hxx : x * x = (algebraMap A C) (lev k) * x := by
+    have h1 : Φ ((lev k • (1:B)) * (lev k • (1:B))) = x * x :=
+      glued_lift_mul lev Ψ Φ hΦ hmul k 1 1
+    have h2 : (lev k • (1:B)) * (lev k • (1:B)) = lev k • (lev k • (1:B)) := by
+      rw [smul_mul_smul_comm, one_mul, smul_smul]
+    rw [h2] at h1
+    rw [glued_lift_smul lev Ψ Φ hΦ (lev k) _ ⟨k, 1, rfl⟩, hx] at h1
+    rw [← h1, Algebra.smul_def]
+  have hy : x - (algebraMap A C) (lev k) ∈ I := by
+    rw [← Ideal.Quotient.eq_zero_iff_mem]
+    have h3 := hψ k 1
+    rw [hx, hΦ, map_sub, h3, map_one, Algebra.smul_def, mul_one,
+      IsScalarTower.algebraMap_apply A C (C ⧸ I), Ideal.Quotient.algebraMap_eq, sub_self]
+  set y : C := x - (algebraMap A C) (lev k) with hyd
+  have hy2 : y * y = 0 := hsq y hy y hy
+  have hxy : x = (algebraMap A C) (lev k) + y := by rw [hyd]; ring
+  have hkey : (algebraMap A C) (lev k) * y = 0 := by
+    rw [hxy] at hxx
+    linear_combination hxx - hy2
+  have hz : y = 0 := htors k y hkey
+  rw [hyd] at hz
+  linear_combination hz
+
+/-- `mB ∩ A·1` 上では `φ₀` は `algebraMap` に一致する——`B = A·1 + mB`
+分解の well-defined 性の核心。 -/
+theorem glued_lift_algebraMap {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C]
+    (lev : ℕ → A) (Ψ : ℕ → (B →ₗ[A] C)) (Φ : B → C)
+    (hΦ : ∀ (k : ℕ) (b : B), Φ (lev k • b) = Ψ k b)
+    (hmul : ∀ (k : ℕ) (x y : B), lev k • Ψ k (x * y) = Ψ k x * Ψ k y)
+    (hdvd : ∀ k k' : ℕ, k ≤ k' → ∃ d : A, lev k = lev k' * d)
+    (hone : ∀ k : ℕ, Φ (lev k • (1 : B)) = (algebraMap A C) (lev k))
+    (htors : ∀ (k : ℕ) (x : C), (algebraMap A C) (lev k) * x = 0 → x = 0)
+    (a : A) (hu : ∃ (k : ℕ) (b : B), lev k • b = a • (1 : B)) :
+    Φ (a • (1 : B)) = (algebraMap A C) a := by
+  obtain ⟨k, b, hkb⟩ := hu
+  have h1 : Φ ((lev k • (1:B)) * (a • (1:B))) = Φ (lev k • (1:B)) * Φ (a • (1:B)) :=
+    glued_lift_mul_general lev Ψ Φ hΦ hmul hdvd _ _ ⟨k, 1, rfl⟩ ⟨k, b, hkb⟩
+  have h2 : (lev k • (1:B)) * (a • (1:B)) = a • (lev k • (1:B)) := by
+    rw [smul_mul_smul_comm, one_mul, smul_smul, mul_comm]
+  rw [h2, glued_lift_smul lev Ψ Φ hΦ a _ ⟨k, 1, rfl⟩, hone] at h1
+  have h3 : (algebraMap A C) (lev k) * (Φ (a • (1:B)) - (algebraMap A C) a) = 0 := by
+    rw [Algebra.smul_def] at h1
+    linear_combination -h1
+  have h4 := htors k _ h3
+  linear_combination h4
+
+/-- **`B = A·1 + mB` 分解の well-defined 性**。 -/
+theorem glued_lift_wd {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C]
+    (lev : ℕ → A) (Ψ : ℕ → (B →ₗ[A] C)) (Φ : B → C)
+    (hΦ : ∀ (k : ℕ) (b : B), Φ (lev k • b) = Ψ k b)
+    (hmul : ∀ (k : ℕ) (x y : B), lev k • Ψ k (x * y) = Ψ k x * Ψ k y)
+    (hdvd : ∀ k k' : ℕ, k ≤ k' → ∃ d : A, lev k = lev k' * d)
+    (hone : ∀ k : ℕ, Φ (lev k • (1 : B)) = (algebraMap A C) (lev k))
+    (htors : ∀ (k : ℕ) (x : C), (algebraMap A C) (lev k) * x = 0 → x = 0)
+    (a a' : A) (z z' : B)
+    (hz : ∃ (k : ℕ) (b : B), lev k • b = z) (hz' : ∃ (k : ℕ) (b : B), lev k • b = z')
+    (heq : a • (1 : B) + z = a' • (1 : B) + z') :
+    (algebraMap A C) a + Φ z = (algebraMap A C) a' + Φ z' := by
+  have hdiff : (a - a') • (1 : B) = z' - z := by
+    rw [sub_smul]; linear_combination heq
+  have hmem : ∃ (k : ℕ) (b : B), lev k • b = (a - a') • (1 : B) := by
+    rw [hdiff]; exact mem_mB_sub lev hdvd z' z hz' hz
+  have h1 : Φ ((a - a') • (1:B)) = (algebraMap A C) (a - a') :=
+    glued_lift_algebraMap lev Ψ Φ hΦ hmul hdvd hone htors (a - a') hmem
+  have h2 : Φ ((z' - z) + z) = Φ (z' - z) + Φ z :=
+    glued_lift_add_general lev Ψ Φ hΦ hdvd _ _ (by rw [← hdiff]; exact hmem) hz
+  rw [sub_add_cancel] at h2
+  rw [hdiff] at h1
+  rw [h1, map_sub] at h2
+  linear_combination -h2
+
+open Classical in
+/-- **`B = A·1 + mB` による拡張**。`mB` 上の `φ₀` を `B` 全体に伸ばす。 -/
+theorem exists_glued_extension {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C]
+    (lev : ℕ → A) (Ψ : ℕ → (B →ₗ[A] C)) (Φ : B → C)
+    (hΦ : ∀ (k : ℕ) (b : B), Φ (lev k • b) = Ψ k b)
+    (hmul : ∀ (k : ℕ) (x y : B), lev k • Ψ k (x * y) = Ψ k x * Ψ k y)
+    (hdvd : ∀ k k' : ℕ, k ≤ k' → ∃ d : A, lev k = lev k' * d)
+    (hone : ∀ k : ℕ, Φ (lev k • (1 : B)) = (algebraMap A C) (lev k))
+    (htors : ∀ (k : ℕ) (x : C), (algebraMap A C) (lev k) * x = 0 → x = 0)
+    (hdecomp : ∀ b : B, ∃ (a : A) (z : B),
+      (∃ (k : ℕ) (b' : B), lev k • b' = z) ∧ b = a • (1 : B) + z) :
+    ∃ Φe : B → C, ∀ (a : A) (z : B), (∃ (k : ℕ) (b : B), lev k • b = z) →
+      Φe (a • (1 : B) + z) = (algebraMap A C) a + Φ z := by
+  refine ⟨fun b => (algebraMap A C) (hdecomp b).choose
+    + Φ ((hdecomp b).choose_spec.choose), ?_⟩
+  intro a z hz
+  set b : B := a • (1 : B) + z with hb
+  obtain ⟨hmem, heq⟩ := (hdecomp b).choose_spec.choose_spec
+  show (algebraMap A C) (hdecomp b).choose + Φ ((hdecomp b).choose_spec.choose)
+    = (algebraMap A C) a + Φ z
+  exact glued_lift_wd lev Ψ Φ hΦ hmul hdvd hone htors _ a _ z hmem hz heq.symm
+
+/-- **`Theorem 2.2` の存在側・完成形**——`mB` 上の `φ₀` を `B = A·1 + mB` で
+拡張して得られる `A`-代数準同型 `ψ : B →ₐ[A] C` が `φ` を持ち上げる。 -/
+theorem exists_algHom_of_glued {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C] (I : Ideal C) (φ : B →ₐ[A] (C ⧸ I))
+    (lev : ℕ → A) (Ψ : ℕ → (B →ₗ[A] C)) (Φ : B → C)
+    (hΦ : ∀ (k : ℕ) (b : B), Φ (lev k • b) = Ψ k b)
+    (hmul : ∀ (k : ℕ) (x y : B), lev k • Ψ k (x * y) = Ψ k x * Ψ k y)
+    (hdvd : ∀ k k' : ℕ, k ≤ k' → ∃ d : A, lev k = lev k' * d)
+    (hone : ∀ k : ℕ, Φ (lev k • (1 : B)) = (algebraMap A C) (lev k))
+    (htors : ∀ (k : ℕ) (x : C), (algebraMap A C) (lev k) * x = 0 → x = 0)
+    (hadd : ∀ z z' : B, (∃ (k : ℕ) (b : B), lev k • b = z) →
+      (∃ (k : ℕ) (b : B), lev k • b = z') → Φ (z + z') = Φ z + Φ z')
+    (hmulΦ : ∀ z z' : B, (∃ (k : ℕ) (b : B), lev k • b = z) →
+      (∃ (k : ℕ) (b : B), lev k • b = z') → Φ (z * z') = Φ z * Φ z')
+    (hquot : ∀ z : B, (∃ (k : ℕ) (b : B), lev k • b = z) →
+      Ideal.Quotient.mk I (Φ z) = φ z)
+    (hdecomp : ∀ b : B, ∃ (a : A) (z : B),
+      (∃ (k : ℕ) (b' : B), lev k • b' = z) ∧ b = a • (1 : B) + z) :
+    ∃ ψ : B →ₐ[A] C, ∀ b : B, Ideal.Quotient.mk I (ψ b) = φ b := by
+  obtain ⟨Φe, hΦe⟩ := exists_glued_extension lev Ψ Φ hΦ hmul hdvd hone htors hdecomp
+  have hΦ0 : Φ 0 = 0 := by have h := hΦ 0 0; rwa [smul_zero, map_zero] at h
+  have hrep : ∀ b : B, ∃ (a : A) (z : B), (∃ (k : ℕ) (b' : B), lev k • b' = z) ∧
+      b = a • (1 : B) + z ∧ Φe b = (algebraMap A C) a + Φ z := by
+    intro b
+    obtain ⟨a, z, hz, hbz⟩ := hdecomp b
+    exact ⟨a, z, hz, hbz, by rw [hbz]; exact hΦe a z hz⟩
+  have hcomm : ∀ a : A, Φe ((algebraMap A B) a) = (algebraMap A C) a := by
+    intro a
+    have h : (algebraMap A B) a = a • (1:B) + 0 := by
+      rw [add_zero, Algebra.algebraMap_eq_smul_one]
+    rw [h, hΦe a 0 (mem_mB_zero lev), hΦ0, add_zero]
+  refine ⟨{ toFun := Φe
+            map_one' := ?_
+            map_mul' := ?_
+            map_zero' := ?_
+            map_add' := ?_
+            commutes' := hcomm }, ?_⟩
+  · have h : (1:B) = (1:A) • (1:B) + 0 := by rw [one_smul, add_zero]
+    rw [h, hΦe 1 0 (mem_mB_zero lev), hΦ0, add_zero, map_one]
+  · intro b b'
+    obtain ⟨a, z, hz, hbz, hΦb⟩ := hrep b
+    obtain ⟨a', z', hz', hbz', hΦb'⟩ := hrep b'
+    have hprod : b * b' = (a * a') • (1:B) + (a • z' + a' • z + z * z') := by
+      rw [hbz, hbz']; simp only [Algebra.smul_def, map_mul, mul_one]; ring
+    have hmem : ∃ (k : ℕ) (b : B), lev k • b = a • z' + a' • z + z * z' :=
+      mem_mB_add lev hdvd _ _ (mem_mB_add lev hdvd _ _ (mem_mB_smul lev a z' hz')
+        (mem_mB_smul lev a' z hz)) (mem_mB_mul lev hdvd z z' hz hz')
+    rw [hprod, hΦe _ _ hmem, hΦb, hΦb',
+      hadd _ _ (mem_mB_add lev hdvd _ _ (mem_mB_smul lev a z' hz') (mem_mB_smul lev a' z hz))
+        (mem_mB_mul lev hdvd z z' hz hz'),
+      hadd _ _ (mem_mB_smul lev a z' hz') (mem_mB_smul lev a' z hz),
+      glued_lift_smul lev Ψ Φ hΦ a z' hz', glued_lift_smul lev Ψ Φ hΦ a' z hz,
+      hmulΦ z z' hz hz', map_mul]
+    simp only [Algebra.smul_def]
+    ring
+  · have h : (0:B) = (0:A) • (1:B) + 0 := by rw [zero_smul, add_zero]
+    rw [h, hΦe 0 0 (mem_mB_zero lev), hΦ0, add_zero, map_zero]
+  · intro b b'
+    obtain ⟨a, z, hz, hbz, hΦb⟩ := hrep b
+    obtain ⟨a', z', hz', hbz', hΦb'⟩ := hrep b'
+    have hsum : b + b' = (a + a') • (1:B) + (z + z') := by
+      rw [hbz, hbz', add_smul]; ring
+    rw [hsum, hΦe _ _ (mem_mB_add lev hdvd z z' hz hz'), hΦb, hΦb',
+      hadd z z' hz hz', map_add]
+    ring
+  · intro b
+    obtain ⟨a, z, hz, hbz, hΦb⟩ := hrep b
+    show Ideal.Quotient.mk I (Φe b) = φ b
+    rw [hΦb, map_add, hquot z hz, hbz, map_add, map_smul, map_one,
+      ← Algebra.algebraMap_eq_smul_one, IsScalarTower.algebraMap_apply A C (C ⧸ I),
+      Ideal.Quotient.algebraMap_eq]
+
+/-- **`Theorem 2.2`(存在側・単一の主張)**——整合な almost 持ち上げの族
+`{Ψ k}` から、honest な `A`-代数準同型 `ψ : B →ₐ[A] C` による `φ` の
+持ち上げを得る。仮定はすべて Faltings の設定そのもの:
+
+* `hdvd`/`hcompat`——族が水準について整合(`p^{1/p^k}` の塔)
+* `hBtors`/`htors`——`B`・`C` が `lev k` 捩れを持たない
+* `hsq`——`I` は平方零(`Theorem 2.2` の設定)
+* `hψ`/`hmul`——各水準で `almost` に持ち上げかつ `almost` 乗法的
+* `hdecomp`——`B = A·1 + mB` -/
+theorem thm_2_2_lift_of_family {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C] (I : Ideal C) (hsq : ∀ u ∈ I, ∀ v ∈ I, u * v = 0)
+    (φ : B →ₐ[A] (C ⧸ I))
+    (lev : ℕ → A) (Ψ : ℕ → (B →ₗ[A] C))
+    (hdvd : ∀ k k' : ℕ, k ≤ k' → ∃ d : A, lev k = lev k' * d)
+    (hcompat : ∀ (k k' : ℕ) (d : A), k ≤ k' → lev k = lev k' * d → Ψ k = d • Ψ k')
+    (hBtors : ∀ (k : ℕ) (b : B), lev k • b = 0 → b = 0)
+    (hψ : ∀ (k : ℕ) (b : B), Ideal.Quotient.mk I (Ψ k b) = lev k • φ b)
+    (hmul : ∀ (k : ℕ) (x y : B), lev k • Ψ k (x * y) = Ψ k x * Ψ k y)
+    (htors : ∀ (k : ℕ) (x : C), (algebraMap A C) (lev k) * x = 0 → x = 0)
+    (hdecomp : ∀ b : B, ∃ (a : A) (z : B),
+      (∃ (k : ℕ) (b' : B), lev k • b' = z) ∧ b = a • (1 : B) + z) :
+    ∃ ψ : B →ₐ[A] C, ∀ b : B, Ideal.Quotient.mk I (ψ b) = φ b := by
+  obtain ⟨Φ, hΦ, hadd, hmulΦ, hquot⟩ :=
+    exists_lift_on_mB I φ lev Ψ hdvd hcompat hBtors hψ hmul
+  exact exists_algHom_of_glued I φ lev Ψ Φ hΦ hmul hdvd
+    (fun k => glued_lift_one I hsq φ lev Ψ Φ hΦ hψ hmul htors k)
+    htors hadd hmulΦ hquot hdecomp
+
+open Classical in
+/-- **`Theorem 2.2`(存在側)——`p`-可除な塔での完成形**。
+
+> *Theorem 2.2. Suppose `B` is an almost étale covering of `A`, and
+> `C → C/I` a surjection with `I² = 0`. Then any `A`-algebra map
+> `φ : B → C/I` lifts to an `A`-algebra map `B → C`.*
+
+証明の流れ(すべて本ファイル内で閉じている):
+
+1. `B` の almost 射影性(`AlmostProjective.lean`)から、各水準 `ε = ϖ k`
+   で `A`-加群写像 `ψ_ε` に持ち上げる。
+2. 障害類を Hochschild `H²` で消して `ψ_ε` を almost 乗法的にする
+   (`exists_multiplicative_lift_tower`)。
+3. `Ω[B⁄A]` が almost 零(`kaehler_isAlmostZero_of_tower`)なので
+   `ψ_ε` は水準を除いて一意——族 `{ψ_ε}` は整合する(`lift_compat`)。
+4. 族を貼り合わせて `φ₀ : mB → C`(`exists_lift_on_mB`)。
+5. `x² = p^ε x ⟹ p^ε y = 0` で `φ₀` が `A·1` 上 `algebraMap` に一致する
+   ことを示し(`glued_lift_one`)、`B = A·1 + mB` で `B` 全体へ拡張する
+   (`exists_algHom_of_glued`)。
+
+一意性側は `thm_2_2_uniqueness_of_isAlmostEtale`(既証)。 -/
+theorem thm_2_2_tower {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C] [Module.Finite A B] [Module.Free A B]
+    {q : ℕ} (hq : 1 ≤ q) (T : PDivTower A q)
+    (hAET : IsAlmostEtaleCoveringTower (A := A) (B := B) T)
+    (hf0inj : letI := awayAlgebra (T.ϖ 0) (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B (T.ϖ 0)))))
+    (I : Ideal C) (hsq : ∀ u ∈ I, ∀ v ∈ I, u * v = 0) (φ : B →ₐ[A] (C ⧸ I))
+    (htors : ∀ (k : ℕ) (x : C), (algebraMap A C) (T.ϖ k) * x = 0 → x = 0)
+    (hBtors : ∀ (k : ℕ) (b : B), T.ϖ k • b = 0 → b = 0)
+    (hdecomp : ∀ b : B, ∃ (a : A) (z : B),
+      (∃ (k : ℕ) (b' : B), ((T.ϖ k * T.ϖ k) * (T.ϖ k * T.ϖ k)) • b' = z)
+        ∧ b = a • (1 : B) + z) :
+    ∃ ψ : B →ₐ[A] C, ∀ b : B, Ideal.Quotient.mk I (ψ b) = φ b := by
+  set lev : ℕ → A := fun k => (T.ϖ k * T.ϖ k) * (T.ϖ k * T.ϖ k) with hlev
+  choose Ψ hψraw hmulraw using fun k =>
+    exists_multiplicative_lift_tower T hAET hf0inj I hsq φ htors k k
+  have hψ : ∀ (k : ℕ) (b : B), Ideal.Quotient.mk I (Ψ k b) = lev k • φ b := hψraw
+  have hmul : ∀ (k : ℕ) (x y : B), lev k • Ψ k (x * y) = Ψ k x * Ψ k y := hmulraw
+  have hlevtors : ∀ (k : ℕ) (x : C), (algebraMap A C) (lev k) * x = 0 → x = 0 := by
+    intro k x hx
+    have h4 : (algebraMap A C) (lev k) * x
+        = (algebraMap A C) (T.ϖ k) * ((algebraMap A C) (T.ϖ k) *
+          ((algebraMap A C) (T.ϖ k) * ((algebraMap A C) (T.ϖ k) * x))) := by
+      rw [hlev]; simp only [map_mul]; ring
+    rw [h4] at hx
+    exact htors k _ (htors k _ (htors k _ (htors k _ hx)))
+  have hlevBtors : ∀ (k : ℕ) (b : B), lev k • b = 0 → b = 0 := by
+    intro k b hb
+    have h4 : lev k • b = T.ϖ k • (T.ϖ k • (T.ϖ k • (T.ϖ k • b))) := by
+      rw [smul_smul, smul_smul, smul_smul, hlev]; congr 1; ring
+    rw [h4] at hb
+    exact hBtors k _ (hBtors k _ (hBtors k _ (hBtors k _ hb)))
+  have hdvd : ∀ k k' : ℕ, k ≤ k' → ∃ d : A, lev k = lev k' * d := by
+    intro k k' hle
+    obtain ⟨e, he⟩ := T.dvd_of_le hq hle
+    exact ⟨(e * e) * (e * e), by rw [hlev]; simp only []; rw [he]; ring⟩
+  have hΩ : ∀ x : Ω[B⁄A], T.ϖ 0 • x = 0 :=
+    fun x => kaehler_isAlmostZero_of_tower T hAET hf0inj 0 x
+  have hcompat : ∀ (k k' : ℕ) (d : A), k ≤ k' → lev k = lev k' * d → Ψ k = d • Ψ k' := by
+    intro k k' d _ hd
+    refine lift_compat I hsq φ (lev k') d (Ψ k') (Ψ k) (hψ k') (hmul k') ?_ ?_
+      (T.ϖ 0) hΩ ?_ (htors 0)
+    · intro b; rw [← hd]; exact hψ k b
+    · intro x y; rw [← hd]; exact hmul k x y
+    · intro x hx; rw [← hd] at hx; exact hlevtors k x hx
+  exact thm_2_2_lift_of_family I hsq φ lev Ψ hdvd hcompat hlevBtors hψ hmul hlevtors hdecomp
+
 end ABC3.Found.Falt1
