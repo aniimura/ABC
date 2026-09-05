@@ -123,3 +123,43 @@
 - **推奨**: **(c) → (b)**。まず 3 本が本当に poppler 産かを目視で確定し、
   そのうえで消費側に警告を足す。全 137 本の作り直しは費用が見合わない。
 - **決定**: —
+
+## D8. ★Divisor クラスタの statement 修理(8 例目の退化)
+
+- **状態**: **保留**(2026-09-05 発見。`autonomy-policy.md` §2「Skeleton の statement の修理」に該当)
+- **論点**: `Skeleton/Divisor/SchemeWeil.lean` の `ordAtDiv` 以降から
+  **`IsNormalScheme` が丸ごと抜けている**。正規でなければ余次元 1 の茎は DVR でなく
+  `ord` は定義できないので、`ordAtDiv ≡ 0` と置くと
+  `ordAtDiv_mul` / `finite_support_ordAtDiv` / `divOfFn_mul` が**すべて自明に成立する**
+  ——**6 つの sorry のうち 5 つが数学的内容ゼロで埋まる**(DVR の 1 件だけが本物)。
+  ★さらに下流へ伝播する: `Cartier/Example61.lean:27` が `ordAtDiv` を直に使うので
+  `IsCartierDiv X D ↔ (D = 0)`、`cartierSubgroup = ⊥` になり、
+  `Cartier/Theorem62.lean` の `pullbackCartier` も `[IsDominant ψ]` を欠くので
+  正直な定義が不可能 ⇒ 0 で落ちる。
+  **Divisor クラスタ 15 sorry のうち 14 が零写像だけで閉じられる。**
+- **★重要**: **`hnorm` を足すだけでは退化は消えない。**
+  `hnorm` は「正直な定義が可能になる」条件であって「零写像を排除する」条件ではない。
+  排除には**錨**(`∃ f, ordPt = 1`)が要る。
+- **要る修理**(いずれも Skeleton の statement 変更なので人の判断待ち):
+  1. `SchemeWeil.lean` の 5 宣言に `hnorm : IsNormalScheme X` を足す(`_hnorm` の
+     先頭アンダースコアも外す)
+  2. `Cartier/Theorem62.lean` の `pullbackCartier` に `[IsDominant ψ]`・`hdim`・
+     `[CompactSpace Y]` を足す
+  3. 重複定義の解消(Skeleton の `IsCodimOnePt` / `PrimeDivisorPt` / `WeilDiv` /
+     `IsNormalScheme` を `Found` の `export`/`abbrev` に置き換える)。
+     ★現在 `Skeleton/Divisor/Normalization.lean:73` が defeq 依存の綱渡りをしている
+  4. `.needs` の訂正 —— `isDiscreteValuationRing_stalk_of_codimOne.needs` の
+     `.derivation "茎とアフィン開の局所化の同一視"` は**不要と判明済み**
+     (`Found/Divisor/SchemeWeil.lean` 冒頭に「見立ての訂正」と明記)。
+     ★`.needs` が下界どころか**過大**という珍しい向きのズレ。
+     逆に「正規性が無ければ `ord` は存在しない」という依存辺が**欠けている**
+  5. 逸脱記録の追加 —— 原文の **proper** を第 1 層で落として準コンパクトで代用している。
+     ★これは正しい代用(proper が本当に効くのは p.110 の `𝒪^×(A) = k_L^×` だけで、
+     `div(f)` の台の有限性に効くのは準コンパクト性のみ)だが、理由が書かれていない
+- **先に無人で進めたこと**(判断待ちに当たらないもの):
+  - `Found/Divisor/SchemeWeilOrd.lean::exists_ordPt_eq_one`(錨。新規 Found 補題)
+  - `Check/FrdI/Ex61OrdDegenerate.lean`(8 例目の証拠を固定。statement は変えない)
+- ★**数学はもう在る。** `Found/Divisor/` の `weil` 鎖 7 節点は全部 `done` で sorry ゼロ。
+  Skeleton の 6 sorry は Found の項で埋まる(`ordAtDiv` ← `ordPt` ほか)。
+  **これは「未解決の数学」ではなく「配線されていない既済の数学」である。**
+- **決定**: —
