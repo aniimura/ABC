@@ -5219,3 +5219,24 @@ noncomputable def adjoinIntegersIncl (z : adjoinIntegers K x) : adjoinIntegers K
 maxHeartbeats 2000000 でも 30 秒)。
 
 実例: `Found/PGC/TotallyRamified.lean` の docstring(2026-09-05)。
+
+## 66. 在庫確認を「結論の形」でやる——`map` と `aeval` の交換律を2度書きかけた
+
+`MvPolynomial.map ψ (aeval ev p) = aeval (map ψ ∘ ev) (map ψ p)` を
+新規に証明してから(0.13 秒で通ったので気付かず)、`FieldLimit.lean` に
+**同じ主張が `mvPolynomial_map_aeval_comm_general` として既にあった**
+ことに気付いた。`mvPolynomial_map_aeval_comm`(`Algebra.TensorProduct.map`
+専用版)と、その一般版の 2 本が並んでいた。
+
+**教訓**: `decl-index` を**名前**で引くと当たらない(自分が付けたい名前は
+`map_aeval_map`、既存は `mvPolynomial_map_aeval_comm_general`)。
+`.cache/decl-index.txt` は statement 付きなので、**結論のリテラル**
+(ここなら `aeval` と `map` が両方出てくる行)で grep する:
+
+```
+grep -n "^theorem .*aeval" lean/ABC3/Found/CorrHyp/FieldLimit.lean
+node tools/decl-index.mjs && grep "aeval.*map\|map.*aeval" .cache/decl-index.txt
+```
+
+同じ回に `algebraTensorMap_inclusion_comp_inclusion` も既存だと分かり、
+新規に要ったのは「係数側も動く版」`_of_map` 1 本だけだった。

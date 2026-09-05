@@ -1540,6 +1540,82 @@ theorem mvPolynomial_map_aeval_comm_general {R S : Type} [CommRing R] [CommRing 
     rw [hp]
 
 open scoped TensorProduct in
+/-- `algebraTensorMap_inclusion_comp_inclusion`の「係数側も動く」版——
+`(id ⊗ incl h2) ∘ (φ ⊗ incl h1) = φ ⊗ incl (h1.trans h2)`。
+`Lemma 4.1`で`f i j`の降下データを共通の精密化`R''`へ持ち上げるときに使う。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem algebraTensorMap_inclusion_comp_of_map {A A' : Type} [CommRing A] [Algebra ℚ A]
+    [CommRing A'] [Algebra ℚ A'] (φ : A →ₐ[ℚ] A')
+    {R S T : FgSubalgebra ℚ ℝ} (h1 : R ≤ S) (h2 : S ≤ T) :
+    (Algebra.TensorProduct.map (AlgHom.id ℚ A') (Subalgebra.inclusion h2)).toRingHom.comp
+      (Algebra.TensorProduct.map φ (Subalgebra.inclusion h1)).toRingHom
+    = (Algebra.TensorProduct.map φ (Subalgebra.inclusion (h1.trans h2))).toRingHom := by
+  apply RingHom.ext
+  intro x
+  show (Algebra.TensorProduct.map (AlgHom.id ℚ A') (Subalgebra.inclusion h2))
+      ((Algebra.TensorProduct.map φ (Subalgebra.inclusion h1)) x) = _
+  rw [← AlgHom.comp_apply, ← Algebra.TensorProduct.map_comp]
+  congr 2
+
+open scoped TensorProduct in
+/-- **`descend2_of_map`の結論を、より大きい`R''`へ持ち上げる**——
+`Lemma 4.1`の`GlueData`は**すべての添字対`(i,j)`に共通の1つの`R'`**を
+要求するが、`exists_descendPieceR_ringHom`は対ごとに自分の`R'`を返す。
+有限個の`R'`を`exists_fgSubalgebra_upperBound`で1つにまとめたあと、
+各対の降下データをその共通段階へ持ち上げるのがこの補題である。
+
+`ev`を`map (id ⊗ incl)`で押し出し、関係式の所属は
+`mem_ideal_span_range_promote`で押し出したうえで、
+`mvPolynomial_map_aeval_comm_general`(`map`と`aeval`の交換、**既存**)と
+`algebraTensorMap_inclusion_comp_inclusion`/`_of_map`(2段の昇格が1段に
+潰れること)で形を揃えるだけ。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem descend2_relation_promote
+    (A A' : Type) [CommRing A] [Algebra ℚ A] [CommRing A'] [Algebra ℚ A'] (φ : A →ₐ[ℚ] A')
+    {R R₂ R' R'' : FgSubalgebra ℚ ℝ} (hR : R ≤ R') (hR₂ : R₂ ≤ R') (hR' : R' ≤ R'')
+    {ι κ ι' κ' : Type}
+    (q : κ → MvPolynomial ι (A ⊗[ℚ] R.1)) (q₂ : κ' → MvPolynomial ι' (A' ⊗[ℚ] R₂.1))
+    (ev : ι → MvPolynomial ι' (A' ⊗[ℚ] R'.1))
+    (hrel : ∀ k, MvPolynomial.aeval ev (MvPolynomial.map
+        (Algebra.TensorProduct.map φ (Subalgebra.inclusion hR)).toRingHom (q k)) ∈
+      Ideal.span (Set.range (fun k' => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A')
+          (Subalgebra.inclusion hR₂)).toRingHom (q₂ k')))) :
+    ∀ k, MvPolynomial.aeval (fun i => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A') (Subalgebra.inclusion hR')).toRingHom (ev i))
+        (MvPolynomial.map (Algebra.TensorProduct.map φ
+          (Subalgebra.inclusion (hR.trans hR'))).toRingHom (q k))
+      ∈ Ideal.span (Set.range (fun k' => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A')
+          (Subalgebra.inclusion (hR₂.trans hR'))).toRingHom (q₂ k'))) := by
+  intro k
+  have h1 := mem_ideal_span_range_promote A' hR'
+    (fun k' => MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A')
+      (Subalgebra.inclusion hR₂)).toRingHom (q₂ k')) _ (hrel k)
+  have hq₂ : ∀ k', MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A')
+        (Subalgebra.inclusion hR')).toRingHom
+        (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A')
+          (Subalgebra.inclusion hR₂)).toRingHom (q₂ k'))
+      = MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A')
+          (Subalgebra.inclusion (hR₂.trans hR'))).toRingHom (q₂ k') := fun k' =>
+    Eq.trans (MvPolynomial.map_map _ _ _)
+      (congrArg (fun t : (A' ⊗[ℚ] R₂.1) →+* (A' ⊗[ℚ] R''.1) => MvPolynomial.map t (q₂ k'))
+        (algebraTensorMap_inclusion_comp_inclusion A' hR₂ hR'))
+  have hqU : MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A')
+        (Subalgebra.inclusion hR')).toRingHom
+        (MvPolynomial.map (Algebra.TensorProduct.map φ
+          (Subalgebra.inclusion hR)).toRingHom (q k))
+      = MvPolynomial.map (Algebra.TensorProduct.map φ
+          (Subalgebra.inclusion (hR.trans hR'))).toRingHom (q k) :=
+    Eq.trans (MvPolynomial.map_map _ _ _)
+      (congrArg (fun t : (A ⊗[ℚ] R.1) →+* (A' ⊗[ℚ] R''.1) => MvPolynomial.map t (q k))
+        (algebraTensorMap_inclusion_comp_of_map φ hR hR'))
+  rw [mvPolynomial_map_aeval_comm_general, hqU] at h1
+  simpa only [hq₂] using h1
+
+open scoped TensorProduct in
 /-- **`ψ`の値(有限個)だけから、関係式を全く経由せずにRレベルの候補を
 取り出す**——`exists_mvPolynomial_quotient_ringHom_descend`から関係式
 条件を落としただけの純粋な存在部分。`exists_mvPolynomial_quotient_

@@ -2647,3 +2647,21 @@ U_i ⊓ U_j が U_i の基本開集合 D(f) である必要がある
 その細分をまだ形式化していない。ここが Lemma 4.1 本体への残りの主要な段差。
 
 集計は10/24——§4は0/2。
+
+## 2026-09-05夜さらに続き43 — 降下データを共通の R'' へ持ち上げる
+
+FieldLimit.lean に descend2_relation_promote(2.75秒)と、その部品
+algebraTensorMap_inclusion_comp_of_map(係数側も動く版)を追加。
+GlueData は全添字対に共通の1つの R' を要求するが
+exists_descendPieceR_ringHom は対ごとに R' を返すので、
+exists_fgSubalgebra_upperBound(既存)で合流させたあと各対を持ち上げる。
+
+在庫確認の失敗(idiom #66): map と aeval の交換律を新規に書いてしまい、
+既存の mvPolynomial_map_aeval_comm_general と重複していた。decl-index は
+名前でなく結論のリテラルで grep すること。追加前に気付いて捨てた。
+
+AffineTransitionLimit.lean の在庫確認: Scheme.exists_isOpenCover_and_isAffine
+などが揃っているが、いずれも D と極限錐 c が既に与えられている前提。
+Lemma 4.1 は Z_R(= D.obj i)を作る問題なのでそのままでは使えない(循環)。
+
+集計は10/24——§4は0/2。

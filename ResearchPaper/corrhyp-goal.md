@@ -5868,3 +5868,42 @@ Found側sorry 0件(`ExtLimit` 394秒)。
 ここが`Lemma 4.1`本体への残りの主要な段差である。
 
 集計は引き続き10/24——§4は引き続き0/2。
+
+### 2026-09-05夜さらに続き43 — 降下データを共通の`R''`へ持ち上げる(`GlueData`の前提整備)
+
+`GlueData`は**すべての添字対`(i,j)`に共通の1つの`R'`**を要求するが、
+`exists_descendPieceR_ringHom`は対ごとに自分の`R'`を返す。有限個の`R'`を
+`exists_fgSubalgebra_upperBound`(**既存**)で1つにまとめたあと、各対の
+降下データをその共通段階へ持ち上げる必要がある。その持ち上げを
+`FieldLimit.lean`に入れた(2.75秒):
+
+```
+theorem descend2_relation_promote (φ : A →ₐ[ℚ] A')
+    (hR : R ≤ R') (hR₂ : R₂ ≤ R') (hR' : R' ≤ R'')
+    (hrel : ∀ k, aeval ev (map (φ ⊗ incl hR) (q k)) ∈ span (range (id ⊗ incl hR₂ で送った q₂))) :
+    ∀ k, aeval (map (id ⊗ incl hR') ∘ ev) (map (φ ⊗ incl (hR.trans hR')) (q k))
+      ∈ span (range (id ⊗ incl (hR₂.trans hR') で送った q₂))
+```
+
+`ev`を`map (id ⊗ incl)`で押し出し、所属は`mem_ideal_span_range_promote`
+(**既存**)で押し出し、`mvPolynomial_map_aeval_comm_general`(**既存**、
+`map`と`aeval`の交換)と`algebraTensorMap_inclusion_comp_inclusion`
+(**既存**)で形を揃えるだけ。新規に要ったのは「係数側も動く版」
+`algebraTensorMap_inclusion_comp_of_map`1本だけだった。
+
+**在庫確認の失敗を1つ記録**(`lean-idioms` #66): `map`と`aeval`の交換律を
+新規に書いて0.13秒で通ってしまい、**既存の
+`mvPolynomial_map_aeval_comm_general`と重複**していたことに後から
+気付いた。`decl-index`を**名前**で引くと当たらない(付けたい名前と既存名が
+違う)ので、**結論のリテラル**で grep すること。今回は追加前に気付いて
+捨てたので重複はコミットしていない。
+
+**あわせて`AffineTransitionLimit.lean`の在庫を確認**した。
+`Scheme.exists_isOpenCover_and_isAffine`(極限のアフィン開被覆が有限段階へ
+降りる)・`exists_isAffineOpen_preimage_eq`・`isBasis_preimage_isAffineOpen`
+などが揃っているが、いずれも**`D`と極限錐`c`が既に与えられている**ことを
+前提にする。`Lemma 4.1`は`Z_R`(=`D.obj i`)を**作る**問題なので、
+そのままでは使えない(循環)。この確認結果も記録しておく。
+
+検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
+Found側sorry 0件。集計は引き続き10/24——§4は引き続き0/2。
