@@ -1886,3 +1886,25 @@ instance 探索が展開しない)。明示的に `instance` として与え直�
 Lubin-Tate 塔は `K(Λ_n)/K(Λ_{n-1})` という**相対的な**拡大の連なり
 (`ψ_n` は `𝒪_{K(Λ_{n-1})}` 上の Eisenstein)。一方 `TotallyRamified.lean` の
 道具は `K.closure` の中の中間体について書かれている。この同型で両者が繋がる。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05: **`SubgroupCorrespondence` の待ちが解消した**
+
+`Found/PGC/AdjoinFieldClosure.lean` に追加。
+
+`Interface/PGC/LocalFieldData.lean::SubgroupCorrespondence.waiting` は
+二つ待っていた:
+1. 「開部分群 H に対応する中間体が p進局所体であること」
+   → `fixedFieldLocalField`(第 959)で解消済み
+2. 「**その絶対 Galois 群が H であること**」
+   → **本コミットで解消**
+
+- **`absGalAdjoinFieldEquiv`** : `Γ_{K(x)} ≃* (K(x)).fixingSubgroup`
+- **`absGalFixedFieldEquiv`** : `Γ_{L_H} ≃* H`(H は開部分群)
+
+道具は代数閉包の同一視 `closureEquivAdjoinField`/`closureEquivFixedField`
+(第 989)+ mathlib の `AlgEquiv.autCongr` と
+`IntermediateField.fixingSubgroupEquiv`、それに
+`InfiniteGalois.fixingSubgroup_fixedField`(開部分群は閉)。
+最後の `(fixedField H).fixingSubgroup = H` の書き換えは `▸` だと
+`fixedFieldLocalField K H hH` の中の `H` まで書き換わって型が合わないので
+`MulEquiv.subgroupCongr` を使う。

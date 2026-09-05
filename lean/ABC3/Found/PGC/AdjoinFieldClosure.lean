@@ -1,4 +1,4 @@
-import ABC3.Found.PGC.AdjoinFieldConstruction
+import ABC3.Found.PGC.SubgroupCorrespondenceConstruction
 
 /-!
 # 代数閉包の同一視 `(K(x))‾ ≃ K‾`
@@ -52,5 +52,64 @@ instance isAlgClosureAdjoinField (K : PAdicLocalField p) (x : K.closure) :
 noncomputable def closureEquivAdjoinField (K : PAdicLocalField p) (x : K.closure) :
     (adjoinField K x).closure ≃ₐ[(adjoinField K x).carrier] K.closure :=
   IsAlgClosure.equiv _ _ _
+
+/-! ## `Γ_{L}` は `Γ_K` の開部分群
+
+`Interface/PGC/LocalFieldData.lean::SubgroupCorrespondence.waiting` は
+待っているものを二つ挙げていた:
+
+> 開部分群 H ⊆ Γ_K に対応する中間体が p進局所体であり、
+> **その絶対 Galois 群が H であること**
+
+前者は `Found/PGC/SubgroupCorrespondenceConstruction.lean::fixedFieldLocalField`
+で解消済み。**後者を本節で解消する**——代数閉包の同一視
+`closureEquivAdjoinField` と mathlib の
+`IntermediateField.fixingSubgroupEquiv` を繋ぐだけ。 -/
+
+/-- **★★★★★★`Γ_{K(x)}` は `K(x)` の固定部分群**。 -/
+noncomputable def absGalAdjoinFieldEquiv (K : PAdicLocalField p) (x : K.closure) :
+    (adjoinField K x).absGal ≃*
+      ((IntermediateField.adjoin K.carrier ({x} : Set K.closure)).fixingSubgroup) :=
+  (AlgEquiv.autCongr (closureEquivAdjoinField K x)).trans
+    (IntermediateField.fixingSubgroupEquiv
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure))).symm
+
+noncomputable instance algebraFixedFieldClosure (K : PAdicLocalField p) (H : Subgroup K.absGal)
+    (hH : IsOpen (H : Set K.absGal)) :
+    Algebra ((fixedFieldLocalField K H hH).carrier) K.closure :=
+  (inferInstance : Algebra (IntermediateField.fixedField H) K.closure)
+
+instance isAlgebraicFixedFieldClosure (K : PAdicLocalField p) (H : Subgroup K.absGal)
+    (hH : IsOpen (H : Set K.absGal)) :
+    Algebra.IsAlgebraic ((fixedFieldLocalField K H hH).carrier) K.closure :=
+  (inferInstance : Algebra.IsAlgebraic (IntermediateField.fixedField H) K.closure)
+
+instance isAlgClosureFixedField (K : PAdicLocalField p) (H : Subgroup K.absGal)
+    (hH : IsOpen (H : Set K.absGal)) :
+    IsAlgClosure ((fixedFieldLocalField K H hH).carrier) K.closure := by
+  constructor
+  · infer_instance
+  · infer_instance
+
+noncomputable def closureEquivFixedField (K : PAdicLocalField p) (H : Subgroup K.absGal)
+    (hH : IsOpen (H : Set K.absGal)) :
+    (fixedFieldLocalField K H hH).closure
+      ≃ₐ[(fixedFieldLocalField K H hH).carrier] K.closure :=
+  IsAlgClosure.equiv _ _ _
+
+/-- **★★★★★★★開部分群 `H` に対応する体 `L_H` の絶対 Galois 群は `H` そのもの**。
+
+`Interface/PGC/LocalFieldData.lean::SubgroupCorrespondence.waiting` が
+待っていたもう半分——これで `SubgroupCorrespondence` の待ちは解消した。 -/
+noncomputable def absGalFixedFieldEquiv (K : PAdicLocalField p) (H : Subgroup K.absGal)
+    (hH : IsOpen (H : Set K.absGal)) :
+    (fixedFieldLocalField K H hH).absGal ≃* H := by
+  haveI := isGalois_closure K
+  have hclosed : IsClosed (H : Set K.absGal) := Subgroup.isClosed_of_isOpen H hH
+  have h2 : (IntermediateField.fixedField H).fixingSubgroup = H :=
+    InfiniteGalois.fixingSubgroup_fixedField (⟨H, hclosed⟩ : ClosedSubgroup K.absGal)
+  exact ((AlgEquiv.autCongr (closureEquivFixedField K H hH)).trans
+    (IntermediateField.fixingSubgroupEquiv (IntermediateField.fixedField H)).symm).trans
+    (MulEquiv.subgroupCongr h2)
 
 end ABC3.Found.PGC
