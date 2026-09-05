@@ -485,6 +485,50 @@ example :
   have h4 : (4 : ZMod 4) = 0 := rfl
   linear_combination (a * b) * h4
 
+/-! ## 乗法の持ち上げと結合子の所在
+
+原文の
+
+> *Let `m : B ⊗_Ā B → B` denote the multiplication map. `p^{3ε}·m` lifts
+> to `m_ε : B_ε ⊗_A B_ε → B_ε`. The obstruction to `m_ε` being associative
+> is given by
+> `b₀[m_ε(b₁, m_ε(b₂,b₃)) − m_ε(m_ε(b₁,b₂),b₃)]b₄ ∈ Kern(B_ε → B)`*
+
+の 2 段。前段は `B_ε ⊗_A B_ε` の almost 射影性を全射 `ρ : B_ε ↠ B` に
+沿って使うだけ、後段は `B` の結合律だけから出る。 -/
+
+/-- **`Theorem 2.3` の乗法の持ち上げ**——原文の
+*"`p^{3ε}·m` lifts to `m_ε : B_ε ⊗_A B_ε → B_ε`"*。 -/
+theorem thm_2_3_mul_lift {A B : Type u} [CommRing A] [AddCommGroup B] [Module A B]
+    {ι : Type u} [Fintype ι]
+    (s : A) (E : Module.End A (ι → A)) (hE : E * E = s • E)
+    (ρ : ((ι → A) ⧸ LinearMap.range (s • (1 : Module.End A (ι → A)) - E)) →ₗ[A] B)
+    (hρ : Function.Surjective ρ)
+    (m : B →ₗ[A] B →ₗ[A] B) :
+    ∃ μ : TensorProduct A
+        ((ι → A) ⧸ LinearMap.range (s • (1 : Module.End A (ι → A)) - E))
+        ((ι → A) ⧸ LinearMap.range (s • (1 : Module.End A (ι → A)) - E))
+        →ₗ[A] ((ι → A) ⧸ LinearMap.range (s • (1 : Module.End A (ι → A)) - E)),
+      ∀ z, ρ (μ z) = (s * s) •
+        ((TensorProduct.lift m) (TensorProduct.map ρ ρ z)) := by
+  obtain ⟨μ, hμ⟩ := almostIdemQuotient_tensor_almost_lift s E hE ρ hρ
+    ((TensorProduct.lift m) ∘ₗ (TensorProduct.map ρ ρ))
+  exact ⟨μ, hμ⟩
+
+/-- **`Theorem 2.3`——結合子は `ρ` の核に入る**。原文の
+*"The obstruction to `m_ε` being associative is given by
+`b₀[...]b₄ ∈ Kern(B_ε → B)`"*。`B` の結合律だけから出る。 -/
+theorem associator_mem_ker {A N B : Type u} [CommRing A] [AddCommGroup N] [Module A N]
+    [AddCommGroup B] [Module A B]
+    (ρ : N →ₗ[A] B) (m : B →ₗ[A] B →ₗ[A] B) (c : A)
+    (μ : N →ₗ[A] N →ₗ[A] N)
+    (hμ : ∀ x y : N, ρ (μ x y) = c • m (ρ x) (ρ y))
+    (hassoc : ∀ a b d : B, m a (m b d) = m (m a b) d)
+    (x y z : N) :
+    ρ (μ x (μ y z) - μ (μ x y) z) = 0 := by
+  simp only [map_sub, hμ, map_smul, LinearMap.smul_apply, smul_smul]
+  rw [hassoc, sub_self]
+
 /-- **交換子は導分**(Faltings `Theorem 2.3`: *"It also follows that the
 product is commutative, as **the commutator with a fixed element of `B_ε`
 is a derivation**"*)。結合律だけから出る:
