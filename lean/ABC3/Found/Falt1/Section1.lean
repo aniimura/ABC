@@ -484,6 +484,90 @@ theorem min_sum_le_sum_min {r : ℕ} (k : Fin r → ℝ) (hk : ∀ i, 0 ≤ k i)
     rw [hmj] at hstep
     exact le_trans (min_le_right _ _) hstep
 
+/-! ### 事実 (b) を**分解なしで**閉じる
+
+上の 2 つ(`min_avg_le_sum_min`・`min_sum_le_sum_min`)は巡回分解を
+経由する道だが、実は**分解を全く使わずに**次が出る:
+
+    min(length M, e) ≤ length(M / 𝔪^e·M)
+
+証明は Nakayama だけ:`𝔪^e·M ≠ 0` なら鎖 `M ⊋ 𝔪M ⊋ ⋯ ⊋ 𝔪^eM` は
+**真に**減るので `length(M/𝔪^eM) ≥ e`;`𝔪^e·M = 0` なら
+`M/𝔪^eM = M` で `≥ length M`。
+
+★これは Faltings の `β = min{1, δₙ/(d+1)}` より**強い**
+(`(d+1)` で割る必要が無い)。構造定理も和因子の個数の評価も要らない。 -/
+
+open IsLocalRing in
+/-- **Nakayama**——`𝔪^e·M = 𝔪^{e+1}·M` なら `𝔪^e·M = 0`。 -/
+theorem smul_pow_eq_bot_of_eq_succ {R M : Type*} [CommRing R] [IsLocalRing R] [IsNoetherianRing R]
+    [AddCommGroup M] [Module R M] [Module.Finite R M] (e : ℕ)
+    (h : (maximalIdeal R)^e • (⊤ : Submodule R M)
+      = (maximalIdeal R)^(e+1) • (⊤ : Submodule R M)) :
+    (maximalIdeal R)^e • (⊤ : Submodule R M) = ⊥ := by
+  set N : Submodule R M := (maximalIdeal R)^e • ⊤ with hN
+  have hfg : N.FG := Submodule.FG.of_finite
+  have hle : N ≤ maximalIdeal R • N := by
+    rw [hN] at h ⊢
+    rw [pow_succ, mul_comm, mul_smul] at h
+    exact le_of_eq h
+  exact Submodule.eq_bot_of_le_smul_of_le_jacobson_bot (maximalIdeal R) N hfg hle
+    (le_of_eq (IsLocalRing.jacobson_eq_maximalIdeal ⊥ bot_ne_top).symm)
+
+open IsLocalRing in
+/-- **`𝔪^e·M ≠ 0` なら `e ≤ length(M/𝔪^e·M)`**——鎖
+`M ⊋ 𝔪M ⊋ ⋯ ⊋ 𝔪^eM` が真に減ることから。 -/
+theorem le_length_quot_smul_pow {R M : Type*} [CommRing R] [IsLocalRing R] [IsNoetherianRing R]
+    [AddCommGroup M] [Module R M] [Module.Finite R M] [IsArtinian R M] [IsNoetherian R M] :
+    ∀ (e : ℕ), (maximalIdeal R)^e • (⊤ : Submodule R M) ≠ ⊥ →
+      (e : ℕ∞) ≤ Module.length R (M ⧸ (maximalIdeal R)^e • (⊤ : Submodule R M)) := by
+  intro e
+  induction e with
+  | zero => intro _; simp
+  | succ k ih =>
+    intro hne
+    have hST : (maximalIdeal R)^(k+1) • (⊤ : Submodule R M)
+        ≤ (maximalIdeal R)^k • (⊤ : Submodule R M) :=
+      Submodule.smul_mono_left (Ideal.pow_le_pow_right (Nat.le_succ k))
+    have hneT : (maximalIdeal R)^k • (⊤ : Submodule R M) ≠ ⊥ := by
+      intro h
+      exact hne (le_bot_iff.mp (h ▸ hST))
+    have hmapne : Submodule.map ((maximalIdeal R)^(k+1) • (⊤ : Submodule R M)).mkQ
+        ((maximalIdeal R)^k • (⊤ : Submodule R M)) ≠ ⊥ := by
+      intro h
+      have hle : (maximalIdeal R)^k • (⊤ : Submodule R M)
+          ≤ (maximalIdeal R)^(k+1) • (⊤ : Submodule R M) := by
+        intro x hx
+        have hmem : ((maximalIdeal R)^(k+1) • (⊤ : Submodule R M)).mkQ x
+            ∈ Submodule.map _ ((maximalIdeal R)^k • (⊤ : Submodule R M)) := ⟨x, hx, rfl⟩
+        rw [h, Submodule.mem_bot] at hmem
+        exact (Submodule.Quotient.mk_eq_zero _).mp hmem
+      have heq : (maximalIdeal R)^k • (⊤ : Submodule R M)
+          = (maximalIdeal R)^(k+1) • (⊤ : Submodule R M) := le_antisymm hle hST
+      exact hneT (smul_pow_eq_bot_of_eq_succ k heq)
+    have hlt := Submodule.length_quotient_lt
+      (R := R) (M := M ⧸ (maximalIdeal R)^(k+1) • (⊤ : Submodule R M)) _ hmapne
+    rw [(Submodule.quotientQuotientEquivQuotient _ _ hST).length_eq] at hlt
+    have hih := ih hneT
+    have hfin : ((k : ℕ∞) + 1) ≤ Module.length R
+        (M ⧸ (maximalIdeal R)^(k+1) • (⊤ : Submodule R M)) :=
+      Order.add_one_le_of_lt (lt_of_le_of_lt hih hlt)
+    simpa using hfin
+
+open IsLocalRing in
+/-- **`Theorem 1.2` の事実 (b)**——`min(length M, e) ≤ length(M/𝔪^e·M)`。
+★Faltings の `β = min{1, δₙ/(d+1)}` より強く、しかも巡回分解も
+和因子の個数の評価も要らない。 -/
+theorem min_le_length_quot_smul_pow {R M : Type*} [CommRing R] [IsLocalRing R]
+    [IsNoetherianRing R] [AddCommGroup M] [Module R M] [Module.Finite R M]
+    [IsArtinian R M] [IsNoetherian R M] (e : ℕ) :
+    min (Module.length R M) (e : ℕ∞)
+      ≤ Module.length R (M ⧸ (maximalIdeal R)^e • (⊤ : Submodule R M)) := by
+  by_cases h : (maximalIdeal R)^e • (⊤ : Submodule R M) = ⊥
+  · rw [h, (Submodule.quotEquivOfEqBot (⊥ : Submodule R M) rfl).length_eq]
+    exact min_le_left _ _
+  · exact le_trans (min_le_right _ _) (le_length_quot_smul_pow e h)
+
 /-- DVR ではイデアルの冪は全順序なので、和は指数の `min`。 -/
 theorem pow_sup_pow {R : Type*} [CommRing R] (I : Ideal R) (k e : ℕ) :
     I^k ⊔ I^e = I^(min k e) := by
