@@ -5654,3 +5654,22 @@ error: unsolved goals      ← 直後にこれが続く(タクティクが無い
 「名前が無い」ではなく「unknown tactic + 直後の unsolved goals」なので気づきにくい。
 逆に言えば、`lean_check` が通った証明は import を足すだけで必ず通る。
 (2026-09-05、`Found/HerbrandIndex.lean`(Herbrand 商)で実測。)
+
+## `(fixedFieldLocalField K H hH).carrier` にはインスタンスが付かない（2026-09-05）
+
+`(selfField p).carrier`（上）の**インスタンス合成版**。`fixedFieldLocalField` は `def`
+（semireducible）なので、TC 解決（`instances` 透明度）は射影を潰せない。
+
+```
+failed to synthesize instance of type class
+  Module K.carrier (fixedFieldLocalField K H hH).carrier
+```
+
+`Algebra ℚ_[p] F.carrier` は `PAdicLocalField.isAlgebra` が `?K.carrier` に直接
+マッチするので通るが、**底体が `K.carrier` の側**（`Module K.carrier ↥(fixedField H)`）は
+射影を剥がさないと見えない。
+
+**直し方**: 補題は生の型 `↥(IntermediateField.fixedField H)` で述べ、`show` で橋を架ける
+（`Module.finrank ℚ_[p] (fixedFieldLocalField K H hH).carrier
+= Module.finrank ℚ_[p] ↥(IntermediateField.fixedField H)` は `rfl` で通る）。
+`Found/PGC/DegreeTransport.lean::finrank_fixedFieldLocalField` が実例。

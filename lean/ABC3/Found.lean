@@ -1711,6 +1711,7 @@ import ABC3.Found.PGC.UnramifiedRootsOfUnity
 import ABC3.Found.PGC.ResidueCardLowerBound
 import ABC3.Found.PGC.UnramifiedFrobenius
 import ABC3.Found.PGC.UnramifiedClosureRoots
+import ABC3.Found.PGC.DegreeTransport
 /-!
 # Found — 実装済みの基礎
 
