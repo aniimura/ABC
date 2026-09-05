@@ -626,3 +626,51 @@ Galois 性が付いたので、同じ次数の不分岐拡大が一致するこ�
 `Gal(K^ur/K) ≅ Ẑ` は、これらを `n` について射影極限に組み上げたもの
 ——残る仕事は (a) 一意性(次数 `n` の不分岐拡大が `K.closure` の中で
 一意)と (b) 極限の構成。
+
+## ★★★★★★★★2026-09-05: 不分岐拡大の**一意性**——第二の柱が立った
+
+### 構造の整理(リファクタ)
+
+中心を `isUnramifiedAdjoin_of_lift`(**不分岐拡大の判定子**)に一本化した:
+
+```
+f : 𝒪[K.carrier][X] モニック、f̄ 既約、x は f_K の根
+ ⟹ [K(x):K] = deg f ∧ IsUnramifiedAdjoin K x ∧ Normal ∧ Bijective (residueGalHom K x)
+```
+
+存在(`exists_isUnramifiedAdjoin_of_irreducible`)はこれに流し込むだけの
+30 行に縮んだ。
+
+### 逆向き——不分岐性から定義多項式を取り出す
+
+`exists_integral_generator` : `IsUnramifiedAdjoin K x` なら、剰余体の
+原始元(`Field.exists_primitive_element`)を Hensel で持ち上げた `θ` が
+`K(x)` の生成元になり、その最小多項式は剰余体で既約な `f` の持ち上げ。
+——`[K(θ):K] = deg f`(既約性から直接)と `K(θ) ⊆ K(x)` の次数一致で
+`K(θ) = K(x)`。これで**任意の**不分岐拡大に判定子を適用できる。
+
+### 結果
+
+- `normal_of_isUnramifiedAdjoin` : **不分岐 ⟹ normal**(標数 0 で Galois)
+- `mem_adjoin_of_root_of_splits` : `F` が `K(x)` で分裂するなら
+  `K.closure` の `F` の根はすべて `K(x)` に入る
+- `exists_root_lift_of_residue_root` : 剰余体の `f̄` の根は Hensel で
+  `𝒪_{K(x)}` の `f` の根に持ち上がる
+- `ABC3.Found.exists_root_of_finrank_eq`(`Found/FiniteFieldIrreducible.lean`)
+  : 次数が一致する有限体拡大には既約多項式の根がある(`AdjoinRoot` +
+  `FiniteField.nonempty_algHom_of_finrank_dvd`)
+- **`adjoin_eq_of_isUnramified`** : **同じ次数の不分岐拡大は
+  `K.closure` の中で一致する**(一意性)
+- **`exists_unique_adjoin_isUnramified`** : 各次数 `n ≥ 1` に不分岐拡大が
+  **存在して一意**
+
+一意性の筋: `K(y)` の定義多項式 `f` を取る。`𝓀_{K(x)}` も `n` 次拡大
+だから `f̄` の根 `b` を含む。`b` を Hensel で持ち上げて `f` の根
+`z ∈ K(x)` を得ると `[K(z):K] = n` で `K(z) = K(x)`。一方 `K(y)` は
+normal で `f_K` が分裂するから `z ∈ K(y)`、同様に `K(z) = K(y)`。
+
+### 残り: `K^ur` と `Gal(K^ur/K) ≅ Ẑ`
+
+存在・一意性・`Gal ≃ ℤ/n` が揃ったので、あとは `n` について
+`K_n`(次数 `n` の不分岐拡大)を選び、`K^ur := ⨆ n, K_n` を作って
+`Gal(K^ur/K) ≅ lim ℤ/n! = Ẑ` を出す段。

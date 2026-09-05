@@ -66,4 +66,20 @@ theorem exists_monic_irreducible_natDegree_eq (F : Type*) [Field F] [Finite F] (
   refine ⟨minpoly F α, minpoly.monic hint, minpoly.irreducible hint, ?_⟩
   rw [← IntermediateField.adjoin.finrank hint, hα, IntermediateField.finrank_top', hrk]
 
+
+/-- **次数が一致する有限体拡大には既約多項式の根がある**——`AdjoinRoot g`
+(次数 `deg g` の有限体)から `E` への `F`-代数準同型が
+`FiniteField.nonempty_algHom_of_finrank_dvd` で取れる。 -/
+theorem exists_root_of_finrank_eq (F : Type*) [Field F] [Finite F] (g : Polynomial F)
+    (hgi : Irreducible g) (E : Type*) [Field E] [Finite E] [Algebra F E]
+    (hdeg : Module.finrank F E = g.natDegree) :
+    ∃ b : E, Polynomial.aeval b g = 0 := by
+  haveI : Fact (Irreducible g) := ⟨hgi⟩
+  have h1 : Module.finrank F (AdjoinRoot g) = g.natDegree := by
+    rw [(AdjoinRoot.powerBasis (f := g) hgi.ne_zero).finrank, AdjoinRoot.powerBasis_dim]
+  obtain ⟨φ⟩ := FiniteField.nonempty_algHom_of_finrank_dvd (F := F) (K := AdjoinRoot g) (L := E)
+    (by rw [h1, hdeg])
+  refine ⟨φ (AdjoinRoot.root g), ?_⟩
+  rw [Polynomial.aeval_algHom_apply, AdjoinRoot.aeval_eq, AdjoinRoot.mk_self, map_zero]
+
 end ABC3.Found
