@@ -222,4 +222,64 @@ theorem almostIdemQuotient_almost_lift {A C D : Type u} [CommRing A]
   obtain ⟨α, β, hαβ⟩ := almostIdemQuotient_factor s E hE
   exact almost_lift_of_surjective s ⟨ι, inferInstance, α, β, hαβ⟩ π hπ φ
 
+/-! ## 第 4 段(後半への足場)——テンソル積も almost 射影的
+
+原文の *"Let `m : B ⊗_Ā B → B` denote the multiplication map. `p^{3ε}·m`
+lifts to `m_ε : B_ε ⊗_A B_ε → B_ε`."*
+
+`B_ε` の almost 射影性(上)から `B_ε ⊗_A B_ε` の almost 射影性が出る
+(水準は積 `s·s`)。ここで中間加群は `(ι→A) ⊗_A (ι→A)`——有限自由では
+あるが `μ → A` の形には**書いていない**ので、`almost_lift_of_surjective`
+を「中間加群は射影的でありさえすればよい」形へ一般化しておく。 -/
+
+/-- `almost_lift_of_surjective` の一般化——中間加群は有限自由でなくとも
+**射影的**でありさえすればよい。 -/
+theorem almost_lift_of_projective_factor {A B C D P : Type u} [CommRing A]
+    [AddCommGroup B] [Module A B] [AddCommGroup C] [Module A C]
+    [AddCommGroup D] [Module A D] [AddCommGroup P] [Module A P] [Module.Projective A P]
+    (c : A) (f : B →ₗ[A] P) (g : P →ₗ[A] B) (hgf : ∀ b : B, g (f b) = c • b)
+    (π : C →ₗ[A] D) (hπ : Function.Surjective π) (φ : B →ₗ[A] D) :
+    ∃ ψ : B →ₗ[A] C, ∀ b : B, π (ψ b) = c • φ b := by
+  obtain ⟨χ, hχ⟩ := Module.projective_lifting_property π (φ ∘ₗ g) hπ
+  refine ⟨χ ∘ₗ f, fun b => ?_⟩
+  have h := LinearMap.congr_fun hχ (f b)
+  simp only [LinearMap.coe_comp, Function.comp_apply] at h ⊢
+  rw [h, hgf b, map_smul]
+
+/-- **almost 射影加群のテンソル積は almost 射影的**——水準は積になる。 -/
+theorem almost_projective_tensor {A M N P Q : Type u} [CommRing A]
+    [AddCommGroup M] [Module A M] [AddCommGroup N] [Module A N]
+    [AddCommGroup P] [Module A P] [AddCommGroup Q] [Module A Q]
+    (c d : A)
+    (f : M →ₗ[A] P) (g : P →ₗ[A] M) (hgf : ∀ x : M, g (f x) = c • x)
+    (f' : N →ₗ[A] Q) (g' : Q →ₗ[A] N) (hgf' : ∀ x : N, g' (f' x) = d • x)
+    (z : TensorProduct A M N) :
+    TensorProduct.map g g' (TensorProduct.map f f' z) = (c * d) • z := by
+  induction z using TensorProduct.induction_on with
+  | zero => simp
+  | tmul x y =>
+    rw [TensorProduct.map_tmul, TensorProduct.map_tmul, hgf, hgf',
+      TensorProduct.tmul_smul, TensorProduct.smul_tmul', TensorProduct.smul_tmul',
+      smul_smul, mul_comm d c]
+  | add u v ihu ihv => rw [map_add, map_add, ihu, ihv, smul_add]
+
+/-- **`B_ε ⊗_A B_ε` も almost 射影的**(水準 `s²`)——乗法 `m` は
+`s²` を除いて `B_ε ⊗_A B_ε → B_ε` に持ち上がる。 -/
+theorem almostIdemQuotient_tensor_almost_lift {A C D : Type u} [CommRing A]
+    [AddCommGroup C] [Module A C] [AddCommGroup D] [Module A D]
+    {ι : Type u} [Fintype ι]
+    (s : A) (E : Module.End A (ι → A)) (hE : E * E = s • E)
+    (π : C →ₗ[A] D) (hπ : Function.Surjective π)
+    (φ : TensorProduct A
+        ((ι → A) ⧸ LinearMap.range (s • (1 : Module.End A (ι → A)) - E))
+        ((ι → A) ⧸ LinearMap.range (s • (1 : Module.End A (ι → A)) - E)) →ₗ[A] D) :
+    ∃ ψ : TensorProduct A
+        ((ι → A) ⧸ LinearMap.range (s • (1 : Module.End A (ι → A)) - E))
+        ((ι → A) ⧸ LinearMap.range (s • (1 : Module.End A (ι → A)) - E)) →ₗ[A] C,
+      ∀ x, π (ψ x) = (s * s) • φ x := by
+  obtain ⟨α, β, hαβ⟩ := almostIdemQuotient_factor s E hE
+  exact almost_lift_of_projective_factor (P := TensorProduct A (ι → A) (ι → A)) (s * s)
+    (TensorProduct.map α α) (TensorProduct.map β β)
+    (fun z => almost_projective_tensor s s α β hαβ α β hαβ z) π hπ φ
+
 end ABC3.Found.Falt1
