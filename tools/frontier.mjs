@@ -17,11 +17,14 @@
  *   ★`startable` でない節点に人手（agent）を割いても、上流の sorry に当たって
  *     止まる。だから配る順序は「startable のうち downstream が大きいもの」から。
  *
+ * ★同時に起動する agent は **5 個まで**（`ResearchPaper/orchestration.md` §0）。
+ *   だから既定の出力も 5 件で切る。足りなければ**次の波**にする。
+ *
  * 使い方:
- *   node tools/frontier.mjs                 # 着手可能なものを効果の大きい順に
+ *   node tools/frontier.mjs                 # 着手可能なものを効果の大きい順に（上位 5 件）
  *   node tools/frontier.mjs --all           # 着手不可のものも出す（blockers 付き）
  *   node tools/frontier.mjs --owner pGC     # 所属で絞る
- *   node tools/frontier.mjs --limit 5
+ *   node tools/frontier.mjs --limit 0       # 件数の上限を外す（俯瞰したいときだけ）
  *   node tools/frontier.mjs --json          # Orchestrator が食う形
  */
 
@@ -104,7 +107,10 @@ sel.sort((a, b) =>
   (b.startable - a.startable) || (b.downstream - a.downstream) ||
   (b.dsItems - a.dsItems) || a.rel.localeCompare(b.rel));
 
-const limit = Number(opt('--limit') ?? 0);
+/** ★既定 5 件。1 波で配る持ち場の上限（`ResearchPaper/orchestration.md` §0）。
+ *  上限を外したいときだけ `--limit 0`。 */
+const shown = sel.length;
+const limit = Number(opt('--limit') ?? 5);
 if (limit > 0) sel = sel.slice(0, limit);
 
 if (flag('--json')) {
@@ -131,5 +137,11 @@ for (const r of sel) {
   }
 }
 console.log();
+if (limit > 0 && shown > limit) {
+  console.log(`  … 他 ${shown - limit} 件（★既定は 5 件まで。全部見るなら --limit 0）`);
+  console.log();
+}
 console.log('☆次の一手は「下流」が大きい startable なノード。');
 console.log('  そのノードの持ち場を sub-agent に渡すには node tools/brief.mjs --node <rel>');
+console.log('★同時に起動する agent は 5 個まで。足りなければ次の波にする。');
+console.log('  前線が 5 件も無いときに agent を増やしても、上流の sorry に当たって止まる。');

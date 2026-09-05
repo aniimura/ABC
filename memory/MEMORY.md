@@ -63,3 +63,5 @@
 - [ABC3b/cとは.git自体を共有——他セッションのcommitで自分のコミット内容が合流・作業ツリーが差し戻ることがある。.lake/buildキャッシュでも類似の再現性トラブルを観測](shared-git-repo-race-hazard.md) — commit直後は`git log -1 --stat`で自分のメッセージか確認、触る前は`git status`/`git diff`でHEADとの一致を確認してから編集する。多相化した補題は型注釈を省略しない。2026-09-04実測。
 - [Scheme等"大きな圏"のデータはType 1に住む——interfaceのSpace:Typeと衝突する](corrhyp-scheme-universe-mismatch.md) — HyperbolicCurveData.SpaceをType uに universe 多相化して解決。既存の具体化には無影響。エラーは後続フィールドの行に出ることがあるので孤立させて再現すること。
 - [ユーザーは会話内の報告を日本語で書くことを明示的に指示した](user-prefers-japanese-reports.md) — 2026-09-04。ターン末尾の要約・状況報告は日本語で。
+- [進め方は「外部依存グラフが真実、agentには持ち場だけ」](orchestration-graph-first.md) — 2026-09-05に切替。設計はResearchPaper/orchestration.md。次にどこを叩くかはtools/frontier.mjs、持ち場の切り出しはtools/brief.mjs、役割は.claude/agents/。
+- [並列agent数の上限は5程度](orchestration-parallel-cap-5.md) — 2026-09-05ユーザー指示。前線が狭い(着手可能13件)・worktree共有・統合コストの3点が理由。frontier.mjsの既定--limitも5。
