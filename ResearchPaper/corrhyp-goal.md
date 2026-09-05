@@ -5284,3 +5284,34 @@ theorem piecePullbackIso_inv_fst … :
 集計は引き続き10/24——§4は引き続き0/2。次の一手は、この等式から
 `pieceRingEquiv.symm (a ⊗ₜ 1) = appLE a`(環レベル)を導き、続き23の(i)と
 合わせて四角形を閉じること。
+
+## 2026-09-05夜さらに続き27: 環レベルへ渡す道筋が**4手に分解**できた
+(mathlibの橋渡し補題を2本発見)
+
+続き26で得た`piecePullbackIso_inv_fst`(`Spec`側の等式)から、実際に要る
+環レベルの等式`pieceRingEquiv.symm (a ⊗ₜ 1) = appLE a`へ渡す道筋を調べ、
+**4手に分解**できた。mathlibに必要な橋渡しが2本あることを確認した:
+
+- **`IsAffineOpen.isoSpec_inv_ι`** : `hU.isoSpec.inv ≫ U.ι = hU.fromSpec`
+  ——続き26の等式の右辺をそのまま`fromSpec`の形に書き直せる。
+- **`IsAffineOpen.SpecMap_appLE_fromSpec`** :
+  `Spec.map (f.appLE U V i) ≫ hU.fromSpec = hV.fromSpec ≫ f`
+  ——`appLE`の`Spec`側の意味を与える**まさに欲しかった橋渡し**。
+  `f := pullback.fst X.hom toBaseK`、`V := piece(U)`(`piece_isAffineOpen`で
+  アフィン)で使う。
+
+**4手の分解**:
+1. 続き26の等式を`isoSpec_inv_ι`で`… = Spec.map includeLeft ≫ hU.fromSpec`と
+   書き直す。
+2. `SpecMap_appLE_fromSpec`で
+   `Spec.map appLE ≫ hU.fromSpec = (piece).fromSpec ≫ pullback.fst`を得る。
+3. 両者を突き合わせ、`hU.fromSpec`が**モノ**(開埋め込み∘同型)であることで
+   右から消去する。
+4. 残るのは
+   `piecePullbackIso.inv ≫ (piece).isoSpec.hom = Spec.map (pieceRingEquiv.symm)`
+   という**最後の同定**——`pieceRingEquiv`の定義(`Scheme.Opens.topIso`+
+   `Γ.mapIso piecePullbackIso.symm.op`+`ΓSpecIso`)を追えばよい。
+   ここまで来れば`Spec`の忠実充満性で環レベルの等式が出る。
+
+集計は引き続き10/24——§4は引き続き0/2。次の一手は上の1〜3(2本の橋渡しは
+既にmathlibにあるので機械的)、そして4の同定である。

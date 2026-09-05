@@ -2374,3 +2374,17 @@ grep -c "^error"が0かつEXIT:0を確認してからコミットした。
 
 次の一手: この等式からpieceRingEquiv.symm (a ⊗ₜ 1) = appLE a(環レベル)を
 導き、続き23の(i)と合わせて四角形を閉じる。集計は10/24——§4は0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き27
+続き26のSpec側の等式から環レベルの pieceRingEquiv.symm (a⊗ₜ1) = appLE a へ
+渡す道筋を4手に分解。mathlibの橋渡し2本を発見:
+- IsAffineOpen.isoSpec_inv_ι : hU.isoSpec.inv ≫ U.ι = hU.fromSpec
+- IsAffineOpen.SpecMap_appLE_fromSpec :
+  Spec.map (f.appLE U V i) ≫ hU.fromSpec = hV.fromSpec ≫ f  ←appLEのSpec側の意味
+
+4手: 1.続き26の等式をfromSpecの形へ書き直す、2.SpecMap_appLE_fromSpecで
+appLE側を得る、3.hU.fromSpecがモノ(開埋め込み∘同型)なので右から消去、
+4.piecePullbackIso.inv ≫ (piece).isoSpec.hom = Spec.map (pieceRingEquiv.symm)
+の同定(pieceRingEquivの定義=topIso+Γ.mapIso+ΓSpecIsoを追う)。
+ここまで来ればSpecの忠実充満性で環レベルの等式が出る。
+集計は10/24——§4は0/2。
