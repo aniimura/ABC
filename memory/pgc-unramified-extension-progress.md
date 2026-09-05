@@ -2141,3 +2141,34 @@ MCP REPL も ABC3 の import 集合で動くので同じ嘘をつく。
 
 次: `Gal(K(y) ⊔ K(x)/K) ≅ Gal(K(y)/K) × Gal(K(x)/K)`。両方正規になったので
 制限写像は単射、次数は第 999 で積と分かっているから濃度が合う。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05: `Γ_K ↠ Γ/H_{K(y)} × Γ/H_{K(Λ_n)}`
+
+`Found/PGC/CompositumSurjection.lean`(新規)。相互律の**有限段での全射性**。
+
+### ★体の塔を作らずに済ませた
+
+`AlgEquiv.restrictNormalHom` で `Gal(E₁⊔E₂/K) → Gal(E₁/K)` を作る道は
+`↥E₁ → ↥(E₁⊔E₂)` の代数構造を手で入れることになり、中間体 2 層の `rfl` が
+kernel を止める(idioms #59)。代わりに **`Γ_K` の側で閉じた**:
+
+- `fixingSubgroup_sup`(`fixingSubgroup (A ⊔ B) = fixingSubgroup A ⊓ fixingSubgroup B`
+  ——Galois 接続 `IntermediateField.le_iff_le` から)
+- `IntermediateField.finrank_eq_fixingSubgroup_index`(mathlib に既存)
+- `surjective_prod_quotient_of_index_mul`(**純粋な群論**:
+  `Γ → Γ/H₁ × Γ/H₂` の核は `H₁ ⊓ H₂`、指数が積なら濃度一致で単射⟹全単射)
+
+これで体の塔は一度も要らない。
+
+### 主定理
+
+- `surjective_absGal_prod_quotient`(`E₁`・`E₂` Galois + 次数が積 ⟹ 同時全射)
+- `surjective_absGal_prod_lubinTate_unramified`(不分岐 `K(y)` と `K(Λ_n)` の具体形)
+
+`Γ/H_{K(x)} ≅ Gal(K(x)/K) ≃* (𝒪_K/π^n)^×`・`Γ/H_{K(y)} ≅ ℤ/m` なので、
+これは `Γ_K ↠ 𝒪_K^× × Ẑ` の有限段。残るのは**極限**(逆極限を取る段)と、
+それが `Γ_K^ab` と一致すること(`K^ab = K_π·K^ur`)。
+
+### 記録: `lake build ABC3` の初回失敗→再実行成功が今日 2 度あった
+
+並行セッションの書き込みと衝突していると思われる。**必ず再実行して確認**する。
