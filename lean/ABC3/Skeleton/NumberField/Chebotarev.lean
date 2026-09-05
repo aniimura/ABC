@@ -171,8 +171,10 @@ def chebotarev_splitsCompletely.needs : List ProofObligation :=
       (.inMathlib "NumberField.dedekindZeta_residue") 116,
     .citation "[mathlib]" "Nat.infinite_setOf_prime_and_eq_mod(Dirichlet の算術級数定理)"
       (.inMathlib "Nat.infinite_setOf_prime_and_eq_mod") 116,
-    .citation "[mathlib]" "Chebotarev / Artin の相互法則 / Dirichlet 密度 / Frobenius 元 / 射類群"
-      (.absent "lean/.lake/packages/mathlib/Mathlib/ 全体を Chebotarev|Tchebotarev|ArtinReciprocity|DirichletDensity|FrobeniusElement|RayClassGroup で grep、いずれも 0 件(2026-08-20)") 116,
+    .citation "[mathlib]" "Chebotarev / Artin の相互法則 / Dirichlet 密度 / 射類群"
+      (.absent "lean/.lake/packages/mathlib/Mathlib/ 全体を Chebotarev|Tchebotarev|ArtinReciprocity|artinMap|DirichletDensity|RayClassGroup|SplitsCompletely|decompositionGroup|analyticDensity|naturalDensity|primeDensity で grep、いずれも 0 件(2026-09-06 再測。node tools/absent-recheck.mjs --try で再実行できる)") 116,
+    .citation "[mathlib]" "Frobenius 元(★2026-08-20 の「不在」は誤り。名前が FrobeniusElement ではないので旧 regex に当たらなかった。流儀は Gal(L/K) ではなく、G が S に作用し R が固定環という RingTheory/Invariant の形)"
+      (.inMathlib "IsArithFrobAt") 116,
     .derivation
       "鎖 cheb: 密度の定義 → Frobenius 元 → 射類群 → Artin 写像 → 相互法則 → L(1,χ)≠0 → 射類ごとの等分布 → アーベルの場合 → 巡回への還元 → 2 つの計数((a) 全単射・(b) d/(cf) 対 1)→ 本体" 116,
     .implicitStep

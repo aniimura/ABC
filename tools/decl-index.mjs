@@ -56,7 +56,28 @@ function walk(dir, acc = []) {
 }
 
 const MODS = '(?:private\\s+|protected\\s+|noncomputable\\s+|scoped\\s+|local\\s+)*';
-const NAME = "[A-Za-z_][\\w'!?₀-₉]*(?:\\.[\\w'!?₀-₉]+)*";
+/** ★★★★★**名前の文字類**(2026-09-06 に拡張。第 1036)。
+ *
+ * ★旧版は `[A-Za-z_][\w'!?₀-₉]*` だったが、JS の `\w` は **ASCII だけ**である。
+ * そのため **名前が非 ASCII 文字で切れていた**。実測(2026-09-06):
+ *   `WeierstrassCurve.preΨ₄` → 索引上 `WeierstrassCurve.pre`
+ *   `coeff_Ψ`               → 索引上 `coeff_`
+ * したがって `Ψ|Φ` で名前欄を grep すると **0 件**と出るが、
+ * 実体は存在する(statement 欄には 133 行あった)。
+ *
+ * ★★これはこの木で 5 件出ている「不在の誤判定」と**同じ回路**である
+ * (`ULift.field` / `continuousCohomology` / `Ẑ` / `CompactSpace Gal` / `IsArithFrobAt`)。
+ * 無名 instance を入れた 2026-09-05 の拡張(backlog M5)と同じ動機である。
+ *
+ * ★入れた範囲(Lean の識別子で実際に使われるものだけ):
+ *   `\u00C0-\u024F` Latin Extended / `\u0370-\u03FF` ギリシャ(Ψ Φ σ μ π …)
+ *   `\u1D00-\u1DBF` 音声拡張(ᵥ ᵢ …) / `\u2070-\u209F` 上付き・下付き
+ *   `\u2100-\u214F` 文字風記号(ℓ ℝ ℤ ℕ ℚ ℂ ℘ …) / `\uD800-\uDFFF` 代理対(𝓞 𝔓 𝕜 …)
+ * ★★**矢印(`\u2190-\u21FF`)や論理記号(`\u2200-`)は入れていない** ——
+ * 入れると `def f : A → B` の型まで名前に食い込むからである。 */
+const IDX = "\\w'!?\\u00C0-\\u024F\\u0370-\\u03FF\\u1D00-\\u1DBF\\u2070-\\u209F\\u2100-\\u214F\\uD800-\\uDFFF";
+const ID1 = "A-Za-z_\\u00C0-\\u024F\\u0370-\\u03FF\\u2100-\\u214F\\uD800-\\uDFFF";
+const NAME = `[${ID1}][${IDX}]*(?:\\.[${IDX}]+)*`;
 const DECL_RE = new RegExp(
   `^\\s*(?:@\\[[^\\]]*\\]\\s*)?${MODS}(theorem|lemma|def|abbrev|instance|structure|inductive|class)\\s+(${NAME})`);
 

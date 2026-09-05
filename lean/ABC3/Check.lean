@@ -45,6 +45,7 @@ import ABC3.Check.FrdI.AutAmpleGap
 import ABC3.Check.FrdI.Prop21QuantifierGap
 import ABC3.Check.FrdI.VLocFalse
 import ABC3.Check.FrdI.Ex61OrdDegenerate
+import ABC3.Check.FrdI.Ex63DegDegenerate
 import ABC3.Check.Arakelov.ArcSpaceNondegenerate
 import ABC3.Check.Arakelov.PicNondegenerate
 import ABC3.Check.Arakelov.PullbackNondegenerate

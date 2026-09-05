@@ -1713,6 +1713,7 @@ import ABC3.Found.PGC.UnramifiedFrobenius
 import ABC3.Found.PGC.UnramifiedClosureRoots
 import ABC3.Found.PGC.DegreeTransport
 import ABC3.Found.PGC.InertiaKummer
+import ABC3.Found.PGC.UnramifiedGalCharCount
 /-!
 # Found — 実装済みの基礎
 

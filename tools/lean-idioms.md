@@ -5765,3 +5765,41 @@ example (K : PAdicLocalField p) : True := by
 ★対処: **確認のための `haveI` を並べない**。1 宣言に 1 つずつ `example` で試す。
 本番でも「すでにインスタンスがあるもの」を `haveI` で置き直さない。
 `open scoped NormedField Valued` のせいだと誤診しやすい（実際は無関係）。
+
+## `¬ Countable NNReal` を示すとき、局所仮説の `Countable NNReal` が拾われない（2026-09-06、Check/FrdI/Ex63DegDegenerate で実測）
+
+```lean
+theorem not_countable_nnreal : ¬ Countable NNReal := by
+  intro h                      -- h : Countable NNReal（局所インスタンスのはず）
+  have hinj : Function.Injective (fun x : ℝ => Real.toNNReal (Real.exp x)) := …
+  have : Countable ℝ := hinj.countable
+  -- failed to synthesize  Countable { r // 0 ≤ r }
+```
+
+`NNReal` は `def NNReal := {r : ℝ // 0 ≤ r}` なので、`Function.Injective.countable` の
+`[Countable β]` を解こうとしたエラボレータが `β` を**subtype に unfold した形**で
+探索し、局所の `h : Countable NNReal` と syntactic に合わなくなる。
+`⟨Real.exp x, _⟩` という anonymous constructor で関数を書くと、`β` が最初から
+`{r // 0 ≤ r}` に推論されるので同じ穴に落ちる。
+
+★対処: **インスタンス引数を明示で渡す**。
+
+```lean
+  haveI : Countable ℝ := @Function.Injective.countable ℝ NNReal h _ hinj
+  exact Cardinal.not_countable_real Set.countable_univ
+```
+
+関数側も `Real.toNNReal (Real.exp x)` と書いて `β = NNReal` を固定する。
+`Uncountable ℝ` のインスタンスと `Cardinal.not_countable_real` は
+`Mathlib.Analysis.Real.Cardinality` にある（`Mathlib.Data.Real.Cardinality` は**無い**）。
+
+## MCP `lean_start` の基準環境は sub-agent 間で共有される——他の agent が import を差し替える（2026-09-06 実測）
+
+`lean_start(["Mathlib.NumberTheory.NumberField.ProductFormula", …])` で立てた環境で
+数回 `lean_check` したあと、突然 `open NumberField` が `unknown namespace` を返し始めた。
+`lean_status` を見ると `imports:` が **こちらが指定していない** `ABC3.Found.PGC.InertiaKummer`
+に変わっていた——並行する別 agent が同じ MCP サーバに `lean_start` を打っている。
+
+★対処: **並行セッションだと分かっているときは最初から `node tools/leanfile.mjs` を使う**。
+1 往復 11〜13 秒だが、環境を横取りされない。`lean_check` が急に基本語彙を見失ったら
+バグを疑う前に `lean_status` の `imports:` を見る。

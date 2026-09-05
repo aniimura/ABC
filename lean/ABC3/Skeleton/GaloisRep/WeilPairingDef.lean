@@ -2,6 +2,8 @@ import ABC3.Skeleton.GaloisRep.WeilRoot
 import ABC3.Found.GaloisRep.WeilCharZero
 import ABC3.Found.GaloisRep.WeilGalois
 import ABC3.Found.GaloisRep.WeilGalPoint
+import ABC3.Found.GaloisRep.WeilNondegFull
+import ABC3.Found.GaloisRep.Dedekind
 
 /-!
 # スケルトン —— **Weil 対 `e_n` とその 5 性質**(`Skeleton`)
@@ -20,7 +22,7 @@ import ABC3.Found.GaloisRep.WeilGalPoint
 | `weilPairing_add_left` | ✅ **第 184 + 第 191**(`O` と `P₂ = −P₁` の場合込み) |
 | `weilPairing_self` | ✅ **第 190 + 第 191** |
 | `weilPairing_galois` | ✅ **第 192-194** |
-| `weilPairing_nondeg` | ❌ 未 |
+| `weilPairing_nondeg` | ✅ **第 1036**（`Found` の `exists_pairing_ne_one` への配線） |
 
 ★対は `e_n(P, Q) := τ_Q(g_P) / g_P` で定める(`WeilRoot.lean` の `g_P`)。
 ★★値が `F` に落ちるのは `n` 乗が 1 だからで、第 176-178 で構成した。
@@ -84,10 +86,15 @@ theorem weilPairing_self [CharZero F] [IsAlgClosed F] (W : WeierstrassCurve.Affi
   ABC3.Found.GaloisRep.weilPairingVal_alt W n hn P hP
 
 /-- ★★★★**非退化性**——`P ≠ 0` なら `e_n(P, ·)` は自明でない。 -/
-theorem weilPairing_nondeg (W : WeierstrassCurve.Affine F) [W.IsElliptic] (n : ℕ) (hn : 1 ≤ n)
+theorem weilPairing_nondeg [CharZero F] [IsAlgClosed F] (W : WeierstrassCurve.Affine F)
+    [W.IsElliptic] (n : ℕ) (hn : 1 ≤ n)
     (P : W.Point) (hP : n • P = 0) (hP0 : P ≠ 0) :
     ∃ Q : W.Point, n • Q = 0 ∧ weilPairing W n P Q ≠ 1 := by
-  sorry
+  have h2 : IsUnit (2 : F) := isUnit_iff_ne_zero.2 (by exact_mod_cast (NeZero.ne' (2 : F)).symm)
+  haveI : IsDedekindDomain W.CoordinateRing := isDedekindDomain_coordinateRing h2 W
+  have h4 : (4 : F) ≠ 0 := by norm_num
+  match P, hP, hP0 with
+  | Point.some x y hPx, hP, hP0 => exact exists_pairing_ne_one W h2 h4 n hn x y hPx hP hP0
 
 /-- ★★★★**Galois 同変性** `σ(e_n(P,Q)) = e_n(σP, σQ)`。★★★第 192-194 ブロックで証明された。
 
@@ -171,7 +178,9 @@ def weilPairing_nondeg.src : Source :=
     sectionId := "genell-thm-3-8" }
 
 def weilPairing_nondeg.needs : List ProofObligation :=
-  [ .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.8.1(c)(非退化性)"
+  [ .implicitStep
+      "★★★★★★★★★★**2026-09-06(第 1036): 閉じた。以下の implicitStep の項はすべて**解決済みの履歴**である**。★下で「残る 1 行」として挙げられていた `x([n]P) = Φ_n/ΨSq_n` は、第 325-327(2026-08-26)が **EDS 恒等式も双対同種も使わず**(第 42-52 の `MulOK` の帰納を再利用して)回避しており、`Skeleton/GaloisRep/WeilFunctionField.lean` の sorry は 0 である。★非退化性の本体は `Found.GaloisRep.exists_pairing_ne_one`(`Found/GaloisRep/WeilNondegFull.lean:161`)と `weilPairing_nondegenerate`(同 :189)であり、本宣言はそこへの配線 5 行である。★★消費者 `det_galRep_eq_cyclotomic` はこれとは独立に `Found` を直接使って既に閉じていたので、本宣言の `sorry` は**宙に浮いていた**(0 ブロック)" 19,
+    .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.8.1(c)(非退化性)"
       (.absent "mathlib に Weil 対は 0 件(2026-08-20、同上の検索)") 19,
     .otherPaper "GenEll" "Theorem 3.8(Weil 対 e_n の定義)" 19,
     .implicitStep
