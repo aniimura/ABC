@@ -2719,3 +2719,28 @@ GlueData の現状(R' レベル): J・U・V・f(続き45)・t・t_id・cocycle �
 (続き46)が揃い、残るのは f_open(開埋め込み性)と t'/t_fac(pullback の配線)。
 f_open には U_i ⊓ U_j を U_i の基本開集合に取る細分が要る(未形式化)。
 集計は10/24——§4は0/2。
+
+## 2026-09-05夜さらに続き47 — f・t をスキームの層へ／f_open の在庫確認
+
+追加2本(ExtLimit.lean):
+- exists_common_descendPieceRModel_schemeHom(0.08秒): 続き45 に Spec。
+  descendPieceRModel.instCommRing のおかげで CommRingCat.of が素直に通り、
+  続き42 のような letI の並べ立てが不要になった。
+- descendPieceRModel_tScheme: RingEquiv.toCommRingCatIso + Scheme.Spec.mapIso。
+
+f_open の在庫確認(重要): ExtLimit.lean には既に
+- descendPieceR_localization_isOpenImmersion(行1691)
+- exists_descendPieceR_localization_baseChange(行1759、227秒)
+がある。f_open は「V を U の基本開集合として扱い、V のモデルを U のモデルの
+局所化として構成する」設計なら得られる。
+
+2つの設計の関係(正直な整理):
+- D(f)設計(既存): f_open は自動。だが V(i,j)=D(f_ij)⊆U i と V(j,i)=D(f_ji)⊆U j が
+  別々の開なので t i j が eqToHom にならず重い(続き19 以前の詰まり)。
+- 交わり設計(続き40〜47): t/t_id/cocycle は rfl 同然だが、f_open には
+  U_i ⊓ U_j が U_i の基本開集合であることが要る。
+
+残る段差は「アフィン被覆を、交わりが両側で基本開集合になるように細分する」
+の1点に集約。標準的な議論だが mathlib に直接の補題は見当たらず未形式化。
+
+集計は10/24——§4は0/2。

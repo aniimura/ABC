@@ -4555,6 +4555,47 @@ theorem descendPieceRModel_t_trans (X : Over BaseK) {J : Type} (U : J → X.left
   exact descendPieceRModel_ringEquivOfEq_refl X (hV i j) (hV i j) _ C α R' (hVR i j) (hVR i j)
 
 open scoped TensorProduct in
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 800000 in
+/-- ★**`GlueData`の`f`成分を、スキームの射として全対同時に**——
+`exists_common_descendPieceRModel_ringHom`(続き45)に`Spec`をかけただけ。
+`descendPieceRModel.instCommRing`のおかげで`CommRingCat.of`が素直に通り、
+続き42のような`letI`の並べ立ては不要になった(0.08秒)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_common_descendPieceRModel_schemeHom (X : Over BaseK)
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α]
+    {J : Type} [Fintype J]
+    (U : J → X.left.Opens) (hU : ∀ i, IsAffineOpen (U i))
+    (V : J → J → X.left.Opens) (hV : ∀ i j, IsAffineOpen (V i j))
+    (hVU : ∀ i j, V i j ≤ U i) :
+    ∃ (R' : FgSubalgebra ℚ ℝ)
+      (hUR : ∀ i, pieceAlgebra_relation_descend_R X (U i) (hU i) C α ≤ R')
+      (hVR : ∀ i j, pieceAlgebra_relation_descend_R X (V i j) (hV i j) C α ≤ R'),
+      ∀ i j, Nonempty (
+        (Spec (CommRingCat.of (descendPieceRModel X (V i j) (hV i j) C α R' (hVR i j))) : Scheme)
+        ⟶ Spec (CommRingCat.of (descendPieceRModel X (U i) (hU i) C α R' (hUR i)))) := by
+  obtain ⟨R', hUR, hVR, hmap⟩ :=
+    exists_common_descendPieceRModel_ringHom X C α U hU V hV hVU
+  exact ⟨R', hUR, hVR, fun i j => (hmap i j).elim
+    (fun g => ⟨Spec.map (CommRingCat.ofHom g)⟩)⟩
+
+open scoped TensorProduct in
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 800000 in
+/-- ★**`GlueData`の`t i j`をスキームの同型として**——`descendPieceRModel_t`
+(環同型)を`RingEquiv.toCommRingCatIso`で`CommRingCat`の同型にし、
+`Scheme.Spec.mapIso`で送るだけ。`Spec`は反変なので`.symm`を挟む。 -/
+noncomputable def descendPieceRModel_tScheme (X : Over BaseK) {J : Type} (U : J → X.left.Opens)
+    (hV : ∀ i j, IsAffineOpen (U i ⊓ U j)) (C : Scheme) (α : C ⟶ (ExtF.obj X).left)
+    [IsFinite α] [Etale α] (R' : FgSubalgebra ℚ ℝ)
+    (hVR : ∀ i j, pieceAlgebra_relation_descend_R X (U i ⊓ U j) (hV i j) C α ≤ R') (i j : J) :
+    (Spec (CommRingCat.of (descendPieceRModel X (U i ⊓ U j) (hV i j) C α R' (hVR i j))) : Scheme)
+      ≅ Spec (CommRingCat.of (descendPieceRModel X (U j ⊓ U i) (hV j i) C α R' (hVR j i))) :=
+  Scheme.Spec.mapIso
+    (descendPieceRModel_t X U hV C α R' hVR i j).symm.toCommRingCatIso.op
+
+open scoped TensorProduct in
 open scoped Classical in
 set_option maxHeartbeats 1000000 in
 set_option synthInstance.maxHeartbeats 800000 in

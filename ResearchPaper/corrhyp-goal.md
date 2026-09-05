@@ -6011,3 +6011,38 @@ Found側sorry 0件。
 **残るのは`f_open`(開埋め込み性)と`t'`/`t_fac`(pullbackの配線)**。
 `f_open`には`U_i ⊓ U_j`を`U_i`の基本開集合に取る細分が要る(未形式化)。
 集計は引き続き10/24——§4は引き続き0/2。
+
+### 2026-09-05夜さらに続き47 — `f`・`t`をスキームの層へ上げた／`f_open`の在庫を確認した
+
+**追加した2本**(`ExtLimit.lean`):
+- `exists_common_descendPieceRModel_schemeHom` — 続き45の環準同型版に
+  `Spec`をかけただけ。`descendPieceRModel.instCommRing`のおかげで
+  `CommRingCat.of`が素直に通り、**続き42のような`letI`の並べ立ては不要**に
+  なった(0.08秒)。
+- `descendPieceRModel_tScheme` — `descendPieceRModel_t`(環同型)を
+  `RingEquiv.toCommRingCatIso`＋`Scheme.Spec.mapIso`で送るだけ
+  (`Spec`は反変なので`.symm`を挟む)。
+
+**`f_open`について在庫を確認した(重要)**: `ExtLimit.lean`には既に
+- `descendPieceR_localization_isOpenImmersion`(行1691)——
+  `R'`レベルモデルを任意の元で局所化すれば`Spec`は開埋め込み
+  (`IsOpenImmersion.of_isLocalization`をそのまま適用)
+- `exists_descendPieceR_localization_baseChange`(行1759、227秒)——
+  その局所化を`ℝ`へ底変換すると`Γ(C,piece(D(f*g)))`になる
+
+が**すでにある**。つまり`f_open`は「`V`を`U`の**基本開集合**として扱い、
+`V`のモデルを`U`のモデルの局所化として**構成する**」設計なら得られる。
+
+**2つの設計の関係(正直な整理)**:
+- **D(f)設計**(既存): `f_open`は自動。だが`V (i,j) = D(f_ij) ⊆ U i`と
+  `V (j,i) = D(f_ji) ⊆ U j`は別々の開なので、`t i j`が`eqToHom`にならず
+  重い(これが`続き19`以前に詰まっていた点)。
+- **交わり設計**(続き40〜47): `t`・`t_id`・`cocycle`は`rfl`同然だが、
+  `f_open`には`U_i ⊓ U_j`が`U_i`の基本開集合であることが要る。
+
+したがって残る段差は「**アフィン被覆を、交わりが両側で基本開集合に
+なるように細分する**」の1点に集約される。これは標準的な議論だが
+mathlibに直接の補題は見当たらず、未形式化である。
+
+検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
+Found側sorry 0件。集計は引き続き10/24——§4は引き続き0/2。
