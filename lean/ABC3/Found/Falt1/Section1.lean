@@ -1727,6 +1727,80 @@ theorem thm_1_2 (d : ℕ) (δ : ℕ → ℝ) (h0 : ∀ n, 0 ≤ δ n)
     Tendsto δ atTop (nhds 0) :=
   thm_1_2_of_steps d δ h0 (fun n => (S n).key)
 
+/-! ### ★節点 A の入力 `φ` を塔の仮定から作る(2026-09-05)
+
+`KaehlerDifferential.exact_mapBaseChange_map`(Jacobi–Zariski)により
+
+    ker g = range(Ω_{V_{n+1}/Vₙ} ⊗ W_{n+1} → Ω_{W_{n+1}/Vₙ})
+
+——原文の *"the kernel of the second map **contains**
+`Ω_{V_{n+1}/Vₙ} ⊗_{V_{n+1}} W_{n+1}`"* は実は**等号**である。
+
+原文はさらに「その加群が `(W_{n+1}/pW_{n+1})^{d+1}` を商に持つ」から
+「核が `(W_{n+1}/pW_{n+1})^{d+1}` を商に持つ」へ移るが、これには
+`mapBaseChange` の**単射性**が要る(原文は断らずに使っている——
+★逸脱ではなく、原文が畳んでいる段の明示化)。それを `hinj` として
+仮定すれば `ker g ≅ Ω_{V_{n+1}/Vₙ} ⊗ W_{n+1}` となり、塔の仮定が
+そのまま `φ` を与える。 -/
+
+/-- `ker g ≅ Ω_{V_{n+1}/Vₙ} ⊗ W_{n+1}`(Jacobi–Zariski の完全性＋単射性)。 -/
+noncomputable def kerEquivTensor {Vn Vn1 Wn1 : Type*} [CommRing Vn] [CommRing Vn1]
+    [CommRing Wn1] [Algebra Vn Vn1] [Algebra Vn1 Wn1] [Algebra Vn Wn1]
+    [IsScalarTower Vn Vn1 Wn1]
+    (hinj : Function.Injective (KaehlerDifferential.mapBaseChange Vn Vn1 Wn1)) :
+    ↥(LinearMap.ker (KaehlerDifferential.map Vn Vn1 Wn1 Wn1))
+      ≃ₗ[Wn1] TensorProduct Vn1 Wn1 (Ω[Vn1⁄Vn]) :=
+  (LinearEquiv.ofEq _ _
+      (KaehlerDifferential.exact_mapBaseChange_map Vn Vn1 Wn1).linearMap_ker_eq).trans
+    (LinearEquiv.ofInjective _ hinj).symm
+
+/-- 塔の仮定(`Ω_{V_{n+1}/Vₙ} ⊗ W_{n+1}` が `(W_{n+1}/pW_{n+1})^{d+1}` を
+商に持つ)から `φ` を作る。 -/
+noncomputable def phi_of_tower {Vn Vn1 Wn1 : Type*} [CommRing Vn] [CommRing Vn1]
+    [CommRing Wn1] [Algebra Vn Vn1] [Algebra Vn1 Wn1] [Algebra Vn Wn1]
+    [IsScalarTower Vn Vn1 Wn1] {d : ℕ} {p : Wn1}
+    (hinj : Function.Injective (KaehlerDifferential.mapBaseChange Vn Vn1 Wn1))
+    (Ψ : TensorProduct Vn1 Wn1 (Ω[Vn1⁄Vn]) →ₗ[Wn1]
+      (Fin (d + 1) → Wn1 ⧸ Ideal.span ({p} : Set Wn1))) :
+    ↥(LinearMap.ker (KaehlerDifferential.map Vn Vn1 Wn1 Wn1)) →ₗ[Wn1]
+      (Fin (d + 1) → Wn1 ⧸ Ideal.span ({p} : Set Wn1)) :=
+  Ψ ∘ₗ (kerEquivTensor hinj).toLinearMap
+
+theorem phi_of_tower_surjective {Vn Vn1 Wn1 : Type*} [CommRing Vn] [CommRing Vn1]
+    [CommRing Wn1] [Algebra Vn Vn1] [Algebra Vn1 Wn1] [Algebra Vn Wn1]
+    [IsScalarTower Vn Vn1 Wn1] {d : ℕ} {p : Wn1}
+    (hinj : Function.Injective (KaehlerDifferential.mapBaseChange Vn Vn1 Wn1))
+    (Ψ : TensorProduct Vn1 Wn1 (Ω[Vn1⁄Vn]) →ₗ[Wn1]
+      (Fin (d + 1) → Wn1 ⧸ Ideal.span ({p} : Set Wn1)))
+    (hΨ : Function.Surjective Ψ) :
+    Function.Surjective (phi_of_tower hinj Ψ) :=
+  hΨ.comp (kerEquivTensor hinj).surjective
+
+/-- **余核の生成元は巡回性から**——`Ω_{W_{n+1}/V_{n+1}}` が `ω` で生成
+される(`Lemma 1.1`:`Ω_{W/V} ≅ W/𝔡` は巡回)なら、その任意の商も
+`ω` の像を `d+1` 回並べたもので生成される。 -/
+theorem hspanc_of_cyclic {R M : Type*} [CommRing R] [AddCommGroup M] [Module R M]
+    (P : Submodule R M) (r : ℕ) [NeZero r] (ω : M)
+    (hω : Submodule.span R ({ω} : Set M) = ⊤) :
+    Submodule.span R
+        (Set.range (fun _ : Fin r => (Submodule.Quotient.mk ω : M ⧸ P))) = ⊤ := by
+  have hne : (Set.range (fun _ : Fin r => (Submodule.Quotient.mk ω : M ⧸ P)))
+      = {(Submodule.Quotient.mk ω : M ⧸ P)} := by
+    ext z
+    constructor
+    · rintro ⟨i, rfl⟩; rfl
+    · rintro rfl; exact ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne r)⟩, rfl⟩
+  rw [hne]
+  have : Submodule.map P.mkQ (Submodule.span R ({ω} : Set M))
+      = Submodule.span R ({(Submodule.Quotient.mk ω : M ⧸ P)} : Set (M ⧸ P)) := by
+    rw [Submodule.map_span]
+    congr 1
+    ext z
+    constructor
+    · rintro ⟨w, hw, rfl⟩; rw [Set.mem_singleton_iff] at hw; rw [hw]; rfl
+    · rintro rfl; exact ⟨ω, rfl, rfl⟩
+  rw [← this, hω, Submodule.map_top, Submodule.range_mkQ]
+
 /-- **★環の塔の 1 段から `Thm12StepData` を作る**——原文の 2 本の写像を
 Kähler 微分の標準写像に取り、節点 B は**環のレベルの導手条件**
 (`hbA`・`hb`)だけで済む(`hbann_of_conductor_tower`)。
