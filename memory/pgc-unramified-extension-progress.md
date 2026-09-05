@@ -1493,3 +1493,34 @@ normal でない有限拡大 ⟹ 固定部分群が**正規でない開部分群
 「共役による反証には非正規な部分群が要る」と記録していた穴がここで埋まる。
 反証の形: `IntKbar K := ℤ`、`g • n := if g = g₀ then 0 else n`(`g₀` 非中心)、
 `α := c による共役`。`φ` が存在しえない。
+
+## ★★★★★★★★★★★★★★★★★★2026-09-05: **`Γ_{ℚ_p}` は非可換**——非正規な開部分群を作った
+
+`Found/PGC/QpNonAbelian.lean`(新規)
+
+`Check/PGC/RefutationAttempts.lean` が「共役による反証には**非正規な開部分群**が
+要る」と記録していた穴を埋めた。
+
+- `exists_prime_gt` / `not_dvd_sub_one_of_gt` : `ℓ > p` なる素数を取れば
+  `ℓ ≠ p` かつ `ℓ ∤ p-1`
+- `exists_root_pow_eq_p` : `X^ℓ - p` の根 `x` は `[ℚ_p(x):ℚ_p] = ℓ`
+- **`eq_one_of_pow_eq_one_mem_adjoin`** : `ℚ_p(x)` の中の `ℓ` 乗根は 1 だけ
+  (`ζ ≠ 1` なら `[ℚ_p(ζ):ℚ_p] ≤ ℓ-1` かつ `ℓ` を割る ⟹ 1 ⟹ `ζ ∈ ℚ_p` ⟹
+  `eq_one_of_pow_eq_one_qp` で `ζ = 1`、矛盾)
+- **`gal_adjoin_trivial`** : `Gal(ℚ_p(x)/ℚ_p) = 1`(`σx/x` は `ℓ` 乗根)
+- **`not_normal_adjoin`** : `ℚ_p(x)` は normal でない
+  (normal なら標数 0 で Galois、`|Gal| = ℓ ≥ 2` だが 1)
+- **`not_commutative_absGal`** : `Γ_{ℚ_p}` は非可換
+- **`exists_not_commute_absGal`** : `∃ c g, c g c⁻¹ ≠ g`
+
+★配管の罠: `set K := selfField p` を使うと束縛変数が付け替わって
+`ζ✝`・`x✝` のような shadow が出る(autoImplicit と相互作用)。
+長い式でも `set` を使わず素直に書いたほうが安全。
+
+### 次: `prop_2_2` の反証
+
+`IntKbar K := ℤ`・`g • n := if g = g₀ then 0 else n`(`g₀` は上で得た非中心元)・
+`α := c による共役`(位相群なので連続、`ContinuousMulEquiv` にできる)。
+`φ : ℤ ≃+ ℤ` が `φ(g₀ • n) = (c g₀ c⁻¹) • φ n` を満たすことは不可能:
+左辺 = `φ 0 = 0`、右辺 = `φ n`(`c g₀ c⁻¹ ≠ g₀`)なので `φ ≡ 0`、
+`AddEquiv` に反する。
