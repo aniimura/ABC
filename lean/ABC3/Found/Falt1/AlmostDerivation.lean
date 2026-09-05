@@ -700,8 +700,6 @@ theorem almostIso_comp {A M N P : Type u} [CommRing A] [AddCommGroup M] [Module 
     omega
   exact almostIsoAt_of_dvd hdvd _ (almostIsoAt_comp _ _ f g (hf (k+1)) (hg (k+1)))
 
-/-- almost 同型で源に `m`-捩れが無ければ**単射**——`Theorem 4.1(ii)` の
-証明の形(*"its kernel is annihilated by `m`. But ... has no `m`-torsion"*)。 -/
 /-- **almost 零は拡大で閉じる**——`M' → M → M''` が完全で両端が almost 零
 なら `M` も almost 零。塔があるので水準が回収できる
 (`ϖ(k+1)² ∣ ϖ k`、`q ≥ 2`)。
@@ -728,6 +726,8 @@ theorem isAlmostZero_of_exact {A M M' M'' : Type u} [CommRing A]
     rw [← hy, ← map_smul, h' (k+1) y, map_zero]
   rw [hd, mul_comm, ← smul_smul, ← smul_smul, h2, smul_zero]
 
+/-- almost 同型で源に `m`-捩れが無ければ**単射**——`Theorem 4.1(ii)` の
+証明の形(*"its kernel is annihilated by `m`. But ... has no `m`-torsion"*)。 -/
 theorem injective_of_almostIso_of_noTorsion {A M N : Type u} [CommRing A]
     [AddCommGroup M] [Module A M] [AddCommGroup N] [Module A N]
     {q : ℕ} (T : PDivTower A q) (f : M →ₗ[A] N) (hf : AlmostIso T f)
