@@ -1,5 +1,6 @@
 import ABC3.Skeleton.PGC.Setup
 import ABC3.Interface.PGC.LocalFieldData
+import ABC3.Found.PGC.SubgroupCorrespondenceConstruction
 
 /-!
 # [pGC] Corollary 1.3 — 惰性群
@@ -94,7 +95,32 @@ def inertiaObject.src : Source :=
 原文の論拠は Proposition 1.2 を (L, H) に適用することだが、
 そこから `I_K` そのものを得る段は書かれていない(上記の設計の経緯を参照)。
 
-## 反証可能性(2026-08-14 監査)
+## ★★★2026-09-05: **自由な `SC` の下では偽だった**(訂正)——実物に差し替えた
+
+下の 2026-08-14 の監査は「反証には**非正規な** `inertia` が要り、それには
+`Γ_K` の非 Galois な3次以上の拡大を構成する必要がある」で止まっていた。
+`Found/PGC/QpNonAbelian.lean` でそれを構成した(`ℚ_p(p^{1/ℓ})` は normal でない)
+ので、**反証が届いた**:
+
+`H₀ := Gal(K̄/ℚ_p(p^{1/ℓ}))` は開・指数 `ℓ ≥ 2`・**非正規**。`RD` は実物のまま
+`SC` だけを `SC.field K H _ := if (HEq H H₀ ∧ H ≠ ⊤) then A else K`
+(`A` は剰余体の元の個数が `q^{[Γ:H₀]}` の不分岐拡大)と取ると、判定条件を
+満たす開部分群はちょうど `{⊤, H₀}` になり `inertia = H₀`——非正規。だが
+`RecoverableFromAbsGal` は内部自己同型でも保たれることを要求するので矛盾。
+証明は `Check/PGC/Cor13Degenerate.lean::cor_1_3_statement_false`(`sorry` 無し)。
+★`field_top` は満たしたうえで偽になる。
+
+**修理**: `Found/` が実物を構成したので、それについて述べる形に直した——
+`residueCardinality p`(`ResidueCardinalityConstruction.lean`)と
+`subgroupCorrespondence p`(`SubgroupCorrespondenceConstruction.lean`)。
+実物の下では `inertia = Gal(K̄/K^ur)` であり
+(`Found/PGC/InertiaIdentification.lean`)、これは**正規**なので反例は塞がる。
+
+★上の設計メモが予告していた「Track B が本物の `ResidueCardinality` を構成した
+時点で、ここに依存する全ての statement が一斉に非空虚性の検査を受ける」が、
+まさにこの形で起きた。
+
+## 反証可能性(2026-08-14 監査——上のとおり**この結論は覆った**)
 
 **反証できなかった。** それどころか、我々が構成できる唯一の `SC`(`degenerateSC`)の下では
 **この定理は証明できる**(`Check.PGC.inertia_recoverable_degenerateSC`、`sorry` 無し)——
@@ -103,8 +129,9 @@ def inertiaObject.src : Source :=
 反証には**非正規な** `inertia` が要り(`Check.PGC.map_conj_of_normal`)、
 それには `Γ_K` の非 Galois な3次以上の拡大を構成する必要がある。
 探した範囲は `Check/PGC/RefutationAttempts.lean`。 -/
-theorem inertia_recoverable (RD : ResidueCardinality p) (SC : SubgroupCorrespondence p) :
-    (inertiaObject RD SC).RecoverableFromAbsGal := by
+theorem inertia_recoverable :
+    (inertiaObject (ABC3.Found.PGC.residueCardinality p)
+      (ABC3.Found.PGC.subgroupCorrespondence p)).RecoverableFromAbsGal := by
   sorry
 
 def inertia_recoverable.src : Source :=

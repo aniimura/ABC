@@ -1564,3 +1564,37 @@ normal でない有限拡大 ⟹ 固定部分群が**正規でない開部分群
 | Def 3.2 | 空虚に真(`I = ∅`) | 修理(開**部分群**)+ 識別力 |
 | Cor 3.3 | **偽**(`ρ`・`ρ'` 無関係) | 反証 + 修理 |
 | Thm 4.2 | **偽**(`Φ` 自由) | 反証 + 修理(自然な射を構成) |
+
+## ★★★★★★★★★★★★★★★★★★★★2026-09-05: Corollary 1.3 も偽だった——実物に差し替えた
+
+`Check/PGC/Cor13Degenerate.lean`(新規)+ `Skeleton/PGC/Section1Cor13.lean` の修理。
+
+設計メモは「反証には**非正規な** `inertia` が要り、それには `Γ_K` の非 Galois な
+3次以上の拡大を構成する必要がある」で止まっていた。第 975 でそれを作ったので
+**反証が届いた**。
+
+**反例**(`cor_1_3_statement_false`、sorry 無し):
+- `H₀ := Gal(K̄/ℚ_p(p^{1/ℓ}))` は開・指数 `ℓ ≥ 2`・**非正規**
+- `RD` は**実物のまま**、`SC` だけ
+  `SC.field K H _ := if (HEq H H₀ ∧ H ≠ ⊤) then A else K`
+  (`A` は剰余体の元の個数 `q^{[Γ:H₀]}` の不分岐拡大、`exists_residueCard_pow`)
+- 判定条件を満たす開部分群はちょうど `{⊤, H₀}`(`inertia_badSC`)⟹ `inertia = H₀`
+- `RecoverableFromAbsGal` は内部自己同型でも保つことを要求 ⟹ `H₀` 正規、矛盾
+★`field_top` は満たしたうえで偽になる。
+
+**修理**: `inertia_recoverable` を**実物** `residueCardinality p`・
+`subgroupCorrespondence p` について述べる形にした。実物の下では
+`inertia = Gal(K̄/K^ur)`(第 965)で**正規**なので反例は塞がる。
+★設計メモが予告していた「Track B が本物を構成した時点で一斉に検査を受ける」が
+まさにこの形で起きた。
+
+★配管: `Skeleton/PGC/Section1Cor13.lean` が
+`Found/PGC/SubgroupCorrespondenceConstruction` を import しても循環しない
+(`UnramifiedCriterion` が Section1Cor13 を import する向きとは独立)。
+
+### 本日の総括(2026-09-05)
+
+11 項目のうち **4 つが「偽」と判明して直った**(Cor 1.3・Prop 2.2・Cor 3.3・Thm 4.2)、
+**1 つが「空虚に真」と判明して直った**(Def 3.2)、**1 つが未使用引数だった**(Cor 3.1)。
+残る Prop 1.1(局所 Tate 双対性)・Prop 1.2(相互律)・Prop 2.1 は
+本物の数学が足りないだけで、statement は健全。
