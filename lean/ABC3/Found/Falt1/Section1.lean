@@ -404,6 +404,36 @@ theorem length_le_of_surjective_pi {R M N : Type*} [Ring R] [AddCommGroup M] [Mo
   rw [← length_pi (R := R) (N := N) r]
   exact Module.length_le_of_surjective f hf
 
+/-- **`Theorem 1.2` の事実 (c) 本体**——`r` 個の元で生成され `a` で
+零化される加群の長さは `r · length(R/(a))` 以下。原文の
+*"So its length is at most equal to that of `W_{n+1}` divided by the
+`(d+1)`st power of this"* そのもの。 -/
+theorem length_le_of_span_and_annihilator {R M : Type*} [CommRing R] [AddCommGroup M]
+    [Module R M] (r : ℕ) (g : Fin r → M)
+    (hspan : Submodule.span R (Set.range g) = ⊤)
+    (a : R) (ha : ∀ m : M, a • m = 0) :
+    Module.length R M ≤ (r : ℕ∞) * Module.length R (R ⧸ Ideal.span ({a} : Set R)) := by
+  have hker : ∀ i : Fin r, Ideal.span ({a} : Set R)
+      ≤ LinearMap.ker (LinearMap.toSpanSingleton R M (g i)) := by
+    intro i x hx
+    obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.mp hx
+    show (c * a) • g i = 0
+    rw [mul_comm, mul_smul, ha]
+  set comp : Fin r → ((R ⧸ Ideal.span ({a} : Set R)) →ₗ[R] M) := fun i =>
+    Submodule.liftQ _ (LinearMap.toSpanSingleton R M (g i)) (hker i) with hcomp
+  set ψ : (Fin r → (R ⧸ Ideal.span ({a} : Set R))) →ₗ[R] M :=
+    ∑ i, (comp i) ∘ₗ (LinearMap.proj i) with hψ
+  refine length_le_of_surjective_pi r ψ ?_
+  intro m
+  have hm : m ∈ Submodule.span R (Set.range g) := hspan ▸ Submodule.mem_top
+  obtain ⟨c, hc⟩ := (Submodule.mem_span_range_iff_exists_fun R).mp hm
+  refine ⟨fun i => Ideal.Quotient.mk _ (c i), ?_⟩
+  rw [hψ]
+  simp only [LinearMap.coe_sum, Finset.sum_apply, LinearMap.coe_comp, Function.comp_apply,
+    LinearMap.proj_apply, hcomp]
+  rw [← hc]
+  exact Finset.sum_congr rfl (fun i _ => rfl)
+
 /-! ### 事実 (b) の材料——`β = min{1, δₙ/(d+1)}` の由来
 
 原文は *"this kernel has length at least equal to that of
