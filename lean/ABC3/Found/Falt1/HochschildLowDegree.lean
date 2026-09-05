@@ -147,4 +147,41 @@ theorem hochschild_H2_almost_coboundary_of_isAlmostEtale {A B M : Type u}
     (fun q => almost_swap_annihilate p hAE hf0inj n w hw q)
     (almost_swap_augment p hAE hf0inj n w hw) c hc
 
+/-! ## `Theorem 2.2` の障害類——2-コサイクルであることの代数的な核
+
+`Theorem 2.2` の第2段は、第1段で得た `A`-加群写像 `ψ`
+(`π∘ψ = p^n·φ`、`almost_lift_of_isAlmostEtale`)の積の非可換性
+
+    c(b₁,b₂) := p^n·ψ(b₁b₂) - ψ(b₁)·ψ(b₂)
+
+を Hochschild 2-コサイクルとして扱う。以下の2本がその代数的な核である。 -/
+
+/-- **障害はイデアル `I = ker π` に入る**。`π(c(b₁,b₂)) = p^{2n}φ(b₁)φ(b₂)
+- p^{2n}φ(b₁)φ(b₂) = 0`。 -/
+theorem obstruction_mem_ker {A B C D : Type u} [CommRing A] [CommRing B] [CommRing C] [CommRing D]
+    [Algebra A B] [Algebra A C] [Algebra A D]
+    (p : A) (n : ℕ) (π : C →ₐ[A] D) (φ : B →ₐ[A] D) (ψ : B →ₗ[A] C)
+    (hψ : ∀ b : B, π (ψ b) = (p ^ n) • φ b) (b₁ b₂ : B) :
+    π ((p ^ n) • ψ (b₁ * b₂) - ψ b₁ * ψ b₂) = 0 := by
+  rw [map_sub, map_smul, map_mul π (ψ b₁) (ψ b₂), hψ, hψ, hψ, map_mul φ]
+  simp only [Algebra.smul_def]
+  ring
+
+/-- **障害の `p^n` 倍されたコサイクル恒等式**。任意の `A`-線形 `ψ` について
+恒等式として成り立つ(仮定は一切要らない——`C` の可換性だけで `ring` が
+閉じる)。`x ∈ I := ker π` に対して `ψ(b)·x = p^n·(b•x)`(`b•x` は
+`φ` 経由の `B`-作用)なので、これは**コサイクル条件を `p^n` 倍したもの**
+である。したがって `C` が `p` 捩れ無し(Faltings の標準仮定)であれば
+`c` は honest な 2-コサイクルであり、`hochschild_H2_almost_coboundary` を
+適用できる。 -/
+theorem obstruction_identity {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C] (p : A) (n : ℕ) (ψ : B →ₗ[A] C) (b₁ b₂ b₃ : B) :
+    ψ b₁ * ((p ^ n) • ψ (b₂ * b₃) - ψ b₂ * ψ b₃)
+      - (p ^ n) • ((p ^ n) • ψ (b₁ * b₂ * b₃) - ψ (b₁ * b₂) * ψ b₃)
+      + (p ^ n) • ((p ^ n) • ψ (b₁ * (b₂ * b₃)) - ψ b₁ * ψ (b₂ * b₃))
+      - ψ b₃ * ((p ^ n) • ψ (b₁ * b₂) - ψ b₁ * ψ b₂) = 0 := by
+  rw [mul_assoc b₁ b₂ b₃]
+  simp only [Algebra.smul_def]
+  ring
+
 end ABC3.Found.Falt1
