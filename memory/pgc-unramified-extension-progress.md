@@ -577,3 +577,38 @@ Galois 性が付いたので、同じ次数の不分岐拡大が一致するこ�
 「`𝒪_{K(y)}` の剰余体に `ḡ` の根がある(次数が割り切るから)⟹ Hensel で
 持ち上げ ⟹ `K(x)` の共役が `K(y)` に入る ⟹ normal だから `K(x) ⊆ K(y)`」
 で言えるはず。材料はすべて揃った。
+
+## ★★★★★★★2026-09-05: `Gal(K(x)/K) ≃* Gal(𝓀_{K(x)}/𝓀)`——不分岐理論の核心
+
+`Found/PGC/UnramifiedExtension.lean`(すべて sorry 無し):
+- `norm_algEquiv` : `K(x)` の `K`-自己同型はノルムを保つ
+  (`spectralNorm_eq_of_equiv` + `NormedAlgebra.norm_eq_spectralNorm`)
+- `algEquivIntegers` : したがって整数環の環同型を誘導
+- `residueAlgEquiv` / `residueAlgEquiv_apply` : 剰余体の `𝓀`-代数同型
+- `residueGalHom` : **還元射 `Gal(K(x)/K) →* Gal(𝓀_{K(x)}/𝓀)`**
+- `algEquiv_eq_one_of_fixes_gen` : 生成元を固定する自己同型は恒等
+  (`IntermediateField.algHom_ext_of_eq_adjoin`)
+- `isUnit_eval_derivative` : `f̄` の根で `f'` は単元(分離性)
+- `residueGalHom_injective` : **単射**——Hensel の一意性
+  (`IsLocalRing.eq_of_eval_eq_zero_of_not_isUnit_sub`)。`σ` が剰余体で
+  恒等なら `σ(x)` と `x` は同じ剰余を持つ `f` の 2 根、`f'(x)` が単元
+  なので `σ(x)=x`、`x` は生成元だから `σ=1`。
+- `residueGalHom_bijective` : **全単射**——位数の比較。
+  `|Gal(K(x)/K)| = [K(x):K]`(Galois)、`|Gal(𝓀_{K(x)}/𝓀)| = f`
+  (有限体は Galois)、不分岐なので `[K(x):K] = f`。
+- `exists_isUnramifiedAdjoin_of_irreducible` / `exists_isUnramifiedAdjoin`
+  の結論に `∧ Function.Bijective (residueGalHom K x)` を追加。
+- **`exists_mulEquiv_residueGal`** : 各次数 `n` に対し
+  `Gal(K(x)/K) ≃* Gal(𝓀_{K(x)}/𝓀)`。
+
+右辺は有限体の Galois 群なので Frobenius が生成する巡回群 `ℤ/n`
+——**これが `Gal(K^ur/K) ≅ Ẑ` の出どころ**。
+
+★ファイル内の順序をもう一度入れ替えた: 還元射の節を構成節の前へ。
+
+### 次
+
+1. `Gal(𝓀_{K(x)}/𝓀) ≃ ℤ/n`(Frobenius が生成)——mathlib に有限体の
+   Galois 群の巡回性はあるはず(`FiniteField`/`GaloisField` 周辺)。
+2. 一意性(同じ次数の不分岐拡大は `K.closure` の中で一致)。
+3. `K^ur` の構成と `Gal(K^ur/K) ≅ Ẑ`(射影極限)。

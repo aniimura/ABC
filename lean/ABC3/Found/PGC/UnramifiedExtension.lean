@@ -740,6 +740,255 @@ instance henselianLocalRing_adjoinIntegers {p : ℕ} [Fact p.Prime] (K : PAdicLo
   exact HenselianRing.is_henselian f hf a₀ h0 (hu.map (Ideal.Quotient.mk _))
 
 
+/-! ## Galois 群から剰余体の Galois 群への還元射
+
+不分岐拡大の理論の核心は
+**`Gal(K(x)/K) ≅ Gal(𝓀_{K(x)}/𝓀)`**(そして右辺は Frobenius が生成する
+巡回群)——これが `Gal(K^ur/K) ≅ Ẑ` の出どころ。本節ではその射
+`residueGalHom` を構成する。
+
+構成は 3 段:
+1. `σ : K(x) ≃ₐ[K] K(x)` は**ノルムを保つ**(`norm_algEquiv`)——
+   スペクトルノルムが Galois 共役で不変であること
+   (`spectralNorm_eq_of_equiv`)と `NormedAlgebra.norm_eq_spectralNorm`
+   から。したがって `σ` は整数環 `adjoinIntegers K x` を保つ。
+2. よって `σ` は `adjoinIntegers K x` の環同型 `algEquivIntegers` を誘導し、
+3. さらに剰余体の `𝓀`-代数同型 `residueAlgEquiv` を誘導する
+   (`σ` が `K.carrier` を固定するので `𝓀` を固定する)。
+
+これを群準同型にまとめたものが `residueGalHom`。 -/
+
+/-- `K(x)` の `K`-自己同型はノルムを保つ。 -/
+theorem norm_algEquiv {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure)
+    (σ : (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+      ≃ₐ[K.carrier] (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))
+    (z : IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :
+    ‖σ z‖ = ‖z‖ := by
+  rw [NormedAlgebra.norm_eq_spectralNorm K.carrier (σ z),
+    NormedAlgebra.norm_eq_spectralNorm K.carrier z]
+  exact (spectralNorm_eq_of_equiv σ z).symm
+
+/-- ノルムを保つので、`σ` は整数環 `adjoinIntegers K x` の環同型を誘導する。 -/
+noncomputable def algEquivIntegers {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure)
+    (σ : (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+      ≃ₐ[K.carrier] (IntermediateField.adjoin K.carrier ({x} : Set K.closure))) :
+    adjoinIntegers K x ≃+* adjoinIntegers K x where
+  toFun z := ⟨σ (z : IntermediateField.adjoin K.carrier ({x} : Set K.closure)),
+    by show ‖σ (z : IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖ ≤ 1
+       rw [norm_algEquiv K x σ]; exact z.2⟩
+  invFun z := ⟨σ.symm (z : IntermediateField.adjoin K.carrier ({x} : Set K.closure)),
+    by show ‖σ.symm (z : IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖ ≤ 1
+       rw [norm_algEquiv K x σ.symm]; exact z.2⟩
+  left_inv z := by apply Subtype.ext; simp
+  right_inv z := by apply Subtype.ext; simp
+  map_mul' a b := by apply Subtype.ext; simp
+  map_add' a b := by apply Subtype.ext; simp
+
+/-- さらに剰余体の `𝓀[K.carrier]`-代数同型を誘導する。 -/
+noncomputable def residueAlgEquiv {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure)
+    (σ : (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+      ≃ₐ[K.carrier] (IntermediateField.adjoin K.carrier ({x} : Set K.closure))) :
+    IsLocalRing.ResidueField (adjoinIntegers K x)
+      ≃ₐ[𝓀[K.carrier]] IsLocalRing.ResidueField (adjoinIntegers K x) :=
+  { IsLocalRing.ResidueField.mapEquiv (algEquivIntegers K x σ) with
+    commutes' := by
+      intro r
+      obtain ⟨a, rfl⟩ := IsLocalRing.residue_surjective r
+      have h1 : algebraMap 𝓀[K.carrier] (IsLocalRing.ResidueField (adjoinIntegers K x))
+          (IsLocalRing.residue 𝒪[K.carrier] a)
+          = IsLocalRing.residue (adjoinIntegers K x)
+            (algebraMap 𝒪[K.carrier] (adjoinIntegers K x) a) := rfl
+      show (IsLocalRing.ResidueField.mapEquiv (algEquivIntegers K x σ)) _ = _
+      rw [h1, IsLocalRing.ResidueField.mapEquiv_apply, IsLocalRing.ResidueField.map_residue]
+      congr 1
+      apply Subtype.ext
+      show σ (algebraMap K.carrier
+        (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) (a : K.carrier)) = _
+      rw [AlgEquiv.commutes]
+      rfl }
+
+/-- `residueAlgEquiv` の剰余元での値。 -/
+theorem residueAlgEquiv_apply {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure)
+    (σ : (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+      ≃ₐ[K.carrier] (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))
+    (b : adjoinIntegers K x) :
+    residueAlgEquiv K x σ (IsLocalRing.residue (adjoinIntegers K x) b)
+      = IsLocalRing.residue (adjoinIntegers K x) (algEquivIntegers K x σ b) := by
+  show (IsLocalRing.ResidueField.mapEquiv (algEquivIntegers K x σ)) _ = _
+  rw [IsLocalRing.ResidueField.mapEquiv_apply, IsLocalRing.ResidueField.map_residue]
+  rfl
+
+/-- **還元射 `Gal(K(x)/K) →* Gal(𝓀_{K(x)}/𝓀)`**。 -/
+noncomputable def residueGalHom {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure) :
+    ((IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+      ≃ₐ[K.carrier] (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))
+    →* (IsLocalRing.ResidueField (adjoinIntegers K x)
+      ≃ₐ[𝓀[K.carrier]] IsLocalRing.ResidueField (adjoinIntegers K x)) where
+  toFun := residueAlgEquiv K x
+  map_one' := by
+    apply AlgEquiv.ext
+    intro z
+    obtain ⟨b, rfl⟩ := IsLocalRing.residue_surjective z
+    rw [residueAlgEquiv_apply, AlgEquiv.one_apply]
+    rfl
+  map_mul' σ τ := by
+    apply AlgEquiv.ext
+    intro z
+    obtain ⟨b, rfl⟩ := IsLocalRing.residue_surjective z
+    rw [residueAlgEquiv_apply, AlgEquiv.mul_apply, residueAlgEquiv_apply, residueAlgEquiv_apply]
+    rfl
+
+
+/-! ### 還元射の単射性と全単射性
+
+単射性の要は **Hensel の一意性**(`IsLocalRing.eq_of_eval_eq_zero_of_
+not_isUnit_sub`): `σ` が剰余体で恒等なら `σ(x)` と `x` は同じ剰余を持つ
+`f` の 2 根、`f'(x)` が単元(= `f̄` が分離的で `x̄` が単根)なので
+`σ(x) = x`、`x` は生成元だから `σ = 1`。
+
+全単射性は位数の比較——`|Gal(K(x)/K)| = [K(x):K]`(Galois)と
+`|Gal(𝓀_{K(x)}/𝓀)| = f`(有限体は Galois)、不分岐なので両者は等しい。 -/
+
+/-- 生成元 `x` を固定する `K`-自己同型は恒等。 -/
+theorem algEquiv_eq_one_of_fixes_gen {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    (x : K.closure)
+    (σ : (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+      ≃ₐ[K.carrier] (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))
+    (h : σ ⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩
+      = ⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩) : σ = 1 := by
+  have hext : (σ : (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) →ₐ[K.carrier]
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))
+      = AlgHom.id K.carrier _ := by
+    refine IntermediateField.algHom_ext_of_eq_adjoin K.carrier rfl ?_
+    intro y hy
+    simp only [Set.mem_singleton_iff] at hy
+    subst hy
+    exact h
+  apply AlgEquiv.ext
+  intro z
+  have := AlgHom.congr_fun hext z
+  simpa using this
+
+/-- `f̄` が既約(有限体上なので分離的)なら、その根で `f'` は単元。 -/
+theorem isUnit_eval_derivative {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure)
+    (f : Polynomial 𝒪[K.carrier])
+    (hgi : Irreducible (f.map (IsLocalRing.residue 𝒪[K.carrier])))
+    (b : adjoinIntegers K x)
+    (hbar : Polynomial.aeval (IsLocalRing.residue (adjoinIntegers K x) b)
+      (f.map (IsLocalRing.residue 𝒪[K.carrier])) = 0) :
+    IsUnit (Polynomial.eval b (Polynomial.derivative
+      (f.map (algebraMap 𝒪[K.carrier] (adjoinIntegers K x))))) := by
+  haveI : Finite 𝓀[K.carrier] := residueField_finite K
+  have hcomp : (algebraMap 𝓀[K.carrier] (IsLocalRing.ResidueField (adjoinIntegers K x))).comp
+      (IsLocalRing.residue 𝒪[K.carrier])
+      = (IsLocalRing.residue (adjoinIntegers K x)).comp
+        (algebraMap 𝒪[K.carrier] (adjoinIntegers K x)) := RingHom.ext (congrFun rfl)
+  have hFAres : (f.map (algebraMap 𝒪[K.carrier] (adjoinIntegers K x))).map
+      (IsLocalRing.residue (adjoinIntegers K x))
+      = (f.map (IsLocalRing.residue 𝒪[K.carrier])).map
+        (algebraMap 𝓀[K.carrier] (IsLocalRing.ResidueField (adjoinIntegers K x))) := by
+    rw [Polynomial.map_map, Polynomial.map_map, ← hcomp]
+  refine (IsLocalRing.residue_ne_zero_iff_isUnit _).mp ?_
+  have hev := Polynomial.hom_eval₂ (Polynomial.derivative
+      (f.map (algebraMap 𝒪[K.carrier] (adjoinIntegers K x)))) (RingHom.id _)
+    (IsLocalRing.residue (adjoinIntegers K x)) b
+  simp only [Polynomial.eval₂_id, RingHom.comp_id] at hev
+  rw [hev, ← Polynomial.eval_map, ← Polynomial.derivative_map, hFAres]
+  have hsep : ((f.map (IsLocalRing.residue 𝒪[K.carrier])).map
+      (algebraMap 𝓀[K.carrier] (IsLocalRing.ResidueField (adjoinIntegers K x)))).Separable :=
+    (PerfectField.separable_of_irreducible hgi).map
+  have hroot : Polynomial.eval (IsLocalRing.residue (adjoinIntegers K x) b)
+      ((f.map (IsLocalRing.residue 𝒪[K.carrier])).map
+        (algebraMap 𝓀[K.carrier] (IsLocalRing.ResidueField (adjoinIntegers K x)))) = 0 := by
+    rw [Polynomial.eval_map, ← Polynomial.aeval_def]
+    exact hbar
+  obtain ⟨u, v, huv⟩ := hsep
+  intro hcon
+  have hev2 := congrArg (Polynomial.eval (IsLocalRing.residue (adjoinIntegers K x) b)) huv
+  simp only [Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_one, hcon, hroot,
+    mul_zero, zero_add] at hev2
+  exact one_ne_zero hev2.symm
+
+/-- **還元射は単射**——Hensel の一意性から。 -/
+theorem residueGalHom_injective {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure)
+    (f : Polynomial 𝒪[K.carrier])
+    (hnorm : ‖(⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩ :
+      IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖ ≤ 1)
+    (hroot : Polynomial.eval₂ (algebraMap 𝒪[K.carrier] (adjoinIntegers K x))
+      (⟨⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩, hnorm⟩ : adjoinIntegers K x)
+      f = 0)
+    (hunit : IsUnit (Polynomial.eval
+      (⟨⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩, hnorm⟩ : adjoinIntegers K x)
+      (Polynomial.derivative
+        (f.map (algebraMap 𝒪[K.carrier] (adjoinIntegers K x)))))) :
+    Function.Injective (residueGalHom K x) := by
+  rw [injective_iff_map_eq_one]
+  intro σ hσ
+  set xO : adjoinIntegers K x :=
+    ⟨⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩, hnorm⟩ with hxO
+  have hres : IsLocalRing.residue (adjoinIntegers K x) (algEquivIntegers K x σ xO)
+      = IsLocalRing.residue (adjoinIntegers K x) xO := by
+    have h1 := congrArg (fun (e : IsLocalRing.ResidueField (adjoinIntegers K x)
+      ≃ₐ[𝓀[K.carrier]] IsLocalRing.ResidueField (adjoinIntegers K x)) =>
+        e (IsLocalRing.residue (adjoinIntegers K x) xO)) hσ
+    have h0 : residueGalHom K x σ = residueAlgEquiv K x σ := rfl
+    simp only [h0] at h1
+    rw [residueAlgEquiv_apply] at h1
+    simpa using h1
+  have hgψ : ((algEquivIntegers K x σ : adjoinIntegers K x →+* adjoinIntegers K x).comp
+      (algebraMap 𝒪[K.carrier] (adjoinIntegers K x)))
+      = algebraMap 𝒪[K.carrier] (adjoinIntegers K x) := by
+    refine RingHom.ext fun a => ?_
+    apply Subtype.ext
+    show σ (algebraMap K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) (a : K.carrier)) = _
+    rw [AlgEquiv.commutes]
+    rfl
+  have hb : Polynomial.eval xO (f.map (algebraMap 𝒪[K.carrier] (adjoinIntegers K x))) = 0 := by
+    rw [Polynomial.eval_map]; exact hroot
+  have ha : Polynomial.eval (algEquivIntegers K x σ xO)
+      (f.map (algebraMap 𝒪[K.carrier] (adjoinIntegers K x))) = 0 := by
+    have h2 := Polynomial.hom_eval₂ f (algebraMap 𝒪[K.carrier] (adjoinIntegers K x))
+      (algEquivIntegers K x σ : adjoinIntegers K x →+* adjoinIntegers K x) xO
+    rw [hgψ, hroot, map_zero] at h2
+    rw [Polynomial.eval_map]
+    exact h2.symm
+  have hnu : ¬ IsUnit (xO - algEquivIntegers K x σ xO) := by
+    rw [← mem_nonunits_iff, ← IsLocalRing.mem_maximalIdeal,
+      ← IsLocalRing.residue_eq_zero_iff, map_sub, hres, sub_self]
+  have hkey : xO = algEquivIntegers K x σ xO :=
+    IsLocalRing.eq_of_eval_eq_zero_of_not_isUnit_sub hb ha hnu hunit
+  refine algEquiv_eq_one_of_fixes_gen K x σ ?_
+  have h3 := congrArg (fun (z : adjoinIntegers K x) =>
+    (z : IntermediateField.adjoin K.carrier ({x} : Set K.closure))) hkey
+  exact h3.symm
+
+/-- **還元射は全単射**——単射性と位数の一致(不分岐なので `[K(x):K] = f`)から。 -/
+theorem residueGalHom_bijective {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure)
+    (hnor : Normal K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))
+    (hu : IsUnramifiedAdjoin K x)
+    (hinj : Function.Injective (residueGalHom K x)) :
+    Function.Bijective (residueGalHom K x) := by
+  haveI : CharZero K.carrier :=
+    charZero_of_injective_algebraMap (algebraMap ℚ_[p] K.carrier).injective
+  haveI := hnor
+  haveI : Algebra.IsSeparable K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :=
+    IntermediateField.isSeparable_tower_bot K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+  haveI : IsGalois K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := ⟨⟩
+  haveI := module_finite_adjoinIntegers K x
+  haveI : Finite 𝓀[K.carrier] := residueField_finite K
+  haveI : IsGalois 𝓀[K.carrier] (IsLocalRing.ResidueField (adjoinIntegers K x)) := by
+    infer_instance
+  rw [Fintype.bijective_iff_injective_and_card]
+  refine ⟨hinj, ?_⟩
+  rw [← Nat.card_eq_fintype_card, ← Nat.card_eq_fintype_card,
+    IsGalois.card_aut_eq_finrank, IsGalois.card_aut_eq_finrank,
+    ← inertiaDegree_eq_finrank_residueField K x,
+    inertiaDegree_eq_finrank_of_isUnramified K x hu]
+
+
 /-! ## Hensel による分裂の持ち上げ——不分岐拡大は normal
 
 `Found/HenselianSplits.lean`(一般の結果)を本設定に流し込む。剰余体
@@ -858,7 +1107,8 @@ theorem exists_isUnramifiedAdjoin_of_irreducible {p : ℕ} [Fact p.Prime] (K : P
     ∃ x : K.closure,
       Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
         = g.natDegree ∧ IsUnramifiedAdjoin K x
-        ∧ Normal K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := by
+        ∧ Normal K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+        ∧ Function.Bijective (residueGalHom K x) := by
   have hlifts : g ∈ Polynomial.lifts (IsLocalRing.residue 𝒪[K.carrier]) :=
     Polynomial.lifts_iff_coeff_lifts g |>.mpr (fun n => ⟨_, Quotient.out_eq' _⟩)
   obtain ⟨f, hfmap, hfdeg, hfm⟩ := Polynomial.lifts_and_degree_eq_and_monic hlifts hgm
@@ -941,8 +1191,8 @@ theorem exists_isUnramifiedAdjoin_of_irreducible {p : ℕ} [Fact p.Prime] (K : P
         ⟨⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩, hnorm⟩) := by
     rw [hfmap]
     exact minpoly.eq_of_irreducible_of_monic hgi (by rw [hfmap] at hbar; exact hbar) hgm
-  refine ⟨x, hrank, ?_, ?_⟩
-  · haveI := module_finite_adjoinIntegers K x
+  have hunram : IsUnramifiedAdjoin K x := by
+    haveI := module_finite_adjoinIntegers K x
     have hge : g.natDegree ≤ inertiaDegree K x := by
       rw [inertiaDegree_eq_finrank_residueField K x, ← hfmap, hmpbar]
       exact minpoly.natDegree_le _
@@ -956,8 +1206,14 @@ theorem exists_isUnramifiedAdjoin_of_irreducible {p : ℕ} [Fact p.Prime] (K : P
     have hle : inertiaDegree K x ≤ ramificationIndex K x * inertiaDegree K x :=
       Nat.le_mul_of_pos_left _ (Nat.pos_of_ne_zero he)
     omega
-  · exact normal_of_splits_in_adjoin K x (f.map (algebraMap 𝒪[K.carrier] K.carrier)) hFm.ne_zero
+  have hnormal : Normal K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :=
+    normal_of_splits_in_adjoin K x (f.map (algebraMap 𝒪[K.carrier] K.carrier)) hFm.ne_zero
       (splits_adjoin_of_lift K x f hfm (by rw [hfmap]; exact hgi) _ hmpbar) haev
+  have hunit := isUnit_eval_derivative K x f (by rw [hfmap]; exact hgi) _ hbar
+  exact ⟨x, hrank, hunram, hnormal,
+    residueGalHom_bijective K x hnormal hunram
+      (residueGalHom_injective K x f hnorm hrootO hunit)⟩
 
 /-- **★各次数の不分岐拡大の存在**——`n ≥ 1` に対し、`K` の次数 `n` の
 **不分岐**単項拡大 `K(x)/K` が `K.closure` の中に存在し、しかも
@@ -973,11 +1229,12 @@ theorem exists_isUnramifiedAdjoin {p : ℕ} [Fact p.Prime] (K : PAdicLocalField 
     ∃ x : K.closure,
       Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) = n
         ∧ IsUnramifiedAdjoin K x
-        ∧ Normal K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := by
+        ∧ Normal K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+        ∧ Function.Bijective (residueGalHom K x) := by
   haveI : Finite 𝓀[K.carrier] := residueField_finite K
   obtain ⟨g, hgm, hgi, hgd⟩ := ABC3.Found.exists_monic_irreducible_natDegree_eq 𝓀[K.carrier] n hn
-  obtain ⟨x, hrank, hu, hnor⟩ := exists_isUnramifiedAdjoin_of_irreducible K g hgm hgi
-  exact ⟨x, hgd ▸ hrank, hu, hnor⟩
+  obtain ⟨x, hrank, hu, hnor, hbij⟩ := exists_isUnramifiedAdjoin_of_irreducible K g hgm hgi
+  exact ⟨x, hgd ▸ hrank, hu, hnor, hbij⟩
 
 /-- 標数 0 なので、上で得た不分岐拡大は **Galois**。 -/
 theorem exists_isGalois_isUnramifiedAdjoin {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (n : ℕ)
@@ -986,7 +1243,7 @@ theorem exists_isGalois_isUnramifiedAdjoin {p : ℕ} [Fact p.Prime] (K : PAdicLo
       Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) = n
         ∧ IsUnramifiedAdjoin K x
         ∧ IsGalois K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := by
-  obtain ⟨x, hrank, hu, hnor⟩ := exists_isUnramifiedAdjoin K n hn
+  obtain ⟨x, hrank, hu, hnor, _⟩ := exists_isUnramifiedAdjoin K n hn
   haveI : CharZero K.carrier :=
     charZero_of_injective_algebraMap (algebraMap ℚ_[p] K.carrier).injective
   haveI := hnor
@@ -995,5 +1252,22 @@ theorem exists_isGalois_isUnramifiedAdjoin {p : ℕ} [Fact p.Prime] (K : PAdicLo
     IntermediateField.isSeparable_tower_bot K.carrier
       (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
   exact ⟨x, hrank, hu, ⟨⟩⟩
+
+
+/-- **★★不分岐拡大の Galois 群は剰余体の Galois 群と同型**——各次数 `n`
+について、`Gal(K(x)/K) ≃* Gal(𝓀_{K(x)}/𝓀)`。右辺は有限体の Galois 群
+なので Frobenius が生成する巡回群 `ℤ/n`——これが `Gal(K^ur/K) ≅ Ẑ` の
+出どころになる。 -/
+theorem exists_mulEquiv_residueGal {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (n : ℕ)
+    (hn : n ≠ 0) :
+    ∃ x : K.closure,
+      Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) = n
+        ∧ IsUnramifiedAdjoin K x
+        ∧ Nonempty (((IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+            ≃ₐ[K.carrier] (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))
+          ≃* (IsLocalRing.ResidueField (adjoinIntegers K x)
+            ≃ₐ[𝓀[K.carrier]] IsLocalRing.ResidueField (adjoinIntegers K x))) := by
+  obtain ⟨x, hrank, hu, _, hbij⟩ := exists_isUnramifiedAdjoin K n hn
+  exact ⟨x, hrank, hu, ⟨MulEquiv.ofBijective (residueGalHom K x) hbij⟩⟩
 
 end ABC3.Found.PGC
