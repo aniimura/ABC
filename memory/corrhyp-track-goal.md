@@ -2251,3 +2251,23 @@ isUnit_rename_of_flat_relationとpieceAlgebra_R_model_baseChange_constは
 f i jの生成元の行き先を書き下す場面で使える。
 
 次の一手: 新設計のf i j(写像の降下)を構成する。集計は10/24——§4は0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き20
+(1)訂正: 続き16のexists_fgSubalgebra_mvPolynomial_ideal_mem_descendは
+FieldLimit.leanに既にあったexists_mem_ideal_span_range_descendと完全重複
+だった(既にdescend2の証明中で使われていた)。配管の
+mvPolynomial_map_val_inclusion_compも薄い包みで使う先が重複補題だけ
+だったので両方削除(commit a22c3636)。CLAUDE.mdの「在庫」どおり書く前に
+ファイル自身の名前一覧を引くべきだった。lean-idioms #56に在庫一覧と
+引き方を記録(#54は並行セッションと衝突したため#56へ)。
+
+(2)新設計に要る道具はすでにある: f i j(写像の降下)は既存の
+exists_mvPolynomial_quotient_ringHom_descend2そのもの。唯一の差は底環が
+A=Γ(X.left,U_i)からA'=Γ(X.left,U_i⊓U_j)へ動くことだが、関係式を先に
+Algebra.TensorProduct.map φ (AlgHom.id ℚ R.1)でA'側へ押し出してから
+descend2をA := A'で使えば無料で一般化できる(根拠:
+(map (id A')(val R))∘(map φ (id R)) = map φ (val R)、REPLで1行確認済み)。
+
+次の一手: descend2の「底が動く版」を薄いラッパとして書き、descendPieceRの
+Uについての関手性(V ⊆ Uに沿った制限写像のRレベル版)を構成する。
+集計は引き続き10/24——§4は0/2。
