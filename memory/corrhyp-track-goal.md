@@ -2454,3 +2454,18 @@ pullbackRightPullbackFstIso_inv_snd_snd・pullbackHomIsoLeft_inv_snd'(今回追�
 ⊤のfromSpecはIsAffineOpen.fromSpec_top)、2成分からpieceRingEquiv.symmの
 自然性を組み立てる。そこまで行けば新設計のf i jをdescend2_of_mapで降ろす前提が
 すべて揃う。集計は10/24——§4は0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き32
+pieceRingEquiv_appLE_snd + piecePullbackIso_inv_isoSpec_appLE_snd完成
+(commit b38bc8ca、sorry無し、Instance4ビルドerror 0件・EXIT:0、Found側sorry 0件)。
+pieceRingEquivの値が a⊗ₜ1側(続き30)と 1⊗ₜr側(今回)の両方で確定した。
+テンソル積からの環準同型はこの2成分で決まるので、pieceRingEquiv.symmのUに
+ついての自然性はこの2本+piece_appLE_naturality(続き23)から組み立てられる。
+
+配管: cancel_monoはrwではなく(cancel_mono _).mpで使う(specKとSpec(of ℝ)の
+構文的ずれでrwのパターン照合が失敗)。specK.isoSpec.invの書き換えもhaveで型を
+明示してからrw。
+
+次の一手: 2成分からpieceRingEquiv.symmの自然性を組み立てる
+(Algebra.TensorProduct.ext系で2成分から環準同型の一致を出す)。
+集計は10/24——§4は0/2。

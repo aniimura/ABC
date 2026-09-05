@@ -5450,3 +5450,40 @@ theorem piecePullbackIso_inv_snd … :
 組み立てる。そこまで行けば、新設計の`f i j`を
 `descend2_of_map`で降ろす前提がすべて揃う。
 集計は引き続き10/24——§4は引き続き0/2。
+
+## 2026-09-05夜さらに続き32: ℝ成分も環レベルへ——**自然性を決める
+2成分がともに確定**
+
+続き31で`Spec`側のℝ成分を押さえたので、それを環レベルへ落とした
+(`ExtLimit.lean`、commit `b38bc8ca`、`sorry`無し、
+`lake build ABC3.Found.CorrHyp.Instance4`は`error`0件・`EXIT:0`、
+`Found`側の`sorry`は0件):
+
+```
+theorem pieceRingEquiv_appLE_snd … :
+    (pullback.snd).appLE ⊤ (piece U) le_top ≫ pieceRingEquiv
+      = (ΓSpecIso ℝ).hom ≫ includeRight
+```
+
+前段の`piecePullbackIso_inv_isoSpec_appLE_snd`(`Spec`側最終形)も併せて
+追加した。`piecePullbackIso_inv_snd`を`pullback.snd`側の`appLE`の`Spec`表示
+(`SpecMap_appLE_fromSpec`+`IsAffineOpen.fromSpec_top`+
+`Scheme.isoSpec_Spec_inv`)と突き合わせ、`Spec.map (ΓSpecIso ℝ).inv`が
+同型ゆえモノであることで右から消去しただけである。
+
+**現在の状態**: `pieceRingEquiv`の値が
+- `a ⊗ₜ 1`側: `pieceRingEquiv (appLE a) = a ⊗ₜ 1`(続き30)
+- `1 ⊗ₜ r`側: `pieceRingEquiv (snd由来の構造射 r) = 1 ⊗ₜ r`(今回)
+
+の**両方で確定した**。テンソル積からの環準同型はこの2成分で決まるので、
+`pieceRingEquiv.symm`の`U`についての自然性はこの2本+`appLE`側の自然性
+(`piece_appLE_naturality`、続き23)から組み立てられる。
+
+**配管の記録**: `cancel_mono`は`rw`ではなく`(cancel_mono _).mp`で使う
+(`specK`と`Spec (CommRingCat.of ℝ)`の構文的なずれで`rw`のパターン照合が
+失敗するため)。`specK.isoSpec.inv`の書き換えも`have`で型を明示してから
+`rw`する。
+
+集計は引き続き10/24——§4は引き続き0/2。次の一手は、この2成分から
+`pieceRingEquiv.symm`の自然性を実際に組み立てること
+(`Algebra.TensorProduct.ext`系の補題で2成分から環準同型の一致を出す)。
