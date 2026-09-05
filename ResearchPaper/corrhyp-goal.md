@@ -4957,3 +4957,41 @@ IsUnit (Ideal.Quotient.mk (Ideal.span (Set.range (Sum.elim … ))) (rename Sum.i
 
 集計は引き続き10/24——§4は引き続き0/2。次の一手は
 `pieceAlgebra_R_model_baseChange`の`AlgEquiv`版を作ること。
+
+## 2026-09-05夜さらに続き18: 続き17で特定した障害を除去——
+`pieceAlgebra_R_model_baseChange`の「定数の行き先つき」版が完成
+
+続き17で「`e`が`≃+*`なので値の情報が無く、`h₂`と`C(g⊗1)`の対応が使えない」
+という障害を記録した。これを**`AlgEquiv`への全面的な作り直しではなく、
+必要な情報だけを併せて主張する形**で解消した(`ExtLimit.lean`、
+commit `d21bfed3`、`sorry`無し、`lake build ABC3.Found.CorrHyp.Instance4`
+0エラー):
+
+```
+theorem pieceAlgebra_R_model_baseChange_const … :
+    ∃ e : (MvPolynomial (Fin n) (A⊗R.1) ⧸ span(range q₀)) ⊗[A⊗R.1] (A⊗ℝ)
+            ≃+* Γ(C, piece),
+      ∀ b, e (mk (span(range q₀)) (C b) ⊗ₜ 1) = algebraMap … (algebraMap … b)
+```
+
+もとの証明が実際に組み立てている同型(`quotient_mvPolynomial_baseChange`
+→`Ideal.quotEquivOfEq`→第一同型定理)を**そのまま**返し、定数についての
+振る舞いを併記するだけでよかった。各段の値の計算は既存の自然性補題
+(`quotient_mvPolynomial_baseChange_tmul_one`、このセッションの前半で
+作ったもの)+mathlibの`Ideal.quotEquivOfEq_mk`・
+`RingHom.quotientKerEquivOfSurjective_apply_mk`+`MvPolynomial.map_C`+
+`AlgHom.commutes`で済む。
+
+**配管の記録**: `RingHom.ker (aeval P.val)`(coe版)と
+`RingHom.ker (aeval P.val).toRingHom`は`rfl`で等しいが**構文的に違う**ので、
+`rw`で扱うには後者へ揃えておく必要がある(そうしないと
+`quotientKerEquivOfSurjective_apply_mk`の`rw`がパターンを見つけられない)。
+
+**この2手で揃ったもの**: (a)`isUnit_rename_of_flat_relation`(続き17)=
+「`F`の中で`p₀`の像は単元」、(b)今回=「`C b`のクラスの行き先は
+`algebraMap b`」。あとは`hp₀`(=`p₀`のクラスの底変換が`e.symm h₂`)と
+(b)を突き合わせて「`C(g⊗1)`と`p₀`のクラスがℝレベルで一致」を出し、
+続き16の降下補題`exists_fgSubalgebra_mvPolynomial_ideal_mem_descend`で
+有限段階へ降ろせば、`F`の中で`g⊗1`の像が単元だと言える——これで
+`F`が`A₃⊗R''`-代数になり、`D(f)`側と`D(g)`側が共通の底に乗る。
+集計は引き続き10/24——§4は引き続き0/2。

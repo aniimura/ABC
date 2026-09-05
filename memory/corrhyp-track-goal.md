@@ -2206,3 +2206,25 @@ pieceAlgebra_R_model_baseChange)がΓ(X.left,U)⊗ℝ-代数同型でなけれ�
 
 次の一手: pieceAlgebra_R_model_baseChangeのAlgEquiv版を作る。
 集計は引き続き10/24——§4は0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き18
+pieceAlgebra_R_model_baseChange_const完成(commit d21bfed3、ExtLimit.lean、
+sorry無し、Instance4ビルド0エラー)。続き17の障害(eが≃+*で値の情報が無い)を
+AlgEquivへの全面作り直しではなく「必要な情報だけ併記する∃形」で解消:
+
+∃ e : (…) ≃+* Γ(C,piece), ∀ b, e (mk (C b) ⊗ₜ 1) = algebraMap … b
+
+もとの証明が組み立てている同型(quotient_mvPolynomial_baseChange →
+Ideal.quotEquivOfEq → 第一同型定理)をそのまま返すだけでよかった。値の計算は
+quotient_mvPolynomial_baseChange_tmul_one(自然性、今セッション前半で作成)+
+Ideal.quotEquivOfEq_mk・RingHom.quotientKerEquivOfSurjective_apply_mk+
+MvPolynomial.map_C+AlgHom.commutes。
+
+配管: RingHom.ker (aeval P.val)(coe版)と RingHom.ker (aeval P.val).toRingHom
+はrflで等しいが構文的に違う——rwで扱うには後者へ揃える。
+
+揃ったもの: (a)isUnit_rename_of_flat_relation=「Fでp₀の像は単元」、
+(b)今回=「C bのクラスの行き先はalgebraMap b」。あとはhp₀と(b)を突き合わせて
+「C(g⊗1)とp₀のクラスがℝレベルで一致」を出し、続き16の降下補題で有限段階へ
+降ろせば、Fの中でg⊗1の像が単元→FがA₃⊗R''-代数→両側が共通の底に乗る。
+集計は引き続き10/24——§4は0/2。
