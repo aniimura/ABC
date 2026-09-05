@@ -1700,3 +1700,34 @@ DVR なので `𝔪^k = {z | ‖z‖ ≤ ‖ϖ‖^k}` を経由するのが素�
 `Found/Falt1/AlmostDerivation.lean`(第 1533)で落ちている。
 自分の対象(`ABC3.Found.PGC.TotallyRamified` / `ABC3.Check` / `ABC3.Skeleton`)は
 すべて成功。check.mjs の NG 14 件のうち 1 件はその build 失敗。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05: 「Eisenstein ⟹ 完全分岐」が閉じた
+
+`Found/PGC/TotallyRamified.lean::isTotallyRamifiedAdjoin_of_norm_pow_eq`
+
+**`‖x‖^{[K(x):K]} = ‖π‖` ⟹ `K(x)/K` は完全分岐**。
+
+証明: `u := π / x^n` は `‖u‖ = 1` すなわち `𝒪_L` の元(単数)なので
+`π = u·x^n ∈ 𝔪_L^n`。`Ideal.map_span` で `map 𝔪_K ≤ 𝔪_L^n`、
+`le_ramificationIdx_of_map_le_pow`(第 981)で `n ≤ e`、
+`isTotallyRamifiedAdjoin_of_finrank_le`(第 981)で `f = 1`。
+
+`norm_pow_eq_of_monic_root`(第 980、Eisenstein の根のノルム `‖α‖^n = ‖a_0‖`)と
+合わせると **「Eisenstein の根が生成する拡大は完全分岐」** が出る。
+
+### 相互律への地図(2026-09-05 終了時)
+
+| 部品 | 状態 |
+|---|---|
+| 不分岐側 `Γ_K ↠ ℤ/n`・`K^ur` の完全な特徴づけ | ✔(第 953-967) |
+| 完全分岐側 `Γ_K ↠ 𝒪_K^×`(無条件) | ✔(第 962) |
+| `q` と `[K:ℚ_p]` を群の同型類から読む | ✔(第 963) |
+| 惰性群 `I_K = Gal(K̄/K^ur)`・`Γ_K/I_K ≅ Gal(K^ur/K)` | ✔(第 965-966) |
+| 「完全分岐 ∩ K^ur = K」 | ✔(第 979) |
+| 「Eisenstein ⟹ 完全分岐」 | ✔(第 980-982) |
+| **Lubin-Tate 塔 `K_π,n` が Eisenstein であることの適用** | ← 残り |
+| **`K^ab = K^ur · K_π,∞`(局所 Kronecker-Weber)** | ← 本丸 |
+
+`LubinTateActionPsi.lean::heis` が `ψ_n` の Eisenstein 性を出しているので、
+残りの適用は「`ψ_n` の根 `α` について `‖α‖^{deg} = ‖π‖`」を
+`norm_pow_eq_of_monic_root` から引くだけ。

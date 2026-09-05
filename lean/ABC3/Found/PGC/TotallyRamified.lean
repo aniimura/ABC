@@ -372,4 +372,100 @@ theorem isTotallyRamifiedAdjoin_of_finrank_le (K : PAdicLocalField p) (x : K.clo
   show inertiaDegree K x = 1
   omega
 
+/-! ## ★「`‖x‖^n = ‖π‖` ⟹ 完全分岐」——Eisenstein からの最後の一段 -/
+
+/-- **★★★★★★`‖x‖^{[K(x):K]} = ‖π‖` なら `K(x)/K` は完全分岐**。
+
+`π = u·x^n`(`u` は `‖u‖ = 1` すなわち単数)なので `π ∈ 𝔪_L^n`、よって
+`n ≤ e`(`le_ramificationIdx_of_map_le_pow`)、`e·f = n` と合わせて `f = 1`。
+
+`norm_pow_eq_of_monic_root`(Eisenstein の根のノルム)と合わせると
+**「Eisenstein の根が生成する拡大は完全分岐」**が出る。 -/
+theorem isTotallyRamifiedAdjoin_of_norm_pow_eq (K : PAdicLocalField p) (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    {π : 𝒪[K.carrier]} (hπ0 : (π : K.carrier) ≠ 0)
+    (hπmax : IsLocalRing.maximalIdeal 𝒪[K.carrier] = Ideal.span {π})
+    (hnorm : ‖x‖ ^ (Module.finrank K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure))) = ‖(π : K.carrier)‖) :
+    IsTotallyRamifiedAdjoin K x := by
+  haveI := isLocalRing_adjoinIntegers K x
+  have hnpos : 0 < Module.finrank K.carrier
+    (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := Module.finrank_pos
+  have hπle : ‖(π : K.carrier)‖ ≤ 1 := by
+    have h := π.2; rw [Valued.integer.mem_iff] at h; exact h
+  have hπmem : π ∈ IsLocalRing.maximalIdeal 𝒪[K.carrier] := by
+    rw [hπmax]; exact Ideal.mem_span_singleton_self π
+  have hπlt : ‖(π : K.carrier)‖ < 1 := by
+    rw [IsLocalRing.mem_maximalIdeal, mem_nonunits_iff,
+      Valued.integer.isUnit_iff_norm_eq_one] at hπmem
+    exact lt_of_le_of_ne hπle hπmem
+  have hxlt : ‖x‖ < 1 := by
+    by_contra hc
+    rw [not_lt] at hc
+    have h1 : (1:ℝ) ≤ ‖x‖ ^ (Module.finrank K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure))) := one_le_pow₀ hc
+    rw [hnorm] at h1
+    linarith
+  have hxE0 : (⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩ :
+      IntermediateField.adjoin K.carrier ({x} : Set K.closure)) ≠ 0 := by
+    intro h
+    have hz : ‖x‖ = 0 := by
+      have hv := congrArg Subtype.val h
+      show ‖x‖ = 0
+      rw [show x = 0 from hv, norm_zero]
+    rw [hz, zero_pow hnpos.ne'] at hnorm
+    exact hπ0 (norm_eq_zero.mp hnorm.symm)
+  have hxEnorm : ‖(⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩ :
+      IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖ = ‖x‖ := rfl
+  have hπLnorm : ‖(algebraMap K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) (π : K.carrier))‖
+      = ‖(π : K.carrier)‖ := norm_algebraMap' _ _
+  have hπnorm0 : ‖(π : K.carrier)‖ ≠ 0 := norm_ne_zero_iff.mpr hπ0
+  have hu1 : ‖(algebraMap K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) (π : K.carrier))
+      / (⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩ :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) ^ (Module.finrank K.carrier
+        (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))‖ = 1 := by
+    rw [norm_div, norm_pow, hπLnorm, hxEnorm, hnorm, div_self hπnorm0]
+  have hxOle : ‖(⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩ :
+      IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖ ≤ 1 := by
+    rw [hxEnorm]; exact le_of_lt hxlt
+  have hxOmem : (⟨⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩, hxOle⟩ :
+      adjoinIntegers K x) ∈ IsLocalRing.maximalIdeal (adjoinIntegers K x) := by
+    rw [IsLocalRing.mem_maximalIdeal, mem_nonunits_iff, isUnit_adjoinIntegers_iff]
+    show ¬ (‖(⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩ :
+      IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖ = 1)
+    rw [hxEnorm]; exact ne_of_lt hxlt
+  have hpow0 : (⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩ :
+      IntermediateField.adjoin K.carrier ({x} : Set K.closure)) ^ (Module.finrank K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure))) ≠ 0 := pow_ne_zero _ hxE0
+  have heq : (algebraMap 𝒪[K.carrier] (adjoinIntegers K x)) π
+      = (⟨(algebraMap K.carrier
+          (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) (π : K.carrier))
+        / (⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩ :
+          IntermediateField.adjoin K.carrier ({x} : Set K.closure)) ^ (Module.finrank K.carrier
+          (IntermediateField.adjoin K.carrier ({x} : Set K.closure))), le_of_eq hu1⟩ :
+        adjoinIntegers K x)
+        * (⟨⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩, hxOle⟩ :
+          adjoinIntegers K x) ^ (Module.finrank K.carrier
+          (IntermediateField.adjoin K.carrier ({x} : Set K.closure))) := by
+    apply Subtype.ext
+    show algebraMap K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+      (π : K.carrier) = _
+    push_cast
+    rw [div_mul_cancel₀ _ hpow0]
+  have hmem : (algebraMap 𝒪[K.carrier] (adjoinIntegers K x)) π
+      ∈ (IsLocalRing.maximalIdeal (adjoinIntegers K x)) ^ (Module.finrank K.carrier
+        (IntermediateField.adjoin K.carrier ({x} : Set K.closure))) := by
+    rw [heq]
+    exact Ideal.mul_mem_left _ _ (Ideal.pow_mem_pow hxOmem _)
+  have hmap : Ideal.map (algebraMap 𝒪[K.carrier] (adjoinIntegers K x))
+      (IsLocalRing.maximalIdeal 𝒪[K.carrier])
+      ≤ (IsLocalRing.maximalIdeal (adjoinIntegers K x)) ^ (Module.finrank K.carrier
+        (IntermediateField.adjoin K.carrier ({x} : Set K.closure))) := by
+    rw [hπmax, Ideal.map_span, Ideal.span_le, Set.image_singleton, Set.singleton_subset_iff]
+    exact hmem
+  exact isTotallyRamifiedAdjoin_of_finrank_le K x
+    (le_ramificationIdx_of_map_le_pow (ramificationIndex_ne_zero K x) hmap)
+
 end ABC3.Found.PGC
