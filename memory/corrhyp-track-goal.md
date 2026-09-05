@@ -2402,3 +2402,20 @@ Spec.map (pieceRingEquiv.symm) と同定する(pieceRingEquivの定義=
 topIso+Γ.mapIso piecePullbackIso.symm.op+ΓSpecIsoを追う)。そこまで行けば
 Specの忠実充満性から環レベルの pieceRingEquiv.symm (a⊗ₜ1) = appLE a が出て、
 続き23の(i)と合わせて自然性の四角形が閉じる。集計は10/24——§4は0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き29
+4手目(piecePullbackIso.inv ≫ (piece).isoSpec.hom = Spec.map pieceRingEquiv)に
+着手。数学的道筋は完全に判明し材料も揃った:
+- IsAffineOpen.isoSpec hU = (↑U).isoSpec ≪≫ Spec.mapIso U.topIso.symm.op(定義)
+  → pieceRingEquivのe1(topIso)に対応
+- Scheme.isoSpec_hom_naturality (f := piecePullbackIso.inv) で左辺が
+  (Spec(A⊗ℝ)).isoSpec.hom ≫ Spec.map (inv.appTop) に化ける → e2に対応
+- Scheme.isoSpec_Spec_hom : (Spec R).isoSpec.hom = Spec.map (ΓSpecIso R).hom
+  → e3に対応
+Spec.mapの反変性で順序が逆になることまで含め辻褄が合う。
+
+止まっている理由: rw [← Category.assoc]ですら「パターンが見つからない」と
+言われる(instances transparencyの警告つき)——続き26で
+piecePullbackIso_inv_fstを通したときと同じ壁。直し方も同じで、rwを諦めて
+congrArg+Eq.transで項として組み立て最後をexactにすればよい見込み。
+集計は10/24——§4は0/2。

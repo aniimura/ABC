@@ -5343,3 +5343,37 @@ theorem piecePullbackIso_inv_isoSpec_appLE … :
 **自然性の四角形が閉じる**。
 
 集計は引き続き10/24——§4は引き続き0/2。
+
+## 2026-09-05夜さらに続き29: 4手目(同定)に着手——必要な材料は
+**すべて揃った**が、例のインスタンス透明度の壁で`rw`が止まる
+
+続き28で残した4手目
+(`piecePullbackIso.inv ≫ (piece).isoSpec.hom = Spec.map (pieceRingEquiv)`)
+に着手した。**数学的な道筋は完全に判明し、mathlibの材料も揃っている**:
+
+- `IsAffineOpen.isoSpec hU = (↑U).isoSpec ≪≫ Scheme.Spec.mapIso U.topIso.symm.op`
+  (定義、`#print`で確認)——`pieceRingEquiv`の`e1`(`topIso`)がこれに対応する。
+- **`Scheme.isoSpec_hom_naturality`** :
+  `X.isoSpec.hom ≫ Spec.map f.appTop = f ≫ Y.isoSpec.hom`
+  ——`f := piecePullbackIso.inv`で使うと、ゴールの左辺
+  `piecePullbackIso.inv ≫ (piece).isoSpec.hom`が
+  `(Spec(A⊗ℝ)).isoSpec.hom ≫ Spec.map (inv.appTop)`に化ける。
+  これが`pieceRingEquiv`の`e2`(`Γ.mapIso piecePullbackIso.symm.op`)に対応。
+- **`Scheme.isoSpec_Spec_hom`** : `(Spec R).isoSpec.hom = Spec.map (ΓSpecIso R).hom`
+  ——`pieceRingEquiv`の`e3`に対応。
+
+つまり`pieceRingEquiv`の3つの成分が、それぞれ`topIso`・naturality・
+`ΓSpecIso`にちょうど対応しており、`Spec.map`の反変性で順序が逆になる
+ことまで含めて辻褄が合う。
+
+**止まっている理由(既知の壁)**: `rw [← Category.assoc]`ですら
+「パターン`?f ≫ ?g ≫ ?h`が見つからない」と言われる——ゴールは明らかに
+その形なのに、である。`Note: The target expression is not type-correct
+under the instances transparency level`という警告が併記されており、
+続き26で`piecePullbackIso_inv_fst`を通したときと**同じ壁**である。
+
+**直し方(既に成功例がある)**: そのときは`rw`を諦め、
+`congrArg`+`Eq.trans`で等式を項として組み立て、最後を`exact`(defeqで
+通る)にすることで解決した。4手目も同じ方式で組めばよい見込みである。
+
+集計は引き続き10/24——§4は引き続き0/2。
