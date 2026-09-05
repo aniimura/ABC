@@ -398,4 +398,51 @@ theorem associator_eq_zero_of_act' {A N B J : Type u} [CommRing A] [AddCommGroup
   rw [hcomm (ι j) z, hact z j, hact x (π z • j), hact x j,
     hcomm (ι (π x • j)) z, hact z (π x • j), smul_comm, sub_self]
 
+/-! ## 第 4 段(後半)——`B_ε ⊗_A Ā` と `B` の差は `p^ε` で消える
+
+原文の *"`B_ε` contains `B ⊗_Ā A/(p-torsion)`, the quotient being
+annihilated by `p^ε`."*
+
+"Tripling ε" の帰結 `π e = s²·ē` から
+
+    π(s³·1 − e) = s³·1 − s²·ē = s²·(s·1 − ē)
+
+なので、`B_ε ⊗_A Ā = coker(s²·(s·1 − ē))` と `B = coker(s·1 − ē)` を
+比べる自然な全射ができ、**その核は `s²` で零化される**——`coker(d·f)`
+から `coker(f)` への全射の核が常に `d` で消えるという初等的な事実。 -/
+
+/-- `coker(d·f) ↠ coker(f)` の**核は `d` で零化される**。 -/
+theorem quot_comparison_kernel {R M : Type u} [CommRing R] [AddCommGroup M] [Module R M]
+    (f : M →ₗ[R] M) (d : R) :
+    ∃ q : (M ⧸ LinearMap.range (d • f)) →ₗ[R] (M ⧸ LinearMap.range f),
+      Function.Surjective q ∧ ∀ x, q x = 0 → d • x = 0 := by
+  have hle : LinearMap.range (d • f) ≤ LinearMap.range f := by
+    rintro _ ⟨y, rfl⟩
+    exact ⟨d • y, by simp [LinearMap.smul_apply, map_smul]⟩
+  refine ⟨Submodule.mapQ _ _ LinearMap.id hle, ?_, ?_⟩
+  · intro y
+    induction y using Submodule.Quotient.induction_on with
+    | H m => exact ⟨Submodule.Quotient.mk m, rfl⟩
+  · intro x hx
+    induction x using Submodule.Quotient.induction_on with
+    | H m =>
+      have hm : m ∈ LinearMap.range f := by
+        have hq : Submodule.Quotient.mk (p := LinearMap.range f) m = 0 := hx
+        exact (Submodule.Quotient.mk_eq_zero _).mp hq
+      obtain ⟨y, rfl⟩ := hm
+      show Submodule.Quotient.mk (d • f y) = 0
+      rw [Submodule.Quotient.mk_eq_zero]
+      exact ⟨y, by simp [LinearMap.smul_apply]⟩
+
+/-- **"Tripling ε" の帰結を商の比較に繋ぐ**。`π e = s²·ē` なので
+`π(s³·1 − e) = s²·(s·1 − ē)`——右辺が `quot_comparison_kernel` の
+`d·f`(`d = s²`, `f = s·1 − ē`)の形になる。 -/
+theorem reduction_of_idem_lift {A S S' : Type u} [CommRing A] [Ring S] [Ring S']
+    [Algebra A S] [Algebra A S'] (π : S →ₐ[A] S') (s : A) (e : S) (ebar : S')
+    (he : π e = algebraMap A S' (s^2) * ebar) :
+    π (algebraMap A S (s^3) - e) = algebraMap A S' (s^2) * (algebraMap A S' s - ebar) := by
+  rw [map_sub, AlgHom.commutes, he, mul_sub, ← map_mul]
+  congr 2
+  ring
+
 end ABC3.Found.Falt1
