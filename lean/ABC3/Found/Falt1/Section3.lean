@@ -467,6 +467,28 @@ theorem kummerAlgebra_kaehler_annihilated (S : Type u) [CommRing S] (ι : Type u
     (fun i => (hu i).map (algebraMap S (kummerAlgebra S ι N u)))
     (kaehler_span_of_adjoin _ (kummerGen_adjoin S ι N u))
 
+/-- **塔の遷移写像 `Rₙ → R_{nm}`**——`xᵢ ↦ yᵢ^M`。原文の
+`Rₙ ⊂ R_{n+1}`(`M = p` の場合)そのもの。 -/
+noncomputable def kummerTransition (S : Type u) [CommRing S] (ι : Type u) (N M : ℕ)
+    (u : ι → S) :
+    kummerAlgebra S ι N u →ₐ[S] kummerAlgebra S ι (N * M) u := by
+  refine Ideal.Quotient.liftₐ _
+    (MvPolynomial.aeval (fun i => (kummerGen S ι (N * M) u i) ^ M)) ?_
+  intro a ha
+  refine Submodule.span_induction ?_ ?_ ?_ ?_ ha
+  · rintro _ ⟨i, rfl⟩
+    simp only [map_sub, map_pow, MvPolynomial.aeval_X, MvPolynomial.aeval_C]
+    rw [← pow_mul, mul_comm M N, kummerGen_pow, sub_self]
+  · simp
+  · intro x y _ _ hx hy; rw [map_add, hx, hy, add_zero]
+  · intro c x _ hx; rw [smul_eq_mul, map_mul, hx, mul_zero]
+
+@[simp] theorem kummerTransition_gen (S : Type u) [CommRing S] (ι : Type u) (N M : ℕ)
+    (u : ι → S) (i : ι) :
+    kummerTransition S ι N M u (kummerGen S ι N u i) = (kummerGen S ι (N * M) u i) ^ M := by
+  rw [kummerTransition, kummerGen, Ideal.Quotient.liftₐ_apply, Ideal.Quotient.lift_mk]
+  simp
+
 /-- 非空虚性——`S = ℤ[T]`、`ι = Fin 1`、`N = 5`、`u ≡ 1`
 (`S[X]/(X⁵−1)`、1 の 5 乗根を添加した環)。その微分は `5` で消える。 -/
 example : ∀ ω : Ω[(kummerAlgebra (Polynomial ℤ) (Fin 1) 5 (fun _ => 1))⁄(Polynomial ℤ)],
