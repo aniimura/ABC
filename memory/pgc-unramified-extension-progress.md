@@ -886,3 +886,21 @@ K^×  ≅  ℤ × 𝓀^× × (1+𝔪_K)
 
 これで `q` と `[K:ℚ_p]` が独立な量ではなく `(e,f)` で決まることが確定した
 ——[pGC] Proposition 1.2 が読み取る二つの量の関係。
+
+## ★★★★★★★★2026-09-05: `Γ_K` から `K^×` の**両因子**への全射が揃った
+
+新規 `Found/PGC/AbsGalSurjections.lean`(sorry 無し):
+- `unitsEquivCompatibleUnits : 𝒪_K^× ≃* CompatibleUnits`
+  ——`unitReductionHom` は単射(`IsHausdorff`)かつ全射(`IsAdicComplete`)。
+  **両方ともプロジェクトに既存だった**(`UnitsInverseLimit.lean`)ので
+  `MulEquiv.ofBijective` を書くだけ。
+- **`exists_surjective_absGal_to_units : Γ_K ↠ 𝒪_K^×`**
+  ——節目(5)の `reciprocityMapLimit`(`CompatibleUnits` への全射)を
+  実際の単数群の言葉に翻訳したもの。
+- **`exists_surjective_absGal_both_halves`** : 二つの半分を並べた形
+  * 完全分岐: `Γ_K ↠ 𝒪_K^×`(Lubin-Tate、節目(5))
+  * 不分岐: `Γ_K ↠ ℤ/n`(任意の `n ≥ 1`、本日の不分岐拡大理論)
+
+`K^× ≅ ℤ × 𝒪_K^×`(`UnitsSplit.lean`)の**各因子が `Γ_K` の商として
+現れる**ところまで来た。両者を「合わせて全体」にするには Lubin-Tate の
+主定理 `K^ab = K^ur · K_π` が要る——そこが次の山。
