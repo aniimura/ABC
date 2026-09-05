@@ -2121,3 +2121,23 @@ mathlib に「`E₁ ⊓ E₂ = ⊥` かつ `E₁/F` Galois ⟹ `[E₁E₂:E₂] 
 名前があるなら「mathlib に無い」ではなく「**import していない**」。
 MCP REPL も ABC3 の import 集合で動くので同じ嘘をつく。
 まず index を引き、あれば import を足す。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05: 同じ `x` で四つが揃った
+
+`Found/PGC/LubinTateTotallyRamified.lean::isTotallyRamifiedAdjoin_iteratedLubinTatePsi`。
+
+`exists_isTotallyRamifiedAdjoin_lubinTate_psi` は「そういう `α` が**ある**」形で、
+`galoisReciprocityEquiv` が語る `x` と同じ元だとは言えていなかった。
+**与えられた捩れ点 `x` そのもの**について述べる形にした。これで同じ `x` で:
+
+* `Gal(K(x)/K) ≃* (𝒪_K/π^n)^×`(`galoisReciprocityEquiv`)
+* `[K(x):K] = q^n − q^{n−1}`(`finrank_adjoin_iteratedLubinTatePsi`、第 996)
+* `K(x)/K` は正規(`normal_adjoin_of_mem_iteratedLubinTatePsiTorsionPoints`)
+* `K(x)/K` は完全分岐(本定理)
+
+★`iteratedLubinTatePsiTorsionPoints` は `Finset` なので
+`Multiset.mem_toFinset` に `DecidableEq K.closure` が要る——
+`open scoped Classical` + `classical` の両方を入れた。
+
+次: `Gal(K(y) ⊔ K(x)/K) ≅ Gal(K(y)/K) × Gal(K(x)/K)`。両方正規になったので
+制限写像は単射、次数は第 999 で積と分かっているから濃度が合う。

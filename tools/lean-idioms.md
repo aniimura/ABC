@@ -5263,3 +5263,29 @@ node tools/decl-index.mjs && grep "aeval.*map\|map.*aeval" .cache/decl-index.txt
 
 同種の「黙って失敗する」罠は #(シェルの終了コード隠蔽)と同じ族——
 ログや stat の**実物**を見るまで成功と見なさないこと。
+
+## 68. `Unknown constant` は「mathlib に無い」ではなく「**import していない**」ことが多い
+
+**症状**: `IntermediateField.LinearDisjoint.of_inf_eq_bot` を使ったら
+`Unknown constant`。`mcp__abc3-lean__lean_check` の `#check @...` でも同じ。
+「pin した mathlib(`db127794`)には無いのだろう」と結論しかけた。
+
+**実際**: `.cache/mathlib-index.txt` を引いたら**あった**
+(`FieldTheory/LinearDisjoint.lean:157`)。ABC3 のどこも
+`Mathlib.FieldTheory.LinearDisjoint` を import していなかっただけ。
+`import Mathlib.FieldTheory.LinearDisjoint` を 1 行足したら通った。
+
+**なぜ嘘に見えるか**: MCP REPL は `Mathlib` 全体ではなく **ABC3 の import 集合**で
+動く。だから REPL の `#check` の Unknown も「木に無い」の証拠にならない。
+`exact?` が引けないのも同じ理由。
+
+**手順**:
+
+1. `Unknown constant` が出たら、まず
+   `grep '<名前>' .cache/mathlib-index.txt`(無ければ
+   `node tools/decl-index.mjs --mathlib` で作る)。
+2. **あれば** その行のファイルを `import Mathlib.<パス>` で足す(拡張子を除き
+   `/` を `.` に)。
+3. **無ければ**そのとき初めて「mathlib 不在」と記録する。
+
+★「不在」の測定を誤ると、既にある数学を数百行書き直すことになる。

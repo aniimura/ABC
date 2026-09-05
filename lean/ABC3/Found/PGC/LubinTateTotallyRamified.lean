@@ -1,5 +1,6 @@
 import ABC3.Found.PGC.TotallyRamified
 import ABC3.Found.PGC.LubinTateActionWeierstrass
+import ABC3.Found.PGC.LubinTateDegree
 
 /-!
 # Lubin-Tate の第一段 `K(Λ_1)/K` は完全分岐
@@ -36,7 +37,7 @@ import ABC3.Found.PGC.LubinTateActionWeierstrass
 namespace ABC3.Found.PGC
 
 open ABC3.Skeleton.PGC
-open scoped Valued
+open scoped Valued Classical
 
 variable {p : ℕ} [Fact p.Prime]
 
@@ -101,5 +102,52 @@ theorem exists_isTotallyRamifiedAdjoin_lubinTate_psi (K : PAdicLocalField p)
     (isDistinguishedAt_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn).monic
     (isEisensteinAt_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn) hdegpos
   exact ⟨α, hα, hrank.trans (natDegree_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn)⟩
+
+/-! ## 与えられた捩れ点 `x` そのものについての完全分岐性
+
+`exists_isTotallyRamifiedAdjoin_lubinTate_psi` は「そういう `α` が**ある**」
+という形で、`galoisReciprocityEquiv`(`Gal(K(x)/K) ≃* (𝒪_K/π^n)^×`)や
+`normal_adjoin_of_mem_iteratedLubinTatePsiTorsionPoints`(正規性)が語る
+`x` と同じ元だとは言えていない。**同じ `x` について三つが揃う**形にする。 -/
+
+/-- **★★★★★★★★★★★★★★★★`ψ_n` の根 `x` について `K(x)/K` は完全分岐**。
+
+これで同じ `x` について
+* `Gal(K(x)/K) ≃* (𝒪_K/π^n)^×`(`galoisReciprocityEquiv`)
+* `[K(x):K] = q^n − q^{n−1}`(`finrank_adjoin_iteratedLubinTatePsi`)
+* `K(x)/K` は正規(`normal_adjoin_of_mem_iteratedLubinTatePsiTorsionPoints`)
+* `K(x)/K` は完全分岐(本定理)
+
+が揃う。 -/
+theorem isTotallyRamifiedAdjoin_iteratedLubinTatePsi (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal 𝒪[K.carrier]) 𝒪[K.carrier]]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField 𝒪[K.carrier]) pp]
+    [Fintype (IsLocalRing.ResidueField 𝒪[K.carrier])] {ff : ℕ}
+    (hq : Fintype.card (IsLocalRing.ResidueField 𝒪[K.carrier]) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal 𝒪[K.carrier] = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries 𝒪[K.carrier]) (hf0 : PowerSeries.coeff 0 f = 0)
+    (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue 𝒪[K.carrier]) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) (x : K.closure)
+    (hxψ : x ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn)
+    (hxn : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))] :
+    IsTotallyRamifiedAdjoin K x := by
+  have hπ0 : (π : K.carrier) ≠ 0 := fun h => hπne0 (Subtype.ext h)
+  have hroot0 : Polynomial.eval x (Polynomial.map (algebraMap 𝒪[K.carrier] K.closure)
+      (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn)) = 0 := by
+    classical
+    have hmem' : x ∈ (Polynomial.map (algebraMap 𝒪[K.carrier] K.closure)
+        (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn)).roots :=
+      Multiset.mem_toFinset.mp hxψ
+    exact (Polynomial.mem_roots'.mp hmem').2
+  refine isTotallyRamifiedAdjoin_of_eisenstein K x hπ0 hπmax _
+    (isDistinguishedAt_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn).monic
+    (isEisensteinAt_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn) ?_ ?_
+  · rw [natDegree_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn,
+      finrank_adjoin_iteratedLubinTatePsi K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem]
+  · exact hroot0
 
 end ABC3.Found.PGC
