@@ -229,6 +229,38 @@ theorem doubling_multiplicative {A B C : Type u} [CommRing A] [CommRing B] [Comm
   simp only [LinearMap.add_apply, LinearMap.smul_apply, Algebra.smul_def, map_pow] at hc ⊢
   linear_combination ((algebraMap A C) p ^ n) * hc - hsq
 
+/-- **一意性の代数的な核**(Faltings の *"Such a lifting is unique up to
+`H¹(B/A,I)`"*)。水準 `n` の乗法的持ち上げが2つあれば、その差
+`d := ψ' - ψ` は `p^n·d(xy) = ψ(x)·d(y) + ψ(y)·d(x)` を満たす——
+`x ∈ I` に対し `ψ(b)·x = p^n·(b•x)` なので、これは `d` が(`p^n` 倍
+された意味で)**導分**であることを言っている。`C` が `p` 捩れ無しなら
+honest な導分になり、`Ω[B⁄A]` の almost 消滅
+(`AlmostDifferentials.kaehler_almost_zero`)から `d` は `p` 冪で消える。 -/
+theorem uniqueness_derivation_eq {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C] (p : A) (n : ℕ) (ψ ψ' : B →ₗ[A] C)
+    (hmul : ∀ x y : B, (p ^ n) • ψ (x * y) = ψ x * ψ y)
+    (hmul' : ∀ x y : B, (p ^ n) • ψ' (x * y) = ψ' x * ψ' y)
+    (hsq : ∀ x y : B, (ψ' x - ψ x) * (ψ' y - ψ y) = 0)
+    (x y : B) :
+    (p ^ n) • ((ψ' - ψ) (x * y)) = ψ x * ((ψ' - ψ) y) + ψ y * ((ψ' - ψ) x) := by
+  have h1 := hmul x y
+  have h2 := hmul' x y
+  have h3 := hsq x y
+  simp only [LinearMap.sub_apply, smul_sub] at *
+  linear_combination h2 - h1 + h3
+
+/-- **貼り合わせの整合性の核**(Faltings の *"the different `φ_ε` glue
+together"*)。水準 `n` の乗法的持ち上げ `ψ` を `p^k` 倍したものは、
+水準 `n+k` の乗法的持ち上げになる。したがって一意性と合わせると
+`ψ_{n+k} = p^k·ψ_n` が従い、族が整合する。 -/
+theorem rescale_multiplicative {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C] (p : A) (n k : ℕ) (ψ : B →ₗ[A] C)
+    (hmul : ∀ x y : B, (p ^ n) • ψ (x * y) = ψ x * ψ y) (x y : B) :
+    (p ^ (n + k)) • (((p ^ k) • ψ) (x * y)) = (((p ^ k) • ψ) x) * (((p ^ k) • ψ) y) := by
+  have h := hmul x y
+  simp only [LinearMap.smul_apply, Algebra.smul_def, map_pow] at h ⊢
+  linear_combination ((algebraMap A C) p ^ k * (algebraMap A C) p ^ k) * h
+
 /-! ## `Theorem 2.2` の残り(正直な記録)
 
 上の `doubling_multiplicative` により、`Theorem 2.2` の証明の
@@ -243,16 +275,36 @@ theorem doubling_multiplicative {A B C : Type u} [CommRing A] [CommRing B] [Comm
 1. *"Such a lifting is unique up to `H¹(B/A,I)`, hence up to `p`-torsion.
    As `C` has no such torsion, the different `φ_ε` glue together to give a
    multiplicative `A`-linear map `φ₀ : mB → C`."*
-   ——`ε` を動かしたときの `φ_ε` の族を貼り合わせる操作。ここで初めて
-   `m = ∪ p^ε` という**almost mathematics の枠組み**(有向系としての `m`)
-   が本質的に要る。本プロジェクトの形式化は単一の `p^n` で進めてきたので、
-   `m` を有向系として持つ層を新たに設計する必要がある。
+   ——一意性の核は `uniqueness_derivation_eq`、整合性の核は
+   `rescale_multiplicative` で閉じている。残るのは族の極限を取る操作。
 2. *"We can extend to `B = A + mB`, because `φ₀` maps `p^ε` to an element
    `x = p^ε + y` (`y ∈ I`) satisfying `x² = p^ε x`, hence `p^ε y = 0`."*
-   ——`B = A + mB` という構造を使う最後の詰め。
 
-いずれも「almost mathematics の枠組みそのもの」を要する部分であり、
-`ResearchPaper/mathlib-gap.json` の `falt1-almost-mathematics` に対応する。
+### ★重要な構造上の発見(2026-09-05)——なぜ `2.4` は閉じて `2.2` は閉じないか
+
+本プロジェクトの `Definition 2.1` の条件(iii)は指数を **`n : ℕ`** で
+取っている(`∀ n : ℕ, 0 < n → ∃ e, diagonalCompare p e = p^n • elem`)。
+原典は `ε > 0` を**`p` 冪分母を持つ正の有理数**で走らせる——つまり
+`A` が `p^{1/p^k}` を含む(perfectoid 的な)底を前提とし、
+`m = ∪_ε p^ε A` は `(p)` より真に小さい。
+
+この違いが `2.2`/`2.3` と `2.4` を分ける:
+
+- **`Theorem 2.4` は almost な結論**(「`m` が零化する」)なので、
+  整数指数の枠組みでもそのまま意味を持ち、実際に閉じた
+  (`GaloisTransfer.thm_2_4_ii`・`AlmostDifferentials.thm_2_4_i_cokernel`)。
+- **`Theorem 2.2`/`2.3` は honest な結論**(「`φ` は**一意に**持ち上がる」)
+  であり、`p^ε φ_ε` の族から `ε → 0` の極限として honest な `φ₀` を得る
+  操作が要る。整数指数では `ε ≥ 1` までしか下がらないので、
+  **`p` で割る操作が原理的に構成できない**。すなわち `2.2`/`2.3` を
+  閉じるには、まず**`p`-可除な底(`m = ∪ p^{1/p^k}`)を持つ層**を
+  新たに設計する必要がある——これは `ResearchPaper/mathlib-gap.json` の
+  `falt1-almost-mathematics` そのものである。
+
+したがって次に着手すべきは「`Theorem 2.2` の続き」ではなく、
+**`p`-可除な底の上の almost mathematics の層**の設計である。
+本ファイルまでに揃えた材料(第1段・障害のコサイクル性・コバウンダリ
+表示・倍化・一意性・整合性)は、その層の上でそのまま再利用できる。
 -/
 
 end ABC3.Found.Falt1
