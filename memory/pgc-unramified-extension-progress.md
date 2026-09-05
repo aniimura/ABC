@@ -1077,3 +1077,44 @@ Frobenius・Teichmüller など)が、そのまま `adjoinField K x` を
 
 残るのは `fixedField H` と `K(x)`(`exists_adjoin_eq_fixedField` で
 一致する)の間で `q_L` を移す一手だけ。
+
+## ★★★★★★2026-09-05: `Γ_K ↠ 𝒪_K^×` が無条件になり、`q-1` が群から読めた
+
+### `Found/PGC/AbsGalUnitsSurjective.lean`(新規)
+
+`exists_surjective_absGal_to_units` が引きずっていた仮説
+(`IsAdicComplete`・`Fintype 𝓀`・`ExpChar p`・`q=pp^ff`・一意化元 `π`・
+Lubin-Tate 級数 `f`)は**すべて本リポジトリで既に構築済みだった**。
+組み上げるだけで消える:
+
+| 仮説 | 供給元 |
+|---|---|
+| `IsAdicComplete` | `ValuationRingComplete.lean::isAdicComplete_valuationRing` |
+| `Fintype 𝓀`・`ExpChar p` | `ValuationRingDVR.lean` の instance 2 つ |
+| `q = p^f` | `AbsoluteRamification.lean::residueCard_eq_pow` |
+| `π` | `valuationRing_isDVR` + mathlib `IsDiscreteValuationRing.exists_irreducible`/`irreducible_iff_uniformizer` |
+| `f` | `LubinTateSeriesExists.lean::exists_lubinTateSeries` |
+
+**`exists_surjective_absGal_units (K) : ∃ φ : Γ_K →* 𝒪_K^×, Surjective φ`**
+——任意の p進局所体で**無条件**。新しい数学はゼロ、組み上げだけ。
+
+### `Found/PGC/PrimeToPTorsion.lean`(新規)
+
+`μ^{(p')}(𝒪_K) := {u | ∃ m, p∤m ∧ u^m=1}`(`𝒪_K^×` の群構造だけで定義)。
+
+- `norm_pow_sub_one_of_not_dvd` : `‖u-1‖<1`・`p∤m` ⟹ `‖u^m-1‖ = ‖u-1‖`。
+  ★**幾何級数だけで済む**——`u^m-1 = S·(u-1)`、`S=Σ_{i<m}u^i` は
+  `‖S-m‖ ≤ ‖u-1‖ < 1 = ‖m‖` なので超距離で `‖S‖=1`。
+  二項展開も p進対数も要らなかった。
+- `eq_one_of_pow_eq_one_of_not_dvd` : 主単数群に `p` と素な捩れは無い。
+- **`primeToPTorsionEquiv : μ^{(p')}(𝒪_K) ≃* 𝓀^×`**(単射は上、全射は Teichmüller)
+- **`card_primeToPTorsion : Nat.card μ^{(p')}(𝒪_K) = q - 1`**
+- `isCyclic_primeToPTorsion`
+
+### Proposition 1.2 との距離
+
+原典の論拠は「捩れの prime-to-p 部分が `q-1` 個・pro-p 商の階数が
+`[K:ℚ_p]+1`」。前者が本日確定した。後者も `PrincipalUnitsRank.lean`
+(階数 `[K:ℚ_p]`)+ `UnitsSplit.lean`(`ℤ` の分)で揃っている。
+**残るのは商の標準性——相互律 `Γ_K^ab ≅ (K^×)^∧` そのもの**
+(`Γ_K ≅ Γ_{K'}` から `𝒪_K^× ≅ 𝒪_{K'}^×` を導く一手)。
