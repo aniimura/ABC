@@ -702,6 +702,32 @@ theorem almostIso_comp {A M N P : Type u} [CommRing A] [AddCommGroup M] [Module 
 
 /-- almost 同型で源に `m`-捩れが無ければ**単射**——`Theorem 4.1(ii)` の
 証明の形(*"its kernel is annihilated by `m`. But ... has no `m`-torsion"*)。 -/
+/-- **almost 零は拡大で閉じる**——`M' → M → M''` が完全で両端が almost 零
+なら `M` も almost 零。塔があるので水準が回収できる
+(`ϖ(k+1)² ∣ ϖ k`、`q ≥ 2`)。
+
+`almostIso_comp` と並ぶ almost mathematics の基本構造で、§3・§4 で
+繰り返し使われる。 -/
+theorem isAlmostZero_of_exact {A M M' M'' : Type u} [CommRing A]
+    [AddCommGroup M] [Module A M] [AddCommGroup M'] [Module A M']
+    [AddCommGroup M''] [Module A M'']
+    {q : ℕ} (hq : 2 ≤ q) (T : PDivTower A q)
+    (f : M' →ₗ[A] M) (g : M →ₗ[A] M'') (hex : Function.Exact f g)
+    (h' : T.IsAlmostZero M') (h'' : T.IsAlmostZero M'') :
+    T.IsAlmostZero M := by
+  intro k x
+  have hdvd : (T.ϖ (k+1) * T.ϖ (k+1)) ∣ T.ϖ k := by
+    refine ⟨(T.ϖ (k+1))^(q-2), ?_⟩
+    rw [← T.ϖ_succ k, ← pow_two, ← pow_add]
+    congr 1
+    omega
+  obtain ⟨d, hd⟩ := hdvd
+  have h1 : g (T.ϖ (k+1) • x) = 0 := by rw [map_smul, h'' (k+1) (g x)]
+  obtain ⟨y, hy⟩ := (hex (T.ϖ (k+1) • x)).mp h1
+  have h2 : T.ϖ (k+1) • (T.ϖ (k+1) • x) = 0 := by
+    rw [← hy, ← map_smul, h' (k+1) y, map_zero]
+  rw [hd, mul_comm, ← smul_smul, ← smul_smul, h2, smul_zero]
+
 theorem injective_of_almostIso_of_noTorsion {A M N : Type u} [CommRing A]
     [AddCommGroup M] [Module A M] [AddCommGroup N] [Module A N]
     {q : ℕ} (T : PDivTower A q) (f : M →ₗ[A] N) (hf : AlmostIso T f)
