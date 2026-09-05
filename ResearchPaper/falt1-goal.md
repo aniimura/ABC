@@ -64,7 +64,7 @@
 | 「almost 同型」の語彙 | **✅証明済み**——`AlmostIsoAt`/`AlmostIso`(塔版)と**合成則**`almostIso_comp`(塔があるので `ϖ(k+1)² ∣ ϖ k` で水準を回収できる=almost math が圏になる理由)。§3・§4 が繰り返し使う | `AlmostDerivation.lean` |
 | `Theorem 2.2` の冪零版への還元 | **✅証明済み**——`lift_nilpotent_of_lift_sq`(原文 *"We may assume that I² = 0"*)。非空虚性つき | `AlmostLifting.lean` |
 | `Theorem 2.3` 第2・3・4段 | **✅証明済み**("Tripling ε"・`B_ε` の almost 射影性・`B_ε⊗Ā` と `B` の比較) | `AlmostDeform.lean` |
-| `Theorem 2.3` 第5段 | **✅ほぼ証明済み**(five-term identity・結合律への補正は**倍化なしで厳密**・交換子は導分・**乗法の持ち上げ**`thm_2_3_mul_lift`・**結合子が核に入る**`associator_mem_ker`)。★残る中央の 1 点:核 `J = ker(B_ε → B)` の `B`-加群構造が**almost にしか成り立たない**(切断 `σ` を使うと `(bb')·j` と `b·(b'·j)` が結合子の分だけずれる)ため、Hochschild の機械を「almost 加群」へ一般化する必要がある | `AlmostDeform.lean` |
+| `Theorem 2.3` 第5段 | **✅全段証明済み**——`ρ : B_ε ↠ B` の構成(`exists_quot_map`)・乗法の持ち上げ(`thm_2_3_mul_lift`)・結合子が核に入る(`associator_mem_ker`)・five-term identity・**H³ の almost 加群版**(`hochschild_H3_almost_coboundary_act`——核 `J` の `B`-加群構造が almost にしかならない問題を、作用を外から与えて「結合律がスカラー `t` を除いて成立」で足りる形に一般化して解決。ずれは恒等式の 4 箇所に現れるが全て `t` で消える)・結合律への補正は**倍化なしで厳密**・交換子は導分。★残るのは `C_σ = A + p^{5σ}B_σ` の増大列の合併と、その合併が `A` 上 almost étale になることの検証のみ | `AlmostDeform.lean` + `HochschildLowDegree.lean` |
 | `H³` の almost 消滅(明示形) | **✅証明済み** | `HochschildLowDegree.lean` |
 
 **インフラの修正**: `lean/ABC3/Found/Falt1/*.lean` は `Found.lean` に
