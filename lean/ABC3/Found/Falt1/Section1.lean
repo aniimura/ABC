@@ -1803,6 +1803,35 @@ theorem truncPoly_maximalIdeal {k : Type*} [Field k] (m : ℕ) (hm : 0 < m) :
       exact Ideal.subset_span rfl
     exact hnil.not_isUnit hu
 
+open Polynomial in
+/-- **`(N : k) = 0` なら `Ω[k[X]/(Xᴺ) ⁄ k]` は自由階数 1**。
+既証の `omega_quotient_eq_derivative_span`(`Ω_{R[X]/(f)/R} ≅ B ⧸ (f'(x))`)
+に `f := Xᴺ` を当てると `f' = N·X^{N−1} = 0` なので `Ω ≅ B ⧸ (0) ≅ B`。
+
+★標数 `p` で `N` が `p` 冪のとき、これが「`p` 冪根を添加した段の微分は
+自由になる」という §3(a)/§4(c) の計算の最小形である。 -/
+noncomputable def truncPoly_omegaEquiv {k : Type*} [Field k] (N : ℕ) (hN : (N : k) = 0) :
+    Ω[(Polynomial k ⧸ Ideal.span {(X : Polynomial k) ^ N})⁄k]
+      ≃ₗ[Polynomial k ⧸ Ideal.span {(X : Polynomial k) ^ N}]
+      (Polynomial k ⧸ Ideal.span {(X : Polynomial k) ^ N}) := by
+  have hker : RingHom.ker (algebraMap (Polynomial k)
+      (Polynomial k ⧸ Ideal.span {(X : Polynomial k) ^ N}))
+      = Ideal.span {(X : Polynomial k) ^ N} := Ideal.mk_ker
+  have hsurj : Function.Surjective (algebraMap (Polynomial k)
+      (Polynomial k ⧸ Ideal.span {(X : Polynomial k) ^ N})) := Ideal.Quotient.mk_surjective
+  have hderiv : (algebraMap (Polynomial k)
+      (Polynomial k ⧸ Ideal.span {(X : Polynomial k) ^ N}))
+      (Polynomial.derivative ((X : Polynomial k) ^ N)) = 0 := by
+    rw [Polynomial.derivative_X_pow, hN, map_zero, zero_mul, map_zero]
+  have e1 := omega_quotient_eq_derivative_span ((X : Polynomial k) ^ N) hker hsurj
+  rw [hderiv] at e1
+  have e2 : ((Polynomial k ⧸ Ideal.span {(X : Polynomial k) ^ N})
+      ⧸ Ideal.span ({0} : Set (Polynomial k ⧸ Ideal.span {(X : Polynomial k) ^ N})))
+      ≃ₗ[Polynomial k ⧸ Ideal.span {(X : Polynomial k) ^ N}]
+      (Polynomial k ⧸ Ideal.span {(X : Polynomial k) ^ N}) :=
+    Submodule.quotEquivOfEqBot _ (by simp)
+  exact e1.trans e2
+
 instance zmod4_nontrivial : Nontrivial (ZMod 4) := ⟨0, 1, by decide⟩
 
 /-- `ZMod 4` は局所環(単元でない元 `{0,2}` は加法で閉じている)。 -/
