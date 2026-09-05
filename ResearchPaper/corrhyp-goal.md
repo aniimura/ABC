@@ -4995,3 +4995,44 @@ theorem pieceAlgebra_R_model_baseChange_const … :
 有限段階へ降ろせば、`F`の中で`g⊗1`の像が単元だと言える——これで
 `F`が`A₃⊗R''`-代数になり、`D(f)`側と`D(g)`側が共通の底に乗る。
 集計は引き続き10/24——§4は引き続き0/2。
+
+## 2026-09-05夜さらに続き19: **設計の転換**——`t`を自明にする`GlueData`の
+組み方に気づいた(`ψ`・`ψ'`の大工事が不要になる見込み)
+
+続き16〜18で「`D(f)`側と`D(g)`側を共通の底`A₃`に乗せる」道を追ってきたが、
+その過程で`h₂`と`C(g⊗1)`を繋ぐのに`pieceRingEquiv`の値の計算(=`piecePullback
+Iso`まで遡る)が要ると分かり、грind が続く見通しになった。ここで**設計自体を
+見直した**ところ、はるかに軽い組み方があると気づいた。
+
+**気づき**: `GlueData`の`V (i,j)`を「`U_i`の片を局所化したもの」ではなく
+**「`U_i ⊓ U_j`の片そのもの」**(=`descendPieceR X (U_i ⊓ U_j) …`)に取る。
+すると:
+
+- `V (i,j)`と`V (j,i)`は`U_i ⊓ U_j = U_j ⊓ U_i`(`inf_comm`)より**同じ対象**
+  ——`t i j`は`eqToHom`(実質恒等)で済み、`t_id`・`cocycle`も自明に近い。
+  **`ψ`・`ψ'`(2つの独立な表示を突き合わせる機械)が丸ごと不要になる。**
+- `f i j : V (i,j) ⟶ U i`は「`U_i`の片の表示から`U_i ⊓ U_j`の片の表示への
+  **写像**」であり、**同型ではなく写像を降ろすだけ**で作れる。写像の降下は
+  同型の降下よりずっと軽い:
+  (a)生成元の行き先(ℝレベルで有限個の元)を
+  `exists_fg_subalgebra_tensor_quotientMvPolynomial_lift`(既存)で降ろし、
+  (b)関係式が消えること(ℝレベルで成立)を**続き16で作った**
+  `exists_fgSubalgebra_mvPolynomial_ideal_mem_descend`で有限段階へ降ろす。
+  ——つまり続き16の道具がそのまま効く。
+
+**残る本質的な作業**: `f i j`が**開埋め込み**であること。`U_i ⊓ U_j`が`U_i`の
+基本開`D(f)`である場合(`X.left`が分離的なアフィン被覆を基本開で取れば
+そうなる)、`f i j`は局所化写像になるので既存の
+`IsOpenImmersion.of_isLocalization`+`descendPieceR_localization_isOpenImmersion`
+の筋で押さえられる見込み。
+
+**続き16〜18の成果は無駄にならない**: 降下補題
+(`exists_fgSubalgebra_mvPolynomial_ideal_mem_descend`)は新設計の(b)で
+そのまま使う中心部品であり、`isUnit_rename_of_flat_relation`・
+`pieceAlgebra_R_model_baseChange_const`も「局所化としての開埋め込み」の
+議論で引き続き効く。続き15の`exists_descendPieceR_flat_mvPolynomial_
+baseChange`(1段の`MvPolynomial`表示)も、`f i j`の生成元の行き先を
+具体的に書き下す場面で使える。
+
+集計は引き続き10/24——§4は引き続き0/2。次の一手は、新設計の`f i j`
+(写像の降下)を実際に構成すること。

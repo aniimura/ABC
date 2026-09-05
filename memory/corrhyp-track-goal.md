@@ -2228,3 +2228,26 @@ MvPolynomial.map_C+AlgHom.commutes。
 「C(g⊗1)とp₀のクラスがℝレベルで一致」を出し、続き16の降下補題で有限段階へ
 降ろせば、Fの中でg⊗1の像が単元→FがA₃⊗R''-代数→両側が共通の底に乗る。
 集計は引き続き10/24——§4は0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き19
+設計の転換に気づいた(重要)。GlueDataのV (i,j)を「U_iの片を局所化したもの」
+ではなく「U_i ⊓ U_jの片そのもの」(descendPieceR X (U_i ⊓ U_j) …)に取ると:
+
+- V (i,j)とV (j,i)はU_i ⊓ U_j = U_j ⊓ U_i(inf_comm)より同じ対象。t i jは
+  eqToHom(実質恒等)で済み、t_id・cocycleも自明に近い。ψ・ψ'の機械が
+  丸ごと不要になる。
+- f i j : V (i,j) ⟶ U iは「表示から表示への写像」であり、同型ではなく
+  写像を降ろすだけ。(a)生成元の行き先をexists_fg_subalgebra_tensor_
+  quotientMvPolynomial_lift(既存)で降ろし、(b)関係式が消えることを
+  続き16のexists_fgSubalgebra_mvPolynomial_ideal_mem_descendで降ろす。
+
+残る本質的作業: f i jが開埋め込みであること。U_i ⊓ U_jがU_iの基本開の場合は
+IsOpenImmersion.of_isLocalization+descendPieceR_localization_isOpenImmersion
+の筋で押さえられる見込み。
+
+続き16〜18の成果は無駄にならない: 降下補題は新設計の(b)の中心部品、
+isUnit_rename_of_flat_relationとpieceAlgebra_R_model_baseChange_constは
+「局所化としての開埋め込み」の議論で引き続き効く。続き15のflat表示も
+f i jの生成元の行き先を書き下す場面で使える。
+
+次の一手: 新設計のf i j(写像の降下)を構成する。集計は10/24——§4は0/2。
