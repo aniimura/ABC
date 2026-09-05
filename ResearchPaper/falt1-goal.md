@@ -42,7 +42,7 @@
 | §2 | Definition 2.1 | ✅Found | (完成、`p`が単元でなくても任意のétale/finite/free拡大について成立する一般形まで) |
 | §2 | Theorem 2.2 | 前提は完成・定理本体が残る | ★2026-09-05: **この3項目が使う入力(remark 2.1(v)、honest 版・almost 版とも)は完全に証明できた**——`hochschild_ext_eq_zero`(honest)・`hochschild_ext_almost_zero`(almost、`IsAlmostEtaleCovering`のみから`p^n`が`Ext^{k+1}_{B⊗_AB}(B,M)`を零化、非空虚性の対照つき)。以前「Faltings未証明」と誤認し、その後「almost 化が壁」と報告していた両方が解消済み。**残るのは`Theorem 2.2`本体の議論**——nilpotent ideal に沿った lifting(障害類が`H²`に住み、それが`m`で零化されることから almost 一意的に持ち上がる)を、mathlib の変形理論(`Algebra.FormallySmooth`系)と上記`Ext`消滅の間で繋ぐ部分。 |
 | §2 | Theorem 2.3 | 前提は完成・定理本体が残る | 同上(`H¹`版。`hochschild_ext_almost_zero`は次数`k`を問わず一般に証明済みなので、入力側は共通) |
-| §2 | Theorem 2.4(i) | 前提は完成・定理本体が残る | 同上(`Ω_A⊗B→Ω_B`が almost isomorphism。Kähler 微分と Hochschild cohomology の低次の関係を繋ぐ部分が残る) |
+| §2 | Theorem 2.4(i) | **余核側は完成・核側は1本だけ残る** | ★2026-09-05: `Found/Falt1/AlmostDifferentials.lean`。**余核側は完全に閉じた**——Jacobi–Zariski 完全列(`KaehlerDifferential.range_mapBaseChange`)で余核はちょうど`Ω[B⁄A]`になり、`p^n`が`Ω[B⁄A]`を零化すること(`kaehler_almost_zero`)を条件(iii)の witness から直接示した(`v := w - p^n`と置くと`v∈I`かつ`x·w=0`なので`p^n·x = -(v·x) ∈ I²`——古典的な分離冪等元の1行議論の almost 版)。**核側**は`Algebra.H1Cotangent.exact_δ_mapBaseChange`により「`p^n`が`H1Cotangent A B`を零化する」(= `B`が`A`上 almost formally smooth)にちょうど帰着することまで証明済み(`thm_2_4_i_kernel_of_h1Cotangent`)——残るのはその1本で、これは`Theorem 2.2`(nilpotent ideal に沿った lifting)と同じ深さ。 |
 | §2 | Theorem 2.4(ii) | **✅証明済み**(`thm_2_4_ii`、逸脱2件を記録の上) | ★2026-09-05: 4つの部品を全て証明し、原典の仮定の形のまま繋いだ。(1) remark(iii)の trace 恒等式(`remark_iii_trace_identity`)・ノルム適用(`trace_ideal_pow_mem_traceIdeal`)——この2つは`IsAlmostEtaleCovering`仮定の形へ一般化済みで、**`B`自体が étale である必要は無い**(Faltings の設定そのもの)。(2) 群コホモロジー側の transfer を**全次数`i>0`**で(`transfer_groupCohomology_smul_eq_zero`)——以前「mathlibに一般のtransfer定理が無い」と壁として報告していたが、必要なのはrestriction-corestrictionではなく「`Σ_g g(b)=c`なら`c`が`H^i`を零化する」という平均化だけで、coinduced加群への almost split + Shapiro(`groupCohomology.coindIso`)で閉じた。(3) 後半の`M^G/tr_G(M)`(`transfer_invariants_mem_trace`)。(4) **可換環の Galois trace 公式**(`trace_eq_sum_of_chr`——CHRの同型`B⊗_AB≅Map(G,B)`から。mathlibの`trace_eq_sum_automorphisms`は体専用なので自作、`mathlib-gap.json`の`falt1-galois-trace-rings`を3/3で解消)と局所化からの descent(`trace_formula_of_localized`)。**残る逸脱2件**: `Module.Free A B`(原典は`B[1/p]`が projective——mathlibの`Algebra.trace`が`Module.Free`要求、既記録)と`IsDedekindDomain`+`Module.IsTorsionFree`(`Ideal.relNorm`使用のため)。非空虚性の対照(実際にGalois被覆になる具体例)は未作成。 |
 | §3 | Theorem 3.1 | ブロック | `Theorem 2.2`-`2.4`の結果を直接使う(§2の壁がそのまま継承) |
 | §3 | Theorem 3.2 | ブロック | 同上 |
@@ -92,21 +92,34 @@ check.mjs --brief`で検証済み、mathlibに無かった一般定理):
   同じ「almost split ⟹ almost 消滅」(今セッションで確立したパターンの
   2度目の適用)。非空虚性の対照として古典的な「`|G|`が正次数の群
   コホモロジーを零化する」が系として出ることを確認済み。
-- `thm_2_4_ii_of_trace_formula`:上記と remark(iii)を繋いだ
-  **`Theorem 2.4(ii)`本体**(Galois trace 公式`tr_{B/A}=Σ_{g∈G}g`を
-  仮定`htr`として置いた版)。
+- `trace_pi`・`trace_eq_sum_of_chr`・`trace_formula_of_localized`・
+  `thm_2_4_ii`:**可換環の Galois trace 公式**(mathlib の
+  `trace_eq_sum_automorphisms`は体専用なので自作、CHR の同型
+  `B⊗_AB≅Map(G,B)`から`LinearMap.trace_baseChange`+`trace_pi`で導く)と
+  局所化からの descent、そして**`Theorem 2.4(ii)`本体を原典の仮定の形
+  (Galois は`B[1/p]`の水準)のまま**証明したもの。
+- `kaehler_key`・`kaehler_almost_zero`・`thm_2_4_i_cokernel`・
+  `thm_2_4_i_kernel_of_h1Cotangent`(`AlmostDifferentials.lean`):
+  **`Theorem 2.4(i)`の余核側**(`p^n`が`Ω[B⁄A]`を零化する)と、
+  核側が`H1Cotangent A B`の almost 消滅1本に帰着することの証明。
 
-次回セッションへの最優先候補: (a) **`Theorem 2.4(ii)`の最後の1歩**——
-`htr`(Galois trace 公式)を「`B[1/p]`が`A[1/p]`の`G`-Galois被覆」から
-導く部分。可換環の Galois 拡大論(Chase–Harrison–Rosenberg)が mathlib
-に無いので、`B⊗_AB ≅ Map(G,B)`型の定義から trace 公式を出す小さな理論を
-自前で作るか、原典の意図を優先して`htr`を定義の一部として読む(逸脱記録)か
-の設計判断が要る。(b) **`Theorem 2.2`本体**(nilpotent ideal に沿った
-lifting——障害類が`H²`に住むこと、それが`m`零化されるので almost 一意に
-持ち上がること、を mathlib の変形理論(`Algebra.FormallySmooth`系の
-lifting API)と`hochschild_ext_almost_zero`の間で繋ぐ)。入力側
-(Hochschild cohomology の almost 消滅)は完成しているので、残るのは
-「障害類を実際に`Ext²`の元として取り出す」部分の設計。
+**§2 の残りが1点に収束した(2026-09-05)**: `Theorem 2.2`・`2.3`・
+`2.4(i)`の核側は、いずれも**「square-zero(冪零)拡大に沿った almost
+lifting」という同一の1本**に帰着する:
+
+- `Theorem 2.2` そのものがその主張(`φ:B→C/I` が almost 一意に持ち上がる)。
+- `Theorem 2.3` は almost étale covering 自体の持ち上げ(同じ変形理論)。
+- `Theorem 2.4(i)`の核側は `p^n·H1Cotangent A B = 0`
+  (= `B` が `A` 上 almost formally smooth)で、これは square-zero 拡大に
+  沿った almost lifting の言い換えである。
+
+入力(`hochschild_ext_almost_zero`——`p^n`が`Ext^{k+1}_{B⊗_AB}(B,M)`を
+零化する)は完成しているので、**残るのは「障害類を実際に`Ext²`の元として
+取り出す」変形理論の設計1点**である。mathlib は`Algebra.FormallySmooth`の
+lifting API は持つが、障害類を Hochschild cohomology の元として構成する
+枠組みは持たない(`ResearchPaper/mathlib-gap.json`の
+`falt1-almost-mathematics`参照)。次回セッションはここを設計するのが
+最優先。
 
 ## 0.1 `/goal Falt1 Chapter I Found` の進捗(2026-09-04)
 
