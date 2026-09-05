@@ -1762,6 +1762,47 @@ theorem truncPoly_isLocalRing {k : Type*} [Field k] (m : ℕ) (hm : 0 < m) :
     exact truncPoly_isUnit m (1 - f) (by simp [hf])
   · exact Or.inl (truncPoly_isUnit m f hf)
 
+open Polynomial in
+/-- `k[X]/(Xᵐ)` は `k` 上有限次元(`AdjoinRoot` の冪基底)。 -/
+theorem truncPoly_finite {k : Type*} [Field k] (m : ℕ) :
+    Module.Finite k (Polynomial k ⧸ Ideal.span {(X : Polynomial k) ^ m}) :=
+  Module.Finite.of_basis (AdjoinRoot.powerBasis (pow_ne_zero m Polynomial.X_ne_zero)).basis
+
+open Polynomial in
+/-- `k[X]/(Xᵐ)` はアルティン環(体上有限次元)。 -/
+theorem truncPoly_isArtinianRing {k : Type*} [Field k] (m : ℕ) :
+    IsArtinianRing (Polynomial k ⧸ Ideal.span {(X : Polynomial k) ^ m}) := by
+  haveI := truncPoly_finite (k := k) m
+  haveI : IsArtinian k (Polynomial k ⧸ Ideal.span {(X : Polynomial k) ^ m}) := inferInstance
+  exact isArtinian_of_tower k inferInstance
+
+open Polynomial IsLocalRing in
+/-- **`k[X]/(Xᵐ)` の極大イデアルは `(X̄)`**。 -/
+theorem truncPoly_maximalIdeal {k : Type*} [Field k] (m : ℕ) (hm : 0 < m) :
+    letI := truncPoly_isLocalRing (k := k) m hm
+    IsLocalRing.maximalIdeal (Polynomial k ⧸ Ideal.span {(X : Polynomial k) ^ m})
+      = Ideal.span {Ideal.Quotient.mk (Ideal.span {(X : Polynomial k) ^ m}) X} := by
+  letI := truncPoly_isLocalRing (k := k) m hm
+  apply le_antisymm
+  · intro a ha
+    obtain ⟨f, rfl⟩ := Ideal.Quotient.mk_surjective a
+    rw [IsLocalRing.mem_maximalIdeal, mem_nonunits_iff] at ha
+    have hc : f.coeff 0 = 0 := by
+      by_contra hc
+      exact ha (truncPoly_isUnit m f hc)
+    obtain ⟨g, hg⟩ := (X_dvd_iff (f := f)).mpr hc
+    rw [hg, map_mul, Ideal.mem_span_singleton]
+    exact Dvd.intro _ rfl
+  · rw [Ideal.span_le, Set.singleton_subset_iff, SetLike.mem_coe,
+      IsLocalRing.mem_maximalIdeal, mem_nonunits_iff]
+    intro hu
+    have hnil : IsNilpotent (Ideal.Quotient.mk (Ideal.span {(X : Polynomial k) ^ m})
+        (X : Polynomial k)) := by
+      refine ⟨m, ?_⟩
+      rw [← map_pow, Ideal.Quotient.eq_zero_iff_mem]
+      exact Ideal.subset_span rfl
+    exact hnil.not_isUnit hu
+
 instance zmod4_nontrivial : Nontrivial (ZMod 4) := ⟨0, 1, by decide⟩
 
 /-- `ZMod 4` は局所環(単元でない元 `{0,2}` は加法で閉じている)。 -/
