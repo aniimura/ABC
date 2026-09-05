@@ -176,6 +176,65 @@ const LEAN_SRC = join(LEAN_DIR, 'ABC3');
 /** 較正デモだけは axiom を持つことを許す(それが実演の内容だから) */
 const AXIOM_EXEMPT = ['Meta/Calibration.lean']; // lean/ABC3 からの相対
 
+/** ★G11(`.absent` に再実行できる検索パターンを要求する)の**繰り越し**。
+ *
+ *  規約を入れた 2026-09-05 の時点で既にあった `.absent` を、G9 と同じ形で債務として持つ。
+ *  **この表は減らす方向にしか変えない。** 新規の `.absent` はその場でパターンを書くこと。
+ *  鍵は「ファイル#本文の先頭 28 文字(空白を潰したもの)」。表を作り直すときは
+ *  `ABC3_DEBUG_G11=1 node tools/check.mjs --lean` で鍵をそのまま吐かせる。
+ *
+ *  ☆1 件を消す手順: `node tools/absent-recheck.mjs --try '<正規表現>'` で今の件数を測り、
+ *    `.absent` の本文に ``re:`<正規表現>`→<件数>`` と測定日を書き、ここから 1 行削る。
+ *    ★件数が 0 でなければ、その時点で「無い」が偽である可能性を先に確かめること。 */
+const ABSENT_DEBT = [
+  // ★2026-09-05 の時点で既にあった 48 件(鍵は 44 個——同じファイルに同じ書き出しの
+  //   記録が並ぶことがあるため。Set なので 1 行で複数を覆う)。
+  "Found/AddEquivNNReal.lean#AddMonoidHom.toRealLinearMap",
+  "Found/FrdI/Profinite.lean#Group.ResiduallyFiniteのインスタン",
+  "Found/FrdI/Profinite.lean#Subgroup.normalCore周辺とOpenSu",
+  "Found/GenEll/ClearDenomGlue.lean#mathlibにampleは無い(2026-08-28実",
+  "Found/GenEll/ClearDenominator.lean#mathlibにampleは無い(2026-08-28実",
+  "Found/GenEll/CoordsSurjective.lean#mathlibにampleは無い(2026-08-28実",
+  "Found/GenEll/FiniteFromNorthcott.lean#0_Sourceに[Silv2]は無く、mathlibに",
+  "Found/GenEll/Globalize.lean#mathlibにampleは無い(2026-08-28実",
+  "Found/GenEll/GlobalizeOverlap.lean#mathlibにampleは無い(2026-08-28実",
+  "Found/GenEll/GlobalizeStep.lean#mathlibにampleは無い(2026-08-28実",
+  "Found/GenEll/GluedGlobalRatio.lean#mathlibにampleは無い(2026-08-28実",
+  "Found/GenEll/GluedTrivValue.lean#mathlibにampleは無い(2026-08-28実",
+  "Found/GenEll/OverlapCriterion.lean#mathlibにampleは無い(2026-08-28実",
+  "Skeleton/Divisor/Hartogs.lean#Mathlib/RingTheory/にKrullDom",
+  "Skeleton/Divisor/NormalizationUniversal.lean#Mathlib/AlgebraicGeometry/No",
+  "Skeleton/FrdI/Def28ProL.lean#lean/.lake/packages/mathlib/",
+  "Skeleton/FrdI/Lemma65SixExp.lean#0_Sourceに[Lang1]は無い(papers.j",
+  "Skeleton/FrdI/Lemma65SixExp.lean#Analysis/Complex/の宣言一覧を目視、1点",
+  "Skeleton/FrdI/Thm64Deg.lean#Mathlib/Analysis/にAddMonoidH",
+  "Skeleton/GaloisRep/PointReduction.lean#mathlibに点の還元写像は無い(2026-08-20",
+  "Skeleton/GaloisRep/TateUniformization.lean#mathlibにTate曲線・Tate一意化はいずれも0",
+  "Skeleton/GaloisRep/WeilDivisor.lean#mathlibにWeil対およびその構成要素は0件(20",
+  "Skeleton/GaloisRep/WeilFunctionField.lean#mathlibに[n]の関数体への引き戻しは0件(202",
+  "Skeleton/GaloisRep/WeilPairing.lean#mathlibにWeil対は0件(2026-08-20、",
+  "Skeleton/GaloisRep/WeilPairingDef.lean#mathlibにWeil対は0件(2026-08-20、",
+  "Skeleton/GaloisRep/WeilRoot.lean#mathlibにWeil対およびその構成要素は0件(20",
+  "Skeleton/GenEll/AdditionTheorem.lean#mathlibのAnalysis/SpecialFunc",
+  "Skeleton/GenEll/GaloisImage.lean#mathlibは`EllipticCurve/Reduc",
+  "Skeleton/GenEll/GaloisLocal.lean#mathlibにTate曲線・Tatetwist・M_l",
+  "Skeleton/GenEll/Heights.lean#mathlib全体を`Arakelov`/`arithm",
+  "Skeleton/GenEll/LatticeFromInvariants.lean#mathlibの`Analysis/SpecialFun",
+  "Skeleton/GenEll/Section3.lean#0_Sourceに[Serre]は無く、mathlibに",
+  "Skeleton/GenEll/Section3.lean#mathlibにcomplexanalyticspace",
+  "Skeleton/GenEll/Section3.lean#mathlibにFaltings高さは無い(`Arake",
+  "Skeleton/GenEll/Section3.lean#mathlibにTate曲線・Tatetwist・M_l",
+  "Skeleton/GenEll/Section3.lean#mathlibに半安定schemeへの射の延長定理は無い",
+  "Skeleton/GenEll/Section4.lean#Mathlib/NumberTheory/Chebysh",
+  "Skeleton/GenEll/SigmaConvolution.lean#mathlibはDirichlet畳み込みしか持たない(",
+  "Skeleton/NumberField/Chebotarev.lean#lean/.lake/packages/mathlib/",
+  "Skeleton/PGC/Section2.lean#mathlibv4.31.0-rc2実測:lowerNu",
+  "Skeleton/PGC/Section2.lean#mathlibv4.31.0-rc2実測:Ramific",
+  "Skeleton/PGC/Section3.lean#mathlibv4.31.0-rc2実測:Hodge-T",
+  "Skeleton/PGC/Section3.lean#mathlibv4.31.0-rc2実測:該当なし",
+  "Skeleton/PGC/Section4.lean#§1Proposition1.2で既確認:mathlib",
+];
+
 /** ★`--brief`: 落ちたものと結論だけを出す(2026-09-03、第 1453)。
  *
  *  動機(実測): 既定の出力は **29,243 バイト / 270 行**ある。ブロックの末尾で毎回走らせるので、
@@ -893,6 +952,106 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
     }
   }
 
+  // ── G11: `.absent` は**再実行できる検索パターン**を伴う(2026-09-05、メタ第 2 回)
+  //
+  //    ★動機(実測): 2026-09-05 の 1 日で「mathlib に無い」が **4 件覆った**
+  //    (`ULift.field` / `continuousCohomology` / `ProfiniteGrp.…completion` /
+  //     `CompactSpace Gal(Ω/F)`)。不在の誤りは高い——**既にある数学を数百行書き直させる**。
+  //    いずれも「書き直しかけた」段階で見つかっている。
+  //
+  //    `Meta/Claim.lean` は 2026-08-14 の実失敗を受けて
+  //    `absent (searched : String)` へ変えた——「どこを・どのパターンで探して 0 件だったか」を
+  //    型で要求するために。ところが**型は文字列であることしか要求できない**ので、
+  //    実際に書かれたのは散文であった。2026-09-05 の測定で、`.absent` 49 件のうち
+  //    **再実行できるパターンを持つのは 6 件**、自由文を含む 404 件では **30 件(7%)**。
+  //    ★すなわち「93% は機械で再検査できない」。型で足りないところをここで足す。
+  //
+  //    規約: 本文に `re:`<正規表現>`` を 1 つ以上と、測定日 `YYYY-MM-DD` を書く。
+  //          測定時のヒットが 0 でないなら `re:`pat`→2` と件数まで書く
+  //          (「2 件ヒットするがいずれも別物」という記録が実在する。件数があれば
+  //           **増えたときだけ**鳴らせる)。
+  //    再検査は `node tools/absent-recheck.mjs`(索引 `.cache/mathlib-index.txt` に当てる)。
+  //    書く前の件数は `node tools/absent-recheck.mjs --try '<正規表現>'` で測れる。
+  {
+    // ★`stripLeanComments` は**文字列も潰す**ので使えない(中身がここの対象である)。
+    const stripCommentsKeepStrings = (src) => src
+      .replace(/\/-[\s\S]*?-\//g, (m) => m.replace(/[^\n]/g, ' '))
+      .replace(/--[^\n]*/g, (m) => ' '.repeat(m.length));
+    /** Lean の文字列リテラル(改行を含みうる)を読む。 */
+    const readString = (src, i) => {
+      let out = '';
+      for (let j = i + 1; j < src.length; j++) {
+        if (src[j] === '\\') { out += src[j] + src[j + 1]; j++; continue; }
+        if (src[j] === '"') return { s: out, end: j + 1 };
+        out += src[j];
+      }
+      return null;
+    };
+    const RE_PATTERN = /re:\s*`[^`]+`/;
+    const RE_DATE = /\d{4}-\d{2}-\d{2}/;
+
+    //    ★繰り越し。**この表は減らす方向にしか変えない。** 新しく `.absent` を書くときは、
+    //      その場で `re:` とパターンを書くこと(1 行で済む)。
+    //      ☆鍵は「ファイル#本文の先頭 28 文字(空白を潰したもの)」——行番号は動くし、
+    //        宣言名は `.absent` の側に無い。本文を書き換えたら表から外れて落ちるが、
+    //        それは「触ったなら直せ」という意図どおりである。
+    const G11_DEBT = new Set(ABSENT_DEBT);
+    const absentKey = (rel, arg) => `${rel}#${arg.replace(/\s+/g, '').slice(0, 28)}`;
+
+    const staleAbsent = new Set(G11_DEBT);
+    let nAbsentDebt = 0;
+    for (const [f, raw] of texts) {
+      const rel = relative(dir, f).replace(/\\/g, '/');
+      const src = stripCommentsKeepStrings(raw);
+      const re = /\.absent\s*(?=")/g;
+      let m;
+      while ((m = re.exec(src)) !== null) {
+        const r = readString(src, src.indexOf('"', m.index));
+        if (!r) break;
+        re.lastIndex = r.end;
+        const line = src.slice(0, m.index).split('\n').length;
+        const k = absentKey(rel, r.s);
+        staleAbsent.delete(k);
+        if (RE_PATTERN.test(r.s) && RE_DATE.test(r.s)) continue;
+        if (G11_DEBT.has(k)) { nAbsentDebt++; continue; }
+        ng(`${relative(ROOT, f)}:${line}`,
+          'G11 `.absent` に再実行できる検索パターンが無い: 本文に ``re:`<正規表現>`​`` と' +
+          '測定日 `YYYY-MM-DD` を書くこと' +
+          '(件数が 0 でないなら ``re:`pat`→2`` と件数まで)。' +
+          '★「無い」は探索範囲とセットでしか記録してはならない——2026-09-05 の 1 日で' +
+          '4 件覆っている。再検査は `node tools/absent-recheck.mjs`、' +
+          '書く前の件数は `--try \'<正規表現>\'` で測る');
+      }
+    }
+    if (process.env.ABC3_DEBUG_G11 && !quiet) {
+      for (const [f, raw] of texts) {
+        const rel = relative(dir, f).replace(/\\/g, '/');
+        const src = stripCommentsKeepStrings(raw);
+        const re = /\.absent\s*(?=")/g;
+        let m;
+        while ((m = re.exec(src)) !== null) {
+          const r = readString(src, src.indexOf('"', m.index));
+          if (!r) break;
+          re.lastIndex = r.end;
+          if (RE_PATTERN.test(r.s) && RE_DATE.test(r.s)) continue;
+          console.log(`DBG ${JSON.stringify(absentKey(rel, r.s))},`);
+        }
+      }
+    }
+    if (!quiet) {
+      for (const stale of staleAbsent) {
+        ng('tools/check.mjs (ABSENT_DEBT)',
+          `G11 の繰り越し表に不要な項目がある: ${stale}。` +
+          '該当が消えた(またはパターンが書かれた)ので、表から削ること');
+      }
+      if (nAbsentDebt > 0) {
+        console.log(`  -- G11 繰り越し ${nAbsentDebt} 件(.absent だが再実行できる検索パターンが無い)` +
+                    '——新規は落とす。既存はこの数を減らしていく' +
+                    '(node tools/absent-recheck.mjs が「引けない」と数えるのと同じ集合)');
+      }
+    }
+  }
+
   // ── Found/ と Interface/ は sorry を残さない(各 bucket の docstring の規則)
   //    Skeleton/ の sorry は設計どおりなのでゲートしない。
   //    2026-08-14 の監査で、この規則が機械化されていないことが発覚したので追加。
@@ -1468,6 +1627,11 @@ function selftest() {
     // ★G10: ディレクトリ名が論文でも登記済みの理論でもない
     ['D41 未登記のディレクトリに置かれている', 'Skeleton/NotARegisteredTheory',
       'd41-unregistered-dir.lean', true],
+    // ★G11: `.absent` に再実行できる検索パターンがあるか
+    ['D42 .absent に再実行できる検索パターンが無い', 'Found',
+      'd42-absent-no-pattern.lean', true],
+    ['D43 .absent に re:`…` と測定日があれば通る', 'Found',
+      'd43-absent-with-pattern.lean', false],
   ];
   const FIXTURES = join(ROOT, 'tools', 'selftest-fixtures');
   for (const [label, bucket, fixture, shouldFail] of leanCases) {

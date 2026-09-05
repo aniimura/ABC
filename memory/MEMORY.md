@@ -65,3 +65,7 @@
 - [ユーザーは会話内の報告を日本語で書くことを明示的に指示した](user-prefers-japanese-reports.md) — 2026-09-04。ターン末尾の要約・状況報告は日本語で。
 - [進め方は「外部依存グラフが真実、agentには持ち場だけ」](orchestration-graph-first.md) — 2026-09-05に切替。設計はResearchPaper/orchestration.md。次にどこを叩くかはtools/frontier.mjs、持ち場の切り出しはtools/brief.mjs、役割は.claude/agents/。
 - [並列agent数の上限は5程度](orchestration-parallel-cap-5.md) — 2026-09-05ユーザー指示。前線が狭い(着手可能13件)・worktree共有・統合コストの3点が理由。frontier.mjsの既定--limitも5。
+- [check.mjsは必ずGit Bashから——pdftotextが2実装ありNGが13対176で食い違う](pdftotext-two-implementations-hazard.md) — Git Bash=Xpdf 4.00 / PowerShell=poppler 25.07.0。check.mjsを編集した次の実行でPDFキャッシュが必ず捨てられるので特に注意。2026-09-05実測。
+- [mathlib在庫: 局所Tate双対性はカップ積が無く述べることすらできない](mathlib-cohomology-inventory-2026-09-05.md) — continuousCohomologyは在るがH⁰以外に定理なし。BrauerGroupには乗算すら無い。2026-09-05実測。
+- [mathlib在庫: Ẑは群として在る。CompactSpace Galも無名instanceで在る](mathlib-profinite-inventory-2026-09-05.md) — ★索引は無名instanceを載せないので誤判定した。Γ_K↠ẐはẐを作らずGal(K^ur/K)≅Ẑ一本に落ちる。
+- [mathlib在庫: Kummerは1本の巡回拡大のみ、Hilbert 90は有限次必須、X^n-C aの既約判定は奇数n限定](mathlib-kummer-hilbert90-inventory-2026-09-05.md) — pGC経路Cの落とし穴2つ。IsCyclic.index_powMonoidHom_rangeがgcd(n,q−1)そのもの。

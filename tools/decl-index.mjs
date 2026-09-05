@@ -28,6 +28,12 @@
  *   grep "1728" .cache/decl-index.txt          # ★結論のリテラルで引く(案 I)
  *   grep -i "weierstrass" .cache/mathlib-index.txt   # ★mathlib の在庫を引く(案 D)
  *   grep "Proposition 5.5" .cache/src-index.txt
+ *   grep "CompactSpace" .cache/mathlib-index.txt     # ★無名 instance も入る(2026-09-05)
+ *
+ * ★★2026-09-05 の拡張(backlog M5)。動機は「mathlib に無い」の誤判定 4 件のうち 1 件が
+ *   **索引の穴**だったこと: `instance : CompactSpace Gal(K/k)` は名前を持たないので
+ *   索引に 1 行も入らず、名前で grep しても出なかった。mathlib の `instance` 行の
+ *   **58.8%(15,798 本)がこれ**である。→ 無名 instance を**型を鍵として**索引に入れる。
  */
 
 import { readFileSync, readdirSync, statSync, mkdirSync, writeFileSync, existsSync } from 'node:fs';
@@ -49,8 +55,30 @@ function walk(dir, acc = []) {
   return acc;
 }
 
-const DECL_RE =
-  /^\s*(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+|noncomputable\s+)*(theorem|lemma|def|abbrev|instance|structure|inductive|class)\s+([A-Za-z_][\w'!?₀-₉]*(?:\.[\w'!?₀-₉]+)*)/;
+const MODS = '(?:private\\s+|protected\\s+|noncomputable\\s+|scoped\\s+|local\\s+)*';
+const NAME = "[A-Za-z_][\\w'!?₀-₉]*(?:\\.[\\w'!?₀-₉]+)*";
+const DECL_RE = new RegExp(
+  `^\\s*(?:@\\[[^\\]]*\\]\\s*)?${MODS}(theorem|lemma|def|abbrev|instance|structure|inductive|class)\\s+(${NAME})`);
+
+/** ★**無名 instance**(2026-09-05、メタ第 2 回 / backlog M5)。
+ *
+ * `DECL_RE` は種別の後ろに**名前を要求する**ので、`instance : CompactSpace G := …` のように
+ * 名前を持たない instance は索引に 1 行も入っていなかった。
+ * 実測: mathlib の `instance` 行 26,846 本のうち **15,798 本(58.8%)が無名**である。
+ *
+ * ★これが「mathlib に X は無い」の誤判定を生んでいた(backlog M4 の 4 件目):
+ * `CompactSpace Gal(Ω/F)` は `FieldTheory/Galois/Profinite.lean:329` に
+ * `instance [IsGalois k K] : CompactSpace Gal(K/k)` として**在る**のに、
+ * 名前が無いので索引を grep しても出ず、ソース直読で初めて見つかった。
+ *
+ * 無名なので**鍵は型**である——名前の列には `⟨無名⟩` を置き、
+ * 4 列目の statement(型)で引けるようにする。
+ * `instance (priority := low) Foo.bar : …` のように名前の前に括弧が来る形も
+ * ここで拾う(`DECL_RE` は括弧で止まるため)。 */
+const ANON_INST_RE = new RegExp(`^\\s*(?:@\\[[^\\]]*\\]\\s*)?${MODS}instance\\b(.*)$`);
+const INST_NAME_RE = new RegExp(`^\\s*(?:\\(\\s*priority\\s*:=[^)]*\\)\\s*)?(${NAME})(?=\\s|:|$)`);
+const ANON = '⟨無名⟩';
+
 const NS_RE = /^\s*namespace\s+([A-Za-z_][\w'.₀-₉]*)/;
 const END_RE = /^\s*end\s+([A-Za-z_][\w'.₀-₉]*)\s*$/;
 
@@ -65,7 +93,7 @@ function statementOf(lines, start) {
   const buf = [];
   for (let j = start; j < Math.min(start + 24, lines.length); j++) {
     let s = lines[j];
-    if (j > start && (DECL_RE.test(s) || NS_RE.test(s) || END_RE.test(s))) break;
+    if (j > start && (DECL_RE.test(s) || ANON_INST_RE.test(s) || NS_RE.test(s) || END_RE.test(s))) break;
     // 行コメントを落とす(`--` の前だけ残す)
     s = s.replace(/--.*$/, ' ');
     const cut = s.search(/:=|\bwhere\b/);
@@ -91,10 +119,18 @@ function scan(srcRoot, { collectSrc }) {
       if (ns) { nsStack.push(ns[1]); continue; }
       const en = END_RE.exec(line);
       if (en && nsStack.length && nsStack[nsStack.length - 1] === en[1]) { nsStack.pop(); continue; }
-      const m = DECL_RE.exec(line);
-      if (!m) continue;
+      let m = DECL_RE.exec(line);
+      if (!m) {
+        // ★無名 instance(または `instance (priority := …) 名前` のように
+        //   `DECL_RE` が括弧で止まる形)。名前が取れなければ `⟨無名⟩` を置く。
+        const a = ANON_INST_RE.exec(line);
+        if (!a) continue;
+        const nm = INST_NAME_RE.exec(a[1]);
+        m = [line, 'instance', nm ? nm[1] : ANON];
+      }
       const full = [...nsStack, m[2]].join('.');
       // ★4 列目が statement(案 I)。名前で引いて外した失敗形を潰すための列である。
+      //   ★無名 instance では**ここだけが手がかり**なので、型が入っていることが要である。
       decls.push(`${m[1].padEnd(9)}\t${full}\t${rel}:${i + 1}\t${statementOf(lines, i)}`);
       if (!collectSrc) continue;
       if (m[2].endsWith('.src')) pendingSrcDecl = { name: full, rel, line: i + 1, at: i };
