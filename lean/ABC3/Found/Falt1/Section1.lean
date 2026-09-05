@@ -2014,6 +2014,53 @@ noncomputable def thm12StepData_of_tower
   hN := hN
   hbl := hbl
 
+/-- **`δ` を長さから定める版**——`δₙ := length(M)/e`、
+`δ_{n+1} := length(N)/e` と置けば `hM`・`hN` は自動で満たされ、残るのは
+
+    length(R/(b)) = length(M) − length(N)
+
+——すなわち**節点 B の `b` が差積の差をちょうど測る**という条件だけ。
+
+★`Lemma 1.1`(既に Found)が `length(Ω_{W/V}) = length(W/p^δ W)` を
+与えるので、この `δ` は原文の差積の指数と一致する。段をまたぐ整合性
+(段 `n` の `δ_{n+1}` と段 `n+1` の `δ_{n+1}` が一致すること)は
+`length_baseChange_kaehler` が与える。 -/
+noncomputable def thm12StepData_of_tower_len
+    {Vn Vn1 Wn Wn1 : Type u} [CommRing Vn] [CommRing Vn1] [CommRing Wn] [CommRing Wn1]
+    [Algebra Vn Vn1] [Algebra Vn Wn] [Algebra Vn Wn1] [Algebra Vn1 Wn1] [Algebra Wn Wn1]
+    [IsScalarTower Vn Vn1 Wn1] [IsScalarTower Vn Wn Wn1]
+    [IsLocalRing Wn1] [IsNoetherianRing Wn1]
+    [Module.Finite Wn1 (TensorProduct Wn Wn1 (Ω[Wn⁄Vn]))]
+    [IsArtinian Wn1 (TensorProduct Wn Wn1 (Ω[Wn⁄Vn]))]
+    [IsNoetherian Wn1 (TensorProduct Wn Wn1 (Ω[Wn⁄Vn]))]
+    [IsArtinian Wn1 (Ω[Wn1⁄Vn])] [IsNoetherian Wn1 (Ω[Wn1⁄Vn])]
+    [IsArtinian Wn1 (Ω[Wn1⁄Vn1])] [IsNoetherian Wn1 (Ω[Wn1⁄Vn1])]
+    (d e : ℕ) (he : 0 < e)
+    (p : Wn1) (hp : Ideal.span ({p} : Set Wn1) = (IsLocalRing.maximalIdeal Wn1) ^ e)
+    (gN₀ : Fin (d + 1) → Ω[Wn1⁄Vn])
+    (hspanN₀ : Submodule.span Wn1 (Set.range gN₀) = ⊤)
+    (φ : ↥(LinearMap.ker (KaehlerDifferential.map Vn Vn1 Wn1 Wn1)) →ₗ[Wn1]
+      (Fin (d + 1) → Wn1 ⧸ Ideal.span ({p} : Set Wn1)))
+    (hφ : Function.Surjective φ)
+    (gc : Fin (d + 1) → (Ω[Wn1⁄Vn1] ⧸ LinearMap.range
+      ((KaehlerDifferential.map Vn Vn1 Wn1 Wn1) ∘ₗ
+        (KaehlerDifferential.mapBaseChange Vn Wn Wn1))))
+    (hspanc : Submodule.span Wn1 (Set.range gc) = ⊤)
+    (b : Wn1)
+    (hbA : b ∈ Algebra.adjoin Vn1 (Set.range (algebraMap Wn Wn1)))
+    (hb : ∀ y : Wn1, b * y ∈ Algebra.adjoin Vn1 (Set.range (algebraMap Wn Wn1)))
+    (hbfin : Module.length Wn1 (Wn1 ⧸ Ideal.span ({b} : Set Wn1)) ≠ ⊤)
+    (hbl : lenR Wn1 (Wn1 ⧸ Ideal.span ({b} : Set Wn1))
+      = lenR Wn1 (TensorProduct Wn Wn1 (Ω[Wn⁄Vn])) - lenR Wn1 (Ω[Wn1⁄Vn1])) :
+    Thm12StepData.{u} d
+      (lenR Wn1 (TensorProduct Wn Wn1 (Ω[Wn⁄Vn])) / (e : ℝ))
+      (lenR Wn1 (Ω[Wn1⁄Vn1]) / (e : ℝ)) := by
+  have hene : ((e : ℝ)) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
+  exact thm12StepData_of_tower d e he p hp gN₀ hspanN₀ φ hφ gc hspanc b hbA hb hbfin _ _
+    (by rw [div_mul_cancel₀ _ hene])
+    (by rw [div_mul_cancel₀ _ hene])
+    (by rw [sub_mul, div_mul_cancel₀ _ hene, div_mul_cancel₀ _ hene]; exact hbl)
+
 /-- **非空虚性(非退化)**——`Thm12StepData 0 1 0` の実例。
 `R = ZMod 4`、`k = R/(2)`、`M = N₀ = k`、`N = 0`、`b = 2`。
 ★節点 A の 2 つの入力はどちらも非退化に満たされる。 -/
