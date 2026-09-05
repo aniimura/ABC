@@ -4361,6 +4361,111 @@ open scoped TensorProduct in
 open scoped Classical in
 set_option maxHeartbeats 1000000 in
 set_option synthInstance.maxHeartbeats 800000 in
+/-- **`Γ(C, piece(U))`の`R'`レベルモデルに名前を付ける**——
+`letI`の長い前口上を定義の中に閉じ込めるための`abbrev`。これ以降、
+`R'`レベルの主張は前口上なしで短く書ける。
+
+`GlueData`は添字`i`ごと・対`(i,j)`ごとにこの型を使うので、
+`letI`で外から与える方式(`i`に依存する`letI`は書けない)では
+そもそも文が書けなかった。名付けはここでの**必須**の手当てである。 -/
+noncomputable abbrev descendPieceRModel (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U)
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α]
+    (R' : FgSubalgebra ℚ ℝ) (h : pieceAlgebra_relation_descend_R X U hU C α ≤ R') : Type :=
+  letI := pieceAlgebra X U hU
+  letI algU : Algebra (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+      (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.comp
+      (pieceRingEquiv X U hU).symm.toRingHom).toAlgebra
+  haveI : Algebra.Etale (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    piece_algebraEtale_tensor X U hU C α
+  haveI : Algebra.FinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ)
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) := inferInstance
+  MvPolynomial (Fin (Algebra.Presentation.ofFinitePresentationVars (Γ(X.left, U) ⊗[ℚ] ℝ)
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)))) (Γ(X.left, U) ⊗[ℚ] R'.1) ⧸
+    Ideal.span (Set.range (fun k => MvPolynomial.map
+      (Algebra.TensorProduct.map (AlgHom.id ℚ Γ(X.left, U))
+        (Subalgebra.inclusion h)).toRingHom
+      (pieceAlgebra_relation_descend_q₀ X U hU C α k)))
+
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 800000 in
+open scoped TensorProduct in
+/-- `descendPieceRModel`の`CommRing`構造。`abbrev`(=`@[reducible]`)でも
+本体の`letI`が`instances`透明度で`whnf`を止めるため自動では見つからない
+——明示的な`instance`として与える(`unfold`してから`infer_instance`)。 -/
+noncomputable instance descendPieceRModel.instCommRing (X : Over BaseK) (U : X.left.Opens)
+    (hU : IsAffineOpen U) (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α]
+    (R' : FgSubalgebra ℚ ℝ) (h : pieceAlgebra_relation_descend_R X U hU C α ≤ R') :
+    CommRing (descendPieceRModel X U hU C α R' h) := by
+  unfold descendPieceRModel
+  letI := pieceAlgebra X U hU
+  letI algU : Algebra (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+      (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.comp
+      (pieceRingEquiv X U hU).symm.toRingHom).toAlgebra
+  letI hCR : CommRing (Γ(X.left, U) ⊗[ℚ] R'.1) := inferInstance
+  infer_instance
+
+open scoped TensorProduct in
+open scoped Classical in
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 800000 in
+/-- `exists_descendPieceR_ringHom_ge`を`descendPieceRModel`で言い直したもの
+——**`letI`の前口上が消える**。中身は同じ(`abbrev`なので`exact`一発)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_descendPieceRModel_ringHom (X : Over BaseK) (U V : X.left.Opens)
+    (hU : IsAffineOpen U) (hV : IsAffineOpen V) (hVU : V ≤ U)
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α] :
+    ∃ (R₀ : FgSubalgebra ℚ ℝ)
+      (h₀U : pieceAlgebra_relation_descend_R X U hU C α ≤ R₀)
+      (h₀V : pieceAlgebra_relation_descend_R X V hV C α ≤ R₀),
+      ∀ (R' : FgSubalgebra ℚ ℝ) (h : R₀ ≤ R'),
+        Nonempty (descendPieceRModel X U hU C α R' (h₀U.trans h)
+          →+* descendPieceRModel X V hV C α R' (h₀V.trans h)) :=
+  exists_descendPieceR_ringHom_ge X U V hU hV hVU C α
+
+open scoped TensorProduct in
+open scoped Classical in
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 800000 in
+/-- ★★★**`GlueData`の`f`成分がすべて同時に、1つの`R'`の上で取れる**★★★
+
+有限添字集合`J`のアフィン開の族`U i`と、その部分開`V i j ≤ U i`
+(新設計では`V i j := U i ⊓ U j`)に対して、**共通の1つの`R'`**があって
+`f i j : (V i j の R'モデル) ⟵ (U i の R'モデル)`が全対で同時に存在する。
+
+証明は`exists_descendPieceRModel_ringHom`(閾値版)を`J × J`で`choose`し、
+`exists_fgSubalgebra_upperBound`(**既存**)で有限個の閾値を1つにまとめる
+だけ。`hUR i`は対`(i,i)`の閾値経由で取る。異なる`≤`の証明から作った
+`Subalgebra.inclusion`は**証明無関係性により定義的に等しい**ので、
+`exact`がそのまま通る。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_common_descendPieceRModel_ringHom (X : Over BaseK)
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α]
+    {J : Type} [Fintype J]
+    (U : J → X.left.Opens) (hU : ∀ i, IsAffineOpen (U i))
+    (V : J → J → X.left.Opens) (hV : ∀ i j, IsAffineOpen (V i j))
+    (hVU : ∀ i j, V i j ≤ U i) :
+    ∃ (R' : FgSubalgebra ℚ ℝ)
+      (hUR : ∀ i, pieceAlgebra_relation_descend_R X (U i) (hU i) C α ≤ R')
+      (hVR : ∀ i j, pieceAlgebra_relation_descend_R X (V i j) (hV i j) C α ≤ R'),
+      ∀ i j, Nonempty (descendPieceRModel X (U i) (hU i) C α R' (hUR i)
+        →+* descendPieceRModel X (V i j) (hV i j) C α R' (hVR i j)) := by
+  classical
+  choose R₀ h₀U h₀V hmap using fun p : J × J =>
+    exists_descendPieceRModel_ringHom X (U p.1) (V p.1 p.2) (hU p.1) (hV p.1 p.2)
+      (hVU p.1 p.2) C α
+  obtain ⟨R', hR'⟩ := exists_fgSubalgebra_upperBound (Finset.univ : Finset (J × J)) R₀
+  refine ⟨R', fun i => (h₀U (i, i)).trans (hR' (i, i) (Finset.mem_univ _)),
+    fun i j => (h₀V (i, j)).trans (hR' (i, j) (Finset.mem_univ _)), fun i j => ?_⟩
+  exact hmap (i, j) R' (hR' (i, j) (Finset.mem_univ _))
+
+open scoped TensorProduct in
+open scoped Classical in
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 800000 in
 /-- ★★★**`f i j : V (i,j) ⟶ U i` そのもの**★★★
 
 `exists_descendPieceR_ringHom`の環準同型に`Spec`をかけただけ。

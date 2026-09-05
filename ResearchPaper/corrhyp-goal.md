@@ -5938,3 +5938,48 @@ Found側sorry 0件(`ExtLimit` 388秒)。
 にわたって閾値を`exists_fgSubalgebra_upperBound`でまとめ、
 `∃ R', ∀ i j, Nonempty (f i j)`の形にする。
 集計は引き続き10/24——§4は引き続き0/2。
+
+### 2026-09-05夜さらに続き45 — ★★★`GlueData`の`f`成分が**すべて同時に**1つの`R'`の上で取れた
+
+3段で仕上げた(`ExtLimit.lean`)。
+
+**(1) `R'`レベルモデルに名前を付けた**——`descendPieceRModel X U hU C α R' h`
+(`noncomputable abbrev`)。これまで`R'`レベルの主張には毎回20行の`letI`
+前口上が必要だったが、それを定義の中に閉じ込めた。**`GlueData`では
+添字`i`ごとにこの型を使うので、`letI`(外から与える方式、`i`に依存する
+`letI`は書けない)ではそもそも文が書けなかった**——名付けは必須の手当て。
+`CommRing`は`abbrev`でも自動では見つからない(本体の`letI`が`instances`
+透明度で`whnf`を止める)ので、`descendPieceRModel.instCommRing`として
+明示的に与えた(`unfold`してから`infer_instance`)。
+
+**(2) 続き44を言い直した**——`exists_descendPieceRModel_ringHom`。
+前口上が消えて**11行**になった。中身は同じ(`exact`一発、4.9秒)。
+
+**(3) 有限添字集合にわたって合流させた**——
+`exists_common_descendPieceRModel_ringHom`(2.6秒):
+
+```
+(U : J → X.left.Opens) (hU : ∀ i, IsAffineOpen (U i))
+(V : J → J → X.left.Opens) (hV : ∀ i j, IsAffineOpen (V i j))
+(hVU : ∀ i j, V i j ≤ U i) :
+∃ R' (hUR : ∀ i, R_{U i} ≤ R') (hVR : ∀ i j, R_{V i j} ≤ R'),
+  ∀ i j, Nonempty (descendPieceRModel (U i) … R' (hUR i)
+    →+* descendPieceRModel (V i j) … R' (hVR i j))
+```
+
+**共通の1つの`R'`**の上で、**全対`(i,j)`の`f i j`が同時に**存在する。
+証明は閾値版を`J × J`で`choose`し、`exists_fgSubalgebra_upperBound`
+(**既存**)で有限個の閾値を1つにまとめるだけ。異なる`≤`の証明から
+作った`Subalgebra.inclusion`は**証明無関係性により定義的に等しい**ので
+`exact`がそのまま通る。
+
+これで`Scheme.GlueData`の`J`・`U`・`V`・`f`の4成分が、`R'`レベルで
+**同時に**用意できたことになる(`f`は環準同型の形。`Spec`は続き42と
+同じ手順)。
+
+検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
+Found側sorry 0件。
+
+**残り**: `f i j`の開埋め込み性(`U_i ⊓ U_j`を`U_i`の基本開集合に取る
+細分がまだ未形式化)・`t`/`t_id`/`cocycle`・β脚・Theorem 4.2。
+集計は引き続き10/24——§4は引き続き0/2。

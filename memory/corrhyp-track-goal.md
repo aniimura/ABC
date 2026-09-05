@@ -2679,3 +2679,24 @@ descend2_relation_promote。
 次の一手: 添字集合(exists_finite_standardEtaleCover の Finset)にわたって
 閾値をまとめ、∃ R', ∀ i j, Nonempty (f i j) の形にする。
 集計は10/24——§4は0/2。
+
+## 2026-09-05夜さらに続き45 — GlueData の f 成分が全対同時に1つの R' 上で取れた
+
+ExtLimit.lean に3段:
+(1) descendPieceRModel(noncomputable abbrev)= R' レベルモデルの命名。
+    20行の letI 前口上を定義内に閉じ込めた。GlueData は添字 i ごとにこの型を
+    使うので letI 方式では文が書けず、名付けは必須だった。CommRing は
+    abbrev でも自動で見つからない(本体の letI が instances 透明度で whnf を
+    止める)ので descendPieceRModel.instCommRing を明示的に与えた
+    (unfold してから infer_instance)。
+(2) exists_descendPieceRModel_ringHom = 続き44 の言い直し(11行、exact 一発)。
+(3) exists_common_descendPieceRModel_ringHom(2.6秒):
+    ∃ R' (hUR : ∀ i, …) (hVR : ∀ i j, …),
+      ∀ i j, Nonempty (U i の R'モデル →+* V i j の R'モデル)
+    閾値版を J × J で choose し exists_fgSubalgebra_upperBound で合流。
+    異なる ≤ の証明から作った Subalgebra.inclusion は証明無関係性で
+    定義的に等しいので exact がそのまま通る。
+
+これで Scheme.GlueData の J・U・V・f の4成分が R' レベルで同時に揃った。
+残り: f i j の開埋め込み性(U_i ⊓ U_j を基本開集合に取る細分が未形式化)・
+t/t_id/cocycle・β脚・Theorem 4.2。集計は10/24——§4は0/2。
