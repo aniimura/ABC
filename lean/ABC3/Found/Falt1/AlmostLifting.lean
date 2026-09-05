@@ -1206,8 +1206,14 @@ theorem thm_2_2_uniqueness_tower {A B C : Type u} [CommRing A] [CommRing B] [Com
 
 /-- **`Theorem 2.2`(Faltings, *p-Adic Hodge Theory* Ch.I §2)——存在と一意性**。
 
-> *Theorem 2.2. ... any `A`-algebra map `φ : B → C/I` lifts uniquely to an
-> `A`-algebra map `B → C`.*(物理 p.6-7 = 印字 p.259-260)
+> *2.2. Theorem. Suppose `B = A + mB` is an almost étale covering of `A`,
+> `C` an `A`-algebra, `I ⊂ C` a nilpotent ideal, and `φ : B → C/I` an
+> `A`-algebra morphism. Then `φ` lifts uniquely to `B → C`.*
+> (物理 p.6-7 = 印字 p.259-260)
+
+★仮定 `hdecomp` は原文の **`B = A + mB`** そのもの(定理の主語に書かれて
+いる)。`htors`(`C` の `ϖ k` 捩れ無し)も原文が証明中で明示的に使う
+(*"As `C` has no such torsion, the different `φ_ε` glue together"*)。
 
 存在は `thm_2_2_tower`、一意性は `thm_2_2_uniqueness_tower`。 -/
 theorem thm_2_2 {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]

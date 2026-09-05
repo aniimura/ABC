@@ -40,7 +40,7 @@
 | §1 | Lemma 1.1 | ✅Found | (完成) |
 | §1 | Theorem 1.2 | ブロック | `Wₙ⊗_{Vₙ}Vₙ₊₁`の非正規性(`differentIdeal Wₙ Wₙ₊₁`)の評価が必要。`Vₙ`塔側の技術(Eisenstein多項式・differentIdeal計算)は完成済みだが`Wₙ`側(任意のalmost étale `W`)には転用できない(`differentIdeal_tower_diamond`のdocstring参照)。退化した`W`(非分岐)を使うと`δₙ≡0`は自明に出るが、原文の「任意の`W`」という全称量化を証明したことにはならない。 |
 | §2 | Definition 2.1 | ✅Found | (完成、`p`が単元でなくても任意のétale/finite/free拡大について成立する一般形まで) |
-| §2 | Theorem 2.2 | **✅Found**(`thm_2_2`、`∃!`の形、非空虚性2件つき) | ★2026-09-05(後半): **完成**。`thm_2_2`は存在(`thm_2_2_tower`)と一意性(`thm_2_2_uniqueness_tower`)を`∃!`で束ねた形。最後に閉じた2段は (a)**族の貼り合わせ**——`exists_glued_lift`(交差水準のwell-defined性は整合性`hcompat`と捩れ無しから)+`exists_common_level`(塔は整除で全順序なので2元は常に共通水準に書き直せる)で`φ₀ : mB → C`(`exists_lift_on_mB`)、(b)**`B = A·1 + mB`による拡張**——原文の`x = p^ε + y`, `x² = p^ε x ⟹ p^ε y = 0`をそのまま形式化した`glued_lift_one`で`φ₀`が`A·1`上`algebraMap`に一致することを示し、`glued_lift_wd`→`exists_glued_extension`→`exists_algHom_of_glued`で`B`全体へ。**逸脱4件**(下記「逸脱の記録」参照): `PDivTower`(塔の明示化)・`hdecomp`(`B = A·1 + mB`を仮定として明示)・`htors`/`hBtors`(`C`・`B`の`ϖk`捩れ無し)・`Module.Finite/Free A B`。以下は途中段の記録。**一意性**:`thm_2_2_uniqueness_of_isAlmostEtale`(`A`-代数写像版)と`uniqueness_level_lift`(水準`s`で乗法的な版——族の貼り合わせに要る)。**存在**:第1段`almost_lift_of_isAlmostEtale`(任意水準)→ 障害が`I`に値を取りコサイクル(`obsBil`・`obstruction_mem_ker`・`obstruction_isCocycle`)→ コバウンダリ表示(`hochschild_H2_almost_coboundary`、明示形)→ **`ε`を倍にする段**(`doubling_multiplicative`)→ 第2段`exists_multiplicative_lift`(水準`(ct)²`で厳密に乗法的)→ 塔の上での族`exists_multiplicative_lift_tower`(任意に深い水準)→ **`sB`上で「almost」が消える**(`exists_honest_lift_on_ideal`——`(s·b)(s·b')=s·(s·bb')`の余分な`s`が水準`s`の乗法性と打ち消し合う)→ 族の整合性(`lift_compat`・`honest_lift_agree`)→ **到達点`thm_2_2_honest_lift_on_ideal`**。**残るのは2段だけ**: (a)`mB = ∪_k (ϖk)B`上へ族を集合論的に取りまとめる、(b)`B = A + mB`を使う最後の拡張(原文の`x²=p^ε x ⟹ p^ε y=0`)。 |
+| §2 | Theorem 2.2 | **✅Found**(`thm_2_2`、`∃!`の形、非空虚性2件つき) | ★2026-09-05(後半): **完成**。`thm_2_2`は存在(`thm_2_2_tower`)と一意性(`thm_2_2_uniqueness_tower`)を`∃!`で束ねた形。最後に閉じた2段は (a)**族の貼り合わせ**——`exists_glued_lift`(交差水準のwell-defined性は整合性`hcompat`と捩れ無しから)+`exists_common_level`(塔は整除で全順序なので2元は常に共通水準に書き直せる)で`φ₀ : mB → C`(`exists_lift_on_mB`)、(b)**`B = A·1 + mB`による拡張**——原文の`x = p^ε + y`, `x² = p^ε x ⟹ p^ε y = 0`をそのまま形式化した`glued_lift_one`で`φ₀`が`A·1`上`algebraMap`に一致することを示し、`glued_lift_wd`→`exists_glued_extension`→`exists_algHom_of_glued`で`B`全体へ。**逸脱は3件**(§0.1参照): `PDivTower`(`p^ε`の意味づけ)・`hBtors`(`B`の`ϖk`捩れ無し)・`Module.Finite/Free A B`。★`hdecomp : B = A·1 + mB`と`htors`(`C`の捩れ無し)は**逸脱ではない**——原文が`Theorem 2.2`の仮定・証明中で明示している(§0.1の訂正記録参照)。以下は途中段の記録。**一意性**:`thm_2_2_uniqueness_of_isAlmostEtale`(`A`-代数写像版)と`uniqueness_level_lift`(水準`s`で乗法的な版——族の貼り合わせに要る)。**存在**:第1段`almost_lift_of_isAlmostEtale`(任意水準)→ 障害が`I`に値を取りコサイクル(`obsBil`・`obstruction_mem_ker`・`obstruction_isCocycle`)→ コバウンダリ表示(`hochschild_H2_almost_coboundary`、明示形)→ **`ε`を倍にする段**(`doubling_multiplicative`)→ 第2段`exists_multiplicative_lift`(水準`(ct)²`で厳密に乗法的)→ 塔の上での族`exists_multiplicative_lift_tower`(任意に深い水準)→ **`sB`上で「almost」が消える**(`exists_honest_lift_on_ideal`——`(s·b)(s·b')=s·(s·bb')`の余分な`s`が水準`s`の乗法性と打ち消し合う)→ 族の整合性(`lift_compat`・`honest_lift_agree`)→ **到達点`thm_2_2_honest_lift_on_ideal`**。**残るのは2段だけ**: (a)`mB = ∪_k (ϖk)B`上へ族を集合論的に取りまとめる、(b)`B = A + mB`を使う最後の拡張(原文の`x²=p^ε x ⟹ p^ε y=0`)。 |
 | §2 | Theorem 2.3 | 同上(同じ変形理論) | `Theorem 2.2`と同じ層を待つ。入力側(`hochschild_ext_almost_zero`は次数を問わず一般)は共通。 |
 | §2 | Theorem 2.4(i) | **余核側は完成・核側は1本だけ残る** | ★2026-09-05: `Found/Falt1/AlmostDifferentials.lean`。**余核側は完全に閉じた**——Jacobi–Zariski 完全列(`KaehlerDifferential.range_mapBaseChange`)で余核はちょうど`Ω[B⁄A]`になり、`p^n`が`Ω[B⁄A]`を零化すること(`kaehler_almost_zero`)を条件(iii)の witness から直接示した(`v := w - p^n`と置くと`v∈I`かつ`x·w=0`なので`p^n·x = -(v·x) ∈ I²`——古典的な分離冪等元の1行議論の almost 版)。**核側**は`Algebra.H1Cotangent.exact_δ_mapBaseChange`により「`p^n`が`H1Cotangent A B`を零化する」(= `B`が`A`上 almost formally smooth)にちょうど帰着することまで証明済み(`thm_2_4_i_kernel_of_h1Cotangent`)——残るのはその1本で、これは`Theorem 2.2`(nilpotent ideal に沿った lifting)と同じ深さ。 |
 | §2 | Theorem 2.4(ii) | **✅証明済み**(`thm_2_4_ii`、逸脱2件を記録の上) | ★2026-09-05: 4つの部品を全て証明し、原典の仮定の形のまま繋いだ。(1) remark(iii)の trace 恒等式(`remark_iii_trace_identity`)・ノルム適用(`trace_ideal_pow_mem_traceIdeal`)——この2つは`IsAlmostEtaleCovering`仮定の形へ一般化済みで、**`B`自体が étale である必要は無い**(Faltings の設定そのもの)。(2) 群コホモロジー側の transfer を**全次数`i>0`**で(`transfer_groupCohomology_smul_eq_zero`)——以前「mathlibに一般のtransfer定理が無い」と壁として報告していたが、必要なのはrestriction-corestrictionではなく「`Σ_g g(b)=c`なら`c`が`H^i`を零化する」という平均化だけで、coinduced加群への almost split + Shapiro(`groupCohomology.coindIso`)で閉じた。(3) 後半の`M^G/tr_G(M)`(`transfer_invariants_mem_trace`)。(4) **可換環の Galois trace 公式**(`trace_eq_sum_of_chr`——CHRの同型`B⊗_AB≅Map(G,B)`から。mathlibの`trace_eq_sum_automorphisms`は体専用なので自作、`mathlib-gap.json`の`falt1-galois-trace-rings`を3/3で解消)と局所化からの descent(`trace_formula_of_localized`)。**残る逸脱2件**: `Module.Free A B`(原典は`B[1/p]`が projective——mathlibの`Algebra.trace`が`Module.Free`要求、既記録)と`IsDedekindDomain`+`Module.IsTorsionFree`(`Ideal.relNorm`使用のため)。非空虚性の対照(実際にGalois被覆になる具体例)は未作成。 |
@@ -63,18 +63,25 @@ AlmostLifting.lean` の `thm_2_2`)で、原文に無い仮定を4つ足した。
    これが basic setup の冪等性そのもの。
    ★この明示化は**必要**だった:`n : ℕ` 添字だけでは almost な結論
    (`Theorem 2.4`)は出せても honest な結論(`2.2` の存在)は出せない。
-2. **`hdecomp : B = A·1 + mB`**。原文は `B` の元を `p^ε + y` の形に
-   書く操作を断りなく使う(`x = p^ε + y`, `y ∈ I`)。これは `mB` の
-   剰余で `B/mB = A/mA` になっていること、すなわち被覆が `m` を法として
-   自明であることに相当する。Faltings の設定(`B` は `A` に `p` 冪根を
-   添加した塔の中の環)では成り立つが、一般の almost étale covering では
-   成り立たないので仮定として明示した。
-3. **`htors`/`hBtors`(`C`・`B` の `ϖ k` 捩れ無し)**。原文は
-   「`p^ε y = 0` ゆえ `y = 0`」と結論する箇所で `p` が非零因子である
-   ことを暗黙に使う。Faltings の設定(`p` 進完備な整域上)では自明。
-4. **`[Module.Finite A B]`・`[Module.Free A B]`**。mathlib の
+2. **`hBtors`(`B` の `ϖ k` 捩れ無し)**。族の貼り合わせの
+   well-defined 性(`ϖ•(d·b₁ - b₂) = 0 ⟹ d·b₁ = b₂`)で使う。
+   原文は同じことを断りなく使っている(`2.1` 直前の
+   *"Divide `C/I²` by its p-torsion, etc."* が同種の前提)。
+3. **`[Module.Finite A B]`・`[Module.Free A B]`**。mathlib の
    `Algebra.trace` が `Module.Free` を要求するため。原典は `B[1/p]` が
    projective としか言わない(`Theorem 2.4(ii)` と同じ既記録の逸脱)。
+
+★**逸脱でなかったもの(2026-09-05 に原文を逐語で再確認して訂正)**:
+- **`hdecomp : B = A·1 + mB`** は逸脱では**ない**。原文の `Theorem 2.2`
+  は *"Suppose **B = A + mB** is an almost étale covering of `A`"* と、
+  この分解を**定理の仮定そのものとして明記**している(物理 p.6 =
+  印字 p.259 の 2.2 冒頭、`Theorem 2.3` も同じ `B = A + mB` を仮定)。
+  形式化は原文に忠実。
+- **`htors`(`C` の `ϖ k` 捩れ無し)** も逸脱では**ない**。原文の証明は
+  *"...hence unique up to p-torsion. **As `C` has no such torsion**, the
+  different `φ_ε` glue together..."* と、`C` の p-捩れ無しを**証明の中で
+  明示的に使っている**。さらに `2.1` 直前に *"Divide `C/I²` by its
+  p-torsion, etc."* という設定の断りがある。
 
 **非空虚性の対照**は2軸で埋めた(`AlmostLifting.lean` 末尾):
 (その1)`A = B = C = ℤ`、`ϖ ≡ 5`——`p` が**真の非単元**。
