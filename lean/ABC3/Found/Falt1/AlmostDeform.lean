@@ -171,4 +171,55 @@ theorem exists_matrix_almost_idem_lift {ι A : Type u} [Fintype ι] [DecidableEq
   ext i j
   exact (Ideal.Quotient.mk_surjective (m i j)).choose_spec
 
+/-! ## 第 4 段(前半)——`B_ε` の almost 射影性
+
+原文の *"Let `B_ε = A^r/(p^ε − e)(A^r)`. Then `B_ε` is `A`-projective up to
+`p^ε`, that is, `p^ε` annihilates all higher Ext-groups `Ext^i(B_ε, M)`."*
+
+`E² = s·E` から `E·(s·1 − E) = s·E − E² = 0` なので `E` は商
+`N := (ι→A)/im(s·1−E)` を経由する。その `α : N → (ι→A)` と商写像
+`β : (ι→A) → N` について `β∘α = s·id_N`——**`s·id_N` が自由加群を経由して
+分解する**。これがそのまま「`s` を除いて射影的」の内容であり、
+`AlmostProjective.almost_lift_of_surjective` にそのまま渡せる
+(Ext の言葉に直すなら `ext_smul_eq_zero_of_almost_split`——
+`tools/lean-idioms.md` #54 の「almost split ⟹ almost vanishing」)。 -/
+
+/-- `E² = s·E` から作る商加群 `N := (ι→A)/im(s·1 − E)` について、
+`s·id_N` が自由加群 `ι→A` を経由して分解する。 -/
+theorem almostIdemQuotient_factor {A : Type u} [CommRing A] {ι : Type u} [Fintype ι]
+    (s : A) (E : Module.End A (ι → A)) (hE : E * E = s • E) :
+    ∃ (α : ((ι → A) ⧸ LinearMap.range (s • (1 : Module.End A (ι → A)) - E)) →ₗ[A] (ι → A))
+      (β : (ι → A) →ₗ[A] ((ι → A) ⧸ LinearMap.range (s • (1 : Module.End A (ι → A)) - E))),
+      ∀ x, β (α x) = s • x := by
+  set P := LinearMap.range (s • (1 : Module.End A (ι → A)) - E) with hP
+  have hEker : P ≤ LinearMap.ker E := by
+    rintro z ⟨y, rfl⟩
+    have hz : E * (s • (1 : Module.End A (ι → A)) - E) = 0 := by
+      rw [mul_sub, mul_smul_comm, mul_one, hE, sub_self]
+    show E _ = 0
+    exact congrArg (fun (f : Module.End A (ι → A)) => f y) hz
+  refine ⟨P.liftQ E hEker, P.mkQ, ?_⟩
+  intro x
+  induction x using Submodule.Quotient.induction_on with
+  | H y =>
+    show P.mkQ ((P.liftQ E hEker) (Submodule.Quotient.mk y)) = s • Submodule.Quotient.mk y
+    rw [P.liftQ_apply, ← Submodule.mkQ_apply, ← map_smul, ← sub_eq_zero, ← map_sub,
+      Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero]
+    refine ⟨-y, ?_⟩
+    simp only [LinearMap.sub_apply, LinearMap.smul_apply, Module.End.one_apply, map_neg]
+    abel
+
+/-- **`Theorem 2.3` の第 4 段(前半)**——`B_ε := (ι→A)/im(s·1−E)` は
+`s` を除いて射影的:任意の全射に沿って `s·φ` が持ち上がる。 -/
+theorem almostIdemQuotient_almost_lift {A C D : Type u} [CommRing A]
+    [AddCommGroup C] [Module A C] [AddCommGroup D] [Module A D]
+    {ι : Type u} [Fintype ι]
+    (s : A) (E : Module.End A (ι → A)) (hE : E * E = s • E)
+    (π : C →ₗ[A] D) (hπ : Function.Surjective π)
+    (φ : ((ι → A) ⧸ LinearMap.range (s • (1 : Module.End A (ι → A)) - E)) →ₗ[A] D) :
+    ∃ ψ : ((ι → A) ⧸ LinearMap.range (s • (1 : Module.End A (ι → A)) - E)) →ₗ[A] C,
+      ∀ x, π (ψ x) = s • φ x := by
+  obtain ⟨α, β, hαβ⟩ := almostIdemQuotient_factor s E hE
+  exact almost_lift_of_surjective s ⟨ι, inferInstance, α, β, hαβ⟩ π hπ φ
+
 end ABC3.Found.Falt1
