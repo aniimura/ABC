@@ -282,4 +282,49 @@ theorem almostIdemQuotient_tensor_almost_lift {A C D : Type u} [CommRing A]
     (TensorProduct.map α α) (TensorProduct.map β β)
     (fun z => almost_projective_tensor s s α β hαβ α β hαβ z) π hπ φ
 
+/-! ## 第 5 段——結合律の障害は "five-term identity" でコサイクルになる
+
+原文の *"The obstruction to `m_ε` being associative is given by
+`b₀[m_ε(b₁, m_ε(b₂,b₃)) − m_ε(m_ε(b₁,b₂),b₃)]b₄ ∈ Kern(B_ε → B)`
+and defines a class in `H³(B/Ā)` with values in this module.
+**(That we get a cycle amounts to a five-term identity well known in the
+study of associativity.)**"*
+
+その "five-term identity" は、**任意の**双線形な「乗法」`m` について
+恒等的に成り立つ:結合子 `F(a,b,c) := m a (m b c) − m (m a b) c` は
+
+    m w (F x y z) − F (m w x) y z + F w (m x y) z − F w x (m y z) + m (F w x y) z = 0
+
+を満たす(展開すると 10 項がちょうど打ち消し合う)。
+`H²` のときの `HochschildLowDegree.obstruction_identity` に対応する段で、
+これと「核の上では `m` が加群作用に一致する」ことを合わせれば
+Hochschild 3-コサイクル条件になり、`hochschild_H3_almost_coboundary` が
+効く。 -/
+
+/-- **結合律の "five-term identity"**。任意の双線形 `m` について恒等的に
+成り立つ——「障害がコサイクルである」ことの代数的な核。 -/
+theorem five_term_identity {A N : Type u} [CommRing A] [AddCommGroup N] [Module A N]
+    (m : N →ₗ[A] N →ₗ[A] N) (w x y z : N) :
+    m w (m x (m y z) - m (m x y) z)
+      - (m (m w x) (m y z) - m (m (m w x) y) z)
+      + (m w (m (m x y) z) - m (m w (m x y)) z)
+      - (m w (m x (m y z)) - m (m w x) (m y z))
+      + m (m w (m x y) - m (m w x) y) z = 0 := by
+  simp only [map_sub, LinearMap.sub_apply]
+  abel
+
+/-- 結合子を三重線形写像として束ねたもの
+(`hochschild_H3_almost_coboundary` にそのまま渡せる形)。 -/
+noncomputable def associatorTri {A N : Type u} [CommRing A] [AddCommGroup N] [Module A N]
+    (m : N →ₗ[A] N →ₗ[A] N) : N →ₗ[A] N →ₗ[A] (N →ₗ[A] N) :=
+  LinearMap.mk₂ A (fun a b => (m a) ∘ₗ (m b) - m (m a b))
+    (by intro a a' b; ext c; simp; abel)
+    (by intro r a b; ext c; simp [smul_sub])
+    (by intro a b b'; ext c; simp; abel)
+    (by intro r a b; ext c; simp [smul_sub])
+
+@[simp] theorem associatorTri_apply {A N : Type u} [CommRing A] [AddCommGroup N] [Module A N]
+    (m : N →ₗ[A] N →ₗ[A] N) (a b c : N) :
+    associatorTri m a b c = m a (m b c) - m (m a b) c := rfl
+
 end ABC3.Found.Falt1
