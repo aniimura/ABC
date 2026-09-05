@@ -59,7 +59,7 @@
 | `Theorem 2.2` | **✅Found**(`thm_2_2`、`∃!`、非空虚性2件) | `AlmostLifting.lean` |
 | `Theorem 2.4` | **✅Found**((i)(ii)とも、非空虚性つき)。(i)は**原文どおり「`m` が零化する」形**まで(`thm_2_4_i_m_annihilates`) | `AlmostDerivation.lean` + `GaloisTransfer.lean` |
 | `Theorem 4.1(ii)` | **✅証明済み**(非空虚性つき)。塔版`thm_4_1_ii_tower`は**原文3行がそのまま仮定と結論** | `Section4.lean` |
-| `Theorem 1.2` | **★鍵の不等式1つに完全帰着**——第7段(`δₙ → 0`)を形式化(`delta_two_regime_of_key`・`thm_1_2_tendsto_zero`、非空虚性つき)。残るのは長さの評価(第2〜6段) | `Section1.lean` |
+| `Theorem 1.2` | **★「長さの3事実」に完全帰着**(`thm_1_2_of_length_bounds`、非空虚性つき)。**解析部分は全部済んだ**——残るのは (a)`length(ker) − length(coker) = (δₙ−δ_{n+1})·e`、(b)`length(ker) ≥ β·e`(`β = min{1, δₙ/(d+1)}`)、(c)`length(coker) ≤ (d+1)(δₙ−δ_{n+1})·e` を実際の`Ω`と差積について示すことだけ。道具(指数の加法性`length_ker_add_target`・`p`倍の核の移送`ker_comp_contains_pTorsion`・長さの線型性`length_quot_p_pow`)は3つとも揃った | `Section1.lean` |
 | `Theorem 3.2` の代数的核 | **✅証明済み**(almost 直和因子からの降下) | `Section3.lean` |
 | `Theorem 2.3` 第2・3・4段 | **✅証明済み**("Tripling ε"・`B_ε` の almost 射影性・`B_ε⊗Ā` と `B` の比較) | `AlmostDeform.lean` |
 | `Theorem 2.3` 第5段 | **✅証明済み**(five-term identity・結合律への補正は**倍化なしで厳密**・交換子は導分) | `AlmostDeform.lean` |
