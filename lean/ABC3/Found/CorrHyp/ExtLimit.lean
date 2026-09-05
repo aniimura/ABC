@@ -3495,6 +3495,47 @@ theorem piecePullbackIso_inv_fst (X : Over BaseK) (U : X.left.Opens) (hU : IsAff
   exact (Category.assoc _ _ _).symm.trans
     (congrArg (fun t => t ≫ (hU.isoSpec.inv ≫ U.ι)) (pullbackSpecIso_inv_fst ℚ Γ(X.left, U) ℝ))
 
+set_option maxHeartbeats 1000000 in
+open scoped TensorProduct in
+/-- **`appLE`(標準写像)と`includeLeft`が`piecePullbackIso`を通して一致する**
+——`piecePullbackIso_inv_fst`(`Spec`側の値の特徴づけ)を、`appLE`の側の
+`Spec`表示(`IsAffineOpen.SpecMap_appLE_fromSpec`、mathlib)と突き合わせ、
+`hU.fromSpec`が**モノ**(開埋め込み∘同型)であることで右から消去した形。
+
+これが自然性の四角形(ii)の**`Spec`側での最終形**である。残るのは
+`piecePullbackIso.inv ≫ (piece).isoSpec.hom`を`Spec.map (pieceRingEquiv.symm)`
+と同定すること(`pieceRingEquiv`の定義=`topIso`+`Γ.mapIso`+`ΓSpecIso`を
+追う)だけで、そこまで行けば`Spec`の忠実充満性から環レベルの等式
+`pieceRingEquiv.symm (a ⊗ₜ 1) = appLE a`が出る。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem piecePullbackIso_inv_isoSpec_appLE (X : Over BaseK) (U : X.left.Opens)
+    (hU : IsAffineOpen U) :
+    letI := pieceAlgebra X U hU
+    (piecePullbackIso X U hU).inv ≫ (piece_isAffineOpen X U hU).isoSpec.hom ≫
+      Spec.map ((pullback.fst X.hom toBaseK).appLE U (pullback.fst X.hom toBaseK ⁻¹ᵁ U) le_rfl)
+    = Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom (R := ℚ)
+        (A := Γ(X.left, U)) (B := ℝ))) := by
+  letI := pieceAlgebra X U hU
+  have hmid : (piece_isAffineOpen X U hU).isoSpec.hom ≫ (piece_isAffineOpen X U hU).fromSpec
+      = (pullback.fst X.hom toBaseK ⁻¹ᵁ U).ι := by
+    rw [← IsAffineOpen.isoSpec_inv_ι, Iso.hom_inv_id_assoc]
+    rfl
+  have hA := piecePullbackIso_inv_fst X U hU
+  rw [IsAffineOpen.isoSpec_inv_ι] at hA
+  have hB := IsAffineOpen.SpecMap_appLE_fromSpec (pullback.fst X.hom toBaseK) hU
+    (piece_isAffineOpen X U hU) (le_rfl : (pullback.fst X.hom toBaseK ⁻¹ᵁ U) ≤ _)
+  have h3 : (piece_isAffineOpen X U hU).isoSpec.hom ≫
+      ((piece_isAffineOpen X U hU).fromSpec ≫ pullback.fst X.hom toBaseK)
+      = (pullback.fst X.hom toBaseK ⁻¹ᵁ U).ι ≫ pullback.fst X.hom toBaseK := by
+    rw [← Category.assoc, hmid]
+    rfl
+  rw [← cancel_mono hU.fromSpec]
+  refine Eq.trans ?_ hA
+  refine Eq.trans (congrArg (fun t => (piecePullbackIso X U hU).inv ≫
+    (piece_isAffineOpen X U hU).isoSpec.hom ≫ t) hB) ?_
+  exact congrArg (fun t => (piecePullbackIso X U hU).inv ≫ t) h3
+
 /-- `piecesOpenCover`の脚`(e i).inv ≫ X.homOfLE (h i)`同士のpullbackは、
 `e i`・`e j`をpullbackの脚から追い出す(`pullbackHomIsoLeft`+
 `pullbackSymmetry`、いずれも既存の一般的事実)ことで、`X.homOfLE`同士
