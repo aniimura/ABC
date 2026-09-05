@@ -1388,6 +1388,131 @@ theorem thm_1_2_step_of_modules {R M N : Type*} [CommRing R] [IsLocalRing R] [Is
   push_cast at h3
   linarith
 
+open IsLocalRing in
+/-- **★`Theorem 1.2` の 1 ステップ・原文の仮定そのままの形**。
+
+原文の 2 本の写像 `f : Ω_{Wₙ/Vₙ} ⊗ W' → Ω_{W'/Vₙ}`、
+`g : Ω_{W'/Vₙ} → Ω_{W'/V_{n+1}}` をそのまま取り、節点 A・節点 B の
+入力を原文の文の形で与える:
+
+| 入力 | 原文 |
+|---|---|
+| `gN₀`/`hspanN₀` | *"`Ω_{W_{n+1}/Vₙ}` is the direct sum of `d+1` modules"*(生成元の個数だけ使う) |
+| `φ`/`hφ` | *"the kernel of the second map contains `Ω_{V_{n+1}/Vₙ} ⊗ W_{n+1}`, which has `(W_{n+1}/pW_{n+1})^{d+1}` as quotient"* |
+| `gc`/`hspanc` | *"its length is at most that of `W_{n+1}` divided by the `(d+1)`st power"* |
+| `b`/`hbann` | *"`p^{δₙ−δ_{n+1}}` annihilates …"*(節点 B) |
+| `hM`/`hN`/`hbl` | `Lemma 1.1` と `length(R/p^α)=α·e` |
+
+結論は原文の鍵の不等式(★`β = min{1,δₙ}` と原文より強い形)。 -/
+theorem thm_1_2_step_of_faltings {R M N₀ N : Type*} [CommRing R] [IsLocalRing R]
+    [IsNoetherianRing R]
+    [AddCommGroup M] [Module R M] [Module.Finite R M] [IsArtinian R M] [IsNoetherian R M]
+    [AddCommGroup N₀] [Module R N₀] [IsArtinian R N₀] [IsNoetherian R N₀]
+    [AddCommGroup N] [Module R N] [IsArtinian R N] [IsNoetherian R N]
+    (f : M →ₗ[R] N₀) (g : N₀ →ₗ[R] N)
+    (e : ℕ) (he : 0 < e)
+    (p : R) (hp : Ideal.span ({p} : Set R) = (maximalIdeal R) ^ e)
+    (d : ℕ)
+    (gN₀ : Fin (d + 1) → N₀) (hspanN₀ : Submodule.span R (Set.range gN₀) = ⊤)
+    (φ : ↥(LinearMap.ker g) →ₗ[R] (Fin (d + 1) → R ⧸ Ideal.span ({p} : Set R)))
+    (hφ : Function.Surjective φ)
+    (gc : Fin (d + 1) → (N ⧸ LinearMap.range (g ∘ₗ f)))
+    (hspanc : Submodule.span R (Set.range gc) = ⊤)
+    (b : R) (hbann : ∀ x : (N ⧸ LinearMap.range (g ∘ₗ f)), b • x = 0)
+    (hbfin : Module.length R (R ⧸ Ideal.span ({b} : Set R)) ≠ ⊤)
+    (δn δn1 : ℝ)
+    (hM : lenR R M = δn * (e : ℝ)) (hN : lenR R N = δn1 * (e : ℝ))
+    (hbl : lenR R (R ⧸ Ideal.span ({b} : Set R)) = (δn - δn1) * (e : ℝ)) :
+    min 1 δn - ((d : ℝ) + 1) * (δn - δn1) ≤ δn - δn1 := by
+  have hgker : ∀ y : N₀, p • y = 0 → g y = 0 :=
+    hg_of_faltings p (d + 1) gN₀ hspanN₀ g φ hφ
+  have hker : LinearMap.ker (p • (LinearMap.id : M →ₗ[R] M)) ≤ LinearMap.ker (g ∘ₗ f) := by
+    intro x hx
+    have hx' : p • x = 0 := by simpa using hx
+    simpa [LinearMap.mem_ker] using ker_comp_contains_pTorsion f g p hgker x hx'
+  exact thm_1_2_step_of_modules (g ∘ₗ f) e he p hp hker d gc hspanc b hbann hbfin
+    δn δn1 hM hN hbl
+
+/-! ### 非空虚性——`thm_1_2_step_of_faltings` の仮定は同時に満たせる
+
+`R = ZMod 4`(局所環、`𝔪 = (2)`、`e = 1`)、`k = R/(2)`、
+`M = N₀ = k`、`N = 0`、`f = id`、`g = 0`、`d = 0`、`b = 2`、
+`δₙ = 1`、`δ_{n+1} = 0` と取る。**節点 A の 2 つの入力はどちらも
+非退化に満たされる**——`N₀ = k` は 1 個の元で生成され、`ker g = ⊤`
+は `(R/(2))^1` を商に持つ。結論は `min{1,1} − 1·(1−0) = 0 ≤ 1`。
+
+`ZMod 4` が局所環であること・`𝔪 = (2)` であることは `decide` で確かめる
+(有限環なので単元性が決定可能)。 -/
+
+/-- `ZMod 4` は局所環(単元でない元 `{0,2}` は加法で閉じている)。 -/
+theorem zmod4_isLocalRing : IsLocalRing (ZMod 4) :=
+  haveI : Nontrivial (ZMod 4) := ⟨0, 1, by decide⟩
+  IsLocalRing.of_isUnit_or_isUnit_of_isUnit_add (by decide)
+
+/-- `ZMod 4` の極大イデアルは `(2)`。 -/
+theorem zmod4_maximalIdeal :
+    letI := zmod4_isLocalRing
+    IsLocalRing.maximalIdeal (ZMod 4) = Ideal.span {(2 : ZMod 4)} := by
+  letI := zmod4_isLocalRing
+  ext x
+  rw [IsLocalRing.mem_maximalIdeal, mem_nonunits_iff, Ideal.mem_span_singleton']
+  revert x
+  decide
+
+/-- `ZMod 4 / (2)` は単純加群、したがって長さ `1`。 -/
+theorem zmod4_k_length :
+    Module.length (ZMod 4) (ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)}) = 1 := by
+  letI := zmod4_isLocalRing
+  haveI : IsSimpleModule (ZMod 4) (ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)}) := by
+    rw [isSimpleModule_iff_isCoatom, ← zmod4_maximalIdeal]
+    exact Ideal.isMaximal_def.mp (IsLocalRing.maximalIdeal.isMaximal (ZMod 4))
+  exact Module.length_eq_one _ _
+
+/-- 非空虚性——`thm_1_2_step_of_faltings` の仮定が
+`R = ZMod 4`・`k = R/(2)` で同時に満たされる。 -/
+example : min 1 (1 : ℝ) - (((0 : ℕ) : ℝ) + 1) * ((1 : ℝ) - 0) ≤ (1 : ℝ) - 0 := by
+  letI := zmod4_isLocalRing
+  refine thm_1_2_step_of_faltings
+    (R := ZMod 4) (M := ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)})
+    (N₀ := ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)})
+    (N := ↥(⊥ : Submodule (ZMod 4) (ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)})))
+    LinearMap.id 0 1 one_pos 2 (by rw [pow_one, zmod4_maximalIdeal]) 0
+    (fun _ => 1) ?_
+    (LinearMap.pi (fun _ : Fin 1 =>
+      (LinearMap.ker (0 : (ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)}) →ₗ[ZMod 4]
+        ↥(⊥ : Submodule (ZMod 4) (ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)})))).subtype)) ?_
+    (fun _ => 0) ?_ 2 ?_ ?_ 1 0 ?_ ?_ ?_
+  · -- `K = R/(2)` は `1` で生成される
+    refine Submodule.eq_top_iff'.mpr (fun x => ?_)
+    obtain ⟨r, rfl⟩ := Submodule.Quotient.mk_surjective (Ideal.span {(2 : ZMod 4)}) x
+    have h : (Submodule.Quotient.mk r : ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)})
+        = r • (1 : ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)}) := by
+      rw [Algebra.smul_def, mul_one]; rfl
+    rw [h]
+    exact Submodule.smul_mem _ r (Submodule.subset_span ⟨0, rfl⟩)
+  · -- `ker g = ⊤` は `(R/(2))^1` を商に持つ
+    intro y
+    refine ⟨⟨y 0, ?_⟩, ?_⟩
+    · rw [LinearMap.ker_zero]; trivial
+    · funext i
+      fin_cases i
+      rfl
+  · -- 余核は零加群
+    exact Submodule.eq_top_iff'.mpr (fun x => by
+      rw [Subsingleton.elim x 0]; exact Submodule.zero_mem _)
+  · exact fun x => by rw [Subsingleton.elim x 0, smul_zero]
+  · rw [zmod4_k_length]; exact ENat.coe_ne_top 1
+  · show ((Module.length (ZMod 4) (ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)})).toNat : ℝ)
+      = 1 * ((1 : ℕ) : ℝ)
+    rw [zmod4_k_length]; norm_num
+  · show ((Module.length (ZMod 4)
+      ↥(⊥ : Submodule (ZMod 4) (ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)}))).toNat : ℝ)
+      = 0 * ((1 : ℕ) : ℝ)
+    rw [Module.length_bot]; norm_num
+  · show ((Module.length (ZMod 4) (ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)})).toNat : ℝ)
+      = (1 - 0) * ((1 : ℕ) : ℝ)
+    rw [zmod4_k_length]; norm_num
+
 open Filter Topology in
 /-- **`Theorem 1.2`——各ステップの不等式(強い形)から `δₙ → 0`**。
 
