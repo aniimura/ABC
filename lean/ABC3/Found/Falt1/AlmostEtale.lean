@@ -1079,30 +1079,30 @@ theorem remark_iii_trace_identity {A B : Type u} [CommRing A] [CommRing B] [Alge
     haveI := hAE.2.2.1
     haveI := (hAE.2.1 : Module.Finite _ _)
     Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))) →
-    ∀ (n : ℕ) (e : TensorProduct A B B) (b : B),
+    ∀ (c : A) (e : TensorProduct A B B) (b : B),
     (diagonalCompare p e
-        = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p))) →
-    algebraMap A B (p ^ n) * b = Tr1map A B ((b ⊗ₜ[A] (1:B)) * e) := by
+        = c • Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p))) →
+    algebraMap A B c * b = Tr1map A B ((b ⊗ₜ[A] (1:B)) * e) := by
   letI := awayAlgebra p (A := A) (B := B)
   haveI := awayScalarTower p (A := A) (B := B)
   haveI hEtale := hAE.2.2.1
   haveI hFinite := (hAE.2.1 : Module.Finite _ _)
-  intro hf0inj n e b he
+  intro hf0inj c e b he
   set Ap := Localization.Away p
   set Bp := Localization.Away (algebraMap A B p)
   set f0 := algebraMap B Bp with hf0def
   haveI hFreeAp : Module.Free Ap Bp := hAE.1
   set bB := Module.Free.chooseBasis Ap Bp
-  have key1 : Tr1map Ap Bp ((f0 b ⊗ₜ[Ap] (1:Bp)) * (diagonalCompare p e)) = f0 (algebraMap A B (p^n) * b) := by
+  have key1 : Tr1map Ap Bp ((f0 b ⊗ₜ[Ap] (1:Bp)) * (diagonalCompare p e)) = f0 (algebraMap A B c * b) := by
     rw [he]
-    have hscale : (f0 b ⊗ₜ[Ap] (1:Bp)) * (p^n • Algebra.FormallyUnramified.elem Ap Bp)
-        = p^n • ((f0 b ⊗ₜ[Ap] (1:Bp)) * Algebra.FormallyUnramified.elem Ap Bp) := by
+    have hscale : (f0 b ⊗ₜ[Ap] (1:Bp)) * (c • Algebra.FormallyUnramified.elem Ap Bp)
+        = c • ((f0 b ⊗ₜ[Ap] (1:Bp)) * Algebra.FormallyUnramified.elem Ap Bp) := by
       rw [mul_smul_comm]
     rw [hscale, LinearMap.map_smul_of_tower,
       Ψ_eq_smul_Tr1 _ (Algebra.FormallyUnramified.one_tmul_sub_tmul_one_mul_elem) (f0 b),
       Tr1map_elem_eq_one bB _ (Algebra.FormallyUnramified.one_tmul_sub_tmul_one_mul_elem) (Algebra.FormallyUnramified.lmul_elem)]
     rw [smul_eq_mul, mul_one]
-    show p^n • f0 b = f0 (algebraMap A B (p^n) * b)
+    show c • f0 b = f0 (algebraMap A B c * b)
     rw [Algebra.smul_def, map_mul, ← IsScalarTower.algebraMap_apply A B Bp,
       IsScalarTower.algebraMap_apply A Ap Bp]
   have key2 : Tr1map Ap Bp ((f0 b ⊗ₜ[Ap] (1:Bp)) * (diagonalCompare p e))
@@ -1172,7 +1172,7 @@ theorem trace_ideal_pow_mem_traceIdeal {A B : Type u} [CommRing A] [CommRing B] 
   have heq : (1:B) ⊗ₜ[A] (1:B) * e = e := by
     rw [show (1:B) ⊗ₜ[A] (1:B) = (1 : TensorProduct A B B) from rfl, one_mul]
   have hstep1 : algebraMap A B (p^n) ∈ a.map (algebraMap A B) := by
-    have hthis := remark_iii_trace_identity (A := A) (B := B) p hAE hf0inj n e 1 he
+    have hthis := remark_iii_trace_identity (A := A) (B := B) p hAE hf0inj (p ^ n) e 1 he
     rw [mul_one, heq] at hthis
     rw [hthis]
     exact Tr1map_mem_traceIdeal_map e

@@ -54,18 +54,18 @@ theorem almost_dual_basis {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
     (hAE : IsAlmostEtaleCovering (A := A) (B := B) p)
     (hf0inj : letI := awayAlgebra p (A := A) (B := B)
       Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))))
-    (n : ℕ) (w : TensorProduct A B B)
+    (c : A) (w : TensorProduct A B B)
     (hw : letI := awayAlgebra p (A := A) (B := B)
       haveI := hAE.2.2.1
       haveI := (hAE.2.1 : Module.Finite _ _)
       diagonalCompare p w
-        = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p)
+        = c • Algebra.FormallyUnramified.elem (Localization.Away p)
             (Localization.Away (algebraMap A B p))) :
     ∃ S : Finset (B × B), ∀ b : B,
-      (p ^ n) • b = ∑ i ∈ S, (Algebra.trace A B (b * i.1)) • i.2 := by
+      c • b = ∑ i ∈ S, (Algebra.trace A B (b * i.1)) • i.2 := by
   obtain ⟨S, hS⟩ := TensorProduct.exists_finset w
   refine ⟨S, fun b => ?_⟩
-  have h := remark_iii_trace_identity p hAE hf0inj n w b hw
+  have h := remark_iii_trace_identity p hAE hf0inj c w b hw
   rw [← Algebra.smul_def] at h
   rw [h, hS, Finset.mul_sum, map_sum]
   refine Finset.sum_congr rfl (fun i _ => ?_)
@@ -79,16 +79,16 @@ theorem almost_projective_factor {A B : Type u} [CommRing A] [CommRing B] [Algeb
     (hAE : IsAlmostEtaleCovering (A := A) (B := B) p)
     (hf0inj : letI := awayAlgebra p (A := A) (B := B)
       Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))))
-    (n : ℕ) (w : TensorProduct A B B)
+    (c : A) (w : TensorProduct A B B)
     (hw : letI := awayAlgebra p (A := A) (B := B)
       haveI := hAE.2.2.1
       haveI := (hAE.2.1 : Module.Finite _ _)
       diagonalCompare p w
-        = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p)
+        = c • Algebra.FormallyUnramified.elem (Localization.Away p)
             (Localization.Away (algebraMap A B p))) :
     ∃ (ι : Type u) (_ : Fintype ι) (f : B →ₗ[A] (ι → A)) (g : (ι → A) →ₗ[A] B),
-      ∀ b : B, g (f b) = (p ^ n) • b := by
-  obtain ⟨S, hS⟩ := almost_dual_basis p hAE hf0inj n w hw
+      ∀ b : B, g (f b) = c • b := by
+  obtain ⟨S, hS⟩ := almost_dual_basis p hAE hf0inj c w hw
   refine ⟨{x // x ∈ S}, inferInstance,
     { toFun := fun b i => Algebra.trace A B (b * (i : B × B).1)
       map_add' := by intro b b'; funext i; simp [add_mul]
@@ -105,7 +105,7 @@ theorem almost_projective_factor {A B : Type u} [CommRing A] [CommRing B] [Algeb
         intro c a
         simp only [Pi.smul_apply, RingHom.id_apply, smul_eq_mul, Finset.smul_sum, mul_smul] },
     fun b => ?_⟩
-  show (∑ i : {x // x ∈ S}, (Algebra.trace A B (b * (i : B × B).1)) • (i : B × B).2) = (p ^ n) • b
+  show (∑ i : {x // x ∈ S}, (Algebra.trace A B (b * (i : B × B).1)) • (i : B × B).2) = c • b
   rw [Finset.sum_coe_sort S (fun i => (Algebra.trace A B (b * i.1)) • i.2)]
   exact (hS b).symm
 
@@ -136,15 +136,15 @@ theorem almost_lift_of_isAlmostEtale {A B C D : Type u} [CommRing A] [CommRing B
     (p : A) (hAE : IsAlmostEtaleCovering (A := A) (B := B) p)
     (hf0inj : letI := awayAlgebra p (A := A) (B := B)
       Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))))
-    (n : ℕ) (w : TensorProduct A B B)
+    (c : A) (w : TensorProduct A B B)
     (hw : letI := awayAlgebra p (A := A) (B := B)
       haveI := hAE.2.2.1
       haveI := (hAE.2.1 : Module.Finite _ _)
       diagonalCompare p w
-        = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p)
+        = c • Algebra.FormallyUnramified.elem (Localization.Away p)
             (Localization.Away (algebraMap A B p)))
     (π : C →ₗ[A] D) (hπ : Function.Surjective π) (φ : B →ₗ[A] D) :
-    ∃ ψ : B →ₗ[A] C, ∀ b : B, π (ψ b) = (p ^ n) • φ b :=
-  almost_lift_of_surjective (p ^ n) (almost_projective_factor p hAE hf0inj n w hw) π hπ φ
+    ∃ ψ : B →ₗ[A] C, ∀ b : B, π (ψ b) = c • φ b :=
+  almost_lift_of_surjective c (almost_projective_factor p hAE hf0inj c w hw) π hπ φ
 
 end ABC3.Found.Falt1

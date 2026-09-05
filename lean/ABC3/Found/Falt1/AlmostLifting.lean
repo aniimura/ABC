@@ -1,6 +1,7 @@
 import ABC3.Found.Falt1.AlmostDifferentials
 import ABC3.Found.Falt1.AlmostProjective
 import ABC3.Found.Falt1.HochschildLowDegree
+import ABC3.Found.Falt1.AlmostBase
 
 /-!
 # [Falt1] Theorem 2.2 の一意性——完全に証明(2026-09-05)
@@ -371,5 +372,86 @@ theorem exists_multiplicative_lift {A B C : Type u} [CommRing A] [CommRing B] [C
 どちらも `AlmostBase.lean` の塔(`PDivTower`)の上で書く必要がある——
 `m² = m` が効くのはそこ(`mB` の元の積がまた `mB` に入る)である。
 -/
+
+/-- **`Definition 2.1` から直接述べた第1段+第2段**。水準 `c` の witness で
+`A`-加群持ち上げを作り(第1段)、水準 `t` の witness で乗法的にする(第2段)。
+結果は**水準 `(ct)²` で厳密に乗法的な持ち上げ**。 -/
+theorem exists_multiplicative_lift_of_isAlmostEtale {A B C : Type u}
+    [CommRing A] [CommRing B] [CommRing C] [Algebra A B] [Algebra A C]
+    [Module.Finite A B] [Module.Free A B]
+    (p : A) (hAE : IsAlmostEtaleCovering (A := A) (B := B) p)
+    (hf0inj : letI := awayAlgebra p (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))))
+    (I : Ideal C) (hsq : ∀ u ∈ I, ∀ v ∈ I, u * v = 0) (φ : B →ₐ[A] (C ⧸ I))
+    (c : A) (wc : TensorProduct A B B)
+    (hwc : letI := awayAlgebra p (A := A) (B := B)
+      haveI := hAE.2.2.1
+      haveI := (hAE.2.1 : Module.Finite _ _)
+      diagonalCompare p wc = c • Algebra.FormallyUnramified.elem (Localization.Away p)
+        (Localization.Away (algebraMap A B p)))
+    (htors : ∀ x : C, (algebraMap A C) c * x = 0 → x = 0)
+    (t : A) (wt : TensorProduct A B B)
+    (hwt : letI := awayAlgebra p (A := A) (B := B)
+      haveI := hAE.2.2.1
+      haveI := (hAE.2.1 : Module.Finite _ _)
+      diagonalCompare p wt = t • Algebra.FormallyUnramified.elem (Localization.Away p)
+        (Localization.Away (algebraMap A B p))) :
+    ∃ ψ₂ : B →ₗ[A] C,
+      (∀ b, Ideal.Quotient.mk I (ψ₂ b) = ((c*t)*(c*t)) • φ b) ∧
+      (∀ x y, ((c*t)*(c*t)) • ψ₂ (x*y) = ψ₂ x * ψ₂ y) := by
+  obtain ⟨ψ, hψ⟩ := almost_lift_of_isAlmostEtale p hAE hf0inj c wc hwc
+    ((Ideal.Quotient.mkₐ A I).toLinearMap) Ideal.Quotient.mk_surjective φ.toLinearMap
+  exact exists_multiplicative_lift I hsq φ c ψ hψ htors t wt
+    (fun q => almost_swap_annihilate p hAE hf0inj t wt hwt q)
+    (almost_swap_augment p hAE hf0inj t wt hwt)
+
+/-- 塔に対する `Definition 2.1` から、`p := ϖ 0` についての通常の
+`Definition 2.1` が出る(条件(iii)の `p^n` 版は `k=0` の witness を
+`(ϖ 0)^{n-1}` 倍して得る)。 -/
+theorem isAlmostEtaleCovering_of_tower {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    {q : ℕ} (T : PDivTower A q) (hAET : IsAlmostEtaleCoveringTower (A := A) (B := B) T) :
+    IsAlmostEtaleCovering (A := A) (B := B) (T.ϖ 0) := by
+  letI := awayAlgebra (T.ϖ 0) (A := A) (B := B)
+  haveI := awayScalarTower (T.ϖ 0) (A := A) (B := B)
+  obtain ⟨hFree, hFin, hEt, htr, hwit⟩ := hAET
+  refine ⟨hFree, hFin, hEt, htr, fun n hn => ?_⟩
+  obtain ⟨e₀, he₀⟩ := hwit 0
+  refine ⟨(T.ϖ 0) ^ (n - 1) • e₀, ?_⟩
+  rw [map_smul, he₀, smul_smul]
+  congr 1
+  rw [← pow_succ]
+  congr 1
+  omega
+
+/-- **塔の上での第1段+第2段**——`Theorem 2.2` の存在側が要求する
+「`ε` を小さくしながら乗法的な持ち上げを作る」族そのもの。
+任意の `k, j` について、**水準 `(ϖ k · ϖ j)²`(`k,j` を大きくすればいくらでも
+深くなる)で厳密に乗法的な持ち上げ**が存在する。
+
+Faltings の証明で残るのは、この族の極限を取って honest な
+`φ₀ : mB → C` を得る段(整合性の核は
+`HochschildLowDegree.rescale_multiplicative`、一意性の核は
+`uniqueness_derivation_eq`・`thm_2_2_uniqueness`)と、`B = A + mB` への
+拡張だけである。 -/
+theorem exists_multiplicative_lift_tower {A B C : Type u}
+    [CommRing A] [CommRing B] [CommRing C] [Algebra A B] [Algebra A C]
+    [Module.Finite A B] [Module.Free A B]
+    {q : ℕ} (T : PDivTower A q)
+    (hAET : IsAlmostEtaleCoveringTower (A := A) (B := B) T)
+    (hf0inj : letI := awayAlgebra (T.ϖ 0) (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B (T.ϖ 0)))))
+    (I : Ideal C) (hsq : ∀ u ∈ I, ∀ v ∈ I, u * v = 0) (φ : B →ₐ[A] (C ⧸ I))
+    (htors : ∀ (k : ℕ) (x : C), (algebraMap A C) (T.ϖ k) * x = 0 → x = 0)
+    (k j : ℕ) :
+    ∃ ψ : B →ₗ[A] C,
+      (∀ b, Ideal.Quotient.mk I (ψ b)
+        = ((T.ϖ k * T.ϖ j) * (T.ϖ k * T.ϖ j)) • φ b) ∧
+      (∀ x y, ((T.ϖ k * T.ϖ j) * (T.ϖ k * T.ϖ j)) • ψ (x*y) = ψ x * ψ y) := by
+  have hAE := isAlmostEtaleCovering_of_tower T hAET
+  obtain ⟨_, _, _, _, hwit⟩ := hAET
+  obtain ⟨wk, hwk⟩ := hwit k
+  obtain ⟨wj, hwj⟩ := hwit j
+  exact exists_multiplicative_lift_of_isAlmostEtale (T.ϖ 0) hAE hf0inj I hsq φ
+    (T.ϖ k) wk hwk (htors k) (T.ϖ j) wj hwj
 
 end ABC3.Found.Falt1
