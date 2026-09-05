@@ -513,4 +513,95 @@ example :
   haveI := (hAE.2.1 : Module.Finite _ _)
   rw [map_smul, diagonalCompare_elem_eq]
 
+/-! ## 原文どおりの「`m` が零化する」形へ
+
+`thm_2_4_i` は witness の水準 `p^n` で述べているが、原文は
+*"its kernel and cokernel are annihilated by **`m`**"* と書く。
+`p`-可除な塔 `PDivTower` の上では条件(iii)の witness が**各水準 `ϖ k` で
+取れる**ので、その形にそのまま強められる。
+
+核側で `ϖ k` そのもの(`ϖ k` の平方ではなく)が効くのは、`q ≥ 2` のとき
+`ϖ k = (ϖ(k+1))^q` が `(ϖ(k+1))²` で割れるから——塔があることの
+ご利益がここでも効く。 -/
+
+open KaehlerDifferential in
+/-- `thm_2_4_i` の一般スカラー版(witness の水準を `c` に一般化)。 -/
+theorem thm_2_4_i_gen {R A B : Type u} [CommRing R] [CommRing A] [CommRing B]
+    [Algebra R A] [Algebra A B] [Algebra R B] [IsScalarTower R A B]
+    [Module.Finite A B] [Module.Free A B]
+    (p : A) (hAE : IsAlmostEtaleCovering (A := A) (B := B) p)
+    (hf0inj : letI := awayAlgebra p (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))))
+    (c : A) (w : TensorProduct A B B)
+    (hw : letI := awayAlgebra p (A := A) (B := B)
+      haveI := hAE.2.2.1
+      haveI := (hAE.2.1 : Module.Finite _ _)
+      diagonalCompare p w
+        = c • Algebra.FormallyUnramified.elem (Localization.Away p)
+            (Localization.Away (algebraMap A B p))) :
+    (∀ ξ : TensorProduct A B Ω[A⁄R],
+        KaehlerDifferential.mapBaseChange R A B ξ = 0 → (c * c) • ξ = 0) ∧
+    (∀ x : Ω[B⁄R], (algebraMap A B c) • x
+        ∈ LinearMap.range (KaehlerDifferential.mapBaseChange R A B)) := by
+  have hann := almost_swap_annihilate p hAE hf0inj c w hw
+  have haug := almost_swap_augment p hAE hf0inj c w hw
+  obtain ⟨S, hS⟩ := almost_dual_basis p hAE hf0inj c w hw
+  refine ⟨fun ξ hξ => ?_, fun x => thm_2_4_i_cokernel c w hann haug x⟩
+  exact thm_2_4_i_kernel (R := R)
+    (fun i : {x // x ∈ S} => Algebra.trace A B ∘ₗ LinearMap.mulRight A ((i : B × B).1))
+    (fun i : {x // x ∈ S} => ((i : B × B).2)) c
+    (dualBasis_family c S hS) c w hann haug ξ hξ
+
+open KaehlerDifferential in
+/-- **`Theorem 2.4(i)`、塔の上での形**——核も余核も**各水準 `ϖ k` で**
+零化される。 -/
+theorem thm_2_4_i_tower {R A B : Type u} [CommRing R] [CommRing A] [CommRing B]
+    [Algebra R A] [Algebra A B] [Algebra R B] [IsScalarTower R A B]
+    [Module.Finite A B] [Module.Free A B]
+    {q : ℕ} (hq : 2 ≤ q) (T : PDivTower A q)
+    (hAET : IsAlmostEtaleCoveringTower (A := A) (B := B) T)
+    (hf0inj : letI := awayAlgebra (T.ϖ 0) (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B (T.ϖ 0))))) :
+    (∀ (k : ℕ) (ξ : TensorProduct A B Ω[A⁄R]),
+        KaehlerDifferential.mapBaseChange R A B ξ = 0 → T.ϖ k • ξ = 0) ∧
+    (∀ (k : ℕ) (x : Ω[B⁄R]), (algebraMap A B (T.ϖ k)) • x
+        ∈ LinearMap.range (KaehlerDifferential.mapBaseChange R A B)) := by
+  have hAE := isAlmostEtaleCovering_of_tower T hAET
+  obtain ⟨_, _, _, _, hwit⟩ := hAET
+  constructor
+  · intro k ξ hξ
+    obtain ⟨wk, hwk⟩ := hwit (k+1)
+    have hker := (thm_2_4_i_gen (R := R) (T.ϖ 0) hAE hf0inj (T.ϖ (k+1)) wk hwk).1 ξ hξ
+    have hdvd : T.ϖ k = (T.ϖ (k+1))^(q - 2) * (T.ϖ (k+1) * T.ϖ (k+1)) := by
+      rw [← T.ϖ_succ k, ← pow_two, ← pow_add]
+      congr 1
+      omega
+    rw [hdvd, ← smul_smul, hker, smul_zero]
+  · intro k x
+    obtain ⟨wk, hwk⟩ := hwit k
+    exact (thm_2_4_i_gen (R := R) (T.ϖ 0) hAE hf0inj (T.ϖ k) wk hwk).2 x
+
+open KaehlerDifferential in
+/-- **`Theorem 2.4(i)`——「核は `m` で零化される」**(原文の言葉そのもの)。 -/
+theorem thm_2_4_i_m_annihilates {R A B : Type u} [CommRing R] [CommRing A] [CommRing B]
+    [Algebra R A] [Algebra A B] [Algebra R B] [IsScalarTower R A B]
+    [Module.Finite A B] [Module.Free A B]
+    {q : ℕ} (hq : 2 ≤ q) (T : PDivTower A q)
+    (hAET : IsAlmostEtaleCoveringTower (A := A) (B := B) T)
+    (hf0inj : letI := awayAlgebra (T.ϖ 0) (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B (T.ϖ 0))))) :
+    T.IsAlmostZero (LinearMap.ker (KaehlerDifferential.mapBaseChange R A B))
+    ∧ (∀ (a : A), a ∈ T.m → ∀ ξ : TensorProduct A B Ω[A⁄R],
+        KaehlerDifferential.mapBaseChange R A B ξ = 0 → a • ξ = 0) := by
+  obtain ⟨hker, hcoker⟩ := thm_2_4_i_tower (R := R) hq T hAET hf0inj
+  have hz : T.IsAlmostZero (LinearMap.ker (KaehlerDifferential.mapBaseChange R A B)) := by
+    intro k x
+    apply Subtype.ext
+    show T.ϖ k • (x : TensorProduct A B Ω[A⁄R]) = 0
+    exact hker k x x.2
+  refine ⟨hz, fun a ha ξ hξ => ?_⟩
+  have h := (T.isAlmostZero_iff_m_smul_eq_bot
+    (LinearMap.ker (KaehlerDifferential.mapBaseChange R A B))).mp hz ⟨ξ, hξ⟩ a ha
+  exact congrArg Subtype.val h
+
 end ABC3.Found.Falt1
