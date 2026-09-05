@@ -1693,6 +1693,13 @@ import ABC3.Found.Falt1.Section3
 import ABC3.Found.Falt1.Section4
 import ABC3.Found.Falt1.GaloisTransfer
 import ABC3.Found.Falt1.Lemma11
+import ABC3.Found.PGC.InertiaTransport
+import ABC3.Found.PGC.LubinTateDegree
+import ABC3.Found.PGC.LubinTateTotallyRamified
+import ABC3.Found.PGC.UnitsGroupInvariants
+import ABC3.Found.PGC.UnramifiedSubextension
+import ABC3.Found.PGC.AbsGalUnitsSurjective
+import ABC3.Found.PGC.GaloisTransferContinuous
 /-!
 # Found — 実装済みの基礎
 

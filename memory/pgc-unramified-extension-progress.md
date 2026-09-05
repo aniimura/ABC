@@ -2024,3 +2024,26 @@ Krull 位相の比較(`fixingSubgroupEquiv` が同相であること)がもう�
 "By applying Proposition 1.2 to L and H" そのもの。
 
 **`inertia_recoverable_of_prop12`**: Prop 1.2 ⟹ Cor 1.3。**残るのは Prop 1.2 のみ**。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05: `[K(Λ_n):K] = q^n − q^{n−1}`
+
+`Found/PGC/LubinTateDegree.lean`(新規)。Lubin-Tate 主定理
+`galoisReciprocityEquiv`(`Gal(K(x)/K) ≃* (𝒪_K/π^n)^×`)から**次数**を読む:
+
+1. `normal_adjoin_of_mem_iteratedLubinTatePsiTorsionPoints`(正規)
+   + 標数 0(`charZero_of_injective_algebraMap` +
+   `IntermediateField.isSeparable_tower_bot`)⟹ `IsGalois`
+2. `IsGalois.card_aut_eq_finrank`(★**`Nat.card` 版**であって `Fintype.card` 版ではない)
+3. `card_units_quotient_span_pi_pow`(`|(𝒪_K/π^n)^×| = q^n − q^{n−1}`)
+
+★これで `K_π,n/K` が「次数 `q^{n−1}(q−1)` の Galois 拡大、Galois 群 `(𝒪_K/π^n)^×`」
+という古典的な形で揃った。`n = 1` は完全分岐まで既知
+(`exists_isTotallyRamifiedAdjoin_lubinTate`)。
+
+### ★配管の発見: `Found.lean` に PGC のファイルがほとんど載っていなかった
+
+`lean/ABC3/Found.lean` は PGC を 3 ファイルしか直接 import しておらず、
+残りは `Skeleton`/`Check` 経由で推移的に入っていた。そのため**どこからも
+import されない葉**(`InertiaTransport`・`LubinTateDegree` 等)は
+`lake build ABC3` の対象外だった。7 ファイルを追加(6905 → 6914 jobs)。
+今後 `Found/` に葉を作ったら `Found.lean` への追加を忘れないこと。
