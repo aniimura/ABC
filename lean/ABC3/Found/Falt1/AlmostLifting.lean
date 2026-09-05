@@ -636,4 +636,61 @@ theorem honest_lift_agree {A B C : Type u} [CommRing A] [CommRing B] [CommRing C
   rw [hcompat, map_smul]
   rfl
 
+/-! ## 総括——`Theorem 2.2` の存在側で得られたもの -/
+
+/-- **`Theorem 2.2` の存在側、到達点**。`B` が塔に対する almost étale
+covering、`I ⊆ C` が二乗零、`φ : B →ₐ[A] C ⧸ I` のとき、**任意の `k` について
+`m` の元 `s`(`= (ϖ k)⁴`、`k` を大きくすればいくらでも深い)が取れて、
+イデアル `sB` の上に honest な(`p^ε` 倍の付かない)加法的・乗法的な
+持ち上げ `φ₀` が存在する**。
+
+`k` は任意なので、これは Faltings が
+*"the different `φ_ε` glue together"* で貼り合わせる族そのものである。
+族の整合性は `lift_compat`・`honest_lift_agree` で証明済みなので、
+残るのは
+- `mB = ∪_k (ϖ k)·B` 上へこの族を集合論的に取りまとめる作業、
+- `B = A + mB` を使う最後の拡張(原文の
+  *"φ₀ maps `p^ε` to an element `x = p^ε + y` satisfying `x² = p^ε x`,
+  hence `p^ε y = 0`"*)
+の2つだけである。 -/
+theorem thm_2_2_honest_lift_on_ideal {A B C : Type u}
+    [CommRing A] [CommRing B] [CommRing C] [Algebra A B] [Algebra A C]
+    [Module.Finite A B] [Module.Free A B]
+    {q : ℕ} (T : PDivTower A q)
+    (hAET : IsAlmostEtaleCoveringTower (A := A) (B := B) T)
+    (hf0inj : letI := awayAlgebra (T.ϖ 0) (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B (T.ϖ 0)))))
+    (I : Ideal C) (hsq : ∀ u ∈ I, ∀ v ∈ I, u * v = 0) (φ : B →ₐ[A] (C ⧸ I))
+    (htors : ∀ (k : ℕ) (x : C), (algebraMap A C) (T.ϖ k) * x = 0 → x = 0)
+    (hBtors : ∀ (k : ℕ) (b : B), T.ϖ k • b = 0 → b = 0)
+    (k : ℕ) :
+    ∃ (s : A) (_ : s ∈ T.m) (φ₀ : B → C),
+      (∀ b b' : B, φ₀ ((s • b) * (s • b')) = φ₀ (s • b) * φ₀ (s • b')) ∧
+      (∀ b b' : B, φ₀ (s • b + s • b') = φ₀ (s • b) + φ₀ (s • b')) ∧
+      (∀ b : B, Ideal.Quotient.mk I (φ₀ (s • b)) = φ (s • b)) := by
+  set s : A := (T.ϖ k * T.ϖ k) * (T.ϖ k * T.ϖ k) with hs
+  have hsm : s ∈ T.m := by
+    rw [hs]
+    exact Ideal.mul_mem_left _ _ (Ideal.mul_mem_right _ _ (T.ϖ_mem_m k))
+  have hstors : ∀ x : C, (algebraMap A C) s * x = 0 → x = 0 := by
+    intro x hx
+    have h4 : (algebraMap A C) s * x
+        = (algebraMap A C) (T.ϖ k) * ((algebraMap A C) (T.ϖ k) *
+          ((algebraMap A C) (T.ϖ k) * ((algebraMap A C) (T.ϖ k) * x))) := by
+      rw [hs]; simp only [map_mul]; ring
+    rw [h4] at hx
+    exact htors k _ (htors k _ (htors k _ (htors k _ hx)))
+  have hsBtors : ∀ b : B, s • b = 0 → b = 0 := by
+    intro b hb
+    have h4 : s • b = T.ϖ k • (T.ϖ k • (T.ϖ k • (T.ϖ k • b))) := by
+      rw [smul_smul, smul_smul, smul_smul, hs]
+      congr 1
+      ring
+    rw [h4] at hb
+    exact hBtors k _ (hBtors k _ (hBtors k _ (hBtors k _ hb)))
+  obtain ⟨ψ, hψ, hmul⟩ := exists_multiplicative_lift_tower T hAET hf0inj I hsq φ htors k k
+  obtain ⟨φ₀, hφ₀, hmulφ, hliftφ, haddφ⟩ :=
+    exists_honest_lift_on_ideal I φ s ψ hψ hmul hsBtors
+  exact ⟨s, hsm, φ₀, hmulφ, haddφ, hliftφ⟩
+
 end ABC3.Found.Falt1
