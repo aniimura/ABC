@@ -871,3 +871,18 @@ K^×  ≅  ℤ × 𝓀^× × (1+𝔪_K)
 経路の**右辺側**は、これで形式化された分解として手元にある。残るのは
 左辺との接続——`Γ_K^ab ≅ (K^×)^∧`(節目(5) の完全分岐部分と、本日の
 不分岐部分 `Γ_K ↠ ℤ/n` を組み合わせる段)。
+
+## 2026-09-05: `K/ℚ_p` の分岐——`e·f = [K:ℚ_p]` と `q = p^f`
+
+新規 `Found/PGC/AbsoluteRamification.lean`(sorry 無し):
+- `isLocalHom_algebraMap_padicInt`(instance)
+- `absoluteRamificationIndex` / `absoluteInertiaDegree`
+- **`absoluteRamificationIndex_mul_absoluteInertiaDegree : e·f = [K:ℚ_p]`**
+- `absoluteInertiaDegree_eq_finrank`(`f = [𝓀_K : 𝔽_p]`)
+- **`residueCard_eq_pow : Nat.card 𝓀_K = p^f`**
+
+`UnramifiedExtension.lean` の `e·f=[K(x):K]` を底の `K/ℚ_p` で繰り返した
+だけ(材料は `CarrierIntegersFree.lean` の `Module.Finite ℤ_[p] 𝒪_K`)。
+
+これで `q` と `[K:ℚ_p]` が独立な量ではなく `(e,f)` で決まることが確定した
+——[pGC] Proposition 1.2 が読み取る二つの量の関係。
