@@ -5837,3 +5837,34 @@ Found側sorry 0件。
 そのあと`t i j = eqToHom`(`inf_comm`)・`t_id`・`cocycle`を組んで
 `Scheme.GlueData`を完成させる。
 集計は引き続き10/24——§4は引き続き0/2(`Lemma 4.1`本体はまだ)。
+
+### 2026-09-05夜さらに続き42 — ★★★`f i j : V (i,j) ⟶ U i`をスキームの射として得た★★★
+
+続き41の環準同型に`Spec`をかけ、`Lemma 4.1`の`GlueData`の`f`成分が
+**共通の有限生成`R' ⊆ ℝ`の上で実際にスキームの射として存在する**ことを
+示した(`ExtLimit.lean`の`exists_descendPieceR_schemeHom`、7.5秒):
+
+```
+∃ R' (hR : R_U ≤ R') (hR₂ : R_V ≤ R'),
+  Nonempty (Spec (V の R' レベルモデル) ⟶ Spec (U の R' レベルモデル))
+```
+
+**配管**: `CommRingCat.of`は`⧸`と違って完全な`CommRing`を要求するため、
+`Ideal.Quotient.commRing`の`IsTwoSided`探索が既定の
+`synthInstance.maxHeartbeats`(20000)を超えて「見つからない」と報告される。
+`∃`の**本体にも証明側にも**`letI hCR… := inferInstance`を並べ、
+`synthInstance.maxHeartbeats 800000`を付けると通る(`lean-idioms` #40 の
+パターンの再現)。
+
+検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
+Found側sorry 0件(`ExtLimit` 394秒)。
+
+**残りの設計上の論点(正直な記録)**: `GlueData`には`f i j`が**開埋め込み**
+であることが要る。ℝレベルでは`piece(U_i ⊓ U_j) → piece(U_i)`は開埋め込み
+(`U_i ⊓ U_j ⊆ U_i`が開で`piece`は引き戻し)だが、`R'`レベルの降下した射に
+ついてこれを言うには、`U_i ⊓ U_j`が`U_i`の**基本開集合**`D(f)`である必要が
+ある(そのとき`IsOpenImmersion.of_isLocalization`が使える)。曲線の
+アフィン被覆はこの形に細分できるが、**その細分をまだ形式化していない**。
+ここが`Lemma 4.1`本体への残りの主要な段差である。
+
+集計は引き続き10/24——§4は引き続き0/2。

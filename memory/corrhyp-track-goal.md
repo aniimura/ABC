@@ -2629,3 +2629,21 @@ Eq.mpr (congrArg (fun x => x ∈ I) …) と動機を明示。
 次の一手: Spec を取って f i j を作り、開埋め込み性を示す。そのあと
 t i j = eqToHom(inf_comm)・t_id・cocycle で Scheme.GlueData を完成。
 集計は10/24——§4は0/2(Lemma 4.1 本体はまだ)。
+
+## 2026-09-05夜さらに続き42 — f i j をスキームの射として得た
+
+ExtLimit.lean の exists_descendPieceR_schemeHom(7.5秒)。続き41 の環準同型に
+Spec をかけただけ。GlueData の f 成分が R' 上で実在することを言う。
+
+配管: CommRingCat.of は完全な CommRing を要求し、Ideal.Quotient.commRing の
+IsTwoSided 探索が既定の synthInstance.maxHeartbeats(20000)を超えて
+「見つからない」と出る。∃ の本体にも証明側にも letI hCR… := inferInstance を
+並べ、synthInstance.maxHeartbeats 800000 を付けると通る(idiom #40 の再現)。
+
+残りの設計上の論点(正直な記録): GlueData には f i j が開埋め込みであることが
+要る。ℝレベルでは自明だが、R' レベルの降下した射でこれを言うには
+U_i ⊓ U_j が U_i の基本開集合 D(f) である必要がある
+(IsOpenImmersion.of_isLocalization)。曲線のアフィン被覆はその形に細分できるが、
+その細分をまだ形式化していない。ここが Lemma 4.1 本体への残りの主要な段差。
+
+集計は10/24——§4は0/2。
