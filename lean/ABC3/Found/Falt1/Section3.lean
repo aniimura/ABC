@@ -88,6 +88,74 @@ theorem almost_descent_range_of_trace {R A M N : Type u} [CommRing R] [CommRing 
     (by simp only [LinearMap.coe_comp, Function.comp_apply, LinearMap.mulLeft_apply,
       mul_one]; exact hc) f x hx
 
+/-! ## 「almost 直和因子である」を almost étale 性から導く
+
+原文は *"`A∞` is almost étale over `R∞`, and **`R∞` is almost a direct
+summand in it (the image of the trace form contains `m·R∞`)**"* と、
+almost 直和因子性を almost étale 性の帰結として使う。
+
+`AlmostEtale.trace_ideal_pow_mem_traceIdeal`(既証)は
+`span{p^{n·rank}} ≤ span(range tr)` を与えるが、`Algebra.trace` は
+`A`-線型なのでその像は既に `A`-部分加群であり、生成するイデアルと一致する。
+したがって**実際に `p^{n·rank} = tr(z)` となる `z` が取れる**——
+これが `almost_descent_range_of_trace` の入力にそのまま入る。 -/
+
+attribute [local instance] FractionRing.liftAlgebra in
+/-- **trace 形式の像が `p^{n·rank}` を含む**(原文の
+*"the image of the trace form contains `m·R∞`"*)。 -/
+theorem exists_trace_eq_pow {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [Module.Finite A B] [Module.Free A B] (p : A)
+    (hAE : IsAlmostEtaleCovering (A := A) (B := B) p)
+    [IsDedekindDomain A] [IsDedekindDomain B] [Module.IsTorsionFree A B]
+    (hf0inj : letI := awayAlgebra p (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))))
+    (n : ℕ) (e : TensorProduct A B B)
+    (he : letI := awayAlgebra p (A := A) (B := B)
+      haveI := hAE.2.2.1
+      haveI := (hAE.2.1 : Module.Finite _ _)
+      diagonalCompare p e
+        = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p)
+            (Localization.Away (algebraMap A B p))) :
+    ∃ z : B, Algebra.trace A B z
+      = p ^ (n * Module.finrank (FractionRing A) (FractionRing B)) := by
+  have hsub := trace_ideal_pow_mem_traceIdeal p hAE hf0inj n e he
+  have hmem : p ^ (n * Module.finrank (FractionRing A) (FractionRing B))
+      ∈ (Ideal.span (Set.range (Algebra.trace A B)) : Ideal A) :=
+    hsub (Ideal.mem_span_singleton_self _)
+  have hspan : (Ideal.span (Set.range (Algebra.trace A B)) : Ideal A)
+      = LinearMap.range (Algebra.trace A B) :=
+    Submodule.span_eq (LinearMap.range (Algebra.trace A B))
+  rw [hspan] at hmem
+  exact hmem
+
+attribute [local instance] FractionRing.liftAlgebra in
+/-- **`Theorem 3.2` の降下段**——*"As `R∞` is almost a direct summand in
+`A∞`, this already holds before tensoring."*
+
+★「almost 直和因子である」を**仮定せず、almost étale 性から導いて**いる
+(`exists_trace_eq_pow`)のが要点。 -/
+theorem thm_3_2_descent {A B M N : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [Module.Finite A B] [Module.Free A B] (p : A)
+    (hAE : IsAlmostEtaleCovering (A := A) (B := B) p)
+    [IsDedekindDomain A] [IsDedekindDomain B] [Module.IsTorsionFree A B]
+    (hf0inj : letI := awayAlgebra p (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))))
+    (n : ℕ) (e : TensorProduct A B B)
+    (he : letI := awayAlgebra p (A := A) (B := B)
+      haveI := hAE.2.2.1
+      haveI := (hAE.2.1 : Module.Finite _ _)
+      diagonalCompare p e
+        = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p)
+            (Localization.Away (algebraMap A B p)))
+    [AddCommGroup M] [Module A M] [AddCommGroup N] [Module A N]
+    (f : N →ₗ[A] M) (x : M)
+    (hx : x ⊗ₜ[A] (1 : B)
+      ∈ LinearMap.range (TensorProduct.map f (LinearMap.id : B →ₗ[A] B))) :
+    (p ^ (n * Module.finrank (FractionRing A) (FractionRing B))) • x
+      ∈ LinearMap.range f := by
+  obtain ⟨z, hz⟩ := exists_trace_eq_pow p hAE hf0inj n e he
+  exact almost_descent_range_of_trace _ z hz f x hx
+
 /-- 非空虚性——`R = ℤ[X]`、`A = Fin 2 → R`(非自明な有限自由拡大)、
 `τ =` 第 0 成分への射影(`τ 1 = 1`)。仮定が空虚に真になっていないことの対照。 -/
 example : (1 : Polynomial ℤ) • (1 : Polynomial ℤ) ∈
