@@ -57,13 +57,13 @@
 | 項目 | 到達点 | ファイル |
 |---|---|---|
 | `Theorem 2.2` | **✅Found**(`thm_2_2`、`∃!`、非空虚性2件) | `AlmostLifting.lean` |
-| `Theorem 2.4` | **✅Found**((i)(ii)とも、非空虚性つき) | `AlmostDerivation.lean` + `GaloisTransfer.lean` |
-| `Theorem 4.1(ii)` | **✅証明済み**(非空虚性つき) | `Section4.lean` |
-| `Theorem 1.2` 第7段 | **✅証明済み**(`δₙ → 0` の解析部分) | `Section1.lean` |
+| `Theorem 2.4` | **✅Found**((i)(ii)とも、非空虚性つき)。(i)は**原文どおり「`m` が零化する」形**まで(`thm_2_4_i_m_annihilates`) | `AlmostDerivation.lean` + `GaloisTransfer.lean` |
+| `Theorem 4.1(ii)` | **✅証明済み**(非空虚性つき)。塔版`thm_4_1_ii_tower`は**原文3行がそのまま仮定と結論** | `Section4.lean` |
+| `Theorem 1.2` | **★鍵の不等式1つに完全帰着**——第7段(`δₙ → 0`)を形式化(`delta_two_regime_of_key`・`thm_1_2_tendsto_zero`、非空虚性つき)。残るのは長さの評価(第2〜6段) | `Section1.lean` |
 | `Theorem 3.2` の代数的核 | **✅証明済み**(almost 直和因子からの降下) | `Section3.lean` |
-| `Theorem 2.3` 第2・3・4段 | **✅証明済み**("Tripling ε"・`B_ε` の almost 射影性) | `AlmostDeform.lean` |
+| `Theorem 2.3` 第2・3・4段 | **✅証明済み**("Tripling ε"・`B_ε` の almost 射影性・`B_ε⊗Ā` と `B` の比較) | `AlmostDeform.lean` |
+| `Theorem 2.3` 第5段 | **✅証明済み**(five-term identity・結合律への補正は**倍化なしで厳密**・交換子は導分) | `AlmostDeform.lean` |
 | `H³` の almost 消滅(明示形) | **✅証明済み** | `HochschildLowDegree.lean` |
-| "five-term identity" | **✅証明済み** | `AlmostDeform.lean` |
 
 **インフラの修正**: `lean/ABC3/Found/Falt1/*.lean` は `Found.lean` に
 登録されておらず、既定の `lake build` の対象外だった(6590 jobs には
