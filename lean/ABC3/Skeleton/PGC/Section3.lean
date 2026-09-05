@@ -74,7 +74,23 @@ def filteredGroupOf.src : Source :=
   Hodge-Tate の定義そのもの)。mathlib 不在。
 - Proposition 2.2(K̄^ の回復)への直接依存。
 
-## ★★検討中の懸念(2026-09-04、訂正込み)
+## ★★★2026-09-05: `V` が**使われていなかった**(訂正)
+
+旧形は `V : PAdicLocalField p → Type*` を仮説に取りながら、結論
+`isHodgeTate K ↔ isHodgeTate K'` に **`V` が一度も現れない**——
+すなわち「`K` 添字の**任意の** Prop 族は filtered iso で不変」と
+言っていた。これは `Check/PGC/Theorem42Degenerate.lean`(自由な `Φ`)・
+`Check/PGC/Cor33Degenerate.lean`(無関係な `ρ`・`ρ'`)と同じ型の欠陥である
+——ただし反例には `K ≠ K'` の witness が要るので、今のところ**反証は
+できていない**(`Check/PGC/RefutationAttempts.lean` の壁)。
+
+**修理**: 原文は「**与えられた** `V` が Hodge-Tate かどうか」を言うのだから、
+`isHodgeTate` を **`V` にも依存する述語**にし、`α` で対応する2つの作用を
+持つ**同一の** `V` について比べる形にした(`Cor 3.3` の修理と同じ発想:
+移送で結ばれた対を比べる)。`K' = K`・`α = 恒等` では `_hcompat` が
+`sK' = sK` を強制するので、`Iff.rfl` に落ちる。
+
+## ★★検討中の懸念(2026-09-04、訂正込み——上の修理で `V` は使われるようになった)
 
 `isHodgeTate : ∀ K, Prop` は**完全に自由なパラメータ**——`V` の構造から
 導かれる制約が一切無い。一見 `Cor 1.3` の `I_K`・`Prop 1.2` の `RD` の
@@ -93,12 +109,14 @@ def filteredGroupOf.src : Source :=
 `Prop 1.1`・`Prop 1.2`・`Cor 1.3` と同じ意味で「反証もできないし証明も
 できない」——未解決のまま、`isHodgeTate` を制約する訂正は不要と見る。 -/
 theorem cor_3_1 (RF : RamificationFiltration p)
-    (V : PAdicLocalField p → Type*) [∀ K, AddCommGroup (V K)] [∀ K, Module ℚ_[p] (V K)]
-    [∀ K, FiniteDimensional ℚ_[p] (V K)] [∀ K, SMul K.absGal (V K)]
-    (isHodgeTate : ∀ K, Prop) :
+    (isHodgeTate : ∀ (K : PAdicLocalField p) (V : Type)
+      [AddCommGroup V] [Module ℚ_[p] V] [SMul K.absGal V], Prop) :
     ∀ {K K' : PAdicLocalField p}
-      (_α : FilteredGroup.Iso (filteredGroupOf RF K) (filteredGroupOf RF K')),
-      isHodgeTate K ↔ isHodgeTate K' := sorry
+      (α : FilteredGroup.Iso (filteredGroupOf RF K) (filteredGroupOf RF K'))
+      (V : Type) [AddCommGroup V] [Module ℚ_[p] V] [FiniteDimensional ℚ_[p] V]
+      (sK : SMul K.absGal V) (sK' : SMul K'.absGal V)
+      (_hcompat : ∀ (g : K.absGal) (x : V), sK'.smul (α.equiv g) x = sK.smul g x),
+      @isHodgeTate K V _ _ sK ↔ @isHodgeTate K' V _ _ sK' := sorry
 
 def cor_3_1.src : Source :=
   { paper := "pGC", pdfPage := 6, item := "Corollary 3.1", sectionId := "cor-3-1" }

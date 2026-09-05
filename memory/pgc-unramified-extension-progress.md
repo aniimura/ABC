@@ -1432,3 +1432,34 @@ PDF と**逐語照合**する。強調の `**` を引用文の中に入れると
 
 ★これで「落とした条件は、主張を偽にするか自明にするかのどちらかになる」例は
 4 つ目(`InertiaDegeneracy`・`Theorem42Degenerate`・`Def32Degenerate`・本件)。
+
+## ★★★★★★★★★★★★★★★★2026-09-05: Corollary 3.1 では `V` が使われていなかった
+
+`Skeleton/PGC/Section3.lean::cor_3_1` の修理。
+
+旧形は `V : PAdicLocalField p → Type*` を仮説に取りながら、結論
+`isHodgeTate K ↔ isHodgeTate K'` に **`V` が一度も現れない**——
+「`K` 添字の**任意の** Prop 族は filtered iso で不変」と言っていた。
+`Theorem42Degenerate`(自由な `Φ`)・`Cor33Degenerate`(無関係な `ρ`・`ρ'`)
+と同じ型の欠陥。**ただし反例には `K ≠ K'` の witness が要るので反証は
+できていない**(`RefutationAttempts.lean` の壁)——ここが Thm 4.2 / Cor 3.3
+との違い。
+
+**修理**: `isHodgeTate` を `V` にも依存する述語にし、`α` で対応する2つの
+作用を持つ**同一の** `V` について比べる形にした(Cor 3.3 の修理と同じ発想):
+```
+(isHodgeTate : ∀ (K) (V : Type) [AddCommGroup V] [Module ℚ_[p] V] [SMul K.absGal V], Prop)
+∀ {K K'} (α) (V) [...] (sK : SMul K.absGal V) (sK' : SMul K'.absGal V)
+  (_hcompat : ∀ g x, sK'.smul (α.equiv g) x = sK.smul g x),
+  @isHodgeTate K V _ _ sK ↔ @isHodgeTate K' V _ _ sK'
+```
+`K'=K`・`α=恒等` では `_hcompat` が `sK' = sK` を強制するので `Iff.rfl` に落ちる。
+
+### §3・§4 の棚卸し(2026-09-05 時点)
+
+| 項目 | 旧形の状態 | 対応 |
+|---|---|---|
+| Def 3.2 | 空虚に真(`I = ∅`) | 修理(開**部分群**)+ 識別力の証明 |
+| Cor 3.1 | `V` 未使用(反証は未達) | 修理(`isHodgeTate` を `V` 依存に) |
+| Cor 3.3 | **偽**(`ρ`・`ρ'` 無関係) | 反証 + 修理(`ρ' ∘ α = ρ`) |
+| Thm 4.2 | **偽**(`Φ` 自由) | 反証 + 修理(自然な射を構成) |
