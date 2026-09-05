@@ -493,6 +493,85 @@ theorem coker_mapBaseChange_annihilated (R : Type*) [CommRing R] (A B : Type*)
   rw [← hω, ← Submodule.Quotient.mk_smul, Submodule.Quotient.mk_eq_zero]
   exact smul_mem_range_mapBaseChange R A B b hb ω
 
+/-! #### ★(B1) の一般形——`Ω[B⁄A]` を経由しない形(2026-09-05)
+
+上の形は余核が**ちょうど** `Ω[B⁄A]` になる場合しか使えない。原文の
+「合成の余核」は `Ω_{W_{n+1}/V_{n+1}}` の**部分加群 `P` による商**
+なので、`P` を直接扱える形にしておくほうが使いやすい:
+
+> `P ≤ Ω[B⁄V]` を `B`-部分加群、`A' := {a ∈ B | D a ∈ P}`(これは
+> `V`-部分代数)とする。`b ∈ A'` かつ `b·B ⊆ A'` なら `b·Ω[B⁄V] ⊆ P`。
+
+証明は **`b·Dx = D(b·x) − x·Db`** の 1 行。`Ω[B⁄A]` も商も経由しない。 -/
+
+/-- **(B1) の一般形**——`b·Dx = D(b·x) − x·Db` の 1 行。 -/
+theorem smul_mem_of_derivation_mem {V B : Type*} [CommRing V] [CommRing B] [Algebra V B]
+    (P : Submodule B (Ω[B⁄V])) (b : B)
+    (hbP : KaehlerDifferential.D V B b ∈ P)
+    (hb : ∀ y : B, KaehlerDifferential.D V B (b * y) ∈ P) :
+    ∀ ω : Ω[B⁄V], b • ω ∈ P := by
+  intro ω
+  have hmem : ω ∈ (⊤ : Submodule B (Ω[B⁄V])) := Submodule.mem_top
+  rw [← KaehlerDifferential.span_range_derivation] at hmem
+  refine Submodule.span_induction ?_ ?_ ?_ ?_ hmem
+  · rintro _ ⟨x, rfl⟩
+    have h := (KaehlerDifferential.D V B).leibniz b x
+    have hb' : b • KaehlerDifferential.D V B x
+        = KaehlerDifferential.D V B (b * x) - x • KaehlerDifferential.D V B b := by
+      rw [h]; abel
+    rw [hb']
+    exact P.sub_mem (hb x) (P.smul_mem x hbP)
+  · simp
+  · intro x y _ _ hx hy; rw [smul_add]; exact P.add_mem hx hy
+  · intro c x _ hx; rw [smul_comm]; exact P.smul_mem c hx
+
+/-- `{a ∈ B | D a ∈ P}` は `V`-部分代数(Leibniz 則と `D(algebraMap)=0`)。
+これがあると「`D a ∈ P`」は**生成元でだけ確かめればよい**
+(`Algebra.adjoin_le`)。 -/
+def derivPreimage {V B : Type*} [CommRing V] [CommRing B] [Algebra V B]
+    (P : Submodule B (Ω[B⁄V])) : Subalgebra V B where
+  carrier := {a : B | KaehlerDifferential.D V B a ∈ P}
+  mul_mem' {a b} ha hb := by
+    show KaehlerDifferential.D V B (a * b) ∈ P
+    rw [Derivation.leibniz]
+    exact P.add_mem (P.smul_mem _ hb) (P.smul_mem _ ha)
+  add_mem' {a b} ha hb := by
+    show KaehlerDifferential.D V B (a + b) ∈ P
+    rw [map_add]; exact P.add_mem ha hb
+  zero_mem' := by show KaehlerDifferential.D V B 0 ∈ P; rw [map_zero]; exact P.zero_mem
+  one_mem' := by
+    show KaehlerDifferential.D V B 1 ∈ P
+    rw [← (algebraMap V B).map_one, (KaehlerDifferential.D V B).map_algebraMap]
+    exact P.zero_mem
+  algebraMap_mem' r := by
+    show KaehlerDifferential.D V B (algebraMap V B r) ∈ P
+    rw [(KaehlerDifferential.D V B).map_algebraMap]; exact P.zero_mem
+
+@[simp] theorem mem_derivPreimage {V B : Type*} [CommRing V] [CommRing B] [Algebra V B]
+    (P : Submodule B (Ω[B⁄V])) (a : B) :
+    a ∈ derivPreimage P ↔ KaehlerDifferential.D V B a ∈ P := Iff.rfl
+
+/-- **(B1) の部分代数版**——`b` が部分代数 `A ≤ derivPreimage P` の導手に
+入るなら `b·Ω[B⁄V] ⊆ P`。 -/
+theorem smul_mem_of_conductor_subalgebra {V B : Type*} [CommRing V] [CommRing B] [Algebra V B]
+    (A : Subalgebra V B) (P : Submodule B (Ω[B⁄V]))
+    (hA : A ≤ derivPreimage P)
+    (b : B) (hbA : b ∈ A) (hb : ∀ y : B, b * y ∈ A) :
+    ∀ ω : Ω[B⁄V], b • ω ∈ P :=
+  smul_mem_of_derivation_mem P b (hA hbA) (fun y => hA (hb y))
+
+/-- **(B1) を「余核が零化される」形へ**——`b` は `Ω[B⁄V] ⧸ P` を零化する。
+`step_facts_of_modules` の `hbann` に直接入る形。 -/
+theorem quot_annihilated_of_conductor_subalgebra {V B : Type*} [CommRing V] [CommRing B]
+    [Algebra V B] (A : Subalgebra V B) (P : Submodule B (Ω[B⁄V]))
+    (hA : A ≤ derivPreimage P)
+    (b : B) (hbA : b ∈ A) (hb : ∀ y : B, b * y ∈ A) :
+    ∀ z : (Ω[B⁄V] ⧸ P), b • z = 0 := by
+  intro z
+  obtain ⟨ω, hω⟩ := Submodule.Quotient.mk_surjective P z
+  rw [← hω, ← Submodule.Quotient.mk_smul, Submodule.Quotient.mk_eq_zero]
+  exact smul_mem_of_conductor_subalgebra A P hA b hbA hb ω
+
 /-! #### ★(B2) への接続——導手の元が (B1) の仮定を与える
 
 mathlib の `conductor R x = {b : S | ∀ y : S, b·y ∈ R[x]}` は
@@ -528,6 +607,24 @@ theorem kaehler_annihilated_of_mem_conductor {R S : Type*} [CommRing R] [CommRin
     ∀ ω : Ω[S⁄↥(Algebra.adjoin R ({x} : Set S))],
       (⟨b, conductor_subset_adjoin hb⟩ : ↥(Algebra.adjoin R ({x} : Set S))) • ω = 0 :=
   kaehler_annihilated_of_conductor _ (hb_of_mem_conductor x b hb)
+
+/-- **(B1) の一般形＋導手**——`b ∈ conductor R x` と
+「`R[x]` の元の微分が `P` に入る」から、`b` が `Ω[B⁄V] ⧸ P` を零化する。
+
+原文の合成 `Ω_{Wₙ/Vₙ} ⊗ W' → Ω_{W'/Vₙ} → Ω_{W'/V_{n+1}}` に対して
+`P := 合成の像`、`R := Wₙ`、`x := V_{n+1}` の生成元、`V := V_{n+1}`
+と取ると、`R[x] = Wₙ ⊗_{Vₙ} V_{n+1}` の像で、その微分は
+第 1 写像の像に入る(`Wₙ` の元の `d`)から `hA` が満たされる。 -/
+theorem quot_annihilated_of_mem_conductor {V R B : Type*} [CommRing V] [CommRing R] [CommRing B]
+    [Algebra V B] [Algebra R B] (x : B) (P : Submodule B (Ω[B⁄V]))
+    (hA : ∀ a ∈ Algebra.adjoin R ({x} : Set B), KaehlerDifferential.D V B a ∈ P)
+    (b : B) (hb : b ∈ conductor R x) :
+    ∀ z : (Ω[B⁄V] ⧸ P), b • z = 0 := by
+  intro z
+  obtain ⟨ω, hω⟩ := Submodule.Quotient.mk_surjective P z
+  rw [← hω, ← Submodule.Quotient.mk_smul, Submodule.Quotient.mk_eq_zero]
+  exact smul_mem_of_derivation_mem P b (hA b (conductor_subset_adjoin hb))
+    (fun y => hA _ (mem_conductor_iff.mp hb y)) ω
 
 open Polynomial in
 /-- 非空虚性——`R[x] = S` なら導手は `⊤`(`conductor_eq_top_of_adjoin_eq_top`)
