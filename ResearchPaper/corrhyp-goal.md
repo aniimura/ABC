@@ -5788,3 +5788,52 @@ Found側sorry 0件。
 **次の一手**: `descend2_of_map`を実際に呼んで`R'`レベルの環準同型を得る。
 そこから`Spec`を取れば`f i j : V (i,j) ⟶ U i`。
 集計は引き続き10/24——§4は引き続き0/2。
+
+### 2026-09-05夜さらに続き41 — ★★`f i j`の`R'`レベル環準同型を得た★★
+
+続き40の`hψ`を使って`descend2_of_map`を**実際に呼び**、`Lemma 4.1`の
+`f i j`の正体である`R'`レベルの環準同型の存在を示した
+(`ExtLimit.lean`の`exists_descendPieceR_ringHom`、12.6秒):
+
+```
+∃ R' (hR : R_U ≤ R') (hR₂ : R_V ≤ R'),
+  Nonempty (
+    MvPolynomial _ (Γ(X.left,U) ⊗[ℚ] R'.1) ⧸ span (range (q₀_U を R' へ昇格))
+    →+*
+    MvPolynomial _ (Γ(X.left,V) ⊗[ℚ] R'.1) ⧸ span (range (q₀_V を R' へ昇格)))
+```
+
+`Spec`を取れば`f i j : V (i,j) ⟶ U i`そのものである。
+
+**組み立て**:
+1. `descend2_of_map`を`φ := pieceRestrictAlgHom`・
+   `q`/`q₂ := pieceAlgebra_relation_descend_q₀`・
+   `ψ i := P_V.σ (制限 (P_U.val i))`・`hψ := descendPieceR_hψ`で呼ぶ。
+   `R'`と生成元の行き先`ev`、`R'`レベルでの関係式の所属が出る。
+2. 係数の写像を`(φ ⊗ id R') ∘ (id ⊗ incl hR) = φ ⊗ incl hR`で揃える。
+3. `mvPolynomial_quotient_ringHom_of_data`(新設、`Ideal.Quotient.lift`)で
+   商環の間の環準同型に仕立てる。
+
+**新設の汎用補題**(いずれも`FieldLimit.lean`、CorrHyp非依存):
+- `tensorProduct_map_split` — `f ⊗ g = (f ⊗ id) ∘ (id ⊗ g)`
+- `mvPolynomial_map_tensorMap_split` — その`MvPolynomial`版
+- `mvPolynomial_quotient_ringHom_of_data` / `_mk` — `ev`と`ρ`から商環の
+  環準同型。既存の`..._ringEquiv_of_data`は**同型**用だったが、新設計では
+  `f i j`は**写像**でよく係数環も動くので、こちらの方が軽い。
+
+**配管で今日いちばん効いた教訓**(`lean-idioms` #65 に追記):
+2. を巨大な文脈で`rw [MvPolynomial.map_map]`と書くと`isDefEq`が
+ヒートビートを食い尽くす(4000000でも**6分でtimeout**)。同じ等式を
+**小さい汎用の文脈で証明しておいて`exact`する**と**3秒**。
+補題側でも`rw`は落ちるので項(`Eq.trans`+`congrArg`)で組み、
+最後の所属も`▸`でなく`Eq.mpr (congrArg (fun x => x ∈ I) …)`と
+**動機を明示**して渡す。
+
+検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
+Found側sorry 0件。
+
+**次の一手**: `Spec`を取って`f i j : V (i,j) ⟶ U i`を実際に作り、
+開埋め込み性(`IsOpenImmersion.of_isLocalization`)を示す。
+そのあと`t i j = eqToHom`(`inf_comm`)・`t_id`・`cocycle`を組んで
+`Scheme.GlueData`を完成させる。
+集計は引き続き10/24——§4は引き続き0/2(`Lemma 4.1`本体はまだ)。

@@ -3294,4 +3294,61 @@ theorem tensorProduct_map_split {R A A' B B' : Type} [CommRing R] [CommRing A] [
           (Algebra.TensorProduct.map (AlgHom.id R A) g) := by
   ext <;> simp
 
+set_option maxHeartbeats 2000000 in
+open scoped TensorProduct in
+/-- `tensorProduct_map_split`の`MvPolynomial`版。**使う側でこの形が要る**
+ので、`CorrHyp`の巨大な型を持ち込まない小さい文脈でここに置いておく
+(`Algebra.TensorProduct`のインスタンス解決が重く、ここで56秒かかるが、
+使う側では`exact`一発・3秒で済む)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem mvPolynomial_map_tensorMap_split {R A A' B B' : Type} [CommRing R] [CommRing A]
+    [CommRing A'] [CommRing B] [CommRing B'] [Algebra R A] [Algebra R A'] [Algebra R B]
+    [Algebra R B'] (f : A →ₐ[R] A') (g : B →ₐ[R] B') {ι : Type} (x : MvPolynomial ι (A ⊗[R] B)) :
+    MvPolynomial.map (Algebra.TensorProduct.map f (AlgHom.id R B')).toRingHom
+      (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id R A) g).toRingHom x)
+    = MvPolynomial.map (Algebra.TensorProduct.map f g).toRingHom x :=
+  Eq.trans (MvPolynomial.map_map _ _ x)
+    (congrArg (fun t : (A ⊗[R] B) →ₐ[R] (A' ⊗[R] B') => MvPolynomial.map t.toRingHom x)
+      (tensorProduct_map_split f g).symm)
+
+/-- **商環の間の環準同型を、生成元の行き先`ev`と係数の写像`ρ`から作る**——
+`Lemma 4.1`の`f i j`は「`R'`レベルの環準同型の`Spec`」なので、
+`descend2_of_map`が返す生データ(`ev`と関係式の所属)から実際の`RingHom`を
+組み立てるのがこれ。`Ideal.Quotient.lift`のwell-definednessは
+`Ideal.span_le`＋`Ideal.comap`で`hq`から出る。
+
+既存の`exists_mvPolynomial_quotient_ringEquiv_of_data`は**同型**を作る
+ものだったが、新設計(`V (i,j) := U_i ⊓ U_j`の片)では`f i j`は**写像**で
+よく、係数環も`T`から`T'`へ動く。その分だけ軽い。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def mvPolynomial_quotient_ringHom_of_data {T T' : Type} [CommRing T] [CommRing T']
+    {ι κ ι' κ' : Type} (ρ : T →+* T')
+    (q : κ → MvPolynomial ι T) (q₂ : κ' → MvPolynomial ι' T') (ev : ι → MvPolynomial ι' T')
+    (hq : ∀ k, MvPolynomial.aeval ev (MvPolynomial.map ρ (q k)) ∈ Ideal.span (Set.range q₂)) :
+    (MvPolynomial ι T ⧸ Ideal.span (Set.range q)) →+*
+      (MvPolynomial ι' T' ⧸ Ideal.span (Set.range q₂)) :=
+  Ideal.Quotient.lift _
+    ((Ideal.Quotient.mk (Ideal.span (Set.range q₂))).comp
+      ((MvPolynomial.aeval ev).toRingHom.comp (MvPolynomial.map ρ)))
+    (fun a ha => by
+      rw [RingHom.comp_apply, Ideal.Quotient.eq_zero_iff_mem]
+      have hle : Ideal.span (Set.range q) ≤ Ideal.comap
+          ((MvPolynomial.aeval ev).toRingHom.comp (MvPolynomial.map ρ))
+          (Ideal.span (Set.range q₂)) :=
+        Ideal.span_le.mpr (fun x hx => by obtain ⟨k, rfl⟩ := hx; exact hq k)
+      exact hle ha)
+
+/-- `mvPolynomial_quotient_ringHom_of_data`の計算則(`rfl`)。 -/
+theorem mvPolynomial_quotient_ringHom_of_data_mk {T T' : Type} [CommRing T] [CommRing T']
+    {ι κ ι' κ' : Type} (ρ : T →+* T')
+    (q : κ → MvPolynomial ι T) (q₂ : κ' → MvPolynomial ι' T') (ev : ι → MvPolynomial ι' T')
+    (hq : ∀ k, MvPolynomial.aeval ev (MvPolynomial.map ρ (q k)) ∈ Ideal.span (Set.range q₂))
+    (p : MvPolynomial ι T) :
+    mvPolynomial_quotient_ringHom_of_data ρ q q₂ ev hq
+        (Ideal.Quotient.mk (Ideal.span (Set.range q)) p)
+      = Ideal.Quotient.mk (Ideal.span (Set.range q₂))
+        (MvPolynomial.aeval ev (MvPolynomial.map ρ p)) := rfl
+
 end ABC3.Found.CorrHyp

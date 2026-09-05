@@ -2607,3 +2607,25 @@ R/R₂ := pieceAlgebra_relation_descend_R・q/q₂ := 同 q₀ で呼ぶとき�
 
 次の一手: descend2_of_map を実際に呼んで R' レベルの環準同型 → Spec →
 f i j : V (i,j) ⟶ U i。集計は10/24——§4は0/2。
+
+## 2026-09-05夜さらに続き41 — f i j の R' レベル環準同型を得た
+
+ExtLimit.lean の exists_descendPieceR_ringHom(12.6秒)。descend2_of_map を
+続き40 の hψ で実際に呼び、R' レベルの環準同型の存在を示した。Spec を取れば
+f i j : V (i,j) ⟶ U i そのもの。
+
+新設の汎用補題(FieldLimit、CorrHyp非依存):
+- tensorProduct_map_split: f ⊗ g = (f ⊗ id) ∘ (id ⊗ g)
+- mvPolynomial_map_tensorMap_split: その MvPolynomial 版(小さい文脈で56秒
+  かけて証明しておくと、使う側は exact 一発3秒)
+- mvPolynomial_quotient_ringHom_of_data / _mk: ev と ρ から商環の環準同型
+  (既存の ..._ringEquiv_of_data は同型用。新設計では写像でよく係数環も動く)
+
+配管の教訓(lean-idioms #65 追記): 巨大な文脈で rw [MvPolynomial.map_map] は
+isDefEq がヒートビートを食い尽くす(4000000 でも6分 timeout)。小さい汎用の
+文脈で証明した補題を exact するのが正解。最後の所属も ▸ でなく
+Eq.mpr (congrArg (fun x => x ∈ I) …) と動機を明示。
+
+次の一手: Spec を取って f i j を作り、開埋め込み性を示す。そのあと
+t i j = eqToHom(inf_comm)・t_id・cocycle で Scheme.GlueData を完成。
+集計は10/24——§4は0/2(Lemma 4.1 本体はまだ)。
