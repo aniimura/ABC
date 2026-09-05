@@ -1,4 +1,5 @@
 import ABC3.Found.Falt1.AlmostDerivation
+import ABC3.Found.Falt1.Section1
 
 /-!
 # [Falt1] Chapter I §3 —— almost 直和因子からの降下(2026-09-05)
@@ -412,6 +413,66 @@ theorem kaehler_annihilated_of_roots_of_units {A B ι : Type u} [CommRing A] [Co
   · simp
   · intro y z _ _ hy hz; rw [smul_add, hy, hz, add_zero]
   · intro c y _ hy; rw [smul_comm, hy, smul_zero]
+
+/-! ### ★原文 §3(a) の `Rₙ` を実際に構成する(2026-09-05)
+
+原文が *"It is clear that `Rₙ ≅ (R ⊗_V Vₙ)[X₁,…,X_d]/(Xᵢ^{p^n} − uᵢ)`"*
+と書く環を、Lean で**そのまま定義**して微分を計算する。 -/
+
+/-- **原文 §3(a) の `Rₙ`**——`S[X₁,…,X_d]/(Xᵢ^N − uᵢ)`。 -/
+noncomputable abbrev kummerAlgebra (S : Type u) [CommRing S] (ι : Type u) (N : ℕ) (u : ι → S) :
+    Type u :=
+  MvPolynomial ι S ⧸ Ideal.span (Set.range fun i =>
+    (MvPolynomial.X i : MvPolynomial ι S) ^ N - MvPolynomial.C (u i))
+
+/-- 生成元 `xᵢ = Xᵢ` の像。 -/
+noncomputable def kummerGen (S : Type u) [CommRing S] (ι : Type u) (N : ℕ) (u : ι → S)
+    (i : ι) : kummerAlgebra S ι N u :=
+  Ideal.Quotient.mk _ (MvPolynomial.X i)
+
+/-- `xᵢ^N = uᵢ`。 -/
+theorem kummerGen_pow (S : Type u) [CommRing S] (ι : Type u) (N : ℕ) (u : ι → S) (i : ι) :
+    (kummerGen S ι N u i) ^ N = algebraMap S (kummerAlgebra S ι N u) (u i) := by
+  rw [kummerGen, ← map_pow]
+  have hrw : (MvPolynomial.X i : MvPolynomial ι S) ^ N
+      = MvPolynomial.C (u i) + ((MvPolynomial.X i) ^ N - MvPolynomial.C (u i)) := by ring
+  have hmem : ((MvPolynomial.X i : MvPolynomial ι S) ^ N - MvPolynomial.C (u i))
+      ∈ Ideal.span (Set.range fun j => (MvPolynomial.X j : MvPolynomial ι S) ^ N
+        - MvPolynomial.C (u j)) := Ideal.subset_span ⟨i, rfl⟩
+  rw [hrw, map_add, Ideal.Quotient.eq_zero_iff_mem.mpr hmem, add_zero]
+  rfl
+
+/-- `xᵢ` たちが `S`-代数として生成する。 -/
+theorem kummerGen_adjoin (S : Type u) [CommRing S] (ι : Type u) (N : ℕ) (u : ι → S) :
+    Algebra.adjoin S (Set.range (kummerGen S ι N u)) = ⊤ := by
+  have hrange : Set.range (kummerGen S ι N u)
+      = (Ideal.Quotient.mkₐ S (Ideal.span (Set.range fun i =>
+          (MvPolynomial.X i : MvPolynomial ι S) ^ N - MvPolynomial.C (u i)))) ''
+        (Set.range MvPolynomial.X) := by
+    ext z
+    constructor
+    · rintro ⟨i, rfl⟩; exact ⟨MvPolynomial.X i, ⟨i, rfl⟩, rfl⟩
+    · rintro ⟨_, ⟨i, rfl⟩, rfl⟩; exact ⟨i, rfl⟩
+  rw [hrange, Algebra.adjoin_image, MvPolynomial.adjoin_range_X, Algebra.map_top,
+    AlgHom.range_eq_top]
+  exact Ideal.Quotient.mkₐ_surjective S _
+
+/-- **★`Rₙ` の微分は `N` で消える**——原文 §3(a) の `Rₙ` そのものに対する
+主張。`uᵢ` が単元であることだけを使う。 -/
+theorem kummerAlgebra_kaehler_annihilated (S : Type u) [CommRing S] (ι : Type u) (N : ℕ)
+    (hN : 0 < N) (u : ι → S) (hu : ∀ i, IsUnit (u i)) :
+    ∀ ω : Ω[(kummerAlgebra S ι N u)⁄S], (N : ℕ) • ω = 0 :=
+  kaehler_annihilated_of_roots_of_units (kummerGen S ι N u) N hN u
+    (kummerGen_pow S ι N u)
+    (fun i => (hu i).map (algebraMap S (kummerAlgebra S ι N u)))
+    (kaehler_span_of_adjoin _ (kummerGen_adjoin S ι N u))
+
+/-- 非空虚性——`S = ℤ[T]`、`ι = Fin 1`、`N = 5`、`u ≡ 1`
+(`S[X]/(X⁵−1)`、1 の 5 乗根を添加した環)。その微分は `5` で消える。 -/
+example : ∀ ω : Ω[(kummerAlgebra (Polynomial ℤ) (Fin 1) 5 (fun _ => 1))⁄(Polynomial ℤ)],
+    (5 : ℕ) • ω = 0 :=
+  kummerAlgebra_kaehler_annihilated (Polynomial ℤ) (Fin 1) 5 (by norm_num) (fun _ => 1)
+    (fun _ => isUnit_one)
 
 /-! ## ★almost étale は塔で合成できる(2026-09-05)
 
