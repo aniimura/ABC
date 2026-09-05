@@ -28,8 +28,13 @@ tools: Read, Grep, Glob, Bash
 
 3. **省略の合図を数える。**
    原典が `immediately / formally / routine / one verifies / well-known` で畳んだ箇所は
-   `node tools/hedge-index.mjs --item "<項目名>"` で内訳、`--cite` で
+   `node tools/hedge-index.mjs --paper <鍵> --item "<項目名>"` で内訳、`--cite` で
    「合図の文が抱えている引用」＝手順書が出る。
+   ★**`--paper` を必ず付ける**(2026-09-05 の第 1027 まで、付けないと別の論文の地図が
+   静かに出ていた)。鍵の一覧は `--papers`、全 47 論文の被覆は `--all`。
+   ★**見出しが見つからないと exit 1 で終わる**(近い見出しを出す)。これは仕様で、
+   「黙って 0 件を返す」ことが誤った安心を生んだため。`&&` で繋がず、出力を読むこと。
+   「合図 0 件」は**原文が畳んでいない**という別の結論として表示される。
    語ごとの意味は `ResearchPaper/frdi-decomposition.json` の「★省略の合図の読み方」。
    **合図 1 つ = 依存グラフの節点 1 つ**として数える。
 
