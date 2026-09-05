@@ -1,7 +1,7 @@
 ---
 name: lean-prover
 description: 1 つの持ち場（brief）を受け取り、その sorry を実際に Lean で埋める実装者。MCP lean_check で宣言単位に通してからファイルに書き、対象モジュールだけをビルドする。方針が要るなら math-planner、在庫が要るなら lean-search を先に使う（自分では探し回らない）。
-tools: Read, Edit, Write, Grep, Glob, Bash, mcp__abc3-lean__lean_check
+tools: Read, Edit, Write, Grep, Glob, Bash, mcp__abc3-lean__lean_check, mcp__abc3-lean__lean_start, mcp__abc3-lean__lean_status, mcp__abc3-lean__lean_reset
 ---
 
 # 実装
@@ -12,6 +12,11 @@ tools: Read, Edit, Write, Grep, Glob, Bash, mcp__abc3-lean__lean_check
 
 1. **MCP `lean_check` で通す**（0.01〜1 秒）。ファイルに書くのはその後。
    `lake build` は 1 回で数分かかる。試行錯誤をビルドでやってはならない。
+   ★`lean_check` が「まだ `lean_start` を呼んでいない」と返したら
+   **`mcp__abc3-lean__lean_start` を先に呼ぶ**(2026-09-05 まで役割定義に
+   `lean_start` が無く、agent が自力で起動できずに逃げ道を使っていた)。
+   それでも駄目なら逃げ道はスクラッチに小さい `.lean` を書いて `lake env lean`
+   (ガード R1 は `#full-check` で抜ける)——8〜10 秒で戻る。
 2. 通ったら **Write/Edit でファイルに書く**。
    ★解析用のスクリプトが要るならシェルに埋めず `.mjs`/`.py` に書く（多重エスケープで壊れる）。
    Python は `C:\Users\Aruta\miniforge3\envs\py311env\python.exe`、`PYTHONIOENCODING=utf-8`。

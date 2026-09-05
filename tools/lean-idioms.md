@@ -5673,3 +5673,38 @@ failed to synthesize instance of type class
 （`Module.finrank ℚ_[p] (fixedFieldLocalField K H hH).carrier
 = Module.finrank ℚ_[p] ↥(IntermediateField.fixedField H)` は `rfl` で通る）。
 `Found/PGC/DegreeTransport.lean::finrank_fixedFieldLocalField` が実例。
+
+## `WithZero (Multiplicative ℤ)` の付値は `WithZero.exp` / `WithZero.log` で書く（2026-09-05）
+
+mathlib の adic valuation の戻り値が `Multiplicative.ofAdd (-1)` から
+**`WithZero.exp (-1 : ℤ)`** に変わっている（`exp a = coe (Multiplicative.ofAdd a)` なので
+定義は同じだが、**simp 補題が `exp`/`log` 側にしか付いていない**）。
+
+- `IsDedekindDomain.HeightOneSpectrum.valuation_exists_uniformizer K v : ∃ π, v.valuation K π = WithZero.exp (-1)`
+- `valuation_exists_uniformizer'` は **`π : R`**（整の側）を返す。茂・正則関数の側に錨を打つときはこちら。
+
+★`ord := -(WithZero.unzero h).toAdd` のような定義を扱うなら、まず
+`ord f = -WithZero.log (v f)`（**`if` 無し**、`log 0 = 0` なので `f = 0` も含めて成立）
+を 1 本立てると、以降が `log_exp` / `log_zpow` / `log_mul` で全部落ちる。
+場合分けを毎回書くのと差が大きい。
+`Found/Divisor/SchemeWeilOrd.lean::ordPt_eq_neg_log` が実例。
+
+## `lean_start` がツール一覧に無い agent での逃げ道（2026-09-05）
+
+sub-agent によっては MCP が `lean_check` だけを見せていて、`lean_check` は
+「まだ lean_start を呼んでいない」と返して起動できない。このときは
+**スクラッチパッドに小さい `.lean` を書いて `lake env lean <そのファイル>`**（ガード R1 を
+コマンドに `#full-check` を含めて抜ける）で代用する。import が 1 本なら **8〜10 秒**で戻るので、
+対象ファイル本体を毎回 `lake build` するよりずっと安い。
+★対象ファイル自体を import せず、**head -N で先頭を切り出して新ブロックを挿した写し**を
+作ると、もとの `variable` の効き方まで含めて同じ 8 秒で検査できる。
+
+## 構造体フィールドが `[inst]` を含むとき、`f _ _ := 0` の**下線の数**を数え違えると別の場所でエラーになる（2026-09-05）
+
+`ord : ∀ (X : Scheme) [IsIntegral X], PrimeDivisorPt X → X.functionField → ℤ` のような
+フィールドを `where` で埋めるとき、**instance-implicit 束縛子も下線 1 個を消費する**
+（自動挿入されない）。ところが束縛子を減らしすぎても `Pi.instOfNat` が効いて
+「関数への `0`」として**通ってしまう**ことがあり、エラーは
+`OfNat (IsNormalScheme x → … → WeilDiv x) 0` のように**別のフィールドで**出る。
+→ フィールドの `∀` を数え、`[…]` も 1 個ずつ数えて下線を合わせる。
+`Check/FrdI/Ex61OrdDegenerate.lean::zeroWeilOrd`（`ord _ _ _ _ := 0`、`div _ _ _ _ := 0`）が実例。

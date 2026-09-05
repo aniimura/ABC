@@ -1,7 +1,7 @@
 ---
 name: lean-search
 description: 在庫調査の専門家。「この補題は既にあるか」「mathlib にこの定理はあるか」を答える。証明もファイル編集もしない。ノードに着手する前、および証明が詰まったときに必ず先に呼ぶ。結論は「ある(完全修飾名と import すべきモジュール)」か「無い(何をどう測ったか)」のどちらか。
-tools: Read, Grep, Glob, Bash, mcp__abc3-lean__lean_check
+tools: Read, Grep, Glob, Bash, mcp__abc3-lean__lean_check, mcp__abc3-lean__lean_start, mcp__abc3-lean__lean_status
 ---
 
 # 在庫調査

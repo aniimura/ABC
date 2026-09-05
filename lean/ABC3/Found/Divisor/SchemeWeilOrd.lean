@@ -37,6 +37,7 @@ import Mathlib.AlgebraicGeometry.Stalk
 |---|---|
 | `weil:ord-pt` | `ordPtVal` / `ordPt` / `ordPt_mul` / `ordPt_one` |
 | `weil:affine-compat` | `isCodimOnePt_spec_iff` / `isCodimOnePt_iff_of_isOpenImmersion` |
+| `weil:ord-nondeg` | ★`exists_ordPt_eq_one` / `exists_ordPt_eq_one'` / `exists_ordPt_eq` / `ordPt_surjective` / `not_forall_ordPt_eq_zero` |
 -/
 
 namespace ABC3.Found.Divisor
@@ -129,12 +130,128 @@ theorem isCodimOnePt_iff_of_isOpenImmersion {X Y : Scheme.{u}} (f : X ⟶ Y)
     ((asIso (f.stalkMap x)).commRingCatIsoToRingEquiv).ringKrullDim
   rw [IsCodimOnePt, IsCodimOnePt, ← h]
 
+/-! ## ★4. 錨 —— `ord_x` は零写像ではない(鎖 `weil` の `ord-nondeg`)
+
+★★**なぜこの節が要るか** —— `ord_x` の性質として書かれるもの
+(`ordPt_mul` / `ordPt_one` / `div(f)` の台の有限性)は、
+**`ord_x ≡ 0` と置けばすべて自明に成り立ってしまう**。
+`IsNormalScheme` は「正直な定義が可能になる」条件であって、
+「零写像を排除する」条件ではない。排除するには**錨**が要る。
+
+★錨は一様化元(uniformizer)である —— 余次元 1 の茎は DVR なので、
+`HeightOneSpectrum.valuation_exists_uniformizer` が付値 `exp (-1)` の元を与える。
+符号規約 `ordPt := -(unzero v f).toAdd` により `-(-1) = 1`。
+-/
+
+/-- ★**`ordPt` は `-log ∘ ordPtVal`** —— `0` の場合も含めて場合分け無しで書ける。
+
+★`WithZero.log 0 = 0` なので、`ordPt` の `if` と一致する。 -/
+theorem ordPt_eq_neg_log (hnorm : IsNormalScheme X) (x : PrimeDivisorPt X)
+    (f : X.functionField) :
+    ordPt X hnorm x f = -WithZero.log (ordPtVal X hnorm x f) := by
+  rw [ordPt]
+  split
+  · next h => rw [h]; simp
+  · next h =>
+      refine congrArg Neg.neg ?_
+      conv_rhs => rw [← WithZero.coe_unzero h]
+      rfl
+
+/-- ★★**一様化元** —— 付値がちょうど `exp (-1)` になる関数体の元。
+
+★`IsDedekindDomain.HeightOneSpectrum.valuation_exists_uniformizer` をそのまま乗せた。 -/
+theorem exists_uniformizer_ordPtVal (hnorm : IsNormalScheme X) (x : PrimeDivisorPt X) :
+    ∃ π : X.functionField, π ≠ 0 ∧ ordPtVal X hnorm x π = WithZero.exp (-1 : ℤ) := by
+  haveI := isDiscreteValuationRing_stalk_of_codimOne X hnorm x
+  obtain ⟨π, hπ⟩ :=
+    (dvrSpectrum (X.presheaf.stalk x.1)).valuation_exists_uniformizer X.functionField
+  have hval : ordPtVal X hnorm x π = WithZero.exp (-1 : ℤ) := hπ
+  refine ⟨π, ?_, hval⟩
+  rintro rfl
+  rw [map_zero] at hval
+  exact WithZero.exp_ne_zero hval.symm
+
+/-- ★★★**錨(一般形)** —— 任意の `n : ℤ` に対し `ord_x(f) = n` となる `f ∈ K(X)^×` がある。 -/
+theorem exists_ordPt_eq (hnorm : IsNormalScheme X) (x : PrimeDivisorPt X) (n : ℤ) :
+    ∃ f : (X.functionField)ˣ, ordPt X hnorm x (f : X.functionField) = n := by
+  obtain ⟨π, hπ0, hval⟩ := exists_uniformizer_ordPtVal hnorm x
+  refine ⟨Units.mk0 π hπ0 ^ n, ?_⟩
+  have hcoe : ((Units.mk0 π hπ0 ^ n : (X.functionField)ˣ) : X.functionField) = π ^ n := by
+    simp
+  rw [hcoe, ordPt_eq_neg_log]
+  have hz : ordPtVal X hnorm x (π ^ n) = WithZero.exp (-1 : ℤ) ^ n := by
+    rw [map_zpow₀, hval]
+  rw [hz, WithZero.log_zpow, WithZero.log_exp]
+  simp
+
+/-- ★★★★★**錨** —— `ord_x(f) = 1` となる `f ∈ K(X)^×` が存在する。
+
+★★これ 1 本で `ordPt ≡ 0` は死ぬ(`not_forall_ordPt_eq_zero`)。 -/
+theorem exists_ordPt_eq_one (hnorm : IsNormalScheme X) (x : PrimeDivisorPt X) :
+    ∃ f : (X.functionField)ˣ, ordPt X hnorm x (f : X.functionField) = 1 :=
+  exists_ordPt_eq hnorm x 1
+
+/-- ★★★★★**錨(単元を剥いた形)** —— `Check/FrdI/Ex61OrdDegenerate.lean` の
+`HasOrdAnchor` がそのまま消費できる形。 -/
+theorem exists_ordPt_eq_one' (hnorm : IsNormalScheme X) (x : PrimeDivisorPt X) :
+    ∃ f : X.functionField, f ≠ 0 ∧ ordPt X hnorm x f = 1 := by
+  obtain ⟨f, hf⟩ := exists_ordPt_eq_one hnorm x
+  exact ⟨(f : X.functionField), f.ne_zero, hf⟩
+
+/-- ★★**錨(茎の側)** —— 一様化元は茎(正則関数)から取れる。
+
+★これは `ordPt ≥ 0` の側に錨を打つ —— `div(f)` が実際に `x` を係数 `1` で含む。 -/
+theorem exists_stalk_ordPt_eq_one (hnorm : IsNormalScheme X) (x : PrimeDivisorPt X) :
+    ∃ r : X.presheaf.stalk x.1,
+      algebraMap (X.presheaf.stalk x.1) X.functionField r ≠ 0 ∧
+        ordPt X hnorm x (algebraMap (X.presheaf.stalk x.1) X.functionField r) = 1 := by
+  haveI := isDiscreteValuationRing_stalk_of_codimOne X hnorm x
+  obtain ⟨r, hr⟩ :=
+    (dvrSpectrum (X.presheaf.stalk x.1)).valuation_exists_uniformizer' X.functionField
+  have hval : ordPtVal X hnorm x (algebraMap _ _ r) = WithZero.exp (-1 : ℤ) := hr
+  refine ⟨r, ?_, ?_⟩
+  · intro h
+    rw [h, map_zero] at hval
+    exact WithZero.exp_ne_zero hval.symm
+  · rw [ordPt_eq_neg_log, hval, WithZero.log_exp]
+    simp
+
+/-- ★★★**`ord_x : K(X)^× → ℤ` は全射**。 -/
+theorem ordPt_surjective (hnorm : IsNormalScheme X) (x : PrimeDivisorPt X) :
+    Function.Surjective fun f : (X.functionField)ˣ => ordPt X hnorm x (f : X.functionField) :=
+  fun n => exists_ordPt_eq hnorm x n
+
+/-- ★★★★★**退化の否定** —— `ord_x` は零写像ではない。
+
+★★`Check/**/*Degenerate.lean` の 7 例と同じ罠(条件を落とすと主張が自明になる)を、
+ここで**塞いだ**ことの記録である。 -/
+theorem not_forall_ordPt_eq_zero (hnorm : IsNormalScheme X) (x : PrimeDivisorPt X) :
+    ¬ ∀ f : X.functionField, ordPt X hnorm x f = 0 := by
+  intro h
+  obtain ⟨f, hf⟩ := exists_ordPt_eq_one hnorm x
+  rw [h (f : X.functionField)] at hf
+  exact zero_ne_one hf
+
 /-! ### ★出典の紐付け -/
 
 /-- ★★★locator —— `Example 6.1` の `ord_x`。 -/
 def ordPt.src : ABC3.Meta.Source :=
   { paper := "FrdI", pdfPage := 109,
     item := "Example 6.1 — 余次元 1 の点が定める ord_x : K(X)^× → ℤ",
+    sectionId := "frdi-example-6-1" }
+
+/-- ★★★★★locator —— `ord_x` が零写像でないこと(錨)。
+
+★★★逸脱の記録: **原典はこの主張を明示的に書いていない**。
+FrdI p.109 の `Example 6.1` は `ord_x` を「余次元 1 の点の付値」として導入するだけで、
+「零写像でない」ことは自明として畳んでいる。
+本ファイルではこれを**明示の定理として立てた** —— 理由は、
+`ord_x` の性質(乗法性・台の有限性)だけでは `ord_x ≡ 0` が反例として残り、
+後続の `div(f)` / `B(L)` の議論が空になるからである。
+主張の追加であって前提の追加ではないので、後続の証明への影響は無い。 -/
+def exists_ordPt_eq_one.src : ABC3.Meta.Source :=
+  { paper := "FrdI", pdfPage := 109,
+    item := "Example 6.1 — ord_x は零写像でない(一様化元による錨)",
     sectionId := "frdi-example-6-1" }
 
 /-- ★★locator —— `Example 6.1` のアフィン開との両立(余次元 1 の点 ↔ 高さ 1 の素イデアル)。 -/
