@@ -1598,3 +1598,31 @@ normal でない有限拡大 ⟹ 固定部分群が**正規でない開部分群
 **1 つが「空虚に真」と判明して直った**(Def 3.2)、**1 つが未使用引数だった**(Cor 3.1)。
 残る Prop 1.1(局所 Tate 双対性)・Prop 1.2(相互律)・Prop 2.1 は
 本物の数学が足りないだけで、statement は健全。
+
+## 2026-09-05(続き): 完全分岐の枠組みと、配管の壁の記録
+
+`Found/PGC/TotallyRamified.lean`(新規)
+
+- `IsTotallyRamifiedAdjoin K x := inertiaDegree K x = 1`
+- **`finrank_eq_one_of_isUnramified_of_isTotallyRamified`** :
+  不分岐かつ完全分岐なら次数 1(`e·f = [K(x):K]` の直接の帰結)
+- `finrank_eq_one_of_mem_unramifiedClosure_of_isTotallyRamified` :
+  `x ∈ K^ur` かつ完全分岐なら `K(x) = K`
+- `isUnit_adjoinIntegers_iff` : `adjoinIntegers K x` の単数はノルム 1
+
+### ★壁の記録(tools/lean-idioms.md #59)
+
+`K(x) ≤ K(y)` に沿った整数環の包含は**数学的には自明**だが Lean では素直に
+書けない:
+- `IntermediateField.inclusion` を使うと kernel deterministic timeout(60 秒)
+- `⟨(z : K.closure), hle z.2⟩` と書けば**中間体の元 1 層なら 0.06 秒**
+- しかし `adjoinIntegers`(中間体の部分環)は**2 層**なので同じ形でも落ちる
+
+回避策: `𝒪[(adjoinField K x).carrier]` 側で組む
+(`integers_eq_adjoinIntegers` で移せる)か、ノルム保存を明示補題として
+先に用意してから `def` を書く。
+
+### 「完全分岐 ∩ K^ur = K」に残っているもの
+
+`K(x) ≤ K(y)`・`K(y)` 完全分岐 ⟹ `K(x)` も完全分岐(慣性次数の塔)。
+これには剰余体の包含 `𝓀_x ↪ 𝓀_y` が要り、上の配管の壁がそこにある。

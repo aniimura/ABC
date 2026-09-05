@@ -5183,3 +5183,29 @@ error: (deterministic) timeout at `whnf`, maximum number of heartbeats (4000000)
 `RingHom.toAlgebra` 越しの defeq 判定が起きず、これも爆発を防ぐ。
 実例: `Found/CorrHyp/ExtLimit.lean` の
 `pieceAlgebra_relation_descend_q₀_map` と `descendPieceR_hψ`。
+
+## 59. 中間体の 2 層をまたぐ `rfl` は kernel を止める(1 層なら速い)
+
+`K.closure` の中間体 `K⟮x⟯ ≤ K⟮y⟯` に沿った写像を作るとき:
+
+```lean
+-- ✗ IntermediateField.inclusion を使うと kernel deterministic timeout(実測 60 秒)
+example (z : ↥K⟮x⟯) : ((IntermediateField.inclusion hle z : ↥K⟮y⟯) : K.closure)
+    = ((z : ↥K⟮x⟯) : K.closure) := rfl
+
+-- ✓ 素直に書けば 0.06 秒(中間体の元は 1 層)
+example (z : ↥K⟮x⟯) : ‖(⟨(z : K.closure), hle z.2⟩ : ↥K⟮y⟯)‖ = ‖z‖ := rfl
+```
+
+ところが `adjoinIntegers K x`(中間体の**部分環**)の元は **2 層**なので、
+同じ形の `def` を書いても kernel が落ちる(実測 60 秒)。
+`maxHeartbeats 2000000` を付ければ `def` 自体は 30 秒で通るが、
+そこから `norm ... = norm ...` を `rfl` で出そうとするとまた落ちる。
+
+**回避策**:
+- `adjoinIntegers` を経由せず `𝒪[(adjoinField K x).carrier]` 側で組む
+  (`Found/PGC/AdjoinFieldConstruction.lean::integers_eq_adjoinIntegers` で移せる)
+- または、ノルム保存を**明示補題として先に**用意してから `def` を書く
+  (`def` の中で `z.2` を defeq に頼らせない)
+
+実例: `Found/PGC/TotallyRamified.lean` の docstring(2026-09-05)。
