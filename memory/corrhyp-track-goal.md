@@ -2285,3 +2285,24 @@ Specを取ればf i j : V (i,j) ⟶ U iになる。
 次の一手: この補題へdescendPieceRのデータ(pieceAlgebra_relation_descend_q₀)
 をspecializeしてf i jを構成する。その後に残るのは開埋め込み性(U_i⊓U_jが
 U_iの基本開の場合は局所化の議論で押さえられる見込み)。集計は10/24——§4は0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き22
+f i jの構成に進み、必要な仮説hψを分解したところ、最後に必ず
+「pieceRingEquivのUについての自然性」(制限写像とφ⊗idの四角形が可換)が
+要ると判明。理由: hψをP_V.aeval_valで潰すには「aeval(制限∘P_U.val)∘
+map(φ⊗val)」と「制限∘P_U.aeval_val」の一致が要り、変数の行き先は一致
+するが係数の行き先の一致がまさにその四角形。
+
+これは3つ目の「不透明な同型の値が要る」場面(続き17のh₂とC(g⊗1)、
+続き18でpieceAlgebra_R_model_baseChange_constとして解決、今回)。
+pieceRingEquivはpiecePullbackIso(6段のcalc)をΓで送った同型で、値に
+ついての補題が1つも無いのが根本原因。
+
+次の一手(2案、後者が有望): (a)piecePullbackIsoの6段それぞれの可換性、
+(b)pieceRingEquiv.symmが標準写像(Algebra.TensorProduct.liftで作る
+pullback.fst.appとℝ側構造射の組)に一致することを示す——一致すれば
+自然性はScheme.Hom.appの自然性から自動。mathlibに
+pullbackSpecIso_inv_fst/_hom_sndなど特徴づけの補題が揃っていることを確認。
+
+この1本は続き17のg⊗1にもf i jにも将来のβ脚にも効く「一度払えば何度も
+使える」補題。集計は引き続き10/24——§4は0/2。

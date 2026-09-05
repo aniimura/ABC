@@ -5108,3 +5108,43 @@ theorem exists_mvPolynomial_quotient_ringHom_descend2_of_map
 `descendPieceR`のデータ(`pieceAlgebra_relation_descend_q₀`)を実際に
 specialize して`f i j`を構成すること。その後に残るのは**開埋め込み性**
 (`U_i ⊓ U_j`が`U_i`の基本開である場合は局所化の議論で押さえられる見込み)。
+
+## 2026-09-05夜さらに続き22: `f i j`の構成に進んで、**共通の障害**が
+`pieceRingEquiv`の`U`についての自然性であることを突き止めた
+
+続き21の`descend2_of_map`へ`descendPieceR`のデータを specialize して
+`f i j`を作る作業に入り、必要な仮説`hψ`を分解したところ、最後に必ず
+**次の可換性**が要ることが分かった:
+
+```
+Γ(ExtX, piece(U)) --(制限)--> Γ(ExtX, piece(V))
+      | pieceRingEquiv              | pieceRingEquiv
+   A_U ⊗ ℝ ------ φ⊗id --------> A_V ⊗ ℝ      (φ = Γ(X.left,U)→Γ(X.left,V) の制限)
+```
+
+理由: `hψ`は「`aeval ψ (map (φ⊗val) (q^U k))`が`V`側の関係式イデアルに
+入る」という主張で、これを`P_V.aeval_val`で潰して`0`にするには
+「`aeval (制限 ∘ P_U.val) ∘ map (φ⊗val)`」と「`制限 ∘ P_U.aeval_val`」が
+一致することが要る。両者は**変数の行き先では一致する**(`ψ`の作り方)が、
+**係数の行き先**で一致するかは上の四角形そのものである。
+
+**これは3つ目の「不透明な同型の値が要る」場面**である(続き17:`h₂`と
+`C(g⊗1)`、続き18で`pieceAlgebra_R_model_baseChange_const`として解決、
+そして今回)。`pieceRingEquiv`は`piecePullbackIso`(6段の`calc`)を`Γ`で
+送って作った同型で、値についての補題が1つも無いことが根本原因である。
+
+**次の一手(2案、後者が有望)**:
+- (a) `piecePullbackIso`の6段それぞれについて`V ≤ U`に沿った可換性を示す
+  ——標準的だが手数が多い。
+- (b) **`pieceRingEquiv.symm`が「標準的な写像」に一致することを示す**:
+  `A_U ⊗ ℝ → Γ(ExtX, piece(U))`には`Algebra.TensorProduct.lift`で作れる
+  **定義から自然な**写像(`pullback.fst.app`と`ℝ`側の構造射の組)がある。
+  これと`pieceRingEquiv.symm`が一致すれば、自然性は**その標準写像の側から
+  自動的に**従う(`Scheme.Hom.app`の自然性)。一致の証明は
+  `Spec`側で2つの射影と合成して比べればよく、mathlibに
+  `pullbackSpecIso_inv_fst`・`_hom_snd`など**特徴づけの補題が揃っている**
+  ことを確認した。
+
+この1本(`pieceRingEquiv`の値/自然性)は、続き17の`g⊗1`の話にも、今回の
+`f i j`にも、将来の`β`脚にも効く「一度払えば何度も使える」補題である。
+集計は引き続き10/24——§4は引き続き0/2。
