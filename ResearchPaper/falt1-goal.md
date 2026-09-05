@@ -117,6 +117,16 @@ check.mjs --brief`で検証済み、mathlibに無かった一般定理):
 - `derivation_almost_zero`・`thm_2_2_uniqueness`・
   `thm_2_2_uniqueness_of_isAlmostEtale`(`AlmostLifting.lean`):
   **`Theorem 2.2`の一意性を完全に証明**。
+- `PDivTower`・`m`・**`m_sq_eq`(`m²=m`)**・`IsAlmostZero`・
+  `HasAlmostWitnesses`・`IsAlmostEtaleCoveringTower`・
+  `hasAlmostWitnesses_of_tower`・`kaehler_isAlmostZero_of_tower`・
+  `perfTower`・`perfTower_basicSetup`(`AlmostBase.lean`):
+  **`p`可除な底の層**。`ϖ:ℕ→A`で`(ϖ(k+1))^q = ϖk`という塔を持ち、
+  `m := (ϖk : k)`が almost ring theory の *basic setup*(`m²=m`)を
+  満たすことを証明。非退化な実例(完全化`MvPolynomial ℕ ℤ ⧸
+  (X_{k+1}^q - X_k)`で`m²=m`かつ`m≠⊤`)つき。塔に対する`Definition 2.1`
+  も定義し、**`Theorem 2.4(i)`の余核側を「`m`が`Ω[B⁄A]`を零化する」という
+  原典そのものの形**で述べられるようにした。
 
 ### ★構造上の発見(2026-09-05)——なぜ `2.4` は閉じて `2.2`/`2.3` は閉じないか
 
