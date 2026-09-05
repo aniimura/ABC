@@ -256,3 +256,38 @@
 - **先に無人で進めたこと**: `Check/FrdI/Ex63DegDegenerate.lean`(9 例目の証拠を固定。
   ★新種の危険「素朴な修理は偽を作る」も可算性で示す)
 - **決定**: —
+
+## D11. [FrdI] Theorem 6.4 (iv) / Chebotarev —— スケルトンが死んでいる
+
+- **状態**: **保留**(2026-09-06 発見)
+- **★測定**: この持ち場の数学は**既に別所で閉じている**。
+  - `Found/NumberField/` **21 ファイル・4,864 行、sorry 0**
+    (`tendsto_splQ_div_log`(Chebotarev の完全分解版)/ `HasDirichletDensity` /
+     `splitsCompletely_iff_stabilizer_trivial` / `infinite_splitsCompletely_of_isGalois`(**無条件**)/
+     `le_of_SplQ_subset`(Bauer)/ `nonempty_algEquiv_of_SplQ_eq` / `finrank_isGreatest_deg'`)
+  - `frdi-decomposition.json` の鎖 `cheb` 23 節点のうち、
+    **`frdiNeeded: true` の 9 節点はすべて `done` か `inMathlib`**
+  - 唯一の消費者 `Skeleton/FrdI/Thm64Deg.lean::deg_eq_one_of_galois` は**既に sorry 無し**で、
+    中身は `Found.NF.*` を使う
+  - ★**`ABC3.Skeleton.Cheb.*` を参照している行は木全体に 1 行も無い**
+    (`import ABC3.Skeleton.NumberField.Chebotarev` は残っているが空撃ち)
+- **要る判断**:
+  1. `Skeleton/NumberField/Chebotarev.lean` の 3 つの `sorry` を
+     **`Found` への薄い橋で埋めるか、スケルトンごと畳むか**。
+     ★橋を架けるなら `Rat.HeightOneSpectrum.primesEquiv`
+     (`Mathlib.NumberTheory.Padics.HeightOneSpectrum:112`)経由の glue で数十〜百数十行。
+     ★ただし **[FrdI] Theorem 6.4 (iv) は底が ℚ** なので、
+     一般の底 `K` へ上げる作業は**原典には要らない**
+  2. ★**`HasDirichletDensity` の重複定義の解消** —— `Skeleton/NumberField/Chebotarev.lean:90` の
+     `ABC3.Skeleton.Cheb.HasDirichletDensity` は `Found/NumberField/DirichletDensity.lean:51` と
+     **本文まで同一**(片方が `nhdsWithin 1 (Set.Ioi 1)`、片方が `𝓝[>] 1` と書いているだけ)
+  3. ★**`.needs` の `.absent` から `FrobeniusElement` を外す** —— **誤判定だった**。
+     Frobenius 元は `Mathlib.RingTheory.Frobenius` に `IsArithFrobAt` / `arithFrobAt` として
+     **ある**(Andrew Yang, 2025)。名前が違うので旧 regex に当たらなかった。
+     ★これで鎖 `cheb` の `cheb-frob`(status `todo`)が `inMathlib` に落ち、
+     連鎖して `cheb-artin-map` の前提も 1 本埋まる。
+     **3 つの中でいちばん安全**(記録の訂正であって statement を変えない)
+- ★**「不在」の誤りは 2026-09-05〜06 の 2 日で 5 件目**
+  (`ULift.field` / `continuousCohomology` / `Ẑ` / `CompactSpace Gal` / `FrobeniusElement`)。
+  第 1019 の G11 と `absent-recheck.mjs` はこれを機械化するために入れた。
+- **決定**: —
