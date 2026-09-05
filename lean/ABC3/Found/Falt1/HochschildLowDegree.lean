@@ -421,4 +421,96 @@ theorem hochschild_H3_almost_coboundary_of_isAlmostEtale {A B M : Type u}
     (fun q => almost_swap_annihilate p hAE hf0inj (p ^ n) w hw q)
     (almost_swap_augment p hAE hf0inj (p ^ n) w hw) F hF
 
+/-! ## `H³` の **almost 加群**版
+
+`Theorem 2.3` で障害が値を取る `J = Kern(B_ε → B)` は、`B`-加群には
+**almost にしかならない**——切断 `σ : B → B_ε` を使って
+`b·j := μ(σb, j)` と定めても、`(bb')·j` と `b·(b'·j)` は結合子の分だけ
+ずれる。そこで作用を `act : B →ₗ[A] M →ₗ[A] M` として外から与え、
+**加群の結合律がスカラー `t` を除いて成り立てば十分**な形に一般化する。
+
+計算を追うと、結合律のずれは `hochH3_identity` の中で 4 箇所に現れ、
+そのすべてが `t` で消えるので、恒等式は `t` 倍したところで成立する
+——水準が `t` 1 つ分だけ悪くなるだけである。 -/
+
+/-- 作用を抽象化した `hochH3Bil`。 -/
+noncomputable def hochH3BilAct {A B M : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [AddCommGroup M] [Module A M]
+    (act : B →ₗ[A] M →ₗ[A] M) (F : B →ₗ[A] B →ₗ[A] B →ₗ[A] M) :
+    B →ₗ[A] B →ₗ[A] (B →ₗ[A] B →ₗ[A] M) :=
+  LinearMap.mk₂ A (fun u v => LinearMap.compr₂ (F v) (act u))
+    (by intro u u' v; ext b b'; simp)
+    (by intro a u v; ext b b'; simp)
+    (by intro u v v'; ext b b'; simp)
+    (by intro a u v; ext b b'; simp)
+
+@[simp] theorem hochH3BilAct_apply {A B M : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [AddCommGroup M] [Module A M]
+    (act : B →ₗ[A] M →ₗ[A] M) (F : B →ₗ[A] B →ₗ[A] B →ₗ[A] M) (u v b₁ b₂ : B) :
+    (TensorProduct.lift (hochH3BilAct act F)) (u ⊗ₜ[A] v) b₁ b₂ = act u (F v b₁ b₂) := rfl
+
+/-- **鍵の恒等式(次数 3、almost 加群版)**。結合律のずれ 4 箇所が
+すべて `t` で消えるので、`t` 倍したところで恒等式が成立する。 -/
+theorem hochH3Act_identity {A B M : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [AddCommGroup M] [Module A M]
+    (act : B →ₗ[A] M →ₗ[A] M) (t : A)
+    (herr : ∀ (b u : B) (m : M), t • (act b (act u m) - act (b*u) m) = 0)
+    (F : B →ₗ[A] B →ₗ[A] B →ₗ[A] M)
+    (hF : ∀ v b₁ b₂ b₃ : B, act v (F b₁ b₂ b₃) - F (v*b₁) b₂ b₃ + F v (b₁*b₂) b₃
+      - F v b₁ (b₂*b₃) + act b₃ (F v b₁ b₂) = 0)
+    (b₁ b₂ b₃ : B) (z : TensorProduct A B B) :
+    t • (act b₁ ((TensorProduct.lift (hochH3BilAct act F) z) b₂ b₃)
+      - (TensorProduct.lift (hochH3BilAct act F) z) (b₁*b₂) b₃
+      + (TensorProduct.lift (hochH3BilAct act F) z) b₁ (b₂*b₃)
+      - act b₃ ((TensorProduct.lift (hochH3BilAct act F) z) b₁ b₂))
+    = t • (act (Algebra.TensorProduct.lmul' A z) (F b₁ b₂ b₃)
+      + (TensorProduct.lift (hochH3BilAct act F) ((b₁ ⊗ₜ[A] (1:B)) * z)) b₂ b₃
+      - (TensorProduct.lift (hochH3BilAct act F) (((1:B) ⊗ₜ[A] b₁) * z)) b₂ b₃) := by
+  induction z using TensorProduct.induction_on with
+  | zero => simp
+  | tmul u v =>
+    rw [Algebra.TensorProduct.tmul_mul_tmul, Algebra.TensorProduct.tmul_mul_tmul,
+      Algebra.TensorProduct.lmul'_apply_tmul]
+    show t • (act b₁ (act u (F v b₂ b₃)) - act u (F v (b₁*b₂) b₃)
+        + act u (F v b₁ (b₂*b₃)) - act b₃ (act u (F v b₁ b₂)))
+      = t • (act (u*v) (F b₁ b₂ b₃) + act (b₁*u) (F (1*v) b₂ b₃)
+        - act (1*u) (F (b₁*v) b₂ b₃))
+    have e1 := herr u v (F b₁ b₂ b₃)
+    have e2 := herr u b₃ (F v b₁ b₂)
+    have e3 := herr b₁ u (F v b₂ b₃)
+    have e4 := herr b₃ u (F v b₁ b₂)
+    have hc := congrArg (fun m : M => t • act u m) (hF v b₁ b₂ b₃)
+    simp only [map_sub, map_add, map_zero, smul_sub, smul_add, smul_zero] at hc e1 e2 e3 e4 ⊢
+    rw [one_mul, one_mul, mul_comm b₁ v, mul_comm u b₃] at *
+    linear_combination (norm := module) e1 + e2 + e3 - e4 - hc
+  | add z z' hz hz' =>
+    simp only [map_add, mul_add, LinearMap.add_apply]
+    linear_combination (norm := module) hz + hz'
+
+/-- **`H³` の almost 消滅、almost 加群版**。作用 `act` が「`t` を除いて」
+加群の結合律を満たせば十分——`Theorem 2.3` の `J = Kern(B_ε → B)` は
+まさにこの状況にある。 -/
+theorem hochschild_H3_almost_coboundary_act {A B M : Type u} [CommRing A] [CommRing B]
+    [Algebra A B] [AddCommGroup M] [Module A M]
+    (w : TensorProduct A B B)
+    (hw_ann : ∀ q : B, (1 ⊗ₜ[A] q - q ⊗ₜ[A] 1) * w = 0)
+    (act : B →ₗ[A] M →ₗ[A] M) (t : A)
+    (herr : ∀ (b u : B) (m : M), t • (act b (act u m) - act (b*u) m) = 0)
+    (F : B →ₗ[A] B →ₗ[A] B →ₗ[A] M)
+    (hF : ∀ v b₁ b₂ b₃ : B, act v (F b₁ b₂ b₃) - F (v*b₁) b₂ b₃ + F v (b₁*b₂) b₃
+      - F v b₁ (b₂*b₃) + act b₃ (F v b₁ b₂) = 0) :
+    ∃ h : B →ₗ[A] B →ₗ[A] M, ∀ b₁ b₂ b₃ : B,
+      t • act (Algebra.TensorProduct.lmul' A w) (F b₁ b₂ b₃)
+        = t • (act b₁ (h b₂ b₃) - h (b₁*b₂) b₃ + h b₁ (b₂*b₃) - act b₃ (h b₁ b₂)) := by
+  refine ⟨TensorProduct.lift (hochH3BilAct act F) w, fun b₁ b₂ b₃ => ?_⟩
+  have hid := hochH3Act_identity act t herr F hF b₁ b₂ b₃ w
+  have hcancel : ((b₁ ⊗ₜ[A] (1:B)) * w) = (((1:B) ⊗ₜ[A] b₁) * w) := by
+    have h0 := hw_ann b₁
+    rw [sub_mul, sub_eq_zero] at h0
+    exact h0.symm
+  rw [hcancel] at hid
+  rw [hid]
+  simp only [smul_add, smul_sub]
+  abel
+
 end ABC3.Found.Falt1
