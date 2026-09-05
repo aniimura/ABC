@@ -1142,3 +1142,31 @@ Lubin-Tate 級数 `f`)は**すべて本リポジトリで既に構築済みだ�
 ——`Γ_K ≅ Γ_{K'}`(位相群)から `𝒪_K^× ≃* 𝒪_{K'}^×` を導く一手だけで、
 それがまさに相互律 `Γ_K^ab ≅ (K^×)^∧`。Prop 1.2 の未解決部分は
 **相互律ちょうど一つ**に絞り込まれた。
+
+## ★★★★★★★★2026-09-05: 原文の不分岐判定が「正しい」と証明できた
+
+`Found/PGC/UnramifiedCriterion.lean`(新規)
+
+原文 p.3 の `q_L = q^{[Γ_K:H]}` を、**構成した** `residueCardinality p`・
+`subgroupCorrespondence p` に代入すると、**本物の不分岐性と同値**:
+
+- **`isUnramifiedAt_iff_isUnramifiedAdjoin`** :
+  `IsUnramifiedAt (residueCardinality p) (subgroupCorrespondence p) K H hH`
+  `↔ IsUnramifiedAdjoin K x`(`K(x) = L_H`、`H ≠ ⊤`)
+- `isUnramifiedAt_top` : `H = ⊤` は常に成立
+- `fixedField_le_unramifiedClosure_of_isUnramifiedAt` : `L_H ≤ K^ur`
+- **`fixingSubgroup_unramifiedClosure_le_inertia`** :
+  `Gal(K̄/K^ur) ≤ inertia (residueCardinality p) (subgroupCorrespondence p) K`
+  ——`Skeleton` が構成した `I_K` は本物の惰性群を含む。
+
+★配管(重要): `adjoinField K x` と `fixedFieldLocalField K H hH` は
+`K(x) = L_H` のとき同じものだが、`rw` は **`isFinite` の証明項を
+動かせない**ので「motive is not type correct」で落ちる。有限性を
+**明示引数**で取る `intermediateLocalField` を経由すれば
+`subst` + `rfl`(証明無関係)で通る。→ `tools/lean-idioms.md` 行き。
+
+### 次の段
+
+逆向き `inertia ≤ Gal(K̄/K^ur)` には「閉部分群は自分を含む開部分群
+すべての共通部分」という副有限群の事実が要る。それが済めば
+`inertia = Gal(K̄/K^ur)`(構成した `I_K` が本物だという確定)。

@@ -5031,3 +5031,35 @@ expression inferred by typing rules,
 (2026-09-05 に判明。Falt1 の 9 ファイルが既定ビルドの外にあり、
 それまでのコミットの「lake build 6590 jobs 成功」は Falt1 の検証に
 なっていなかった。登録後は 6800 jobs。)
+
+## 58. 構造体の Prop フィールドが `rw` を止める(motive is not type correct)
+
+`PAdicLocalField` のように「型 + その型に依存する Prop の証明」を持つ構造体は、
+中身の型を `rw` で書き換えられない:
+
+```lean
+-- hx : K.carrier⟮x⟯ = IntermediateField.fixedField H
+unfold adjoinField fixedFieldLocalField
+rw [hx]
+-- ✗ motive is not type correct:
+--   adjoinField._proof_4 K x : Module.Finite ℚ_[p] ↥K.carrier⟮x⟯
+--   but is expected to have type FiniteDimensional ℚ_[p] ↥_a
+```
+
+証明項が抽象化されないため motive が型付かない。**Prop なのに落ちる**のが罠。
+
+**直し方**: その Prop を**明示引数**で取る共通のコンストラクタを 1 つ挟む。
+
+```lean
+noncomputable def intermediateLocalField (K : PAdicLocalField p)
+    (E : IntermediateField K.carrier K.closure) (hE : FiniteDimensional ℚ_[p] E) :
+    PAdicLocalField p := { carrier := E, isFinite := hE }
+
+theorem intermediateLocalField_congr (K) {A B} (hA) (hB) (h : A = B) :
+    intermediateLocalField K A hA = intermediateLocalField K B hB := by
+  subst h; rfl        -- 証明無関係で hA = hB は defeq
+```
+
+元の 2 つの定義がこの形に `rfl` で一致することを 1 行ずつ示せば、
+以後は `rw [thisEq, thatEq]; exact intermediateLocalField_congr K _ _ h` で通る。
+実例: `Found/PGC/UnramifiedCriterion.lean`(2026-09-05)。
