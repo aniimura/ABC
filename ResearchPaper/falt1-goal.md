@@ -70,6 +70,41 @@
 含まれていない)。登録して 6803 jobs になった——それまでのコミットの
 「lake build 成功」は Falt1 の回帰検出になっていなかった。
 
+## 0.06 `Theorem 1.2` に残る 2 節点(2026-09-05、260dpi 精読で確定)
+
+`Theorem 1.2` は 4 層(解析部分・加群側の 3 事実・翻訳層・最終配線)が
+すべて `Found/Falt1/Section1.lean` に形式化済みで、`Skeleton` の
+`thm12`(ε-N 形)にそのまま繋がる形(`thm_1_2_eps_delta`)まで来ている。
+残るのは**原典の 2 箇所**だけである。
+
+### 節点 A(構造の議論)
+
+> *The kernel of the second map contains `Ω_{V_{n+1}/Vₙ} ⊗_{V_{n+1}} W_{n+1}`,
+> which has `(W_{n+1}/pW_{n+1})^{d+1}` as quotient. As `Ω_{W_{n+1}/Vₙ}` is
+> the direct sum of `d+1` modules of the form `W_{n+1}/p^α W_{n+1}`,
+> **the kernel of the second map contains the kernel of multiplication by
+> `p` on `Ω_{W_{n+1}/Vₙ}`**.*
+
+塔の仮定(`Ω_{V_{n+1}/Vₙ}` が `(V_{n+1}/pV_{n+1})^{d+1}` を商に持つ)と
+`Ω_{W_{n+1}/Vₙ}` の巡回分解から、**包含**を出す段。Faltings は
+「どちらも `(W'/pW')^{d+1}` の形だから」という大きさの議論で済ませて
+いるので、包含そのものは補完が要る。
+形式化後は `ker_comp_contains_pTorsion` と `step_facts_of_modules` の
+`hker` にそのまま入る。
+
+### 節点 B(原文の *"it is clear that"*)
+
+> *Also **it is clear that** `p^{δₙ − δ_{n+1}}` annihilates
+> `W_{n+1}/(Wₙ ⊗_{Vₙ} V_{n+1})`, and so the cokernel of the composition
+> of the two maps is annihilated by `p^{δₙ − δ_{n+1}}`.*
+
+`Wₙ ⊗_{Vₙ} V_{n+1}` の**非正規性**を差積の差で測る段。これが当初
+「ブロッカー」と特定していた `differentIdeal Wₙ Wₙ₊₁` の評価に当たる。
+形式化後は `step_facts_of_modules` の `b`/`hbann` に入る。
+
+★なお `tools/hedge-index.mjs` は FrdI 専用(Falt1 は索引していない)
+なので、Falt1 の合図はこの節に手で記録する。
+
 ## 0.1 `Theorem 2.2` の逸脱の記録(2026-09-05)
 
 原典 Chapter I §2 Theorem 2.2 の形式化(`lean/ABC3/Found/Falt1/
