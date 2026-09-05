@@ -3111,4 +3111,33 @@ theorem exists_fgSubalgebra_mvPolynomial_ideal_mem_descend (A : Type) [CommRing 
   rw [map_mul, mvPolynomial_map_val_inclusion_comp A R₁ R' hR1 ι (c₀ k),
     mvPolynomial_map_val_inclusion_comp A R R' hR ι (q₀ k), hc₀ k]
 
+open scoped Classical in
+/-- **平坦化した商の中では、局所化の分母`p`の像が単元である**——
+`localization_away_quotient_mvPolynomial_flat_algEquiv`が作る関係式の族に
+`rename Sum.inr p * X (Sum.inl ()) - 1`が入っているので、`X (Sum.inl ())`の
+クラスがそのまま逆元になる。
+
+`t`の構成では「`D(f)`側の平坦化表示`F`が、実は`A_f[1/g]`(=`Γ(X.left,
+D(f*g))`)の上の代数でもある」ことを言うのに使う——`F`の底環`A_f⊗R'`の中で
+`g`に対応する元の像が単元だと分かれば、局所化の普遍性で`A_f[1/g]⊗R'`から
+`F`への代数構造が誘導され、`D(f)`側と`D(g)`側が**共通の底**の上に乗る
+(`exists_mvPolynomial_quotient_specIso_descend`は単一の`A`を要求するので
+これが要る)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem isUnit_rename_of_flat_relation (B : Type) [CommRing B] (n : Type) [Fintype n]
+    (κ₀ : Type) [Fintype κ₀] (q₀ : κ₀ → MvPolynomial n B) (p : MvPolynomial n B) :
+    IsUnit (Ideal.Quotient.mk (Ideal.span (Set.range
+        (Sum.elim (fun k => MvPolynomial.rename Sum.inr (q₀ k))
+          (fun _ : Unit => MvPolynomial.rename Sum.inr p * MvPolynomial.X (Sum.inl ()) - 1))))
+      (MvPolynomial.rename Sum.inr p)) := by
+  set J := Ideal.span (Set.range
+      (Sum.elim (fun k => MvPolynomial.rename Sum.inr (q₀ k))
+        (fun _ : Unit => MvPolynomial.rename Sum.inr p * MvPolynomial.X (Sum.inl ()) - 1))) with hJ
+  refine IsUnit.of_mul_eq_one (Ideal.Quotient.mk J (MvPolynomial.X (Sum.inl ()))) ?_
+  rw [← map_mul, ← sub_eq_zero, ← map_one (Ideal.Quotient.mk J), ← map_sub,
+    Ideal.Quotient.eq_zero_iff_mem, hJ]
+  apply Ideal.subset_span
+  exact ⟨Sum.inr (), rfl⟩
+
 end ABC3.Found.CorrHyp
