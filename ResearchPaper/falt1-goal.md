@@ -60,7 +60,9 @@
 | `Theorem 2.4` | **✅Found**((i)(ii)とも、非空虚性つき)。(i)は**原文どおり「`m` が零化する」形**まで(`thm_2_4_i_m_annihilates`) | `AlmostDerivation.lean` + `GaloisTransfer.lean` |
 | `Theorem 4.1(ii)` | **✅証明済み**(非空虚性つき)。塔版`thm_4_1_ii_tower`は**原文3行がそのまま仮定と結論** | `Section4.lean` |
 | `Theorem 1.2` | **★4層すべて形式化済み**(`thm_1_2_of_module_facts`、非空虚性つき)。(1)**解析部分**`thm_1_2_tendsto_zero`、(2)**加群側の3事実**——(a)`length_ker_add_target`+`length_baseChange_kaehler`、(b)`min_le_length_of_torsion_le`(★**原文より強い**:`(d+1)`で割る必要なし・巡回分解も不要、Nakayamaの鎖だけ)、(c)`length_le_of_span_and_annihilator`、(3)**翻訳層**`lenR`系(`ℕ∞`→ℝ)、(4)**最終配線**`key_inequality_of_lenR`。★残るのは**実際の`Ω`・差積・塔をこの3つに当てはめるだけ**——具体的には`Wₙ`(=`Vₙ⊗_V W`の正規化)の塔を Lean で立て、塔の仮定(`Ω_{V_{n+1}/Vₙ}`が`(V_{n+1}/pV_{n+1})^{d+1}`を商に持つ)から`ker(g∘f) ⊇ ker(p·)`を出し、原文が*"it is clear that"*で畳んだ余核の零化を示す部分 | `Section1.lean` |
-| `Theorem 3.2` の代数的核 | **✅証明済み**(almost 直和因子からの降下) | `Section3.lean` |
+| `Theorem 3.2` の**最終段** | **✅証明済み**——`thm_3_2_descent`。原文 *"As R∞ is almost a direct summand in A∞, this already holds before tensoring"* を、**「almost 直和因子である」を仮定せず almost étale 性から導いて**閉じた(`exists_trace_eq_pow`:`trace_ideal_pow_mem_traceIdeal` の像が `A`-部分加群なので `p^{n·rank} = tr(z)` となる `z` が実際に取れる)。残るのは前段(*"S becomes almost étale if we adjoin sufficiently many p-power roots of units"*・*"B∞ is almost isomorphic to S∞ ⊗ A∞"*・局所 henselian への還元) | `Section3.lean` |
+| 「almost 同型」の語彙 | **✅証明済み**——`AlmostIsoAt`/`AlmostIso`(塔版)と**合成則**`almostIso_comp`(塔があるので `ϖ(k+1)² ∣ ϖ k` で水準を回収できる=almost math が圏になる理由)。§3・§4 が繰り返し使う | `AlmostDerivation.lean` |
+| `Theorem 2.2` の冪零版への還元 | **✅証明済み**——`lift_nilpotent_of_lift_sq`(原文 *"We may assume that I² = 0"*)。非空虚性つき | `AlmostLifting.lean` |
 | `Theorem 2.3` 第2・3・4段 | **✅証明済み**("Tripling ε"・`B_ε` の almost 射影性・`B_ε⊗Ā` と `B` の比較) | `AlmostDeform.lean` |
 | `Theorem 2.3` 第5段 | **✅証明済み**(five-term identity・結合律への補正は**倍化なしで厳密**・交換子は導分) | `AlmostDeform.lean` |
 | `H³` の almost 消滅(明示形) | **✅証明済み** | `HochschildLowDegree.lean` |
