@@ -544,3 +544,36 @@ Hensel で持ち上げ、`K(x) ⊆ K(y)`、次数が等しいので一致」)の
 2. `K⟮x'⟯ = K⟮x⟯`(`g` の根はどれも同じ体を生成する)——不分岐拡大が
    Galois であること(剰余体側が Galois で Hensel の持ち上げが一意)
    から出る。ここが一番手数が要りそう。
+
+## ★★★★★★2026-09-05: 不分岐拡大は **Galois**——Hensel で分裂を持ち上げた
+
+新規 `Found/HenselianSplits.lean`(一般の結果、mathlib へ出せる形):
+- `exists_root_of_residue_root` : Henselian 局所環で、剰余体の**単根**
+  (`F̄(b)=0` かつ `F̄'(b)≠0`)は `A` の根に持ち上がる。
+- `splits_map_of_residue_splits` : `A` Henselian 局所整域、`F` モニックで
+  `F̄` が**分離的かつ剰余体で分裂**するなら、`A` を埋め込む任意の体で
+  `F` も分裂する。骨格は「`residue` が `F.roots → F̄.roots` の全射
+  (Hensel)⟹ `A` の中に `deg F` 個以上の相異なる根」+
+  `roots.card ≤ natDegree` の挟み撃ち。
+
+`Found/PGC/UnramifiedExtension.lean`:
+- `splits_adjoin_of_lift` : 剰余体の既約多項式の持ち上げ `f` は `K(x)` で
+  分裂する(`𝓀_{K(x)}/𝓀` は有限体の有限次拡大なので normal、分離性は
+  完全体から)。
+- `normal_of_splits_in_adjoin` : `K(x)` で `F` が分裂し `x` が根なら
+  `K(x)` は `F` の分裂体——`Normal K.carrier K(x)`。
+- `exists_isUnramifiedAdjoin_of_irreducible` / `exists_isUnramifiedAdjoin`
+  の結論に **`∧ Normal K.carrier K(x)`** を追加。
+- `exists_isGalois_isUnramifiedAdjoin` : 標数 0 なので **Galois**。
+
+★ファイル内の順序を入れ替えた: 拡大体側の Henselian 節
+(`isAdic_...`/`isAdicComplete_...`/`henselianLocalRing_adjoinIntegers`)を
+構成節の**前**へ移した(`splits_adjoin_of_lift` が Henselian を要求する
+ため)。`finiteDimensional_adjoin_closure`(instance)はさらにその前。
+
+### 次: 一意性 → `K^ur` → `Gal(K^ur/K) ≅ Ẑ`
+
+Galois 性が付いたので、同じ次数の不分岐拡大が一致することは
+「`𝒪_{K(y)}` の剰余体に `ḡ` の根がある(次数が割り切るから)⟹ Hensel で
+持ち上げ ⟹ `K(x)` の共役が `K(y)` に入る ⟹ normal だから `K(x) ⊆ K(y)`」
+で言えるはず。材料はすべて揃った。

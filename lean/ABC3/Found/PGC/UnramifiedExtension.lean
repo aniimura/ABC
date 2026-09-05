@@ -5,6 +5,7 @@ import Mathlib.RingTheory.Henselian
 import Mathlib.Algebra.Polynomial.Eval.Irreducible
 import Mathlib.RingTheory.Polynomial.GaussLemma
 import ABC3.Found.FiniteFieldIrreducible
+import ABC3.Found.HenselianSplits
 import ABC3.Found.PGC.ValuationRingComplete
 
 /-!
@@ -663,30 +664,6 @@ instance henselianLocalRing_carrierIntegers {p : ℕ} [Fact p.Prime] (K : PAdicL
   exact HenselianRing.is_henselian f hf a₀ h0 (hu.map (Ideal.Quotient.mk _))
 
 
-/-! ## ★不分岐拡大の構成——剰余体の既約多項式を持ち上げる
-
-`isUnramifiedAdjoin_of_inertiaDegree_eq_finrank`(`f=[L:K] ⟹ e=1`)が
-あるので、**Hensel の補題を使わずに**不分岐拡大が作れる:
-
-1. 剰余体 `𝓀[K.carrier]` 上のモニック既約多項式 `g` を取る。
-2. `Polynomial.lifts_and_degree_eq_and_monic` で `𝒪[K.carrier]` 上の
-   モニック `f`(同次数、`f ↦ g`)へ持ち上げる。
-3. `Polynomial.Monic.irreducible_of_irreducible_map` で `f` も既約。
-4. Gauss(`Monic.irreducible_iff_irreducible_map_fraction_map`、
-   `IsIntegrallyClosed 𝒪[K.carrier]` は付値環だから自動)で
-   `K.carrier` 上でも既約。
-5. `K.closure` は代数閉体なので根 `x` が取れ、`minpoly K.carrier x`
-   がその既約多項式そのものだから `[K(x):K] = deg g`。
-6. `f` がモニックだから `x` は `𝒪[K.carrier]` 上整、よって `‖x‖ ≤ 1`
-   (`norm_le_one_of_isIntegral`)——`x` は `adjoinIntegers K x` の元。
-7. 剰余をとると `x̄` は `g` の根。`g` は既約モニックだから
-   `minpoly 𝓀 x̄ = g`、よって `deg g ≤ f = inertiaDegree K x`。
-8. `e·f = [K(x):K] = deg g` と `e ≥ 1` から `f ≤ deg g`。
-   両方合わせて `f = deg g = [K(x):K]`、すなわち **`e = 1`**。
-
-残るのは「有限体上の任意次数のモニック既約多項式の存在」だけ
-(これは純粋に有限体の話で、この節とは独立に足せる)。 -/
-
 /-- `K.closure` は `K.carrier` の代数閉包なので、単項生成の中間体は
 つねに有限次元。インスタンスにしておくと以降の
 `[FiniteDimensional ...]` 束縛が自動で埋まる。 -/
@@ -695,131 +672,6 @@ instance finiteDimensional_adjoin_closure {p : ℕ} [Fact p.Prime] (K : PAdicLoc
     FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :=
   IntermediateField.adjoin.finiteDimensional
     (IsAlgebraic.isIntegral (Algebra.IsAlgebraic.isAlgebraic x))
-
-/-- **★不分岐拡大の構成**——剰余体上のモニック既約多項式 `g` から、
-次数 `deg g` の**不分岐**単項拡大 `K(x)/K` を作る。Hensel の補題は
-使わない(上の見取り図を参照)。 -/
-theorem exists_isUnramifiedAdjoin_of_irreducible {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
-    (g : Polynomial 𝓀[K.carrier]) (hgm : g.Monic) (hgi : Irreducible g) :
-    ∃ x : K.closure,
-      Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
-        = g.natDegree ∧ IsUnramifiedAdjoin K x := by
-  have hlifts : g ∈ Polynomial.lifts (IsLocalRing.residue 𝒪[K.carrier]) :=
-    Polynomial.lifts_iff_coeff_lifts g |>.mpr (fun n => ⟨_, Quotient.out_eq' _⟩)
-  obtain ⟨f, hfmap, hfdeg, hfm⟩ := Polynomial.lifts_and_degree_eq_and_monic hlifts hgm
-  have hgnd : g.natDegree = f.natDegree := by rw [← hfmap, hfm.natDegree_map]
-  have hfi : Irreducible f := hfm.irreducible_of_irreducible_map _ f (by rw [hfmap]; exact hgi)
-  haveI : IsFractionRing 𝒪[K.carrier] K.carrier :=
-    ValuationRing.instIsFractionRingInteger (K := K.carrier) Valued.v
-  have hfKi : Irreducible (f.map (algebraMap 𝒪[K.carrier] K.carrier)) :=
-    (hfm.irreducible_iff_irreducible_map_fraction_map (K := K.carrier)).mp hfi
-  have hFm : (f.map (algebraMap 𝒪[K.carrier] K.carrier)).Monic := hfm.map _
-  have hFCm : ((f.map (algebraMap 𝒪[K.carrier] K.carrier)).map
-      (algebraMap K.carrier K.closure)).Monic := hFm.map _
-  have hndpos : 0 < f.natDegree := hgnd ▸ Irreducible.natDegree_pos hgi
-  obtain ⟨x, hx⟩ := IsAlgClosed.exists_root
-    ((f.map (algebraMap 𝒪[K.carrier] K.carrier)).map (algebraMap K.carrier K.closure))
-    (by
-      rw [Polynomial.degree_eq_natDegree hFCm.ne_zero, hFm.natDegree_map, hfm.natDegree_map]
-      exact_mod_cast Nat.pos_iff_ne_zero.mp hndpos)
-  have haev : Polynomial.aeval x (f.map (algebraMap 𝒪[K.carrier] K.carrier)) = 0 := by
-    rw [Polynomial.aeval_def, ← Polynomial.eval_map]; exact hx
-  have hint : IsIntegral K.carrier x := IsAlgebraic.isIntegral (Algebra.IsAlgebraic.isAlgebraic x)
-  have hmp : f.map (algebraMap 𝒪[K.carrier] K.carrier) = minpoly K.carrier x :=
-    minpoly.eq_of_irreducible_of_monic hfKi haev hFm
-  have hrank : Module.finrank K.carrier
-      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) = g.natDegree := by
-    rw [IntermediateField.adjoin.finrank hint, ← hmp, hfm.natDegree_map, hgnd]
-  refine ⟨x, hrank, ?_⟩
-  have hval : (IntermediateField.adjoin K.carrier ({x} : Set K.closure)).val
-      ⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩ = x := rfl
-  have hkey := Polynomial.aeval_algHom_apply
-    (IntermediateField.adjoin K.carrier ({x} : Set K.closure)).val
-    (⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩ :
-      IntermediateField.adjoin K.carrier ({x} : Set K.closure))
-    (f.map (algebraMap 𝒪[K.carrier] K.carrier))
-  rw [hval, haev] at hkey
-  have h1 : Polynomial.aeval
-      (⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩ :
-        IntermediateField.adjoin K.carrier ({x} : Set K.closure))
-      (f.map (algebraMap 𝒪[K.carrier] K.carrier)) = 0 :=
-    (IntermediateField.adjoin K.carrier ({x} : Set K.closure)).val.injective
-      (by rw [map_zero]; exact hkey.symm)
-  have halg : (algebraMap 𝒪[K.carrier]
-      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))
-      = (algebraMap K.carrier
-          (IntermediateField.adjoin K.carrier ({x} : Set K.closure))).comp
-        (Subring.subtype 𝒪[K.carrier]) := rfl
-  have h3 : Polynomial.eval₂ (algebraMap 𝒪[K.carrier]
-      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))
-      (⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩ :
-        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) f = 0 := by
-    rw [halg, ← Polynomial.eval₂_map]; exact h1
-  have hintL : IsIntegral 𝒪[K.carrier]
-      (⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩ :
-        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := ⟨f, hfm, h3⟩
-  have hnorm : ‖(⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩ :
-      IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖ ≤ 1 :=
-    norm_le_one_of_isIntegral K x _ hintL
-  have hsub : ((Subring.subtype (adjoinIntegers K x)).comp
-      (algebraMap 𝒪[K.carrier] (adjoinIntegers K x)))
-      = algebraMap 𝒪[K.carrier]
-        (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := rfl
-  have h2 := Polynomial.hom_eval₂ f (algebraMap 𝒪[K.carrier] (adjoinIntegers K x))
-    (Subring.subtype (adjoinIntegers K x))
-    (⟨⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩, hnorm⟩ : adjoinIntegers K x)
-  rw [hsub] at h2
-  have hrootO : Polynomial.eval₂ (algebraMap 𝒪[K.carrier] (adjoinIntegers K x))
-      (⟨⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩, hnorm⟩ : adjoinIntegers K x)
-      f = 0 := Subtype.ext (h2.trans h3)
-  have hbar : Polynomial.aeval (IsLocalRing.residue (adjoinIntegers K x)
-      ⟨⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩, hnorm⟩)
-      (f.map (IsLocalRing.residue 𝒪[K.carrier])) = 0 := by
-    rw [Polynomial.aeval_def, Polynomial.eval₂_map]
-    have hcomp : (algebraMap 𝓀[K.carrier] (IsLocalRing.ResidueField (adjoinIntegers K x))).comp
-        (IsLocalRing.residue 𝒪[K.carrier])
-        = (IsLocalRing.residue (adjoinIntegers K x)).comp
-          (algebraMap 𝒪[K.carrier] (adjoinIntegers K x)) := RingHom.ext (congrFun rfl)
-    rw [hcomp, ← Polynomial.hom_eval₂ f (algebraMap 𝒪[K.carrier] (adjoinIntegers K x))
-      (IsLocalRing.residue (adjoinIntegers K x)) _, hrootO, map_zero]
-  rw [hfmap] at hbar
-  haveI := module_finite_adjoinIntegers K x
-  have hge : g.natDegree ≤ inertiaDegree K x := by
-    have hmpbar : g = minpoly 𝓀[K.carrier] (IsLocalRing.residue (adjoinIntegers K x)
-        ⟨⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩, hnorm⟩) :=
-      minpoly.eq_of_irreducible_of_monic hgi hbar hgm
-    rw [inertiaDegree_eq_finrank_residueField K x, hmpbar]
-    exact minpoly.natDegree_le _
-  apply isUnramifiedAdjoin_of_inertiaDegree_eq_finrank
-  rw [hrank]
-  have hmul := ramificationIndex_mul_inertiaDegree K x
-  rw [hrank] at hmul
-  have hnpos : 0 < g.natDegree := Irreducible.natDegree_pos hgi
-  have he : ramificationIndex K x ≠ 0 := by
-    intro h; rw [h, zero_mul] at hmul; omega
-  have hle : inertiaDegree K x ≤ ramificationIndex K x * inertiaDegree K x :=
-    Nat.le_mul_of_pos_left _ (Nat.pos_of_ne_zero he)
-  omega
-
-
-/-- **★各次数の不分岐拡大の存在**——`n ≥ 1` に対し、`K` の次数 `n` の
-**不分岐**単項拡大 `K(x)/K` が `K.closure` の中に存在する。
-`Found/FiniteFieldIrreducible.lean`(有限体上の任意次数のモニック既約
-多項式)を上の構成に流し込むだけ。
-
-これで「不分岐拡大の理論」の第一の柱——**存在**——が立った。
-残るのは一意性(同じ次数の不分岐拡大は同型)と、`K^ur` および
-`Gal(K^ur/K) ≅ Ẑ`。 -/
-theorem exists_isUnramifiedAdjoin {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (n : ℕ)
-    (hn : n ≠ 0) :
-    ∃ x : K.closure,
-      Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) = n
-        ∧ IsUnramifiedAdjoin K x := by
-  haveI : Finite 𝓀[K.carrier] := residueField_finite K
-  obtain ⟨g, hgm, hgi, hgd⟩ := ABC3.Found.exists_monic_irreducible_natDegree_eq 𝓀[K.carrier] n hn
-  obtain ⟨x, hrank, hu⟩ := exists_isUnramifiedAdjoin_of_irreducible K g hgm hgi
-  exact ⟨x, hgd ▸ hrank, hu⟩
-
 
 /-! ## 拡大体側も Henselian——一意性へ向けた準備
 
@@ -886,5 +738,262 @@ instance henselianLocalRing_adjoinIntegers {p : ℕ} [Fact p.Prime] (K : PAdicLo
   constructor
   intro f hf a₀ h0 hu
   exact HenselianRing.is_henselian f hf a₀ h0 (hu.map (Ideal.Quotient.mk _))
+
+
+/-! ## Hensel による分裂の持ち上げ——不分岐拡大は normal
+
+`Found/HenselianSplits.lean`(一般の結果)を本設定に流し込む。剰余体
+`𝓀_{K(x)}` は `𝓀` の**有限体の有限次拡大**なので normal——したがって
+`x̄` の最小多項式 `ḡ` は `𝓀_{K(x)}` で分裂する。分離性は有限体が完全体
+であることから。これを Hensel で `𝒪_{K(x)}` へ持ち上げると、定義多項式
+`f` が `K(x)` で分裂する。あとは `K(x)` が `f` の分裂体であることを見て
+`Normal.of_isSplittingField` で結論する。
+
+標数 0 なので `Normal` から直ちに `IsGalois` が従う——不分岐拡大の
+Galois 性・一意性・`Gal(K^ur/K) ≅ Ẑ` へ向かう足場。 -/
+
+/-- 剰余体の既約多項式 `ḡ` の持ち上げ `f` は、`K(x)` の中で分裂する。 -/
+theorem splits_adjoin_of_lift {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure)
+    (f : Polynomial 𝒪[K.carrier]) (hfm : f.Monic)
+    (hgi : Irreducible (f.map (IsLocalRing.residue 𝒪[K.carrier])))
+    (xbar : IsLocalRing.ResidueField (adjoinIntegers K x))
+    (hmpbar : f.map (IsLocalRing.residue 𝒪[K.carrier]) = minpoly 𝓀[K.carrier] xbar) :
+    ((f.map (algebraMap 𝒪[K.carrier] K.carrier)).map (algebraMap K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))).Splits := by
+  haveI := module_finite_adjoinIntegers K x
+  haveI : Finite 𝓀[K.carrier] := residueField_finite K
+  have hcomp : (algebraMap 𝓀[K.carrier] (IsLocalRing.ResidueField (adjoinIntegers K x))).comp
+      (IsLocalRing.residue 𝒪[K.carrier])
+      = (IsLocalRing.residue (adjoinIntegers K x)).comp
+        (algebraMap 𝒪[K.carrier] (adjoinIntegers K x)) := RingHom.ext (congrFun rfl)
+  have hFAres : (f.map (algebraMap 𝒪[K.carrier] (adjoinIntegers K x))).map
+      (IsLocalRing.residue (adjoinIntegers K x))
+      = (f.map (IsLocalRing.residue 𝒪[K.carrier])).map
+        (algebraMap 𝓀[K.carrier] (IsLocalRing.ResidueField (adjoinIntegers K x))) := by
+    rw [Polynomial.map_map, Polynomial.map_map, ← hcomp]
+  have hsep : ((f.map (algebraMap 𝒪[K.carrier] (adjoinIntegers K x))).map
+      (IsLocalRing.residue (adjoinIntegers K x))).Separable := by
+    rw [hFAres]; exact (PerfectField.separable_of_irreducible hgi).map
+  have hspl : ((f.map (algebraMap 𝒪[K.carrier] (adjoinIntegers K x))).map
+      (IsLocalRing.residue (adjoinIntegers K x))).Splits := by
+    rw [hFAres, hmpbar]; exact Normal.splits (by infer_instance) xbar
+  have hmain := ABC3.Found.splits_map_of_residue_splits
+    (Subring.subtype (adjoinIntegers K x)) Subtype.val_injective
+    (f.map (algebraMap 𝒪[K.carrier] (adjoinIntegers K x))) (hfm.map _) hsep hspl
+  rw [Polynomial.map_map] at hmain
+  rw [Polynomial.map_map]
+  exact hmain
+
+/-- `K(x)` の中で `F` が分裂し `x` が `F` の根なら、`K(x)/K` は normal
+——`K(x)` が `F` の分裂体そのものになる(`K.closure` の中で `F` の根は
+すべて `K(x)` に収まる)。 -/
+theorem normal_of_splits_in_adjoin {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x : K.closure)
+    (F : Polynomial K.carrier) (hFne : F ≠ 0)
+    (hFsplitsL : (F.map (algebraMap K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))).Splits)
+    (hxroot : Polynomial.aeval x F = 0) :
+    Normal K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := by
+  haveI := IsAlgClosure.normal K.carrier K.closure
+  have hsplitsC : (F.map (algebraMap K.carrier K.closure)).Splits := IsAlgClosed.splits _
+  have hsplitfield := IntermediateField.adjoin_rootSet_isSplittingField hsplitsC
+  have htower : (algebraMap K.carrier K.closure)
+      = (algebraMap (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) K.closure).comp
+        (algebraMap K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))) :=
+    IsScalarTower.algebraMap_eq _ _ _
+  have heq : IntermediateField.adjoin K.carrier (F.rootSet K.closure)
+      = IntermediateField.adjoin K.carrier ({x} : Set K.closure) := by
+    apply le_antisymm
+    · rw [IntermediateField.adjoin_le_iff]
+      intro z hz
+      have hz' : z ∈ (F.map (algebraMap K.carrier K.closure)).roots := by
+        rw [Polynomial.mem_roots (by
+          simpa [Polynomial.map_eq_zero_iff (algebraMap K.carrier K.closure).injective] using hFne)]
+        obtain ⟨h1, h2⟩ := Polynomial.mem_rootSet'.mp hz
+        rw [Polynomial.IsRoot, Polynomial.eval_map, ← Polynomial.aeval_def]
+        exact h2
+      rw [htower, ← Polynomial.map_map, Polynomial.Splits.roots_map hFsplitsL] at hz'
+      obtain ⟨r, _, hr⟩ := Multiset.mem_map.mp hz'
+      exact hr ▸ r.2
+    · rw [IntermediateField.adjoin_le_iff]
+      intro z hz
+      simp only [Set.mem_singleton_iff] at hz
+      subst hz
+      refine IntermediateField.subset_adjoin K.carrier (F.rootSet K.closure) ?_
+      rw [Polynomial.mem_rootSet']
+      exact ⟨by simpa [Polynomial.map_eq_zero_iff (algebraMap K.carrier K.closure).injective]
+        using hFne, hxroot⟩
+  rw [heq] at hsplitfield
+  exact Normal.of_isSplittingField F
+
+/-! ## ★不分岐拡大の構成——剰余体の既約多項式を持ち上げる
+
+`isUnramifiedAdjoin_of_inertiaDegree_eq_finrank`(`f=[L:K] ⟹ e=1`)が
+あるので、**Hensel の補題を使わずに**不分岐拡大が作れる:
+
+1. 剰余体 `𝓀[K.carrier]` 上のモニック既約多項式 `g` を取る。
+2. `Polynomial.lifts_and_degree_eq_and_monic` で `𝒪[K.carrier]` 上の
+   モニック `f`(同次数、`f ↦ g`)へ持ち上げる。
+3. `Polynomial.Monic.irreducible_of_irreducible_map` で `f` も既約。
+4. Gauss(`Monic.irreducible_iff_irreducible_map_fraction_map`、
+   `IsIntegrallyClosed 𝒪[K.carrier]` は付値環だから自動)で
+   `K.carrier` 上でも既約。
+5. `K.closure` は代数閉体なので根 `x` が取れ、`minpoly K.carrier x`
+   がその既約多項式そのものだから `[K(x):K] = deg g`。
+6. `f` がモニックだから `x` は `𝒪[K.carrier]` 上整、よって `‖x‖ ≤ 1`
+   (`norm_le_one_of_isIntegral`)——`x` は `adjoinIntegers K x` の元。
+7. 剰余をとると `x̄` は `g` の根。`g` は既約モニックだから
+   `minpoly 𝓀 x̄ = g`、よって `deg g ≤ f = inertiaDegree K x`。
+8. `e·f = [K(x):K] = deg g` と `e ≥ 1` から `f ≤ deg g`。
+   両方合わせて `f = deg g = [K(x):K]`、すなわち **`e = 1`**。
+
+残るのは「有限体上の任意次数のモニック既約多項式の存在」だけ
+(これは純粋に有限体の話で、この節とは独立に足せる)。 -/
+
+/-- **★不分岐拡大の構成**——剰余体上のモニック既約多項式 `g` から、
+次数 `deg g` の**不分岐**単項拡大 `K(x)/K` を作る。存在の部分では
+Hensel の補題は使わない(上の見取り図を参照)。さらに `Normal` 性も
+同時に得る(こちらは Hensel を使う——`splits_adjoin_of_lift`)。 -/
+theorem exists_isUnramifiedAdjoin_of_irreducible {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    (g : Polynomial 𝓀[K.carrier]) (hgm : g.Monic) (hgi : Irreducible g) :
+    ∃ x : K.closure,
+      Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+        = g.natDegree ∧ IsUnramifiedAdjoin K x
+        ∧ Normal K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := by
+  have hlifts : g ∈ Polynomial.lifts (IsLocalRing.residue 𝒪[K.carrier]) :=
+    Polynomial.lifts_iff_coeff_lifts g |>.mpr (fun n => ⟨_, Quotient.out_eq' _⟩)
+  obtain ⟨f, hfmap, hfdeg, hfm⟩ := Polynomial.lifts_and_degree_eq_and_monic hlifts hgm
+  have hgnd : g.natDegree = f.natDegree := by rw [← hfmap, hfm.natDegree_map]
+  have hfi : Irreducible f := hfm.irreducible_of_irreducible_map _ f (by rw [hfmap]; exact hgi)
+  haveI : IsFractionRing 𝒪[K.carrier] K.carrier :=
+    ValuationRing.instIsFractionRingInteger (K := K.carrier) Valued.v
+  have hfKi : Irreducible (f.map (algebraMap 𝒪[K.carrier] K.carrier)) :=
+    (hfm.irreducible_iff_irreducible_map_fraction_map (K := K.carrier)).mp hfi
+  have hFm : (f.map (algebraMap 𝒪[K.carrier] K.carrier)).Monic := hfm.map _
+  have hFCm : ((f.map (algebraMap 𝒪[K.carrier] K.carrier)).map
+      (algebraMap K.carrier K.closure)).Monic := hFm.map _
+  have hndpos : 0 < f.natDegree := hgnd ▸ Irreducible.natDegree_pos hgi
+  obtain ⟨x, hx⟩ := IsAlgClosed.exists_root
+    ((f.map (algebraMap 𝒪[K.carrier] K.carrier)).map (algebraMap K.carrier K.closure))
+    (by
+      rw [Polynomial.degree_eq_natDegree hFCm.ne_zero, hFm.natDegree_map, hfm.natDegree_map]
+      exact_mod_cast Nat.pos_iff_ne_zero.mp hndpos)
+  have haev : Polynomial.aeval x (f.map (algebraMap 𝒪[K.carrier] K.carrier)) = 0 := by
+    rw [Polynomial.aeval_def, ← Polynomial.eval_map]; exact hx
+  have hint : IsIntegral K.carrier x := IsAlgebraic.isIntegral (Algebra.IsAlgebraic.isAlgebraic x)
+  have hmp : f.map (algebraMap 𝒪[K.carrier] K.carrier) = minpoly K.carrier x :=
+    minpoly.eq_of_irreducible_of_monic hfKi haev hFm
+  have hrank : Module.finrank K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) = g.natDegree := by
+    rw [IntermediateField.adjoin.finrank hint, ← hmp, hfm.natDegree_map, hgnd]
+  have hval : (IntermediateField.adjoin K.carrier ({x} : Set K.closure)).val
+      ⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩ = x := rfl
+  have hkey := Polynomial.aeval_algHom_apply
+    (IntermediateField.adjoin K.carrier ({x} : Set K.closure)).val
+    (⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩ :
+      IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    (f.map (algebraMap 𝒪[K.carrier] K.carrier))
+  rw [hval, haev] at hkey
+  have h1 : Polynomial.aeval
+      (⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩ :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+      (f.map (algebraMap 𝒪[K.carrier] K.carrier)) = 0 :=
+    (IntermediateField.adjoin K.carrier ({x} : Set K.closure)).val.injective
+      (by rw [map_zero]; exact hkey.symm)
+  have halg : (algebraMap 𝒪[K.carrier]
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))
+      = (algebraMap K.carrier
+          (IntermediateField.adjoin K.carrier ({x} : Set K.closure))).comp
+        (Subring.subtype 𝒪[K.carrier]) := rfl
+  have h3 : Polynomial.eval₂ (algebraMap 𝒪[K.carrier]
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))
+      (⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩ :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) f = 0 := by
+    rw [halg, ← Polynomial.eval₂_map]; exact h1
+  have hintL : IsIntegral 𝒪[K.carrier]
+      (⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩ :
+        IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := ⟨f, hfm, h3⟩
+  have hnorm : ‖(⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩ :
+      IntermediateField.adjoin K.carrier ({x} : Set K.closure))‖ ≤ 1 :=
+    norm_le_one_of_isIntegral K x _ hintL
+  have hsub : ((Subring.subtype (adjoinIntegers K x)).comp
+      (algebraMap 𝒪[K.carrier] (adjoinIntegers K x)))
+      = algebraMap 𝒪[K.carrier]
+        (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := rfl
+  have h2 := Polynomial.hom_eval₂ f (algebraMap 𝒪[K.carrier] (adjoinIntegers K x))
+    (Subring.subtype (adjoinIntegers K x))
+    (⟨⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩, hnorm⟩ : adjoinIntegers K x)
+  rw [hsub] at h2
+  have hrootO : Polynomial.eval₂ (algebraMap 𝒪[K.carrier] (adjoinIntegers K x))
+      (⟨⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩, hnorm⟩ : adjoinIntegers K x)
+      f = 0 := Subtype.ext (h2.trans h3)
+  have hbar : Polynomial.aeval (IsLocalRing.residue (adjoinIntegers K x)
+      ⟨⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩, hnorm⟩)
+      (f.map (IsLocalRing.residue 𝒪[K.carrier])) = 0 := by
+    rw [Polynomial.aeval_def, Polynomial.eval₂_map]
+    have hcomp : (algebraMap 𝓀[K.carrier] (IsLocalRing.ResidueField (adjoinIntegers K x))).comp
+        (IsLocalRing.residue 𝒪[K.carrier])
+        = (IsLocalRing.residue (adjoinIntegers K x)).comp
+          (algebraMap 𝒪[K.carrier] (adjoinIntegers K x)) := RingHom.ext (congrFun rfl)
+    rw [hcomp, ← Polynomial.hom_eval₂ f (algebraMap 𝒪[K.carrier] (adjoinIntegers K x))
+      (IsLocalRing.residue (adjoinIntegers K x)) _, hrootO, map_zero]
+  have hmpbar : f.map (IsLocalRing.residue 𝒪[K.carrier])
+      = minpoly 𝓀[K.carrier] (IsLocalRing.residue (adjoinIntegers K x)
+        ⟨⟨x, IntermediateField.mem_adjoin_simple_self K.carrier x⟩, hnorm⟩) := by
+    rw [hfmap]
+    exact minpoly.eq_of_irreducible_of_monic hgi (by rw [hfmap] at hbar; exact hbar) hgm
+  refine ⟨x, hrank, ?_, ?_⟩
+  · haveI := module_finite_adjoinIntegers K x
+    have hge : g.natDegree ≤ inertiaDegree K x := by
+      rw [inertiaDegree_eq_finrank_residueField K x, ← hfmap, hmpbar]
+      exact minpoly.natDegree_le _
+    apply isUnramifiedAdjoin_of_inertiaDegree_eq_finrank
+    rw [hrank]
+    have hmul := ramificationIndex_mul_inertiaDegree K x
+    rw [hrank] at hmul
+    have hnpos : 0 < g.natDegree := Irreducible.natDegree_pos hgi
+    have he : ramificationIndex K x ≠ 0 := by
+      intro h; rw [h, zero_mul] at hmul; omega
+    have hle : inertiaDegree K x ≤ ramificationIndex K x * inertiaDegree K x :=
+      Nat.le_mul_of_pos_left _ (Nat.pos_of_ne_zero he)
+    omega
+  · exact normal_of_splits_in_adjoin K x (f.map (algebraMap 𝒪[K.carrier] K.carrier)) hFm.ne_zero
+      (splits_adjoin_of_lift K x f hfm (by rw [hfmap]; exact hgi) _ hmpbar) haev
+
+/-- **★各次数の不分岐拡大の存在**——`n ≥ 1` に対し、`K` の次数 `n` の
+**不分岐**単項拡大 `K(x)/K` が `K.closure` の中に存在し、しかも
+`Normal`(標数 0 なので Galois)である。
+`Found/FiniteFieldIrreducible.lean`(有限体上の任意次数のモニック既約
+多項式)を上の構成に流し込むだけ。
+
+これで「不分岐拡大の理論」の第一の柱——**存在**——が立った。
+残るのは一意性(同じ次数の不分岐拡大は一致)と、`K^ur` および
+`Gal(K^ur/K) ≅ Ẑ`。 -/
+theorem exists_isUnramifiedAdjoin {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (n : ℕ)
+    (hn : n ≠ 0) :
+    ∃ x : K.closure,
+      Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) = n
+        ∧ IsUnramifiedAdjoin K x
+        ∧ Normal K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := by
+  haveI : Finite 𝓀[K.carrier] := residueField_finite K
+  obtain ⟨g, hgm, hgi, hgd⟩ := ABC3.Found.exists_monic_irreducible_natDegree_eq 𝓀[K.carrier] n hn
+  obtain ⟨x, hrank, hu, hnor⟩ := exists_isUnramifiedAdjoin_of_irreducible K g hgm hgi
+  exact ⟨x, hgd ▸ hrank, hu, hnor⟩
+
+/-- 標数 0 なので、上で得た不分岐拡大は **Galois**。 -/
+theorem exists_isGalois_isUnramifiedAdjoin {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (n : ℕ)
+    (hn : n ≠ 0) :
+    ∃ x : K.closure,
+      Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) = n
+        ∧ IsUnramifiedAdjoin K x
+        ∧ IsGalois K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := by
+  obtain ⟨x, hrank, hu, hnor⟩ := exists_isUnramifiedAdjoin K n hn
+  haveI : CharZero K.carrier :=
+    charZero_of_injective_algebraMap (algebraMap ℚ_[p] K.carrier).injective
+  haveI := hnor
+  haveI : Algebra.IsSeparable K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :=
+    IntermediateField.isSeparable_tower_bot K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+  exact ⟨x, hrank, hu, ⟨⟩⟩
 
 end ABC3.Found.PGC
