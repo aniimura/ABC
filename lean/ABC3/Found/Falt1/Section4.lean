@@ -148,4 +148,35 @@ example :
   haveI := (hAE.2.1 : Module.Finite _ _)
   rw [map_smul, diagonalCompare_elem_eq]
 
+/-! ## 原文どおりの形——「核は `m` で零化される。しかし源に `m`-捩れは無い」
+
+`p`-可除な塔 `PDivTower` の上で述べると、原文の証明の 3 行
+
+> *We already know that its kernel is annihilated by `m`.
+> But `Ω_{V̄/V} ⊗_V R̄` has **no `m`-torsion**.*
+
+がそのまま仮定と結論になる。 -/
+
+open KaehlerDifferential in
+/-- **`Theorem 4.1(ii)`、塔の上での形**。仮定 `hnotors` が原文の
+*"has no `m`-torsion"* に、`thm_2_4_i_tower` が *"its kernel is
+annihilated by `m`"* に対応する。 -/
+theorem thm_4_1_ii_tower {R A B : Type u} [CommRing R] [CommRing A] [CommRing B]
+    [Algebra R A] [Algebra A B] [Algebra R B] [IsScalarTower R A B]
+    [Module.Finite A B] [Module.Free A B]
+    {q : ℕ} (hq : 2 ≤ q) (T : PDivTower A q)
+    (hAET : IsAlmostEtaleCoveringTower (A := A) (B := B) T)
+    (hf0inj : letI := awayAlgebra (T.ϖ 0) (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B (T.ϖ 0)))))
+    (hnotors : ∀ (k : ℕ) (ξ : TensorProduct A B Ω[A⁄R]), T.ϖ k • ξ = 0 → ξ = 0) :
+    Function.Injective (KaehlerDifferential.mapBaseChange R A B) ∧
+    Function.Exact (KaehlerDifferential.mapBaseChange R A B)
+      (KaehlerDifferential.map R A B B) ∧
+    Function.Surjective (KaehlerDifferential.map R A B B) := by
+  refine ⟨?_, KaehlerDifferential.exact_mapBaseChange_map R A B,
+    KaehlerDifferential.map_surjective R A B⟩
+  rw [injective_iff_map_eq_zero]
+  intro x hx
+  exact hnotors 0 x ((thm_2_4_i_tower (R := R) hq T hAET hf0inj).1 0 x hx)
+
 end ABC3.Found.Falt1
