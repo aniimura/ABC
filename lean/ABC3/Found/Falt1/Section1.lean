@@ -1832,6 +1832,39 @@ noncomputable def truncPoly_omegaEquiv {k : Type*} [Field k] (N : ℕ) (hN : (N 
     Submodule.quotEquivOfEqBot _ (by simp)
   exact e1.trans e2
 
+/-- **中間の底 `A` の像の微分が消えるなら `Ω[B⁄k] ≅ Ω[B⁄A]`**。
+`A` の作用が `k` を経由する(例:塔の遷移写像が `X ↦ 0`)場合の
+基本的な取り換え。 -/
+theorem kaehler_map_bijective_of_D_eq_zero (k A B : Type*) [CommRing k] [CommRing A]
+    [CommRing B] [Algebra k A] [Algebra A B] [Algebra k B] [IsScalarTower k A B]
+    (h : ∀ a : A, KaehlerDifferential.D k B (algebraMap A B a) = 0) :
+    Function.Bijective (KaehlerDifferential.map k A B B) := by
+  have hzero : ∀ ω : Ω[A⁄k], KaehlerDifferential.map k k A B ω = 0 := by
+    intro ω
+    have hmem : ω ∈ (⊤ : Submodule A (Ω[A⁄k])) := Submodule.mem_top
+    rw [← KaehlerDifferential.span_range_derivation] at hmem
+    refine Submodule.span_induction ?_ ?_ ?_ ?_ hmem
+    · rintro _ ⟨a, rfl⟩
+      rw [KaehlerDifferential.map_D]
+      exact h a
+    · simp
+    · intro x y _ _ hx hy; rw [map_add, hx, hy, add_zero]
+    · intro c x _ hx; rw [map_smul, hx, smul_zero]
+  have hmb : ∀ y : TensorProduct A B (Ω[A⁄k]),
+      KaehlerDifferential.mapBaseChange k A B y = 0 := by
+    intro y
+    induction y using TensorProduct.induction_on with
+    | zero => simp
+    | tmul b ω => rw [KaehlerDifferential.mapBaseChange_tmul, hzero, smul_zero]
+    | add u v hu hv => rw [map_add, hu, hv, add_zero]
+  constructor
+  · rw [injective_iff_map_eq_zero]
+    intro x hx
+    obtain ⟨y, hy⟩ := ((KaehlerDifferential.exact_mapBaseChange_map k A B) x).mp hx
+    rw [← hy]
+    exact hmb y
+  · exact KaehlerDifferential.map_surjective k A B
+
 instance zmod4_nontrivial : Nontrivial (ZMod 4) := ⟨0, 1, by decide⟩
 
 /-- `ZMod 4` は局所環(単元でない元 `{0,2}` は加法で閉じている)。 -/
