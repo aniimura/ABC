@@ -145,3 +145,15 @@ theorem finrank_fixedField_eq_index (K : PAdicLocalField p) (H : Subgroup K.absG
   rw [h1, h2]
 
 end ABC3.Found.PGC
+
+/-- **G2 の非空虚 witness**——`SubgroupCorrespondence p` は実際に存在する。
+
+`Interface` は `Found` を import できない(`Interface/PGC/LocalFieldData.lean`
+冒頭の規約)ので、実装側から `Interface.PGC` 名前空間へ足す
+——`ResidueCardinality.nonvacuous` と同じ配置。
+
+これにより、`SubgroupCorrespondence` を仮説に持つ `Skeleton/` の主張
+(`Skeleton/PGC/Section1Cor13.lean`)は**空虚でないことが確定した**。 -/
+theorem ABC3.Interface.PGC.SubgroupCorrespondence.nonvacuous (p : ℕ) [Fact p.Prime] :
+    Nonempty (ABC3.Interface.PGC.SubgroupCorrespondence p) :=
+  ⟨ABC3.Found.PGC.subgroupCorrespondence p⟩

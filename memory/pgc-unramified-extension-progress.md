@@ -1908,3 +1908,17 @@ Lubin-Tate 塔は `K(Λ_n)/K(Λ_{n-1})` という**相対的な**拡大の連な
 最後の `(fixedField H).fixingSubgroup = H` の書き換えは `▸` だと
 `fixedFieldLocalField K H hH` の中の `H` まで書き換わって型が合わないので
 `MulEquiv.subgroupCongr` を使う。
+
+## 2026-09-05(続き): `SubgroupCorrespondence` の discharge を台帳に記録
+
+- `Interface/PGC/LocalFieldData.lean` の docstring に
+  「★★★2026-09-05: discharge 済み」を追記(`ResidueCardinality` と同じ形式)。
+  待っていた二つ(中間体が p進局所体・その絶対 Galois 群が H)の解消先を明記。
+- `Found/PGC/SubgroupCorrespondenceConstruction.lean` に
+  **`ABC3.Interface.PGC.SubgroupCorrespondence.nonvacuous`** を追加
+  (`Interface` は `Found` を import できないので実装側から名前空間へ足す
+  ——`ResidueCardinality.nonvacuous` と同じ配置)。
+
+これで `Interface/PGC` の自由データ 3 つのうち **2 つが実物として完成**
+(`ResidueCardinality`・`SubgroupCorrespondence`)。残るのは
+`RamificationFiltration`(Herbrand の定理、mathlib 本体の TODO)だけ。

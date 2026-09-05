@@ -89,7 +89,24 @@ Krull 位相を持つが、「開部分群に対応する中間体が ℚ_p 上�
 
 ★`field_top` は原文が明示していない——H = Γ_K のとき L = K であることは
 対応の定義から従う自明な事実だが、**我々が明示的に課している**ことを記録しておく。
-これが無いと不分岐な開部分群の集合が空になりうる。 -/
+これが無いと不分岐な開部分群の集合が空になりうる。
+
+**★★★2026-09-05: discharge 済み**。`waiting` が挙げていた二つ
+
+1. 開部分群 H に対応する中間体が p進局所体であること
+2. その絶対 Galois 群が H であること
+
+は両方とも構成された:
+1. `Found/PGC/SubgroupCorrespondenceConstruction.lean::fixedFieldLocalField`
+   (Krull 位相の開部分群の固定体は ℚ_p 上有限次——
+   `krullTopology_mem_nhds_one_iff` で有限次中間体に挟む)
+2. `Found/PGC/AdjoinFieldClosure.lean::absGalFixedFieldEquiv`
+   (代数閉包の同一視 + `IntermediateField.fixingSubgroupEquiv` +
+   `InfiniteGalois.fixingSubgroup_fixedField`)
+
+実物は `Found/PGC/SubgroupCorrespondenceConstruction.lean::subgroupCorrespondence`。
+非空虚 witness は同ファイルの `SubgroupCorrespondence.nonvacuous`
+(`Interface` は `Found` を import できないので、実装側から名前空間に足す)。 -/
 structure SubgroupCorrespondence where
   /-- 開部分群 H に対応する中間体(これも p進局所体) -/
   field : (K : PAdicLocalField p) → (H : Subgroup K.absGal) →
