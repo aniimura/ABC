@@ -1228,3 +1228,39 @@ Lubin-Tate 級数 `f`)は**すべて本リポジトリで既に構築済みだ�
 
 ★もう一つの発見: **中間体のノルムは `K.closure` のノルムの制限そのもの**
 (`‖z‖ = ‖(z : K.closure)‖` が `rfl`)。整数環の包含を作るのが安い。
+
+## ★★★★★★★★★★2026-09-05: 部分拡大の不分岐性——`K(x) ≤ K^ur ⟺ 不分岐`
+
+`Found/PGC/UnramifiedSubextension.lean`(新規)
+
+**塔の乗法性(`Ideal.ramificationIdx_algebra_tower'`)は使わなかった。**
+`adjoinIntegers K x → adjoinIntegers K y` の代数構造と `LiesOver` を組む
+配管が要るので、代わりに**不分岐拡大の Galois 群が巡回**であることを使った:
+
+1. `m := [K(x):K] ∣ n := [K(y):K]`(`finrank_dvd_of_adjoin_le`)
+2. 次数 `n` の不分岐 `K(w)` は `Gal` が巡回(`exists_isCyclic_gal`)、
+   一意性で `K(y) = K(w)`
+3. 次数 `m` の不分岐 `K(z)` は `K(z) ⊆ K(w)`(`adjoin_le_of_dvd`)
+4. `Γ_K/Gal(K̄/K(w)) ≅ Gal(K(w)/K)` は位数 `n` の巡回群なので、
+   指数の等しい部分群は一致 ⟹ `K(x) = K(z)` ⟹ 不分岐
+
+★**巡回群では位数の等しい部分群は一致する**は mathlib に無かったので自作
+(`eq_of_natCard_eq_of_isCyclic`)。`IsCyclic.card_pow_eq_one_le`
+(`x^d=1` の解は高々 `d` 個)+ Lagrange で `H = {a | a^d = 1}`。
+
+主な結果:
+- `isUnramifiedAdjoin_of_adjoin_eq` : 不分岐性は生成体だけで決まる
+- `index_fixingSubgroup_adjoin` : `[K(x):K] = [Γ_K : Gal(K̄/K(x))]`
+- `adjoin_eq_of_le_of_finrank_eq` : 巡回 Galois 拡大の中では次数の等しい
+  部分拡大は一致
+- **`isUnramifiedAdjoin_of_le`** : 部分拡大の不分岐性
+- **`adjoin_le_unramifiedClosure_iff`** : `K(x) ≤ K^ur ⟺ 不分岐`
+- `mem_unramifiedClosure_iff_isUnramified`
+- `isUnramifiedAt_iff_fixedField_le` : 原文の判定条件は「固定体が `K^ur`
+  に入る」ことと**同値**(前ファイルでは片方向だった)
+
+### 次
+
+「完全分岐 ∩ K^ur = K」——Lubin-Tate 塔 `K_π,n` が完全分岐であることが
+要る。`LubinTateActionPsi.lean` は `ψ_n` の Eisenstein 性(既約性)まで
+出しているが、`e = deg` そのものは未証明(同ファイル 331 行の注記)。
