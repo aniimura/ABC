@@ -184,4 +184,75 @@ theorem obstruction_identity {A B C : Type u} [CommRing A] [CommRing B] [CommRin
   simp only [Algebra.smul_def]
   ring
 
+/-! ## Faltings の「`ε` を倍にする」段(物理p.7=印字p.260)
+
+原文: *"Doubling `ε` and then enlarging it a little we may assume that this
+class vanishes, and then we can modify `φ_ε` so that it becomes
+multiplicative, i.e. such that `p^ε φ_ε(xy) = φ_ε(x)φ_ε(y)`."*
+
+この2文が指す操作は、以下の2本にちょうど分解される。 -/
+
+/-- **「`ε` を少し大きくする」段**。`ψ` を `p^d` 倍すると、水準は `n` から
+`n+d` に上がり、障害は `p^{2d}` 倍になる。したがって
+`H²` の almost 消滅が与える `p^d·c = d h` と合わせると、
+**`p^d ψ` の障害 `p^{2d}c = d(p^d h)` はちょうどコバウンダリになる**
+(= class が消える)。 -/
+theorem rescale_obstruction {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C] (p : A) (n d : ℕ) (ψ : B →ₗ[A] C) (b₁ b₂ : B) :
+    (p ^ (n + d)) • (((p ^ d) • ψ) (b₁ * b₂)) - (((p ^ d) • ψ) b₁) * (((p ^ d) • ψ) b₂)
+      = (p ^ (2 * d)) • ((p ^ n) • ψ (b₁ * b₂) - ψ b₁ * ψ b₂) := by
+  simp only [LinearMap.smul_apply, Algebra.smul_def, map_pow]
+  ring
+
+/-- **「`ε` を倍にする」段——Faltings の `Theorem 2.2` の核心**。
+障害がコバウンダリ(`hcob`——`ψ` 側にスケールした形で書いてある。
+`x ∈ I` に対し `ψ(b)·x = p^n·(b•x)` なので、これは抽象的な
+コバウンダリ条件 `c = dh` を `p^n` 倍したものである)であり、
+`h` が `I`(`I²=0`)に値を取る(`hIsq`)なら、
+**`ψ'' := p^n·ψ + h` は水準 `2n` で厳密に乗法的**になる:
+
+    p^{2n}·ψ''(b₁b₂) = ψ''(b₁)·ψ''(b₂).
+
+証明は可換環の恒等式1本(`linear_combination q^n * hcob - hIsq`、
+`q := algebraMap A C p`)——`h(b₁)h(b₂)=0` と コバウンダリ関係で
+すべての項が打ち消し合う。 -/
+theorem doubling_multiplicative {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C] (p : A) (n : ℕ) (ψ h : B →ₗ[A] C)
+    (hIsq : ∀ b₁ b₂ : B, h b₁ * h b₂ = 0)
+    (hcob : ∀ b₁ b₂ : B, (p ^ n) • ((p ^ n) • ψ (b₁ * b₂) - ψ b₁ * ψ b₂)
+        = ψ b₁ * h b₂ - (p ^ n) • h (b₁ * b₂) + ψ b₂ * h b₁)
+    (b₁ b₂ : B) :
+    (p ^ (2 * n)) • (((p ^ n) • ψ + h) (b₁ * b₂))
+      = (((p ^ n) • ψ + h) b₁) * (((p ^ n) • ψ + h) b₂) := by
+  have hc := hcob b₁ b₂
+  have hsq := hIsq b₁ b₂
+  simp only [LinearMap.add_apply, LinearMap.smul_apply, Algebra.smul_def, map_pow] at hc ⊢
+  linear_combination ((algebraMap A C) p ^ n) * hc - hsq
+
+/-! ## `Theorem 2.2` の残り(正直な記録)
+
+上の `doubling_multiplicative` により、`Theorem 2.2` の証明の
+「`p^ε φ_ε(xy) = φ_ε(x)φ_ε(y)` を満たす `φ_ε` を作る」という部分は
+**完全に閉じた**(材料は `almost_lift_of_isAlmostEtale`(第1段)・
+`obstruction_mem_ker`・`obstruction_identity`(障害がコサイクル)・
+`hochschild_H2_almost_coboundary`(コバウンダリ表示)・
+`rescale_obstruction`・`doubling_multiplicative`)。
+
+残るのは Faltings の証明の最後の2文である:
+
+1. *"Such a lifting is unique up to `H¹(B/A,I)`, hence up to `p`-torsion.
+   As `C` has no such torsion, the different `φ_ε` glue together to give a
+   multiplicative `A`-linear map `φ₀ : mB → C`."*
+   ——`ε` を動かしたときの `φ_ε` の族を貼り合わせる操作。ここで初めて
+   `m = ∪ p^ε` という**almost mathematics の枠組み**(有向系としての `m`)
+   が本質的に要る。本プロジェクトの形式化は単一の `p^n` で進めてきたので、
+   `m` を有向系として持つ層を新たに設計する必要がある。
+2. *"We can extend to `B = A + mB`, because `φ₀` maps `p^ε` to an element
+   `x = p^ε + y` (`y ∈ I`) satisfying `x² = p^ε x`, hence `p^ε y = 0`."*
+   ——`B = A + mB` という構造を使う最後の詰め。
+
+いずれも「almost mathematics の枠組みそのもの」を要する部分であり、
+`ResearchPaper/mathlib-gap.json` の `falt1-almost-mathematics` に対応する。
+-/
+
 end ABC3.Found.Falt1
