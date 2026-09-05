@@ -698,10 +698,25 @@ noncomputable def pieceAlgebra (X : Over BaseK) (U : X.left.Opens) (hU : IsAffin
   `pullbackSpecIso_inv_fst`・`_hom_snd` など特徴づけの補題が使える見込み。 -/
 
 open CategoryTheory AlgebraicGeometry Limits in
+/-- **任意のスキームの射`f : C ⟶ Y`について、`f.appLE`(逆像への標準写像)は
+開集合の制限と可換**——`Scheme.Hom.map_appLE`で右辺を、`Scheme.Hom.appLE_map`
+で左辺を潰すだけ。上の四角形の (i)の一般形。`pullback.fst`側でも
+`α`(`C ⟶ Ext X`)側でも同じ形で使えるように、射を一般のまま取り出した。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem Scheme.Hom.appLE_preimage_naturality {C Y : Scheme} (f : C ⟶ Y) (W W' : Y.Opens)
+    (hW : W' ≤ W) :
+    f.appLE W (f ⁻¹ᵁ W) le_rfl ≫ C.presheaf.map (homOfLE (show (f ⁻¹ᵁ W' : C.Opens) ≤ f ⁻¹ᵁ W
+      from fun _ hx => hW hx)).op
+    = Y.presheaf.map (homOfLE hW).op ≫ f.appLE W' (f ⁻¹ᵁ W') le_rfl := by
+  rw [Scheme.Hom.map_appLE]
+  exact Scheme.Hom.appLE_map _ _ _
+
+open CategoryTheory AlgebraicGeometry Limits in
 /-- **`pullback.fst` の `appLE`(片への標準写像)は開集合の制限と可換**——
-`Scheme.Hom.map_appLE` で右辺を、`Scheme.Hom.appLE_map` で左辺を潰すだけ。
-上の四角形の (i)。`pieceRingEquiv` を経由しない**標準写像の側**の自然性は
-これで完全に押さえられる。
+一般形`Scheme.Hom.appLE_preimage_naturality`の`f := pullback.fst X.hom toBaseK`
+での特殊化。上の四角形の (i)。`pieceRingEquiv` を経由しない**標準写像の側**の
+自然性はこれで完全に押さえられる。
 
 ★**sorry 無し**。標準3公理のみ。 -/
 theorem piece_appLE_naturality (X : Over BaseK) (U V : X.left.Opens) (hV : V ≤ U) :
@@ -710,9 +725,8 @@ theorem piece_appLE_naturality (X : Over BaseK) (U V : X.left.Opens) (hV : V ≤
         (pullback.fst X.hom toBaseK ⁻¹ᵁ V : ((ExtF.obj X).left).Opens)
         ≤ pullback.fst X.hom toBaseK ⁻¹ᵁ U from fun _ hx => hV hx)).op
     = X.left.presheaf.map (homOfLE hV).op ≫
-      (pullback.fst X.hom toBaseK).appLE V (pullback.fst X.hom toBaseK ⁻¹ᵁ V) le_rfl := by
-  rw [Scheme.Hom.map_appLE]
-  exact Scheme.Hom.appLE_map _ _ _
+      (pullback.fst X.hom toBaseK).appLE V (pullback.fst X.hom toBaseK ⁻¹ᵁ V) le_rfl :=
+  Scheme.Hom.appLE_preimage_naturality _ U V hV
 
 /-- **`Ext X` の `U`(`X.left` のアフィン開、`R` に依らない)上のアフィン片は
 `Spec(Γ(U,U) ⊗[ℚ] ℝ)`**——`Lemma 4.1` の構成的降下で generic flatness を
