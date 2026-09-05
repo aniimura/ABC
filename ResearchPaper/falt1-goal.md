@@ -40,8 +40,8 @@
 | §1 | Lemma 1.1 | ✅Found | (完成) |
 | §1 | Theorem 1.2 | ブロック | `Wₙ⊗_{Vₙ}Vₙ₊₁`の非正規性(`differentIdeal Wₙ Wₙ₊₁`)の評価が必要。`Vₙ`塔側の技術(Eisenstein多項式・differentIdeal計算)は完成済みだが`Wₙ`側(任意のalmost étale `W`)には転用できない(`differentIdeal_tower_diamond`のdocstring参照)。退化した`W`(非分岐)を使うと`δₙ≡0`は自明に出るが、原文の「任意の`W`」という全称量化を証明したことにはならない。 |
 | §2 | Definition 2.1 | ✅Found | (完成、`p`が単元でなくても任意のétale/finite/free拡大について成立する一般形まで) |
-| §2 | Theorem 2.2 | 前提は完成・定理本体が残る | ★2026-09-05: **この3項目が使う入力(remark 2.1(v)、honest 版・almost 版とも)は完全に証明できた**——`hochschild_ext_eq_zero`(honest)・`hochschild_ext_almost_zero`(almost、`IsAlmostEtaleCovering`のみから`p^n`が`Ext^{k+1}_{B⊗_AB}(B,M)`を零化、非空虚性の対照つき)。以前「Faltings未証明」と誤認し、その後「almost 化が壁」と報告していた両方が解消済み。**残るのは`Theorem 2.2`本体の議論**——nilpotent ideal に沿った lifting(障害類が`H²`に住み、それが`m`で零化されることから almost 一意的に持ち上がる)を、mathlib の変形理論(`Algebra.FormallySmooth`系)と上記`Ext`消滅の間で繋ぐ部分。 |
-| §2 | Theorem 2.3 | 前提は完成・定理本体が残る | 同上(`H¹`版。`hochschild_ext_almost_zero`は次数`k`を問わず一般に証明済みなので、入力側は共通) |
+| §2 | Theorem 2.2 | **一意性✅完成・存在は`p`可除な底待ち** | ★2026-09-05: 入力(remark 2.1(v)、honest 版`hochschild_ext_eq_zero`・almost 版`hochschild_ext_almost_zero`)は完成。**一意性は完全に証明した**(`AlmostLifting.thm_2_2_uniqueness_of_isAlmostEtale`——差が導分になり、`Ω[B⁄A]`のalmost消滅と`C`の`p`捩れ無しから`0`)。**存在**も部品はすべて揃った:第1段`almost_lift_of_isAlmostEtale`(almost射影性からの持ち上げ)・障害のコサイクル性(`obstruction_mem_ker`・`obstruction_identity`)・コバウンダリ表示(`hochschild_H2_almost_coboundary`、明示形)・**Faltings の「`ε`を倍にする」段**(`doubling_multiplicative`)・整合性(`rescale_multiplicative`)。残るのは`ε`族の極限——★これには**`p`可除な底(`m = ∪p^{1/p^k}`)を持つ almost mathematics の層**が要る(下記「構造上の発見」参照)。 |
+| §2 | Theorem 2.3 | 同上(同じ変形理論) | `Theorem 2.2`と同じ層を待つ。入力側(`hochschild_ext_almost_zero`は次数を問わず一般)は共通。 |
 | §2 | Theorem 2.4(i) | **余核側は完成・核側は1本だけ残る** | ★2026-09-05: `Found/Falt1/AlmostDifferentials.lean`。**余核側は完全に閉じた**——Jacobi–Zariski 完全列(`KaehlerDifferential.range_mapBaseChange`)で余核はちょうど`Ω[B⁄A]`になり、`p^n`が`Ω[B⁄A]`を零化すること(`kaehler_almost_zero`)を条件(iii)の witness から直接示した(`v := w - p^n`と置くと`v∈I`かつ`x·w=0`なので`p^n·x = -(v·x) ∈ I²`——古典的な分離冪等元の1行議論の almost 版)。**核側**は`Algebra.H1Cotangent.exact_δ_mapBaseChange`により「`p^n`が`H1Cotangent A B`を零化する」(= `B`が`A`上 almost formally smooth)にちょうど帰着することまで証明済み(`thm_2_4_i_kernel_of_h1Cotangent`)——残るのはその1本で、これは`Theorem 2.2`(nilpotent ideal に沿った lifting)と同じ深さ。 |
 | §2 | Theorem 2.4(ii) | **✅証明済み**(`thm_2_4_ii`、逸脱2件を記録の上) | ★2026-09-05: 4つの部品を全て証明し、原典の仮定の形のまま繋いだ。(1) remark(iii)の trace 恒等式(`remark_iii_trace_identity`)・ノルム適用(`trace_ideal_pow_mem_traceIdeal`)——この2つは`IsAlmostEtaleCovering`仮定の形へ一般化済みで、**`B`自体が étale である必要は無い**(Faltings の設定そのもの)。(2) 群コホモロジー側の transfer を**全次数`i>0`**で(`transfer_groupCohomology_smul_eq_zero`)——以前「mathlibに一般のtransfer定理が無い」と壁として報告していたが、必要なのはrestriction-corestrictionではなく「`Σ_g g(b)=c`なら`c`が`H^i`を零化する」という平均化だけで、coinduced加群への almost split + Shapiro(`groupCohomology.coindIso`)で閉じた。(3) 後半の`M^G/tr_G(M)`(`transfer_invariants_mem_trace`)。(4) **可換環の Galois trace 公式**(`trace_eq_sum_of_chr`——CHRの同型`B⊗_AB≅Map(G,B)`から。mathlibの`trace_eq_sum_automorphisms`は体専用なので自作、`mathlib-gap.json`の`falt1-galois-trace-rings`を3/3で解消)と局所化からの descent(`trace_formula_of_localized`)。**残る逸脱2件**: `Module.Free A B`(原典は`B[1/p]`が projective——mathlibの`Algebra.trace`が`Module.Free`要求、既記録)と`IsDedekindDomain`+`Module.IsTorsionFree`(`Ideal.relNorm`使用のため)。非空虚性の対照(実際にGalois被覆になる具体例)は未作成。 |
 | §3 | Theorem 3.1 | ブロック | `Theorem 2.2`-`2.4`の結果を直接使う(§2の壁がそのまま継承) |
@@ -102,6 +102,40 @@ check.mjs --brief`で検証済み、mathlibに無かった一般定理):
   `thm_2_4_i_kernel_of_h1Cotangent`(`AlmostDifferentials.lean`):
   **`Theorem 2.4(i)`の余核側**(`p^n`が`Ω[B⁄A]`を零化する)と、
   核側が`H1Cotangent A B`の almost 消滅1本に帰着することの証明。
+- `almost_dual_basis`・`almost_projective_factor`・
+  `almost_lift_of_surjective`・`almost_lift_of_isAlmostEtale`
+  (`AlmostProjective.lean`):remark(iii)が与える almost dual basis から
+  「`B`は`A`上 almost 射影的」を出し、**`Theorem 2.2`の第1段**
+  (任意の全射に沿って`A`-加群写像が`p^n`倍で持ち上がる)を閉じたもの。
+- `hochH2Bil`・`hochH2_identity`・`hochschild_H2_almost_coboundary`・
+  `obstruction_mem_ker`・`obstruction_identity`・`rescale_obstruction`・
+  `doubling_multiplicative`・`uniqueness_derivation_eq`・
+  `rescale_multiplicative`(`HochschildLowDegree.lean`):
+  **Hochschild `H²`の almost 消滅をコチェインの明示形で**(remark(v)の
+  縮約ホモトピーそのもの)与え、`Theorem 2.2`の障害類の扱い
+  (コサイクル性・`ε`を倍にする段・一意性・整合性)を**すべて**閉じたもの。
+- `derivation_almost_zero`・`thm_2_2_uniqueness`・
+  `thm_2_2_uniqueness_of_isAlmostEtale`(`AlmostLifting.lean`):
+  **`Theorem 2.2`の一意性を完全に証明**。
+
+### ★構造上の発見(2026-09-05)——なぜ `2.4` は閉じて `2.2`/`2.3` は閉じないか
+
+本プロジェクトの `Definition 2.1` 条件(iii)は指数を **`n : ℕ`** で取る。
+原典は `ε>0` を **`p`冪分母の正有理数**で走らせる——`A` が `p^{1/p^k}` を
+含む(perfectoid 的な)底を前提とし、`m = ∪_ε p^ε A` は `(p)` より真に
+小さい。この違いが項目を二分する:
+
+- **`Theorem 2.4` は almost な結論**(「`m` が零化する」)なので整数指数の
+  枠組みでもそのまま意味を持ち、実際に閉じた。
+- **`Theorem 2.2`/`2.3` は honest な結論**(「**一意に**持ち上がる」)であり、
+  `p^ε φ_ε` の族から `ε→0` の極限として honest な `φ₀` を得る操作が要る。
+  整数指数では `ε ≥ 1` までしか下がらず、**`p` で割る操作が原理的に構成
+  できない**。一意性側はこの極限を要しないので閉じた(`AlmostLifting.lean`)。
+
+したがって次に着手すべきは「`Theorem 2.2` の続き」ではなく、
+**`p`可除な底(`ϖ : ℕ → A`、`ϖ 0 = p`、`(ϖ (k+1))^q = ϖ k`、
+`m = ⨆ₖ (ϖ k)`)を持つ層の設計**である。今セッションで揃えた材料は
+その層の上でそのまま再利用できる。
 
 **§2 の残りが1点に収束した(2026-09-05)**: `Theorem 2.2`・`2.3`・
 `2.4(i)`の核側は、いずれも**「square-zero(冪零)拡大に沿った almost
@@ -113,13 +147,12 @@ lifting」という同一の1本**に帰着する:
   (= `B` が `A` 上 almost formally smooth)で、これは square-zero 拡大に
   沿った almost lifting の言い換えである。
 
-入力(`hochschild_ext_almost_zero`——`p^n`が`Ext^{k+1}_{B⊗_AB}(B,M)`を
-零化する)は完成しているので、**残るのは「障害類を実際に`Ext²`の元として
-取り出す」変形理論の設計1点**である。mathlib は`Algebra.FormallySmooth`の
-lifting API は持つが、障害類を Hochschild cohomology の元として構成する
-枠組みは持たない(`ResearchPaper/mathlib-gap.json`の
-`falt1-almost-mathematics`参照)。次回セッションはここを設計するのが
-最優先。
+入力(`hochschild_ext_almost_zero`)も、障害類の取り出しも、
+`ε`を倍にする段も、今セッションで**すべて明示的に閉じた**
+(`HochschildLowDegree.lean`)。**残るのは`ε`族の極限を取る操作1点**で、
+それには上記の「`p`可除な底」の層が要る
+(`ResearchPaper/mathlib-gap.json`の`falt1-almost-mathematics`)。
+次回セッションはこの層の設計が最優先。
 
 ## 0.1 `/goal Falt1 Chapter I Found` の進捗(2026-09-04)
 
