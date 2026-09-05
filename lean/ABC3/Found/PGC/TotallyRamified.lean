@@ -591,4 +591,46 @@ theorem isTotallyRamifiedAdjoin_of_eisenstein (K : PAdicLocalField p) (x : K.clo
   · show ‖_‖ = _
     rw [norm_intAlgebraMap, hc0]
 
+/-- **★★★★★★★Eisenstein 多項式は完全分岐拡大を生む**——根 `α` を取れば
+`[K(α):K] = deg` で `K(α)/K` は完全分岐。
+
+Gauss の補題(`Monic.irreducible_iff_irreducible_map_fraction_map`)で
+`𝒪_K` 上の既約性を `K` 上へ移し、`minpoly = g` から次数を読み、
+`isTotallyRamifiedAdjoin_of_eisenstein` を適用する。 -/
+theorem exists_isTotallyRamifiedAdjoin_of_eisenstein (K : PAdicLocalField p)
+    {π : 𝒪[K.carrier]} (hπ0 : (π : K.carrier) ≠ 0)
+    (hπmax : IsLocalRing.maximalIdeal 𝒪[K.carrier] = Ideal.span {π})
+    (g : Polynomial 𝒪[K.carrier]) (hmonic : g.Monic)
+    (heis : g.IsEisensteinAt (IsLocalRing.maximalIdeal 𝒪[K.carrier]))
+    (hdegpos : 0 < g.natDegree) :
+    ∃ α : K.closure, IsTotallyRamifiedAdjoin K α
+      ∧ Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({α} : Set K.closure))
+        = g.natDegree := by
+  haveI := uniqueFactorizationMonoid_valuationRing K
+  have hirrO : Irreducible g :=
+    heis.irreducible (IsLocalRing.maximalIdeal.isMaximal _).isPrime hmonic.isPrimitive hdegpos
+  have hmonicK : (g.map (algebraMap 𝒪[K.carrier] K.carrier)).Monic := hmonic.map _
+  have hirrK : Irreducible (g.map (algebraMap 𝒪[K.carrier] K.carrier)) :=
+    (hmonic.irreducible_iff_irreducible_map_fraction_map).mp hirrO
+  have hdegK : (g.map (algebraMap 𝒪[K.carrier] K.carrier)).natDegree = g.natDegree :=
+    hmonic.natDegree_map _
+  have hdeg0 : (g.map (algebraMap 𝒪[K.carrier] K.carrier)).degree ≠ 0 := by
+    rw [Polynomial.degree_eq_natDegree hmonicK.ne_zero, hdegK]
+    exact_mod_cast Nat.cast_ne_zero.mpr hdegpos.ne'
+  obtain ⟨α, hα⟩ := IsAlgClosed.exists_root (k := K.closure)
+    ((g.map (algebraMap 𝒪[K.carrier] K.carrier)).map (algebraMap K.carrier K.closure))
+    (by rw [Polynomial.degree_map]; exact hdeg0)
+  have haeval : (Polynomial.aeval α) (g.map (algebraMap 𝒪[K.carrier] K.carrier)) = 0 := by
+    rw [Polynomial.aeval_def, ← Polynomial.eval_map]; exact hα
+  have hmin : minpoly K.carrier α = g.map (algebraMap 𝒪[K.carrier] K.carrier) :=
+    (minpoly.eq_of_irreducible_of_monic hirrK haeval hmonicK).symm
+  have hint : IsIntegral K.carrier α := ⟨_, hmonicK, haeval⟩
+  have hrank : Module.finrank K.carrier
+      (IntermediateField.adjoin K.carrier ({α} : Set K.closure)) = g.natDegree := by
+    rw [IntermediateField.adjoin.finrank hint, hmin, hdegK]
+  refine ⟨α, ?_, hrank⟩
+  refine isTotallyRamifiedAdjoin_of_eisenstein K α hπ0 hπmax g hmonic heis hrank.symm ?_
+  rw [← Polynomial.map_map]
+  exact hα
+
 end ABC3.Found.PGC

@@ -1819,3 +1819,26 @@ f.natDegree = [K(x):K],  f の根 x  ⟹  K(x)/K は完全分岐
    ⟹ `[K(α):K] = φ_1.natDegree = q-1`
 3. `isTotallyRamifiedAdjoin_of_eisenstein` を適用
 ——第 974 の `exists_root_pow_eq_p` と同じ型の議論。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05: **`K(Λ_1)/K` は次数 `q-1` の完全分岐拡大**
+
+`Found/PGC/TotallyRamified.lean::exists_isTotallyRamifiedAdjoin_of_eisenstein`
++ `Found/PGC/LubinTateTotallyRamified.lean`(新規)
+
+**一般形**: `𝒪_K` 上の Eisenstein 多項式 `g` について、根 `α` を取れば
+`[K(α):K] = deg g` で `K(α)/K` は完全分岐。
+Gauss の補題(`Monic.irreducible_iff_irreducible_map_fraction_map`)で
+`𝒪_K` 上の既約性を `K` 上へ移し、`minpoly = g` から次数を読む。
+
+**適用**: `φ_1` は `𝒪_K` 上の Eisenstein(第 986)なのでそのまま渡せて、
+**`K(Λ_1)/K` は次数 `q-1 = pp^ff - 1` の完全分岐拡大**。
+
+`finrank_eq_one_of_mem_unramifiedClosure_of_le`(第 979、「完全分岐 ∩ K^ur = K」)
+と合わせると `K(Λ_1)` は `K^ur` と**線型無関係**。
+
+### 残り
+
+`n ≥ 2` の `ψ_n` は `𝒪_{K(Λ_{n-1})}` 上の Eisenstein なので、塔の合成
+(慣性次数の乗法性 `f(M/K) = f(M/L)·f(L/K)`)が要る。
+mathlib の `Ideal.inertiaDeg_algebra_tower` を使うか、剰余体の
+`finrank` の塔則(`Module.finrank_mul_finrank`)で出すのが素直。
