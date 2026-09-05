@@ -442,3 +442,40 @@ IsAdicComplete.henselianRing (R) (I) [IsAdicComplete I R] : HenselianRing R I
 残る材料の所在: 1. の「有限体上の任意次数のモニック既約多項式の存在」
 ——mathlib での名前は未確認(`GaloisField` の原始元の `minpoly` を
 使う経路が確実)。
+
+## ★★★★2026-09-05: 不分岐拡大の**構成**が完成(Hensel を使わずに)
+
+`Found/PGC/UnramifiedExtension.lean::exists_isUnramifiedAdjoin_of_irreducible`
+(sorry 無し、全ゲート通過):
+
+```
+剰余体 𝓀[K.carrier] 上のモニック既約 g  ⟹  ∃ x : K.closure,
+  [K(x):K] = deg g  ∧  IsUnramifiedAdjoin K x
+```
+
+証明の骨格(Hensel の補題は**使っていない**):
+1. `Polynomial.lifts_and_degree_eq_and_monic` で `g` を `𝒪_K` 上の
+   モニック `f`(同次数)へ持ち上げる。
+2. `Polynomial.Monic.irreducible_of_irreducible_map` で `f` も既約。
+3. Gauss(`Monic.irreducible_iff_irreducible_map_fraction_map`、
+   `IsIntegrallyClosed 𝒪_K` は付値環だから自動)で `K` 上でも既約。
+4. `IsAlgClosed.exists_root` で根 `x`、`minpoly.eq_of_irreducible_
+   of_monic` から `[K(x):K] = deg g`。
+5. `f` モニック ⟹ `x` は整 ⟹ `‖x‖≤1`
+   (`norm_le_one_of_isIntegral`)⟹ `x ∈ adjoinIntegers K x`。
+6. `Polynomial.hom_eval₂` を二度(`Subring.subtype` と
+   `IsLocalRing.residue`)使って剰余体へ落とし、`x̄` が `g` の根。
+7. `minpoly 𝓀 x̄ = g` ⟹ `deg g ≤ f = inertiaDegree K x`
+   (`minpoly.natDegree_le`)。
+8. `e·f = [K(x):K] = deg g` と `e ≥ 1` から `f ≤ deg g`。
+   両方合わせて `f = deg g = [K(x):K]`、すなわち **`e = 1`**。
+
+また `finiteDimensional_adjoin_closure` をインスタンス化した
+(`K.closure` は代数閉包なので単項生成中間体はつねに有限次元)——
+以降 `[FiniteDimensional ...]` 束縛は自動で埋まる。
+
+### 残り 1 点: 有限体上の任意次数のモニック既約多項式の存在
+
+これだけが「次数 `n` の不分岐拡大が各 `n` に存在する」を言うために
+足りない。純粋に有限体の話で、この節とは独立。mathlib での所在は
+未確認(`GaloisField p n` の原始元の `minpoly` を使う経路が有力)。
