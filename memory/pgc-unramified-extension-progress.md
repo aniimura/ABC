@@ -920,3 +920,14 @@ K^×  ≅  ℤ × 𝓀^× × (1+𝔪_K)
 
 これで不分岐側は `Γ_K ↠ Gal(K^ur/K) ↠ ℤ/n` の形に整理された。
 `Ẑ = lim ℤ/n` を作れば `Gal(K^ur/K) ≅ Ẑ` になる(`Ẑ` は mathlib 不在)。
+
+## 2026-09-05: 不分岐拡大の塔は `(ℕ, ∣)` で決まる
+
+`Found/PGC/UnramifiedExtension.lean`(sorry 無し):
+- `finrank_dvd_of_adjoin_le` : 単項拡大の包含 ⟹ 次数の整除(塔の公式、
+  不分岐性は不要)
+- **`adjoin_le_iff_dvd`** : `K_m ⊆ K_n ⟺ m ∣ n`
+  (`⟸` は `adjoin_le_of_dvd`(Hensel + 一意性)、`⟹` は塔の公式)
+
+`K^ur` の内部構造が `(ℕ, ∣)` の順序で完全に記述される——
+`Gal(K^ur/K) ≅ Ẑ = lim ℤ/n` の「順序系」の側にあたる。

@@ -1881,4 +1881,37 @@ theorem exists_surjective_unramifiedClosureGal_to_zmod {p : ℕ} [Fact p.Prime]
       (K₁ := (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))
       (E := (unramifiedClosure K)))
 
+
+/-- 単項拡大の包含は次数の整除を導く(塔の公式)。不分岐性は不要。 -/
+theorem finrank_dvd_of_adjoin_le {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    {x y : K.closure}
+    (hle : IntermediateField.adjoin K.carrier ({x} : Set K.closure)
+      ≤ IntermediateField.adjoin K.carrier ({y} : Set K.closure)) :
+    Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+      ∣ Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({y} : Set K.closure)) := by
+  letI : Algebra (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+      (IntermediateField.adjoin K.carrier ({y} : Set K.closure)) :=
+    (IntermediateField.inclusion hle).toRingHom.toAlgebra
+  haveI : IsScalarTower K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+      (IntermediateField.adjoin K.carrier ({y} : Set K.closure)) :=
+    IsScalarTower.of_algebraMap_eq (fun _ => rfl)
+  exact ⟨Module.finrank (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+      (IntermediateField.adjoin K.carrier ({y} : Set K.closure)),
+    (Module.finrank_mul_finrank K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+      (IntermediateField.adjoin K.carrier ({y} : Set K.closure))).symm⟩
+
+/-- **★不分岐拡大の塔は次数の整除で決まる**——`K_m ⊆ K_n ⟺ m ∣ n`。
+`⟸` は `adjoin_le_of_dvd`(Hensel + 一意性)、`⟹` は塔の公式。
+`K^ur` の内部構造が `(ℕ, ∣)` の順序で完全に記述されることを意味する
+——`Gal(K^ur/K) ≅ Ẑ = lim ℤ/n` の「順序系」の側。 -/
+theorem adjoin_le_iff_dvd {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (x y : K.closure)
+    (hux : IsUnramifiedAdjoin K x) (huy : IsUnramifiedAdjoin K y) :
+    IntermediateField.adjoin K.carrier ({x} : Set K.closure)
+        ≤ IntermediateField.adjoin K.carrier ({y} : Set K.closure)
+      ↔ Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+        ∣ Module.finrank K.carrier
+          (IntermediateField.adjoin K.carrier ({y} : Set K.closure)) :=
+  ⟨fun hle => finrank_dvd_of_adjoin_le K hle, adjoin_le_of_dvd K x y hux huy⟩
+
 end ABC3.Found.PGC
