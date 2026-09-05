@@ -194,6 +194,30 @@ theorem sqZero_act_eq {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
   rw [hbz, Algebra.smul_def]
   linear_combination hzero
 
+/-- `A` → `B` → `I` のスカラー塔(`hochschild_H2_almost_coboundary` が
+要求する `[IsScalarTower A B M]`)。 -/
+theorem sqZeroTower {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C]
+    (I : Ideal C) (hsq : ∀ u ∈ I, ∀ v ∈ I, u * v = 0) (φ : B →ₐ[A] (C ⧸ I)) :
+    letI : Module (C ⧸ I) I := sqZeroModule I hsq
+    letI : Module B I := Module.compHom _ (φ.toRingHom : B →+* (C ⧸ I))
+    IsScalarTower A B I := by
+  letI : Module (C ⧸ I) I := sqZeroModule I hsq
+  letI : Module B I := Module.compHom _ (φ.toRingHom : B →+* (C ⧸ I))
+  constructor
+  intro a b z
+  apply Subtype.ext
+  obtain ⟨y, hy⟩ := Ideal.Quotient.mk_surjective (φ b)
+  have h1 : ((b • z : I) : C) = y * (z : C) := by
+    show ((φ b • z : I) : C) = _
+    rw [← hy]; rfl
+  have hmk : (algebraMap A (C ⧸ I)) a = Ideal.Quotient.mk I (algebraMap A C a) := rfl
+  have h2 : (((a • b) • z : I) : C) = (algebraMap A C a * y) * (z : C) := by
+    show ((φ (a • b) • z : I) : C) = _
+    rw [map_smul, Algebra.smul_def, hmk, ← hy, ← map_mul (Ideal.Quotient.mk I)]
+    rfl
+  rw [h2, Submodule.coe_smul_of_tower, h1, Algebra.smul_def, mul_assoc]
+
 /-- **障害は honest な Hochschild 2-コサイクルである**。
 `obstruction_identity`(仮定なしの `c` 倍された恒等式)を `sqZero_act_eq`
 (`ψ(b)·x = c·(b•x)`)で `I` の `B`-加群構造の言葉に翻訳し、`C` の
@@ -230,26 +254,121 @@ theorem obstruction_isCocycle {A B C : Type u} [CommRing A] [CommRing B] [CommRi
   rw [mul_sub, mul_add, mul_sub, e1, e2, h1, h2, h3, h4]
   linear_combination hid
 
+/-- 障害を `I` に値を取る `A`-双線形写像として束ねたもの
+(`B →ₗ[A] B →ₗ[A] I`)。値が `I` に入るのは `obstruction_mem_ker`、
+双線形性は `ψ` の `A`-線形性から。 -/
+noncomputable def obsBil {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C]
+    (I : Ideal C) (φ : B →ₐ[A] (C ⧸ I)) (c : A) (ψ : B →ₗ[A] C)
+    (hψ : ∀ b : B, Ideal.Quotient.mk I (ψ b) = c • φ b) : B →ₗ[A] B →ₗ[A] I :=
+  LinearMap.mk₂ A
+    (fun b₁ b₂ => ⟨c • ψ (b₁ * b₂) - ψ b₁ * ψ b₂, by
+      have hmem := obstruction_mem_ker c (Ideal.Quotient.mkₐ A I) φ ψ (fun b => hψ b) b₁ b₂
+      rwa [← Ideal.Quotient.eq_zero_iff_mem]⟩)
+    (by intro b₁ b₁' b₂; apply Subtype.ext
+        show c • ψ ((b₁ + b₁') * b₂) - ψ (b₁ + b₁') * ψ b₂
+          = (c • ψ (b₁ * b₂) - ψ b₁ * ψ b₂) + (c • ψ (b₁' * b₂) - ψ b₁' * ψ b₂)
+        rw [add_mul, map_add, map_add, smul_add]; ring)
+    (by intro a b₁ b₂; apply Subtype.ext
+        show c • ψ ((a • b₁) * b₂) - ψ (a • b₁) * ψ b₂
+          = a • (c • ψ (b₁ * b₂) - ψ b₁ * ψ b₂)
+        rw [smul_mul_assoc, map_smul, map_smul, smul_sub, smul_comm c a, smul_mul_assoc])
+    (by intro b₁ b₂ b₂'; apply Subtype.ext
+        show c • ψ (b₁ * (b₂ + b₂')) - ψ b₁ * ψ (b₂ + b₂')
+          = (c • ψ (b₁ * b₂) - ψ b₁ * ψ b₂) + (c • ψ (b₁ * b₂') - ψ b₁ * ψ b₂')
+        rw [mul_add, map_add, map_add, smul_add]; ring)
+    (by intro a b₁ b₂; apply Subtype.ext
+        show c • ψ (b₁ * (a • b₂)) - ψ b₁ * ψ (a • b₂)
+          = a • (c • ψ (b₁ * b₂) - ψ b₁ * ψ b₂)
+        rw [mul_smul_comm, map_smul, map_smul, smul_sub, smul_comm c a, mul_smul_comm])
+
+/-- **`Theorem 2.2` の第2段、完成**——Faltings の
+*"Doubling `ε` and then enlarging it a little we may assume that this class
+vanishes, and then we can modify `φ_ε` so that it becomes multiplicative,
+i.e. such that `p^ε φ_ε(xy) = φ_ε(x)φ_ε(y)`"* そのもの。
+
+`I ⊆ C` が二乗零、`φ : B →ₐ[A] C ⧸ I`、`ψ` が水準 `c` の `A`-加群持ち上げ
+(`AlmostProjective.almost_lift_of_isAlmostEtale` が供給する)、`C` が
+`c` 捩れ無し、`w` が水準 `t` の witness——このとき
+**水準 `(ct)²` で厳密に乗法的な持ち上げ `ψ₂` が存在する**。
+
+証明は本ファイルと `HochschildLowDegree.lean` の部品を繋ぐだけ:
+障害 `Ob`(`obsBil`)は `I` に値を取りコサイクル(`obstruction_isCocycle`)、
+`w` から `t·Ob = dh`(`hochschild_H2_almost_coboundary`)、
+`ψ₁ := t·ψ` の障害はちょうどコバウンダリ(`rescale_obstruction`)、
+`ψ₂ := (ct)·ψ₁ + t·h` が乗法的(`doubling_multiplicative`)。 -/
+theorem exists_multiplicative_lift {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C]
+    (I : Ideal C) (hsq : ∀ u ∈ I, ∀ v ∈ I, u * v = 0)
+    (φ : B →ₐ[A] (C ⧸ I))
+    (c : A) (ψ : B →ₗ[A] C) (hψ : ∀ b, Ideal.Quotient.mk I (ψ b) = c • φ b)
+    (htors : ∀ x : C, (algebraMap A C) c * x = 0 → x = 0)
+    (t : A) (w : TensorProduct A B B)
+    (hw_ann : ∀ q : B, (1 ⊗ₜ[A] q - q ⊗ₜ[A] 1) * w = 0)
+    (hw_aug : Algebra.TensorProduct.lmul' A w = t • (1 : B)) :
+    ∃ ψ₂ : B →ₗ[A] C,
+      (∀ b, Ideal.Quotient.mk I (ψ₂ b) = ((c*t)*(c*t)) • φ b) ∧
+      (∀ x y, ((c*t)*(c*t)) • ψ₂ (x*y) = ψ₂ x * ψ₂ y) := by
+  letI : Module (C ⧸ I) I := sqZeroModule I hsq
+  letI : Module B I := Module.compHom _ (φ.toRingHom : B →+* (C ⧸ I))
+  haveI : IsScalarTower A B I := sqZeroTower I hsq φ
+  set Ob := obsBil I φ c ψ hψ with hObdef
+  have hObC : ∀ b₁ b₂ : B, ((Ob b₁ b₂ : I) : C) = c • ψ (b₁ * b₂) - ψ b₁ * ψ b₂ :=
+    fun b₁ b₂ => rfl
+  have hcoc := obstruction_isCocycle I hsq φ c ψ hψ htors Ob hObC
+  obtain ⟨h, hh⟩ := hochschild_H2_almost_coboundary t w hw_ann hw_aug Ob hcoc
+  have hact := sqZero_act_eq I hsq φ c ψ hψ
+  set ĥ : B →ₗ[A] C := t • ((I.subtype.restrictScalars A) ∘ₗ h) with hĥ
+  have hIsq2 : ∀ b₁ b₂ : B, ĥ b₁ * ĥ b₂ = 0 := by
+    intro b₁ b₂
+    show (t • ((h b₁ : I) : C)) * (t • ((h b₂ : I) : C)) = 0
+    have hz := hsq _ (h b₁).2 _ (h b₂).2
+    rw [Algebra.smul_def, Algebra.smul_def]
+    linear_combination (algebraMap A C t * algebraMap A C t) * hz
+  have hcob : ∀ b₁ b₂ : B,
+      (c*t) • ((c*t) • ((t • ψ) (b₁ * b₂)) - (t • ψ) b₁ * (t • ψ) b₂)
+      = (t • ψ) b₁ * ĥ b₂ - (c*t) • ĥ (b₁ * b₂) + (t • ψ) b₂ * ĥ b₁ := by
+    intro b₁ b₂
+    have hh12 := congrArg (fun x : I => (x : C)) (hh b₁ b₂)
+    have ha1 := hact b₁ (h b₂)
+    have ha2 := hact b₂ (h b₁)
+    have hO := hObC b₁ b₂
+    simp only [hĥ, LinearMap.smul_apply, LinearMap.coe_comp, Function.comp_apply,
+      LinearMap.coe_restrictScalars, Submodule.coe_subtype,
+      Submodule.coe_add, Submodule.coe_sub, Submodule.coe_smul_of_tower,
+      Algebra.smul_def, map_mul] at hh12 ha1 ha2 hO ⊢
+    linear_combination (-(algebraMap A C c * (algebraMap A C t)^3)) * hO
+      + (algebraMap A C c * (algebraMap A C t)^2) * hh12
+      - ((algebraMap A C t)^2) * ha1 - ((algebraMap A C t)^2) * ha2
+  refine ⟨(c*t) • (t • ψ) + ĥ, fun b => ?_, fun x y => ?_⟩
+  · show Ideal.Quotient.mk I ((c*t) • (t • ψ b) + t • ((h b : I) : C)) = ((c*t)*(c*t)) • φ b
+    have hzero : Ideal.Quotient.mk I ((h b : I) : C) = 0 :=
+      (Ideal.Quotient.eq_zero_iff_mem).mpr (h b).2
+    have hmk : ∀ x : A, Ideal.Quotient.mk I (algebraMap A C x) = algebraMap A (C ⧸ I) x :=
+      fun _ => rfl
+    simp only [Algebra.smul_def, map_add, map_mul, hmk, hzero, mul_zero, add_zero, hψ b]
+    ring
+  · exact doubling_multiplicative (c*t) (t • ψ) ĥ hIsq2 hcob x y
+
 /-! ## `Theorem 2.2` 存在側の組み立て——残りの見取り図
 
-上で `obstruction_isCocycle` が閉じたので、**1つの水準での存在**は
-以下の連鎖で機械的に出る(スカラーの帳簿だけが残る作業):
+`exists_multiplicative_lift` により、Faltings の証明のうち
 
-1. `AlmostProjective.almost_lift_of_isAlmostEtale`:
-   `ψ : B →ₗ[A] C` で `π∘ψ = c·φ`。
-2. `HochschildLowDegree.obstruction_mem_ker`:
-   `Ob(b₁,b₂) := c·ψ(b₁b₂) - ψ(b₁)ψ(b₂)` は `I` に値を取る
-   (`A`-双線形なので `B →ₗ[A] B →ₗ[A] I` にまとめられる)。
-3. `obstruction_isCocycle`(本ファイル):`Ob` は honest な 2-コサイクル。
-4. `HochschildLowDegree.hochschild_H2_almost_coboundary`:
-   水準 `t` の witness から `t·Ob = d h`。
-5. `HochschildLowDegree.rescale_obstruction`:`ψ₁ := t·ψ`(水準 `c·t`)の
-   障害は `t²·Ob = d(t·h)` ——**ちょうどコバウンダリ**になる。
-6. `HochschildLowDegree.doubling_multiplicative`:
-   `ψ₂ := (c·t)·ψ₁ + (t·h)` が水準 `(c·t)²` で**厳密に乗法的**。
+- 第1段(`AlmostProjective.almost_lift_of_isAlmostEtale`——almost 射影性から
+  `A`-加群写像を `p^ε` 倍で持ち上げる)
+- 第2段(**本ファイルの `exists_multiplicative_lift`**——障害を `H²` で
+  消して乗法的にする)
+- 一意性(`thm_2_2_uniqueness`)
 
-その先の「`ε` 族の極限を取って honest な `φ₀ : mB → C` を得る」段は
-`AlmostBase.lean` の塔(`PDivTower`)の上で書く必要がある——
+は**すべて閉じた**。残るのは Faltings の証明の最後の2文だけである:
+
+1. *"the different `φ_ε` glue together to give a multiplicative `A`-linear
+   map `φ₀ : mB → C`"* ——`ε` 族の極限。整合性の核は
+   `HochschildLowDegree.rescale_multiplicative`、一意性の核は
+   `HochschildLowDegree.uniqueness_derivation_eq` で用意済み。
+2. *"We can extend to `B = A + mB`"* ——最後の詰め。
+
+どちらも `AlmostBase.lean` の塔(`PDivTower`)の上で書く必要がある——
 `m² = m` が効くのはそこ(`mB` の元の積がまた `mB` に入る)である。
 -/
 
