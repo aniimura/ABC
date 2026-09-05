@@ -3170,4 +3170,59 @@ theorem eval₂_map_aeval_eq_zero {𝔸 𝔹 S T : Type} [CommRing 𝔸] [CommRi
   rw [hC, hfun, MvPolynomial.eval₂_map, ← hcomm,
     ← MvPolynomial.eval₂_comp_left restr algU valU p, hp, map_zero]
 
+/-- **`= 0` から `∈ J` へ戻す**——表示(presentation)があれば
+`eval₂`の核はちょうど関係式のイデアルである。
+
+`e : MvPolynomial ι' 𝔹 ⧸ J ≃+* T` が「`T` は生成元 `X i` と係数 `C b` で
+`J` を法として表示される」という情報を持っているとき、`eval₂ algV valV` は
+`e ∘ mk` と**環準同型として一致する**(`ringHom_ext`で生成元と定数だけ見れば
+よい)。よって `eval₂ algV valV r = 0` は `mk r = 0`、すなわち `r ∈ J`。
+
+`eval₂_map_aeval_eq_zero`の相棒。あちらが「消える」ことを言い、
+こちらが「消えるならイデアルに入る」ことを言う。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem mem_ideal_of_eval₂_eq_zero {𝔹 T : Type} [CommRing 𝔹] [CommRing T] {ι' : Type}
+    (J : Ideal (MvPolynomial ι' 𝔹)) (e : (MvPolynomial ι' 𝔹 ⧸ J) ≃+* T)
+    (algV : 𝔹 →+* T) (valV : ι' → T)
+    (halg : ∀ b, algV b = e (Ideal.Quotient.mk J (MvPolynomial.C b)))
+    (hval : ∀ i, valV i = e (Ideal.Quotient.mk J (MvPolynomial.X i)))
+    (r : MvPolynomial ι' 𝔹) (hr : MvPolynomial.eval₂ algV valV r = 0) : r ∈ J := by
+  have hEq : (MvPolynomial.eval₂Hom algV valV)
+      = ((e : (MvPolynomial ι' 𝔹 ⧸ J) →+* T).comp (Ideal.Quotient.mk J)) := by
+    apply MvPolynomial.ringHom_ext
+    · intro b; simpa using halg b
+    · intro i; simpa using hval i
+  have h0 : e (Ideal.Quotient.mk J r) = 0 := by
+    have hh : (MvPolynomial.eval₂Hom algV valV) r
+        = ((e : (MvPolynomial ι' 𝔹 ⧸ J) →+* T).comp (Ideal.Quotient.mk J)) r :=
+      congrArg (fun f : MvPolynomial ι' 𝔹 →+* T => f r) hEq
+    simpa [hr] using hh.symm
+  rw [← Ideal.Quotient.eq_zero_iff_mem]
+  exact e.map_eq_zero_iff.mp h0
+
+/-- **`hψ`そのもの**——2本を合成した、`descend2_of_map`にそのまま食わせる形。
+
+`U`側で消える関係式 `p` を、係数を `φ'` で `V` 側へ移し生成元に `ψ` を代入
+すると、`V`側の表示のイデアル `J` に入る。`Lemma 4.1`の`f i j`を降ろすとき、
+`hcomm`には`ExtLimit.lean`の`pieceAlgebraMap_naturality`が、`J`には
+`exists_descendPieceR_flat_mvPolynomial_baseChange`が与える平坦表示が入る。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem aeval_map_mem_ideal_of_relation
+    {𝔸 𝔹 S T : Type} [CommRing 𝔸] [CommRing 𝔹] [CommRing S] [CommRing T]
+    {ι ι' : Type}
+    (φ' : 𝔸 →+* 𝔹) (algU : 𝔸 →+* S) (algV : 𝔹 →+* T) (restr : S →+* T)
+    (hcomm : restr.comp algU = algV.comp φ')
+    (valU : ι → S) (valV : ι' → T) (ψ : ι → MvPolynomial ι' 𝔹)
+    (hψval : ∀ i, MvPolynomial.eval₂ algV valV (ψ i) = restr (valU i))
+    (J : Ideal (MvPolynomial ι' 𝔹)) (e : (MvPolynomial ι' 𝔹 ⧸ J) ≃+* T)
+    (halg : ∀ b, algV b = e (Ideal.Quotient.mk J (MvPolynomial.C b)))
+    (hval : ∀ i, valV i = e (Ideal.Quotient.mk J (MvPolynomial.X i)))
+    (p : MvPolynomial ι 𝔸) (hp : MvPolynomial.eval₂ algU valU p = 0) :
+    MvPolynomial.aeval ψ (MvPolynomial.map φ' p) ∈ J := by
+  rw [MvPolynomial.aeval_def, MvPolynomial.algebraMap_eq]
+  exact mem_ideal_of_eval₂_eq_zero J e algV valV halg hval _
+    (eval₂_map_aeval_eq_zero φ' algU algV restr hcomm valU valV ψ hψval p hp)
+
 end ABC3.Found.CorrHyp

@@ -2542,3 +2542,16 @@ eval₂_map を各2回だけ。
 次の一手: この補題に pieceAlgebraMap_naturality を hcomm として食わせ、
 descend2_of_map を呼んで f i j : V (i,j) ⟶ U i を構成する。
 集計は10/24——§4は0/2。
+
+## 2026-09-05夜さらに続き37 — hψ を descend2_of_map にそのまま食わせる形へ
+
+相棒2本を FieldLimit.lean に追加(error 0件・EXIT:0、Found側sorry 0件):
+- mem_ideal_of_eval₂_eq_zero: 表示 e : MvPolynomial ι' 𝔹 ⧸ J ≃+* T があれば
+  eval₂ algV valV = e ∘ mk(ringHom_ext で C b と X i だけ見る)。よって
+  eval₂ = 0 ⇒ mk r = 0 ⇒ r ∈ J。一発通過(0.84秒)。
+- aeval_map_mem_ideal_of_relation: 続き36と合成し、hψ の形そのもの
+  (aeval ψ (map φ' p) ∈ J)。aeval_def + algebraMap_eq の2書き換えだけ。
+
+次の一手: descendPieceR のデータに halg/hval/hψval を具体的に用意し
+(pieceRingEquiv の値は続き33〜34で計算済み)、descend2_of_map を呼んで
+f i j : V (i,j) ⟶ U i を得る。集計は10/24——§4は0/2。

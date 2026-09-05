@@ -5626,3 +5626,41 @@ theorem eval₂_map_aeval_eq_zero
 **次の一手**: この補題に`pieceAlgebraMap_naturality`を`hcomm`として
 食わせ、`descend2_of_map`を呼んで`f i j : V (i,j) ⟶ U i`を構成する。
 集計は引き続き10/24——§4は引き続き0/2。
+
+### 2026-09-05夜さらに続き37 — `hψ`を「そのまま食わせられる形」まで組んだ
+
+続き36の`eval₂_map_aeval_eq_zero`は「消える(`= 0`)」しか言わない。
+`descend2_of_map`が要求する`hψ`は「イデアルに**入る**」なので、相棒を足した。
+
+```
+theorem mem_ideal_of_eval₂_eq_zero
+    (J : Ideal (MvPolynomial ι' 𝔹)) (e : (MvPolynomial ι' 𝔹 ⧸ J) ≃+* T)
+    (halg : ∀ b, algV b = e (mk J (C b)))
+    (hval : ∀ i, valV i = e (mk J (X i)))
+    (hr : eval₂ algV valV r = 0) : r ∈ J
+```
+
+**核心**: 表示(`e`)があれば `eval₂ algV valV` は環準同型として `e ∘ mk` に
+一致する——`MvPolynomial.ringHom_ext`で「定数`C b`と生成元`X i`だけ」
+見れば済むので、`halg`と`hval`がそのまま前提になる。あとは`e`が単射
+(`RingEquiv.map_eq_zero_iff`)と`Ideal.Quotient.eq_zero_iff_mem`。
+一発で通った(0.84秒)。
+
+さらに2本を合成して、`descend2_of_map`の`hψ`の形そのものにした:
+
+```
+theorem aeval_map_mem_ideal_of_relation … (hp : eval₂ algU valU p = 0) :
+    MvPolynomial.aeval ψ (MvPolynomial.map φ' p) ∈ J
+```
+
+`aeval`と`eval₂ C`の橋渡しは`aeval_def`＋`algebraMap_eq`の2書き換えだけ。
+使うときは`hcomm`に`pieceAlgebraMap_naturality`(続き35)、`J`に
+`exists_descendPieceR_flat_mvPolynomial_baseChange`の平坦表示が入る。
+
+検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
+Found側sorry 0件(`FieldLimit` 63秒・`ExtLimit` 377秒を再ビルド)。
+
+**次の一手**: `descendPieceR`のデータに対して`halg`/`hval`/`hψval`の3つを
+具体的に用意し(`pieceRingEquiv`の値の計算は続き33〜34で済んでいる)、
+`descend2_of_map`を呼んで`f i j : V (i,j) ⟶ U i`を得る。
+集計は引き続き10/24——§4は引き続き0/2。
