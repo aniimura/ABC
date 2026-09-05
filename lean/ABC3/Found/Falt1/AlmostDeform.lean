@@ -631,6 +631,28 @@ theorem mem_iSup_scaledSubalgebra {A B : Type u} [CommRing A] [CommRing B] [Alge
   · rintro ⟨n, hn⟩
     exact le_iSup (fun n => scaledSubalgebra (A := A) (c n)) n hn
 
+/-- **像がテンソルへ伝わる**——`C` の像が `c·B` を含めば、`C ⊗ C` の像は
+`c²·(B ⊗ B)` を含む。原文の *"The image of `C_σ` in `B` contains
+`p^{6σ}·B`. It follows that `p^{7σ}·e_{B/Ā}` lies in `C_σ ⊗_A C_σ`"* の
+代数的核(条件(iii)の witness が `C_σ ⊗ C_σ` に入ることを言う段)。 -/
+theorem tensor_range_of_range {A B C : Type u} [CommRing A]
+    [AddCommGroup B] [Module A B] [AddCommGroup C] [Module A C]
+    (f : C →ₗ[A] B) (c : A) (h : ∀ b : B, c • b ∈ LinearMap.range f)
+    (z : TensorProduct A B B) :
+    (c * c) • z ∈ LinearMap.range (TensorProduct.map f f) := by
+  induction z using TensorProduct.induction_on with
+  | zero => simp
+  | tmul b b' =>
+    obtain ⟨x, hx⟩ := h b
+    obtain ⟨y, hy⟩ := h b'
+    refine ⟨x ⊗ₜ[A] y, ?_⟩
+    rw [TensorProduct.map_tmul, hx, hy, TensorProduct.smul_tmul', TensorProduct.tmul_smul,
+      ← smul_smul]
+    exact (TensorProduct.smul_tmul' c (c • b) b').symm
+  | add u v hu hv =>
+    rw [smul_add]
+    exact Submodule.add_mem _ hu hv
+
 /-! ## エタール持ち上げの一意性——*"all `B_ε[1/p]` are isomorphic"*
 
 原文の
