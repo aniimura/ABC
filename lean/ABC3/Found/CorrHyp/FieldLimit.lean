@@ -1504,6 +1504,23 @@ theorem mem_ideal_span_range_promote (A : Type) [CommRing A] [Algebra ℚ A]
     (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.inclusion hR)).toRingHom) h
   rwa [Ideal.map_span, ← Set.range_comp] at this
 
+/-- **`Ideal.map (MvPolynomial.map ρ)` は生成元の像で張られる**——
+`Ideal.map_span`＋`Set.range_comp`の2行だが、`ExtLimit.lean`と
+`FieldLimit.lean`で計5箇所にインラインで書かれていたので名前を付けた
+(`在庫`原則)。
+
+`descendPieceRModel`(`span (range (map ρ ∘ q₀))`の形)と
+`descendPieceR_localization_isOpenImmersion`(`Ideal.map … I`の形)を
+**同じ対象だと言うための橋**でもある。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem ideal_map_mvPolynomial_span_range {T T' : Type} [CommRing T] [CommRing T']
+    (ρ : T →+* T') {ι κ : Type} (q : κ → MvPolynomial ι T) :
+    Ideal.map (MvPolynomial.map ρ) (Ideal.span (Set.range q))
+      = Ideal.span (Set.range (fun k => MvPolynomial.map ρ (q k))) := by
+  rw [Ideal.map_span, ← Set.range_comp]
+  rfl
+
 /-- `Subalgebra.inclusion`を2回昇格させたものは、直接1回で昇格させた
 ものと一致すること(`Algebra.TensorProduct.map`で包んだ版)——
 `Subalgebra.inclusion_inclusion`(mathlib)+`Algebra.TensorProduct.
