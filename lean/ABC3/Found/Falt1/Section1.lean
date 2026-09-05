@@ -430,6 +430,86 @@ example : LinearMap.ker (LinearMap.lsmul ℤ (ZMod 4) 2)
     simpa [LinearMap.mem_ker] using hy
   · rw [hLK]
 
+/-! ### ★節点 B の後半 —— 「導手が余核を零化する」(2026-09-05)
+
+原文(物理 p.4 = 印字 p.257):
+
+> *Also **it is clear that** `p^{δₙ − δ_{n+1}}` annihilates
+> `W_{n+1}/(Wₙ ⊗_{Vₙ} V_{n+1})`, and so **the cokernel of the composition
+> of the two maps is annihilated by `p^{δₙ − δ_{n+1}}`**.*
+
+この文は 2 段に分かれる:
+
+* **(B1)** `b·W_{n+1} ⊆ Wₙ ⊗_{Vₙ} V_{n+1}`(= `b` が導手に入る)
+  **⟹** 合成の余核が `b` で零化される。
+* **(B2)** `b := p^{δₙ − δ_{n+1}}` が実際に導手に入る(差積の比較)。
+
+本節で **(B1) を完全に証明する**。要点は、合成の余核が
+Jacobi–Zariski 完全列で `Ω[B⁄A]`(`A := Wₙ ⊗_{Vₙ} V_{n+1}`、
+`B := W_{n+1}`)になり、`b·B ⊆ A` なら任意の `x ∈ B` に対し
+`b·dx = d(b·x) = d(algebraMap a) = 0` となること——1 行の議論である。
+(B2) は差積の比較で、`.needs` に残る。 -/
+
+/-- **(B1) の核**——`b·B ⊆ A`(= `b` が導手に入る)なら
+`b` は `Ω[B⁄A]` を零化する。`b·dx = d(b·x) = d(algebraMap a) = 0`。 -/
+theorem kaehler_annihilated_of_conductor {A B : Type*} [CommRing A] [CommRing B] [Algebra A B]
+    (b : A) (hb : ∀ x : B, ∃ a : A, b • x = algebraMap A B a) :
+    ∀ ω : Ω[B⁄A], b • ω = 0 := by
+  suffices h : ∀ ω : Ω[B⁄A], (algebraMap A B b) • ω = 0 by
+    intro ω; rw [← algebraMap_smul B b ω]; exact h ω
+  intro ω
+  have hmem : ω ∈ (⊤ : Submodule B (Ω[B⁄A])) := Submodule.mem_top
+  rw [← KaehlerDifferential.span_range_derivation] at hmem
+  refine Submodule.span_induction ?_ (by simp) ?_ ?_ hmem
+  · rintro _ ⟨x, rfl⟩
+    obtain ⟨a, ha⟩ := hb x
+    rw [algebraMap_smul, ← Derivation.map_smul, ha]
+    exact (KaehlerDifferential.D A B).map_algebraMap a
+  · intro x y _ _ hx hy; rw [smul_add, hx, hy, add_zero]
+  · intro c x _ hx; rw [smul_comm, hx, smul_zero]
+
+/-- **(B1)**——`b·B ⊆ A` なら `b` は
+`coker(Ω[A⁄R] ⊗_A B → Ω[B⁄R])` の元を像へ送る。
+Jacobi–Zariski(`KaehlerDifferential.exact_mapBaseChange_map`)で
+余核が `Ω[B⁄A]` になることから。 -/
+theorem smul_mem_range_mapBaseChange (R : Type*) [CommRing R] (A B : Type*)
+    [CommRing A] [CommRing B] [Algebra R A] [Algebra A B] [Algebra R B] [IsScalarTower R A B]
+    (b : A) (hb : ∀ x : B, ∃ a : A, b • x = algebraMap A B a) (ω : Ω[B⁄R]) :
+    (algebraMap A B b) • ω ∈ LinearMap.range (KaehlerDifferential.mapBaseChange R A B) := by
+  refine (KaehlerDifferential.exact_mapBaseChange_map R A B _).mp ?_
+  rw [map_smul, algebraMap_smul]
+  exact kaehler_annihilated_of_conductor b hb _
+
+/-- **(B1) を `step_facts_of_modules` の `hbann` の形へ**——
+合成の余核は `b` で零化される。 -/
+theorem coker_mapBaseChange_annihilated (R : Type*) [CommRing R] (A B : Type*)
+    [CommRing A] [CommRing B] [Algebra R A] [Algebra A B] [Algebra R B] [IsScalarTower R A B]
+    (b : A) (hb : ∀ x : B, ∃ a : A, b • x = algebraMap A B a) :
+    ∀ x : (Ω[B⁄R] ⧸ LinearMap.range (KaehlerDifferential.mapBaseChange R A B)),
+      (algebraMap A B b) • x = 0 := by
+  intro x
+  obtain ⟨ω, hω⟩ := Submodule.Quotient.mk_surjective
+    (LinearMap.range (KaehlerDifferential.mapBaseChange R A B)) x
+  rw [← hω, ← Submodule.Quotient.mk_smul, Submodule.Quotient.mk_eq_zero]
+  exact smul_mem_range_mapBaseChange R A B b hb ω
+
+open Polynomial in
+/-- 非空虚性——全射な代数写像 `A ↠ B` では `b = 1` が導手に入るので
+`Ω[B⁄A] = 0` が出る。`A = ℤ[X]`、`B = ℤ[X]/(X)` で確かめる
+(結論は自明な言明ではない: `Ω` が実際に消えることを主張している)。 -/
+example : ∀ ω : Ω[(Polynomial ℤ ⧸ Ideal.span ({(X : Polynomial ℤ)} : Set (Polynomial ℤ)))⁄
+    (Polynomial ℤ)], ω = 0 := by
+  intro ω
+  have hb : ∀ x : (Polynomial ℤ ⧸ Ideal.span ({(X : Polynomial ℤ)} : Set (Polynomial ℤ))),
+      ∃ a : Polynomial ℤ, (1 : Polynomial ℤ) • x
+        = algebraMap (Polynomial ℤ)
+            (Polynomial ℤ ⧸ Ideal.span ({(X : Polynomial ℤ)} : Set (Polynomial ℤ))) a := by
+    intro x
+    obtain ⟨a, ha⟩ := Ideal.Quotient.mk_surjective
+      (I := Ideal.span ({(X : Polynomial ℤ)} : Set (Polynomial ℤ))) x
+    exact ⟨a, by rw [one_smul, ← ha]; rfl⟩
+  simpa using kaehler_annihilated_of_conductor (1 : Polynomial ℤ) hb ω
+
 /-! ### `length(W/p^α W)` の線型性
 
 原文(物理 p.4 = 印字 p.257、260dpi 確認)は
