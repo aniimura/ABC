@@ -3060,4 +3060,80 @@ theorem isUnit_rename_of_flat_relation (B : Type) [CommRing B] (n : Type) [Finty
   apply Ideal.subset_span
   exact ⟨Sum.inr (), rfl⟩
 
+open scoped TensorProduct in
+/-- **`exists_mvPolynomial_quotient_ringHom_descend2`の「底環が動く版」**——
+出発側の底が`A`、行き先側の底が`A'`で、その間に`ℚ`-代数写像`φ : A →ₐ[ℚ] A'`が
+あるときの、環準同型の降下。
+
+`Lemma 4.1`の`GlueData`を「`V (i,j) := U_i ⊓ U_j`の片」で組む設計
+(`corrhyp-goal.md`の`2026-09-05夜、続き19`)では、`f i j : V (i,j) ⟶ U i`は
+「`Γ(X.left,U_i)`を底とする表示から`Γ(X.left,U_i ⊓ U_j)`を底とする表示への
+**写像**」であり、底環が`φ`(制限写像)に沿って動く。既存の`descend2`は
+単一の底を仮定しているが、**関係式を先に`φ`で押し出しておけば無料で
+帰着できる**——それがこの補題である。
+
+鍵の恒等式は
+`(map (id A') (val R)) ∘ (map φ (id R)) = map φ (val R)`
+(`Algebra.TensorProduct.map_comp`+`AlgHom.id_comp`/`comp_id`)であり、
+`inclusion`版も同型に従う。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem exists_mvPolynomial_quotient_ringHom_descend2_of_map
+    (A A' : Type) [CommRing A] [Algebra ℚ A] [CommRing A'] [Algebra ℚ A'] (φ : A →ₐ[ℚ] A')
+    (R R₂ : FgSubalgebra ℚ ℝ) {ι κ ι' κ' : Type} [Fintype ι] [Fintype κ] [Fintype κ']
+    (q : κ → MvPolynomial ι (A ⊗[ℚ] R.1)) (q₂ : κ' → MvPolynomial ι' (A' ⊗[ℚ] R₂.1))
+    (ψ : ι → MvPolynomial ι' (A' ⊗[ℚ] ℝ))
+    (hψ : ∀ k, MvPolynomial.aeval ψ
+        (MvPolynomial.map (Algebra.TensorProduct.map φ (Subalgebra.val R.1)).toRingHom (q k)) ∈
+      Ideal.span (Set.range (fun k' => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A') (Subalgebra.val R₂.1)).toRingHom (q₂ k')))) :
+    ∃ (R' : FgSubalgebra ℚ ℝ) (hR : R ≤ R') (hR₂ : R₂ ≤ R') (ev : ι → MvPolynomial ι' (A' ⊗[ℚ] R'.1)),
+      (∀ i, MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A') (Subalgebra.val R'.1)).toRingHom (ev i) = ψ i) ∧
+      (∀ k, MvPolynomial.aeval ev (MvPolynomial.map
+          (Algebra.TensorProduct.map φ (Subalgebra.inclusion hR)).toRingHom (q k)) ∈
+        Ideal.span (Set.range (fun k' => MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ A') (Subalgebra.inclusion hR₂)).toRingHom (q₂ k')))) := by
+  set qt : κ → MvPolynomial ι (A' ⊗[ℚ] R.1) := fun k =>
+    MvPolynomial.map (Algebra.TensorProduct.map φ (AlgHom.id ℚ R.1)).toRingHom (q k) with hqt
+  have hcompval : ∀ (S : FgSubalgebra ℚ ℝ) (hRS : R ≤ S) (x : MvPolynomial ι (A ⊗[ℚ] R.1)),
+      MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A') (Subalgebra.inclusion hRS)).toRingHom
+        (MvPolynomial.map (Algebra.TensorProduct.map φ (AlgHom.id ℚ R.1)).toRingHom x)
+      = MvPolynomial.map (Algebra.TensorProduct.map φ (Subalgebra.inclusion hRS)).toRingHom x := by
+    intro S hRS x
+    rw [MvPolynomial.map_map]
+    congr 2
+    have h : (Algebra.TensorProduct.map (AlgHom.id ℚ A') (Subalgebra.inclusion hRS)).comp
+        (Algebra.TensorProduct.map φ (AlgHom.id ℚ R.1))
+        = Algebra.TensorProduct.map φ (Subalgebra.inclusion hRS) := by
+      rw [← Algebra.TensorProduct.map_comp, AlgHom.id_comp, AlgHom.comp_id]
+    exact congrArg AlgHom.toRingHom h
+  have hcompval' : ∀ x : MvPolynomial ι (A ⊗[ℚ] R.1),
+      MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A') (Subalgebra.val R.1)).toRingHom
+        (MvPolynomial.map (Algebra.TensorProduct.map φ (AlgHom.id ℚ R.1)).toRingHom x)
+      = MvPolynomial.map (Algebra.TensorProduct.map φ (Subalgebra.val R.1)).toRingHom x := by
+    intro x
+    rw [MvPolynomial.map_map]
+    congr 2
+    have h : (Algebra.TensorProduct.map (AlgHom.id ℚ A') (Subalgebra.val R.1)).comp
+        (Algebra.TensorProduct.map φ (AlgHom.id ℚ R.1))
+        = Algebra.TensorProduct.map φ (Subalgebra.val R.1) := by
+      rw [← Algebra.TensorProduct.map_comp, AlgHom.id_comp, AlgHom.comp_id]
+    exact congrArg AlgHom.toRingHom h
+  have hψ' : ∀ k, MvPolynomial.aeval ψ
+      (MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ A') (Subalgebra.val R.1)).toRingHom (qt k)) ∈
+      Ideal.span (Set.range (fun k' => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ A') (Subalgebra.val R₂.1)).toRingHom (q₂ k'))) := by
+    intro k
+    rw [hqt, hcompval']
+    exact hψ k
+  obtain ⟨R', hR, hR₂, ev, hev, hmem⟩ :=
+    exists_mvPolynomial_quotient_ringHom_descend2 A' R R₂ qt q₂ ψ hψ'
+  refine ⟨R', hR, hR₂, ev, hev, ?_⟩
+  intro k
+  have hk := hmem k
+  rw [hqt] at hk
+  rw [hcompval R' hR (q k)] at hk
+  exact hk
+
 end ABC3.Found.CorrHyp
