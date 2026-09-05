@@ -2419,3 +2419,22 @@ Spec.mapの反変性で順序が逆になることまで含め辻褄が合う。
 piecePullbackIso_inv_fstを通したときと同じ壁。直し方も同じで、rwを諦めて
 congrArg+Eq.transで項として組み立て最後をexactにすればよい見込み。
 集計は10/24——§4は0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き30
+自然性の四角形が閉じた(commit 751791e5、sorry無し、Instance4ビルドerror 0件・
+EXIT:0、sorryはSkeleton側7件のみ=Found側0件):
+  pieceRingEquiv_appLE : appLE ≫ pieceRingEquiv = includeLeftRingHom
+つまりpieceRingEquivはappLE aを純テンソルa ⊗ₜ 1へ送る。続き23の
+piece_appLE_naturality((i))と合わせて四角形が閉じた。
+
+前段: piecePullbackIso_inv_isoSpec_hom(piecePullbackIsoとisoSpecの差が
+ちょうどpieceRingEquiv)。pieceRingEquivの3成分がtopIso↔IsAffineOpen.isoSpecの
+定義、Γ.mapIso↔Scheme.isoSpec_hom_naturality、ΓSpecIso↔isoSpec_Spec_homに
+対応する。環レベルへはSpec.map_injectiveで落とす。
+
+続き22〜30の教訓: rwが効かない箇所は一貫してcongrArg+Eq.trans+exactで項として
+組み立てれば通る(HasPullback等のインスタンスが定義由来と探索由来で食い違い、
+表示が同一でもrwはパターンを見つけられない。instances transparencyの警告が出る)。
+
+次の一手: 揃った材料(四角形+descend2_of_map)で新設計のf i jを実際に構成する。
+t i jはeqToHomで済むのでGlueDataの主要部が組める。集計は10/24——§4は0/2。

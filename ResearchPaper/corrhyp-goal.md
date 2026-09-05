@@ -5377,3 +5377,44 @@ under the instances transparency level`という警告が併記されており�
 通る)にすることで解決した。4手目も同じ方式で組めばよい見込みである。
 
 集計は引き続き10/24——§4は引き続き0/2。
+
+## 2026-09-05夜さらに続き30: **自然性の四角形が閉じた**——
+`pieceRingEquiv (appLE a) = a ⊗ₜ 1`
+
+続き22で「3つ目の不透明な同型」として特定し、続き23〜29で分解・追跡して
+きた障害を**完全に解消した**(`ExtLimit.lean`、commit `751791e5`、
+`sorry`無し、`lake build ABC3.Found.CorrHyp.Instance4`は`error`0件・
+`EXIT:0`、`sorry`は`Skeleton`側の7件のみ=`Found`側0件を確認):
+
+```
+theorem pieceRingEquiv_appLE … :
+    appLE ≫ CommRingCat.ofHom (pieceRingEquiv X U hU).toRingHom
+      = CommRingCat.ofHom includeLeftRingHom
+```
+
+つまり**`pieceRingEquiv`は標準写像`appLE`による`Γ(X.left,U)`の元の像を
+純テンソル`a ⊗ₜ 1`へ送る**。続き23の`piece_appLE_naturality`(四角形の(i))と
+合わせて、**`pieceRingEquiv`の`U`についての自然性の四角形が閉じた**。
+
+前段として`piecePullbackIso_inv_isoSpec_hom`(`piecePullbackIso`と`isoSpec`の
+差がちょうど`pieceRingEquiv`であること)を証明した。鍵は
+`pieceRingEquiv`の3成分がそれぞれ
+
+- `topIso` ↔ `IsAffineOpen.isoSpec`の定義
+- `Γ.mapIso piecePullbackIso.symm.op` ↔ `Scheme.isoSpec_hom_naturality`
+- `ΓSpecIso` ↔ `Scheme.isoSpec_Spec_hom`
+
+に対応すること(`Spec.map`の反変性で順序が逆になる)。環レベルへは
+`Spec.map_injective`(`Spec`の忠実性)で落とすだけである。
+
+**この一連(続き22〜30)で得た教訓**: `rw`が効かない箇所は一貫して
+`congrArg`+`Eq.trans`+`exact`で項として組み立てれば通る。原因は
+`HasPullback`等のインスタンスが「定義由来」と「探索由来」で食い違い、
+**表示が同一でも`rw`はパターンを見つけられない**ことである
+(`the target expression is not type-correct under the instances
+transparency level`という警告が出る)。
+
+**次の一手**: 揃った材料(自然性の四角形+`descend2_of_map`)で、新設計の
+`f i j : V (i,j) ⟶ U i`(`V (i,j) := U_i ⊓ U_j`の片)を実際に構成する。
+`t i j`は`eqToHom`で済むので、そこまで行けば`GlueData`の主要部が組める。
+集計は引き続き10/24——§4は引き続き0/2。
