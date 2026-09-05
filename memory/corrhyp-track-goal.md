@@ -2805,3 +2805,37 @@ core := id, Aut := PUnit, ModuliStack := basePt4, stackType := 定数)に
 条件に置き換える必要がある。Iso の変更は lemma_4_1 の h : ZK = D.Ext Z
 (命題的等号、transport に使用)と衝突し、Corr と lemma_4_1 の statement
 同時変更が要る。§1 の完成済み 5/5 への波及評価が必要で、ユーザー判断事項。
+
+## 2026-09-05夜さらに続き51 — ℝレベルの f_open
+
+ExtLimit.lean に piece_basicOpen_isOpenImmersion(0.17秒)。
+piece_isLocalization_basicOpen に IsOpenImmersion.of_isLocalization を
+当てるだけ。R' レベルの対応物 descendPieceR_localization_isOpenImmersion は
+既存なので、f_open はℝ側・R'側の両方で揃った(V(i,j) が U i の基本開である
+という前提の下)。
+
+## 2026-09-05夜さらに続き52 — IsZariskiLocalAtTarget の発見と橋渡しの補題
+
+在庫の発見: mathlib に isOpenImmersion_isZariskiLocalAtTarget
+(Morphisms/OpenImmersion.lean:110)がある。開埋め込み性は標的の開被覆で
+確かめれば十分。ただし f_open を直ちには閉じない——U i ∖ V が一般に開でない
+ので「V の中の基本開たち」と「V の外」で U i を覆えず、境界の点が残る。
+
+橋渡しの補題(FieldLimit.lean、0.08秒):
+  ideal_map_mvPolynomial_span_range:
+    Ideal.map (MvPolynomial.map ρ) (span (range q)) = span (range (map ρ ∘ q))
+計5箇所にインラインで書かれていた(在庫原則)。descendPieceRModel(span 形)と
+descendPieceR_localization_isOpenImmersion(Ideal.map 形)を同じ対象だと
+言うための橋でもある。
+
+## 2026-09-05夜さらに続き53 — 記録が2回消えていた(python が Store のスタブ)
+
+続き51・52 の記録を python ヒアドキュメントで追記したつもりが2回とも
+書かれていなかった。Git Bash の PATH 上の python は
+C:\Users\Aruta\AppData\Local\Microsoft\WindowsApps\python(Microsoft Store の
+インストーラ用スタブ)で、何もせず終了する。git diff --cached --stat に .md が
+現れないことで発覚した。対処: 記録の追記は cat >> file << 'EOF' で行う。
+Python が要る場合は CLAUDE.md の絶対パス
+C:\Users\Aruta\miniforge3\envs\py311env\python.exe を使う。idiom #67 に登記。
+
+集計は10/24——§4は0/2。

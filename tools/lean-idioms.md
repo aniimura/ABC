@@ -5240,3 +5240,26 @@ node tools/decl-index.mjs && grep "aeval.*map\|map.*aeval" .cache/decl-index.txt
 
 同じ回に `algebraTensorMap_inclusion_comp_inclusion` も既存だと分かり、
 新規に要ったのは「係数側も動く版」`_of_map` 1 本だけだった。
+
+## 67. Git Bash の `python` は Microsoft Store のスタブ——**黙って何もしない**
+
+`python - << 'PYEOF' … PYEOF` でファイルを書き換えたつもりが、**2 回連続で
+何も書かれていなかった**。原因は PATH 上の
+
+```
+/c/Users/Aruta/AppData/Local/Microsoft/WindowsApps/python
+```
+
+が Microsoft Store のインストーラ用スタブで、標準入力を読まずに終了するため。
+終了コードも 0 になりうるので `&&` チェーンでも気付けない。
+
+**直し方**:
+- ファイル追記は `cat >> file << 'EOF'`(シェル組み込み)を使う。
+- Python が要るときは CLAUDE.md に書かれている絶対パス
+  `C:\Users\Aruta\miniforge3\envs\py311env\python.exe` を使う
+  (`PYTHONIOENCODING=utf-8` も忘れずに)。
+- **検算**: `git diff --cached --stat` に意図したファイルが**現れているか**を
+  必ず見る。これが今回の発覚の手がかりだった。
+
+同種の「黙って失敗する」罠は #(シェルの終了コード隠蔽)と同じ族——
+ログや stat の**実物**を見るまで成功と見なさないこと。

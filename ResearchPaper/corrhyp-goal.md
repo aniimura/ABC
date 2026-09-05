@@ -6172,3 +6172,58 @@ CLAUDE.mdの「姿勢」に照らしても、工数の山は壁ではないが�
 `lemma_4_1`の`h : ZK = D.Ext Z`(命題的等号、transport に使われている)と
 衝突するため、`Corr`と`lemma_4_1`のstatement同時変更が要る——§1の完成済み
 5/5への波及を評価してから行うべきで、**ユーザー判断を要する事項**である。
+
+### 2026-09-05夜さらに続き51 — ℝレベルの`f_open`
+
+`piece_isLocalization_basicOpen`(続き49)に mathlib の
+`IsOpenImmersion.of_isLocalization`を当てて、ℝレベルの`f_open`を得た
+(`ExtLimit.lean`の`piece_basicOpen_isOpenImmersion`、0.17秒):
+`V = D(g) ≤ U`のとき
+`Spec.map (algebraMap Γ(C,piece U) Γ(C, C.basicOpen elem))`は開埋め込み。
+
+`R'`レベルの対応物は`descendPieceR_localization_isOpenImmersion`(既存)。
+両者が揃ったので、`GlueData`の`f_open`は「`V (i,j)`を`U i`の基本開集合
+として取れる被覆」の下で**ℝ側・`R'`側の両方**で得られることになった。
+
+### 2026-09-05夜さらに続き52 — `IsZariskiLocalAtTarget`の発見と、橋渡しの補題
+
+**在庫の発見**: mathlib に
+`AlgebraicGeometry.isOpenImmersion_isZariskiLocalAtTarget :
+IsZariskiLocalAtTarget @IsOpenImmersion`(`Morphisms/OpenImmersion.lean:110`)
+がある。つまり「開埋め込みであること」は**標的の開被覆で確かめれば十分**。
+
+**ただし`f_open`を直ちには閉じない**(正直な分析、記録): 標的
+`Spec (U i の R'モデル)`の開被覆が要るが、`V (i,j) = U i ⊓ U j`の外側
+(`U i ∖ V`)は一般に開でないので、「`V`の中の基本開たち」と「`V`の外」で
+`U i`を覆うことはできない。境界の点をどう覆うかが残る。したがって
+`isOpenImmersion_isZariskiLocalAtTarget`は**道具として登記**するに留める。
+
+**橋渡しの補題**(`FieldLimit.lean`、0.08秒):
+
+```
+theorem ideal_map_mvPolynomial_span_range (ρ : T →+* T') (q : κ → MvPolynomial ι T) :
+    Ideal.map (MvPolynomial.map ρ) (Ideal.span (Set.range q))
+      = Ideal.span (Set.range (fun k => MvPolynomial.map ρ (q k)))
+```
+
+`Ideal.map_span`＋`Set.range_comp`の2行だが、`ExtLimit.lean`と
+`FieldLimit.lean`に**計5箇所インラインで書かれていた**ので名前を付けた
+(`在庫`原則)。これは同時に、`descendPieceRModel`
+(`span (range (map ρ ∘ q₀))`の形、続き45)と
+`descendPieceR_localization_isOpenImmersion`(`Ideal.map … I`の形、既存)を
+**同じ対象だと言うための橋**でもある。
+
+### 2026-09-05夜さらに続き53 — ★記録が2回消えていた(`python`がMicrosoft Storeのスタブ)
+
+続き51・続き52の記録を`python - << 'PYEOF'`(ヒアドキュメント)で
+`corrhyp-goal.md`へ追記したつもりだったが、**2回とも書き込まれていなかった**。
+原因は、Git BashのPATH上の`python`が
+`C:\Users\Aruta\AppData\Local\Microsoft\WindowsApps\python`
+——**Microsoft Storeのインストーラ用スタブ**で、何もせず終了するため。
+`git diff --cached --stat`に`.md`が現れなかったのに気付いて発覚した
+(CLAUDE.mdの「Push」「逸脱」の記録原則を守るための確認手順が効いた)。
+
+**対処**: 記録の追記は`cat >> file << 'EOF'`(シェル組み込み)で行う。
+Pythonが要る場合はCLAUDE.mdに書かれている絶対パス
+`C:\Users\Aruta\miniforge3\envs\py311env\python.exe`を使う。
+`lean-idioms.md` #67 に登記した。上の続き51・続き52は本コミットで復元した。
