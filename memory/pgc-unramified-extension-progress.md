@@ -2070,3 +2070,27 @@ Eisenstein 性を主張していた。**塔は要らなかった**。
 **「塔が要る」という見立ては、実際に補題の型を読む前に書いてはいけない。**
 在庫(`isEisensteinAt_iteratedLubinTatePsi` の base ring が `A` だったこと)を
 確かめれば一行で済んだ。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05: `K(α) ⊓ K^ur = K`(体の交わり)
+
+`Found/PGC/TotallyRamified.lean::totallyRamifiedAdjoin_inf_unramifiedClosure`。
+
+第 979 の `finrank_eq_one_of_mem_unramifiedClosure_of_le` は「**元**」についての形
+だった。相互律 `Γ_K ↠ 𝒪_K^× × Ẑ` の全射性には「**体の交わり**」としての形が要る。
+`IntermediateField.finrank_eq_one_iff`(`finrank = 1 ↔ E = ⊥`)で繋ぐだけ。
+
+第 997 と合わせて **`K(Λ_n) ⊓ K^ur = K`**——`K_π` と `K^ur` の線型無関係性。
+
+### 次の一手
+
+`Gal(K(x)·K(y)/K) ≅ Gal(K(x)/K) × Gal(K(y)/K)`(`x` 完全分岐・`y` 不分岐)。
+これが付けば `Γ_K ↠ (𝒪_K/π^n)^× × ℤ/m` が出て、極限で `Γ_K ↠ 𝒪_K^× × Ẑ`。
+mathlib に「`E₁ ⊓ E₂ = ⊥` かつ `E₁/F` Galois ⟹ `[E₁E₂:E₂] = [E₁:F]`」が
+あるかを先に測ること。
+
+## ★記録: 第 997 のゲート順序を誤った
+
+第 997 のコミット直前の `lake build ABC3` は失敗を返した(並行セッションの
+書き込み中と思われる過渡的失敗)。**そのまま commit/push してしまった**。
+直後の再実行で 6914 jobs 成功を確認したのでコミットメッセージの主張自体は
+正しいが、**確認前に push した順序が誤り**。ゲートは push の前に通すこと。

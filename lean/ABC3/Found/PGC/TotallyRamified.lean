@@ -674,4 +674,33 @@ theorem isTotallyRamifiedAdjoin_of_residueDegree_le (K : PAdicLocalField p) {x y
   rw [heq]
   exact hx
 
+/-! ## 完全分岐拡大は `K^ur` と交わらない(体としての形)
+
+`finrank_eq_one_of_mem_unramifiedClosure_of_le` は「元」についての形だった。
+`Γ_K ↠ 𝒪_K^× × Ẑ` の全射性(相互律)には、**体の交わり**としての形が要る。 -/
+
+/-- **★★★★★★★★★★★★`K(α) ⊓ K^ur = K`**(`α` が完全分岐なら)。
+
+`Found/PGC/LubinTateTotallyRamified.lean::exists_isTotallyRamifiedAdjoin_lubinTate_psi`
+と合わせると `K(Λ_n) ⊓ K^ur = K`——`K_π` と `K^ur` の線型無関係性であり、
+`Γ_K ↠ 𝒪_K^× × Ẑ` の全射性の要。 -/
+theorem totallyRamifiedAdjoin_inf_unramifiedClosure (K : PAdicLocalField p) {α : K.closure}
+    (hα : IsTotallyRamifiedAdjoin K α) :
+    IntermediateField.adjoin K.carrier ({α} : Set K.closure) ⊓ unramifiedClosure K = ⊥ := by
+  refine le_antisymm (fun z hz => ?_) bot_le
+  obtain ⟨hzα, hzur⟩ := hz
+  have hle : IntermediateField.adjoin K.carrier ({z} : Set K.closure)
+      ≤ IntermediateField.adjoin K.carrier ({α} : Set K.closure) := by
+    rw [IntermediateField.adjoin_le_iff]
+    rintro w rfl
+    exact hzα
+  have h1 : Module.finrank K.carrier
+      (IntermediateField.adjoin K.carrier ({z} : Set K.closure)) = 1 :=
+    finrank_eq_one_of_mem_unramifiedClosure_of_le K hle hzur hα
+  have hbot : IntermediateField.adjoin K.carrier ({z} : Set K.closure) = ⊥ :=
+    IntermediateField.finrank_eq_one_iff.mp h1
+  have hmem : z ∈ IntermediateField.adjoin K.carrier ({z} : Set K.closure) :=
+    IntermediateField.subset_adjoin _ _ rfl
+  rwa [hbot] at hmem
+
 end ABC3.Found.PGC
