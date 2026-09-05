@@ -5063,3 +5063,29 @@ theorem intermediateLocalField_congr (K) {A B} (hA) (hB) (h : A = B) :
 元の 2 つの定義がこの形に `rfl` で一致することを 1 行ずつ示せば、
 以後は `rw [thisEq, thatEq]; exact intermediateLocalField_congr K _ _ h` で通る。
 実例: `Found/PGC/UnramifiedCriterion.lean`(2026-09-05)。
+
+## 62. MCP REPL は `autoImplicit` が効いている——`Type v` が REPL で通ってもファイルで落ちる
+
+プロジェクトの `lakefile.toml` は
+
+```toml
+relaxedAutoImplicit = false
+autoImplicit = false
+```
+
+だが、**MCP REPL の基準環境はこの設定を引き継がない**。そのため
+
+```lean
+theorem foo {R : Type*} [Ring R] :
+    ∀ (r : ℕ) (N : Fin r → Type v), …   -- ★ v を宣言していない
+```
+
+は REPL では `v` が自動束縛されて通るが、ファイルに書いて `lake build`
+すると `unknown universe level 'v'` で落ちる。
+
+**対策**: 宇宙変数は `Type*` を使うか、ファイル冒頭で `universe v` を
+宣言する。より一般に、`lean_check` で通ったものは**必ず**
+`lake build <module>` で確認してからコミットする(#50(b) の一般則の
+具体例)。
+
+(2026-09-05、`Found/Falt1/Section1.lean` の `length_pi_fin` で踏んだ。)
