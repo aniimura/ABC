@@ -2469,3 +2469,20 @@ pieceRingEquivの値が a⊗ₜ1側(続き30)と 1⊗ₜr側(今回)の両方で
 次の一手: 2成分からpieceRingEquiv.symmの自然性を組み立てる
 (Algebra.TensorProduct.ext系で2成分から環準同型の一致を出す)。
 集計は10/24——§4は0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き33
+Scheme.Hom.appLE_preimage_naturality完成(commit c19bbab0、sorry無し、
+Instance4ビルドerror 0件・EXIT:0、Found側sorry 0件): 任意のスキームの射
+f : C ⟶ Y について f.appLE が開集合の制限と可換。piece_appLE_naturalityは
+この特殊化に書き換えた(証明1行)。新設計のf i jではα(C ⟶ Ext X)側でも同じ
+自然性が要る(Γ(C,piece(U))の代数構造がα.appLE ∘ pieceRingEquiv.symmのため)。
+
+材料一覧(自然性まわり): appLE_preimage_naturality(任意の射)、
+piece_appLE_naturality(pullback.fst版)、pieceRingEquiv_appLE(a⊗ₜ1成分)、
+pieceRingEquiv_appLE_snd(1⊗ₜr成分)、piecePullbackIso_inv_fst/_snd・
+piecePullbackIso_inv_isoSpec_hom(Spec側の特徴づけ)。
+
+次の一手: 2成分からpieceRingEquiv.symmの自然性(環準同型の一致)を組み立て、
+α側の自然性と合わせて「Γ(C,piece(U))の代数構造が制限と可換」を出す。そこまで
+行けばdescend2_of_mapのhψが検証でき新設計のf i jが構成できる。
+集計は10/24——§4は0/2。

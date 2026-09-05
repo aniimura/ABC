@@ -5487,3 +5487,36 @@ theorem pieceRingEquiv_appLE_snd … :
 集計は引き続き10/24——§4は引き続き0/2。次の一手は、この2成分から
 `pieceRingEquiv.symm`の自然性を実際に組み立てること
 (`Algebra.TensorProduct.ext`系の補題で2成分から環準同型の一致を出す)。
+
+## 2026-09-05夜さらに続き33: `appLE`の自然性を任意の射へ一般化
+——`α`側にも使えるようにした
+
+新設計の`f i j`では、`pullback.fst`側だけでなく**`α`(`C ⟶ Ext X`)側**でも
+同じ形の自然性が要る(`Γ(C,piece(U))`の代数構造が
+`α.appLE ∘ pieceRingEquiv.symm`で定義されているため)。そこで続き23の
+`piece_appLE_naturality`を任意の射へ一般化した(`ExtLimit.lean`、
+commit `c19bbab0`、`sorry`無し、`lake build ABC3.Found.CorrHyp.Instance4`は
+`error`0件・`EXIT:0`、`Found`側の`sorry`は0件):
+
+```
+theorem Scheme.Hom.appLE_preimage_naturality {C Y : Scheme} (f : C ⟶ Y)
+    (W W' : Y.Opens) (hW : W' ≤ W) :
+    f.appLE W (f ⁻¹ᵁ W) le_rfl ≫ C.presheaf.map (制限).op
+      = Y.presheaf.map (制限).op ≫ f.appLE W' (f ⁻¹ᵁ W') le_rfl
+```
+
+`piece_appLE_naturality`はこの`f := pullback.fst X.hom toBaseK`での特殊化に
+書き換えた(証明は1行になった)。
+
+**現在の材料一覧(自然性の四角形まわり)**:
+- `Scheme.Hom.appLE_preimage_naturality`(任意の射、今回)
+- `piece_appLE_naturality`(`pullback.fst`版、続き23)
+- `pieceRingEquiv_appLE`(`a ⊗ₜ 1`成分、続き30)
+- `pieceRingEquiv_appLE_snd`(`1 ⊗ₜ r`成分、続き32)
+- `piecePullbackIso_inv_fst`/`_snd`・`piecePullbackIso_inv_isoSpec_hom`ほか
+  (`Spec`側の特徴づけ、続き26〜32)
+
+**次の一手**: 上の2成分から`pieceRingEquiv.symm`の自然性(環準同型の一致)を
+組み立て、`α`側の自然性と合わせて「`Γ(C,piece(U))`の代数構造が制限と
+可換であること」を出す。そこまで行けば`descend2_of_map`の`hψ`が検証でき、
+新設計の`f i j`が構成できる。集計は引き続き10/24——§4は引き続き0/2。
