@@ -4930,3 +4930,104 @@ Lubin-Tate 系と p 進対数系の二つの枝が同時に使えなかった。
   ——REPL はエラーメッセージを落とすが `lake build` は出す。
 * 同じ namespace に汎用的な名前(`coeff_pow_eq_zero_of_lt` のような)を
   置くときは、枝が合流する日を考えて修飾語を付ける。
+
+## 58. 構造体インスタンスのフィールドは **改行区切り**にする——`,` 区切りが `refine ⟨{ … }, ?_⟩` の中でパースに失敗する
+
+`Derivation` や `AlgHom` を `refine` の中で組み立てるとき、
+
+```lean
+refine ⟨{ toFun := f, map_one' := ?_, map_mul' := ?_, … }, ?_⟩
+--                    ^^ ここで
+-- error: unexpected identifier; expected '}'
+```
+
+`,` 区切りだと `toFun := f` の直後で「`}` を期待」と言われる。
+**改行区切りにすれば通る**:
+
+```lean
+refine ⟨{ toFun := f
+          map_one' := ?_
+          map_mul' := ?_ }, ?_⟩
+```
+
+入れ子の構造体があるときは、内側の `}` を**独立した行**に置き、
+外側のフィールドを内側の `{` と同じ列に揃える:
+
+```lean
+refine ⟨{
+  toLinearMap := {
+    toFun := fun b => …
+    map_add' := …
+    map_smul' := …
+  }
+  map_one_eq_zero' := ?_
+  leibniz' := ?_
+}, ?_⟩
+```
+
+(2026-09-05、`Found/Falt1/AlmostDerivation.lean` の
+`exists_derivation_extension` で 2 回踏んだ。)
+
+## 59. **非可換環での多項式恒等式**は `Polynomial.eval₂RingHom'` で移す
+
+行列環のような非可換 `S` では `Polynomial.aeval` が使えない
+(`CommSemiring S` を要求する)。しかし係数と可換な元 `u : S` があれば
+
+```lean
+Polynomial.eval₂RingHom' (algebraMap A S) u
+  (fun r => Algebra.commute_algebraMap_left r u) : A[X] →+* S
+```
+
+が**環準同型**になるので、可換環 `A[X]` で `ring` で証明した恒等式を
+`congrArg` でそのまま `S` へ移せる。
+
+```lean
+have h := congrArg φ (my_poly_identity s)
+simp only [hφ, Polynomial.eval₂RingHom'_apply, map_sub, map_mul, map_pow,
+  map_ofNat, Polynomial.eval₂_C, Polynomial.eval₂_X] at h
+```
+
+`noncomm_ring` は mathlib の該当ファイルを import していないと使えず、
+そもそも仮定を使えないので、この経路のほうが強い。
+(2026-09-05、Faltings の "Tripling ε"(almost 冪等元の持ち上げ)
+`Found/Falt1/AlmostDeform.lean` で使用。)
+
+## 60. `A = B` を代入した具体例で `Semiring.toModule` と `Algebra.toModule` が衝突する
+
+`IsAlmostEtaleCovering (A := X) (B := X) p` のように**同じ型を 2 回**
+渡した具体例を作ると、
+
+```
+synthesized type class instance is not definitionally equal to
+expression inferred by typing rules,
+  synthesized  Semiring.toModule
+  inferred     Algebra.toModule
+```
+
+が出る(`haveI := (hAE.2.1 : Module.Finite _ _)` のところ)。
+`Module ℤ`(`AddCommGroup.toIntModule` 対 `TensorProduct.instModule`)でも
+同種の衝突が起きる。
+
+**逃げ方**: 具体例では `A ≠ B` を選ぶ(`B := Fin 2 → A` など)、
+底環を `ℤ` 以外にする(`Polynomial ℤ` など)。非空虚性の対照としては
+むしろ非自明な例のほうが良いので、これは実質的な損にならない。
+(2026-09-05、`Found/Falt1/Section3.lean`・`Section4.lean` の
+非空虚性で 2 回踏んだ。)
+
+## 61. `Found/<Track>/` のファイルは **`Found.lean` に import を足さないと既定の `lake build` に入らない**
+
+`lake build`(既定ターゲット `ABC3`)がビルドするのは `ABC3.lean` から
+**推移的に到達できるモジュールだけ**である。`lean/ABC3/Found/Falt1/*.lean`
+を 9 ファイル書いても、`Found.lean` に import が無ければ既定ビルドは
+一度もそれらを触らない——`lake build ABC3.Found.Falt1.X` では通るので
+気づきにくい。
+
+**症状**: `lake build` が成功しているのに、MCP REPL を再起動しても
+新しく書いた定理が「unknown identifier」になる(olean が古いまま)。
+
+**対策**: 新しいトラックのファイルを作ったら、その場で `Found.lean`
+(または対応する集約ファイル)に import を足し、`lake build` の job 数が
+増えることを確認する。
+(2026-09-05 に判明。Falt1 の 9 ファイルが既定ビルドの外にあり、
+それまでのコミットの「lake build 6590 jobs 成功」は Falt1 の検証に
+なっていなかった。登録後は 6800 jobs。)
