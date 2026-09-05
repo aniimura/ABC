@@ -327,4 +327,75 @@ noncomputable def associatorTri {A N : Type u} [CommRing A] [AddCommGroup N] [Mo
     (m : N →ₗ[A] N →ₗ[A] N) (a b c : N) :
     associatorTri m a b c = m a (m b c) - m (m a b) c := rfl
 
+/-! ## 第 5 段の後半——**結合律への補正は倍化なしで厳密に閉じる**
+
+原文の *"It follows that we can modify `p^{4ε}m_ε` such that the
+associative law holds."*
+
+`t·(結合子) = δh` が `hochschild_H3_almost_coboundary` から得られたとき、
+補正 `ν := t·μ − h` の結合子を展開すると
+
+    F' = t²·F + t·δh + [h(x,h(y,z)) − h(h(x,y),z)]
+       = t²·F − t²·F + [二次の項]
+
+となり、**二次の項は `h` の値が「核」`J` に入り、かつ `h` が `J` の引数で
+消えることから `0`** になる。すなわち `ν` は**厳密に**結合的である
+——`Theorem 2.2` の第 2 段で必要だった「`ε` を倍にする」
+(`doubling_multiplicative`)がここでは**要らない**。
+
+「`h` が `J` の引数で消える」のは、`h(x,y) = Σᵢ xᵢ·F(yᵢ,x,y)` の形をして
+いて、**結合子 `F` 自体が `J` の引数で消える**からである
+(`associator_eq_zero_of_act`・`associator_eq_zero_of_act'`)——
+`J` が `π : N → B` を通して `B`-加群であること(`μ x (ι j) = ι (π x • j)`)
+と `B` の可換性・結合性だけから出る。 -/
+
+/-- **結合律への補正**。`t·(結合子) = δh` で `h` が二次で消えるなら、
+`ν := t·μ − h` は**厳密に**結合的。 -/
+theorem associativity_correction {A N : Type u} [CommRing A] [AddCommGroup N] [Module A N]
+    (μ : N →ₗ[A] N →ₗ[A] N) (t : A) (h : N →ₗ[A] N →ₗ[A] N)
+    (hv2 : ∀ x y z : N, h x (h y z) = 0)
+    (hv1 : ∀ x y z : N, h (h x y) z = 0)
+    (hcob : ∀ x y z : N, t • (μ x (μ y z) - μ (μ x y) z)
+      = μ x (h y z) - h (μ x y) z + h x (μ y z) - μ (h x y) z)
+    (x y z : N) :
+    (t • μ - h) x ((t • μ - h) y z) = (t • μ - h) ((t • μ - h) x y) z := by
+  have hL : (t • μ - h) x ((t • μ - h) y z)
+      = t • (t • μ x (μ y z)) - t • μ x (h y z) - t • h x (μ y z) := by
+    show (t • μ x - h x) (t • μ y z - h y z) = _
+    simp only [LinearMap.sub_apply, LinearMap.smul_apply, map_sub, map_smul]
+    rw [hv2]
+    module
+  have hR : (t • μ - h) ((t • μ - h) x y) z
+      = t • (t • μ (μ x y) z) - t • μ (h x y) z - t • h (μ x y) z := by
+    show (t • μ (t • μ x y - h x y) - h (t • μ x y - h x y)) z = _
+    simp only [map_sub, map_smul, LinearMap.sub_apply, LinearMap.smul_apply]
+    rw [hv1]
+    module
+  rw [hL, hR]
+  have hc := hcob x y z
+  simp only [smul_sub] at hc ⊢
+  linear_combination (norm := module) t • hc
+
+/-- **核の引数では結合子が消える**(第 3 引数)。`J` が `π` を通して
+`B`-加群であり `μ x (ι j) = ι (π x • j)` なら、結合子は `0`。 -/
+theorem associator_eq_zero_of_act {A N B J : Type u} [CommRing A] [AddCommGroup N] [Module A N]
+    [CommRing B] [Algebra A B] [AddCommGroup J] [Module A J] [Module B J] [IsScalarTower A B J]
+    (μ : N →ₗ[A] N →ₗ[A] N) (ι : J →ₗ[A] N) (π : N →ₗ[A] B)
+    (hact : ∀ (x : N) (j : J), μ x (ι j) = ι (π x • j))
+    (hmulπ : ∀ x y : N, π (μ x y) = π x * π y)
+    (x y : N) (j : J) :
+    μ x (μ y (ι j)) - μ (μ x y) (ι j) = 0 := by
+  rw [hact, hact, hact, hmulπ, mul_smul, sub_self]
+
+/-- 第 2 引数が `J` のときも同様(`μ` の可換性を使う)。 -/
+theorem associator_eq_zero_of_act' {A N B J : Type u} [CommRing A] [AddCommGroup N] [Module A N]
+    [CommRing B] [Algebra A B] [AddCommGroup J] [Module A J] [Module B J] [IsScalarTower A B J]
+    (μ : N →ₗ[A] N →ₗ[A] N) (ι : J →ₗ[A] N) (π : N →ₗ[A] B)
+    (hcomm : ∀ x y : N, μ x y = μ y x)
+    (hact : ∀ (x : N) (j : J), μ x (ι j) = ι (π x • j))
+    (x z : N) (j : J) :
+    μ x (μ (ι j) z) - μ (μ x (ι j)) z = 0 := by
+  rw [hcomm (ι j) z, hact z j, hact x (π z • j), hact x j,
+    hcomm (ι (π x • j)) z, hact z (π x • j), smul_comm, sub_self]
+
 end ABC3.Found.Falt1
