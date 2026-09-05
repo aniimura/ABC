@@ -2388,3 +2388,17 @@ appLE側を得る、3.hU.fromSpecがモノ(開埋め込み∘同型)なので右
 の同定(pieceRingEquivの定義=topIso+Γ.mapIso+ΓSpecIsoを追う)。
 ここまで来ればSpecの忠実充満性で環レベルの等式が出る。
 集計は10/24——§4は0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き28
+piecePullbackIso_inv_isoSpec_appLE完成(commit b1db7975、sorry無し、
+Instance4ビルドのerror行0件・EXIT:0確認):
+ (piecePullbackIso).inv ≫ (piece).isoSpec.hom ≫ Spec.map appLE
+   = Spec.map (ofHom includeLeftRingHom)
+続き27の4手のうち1〜3が完了(続き26の等式+SpecMap_appLE_fromSpec+
+hU.fromSpecがモノであることによる右消去)。
+
+残るのは4手目のみ: piecePullbackIso.inv ≫ (piece).isoSpec.hom を
+Spec.map (pieceRingEquiv.symm) と同定する(pieceRingEquivの定義=
+topIso+Γ.mapIso piecePullbackIso.symm.op+ΓSpecIsoを追う)。そこまで行けば
+Specの忠実充満性から環レベルの pieceRingEquiv.symm (a⊗ₜ1) = appLE a が出て、
+続き23の(i)と合わせて自然性の四角形が閉じる。集計は10/24——§4は0/2。

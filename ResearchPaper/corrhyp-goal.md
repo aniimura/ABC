@@ -5315,3 +5315,31 @@ theorem piecePullbackIso_inv_fst … :
 
 集計は引き続き10/24——§4は引き続き0/2。次の一手は上の1〜3(2本の橋渡しは
 既にmathlibにあるので機械的)、そして4の同定である。
+
+## 2026-09-05夜さらに続き28: 4手のうち**1〜3が完了**——自然性(ii)の
+`Spec`側での最終形に到達
+
+続き27で立てた4手のうち1〜3を実行した(`ExtLimit.lean`、commit `b1db7975`、
+`sorry`無し、`lake build ABC3.Found.CorrHyp.Instance4`は
+**`error`行0件・`EXIT:0`を確認**):
+
+```
+theorem piecePullbackIso_inv_isoSpec_appLE … :
+    (piecePullbackIso X U hU).inv ≫ (piece_isAffineOpen X U hU).isoSpec.hom ≫
+      Spec.map ((pullback.fst X.hom toBaseK).appLE U (piece U) le_rfl)
+    = Spec.map (ofHom includeLeftRingHom)
+```
+
+続き26の`piecePullbackIso_inv_fst`を、`appLE`側の`Spec`表示
+(`IsAffineOpen.SpecMap_appLE_fromSpec`)と突き合わせ、`hU.fromSpec`が
+**モノ**(開埋め込み∘同型、`inferInstance`で出る)であることで右から
+消去しただけである。
+
+**残るのは4手目のみ**: `piecePullbackIso.inv ≫ (piece).isoSpec.hom`を
+`Spec.map (pieceRingEquiv.symm)`と同定する。`pieceRingEquiv`の定義
+(`Scheme.Opens.topIso`+`Γ.mapIso piecePullbackIso.symm.op`+`ΓSpecIso`)を
+追えばよい。そこまで行けば`Spec`の忠実充満性から環レベルの
+`pieceRingEquiv.symm (a ⊗ₜ 1) = appLE a`が出て、続き23の(i)と合わせて
+**自然性の四角形が閉じる**。
+
+集計は引き続き10/24——§4は引き続き0/2。
