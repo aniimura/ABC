@@ -737,6 +737,41 @@ theorem injective_of_almostIso_of_noTorsion {A M N : Type u} [CommRing A]
   intro x hx
   exact hnotors 0 x ((hf 0).1 x hx)
 
+/-! ## ★底変換と almost 性(2026-09-05)
+
+§4 は `Ω_{R/V} ⊗_R R̄` の形の主張を扱うので、「almost 性が `⊗` で
+どう振る舞うか」を押さえておく。
+
+* **almost 全射性(余核側)は任意の底変換で保たれる**——テンソルは
+  右完全なので何も要らない。
+* **almost 零も保たれる**。
+* ★**核側は保たれない**(テンソルは左完全でない)——`Theorem 4.1(ii)`
+  が「核が `m` で消える」を別途扱う理由がここにある。 -/
+
+/-- **almost 全射性は底変換で保たれる**——`c • y ∈ range f` なら
+`c • z ∈ range (id_P ⊗ f)`。 -/
+theorem almostSurj_lTensor {A M N P : Type u} [CommRing A] [AddCommGroup M] [Module A M]
+    [AddCommGroup N] [Module A N] [AddCommGroup P] [Module A P]
+    (c : A) (f : M →ₗ[A] N) (hf : ∀ y : N, c • y ∈ LinearMap.range f) :
+    ∀ z : TensorProduct A P N, c • z ∈ LinearMap.range (LinearMap.lTensor P f) := by
+  intro z
+  induction z using TensorProduct.induction_on with
+  | zero => simp
+  | tmul p n =>
+    obtain ⟨m, hm⟩ := hf n
+    exact ⟨p ⊗ₜ m, by rw [LinearMap.lTensor_tmul, hm, TensorProduct.tmul_smul]⟩
+  | add x y hx hy => rw [smul_add]; exact Submodule.add_mem _ hx hy
+
+/-- **almost 零は底変換で保たれる**。 -/
+theorem isAlmostZero_tensor {A M P : Type u} [CommRing A] [AddCommGroup M] [Module A M]
+    [AddCommGroup P] [Module A P] {q : ℕ} (T : PDivTower A q)
+    (h : T.IsAlmostZero M) : T.IsAlmostZero (TensorProduct A P M) := by
+  intro k z
+  induction z using TensorProduct.induction_on with
+  | zero => simp
+  | tmul p m => rw [← TensorProduct.tmul_smul, h k m, TensorProduct.tmul_zero]
+  | add x y hx hy => rw [smul_add, hx, hy, add_zero]
+
 /-! ### ★★★★項目全体の `.src`(2026-09-05)
 
 `Theorem 2.4` は (i)(ii) とも証明され、非空虚性の対照もある。
