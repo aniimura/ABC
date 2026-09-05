@@ -63,6 +63,10 @@
 | `Theorem 3.2` の**最終段** | **✅証明済み**——`thm_3_2_descent`。原文 *"As R∞ is almost a direct summand in A∞, this already holds before tensoring"* を、**「almost 直和因子である」を仮定せず almost étale 性から導いて**閉じた(`exists_trace_eq_pow`:`trace_ideal_pow_mem_traceIdeal` の像が `A`-部分加群なので `p^{n·rank} = tr(z)` となる `z` が実際に取れる)。残るのは前段(*"S becomes almost étale if we adjoin sufficiently many p-power roots of units"*・*"B∞ is almost isomorphic to S∞ ⊗ A∞"*・局所 henselian への還元) | `Section3.lean` |
 | 「almost 同型」の語彙 | **✅証明済み**——`AlmostIsoAt`/`AlmostIso`(塔版)と**合成則**`almostIso_comp`(塔があるので `ϖ(k+1)² ∣ ϖ k` で水準を回収できる=almost math が圏になる理由)。§3・§4 が繰り返し使う | `AlmostDerivation.lean` |
 | witness の押し出し | **✅証明済み**——`lmul'_map`・`witness_pushforward`。`Definition 2.1` 条件(iii)の内容(annihilation と augmentation)は**全射 `A`-代数写像で同じ水準のまま押し出せる**。`Theorem 3.2` の *"B∞ is almost isomorphic to S∞ ⊗ A∞"* のように almost étale 性を別の環へ移す段で使う | `Section3.lean` |
+| **almost 零は拡大で閉じる** | **✅証明済み**(第 1533)——`isAlmostZero_of_exact`。`M' → M → M''` が完全で両端が almost 零なら `M` も almost 零。塔があるので `ϖ(k+1)² ∣ ϖ k` で水準が回収できる。★`almostIso_comp` と並ぶ almost mathematics の基本構造 | `AlmostDerivation.lean` |
+| **almost étale 性は底変換で保たれる** | **✅証明済み**(第 1535・1536)——`Theorem 3.2` の *"B∞ is almost isomorphic to S∞ ⊗_{R∞} A∞ **as this is almost étale over S∞**"* の括弧内。`bcWitnessMap`(`Algebra.TensorProduct.lift` を `restrictScalars` 経由で組み、`cancelBaseChange`/`assoc` の配管を回避)・`witness_baseChange`(水準は `c ↦ algebraMap A A' c` になるだけ)・`hasAlmostWitnesses_baseChange`(塔版 = 「`ε` は任意に小さくできる」)。**`pi_witness`**——分裂エタール代数 `ι → A` の分離冪等元 `w = Σᵢ eᵢ ⊗ eᵢ` が witness 条件を `c = 1` で満たす。★`hasAlmostWitnesses_pi` により `HasAlmostWitnesses` を仮定する既証の結果すべてに具体的な入力が付いた | `Section3.lean` |
+| **`Theorem 1.2` 節点 A** | **✅証明済み**(第 1537)——原文 *"the kernel of the second map contains the kernel of multiplication by `p`"*。★**構造定理(巡回分解)を使わない**証明: `length(L[p]) = length(L/pL)`(2 本の完全列)+ `L ↠ Q`(`pQ = 0`)から `length Q ≤ length(L/pL)` + `A ≤ B` & `length B ≤ length A ⟹ A = B`。非空虚性は `ZMod 4` の `2`-捩れ | `Section1.lean` |
+| **`Theorem 1.2` 節点 B(B1)** | **✅証明済み**(第 1538・1540)——`b·Dx = D(b·x) − x·Db` の 1 行。`derivPreimage`(`{a ∣ D a ∈ P}` は部分代数)で「生成元だけ確かめればよい」形に。(B2) は既証の `cancel_conductor_delta` へ帰着 | `Section1.lean` |
 | エタール持ち上げの一意性(古典版) | **✅証明済み**——`etale_lift_existsUnique`・`etale_lift_iso`。mathlib の `FormallySmooth.exists_lift`+`FormallyUnramified.ext` から。★`Theorem 2.2` はこれの **almost 版**であり、両者が並んだことで対比が明確になった | `AlmostDeform.lean` |
 | `Theorem 2.2` の冪零版への還元 | **✅証明済み**——`lift_nilpotent_of_lift_sq`(原文 *"We may assume that I² = 0"*)。非空虚性つき | `AlmostLifting.lean` |
 | `Theorem 2.3` 第2・3・4段 | **✅証明済み**("Tripling ε"・`B_ε` の almost 射影性・`B_ε⊗Ā` と `B` の比較) | `AlmostDeform.lean` |
@@ -96,6 +100,25 @@
 形式化後は `ker_comp_contains_pTorsion` と `step_facts_of_modules` の
 `hker` にそのまま入る。
 
+**★2026-09-05(第 1537)完了**——`Section1.lean`。しかも
+**構造定理(巡回分解)を一切使わない**証明で閉じた:
+
+1. 任意の有限長 `L` について `length(L[p]) = length(L/pL)`
+   ——`0 → L[p] → L →ᵖ L → L/pL → 0` の 2 本の完全列から。既証の
+   `length_ker_eq_length_coker` を `f := p·` に当てるだけ。
+2. `length_le_length_quot_smul_of_surjective`——`L` が `p` で消える
+   `Q` を商に持てば `length Q ≤ length(L/pL)`。
+3. `eq_of_le_of_length_le`——`A ≤ B` かつ `length B ≤ length A` なら
+   `A = B`(`Submodule.length_lt` を `↥B` の中で使う)。
+4. `pTorsion_le_of_length_le` / `ker_contains_pTorsion_of_quotient`
+   (節点 A 本体)/ `ker_contains_pTorsion_of_pi_quotient`(原文の
+   literal な形 `Q = (R/pR)^r`)/ `hg_of_quotient`(既証の
+   `ker_comp_contains_pTorsion` の入力の形へ)。
+
+★**原典より弱い仮定で足りる**——巡回分解は不要で、必要なのは
+`length(N[p]) ≤ length((W'/pW')^{d+1})` という大きさの比較だけ。
+非空虚性は `R = ℤ`・`N = ZMod 4`・`p = 2`・`L = 2·N`(真の非零部分加群)。
+
 ### 節点 B(原文の *"it is clear that"*)
 
 > *Also **it is clear that** `p^{δₙ − δ_{n+1}}` annihilates
@@ -105,6 +128,32 @@
 `Wₙ ⊗_{Vₙ} V_{n+1}` の**非正規性**を差積の差で測る段。これが当初
 「ブロッカー」と特定していた `differentIdeal Wₙ Wₙ₊₁` の評価に当たる。
 形式化後は `step_facts_of_modules` の `b`/`hbann` に入る。
+
+**★2026-09-05(第 1538・1539・1540)——2 段に分けて前半を完了**:
+
+* **(B1) ✅完了**「`b·B ⊆ A`(= `b` が導手に入る)⟹ 合成の余核が
+  `b` で零化される」。最初は `Ω[B⁄A]` 経由で書いた
+  (`kaehler_annihilated_of_conductor`・`smul_mem_range_mapBaseChange`・
+  `coker_mapBaseChange_annihilated`)が、原文の余核は
+  `Ω_{W_{n+1}/V_{n+1}}` の**部分加群 `P` による商**なので、
+  **`P` を直接扱う一般形**に作り直した(第 1540):
+  - `smul_mem_of_derivation_mem`——`D b ∈ P` かつ `∀ y, D(b·y) ∈ P` なら
+    `b·Ω[B⁄V] ⊆ P`。証明は **`b·Dx = D(b·x) − x·Db`** の 1 行。
+  - `derivPreimage`——`{a ∈ B | D a ∈ P}` は `V`-部分代数。★これで
+    「`D a ∈ P`」は**生成元でだけ**確かめればよい(`Algebra.adjoin_le`)。
+  - `quot_annihilated_of_conductor_subalgebra` /
+    `quot_annihilated_of_mem_conductor`——`step_facts_of_modules` の
+    `hbann` に直接入る形。
+* **(B2) 残**「`b := p^{δₙ − δ_{n+1}}` が実際に導手に入る」。
+  ★ただしこれは**既に持っている道具に帰着している**——
+  `KaehlerAux.lean` の `cancel_conductor_delta`(既証)が、
+  `differentIdeal_tower_diamond`(既証)と mathlib の
+  `conductor_mul_differentIdeal` から
+  `conductor(Wₙ, y) · δₙ₊₁ = δₙ(base change)` を与える。すなわち
+  **導手はちょうど `p^{δₙ − δ_{n+1}}`** で、これが原文の
+  *"it is clear that"* の中身である。残るのは `cancel_conductor_delta`
+  の仮定 `hspan_eq`(`y` の最小多項式が base change と両立する)の
+  確認と、実際の塔での適用。
 
 ★なお `tools/hedge-index.mjs` は FrdI 専用(Falt1 は索引していない)
 なので、Falt1 の合図はこの節に手で記録する。
