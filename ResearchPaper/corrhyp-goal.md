@@ -6227,3 +6227,37 @@ theorem ideal_map_mvPolynomial_span_range (ρ : T →+* T') (q : κ → MvPolyno
 Pythonが要る場合はCLAUDE.mdに書かれている絶対パス
 `C:\Users\Aruta\miniforge3\envs\py311env\python.exe`を使う。
 `lean-idioms.md` #67 に登記した。上の続き51・続き52は本コミットで復元した。
+
+### 2026-09-05夜さらに続き54 — ★新記法と`f_open`側の記法をつないだ
+
+`descendPieceRModel`(続き45、`span (range (map ρ ∘ q₀))`の形)と、
+`descendPieceR_localization_isOpenImmersion`・
+`exists_descendPieceR_localization_baseChange`(既存、`Ideal.map … I`の形)が
+**同じ対象である**ことを示した(`ExtLimit.lean`の
+`descendPieceRModel_eq_quotient_map`、3.9秒):
+
+```
+descendPieceRModel X U hU C α R' h
+  = MvPolynomial (Fin n) (Γ(X.left,U) ⊗[ℚ] R'.1) ⧸
+      Ideal.map (MvPolynomial.map (algebraMap …)) (Ideal.span (Set.range q₀))
+```
+
+証明は続き52の`ideal_map_mvPolynomial_span_range`を`congrArg`で商へ送るだけ。
+
+**配管**: `⧸`(`HasQuotient`)の合成には`CommRing (Γ(X.left,U) ⊗[ℚ] R'.1)`が
+先に要る(`letI hCR' := inferInstance`を statement・証明の両方に置く)。
+これを忘れると`failed to synthesize HasQuotient …`になる(`lean-idioms` #40 の
+パターン)。
+
+**意味**: これで§4の2つの流れが合流した。
+- **続き40〜47の流れ**(交わり設計): `f`・`t`・`t_id`・`cocycle`が
+  `descendPieceRModel`の言葉で揃っている。
+- **既存の流れ**(D(f)設計): `f_open`(`descendPieceR_localization_
+  isOpenImmersion`)と底変換の正しさ(`exists_descendPieceR_localization_
+  baseChange`)が`Ideal.map … I`の言葉で揃っている。
+
+この橋があるので、`V (i,j)`が`U i`の基本開集合として取れる場合には、
+**両方の成果を同じ`GlueData`へ入れられる**。
+
+検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
+Found側sorry 0件。集計は引き続き10/24——§4は引き続き0/2。

@@ -2839,3 +2839,22 @@ Python が要る場合は CLAUDE.md の絶対パス
 C:\Users\Aruta\miniforge3\envs\py311env\python.exe を使う。idiom #67 に登記。
 
 集計は10/24——§4は0/2。
+
+## 2026-09-05夜さらに続き54 — 新記法と f_open 側の記法をつないだ
+
+ExtLimit.lean の descendPieceRModel_eq_quotient_map(3.9秒):
+  descendPieceRModel X U hU C α R' h
+    = MvPolynomial (Fin n) (Γ ⊗ R'.1) ⧸ Ideal.map (map (algebraMap …)) (span (range q₀))
+証明は続き52 の ideal_map_mvPolynomial_span_range を congrArg で商へ送るだけ。
+
+配管: ⧸(HasQuotient)の合成には CommRing (Γ(X.left,U) ⊗[ℚ] R'.1) が先に要る
+(letI hCR' := inferInstance を statement・証明の両方に置く)。忘れると
+failed to synthesize HasQuotient になる(idiom #40 のパターン)。
+
+意味: §4 の2つの流れが合流した。
+- 続き40〜47(交わり設計): f・t・t_id・cocycle が descendPieceRModel の言葉で
+- 既存(D(f)設計): f_open と底変換の正しさが Ideal.map … I の言葉で
+この橋があるので、V(i,j) が U i の基本開として取れる場合には両方の成果を
+同じ GlueData へ入れられる。
+
+集計は10/24——§4は0/2。
