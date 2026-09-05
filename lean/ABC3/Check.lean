@@ -33,6 +33,7 @@ import ABC3.Check.PGC.ResidueCardinalityNondegenerate
 import ABC3.Check.IUTchIII.LogVolumeFillsInterface
 import ABC3.Check.IUTchIII.Cor312Degenerate
 import ABC3.Check.PGC.RefutationAttempts
+import ABC3.Check.PGC.Theorem42Degenerate
 import ABC3.Check.FrdI.TwistedFrobenioid
 import ABC3.Check.FrdI.AutAmpleGap
 import ABC3.Check.FrdI.Prop21QuantifierGap

@@ -82,7 +82,30 @@ filtered group の外部同型に持ち上げる構成——はそれ自体ま�
 証明を要する、独立した構成)。
 
 ここでは自然な射を `Φ` として**パラメータで受け取り**、それが全単射であることだけを
-主張する——`Φ` の構成そのものは `.needs` に implicitStep として明示的に記録した。 -/
+主張する——`Φ` の構成そのものは `.needs` に implicitStep として明示的に記録した。
+
+## ★★★2026-09-05: **この形は偽である**(`Check/PGC/Theorem42Degenerate.lean`)
+
+`Φ` に自然性の制約が一切無いので、上の主張は「**任意の**関数が全単射」を
+言っていることになる。定数関数が反例になる:
+
+* `RF` は退化させてよい(`Gv ≡ ⊤`)。
+* `K` として `ℚ_p` の**不分岐2次拡大**を取ると
+  `Isom_{Q_p}(K,K) = Gal(K/ℚ_p)` は 2 元
+  (`Found/PGC/UnramifiedExtension.lean::exists_isCyclic_gal` +
+  `Found/PGC/AdjoinFieldConstruction.lean::adjoinField`)。
+* `Φ := fun _ => 恒等外部同型` は単射でない。
+
+`Check.PGC.theorem_4_2_statement_false` に `sorry` 無しの証明がある。
+すなわち本項目は「`sorry` が埋まらない」のではなく「**埋めようがない**」。
+
+**直し方**: 原文が「the **natural** morphism」と言う以上、`Φ` は構成
+されねばならない。部品は既にある——`Found/PGC/GaloisTransfer.lean::
+galMulEquivOf`(延長+共役)と `galMulEquivOf_indep`(延長の取り方に
+よらない=外部同型としては一意)。残る穴は `map_Gv`(フィルトレーション
+を保つこと)で、これは `Interface.PGC.RamificationFiltration` に
+自然性の公理が無いことに帰着する(`memory/pgc-ramification-naturality-gap.md`、
+下の `.needs` の implicitStep と同じ穴)。 -/
 theorem theorem_4_2 (RF : RamificationFiltration p) (K K' : PAdicLocalField p)
     (Φ : (K.carrier ≃ₐ[ℚ_[p]] K'.carrier) →
       FilteredGroup.OuterIso (RF.filt K) (RF.filt K')) :

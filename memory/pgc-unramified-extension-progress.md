@@ -1264,3 +1264,39 @@ Lubin-Tate 級数 `f`)は**すべて本リポジトリで既に構築済みだ�
 「完全分岐 ∩ K^ur = K」——Lubin-Tate 塔 `K_π,n` が完全分岐であることが
 要る。`LubinTateActionPsi.lean` は `ψ_n` の Eisenstein 性(既約性)まで
 出しているが、`e = deg` そのものは未証明(同ファイル 331 行の注記)。
+
+## ★★★★★★★★★★★2026-09-05: **Theorem 4.2 の現在の形は偽だった**
+
+`Check/PGC/Theorem42Degenerate.lean`(新規)+ `Skeleton/PGC/Section4.lean`
+の docstring 更新。
+
+`theorem_4_2` は原文の「the **natural** morphism」を構成する代わりに
+`Φ` を**パラメータで受け取って**全単射性を主張していた。`Φ` に自然性の
+制約が一切無いので、これは「任意の関数が全単射」を言っている。
+
+**反例**(`theorem_4_2_statement_false`、sorry 無し):
+- `RF` は退化させてよい(`Gv ≡ ⊤`、`degenerateRF`)
+- `K := ℚ_p` の不分岐2次拡大 ⟹ `Isom_{Q_p}(K,K) = Gal(K/ℚ_p)` は 2 元
+  (★本日構築した `exists_isCyclic_gal` + `adjoinField` で初めて作れた)
+- `Φ := fun _ => 恒等外部同型` は単射でない
+
+すなわち本項目は「`sorry` が埋まらない」のではなく「**埋めようがない**」。
+
+### 直し方(部品は在庫にある)
+
+`Φ` を構成する:
+- `Found/PGC/GaloisTransfer.lean::galMulEquivOf`——`α : K ≃ₐ[ℚ_p] K′` を
+  代数閉包へ延長して共役で `Γ_K ≃* Γ_K′`
+- `galMulEquivOf_indep`——延長の取り方によらず内部自己同型で繋がる
+  (だから**外部**同型としては一意)
+
+残る穴は `map_Gv`。これは `Interface.PGC.RamificationFiltration` に
+「体の同型から誘導される共役が `Gv` を保つ」自然性の公理が無いことに
+帰着する(`memory/pgc-ramification-naturality-gap.md`、`Section4.lean` の
+`.needs` の implicitStep と同じ穴)。
+
+★教訓: `Check/PGC/InertiaDegeneracy.lean`(`I_K` を自由データに置くと
+退化)と同型の発見——**自由なデータ/自由な射は、主張を偽にするか自明に
+するかのどちらかになる**。同じ疑いを `cor_3_1`・`cor_3_3`
+(`isHodgeTate` が自由な述語)・`prop_2_2`(`IntKbar`/`CompKbar` が
+自由な型族)にも向けるべき。ただしそちらは `K ≠ K′` の witness が要る。
