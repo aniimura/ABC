@@ -1170,3 +1170,30 @@ Lubin-Tate 級数 `f`)は**すべて本リポジトリで既に構築済みだ�
 逆向き `inertia ≤ Gal(K̄/K^ur)` には「閉部分群は自分を含む開部分群
 すべての共通部分」という副有限群の事実が要る。それが済めば
 `inertia = Gal(K̄/K^ur)`(構成した `I_K` が本物だという確定)。
+
+## ★★★★★★★★★2026-09-05: 構成した惰性群は本物だった——`I_K = Gal(K̄/K^ur)`
+
+`Found/PGC/InertiaIdentification.lean`(新規)
+
+`Skeleton/PGC/Section1Cor13.lean` が「原文に無い段」として補った構成
+`inertia RD SC K = sInf {H 開 | q_{L_H} = q^{[Γ_K:H]}}` は、実物
+`residueCardinality p`・`subgroupCorrespondence p` を入れると
+
+**`inertia (residueCardinality p) (subgroupCorrespondence p) K
+  = (unramifiedClosure K).fixingSubgroup  ( = Gal(K̄/K^ur) )`**
+
+——古典的な惰性群そのもの。設計メモが恐れていた「`RD` の自由度による
+退化」は**起きていない**。
+
+- `isUnramifiedAt_fixingSubgroup_adjoin` : 不分岐な `K(x)` の固定部分群は
+  開(`IntermediateField.fixingSubgroup_isOpen`)で判定条件を満たす
+- `inertia_le_fixingSubgroup_unramifiedClosure`
+- **`inertia_eq_fixingSubgroup_unramifiedClosure`**
+- **`normal_inertia`** : `I_K` は正規(`InfiniteGalois.normal_iff_isGalois`
+  + `isGalois_unramifiedClosure`)。★`Check/PGC/RefutationAttempts.lean` が
+  記録した「共役による Cor 1.3 の反証には非正規な `inertia` が要る」に
+  対する答え——実物の下では**その反証経路は閉じている**。
+
+★予想外の収穫: 「閉部分群は自分を含む開部分群すべての共通部分」という
+副有限群の一般論は**要らなかった**。`K^ur` が単項不分岐拡大の有向和である
+(`mem_unramifiedClosure_iff`)ことがその役割をそのまま果たす。
