@@ -3640,6 +3640,82 @@ theorem piecePullbackIso_inv_snd (X : Over BaseK) (U : X.left.Opens) (hU : IsAff
     (pullbackHomIsoLeft_inv_snd' hU.isoSpec (Spec.map (pieceRingHom X U hU)) toBaseK)) ?_
   exact pullbackSpecIso_inv_snd ℚ Γ(X.left, U) ℝ
 
+set_option maxHeartbeats 1000000 in
+open scoped TensorProduct in
+/-- **ℝ側の`Spec`側最終形**——`piecePullbackIso_inv_isoSpec_appLE`(`A_U`側)の
+相方。`piecePullbackIso_inv_snd`を`pullback.snd`側の`appLE`の`Spec`表示
+(`IsAffineOpen.SpecMap_appLE_fromSpec`+`IsAffineOpen.fromSpec_top`+
+`Scheme.isoSpec_Spec_inv`)と突き合わせ、`Spec.map (ΓSpecIso ℝ).inv`が
+同型ゆえモノであることで右から消去した形。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem piecePullbackIso_inv_isoSpec_appLE_snd (X : Over BaseK) (U : X.left.Opens)
+    (hU : IsAffineOpen U) :
+    letI := pieceAlgebra X U hU
+    (piecePullbackIso X U hU).inv ≫ (piece_isAffineOpen X U hU).isoSpec.hom ≫
+      Spec.map ((pullback.snd X.hom toBaseK).appLE ⊤ (pullback.fst X.hom toBaseK ⁻¹ᵁ U) le_top)
+    = Spec.map ((Scheme.ΓSpecIso (CommRingCat.of ℝ)).hom ≫
+        CommRingCat.ofHom (Algebra.TensorProduct.includeRight (R := ℚ)
+          (A := Γ(X.left, U)) (B := ℝ)).toRingHom) := by
+  letI := pieceAlgebra X U hU
+  haveI : IsAffine specK := by unfold specK; infer_instance
+  have hmid : (piece_isAffineOpen X U hU).isoSpec.hom ≫ (piece_isAffineOpen X U hU).fromSpec
+      = (pullback.fst X.hom toBaseK ⁻¹ᵁ U).ι := by
+    rw [← IsAffineOpen.isoSpec_inv_ι, Iso.hom_inv_id_assoc]
+    rfl
+  have hA := piecePullbackIso_inv_snd X U hU
+  have hB := IsAffineOpen.SpecMap_appLE_fromSpec (pullback.snd X.hom toBaseK)
+    (isAffineOpen_top specK) (piece_isAffineOpen X U hU) (le_top)
+  rw [IsAffineOpen.fromSpec_top] at hB
+  have hspecK : specK.isoSpec.inv = Spec.map (Scheme.ΓSpecIso (CommRingCat.of ℝ)).inv :=
+    Scheme.isoSpec_Spec_inv (CommRingCat.of ℝ)
+  rw [hspecK] at hB
+  have h3 : (piece_isAffineOpen X U hU).isoSpec.hom ≫
+      ((piece_isAffineOpen X U hU).fromSpec ≫ pullback.snd X.hom toBaseK)
+      = (pullback.fst X.hom toBaseK ⁻¹ᵁ U).ι ≫ pullback.snd X.hom toBaseK := by
+    rw [← Category.assoc, hmid]
+    rfl
+  have hRHS : Spec.map ((Scheme.ΓSpecIso (CommRingCat.of ℝ)).hom ≫
+        CommRingCat.ofHom (Algebra.TensorProduct.includeRight (R := ℚ)
+          (A := Γ(X.left, U)) (B := ℝ)).toRingHom)
+      ≫ Spec.map (Scheme.ΓSpecIso (CommRingCat.of ℝ)).inv
+      = Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight (R := ℚ)
+          (A := Γ(X.left, U)) (B := ℝ)).toRingHom) := by
+    rw [← Spec.map_comp, Iso.inv_hom_id_assoc]
+  refine (cancel_mono (Spec.map (Scheme.ΓSpecIso (CommRingCat.of ℝ)).inv)).mp ?_
+  refine Eq.trans ?_ hRHS.symm
+  refine Eq.trans ?_ hA
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  refine Eq.trans (congrArg (fun t => (piecePullbackIso X U hU).inv ≫
+    (piece_isAffineOpen X U hU).isoSpec.hom ≫ t) hB) ?_
+  exact congrArg (fun t => (piecePullbackIso X U hU).inv ≫ t) h3
+
+set_option maxHeartbeats 1000000 in
+open scoped TensorProduct in
+/-- **自然性の四角形(ii)のℝ成分——環レベル**:`pieceRingEquiv`は
+`pullback.snd`由来の標準写像(ℝ側の構造射)を`1 ⊗ₜ r`へ送る。
+
+`pieceRingEquiv_appLE`(`a ⊗ₜ 1`側)と合わせて、テンソル積からの
+環準同型を決める**2成分がともに確定した**——これで`pieceRingEquiv.symm`の
+`U`についての自然性を、純テンソル上の2つの等式から組み立てられる。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem pieceRingEquiv_appLE_snd (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U) :
+    letI := pieceAlgebra X U hU
+    ((pullback.snd X.hom toBaseK).appLE ⊤ (pullback.fst X.hom toBaseK ⁻¹ᵁ U) le_top) ≫
+      CommRingCat.ofHom (pieceRingEquiv X U hU).toRingHom
+    = (Scheme.ΓSpecIso (CommRingCat.of ℝ)).hom ≫
+        CommRingCat.ofHom (Algebra.TensorProduct.includeRight (R := ℚ)
+          (A := Γ(X.left, U)) (B := ℝ)).toRingHom := by
+  letI := pieceAlgebra X U hU
+  apply Spec.map_injective
+  refine Eq.trans (Spec.map_comp _ _) ?_
+  refine Eq.trans (congrArg (fun t => t ≫
+    Spec.map ((pullback.snd X.hom toBaseK).appLE ⊤ (pullback.fst X.hom toBaseK ⁻¹ᵁ U) le_top))
+    (piecePullbackIso_inv_isoSpec_hom X U hU).symm) ?_
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  exact piecePullbackIso_inv_isoSpec_appLE_snd X U hU
+
 /-- `piecesOpenCover`の脚`(e i).inv ≫ X.homOfLE (h i)`同士のpullbackは、
 `e i`・`e j`をpullbackの脚から追い出す(`pullbackHomIsoLeft`+
 `pullbackSymmetry`、いずれも既存の一般的事実)ことで、`X.homOfLE`同士
