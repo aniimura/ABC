@@ -369,4 +369,32 @@ theorem length_baseChange_kaehler {Z V K L W W' : Type*} [CommRing Z] [CommRing 
   rw [IsLocalRing.length_baseChange W W' Ω[W⁄V],
     (lemma_1_1_falt1 (Z := Z) w hint hadjoin hw).2]
 
+/-! ### 事実 (c) の材料——「`d+1` 個の生成元」の効き方
+
+原文の *"So its length is at most equal to that of `W_{n+1}` divided by
+the `(d+1)`st power of this"* は、余核が `d+1` 個の生成元を持ち
+`p^{δₙ−δ_{n+1}}` で消えることから
+
+    length(coker) ≤ (d+1)·length(W_{n+1}/p^{δₙ−δ_{n+1}}W_{n+1})
+
+となる、という形をしている(`d+1` は `Ω_V` が `≤ d+1` 個の元で生成される
+——物理 p.4 = 印字 p.257、260dpi 確認——ことに由来する)。 -/
+
+/-- 有限直積の長さ。 -/
+theorem length_pi {R N : Type*} [Ring R] [AddCommGroup N] [Module R N] (r : ℕ) :
+    Module.length R (Fin r → N) = (r : ℕ∞) * Module.length R N := by
+  have e : (Fin r → N) ≃ₗ[R] (Fin r →₀ N) := (Finsupp.linearEquivFunOnFinite R N (Fin r)).symm
+  rw [e.length_eq, Module.length_finsupp]
+  congr 1
+  simp
+
+/-- **`r` 個の生成元で書ける加群の長さは `r·length(N)` 以下**
+——事実 (c) の形(`N := W'/p^{δₙ−δ_{n+1}}W'`、`r := d+1`)。 -/
+theorem length_le_of_surjective_pi {R M N : Type*} [Ring R] [AddCommGroup M] [Module R M]
+    [AddCommGroup N] [Module R N] (r : ℕ) (f : (Fin r → N) →ₗ[R] M)
+    (hf : Function.Surjective f) :
+    Module.length R M ≤ (r : ℕ∞) * Module.length R N := by
+  rw [← length_pi (R := R) (N := N) r]
+  exact Module.length_le_of_surjective f hf
+
 end ABC3.Found.Falt1
