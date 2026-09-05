@@ -826,6 +826,69 @@ theorem length_le_of_span_and_annihilator {R M : Type*} [CommRing R] [AddCommGro
   rw [← hc]
   exact Finset.sum_congr rfl (fun i _ => rfl)
 
+/-- **★節点 A の `hlen` を「`r` 個で生成される」から出す**——
+`length(N[p]) = length(N/pN) ≤ r·length(R/(p))`。
+
+原文は *"`Ω_{W_{n+1}/Vₙ}` is the direct sum of `d+1` modules of the form
+`W'/p^α W'`"* と**巡回分解**を使うが、必要なのは
+「`d+1` 個の元で生成される」ことだけである(`Ω_V` が `≤ d+1` 個で
+生成されることから直ちに従う)。★構造定理は要らない。 -/
+theorem length_pTorsion_le_of_span {R N : Type*} [CommRing R] [AddCommGroup N] [Module R N]
+    (p : R) (hfin : Module.length R N ≠ ⊤) (r : ℕ) (g : Fin r → N)
+    (hspan : Submodule.span R (Set.range g) = ⊤) :
+    Module.length R ↥(LinearMap.ker (LinearMap.lsmul R N p))
+      ≤ (r : ℕ∞) * Module.length R (R ⧸ Ideal.span ({p} : Set R)) := by
+  set P : Submodule R N := LinearMap.range (LinearMap.lsmul R N p) with hP
+  have h1 : Module.length R ↥(LinearMap.ker (LinearMap.lsmul R N p))
+      = Module.length R (N ⧸ P) := length_ker_eq_length_coker _ hfin
+  rw [h1]
+  refine length_le_of_span_and_annihilator r (fun i => Submodule.Quotient.mk (g i)) ?_ p ?_
+  · have hmap : Submodule.map P.mkQ (Submodule.span R (Set.range g))
+        = Submodule.span R (Set.range (fun i => Submodule.Quotient.mk (g i) : Fin r → N ⧸ P)) := by
+      rw [Submodule.map_span]
+      congr 1
+      ext z
+      constructor
+      · rintro ⟨_, ⟨i, rfl⟩, rfl⟩; exact ⟨i, rfl⟩
+      · rintro ⟨i, rfl⟩; exact ⟨g i, ⟨i, rfl⟩, rfl⟩
+    rw [← hmap, hspan, Submodule.map_top, Submodule.range_mkQ]
+  · intro x
+    obtain ⟨y, hy⟩ := Submodule.Quotient.mk_surjective P x
+    rw [← hy, ← Submodule.Quotient.mk_smul, Submodule.Quotient.mk_eq_zero]
+    exact ⟨y, rfl⟩
+
+/-- **★節点 A の完成形**——原文の 2 つの仮定だけから
+`N[p] ⊆ L`(第 2 写像の核は `p` 倍の核を含む):
+
+* `gN`/`hspanN`——`N = Ω_{W_{n+1}/Vₙ}` が `r = d+1` 個の元で生成される
+  (原文は「`d+1` 個の `W'/p^α W'` の直和」と**巡回分解**で言うが、
+  生成元の個数だけで足りる)。
+* `φ`/`hφ`——`L`(核が含む部分加群 `Ω_{V_{n+1}/Vₙ} ⊗ W'` の像)が
+  `(R/pR)^r = (W'/pW')^{d+1}` を商に持つ(塔の仮定)。
+
+★**構造定理も巡回分解も使わない**。 -/
+theorem ker_contains_pTorsion_of_faltings {R N : Type*} [CommRing R]
+    [AddCommGroup N] [Module R N] [IsArtinian R N] [IsNoetherian R N]
+    (p : R) (r : ℕ) (gN : Fin r → N) (hspanN : Submodule.span R (Set.range gN) = ⊤)
+    (L : Submodule R N)
+    (φ : ↥L →ₗ[R] (Fin r → R ⧸ Ideal.span ({p} : Set R))) (hφ : Function.Surjective φ) :
+    LinearMap.ker (LinearMap.lsmul R N p) ≤ L :=
+  ker_contains_pTorsion_of_pi_quotient p r L
+    (length_pTorsion_le_of_span p Module.length_ne_top r gN hspanN) φ hφ
+
+/-- **節点 A の完成形を `ker_comp_contains_pTorsion` の入力の形へ**。 -/
+theorem hg_of_faltings {R N P : Type*} [CommRing R]
+    [AddCommGroup N] [Module R N] [IsArtinian R N] [IsNoetherian R N]
+    [AddCommGroup P] [Module R P]
+    (p : R) (r : ℕ) (gN : Fin r → N) (hspanN : Submodule.span R (Set.range gN) = ⊤)
+    (g : N →ₗ[R] P)
+    (φ : ↥(LinearMap.ker g) →ₗ[R] (Fin r → R ⧸ Ideal.span ({p} : Set R)))
+    (hφ : Function.Surjective φ) :
+    ∀ y : N, p • y = 0 → g y = 0 := by
+  intro y hy
+  have := ker_contains_pTorsion_of_faltings p r gN hspanN (LinearMap.ker g) φ hφ
+  exact this (by simpa [LinearMap.mem_ker] using hy)
+
 /-! ### 事実 (b) の材料——`β = min{1, δₙ/(d+1)}` の由来
 
 原文は *"this kernel has length at least equal to that of
