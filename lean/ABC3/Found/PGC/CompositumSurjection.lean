@@ -202,7 +202,7 @@ theorem exists_surjective_absGal_zmod_prod_units (K : PAdicLocalField p)
     (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
     [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
     (m : ℕ) (hm : m ≠ 0) :
-    ∃ F : K.absGal → (Multiplicative (ZMod m)
+    ∃ F : K.absGal →* (Multiplicative (ZMod m)
         × (𝒪[K.carrier] ⧸ Ideal.span ({π ^ n} : Set 𝒪[K.carrier]))ˣ),
       Function.Surjective F := by
   classical
@@ -234,13 +234,62 @@ theorem exists_surjective_absGal_zmod_prod_units (K : PAdicLocalField p)
     (IntermediateField.adjoin K.carrier ({y} : Set K.closure))
   haveI := normal_fixingSubgroup_of_isGalois K
     (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
-  refine ⟨(MulEquiv.prodCongr
-      ((absGalQuotFixingSubgroupEquiv K
-        (IntermediateField.adjoin K.carrier ({y} : Set K.closure))).trans ezm)
-      ((absGalQuotFixingSubgroupEquiv K
-        (IntermediateField.adjoin K.carrier ({x} : Set K.closure))).trans
-        (galoisReciprocityEquiv K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem)))
-    ∘ (fun g : K.absGal => ((QuotientGroup.mk g : _), (QuotientGroup.mk g : _))), ?_⟩
-  exact (MulEquiv.surjective _).comp hsurj
+  set e₁ : (K.absGal ⧸ (IntermediateField.adjoin K.carrier
+      ({y} : Set K.closure)).fixingSubgroup) ≃* Multiplicative (ZMod m) :=
+    (absGalQuotFixingSubgroupEquiv K
+      (IntermediateField.adjoin K.carrier ({y} : Set K.closure))).trans ezm with he₁
+  set e₂ : (K.absGal ⧸ (IntermediateField.adjoin K.carrier
+      ({x} : Set K.closure)).fixingSubgroup)
+      ≃* (𝒪[K.carrier] ⧸ Ideal.span ({π ^ n} : Set 𝒪[K.carrier]))ˣ :=
+    (absGalQuotFixingSubgroupEquiv K
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure))).trans
+      (galoisReciprocityEquiv K hq hπmax hπne0 f hf0 hf1 hf n hn x hxψ hxn hmem) with he₂
+  refine ⟨(e₁.toMonoidHom.comp (QuotientGroup.mk' _)).prod
+    (e₂.toMonoidHom.comp (QuotientGroup.mk' _)), fun z => ?_⟩
+  obtain ⟨g, hg⟩ := hsurj (e₁.symm z.1, e₂.symm z.2)
+  refine ⟨g, ?_⟩
+  have h1 : (QuotientGroup.mk g :
+      K.absGal ⧸ (IntermediateField.adjoin K.carrier
+        ({y} : Set K.closure)).fixingSubgroup) = e₁.symm z.1 := congrArg Prod.fst hg
+  have h2 : (QuotientGroup.mk g :
+      K.absGal ⧸ (IntermediateField.adjoin K.carrier
+        ({x} : Set K.closure)).fixingSubgroup) = e₂.symm z.2 := congrArg Prod.snd hg
+  show (e₁ (QuotientGroup.mk g), e₂ (QuotientGroup.mk g)) = z
+  rw [h1, h2, MulEquiv.apply_symm_apply, MulEquiv.apply_symm_apply]
+
+/-- **★★★★★★★★★★★★★★★★★★★★★★★★★★★★`Γ_K^{ab} ↠ ℤ/m × (𝒪_K/π^n)^×`**
+
+Prop 1.2 が数えるのは `Γ_K` そのものではなく**アーベル化** `Γ_K^{ab}` の不変量
+(捩れの prime-to-p 部分が `q−1` 個、pro-p 部分の階数が `[K:ℚ_p]+1`)なので、
+第 1002 をアーベル化に持ち上げておく。行き先が可換なので
+`Abelianization.lift` を当てるだけ。 -/
+theorem exists_surjective_abelianization_zmod_prod_units (K : PAdicLocalField p)
+    [IsAdicComplete (IsLocalRing.maximalIdeal 𝒪[K.carrier]) 𝒪[K.carrier]]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField 𝒪[K.carrier]) pp]
+    [Fintype (IsLocalRing.ResidueField 𝒪[K.carrier])] {ff : ℕ}
+    (hq : Fintype.card (IsLocalRing.ResidueField 𝒪[K.carrier]) = pp ^ ff)
+    {π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal 𝒪[K.carrier] = Ideal.span {π})
+    (hπne0 : π ≠ 0)
+    (f : PowerSeries 𝒪[K.carrier]) (hf0 : PowerSeries.coeff 0 f = 0)
+    (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue 𝒪[K.carrier]) f = PowerSeries.X ^ (pp ^ ff))
+    (n : ℕ) (hn : 1 ≤ n) (x : K.closure)
+    (hxψ : x ∈ iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n hn)
+    (hxn : x ∈ iteratedLubinTateTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf n)
+    (hmem : x ∈ IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (m : ℕ) (hm : m ≠ 0) :
+    ∃ F : Abelianization K.absGal →* (Multiplicative (ZMod m)
+        × (𝒪[K.carrier] ⧸ Ideal.span ({π ^ n} : Set 𝒪[K.carrier]))ˣ),
+      Function.Surjective F := by
+  obtain ⟨F, hF⟩ := exists_surjective_absGal_zmod_prod_units K hq hπmax hπne0 f hf0 hf1 hf
+    n hn x hxψ hxn hmem m hm
+  refine ⟨Abelianization.lift (G := K.absGal)
+    (A := Multiplicative (ZMod m)
+      × (𝒪[K.carrier] ⧸ Ideal.span ({π ^ n} : Set 𝒪[K.carrier]))ˣ) F, fun z => ?_⟩
+  obtain ⟨g, hg⟩ := hF z
+  refine ⟨Abelianization.of g, ?_⟩
+  rw [Abelianization.lift_apply_of]
+  exact hg
 
 end ABC3.Found.PGC

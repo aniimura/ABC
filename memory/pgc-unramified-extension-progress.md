@@ -2196,3 +2196,21 @@ kernel を止める(idioms #59)。代わりに **`Γ_K` の側で閉じた**:
 3. そこから `Γ_K^ab ≅ 𝒪_K^× × Ẑ` が出れば、第 962・第 963 の数え上げ
    (`card_primeToPTorsion` で `q−1`、`finrank_eq_of_smallPrincipalUnits_mulEquiv`
    で `[K:ℚ_p]`)がそのまま Prop 1.2 になる。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05: `Γ_K^{ab} ↠ ℤ/m × (𝒪_K/π^n)^×`
+
+`Found/PGC/CompositumSurjection.lean::exists_surjective_abelianization_zmod_prod_units`。
+
+Prop 1.2 が数えるのは `Γ_K` そのものではなく**アーベル化** `Γ_K^{ab}` の不変量
+(捩れの prime-to-p 部分が `q−1` 個、pro-p 部分の階数が `[K:ℚ_p]+1`)なので、
+第 1002 をアーベル化に持ち上げた。行き先が可換なので `Abelianization.lift`
+を当てるだけ。第 1002 の結論も `→` から `→*`(MonoidHom)に強めた。
+
+★配管:
+- `Abelianization.lift` は **`Equiv`**(`(G →* A) ≃ (Abelianization G →* A)`)。
+  `Abelianization.lift.of` は projection と解釈されて失敗する——正しい補題名は
+  **`Abelianization.lift_apply_of`**、`rw` で使う。
+- `MulEquiv.prodCongr ... |>.toMonoidHom.comp ((mk').prod (mk'))` は
+  メタ変数で詰まる。`MonoidHom.prod` を外側にして
+  `(e₁.toMonoidHom.comp (mk' _)).prod (e₂.toMonoidHom.comp (mk' _))` と書き、
+  全射性は `hsurj (e₁.symm z.1, e₂.symm z.2)` から手で組む方が通る。
