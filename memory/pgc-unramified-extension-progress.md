@@ -1041,3 +1041,18 @@ Frobenius・Teichmüller など)が、そのまま `adjoinField K x` を
 
 `Corollary 1.3`(`inertia_recoverable RD SC`)の**両方の仮説**に実物が
 入るようになった。
+
+## 2026-09-05: 有限部分拡大はすべて単項——`adjoin` の機構が固定体に届く
+
+`Found/PGC/SubgroupCorrespondenceConstruction.lean`(sorry 無し):
+- **`exists_adjoin_eq_of_finiteDimensional`** : `K̄/K` の有限次中間体 `E` は
+  単項 `E = K(x)`(標数 0 なので分離的、原始元定理)。
+  `minpoly.algebraMap_eq` で `minpoly K α`(`α : ↥E`)と
+  `minpoly K ↑α`(`↑α : K̄`)を同一視し、次数一致で
+  `IntermediateField.eq_of_le_of_finrank_eq`。
+- `exists_adjoin_eq_fixedField` : 開部分群の固定体も単項 `L_H = K(x)`。
+
+これで `UnramifiedExtension.lean` で `K(x)` について積み上げた理論
+(`e·f`・不分岐性・Frobenius・一意性)が、開部分群の固定体
+`L_H = fixedField H` にもそのまま適用できる——原文が
+「Proposition 1.2 を `(L, H)` に適用する」と書く操作の土台。

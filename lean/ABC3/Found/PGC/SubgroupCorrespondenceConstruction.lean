@@ -86,4 +86,45 @@ noncomputable def subgroupCorrespondence (p : ℕ) [Fact p.Prime] : SubgroupCorr
   field K H hH := if H = ⊤ then K else fixedFieldLocalField K H hH
   field_top K h := by simp
 
+
+/-! ## 有限部分拡大はすべて単項——`adjoin` の機構が固定体にも届く
+
+標数 0 なので `K̄/K` の有限次中間体はすべて分離的、したがって原始元定理で
+**単項**:`E = K(x)`。これで `Found/PGC/UnramifiedExtension.lean` で
+`K(x)` について積み上げた理論(`e·f`・不分岐性・Frobenius・一意性)が、
+開部分群の固定体 `L_H = fixedField H` にもそのまま適用できる
+——原文が「Proposition 1.2 を `(L, H)` に適用する」と書く操作の土台。 -/
+
+/-- **有限次中間体は単項**(原始元定理、標数 0)。 -/
+theorem exists_adjoin_eq_of_finiteDimensional (K : PAdicLocalField p)
+    (E : IntermediateField K.carrier K.closure) [FiniteDimensional K.carrier E] :
+    ∃ x : K.closure, IntermediateField.adjoin K.carrier ({x} : Set K.closure) = E := by
+  haveI : CharZero K.carrier :=
+    charZero_of_injective_algebraMap (algebraMap ℚ_[p] K.carrier).injective
+  haveI : Algebra.IsSeparable K.carrier E :=
+    IntermediateField.isSeparable_tower_bot K.carrier E
+  obtain ⟨α, hα⟩ := Field.exists_primitive_element K.carrier E
+  refine ⟨(α : K.closure), ?_⟩
+  have hle : IntermediateField.adjoin K.carrier ({(α : K.closure)} : Set K.closure) ≤ E := by
+    rw [IntermediateField.adjoin_simple_le_iff]
+    exact α.2
+  refine IntermediateField.eq_of_le_of_finrank_eq hle ?_
+  have hint : IsIntegral K.carrier (α : K.closure) :=
+    IsAlgebraic.isIntegral (Algebra.IsAlgebraic.isAlgebraic _)
+  have hintE : IsIntegral K.carrier α := IsIntegral.of_finite _ _
+  have hmp : minpoly K.carrier (α : K.closure) = minpoly K.carrier α :=
+    minpoly.algebraMap_eq (A := K.carrier) (B := (E : IntermediateField K.carrier K.closure))
+      (B' := K.closure) (IntermediateField.val E).injective α
+  rw [IntermediateField.adjoin.finrank hint,
+    ← IntermediateField.finrank_top' (F := K.carrier) (E := E), ← hα,
+    IntermediateField.adjoin.finrank hintE, hmp]
+
+/-- **開部分群の固定体も単項**——`L_H = K(x)`。 -/
+theorem exists_adjoin_eq_fixedField (K : PAdicLocalField p) (H : Subgroup K.absGal)
+    (hH : IsOpen (H : Set K.absGal)) :
+    ∃ x : K.closure, IntermediateField.adjoin K.carrier ({x} : Set K.closure)
+      = IntermediateField.fixedField H := by
+  haveI := finiteDimensional_fixedField_of_isOpen K H hH
+  exact exists_adjoin_eq_of_finiteDimensional K (IntermediateField.fixedField H)
+
 end ABC3.Found.PGC
