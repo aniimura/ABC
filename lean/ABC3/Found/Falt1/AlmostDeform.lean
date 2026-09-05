@@ -103,4 +103,72 @@ example : ∃ e : ZMod 4, e^2 = algebraMap ℤ (ZMod 4) ((1:ℤ)^3) * e
     exact ⟨(ZMod.val x : ZMod 4), by revert x; decide⟩
   · decide
 
+/-! ## 第 2 段——almost 射影性はそのまま almost 冪等行列を与える
+
+原文の *"First `B` is a direct summand in a free module `Ā^r` up to some
+`p^ε`. That is, there exists an `r×r` matrix `ē` such that `ē² = p^ε ē` and
+`B = Ā^r/(p^ε − ē)(Ā^r)` modulo `p`-torsion."*
+
+前半(`ē` の存在)は `AlmostProjective.almost_projective_factor` から
+**1 行で**出る:`g∘f = c·id` なら `E := f∘g` について
+`E² = f g f g = f (c·id) g = c·E`。 -/
+
+/-- **`Theorem 2.3` の第 2 段**——`g∘f = c·id` なら `E := f∘g` は
+`E² = c·E` を満たす。 -/
+theorem almost_idem_of_factor {A B : Type u} [CommRing A] [AddCommGroup B] [Module A B]
+    {ι : Type u} [Fintype ι] (c : A) (f : B →ₗ[A] (ι → A)) (g : (ι → A) →ₗ[A] B)
+    (hgf : ∀ b : B, g (f b) = c • b) :
+    (f ∘ₗ g) ∘ₗ (f ∘ₗ g) = c • (f ∘ₗ g) := by
+  ext x
+  simp only [LinearMap.coe_comp, Function.comp_apply, LinearMap.smul_apply]
+  rw [hgf, map_smul]
+
+/-- 第 2 段を行列の言葉へ。 -/
+theorem almost_idem_matrix_of_factor {A B : Type u} [CommRing A] [AddCommGroup B] [Module A B]
+    {ι : Type u} [Fintype ι] [DecidableEq ι] (c : A)
+    (f : B →ₗ[A] (ι → A)) (g : (ι → A) →ₗ[A] B)
+    (hgf : ∀ b : B, g (f b) = c • b) :
+    (LinearMap.toMatrixAlgEquiv' (f ∘ₗ g))^2
+      = algebraMap A (Matrix ι ι A) c * LinearMap.toMatrixAlgEquiv' (f ∘ₗ g) := by
+  have h2 : (f ∘ₗ g) * (f ∘ₗ g) = c • (f ∘ₗ g) := almost_idem_of_factor c f g hgf
+  have h3 := congrArg (LinearMap.toMatrixAlgEquiv' (R := A) (n := ι)) h2
+  rw [map_mul, map_smul] at h3
+  rw [sq, h3, Algebra.smul_def]
+
+/-- 平方零イデアル `I` に沿った行列環の還元は、積を零化する。 -/
+theorem matrix_sq_zero {ι A : Type u} [Fintype ι] [DecidableEq ι] [CommRing A]
+    (I : Ideal A) (hI : ∀ u ∈ I, ∀ v ∈ I, u * v = 0) (x y : Matrix ι ι A)
+    (hx : (Ideal.Quotient.mkₐ A I).mapMatrix x = 0)
+    (hy : (Ideal.Quotient.mkₐ A I).mapMatrix y = 0) : x * y = 0 := by
+  ext i j
+  rw [Matrix.mul_apply, Matrix.zero_apply]
+  refine Finset.sum_eq_zero (fun k _ => ?_)
+  refine hI _ ?_ _ ?_
+  · rw [← Ideal.Quotient.eq_zero_iff_mem]
+    exact congrFun (congrFun (congrArg (fun m => (m : Matrix ι ι (A ⧸ I))) hx) i) k
+  · rw [← Ideal.Quotient.eq_zero_iff_mem]
+    exact congrFun (congrFun (congrArg (fun m => (m : Matrix ι ι (A ⧸ I))) hy) k) j
+
+/-- **`Theorem 2.3` の第 3 段(行列版)**——`Ā = A/I`(`I² = 0`)上の
+almost 冪等行列 `ē`(`ē² = s·ē`)は `A` 上の行列 `e`(`e² = s³·e`)に
+持ち上がり、その像はちょうど `s²·ē`。
+
+第 2 段(`almost_idem_matrix_of_factor`)が `Ā` 上の `ē` を供給するので、
+この 2 つを繋げば原文の *"Tripling `ε` we may assume that `ē` lifts to an
+`r×r` matrix `e` with `e² = p^ε e`"* がそのまま出る。 -/
+theorem exists_matrix_almost_idem_lift {ι A : Type u} [Fintype ι] [DecidableEq ι] [CommRing A]
+    (I : Ideal A) (hI : ∀ u ∈ I, ∀ v ∈ I, u * v = 0)
+    (s : A) (ebar : Matrix ι ι (A ⧸ I))
+    (hebar : ebar^2 = algebraMap A (Matrix ι ι (A ⧸ I)) s * ebar) :
+    ∃ e : Matrix ι ι A,
+      e^2 = algebraMap A (Matrix ι ι A) (s^3) * e ∧
+      (Ideal.Quotient.mkₐ A I).mapMatrix e
+        = algebraMap A (Matrix ι ι (A ⧸ I)) (s^2) * ebar := by
+  refine exists_almost_idem_lift (Ideal.Quotient.mkₐ A I).mapMatrix ?_
+    (matrix_sq_zero I hI) s ebar hebar
+  intro m
+  refine ⟨Matrix.of (fun i j => (Ideal.Quotient.mk_surjective (m i j)).choose), ?_⟩
+  ext i j
+  exact (Ideal.Quotient.mk_surjective (m i j)).choose_spec
+
 end ABC3.Found.Falt1
