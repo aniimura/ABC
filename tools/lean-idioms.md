@@ -4814,3 +4814,30 @@ morphism の水準で示せばよい(`map_id_comp` + `IsZero.eq_zero_of_tgt`)。
 としては**射影性/入射性の `c` 倍版**である。対象そのものの分解を
 探すより、`s ≫ μ = c • 𝟙` という 1 本の等式に落とすと、あとは
 mathlib の既存の関手性 API に載る。
+
+## 55. `Subring` の `def` を挟むと `CommRing` インスタンス経路が変わり `rw` が落ちる(`▸` なら通る)
+
+`adjoinIntegers K x`(`def`、`Subring L`)と `𝒪[L]`(`Valued.integer L`)は
+`rfl` で一致するが、`↥` を取ったときの `CommRing` インスタンスの**経路**が違う:
+
+```
+↥(adjoinIntegers K x) : CommRing.toCommSemiring.toSemiring
+↥𝒪[L]                : (SubsemiringClass.toCommSemiring 𝒪[L]).toSemiring
+```
+
+このため両者にまたがる書き換えは `rw` が
+「Application type mismatch / not type-correct under `instances` transparency」
+で落ちる。**`▸` の項レベルのキャスト**(または `exact`)にすると
+defeq で通る。#37(`rw` は syntactic・`exact` は defeq)と同じ根。
+
+実例: `Found/PGC/UnramifiedExtension.lean::isAdic_maximalIdeal_adjoinIntegers`
+——基礎体版(`ValuationRingComplete.lean`)は `rw [show ... from rfl, hball n]`
+で書けたが、拡大体では `have h1 : ... := ...; exact (hball n) ▸ h1` にする必要が
+あった。
+
+あわせて: `Valued.integer.norm_irreducible_pos` などは
+`[NontriviallyNormedField K]` を要求する。拡大体 `↥K.carrier⟮x⟯` には
+その instance が**無い**ので、`letI := nontriviallyNormedField_adjoin K x`
+(`@[implicit_reducible]` 付きの `def`)を先に置く。置き忘れると
+インスタンス探索が `whnf` で 200000 heartbeats タイムアウトする
+(#47「`maxHeartbeats` の `whnf` タイムアウト」と同じ症状——原因は「構造的に不可能」ではなく「instance が単に無い」)。

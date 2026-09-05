@@ -5,6 +5,7 @@ import Mathlib.RingTheory.Henselian
 import Mathlib.Algebra.Polynomial.Eval.Irreducible
 import Mathlib.RingTheory.Polynomial.GaussLemma
 import ABC3.Found.FiniteFieldIrreducible
+import ABC3.Found.PGC.ValuationRingComplete
 
 /-!
 # 不分岐拡大への出発点(スケルトン、`sorry` 無し・現時点では定義のみ)
@@ -818,5 +819,72 @@ theorem exists_isUnramifiedAdjoin {p : ℕ} [Fact p.Prime] (K : PAdicLocalField 
   obtain ⟨g, hgm, hgi, hgd⟩ := ABC3.Found.exists_monic_irreducible_natDegree_eq 𝓀[K.carrier] n hn
   obtain ⟨x, hrank, hu⟩ := exists_isUnramifiedAdjoin_of_irreducible K g hgm hgi
   exact ⟨x, hgd ▸ hrank, hu⟩
+
+
+/-! ## 拡大体側も Henselian——一意性へ向けた準備
+
+不分岐拡大の**一意性**(同じ次数なら一致)を示すには、
+「`𝒪_{K(y)}` の剰余体 `𝔽_{q^n}` にある根を `𝒪_{K(y)}` へ持ち上げる」
+段で `HenselianLocalRing (adjoinIntegers K y)` が要る。基礎体側
+(`henselianLocalRing_carrierIntegers`)と同じ筋——`IsAdic`(進位相=
+距離位相)+ コンパクト性からの完備性 → `IsAdicComplete` →
+`IsAdicComplete.henselianRing`——が拡大体でもそのまま通る。
+
+★配管(記録): `Found/PGC/ValuationRingComplete.lean` の基礎体版は
+`rw [show maximalIdeal ... = Valued.maximalIdeal ... from rfl, ...]` で
+書けたが、拡大体では `↥(adjoinIntegers K x)` と `↥𝒪[K.carrier⟮x⟯]` の
+`CommRing` インスタンス経路が違う(`CommRing.toCommSemiring` と
+`SubsemiringClass.toCommSemiring`)ため `rw` が型検査で落ちる。
+**`▸` の項レベルのキャスト**にすると defeq で通る
+(`tools/lean-idioms.md` #37 の類型)。また `Valued.integer.norm_
+irreducible_pos` 等は `[NontriviallyNormedField K]` を要求するので、
+`letI := nontriviallyNormedField_adjoin K x` を先に置かないと
+インスタンス探索が `whnf` でタイムアウトする。 -/
+
+/-- 拡大体の整数環でも「`maximalIdeal`-進位相 = 距離位相」。 -/
+theorem isAdic_maximalIdeal_adjoinIntegers {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    (x : K.closure) :
+    IsAdic (IsLocalRing.maximalIdeal (adjoinIntegers K x)) := by
+  letI := nontriviallyNormedField_adjoin K x
+  haveI : IsDiscreteValuationRing 𝒪[IntermediateField.adjoin K.carrier ({x} : Set K.closure)] :=
+    isDiscreteValuationRing_adjoinIntegers K x
+  obtain ⟨ϖ, hϖ⟩ := IsDiscreteValuationRing.exists_irreducible
+    𝒪[IntermediateField.adjoin K.carrier ({x} : Set K.closure)]
+  have hϖnorm0 : ‖ϖ‖ ≠ 0 := (Valued.integer.norm_irreducible_pos hϖ).ne'
+  have hϖlt1 : ‖ϖ‖ < 1 := Valued.integer.norm_irreducible_lt_one hϖ
+  have hball := Irreducible.maximalIdeal_pow_eq_closedBall_pow hϖ
+  rw [isAdic_iff]
+  refine ⟨fun n => ?_, fun s hs => ?_⟩
+  · have h1 : IsOpen (Metric.closedBall
+        (0 : 𝒪[IntermediateField.adjoin K.carrier ({x} : Set K.closure)]) (‖ϖ‖ ^ n)) :=
+      IsUltrametricDist.isOpen_closedBall 0 (pow_ne_zero n hϖnorm0)
+    exact (hball n) ▸ h1
+  · rw [Metric.mem_nhds_iff] at hs
+    obtain ⟨ε, hεpos, hεsub⟩ := hs
+    obtain ⟨n, hn⟩ := exists_pow_lt_of_lt_one hεpos hϖlt1
+    refine ⟨n, ?_⟩
+    have h2 : Metric.closedBall
+        (0 : 𝒪[IntermediateField.adjoin K.carrier ({x} : Set K.closure)]) (‖ϖ‖ ^ n) ⊆ s :=
+      (Metric.closedBall_subset_ball hn).trans hεsub
+    exact (hball n) ▸ h2
+
+/-- 拡大体の整数環も `maximalIdeal`-進完備。 -/
+theorem isAdicComplete_adjoinIntegers {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    (x : K.closure) :
+    IsAdicComplete (IsLocalRing.maximalIdeal (adjoinIntegers K x)) (adjoinIntegers K x) := by
+  haveI : CompactSpace (adjoinIntegers K x) := compactSpace_adjoinIntegers K x
+  exact (isAdic_maximalIdeal_adjoinIntegers K x).isAdicComplete_iff.mpr
+    ⟨inferInstance, inferInstance⟩
+
+/-- **拡大体の整数環も Henselian 局所環**。剰余体での単根が
+`adjoinIntegers K x` へ持ち上がる——不分岐拡大の一意性の要。 -/
+instance henselianLocalRing_adjoinIntegers {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    (x : K.closure) : HenselianLocalRing (adjoinIntegers K x) := by
+  haveI := isAdicComplete_adjoinIntegers K x
+  haveI := IsAdicComplete.henselianRing (adjoinIntegers K x)
+    (IsLocalRing.maximalIdeal (adjoinIntegers K x))
+  constructor
+  intro f hf a₀ h0 hu
+  exact HenselianRing.is_henselian f hf a₀ h0 (hu.map (Ideal.Quotient.mk _))
 
 end ABC3.Found.PGC

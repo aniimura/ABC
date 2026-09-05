@@ -512,3 +512,35 @@ n ≠ 0  ⟹  ∃ x : K.closure, [K(x):K] = n ∧ IsUnramifiedAdjoin K x
    `⨆`)と `Gal(K^ur/K) ≅ Gal(𝔽̄_q/𝔽_q) ≅ Ẑ`。
    `Gal(𝔽̄_q/𝔽_q) ≅ Ẑ` そのものは mathlib に不在(2026-09-05 実測)
    なので、Frobenius の位相的生成性から自前で組む必要がある。
+
+## 2026-09-05: 拡大体側も Henselian(一意性への準備)
+
+`Found/PGC/UnramifiedExtension.lean`(すべて sorry 無し):
+- `isAdic_maximalIdeal_adjoinIntegers` : 拡大体の整数環でも
+  「`maximalIdeal`-進位相 = 距離位相」
+- `isAdicComplete_adjoinIntegers` : 同じく `maximalIdeal`-進完備
+- `henselianLocalRing_adjoinIntegers`(instance):
+  **`HenselianLocalRing (adjoinIntegers K x)`**
+
+基礎体版(`ValuationRingComplete.lean`)と同じ筋がそのまま通ったが、
+2 つの配管の違いがあった(`tools/lean-idioms.md` #55 に記録):
+* `↥(adjoinIntegers K x)` と `↥𝒪[K.carrier⟮x⟯]` は `CommRing` の
+  インスタンス**経路**が違う(`CommRing.toCommSemiring` vs
+  `SubsemiringClass.toCommSemiring`)ので `rw` が型検査で落ちる。
+  `▸` の項レベルキャストにすると defeq で通る。
+* `Valued.integer.norm_irreducible_pos` 等は
+  `[NontriviallyNormedField K]` を要求する。拡大体にはこの instance が
+  無いので `letI := nontriviallyNormedField_adjoin K x` を先に置く
+  (置き忘れると `whnf` で 200000 heartbeats タイムアウト)。
+
+### 一意性の残り
+
+`HenselianLocalRing (adjoinIntegers K y)` が揃ったので、classical な
+一意性の議論(「`𝒪_{K(y)}` の剰余体 `𝔽_{q^n}` にある `ḡ` の根を
+Hensel で持ち上げ、`K(x) ⊆ K(y)`、次数が等しいので一致」)の最後の
+道具が入った。残る材料:
+1. 「次数 `n` の既約多項式は `𝔽_{q^n}` に根を持つ」
+   ——`FiniteField.nonempty_algHom_of_finrank_dvd` から出るはず。
+2. `K⟮x'⟯ = K⟮x⟯`(`g` の根はどれも同じ体を生成する)——不分岐拡大が
+   Galois であること(剰余体側が Galois で Hensel の持ち上げが一意)
+   から出る。ここが一番手数が要りそう。
