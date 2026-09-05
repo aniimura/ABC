@@ -604,4 +604,75 @@ theorem thm_2_4_i_m_annihilates {R A B : Type u} [CommRing R] [CommRing A] [Comm
     (LinearMap.ker (KaehlerDifferential.mapBaseChange R A B))).mp hz ⟨ξ, hξ⟩ a ha
   exact congrArg Subtype.val h
 
+/-! ## 「almost 同型」の言葉
+
+Faltings は §3・§4 で *"the map ... is an **almost isomorphism**"* を
+繰り返し使う(`Theorem 2.4(i)`・`4.1(i)`・`4.2(ii)(iii)(vi)`・`4.5(ii)` 等)。
+その形を定義として切り出し、**合成則**まで用意しておく——水準は積になる。 -/
+
+/-- **水準 `c` での almost 同型**——核が `c` で零化され、余核も `c` で
+零化される(= `c·N ⊆ im f`)。 -/
+def AlmostIsoAt {A M N : Type u} [CommRing A] [AddCommGroup M] [Module A M]
+    [AddCommGroup N] [Module A N] (c : A) (f : M →ₗ[A] N) : Prop :=
+  (∀ x : M, f x = 0 → c • x = 0) ∧ (∀ y : N, c • y ∈ LinearMap.range f)
+
+theorem almostIsoAt_id {A M : Type u} [CommRing A] [AddCommGroup M] [Module A M] :
+    AlmostIsoAt (1 : A) (LinearMap.id : M →ₗ[A] M) :=
+  ⟨fun x hx => by rw [one_smul]; exact hx, fun y => ⟨y, by simp⟩⟩
+
+/-- **almost 同型の合成**——水準は積になる。 -/
+theorem almostIsoAt_comp {A M N P : Type u} [CommRing A] [AddCommGroup M] [Module A M]
+    [AddCommGroup N] [Module A N] [AddCommGroup P] [Module A P]
+    (c d : A) (f : M →ₗ[A] N) (g : N →ₗ[A] P)
+    (hf : AlmostIsoAt c f) (hg : AlmostIsoAt d g) :
+    AlmostIsoAt (c * d) (g ∘ₗ f) := by
+  refine ⟨fun x hx => ?_, fun z => ?_⟩
+  · have h1 : d • f x = 0 := hg.1 (f x) hx
+    have h2 : f (d • x) = 0 := by rw [map_smul]; exact h1
+    have h3 : c • (d • x) = 0 := hf.1 _ h2
+    rw [smul_smul] at h3
+    exact h3
+  · obtain ⟨y, hy⟩ := hg.2 z
+    obtain ⟨w, hw⟩ := hf.2 y
+    refine ⟨w, ?_⟩
+    show g (f w) = (c * d) • z
+    rw [hw, map_smul, hy, smul_smul, mul_comm]
+
+/-- 水準は割り切れる方へ緩められる。 -/
+theorem almostIsoAt_of_dvd {A M N : Type u} [CommRing A] [AddCommGroup M] [Module A M]
+    [AddCommGroup N] [Module A N] {c c' : A} (h : c ∣ c') (f : M →ₗ[A] N)
+    (hf : AlmostIsoAt c f) : AlmostIsoAt c' f := by
+  obtain ⟨e, rfl⟩ := h
+  refine ⟨fun x hx => ?_, fun y => ?_⟩
+  · rw [mul_comm, ← smul_smul, hf.1 x hx, smul_zero]
+  · rw [mul_comm, ← smul_smul]
+    exact Submodule.smul_mem _ e (hf.2 y)
+
+open KaehlerDifferential in
+/-- **`Theorem 2.4(i)` を「almost 同型」の言葉で**——原文の
+*"The map `Ω_A ⊗_A B → Ω_B` is an **almost isomorphism**"* そのもの。 -/
+theorem thm_2_4_i_almostIso {R A B : Type u} [CommRing R] [CommRing A] [CommRing B]
+    [Algebra R A] [Algebra A B] [Algebra R B] [IsScalarTower R A B]
+    [Module.Finite A B] [Module.Free A B]
+    (p : A) (hAE : IsAlmostEtaleCovering (A := A) (B := B) p)
+    (hf0inj : letI := awayAlgebra p (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))))
+    (n : ℕ) (w : TensorProduct A B B)
+    (hw : letI := awayAlgebra p (A := A) (B := B)
+      haveI := hAE.2.2.1
+      haveI := (hAE.2.1 : Module.Finite _ _)
+      diagonalCompare p w
+        = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p)
+            (Localization.Away (algebraMap A B p))) :
+    AlmostIsoAt ((p^n) * (p^n))
+      ((KaehlerDifferential.mapBaseChange R A B).restrictScalars A) := by
+  obtain ⟨hker, hcoker⟩ := thm_2_4_i (R := R) p hAE hf0inj n w hw
+  refine ⟨fun x hx => hker x hx, fun y => ?_⟩
+  have h1 := hcoker y
+  rw [algebraMap_smul] at h1
+  obtain ⟨z, hz⟩ := h1
+  refine ⟨(p^n) • z, ?_⟩
+  show KaehlerDifferential.mapBaseChange R A B ((p^n) • z) = ((p^n) * (p^n)) • y
+  rw [(KaehlerDifferential.mapBaseChange R A B).map_smul_of_tower, hz, smul_smul]
+
 end ABC3.Found.Falt1
