@@ -28,10 +28,24 @@ import ABC3.Found.PGC.AdjoinFieldClosure
 `α` は「判定条件を満たす開部分群」の集合を全単射に移し、したがって
 その `sInf` である `I_K` も移る。
 
-★`Found/PGC/AdjoinFieldClosure.lean::absGalFixedFieldEquiv`(`Γ_{L_H} ≅ H`)が
-あるので、第二の仮定は「Prop 1.2 を `L_H` と `L_{α(H)}` に適用する」ことに
-ほかならない——ただし `Γ_{L_H} ≅ H` を**位相群の同型**として使うには
-Krull 位相の比較(`fixingSubgroupEquiv` が同相であること)がもう一段要る。
+## ★★★2026-09-05: 第二の仮定は**消えた**——Cor 1.3 ⟸ Prop 1.2(仮定なし)
+
+上に「`Γ_{L_H} ≅ H` を位相群の同型として使うには Krull 位相の比較
+(`fixingSubgroupEquiv` が同相であること)がもう一段要る」と書いていた。
+その一段が `AdjoinFieldClosure.lean` で付いた
+(`continuous_fixingSubgroupEquiv` / `continuous_fixingSubgroupEquiv_symm` /
+`absGalFixedFieldCME : Γ_{L_H} ≃ₜ* H`)。
+
+したがって **`htr`(第二の仮定)は `htop`(Prop 1.2 そのもの)から従う**
+——`residueCard_transport_of_prop12`。`α` を `H` に制限して
+`Γ_{L_H} ≃ₜ* H ≃ₜ* α(H) ≃ₜ* Γ_{L_{α(H)}}` を作り、そこに Prop 1.2 を当てる。
+これが原文の "By applying Proposition 1.2 to L and H" そのもの。
+
+結論(`inertia_recoverable_of_prop12`):
+
+> **Prop 1.2(`q` が位相群 `Γ_K` から決まる)が成り立てば、Cor 1.3 が成り立つ。**
+
+残るのは Prop 1.2 のみ。
 -/
 
 namespace ABC3.Found.PGC
@@ -133,5 +147,74 @@ theorem inertia_recoverable_of_residueCard_transport
       (subgroupCorrespondence p)).RecoverableFromAbsGal := by
   intro K K' α
   exact transport_inertia_of_residueCard_transport K K' α (htop K K' α) (htr K K' α)
+
+/-- 位相群の同型を部分群に制限したもの。 -/
+noncomputable def subgroupMapCME {G G' : Type*} [Group G] [Group G']
+    [TopologicalSpace G] [TopologicalSpace G'] (α : ContinuousMulEquiv G G')
+    (S : Subgroup G) : ContinuousMulEquiv S (S.map α.toMulEquiv.toMonoidHom) where
+  toMulEquiv := Subgroup.equivMapOfInjective S α.toMulEquiv.toMonoidHom α.injective
+  continuous_toFun := continuous_induced_rng.2 (α.continuous_toFun.comp continuous_subtype_val)
+  continuous_invFun := by
+    refine continuous_induced_rng.2 ?_
+    refine (α.continuous_invFun.comp continuous_subtype_val).congr ?_
+    intro y
+    show α.symm (y : G') = _
+    apply α.injective
+    rw [ContinuousMulEquiv.apply_symm_apply]
+    exact (congrArg Subtype.val
+      ((Subgroup.equivMapOfInjective S α.toMulEquiv.toMonoidHom
+        α.injective).apply_symm_apply y)).symm
+
+/-- **★★★★★★★★★`htr` は Prop 1.2 から従う**——原文の
+"By applying Proposition 1.2 to L and H" そのもの。
+
+`H ≠ ⊤` のとき `L_H = fixedFieldLocalField K H`、`L_{α(H)} = fixedFieldLocalField K' α(H)`
+で、`absGalFixedFieldCME`(`Γ_{L_H} ≃ₜ* H`)と `α` の制限を繋げば
+`Γ_{L_H} ≃ₜ* Γ_{L_{α(H)}}` が得られる。`H = ⊤` のときは `L_⊤ = K` なので
+Prop 1.2 を `K`・`K'` に当てるだけ。 -/
+theorem residueCard_transport_of_prop12
+    (htop : ∀ (K K' : PAdicLocalField p) (_α : ContinuousMulEquiv K.absGal K'.absGal),
+      Nat.card 𝓀[K.carrier] = Nat.card 𝓀[K'.carrier])
+    (K K' : PAdicLocalField p) (α : ContinuousMulEquiv K.absGal K'.absGal)
+    (H : Subgroup K.absGal) (hH : IsOpen (H : Set K.absGal))
+    (hH' : IsOpen ((H.map α.toMulEquiv.toMonoidHom : Subgroup K'.absGal) : Set K'.absGal)) :
+    (residueCardinality p).card ((subgroupCorrespondence p).field K H hH)
+      = (residueCardinality p).card ((subgroupCorrespondence p).field K'
+          (H.map α.toMulEquiv.toMonoidHom) hH') := by
+  classical
+  by_cases hTop : H = ⊤
+  · have h2 : H.map α.toMulEquiv.toMonoidHom = ⊤ := by
+      rw [hTop]; exact Subgroup.map_top_of_surjective _ α.surjective
+    have e1 : (subgroupCorrespondence p).field K H hH = K := if_pos hTop
+    have e2 : (subgroupCorrespondence p).field K' (H.map α.toMulEquiv.toMonoidHom) hH' = K' :=
+      if_pos h2
+    rw [e1, e2]
+    simp only [residueCardinality_card]
+    exact htop K K' α
+  · have h2 : H.map α.toMulEquiv.toMonoidHom ≠ ⊤ := by
+      intro hc
+      apply hTop
+      have hcm := Subgroup.comap_map_eq_self_of_injective
+        (f := α.toMulEquiv.toMonoidHom) α.injective H
+      rw [hc] at hcm
+      rw [← hcm]
+      exact Subgroup.comap_top _
+    have e1 : (subgroupCorrespondence p).field K H hH = fixedFieldLocalField K H hH := if_neg hTop
+    have e2 : (subgroupCorrespondence p).field K' (H.map α.toMulEquiv.toMonoidHom) hH'
+        = fixedFieldLocalField K' (H.map α.toMulEquiv.toMonoidHom) hH' := if_neg h2
+    rw [e1, e2]
+    simp only [residueCardinality_card]
+    exact htop _ _ ((absGalFixedFieldCME K H hH).trans
+      ((subgroupMapCME α H).trans (absGalFixedFieldCME K' _ hH').symm))
+
+/-- **★★★★★★★★★★★★[pGC] Corollary 1.3 ⟸ Proposition 1.2**(他に仮定なし)。
+
+原文の論拠「Prop 1.2 を (L, H) に適用する」を、そのまま Lean の含意にした形。 -/
+theorem inertia_recoverable_of_prop12
+    (htop : ∀ (K K' : PAdicLocalField p) (_α : ContinuousMulEquiv K.absGal K'.absGal),
+      Nat.card 𝓀[K.carrier] = Nat.card 𝓀[K'.carrier]) :
+    (inertiaObject (residueCardinality p)
+      (subgroupCorrespondence p)).RecoverableFromAbsGal :=
+  inertia_recoverable_of_residueCard_transport htop (residueCard_transport_of_prop12 htop)
 
 end ABC3.Found.PGC

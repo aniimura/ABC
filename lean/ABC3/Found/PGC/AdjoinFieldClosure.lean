@@ -208,17 +208,75 @@ theorem continuous_fixingSubgroupEquiv {F Ω : Type*} [Field F] [Field Ω] [Alge
   intro z hz
   exact (IntermediateField.mem_fixingSubgroup_iff _ _).mp hσ (z : Ω) hz
 
-/-- **`H → Γ_{L_H}` は連続な群準同型**——`Γ_{L_H} ≃ₜ* H` の順方向。
+/-- **★★★★★逆向きも連続**。
 
-逆向き(`Γ_{L_H} → H` の連続性)には、`F` 上有限次の中間体 `E''` に対して
-`E` 上有限次の `E'`(例えば `E(γ)`、`E'' = F(γ)`)を取る一手が要る——次の課題。 -/
-noncomputable def fixedFieldToAbsGalHom (K : PAdicLocalField p) (H : Subgroup K.absGal)
+`F` 上有限次の `E''` に対して `E` 上有限次の `E'` を取ればよい。原始元を
+取る必要はない——**合成体 `E ⊔ E''`** を `extendScalars` で `E` 上の中間体と
+見れば、`E/F`・`E''/F` がともに有限次なので `E ⊔ E''` も有限次
+(`IntermediateField.finiteDimensional_sup`)、したがって `E` 上も有限次。 -/
+theorem continuous_fixingSubgroupEquiv_symm {F Ω : Type*} [Field F] [Field Ω] [Algebra F Ω]
+    (E : IntermediateField F Ω) [FiniteDimensional F E] :
+    Continuous (E.fixingSubgroupEquiv.symm) := by
+  refine continuous_of_continuousAt_one (E.fixingSubgroupEquiv.symm).toMonoidHom ?_
+  rw [ContinuousAt, map_one, Filter.tendsto_def]
+  intro s hs
+  rw [nhds_subtype, Filter.mem_comap] at hs
+  obtain ⟨t, ht, hts⟩ := hs
+  obtain ⟨E'', hfin, hsub⟩ := (krullTopology_mem_nhds_one_iff F Ω t).mp ht
+  haveI := hfin
+  set E' : IntermediateField (↥E) Ω :=
+    IntermediateField.extendScalars (le_sup_left : E ≤ E ⊔ E'') with hE'
+  haveI hF : FiniteDimensional F ↥E' := by
+    show FiniteDimensional F ↥(IntermediateField.extendScalars (le_sup_left : E ≤ E ⊔ E''))
+    exact (inferInstance : FiniteDimensional F ↥(E ⊔ E''))
+  haveI : FiniteDimensional (↥E) ↥E' := Module.Finite.of_restrictScalars_finite F (↥E) ↥E'
+  rw [krullTopology_mem_nhds_one_iff]
+  refine ⟨E', inferInstance, ?_⟩
+  intro σ hσ
+  apply hts
+  show (E.fixingSubgroupEquiv.symm σ : Ω ≃ₐ[F] Ω) ∈ t
+  apply hsub
+  rw [SetLike.mem_coe, IntermediateField.mem_fixingSubgroup_iff]
+  intro z hz
+  have hmem : z ∈ E' := by
+    rw [hE', IntermediateField.mem_extendScalars]
+    exact (le_sup_right : E'' ≤ E ⊔ E'') hz
+  exact (IntermediateField.mem_fixingSubgroup_iff _ _).mp hσ z hmem
+
+/-- **`E.fixingSubgroup ≃ₜ* Gal(Ω/E)`**——部分空間位相と Krull 位相の一致。 -/
+noncomputable def fixingSubgroupContinuousMulEquiv {F Ω : Type*} [Field F] [Field Ω] [Algebra F Ω]
+    (E : IntermediateField F Ω) [FiniteDimensional F E] :
+    ContinuousMulEquiv (E.fixingSubgroup) (Ω ≃ₐ[E] Ω) where
+  toMulEquiv := E.fixingSubgroupEquiv
+  continuous_toFun := continuous_fixingSubgroupEquiv E
+  continuous_invFun := continuous_fixingSubgroupEquiv_symm E
+
+/-- 等しい部分群の間の同一視は同相。 -/
+noncomputable def subgroupCongrContinuousMulEquiv {G : Type*} [Group G] [TopologicalSpace G]
+    {H₁ H₂ : Subgroup G} (h : H₁ = H₂) : ContinuousMulEquiv H₁ H₂ where
+  toMulEquiv := MulEquiv.subgroupCongr h
+  continuous_toFun := continuous_induced_rng.2 continuous_subtype_val
+  continuous_invFun := continuous_induced_rng.2 continuous_subtype_val
+
+/-- **★★★★★★★★★★`Γ_{L_H} ≃ₜ* H`——位相群の同型として**。
+
+`absGalFixedFieldEquiv`(群同型)の位相版。第 992 の
+`inertia_recoverable_of_residueCard_transport` が第二仮定として要求していた形。
+
+三段の合成:
+1. `absGalFixedFieldContinuousEquiv`(代数閉包の同一視、第 993)
+2. `fixingSubgroupContinuousMulEquiv` の逆(部分空間位相 = Krull 位相)
+3. `InfiniteGalois.fixingSubgroup_fixedField`(閉部分群の Galois 対応) -/
+noncomputable def absGalFixedFieldCME (K : PAdicLocalField p) (H : Subgroup K.absGal)
     (hH : IsOpen (H : Set K.absGal)) :
-    ContinuousMonoidHom ((IntermediateField.fixedField H).fixingSubgroup)
-      (K.closure ≃ₐ[(IntermediateField.fixedField H)] K.closure) where
-  toMonoidHom := (IntermediateField.fixedField H).fixingSubgroupEquiv.toMonoidHom
-  continuous_toFun := by
-    haveI := finiteDimensional_fixedField_of_isOpen K H hH
-    exact continuous_fixingSubgroupEquiv (IntermediateField.fixedField H)
+    ContinuousMulEquiv (fixedFieldLocalField K H hH).absGal H := by
+  haveI := isGalois_closure K
+  haveI := finiteDimensional_fixedField_of_isOpen K H hH
+  have hclosed : IsClosed (H : Set K.absGal) := Subgroup.isClosed_of_isOpen H hH
+  have h2 : (IntermediateField.fixedField H).fixingSubgroup = H :=
+    InfiniteGalois.fixingSubgroup_fixedField (⟨H, hclosed⟩ : ClosedSubgroup K.absGal)
+  exact ((absGalFixedFieldContinuousEquiv K H hH).trans
+    (fixingSubgroupContinuousMulEquiv (IntermediateField.fixedField H)).symm).trans
+    (subgroupCongrContinuousMulEquiv h2)
 
 end ABC3.Found.PGC

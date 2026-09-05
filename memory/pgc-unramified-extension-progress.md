@@ -1998,3 +1998,29 @@ Krull 位相の比較(`fixingSubgroupEquiv` が同相であること)がもう�
 これが付けば `Γ_{L_H} ≃ₜ* H` が完成し、第 992 の
 `inertia_recoverable_of_residueCard_transport` の第二仮定が
 「Prop 1.2 を L_H に適用する」に完全一致する。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05: **Cor 1.3 ⟸ Prop 1.2**(他に仮定なし)
+
+`Found/PGC/AdjoinFieldClosure.lean` + `Found/PGC/InertiaTransport.lean`。
+
+### 1. `Γ_{L_H} ≃ₜ* H`(位相群の同型)が完成
+
+- `continuous_fixingSubgroupEquiv`(順方向、`E/F` 有限次)——**塔**
+  (`E'.restrictScalars F` は `F` 上も有限次)
+- `continuous_fixingSubgroupEquiv_symm`(逆方向)——**合成体**
+  `E ⊔ E''` を `extendScalars` で `E` 上の中間体と見る
+  (`IntermediateField.finiteDimensional_sup` + `Module.Finite.of_restrictScalars_finite`)。
+  ★原始元定理は要らなかった。
+- `fixingSubgroupContinuousMulEquiv` / `subgroupCongrContinuousMulEquiv`
+- **`absGalFixedFieldCME : Γ_{L_H} ≃ₜ* H`**
+
+### 2. これで第二の仮定が消えた
+
+`InertiaTransport.lean` の `transport_inertia_of_residueCard_transport` は
+`htop`(Prop 1.2)と `htr`(各開部分群での `q` の移送)を要求していたが、
+**`htr` は `htop` から従う**(`residueCard_transport_of_prop12`)——
+`α` を `H` に制限して `Γ_{L_H} ≃ₜ* H ≃ₜ* α(H) ≃ₜ* Γ_{L_{α(H)}}` を作り、
+そこに Prop 1.2 を当てる。これが原文の
+"By applying Proposition 1.2 to L and H" そのもの。
+
+**`inertia_recoverable_of_prop12`**: Prop 1.2 ⟹ Cor 1.3。**残るのは Prop 1.2 のみ**。
