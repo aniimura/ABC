@@ -6261,3 +6261,28 @@ descendPieceRModel X U hU C α R' h
 
 検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
 Found側sorry 0件。集計は引き続き10/24——§4は引き続き0/2。
+
+### 2026-09-05夜さらに続き55 — 橋を環同型にした(型の等式より使える形)
+
+続き54の`descendPieceRModel_eq_quotient_map`は**型の等式**だった。
+`IsOpenImmersion`のような性質を移すには型の等式で`▸`するより
+**環同型**の方が扱いやすい(型の等式で`▸`すると`CommRing`インスタンスの
+移送で詰まる)。そこで環同型版を追加した(`ExtLimit.lean`の
+`descendPieceRModel_ringEquivQuotientMap`、6.4秒):
+
+```
+descendPieceRModel X U hU C α R' h ≃+*
+  (MvPolynomial (Fin n) (Γ(X.left,U) ⊗[ℚ] R'.1) ⧸
+    Ideal.map (MvPolynomial.map (algebraMap …)) (Ideal.span (Set.range q₀)))
+```
+
+証明は mathlib の`Ideal.quotEquivOfEq`にイデアルの等式
+(`ideal_map_mvPolynomial_span_range`、続き52)を渡すだけ。
+
+これで、`Ideal.map … I`の言葉で書かれている既存の`f_open`
+(`descendPieceR_localization_isOpenImmersion`)と底変換
+(`exists_descendPieceR_localization_baseChange`)を、
+`descendPieceRModel`の言葉へ**同型で移せる**ようになった。
+
+検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
+Found側sorry 0件。集計は引き続き10/24——§4は引き続き0/2。

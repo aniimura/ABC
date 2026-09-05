@@ -4529,6 +4529,60 @@ theorem descendPieceRModel_eq_quotient_map (X : Over BaseK) (U : X.left.Opens)
       (Subalgebra.inclusion h)).toRingHom
       (pieceAlgebra_relation_descend_q₀ X U hU C α)).symm
 
+open scoped TensorProduct Classical in
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 800000 in
+/-- ★**`descendPieceRModel_eq_quotient_map`の環同型版**——型の等式より
+こちらの方が使いやすい(`IsOpenImmersion`のような性質は同型で移せるが、
+型の等式で`▸`すると`CommRing`インスタンスの移送で詰まる)。
+
+`Ideal.quotEquivOfEq`(mathlib)にイデアルの等式
+(`ideal_map_mvPolynomial_span_range`)を渡すだけ。
+
+★**sorry 無し**。標準3公理のみ。 -/
+noncomputable def descendPieceRModel_ringEquivQuotientMap (X : Over BaseK) (U : X.left.Opens)
+    (hU : IsAffineOpen U) (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α]
+    (R' : FgSubalgebra ℚ ℝ) (h : pieceAlgebra_relation_descend_R X U hU C α ≤ R') :
+    letI := pieceAlgebra X U hU
+    letI algU : Algebra (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+      ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+        (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.comp
+        (pieceRingEquiv X U hU).symm.toRingHom).toAlgebra
+    haveI : Algebra.Etale (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+      piece_algebraEtale_tensor X U hU C α
+    haveI : Algebra.FinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ)
+        Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) := inferInstance
+    letI hCR' : CommRing (Γ(X.left, U) ⊗[ℚ] R'.1) := inferInstance
+    letI algRR' : Algebra (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1)
+        (Γ(X.left, U) ⊗[ℚ] R'.1) :=
+      (Algebra.TensorProduct.map (AlgHom.id ℚ Γ(X.left, U))
+        (Subalgebra.inclusion h)).toRingHom.toAlgebra
+    descendPieceRModel X U hU C α R' h ≃+*
+      (MvPolynomial (Fin (Algebra.Presentation.ofFinitePresentationVars (Γ(X.left, U) ⊗[ℚ] ℝ)
+          Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)))) (Γ(X.left, U) ⊗[ℚ] R'.1) ⧸
+        Ideal.map (MvPolynomial.map (algebraMap
+          (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1)
+          (Γ(X.left, U) ⊗[ℚ] R'.1)))
+          (Ideal.span (Set.range (pieceAlgebra_relation_descend_q₀ X U hU C α)))) := by
+  letI := pieceAlgebra X U hU
+  letI algU : Algebra (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+      (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.comp
+      (pieceRingEquiv X U hU).symm.toRingHom).toAlgebra
+  haveI : Algebra.Etale (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    piece_algebraEtale_tensor X U hU C α
+  haveI : Algebra.FinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ)
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) := inferInstance
+  letI hCR' : CommRing (Γ(X.left, U) ⊗[ℚ] R'.1) := inferInstance
+  letI algRR' : Algebra (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1)
+      (Γ(X.left, U) ⊗[ℚ] R'.1) :=
+    (Algebra.TensorProduct.map (AlgHom.id ℚ Γ(X.left, U))
+      (Subalgebra.inclusion h)).toRingHom.toAlgebra
+  exact Ideal.quotEquivOfEq (ideal_map_mvPolynomial_span_range
+    (Algebra.TensorProduct.map (AlgHom.id ℚ Γ(X.left, U))
+      (Subalgebra.inclusion h)).toRingHom
+    (pieceAlgebra_relation_descend_q₀ X U hU C α)).symm
+
 open scoped TensorProduct in
 open scoped Classical in
 set_option maxHeartbeats 1000000 in

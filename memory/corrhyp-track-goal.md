@@ -2858,3 +2858,15 @@ failed to synthesize HasQuotient になる(idiom #40 のパターン)。
 同じ GlueData へ入れられる。
 
 集計は10/24——§4は0/2。
+
+## 2026-09-05夜さらに続き55 — 橋を環同型にした
+
+ExtLimit.lean の descendPieceRModel_ringEquivQuotientMap(6.4秒)。
+続き54 は型の等式だったが、IsOpenImmersion のような性質を移すには環同型の
+方が扱いやすい(型の等式で ▸ すると CommRing インスタンスの移送で詰まる)。
+証明は Ideal.quotEquivOfEq にイデアルの等式(続き52)を渡すだけ。
+
+これで Ideal.map … I の言葉で書かれた既存の f_open と底変換を
+descendPieceRModel の言葉へ同型で移せる。
+
+集計は10/24——§4は0/2。
