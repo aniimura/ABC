@@ -444,7 +444,7 @@ theorem min_avg_le_sum_min {r : ℕ} (hr : 0 < r) (m : Fin r → ℝ) (hm : ∀ 
 `Module.equiv_directSum_of_isTorsion` の出力(`⨁ i : ι, R ⧸ R∙p^e`)の
 長さを計算するのに使う。 -/
 theorem length_pi_fin {R : Type*} [Ring R] :
-    ∀ (r : ℕ) (N : Fin r → Type v) (_ : ∀ i, AddCommGroup (N i)) (_ : ∀ i, Module R (N i)),
+    ∀ (r : ℕ) (N : Fin r → Type*) (_ : ∀ i, AddCommGroup (N i)) (_ : ∀ i, Module R (N i)),
       Module.length R (∀ i, N i) = ∑ i, Module.length R (N i) := by
   intro r
   induction r with
