@@ -574,6 +574,61 @@ theorem quot_annihilated_of_conductor_subalgebra {V B : Type*} [CommRing V] [Com
   rw [← hω, ← Submodule.Quotient.mk_smul, Submodule.Quotient.mk_eq_zero]
   exact smul_mem_of_conductor_subalgebra A P hA b hbA hb ω
 
+/-! #### ★原文の 2 本の写像に当てはめる(2026-09-05)
+
+原文の合成を Kähler 微分の標準写像に取る:
+
+* `f := KaehlerDifferential.mapBaseChange Vₙ Wₙ W_{n+1}`
+  (`Ω_{Wₙ/Vₙ} ⊗ W_{n+1} → Ω_{W_{n+1}/Vₙ}`)
+* `g := KaehlerDifferential.map Vₙ V_{n+1} W_{n+1} W_{n+1}`
+  (`Ω_{W_{n+1}/Vₙ} → Ω_{W_{n+1}/V_{n+1}}`)
+
+このとき**合成の像は `Wₙ` の元の微分をすべて含む**ので、`derivPreimage`
+が部分代数であることと合わせて、節点 B の `hA` は
+`Algebra.adjoin V_{n+1} (range (algebraMap Wₙ W_{n+1}))`
+——原文の `A = Wₙ ⊗_{Vₙ} V_{n+1}` の像そのもの——の上で**自動的に**
+満たされる。したがって節点 B は「`b` がこの部分代数の導手に入る」
+という**環のレベルの条件だけ**に帰着する。 -/
+
+/-- 合成の像は `Wₙ` の元の微分を含む。 -/
+theorem D_mem_range_comp {Vn Vn1 Wn Wn1 : Type*} [CommRing Vn] [CommRing Vn1] [CommRing Wn]
+    [CommRing Wn1] [Algebra Vn Vn1] [Algebra Vn Wn] [Algebra Vn Wn1] [Algebra Vn1 Wn1]
+    [Algebra Wn Wn1] [IsScalarTower Vn Vn1 Wn1] [IsScalarTower Vn Wn Wn1]
+    (w : Wn) :
+    KaehlerDifferential.D Vn1 Wn1 (algebraMap Wn Wn1 w)
+      ∈ LinearMap.range ((KaehlerDifferential.map Vn Vn1 Wn1 Wn1) ∘ₗ
+          (KaehlerDifferential.mapBaseChange Vn Wn Wn1)) := by
+  refine ⟨(1 : Wn1) ⊗ₜ[Wn] (KaehlerDifferential.D Vn Wn w), ?_⟩
+  simp only [LinearMap.coe_comp, Function.comp_apply]
+  rw [KaehlerDifferential.mapBaseChange_tmul, one_smul, KaehlerDifferential.map_D,
+    KaehlerDifferential.map_D]
+  simp
+
+/-- **`Wₙ ⊗_{Vₙ} V_{n+1}` の像は `derivPreimage` に入る**——`derivPreimage`
+が部分代数なので生成元(`Wₙ` の像)で確かめれば足りる。 -/
+theorem adjoin_le_derivPreimage_comp {Vn Vn1 Wn Wn1 : Type*} [CommRing Vn] [CommRing Vn1]
+    [CommRing Wn] [CommRing Wn1] [Algebra Vn Vn1] [Algebra Vn Wn] [Algebra Vn Wn1]
+    [Algebra Vn1 Wn1] [Algebra Wn Wn1] [IsScalarTower Vn Vn1 Wn1] [IsScalarTower Vn Wn Wn1] :
+    Algebra.adjoin Vn1 (Set.range (algebraMap Wn Wn1))
+      ≤ derivPreimage (LinearMap.range ((KaehlerDifferential.map Vn Vn1 Wn1 Wn1) ∘ₗ
+          (KaehlerDifferential.mapBaseChange Vn Wn Wn1))) := by
+  refine Algebra.adjoin_le ?_
+  rintro _ ⟨w, rfl⟩
+  exact D_mem_range_comp w
+
+/-- **★節点 B、原文の設定での完成形**——`b` が
+`Wₙ ⊗_{Vₙ} V_{n+1}` の像の導手に入れば、合成の余核を零化する。
+これが `Thm12StepData` の `hbann` にそのまま入る。 -/
+theorem hbann_of_conductor_tower {Vn Vn1 Wn Wn1 : Type*} [CommRing Vn] [CommRing Vn1]
+    [CommRing Wn] [CommRing Wn1] [Algebra Vn Vn1] [Algebra Vn Wn] [Algebra Vn Wn1]
+    [Algebra Vn1 Wn1] [Algebra Wn Wn1] [IsScalarTower Vn Vn1 Wn1] [IsScalarTower Vn Wn Wn1]
+    (b : Wn1)
+    (hbA : b ∈ Algebra.adjoin Vn1 (Set.range (algebraMap Wn Wn1)))
+    (hb : ∀ y : Wn1, b * y ∈ Algebra.adjoin Vn1 (Set.range (algebraMap Wn Wn1))) :
+    ∀ z : (Ω[Wn1⁄Vn1] ⧸ LinearMap.range ((KaehlerDifferential.map Vn Vn1 Wn1 Wn1) ∘ₗ
+        (KaehlerDifferential.mapBaseChange Vn Wn Wn1))), b • z = 0 :=
+  quot_annihilated_of_conductor_subalgebra _ _ adjoin_le_derivPreimage_comp b hbA hb
+
 /-! #### ★(B2) への接続——導手の元が (B1) の仮定を与える
 
 mathlib の `conductor R x = {b : S | ∀ y : S, b·y ∈ R[x]}` は
@@ -1671,6 +1726,69 @@ theorem thm_1_2 (d : ℕ) (δ : ℕ → ℝ) (h0 : ∀ n, 0 ≤ δ n)
     (S : ∀ n, Thm12StepData.{u} d (δ n) (δ (n + 1))) :
     Tendsto δ atTop (nhds 0) :=
   thm_1_2_of_steps d δ h0 (fun n => (S n).key)
+
+/-- **★環の塔の 1 段から `Thm12StepData` を作る**——原文の 2 本の写像を
+Kähler 微分の標準写像に取り、節点 B は**環のレベルの導手条件**
+(`hbA`・`hb`)だけで済む(`hbann_of_conductor_tower`)。
+
+残りの入力は原文の各文にそのまま対応する:
+
+* `gN₀`/`hspanN₀`——`Ω_{W_{n+1}/Vₙ}` が `d+1` 個の元で生成される。
+* `φ`/`hφ`——第 2 写像の核が `(W_{n+1}/pW_{n+1})^{d+1}` を商に持つ(塔の仮定)。
+* `gc`/`hspanc`——余核が `d+1` 個の元で生成される。
+* `hM`/`hN`/`hbl`——`Lemma 1.1` と `length(R/p^α) = α·e`。 -/
+noncomputable def thm12StepData_of_tower
+    {Vn Vn1 Wn Wn1 : Type u} [CommRing Vn] [CommRing Vn1] [CommRing Wn] [CommRing Wn1]
+    [Algebra Vn Vn1] [Algebra Vn Wn] [Algebra Vn Wn1] [Algebra Vn1 Wn1] [Algebra Wn Wn1]
+    [IsScalarTower Vn Vn1 Wn1] [IsScalarTower Vn Wn Wn1]
+    [IsLocalRing Wn1] [IsNoetherianRing Wn1]
+    [Module.Finite Wn1 (TensorProduct Wn Wn1 (Ω[Wn⁄Vn]))]
+    [IsArtinian Wn1 (TensorProduct Wn Wn1 (Ω[Wn⁄Vn]))]
+    [IsNoetherian Wn1 (TensorProduct Wn Wn1 (Ω[Wn⁄Vn]))]
+    [IsArtinian Wn1 (Ω[Wn1⁄Vn])] [IsNoetherian Wn1 (Ω[Wn1⁄Vn])]
+    [IsArtinian Wn1 (Ω[Wn1⁄Vn1])] [IsNoetherian Wn1 (Ω[Wn1⁄Vn1])]
+    (d e : ℕ) (he : 0 < e)
+    (p : Wn1) (hp : Ideal.span ({p} : Set Wn1) = (IsLocalRing.maximalIdeal Wn1) ^ e)
+    (gN₀ : Fin (d + 1) → Ω[Wn1⁄Vn])
+    (hspanN₀ : Submodule.span Wn1 (Set.range gN₀) = ⊤)
+    (φ : ↥(LinearMap.ker (KaehlerDifferential.map Vn Vn1 Wn1 Wn1)) →ₗ[Wn1]
+      (Fin (d + 1) → Wn1 ⧸ Ideal.span ({p} : Set Wn1)))
+    (hφ : Function.Surjective φ)
+    (gc : Fin (d + 1) → (Ω[Wn1⁄Vn1] ⧸ LinearMap.range
+      ((KaehlerDifferential.map Vn Vn1 Wn1 Wn1) ∘ₗ
+        (KaehlerDifferential.mapBaseChange Vn Wn Wn1))))
+    (hspanc : Submodule.span Wn1 (Set.range gc) = ⊤)
+    (b : Wn1)
+    (hbA : b ∈ Algebra.adjoin Vn1 (Set.range (algebraMap Wn Wn1)))
+    (hb : ∀ y : Wn1, b * y ∈ Algebra.adjoin Vn1 (Set.range (algebraMap Wn Wn1)))
+    (hbfin : Module.length Wn1 (Wn1 ⧸ Ideal.span ({b} : Set Wn1)) ≠ ⊤)
+    (δn δn1 : ℝ)
+    (hM : lenR Wn1 (TensorProduct Wn Wn1 (Ω[Wn⁄Vn])) = δn * (e : ℝ))
+    (hN : lenR Wn1 (Ω[Wn1⁄Vn1]) = δn1 * (e : ℝ))
+    (hbl : lenR Wn1 (Wn1 ⧸ Ideal.span ({b} : Set Wn1)) = (δn - δn1) * (e : ℝ)) :
+    Thm12StepData.{u} d δn δn1 where
+  R := Wn1
+  M := TensorProduct Wn Wn1 (Ω[Wn⁄Vn])
+  N₀ := Ω[Wn1⁄Vn]
+  N := Ω[Wn1⁄Vn1]
+  f := KaehlerDifferential.mapBaseChange Vn Wn Wn1
+  g := KaehlerDifferential.map Vn Vn1 Wn1 Wn1
+  e := e
+  he := he
+  p := p
+  hp := hp
+  gN₀ := gN₀
+  hspanN₀ := hspanN₀
+  φ := φ
+  hφ := hφ
+  gc := gc
+  hspanc := hspanc
+  b := b
+  hbann := hbann_of_conductor_tower b hbA hb
+  hbfin := hbfin
+  hM := hM
+  hN := hN
+  hbl := hbl
 
 /-- **非空虚性(非退化)**——`Thm12StepData 0 1 0` の実例。
 `R = ZMod 4`、`k = R/(2)`、`M = N₀ = k`、`N = 0`、`b = 2`。
