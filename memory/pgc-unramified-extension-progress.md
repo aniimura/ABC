@@ -764,3 +764,26 @@ normal で `f_K` が分裂するから `z ∈ K(y)`、同様に `K(z) = K(y)`。
 これで [pGC] Proposition 1.2 が `Γ_K^ab` の群構造から読み取る二つの量の
 うち、**`q`(=`|𝓀|` = `𝓀^×` の位数 +1)** の入口が付いた。残るのは
 第二因子 `1+𝔪_K`(pro-p 群)の `ℤ_p`-階数が `[K:ℚ_p]` であること。
+
+## ★★★★2026-09-05: 主単数群は加法群と同型——第二因子の構造
+
+新規 `Found/PGC/PrincipalUnitsLog.lean`(sorry 無し):
+- `smallBall K : AddSubgroup K.carrier`(半径 `1/4` の球)
+- `smallPrincipalUnits K : Subgroup (K.carrier)ˣ`(`‖u-1‖ ≤ 1/4`)
+- `padicLogUnitsHom` / `padicLogUnitsHom_bijective` /
+  **`padicLogUnitsEquiv : smallPrincipalUnits K ≃* Multiplicative (smallBall K)`**
+
+既存の `padicLog_bijOn`(半径 `1/4` の球からそれ自身への全単射、
+Banach の不動点定理経由)と `padicLog_mul`
+(`log((1+x)(1+y)) = log(1+x)+log(1+y)`)を組み合わせるだけ。
+
+これで `𝒪_K^× ≅ 𝓀^× × (1+𝔪_K)` の**両因子**の構造が付いた:
+* 第一因子 `𝓀^×` = 位数 `q-1` の巡回群 ⟹ **`q` が読める**
+* 第二因子 `1+𝔪_K` ≅(十分小さい層で)加法群 `𝔪_K` ⟹ `ℤ_p`-加群として
+  階数 `[K:ℚ_p]` ⟹ **`[K:ℚ_p]` が読める**(階数の取り出しは未形式化)
+
+★配管(`tools/lean-idioms.md` #56): MCP REPL の `lean_start` に**独立した
+2 つのプロジェクトルート**を渡すと、起動は成功と報告されるのに mathlib
+ごと読み込みに失敗する(`‖x‖` が `expected token` になる)。起動時間が
+半分以下なのが手がかり。モジュールは 1 つにすること。olean 未ビルドの
+モジュールを渡した場合も同じ無言の失敗になる。

@@ -4885,3 +4885,25 @@ grep -n "^theorem exists_fg\|^theorem exists_mvPolynomial\|^theorem mem_ideal\|^
 から`descend2`を`A := A'`で使えばよい。
 `(map (id A') (val R)) ∘ (map φ (id R)) = map φ (val R)`
 (`Algebra.TensorProduct.map_comp`+`id_comp`/`comp_id`)がその根拠。
+
+## 56. MCP REPL の `lean_start` に**独立した 2 つのルート**を渡すと mathlib ごと読み込みに失敗する(無言)
+
+`lean_start` に `["ABC3.Found.PGC.UnramifiedExtension",
+"ABC3.Found.PGC.PadicLogSurjective"]` のように、互いに import 関係の無い
+2 モジュールを渡すと、**起動は成功したと報告される**(「起動して import を
+読み込んだ (5.0 秒)」)のに、環境には mathlib すら入っていない。症状は
+
+* `‖x‖` が `expected token`(ノルム記法が無い)
+* 与えたモジュールの宣言が `Unknown identifier`
+
+起動時間が通常(11〜12 秒)の半分以下なのが唯一の手がかり。
+`lean_reset` しても直らない。
+
+対処: **`lean_start` のモジュールは 1 つにする**(必要なら、両方を import
+する薄いファイルを先に作って `lake build` し、それを 1 つだけ渡す)。
+mathlib のモジュールを併記するのは問題ない
+(`["ABC3.Found.PGC.UnramifiedExtension", "Mathlib.FieldTheory.…"]` は動く)
+——壊れるのはプロジェクト側のルートが 2 つ以上のとき。
+
+なお、そもそも olean が未ビルドのモジュールを渡した場合も同じ無言の失敗に
+なる(`lake build <module>` を先に通すこと)。
