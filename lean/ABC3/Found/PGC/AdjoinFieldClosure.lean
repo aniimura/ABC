@@ -112,4 +112,64 @@ noncomputable def absGalFixedFieldEquiv (K : PAdicLocalField p) (H : Subgroup K.
     (IntermediateField.fixingSubgroupEquiv (IntermediateField.fixedField H)).symm).trans
     (MulEquiv.subgroupCongr h2)
 
+/-! ## `AlgEquiv.autCongr` は Krull 位相で連続
+
+`Found/PGC/GaloisTransferContinuous.lean::continuous_galMulEquivOf`(第 969)は
+「二つの p進局所体の**台**の同型から誘導される `Γ_K ≃ Γ_{K'}` は連続」を
+言っていた。ここで要るのはその双対——**台は同じで代数閉包が違う**場合。
+
+一般に、`F`-代数の同型 `e : Ω₁ ≃ₐ[F] Ω₂` から誘導される
+`AlgEquiv.autCongr e : Gal(Ω₁/F) ≃* Gal(Ω₂/F)` は連続である。
+証明は第 969 と同じ形だが、原始元定理の代わりに
+`IntermediateField.map` で有限次中間体を引き戻せばよく、**より短い**。 -/
+
+/-- **★★★★★`AlgEquiv.autCongr e` は連続**——`F`-代数の同型 `e : Ω₁ ≃ₐ[F] Ω₂`
+から誘導される `Gal(Ω₁/F) → Gal(Ω₂/F)`。 -/
+theorem continuous_autCongr {F Ω₁ Ω₂ : Type*} [Field F] [Field Ω₁] [Field Ω₂]
+    [Algebra F Ω₁] [Algebra F Ω₂] (e : Ω₁ ≃ₐ[F] Ω₂) :
+    Continuous (AlgEquiv.autCongr e) := by
+  refine continuous_of_continuousAt_one (AlgEquiv.autCongr e).toMonoidHom ?_
+  rw [ContinuousAt, map_one, Filter.tendsto_def]
+  intro s hs
+  obtain ⟨E₂, hE₂fin, hE₂sub⟩ := (krullTopology_mem_nhds_one_iff F Ω₂ s).mp hs
+  haveI := hE₂fin
+  rw [krullTopology_mem_nhds_one_iff]
+  refine ⟨IntermediateField.map (e.symm : Ω₂ →ₐ[F] Ω₁) E₂, ?_, ?_⟩
+  · exact (IntermediateField.equivMap E₂ (e.symm : Ω₂ →ₐ[F] Ω₁)).toLinearEquiv.finiteDimensional
+  · intro g hg
+    apply hE₂sub
+    rw [SetLike.mem_coe] at hg ⊢
+    rw [IntermediateField.mem_fixingSubgroup_iff] at hg ⊢
+    intro z hz
+    have hgz : g ((e.symm : Ω₂ →ₐ[F] Ω₁) z) = (e.symm : Ω₂ →ₐ[F] Ω₁) z := hg _ ⟨z, hz, rfl⟩
+    show e (g (e.symm z)) = z
+    rw [show g (e.symm z) = e.symm z from hgz, AlgEquiv.apply_symm_apply]
+
+/-- **★★★★★`autCongr` は位相群の同型**。 -/
+noncomputable def autCongrContinuousMulEquiv {F Ω₁ Ω₂ : Type*} [Field F] [Field Ω₁] [Field Ω₂]
+    [Algebra F Ω₁] [Algebra F Ω₂] (e : Ω₁ ≃ₐ[F] Ω₂) :
+    ContinuousMulEquiv (Ω₁ ≃ₐ[F] Ω₁) (Ω₂ ≃ₐ[F] Ω₂) where
+  toMulEquiv := AlgEquiv.autCongr e
+  continuous_toFun := continuous_autCongr e
+  continuous_invFun := by
+    show Continuous (⇑(AlgEquiv.autCongr e).symm)
+    rw [AlgEquiv.autCongr_symm]
+    exact continuous_autCongr e.symm
+
+/-- 代数閉包の同一視は**位相群**の同型を与える:
+`Γ_{K(x)} = Gal((K(x))‾/K(x)) ≃ₜ* Gal(K‾/K(x))`。 -/
+noncomputable def absGalAdjoinFieldContinuousEquiv (K : PAdicLocalField p) (x : K.closure) :
+    ContinuousMulEquiv ((adjoinField K x).closure ≃ₐ[(adjoinField K x).carrier]
+        (adjoinField K x).closure)
+      (K.closure ≃ₐ[(adjoinField K x).carrier] K.closure) :=
+  autCongrContinuousMulEquiv (closureEquivAdjoinField K x)
+
+/-- 同じく固定体の側。 -/
+noncomputable def absGalFixedFieldContinuousEquiv (K : PAdicLocalField p) (H : Subgroup K.absGal)
+    (hH : IsOpen (H : Set K.absGal)) :
+    ContinuousMulEquiv ((fixedFieldLocalField K H hH).closure
+        ≃ₐ[(fixedFieldLocalField K H hH).carrier] (fixedFieldLocalField K H hH).closure)
+      (K.closure ≃ₐ[(fixedFieldLocalField K H hH).carrier] K.closure) :=
+  autCongrContinuousMulEquiv (closureEquivFixedField K H hH)
+
 end ABC3.Found.PGC

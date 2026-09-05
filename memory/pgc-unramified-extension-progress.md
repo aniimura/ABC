@@ -1951,3 +1951,27 @@ Lubin-Tate 塔は `K(Λ_n)/K(Λ_{n-1})` という**相対的な**拡大の連な
 ほかならない。ただし `Γ_{L_H} ≅ H` を**位相群の同型**として使うには
 Krull 位相の比較(`fixingSubgroupEquiv` が同相であること)がもう一段要る
 ——次の課題。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05: `AlgEquiv.autCongr` は Krull 位相で連続
+
+`Found/PGC/AdjoinFieldClosure.lean` に追加。
+
+第 969 の `continuous_galMulEquivOf` は「二つの p進局所体の**台**の同型から
+誘導される `Γ_K ≃ Γ_{K'}` は連続」だった。ここで要るのはその双対
+——**台は同じで代数閉包が違う**場合。
+
+- **`continuous_autCongr`** : `F`-代数の同型 `e : Ω₁ ≃ₐ[F] Ω₂` から誘導される
+  `AlgEquiv.autCongr e : Gal(Ω₁/F) → Gal(Ω₂/F)` は連続。
+  ★証明は第 969 と同じ形だが、**原始元定理の代わりに `IntermediateField.map`
+  で有限次中間体を引き戻せばよく、はるかに短い**
+  (`IntermediateField.equivMap` で有限次性も移る)。
+- `autCongrContinuousMulEquiv` : 位相群の同型として
+- `absGalAdjoinFieldContinuousEquiv` / `absGalFixedFieldContinuousEquiv` :
+  代数閉包の同一視の位相群版
+
+### `Γ_{L_H} ≃ₜ* H` に残る一段
+
+`IntermediateField.fixingSubgroupEquiv E : E.fixingSubgroup ≃* Gal(Ω/E)` が
+**同相**であること(部分空間位相 vs Krull 位相)。これが付けば第 992 の
+`inertia_recoverable_of_residueCard_transport` の第二仮定が
+「Prop 1.2 を L_H に適用する」に完全に一致する。
