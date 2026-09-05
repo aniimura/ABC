@@ -1595,6 +1595,52 @@ theorem piece_isLocalization_basicOpen_mul (X : Over BaseK) (U : X.left.Opens) (
   exact (piece_preimage_isAffineOpen X (X.left.basicOpen f) hUf C α).isLocalization_basicOpen
     (piece_basicOpen_localizationElem X U f g C α)
 
+open CategoryTheory AlgebraicGeometry Limits in
+/-- `piece_basicOpen_localizationElem`の**一般化**——`D(f)`の中の`D(f*g)`
+ではなく、**アフィン開`U`の中の`D(g)`**を扱う。`f_open`(`GlueData`の
+`f i j`の開埋め込み性)を、`V (i,j)`が`U i`の基本開集合である場合に
+得るための土台。 -/
+noncomputable def piece_basicOpen_elem (X : Over BaseK) (U : X.left.Opens) (g : Γ(X.left, U))
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) :
+    Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+  α.app (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+    ((pullback.fst X.hom toBaseK).app U g)
+
+open CategoryTheory AlgebraicGeometry Limits in
+/-- **`C`側の片`piece(D(g))`は`piece(U)`の基本開そのもの**——
+`piece_basicOpen_mul_eq`の一般化(`Scheme.preimage_basicOpen`を2回)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem piece_basicOpen_eq (X : Over BaseK) (U : X.left.Opens) (g : Γ(X.left, U))
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) :
+    (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen g)) : C.Opens)
+      = C.basicOpen (piece_basicOpen_elem X U g C α) := by
+  have h1 : (pullback.fst X.hom toBaseK ⁻¹ᵁ (X.left.basicOpen g) : (ExtF.obj X).left.Opens)
+      = (ExtF.obj X).left.basicOpen ((pullback.fst X.hom toBaseK).app U g) :=
+    Scheme.preimage_basicOpen _ _
+  rw [h1]
+  exact Scheme.preimage_basicOpen _ _
+
+open CategoryTheory AlgebraicGeometry Limits in
+/-- **`Γ(C,piece(D(g)))`は`Γ(C,piece(U))`の`Away`局所化**——
+`piece_isLocalization_basicOpen_mul`の一般化。`piece(U)`のアフィン性
+(`piece_preimage_isAffineOpen`)に`IsAffineOpen.isLocalization_basicOpen`
+(mathlib)を当てるだけ。`piece_basicOpen_eq`と組み合わせれば
+(`▸`で開集合の等式を渡す)`piece(D(g))`自体についての
+`IsLocalization.Away`になる。
+
+**なぜ「組み合わせ」を1本の補題にしないか**(記録): `Γ(C, W)`の
+`Γ(C, W')`-代数構造は開の包含ごとに別物なので、開集合の等式で`rw`すると
+`Algebra`インスタンスが合わず`failed to synthesize`になる。既存の
+`_mul`版も同じ理由で2本に分けてある。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem piece_isLocalization_basicOpen (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U)
+    (g : Γ(X.left, U)) (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] :
+    IsLocalization.Away (piece_basicOpen_elem X U g C α)
+      Γ(C, C.basicOpen (piece_basicOpen_elem X U g C α)) :=
+  (piece_preimage_isAffineOpen X U hU C α).isLocalization_basicOpen _
+
 /-! ## `piece_basicOpen_localizationElem`の`R`レベルへの持ち上げ
 (`2026-09-05夜、続き20`)
 

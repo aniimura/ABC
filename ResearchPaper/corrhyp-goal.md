@@ -6082,3 +6082,34 @@ AlgebraicGeometry.exists_basicOpen_le_affine_inter
 
 検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
 Found側sorry 0件。集計は引き続き10/24——§4は引き続き0/2。
+
+### 2026-09-05夜さらに続き49 — `f_open`の土台を「`U`の中の`D(g)`」へ一般化した
+
+既存の`piece_basicOpen_localizationElem`/`piece_basicOpen_mul_eq`/
+`piece_isLocalization_basicOpen_mul`は「`D(f)`の中の`D(f*g)`」専用だった。
+`GlueData`の`f i j : V (i,j) ⟶ U i`で`V (i,j)`が`U i`の基本開集合である
+場合を扱うには「**アフィン開`U`の中の`D(g)`**」の形が要るので、3本を
+一般化して追加した(`ExtLimit.lean`、0.13秒):
+
+- `piece_basicOpen_elem X U g C α : Γ(C, piece U)` — 局所化パラメータ
+- `piece_basicOpen_eq` — `piece(D(g)) = C.basicOpen (piece_basicOpen_elem …)`
+  (`Scheme.preimage_basicOpen`を2回)
+- `piece_isLocalization_basicOpen` — `Γ(C, C.basicOpen …)`が`Away`局所化
+  (`piece_preimage_isAffineOpen`＋mathlibの
+  `IsAffineOpen.isLocalization_basicOpen`)
+
+**なぜ「組み合わせ」を1本にしないか(記録)**: `Γ(C, W)`の
+`Γ(C, W')`-代数構造は開の包含ごとに別物なので、開集合の等式で`rw`すると
+`Algebra`インスタンスが合わず`failed to synthesize`になる
+(実際に試して確認した)。既存の`_mul`版も同じ理由で2本に分かれている。
+
+**現在の`f_open`の見取り図**:
+`V (i,j) = X.left.basicOpen g`(`g ∈ Γ(X.left, U i)`)であれば
+`Γ(C, piece(V))`は`Γ(C, piece(U i))`の`Away`局所化 →
+`descendPieceR_localization_isOpenImmersion`(既存)で`R'`レベルの
+`Spec`が開埋め込み、という道筋が立つ。残るのは
+「`V (i,j)`を`U i`の基本開集合として**取れる**被覆の構成」であり、
+続き48の`exists_basicOpen_le_affine_inter`(mathlib)がその材料。
+
+検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
+Found側sorry 0件。集計は引き続き10/24——§4は引き続き0/2。

@@ -2760,3 +2760,24 @@ affine_inter という語で引くと出る。
 であって「基本開で覆える」ではないので、まだ段差は残る。得たのは道具の1つ。
 
 集計は10/24——§4は0/2。
+
+## 2026-09-05夜さらに続き49 — f_open の土台を「U の中の D(g)」へ一般化
+
+既存の piece_basicOpen_localizationElem 系は「D(f) の中の D(f*g)」専用
+だったので、「アフィン開 U の中の D(g)」の形へ一般化して3本追加
+(ExtLimit.lean、0.13秒):
+- piece_basicOpen_elem(局所化パラメータ)
+- piece_basicOpen_eq: piece(D(g)) = C.basicOpen (elem)
+- piece_isLocalization_basicOpen: Γ(C, C.basicOpen elem) が Away 局所化
+
+なぜ組み合わせを1本にしないか(記録): Γ(C,W) の Γ(C,W')-代数構造は開の
+包含ごとに別物なので、開の等式で rw すると Algebra インスタンスが合わず
+failed to synthesize になる(実際に試して確認)。既存の _mul 版も同じ理由。
+
+f_open の見取り図: V(i,j) = basicOpen g(g ∈ Γ(X.left, U i))であれば
+Γ(C,piece V) は Γ(C,piece U i) の Away 局所化 →
+descendPieceR_localization_isOpenImmersion(既存)で R' レベルの Spec が
+開埋め込み。残るのは「V(i,j) を U i の基本開として取れる被覆の構成」で、
+続き48 の exists_basicOpen_le_affine_inter がその材料。
+
+集計は10/24——§4は0/2。
