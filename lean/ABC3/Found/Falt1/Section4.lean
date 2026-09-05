@@ -38,9 +38,16 @@ import ABC3.Found.Falt1.AlmostDerivation
 
 ## `Theorem 4.1(i)` について
 
-(i) は `Ω̄`(`p` 進完備化した微分)と `R̄[1/p]` を含むので、完備化の
-枠組みを別途用意する必要がある。抽象的な内容自体は `thm_2_4_i`
-(核・余核が `m` で零化される)そのものである。
+★**訂正(2026-09-05)**: 以前ここに「(i) は `Ω̄`(`p` 進完備化した微分)を
+含むので完備化の枠組みが要る」と書いていたが、**誤りだった**——原典を
+260dpi で描画して逐語確認した結果、bar は `Ω` ではなく**添字の
+`R`・`V`** に付いており(`Ω_{R̄/V̄}`)、`p` 進完備化ではない。
+必要なのは通常の Kähler 微分と局所化 `R̄[1/p]` だけである。
+
+その抽象的な内容 —— *"almost 同型は `[1/p]` を取ると本物の同型になる"*
+—— は `thm_4_1_i_localized` で証明した(`localizedModule_map_bijective`
+＋ `thm_2_4_i`)。残るのは `R∞`(単元の `p` 冪根を添加した塔)の設定と
+`dlog(uᵢ)` を基底とする明示計算である。
 -/
 
 namespace ABC3.Found.Falt1
@@ -177,6 +184,24 @@ example :
   refine thm_4_1_ii (R := ℤ) (5 : Polynomial ℤ) hAE thm_4_1_nonvacuous_hf0inj 1
     ((5 : Polynomial ℤ)^1 • Algebra.FormallyUnramified.elem
       (Polynomial ℤ) (Fin 2 → Polynomial ℤ)) ?_ thm_4_1_nonvacuous_notors
+  letI := awayAlgebra (5 : Polynomial ℤ) (A := Polynomial ℤ) (B := Fin 2 → Polynomial ℤ)
+  haveI := hAE.2.2.1
+  haveI := (hAE.2.1 : Module.Finite _ _)
+  rw [map_smul, diagonalCompare_elem_eq]
+
+open KaehlerDifferential in
+/-- **`thm_4_1_i_localized` の非空虚性**——同じ具体例
+(`R = ℤ`・`A = ℤ[X]`・`B = Fin 2 → A`・`p = 5`)で、`25` を反転すると
+`Ω[A⁄R] ⊗_A B → Ω[B⁄R]` が**本物の全単射**になる。 -/
+example : Function.Bijective (LocalizedModule.map
+    (Submonoid.powers (algebraMap (Polynomial ℤ) (Fin 2 → Polynomial ℤ)
+      ((5 : Polynomial ℤ) ^ 1 * (5 : Polynomial ℤ) ^ 1)))
+    (KaehlerDifferential.mapBaseChange ℤ (Polynomial ℤ) (Fin 2 → Polynomial ℤ))) := by
+  have hAE : IsAlmostEtaleCovering (A := Polynomial ℤ) (B := Fin 2 → Polynomial ℤ)
+      (5 : Polynomial ℤ) := isAlmostEtaleCovering_of_etale_general _
+  refine thm_4_1_i_localized (R := ℤ) (5 : Polynomial ℤ) hAE thm_4_1_nonvacuous_hf0inj 1
+    ((5 : Polynomial ℤ) ^ 1 • Algebra.FormallyUnramified.elem
+      (Polynomial ℤ) (Fin 2 → Polynomial ℤ)) ?_
   letI := awayAlgebra (5 : Polynomial ℤ) (A := Polynomial ℤ) (B := Fin 2 → Polynomial ℤ)
   haveI := hAE.2.2.1
   haveI := (hAE.2.1 : Module.Finite _ _)
