@@ -1,5 +1,6 @@
 import ABC3.Found.Falt1.AlmostDerivation
 import Mathlib.Data.ZMod.Basic
+import Mathlib.Algebra.Algebra.Subalgebra.Directed
 
 /-!
 # [Falt1] `Theorem 2.3` への第 1 段——almost 冪等元の持ち上げ(2026-09-05)
@@ -572,5 +573,62 @@ theorem commutator_leibniz {A N : Type u} [CommRing A] [AddCommGroup N] [Module 
   rw [map_sub, map_sub, LinearMap.sub_apply]
   rw [hassoc x a y, hassoc x y a, hassoc a x y]
   abel
+
+/-! ## 最終段——`C_σ = A + p^{5σ}·B_σ` の増大列とその合併
+
+原文の
+
+> *Consider the subalgebras `C_σ = A + p^{5σ}B_σ ⊆ B̃[1/p]`. If `σ < ε/2`
+> then `C_ε ⊆ C_σ`. ... If we choose a sequence `εₙ` with `ε_{n+1} < εₙ/2`,
+> the corresponding `C_{εₙ}`'s form an increasing sequence. If `B̃` denotes
+> their union, `B̃ ⊗_A B̃` contains `m·e_{B̃/A}`, hence `B̃` is the required
+> lifting of `B`.*
+
+の骨格。`A + c·B` が部分代数になるのは
+`(a + cb)(a' + cb') = aa' + c(ab' + a'b + cbb')` から。増大性は
+`c ∈ c'·B` から出る(`σ < ε/2` のときの `p^{5ε} ∈ p^{5σ}·B` に対応)。 -/
+
+/-- **`C_σ := A + c·B`**——Faltings `Theorem 2.3` 最終段の部分代数。 -/
+def scaledSubalgebra {A B : Type u} [CommRing A] [CommRing B] [Algebra A B] (c : B) :
+    Subalgebra A B where
+  carrier := {x | ∃ (a : A) (b : B), x = algebraMap A B a + c * b}
+  mul_mem' := by
+    rintro _ _ ⟨a, b, rfl⟩ ⟨a', b', rfl⟩
+    exact ⟨a * a', algebraMap A B a * b' + algebraMap A B a' * b + c * (b * b'),
+      by rw [map_mul]; ring⟩
+  add_mem' := by
+    rintro _ _ ⟨a, b, rfl⟩ ⟨a', b', rfl⟩
+    exact ⟨a + a', b + b', by rw [map_add]; ring⟩
+  algebraMap_mem' := fun a => ⟨a, 0, by rw [mul_zero, add_zero]⟩
+
+@[simp] theorem mem_scaledSubalgebra {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    (c x : B) :
+    x ∈ scaledSubalgebra (A := A) c ↔ ∃ (a : A) (b : B), x = algebraMap A B a + c * b :=
+  Iff.rfl
+
+/-- **増大性**——`c ∈ c'·B` なら `A + c·B ⊆ A + c'·B`
+(原文の *"If `σ < ε/2` then `C_ε ⊆ C_σ`"*)。 -/
+theorem scaledSubalgebra_mono {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    (c c' : B) (h : ∃ d : B, c = c' * d) :
+    scaledSubalgebra (A := A) c ≤ scaledSubalgebra (A := A) c' := by
+  obtain ⟨d, rfl⟩ := h
+  rintro _ ⟨a, b, rfl⟩
+  exact ⟨a, d * b, by ring⟩
+
+/-- **増大列の合併**——原文の *"the corresponding `C_{εₙ}`'s form an
+increasing sequence. If `B̃` denotes their union..."*。 -/
+theorem mem_iSup_scaledSubalgebra {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    (c : ℕ → B) (hmono : ∀ n, ∃ d : B, c n = c (n+1) * d) (x : B) :
+    x ∈ (⨆ n, scaledSubalgebra (A := A) (c n)) ↔ ∃ n, x ∈ scaledSubalgebra (A := A) (c n) := by
+  have hmono' : Monotone (fun n => scaledSubalgebra (A := A) (c n)) :=
+    monotone_nat_of_le_succ (fun n => scaledSubalgebra_mono _ _ (hmono n))
+  have hcoe := Subalgebra.coe_iSup_of_directed hmono'.directed_le
+  constructor
+  · intro hx
+    have hx' : x ∈ (↑(⨆ n, scaledSubalgebra (A := A) (c n)) : Set B) := hx
+    rw [hcoe] at hx'
+    simpa using hx'
+  · rintro ⟨n, hn⟩
+    exact le_iSup (fun n => scaledSubalgebra (A := A) (c n)) n hn
 
 end ABC3.Found.Falt1
