@@ -4865,3 +4865,57 @@ AlgebraicGeometry`、`Γ(X, U)`のparse error)になる。
 対応)を`exists_fg_subalgebra_tensor_quotientMvPolynomial_lift`で構成し、
 `exists_mvPolynomial_quotient_specIso_descend`へ渡す。集計は引き続き
 10/24——§4は引き続き0/2だが、`t`の`D(f)`側という最大の部品が完成した。
+
+## 2026-09-05夜さらに続き16: `ψ`機械の**底環の食い違い**を発見し、
+その解消に要る降下補題を完成させた
+
+続き15で`D(f)`側が書けたので`D(g)`側へ進もうとしたところ、
+**設計上の食い違い**を発見した:
+
+`exists_mvPolynomial_quotient_specIso_descend`(`ψ`・`ψ'`の機械)は
+```
+(A : Type) ... (q : κ → MvPolynomial ι (A ⊗[ℚ] R.1))
+             (q₂ : κ' → MvPolynomial ι' (A ⊗[ℚ] R₂.1))
+```
+と**単一の`A`**を要求する。ところが我々の2つの表示は、
+`D(f)`側が`A_f := Γ(X.left, D(f))`、`D(g)`側が`A_g := Γ(X.left, D(g))`
+という**別々の底環**の上にある。`ψ'`の向きの環準同型
+(`MvPolynomial ι'(A_g⊗R')⧸… → MvPolynomial ι(A_f⊗R')⧸…`)を作るには
+`A_g → (A_f側の商)`という写像が要るが、そのままでは存在しない。
+
+**解消の道筋(見立て)**: `A₃ := Γ(X.left, D(f*g))`は`A_f`の`g`による
+局所化`A_f[1/g]`である。一方`D(f)`側の平坦化表示`F₁`は、局所化関係式
+`rename Sum.inr p₀ * X(Sum.inl ()) = 1`を**明示的に持っている**ので
+`p₀`の像は`F₁`で単元である。そして`p₀`は`h₂`(=`g`の像)の持ち上げ
+(`hp₀`)なので、「`g⊗1`の像が`F₁`で単元」が言えれば`F₁`は
+**`A₃⊗R'`-代数**になり、両側が`A₃`の上に乗って既存の機械がそのまま
+使える。
+
+ただし`hp₀`が与える一致は**ℝへ底変換した後**の一致なので、これを
+有限段階(`R'`を少し大きくした`R''`)へ降ろす必要がある——そこで
+今回、その道具を`FieldLimit.lean`に用意した(commit `5c642cca`、
+いずれも`sorry`無し、`lake build ABC3.Found.CorrHyp.Instance4`0エラー):
+
+- `mvPolynomial_map_val_inclusion_comp`:
+  `map (val R'.1) ∘ map (inclusion hR) = map (val R.1)`という配管
+  (`Subalgebra.val ∘ Subalgebra.inclusion = Subalgebra.val`が`rfl`で
+  あることを`Algebra.TensorProduct.map_comp`+`MvPolynomial.map_map`で
+  持ち上げるだけ)。
+- `exists_fgSubalgebra_mvPolynomial_ideal_mem_descend`:
+  **ℝレベルでイデアルに属していれば、`R`を大きくすれば`R'`レベルでも
+  属する**。`A⊗[ℚ]ℝ = colim_R (A⊗[ℚ]R.1)`がフィルター余極限であること
+  の実用形。証明は(1)`Ideal.mem_span_range_iff_exists_fun`でℝレベルの
+  線形結合を取り出し、(2)係数を`exists_fg_subalgebra_tensor_
+  mvPolynomial_finset`で単一の`R₁`へ降ろし、(3)`R' := R ⊔ R₁`へ送り、
+  (4)`ℚ`が体だから`A⊗R.1 → A⊗ℝ`は単射(既存の
+  `mvPolynomial_map_algebraTensorMap_val_injective`)なので降ろした
+  等式が`R'`レベルで既に成り立つ、という4手。
+
+この補題は`ψ`・`ψ'`の4つの仮説(`hψ`・`hψ'`・`hround1`・`hround2`、
+いずれも「ℝレベルでイデアルに属する」形)を実際に検証する場面でも
+そのまま使える——`t`の構成の**両方の難所**に効く道具である。
+集計は引き続き10/24——§4は引き続き0/2。
+
+**次の一手**: 「`g⊗1`の像が`F₁`で単元」を、`hp₀`+今回の降下補題で
+実際に証明する。そこまで行けば`F₁`が`A₃⊗R''`-代数になり、`D(g)`側も
+同様に扱えて、両側が共通の底`A₃`の上に乗る。

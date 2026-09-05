@@ -2162,3 +2162,29 @@ lake build ABC3は0エラーを返し、その状態のREPLは「空の環境」
 両側が揃ったらψ・ψ'をexists_fg_subalgebra_tensor_quotientMvPolynomial_
 liftで構成しexists_mvPolynomial_quotient_specIso_descendへ渡す。
 集計は引き続き10/24——§4は0/2だがtのD(f)側という最大の部品が完成。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き16
+設計上の食い違いを発見: exists_mvPolynomial_quotient_specIso_descend
+(ψ・ψ'の機械)は単一のAを要求するが、我々の2つの表示はD(f)側が
+A_f := Γ(X.left,D(f))、D(g)側がA_g := Γ(X.left,D(g))という別々の底環の
+上にある。ψ'の向きの環準同型を作るにはA_g →(A_f側の商)が要るが無い。
+
+解消の見立て: A₃ := Γ(X.left,D(f*g)) = A_f[1/g]。D(f)側の平坦化表示F₁は
+局所化関係式 rename Sum.inr p₀ * X(Sum.inl ()) = 1 を明示的に持つので
+p₀の像は単元。p₀はh₂(=gの像)の持ち上げ(hp₀)なので「g⊗1の像がF₁で
+単元」が言えればF₁はA₃⊗R'-代数になり両側が共通の底A₃に乗る。ただし
+hp₀の一致はℝ底変換後なので有限段階へ降ろす必要がある。
+
+その道具を完成(commit 5c642cca、sorry無し、Instance4ビルド0エラー):
+- mvPolynomial_map_val_inclusion_comp(map val ∘ map inclusion = map val)
+- exists_fgSubalgebra_mvPolynomial_ideal_mem_descend
+  (ℝレベルでイデアルに属せばRを大きくしてR'レベルでも属する。
+   A⊗ℚℝ = colim_R(A⊗ℚR.1)のフィルター余極限性の実用形。証明4手:
+   mem_span_range_iff_exists_fun → 係数をR₁へ降ろす → R⊔R₁ →
+   A⊗R.1→A⊗ℝの単射性)
+
+この補題はψ・ψ'の4仮説(hψ/hψ'/hround1/hround2、いずれも「ℝレベルで
+イデアルに属する」形)の検証にもそのまま使える。tの構成の両方の難所に
+効く道具。集計は引き続き10/24——§4は0/2。
+
+次の一手: 「g⊗1の像がF₁で単元」をhp₀+今回の降下補題で証明する。
