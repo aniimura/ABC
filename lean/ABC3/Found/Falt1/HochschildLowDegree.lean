@@ -307,4 +307,118 @@ theorem rescale_multiplicative {A B C : Type u} [CommRing A] [CommRing B] [CommR
 表示・倍化・一意性・整合性)は、その層の上でそのまま再利用できる。
 -/
 
+/-! ## `H³` ——`Theorem 2.3` の結合律の障害(2026-09-05 追記)
+
+`Theorem 2.3` の証明は、乗法 `m_ε : B_ε ⊗_A B_ε → B_ε` の**結合律**の障害
+
+    b₀[m_ε(b₁, m_ε(b₂,b₃)) − m_ε(m_ε(b₁,b₂),b₃)]b₄ ∈ Kern(B_ε → B)
+
+が `H³(B/Ā)` の類を定める、という段を含む(原文:*"(That we get a cycle
+amounts to a five-term identity well known in the study of associativity.)"*)。
+
+縮約ホモトピーは `H²` と**まったく同じ形**である:`w = Σᵢ xᵢ⊗yᵢ` に対し
+
+    h(b₁,b₂) := Σᵢ xᵢ·F(yᵢ, b₁, b₂)
+
+が `t·F = δh` を与える。3-コサイクル条件
+
+    v·F(b₁,b₂,b₃) − F(vb₁,b₂,b₃) + F(v,b₁b₂,b₃) − F(v,b₁,b₂b₃) + b₃·F(v,b₁,b₂) = 0
+
+を `(yᵢ,b₁,b₂,b₃)` で使って `xᵢ` 倍して和を取ると、annihilation と
+augmentation がそれぞれ `H²` のときと同じ役割を果たす。 -/
+
+/-- homotopy `h(b₁,b₂) := Σᵢ xᵢ·F(yᵢ,b₁,b₂)` の台になる双線形写像。 -/
+noncomputable def hochH3Bil {A B M : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [AddCommGroup M] [Module B M] [Module A M] [IsScalarTower A B M]
+    (F : B →ₗ[A] B →ₗ[A] B →ₗ[A] M) : B →ₗ[A] B →ₗ[A] (B →ₗ[A] B →ₗ[A] M) :=
+  LinearMap.mk₂ A (fun u v => LinearMap.compr₂ (F v) ((LinearMap.lsmul B M u).restrictScalars A))
+    (by intro u u' v; ext b b'; simp)
+    (by intro a u v; ext b b'; simp)
+    (by intro u v v'; ext b b'; simp)
+    (by intro a u v; ext b b'; simp)
+
+@[simp]
+theorem hochH3Bil_apply {A B M : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [AddCommGroup M] [Module B M] [Module A M] [IsScalarTower A B M]
+    (F : B →ₗ[A] B →ₗ[A] B →ₗ[A] M) (u v b₁ b₂ : B) :
+    (TensorProduct.lift (hochH3Bil F)) (u ⊗ₜ[A] v) b₁ b₂ = u • F v b₁ b₂ := rfl
+
+/-- **鍵の恒等式(次数 3)**——`hochH2_identity` と同じ形。 -/
+theorem hochH3_identity {A B M : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [AddCommGroup M] [Module B M] [Module A M] [IsScalarTower A B M]
+    (F : B →ₗ[A] B →ₗ[A] B →ₗ[A] M)
+    (hF : ∀ v b₁ b₂ b₃ : B, v • F b₁ b₂ b₃ - F (v*b₁) b₂ b₃ + F v (b₁*b₂) b₃
+      - F v b₁ (b₂*b₃) + b₃ • F v b₁ b₂ = 0)
+    (b₁ b₂ b₃ : B) (z : TensorProduct A B B) :
+    b₁ • (TensorProduct.lift (hochH3Bil F) z) b₂ b₃
+      - (TensorProduct.lift (hochH3Bil F) z) (b₁*b₂) b₃
+      + (TensorProduct.lift (hochH3Bil F) z) b₁ (b₂*b₃)
+      - b₃ • (TensorProduct.lift (hochH3Bil F) z) b₁ b₂
+    = (Algebra.TensorProduct.lmul' A z) • F b₁ b₂ b₃
+      + (TensorProduct.lift (hochH3Bil F) ((b₁ ⊗ₜ[A] (1:B)) * z)) b₂ b₃
+      - (TensorProduct.lift (hochH3Bil F) (((1:B) ⊗ₜ[A] b₁) * z)) b₂ b₃ := by
+  induction z using TensorProduct.induction_on with
+  | zero => simp
+  | tmul u v =>
+    rw [Algebra.TensorProduct.tmul_mul_tmul, Algebra.TensorProduct.tmul_mul_tmul,
+      Algebra.TensorProduct.lmul'_apply_tmul]
+    show b₁ • (u • F v b₂ b₃) - u • F v (b₁*b₂) b₃ + u • F v b₁ (b₂*b₃)
+        - b₃ • (u • F v b₁ b₂)
+      = (u*v) • F b₁ b₂ b₃ + (b₁*u) • F (1*v) b₂ b₃ - (1*u) • F (b₁*v) b₂ b₃
+    have h := hF v b₁ b₂ b₃
+    have h2 := congrArg (fun m : M => u • m) h
+    simp only [smul_sub, smul_add, smul_zero, smul_smul] at h2
+    rw [one_mul, one_mul, mul_comm b₁ v]
+    rw [smul_smul, smul_smul, mul_comm b₁ u, mul_comm b₃ u]
+    linear_combination (norm := abel) -h2
+  | add z z' hz hz' =>
+    simp only [map_add, mul_add, LinearMap.add_apply, smul_add, add_smul]
+    linear_combination (norm := abel) hz + hz'
+
+/-- **`H³` の almost 消滅、明示形**。witness `w` があれば、任意の
+Hochschild 3-コサイクル `F` について `t·F` はコバウンダリであり、
+homotopy は `h := lift (hochH3Bil F) w` で**陽に**与えられる。 -/
+theorem hochschild_H3_almost_coboundary {A B M : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [AddCommGroup M] [Module B M] [Module A M] [IsScalarTower A B M]
+    (t : A) (w : TensorProduct A B B)
+    (hw_ann : ∀ q : B, (1 ⊗ₜ[A] q - q ⊗ₜ[A] 1) * w = 0)
+    (hw_aug : Algebra.TensorProduct.lmul' A w = t • (1 : B))
+    (F : B →ₗ[A] B →ₗ[A] B →ₗ[A] M)
+    (hF : ∀ v b₁ b₂ b₃ : B, v • F b₁ b₂ b₃ - F (v*b₁) b₂ b₃ + F v (b₁*b₂) b₃
+      - F v b₁ (b₂*b₃) + b₃ • F v b₁ b₂ = 0) :
+    ∃ h : B →ₗ[A] B →ₗ[A] M, ∀ b₁ b₂ b₃ : B,
+      t • F b₁ b₂ b₃ = b₁ • h b₂ b₃ - h (b₁*b₂) b₃ + h b₁ (b₂*b₃) - b₃ • h b₁ b₂ := by
+  refine ⟨TensorProduct.lift (hochH3Bil F) w, fun b₁ b₂ b₃ => ?_⟩
+  have hid := hochH3_identity F hF b₁ b₂ b₃ w
+  have hcancel : ((b₁ ⊗ₜ[A] (1:B)) * w) = (((1:B) ⊗ₜ[A] b₁) * w) := by
+    have h0 := hw_ann b₁
+    rw [sub_mul, sub_eq_zero] at h0
+    exact h0.symm
+  rw [hcancel, hw_aug] at hid
+  rw [hid, Algebra.smul_def, mul_one, ← algebraMap_smul B t (F b₁ b₂ b₃)]
+  abel
+
+/-- `Definition 2.1` の仮定から直接述べた形(`H³`)。 -/
+theorem hochschild_H3_almost_coboundary_of_isAlmostEtale {A B M : Type u}
+    [CommRing A] [CommRing B] [Algebra A B] [Module.Free A B]
+    [AddCommGroup M] [Module B M] [Module A M] [IsScalarTower A B M]
+    (p : A) (hAE : IsAlmostEtaleCovering (A := A) (B := B) p)
+    (hf0inj : letI := awayAlgebra p (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))))
+    (n : ℕ) (w : TensorProduct A B B)
+    (hw : letI := awayAlgebra p (A := A) (B := B)
+      haveI := hAE.2.2.1
+      haveI := (hAE.2.1 : Module.Finite _ _)
+      diagonalCompare p w
+        = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p)
+            (Localization.Away (algebraMap A B p)))
+    (F : B →ₗ[A] B →ₗ[A] B →ₗ[A] M)
+    (hF : ∀ v b₁ b₂ b₃ : B, v • F b₁ b₂ b₃ - F (v*b₁) b₂ b₃ + F v (b₁*b₂) b₃
+      - F v b₁ (b₂*b₃) + b₃ • F v b₁ b₂ = 0) :
+    ∃ h : B →ₗ[A] B →ₗ[A] M, ∀ b₁ b₂ b₃ : B,
+      (p ^ n) • F b₁ b₂ b₃ = b₁ • h b₂ b₃ - h (b₁*b₂) b₃ + h b₁ (b₂*b₃) - b₃ • h b₁ b₂ :=
+  hochschild_H3_almost_coboundary (p ^ n) w
+    (fun q => almost_swap_annihilate p hAE hf0inj (p ^ n) w hw q)
+    (almost_swap_augment p hAE hf0inj (p ^ n) w hw) F hF
+
 end ABC3.Found.Falt1
