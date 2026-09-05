@@ -1524,3 +1524,43 @@ normal でない有限拡大 ⟹ 固定部分群が**正規でない開部分群
 `φ : ℤ ≃+ ℤ` が `φ(g₀ • n) = (c g₀ c⁻¹) • φ n` を満たすことは不可能:
 左辺 = `φ 0 = 0`、右辺 = `φ n`(`c g₀ c⁻¹ ≠ g₀`)なので `φ ≡ 0`、
 `AddEquiv` に反する。
+
+## ★★★★★★★★★★★★★★★★★★★2026-09-05: Proposition 2.2 も偽だった——`SMul` は「加群」ではない
+
+`Check/PGC/Prop22Degenerate.lean`(新規)+ `Skeleton/PGC/Section2.lean` の修理。
+
+原文は「Γ_K-**加群**」と言うのに、旧形は作用を **`SMul`**
+(`one_smul` も `mul_smul` も `smul_add` も要求しない公理ゼロのクラス)で
+受け取っていた。
+
+**反例**(`prop_2_2_statement_false`、sorry 無し):
+- `Γ_{ℚ_p}` 非可換(第 975)から `c g₀ c⁻¹ ≠ g₀`
+- `IntKbar K := ℤ`、`g • n := if HEq g g₀ then 0 else n`
+- `α := c による共役`(`conjContinuousEquiv`、位相群なので連続)
+- `φ (g₀ • 1) = 0` かつ `= φ 1` ⟹ `φ 1 = 0`、同型に反する
+
+★**非可換性を本質的に使う**——可換なら `c g₀ c⁻¹ = g₀` で右辺も潰れる。
+`RefutationAttempts.lean` の「非正規な部分群が要る」はこのこと。
+
+**修理**: `RecoverableAsAddModule` の作用を `SMul` → **`DistribMulAction`**
+(原文の「Γ_K-加群」)に強めた。病的な作用は `MulAction` ですらないので塞がる
+(`g₀ • (g₀⁻¹ • n) = 0 ≠ n`)。`K.closure` への自然な作用は
+`closureDistribMulAction` として満たす。
+
+★配管: `Check/PGC/RefutationAttempts.lean` に既に `conjEquiv` があったので
+`conjContinuousEquiv` に改名(`environment already contains ..._proof_1`)。
+`SMul` を返す `def` は `@[implicit_reducible]` を付けないと警告が出る。
+
+### §1〜§4 の棚卸し(2026-09-05 終了時)
+
+| 項目 | 旧形の状態 | 対応 |
+|---|---|---|
+| Prop 1.1 | 未解決(局所 Tate 双対性) | — |
+| Prop 1.2 | 未解決(相互律ちょうど一つ) | 材料は本日大量に構築 |
+| Cor 1.3 | `I_K` の構成は本物と確認 | 判定条件の正しさ + `I_K = Gal(K̄/K^ur)` |
+| Prop 2.1 | 未解決 | 作用のクラスを `DistribMulAction` に |
+| Prop 2.2 | **偽**(`SMul` が公理ゼロ) | 反証 + 修理 |
+| Cor 3.1 | `V` 未使用 | 修理(`isHodgeTate` を `V` 依存に) |
+| Def 3.2 | 空虚に真(`I = ∅`) | 修理(開**部分群**)+ 識別力 |
+| Cor 3.3 | **偽**(`ρ`・`ρ'` 無関係) | 反証 + 修理 |
+| Thm 4.2 | **偽**(`Φ` 自由) | 反証 + 修理(自然な射を構成) |
