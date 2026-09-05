@@ -4813,3 +4813,55 @@ scratchpadに`wip-flat-baseChange.patch`として保存してある。
 追加は、`git add`直後に並行セッションのコミット`7675ebd0`に巻き込まれて
 一緒にコミットされた(内容は正しく入っている)。(b)`tools/lean-idioms.md`
 の番号`#51`を並行セッションも同時に使ったため、こちら側を`#52`へ改番した。
+
+## 2026-09-05夜さらに続き15: **`Γ(C,piece(D(f*g)))`を1段の`MvPolynomial`
+商のℝ底変換として書き下すことに成功**——`t`構成の`D(f)`側が完成
+
+続き14で作った`≃ₐ[B']`版を使い、`ExtLimit.lean`に
+`exists_descendPieceR_flat_mvPolynomial_baseChange`(`sorry`無し、
+commit `47b2f5c8`)を完成させた:
+
+```
+∃ R' hR p₀,
+  Nonempty ((MvPolynomial (Unit ⊕ Fin n) (A⊗R'.1) ⧸ Ideal.span (Set.range q))
+    ⊗[A⊗R'.1] (A⊗ℝ) ≃+* Γ(C, piece(D(f*g))))
+
+  q = Sum.elim (fun k => rename Sum.inr (map φ (q₀ k)))
+               (fun _ => rename Sum.inr p₀ * X (Sum.inl ()) - 1)
+```
+
+つまり「`C`の`D(f*g)`上の片は、`R`レベルの関係式`q₀`を`R'`へ昇格して
+`Sum.inr`側の変数へ移し、局所化の分母`p₀`の逆元を`X(Sum.inl ())`として
+**1変数だけ**添加した多項式環の商——のℝへの底変換そのものである」。
+
+**設計(3手、続き13の反省を踏まえた形)**:
+1. `e := exists_descendPieceR_localization_baseChange`を**正準な**
+   `M₀ := Localization.Away (mk I' p₀)`で実体化する。`Algebra B' M₀`も
+   `IsScalarTower B' Q M₀`も正準に存在する(REPLで確認済み)ので、
+   インスタンスを自作する必要がまったく無い——**ここが続き13の失敗
+   (商環へインスタンスを後付け移送しようとした)との決定的な違い**。
+2. `flat_algEquiv_of_eq`で`M₀ ≃ₐ[B'] F`を得る。
+3. `Algebra.TensorProduct.congr`で`F⊗[B']T ≃ₐ[B'] M₀⊗[B']T`へ移し、
+   1の同型と合成する。
+
+**配管の記録**: `maxHeartbeats 40000000`に加えて
+**`synthInstance.maxHeartbeats`(既定20000)も4000000へ上げる必要**が
+あった(`IsScalarTower B' Q M₀`の探索が巨大な文脈では既定値で終わらない
+——小さい文脈で先に`haveI`で計算して渡すと46秒で見つかる)。REPLでの
+検査に584秒。`lake build ABC3.Found.CorrHyp.Instance4`も同程度。
+
+**検証の的についての重要な発見(`lean-idioms #53`)**: `lake build ABC3`は
+`Found/CorrHyp/`を**ビルドしない**。`lakefile.toml`の`[[lean_lib]]`に
+glob が無いためルート`ABC3.lean`から`import`で辿れるものだけが対象で、
+`ABC3/Found.lean`には`CorrHyp`の行が1つも無い。したがって`CorrHyp`を
+触ったときの検証は`lake build ABC3.Found.CorrHyp.Instance4`(この系列で
+最も深いモジュール)を明示的に叩く必要がある。実際、失敗ビルドの直後は
+`ExtLimit.olean`が消えたままなのに`lake build ABC3`は0エラーを返し、
+その状態でREPLを起動すると「空の環境」(`unknown namespace
+AlgebraicGeometry`、`Γ(X, U)`のparse error)になる。
+
+**次の一手**: `D(g)`側は同じ定理を`(g,f)`で使うだけ(`D(g*f) = D(f*g)`は
+`mul_comm`)。両側の表示が揃ったら、`ψ`・`ψ'`(2つの表示の生成元同士の
+対応)を`exists_fg_subalgebra_tensor_quotientMvPolynomial_lift`で構成し、
+`exists_mvPolynomial_quotient_specIso_descend`へ渡す。集計は引き続き
+10/24——§4は引き続き0/2だが、`t`の`D(f)`側という最大の部品が完成した。

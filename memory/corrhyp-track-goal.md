@@ -2133,3 +2133,32 @@ REPLで確認済み)、(2)flat_algEquiv_of_eqでM₀ ≃ₐ[B'] Fを得る、
 並行セッションとの衝突2件: (a)FieldLimit.leanへの追加はgit add直後に
 並行セッションのコミット7675ebd0に巻き込まれた(内容は正しく入っている)。
 (b)lean-idiomsの#51が衝突したのでこちらを#52へ改番。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き15
+exists_descendPieceR_flat_mvPolynomial_baseChange完成(sorry無し、
+commit 47b2f5c8、ExtLimit.lean)。Γ(C,piece(D(f*g)))が1段の
+MvPolynomial(Unit⊕Fin n)(A⊗R'.1)商のℝ底変換そのものとして書けた:
+q = Sum.elim (fun k => rename Sum.inr (map φ (q₀ k)))
+             (fun _ => rename Sum.inr p₀ * X (Sum.inl ()) - 1)。
+
+設計3手: (1)eを正準なM₀ := Localization.Away (mk I' p₀)で実体化
+——Algebra B' M₀もIsScalarTower B' Q M₀も正準に存在するので
+インスタンスを自作しない(続き13の失敗との決定的な違い)、
+(2)flat_algEquiv_of_eqでM₀ ≃ₐ[B'] F、(3)Algebra.TensorProduct.congrで
+F⊗[B']T ≃ M₀⊗[B']Tへ移して合成。
+
+配管: maxHeartbeats 40000000に加えsynthInstance.maxHeartbeats(既定
+20000)も4000000へ上げる必要。IsScalarTower B' Q M₀は小さい文脈で
+先にhaveIで計算(46秒)。REPL検査584秒。
+
+重要な発見(lean-idioms #53): lake build ABC3はFound/CorrHyp/を
+ビルドしない(lakefile.tomlにglobが無くABC3/Found.leanにCorrHypの
+行が無い)。CorrHypの検証は lake build ABC3.Found.CorrHyp.Instance4
+を明示的に叩くこと。失敗ビルド直後はExtLimit.oleanが消えたままでも
+lake build ABC3は0エラーを返し、その状態のREPLは「空の環境」になる
+(unknown namespace AlgebraicGeometry / Γ(X,U)のparse error)。
+
+次の一手: D(g)側は同じ定理を(g,f)で使うだけ(D(g*f)=D(f*g)はmul_comm)。
+両側が揃ったらψ・ψ'をexists_fg_subalgebra_tensor_quotientMvPolynomial_
+liftで構成しexists_mvPolynomial_quotient_specIso_descendへ渡す。
+集計は引き続き10/24——§4は0/2だがtのD(f)側という最大の部品が完成。
