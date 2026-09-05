@@ -5585,3 +5585,54 @@ rw [card_rootsOfUnity hζ hn] at h2   -- ✓ h2 : ... ∣ n
 に済む（`Found/PGC/ContinuousHomCount.lean` の `contHom`）。
 `ker (f*g) ⊇ ker f ⊓ ker g` から開性を出すには `Subgroup.isOpen_mono` が要り、
 これは `[SeparatelyContinuousMul G]` を要求する（`IsTopologicalGroup` から出る）。
+
+## 暗黙の `{m : ℕ}` が `by` ブロック側から**逆に**決まる（2026-09-05、pGC G1 で実測）
+
+`exists_orderOf_eq_of_dvd_card {m : ℕ} (hdvd : m ∣ Nat.card G)` に
+`(by rw [card_primeToPTorsion]; exact hdvd)` を渡すと、`m` は `n` ではなく
+`Nat.card G` に決まってしまう（`rw` が `m ∣ Nat.card G` を `rfl` で閉じ、
+`exact hdvd` が `No goals to be solved` になる）。証明項が `by` ブロックだと
+`m` がメタ変数のまま残り、`Nat.card G ∣ Nat.card G` で先に埋まるため。
+
+**直し方**: 暗黙引数を**名前で先に固定**する。
+```lean
+exists_orderOf_eq_of_dvd_card (G := primeToPTorsion K) (m := n)
+  (by rw [card_primeToPTorsion]; exact hdvd)   -- ✓
+```
+
+## `Skeleton/PGC/Setup.lean` の `closure` / `absGal` は `abbrev`（2026-09-05）
+
+`K.closure = AlgebraicClosure K.carrier`、`K.absGal = K.closure ≃ₐ[K.carrier] K.closure`
+はどちらも `abbrev`（reducible）。`AlgebraicClosure F ≃ₐ[F] AlgebraicClosure F` に
+ついて述べた補題は `K.absGal` に**そのまま当たり**、
+`contHomCard K.absGal n = contHomCard (AlgebraicClosure K.carrier ≃ₐ[K.carrier] _) n` は
+`rfl` で通る（位相・群の instance も一致）。★`autCongrContinuousMulEquiv` /
+`contHomCard_congr` で移送する設計を**先に考えない**こと。
+
+## 有限次中間体から**生成元の有限集合**を取る（2026-09-05、pGC D3 で実測）
+
+`FiniteDimensional K ↥E'` から「`adjoin K S = E'` なる有限集合 `S`」を取る道は
+`IntermediateField.fg_of_finiteDimensional` **ではない**（そんな名前は無い）。
+`fg_of_noetherian` は `[IsNoetherian F E]`（**大きい方の体**全体）を要求するので
+中間体には当たらない。実際に効くのは `EssFiniteType` 経由：
+
+```lean
+obtain ⟨S, hSfin, hSadj⟩ := IntermediateField.fg_def.mp
+  (IntermediateField.essFiniteType_iff.mp inferInstance : E'.FG)
+haveI : Finite S := hSfin
+```
+`Module.Finite → Algebra.FiniteType → Algebra.EssFiniteType.of_finiteType` が
+instance で繋がるので `inferInstance` で通る。
+
+★これで「Krull 位相の近傍を**生成元**に落とす」書き方ができる。
+`(adjoin F S).fixingSubgroup = fixingSubgroup (Ω ≃ₐ[F] Ω) S`
+（`Found/PGC/AdjoinFieldClosure.lean::fixingSubgroup_adjoin_eq`、
+証明は `← IntermediateField.le_iff_le` と `adjoin_le_iff` の 2 手）を挟むと、
+底体 `F` を `E` に取り替えても条件が「`S` を各点固定する」のまま変わらないので、
+**合成体 `E ⊔ E''` も塔も要らなくなる**（`finiteDimensional_sup` は両方の
+有限性を要求するので無限次では使えない。そこを回避できる）。
+
+★`_root_.mem_fixingSubgroup_iff` は `M` が**明示引数**：
+`(_root_.mem_fixingSubgroup_iff _).mp hf` と書く。`_root_.` を落とすと
+`IntermediateField.mem_fixingSubgroup_iff` に取られ、`_` を落とすと
+`Unknown constant mem_fixingSubgroup_iff.mp` という**紛らわしいエラー**になる。

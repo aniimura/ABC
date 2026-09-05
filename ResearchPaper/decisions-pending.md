@@ -39,7 +39,7 @@
 
 ## D3. `Γ_{K^ur} ≃ₜ* (unramifiedClosure K).fixingSubgroup`(無限次版)
 
-- **状態**: **保留**(2026-09-05 に発見)
+- **状態**: ★**解決**(2026-09-05、第 1022。選択肢 (a) が通った)
 - **論点**: 経路 C のノード F1 がこれを要求するが、在庫の
   `fixingSubgroupContinuousMulEquiv`(第 995)は **`[FiniteDimensional F E]` 付き**で、
   `K^ur` は無限次。**新規に要る。**
@@ -51,7 +51,19 @@
 - **推奨**: **まず (a) の可否を小ノードで測る。** 数学的には
   `krullTopology_mem_nhds_one_iff` の両側比較で出るはずだが未構築。
   通らなければ (b)。★ここが通らないと (C-q) の上界が止まる。
-- **決定**: —
+- **決定(第 1022)**: **(a) が通った。迂回案 (b) は不要。**
+  ★効いた道具は**原始元定理ではなかった**:
+  1. 有限次中間体から**生成元の有限集合**を取る——
+     `IntermediateField.fg_def.mp (IntermediateField.essFiniteType_iff.mp inferInstance)`。
+     ★`IntermediateField.fg_of_finiteDimensional` は**存在しない**。
+     `fg_of_noetherian` は大きい方の体に `IsNoetherian` を要求するので中間体に当たらない。
+  2. `fixingSubgroup_adjoin_eq`(新規、8 行)——`adjoin F S` の固定部分群は
+     「`S` を各点固定する部分群」なので、**底体を `F` ↔ `E` と取り替えても条件が変わらない**。
+     これで合成体も塔も消え、`finiteDimensional_sup` の両側有限性という壁を迂回できた。
+  ★**逆方向は追加仮定ゼロ**で通り、既存の `continuous_fixingSubgroupEquiv_symm`(第 995)は
+  新版の特別な場合になった。順方向にだけ `[Algebra.IsAlgebraic F Ω]` が要る
+  ——これは技術的都合ではなく**必要**(反例: `F = ℚ, E = ℚ(t), Ω = ℚ(t)‾`)。
+  消費側では instance で自動的に満たされる(実測確認済み)。
 
 ## D4. 経路 C で新たに導入する逸脱 3 件
 

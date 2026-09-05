@@ -106,12 +106,13 @@ Kummer 双対(全射性は Hilbert 90、mathlib 在庫)+ `unitsSplitEquiv` +
    (`κ_a(σ) := σ(α)/α`、α は任意の根)。**これで `p = 2` も素通しできる。**
    ★`autEquivZmod` / `autEquivRootsOfUnity` を使う設計にすると偶数の壁に当たる。
 
-### ★残るリスク
+### ★残っていたリスク F1 は解消した(2026-09-05、第 1022)
 
-**F1**(`Γ_{K^ur} ≃ₜ* (unramifiedClosure K).fixingSubgroup`)。在庫の
-`fixingSubgroupContinuousMulEquiv`(第 995)は有限次限定で、`K^ur` は無限次。
-両方向とも作り直しになる(順方向は塔、逆方向は `finiteDimensional_sup` が
-有限性を要求する)。**波 2 の前に小ノードで測ること**(`decisions-pending.md` D3)。
+`fixingSubgroupContinuousMulEquivInf`(`Found/PGC/AdjoinFieldClosure.lean`)が
+**無限次でも両方向とも**通り、`unramifiedClosure K` にそのまま当たることを実地確認した。
+効いたのは原始元定理ではなく、`fixingSubgroup_adjoin_eq`
+(`adjoin F S` の固定部分群は「`S` を各点固定する部分群」なので底体を取り替えても
+条件が変わらない)——これで合成体も塔も消えた。詳細は `decisions-pending.md` D3。
 
 ## 済んだ土台(2026-09-05 までに sorry 無しで構成)
 

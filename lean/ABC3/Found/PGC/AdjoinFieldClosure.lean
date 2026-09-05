@@ -279,4 +279,137 @@ noncomputable def absGalFixedFieldCME (K : PAdicLocalField p) (H : Subgroup K.ab
     (fixingSubgroupContinuousMulEquiv (IntermediateField.fixedField H)).symm).trans
     (subgroupCongrContinuousMulEquiv h2)
 
+/-! ## `fixingSubgroupEquiv` は連続(**無限次**中間体でも)
+
+上の第 994/995 は `[FiniteDimensional F E]` を要求していた。`K^ur` のような
+**無限次**の中間体には当たらない(`decisions-pending.md` の D3)。
+本節でその制限を外す。
+
+両向きとも**有限生成の取り直し**で済む——合成体 `E ⊔ E''` も塔も使わない。
+
+* 有限次中間体は**有限生成**である
+  (`IntermediateField.essFiniteType_iff` + `Module.Finite → Algebra.FiniteType
+  → Algebra.EssFiniteType`)。生成元の**有限集合** `S ⊆ Ω` が取れる。
+* 生成元さえ止めれば添加した体は止まる:
+  `fixingSubgroup_adjoin_eq`(下)——`(adjoin F S).fixingSubgroup` は
+  「`S` を各点固定する部分群」に**一致**する。したがって
+  `adjoin F S` と `adjoin E S` の固定部分群は、`Gal(Ω/F)` と `Gal(Ω/E)` の
+  どちらから見ても**同じ条件**「`S` を止める」で書ける。
+
+**順方向**(`E.fixingSubgroup → Gal(Ω/E)`): `E` 上有限次の `E'` を `adjoin E S` と
+書き、`E''` として**合成体でなく `adjoin F S`** を取る。
+★ここで `S` の元が `F` 上整であることが要る——**`Algebra.IsAlgebraic F Ω` を仮定**する。
+
+**逆方向**(`Gal(Ω/E) → E.fixingSubgroup`): `F` 上有限次の `E''` を `adjoin F S` と
+書き、`E'` として `adjoin E S` を取る。`S ⊆ E''` は `F` 上有限次の体の元なので
+**自動的に** `F` 上整、したがって `E` 上整。★**追加の仮定は要らない**
+(第 995 の有限次版はこの一般形の特別な場合になる)。
+
+### 逸脱の記録
+
+`continuous_fixingSubgroupEquivInf` は原典に無い前提 `[Algebra.IsAlgebraic F Ω]` を
+**追加**している。これは技術的都合ではなく**必要**である: `F = ℚ`, `E = ℚ(t)`,
+`Ω = ℚ(t)‾` では `Gal(Ω/ℚ(t))` の元は `√t` を動かしうる一方、`ℚ` 上有限次の
+中間体は `ℚ‾` の中にあって `√t` を捉えられないので、順方向は連続にならない。
+消費側(`K^ur ⊆ K‾`)では `Ω` が代数閉包なので仮定は自動で満たされる。 -/
+
+/-- **生成元を止めれば添加体は止まる**。`adjoin F S` の固定部分群は、
+`S` を各点固定する部分群(`MulAction` の `fixingSubgroup`)そのものである。 -/
+theorem fixingSubgroup_adjoin_eq {F Ω : Type*} [Field F] [Field Ω] [Algebra F Ω] (S : Set Ω) :
+    (IntermediateField.adjoin F S).fixingSubgroup = _root_.fixingSubgroup (Ω ≃ₐ[F] Ω) S := by
+  refine le_antisymm (fun f hf => ?_) ?_
+  · rw [_root_.mem_fixingSubgroup_iff]
+    intro y hy
+    exact (IntermediateField.mem_fixingSubgroup_iff _ _).mp hf y
+      (IntermediateField.subset_adjoin F S hy)
+  · rw [← IntermediateField.le_iff_le, IntermediateField.adjoin_le_iff]
+    intro x hx
+    rw [SetLike.mem_coe, IntermediateField.mem_fixedField_iff]
+    intro f hf
+    exact (_root_.mem_fixingSubgroup_iff _).mp hf x hx
+
+/-- **★★★★★★★★`fixingSubgroupEquiv` は連続(`E/F` は無限次でよい)**。
+
+`E` 上有限次の `E'` に対し、その生成元の有限集合 `S` を取って
+`E'' := adjoin F S` とすればよい。`Ω/F` が代数的なので `E''` は `F` 上有限次、
+したがって `E''.fixingSubgroup` は `Gal(Ω/F)` で開である。 -/
+theorem continuous_fixingSubgroupEquivInf {F Ω : Type*} [Field F] [Field Ω] [Algebra F Ω]
+    [Algebra.IsAlgebraic F Ω] (E : IntermediateField F Ω) :
+    Continuous (E.fixingSubgroupEquiv) := by
+  refine continuous_of_continuousAt_one (E.fixingSubgroupEquiv).toMonoidHom ?_
+  rw [ContinuousAt, map_one, Filter.tendsto_def]
+  intro s hs
+  obtain ⟨E', hE'fin, hE'sub⟩ := (krullTopology_mem_nhds_one_iff (↥E) Ω s).mp hs
+  haveI := hE'fin
+  obtain ⟨S, hSfin, hSadj⟩ := IntermediateField.fg_def.mp
+    (IntermediateField.essFiniteType_iff.mp inferInstance : E'.FG)
+  haveI : Finite S := hSfin
+  haveI : FiniteDimensional F (IntermediateField.adjoin F S) :=
+    IntermediateField.finiteDimensional_adjoin (fun x _ => Algebra.IsIntegral.isIntegral x)
+  have hopen : IsOpen (((IntermediateField.adjoin F S).fixingSubgroup : Set (Ω ≃ₐ[F] Ω))) :=
+    IntermediateField.fixingSubgroup_isOpen _
+  have hnhd : (Subtype.val ⁻¹' ((IntermediateField.adjoin F S).fixingSubgroup : Set (Ω ≃ₐ[F] Ω)))
+      ∈ nhds (1 : E.fixingSubgroup) := by
+    refine IsOpen.mem_nhds (hopen.preimage continuous_subtype_val) ?_
+    show (1 : Ω ≃ₐ[F] Ω) ∈ (IntermediateField.adjoin F S).fixingSubgroup
+    exact one_mem _
+  refine Filter.mem_of_superset hnhd ?_
+  intro σ hσ
+  show E.fixingSubgroupEquiv σ ∈ s
+  apply hE'sub
+  rw [SetLike.mem_coe, ← hSadj, fixingSubgroup_adjoin_eq, _root_.mem_fixingSubgroup_iff]
+  intro y hy
+  show E.fixingSubgroupEquiv σ y = y
+  exact (IntermediateField.mem_fixingSubgroup_iff _ _).mp hσ y
+    (IntermediateField.subset_adjoin F S hy)
+
+/-- **★★★★★★★★逆向きも連続(`E/F` は無限次でよい)**。
+
+`F` 上有限次の `E''` の生成元 `S` を取り、`E' := adjoin E S` とする。
+`S` は `F` 上有限次の体の元なので `F` 上整、したがって `E` 上整であり、
+`E'` は `E` 上有限次。★代数性の仮定は要らない。 -/
+theorem continuous_fixingSubgroupEquivInf_symm {F Ω : Type*} [Field F] [Field Ω] [Algebra F Ω]
+    (E : IntermediateField F Ω) :
+    Continuous (E.fixingSubgroupEquiv.symm) := by
+  refine continuous_of_continuousAt_one (E.fixingSubgroupEquiv.symm).toMonoidHom ?_
+  rw [ContinuousAt, map_one, Filter.tendsto_def]
+  intro s hs
+  rw [nhds_subtype, Filter.mem_comap] at hs
+  obtain ⟨t, ht, hts⟩ := hs
+  obtain ⟨E'', hfin, hsub⟩ := (krullTopology_mem_nhds_one_iff F Ω t).mp ht
+  haveI := hfin
+  obtain ⟨S, hSfin, hSadj⟩ := IntermediateField.fg_def.mp
+    (IntermediateField.essFiniteType_iff.mp inferInstance : E''.FG)
+  haveI : Finite S := hSfin
+  have hint : ∀ x ∈ S, IsIntegral (↥E) x := by
+    intro x hx
+    have hxE : x ∈ E'' := hSadj ▸ IntermediateField.subset_adjoin F S hx
+    exact ((Algebra.IsIntegral.isIntegral (R := F) (⟨x, hxE⟩ : ↥E'')).map E''.val).tower_top
+  haveI : FiniteDimensional (↥E) (IntermediateField.adjoin (↥E) S) :=
+    IntermediateField.finiteDimensional_adjoin hint
+  rw [krullTopology_mem_nhds_one_iff]
+  refine ⟨IntermediateField.adjoin (↥E) S, inferInstance, ?_⟩
+  intro σ hσ
+  apply hts
+  show (E.fixingSubgroupEquiv.symm σ : Ω ≃ₐ[F] Ω) ∈ t
+  apply hsub
+  rw [SetLike.mem_coe, ← hSadj, fixingSubgroup_adjoin_eq, _root_.mem_fixingSubgroup_iff]
+  intro y hy
+  show (E.fixingSubgroupEquiv.symm σ : Ω ≃ₐ[F] Ω) y = y
+  exact (IntermediateField.mem_fixingSubgroup_iff _ _).mp hσ y
+    (IntermediateField.subset_adjoin (↥E) S hy)
+
+/-- **★★★★★★★★★★`E.fixingSubgroup ≃ₜ* Gal(Ω/E)`(`E/F` は無限次でよい)**。
+
+部分空間位相(`Gal(Ω/F)` から)と Krull 位相(`Gal(Ω/E)` の)の一致。
+`fixingSubgroupContinuousMulEquiv`(第 995)の `[FiniteDimensional F E]` を外した版で、
+`decisions-pending.md` の D3 が要求していたもの。`K^ur` のような無限次の中間体に
+当たる。 -/
+noncomputable def fixingSubgroupContinuousMulEquivInf {F Ω : Type*} [Field F] [Field Ω]
+    [Algebra F Ω] [Algebra.IsAlgebraic F Ω] (E : IntermediateField F Ω) :
+    ContinuousMulEquiv (E.fixingSubgroup) (Ω ≃ₐ[E] Ω) where
+  toMulEquiv := E.fixingSubgroupEquiv
+  continuous_toFun := continuous_fixingSubgroupEquivInf E
+  continuous_invFun := continuous_fixingSubgroupEquivInf_symm E
+
 end ABC3.Found.PGC
