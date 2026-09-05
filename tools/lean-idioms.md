@@ -4886,7 +4886,7 @@ grep -n "^theorem exists_fg\|^theorem exists_mvPolynomial\|^theorem mem_ideal\|^
 `(map (id A') (val R)) ∘ (map φ (id R)) = map φ (val R)`
 (`Algebra.TensorProduct.map_comp`+`id_comp`/`comp_id`)がその根拠。
 
-## 56. MCP REPL の `lean_start` に**独立した 2 つのルート**を渡すと mathlib ごと読み込みに失敗する(無言)
+## 57. MCP REPL の `lean_start` に**独立した 2 つのルート**を渡すと mathlib ごと読み込みに失敗する(無言)
 
 `lean_start` に `["ABC3.Found.PGC.UnramifiedExtension",
 "ABC3.Found.PGC.PadicLogSurjective"]` のように、互いに import 関係の無い
