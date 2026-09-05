@@ -722,6 +722,25 @@ theorem tensor_range_of_range {A B C : Type u} [CommRing A]
     rw [smul_add]
     exact Submodule.add_mem _ hu hv
 
+/-- **★`Theorem 2.3` 最終段の形**——比較写像 `Φ` を通した形。
+`C` の像が `c·B` を含めば、`Φ` の像の元 `Φ z` に対し
+`(c·c)·Φ z` は **`C ⊗_A C` から来る**。
+
+`Definition 2.1` 条件(iii)は「`p^n·e` が `B ⊗_A B` の像
+(`diagonalCompare` による)に入る」という形なので、`Φ` に
+`diagonalCompare` を取れば原文の *"`p^{7σ}·e_{B/Ā}` lies in
+`C_σ ⊗_A C_σ`"* そのものになる。 -/
+theorem image_smul_mem_range_comp {A B C D : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [AddCommGroup D] [Module A D] [Algebra A B] [Algebra A C]
+    (f : C →ₐ[A] B) (c : A)
+    (h : ∀ b : B, c • b ∈ LinearMap.range f.toLinearMap)
+    (Φ : TensorProduct A B B →ₗ[A] D) (z : TensorProduct A B B) :
+    (c * c) • (Φ z)
+      ∈ LinearMap.range (Φ ∘ₗ TensorProduct.map f.toLinearMap f.toLinearMap) := by
+  obtain ⟨u, hu⟩ := tensor_range_of_range f.toLinearMap c h z
+  refine ⟨u, ?_⟩
+  rw [LinearMap.coe_comp, Function.comp_apply, hu, map_smul]
+
 /-! ## エタール持ち上げの一意性——*"all `B_ε[1/p]` are isomorphic"*
 
 原文の
