@@ -3879,6 +3879,97 @@ theorem pieceAlgebraMap_naturality (X : Over BaseK) (U V : X.left.Opens)
       (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V)) le_rfl).hom
     (pieceRingEquiv_symm_naturality X U V hU hV hVU a r)
 
+/-- **`pieceRingHom`は開集合の制限と可換**——`Γ(X.left,U)`の`ℚ`-代数構造
+(`pieceAlgebra`)が制限で保たれることを言う。
+
+`pieceRingHom`は`Spec.map`で送ると`hU.fromSpec ≫ X.hom`に等しい
+(`pieceRingHom_spec`と`IsAffineOpen.isoSpec_inv_ι`)。あとは mathlib の
+`IsAffineOpen.map_fromSpec`(`Spec.map (presheaf.map f) ≫ hU.fromSpec
+= hV.fromSpec`)の`_assoc`版1本で、`Spec.map_injective`により従う。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem pieceRingHom_naturality (X : Over BaseK) (U V : X.left.Opens)
+    (hU : IsAffineOpen U) (hV : IsAffineOpen V) (hVU : V ≤ U) :
+    pieceRingHom X U hU ≫ X.left.presheaf.map (homOfLE hVU).op = pieceRingHom X V hV := by
+  apply Spec.map_injective
+  rw [Spec.map_comp]
+  have hU' : Spec.map (pieceRingHom X U hU) = hU.fromSpec ≫ X.hom := by
+    rw [← IsAffineOpen.isoSpec_inv_ι hU, Category.assoc]
+    exact ((Iso.inv_comp_eq _).mpr (pieceRingHom_spec X U hU).symm).symm
+  have hV' : Spec.map (pieceRingHom X V hV) = hV.fromSpec ≫ X.hom := by
+    rw [← IsAffineOpen.isoSpec_inv_ι hV, Category.assoc]
+    exact ((Iso.inv_comp_eq _).mpr (pieceRingHom_spec X V hV).symm).symm
+  rw [hU', hV']
+  exact IsAffineOpen.map_fromSpec_assoc hU hV (homOfLE hVU).op X.hom
+
+/-- 開集合の制限を`ℚ`-代数準同型として見たもの。`commutes'`が
+`pieceRingHom_naturality`である。`Lemma 4.1`で
+`exists_mvPolynomial_quotient_ringHom_descend2_of_map`の`φ : A →ₐ[ℚ] A'`
+に渡すのがこれ。 -/
+noncomputable def pieceRestrictAlgHom (X : Over BaseK) (U V : X.left.Opens)
+    (hU : IsAffineOpen U) (hV : IsAffineOpen V) (hVU : V ≤ U) :
+    letI := pieceAlgebra X U hU
+    letI := pieceAlgebra X V hV
+    Γ(X.left, U) →ₐ[ℚ] Γ(X.left, V) :=
+  letI := pieceAlgebra X U hU
+  letI := pieceAlgebra X V hV
+  { (X.left.presheaf.map (homOfLE hVU).op).hom with
+    commutes' := fun r => by
+      have h := congrArg (fun t : (CommRingCat.of ℚ ⟶ Γ(X.left, V)) =>
+        (CommRingCat.Hom.hom t : ℚ → Γ(X.left, V)) r) (pieceRingHom_naturality X U V hU hV hVU)
+      exact h }
+
+set_option maxHeartbeats 1000000 in
+open scoped TensorProduct in
+/-- **`hcomm`の最終形**——`FieldLimit.lean`の`aeval_map_relation_mem_span`が
+要求する形(`restr.comp (algebraMap 𝔸 S) = (algebraMap 𝔹 T).comp φ'`)ちょうど。
+
+`pieceAlgebraMap_naturality`は純テンソル`a ⊗ₜ r`上の等式だったので、
+`RingHom.ext` + `TensorProduct.induction_on`で環準同型の等式へ持ち上げる
+だけ(`zero`と`add`は`simp`)。これで`Lemma 4.1`の`f i j`を降ろすときの
+仮説`hψ`が、**完全に検証済みの部品だけから**組めるようになった。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem pieceAlgebraMap_comp_naturality (X : Over BaseK) (U V : X.left.Opens)
+    (hU : IsAffineOpen U) (hV : IsAffineOpen V) (hVU : V ≤ U)
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) :
+    letI := pieceAlgebra X U hU
+    letI := pieceAlgebra X V hV
+    letI algU : Algebra (Γ(X.left, U) ⊗[ℚ] ℝ)
+        Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+      ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+        (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.comp
+        (pieceRingEquiv X U hU).symm.toRingHom).toAlgebra
+    letI algV : Algebra (Γ(X.left, V) ⊗[ℚ] ℝ)
+        Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V)) :=
+      ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ V)
+        (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V)) le_rfl).hom.comp
+        (pieceRingEquiv X V hV).symm.toRingHom).toAlgebra
+    (C.presheaf.map (homOfLE (piece_le_of_le X U V hVU C α)).op).hom.comp
+        (algebraMap (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)))
+      = (algebraMap (Γ(X.left, V) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V))).comp
+          (Algebra.TensorProduct.map (pieceRestrictAlgHom X U V hU hV hVU)
+            (AlgHom.id ℚ ℝ)).toRingHom := by
+  letI := pieceAlgebra X U hU
+  letI := pieceAlgebra X V hV
+  letI algU : Algebra (Γ(X.left, U) ⊗[ℚ] ℝ)
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+      (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.comp
+      (pieceRingEquiv X U hU).symm.toRingHom).toAlgebra
+  letI algV : Algebra (Γ(X.left, V) ⊗[ℚ] ℝ)
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V)) :=
+    ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ V)
+      (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V)) le_rfl).hom.comp
+      (pieceRingEquiv X V hV).symm.toRingHom).toAlgebra
+  refine RingHom.ext fun x => ?_
+  induction x using TensorProduct.induction_on with
+  | zero => simp
+  | tmul a r => exact pieceAlgebraMap_naturality X U V hU hV hVU C α a r
+  | add x y hx hy =>
+      simp only [RingHom.comp_apply, map_add] at hx hy ⊢
+      rw [hx, hy]
+
 /-- `piecesOpenCover`の脚`(e i).inv ≫ X.homOfLE (h i)`同士のpullbackは、
 `e i`・`e j`をpullbackの脚から追い出す(`pullbackHomIsoLeft`+
 `pullbackSymmetry`、いずれも既存の一般的事実)ことで、`X.homOfLE`同士

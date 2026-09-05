@@ -5710,3 +5710,37 @@ Found側sorry 0件。
 `Presentation`の`relation`と`descend2_of_map`の`q`/`q₂`を突き合わせ、
 実際に`f i j : V (i,j) ⟶ U i`を得る。
 集計は引き続き10/24——§4は引き続き0/2。
+
+### 2026-09-05夜さらに続き39 — `hcomm`を「補題がそのまま食える形」にした(§4の`hψ`が完成)
+
+続き38で`hψ`が`hcomm`だけから出るようになったので、`ExtLimit.lean`側で
+`hcomm`を`aeval_map_relation_mem_span`が要求する形
+(`restr.comp (algebraMap 𝔸 S) = (algebraMap 𝔹 T).comp φ'`)に整えた。3本:
+
+1. **`pieceRingHom_naturality`** — `pieceRingHom X U hU ≫ (制限) =
+   pieceRingHom X V hV`。`Spec.map`で送ると`pieceRingHom_spec`＋
+   `IsAffineOpen.isoSpec_inv_ι`で`hU.fromSpec ≫ X.hom`になり、あとは
+   mathlibの`IsAffineOpen.map_fromSpec`の`_assoc`版1本。
+   `Spec.map_injective`で戻して完了。
+
+2. **`pieceRestrictAlgHom`** — 制限を`ℚ`-代数準同型
+   `Γ(X.left,U) →ₐ[ℚ] Γ(X.left,V)`として見たもの。`commutes'`がまさに
+   1.。これが`descend2_of_map`の`φ : A →ₐ[ℚ] A'`に渡るもの。
+
+3. **`pieceAlgebraMap_comp_naturality`** — `hcomm`そのもの。
+   続き35の`pieceAlgebraMap_naturality`は純テンソル`a ⊗ₜ r`上の等式
+   だったので、`RingHom.ext` + `TensorProduct.induction_on`で環準同型の
+   等式へ持ち上げる(`zero`・`add`は`simp`)。`φ'`は
+   `Algebra.TensorProduct.map (pieceRestrictAlgHom …) (AlgHom.id ℚ ℝ)`。
+
+**到達点**: `Lemma 4.1`の`f i j`を降ろすときの仮説`hψ`が、
+**完全に検証済みの部品だけから組める**ようになった。続き22からの
+「不透明な同型」との格闘(18段階)が、ここで一つの可換図式に収束した。
+
+検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
+Found側sorry 0件。
+
+**次の一手**: `descend2_of_map`を実際に呼ぶ。`q`/`q₂`を
+`Algebra.Presentation.ofFinitePresentation`の`relation`と突き合わせ、
+`R'`レベルの環準同型を得て`Spec`を取り、`f i j : V (i,j) ⟶ U i`を作る。
+集計は引き続き10/24——§4は引き続き0/2。

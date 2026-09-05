@@ -2570,3 +2570,21 @@ FieldLimit.lean に2本追加(error 0件・EXIT:0、Found側sorry 0件、両方�
 
 次の一手: descendPieceR の R' レベルのデータで Presentation の relation と
 descend2_of_map の q/q₂ を突き合わせ、f i j を得る。集計は10/24——§4は0/2。
+
+## 2026-09-05夜さらに続き39 — hcomm を補題が食える形にした(§4の hψ が完成)
+
+ExtLimit.lean に3本(error 0件・EXIT:0、Found側sorry 0件):
+1. pieceRingHom_naturality: pieceRingHom U ≫ 制限 = pieceRingHom V。
+   Spec.map で送ると fromSpec ≫ X.hom になり(pieceRingHom_spec +
+   isoSpec_inv_ι)、mathlib の IsAffineOpen.map_fromSpec_assoc 1本で終わり。
+   Spec.map_injective で戻す。
+2. pieceRestrictAlgHom: 制限を ℚ-代数準同型として見たもの。commutes' が 1.。
+   descend2_of_map の φ : A →ₐ[ℚ] A' に渡すのがこれ。
+3. pieceAlgebraMap_comp_naturality: hcomm そのもの。続き35 の純テンソル版を
+   RingHom.ext + TensorProduct.induction_on で環準同型の等式へ持ち上げた。
+   φ' = Algebra.TensorProduct.map (pieceRestrictAlgHom …) (AlgHom.id ℚ ℝ)。
+
+到達点: Lemma 4.1 の f i j 降下の hψ が完全に検証済みの部品だけで組める。
+
+次の一手: descend2_of_map を実際に呼ぶ。q/q₂ を Presentation の relation と
+突き合わせ、R' レベルの環準同型 → Spec → f i j。集計は10/24——§4は0/2。
