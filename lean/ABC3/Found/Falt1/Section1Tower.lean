@@ -90,4 +90,63 @@ noncomputable def VtOmegaEquiv (n : ℕ) :
       have : ((2 : ℕ) : ZMod 2) = 0 := by decide
       rw [Nat.cast_pow, this, zero_pow (by positivity)]))
 
+/-! ## 局所環としてのインスタンスと生成元 -/
+
+instance VtLocal (n : ℕ) : IsLocalRing (Vt n) :=
+  truncPoly_isLocalRing _ (by positivity)
+
+instance VtArtinianRing (n : ℕ) : IsArtinianRing (Vt n) :=
+  truncPoly_isArtinianRing _
+
+/-- 極大イデアルの生成元 `X̄`。 -/
+noncomputable def VtGen (n : ℕ) : Vt n :=
+  Ideal.Quotient.mk _ (X : Polynomial (ZMod 2))
+
+theorem VtGen_span (n : ℕ) :
+    Ideal.span ({VtGen n} : Set (Vt n)) = IsLocalRing.maximalIdeal (Vt n) :=
+  (truncPoly_maximalIdeal _ (by positivity)).symm
+
+/-- `Ω[V_{n+1}⁄Vₙ]` は `V_{n+1}` と同型なのでアルティン。 -/
+instance VtOmegaArtinian (n : ℕ) : IsArtinian (Vt (n + 1)) (Ω[(Vt (n + 1))⁄(Vt n)]) :=
+  isArtinian_of_linearEquiv (VtOmegaEquiv n).symm
+
+instance VtOmegaNoetherian (n : ℕ) : IsNoetherian (Vt (n + 1)) (Ω[(Vt (n + 1))⁄(Vt n)]) :=
+  isNoetherian_of_linearEquiv (VtOmegaEquiv n).symm
+
+/-! ## 塔の仮定 `Ψ`——`Ω[V_{n+1}⁄Vₙ] ⊗ V_{n+1}` は `V_{n+1}/𝔪` を商に持つ -/
+
+/-- **塔の仮定の実現**——`Ω[V_{n+1}⁄Vₙ] ⊗ V_{n+1} ↠ (V_{n+1}/𝔪)^1`。 -/
+noncomputable def VtPsi (n : ℕ) :
+    TensorProduct (Vt (n + 1)) (Vt (n + 1)) (Ω[(Vt (n + 1))⁄(Vt n)]) →ₗ[Vt (n + 1)]
+      (Fin 1 → Vt (n + 1) ⧸ Ideal.span ({VtGen (n + 1)} : Set (Vt (n + 1)))) :=
+  LinearMap.pi (fun _ : Fin 1 =>
+    (Ideal.span ({VtGen (n + 1)} : Set (Vt (n + 1)))).mkQ ∘ₗ
+      (VtOmegaEquiv n).toLinearMap ∘ₗ
+      (TensorProduct.lid (Vt (n + 1)) (Ω[(Vt (n + 1))⁄(Vt n)])).toLinearMap)
+
+set_option maxHeartbeats 4000000 in
+/-- 合成が全射であること(`VtPsi` の各成分)。 -/
+theorem VtPsiComp_surjective (n : ℕ) : Function.Surjective
+    ((Ideal.span ({VtGen (n + 1)} : Set (Vt (n + 1)))).mkQ ∘ₗ
+      (VtOmegaEquiv n).toLinearMap ∘ₗ
+      (TensorProduct.lid (Vt (n + 1)) (Ω[(Vt (n + 1))⁄(Vt n)])).toLinearMap) := by
+  intro z
+  obtain ⟨v, hv⟩ := Submodule.mkQ_surjective
+    (Ideal.span ({VtGen (n + 1)} : Set (Vt (n + 1)))) z
+  refine ⟨(TensorProduct.lid (Vt (n + 1)) (Ω[(Vt (n + 1))⁄(Vt n)])).symm
+    ((VtOmegaEquiv n).symm v), ?_⟩
+  rw [LinearMap.coe_comp, Function.comp_apply, LinearMap.coe_comp, Function.comp_apply,
+    LinearEquiv.coe_coe, LinearEquiv.coe_coe, LinearEquiv.apply_symm_apply,
+    LinearEquiv.apply_symm_apply]
+  exact hv
+
+set_option maxHeartbeats 4000000 in
+theorem VtPsi_surjective (n : ℕ) : Function.Surjective (VtPsi n) := by
+  intro y
+  obtain ⟨x, hx⟩ := VtPsiComp_surjective n (y 0)
+  refine ⟨x, funext fun i => ?_⟩
+  have hi : i = 0 := Subsingleton.elim i 0
+  subst hi
+  exact hx
+
 end ABC3.Found.Falt1
