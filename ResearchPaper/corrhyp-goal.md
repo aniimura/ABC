@@ -5148,3 +5148,24 @@ specialize して`f i j`を構成すること。その後に残るのは**開埋
 この1本(`pieceRingEquiv`の値/自然性)は、続き17の`g⊗1`の話にも、今回の
 `f i j`にも、将来の`β`脚にも効く「一度払えば何度も使える」補題である。
 集計は引き続き10/24——§4は引き続き0/2。
+
+## 2026-09-05夜さらに続き23: 自然性の四角形を2つに分解し、**標準写像の側**を完成
+
+続き22で「`pieceRingEquiv`の`U`についての自然性が要る」と特定した四角形を
+2つに分解し、**片方を完成させた**(`ExtLimit.lean`、commit `c8a3ad5e`、
+`sorry`無し、`lake build ABC3.Found.CorrHyp.Instance4` 0エラー):
+
+- **(i) 標準写像の側**(完成): `piece_appLE_naturality`——
+  `pullback.fst`の`appLE`(`A_U`から`Γ(ExtX,piece(U))`への標準写像)が
+  開集合の制限と可換であること。mathlibの`Scheme.Hom.map_appLE`+
+  `appLE_map`だけで従う(2行)。
+- **(ii) `pieceRingEquiv`と標準写像の一致**(未完): `pieceRingEquiv.symm`が
+  純テンソル`a ⊗ₜ 1`を`appLE a`へ送ること。`piecePullbackIso`(6段の`calc`)に
+  値の補題が1つも無いのが原因。mathlibの`pullbackSpecIso_inv_fst`・
+  `_hom_snd`などの特徴づけ補題を使う見込み。
+
+この分解自体を`ExtLimit.lean`の節見出しに書いておいたので、次に触る者は
+「四角形のどちら側が済んでいてどちらが残っているか」を読むだけで分かる。
+
+集計は引き続き10/24——§4は引き続き0/2。次の一手は(ii)、すなわち
+`piecePullbackIso`の値(純テンソルの行き先)を`Spec`側で特徴づけること。

@@ -2306,3 +2306,15 @@ pullbackSpecIso_inv_fst/_hom_sndなど特徴づけの補題が揃っているこ
 
 この1本は続き17のg⊗1にもf i jにも将来のβ脚にも効く「一度払えば何度も
 使える」補題。集計は引き続き10/24——§4は0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き23
+自然性の四角形を2つに分解し標準写像の側を完成(commit c8a3ad5e、sorry無し、
+Instance4ビルド0エラー):
+(i)piece_appLE_naturality(完成)= pullback.fstのappLEが開集合の制限と可換。
+   mathlibのScheme.Hom.map_appLE+appLE_mapだけで2行。
+(ii)pieceRingEquivと標準写像の一致(未完)= pieceRingEquiv.symmがa⊗ₜ1を
+   appLE aへ送ること。piecePullbackIso(6段のcalc)に値の補題が無いのが原因。
+   mathlibのpullbackSpecIso_inv_fst/_hom_sndで特徴づける見込み。
+
+分解自体をExtLimit.leanの節見出しに書いたので、次に触る者は四角形のどちら側が
+残っているかを読むだけで分かる。次の一手は(ii)。集計は10/24——§4は0/2。
