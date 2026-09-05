@@ -2214,3 +2214,32 @@ Prop 1.2 が数えるのは `Γ_K` そのものではなく**アーベル化** `
   メタ変数で詰まる。`MonoidHom.prod` を外側にして
   `(e₁.toMonoidHom.comp (mk' _)).prod (e₂.toMonoidHom.comp (mk' _))` と書き、
   全射性は `hsurj (e₁.symm z.1, e₂.symm z.2)` から手で組む方が通る。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05: `μ_m ⊆ K^ur`(`p ∤ m`)
+
+`Found/PGC/UnramifiedRootsOfUnity.lean`(新規)
+`exists_isPrimitiveRoot_mem_unramifiedClosure`。
+
+**局所類体論を経由しない**組み立て:
+
+1. `k := φ(m)`(Euler)で `m ∣ q^k − 1`(`dvd_pow_totient_sub_one`)
+2. 次数 `k` の不分岐拡大 `A = K(x)`(`exists_isUnramifiedAdjoin`)——
+   剰余体の元は `q^k` 個
+3. `primeToPTorsion A` は位数 `q^k − 1` の巡回群(第 962)
+4. `exists_orderOf_eq_of_dvd_card`(巡回群は位数の約数ごとに元を持つ)
+5. `K(x) ≤ K^ur`(第 999 の `adjoin_le_unramifiedClosure_of_isUnramifiedAdjoin`)
+
+### 何に効くか
+
+`q` を群論的に読む LCFT 非経由の道——**暴分岐 `P_K` を割った惰性群
+`I_K/P_K ≅ ∏_{ℓ≠p} ℤ_ℓ` に Frobenius が `q` 倍で作用する**——の土台。
+`μ_ℓ ⊆ K^ur` は Kummer 理論 `Gal(K^ur(π^{1/ℓ})/K^ur) ≅ μ_ℓ` の前提。
+
+### ★配管
+
+- `(adjoinField K x).carrier` から `K.closure` への**coe は見つからない**。
+  `algebraMap (IntermediateField.adjoin K.carrier {x}) K.closure` を明示する。
+- `MonoidHom` を `where` で定義すると `exact` が展開してくれない——
+  `show <展開後の項> ∈ _` を挟む。
+- `exists_orderOf_eq_of_dvd_card` は `(m := m)` を明示しないと
+  `m` が `q^k − 1` に潰れる。

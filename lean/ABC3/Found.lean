@@ -1702,6 +1702,7 @@ import ABC3.Found.PGC.AbsGalUnitsSurjective
 import ABC3.Found.PGC.GaloisTransferContinuous
 import ABC3.Found.PGC.RamifiedUnramifiedDisjoint
 import ABC3.Found.PGC.CompositumSurjection
+import ABC3.Found.PGC.UnramifiedRootsOfUnity
 /-!
 # Found — 実装済みの基礎
 
