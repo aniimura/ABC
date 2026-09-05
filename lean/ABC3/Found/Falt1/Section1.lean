@@ -575,6 +575,21 @@ theorem kaehler_cyclic_of_adjoin {A B : Type*} [CommRing A] [CommRing B] [Algebr
     exact Submodule.mem_span_singleton_self _
   exact hsub (hw ▸ Algebra.mem_top)
 
+/-- **生成集合の微分は `Ω` を生成する**——`B = A[s]` なら `Ω[B⁄A]` は
+`{D b : b ∈ s}` で生成される。`kaehler_cyclic_of_adjoin` の一般形。 -/
+theorem kaehler_span_of_adjoin {A B : Type*} [CommRing A] [CommRing B] [Algebra A B]
+    (s : Set B) (hs : Algebra.adjoin A s = ⊤) :
+    Submodule.span B (KaehlerDifferential.D A B '' s) = ⊤ := by
+  refine le_antisymm le_top ?_
+  rw [← KaehlerDifferential.span_range_derivation, Submodule.span_le]
+  rintro _ ⟨x, rfl⟩
+  have hsub : Algebra.adjoin A s
+      ≤ derivPreimage (Submodule.span B (KaehlerDifferential.D A B '' s)) := by
+    refine Algebra.adjoin_le ?_
+    intro y hy
+    exact Submodule.subset_span ⟨y, hy, rfl⟩
+  exact hsub (hs ▸ Algebra.mem_top)
+
 /-- 巡回加群は定数族でも生成される(`Fin r` が空でなければ)。 -/
 theorem span_const_of_cyclic {R M : Type*} [CommRing R] [AddCommGroup M] [Module R M]
     (r : ℕ) [NeZero r] (ω : M) (hω : Submodule.span R ({ω} : Set M) = ⊤) :
