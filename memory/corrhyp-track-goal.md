@@ -2700,3 +2700,22 @@ ExtLimit.lean に3段:
 これで Scheme.GlueData の J・U・V・f の4成分が R' レベルで同時に揃った。
 残り: f i j の開埋め込み性(U_i ⊓ U_j を基本開集合に取る細分が未形式化)・
 t/t_id/cocycle・β脚・Theorem 4.2。集計は10/24——§4は0/2。
+
+## 2026-09-05夜さらに続き46 — t i j・t_id・cocycle が R' レベルで揃った
+
+続き45 の descendPieceRModel の命名が効いて、GlueData の t 系列を一気に
+書けた(ExtLimit.lean、5本、合計5秒弱):
+- descendPieceRModel_congr / _ringEquivOfEq(eqToHom 相当)
+- _ringEquivOfEq_refl: U = U の証明はどれでも恒等。Lean 4 の定義的証明
+  無関係性で e は rfl と defeq なので rfl で閉じる
+- _ringEquivOfEq_trans: 2回のキャストは1回
+- descendPieceRModel_t / _t_id / _t_trans: V (i,j) := U i ⊓ U j なので
+  t i j は inf_comm によるキャストだけ。t_id は rfl 一語。
+
+続き19 の設計の狙い(t を実質恒等にして t_id/cocycle を軽くする)が
+そのとおり実現した。
+
+GlueData の現状(R' レベル): J・U・V・f(続き45)・t・t_id・cocycle の骨格
+(続き46)が揃い、残るのは f_open(開埋め込み性)と t'/t_fac(pullback の配線)。
+f_open には U_i ⊓ U_j を U_i の基本開集合に取る細分が要る(未形式化)。
+集計は10/24——§4は0/2。

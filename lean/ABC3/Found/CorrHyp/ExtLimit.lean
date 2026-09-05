@@ -4462,6 +4462,98 @@ theorem exists_common_descendPieceRModel_ringHom (X : Over BaseK)
     fun i j => (h₀V (i, j)).trans (hR' (i, j) (Finset.mem_univ _)), fun i j => ?_⟩
   exact hmap (i, j) R' (hR' (i, j) (Finset.mem_univ _))
 
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 800000 in
+/-- 開集合が等しければ`R'`レベルモデルも等しい——`hU`・`h`は`Prop`なので
+`subst`のあとは**証明無関係性**で`rfl`。`GlueData`の`t i j`の土台。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem descendPieceRModel_congr (X : Over BaseK) {U U' : X.left.Opens}
+    (hU : IsAffineOpen U) (hU' : IsAffineOpen U') (hUU' : U = U')
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α]
+    (R' : FgSubalgebra ℚ ℝ) (h : pieceAlgebra_relation_descend_R X U hU C α ≤ R')
+    (h' : pieceAlgebra_relation_descend_R X U' hU' C α ≤ R') :
+    descendPieceRModel X U hU C α R' h = descendPieceRModel X U' hU' C α R' h' := by
+  subst hUU'
+  rfl
+
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 800000 in
+/-- `descendPieceRModel_congr`の環同型版(`eqToHom`に相当)。 -/
+noncomputable def descendPieceRModel_ringEquivOfEq (X : Over BaseK) {U U' : X.left.Opens}
+    (hU : IsAffineOpen U) (hU' : IsAffineOpen U') (hUU' : U = U')
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α]
+    (R' : FgSubalgebra ℚ ℝ) (h : pieceAlgebra_relation_descend_R X U hU C α ≤ R')
+    (h' : pieceAlgebra_relation_descend_R X U' hU' C α ≤ R') :
+    descendPieceRModel X U hU C α R' h ≃+* descendPieceRModel X U' hU' C α R' h' := by
+  subst hUU'
+  exact RingEquiv.refl _
+
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 800000 in
+/-- **`U = U`の証明はどれでも恒等**——Lean 4 の**定義的**証明無関係性に
+より`e`は`rfl`と defeq なので、`subst`が簡約して`rfl`で閉じる。
+`GlueData`の`t_id`はこれの特殊化。 -/
+theorem descendPieceRModel_ringEquivOfEq_refl (X : Over BaseK) {U : X.left.Opens}
+    (hU hU' : IsAffineOpen U) (e : U = U)
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α]
+    (R' : FgSubalgebra ℚ ℝ) (h : pieceAlgebra_relation_descend_R X U hU C α ≤ R')
+    (h' : pieceAlgebra_relation_descend_R X U hU' C α ≤ R') :
+    descendPieceRModel_ringEquivOfEq X hU hU' e C α R' h h' = RingEquiv.refl _ := rfl
+
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 800000 in
+/-- 2回のキャストは1回のキャスト——`GlueData`の`cocycle`はこれの特殊化。 -/
+theorem descendPieceRModel_ringEquivOfEq_trans (X : Over BaseK) {U U' U'' : X.left.Opens}
+    (hU : IsAffineOpen U) (hU' : IsAffineOpen U') (hU'' : IsAffineOpen U'')
+    (e1 : U = U') (e2 : U' = U'')
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α]
+    (R' : FgSubalgebra ℚ ℝ) (h : pieceAlgebra_relation_descend_R X U hU C α ≤ R')
+    (h' : pieceAlgebra_relation_descend_R X U' hU' C α ≤ R')
+    (h'' : pieceAlgebra_relation_descend_R X U'' hU'' C α ≤ R') :
+    (descendPieceRModel_ringEquivOfEq X hU hU' e1 C α R' h h').trans
+      (descendPieceRModel_ringEquivOfEq X hU' hU'' e2 C α R' h' h'')
+    = descendPieceRModel_ringEquivOfEq X hU hU'' (e1.trans e2) C α R' h h'' := by
+  subst e1
+  subst e2
+  rfl
+
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 800000 in
+/-- ★**`GlueData`の`t i j`**——新設計(`V (i,j) := U i ⊓ U j`)では
+`V (i,j) = V (j,i)`が`inf_comm`なので、`t i j`は**キャストだけ**である。
+これが「`t`を実質恒等にする」という設計(`corrhyp-goal.md`の`続き19`)の
+実現であり、`t_id`・`cocycle`が軽くなる理由そのもの。 -/
+noncomputable def descendPieceRModel_t (X : Over BaseK) {J : Type} (U : J → X.left.Opens)
+    (hV : ∀ i j, IsAffineOpen (U i ⊓ U j)) (C : Scheme) (α : C ⟶ (ExtF.obj X).left)
+    [IsFinite α] [Etale α] (R' : FgSubalgebra ℚ ℝ)
+    (hVR : ∀ i j, pieceAlgebra_relation_descend_R X (U i ⊓ U j) (hV i j) C α ≤ R') (i j : J) :
+    descendPieceRModel X (U i ⊓ U j) (hV i j) C α R' (hVR i j)
+      ≃+* descendPieceRModel X (U j ⊓ U i) (hV j i) C α R' (hVR j i) :=
+  descendPieceRModel_ringEquivOfEq X (hV i j) (hV j i) (inf_comm _ _) C α R' (hVR i j) (hVR j i)
+
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 800000 in
+/-- ★`GlueData`の`t_id`——`rfl`で閉じる。 -/
+theorem descendPieceRModel_t_id (X : Over BaseK) {J : Type} (U : J → X.left.Opens)
+    (hV : ∀ i j, IsAffineOpen (U i ⊓ U j)) (C : Scheme) (α : C ⟶ (ExtF.obj X).left)
+    [IsFinite α] [Etale α] (R' : FgSubalgebra ℚ ℝ)
+    (hVR : ∀ i j, pieceAlgebra_relation_descend_R X (U i ⊓ U j) (hV i j) C α ≤ R') (i : J) :
+    descendPieceRModel_t X U hV C α R' hVR i i = RingEquiv.refl _ := rfl
+
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 800000 in
+/-- ★`t i j`と`t j i`は互いに逆——`GlueData`の`cocycle`の中身。 -/
+theorem descendPieceRModel_t_trans (X : Over BaseK) {J : Type} (U : J → X.left.Opens)
+    (hV : ∀ i j, IsAffineOpen (U i ⊓ U j)) (C : Scheme) (α : C ⟶ (ExtF.obj X).left)
+    [IsFinite α] [Etale α] (R' : FgSubalgebra ℚ ℝ)
+    (hVR : ∀ i j, pieceAlgebra_relation_descend_R X (U i ⊓ U j) (hV i j) C α ≤ R') (i j : J) :
+    (descendPieceRModel_t X U hV C α R' hVR i j).trans
+      (descendPieceRModel_t X U hV C α R' hVR j i) = RingEquiv.refl _ := by
+  rw [descendPieceRModel_t, descendPieceRModel_t,
+    descendPieceRModel_ringEquivOfEq_trans]
+  exact descendPieceRModel_ringEquivOfEq_refl X (hV i j) (hV i j) _ C α R' (hVR i j) (hVR i j)
+
 open scoped TensorProduct in
 open scoped Classical in
 set_option maxHeartbeats 1000000 in

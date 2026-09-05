@@ -5983,3 +5983,31 @@ Found側sorry 0件。
 **残り**: `f i j`の開埋め込み性(`U_i ⊓ U_j`を`U_i`の基本開集合に取る
 細分がまだ未形式化)・`t`/`t_id`/`cocycle`・β脚・Theorem 4.2。
 集計は引き続き10/24——§4は引き続き0/2。
+
+### 2026-09-05夜さらに続き46 — ★`t i j`・`t_id`・`cocycle`が`R'`レベルで揃った
+
+続き45で`descendPieceRModel`に名前が付いたおかげで、`GlueData`の`t`系列が
+一気に書けた(`ExtLimit.lean`、5本、合計5秒弱)。
+
+- `descendPieceRModel_congr` — 開集合が等しければモデルも等しい
+  (`subst`のあと`hU`・`h`は`Prop`なので**証明無関係性**で`rfl`)
+- `descendPieceRModel_ringEquivOfEq` — その環同型版(`eqToHom`相当)
+- `descendPieceRModel_ringEquivOfEq_refl` — `U = U`の証明はどれでも恒等。
+  Lean 4 の**定義的**証明無関係性により`e`は`rfl`とdefeqなので`rfl`で閉じる
+- `descendPieceRModel_ringEquivOfEq_trans` — 2回のキャストは1回のキャスト
+- `descendPieceRModel_t` / `_t_id` / `_t_trans` — 新設計
+  (`V (i,j) := U i ⊓ U j`)での`t i j`は`inf_comm`による**キャストだけ**。
+  `t_id`は`rfl`、`t i j`と`t j i`が互いに逆なのは`_trans`＋`_refl`。
+
+**設計の狙いが実現した**: `続き19`で「`V (i,j) := U_i ⊓ U_j`にすれば
+`t i j`は`eqToHom`(実質恒等)になり`t_id`/`cocycle`が軽くなる」と
+書いた見立てが、そのとおりになった——`t_id`が**`rfl`一語**で閉じる。
+
+検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
+Found側sorry 0件。
+
+**`GlueData`の成分の現状**(`R'`レベル):
+`J`・`U`・`V`・`f`(続き45)・`t`・`t_id`・`cocycle`の骨格(続き46)が揃い、
+**残るのは`f_open`(開埋め込み性)と`t'`/`t_fac`(pullbackの配線)**。
+`f_open`には`U_i ⊓ U_j`を`U_i`の基本開集合に取る細分が要る(未形式化)。
+集計は引き続き10/24——§4は引き続き0/2。
