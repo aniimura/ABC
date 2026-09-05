@@ -5036,3 +5036,39 @@ baseChange`(1段の`MvPolynomial`表示)も、`f i j`の生成元の行き先を
 
 集計は引き続き10/24——§4は引き続き0/2。次の一手は、新設計の`f i j`
 (写像の降下)を実際に構成すること。
+
+## 2026-09-05夜さらに続き20: 在庫確認漏れの訂正と、新設計に要る道具が
+**すでに在庫にある**ことの確認
+
+続き19の新設計(`V (i,j) := U_i ⊓ U_j`の片、`t`は`eqToHom`)を実装しようと
+`f i j`(写像の降下)の道具を作りにかかったところ、**2つ分かった**。
+
+**(1) 訂正: 続き16で作った降下補題は重複だった**。
+`exists_fgSubalgebra_mvPolynomial_ideal_mem_descend`(commit `5c642cca`)は、
+同じ`FieldLimit.lean`に既にあった**`exists_mem_ideal_span_range_descend`**と
+完全な重複であり、しかもそれは`exists_mvPolynomial_quotient_ringHom_descend2`
+の証明中で既に使われていた。配管の`mvPolynomial_map_val_inclusion_comp`も
+`algebraTensorMap_val_comp_inclusion`+`MvPolynomial.map_map`の薄い包みで、
+使う先が重複補題だけだったので、両方削除した(commit `a22c3636`)。
+`CLAUDE.md`の「在庫」の指示どおり、書く前にファイル自身の名前一覧を
+引くべきだった——`tools/lean-idioms.md`の`#56`に、`FieldLimit.lean`の
+降下まわりの在庫一覧とその引き方を記録した。
+
+**(2) 新設計に要る道具はすでにある**。`f i j`(写像の降下)は
+**`exists_mvPolynomial_quotient_ringHom_descend2`**(既存)がそのもので、
+「ℝレベルで生成元の行き先`ψ`が与えられ、関係式がイデアルに落ちる」なら
+「有限段階`R'`で同じことが成り立つ`ev`」を返してくれる。
+
+唯一の差は**底環**で、`descend2`は単一の`A`を仮定するが、新設計では
+`A := Γ(X.left,U_i)`から`A' := Γ(X.left,U_i ⊓ U_j)`へ動く。しかしこれは
+**無料で一般化できる**ことをREPLで確認した——関係式を先に
+`Algebra.TensorProduct.map φ (AlgHom.id ℚ R.1)`で`A'`側へ押し出してから
+`descend2`を`A := A'`で使えばよい。根拠は
+`(map (id A') (val R)) ∘ (map φ (id R)) = map φ (val R)`
+(`Algebra.TensorProduct.map_comp`+`AlgHom.id_comp`/`comp_id`、1行で通る)。
+
+つまり続き19の新設計は、**新しい降下機械を作らずに**既存の`descend2`へ
+`Presentation`データを specialize するだけで進められる見込みが立った。
+集計は引き続き10/24——§4は引き続き0/2。次の一手は、`descend2`の
+「底が動く版」を薄いラッパとして書き、`descendPieceR`の`U`についての
+関手性(`V ⊆ U`に沿った制限写像の`R`レベル版)を構成すること。

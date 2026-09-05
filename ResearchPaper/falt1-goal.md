@@ -40,7 +40,7 @@
 | §1 | Lemma 1.1 | ✅Found | (完成) |
 | §1 | Theorem 1.2 | ブロック | `Wₙ⊗_{Vₙ}Vₙ₊₁`の非正規性(`differentIdeal Wₙ Wₙ₊₁`)の評価が必要。`Vₙ`塔側の技術(Eisenstein多項式・differentIdeal計算)は完成済みだが`Wₙ`側(任意のalmost étale `W`)には転用できない(`differentIdeal_tower_diamond`のdocstring参照)。退化した`W`(非分岐)を使うと`δₙ≡0`は自明に出るが、原文の「任意の`W`」という全称量化を証明したことにはならない。 |
 | §2 | Definition 2.1 | ✅Found | (完成、`p`が単元でなくても任意のétale/finite/free拡大について成立する一般形まで) |
-| §2 | Theorem 2.2 | **一意性✅完成・存在は`p`可除な底待ち** | ★2026-09-05: 入力(remark 2.1(v)、honest 版`hochschild_ext_eq_zero`・almost 版`hochschild_ext_almost_zero`)は完成。**一意性は完全に証明した**(`AlmostLifting.thm_2_2_uniqueness_of_isAlmostEtale`——差が導分になり、`Ω[B⁄A]`のalmost消滅と`C`の`p`捩れ無しから`0`)。**存在**も部品はすべて揃った:第1段`almost_lift_of_isAlmostEtale`(almost射影性からの持ち上げ)・障害のコサイクル性(`obstruction_mem_ker`・`obstruction_identity`)・コバウンダリ表示(`hochschild_H2_almost_coboundary`、明示形)・**Faltings の「`ε`を倍にする」段**(`doubling_multiplicative`)・整合性(`rescale_multiplicative`)。残るのは`ε`族の極限——★これには**`p`可除な底(`m = ∪p^{1/p^k}`)を持つ almost mathematics の層**が要る(下記「構造上の発見」参照)。 |
+| §2 | Theorem 2.2 | **一意性✅・存在は残り2段(union と `B=A+mB`)** | ★2026-09-05: Faltings の証明の各段が個別に verified な定理として存在する。**一意性**:`thm_2_2_uniqueness_of_isAlmostEtale`(`A`-代数写像版)と`uniqueness_level_lift`(水準`s`で乗法的な版——族の貼り合わせに要る)。**存在**:第1段`almost_lift_of_isAlmostEtale`(任意水準)→ 障害が`I`に値を取りコサイクル(`obsBil`・`obstruction_mem_ker`・`obstruction_isCocycle`)→ コバウンダリ表示(`hochschild_H2_almost_coboundary`、明示形)→ **`ε`を倍にする段**(`doubling_multiplicative`)→ 第2段`exists_multiplicative_lift`(水準`(ct)²`で厳密に乗法的)→ 塔の上での族`exists_multiplicative_lift_tower`(任意に深い水準)→ **`sB`上で「almost」が消える**(`exists_honest_lift_on_ideal`——`(s·b)(s·b')=s·(s·bb')`の余分な`s`が水準`s`の乗法性と打ち消し合う)→ 族の整合性(`lift_compat`・`honest_lift_agree`)→ **到達点`thm_2_2_honest_lift_on_ideal`**。**残るのは2段だけ**: (a)`mB = ∪_k (ϖk)B`上へ族を集合論的に取りまとめる、(b)`B = A + mB`を使う最後の拡張(原文の`x²=p^ε x ⟹ p^ε y=0`)。 |
 | §2 | Theorem 2.3 | 同上(同じ変形理論) | `Theorem 2.2`と同じ層を待つ。入力側(`hochschild_ext_almost_zero`は次数を問わず一般)は共通。 |
 | §2 | Theorem 2.4(i) | **余核側は完成・核側は1本だけ残る** | ★2026-09-05: `Found/Falt1/AlmostDifferentials.lean`。**余核側は完全に閉じた**——Jacobi–Zariski 完全列(`KaehlerDifferential.range_mapBaseChange`)で余核はちょうど`Ω[B⁄A]`になり、`p^n`が`Ω[B⁄A]`を零化すること(`kaehler_almost_zero`)を条件(iii)の witness から直接示した(`v := w - p^n`と置くと`v∈I`かつ`x·w=0`なので`p^n·x = -(v·x) ∈ I²`——古典的な分離冪等元の1行議論の almost 版)。**核側**は`Algebra.H1Cotangent.exact_δ_mapBaseChange`により「`p^n`が`H1Cotangent A B`を零化する」(= `B`が`A`上 almost formally smooth)にちょうど帰着することまで証明済み(`thm_2_4_i_kernel_of_h1Cotangent`)——残るのはその1本で、これは`Theorem 2.2`(nilpotent ideal に沿った lifting)と同じ深さ。 |
 | §2 | Theorem 2.4(ii) | **✅証明済み**(`thm_2_4_ii`、逸脱2件を記録の上) | ★2026-09-05: 4つの部品を全て証明し、原典の仮定の形のまま繋いだ。(1) remark(iii)の trace 恒等式(`remark_iii_trace_identity`)・ノルム適用(`trace_ideal_pow_mem_traceIdeal`)——この2つは`IsAlmostEtaleCovering`仮定の形へ一般化済みで、**`B`自体が étale である必要は無い**(Faltings の設定そのもの)。(2) 群コホモロジー側の transfer を**全次数`i>0`**で(`transfer_groupCohomology_smul_eq_zero`)——以前「mathlibに一般のtransfer定理が無い」と壁として報告していたが、必要なのはrestriction-corestrictionではなく「`Σ_g g(b)=c`なら`c`が`H^i`を零化する」という平均化だけで、coinduced加群への almost split + Shapiro(`groupCohomology.coindIso`)で閉じた。(3) 後半の`M^G/tr_G(M)`(`transfer_invariants_mem_trace`)。(4) **可換環の Galois trace 公式**(`trace_eq_sum_of_chr`——CHRの同型`B⊗_AB≅Map(G,B)`から。mathlibの`trace_eq_sum_automorphisms`は体専用なので自作、`mathlib-gap.json`の`falt1-galois-trace-rings`を3/3で解消)と局所化からの descent(`trace_formula_of_localized`)。**残る逸脱2件**: `Module.Free A B`(原典は`B[1/p]`が projective——mathlibの`Algebra.trace`が`Module.Free`要求、既記録)と`IsDedekindDomain`+`Module.IsTorsionFree`(`Ideal.relNorm`使用のため)。非空虚性の対照(実際にGalois被覆になる具体例)は未作成。 |
@@ -117,6 +117,17 @@ check.mjs --brief`で検証済み、mathlibに無かった一般定理):
 - `derivation_almost_zero`・`thm_2_2_uniqueness`・
   `thm_2_2_uniqueness_of_isAlmostEtale`(`AlmostLifting.lean`):
   **`Theorem 2.2`の一意性を完全に証明**。
+- `sqZeroModule`・`sqZeroTower`・`sqZero_act_eq`・`obsBil`・
+  `obstruction_isCocycle`・`exists_multiplicative_lift`・
+  `exists_multiplicative_lift_of_isAlmostEtale`・
+  `exists_multiplicative_lift_tower`・`lift_wd`・`lift_mul`・
+  `lift_mul_rep`・`exists_honest_lift_on_ideal`・`uniqueness_level_lift`・
+  `lift_compat`・`honest_lift_agree`・`thm_2_2_honest_lift_on_ideal`
+  (`AlmostLifting.lean`):**`Theorem 2.2`の存在側**。二乗零イデアルの
+  `B`-加群構造の配線から始めて、障害がコサイクルであること・
+  Faltings の「`ε`を倍にする」段・**`sB`上で「almost」が消えること**・
+  族の一意性と整合性まで、Faltings の証明の各段を個別の定理として
+  完成させた。到達点は`thm_2_2_honest_lift_on_ideal`。
 - `PDivTower`・`m`・**`m_sq_eq`(`m²=m`)**・`IsAlmostZero`・
   `HasAlmostWitnesses`・`IsAlmostEtaleCoveringTower`・
   `hasAlmostWitnesses_of_tower`・`kaehler_isAlmostZero_of_tower`・
@@ -157,12 +168,25 @@ lifting」という同一の1本**に帰着する:
   (= `B` が `A` 上 almost formally smooth)で、これは square-zero 拡大に
   沿った almost lifting の言い換えである。
 
-入力(`hochschild_ext_almost_zero`)も、障害類の取り出しも、
-`ε`を倍にする段も、今セッションで**すべて明示的に閉じた**
-(`HochschildLowDegree.lean`)。**残るのは`ε`族の極限を取る操作1点**で、
-それには上記の「`p`可除な底」の層が要る
-(`ResearchPaper/mathlib-gap.json`の`falt1-almost-mathematics`)。
-次回セッションはこの層の設計が最優先。
+入力(`hochschild_ext_almost_zero`)も、障害類の取り出しも、`ε`を倍に
+する段も、`p`可除な底の層(`AlmostBase.lean`)も、`sB`上で almost が
+消えることも、族の一意性・整合性も、今セッションで**すべて閉じた**。
+
+**`Theorem 2.2` に残るのは以下の2段だけである(次回セッションの入口)**:
+
+1. **union の構成**——`mB = ∪_k (ϖ k)·B`(塔の元は整除で全順序なので
+   有限和は1つの積に書ける)の上へ、compatible な族
+   `{φ₀^{s_k}}`(`s_k := (ϖ k)⁴`、`k` について cofinal)を取りまとめて
+   `φ₀ : mB → C` を定める。整合性は `lift_compat`・`honest_lift_agree`
+   で済んでいるので、`Classical.choice` を使った関数定義と
+   well-definedness の帳簿だけ。
+2. **`B = A + mB` を使う拡張**——原文の
+   *"`φ₀` maps `p^ε` to an element `x = p^ε + y` (`y ∈ I`) satisfying
+   `x² = p^ε x`, hence `p^ε y = 0`"*。`A ∩ mB` の上で
+   `algebraMap A C` と `φ₀` が一致することを言う段。
+
+`Theorem 2.3`(almost étale covering 自体の持ち上げ)は同じ層の上で、
+さらに `H³` の障害(原文が明示している)を要する。
 
 ## 0.1 `/goal Falt1 Chapter I Found` の進捗(2026-09-04)
 
