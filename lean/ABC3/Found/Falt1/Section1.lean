@@ -553,6 +553,39 @@ def derivPreimage {V B : Type*} [CommRing V] [CommRing B] [Algebra V B]
     (P : Submodule B (Ω[B⁄V])) (a : B) :
     a ∈ derivPreimage P ↔ KaehlerDifferential.D V B a ∈ P := Iff.rfl
 
+/-- **★単項生成なら `Ω` は巡回**——`B = A[w]` なら `Ω[B⁄A]` は `Dw` で
+生成される。`derivPreimage` が部分代数であることの直接の帰結。
+
+★これが原文の *"`Ω_{W_{n+1}/Vₙ}` is the direct sum of `d+1` modules"* の
+実体である——`W_{n+1}` は `Vₙ` 上単項生成(`Lemma 1.1` が使う
+`Algebra.adjoin V {w} = ⊤` と同じ仮定)なので、生成元は実は **1 個**
+で足りる(`1 ≤ d+1`)。 -/
+theorem kaehler_cyclic_of_adjoin {A B : Type*} [CommRing A] [CommRing B] [Algebra A B]
+    (w : B) (hw : Algebra.adjoin A ({w} : Set B) = ⊤) :
+    Submodule.span B ({KaehlerDifferential.D A B w} : Set (Ω[B⁄A])) = ⊤ := by
+  refine le_antisymm le_top ?_
+  rw [← KaehlerDifferential.span_range_derivation, Submodule.span_le]
+  rintro _ ⟨x, rfl⟩
+  have hsub : Algebra.adjoin A ({w} : Set B)
+      ≤ derivPreimage (Submodule.span B ({KaehlerDifferential.D A B w} : Set (Ω[B⁄A]))) := by
+    refine Algebra.adjoin_le ?_
+    rintro y hy
+    rw [Set.mem_singleton_iff] at hy
+    subst hy
+    exact Submodule.mem_span_singleton_self _
+  exact hsub (hw ▸ Algebra.mem_top)
+
+/-- 巡回加群は定数族でも生成される(`Fin r` が空でなければ)。 -/
+theorem span_const_of_cyclic {R M : Type*} [CommRing R] [AddCommGroup M] [Module R M]
+    (r : ℕ) [NeZero r] (ω : M) (hω : Submodule.span R ({ω} : Set M) = ⊤) :
+    Submodule.span R (Set.range (fun _ : Fin r => ω)) = ⊤ := by
+  have hrange : (Set.range (fun _ : Fin r => ω)) = ({ω} : Set M) := by
+    ext z
+    constructor
+    · rintro ⟨i, rfl⟩; rfl
+    · rintro rfl; exact ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne r)⟩, rfl⟩
+  rw [hrange, hω]
+
 /-- **(B1) の部分代数版**——`b` が部分代数 `A ≤ derivPreimage P` の導手に
 入るなら `b·Ω[B⁄V] ⊆ P`。 -/
 theorem smul_mem_of_conductor_subalgebra {V B : Type*} [CommRing V] [CommRing B] [Algebra V B]
@@ -2294,6 +2327,72 @@ theorem thm_1_2_of_ring_tower (d : ℕ)
     lenR_div_eq_of_baseChange (c n) (e n) (e (n + 1)) (hc n) (he n) (hfin n) (hbc n) (hce n)
   rw [h1] at hstep
   exact hstep
+
+open Filter Topology in
+/-- **★★★`Theorem 1.2`——原始的な塔の仮定から**。
+
+`thm_1_2_of_ring_tower` の入力のうち、生成元の族(`gN₀`・`gc`)と
+核の商(`φ`)を、**原文が実際に述べている仮定**から作った形:
+
+| 入力 | 原文 |
+|---|---|
+| `w`/`hwn` | `W_{n+1}` は `Vₙ` 上 1 元で生成される(`Lemma 1.1` と同じ仮定)。★これで `Ω_{W_{n+1}/Vₙ}` は**巡回**になり、原文の *"direct sum of `d+1` modules"* は上からの評価として十分 |
+| `w'`/`hwn'` | 同じく `V_{n+1}` 上 |
+| `Ψ`/`hΨ` | *"`Ω_{V_{n+1}/Vₙ}` has `(Vₙ/pVₙ)^{d+1}` as quotient"*(§1(b) の塔の仮定)を `W_{n+1}` へ底変換したもの |
+| `hinj` | 原文が断らずに使う `Ω_{V_{n+1}/Vₙ} ⊗ W_{n+1} → Ω_{W_{n+1}/Vₙ}` の単射性 |
+| `b`/… | 節点 B(導手)。`hbl` は `hbl_of_conductor_eq` が与える |
+-/
+theorem thm_1_2_of_ring_tower_monogenic (d : ℕ)
+    (V W : ℕ → Type u)
+    [∀ n, CommRing (V n)] [∀ n, CommRing (W n)]
+    [∀ n, Algebra (V n) (V (n + 1))] [∀ n, Algebra (V n) (W n)]
+    [∀ n, Algebra (W n) (W (n + 1))] [∀ n, Algebra (V n) (W (n + 1))]
+    [∀ n, IsScalarTower (V n) (V (n + 1)) (W (n + 1))]
+    [∀ n, IsScalarTower (V n) (W n) (W (n + 1))]
+    [∀ n, IsLocalRing (W n)] [∀ n, IsNoetherianRing (W n)]
+    [∀ n, Module.Finite (W (n + 1)) (TensorProduct (W n) (W (n + 1)) (Ω[W n⁄V n]))]
+    [∀ n, IsArtinian (W (n + 1)) (TensorProduct (W n) (W (n + 1)) (Ω[W n⁄V n]))]
+    [∀ n, IsNoetherian (W (n + 1)) (TensorProduct (W n) (W (n + 1)) (Ω[W n⁄V n]))]
+    [∀ n, IsArtinian (W (n + 1)) (Ω[W (n + 1)⁄V n])]
+    [∀ n, IsNoetherian (W (n + 1)) (Ω[W (n + 1)⁄V n])]
+    [∀ n, IsArtinian (W n) (Ω[W n⁄V n])] [∀ n, IsNoetherian (W n) (Ω[W n⁄V n])]
+    (e : ℕ → ℕ) (he : ∀ n, 0 < e n)
+    (c : ℕ → ℕ) (hc : ∀ n, 0 < c n) (hce : ∀ n, e (n + 1) = c n * e n)
+    (hbc : ∀ n, Module.length (W (n + 1)) (TensorProduct (W n) (W (n + 1)) (Ω[W n⁄V n]))
+      = (c n : ℕ∞) * Module.length (W n) (Ω[W n⁄V n]))
+    (hfin : ∀ n, Module.length (W n) (Ω[W n⁄V n]) ≠ ⊤)
+    (p : ∀ n, W (n + 1))
+    (hp : ∀ n, Ideal.span ({p n} : Set (W (n + 1)))
+      = (IsLocalRing.maximalIdeal (W (n + 1))) ^ (e (n + 1)))
+    (w : ∀ n, W (n + 1))
+    (hwn : ∀ n, Algebra.adjoin (V n) ({w n} : Set (W (n + 1))) = ⊤)
+    (w' : ∀ n, W (n + 1))
+    (hwn' : ∀ n, Algebra.adjoin (V (n + 1)) ({w' n} : Set (W (n + 1))) = ⊤)
+    (hinj : ∀ n, Function.Injective
+      (KaehlerDifferential.mapBaseChange (V n) (V (n + 1)) (W (n + 1))))
+    (Ψ : ∀ n, TensorProduct (V (n + 1)) (W (n + 1)) (Ω[V (n + 1)⁄V n]) →ₗ[W (n + 1)]
+      (Fin (d + 1) → W (n + 1) ⧸ Ideal.span ({p n} : Set (W (n + 1)))))
+    (hΨ : ∀ n, Function.Surjective (Ψ n))
+    (b : ∀ n, W (n + 1))
+    (hbA : ∀ n, b n ∈ Algebra.adjoin (V (n + 1))
+      (Set.range (algebraMap (W n) (W (n + 1)))))
+    (hb : ∀ (n : ℕ) (y : W (n + 1)), b n * y ∈ Algebra.adjoin (V (n + 1))
+      (Set.range (algebraMap (W n) (W (n + 1)))))
+    (hbfin : ∀ n, Module.length (W (n + 1))
+      (W (n + 1) ⧸ Ideal.span ({b n} : Set (W (n + 1)))) ≠ ⊤)
+    (hbl : ∀ n, lenR (W (n + 1)) (W (n + 1) ⧸ Ideal.span ({b n} : Set (W (n + 1))))
+      = lenR (W (n + 1)) (TensorProduct (W n) (W (n + 1)) (Ω[W n⁄V n]))
+        - lenR (W (n + 1)) (Ω[W (n + 1)⁄V (n + 1)])) :
+    Tendsto (fun n => lenR (W n) (Ω[W n⁄V n]) / (e n : ℝ)) atTop (nhds 0) :=
+  thm_1_2_of_ring_tower d V W e he c hc hce hbc hfin p hp
+    (fun n => fun _ => KaehlerDifferential.D (V n) (W (n + 1)) (w n))
+    (fun n => span_const_of_cyclic (d + 1) _ (kaehler_cyclic_of_adjoin (w n) (hwn n)))
+    (fun n => phi_of_tower (hinj n) (Ψ n))
+    (fun n => phi_of_tower_surjective (hinj n) (Ψ n) (hΨ n))
+    (fun n => fun _ => Submodule.Quotient.mk
+      (KaehlerDifferential.D (V (n + 1)) (W (n + 1)) (w' n)))
+    (fun n => hspanc_of_cyclic _ (d + 1) _ (kaehler_cyclic_of_adjoin (w' n) (hwn' n)))
+    b hbA hb hbfin hbl
 
 open Filter Topology in
 /-- **`Theorem 1.2`——Skeleton の `thm12`(ε-N 形)の形**。 -/
