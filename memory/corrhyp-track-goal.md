@@ -2353,3 +2353,24 @@ simp補題)、3.pullbackRestrictIsoRestrict_hom_ι_assoc→pullbackSymmetry_inv_
 comp_fst_assoc→pullbackRightPullbackFstIso_inv_snd_fst→pullback.congrHom_inv
 +lift_fst→pullbackHomIsoLeft_hom_fst'のinv版→pullbackSpecIso_inv_fstの順。
 各段の補題の存在は確認済み。集計は10/24——§4は0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き26
+piecePullbackIso_inv_fst完成(commit 1d457ad2、sorry無し、Instance4ビルド
+0エラー確認):
+ (piecePullbackIso).inv ≫ (piece U).ι ≫ pullback.fst
+   = Spec.map (ofHom includeLeftRingHom) ≫ hU.isoSpec.inv ≫ U.ι
+pieceRingEquivはpiecePullbackIsoをΓで送っただけなので値の情報はここからしか
+取れない。続き22で特定した「3つ目の不透明な同型」の核心。
+
+片付いた3つの詰まり: (1)(ExtF.obj X).leftという型注釈を書くとsimpの照合が
+効かない(注釈を外す)、(2)定義がcalc+▸だとunfoldしても合成が露出しない
+(.transの明示的な鎖+pullback.congrHomへ書き換え、型は不変)、(3)最後の2段は
+rwが使えない——HasPullbackインスタンスが定義由来と探索由来で食い違い表示が
+同一なのにパターンが見つからないと言われる(congrArg+Eq.trans+exactで解決)。
+
+手順の反省: 1度目のコミット57c3fa9dはビルド確認前にコミットして失敗し
+51327005で差し戻した(grepの先頭3行だけ見てEXIT:0と早合点)。2度目は
+grep -c "^error"が0かつEXIT:0を確認してからコミットした。
+
+次の一手: この等式からpieceRingEquiv.symm (a ⊗ₜ 1) = appLE a(環レベル)を
+導き、続き23の(i)と合わせて四角形を閉じる。集計は10/24——§4は0/2。

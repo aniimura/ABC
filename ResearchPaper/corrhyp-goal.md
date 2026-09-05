@@ -5247,3 +5247,40 @@ Iso_inv_snd_fst`のいずれも「未使用」と報告される。原因は
 
 各段に対応する補題が**すべて存在すること**は確認済みなので、(2)さえ片付けば
 機械的に終わる見込みである。集計は引き続き10/24——§4は引き続き0/2。
+
+## 2026-09-05夜さらに続き26: **自然性の四角形(ii)の核心が完成**——
+`piecePullbackIso`の値を特徴づけた
+
+続き25で「(2)さえ片付けば機械的に終わる見込み」と書いた追跡を**完走した**
+(`ExtLimit.lean`、commit `1d457ad2`、`sorry`無し、
+`lake build ABC3.Found.CorrHyp.Instance4` 0エラー確認):
+
+```
+theorem piecePullbackIso_inv_fst … :
+    (piecePullbackIso X U hU).inv ≫ (piece U).ι ≫ pullback.fst X.hom toBaseK
+    = Spec.map (ofHom includeLeftRingHom) ≫ hU.isoSpec.inv ≫ U.ι
+```
+
+`pieceRingEquiv`は`piecePullbackIso`を`Γ`で送っただけの同型なので、
+**値についての情報はこの等式から取り出すほかない**。続き22で「3つ目の
+不透明な同型」として特定した障害の核心部分である。
+
+**片付いた3つの詰まり**:
+1. `(ExtF.obj X).left`という型注釈を書くと`simp`の照合が効かない
+   ——注釈を外して`pullback.fst X.hom toBaseK ⁻¹ᵁ U`と書けば発火する。
+2. `piecePullbackIso`の定義が`calc`+`▸`だと`unfold`しても合成が露出しない
+   ——`.trans`の明示的な鎖+`pullback.congrHom`へ書き換えた(型は不変)。
+3. 最後の2段は`rw`が使えない——ゴールに埋まっている`HasPullback`
+   インスタンス(定義由来)と補題側(探索由来)が食い違い、**表示が同一なのに**
+   「パターンが見つからない」と言われる。`congrArg`+`Eq.trans`で組み立てて
+   `exact`(defeqで通る)にすると解決する。
+
+**手順の反省(正直な記録)**: 1度目のコミット`57c3fa9d`は**ビルド確認前に
+コミットしてしまい**(補題の定義順の誤りで失敗)、`51327005`で差し戻した。
+`grep`の出力の先頭3行だけを見て`EXIT:0`と早合点したのが原因である。
+2度目は`grep -c "^error"`が0件かつ`EXIT:0`であることを確認してから
+コミットした。
+
+集計は引き続き10/24——§4は引き続き0/2。次の一手は、この等式から
+`pieceRingEquiv.symm (a ⊗ₜ 1) = appLE a`(環レベル)を導き、続き23の(i)と
+合わせて四角形を閉じること。
