@@ -2588,3 +2588,22 @@ ExtLimit.lean に3本(error 0件・EXIT:0、Found側sorry 0件):
 
 次の一手: descend2_of_map を実際に呼ぶ。q/q₂ を Presentation の relation と
 突き合わせ、R' レベルの環準同型 → Spec → f i j。集計は10/24——§4は0/2。
+
+## 2026-09-05夜さらに続き40 — hψ を具体データで検証した(descendPieceR_hψ)
+
+ExtLimit.lean に descendPieceR_hψ(10.3秒)。descend2_of_map を
+A := Γ(X.left,U)・A' := Γ(X.left,V)・φ := pieceRestrictAlgHom・
+R/R₂ := pieceAlgebra_relation_descend_R・q/q₂ := 同 q₀ で呼ぶときの
+仮説そのもの。組み立ては3部品:
+1. tensorProduct_map_split(FieldLimit新設)で φ⊗val を (φ⊗id)∘(id⊗val) に
+   分け、後半に pieceAlgebra_relation_descend_q₀_map(インライン2箇所から抽出)。
+2. V 側も同じ定義方程式で span を P_V.relation の span に直す。
+3. aeval_map_relation_mem_span に hcomm := pieceAlgebraMap_comp_naturality。
+
+配管の学び(lean-idioms #65): 巨大な型では rw が whnf のヒートビートを
+食い尽くす(4000000でも87秒でtimeout)。congrArg + Eq.trans の項で組むと
+1000000 のまま2秒。congrArg の関数には型注釈を付ける。補題は algebraMap
+ではなく (TensorProduct.map …).toRingHom の明示形で述べる。
+
+次の一手: descend2_of_map を実際に呼んで R' レベルの環準同型 → Spec →
+f i j : V (i,j) ⟶ U i。集計は10/24——§4は0/2。

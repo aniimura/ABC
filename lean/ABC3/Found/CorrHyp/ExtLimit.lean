@@ -935,6 +935,51 @@ noncomputable def pieceAlgebra_relation_descend_q₀ (X : Over BaseK) (U : X.lef
     (Finset.mem_image_of_mem _ (Finset.mem_univ k))).choose
 
 open scoped Classical in
+/-- **`pieceAlgebra_relation_descend_q₀`の定義方程式**——降ろした関係式を
+`R.1 ↪ ℝ`で戻すと元の`P.relation k`に一致する。`choose_spec`から`k`番目を
+取り出すだけだが、`pieceAlgebra_R_model_baseChange`の中で2度インラインに
+書かれていたもの(`在庫`原則)。
+
+**`algebraMap`ではなく`(Algebra.TensorProduct.map (AlgHom.id ℚ A)
+(Subalgebra.val R.1)).toRingHom`という明示形で述べてある**のが要点:
+`algebraMap`形にすると、これを使う側で`whnf`のヒートビートが尽きる
+(`lean-idioms` #65)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem pieceAlgebra_relation_descend_q₀_map (X : Over BaseK) (U : X.left.Opens)
+    (hU : IsAffineOpen U) (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α] :
+    letI := pieceAlgebra X U hU
+    letI : Algebra (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+      ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+        (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.comp
+        (pieceRingEquiv X U hU).symm.toRingHom).toAlgebra
+    haveI : Algebra.Etale (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+      piece_algebraEtale_tensor X U hU C α
+    haveI : Algebra.FinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ)
+        Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) := inferInstance
+    ∀ k, MvPolynomial.map (Algebra.TensorProduct.map (AlgHom.id ℚ Γ(X.left, U))
+          (Subalgebra.val (pieceAlgebra_relation_descend_R X U hU C α).1)).toRingHom
+        (pieceAlgebra_relation_descend_q₀ X U hU C α k)
+      = (Algebra.Presentation.ofFinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ)
+          Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U))).relation k := by
+  letI := pieceAlgebra X U hU
+  letI : Algebra (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+      (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.comp
+      (pieceRingEquiv X U hU).symm.toRingHom).toAlgebra
+  haveI : Algebra.Etale (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    piece_algebraEtale_tensor X U hU C α
+  haveI : Algebra.FinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ)
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) := inferInstance
+  intro k
+  exact ((exists_fg_subalgebra_tensor_mvPolynomial_finset (Γ(X.left, U))
+    (Finset.image (Algebra.Presentation.ofFinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ)
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U))).relation Finset.univ)).choose_spec
+    ((Algebra.Presentation.ofFinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ)
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U))).relation k)
+    (Finset.mem_image_of_mem _ (Finset.mem_univ k))).choose_spec
+
+open scoped Classical in
 /-- **`Γ(C,piece)`の`R`レベルモデル`S_0`**——`pieceAlgebra_relation_
 descend_q₀`が与える降ろした関係式による`MvPolynomial`商。`Γ(C,piece)`
 全体を一度に`R`レベルへ降ろす計画の目標そのもの——次の一手は
@@ -3969,6 +4014,123 @@ theorem pieceAlgebraMap_comp_naturality (X : Over BaseK) (U V : X.left.Opens)
   | add x y hx hy =>
       simp only [RingHom.comp_apply, map_add] at hx hy ⊢
       rw [hx, hy]
+
+open scoped TensorProduct in
+open scoped Classical in
+set_option maxHeartbeats 1000000 in
+/-- ★**`Lemma 4.1`の`f i j`を降ろすための仮説`hψ`——具体データで検証済み**★
+
+`exists_mvPolynomial_quotient_ringHom_descend2_of_map`(`FieldLimit.lean`)を
+`A := Γ(X.left,U)`・`A' := Γ(X.left,V)`・`φ := pieceRestrictAlgHom`・
+`R := pieceAlgebra_relation_descend_R X U hU C α`・`R₂ := 同 V`・
+`q := pieceAlgebra_relation_descend_q₀ X U hU C α`・`q₂ := 同 V`・
+`ψ i := P_V.σ (制限 (P_U.val i))` で呼ぶときの仮説そのもの。
+
+**組み立て**(3つの部品の合成):
+1. `tensorProduct_map_split`で`φ ⊗ val R`を`(φ ⊗ id) ∘ (id ⊗ val R)`に分け、
+   後半に`pieceAlgebra_relation_descend_q₀_map`を当てて
+   `map (φ ⊗ id) (P_U.relation k)`にする(`h1`)。
+2. `V`側も同じ定義方程式で`span (range q₂の像) = span (range P_V.relation)`
+   に直す(`h2`)。
+3. あとは`aeval_map_relation_mem_span`に
+   `hcomm := pieceAlgebraMap_comp_naturality`を食わせるだけ。
+
+**配管の注意**: `h1`は`rw`で書くと`whnf`のヒートビートが尽きる
+(4000000でも足りない)。`congrArg` + `Eq.trans`の**項で組む**と2秒で通る
+(`lean-idioms` #65)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem descendPieceR_hψ (X : Over BaseK) (U V : X.left.Opens)
+    (hU : IsAffineOpen U) (hV : IsAffineOpen V) (hVU : V ≤ U)
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α] :
+    letI := pieceAlgebra X U hU
+    letI := pieceAlgebra X V hV
+    letI algU : Algebra (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+      ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+        (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.comp
+        (pieceRingEquiv X U hU).symm.toRingHom).toAlgebra
+    letI algV : Algebra (Γ(X.left, V) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V)) :=
+      ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ V)
+        (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V)) le_rfl).hom.comp
+        (pieceRingEquiv X V hV).symm.toRingHom).toAlgebra
+    haveI : Algebra.Etale (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+      piece_algebraEtale_tensor X U hU C α
+    haveI : Algebra.Etale (Γ(X.left, V) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V)) :=
+      piece_algebraEtale_tensor X V hV C α
+    haveI : Algebra.FinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ)
+        Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) := inferInstance
+    haveI : Algebra.FinitePresentation (Γ(X.left, V) ⊗[ℚ] ℝ)
+        Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V)) := inferInstance
+    ∀ k, MvPolynomial.aeval
+        (fun i => (Algebra.Presentation.ofFinitePresentation (Γ(X.left, V) ⊗[ℚ] ℝ)
+            Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V))).σ
+          ((C.presheaf.map (homOfLE (piece_le_of_le X U V hVU C α)).op).hom
+            ((Algebra.Presentation.ofFinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ)
+              Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U))).val i)))
+        (MvPolynomial.map (Algebra.TensorProduct.map (pieceRestrictAlgHom X U V hU hV hVU)
+            (Subalgebra.val (pieceAlgebra_relation_descend_R X U hU C α).1)).toRingHom
+          (pieceAlgebra_relation_descend_q₀ X U hU C α k))
+      ∈ Ideal.span (Set.range (fun k' => MvPolynomial.map
+          (Algebra.TensorProduct.map (AlgHom.id ℚ Γ(X.left, V))
+            (Subalgebra.val (pieceAlgebra_relation_descend_R X V hV C α).1)).toRingHom
+          (pieceAlgebra_relation_descend_q₀ X V hV C α k'))) := by
+  letI := pieceAlgebra X U hU
+  letI := pieceAlgebra X V hV
+  letI algU : Algebra (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ U)
+      (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) le_rfl).hom.comp
+      (pieceRingEquiv X U hU).symm.toRingHom).toAlgebra
+  letI algV : Algebra (Γ(X.left, V) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V)) :=
+    ((Scheme.Hom.appLE α (pullback.fst X.hom toBaseK ⁻¹ᵁ V)
+      (α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V)) le_rfl).hom.comp
+      (pieceRingEquiv X V hV).symm.toRingHom).toAlgebra
+  haveI : Algebra.Etale (Γ(X.left, U) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) :=
+    piece_algebraEtale_tensor X U hU C α
+  haveI : Algebra.Etale (Γ(X.left, V) ⊗[ℚ] ℝ) Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V)) :=
+    piece_algebraEtale_tensor X V hV C α
+  haveI : Algebra.FinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ)
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)) := inferInstance
+  haveI : Algebra.FinitePresentation (Γ(X.left, V) ⊗[ℚ] ℝ)
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V)) := inferInstance
+  have hqU := pieceAlgebra_relation_descend_q₀_map X U hU C α
+  have hqV := pieceAlgebra_relation_descend_q₀_map X V hV C α
+  have hsplit := tensorProduct_map_split (R := ℚ) (pieceRestrictAlgHom X U V hU hV hVU)
+      (Subalgebra.val (pieceAlgebra_relation_descend_R X U hU C α).1)
+  have h1 : ∀ k, MvPolynomial.map (Algebra.TensorProduct.map (pieceRestrictAlgHom X U V hU hV hVU)
+        (Subalgebra.val (pieceAlgebra_relation_descend_R X U hU C α).1)).toRingHom
+        (pieceAlgebra_relation_descend_q₀ X U hU C α k)
+      = MvPolynomial.map (Algebra.TensorProduct.map (pieceRestrictAlgHom X U V hU hV hVU)
+          (AlgHom.id ℚ ℝ)).toRingHom
+          ((Algebra.Presentation.ofFinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ)
+            Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U))).relation k) := fun k =>
+    Eq.trans (congrArg (fun t : (Γ(X.left, U) ⊗[ℚ] (pieceAlgebra_relation_descend_R X U hU C α).1)
+        →ₐ[ℚ] (Γ(X.left, V) ⊗[ℚ] ℝ) => MvPolynomial.map t.toRingHom
+        (pieceAlgebra_relation_descend_q₀ X U hU C α k)) hsplit)
+      (Eq.trans (MvPolynomial.map_map _ _ _).symm
+        (congrArg (MvPolynomial.map (Algebra.TensorProduct.map
+          (pieceRestrictAlgHom X U V hU hV hVU) (AlgHom.id ℚ ℝ)).toRingHom) (hqU k)))
+  have h2 : Ideal.span (Set.range (fun k' => MvPolynomial.map
+        (Algebra.TensorProduct.map (AlgHom.id ℚ Γ(X.left, V))
+          (Subalgebra.val (pieceAlgebra_relation_descend_R X V hV C α).1)).toRingHom
+        (pieceAlgebra_relation_descend_q₀ X V hV C α k')))
+      = Ideal.span (Set.range (Algebra.Presentation.ofFinitePresentation (Γ(X.left, V) ⊗[ℚ] ℝ)
+          Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V))).relation) :=
+    congrArg (fun s => Ideal.span (Set.range s)) (funext hqV)
+  intro k
+  have hmain := aeval_map_relation_mem_span
+    (Algebra.Presentation.ofFinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ)
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U)))
+    (Algebra.Presentation.ofFinitePresentation (Γ(X.left, V) ⊗[ℚ] ℝ)
+      Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V)))
+    (Algebra.TensorProduct.map (pieceRestrictAlgHom X U V hU hV hVU) (AlgHom.id ℚ ℝ)).toRingHom
+    (C.presheaf.map (homOfLE (piece_le_of_le X U V hVU C α)).op).hom
+    (pieceAlgebraMap_comp_naturality X U V hU hV hVU C α) k
+  exact h2 ▸ (congrArg (MvPolynomial.aeval
+    (fun i => (Algebra.Presentation.ofFinitePresentation (Γ(X.left, V) ⊗[ℚ] ℝ)
+        Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ V))).σ
+      ((C.presheaf.map (homOfLE (piece_le_of_le X U V hVU C α)).op).hom
+        ((Algebra.Presentation.ofFinitePresentation (Γ(X.left, U) ⊗[ℚ] ℝ)
+          Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U))).val i)))) (h1 k)).symm ▸ hmain
 
 /-- `piecesOpenCover`の脚`(e i).inv ≫ X.homOfLE (h i)`同士のpullbackは、
 `e i`・`e j`をpullbackの脚から追い出す(`pullbackHomIsoLeft`+

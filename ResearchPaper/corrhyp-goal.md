@@ -5744,3 +5744,47 @@ Found側sorry 0件。
 `Algebra.Presentation.ofFinitePresentation`の`relation`と突き合わせ、
 `R'`レベルの環準同型を得て`Spec`を取り、`f i j : V (i,j) ⟶ U i`を作る。
 集計は引き続き10/24——§4は引き続き0/2。
+
+### 2026-09-05夜さらに続き40 — ★`hψ`を具体データで検証した(`descendPieceR_hψ`)
+
+続き39までで揃った部品を、`descend2_of_map`が実際に要求する形で
+組み上げた。`ExtLimit.lean`に`descendPieceR_hψ`(10.3秒で通過):
+
+```
+∀ k, aeval (fun i => P_V.σ (制限 (P_U.val i)))
+      (map (TensorProduct.map (pieceRestrictAlgHom X U V …) (val R_U)).toRingHom
+        (pieceAlgebra_relation_descend_q₀ X U hU C α k))
+    ∈ Ideal.span (Set.range (fun k' =>
+        map (TensorProduct.map (id A_V) (val R_V)).toRingHom
+          (pieceAlgebra_relation_descend_q₀ X V hV C α k')))
+```
+
+これは`exists_mvPolynomial_quotient_ringHom_descend2_of_map`を
+`A := Γ(X.left,U)`・`A' := Γ(X.left,V)`・`φ := pieceRestrictAlgHom`・
+`R`/`R₂ := pieceAlgebra_relation_descend_R`・`q`/`q₂ := 同 q₀`で呼ぶときの
+**仮説そのもの**である。
+
+**組み立て**(3部品):
+1. `tensorProduct_map_split`(FieldLimitに新設)で`φ ⊗ val R`を
+   `(φ ⊗ id) ∘ (id ⊗ val R)`に分解。後半に
+   `pieceAlgebra_relation_descend_q₀_map`(`pieceAlgebra_R_model_baseChange`
+   の中に2度インラインで書かれていたものを`在庫`原則に従って抽出)を当てて
+   `map (φ ⊗ id) (P_U.relation k)`にする。
+2. `V`側も同じ定義方程式で
+   `span (range q₂の像) = span (range P_V.relation)`に直す。
+3. `aeval_map_relation_mem_span`(続き38)に
+   `hcomm := pieceAlgebraMap_comp_naturality`(続き39)を食わせる。
+
+**配管で1つ学んだ**(`lean-idioms` #65): 1. を`rw`で書くと`whnf`が
+ヒートビートを食い尽くす(4000000でも足りず87秒でtimeout)。同じ内容を
+`congrArg` + `Eq.trans`の**項**で組むと`maxHeartbeats 1000000`のまま
+**2秒**で通る。`congrArg`の関数には型注釈を付けるのがコツ。
+併せて、補題を`algebraMap`ではなく`(TensorProduct.map … ).toRingHom`の
+**明示形**で述べておくと`RingHom.toAlgebra`越しのdefeq判定が起きない。
+
+検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
+Found側sorry 0件。
+
+**次の一手**: `descend2_of_map`を実際に呼んで`R'`レベルの環準同型を得る。
+そこから`Spec`を取れば`f i j : V (i,j) ⟶ U i`。
+集計は引き続き10/24——§4は引き続き0/2。

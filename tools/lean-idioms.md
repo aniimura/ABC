@@ -5122,3 +5122,64 @@ have hfun : ((MvPolynomial.eval₂Hom algV valV : MvPolynomial ι' 𝔹 →+* T)
 ```
 
 実例: `Found/CorrHyp/FieldLimit.lean` の `eval₂_map_aeval_eq_zero`。
+
+## 64. テンソル積からの環準同型の等式に `ext x` を使うと `TensorProduct.ext` が先に噛む
+
+`f g : (A ⊗[R] B) →+* T` の `f = g` を示すのに `ext x` と書くと、
+`Algebra.TensorProduct.ext`(成分ごとに見る `ext` 補題)が先に選ばれて
+`x : A` になり、続く `induction x using TensorProduct.induction_on` が
+
+```
+Invalid target: x has type ↑Γ(X.left, U) but is expected to have type ?m ⊗[?m] ?m
+```
+
+で落ちる。**直し方**: `ext` を使わず `refine RingHom.ext fun x => ?_` と
+明示する。そのあと `induction x using TensorProduct.induction_on` が通る。
+
+**`add` ケースの注意**: 帰納法の仮説 `hx`/`hy` は `(f.comp g) x = (h.comp k) x`
+という **`.comp` の形**で出るのに、`simp` はゴールを `f (g x) = h (k x)` へ
+展開してしまうため `simp [hx, hy]` が「引数が使われていない」と言って
+失敗する。両方を同じ形に揃えてから `rw` する:
+
+```lean
+| add x y hx hy =>
+    simp only [RingHom.comp_apply, map_add] at hx hy ⊢
+    rw [hx, hy]
+```
+
+実例: `Found/CorrHyp/ExtLimit.lean` の `pieceAlgebraMap_comp_naturality`
+(純テンソル上の等式 `pieceAlgebraMap_naturality` を環準同型の等式へ
+持ち上げるところ)。
+
+## 65. 巨大な型では `rw` が `whnf` のヒートビートを食い尽くす——`congrArg` + `Eq.trans` の**項**で組む
+
+`Γ(C, α ⁻¹ᵁ (pullback.fst X.hom toBaseK ⁻¹ᵁ U))` のように `letI` を
+何段も重ねた型の上では、`rw` の motive 計算と `whnf` が爆発する。
+
+```
+error: (deterministic) timeout at `whnf`, maximum number of heartbeats (4000000) has been reached
+```
+
+`maxHeartbeats 4000000` でも足りない。同じ内容を**項で組む**と
+`maxHeartbeats 1000000` のまま **2 秒**で通る:
+
+```lean
+-- ✗ 87 秒かけて timeout
+    rw [← hq k, MvPolynomial.map_map]
+    exact congrArg (fun t => MvPolynomial.map t.toRingHom q₀) hsplit
+
+-- ✓ 2 秒
+    Eq.trans (congrArg (fun t : A →ₐ[ℚ] B => MvPolynomial.map t.toRingHom q₀) hsplit)
+      (Eq.trans (MvPolynomial.map_map _ _ _).symm
+        (congrArg (MvPolynomial.map g.toRingHom) (hq k)))
+```
+
+`congrArg` の関数には**型注釈を付ける**(`fun t : A →ₐ[ℚ] B => …`)。
+付けないと `t` の型が決まらず、結局同じ探索に落ちる。
+
+**併せて**: 補題を述べるとき `algebraMap R S` と書かず
+`(Algebra.TensorProduct.map (AlgHom.id ℚ A) (Subalgebra.val R.1)).toRingHom`
+のような**明示形**にしておくと、使う側で `algebraMap` の
+`RingHom.toAlgebra` 越しの defeq 判定が起きず、これも爆発を防ぐ。
+実例: `Found/CorrHyp/ExtLimit.lean` の
+`pieceAlgebra_relation_descend_q₀_map` と `descendPieceR_hψ`。

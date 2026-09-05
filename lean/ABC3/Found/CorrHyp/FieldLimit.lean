@@ -3278,4 +3278,20 @@ theorem aeval_map_relation_mem_span
   rw [← PU.span_range_relation_eq_ker]
   exact Ideal.subset_span ⟨k, rfl⟩
 
+open scoped TensorProduct in
+/-- **`f ⊗ g` を「係数だけ動かす」と「底だけ動かす」に分ける**——
+`Lemma 4.1`で`R`レベルの関係式`q₀`(`A ⊗ R.1`係数)を`A' ⊗ ℝ`へ移すとき、
+`φ ⊗ (val R)` を `(φ ⊗ id) ∘ (id ⊗ val R)` と分解すると、後半が
+`pieceAlgebra_relation_descend_q₀_map`(降ろした関係式の定義方程式)、
+前半が`aeval_map_relation_mem_span`の`φ'`にそのまま対応する。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem tensorProduct_map_split {R A A' B B' : Type} [CommRing R] [CommRing A] [CommRing A']
+    [CommRing B] [CommRing B'] [Algebra R A] [Algebra R A'] [Algebra R B] [Algebra R B']
+    (f : A →ₐ[R] A') (g : B →ₐ[R] B') :
+    Algebra.TensorProduct.map f g
+      = (Algebra.TensorProduct.map f (AlgHom.id R B')).comp
+          (Algebra.TensorProduct.map (AlgHom.id R A) g) := by
+  ext <;> simp
+
 end ABC3.Found.CorrHyp
