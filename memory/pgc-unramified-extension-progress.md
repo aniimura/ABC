@@ -1345,3 +1345,40 @@ theorem theorem_4_2 (RF) (hnat : RF.IsNatural) (K K') :
 import してよい(`Section1Cor13` までしか遡らないので循環しない)。
 `filtOf` は `Section3.lean::filteredGroupOf` / `Section4.lean::RF.filt` と
 **定義的に等しい**(同じ構造体リテラル)ので型は合う。
+
+## ★★★★★★★★★★★★★2026-09-05: Theorem 4.2 を**直した**——自然な射を構成
+
+`Found/PGC/RamificationNaturality.lean`(新規)+ `Skeleton/PGC/Section4.lean`
+の statement 差し替え + `Found/PGC/GaloisTransfer.lean` の import 修正。
+
+**旧**: `Φ` を自由なパラメータで受け取って `Function.Bijective Φ`(偽)
+**新**:
+```
+theorem theorem_4_2 (RF) (hnat : IsNaturalFiltration RF) (K K') :
+    Function.Bijective (naturalOuterIso RF hnat (K := K) (K' := K'))
+```
+
+- `filtOf RF K` : `Section3::filteredGroupOf` / `Section4::RF.filt` と同じ
+  構造体リテラル(定義的に等しい)。import の向きのために Found 側に複製。
+- **`IsNaturalFiltration RF`** : 体の同型から誘導される共役が `Gv` を保つ
+  ——`Interface` に無い自然性を**明示的な仮説**に切り出した。
+  ★名前を `RamificationFiltration.IsNatural` にしないのは、`namespace
+  ABC3.Found.PGC` の内側だと `ABC3.Found.PGC.RamificationFiltration.IsNatural`
+  になってしまうため(Section4 冒頭の注意と同じ罠)。
+- `exists_isNaturalFiltration` : 退化した `Gv ≡ ⊤` が満たす(非空虚)
+- **`naturalFilteredIso` / `naturalOuterIso`** : 自然な射そのもの
+
+★import の配管: `GaloisTransfer.lean` が `Skeleton/PGC/Section4` を
+import していた(docstring で `FilteredGroup` に言及するだけで、**コードでは
+使っていなかった**)。これを `Skeleton/PGC/Setup` に落とすと、Section4 が
+`Found/PGC/RamificationNaturality` を import できるようになり循環が解けた。
+
+### 残っているのは本物の数学だけ
+
+新しい statement で `sorry` を埋めるには、
+- **単射性**: 相異なる体の同型は相異なる外部同型を与える
+- **全射性**: フィルトレーションを保つ外部同型はすべて体の同型から来る
+  ←これが Grothendieck 予想そのもの(§1〜§3 の全部+局所類体論)
+
+`IsNaturalFiltration` の仮説は、Herbrand の定理が入って
+`RamificationFiltration` が本物として構成された時点で落ちる。

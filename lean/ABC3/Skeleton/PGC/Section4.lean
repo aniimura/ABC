@@ -1,5 +1,6 @@
 import ABC3.Skeleton.PGC.Section3
 import ABC3.Found.PGC.OpenSubgroupSpan
+import ABC3.Found.PGC.RamificationNaturality
 
 /-!
 # [pGC] §4 — 命題(主定理)
@@ -99,24 +100,39 @@ filtered group の外部同型に持ち上げる構成——はそれ自体ま�
 `Check.PGC.theorem_4_2_statement_false` に `sorry` 無しの証明がある。
 すなわち本項目は「`sorry` が埋まらない」のではなく「**埋めようがない**」。
 
-**直し方**: 原文が「the **natural** morphism」と言う以上、`Φ` は構成
-されねばならない。部品は既にある——`Found/PGC/GaloisTransfer.lean::
-galMulEquivOf`(延長+共役)と `galMulEquivOf_indep`(延長の取り方に
-よらない=外部同型としては一意)。残る穴は `map_Gv`(フィルトレーション
-を保つこと)で、これは `Interface.PGC.RamificationFiltration` に
-自然性の公理が無いことに帰着する(`memory/pgc-ramification-naturality-gap.md`、
-下の `.needs` の implicitStep と同じ穴)。 -/
-theorem theorem_4_2 (RF : RamificationFiltration p) (K K' : PAdicLocalField p)
-    (Φ : (K.carrier ≃ₐ[ℚ_[p]] K'.carrier) →
-      FilteredGroup.OuterIso (RF.filt K) (RF.filt K')) :
-    Function.Bijective Φ := sorry
+## ★★★2026-09-05: **直した**(`Found/PGC/RamificationNaturality.lean`)
+
+自然な射を**構成**して、それについて述べる形に直した:
+
+* 延長 `extendToClosure`(mathlib `IsAlgClosure.equivOfEquiv`)
+* 共役 `galMulEquivOf`
+* 延長の選択に依らない `galMulEquivOf_indep`(=**外部**同型としては一意)
+* **連続性** `galContinuousMulEquiv`(`Found/PGC/GaloisTransferContinuous.lean`)
+* `map_Gv` は `IsNaturalFiltration RF` として**明示的な仮説**に切り出した
+
+最後の一点だけが仮説として残るのは、`Interface.PGC.RamificationFiltration`
+が `K` ごとに独立な `Gv` を許す抽象データで、「体の同型から誘導される共役が
+`Gv` を保つ」という自然性を課していないため(`memory/
+pgc-ramification-naturality-gap.md`、下の `.needs` の implicitStep と同じ穴)。
+本物の高次分岐群なら成り立つ性質であり、Herbrand の定理が入って
+`RamificationFiltration` が構成された時点でこの仮説は落ちる。
+
+★仮説 `IsNaturalFiltration` は空虚ではない
+(`Found.PGC.exists_isNaturalFiltration`——退化した `Gv ≡ ⊤` が満たす)。 -/
+theorem theorem_4_2 (RF : RamificationFiltration p) (hnat : IsNaturalFiltration RF)
+    (K K' : PAdicLocalField p) :
+    Function.Bijective (naturalOuterIso RF hnat (K := K) (K' := K')) := sorry
 
 def theorem_4_2.src : Source :=
   { paper := "pGC", pdfPage := 7, item := "Theorem 4.2", sectionId := "theorem-4-2" }
 
 def theorem_4_2.needs : List ProofObligation :=
   [ .implicitStep
-      ("Q_p-代数同型 α : K ≃ K′ を代数閉包への同型 ᾱ : K̄ ≃ K̄′ へ延長し、共役で誘導される" ++
+      ("★2026-09-05: **この段は解消した**——Found/PGC/RamificationNaturality.lean::" ++
+       "naturalOuterIso として自然な射を実際に構成し、theorem_4_2 の statement を" ++
+       "それについて述べる形に直した(連続性は GaloisTransferContinuous.lean で解消、" ++
+       "map_Gv は IsNaturalFiltration という明示的な仮説に切り出した)。以下は経緯: " ++
+       "Q_p-代数同型 α : K ≃ K′ を代数閉包への同型 ᾱ : K̄ ≃ K̄′ へ延長し、共役で誘導される" ++
        "Γ_K ≅ Γ_K′ が ᾱ の取り方によらない外部同型類を定めることの構成。" ++
        "★2026-09-04: 「延長+共役+選択非依存」の部分自体は一般の Galois 理論だけで" ++
        "**sorry 無しで構成できた**(`Found/PGC/GaloisTransfer.lean::galMulEquivOf`・" ++

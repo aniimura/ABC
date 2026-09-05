@@ -1,4 +1,4 @@
-import ABC3.Skeleton.PGC.Section4
+import ABC3.Skeleton.PGC.Setup
 
 /-!
 # 体の同型から絶対 Galois 群の同型へ(`sorry` 無し、局所類体論を経由しない)

@@ -3,7 +3,12 @@ import ABC3.Found.PGC.UnramifiedSubextension
 import ABC3.Found.PGC.QpResidueField
 
 /-!
-# [pGC] Theorem 4.2 の現在の形は**偽**——`Φ` が自由な関数だから
+# [pGC] Theorem 4.2 の**旧**形は偽だった——`Φ` が自由な関数だから
+
+★2026-09-05 追記: この検査を受けて `Skeleton/PGC/Section4.lean::theorem_4_2`
+は**直した**(`Found/PGC/RamificationNaturality.lean::naturalOuterIso` で
+自然な射を構成し、それについて述べる形にした)。以下の反例は
+**旧形が偽だったこと**の記録であり、なぜ直す必要があったかの根拠である。
 
 `Skeleton/PGC/Section4.lean::theorem_4_2` は、原文
 
@@ -28,7 +33,7 @@ theorem theorem_4_2 (RF) (K K')
   `Isom_{Q_p}(K,K) = Gal(K/ℚ_p)` は 2 元。
 * `Φ := fun _ => 恒等外部同型` は単射でない。
 
-したがって `theorem_4_2` は **`sorry` が埋まらないのではなく、偽**。
+したがって**旧形の** `theorem_4_2` は **`sorry` が埋まらないのではなく、偽**だった。
 
 ## 何を直すべきか
 
