@@ -6318,3 +6318,32 @@ Spec.map (ofHom φ)`、`e`が環同型なら前者は同型、開埋め込みと
 
 検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
 Found側sorry 0件。集計は引き続き10/24——§4は引き続き0/2。
+
+### 2026-09-05夜さらに続き57 — ★`GlueData'`の`t_inv`をスキームレベルで閉じた
+
+mathlibの`CategoryTheory.GlueData'`(`GlueData`の`i ≠ j`だけ条件を課す版、
+`GlueData.ofGlueData'`で本物になる)の要求を確認したところ、
+`t'`・`t_fac`・`t_inv`・`cocycle`は依然として必要だった。そのうち
+**`t_inv`をスキームレベルで閉じた**(`ExtLimit.lean`、3本):
+
+- `descendPieceRModel_ringEquivOfEq_symm` — 逆向きのキャストはキャストの逆
+  (`subst`のあと`rfl`)
+- `descendPieceRModel_t_symm` — `t j i = (t i j).symm`
+  (`inf_comm`の2つの向きは互いに逆)
+- `descendPieceRModel_tScheme_trans` — **`t i j ≫ t j i = 𝟙`**(スキーム)
+
+**配管を2つ記録**:
+1. `rw [← Scheme.Spec.map_comp]`は`Spec X`と`Scheme.Spec.obj (op X)`が
+   `instances`透明度で見分けられず失敗する(`lean-idioms` #65 の再現)。
+   `Eq.trans (Scheme.Spec.map_comp _ _).symm (…)`と**項で組む**と通る。
+2. `ᵒᵖ`での合成が恒等であることを`ext`で示そうとすると
+   `Ideal.Quotient.ringHom_ext`が効いて**商の生成元`X x`まで降りてしまう**。
+   `CommRingCat.hom_ext` → `RingHom.ext` → `RingEquiv.symm_apply_apply`と
+   **深さを明示して**閉じる。
+
+**`GlueData'`成分の現状**(`R'`レベル): `J`・`U`・`V`・`f`・`t`・`t_inv`が
+揃った。残るのは`f_mono`/`f_open`(被覆の細分待ち)と`t'`・`t_fac`・
+`cocycle`(三重交差=pullbackの同定が要る)。
+
+検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
+Found側sorry 0件。集計は引き続き10/24——§4は引き続き0/2。

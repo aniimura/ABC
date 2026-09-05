@@ -4799,6 +4799,70 @@ noncomputable def descendPieceRModel_tScheme (X : Over BaseK) {J : Type} (U : J 
   Scheme.Spec.mapIso
     (descendPieceRModel_t X U hV C α R' hVR i j).symm.toCommRingCatIso.op
 
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 800000 in
+/-- 逆向きのキャストは、キャストの逆——`subst`のあと`rfl`。 -/
+theorem descendPieceRModel_ringEquivOfEq_symm (X : Over BaseK) {U U' : X.left.Opens}
+    (hU : IsAffineOpen U) (hU' : IsAffineOpen U') (hUU' : U = U')
+    (C : Scheme) (α : C ⟶ (ExtF.obj X).left) [IsFinite α] [Etale α]
+    (R' : FgSubalgebra ℚ ℝ) (h : pieceAlgebra_relation_descend_R X U hU C α ≤ R')
+    (h' : pieceAlgebra_relation_descend_R X U' hU' C α ≤ R') :
+    descendPieceRModel_ringEquivOfEq X hU' hU hUU'.symm C α R' h' h
+      = (descendPieceRModel_ringEquivOfEq X hU hU' hUU' C α R' h h').symm := by
+  subst hUU'
+  rfl
+
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 800000 in
+/-- ★`t j i = (t i j).symm`——`inf_comm`の2つの向きは互いに逆。 -/
+theorem descendPieceRModel_t_symm (X : Over BaseK) {J : Type} (U : J → X.left.Opens)
+    (hV : ∀ i j, IsAffineOpen (U i ⊓ U j)) (C : Scheme) (α : C ⟶ (ExtF.obj X).left)
+    [IsFinite α] [Etale α] (R' : FgSubalgebra ℚ ℝ)
+    (hVR : ∀ i j, pieceAlgebra_relation_descend_R X (U i ⊓ U j) (hV i j) C α ≤ R') (i j : J) :
+    descendPieceRModel_t X U hV C α R' hVR j i
+      = (descendPieceRModel_t X U hV C α R' hVR i j).symm :=
+  descendPieceRModel_ringEquivOfEq_symm X (hV i j) (hV j i) (inf_comm _ _) C α R'
+    (hVR i j) (hVR j i)
+
+open scoped TensorProduct in
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 800000 in
+/-- ★**`GlueData'`の`t_inv`(スキームレベル)**——
+`t i j ≫ t j i = 𝟙`。`descendPieceRModel_t_symm`で`t j i`を
+`(t i j).symm`に直し、`Scheme.Spec`の関手性で閉じる。
+
+**配管**(`lean-idioms` #65 の再現): `rw [← Scheme.Spec.map_comp]`は
+`Spec X`と`Scheme.Spec.obj (op X)`が`instances`透明度で見分けられず失敗する。
+`Eq.trans (Scheme.Spec.map_comp _ _).symm (…)`と**項で組む**と通る。
+また`h`(`ᵒᵖ`での合成が恒等であること)を`ext`で証明しようとすると
+`Ideal.Quotient.ringHom_ext`が効いて商の生成元まで降りてしまうので、
+`CommRingCat.hom_ext`→`RingHom.ext`→`RingEquiv.symm_apply_apply`と
+**深さを明示して**閉じる。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem descendPieceRModel_tScheme_trans (X : Over BaseK) {J : Type} (U : J → X.left.Opens)
+    (hV : ∀ i j, IsAffineOpen (U i ⊓ U j)) (C : Scheme) (α : C ⟶ (ExtF.obj X).left)
+    [IsFinite α] [Etale α] (R' : FgSubalgebra ℚ ℝ)
+    (hVR : ∀ i j, pieceAlgebra_relation_descend_R X (U i ⊓ U j) (hV i j) C α ≤ R') (i j : J) :
+    (descendPieceRModel_tScheme X U hV C α R' hVR i j).hom
+      ≫ (descendPieceRModel_tScheme X U hV C α R' hVR j i).hom = 𝟙 _ := by
+  have h : (descendPieceRModel_t X U hV C α R' hVR i j).symm.toCommRingCatIso.op.hom
+      ≫ (descendPieceRModel_t X U hV C α R' hVR i j).toCommRingCatIso.op.hom = 𝟙 _ := by
+    simp only [Iso.op_hom, ← op_comp]
+    have h2 : (descendPieceRModel_t X U hV C α R' hVR i j).toCommRingCatIso.hom
+        ≫ (descendPieceRModel_t X U hV C α R' hVR i j).symm.toCommRingCatIso.hom = 𝟙 _ := by
+      apply CommRingCat.hom_ext
+      apply RingHom.ext
+      intro y
+      exact (descendPieceRModel_t X U hV C α R' hVR i j).symm_apply_apply y
+    rw [h2]
+    rfl
+  unfold descendPieceRModel_tScheme
+  rw [descendPieceRModel_t_symm X U hV C α R' hVR i j]
+  simp only [Functor.mapIso_hom, RingEquiv.symm_symm]
+  exact Eq.trans (Scheme.Spec.map_comp _ _).symm
+    (Eq.trans (congrArg Scheme.Spec.map h) (Scheme.Spec.map_id _))
+
 /-- **アフィン開の交わりは「両側で基本開集合」になる開で覆える**——
 `f_open`(`GlueData`が要求する`f i j`の開埋め込み性)への段差を詰める
 ための第一歩。

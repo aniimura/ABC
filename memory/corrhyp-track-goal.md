@@ -2884,3 +2884,24 @@ descendPieceRModel_ringEquivQuotientMap 自身の型が letI を何段も抱え�
 idiom #68 に登記(statement を書くこと自体が高い、という #65 の新しい現れ方)。
 
 集計は10/24——§4は0/2。
+
+## 2026-09-05夜さらに続き57 — GlueData' の t_inv をスキームレベルで閉じた
+
+mathlib の CategoryTheory.GlueData'(i ≠ j だけ条件を課す版)を確認したが
+t'・t_fac・t_inv・cocycle は依然必要。そのうち t_inv を閉じた(3本):
+- descendPieceRModel_ringEquivOfEq_symm(subst のあと rfl)
+- descendPieceRModel_t_symm: t j i = (t i j).symm
+- descendPieceRModel_tScheme_trans: t i j ≫ t j i = 𝟙(スキーム)
+
+配管2つ:
+1. rw [← Scheme.Spec.map_comp] は Spec X と Scheme.Spec.obj (op X) が
+   instances 透明度で見分けられず失敗。Eq.trans (map_comp _ _).symm (…) と
+   項で組む(idiom #65 の再現)。
+2. ᵒᵖ の合成が恒等であることを ext で示そうとすると
+   Ideal.Quotient.ringHom_ext が効いて商の生成元 X x まで降りる。
+   CommRingCat.hom_ext → RingHom.ext → RingEquiv.symm_apply_apply と
+   深さを明示して閉じる。
+
+GlueData' 成分の現状(R'レベル): J・U・V・f・t・t_inv が揃った。残るのは
+f_mono/f_open(被覆の細分待ち)と t'・t_fac・cocycle(三重交差=pullback の
+同定が要る)。集計は10/24——§4は0/2。
