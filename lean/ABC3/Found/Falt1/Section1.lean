@@ -284,4 +284,55 @@ theorem length_quot_p_pow {W : Type*} [CommRing W] [IsDomain W] [IsDiscreteValua
   push_cast
   ring
 
+/-! ## `Theorem 1.2` を「長さの 3 事実」に完全に帰着させる
+
+上の 3 つの道具(指数の加法性・`p` 倍の核の移送・長さの線型性)を使うと、
+原文の証明は次の 3 つの数値的な事実に帰着する:
+
+* **`hidx`**——`length(ker) − length(coker) = (δₙ − δ_{n+1})·e`
+  (指数の加法性 `length_ker_add_target` と `Lemma 1.1` から)
+* **`hk`**——*"this kernel has length at least equal to that of
+  `W_{n+1}/p^β W_{n+1}`"*(`β = min{1, δₙ/(d+1)}`)
+* **`hc`**——*"the cokernel ... is annihilated by `p^{δₙ−δ_{n+1}}`. So its
+  length is at most equal to that of `W_{n+1}` divided by the `(d+1)`st
+  power of this"*
+
+この 3 つから原文の鍵の不等式が出て、あとは既に証明済みの
+`delta_two_regime_of_key`・`tendsto_zero_of_two_regime` で `δₙ → 0`。 -/
+
+/-- **3 つの長さの事実から原文の鍵の不等式へ**。 -/
+theorem key_inequality_of_length_bounds (d : ℕ) (e β Δ Lker Lcoker : ℝ) (he : 0 < e)
+    (hidx : Lker - Lcoker = Δ * e)
+    (hk : β * e ≤ Lker)
+    (hc : Lcoker ≤ ((d:ℝ)+1) * Δ * e) :
+    β - ((d:ℝ)+1) * Δ ≤ Δ := by
+  have h1 : (β - ((d:ℝ)+1) * Δ) * e ≤ Δ * e := by nlinarith
+  exact le_of_mul_le_mul_right (by linarith [h1]) he
+
+/-- **`Theorem 1.2`——長さの 3 事実に完全に帰着した形**。
+
+★これが「解析部分は全部済んだ」という到達点である——残るのは上の
+`hidx`・`hk`・`hc` を実際の `Ω` と差積について示すことだけ。 -/
+theorem thm_1_2_of_length_bounds (d : ℕ) (δ : ℕ → ℝ) (h0 : ∀ n, 0 ≤ δ n)
+    (e Lker Lcoker : ℕ → ℝ) (he : ∀ n, 0 < e n)
+    (hidx : ∀ n, Lker n - Lcoker n = (δ n - δ (n+1)) * e n)
+    (hk : ∀ n, min 1 (δ n / ((d:ℝ)+1)) * e n ≤ Lker n)
+    (hc : ∀ n, Lcoker n ≤ ((d:ℝ)+1) * (δ n - δ (n+1)) * e n) :
+    Filter.Tendsto δ Filter.atTop (nhds 0) := by
+  refine thm_1_2_tendsto_zero d δ h0 (fun n => ?_)
+  have h := key_inequality_of_length_bounds d (e n) (min 1 (δ n / ((d:ℝ)+1)))
+    (δ n - δ (n+1)) (Lker n) (Lcoker n) (he n) (hidx n) (hk n) (hc n)
+  linarith
+
+/-- 非空虚性——`d = 0`、`δₙ = (1/2)^n`、`e ≡ 1`、`Lker = δₙ`、
+`Lcoker = δₙ/2`。3 つの長さの事実が同時に成り立つ具体例。 -/
+example : Filter.Tendsto (fun n : ℕ => (1/2 : ℝ)^n) Filter.atTop (nhds 0) := by
+  refine thm_1_2_of_length_bounds 0 (fun n => (1/2 : ℝ)^n) (fun n => by positivity)
+    (fun _ => 1) (fun n => (1/2 : ℝ)^n) (fun n => (1/2 : ℝ)^n / 2)
+    (fun _ => one_pos) (fun n => ?_) (fun n => ?_) (fun n => ?_)
+  · rw [pow_succ]; ring
+  · have hle : ((1:ℝ)/2)^n ≤ 1 := pow_le_one₀ (by norm_num) (by norm_num)
+    rw [Nat.cast_zero, zero_add, div_one, min_eq_right hle, mul_one]
+  · rw [Nat.cast_zero, zero_add, pow_succ]; ring_nf; linarith
+
 end ABC3.Found.Falt1
