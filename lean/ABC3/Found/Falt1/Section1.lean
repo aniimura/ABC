@@ -46,6 +46,8 @@ import Mathlib.RingTheory.LocalRing.Length
 
 namespace ABC3.Found.Falt1
 
+universe u
+
 open Filter Topology
 
 /-- **幾何減衰版**。`0 ≤ δₙ` かつ `δ_{n+1} ≤ r·δₙ`(`0 ≤ r < 1`)なら
@@ -1444,16 +1446,15 @@ theorem thm_1_2_step_of_faltings {R M N₀ N : Type*} [CommRing R] [IsLocalRing 
 `ZMod 4` が局所環であること・`𝔪 = (2)` であることは `decide` で確かめる
 (有限環なので単元性が決定可能)。 -/
 
+instance zmod4_nontrivial : Nontrivial (ZMod 4) := ⟨0, 1, by decide⟩
+
 /-- `ZMod 4` は局所環(単元でない元 `{0,2}` は加法で閉じている)。 -/
-theorem zmod4_isLocalRing : IsLocalRing (ZMod 4) :=
-  haveI : Nontrivial (ZMod 4) := ⟨0, 1, by decide⟩
+instance zmod4_isLocalRing : IsLocalRing (ZMod 4) :=
   IsLocalRing.of_isUnit_or_isUnit_of_isUnit_add (by decide)
 
 /-- `ZMod 4` の極大イデアルは `(2)`。 -/
 theorem zmod4_maximalIdeal :
-    letI := zmod4_isLocalRing
     IsLocalRing.maximalIdeal (ZMod 4) = Ideal.span {(2 : ZMod 4)} := by
-  letI := zmod4_isLocalRing
   ext x
   rw [IsLocalRing.mem_maximalIdeal, mem_nonunits_iff, Ideal.mem_span_singleton']
   revert x
@@ -1527,6 +1528,226 @@ theorem thm_1_2_of_steps (d : ℕ) (δ : ℕ → ℝ) (h0 : ∀ n, 0 ≤ δ n)
     min_le_min le_rfl (div_le_self (h0 n)
       (by have := (Nat.cast_nonneg d : (0 : ℝ) ≤ (d : ℝ)); linarith))
   linarith [hstep n]
+
+/-! ## ★`Theorem 1.2` の主張——1 ステップ分のデータを束ねた形(2026-09-05)
+
+原文の証明は「各 `n` について 1 ステップ分の不等式を出し、それを
+`δₙ → 0` に繋ぐ」という形をしている。1 ステップ分の**データと仮定**を
+構造体に束ねると、`Theorem 1.2` は
+
+> 各 `n` について `Thm12StepData d (δ n) (δ (n+1))` が与えられれば
+> `δₙ → 0`
+
+と述べられる。構造体の各フィールドは原文の各文にそのまま対応する
+(`thm_1_2_step_of_faltings` の docstring の表を参照)。 -/
+
+open IsLocalRing in
+/-- **`Theorem 1.2` の 1 ステップ分のデータ**——原文の仮定をそのまま
+束ねた構造体。 -/
+structure Thm12StepData (d : ℕ) (δn δn1 : ℝ) where
+  /-- 段の底(原文の `W_{n+1}`)。 -/
+  R : Type u
+  [commRingR : CommRing R]
+  [localR : IsLocalRing R]
+  [noethR : IsNoetherianRing R]
+  /-- 原文の `Ω_{Wₙ/Vₙ} ⊗ W_{n+1}`。 -/
+  M : Type u
+  [addM : AddCommGroup M]
+  [modM : Module R M]
+  [finM : Module.Finite R M]
+  [artM : IsArtinian R M]
+  [noethM : IsNoetherian R M]
+  /-- 原文の `Ω_{W_{n+1}/Vₙ}`。 -/
+  N₀ : Type u
+  [addN₀ : AddCommGroup N₀]
+  [modN₀ : Module R N₀]
+  [artN₀ : IsArtinian R N₀]
+  [noethN₀ : IsNoetherian R N₀]
+  /-- 原文の `Ω_{W_{n+1}/V_{n+1}}`。 -/
+  N : Type u
+  [addN : AddCommGroup N]
+  [modN : Module R N]
+  [artN : IsArtinian R N]
+  [noethN : IsNoetherian R N]
+  /-- 第 1 写像。 -/
+  f : M →ₗ[R] N₀
+  /-- 第 2 写像。 -/
+  g : N₀ →ₗ[R] N
+  /-- 絶対分岐指数。 -/
+  e : ℕ
+  he : 0 < e
+  /-- `p`(`span{p} = 𝔪^e`)。 -/
+  p : R
+  hp : Ideal.span ({p} : Set R) = (maximalIdeal R) ^ e
+  /-- *"`Ω_{W_{n+1}/Vₙ}` is the direct sum of `d+1` modules"*——
+  使うのは生成元の個数だけ。 -/
+  gN₀ : Fin (d + 1) → N₀
+  hspanN₀ : Submodule.span R (Set.range gN₀) = ⊤
+  /-- *"the kernel of the second map contains `Ω_{V_{n+1}/Vₙ} ⊗ W_{n+1}`,
+  which has `(W_{n+1}/pW_{n+1})^{d+1}` as quotient"*。 -/
+  φ : ↥(LinearMap.ker g) →ₗ[R] (Fin (d + 1) → R ⧸ Ideal.span ({p} : Set R))
+  hφ : Function.Surjective φ
+  /-- 余核は `d+1` 個の元で生成される。 -/
+  gc : Fin (d + 1) → (N ⧸ LinearMap.range (g ∘ₗ f))
+  hspanc : Submodule.span R (Set.range gc) = ⊤
+  /-- 節点 B の `b = p^{δₙ−δ_{n+1}}`。 -/
+  b : R
+  hbann : ∀ x : (N ⧸ LinearMap.range (g ∘ₗ f)), b • x = 0
+  hbfin : Module.length R (R ⧸ Ideal.span ({b} : Set R)) ≠ ⊤
+  /-- `Lemma 1.1`:`length(M) = δₙ·e`。 -/
+  hM : lenR R M = δn * (e : ℝ)
+  /-- `Lemma 1.1`:`length(N) = δ_{n+1}·e`。 -/
+  hN : lenR R N = δn1 * (e : ℝ)
+  /-- `length(R/p^{δₙ−δ_{n+1}}) = (δₙ−δ_{n+1})·e`。 -/
+  hbl : lenR R (R ⧸ Ideal.span ({b} : Set R)) = (δn - δn1) * (e : ℝ)
+
+attribute [instance] Thm12StepData.commRingR Thm12StepData.localR Thm12StepData.noethR
+  Thm12StepData.addM Thm12StepData.modM Thm12StepData.finM Thm12StepData.artM
+  Thm12StepData.noethM Thm12StepData.addN₀ Thm12StepData.modN₀ Thm12StepData.artN₀
+  Thm12StepData.noethN₀ Thm12StepData.addN Thm12StepData.modN Thm12StepData.artN
+  Thm12StepData.noethN
+
+/-- **1 ステップ分のデータから原文の鍵の不等式**。 -/
+theorem Thm12StepData.key {d : ℕ} {δn δn1 : ℝ} (S : Thm12StepData.{u} d δn δn1) :
+    min 1 δn - ((d : ℝ) + 1) * (δn - δn1) ≤ δn - δn1 :=
+  thm_1_2_step_of_faltings S.f S.g S.e S.he S.p S.hp d S.gN₀ S.hspanN₀ S.φ S.hφ
+    S.gc S.hspanc S.b S.hbann S.hbfin δn δn1 S.hM S.hN S.hbl
+
+open Filter Topology in
+/-- **★`Theorem 1.2`(原文の主張)**——各 `n` について 1 ステップ分の
+データが与えられれば `δₙ → 0`。 -/
+theorem thm_1_2 (d : ℕ) (δ : ℕ → ℝ) (h0 : ∀ n, 0 ≤ δ n)
+    (S : ∀ n, Thm12StepData.{u} d (δ n) (δ (n + 1))) :
+    Tendsto δ atTop (nhds 0) :=
+  thm_1_2_of_steps d δ h0 (fun n => (S n).key)
+
+/-- **非空虚性(非退化)**——`Thm12StepData 0 1 0` の実例。
+`R = ZMod 4`、`k = R/(2)`、`M = N₀ = k`、`N = 0`、`b = 2`。
+★節点 A の 2 つの入力はどちらも非退化に満たされる。 -/
+noncomputable def thm12StepData_zmod4 : Thm12StepData.{0} 0 1 0 where
+  R := ZMod 4
+  M := ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)}
+  N₀ := ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)}
+  N := ↥(⊥ : Submodule (ZMod 4) (ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)}))
+  f := LinearMap.id
+  g := 0
+  e := 1
+  he := one_pos
+  p := 2
+  hp := by rw [pow_one, zmod4_maximalIdeal]
+  gN₀ := fun _ => 1
+  hspanN₀ := by
+    refine Submodule.eq_top_iff'.mpr (fun x => ?_)
+    obtain ⟨r, rfl⟩ := Submodule.Quotient.mk_surjective (Ideal.span {(2 : ZMod 4)}) x
+    have h : (Submodule.Quotient.mk r : ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)})
+        = r • (1 : ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)}) := by
+      rw [Algebra.smul_def, mul_one]; rfl
+    rw [h]
+    exact Submodule.smul_mem _ r (Submodule.subset_span ⟨0, rfl⟩)
+  φ := LinearMap.pi (fun _ : Fin 1 =>
+    (LinearMap.ker (0 : (ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)}) →ₗ[ZMod 4]
+      ↥(⊥ : Submodule (ZMod 4) (ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)})))).subtype)
+  hφ := by
+    intro y
+    refine ⟨⟨y 0, ?_⟩, ?_⟩
+    · rw [LinearMap.ker_zero]; trivial
+    · funext i; fin_cases i; rfl
+  gc := fun _ => 0
+  hspanc := Submodule.eq_top_iff'.mpr (fun x => by
+    rw [Subsingleton.elim x 0]; exact Submodule.zero_mem _)
+  b := 2
+  hbann := fun x => by rw [Subsingleton.elim x 0, smul_zero]
+  hbfin := by rw [zmod4_k_length]; exact ENat.coe_ne_top 1
+  hM := by
+    show ((Module.length (ZMod 4) (ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)})).toNat : ℝ)
+      = 1 * ((1 : ℕ) : ℝ)
+    rw [zmod4_k_length]; norm_num
+  hN := by
+    show ((Module.length (ZMod 4)
+      ↥(⊥ : Submodule (ZMod 4) (ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)}))).toNat : ℝ)
+      = 0 * ((1 : ℕ) : ℝ)
+    rw [Module.length_bot]; norm_num
+  hbl := by
+    show ((Module.length (ZMod 4) (ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)})).toNat : ℝ)
+      = (1 - 0) * ((1 : ℕ) : ℝ)
+    rw [zmod4_k_length]; norm_num
+
+/-- **非空虚性(全段)**——`Thm12StepData 0 0 0` の実例。
+`M = N = 0`、`b = 1`。これを全段で使うと `thm_1_2` の仮説が
+実際に満たせる(`δ ≡ 0`)。 -/
+noncomputable def thm12StepData_zero : Thm12StepData.{0} 0 0 0 where
+  R := ZMod 4
+  M := ↥(⊥ : Submodule (ZMod 4) (ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)}))
+  N₀ := ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)}
+  N := ↥(⊥ : Submodule (ZMod 4) (ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)}))
+  f := 0
+  g := 0
+  e := 1
+  he := one_pos
+  p := 2
+  hp := by rw [pow_one, zmod4_maximalIdeal]
+  gN₀ := fun _ => 1
+  hspanN₀ := by
+    refine Submodule.eq_top_iff'.mpr (fun x => ?_)
+    obtain ⟨r, rfl⟩ := Submodule.Quotient.mk_surjective (Ideal.span {(2 : ZMod 4)}) x
+    have h : (Submodule.Quotient.mk r : ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)})
+        = r • (1 : ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)}) := by
+      rw [Algebra.smul_def, mul_one]; rfl
+    rw [h]
+    exact Submodule.smul_mem _ r (Submodule.subset_span ⟨0, rfl⟩)
+  φ := LinearMap.pi (fun _ : Fin 1 =>
+    (LinearMap.ker (0 : (ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)}) →ₗ[ZMod 4]
+      ↥(⊥ : Submodule (ZMod 4) (ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)})))).subtype)
+  hφ := by
+    intro y
+    refine ⟨⟨y 0, ?_⟩, ?_⟩
+    · rw [LinearMap.ker_zero]; trivial
+    · funext i; fin_cases i; rfl
+  gc := fun _ => 0
+  hspanc := Submodule.eq_top_iff'.mpr (fun x => by
+    rw [Subsingleton.elim x 0]; exact Submodule.zero_mem _)
+  b := 1
+  hbann := fun x => by rw [Subsingleton.elim x 0, smul_zero]
+  hbfin := by
+    rw [Ideal.span_singleton_one]
+    haveI : Subsingleton (ZMod 4 ⧸ (⊤ : Ideal (ZMod 4))) := inferInstance
+    rw [Module.length_eq_zero]
+    exact ENat.coe_ne_top 0
+  hM := by
+    show ((Module.length (ZMod 4)
+      ↥(⊥ : Submodule (ZMod 4) (ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)}))).toNat : ℝ)
+      = 0 * ((1 : ℕ) : ℝ)
+    rw [Module.length_bot]; norm_num
+  hN := by
+    show ((Module.length (ZMod 4)
+      ↥(⊥ : Submodule (ZMod 4) (ZMod 4 ⧸ Ideal.span {(2 : ZMod 4)}))).toNat : ℝ)
+      = 0 * ((1 : ℕ) : ℝ)
+    rw [Module.length_bot]; norm_num
+  hbl := by
+    show ((Module.length (ZMod 4) (ZMod 4 ⧸ Ideal.span ({1} : Set (ZMod 4)))).toNat : ℝ)
+      = (0 - 0) * ((1 : ℕ) : ℝ)
+    rw [Ideal.span_singleton_one]
+    haveI : Subsingleton (ZMod 4 ⧸ (⊤ : Ideal (ZMod 4))) := inferInstance
+    rw [Module.length_eq_zero]
+    norm_num
+
+/-- 非空虚性——`thm_1_2` の仮説(全段のデータ)が実際に満たせる。 -/
+example : Filter.Tendsto (fun _ : ℕ => (0 : ℝ)) Filter.atTop (nhds 0) :=
+  thm_1_2 0 (fun _ => 0) (fun _ => le_refl 0) (fun _ => thm12StepData_zero)
+
+open Filter Topology in
+/-- **`Theorem 1.2`——Skeleton の `thm12`(ε-N 形)の形**。 -/
+theorem thm_1_2_eps (d : ℕ) (δ : ℕ → ℝ) (h0 : ∀ n, 0 ≤ δ n)
+    (S : ∀ n, Thm12StepData.{u} d (δ n) (δ (n + 1))) :
+    ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ n ≥ N, δ n < ε := by
+  intro ε hε
+  have htend := thm_1_2 d δ h0 S
+  rw [Metric.tendsto_atTop] at htend
+  obtain ⟨N, hN⟩ := htend ε hε
+  refine ⟨N, fun n hn => ?_⟩
+  have hd := hN n hn
+  rw [Real.dist_eq, sub_zero, abs_of_nonneg (h0 n)] at hd
+  exact hd
 
 open Filter Topology in
 /-- **`Theorem 1.2`——Skeleton の `thm12`(ε-N 形)へ、ステップの
