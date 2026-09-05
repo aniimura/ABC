@@ -705,6 +705,68 @@ theorem lenR_le_nsmul {R M N : Type*} [Ring R] [AddCommGroup M] [Module R M]
   unfold lenR
   exact_mod_cast hle
 
+/-! ## 最終配線——加群の 3 事実から `δₙ → 0` へ -/
+
+/-- **加群の 3 事実(実数化済み)から原文の鍵の不等式へ**。
+`δₙ·e = length(M₁)`、`δ_{n+1}·e = length(M₃)` と置くと、
+(a) 指数の加法性・(b) 核の下界・(c) 余核の上界がそのまま
+`min{1,δₙ} − (d+1)(δₙ−δ_{n+1}) ≤ δₙ−δ_{n+1}` を与える。 -/
+theorem key_inequality_of_lenR (d : ℕ) (e δn δn1 Lker Lcoker : ℝ) (he : 0 < e)
+    (hidx : Lker + δn1 * e = δn * e + Lcoker)
+    (hb : min (δn * e) e ≤ Lker)
+    (hc : Lcoker ≤ ((d:ℝ)+1) * (δn - δn1) * e) :
+    min 1 δn - ((d:ℝ)+1) * (δn - δn1) ≤ δn - δn1 := by
+  have hmin : min (δn * e) e = (min 1 δn) * e := by
+    rcases le_total δn 1 with h | h
+    · rw [min_eq_left (show δn * e ≤ e by nlinarith), min_eq_right h]
+    · rw [min_eq_right (show e ≤ δn * e by nlinarith), min_eq_left h, one_mul]
+  rw [hmin] at hb
+  have hstep2 : (min 1 δn - ((d:ℝ)+1) * (δn - δn1)) * e ≤ (δn - δn1) * e := by
+    nlinarith [hb, hidx, hc]
+  exact le_of_mul_le_mul_right hstep2 he
+
+open Filter Topology in
+/-- **`Theorem 1.2`——加群の 3 事実(実数化済み)から `δₙ → 0`**。
+
+`δₙ·e n = length(M₁ⁿ)`、`δ_{n+1}·e n = length(M₃ⁿ)` と置いたとき:
+
+* `hidx`——指数の加法性
+  `length(ker) + length(M₃) = length(M₁) + length(coker)`
+  (`length_ker_add_target` を実数化したもの)
+* `hb`——`min(length M₁, e) ≤ length(ker)`
+  (`min_le_length_quot_smul_pow` 由来、★原文より強い形)
+* `hc`——`length(coker) ≤ (d+1)(δₙ−δ_{n+1})·e`
+  (`length_le_of_span_and_annihilator` 由来)
+
+★これで `Theorem 1.2` の証明は、**実際の `Ω`・差積・塔をこの 3 つに
+当てはめるだけ**になった。 -/
+theorem thm_1_2_of_module_facts (d : ℕ) (δ e Lker Lcoker : ℕ → ℝ)
+    (h0 : ∀ n, 0 ≤ δ n) (he : ∀ n, 0 < e n)
+    (hidx : ∀ n, Lker n + δ (n+1) * e n = δ n * e n + Lcoker n)
+    (hb : ∀ n, min (δ n * e n) (e n) ≤ Lker n)
+    (hc : ∀ n, Lcoker n ≤ ((d:ℝ)+1) * (δ n - δ (n+1)) * e n) :
+    Filter.Tendsto δ Filter.atTop (nhds 0) := by
+  refine thm_1_2_tendsto_zero d δ h0 (fun n => ?_)
+  have hkey := key_inequality_of_lenR d (e n) (δ n) (δ (n+1)) (Lker n) (Lcoker n)
+    (he n) (hidx n) (hb n) (hc n)
+  have hd1 : (0:ℝ) < (d:ℝ)+1 := by positivity
+  have hdiv : min 1 (δ n / ((d:ℝ)+1)) ≤ min 1 (δ n) := by
+    refine min_le_min (le_refl 1) ?_
+    rw [div_le_iff₀ hd1]
+    nlinarith [h0 n]
+  linarith
+
+/-- 非空虚性——`d = 0`、`δₙ = (1/2)^n`、`e ≡ 1`、`Lker = δₙ`、
+`Lcoker = δₙ/2`。加群の 3 事実が同時に成り立つ具体例。 -/
+example : Filter.Tendsto (fun n : ℕ => (1/2 : ℝ)^n) Filter.atTop (nhds 0) := by
+  refine thm_1_2_of_module_facts 0 (fun n => (1/2 : ℝ)^n) (fun _ => 1)
+    (fun n => (1/2 : ℝ)^n) (fun n => (1/2 : ℝ)^n / 2)
+    (fun n => by positivity) (fun _ => one_pos) (fun n => ?_) (fun n => ?_) (fun n => ?_)
+  · rw [pow_succ]; ring
+  · have hle : ((1:ℝ)/2)^n ≤ 1 := pow_le_one₀ (by norm_num) (by norm_num)
+    rw [mul_one, min_eq_left hle]
+  · rw [Nat.cast_zero, zero_add, pow_succ]; ring_nf; linarith
+
 /-! ## `Theorem 1.2` の残りの手順(2026-09-05 時点の確定版)
 
 解析部分(`thm_1_2_of_length_bounds`)と 3 事実 (a)(b)(c) の**材料**は
