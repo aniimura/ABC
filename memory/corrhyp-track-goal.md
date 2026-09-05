@@ -2744,3 +2744,19 @@ f_open の在庫確認(重要): ExtLimit.lean には既に
 の1点に集約。標準的な議論だが mathlib に直接の補題は見当たらず未形式化。
 
 集計は10/24——§4は0/2。
+
+## 2026-09-05夜さらに続き48 — 在庫の訂正: 「交わりが両側で基本開」はmathlibにあった
+
+続き47 で「mathlib に直接の補題は見当たらず未形式化」と書いたのは探し方が
+悪かった。AlgebraicGeometry.exists_basicOpen_le_affine_inter
+(AffineScheme.lean:750)が既にある:
+  (hU : IsAffineOpen U) (hV : IsAffineOpen V) (x : X) (hx : x ∈ U ⊓ V) :
+  ∃ f g, X.basicOpen f = X.basicOpen g ∧ x ∈ X.basicOpen f
+basicOpen の基底(isBasis_basicOpen)の側だけ探していたので当たらなかった。
+affine_inter という語で引くと出る。
+
+被覆の形へ言い直した iSup_doublyBasicOpen_eq_inf を ExtLimit.lean に追加
+(0.19秒)。ただし GlueData が要求するのは「V(i,j) が U i の基本開そのもの」
+であって「基本開で覆える」ではないので、まだ段差は残る。得たのは道具の1つ。
+
+集計は10/24——§4は0/2。

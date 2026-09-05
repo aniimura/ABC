@@ -4595,6 +4595,35 @@ noncomputable def descendPieceRModel_tScheme (X : Over BaseK) {J : Type} (U : J 
   Scheme.Spec.mapIso
     (descendPieceRModel_t X U hV C α R' hVR i j).symm.toCommRingCatIso.op
 
+/-- **アフィン開の交わりは「両側で基本開集合」になる開で覆える**——
+`f_open`(`GlueData`が要求する`f i j`の開埋め込み性)への段差を詰める
+ための第一歩。
+
+mathlibの`AlgebraicGeometry.exists_basicOpen_le_affine_inter`
+(`AffineScheme.lean:750`、`x ∈ U ⊓ V`のとき`X.basicOpen f = X.basicOpen g`
+かつ`x ∈ X.basicOpen f`となる`f : Γ(X,U)`・`g : Γ(X,V)`が取れる)を
+**被覆の形**に言い直しただけ。`≤`側は`basicOpen_le`を両側に使うだけ、
+`≥`側は各点にこの補題を当てるだけ。
+
+**在庫の発見として重要**: 「交わりが両側で基本開になる」という、
+`f_open`の設計で要になる事実がmathlibに**既にあった**
+(`corrhyp-goal.md`の`続き47`で「mathlibに直接の補題は見当たらず」と
+書いたのは、`basicOpen`の**基底**の側だけを探していたためで、
+`affine_inter`という語で引くと当たる)。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem iSup_doublyBasicOpen_eq_inf (X : Scheme) {U V : X.Opens}
+    (hU : IsAffineOpen U) (hV : IsAffineOpen V) :
+    (⨆ p : {p : Γ(X, U) × Γ(X, V) // X.basicOpen p.1 = X.basicOpen p.2},
+      X.basicOpen p.1.1) = U ⊓ V := by
+  apply le_antisymm
+  · refine iSup_le fun p => le_inf (X.basicOpen_le p.1.1) ?_
+    rw [p.2]
+    exact X.basicOpen_le p.1.2
+  · intro x hx
+    obtain ⟨f, g, hfg, hxf⟩ := exists_basicOpen_le_affine_inter hU hV x hx
+    exact TopologicalSpace.Opens.mem_iSup.mpr ⟨⟨(f, g), hfg⟩, hxf⟩
+
 open scoped TensorProduct in
 open scoped Classical in
 set_option maxHeartbeats 1000000 in

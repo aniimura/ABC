@@ -6046,3 +6046,39 @@ mathlibに直接の補題は見当たらず、未形式化である。
 
 検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
 Found側sorry 0件。集計は引き続き10/24——§4は引き続き0/2。
+
+### 2026-09-05夜さらに続き48 — ★在庫の訂正: 「交わりが両側で基本開」はmathlibにあった
+
+続き47で「アフィン被覆を、交わりが両側で基本開集合になるように細分する
+——mathlibに直接の補題は見当たらず未形式化」と書いたが、**これは私の
+探し方が悪かった**。mathlibには
+
+```
+AlgebraicGeometry.exists_basicOpen_le_affine_inter
+  (AffineScheme.lean:750)
+  (hU : IsAffineOpen U) (hV : IsAffineOpen V) (x : X) (hx : x ∈ U ⊓ V) :
+  ∃ (f : Γ(X, U)) (g : Γ(X, V)), X.basicOpen f = X.basicOpen g ∧ x ∈ X.basicOpen f
+```
+
+が**既にある**。`basicOpen`の**基底**(`isBasis_basicOpen`)の側だけを
+探していたので当たらなかった——`affine_inter`という語で引くと出る。
+
+これを被覆の形へ言い直した`iSup_doublyBasicOpen_eq_inf`を追加した
+(`ExtLimit.lean`、0.19秒):
+
+```
+(⨆ p : {p : Γ(X,U) × Γ(X,V) // X.basicOpen p.1 = X.basicOpen p.2},
+  X.basicOpen p.1.1) = U ⊓ V
+```
+
+`≤`は`basicOpen_le`を両側に使うだけ、`≥`は各点に上の補題を当てるだけ。
+
+**意味**: `f_open`の設計で要になる「交わりを両側で基本開な開で覆う」
+という事実が手に入った。ただし`GlueData`が要求するのは
+「`V (i,j)`が`U i`の基本開集合**そのもの**」であって「基本開で覆える」
+ではないので、**まだ段差は残る**(被覆の細分そのものを構成する必要が
+ある)。正直に言えば、今回得たのは段差を越える道具の1つであって
+段差そのものではない。
+
+検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
+Found側sorry 0件。集計は引き続き10/24——§4は引き続き0/2。
