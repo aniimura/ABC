@@ -946,6 +946,44 @@ theorem hg_of_faltings {R N P : Type*} [CommRing R]
   have := ker_contains_pTorsion_of_faltings p r gN hspanN (LinearMap.ker g) φ hφ
   exact this (by simpa [LinearMap.mem_ker] using hy)
 
+/-! #### ★生成元の個数を分けた形(頑健化、2026-09-05)
+
+原文は `Ω_{W_{n+1}/Vₙ}` の生成元の個数と、核が持つ商
+`(W'/pW')^{d+1}` の個数を**どちらも `d+1`** としている。しかし
+Jacobi–Zariski で数えると前者は `d+2` になる可能性がある
+(`Ω_{V_{n+1}/Vₙ}` の `d+1` 個 ＋ `Ω_{W'/V_{n+1}}` の巡回生成元 1 個)。
+
+議論に必要なのは **`rN ≤ rφ`** だけなので、2 つを分けた形も用意する。
+`rN = rφ = d+1` と取れば原文の形に戻る。 -/
+
+/-- **節点 A(生成元の個数を分けた形)**——`N` が `rN` 個で生成され、
+`L` が `(R/pR)^{rφ}` を商に持ち、`rN ≤ rφ` なら `N[p] ⊆ L`。 -/
+theorem ker_contains_pTorsion_of_faltings_gen {R N : Type*} [CommRing R]
+    [AddCommGroup N] [Module R N] [IsArtinian R N] [IsNoetherian R N]
+    (p : R) (rN rφ : ℕ) (hle : rN ≤ rφ)
+    (gN : Fin rN → N) (hspanN : Submodule.span R (Set.range gN) = ⊤)
+    (L : Submodule R N)
+    (φ : ↥L →ₗ[R] (Fin rφ → R ⧸ Ideal.span ({p} : Set R))) (hφ : Function.Surjective φ) :
+    LinearMap.ker (LinearMap.lsmul R N p) ≤ L := by
+  refine ker_contains_pTorsion_of_pi_quotient p rφ L ?_ φ hφ
+  refine le_trans (length_pTorsion_le_of_span p Module.length_ne_top rN gN hspanN) ?_
+  exact mul_le_mul_right' (Nat.cast_le.mpr hle) _
+
+/-- **節点 A(生成元の個数を分けた形)を `ker_comp_contains_pTorsion` の
+入力の形へ**。 -/
+theorem hg_of_faltings_gen {R N P : Type*} [CommRing R]
+    [AddCommGroup N] [Module R N] [IsArtinian R N] [IsNoetherian R N]
+    [AddCommGroup P] [Module R P]
+    (p : R) (rN rφ : ℕ) (hle : rN ≤ rφ)
+    (gN : Fin rN → N) (hspanN : Submodule.span R (Set.range gN) = ⊤)
+    (g : N →ₗ[R] P)
+    (φ : ↥(LinearMap.ker g) →ₗ[R] (Fin rφ → R ⧸ Ideal.span ({p} : Set R)))
+    (hφ : Function.Surjective φ) :
+    ∀ y : N, p • y = 0 → g y = 0 := by
+  intro y hy
+  have := ker_contains_pTorsion_of_faltings_gen p rN rφ hle gN hspanN (LinearMap.ker g) φ hφ
+  exact this (by simpa [LinearMap.mem_ker] using hy)
+
 /-! ### 事実 (b) の材料——`β = min{1, δₙ/(d+1)}` の由来
 
 原文は *"this kernel has length at least equal to that of
@@ -1534,6 +1572,40 @@ theorem thm_1_2_step_of_faltings {R M N₀ N : Type*} [CommRing R] [IsLocalRing 
     min 1 δn - ((d : ℝ) + 1) * (δn - δn1) ≤ δn - δn1 := by
   have hgker : ∀ y : N₀, p • y = 0 → g y = 0 :=
     hg_of_faltings p (d + 1) gN₀ hspanN₀ g φ hφ
+  have hker : LinearMap.ker (p • (LinearMap.id : M →ₗ[R] M)) ≤ LinearMap.ker (g ∘ₗ f) := by
+    intro x hx
+    have hx' : p • x = 0 := by simpa using hx
+    simpa [LinearMap.mem_ker] using ker_comp_contains_pTorsion f g p hgker x hx'
+  exact thm_1_2_step_of_modules (g ∘ₗ f) e he p hp hker d gc hspanc b hbann hbfin
+    δn δn1 hM hN hbl
+
+open IsLocalRing in
+/-- **`thm_1_2_step_of_faltings` の頑健化**——`Ω_{W_{n+1}/Vₙ}` の生成元の
+個数 `rN` と、核が持つ商 `(R/pR)^{rφ}` の個数 `rφ` を分けた形。
+必要なのは `rN ≤ rφ` だけ。`rN = rφ = d+1` で原文の形に戻る。 -/
+theorem thm_1_2_step_of_faltings_gen {R M N₀ N : Type*} [CommRing R] [IsLocalRing R]
+    [IsNoetherianRing R]
+    [AddCommGroup M] [Module R M] [Module.Finite R M] [IsArtinian R M] [IsNoetherian R M]
+    [AddCommGroup N₀] [Module R N₀] [IsArtinian R N₀] [IsNoetherian R N₀]
+    [AddCommGroup N] [Module R N] [IsArtinian R N] [IsNoetherian R N]
+    (f : M →ₗ[R] N₀) (g : N₀ →ₗ[R] N)
+    (e : ℕ) (he : 0 < e)
+    (p : R) (hp : Ideal.span ({p} : Set R) = (maximalIdeal R) ^ e)
+    (rN rφ : ℕ) (hle : rN ≤ rφ)
+    (gN₀ : Fin rN → N₀) (hspanN₀ : Submodule.span R (Set.range gN₀) = ⊤)
+    (φ : ↥(LinearMap.ker g) →ₗ[R] (Fin rφ → R ⧸ Ideal.span ({p} : Set R)))
+    (hφ : Function.Surjective φ)
+    (d : ℕ)
+    (gc : Fin (d + 1) → (N ⧸ LinearMap.range (g ∘ₗ f)))
+    (hspanc : Submodule.span R (Set.range gc) = ⊤)
+    (b : R) (hbann : ∀ x : (N ⧸ LinearMap.range (g ∘ₗ f)), b • x = 0)
+    (hbfin : Module.length R (R ⧸ Ideal.span ({b} : Set R)) ≠ ⊤)
+    (δn δn1 : ℝ)
+    (hM : lenR R M = δn * (e : ℝ)) (hN : lenR R N = δn1 * (e : ℝ))
+    (hbl : lenR R (R ⧸ Ideal.span ({b} : Set R)) = (δn - δn1) * (e : ℝ)) :
+    min 1 δn - ((d : ℝ) + 1) * (δn - δn1) ≤ δn - δn1 := by
+  have hgker : ∀ y : N₀, p • y = 0 → g y = 0 :=
+    hg_of_faltings_gen p rN rφ hle gN₀ hspanN₀ g φ hφ
   have hker : LinearMap.ker (p • (LinearMap.id : M →ₗ[R] M)) ≤ LinearMap.ker (g ∘ₗ f) := by
     intro x hx
     have hx' : p • x = 0 := by simpa using hx
