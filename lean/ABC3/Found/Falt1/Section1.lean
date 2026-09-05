@@ -1343,6 +1343,57 @@ theorem step_facts_of_modules {R M N : Type*} [CommRing R] [IsLocalRing R] [IsNo
    `length_le_of_surjective_pi` と `length_quot_p_pow`。
 -/
 
+/-! ### ★★★★項目全体の `.src`(2026-09-05)
+
+`Theorem 1.2` の**証明の骨格・不等式・長さの算術はすべて Lean で閉じた**
+(`thm_1_2`)。残るのは「実際の塔 `Vₙ ⊂ V_{n+1}`・`Wₙ =` 正規化 が
+各段で `Thm12StepData` を供給する」という**塔の構成**だけである。
+これを `.needs` に正直に記録する。 -/
+
+/-- ★★★★**[Falt1] Theorem 1.2**——`δₙ → 0`。
+
+## ★主張
+
+| 原文 | 宣言 |
+|---|---|
+| 鍵の不等式(1 ステップ) | `thm_1_2_step_of_faltings`(原文の仮定の形)/ `Thm12StepData.key` |
+| *"In any case `δₙ → 0`"* | `thm_1_2` / `thm_1_2_eps`(Skeleton の `thm12` の形) |
+| 節点 A(*"the kernel … contains the kernel of multiplication by `p`"*) | `ker_contains_pTorsion_of_faltings`(★構造定理不要) |
+| 節点 B(*"it is clear that `p^{δₙ−δ_{n+1}}` annihilates …"*) | `quot_annihilated_of_conductor_subalgebra`(B1、★`b·Dx = D(b·x) − x·Db` の 1 行)/ (B2) は `cancel_conductor_delta` へ |
+| 非空虚性 | `thm12StepData_zmod4`(非退化、`δₙ=1`・`δ_{n+1}=0`)/ `thm12StepData_zero`(全段) |
+
+## ★原典より強い点
+
+* `β = min{1, δₙ}`(原文は `min{1, δₙ/(d+1)}`)。
+* 節点 A・`length_pTorsion_le_of_span` は**巡回分解(構造定理)を使わない**
+  ——必要なのは「`d+1` 個で生成される」ことだけ。
+
+## ★残る `.needs`
+
+塔の構成(`Vₙ` の列と `Wₙ = ` 正規化)から `Thm12StepData` を作る段。 -/
+def thm_1_2.src : ABC3.Meta.Source :=
+  { paper := "Falt1", pdfPage := 5, item := "Theorem 1.2", sectionId := "falt1-thm-1-2" }
+
+def thm_1_2.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "thm_1_2(δₙ → 0 そのもの、各段のデータから)"
+      (.inProject "ABC3" "ABC3.Found.Falt1.thm_1_2") 5,
+    .citation "[ABC3]" "thm_1_2_step_of_faltings(1 ステップ、原文の仮定の形)"
+      (.inProject "ABC3" "ABC3.Found.Falt1.thm_1_2_step_of_faltings") 5,
+    .citation "[ABC3]" "ker_contains_pTorsion_of_faltings(節点 A、構造定理不要)"
+      (.inProject "ABC3" "ABC3.Found.Falt1.ker_contains_pTorsion_of_faltings") 5,
+    .citation "[ABC3]" "quot_annihilated_of_conductor_subalgebra(節点 B の B1)"
+      (.inProject "ABC3" "ABC3.Found.Falt1.quot_annihilated_of_conductor_subalgebra") 5,
+    .citation "[ABC3]" "thm12StepData_zmod4(非空虚性、非退化)"
+      (.inProject "ABC3" "ABC3.Found.Falt1.thm12StepData_zmod4") 5,
+    .implicitStep
+      ("★残: 実際の塔(Vₙ の列と Wₙ = Vₙ⊗W の正規化)が各段で " ++
+       "Thm12StepData を供給する段。証明の骨格・不等式・長さの算術は" ++
+       "すべて閉じているので、残るのは塔の構成のみ") 5,
+    .implicitStep
+      ("★残(節点 B の B2): b := p^{δₙ−δ_{n+1}} が導手に入ること。" ++
+       "cancel_conductor_delta(既証)+ conductor_mul_differentIdeal(mathlib)" ++
+       "から出るが、hspan_eq(最小多項式の base change 両立)の確認が残る") 5 ]
+
 /-! ## ★1 ステップ分を 1 本の定理にまとめる(2026-09-05)
 
 `step_facts_of_modules` と `key_inequality_of_lenR` を繋いで、
