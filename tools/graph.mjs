@@ -85,7 +85,7 @@ for (const f of walk(SRC)) {
   let m;
   while ((m = SRC_RE.exec(text)) !== null) items.push({ paper: m[1], item: m[2] });
   const node = {
-    mod, rel, bucket, dir,
+    mod, rel, bucket, dir, text,
     owner: dir ? (DIR_ALIAS[dir] ?? dir) : '(バケツ直下)',
     ownerKind: dir ? (PAPERS[DIR_ALIAS[dir] ?? dir] ? 'paper' : 'theory') : 'root',
     items,
@@ -98,6 +98,146 @@ for (const f of walk(SRC)) {
   byPath.set(rel, node);
 }
 for (const n of nodes.values()) n.imports = n.imports.filter((i) => nodes.has(i));
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * ★`.needs` に書かれた**数学的依存**を辺として拾う(2026-09-05)
+ *
+ * ★なぜ要るか(実測)
+ *   `import` 依存と数学的依存は一致しない。実例:
+ *     `Skeleton/PGC/Section1Cor13.lean` の `inertia_recoverable` は
+ *     `.needs` に「Proposition 1.2 を (L, H) に適用して q_L を得る段」と書いてあり、
+ *     実際 `Found/PGC/InertiaTransport.lean::inertia_recoverable_of_prop12` で
+ *     Prop 1.2 に完全に帰着している。しかし Prop 1.2 のある
+ *     `Skeleton/PGC/Section1.lean` を **import していない**(型として要らないから)。
+ *   その結果 `tools/frontier.mjs` はこのノードを **着手可能(下流 27、第 1 位)**と
+ *   出していた。agent を割いても上流の sorry に当たって止まる。
+ *
+ * ★`Meta/Claim.lean` の `otherPaper` の docstring が予告していた誤読が、
+ *   実際に起きている——同一論文内の依存を `.derivation`(指す先を持たない自由文字列)で
+ *   書くと辺にならない。だからここでは **自由文の中の項目番号も拾う**。
+ *
+ * ★これは「疑い」であって証明ではない。文字列照合なので取りこぼしも誤検出もある。
+ *   `--math-edges` で全件を印字できるようにしてあるので、疑わしければ目で見ること。
+ * ───────────────────────────────────────────────────────────────────────── */
+
+/** 項目名を「Kind N.N」だけに正規化する(`Proposition 3.4(段 A)` → `Proposition 3.4`)。 */
+const bareItem = (it) => {
+  const m = it.match(new RegExp(`(?:${KIND})\\s+\\d+(?:\\.\\d+)+`));
+  return m ? m[0].replace(/\s+/g, ' ') : null;
+};
+
+/** `.needs … :=` の直後の `[ … ]` を括弧対応で切り出す(文字列の中の括弧は無視)。
+ *  ★正規表現で `\][\s\S]*?` と書くと閉じ括弧が同じ行にある形を取りこぼす。 */
+function needsBlocks(text) {
+  const out = [];
+  const head = /\.needs\s*:\s*List\s+(?:ABC3\.Meta\.)?ProofObligation\s*:=/g;
+  let h;
+  while ((h = head.exec(text)) !== null) {
+    let i = head.lastIndex;
+    while (i < text.length && /\s/.test(text[i])) i++;
+    if (text[i] !== '[') continue;
+    let depth = 0, inStr = false, j = i;
+    for (; j < text.length; j++) {
+      const c = text[j];
+      if (inStr) { if (c === '\\') j++; else if (c === '"') inStr = false; continue; }
+      if (c === '"') { inStr = true; continue; }
+      if (c === '[') depth++;
+      else if (c === ']') { depth--; if (depth === 0) { j++; break; } }
+    }
+    out.push(text.slice(i, j));
+  }
+  return out;
+}
+
+const NEEDS_OTHER = /\.otherPaper\s+"((?:[^"\\]|\\.)*)"\s+"((?:[^"\\]|\\.)*)"/g;
+const NEEDS_FREE = /\.(derivation|implicitStep|folklore)\s+((?:\s*"(?:[^"\\]|\\.)*"\s*(?:\+\+)?)+)/g;
+const ITEM_IN_TEXT = new RegExp(`(?:${KIND})\\s*\\d+(?:\\.\\d+)+`, 'g');
+
+for (const n of nodes.values()) {
+  const refs = [];
+  // 自由文の項目番号は「どの論文の」かが書いていない。自分の `.src` が名乗る論文を候補にする。
+  const own = [...new Set(n.items.map((x) => x.paper))];
+  const cand = own.length ? own : [n.owner];
+  for (const body of needsBlocks(n.text)) {
+    let m;
+    NEEDS_OTHER.lastIndex = 0;
+    while ((m = NEEDS_OTHER.exec(body)) !== null) {
+      const b = bareItem(m[2]);
+      if (b) refs.push({ paper: m[1], item: b, kind: 'otherPaper' });
+    }
+    NEEDS_FREE.lastIndex = 0;
+    while ((m = NEEDS_FREE.exec(body)) !== null) {
+      const kind = m[1];
+      ITEM_IN_TEXT.lastIndex = 0;
+      let t;
+      while ((t = ITEM_IN_TEXT.exec(m[2])) !== null) {
+        const it = t[0].replace(/\s+/g, ' ');
+        for (const p of cand) refs.push({ paper: p, item: it, kind });
+      }
+    }
+  }
+  n.needsRefs = refs;
+}
+
+/** `paper|項目` → その項目を `.src` で名乗るモジュール群。 */
+const declaredBy = new Map();
+for (const n of nodes.values()) {
+  for (const it of n.items) {
+    const b = bareItem(it.item);
+    if (!b) continue;
+    const k = `${it.paper}|${b}`;
+    if (!declaredBy.has(k)) declaredBy.set(k, new Set());
+    declaredBy.get(k).add(n.mod);
+  }
+}
+
+/** 推移的な import の上流(自分を含まない)。 */
+const upCache = new Map();
+function upstreamOf(mod) {
+  if (upCache.has(mod)) return upCache.get(mod);
+  const seen = new Set();
+  const st = [...(nodes.get(mod)?.imports ?? [])];
+  while (st.length) {
+    const m = st.pop();
+    if (seen.has(m)) continue;
+    seen.add(m);
+    for (const w of nodes.get(m)?.imports ?? []) if (!seen.has(w)) st.push(w);
+  }
+  upCache.set(mod, seen);
+  return seen;
+}
+
+/** ★import に現れない数学的依存。
+ *
+ *  `needsUncovered` … `.needs` が指す項目のうち、**どの提供元も import していない**もの。
+ *                     これは衛生の問題であって、必ずしも塞がってはいない。
+ *  `mathEdges`      … そのうち **提供元が全部 sorry を持つ**もの。
+ *                     ★これだけが「数学的に塞がっている」——項目を実際に確立している
+ *                     ファイルがどこにも無いという意味だから。
+ *                     提供元が 1 つでも sorry 無しなら、中身は在る(import していないだけ)。
+ *
+ *  ★この区別が要る理由(実測): `Skeleton/GenEll/Section2.lean` の
+ *    `.implicitStep` は `Proposition 1.4` を指し、その項目を `.src` で名乗るファイルは
+ *    **136 本**ある(「1 ファイル = 1 ノード」の違反側)。全部を辺にすると 175 辺の雑音になる。
+ *    そのうち sorry を持つものは 0 本なので、塞がってはいない。 */
+for (const n of nodes.values()) {
+  const up = upstreamOf(n.mod);
+  const unc = [];
+  const seen = new Set();
+  for (const r of n.needsRefs) {
+    const key = `${r.paper}|${r.item}`;
+    if (seen.has(key)) continue;
+    const tgt = declaredBy.get(key);
+    if (!tgt) continue;                        // 木にまだ無い項目(別論文・未着手)
+    const mods = [...tgt].filter((m) => m !== n.mod);
+    if (!mods.length || mods.some((m) => up.has(m))) continue;   // import で覆えている
+    seen.add(key);
+    unc.push({ ...r, mods });
+  }
+  n.needsUncovered = unc;
+  n.mathEdges = unc.filter((u) => u.mods.every((m) => nodes.get(m).hasSorry))
+    .map((u) => ({ mods: u.mods, via: `${u.kind}: ${u.paper} ${u.item}` }));
+}
 
 /** n から import で辿れる集合(n を含む)。 */
 function closure(start) {
@@ -114,8 +254,32 @@ if (flag('--json')) {
     nodes: [...nodes.values()].map((n) => ({
       mod: n.mod, rel: n.rel, bucket: n.bucket, owner: n.owner, ownerKind: n.ownerKind,
       items: n.allItems, bare: n.bare, hasSorry: n.hasSorry, imports: n.imports,
+      mathEdges: n.mathEdges,
     })),
   }, null, 1));
+  process.exit(0);
+}
+
+// ── ★`.needs` が指しているのに import していない辺 ────────────────────────
+if (flag('--math-edges')) {
+  const all = flag('--all');
+  const key = all ? 'needsUncovered' : 'mathEdges';
+  const rows = [...nodes.values()].filter((n) => n[key].length);
+  const cnt = rows.reduce((a, n) => a + n[key].length, 0);
+  console.log('★`.needs` に書かれているが `import` に現れない依存');
+  console.log(all
+    ? `  ${cnt} 件 / ${rows.length} ノード（--all: 提供元が sorry 無しのものも出す＝衛生の問題）`
+    : `  ${cnt} 件 / ${rows.length} ノード（★提供元が全部 sorry ＝ 数学的に塞がっている。--all で全部）`);
+  console.log('  ☆文字列照合による**疑い**である。辺として採るかは目で見て決めること。\n');
+  for (const n of rows.sort((a, b) => (b.hasSorry - a.hasSorry) || a.rel.localeCompare(b.rel))) {
+    console.log(`  ${n.rel}${n.hasSorry ? '  ★sorry' : ''}`);
+    for (const e of n[key]) {
+      const ms = (e.mods ?? []).map((m) => nodes.get(m));
+      const head = ms.slice(0, 3).map((t) => `${t.rel}${t.hasSorry ? ' ★sorry' : ''}`).join(', ');
+      console.log(`      [${e.via ?? `${e.kind}: ${e.paper} ${e.item}`}]`);
+      console.log(`      → ${head}${ms.length > 3 ? ` … 他 ${ms.length - 3} 本` : ''}`);
+    }
+  }
   process.exit(0);
 }
 

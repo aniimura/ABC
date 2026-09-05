@@ -49,11 +49,26 @@ const node = modArg
 if (!node) { console.error(`ノードが見つからない: ${relArg ?? modArg}`); process.exit(1); }
 
 /* ---------- 依存・被依存 ---------- */
+/* ★`import` 依存と数学的依存は一致しない。`graph.mjs` が `.needs` から拾った
+ *   `mathEdges` を import と同じ扱いにする（`tools/frontier.mjs` と同じ規則）。
+ *   ★これが無いと、数学的に塞がっているノードの持ち場を agent に渡してしまう。 */
+const mathUp = new Map();
+const mathVia = new Map();
+for (const n of nodes) {
+  const ms = [...new Set((n.mathEdges ?? []).flatMap((e) => e.mods))]
+    .filter((m) => byMod.has(m) && m !== n.mod);
+  if (ms.length) mathUp.set(n.mod, ms);
+  for (const e of n.mathEdges ?? []) for (const m of e.mods) mathVia.set(`${n.mod}→${m}`, e.via);
+}
+
 const rdeps = new Map();
-for (const n of nodes) for (const im of n.imports) {
-  if (!byMod.has(im)) continue;
-  if (!rdeps.has(im)) rdeps.set(im, []);
-  rdeps.get(im).push(n.mod);
+const addR = (from, to) => {
+  if (!rdeps.has(from)) rdeps.set(from, []);
+  if (!rdeps.get(from).includes(to)) rdeps.get(from).push(to);
+};
+for (const n of nodes) {
+  for (const im of n.imports) { if (byMod.has(im)) addR(im, n.mod); }
+  for (const m of mathUp.get(n.mod) ?? []) addR(m, n.mod);
 }
 const reach = (start, edgesOf) => {
   const seen = new Set(); const st = [...(edgesOf(start) ?? [])];
@@ -62,11 +77,13 @@ const reach = (start, edgesOf) => {
   return seen;
 };
 const downOf = (m) => rdeps.get(m) ?? [];
-const upOf = (m) => (byMod.get(m)?.imports ?? []).filter((x) => byMod.has(x));
+const importUpOf = (m) => (byMod.get(m)?.imports ?? []).filter((x) => byMod.has(x));
+const upOf = (m) => [...importUpOf(m), ...(mathUp.get(m) ?? [])];
 const sorryMods = new Set(nodes.filter((n) => n.hasSorry).map((n) => n.mod));
 
 const down = reach(node.mod, downOf);
 const up = reach(node.mod, upOf);
+const upImport = reach(node.mod, importUpOf);
 const blockers = [...up].filter((m) => sorryMods.has(m)).sort();
 let dsItems = 0; for (const m of down) dsItems += (byMod.get(m)?.items.length ?? 0);
 
@@ -128,7 +145,11 @@ const result = {
   items: node.items,
   status: blockers.length ? 'blocked' : (node.hasSorry ? 'startable' : 'done'),
   impact: { downstream: down.size, downstreamItems: dsItems },
-  blockers: blockers.map((m) => byMod.get(m)?.rel ?? m),
+  blockers: blockers.map((m) => ({
+    rel: byMod.get(m)?.rel ?? m,
+    // ★import には現れず、`.needs` から拾って初めて見えた依存
+    viaNeeds: upImport.has(m) ? null : (mathVia.get(`${node.mod}→${m}`) ?? '（推移的）'),
+  })),
   imports: node.imports.filter((m) => byMod.has(m)).map((m) => ({
     rel: byMod.get(m).rel, hasSorry: byMod.get(m).hasSorry,
   })),
@@ -151,9 +172,15 @@ L.push('');
 
 if (result.blockers.length) {
   L.push('## ★上流に残る sorry（これらが先）');
-  for (const b of result.blockers) L.push(`- \`${b}\``);
+  for (const b of result.blockers) {
+    L.push(`- \`${b.rel}\`${b.viaNeeds ? `  ★**import には現れない依存**（\`.needs\` の ${b.viaNeeds}）` : ''}`);
+  }
   L.push('');
   L.push('☆このノードには**まだ着手できない**。上流を先に片付けること。');
+  if (result.blockers.some((b) => b.viaNeeds)) {
+    L.push('★import していないので Lean は何も言わないが、**数学的には塞がっている**。');
+    L.push('  この形は 2026-09-05 に `tools/graph.mjs --math-edges` で機械的に拾えるようにした。');
+  }
   L.push('');
 }
 

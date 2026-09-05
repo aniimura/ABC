@@ -49,14 +49,40 @@ function loadGraph() {
 const { nodes } = loadGraph();
 const byMod = new Map(nodes.map((n) => [n.mod, n]));
 
-/** 逆辺: mod → それを直接 import しているノードの mod 一覧。 */
+/* ★★`import` 依存と数学的依存は一致しない(2026-09-05)
+ *
+ *   実例: `Skeleton/PGC/Section1Cor13.lean` は 2026-09-05 まで
+ *   **着手可能・下流 27・第 1 位**と出ていた。しかし中身の `inertia_recoverable` は
+ *   Prop 1.2 に完全に帰着することが証明済みで(`Found/PGC/InertiaTransport.lean`)、
+ *   その Prop 1.2 は `Skeleton/PGC/Section1.lean` の **sorry のまま**である。
+ *   `Section1Cor13.lean` は Prop 1.2 を型として要らないので import していない。
+ *   ★つまりスケジューラの第 1 位が、数学的には塞がっているノードだった。
+ *
+ *   `graph.mjs` が `.needs`(`.otherPaper` / `.derivation` / `.implicitStep` / `.folklore`)
+ *   から拾った辺を `mathEdges` として渡してくる。ここではそれを import と同じ扱いにする。
+ *   ★`--no-math` で切れる(2026-09-05 以前の挙動に戻す)。 */
+const useMath = !flag('--no-math');
+const mathUp = new Map();                    // mod → 数学的な上流 mod[]
+const mathVia = new Map();                   // `${from}→${to}` → 理由
+for (const n of nodes) {
+  const es = useMath ? (n.mathEdges ?? []) : [];
+  const ms = [...new Set(es.flatMap((e) => e.mods))].filter((m) => byMod.has(m) && m !== n.mod);
+  if (ms.length) mathUp.set(n.mod, ms);
+  for (const e of es) for (const m of e.mods) mathVia.set(`${n.mod}→${m}`, e.via);
+}
+
+/** 逆辺: mod → それを直接 import しているノードの mod 一覧(数学的な辺を含む)。 */
 const rdeps = new Map();
+const addR = (from, to) => {                 // to が from に依存している
+  if (!rdeps.has(from)) rdeps.set(from, []);
+  if (!rdeps.get(from).includes(to)) rdeps.get(from).push(to);
+};
 for (const n of nodes) {
   for (const im of n.imports) {
     if (!byMod.has(im)) continue;            // Mathlib 等、木の外は辿らない
-    if (!rdeps.has(im)) rdeps.set(im, []);
-    rdeps.get(im).push(n.mod);
+    addR(im, n.mod);
   }
+  for (const m of mathUp.get(n.mod) ?? []) addR(m, n.mod);
 }
 
 /** v から辺を辿って到達できる集合（v 自身は含めない）。 */
@@ -73,7 +99,10 @@ function reach(start, edgesOf) {
 }
 
 const downOf = (m) => rdeps.get(m) ?? [];
-const upOf = (m) => (byMod.get(m)?.imports ?? []).filter((x) => byMod.has(x));
+const upOf = (m) => [
+  ...(byMod.get(m)?.imports ?? []).filter((x) => byMod.has(x)),
+  ...(mathUp.get(m) ?? []),
+];
 
 const sorryMods = new Set(nodes.filter((n) => n.hasSorry).map((n) => n.mod));
 
@@ -83,6 +112,9 @@ for (const n of nodes) {
   const down = reach(n.mod, downOf);
   const up = reach(n.mod, upOf);
   const blockers = [...up].filter((m) => sorryMods.has(m)).sort();
+  /** ★import だけでは見えない blocker（`.needs` から拾った辺で初めて見えたもの）。 */
+  const upImport = reach(n.mod, (m) => (byMod.get(m)?.imports ?? []).filter((x) => byMod.has(x)));
+  const mathOnly = blockers.filter((m) => !upImport.has(m));
   let dsItems = 0;
   for (const m of down) dsItems += (byMod.get(m)?.items.length ?? 0);
   rows.push({
@@ -95,6 +127,7 @@ for (const n of nodes) {
     downstream: down.size,
     dsItems,
     blockers,
+    mathOnly,
     startable: blockers.length === 0,
   });
 }
@@ -120,8 +153,15 @@ if (flag('--json')) {
 
 const total = rows.length;
 const startable = rows.filter((r) => r.startable).length;
+const mathBlocked = rows.filter((r) => !r.startable && r.mathOnly.length && r.blockers.length === r.mathOnly.length);
 console.log('★前線（sorry を持つノード）');
 console.log(`  sorry ノード ${total} / うち着手可能 ${startable}`);
+if (useMath && mathBlocked.length) {
+  console.log(`  ★うち ${mathBlocked.length} 件は **import には現れない依存**だけで塞がっている`);
+  console.log(`    （\`.needs\` から拾った。--no-math で切ると着手可能に見えてしまう）`);
+} else if (!useMath) {
+  console.log('  ★--no-math: `.needs` の辺を無視している（2026-09-05 以前の挙動）');
+}
 if (ownerFilter) console.log(`  所属で絞り込み: ${ownerFilter}`);
 console.log(`  ${flag('--all') ? '★--all: 着手不可も表示' : '（着手不可を隠している。--all で全部）'}`);
 console.log();
@@ -132,7 +172,11 @@ for (const r of sel) {
   if (r.items.length) console.log(`                  項目: ${r.items.slice(0, 4).join(' / ')}${r.items.length > 4 ? ' …' : ''}`);
   if (!r.startable) {
     console.log(`                  ★上流の sorry ${r.blockers.length} 件で止まる:`);
-    for (const b of r.blockers.slice(0, 3)) console.log(`                    ${byMod.get(b)?.rel ?? b}`);
+    for (const b of r.blockers.slice(0, 3)) {
+      const via = mathVia.get(`${r.mod}→${b}`);
+      const tag = r.mathOnly.includes(b) ? `  ★import に無い依存${via ? `（${via}）` : ''}` : '';
+      console.log(`                    ${byMod.get(b)?.rel ?? b}${tag}`);
+    }
     if (r.blockers.length > 3) console.log(`                    … 他 ${r.blockers.length - 3} 件`);
   }
 }
