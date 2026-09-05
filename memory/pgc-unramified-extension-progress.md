@@ -1012,3 +1012,32 @@ Frobenius・Teichmüller など)が、そのまま `adjoinField K x` を
 依存で通らない。`RingEquiv.subringCongr` 経由も
 `Subring ((adjoinField K x).carrier)` と `Subring ↥K⟮x⟯` の
 `CommRing` 経路の違いで詰まる。次に必要になったときの課題。
+
+## ★★★★★★★★★★★★2026-09-05: `SubgroupCorrespondence` も構成した
+——`Interface` の自由データは残り 1 つ
+
+新規 `Found/PGC/SubgroupCorrespondenceConstruction.lean`(sorry 無し):
+- `isGalois_closure` : `K̄/K` は無限次 Galois(標数 0 + 代数閉包)
+- **`finiteDimensional_fixedField_of_isOpen`** : 開部分群の固定体は `K` 上
+  有限次。`H` 開 ⟹ `H ∈ 𝓝 1` ⟹(`krullTopology_mem_nhds_one_iff`)
+  `K` 上有限次の `E` で `E.fixingSubgroup ⊆ H` ⟹ `fixedField H ≤
+  fixedField (E.fixingSubgroup) = E`(`InfiniteGalois.fixedField_fixingSubgroup`)。
+- `fixedFieldLocalField` : 固定体を `PAdicLocalField p` として
+- **`subgroupCorrespondence p : SubgroupCorrespondence p`**
+
+★逸脱の記録: `field_top : field K ⊤ h = K` は**構造としての等式**なので
+`carrier` が型として `K.carrier` に一致しなければならない。
+`fixedField ⊤ = ⊥` の台 `↥⊥` は `K.carrier` と標準同型だが型としては別物
+なので、`H = ⊤` の場合だけ場合分けして `K` そのものを返す
+(`H ≠ ⊤` では本物の固定体——数学的内容は変わらない)。
+
+### `Interface/PGC/LocalFieldData.lean` の状況
+
+| データ | 状態 |
+|---|---|
+| `ResidueCardinality` | **構成済**(第 956) |
+| `SubgroupCorrespondence` | **構成済**(本項) |
+| `RamificationFiltration` | 未構成(上付き番号付け高次分岐群、mathlib 不在) |
+
+`Corollary 1.3`(`inertia_recoverable RD SC`)の**両方の仮説**に実物が
+入るようになった。
