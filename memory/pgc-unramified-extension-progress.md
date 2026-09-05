@@ -730,3 +730,21 @@ normal で `f_K` が分裂するから `z ∈ K(y)`、同様に `K(z) = K(y)`。
 残るのは「完全分岐部分(節目(5)、既に完成)と不分岐部分を**組み合わせて**
 `Γ_K^ab ≅ (K^×)^∧` を出す」段——`pgc-prop12-reciprocity-gap.md` の
 (2)(3)(4) にあたる。
+
+## 2026-09-05: Teichmüller 持ち上げ——`𝒪_K^×` は `𝓀^×` を含む
+
+新規 `Found/Teichmuller.lean`(一般の結果、mathlib へ出せる形):
+- `exists_teichmullerRep` / `teichmullerRep_unique` :
+  Henselian 局所環 `A` で剰余体が有限(位数 `q`)なら、`𝓀_A` の `0` でない
+  元は `X^{q-1}-1` の根に**一意に**持ち上がる。単根であることは
+  `q-1 ≡ -1 (mod p)`(`FiniteField.cast_card_eq_zero`)から。
+- **`teichmuller A : 𝓀_Aˣ →* Aˣ`**(乗法性は一意性から)
+- `residue_teichmuller`(切断)・`teichmuller_injective`
+
+`Found/PGC/UnramifiedExtension.lean`:
+- `exists_teichmuller_section` : `𝒪_K^× → 𝓀^×` の群としての切断が存在する
+
+これは古典的局所類体論の `𝒪_K^× ≅ μ_{q-1} × (1+𝔪_K)` の**第一因子**
+——[pGC] Proposition 1.2 が `Γ_K^ab` の群構造から `q` を読み取るときの
+入口にあたる。残る第二因子 `1+𝔪_K`(pro-p 部分、`ℤ_p`-階数が
+`[K:ℚ_p]`)は未着手。

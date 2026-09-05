@@ -6,6 +6,7 @@ import Mathlib.Algebra.Polynomial.Eval.Irreducible
 import Mathlib.RingTheory.Polynomial.GaussLemma
 import ABC3.Found.FiniteFieldIrreducible
 import ABC3.Found.HenselianSplits
+import ABC3.Found.Teichmuller
 import ABC3.Found.PGC.ValuationRingComplete
 
 /-!
@@ -1761,5 +1762,29 @@ theorem exists_surjective_absGal_to_zmod {p : ℕ} [Fact p.Prime] (K : PAdicLoca
   exact (e.surjective).comp
     (AlgEquiv.restrictNormalHom_surjective (F := K.carrier)
       (K₁ := (IntermediateField.adjoin K.carrier ({x} : Set K.closure))) (E := K.closure))
+
+
+/-! ## Teichmüller 持ち上げ——`𝒪_K^×` は `𝓀^×`(位数 `q-1` の巡回群)を含む
+
+`Found/Teichmuller.lean`(一般の結果)を `𝒪[K.carrier]` に適用する。
+`𝒪[K.carrier]` は Henselian(`henselianLocalRing_carrierIntegers`)で
+剰余体は有限(`residueField_finite`)なので、剰余写像
+`𝒪_K^× → 𝓀^×` は群としての切断を持つ。
+
+古典的局所類体論の `𝒪_K^× ≅ μ_{q-1} × (1+𝔪_K)` の**第一因子**——
+[pGC] Proposition 1.2 が `Γ_K^ab` の群構造から `q` を読み取るときの入口。 -/
+
+/-- **`𝒪_K^×` の Teichmüller 持ち上げ**——剰余写像 `𝒪_K^× → 𝓀^×` の
+群としての切断が存在する(したがって `𝓀^×` は `𝒪_K^×` の部分群として
+実現される)。 -/
+theorem exists_teichmuller_section {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) :
+    ∃ ω : (𝓀[K.carrier])ˣ →* (𝒪[K.carrier])ˣ,
+      (∀ b, Units.map (IsLocalRing.residue 𝒪[K.carrier] :
+        𝒪[K.carrier] →* 𝓀[K.carrier]) (ω b) = b) ∧ Function.Injective ω := by
+  haveI : Finite 𝓀[K.carrier] := residueField_finite K
+  haveI : Fintype 𝓀[K.carrier] := Fintype.ofFinite _
+  exact ⟨ABC3.Found.teichmuller 𝒪[K.carrier],
+    ABC3.Found.residue_teichmuller 𝒪[K.carrier],
+    ABC3.Found.teichmuller_injective 𝒪[K.carrier]⟩
 
 end ABC3.Found.PGC

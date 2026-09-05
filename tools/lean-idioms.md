@@ -4841,3 +4841,47 @@ defeq で通る。#37(`rw` は syntactic・`exact` は defeq)と同じ根。
 (`@[implicit_reducible]` 付きの `def`)を先に置く。置き忘れると
 インスタンス探索が `whnf` で 200000 heartbeats タイムアウトする
 (#47「`maxHeartbeats` の `whnf` タイムアウト」と同じ症状——原因は「構造的に不可能」ではなく「instance が単に無い」)。
+
+## 54. 降下補題を書く前に、**そのファイル自身の在庫**を引く——
+`FieldLimit.lean` には既に降下の道具一式がある(2026-09-05)
+
+**やらかし**: `A⊗[ℚ]ℝ = colim_R (A⊗[ℚ]R.1)` のフィルター余極限性から
+「ℝレベルでイデアルに属していれば有限段階でも属する」を導く補題を
+`exists_fgSubalgebra_mvPolynomial_ideal_mem_descend` として新規に書いた。
+ところが同じ主張が同じファイルに
+**`exists_mem_ideal_span_range_descend`** としてすでに存在しており、
+しかも`exists_mvPolynomial_quotient_ringHom_descend2`の証明中で
+実際に使われていた。完全な重複だったので削除した。
+
+**在庫の引き方(`CLAUDE.md`の「在庫」の具体化)**: `CorrHyp` の降下まわりは
+`FieldLimit.lean` に集中しているので、まず
+
+```
+grep -n "^theorem exists_fg\|^theorem exists_mvPolynomial\|^theorem mem_ideal\|^theorem exists_mem" \
+  lean/ABC3/Found/CorrHyp/FieldLimit.lean
+```
+
+で**名前の一覧**を眺めるだけでよい(30 行ほど)。`decl-index` を作るより速い。
+主な在庫(2026-09-05 時点):
+
+- `exists_fg_subalgebra_tensor_finset` / `_mvPolynomial_finset` /
+  `_polynomial_family` …… ℝレベルの有限個の元・多項式を単一の`R`へ降ろす
+- `exists_fgSubalgebra_upperBound` / `upperBound2` …… `R`たちの上界
+- `exists_mem_ideal_span_range_descend` …… **イデアル所属の降下**
+- `mem_ideal_span_range_promote` …… 所属を`R'`へ持ち上げる
+- `exists_mvPolynomial_eval_descend` …… `ψ`(生成元の行き先)の降下
+- `exists_mvPolynomial_quotient_ringHom_descend` / `descend2` ……
+  **環準同型そのものの降下**(片方向。`descend2`はイデアル所属版)
+- `exists_mvPolynomial_quotient_ringEquiv_descend` / `descend'` /
+  `_specIso_descend` …… 両方向(`ψ`・`ψ'`)からの同型の降下
+- `algebraTensorMap_val_injective` / `mvPolynomial_map_algebraTensorMap_val_injective`
+  …… `ℚ`が体なので`A⊗R.1 → A⊗ℝ`は単射
+- `algebraTensorMap_val_comp_inclusion` / `algebraTensorMap_inclusion_comp_inclusion`
+  …… `val ∘ inclusion = val` などの配管
+
+**ついでの発見**: `descend2` は単一の底`A`を仮定しているが、
+底が`A → A'`と動く場合へは**無料で一般化できる**——関係式を先に
+`Algebra.TensorProduct.map φ (AlgHom.id ℚ R.1)` で`A'`側へ押し出して
+から`descend2`を`A := A'`で使えばよい。
+`(map (id A') (val R)) ∘ (map φ (id R)) = map φ (val R)`
+(`Algebra.TensorProduct.map_comp`+`id_comp`/`comp_id`)がその根拠。
