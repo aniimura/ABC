@@ -5316,3 +5316,37 @@ theorem isOpenImmersion_specMap_comp_ringEquiv (φ : A →+* B) (e : C ≃+* A)
 **見分け方**: `letI` を 5 段以上抱えた定義(ここでは
 `descendPieceRModel_ringEquivQuotientMap`)を**型の中で合成**しようとして
 いるなら、この罠に入っている。
+
+## 69. `adjoinField K x` と `adjoinIntegers K x` の境界は「工夫で越える」ものではない(実測)
+
+#59 の続き。`ABC3` には同じ整数環の**二つの表現**がある:
+
+* `adjoinIntegers K x : Subring ↥K⟮x⟯`(手で作った `{y | ‖y‖ ≤ 1}`)
+* `𝒪[(adjoinField K x).carrier]`(`Valued` から来る `Valuation.integer`)
+
+`integersEquivAdjoinIntegers` はこの二つを繋ぐ `≃+*` で、**構成は通る**
+(`card_residueField_adjoinField` は実際にこれを使っている)。しかし
+
+```lean
+theorem tst (w : 𝒪[(adjoinField K x).carrier]) :
+    (integersEquivAdjoinIntegers K x w).1 = w.1 := rfl
+```
+
+——定義上ほとんど自明(`toFun z := ⟨z.1, _⟩`)なのに——は**通らない**:
+
+| 設定 | 結果 | 時間 |
+|---|---|---|
+| 既定 | `(kernel) deterministic timeout` | 212 秒 |
+| `maxHeartbeats 1000000` | `(deterministic) timeout at whnf` | 126 秒 |
+
+(2026-09-05 実測。`Subtype.ext rfl` でも同じ。)
+
+**原因**: 両辺の型が `↥K⟮x⟯` と `(adjoinField K x).carrier` で異なり、
+`𝒪[·]` がスペクトルノルム由来の `Valued` インスタンスなので `whnf` が
+展開しきれない。#59 の「1 層なら速い」の**外側**にある。
+
+**対処**: 越えようとしない。**片側に寄せて書き直す**。
+例: `Gal(K(x)/K)` の整数環への作用は、`algEquivIntegers`(`adjoinIntegers` 側)
+と合成せず、`Found/PGC/UnramifiedFrobenius.lean::integersEquivOf` のように
+`𝒪[(adjoinField K x).carrier]` 側で**直接**書けば通る。
+`adjoinIntegers` 側の定理を使いたければ、その定理自体を書き直すこと。
