@@ -479,3 +479,36 @@ IsAdicComplete.henselianRing (R) (I) [IsAdicComplete I R] : HenselianRing R I
 これだけが「次数 `n` の不分岐拡大が各 `n` に存在する」を言うために
 足りない。純粋に有限体の話で、この節とは独立。mathlib での所在は
 未確認(`GaloisField p n` の原始元の `minpoly` を使う経路が有力)。
+
+## ★★★★★2026-09-05: 各次数の不分岐拡大の**存在**が完成
+
+最後に残っていた「有限体上の任意次数のモニック既約多項式の存在」を
+新規ファイル `Found/FiniteFieldIrreducible.lean` に書いた
+(`ABC3.Found.exists_monic_irreducible_natDegree_eq`、一般の結果として
+mathlib へ出せる形。`Found/ResidueFieldFinite.lean` と同じ位置づけ)。
+
+筋: `F` の標数 `p`、`m := [F : ZMod p]` として `GaloisField p (m*n)` を
+取り、`m ∣ m*n` から `FiniteField.nonempty_algHom_of_finrank_dvd` で
+`F`-代数とみなす。塔の公式で `[GaloisField p (m*n) : F] = n`、
+有限体は完全体だから `Field.exists_primitive_element` で原始元 `α`、
+`minpoly F α` が求めるもの。
+
+これを流し込んで
+`Found/PGC/UnramifiedExtension.lean::exists_isUnramifiedAdjoin`:
+
+```
+n ≠ 0  ⟹  ∃ x : K.closure, [K(x):K] = n ∧ IsUnramifiedAdjoin K x
+```
+
+**不分岐拡大理論の第一の柱(存在)が立った**。
+
+### 次の柱
+
+1. **一意性**: 同じ次数の不分岐拡大は(`K.closure` の中で)一致する。
+   剰余体が `𝔽_{q^n}` で決まることと `e=1` から、`K(x)` の元は
+   `𝒪_{K(x)}` の Teichmüller 持ち上げで決まる——ここで
+   `HenselianLocalRing`(本日入った)が効くはず。
+2. `K^ur` の構成(すべての不分岐拡大の合併=`IntermediateField` の
+   `⨆`)と `Gal(K^ur/K) ≅ Gal(𝔽̄_q/𝔽_q) ≅ Ẑ`。
+   `Gal(𝔽̄_q/𝔽_q) ≅ Ẑ` そのものは mathlib に不在(2026-09-05 実測)
+   なので、Frobenius の位相的生成性から自前で組む必要がある。

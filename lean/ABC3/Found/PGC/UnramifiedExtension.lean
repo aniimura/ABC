@@ -4,6 +4,7 @@ import Mathlib.NumberTheory.RamificationInertia.Basic
 import Mathlib.RingTheory.Henselian
 import Mathlib.Algebra.Polynomial.Eval.Irreducible
 import Mathlib.RingTheory.Polynomial.GaussLemma
+import ABC3.Found.FiniteFieldIrreducible
 
 /-!
 # 不分岐拡大への出発点(スケルトン、`sorry` 無し・現時点では定義のみ)
@@ -798,5 +799,24 @@ theorem exists_isUnramifiedAdjoin_of_irreducible {p : ℕ} [Fact p.Prime] (K : P
   have hle : inertiaDegree K x ≤ ramificationIndex K x * inertiaDegree K x :=
     Nat.le_mul_of_pos_left _ (Nat.pos_of_ne_zero he)
   omega
+
+
+/-- **★各次数の不分岐拡大の存在**——`n ≥ 1` に対し、`K` の次数 `n` の
+**不分岐**単項拡大 `K(x)/K` が `K.closure` の中に存在する。
+`Found/FiniteFieldIrreducible.lean`(有限体上の任意次数のモニック既約
+多項式)を上の構成に流し込むだけ。
+
+これで「不分岐拡大の理論」の第一の柱——**存在**——が立った。
+残るのは一意性(同じ次数の不分岐拡大は同型)と、`K^ur` および
+`Gal(K^ur/K) ≅ Ẑ`。 -/
+theorem exists_isUnramifiedAdjoin {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p) (n : ℕ)
+    (hn : n ≠ 0) :
+    ∃ x : K.closure,
+      Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) = n
+        ∧ IsUnramifiedAdjoin K x := by
+  haveI : Finite 𝓀[K.carrier] := residueField_finite K
+  obtain ⟨g, hgm, hgi, hgd⟩ := ABC3.Found.exists_monic_irreducible_natDegree_eq 𝓀[K.carrier] n hn
+  obtain ⟨x, hrank, hu⟩ := exists_isUnramifiedAdjoin_of_irreducible K g hgm hgi
+  exact ⟨x, hgd ▸ hrank, hu⟩
 
 end ABC3.Found.PGC
