@@ -737,4 +737,45 @@ theorem injective_of_almostIso_of_noTorsion {A M N : Type u} [CommRing A]
   intro x hx
   exact hnotors 0 x ((hf 0).1 x hx)
 
+/-! ### ★★★★項目全体の `.src`(2026-09-05)
+
+`Theorem 2.4` は (i)(ii) とも証明され、非空虚性の対照もある。
+原文に無い仮定(逸脱)は `.needs` に記録する。 -/
+
+/-- ★★★★**[Falt1] Theorem 2.4**——almost étale covering の
+**微分の消滅(i)** と **Galois コホモロジーの almost 消滅(ii)**。
+
+## ★主張
+
+| 原文 | 宣言 |
+|---|---|
+| (i) 余核側(`Ω[B⁄A]` が almost 零) | `thm_2_4_i_cokernel`(`AlmostDifferentials.lean`)/ `kaehler_almost_zero` |
+| (i) 核側 | `thm_2_4_i_kernel` ＋ `thm_2_4_i`——★`H1Cotangent` を経由しない**初等的**証明(`c` 捩れ半線型コチェイン `u(b) := Σᵢ yᵢ·d(fᵢ b)`) |
+| (i) 原文どおり「`m` が零化する」形 | `thm_2_4_i_m_annihilates` |
+| (i) almost 同型の形 | `thm_2_4_i_almostIso` |
+| (ii) | `thm_2_4_ii`(`GaloisTransfer.lean`)——transfer は全次数 `i>0` で(`transfer_groupCohomology_smul_eq_zero`)、可換環の Galois trace 公式は自作(`trace_eq_sum_of_chr`) |
+| 非空虚性 | `thm_2_4_i_nonvacuous_hf0inj` ほか |
+
+## ★逸脱の記録
+
+* `Module.Free A B`(原典は `B[1/p]` が projective としか言わない
+  ——mathlib の `Algebra.trace` が `Module.Free` を要求)。
+* `IsDedekindDomain` + `Module.IsTorsionFree`((ii) で `Ideal.relNorm` を使うため)。 -/
+def thm_2_4.src : ABC3.Meta.Source :=
+  { paper := "Falt1", pdfPage := 8, item := "Theorem 2.4", sectionId := "falt1-thm-2-4" }
+
+def thm_2_4.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "thm_2_4_i(核側、H1Cotangent を経由しない初等的証明)"
+      (.inProject "ABC3" "ABC3.Found.Falt1.thm_2_4_i") 8,
+    .citation "[ABC3]" "thm_2_4_i_cokernel(余核側)"
+      (.inProject "ABC3" "ABC3.Found.Falt1.thm_2_4_i_cokernel") 8,
+    .citation "[ABC3]" "thm_2_4_i_m_annihilates(原文どおり「m が零化する」形)"
+      (.inProject "ABC3" "ABC3.Found.Falt1.thm_2_4_i_m_annihilates") 8,
+    .citation "[ABC3]" "thm_2_4_ii(Galois コホモロジーの almost 消滅)"
+      (.inProject "ABC3" "ABC3.Found.Falt1.thm_2_4_ii") 8,
+    .implicitStep
+      "★逸脱: Module.Free A B——mathlib の Algebra.trace が要求(原典は B[1/p] が projective)" 8,
+    .implicitStep
+      "★逸脱: IsDedekindDomain + Module.IsTorsionFree——(ii) で Ideal.relNorm を使うため" 8 ]
+
 end ABC3.Found.Falt1

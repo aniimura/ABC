@@ -1,3 +1,4 @@
+import ABC3.Meta.Claim
 import ABC3.Found.Falt1.AlmostDifferentials
 import ABC3.Found.Falt1.AlmostProjective
 import ABC3.Found.Falt1.HochschildLowDegree
@@ -1384,5 +1385,53 @@ example (A : Type u) [CommRing A] :
     simpa using hc
   rw [h1]
   rfl
+
+/-! ### ★★★★項目全体の `.src`(2026-09-05)
+
+`Theorem 2.2` は存在と一意性の両方が `∃!` の形で証明され、非空虚性の
+対照も 2 件ある。原文に無い仮定(逸脱)は `.needs` に記録する。 -/
+
+/-- ★★★★**[Falt1] Theorem 2.2**——almost étale covering に沿った
+冪零イデアル上の**持ち上げの存在と一意性**(`∃!`)。
+
+## ★主張
+
+| 原文 | 宣言 |
+|---|---|
+| *"there exists a unique lifting"* | `thm_2_2`(`∃! ψ : B →ₐ[A] C`) |
+| 存在 | `thm_2_2_tower`(族の貼り合わせ `exists_glued_lift` + `B = A·1 + mB` による拡張 `exists_glued_extension`) |
+| 一意性 | `thm_2_2_uniqueness_tower` |
+| *"We may assume that `I² = 0`"* | `lift_nilpotent_of_lift_sq` |
+| 非空虚性 | 2 件(`p` が真の非単元・`B/A` が非自明の 2 軸) |
+
+## ★逸脱の記録(`falt1-goal.md` §0.1)
+
+1. `PDivTower A q`——原文の `p^ε`(`ε ∈ ℚ_{>0}`)に Lean で意味を
+   与えるための塔。`m := span(range ϖ)` は `m² = m` を満たす。
+2. `hBtors`(`B` の `ϖ k` 捩れ無し)——族の貼り合わせの well-defined 性で使う。
+3. `[Module.Finite A B]`・`[Module.Free A B]`——mathlib の
+   `Algebra.trace` が `Module.Free` を要求するため。
+
+★`hdecomp : B = A·1 + mB` と `htors`(`C` の捩れ無し)は**逸脱ではない**
+——原文が `Theorem 2.2` の仮定・証明中で明示している。 -/
+def thm_2_2.src : ABC3.Meta.Source :=
+  { paper := "Falt1", pdfPage := 7, item := "Theorem 2.2", sectionId := "falt1-thm-2-2" }
+
+def thm_2_2.needs : List ABC3.Meta.ProofObligation :=
+  [ .citation "[ABC3]" "thm_2_2(∃! そのもの)"
+      (.inProject "ABC3" "ABC3.Found.Falt1.thm_2_2") 7,
+    .citation "[ABC3]" "thm_2_2_tower(存在)"
+      (.inProject "ABC3" "ABC3.Found.Falt1.thm_2_2_tower") 7,
+    .citation "[ABC3]" "thm_2_2_uniqueness_tower(一意性)"
+      (.inProject "ABC3" "ABC3.Found.Falt1.thm_2_2_uniqueness_tower") 7,
+    .citation "[ABC3]" "lift_nilpotent_of_lift_sq(原文の \"We may assume I² = 0\")"
+      (.inProject "ABC3" "ABC3.Found.Falt1.lift_nilpotent_of_lift_sq") 7,
+    .implicitStep
+      ("★逸脱 1: PDivTower(原文の p^ε に意味を与える塔)。" ++
+       "n : ℕ 添字だけでは honest な結論(2.2 の存在)は出せないので必要だった") 7,
+    .implicitStep
+      "★逸脱 2: hBtors(B の ϖk 捩れ無し)——族の貼り合わせの well-defined 性で使う" 7,
+    .implicitStep
+      "★逸脱 3: Module.Finite/Free A B——mathlib の Algebra.trace が Module.Free を要求" 7 ]
 
 end ABC3.Found.Falt1
