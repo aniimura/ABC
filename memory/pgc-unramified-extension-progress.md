@@ -1778,3 +1778,24 @@ f.natDegree = [K(x):K],  f の根 x  ⟹  K(x)/K は完全分岐
 `LubinTateActionPsi.lean::heis` に渡すだけ。必要な追加は
 `f.natDegree = [K(α):K]`(`ψ_n` の既約性から minpoly = ψ_n)と、
 根の形を `eval x (f.map φ) = 0` に整えること。
+
+## 2026-09-05(続き): `ψ_n` の Eisenstein 性を独立した定理として取り出した
+
+`Found/PGC/LubinTateActionPsi.lean::isEisensteinAt_iteratedLubinTatePsi`
+
+`irreducible_iteratedLubinTatePsi` の証明の中に埋まっていた
+`heis : (iteratedLubinTatePsi ...).IsEisensteinAt (maximalIdeal A)` を
+独立した定理に切り出した(元の証明はそれを呼ぶだけに縮んだ)。
+`TotallyRamified.lean::isTotallyRamifiedAdjoin_of_eisenstein` に渡すため。
+
+### 残っている接続
+
+`ψ_n` は `K(Λ_{n-1})` 上の多項式なので、そのままでは
+「`K(Λ_n)/K(Λ_{n-1})` が完全分岐」しか出ない。`K_π,n/K` 全体の完全分岐性には
+**完全分岐の塔の合成**(`L/K`・`M/L` 完全分岐 ⟹ `M/K` 完全分岐)が要る。
+今あるのは逆向きの `isTotallyRamified_of_le`(部分拡大への遺伝)だけ。
+慣性次数の塔の乗法性 `f(M/K) = f(M/L)·f(L/K)` を出すのが素直
+(`Ideal.inertiaDeg_algebra_tower` が mathlib にある)。
+
+`n = 1` の `φ_1` は `𝒪_K` 上の Eisenstein なので、
+**`K(Λ_1)/K` が完全分岐(次数 q-1)** は今すぐ言える。

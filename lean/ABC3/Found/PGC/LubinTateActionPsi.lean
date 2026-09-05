@@ -326,6 +326,31 @@ theorem iteratedLubinTatePsi_coeff_zero_notMem_sq {A : Type*} [CommRing A] [IsLo
   exact (IsLocalRing.maximalIdeal.isMaximal A).ne_top
     (Ideal.eq_top_of_isUnit_mem _ hπmem hπunit)
 
+/-- ★★★★★★★★★★**`ψ_n` は Eisenstein**——distinguished(モニック・弱 Eisenstein)
+であることと `coeff 0 ∉ 𝔪²` を束ねただけ。
+
+★2026-09-05: `irreducible_iteratedLubinTatePsi` の証明の中に埋まっていたものを
+**独立した定理として取り出した**。`Found/PGC/TotallyRamified.lean::
+isTotallyRamifiedAdjoin_of_eisenstein`(Eisenstein の根が生成する拡大は完全分岐)
+に渡すため。 -/
+theorem isEisensteinAt_iteratedLubinTatePsi {A : Type*} [CommRing A] [IsLocalRing A] [IsDomain A]
+    [IsAdicComplete (IsLocalRing.maximalIdeal A) A]
+    {pp : ℕ} [ExpChar (IsLocalRing.ResidueField A) pp] [Fintype (IsLocalRing.ResidueField A)]
+    {ff : ℕ} (hq : Fintype.card (IsLocalRing.ResidueField A) = pp ^ ff)
+    {π : A} (hπmax : IsLocalRing.maximalIdeal A = Ideal.span {π}) (hπne0 : π ≠ 0)
+    (f : PowerSeries A) (hf0 : PowerSeries.coeff 0 f = 0) (hf1 : PowerSeries.coeff 1 f = π)
+    (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n : ℕ) (hn : 1 ≤ n) :
+    (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn).IsEisensteinAt
+      (IsLocalRing.maximalIdeal A) := by
+  have hmonic := (isDistinguishedAt_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn).monic
+  constructor
+  · rw [hmonic.leadingCoeff]
+    exact fun h => (IsLocalRing.maximalIdeal.isMaximal A).ne_top
+      (Ideal.eq_top_of_isUnit_mem _ h isUnit_one)
+  · exact fun {k} hk =>
+      (isDistinguishedAt_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn).mem hk
+  · exact iteratedLubinTatePsi_coeff_zero_notMem_sq hq hπmax hπne0 f hf0 hf1 hf n hn
+
 /-- ★★★★★★★★★★★**`ψ_n` は既約(任意の `n≥1`)**——古典的な Lubin-Tate
 理論の核心定理。原始 `π^n`-捩れ点(`Λ_n\Λ_{n-1}`)を1つ添加した拡大
 `K(α)/K(Λ_{n-1})` は次数 `q^n-q^{n-1}` の**完全分岐拡大**である、
@@ -342,14 +367,7 @@ theorem irreducible_iteratedLubinTatePsi {A : Type*} [CommRing A] [IsLocalRing A
     (hf : PowerSeries.map (IsLocalRing.residue A) f = PowerSeries.X ^ (pp ^ ff)) (n : ℕ) (hn : 1 ≤ n) :
     Irreducible (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn) := by
   have hmonic := (isDistinguishedAt_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn).monic
-  have heis : (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn).IsEisensteinAt
-      (IsLocalRing.maximalIdeal A) := by
-    constructor
-    · rw [hmonic.leadingCoeff]
-      exact fun h => (IsLocalRing.maximalIdeal.isMaximal A).ne_top (Ideal.eq_top_of_isUnit_mem _ h isUnit_one)
-    · exact fun {k} hk =>
-        (isDistinguishedAt_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn).mem hk
-    · exact iteratedLubinTatePsi_coeff_zero_notMem_sq hq hπmax hπne0 f hf0 hf1 hf n hn
+  have heis := isEisensteinAt_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn
   have hdegpos : 0 < (iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn).natDegree := by
     rw [natDegree_iteratedLubinTatePsi hq hπmax hπne0 f hf0 hf1 hf n hn]
     have h2 : 1 < pp ^ ff := hq ▸ Fintype.one_lt_card
