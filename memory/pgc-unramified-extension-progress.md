@@ -1197,3 +1197,34 @@ Lubin-Tate 級数 `f`)は**すべて本リポジトリで既に構築済みだ�
 ★予想外の収穫: 「閉部分群は自分を含む開部分群すべての共通部分」という
 副有限群の一般論は**要らなかった**。`K^ur` が単項不分岐拡大の有向和である
 (`mem_unramifiedClosure_iff`)ことがその役割をそのまま果たす。
+
+## 2026-09-05(続き): `Γ_K / I_K ≅ Gal(K^ur/K)`
+
+`Found/PGC/InertiaIdentification.lean` に追加:
+- `instNormalUnramifiedClosure`(★`AlgEquiv.restrictNormalHom` を**式に書くために**
+  instance が要る——`haveI` を証明の中に置くのでは遅い)
+- `ker_restrictNormalHom_unramifiedClosure` : 制限射の核 = `I_K`
+- **`absGalQuotKerEquivUnramifiedGal`** : `Γ_K / I_K ≃* Gal(K^ur/K)`
+- `exists_surjective_quotKer_to_zmod` : `Γ_K/I_K ↠ ℤ/n`(`Ẑ` を経由しない形)
+
+### 次の目標(手順まで確定済み)
+
+**部分拡大の不分岐性**: `K(x) ≤ K(y)`・`K(y)/K` 不分岐 ⟹ `K(x)/K` 不分岐。
+これがあれば `K(x) ≤ K^ur ↔ IsUnramifiedAdjoin K x` になり、
+「完全分岐 ∩ K^ur = K」(相互律の全体像に必要な線型無関係性)へ繋がる。
+
+**手順**(検討済み、部品はすべて在庫にある):
+1. `m := [K(x):K]`、`n := [K(y):K]`、`m ∣ n`。
+2. `exists_isUnramifiedAdjoin K m` で次数 `m` の不分岐 `z` を取り、
+   `adjoin_le_of_dvd` で `K(z) ≤ K(y)`。
+3. `H_x := K(x).fixingSubgroup`・`H_z := K(z).fixingSubgroup` は
+   ともに `H_y` を含む開部分群で指数 `m`(`finrank_fixedField_eq_index`)。
+4. `H_y` は正規(`K(y)/K` は Galois)、`Γ_K/H_y ≅ Gal(K(y)/K)` は
+   位数 `n` の巡回群(`exists_isCyclic_gal`)。
+5. **巡回群では位数の等しい部分群は一致**——mathlib に直接の補題は無いが
+   `IsCyclic.card_pow_eq_one_le`(`x^d=1` の解は高々 `d` 個)から 3 行:
+   `H ⊆ {a | a^d = 1}`(Lagrange)、`|{a|a^d=1}| ≤ d = |H|` ⟹ 一致。
+6. ゆえに `H_x = H_z`、`K(x) = K(z)` で不分岐。
+
+★もう一つの発見: **中間体のノルムは `K.closure` のノルムの制限そのもの**
+(`‖z‖ = ‖(z : K.closure)‖` が `rfl`)。整数環の包含を作るのが安い。

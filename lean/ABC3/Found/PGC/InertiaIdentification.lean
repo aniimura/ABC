@@ -108,4 +108,44 @@ theorem normal_inertia (K : PAdicLocalField p) :
   rw [inertia_eq_fixingSubgroup_unramifiedClosure K]
   exact (InfiniteGalois.normal_iff_isGalois _).mpr (isGalois_unramifiedClosure K)
 
+/-! ## `Γ_K / I_K ≅ Gal(K^ur/K)` -/
+
+/-- `K^ur/K` は normal——`AlgEquiv.restrictNormalHom` を**式に書くために**
+instance が要る(`haveI` を証明の中に置くのでは遅い)。 -/
+instance instNormalUnramifiedClosure (K : PAdicLocalField p) :
+    Normal K.carrier (unramifiedClosure K) := normal_unramifiedClosure K
+
+/-- `K^ur` への制限射の核はちょうど `I_K`
+(`IntermediateField.restrictNormalHom_ker` + 惰性群の同定)。 -/
+theorem ker_restrictNormalHom_unramifiedClosure (K : PAdicLocalField p) :
+    (AlgEquiv.restrictNormalHom (F := K.carrier) (K₁ := K.closure) (unramifiedClosure K)).ker
+      = inertia (residueCardinality p) (subgroupCorrespondence p) K := by
+  haveI := normal_unramifiedClosure K
+  rw [inertia_eq_fixingSubgroup_unramifiedClosure K]
+  exact IntermediateField.restrictNormalHom_ker _
+
+/-- **★★★★`Γ_K / I_K ≅ Gal(K^ur/K)`**——古典的な「惰性群による商は
+不分岐 Galois 群」。核が `I_K` であること(上)と制限射の全射性
+(`AlgEquiv.restrictNormalHom_surjective`、`K^ur/K` は normal)から。 -/
+noncomputable def absGalQuotKerEquivUnramifiedGal (K : PAdicLocalField p) :
+    (K.absGal ⧸ (AlgEquiv.restrictNormalHom
+        (F := K.carrier) (K₁ := K.closure) (unramifiedClosure K)).ker)
+      ≃* (unramifiedClosure K ≃ₐ[K.carrier] unramifiedClosure K) := by
+  haveI := normal_unramifiedClosure K
+  haveI := IsAlgClosure.normal K.carrier K.closure
+  exact QuotientGroup.quotientKerEquivOfSurjective _
+    (AlgEquiv.restrictNormalHom_surjective (F := K.carrier)
+      (K₁ := (unramifiedClosure K)) (E := K.closure))
+
+/-- **`Γ_K / I_K` は任意の `n ≥ 1` に対して `ℤ/n` へ全射する**——
+`Gal(K^ur/K) ≅ Ẑ` の、`Ẑ` を経由しない具体的な言い換え
+(`Ẑ` は mathlib に不在、2026-09-05 実測)。 -/
+theorem exists_surjective_quotKer_to_zmod (K : PAdicLocalField p) (n : ℕ) (hn : n ≠ 0) :
+    ∃ φ : (K.absGal ⧸ (AlgEquiv.restrictNormalHom
+        (F := K.carrier) (K₁ := K.closure) (unramifiedClosure K)).ker)
+      →* Multiplicative (ZMod n), Function.Surjective φ := by
+  obtain ⟨ψ, hψ⟩ := exists_surjective_unramifiedClosureGal_to_zmod K n hn
+  exact ⟨ψ.comp (absGalQuotKerEquivUnramifiedGal K).toMonoidHom,
+    hψ.comp (absGalQuotKerEquivUnramifiedGal K).surjective⟩
+
 end ABC3.Found.PGC
