@@ -329,6 +329,71 @@ theorem pi_witness {A : Type u} [CommRing A] {ι : Type u} [Fintype ι] [Decidab
           Finset.sum_congr rfl (fun i _ => by funext j; by_cases h : j = i <;> simp [h])
       _ = 1 := hsum
 
+/-! ## 塔の言葉へ——「`ε` は任意に小さくできる」
+
+`PDivTower.HasAlmostWitnesses` は「**各 `k` について** 水準 `ϖ k` の
+witness がある」という述語で、これが原文の *"the assertion now follows
+as `ε` can be arbitrarily small"* に対応する(`ε = 1/q^k`)。
+
+上の 2 つの操作(全射での押し出し・底変換)はどちらも**水準を変えない**
+ので、そのまま塔の言葉へ持ち上がる。 -/
+
+namespace PDivTower
+
+/-- 塔は環準同型で押し出せる。`ϖ' k := f (ϖ k)`。 -/
+def mapRingHom {A A' : Type u} [CommRing A] [CommRing A'] {q : ℕ}
+    (T : PDivTower A q) (f : A →+* A') : PDivTower A' q where
+  ϖ k := f (T.ϖ k)
+  ϖ_succ k := by rw [← map_pow, T.ϖ_succ]
+
+@[simp] theorem mapRingHom_ϖ {A A' : Type u} [CommRing A] [CommRing A'] {q : ℕ}
+    (T : PDivTower A q) (f : A →+* A') (k : ℕ) :
+    (T.mapRingHom f).ϖ k = f (T.ϖ k) := rfl
+
+end PDivTower
+
+/-- **witness の族は底変換で保たれる**——`A'` 上の塔を
+`ϖ' k = algebraMap A A' (ϖ k)` と取れば、`A' ⊗_A B` は `A'` 上
+同じ水準の witness の族を持つ。
+
+原文 *"`B∞` is almost isomorphic to `S∞ ⊗_{R∞} A∞` **as this is almost
+étale over `S∞`**"* の括弧内を、塔(= 任意に小さい `ε`)の言葉で
+述べたもの。 -/
+theorem hasAlmostWitnesses_baseChange {A A' B : Type u} [CommRing A] [CommRing A']
+    [CommRing B] [Algebra A A'] [Algebra A B] {q : ℕ} (T : PDivTower A q)
+    (hwit : T.HasAlmostWitnesses B) :
+    (T.mapRingHom (algebraMap A A')).HasAlmostWitnesses (TensorProduct A A' B) := by
+  intro k
+  obtain ⟨w, hann, haug⟩ := hwit k
+  obtain ⟨h1, h2⟩ := witness_baseChange A A' B (T.ϖ k) w hann haug
+  exact ⟨bcWitnessMap A A' B w, h1, h2⟩
+
+/-- **witness の族は全射 `A`-代数写像で押し出せる**(`witness_pushforward`
+の塔版)。 -/
+theorem hasAlmostWitnesses_of_surjective {A B B' : Type u} [CommRing A] [CommRing B]
+    [CommRing B'] [Algebra A B] [Algebra A B'] {q : ℕ} (T : PDivTower A q)
+    (f : B →ₐ[A] B') (hf : Function.Surjective f)
+    (hwit : T.HasAlmostWitnesses B) : T.HasAlmostWitnesses B' := by
+  intro k
+  obtain ⟨w, hann, haug⟩ := hwit k
+  obtain ⟨h1, h2⟩ := witness_pushforward f hf (T.ϖ k) w hann haug
+  exact ⟨Algebra.TensorProduct.map f f w, h1, h2⟩
+
+/-- **分裂エタール代数は任意の塔について witness の族を持つ**——
+`pi_witness`(水準 `1`)を `ϖ k` 倍するだけ。
+
+★`PDivTower.HasAlmostWitnesses` が空虚に真な述語ではないことの対照。
+これで `kaehler_isAlmostZero`・`hochschild_H2_isAlmostCoboundary` など
+この述語を仮定する結果すべてに具体的な入力が付いた。 -/
+theorem hasAlmostWitnesses_pi {A : Type u} [CommRing A] {q : ℕ} (T : PDivTower A q)
+    {ι : Type u} [Fintype ι] [DecidableEq ι] : T.HasAlmostWitnesses (ι → A) := by
+  intro k
+  obtain ⟨hann, haug⟩ := (pi_witness (A := A) (ι := ι))
+  refine ⟨T.ϖ k • (∑ i : ι, (Pi.single i (1 : A)) ⊗ₜ[A] (Pi.single i (1 : A))), ?_, ?_⟩
+  · intro b
+    rw [mul_smul_comm, hann b, smul_zero]
+  · rw [map_smul, haug, one_smul]
+
 open scoped TensorProduct in
 /-- 非空虚性——`A = ℤ[X]`、`B = Fin 2 → A`(分裂エタール、`pi_witness`)を
 `A' = A[Y]` へ底変換する。`witness_baseChange` の仮定が空虚に真に
