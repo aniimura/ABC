@@ -5520,3 +5520,33 @@ theorem Scheme.Hom.appLE_preimage_naturality {C Y : Scheme} (f : C ⟶ Y)
 組み立て、`α`側の自然性と合わせて「`Γ(C,piece(U))`の代数構造が制限と
 可換であること」を出す。そこまで行けば`descend2_of_map`の`hψ`が検証でき、
 新設計の`f i j`が構成できる。集計は引き続き10/24——§4は引き続き0/2。
+
+## 2026-09-05夜さらに続き34: **`pieceRingEquiv.symm`の自然性が完成**——
+続き22の障害を完全に解消
+
+続き32で揃えた2成分から、自然性そのものを組み立てた(`ExtLimit.lean`、
+commit `95f44bc1`、`sorry`無し、`lake build ABC3.Found.CorrHyp.Instance4`は
+`error`0件・`EXIT:0`、`Found`側の`sorry`は0件):
+
+```
+theorem pieceRingEquiv_symm_naturality … (a : Γ(X.left,U)) (r : ℝ) :
+    restr_ExtX ((pieceRingEquiv X U hU).symm (a ⊗ₜ r))
+      = (pieceRingEquiv X V hV).symm ((restr_X a) ⊗ₜ r)
+```
+
+証明は純テンソルを`a ⊗ₜ r = (a ⊗ₜ 1)(1 ⊗ₜ r)`と分解し、2成分それぞれに
+`pieceRingEquiv_symm_tmul_one`・`pieceRingEquiv_symm_one_tmul`(今回併せて
+追加、続き30・32の`CommRingCat`射の等式を**元レベル**へ落としたもの)を
+当ててから、`appLE`側の自然性(`piece_appLE_naturality`・
+`Scheme.Hom.appLE_map`)で移すだけ。`Algebra.TensorProduct.ext`のような
+重い道具は要らなかった。
+
+**これで続き22で「3つ目の不透明な同型」として立ちはだかった障害は、
+`Spec`側・環レベル・両成分・自然性のすべてで解消した。**
+
+**次の一手**: `Γ(C,piece(U))`の`A_U⊗ℝ`-代数構造は
+`α.appLE ∘ pieceRingEquiv.symm`なので、今回の自然性と
+`Scheme.Hom.appLE_preimage_naturality`(`α`側、続き33)を合わせて
+「代数構造が制限と可換」を出す。それを`descend2_of_map`の`hψ`の検証に
+使えば、新設計の`f i j : V (i,j) ⟶ U i`が構成できる。
+集計は引き続き10/24——§4は引き続き0/2。

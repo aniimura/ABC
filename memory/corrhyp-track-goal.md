@@ -2486,3 +2486,20 @@ piecePullbackIso_inv_isoSpec_hom(Spec側の特徴づけ)。
 α側の自然性と合わせて「Γ(C,piece(U))の代数構造が制限と可換」を出す。そこまで
 行けばdescend2_of_mapのhψが検証でき新設計のf i jが構成できる。
 集計は10/24——§4は0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き34
+pieceRingEquiv_symm_naturality完成(commit 95f44bc1、sorry無し、Instance4
+ビルドerror 0件・EXIT:0、Found側sorry 0件):
+  restr_ExtX (pieceRingEquiv_U.symm (a ⊗ₜ r)) = pieceRingEquiv_V.symm ((restr_X a) ⊗ₜ r)
+証明は a⊗ₜr = (a⊗ₜ1)(1⊗ₜr) と分解し、pieceRingEquiv_symm_tmul_one・
+pieceRingEquiv_symm_one_tmul(今回併せて追加、続き30・32のCommRingCat射の等式を
+元レベルへ落としたもの)を当て、appLE側の自然性で移すだけ。
+Algebra.TensorProduct.extのような重い道具は不要だった。
+
+続き22で「3つ目の不透明な同型」として立ちはだかった障害は、Spec側・環レベル・
+両成分・自然性のすべてで解消した。
+
+次の一手: Γ(C,piece(U))のA_U⊗ℝ-代数構造はα.appLE ∘ pieceRingEquiv.symmなので、
+今回の自然性とScheme.Hom.appLE_preimage_naturality(α側)を合わせて「代数構造が
+制限と可換」を出し、descend2_of_mapのhψの検証に使ってf i jを構成する。
+集計は10/24——§4は0/2。
