@@ -1710,6 +1710,58 @@ theorem thm_1_2_step_of_faltings_gen {R M N₀ N : Type*} [CommRing R] [IsLocalR
 `ZMod 4` が局所環であること・`𝔪 = (2)` であることは `decide` で確かめる
 (有限環なので単元性が決定可能)。 -/
 
+/-! #### 具体的な局所環の在庫
+
+非空虚性の対照を書くのに繰り返し要るので、`ZMod 4` と
+`k[X]/(Xᵐ)`(切断多項式環)を局所環として登録しておく。
+後者は原文の塔(`Vₙ` の列)の非空虚性を作るときに使う。 -/
+
+open Polynomial in
+/-- `k[X]/(Xᵐ)` で定数項が非零なら単元(残りは冪零なので)。 -/
+theorem truncPoly_isUnit {k : Type*} [Field k] (m : ℕ) (f : Polynomial k)
+    (hf : f.coeff 0 ≠ 0) :
+    IsUnit (Ideal.Quotient.mk (Ideal.span {(X : Polynomial k) ^ m}) f) := by
+  set I : Ideal (Polynomial k) := Ideal.span {(X : Polynomial k) ^ m} with hI
+  have hdvd : (X : Polynomial k) ∣ (f - C (f.coeff 0)) := by
+    rw [X_dvd_iff]; simp
+  obtain ⟨g, hg⟩ := hdvd
+  have hnil : IsNilpotent (Ideal.Quotient.mk I (f - C (f.coeff 0))) := by
+    refine ⟨m, ?_⟩
+    rw [← map_pow, hg, mul_pow, Ideal.Quotient.eq_zero_iff_mem]
+    exact Ideal.mul_mem_right _ _ (Ideal.subset_span rfl)
+  have hu : IsUnit (Ideal.Quotient.mk I (C (f.coeff 0))) :=
+    IsUnit.map (Ideal.Quotient.mk I)
+      ((Polynomial.isUnit_C).mpr (isUnit_iff_ne_zero.mpr hf))
+  have hsum := hnil.isUnit_add_right_of_commute hu (Commute.all _ _)
+  rw [← map_add] at hsum
+  simpa using hsum
+
+open Polynomial in
+/-- **`k[X]/(Xᵐ)` は局所環**(`m ≥ 1`)。定数項が零か否かで
+`a` と `1 − a` のどちらかが単元。 -/
+theorem truncPoly_isLocalRing {k : Type*} [Field k] (m : ℕ) (hm : 0 < m) :
+    IsLocalRing (Polynomial k ⧸ Ideal.span {(X : Polynomial k) ^ m}) := by
+  haveI : Nontrivial (Polynomial k ⧸ Ideal.span {(X : Polynomial k) ^ m}) := by
+    refine Submodule.Quotient.nontrivial_iff.mpr ?_
+    intro htop
+    have h1 : (1 : Polynomial k) ∈ Ideal.span {(X : Polynomial k) ^ m} :=
+      htop ▸ Submodule.mem_top
+    rw [Ideal.mem_span_singleton] at h1
+    have h2 := Polynomial.natDegree_le_of_dvd h1 one_ne_zero
+    simp only [natDegree_X_pow, natDegree_one] at h2
+    omega
+  refine IsLocalRing.of_isUnit_or_isUnit_one_sub_self ?_
+  intro a
+  obtain ⟨f, rfl⟩ := Ideal.Quotient.mk_surjective a
+  by_cases hf : f.coeff 0 = 0
+  · right
+    have h1 : (1 : Polynomial k ⧸ Ideal.span {(X : Polynomial k) ^ m})
+        - Ideal.Quotient.mk _ f = Ideal.Quotient.mk _ (1 - f) := by
+      rw [map_sub, map_one]
+    rw [h1]
+    exact truncPoly_isUnit m (1 - f) (by simp [hf])
+  · exact Or.inl (truncPoly_isUnit m f hf)
+
 instance zmod4_nontrivial : Nontrivial (ZMod 4) := ⟨0, 1, by decide⟩
 
 /-- `ZMod 4` は局所環(単元でない元 `{0,2}` は加法で閉じている)。 -/
@@ -2313,6 +2365,20 @@ noncomputable def thm12StepData_zero : Thm12StepData.{0} 0 0 0 where
 /-- 非空虚性——`thm_1_2` の仮説(全段のデータ)が実際に満たせる。 -/
 example : Filter.Tendsto (fun _ : ℕ => (0 : ℝ)) Filter.atTop (nhds 0) :=
   thm_1_2 0 (fun _ => 0) (fun _ => le_refl 0) (fun _ => thm12StepData_zero)
+
+/-- **非空虚性(★`δ` が恒等的に 0 でない実例)**——
+`δ = (1, 0, 0, …)` は `thm_1_2` の仮説を実際に満たす。第 0 段は
+**非退化**な `thm12StepData_zmod4`(`δ₀ = 1`・`δ₁ = 0`)、以降は
+`thm12StepData_zero`。
+
+★これで `thm_1_2` は「`δ ≡ 0` でしか成り立たない」空虚な主張では
+ないことが確かめられた。 -/
+example : Filter.Tendsto (fun n : ℕ => if n = 0 then (1 : ℝ) else 0) Filter.atTop (nhds 0) := by
+  refine thm_1_2 0 (fun n => if n = 0 then (1 : ℝ) else 0)
+    (fun n => by split <;> norm_num) (fun n => ?_)
+  match n with
+  | 0 => simpa using thm12StepData_zmod4
+  | (m + 1) => simpa using thm12StepData_zero
 
 /-! ## ★★`Theorem 1.2`——環の塔から直接(2026-09-05)
 
