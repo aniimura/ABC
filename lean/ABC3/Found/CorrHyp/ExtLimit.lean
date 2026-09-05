@@ -3603,6 +3603,43 @@ theorem pieceRingEquiv_appLE (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineO
   refine Eq.trans (Category.assoc _ _ _) ?_
   exact piecePullbackIso_inv_isoSpec_appLE X U hU
 
+/-- `pullbackHomIsoLeft`の`inv`と`snd`の可換性——既存の`_hom_snd'`から
+`Iso.inv_comp_eq`で導く。`piecePullbackIso_inv_snd`の追跡で使う。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem pullbackHomIsoLeft_inv_snd' {A B Z W : Scheme} (i : A ≅ B) (g : B ⟶ Z) (f : W ⟶ Z) :
+    (pullbackHomIsoLeft i g f).inv ≫ pullback.snd (i.hom ≫ g) f = pullback.snd g f := by
+  rw [Iso.inv_comp_eq, pullbackHomIsoLeft_hom_snd']
+
+set_option maxHeartbeats 1000000 in
+open scoped TensorProduct in
+/-- **`piecePullbackIso`の値の特徴づけ(ℝ側)**——`Spec(Γ(U,U)⊗[ℚ]ℝ)`から
+`Spec ℝ`への「片を経由する射」は`includeRight`(`r ↦ 1 ⊗ₜ r`)の`Spec`に
+一致する。`piecePullbackIso_inv_fst`(`A_U`側)の相方であり、
+`pieceRingEquiv`の自然性を**純テンソルの2成分**で決めるのに要る
+(テンソル積からの環準同型は`a ⊗ₜ 1`と`1 ⊗ₜ r`での値で決まる)。
+
+証明は`fst`側と同じ6段の追跡で、最後だけ`pullbackSpecIso_inv_snd`と
+`pullbackRightPullbackFstIso_inv_snd_snd`・`pullbackHomIsoLeft_inv_snd'`に
+差し替える。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem piecePullbackIso_inv_snd (X : Over BaseK) (U : X.left.Opens) (hU : IsAffineOpen U) :
+    letI := pieceAlgebra X U hU
+    (piecePullbackIso X U hU).inv ≫
+      (pullback.fst X.hom toBaseK ⁻¹ᵁ U).ι ≫ pullback.snd X.hom toBaseK
+    = Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight (R := ℚ)
+        (A := Γ(X.left, U)) (B := ℝ)).toRingHom) := by
+  letI := pieceAlgebra X U hU
+  unfold piecePullbackIso
+  simp only [Iso.trans_inv, Iso.symm_inv, Category.assoc,
+    pullbackRestrictIsoRestrict_hom_ι_assoc, pullbackSymmetry_inv_comp_fst_assoc,
+    pullbackRightPullbackFstIso_inv_snd_snd, pullback.congrHom_inv, pullback.lift_snd,
+    Category.comp_id]
+  refine Eq.trans (congrArg (fun t => (pullbackSpecIso ℚ Γ(X.left, U) ℝ).inv ≫ t)
+    (pullbackHomIsoLeft_inv_snd' hU.isoSpec (Spec.map (pieceRingHom X U hU)) toBaseK)) ?_
+  exact pullbackSpecIso_inv_snd ℚ Γ(X.left, U) ℝ
+
 /-- `piecesOpenCover`の脚`(e i).inv ≫ X.homOfLE (h i)`同士のpullbackは、
 `e i`・`e j`をpullbackの脚から追い出す(`pullbackHomIsoLeft`+
 `pullbackSymmetry`、いずれも既存の一般的事実)ことで、`X.homOfLE`同士
