@@ -5400,3 +5400,81 @@ kernel が止まっていた**。橋は渡る必要が無かった。
 **目印**: `Found/PGC/` の `↥K⟮x⟯`・`K.closure`・`𝒪[·]` が文脈に居る証明で
 `linarith` / `nlinarith` / `positivity` / `norm_num at` / `omega` を
 書こうとしたら、まず項で書けないかを見る。
+
+## 71. 同型な2つの構造を「別の項」として作るには、**台の型は同じまま**にして型同義語で包む
+
+「同じ型の上に別の代数構造を2つ載せ、その2項が異なることを証明したい」ときの型。
+`Check/PGC/Prop12Degenerate.lean`(Prop 1.2 の反証)で踏んだ。
+
+**やってはいけない**: `ULift ℚ_[p]` のような **`structure` で包んだ別の型**にすること。
+`ULift.field` は在る(2026-08-14 の「mathlib に無い」は今は誤り)が、
+`ULift ℚ_[p] ≠ ℚ_[p]`(**型の非等号**)は Lean では証明できないので、
+「2つの項が異なる」が言えない。
+
+**やってはいけない(その2)**: 台を `ℚ_[p]` のまま、捻った `Field`/`Algebra` を
+その場で使うこと。台の型が標準構造の型と同じなので、`AlgEquiv.symm` や
+`Module.Finite.equiv` のインスタンス引数を**探索が標準構造で埋めてしまい**、
+
+```
+error: synthesized type class instance is not definitionally equal to
+expression inferred by typing rules
+```
+
+で落ちる(単一化が割り当てた捻り側と、探索が見つけた標準側が食い違う)。
+
+**正解**: `def TwistedQp (p) : Type := ℚ_[p]`(**`abbrev` ではなく `def`**)。
+
+* `TwistedQp p = ℚ_[p]` は `rfl` で証明できる(項の区別に使える)
+* インスタンス探索の鍵は `TwistedQp` なので、捻ったインスタンスだけが見つかる
+  ——`.symm` も `Module.Finite.equiv` も素直に通る
+
+★ただし**捻ったインスタンスを作る所だけ**は台が `ℚ_[p]` のままなので、
+`Equiv.algebra` / `Equiv.algEquiv` の引数を**全部 `@` で明示**する必要がある
+(`by infer_instance` を書く)。明示せずに型同義語側で直接作ると、
+`whnf` が 200000 heartbeats を食って `Type mismatch` になる。
+順序は「① 台 `ℚ_[p]` の上で `@` 明示で作る → ② 型同義語のインスタンスとして
+`:= negField p` のように**一段の delta で**渡す」。
+
+## `n` を `n-1+1` に `rw` すると、台の型が `n` に依存していて motive が壊れる（2026-09-05）
+
+`ℤ_[p]` の中で二項展開の和 `∑ k ∈ range (p+1), f k` から先頭2項を剥がしたい。
+`Finset.sum_range_succ'` を2回使うため `p = (p-1)+1` を `rw` したくなるが、
+
+```
+rw [hpe]   -- hpe : p = p - 1 + 1
+-- ✗ motive is not type correct:
+--   Application type mismatch: hp : Fact (Nat.Prime p) but expected Fact (Nat.Prime _a)
+--   in the application @PadicInt _a
+```
+
+`p` は `ℤ_[p]` と `Fact p.Prime` の**両方**に現れるので、`p` を抽象化した motive に型が付かない。
+
+**正解**: 剥がす操作だけを**台に依存しない補題**として切り出し、そこで `obtain ⟨m, rfl⟩` する。
+
+```lean
+private theorem sum_range_split_two {M : Type*} [AddCommMonoid M] {n : ℕ} (hn : 2 ≤ n)
+    (f : ℕ → M) :
+    ∑ k ∈ range (n+1), f k = (∑ k ∈ range (n-1), f (k+2)) + f 1 + f 0 := by
+  obtain ⟨m, rfl⟩ : ∃ m, n = m + 2 := ⟨n - 2, by omega⟩   -- ★ここでは n に依存する型が無い
+  rw [Finset.sum_range_succ' f (m+2)]; congr 1
+  rw [Finset.sum_range_succ' (fun k => f (k+1)) (m+1)]; simp
+```
+
+呼ぶ側は `rw [sum_range_split_two (by omega) f] at h` だけで済み、`p` は一切書き換わらない。
+★一般に「添字の算術を直す `rw`」は、台が添字に依存していると必ずこれを踏む。
+**添字の算術は台を `Type*` に一般化した補題の中に閉じ込める。**
+
+## `(selfField p).carrier` は `exact` では `ℚ_[p]` と合うが `rw` では合わない（2026-09-05）
+
+`selfField p : PAdicLocalField p := { carrier := ℚ_[p] }` は `def`（semireducible）なので、
+`(selfField p).carrier` は **default 透明度でだけ** `ℚ_[p]` に落ちる。
+
+* `exact`／項の適用は通る —— `ℚ_[p]` について述べた定理を
+  `y : (selfField p).carrier` にそのまま当てられる（`tst_qp_odd p hp3 h` で通った）
+* `rw` は落ちる —— インスタンス引数を `instances` 透明度で照合するため
+  「`Membership (selfField p).closure (Set (AlgebraicClosure ℚ_[p]))`」のような
+  型不一致になる（§1 と同じ症状）
+
+**書き方**: 補題は `ℚ_[p]` 側で述べ、`selfField` 側の証明では `rw` を使わず
+`exact` / `apply` で当てる。`rw` が要るなら、両辺とも `(selfField p).carrier` 側の
+語彙（`IntermediateField.mem_bot (F := (selfField p).carrier)` のように `F`/`E` を明示）で書く。

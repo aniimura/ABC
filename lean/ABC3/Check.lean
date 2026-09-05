@@ -38,6 +38,7 @@ import ABC3.Check.PGC.Def32Degenerate
 import ABC3.Check.PGC.Cor33Degenerate
 import ABC3.Check.PGC.Prop22Degenerate
 import ABC3.Check.PGC.Cor13Degenerate
+import ABC3.Check.PGC.CyclotomicCharacterNontrivial
 import ABC3.Check.FrdI.TwistedFrobenioid
 import ABC3.Check.FrdI.AutAmpleGap
 import ABC3.Check.FrdI.Prop21QuantifierGap
