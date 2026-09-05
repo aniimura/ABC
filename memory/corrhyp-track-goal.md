@@ -2503,3 +2503,20 @@ Algebra.TensorProduct.extのような重い道具は不要だった。
 今回の自然性とScheme.Hom.appLE_preimage_naturality(α側)を合わせて「代数構造が
 制限と可換」を出し、descend2_of_mapのhψの検証に使ってf i jを構成する。
 集計は10/24——§4は0/2。
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05夜さらに続き35
+pieceAlgebraMap_naturality完成(commit aa08ea53、sorry無し、Instance4ビルド
+error 0件・EXIT:0、Found側sorry 0件):
+  restr_C (α.appLE_U (pieceRingEquiv_U.symm (a ⊗ₜ r)))
+    = α.appLE_V (pieceRingEquiv_V.symm ((restr_X a) ⊗ₜ r))
+Γ(C,piece(U))の代数構造は定義からα.appLE ∘ pieceRingEquiv.symmなので、
+続き34の自然性と続き33のα側の自然性を合成するだけ(証明はcongrArg 2つ)。
+
+続き22〜35の総括: 「f i jを降ろすには代数構造が制限と可換であることが要る」→
+「pieceRingEquivの自然性が要る」→「その値が要る」→「piecePullbackIso(6段の
+calc)の値が要る」と遡り、定義の書き換え(▸→pullback.congrHom)から始めて
+Spec側の特徴づけ(fst・snd)→環レベル→純テンソル2成分→自然性→代数構造の
+可換性、と14段階を積み上げて解消した。
+
+次の一手: この可換性でdescend2_of_mapのhψを実際に検証し、f i j(R'レベルの
+環準同型のSpec)を構成する。集計は10/24——§4は0/2。

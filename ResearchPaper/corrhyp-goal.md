@@ -5550,3 +5550,33 @@ theorem pieceRingEquiv_symm_naturality … (a : Γ(X.left,U)) (r : ℝ) :
 「代数構造が制限と可換」を出す。それを`descend2_of_map`の`hψ`の検証に
 使えば、新設計の`f i j : V (i,j) ⟶ U i`が構成できる。
 集計は引き続き10/24——§4は引き続き0/2。
+
+## 2026-09-05夜さらに続き35: **`hψ`の核心の可換性が完成**——
+`Γ(C,piece(U))`の代数構造が制限と可換
+
+続き34の自然性と続き33の`α`側の自然性を合成し、`f i j`の構成に直接要る
+形の可換性を出した(`ExtLimit.lean`、commit `aa08ea53`、`sorry`無し、
+`lake build ABC3.Found.CorrHyp.Instance4`は`error`0件・`EXIT:0`、
+`Found`側の`sorry`は0件):
+
+```
+theorem pieceAlgebraMap_naturality … (a : Γ(X.left,U)) (r : ℝ) :
+    restr_C (α.appLE_U ((pieceRingEquiv X U hU).symm (a ⊗ₜ r)))
+      = α.appLE_V ((pieceRingEquiv X V hV).symm ((restr_X a) ⊗ₜ r))
+```
+
+`Γ(C,piece(U))`の`Γ(X.left,U)⊗[ℚ]ℝ`-代数構造は**定義から**
+`α.appLE ∘ pieceRingEquiv.symm`なので、続き34と続き33の2本を合成する
+だけで済んだ(証明は`congrArg`2つ)。
+
+**続き22〜35でやったことの総括**: 「`f i j`を降ろすには
+`Γ(C,piece(U))`の代数構造が制限と可換であることが要る」→「それには
+`pieceRingEquiv`の自然性が要る」→「それには`pieceRingEquiv`の値が要る」→
+「それには`piecePullbackIso`(6段の`calc`)の値が要る」と遡り、
+`piecePullbackIso`の定義の書き換え(`▸`→`pullback.congrHom`)から始めて
+`Spec`側の特徴づけ(`fst`・`snd`)→環レベル→純テンソル2成分→自然性→
+今回の代数構造の可換性、と**14段階を積み上げて**解消した。
+
+**次の一手**: この可換性を使って`descend2_of_map`の`hψ`を実際に検証し、
+`f i j : V (i,j) ⟶ U i`(`R'`レベルの環準同型の`Spec`)を構成する。
+集計は引き続き10/24——§4は引き続き0/2。
