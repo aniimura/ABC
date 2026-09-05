@@ -5664,3 +5664,49 @@ Found側sorry 0件(`FieldLimit` 63秒・`ExtLimit` 377秒を再ビルド)。
 具体的に用意し(`pieceRingEquiv`の値の計算は続き33〜34で済んでいる)、
 `descend2_of_map`を呼んで`f i j : V (i,j) ⟶ U i`を得る。
 集計は引き続き10/24——§4は引き続き0/2。
+
+### 2026-09-05夜さらに続き38 — `hψ`が「`hcomm`だけで自動」になった
+
+続き37の`aeval_map_mem_ideal_of_relation`は`ψ`・`e`・`halg`・`hval`を
+呼ぶ側が用意する必要があった。ところが mathlib の `Algebra.Generators` は
+生成元 `val` だけでなく**切断 `σ`**(`aeval_val_σ : aeval P.val (P.σ s) = s`)
+を持っている。これで`ψ`は**自分で作れる**と気づいた:
+
+```
+ψ i := PV.σ (restr (PU.val i))
+```
+
+と置けば `hψval` は `aeval_val_σ` そのもの。よって:
+
+```
+theorem aeval_map_relation_mem_ker
+    (PU : Algebra.Generators 𝔸 S ι) (PV : Algebra.Generators 𝔹 T ι')
+    (hcomm : restr.comp (algebraMap 𝔸 S) = (algebraMap 𝔹 T).comp φ')
+    (hp : p ∈ PU.ker) :
+    aeval (fun i => PV.σ (restr (PU.val i))) (map φ' p) ∈ PV.ker
+```
+
+さらに`Presentation`版(`descend2_of_map`が欲しがる`span (range relation)`の形):
+
+```
+theorem aeval_map_relation_mem_span
+    (PU : Algebra.Presentation 𝔸 S ι κ) (PV : Algebra.Presentation 𝔹 T ι' κ')
+    (hcomm : …) (k : κ) :
+    aeval (fun i => PV.σ (restr (PU.val i))) (map φ' (PU.relation k))
+      ∈ Ideal.span (Set.range PV.relation)
+```
+
+`Presentation`の構造フィールド`span_range_relation_eq_ker`で`ker`と
+`span (range relation)`を往復するだけ。**どちらも一発で通った**(0.15秒・0.05秒)。
+
+**意味**: §4の`f i j`降下に必要な`hψ`は、これで
+**`hcomm` = `pieceAlgebraMap_naturality`(続き35)だけから出る**。
+続き22〜35で14段階かけて積んだ自然性が、ここで一気に効いた。
+
+検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
+Found側sorry 0件。
+
+**次の一手**: `descendPieceR`の`R'`レベルのデータに対して、
+`Presentation`の`relation`と`descend2_of_map`の`q`/`q₂`を突き合わせ、
+実際に`f i j : V (i,j) ⟶ U i`を得る。
+集計は引き続き10/24——§4は引き続き0/2。

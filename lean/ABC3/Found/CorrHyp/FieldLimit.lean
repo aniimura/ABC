@@ -3225,4 +3225,57 @@ theorem aeval_map_mem_ideal_of_relation
   exact mem_ideal_of_eval₂_eq_zero J e algV valV halg hval _
     (eval₂_map_aeval_eq_zero φ' algU algV restr hcomm valU valV ψ hψval p hp)
 
+/-- **`Algebra.Generators` があれば `ψ` は自分で作れる**——
+`Generators` は生成元 `val` だけでなく**切断 `σ`** (`aeval val (σ s) = s`)
+を持つので、`ψ i := PV.σ (restr (PU.val i))` と置けば
+`eval₂_map_aeval_eq_zero` の `hψval` は `Generators.aeval_val_σ` そのもの。
+つまり**`hcomm`(代数構造が制限と可換)さえあれば `hψ` は自動**である。
+
+`Lemma 4.1` の `f i j` を降ろすとき、`hcomm` には `ExtLimit.lean` の
+`pieceAlgebraMap_naturality` がそのまま入る。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem aeval_map_relation_mem_ker
+    {𝔸 𝔹 S T : Type} [CommRing 𝔸] [CommRing 𝔹] [CommRing S] [CommRing T]
+    [Algebra 𝔸 S] [Algebra 𝔹 T]
+    {ι ι' : Type} (PU : Algebra.Generators 𝔸 S ι) (PV : Algebra.Generators 𝔹 T ι')
+    (φ' : 𝔸 →+* 𝔹) (restr : S →+* T)
+    (hcomm : restr.comp (algebraMap 𝔸 S) = (algebraMap 𝔹 T).comp φ')
+    (p : MvPolynomial ι 𝔸) (hp : p ∈ PU.ker) :
+    MvPolynomial.aeval (fun i => PV.σ (restr (PU.val i))) (MvPolynomial.map φ' p) ∈ PV.ker := by
+  rw [Algebra.Generators.ker_eq_ker_aeval_val, RingHom.mem_ker]
+  simp only [MvPolynomial.aeval_def, MvPolynomial.algebraMap_eq]
+  have hp0 : MvPolynomial.eval₂ (algebraMap 𝔸 S) PU.val p = 0 := by
+    have h := hp
+    rw [Algebra.Generators.ker_eq_ker_aeval_val, RingHom.mem_ker] at h
+    simpa [MvPolynomial.aeval_def] using h
+  have hψval : ∀ i, MvPolynomial.eval₂ (algebraMap 𝔹 T) PV.val (PV.σ (restr (PU.val i)))
+      = restr (PU.val i) := by
+    intro i
+    have h := PV.aeval_val_σ (restr (PU.val i))
+    simpa [MvPolynomial.aeval_def] using h
+  exact eval₂_map_aeval_eq_zero φ' (algebraMap 𝔸 S) (algebraMap 𝔹 T) restr hcomm
+    PU.val PV.val (fun i => PV.σ (restr (PU.val i))) hψval p hp0
+
+/-- **`descend2_of_map` の `hψ` の最終形**——`Presentation` を2つ与えれば、
+「`U` 側の関係式 `k` を `V` 側へ移したものは `V` 側の関係式が張るイデアルに
+入る」が `hcomm` だけから出る。`Presentation` の構造フィールド
+`span_range_relation_eq_ker` で `ker` と `span (range relation)` を
+往復するだけで `aeval_map_relation_mem_ker` に帰着する。
+
+★**sorry 無し**。標準3公理のみ。 -/
+theorem aeval_map_relation_mem_span
+    {𝔸 𝔹 S T : Type} [CommRing 𝔸] [CommRing 𝔹] [CommRing S] [CommRing T]
+    [Algebra 𝔸 S] [Algebra 𝔹 T]
+    {ι κ ι' κ' : Type} (PU : Algebra.Presentation 𝔸 S ι κ) (PV : Algebra.Presentation 𝔹 T ι' κ')
+    (φ' : 𝔸 →+* 𝔹) (restr : S →+* T)
+    (hcomm : restr.comp (algebraMap 𝔸 S) = (algebraMap 𝔹 T).comp φ') (k : κ) :
+    MvPolynomial.aeval (fun i => PV.σ (restr (PU.val i)))
+        (MvPolynomial.map φ' (PU.relation k))
+      ∈ Ideal.span (Set.range PV.relation) := by
+  rw [PV.span_range_relation_eq_ker]
+  refine aeval_map_relation_mem_ker PU.toGenerators PV.toGenerators φ' restr hcomm _ ?_
+  rw [← PU.span_range_relation_eq_ker]
+  exact Ideal.subset_span ⟨k, rfl⟩
+
 end ABC3.Found.CorrHyp

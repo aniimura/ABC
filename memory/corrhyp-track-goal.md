@@ -2555,3 +2555,18 @@ descend2_of_map を呼んで f i j : V (i,j) ⟶ U i を構成する。
 次の一手: descendPieceR のデータに halg/hval/hψval を具体的に用意し
 (pieceRingEquiv の値は続き33〜34で計算済み)、descend2_of_map を呼んで
 f i j : V (i,j) ⟶ U i を得る。集計は10/24——§4は0/2。
+
+## 2026-09-05夜さらに続き38 — hψ が hcomm だけで自動になった
+
+mathlib の Algebra.Generators は切断 σ を持つ(aeval_val_σ)。よって
+ψ i := PV.σ (restr (PU.val i)) と置けば hψval は aeval_val_σ そのもの。
+FieldLimit.lean に2本追加(error 0件・EXIT:0、Found側sorry 0件、両方一発通過):
+- aeval_map_relation_mem_ker (Generators 版、結論は PV.ker)
+- aeval_map_relation_mem_span (Presentation 版、結論は span (range relation))
+  ← descend2_of_map の hψ の形そのもの。
+
+意味: §4 の f i j 降下に要る hψ は hcomm = pieceAlgebraMap_naturality
+(続き35)だけから出る。続き22〜35で積んだ14段階がここで効いた。
+
+次の一手: descendPieceR の R' レベルのデータで Presentation の relation と
+descend2_of_map の q/q₂ を突き合わせ、f i j を得る。集計は10/24——§4は0/2。
