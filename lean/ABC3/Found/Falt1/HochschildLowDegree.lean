@@ -144,8 +144,8 @@ theorem hochschild_H2_almost_coboundary_of_isAlmostEtale {A B M : Type u}
     ∃ h : B →ₗ[A] M, ∀ b₁ b₂ : B,
       (p ^ n) • c b₁ b₂ = b₁ • h b₂ - h (b₁*b₂) + b₂ • h b₁ :=
   hochschild_H2_almost_coboundary (p ^ n) w
-    (fun q => almost_swap_annihilate p hAE hf0inj n w hw q)
-    (almost_swap_augment p hAE hf0inj n w hw) c hc
+    (fun q => almost_swap_annihilate p hAE hf0inj (p ^ n) w hw q)
+    (almost_swap_augment p hAE hf0inj (p ^ n) w hw) c hc
 
 /-! ## `Theorem 2.2` の障害類——2-コサイクルであることの代数的な核
 

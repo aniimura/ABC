@@ -128,8 +128,8 @@ theorem kaehler_almost_zero_of_isAlmostEtale {A B : Type u} [CommRing A] [CommRi
             (Localization.Away (algebraMap A B p)))
     (x : Ω[B⁄A]) : (p ^ n) • x = 0 :=
   kaehler_almost_zero (p ^ n) w
-    (fun q => almost_swap_annihilate p hAE hf0inj n w hw q)
-    (almost_swap_augment p hAE hf0inj n w hw) x
+    (fun q => almost_swap_annihilate p hAE hf0inj (p ^ n) w hw q)
+    (almost_swap_augment p hAE hf0inj (p ^ n) w hw) x
 
 /-- **`Theorem 2.4(i)` の余核側**: `Ω[A⁄R]⊗_AB → Ω[B⁄R]` の余核は `p^n` で
 零化される。すなわち任意の `x : Ω[B⁄R]` について `p^n·x` は像に入る。

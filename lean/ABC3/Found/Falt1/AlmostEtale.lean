@@ -1411,12 +1411,12 @@ theorem almost_swap_annihilate {A B : Type u} [CommRing A] [CommRing B] [Algebra
     (hAE : IsAlmostEtaleCovering (A := A) (B := B) p)
     (hf0inj : letI := awayAlgebra p (A := A) (B := B)
       Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))))
-    (n : ℕ) (w : TensorProduct A B B)
+    (c : A) (w : TensorProduct A B B)
     (hw : letI := awayAlgebra p (A := A) (B := B)
       haveI := hAE.2.2.1
       haveI := (hAE.2.1 : Module.Finite _ _)
       diagonalCompare p w
-        = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p)))
+        = c • Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p)))
     (q : B) :
     (1 ⊗ₜ[A] q - q ⊗ₜ[A] 1) * w = 0 := by
   letI := awayAlgebra p (A := A) (B := B)
@@ -1441,15 +1441,15 @@ theorem almost_swap_mul_eq {A B : Type u} [CommRing A] [CommRing B] [Algebra A B
     (hAE : IsAlmostEtaleCovering (A := A) (B := B) p)
     (hf0inj : letI := awayAlgebra p (A := A) (B := B)
       Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))))
-    (n : ℕ) (w : TensorProduct A B B)
+    (c : A) (w : TensorProduct A B B)
     (hw : letI := awayAlgebra p (A := A) (B := B)
       haveI := hAE.2.2.1
       haveI := (hAE.2.1 : Module.Finite _ _)
       diagonalCompare p w
-        = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p)))
+        = c • Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p)))
     (q : B) :
     (1:B) ⊗ₜ[A] q * w = q ⊗ₜ[A] (1:B) * w := by
-  have h := almost_swap_annihilate p hAE hf0inj n w hw q
+  have h := almost_swap_annihilate p hAE hf0inj c w hw q
   rw [sub_mul] at h
   exact sub_eq_zero.mp h
 
@@ -1464,13 +1464,13 @@ theorem almost_swap_augment {A B : Type u} [CommRing A] [CommRing B] [Algebra A 
     (hAE : IsAlmostEtaleCovering (A := A) (B := B) p)
     (hf0inj : letI := awayAlgebra p (A := A) (B := B)
       Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))))
-    (n : ℕ) (w : TensorProduct A B B)
+    (c : A) (w : TensorProduct A B B)
     (hw : letI := awayAlgebra p (A := A) (B := B)
       haveI := hAE.2.2.1
       haveI := (hAE.2.1 : Module.Finite _ _)
       diagonalCompare p w
-        = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p))) :
-    Algebra.TensorProduct.lmul' A w = p ^ n • (1 : B) := by
+        = c • Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p))) :
+    Algebra.TensorProduct.lmul' A w = c • (1 : B) := by
   letI := awayAlgebra p (A := A) (B := B)
   haveI := awayScalarTower p (A := A) (B := B)
   haveI hEtale := hAE.2.2.1
@@ -1479,17 +1479,17 @@ theorem almost_swap_augment {A B : Type u} [CommRing A] [CommRing B] [Algebra A 
   have h1 := lmul'_diagonalCompare p w
   rw [hw] at h1
   have hpull := (Algebra.TensorProduct.lmul' (Localization.Away p) (S := Localization.Away (algebraMap A B p))).toLinearMap.map_smul_of_tower
-    (p^n) (Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p)))
+    c (Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p)))
   rw [show (Algebra.TensorProduct.lmul' (Localization.Away p))
-      (p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p)))
-      = p ^ n • (Algebra.TensorProduct.lmul' (Localization.Away p)
+      (c • Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p)))
+      = c • (Algebra.TensorProduct.lmul' (Localization.Away p)
           (Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p))))
       from hpull, Algebra.FormallyUnramified.lmul_elem] at h1
-  have hLHS : (p ^ n • (1:Localization.Away (algebraMap A B p)))
-      = algebraMap A (Localization.Away (algebraMap A B p)) (p ^ n) := by
+  have hLHS : (c • (1:Localization.Away (algebraMap A B p)))
+      = algebraMap A (Localization.Away (algebraMap A B p)) c := by
     rw [Algebra.smul_def, mul_one]
-  have hRHS : algebraMap B (Localization.Away (algebraMap A B p)) (p ^ n • (1:B))
-      = algebraMap A (Localization.Away (algebraMap A B p)) (p ^ n) := by
+  have hRHS : algebraMap B (Localization.Away (algebraMap A B p)) (c • (1:B))
+      = algebraMap A (Localization.Away (algebraMap A B p)) c := by
     rw [Algebra.smul_def, mul_one, ← IsScalarTower.algebraMap_apply A B (Localization.Away (algebraMap A B p))]
   rw [← h1, hLHS, hRHS]
 
@@ -1555,9 +1555,9 @@ theorem hochSectionAlmost_augment {A B : Type u} [CommRing A] [CommRing B] [Alge
       diagonalCompare p w
         = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p)))
     (b : B) :
-    Algebra.TensorProduct.lmul' A (hochSectionOfWitness A B w (almost_swap_mul_eq p hAE hf0inj n w hw) b)
+    Algebra.TensorProduct.lmul' A (hochSectionOfWitness A B w (almost_swap_mul_eq p hAE hf0inj (p ^ n) w hw) b)
       = algebraMap A B (p ^ n) * b := by
-  rw [hochSectionOfWitness_augment, almost_swap_augment p hAE hf0inj n w hw]
+  rw [hochSectionOfWitness_augment, almost_swap_augment p hAE hf0inj (p ^ n) w hw]
   rw [Algebra.smul_def, mul_one, mul_comm]
 
 /-! **almost 版 remark(v)の完成(2026-09-05)**: 上記により
@@ -1618,7 +1618,7 @@ theorem hochSectionAlmost_comp_lmul {A B : Type u} [CommRing A] [CommRing B] [Al
       diagonalCompare p w
         = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p) (Localization.Away (algebraMap A B p))) :
     letI : Algebra (TensorProduct A B B) B := (Algebra.TensorProduct.lmul' A).toRingHom.toAlgebra
-    (ModuleCat.ofHom (hochSectionOfWitness A B w (almost_swap_mul_eq p hAE hf0inj n w hw))
+    (ModuleCat.ofHom (hochSectionOfWitness A B w (almost_swap_mul_eq p hAE hf0inj (p ^ n) w hw))
       ≫ ModuleCat.ofHom (hochSectionLmul A B))
       = (algebraMap A (TensorProduct A B B) (p^n)) • 𝟙 (ModuleCat.of (TensorProduct A B B) B) := by
   letI : Algebra (TensorProduct A B B) B := (Algebra.TensorProduct.lmul' A).toRingHom.toAlgebra
@@ -1626,7 +1626,7 @@ theorem hochSectionAlmost_comp_lmul {A B : Type u} [CommRing A] [CommRing B] [Al
   simp only [ModuleCat.hom_comp, ModuleCat.hom_ofHom, LinearMap.comp_apply, ModuleCat.hom_smul,
     ModuleCat.hom_id, LinearMap.smul_apply, LinearMap.id_apply]
   show Algebra.TensorProduct.lmul' A
-      (hochSectionOfWitness A B w (almost_swap_mul_eq p hAE hf0inj n w hw) b)
+      (hochSectionOfWitness A B w (almost_swap_mul_eq p hAE hf0inj (p ^ n) w hw) b)
     = (algebraMap A (TensorProduct A B B)) (p ^ n) • b
   rw [hochSectionAlmost_augment p hAE hf0inj n w hw b, Algebra.smul_def]
   congr 1
@@ -1669,7 +1669,7 @@ theorem hochschild_ext_almost_zero {A B : Type u} [CommRing A] [CommRing B] [Alg
   intro _ k e
   exact ext_smul_eq_zero_of_almost_split (TensorProduct A B B)
     (ModuleCat.of (TensorProduct A B B) B) (ModuleCat.of (TensorProduct A B B) M)
-    (ModuleCat.ofHom (hochSectionOfWitness A B w (almost_swap_mul_eq p hAE hf0inj n w hw)))
+    (ModuleCat.ofHom (hochSectionOfWitness A B w (almost_swap_mul_eq p hAE hf0inj (p ^ n) w hw)))
     (ModuleCat.ofHom (hochSectionLmul A B))
     (algebraMap A (TensorProduct A B B) (p ^ n))
     (hochSectionAlmost_comp_lmul p hAE hf0inj n w hw) k e

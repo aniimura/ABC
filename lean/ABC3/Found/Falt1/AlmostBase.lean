@@ -134,6 +134,67 @@ theorem hochschild_H2_isAlmostCoboundary {B M : Type u} [CommRing B] [Algebra A 
 
 end PDivTower
 
+/-! ## 塔に対する `Definition 2.1` と、almost mathematics の言葉での主張 -/
+
+/-- **塔に対する `Definition 2.1`**。条件(i)(ii)は `p := ϖ 0` について、
+条件(iii)は**各 `ϖ k`** について要求する——これが原典の
+「`p^ε e_{B/A}` が任意の `ε>0` について `B⊗_AB` の像に入る」の、
+塔による表現である(`ε = 1/q^k` が `ϖ k` に対応)。 -/
+def IsAlmostEtaleCoveringTower {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    {q : ℕ} (T : PDivTower A q) : Prop :=
+  letI := awayAlgebra (T.ϖ 0) (A := A) (B := B)
+  haveI := awayScalarTower (T.ϖ 0) (A := A) (B := B)
+  ∃ (_ : Module.Free (Localization.Away (T.ϖ 0))
+        (Localization.Away (algebraMap A B (T.ϖ 0))))
+    (_ : Module.Finite (Localization.Away (T.ϖ 0))
+        (Localization.Away (algebraMap A B (T.ϖ 0))))
+    (_ : Algebra.Etale (Localization.Away (T.ϖ 0))
+        (Localization.Away (algebraMap A B (T.ϖ 0)))),
+    (∀ b : B, ∃ a : A, Algebra.trace (Localization.Away (T.ϖ 0))
+        (Localization.Away (algebraMap A B (T.ϖ 0)))
+        (algebraMap B (Localization.Away (algebraMap A B (T.ϖ 0))) b)
+      = algebraMap A (Localization.Away (T.ϖ 0)) a) ∧
+    (∀ k : ℕ, ∃ e : TensorProduct A B B, diagonalCompare (T.ϖ 0) e
+      = T.ϖ k • Algebra.FormallyUnramified.elem (Localization.Away (T.ϖ 0))
+          (Localization.Away (algebraMap A B (T.ϖ 0))))
+
+/-- **塔に対する `Definition 2.1` から witness の族が出る**。各 `k` の
+条件(iii)の witness に `almost_swap_annihilate`・`almost_swap_augment`
+(前コミットで一般スカラー化した)を適用するだけ。
+条件(iii)の `p^n` 版は `k = 0` の witness を `(ϖ 0)^{n-1}` 倍して得る。 -/
+theorem hasAlmostWitnesses_of_tower {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [Module.Free A B] {q : ℕ} (T : PDivTower A q)
+    (hAET : IsAlmostEtaleCoveringTower (A := A) (B := B) T)
+    (hf0inj : letI := awayAlgebra (T.ϖ 0) (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B (T.ϖ 0))))) :
+    T.HasAlmostWitnesses B := by
+  letI := awayAlgebra (T.ϖ 0) (A := A) (B := B)
+  haveI := awayScalarTower (T.ϖ 0) (A := A) (B := B)
+  obtain ⟨hFree, hFin, hEt, htr, hwit⟩ := hAET
+  have hAE : IsAlmostEtaleCovering (A := A) (B := B) (T.ϖ 0) := by
+    refine ⟨hFree, hFin, hEt, htr, fun n hn => ?_⟩
+    obtain ⟨e₀, he₀⟩ := hwit 0
+    refine ⟨(T.ϖ 0) ^ (n - 1) • e₀, ?_⟩
+    rw [map_smul, he₀, smul_smul]
+    congr 1
+    rw [← pow_succ]
+    congr 1
+    omega
+  intro k
+  obtain ⟨e, he⟩ := hwit k
+  exact ⟨e, fun b => almost_swap_annihilate (T.ϖ 0) hAE hf0inj (T.ϖ k) e he b,
+    almost_swap_augment (T.ϖ 0) hAE hf0inj (T.ϖ k) e he⟩
+
+/-- **`Theorem 2.4(i)` の余核側、Faltings 自身の言葉で**:
+`B` が塔に対する almost étale covering なら **`m` が `Ω[B⁄A]` を零化する**。 -/
+theorem kaehler_isAlmostZero_of_tower {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    [Module.Free A B] {q : ℕ} (T : PDivTower A q)
+    (hAET : IsAlmostEtaleCoveringTower (A := A) (B := B) T)
+    (hf0inj : letI := awayAlgebra (T.ϖ 0) (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B (T.ϖ 0))))) :
+    T.IsAlmostZero (Ω[B⁄A]) :=
+  T.kaehler_isAlmostZero (hasAlmostWitnesses_of_tower T hAET hf0inj)
+
 /-! ## 非空虚性の対照
 
 塔が実際に存在すること、しかも **`m` が真のイデアル**(`m ≠ ⊤`)に
