@@ -1699,6 +1699,8 @@ import ABC3.Found.PGC.LubinTateDegree
 import ABC3.Found.PGC.LubinTateTotallyRamified
 import ABC3.Found.PGC.UnitsGroupInvariants
 import ABC3.Found.PGC.UnitsPowPrimeToP
+import ABC3.Found.PGC.ContinuousHomCount
+import ABC3.Found.PGC.KummerDuality
 import ABC3.Found.PGC.UnramifiedSubextension
 import ABC3.Found.PGC.AbsGalUnitsSurjective
 import ABC3.Found.PGC.GaloisTransferContinuous

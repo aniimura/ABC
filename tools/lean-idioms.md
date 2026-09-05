@@ -5538,3 +5538,50 @@ but is expected to have type
 `Nat.dvd_sub`（同じ結論、ℕ の切り捨て減算のまま）を使う。
 `p ∣ Q → ¬ p ∣ (Q-1)` は `Nat.dvd_sub hpQ hcon` で `p ∣ Q - (Q-1)` を作り、
 `rw [show Q - (Q - 1) = 1 by omega]` で `p ∣ 1` に落とすのが最短。
+
+## `omit [Inst] in` は docstring より**前**に置く（2026-09-05）
+
+```lean
+/-- ... -/
+omit [CharZero F] in
+lemma foo ...        -- ✗ `unexpected token 'omit'; expected 'lemma'`
+
+omit [CharZero F] in
+/-- ... -/
+lemma foo ...        -- ✓
+```
+
+section variable の instance 引数（`[Field F]`・`[CharZero F]` など）は
+「`F` を使った宣言」に**自動で全部入る**。1 つでも使わない宣言があると
+`unusedSectionVars` 警告が出るので、`omit ... in` を足すか、
+`[CharZero F]` を必要な宣言だけの `section` に分ける。
+
+## 型の**添字**に現れる `n` を `rw` しない（2026-09-05）
+
+`f : Γ →* ↥(rootsOfUnity n Ω)` が文脈にあるとき、ゴールの `n` を
+`rw [← card_rootsOfUnity hζ hn]`（`n = Nat.card ↥(rootsOfUnity n Ω)`）で
+書き換えると `motive is not type correct`（`f` の型の `n` まで抽象化される）。
+
+**直し方**: ゴールではなく**仮説の側**を書き換える。
+```lean
+have h2 : Nat.card ↥f.range ∣ Nat.card ↥(rootsOfUnity n Ω) := ...
+rw [card_rootsOfUnity hζ hn] at h2   -- ✓ h2 : ... ∣ n
+```
+同じ理由で `IsPrimitiveRoot.pow` に渡す `n = k * d` も
+`rw [hk, mul_comm]` ではなく `hk.trans (mul_comm _ _)` と**項で**書く。
+
+## 名前が違う 3 つ（2026-09-05、pGC 経路 C で実測）
+
+| 探した名前 | 実在する名前 |
+|---|---|
+| `Subgroup.equivOfEq (h : H = K) : H ≃* K` | `MulEquiv.subgroupCongr` |
+| `Subgroup.eq_of_le_of_card_le` | `Subgroup.eq_of_le_of_card_ge`（`H ≤ K → card K ≤ card H → H = K`） |
+| `AddEquiv.toMultiplicative' : (α ≃+ Additive β) ≃ (Multiplicative α ≃* β)` | `AddEquiv.toMultiplicativeLeft` |
+
+## `ZMod n` に `TopologicalSpace` は無い（2026-09-05）
+
+`ContinuousMonoidHom G (Multiplicative (ZMod n))` は**書けない**。
+「連続」を `IsOpen (MonoidHom.ker f)` で定義すれば係数群の位相を一切参照せず
+に済む（`Found/PGC/ContinuousHomCount.lean` の `contHom`）。
+`ker (f*g) ⊇ ker f ⊓ ker g` から開性を出すには `Subgroup.isOpen_mono` が要り、
+これは `[SeparatelyContinuousMul G]` を要求する（`IsTopologicalGroup` から出る）。
