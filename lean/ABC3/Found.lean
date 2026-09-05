@@ -1712,6 +1712,7 @@ import ABC3.Found.PGC.ResidueCardLowerBound
 import ABC3.Found.PGC.UnramifiedFrobenius
 import ABC3.Found.PGC.UnramifiedClosureRoots
 import ABC3.Found.PGC.DegreeTransport
+import ABC3.Found.PGC.InertiaKummer
 /-!
 # Found — 実装済みの基礎
 
