@@ -460,6 +460,30 @@ theorem length_pi_fin {R : Type*} [Ring R] :
     rw [e.length_eq, Module.length_prod, ih (fun i : Fin k => N i.succ)
       (fun i => hN i.succ) (fun i => hM i.succ), Fin.sum_univ_succ]
 
+/-- **`min(Σkᵢ, e) ≤ Σ min(kᵢ, e)`**——★Faltings の
+`β = min{1, δₙ/(d+1)}` は実は **`β = min{1, δₙ}` まで改善できる**
+(`(d+1)` で割る必要が無い)。証明は 2 場合:全ての `kᵢ ≤ e` なら
+`Σ min = Σ kᵢ`、そうでなければ或る `j` で `min(k_j,e) = e` が和の中に
+現れる。
+
+`min_avg_le_sum_min`(平均を使う弱い版、原文どおりの `β`)と
+どちらでも `delta_two_regime_of_key` に渡せる。 -/
+theorem min_sum_le_sum_min {r : ℕ} (k : Fin r → ℝ) (hk : ∀ i, 0 ≤ k i) (e : ℝ) (he : 0 ≤ e) :
+    min (∑ i, k i) e ≤ ∑ i, min (k i) e := by
+  by_cases hall : ∀ i, k i ≤ e
+  · have hsum : ∑ i, min (k i) e = ∑ i, k i :=
+      Finset.sum_congr rfl (fun i _ => min_eq_left (hall i))
+    rw [hsum]
+    exact min_le_left _ _
+  · push Not at hall
+    obtain ⟨j, hj⟩ := hall
+    have hmj : min (k j) e = e := min_eq_right (le_of_lt hj)
+    have hstep : min (k j) e ≤ ∑ i, min (k i) e :=
+      Finset.single_le_sum (f := fun i => min (k i) e)
+        (fun i _ => le_min (hk i) he) (Finset.mem_univ j)
+    rw [hmj] at hstep
+    exact le_trans (min_le_right _ _) hstep
+
 /-- DVR ではイデアルの冪は全順序なので、和は指数の `min`。 -/
 theorem pow_sup_pow {R : Type*} [CommRing R] (I : Ideal R) (k e : ℕ) :
     I^k ⊔ I^e = I^(min k e) := by
