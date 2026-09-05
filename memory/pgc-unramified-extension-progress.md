@@ -966,3 +966,23 @@ Frobenius、`coe_...` で `z ↦ z^{Fintype.card 𝓀}`、`orderOf_...` で
 実在の量についての主張として読める(証明自体はまだ `sorry`)。
 
 `Interface` の自由なデータを一つ、実物に置き換えた。
+
+## 2026-09-05: `adjoinField`(有限拡大を `PAdicLocalField p` として)と不分岐判定条件
+
+新規 `Found/PGC/AdjoinFieldConstruction.lean`(sorry 無し):
+- **`adjoinField K x : PAdicLocalField p`**——`PAdicLocalField p` は
+  `Field`+`Algebra ℚ_[p]`+`FiniteDimensional ℚ_[p]` だけなので、単項拡大
+  `K(x)` はそのまま局所体になる(`Algebra ℚ_[p] ↥K⟮x⟯` は自動、
+  有限次元性は `Module.Finite.trans`)。
+  `Interface` の `SubgroupCorrespondence` へ向かう第一歩。
+- **`isUnramifiedAdjoin_iff_residueDegree`** : 原文 p.3 の
+  「L is unramified over K if and only q_L = q^[Γ_K:H]」を単項拡大について
+  本プロジェクトの量で書いたもの——`q_L = q_K^{[L:K]} ⟺ e = 1`。
+
+★**未解決の配管**(次の出発点): `(adjoinField K x).carrier` には
+`LocalFieldNorm.lean` の `normedField`(ℚ_p 上のスペクトルノルム)が載るが、
+`adjoinIntegers K x` が使うのは `K.closure` の部分体として `↥K⟮x⟯` が継ぐ
+ノルム。**命題としては等しい**(完備体上のノルム延長の一意性)が
+**definitional には別物**なので
+`Nat.card 𝓀[(adjoinField K x).carrier] = residueDegree K x` は `rfl` で
+通らない。橋渡しには `spectralNorm_unique_field_norm_ext` を使う。
