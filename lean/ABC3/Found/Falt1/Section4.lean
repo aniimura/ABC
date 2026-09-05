@@ -79,6 +79,40 @@ theorem thm_4_1_ii {R A B : Type u} [CommRing R] [CommRing A] [CommRing B]
   intro x hx
   exact hnotors x ((thm_2_4_i (R := R) p hAE hf0inj n w hw).1 x hx)
 
+open KaehlerDifferential in
+/-- **★`Theorem 4.1(i)` の抽象的な内容**——`Theorem 2.4(i)` の almost 同型は
+**水準を反転すると本物の同型になる**。
+
+原文の *"The map `Ω_{R/V} ⊗_R R̄ → Ω_{R̄/V̄}` induces almost isomorphisms
+`Ω_{R/V} ⊗_R R̄[1/p] ≅ …`"* の機構そのもの——`[1/p]` を取ると
+`m`-捩れが消え、almost 同型が honest な同型になる。
+
+★**完備化の枠組みは要らない**(2026-09-05 に原典を 260dpi で再確認:
+bar は `Ω` ではなく添字に付いており、`p` 進完備化ではない)。
+局所化は完全なので**平坦性の議論も要らない**。 -/
+theorem thm_4_1_i_localized {R A B : Type u} [CommRing R] [CommRing A] [CommRing B]
+    [Algebra R A] [Algebra A B] [Algebra R B] [IsScalarTower R A B]
+    [Module.Finite A B] [Module.Free A B]
+    (p : A) (hAE : IsAlmostEtaleCovering (A := A) (B := B) p)
+    (hf0inj : letI := awayAlgebra p (A := A) (B := B)
+      Function.Injective (algebraMap B (Localization.Away (algebraMap A B p))))
+    (n : ℕ) (w : TensorProduct A B B)
+    (hw : letI := awayAlgebra p (A := A) (B := B)
+      haveI := hAE.2.2.1
+      haveI := (hAE.2.1 : Module.Finite _ _)
+      diagonalCompare p w
+        = p ^ n • Algebra.FormallyUnramified.elem (Localization.Away p)
+            (Localization.Away (algebraMap A B p))) :
+    Function.Bijective (LocalizedModule.map
+      (Submonoid.powers (algebraMap A B (p ^ n * p ^ n)))
+      (KaehlerDifferential.mapBaseChange R A B)) := by
+  obtain ⟨hk, hc⟩ := thm_2_4_i (R := R) p hAE hf0inj n w hw
+  refine localizedModule_map_bijective _ _ (fun ξ hξ => ?_) (fun x => ?_)
+  · rw [algebraMap_smul]
+    exact hk ξ hξ
+  · rw [map_mul, mul_smul]
+    exact Submodule.smul_mem _ _ (hc x)
+
 /-! ## 非空虚性の対照
 
 `R = ℤ`、`A = ℤ[X]`(**`Ω[A⁄R] ≠ 0`** なので主張が退化しない)、

@@ -737,6 +737,60 @@ theorem injective_of_almostIso_of_noTorsion {A M N : Type u} [CommRing A]
   intro x hx
   exact hnotors 0 x ((hf 0).1 x hx)
 
+/-! ## ★★almost 同型は水準を反転すると本物の同型になる(2026-09-05)
+
+`Theorem 4.1(i)` の *"induces almost isomorphisms `… ⊗_R R̄[1/p] ≅ …`"*
+の機構はこれである——核も余核も `c` で消えるなら、`c` を可逆にした
+(= `c` の冪で局所化した)世界では核も余核も消える。
+
+局所化は左右とも完全なので、**平坦性の議論は一切要らない**
+(`LocalizedModule` の `mk` の等式を直接扱うだけ)。 -/
+
+/-- **★almost 同型 ⟹ 局所化すると全単射**。 -/
+theorem localizedModule_map_bijective {A M N : Type u} [CommRing A] [AddCommGroup M]
+    [Module A M] [AddCommGroup N] [Module A N] (c : A) (f : M →ₗ[A] N)
+    (hker : ∀ x : M, f x = 0 → c • x = 0)
+    (hcoker : ∀ y : N, c • y ∈ LinearMap.range f) :
+    Function.Bijective (LocalizedModule.map (Submonoid.powers c) f) := by
+  constructor
+  · rw [injective_iff_map_eq_zero]
+    intro z hz
+    induction z using LocalizedModule.induction_on with
+    | _ x s =>
+      rw [LocalizedModule.map_mk, ← LocalizedModule.zero_mk s, LocalizedModule.mk_eq] at hz
+      obtain ⟨u, hu⟩ := hz
+      simp only [smul_zero] at hu
+      have hfx : f (((u : A) * (s : A)) • x) = 0 := by
+        rw [map_smul, mul_smul]
+        exact hu
+      have hcx : c • (((u : A) * (s : A)) • x) = 0 := hker _ hfx
+      rw [← LocalizedModule.zero_mk s, LocalizedModule.mk_eq]
+      refine ⟨⟨c * (u : A), Submonoid.mul_mem _ (Submonoid.mem_powers c) u.2⟩, ?_⟩
+      simp only [smul_zero]
+      show (c * (u : A)) • ((s : A) • x) = 0
+      rw [← mul_smul, show (c * (u : A)) * (s : A) = c * ((u : A) * (s : A)) from by ring,
+        mul_smul]
+      exact hcx
+  · intro z
+    induction z using LocalizedModule.induction_on with
+    | _ y s =>
+      obtain ⟨x, hx⟩ := hcoker y
+      refine ⟨LocalizedModule.mk x ⟨c * (s : A),
+        Submonoid.mul_mem _ (Submonoid.mem_powers c) s.2⟩, ?_⟩
+      rw [LocalizedModule.map_mk, LocalizedModule.mk_eq]
+      refine ⟨1, ?_⟩
+      simp only [one_smul]
+      rw [hx]
+      show (s : A) • (c • y) = (c * (s : A)) • y
+      rw [← mul_smul, mul_comm]
+
+/-- `AlmostIsoAt` の言葉での言い換え。 -/
+theorem localizedModule_map_bijective_of_almostIsoAt {A M N : Type u} [CommRing A]
+    [AddCommGroup M] [Module A M] [AddCommGroup N] [Module A N]
+    (c : A) (f : M →ₗ[A] N) (h : AlmostIsoAt c f) :
+    Function.Bijective (LocalizedModule.map (Submonoid.powers c) f) :=
+  localizedModule_map_bijective c f h.1 h.2
+
 /-! ## ★底変換と almost 性(2026-09-05)
 
 §4 は `Ω_{R/V} ⊗_R R̄` の形の主張を扱うので、「almost 性が `⊗` で
