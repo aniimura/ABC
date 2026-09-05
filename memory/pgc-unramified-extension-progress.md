@@ -787,3 +787,30 @@ Banach の不動点定理経由)と `padicLog_mul`
 ごと読み込みに失敗する(`‖x‖` が `expected token` になる)。起動時間が
 半分以下なのが手がかり。モジュールは 1 つにすること。olean 未ビルドの
 モジュールを渡した場合も同じ無言の失敗になる。
+
+## ★★★★★2026-09-05: `𝒪_K` は `ℤ_p` 上の階数 `[K:ℚ_p]` の自由加群
+
+新規 `Found/PGC/CarrierIntegersFree.lean`(sorry 無し):
+- `algebraPadicIntCarrier` / `isScalarTowerPadicIntCarrier`
+  (`ℚ_[p]` 経由の `Algebra ℤ_[p] K.carrier`——プロジェクトに無かった)
+- `isIntegral_of_norm_le_one_base` / `norm_le_one_of_isIntegral_base` :
+  `IsIntegral ℤ_[p] y ↔ ‖y‖ ≤ 1`(`y : K.carrier`)——
+  `UnramifiedExtension.lean` でやった spectral norm の議論を、底の
+  `ℤ_[p] ⊆ ℚ_[p]` に対して繰り返しただけ
+- `isIntegralClosure_carrierIntegers` :
+  `IsIntegralClosure 𝒪[K.carrier] ℤ_[p] K.carrier`
+- `algebraPadicIntCarrierIntegers` / `isScalarTowerPadicIntCarrierIntegers`
+- `module_finite_carrierIntegers` / `module_free_carrierIntegers`
+- **`finrank_carrierIntegers`** :
+  `Module.finrank ℤ_[p] 𝒪[K.carrier] = Module.finrank ℚ_[p] K.carrier`
+
+これで [pGC] Proposition 1.2 が読み取る二つの量の**両方**に、
+具体的な形式化された足場が付いた:
+
+| 因子 | 構造 | 読める量 |
+|---|---|---|
+| `𝓀^×` | 位数 `q-1` の巡回群(Teichmüller) | `q` |
+| `1+𝔪_K` | 加法群 `{‖y‖≤1/4}` ≅ `𝒪_K` の相似形、`ℤ_p` 上自由で階数 `[K:ℚ_p]` | `[K:ℚ_p]` |
+
+残るのは (a) `{‖y‖≤1/4}` と `𝒪_K` の `ℤ_p`-加群同型(`π^k` 倍)、
+(b) これらを `Γ_K^ab ≅ (K^×)^∧` に接続する段。
