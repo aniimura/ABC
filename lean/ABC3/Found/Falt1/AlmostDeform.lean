@@ -631,4 +631,54 @@ theorem mem_iSup_scaledSubalgebra {A B : Type u} [CommRing A] [CommRing B] [Alge
   · rintro ⟨n, hn⟩
     exact le_iSup (fun n => scaledSubalgebra (A := A) (c n)) n hn
 
+/-! ## エタール持ち上げの一意性——*"all `B_ε[1/p]` are isomorphic"*
+
+原文の
+
+> *Now each `B_ε[1/p]` is a lifting of the étale `A[1/p]`-algebra `B[1/p]`
+> and is a projective `A[1/p]`-module. **It follows that all `B_ε[1/p]` are
+> isomorphic to a fixed algebra `B̃[1/p]`** (say)*
+
+は古典的な事実(エタール代数は冪零イデアルに沿って一意に持ち上がる)。
+mathlib に `Algebra.FormallySmooth.exists_lift`(存在)と
+`Algebra.FormallyUnramified.ext`(一意性)があるので、両方を使うだけで
+出る——**`Theorem 2.2` はこれの almost 版**にあたる。 -/
+
+/-- **エタール持ち上げの存在と一意性**(古典版)。 -/
+theorem etale_lift_existsUnique {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C] [Algebra.FormallyEtale A B]
+    (I : Ideal C) (hI : IsNilpotent I) (φ : B →ₐ[A] (C ⧸ I)) :
+    ∃! ψ : B →ₐ[A] C, (Ideal.Quotient.mkₐ A I).comp ψ = φ := by
+  obtain ⟨ψ, hψ⟩ := Algebra.FormallySmooth.exists_lift I hI φ
+  refine ⟨ψ, hψ, fun ψ' hψ' => ?_⟩
+  refine Algebra.FormallyUnramified.ext (I := I) hI (fun x => ?_)
+  have h1 := congrArg (fun f : B →ₐ[A] (C ⧸ I) => f x) hψ'
+  have h2 := congrArg (fun f : B →ₐ[A] (C ⧸ I) => f x) hψ
+  simpa using h1.trans h2.symm
+
+/-- **エタール持ち上げは同型を除いて一意**——原文の
+*"It follows that all `B_ε[1/p]` are isomorphic to a fixed algebra
+`B̃[1/p]`"*。 -/
+theorem etale_lift_iso {A B₁ B₂ : Type u} [CommRing A] [CommRing B₁] [CommRing B₂]
+    [Algebra A B₁] [Algebra A B₂] [Algebra.FormallyEtale A B₁] [Algebra.FormallyEtale A B₂]
+    (I₁ : Ideal B₁) (I₂ : Ideal B₂) (hI₁ : IsNilpotent I₁) (hI₂ : IsNilpotent I₂)
+    (e : (B₁ ⧸ I₁) ≃ₐ[A] (B₂ ⧸ I₂)) :
+    ∃ (f : B₁ →ₐ[A] B₂) (g : B₂ →ₐ[A] B₁),
+      g.comp f = AlgHom.id A B₁ ∧ f.comp g = AlgHom.id A B₂ := by
+  obtain ⟨f, hf⟩ := Algebra.FormallySmooth.exists_lift (R := A) (A := B₁) I₂ hI₂
+    (e.toAlgHom.comp (Ideal.Quotient.mkₐ A I₁))
+  obtain ⟨g, hg⟩ := Algebra.FormallySmooth.exists_lift (R := A) (A := B₂) I₁ hI₁
+    (e.symm.toAlgHom.comp (Ideal.Quotient.mkₐ A I₂))
+  have hf' : ∀ b, Ideal.Quotient.mk I₂ (f b) = e (Ideal.Quotient.mk I₁ b) :=
+    fun b => congrArg (fun h : B₁ →ₐ[A] (B₂ ⧸ I₂) => h b) hf
+  have hg' : ∀ c, Ideal.Quotient.mk I₁ (g c) = e.symm (Ideal.Quotient.mk I₂ c) :=
+    fun c => congrArg (fun h : B₂ →ₐ[A] (B₁ ⧸ I₁) => h c) hg
+  refine ⟨f, g, ?_, ?_⟩
+  · refine Algebra.FormallyUnramified.ext (I := I₁) hI₁ (fun b => ?_)
+    show Ideal.Quotient.mk I₁ (g (f b)) = Ideal.Quotient.mk I₁ b
+    rw [hg' (f b), hf' b, AlgEquiv.symm_apply_apply]
+  · refine Algebra.FormallyUnramified.ext (I := I₂) hI₂ (fun c => ?_)
+    show Ideal.Quotient.mk I₂ (f (g c)) = Ideal.Quotient.mk I₂ c
+    rw [hf' (g c), hg' c, AlgEquiv.apply_symm_apply]
+
 end ABC3.Found.Falt1
