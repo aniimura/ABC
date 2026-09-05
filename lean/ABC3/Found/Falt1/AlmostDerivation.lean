@@ -675,4 +675,40 @@ theorem thm_2_4_i_almostIso {R A B : Type u} [CommRing R] [CommRing A] [CommRing
   show KaehlerDifferential.mapBaseChange R A B ((p^n) • z) = ((p^n) * (p^n)) • y
   rw [(KaehlerDifferential.mapBaseChange R A B).map_smul_of_tower, hz, smul_smul]
 
+/-! ### 塔の上での almost 同型——**合成で閉じる**
+
+各水準 `ϖ k` で almost 同型であることが Faltings の
+「核と余核が `m` で零化される」の内容である。塔があるおかげで
+`ϖ(k+1)² ∣ ϖ k`(`q ≥ 2`)が使え、**合成しても水準が回収できる**
+——これが almost mathematics が「圏」として機能する理由である。 -/
+
+/-- **塔の上での almost 同型**——各水準 `ϖ k` で almost 同型。 -/
+def AlmostIso {A M N : Type u} [CommRing A] [AddCommGroup M] [Module A M]
+    [AddCommGroup N] [Module A N] {q : ℕ} (T : PDivTower A q) (f : M →ₗ[A] N) : Prop :=
+  ∀ k : ℕ, AlmostIsoAt (T.ϖ k) f
+
+/-- **almost 同型は合成で閉じる**。 -/
+theorem almostIso_comp {A M N P : Type u} [CommRing A] [AddCommGroup M] [Module A M]
+    [AddCommGroup N] [Module A N] [AddCommGroup P] [Module A P]
+    {q : ℕ} (hq : 2 ≤ q) (T : PDivTower A q) (f : M →ₗ[A] N) (g : N →ₗ[A] P)
+    (hf : AlmostIso T f) (hg : AlmostIso T g) : AlmostIso T (g ∘ₗ f) := by
+  intro k
+  have hdvd : (T.ϖ (k+1) * T.ϖ (k+1)) ∣ T.ϖ k := by
+    refine ⟨(T.ϖ (k+1))^(q-2), ?_⟩
+    rw [← T.ϖ_succ k, ← pow_two, ← pow_add]
+    congr 1
+    omega
+  exact almostIsoAt_of_dvd hdvd _ (almostIsoAt_comp _ _ f g (hf (k+1)) (hg (k+1)))
+
+/-- almost 同型で源に `m`-捩れが無ければ**単射**——`Theorem 4.1(ii)` の
+証明の形(*"its kernel is annihilated by `m`. But ... has no `m`-torsion"*)。 -/
+theorem injective_of_almostIso_of_noTorsion {A M N : Type u} [CommRing A]
+    [AddCommGroup M] [Module A M] [AddCommGroup N] [Module A N]
+    {q : ℕ} (T : PDivTower A q) (f : M →ₗ[A] N) (hf : AlmostIso T f)
+    (hnotors : ∀ (k : ℕ) (x : M), T.ϖ k • x = 0 → x = 0) :
+    Function.Injective f := by
+  rw [injective_iff_map_eq_zero]
+  intro x hx
+  exact hnotors 0 x ((hf 0).1 x hx)
+
 end ABC3.Found.Falt1
