@@ -814,3 +814,34 @@ Banach の不動点定理経由)と `padicLog_mul`
 
 残るのは (a) `{‖y‖≤1/4}` と `𝒪_K` の `ℤ_p`-加群同型(`π^k` 倍)、
 (b) これらを `Γ_K^ab ≅ (K^×)^∧` に接続する段。
+
+## ★★★★★★2026-09-05: 主単数群の `ℤ_p`-階数は `[K:ℚ_p]`——両量が揃った
+
+新規 `Found/PGC/PrincipalUnitsRank.lean`(sorry 無し):
+- `norm_algebraMap_padicInt_le_one` / `norm_natCast_p_le_half`(`‖p‖ ≤ 1/2`)
+- `smallBallSubmodule K : Submodule ℤ_[p] K.carrier`(台は `smallBall K`)
+- `smallBallIncl`(`smallBall ↪ 𝒪_K`)/ `smallBallMul`(`p²` 倍
+  `𝒪_K ↪ smallBall`)と、それぞれの単射性
+- `module_finite_smallBall` / `module_free_smallBall`
+- **`finrank_smallBall : finrank ℤ_[p] smallBall = finrank ℚ_[p] K.carrier`**
+  ——`p²·𝒪_K ⊆ smallBall ⊆ 𝒪_K` の挟み撃ち
+
+### ★構造的な障害を一つ除去した
+
+このファイルを書くために `Found/PGC/PadicLogMul.lean` の
+`coeff_pow_eq_zero_of_lt` を `coeff_polynomial_pow_eq_zero_of_lt` へ改名した。
+`Found/PGC/AdjoinIntegers.lean` に**同名**(`PowerSeries` 版)があり、
+両方を import した瞬間に `environment already contains` で落ちていた
+——**Lubin-Tate 系と p 進対数系の二つの枝は、この改名まで一つのファイルから
+同時に使えなかった**。`tools/lean-idioms.md` #57 に追記(REPL が無言で
+壊れる症状の原因もこれだった)。
+
+### これで揃ったもの([pGC] Proposition 1.2 が読む二つの量)
+
+| 因子 | 構造 | 読める量 |
+|---|---|---|
+| `𝓀^×` | 位数 `q-1` の巡回群(`Found/Teichmuller.lean`) | `q` |
+| `1+𝔪_K` | `≃*` 加法群 `smallBall`、`ℤ_p` 上自由で階数 `[K:ℚ_p]` | `[K:ℚ_p]` |
+
+残るのは `Γ_K^ab ≅ (K^×)^∧` への接続(`K^× ≅ 𝒪_K^× × ℤ` の分解と、
+節目(5)+不分岐部分の組み合わせ)。

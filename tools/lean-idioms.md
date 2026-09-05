@@ -4907,3 +4907,26 @@ mathlib のモジュールを併記するのは問題ない
 
 なお、そもそも olean が未ビルドのモジュールを渡した場合も同じ無言の失敗に
 なる(`lake build <module>` を先に通すこと)。
+
+### #57 の★原因判明(同日追記)
+
+上の「2 つのルートを渡すと壊れる」は REPL の制限ではなく、**その 2 つが
+同時に import できない**ことの現れだった。実際に `lake build` で同じ 2 つを
+import するファイルを作ると:
+
+```
+error: import ABC3.Found.PGC.PadicLogMul failed,
+  environment already contains 'ABC3.Found.PGC.coeff_pow_eq_zero_of_lt'
+  from ABC3.Found.PGC.AdjoinIntegers
+```
+
+`Found/PGC/AdjoinIntegers.lean`(`PowerSeries` 版)と
+`Found/PGC/PadicLogMul.lean`(`Polynomial` 版)に**同名の定理**があり、
+Lubin-Tate 系と p 進対数系の二つの枝が同時に使えなかった。
+`PadicLogMul.lean` 側を `coeff_polynomial_pow_eq_zero_of_lt` に改名して解消。
+
+教訓:
+* **REPL が無言で壊れたら、まず `lake build` で同じ import を試す**
+  ——REPL はエラーメッセージを落とすが `lake build` は出す。
+* 同じ namespace に汎用的な名前(`coeff_pow_eq_zero_of_lt` のような)を
+  置くときは、枝が合流する日を考えて修飾語を付ける。

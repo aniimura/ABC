@@ -141,7 +141,7 @@ theorem padicLog_eq_tsum_coeff_log (K : PAdicLocalField p) (x : K.carrier) :
 
 /-! ### 部品5: `P^d` の係数の台(ノルム不要、汎用) -/
 
-theorem coeff_pow_eq_zero_of_lt {K : PAdicLocalField p} {P : Polynomial K.carrier}
+theorem coeff_polynomial_pow_eq_zero_of_lt {K : PAdicLocalField p} {P : Polynomial K.carrier}
     (hP0 : P.coeff 0 = 0) : ∀ (d n : ℕ), n < d → (P ^ d).coeff n = 0 := by
   intro d
   induction d with
@@ -170,7 +170,7 @@ theorem summable_and_tsum_coeff_logOf {K : PAdicLocalField p} (P : Polynomial K.
   classical
   set G : ℕ → ℕ → K.carrier := fun d n => coeff d (log K.carrier) * (P ^ d).coeff n with hG
   have hGzero_d : ∀ d n, n < d → G d n = 0 := fun d n h => by
-    simp [hG, coeff_pow_eq_zero_of_lt hP0 d n h]
+    simp [hG, coeff_polynomial_pow_eq_zero_of_lt hP0 d n h]
   have hGzero_n : ∀ d n, d * P.natDegree < n → G d n = 0 := fun d n h => by
     have h2 : (P ^ d).coeff n = 0 :=
       Polynomial.coeff_eq_zero_of_natDegree_lt (lt_of_le_of_lt Polynomial.natDegree_pow_le h)
