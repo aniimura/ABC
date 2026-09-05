@@ -1863,3 +1863,26 @@ mathlib の `Ideal.inertiaDeg_algebra_tower` を使うか、剰余体の
 `𝒪_{K(Λ_{n-1})}` 上の Eisenstein であることから出るはずだが、
 `ψ_n` の根が生成する拡大を `K.closure` の中の中間体として捉え直す
 (= 代数閉包の同一視)配管がまだ無い。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05: 代数閉包の同一視 `(K(x))‾ ≃ K‾`
+
+`Found/PGC/AdjoinFieldClosure.lean`(新規)
+
+前コミットで「残る配管」と書いたもの。`adjoinField K x` を
+`PAdicLocalField` として見るとその代数閉包は `AlgebraicClosure ↥K⟮x⟯` という
+**別の型**になるが、`K.closure` 自身が `K(x)` 上の代数閉包でもあるので同型:
+
+- `algebraAdjoinFieldClosure` : `Algebra ↥K⟮x⟯ K.closure`
+- `isAlgebraicAdjoinFieldClosure` / `isAlgClosureAdjoinField`
+- **`closureEquivAdjoinField : (adjoinField K x).closure ≃ₐ[(adjoinField K x).carrier] K.closure`**
+  (`IsAlgClosure.equiv`)
+
+★配管の注意: これらのインスタンスは**中間体を直接書けば**見つかるが
+`(adjoinField K x).carrier` と書くと見つからない(`adjoinField` は `def` なので
+instance 探索が展開しない)。明示的に `instance` として与え直す必要がある。
+
+### これで繋がる道
+
+Lubin-Tate 塔は `K(Λ_n)/K(Λ_{n-1})` という**相対的な**拡大の連なり
+(`ψ_n` は `𝒪_{K(Λ_{n-1})}` 上の Eisenstein)。一方 `TotallyRamified.lean` の
+道具は `K.closure` の中の中間体について書かれている。この同型で両者が繋がる。
