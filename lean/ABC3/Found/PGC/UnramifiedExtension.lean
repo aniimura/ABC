@@ -1815,4 +1815,70 @@ theorem mem_ker_units_map_residue_iff {p : ℕ} [Fact p.Prime] (K : PAdicLocalFi
   rw [MonoidHom.mem_ker, Units.ext_iff]
   rfl
 
+
+/-! ## `Γ_K ↠ Gal(K^ur/K) ↠ ℤ/n`
+
+`K^ur/K` は Galois(`isGalois_unramifiedClosure`)なので、絶対 Galois 群
+からの制限射は全射(`AlgEquiv.restrictNormalHom_surjective`)。さらに
+次数 `n` の不分岐拡大 `K_n ⊆ K^ur` への制限も全射で、
+`Gal(K_n/K) ≃ ℤ/n`。したがって
+
+```
+Γ_K ↠ Gal(K^ur/K) ↠ ℤ/n   (任意の n ≥ 1)
+```
+
+`Ẑ = lim ℤ/n` を作れば右側は `Gal(K^ur/K) ≅ Ẑ` になる(`Ẑ` は mathlib
+に不在、2026-09-05 実測)。 -/
+
+/-- **`Γ_K ↠ Gal(K^ur/K)`**——`K^ur/K` が normal だから。 -/
+theorem exists_surjective_absGal_to_unramifiedClosureGal {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p) :
+    ∃ φ : (K.closure ≃ₐ[K.carrier] K.closure) →*
+      ((unramifiedClosure K) ≃ₐ[K.carrier] (unramifiedClosure K)), Function.Surjective φ := by
+  haveI := normal_unramifiedClosure K
+  haveI := IsAlgClosure.normal K.carrier K.closure
+  exact ⟨AlgEquiv.restrictNormalHom (F := K.carrier) (K₁ := K.closure) (unramifiedClosure K),
+    AlgEquiv.restrictNormalHom_surjective (F := K.carrier)
+      (K₁ := (unramifiedClosure K)) (E := K.closure)⟩
+
+/-- **`Gal(K^ur/K) ↠ ℤ/n`**——次数 `n` の不分岐拡大 `K_n ⊆ K^ur` への
+制限が全射で、`Gal(K_n/K) ≃ ℤ/n` だから。 -/
+theorem exists_surjective_unramifiedClosureGal_to_zmod {p : ℕ} [Fact p.Prime]
+    (K : PAdicLocalField p) (n : ℕ) (hn : n ≠ 0) :
+    ∃ ψ : ((unramifiedClosure K) ≃ₐ[K.carrier] (unramifiedClosure K))
+      →* Multiplicative (ZMod n), Function.Surjective ψ := by
+  obtain ⟨x, hrank, hu, hnor, hbij⟩ := exists_isUnramifiedAdjoin K n hn
+  haveI := hnor
+  haveI := normal_unramifiedClosure K
+  haveI := module_finite_adjoinIntegers K x
+  haveI : Finite 𝓀[K.carrier] := residueField_finite K
+  haveI : CharZero K.carrier :=
+    charZero_of_injective_algebraMap (algebraMap ℚ_[p] K.carrier).injective
+  haveI : Algebra.IsSeparable K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :=
+    IntermediateField.isSeparable_tower_bot K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+  haveI : IsGalois K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := ⟨⟩
+  have hcyc : IsCyclic ((IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+      ≃ₐ[K.carrier] (IntermediateField.adjoin K.carrier ({x} : Set K.closure))) :=
+    (MulEquiv.isCyclic (MulEquiv.ofBijective (residueGalHom K x) hbij).symm).mp inferInstance
+  have hcard : Nat.card ((IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+      ≃ₐ[K.carrier] (IntermediateField.adjoin K.carrier ({x} : Set K.closure))) = n := by
+    rw [IsGalois.card_aut_eq_finrank, hrank]
+  haveI := hcyc
+  have e := (hcard ▸ (zmodCyclicMulEquiv hcyc)).symm
+  letI : Algebra (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+      (unramifiedClosure K) :=
+    (IntermediateField.inclusion (adjoin_le_unramifiedClosure K hu)).toRingHom.toAlgebra
+  haveI : IsScalarTower K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+      (unramifiedClosure K) :=
+    IsScalarTower.of_algebraMap_eq (fun _ => rfl)
+  refine ⟨(e : _ ≃* Multiplicative (ZMod n)).toMonoidHom.comp
+    (AlgEquiv.restrictNormalHom (F := K.carrier) (K₁ := (unramifiedClosure K))
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure))), ?_⟩
+  exact (e.surjective).comp
+    (AlgEquiv.restrictNormalHom_surjective (F := K.carrier)
+      (K₁ := (IntermediateField.adjoin K.carrier ({x} : Set K.closure)))
+      (E := (unramifiedClosure K)))
+
 end ABC3.Found.PGC

@@ -904,3 +904,19 @@ K^×  ≅  ℤ × 𝓀^× × (1+𝔪_K)
 `K^× ≅ ℤ × 𝒪_K^×`(`UnitsSplit.lean`)の**各因子が `Γ_K` の商として
 現れる**ところまで来た。両者を「合わせて全体」にするには Lubin-Tate の
 主定理 `K^ab = K^ur · K_π` が要る——そこが次の山。
+
+## 2026-09-05: `Γ_K ↠ Gal(K^ur/K) ↠ ℤ/n`
+
+`Found/PGC/UnramifiedExtension.lean`(sorry 無し):
+- `exists_surjective_absGal_to_unramifiedClosureGal` : **`Γ_K ↠ Gal(K^ur/K)`**
+  (`K^ur/K` が normal だから `AlgEquiv.restrictNormalHom_surjective`)
+- `exists_surjective_unramifiedClosureGal_to_zmod` : **`Gal(K^ur/K) ↠ ℤ/n`**
+  (次数 `n` の不分岐拡大 `K_n ⊆ K^ur` への制限が全射、`Gal(K_n/K) ≃ ℤ/n`)
+
+★配管: `K⟮x⟯ ≤ K^ur` から `Algebra ↥K⟮x⟯ ↥K^ur` を作るには
+`IntermediateField.inclusion h |>.toRingHom.toAlgebra` を `letI` で入れ、
+`IsScalarTower` は `of_algebraMap_eq (fun _ => rfl)`。**結論を `∃ ψ, ...`
+の形にしておく**と、これらのインスタンスが主張の型に漏れない。
+
+これで不分岐側は `Γ_K ↠ Gal(K^ur/K) ↠ ℤ/n` の形に整理された。
+`Ẑ = lim ℤ/n` を作れば `Gal(K^ur/K) ≅ Ẑ` になる(`Ẑ` は mathlib 不在)。
