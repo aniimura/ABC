@@ -2228,6 +2228,73 @@ noncomputable def thm12StepData_zero : Thm12StepData.{0} 0 0 0 where
 example : Filter.Tendsto (fun _ : ℕ => (0 : ℝ)) Filter.atTop (nhds 0) :=
   thm_1_2 0 (fun _ => 0) (fun _ => le_refl 0) (fun _ => thm12StepData_zero)
 
+/-! ## ★★`Theorem 1.2`——環の塔から直接(2026-09-05)
+
+`V : ℕ → Type u`(原文の `V = V₀ ⊂ V₁ ⊂ ⋯`)と
+`W : ℕ → Type u`(原文の `Wₙ = Vₙ ⊗_V W` の正規化)を与え、各段で
+原文の仮定を満たせば、`δₙ := length(Ω_{Wₙ/Vₙ})/eₙ` が `0` に収束する。
+
+`δ` は**長さから定義**するので、原文の *"the different `δ(Wₙ/Vₙ)`"* と
+`Lemma 1.1`(既に Found)により一致する。段をまたぐ整合性は
+`lenR_div_eq_of_baseChange` が与える。 -/
+
+open Filter Topology in
+/-- **★★`Theorem 1.2`(環の塔から)**——原文の設定そのままの形。 -/
+theorem thm_1_2_of_ring_tower (d : ℕ)
+    (V W : ℕ → Type u)
+    [∀ n, CommRing (V n)] [∀ n, CommRing (W n)]
+    [∀ n, Algebra (V n) (V (n + 1))] [∀ n, Algebra (V n) (W n)]
+    [∀ n, Algebra (W n) (W (n + 1))] [∀ n, Algebra (V n) (W (n + 1))]
+    [∀ n, IsScalarTower (V n) (V (n + 1)) (W (n + 1))]
+    [∀ n, IsScalarTower (V n) (W n) (W (n + 1))]
+    [∀ n, IsLocalRing (W n)] [∀ n, IsNoetherianRing (W n)]
+    [∀ n, Module.Finite (W (n + 1)) (TensorProduct (W n) (W (n + 1)) (Ω[W n⁄V n]))]
+    [∀ n, IsArtinian (W (n + 1)) (TensorProduct (W n) (W (n + 1)) (Ω[W n⁄V n]))]
+    [∀ n, IsNoetherian (W (n + 1)) (TensorProduct (W n) (W (n + 1)) (Ω[W n⁄V n]))]
+    [∀ n, IsArtinian (W (n + 1)) (Ω[W (n + 1)⁄V n])]
+    [∀ n, IsNoetherian (W (n + 1)) (Ω[W (n + 1)⁄V n])]
+    [∀ n, IsArtinian (W n) (Ω[W n⁄V n])] [∀ n, IsNoetherian (W n) (Ω[W n⁄V n])]
+    (e : ℕ → ℕ) (he : ∀ n, 0 < e n)
+    (c : ℕ → ℕ) (hc : ∀ n, 0 < c n) (hce : ∀ n, e (n + 1) = c n * e n)
+    (hbc : ∀ n, Module.length (W (n + 1)) (TensorProduct (W n) (W (n + 1)) (Ω[W n⁄V n]))
+      = (c n : ℕ∞) * Module.length (W n) (Ω[W n⁄V n]))
+    (hfin : ∀ n, Module.length (W n) (Ω[W n⁄V n]) ≠ ⊤)
+    (p : ∀ n, W (n + 1))
+    (hp : ∀ n, Ideal.span ({p n} : Set (W (n + 1)))
+      = (IsLocalRing.maximalIdeal (W (n + 1))) ^ (e (n + 1)))
+    (gN₀ : ∀ n, Fin (d + 1) → Ω[W (n + 1)⁄V n])
+    (hspanN₀ : ∀ n, Submodule.span (W (n + 1)) (Set.range (gN₀ n)) = ⊤)
+    (φ : ∀ n, ↥(LinearMap.ker
+        (KaehlerDifferential.map (V n) (V (n + 1)) (W (n + 1)) (W (n + 1)))) →ₗ[W (n + 1)]
+      (Fin (d + 1) → W (n + 1) ⧸ Ideal.span ({p n} : Set (W (n + 1)))))
+    (hφ : ∀ n, Function.Surjective (φ n))
+    (gc : ∀ n, Fin (d + 1) → (Ω[W (n + 1)⁄V (n + 1)] ⧸ LinearMap.range
+      ((KaehlerDifferential.map (V n) (V (n + 1)) (W (n + 1)) (W (n + 1))) ∘ₗ
+        (KaehlerDifferential.mapBaseChange (V n) (W n) (W (n + 1))))))
+    (hspanc : ∀ n, Submodule.span (W (n + 1)) (Set.range (gc n)) = ⊤)
+    (b : ∀ n, W (n + 1))
+    (hbA : ∀ n, b n ∈ Algebra.adjoin (V (n + 1))
+      (Set.range (algebraMap (W n) (W (n + 1)))))
+    (hb : ∀ (n : ℕ) (y : W (n + 1)), b n * y ∈ Algebra.adjoin (V (n + 1))
+      (Set.range (algebraMap (W n) (W (n + 1)))))
+    (hbfin : ∀ n, Module.length (W (n + 1))
+      (W (n + 1) ⧸ Ideal.span ({b n} : Set (W (n + 1)))) ≠ ⊤)
+    (hbl : ∀ n, lenR (W (n + 1)) (W (n + 1) ⧸ Ideal.span ({b n} : Set (W (n + 1))))
+      = lenR (W (n + 1)) (TensorProduct (W n) (W (n + 1)) (Ω[W n⁄V n]))
+        - lenR (W (n + 1)) (Ω[W (n + 1)⁄V (n + 1)])) :
+    Tendsto (fun n => lenR (W n) (Ω[W n⁄V n]) / (e n : ℝ)) atTop (nhds 0) := by
+  refine thm_1_2 d (fun n => lenR (W n) (Ω[W n⁄V n]) / (e n : ℝ))
+    (fun n => div_nonneg (lenR_nonneg _ _) (by positivity)) (fun n => ?_)
+  have hstep := thm12StepData_of_tower_len (Vn := V n) (Vn1 := V (n + 1))
+    (Wn := W n) (Wn1 := W (n + 1)) d (e (n + 1)) (he (n + 1)) (p n) (hp n)
+    (gN₀ n) (hspanN₀ n) (φ n) (hφ n) (gc n) (hspanc n) (b n) (hbA n) (hb n)
+    (hbfin n) (hbl n)
+  have h1 : lenR (W (n + 1)) (TensorProduct (W n) (W (n + 1)) (Ω[W n⁄V n]))
+      / ((e (n + 1) : ℕ) : ℝ) = lenR (W n) (Ω[W n⁄V n]) / ((e n : ℕ) : ℝ) :=
+    lenR_div_eq_of_baseChange (c n) (e n) (e (n + 1)) (hc n) (he n) (hfin n) (hbc n) (hce n)
+  rw [h1] at hstep
+  exact hstep
+
 open Filter Topology in
 /-- **`Theorem 1.2`——Skeleton の `thm12`(ε-N 形)の形**。 -/
 theorem thm_1_2_eps (d : ℕ) (δ : ℕ → ℝ) (h0 : ∀ n, 0 ≤ δ n)
