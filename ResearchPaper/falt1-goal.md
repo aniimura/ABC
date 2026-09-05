@@ -59,7 +59,7 @@
 | `Theorem 2.2` | **✅Found**(`thm_2_2`、`∃!`、非空虚性2件) | `AlmostLifting.lean` |
 | `Theorem 2.4` | **✅Found**((i)(ii)とも、非空虚性つき)。(i)は**原文どおり「`m` が零化する」形**まで(`thm_2_4_i_m_annihilates`) | `AlmostDerivation.lean` + `GaloisTransfer.lean` |
 | `Theorem 4.1(ii)` | **✅証明済み**(非空虚性つき)。塔版`thm_4_1_ii_tower`は**原文3行がそのまま仮定と結論** | `Section4.lean` |
-| `Theorem 1.2` | **★「長さの3事実」に完全帰着**(`thm_1_2_of_length_bounds`、非空虚性つき)。**解析部分は全部済んだ**——残るのは (a)`length(ker) − length(coker) = (δₙ−δ_{n+1})·e`、(b)`length(ker) ≥ β·e`(`β = min{1, δₙ/(d+1)}`)、(c)`length(coker) ≤ (d+1)(δₙ−δ_{n+1})·e` を実際の`Ω`と差積について示すことだけ。道具(指数の加法性`length_ker_add_target`・`p`倍の核の移送`ker_comp_contains_pTorsion`・長さの線型性`length_quot_p_pow`)は3つとも揃った | `Section1.lean` |
+| `Theorem 1.2` | **★4層すべて形式化済み**(`thm_1_2_of_module_facts`、非空虚性つき)。(1)**解析部分**`thm_1_2_tendsto_zero`、(2)**加群側の3事実**——(a)`length_ker_add_target`+`length_baseChange_kaehler`、(b)`min_le_length_of_torsion_le`(★**原文より強い**:`(d+1)`で割る必要なし・巡回分解も不要、Nakayamaの鎖だけ)、(c)`length_le_of_span_and_annihilator`、(3)**翻訳層**`lenR`系(`ℕ∞`→ℝ)、(4)**最終配線**`key_inequality_of_lenR`。★残るのは**実際の`Ω`・差積・塔をこの3つに当てはめるだけ**——具体的には`Wₙ`(=`Vₙ⊗_V W`の正規化)の塔を Lean で立て、塔の仮定(`Ω_{V_{n+1}/Vₙ}`が`(V_{n+1}/pV_{n+1})^{d+1}`を商に持つ)から`ker(g∘f) ⊇ ker(p·)`を出し、原文が*"it is clear that"*で畳んだ余核の零化を示す部分 | `Section1.lean` |
 | `Theorem 3.2` の代数的核 | **✅証明済み**(almost 直和因子からの降下) | `Section3.lean` |
 | `Theorem 2.3` 第2・3・4段 | **✅証明済み**("Tripling ε"・`B_ε` の almost 射影性・`B_ε⊗Ā` と `B` の比較) | `AlmostDeform.lean` |
 | `Theorem 2.3` 第5段 | **✅証明済み**(five-term identity・結合律への補正は**倍化なしで厳密**・交換子は導分) | `AlmostDeform.lean` |
