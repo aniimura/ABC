@@ -119,4 +119,18 @@ theorem exists_isPrimitiveRoot_mem_unramifiedClosure (K : PAdicLocalField p) (m 
     rw [← hord]
     exact orderOf_dvd_of_pow_eq_one hl
 
+/-- **★★★★★★★★★★★★★★★★★★★★`μ_m ⊆ K^ur`(`p ∤ m`)**——`m` 乗して `1` に
+なる元は**すべて** `K^ur` にある。
+
+原始 `m` 乗根 `ζ₀ ∈ K^ur` を取れば、`X^m − 1` の根は `ζ₀` の冪で尽くされる
+(`IsPrimitiveRoot.eq_pow_of_pow_eq_one`)ので、`K^ur` が体であることから従う。 -/
+theorem mem_unramifiedClosure_of_pow_eq_one (K : PAdicLocalField p) {m : ℕ}
+    (hm : 0 < m) (hmp : ¬ p ∣ m) {ζ : K.closure} (hζ : ζ ^ m = 1) :
+    ζ ∈ unramifiedClosure K := by
+  haveI : NeZero m := ⟨hm.ne'⟩
+  obtain ⟨ζ₀, hζ₀mem, hζ₀⟩ := exists_isPrimitiveRoot_mem_unramifiedClosure K m hm hmp
+  obtain ⟨i, -, hi⟩ := hζ₀.eq_pow_of_pow_eq_one hζ
+  rw [← hi]
+  exact pow_mem hζ₀mem i
+
 end ABC3.Found.PGC
