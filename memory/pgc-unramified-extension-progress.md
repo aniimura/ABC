@@ -945,3 +945,24 @@ Frobenius、`coe_...` で `z ↦ z^{Fintype.card 𝓀}`、`orderOf_...` で
 
 これで `Gal(K^ur/K) ≅ Ẑ` の「生成元」の側も形になった
 ——`Ẑ` は Frobenius が位相的に生成する。
+
+## ★★★★★★★★★★★2026-09-05: `Interface.PGC.ResidueCardinality` を**構成した**
+
+新規 `Found/PGC/ResidueCardinalityConstruction.lean`(sorry 無し):
+- `absoluteInertiaDegree_pos` : `f > 0`(`e·f = [K:ℚ_p] > 0` から)
+- **`residueCardinality p : ResidueCardinality p`**
+  - `card K := Nat.card 𝓀[K.carrier]`
+  - `isPrimePow` は `residueCard_eq_pow`(`q = p^f`)+ `f > 0`
+
+`Skeleton/PGC/Section1Cor13.lean` の設計メモが
+
+> 退化は消えていない——移動した …… Track B が本物の `ResidueCardinality` を
+> 構成した時点で、ここに依存する全ての statement が一斉に非空虚性の検査を受ける。
+
+と予告していた**その本物**。これで `Proposition 1.2`
+(`residueCard_and_degree_recoverable`)と `Corollary 1.3`
+(`inertia_recoverable`)の仮説 `RD : ResidueCardinality p` に具体的な値が
+入る——両者はもはや「自由なデータについての条件付き主張」ではなく、
+実在の量についての主張として読める(証明自体はまだ `sorry`)。
+
+`Interface` の自由なデータを一つ、実物に置き換えた。
