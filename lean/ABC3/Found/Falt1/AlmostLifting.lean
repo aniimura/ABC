@@ -454,4 +454,78 @@ theorem exists_multiplicative_lift_tower {A B C : Type u}
   exact exists_multiplicative_lift_of_isAlmostEtale (T.ϖ 0) hAE hf0inj I hsq φ
     (T.ϖ k) wk hwk (htors k) (T.ϖ j) wj hwj
 
+/-! ## `ε` 族の極限へ——**イデアル `sB` の上では「almost」が消える**
+
+Faltings の *"the different `φ_ε` glue together to give a multiplicative
+`A`-linear map `φ₀ : mB → C`"* の中身は、次の観察である:
+
+水準 `s` の乗法的持ち上げ `ψ`(`π∘ψ = s·φ`、`s·ψ(xy) = ψ(x)ψ(y)`)が
+あるとき、**イデアル `sB` の上では `φ₀(s·b) := ψ(b)` が honest な
+(`p^ε` 倍の付かない)持ち上げになる**:
+
+- 加法性・`π∘φ₀ = φ|_{sB}`:`ψ` の `A`-線形性から。
+- **乗法性**: `(s·b)(s·b') = s·(s·(bb'))` なので
+  `φ₀((s b)(s b')) = ψ(s·(bb')) = s·ψ(bb') = ψ(b)ψ(b') = φ₀(sb)φ₀(sb')`
+  ——`s` の因子がちょうど打ち消し合う。
+- **well-defined**:`B` が `s` 捩れ無しであること。これは Faltings 自身の
+  標準仮定(`algebraMap B B[1/p]` が単射)から従う——`s` は `p` を割るので
+  `s·b = 0` なら `b` は `p` 捩れ、よって `0`。
+
+`mB = ∪_k (ϖ k)·B`(塔の元は整除で全順序なので、有限和は1つの積に書ける)
+なので、あとはこの族を `k` について貼り合わせれば `φ₀ : mB → C` が得られる。 -/
+
+/-- well-defined 性:`B` が `s` 捩れ無しなら `s•b = s•b'` から `ψ b = ψ b'`。 -/
+theorem lift_wd {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C] (s : A) (ψ : B →ₗ[A] C)
+    (hBtors : ∀ b : B, s • b = 0 → b = 0) (b b' : B) (h : s • b = s • b') : ψ b = ψ b' := by
+  have hs : s • (b - b') = 0 := by rw [smul_sub, h, sub_self]
+  have hb := hBtors _ hs
+  have hbb : b = b' := by linear_combination hb
+  rw [hbb]
+
+/-- 乗法性の核:`ψ(s•(bb')) = ψ(b)ψ(b')`。水準 `s` の乗法性と `A`-線形性から。 -/
+theorem lift_mul {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C] (s : A) (ψ : B →ₗ[A] C)
+    (hmul : ∀ x y : B, s • ψ (x * y) = ψ x * ψ y) (b b' : B) :
+    ψ (s • (b * b')) = ψ b * ψ b' := by
+  rw [map_smul, hmul]
+
+/-- 積の代表元:`(s•b)·(s•b') = s•(s•(b*b'))`。 -/
+theorem lift_mul_rep {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    (s : A) (b b' : B) : (s • b) * (s • b') = s • (s • (b * b')) := by
+  simp only [Algebra.smul_def]
+  ring
+
+open Classical in
+/-- **イデアル `sB` の上の honest な持ち上げ**——Faltings の `φ₀` の1水準版。
+水準 `s` の乗法的持ち上げ `ψ` と `B` の `s` 捩れ無しから、
+`φ₀(s·b) := ψ(b)` が well-defined で、加法的・**乗法的**であり、
+`π∘φ₀ = φ` を `sB` の上で満たす。**`p^ε` 倍が付かない honest な等式**
+であることが要点である。 -/
+theorem exists_honest_lift_on_ideal {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
+    [Algebra A B] [Algebra A C]
+    (I : Ideal C) (φ : B →ₐ[A] (C ⧸ I)) (s : A) (ψ : B →ₗ[A] C)
+    (hψ : ∀ b, Ideal.Quotient.mk I (ψ b) = s • φ b)
+    (hmul : ∀ x y : B, s • ψ (x * y) = ψ x * ψ y)
+    (hBtors : ∀ b : B, s • b = 0 → b = 0) :
+    ∃ φ₀ : B → C,
+      (∀ b : B, φ₀ (s • b) = ψ b) ∧
+      (∀ b b' : B, φ₀ ((s • b) * (s • b')) = φ₀ (s • b) * φ₀ (s • b')) ∧
+      (∀ b : B, Ideal.Quotient.mk I (φ₀ (s • b)) = φ (s • b)) ∧
+      (∀ b b' : B, φ₀ (s • b + s • b') = φ₀ (s • b) + φ₀ (s • b')) := by
+  set F : B → C := fun z => if h : ∃ b : B, s • b = z then ψ h.choose else 0 with hF
+  have hkey : ∀ b : B, F (s • b) = ψ b := by
+    intro b
+    have hex : ∃ b' : B, s • b' = s • b := ⟨b, rfl⟩
+    show (if h : ∃ b' : B, s • b' = s • b then ψ h.choose else 0) = ψ b
+    rw [dif_pos hex]
+    exact lift_wd s ψ hBtors _ b hex.choose_spec
+  refine ⟨F, hkey, ?_, ?_, ?_⟩
+  · intro b b'
+    rw [lift_mul_rep, hkey, hkey, hkey, lift_mul s ψ hmul]
+  · intro b
+    rw [hkey, hψ b, map_smul]
+  · intro b b'
+    rw [← smul_add, hkey, hkey, hkey, map_add]
+
 end ABC3.Found.Falt1
