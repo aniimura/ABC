@@ -845,3 +845,29 @@ Banach の不動点定理経由)と `padicLog_mul`
 
 残るのは `Γ_K^ab ≅ (K^×)^∧` への接続(`K^× ≅ 𝒪_K^× × ℤ` の分解と、
 節目(5)+不分岐部分の組み合わせ)。
+
+## ★★★★★★★2026-09-05: `K^× ≅ ℤ × 𝒪_K^×`——右辺の完全分解
+
+新規 `Found/PGC/UnitsSplit.lean`(sorry 無し):
+- `norm_unit_carrierIntegers` : `𝒪_K` の単数のノルムは `1`
+- `unitsSplitHom` : `(n,u) ↦ ϖ^n·u`(`ϖ` は既約元)
+- `unitsSplitHom_surjective` : mathlib の
+  `IsDiscreteValuationRing.exists_units_eq_smul_zpow_of_irreducible`
+- `unitsSplitHom_injective` : `0 < ‖ϖ‖ < 1` から `‖ϖ‖^n = 1 ⟹ n = 0`
+  (`zpow_eq_one_iff_right₀`)
+- **`unitsSplitEquiv : Multiplicative ℤ × 𝒪_K^× ≃* K^×`**
+- `exists_unitsSplitEquiv`(素元の存在込み)
+
+### これで相互律の右辺 `(K^×)` が完全に分解された
+
+```
+K^×  ≅  ℤ × 𝓀^× × (1+𝔪_K)
+         │   │       └ ℤ_p 上自由・階数 [K:ℚ_p](PrincipalUnitsRank)
+         │   └ 位数 q-1 の巡回群(Teichmuller)
+         └ 付値(UnitsSplit)
+```
+
+[pGC] Proposition 1.2 が `Γ_K^ab` の群構造から `q` と `[K:ℚ_p]` を読み取る
+経路の**右辺側**は、これで形式化された分解として手元にある。残るのは
+左辺との接続——`Γ_K^ab ≅ (K^×)^∧`(節目(5) の完全分岐部分と、本日の
+不分岐部分 `Γ_K ↠ ℤ/n` を組み合わせる段)。
