@@ -67,7 +67,9 @@
 | **almost étale 性は底変換で保たれる** | **✅証明済み**(第 1535・1536)——`Theorem 3.2` の *"B∞ is almost isomorphic to S∞ ⊗_{R∞} A∞ **as this is almost étale over S∞**"* の括弧内。`bcWitnessMap`(`Algebra.TensorProduct.lift` を `restrictScalars` 経由で組み、`cancelBaseChange`/`assoc` の配管を回避)・`witness_baseChange`(水準は `c ↦ algebraMap A A' c` になるだけ)・`hasAlmostWitnesses_baseChange`(塔版 = 「`ε` は任意に小さくできる」)。**`pi_witness`**——分裂エタール代数 `ι → A` の分離冪等元 `w = Σᵢ eᵢ ⊗ eᵢ` が witness 条件を `c = 1` で満たす。★`hasAlmostWitnesses_pi` により `HasAlmostWitnesses` を仮定する既証の結果すべてに具体的な入力が付いた | `Section3.lean` |
 | **`Theorem 1.2` の主張本体** | **✅Lean の定理として述べ、証明した**(第 1542-1546)——`Thm12StepData d δₙ δ_{n+1}`(原文の 1 ステップ分のデータと仮定を束ねた構造体。各フィールドが原文の各文に対応)・`Thm12StepData.key`(1 組から鍵の不等式)・**`thm_1_2`**(各 `n` でデータが与えられれば `δₙ → 0`)・`thm_1_2_eps`(Skeleton の `thm12` の形)。**非空虚性 2 件**——`thm12StepData_zmod4`(**非退化**、`R = ZMod 4`・`δₙ=1`・`δ_{n+1}=0`)と `thm12StepData_zero`(全段、`thm_1_2` の仮説自体が満たせることの対照)。`.src`/`.needs` つき。★残るのは**塔の構成**(`Vₙ` の列と `Wₙ =` 正規化)が各段で `Thm12StepData` を供給する段だけ | `Section1.lean` |
 | **`Theorem 1.2` 節点 A** | **✅証明済み**(第 1537)——原文 *"the kernel of the second map contains the kernel of multiplication by `p`"*。★**構造定理(巡回分解)を使わない**証明: `length(L[p]) = length(L/pL)`(2 本の完全列)+ `L ↠ Q`(`pQ = 0`)から `length Q ≤ length(L/pL)` + `A ≤ B` & `length B ≤ length A ⟹ A = B`。非空虚性は `ZMod 4` の `2`-捩れ | `Section1.lean` |
-| **`Theorem 1.2` 節点 B(B1)** | **✅証明済み**(第 1538・1540)——`b·Dx = D(b·x) − x·Db` の 1 行。`derivPreimage`(`{a ∣ D a ∈ P}` は部分代数)で「生成元だけ確かめればよい」形に。(B2) は既証の `cancel_conductor_delta` へ帰着 | `Section1.lean` |
+| **`Theorem 1.2` 節点 B(B1)** | **✅証明済み**(第 1538・1540)——`b·Dx = D(b·x) − x·Db` の 1 行。`derivPreimage`(`{a ∣ D a ∈ P}` は部分代数)で「生成元だけ確かめればよい」形に | `Section1.lean` |
+| **`Theorem 1.2` 節点 B(B2)の算術** | **✅証明済み**(第 1554)——`hbl_of_conductor_eq`。既証の `cancel_conductor_delta` の結論 `conductor·δ_{n+1} = δₙ` から `length(R/(b)) = length(M) − length(N)` が出る(既証の `length_quotient_span_singleton_mul` だけを使う)。`Lemma 1.1` が `hMlen`・`hNlen` を与える | `Section1.lean` |
+| **環の塔の 1 段 → `Thm12StepData`** | **✅証明済み**(第 1549・1550・1552・1553)——`thm12StepData_of_tower`(原文の 2 本の写像を Kähler 微分の標準写像に取る)・`hbann_of_conductor_tower`(節点 B が**環のレベルの導手条件だけ**になる)・`kerEquivTensor`/`phi_of_tower`(★`ker g = range(Ω_{V_{n+1}/Vₙ}⊗W')` は Jacobi–Zariski で**等号**。原文が暗黙に使う単射性 `hinj` を明示)・`exists_span_kaehler_mid`(生成元の個数は完全列の両端の和)・`hspanc_of_cyclic`・`thm12StepData_of_tower_len`(`δ` を長さから定めれば `hM`/`hN` が自動)。**頑健化**:`..._gen` 系は `rN ≤ rφ` だけを要求(生成元の個数が `d+2` でも通る) | `Section1.lean` |
 | エタール持ち上げの一意性(古典版) | **✅証明済み**——`etale_lift_existsUnique`・`etale_lift_iso`。mathlib の `FormallySmooth.exists_lift`+`FormallyUnramified.ext` から。★`Theorem 2.2` はこれの **almost 版**であり、両者が並んだことで対比が明確になった | `AlmostDeform.lean` |
 | `Theorem 2.2` の冪零版への還元 | **✅証明済み**——`lift_nilpotent_of_lift_sq`(原文 *"We may assume that I² = 0"*)。非空虚性つき | `AlmostLifting.lean` |
 | `Theorem 2.3` 第2・3・4段 | **✅証明済み**("Tripling ε"・`B_ε` の almost 射影性・`B_ε⊗Ā` と `B` の比較) | `AlmostDeform.lean` |
@@ -145,7 +147,12 @@
   - `quot_annihilated_of_conductor_subalgebra` /
     `quot_annihilated_of_mem_conductor`——`step_facts_of_modules` の
     `hbann` に直接入る形。
-* **(B2) 残**「`b := p^{δₙ − δ_{n+1}}` が実際に導手に入る」。
+* **(B2) 算術は✅完了(第 1554)**——`hbl_of_conductor_eq`。
+  導手の等式 `conductor·δ_{n+1} = δₙ` から
+  `length(R/(b)) = length(M) − length(N)` が出る。残るのは
+  `cancel_conductor_delta` の仮定 `hspan_eq`(最小多項式の base change
+  両立)の確認だけ。以下は旧記録。
+* **(B2) 旧記録**「`b := p^{δₙ − δ_{n+1}}` が実際に導手に入る」。
   ★ただしこれは**既に持っている道具に帰着している**——
   `KaehlerAux.lean` の `cancel_conductor_delta`(既証)が、
   `differentIdeal_tower_diamond`(既証)と mathlib の
