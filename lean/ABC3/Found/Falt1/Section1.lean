@@ -2061,6 +2061,31 @@ noncomputable def thm12StepData_of_tower_len
     (by rw [div_mul_cancel₀ _ hene])
     (by rw [sub_mul, div_mul_cancel₀ _ hene, div_mul_cancel₀ _ hene]; exact hbl)
 
+/-- **★段をまたぐ `δ` の整合性**——段 `n` が出す `δ_{n+1} =
+length_{W_{n+1}}(Ω_{W_{n+1}/V_{n+1}})/e_{n+1}` と、段 `n+1` が出す
+`δ_{n+1} = length_{W_{n+2}}(W_{n+2}⊗Ω_{W_{n+1}/V_{n+1}})/e_{n+2}` は
+**一致する**。
+
+理由は 2 つが同じ因子 `c = length_{W_{n+2}}(W_{n+2}/𝔪_{W_{n+1}}W_{n+2})`
+で伸びるだけだから:`length` は `c` 倍(`length_baseChange_kaehler`
+＝ mathlib の `IsLocalRing.length_baseChange`)、分岐指数も `c` 倍。 -/
+theorem lenR_div_eq_of_baseChange {R R' : Type*} [Ring R] [Ring R']
+    {N : Type*} [AddCommGroup N] [Module R N] {M : Type*} [AddCommGroup M] [Module R' M]
+    (c e e' : ℕ) (hc : 0 < c) (he : 0 < e)
+    (hfin : Module.length R N ≠ ⊤)
+    (hM : Module.length R' M = (c : ℕ∞) * Module.length R N)
+    (he' : e' = c * e) :
+    lenR R' M / (e' : ℝ) = lenR R N / (e : ℝ) := by
+  have hlen : lenR R' M = (c : ℝ) * lenR R N := by
+    unfold lenR
+    rw [hM, enat_toNat_nsmul c hfin]
+    push_cast
+    ring
+  rw [hlen, he']
+  have hc' : ((c : ℝ)) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
+  push_cast
+  rw [mul_div_mul_left _ _ hc']
+
 /-- **★節点 B2 の算術**——既証の `cancel_conductor_delta` の結論
 `conductor · δ_{n+1} = δₙ`(base change)から、`hbl`
 
