@@ -1672,3 +1672,31 @@ Lubin-Tate 塔 `K_π,n` が完全分岐であることを示す:
 
 ★2 の橋(`Ideal.ramificationIdx` を付値の言葉に翻訳する)がまだ無い。
 DVR なので `𝔪^k = {z | ‖z‖ ≤ ‖ϖ‖^k}` を経由するのが素直。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★2026-09-05: `ramificationIdx` を下から押さえる橋
+
+`Found/PGC/TotallyRamified.lean` に追加。
+
+`Ideal.ramificationIdx q P = sSup {n | map q ≤ P^n}` なので、`map q ≤ P^n` から
+`n ≤ e` を出すには**上に有界**であることが要る。
+`Nat.sSup_of_not_bddAbove`(有界でなければ `sSup = 0`)の**対偶**で、
+`e ≠ 0` から有界性が出る——そして `e ≠ 0` は `e·f = [K(x):K] ≥ 1` から従う。
+
+- **`le_ramificationIdx_of_map_le_pow`** : `e ≠ 0` かつ `map q ≤ P^n` ⟹ `n ≤ e`
+- `ramificationIndex_ne_zero` / `inertiaDegree_ne_zero`
+- **`isTotallyRamifiedAdjoin_of_finrank_le`** : `[K(x):K] ≤ e` ⟹ 完全分岐
+  (`e·f = [K(x):K]` から `f ≤ 1`)
+
+### 「Eisenstein ⟹ 完全分岐」に残っているもの
+
+1. `‖α‖^n = ‖π‖` ← `norm_pow_eq_of_monic_root`(第 980)✔
+2. `π = u·α^n`(`u` は単数、`‖π/α^n‖ = 1` だから)⟹ `π ∈ 𝔪_L^n` ← **残り**
+3. `n ≤ e` ← `le_ramificationIdx_of_map_le_pow` ✔
+4. `f = 1` ← `isTotallyRamifiedAdjoin_of_finrank_le` ✔
+
+残るのは 2 だけ:`𝔪_K = (π)` を `𝔪_L` の `n` 乗に押し込む一手。
+
+★注意(2026-09-05): この時点で `lake build ABC3` は**別セッションの**
+`Found/Falt1/AlmostDerivation.lean`(第 1533)で落ちている。
+自分の対象(`ABC3.Found.PGC.TotallyRamified` / `ABC3.Check` / `ABC3.Skeleton`)は
+すべて成功。check.mjs の NG 14 件のうち 1 件はその build 失敗。

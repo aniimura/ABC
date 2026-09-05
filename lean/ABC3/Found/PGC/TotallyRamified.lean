@@ -317,4 +317,59 @@ theorem norm_pow_eq_of_monic_root {F : Type*} [NormedField F] [IsUltrametricDist
     norm_neg, norm_neg]
   exact max_eq_right (le_of_lt hSlt)
 
+/-! ## `ramificationIdx` を「`P^n` に入る」で下から押さえる橋
+
+`Ideal.ramificationIdx p P = sSup {n | map p ≤ P^n}` なので、
+`map p ≤ P^n` から `n ≤ e` を出すには**上に有界**であることが要る。
+`Nat.sSup_of_not_bddAbove`(有界でなければ `sSup = 0`)の対偶で、
+`e ≠ 0` から有界性が出る——そして `e ≠ 0` は `e·f = [K(x):K] ≥ 1` から従う。
+
+これで「Eisenstein ⟹ 完全分岐」の道筋の (2) が通る:
+`‖α‖^n = ‖π‖`(`norm_pow_eq_of_monic_root`)から `π = u·α^n`(`u` は単数)、
+よって `π ∈ 𝔪_L^n`、よって `n ≤ e`、`e·f = n` と合わせて `f = 1`。 -/
+
+/-- **`map p ≤ P^n` なら `n ≤ ramificationIdx`**(`e ≠ 0` のとき)。 -/
+theorem le_ramificationIdx_of_map_le_pow {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
+    {q : Ideal R} {P : Ideal S} {n : ℕ} (hne : Ideal.ramificationIdx q P ≠ 0)
+    (h : Ideal.map (algebraMap R S) q ≤ P ^ n) : n ≤ Ideal.ramificationIdx q P := by
+  have hbdd : BddAbove {m | Ideal.map (algebraMap R S) q ≤ P ^ m} := by
+    by_contra hc
+    exact hne (Nat.sSup_of_not_bddAbove hc)
+  exact le_csSup hbdd h
+
+theorem ramificationIndex_ne_zero (K : PAdicLocalField p) (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))] :
+    ramificationIndex K x ≠ 0 := by
+  intro h
+  have hmul := ramificationIndex_mul_inertiaDegree K x
+  rw [h, Nat.zero_mul] at hmul
+  have hpos : 0 < Module.finrank K.carrier
+    (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := Module.finrank_pos
+  omega
+
+theorem inertiaDegree_ne_zero (K : PAdicLocalField p) (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))] :
+    inertiaDegree K x ≠ 0 := by
+  intro h
+  have hmul := ramificationIndex_mul_inertiaDegree K x
+  rw [h, Nat.mul_zero] at hmul
+  have hpos : 0 < Module.finrank K.carrier
+    (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := Module.finrank_pos
+  omega
+
+/-- **★★★★★`[K(x):K] ≤ e` なら完全分岐**——`e·f = [K(x):K]` から `f ≤ 1`。
+「Eisenstein ⟹ 完全分岐」の最後の一段。 -/
+theorem isTotallyRamifiedAdjoin_of_finrank_le (K : PAdicLocalField p) (x : K.closure)
+    [FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))]
+    (h : Module.finrank K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure))
+      ≤ ramificationIndex K x) : IsTotallyRamifiedAdjoin K x := by
+  have hmul := ramificationIndex_mul_inertiaDegree K x
+  have hf1 : inertiaDegree K x ≤ 1 := by
+    refine Nat.le_of_mul_le_mul_left ?_ (Nat.pos_of_ne_zero (ramificationIndex_ne_zero K x))
+    rw [hmul, Nat.mul_one]
+    exact h
+  have hf0 := inertiaDegree_ne_zero K x
+  show inertiaDegree K x = 1
+  omega
+
 end ABC3.Found.PGC
