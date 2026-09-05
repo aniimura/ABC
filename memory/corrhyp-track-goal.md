@@ -2905,3 +2905,23 @@ t'・t_fac・t_inv・cocycle は依然必要。そのうち t_inv を閉じた(3
 GlueData' 成分の現状(R'レベル): J・U・V・f・t・t_inv が揃った。残るのは
 f_mono/f_open(被覆の細分待ち)と t'・t_fac・cocycle(三重交差=pullback の
 同定が要る)。集計は10/24——§4は0/2。
+
+## 2026-09-05夜さらに続き58 — Lemma 4.1 の残作業を依存グラフとして固定
+
+(A) 被覆の細分(V(i,j) を U i の基本開に): mathlib に
+    exists_basicOpen_le_affine_inter はあるが「基本開で覆える」までで、
+    「すべての対の交わりが両側で単一の基本開になる細分」の構成は無い。最大の段差。
+(B) f_open・f_mono: ℝ側・R'側とも揃い記法も接続済み。(A) が済めば閉じる。
+(C) t・t_id・t_inv: 完了(続き46・57)。
+(D) t'・t_fac・cocycle: mathlib の pullbackSpecIso で t' は環準同型
+    (V jk ⊗_{U j} V ji) → (V ij ⊗_{U i} V ik) の Spec に帰着する。だが
+    V ij ⊗_{U i} V ik ≅ (U i ⊓ U j ⊓ U k) のモデル という降下の定理が無い
+    (EGA IV §8.8 相当)。(A) と並ぶ段差。
+(E) GlueData 完成後: glued = Z_R、base change で Z_K。ℝレベルの類似は
+    corrPieceGlueData_glued_iso で確立済み。
+(F) β脚: 手つかず。部品は汎用なので配線が主。
+(G) h : ZK = D.Ext Z の命題的等号: 構造的に成り立たない可能性。ユーザー判断事項。
+
+要約: 残る数学的段差は (A) と (D) の2つ。どちらも「ℝレベルでは自明、R' へ
+降ろすのが本体」で EGA IV §8 の spreading out に相当。
+集計は10/24——§4は0/2。

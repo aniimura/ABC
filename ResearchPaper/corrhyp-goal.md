@@ -6347,3 +6347,64 @@ mathlibの`CategoryTheory.GlueData'`(`GlueData`の`i ≠ j`だけ条件を課す
 
 検証: `lake build ABC3.Found.CorrHyp.Instance4` で`error` 0件・`EXIT:0`、
 Found側sorry 0件。集計は引き続き10/24——§4は引き続き0/2。
+
+### 2026-09-05夜さらに続き58 — ★`Lemma 4.1`の残作業を依存グラフとして固定した
+
+続き36〜57で§4の部品が大量に揃ったので、**残りを節点に分けて固定**する
+(CLAUDE.mdの「進め方」——工数の塊を壁として認識しないため)。
+各節点に「mathlibに何があるか/無いか」を実測で添えた。
+
+#### (A) 被覆の細分——`V (i,j)`を`U i`の基本開集合として取る
+- **mathlibにある**: `AlgebraicGeometry.exists_basicOpen_le_affine_inter`
+  (`AffineScheme.lean:750`)——`x ∈ U ⊓ V`に対し
+  `X.basicOpen f = X.basicOpen g ∋ x`(`f ∈ Γ(X,U)`・`g ∈ Γ(X,V)`)。
+  被覆の形にしたものが`iSup_doublyBasicOpen_eq_inf`(続き48)。
+- **無い/未着手**: 「有限アフィン被覆を、**すべての対の交わりが両側で
+  単一の基本開**になるように細分する」構成そのもの。上の補題は
+  「基本開で**覆える**」までしか言わない。**これが最大の残段差**。
+
+#### (B) `f_open`・`f_mono`
+- **揃っている**: ℝ側`piece_basicOpen_isOpenImmersion`(続き51)、
+  `R'`側`descendPieceR_localization_isOpenImmersion`(既存)、
+  両者をつなぐ記法の橋(続き54・55)、移送補題
+  `isOpenImmersion_specMap_comp_ringEquiv`(続き56)。
+- `f_mono`は`IsOpenImmersion`から自動(mathlibのインスタンス)。
+- **(A)が済めば閉じる**。
+
+#### (C) `t`・`t_id`・`t_inv`
+- **完了**(続き46・57)。`V (i,j) := U i ⊓ U j`設計のおかげで`t`は
+  キャストだけ、`t_id`は`rfl`一語、`t_inv`もスキームレベルで閉じた。
+
+#### (D) `t'`・`t_fac`・`cocycle`——三重交差
+- **mathlibにある**: `AlgebraicGeometry.pullbackSpecIso`
+  (`Pullbacks.lean:719`)——
+  `pullback (Spec.map (ofHom (algebraMap R S))) (Spec.map (ofHom (algebraMap R T)))
+   ≅ Spec (.of (S ⊗[R] T))`、および`_hom_fst`/`_inv_snd`等の特徴づけ一式。
+  よって`t'`は**環準同型
+  `(V jk ⊗_{U j} V ji) → (V ij ⊗_{U i} V ik)`の`Spec`**に帰着する。
+- **無い**: `V ij ⊗_{U i} V ik ≅ (U i ⊓ U j ⊓ U k)のモデル`という
+  **降下の定理**。ℝレベルでは自明(開の交わり)だが、`R'`レベルでは
+  「`R'`を十分大きくすれば成り立つ」という spreading out(EGA IV §8.8 相当)
+  であり、mathlibに無い。**(A)と並ぶ残段差**。
+
+#### (E) `GlueData`完成後
+- `glued`が`Z_R`であること、`Z_R ×_{R'} ℝ ≅ Z_K`であること
+  (ℝレベルの類似は`corrPieceGlueData_glued_iso`で既に確立済み、
+  `Instance4.lean`の`corrPieceGlueDataOfCorr_glued_iso`で`Corr`の実データにも
+  接続済み)。
+
+#### (F) β脚
+- **手つかず**。α脚(`c.α`)についてここまでの全工程を、β脚(`c.β`)にも
+  行う必要がある。部品は汎用に作ってあるので配線が主。
+
+#### (G) `h : ZK = D.Ext Z`(命題的等号)の構造的問題
+- `Instance4`の`Iso X Y := X = Y`と`QcqsSpace`が同型類の商でないことから、
+  一般の`ZK`に対して**成り立たない可能性が高い**。原文の忠実な読みは同型。
+  修正は`Corr`と`lemma_4_1`のstatement同時変更を要し、§1の完成済み5/5への
+  波及評価が要る——**ユーザー判断を要する事項**(続き50 に詳細)。
+
+**要約**: 残る数学的な段差は**(A)被覆の細分**と**(D)三重交差の降下**の
+2つ。どちらも「ℝレベルでは自明、`R'`レベルへ降ろすのが本体」という
+同じ形をしており、EGA IV §8 の spreading out に相当する。
+(B)(C)(E)は部品が揃っているか、(A)(D)が済めば配線で閉じる。
+(F)は配線、(G)はstatement設計の判断。
