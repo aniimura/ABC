@@ -34,10 +34,15 @@ variable {p : ℕ} [Fact p.Prime]
 /-- 退化した剰余体データ: どの体でも剰余体の元の個数を `p` とする。
 
 `isPrimePow`(q = p^f, f > 0)は f = 1 で満たされるので、
-**`Interface` の条件を通過してしまう**。 -/
+**`Interface` の条件を通過してしまう**。
+
+★2026-09-05 に足された `card_congr`(同型不変性、第 1012 の修理)も
+**素通りする**——定数関数は当然に同型不変だから。
+すなわち第 1012 の修理はこの退化を塞がない(塞ぐのは Proposition 1.2 の反例の方)。 -/
 def degenerateRD : ResidueCardinality p where
   card := fun _ => p
   isPrimePow := fun _ => ⟨1, one_pos, (pow_one p).symm⟩
+  card_congr := fun _ => rfl
 
 /-- ★**退化の移動の実証**: 退化した `RD` を与えると惰性群は `⊤` に潰れる。
 

@@ -143,7 +143,26 @@ def residueCardAndDegreeObject.src : Source :=
 残るのは「異なる2体の間の連続同型 α」の構成だけ。しかも
 `Check.PGC.refutation_reduces_to_alpha` が示すとおり、その α が1つでも作れれば
 `RD` に関係なく次数成分だけで落ちる——すなわち**反証するには本命題自身を偽にするしかない**。
-探した範囲は `Check/PGC/RefutationAttempts.lean`。 -/
+探した範囲は `Check/PGC/RefutationAttempts.lean`。
+
+## ★2026-09-05: 上の監査は誤りだった——修理の記録(7 例目)
+
+`Check/PGC/Prop12Degenerate.lean`(第 1012)が反証を作った。
+上の監査は「異なる2体の間の α が要る」までは正しかったが、
+**その α は体の同型から作れる**ことを見落としていた——台の型を `ℚ_[p]` のままにして
+体構造だけを `x ↦ -x` に沿って移送すると、ℚ_p-代数として同型なのに
+`PAdicLocalField p` の項としては異なる2体ができ、
+`Found/PGC/GaloisTransferContinuous.lean::galContinuousMulEquiv` が α を与える。
+次数成分は両方 1 なので効かず、落ちるのは `card` 成分だった。
+
+落とした条件は**同型不変性**——「落とした条件は主張を偽にするか自明にする」の 7 例目。
+修理として `Interface/PGC/LocalFieldData.lean` の `ResidueCardinality` に
+`card_congr`(ℚ_p-代数同型なら同じ q)を足した。実物がそれを満たすことは
+`Found/PGC/ResidueCardinality.lean::residueCard_congr` で証明済み(`sorry` 無し)——
+ℚ_p-代数同型はスペクトルノルムを保つので整数環の環同型を誘導し、剰余体の濃度が一致する。
+修理後は反例が作れないことも `Prop12Degenerate.lean::no_residueCardinality_with_badRD_card`
+で確認した。★これで本定理は原典本来の内容(α から体の同型を作る)に戻っており、
+**易しくはなっていない**。 -/
 theorem residueCard_and_degree_recoverable (RD : ResidueCardinality p) :
     (residueCardAndDegreeObject RD).RecoverableFromAbsGal := by
   sorry

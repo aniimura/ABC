@@ -6,22 +6,28 @@ import Mathlib.Algebra.Field.TransferInstance
 import Mathlib.Algebra.Module.TransferInstance
 
 /-!
-# [pGC] Proposition 1.2 の現在の形は偽だった——`ResidueCardinality` は同型不変でない
+# [pGC] Proposition 1.2 の**旧**形は偽だった——`ResidueCardinality` は同型不変でなかった
 
 原文 (pGC p.3):
 
 > The number q of elements in the residue field of O[scr]_K, and well as the absolute
 > degree [K : Q[bb]_p] of K, can be recovered entirely group-theoretically from Γ_K.
 
-`Skeleton/PGC/Section1.lean` の現在の形は
+`Skeleton/PGC/Section1.lean` の形は
 
 ```
 ∀ RD : ResidueCardinality p, (residueCardAndDegreeObject RD).RecoverableFromAbsGal
 ```
 
-であり、`RD : ResidueCardinality p`(`Interface/PGC/LocalFieldData.lean`)は
+であり、**旧**の `RD`(本ファイルの `ResidueCardinalityOld`)は
 `card : PAdicLocalField p → ℕ` と `isPrimePow`(`card K = p^f`, `f > 0`)だけを持つ
-自由なデータである。**`card` が同型不変であることは要求されていない。**
+自由なデータだった。**`card` が同型不変であることは要求されていなかった。**
+
+★2026-09-05 に `Interface/PGC/LocalFieldData.lean` の `ResidueCardinality` へ
+`card_congr`(同型不変性)を足して修理したので、以下の反例はもはや
+現在の `ResidueCardinality` の項ではない。反証そのものを残すため、
+`Prop22Degenerate.lean` の `RecoverableAsAddModuleOld` と同じやり方で
+**旧形を本ファイル内に局所的に定義**して保存してある。
 
 `card` の定義域は p進局所体の同型類ではなく `PAdicLocalField p` の**項**なので、
 同じ体を別の項として2つ作れば、`card` はその2つに別の値を割り当ててよい。
@@ -57,16 +63,25 @@ import Mathlib.Algebra.Module.TransferInstance
 すなわち「落とした条件は主張を偽にするか自明にする」の7例目。
 落とした条件は**同型不変性**である。
 
-## 修理の方向(本体セッションへ)
+## ★修理(2026-09-05 に実施済み)
 
-`ResidueCardinality` に不変性の場を1つ足せばこの反例は消える:
+`ResidueCardinality` に不変性の場を1つ足すとこの反例は消える:
 
 ```
 card_congr : ∀ {K K' : PAdicLocalField p}, (K.carrier ≃ₐ[ℚ_[p]] K'.carrier) → card K = card K'
 ```
 
-実物 `Found/PGC/ResidueCardinality.lean::realResidueCardinality` はこれを満たすはずである
-(剰余体の元の個数は ℚ_p-代数同型で保たれる)ので、非空虚性は失われない。
+これを `Interface/PGC/LocalFieldData.lean` に足した。**修理後は `card_congr` が
+反例を塞ぐ**——`badRD` の `card` を持つ `ResidueCardinality` は存在しない
+(`no_residueCardinality_with_badRD_card`、本ファイル末尾)。上の2体は
+`twistedAlgEquiv` で ℚ_p-代数同型なので `card_congr` が `p^2 = p` を強制するからである。
+
+非空虚性も失われていない——実物
+`Found/PGC/ResidueCardinality.lean::realResidueCardinality` と
+`Found/PGC/ResidueCardinalityConstruction.lean::residueCardinality` の両方が
+`card_congr` を満たす(`Found/PGC/ResidueCardinality.lean::residueCard_congr`:
+ℚ_p-代数同型はスペクトルノルムを保つので整数環の環同型を誘導し、剰余体の濃度が一致する)。
+
 ★ただし `card_congr` を足すと Proposition 1.2 は「α : Γ_K ≅ Γ_K′ から体の同型を作れ」
 という原典本来の内容に戻る——**易しくはならない**。
 
@@ -161,7 +176,7 @@ noncomputable def twistedGalEquiv :
 /-- 「台が `ℚ_[p]` に等しいなら、その `1` は標準の `1` である」。
 
 ★同型不変ではない述語である(同型な2体で値が変わる)。それが要点で、
-`ResidueCardinality.card` にはそういう関数を禁じる条件が無い。 -/
+旧形の `card` にはそういう関数を禁じる条件が無かった。 -/
 def OneIsStandard (K : PAdicLocalField p) : Prop :=
   ∀ h : K.carrier = ℚ_[p], cast h (1 : K.carrier) = (1 : ℚ_[p])
 
@@ -183,11 +198,33 @@ theorem twistedField_ne_selfField : twistedField p ≠ selfField p := by
   rw [h]
   exact oneIsStandard_selfField p
 
-/-! ## 3. 病的な `ResidueCardinality` -/
+/-! ## 3. 旧形の `ResidueCardinality` と、その病的な項 -/
+
+/-- **旧** `ResidueCardinality`——`card` と `isPrimePow` だけを持ち、
+同型不変性(`card_congr`)を課していなかった形。
+
+`Interface/PGC/LocalFieldData.lean` の現在の `ResidueCardinality` は
+2026-09-05 に `card_congr` を得たので、以下の `badRD` はもうその項ではない。
+反証を保存するため、`Prop22Degenerate.lean::RecoverableAsAddModuleOld` と同じく
+旧形をここに局所的に定義する。 -/
+structure ResidueCardinalityOld (p : ℕ) [Fact p.Prime] where
+  /-- 剰余体の元の個数 q -/
+  card : PAdicLocalField p → ℕ
+  /-- 原文「k is the field of q = p^f elements」——q は p の正の冪 -/
+  isPrimePow : ∀ K, ∃ f : ℕ, 0 < f ∧ card K = p ^ f
+
+/-- 旧形の `RD` から作る「K に付随する対象」。
+`Skeleton/PGC/Section1.lean::residueCardAndDegreeObject` と同じ中身で、
+仮説の型だけが旧形。 -/
+noncomputable def residueCardAndDegreeObjectOld (RD : ResidueCardinalityOld p) :
+    AssociatedObject p where
+  Obj := fun _ => ℕ × ℕ
+  obj := fun K => (RD.card K, Module.finrank ℚ_[p] K.carrier)
+  transport := fun _ x => x
 
 /-- 病的な剰余体の元の個数——**同型な2体に別の値を返す**。
-`isPrimePow`(原文が課している唯一の条件)は両分岐で満たしている。 -/
-noncomputable def badRD : ResidueCardinality p where
+`isPrimePow`(旧形が課している唯一の条件)は両分岐で満たしている。 -/
+noncomputable def badRD : ResidueCardinalityOld p where
   card K := if OneIsStandard p K then p else p ^ 2
   isPrimePow K := by
     by_cases hK : OneIsStandard p K
@@ -202,13 +239,15 @@ theorem badRD_twisted : (badRD p).card (twistedField p) = p ^ 2 :=
 
 /-! ## 4. 反証 -/
 
-/-- **★★★★★★★[pGC] Proposition 1.2 の現在の形(自由な `RD`)は偽**。
+/-- **★★★★★★★[pGC] Proposition 1.2 の旧形(同型不変性を課さない `RD`)は偽**。
 
 `Skeleton/PGC/Section1.lean::residueCard_and_degree_recoverable` は
 `(RD : ResidueCardinality p)` を仮説に取る条件付き形式化だが、
-`RD` に同型不変性を課していないため、**どの `RD` でも成り立つ**という形にはならない。 -/
+旧形の `RD` には同型不変性が無かったため、**どの `RD` でも成り立つ**という形に
+ならなかった。修理は `card_congr`(下の `no_residueCardinality_with_badRD_card`)。 -/
 theorem prop_1_2_statement_false (p : ℕ) [Fact p.Prime] :
-    ¬ (∀ RD : ResidueCardinality p, (residueCardAndDegreeObject RD).RecoverableFromAbsGal) := by
+    ¬ (∀ RD : ResidueCardinalityOld p,
+        (residueCardAndDegreeObjectOld p RD).RecoverableFromAbsGal) := by
   intro h
   have key := h (badRD p) (twistedGalEquiv p)
   have h1 : (badRD p).card (twistedField p) = (badRD p).card (selfField p) :=
@@ -220,5 +259,23 @@ theorem prop_1_2_statement_false (p : ℕ) [Fact p.Prime] :
   omega
 
 #print axioms prop_1_2_statement_false
+
+/-! ## 5. 修理の確認——`card_congr` が反例を塞ぐ -/
+
+/-- **★★★修理後は反例が作れない**。
+
+現在の `ResidueCardinality`(`card_congr` 付き)には `badRD` の `card` を持つ項が無い。
+`twistedAlgEquiv` が2体を ℚ_p-代数同型にするので、`card_congr` が `p^2 = p` を強制する。 -/
+theorem no_residueCardinality_with_badRD_card (p : ℕ) [Fact p.Prime] :
+    ¬ ∃ RD : ResidueCardinality p, RD.card = (badRD p).card := by
+  rintro ⟨RD, hRD⟩
+  have h : RD.card (twistedField p) = RD.card (selfField p) :=
+    RD.card_congr (twistedAlgEquiv p)
+  rw [hRD] at h
+  rw [badRD_twisted, badRD_selfField] at h
+  have hp : 1 < p := (Fact.out : p.Prime).one_lt
+  have h2 : p * p = p * 1 := by rw [mul_one, ← pow_two]; exact h
+  have h3 : p = 1 := Nat.eq_of_mul_eq_mul_left (by omega) h2
+  omega
 
 end ABC3.Check.PGC

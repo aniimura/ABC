@@ -33,6 +33,21 @@ I_K = ⋂ { H ⊆ Γ_K : H は開、かつ q_{L_H} = q^[Γ_K:H] }
 **1 箇所(`Interface`)に局在した**。Track B が本物の `ResidueCardinality` を
 構成した時点で、ここに依存する全ての statement が一斉に非空虚性の検査を受ける。
 自由なデータのままなら、退化は各 statement に散らばったまま検査されなかった。
+
+## ★2026-09-05: `ResidueCardinality` の修理の記録(7 例目)
+
+`Check/PGC/Prop12Degenerate.lean`(第 1012)が、`card`・`isPrimePow` だけの旧形では
+Proposition 1.2 の形式化が**偽**であることを示した——落とした条件は**同型不変性**。
+`Interface/PGC/LocalFieldData.lean` の `ResidueCardinality` に
+`card_congr : (K.carrier ≃ₐ[ℚ_[p]] K'.carrier) → card K = card K'` を足して修理した。
+実物側の証明は `Found/PGC/ResidueCardinality.lean::residueCard_congr`(`sorry` 無し)。
+
+★**本ファイルの退化(`RD.card := fun _ => p` → `I_K = ⊤`)はこの修理では塞がらない**
+——定数関数は同型不変だから `card_congr` を素通りする
+(`Check/PGC/InertiaDegeneracyMoved.lean::degenerateRD`)。
+Corollary 1.3 の側の退化を塞いだのは実物 `residueCardinality`/`subgroupCorrespondence` に
+主語を移したこと(`Check/PGC/Cor13Degenerate.lean`、6 例目)であり、
+7 例目は Proposition 1.2 の側の話である。
 -/
 
 namespace ABC3.Skeleton.PGC

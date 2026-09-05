@@ -62,7 +62,26 @@ mathlib は `IsNonarchimedeanLocalField`(剰余体の有限性込み)を持つ�
 
 **G2 の非空虚 witness `ResidueCardinality.nonvacuous` は
 `Found/PGC/ResidueCardinality.lean` にある**(上記「import の向き」参照)。
-ここに置くと `Skeleton` が `Found` を推移的に import してしまう。 -/
+ここに置くと `Skeleton` が `Found` を推移的に import してしまう。
+
+## ★2026-09-05: 第 1012 で偽と判明したので同型不変性を課した
+
+`Check/PGC/Prop12Degenerate.lean`(第 1012)は、`card` と `isPrimePow` だけの旧形では
+[pGC] Proposition 1.2 の我々の形式化が**偽**であることを証明した。
+台の型を `ℚ_[p]` のままにして体構造だけを `x ↦ -x` に沿って移送すると、
+ℚ_p-代数として同型な2つの `PAdicLocalField p` の**項**ができる。
+`card` はその2項に別の値(`p` と `p^2`)を返してよく、両分岐とも `isPrimePow` を通る。
+一方 α : Γ_K ≅ Γ_K′ は体の同型から作れてしまうので、`RecoverableFromAbsGal` が破れる。
+
+原因は**同型不変性を課していなかった**こと——`card` は同型類の関数ではなく
+`PAdicLocalField p` の項の関数だった。そこで第3の場 `card_congr` を足す。
+これは原典の数学に無い条件を加えたのではなく、原典が暗黙に前提していた
+「q は体の同型不変量である」を明示しただけである(逸脱の記録)。
+
+実物側でこれが成り立つことは
+`Found/PGC/ResidueCardinality.lean::residueCard_congr` で証明した——
+ℚ_p-代数同型はスペクトルノルム(体の構造だけで決まる内在的な量)を保つので
+整数環の環同型を誘導し、剰余体の濃度が一致する。 -/
 structure ResidueCardinality where
   /-- 剰余体の元の個数 q -/
   card : PAdicLocalField p → ℕ
@@ -70,6 +89,10 @@ structure ResidueCardinality where
       この条件が無いと `card := fun _ => 0` でも通ってしまい、内容が消える。
       この主張自体の検査は `Check/PGC/ResidueCardinalityNondegenerate.lean`。 -/
   isPrimePow : ∀ K, ∃ f : ℕ, 0 < f ∧ card K = p ^ f
+  /-- 同型な体には同じ q を割り当てる。★これが無いと Prop 1.2 は偽になる
+      (`Check/PGC/Prop12Degenerate.lean`、第 1012)。 -/
+  card_congr : ∀ {K K' : PAdicLocalField p},
+    (K.carrier ≃ₐ[ℚ_[p]] K'.carrier) → card K = card K'
 
 /-- 開部分群 H ⊆ Γ_K に対応する中間体 L もまた p進局所体である、という対応。
 

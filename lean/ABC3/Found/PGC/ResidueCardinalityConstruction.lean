@@ -1,4 +1,5 @@
 import ABC3.Found.PGC.AbsoluteRamification
+import ABC3.Found.PGC.ResidueCardinality
 import ABC3.Interface.PGC.LocalFieldData
 
 /-!
@@ -20,6 +21,9 @@ import ABC3.Interface.PGC.LocalFieldData
   で有限性は確立済み)
 * `isPrimePow` は `Found/PGC/AbsoluteRamification.lean::residueCard_eq_pow`
   (`q = p^{f(K/ℚ_p)}`)と `e·f = [K:ℚ_p] > 0`(したがって `f > 0`)から。
+* `card_congr`(2026-09-05 追加、第 1012 の修理)は
+  `Found/PGC/ResidueCardinality.lean::residueCard_congr`——
+  ℚ_p-代数同型はスペクトルノルムを保つので整数環の環同型を誘導し、剰余体の濃度が一致する。
 
 これで `Proposition 1.2`(`residueCard_and_degree_recoverable`)と
 `Corollary 1.3`(`inertia_recoverable`)の仮説 `RD : ResidueCardinality p` に
@@ -47,6 +51,7 @@ theorem absoluteInertiaDegree_pos (K : PAdicLocalField p) : 0 < absoluteInertiaD
 noncomputable def residueCardinality (p : ℕ) [Fact p.Prime] : ResidueCardinality p where
   card K := Nat.card 𝓀[K.carrier]
   isPrimePow K := ⟨absoluteInertiaDegree K, absoluteInertiaDegree_pos K, residueCard_eq_pow K⟩
+  card_congr e := residueCard_congr e
 
 @[simp] theorem residueCardinality_card (K : PAdicLocalField p) :
     (residueCardinality p).card K = Nat.card 𝓀[K.carrier] := rfl

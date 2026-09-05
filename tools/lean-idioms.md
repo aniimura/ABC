@@ -5478,3 +5478,63 @@ private theorem sum_range_split_two {M : Type*} [AddCommMonoid M] {n : ℕ} (hn 
 **書き方**: 補題は `ℚ_[p]` 側で述べ、`selfField` 側の証明では `rw` を使わず
 `exact` / `apply` で当てる。`rw` が要るなら、両辺とも `(selfField p).carrier` 側の
 語彙（`IntermediateField.mem_bot (F := (selfField p).carrier)` のように `F`/`E` を明示）で書く。
+
+## 全体ビルドの `failed to read file '….olean.private'` は REPL のメモリ圧（2026-09-05）
+
+`lake build ABC3`（6900 ジョブ）の途中で
+
+```
+error: ABC3/Interface.lean:1:0: failed to read file
+  '….lake/build/lib/lean/Mathlib/RingTheory/Jacobson/Ring.olean.private'
+```
+
+が出た。**Lean のエラーではなく Windows の mmap 失敗**である——
+MCP の `repl.exe` が 3 GB 保持したまま常駐していて、olean の mmap が取れなくなっていた。
+
+**直し方**: 全体ビルドの前に `taskkill //F //IM repl.exe`（`lean_check` は
+`lean_start` で建て直せる）。再実行したら同じ木がそのまま通った（6921 ジョブ成功）。
+★olean を消したり `lake clean` したりする前に、まずメモリを疑うこと。
+
+## `variable (p : ℕ)` が明示のファイルで `def foo (X : T p)` を作ると `foo p X`（2026-09-05）
+
+`Check/PGC/Prop12Degenerate.lean` は `variable (p : ℕ) [Fact p.Prime]`（**明示**）。
+そこに `def residueCardAndDegreeObjectOld (RD : ResidueCardinalityOld p) : …` を足すと、
+`p` は自動束縛されて**第1引数**になる。呼ぶ側で `residueCardAndDegreeObjectOld RD` と
+書くと
+
+```
+Application type mismatch: RD has type ResidueCardinalityOld p … but is expected to have type ℕ
+```
+
+`Skeleton/` 側の対応物（`variable {p : ℕ}` = 暗黙）からコピーしてくると必ず踏む。
+**ファイルの `variable` の明示／暗黙を先に見る。**
+
+## `set A := adjoinIntegers K x` は `IsLocalRing`/`ResidueField` のインスタンス探索を壊す（2026-09-05）
+
+**症状**: `set A := adjoinIntegers K x with hA` としてから
+`IsLocalRing.ResidueField A` を使うと
+
+```
+Application type mismatch: the argument instIsLocalRingAdjoinIntegers K x has type
+  @IsLocalRing (↥(adjoinIntegers K x)) (SubsemiringClass.toCommSemiring ...).toSemiring
+but is expected to have type
+  @IsLocalRing (↥A) CommRing.toCommSemiring.toSemiring
+```
+
+`set` が `↥(adjoinIntegers K x)` を `↥A` に置き換えた結果、`Subring` 由来の
+`CommRing` インスタンスが `A.toCommRing`（局所定義の方）として拾われ、
+既存の `IsLocalRing` インスタンスと**同じ型に見えなくなる**。副作用として
+`residue A a = residue A b` 型の仮説が `a✝` を含む別物になり、`obtain` の
+結果が使えなくなる。
+
+**直し方**: 部分環・部分体を `set` で略記しない。`adjoinIntegers K x` を
+そのまま書く（長いが 0.2 秒で通る）。略記したいのは剰余体の**位数**の方
+なので、`set Q := Fintype.card (IsLocalRing.ResidueField (adjoinIntegers K x))`
+のように**ℕ の値だけ**を `set` する。
+
+## `Nat.dvd_sub'` は無くなった（2026-09-05）
+
+`Nat.dvd_sub' : k ∣ m → k ∣ n → k ∣ m - n` は現行 mathlib に無い。
+`Nat.dvd_sub`（同じ結論、ℕ の切り捨て減算のまま）を使う。
+`p ∣ Q → ¬ p ∣ (Q-1)` は `Nat.dvd_sub hpQ hcon` で `p ∣ Q - (Q-1)` を作り、
+`rw [show Q - (Q - 1) = 1 by omega]` で `p ∣ 1` に落とすのが最短。

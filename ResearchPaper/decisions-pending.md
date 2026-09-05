@@ -19,7 +19,7 @@
 
 ## D2. Prop 1.2 の `ResidueCardinality` 修理の形
 
-- **状態**: **決定**(2026-09-05、本体セッション。ユーザーが判断を委任)
+- **状態**: **決定 → 実装済み**(2026-09-05、第 1017)
 - **論点**: 第 1012 で我々の形式化が偽と判明(7 例目、落とした条件は**同型不変性**)。
   (a) `Interface` の `structure` に `card_congr` を足す / (b) `Skeleton` の定理に仮説として足す。
 - **決定**: **(a) 構造修正。** (b) は巻き添えゼロだが、`Interface` の非空虚性が
@@ -27,6 +27,15 @@
   ★巻き添え範囲は実測済み——`ResidueCardinality` を**構成する**のは 4 箇所だけ
   (`realResidueCardinality` / `residueCardinality` / `degenerateRD` / `badRD`)。
   後の 2 つは**意図的に壊れる**ので、旧 2 フィールド版を局所定義して書き直す。
+- **実装(第 1017)**: `card_congr` の証明は **3 宣言・約 20 行**で済んだ。
+  ★想定していた「整数環 → 極大イデアル → 剰余体」の 3 段のうち**極大イデアルの段は不要**。
+  実際に要ったのは `spectralNorm = spectralValue (minpoly ℚ_[p] x)` で **`minpoly` に降りる**こと
+  ——`minpoly.algEquiv_eq` は**始域と終域の型が違ってよい**ので 2 つの `PAdicLocalField p` を
+  またげる(手本に挙げた `norm_algEquiv` が使う `spectralNorm_eq_of_equiv` は
+  `Gal(L/K)` 専用でここでは使えなかった)。
+  ★構成箇所は**4 箇所**だった(`ResidueCardinalityConstruction.lean::residueCardinality` を
+  見落としていた)。`badRD` は旧形へ退避し、
+  `no_residueCardinality_with_badRD_card` で**修理が効くことを証明**した。
 
 ## D3. `Γ_{K^ur} ≃ₜ* (unramifiedClosure K).fixingSubgroup`(無限次版)
 
