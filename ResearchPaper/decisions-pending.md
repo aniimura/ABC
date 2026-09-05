@@ -207,3 +207,52 @@
   `hlu : IsUnit (l : primeSubring p)` を statement に足すと残った場合が空になり、
   `VeluQuotOK` の `∀ M` が回収できなくなる。**現行 statement はこれを避けている(正しい)**。
 - **決定**: —
+
+## D10. ★[FrdI] Example 6.3 —— 9 例目の退化と、新種の危険
+
+- **状態**: **保留**(2026-09-06 発見。`autonomy-policy.md` §2 に該当)
+- **論点**: `Skeleton/Divisor/ArithDivisor/Example63.lean` の **10 件の sorry のうち 8 件が
+  零写像・恒等写像だけで閉じる**(`arithDivOfElt := 0` / `degArith := 0` /
+  `Nonempty (A → ℕ)` は `fun _ => 0` / `Nonempty (X → X)` は `id`)。
+  ★**#1・#2・#5 は永久に無内容**——`ord`・`Prime` の語が statement に一度も現れず、
+  `prime_arithPhi_equiv_places` に至っては**「Prime」が型のどこにも無い**。
+  しかも消費者がゼロなので、退化が後で露見する経路も無い。
+- ★★**新種の危険(既知 8 例とは別種)**: **素朴に退化を直すと偽になる。**
+  #2 を素直に `≅ ℝ≥0` に強めると**偽**——`L` は可算なので `{|x|_v : x ∈ L^×}` は
+  `ℝ_{>0}` の可算部分群にすぎない。原文の `O_v^▷` は**完備化 `F_v` の中**の対象である。
+  ★`Found/Divisor/ArithOrd.lean` はここを正しく扱っている
+  (`ordArch (v : InfinitePlace L) (x : v.Completion) : ℝ`)。
+  **退化の修理は「domain を `v.Completion` へ移す」ことと同時にやらないと偽を作り込む。**
+- ★**退化の指紋**: `_f` / `_x` という**アンダースコア引数名**。`sorry` 本体の `def` の
+  引数がアンダースコアで宣言されている = 「この引数は使わない」と明言されている。
+  **同じ指紋を他の Skeleton の `sorry` 本体 `def` でも走査する価値がある。**
+- ★**これも「未解決の数学」ではない**: `Found/Divisor/Arith*.lean` は
+  **17 ファイルすべて sorry 0** で実物が揃っている(`arithDiv` / `arithDegree` /
+  `arithPrimeEquiv` / `ordArch` / `ordFin` / `isPerfFactorial_arithEff` /
+  `ex63ModelData` / `arithPicIso` ほか)。
+  ★2026-08-25 の先行監査は「古い写し」までは見抜いていたが、
+  **「その写しが零写像で埋まる」ことは書いていなかった**。
+- ★**前線が止まっている実体**: `degArith` が `sorry` 本体の `def` である限り、
+  `Theorem64` は**原理的に証明不能**(`sorry` は不透明)。
+- **要る修理**(いずれも Skeleton の statement 変更なので人の判断待ち):
+  1. `degArith` を `Found.Divisor.arithDegree` へ配線し、錨 `degArith_single_finite`
+     (値 `log (absNorm v)` ≠ 0)を立てる。→ `degArith_add` と `degArith_arithDivOfElt`
+     (積公式)が Found から即座に落ちる
+  2. `arithDivOfElt` を `arithDiv` へ配線し、錨 2 本(有限成分・無限成分)
+  3. #1・#2・#5 を実物の形に言い直す。★#2 は **domain を `v.Completion` へ**
+  4. `prime_arithPhi_equiv_places` / `support_arithPhi_eq_finite` を実物
+     (`arithPrimeEquiv` / `exists_arithEff_support_eq`)へ差し替え。
+     後者は `ArithPlace L` 全体(無限素点込み)で量化し直す
+  5. **欠落 4 項目を Skeleton に立てる** —— perf-factorial / model Frobenioid
+     (Theorem 5.2 (ii) の帰結。★**Example 6.3 の帰結そのもの**)/ 射の 3 つ組 /
+     関手性。すべて在庫あり
+  6. `Theorem64` の `degArith_surjective_and_kernel_eq_image` は
+     **名前と statement が食い違っている**(核の主張が消えている)。名前どおりに戻す。
+     在庫は `arithPicIso`
+  7. `.needs` —— `arithDivOfElt` と `degArith`(★**退化のある 2 つ**)には
+     `.needs` が**無い**。錨が必要なのはまさにこの 2 つ。
+     既存の `.needs` の引用も幾何側 `effSubPrimeEquiv` のままで、
+     算術側の実物 `arithPrimeEquiv` に張り替えが要る
+- **先に無人で進めたこと**: `Check/FrdI/Ex63DegDegenerate.lean`(9 例目の証拠を固定。
+  ★新種の危険「素朴な修理は偽を作る」も可算性で示す)
+- **決定**: —
