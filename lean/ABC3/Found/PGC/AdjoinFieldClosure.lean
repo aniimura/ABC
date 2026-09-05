@@ -172,4 +172,53 @@ noncomputable def absGalFixedFieldContinuousEquiv (K : PAdicLocalField p) (H : S
       (K.closure ≃ₐ[(fixedFieldLocalField K H hH).carrier] K.closure) :=
   autCongrContinuousMulEquiv (closureEquivFixedField K H hH)
 
+/-! ## `fixingSubgroupEquiv` は連続(有限次中間体の場合)
+
+`IntermediateField.fixingSubgroupEquiv E : E.fixingSubgroup ≃* Gal(Ω/E)` は
+集合としては「同じ自己同型を見る向きを変える」だけだが、位相は
+**部分空間位相(`Gal(Ω/F)` から)** と **Krull 位相(`Gal(Ω/E)` の)** で
+別物なので、同相であることは示す必要がある。
+
+`E/F` が有限次のときは順方向が短く済む: `E'/E` 有限次なら
+`E'.restrictScalars F` は `F` 上も有限次(塔)なので、その固定部分群は
+`Gal(Ω/F)` で**開**であり、その引き戻しが求める近傍になる。 -/
+
+/-- **★★★★★`fixingSubgroupEquiv` は連続**(`E/F` 有限次)。 -/
+theorem continuous_fixingSubgroupEquiv {F Ω : Type*} [Field F] [Field Ω] [Algebra F Ω]
+    (E : IntermediateField F Ω) [FiniteDimensional F E] :
+    Continuous (E.fixingSubgroupEquiv) := by
+  refine continuous_of_continuousAt_one (E.fixingSubgroupEquiv).toMonoidHom ?_
+  rw [ContinuousAt, map_one, Filter.tendsto_def]
+  intro s hs
+  obtain ⟨E', hE'fin, hE'sub⟩ := (krullTopology_mem_nhds_one_iff (↥E) Ω s).mp hs
+  haveI := hE'fin
+  haveI : FiniteDimensional F (E'.restrictScalars F) :=
+    (Module.Finite.trans (R := F) (↥E) (↥E') : FiniteDimensional F ↥E')
+  have hopen : IsOpen ((E'.restrictScalars F).fixingSubgroup : Set (Ω ≃ₐ[F] Ω)) :=
+    IntermediateField.fixingSubgroup_isOpen _
+  have hnhd : (Subtype.val ⁻¹' ((E'.restrictScalars F).fixingSubgroup : Set (Ω ≃ₐ[F] Ω)))
+      ∈ nhds (1 : E.fixingSubgroup) := by
+    refine IsOpen.mem_nhds (hopen.preimage continuous_subtype_val) ?_
+    show (1 : Ω ≃ₐ[F] Ω) ∈ (E'.restrictScalars F).fixingSubgroup
+    exact one_mem _
+  refine Filter.mem_of_superset hnhd ?_
+  intro σ hσ
+  apply hE'sub
+  rw [SetLike.mem_coe, IntermediateField.mem_fixingSubgroup_iff]
+  intro z hz
+  exact (IntermediateField.mem_fixingSubgroup_iff _ _).mp hσ (z : Ω) hz
+
+/-- **`H → Γ_{L_H}` は連続な群準同型**——`Γ_{L_H} ≃ₜ* H` の順方向。
+
+逆向き(`Γ_{L_H} → H` の連続性)には、`F` 上有限次の中間体 `E''` に対して
+`E` 上有限次の `E'`(例えば `E(γ)`、`E'' = F(γ)`)を取る一手が要る——次の課題。 -/
+noncomputable def fixedFieldToAbsGalHom (K : PAdicLocalField p) (H : Subgroup K.absGal)
+    (hH : IsOpen (H : Set K.absGal)) :
+    ContinuousMonoidHom ((IntermediateField.fixedField H).fixingSubgroup)
+      (K.closure ≃ₐ[(IntermediateField.fixedField H)] K.closure) where
+  toMonoidHom := (IntermediateField.fixedField H).fixingSubgroupEquiv.toMonoidHom
+  continuous_toFun := by
+    haveI := finiteDimensional_fixedField_of_isOpen K H hH
+    exact continuous_fixingSubgroupEquiv (IntermediateField.fixedField H)
+
 end ABC3.Found.PGC

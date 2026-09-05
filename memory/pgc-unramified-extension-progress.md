@@ -1975,3 +1975,26 @@ Krull 位相の比較(`fixingSubgroupEquiv` が同相であること)がもう�
 **同相**であること(部分空間位相 vs Krull 位相)。これが付けば第 992 の
 `inertia_recoverable_of_residueCard_transport` の第二仮定が
 「Prop 1.2 を L_H に適用する」に完全に一致する。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★2026-09-05: `fixingSubgroupEquiv` の連続性(順方向)
+
+`Found/PGC/AdjoinFieldClosure.lean` に追加。第 993 で残していた「一段」の**半分**。
+
+`IntermediateField.fixingSubgroupEquiv E : E.fixingSubgroup ≃* Gal(Ω/E)` は
+集合としては同じ自己同型を見る向きを変えるだけだが、位相は
+**部分空間位相**(`Gal(Ω/F)` から)と **Krull 位相**(`Gal(Ω/E)` の)で別物。
+
+- **`continuous_fixingSubgroupEquiv`** : `E/F` 有限次なら順方向は連続。
+  ★鍵は**塔**——`E'/E` 有限次なら `E'.restrictScalars F` は `F` 上も有限次
+  (`Module.Finite.trans`)なので、その固定部分群が `Gal(Ω/F)` で**開**になり、
+  引き戻しがそのまま求める近傍になる。
+- `fixedFieldToAbsGalHom` : `H → Γ_{L_H}` を `ContinuousMonoidHom` として
+
+### 残り(逆方向)
+
+`F` 上有限次の `E''` に対し `E` 上有限次の `E'` を取る一手。
+原始元 `E'' = F(γ)` を取って `E' := E(γ)` とすればよい
+(`Field.exists_primitive_element` は標数 0 で使える)。
+これが付けば `Γ_{L_H} ≃ₜ* H` が完成し、第 992 の
+`inertia_recoverable_of_residueCard_transport` の第二仮定が
+「Prop 1.2 を L_H に適用する」に完全一致する。
