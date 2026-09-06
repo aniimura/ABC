@@ -4,6 +4,8 @@ Copyright (c) 2026 ABC3 Project. All rights reserved.
 import ABC3.Found.GenEll.VeluQuotElliptic
 import ABC3.Found.GenEll.VeluSemistableAll
 import ABC3.Found.GenEll.VeluSemistableJ
+import ABC3.Found.GenEll.VeluJExpAssemble
+import ABC3.Found.GenEll.VeluJExpDeep
 import ABC3.Meta.Claim
 
 /-!
@@ -240,10 +242,49 @@ Liouville（第 598）と「`R = ∏_{w∈T∖0}(℘(z+w)−e)` が偶関数」�
 在庫の `semistableAt_veluQuot_badPrime_all`（第 1436、sorry 0、`p ∣ l` でも動く）は
 **`SemistableAt p X` を要求する**。★`jExp p X < 0` だけでは
 加法還元（`c₄` が単元でない）でありうるので、そのままでは使えない。
-☆①には「潜在的乗法還元は 2 次拡大で乗法還元になる」
-（＝`j` が同じ 2 曲線は 2 次拡大で同型）が要る。
+☆①には「潜在的乗法還元は有限次拡大で乗法還元になる」
+（＝`j` が同じ 2 曲線は有限次拡大で同型）が要る。
 ★`jExp` は `jExp_baseChange` で符号を保存かつ反映するので、
-**拡大に上げてよい**——だから①は「2 次のねじれを外す」1 本になる。
+**拡大に上げてよい**——だから①は「ねじれを外す」1 本になる。
+
+## ★★★★★★★★★★★★★★★★★★★★道 C は配管が全部つながった（2026-09-06、第 1445）
+
+| 枚 | 内容 | 場所 | 状態 |
+|---|---|---|---|
+| ② | 双対同種の `j` | `Found/GenEll/VeluDualJ.lean` | ★閉（第 1442） |
+| ①(i) | `jExp < 0` なら `ofJ j` は乗法還元 | `Found/GenEll/VeluJExpNeg.lean` | ★閉（第 1443） |
+| N1 | 潜在的乗法還元は有限次拡大で乗法還元 | `Found/GenEll/VeluJDescent.lean` | ★閉（第 1444） |
+| 組み上げ | ②→N1→① を 1 本に | `Found/GenEll/VeluJExpAssemble.lean` | ★閉（第 1445） |
+| ①の `l ∤ v(j)` | `minDeltaExp(E′) = l·minDeltaExp(E)` から | 同上 | ★閉（第 1445） |
+| ①の `l ∣ v(j)` | **深い核**の Vélu の商の `jExp < 0` | `Found/GenEll/VeluJExpDeep.lean` | ★閉（第 1446） |
+
+★★**合成体は要らなかった**——②を先に当てて `N` を取り、`N` を底体として
+N1 を当てれば `L ⊆ N ⊆ M` の**塔**になる。
+☆`veluQuotientFull_baseChange`（第 1197）で②の `j` の等式がそのまま `M` へ上がり、
+`jExp_baseChange` が符号を保存かつ反映するので塔を上げ下げしてよい。
+
+## ★★★★★★★★★★★★★★★★★★★★★★★★閉じた（2026-09-06、第 1446）
+
+★★★**本ファイルの `sorry` は無くなった**——`JExpNegVeluStable` は
+`Found/GenEll/VeluJExpDeep.lean` の `jExpNegVeluStable_holds`（sorry 0）である。
+
+☆鍵は 2 つだった:
+
+1. **`jExp` は変数変換の `u` を見ない**——`jExp = 3·v(c₄) − v(Δ)` で
+   `3·4 − 12 = 0` なので `u` が打ち消し合う。★だから第 1404 が要求した
+   `vAdd (C₀.u) = 0` も、第 1436 が要求した「核の座標の整性」も要らない。
+2. **深い核では `w` も `𝔪` に入る**——`v ∈ 𝔪` は第 1412 が既に出していた。
+   `exists_veluW_of_inv`（第 960）の証人は `veluU`・`veluV2` の和なので、
+   Tate 曲線（`a₃ = 0`・`a₄ ∈ 𝔪`）では座標が深ければ各項が `𝔪` に入る。
+   ☆`2` の可逆性は使わない。
+
+★すると `veluCurve` は剰余環で `E_q` に戻り `Δ(veluCurve) ∈ 𝔪`、
+`c₄` は単元なので `jExp = −v(Δ) < 0` である。
+`μ_l` 型の側は `c₄ = l⁴c₄(E_{q^l})`・`Δ = l¹²Δ(E_{q^l})` から
+`jExp = −l·v(q) < 0`——`v(l)` は打ち消し合うので `p ∣ l` でもよい。
+
+★★仮説は**減った**——`jExp_neg_veluQuot_badPrime_all` は
+`p ∤ 6` も `l ∣ v_P(j)` も要求しない。
 -/
 
 namespace ABC3.Skeleton.GenEll
@@ -273,19 +314,26 @@ theorem semistableAt_veluQuotientFull {L : Type} [Field L] [NumberField L] [Deci
   -- ★★★★★**2026-09-02（第 1439）**——第 1439 で仮定は 1 本になった。
   haveI hVell := ABC3.Found.GenEll.isElliptic_veluQuotientFull_nsmul_nf' L E hQ
   refine ABC3.Found.GenEll.semistableAt_veluQuot_all_of_jExp p E (hss p) hl hl5 Q hQ ?_
-  -- ☆残る 1 本: `p ∣ l` かつ良い素点のとき `0 ≤ jExp p (E/⟨Q⟩)`——
+  -- ☆ここで要るのは: `p ∣ l` かつ良い素点のとき `0 ≤ jExp p (E/⟨Q⟩)`——
   -- ★すなわち **`j(E′)` の整性**（`E` が良還元なら同種な `E′` の `j` も整）。
   -- ☆古典的にはモジュラー多項式 `Φ_l(j, j′) = 0` の単項性、
   -- あるいは Néron–Ogg–Shafarevich から出る。どちらも mathlib に無い。
+  -- ★★本プロジェクトは**対偶（道 C）**で攻める——下を参照。
   intro hlu hj
-  -- ★★★★★**2026-09-06（第 1442）**——対偶の②は閉じた:
-  -- `ABC3.Found.GenEll.exists_dual_veluQuot_j_numberField`
-  -- （`Found/GenEll/VeluDualJ.lean`、sorry 0、無条件）が
-  -- 有限次拡大 `M` と `E′ ⊗ M` の位数 `l` の点 `Q′` を与え、
-  -- `j((E′ ⊗ M)/⟨Q′⟩) = j(E ⊗ M)` である。
-  -- ☆残るのは①（`jExp < 0` は `l`-巡回商で保たれる）だけである
-  -- ——上の docstring の「①に何が要るか」を参照。
-  sorry
+  -- ★★★★★**2026-09-06（第 1445）**——道 C（対偶）の**配管はすべてつながった**:
+  -- ②（第 1442、`VeluDualJ.lean`）→ N1（第 1444、`VeluJDescent.lean`）→
+  -- ①（`VeluJExpAssemble.lean`）が `jExp_nonneg_veluQuot_of_stable` で 1 本になり、
+  -- 合成体は要らなかった（`L ⊆ N ⊆ M` の塔で取る）。
+  -- ☆`p ∣ l` かつ `l ≥ 5` なので `p ∤ 6` は無条件である（第 1435）。
+  have h48 := ABC3.Found.GenEll.valAdd_48_eq_zero p hl hl5 hlu
+  have h864 := ABC3.Found.GenEll.valAdd_864_eq_zero p hl hl5 hlu
+  -- ★★★★★**2026-09-06（第 1446）**——①の `l ∣ v_P(j)` の場合（深い核）が閉じた。
+  -- ☆`jExpNegVeluStable_holds`（`Found/GenEll/VeluJExpDeep.lean`、sorry 0）は
+  -- `μ_l` 型と深い核の二者択一を**一本で**扱う——`jExp = 3·v(c₄) − v(Δ)` は
+  -- 変数変換の `u` が打ち消し合うので、核の座標の整性も `p ∤ 6` も要らない。
+  have h1 : ABC3.Found.GenEll.JExpNegVeluStable :=
+    ABC3.Found.GenEll.jExpNegVeluStable_holds
+  exact ABC3.Found.GenEll.jExp_nonneg_veluQuot_of_stable h1 p E hl hl5 h48 h864 Q hQ hj
 
 /-- ★★★★★★★★★★★★**`SSCurve` の語彙で**（第 1345）。 -/
 theorem semistableAt_veluQuot_ss (E : SSCurve) {l : ℕ} (hl : l.Prime) (hl5 : 5 ≤ l)
@@ -323,8 +371,34 @@ def semistableAt_veluQuotientFull.needs : List ProofObligation :=
       (.inProject "ABC3" "ABC3.Found.GenEll.semistableAt_veluQuot_all_of_jExp") 1,
     .citation "[ABC3]" "exists_dual_veluQuot_j_numberField(第 1442、証明済み——道 C の②。双対同種を格子で作って数体へ降ろした。737 行・sorry 0)"
       (.inProject "ABC3" "ABC3.Found.GenEll.exists_dual_veluQuot_j_numberField") 17,
+    .citation "[ABC3]" "jExp_nonneg_veluQuot_of_stable(第 1046、証明済み——組み上げ本体)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.jExp_nonneg_veluQuot_of_stable") 17,
     .implicitStep
-      "★★★★★2026-09-06(第 1042): **道 C(対偶・Tate)の②が丸ごと閉じた**。残るのは① `jExp P X < 0 ⇒ jExp P (X/⟨Q′⟩) < 0` だけである。★止まった理由は**数学が足りない**(配管ではない)。在庫の `semistableAt_veluQuot_badPrime_all` は `SemistableAt p X` を要求するが、`jExp p X < 0` だけでは加法還元でありうる。しかも `semistableAt_veluQuot_all_of_jExp` を経由すると**循環する**(未知なのがまさに `p ∣ l` かつ `E` 良還元の場合だから)。★①は下位 2 つに落ちる: (i) 潜在的乗法還元は有限次拡大で乗法還元になる(＝ j が等しい 2 曲線は代数閉体上で VariableChange で移り合う。★`ofJ` 側の半安定性は計算のみで出る見込み: `v(c₄) = 0`、`v(Δ) = −v(j) > 0`)、(ii) 深い核の Velu の商の `jExp < 0`。★`jExp_baseChange` が符号を保存かつ反映するので**拡大に上げてよい**——だから①は「2 次のねじれを外す」1 本に落ちる" 17,
+      "★★★★★★★2026-09-06(第 1046): **残る sorry が 1 段小さくなった**。旧: `p ∣ l` かつ良い素点のとき `0 ≤ jExp p (E/⟨Q⟩)`(大域の主張)。新: **`JExpNegVeluStable`** だけ —— 「乗法還元は `l`-同種で保たれる」の**`l ∣ v_P(j)` の場合だけ**(純粋に局所の主張、`p ∤ 6` 付き)。★`l ∤ v_P(j)` の側は `jExp_neg_veluQuot_of_not_dvd` で**閉じた**(核が `μ_l` 型だと決まるので在庫の第 1140 + 第 1436 だけで届く)。★★合成体は**使わずに済んだ** —— 順序を変えて塔にする(②を `L` で当てて `N` を取り、**`N` を底体として** N1 を当てて `M` を取る)と`veluQuotientFull_baseChange`(第 1197)で `j` の等式が `M` へ上がる。★見通し: μ_l 型は `j_veluQuot_eq_j_tate_pow_K` + `jExp_eq_neg_vAdd_of_j_tateCurveAt` で`jExp = −l·v(q) < 0`、深い核は `isUnit_c4_add_240_deep`(第 1412)で `v(c₄) = 0` を得てから`v(Δ) > 0` を出す、2 枚になるはず。第 1424-1436 と同規模の作業" 17,
+    .citation "[ABC3]" "exists_finite_extension_semistableAt_of_jExp_neg(N1、第 1444、証明済み——潜在的乗法還元は有限次拡大で乗法還元になる)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.exists_finite_extension_semistableAt_of_jExp_neg") 17,
+    .citation "[ABC3]" "jExp_nonneg_veluQuot_of_stable(第 1445、証明済み——道 C の組み上げ。②→N1→① を 1 本にした)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.jExp_nonneg_veluQuot_of_stable") 17,
+    .citation "[ABC3]" "jExp_neg_veluQuot_of_not_dvd(第 1445、証明済み——①のうち l ∤ v_P(j) の場合)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.jExp_neg_veluQuot_of_not_dvd") 17,
+    .citation "[ABC3]" "jExpNegVeluStable_holds(第 1446、証明済み——①の l ∣ v_P(j)、すなわち深い核の場合)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.jExpNegVeluStable_holds") 17,
+    .implicitStep
+      ("★★★★★★★2026-09-06(第 1446): **本ファイルの sorry は無くなった**。" ++
+       "☆`JExpNegVeluStable` は `Found/GenEll/VeluJExpDeep.lean` の " ++
+       "`jExpNegVeluStable_holds` で閉じた。★鍵は 2 つ: " ++
+       "(1) `jExp = 3·v(c₄) − v(Δ)` は変数変換の `u` を見ない" ++
+       "(`3·4 − 12 = 0` で打ち消し合う)ので、第 1404 の `vAdd (C₀.u) = 0` も" ++
+       "第 1436 が残していた「核の座標の整性」も要らない。" ++
+       "(2) 深い核では `v ∈ 𝔪`(第 1412)に加えて **`w ∈ 𝔪`** も出る" ++
+       "——`exists_veluW_of_inv`(第 960)の証人は `veluU`・`veluV2` の和で、" ++
+       "Tate 曲線は `a₃ = 0`・`a₄ ∈ 𝔪` だから。☆`2` の可逆性は使わない。" ++
+       "★すると剰余環で `veluCurve` が `E_q` に戻り `Δ ∈ 𝔪`、`c₄` は単元なので " ++
+       "`jExp = −v(Δ) < 0`。`μ_l` 型は `Δ = l¹²Δ(E_{q^l})` から `jExp = −l·v(q) < 0` で、" ++
+       "`v(l)` が打ち消し合うので `p ∣ l` でもよい。" ++
+       "★★仮説は**減った**——`p ∤ 6` も `l ∣ v_P(j)` も使っていない。") 17,
+    .implicitStep
+      "★★★★★2026-09-06(第 1445): **道 C(対偶・Tate)の配管が全部つながった**。②(第 1442)・①(i)(第 1443)・N1(第 1444)を `jExp_nonneg_veluQuot_of_stable`(第 1445)が 1 本にまとめる。★★合成体は要らなかった——②を先に当てて `N` を取り、`N` を底体として N1 を当てれば `L ⊆ N ⊆ M` の**塔**になる。☆`veluQuotientFull_baseChange`(第 1197)で②の `j` の等式が `M` へ上がり、`jExp_baseChange` が符号を保存かつ反映するので塔を上げ下げしてよい。★★★残る `sorry` は **`JExpNegVeluStable`**(＝①の `l ∣ v_P(j)` の場合)1 本である: 「乗法還元は `l`-同種で保たれる」の、Tate 母数 `q` の付値が `l` で割れる場合。☆この場合だけ核が `μ_l` でなく**深い点**で生成されうるので `exists_primitiveRoot_of_torsion_point`(`hcop` を要求する)が使えない。★`l ∤ v_P(j)` の側は `jExp_neg_veluQuot_of_not_dvd`(第 1445、sorry 0)で閉じた——`minDeltaExp_eq_mul_at_bad_prime_any_K`(第 1140)と `semistableAt_veluQuot_badPrime_all`(第 1436)を並べるだけだった。★止まった理由は**数学が足りない**(配管ではない)" 17,
     .citation "[Sil]" "The Arithmetic of Elliptic Curves(同種で j の整性が保たれること)"
       (.absent
         ("`E` が `p` で良還元なら同種な `E′` の `j` も整である。" ++

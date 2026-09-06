@@ -29,6 +29,15 @@ import ABC3.Interface.PGC.LocalFieldData
 `Corollary 1.3`(`inertia_recoverable`)の仮説 `RD : ResidueCardinality p` に
 **具体的な値**が入る——両者はもはや「自由なデータについての条件付き主張」では
 なく、実在の量についての主張として読める。
+
+## ★2026-09-06(D13 の実行): 仮説は消えた
+
+上の「仮説 `RD` に具体的な値が入る」は、2026-09-06 に**仮説そのものを外す**形で決着した。
+`Skeleton/PGC/Section1.lean` の Proposition 1.2 は `∀ RD : ResidueCardinality p` をやめ
+`Found/PGC/ResidueCardinality.lean::realResidueCardinality` に固定してある
+(理由: `∀ RD` 版は原典が偽と述べている命題と同値だった。
+`Check/PGC/Prop12ForallRD.lean::forall_RD_recoverable_iff_algEquiv`)。
+Corollary 1.3 の主語は 2026-09-05 から本ファイルの `residueCardinality` のままである。
 -/
 
 namespace ABC3.Found.PGC

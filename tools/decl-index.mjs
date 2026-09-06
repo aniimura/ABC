@@ -101,7 +101,63 @@ const INST_NAME_RE = new RegExp(`^\\s*(?:\\(\\s*priority\\s*:=[^)]*\\)\\s*)?(${N
 const ANON = '⟨無名⟩';
 
 const NS_RE = /^\s*namespace\s+([A-Za-z_][\w'.₀-₉]*)/;
-const END_RE = /^\s*end\s+([A-Za-z_][\w'.₀-₉]*)\s*$/;
+const END_RE = /^\s*end\s+([A-Za-z_][\w'.₀-₉]*)\s*(?:--.*)?$/;
+const SEC_RE = /^\s*section\b\s*([A-Za-z_][\w'.₀-₉]*)?\s*(?:--.*)?$/;
+const END_BARE_RE = /^\s*end\s*(?:--.*)?$/;
+
+/** 開いている scope の積み。**成分 1 つ = 1 段**で積む。
+ *
+ * ★★2026-09-06(backlog M22 の後半)。旧実装は `namespace A.B.C` を**1 段**で積み、
+ * `end NAME` は**頂と完全一致**したときだけ落としていた。しかし Lean は
+ * ドット付きの名前空間を**部分的に閉じてよい**:
+ *
+ *   namespace Order.Frame.MinimalAxioms   -- 旧: 1 段 "Order.Frame.MinimalAxioms"
+ *   end MinimalAxioms                     -- 旧: 一致しないので落ちない ★
+ *   end Order.Frame                       -- 旧: 一致しないので落ちない ★
+ *
+ * その結果、後続の宣言に**閉じたはずの名前空間が被り続ける**。実測(2026-09-06):
+ * `Order/CompleteBooleanAlgebra.lean:913` の 1 件は索引上
+ * `Order.Frame.MinimalAxioms.Order.Coframe.MinimalAxioms.CompleteDistribLattice.
+ *  MinimalAxioms.CompletelyDistribLattice.MinimalAxioms.Equiv.coframe` と 9 段になっていた
+ * (実体は `Equiv.coframe`)。
+ *
+ * ★台帳 M22 の見立て(「`end Foo -- コメント` を pop できないため」)は**外れ**である。
+ * `end NAME -- コメント` は mathlib 全体で **45 行**しかなく、
+ * ドット付き namespace は **1,486 本**ある。数えて分かった。
+ *
+ * ★`section` も積む。積まないと `end 名前つき section` が
+ * 同名の名前空間成分を**誤って落とす**(旧実装にあった危険)。
+ * section は名前に寄与しないので `ns:false` で持つ。 */
+const pushNamespace = (stack, name) => { for (const c of name.split('.')) stack.push({ ns: true, name: c }); };
+const popEnd = (stack, name) => {
+  if (name === null) { // 裸の `end` = 無名 section を閉じる
+    const top = stack[stack.length - 1];
+    if (top && !top.ns && top.name === null) stack.pop();
+    return;
+  }
+  const segs = name.split('.');
+  if (stack.length >= segs.length) { // 末尾 segs.length 段が成分ごとに一致すれば落とす
+    let ok = true;
+    for (let k = 0; k < segs.length; k++) if (stack[stack.length - segs.length + k].name !== segs[k]) { ok = false; break; }
+    if (ok) { stack.length -= segs.length; return; }
+  }
+  const top = stack[stack.length - 1]; // ドット付きの名前を持つ section を 1 段で閉じる形
+  if (top && top.name === name) stack.pop();
+};
+const nsPath = (stack) => stack.filter((e) => e.ns).map((e) => e.name);
+
+/** 宣言名に名前空間を被せる。
+ *
+ * ★★2026-09-06(backlog M22)。**`_root_.` は名前空間を抜ける指示**であって
+ * 名前の一部ではない。無条件に `[...nsStack, name].join('.')` すると
+ *   `namespace Algebra` の中の `theorem _root_.RingHom.commSemiringToCommRing` が
+ *   索引上 `Algebra._root_.RingHom.commSemiringToCommRing` になる。
+ * 実測(2026-09-06): `.cache/mathlib-index.txt` の名前欄に `._root_.` が **3,041 件**、
+ * 先頭が `_root_.` のものが 52 件(ABC3 側は 0 件——この書き方をしていない)。
+ * ★M14(名前欄が非 ASCII で切れる 24,659 件)・M20(statement 欄が autoParam で切れる
+ * 6,271 件)と**同じ回路の 3 例目**である——「mathlib に無い」の誤判定を生む。 */
+const qualify = (nsStack, name) =>
+  (name.startsWith('_root_.') ? name.slice(7) : [...nsPath(nsStack), name].join('.'));
 
 /** 文字列リテラルを**長さを保ったまま**空白へ伏せる。
  *
@@ -174,9 +230,12 @@ function scan(srcRoot, { collectSrc }) {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const ns = NS_RE.exec(line);
-      if (ns) { nsStack.push(ns[1]); continue; }
+      if (ns) { pushNamespace(nsStack, ns[1]); continue; }
+      const sec = SEC_RE.exec(line);
+      if (sec) { nsStack.push({ ns: false, name: sec[1] ?? null }); continue; }
       const en = END_RE.exec(line);
-      if (en && nsStack.length && nsStack[nsStack.length - 1] === en[1]) { nsStack.pop(); continue; }
+      if (en) { popEnd(nsStack, en[1]); continue; }
+      if (END_BARE_RE.test(line)) { popEnd(nsStack, null); continue; }
       let m = DECL_RE.exec(line);
       if (!m) {
         // ★無名 instance(または `instance (priority := …) 名前` のように
@@ -186,7 +245,7 @@ function scan(srcRoot, { collectSrc }) {
         const nm = INST_NAME_RE.exec(a[1]);
         m = [line, 'instance', nm ? nm[1] : ANON];
       }
-      const full = [...nsStack, m[2]].join('.');
+      const full = qualify(nsStack, m[2]);
       // ★4 列目が statement(案 I)。名前で引いて外した失敗形を潰すための列である。
       //   ★無名 instance では**ここだけが手がかり**なので、型が入っていることが要である。
       decls.push(`${m[1].padEnd(9)}\t${full}\t${rel}:${i + 1}\t${statementOf(lines, i)}`);

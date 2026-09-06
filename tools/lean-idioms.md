@@ -2973,6 +2973,14 @@ because it depends on 'PadicInt.instCommRing'`。
 **診断のしかた**: `set_option pp.explicit true in` を付けた `example` で
 同じ `rw` を書き、パターンと目標の**インスタンス項**を並べて見る。
 
+★**別の顔（2026-09-06、第 1444）**: `rw` ではなく `exact` で在庫を当てると、
+「パターンが無い」ではなく
+`(deterministic) timeout at isDefEq, maximum number of heartbeats (200000)` になる。
+`Subtype.instDecidableEq` 由来の `Finset.image` と `Classical.propDecidable` 由来の
+`Finset.image` を kernel が突き合わせようとして止まるためで、
+**`maxHeartbeats` を上げても本質は直らない**（上の `letI` を入れると 0.5 秒で通る）。
+実例: `veluQuotientFull_baseChange (algebraMap K ↥M) E E' hQ hE'`。
+
 ## `Ideal.ramificationIdx_le_finrank` は `S K L` が明示引数（第 1209）
 
 **失敗形**: `Ideal.ramificationIdx_le_finrank P.asIdeal` →
@@ -6183,3 +6191,268 @@ Lean は通るが、`absent-recheck.mjs` の `readString` は
 `\.` は `[.]`、`\(` は `[(]`、`\s` は素の空白、`\b` は書かずに
 `[A-Za-z0-9_.]*` などで前後を縛る。件数は
 `node tools/absent-recheck.mjs --try '<正規表現>'` で書く前に測ること。
+
+## `OpenSubgroup` を作るとき `rw [Subgroup.coe_map]` が当たらない（2026-09-06）
+
+**失敗形**: `refine ⟨⟨H.map f, ?_⟩, ?_⟩` で `OpenSubgroup` を組むと、
+第 1 の目標が `IsOpen (Subgroup.map f H).carrier` になる。ここに
+`rw [Subgroup.coe_map]`（`↑(Subgroup.map f K) = f '' ↑K`）を当てると
+"Did not find an occurrence of the pattern" で落ちる。構造体フィールドの
+`isOpen'` は `SetLike` の `↑` ではなく `.carrier` で書かれているため。
+
+**直し方**: `rw` の前に `show IsOpen ((… : Subgroup G) : Set G)` を挟んで
+`SetLike` の coercion に戻す。`simp only [Subgroup.coe_map]` でも当たらない。
+
+## `⁅a, b⁆` は `open scoped commutatorElement` が要る（2026-09-06）
+
+**失敗形**: `have : x⁻¹ * y = ⁅a, b⁆ := by group` が
+`failed to synthesize Bracket ↥H ↥H` で落ちる。記法自体は見えているのに
+インスタンスが無い、という紛らわしい形で出る。
+
+**直し方**: ファイル冒頭（`namespace` の中でよい）に
+`open scoped commutatorElement`。なお `⁅a, b⁆ = a * b * a⁻¹ * b⁻¹` なので
+`(h * y * h⁻¹)⁻¹ * y` は `⁅h, y⁻¹⁆` であって `⁅h⁻¹, y⁆` ではない
+（`group` が閉じないときはここを疑う）。
+
+## `Continuous (Subtype.val ∘ f.toFun)` に `rw [funext …]` は当たらない（2026-09-06）
+
+**失敗形**: 部分群への写像の連続性を示すとき、`continuous_induced_rng.2` のあとの
+目標は `Continuous (Subtype.val ∘ e.toFun)` の形で出る。
+`have : (fun x => ↑(e x)) = fun x => … ; rw [this]` はパターンが合わずに落ちる。
+
+**直し方**: `Continuous.congr` を使う——
+`exact (連続性の証明).congr (fun x => (値の等式 x).symm)`。
+`∘` と `.toFun` の差は defeq なので `congr` なら通る。
+
+## `α (S.topologicalClosure) = (α S).topologicalClosure` は `Homeomorph.image_closure`（2026-09-06）
+
+**失敗形**: `f.toHomeomorph.isOpenMap.image_closure_eq_closure_image` は**存在しない**
+（`IsOpenMap` 側の名前を探しに行くと空振りする）。
+
+**直し方**: `Subgroup` に落として `SetLike.coe_injective` してから
+`f.toHomeomorph.image_closure _`（`⇑h '' closure s = closure (⇑h '' s)`）。
+位相的アーベル化の移送（`Found/PGC/TopAbelianization.lean`）はこれ 1 行で足りる。
+
+## `restrictNormalHom` と `restrictNormalHom_surjective` は `K₁`/`E` の役割が逆（2026-09-06）
+
+**失敗形**: `AlgEquiv.restrictNormalHom` の暗黙引数は
+`K₁ = 大きい体`・`E = 部分体`（`Gal(K₁/F) →* Gal(E/F)`）。ところが
+`AlgEquiv.restrictNormalHom_surjective` のほうは
+`K₁ = 部分体`・`E = 大きい体`（`(E : Type _)` が明示引数）。
+同じ名前空間で規約が逆なので、片方に合わせて `(K₁ := …)` を書くと
+`failed to synthesize Algebra 大 部分体` が出る。
+
+**直し方**: 制限写像は `restrictNormalHom (F := F) (K₁ := Ω) (E := ↥E)`、
+全射性は `restrictNormalHom_surjective (F := F) (K₁ := ↥E) Ω`。
+`ker` を書くときは前者、全射性を渡すときは後者。
+
+## `le_sup_left` は「項」なので包含に直接適用できない（2026-09-06）
+
+**失敗形**: `h g (le_sup_left hg)` が
+`Function expected at le_sup_left but this term has type ?a ≤ ?a ⊔ ?b` で落ちる。
+`≤` を `∀ x ∈ …` に unfold して適用させたいのに、暗黙引数が決まらず
+関数適用と読まれない。
+
+**直し方**: 引数を明示する——`le_sup_left (a := H) (b := H') hg`。
+（`Subgroup`・`IntermediateField` どちらでも同じ。）
+
+## `jExp`／`.j` の中の曲線は `rw` で書き換えられない（2026-09-06、第 1445）
+
+**失敗形**: `hZbc : Z.map f = veluQuotientFull (Y.map f) …` を
+`rw [← hZbc] at h1M`（`h1M : jExp P' (veluQuotientFull (Y.map f) …) < 0`）で使うと
+`motive is not type correct` になる。`jExp`（と `WeierstrassCurve.j`）は
+`[W.IsElliptic]` を**曲線に依存するインスタンス引数**として取るからである。
+
+**直し方**: `rw` を使わず `jExp_congr_j P' _ _ (j_congr_curve hZbc.symm)` で
+**`jExp` の値どうしの等式**を作ってから、それを `rw` する（ℤ の等式なので安全）。
+☆`j_congr_curve : W = X → W.j = X.j`（`Found/GenEll/JScale.lean`）が
+`congrArg WeierstrassCurve.j` の代用である（`congrArg` は依存型なので通らない）。
+★同じ理由で `E.baseChange A` と `E.map (algebraMap _ A)` の往復も `rw` ではなく
+`have h' : … := h`（defeq に任せる）で行うこと。
+
+## `by_contra` のあと `push_neg` を `not_le.mp` に置き換えたら whnf timeout（2026-09-06、第 1445）
+
+**失敗形**: `by_contra hcon; push_neg at hcon` は通るのに、
+`by_contra hcon0; have hcon : jExp p E' < 0 := not_le.mp hcon0` に書き換えると
+**証明全体が `(deterministic) timeout at whnf`** で落ちた（`set` で置いた
+局所定義 `E'` を展開しに行くらしい）。
+
+**直し方**: `push_neg` のままにする（deprecation 警告は無害）。
+どうしても消したいなら `set_option maxHeartbeats` を上げる。
+
+## `restrictNormalHom` を**主張の中**で使うには `Normal` が instance でなければならない（2026-09-06、Λ3 位相版）
+
+**失敗形**: `normal_lubinTateClosure`（在庫の**定理**、explicit 引数 `K hq hπmax …`
+を取る）を `haveI` で入れても、`theorem foo … : … restrictNormalHom … = …` の
+**statement の elaboration は `haveI` より前**に走るので
+`failed to synthesize Normal K.carrier ↥(lubinTateClosure …)` で落ちる。
+explicit 引数を持つ定理は `attribute [local instance]` にもできない。
+
+**直し方**: そのセクションで
+`variable [Normal K.carrier (lubinTateClosure K hq hπmax hπne0 f hf0 hf1 hf)]`
+と**インスタンス変数として受け取る**。`Normal` は `Prop` クラスなので
+どのインスタンスを渡しても命題は同じ。仮説なしの形（最終定理）で
+`haveI := normal_lubinTateClosure …` を置けば消える。
+☆同じ形は `IsGalois`・`FiniteDimensional` を要求する statement でも起きる。
+
+## 二重の第一同型定理で作った `MulEquiv` の値は `simp only [定義名, MulEquiv.trans_apply]` でほどける（2026-09-06、Λ3 位相版）
+
+**失敗形と思い込んでいたもの**: `noncomputable def Φ := by haveI …; exact (e₁.symm.trans (e₂.trans …))`
+の形で作った同型は `haveI`（= `let_fun`）が挟まるので値の計算ができない、と考えて
+別定義を作り直しそうになる。
+
+**実際**: `simp only [Φ, MulEquiv.trans_apply]` で素直に
+`e₄ (e₃ (e₂ (e₁.symm x)))` までほどける。あとは
+`(QuotientGroup.quotientKerEquivOfSurjective φ hφ).symm (φ g) = QuotientGroup.mk g`
+（`MulEquiv.symm_apply_eq` → `rfl`）と `QuotientGroup.quotientMulEquivOfEq_mk` を
+`simp` に渡し、最後は `rfl`。
+
+## `↑(GrpCat.of (Multiplicative ℤ))` の元に `Multiplicative.toAdd` を当てられない（2026-09-06、Λ5 `Ẑ`）
+
+**失敗形**: `FiniteIndexNormalSubgroup ↑(GrpCat.of (Multiplicative ℤ))` の要素 `a` に
+`Multiplicative.toAdd a` と書くと
+`failed to synthesize HPow … ↑(GrpCat.of (Multiplicative ℤ)) …`。
+型注釈 `(a : Multiplicative ℤ)` も**効かない**（Lean が coe を探しに行く）。
+
+**直し方**: `show T from a` で defeq を強制する。
+
+```lean
+obtain ⟨n, rfl⟩ : ∃ n : ℤ, (Multiplicative.ofAdd n : Multiplicative ℤ) = a :=
+  ⟨Multiplicative.toAdd (show Multiplicative ℤ from a), rfl⟩
+```
+
+以後 `a` が `Multiplicative.ofAdd n` の形になるので、`^`・`toAdd` の
+インスタンスが素の `Multiplicative ℤ` 側で解決する。
+☆同じ理由で `rwa [heq] at hpow` が「パターンが見つからない」と言うことがある
+（`^` が圏の対象の coe 側で elaborate されている）。`exact heq ▸ hpow` は通る。
+
+## `dif_neg h` は coe の下の `dite` に届かないことがある（2026-09-06、Λ5 `Ẑ`）
+
+**失敗形**: `def f (N : ℕ) := if h : N = 0 then 0 else (choose …)` の仕様を
+`simp only [f, dif_neg hN]` で開こうとすると、`↑(if h : N = 0 then …)` の
+ように **coe の下に残った `dite`** だけ書き換わらず型不一致になる。
+
+**直し方**: 先に `theorem f_of_ne (hN : N ≠ 0) : f N = (choose …) := dif_neg hN` を
+作り、`rw [f_of_ne K hN]` で当てる。`rw` は defeq 込みで一斉に置き換わる。
+
+## `ProfiniteCompletion.lift` の成分計算は `IsLimit.fac` を掘らずに `lift_unique` で出る（2026-09-06、Λ5 `Ẑ`）
+
+**やりたいこと**: `ψ := ProfiniteGrp.ProfiniteCompletion.lift f : completion G ⟶ P` の
+開正規部分群 `U` での成分 `proj U (ψ x)` を `x` の成分で書く。
+`lift` は `P.isLimitCone.lift ⟨…⟩` と**その場で作った錐**で定義されているので
+`IsLimit.fac` を使おうとすると錐を再現する羽目になる。
+
+**効いた直し方**: 両辺とも `completion G ⟶ (diagram P).obj U` なので
+`lift_unique`（`eta` を前置して一致すれば等しい）で 3 行。
+
+```lean
+theorem lift_comp_proj (f : G ⟶ GrpCat.of P) (U : OpenNormalSubgroup P) :
+    lift f ≫ ProfiniteGrp.proj U
+      = (ProfiniteGrp.limitCone (diagram G)).π.app (preimage f U)
+        ≫ ProfiniteGrp.ofFiniteGrpHom (quotientMap f U) := by
+  apply lift_unique
+  rw [Functor.map_comp, ← Category.assoc, lift_eta]
+  ext y
+  rfl
+```
+
+あとは `ConcreteCategory.congr_hom … x` と `simp only [ProfiniteGrp.comp_apply]`。
+`quotientMap f U` は（`preimage f U = f⁻¹ U` なので）**常に単射**なので、
+`ψ x = 1` から `x.val (preimage f U) = 1` が出る。
+`ProfiniteGrp.limit` の元は `Subtype` なので `x.val j` / `x.2 h.hom`（整合性）が使える。
+
+## `Skeleton` の主張に `Found` の証明を配線すると循環する ── 定義を 3 層目に降ろす（2026-09-06、pGC Prop 1.2 / Cor 1.3）
+
+**症状**: `Skeleton/X.lean` に「対象の定義 + 主張」が同居していて、`Found` の証明ファイルが
+その**定義**を使っている。主張の `sorry` を `Found` の定理で埋めようとすると
+`Skeleton の主張 → Found の証明 → Skeleton の定義` で import が循環する。
+（実例: `Skeleton/PGC/Section1Cor13.lean` の `inertia` を `Found/PGC/UnramifiedCriterion.lean`
+以下の PGC の Found スタック 66 本が使っていた。）
+
+**直し方**: 定義だけを新しい `Skeleton/…Defs.lean` に降ろして 3 層にする。
+
+```
+Skeleton/PGC/Section1Defs.lean   （定義。import は Setup + Interface だけ）
+   ↑                                   ↑
+Found/PGC/…（証明）              Skeleton/PGC/Section1.lean（主張。Found へ委譲）
+```
+
+`Found` 側の import を新ファイルへ付け替えるだけで済む（1 行）。
+定義の中身は 1 文字も変えない。★循環の有無は木全体で 1 回測ること
+（`import` を辿って DFS。2,167 モジュールで 1 秒）。
+
+**ついでに踏む罠**: `check.mjs` の **G8** は「`sorry` 0 の Skeleton 定理」に対し、
+**`Found/` 側に同じ `[paper] item` の `.src` が在ること**を要求する。
+`Skeleton` で証明を書き切ると G8 が鳴って NG が増える。
+`Found` に無条件版の定理と `def <名前>.src : ABC3.Meta.Source := { … item := "Proposition 1.2" … }`
+を置き、`Skeleton` は 1 行で委譲する（`Skeleton/GenEll/Section4.lean` の Lemma 4.1 と同じ形）。
+`.needs` は Skeleton の theorem/lemma にしか要求されないので `Found` 側には要らない。
+
+## `namespace ABC3.Found.NF` の中の `open NumberField` は `ABC3.Found.NumberField` を開く（2026-09-06、判断 D11）
+
+`Found/NumberField/RatHeightOne.lean` を書き始めたとき、`namespace ABC3.Found.NF` の中で
+
+    open NumberField IsDedekindDomain
+
+と書いたら `𝓞` が **Unknown identifier** になった（`autoImplicit=false` なので
+「暗黙束縛にもできない」と言われる）。★原因は名前解決である ——
+`ABC3.Found.NumberField` という名前空間が実在する（`Found/NumberField/Theory.lean` と
+`PrimeDivisorsOfValues.lean` が使っている）ので、`ABC3.Found.NF` の中の `NumberField` は
+**そちらに解決され**、mathlib の `NumberField` は開かれない。
+
+★直し方は `_root_.` を付けるだけ。既存の `Found/NumberField/*.lean` は全部そう書いてある:
+
+    open _root_.NumberField IsDedekindDomain Ideal
+    open scoped _root_.NumberField
+
+★`open scoped` の側にも `_root_.` が要る（`𝓞` は scoped notation なので、
+片方だけ直すと記号だけ出てこない）。
+
+## `def f (_x : A) : B := sorry` は**定数関数**に展開される（2026-09-06、判断 D16）
+
+`Skeleton/Divisor/ArithDivisor/Example63.lean` の
+
+    noncomputable def degArith (_x : ArithPhiGp L) : ℝ := sorry
+
+について、`degArith L x = degArith L y` が **`rfl` で通る**。
+`sorry` の項は引数に依存しないからである。したがって
+
+    theorem foo : Function.Surjective (degArith L)
+
+は現在の環境で**反証可能**であり（`0 = 1` が出る）、この `sorry` は
+`degArith` に本体を与えない限り**原理的に閉じない**。
+
+★これは place-holder についての主張であって原典についての主張ではない
+（反証は `degArith` 経由で `sorryAx` に依存する）。
+★★**使い道**: 「`sorry` 本体の `def` の非定数性（全射・単射・非退化）を主張する
+skeleton」は、その場で機械的に反証できる。退化の検査を書く前に 3 行で判る。
+
+## `rw` で曲線を置き換えると `jExp` の motive が壊れる（2026-09-06、第 1446）
+
+`jExp p W` は `[W.IsElliptic]` を**引数に取る**ので、
+
+    have heq : C • X = Y
+    rw [← heq] at hres          -- hres : jExp p Y < 0
+
+は `motive is not type correct` で落ちる（`fun _a => jExp p _a < 0` を作れない：
+`_a.IsElliptic` のインスタンスが `_a` に依存する）。
+
+★直し方は**等式を `jExp` の外に出す**——`j_congr_curve`（曲線が等しければ `j` が等しい）と
+`jExp_congr_j`（`j` が等しければ `jExp` が等しい）を並べて `omega` で閉じる:
+
+    have h1 : jExp p (C • X) = jExp p Y := jExp_congr_j p _ _ (j_congr_curve heq)
+    have h2 : jExp p (C • X) = jExp p X := jExp_variableChange p _ C
+    omega
+
+☆同じ理由で `minDeltaExp`・`SemistableAt` を含む書き換えも詰まる。
+`SemistableAt` はインスタンスを取らないので `rw` が通る——**`jExp` だけが違う**。
+
+## `jExp` を結論に持つ定理は `IsElliptic` を**仮引数に置く**（2026-09-06、第 1446）
+
+    theorem foo ... : jExp p (veluQuotientFull E S) < 0
+
+は statement の elaboration で `(veluQuotientFull E S).IsElliptic` を探しに行き、
+`synthInstance failed` で落ちる（証明の中で `haveI` しても手遅れ）。
+★`[hVell : (veluQuotientFull E S).IsElliptic]` を**仮引数に足す**。
+☆`SemistableAt p (veluQuotientFull E S)` を結論にする版は
+インスタンスを要らないので、`jExp` 版へ移すときにこれが必ず出る。

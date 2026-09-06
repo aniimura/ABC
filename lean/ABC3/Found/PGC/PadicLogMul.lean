@@ -35,7 +35,18 @@ Proposition 1.2 の3つの `.needs` のうち「p進対数」の項目は**こ�
 (mathlib 不在 → 本ファイルで sorry 無しに構築)。残り2項目
 (相互律の同型 `Γ_K^ab ≅ (K^×)^∧` そのもの・完全系列の典拠)は**依然として不在**——
 本ファイルは Proposition 1.2 全体を閉じない。局所類体論の相互写像そのものが
-absent なままである限り、`residueCard_and_degree_recoverable` は `sorry` を残す。
+absent なままである限り、**原典の論拠に沿った**証明は書けない。
+
+## ★2026-09-06 の訂正(D13 の実行)
+
+上の最後の一文は当初「したがって `residueCard_and_degree_recoverable` は `sorry` を残す」
+と書いていたが、**それは今は誤りである**。Proposition 1.2 は
+`Skeleton/PGC/Section1.lean::residueCard_and_degree_recoverable` で閉じた
+(`sorryAx` 無し)——ただし**原典の論拠(相互律 + p 進対数)は経由していない**。
+使ったのは経路 C(`Found/PGC/ResidueCardTransport.lean` の `q` と
+`Found/PGC/DegreeTransport.lean` の `[K:ℚ_p]`)である。
+`.needs` の残り 2 項目(相互律の同型そのもの・完全系列の典拠)は**依然として不在**であり、
+それは「原文の証明文が要求するもの」の記録として正しいまま残る。
 -/
 
 namespace ABC3.Found.PGC

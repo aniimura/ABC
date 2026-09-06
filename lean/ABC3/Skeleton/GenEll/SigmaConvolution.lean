@@ -87,6 +87,31 @@ Eisenstein 級数の言葉では `E₂² = E₄ + (E₂ の微分の項)`、あ�
 
 ☆**畳み込みは一切現れない**。この節点（Besge の恒等式）は
 `c4_velu_tate`・`c6_velu_tate`・`j_velu_tate_mu` のどれからも**もはや引かれていない**。
+
+## ★★判断 D19（2026-09-06）—— **前線から外す（記録のみ。削除はしない）**
+
+★**原典はこの恒等式を述べていない**。[GenEll] Lemma 3.2, (ii) が言うのは
+`q_{E'} = q_E^l`、ゆえに `deg∞(E') = l·deg∞(E)` であって、
+本節点は**我々が Vélu の明示計算という道を選んだために生じた**ものである。
+
+★Lemma 3.2, (ii) の `j` の一致は
+`Skeleton/GenEll/TateIsogeny/GlobalVelu/Lemma32.lean` の
+`j_veluQuot_eq_j_tate_pow`（sorry 0、第 996）が `v`・`w` を定義式のまま自由変数で担って
+閉じており、σ による明示評価を要求しない。
+
+★消費側は二重に死んでいる —— `Found/GaloisRep/VeluMuSum/Lemma35.lean` の
+`veluV_coeff_of_ne_zero` 自身に消費者がおらず、
+`veluVC` / `muConv` / `twoYplusXC` / `a4C` / `tateYC` を
+`VeluMuSum/` と `MuGraded` の外で使う行は **0 件**である（2026-09-06 実測）。
+
+★**主張は真であり、退化ではない** —— `n = 0…299` で数値検証、反例 0
+（既存記録は `n ≤ 11`）。`hn : 2 ≤ n` は不要だが無害である。
+
+★**逸脱の記録（判断 D19、2026-09-06）**: statement は 1 字も変えていない。
+`sorry` は**残し**、ファイルも宣言も**削除しない** ——
+`Found/GaloisRep/VeluMuSum/` に sorry 無しの資産が 12 件以上あり、
+将来 μ-等級付きの道へ戻る可能性を閉じないためである。
+本ファイルが記録するのは「現行の道はここを消費しない」という事実だけである。
 -/
 
 namespace ABC3.Skeleton.GenEll
@@ -135,7 +160,13 @@ def sigma_one_convolution.needs : List ProofObligation :=
        ++ "12·∑_{m<n} σ₁(m)σ₁(n−m) = ∑_{d∣n} (5d³ + d − 6d²·(n/d))。"
        ++ "☆左辺は ab+cd = n なる四つ組にわたる ∑ ac であり、対称性から"
        ++ "∑ac = ∑ad = ∑bc = ∑bd が出る") 2,
-    .citation "[ABC3]" "veluV_coeff_of_ne_zero(この結論の消費側、§9-1254)"
-      (.inProject "ABC3" "ABC3.Found.GaloisRep.veluV_coeff_of_ne_zero") 2 ]
+    .citation "[ABC3]" "veluV_coeff_of_ne_zero(この結論の消費側、§9-1254。★2026-09-06 実測: この消費側自身に消費者がいない)"
+      (.inProject "ABC3" "ABC3.Found.GaloisRep.veluV_coeff_of_ne_zero") 2,
+    .citation "[ABC3]" "j_veluQuot_eq_j_tate_pow(Lemma 3.2, (ii) を σ の明示評価なしで閉じる現行の道、第 996、sorry 0)"
+      (.inProject "ABC3" "ABC3.Skeleton.GenEll.j_veluQuot_eq_j_tate_pow") 15,
+    .implicitStep
+      ("★判断 D19(2026-09-06、記録のみ): μ-等級付き係数の道(VeluMuSum)は"
+       ++ " j_velu_tate_mu_map 経路に置き換わった。この恒等式は現行の道では消費されないので"
+       ++ "前線から外す。★statement は変えず、sorry も宣言も残す") 15 ]
 
 end ABC3.Skeleton.GenEll

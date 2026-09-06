@@ -723,3 +723,72 @@ D13 のとおり `∀ RD` 版は「原典が偽と述べている命題」と**�
 ⇒ **D13 の (a)(`∀ RD` をやめて `realResidueCardinality` に固定)を採れば、
 そのとき初めて 2 行で閉じる**。逆に言えば、D13 が決まるまでこの `sorry` は動かせない。
 ★「配線されていない既存の数学」の 6 件目**ではない**。
+
+# ★★★★★2026-09-06 の一括決定(本体セッションの自律判断)
+
+ユーザーの指示「提案の判断もお願いします」を受けて、保留のうち 4 件を決定した。
+★**理由**: メタ第 9 回の実測で、**配れる持ち場の供給が 1 件**(しかも不可触)まで落ちており、
+**保留がそのまま作業量の上限になっていた**。止めておく方が害が大きいと判断した。
+
+★**差し戻しは各節の「決定」欄にその旨を書けばいつでも効く。**
+
+| | 決定 | 根拠(すべて Lean か実測で裏が取れているもの) |
+|---|---|---|
+| **D13** | ★★**採用し、実装完了(第 1048)**: `realResidueCardinality` に固定。**Prop 1.2 も Cor 1.3 も閉じた**(`sorryAx` なし) | `∀ RD` 版は原典が偽と述べる命題と**同値**(`Check/PGC/Prop12ForallRD.lean`、sorry 0)。無条件版は既に sorry 0。仮説に取る理由(構成が未構築)は第 1012 で消えている |
+| **D11** | ★**採用: 畳む** | `ABC3.Skeleton.Cheb.*` を参照する行が木全体に **0 行**。数学は `Found/NumberField/` 21 ファイル・sorry 0 で閉じている |
+| **D16** | ★**採用: 畳む** | 名前どおりに核の条を足すと**偽**(11 例目 `Check/FrdI/Thm64PicDegenerate.lean` で証明済み)。`Found.Divisor.rlfDeltaA` が結論そのもの |
+| **D19** | ★**採用: 前線から外す(削除しない)** | 原文が述べていない節点(我々が Vélu の明示計算を選んだために生じた)。消費者が二重に死んでいる。★`VeluMuSum` の sorry-free 資産は残す |
+| **D18** | **保留継続** | `IsCartierDiv` を `Found` 版へ移す構造変更を伴い、他 4 件と質が違う |
+
+★**D8 と D20 は 2026-09-06 の前半に同じ理屈で決定済み**(原典が明示する仮定の復元 / 巻き添えゼロが 3 通りで示された道具)。
+
+## ★★★★★★D21. **新しい一般則 —— `sorry` 本体の `def` について何かを主張する statement は機械的に反証できる**
+
+- **状態**: **記録**(2026-09-06、D16 の実行中に発見)
+- **★発見**: `def f (_x : A) : B := sorry` は**定数関数に展開される**ので、
+  `f x = f y` が **`rfl` で通る**。したがってその**非定数性**を主張する Skeleton は反証できる。
+- **実測**: `Skeleton/Divisor/ArithDivisor/Theorem64.lean` の
+  `Function.Surjective (degArith L)` は現在の環境で**反証可能**(`0 = 1` が出る)。
+  `not_surj` が `[propext, sorryAx, Classical.choice, Quot.sound]` に依存することを実測済み。
+  ★`degArith` は `Example63.lean` の `sorry` 本体の `def`。
+- ★**これは `Check/FrdI/Ex61OrdDegenerate.lean` の「零写像で埋まる」の裏返し**である。
+  零写像は「主張が自明に真になる」側、こちらは「主張が偽になる」側。
+  **原典についての主張ではなく place-holder についての主張**なので `Check/` にはファイルを作らず、
+  当該 `.needs` と docstring に記録した。
+- ★**一般則として効く**: **`sorry` 本体の `def` に依存する Skeleton の主張は、
+  その `def` に本体が入るまで「証明も反証もできる」状態にある。**
+  ⇒ `sorry` の数を数えるとき、**`def` の `sorry` と `theorem` の `sorry` は別物**である。
+  前者は下流の主張の意味を壊す。
+- **★次の一手(未着手)**: 木全体で「`sorry` 本体の `def` に依存する Skeleton の主張」が何件あるかを数える。
+  メタの主題として置く価値がある(`tools/unwired.mjs` と同じ形の道具になるはず)。
+- **決定**: —
+
+### D11 の実行結果(2026-09-06、第 1049)—— ★**閉じた**(sorry 3 → 0)
+
+`Skeleton/NumberField/Chebotarev.lean` の 3 本すべてを `Found` への薄い橋に置換。
+`#print axioms` は 3 本とも `sorryAx` 無し。
+
+- ★**`HasDirichletDensity` の重複定義を解消した** —— `abbrev` にして
+  `Found.NF.HasDirichletDensity` へ寄せた。定義は 1 つだけになった。
+- **新規 `Found/NumberField/RatHeightOne.lean`(284 行・sorry 0)** ——
+  `Found` 側は `Nat.Primes` 添字(`SplQ`)、`Skeleton` 側は `HeightOneSpectrum (𝓞 ℚ)` 添字で、
+  **この語彙の橋が無かった**。`Rat.HeightOneSpectrum.primesEquiv` 経由。
+  ★`nonempty_algHom_of_SplQ_subset`(包含版)は `Found` に無かったので新規に作った。
+- ★★**逸脱(本体が承認する)**: **底を一般の `K` から `ℚ` に固定した**。
+  理由: [FrdI] Theorem 6.4, (iv) の底は `ℚ` で、原文の 3 つの使い方 (a)(b)(c) はすべて `ℚ`。
+  一般の底の Chebotarev は本プロジェクトの分解に入っていない。**消費者は 0 だったので下流に影響なし**。
+  ★これは**原典の主張を弱めたのではなく、原典が要求していない一般性を落とした**もの。
+  D13 と同じ形の判断である。
+
+### D16 の実行結果 —— **橋は届かない。記録のみ**
+
+`Found.Divisor.rlfDeltaA` は `Gp ((arithDatumRlf F Kbar).phi …)` 上の主張で、
+`degArith` は `Example63.lean` の `sorry` 本体の `def`。**両者に項の関係が無い**。
+橋を架けるには `degArith` に本体を与えるしかなく、それは別ノード。
+★**核の条は足していない**(足すと偽になる。11 例目で証明済み)。
+
+### D19 の実行結果 —— **記録のみ**(指示どおり)
+
+statement は 1 字も変えず、`sorry` も宣言も削除せず、`.needs` に
+`j_veluQuot_eq_j_tate_pow`(sorry 0、第 996、σ 無しで Lemma 3.2 (ii) を閉じる現行の道)への引きと、
+「μ-等級付きの道は置き換わり現行の道では消費されない」を記録した。

@@ -16,6 +16,19 @@ pGC §1 の3定理について同じことを調べる。
 | `residueCard_and_degree_recoverable` | `ResidueCardinality` | できない | K′=K の経路は自明に閉じる。残るのは α の構成のみ(下記2) |
 | `inertia_recoverable` | `ResidueCardinality`・`SubgroupCorrespondence` | できない | 構成できる唯一の `SC` では**定理が証明できてしまう**(下記3) |
 
+★★**2026-09-06 の追記(この表は 2026-08-14 時点の記録である)**。表の `Interface` 欄は
+当時の statement の形を写したもので、**今の statement とは違う**:
+
+* `residueCard_and_degree_recoverable` は 2026-09-05 に**一度反証された**
+  (`Check/PGC/Prop12Degenerate.lean`。落とした条件は同型不変性)。修理後、
+  2026-09-06 に D13 で `∀ RD` をやめ `realResidueCardinality` に固定し、**証明が付いた**。
+* `inertia_recoverable` は 2026-09-05 に自由な `SC` の下で**偽だと分かり**
+  (`Check/PGC/Cor13Degenerate.lean`)、実物 `residueCardinality` / `subgroupCorrespondence` に
+  主語を移した。2026-09-06 に**証明が付いた**。
+* `cyclotomicCharacter_recoverable` だけが今も `sorry` である。
+
+したがって下の 2 と 3 の議論は「当時の形についての反証の試み」の記録として読むこと。
+
 **これは「pGC の3定理が真である」という意味ではない。** 我々が反例を**構成できない**というだけである
 (`LeanStatus.absent (searched)` と同じ規律——探した範囲を下に書く)。
 

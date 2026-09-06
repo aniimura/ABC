@@ -1,5 +1,5 @@
 import ABC3.Found.PGC.SubgroupCorrespondenceConstruction
-import ABC3.Skeleton.PGC.Section1Cor13
+import ABC3.Skeleton.PGC.Section1Defs
 
 /-!
 # 原文の不分岐判定は正しい——`q_L = q^{[Γ_K:H]}` ⟺ `L_H/K` が不分岐

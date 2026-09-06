@@ -1,4 +1,4 @@
-import ABC3.Skeleton.PGC.Section1
+import ABC3.Skeleton.PGC.Section1Defs
 import ABC3.Found.PGC.ResidueCardTransport
 import ABC3.Found.PGC.DegreeTransport
 import ABC3.Found.PGC.ResidueCardinality
@@ -11,9 +11,15 @@ import ABC3.Found.PGC.ResidueCardinality
 > The number q of elements in the residue field of O[scr]_K, and well as the absolute
 > degree [K : Q[bb]_p] of K, can be recovered entirely group-theoretically from Γ_K.
 
-`Skeleton/PGC/Section1.lean::residueCard_and_degree_recoverable` は
-`(RD : ResidueCardinality p)` を**仮説として量化した**条件付き形式化であり、
-そこは今も `sorry` である(理由は下の「★量化された形は Prop 1.2 より強い」)。
+## ★2026-09-06(D13 の実行): Skeleton 側が本ファイルと同じ形になった
+
+本ファイルを書いた時点では `Skeleton/PGC/Section1.lean::residueCard_and_degree_recoverable` が
+`(RD : ResidueCardinality p)` を**仮説として量化した**条件付き形式化で、そこは `sorry` だった
+(理由は下の「★量化された形は Prop 1.2 より強い」)。
+2026-09-06 に D13 を採り、Skeleton 側も `realResidueCardinality` に固定して**閉じた**ので、
+本ファイルの定理は Skeleton 側と同じ内容の別名になっている。
+★下の「★量化された形は Prop 1.2 より強い」の分析が D13 の根拠そのものなので、
+記録としてこのファイルを残す。
 
 本ファイルはその量化を外し、**実物の `RD`**
 (`Found/PGC/ResidueCardinality.lean::realResidueCardinality`、`card = residueCard`)に
@@ -87,6 +93,9 @@ theorem residueCard_and_degree_recoverable_real :
     (residueCardAndDegreeObject (realResidueCardinality p)).RecoverableFromAbsGal := by
   intro K K' α
   exact Prod.ext (residueCard_eq_of_absGal_equiv α) (finrank_eq_of_absGal_equiv K K' α)
+
+def residueCard_and_degree_recoverable_real.src : ABC3.Meta.Source :=
+  { paper := "pGC", pdfPage := 3, item := "Proposition 1.2", sectionId := "prop-1-2" }
 
 #print axioms residueCard_and_degree_recoverable_real
 

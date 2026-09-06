@@ -22,6 +22,7 @@
  *   node tools/unwired.mjs --node Skeleton/Divisor/SchemeWeil.lean
  *   node tools/unwired.mjs --dead             # 空撃ち
  *   node tools/unwired.mjs --json
+ *   node tools/unwired.mjs --marks            # ★候補と空撃ちを 1 回の走査で返す(frontier.mjs 用)
  *   node tools/unwired.mjs --selftest         # 較正(既知 6 組が上位 3 件に入るか)
  *
  * ★読み方(実測に基づく)
@@ -362,8 +363,15 @@ for (const q of queries.sort((a, b) => a.rel.localeCompare(b.rel) || a.line - b.
   report.push({ rel: q.rel, line: q.line, kind: q.kind, name: q.short, concl: q.concl, bare: q.bare, cands });
 }
 
-if (flag('--json')) {
-  console.log(JSON.stringify({ generated: new Date().toISOString(), pool: ix.pool.length, report }, null, 1));
+/** ★`--marks`(2026-09-06、メタ第 9 回。backlog M18): `--json` の中身に `dead` も入れて返す。
+ *  `tools/frontier.mjs` が**印を付けるために 1 回だけ呼ぶ**口である。
+ *  ★2 回呼ぶ(`--json` と `--dead --json`)と木を 2 度舐めることになる:
+ *  実測 2.12 + 1.87 = 3.99 秒 → 1 回にまとめて **2.35 秒**。
+ *  `--json` 単体の出力は 1 バイトも変えない(`dead` は `--marks` のときだけ足す)。 */
+if (flag('--json') || flag('--marks')) {
+  const out = { generated: new Date().toISOString(), pool: ix.pool.length, report };
+  if (flag('--marks')) out.dead = deadModules(mods, decls);
+  console.log(JSON.stringify(out, null, 1));
   process.exit(0);
 }
 

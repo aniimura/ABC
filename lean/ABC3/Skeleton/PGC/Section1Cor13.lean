@@ -1,53 +1,31 @@
-import ABC3.Skeleton.PGC.Setup
-import ABC3.Interface.PGC.LocalFieldData
-import ABC3.Found.PGC.SubgroupCorrespondenceConstruction
+import ABC3.Skeleton.PGC.Section1Defs
+import ABC3.Found.PGC.InertiaTransport
 
 /-!
 # [pGC] Corollary 1.3 — 惰性群
 
-## 設計の経緯(必読)
+不分岐判定 `IsUnramifiedAt` と惰性群 `inertia` / `inertiaObject` の**定義**は
+`ABC3/Skeleton/PGC/Section1Defs.lean` にある(設計の経緯もそちら)。
+本ファイルは主張 `inertia_recoverable` だけを持つ。
 
-惰性群 `I_K` を **`Interface` の自由なデータ**として置く素朴な設計は**壊れている**。
-`ABC3/Check/PGC/InertiaDegeneracy.lean` で機械的に示したとおり、
-`I_K := ⊥` でも `I_K := ⊤` でも Corollary 1.3 の形は成り立ってしまう
-(どちらも `sorry` 無しで証明済み)。「偽になる」のではなく「**自明になる**」型の失敗。
+## ★2026-09-06(D13 採用): 逸脱の記録
 
-したがって `I_K` は **posit するものではなく derive するもの**である。
-原文 p.3 の不分岐判定から構成する:
+`∀ RD : ResidueCardinality p` をやめ `realResidueCardinality` に固定した。
+★理由: `∀ RD` 版は `Check/PGC/Prop12ForallRD.lean` が**原典が偽と述べている命題と同値**だと
+証明した(10 例目の退化。「修復が強すぎる主張を作った」型)。
+`Interface` に仮説として置いた理由(構成が未構築)は第 1012 で消えている。
+★これは**原典の主張を弱めたのではなく、原典が言っていない主張を落とした**ものである。
 
-```
-I_K = ⋂ { H ⊆ Γ_K : H は開、かつ q_{L_H} = q^[Γ_K:H] }
-```
+★本ファイル(Corollary 1.3)は D13 の**下流**である。Cor 1.3 の主語は 2026-09-05 に
+既に実物(`residueCardinality` / `subgroupCorrespondence`)へ移してあったので、
+statement 自体は今日変えていない。変わったのは**証明が届いたこと**——
+`Found/PGC/InertiaTransport.lean::inertia_recoverable_of_prop12` の仮説 `htop`
+(「q は Γ_K の同型類だけで決まる」= Proposition 1.2 の q の半分)が、
+Proposition 1.2 を実物に固定したことで**無条件に供給できるようになった**
+(`Found/PGC/ResidueCardTransport.lean::residueCard_eq_of_absGal_equiv`)。
 
-**この構成自体は原文にない**(暗黙の段 #7)。原文が与えるのは判定条件までで、
-そこから `I_K` を得る操作は書かれていない。
-
-## 退化は消えていない——移動した
-
-`I_K` の自由度は消えたが、`RD : ResidueCardinality` の自由度は残っている。
-実際、`RD.card := fun _ => p`(`isPrimePow` は f = 1 で満たす)と置くと
-不分岐条件は `p = p^[Γ_K:H]` となり、成り立つのは指数 1 のときだけ、
-すなわち `I_K = ⊤` に退化する。
-
-これは設計の失敗ではなく**設計どおり**である——退化の可能性が
-**1 箇所(`Interface`)に局在した**。Track B が本物の `ResidueCardinality` を
-構成した時点で、ここに依存する全ての statement が一斉に非空虚性の検査を受ける。
-自由なデータのままなら、退化は各 statement に散らばったまま検査されなかった。
-
-## ★2026-09-05: `ResidueCardinality` の修理の記録(7 例目)
-
-`Check/PGC/Prop12Degenerate.lean`(第 1012)が、`card`・`isPrimePow` だけの旧形では
-Proposition 1.2 の形式化が**偽**であることを示した——落とした条件は**同型不変性**。
-`Interface/PGC/LocalFieldData.lean` の `ResidueCardinality` に
-`card_congr : (K.carrier ≃ₐ[ℚ_[p]] K'.carrier) → card K = card K'` を足して修理した。
-実物側の証明は `Found/PGC/ResidueCardinality.lean::residueCard_congr`(`sorry` 無し)。
-
-★**本ファイルの退化(`RD.card := fun _ => p` → `I_K = ⊤`)はこの修理では塞がらない**
-——定数関数は同型不変だから `card_congr` を素通りする
-(`Check/PGC/InertiaDegeneracyMoved.lean::degenerateRD`)。
-Corollary 1.3 の側の退化を塞いだのは実物 `residueCardinality`/`subgroupCorrespondence` に
-主語を移したこと(`Check/PGC/Cor13Degenerate.lean`、6 例目)であり、
-7 例目は Proposition 1.2 の側の話である。
+★これに伴い、定義と主張を 2 ファイルに分けた(理由は `Section1Defs.lean` の冒頭)。
+定義そのものは変えていない。
 -/
 
 namespace ABC3.Skeleton.PGC
@@ -55,45 +33,6 @@ namespace ABC3.Skeleton.PGC
 open ABC3.Meta ABC3.Interface.PGC
 
 variable {p : ℕ} [Fact p.Prime]
-
-/-- 開部分群 H に対応する拡大 L_H/K が**不分岐**であることの判定条件。
-
-原文 (pGC p.3):
-> Note, moreover, that L is unramified over K if and only q_L = q^[Γ_K:H].
-
-原文の "if and only" は "if and only if" の脱字と読めるが、逐語欄では原文どおりに保つ。 -/
-def IsUnramifiedAt (RD : ResidueCardinality p) (SC : SubgroupCorrespondence p)
-    (K : PAdicLocalField p) (H : Subgroup K.absGal) (hH : IsOpen (H : Set K.absGal)) : Prop :=
-  RD.card (SC.field K H hH) = RD.card K ^ H.index
-
-def IsUnramifiedAt.src : Source :=
-  { paper := "pGC", pdfPage := 3, item := "Section 1 (unramifiedness criterion)",
-    sectionId := "setup-1-unram" }
-
-/-- 惰性群 `I_K`——不分岐な開部分群すべての共通部分として**構成する**。
-
-★**原文に無い段**(暗黙の段 #7)。原文は判定条件までしか与えず、
-そこから `I_K` を得る操作を書いていない。ここは我々の構成であり、
-原典の転写ではない。 -/
-noncomputable def inertia (RD : ResidueCardinality p) (SC : SubgroupCorrespondence p)
-    (K : PAdicLocalField p) : Subgroup K.absGal :=
-  sInf {H | ∃ hH : IsOpen (H : Set K.absGal), IsUnramifiedAt RD SC K H hH}
-
-def inertia.src : Source :=
-  { paper := "pGC", pdfPage := 3, item := "Corollary 1.3", sectionId := "cor-1-3" }
-
-/-- 惰性群を「K に付随する対象」として束ねたもの。移送は部分群の押し出し。
-
-`inertiaObjectOf`(`Check/PGC/InertiaDegeneracy.lean`)と同じ形だが、
-`obj` が**自由なデータでなく構成**である点が本質的な違い。 -/
-noncomputable def inertiaObject (RD : ResidueCardinality p) (SC : SubgroupCorrespondence p) :
-    AssociatedObject p where
-  Obj := fun K => Subgroup K.absGal
-  obj := fun K => inertia RD SC K
-  transport := fun α S => S.map α.toMulEquiv.toMonoidHom
-
-def inertiaObject.src : Source :=
-  { paper := "pGC", pdfPage := 3, item := "Corollary 1.3", sectionId := "cor-1-3" }
 
 /-- **[pGC] Corollary 1.3**
 
@@ -143,11 +82,24 @@ def inertiaObject.src : Source :=
 反例を与えたが、ここでは逆に定理を与える。
 反証には**非正規な** `inertia` が要り(`Check.PGC.map_conj_of_normal`)、
 それには `Γ_K` の非 Galois な3次以上の拡大を構成する必要がある。
-探した範囲は `Check/PGC/RefutationAttempts.lean`。 -/
+探した範囲は `Check/PGC/RefutationAttempts.lean`。
+
+## ★★★★2026-09-06: 証明が届いた(D13 の下流)
+
+`Found/PGC/InertiaTransport.lean::inertia_recoverable_of_prop12` は
+「q が Γ_K の位相群としての同型類だけで決まる」(= Proposition 1.2 の q の半分)を
+仮定すれば Corollary 1.3 が従うことを、原文の論拠
+"By applying Proposition 1.2 to L and H" のまま形式化していた。
+その仮説は `Found/PGC/ResidueCardTransport.lean::residueCard_eq_of_absGal_equiv`
+(無条件・`sorry` 無し)がそのまま供給する。
+残っていた `.needs` の 2 本(Prop 1.2 の適用・`I_K` の構成)はいずれも
+`Found` 側で閉じている(後者は `Section1Defs.lean` の `inertia` そのもの)。
+実装は規約(G8)どおり `Found/` にあり
+(`Found/PGC/InertiaTransport.lean::inertia_recoverable_real`)、ここはそれへ**委譲する**。 -/
 theorem inertia_recoverable :
     (inertiaObject (ABC3.Found.PGC.residueCardinality p)
-      (ABC3.Found.PGC.subgroupCorrespondence p)).RecoverableFromAbsGal := by
-  sorry
+      (ABC3.Found.PGC.subgroupCorrespondence p)).RecoverableFromAbsGal :=
+  ABC3.Found.PGC.inertia_recoverable_real
 
 def inertia_recoverable.src : Source :=
   { paper := "pGC", pdfPage := 3, item := "Corollary 1.3", sectionId := "cor-1-3" }

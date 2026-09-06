@@ -8,6 +8,10 @@ canvas{display:block;cursor:grab}canvas.dragging{cursor:grabbing}
 /* ★Lean 形式化が完了した項目のラベル: 薄い灰色の網掛け */
 #detb li.dn{background:repeating-linear-gradient(45deg,#e9ecef 0 5px,#f7f8fa 5px 10px);border-radius:3px;padding:1px 4px;margin:1px -4px;color:#5b6169}
 #detb li.dn b{color:#6b7280!important}
+/* ★人の判断待ち(decisions-pending.md が未決のまま名指ししている項目): 左に青い縦線だけ */
+#detb li.pd{border-left:3px solid #2f6fd0;padding-left:6px;margin-left:-9px}
+.lg{display:flex;gap:6px;font-size:11px;line-height:1.5;padding:2px 0;color:#555}
+.lg b{flex-shrink:0;width:14px;text-align:center;color:#1c1e21}
 #sb{position:fixed;top:0;left:0;width:330px;height:100vh;background:#fff;box-shadow:2px 0 14px rgba(0,0,0,.13);z-index:50;display:flex;flex-direction:column;transition:transform .22s}
 #sb.hid{transform:translateX(-330px)}
 #tg{position:fixed;top:10px;left:10px;z-index:60;width:32px;height:32px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:15px;color:#555;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);transition:left .22s}
@@ -41,6 +45,7 @@ canvas{display:block;cursor:grab}canvas.dragging{cursor:grabbing}
   <div class="hd"><h1>依存の層</h1></div>
   <div class="bd">
     <div class="sec"><h2>規模</h2><div id="stats"></div></div>
+    <div class="sec"><h2>印</h2><div id="legend"></div></div>
     <div class="sec"><h2>論文</h2><div id="papers"></div></div>
   </div>
 </div>
@@ -147,8 +152,12 @@ function draw(){
       ctx.strokeStyle=dim?'rgba(120,128,140,.08)':'rgba(120,128,140,.42)';ctx.lineWidth=1;
       for(let g=-b.h;g<b.w;g+=6){ctx.beginPath();ctx.moveTo(b.x+g,b.y+b.h);ctx.lineTo(b.x+g+b.h,b.y);ctx.stroke();}
       ctx.restore();ctx.globalAlpha=da;}
-    // 上端の色帯
-    ctx.fillStyle=allDone?'#9aa0a8':'#c4cad1';ctx.fillRect(b.x+1,b.y+1,b.w-2,4);
+    // ★上端の色帯。**人の判断待ち**を含む箱だけ青くする(2026-09-06)。
+    //   ★新しい要素は足さず、既にある帯の色を変えるだけにした——
+    //   低倍率でも 4px × 148px の帯は読めるが、記号や枠線は読めないため。
+    //   ★☆(現在の葉)の琥珀とは色を分ける。意味が逆(進んでいる / 止まっている)なので。
+    const pnd=b.pendingN||0;
+    ctx.fillStyle=pnd?'#2f6fd0':(allDone?'#9aa0a8':'#c4cad1');ctx.fillRect(b.x+1,b.y+1,b.w-2,4);
     if(i===sel||i===hov){ctx.strokeStyle='#111';ctx.lineWidth=2.4;ctx.beginPath();ctx.roundRect(b.x-3,b.y-3,b.w+6,b.h+6,9);ctx.stroke();}
     // ★現在作業中のボックスは左上に ☆
     const wip=b.wip||0;
@@ -159,7 +168,9 @@ function draw(){
     const tx=b.x+(wip?20:9), tlim=wip?18:21;
     ctx.fillText(ttl.length>tlim?ttl.slice(0,tlim-1)+'…':ttl,tx,b.y+21);
     ctx.font='11px -apple-system,Segoe UI,sans-serif';ctx.fillStyle='#6b7280';
-    ctx.fillText(`${b.n} 項目${b.ours?`  ● ${b.ours}`:''}${nd?`  ■ ${nd}`:''}`,b.x+9,b.y+36);
+    // ★□ = statement は在るが `sorry` のまま。■/● と**同じ語彙**に足しただけで色は増やさない。
+    const sn=b.sorryN||0;
+    ctx.fillText(`${b.n} 項目${b.ours?`  ● ${b.ours}`:''}${nd?`  ■ ${nd}`:''}${sn?`  □ ${sn}`:''}`,b.x+9,b.y+36);
     if(b.scc){ctx.fillStyle='#c0392b';ctx.fillText('循環(分割不可)',b.x+9,b.y+50);}
     if(b.root){ctx.fillStyle='#a5311f';ctx.font='bold 11px -apple-system,Segoe UI,sans-serif';ctx.fillText('★ Corollary 3.12',b.x+9,b.y+(b.scc?64:50));}
     ctx.globalAlpha=1;
@@ -196,12 +207,23 @@ cv.addEventListener('click',e=>{
     `<div class="sub">層 ${b.layer}${b.scc?' ・ <b style="color:#c0392b">循環している塊(分割不可)</b>':''}${b.root?' ・ <b>根を含む</b>':''}</div>`+
     `<div class="row"><span>項目数</span><span><b>${b.n}</b></span></div>`+
     `<div class="row"><span>我々が触れた</span><span>${b.ours}${b.landed?`(うち着地 ${b.landed})`:''}</span></div>`+`<div class="row"><span>Lean 形式化が完了</span><span><b>${b.done||0} / ${b.n}</b>${b.n>0&&(b.done||0)>=b.n?' —— このボックスは完了':''}</span></div>`+
+    // ★0 のときは行ごと出さない(480 箱で空行が並ぶのを避ける)
+    (b.sorryN?`<div class="row"><span>□ sorry が残る</span><span><b>${b.sorryN}</b></span></div>`:'')+
+    (b.pendingN?`<div class="row"><span style="color:#2f6fd0">人の判断待ち</span><span><b style="color:#2f6fd0">${b.pendingN}</b> —— decisions-pending.md</span></div>`:'')+
     `<hr style="border:0;border-top:1px solid #eee;margin:7px 0">`+
     `<div class="row"><span style="color:${C_DEP}">← これに要る</span><span><b style="color:${C_DEP}">${hlDeps.size} ボックス / ${depN} 項目</b>(直接 ${deps.length})</span></div>`+
     `<div class="row"><span style="color:${C_USE}">→ これを使う</span><span><b style="color:${C_USE}">${hlUsers.size} ボックス / ${useN} 項目</b>(直接 ${used.length})</span></div>`+
     (hlDeps.size?`<div class="row"><span>最も左の層</span><span>層 ${minL}(ここから積み上げる)</span></div>`:
                  `<div class="row"><span>依存</span><span><b style="color:${C_DEP}">無し —— 今すぐ着手できる</b></span></div>`)+
-    `<ul>${b.items.map(it=>`<li${it.o==='done'?' class="dn"':''}>${it.o?`<b style="color:${it.o==='done'?'#6b7280':'#1e7a52'}">${it.o==='done'?'■':'●'}</b> `:''}${it.k.replace(' / ',' ')} <span style="color:#aaa">p.${it.p||'?'}</span></li>`).join('')}</ul>`;
+    `<ul>${b.items.map(it=>{
+      // ■ 完了 / □ statement は在るが sorry / ● それ以外の「触れた」。色は 2 つのまま。
+      // ★□ は ■ に優先する。`Found` が完了と主張していても `Skeleton` に `sorry` が
+      //   残っている項目が実在するため(= 配線されていない既済の数学)。
+      const cls=[it.o==='done'?'dn':'',it.w?'pd':''].filter(Boolean).join(' ');
+      const mk=it.o?(it.s?'□':(it.o==='done'?'■':'●')):'';
+      const col=it.o==='done'?'#6b7280':'#1e7a52';
+      return `<li${cls?` class="${cls}"`:''}>${mk?`<b style="color:${col}">${mk}</b> `:''}${it.k.replace(' / ',' ')} <span style="color:#aaa">p.${it.p||'?'}</span></li>`;
+    }).join('')}</ul>`;
   d.style.display='block';draw();
 });
 document.querySelector('#det .cl').onclick=()=>{document.getElementById('det').style.display='none';sel=null;setHighlight(null);draw();};
@@ -211,7 +233,20 @@ document.getElementById('tg').onclick=function(){document.getElementById('sb').c
 
 document.getElementById('stats').innerHTML=
   `<div class="st"><span>全ノード</span><b>${S.nodes}</b></div>`+
-  `<div class="st"><span>形式化 完了</span><b>${B.reduce((a,b)=>a+(b.done||0),0)}</b></div>`;
+  `<div class="st"><span>形式化 完了</span><b>${B.reduce((a,b)=>a+(b.done||0),0)}</b></div>`+
+  // ★いまの作業状況(2026-09-06)。分母を並べないのは、どちらも「残っている数」だから。
+  `<div class="st"><span>sorry が残る</span><b>${S.sorryItems||0}</b></div>`+
+  `<div class="st"><span>人の判断待ち</span><b>${S.pendingItems||0}</b></div>`;
+
+// ★凡例。印を増やしたので、読み方をここ 1 か所に置く。
+document.getElementById('legend').innerHTML=
+  `<div class="lg"><b>■</b><span>形式化が完了(<code>Found/</code> に <code>.src</code>)</span></div>`+
+  `<div class="lg"><b>●</b><span>触れている(Skeleton に statement)</span></div>`+
+  `<div class="lg"><b>□</b><span>statement は在るが <b>sorry</b> のまま(■ と重なることがある ——`+
+  ` <code>Found</code> は完了、<code>Skeleton</code> に <code>sorry</code>)</span></div>`+
+  `<div class="lg"><b style="color:#d9822b">☆</b><span>いま着手できる葉(分解チェーン)</span></div>`+
+  `<div class="lg"><b style="color:#2f6fd0">▁</b><span>上端が青い箱 = <b style="color:#2f6fd0">人の判断待ち</b>`+
+  `(<code>decisions-pending.md</code> が未決のまま名指し)</span></div>`;
 
 // ★★論文一覧 —— クリックでその論文の部分グラフをハイライトする。
 //   ★ボックスの tags は [[出典, 節点数], …]。循環している塊は

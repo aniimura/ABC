@@ -235,6 +235,7 @@ import ABC3.Found.NumberField.IdealCountSplit
 import ABC3.Found.NumberField.SplitDensity
 import ABC3.Found.NumberField.DecompGroup
 import ABC3.Found.NumberField.SplCompositum
+import ABC3.Found.NumberField.RatHeightOne
 import ABC3.Found.FrdI.Prop53Diag
 import ABC3.Found.FrdI.Prop53QPhi
 import ABC3.Found.FrdI.Prop53Base
@@ -1718,8 +1719,19 @@ import ABC3.Found.PGC.InertiaKummerBound
 import ABC3.Found.PGC.ResidueCardTransport
 import ABC3.Found.PGC.Prop12Transport
 import ABC3.Found.PGC.CyclotomicRecovery
+import ABC3.Found.PGC.TopAbelianization
+import ABC3.Found.PGC.TorsionCyclotome
+import ABC3.Found.PGC.CyclotomeTransport
+import ABC3.Found.PGC.LubinTateClosure
+import ABC3.Found.PGC.AbelianDecomposition
+import ABC3.Found.PGC.LubinTateClosureTopology
+import ABC3.Found.PGC.UnramifiedZhat
+import ABC3.Found.PGC.LubinTateZhat
 import ABC3.Found.GenEll.VeluDualJ
 import ABC3.Found.GenEll.VeluJExpNeg
+import ABC3.Found.GenEll.VeluJDescent
+import ABC3.Found.GenEll.VeluJExpAssemble
+import ABC3.Found.GenEll.VeluJExpDeep
 /-!
 # Found — 実装済みの基礎
 

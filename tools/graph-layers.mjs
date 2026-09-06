@@ -427,9 +427,56 @@ const layerOf = (c, st = new Set()) => {
 };
 
 
+// ── ★★`sorry` の判定に使う「伏せ字」 ─────────────────────────
+//   ★2026-09-06 追加。動機: `skeleton` の色は「Skeleton に statement が在る」しか言わず、
+//   **埋まっているか未着手か**を区別していなかった。
+//
+//   ★**素朴な `grep` は使えない。** 実測(2026-09-06、`lean/ABC3/` 全体):
+//     素朴に `\bsorry\b` を数える            … **779 行**
+//     文字列と注釈を伏せてから数える          … **45 行 / 45 宣言 / 19 ファイル**(17.3 倍)
+//   差の主因は `.needs` の本文と docstring —— 日本語で「sorry 無し」等と**書いてある**だけの行。
+//
+//   ★`tools/decl-index.mjs` の `maskStrings` と同じ「**長さを保つ**」型にする。
+//   長さと改行を保てば、伏せた側で見つけた行番号がそのまま原文の行番号になる。
+//   ★★ただし `decl-index.mjs` の版は**文字列だけ**を伏せる。ここでは**注釈も**伏せる——
+//   文字列だけだと **73 宣言**になり、内訳が `Found` 14 / `Check` 8 / `Gap` 1 と出る。
+//   これは**在り得ない**(規約により `Found` に `sorry` は無い)。すべて docstring の
+//   日本語本文であった。注釈まで伏せると `Found`/`Interface`/`Check`/`Gap` は **0** になる。
+/** 文字列リテラルと注釈を、長さと改行を保ったまま空白へ伏せる。 */
+function maskLean(src) {
+  const out = src.split(''); const n = src.length;
+  const blank = (a, b) => { for (let k = a; k < b && k < n; k++) if (out[k] !== '\n') out[k] = ' '; };
+  let i = 0, depth = 0;                       // depth = ブロック注釈の入れ子(Lean は入れ子を許す)
+  while (i < n) {
+    if (depth > 0) {
+      if (src[i] === '/' && src[i + 1] === '-') { depth++; blank(i, i + 2); i += 2; continue; }
+      if (src[i] === '-' && src[i + 1] === '/') { depth--; blank(i, i + 2); i += 2; continue; }
+      blank(i, i + 1); i++; continue;
+    }
+    if (src[i] === '/' && src[i + 1] === '-') { depth = 1; blank(i, i + 2); i += 2; continue; }
+    if (src[i] === '-' && src[i + 1] === '-') { let j = i; while (j < n && src[j] !== '\n') j++; blank(i, j); i = j; continue; }
+    if (src[i] === '"') {                     // ★複数行にまたがる文字列もここで閉じる
+      let j = i + 1;
+      while (j < n) { if (src[j] === '\\') { j += 2; continue; } if (src[j] === '"') { j++; break; } j++; }
+      blank(i, j); i = j; continue;
+    }
+    if (src[i] === "'" && src[i + 2] === "'") { blank(i, i + 3); i += 3; continue; }
+    i++;
+  }
+  return out.join('');
+}
+const DECL_HEAD_RE = new RegExp('^\\s*(?:@\\[[^\\]]*\\]\\s*)?(?:private\\s+|protected\\s+|noncomputable\\s+|scoped\\s+|local\\s+|partial\\s+|unsafe\\s+)*'
+  + '(?:theorem|lemma|def|abbrev|instance|structure|inductive|class|example|axiom)\\b\\s*([^\\s:({\\[]*)');
+
 // ── 我々の位置(3層) ───────────────────────────────────────
 function walk(d, a = []) { for (const f of readdirSync(d)) { const p = join(d, f); if (statSync(p).isDirectory()) walk(p, a); else if (p.endsWith('.lean')) a.push(p); } return a; }
 const ours = new Map();
+/** ★`.src` を持つ宣言の本体に `sorry` が残っている項目(原典の項目キー)。 */
+const SORRY = new Set();
+/** ★ファイル(`lean/ABC3/…`)→ そのファイルが `.src` で名指ししている項目キーの集合。
+ *  `decisions-pending.md` が**ファイル名**で指した箇所を項目へ写すために使う。 */
+const fileItems = new Map();
+let sorryDecls = 0, sorryFiles = 0;
 {
   const SRC_RE = /paper\s*:=\s*"([^"]*)"[\s\S]{0,400}?item\s*:=\s*"([^"]*)"/g;
   const EDGE_RE = /\.otherPaper\s+"\[?([A-Za-z]+)\]?"\s+"([^"]*)"/g;
@@ -456,9 +503,72 @@ const ours = new Map();
       const im = ITEM_RE.exec(m[2]);
       if (!im) continue;
       const kind = inFound ? (EXACT_RE.test(m[2]) ? 'done' : 'partial') : (landed ? 'landed' : 'skeleton');
-      put(`${m[1]} / ${im[1]} ${im[2]}`, kind, rel);
+      const key = `${m[1]} / ${im[1]} ${im[2]}`;
+      put(key, kind, rel);
+      if (!fileItems.has(rel)) fileItems.set(rel, new Set());
+      fileItems.get(rel).add(key);
     }
     for (const m of t.matchAll(EDGE_RE)) { const im = ITEM_RE.exec(m[2]); if (im) put(`${m[1]} / ${im[1]} ${im[2]}`, 'named', rel); }
+
+    // ── ★`sorry` が残っている項目 ──────────────────────────
+    //   ★宣言の単位で見る。`.src` を持つ宣言 `X.src` の**基の宣言 `X`** が
+    //   `sorry` を含むなら、その `.src` が指す原典の項目に印を付ける。
+    //   ★限界: `X` が別ファイルにある場合(稀)は写せない。**下界**である。
+    const ml = maskLean(t).split(/\r?\n/), rl = t.split(/\r?\n/);
+    const starts = [];
+    for (let i = 0; i < ml.length; i++) { const dm = DECL_HEAD_RE.exec(ml[i]); if (dm) starts.push([i, dm[1]]); }
+    const hasSorry = new Set();
+    for (let k = 0; k < starts.length; k++) {
+      const s = starts[k][0], e = k + 1 < starts.length ? starts[k + 1][0] : ml.length;
+      for (let j = s; j < e; j++) if (/\bsorry\b/.test(ml[j])) { hasSorry.add(starts[k][1]); sorryDecls++; break; }
+    }
+    if (hasSorry.size) sorryFiles++;
+    for (let k = 0; k < starts.length; k++) {
+      const nm = starts[k][1];
+      if (!nm.endsWith('.src') || !hasSorry.has(nm.slice(0, -4))) continue;
+      const s = starts[k][0];
+      const e = Math.min(k + 1 < starts.length ? starts[k + 1][0] : rl.length, s + 8);
+      const blob = rl.slice(s, e).join(' ');                     // ★`.src` の中身は伏せない側から読む
+      const pm = /paper\s*:=\s*"([^"]*)"/.exec(blob), im2 = /item\s*:=\s*"([^"]*)"/.exec(blob);
+      if (!pm || !im2) continue;
+      const iq = ITEM_RE.exec(im2[1]);
+      if (iq) SORRY.add(`${pm[1]} / ${iq[1]} ${iq[2]}`);
+    }
+  }
+}
+
+// ── ★★人の判断待ちの項目(`ResearchPaper/decisions-pending.md`) ────────
+//   ★2026-09-06 追加。`autonomy-policy.md` §2 に当たる判断は `decisions-pending.md` に
+//   積まれ、**そこで止まっている**。図にその位置が出ていなかった。
+//
+//   ★**未決の見分け方**: `- **決定**: —` の**ままのもの**だけ。
+//   「採用を決定」「決定」と書かれている節(D1・D2・D3・D5・D6・D20 など)は除く。
+//   ★`### D16 の続報` のような小見出しは、その番号の節の続きとして扱う。
+const PENDING = new Set();
+let pendingSecs = [];
+{
+  const DP = join(ROOT, 'ResearchPaper', 'decisions-pending.md');
+  if (existsSync(DP)) {
+    const secs = new Map();
+    let cur = null;
+    for (const l of readFileSync(DP, 'utf8').split(/\r?\n/)) {
+      const h = /^#{2,3}\s+\**\s*(D\d+)\b/.exec(l);
+      if (h) { cur = h[1]; if (!secs.has(cur)) secs.set(cur, []); continue; }
+      if (/^#{1,3}\s/.test(l)) { cur = null; continue; }
+      if (cur) secs.get(cur).push(l);
+    }
+    // ★原典の項目を名指ししている形 `[FrdI] Theorem 6.4, (i)`
+    const XI = new RegExp(`\\[([A-Za-z][A-Za-z0-9]*)\\],?\\s*(${KIND})\\s+(\\d+(?:\\.\\d+)+)`, 'g');
+    // ★我々のファイルを名指ししている形。`Skeleton/` と `Interface/` に限る——
+    //   `Found/` の言及は「数学はもう在る」という**根拠**であって、判断待ちの対象ではない。
+    const XF = /\b((?:Skeleton|Interface)\/[A-Za-z0-9_/]*\.lean)/g;
+    for (const [id, body] of secs) {
+      const t = body.join('\n');
+      if (!/^\s*-\s*\*\*決定\*\*\s*[::]\s*[—–-]\s*$/m.test(t)) continue;   // 決まっているものは除く
+      pendingSecs.push(id);
+      for (const m of t.matchAll(XF)) for (const k of fileItems.get(`lean/ABC3/${m[1]}`) ?? []) PENDING.add(k);
+      for (const m of t.matchAll(XI)) { const k = `${m[1]} / ${m[2]} ${m[3]}`; if (adj.has(k)) PENDING.add(k); }
+    }
   }
 }
 
@@ -545,7 +655,10 @@ const B = [...boxes.entries()].map(([id, b]) => ({
   landed: b.items.filter((k) => ours.get(k)?.kind === 'landed').length,
   root: b.items.includes(ROOTK) ? 1 : 0,
   wip: b.items.filter((k) => WIP.has(k)).length,   // ★現在作業中の節点数
-  items: b.items.slice(0, 400).map((k) => ({ k, p: page.get(k) ?? 0, o: ours.get(k)?.kind ?? null })),
+  sorryN: b.items.filter((k) => SORRY.has(k)).length,       // ★statement は在るが `sorry` のまま
+  pendingN: b.items.filter((k) => PENDING.has(k)).length,   // ★人の判断待ち
+  items: b.items.slice(0, 400).map((k) => ({ k, p: page.get(k) ?? 0, o: ours.get(k)?.kind ?? null,
+    s: SORRY.has(k) ? 1 : 0, w: PENDING.has(k) ? 1 : 0 })),
 }));
 const bidx = new Map(B.map((b, i) => [b.id, i]));
 const BE = [...bedge.entries()].map(([k, w]) => { const [a, b] = k.split(' '); return [bidx.get(a), bidx.get(b), w]; })
@@ -565,7 +678,11 @@ const data = {
     //   混ぜると「触れた節点」が 28 だけ水増しされ、進捗の読みを狂わせる。
     ours: [...ours.keys()].filter((k) => adj.has(k) && !k.startsWith('義務 / ')).length,
     oblig: [...adj.keys()].filter((k) => k.startsWith('義務 / ')).length,
-    obligDone: [...adj.keys()].filter((k) => k.startsWith('義務 / ') && k.includes('[埋まった]')).length },
+    obligDone: [...adj.keys()].filter((k) => k.startsWith('義務 / ') && k.includes('[埋まった]')).length,
+    // ★いまの作業状況(2026-09-06 追加)。どちらも**グラフに到達している節点だけ**を数える。
+    sorryItems: [...SORRY].filter((k) => adj.has(k)).length,
+    pendingItems: [...PENDING].filter((k) => adj.has(k)).length,
+    sorryDecls, sorryFiles, pendingSecs: pendingSecs.length },
   width: (maxL + 1) * (BW + GAPX), height: maxH + 40,
 };
 const html = readFileSync(join(ROOT, 'tools', 'graph-layers.template.html'), 'utf8').replace('/*__DATA__*/', JSON.stringify(data));
@@ -578,4 +695,6 @@ console.log(`書き出し: ${OUT}`);
 console.log(`  節点 ${data.stats.nodes} / SCC ${data.stats.sccs}(サイズ>1 は ${data.stats.bigSccs})`);
 console.log(`  ボックス ${data.stats.boxes} / 層 ${data.stats.layers}(左 0 = 依存なし、右 ${maxL} = 根)`);
 console.log(`  我々が触れている節点 ${data.stats.ours}(★義務は含めない)`);
+console.log(`  sorry の残る項目 ${data.stats.sorryItems} / 判断待ち ${data.stats.pendingItems}` +
+  `(★sorry を含む宣言 ${sorryDecls}・ファイル ${sorryFiles} / 未決の節 ${pendingSecs.join(' ')})`);
 console.log(`  Interface の義務: ${data.stats.obligDone} / ${data.stats.oblig}`);

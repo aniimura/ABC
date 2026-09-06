@@ -20,15 +20,28 @@
  * ★同時に起動する agent は **5 個まで**（`ResearchPaper/orchestration.md` §0）。
  *   だから既定の出力も 5 件で切る。足りなければ**次の波**にする。
  *
+ * ★★印（2026-09-06、メタ第 9 回。backlog M18）
+ *   `startable` の判定は**変えない**。持ち場を配る前に見えるべき事実を 3 つ**足すだけ**である。
+ *     配線?N … その `sorry` に `Found/` の既存宣言で解ける候補がある（`unwired.mjs` の
+ *              「裸 かつ 一致率 80% 以上 かつ 情報量 15 以上」。2026-09-06 に 6/9 が当たりだった）
+ *     空撃ち／消費者なし … 誰もその語を使っていない（`unwired.mjs --dead`）
+ *     保留 Dn … `ResearchPaper/decisions-pending.md` に**保留として載っている**
+ *              （`決定` / `採用` / `解決` だけの節は数えない）
+ *   ★実測（2026-09-06）: 前線 19 ノードのうち **11 が保留**、**5 が配線候補**、
+ *   **8 が空撃ち／消費者なし**。すなわち **agent を配る前に人の判断が要るものが 6 割**ある。
+ *   印を出さないと、これは `frontier.mjs` の画面からは 1 つも見えなかった。
+ *
  * 使い方:
  *   node tools/frontier.mjs                 # 着手可能なものを効果の大きい順に（上位 5 件）
  *   node tools/frontier.mjs --all           # 着手不可のものも出す（blockers 付き）
  *   node tools/frontier.mjs --owner pGC     # 所属で絞る
  *   node tools/frontier.mjs --limit 0       # 件数の上限を外す（俯瞰したいときだけ）
  *   node tools/frontier.mjs --json          # Orchestrator が食う形
+ *   node tools/frontier.mjs --no-marks      # 印を付けない（1.1 秒。付けると 3.2 秒）
  */
 
 import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -132,6 +145,111 @@ for (const n of nodes) {
   });
 }
 
+/* ------------------------------------------------------------------ 印
+ *
+ * ★ここから下は **`startable` の判定に触らない**。表示だけを足す（backlog M3 と同じ設計）。 */
+
+/** `decisions-pending.md` の**保留節**を読む。★`決定` / `採用` / `解決` だけの節は数えない。
+ *
+ * 当て方は 2 通りで、**両方要る**（実測 2026-09-06）:
+ *   (a) 節の本文が Lean のファイル名を名指ししている … 前線 19 のうち 9 件が当たる
+ *   (b) 節の**見出し**の `[論文] 項目` が、ノードの `.src` 項目と一致する … 9 件が当たる
+ *   → **どちらかで当たる 11 件**。(a) だけだと `Skeleton/GenEll/VeluSemistable.lean`
+ *     （D9 は「[GenEll] Lemma 3.5」としか書いておらずファイル名が無い）を落とす。
+ * ★項目の照合は**ローマ数字まで見る**。見ないと D16「[FrdI] Theorem 6.4 (i)」が
+ *   `Chebotarev.lean`（Theorem 6.4 **(iv)**）に当たる（実測 1 件の誤報）。 */
+const KIND = 'Theorem|Proposition|Lemma|Definition|Corollary|Example|Remark|Claim|Section|Conjecture|Notation';
+const ITEM_RE = new RegExp(`\\[(\\w+)\\]\\s*(${KIND})\\s*([0-9]+(?:\\.[0-9]+)*)\\s*,?\\s*(?:\\((i{1,3}|iv|vi{0,3}|ix|x)\\))?`, 'g');
+const FILE_RE = /(?:lean[/\\]ABC3[/\\])?((?:Skeleton|Found|Check|Interface|Gap|Meta)[/\\][\w\-./\\]*\.lean)/g;
+const itemKeys = (s) => {
+  const out = [];
+  ITEM_RE.lastIndex = 0;
+  let m;
+  while ((m = ITEM_RE.exec(s))) out.push([`[${m[1]}] ${m[2]} ${m[3]}`, m[4] ?? null]);
+  return out;
+};
+function loadPending() {
+  const byFile = new Map();
+  const byItem = new Map();
+  let sections = 0;
+  let text;
+  try { text = readFileSync(join(ROOT, 'ResearchPaper', 'decisions-pending.md'), 'utf8'); }
+  catch { return { byFile, byItem, sections: -1 }; }
+  let cur = null;
+  const secs = [];
+  for (const l of text.split(/\r?\n/)) {
+    const h = /^##\s+(D\d+)\.\s*(.*)$/.exec(l);
+    if (h) { cur = { id: h[1], title: h[2], state: null, body: [] }; secs.push(cur); continue; }
+    if (!cur) continue;
+    if (cur.state === null) { const s = /^[-*]?\s*\*\*状態\*\*\s*[:：]\s*(.*)$/.exec(l); if (s) cur.state = s[1]; }
+    cur.body.push(l);
+  }
+  for (const s of secs) {
+    if (!(s.state ?? '').includes('保留')) continue;   // ★`決定` だけの節は落とす
+    sections++;
+    const body = s.body.join('\n');
+    let m;
+    FILE_RE.lastIndex = 0;
+    while ((m = FILE_RE.exec(body))) {
+      const f = m[1].replace(/\\/g, '/');
+      if (!byFile.has(f)) byFile.set(f, new Set());
+      byFile.get(f).add(s.id);
+    }
+    for (const [k, roman] of itemKeys(s.title)) {   // ★見出しだけ。本文から拾うと言及が全部当たる
+      if (!byItem.has(k)) byItem.set(k, []);
+      byItem.get(k).push({ id: s.id, roman });
+    }
+  }
+  return { byFile, byItem, sections };
+}
+
+/** `unwired.mjs` を 1 回だけ呼んで「配線候補」と「空撃ち」を得る。
+ *  ★無ければ静かに諦める（`unwired.mjs` は D14 で取り込んだ新しい道具なので、
+ *    古い木でも `frontier.mjs` が落ちないようにしておく）。 */
+function loadUnwired() {
+  try {
+    const out = execFileSync('node', [join(ROOT, 'tools', 'unwired.mjs'), '--marks'], {
+      encoding: 'utf8', maxBuffer: 1 << 28, stdio: ['ignore', 'pipe', 'ignore'],
+    });
+    const j = JSON.parse(out);
+    const strongBy = new Map();   // rel → 「裸 かつ 80% 以上 かつ 情報量 15 以上」の件数
+    const anyBy = new Map();      // rel → 候補が 1 件でもある sorry 宣言の数
+    for (const r of j.report ?? []) {
+      const strong = r.bare && (r.cands ?? []).some((c) => c.cov >= 0.8 && c.mass >= 15);
+      if (strong) strongBy.set(r.rel, (strongBy.get(r.rel) ?? 0) + 1);
+      if ((r.cands ?? []).length) anyBy.set(r.rel, (anyBy.get(r.rel) ?? 0) + 1);
+    }
+    const deadBy = new Map();
+    for (const d of j.dead ?? []) deadBy.set(d.rel, d.kind);
+    return { strongBy, anyBy, deadBy, ok: true };
+  } catch {
+    return { strongBy: new Map(), anyBy: new Map(), deadBy: new Map(), ok: false };
+  }
+}
+
+const wantMarks = !flag('--no-marks');
+const pending = wantMarks ? loadPending() : null;
+const uw = wantMarks ? loadUnwired() : null;
+if (wantMarks) {
+  for (const r of rows) {
+    const ds = new Set(pending.byFile.get(r.rel) ?? []);
+    for (const it of r.items) {
+      for (const [k, roman] of itemKeys(it)) {
+        for (const e of pending.byItem.get(k) ?? []) {
+          if (e.roman && roman && e.roman !== roman) continue;  // ★(i) と (iv) を混ぜない
+          ds.add(e.id);
+        }
+      }
+    }
+    r.marks = {
+      unwired: uw.strongBy.get(r.rel) ?? 0,
+      cands: uw.anyBy.get(r.rel) ?? 0,
+      dead: uw.deadBy.get(r.rel) ?? null,
+      pending: [...ds].sort((a, b) => Number(a.slice(1)) - Number(b.slice(1))),
+    };
+  }
+}
+
 const ownerFilter = opt('--owner');
 let sel = ownerFilter ? rows.filter((r) => r.owner === ownerFilter) : rows;
 if (!flag('--all')) sel = sel.filter((r) => r.startable);
@@ -162,6 +280,16 @@ if (useMath && mathBlocked.length) {
 } else if (!useMath) {
   console.log('  ★--no-math: `.needs` の辺を無視している（2026-09-05 以前の挙動）');
 }
+if (wantMarks) {
+  const np = rows.filter((r) => r.marks.pending.length).length;
+  const nu = rows.filter((r) => r.marks.unwired).length;
+  const nd = rows.filter((r) => r.marks.dead).length;
+  console.log(`  ★印: 保留 ${np} 件 / 配線候補 ${nu} 件 / 空撃ち・消費者なし ${nd} 件` +
+    `（${total} ノード中）${uw.ok ? '' : '  ※unwired.mjs を呼べなかったので配線/空撃ちは 0'}`);
+  console.log('    保留 = decisions-pending.md に**保留として**載っている（人の判断待ち）。--no-marks で消せる');
+} else {
+  console.log('  ★--no-marks: 保留・配線候補・空撃ちの印を出していない');
+}
 if (ownerFilter) console.log(`  所属で絞り込み: ${ownerFilter}`);
 console.log(`  ${flag('--all') ? '★--all: 着手不可も表示' : '（着手不可を隠している。--all で全部）'}`);
 console.log();
@@ -169,6 +297,14 @@ console.log('  下流  項目  ノード');
 for (const r of sel) {
   const mark = r.startable ? ' ' : '×';
   console.log(`${mark} ${String(r.downstream).padStart(5)} ${String(r.dsItems).padStart(5)}  ${r.rel}  (${r.owner})`);
+  if (wantMarks) {
+    const tags = [];
+    if (r.marks.pending.length) tags.push(`★保留 ${r.marks.pending.join(',')}（人の判断待ち）`);
+    if (r.marks.unwired) tags.push(`★配線候補 ${r.marks.unwired} 件（unwired.mjs --node ${r.rel}）`);
+    else if (r.marks.cands) tags.push(`配線候補 なし（弱い候補 ${r.marks.cands} 件）`);
+    if (r.marks.dead) tags.push(`★${r.marks.dead}（この語を誰も使っていない）`);
+    if (tags.length) console.log(`                  印: ${tags.join(' / ')}`);
+  }
   if (r.items.length) console.log(`                  項目: ${r.items.slice(0, 4).join(' / ')}${r.items.length > 4 ? ' …' : ''}`);
   if (!r.startable) {
     console.log(`                  ★上流の sorry ${r.blockers.length} 件で止まる:`);

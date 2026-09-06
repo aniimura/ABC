@@ -1,5 +1,6 @@
 import ABC3.Found.PGC.InertiaIdentification
 import ABC3.Found.PGC.AdjoinFieldClosure
+import ABC3.Found.PGC.ResidueCardTransport
 
 /-!
 # Corollary 1.3 は Proposition 1.2 に帰着する
@@ -45,7 +46,16 @@ import ABC3.Found.PGC.AdjoinFieldClosure
 
 > **Prop 1.2(`q` が位相群 `Γ_K` から決まる)が成り立てば、Cor 1.3 が成り立つ。**
 
-残るのは Prop 1.2 のみ。
+## ★★★★2026-09-06(D13 の実行): 仮説 `htop` は供給された
+
+`Found/PGC/ResidueCardTransport.lean::residueCard_eq_of_absGal_equiv`(無条件・`sorry` 無し)が
+そのまま `htop` を与えるので、`Skeleton/PGC/Section1Cor13.lean::inertia_recoverable` は
+**閉じた**(`sorryAx` 無し)。
+
+★これに伴い、`IsUnramifiedAt` / `inertia` / `inertiaObject` の定義は
+`Skeleton/PGC/Section1Cor13.lean` から `Skeleton/PGC/InertiaDef.lean` へ降ろした
+(そうしないと「Skeleton の主張 → Found の証明 → Skeleton の定義」が循環する)。
+定義そのものは変えていない。
 -/
 
 namespace ABC3.Found.PGC
@@ -216,5 +226,25 @@ theorem inertia_recoverable_of_prop12
     (inertiaObject (residueCardinality p)
       (subgroupCorrespondence p)).RecoverableFromAbsGal :=
   inertia_recoverable_of_residueCard_transport htop (residueCard_transport_of_prop12 htop)
+
+/-- **★★★★★★★★★★★★★★★★★★★★[pGC] Corollary 1.3
+(無条件版)**。
+
+惰性群 `I_K = inertia (residueCardinality p) (subgroupCorrespondence p) K` は、
+`Γ_K` の位相群としての同型類だけから決まる。仮説は無い。
+
+上の `inertia_recoverable_of_prop12` の仮説 `htop` を、
+`Found/PGC/ResidueCardTransport.lean::residueCard_eq_of_absGal_equiv`
+(無条件・`sorry` 無し、経路 C のノード G)で埋めただけである。
+`Skeleton/PGC/Section1Cor13.lean::inertia_recoverable` はこれへ委譲する。 -/
+theorem inertia_recoverable_real :
+    (inertiaObject (residueCardinality p)
+      (subgroupCorrespondence p)).RecoverableFromAbsGal :=
+  inertia_recoverable_of_prop12 (fun _ _ α => residueCard_eq_of_absGal_equiv α)
+
+def inertia_recoverable_real.src : ABC3.Meta.Source :=
+  { paper := "pGC", pdfPage := 3, item := "Corollary 1.3", sectionId := "cor-1-3" }
+
+#print axioms inertia_recoverable_real
 
 end ABC3.Found.PGC

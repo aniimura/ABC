@@ -19,6 +19,13 @@
 - 対象モジュール単体のビルド
 - 節目の全体ゲート(★**実装 agent が全員止まってから**。`check.mjs` は内部で
   `lake build` を走らせるのでロックで待たされる)
+  - ★**ゲートの最後に `node tools/graph-layers.mjs` を回す**(2026-09-06 追加)。**3.0 秒**。
+    `dependency-graph.html` と `ResearchPaper/graph-layers-stats.json` を作り直す
+    (後者は `index.html` が読む)。
+    ★この図は 2026-09-06 から**いまの作業状況**を映す —— `□`(statement は在るが
+    `sorry` のまま)と、上端が青い箱(`decisions-pending.md` が**未決のまま**名指ししている項目)。
+    ★どちらもゲートで動く量なので、**ゲートを通った時点の姿**にしておかないと figure が古びる。
+    ★★実測の見張り: 出力の `節点 / ボックス / 層` が動いていないこと(§3 の停止条件と同じ理屈)
 - ゲートが緑なら **commit + push**
 - `meta-backlog.md` / `decisions-pending.md` / `memory/` への書き込み
 - `tools/lean-idioms.md` への失敗形の追記

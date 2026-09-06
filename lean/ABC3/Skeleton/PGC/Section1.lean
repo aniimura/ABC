@@ -1,16 +1,18 @@
-import ABC3.Skeleton.PGC.Setup
-import ABC3.Interface.PGC.LocalFieldData
+import ABC3.Skeleton.PGC.Section1Defs
+import ABC3.Found.PGC.Prop12Transport
 
 /-!
 # [pGC] §1 — 命題
 
 設定・記号・§1冒頭の暗黙の定義は `ABC3/Skeleton/PGC/Setup.lean`。
 未構築の基礎は `ABC3/Interface/PGC/LocalFieldData.lean`。
+Proposition 1.2 / Corollary 1.3 が語る対象の定義は
+`ABC3/Skeleton/PGC/Section1Defs.lean`(2026-09-06 に主張から分離した)。
 -/
 
 namespace ABC3.Skeleton.PGC
 
-open ABC3.Meta ABC3.Interface.PGC
+open ABC3.Meta ABC3.Interface.PGC ABC3.Found.PGC
 
 variable {p : ℕ} [Fact p.Prime]
 
@@ -137,23 +139,6 @@ def cyclotomicCharacter_recoverable.needs : List ProofObligation :=
 
 /-! ## Proposition 1.2 -/
 
-/-- Proposition 1.2 が回復されると主張する2つの量を「K に付随する対象」として束ねたもの:
-剰余体の元の個数 q と、絶対次数 [K : ℚ_p]。
-
-いずれも**数**なので、移送は恒等——原典の「α によって対応物へ移る」は、数については
-「等しい」を意味する。
-
-`q` は `Interface` の `ResidueCardinality` から取る(まだ構築できていないため)。
-`[K : ℚ_p]` は mathlib の `Module.finrank` で書ける。 -/
-noncomputable def residueCardAndDegreeObject (RD : ResidueCardinality p) :
-    AssociatedObject p where
-  Obj := fun _ => ℕ × ℕ
-  obj := fun K => (RD.card K, Module.finrank ℚ_[p] K.carrier)
-  transport := fun _ x => x
-
-def residueCardAndDegreeObject.src : Source :=
-  { paper := "pGC", pdfPage := 3, item := "Proposition 1.2", sectionId := "prop-1-2" }
-
 /-- **[pGC] Proposition 1.2**
 
 原文 (pGC p.3):
@@ -162,16 +147,51 @@ def residueCardAndDegreeObject.src : Source :=
 
 原文の "and well as" は "as well as" の誤植と読めるが、逐語欄では原文どおりに保つ。
 
-## 条件付き形式化
+## ★2026-09-06(D13 採用): 逸脱の記録——`∀ RD` をやめ実物に固定した
 
-`RD : ResidueCardinality p` を仮説として取る——q を与える構成そのものが未構築だから
-(`Interface/PGC/LocalFieldData.lean`)。`RD` が本物になれば、この定理は無条件になる。
+`∀ RD : ResidueCardinality p` をやめ `realResidueCardinality` に固定した。
+★理由: `∀ RD` 版は `Check/PGC/Prop12ForallRD.lean` が**原典が偽と述べている命題と同値**だと
+証明した(10 例目の退化。「修復が強すぎる主張を作った」型)。
+`Interface` に仮説として置いた理由(構成が未構築)は第 1012 で消えている。
+★これは**原典の主張を弱めたのではなく、原典が言っていない主張を落とした**ものである。
 
-## 未解決
+具体的には `Check/PGC/Prop12ForallRD.lean::forall_RD_recoverable_iff_algEquiv`(`sorry` 無し)が
+
+```
+(∀ RD, (residueCardAndDegreeObject RD).RecoverableFromAbsGal) ↔
+  ∀ {K K'}, (K.absGal ≃ₜ* K'.absGal) → Nonempty (K.carrier ≃ₐ[ℚ_[p]] K'.carrier)
+```
+
+を証明しており、右辺は原典 Introduction が
+「the Grothendieck Conjecture cannot hold in the naive sense」
+「I originally set out to prove the naive version of the above Theorem,
+only to discover that this was, in fact, false」と述べ、
+[8] (Jarden-Ritter) を挙げているまさにその主張である。
+実物 `realResidueCardinality`(`Found/PGC/ResidueCardinality.lean:98`、第 1012 で構成)
+の `card` は `Nat.card 𝓀[K.carrier]` そのもの(橋は `rfl`)なので、この落とし穴を通らない。
+
+★`Check/PGC/Prop12ForallRD.lean` は「`∀ RD` 版が何と同値か」の記録として残してある。
+★`Interface/PGC/LocalFieldData.lean` の `ResidueCardinality` はそのまま
+(Corollary 1.3 側の `IsUnramifiedAt`・`inertia` が使う)。
+
+## 証明——経路 C(原典の論拠は経由しない)
 
 原典の論拠は局所類体論の同型 Γ_K^ab ≅ (K^×)^∧ と、そこからの計数
 (捩れの prime-to-p 部分が q−1 個、pro-p 商の階数が [K:ℚ_p]+1)。
-後者は p進対数を使う——**mathlib にも公開プロジェクトにも無い**(実測)。
+後者は p進対数を使う——**mathlib にも公開プロジェクトにも無い**(実測。下の `.needs` を参照)。
+
+本形式化はそこを通らず、**経路 C** で閉じている:
+
+| 成分 | 補題 | 置き場所 |
+|---|---|---|
+| `q` | `residueCard_eq_of_absGal_equiv` | `Found/PGC/ResidueCardTransport.lean`(ノード G) |
+| `[K:ℚ_p]` | `finrank_eq_of_absGal_equiv` | `Found/PGC/DegreeTransport.lean`((C-d)) |
+
+`transport` は恒等なので、対 `(q, [K:ℚ_p])` の等号を `Prod.ext` で束ねるだけ。
+実装は規約(G8)どおり `Found/` にあり
+(`Found/PGC/Prop12Transport.lean::residueCard_and_degree_recoverable_real`)、
+ここはそれへ**委譲する**。
+★経路 C が原典の論拠を経由しない逸脱は `ResearchPaper/pgc-goal.md` に記録済み。
 
 ## 反証可能性(2026-08-14 監査)
 
@@ -201,9 +221,9 @@ def residueCardAndDegreeObject.src : Source :=
 修理後は反例が作れないことも `Prop12Degenerate.lean::no_residueCardinality_with_badRD_card`
 で確認した。★これで本定理は原典本来の内容(α から体の同型を作る)に戻っており、
 **易しくはなっていない**。 -/
-theorem residueCard_and_degree_recoverable (RD : ResidueCardinality p) :
-    (residueCardAndDegreeObject RD).RecoverableFromAbsGal := by
-  sorry
+theorem residueCard_and_degree_recoverable :
+    (residueCardAndDegreeObject (realResidueCardinality p)).RecoverableFromAbsGal :=
+  ABC3.Found.PGC.residueCard_and_degree_recoverable_real p
 
 def residueCard_and_degree_recoverable.src : Source :=
   { paper := "pGC", pdfPage := 3, item := "Proposition 1.2", sectionId := "prop-1-2" }
