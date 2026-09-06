@@ -6721,3 +6721,25 @@ Cauchy 条件 `hcauchy` の型に `I^m • ⊤` が出るので**そちらは埋
 `x - (x - y) ∈ 𝔪` を返す。`simpa using` で通るが
 `Try 'simp at h' instead`（= simp が目標まで閉じている）という警告が出て意図が濁る。
 `rwa [sub_sub_cancel] at h` と書けば `a - (a - b) = b` の 1 手だと読める。
+
+## #79 「`N` を法として等しい 2 元」の乗り換えは商群を 1 回作るのが最短（2026-09-06、N13）
+
+**場面**: Frobenius の持ち上げ `σ₀` を「`F` を固定する `σ`」に取り替えたとき、
+`σ₀` に課された条件（`σ₀^k ∈ N ↔ m ∣ k` など）を `σ` へ移したい。
+`σ₀⁻¹σ ∈ N`（`N` 正規）だけが手掛かり。
+
+**失敗形**: `(σ₀ n)^k σ₀^{-k} ∈ N` を `ℤ` の帰納法で直接示そうとすると長い。
+
+**直し方**: `QuotientGroup.mk' N` を通す。3 行で済む。
+
+    have hq : (QuotientGroup.mk' N) σ = (QuotientGroup.mk' N) h := by
+      simp only [QuotientGroup.mk'_apply]; exact QuotientGroup.eq.mpr hmem
+    -- あとは (QuotientGroup.eq_one_iff _) と map_zpow で往復するだけ
+
+★`QuotientGroup.mk'_eq_mk'` は**無い**（`Unknown constant` になる）。
+`QuotientGroup.eq : (↑a = ↑b) ↔ a⁻¹ * b ∈ s` を `mk'_apply` で剥がしてから使う。
+★`⟨σ⟩ ⊔ N = ⊤` の乗り換えだけは商群も正規性も要らない
+（`σ = h * (σ⁻¹h)⁻¹ ∈ ⟨h⟩ ⊔ N` で `Subgroup.zpowers_le` に流す）。
+★ついでに「`_root_.mem_fixingSubgroup_iff` は M が明示引数」の罠は `IntermediateField.mem_fixingSubgroup_iff` にもある
+（`K` と `σ` が**両方とも明示引数**：`(IntermediateField.mem_fixingSubgroup_iff F g).mp h`。
+`_` を 1 つにすると `Invalid field 'mp' ... Function.mp` という無関係なエラーが出る）。
