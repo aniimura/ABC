@@ -7,6 +7,17 @@
   "notationRisk: .txt 抽出で対象の同定が壊れる危険度。high の論文は全 locator で PDF 目視必須。"
  ],
  "papers": {
+  "Yoshida08": {
+   "title": "Local Class Field Theory via Lubin-Tate Theory",
+   "file": "Yoshida - Local Class Field Theory via Lubin-Tate Theory (Ann. Fac. Sci. Toulouse 17-2, 2008; arXiv math-0606108)",
+   "author": "Teruyoshi Yoshida",
+   "year": 2008,
+   "pdfPages": 21,
+   "pageOffset": 0,
+   "notationRisk": "medium",
+   "notationNotes": "★arXiv の LaTeX 版で抽出は良好(21 頁 / 58,164 字)。ただし数式中の記号が壊れる: `K̂` → `bK` / `b` 単独、`Ẑ` → `bZ`、`Θ` → `Θ` はそのまま、`φ_G` → `φG`、`≅` → `∼ =`(2 行に割れる)、`⊕` → `L`(大文字エル)。★上付き添字が本文に落ちる(`K^ram_x` → `Kram x`)。locator は PDF 目視で確かめること。",
+   "note": "★★★★★2026-09-06 に取得(ユーザーが MSE の質問から辿った。arXiv math/0606108、Ann. Fac. Sci. Toulouse 17-2 (2008)。オープンアクセス)。★★★**経路 Λ の欠落 3 つのうち 2 つがこの 21 頁で埋まる。** 実測(第 1062): (1) ★★**Theorem 6.11 (Hasse-Arf) は完全な証明つき**(Sen [14] に従う。Prop 6.6 (Sen) → Cor 6.7 → Lemma 6.8 → Prop 6.9 (Herbrand) → Lemma 6.10 → Thm 6.11)。⇒ ★**N9(2,500-6,000 行)の典拠がゼロから 1 になった。Milne も Serre 1961 も Sharifi も外注していた唯一の定理である。** (2) ★★**Proposition 6.9 (Herbrand) も証明つき**(Sharifi Thm 6.5.25 に次ぐ 2 本目)。 (3) ★★★**Theorem 6.15 (Local Kronecker-Weber) = K^ab = K_LT が証明つき** —— これは経路 Λ7 のゴールそのもの。 (4) ★★**Theorem A / Corollary 5.16 が Artin 写像を一意性つきで特徴づける**(Art_K(π)|_{K^ur} = Frob_K と ノルム群が id に写ること)。(ii) が基底変換との両立。⇒ ★**Λ8(Milne が Need to add a proof … と書いて Iwasawa 1986 Thm 6.9 に外注した箇所)の典拠。**要旨自身が refining the arguments of Iwasawa [9] と書いている。 (5) ★**Theorem 5.15 (Base change) も証明つき。** ★**埋まらないもの**: [pGC] §2 が要求する Art(U_K^v) = Gamma_K^v(上付き分岐群と単数フィルトレーションの対応)は本文に見当たらない(grep で 0 件)。Yoshida は下付き G_n と phi_G だけで Hasse-Arf を通す。 ★★**前提が軽い**: The only prerequisites are Galois theory … and some basic commutative algebra summarized in Appendix。位相的なコンパクト性の議論を避けていると明記。★★**しかも Lubin-Tate 経由**なので、我々の在庫(Found/PGC/LubinTate*.lean = 13,260 行 / 55 ファイル)がそのまま土台になる。★`0_Source` は gitignore 済みで公開リポジトリには入らない。"
+  },
   "Sharifi": {
    "title": "Algebraic Number Theory (lecture notes)",
    "file": "Sharifi - Algebraic Number Theory (UCLA lecture notes)",

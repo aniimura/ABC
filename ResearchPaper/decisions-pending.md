@@ -2091,3 +2091,75 @@ Chonoles(9 頁)は両方とも省略、Sharifi(259 頁)は Herbrand のみ証明
 ★**分量が判定と相関している**(9 頁 → 0 本、51 頁 → 0 本、259 頁 → 1 本)。
 
 - **決定**: —
+
+### ★★★★★★★D25 の続報(第 1062)—— **Yoshida 2008 で Hasse-Arf の典拠が手に入った。経路 Λ の欠落が 3 → 1 になった**
+
+ユーザーが MSE の質問(`Step in Yoshida's proof of Hasse-Arf theorem`)から辿った文献。
+**Yoshida, "Local Class Field Theory via Lubin-Tate Theory"**、arXiv math/0606108、
+Ann. Fac. Sci. Toulouse 17-2 (2008)、**21 頁**。オープンアクセス。鍵 `Yoshida08`。
+
+## ★★★これ 1 本で埋まるもの
+
+| 我々の欠落 | Yoshida | 状態 |
+|---|---|---|
+| ★★**N9 = Hasse-Arf** | **Theorem 6.11** | ★**完全な証明つき**(Sen [14] に従う) |
+| N8 = Herbrand | **Proposition 6.9** | ★**証明つき**(Sharifi Thm 6.5.25 に次ぐ 2 本目) |
+| ★★★**Λ7 のゴール `K^ab = K_π·K^ur`** | **Theorem 6.15**(Local Kronecker-Weber) | ★**証明つき** |
+| ★★**Λ8**(Artin 写像の特徴づけと基底変換) | **Theorem A / Cor 5.16 / Thm 5.15** | ★**証明つき + 一意性つき** |
+
+★★**N9 は、Milne も Serre 1961 も Sharifi も外注していた唯一の定理**である。
+これで **典拠ゼロの節点が無くなった**(§2 の `abelianImage` を除く)。
+
+Hasse-Arf の証明の鎖(すべて証明つき):
+`Prop 6.2` → `Cor 6.3` → `Lemma 6.4/6.5` → **`Prop 6.6 (Sen)`** → `Cor 6.7` → `Lemma 6.8`
+→ **`Prop 6.9 (Herbrand)`** → `Lemma 6.10` → **`Thm 6.11 (Hasse-Arf)`**。
+
+★**Λ8 について**: Milne は p.34 に `Need to add a proof of this to the notes` と書いて
+**Iwasawa 1986 Thm 6.9 p.89** に外注していた。Yoshida の要旨は
+**`refining the arguments of Iwasawa [9]`** と書いており、**Theorem A (ii)** が
+`Art_{K'}(x)|_{K^ab} = Art_K(N_{K'/K}(x))` を与える。⇒ **Iwasawa 1986 の取得は不要になった見込み。**
+
+## ★埋まらないもの(1 つだけ残った)
+
+**[pGC] §2 の `abelianImage`**(`Art(U_K^v) = Γ_K^v`、上付き分岐群と単数フィルトレーションの対応)は
+**本文に見当たらない**(grep 0 件)。Yoshida は下付き `G_n` と `φ_G` だけで Hasse-Arf を通す。
+⇒ **これだけが Serre "Local CFT"(Cassels-Fröhlich)[3] Thm 1 p.155 のまま。**
+
+## ★★前提が軽く、しかも**我々の経路と一致している**
+
+> The only prerequisites are Galois theory (including cyclotomic extensions, finite fields and
+> infinite extensions) and some basic commutative algebra summarized in Appendix.
+
+位相的なコンパクト性の議論を避けていると明記。★★**しかも Lubin-Tate 経由**なので、
+我々の在庫(`Found/PGC/LubinTate*.lean` = **13,260 行 / 55 ファイル**)がそのまま土台になる。
+★§3「Formal groups and Lubin-Tate groups」・§4「Lubin-Tate extensions and Artin maps」は
+**我々が既に持っている部分**である。
+
+## ★★取得判断の更新(3 → 1)
+
+| 文献 | 前回 | 今回 |
+|---|---|---|
+| Herbrand の証明 | 未取得 | ★**Sharifi Thm 6.5.25 + Yoshida Prop 6.9** で解決 |
+| **Hasse-Arf の証明** | ★典拠ゼロ | ★★**Yoshida Thm 6.11** で解決 |
+| **Λ7 のゴール** | Milne(2 大ノードが外注) | ★★**Yoshida Thm 6.15** で自己完結 |
+| **Λ8** | Iwasawa 1986(未取得) | ★★**Yoshida Thm A/5.15/5.16** で解決の見込み |
+| **§2 の `abelianImage`** | 未取得 | ★**残る唯一の欠落** |
+
+★**Rosen 棄却の判定は変わらない**(Rosen は Herbrand を使わないが `Z_p[C_p]` 格子の分類が要り、
+Yoshida は 21 頁で自己完結している)。
+
+## ★★★段取りの見直しが要る(次の測定点)
+
+Λ7 のノード表(14 ノード / 7,300-15,500 行)は **Milne I §4 の構成**に基づいて作った。
+★**Yoshida の構成は違う**(Sen の議論で Hasse-Arf を通し、`i(σ)` と `φ_G` だけで進む)。
+⇒ **Yoshida の構成でノード表を作り直すと、行数が変わる可能性がある。**
+特に:
+* Yoshida は**上付き番号付けを最小限しか使わない**(`φ_G(n) ∈ ℤ` の形で Hasse-Arf を述べる)
+* `Prop 6.6 (Sen)` が鍵で、これは `σ ∈ G_1` の位数 `p^m` に対する付値の評価
+* ★**我々の在庫(Lubin-Tate 一式)がそのまま §3-§4 に対応する**
+
+☆未確認: Yoshida の `Prop 6.2`(下付き分岐群の埋め込み)が mathlib の `Ideal.inertia` と
+どう対応するか。Yoshida の `K_LT`(Lubin-Tate 拡大の合成)が我々の
+`lubinTateClosure ⊔ unramifiedClosure` と一致するか。
+
+- **決定**: —
