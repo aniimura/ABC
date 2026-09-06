@@ -6648,3 +6648,32 @@ rwa [hcardG] at h    -- 型の中の ZMod N は動かない
 **直し方**: `Subgroup.mem_inf.mpr ⟨h1, h2⟩` を使う（`h1`・`h2` は
 `x ∈ H`・`x ∈ K` を**別の `have` で作っておく**）。`⊓` を anonymous
 constructor で割らない。
+
+## #74 `IsHausdorff.haus inferInstance` はイデアルが決まらず stuck（2026-09-06、Λ6 Dwork 加法版）
+
+**失敗形**: `refine IsHausdorff.haus inferInstance _ (fun N => ?_)` が
+
+    typeclass instance problem is stuck, it is often due to metavariables
+      IsHausdorff ?m.243 ↥(unramifiedCompletionInt K)
+
+`IsHausdorff.haus` の結論は `x = 0` で、イデアル `I` は**結論に現れない**ので
+暗黙引数が埋まらない。同じ `IsAdicComplete` から取る `IsPrecomplete.prec` は
+Cauchy 条件 `hcauchy` の型に `I^m • ⊤` が出るので**そちらは埋まる**——
+片方だけ落ちるので原因に気づきにくい。
+
+**直し方**: `(I := …)` を明示する。
+
+    refine IsHausdorff.haus (I := IsLocalRing.maximalIdeal ↥(unramifiedCompletionInt K))
+      inferInstance _ (fun N => ?_)
+
+## #75 `SModEq` は `I^n • ⊤` の形なので、差の所属に落とす補題を 1 本置く（2026-09-06、Λ6）
+
+`IsPrecomplete.prec` / `IsHausdorff.haus` が使う形は `f m ≡ f n [SMOD I ^ m • ⊤]` で、
+環を自分自身の加群と見た `I ^ m • (⊤ : Submodule R R)` である。往復のたびに
+`SModEq.sub_mem` と `I • ⊤ = I` を手で当てると読めなくなるので、1 本だけ置く:
+
+    theorem sModEq_pow_iff {R : Type*} [CommRing R] (I : Ideal R) (n : ℕ) (x y : R) :
+        x ≡ y [SMOD I ^ n • (⊤ : Submodule R R)] ↔ x - y ∈ I ^ n := by
+      rw [SModEq.sub_mem]; simp
+
+★`I • (⊤ : Submodule R R) = I` は `simp` が一発で閉じる（専用の補題名を探さなくてよい）。
