@@ -169,7 +169,24 @@ const LEAD = '^[ \\t]{0,6}';
 const DISPLAY_RE = new RegExp(`${LEAD}${KIND}\\s+${NUM}\\.(?:\\s*$|\\s*\\()`);
 const COLON_RE = new RegExp(`${LEAD}${KIND}\\s+${NUM}\\s*:\\s*$`);
 const RUNIN_RE = new RegExp(`${LEAD}${KIND}\\s+${NUM}\\.\\s+\\S`);
-const KEY_RE = new RegExp(`${LEAD}(${KIND})\\s+(${NUM})`);
+// ★★2026-09-06 追加(第 1065、D25 の測定器の欠陥 1)。
+//   見出しが ALLCAPS の論文を**まったく見ていなかった**。実測: MilneCFT 2/327・
+//   MilneANT 1/266・MilneAV 1/255 しか拾えず、`--item` が引けない論文が 50 本中 15 本あった。
+//   (D23 が「hedge-index で引けなかったので手で数えた」と書いたのはこの穴。)
+const CAPS = '(?:PROPOSITION|THEOREM|DEFINITION|COROLLARY|LEMMA|EXAMPLE|REMARK|CLAIM|NOTATION|CONJECTURE)';
+// ★Milne 系は `THEOREM 0.1 本文…` と番号のあとに**ピリオドが無い**ので、
+//   DISPLAY(行独立) にも RUNIN(番号のあとにピリオド) にも当たらない。
+// ★★2026-09-06 追加(第 1065)。第 4 の書式 PAREN —— `Theorem 6.11 (Hasse-Arf).` のように
+//   **番号のあとにピリオドが無く、空白 + 括弧の題が続く**もの。Yoshida08 / Sharifi の
+//   名前つき定理がこれで、DISPLAY(番号のあとにピリオド)にも RUNIN にも当たらなかった。
+//   ★取り落としていたのは Herbrand と Hasse-Arf という**いちばん重い 2 本**である。
+//   ★行頭に錨を打つ(LEAD)ので、文中の前方参照 `see Theorem 3.2 (i)` は拾わない。
+const PAREN_RE = new RegExp(`${LEAD}(?:${KIND}|${CAPS})\\s+${NUM}\\s+\\(`);
+const CAPS_RE = new RegExp(`${LEAD}${CAPS}\\s+${NUM}(?:[\\s.:(]|$)`);
+// ★KEY は大小どちらでも拾い、種別は Titlecase に正規化する(`.src` の項目名に合わせるため)。
+const KEY_RE = new RegExp(`${LEAD}(${KIND}|${CAPS})\\s+(${NUM})`);
+const titleCaseKind = (k) =>
+  k === k.toUpperCase() && k.length > 4 ? k[0] + k.slice(1).toLowerCase() : k;
 const PAGE_RE = /^=====\s*\[page\s+(\d+)\]\s*=====/;
 
 function readSource(key) {
@@ -187,18 +204,22 @@ function scanSource(text) {
   const lines = text.split(/\r?\n/);
   const marked = lines.some((s) => PAGE_RE.test(s));
   // ★書式の多数決: 走り込みだけで拾える見出しが、行独立の見出しより多ければ走り込み式。
-  let nDisplay = 0, nRunInOnly = 0;
+  let nDisplay = 0, nRunInOnly = 0, nCaps = 0;
   for (const s of lines) {
     const t = s.replace(/\f/g, '');
+    if (CAPS_RE.test(t)) nCaps += 1;
     if (DISPLAY_RE.test(t)) nDisplay += 1;
     else if (RUNIN_RE.test(t)) nRunInOnly += 1;
   }
   const runIn = nRunInOnly > nDisplay;
-  return { lines, marked, runIn, nDisplay, nRunInOnly };
+  // ★ALLCAPS は他の書式と排他ではない(Milne は ALLCAPS のみ、Stacks は混在)。
+  //   拾えた数が既存 2 書式の合計を超えたときだけ有効にする。
+  const caps = nCaps > nDisplay + nRunInOnly;
+  return { lines, marked, runIn, caps, nDisplay, nRunInOnly, nCaps };
 }
 
 function mapItems(scan) {
-  const { lines, marked, runIn } = scan;
+  const { lines, marked, runIn, caps } = scan;
   let page = marked ? null : 1;
   const rows = []; // 行ごとの {page, item}
   let item = null;
@@ -207,10 +228,11 @@ function mapItems(scan) {
     const pm = s.match(PAGE_RE);
     if (pm) { page = Number(pm[1]); rows.push({ page, item }); continue; }
     const t = s.replace(/\f/g, '');
-    if (DISPLAY_RE.test(t) || COLON_RE.test(t) || (runIn && RUNIN_RE.test(t))) {
+    if (DISPLAY_RE.test(t) || COLON_RE.test(t) || (runIn && RUNIN_RE.test(t))
+        || (caps && CAPS_RE.test(t)) || PAREN_RE.test(t)) {
       const m = t.match(KEY_RE);
       if (m) {
-        item = `${m[1]} ${m[2]}`;
+        item = `${titleCaseKind(m[1])} ${m[2]}`;
         if (!seen.has(item)) seen.set(item, page);
         rows.push({ page, item, heading: true });
         const nf = (s.match(/\f/g) ?? []).length;
