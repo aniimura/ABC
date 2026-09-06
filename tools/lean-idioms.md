@@ -6936,3 +6936,35 @@ statement の一部を `MvPowerSeries.*` のまま書いているものがある
 `smul_pow' : r • x ^ n = (r • x) ^ n`（`MulDistribMulAction`、`@[simp]`）。
 `smul_pow : (r • x) ^ n = r ^ n • x ^ n` は**別物**（`Monoid` へのスカラー倍）で、
 `rw [smul_pow]` は `(?r • ?x) ^ ?n` を探して落ちる。
+
+## #91 `rw [← mul_smul]` は 1 回だと片側しか畳まず `congr 1` が誤分割する（2026-09-06、Y4）
+
+`(τ * σ * τ⁻¹) • (τ • α) = τ • (σ • α)` を出したいとき
+
+```lean
+rw [← mul_smul]; congr 1; group   -- ✗
+```
+
+は左辺だけ `(τ*σ*τ⁻¹*τ) • α` に畳み、右辺は `τ • σ • α` のままなので
+`congr 1` が `τ * σ = τ` と `α = σ • α` という**偽のゴール 2 本**に割る。
+
+**直し方**: 両側を畳んでから割る。
+
+```lean
+rw [← mul_smul, ← mul_smul]; congr 1; group   -- ○
+```
+
+## #92 群 `G` が結論に現れない補題は `(G := G)` を明示しないと instance が stuck（2026-09-06、Y4）
+
+`exists_lowerRamificationGroup_eq_bot (A := A) hadj` のように、結論
+`∃ N, ∀ n, N ≤ n → lowerRamificationGroup B G n = ⊥` を
+`obtain` の右辺でしか使わない形だと、`G` が未決定のまま
+`[FaithfulSMul ?m B]` の探索に入り
+
+```
+typeclass instance problem is stuck
+  FaithfulSMul ?m.49 B
+```
+
+で止まる。`hadj : Algebra.adjoin A {α} = ⊤` は `G` を決めない。
+**直し方**: `(A := A) (G := G)` と**両方**明示する。
