@@ -1291,3 +1291,240 @@ D13 の正しい修理(`residueCard_and_degree_recoverable_real`)と同じ。
 (像の条件は満たすが Γ_L への制限を支えられるかは不明)。
 
 - **決定**: —
+
+### D22・D24 の続報(第 1055)—— ★**D22 の「足すべき条件 4 つ」は段差 witness に全部通される**
+
+## ★★D22 の種別は「自明」ではなく「偽」に訂正する
+
+`:1013` は D22 を「D13 = 強すぎる / D17 = 偽 / これは自明」と分類していたが、
+`Gv ≡ ⊤` でも `Gv ≡ ⊥` でも `FilteredGroup.Iso` の `map_Gv` が無内容になるため、
+`theorem_4_2` は**自明化するのではなく naive Grothendieck 予想に化ける**。
+`prop_2_2` / `cor_3_1` / `cor_3_3` も `twistedField` で実際に反証できる。
+⇒ ★**D22 は D17 と同じ「偽」の側**。D24 の「D13 と同型の事故」という読みと整合する。
+
+## ★★`IsNaturalFiltration` は `⊥` も通す
+
+`Subgroup.map f ⊥ = ⊥` は任意の `f` で成り立つので、**`⊥` 定数フィルトレーションも
+`IsNaturalFiltration` を満たす**。`⊤` 側は `exists_isNaturalFiltration` で証明済み。
+⇒ ★**自然性は退化の 2 つの埋め方のどちらも切らない。**
+
+## ★★★★★段差 witness —— D22 が挙げる 4 条件を全部足しても切れない
+
+    Gv K v := if v ≤ 0 then I_K else ⊥
+
+| 条件(`:1011` の 4 つ) | 段差 witness | 判定 |
+|---|---|---|
+| `isClosed`(Γ_K は副有限=T2 なので `⊥` も閉) | 通る | — |
+| `isNormal` / `antitone` | 通る | — |
+| `IsNaturalFiltration` | 通る(`map ⊥ = ⊥`) | ★切れない |
+| `Gv K 0 = inertia` | 通る(そう定義した) | ★切れない |
+| `⋂_v Gv K v = ⊥` | 通る(v > 0 で ⊥) | ★切れない |
+| 十分大で自明 | 通る | ★切れない |
+| `G_i/G_{i+1} ↪ 𝓀` | i ≥ 1 で読むなら `⊥/⊥` で通る | ★読み方次第 |
+| ★`abelianImage`(原文の Herbrand: 像 = U_K^v) | `⊥` の像は自明 ≠ `U_K^v` | ★★**切れる** |
+
+★**唯一確実に切るのは、原文が実際に使っている `abelianImage` だけ**である。
+逆に言えば **D22 の 4 条件を「Λ7 の副産物として出るから」と採用すると、
+退化を切らないまま `Interface` が重くなる。**
+
+☆段取り係が**分からなかったと明記したこと**: `↪ 𝓀` の添字範囲が i ≥ 1 か i ≥ 0 か
+(古典的な形は `G_0/G_1 ↪ 𝓀^×`・`i ≥ 1` で `↪ 𝓀`)。i = 0 を含む形なら段差 witness も切れる。
+
+## ★★★(A) vs (B) の価格が変わった —— §2 が要るのは Λ7 **全体ではなく前半 5 ノード**
+
+★段取り係が前回「Λ7c″ の記録が repo に無い」と書いたのは**誤り**だった
+(背景に回した grep が完了前に空を返していた)。実物は本ファイルにある:
+
+| 項目 | 記録された値 | 場所 |
+|---|---|---|
+| Λ7c″ = Milne Prop 4.3、消費先 2 つ(§2 非退化化 + Λ7 後半 Lemma 4.9) | — | `:997-1002` |
+| Λ7 全体 | 12 ノード / 8,000-15,000 行 | `:1195`, `:1202` |
+| Λ7a(下付き分岐群 `G_i`)単体 | 800-1,500 行。★**§2 の臨界路でもある** | `:1079` |
+| Prop 4.4 + Hasse-Arf のブロック | 4,000-8,000 行 | `:1206` |
+
+`:1206` が既に書いているとおり、**Λ7a-c″(前半 5 ノード、§2 と共有)を作り
+`K^ab = K_π·K^ur` だけを SECOND PROOF に振ると Prop 4.4 と Hasse-Arf が消える**。
+⇒ **§2 の非退化化に要る額は概ね 2,000-5,000 行**の見込み。
+
+☆★**この引き算は段取り係の算術であって、記録された測定値ではない。**
+Λ7a-c″ の独立見積は**測られていない**。⇒ 判断の前に測ること。
+
+★**前回 (C) を推した根拠のうち「(B) は 8,000-15,000 行の先」は誤り。
+§2 に限れば (B) の価格はその 1/3 前後**であり、(C) 第 2 段の現実味は前回の記述より高い。
+
+☆段取り係が今回も解決できなかったこと: Λ7a-c″ の独立見積、`↪ 𝓀` の添字範囲、
+`ltPreimageFiltration` が Γ_L への制限(上付き↔下付き変換)を支えられるか。
+
+- **決定**: —
+
+### D23 の続報(第 1055)—— ★★**前回の結論 2 点が誤り。SECOND PROOF は Lean では FIRST より高い**
+
+★これは第 1054 のコミットに書いた内容の**訂正**である(Milne CFT を逐語で読み直した結果)。
+
+## ★★訂正 1: 「§4 の冒頭に『この節は飛ばしてよい』とある」は**誤読**
+
+skip の断りは §4 の冒頭ではなく **p.34 の三択の直後**にあり、内容は
+「global CFT への最短路が欲しい読者は **THIRD PROOF** だけ読み、**Chapter I の残り全部**
+(= §2-§4、Lubin-Tate 章まるごと)を飛ばしてよい」である。
+★**ABC3 が既に建てた Lubin-Tate の山こそが Milne の言う「飛ばしてよい部分」**であり、
+**この断りは SECOND PROOF を推してはいない**。
+
+Milne は同じ結論に 3 本の道を用意し、見出しに依存先を書いている(実測、行番号は `.txt`):
+
+* FIRST PROOF  `(LUBIN-TATE AND HASSE-ARF; I 2-4)`        —— 1669 行
+* SECOND PROOF `(LUBIN-TATE AND COHOMOLOGY; I 2-3; III 1-3)` —— 1695 行
+* THIRD PROOF  `(COHOMOLOGY AND HILBERT SYMBOLS; III 1-5)`   —— 1776 行
+
+## ★★★★訂正 2: SECOND PROOF は Hasse-Arf を**回避しているが、Lean では FIRST より高い**
+
+Hasse-Arf 回避そのものは**正しい**(Remark 4.15 が明言。分岐フィルトレーションも
+上付き番号も 1.14/1.15 に現れない)。**しかし** 1.15 は入力として
+**Chapter III Theorem 3.4**(コホモロジーによる局所 Artin 写像)を丸ごと呼ぶ。
+見出し自身が `III 1-3` と書いている。下部構造の実測:
+
+| 測定 | Ch.I §4(Hasse-Arf 路) | Ch.III §1-3(SECOND PROOF の入力) |
+|---|---|---|
+| 畳み込み参照 | **7 件**(硬いのは Herbrand と Hasse-Arf の 2 件) | **20 件**(Hilbert 90・Herbrand 商・Tate の定理・inf-res・カップ積) |
+| 必要な mathlib 語彙 | 下付き分岐群・φ/ψ・上付き番号 —— **無いが述べられる** | `Br(K)` の乗法・`inv_K`・副有限のカップ積 —— ★**述べることすらできない** |
+
+`memory/mathlib-cohomology-inventory-2026-09-05.md` の実測がそのまま効く:
+`BrauerGroup K` には**群構造すら入っておらず、カップ積は 0 件**、`tateCohomology` は `[Fintype G]` 必須。
+
+⇒ ★**1.5 頁は「Theorem 3.4 があれば以下は配管」という分岐器であって、費用は分岐先にある。**
+
+## ★節点数(確定)
+
+* SECOND PROOF 路 = **名前つき 12 + Theorem 3.4 の下部木 9 = 21 節点、うち 9 が着手不能**
+  (「12」という見積は**名前つきの数としては当たり**。1 つが 9 節点の部分木だった)
+* FIRST PROOF 路 = **10 節点、着手不能ゼロ**
+
+⇒ **現時点の推奨は (B) FIRST PROOF**(mathlib に無いが全部「述べられる」)。
+
+## ★★★思ったより安い発見が 3 つ
+
+1. **Lemma 4.11 は Hasse-Arf を 1 滴も使わない**(2841 行)。Ch.I §4 の 3 補題のうち
+   **高いのは Lemma 4.9 だけ**。4.10 は ANT 7.58(ABC3 が既に持つ不分岐拡大の一意性)1 件。
+2. ★**「最大位数の巡回部分群は直和因子」という mathlib 不在の一般補題は要らない。**
+   `⟨σ⟩ ∩ N = 1` と `|⟨σ⟩|·|N| = |G|` の**位数勘定だけ**で `IsCompl` が出る
+   (アーベル群なので)。当初 `Module.Baer` から作る見積だった。
+3. ★**SECOND PROOF の指数計算の右辺 `[K_{π,n}·K_m:K]` は既に在庫にある**
+   (`Found/PGC/RamifiedUnramifiedDisjoint.lean:86` の `exists_finrank_sup_lubinTate_unramified`)。
+
+## ★★★★★訂正 3: **Rosen 1981 は要再検討**(前回「使えない」と結論したのは早かった)
+
+Remark 4.15 は Rosen 1981 (Trans. AMS 265) を
+**「char 0 の局所体について、Hasse-Arf もコホモロジーも使わない、ただし上記より複雑な証明」**
+と名指ししている。★**`PAdicLocalField p` は char 0 なので適用範囲がちょうど一致する。**
+`ResearchPaper/0_Source/` に無いので**読めていない**。
+
+- **判断待ち**: Rosen 1981 を `0_Source/` に入れるか(★人が入手する必要がある)。
+  ★**Λ7 の最短化に最も効く一手**という段取り係の評価。ただし**未読なので確認できていない**。
+
+## ★循環の注意
+
+Example 4.7(2787 行)が「局所 Kronecker-Weber ⟹ Hasse-Arf」を示している。
+つまり **Λ7 の Lean 証明は Hasse-Arf の内容を必ず含む**。含まずに済むのは
+**機械(分岐フィルトレーション)だけ**。Rosen が価値を持つのはここ。
+
+## ★原文に印の無い飛躍を 1 つ見つけた(N8)
+
+Theorem 4.8 は Lemma 4.11(**局所体上**の主張)を**無限次拡大 `K_π` 上に適用**している。
+有限段 `K_{π,n}` への降下が要る。★合図の語を持たないので `hedge-index` では出ない型。
+
+## ★次の実装ノード(材料は全部 ABC3 の在庫内、合計 280 行の見積)
+
+* `Found/PGC/AbelianFrobeniusSplit.lean` —— `isCompl_zpowers_frobLift`(80 行)
+* `Found/PGC/AbelianSplitUnramified.lean` —— `exists_totallyRamified_sup_unramified`(200 行)
+
+★**退化の自己検査の根拠が原典にある**: Milne **Example 4.13**(`ℚ₅` 上の具体例)が
+`m` を指数より小さく取ると結論が崩れることを実証している。
+⇒ `Check/PGC/Lemma411Degenerate.lean` は**原文が反例を書いてくれている珍しい 1 本**になる。
+
+- **決定**: —
+
+### D22・D23・D24 の合流(第 1055、★本体セッションの算術。測定値ではない)
+
+3 つの報告が同じ数字に収束した:
+
+* D24 の続報 ——「§2 の退化を**唯一確実に切る**のは `abelianImage`(原文の Herbrand: 像 = U_K^v)だけ」
+* D23 の続報 —— Λ7 の FIRST PROOF 路のノード表で **N3 `ramificationGroup` 下付き 400 行 /
+  N4 `herbrandPhi/Psi` + Prop 4.4 500 行**
+* `abelianImage` を述べるには N3(下付き分岐群)が、その像が `U_K^v` だと言うには N4(Herbrand)が要る
+
+⇒ ★**§2 の非退化化の価格 ≒ N3 + N4 ≒ 900 行**。前の agent の引き算(2,000-5,000 行)より安い。
+★ただし**これは本体の算術**であって、N3/N4 の見積自体が段取り係の見積である。着手前に測ること。
+
+★これで **§2 の非退化化と Λ7(FIRST PROOF 路)が N3・N4 を共有する**ことが確定した。
+どちらを先に始めても他方の 900 行が前払いされる。
+
+- **決定**: —
+
+### D23 の続報(第 1055)—— Λ6(Dwork)の節点を確定した。★見積 7 は**外れ(過小)、実測 13**
+
+## ★★安くなった発見 2 つ
+
+1. ★★**Dwork の逐次近似は解析ではなく純代数で書ける。**
+   `ABC3.Found.GaloisRep.isAdicComplete_valuationSubring`(`Found/GaloisRep/AdicCompleteValued.lean:124`)
+   に、今日着地した `isDiscreteValuationRing_unramifiedCompletionInt`(M1)と
+   `CompleteSpace`(`UniformSpace.Completion` から自動)を与えると
+   **`IsAdicComplete (𝔪) 𝒪_{K̂^ur}`** が出る。⇒ Cauchy 列・ε-δ を使わず
+   `IsPrecomplete.prec` + `IsHausdorff.haus` で済む。M1 の `exists_eq_uniformizer_mul` が
+   ちょうど「1 段進める」道具になる。
+   ★**Milne の証明路(逆極限 A.7/A.8)はそのまま使えない**(ノルム完備化と 𝔪-進完備化の
+   一致が未証明 —— Λ5 の逸脱が未閉)。代わりにこの道が開いた。
+2. ★**乗法版 Dwork は加法版の 1 段補題を再利用できる**(`1+π^{n+1}B` の段で
+   `σe−e ≡ −d` が加法版と同じ式になる)。Milne の "similar" の中身を確認した結果。
+
+## ★Λ6a′ の正体 —— 「不要」ではなく「**Dwork から独立で、しかも安い**」
+
+Λ6a′ = 同じ `π` の `f, g ∈ F_π` で `K_{π,f} = K_{π,g}`。これは **Prop 3.10 の `u = 1` の場合**で、
+`ε = 1` が取れるので `σθ = θ`、すなわち `θ ∈ 𝒪_K[[T]]` = `[1]_{g,f}`。
+**Dwork の補題を一切通らない。** 材料は全部在庫(`LubinTateEndo` / `powerSeries_uniqueness` /
+`lubinTateEvalAtTorsionPoint`)。★**M3(ℂ_K)も要らない。**
+⇒ 見積 400-800 → **200-400**。★**今すぐ並行で配れる独立の葉**。
+
+## ★★★危険信号: Λ5 と Λ6 で Frobenius が食い違っている
+
+`unramifiedClosureGalEquivZHat`(`UnramifiedZhat.lean:482`)は `coherentFrobenius`
+(**位相的生成元一般**)を `Classical.choose` で使っている。Dwork は**算術 Frobenius**を使う。
+`Ẑ` の同定が `Ẑ^×` のぶん不定なので、★**Λ7/Λ8 で Artin 写像を組むときに必ず衝突する。**
+Λ9(捩れ)は `Ẑ` が捩れ自由なので影響なし。
+⇒ 新ノード **Λ5b′ `ArithFrobeniusIsTopGen`(150-300 行)**で潰すのが安い。
+
+## ★★`ArtinMapPiIndependent` の量化の向き(退化の予防)
+
+`∃ π ∃ ϖ` で書くと `π = ϖ` で**自明化する**。`∀ π ∀ ϖ` でなければならない。
+`LubinTateFieldPiIndependent` も同型。★**D13(`∀` が強すぎ)と逆向きの退化**であり、
+退化検査ファイルを 1 本立てる価値がある(現在 12 本)。
+同じく `DworkLemmaAdditive` は `∃ σ, ∀ c, ∃ b` であって `∀ c, ∃ σ, ∃ b` ではない。
+
+## ★Theorem 3.9 の「体」の半分は Λ7 から無料で出る
+
+Milne p.58(Example 4.13 の直後)が明言している ——
+「`K_π·K^un` が `π` に依らないことは **Prop 3.10 を使わずに**回復できる。
+ただし `φ` が `π` に依らないことを示すには依然としてこの命題が要る」。
+⇒ **Dwork が迂回不能なのは「写像 `φ_π`」の半分だけ**(#10 `ArtinMapPiIndependent`)。
+#9 `LubinTateFieldPiIndependent` は Λ7(Thm 4.8)に振り替えられる。
+
+## ★確定した節点数: **12 新規 + 1 既済(M1) = 13**(見積 7 は過小)
+
+漏れの理由: M2 `DworkFixedRing`・M3 `ClosureCompletion`・Lemma 3.12 `SubfieldClosed`・
+Λ5b′ が数えられていなかった。#9 を Λ7 に振り替えると **Λ6 単独の臨界路は 11**。
+合計 **4,000-7,000 行**(D23 の 3,000-5,000 をやや上回る)。
+
+☆段取り係が**自信が無いと明記した**箇所: M3 の 600-1,200 は幅が大きく
+「`ℂ_K` 全体」と「`K̂^ur(λ)` だけ」のどちらが安いか**測っていない**。
+Lemma 3.12 の 300-600 は**根拠の弱い数字**。
+「位相的生成元でも `σ−1` が全射か」は**未確認**(#12 を入れれば回避できる)。
+`IsAdicComplete` instance の側条件が自動で付くかも**未確認**(#1 の最初の関門)。
+
+## ★次に配れる実装ノード 4 本(いずれも材料は在庫内)
+
+| 優先 | ノード | 見積 | 理由 |
+|---|---|---|---|
+| 1 | **Λ5b′ `ArithFrobeniusIsTopGen`** | 150-300 | ★**着地済みのファイル 2 本の不整合**を潰す。放置すると Λ7/Λ8 で衝突 |
+| 2 | **Λ6a′ `LubinTateFieldFIndependent`** | 200-400 | Dwork から独立の葉。M3 不要 |
+| 3 | **N1+N2(Milne Lemma 4.11)** | 280 | Λ7 の FIRST PROOF 路の起点。Hasse-Arf 非依存 |
+| 4 | **`DworkLemmaAdditive`** | 250-400 | Λ6 の起点。`IsAdicComplete` 経由 |
+
+- **決定**: —

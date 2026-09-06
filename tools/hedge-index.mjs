@@ -79,7 +79,17 @@ const HEDGES = [
   { key: 'easily', re: /\beasil(?:y|ier)\b/i, note: '短いことが多い' },
   { key: 'clearly', re: /\bclearl(?:y)\b/i, note: '短いことが多い' },
   { key: 'well-known', re: /\bwell-known\b/i, note: '★外部の在庫を指す。mathlib を測ること' },
-  { key: 'similarly', re: /\b(?:similarly|in a similar (?:way|manner))\b/i, note: '前の議論の再演' },
+  { key: 'similarly', re: /\b(?:similarly|in a similar (?:way|manner)|(?:is|are) similar)\b/i, note: '前の議論の再演' },
+  // ★★2026-09-06 追加(第 1055、Λ6 の段取り係が [MilneCFT] の Dwork 節を逐語で読んで指摘)。
+  //   Dwork 節(行 2455-2620)の合図 6 個のうち 5 個を旧語彙が見ていなかった:
+  //   "This is obviously exact." / "The proof for B^x is similar."(乗法版 Dwork 丸ごと) /
+  //   "obviously still satisfies (a)" / "straightforward … left to the reader"。
+  //   ★similarly の正規表現が "is similar" という別語形を落としていたのが最大の穴。
+  //   ★obvious を裸で取らないのは formal の教訓(2026-09-06)——"the obvious map" は
+  //   標準的な構成の名指しであって省略の合図ではない。副詞形に絞る。
+  { key: 'obviously', re: /\bobviously\b/i, note: '短いことが多い。clearly と同族' },
+  { key: 'straightforward', re: /\bstraightforward(?:ly)?\b/i, note: '手数はあるが新材料は要らない' },
+  { key: 'left to the reader', re: /\bleft (?:as an exercise )?(?:to|for) the reader\b/i, note: '★原文が明示的に投げている' },
 ];
 
 // ───────────────── 第 2 の水路: 角括弧の傍注 ─────────────────

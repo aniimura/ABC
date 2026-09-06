@@ -544,6 +544,11 @@ let sorryDecls = 0, sorryFiles = 0;
 //   ★**未決の見分け方**: `- **決定**: —` の**ままのもの**だけ。
 //   「採用を決定」「決定」と書かれている節(D1・D2・D3・D5・D6・D20 など)は除く。
 //   ★`### D16 の続報` のような小見出しは、その番号の節の続きとして扱う。
+//   ★★2026-09-06 に 2 つ直した(測定器の欠陥。今日 6 種目):
+//   (1) 見出しの `##` と `D` の間に `★` が入る形(`## ★★★★★★★D24.`)を**見ていなかった**
+//       ——D21 と D24 の節が丸ごと存在しないことになっていた。
+//   (2) 節の本文中の小見出しで節が切れ、末尾の `- **決定**: —` が宙に浮いていた。
+//   ⇒ 未決 11 件 → 13 件(D21・D24 が加わる。偽陽性は増えない——実測で確認)。
 const PENDING = new Set();
 let pendingSecs = [];
 {
@@ -552,9 +557,13 @@ let pendingSecs = [];
     const secs = new Map();
     let cur = null;
     for (const l of readFileSync(DP, 'utf8').split(/\r?\n/)) {
-      const h = /^#{2,3}\s+\**\s*(D\d+)\b/.exec(l);
+      const h = /^#{2,3}\s+[★*\s]*(D\d+)\b/.exec(l);
       if (h) { cur = h[1]; if (!secs.has(cur)) secs.set(cur, []); continue; }
-      if (/^#{1,3}\s/.test(l)) { cur = null; continue; }
+      // ★見出しで節を切るのは `#`(日付の区切り)だけにする。`##` / `###` の小見出しは
+      //   その節の**続き**として扱う ——2026-09-06 実測: D24 は本文中に `## ★★★より重い発見`
+      //   等の小見出しを持つため、末尾の `- **決定**: —` が節に紐付かず未決から漏れていた。
+      const lvl = /^(#{1,3})\s/.exec(l);
+      if (lvl) { if (lvl[1].length === 1) cur = null; continue; }
       if (cur) secs.get(cur).push(l);
     }
     // ★原典の項目を名指ししている形 `[FrdI] Theorem 6.4, (i)`

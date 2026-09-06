@@ -178,7 +178,10 @@ function loadPending() {
   let cur = null;
   const secs = [];
   for (const l of text.split(/\r?\n/)) {
-    const h = /^##\s+(D\d+)\.\s*(.*)$/.exec(l);
+    // ★`##` と `D` の間に `★` が入る形(`## ★★★★★★★D24.`)を見ていなかった
+    //   ——2026-09-06 実測: D21・D23・D24 の節が丸ごと存在せず、本文が直前の節に
+    //   吸収されていた(この解析器は見出し以外で節を切らないため)。
+    const h = /^##\s+[★*\s]*(D\d+)\.\s*(.*)$/.exec(l);
     if (h) { cur = { id: h[1], title: h[2], state: null, body: [] }; secs.push(cur); continue; }
     if (!cur) continue;
     if (cur.state === null) { const s = /^[-*]?\s*\*\*状態\*\*\s*[:：]\s*(.*)$/.exec(l); if (s) cur.state = s[1]; }
