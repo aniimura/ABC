@@ -199,6 +199,27 @@ const ABSENT_DEBT = [
   // (空。2026-09-06 に完済した。上の docstring を読むこと)
 ];
 
+/** G1「locator のずれ」の繰り越し表(2026-09-06、メタ第 11 回)。
+ *
+ *  鍵は `論文#sectionId#src が主張する項目`。行番号もファイル名も使わない
+ *  (どちらも動く。G9 / G11 の鍵の付け方と同じ理由)。
+ *
+ *  ★導入時点の該当は木じゅうで **3 件**しか無い(`.src` 4,364 件を照合した実測)。
+ *  3 件とも `lean/ABC3/` の中身を直す話なので、**メタ係は直さず繰り越した**。
+ *  ☆1 件を消す手順: `sectionId` を候補の id に直す(または `item` の表記を直す)。 */
+const SRC_ITEM_DEBT = new Set([
+  // Found/FrdI/Thm52Rem272.lean:99 —— `Remark 2.7.2` を名乗って `frdi-def-2-7` を指す。
+  // ★`frdi-remark-2-7-2` が実在するので、id を差し替えるだけで消える。
+  'FrdI#frdi-def-2-7#Remark 2.7.2',
+  // Found/GenEll/ArchPoint.lean:232 —— `Proposition 1.4, (i)` を名乗って
+  // `genell-def-1-1-i`(p.3)を指す。Prop 1.4 は p.6(`genell-prop-1-4`)。
+  'GenEll#genell-def-1-1-i#Proposition 1.4',
+  // Skeleton/PGC/Section3.lean:31 —— 台帳の付随宣言(`filteredGroupOf`)で、
+  // item が `Section 3 (filteredGroupOf)`。★意図的な書き方に見えるので、
+  // 本体が「§3 の setup-3-* を指す」か「item を Corollary 3.1 にする」かを決めること。
+  'pGC#cor-3-1#Section 3',
+]);
+
 /** ★`--brief`: 落ちたものと結論だけを出す(2026-09-03、第 1453)。
  *
  *  動機(実測): 既定の出力は **29,243 バイト / 270 行**ある。ブロックの末尾で毎回走らせるので、
@@ -762,6 +783,13 @@ function scanLeanTree(dir) {
 }
 
 /** 1_Structured から「論文タグ → section id の集合」を集める。 */
+/** 論文タグ → (sectionId → { item, page })。
+ *
+ *  ★2026-09-06(メタ第 11 回): 返り値を `Set(id)` から `Map(id → 属性)` に変えた。
+ *  G1 が `.src` の `item` と HTML の `data-item` の**一致**を見るため
+ *  (backlog M31。id の実在だけでは locator のずれが素通りする)。
+ *  `Map` も `.has` を持つので、既存の存在検査はそのまま動く。
+ */
 function collectStructuredIds() {
   const map = new Map();
   const files = walk(STRUCT_DIR)
@@ -773,11 +801,28 @@ function collectStructuredIds() {
       const paper = attrs['data-paper'];
       const id = attrs['id'];
       if (!paper || !id) continue;
-      if (!map.has(paper)) map.set(paper, new Set());
-      map.get(paper).add(id);
+      if (!map.has(paper)) map.set(paper, new Map());
+      map.get(paper).set(id, {
+        item: attrs['data-item'] ?? '',
+        page: attrs['data-pdf-page'] === undefined ? null : Number(attrs['data-pdf-page']),
+      });
     }
   }
   return map;
+}
+
+/** 項目名から「種別 + 番号」だけを取る(付記・訳注・部分番号の書き方の揺れを捨てる)。
+ *
+ *  `"Definition 1.1, (ii)(正規化次数…)"` → `Definition 1.1`。
+ *  ★番号の後の `(ii)` を含めないのは、HTML 側が `Definition 1.1, (i)` と分けている
+ *  のに Lean 側は `Definition 1.1` とだけ書くことがあるためで、
+ *  **ここを厳しくすると本物の食い違いが雑音に埋もれる**(2026-09-06 実測)。
+ */
+const ITEM_KIND_RE =
+  /(Theorem|Proposition|Corollary|Definition|Lemma|Remark|Example|Claim|Assertion|Step|Section|Chapter)\s*([0-9]+(?:[.-][0-9]+)*)/;
+function itemKeyOf(s) {
+  const m = ITEM_KIND_RE.exec(s ?? '');
+  return m ? `${m[1]} ${m[2].replace(/-/g, '.')}` : null;
 }
 
 /**
@@ -1397,6 +1442,7 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
   //     `Found/ にある原典項目の実装` の件数が増えないので、**逃げても得しない**。
   let nSrcOk = 0;
   let nSrcOkFound = 0;
+  const seenSrcItemDebt = new Set();
   for (const d of decls.filter((x) => x.bucket === 'Skeleton' || x.bucket === 'Found')) {
     const required = d.bucket === 'Skeleton';
     // 台帳の付随宣言そのものには出典を要求しない
@@ -1422,7 +1468,57 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
                 `——先に構造化するか、id を直す`);
       continue;
     }
+    // ── G1(項目の一致): `.src` の `item` と、その `sectionId` が指す
+    //    HTML の `data-item` が**同じ項目**を指しているか(backlog M31、メタ第 11 回)。
+    //
+    //    ★M31 は「`pdfPage` と `data-pdf-page` の一致」を提案していたが、
+    //      **実測すると不一致が 985 件(相異なる鍵 64)出る**。中身を見ると大半は
+    //      正当で、`Theorem 3.4`(FrdI、p.62 から 8 頁)のように**項目が数頁にまたがる**
+    //      とき、`.src` は引いている段の頁を、HTML は項目の先頭頁を指している
+    //      (`frdi-thm-3-4` は src が 62,63,64,65,66,67,68,69 の 8 通り)。
+    //      頁の一致を要求すると、この 985 件を全部繰り越すことになる。
+    //    ★同じ木で**項目名**を照合すると **3 件**しか出ず、うち 2 件は本物のずれ:
+    //      `Remark 2.7.2` と書いてあるのに `frdi-def-2-7` を指している
+    //      (`frdi-remark-2-7-2` は**実在する**)、
+    //      `Proposition 1.4, (i)` と書いてあるのに `genell-def-1-1-i` を指している。
+    //      ⇒ **頁ではなく項目名で照合する。**
+    //    ★落とすのは「主張している項目の section が実在する」ときだけにする。
+    //      構造化されていない項目(細かい Remark 等)を最寄りの section に
+    //      ぶら下げるのは許された運用なので、それを落とすと嘘の id を書かせる
+    //      逆インセンティブになる(G1 の `Found/` 非対称と同じ理由)。
+    const secItem = ids.get(sectionId);
+    const srcItem = /item\s*:=\s*"([^"]*)"/.exec(m[0])?.[1] ?? '';
+    const kSrc = itemKeyOf(srcItem);
+    const kSec = itemKeyOf(secItem?.item);
+    if (kSrc && kSec && kSrc !== kSec) {
+      const cand = [];
+      for (const [id2, info2] of ids) if (itemKeyOf(info2.item) === kSrc) cand.push(id2);
+      if (cand.length) {
+        const debtKey = `${paper}#${sectionId}#${kSrc}`;
+        seenSrcItemDebt.add(debtKey);
+        if (!SRC_ITEM_DEBT.has(debtKey)) {
+          ng(at(d), `G1 locator のずれ: item は "${kSrc}" だが sectionId="${sectionId}" は` +
+                    ` "${kSec}" の section である。その項目の section は実在する` +
+                    `(候補: ${cand.join(', ')})——id か item のどちらかを直す`);
+          continue;
+        }
+      }
+    }
     if (required) nSrcOk++; else nSrcOkFound++;
+  }
+  // ★繰り越し表の掃除は**本物の木を見たときだけ**(G9 と同じ。selftest は fixture 1 本しか見ない)。
+  if (!quiet) {
+    for (const stale of SRC_ITEM_DEBT) {
+      if (!seenSrcItemDebt.has(stale)) {
+        ng('tools/check.mjs (SRC_ITEM_DEBT)',
+          `G1 の繰り越し表に不要な項目がある: ${stale}。該当が消えたので表から削ること`);
+      }
+    }
+    const nSrcItemDebt = [...seenSrcItemDebt].filter((k) => SRC_ITEM_DEBT.has(k)).length;
+    if (nSrcItemDebt > 0) {
+      console.log(`  -- G1 繰り越し ${nSrcItemDebt} 件(locator のずれ)` +
+                  '——新規は落とす。既存はこの数を減らしていく');
+    }
   }
 
   // ── 依存グラフ(指標。★ゲートではない)
@@ -1772,6 +1868,12 @@ function selftest() {
       'd45-needs-kind-spelled-in-string.lean', false],
     ['D46 文字列を潰しても本物の範囲外ページは落とせる', 'Skeleton',
       'd46-needs-bad-page-with-kind-in-string.lean', true],
+    // ★G1(項目の一致): backlog M31、メタ第 11 回。D47/D48 は**対**である
+    //   ——落とすだけを入れると、未構造化の項目に嘘の id を書かせることになる。
+    ['D47 .src の item と sectionId が別の項目を指す', 'Found',
+      'd47-src-item-points-elsewhere.lean', true],
+    ['D48 未構造化の項目を最寄りの section にぶら下げるのは通る', 'Found',
+      'd48-src-item-unstructured-nearest.lean', false],
   ];
   const FIXTURES = join(ROOT, 'tools', 'selftest-fixtures');
   for (const [label, bucket, fixture, shouldFail] of leanCases) {
