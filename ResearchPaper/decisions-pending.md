@@ -2723,3 +2723,100 @@ worktree 分離(各 agent が独自の `.lake` を持つ)。代償は**冷ビル
 * ★**3 体以上は未検証**なので、当面 2 体を上限とする
 
 - **決定**: ★**実験は完了。ゲートは揺れなかった。**★**運用変更(2 体まで)の採否は本体が節目で判断する。**
+
+### ★★★★★★D24 の続報(第 1076)—— **3 定理とも現行形で偽であることを Lean で固定した。しかも原因は 1 つ**
+
+`Check/PGC/FreeTermFunctionRefutation.lean`(415 行、`sorry` 0)。
+3 本とも `#print axioms` は `[propext, Classical.choice, Quot.sound]`(`Skeleton` の `sorry` 定理を
+参照せず**型を写した**ので `sorryAx` は入っていない)。
+
+| 宣言 | 突いた自由な項関数 | 反例 |
+|---|---|---|
+| `not_prop_2_2_current_form` | `IntKbar` / `CompKbar` | `ZMod (if OneIsStandard K then 2 else 3)` + **自明な作用** ⇒ `ZMod 3 ≃+ ZMod 2` を要求して落ちる |
+| `not_cor_3_1_current_form` | `isHodgeTate` | `isHodgeTate K V := OneIsStandard K` ⇒ 結論が `False ↔ True` |
+| `not_cor_3_3_current_form` | `toGal` | 標準側 `toGalChoice` / 捻り側 `fun _ => 1`。★`_hρ` を**満たした上で**倒す |
+
+## ★★★2026-09-05 の修理は 3 本とも効いていなかった
+
+* `prop_2_2`: `SMul → DistribMulAction` の修理は効かない ——★**自明な作用はどんな型族にも乗る**
+* `cor_3_1`: `V` 依存化の修理は効かない ——★**`V` を無視すればよい**
+* `cor_3_3`: `_hρ` の修理は効かない ——★**満たした上で `toGal` を突ける**
+
+## ★★★★判断材料: **3 つの穴は同一原因で、修理は 1 種類で足りる**
+
+★**原因は「項関数に同型不変性が無い」こと**。`PAdicLocalField p` は**項**の型であって
+同型類の型ではないので、`OneIsStandard K` で分岐する族が必ず作れる。
+⇒ ★**修理は `ResidueCardinality.card_congr` と同じ形の `congr` 条件 1 種類で 3 本とも塞がる見込み。**
+実装係が §6 にその境界を示す 2 補題を置いた
+(`no_transport_badFamily` / `no_invariant_oneIsStandard` ——
+「同型不変性を課せば反例族は存在しない」)。
+
+★**これで D24 第 1 段の判断が具体化した** —— 3 本を個別に直すのではなく、**同じ条件を 1 つ足す**。
+
+## ★既存の Check と重複していない(実測)
+
+* `Prop22Degenerate` は**旧**形(公理ゼロの `SMul`)を非可換性で倒す。本件は**現行**の
+  `DistribMulAction` 版を、**作用を一切使わずに**倒す
+* `Cor33Degenerate` は**旧**形(`ρ`・`ρ'` 無関係)。本件は `_hρ` を満たした上で `toGal` を突く
+* ★**`cor_3_1` は既存の反証が無く、本件が初**(`RefutationAttempts.lean` が
+  「witness が作れない」で止まっていた)
+
+★**`Skeleton/PGC/Section3.lean:98-110` の「K ≠ K′ の witness は現状の道具では構成できない」は
+実測上 obsolete になった**(2026-09-05 に `twistedField` が着地して以来古かったことが、
+これで確定した)。
+
+## ★本体の見立てが外れた(良い方に)
+
+本体は brief で「★**反例の構成なので抽象核は切り出せない可能性が高い**」と書いたが、
+★**切り出せた**(`not_forall_family_addEquiv` / `not_forall_pred_iff` ほか 3 本、
+**まとめて 0.90 秒**、分岐・付値・Galois の語彙が 1 つも出ない一般の添字型 `ι` の話)。
+★**理由は「穴の正体が量化子の欠陥だったから」** —— 数学ではなく論理の形の問題なので一般化できた。
+⇒ ★**抽象核の切り出しは 9 回連続で効いた。**
+
+☆逸脱 3 件: `Skeleton` の `sorry` 定理を import せず型を写した / 原典の `Type*` を `Type` に固定
+(★Lean では `¬ (∀ …)` の内側で宇宙変数を束縛できず不可避。`Type 0` を倒せば多相版も倒れる。
+既存 2 本と同じ固定) / `cor_3_3` の反例で `E` を固定。
+
+☆同時実行の異常: ★**無かった**(`lean_start` 1 回・13.5 秒、同じコマンドの結果のブレも無し)。
+⇒ **D27 の 2 体運用の 2 例目**。
+
+- **決定**: —
+
+### ★★★★★D27 の重要な訂正(第 1077)—— **MCP REPL の基準環境は共有で、同時実行で壊れる**
+
+★**2 例目の同時 2 体で、ビルド成果物とは**別の**壊れ方が出た。**
+
+Y7a の実装係の報告(逐語):
+
+> `lean_start(["ABC3.Found.PGC.UniformizerExpansion"])` は **10.2 秒**で「成功」と返ったが、
+> その後の `lean_check` で `ABC3.Found.PGC.ramIndex` が `Unknown identifier`。
+> `lean_status` を見ると imports が **`ABC3.Check.PGC.Prop12Degenerate, ABC3.Check.PGC.Cor33Degenerate`**
+> (★**もう 1 体の agent のもの**)に**差し替わっていた**。
+> ★**起動が 90 秒でなく 10 秒なのが合図だった。**
+
+⇒ ★**D27 の結論を修正する。**
+
+| 壊れ方 | 同時 2 体で | 判定 |
+|---|---|---|
+| **ビルド成果物**(`.ilean` / `setup.json`)とゲートの数字 | ★**壊れなかった**(NG 13 × 5 回、ノード数も一致) | 制約は不要だった |
+| ★**MCP REPL の基準環境** | ★★**壊れた**(imports が他 agent のものに差し替わる) | ★**制約が要る** |
+
+★**2026-09-06 の 4 件のうち `lean_start` 590 秒は、これで説明がつく可能性がある**
+(基準環境の奪い合い)。★ただし残り 3 件は依然として未解明。
+
+## ★対処(実装係が正しく回避した)
+
+★**再起動しない**(役割定義どおり)。`node tools/leanfile.mjs` に切り替える
+(olean を書かないので安全、**12 秒/往復**)。★実装係はこれで 3 往復で着地させた。
+
+## ★運用の追加条件(§4 に足すべき)
+
+★**同時 2 体のとき、MCP の `lean_start` / `lean_check` を使えるのは 1 体まで。**
+2 体目は `node tools/leanfile.mjs`(ファイル単位、12 秒/往復)を使う。
+★**見分け方**: `lean_start` が **90 秒でなく 10 秒で返ったら、他 agent の環境を掴んでいる**。
+`lean_status` で imports を確認すること。
+
+☆★**あるいは brief に「あなたは 2 体目なので `leanfile.mjs` を使え」と明示する**方が確実。
+次の波でそうする。
+
+- **決定**: ★**同時 2 体は継続する。ただし MCP REPL は 1 体まで**(2026-09-07)。

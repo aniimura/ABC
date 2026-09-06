@@ -1745,6 +1745,7 @@ import ABC3.Found.PGC.RamificationQuotientEmbedding
 import ABC3.Found.PGC.RamificationJumpDivisibility
 import ABC3.Found.PGC.ConjugateSumValuation
 import ABC3.Found.PGC.UniformizerExpansion
+import ABC3.Found.PGC.SenJumpFiltration
 import ABC3.Found.PGC.LubinTateFieldFIndependent
 import ABC3.Found.GenEll.VeluDualJ
 import ABC3.Found.GenEll.VeluJExpNeg

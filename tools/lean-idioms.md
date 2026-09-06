@@ -7014,3 +7014,23 @@ DVR の補題を書くときに「必要なものを全部並べる」と
 ★同じ回で `congr 1` も外した——2 段の coe（`adjoinIntegers → K⟮x⟯ → K.closure`）に
 撃つと 1 段しか剥がれず向きも反転する。`congr` ではなく
 「等式を先にゴールへ `rw` して `exact h.symm`」が速い。
+
+## #97 `K.carrier` から `K` は逆算できない —— `(K := …)` を名前付き引数で先に固定する（2026-09-07、Λ7 D24 第 1 段）
+
+`h : ∀ {K K' : PAdicLocalField p}, (K.carrier ≃ₐ[ℚ_[p]] K'.carrier) → …` に
+`twistedAlgEquiv p : TwistedQp p ≃ₐ[ℚ_[p]] ℚ_[p]` をそのまま当てると
+`Application type mismatch … expected PAdicLocalField.carrier ?m ≃ₐ[ℚ_[p]] PAdicLocalField.carrier ?m'`
+で落ちる（構造体の射影 `carrier` を逆向きに解くのは高階単一化で、`?m` が決まらない）。
+**直し方**: `h (K := twistedField p) (K' := selfField p) (twistedAlgEquiv p)` と
+名前付き引数で `K`・`K'` を先に固定する。固定してしまえば本体は defeq で通る
+（`(selfField p).carrier` は `exact` なら `ℚ_[p]` と合う、の項と同じ事情）。
+
+## #98 MCP REPL の基準環境は**共有**である —— 並行 agent に import を差し替えられる（2026-09-07、Y7a）
+
+`lean_start(["ABC3.Found.PGC.UniformizerExpansion"])` が **10.2 秒で「成功」**と返ったのに、
+その後の `lean_check` で `ABC3.Found.PGC.ramIndex` が `Unknown identifier` になった。
+`lean_status` を見ると imports が **`ABC3.Check.PGC.Prop12Degenerate, …`**（別 agent のもの）で、
+基準環境が横から差し替わっていた。**起動が速すぎる（90 秒でなく 10 秒）ときは疑うこと。**
+**直し方**: `lean_start` を撃ち直すと相手の環境を壊して往復戦争になる（役割定義の 313 回問題）。
+**`node tools/leanfile.mjs <path>` に切り替える**（olean を書かないので並行安全、12 秒/往復）。
+★実測: Y7a は §1 の 4 補題だけ MCP で通し、以降は leanfile.mjs で 3 往復。ファイル 455 行は初回で通った。

@@ -59,6 +59,7 @@ import ABC3.Check.GaloisRep.OmegaNondegenerate
 import ABC3.Check.GaloisRep.HtFaltPinned
 import ABC3.Check.Arakelov.ProjectiveCaseWeak
 import ABC3.Check.GaloisRep.TorsionEquivWeak
+import ABC3.Check.PGC.FreeTermFunctionRefutation
 /-!
 # Check — 我々のモデルについての検査
 
