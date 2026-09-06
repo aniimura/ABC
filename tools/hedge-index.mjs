@@ -67,7 +67,13 @@ const onlyItem = itemIdx >= 0 ? args[itemIdx + 1] : null;
 /** 合図の語。★分類は「実際に開けてみた経験」に基づく(README を見よ)。 */
 const HEDGES = [
   { key: 'routine', re: /\broutine\b/i, note: '★最大級。畳まれた量がいちばん多い' },
-  { key: 'formally', re: /\bformal(?:ly)?\b/i, note: '新しい材料は要らない。手数はある' },
+  // ★★2026-09-06 修正: 旧版は `/\bformal(?:ly)?\b/i` で **裸の `formal` にも当たっていた**。
+  //   Lubin–Tate の章では "formal group law" が数十件あり、[MilneCFT] Chapter I では
+  //   **57 件中 44 件が偽陽性**だった(合図 131 → 実質 84)。
+  //   ★合図としての `formal` は「formally, this follows」の副詞形なので `formally` に絞る。
+  //   `formal consequence` のような名詞修飾は稀で、取りこぼしても下界が下がるだけ
+  //   (`.needs` は下界という規約に沿う)。偽陽性は**見積を膨らませる**ので害が大きい。
+  { key: 'formally', re: /\bformally\b/i, note: '新しい材料は要らない。手数はある' },
   { key: 'immediately', re: /\bimmediat(?:e|ely)\b/i, note: '玉石混交。要点検' },
   { key: 'one verifies', re: /\b(?:one|One)\s+(?:verifies|checks|computes)\b/, note: '短いことが多い' },
   { key: 'easily', re: /\beasil(?:y|ier)\b/i, note: '短いことが多い' },

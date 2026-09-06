@@ -6593,3 +6593,16 @@ Edit は実ファイルの文字列をそのまま受けるので、
 ★`ProfiniteCompletion.completion` は `abbrev` ではなく `def` なので、
 `limit_pow_val (diagram G) x H k` のような**補題の適用（`exact`）は通る**（default transparency）が、
 `rw` は通らない。**補題は `ZHat` 版に言い換えて置く**（`zhat_pow_val`）のが安い。
+
+## #70 `div_le_iff₀` / `div_lt_iff₀` が作る積の**左右**を当てにいかない（2026-09-06、Λ6-M1）
+
+**失敗形**: `rw [div_le_iff₀ h] at hkey` で `‖z‖ ≤ ‖π‖ ^ m * ‖π‖` になるか
+`‖π‖ * ‖π‖ ^ m` になるかは、周りの `have` の書き方ひとつで入れ替わる。
+補助等式 `hexp : ‖π‖ ^ m * ‖π‖ = ‖π‖ ^ (m+1)` を `rw [hexp] at hkey` で当てると
+半分の確率で `Did not find an occurrence of the pattern` になり、
+`mul_comm` を足すか外すかで**同じ往復を 2 回**やる羽目になる。
+
+**直し方**: 積の向きを当てにいかず、**等式を linarith/nlinarith に渡す**
+（`linarith [hexp, hkey]`）か、`rw [hexp]` の代わりに
+`calc`／`linear_combination` を使う。どうしても `rw` にするなら
+`mul_comm` を**一度だけ**入れて、外れたら向きを変えるのではなく手法を変えること。

@@ -62,7 +62,7 @@ tools: Read, Grep, Glob, Bash
 ## 危険信号
 （statement が退化していないか。自由なパラメータが結論に現れていないか。
   この木では「落とした条件は主張を偽にするか自明にするかのどちらかになる」例が
-  6 つ見つかっている——`lean/ABC3/Check/PGC/*Degenerate.lean`）
+  ★**12 本**の検査がある(2026-09-06 実測: FrdI 3・GenEll 2・IUTchIII 1・PGC 6)——`lean/ABC3/Check/PGC/*Degenerate.lean`）
 ```
 
 ## 禁止

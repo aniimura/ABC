@@ -980,9 +980,27 @@ docstring にその区切りを明記した。
   ★途中で NG 27 まで増えたが、原因は**新規の橋 7 本に `.src` / `.needs` が無かった**だけ
   (G1 / G6)。書いて 13 に戻した。
 
-## ★★★★★★D22. [pGC §2] `RamificationFiltration` が**退化している**(12 例目の候補)
+## D22. [pGC §2] `RamificationFiltration` の退化 —— ★**新種ではなかった(本体の誤りを訂正)**
 
-- **状態**: **保留**(2026-09-06、Λ6/Λ7 の段取り測定中に発見)
+- **状態**: ★★**訂正済み**(2026-09-06)。**「12 例目の新種」は本体の誤りだった**。
+  ★**この退化は既に見つかっており、witness も本流に入っている**:
+  `Found/PGC/RamificationNaturality.lean:75` の `topFiltration`(`Gv = ⊤` を全 `v` で返す)と、
+  それを使った退化の証明が **3 本**
+  (`Check/PGC/Prop22Degenerate.lean:82` / `Cor33Degenerate.lean:126` / `Theorem42Degenerate.lean:67`)。
+  ★本体が挙げた `⊥` は `⊤` と**同じ現象の別の埋め方**であり、**新種ではない**。
+  原因も同定済み —— **自然性(`map_Gv`)の欠落**
+  (`GaloisTransfer.lean:34` / `GaloisTransferContinuous.lean:42` / `RamificationNaturality.lean:26`)。
+
+  ## ★段取りへの含意も変わる
+
+  * 「非空虚 witness を足すべき」は**不要**(退化側の witness は既にある)。
+  * 要るのは逆 —— **`Λ7c″`(Prop 4.3)が入ったときに
+    `RamificationFiltration` を「本物」に差し替える**か、
+    `IsNaturalFiltration`(`RamificationNaturality.lean:69`)を仮説として要求する側に回るかの
+    **設計判断ノード 1 個**。Λ7 の 12 ノードとは別立て。
+  * ★★**Λ7c″ の消費先は 2 つ**: §2 の `RamificationFiltration` を非退化にすること
+    (**Prop 2.2・Cor 3.3・Thm 4.2 の 3 本が今は退化で止まっている**)と、Λ7 後半(Lemma 4.9)。
+    ★**二重計上の効きは D23 の見立てより大きい**。
 - **場所**: `Interface/PGC/LocalFieldData.lean:160`
 - **★問題**: 場は `Gv` / `isClosed` / `isNormal` / `antitone` の **4 つだけ**で、
   ★**`Gv := fun _ _ => ⊥` が 4 条件すべてを満たす**
@@ -1119,3 +1137,157 @@ docstring にその区切りを明記した。
 * ★**既存 `.txt` との完全一致は追わなかった** —— 差は 0.03%(FrdI で 310,495 対 310,596)まで縮んだが、
   メタ第 6 回が「PyMuPDF でも完全一致は 244/458 頁 = **53%**」と測っており、残りは版差か追加の正規化。
   **目的は Milne を読めるようにすることで、既存ファイルのバイト再現ではない**
+
+### D23 の続報(第 1054)—— Milne を原典として節点を確定した
+
+★**`hedge-index --paper MilneCFT --item` は引けなかった**(見出し検出が 2 件のみ。走り込み帰属で
+p.50 以降 246 頁の 92 件が全部「Lemma 3.11」に付く)。**原文を直読して手で数えた。**
+
+## ★測定器の欠陥を 1 件見つけて直した(今日 5 種目)
+
+`tools/hedge-index.mjs:70` の `/\bformal(?:ly)?\b/i` が **裸の `formal` に当たっていた**。
+"formal group law" が Lubin-Tate の章に大量にあり、[MilneCFT] Chapter I では **57 件中 44 件が偽陽性**。
+
+| | 修正前 | 修正後 |
+|---|---|---|
+| 全論文の合図 | 9,045 | **7,007**(−2,038、**23% が偽陽性**) |
+| MilneCFT | 131(帰属 99%) | ★**84(帰属 100%)** |
+| FrdI / GenEll(較正に使った論文) | 259 / 53 | 257 / 52 |
+
+★**較正論文はほぼ動かず、Lubin-Tate 系だけが大きく減った** ——
+「FrdI で較正した語彙が別の章で壊れる」形。ゲートは NG 13 のまま。
+
+## ★★Milne §4 の冒頭に「この節は飛ばしてよい」と書いてある
+
+p.53:「この節の結果は主定理の証明には必要でなく、むしろ主定理から従う。**この節は飛ばしてよい**」。
+実際 p.34-36 の **SECOND PROOF(I §2-3 + III §1-3)** が `K^ab = K_π·K^ur` を
+**1.14 + 1.15 の 1.5 頁**で、**Hasse-Arf も分岐フィルトレーションも使わず**導いている
+(外部参照ゼロ・合図ゼロ)。
+
+## ★Rosen は使えない(判断: 入手しない)
+
+Remark 4.15 が Iwasawa (1986, p.115) を引いて
+**「Prop 4.4 と `K_{π,n}/K` の性質を認めれば、局所 Kronecker-Weber と Hasse-Arf は本質的に同値」**
+と書き、**Example 4.7 が片方向を実際に示している**(`K_{π,n}` の跳びを明示計算)。
+⇒ **内容は保存される。** Rosen で消えるのは「Serre V.7 を引く」という**参照だけ**で、
+Milne 自身が "more complicated" と評している。**Λ7e は削れない。**
+
+## ★★Λ8 には Milne は原典にならない
+
+p.34 に地の文で **「Need to add a proof of this to the notes」** とあり、
+鍵の可換図式(`Art_L` と `Nm_{L/K}` の両立)は **Iwasawa 1986, Thm 6.9 p.89** に外注されている。
+★D23 が「Λ8 は迂回不能」と書いた根拠は **Milne の外**にある。原典の取り直しが要る。
+
+## ★新しい節点を 1 つ見つけた —— `DworkLemmaMultiplicative`
+
+Milne は p.50 で **「The proof for B^× is similar.」** の 1 文で畳んでおり、
+`hedge-index` の正規表現は `similarly` しか見ないので **`similar` を取りこぼす**。
+中身は `k̄^× →^{x↦x^{q−1}} k̄^×` の全射性と核 `𝔽_q^×`(乗法版 Artin-Schreier)で、加法版とは別の補題。
+
+## ★Milne の畳み方は「語式」ではなく「外部参照式」
+
+§3-§4 で **外部参照 17 件 対 語の合図 16 件**。
+★**Λ7 の 2 大ノード(Prop 4.4・Hasse-Arf)は語の合図をひとつも持たず、`See Serre 1962` の 2 行だけ**。
+**合図を数えるだけでは Λ7 の重さは見えない。**
+
+## 節点の数(確定)
+
+**Λ6 = 7 / Λ7 = 12 / Λ8 = 1 / Λ9 = 1 = 21**(D23 の 16 から +5)。
+★うち **Λ6 の 1 つ(`UnramifiedResidueAlgClosed`)は Λ5b で完了済み**、Λ9 も完了済み。
+
+## ★経路の比較(桁で)
+
+| | 節点 | 行数 | 第 2 の消費者 |
+|---|---|---|---|
+| **Λ7 = Milne I §4** | 12 | 8,000-15,000 | ★あり(Λ7a-c″ が [pGC] §2 の `RamificationFiltration`) |
+| コホモロジー経路 = Ch II 必要部 + Ch III §1-3 | 40-55 | 15,000-30,000 | なし |
+
+★**桁は同じ 10⁴ だが、節点数で 3-4 倍・行数で 2 倍前後、コホモロジー経路が重い。**
+★**ただし組み合わせが有望**: Λ7a-c″(前半 5 ノード、§2 と共有)を作り、
+`K^ab = K_π·K^ur` だけを SECOND PROOF に振ると **Prop 4.4 と Hasse-Arf(4,000-8,000 行)が消える**。
+代わりに Ch III Thm 3.4 が要る。★**その費用は測れていない。次の測定点。**
+
+## 落とせるもの(合図が「省いてよい」を指す例)
+
+* Prop 3.10 の条件 (c)(d)(Steps 3・4) —— **確認済み**。合図 2 件が 0 ノードに
+* Lemma 3.3 の脚注 / Example 3.2・3.8・3.13 / Cor 4.12・Example 4.13・Remark 4.14
+* **大域 Kronecker-Weber 4.16-4.18**(2,900 字)—— pGC は局所しか要らない
+* Notes / 回想(3,600 字、裸 `formal` × 11)
+* ★**Ch V-VIII(真の合図 84 件のうち 37 件)と Ch IV(Brauer 群、28 頁)は丸ごと射程外**
+
+## ★★★★★★★D24. [pGC §2-§4] **`theorem_4_2` は現在「素朴な Grothendieck 予想」を含んでいる**
+
+- **状態**: **保留**(2026-09-06 発見)。★**D18 と同じく「保留が偽を温存する」型**
+- ★**本体の仮説は否定された**: 「`IsNaturalFiltration` を足せば §2 の 3 定理が退化から出る」は**誤り**。
+  `Found/PGC/RamificationNaturality.lean:81` の `exists_isNaturalFiltration` が
+  **`topFiltration`(`Gv ≡ ⊤`)が `IsNaturalFiltration` を満たすことを 2 行で証明済み**
+  (`Subgroup.map f ⊤ = ⊤` が全射から出る)。
+  ⇒ **仮説を足しても退化のインスタンス化はそのまま生き残る。**
+  ★これは「空虚な修理」ではなく **「無効な修理」(no-op)** である。
+
+## ★★★より重い発見 —— 既に「修理済み」と記録されている項目で D13 と同じ事故が進行中
+
+`Skeleton/PGC/Section4.lean:122` の `theorem_4_2` は **2026-09-05 に `IsNaturalFiltration` を
+足して修理済み**と記録されている。しかし `RF := topFiltration` を代入すると
+`Gv ≡ ⊤` なので `FilteredGroup.Iso` の `map_Gv` が無内容になり、結論は
+
+> `Isom_{ℚ_p}(K,K′) → Out(Γ_K, Γ_K′)` が全単射
+
+そのものになる。★**原典 Introduction が明示的に偽だと述べている命題**である:
+
+> the Grothendieck Conjecture cannot hold in the naive sense
+> (i.e., **if one removes the condition of "compatibility with the filtrations"** … see [8])
+
+★**`Gv ≡ ⊤` は「フィルトレーションとの両立条件を取り除く」ことの Lean 上の実現そのもの**。
+⇒ **D13(Prop 1.2 の `∀ RD`)と同型の事故**であり、**13 例目ではなく同じ種の再発**。
+
+## ★★3 定理は「いま実際に反証できる」(在庫が 2026-09-05 に変わった)
+
+`Check/PGC/Prop12Degenerate.lean` が `twistedField` / `twistedGalEquiv` / `OneIsStandard`
+(いずれも sorry 無し)を出しており、**相異なる 2 項 K ≠ K′ とその間の連続同型が在庫にある**。
+3 定理はいずれも**項 K の自由な関数**を仮説に取っているので、そのまま反証できる:
+
+| 定理 | 自由な項関数 | 退化させる取り方 |
+|---|---|---|
+| `prop_2_2` | `IntKbar` / `CompKbar` | `if OneIsStandard K then ℤ else ℤ × ℤ` ⇒ `ℤ ≃+ ℤ×ℤ` を要求して落ちる |
+| `cor_3_1` | `isHodgeTate` | `isHodgeTate K _ := OneIsStandard K` ⇒ 結論が `True ↔ False` |
+| `cor_3_3` | `toGal` | 標準側は `toGalChoice`、捻り側は `fun _ => 1` |
+
+★`Section3.lean:98-110` の「K≠K′ の witness は現状の道具では構成できない」は
+**2026-09-05 に古くなっている**(監査記録の陳腐化)。
+
+## ★★診断の訂正 —— 3 本の Check は RamificationFiltration の退化を突いていなかった
+
+`Prop22Degenerate` は**作用が公理ゼロの `SMul` だったこと**、
+`Cor33Degenerate` は **`ρ` と `ρ'` が無関係だったこと**、
+`Theorem42Degenerate` は **`Φ` が自由な関数だったこと**を反証していた。
+`topFiltration'` / `degenerateRF` は「`∀ RF` の束縛子を潰す最も安い項」として使われていただけ。
+★**「3 定理が RamificationFiltration の退化で止まっている」という本体の診断は当たっていない。**
+
+## ★★★非空虚 witness が退化項と一致している(G2 の穴)
+
+`exists_isNaturalFiltration` の witness は `topFiltration` **そのもの**。
+G2(非空虚性)は通るが、★**通ること自体が「その仮説は何も切っていない」証拠**である。
+**G2 の合格が安心を生む典型的な穴。**
+
+## ★原文が使う唯一の性質は自然性ではない
+
+[pGC] §2 が使うのは **`Γ_K^v` の `Γ_K^{ab}` における像 = `U_K^v`**(Herbrand、[3] p.155 Theorem 1)と
+**部分群への制限との両立**(上付き↔下付き変換)。★**自然性ではない。**
+`RamificationFiltration` に足すべき場は `abelianImage` であって `IsNaturalFiltration` ではない。
+★ただし足すと **その瞬間 G2 が空虚になる**(`Found/PGC/` に本物の分岐フィルトレーションは 1 つも無い)。
+
+## ★推奨: (C) 二段構え
+
+**第 1 段(今日できる。費用小・効果大)** —— **`∀`(自由な項関数)を外す**。
+D13 の正しい修理(`residueCard_and_degree_recoverable_real`)と同じ。
+★特に **`prop_2_2` の `_RF` は結論にも型にも現れない**(`Section2.lean:134`)。
+`cor_3_1` / `cor_3_3` が 2026-09-04 に受けた訂正が **`prop_2_2` だけ未適用**である。
+
+**第 2 段** —— `abelianImage` を足す。ただし**着手前に非空虚 witness を作れるか測る**こと。
+候補は `ltPreimageFiltration`(`Γ_K ↠ 𝒪_K^×` による `principalUnits` の逆像)。
+★留保 2 つ(段取り係も解決できていない): (1) 相互律の π 非依存性が在庫 0 なので
+**自然性 witness と非退化 witness が別物になる危険**、(2) これは本物の `Γ_K^v` ではない
+(像の条件は満たすが Γ_L への制限を支えられるかは不明)。
+
+- **決定**: —
