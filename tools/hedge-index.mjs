@@ -494,7 +494,17 @@ console.log('   ★これが「まだ開いていない省略」の下界であ�
 //   ★経験則: **合図の文に括弧の引用があれば、それが手順書である**。
 //   引用が無い合図は、公理の向きが合っていない可能性を先に疑うこと。
 if (args.includes('--cite')) {
-  const REF = /\b(Proposition|Theorem|Definition|Corollary|Lemma|Example|Remark)s?\s+([0-9]+\.[0-9]+(?:\.[0-9]+)?)/g;
+  // ★★2026-09-06 修正(第 1055)。旧版は 2 つとも取り落としていた:
+  //   (1) 番号に点を要求していた(`[0-9]+.[0-9]+`)ので、[pGC] p.4 の
+  //       "(Theorem 1 of [3], p. 155)" —— ★Herbrand の定理そのもの —— に当たらなかった。
+  //       Prop 2.1 の well-known が「引用なし」と表示されていた原因はこれである
+  //       (行跨ぎではない。文脈窓は元から 5 行ある)。
+  //   (2) `[3]` 形式の文献番号を見ていなかった。★これが最も重い水路である ——
+  //       [MilneCFT] は §3-§4 で外部参照 17 対 語 16 で、Λ7 の 2 大ノードは
+  //       省略の語をひとつも持たず "See Serre 1962" の 2 行だけで畳まれている。
+  const REF = /\b(Proposition|Theorem|Definition|Corollary|Lemma|Example|Remark|Chapter|Ch\.|Pptn)s?\s+([0-9IVX]+(?:\.[0-9]+)*)/g;
+  // ★外部参照(文献番号と著者+年)。合図 1 つ = 節点 1 つの規約では、これも節点になる。
+  const BIB = /\[([0-9]{1,3})\]|\b([A-Z][a-zA-Z]{3,})\s+(1[89][0-9]{2}|20[0-2][0-9])\b/g;
   console.log('\n-- 合図の文が抱えている引用(候補の依存)');
   for (const r of withHedge) {
     if (onlyItem === null && r.state === '済') continue;
@@ -503,6 +513,8 @@ if (args.includes('--cite')) {
     for (const h of r.hits) {
       const ctx = lines.slice(Math.max(0, h.line - 3), h.line + 2).join(' ');
       const refs = [...ctx.matchAll(REF)].map((m) => `${m[1]} ${m[2]}`);
+      // ★外部参照も「抱えている引用」に数える(2026-09-06)。
+      for (const m of ctx.matchAll(BIB)) refs.push(m[1] ? `[${m[1]}]` : `${m[2]} ${m[3]}`);
       if (refs.length === 0) noCite += 1;
       for (const x of refs) seenRef.add(x);
     }

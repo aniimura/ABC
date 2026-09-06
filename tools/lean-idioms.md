@@ -6606,3 +6606,20 @@ Edit は実ファイルの文字列をそのまま受けるので、
 （`linarith [hexp, hkey]`）か、`rw [hexp]` の代わりに
 `calc`／`linear_combination` を使う。どうしても `rw` にするなら
 `mul_comm` を**一度だけ**入れて、外れたら向きを変えるのではなく手法を変えること。
+
+## #71 `hcard ▸ orderOf_dvd_natCard a` は motive が壊れる（2026-09-06、Λ5b′）
+
+**失敗形**: `Nat.card (Multiplicative (ZMod N)) = N` を `hcardG` として
+`have hdvd : orderOf a ∣ N := hcardG ▸ orderOf_dvd_natCard a` と書くと、
+`▸` が **`a` の型の中の `ZMod N`** まで一緒に書き換えようとして
+`orderOf (a : Multiplicative (ZMod (Nat.card ...)))` という化物を作る
+（`rw [← hcardG]` にしても `motive is not type correct`）。
+`Nat.card G` の `G` が引数の型に現れる補題（`orderOf_dvd_natCard`,
+`Nat.card_zpowers`, `Subgroup.eq_top_of_card_eq` 系）で必ず踏む。
+
+**直し方**: ゴール側を触らず、**補題を仮説に落としてから仮説を書き換える**:
+
+```lean
+have h := orderOf_dvd_natCard a
+rwa [hcardG] at h    -- 型の中の ZMod N は動かない
+```

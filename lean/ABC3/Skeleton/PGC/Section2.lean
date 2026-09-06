@@ -145,7 +145,7 @@ def prop_2_2.needs : List ProofObligation :=
   [ .citation "Interface.PGC.RamificationFiltration" "高次分岐群(上付き番号付け)"
       (.absent "mathlib v4.31.0-rc2 実測: RamificationGroup.lean に上付き番号付けは無い。★2026-09-06 に再測: RamificationGroup.lean にあるのは分解群・惰性群の 4 宣言だけで、re:`upperNumbering|UpperNumbering|ramificationGroup[A-Za-z]*Upper|Herbrand|herbrand|phiDeriv|psiDeriv`→0") 4,
     .citation "[6] Serre, Local Fields, Chapter IV" "上付き↔下付き番号付けの変換"
-      (.absent "mathlib v4.31.0-rc2 実測: lowerNumbering/upperNumbering 系の宣言は0件。★2026-09-06 に再測: re:`lowerNumbering|LowerNumbering|upperNumbering|UpperNumbering|herbrand|Herbrand`→0") 5,
+      (.absent "mathlib v4.31.0-rc2 実測: lowerNumbering/upperNumbering 系の宣言は0件。★2026-09-06 に再測: re:`lowerNumbering|LowerNumbering|upperNumbering|UpperNumbering|herbrand|Herbrand`→0。★★2026-09-06 第 3 の再測でこの記録は半分誤りと分かった —— 下付き分岐群は名前が違うだけで mathlib に在る: `Ideal.inertia` (RingTheory/Ideal/Defs.lean:152)、`AddSubgroup.inertia` (Algebra/Group/Subgroup/Basic.lean:1066)、`AddSubgroup.mem_inertia` は @[simp]、そして `AddSubgroup.subgroupOf_inertia` は rfl(= 原文の「下付きは部分群への移行と両立する」がそのまま在る)。不在なのは上付き番号付けと Herbrand の変換だけ。★教訓: 我々が付けたい名前で引いて 0 件でも、対象が別名で在ることがある") 5,
     .otherPaper "pGC" "Corollary 1.3" 3 ]
 
 end ABC3.Skeleton.PGC
