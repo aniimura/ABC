@@ -1727,6 +1727,8 @@ import ABC3.Found.PGC.AbelianDecomposition
 import ABC3.Found.PGC.LubinTateClosureTopology
 import ABC3.Found.PGC.UnramifiedZhat
 import ABC3.Found.PGC.LubinTateZhat
+import ABC3.Found.PGC.UnramifiedCompletion
+import ABC3.Found.PGC.UnramifiedResidueField
 import ABC3.Found.GenEll.VeluDualJ
 import ABC3.Found.GenEll.VeluJExpNeg
 import ABC3.Found.GenEll.VeluJDescent

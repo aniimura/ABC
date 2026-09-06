@@ -217,7 +217,7 @@ def exists_normalizationIn_map.needs : List ProofObligation :=
     .citation "[mathlib]" "Scheme.Hom.normalizationDesc"
       (.inMathlib "AlgebraicGeometry.Scheme.Hom.normalizationDesc") 110,
     .citation "[ABC3]" "cartierPullback(支配射に沿った Cartier 因子の引き戻し)"
-      (.inProject "ABC3" "ABC3.Found.Divisor.pullbackCartier") 110,
+      (.inProject "ABC3" "ABC3.Found.Divisor.cartierPullback") 110,
     .derivation "V₂ ×_{V₁} V₁[L] は V₂ の上で整。仮定がちょうど lift の条件になる" 110 ]
 
 def toNormalizationIn_unique.src : Source :=

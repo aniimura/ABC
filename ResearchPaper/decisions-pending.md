@@ -236,7 +236,7 @@
 
 ## D10. ★[FrdI] Example 6.3 —— 9 例目の退化と、新種の危険
 
-- **状態**: **保留**(2026-09-06 発見。`autonomy-policy.md` §2 に該当)
+- **状態**: ★★**第 1 波(段階 1・2、statement 不変)は実装完了**(2026-09-06)。`Example63.lean` の sorry 10 → **4**、`Theorem64.lean` は sorry 1 → **0**(下の「D10 第 1 波の実行結果」)。★第 2 波(段階 3、statement 変更)は**引き続き保留**
 - **論点**: `Skeleton/Divisor/ArithDivisor/Example63.lean` の **10 件の sorry のうち 8 件が
   零写像・恒等写像だけで閉じる**(`arithDivOfElt := 0` / `degArith := 0` /
   `Nonempty (A → ℕ)` は `fun _ => 0` / `Nonempty (X → X)` は `id`)。
@@ -285,7 +285,7 @@
 
 ## D11. [FrdI] Theorem 6.4 (iv) / Chebotarev —— スケルトンが死んでいる
 
-- **状態**: **保留**(2026-09-06 発見)
+- **状態**: ★★**採用し実装完了**(2026-09-06、第 1049)。畳んだ。sorry 3 → 0
 - **★測定**: この持ち場の数学は**既に別所で閉じている**。
   - `Found/NumberField/` **21 ファイル・4,864 行、sorry 0**
     (`tendsto_splQ_div_log`(Chebotarev の完全分解版)/ `HasDirichletDensity` /
@@ -316,7 +316,7 @@
 - ★**「不在」の誤りは 2026-09-05〜06 の 2 日で 5 件目**
   (`ULift.field` / `continuousCohomology` / `Ẑ` / `CompactSpace Gal` / `FrobeniusElement`)。
   第 1019 の G11 と `absent-recheck.mjs` はこれを機械化するために入れた。
-- **決定**: —
+- **決定**: ★**採用し、実装完了(第 1049)**。畳んだ。sorry 3 → 0
 
 ## D12. [メタ] `tools/source-health.mjs` を取り込むか(メタ第 6 回、隔離 worktree)
 
@@ -346,7 +346,7 @@
 
 ## D13. ★★★[pGC] Proposition 1.2 —— **修理が強すぎた**(10 例目の退化、新種)
 
-- **状態**: **保留**(2026-09-06)。★**数学は完成している。残るのは statement の判断だけ**
+- **状態**: ★★**採用し実装完了**(2026-09-06、第 1048)。Prop 1.2 も Cor 1.3 も閉じた
 - **★数学の側は閉じた**: `Found/PGC/Prop12Transport.lean`
   `residueCard_and_degree_recoverable_real : (residueCardAndDegreeObject (realResidueCardinality p)).RecoverableFromAbsGal`
   —— **無条件・sorry 0**。`#print axioms` は `[propext, Classical.choice, Quot.sound]` のみ。
@@ -392,11 +392,11 @@
     ★`Interface` を実物に固定することになるので `Interface` の意味が薄れる。
     しかも方針書 §2 の「`Interface` への場の追加」に当たる。
 - ★**Corollary 1.3 も同じ判断の下流にある**(`Skeleton/PGC/Section1Cor13.lean:147`)。
-- **決定**: —
+- **決定**: ★**採用し、実装完了(第 1048)**。Prop 1.2 も Cor 1.3 も閉じた
 
 ## D14. [メタ] `tools/unwired.mjs` を取り込むか(メタ第 7 回、隔離 worktree)
 
-- **状態**: **保留**(2026-09-06)。★ただし**測定結果は既に使い始めている**
+- **状態**: ★★**採用済み**(2026-09-06、D20 と一括で本体へ取り込み)
 - **中身**: 「**配線されていない既存の数学**」を機械で見つける新規 1 本(394 行)。
   `Skeleton` の `sorry` 宣言の**結論**を鍵集合(識別子・末尾成分・camel/snake 部分語・記号)にし、
   `sorry` 無しの在庫 16,182 宣言へ idf 重みで当てる。`--dead` で**空撃ち**も出す。
@@ -447,7 +447,7 @@
 
 ## D16. ★★★[FrdI] Theorem 6.4 (i) 末尾 —— **名前が約束した半分が型に無く、足すと偽**(11 例目の候補)
 
-- **状態**: **保留**(2026-09-06)
+- **状態**: ★★★**閉じた**(2026-09-06)。★**予測どおり D10 の第 1 波で `degArith` に本体が入った瞬間に閉じた**。ただし閉じたのは**名前が約束した半分(全射性)だけ**で、核の条は型に無いまま(足すと偽)
 - **場所**: `Skeleton/Divisor/ArithDivisor/Theorem64.lean` の
   `degArith_surjective_and_kernel_eq_image`
 - **★★退化 その 1(名前と statement の乖離)**: 宣言名は「全射**かつ**核 = 像」だが、
@@ -474,7 +474,7 @@
   (`Ex63RlfPic.lean`)が原典に忠実」と記録する。
 - ★あわせて `Check/FrdI/Thm64PicDegenerate.lean` を書く価値がある
   (`L = ℚ(√2)` で商に円が残ることの証明 = **11 例目の退化検査**)。
-- **決定**: —
+- **決定**: ★**採用(畳む)。ただし橋は届かない**ので記録のみ(第 1049)。`degArith` に本体が入るまで動かせない
 
 ## D17. ★★[CorrHyp] Theorem 6.1 —— `∀ D` 量化が**反証可能**(★CorrHyp は不可触なので報告のみ)
 
@@ -502,7 +502,7 @@
 
 ## D18. [FrdI] Theorem 6.2 (i) —— `IsDominant` が無いので正直な定義が付けられない(D8 の追補)
 
-- **状態**: **保留**(2026-09-06)。★**D8 と同じ束の追加測定**
+- **状態**: ★★★**採用し実装完了**(2026-09-06)。sorry 4 → **0**。偽になっていた statement は消えた(下の「D18 の実行結果」)
 - **場所**: `Skeleton/Divisor/Cartier/Theorem62.lean`(sorry 4 個)
 - **★測定 1**: Skeleton 側は `(_ψ : Y ⟶ X)` に **`IsDominant` が無い**。
   `Found` 側は `variable {X Y} (g : X ⟶ Y) [IsDominant g]`。
@@ -520,7 +520,7 @@
 
 ## D19. [GenEll] Lemma 3.2 (ii) の σ 恒等式 —— 真だが**消費者ごと死んでいる**
 
-- **状態**: **保留**(2026-09-06)
+- **状態**: ★★**採用し記録完了**(2026-09-06、第 1049)。前線から外す(削除しない)。sorry は意図的に残す
 - **場所**: `Skeleton/GenEll/SigmaConvolution.lean`
 - ★**原文はラマヌジャンの恒等式を述べていない**。[GenEll] Lemma 3.2, (ii) は
   「`q_{E'} = q_E^l`、ゆえに `deg∞(E') = l·deg∞(E)`」である。
@@ -539,7 +539,7 @@
   ★**削除ではなく保留**。`Found/GaloisRep/VeluMuSum/` に **12 件超の sorry-free な資産**が眠っている。
 - ★**分からなかったこと**: `VeluMuSum` を**将来使う計画があるのか**は判定できなかった。
   Lemma 3.5 の本線(`minDeltaExp_eq_mul_*`)は既に sorry 0 だが、Lemma 3.7 以降で再登場する設計かもしれない。
-- **決定**: —
+- **決定**: ★**採用し、記録完了(第 1049)**。前線から外す(削除しない)。sorry は意図的に残す
 
 ## D20. [メタ] 第 7 回・第 8 回の取り込み —— ★**採用を決定**(2026-09-06、本体セッションの自律判断)
 
@@ -792,3 +792,190 @@ D13 のとおり `∀ RD` 版は「原典が偽と述べている命題」と**�
 statement は 1 字も変えず、`sorry` も宣言も削除せず、`.needs` に
 `j_veluQuot_eq_j_tate_pow`(sorry 0、第 996、σ 無しで Lemma 3.2 (ii) を閉じる現行の道)への引きと、
 「μ-等級付きの道は置き換わり現行の道では消費されない」を記録した。
+
+# ★★★★★★2026-09-06 D10・D18 の測り直しと決定
+
+## ★★D18 —— **本体の読みは逆だった。しかも今日 statement が偽になった**
+
+本体は「D8 の `∃ hnorm` 化で `hnormY` は結論側に入ったので不要になったのでは」と書いたが、**逆**である。
+
+| D18 が挙げた 4 つ | 今日以後の姿 |
+|---|---|
+| `[IsDominant ψ]` | **まだ要る**(★原文が明示。逸脱ではない) |
+| `hnormX`(的側 `X` の正規性) | ★**消えた**。仮定 `hD : IsCartierDiv X D` から取り出せる |
+| `hnormY`(源側 `Y` の正規性) | ★★**消えていない。逆に必須になった** |
+| `hdim` | まだ要る。★**原典には無い**(逸脱記録が要る) |
+| (`[CompactSpace Y]`) | 不要(`[IsNoetherian Y]` から出る) |
+
+⇒ 4 → **3**。減ったのは `hnormX` であって `hnormY` ではない。
+
+### ★★★`isCartierDiv_pullbackCartier` は今日**偽の主張になった**(12 例目の候補)
+
+```
+IsCartierDiv Y (pullbackCartier X ψ D hD) = ∃ hnorm : IsNormalScheme Y, …
+```
+
+`Y` は `[IsIntegral Y] [IsNoetherian Y]` しか持たない。
+**非正規な整 Noether スキーム(結節 3 次曲線)を取れば `IsNormalScheme Y` は偽**なので `∃` 全体が偽。
+本体が `sorry` かどうかとは**無関係**である。仮定側は充足可能(`X = Spec ℤ`、`D = 0`)。
+
+★**要求を結論に入れることは、要求を消すことではなく、義務に変えることである。**
+★D8 の実行 agent は「偽の証明は生じない」と正しく書いたが、
+**statement 自体が偽になったこと**は書いていなかった。
+
+★**正直な区切り**: 数学的に偽だが **Lean での反証は未実施**
+(非正規な整 Noether スキームの witness が木にも mathlib にも無い)。
+
+### ★決定: **(A) で直す。採用。**
+
+理由 3 つ:
+1. ★**保留を続けると偽の statement が木に残る。** D8 以前は「証明できない」だったものが
+   今日「偽」になった。**保留のコストが今日変わった**。
+   ★「保留継続」が偽を温存する選択肢になったのは D18 が初めてである。
+2. 足す 3 つのうち 2 つ(`IsDominant` / `hnormY`)は**原典の明示的仮定の復元**。
+   D8 の項目 1・4 を採用したのと同じ理屈。逸脱記録が要るのは `hdim` **1 つだけ**。
+3. 消費者ゼロなので巻き添えは `Normalization.lean` の 1 ノードに閉じる。
+
+**見積 80-130 行・新規数学 0**(`cartierPullback` / `pullCoeff_add` /
+`isCartierDiv_cartierPullback` / `pullCoeff_nonneg` の 4 本が sorry 0 で在庫)。
+`hdim` を局所 Hartogs で落とす道(C)は**独立ノードとして後送り**
+(原典の 2 用例——正規化射・Frobenius——では自動成立するので臨界路に乗らない)。
+
+### あわせて見つかった穴 3 つ
+
+- ★`.needs` に**条件 (a)(台の条件)が無い**。原文が「by assumption (a)」と名指ししている依存が写っていない
+- ★`Skeleton/Divisor/NormalizationUniversal.lean:220` の `.citation` が
+  **存在しない宣言 `ABC3.Found.Divisor.pullbackCartier` を指している**(実名は `cartierPullback`)
+- ★`hdim` が `Found` 側に既に入っているが**逸脱として記録された形跡が無い**
+
+## ★★D10 —— **本体を入れる方向には偽が無い。第 1 波は判断不要**
+
+### ★型が既に一致していた(想定外の拾い物)
+
+`Found/Divisor/ArithOrd.lean:251` の `arithDivGroupEquiv` の domain は
+Skeleton の `ArithPhiGp L` と**リテラルに同一**(宇宙も一致)。
+`ArithOrd.lean` は `Found` と mathlib しか import しないので**循環なし**。
+⇒ `arithDivOfElt` / `degArith` の配線は**型の詰め替えすら要らない**。
+
+### ★★本体を入れてもどの statement も偽にならない(5 件確認)
+
+`arithDivOfElt_mul` / `degArith_add` / `degArith_arithDivOfElt` / `units_eq_roots_of_unity` /
+★`Theorem64::degArith_surjective_and_kernel_eq_image` —— **全部真**
+(最後は `(0, single v r)` を取れば `deg = r`)。
+★これは D16 の「核の条を足すと偽になる」とは**別物**。**本体を入れる方向には偽が無い。**
+
+### ★★★D10 を直すと D16 の未閉ノードが同時に開く
+
+D16 は「橋は届かない。`degArith` に本体が入るまで動かせない」で止まっている。
+本体が入れば `Theorem64.lean` の `sorry` が閉じ、
+**D21 の実測反証(`Function.Surjective (degArith L)` から `0 = 1`)も同時に消える**。
+
+### ★決定: **2 波に分ける。第 1 波は判断不要なので即実行。**
+
+- ★**第 1 波(段階 1・2)** —— **statement を 1 字も変えない**ので方針書 §2 に当たらない。
+  `sorry` 10 → 3、Theorem64 も閉じる、D21 の危険が算術側で消える。
+  見積 **90-180 行**、新規数学は `units_eq_roots_of_unity`(Kronecker、部品は mathlib に全部ある)の **1 本だけ**。
+- **第 2 波(段階 3)** —— statement 変更。**引き続き保留**。
+  ★★**#2 は `v.Completion` への移動と一体でしか動かせない**
+  (`L` の上のまま強めると `L` 可算 vs `ℝ≥0` 非可算で**偽**。9 例目で証明済み)。
+
+### 合図の穴 2 件(★`frontier.mjs` からは見えない)
+
+`hedge-index --paper FrdI --item "Example 6.3"` の合図 5 件のうち、
+**2 節点(perf-factorial / 射の 3 つ組)に Skeleton の項目が無い**。
+`.needs` の下界に写らないので前線に出てこない。
+★`arithDivOfElt` / `degArith` の `.needs` が**空**だが、原文は両方とも明示している
+(傍注 6383 と p.113-114 の 2 場合の式)。
+
+## ★方針書 §4 を守るため、実行は Λ5b の完了後にする
+
+新 §4 は「`lake` / `lean.exe` を動かす agent は**同時 1 体**」。
+Λ5b が走っているので、D18・D10 の実行 agent は**それが止まってから**起こす。
+★今日採用したばかりの規則を、採用直後に破らない。
+
+# ★★★★★★2026-09-06 D18・D10 第 1 波の実行結果
+
+## ★D18 の実行結果 —— `Skeleton/Divisor/Cartier/Theorem62.lean` は sorry 4 → **0**
+
+**新しく作った補題は 3 本、いずれも配線のための橋**(数学は 1 つも新規に無い):
+
+| 名前 | 型(要約) |
+|---|---|
+| `isNormalScheme_of_isCartierDiv` | `IsCartierDiv X D → IsNormalScheme X` |
+| `found_isCartierDiv_of_isCartierDiv` | `IsCartierDiv X D → (hnorm) → Found.IsCartierDiv hnorm D` |
+| `isCartierDiv_of_found` | `Found.IsCartierDiv hnorm D → IsCartierDiv X D` |
+
+★橋の 2 本目は**`hnorm` を任意に取ってよい形**にした —— `IsNormalScheme X : Prop` なので
+**証明無関係性でどの証明でも defeq** になり、`hD.choose` を持ち回らずに済む。
+`Exists.choose` を使わないので `Classical.choice` も増えない。
+★補助として `pullbackCartier_apply`(成分 = `Found.pullCoeff`、`rfl`)を置いた。
+
+**足した仮定は測定どおり 3 つ**(`[IsDominant ψ]` / `hnormY` / `hdim`)。
+★`hnormX`(的側)は**足していない** —— `hD` から取り出せる。
+★`[CompactSpace Y]` も**足していない** —— `[AlgebraicGeometry.IsNoetherian Y]` から instance で出る。
+
+**逸脱の記録**: `hdim` は原典に無い仮定である。ファイル冒頭の docstring と
+`pullbackCartier.needs` の `.implicitStep` の**両方に**書いた(決定 id D18、日付 2026-09-06)。
+
+**あわせて直した記録の穴 3 つ**(すべて実施):
+- `pullbackCartier.needs` を**新設**し、原文が「by assumption (a)」で引く**台の条件**を
+  `Found.Divisor.pullCoeff_eq_zero_of_notMem`(底が動く版が `hpull` として抱えている)への
+  citation として写した
+- `Skeleton/Divisor/NormalizationUniversal.lean:220` の citation を
+  存在しない `ABC3.Found.Divisor.pullbackCartier` から実名 `cartierPullback` へ直した
+- `hdim` の逸脱を上記のとおり記録した
+
+**下流**: `Skeleton/Divisor/Normalization.lean::exists_cartierDatum_of_geometry` は
+`pullbackCartier` を**statement に含まない**(`.needs` の文字列で引いているだけ)ので
+**arity 変更の巻き添えはゼロ**だった。★ただしこの sorry を実際に埋めるときは
+`IsDominant`(底変換 `_base` が支配的であること)と `hdim` を仮定に足す必要がある。
+**statement 変更なので今回は触っていない**(未着手の債務として残す)。
+
+## ★D10 第 1 波の実行結果 —— `Example63.lean` は sorry 10 → **4**、`Theorem64.lean` は 1 → **0**
+
+★**statement は 1 字も変えていない**(binder 名の `_f` → `f`、`_x` → `x`、`_h` → `h` のみ)。
+
+閉じた 6 本: `arithDivOfElt`(本体) / `arithDivOfElt_mul` / `degArith`(本体) /
+`degArith_add` / `degArith_arithDivOfElt` / `units_eq_roots_of_unity`。
+
+★★**段階 2 の「新規数学 1 本」は不要だった** —— Kronecker は
+`Found/Divisor/ArithDivisor.lean::exists_pow_eq_one_of_arithDiv_eq_zero`(sorry 0)に
+**そのまま在った**。`FinitePlace ↔ HeightOneSpectrum.valuation` の橋も
+その中で既に架かっている(`ordFin_eq_zero_of_arithDiv_eq_zero` +
+`mem_integers_of_valuation_le_one`)。**新規に書いた数学は 0 本。**
+
+★★**型の一致は測定どおりだった** —— `arithDivGroupEquiv` の定義域が `ArithPhiGp L` と
+リテラルに同一で、詰め替えは要らなかった。
+
+**新しく作った補題 3 本**(すべて配線と錨):
+
+| 名前 | 型(要約) |
+|---|---|
+| `arithOfParts_arithDivOfElt` | `arithOfParts (arithDivOfElt f) = Found.arithDiv f` |
+| `arithOfParts_single_inr` | `arithOfParts (0, single v r) = single (Sum.inr v) r` |
+| `degArith_single_infinite` | `degArith (0, single v r) = r` ★**退化を排除する錨** |
+
+★`degArith_single_infinite` が **D21 の危険を消す** —— `degArith` が `sorry` 本体の
+`def` だったころは `degArith L x = degArith L y` が `rfl` で通っていた。
+
+**`Theorem64.lean` は閉じた**(D16 の残務が消えた)。`(0, single v r)` を当てるだけの数行。
+★**ただし閉じたのは名前が約束した半分(全射性)だけ**である。「核 = 主因子の像」は
+型に無いままで、足すと偽になる(11 例目、`Check/FrdI/Thm64PicDegenerate.lean`)。
+docstring にその区切りを明記した。
+
+**残した 4 つの sorry と理由**(すべて**数学ではなく statement の判断待ち** = 第 2 波):
+`ordMon_nonarch_equiv` / `ordMon_arch_equiv` / `prime_arithPhi_equiv_places` /
+`support_arithPhi_eq_finite`。
+★前 3 つは `fun _ => 0` や `id` で閉じるが**9 例目の退化そのもの**なので採らなかった。
+★`support_arithPhi_eq_finite` は非退化な証人で閉じられるが、
+実物(`ArithPlace L` 全体で量化した版)への言い直しと一体でないと
+**債務が前線から消えるだけ**になるので、あえて閉じていない。
+★`.needs` は `arithDivOfElt` / `degArith` の**空欄 2 つ**を埋めた(D10 の記録の穴)。
+
+## 検査
+
+- `#print axioms`: 新規・改訂した **18 宣言すべて** `[propext, Classical.choice, Quot.sound]`。
+  **`sorryAx` は 1 つも無い**。
+- `node tools/check.mjs --lean --brief` → **NG 13 件のまま**(木全体の `lake build` も成功)。
+  ★途中で NG 27 まで増えたが、原因は**新規の橋 7 本に `.src` / `.needs` が無かった**だけ
+  (G1 / G6)。書いて 13 に戻した。

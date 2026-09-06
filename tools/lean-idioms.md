@@ -6456,3 +6456,93 @@ skeleton」は、その場で機械的に反証できる。退化の検査を書
 ★`[hVell : (veluQuotientFull E S).IsElliptic]` を**仮引数に足す**。
 ☆`SemistableAt p (veluQuotientFull E S)` を結論にする版は
 インスタンスを要らないので、`jExp` 版へ移すときにこれが必ず出る。
+
+## `↥(myDef)` に mathlib の `↥v.integer` 補題を `rw` できない（2026-09-06、Λ5）
+
+    noncomputable def OK : ValuationSubring F := (Valued.v : Valuation F NNReal).valuationSubring
+    example (w : ↥(OK)) : ¬ IsUnit w ↔ ‖(w : F)‖ < 1 := by
+      rw [Valuation.Integer.not_isUnit_iff_valuation_lt_one]   -- ✗ pattern not found
+
+`rw` は instance-reducible までしか展開しないので、`↥(OK)` は `↥v.integer` と
+**構文的に**一致せず、`{x : ↥v.integer}` の暗黙引数が埋まらない。
+
+★直し方は**補題を項として適用し、引数で型を合わせる**（既定透明度なので `def` が展開される）:
+
+    have h := Valuation.Integer.not_isUnit_iff_valuation_lt_one
+      (v := (Valued.v : Valuation F NNReal)) (x := w)
+    rw [valuation_eq_nnnorm] at h
+    exact h.trans ⟨fun hh => by exact_mod_cast hh, fun hh => by exact_mod_cast hh⟩
+
+## 完備化に `Valued` が二重に付く（2026-09-06、Λ5）
+
+底 `F` に `instance : Valued F NNReal := NormedField.toValued` を置くと、
+mathlib の `Valued.valuedCompletion`（priority 既定の instance）が
+`UniformSpace.Completion F` に**自動で** `Valued` を作る。そこへ自分でも
+`NormedField.toValued` を置くと菱形になり、`Valued.v z = ‖z‖₊` が `rfl` で通らなくなる。
+
+★片側に寄せる。底では `Valued` を **instance にせず**（必要な
+`CompletableTopField` は `letI : Valued F NNReal := NormedField.toValued; Valued.completable`
+で借りる）、完備化側だけに `NormedField.toValued` を置く。こうすると
+`Valued.v z = ‖z‖₊` が `rfl` になり、以降の付値の議論がすべてノルムの議論に落ちる。
+
+## `f z` の値を 2 層剥がす `rfl` は kernel を止める ── `_apply` 補題を挟む（2026-09-06、Λ5b）
+
+    noncomputable def F : A →+* ↥(myValuationSubring) where
+      toFun z := ⟨⟨(z : Base), h₁⟩, h₂⟩
+      ...
+    theorem F_coe (z : A) : ((F z : ↥S) : Mid) = ... := rfl   -- ✗ (kernel) deterministic timeout 57 秒
+
+`RingHom` の構造体の展開と `Subtype.val` を **2 層**同時に要求すると kernel が落ちる
+（#59 と同型。elaborator は 0.1 秒で通るのに kernel だけが止まるので気付きにくい）。
+`w : ↥S` を変数にした `(w : Mid) = w.1 := rfl` は 0.03 秒で通る ── 詰まるのは
+**構造体インスタンスの適用と Subtype の反復**の組み合わせである。
+
+★直し方は**トップレベルの `rfl` で `_apply` 補題を先に置き、あとは `rw` で 1 層ずつ**:
+
+    theorem F_apply (z : A) : F z = ⟨⟨(z : Base), h₁⟩, h₂⟩ := rfl     -- 0.06 秒
+    theorem F_coe (z : A) : ((F z : ↥S) : Mid) = ⟨(z : Base), h₁⟩ := by rw [F_apply]
+    theorem norm_F (z : A) : ‖((F z : ↥S) : Mid)‖ = ‖z‖ := by rw [F_apply]; rfl
+
+`_apply` は両辺が同じ項なので kernel の仕事が消え、`rw` のあとに残る `rfl` は 1 層だけになる。
+
+## `set x := e with h` は他の仮説の**型**まで書き換えて別の変数を生む（2026-09-06、Λ5b）
+
+    (σ : ↥K⟮x⟯ ≃ₐ[F] ↥K⟮x⟯) (hσ : P σ)
+    set L := K⟮x⟯ with hL      -- ここで σ : Gal(↥L/F) と σ✝ : Gal(↥K⟮x⟯/F) に**分裂する**
+    rw [hσ]                    -- ✗ pattern not found（hσ は σ✝ の話）
+
+`set` は目標だけでなく文脈の型にも置換をかけるため、束縛済みの変数が
+「置換後の型を持つ新しい変数」として複製され、古い仮説は `σ✝` を指したままになる。
+
+★長い型を短くしたいだけなら `set` を使わず**そのまま書く**か、`set` は
+仮説に現れない局所的な項（構成した `⟨_, _⟩` など）だけに使う。
+
+## `rw [← map_add]` は「もう片方の辺が `def` のまま」だと当たらない（2026-09-06、D10 の配線）
+
+**失敗形**: `arithDivOfElt L (f * g) = arithDivOfElt L f + arithDivOfElt L g` を
+`show (equiv.symm _) = _` で左辺だけ開いてから `rw [← map_add]` すると
+
+```
+Did not find an occurrence of the pattern ?f ?x + ?f ?y
+in the target expression
+  equiv.symm ⟨arithDiv (f * g), ⋯⟩ = arithDivOfElt L f + arithDivOfElt L g
+```
+
+`show` は**書いた側しか**開かないので、右辺は `def` の名前のまま残り
+`?f ?x + ?f ?y` に一致しない。
+
+**直し方**: `unfold <def名>` で**両辺**を開いてから `rw [← map_add]`。
+`simp only [<def名>]` でもよいが、`simp only` は続けて余計な正規化をかけて
+`← map_add` の形を壊すことがあるので `unfold` の方が安全である。
+
+## `Finsupp.single_apply` は素点の上では `classical` が要る（2026-09-06）
+
+**失敗形**: `rw [Finsupp.single_apply]` が
+
+```
+failed to synthesize instance of type class Decidable (v = w)
+```
+
+`InfinitePlace L` / `FinitePlace L` / `Sum` に `DecidableEq` が付いていないためで、
+補題が無いのではない。**定理の先頭に `classical` を置くだけ**で通る
+（`by_cases` + `Finsupp.single_eq_of_ne` に逃げると今度は向き（上の項）で嵌まる）。

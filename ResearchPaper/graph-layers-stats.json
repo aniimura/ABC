@@ -7,10 +7,10 @@
   "ours": 98,
   "oblig": 141,
   "obligDone": 19,
-  "sorryItems": 7,
-  "pendingItems": 7,
-  "sorryDecls": 39,
-  "sorryFiles": 16,
-  "pendingSecs": 14,
+  "sorryItems": 6,
+  "pendingItems": 4,
+  "sorryDecls": 28,
+  "sorryFiles": 14,
+  "pendingSecs": 10,
   "maxLayer": 63
 }

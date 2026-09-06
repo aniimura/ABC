@@ -27,23 +27,27 @@ variable (L : Type u) [Field L] [NumberField L]
 ★★原文は「an immediate consequence of the well-known **Dirichlet unit theorem**」と書く。
 mathlib に在る(`NumberField.Units.dirichletUnitTheorem`)。
 
-## ★★判断 D16（2026-09-06）—— **畳めなかった。記録に留める**
+## ★★判断 D16（2026-09-06）—— **記録のみ → 判断 D10 の第 1 波で閉じた**
 
-★**橋は届かない**。原典 `Theorem 6.4, (i)` の結論そのものは
+★2026-09-06 の前半の測定は「**橋は届かない**」だった。原典 `Theorem 6.4, (i)` の結論そのものは
 `Found/Divisor/Ex63RlfPic.lean` の `rlfDeltaA`（`Pic_Φ(A) ≃+ ℝ`、sorry 0）として
 既に閉じているが、本宣言の `degArith` は `Example63.lean` の **`sorry` 本体の `def`** であり、
-`Found` 側の `arithDegreeLin` とは型の上でも項の上でも何の関係も持たない。
-薄い橋を架けるには `degArith` に本体を与える（= `Example63.lean` の `sorry` を閉じる）ことが要り、
-それは本持ち場の外である。
+`Found` 側の `arithDegreeLin` とは型の上でも項の上でも何の関係も持たなかった。
+薄い橋を架けるには `degArith` に本体を与える（= `Example63.lean` の `sorry` を閉じる）ことが要る、
+というのが D16 の結論だった。
 
-★★★**測定（2026-09-06）——現在の型のままでは、この `sorry` は原理的に閉じない**。
-`degArith` の本体は引数に依存しないので `degArith L x = degArith L y` が `rfl` で通る
-（すなわち `degArith L` は定数関数に展開される）。
-ゆえに `Function.Surjective (degArith L)` からは `(0 : ℝ) = 1` が出て、
-現在の環境では**反証可能**である。
-★この反証は `degArith` 経由で `sorryAx` に依存するので、**原典についての主張ではなく、
-この place-holder についての主張**である。`Example63.lean` の `sorry` が閉じれば消える。
-★statement は変えない。
+★★★**2026-09-06、判断 D10 の第 1 波で `degArith` に本体が入った**（`Example63.lean`）。
+本宣言はその直後に**普通の証明で閉じた** ——
+無限素点 `v` を 1 つ取って `(0, Finsupp.single v r)` を当てれば `deg = r` になる
+（`Example63.lean::degArith_single_infinite`）。`Nonempty (InfinitePlace L)` は mathlib の instance。
+★**statement は 1 字も変えていない。**
+
+★★★**判断 D21 の実測反証も同時に消えた**。`degArith` が `sorry` 本体の `def` だったころは
+本体が引数に依存しないので `degArith L x = degArith L y` が `rfl` で通り
+（すなわち `degArith L` は定数関数に展開され）、
+`Function.Surjective (degArith L)` からは `(0 : ℝ) = 1` が出て**反証可能**だった。
+★これは「原典についての主張」ではなく「place-holder についての主張」だった、というのが D21 の一般則で、
+**本体が入れば消える**という予測どおりになった。
 
 ## ★★★**名前が約束した「核 = 像」を足してはならない**
 
@@ -58,10 +62,20 @@ mathlib に在る(`NumberField.Units.dirichletUnitTheorem`)。
 `L = ℚ(√2)` がその最小の実例（`arithPic_ker_not_principal_subgroup_qsqrt2`）。
 
 ⇒ 原典に忠実な水準は**実現化した `Φ^rlf`**（`Found/Divisor/Ex63RlfPic.lean`）の側であり、
-非実現化の `ArithPhiGp` にこの条を足す修復は `False` を作り込む。 -/
+非実現化の `ArithPhiGp` にこの条を足す修復は `False` を作り込む。
+
+★★★**正直な区切り（2026-09-06）**: 本宣言が閉じたのは**名前が約束した半分だけ**である。
+閉じたのは**全射性**（易しい半分）で、**核 = 主因子の像**は型に無いままである。
+原文が `well-known Dirichlet unit theorem` の 1 語で畳んだ内容は
+**この型のままでは載せられない**（載せると偽）。
+その内容は `Found/Divisor/ArithPicR.lean` の `principalSpan_eq_ker` と
+`Found/Divisor/Ex63RlfPic.lean` の `rlfDeltaA`（どちらも sorry 0）に、
+**実現化した水準で**閉じている。 -/
 theorem degArith_surjective_and_kernel_eq_image :
     Function.Surjective (degArith L) := by
-  sorry
+  intro r
+  obtain ⟨v⟩ : Nonempty (InfinitePlace L) := inferInstance
+  exact ⟨(0, Finsupp.single v r), degArith_single_infinite L v r⟩
 
 def degArith_surjective_and_kernel_eq_image.src : Source :=
   { paper := "FrdI", pdfPage := 114, item := "Theorem 6.4, (i) — δ_A : Pic_Φ(A) ≅ ℝ",
@@ -71,6 +85,8 @@ def degArith_surjective_and_kernel_eq_image.src : Source :=
 def degArith_surjective_and_kernel_eq_image.needs : List ProofObligation :=
   [ .citation "[mathlib]" "NumberField.Units.dirichletUnitTheorem(Dirichlet 単数定理)"
       (.inMathlib "NumberField.Units.dirichletUnitTheorem") 114,
+    .citation "[ABC3]" "degArith_single_infinite(無限素点 1 つに r を置けば deg = r。全射性の錨、sorry 無し)"
+      (.inProject "ABC3" "ABC3.Skeleton.Divisor.degArith_single_infinite") 114,
     .derivation "Φ^birat(L) ⊗ ℝ の像が deg^arith の核に一致する(単数定理の階数の主張)" 114,
     .implicitStep "★原文は「an immediate consequence of the well-known Dirichlet unit theorem」で畳む" 114,
     .citation "[ABC3]" "rlfDeltaA(実現化した Φ^rlf の水準での Theorem 6.4, (i)。Pic_Φ(A) ≃+ ℝ、sorry 0)"
