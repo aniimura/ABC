@@ -6800,3 +6800,61 @@ Cauchy 条件 `hcauchy` の型に `I^m • ⊤` が出るので**そちらは埋
 
 の 3 行を付ける（`𝒪[K.carrier]` / `𝓀[K.carrier]` は `open scoped Valued` の記法）。
 ★対象ファイルの `open` 行をまず `grep -n '^open' <file>` で写すのが確実。
+
+## #82 `PowerSeries` の補題が `MvPowerSeries.map` / `MvPowerSeries.expand` で書かれていて `rw` が刺さらない（2026-09-06、Λ6 DworkThetaStep2）
+
+**症状**: `PowerSeries.map_subst` / `PowerSeries.expand_subst` /
+`MvPowerSeries.map_iterateFrobenius_expand` を `rw` すると
+
+    Tactic `rewrite` failed: Did not find an occurrence of the pattern
+      PowerSeries.subst ((PowerSeries.expand (pp ^ n) hqne) Z) ?m
+    in the target expression
+      PowerSeries.subst ((MvPowerSeries.expand (pp ^ n) hqne) Z) P
+
+が出る。目にはまったく同じ式に見えるのに一致しない。
+
+**原因**: `PowerSeries R := MvPowerSeries Unit R` で、`PowerSeries.map` は
+`MvPowerSeries.map` の、`PowerSeries.expand` は `MvPowerSeries.expand` の
+**別名（定義そのもの）**。定義的には等しいが `rw` の keyed matching は
+ヘッド定数が違うと当たらない。mathlib の `PowerSeries.*` 補題は
+statement の一部を `MvPowerSeries.*` のまま書いているものがある。
+
+**直し方**: 使いたい形を `have` で 1 度だけ言い直す（型を明示すれば defeq で通る）。
+
+    have h1 : PowerSeries.map (iterateFrobenius R pp n)
+        (PowerSeries.expand (pp ^ n) hqne W) = W ^ (pp ^ n) :=
+      MvPowerSeries.map_iterateFrobenius_expand (σ := Unit) (R := R) pp hp W n
+
+`map_subst` は 1 変数版を 1 本作って以後それだけ使うのが安い。
+
+    theorem map_subst_powerSeries (φ : B →+* C) {a f : PowerSeries B}
+        (ha : PowerSeries.HasSubst a) :
+        PowerSeries.map φ (PowerSeries.subst a f)
+          = PowerSeries.subst (PowerSeries.map φ a) (PowerSeries.map φ f) :=
+      PowerSeries.map_subst ha f
+
+## #83 `set x := (PowerSeries の式)` のあと `x.foo` が `Function.foo` を探しにいく（2026-09-06、Λ6 DworkThetaStep2）
+
+**症状**:
+
+    set θ0 := PowerSeries.subst θ M with hθ0def
+    refine ⟨θ0, θ0.substInvOfIsUnit hθ01u, …⟩
+
+で
+
+    Invalid field `substInvOfIsUnit`: The environment does not contain
+    `Function.substInvOfIsUnit` … from an expression θ0 of type
+    (Unit →₀ ℕ) → ↥(unramifiedCompletionInt K)
+
+**原因**: `PowerSeries.subst` の戻り値の型は `MvPowerSeries τ S` と書かれており、
+`set` は**推論された型そのまま**（`MvPowerSeries Unit B`、さらに展開すると関数型）
+で局所定義を作る。dot notation は型のヘッドを見るので `PowerSeries` に届かない。
+
+**直し方**: どちらか。
+
+* `set θ0 : PowerSeries B := … with h` と**型を明示**する（これで `set` は
+  `PowerSeries` のまま持つ）。
+* dot notation をやめて `PowerSeries.substInvOfIsUnit θ0 h` と完全修飾で書く。
+
+★型注釈を付けても、`PowerSeries.constantCoeff_subst_eq_zero` のように
+結論が `MvPowerSeries.constantCoeff` で書かれた補題は #82 の問題が残る。

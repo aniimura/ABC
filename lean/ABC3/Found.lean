@@ -1736,6 +1736,7 @@ import ABC3.Found.PGC.DworkAdditive
 import ABC3.Found.PGC.DworkMultiplicative
 import ABC3.Found.PGC.DworkFixedRing
 import ABC3.Found.PGC.DworkTheta
+import ABC3.Found.PGC.DworkThetaStep2
 import ABC3.Found.PGC.AbelianFrobeniusSplit
 import ABC3.Found.PGC.AbelianSplitUnramified
 import ABC3.Found.PGC.AbelianSplitOverSubfield
