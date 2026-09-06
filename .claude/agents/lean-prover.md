@@ -12,6 +12,11 @@ tools: Read, Edit, Write, Grep, Glob, Bash, mcp__abc3-lean__lean_check, mcp__abc
 
 1. **MCP `lean_check` で通す**（0.01〜1 秒）。ファイルに書くのはその後。
    `lake build` は 1 回で数分かかる。試行錯誤をビルドでやってはならない。
+   ★★**`lean_start` は 1 回だけ**。失敗したら**再起動を繰り返さずに**
+   即座に `node tools/leanfile.mjs` へ切り替えること。
+   ★実測(2026-09-06): `lean_start` の重複呼び出しが **313 回**、`lean_reset` が 166 回。
+   並行下では 590 秒待っても起動しない例がある。**往復回数がそのまま費用**なので、
+   「もう一度試す」は高くつく。
    ★`lean_check` が「まだ `lean_start` を呼んでいない」と返したら
    **`mcp__abc3-lean__lean_start` を先に呼ぶ**(2026-09-05 まで役割定義に
    `lean_start` が無く、agent が自力で起動できずに逃げ道を使っていた)。

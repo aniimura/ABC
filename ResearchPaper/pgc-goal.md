@@ -126,4 +126,4 @@ Lubin-Tate 主定理 `Gal(K(Λ_n)/K) ≅ (𝒪_K/π^n)^×` と次数・完全分
 
 `ResearchPaper/orchestration.md` に従う。`node tools/frontier.mjs --owner pGC`
 が次の持ち場を出し、`node tools/brief.mjs --node <rel>` が agent に渡す形にする。
-同時起動は 5 まで。全体ゲートは実装 agent が全員止まってから。
+同時起動は**配れる持ち場の数だけ**(★ 2026-09-06 に `autonomy-policy.md` §4 を書き換えた。実測: 同時数は token の軸では中立——往復回数が変わらないため)。全体ゲートは実装 agent が全員止まってから。
