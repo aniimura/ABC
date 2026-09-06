@@ -7,6 +7,17 @@
   "notationRisk: .txt 抽出で対象の同定が壊れる危険度。high の論文は全 locator で PDF 目視必須。"
  ],
  "papers": {
+  "Sharifi": {
+   "title": "Algebraic Number Theory (lecture notes)",
+   "file": "Sharifi - Algebraic Number Theory (UCLA lecture notes)",
+   "author": "Romyar Sharifi",
+   "year": 2024,
+   "pdfPages": 259,
+   "pageOffset": 0,
+   "notationRisk": "low",
+   "notationNotes": "★現代的な LaTeX 組版で PDF 抽出は良好(259 頁 / 452,627 字)。数式は Unicode の数学英字(U+1D400 台)で出るので、`G` や `phi` の grep は**代理対**に注意(decl-index の非 ASCII 対応と同じ論点)。★章番号は `6.5.25` のように 3 段で、見出しは `Theorem 6.5.25 (Herbrand’s theorem).` の走り込み式。",
+   "note": "★★2026-09-06 に取得(ユーザーが URL を提示。UCLA で無償公開の講義ノート)。★★★**Λ7 の N8(Herbrand)の典拠がこれで手に入った** —— 我々が必要とする 3 つの定理のうち 1 つが完全な証明つきで在る。実測(第 1061): (1) ★**Theorem 6.5.25 (Herbrand’s theorem)** `(G/N)^{phi(t)} = G_t N/N` は**完全な証明つき**(Lemma 6.5.24 経由。i_{L/K} の言葉で書かれている)。上付き版 Proposition 9.6.6 も証明つき。これは Milne CFT Prop 4.4 = Serre Corps Locaux IV.3 Pptn 14 と同一で、Milne も Serre 1961 も外注していたもの。 (2) ★**Theorem 9.6.10 (Hasse) = Hasse-Arf は We state it without proof.**⇒ N9 の典拠は依然ゼロ。 (3) ★**Theorem 9.6.11 (rho(U_i(K)) = G^i) も also without proof** ⇒[pGC] §2 が要求する abelianImage(= [3] Theorem 1, p.155)は**埋まらない**。 その他: 下付き分岐群(Def 6.5.2, Lemma 6.5.5-6.5.7, Cor 6.5.8 可解性)・i_{L/K}(Def 6.5.14, Remark 6.5.15)・phi の定義と性質(Def 6.5.19, Remarks 6.5.20 で連続・区分線型・増加・凹・傾きの公式)・円分塔の上付き分岐群(Prop 9.6.7)と跳び(Example 9.6.9)はすべて本文にある。★導手(Def 9.6.13)と Lubin-Tate(§9.7)も扱う。★`0_Source` は gitignore 済みで公開リポジトリには入らない。"
+  },
   "Serre61": {
    "title": "Sur les corps locaux a corps residuel algebriquement clos",
    "file": "Serre - Sur les corps locaux a corps residuel algebriquement clos (BSMF 89, 1961)",

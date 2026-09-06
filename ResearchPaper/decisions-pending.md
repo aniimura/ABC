@@ -2027,3 +2027,67 @@ pdftotext は `π` と `⊂/⊃` を落とすが、**Lemma 4.9 の証明 1 行�
 強化が予見できる補題は最初から `∃` の外に仮定を出す形で書くか、判断が要る。
 
 - **決定**: —
+
+### ★★★★★D25 の続報(第 1061)—— **Sharifi で N8(Herbrand)の典拠が手に入った。3 分の 1 が埋まった**
+
+ユーザーが提示した `https://www.math.ucla.edu/~sharifi/notes/algnum.pdf`
+(UCLA、無償公開、259 頁)を実測した。鍵 `Sharifi` で登録済み。
+
+## ★★★埋まったもの: **N8 = Herbrand の定理**
+
+> **Theorem 6.5.25 (Herbrand's theorem).** `(G/N)^{φ_{L/E}(t)} = G_t N/N`
+
+★**完全な証明つき**(Lemma 6.5.24 経由、`i_{L/K}` の言葉で書かれている)。
+上付き番号版 **Proposition 9.6.6**(`(G/N)^s = G^s N/N`)も**証明つき**。
+
+★これは **Milne CFT Prop 4.4 = Serre Corps Locaux IV.3 Pptn 14** と同一であり、
+**Milne も Serre 1961 も外注していた**もの。⇒ ★**N8(1,200-2,500 行)の典拠がゼロから 1 になった。**
+
+## ★埋まらないもの 2 つ(どちらも Sharifi 自身が "without proof" と明記)
+
+1. **Theorem 9.6.10 (Hasse) = Hasse-Arf** —— `We state it without proof.`
+   ⇒ ★**N9(2,500-6,000 行)の典拠は依然ゼロ。**
+2. **Theorem 9.6.11**(`ρ_{L/K}(U_i(K)) = G^i`)—— `We next state, also without proof,`
+   ⇒ ★★**[pGC] §2 が要求する `abelianImage`(= `[3]` Theorem 1, p.155)は埋まらない。**
+
+★**重要な切り分け**: [pGC] §2 の「Herbrand」と Λ7 の「Herbrand」は**別の定理だった**:
+
+| | 主張 | Sharifi |
+|---|---|---|
+| Λ7 の N8 | `(G/H)^v = G^v H/H`(商との両立) | ★**Thm 6.5.25、証明あり** |
+| §2 の `abelianImage` | `ρ(U_i) = G^i`(Artin 写像による像) | ★**Thm 9.6.11、証明なし** |
+
+⇒ **Serre / Iwasawa の必要性は §2 側と Hasse-Arf 側に残る。**
+
+## ★その他、本文に証明つきで在るもの(我々のノード表と対応)
+
+* **N2 下付き `G_i`** —— Def 6.5.2 / Lemma 6.5.5(正規性)/ 6.5.6 / 6.5.7(`G_i/G_{i+1} ↪ U_i/U_{i+1}`)
+  / Cor 6.5.8(ガロア群は可解)
+* **N3 `i_{L/K}` による判定** —— Def 6.5.14 / Remark 6.5.15(`σ ∈ G_i ⟺ i_{L/K}(σ) ≥ i+1`)
+* **N5 `φ`** —— Def 6.5.19(積分形)/ Remarks 6.5.20(整数点の和の形・連続・区分線型・増加・凹・
+  傾き `|G_k|/|G_0|`)/ Prop 6.5.16 / Cor 6.5.17 / Lemma 6.5.22 / 6.5.23
+* **N11 相当** —— Prop 9.6.7(`ℚ_p(μ_{p^n})/ℚ_p` の上付き分岐群)+ Example 9.6.9(跳びは `0..n−1`)
+  ★**円分塔での実例**なので、Lubin-Tate 塔(Milne Example 4.7)へは移し替えが要る
+* 導手(Def 9.6.13, Remark 9.6.14, Example 9.6.15, Prop 9.6.16)と Lubin-Tate(§9.7)
+
+## ★測り方(再現できる形)
+
+WebFetch で PDF を取得 → `tool-results/` に保存されたものを PyMuPDF で抽出 →
+番号付き見出しを正規表現で拾い、**直後 40 行に `Proof` があるか / `without proof` があるか**で分類。
+★この粗い分類は**改頁で誤る**(Prop 9.6.6 を「証明なし」と誤判定した)ので、
+**鍵になる定理は本文を逐語で読んで確かめること**。今回はそうした。
+
+## ★取得判断の更新
+
+| 文献 | 状態 |
+|---|---|
+| ~~Herbrand の証明~~ | ★**Sharifi で解決** |
+| **Hasse-Arf の証明** | Serre Corps Locaux V.7。★**代替なし(Sharifi も Milne も Serre 1961 も外注)** |
+| **`ρ(U_i) = G^i` の証明**(§2) | Serre "Local CFT"(Cassels-Fröhlich)[3] Thm 1 p.155。★**代替なし** |
+
+★**講義ノートで代替できるかの判定基準が実証された** ——
+「Herbrand と Hasse-Arf を**述べる**のではなく**証明している**」。
+Chonoles(9 頁)は両方とも省略、Sharifi(259 頁)は Herbrand のみ証明。
+★**分量が判定と相関している**(9 頁 → 0 本、51 頁 → 0 本、259 頁 → 1 本)。
+
+- **決定**: —

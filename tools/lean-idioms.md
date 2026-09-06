@@ -6743,3 +6743,33 @@ Cauchy 条件 `hcauchy` の型に `I^m • ⊤` が出るので**そちらは埋
 ★ついでに「`_root_.mem_fixingSubgroup_iff` は M が明示引数」の罠は `IntermediateField.mem_fixingSubgroup_iff` にもある
 （`K` と `σ` が**両方とも明示引数**：`(IntermediateField.mem_fixingSubgroup_iff F g).mp h`。
 `_` を 1 つにすると `Invalid field 'mp' ... Function.mp` という無関係なエラーが出る）。
+
+
+## #80 `lean_check` の断片で `open X in section … end` と書くと open が中身に届かない（2026-09-06、Λ6b）
+
+**症状**: MCP の `lean_check` に
+
+    open ABC3.Found.PGC in
+    open scoped Valued in
+    section
+    variable ...
+    #check (𝒪[K.carrier] : Type)
+    end
+
+を投げると `Unknown identifier `𝒪`` が出る。`𝒪[…]` は `open scoped Valued` の
+スコープ記法なので「開いたはず」なのに届いていない。
+
+**原因**: `open ... in` は**直後の 1 コマンドだけ**を修飾する。`section` はそれ自体が
+1 つのコマンドなので、`in` は `section` に掛かって終わり、中身には届かない。
+
+**直し方**: `in` を外して、`section` の**中**に `open` を並べる。
+
+    section
+    open ABC3.Found.PGC
+    open scoped NNReal Valued
+    variable {p : ℕ} [Fact p.Prime] (K : PAdicLocalField p)
+    ...
+    end
+
+★`#check @Foo.bar` のように完全修飾で書いた行だけは通ってしまうので、
+「一部だけ通って一部が Unknown identifier」という**紛らわしい**出方をする。
