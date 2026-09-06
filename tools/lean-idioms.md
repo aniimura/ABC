@@ -6990,3 +6990,27 @@ DVR の補題を書くときに「必要なものを全部並べる」と
 ゴール `α * π ∣ ↑m * α` で右辺だけ入れ替えたくて `rw [mul_comm]` と撃つと
 `π * α ∣ ↑m * α` になり、`mul_dvd_mul_left α hpi : α * π ∣ α * ↑m` が当たらない。
 **直し方**: `rw [mul_comm (m : B) α]` と**引数を書く**。
+
+## #95 `Function.update_noteq` / `update_same` は `update_of_ne` / `update_self`、`σ • ∏` は `Finset.smul_prod'`（2026-09-07、Y6）
+
+桁展開の帰納で `Function.update a M d` を作るとき、旧名 `Function.update_noteq` /
+`Function.update_same` は**もう無い**（`Unknown constant`）。現行名は
+`Function.update_of_ne : a ≠ b → Function.update f b v a = f a` と
+`Function.update_self`。
+同じ回で `σ • ∏ i ∈ s, f i = ∏ i ∈ s, σ • f i` を `Finset.prod_map_smul` で探して
+外した。正しくは **`Finset.smul_prod'`**（`MulDistribMulAction` 版。`'` が付く方）。
+**直し方**: 名前が出てこない補題は `.cache/mathlib-index.txt` を結論の形で引く。
+「作用が積を保つ」は `smul_prod'`、「作用が和を保つ」は `map_sum`
+（`MulSemiringAction.toRingHom G B σ` に書き換えてから）。
+
+## #96 `set` で束縛した局所定義は `rw` のパターンに当たらない —— `have h2 : <展開形> = _ := h` を挟む（2026-09-07、Λ6a′）
+
+`set w' : adjoinIntegers K w := ⟨⟨w, hwmem⟩, _⟩` としたあと、補題から得た
+`hE : ... = ↑↑w'` でゴール `w ∈ K⟮u⟯` を `rw [← hE]` しようとすると
+`Did not find an occurrence of the pattern ↑↑w'` で落ちる（ゴールには
+`↑↑w'` ではなく既に簡約された `w` が現れているため）。
+**直し方**: `have h2 : (↑↑(...) : K.closure) = w := hE` と**欲しい形で型を書き直して**
+（`↑↑w'` と `w` は defeq なので `exact hE` で通る）から `rw [← h2]`。
+★同じ回で `congr 1` も外した——2 段の coe（`adjoinIntegers → K⟮x⟯ → K.closure`）に
+撃つと 1 段しか剥がれず向きも反転する。`congr` ではなく
+「等式を先にゴールへ `rw` して `exact h.symm`」が速い。
