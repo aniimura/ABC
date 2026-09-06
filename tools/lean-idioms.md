@@ -6677,3 +6677,47 @@ Cauchy 条件 `hcauchy` の型に `I^m • ⊤` が出るので**そちらは埋
       rw [SModEq.sub_mem]; simp
 
 ★`I • (⊤ : Submodule R R) = I` は `simp` が一発で閉じる（専用の補題名を探さなくてよい）。
+
+## #76 `choose` で漸化式を組むなら存在文は `∃ t, (仮定 → 結論)` にする（2026-09-06、Λ6 Dwork 乗法版）
+
+**失敗形**: 1 段補題を素直に
+
+    theorem step (n : ℕ) (w : Oˣ) (hw : ↑w - 1 ∈ (π^n)) : ∃ t : Oˣ, P n w t
+
+と書いて `choose T hT using step` すると、`T` の型が
+
+    T : ∀ (n : ℕ) (w : Oˣ), ↑w - 1 ∈ (π^n) → Oˣ
+
+になり、**証明を引数に取る関数**なので `Nat.rec` で数列 `w_{n+1} := f (T n (w n)) (w n)`
+が組めない（`w n` が仮定を満たす証明は帰納法の途中でしか手に入らない）。
+
+**直し方**: 仮定を存在の**内側の含意**に押し込んで、結論だけを条件つきにする。
+
+    theorem step (n : ℕ) (w : Oˣ) : ∃ t : Oˣ, (↑w - 1 ∈ (π^n) → P n w t)
+
+こうすると `T : ℕ → Oˣ → Oˣ` と `hT : ∀ n w, ↑w - 1 ∈ (π^n) → P n w (T n w)` に割れる。
+仮定が `t` に依存しないので中身は変わらない。証明側は `by_cases` で
+「仮定が成り立つなら本来の構成、成り立たないなら `1`」と分ければよい。
+★段の場合分け（`n = 0` は剰余体の `q-1` 乗根、`n ≥ 1` は加法版）もこの形の中に隠せる。
+
+## #77 `Function.Surjective (fun x => f x)` の目標に `rw` は当たらない（2026-09-06、Λ6）
+
+**失敗形**: `intro u; refine ⟨ξ, ?_⟩` のあと目標が
+
+    (fun ξ => (unramGalCompletionUnits K σ) ξ * ξ⁻¹) ξ = u
+
+という **β-簡約されていない形**のままなので、`rw [hξ]` が
+「`(unramGalCompletionUnits K σ) ξ` が見つからない」で落ちる。
+
+**直し方**: `show` で β-簡約した形を書いてから `rw` する（`beta_reduce` / `simp only []`
+でもよいが `show` が一番安い）。
+
+    show unramGalCompletionUnits K σ ξ * ξ⁻¹ = u
+    rw [hξ, ...]
+
+## #78 `simpa using h` が linter に叱られたら `sub_sub_cancel` を疑う（2026-09-06、Λ6）
+
+`x ∈ 𝔪` と `x - y ∈ 𝔪` から `y ∈ 𝔪` を出すとき `Submodule.sub_mem _ hx hxy` は
+`x - (x - y) ∈ 𝔪` を返す。`simpa using` で通るが
+`Try 'simp at h' instead`（= simp が目標まで閉じている）という警告が出て意図が濁る。
+`rwa [sub_sub_cancel] at h` と書けば `a - (a - b) = b` の 1 手だと読める。
