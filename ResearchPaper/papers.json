@@ -7,6 +7,28 @@
   "notationRisk: .txt 抽出で対象の同定が壊れる危険度。high の論文は全 locator で PDF 目視必須。"
  ],
  "papers": {
+  "Serre61": {
+   "title": "Sur les corps locaux a corps residuel algebriquement clos",
+   "file": "Serre - Sur les corps locaux a corps residuel algebriquement clos (BSMF 89, 1961)",
+   "author": "Jean-Pierre Serre",
+   "year": 1961,
+   "pdfPages": 51,
+   "pageOffset": 104,
+   "notationRisk": "high",
+   "notationNotes": "★1961 年の紙面の OCR で、**抽出が強く壊れる**。実測(2026-09-06、PyMuPDF): ギリシャ文字がほぼ全滅(φ → 9 / cp / ip、ψ → ^ / ipL、𝔤 → 9 / g^)、`L′isomorphisme` → `Fisomorphisme`、添字が本文行に落ちる。★仏語なので `Demonstration`/`Preuve` の語も hedge-index が拾えない。★locator は PDF 目視必須。式は復元できないと思ってよい。",
+   "note": "★2026-09-06 に取得(ユーザーが配置。Numdam で無償公開)。★**我々が必要としていた 2 つの Serre(Corps Locaux 1962 の書籍、および Cassels-Frohlich 1967 の \"Local class field theory\")のどちらでもない**が、無関係でもない。実測: §3.1「Ramification et conducteur」の前半は★**剰余体が代数閉という仮定を置かない一般論**であり(3.2 の冒頭に「ここから §2 の仮定に戻る」と明記されている)、Herbrand 関数 φ/ψ の定義と初等的性質(連続・区分線型・狭義増加・凸・導関数の公式・ψ が整数点を整数へ移すこと d′)を**証明つき**で与えている。⇒ N4 のうち「φ/ψ の区分線型構成」(見積 500-1,200 行)はこの論文で足りる。★★**ただし核心は埋まらない** —— Herbrand の定理そのもの(PROPOSITION 3、`𝔥^s = 𝔤^s 𝔦/𝔦`= Milne Prop 4.4 と同一)は「Pour la demonstration, voir HERBRAND [10], ou ARTIN [3], p.99」と**この論文もまた外注している**。推移律(PROPOSITION 4)も TAMAGAWA [22] に外注。★§3.2 以降と §4(Artin 導手の整数性 = Hasse-Arf に相当)は**剰余体が代数閉**の設定なので、剰余体が有限な `PAdicLocalField p` にはそのまま移らない。"
+  },
+  "Rosen81": {
+   "title": "An Elementary Proof of the Local Kronecker-Weber Theorem",
+   "file": "Rosen - An Elementary Proof of the Local Kronecker-Weber Theorem (Trans. AMS 265, 1981)",
+   "author": "Michael Rosen",
+   "year": 1981,
+   "pdfPages": 7,
+   "pageOffset": 0,
+   "notationRisk": "medium",
+   "notationNotes": "★1981 年の紙面の OCR。実測(2026-09-06、PyMuPDF): `π` → `77` / `tt` / `w`、`Tate` → `Täte`、`f(x)` → `fix)`、`p^f` → `p-t`。★locator は PDF 目視で確かめること。7 頁と短いので全文確認が現実的。",
+   "note": "★2026-09-06 に取得(ユーザーが配置)。[MilneCFT] Remark 4.15 が名指ししている文献。要旨が「K が p 進体のとき、★高次分岐群の使用すら避ける初等的証明を与える。代わりに有限アーベル拡大の主単数をガロア加群として扱う事実に依拠する」と書いており、★★2026-09-06 に読んで測った結果、この見立ては半分だけ正しい。消えるのは Hasse-Arf(N5)・Example 4.7(N6)・Lemma 4.9(N7)だけで、Herbrand は消えない —— [pGC] §2 が要求する Herbrand は分岐理論の φ/ψ(Milne Prop 4.4)であり、Rosen が使う Herbrand は巡回群の Tate コホモロジーのHerbrand 商(Lang ANT p.188)という別物である。後者は mathlib・ABC3 とも 0 件なのでRosen 路では新規ノード(800-2,000 行)として足し算になる。さらに N3+N4 は §2 が独立に要求するので、Rosen 路を採ると 2,350-5,800 行が共有されなくなり丸ごと追加費用に変わる。★判定: Rosen 路は採らない(節点 16 対 10、行 10,900-24,500 対 8,000-15,000)。Hasse-Arf の内容は Borevich 1965 Thm 3,4 へ移るだけで、Rosen 自身がそれを証明していない。`PAdicLocalField p` は char 0 なので適用範囲が一致する。★在庫 `Found/PGC/PrincipalUnitsLog.lean` / `PrincipalUnitsRank.lean` / `UnitsSplit.lean` / `UnitsGroupInvariants.lean` がまさに主単数の構造を持っている。★`0_Source/` は gitignore 済みで公開リポジトリには入らない。"
+  },
   "pGC": {
    "title": "A Version of the Grothendieck Conjecture for p-adic Local Fields",
    "file": "A Version of the Grothendieck Conjecture for p-adic Local Fields",

@@ -6623,3 +6623,28 @@ Edit は実ファイルの文字列をそのまま受けるので、
 have h := orderOf_dvd_natCard a
 rwa [hcardG] at h    -- 型の中の ZMod N は動かない
 ```
+
+## #72 `map_mul` を `rw` で数え間違えると `whnf` timeout に化ける（2026-09-06、Λ7 Lemma 4.11）
+
+**失敗形**: 準同型 `φ` について `φ (a * b * a⁻¹ * b⁻¹) = 1` を出そうとして
+`rw [map_mul, map_mul, map_inv, map_inv]` と書いた。積は **3 個**なので
+`map_mul` が 1 回足りず、ゴールは `φ (a * b) * (φ a)⁻¹ * (φ b)⁻¹ = 1` のまま。
+次の `exact` が `φ (a*b)` と `φ a * φ b` を合わせにいって
+`(deterministic) timeout at 'whnf', maximum number of heartbeats (200000)`。
+★エラーが「rw が外れた」ではなく **timeout** として出るので、原因が
+`rw` の回数だと気づくまでに往復を無駄にする（実測 11 秒 × 1）。
+
+**直し方**: `rw` で `map_mul` を数えない。**`simp only [map_mul, map_inv]` を
+`have h : φ (…) = 1 := by …` の中で使い**、外側は `exact h` にする。
+
+## #73 `x ∈ H ⊓ K`（Subgroup）を `refine ⟨?_, ?_⟩` で割ると `toSubmonoid` が露出する（2026-09-06、Λ7）
+
+**失敗形**: `⊢ g ^ m ∈ L.fixingSubgroup ⊓ Km.fixingSubgroup` に
+`refine ⟨?_, hpow g⟩` を当てると、第 1 のゴールが
+`g ^ m ∈ ↑(AlgEquiv.restrictNormalHom ↥L).ker.toSubmonoid` という
+**部分モノイドの coe** になり、続く `rw [MonoidHom.mem_ker]` が
+`Did not find an occurrence of the pattern ?x ∈ MonoidHom.ker ?f` で落ちる。
+
+**直し方**: `Subgroup.mem_inf.mpr ⟨h1, h2⟩` を使う（`h1`・`h2` は
+`x ∈ H`・`x ∈ K` を**別の `have` で作っておく**）。`⊓` を anonymous
+constructor で割らない。

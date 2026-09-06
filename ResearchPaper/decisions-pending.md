@@ -1724,3 +1724,154 @@ N3 狭義は **150-400 行**(400 という見積は妥当、やや過大)。
 literal な形に届く抜け道は**見つからなかった**(「存在しない」の証明ではない)。
 
 - **決定**: —
+
+### D23 の続報 3(第 1056)—— ★★**Rosen 路は採らない。Milne I §4 を続ける**
+
+★**本体が「Rosen が当たれば Serre は不要になるかもしれない」と述べたのは楽観的すぎた。訂正する。**
+
+Rosen 7 頁を逐語で読んだ結果、**3 つの理由で Milne 路が勝つ**:
+
+## ★★理由 1: 「Herbrand」が**2 つの別物**を指していた(最大の罠)
+
+| 語 | 中身 | 出所 |
+|---|---|---|
+| Rosen の Herbrand | **巡回群の Tate コホモロジーの商** `h = \|Ĥ⁰\|/\|Ĥ¹\|` | Lang ANT p.188 Lemma 4 |
+| [pGC] §2 / D22・D24 の Herbrand | **分岐理論の `φ`/`ψ`** | Milne Prop 4.4 = Serre 1962 IV.3 Pptn 14 |
+
+★**両者は名前が同じだけで無関係。** Rosen は 7 頁を通して
+**上付き番号付け・`φ`・`ψ`・跳び・Hasse-Arf を 1 語も使わない**(要旨の宣言どおり)。
+⇒ ★**`abelianImage : map recip (G^v) = U_K^{(v)}` を述べる材料が Rosen の出力に含まれない。**
+⇒ **§2 の Herbrand は Rosen 路でも別途要る。判定は YES。**
+
+## ★理由 2: 桁は同じだが Milne が安い。しかも第 2 の消費者がある
+
+| | 節点 | 行数 | 第 2 の消費者 |
+|---|---|---|---|
+| Milne FIRST PROOF | **10** | **8,000-15,000** | ★**あり** —— N3(150-400)+ N4(2,200-5,400)が §2 と共有 |
+| Rosen 1981 | **16** | **10,900-24,500** | ★**無し** —— ρ13/ρ14/ρ6 の消費先は Λ7 だけ |
+
+合算目標(Λ7 + §2 の非退化化 (β))で見ると差が開く:
+Milne **8,000-15,000** 対 Rosen **13,250-30,300**。
+★Milne Remark 4.15 の "more complicated" は、Lean では
+**「節点 1.6 倍・行 1.9 倍」**と翻訳された。★**都合のよい方には出なかった。**
+
+## ★理由 3: Hasse-Arf の「内容」は消えず、**未証明の外部**へ移っただけ
+
+Rosen が回避しているのは**機械(分岐フィルトレーション)だけ**。内容は
+**Borevich 1965 Thm 3,4**(`L/K` 巡回 p 次での `U^{(1)}_L` の `Z_p[C_p]` 加群構造)へ移る。
+★**Rosen 自身がこれを証明していない**(行 387-397)。原論文は Proc. Steklov 80(1965、露語 16 頁)で
+`0_Source` に無い。Rosen 自身が
+
+> The proof uses the fact that `U^{(1)} = NU` in the unramified case and
+> `|U^{(1)}/NU| = p` in the ramified case.
+
+と書いており、これは **巡回 p 次でのノルム指数** —— Hasse-Arf の「跳びの整数性」と同じ鋭さ
+(Milne Example 4.7 の同値性の言明と整合)。
+
+## ★Rosen 側で見つかった安い発見 3 つ(在庫の訂正)
+
+1. ★**正規基底定理は mathlib に在った** ——
+   `exists_linearIndependent_algEquiv_apply_of_infinite`(`FieldTheory/Galois/NormalBasis.lean:62`)。
+   ★**「不在」の 7 件目を回避した。**
+2. ★**Noether 加群の全射自己準同型 ⇒ 単射も在った** ——
+   `IsNoetherian.injective_of_surjective_endomorphism`(`RingTheory/Noetherian/Orzech.lean:60`)。
+3. `Gal(Ω/K)` は既に在庫(`LubinTateZhat.lean:45`、sorry 0)。
+
+## ★退化検査の 13 本目の候補(原文が反例を書いている 2 例目)
+
+Rosen Lemma 11b(ii) の `Z_p × Z_p[𝔊]/N` が、**`[E:K] = p` のとき `U^{(1)}` が
+`Z_p[G]` 自由でないことの実証**である。⇒ `Check/PGC/Krasner1DegenerateP.lean`。
+(1 例目は Milne Example 4.13。)
+
+## ★次の測定点として最も価値が高いところ(段取り係の指摘)
+
+`|U^{(1)}/U^{(1)p^{s+1}}(Ψ)|` を **Borevich 無しで**出す抜け道。
+完全列と Herbrand 商だけで位数が決まる可能性は排除できていない。
+★もし決まるなら Rosen 路の額は 3,000-8,000 行下がり、**判定が覆りうる**。
+☆ただし段取り係は「探したが見つからなかった(存在しないの証明ではない)」と明記している。
+
+☆その他、段取り係が**分からなかったと明記した**こと: Lemma 10 の生成元 `e` の式が
+OCR で落ちている(頁 5 を目視すること)/ `Lemma 11` が 2 つある(原論文の誤りか OCR の融合か不明)/
+Borevich の実体を測れていない(ρ13 = 3,000-8,000 は**構成の見立て**で上下 2.7 倍の幅)。
+
+- **決定**: —
+
+### ★★★D25. [測定] 外部参照で畳まれた節点を全 50 本で数えた —— **水路は小さいが、止めている場所は前線そのもの**
+
+- **状態**: **保留**(2026-09-06、第 1056)。判断は「どの文献を取得するか」
+
+## 数え方(再実行できる形)
+
+3 つの量を**混ぜずに**数えた。外部参照トークンは `[N]` / `[Key]` / `Author YEAR` で、
+★**当該論文の書誌に実在する鍵だけ**を採る(これで Mochizuki の角括弧傍注 `[Thus]` `[Here]` が落ちる)。
+
+* **S(外注 stub)** = `Proof.` から終端までが **30 語以下**で、書誌照合済みの外部参照を含む証明
+* **N(証明なし外注)** = 見出しから次の見出しまでに `Proof` マーカーが**一度も無く**、外部参照がある項目
+* **C(証明内引用)** = 証明ブロックの中の外部参照。`(項目, 文献)` の対で数える
+
+## ★★都合の悪い側の結論: 水路自体は**小さい**
+
+全 50 本 **15,259 証明ブロックのうち外注 stub は 56 件(0.37%)**。
+★**FrdI・GenEll・pGC・CorrHyp・LocProP・NCBelyi・Falt1 で S は 1 件も無い。**
+外注が集中しているのは **Milne の講義ノート 2 本で 27/56(48%)**、次いで MT の 18 件(N のみ)。
+
+⇒ ★**「外部参照で畳む」水路が効くのは (a) Milne の講義ノート(Λ6/Λ7/Λ8 トラック)、
+(b) MT / IUTchII のような引き写しの節、(c) statement 側の外注(pGC 3・CorrHyp 2)の 3 箇所だけ。**
+
+★**ただし (c) は現に前線を止めている。件数の小ささと重要度は別である。**
+
+## ★水路は論文ごとに違う(合計: 引用 6,639 / 語 7,415 / 傍注 11,515)
+
+主水路は **引用 24 本・傍注 19 本・語 7 本**。同じ木の中で
+**FrdI/GenEll/NCBelyi は傍注式、pGC/CorrHyp/LocProP は引用式、Milne は語式**。
+★**1 本で較正した道具を全部に当てるのは今回も危険だった。**
+
+## ★★★取得すべき文献(優先順位。下流は frontier.mjs の欄)
+
+| # | 文献 | 塞いでいる節点 | 下流 |
+|---|---|---|---|
+| 1 | ★**Serre, "Local Class Field Theory"**(Cassels-Fröhlich 1967)= pGC `[3]` | ★**[pGC] Prop 1.1 は原文に証明が無い**(`Γ_K^ab ≅ (K^×)^∧` を `see, e.g., [3]` に外注)・**Prop 2.1**(`Theorem 1 of [3], p.155` = Herbrand)・Cor 1.3 | Section1 **21**(前線最大) |
+| 2 | ★**Serre, "Corps Locaux" (GTM 67)** | pGC `[6]`×2、LocProP `[Ser2]`×4、★**MilneCFT `SERRE 1962`×7 = Λ7 の 2 大ノード** | Λ7 全体 |
+| 3 | **Margulis** = CorrHyp `[Marg]`×7 | ★**[CorrHyp] Theorem 2.5**(証明なし・34 語)。★`frontier.mjs` が今まさにこれで `Section6.lean` を止めている | Section2 **14** |
+| 4 | **Takeuchi (1983)** = CorrHyp `[Take]`×5 | [CorrHyp] Theorem 2.6(証明なし) | 同上 14 |
+| 5 | **Faltings-Chai** = `[FC]` | [GenEll] Prop 3.4・Lemma 3.5 の証明内。`.needs` に 17 ファイル | GenEll 3,363 `.src` の中核 |
+| 6 | **Silverman**(高さの理論)= GenEll `[Silv1] [Silv2]` | [GenEll] Prop 3.4 | `.needs` に 13 / 12 ファイル |
+| 7 | **Iwasawa 1986** = MilneCFT ×3 | Λ8(Artin 写像の同変性) | 迂回不能と判定済み |
+| 8 | **Lang, ANT (1970)** = FrdI `[Lang2]` | [FrdI] Theorem 6.4 の Chebotarev | — |
+| 9 | **Lang 1966 + Baker 1975** | [FrdI] Lemma 6.5(六指数定理。mathlib 0 件) | — |
+| 10 | ★**Mochizuki, "Foundations of p-adic Teichmüller Theory"** | MT `[Mzk2]`×**109**、FrdI ×3 | MT トラック全体 |
+
+★**11-14**: Tamagawa 1997(LocProP ×8)/ Faltings, Crystalline(LocProP ×5)/
+Elkies 1991(GenEll ×4)/ Hyodo・NSW・Fontaine・Belyi 原論文。
+
+## ★★「取得ではなく**登記**」で済むものが 6 件ある(経路上・`0_Source` に実体あり)
+
+`A Theory of Ordinary p-adic Curves`(FrdI `[Mzk1]`×3)/
+`Categorical Representation of Locally Noetherian Log Schemes`(FrdI `[Mzk8]`×4)/
+`Categories of Log Schemes with Archimedean Structures`(FrdI `[Mzk9]`×6)/
+`Categories of Hyperbolic Riemann Surfaces`(FrdI `[Mzk13]`×2)/
+`The Profinite Grothendieck Conjecture …`(LocProP `[Mzk1]`×5)/
+`The Geometry of the Compactification of the Hurwitz Scheme`(LocProP `[Mzk3]`×2)。
+★**`0_Source` の本文 104 本のうち papers.json 未登記が 54 本ある。**
+
+★**Mochizuki 自身の論文にも本文の欠品が 3 本**(`(comments)` しか無い):
+`Foundations of p-adic Teichmüller Theory` / `The Generalized Ordinary Moduli …`(RIMS 1051) /
+`Combinatorialization of p-adic Teichmüller Theory`(RIMS 1076)。
+
+## ★★測定器の欠陥 3 件(新規)
+
+1. ★**見出し判定が ALLCAPS 書式を見ていない。** MilneCFT で見出し **2/327**、MilneANT **1/266**、
+   MilneAV **1/255**。★**`--item` が引けない論文が 50 本中 15 本**ある
+   (D23 が「引けなかったので手で数えた」と書いたのはこの穴)。
+   ALLCAPS と Stacks のタグ前置を足すと Milne 3 本は 255/266/327 まで回復する。
+2. ★★**`--cite` は `state === '済'` の項目を黙って飛ばす。** 実測の飛ばし率:
+   **pGC 100%(4/4)・CorrHyp 100%(9/9)・GenEll 94%・FrdI 78%**。
+   ★**我々の木が最も進んでいる論文でこそ `--cite` は何も出さない。**
+3. **仏語・OCR 起因の測定不能が 8 本**(EGA1/EGA2/Del/Szp/GS/Falt1/Tate/Rosen81)。
+   `Démonstration`/`Preuve` が抽出テキストに 0 件。★**語・傍注・引用のどの水路でも測れていない。**
+
+☆測定係が**自信が弱いと明記した**こと: **N は上界**(見出し検出が漏れると区間が数千語に伸びる)。
+**C は下界**(終端判定が保守的で 80 行超の証明は切れる)。
+文献の所蔵判定は「著者姓がファイル名に無い」という粗い基準。
+
+- **決定**: —
