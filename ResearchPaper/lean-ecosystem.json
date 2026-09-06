@@ -4,6 +4,10 @@
   "「mathlib に無い」は Lean エコシステム全体では偽でありうる——2026-08-14 の調査で確認した。",
   "★測定は時とともに古くなる。measuredAt を必ず書き、古い測定に依拠しないこと。",
   "sorries は grep による概数(コメント内の言及も拾う)であり、厳密な残存 sorry 数ではない。",
+  "★★2026-09-06 追記(測定範囲の申告の訂正)。2026-08-14 の測定は「ClassFieldTheory / LocalClassFieldTheory は本リポジトリに clone されていない」と書いたが、★そのとき external/ 自体が測定範囲に入っていなかった。範囲の申告として不正確だったので明記する。",
+  "★2026-09-06 に external/ の 6 クローン(FLT / LeanBridge / _refs / formal-conjectures / iut-lean / lean-poly-abc)を測り直した結果、★結論は変わらない。(1) external/_refs/mathlib は STAMP.json により作業用 mathlib と同一リビジョンで新しい材料は無い。(2) _refs の中身は PrimeNumberTheoremAnd / batteries / mathlib のみで、CFT 系は無い —— 2026-08-14 の判断は範囲が狭かったにもかかわらず結果として正しかった。(3) external/FLT 260 ファイルを localClassField|artinMap|reciprocity|BrauerGroup|invariantMap|hasseInvariant|crossedProduct で引いて実質 0、groupCohomology|tateCohomology で 0。",
+  "★external/FLT/FLT/GaloisRepresentation/Cyclotomic.lean は在るが、内容は Q 上の Zhat 値円分指標の構成だけで、自然性も群論的回復も LCFT も無い。★この木の Found/PGC/CyclotomicRecovery.lean::cyclotomicCharacter_conj(円分指標の自然性)より弱い。使えるものは無い。",
+  "★したがって「局所相互律は mathlib に全く不在で、この木だけが Lubin-Tate 経由で自前に持っている」という観察は、external/ まで含めてなお正しい。",
   "★2026-08-19 から external/ に浅い clone を置く(gitignore 済み・再配布しない)。測定は clone に対する grep であり、sorries は「sorry を含む行数」の概数である。"
  ],
  "measuredAt": "2026-08-17(PrimeNumberTheoremAnd / FLT を追加。既存 2 件は 2026-08-14 の測定) / 2026-08-17(mathlib4_fork ABS を追加) / 2026-08-19(iut-lean / lean-poly-abc / formal-conjectures / LeanBridge を追加、FLT を再測定。今回は external/ に clone 済みで再現可能)",

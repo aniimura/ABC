@@ -6910,3 +6910,29 @@ statement の一部を `MvPowerSeries.*` のまま書いているものがある
 `Ideal.span_singleton_pow : Ideal.span {a} ^ n = Ideal.span {a ^ n}`。
 `𝔪 = span {α}` を `rw` したあと `𝔪 ^ k` は `span {α} ^ k` になるので、
 `Ideal.mem_span_singleton'` に持ち込むには `rw [Ideal.span_singleton_pow]`（← を付けない）。
+
+## #88 `congrArg Multiplicative.ofAdd ?_` は defeq をすり抜けて元のゴールを返す（2026-09-06、Y3）
+
+**症状**: `M →* Multiplicative R` の `map_mul'` や `MonoidHom.ext` の後で
+`refine congrArg Multiplicative.ofAdd ?_` と書くと**成功したように見えて**、
+残ったゴールが元のまま（あるいは `toAdd (ofAdd a + ofAdd b)` という珍妙な形）になり、
+次の `rw` が「パターンが無い」で落ちる。`Add (Multiplicative R)` が無い、という
+無関係なエラーが出ることもある。
+
+**原因**: `Multiplicative R` は `R` と defeq なので、`congrArg ⇑Multiplicative.ofAdd`
+の `?a`/`?b` がゴールの左右にそのまま当たってしまい、`ofAdd` を剥がせない。
+
+**直し方**: 剥がした後の等式を `have h : … = … := by …` で**先に作ってから**
+`exact congrArg Multiplicative.ofAdd h`。`1` を消したいだけなら `ofAdd_eq_one`
+（`ofAdd x = 1 ↔ x = 0`）を `rw`/`simp only` する。
+
+## #89 `isUnit_of_mul_eq_one` は `IsUnit.of_mul_eq_one`、`add_right_eq_self` は `add_eq_left`（2026-09-06、Y3）
+
+現行 mathlib での名前。`IsUnit.of_mul_eq_one (b) (h : a * b = 1) : IsUnit a`
+（`[IsDedekindFiniteMonoid M]` が要るが可換なら自動）。
+
+## #90 `MulSemiringAction` の `σ • x ^ n` は `smul_pow'`（2026-09-06、Y3）
+
+`smul_pow' : r • x ^ n = (r • x) ^ n`（`MulDistribMulAction`、`@[simp]`）。
+`smul_pow : (r • x) ^ n = r ^ n • x ^ n` は**別物**（`Monoid` へのスカラー倍）で、
+`rw [smul_pow]` は `(?r • ?x) ^ ?n` を探して落ちる。
