@@ -1743,6 +1743,7 @@ import ABC3.Found.PGC.AbelianSplitOverSubfield
 import ABC3.Found.PGC.LowerRamificationGroup
 import ABC3.Found.PGC.RamificationQuotientEmbedding
 import ABC3.Found.PGC.RamificationJumpDivisibility
+import ABC3.Found.PGC.ConjugateSumValuation
 import ABC3.Found.GenEll.VeluDualJ
 import ABC3.Found.GenEll.VeluJExpNeg
 import ABC3.Found.GenEll.VeluJDescent

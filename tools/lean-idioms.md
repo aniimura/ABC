@@ -6968,3 +6968,25 @@ typeclass instance problem is stuck
 
 で止まる。`hadj : Algebra.adjoin A {α} = ⊤` は `G` を決めない。
 **直し方**: `(A := A) (G := G)` と**両方**明示する。
+
+## #93 `[IsDomain B] [IsLocalRing B] [IsDiscreteValuationRing B]` を並べると `linter.overlappingInstances` が鳴る（2026-09-06、Y5）
+
+DVR の補題を書くときに「必要なものを全部並べる」と
+
+```
+⚠️ `[IsDomain B]`, `[IsLocalRing B]`, and `[IsDiscreteValuationRing B]` each imply `[Nontrivial B]`.
+💡️ Of these, `[IsLocalRing B]` may be removed.
+```
+
+が出る。`IsDiscreteValuationRing` は `IsLocalRing` を含むので **`[IsLocalRing B]` を落とす**。
+★落としても `maximalIdeal B` は書ける（DVR インスタンスから出る）。
+★具体層で `attribute [local instance] isDiscreteValuationRing_adjoinIntegers` を入れて
+`lowerRamificationGroupAdjoin`（`instIsLocalRingAdjoinIntegers` で作った定義）に
+`exact` する経路も通る——`LowerRamificationGroup.lean` の
+`mem_lowerRamificationGroupAdjoin_iff_lt_addVal` が先例。
+
+## #94 `rw [mul_comm]` は `∣` の**左辺**に当たる（2026-09-06、Y5）
+
+ゴール `α * π ∣ ↑m * α` で右辺だけ入れ替えたくて `rw [mul_comm]` と撃つと
+`π * α ∣ ↑m * α` になり、`mul_dvd_mul_left α hpi : α * π ∣ α * ↑m` が当たらない。
+**直し方**: `rw [mul_comm (m : B) α]` と**引数を書く**。
