@@ -6773,3 +6773,30 @@ Cauchy 条件 `hcauchy` の型に `I^m • ⊤` が出るので**そちらは埋
 
 ★`#check @Foo.bar` のように完全修飾で書いた行だけは通ってしまうので、
 「一部だけ通って一部が Unknown identifier」という**紛らわしい**出方をする。
+
+## #81 REPL で `open` を忘れると「Unknown identifier」ではなく **65 秒の heartbeat 焼き**になる（2026-09-06、Λ6 DworkTheta）
+
+**症状**: `lean_check` に `Found/PGC` 用の断片を
+
+    namespace ABC3.Found.PGC
+    variable {p : ℕ} [Fact p.Prime]
+    noncomputable def foo (K : PAdicLocalField p) …
+
+と投げると、`Function expected at PAdicLocalField` に続いて
+`(deterministic) timeout at isDefEq, maximum number of heartbeats (1000000)`
+が出て **65 秒**返ってこない。`set_option maxHeartbeats 1000000` を付けていると
+その分だけ焼く。
+
+**原因**: `PAdicLocalField` は `ABC3.Skeleton.PGC` にある。REPL は
+`autoImplicit` が有効（#62）なので、未知の識別子は**型未定のメタ変数**として
+自動束縛され、その先の `rfl` / `isDefEq` がメタ変数を相手に探索し続ける。
+「Unknown identifier」で即座に落ちてくれない。
+
+**直し方**: `Found/PGC` の断片には必ず
+
+    namespace ABC3.Found.PGC
+    open ABC3.Skeleton.PGC ABC3.Found.GaloisRep
+    open scoped NNReal Valued
+
+の 3 行を付ける（`𝒪[K.carrier]` / `𝓀[K.carrier]` は `open scoped Valued` の記法）。
+★対象ファイルの `open` 行をまず `grep -n '^open' <file>` で写すのが確実。
