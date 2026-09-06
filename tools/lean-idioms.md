@@ -6546,3 +6546,50 @@ failed to synthesize instance of type class Decidable (v = w)
 `InfinitePlace L` / `FinitePlace L` / `Sum` に `DecidableEq` が付いていないためで、
 補題が無いのではない。**定理の先頭に `classical` を置くだけ**で通る
 （`by_cases` + `Finsupp.single_eq_of_ne` に逃げると今度は向き（上の項）で嵌まる）。
+
+
+## ★文字列の置換をヒアドキュメントの Python で繰り返さない(2026-09-06、本体セッションが 6 往復浪費)
+
+**失敗形**: `tools/source-text.py` の 2 行を直すのに、
+`python - <<'PYEOF'` の中で `s.replace(old, new)` を書いて `assert s.count(old) == 1` で
+**6 回連続で外した**。原因は毎回違った:
+インデントの実体差 / `\n` の層の数え違い / 1 つ目の assert で止まって 2 つ目が未適用 /
+行番号の 0-based と 1-based。
+
+**直し方**: ★★**Read してから Edit ツールを使う**。一発で通った。
+Edit は実ファイルの文字列をそのまま受けるので、
+**シェル→Python →正規表現の 3 層のエスケープが消える**。
+
+★**往復回数がそのまま費用**である(2026-09-06 の実測: 費用の 99.36% は cache_read、
+1 往復 547K token)。**2 回外したら手法を変える**こと。
+
+★例外: 新規ファイルの作成や、同じ置換を多数のファイルに当てるときは Python が正しい。
+問題は「1 ファイルの数行を直す」のに Python を使うことである。
+
+
+## `ProfiniteGrp.limit` の成分は `G ⧸ H` と defeq だが syntactic には別（2026-09-06、経路 Λ9）
+
+**失敗形**: `x : ZHat`（= `ProfiniteCompletion.completion (GrpCat.of (Multiplicative ℤ))`）の
+成分 `x.val H` の型は `((diagram G).obj H).toProfinite.toTop` で、`G ⧸ H.toSubgroup` と
+**defeq だが syntactic には別**。そのため
+
+* `rw [QuotientGroup.mk_pow]` / `rw [← limit_pow_val]` が
+  `Did not find an occurrence of the pattern` で落ちる
+  （末尾に `The target expression is not type-correct under the instances transparency level` が付く）
+* `exact mul_comm _ _` が `CommMagma ↑((diagram G).obj H)` を探して落ちる
+
+**直し方**: 3 つとも「型を書く」で通る（0.05 秒）。
+
+1. **`have` の型に書く**: `have h : ((x.val H : _) : Multiplicative ℤ ⧸ H.toSubgroup) ^ m = 1 := h1`
+   —— `have`/`show` の型注釈は defeq で通り、以後 `rw` が効くようになる。
+2. **`obtain` の型に書く**: `obtain ⟨a, ha⟩ : ∃ a : Multiplicative ℤ, (QuotientGroup.mk a : _ ⧸ _) = ... := QuotientGroup.mk_surjective _`
+   —— `a : ↑(GrpCat.of (Multiplicative ℤ))` のまま取ると
+   `Multiplicative.toAdd a` が `Multiplicative ↑(GrpCat.of ...)` で誤って通り、
+   後の `toAdd_pow` が全部落ちる。
+3. **★項の型注釈 `(e : T)` は「落ちる」**。`exact mul_comm (x.val H : Multiplicative ℤ ⧸ H.toSubgroup) _`
+   は依然 ProfiniteGrp 側の型で探しにいく。**名前つき暗黙引数で型を固定する**こと:
+   `exact @mul_comm (Multiplicative ℤ ⧸ H.toSubgroup) _ (x.val H) (y.val H)`。
+
+★`ProfiniteCompletion.completion` は `abbrev` ではなく `def` なので、
+`limit_pow_val (diagram G) x H k` のような**補題の適用（`exact`）は通る**（default transparency）が、
+`rw` は通らない。**補題は `ZHat` 版に言い換えて置く**（`zhat_pow_val`）のが安い。
