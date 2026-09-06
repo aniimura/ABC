@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>[Yoshida08] Section 5: Galois Groups, Norm Groups and the Base Change</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.7; color: #222; }
+  h1 { font-size: 1.25em; border-bottom: 2px solid #333; padding-bottom: .3em; }
+  h2 { font-size: 1.05em; margin-top: 2em; }
+  section.statement { border-left: 4px solid #1554b0; padding: .5em 1em; margin: 1.6em 0; background: #f7f9fc; }
+  section.statement.proposition { border-left-color: #0a7d1e; background: #f2f9f2; }
+  section.statement.theorem     { border-left-color: #7d0a1e; background: #fbf2f4; }
+  section.statement.corollary   { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.definition  { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.lemma       { border-left-color: #1554b0; background: #f7f9fc; }
+  section.statement.remark      { border-left-color: #666;    background: #f5f5f5; }
+  section.statement.setup       { border-left-color: #bbb;    background: #fafafa; }
+  .hdr { font-size: .8em; color: #777; margin-bottom: .4em; }
+  .hdr b { color: #333; }
+  .verbatim { background: #fff; border: 1px solid #ddd; padding: .6em .9em; margin: .5em 0; }
+  .reading  { font-size: .93em; color: #333; margin: .5em 0 0; }
+  .reading::before { content: "読み: "; font-weight: bold; color: #1554b0; }
+  p.open { background: #fff8e1; border-left: 4px solid #c9a227; padding: .4em .9em; margin: .6em 0; }
+  p.open::before { content: "未解決: "; font-weight: bold; }
+  code { background: #f5f5f5; padding: 1px 4px; }
+  .ul1  { text-decoration: underline; }
+  .ul2  { text-decoration: underline; text-decoration-style: double; }
+  .bar  { text-decoration: overline; }
+  .hat::after   { content: "\0302"; }
+  .tilde::after { content: "\0303"; }
+  .bb   { font-weight: bold; }
+  .scr  { font-style: italic; }
+  .frak { font-style: italic; }
+</style>
+</head>
+<body>
+
+<p><a href="index.html">&larr; [Yoshida08] 目次</a></p>
+
+<h1>[Yoshida08] Section 5: Galois Groups, Norm Groups and the Base Change</h1>
+
+<p class="hdr">
+原典: <b>Local Class Field Theory via Lubin-Tate Theory</b> (T. Yoshida, 2008; arXiv math/0606108v2)&nbsp;/&nbsp;
+範囲: <b>物理ページ 10&ndash;13</b>(&sect;5 は p.9 から始まるが、本ファイルは p.10 以降を扱う)&nbsp;/&nbsp;
+記法の目視確認: <b>2026-09-06</b>(p.10&middot;11&middot;12&middot;13 を 150dpi 画像で全面目視。<b>p.9 は未確認</b>)&nbsp;/&nbsp;
+規約: <a href="../README.md">1_Structured/README.md</a>
+</p>
+
+<p class="open">
+<b>p.9(&sect;5 冒頭・Proposition 5.1・Lemma 5.2)は未構造化かつ未目視</b>である。
+Definition 5.3 が引用する Lemma 5.2(ii) と Proposition 5.1 はそこにある&mdash;&mdash;
+このファイルの記述はそれらを<b>与えられたものとして</b>扱っている。
+</p>
+
+<!-- ================================================================= -->
+<section class="statement definition"
+         id="def-5-3"
+         data-paper="Yoshida08" data-pdf-page="10" data-item="Definition 5.3"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Definition 5.3</b>(相対 Lubin-Tate 拡大 K<sup>m</sup><sub>x</sub>) &mdash; 物理 p.10</p>
+
+<div class="verbatim">
+Definition 5.3. Let x &#8712; K<sup>&times;</sup> with v(x) = n &gt; 0. Take a uniformizer &#960; of L = K<sub>n</sub> with N<sub>L/K</sub>(&#960;) = x by Lemma 5.2(ii), and a monic f &#8712; <span class="scr">O</span><sub>L</sub>[X] satisfying (3.2.1) for &#960;. Then for m &ge; 1, the fields L<sup>m</sup><sub>f</sub> depend only on x by Proposition 5.1 and Lemma 4.6, so we denote them by K<sup>m</sup><sub>x</sub> := L<sup>m</sup><sub>f</sub>, and set K<sup>ram</sup><sub>x</sub> := <span data-txt="">&#8899;</span><sub>m&ge;1</sub> K<sup>m</sup><sub>x</sub>, which are totally ramified over L.
+</div>
+
+<div class="reading">
+de Shalit の<b>相対</b> Lubin-Tate 拡大。<code>v(x) = n &gt; 0</code> なる x ごとに、
+不分岐拡大 <code>L = K<sub>n</sub></code> 上の形式群から <code>K<sup>m</sup><sub>x</sub></code> の塔を作り、
+その合併 <code>K<sup>ram</sup><sub>x</sub></code> を得る。これが「K 上完全分岐」な部分をすべて供給する
+(<code>K<sup>LT</sup> = K<sup>ur</sup>K<sup>ram</sup><sub>x</sub></code>、Proposition 5.4)。
+<br>★<b>記法</b>: 大合併 <code>&#8899;</code> は <code>pdftotext</code> に一切出力されない
+(README §3 の「消える記号」)。<code>data-txt=""</code> で明示している。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement proposition"
+         id="prop-5-4"
+         data-paper="Yoshida08" data-pdf-page="10" data-item="Proposition 5.4"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Proposition 5.4</b>(Artin 写像の特徴づけ) &mdash; 物理 p.10</p>
+
+<div class="verbatim">
+Proposition 5.4. For x &#8712; K<sup>&times;</sup> with v(x) = n &gt; 0, the element &#963; := Art<sub>K</sub>(x) &#8712; W(K<sup>LT</sup>/K) is characterized by v(&#963;) = v(x) and &#963;|<sub>K<sup>ram</sup><sub>x</sub></sub> = id. For all m &ge; 1, the Artin map induces the isomorphism K<sup>&times;</sup>/<span data-txt="">(</span>(1 + <span class="frak">p</span><sup>m</sup>) &times; <span data-txt="">&#10216;</span>x<span data-txt="">&#10217;</span><span data-txt="">)</span> <span data-txt="&#8764; = &minus;&rarr;">&cong;&rarr;</span> Gal(K<sup>m</sup><sub>x</sub>/K).
+</div>
+
+<div class="reading">
+<code>Art<sub>K</sub>(x)</code> は「不分岐側で Frobenius の v(x) 乗、<code>K<sup>ram</sup><sub>x</sub></code> 上で恒等」という
+<b>2 条件で一意に決まる</b>。Theorem 6.15(LKW)の証明でも Corollary 5.12・Proposition 5.14 経由でも、
+この特徴づけがそのまま使われる。
+<br>★<b>記法</b>: 大きな括弧 <code>(</code> <code>)</code> と生成部分群の角括弧 <code>&#10216; &#10217;</code> は出力されない。
+また <code>&cong;</code> の上に乗った矢印は <code>&#8764;</code> / <code>=</code> / <code>&minus;&rarr;</code> の
+<b>3 トークンに割れる</b>ので、<code>data-txt="&#8764; = &minus;&rarr;"</code> と空白込みで明示している
+(隣接した <code>&#8764;=</code> は <code>check.mjs</code> の正規化が <code>&cong;</code> に畳んでしまうため)。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement definition"
+         id="def-5-9"
+         data-paper="Yoshida08" data-pdf-page="11" data-item="Definition 5.9"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Definition 5.9</b>(ノルム群) &mdash; 物理 p.11</p>
+
+<div class="verbatim">
+Definition 5.9. For a finite separable extension K&prime;/K, we denote the image N<sub>K&prime;/K</sub>(K&prime;<sup>&times;</sup>) of the norm map N<sub>K&prime;/K</sub> : K&prime;<sup>&times;</sup> &rarr; K<sup>&times;</sup> by N(K&prime;/K). For any separable extension E/K, define N(E/K) := <span data-txt="">&#8898;</span><sub>K&prime;</sub> N(K&prime;/K) where K&prime; runs through all the finite extensions in E.
+</div>
+
+<div class="reading">
+ノルム群 <code>N(K&prime;/K)</code> の定義と、<b>無限次拡大への延長</b>(有限部分拡大のノルム群の共通部分)。
+無限次への延長は Corollary 5.12(<code>N(E/K) = &#10216;x&#10217;</code>)と Proposition 5.14 で使われる。
+<br>★<b>記法</b>: 大共通部分 <code>&#8898;</code> は出力されない。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement proposition"
+         id="prop-5-10"
+         data-paper="Yoshida08" data-pdf-page="11" data-item="Proposition 5.10"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Proposition 5.10</b> &mdash; 物理 p.11</p>
+
+<div class="verbatim">
+Proposition 5.10. N(K<sup>m</sup><sub>x</sub>/K) = (1 + <span class="frak">p</span><sup>m</sup>) &times; <span data-txt="">&#10216;</span>x<span data-txt="">&#10217;</span> for all m &ge; 1.
+</div>
+
+<div class="reading">
+Lubin-Tate 拡大のノルム群の<b>明示形</b>。証明は Coleman 作用素(Definition 5.6・Lemma 5.7・5.8)を使う
+&mdash;&mdash;そして <b>&ldquo;By the following Lemma 5.11&rdquo;</b> として
+<a href="#lemma-5-11">Lemma 5.11</a> を<b>前方参照</b>で消費する
+(<code>u &#8712; <span class="scr">O</span><sup>&times;</sup><sub>L&prime;</sub></code> が <code>u = g(&alpha;)</code> と書けること)。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement lemma"
+         id="lemma-5-11"
+         data-paper="Yoshida08" data-pdf-page="12" data-item="Lemma 5.11"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Lemma 5.11</b>(完全分岐なら整数環は素元で単項生成) &mdash; 物理 p.12</p>
+
+<div class="verbatim">
+Lemma 5.11. If L&prime;/L is totally ramified and &alpha; is a uniformizer of L&prime;, then <span class="scr">O</span><sub>L&prime;</sub> = <span class="scr">O</span><sub>L</sub>[&alpha;].
+</div>
+
+<div class="reading">
+★<b>Lean 側の消費先</b>: <code>lean/ABC3/Found/PGC/LowerRamificationGroup.lean</code> の
+<code>exists_uniformizer_adjoin_eq</code>(<code>.src</code> は <code>paper := "Yoshida08", pdfPage := 12,
+item := "Lemma 5.11", sectionId := "lemma-5-11"</code>)。
+<br>原典の証明は <b>4 行</b>: <code>x = &#8721;<sub>i=0</sub><sup>n&minus;1</sup> a<sub>i</sub>&alpha;<sup>i</sup></code> と書くと
+<code>v<sub>L&prime;</sub>(a<sub>i</sub>&alpha;<sup>i</sup>)</code> が<b>互いに相異なる</b>(完全分岐だから
+<code>v<sub>L&prime;</sub>(a<sub>i</sub>) &#8712; n&#8484;</code>、そこに i がずれて乗る)ので
+<code>v<sub>L&prime;</sub>(x) = min<sub>i</sub></code> となり、そこから (i) 一次独立 (ii) 係数の整性 が同時に出る。
+<br>★<b>逸脱の記録</b>: Lean 側は同名の主張を<b>中村補題</b>で書き換えている
+(<code>LowerRamificationGroup.lean</code> 冒頭「逸脱の記録(2)」)。
+原典の付値計算による証明とは別経路だが、結論は同一。
+<br>この補題は &sect;6 全体の土台でもある&mdash;&mdash;
+<a href="section-6.html#setup-6-1">&sect;6.1 の設定</a>が <code><span class="scr">O</span><sub>K&prime;</sub> = <span class="scr">O</span>[&pi;]</code> を
+「by Lemma 5.11」と一行で引いており、<a href="section-6.html#lemma-6-8">Lemma 6.8</a> は
+K&prime; と K&prime;&prime; の<b>両方</b>に適用する。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement corollary"
+         id="cor-5-12"
+         data-paper="Yoshida08" data-pdf-page="12" data-item="Corollary 5.12"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Corollary 5.12</b> &mdash; 物理 p.12</p>
+
+<div class="verbatim">
+Corollary 5.12. If E/L is totally ramified and E contains K<sup>ram</sup><sub>x</sub>, then N(E/K) = <span data-txt="">&#10216;</span>x<span data-txt="">&#10217;</span>.
+</div>
+
+<div class="reading">
+Proposition 5.10 を <code>m &rarr; &#8734;</code> にした形。<code>&#8898;<sub>m&ge;1</sub>(1 + 𝔭<sup>m</sup>) = {1}</code> で
+上から押さえ、<a href="#lemma-5-13">Lemma 5.13</a> で下から(付値 [L:K] の元の存在)押さえる。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement lemma"
+         id="lemma-5-13"
+         data-paper="Yoshida08" data-pdf-page="12" data-item="Lemma 5.13"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Lemma 5.13</b> &mdash; 物理 p.12</p>
+
+<div class="verbatim">
+Lemma 5.13. Let P = P<sub>L</sub> := v<sup>&minus;1</sup><sub>L</sub>(1) be the set of all uniformizers of a local field L, and E/L a totally ramified extension. Then N(E/L)<sup>P</sup> := N(E/L) &#8745; P is non-empty.
+</div>
+
+<div class="reading">
+「完全分岐拡大のノルム群は素元を含む」。証明は有限段での <code>Im N<sub>m</sub></code> の射影極限が空でないこと
+(<b>有限集合の逆極限は空でない</b>)に帰着する&mdash;&mdash;原典が「avoiding topological arguments using
+compactness」(&sect;1)と宣言している通り、コンパクト性ではなく有限性で押している。
+<br>Lean 化では「有限集合の逆系の極限が空でない」が独立の節点になる
+(mathlib の <code>nonempty_sections_of_finite_inverse_system</code> が該当する見込み。<b>未確認</b>)。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-5-3"
+         data-paper="Yoshida08" data-pdf-page="12" data-item="Section 5.3 (heading)"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>&sect;5.3 見出し</b> &mdash; 物理 p.12</p>
+
+<div class="verbatim">
+5.3. Base change and LCFT for Lubin-Tate extensions.
+</div>
+
+<div class="reading">
+ここから Theorem 5.15(基底変換)へ向かう。&sect;1 が「本論文の主たる新機軸」と述べているのは
+<b>この基底変換を LKW より先に、直接示す</b>点である。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement proposition"
+         id="prop-5-14"
+         data-paper="Yoshida08" data-pdf-page="12" data-item="Proposition 5.14"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Proposition 5.14</b> &mdash; 物理 p.12</p>
+
+<div class="verbatim">
+Proposition 5.14. For &#963; &#8712; W(K<sup>sep</sup>/K) with v(&#963;) &gt; 0, let E<sub>&#963;</sub> &sub; K<sup>sep</sup> be its fixed field. Then N(E<sub>&#963;</sub>/K) = <span data-txt="">&#10216;</span>Art<sup>&minus;1</sup>(&#963;|<sub>K<sup>LT</sup></sub>)<span data-txt="">&#10217;</span>.
+</div>
+
+<div class="reading">
+Weil 群の元 &sigma; の固定体のノルム群が、<code>Art<sup>&minus;1</sup>(&sigma;|<sub>K<sup>LT</sup></sub>)</code> の生成する群になる。
+Theorem 5.15 の証明の<b>唯一の道具</b>。証明は 2 行&mdash;&mdash;Proposition 5.4 で
+<code>K<sup>ram</sup><sub>x</sub> &sub; E<sub>&sigma;</sub></code> を見て Corollary 5.12 を当てるだけ。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement theorem"
+         id="thm-5-15"
+         data-paper="Yoshida08" data-pdf-page="12" data-item="Theorem 5.15 (Base change)"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Theorem 5.15</b>(基底変換) &mdash; 物理 p.12(可換図式は p.12 下部、証明は p.13)</p>
+
+<div class="verbatim">
+Theorem 5.15. (Base change) For a finite separable K&prime;/K, we have K<sup>LT</sup> &sub; K&prime;<sup>LT</sup> and the following commutes, i.e. for all x&prime; &#8712; K&prime;<sup>&times;</sup> we have Art<sub>K&prime;</sub>(x&prime;)|<sub>K<sup>LT</sup></sub> = Art<sub>K</sub>(N<sub>K&prime;/K</sub>(x&prime;)).
+</div>
+
+<div class="reading">
+★<b>本論文の主定理級の一段</b>&mdash;&mdash;&sect;1 が「de Shalit の相対 Lubin-Tate 群を使い、
+局所 Kronecker-Weber を先に示さずに<b>直接</b>証明する」と宣言している対象。
+証明は Proposition 5.14 の等式を <code>N<sub>K&prime;/K</sub></code> で押し出すだけで、
+<code>x &#8712; 𝔭<sub>K&prime;</sub> &#8745; K&prime;<sup>&times;</sup></code> が <code>K&prime;<sup>&times;</sup></code> を生成することで一般化する。
+<br>逐語には可換図式そのものは含めていない&mdash;&mdash;図式は「i.e.」以下の等式と同内容であり、
+<code>pdftotext</code> は矢印とラベルを本文と分離して吐くため逐語照合に載せる意味が薄い(README §5)。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement corollary"
+         id="cor-5-16"
+         data-paper="Yoshida08" data-pdf-page="13" data-item="Corollary 5.16 (LCFT minus LKW)"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Corollary 5.16</b>(LKW を除いた LCFT) &mdash; 物理 p.13</p>
+
+<div class="verbatim">
+Corollary 5.16. (LCFT minus Local Kronecker-Weber) (i) There is a unique homomorphism Art<sub>K</sub> : K<sup>&times;</sup> &rarr; Gal(K<sup>LT</sup>/K) satisfying: (a) if &#960; is a uniformizer of K, then Art<sub>K</sub>(&#960;)|<sub>K<sup>ur</sup></sub> = Frob<sub>K</sub>, and (b) if K&prime;/K is a Lubin-Tate extension, then Art<sub>K</sub>(N(K&prime;/K))|<sub>K&prime;</sub> = id. Moreover, the Art<sub>K</sub> is an isomorphism onto W(K<sup>LT</sup>/K) &sub; Gal(K<sup>LT</sup>/K). (ii) If K&prime;/K is finite separable, then K<sup>LT</sup> &sub; K&prime;<sup>LT</sup>, and Art<sub>K&prime;</sub>(x)|<sub>K<sup>LT</sup></sub> = Art<sub>K</sub>(N<sub>K&prime;/K</sub>(x)) for all x &#8712; K&prime;<sup>&times;</sup>. The Art<sub>K</sub> induces K<sup>&times;</sup>/N(K&prime;/K) <span data-txt="&#8764; = &minus;&rarr;">&cong;&rarr;</span> Gal((K&prime; &#8745; K<sup>LT</sup>)/K).
+</div>
+
+<div class="reading">
+<a href="section-1.html#thm-A">Theorem A</a> の <code>K<sup>ab</sup></code> をすべて <code>K<sup>LT</sup></code> に置き換えた形。
+&sect;5 の到達点であり、残る差は <b><code>K<sup>LT</sup> = K<sup>ab</sup></code> の一点だけ</b>&mdash;&mdash;
+それを埋めるのが &sect;6 の <a href="section-6.html#thm-6-15">Theorem 6.15</a>(局所 Kronecker-Weber)である。
+<br>本文はこの直後に、Corollary 5.16 から「easily」出るとして 4 件
+((i) 指数評価と等号条件 / (ii) ノルム群の包含と拡大の包含 / (iii) 合成体と共通部分 / (iv) 存在定理)を
+<b>証明なしで</b>並べている&mdash;&mdash;<b>省略の合図 4 件</b>。本ファイルは構造単位として切り出していない。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<h2>本節の依存関係</h2>
+
+<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%">
+<tr><th>節点</th><th>直接使うもの</th><th>物理ページ</th></tr>
+<tr><td><a href="#def-5-3">Def 5.3</a></td><td>Prop 5.1、Lemma 5.2(ii)、Lemma 4.6(<b>いずれも未構造化</b>)</td><td>10</td></tr>
+<tr><td><a href="#prop-5-4">Prop 5.4</a></td><td>Def 5.3、Prop 4.4(ii)(<b>未構造化</b>)</td><td>10</td></tr>
+<tr><td><a href="#def-5-9">Def 5.9</a></td><td>&mdash;</td><td>11</td></tr>
+<tr><td><a href="#prop-5-10">Prop 5.10</a></td><td>Def 5.9、Lemma 5.7、Lemma 5.8(iii)、<b>Lemma 5.11</b>(前方参照)</td><td>11&ndash;12</td></tr>
+<tr><td><b><a href="#lemma-5-11">Lemma 5.11</a></b></td><td>&mdash;(付値の相異なり だけ)</td><td>12</td></tr>
+<tr><td><a href="#cor-5-12">Cor 5.12</a></td><td>Prop 5.10、Lemma 5.13</td><td>12</td></tr>
+<tr><td><a href="#lemma-5-13">Lemma 5.13</a></td><td>有限集合の逆極限が空でないこと</td><td>12</td></tr>
+<tr><td><a href="#prop-5-14">Prop 5.14</a></td><td>Prop 5.4、Cor 5.12</td><td>12</td></tr>
+<tr><td><a href="#thm-5-15">Thm 5.15</a></td><td>Prop 5.14</td><td>12&ndash;13</td></tr>
+<tr><td><a href="#cor-5-16">Cor 5.16</a></td><td>Thm 5.15、Prop 5.4、Prop 4.4(ii)、Def 4.10</td><td>13</td></tr>
+</table>
+
+<p class="open">
+&sect;5 が &sect;1&ndash;&sect;4 に出す依存(Prop 4.4・Lemma 4.6・Def 4.10・Prop 5.1・Lemma 5.2・
+Def 5.6&ndash;Lemma 5.8)は<b>すべて未構造化</b>である。
+現在 Lean 側が消費しているのは <a href="#lemma-5-11">Lemma 5.11</a> だけであり、
+それは &sect;5 の他の何にも依存しない&mdash;&mdash;だからこの未構造化はいま止めていない。
+Theorem 5.15 や Corollary 5.16 に着手する時点で、&sect;4 と &sect;5 前半の構造化が必要になる。
+</p>
+
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>[Yoshida08] Local Class Field Theory via Lubin-Tate Theory — 目次</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.7; color: #222; }
+  h1 { font-size: 1.3em; } h2 { font-size: 1.05em; margin-top: 2em; }
+  .meta { color: #666; font-size: .9em; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: #f0f0f0; }
+  .done { color: #0a7d1e; font-weight: bold; }
+  .todo { color: #999; }
+  .legacy { color: #b00; }
+  code { background: #f5f5f5; padding: 1px 4px; }
+  p.open { background: #fff8e1; border-left: 4px solid #c9a227; padding: .5em .9em; }
+  .bb { font-weight: bold; }
+  .scr, .frak { font-style: italic; }
+</style>
+</head>
+<body>
+
+<h1>Local Class Field Theory via Lubin-Tate Theory</h1>
+<p class="meta">
+Teruyoshi Yoshida, 2008(<i>Annales de la Facult&eacute; des Sciences de Toulouse</i> 17-2)。
+本フォルダが扱うのは <code>0_Source</code> にある <b>arXiv math/0606108v2</b>(2008-10-13)
+&mdash;&mdash;<b>全 21 物理ページ</b>、印刷ページ番号 1&ndash;21、<code>pageOffset = 0</code>。<br>
+登記: <code>ResearchPaper/papers.json</code> のタグ <b>Yoshida08</b>&nbsp;/&nbsp;構造化の規約:
+<a href="../README.md">1_Structured/README.md</a>
+</p>
+
+<h2>主定理(Theorem A、物理 p.1)</h2>
+<p>
+任意の局所体 K に対し、<b>Artin 写像</b> Art<sub>K</sub> : K<sup>&times;</sup> &rarr; Gal(K<sup>ab</sup>/K) が
+2 条件((a) 素元 &rarr; Frobenius、(b) 有限アーベル拡大のノルム群 &rarr; 恒等)で一意に定まり、
+W<sup>ab</sup><sub>K</sub> の上への同型になる。さらに有限分離拡大 K&prime;/K に対して<b>基底変換</b>が可換。
+逐語は <a href="section-1.html#thm-A">section-1.html#thm-A</a>。
+</p>
+<p>
+本論文の構成は <b>Theorem A = Corollary 5.16 + Theorem 6.15</b> と分割される&mdash;&mdash;
+&sect;5 が「K<sup>ab</sup> を K<sup>LT</sup>(Lubin-Tate 拡大の合併)に置き換えた LCFT」を、
+&sect;6 が「K<sup>LT</sup> = K<sup>ab</sup>(局所 Kronecker-Weber)」を担当する。
+&sect;1 が自ら述べる新機軸は、<b>基底変換(Theorem 5.15)を LKW より先に直接示す</b>点にある。
+</p>
+
+<h2>節構成(全 21 物理ページ)</h2>
+<table>
+<tr><th>節</th><th>内容</th><th>物理ページ</th><th>状態</th></tr>
+<tr><td><b>&sect;1</b></td><td><b>Introduction</b>(Theorem A、Notation)</td><td>1</td>
+    <td class="done"><a href="section-1.html">構造化済み</a>(2026-09-06、2 件。Abstract/Notation は未着手)</td></tr>
+<tr><td>&sect;2</td><td>Local fields and complete extensions</td><td>2&ndash;4</td><td class="todo">未着手</td></tr>
+<tr><td>&sect;3</td><td>Formal groups and Lubin-Tate groups</td><td>4&ndash;6</td><td class="todo">未着手</td></tr>
+<tr><td>&sect;4</td><td>Lubin-Tate extensions and Artin maps(Prop 4.3・4.4・4.7、Def 4.10)</td><td>6&ndash;9</td>
+    <td class="todo">未着手 &mdash; <b>&sect;6 が依存する</b>(Prop 6.14)</td></tr>
+<tr><td><b>&sect;5</b></td><td><b>Galois Groups, Norm Groups and the Base Change</b><br>
+      5.1 (p.9&ndash;10) / 5.2 Coleman operator and norm groups (p.10&ndash;12) /
+      5.3 Base change and LCFT for Lubin-Tate extensions (p.12&ndash;13)</td><td>9&ndash;13</td>
+    <td class="done"><a href="section-5.html">構造化済み</a>(2026-09-06、11 件。<b>p.9 は未目視・未構造化</b>)</td></tr>
+<tr><td><b>&sect;6</b></td><td><b>The Local Kronecker-Weber theorem</b><br>
+      6.1 Ramification groups (p.14&ndash;15) / 6.2 The Hasse-Arf theorem (p.15&ndash;17) /
+      6.3 The Local Kronecker-Weber theorem (p.17)</td><td>13&ndash;17</td>
+    <td class="done"><a href="section-6.html">構造化済み</a>(2026-09-06、17 件。<b>&sect;6 の全 statement を収録</b>)</td></tr>
+<tr><td>App. I</td><td>Basic facts on DVR(完備化・逆極限・無限和の収束)</td><td>18&ndash;20</td>
+    <td class="todo">未着手 &mdash; Lemma 6.5 が参照</td></tr>
+<tr><td>App. II</td><td>Separability of f<sub>m</sub></td><td>20&ndash;21</td><td class="todo">未着手</td></tr>
+<tr><td>&mdash;</td><td>Historical remarks / References</td><td>21</td><td class="todo">未着手</td></tr>
+</table>
+
+<h2>収録した構造単位(30 件)</h2>
+<table>
+<tr><th>ファイル</th><th>id</th><th>原典の呼称</th><th>物理ページ</th></tr>
+<tr><td rowspan="2"><a href="section-1.html">section-1</a></td>
+    <td><code>setup-1-intro</code></td><td>Section 1 (Introduction, opening)</td><td>1</td></tr>
+<tr><td><code>thm-A</code></td><td><b>Theorem A</b> (Local Class Field Theory)</td><td>1</td></tr>
+
+<tr><td rowspan="11"><a href="section-5.html">section-5</a></td>
+    <td><code>def-5-3</code></td><td>Definition 5.3</td><td>10</td></tr>
+<tr><td><code>prop-5-4</code></td><td>Proposition 5.4</td><td>10</td></tr>
+<tr><td><code>def-5-9</code></td><td>Definition 5.9</td><td>11</td></tr>
+<tr><td><code>prop-5-10</code></td><td>Proposition 5.10</td><td>11</td></tr>
+<tr><td><b><code>lemma-5-11</code></b></td><td><b>Lemma 5.11</b>(&#119978;<sub>L&prime;</sub> = &#119978;<sub>L</sub>[&alpha;])</td><td>12</td></tr>
+<tr><td><code>cor-5-12</code></td><td>Corollary 5.12</td><td>12</td></tr>
+<tr><td><code>lemma-5-13</code></td><td>Lemma 5.13</td><td>12</td></tr>
+<tr><td><code>setup-5-3</code></td><td>Section 5.3 (heading)</td><td>12</td></tr>
+<tr><td><code>prop-5-14</code></td><td>Proposition 5.14</td><td>12</td></tr>
+<tr><td><code>thm-5-15</code></td><td><b>Theorem 5.15</b>(Base change)</td><td>12</td></tr>
+<tr><td><code>cor-5-16</code></td><td><b>Corollary 5.16</b>(LCFT minus LKW)</td><td>13</td></tr>
+
+<tr><td rowspan="17"><a href="section-6.html">section-6</a></td>
+    <td><code>setup-6-1</code></td><td>Section 6.1 (Ramification groups, setup)</td><td>14</td></tr>
+<tr><td><b><code>def-6-1</code></b></td><td><b>Definition 6.1</b>(i(&sigma;)、G<sub>n</sub>)</td><td>14</td></tr>
+<tr><td><code>prop-6-2</code></td><td>Proposition 6.2(G<sub>0</sub>/G<sub>1</sub> &#8618; k<sup>&times;</sup>、G<sub>n</sub>/G<sub>n+1</sub> &#8618; k<sup>+</sup>)</td><td>14</td></tr>
+<tr><td><code>cor-6-3</code></td><td>Corollary 6.3</td><td>14</td></tr>
+<tr><td><code>lemma-6-4</code></td><td>Lemma 6.4</td><td>14</td></tr>
+<tr><td><code>lemma-6-5</code></td><td>Lemma 6.5</td><td>14</td></tr>
+<tr><td><code>prop-6-6</code></td><td><b>Proposition 6.6</b>(Sen)</td><td>15</td></tr>
+<tr><td><code>cor-6-7</code></td><td>Corollary 6.7</td><td>15</td></tr>
+<tr><td><code>setup-6-2</code></td><td>Section 6.2 (Hasse-Arf, setup)</td><td>15</td></tr>
+<tr><td><code>lemma-6-8</code></td><td>Lemma 6.8</td><td>15</td></tr>
+<tr><td><code>prop-6-9</code></td><td><b>Proposition 6.9</b>(Herbrand)</td><td>16</td></tr>
+<tr><td><code>lemma-6-10</code></td><td>Lemma 6.10</td><td>16</td></tr>
+<tr><td><code>thm-6-11</code></td><td><b>Theorem 6.11</b>(Hasse-Arf)</td><td>16</td></tr>
+<tr><td><code>def-6-12</code></td><td>Definition 6.12(上付き番号付け)</td><td>17</td></tr>
+<tr><td><code>cor-6-13</code></td><td>Corollary 6.13</td><td>17</td></tr>
+<tr><td><code>prop-6-14</code></td><td>Proposition 6.14</td><td>17</td></tr>
+<tr><td><code>thm-6-15</code></td><td><b>Theorem 6.15</b>(Local Kronecker-Weber)</td><td>17</td></tr>
+</table>
+
+<h2>Lean 側からの参照(ゲート G1)</h2>
+<p>
+現時点で <code>lean/**</code> が <code>Yoshida08</code> を指しているのは <b>2 件</b>で、いずれも
+<code>lean/ABC3/Found/PGC/LowerRamificationGroup.lean</code> にある:
+</p>
+<table>
+<tr><th>Lean 宣言</th><th><code>.src</code> の中身</th><th>本フォルダの対応</th></tr>
+<tr><td><code>exists_uniformizer_adjoin_eq</code></td>
+    <td><code>paper := "Yoshida08", pdfPage := 12, item := "Lemma 5.11", sectionId := "lemma-5-11"</code></td>
+    <td><a href="section-5.html#lemma-5-11">section-5.html#lemma-5-11</a>(物理 p.12 &mdash; <b>一致</b>)</td></tr>
+<tr><td><code>lowerRamificationGroup</code></td>
+    <td><code>paper := "Yoshida08", pdfPage := 14, item := "Definition 6.1", sectionId := "def-6-1"</code></td>
+    <td><a href="section-6.html#def-6-1">section-6.html#def-6-1</a>(物理 p.14 &mdash; <b>一致</b>。★下記参照)</td></tr>
+</table>
+
+<p class="open">
+★<b>ページ番号の食い違いが 1 件あったが、構造化と同じ日に解消した。</b>
+本フォルダの構造化に着手した時点では <code>lowerRamificationGroup.src</code> が
+<code>pdfPage := 13</code> と書いていた。しかし
+<b>Definition 6.1 の本体は物理 p.14</b> にある&mdash;&mdash;p.13 の末尾にあるのは &sect;6 の導入段落
+&ldquo;We finish the proof of Theorem A by proving the local Kronecker-Weber theorem&hellip;&rdquo; だけである。
+<code>check.mjs</code> の G1 は <code>sectionId</code> の存在と <code>pdfPage</code> の範囲(1..21)しか見ないので
+ゲートは通っていたが、<b>locator としては 1 ページずれていた</b>。
+<br>2026-09-06 のうちに Lean 側が <code>pdfPage := 14</code> へ直され、現在は一致している
+(<b>この修正は本フォルダの作業ではなく Lean 側で行われた</b>&mdash;&mdash;構造化の持ち場は
+<code>lean/**</code> を変更しない約束だったため)。
+<b>ゲートが見ていない食い違いだった</b>ことを記録として残す&mdash;&mdash;
+G1 は <code>pdfPage</code> と <code>data-pdf-page</code> の一致を検査していない。
+</p>
+
+<h2>記法の状況(<code>papers.json</code>: <code>notationRisk = medium</code>)</h2>
+<p>
+arXiv の LaTeX 版なので本文の抽出は良好だが、<b>数式中の記号は落ちる</b>。
+目視で確認した脱落(すべて本フォルダの <code>data-txt</code> に反映済み):
+</p>
+<ul>
+<li><b>&#8800;</b> &rarr; <code>=</code>&nbsp;&mdash;&nbsp;斜線が消え、<b>主張が反転して読める</b>。
+    Cor 6.3・Lemma 6.5・Thm 6.11 の 3 箇所で発生。<b>この論文で最も危険な脱落</b>。</li>
+<li><b>&#10216; &#10217;</b>(生成部分群)&rarr; 出力なし。<code>|&#10216;&sigma;&#10217;| = p<sup>m</sup></code> が
+    <code>| &sigma; | = pm</code> としか出ず、<b>元と生成群の区別が消える</b>(Prop 5.4・5.10・5.14、Cor 5.12、Prop 6.6)。</li>
+<li><b>&#8721; &#8899; &#8898;</b>(大演算子)&rarr; 出力なし。上下の添字だけが本文に落ちる。</li>
+<li><b>分数の横線</b> &rarr; 出力なし。<code>1/|H|</code> が <code>1 |H|</code> になる(Lemma 6.8・Prop 6.9・Lemma 6.10)。</li>
+<li><b>&cong;</b> &rarr; <code>&#8764;</code> と <code>=</code> の 2 トークンに割れる(<code>-raw</code> では<b>行も割れる</b>)。
+    <code>check.mjs</code> の正規化は<b>隣接した</b> <code>&#8764;=</code> しか畳まないので、
+    本フォルダは <code>data-txt="&#8764; ="</code> と<b>空白込み</b>で投影を書いている。</li>
+<li><b>&#9655;</b>(<code>\rhd</code>)&rarr; <code>&#8882;</code>(U+22B2)。<b>字形と符号位置が食い違う</b>(setup-6-2、Cor 6.13)。</li>
+<li><b>&#8728;</b>(<code>\circ</code>)&rarr; <code>&#9702;</code>(U+25E6, WHITE BULLET)。同上(Lemma 6.10)。</li>
+<li><b>&#981;</b>(<code>\phi</code>)&rarr; <code>&#966;</code>(U+03C6)。本フォルダは<b>出力側の U+03C6 に合わせている</b>。</li>
+<li><b>&#119978;</b>(script O)&rarr; <code>O</code>、<b>&#120101;</b>(fraktur p)&rarr; <code>p</code>、
+    黒板太字 <b>&#8484; &#8477; &#120125;</b> &rarr; <code>Z R F</code>、上線 <b>&sigma;&#772;</b> &rarr; <code>&sigma;</code>。
+    いずれも README §1 の「基底文字だけが残る」通り。</li>
+</ul>
+<p>
+目視確認済みの物理ページ: <b>1・10・11・12・13・14・15・16・17</b>(いずれも全面、150dpi 画像)。<br>
+<b>未確認</b>: 2&ndash;9・18&ndash;21。<b>記録に無いページの記法については何も言えない</b>(README §2-3)。
+</p>
+
+<h2>★照合モードについて(本論文に固有の事情)</h2>
+<p>
+<code>pdftotext -layout</code> は上付き・下付きを<b>組版位置の順</b>に吐くため、添字が本文に割り込む
+&mdash;&mdash;例えば <code>&#120101;<sup>n+1</sup><sub>K&prime;</sub></code> は <code>pKn+′ 1</code> と出る
+(p、K、n、+、&prime;、1 の順)。同じ記号が同じページの別の場所では <code>pnK+′ 1</code> と出ることもあり、
+<b>一貫しない</b>。一方 <code>-raw</code> は<b>読み順</b>(基底 &rarr; 上付き &rarr; 下付き)で吐くので、
+数式を含む逐語はこちらで素直に一致する。
+</p>
+<p>
+<code>check.mjs</code> は <code>layout &rarr; default &rarr; raw</code> の順に 3 モードを試し、
+<b>どれかで一致すれば S4 は通る</b>(layout 以外で一致した件数は情報として印字される)。
+本フォルダの 30 件の内訳は <b>layout 14 件 / default 4 件 / raw 12 件</b>で、
+これは版面の性質であって転写の誤りではない。
+</p>
+
+<h2>本論文を選んだ理由(依存グラフ上の位置)</h2>
+<p>
+[pGC] &sect;2(Definition 2.3、上付き番号付けの高次分岐群)が mathlib に無い&mdash;&mdash;
+これは <a href="../A Version of the Grothendieck Conjecture for p-adic Local Fields/index.html">[pGC] の目次</a>が
+実測として記録している(<code>Mathlib/RingTheory/Valuation/RamificationGroup.lean</code> の
+<code>TODO: Define higher ramification groups in lower numbering</code>。<b>本作業では再測していない</b>)。
+その穴を埋める<b>自己完結した出典</b>として本論文を採った&mdash;&mdash;
+&sect;1 が宣言する通り前提はガロア理論と Appendix I の可換環論だけで、
+<b>コンパクト性を使う議論を意図的に避けている</b>(&sect;1)。
+&sect;6 は Definition 6.1 から Theorem 6.15 まで<b>15 個の statement で閉じており</b>、
+外に出る依存は &sect;5 の 2 件(Lemma 5.11・Prop 5.4)と &sect;4 の Lubin-Tate 側だけである
+&mdash;&mdash;<a href="section-6.html">section-6.html</a> 末尾の依存表を参照。
+</p>
+
+</body>
+</html>

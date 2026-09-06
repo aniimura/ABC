@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>[Yoshida08] Section 6: The Local Kronecker-Weber theorem</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.7; color: #222; }
+  h1 { font-size: 1.25em; border-bottom: 2px solid #333; padding-bottom: .3em; }
+  h2 { font-size: 1.05em; margin-top: 2em; }
+  section.statement { border-left: 4px solid #1554b0; padding: .5em 1em; margin: 1.6em 0; background: #f7f9fc; }
+  section.statement.proposition { border-left-color: #0a7d1e; background: #f2f9f2; }
+  section.statement.theorem     { border-left-color: #7d0a1e; background: #fbf2f4; }
+  section.statement.corollary   { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.definition  { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.lemma       { border-left-color: #1554b0; background: #f7f9fc; }
+  section.statement.remark      { border-left-color: #666;    background: #f5f5f5; }
+  section.statement.setup       { border-left-color: #bbb;    background: #fafafa; }
+  .hdr { font-size: .8em; color: #777; margin-bottom: .4em; }
+  .hdr b { color: #333; }
+  .verbatim { background: #fff; border: 1px solid #ddd; padding: .6em .9em; margin: .5em 0; }
+  .reading  { font-size: .93em; color: #333; margin: .5em 0 0; }
+  .reading::before { content: "読み: "; font-weight: bold; color: #1554b0; }
+  p.open { background: #fff8e1; border-left: 4px solid #c9a227; padding: .4em .9em; margin: .6em 0; }
+  p.open::before { content: "未解決: "; font-weight: bold; }
+  code { background: #f5f5f5; padding: 1px 4px; }
+  /* 記法クラス — .txt で脱落する装飾を表示側で復元する(README §3) */
+  .ul1  { text-decoration: underline; }
+  .ul2  { text-decoration: underline; text-decoration-style: double; }
+  .bar  { text-decoration: overline; }
+  .hat::after   { content: "\0302"; }
+  .tilde::after { content: "\0303"; }
+  .dot1::after  { content: "\0307"; }
+  .dot2::after  { content: "\0308"; }
+  .bb   { font-weight: bold; }
+  .scr  { font-style: italic; }
+  .frak { font-style: italic; }
+</style>
+</head>
+<body>
+
+<p><a href="index.html">&larr; [Yoshida08] 目次</a></p>
+
+<h1>[Yoshida08] Section 6: The Local Kronecker-Weber theorem</h1>
+
+<p class="hdr">
+原典: <b>Local Class Field Theory via Lubin-Tate Theory</b> (T. Yoshida, 2008; arXiv math/0606108v2)&nbsp;/&nbsp;
+範囲: <b>物理ページ 14&ndash;17</b>(&sect;6 の冒頭段落は p.13 末、本ファイルは p.14 以降を扱う)&nbsp;/&nbsp;
+記法の目視確認: <b>2026-09-06</b>(p.14&middot;15&middot;16&middot;17 を 150dpi 画像で全面目視)&nbsp;/&nbsp;
+規約: <a href="../README.md">1_Structured/README.md</a>
+</p>
+
+<p class="hdr">
+★<b>照合モードについて</b>: 本論文は arXiv の LaTeX 版で、<code>pdftotext -layout</code> は上付き・下付きを
+組版位置の順に吐くため添字が割り込む(例 <code>𝔭<sup>n+1</sup><sub>K&prime;</sub></code> &rarr; <code>pKn+′ 1</code>)。
+<code>-raw</code> は<b>読み順</b>(基底 &rarr; 上付き &rarr; 下付き)で吐くので、本ファイルの逐語は
+<code>-raw</code> モードで一致する。<code>check.mjs</code> は 3 モードを順に試すので照合は通るが、
+「layout 以外のモードで一致した」と印字される&mdash;&mdash;これは版面の情報であって異常ではない。
+</p>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-6-1"
+         data-paper="Yoshida08" data-pdf-page="14" data-item="Section 6.1 (Ramification groups, setup)"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>&sect;6.1 冒頭</b>(分岐群の設定) &mdash; 物理 p.14</p>
+
+<div class="verbatim">
+6.1. Ramification groups. Let K&prime;/K be a finite totally ramified Galois extension of local fields, and set G := Gal(K&prime;/K). For a uniformizer &#960; of K&prime;, we have <span class="scr">O</span><sub>K&prime;</sub> = <span class="scr">O</span>[&#960;] by Lemma 5.11. We write v := v<sub>K&prime;</sub> and q = |<span class="scr">O</span>/<span class="frak">p</span>| = |<span class="scr">O</span><sub>K&prime;</sub>/<span class="frak">p</span><sub>K&prime;</sub>|.
+</div>
+
+<div class="reading">
+&sect;6 全体を通じての約束: <b>K&prime;/K は有限・完全分岐・ガロア</b>で、<code>G := Gal(K&prime;/K)</code>。
+&pi; は K&prime; の素元、<code>v := v<sub>K&prime;</sub></code>(K&prime; の正規化付値、v(&pi;) = 1)、q は剰余体の位数。
+<b>Lemma 5.11 がここで消費される</b>&mdash;&mdash;<span class="scr">O</span><sub>K&prime;</sub> = <span class="scr">O</span>[&pi;] という
+単項生成が、以下すべての「&sigma; を &pi; での値だけで測る」議論の土台になる。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement definition"
+         id="def-6-1"
+         data-paper="Yoshida08" data-pdf-page="14" data-item="Definition 6.1"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Definition 6.1</b>(下付き番号付けの分岐群) &mdash; 物理 p.14</p>
+
+<div class="verbatim">
+Definition 6.1. Let i(&#963;) := v(&#963;(&#960;) &minus; &#960;), where we set i(id) = &#8734;. For n &ge; 0, define G<sub>n</sub> := {&#963; &#8712; G | i(&#963;) &gt; n} = {&#963; &#8712; G | &#963;(&#960;)/&#960; &#8712; 1 + <span class="frak">p</span><sup>n</sup><sub>K&prime;</sub>}. Then G = G<sub>0</sub> as K&prime;/K is totally ramified, and G<sub>n</sub> = {id} for sufficiently large n. They are normal subgroups of G, independent of the choice of &#960;, because G<sub>n</sub> = {&#963; &#8712; G | v(&#963;(a) &minus; a) &gt; n for all a &#8712; <span class="scr">O</span><sub>K&prime;</sub>} is the kernel of the group homomorphism G &#8715; &#963; <span data-txt="&minus;&rarr;">&#10230;</span> &#963;|<sub><span class="scr">O</span><sub>K&prime;</sub></sub> mod <span class="frak">p</span><sup>n+1</sup><sub>K&prime;</sub> &#8712; Aut(<span class="scr">O</span><sub>K&prime;</sub>/<span class="frak">p</span><sup>n+1</sup><sub>K&prime;</sub>).
+</div>
+
+<div class="reading">
+★<b>Lean 側の消費先</b>: <code>lean/ABC3/Found/PGC/LowerRamificationGroup.lean</code> の
+<code>lowerRamificationGroup</code>(<code>.src</code> の <code>pdfPage</code> は
+<b>着手時点で 13、同日 14 に修正済み</b>&mdash;&mdash;Definition 6.1 の<b>本体は物理 p.14</b> にあり、
+p.13 末にあるのは &sect;6 の導入段落だけである。経緯は
+<a href="index.html">目次</a>の「Lean 側からの参照」を見よ)。
+<br>原典は 3 つの同値な定義を<b>一息で</b>並べている:
+(a) <code>i(&sigma;) &gt; n</code>、(b) <code>&sigma;(&pi;)/&pi; &#8712; 1 + 𝔭<sup>n</sup></code>、
+(c) 全ての <code>a &#8712; 𝒪<sub>K&prime;</sub></code> で <code>v(&sigma;(a) &minus; a) &gt; n</code>。
+(c) が「<code>G &rarr; Aut(𝒪<sub>K&prime;</sub>/𝔭<sup>n+1</sup>)</code> の核」という記述を与え、そこから
+<b>正規部分群であること</b>と<b>&pi; の取り方に依らないこと</b>が同時に出る。
+<br>「独立性」「正規性」は原典では <i>because</i> の一語で畳まれている&mdash;&mdash;(c) の形に書けば自明、という論法。
+Lean 化ではこの (a)&hArr;(b)&hArr;(c) の 3 者同値そのものが節点になる。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement proposition"
+         id="prop-6-2"
+         data-paper="Yoshida08" data-pdf-page="14" data-item="Proposition 6.2"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Proposition 6.2</b>(分岐群の商の埋め込み) &mdash; 物理 p.14</p>
+
+<div class="verbatim">
+Proposition 6.2. For n &#8712; <span class="bb">Z</span><sub>&ge;0</sub>, we have the following injective group homomorphisms, independent of the choice of &#960; (they show that G is supersoluble): &#952;<sub>0</sub> : G<sub>0</sub>/G<sub>1</sub> &#8715; &#963; <span data-txt="&minus;&rarr;">&#10230;</span> &#963;(&#960;)/&#960; mod <span class="frak">p</span><sub>K&prime;</sub> &#8712; (<span class="scr">O</span><sub>K&prime;</sub>/<span class="frak">p</span><sub>K&prime;</sub>)<sup>&times;</sup> <span data-txt="&#8764; =">&cong;</span> <span class="bb">F</span><sup>&times;</sup><sub>q</sub>, &#952;<sub>n</sub> : G<sub>n</sub>/G<sub>n+1</sub> &#8715; &#963; <span data-txt="&minus;&rarr;">&#10230;</span> (&#963;(&#960;)/&#960;) &minus; 1 mod <span class="frak">p</span><sup>n+1</sup><sub>K&prime;</sub> &#8712; <span class="frak">p</span><sup>n</sup><sub>K&prime;</sub>/<span class="frak">p</span><sup>n+1</sup><sub>K&prime;</sub> <span data-txt="&#8764; =">&cong;</span> <span class="bb">F</span><sub>q</sub> (n &ge; 1).
+</div>
+
+<div class="reading">
+分岐群のフィルトレーションの<b>段差</b>を測る 2 本の単射。<code>G<sub>0</sub>/G<sub>1</sub> &#8618; 𝔽<sub>q</sub><sup>&times;</sup></code>
+(位数 q&minus;1 の巡回群)と <code>G<sub>n</sub>/G<sub>n+1</sub> &#8618; 𝔽<sub>q</sub><sup>+</sup></code>(初等 p-アーベル)。
+ここから <b>G<sub>1</sub> は p 群</b>、<b>G<sub>0</sub>/G<sub>1</sub> は p と素な巡回群</b>が従い、
+これが Corollary 6.3・Proposition 6.6・Theorem 6.11 の全ての土台になる。
+<br>★<code>data-txt="&#8764; ="</code> について: 原文の <code>&cong;</code> を <code>pdftotext</code> は
+<code>&#8764;</code> と <code>=</code> の<b>2 トークン</b>に割って出す(<code>-raw</code> では行も割れる)。
+<code>check.mjs</code> の正規化は隣接した <code>&#8764;=</code> のみを <code>&cong;</code> に畳むので、
+<b>空白を含む</b> <code>"&#8764; ="</code> を投影として明示している。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement corollary"
+         id="cor-6-3"
+         data-paper="Yoshida08" data-pdf-page="14" data-item="Corollary 6.3"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Corollary 6.3</b> &mdash; 物理 p.14</p>
+
+<div class="verbatim">
+Corollary 6.3. If G is abelian and G<sub>n</sub> <span data-txt="=">&#8800;</span> G<sub>n+1</sub>, then e<sub>0</sub> := |G<sub>0</sub>/G<sub>1</sub>| divides n.
+</div>
+
+<div class="reading">
+Hasse-Arf(Theorem 6.11)の最後の段(G &ne; G<sub>1</sub> の場合)で使われる整除性。
+<br>★<b>記法の復元</b>: 原文は <code>G<sub>n</sub> &ne; G<sub>n+1</sub></code> だが、<code>&ne;</code> の
+斜線はベクター描画で <code>pdftotext</code> に出ない&mdash;&mdash;出力は <code>=</code> だけ。
+これは README §1 の「装飾は基底文字だけが残る」と同型の脱落であり、
+<b>テキストだけを読むと主張が反転する</b>(「G<sub>n</sub> = G<sub>n+1</sub> なら」と読めてしまう)。
+本ファイルでは <code>&ne;</code> の出現をすべて <code>data-txt="="</code> で明示している。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement lemma"
+         id="lemma-6-4"
+         data-paper="Yoshida08" data-pdf-page="14" data-item="Lemma 6.4"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Lemma 6.4</b> &mdash; 物理 p.14</p>
+
+<div class="verbatim">
+Lemma 6.4. For &#963; &#8712; G<sub>1</sub>, we have v<span data-txt="">(</span><span data-txt="">&#8721;</span><sup>p&minus;1</sup><sub>i=0</sub> &#963;<sup>i</sup>(&alpha;)<span data-txt="">)</span> &gt; v(&alpha;) for all &alpha; &#8712; K&prime;<sup>&times;</sup>.
+</div>
+
+<div class="reading">
+Sen の定理(Proposition 6.6)の (i) と (iii) の両方で使われる評価。
+G<sub>1</sub> の元 &sigma; に対して「トレース類似物 &#8721;<sub>i</sub>&sigma;<sup>i</sup>(&alpha;) は &alpha; より真に高い付値を持つ」。
+証明は <code>(&sigma;&minus;1)</code> の反復と <code>&#8721;<sub>i</sub>X<sup>i</sup> = (X&minus;1)<sup>p&minus;1</sup> in 𝔽<sub>p</sub>[X]</code> の 2 行。
+<br>★<b>記法</b>: 大きな括弧 <code>(</code> <code>)</code> と総和記号 <code>&#8721;</code> は
+<code>pdftotext</code> に<b>一切出力されない</b>(<code>data-txt=""</code>)。README §3 の
+「平文記法の限界」で挙がっている「消える記号」がこの論文にも現れる。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement lemma"
+         id="lemma-6-5"
+         data-paper="Yoshida08" data-pdf-page="14" data-item="Lemma 6.5"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Lemma 6.5</b> &mdash; 物理 p.14</p>
+
+<div class="verbatim">
+Lemma 6.5. Let &#963; &#8712; G<sub>1</sub>. For each n &#8712; <span class="bb">Z</span>, there exists &alpha; &#8712; K&prime;<sup>&times;</sup> such that v(&alpha;) = n and v(&#963;(&alpha;) &minus; &alpha;) = n + i(&#963;<sup>n</sup>). Moreover, any x &#8712; K&prime;<sup>&times;</sup> can be written as a sum x = <span data-txt="">&#8721;</span><sup>&#8734;</sup><sub>n=v(x)</sub> x<sub>n</sub> (see Appendix I) where each x<sub>n</sub> satisfies above two properties for n if x<sub>n</sub> <span data-txt="=">&#8800;</span> 0.
+</div>
+
+<div class="reading">
+「各付値 n ごとに、&sigma; の動きが <code>n + i(&sigma;<sup>n</sup>)</code> ちょうどになる元 &alpha; を作れる」+
+「任意の元をそういう元の(Appendix I の意味で収束する)和に分解できる」。
+Proposition 6.6(iii) の背理法で、この分解に Claim(相異なる付値)を当てて矛盾を出す。
+<br>★<code>x<sub>n</sub> &ne; 0</code> の <code>&ne;</code> も <code>=</code> にしか出ない(Corollary 6.3 と同じ脱落)。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement proposition"
+         id="prop-6-6"
+         data-paper="Yoshida08" data-pdf-page="15" data-item="Proposition 6.6 (Sen)"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Proposition 6.6</b>(Sen [14]) &mdash; 物理 p.15</p>
+
+<div class="verbatim">
+Proposition 6.6 (Sen [14]). Let &#963; &#8712; G<sub>1</sub>, and |<span data-txt="">&#10216;</span>&#963;<span data-txt="">&#10217;</span>| = p<sup>m</sup> for m &ge; 1 (by Proposition 6.2). Let H<sub>n</sub> := G<sub>n</sub> &#8745; <span data-txt="">&#10216;</span>&#963;<span data-txt="">&#10217;</span> for n &ge; 1 and i<sub>j</sub> := i(&#963;<sup>p<sup>j</sup></sup>) for j &ge; 0 (and i<sub>j</sub> := &#8734; for j &ge; m). Then: (i) i<sub>j&minus;1</sub> &lt; i<sub>j</sub> if j &le; m. Also, H<sub>n</sub> = <span data-txt="">&#10216;</span>&#963;<sup>p<sup>j</sup></sup><span data-txt="">&#10217;</span> if and only if i<sub>j&minus;1</sub> &le; n &lt; i<sub>j</sub>. (ii) i(&#963;<sup>a</sup>) = i<sub>v<sub>p</sub>(a)</sub> for a &ge; 1, where v<sub>p</sub> := v<sub><span class="bb">Q</span><sub>p</sub></sub>. (iii) i<sub>j&minus;1</sub> &#8801; i<sub>j</sub> (mod p<sup>j</sup>), where &#8734; is understood to be congruent to any integer.
+</div>
+
+<div class="reading">
+Sen の定理。巡回 p 群 <code>&#10216;&sigma;&#10217;</code> に対して、分岐の跳び位置 <code>i<sub>j</sub> = i(&sigma;<sup>p<sup>j</sup></sup>)</code> が
+<b>(i) 狭義増加</b>・<b>(ii) i(&sigma;<sup>a</sup>) は v<sub>p</sub>(a) だけで決まる</b>・
+<b>(iii) i<sub>j&minus;1</sub> &equiv; i<sub>j</sub> (mod p<sup>j</sup>)</b> を満たす。
+(iii) が Hasse-Arf の整数性の源。原典は (iii) の証明に 1 ページ弱を割いており、この論文で<b>最も重い一段</b>。
+<br>★<b>記法</b>: 生成部分群の角括弧 <code>&#10216; &#10217;</code> は <code>pdftotext</code> に出ない
+(<code>| &#963; | = pm</code> としか出ない)。README §1 の [EtTh] の下線と同じく、
+<b>テキストだけでは「&sigma; そのもの」と「&sigma; の生成する群」が区別できない</b>。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement corollary"
+         id="cor-6-7"
+         data-paper="Yoshida08" data-pdf-page="15" data-item="Corollary 6.7"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Corollary 6.7</b> &mdash; 物理 p.15</p>
+
+<div class="verbatim">
+Corollary 6.7. Assume G <span data-txt="&#8764; =">&cong;</span> <span class="bb">Z</span>/p<sup>m</sup><span class="bb">Z</span>. Then there exist n<sub>0</sub>, n<sub>1</sub>, . . . , n<sub>m&minus;1</sub> &#8712; <span class="bb">Z</span><sub>&ge;1</sub> such that, for 1 &le; j &le; m &minus; 1, we have |G<sub>n</sub>| = p<sup>m&minus;j</sup> if and only if <span data-txt="">&#8721;</span><sup>j&minus;1</sup><sub>i=0</sub> n<sub>i</sub>p<sup>i</sup> &lt; n &le; <span data-txt="">&#8721;</span><sup>j</sup><sub>i=0</sub> n<sub>i</sub>p<sup>i</sup>.
+</div>
+
+<div class="reading">
+Proposition 6.6 を巡回 p 群の場合に読み替えた形&mdash;&mdash;跳び位置が
+<code>n<sub>0</sub>, n<sub>0</sub>+n<sub>1</sub>p, &hellip;</code> という p 進展開の形をとる。
+Theorem 6.11 の帰納法の<b>底(j = 1、G &cong; ℤ/p<sup>m</sup>ℤ)</b>でそのまま使われる。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-6-2"
+         data-paper="Yoshida08" data-pdf-page="15" data-item="Section 6.2 (Hasse-Arf, setup)"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>&sect;6.2 冒頭</b>(商への降下の設定) &mdash; 物理 p.15</p>
+
+<div class="verbatim">
+6.2. The Hasse-Arf theorem. Let G = Gal(K&prime;/K) with K&prime;/K totally ramified as before, and let G <span data-txt="&#8882;">&#9655;</span> H with G/H = Gal(K&prime;&prime;/K). For &#963; &#8712; G, let <span class="bar">&#963;</span> = &#963;H &#8712; G/H be its image.
+</div>
+
+<div class="reading">
+Lemma 6.8・Proposition 6.9(Herbrand)・Lemma 6.10 が共有する設定:
+<b>正規部分群 H &#9666; G</b> と中間体 <code>K&Prime; = K&prime;<sup>H</sup></code>、および剰余類 <code><span class="bar">&sigma;</span> = &sigma;H</code>。
+<br>★<b>記法</b>: 原典の記号は <code>&#9655;</code>(<code>\rhd</code>、白三角)だが
+<code>pdftotext</code> は <code>&#8882;</code>(U+22B2, NORMAL SUBGROUP OF)を出す&mdash;&mdash;
+<b>字形と符号位置が食い違っている</b>。表示側は PDF の字形を、<code>data-txt</code> は実出力を持つ。
+また上線付き <code><span class="bar">&sigma;</span></code> は <code>&sigma;</code> としか出ない
+(README §1 の <code>K&#772; &rarr; K</code> と同じ脱落)。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement lemma"
+         id="lemma-6-8"
+         data-paper="Yoshida08" data-pdf-page="15" data-item="Lemma 6.8"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Lemma 6.8</b> &mdash; 物理 p.15</p>
+
+<div class="verbatim">
+Lemma 6.8. For all &#963; &#8712; G, we have i(<span class="bar">&#963;</span>) = <span data-txt="1|H|">1/|H|</span> <span data-txt="">&#8721;</span><sub>&#964;&#8712;H</sub> i(&#963;&#964;).
+</div>
+
+<div class="reading">
+商 G/H の側で測った <code>i(<span class="bar">&sigma;</span>)</code> が、剰余類 &sigma;H 上の i の<b>平均</b>である、という等式。
+Herbrand(Proposition 6.9)の証明はこの 1 行に帰着する。
+証明は K&prime;&prime; の素元の最小多項式に &sigma; を作用させて <code>a | b</code> と <code>b | a</code> を両方示す 2 段。
+<br>★<b>記法</b>: 分数 <code>1/|H|</code> の横線は <code>pdftotext</code> に出ず、分子・分母が
+<code>1</code> <code>|H|</code> と並ぶだけになる(<code>data-txt="1|H|"</code>)。総和記号 <code>&#8721;</code> も出ない。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement proposition"
+         id="prop-6-9"
+         data-paper="Yoshida08" data-pdf-page="16" data-item="Proposition 6.9 (Herbrand)"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Proposition 6.9</b>(Herbrand) &mdash; 物理 p.16</p>
+
+<div class="verbatim">
+Proposition 6.9 (Herbrand). Define &#966;<sub>H</sub>(n) := &minus;1+<span data-txt="1|H|">1/|H|</span> <span data-txt="">&#8721;</span><sub>&#964;&#8712;H</sub> min{i(&#964;), n+1} for n &#8712; <span class="bb">R</span><sub>&ge;0</sub>. Also, for n &#8712; <span class="bb">R</span><sub>&ge;0</sub>, define G<sub>n</sub> := {&#963; &#8712; G | i(&#963;) &ge; n + 1}, i.e. G<sub>n</sub> = G<sub>i</sub> if i &#8712; <span class="bb">Z</span><sub>&ge;0</sub> and n &#8712; (i &minus; 1, i]. Then G<sub>n</sub>H/H = (G/H)<sub>&#966;<sub>H</sub>(n)</sub> for all n &#8712; <span class="bb">R</span><sub>&ge;0</sub>.
+</div>
+
+<div class="reading">
+★<b>Herbrand の定理</b>。Herbrand 関数 <code>&#966;<sub>H</sub></code> を「i の切り詰め平均」として直に定義し、
+<b>分岐群は商へ整合的に降りる</b>(<code>G<sub>n</sub>H/H = (G/H)<sub>&#966;<sub>H</sub>(n)</sub></code>)ことを示す。
+下付き番号付けを実数に延長した <code>G<sub>n</sub> := {&sigma; | i(&sigma;) &ge; n+1}</code> がここで導入される
+(整数 n では Definition 6.1 の <code>G<sub>n</sub></code> と一致する)。
+<br>Lean 化の観点: <b>Definition 6.1 の実数への延長</b>と <b>&#966;<sub>H</sub> の定義</b>が、
+Herbrand の主張そのものより先に必要な節点になる。
+<br>★<code>&#966;</code> は原典の字形が <code>&#981;</code>(<code>\phi</code>)だが、<code>pdftotext</code> の出力は
+U+03C6(<code>&#966;</code>)。本ファイルは<b>出力に合わせて U+03C6 を使う</b>&mdash;&mdash;
+字形の差は同定に効かないと判断した(README §5「同定に関わらない装飾は落としてよい」)。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement lemma"
+         id="lemma-6-10"
+         data-paper="Yoshida08" data-pdf-page="16" data-item="Lemma 6.10"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Lemma 6.10</b> &mdash; 物理 p.16</p>
+
+<div class="verbatim">
+Lemma 6.10. Let &#966;<sub>G</sub>(n) := &minus;1 + <span data-txt="1|G|">1/|G|</span> <span data-txt="">&#8721;</span><sub>&#964;&#8712;G</sub> min{i(&#964;), n + 1} for n &#8712; <span class="bb">R</span><sub>&ge;0</sub>. Then: (i) &#966;<sub>G</sub>(0) = 0, &#966;<sub>G</sub>(n) = <span data-txt="1|G|">1/|G|</span> <span data-txt="">&#8721;</span><sup>n</sup><sub>i=1</sub> |G<sub>i</sub>| for n &#8712; <span class="bb">Z</span><sub>&ge;1</sub>. (ii) &#966;<sub>G</sub> = &#966;<sub>G/H</sub> <span data-txt="&#9702;">&#8728;</span> &#966;<sub>H</sub> on <span class="bb">R</span><sub>&ge;0</sub>.
+</div>
+
+<div class="reading">
+Herbrand 関数の 2 つの基本性質: <b>(i) 整数点での閉じた形</b>
+(<code>&#966;<sub>G</sub>(n) = (1/|G|)&#8721;<sub>i=1</sub><sup>n</sup>|G<sub>i</sub>|</code>)と <b>(ii) 合成則</b>。
+(ii) の証明は「&#966; は連続な区分線形で &#966;(0)=0 だから微分だけ比べればよい」という 3 行&mdash;&mdash;
+<b>区分線形関数の一致判定</b>を Lean で立てるとここが独立の節点になる。
+<br>★<b>記法</b>: 合成記号は原典が <code>&#8728;</code>(<code>\circ</code>)、<code>pdftotext</code> の出力は
+<code>&#9702;</code>(U+25E6, WHITE BULLET)。<code>&#9655;</code>/<code>&#8882;</code> と同型の符号位置ずれ。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement theorem"
+         id="thm-6-11"
+         data-paper="Yoshida08" data-pdf-page="16" data-item="Theorem 6.11 (Hasse-Arf)"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Theorem 6.11</b>(Hasse-Arf) &mdash; 物理 p.16</p>
+
+<div class="verbatim">
+Theorem 6.11 (Hasse-Arf). If G is abelian, n &#8712; <span class="bb">Z</span><sub>&ge;0</sub> and G<sub>n</sub> <span data-txt="=">&#8800;</span> G<sub>n+1</sub>, then &#966;<sub>G</sub>(n) &#8712; <span class="bb">Z</span><sub>&ge;0</sub>.
+</div>
+
+<div class="reading">
+★<b>Hasse-Arf の定理</b>&mdash;&mdash;本論文の &sect;6 が向かう頂点。
+「アーベル拡大では、下付き番号付けの跳びの位置は Herbrand 関数で送っても<b>整数のまま</b>」。
+これが「上付き番号付け <code>G<sup>m</sup></code>(Definition 6.12)が整数点で跳ぶ」を保証し、
+Corollary 6.13(iii) の指数評価を通じて局所 Kronecker-Weber(Theorem 6.15)に効く。
+<br>証明の骨格: <b>(1)</b> G = G<sub>1</sub>(p 群)のとき&mdash;&mdash;巡回成分数 j による帰納法。
+底(j=1)は Corollary 6.7、帰納段は Proposition 6.9 + Lemma 6.10(ii)。
+<b>(2)</b> G &ne; G<sub>1</sub> のとき&mdash;&mdash;H = G<sub>1</sub> をとり、Corollary 6.3 の整除性で
+<code>e<sub>0</sub> | &#966;<sub>H</sub>(n)</code> を出す。
+<br>★<code>G<sub>n</sub> &ne; G<sub>n+1</sub></code> の <code>&ne;</code> は <code>pdftotext</code> に出ない(Corollary 6.3 と同じ)。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement definition"
+         id="def-6-12"
+         data-paper="Yoshida08" data-pdf-page="17" data-item="Definition 6.12"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Definition 6.12</b>(上付き番号付け) &mdash; 物理 p.17</p>
+
+<div class="verbatim">
+Definition 6.12. For m &#8712; <span class="bb">R</span><sub>&ge;0</sub>, set G<sup>m</sup> := G<sub>&#966;<sup>&minus;1</sup><sub>G</sub>(m)</sub> (the upper numbering).
+</div>
+
+<div class="reading">
+<b>上付き番号付け</b>の定義。Herbrand 関数の逆で下付きを付け替えるだけ&mdash;&mdash;
+<code>&#966;<sub>G</sub></code> は狭義単調増加な区分線形全単射 <code>ℝ<sub>&ge;0</sub> &rarr; ℝ<sub>&ge;0</sub></code> なので逆が存在する。
+その全単射性は原典では<b>明示されていない</b>(Lemma 6.10 の形から読み取れ、という扱い)&mdash;&mdash;
+Lean 化では <code>&#966;<sub>G</sub></code> の狭義単調性・連続性・非有界性が独立の節点になる。
+<br>pGC &sect;2(Definition 2.3、上付き番号付けの高次分岐群)と<b>同じ対象</b>を定義しており、
+Λ7 はこちらを実装本体にして pGC 側をその上に載せる予定。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement corollary"
+         id="cor-6-13"
+         data-paper="Yoshida08" data-pdf-page="17" data-item="Corollary 6.13"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Corollary 6.13</b> &mdash; 物理 p.17</p>
+
+<div class="verbatim">
+Corollary 6.13. (i) If G <span data-txt="&#8882;">&#9655;</span> H, then G<sup>m</sup>H/H = (G/H)<sup>m</sup> for all m &#8712; <span class="bb">R</span><sub>&ge;0</sub>. (ii) Let K&prime;/K and K&prime;&prime;/K be two Galois extensions with K&prime;K&prime;&prime;/K totally ramified. If Gal(K&prime;/K)<sup>m</sup> = Gal(K&prime;&prime;/K)<sup>m</sup> = {id} for m &#8712; <span class="bb">R</span><sub>&ge;0</sub>, then Gal(K&prime;K&prime;&prime;/K)<sup>m</sup> = {id}. (iii) Let G be abelian. Then |G/G<sup>m</sup>| divides (q &minus; 1)q<sup>m&minus;1</sup> for m &#8712; <span class="bb">Z</span><sub>&ge;0</sub>.
+</div>
+
+<div class="reading">
+上付き番号付けの 3 つの帰結。<b>(i)</b> 商と可換(下付きに対する Herbrand の言い換え)。
+<b>(ii)</b> 合成体でも上付き分岐が消える。<b>(iii)</b> <b>Hasse-Arf を消費する唯一の場所</b>&mdash;&mdash;
+「跳びは整数点でしか起きない」から <code>|G/G<sup>m</sup>|</code> が <code>(q&minus;1)q<sup>m&minus;1</sup></code> を割る。
+Theorem 6.15 の証明は (ii) と (iii) をこの順に使う。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement proposition"
+         id="prop-6-14"
+         data-paper="Yoshida08" data-pdf-page="17" data-item="Proposition 6.14"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Proposition 6.14</b> &mdash; 物理 p.17</p>
+
+<div class="verbatim">
+Proposition 6.14. Let x &#8712; K<sup>&times;</sup> with v(x) = n &gt; 0. Let L = K<sub>n</sub> and K<sup>m</sup><sub>x</sub> as in Definition 5.3. Then we have Gal(K<sup>m</sup><sub>x</sub>/L)<sup>m</sup> = {id} for all m &ge; 1 (see Definition 6.12).
+</div>
+
+<div class="reading">
+Lubin-Tate 拡大 <code>K<sup>m</sup><sub>x</sub>/L</code> の<b>上付き分岐が m で消える</b>という計算。
+証明は Proposition 4.4 で <code>i(&sigma;) = v(&sigma;(&alpha;)&minus;&alpha;)</code> を Lubin-Tate 加群の割り算に翻訳し、
+<code>|G<sub>n</sub>| = q<sup>m&minus;i</sup></code>(<code>q<sup>i&minus;1</sup>&minus;1 &lt; n &le; q<sup>i</sup>&minus;1</code>)を出してから
+Lemma 6.10(i) で <code>&#966;<sub>G</sub>(q<sup>m</sup>&minus;1) = m</code> を計算する。
+<b>&sect;4 の Lubin-Tate 側の入力(Proposition 4.3・4.4)が全部効く</b>のがこの一段。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement theorem"
+         id="thm-6-15"
+         data-paper="Yoshida08" data-pdf-page="17" data-item="Theorem 6.15 (Local Kronecker-Weber)"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Theorem 6.15</b>(局所 Kronecker-Weber) &mdash; 物理 p.17</p>
+
+<div class="verbatim">
+Theorem 6.15. (Local Kronecker-Weber theorem) Every finite abelian extension of a local field K is a Lubin-Tate extension, i.e. K<sup>LT</sup> = K<sup>ab</sup>.
+</div>
+
+<div class="reading">
+&sect;6 の到達点であり、Theorem A(&sect;1)の残り半分。Corollary 5.16 が
+「<code>K<sup>LT</sup></code> の範囲での LCFT」を既に与えているので、
+<code>K<sup>LT</sup> = K<sup>ab</sup></code> が示せれば Theorem A が閉じる。
+<br>証明: &sigma; の固定体 E<sub>&sigma;</sub> をとり、<code>K<sup>ab</sup> = K<sup>ur</sup>E<sub>&sigma;</sub></code> を見てから
+<code>E<sub>&sigma;</sub> &sub; K<sup>ram</sup><sub>x</sub></code> に帰着。後者は
+Proposition 6.14 + Corollary 6.13(ii)(iii) で次数を押さえて出す。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<h2>本節の依存関係(&sect;6 内の閉じた鎖)</h2>
+
+<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%">
+<tr><th>節点</th><th>直接使うもの</th><th>物理ページ</th></tr>
+<tr><td><a href="#def-6-1">Def 6.1</a>(G<sub>n</sub>)</td><td><a href="section-5.html#lemma-5-11">Lemma 5.11</a>(𝒪<sub>K&prime;</sub> = 𝒪[&pi;])</td><td>14</td></tr>
+<tr><td><a href="#prop-6-2">Prop 6.2</a></td><td>Def 6.1</td><td>14</td></tr>
+<tr><td><a href="#cor-6-3">Cor 6.3</a></td><td>Prop 6.2</td><td>14</td></tr>
+<tr><td><a href="#lemma-6-4">Lemma 6.4</a></td><td>Def 6.1</td><td>14</td></tr>
+<tr><td><a href="#lemma-6-5">Lemma 6.5</a></td><td>Def 6.1、Appendix I(収束)</td><td>14</td></tr>
+<tr><td><a href="#prop-6-6">Prop 6.6</a>(Sen)</td><td>Lemma 6.4、Lemma 6.5、Prop 6.2</td><td>15</td></tr>
+<tr><td><a href="#cor-6-7">Cor 6.7</a></td><td>Prop 6.6</td><td>15</td></tr>
+<tr><td><a href="#lemma-6-8">Lemma 6.8</a></td><td>Lemma 5.11(K&prime; と K&prime;&prime; の両方で)</td><td>15&ndash;16</td></tr>
+<tr><td><a href="#prop-6-9">Prop 6.9</a>(Herbrand)</td><td>Lemma 6.8</td><td>16</td></tr>
+<tr><td><a href="#lemma-6-10">Lemma 6.10</a></td><td>Prop 6.9</td><td>16</td></tr>
+<tr><td><a href="#thm-6-11">Thm 6.11</a>(Hasse-Arf)</td><td>Prop 6.2、Cor 6.3、Cor 6.7、Prop 6.9、Lemma 6.10</td><td>16&ndash;17</td></tr>
+<tr><td><a href="#def-6-12">Def 6.12</a>(上付き)</td><td>Lemma 6.10(&#966;<sub>G</sub> の可逆性)</td><td>17</td></tr>
+<tr><td><a href="#cor-6-13">Cor 6.13</a></td><td>Prop 6.9、Lemma 6.10、<b>Thm 6.11</b>、Prop 6.2</td><td>17</td></tr>
+<tr><td><a href="#prop-6-14">Prop 6.14</a></td><td>Prop 4.3・4.4(&sect;4)、Lemma 6.10(i)</td><td>17</td></tr>
+<tr><td><a href="#thm-6-15">Thm 6.15</a>(LKW)</td><td>Prop 5.4、Prop 6.14、Cor 6.13(ii)(iii)</td><td>17</td></tr>
+</table>
+
+<p class="open">
+<b>&sect;6 の外に出る依存</b>は 3 本だけである&mdash;&mdash;
+<a href="section-5.html#lemma-5-11">Lemma 5.11</a>(&sect;5)、
+<a href="section-5.html#prop-5-4">Proposition 5.4</a>(&sect;5)、
+そして <b>&sect;4 の Lubin-Tate 側</b>(Proposition 4.3(ii)・4.4(ii)(iii))。
+&sect;4 は本フォルダでは<b>未構造化</b>であり、Proposition 6.14 の Lean 化に着手する時点で
+&sect;4 の該当箇所を構造化する必要がある。<b>今それが無いことを、ここに印として残す。</b>
+</p>
+
+<p class="open">
+Appendix I(無限和の収束)も未構造化。<a href="#lemma-6-5">Lemma 6.5</a> の
+「<code>x = &#8721;<sub>n=v(x)</sub><sup>&#8734;</sup> x<sub>n</sub></code>(see Appendix I)」がそこを参照している。
+</p>
+
+</body>
+</html>

@@ -73,3 +73,4 @@
 - [decl-index の名前欄は非ASCIIで切れていた——mathlib 24,659 宣言が誤名で載っていた](mathlib-index-nonascii-truncation.md) — 2026-09-06 修正。「不在の誤判定」5件と同じ回路。
 - [Interface の構造体に場が足りないと ∀ 量化した Skeleton の主張が原典より強くなるか偽になる](interface-forall-too-strong.md) — 2026-09-06 に 2 件確定(pGC Prop 1.2 は「強すぎる」、CorrHyp Thm 6.1 は「偽」)。本物が Found にできたら ∀ をやめてその項に固定する。
 - [mathlib の「不在」は名前で引くと 6 件外れる](mathlib-absent-by-wrong-name.md) — 下付き分岐群は Ideal.inertia として在った。statement で引くこと
+- [pdftotext は ≠ の斜線を落とす](pdftotext-drops-negation.md) — Hasse-Arf を含む 3 箇所で主張が反転して読める。⟨⟩ と ⊂⊃ も消える

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>[Yoshida08] Section 1: Introduction (Theorem A)</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.7; color: #222; }
+  h1 { font-size: 1.25em; border-bottom: 2px solid #333; padding-bottom: .3em; }
+  h2 { font-size: 1.05em; margin-top: 2em; }
+  section.statement { border-left: 4px solid #1554b0; padding: .5em 1em; margin: 1.6em 0; background: #f7f9fc; }
+  section.statement.theorem { border-left-color: #7d0a1e; background: #fbf2f4; }
+  section.statement.setup   { border-left-color: #bbb;    background: #fafafa; }
+  .hdr { font-size: .8em; color: #777; margin-bottom: .4em; }
+  .hdr b { color: #333; }
+  .verbatim { background: #fff; border: 1px solid #ddd; padding: .6em .9em; margin: .5em 0; }
+  .reading  { font-size: .93em; color: #333; margin: .5em 0 0; }
+  .reading::before { content: "読み: "; font-weight: bold; color: #1554b0; }
+  p.open { background: #fff8e1; border-left: 4px solid #c9a227; padding: .4em .9em; margin: .6em 0; }
+  p.open::before { content: "未解決: "; font-weight: bold; }
+  code { background: #f5f5f5; padding: 1px 4px; }
+  .bar  { text-decoration: overline; }
+  .bb   { font-weight: bold; }
+  .scr  { font-style: italic; }
+  .frak { font-style: italic; }
+</style>
+</head>
+<body>
+
+<p><a href="index.html">&larr; [Yoshida08] 目次</a></p>
+
+<h1>[Yoshida08] Section 1: Introduction &mdash; Theorem A</h1>
+
+<p class="hdr">
+原典: <b>Local Class Field Theory via Lubin-Tate Theory</b> (T. Yoshida, 2008; arXiv math/0606108v2)&nbsp;/&nbsp;
+範囲: <b>物理ページ 1</b>&nbsp;/&nbsp;
+記法の目視確認: <b>2026-09-06</b>(p.1 全面、150dpi 画像で目視)&nbsp;/&nbsp;
+規約: <a href="../README.md">1_Structured/README.md</a>
+</p>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-1-intro"
+         data-paper="Yoshida08" data-pdf-page="1" data-item="Section 1 (Introduction, opening)"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>&sect;1 冒頭</b>(前提と本論文の位置づけ) &mdash; 物理 p.1</p>
+
+<div class="verbatim">
+We prove local class field theory via Lubin-Tate theory and the Hasse-Arf theorem. The only prerequisites are Galois theory (including cyclotomic extensions, finite fields and infinite extensions) and some basic commutative algebra summarized in Appendix I. We have tried to make the paper self-contained, to the extent of repeating proofs of standard results on local fields and avoiding topological arguments using compactness. Our argument is close to Iwasawa [9], but the main innovation here is to use the relative Lubin-Tate groups of de Shalit [5] to prove the base change property (Theorem 5.15) directly, without proving the local Kronecker-Weber theorem first.
+</div>
+
+<div class="reading">
+★<b>本プロジェクトがこの論文を選んだ理由がここに書いてある</b>&mdash;&mdash;
+&ldquo;self-contained&rdquo; かつ &ldquo;avoiding topological arguments using compactness&rdquo;。
+前提はガロア理論と Appendix I の可換環論だけであり、<b>境界外入力がほぼ無い</b>。
+Lean 化にあたっては「compactness を避けている」ことが特に効く
+(<a href="section-5.html#lemma-5-13">Lemma 5.13</a> が有限集合の逆極限で押し切るのがその実例)。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement theorem"
+         id="thm-A"
+         data-paper="Yoshida08" data-pdf-page="1" data-item="Theorem A (Local Class Field Theory)"
+         data-notation-checked="2026-09-06">
+<p class="hdr"><b>Theorem A</b>(局所類体論) &mdash; 物理 p.1</p>
+
+<div class="verbatim">
+Theorem A (Local Class Field Theory). (i) For any local field K, there is a unique homomorphism Art<sub>K</sub> : K<sup>&times;</sup> <span data-txt="&minus;&rarr;">&#10230;</span> Gal(K<sup>ab</sup>/K), characterized by the two properties: (a) If &#960; is a uniformizer of K, then Art<sub>K</sub>(&#960;)|<sub>K<sup>ur</sup></sub> = Frob<sub>K</sub>. (b) If K&prime;/K is a finite abelian extension, then Art<sub>K</sub>(N<sub>K&prime;/K</sub>(K&prime;<sup>&times;</sup>))|<sub>K&prime;</sub> = id. Moreover, Art<sub>K</sub> is an isomorphism onto W<sup>ab</sup><sub>K</sub> := {&#963; | &#963;|<sub>K<sup>ur</sup></sub> &#8712; Frob<sup><span class="bb">Z</span></sup><sub>K</sub>} &sub; Gal(K<sup>ab</sup>/K). (ii) If K&prime;/K is finite separable, then Art<sub>K&prime;</sub>(x)|<sub>K<sup>ab</sup></sub> = Art<sub>K</sub>(N<sub>K&prime;/K</sub>(x)) for all x &#8712; K&prime;<sup>&times;</sup>, and Art<sub>K</sub> induces an isomorphism K<sup>&times;</sup>/N<sub>K&prime;/K</sub>(K&prime;<sup>&times;</sup>) <span data-txt="&#8764; = &minus;&rarr;">&cong;&rarr;</span> Gal((K&prime; &#8745; K<sup>ab</sup>)/K).
+</div>
+
+<div class="reading">
+本論文が到達する主張。&sect;5 の <a href="section-5.html#cor-5-16">Corollary 5.16</a> が
+<code>K<sup>ab</sup></code> を <code>K<sup>LT</sup></code> に置き換えた形をすでに与えているので、
+残りは <code>K<sup>LT</sup> = K<sup>ab</sup></code>&mdash;&mdash;すなわち
+&sect;6 の <a href="section-6.html#thm-6-15">Theorem 6.15</a>(局所 Kronecker-Weber)。
+<br><b>証明の分割</b>: Theorem A = Corollary 5.16 + Theorem 6.15。
+そして Theorem 6.15 = Hasse-Arf(<a href="section-6.html#thm-6-11">Theorem 6.11</a>)+ Lubin-Tate 側の計算
+(<a href="section-6.html#prop-6-14">Proposition 6.14</a>)。
+<br>★<b>記法</b>: <code>W<sup>ab</sup><sub>K</sub></code> と <code>Frob<sup>ℤ</sup><sub>K</sub></code> は
+<code>pdftotext -raw</code> では基底 &rarr; 上付き &rarr; 下付きの順に割れる
+(<code>Wab</code>/<code>K</code>、<code>FrobZ</code>/<code>K</code>)。黒板太字 <code>ℤ</code> は <code>Z</code> にしか出ない。
+</div>
+</section>
+
+<p class="open">
+&sect;1 のうち Abstract・R&eacute;sum&eacute;・Notation 段落は構造化していない。
+Notation 段落は <code>F&#772;</code>(代数閉包)・<code>F<sup>sep</sup></code>・<code>F<sup>ab</sup></code> の
+記号の約束を置いている箇所であり、逐語が必要になった時点で足す。
+</p>
+
+</body>
+</html>

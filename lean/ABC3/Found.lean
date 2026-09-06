@@ -1740,6 +1740,7 @@ import ABC3.Found.PGC.DworkThetaStep2
 import ABC3.Found.PGC.AbelianFrobeniusSplit
 import ABC3.Found.PGC.AbelianSplitUnramified
 import ABC3.Found.PGC.AbelianSplitOverSubfield
+import ABC3.Found.PGC.LowerRamificationGroup
 import ABC3.Found.GenEll.VeluDualJ
 import ABC3.Found.GenEll.VeluJExpNeg
 import ABC3.Found.GenEll.VeluJDescent

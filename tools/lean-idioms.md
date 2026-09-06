@@ -6858,3 +6858,55 @@ statement の一部を `MvPowerSeries.*` のまま書いているものがある
 
 ★型注釈を付けても、`PowerSeries.constantCoeff_subst_eq_zero` のように
 結論が `MvPowerSeries.constantCoeff` で書かれた補題は #82 の問題が残る。
+
+## #84 `τ * σ * τ⁻¹ • y` は `τ * σ * (τ⁻¹ • y)` に読まれる（2026-09-06、Y1 LowerRamificationGroup）
+
+**症状**: 正規部分群の共役条件を書こうとして
+
+    have h1 : τ * σ * τ⁻¹ • y - y = τ • (σ • (τ⁻¹ • y) - τ⁻¹ • y) := …
+
+で `failed to synthesize HMul G B`。`G` の元と環の元を掛けようとしている。
+
+**原因**: `•` は `*` より**結合が強い**。`τ * σ * τ⁻¹ • y` は
+`τ * σ * (τ⁻¹ • y)` と解析される。
+
+**直し方**: `(τ * σ * τ⁻¹) • y` と括る。`Subgroup.Normal` の `conj_mem` を
+`Ideal.inertia` で書くときに毎回踏む。
+
+## #85 statement に `IsDiscreteValuationRing.addVal B` を出すと `haveI` では遅い（2026-09-06、Y1）
+
+**症状**:
+
+    theorem foo … : … (n : ℕ∞) < IsDiscreteValuationRing.addVal (adjoinIntegers K x) z := by
+      haveI := isDiscreteValuationRing_adjoinIntegers K x   -- ← 遅い
+      …
+
+で `failed to synthesize IsDiscreteValuationRing ↥(adjoinIntegers K x)`。
+
+**原因**: インスタンスが要るのは**証明中ではなく statement の elaboration 時**。
+`haveI` は本体に入ってからしか効かない。
+
+**直し方**: ファイル（節）の先頭で
+
+    attribute [local instance] isDiscreteValuationRing_adjoinIntegers
+
+と入れる。ABC3 では DVR 性が `instance` ではなく `theorem` で置かれている
+（`isDiscreteValuationRing_adjoinIntegers` / `isDiscreteValuationRing_carrierIntegers` /
+`module_finite_adjoinIntegers`）ので、statement に出す節でだけ local instance にする。
+
+## #86 `Submodule.smul_induction_on` の `a • b` は `smul_eq_mul` を先に要る（2026-09-06、Y1）
+
+**症状**: `x ∈ I * J`（`Ideal`）に `Submodule.smul_induction_on` を当てると
+ゴールが `σ • a • b ∈ …` になり、`rw [smul_mul']` が
+「`?a • (?b₁ * ?b₂)` が見つからない」で落ちる。
+
+**原因**: `Ideal` の積は `Submodule` の `smul` で定義されているので、
+分解して出てくるのは `a • b`（環自身へのスカラー倍）であって `a * b` ではない。
+
+**直し方**: `rw [smul_eq_mul, smul_mul']` と、**先に `smul_eq_mul` で `*` に直す**。
+
+## #87 `Ideal.span_singleton_pow` の向き（2026-09-06、Y1）
+
+`Ideal.span_singleton_pow : Ideal.span {a} ^ n = Ideal.span {a ^ n}`。
+`𝔪 = span {α}` を `rw` したあと `𝔪 ^ k` は `span {α} ^ k` になるので、
+`Ideal.mem_span_singleton'` に持ち込むには `rw [Ideal.span_singleton_pow]`（← を付けない）。
