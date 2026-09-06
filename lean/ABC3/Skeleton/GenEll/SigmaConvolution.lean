@@ -116,7 +116,7 @@ def sigma_one_convolution.src : Source :=
 
 def sigma_one_convolution.needs : List ProofObligation :=
   [ .citation "[mathlib]" "ArithmeticFunction.sigma の加法畳み込みの明示式"
-      (.absent "mathlib は Dirichlet 畳み込みしか持たない(2026-08-31)") 8,
+      (.absent "mathlib は Dirichlet 畳み込みしか持たない(2026-08-31)。★2026-09-06 に再測: re:`ArithmeticFunction[.]sigma[A-Za-z0-9_]*_(add|convolution)|sigma_one_convolution|additiveConvolution`→0") 8,
     .citation "[mathlib]" "EisensteinSeries.G2_S_transform（E₂ の準モジュラー変換則）"
       (.inMathlib "EisensteinSeries.G2_S_transform") 2,
     .citation "[mathlib]" "EisensteinSeries.E_qExpansion_coeff（E_k の q 展開係数は σ_{k−1}）"

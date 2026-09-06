@@ -122,7 +122,7 @@ def theorem_3_8.needs : List ProofObligation :=
     .otherPaper "[GenEll]" "Proposition 3.4(Faltings 高さによる例外集合の有限性)" 17,
     .otherPaper "[GenEll]" "Lemma 3.2 の直前の局所理論(Tate 曲線)" 15,
     .citation "[FC]" "Degenerations of Abelian Varieties(半安定還元)"
-      (.absent "mathlib は `EllipticCurve/Reduction.lean` を持つが Tate 曲線・半安定還元の理論は無い(2026-08-16、ディレクトリ全宣言を確認)") 19,
+      (.absent "mathlib は `EllipticCurve/Reduction.lean` を持つが Tate 曲線・半安定還元の理論は無い(2026-08-16、ディレクトリ全宣言を確認)。★2026-09-06 に再測: re:`TateCurve|tateCurve|Tate curve|SemistableReduction|semistableReduction|IsSemistable`→0") 19,
     .implicitStep
       "原文は 3・5 捩れ点を有理化する次数 23040 の Galois 拡大へ移る段を『there exists a Galois extension L′ of L of degree that divides d₀』と 1 文で済ませている" 20,
     .implicitStep

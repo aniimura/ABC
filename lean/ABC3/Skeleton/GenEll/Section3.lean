@@ -413,7 +413,7 @@ def lemma_3_1.src : Source :=
 /-- ★(i)(ii)(iii) は実装済みなので、残るのは (iv) だけである。 -/
 def lemma_3_1.needs : List ProofObligation :=
   [ .citation "[Serre]" "Abelian l-adic Representations and Elliptic Curves, Chapter IV, §3.4, Lemma 3(pro-l 群の Frattini 型の議論)"
-      (.absent "0_Source に [Serre] は無く、mathlib にも pro-l 群の対応する補題は無い(2026-08-16、`IsProPGroup|pro-p` で 2 件ヒットするがいずれも別物)") 14,
+      (.absent "0_Source に [Serre] は無く、mathlib にも pro-l 群の対応する補題は無い(2026-08-16、`IsProPGroup|pro-p` で 2 件ヒットするがいずれも別物)。★2026-09-06 に再測: re:`IsProPGroup|ProPGroup|pro-p group|pro-l group|IsProCyclic`→0") 14,
     .implicitStep
       "★(i)(ii)(iii) は Found/GenEll/Lemma31.lean に実装済み(sorry 無し)。本 statement が sorry なのは (iv) だけによる" 14,
     .implicitStep
@@ -430,7 +430,7 @@ def lemma_3_2.src : Source :=
 (`degInf_eq`)から導出している**——原文の『hence』の中身である。 -/
 def lemma_3_2.needs : List ProofObligation :=
   [ .citation "[FC]" "Degenerations of Abelian Varieties, Chapter III, Corollary 7.3(完全列 0 → 𝔽_l(1) → M_l(E) → 𝔽_l → 0)"
-      (.absent "mathlib に Tate 曲線・Tate twist・M_l(E) はいずれも無い(2026-08-16、EllipticCurve/ 配下の全宣言名を確認)") 15,
+      (.absent "mathlib に Tate 曲線・Tate twist・M_l(E) はいずれも無い(2026-08-16、EllipticCurve/ 配下の全宣言名を確認)。★2026-09-06 に再測: re:`TateCurve|tateCurve|Tate curve|tateTwist|TateTwist|Tate twist|TateModule`→0") 15,
     .implicitStep
       "原文は『we have the following well-known result』とだけ書き、証明を与えていない。★(i) は「完全列の拡大類が q_E の l 乗根の抽出で得られる」ことから従うと読めるが、その段は書かれていない" 15,
     .implicitStep
@@ -477,9 +477,9 @@ def prop_3_4.src : Source :=
 **`ε` の入った 2 つの不等式はそこから初等的に導いた**。 -/
 def prop_3_4.needs : List ProofObligation :=
   [ .citation "[Silv2]" "Proposition 2.1(ht_∞ と ht^Falt の比較)"
-      (.absent "mathlib に Faltings 高さは無い(`Arakelov` 0 件、`arithmetic line bundle` 0 件、2026-08-16 実測)") 17,
+      (.absent "mathlib に Faltings 高さは無い(`Arakelov` 0 件、`arithmetic line bundle` 0 件、2026-08-16 実測)。★2026-09-06 に再測: re:`Arakelov|arithmetic[A-Za-z ]*line bundle|analytification|faltingsHeight|Faltings`→0") 17,
     .citation "[FC]" "Degenerations of Abelian Varieties, Chapter V, Proposition 4.5(無限遠での計量の対数的特異性)"
-      (.absent "mathlib に complex analytic space が 0 件なので、計量の特異性を述べる場所自体が無い(2026-08-16 実測)") 17,
+      (.absent "mathlib に complex analytic space が 0 件なので、計量の特異性を述べる場所自体が無い(2026-08-16 実測)。★2026-09-06 に再測: re:`AnalyticSpace|analyticSpace|ComplexAnalyticSpace`→0") 17,
     .citation "[Silv1]" "Proposition 8.2"
       (.unmeasured) 17,
     .otherPaper "[GenEll]" "Proposition 1.6(の証明——最初の ≲ がそこから従う)" 9,
@@ -497,7 +497,7 @@ def lemma_3_5.needs : List ProofObligation :=
   [ .otherPaper "[GenEll]" "Lemma 3.2, (i)(ii)(局所階数 1 部分群と deg_∞(E′) = l·deg_∞(E))" 15,
     .otherPaper "[GenEll]" "Proposition 3.4(Faltings 高さと無限遠因子)" 17,
     .citation "[FC]" "Degenerations of Abelian Varieties, Chapter I, Proposition 2.7(次数 l の被覆射の延長)"
-      (.absent "mathlib に半安定 scheme への射の延長定理は無い(2026-08-16 実測)") 17,
+      (.absent "mathlib に半安定 scheme への射の延長定理は無い(2026-08-16 実測)。★2026-09-06 に再測: re:`SemistableReduction|semistableReduction|IsSemistable|semistable`→0") 17,
     .implicitStep
       "★『(1,1)-形式を E_v 上で積分するのと (E_H)_v 上で積分するのとで l 倍だけ違う』という複素解析の段。原文は 1 文で済ませている" 17 ]
 

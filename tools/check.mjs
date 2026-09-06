@@ -185,54 +185,18 @@ const AXIOM_EXEMPT = ['Meta/Calibration.lean']; // lean/ABC3 からの相対
  *
  *  ☆1 件を消す手順: `node tools/absent-recheck.mjs --try '<正規表現>'` で今の件数を測り、
  *    `.absent` の本文に ``re:`<正規表現>`→<件数>`` と測定日を書き、ここから 1 行削る。
- *    ★件数が 0 でなければ、その時点で「無い」が偽である可能性を先に確かめること。 */
+ *    ★件数が 0 でなければ、その時点で「無い」が偽である可能性を先に確かめること。
+ *
+ *  ★★★2026-09-06(第 1449): **繰り越しは 0 になった**。2026-09-05 に 48 件(鍵 44 個)で
+ *  始めた表を、47 件すべて測り直して `re:` を書き入れることで空にした
+ *  (`node tools/absent-recheck.mjs` の「規約つき」が 0 → 47、「引けない」が 37 → 0)。
+ *  ★1 件は測り直しで**覆った**——`Found/FrdI/Profinite.lean` の
+ *  「normalCore の開性・閉性を述べる宣言は無い」は誤りで、mathlib には
+ *  `Subgroup.normalCore_isClosed` と `Subgroup.isOpen_of_isClosed_of_finiteIndex` が在る
+ *  (不在の誤判定はこれで 6 件目)。だから `.absent` は 48 件から 47 件に減っている。
+ *  ★★**この表は空のまま保つこと。** 新しい `.absent` はその場で `re:` を書く。 */
 const ABSENT_DEBT = [
-  // ★2026-09-05 の時点で既にあった 48 件(鍵は 44 個——同じファイルに同じ書き出しの
-  //   記録が並ぶことがあるため。Set なので 1 行で複数を覆う)。
-  "Found/AddEquivNNReal.lean#AddMonoidHom.toRealLinearMap",
-  "Found/FrdI/Profinite.lean#Group.ResiduallyFiniteのインスタン",
-  "Found/FrdI/Profinite.lean#Subgroup.normalCore周辺とOpenSu",
-  "Found/GenEll/ClearDenomGlue.lean#mathlibにampleは無い(2026-08-28実",
-  "Found/GenEll/ClearDenominator.lean#mathlibにampleは無い(2026-08-28実",
-  "Found/GenEll/CoordsSurjective.lean#mathlibにampleは無い(2026-08-28実",
-  "Found/GenEll/FiniteFromNorthcott.lean#0_Sourceに[Silv2]は無く、mathlibに",
-  "Found/GenEll/Globalize.lean#mathlibにampleは無い(2026-08-28実",
-  "Found/GenEll/GlobalizeOverlap.lean#mathlibにampleは無い(2026-08-28実",
-  "Found/GenEll/GlobalizeStep.lean#mathlibにampleは無い(2026-08-28実",
-  "Found/GenEll/GluedGlobalRatio.lean#mathlibにampleは無い(2026-08-28実",
-  "Found/GenEll/GluedTrivValue.lean#mathlibにampleは無い(2026-08-28実",
-  "Found/GenEll/OverlapCriterion.lean#mathlibにampleは無い(2026-08-28実",
-  "Skeleton/Divisor/Hartogs.lean#Mathlib/RingTheory/にKrullDom",
-  "Skeleton/Divisor/NormalizationUniversal.lean#Mathlib/AlgebraicGeometry/No",
-  "Skeleton/FrdI/Def28ProL.lean#lean/.lake/packages/mathlib/",
-  "Skeleton/FrdI/Lemma65SixExp.lean#0_Sourceに[Lang1]は無い(papers.j",
-  "Skeleton/FrdI/Lemma65SixExp.lean#Analysis/Complex/の宣言一覧を目視、1点",
-  "Skeleton/FrdI/Thm64Deg.lean#Mathlib/Analysis/にAddMonoidH",
-  "Skeleton/GaloisRep/PointReduction.lean#mathlibに点の還元写像は無い(2026-08-20",
-  "Skeleton/GaloisRep/TateUniformization.lean#mathlibにTate曲線・Tate一意化はいずれも0",
-  "Skeleton/GaloisRep/WeilDivisor.lean#mathlibにWeil対およびその構成要素は0件(20",
-  "Skeleton/GaloisRep/WeilFunctionField.lean#mathlibに[n]の関数体への引き戻しは0件(202",
-  "Skeleton/GaloisRep/WeilPairing.lean#mathlibにWeil対は0件(2026-08-20、",
-  "Skeleton/GaloisRep/WeilPairingDef.lean#mathlibにWeil対は0件(2026-08-20、",
-  "Skeleton/GaloisRep/WeilRoot.lean#mathlibにWeil対およびその構成要素は0件(20",
-  "Skeleton/GenEll/AdditionTheorem.lean#mathlibのAnalysis/SpecialFunc",
-  "Skeleton/GenEll/GaloisImage.lean#mathlibは`EllipticCurve/Reduc",
-  "Skeleton/GenEll/GaloisLocal.lean#mathlibにTate曲線・Tatetwist・M_l",
-  "Skeleton/GenEll/Heights.lean#mathlib全体を`Arakelov`/`arithm",
-  "Skeleton/GenEll/LatticeFromInvariants.lean#mathlibの`Analysis/SpecialFun",
-  "Skeleton/GenEll/Section3.lean#0_Sourceに[Serre]は無く、mathlibに",
-  "Skeleton/GenEll/Section3.lean#mathlibにcomplexanalyticspace",
-  "Skeleton/GenEll/Section3.lean#mathlibにFaltings高さは無い(`Arake",
-  "Skeleton/GenEll/Section3.lean#mathlibにTate曲線・Tatetwist・M_l",
-  "Skeleton/GenEll/Section3.lean#mathlibに半安定schemeへの射の延長定理は無い",
-  "Skeleton/GenEll/Section4.lean#Mathlib/NumberTheory/Chebysh",
-  "Skeleton/GenEll/SigmaConvolution.lean#mathlibはDirichlet畳み込みしか持たない(",
-  "Skeleton/NumberField/Chebotarev.lean#lean/.lake/packages/mathlib/",
-  "Skeleton/PGC/Section2.lean#mathlibv4.31.0-rc2実測:lowerNu",
-  "Skeleton/PGC/Section2.lean#mathlibv4.31.0-rc2実測:Ramific",
-  "Skeleton/PGC/Section3.lean#mathlibv4.31.0-rc2実測:Hodge-T",
-  "Skeleton/PGC/Section3.lean#mathlibv4.31.0-rc2実測:該当なし",
-  "Skeleton/PGC/Section4.lean#§1Proposition1.2で既確認:mathlib",
+  // (空。2026-09-06 に完済した。上の docstring を読むこと)
 ];
 
 /** ★`--brief`: 落ちたものと結論だけを出す(2026-09-03、第 1453)。
@@ -633,6 +597,27 @@ const stripLeanComments = (src) => src
   .replace(/\/-[\s\S]*?-\//g, (m) => m.replace(/[^\n]/g, ' '))
   .replace(/--[^\n]*/g, (m) => ' '.repeat(m.length))
   .replace(/"(?:[^"\\\n]|\\.)*"/g, (m) => m.replace(/[^\n]/g, ' '));
+
+/**
+ * 文字列リテラルだけを**長さを保ったまま**空白へ伏せる(コメントは残す)。
+ *
+ * ★`stripLeanComments` との違いは 2 つ: コメントを潰さないことと、
+ * **長さが 1 文字も変わらない**こと。長さが同じなので、伏せた側で見つけた
+ * **添字をそのまま原文の `slice` に使える**——これが要点である。
+ *
+ * ★動機(backlog M15。2026-09-06 = 第 1036 に**実害**が出た):
+ * G6 の obligation の区切り検出が `body` を**生のまま**走査していたため、
+ * `.needs` の**本文に**先頭ドット付きで `.implicitStep` と綴ると区切りが 1 件増え、
+ * 前半の断片が引用符の対応を失って、後段の `stripStr` が効かなくなり、
+ * **本文中の数値(第 1036 の "1036")を物理ページとして拾った**。
+ * 出た NG は「物理 p.1036 を指しているが範囲外(1..19, GenEll)」——**偽陽性**である。
+ * 当時は「表記からドットを外す」で回避したが、それは器具ではなく人を曲げている。
+ *
+ * ★D31/D32(文字列内の `sorry`)と**同じ穴**である。潰す側だけ入れると
+ * 本物を見逃すので、selftest は必ず **D45(偽陽性が消える)+ D46(本物は落ちる)** の対で置く。
+ */
+const maskLeanStrings = (src) =>
+  src.replace(/"(?:[^"\\\n]|\\.)*"/g, (m) => m.replace(/[^\n]/g, ' '));
 
 /** `X.src : Source` の中身を読む正準形パターン(1行で書くこと)。 */
 const SRC_RE =
@@ -1335,12 +1320,17 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
     //    ★以前は body 全体から数値を拾って **所有論文** の範囲と比べていた。
     //    `otherPaper` は **別の論文** を指すのだから、それでは辺の先を検査していない
     //    (実際 [IUTchI] [IUTchII] が未登記のまま素通りしていた——2026-08-15 の監査)。
+    //    ★★2026-09-06(backlog M15): 区切りは **文字列を伏せた側** で探す。
+    //      生の body を走査すると `.needs` の本文に書いた綴りが区切りになり、
+    //      断片が引用符の対応を失って本文中の数値を頁として拾う(第 1036 の偽 NG)。
+    //      `maskLeanStrings` は長さを変えないので、`at` はそのまま body に使える。
+    const maskedBody = maskLeanStrings(body);
     const obs = [];
     {
       const marks = [];
       const kre = /\.(citation|folklore|implicitStep|otherPaper|derivation)\b/g;
       let km;
-      while ((km = kre.exec(body))) marks.push({ kind: km[1], at: km.index });
+      while ((km = kre.exec(maskedBody))) marks.push({ kind: km[1], at: km.index });
       for (let i = 0; i < marks.length; i++) {
         obs.push({
           kind: marks[i].kind,
@@ -1380,11 +1370,16 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
       }
     }
 
+    // ★集計も**伏せた側**で数える。生の body で数えると、本文に `.citation` と
+    //   綴っただけで「規模」の印字が黙って +1 される(区切り検出と同じ穴)。
+    //   ★2026-09-06 実測: この木では旧/新の差は **全 10 欄で 0**
+    //   (citation 1857 / implicitStep 1312 / otherPaper 143 / folklore 40 /
+    //    derivation 80、状態欄も同数)。今日の数字は動かない——**将来の罠だけ塞ぐ**。
     for (const k of OBLIGATION_KINDS) {
-      tally[k] += (body.match(new RegExp(`\\.${k}\\b`, 'g')) ?? []).length;
+      tally[k] += (maskedBody.match(new RegExp(`\\.${k}\\b`, 'g')) ?? []).length;
     }
     for (const k of Object.keys(statusTally)) {
-      statusTally[k] += (body.match(new RegExp(`\\.${k}\\b`, 'g')) ?? []).length;
+      statusTally[k] += (maskedBody.match(new RegExp(`\\.${k}\\b`, 'g')) ?? []).length;
     }
   }
 
@@ -1770,6 +1765,13 @@ function selftest() {
       'd42-absent-no-pattern.lean', true],
     ['D43 .absent に re:`…` と測定日があれば通る', 'Found',
       'd43-absent-with-pattern.lean', false],
+    // ★G6: 区切り検出が**文字列の中**まで見ていた(backlog M15、第 1036 に実害)。
+    //   D45/D46 は D31/D32(文字列内の sorry)と同じ対である——
+    //   「潰す」だけを入れると本物を見逃すので、必ず対で置くこと。
+    ['D45 .needs の文字列に obligation の綴りがあっても頁を読み違えない', 'Skeleton',
+      'd45-needs-kind-spelled-in-string.lean', false],
+    ['D46 文字列を潰しても本物の範囲外ページは落とせる', 'Skeleton',
+      'd46-needs-bad-page-with-kind-in-string.lean', true],
   ];
   const FIXTURES = join(ROOT, 'tools', 'selftest-fixtures');
   for (const [label, bucket, fixture, shouldFail] of leanCases) {

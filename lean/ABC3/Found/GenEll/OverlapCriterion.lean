@@ -218,7 +218,7 @@ def res_secOfFun_eq_iff.needs : List ABC3.Meta.ProofObligation :=
     .citation "[ABC3]" "trivEquiv_restrict(座標は制限と可換、LocalMetric.lean)"
       (.inProject "ABC3" "ABC3.Found.Arakelov.trivEquiv_restrict") 3,
     .citation "[Stacks]" "Lemma 01PW(の貼り合わせの段)"
-      (.absent "mathlib に ample は無い(2026-08-28 実測)") 7,
+      (.absent "mathlib に ample は無い(2026-08-28 実測)。★2026-09-06 に再測: re:`AlgebraicGeometry[.][A-Za-z0-9_.]*[Aa]mple|IsAmple|IsVeryAmple|ampleLineBundle`→0。名前に ample を含む 19 件はすべて別物(Analysis/Convex/AmpleSet.lean の凸性、sampleableExt、example_ の部分一致)") 7,
     .implicitStep
       ("★★**遷移単元がちょうど N 乗で効く**のが「n 冪へ移る」ことの幾何的な意味である" ++
        "——M^{⊗N} の遷移函数は M の遷移函数の N 乗だから、N を上げれば分母の極が飲み込める。" ++

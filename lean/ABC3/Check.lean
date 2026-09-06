@@ -39,6 +39,7 @@ import ABC3.Check.PGC.Cor33Degenerate
 import ABC3.Check.PGC.Prop22Degenerate
 import ABC3.Check.PGC.Cor13Degenerate
 import ABC3.Check.PGC.Prop12Degenerate
+import ABC3.Check.PGC.Prop12ForallRD
 import ABC3.Check.PGC.CyclotomicCharacterNontrivial
 import ABC3.Check.FrdI.TwistedFrobenioid
 import ABC3.Check.FrdI.AutAmpleGap
@@ -46,6 +47,8 @@ import ABC3.Check.FrdI.Prop21QuantifierGap
 import ABC3.Check.FrdI.VLocFalse
 import ABC3.Check.FrdI.Ex61OrdDegenerate
 import ABC3.Check.FrdI.Ex63DegDegenerate
+import ABC3.Check.GenEll.SSCurveNonvacuous
+import ABC3.Check.FrdI.Thm64PicDegenerate
 import ABC3.Check.Arakelov.ArcSpaceNondegenerate
 import ABC3.Check.Arakelov.PicNondegenerate
 import ABC3.Check.Arakelov.PullbackNondegenerate

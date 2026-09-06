@@ -124,7 +124,7 @@ def cor_3_1.src : Source :=
 def cor_3_1.needs : List ProofObligation :=
   [ .citation "[1] Serre, Abelian ℓ-adic Representations, Chapter III §1.2"
       "Hodge-Tate の定義(d_V ≤ dim_{Q_p}(V))"
-      (.absent "mathlib v4.31.0-rc2 実測: Hodge-Tate 表現論に相当する宣言はゼロ件") 6,
+      (.absent "mathlib v4.31.0-rc2 実測: Hodge-Tate 表現論に相当する宣言はゼロ件。★2026-09-06 に再測: re:`HodgeTate|hodgeTate|Hodge-Tate|isHodgeTate|hodgeTateWeight`→0") 6,
     .otherPaper "pGC" "Proposition 2.2" 5 ]
 
 /-! ## Definition 3.2 -/
@@ -243,7 +243,7 @@ def cor_3_3.src : Source :=
 def cor_3_3.needs : List ProofObligation :=
   [ .citation "[1] Serre, Abelian ℓ-adic Representations, Chapter III, Appendix §5"
       "d_V(1) = [E:K]; d_V(0) = [E:K]·([K:Q_p]−1) による uniformizing の判定"
-      (.absent "mathlib v4.31.0-rc2 実測: 該当なし") 6,
+      (.absent "mathlib v4.31.0-rc2 実測: 該当なし(Hodge-Tate 重み d_V(0)・d_V(1) による uniformizing の判定)。★2026-09-06 に再測: re:`HodgeTate|hodgeTate|Hodge-Tate|isHodgeTate|hodgeTateWeight`→0") 6,
     .otherPaper "pGC" "Corollary 3.1" 6 ]
 
 end ABC3.Skeleton.PGC

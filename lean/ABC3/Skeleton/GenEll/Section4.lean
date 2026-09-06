@@ -296,7 +296,7 @@ def remark_4_1_1.src : Source :=
 
 def remark_4_1_1.needs : List ProofObligation :=
   [ .citation "[Edw]" "Riemann's Zeta Function, p. 76(素数定理の帰結として θ(x)/x → 1)"
-      (.absent "Mathlib/NumberTheory/Chebyshev.lean は Chebyshev 型の評価(theta_ge' / psi_ge' / pi_le_log4_mul_div など)を持つが、θ(x)/x → 1 は無い(2026-08-16、同ファイルの全定理名を確認)。公開プロジェクト PrimeNumberTheoremAnd が持つが、使う前に clone して sorry を数えること") 21,
+      (.absent "Mathlib/NumberTheory/Chebyshev.lean は Chebyshev 型の評価(theta_ge' / psi_ge' / pi_le_log4_mul_div など)を持つが、θ(x)/x → 1 は無い(2026-08-16、同ファイルの全定理名を確認)。公開プロジェクト PrimeNumberTheoremAnd が持つが、使う前に clone して sorry を数えること。★2026-09-06 に再測: re:`Chebyshev[.](theta|psi)_(isEquivalent|asymp|tendsto|div_id)|theta_div_id|primeNumberTheorem`→1——当たる 1 件は可積分性(Chebyshev.integrableOn_theta_div_id_mul_log_sq)であって漸近ではない") 21,
     .implicitStep
       "★第 1 項(条件 (ii) を満たす ϵ, x_ϵ, C_ϵ の存在)は『entirely elementary』とだけ書かれている。実際 M·log(x) ≤ ϵ·x は log の増大度から従い、mathlib の Real.isLittleO_log_id_atTop 相当で届く" 21 ]
 

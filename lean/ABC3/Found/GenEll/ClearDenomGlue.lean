@@ -173,7 +173,7 @@ def exists_pow_mul_eq_of_res_eq.needs : List ABC3.Meta.ProofObligation :=
     .citation "[mathlib]" "IsAffineOpen.isLocalization_basicOpen"
       (.inMathlib "AlgebraicGeometry.IsAffineOpen.isLocalization_basicOpen") 7,
     .citation "[Stacks]" "Lemma 01PW の第 2 段(重なりを合わせる段)"
-      (.absent "mathlib に ample は無い(2026-08-28 実測)") 7,
+      (.absent "mathlib に ample は無い(2026-08-28 実測)。★2026-09-06 に再測: re:`AlgebraicGeometry[.][A-Za-z0-9_.]*[Aa]mple|IsAmple|IsVeryAmple|ampleLineBundle`→0。名前に ample を含む 19 件はすべて別物(Analysis/Convex/AmpleSet.lean の凸性、sampleableExt、example_ の部分一致)") 7,
     .implicitStep
       ("★原文の「[some positive tensor power of]」という括弧には**冪が 2 回**畳まれている" ++
        "——(1) 分母を払う段(ClearDenominator.lean)と (2) 重なりを合わせる段(本ファイル)。" ++

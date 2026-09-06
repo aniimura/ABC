@@ -194,7 +194,7 @@ def exists_toNormalizationIn.needs : List ProofObligation :=
     .citation "[mathlib]" "Scheme.Hom.normalizationDesc(★向きが逆。分解が先に要る)"
       (.inMathlib "AlgebraicGeometry.Scheme.Hom.normalizationDesc") 110,
     .citation "[mathlib]" "正規スキームからの支配射が正規化を経由すること"
-      (.absent "Mathlib/AlgebraicGeometry/Normalization.lean の宣言を列挙(2026-08-25)。normalizationDesc / normalization.hom_ext はいずれも「分解が与えられていれば降りる」向きで、作る向きは無い") 110,
+      (.absent "Mathlib/AlgebraicGeometry/Normalization.lean の宣言を列挙(2026-08-25)。normalizationDesc / normalization.hom_ext はいずれも「分解が与えられていれば降りる」向きで、作る向きは無い。★2026-09-06 に再測: 作る向き(正規スキームからの支配射が正規化を経由すること)は re:`normalizationLift|liftNormalization|factorsThroughNormalization|factorThroughNormalization|normalizationFactor`→0 で 0 件") 110,
     .citation "[mathlib]" "IsIntegrallyClosed / integralClosure(アフィン局所の中身)"
       (.inMathlib "IsIntegrallyClosed") 110,
     .citation "[ABC3]" "★数学の中身(正規スキームでは整な有理函数は切断、sorry 無し)"

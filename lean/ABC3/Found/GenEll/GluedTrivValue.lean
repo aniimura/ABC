@@ -180,7 +180,7 @@ def exists_glued_ratio_section.needs : List ABC3.Meta.ProofObligation :=
     .citation "[ABC3]" "trivValue_sheafifyTriv(座標は層化で変わらない、§9-823)"
       (.inProject "ABC3" "ABC3.Found.Arakelov.trivValue_sheafifyTriv") 2,
     .citation "[Stacks]" "Lemma 01PW(の消費側)"
-      (.absent "mathlib に ample は無い(2026-08-28 実測)") 7,
+      (.absent "mathlib に ample は無い(2026-08-28 実測)。★2026-09-06 に再測: re:`AlgebraicGeometry[.][A-Za-z0-9_.]*[Aa]mple|IsAmple|IsVeryAmple|ampleLineBundle`→0。名前に ample を含む 19 件はすべて別物(Analysis/Convex/AmpleSet.lean の凸性、sampleableExt、example_ の部分一致)") 7,
     .implicitStep
       ("★★★**残るのは有限の帳簿と指数揃えだけ**である: " ++
        "(1) 試験元は有限個(§9-832)、チャートも有限個(§9-817)なので得られる t も有限個" ++

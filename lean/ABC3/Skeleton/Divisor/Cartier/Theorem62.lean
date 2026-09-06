@@ -20,7 +20,34 @@ variable (X : Scheme.{u}) [IsIntegral X] [AlgebraicGeometry.IsNoetherian X]
 
 /-! ## ★4. Cartier 因子の引き戻し(鎖 `cartier` の `cartier-pullback`)
 
-★★**`Example 6.1` の関手性の本体**である。 -/
+★★**`Example 6.1` の関手性の本体**である。
+
+## ★★在庫の所在と、いま埋まらない理由(2026-09-06)
+
+★実物は `Found/Divisor/SchemeCartierPull.lean` に sorry ゼロで在る ——
+`cartierPullback` / `pullCoeff_add` / `isCartierDiv_cartierPullback` / `pullCoeff_nonneg`。
+本節の 4 宣言はこの 4 本にそのまま対応する。
+
+★★**それでも配線できない。** `Found` 側が要求して本節の statement に無いものは 4 つ:
+
+| 足りないもの | どこで要るか |
+|---|---|
+| `[IsDominant ψ]` | `ffMap ψ : K(X) → K(Y)`(関数体の引き戻し)を作るのに要る |
+| `hnormX` / `hnormY` | `ord` が定義できること(正規性が無ければ茎は DVR でない) |
+| `hdim : ∀ w, ringKrullDim (X.presheaf.stalk (ψ.base w.1)) ≤ 1` | 局所方程式の取り替えに依らないこと |
+
+★逆に **`[CompactSpace Y]` は足さなくてよい** —— `[AlgebraicGeometry.IsNoetherian Y]` が
+局所 Noether ＋ 準コンパクトなので、そこから instance で出る(実測確認済み)。
+★`ResearchPaper/decisions-pending.md` の **D8** はここを
+「`[IsDominant ψ]`・`hdim`・`[CompactSpace Y]` を足す」と書いていたが、
+**`[CompactSpace Y]` は不要**で、代わりに **`hnormX` / `hnormY` が要る**。
+
+★4 つを足したうえでなら、4 宣言は `Found` の 4 本で閉じる(実測済み。
+`pullbackCartier` ← `cartierPullback`、`_add` ← `pullCoeff_add`、
+`isCartierDiv_` ← `isCartierDiv_cartierPullback`、`_nonneg` ← `pullCoeff_nonneg`)。
+★ただし `IsCartierDiv` 自体も `Found` の側(`hnorm` を引数に取る版)へ
+移す必要がある —— 本節が使っている `Example61.lean` の `IsCartierDiv` は
+`ordAtDiv`(本体が `sorry`)で書かれているからである。 -/
 
 /-- ★★**支配射に沿った Cartier 因子の引き戻し**。
 

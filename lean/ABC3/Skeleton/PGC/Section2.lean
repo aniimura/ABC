@@ -143,9 +143,9 @@ def prop_2_2.src : Source :=
 /-- 原文の証明文から抽出した、証明が要求するもの(G6)。★下界。 -/
 def prop_2_2.needs : List ProofObligation :=
   [ .citation "Interface.PGC.RamificationFiltration" "高次分岐群(上付き番号付け)"
-      (.absent "mathlib v4.31.0-rc2 実測: RamificationGroup.lean に上付き番号付けは無い") 4,
+      (.absent "mathlib v4.31.0-rc2 実測: RamificationGroup.lean に上付き番号付けは無い。★2026-09-06 に再測: RamificationGroup.lean にあるのは分解群・惰性群の 4 宣言だけで、re:`upperNumbering|UpperNumbering|ramificationGroup[A-Za-z]*Upper|Herbrand|herbrand|phiDeriv|psiDeriv`→0") 4,
     .citation "[6] Serre, Local Fields, Chapter IV" "上付き↔下付き番号付けの変換"
-      (.absent "mathlib v4.31.0-rc2 実測: lowerNumbering/upperNumbering 系の宣言は0件") 5,
+      (.absent "mathlib v4.31.0-rc2 実測: lowerNumbering/upperNumbering 系の宣言は0件。★2026-09-06 に再測: re:`lowerNumbering|LowerNumbering|upperNumbering|UpperNumbering|herbrand|Herbrand`→0") 5,
     .otherPaper "pGC" "Corollary 1.3" 3 ]
 
 end ABC3.Skeleton.PGC

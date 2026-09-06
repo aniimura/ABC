@@ -94,7 +94,45 @@ def cyclotomicCharacter_recoverable.needs : List ProofObligation :=
         "局所体特有の算術内容(不変写像の具体形)は依然として不在**——次にここへ戻るなら" ++
         "(a)(b)(c) のどれか1つを先に測ること") 2,
     .derivation "H^2(K,M) ≅ Z/p^nZ ⟺ M ≅ Z/p^nZ(1) を双対性から導く段" 3,
-    .implicitStep "Z_p(1) の同型類が回復できることから、指標 χ が回復できることへの一段" 3 ]
+    .implicitStep
+      "★★★★★★★★★★2026-09-06 の再測定(第 1038)。★★★**2026-09-06 後刻の訂正: この欄の旧記述「H2 経由は捨ててよい。H1 経由の在庫がある」は**楽観的すぎた**。`H1(K, mu_n) = K^x/(K^x)^n` は確かに在庫だが、★**Kummer 理論は `mu_n` を係数として最初から持っている**ので、**円分子の構成には使えない**(構成したいものを入力に要求している)。H1 が H2 を代替できるのは局所 Euler 標数公式による計数経路だけで、その上界の標準証明は双対性を通る。★★**円分子は必ず局所相互律か局所双対性のどちらかを通る**。安い迴回路は 3 つとも潰した(Kummer 単独 / 不分岐指標 / H1 の計数)。推奨は**経路 Λ(LCFT 円分子)**で、`tors_{p^n}(Gal_L^{ab}) = mu_{p^n}` を使う道。見積は 11 ノード・中央値 8,700 行。**`Found/PGC/KummerDuality.lean` の `KummerDual.range_kummerMap` と `KummerDual.ker_kummerMap` を合わせると **F^x/(F^x)^n ≅ Hom_cont(Γ_F, μ_n)**、すなわち **H1(K, μ_n) ≅ K^x/(K^x)^n** であり、Bloch-Kato Prop 3.8 の**次数 1 の半分**である(mathlib 不在のまま自前に証明済み、sorry 無し)。★さらに `Found/PGC/LubinTateReciprocityIsomorphism.lean:404` の **`galoisReciprocityEquiv : Gal(K⟮ x⟯/K) ≃* (𝒪_K ⧸ π^n)^x`** がある——**局所相互律は mathlib に全く不在**(re:artinMap|ArtinMap|reciprocityIso|localReciprocity → 0)なのに、この木は Lubin-Tate 経由で自前に持っている。★本ファイルは `Skeleton.PGC.Setup` と `Interface.PGC.LocalFieldData` しか import しておらず、**同じ木の中の完成品を見ていなかった**(「`Found` に在るのに `Skeleton` が参照していない」の **5 件目**)" 3,
+    .citation "[mathlib]" "連続コホモロジー((c) Γ_K への extension)"
+      (.inMathlib "continuousCohomology") 3,
+    .implicitStep
+      "★(c) の使い方の注意(2026-09-06 実測)。`continuousCohomology (R G) (n) : Action (TopModuleCat R) G ⥤ TopModuleCat R` (`Mathlib.Algebra.Category.ContinuousCohomology.Basic`、216 行)。★対象が `Rep R G` ではなく **`Action (TopModuleCat R) G`** なので橋が 1 本要る。★**長完全列が無い**(TODO)し、`groupCohomology` との一致も TODO。つまり「定義はある、道具はまだ無い」。★★**2026-09-04 の記録が (c) を「不在」としていたのは誤り**である" 3,
+    .citation "[mathlib]" "(a) crossed product / (b) 不変写像 Br(K) の具体形 / 局所 Tate 双対性"
+      (.absent
+        ("2026-09-06 再測(★索引の欠陥を直し、非 ASCII を含む名前 24,659 件が載った状態での測定): "
+         ++ "re:crossed → 0 / re:crossedProduct|CrossedProduct → 0 / re:RelativeBrauer → 0 / "
+         ++ "re:invariantMap|BrauerInvariant|invBrauer|hasseInvariant → 0 / "
+         ++ "re:normResidueSymbol|normResidue → 0 / "
+         ++ "re:artinMap|ArtinMap|reciprocityIso|localReciprocity → 0 / "
+         ++ "re:localTateDuality|TateDuality|tateDuality|PoitouTate|Poitou → 0 / re:Herbrand → 0。 "
+         ++ "★re:Brauer → 9 件だが**全 9 件が Algebra/BrauerGroup/Defs.lean(全 100 行)**で、"
+         ++ "CSA の商集合があるだけ。**BrauerGroup は Type であって群ですらない**"
+         ++ "(ファイル冗頭の TODO 1 が「アーベル群であることを証明する」)。 "
+         ++ "★左辺(H2 側)は書ける——`Rep.ofAlgebraAutOnUnits` と `groupCohomology.H2` がある。"
+         ++ "**繋ぐ側だけが無い**。 "
+         ++ "★`tateCohomology` は 33 件あるが **[Fintype G] を要求する**ので Γ_K には使えない"
+         ++ "(有限次 Gal(L/K) 専用。ファイル冗頭に 2025 ClassFieldTheory workshop の成果と明記)。 "
+         ++ "★Tate コホモロジーの慣習的な綴り re:Ĥ も **0 件**"
+         ++ "(名前欄・statement 欄の両方、Ĥ|Ħ|Ḣ の全異体で 0)——"
+         ++ "★索引の切れではなく**本当に不在**。mathlib は ASCII で tateCohomology と綴る")) 2,
+    .implicitStep "Z_p(1) の同型類が回復できることから、指標 χ が回復できることへの一段" 3,
+    .implicitStep
+      "★★★★★★2026-09-06(第 1038): **docstring の ①②③ の切り分けが決着した**。『`Z_p(1)` の同型類 ⇒ 指標 χ』の一段は **`Found/PGC/CyclotomicRecovery.lean::padicUnits_eq_of_smul_equivariant` で閉じた**(階数 1 の `Z_p`-表現は同型類が指標を決める。`Z_p`-線形同型は `φ 1` 倍しかなく、整域で約せる。sorry 無し)。★★したがって **③(原典の飛躍)ではない**。残るのは ② だけである" 3,
+    .implicitStep
+      "★★★★2026-09-06(第 1038): **α が体の同型から来る場合は無条件に成立する**(`cyclotomicCharacterObject_transport_galContinuousMulEquiv`、sorry 無し)。鍵は `cyclotomicCharacter_conj`(**円分指標の自然性**、mathlib に不在)である。★この形式化が展開すると厳密に `∀ K K' (α : Γ_K ≃ₜ* Γ_K') (g), χ_{K'}(α g) = χ_K(g)` になることを Lean で確定させた(`cyclotomicCharacterObject_recoverable_iff`)。★★これは §1 冒頭の原典自身の定義そのままで、Prop 1.2 の `∀ RD` のような**自由なデータ引数が無い**ので、余計な強さが混入する余地がない(★D13 で Prop 1.2 に起きた「修復が強すぎる主張を作った」はここでは起きていない)" 3,
+    .implicitStep
+      "★★★★★★★★**残る壁は 1 つだけ**(2026-09-06)。Jarden-Ritter 型の α(体の同型から来ない α)に対しては、**円分子 `Λ(Γ_K) = Hom(H2(Γ_K, Z/p^n), Z/p^n) ≅ μ_{p^n}`** の群論的構成が要る。接続点は `cyclotomicCharacterObject_transport_of_moduleEquiv` に置いてあり、その仮説がそのまま次のノードの statement になる。★★**前回の段取りは誤りだった** —— `galoisReciprocityEquiv` を `K = Q_p` に特化して `Gal(K(μ_{p^n})/K) ≃ (Z/p^n)^x` を得ても Prop 1.1 には**届かない**。`RecoverableFromAbsGal` は**任意の抽象位相群同型 α** についての主張なので、各 K ごとの `Gal(K(μ_{p^n})/K)` の構造を知っても α の振る舞いは制約されない" 3,
+    .citation "[この木]" "`iteratedLubinTatePsiTorsionPoints` と `μ_{p^n}` を同定する橋"
+      (.absent
+        ("2026-09-06 実測: `.cache/decl-index.txt` で "
+         ++ "re:iteratedLubinTatePsiTorsionPoints → 14 件を**全走査**したが、"
+         ++ "re:rootsOfUnity|IsPrimitiveRoot に触れるものは **0 件**。"
+         ++ "`Found/PGC/QpRootsOfUnity.lean` は `l ≠ p` の素な乗根の話で p 冪乗根を扱っていない。"
+         ++ "★Prop 1.1 には直結しないが、`galoisReciprocityEquiv` を円分側で使うための"
+         ++ "独立に有用な部品である")) 3 ]
 
 
 /-! ## Proposition 1.2 -/

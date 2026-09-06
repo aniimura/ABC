@@ -146,7 +146,7 @@ def weierstrassP_add.needs : List ProofObligation :=
        "weierstrassPExcept。無い——加法定理、群同型 ℂ/Λ ≅ E(ℂ)、楕円関数の Liouville" ++
        "(★本プロジェクトが第 598 で建てた)") 13,
     .citation "[Silverman]" "The Arithmetic of Elliptic Curves, VI.3.6(℘ の加法定理)"
-      (.absent "mathlib の Analysis/SpecialFunctions/Elliptic/Weierstrass.lean は ℘ の理論を 1080 行ぶん持つが加法定理は無い(2026-08-29 に全宣言名を確認)") 13,
+      (.absent "mathlib の Analysis/SpecialFunctions/Elliptic/Weierstrass.lean は ℘ の理論を 1080 行ぶん持つが加法定理は無い(2026-08-29 に全宣言名を確認)。★2026-09-06 に再測: re:`weierstrassP_add(?!_coe)|weierstrassP_addition|addition_theorem`→0(weierstrassP_add_coe は周期性 ℘(z+l)=℘(z) であって加法定理ではない)") 13,
     .implicitStep
       ("★★★★★★2026-08-29(第 612-614)で z ≡ −w の側の核も取れた: " ++
        "Found/GenEll/Uniformization.lean の addQ(= 2(℘(t−w)−℘(w)) − t(℘′(t−w)−℘′(w)))が " ++

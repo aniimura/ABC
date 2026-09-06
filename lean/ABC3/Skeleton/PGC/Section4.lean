@@ -149,6 +149,6 @@ def theorem_4_2.needs : List ProofObligation :=
     .otherPaper "pGC" "Corollary 3.3" 6,
     .otherPaper "pGC" "Lemma 4.1" 7,
     .citation "[3] Serre, Local Class Field Theory" "Γ_K^ab ≅ (K×)^ による単射性の議論"
-      (.absent "§1 Proposition 1.2 で既確認: mathlib 実質不在") 7 ]
+      (.absent "§1 Proposition 1.2 で既確認: mathlib 実質不在。★2026-09-06 に再測: 局所類体論の相互写像は re:`artinMap|ArtinMap|localReciprocity|LocalClassField|normResidue|NormResidue|reciprocityMap`→0") 7 ]
 
 end ABC3.Skeleton.PGC

@@ -87,7 +87,7 @@ def det_galRep_eq_cyclotomic.needs : List ProofObligation :=
     .implicitStep
       "★★★★★★★★**2026-08-20: 本節点に残っているのは非退化性 1 件だけである**。★`Z_l` 線型性を使わずに済んだ——`tateModule` は加法同型 `~+ Z_l^2` しか持たないが、`#E[l^n] = l^{2n}` の数え上げだけで基底の位数がちょうど `l^n` であることが出た(第 210 `order_exact_of_gen`)。★★非退化性には別ルートも測った——`deg [n] = #fiber = n^2` を `Ideal.sum_ramification_inertia`(mathlib にある)で出す道であるが、「関数体の place と点の対応」「不分岐性」「拡大の有限性を先に言う」の 3 段が要り、15-40 ブロックと見積もる(どちらも上流の作業であり、本節点の下では閉じない)" 19,
     .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.8(Weil 対の構成と性質)"
-      (.absent "mathlib に Weil 対は 0 件(2026-08-20、`WeilPairing|weil_pairing` で全文検索して 0 件)") 19,
+      (.absent "mathlib に Weil 対は 0 件(2026-08-20、`WeilPairing|weil_pairing` で全文検索して 0 件)。★2026-09-06 に再測: re:`WeilPairing|weilPairing|weil_pairing`→0") 19,
     .otherPaper "GenEll" "Theorem 3.8(Weil 対の Galois 同変性)" 19,
     .otherPaper "GenEll" "Theorem 3.8(Weil 対の双線型性)" 19,
     .otherPaper "GenEll" "Theorem 3.8(Weil 対の非退化性)" 19,

@@ -191,8 +191,14 @@ def exists_open_normal_notMem.needs : List ProofObligation :=
       (.inMathlib "isTopologicalBasis_isClopen") 111,
     .citation "[mathlib]" "Subgroup.normalCore / normalCore_normal / normalCore_le"
       (.inMathlib "Subgroup.normalCore") 111,
-    .citation "[mathlib]" "開部分群の正規核が開であること"
-      (.absent "Subgroup.normalCore 周辺と OpenSubgroup 周辺の宣言を列挙(2026-08-25)。normalCore の開性・閉性を述べる宣言は無い") 111,
+    .citation "[mathlib]"
+      "正規核の閉性(★2026-09-06 の再測で mathlib に在った。2026-08-25 の「normalCore の開性・閉性を述べる宣言は無い」は不在の誤判定である)"
+      (.inMathlib "Subgroup.normalCore_isClosed") 111,
+    .citation "[mathlib]"
+      "閉かつ有限指数の部分群は開(上と finiteIndex_normalCore に継いで『開部分群の正規核は開』が出る)"
+      (.inMathlib "Subgroup.isOpen_of_isClosed_of_finiteIndex") 111,
+    .citation "[mathlib]" "正規核が有限指数であること"
+      (.inMathlib "Subgroup.finiteIndex_normalCore") 111,
     .derivation
       "H.normalCore = ⋂_{q : G ⧸ H} (a ↦ (out q)⁻¹ a (out q))⁻¹ (H) と書き直す。G ⧸ H が有限なので有限交叉" 111,
     .implicitStep
@@ -226,7 +232,7 @@ def residuallyFinite_of_profinite.needs : List ProofObligation :=
   [ .citation "[mathlib]" "Group.ResiduallyFinite / residuallyFinite_iff_exists_finiteIndex"
       (.inMathlib "Group.ResiduallyFinite") 111,
     .citation "[mathlib]" "副有限群が ResiduallyFinite であるインスタンス"
-      (.absent "Group.ResiduallyFinite のインスタンスは Finite / Subgroup / Prod の 3 つのみ(2026-08-25 実測)。位相からのものは無い") 111,
+      (.absent "Group.ResiduallyFinite のインスタンスは Finite / Subgroup / Prod の 3 つのみ(2026-08-25 実測)。位相からのものは無い。★2026-09-06 に再測: re:`residuallyFinite_of_[a-z]|ResiduallyFinite[A-Za-z]*Profinite|Profinite[A-Za-z]*ResiduallyFinite|ResiduallyFinite[A-Za-z]*Compact`→1 で 1 件当たるが、それは一般の判定条件(有限群への準同型で分離できれば良い)であって位相からのインスタンスではない。re:`ResiduallyFinite`→16 が索引全体の件数") 111,
     .citation "[ABC3]" "exists_open_normal_notMem"
       (.inProject "ABC3" "ABC3.Found.FrdI.Profinite.exists_open_normal_notMem") 111 ]
 

@@ -170,7 +170,7 @@ def dvd_count_pullback.needs : List ProofObligation :=
   [ .implicitStep
       "★★★★★★★**2026-08-20: 本節点は第 149 ブロックで証明された**(`Found/GaloisRep/DvdCount.lean` の `dvd_count_pullback`)。場合 A(第 143)と場合 B(第 144-149)の合流である。★**分岐指数も `deg[n] = n²` も `#E[n] = n²` も場所の分類定理も使っていない**(0 ブロック)" 19,
     .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.8.1 の証明(div(f_P∘[n]) の計算)"
-      (.absent "mathlib に Weil 対およびその構成要素は 0 件(2026-08-20、`WeilPairing|weil_pairing` で全文検索して 0 件)") 19,
+      (.absent "mathlib に Weil 対およびその構成要素は 0 件(2026-08-20、`WeilPairing|weil_pairing` で全文検索して 0 件)。★2026-09-06 に再測: re:`WeilPairing|weilPairing|weil_pairing`→0") 19,
     .implicitStep
       "★★★★★★**不分岐性は要らない**(2026-08-20 の見通し変更)。`ord_Q(μ f) = e_Q · ord_{[n]Q}(f)` で右の因子は `div(f_P) = n(P) − n(O)` から `{n, −n, 0}` のいずれか。★`e_Q` が何であっても `n` で割れる。`deg[n] = n²` も `#E[n] = n²` も**不要**である" 19,
     .implicitStep
@@ -218,7 +218,7 @@ def fractionalIdeal_isPrincipal.needs : List ProofObligation :=
     .implicitStep
       "★逸脱の記録: `hchar`（`∀ k, 1 ≤ k → k ≤ n → (k : F) ≠ 0`）を仮定に足した。第 150（`Σ_{T ∈ E[n]} T = 0`）が (G1) の `E[n] ≅ (ℤ/n)²` を使うためである。★Weil 対 `e_n` はそもそも `char ∤ n` を要求するので、消費側（`det_cyclotomic`、`[CharZero K]`）に影響はない" 19,
     .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.3.5(Abel–Jacobi)"
-      (.absent "mathlib に Weil 対およびその構成要素は 0 件(2026-08-20)") 19,
+      (.absent "mathlib に Weil 対およびその構成要素は 0 件(2026-08-20)。★2026-09-06 に再測: re:`WeilPairing|weilPairing|weil_pairing`→0") 19,
     .implicitStep
       "★★★★★★**分岐指数 `e_Q` はここでも消える**——平行移動 `τ_T`(`T ∈ E[n]`)は `[n]∘τ_T = [n]` により `μ` を保つので `e_Q` は各ファイバー上で一定。共通因子 `e` を括り出すと `Σ_{Q ∈ [n]⁻¹(P)} Q = n²Q₀ = n·P = 0` と `Σ_{T ∈ E[n]} T = 0` から類は 0 になる。★`e` の値を知る必要はない" 19,
     .implicitStep

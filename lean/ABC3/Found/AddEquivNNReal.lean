@@ -139,7 +139,7 @@ def exists_smul_eq_of_addEquiv.needs : List ProofObligation :=
     .citation "[mathlib]" "exists_rat_btwn(ℝ における ℚ の稠密性)"
       (.inMathlib "exists_rat_btwn") 114,
     .citation "[mathlib]" "単調な加法準同型が線型であること"
-      (.absent "AddMonoidHom.toRealLinearMap は連続性を要求する。単調性から線型性を出す宣言は無い(2026-08-25 実測)") 114,
+      (.absent "AddMonoidHom.toRealLinearMap は連続性を要求する。単調性から線型性を出す宣言は無い(2026-08-25 実測)。★2026-09-06 に再測: mathlib 全体を re:`Monotone[.]to[A-Za-z]*Linear|toRealLinearMapOfMonotone|toLinearMapOfMonotone|[Ll]inear[A-Za-z]*_of_monotone|_of_monotone[A-Za-z_]*[Ll]inear`→0 で検索して 0 件。連続版だけが re:`AddMonoidHom[.]toRealLinearMap`→1 に当たる") 114,
     .derivation "単調＋有理点での値＋稠密性で挟み撃ちにする(両向き)" 114,
     .implicitStep
       "★原文は「単系の同型だから順序を保つ」の 1 行で deg(Ψ^rlf) ∈ ℝ>0 の存在まで畳んでいる" 114 ]

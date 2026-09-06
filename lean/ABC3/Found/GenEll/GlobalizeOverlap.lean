@@ -157,7 +157,7 @@ def exists_pow_mul_eq_overlap.needs : List ABC3.Meta.ProofObligation :=
     .citation "[mathlib]" "Scheme.basicOpen_res(制限した切断の非消失軌跡)"
       (.inMathlib "AlgebraicGeometry.Scheme.basicOpen_res") 3,
     .citation "[Stacks]" "Lemma 01PW(の大域化の段)"
-      (.absent "mathlib に ample は無い(2026-08-28 実測)") 7,
+      (.absent "mathlib に ample は無い(2026-08-28 実測)。★2026-09-06 に再測: re:`AlgebraicGeometry[.][A-Za-z0-9_.]*[Aa]mple|IsAmple|IsVeryAmple|ampleLineBundle`→0。名前に ample を含む 19 件はすべて別物(Analysis/Convex/AmpleSet.lean の凸性、sampleableExt、example_ の部分一致)") 7,
     .implicitStep
       ("★W = U_i ⊓ U_j が**アフィンであること**を仮定に置いた。" ++
        "★★X が分離的なら自動である(アフィン開の交わりはアフィン)が、" ++

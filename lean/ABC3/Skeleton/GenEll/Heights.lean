@@ -112,7 +112,7 @@ def degNormalized_base_change.needs : List ProofObligation :=
   [ .implicitStep
       "★**内容を Interface の仮説として輸入した(我々は証明していない)**。`PulledBackClassData.base_change_invariant` がそれである。check.mjs 冒頭 B5 が名指しする穴と同じ形で、`Skeleton/IUTchIII/Cor312.lean` の `cor_3_12_inequality` と同型" 4,
     .citation "[Szp]" "§1.1(算術因子と次数の基本性質)"
-      (.absent "mathlib 全体を `Arakelov` / `arithmetic.*line bundle` / `LineBundle` / `analytification` で grep、いずれも 0 件(2026-08-16)") 4,
+      (.absent "mathlib 全体を `Arakelov` / `arithmetic.*line bundle` / `LineBundle` / `analytification` で grep、いずれも 0 件(2026-08-16)。★2026-09-06 に再測: re:`Arakelov|arithmetic[A-Za-z ]*line bundle|analytification|LineBundle`→0") 4,
     .derivation
       "本当に要るのは素点の分岐・剰余次数の関係 `Σ_{w|v} e_w f_w = [K:F]`。mathlib に `Ideal.sum_ramification_inertia` 系があるはずだが**未測定**" 4 ]
 

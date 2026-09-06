@@ -87,7 +87,7 @@ def six_exponentials.src : Source :=
 `node tools/frdi-newleaves.mjs` が層と葉を印字する。 -/
 def six_exponentials.needs : List ProofObligation :=
   [ .citation "[Lang1]" "Introduction to Transcendental Numbers(原文が送っている先。Baker の本 p.119 も指す)"
-      (.absent "0_Source に [Lang1] は無い(papers.json 未登記、2026-08-18)") 116,
+      (.absent "0_Source に [Lang1] は無い(papers.json 未登記、2026-08-18)。★2026-09-06 に再測: 六指数定理そのものも mathlib に無い——re:`sixExponentials|six_exponentials|SixExponentials|fourExponentials`→0") 116,
     .citation "[mathlib]" "数体上の Siegel の補題(house 版)——補助関数の係数を取る所"
       (.inMathlib "NumberField.house.exists_ne_zero_int_vec_house_le") 116,
     .citation "[mathlib]" "Siegel の補題(整数版)"
@@ -97,7 +97,7 @@ def six_exponentials.needs : List ProofObligation :=
     .citation "[mathlib]" "最大値原理(多零点版の小ささ評価の土台)"
       (.inMathlib "Complex.norm_le_of_forall_mem_frontier_norm_le") 116,
     .citation "[mathlib]" "多点で消える正則関数の小ささ(Schwarz の補題の多零点版)"
-      (.absent "Analysis/Complex/ の宣言一覧を目視、1 点の高位版(Schwarz.lean:144)はあるが多点版は無い(2026-08-18)") 116,
+      (.absent "Analysis/Complex/ の宣言一覧を目視、1 点の高位版(Schwarz.lean:144)はあるが多点版は無い(2026-08-18)。★2026-09-06 に再測: re:`schwarz[A-Za-z_]*(zeros|multi|finset)|multiplicity[A-Za-z_]*schwarz`→0。Schwarz の補題のファイルは re:`Analysis/Complex/Schwarz[.]lean`→12 の 12 宣言のままで、多零点版は入っていない") 116,
     .derivation
       "補助関数 F(z) = Σ c_pq exp((p x1 + q x2) z) を Siegel で作り、増大度評価と Liouville 不等式で外挿の帰納を回す(frdi-decomposition.json の sixexp チェーン、葉 3 個)" 116,
     .implicitStep

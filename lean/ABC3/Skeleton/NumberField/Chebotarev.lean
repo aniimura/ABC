@@ -172,7 +172,7 @@ def chebotarev_splitsCompletely.needs : List ProofObligation :=
     .citation "[mathlib]" "Nat.infinite_setOf_prime_and_eq_mod(Dirichlet の算術級数定理)"
       (.inMathlib "Nat.infinite_setOf_prime_and_eq_mod") 116,
     .citation "[mathlib]" "Chebotarev / Artin の相互法則 / Dirichlet 密度 / 射類群"
-      (.absent "lean/.lake/packages/mathlib/Mathlib/ 全体を Chebotarev|Tchebotarev|ArtinReciprocity|artinMap|DirichletDensity|RayClassGroup|SplitsCompletely|decompositionGroup|analyticDensity|naturalDensity|primeDensity で grep、いずれも 0 件(2026-09-06 再測。node tools/absent-recheck.mjs --try で再実行できる)") 116,
+      (.absent "lean/.lake/packages/mathlib/Mathlib/ 全体を Chebotarev|Tchebotarev|ArtinReciprocity|artinMap|DirichletDensity|RayClassGroup|SplitsCompletely|decompositionGroup|analyticDensity|naturalDensity|primeDensity で grep、いずれも 0 件(2026-09-06 再測。node tools/absent-recheck.mjs の try オプションで再実行できる)。★規約つきに直した(2026-09-06): re:`Chebotarev|Tchebotarev|ArtinReciprocity|artinMap|DirichletDensity|RayClassGroup|SplitsCompletely|decompositionGroup|analyticDensity|naturalDensity|primeDensity`→0") 116,
     .citation "[mathlib]" "Frobenius 元(★2026-08-20 の「不在」は誤り。名前が FrobeniusElement ではないので旧 regex に当たらなかった。流儀は Gal(L/K) ではなく、G が S に作用し R が固定環という RingTheory/Invariant の形)"
       (.inMathlib "IsArithFrobAt") 116,
     .derivation

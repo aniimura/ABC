@@ -149,7 +149,7 @@ def exists_glued_globalRatio.needs : List ABC3.Meta.ProofObligation :=
     .citation "[ABC3]" "globalRatio_unique_of_cover(被覆で大域の比を同定、§9-844)"
       (.inProject "ABC3" "ABC3.Found.GenEll.globalRatio_unique_of_cover") 2,
     .citation "[Stacks]" "Lemma 01PW(の消費側——チャートの座標環が生成される段)"
-      (.absent "mathlib に ample は無い(2026-08-28 実測)") 7,
+      (.absent "mathlib に ample は無い(2026-08-28 実測)。★2026-09-06 に再測: re:`AlgebraicGeometry[.][A-Za-z0-9_.]*[Aa]mple|IsAmple|IsVeryAmple|ampleLineBundle`→0。名前に ample を含む 19 件はすべて別物(Analysis/Convex/AmpleSet.lean の凸性、sampleableExt、example_ の部分一致)") 7,
     .implicitStep
       ("★**指数を 1 つ上げる**のが要点である——§9-831 が出す n は 0 でありうるが、" ++
        "nonVanishing_unit_secPow は n ≥ 1 を要る(n = 0 なら X_1 = ⊤ になってしまう)。" ++

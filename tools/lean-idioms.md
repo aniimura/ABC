@@ -798,6 +798,33 @@ exact (mul_one c).symm.trans h      -- c * 1 = 1  から  c = 1
 本プロジェクトの整数環は U+1D4DE(𝓞 = MATHEMATICAL BOLD SCRIPT CAPITAL O)であって
 U+1D4AA(𝒪 = MATHEMATICAL SCRIPT CAPITAL O)ではない。
 ★見た目がほぼ同じなので、書いた直後の目視では気づかない。
+
+★★★★★2026-09-06 追記(**3 回目。損害の本体が抜けていた**)。
+
+★★**落ちるだけでは済まない——ファイルが 0 行になる。**
+`io.open(path, "w")` は**開いた時点で切り詰める**ので、
+`.write()` が `UnicodeEncodeError` で落ちると、中身が消えたファイルだけが残る。
+実例: `Skeleton/PGC/Section1.lean` が 208 行 → **0 行**(`git checkout --` で復旧)。
+過去にも `VeluSemistableJ.lean` が 117 行 → 0 行になっている。
+
+★**安全な型**(符号化を先に済ませ、一時ファイル経由で差し替える):
+
+```python
+out = s.replace(old, new)
+data = out.encode("utf-8")          # ★ここで落ちれば原本は無傷
+fd, tmp = tempfile.mkstemp(dir=os.path.dirname(P), suffix=".tmp")
+with os.fdopen(fd, "wb") as f:
+    f.write(data)
+os.replace(tmp, P)                  # ★差し替えは原子的
+```
+
+★この型の効き目は実証済み。この項目を追記するスクリプト自体が同じ罠を踏んだが、
+先に `encode` していたので `lean-idioms.md`(5905 行)は**無傷だった**。
+
+★**どちらの O かはファイルを測って決める**。見目では判別できないので、
+書き込む先を `collections.Counter(ch for ch in s if ord(ch) > 0xFFFF)` で数える。
+実測(2026-09-06): `Found/PGC/LubinTateReciprocityIsomorphism.lean` は
+**U+1D4AA(𝒪) を 131 回**使っており、U+1D4DE は 0 回。ファイルごとに違う。
 ★★**エスケープを書かず、ファイルから既存の行をコピーする**のが確実。
 やむを得ず書いたら書いた後に grep で誤った方の字を数え、0 を確認する
 (ビルドは「Unknown identifier」で捕まえてくれるが、docstring に混ざると気づかない)。
@@ -1914,6 +1941,10 @@ theorem foo : True := trivial
 ——パーサのエラー回復が先の 2 つを飲み込んでいる。
 ★「1 件だけ直せば通る」と思って直すと、次のビルドで次の 1 件が出る。
 **同じ形が他にもないか、その場でまとめて grep すること。**
+★2026-09-06 に 4 回目。`Skeleton/` の statement を**変えずに**
+`linter.unusedSectionVars` を黙らせたくて、既にある docstring と `theorem` の
+あいだに差し込んで踏んだ。★`omit [Inst] in` で消してはいけない
+——型から instance を落とすので **statement の変更**になる。
 
 ## `f ∣_ U` を含むゴールで `rw [f = g]` は motive が型付かない
 
@@ -5863,3 +5894,292 @@ example : (((11 : 𝓞 L)) : L) = 11 := map_ofNat (algebraMap (𝓞 L) L) 11
 
 `↑x` と `K.val.toRingHom x` は defeq なので `exact` で通る（`rw` は形が違うので通らない）。
 `push_cast` は `neg`・`div` までは押せるので、残った数値リテラルだけこの手で潰すのが速い。
+
+## インスタンス探索は `def` の射影を**開かない**——`E.W.baseChange M` の `Algebra` は `E.fld` で書く（2026-09-06 実測）
+
+```lean
+theorem foo (M : Type) [Field M] [Algebra fldQ M] :
+    ∃ Q : (ssCurve11a3.W.baseChange M).toAffine.Point, addOrderOf Q = 5 := …
+-- failed to synthesize  Algebra (↥ssCurve11a3.K) M
+```
+
+`ssCurve11a3 : SSCurve` は普通の `def` なので、`ssCurve11a3.K` を `fldQ` へ潰すには
+delta 簡約が要る。**単一化（`exact` の型合わせ）は開くが、インスタンス探索は開かない。**
+★対処: 束縛子の側を射影で書く（`[Algebra ssCurve11a3.fld M]`）。
+補題を渡す側も `model11a3_baseChange ssCurve11a3.fld M` と射影で書けば、
+残りは単一化なので通る。
+
+## 曲線の等式をまたいで `Point` を運ぶには、曲線を**変数に置いてから `subst`**（2026-09-06）
+
+`W₁ = W₂` は命題の等式なので `W₁.toAffine.Point` と `W₂.toAffine.Point` の間の
+輸送が要る。`▸` を直接当てると `addOrderOf (h ▸ Q) = 5` が動かせない。
+★対処: 曲線を**全称量化した変数**にして `subst` する。
+
+```lean
+theorem exists_point_addOrderOf_five (W : WeierstrassCurve L) (hW : W = model11a3 L) :
+    ∃ Q : W.toAffine.Point, addOrderOf Q = 5 := by
+  subst hW; exact ⟨model11a3P L, model11a3_addOrderOf L⟩
+```
+
+`hW : ssCurve11a3.W.baseChange M = model11a3 M` を渡すだけで
+`(ssCurve11a3.W.baseChange M).toAffine.Point` の元が出る。
+
+## `letI` を `∃` の**本体**に書いた命題は、`refine` のあとインスタンス探索が届かない（2026-09-06）
+
+`VeluQuotOK` のように `letI : DecidableEq (M : Type) := …` を項の中に書いた命題を
+証明するとき、`refine ⟨⊥, inferInstance, ?_⟩` のあとの目標に残った `let` は
+**局所文脈に入らない**ので `failed to synthesize DecidableEq ↥⊥` になる。
+★対処: `@` で明示的に渡す。
+
+```lean
+exact @exists_point_addOrderOf_five _ _ (fun a b => Classical.propDecidable (a = b)) _ h
+```
+
+## `AssociatedObject.transport` のような**構造体フィールドの適用**は `simp`/`simpa` が開かない（2026-09-06、Found/PGC/CyclotomicRecovery で実測）
+
+`Skeleton/PGC/Setup.lean` の `AssociatedObject` は `Obj`/`obj`/`transport` を
+フィールドに持つ構造体で、`cyclotomicCharacterObject` は無名コンストラクタで定義されている。
+`(cyclotomicCharacterObject).transport α f g'` を `f (α.toMulEquiv.symm g')` に
+簡約したいとき、`simpa using this` は**射影を開かず**
+
+```
+but is expected to have type
+  cyclotomicCharacterObject.transport α (cyclotomicCharacterObject.obj K) g' = …
+```
+
+で止まる（`simp [cyclotomicCharacterObject]` も、`where` 記法で作った項では効かないことがある）。
+
+★対処: `show` でベータ簡約後の形を書く。`show` は defeq で通るので確実。
+
+```lean
+funext g'
+show cyclotomicCharacter K.closure p (α.toMulEquiv.symm g').toRingEquiv
+  = cyclotomicCharacter K'.closure p g'.toRingEquiv
+```
+
+同じ理由で、`congrFun h (α g)` の結果は `have h2 : … := congrFun h (α g)` と
+**型を明示して**受けてから `show` で開くのが早い。
+
+
+## `(M : Type) × (M : Type)` は**直積ではなく Σ 型**にパースされる（2026-09-06、Found/GenEll/VeluDualJ で実測）
+
+`M : IntermediateField L Lbar` の座標の対を書こうとして
+
+```lean
+(fun q : (M : Type) × (M : Type) => (ψ q.1, ψ q.2))
+```
+
+と書くと、`(x : α) × β` が **`Sigma` の記法**なので
+`Σ (M : Type), ↥M` にパースされ、`q.1 : Type`・`q.2 : q.1` になる。
+エラーは
+
+```
+Application type mismatch: The argument q.fst has type Type of sort `Type 1`
+but is expected to have type ↥M of sort `Type`
+```
+
+★対処: 型注釈の中では `↥M × ↥M` と書く(あるいは `M × M` で CoeSort に任せる)。
+`(M : Type)` の形は `→+*` や `.baseChange` の引数では問題ない——`×` の左だけが危ない。
+
+## `rw [← h]` で `h : addOrderOf X = l` を使うと motive が壊れる（2026-09-06）
+
+`l` は点の型の中（`(range l).erase 0` の中の `veluQuotientFull` の点集合）にも
+現れるので、`rw [← hQord]` は `l` を全部 `addOrderOf X` に置き換えようとして
+`motive is not type correct` になる。
+★対処: 前向きに書き換える。
+
+```lean
+have h := addOrderOf_nsmul_eq_zero X
+rwa [hQord] at h        -- `addOrderOf X • X = 0` → `l • X = 0`
+```
+
+
+## `Skeleton` と `Found` の**同名の重複定義**を両方 `open` すると `Ambiguous term`(2026-09-06)
+
+`ABC3.Skeleton.Divisor` と `ABC3.Found.Divisor` はどちらも
+`IsCodimOnePt` / `PrimeDivisorPt` / `WeilDiv` / `IsNormalScheme` を持っている
+(`decisions-pending.md` D8 の 3 番が解消を待っている重複)。両方 `open` すると
+
+```
+error: Ambiguous term
+  IsNormalScheme
+Possible interpretations:
+  ABC3.Found.Divisor.IsNormalScheme X : Prop
+  ABC3.Skeleton.Divisor.IsNormalScheme X : Prop
+```
+
+が名前の出現ごとに出る。★対処: **片方だけ `open`** し、もう片方は完全修飾で書く。
+★なお 4 つとも **defeq** なので、`open` さえ分ければ
+`Found` の定理に `Skeleton` の項をそのまま食わせられる(`exact` が通る。実測済み)。
+
+
+## `ProfiniteGrp` の `M` に「点ごとの可換性」から `CommGroup` を付ける（2026-09-06、Skeleton/FrdI/Def28ProL で実測）
+
+`Found/ProL/` は `variable {M : Type u} [CommGroup M] [TopologicalSpace M] …` で書かれているが、
+`Skeleton` 側の statement は `(M : ProfiniteGrp.{u}) (_hcomm : ∀ a b : M, a * b = b * a)` である。
+★`letI` で `Group` 構造に `mul_comm` を足すだけで橋が架かる（structure eta のおかげで
+`CommGroup.toGroup` は元の `M.str` と defeq なので、`≃ₜ*` の型が変わらない）。
+
+```lean
+letI : CommGroup M := { (inferInstance : Group M) with mul_comm := _hcomm }
+exact ⟨fun l => ABC3.Found.ProL.lPartGrp M l.1, …⟩
+```
+
+★もう一つの罠: `variable (M) in` が**付いていない**宣言（例 `isProL_lPartGrp`）では
+`M` は implicit なので、`isProL_lPartGrp M l` と書くと
+
+```
+Application type mismatch: M has type ProfiniteGrp.{u} … but is expected to have type ℕ
+```
+
+（`M` が `l : ℕ` の位置に入る）。★対処は名前付き引数＋**coercion を明示**:
+`isProL_lPartGrp (M := (M : Type u)) l.1`。`(M := M)` だけだと `CoeSort` が入らない。
+
+
+## 触れない下流があるとき、statement に足す仮定は `∃` で述語の内側に畳む（2026-09-06、D8 で実測）
+
+**失敗形**: `Skeleton` の `def` に仮定を足す（`ordAtDiv X x f` → `ordAtDiv X hnorm x f`）と、
+その `def` を使う**別ファイルの述語**（`IsCartierDiv`）も引数が増え、
+さらにその述語を使う**触ってはいけないファイル**（保留中の `Cartier/Theorem62.lean`）の
+`IsCartierDiv X D` / `isCartierDiv_add X hD hE` が arity 不一致で落ちる。
+★`[h : P]` の instance-implicit で逃げることはできない（`P` が class でないと
+「invalid binder annotation」。class にしても下流で synthesize できない）。
+
+**直し方**: 述語の側は引数を増やさず、仮定を **`∃` で内側に畳む**:
+
+```lean
+def IsCartierDiv (D : WeilDiv X) : Prop :=
+  ∃ hnorm : IsNormalScheme X, ∀ x : X, …   -- 本文で hnorm を使う
+```
+
+★引数の数が変わらないので下流は無傷。しかも `hD : IsCartierDiv X D` から
+`obtain ⟨hnorm, hD⟩` で仮定を**取り出せる**ので、`add` / `neg` 系の補題は
+追加仮定なしで閉じる（`zero` 系だけが外から仮定を要る）。
+
+★★**向きを間違えないこと**: `∀ hnorm, …` と書くと仮定が偽の枝が**空虚に真**になり、
+「非正規スキームでは全部 Cartier（`cartierSubgroup = ⊤`）」という**新しい退化**を作る。
+`∃` は逆に「仮定が偽なら述語も偽」なので**強める側**であり、退化を作らない。
+
+★`hnorm : Prop` には definitional proof irrelevance が効くので、
+2 つの `obtain` で別名の証明が出ても `ordAtDiv X hnorm₁ … = ordAtDiv X hnorm₂ …` は `rfl`。
+`rw` が syntactic に噛み合わなくても最後の `exact` は通る。
+
+
+## `↑(f⁻¹)`（`Units`）は `(↑f)⁻¹` と defeq ではない（2026-09-06）
+
+**失敗形**: `show _ = ordPt X hnorm y ((f : K)⁻¹)` が
+
+```
+'show' tactic failed, pattern … is not definitionally equal to target
+  -ordAtDiv X hnorm y ↑f = ordAtDiv X hnorm y ↑f⁻¹
+```
+
+で落ちる。`Units.mul` の `val` は `rfl` で割れる（`↑(f*g) = ↑f*↑g` は defeq）のに、
+`Units.inv` の `val` は割れない（`f⁻¹.val` は構造体の `inv` 場であって `(f.val)⁻¹` ではない）。
+
+**直し方**: `Units.val_inv_eq_inv_val` を先に当てる。`def` を挟んでいるときは
+`simp only [ordAtDiv, Units.val_inv_eq_inv_val]` のように **`def` 名も `simp only` に入れて展開**
+してから `rw [… ordPt_inv …]`。
+
+
+## `Finsupp.single_eq_of_ne` の向きは直感と逆（2026-09-06）
+
+**失敗形**: `single w 1 v = 0` を閉じようとして `Finsupp.single_eq_of_ne (Ne.symm hvw)` と書くと
+
+```
+Application type mismatch: hvw has type v ≠ w but is expected to have type w ≠ v
+```
+
+型は `(h : a' ≠ a) : (single a b) a' = 0` で、**添字が先ではなく後ろ**である。
+さらに `simp [Finsupp.single_eq_of_ne hvw]` のように**部分適用**で渡すと
+`b` がメタ変数のまま残り、linter に `This simp argument is unused` と言われる。
+
+**直し方**: 素点の不等式そのものを渡すだけでよい（`simp [hvw]` / `simp [Ne.symm hvw]`）。
+どちらが要るかは `single` の添字と評価点のどちらが左かで決まるので、
+`simp` の unused 警告を見てから片方に決める。
+
+## `nrRealPlaces` を `rw` すると `Fintype` の合成に落ちる（2026-09-06）
+
+**失敗形**: `rw [← NumberField.InfinitePlace.card_real_embeddings]` の直後に
+
+```
+failed to synthesize instance of type class
+  Fintype { φ // ComplexEmbedding.IsReal φ }
+```
+
+`IsReal` が decidable でないので `Subtype.fintype` が付かない。
+
+**直し方**: 証明の冒頭に `classical` を置く。★同じ束で
+`IntermediateField ℚ ℝ`（例: `ℚ⟮Real.sqrt 2⟯`）は `Real.instField` が noncomputable なので
+`noncomputable abbrev` にしないと `dependsOnNoncomputable` で落ちる。
+数体の実例を 1 つ作る手順は
+`Check/FrdI/Thm64PicDegenerate.lean`（`sqrt2_isIntegral` → `NumberField` インスタンス →
+`minpoly` → `finrank` → 実埋め込み → `card_add_two_mul_card_eq_rank` と `omega`）にある。
+
+## 「同じ `j` の 2 曲線」と `ofJ` は mathlib に在る（2026-09-06、在庫）
+
+`Mathlib/AlgebraicGeometry/EllipticCurve/ModelsWithJ.lean` と `.../IsomOfJ.lean`：
+
+* `WeierstrassCurve.ofJ (j : F) [DecidableEq F] : WeierstrassCurve F`、`ofJ_j : (ofJ j).j = j`、
+  無条件の `IsElliptic` インスタンスつき。`j ≠ 0, 1728` なら
+  `ofJ_ne_0_ne_1728 : ofJ j = ofJNe0Or1728 j = ⟨j−1728, 0, 0, −36(j−1728)³, −(j−1728)⁵⟩`。
+  `ofJNe0Or1728_c₄ = j(j−1728)³`・`ofJNe0Or1728_Δ = j²(j−1728)⁹`。
+* `WeierstrassCurve.exists_variableChange_of_j_eq : E.j = E'.j → ∃ C, C • E = E'`
+  ——★仮定は **`[IsSepClosed F]`**（分離閉体）である。数体の上では**そのままでは使えない**。
+  有限次部分拡大へ降ろす配管（`C = ⟨u,r,s,t⟩` を含む `IntermediateField` を取る）が別に要る。
+
+★★数体 `L` の素点 `p` で `v_p(j) < 0` なら、`ofJ j` は **拡大なしで** `p` で乗法還元になる
+（`u = j` の変数変換で `v_p(c₄) = 0`）。証明は `Found/GenEll/VeluJExpNeg.lean`。
+
+## 体の元には `linarith` が効かない（順序が無い）（2026-09-06）
+
+`h : j - 1728 = 0` から `j = 1728` を出すのに `linarith` を使うと
+`linarith failed to find a contradiction`。`L` は `LinearOrderedField` ではないからである。
+
+**直し方**: `sub_eq_zero.1 h` / `linear_combination h` を使う。
+`j + (-1728) = 0 → j - 1728 = 0` も `linear_combination h` で通る。
+
+## `all_goals try ring` を保険で置くと linter が落ちる（2026-09-06）
+
+`field_simp` が閉じてしまうと `'all_goals try ring' tactic does nothing` と
+`this tactic is never executed` の 2 種の警告が出る。
+**保険で置いた行は、1 回通ったら消す**（`sed -i '/all_goals try ring/d'`）。
+
+## 大きな Lean ファイルを bash のヒアドキュメントで書くと落ちることがある（2026-09-06）
+
+★数百行・非 ASCII 多数の内容を `cat > f.lean <<'EOF'` で書いたら
+`/usr/bin/bash: -c: line 1: unexpected EOF while looking for matching \`''` で
+**ファイルが 1 バイトも作られなかった**（同じ書き方で 60 行なら通る）。
+**直し方**: 本体ファイルは Write ツールで書き、小さな差分だけ `sed -i` にする。
+
+## `.absent` の本文に `--` を書くと `re:` の規約が消える（2026-09-06）
+
+**失敗形**: `.absent "… 全体を grep、0 件(node tools/absent-recheck.mjs --try で再実行できる)。re:`Chebotarev|…`→0"`
+と書いたのに、`node tools/absent-recheck.mjs` も `check.mjs` の G11 も
+「パターンが無い」と数え続ける。
+
+**原因**: 両者が使う `stripCommentsKeepStrings` は
+`.replace(/--[^\n]*/g, …)` で **行コメントを文字列の中まで**潰す。
+だから本文中の `--try` から行末までが空白になり、その後ろに書いた
+`` re:`…` `` ごと消える。★`--brief` や `--json` を本文に書いても同じことが起きる。
+
+**直し方**: `.absent` の本文に ASCII のハイフン 2 個を連ねない。
+オプション名を挙げたいときは「`try` オプション」のように書く
+（`——`（U+2014）や単独の `-`（日付の `2026-09-06` など）は安全）。
+
+## `.absent` の `re:` にバックスラッシュを書くと、当たらない正規表現になる（2026-09-06）
+
+**失敗形 1**: `` re:`AddMonoidHom\.toRealLinearMap` `` と書くと Lean が
+`invalid escape sequence` で落ちる（`\.` は Lean の文字列エスケープに無い）。
+
+**失敗形 2**（こちらが危ない）: 逃げて `` re:`AddMonoidHom\.toRealLinearMap` `` と書くと
+Lean は通るが、`absent-recheck.mjs` の `readString` は
+`\` を**そのまま 2 文字として**返す（unescape しない）ので、
+取り出される正規表現は `AddMonoidHom\.toRealLinearMap`
+＝「バックスラッシュ 1 個＋任意の 1 文字」になり、**永遠に 0 件**になる。
+不在の主張が覆っても鳴らない、静かな穴である（実測で確認）。
+
+**直し方**: `re:` の正規表現に ASCII のバックスラッシュを一切使わない。
+`\.` は `[.]`、`\(` は `[(]`、`\s` は素の空白、`\b` は書かずに
+`[A-Za-z0-9_.]*` などで前後を縛る。件数は
+`node tools/absent-recheck.mjs --try '<正規表現>'` で書く前に測ること。

@@ -102,7 +102,7 @@ def finite_of_le_of_northcott.needs : List ABC3.Meta.ProofObligation :=
       ("Proposition 1.4, (iv)(Northcott 性)——M_ell の粗モジュライは j-線なので " ++
        "ℙ¹ の場合で足りる。Check/GenEll/NorthcottProjModelNonvacuous.lean で検査済み") 6,
     .citation "[Silv2]" "Proposition 2.1(deg ≾ ht_∞ ≾ 12(1+ε)·ht_Falt の側)"
-      (.absent "0_Source に [Silv2] は無く、mathlib にも Faltings 高さと無限素点での高さの比較は無い") 17,
+      (.absent "0_Source に [Silv2] は無く、mathlib にも Faltings 高さと無限素点での高さの比較は無い。★2026-09-06 に再測: re:`Faltings|faltingsHeight|Arakelov`→0") 17,
     .implicitStep
       ("★原文が「In particular」で畳んだ段である。機構は包含 1 本: " ++
        "{ht_Falt ≤ C} ⊆ {ht_∞ ≤ a·C + C′}") 17,

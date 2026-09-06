@@ -525,6 +525,22 @@ FrdI / GenEll / NCBelyi / CorrHyp は見出し数・合図数・帰属数・状�
   3. 立ち上がりの実測: `reset --hard` → `0_Source` を junction → 測定開始まで **約 3 分**
      (第 2 回 1 時間 / 第 3 回 10 分)。junction は `cmd /c mklink` がフックに弾かれるので
      **Node の `fs.symlinkSync(target, link, 'junction')`** で作る。
+- **★第 7 回(2026-09-06)。手順どおりで通ったが、時間の見積もりを 2 点訂正する**:
+  1. ★★**`reset --hard master` も `merge --ff-only master` も**、この回は
+     **フックに弾かれた**(「worktree 外へ向かう git 操作」と見なされる)。
+     代わりに **`git checkout master -- tools ResearchPaper lean memory CLAUDE.md …`**
+     (パスを列挙する形)は通った。★`git checkout master -- .` は弾かれる。
+     ★これで作業ツリーは master と byte 一致になる(`git diff master -- lean` が空で確認)。
+     HEAD は古いままだが、**測定はファイルの中身でするので支障が無い**。
+     ★仕上げに `.claude` も戻すこと——戻さないと
+     「agent 定義 5 本を削除する」提案に見える(実際そう見えていた)。
+  2. ★**`check.mjs` の cold な PDF 抽出は「43 秒」では終わらない。**
+     junction を張った状態で **20 分を超えても `.cache/pdf-pages.json` ができなかった**
+     (`0_Source` は 276 エントリ)。`0_Source` 無しで走らせた回は **3 分 32 秒**で
+     終わるが「PDF を読めない」NG が **5,348 件**出る。
+     ⇒ **メタ係の副作用の確認は `graph.mjs`(0.5 秒)を主にし、
+     `check.mjs` は `selftest` と `1_Structured: S1-S6` が出た時点で足りる**とみなす方が安い
+     (この 2 つは 30 秒以内に出る)。全 NG 件数まで要るなら**本体側で 1 回**走らせる。
 - **採否**: 未着手
 
 ## M12. `--all` が炙り出した「測れていない論文」11 + 4 本(M7 の残り)
@@ -756,3 +772,428 @@ depth ≥ 1 に沈む。その結果 FrdI の傍注が **698 → 196 件**(傍�
   取り込みの判断を待たずに直した。
 - 道具本体(`tools/source-health.mjs` 292 行 + `ResearchPaper/source-health.json`)の
   取り込みは **D12** に積んだ(方針書 §2「メタ提案のマージは人を待つ」)。
+
+---
+
+## M17. ★★★★★★★★「配線されていない既存の数学」を機械で見つける(`tools/unwired.mjs`、**実装済(提案)**)
+
+- **状態**: 実装済(提案)(2026-09-06 メタ第 7 回)
+- **観測(なぜ要るか)**: 2026-09-05〜06 の 2 日で、**未解決の数学ではなく配線漏れ**だった
+  節点が 4 件出た(`Divisor/weil` / `Divisor/arith` / `NumberField/cheb` /
+  `GaloisRep/WeilPairingDef`)。**4 件とも人が在庫調査のついでに気づいたもので、機械は 0 件**。
+  `frontier.mjs` は「`sorry` があるノード」を出すが、
+  **その `sorry` が既に `Found` で解けているか**を見ていない。
+
+### 測定 1 —— `sorry` は「ノード 23」ではなく「宣言 56」
+
+| | 件数 |
+|---|---|
+| `lean/ABC3` の宣言(`theorem/lemma/def/abbrev/instance/structure/inductive/class`) | **23,046** |
+| `sorry` を含む宣言 | **57**(Skeleton 56 / `Meta/Calibration` 1) |
+| ★素朴に `\bsorry\b` を grep したときの見かけ | **114**(Skeleton 90) |
+| `Found` / `Interface` / `Gap` / `Check` の `sorry` | **0** |
+
+★★**差の 57 件は `.needs` の本文に「sorry」と日本語で書いてあるだけ**だった。
+**文字列リテラルを潰さずに数えると 2 倍に見える。** 以後 `sorry` を数える道具は
+`stripStrings` を必ず通すこと(`unwired.mjs` の同名関数)。
+
+### 測定 2 —— 結論の突き合わせは効く。**完全一致は要らなかった**
+
+`Skeleton` の `sorry` 宣言の**結論**(深さ 0 の `:` の右)を鍵の集合(識別子・その末尾成分・
+部分語 camel/snake・記号)にし、`sorry` 無しの在庫 16,182 宣言に idf 重みで当てる。
+
+**較正 6/6**(いずれも上位 3 件に正解が入る。所要 **1.47 秒**):
+
+| 組 | 正解の順位 |
+|---|---|
+| `weilPairing_nondeg` → `exists_pairing_ne_one`(第 1036、**4 件目**の修正前の署名) | **2 / 3**(60%) |
+| `inertia_recoverable` → `inertia_recoverable_of_prop12`(**M3 が手で見つけた辺**) | **2 / 3**(82%) |
+| `isDiscreteValuationRing_stalk_of_codimOne`(★**5 件目**) | **1 / 3**(100%) |
+| `ordAtDiv_mul` → `ordPt_mul` | **1 / 3**(60%) |
+| `finite_support_ordAtDiv` → `finite_ordPt_ne_zero` | **1 / 3**(72%) |
+| `alpha_in_modl_image` → `alpha_mem_map_of_galTate` | **1 / 3**(97%) |
+
+★4 件目は在庫 22,988 件のうち **2 位**に出た。**完全一致を狙う必要は無い**という
+本体の見立ては数字で裏づけられた。
+
+### ★★★測定 3 —— **走らせたら 5 件目が出た**(この回の主な成果)
+
+`一致率 80% 以上 かつ 情報量 15 以上 かつ 裸の sorry` で **9 件**。中身を全部開いて確かめた:
+
+| 判定 | 件数 | 中身 |
+|---|---|---|
+| **当たり**(`Found` に sorry 無しで同じ内容がある) | **6** | 下表 |
+| 半分当たり(狙う先は正しいが仮定の橋が要る) | 2 | `alpha_in_modl_image`(σ の構成が残る)/ `inertia_recoverable`(Prop 1.2 待ち。既知) |
+| 外れ | 1 | `nonempty_algHom_of_splitsCompletely_subset`(結論が `Nonempty (M →ₐ[K] L)` だけで情報量 17。`Nonempty` の雑音) |
+
+**当たり 6 件**(★「配線されていない既存の数学」の **5 件目以降**):
+
+| Skeleton の `sorry` | `Found` にある実装(sorry 0) |
+|---|---|
+| `Divisor/SchemeWeil.lean:95 isDiscreteValuationRing_stalk_of_codimOne` | `Found/Divisor/SchemeWeil.lean:112` **同名・同結論** |
+| `Divisor/SchemeWeil.lean` の `ordAtDiv`/`ordAtDiv_mul`/`finite_support_ordAtDiv`/`divOfFn`/`divOfFn_mul` | `Found/Divisor/SchemeWeilOrd.lean` の `ordPt`・`ordPt_mul` / `Found/Divisor/SchemeDivFinite.lean` の `finite_ordPt_ne_zero`・`weilDivOfFn`・`weilDivOfFn_mul` |
+| `Divisor/Cartier/Example61.lean:41/45/50 isCartierDiv_zero/add/neg` | `Found/Divisor/SchemeCartier.lean:80 cartierSubgroup` が `zero_mem'`・`add_mem'`・`neg_mem'` を**全部証明済み** |
+| `Divisor/Cartier/Example61.lean:70 isQCartierSubgroup_of_forall_isQCartier` | `Found/Divisor/SchemeCartier.lean:112 isQCartierSubgroup_cartierSubgroup` |
+| `Divisor/Cartier/Theorem62.lean:29/35/43/50 pullbackCartier*` | `Found/Divisor/SchemeCartierPull.lean:169 cartierPullback`・`:187 isCartierDiv_cartierPullback` |
+| `Divisor/ArithDivisor/Example63.lean:119 units_eq_roots_of_unity` | `Found/Divisor/ArithDivisor.lean:399 exists_pow_eq_one_of_arithDiv_eq_zero` |
+
+★★**`Skeleton/Divisor/SchemeWeil.lean` は前線の第 3 位**(下流 8 / 項目 22)であり、
+`Cartier/Example61` と `Cartier/Theorem62` はその下流である。**まとめて 3 ノード**が
+「未解決の数学」ではなく配線である可能性が高い。
+★★**ただし無条件ではない。** `Found` 側は `hnorm : IsNormalScheme X` を**明示引数**に持ち、
+`cartierPullback` は `[CompactSpace X]` と `hdim` を要求する。`Skeleton` 側は
+`_hnorm`(未使用)で、Noether 性も `IsNoetherian` と `IsLocallyNoetherian` で綴りが違う。
+**仮定を足す逸脱**になるので、4 件目(`[CharZero F]`・`[IsAlgClosed F]`)と同じ扱いが要る。
+★★★**数学の判断は本体がすること。** ここでは「候補として当たっている」までしか言わない。
+
+### 測定 4 —— 空撃ち(3 件目の型)も出る。**`--dead`**
+
+| | 件数 |
+|---|---|
+| 宣言を持つモジュール | 2,079 |
+| 実消費者がいるのに **1 語も使われていない**(空撃ち) | 303(Skeleton 5) |
+| 実消費者が 0(束ねる `Skeleton.lean` だけが import) | 250(Skeleton 41) |
+| ★★**そのうち `sorry` を持つもの** | **8**(前線 23 ノードの **35%**) |
+
+★**3 件目(`NumberField/cheb`)がそのまま第 1 位に出る**:
+`Skeleton/FrdI/Thm64Deg.lean` は `Skeleton/NumberField/Chebotarev.lean` を import しているが
+**1 語も使っていない**。4 件目(`GaloisRep/WeilPairingDef`)も「消費者なし」で出る
+——第 1036 が「この sorry は宙に浮いていた」と書いたのと同じ判定である。
+★**誰も使わない `sorry` 8 件**は「配線するか畳むか」の判断が要る。
+
+### 効かなかったこと(隠さない)
+
+- ★**`Check/` を在庫に入れると雑音の主因になる。** 退化例・反証は**わざと同じ形**を
+  しているので、`Skeleton/PGC/*` の候補が `Check/PGC/*Degenerate.lean` で埋まる(実測)。
+  既定で外した(`--check` で入る)。
+- ★**「裸の sorry か」を見ないと外れる。** `semistableAt_veluQuotientFull` は
+  候補 3 件が 100% で並ぶが、**本文が既に `Found` を 3 本呼んでいて**残りは本物の穴である。
+  本体が `:= by sorry` だけのものを `[裸]` と印し、★の条件に入れた(10 件中 1 件が消えた)。
+- ★**結論が短いと 100% が出るが意味が無い**(`ℝ` / `WeilDiv X` / `Nonempty …`)。
+  一致率だけでは切れないので**情報量(idf の絶対量)を併記**した。外れ 1 件は情報量 17。
+- モジュール単位の素朴な「どこからも参照されない」は **179 本**出て使えなかった。
+  `Found/` の作りたての葉が大半である。**辺ごと**に見て、
+  かつ**束ねるだけのモジュールを消費者から外す**と 303 + 250 に絞れた。
+- 素朴な `:=` での署名の切り出しは **5 件**で結論を壊した(`f (p := p)` の名前つき引数)。
+  **深さ 0 の `:=` でだけ切る**必要がある。★`tools/decl-index.mjs` の `statementOf` は
+  いまも素朴な `search(/:=|\bwhere\b/)` なので、**同じ壊れ方をしている**(未修正・別件)。
+- ★**結論だけでは引けない問いが 2 件ある**(`degArith : ℝ` / `ordAtDiv : ℤ`)。
+  56 件中 2 件(3.6%)。結論の情報量の**中央値は 61**なので、
+  この当て方が使えるのは **54/56**。残り 2 件は名前で引くしかない(道具は印を出すだけ)。
+
+### 触ったファイル(巻き添え範囲)
+
+- **`tools/unwired.mjs`(新規 330 行)のみ。** 既存の道具は 1 行も変えていない。
+  `lean/ABC3/` は 1 行も触っていない。
+  ★`graph.mjs` / `frontier.mjs` / `check.mjs` は `unwired.mjs` を読まないので、
+  **取り込んでも既存の数字は動かない**。
+
+### 副作用の確認
+
+- `node tools/graph.mjs` … ノード **2,146** / 辺 **6,124** / `sorry` **23** —— master と同じ
+  (`lean/` が master と byte 一致であることを確認済み)。
+- `node tools/check.mjs --brief` … selftest **46/46 PASS**、`1_Structured: S1-S6 すべて PASS`。
+- 所要: `unwired.mjs` **1.5 秒** / `--dead` **1.3 秒** / `--selftest` **1.5 秒**。
+  索引は作らない(`.cache` を汚さない)。
+
+### 使い方(brief に載せるなら)
+
+```
+node tools/unwired.mjs                    # sorry ごとに候補 3 件（★印がまず見るもの）
+node tools/unwired.mjs --node Skeleton/Divisor/SchemeWeil.lean
+node tools/unwired.mjs --dead             # 空撃ち／誰も使わない sorry
+node tools/unwired.mjs --selftest         # 較正 6/6
+```
+
+- **採否**: 未着手(本体が書く)
+
+## M18. ★前線の並べ方が「誰が使うか」を見ていない(M17 の副産物、未着手)
+
+- **状態**: 未着手(2026-09-06 第 7 回に発見)
+- **観測**: `frontier.mjs` は `downstream`(推移的に import しているノード数)で並べる。
+  しかし M17 `--dead` の実測で、**前線 23 ノードのうち 8 ノードは
+  「その語を誰も使っていない」**(束ねる `Skeleton.lean` を除く):
+  `Skeleton/NumberField/Chebotarev.lean`(空撃ち)/
+  `Skeleton/Divisor/Cartier/Theorem62.lean`・`Skeleton/CorrHyp/Section6.lean`・
+  `Skeleton/Divisor/NormalizationUniversal.lean`・`Skeleton/FrdI/Def28ProL.lean`・
+  `Skeleton/Divisor/ArithDivisor/Theorem64.lean`・`Skeleton/GenEll/GaloisLocal.lean`・
+  `Skeleton/GenEll/SigmaConvolution.lean`(消費者なし)。
+- **なぜ効くか**: `downstream` は **import の到達数**であって
+  **その宣言を実際に使う消費者の数**ではない。第 1036 の 4 件目は
+  「消費者は独立に `Found` を使って既に閉じており、この sorry は宙に浮いていた」。
+  同じ形が**いま 8 件ある**。
+- **仮説**: `frontier.mjs` に「実消費者 0」の印を出す(並べ替えはしない)だけで、
+  持ち場を配る前に「畳む/配線する」の判断ができる。★M3 と同じで、
+  **判定を変えず印を足す**方が取り込みが軽い。
+- **効果**: —(未測定)
+- **採否**: —
+
+## M15 の補足(第 7 回に**再現と直し方だけ**測った。`check.mjs` は触っていない)
+
+- **再現**: `.needs` の本文に先頭ドット付きで `.implicitStep` と書くと、
+  obligation の切り出しが **2 件 → 3 件**になり、先頭の 1 件は頁番号が `null` になる。
+  ここから先で `stripStr` が引用符の対応を失い、本文中の数値(第 1036 では `1036`)が
+  頁番号として拾われて**偽の NG** になる。
+- ★**直し方は「長さを保つマスク」**。位置がずれないので下流の切り出しはそのまま使える:
+
+  ```js
+  const maskStr = (t) => t.replace(/"(?:[^"\\]|\\.)*"/g, (m) => ' '.repeat(m.length));
+  // check.mjs 1341 行あたり: kre.exec(body) → kre.exec(maskStr(body))
+  //   marks の at はそのまま body.slice() に使う（長さが同じなので位置は変わらない）
+  ```
+
+  実測: 前 **3 件 / 頁 (null, 19, 19)** → 後 **2 件 / 頁 (19, 19)**。
+- ★**この回では当てていない。**「1 回の起動で直すのは 1 件だけ」の規約と、
+  `check.mjs` の巻き添え範囲が広いため。当てるときは selftest に
+  「本文に `.implicitStep` を含む `.needs`」の fixture を 1 本足すこと。
+
+## M19. 古い worktree の棚卸し(2026-09-06。**消していない。一覧だけ**)
+
+本体を除いて **7 本**。`master` から到達できない commit の有無:
+
+| worktree | 枝の先端 | 未取り込み commit | 中身 |
+|---|---|---|---|
+| `agent-a18c16c2e850ed2b2` | `bba119f9` | **1 本** | メタ第 2 回 M4+M5(`absent-recheck.mjs`・索引の無名 instance)。★成果自体は別経路で master に入っている |
+| `agent-a29781764f48bdeb5` | `e5836f0a` | **1 本** | メタ第 4 回 M7(`hedge-index` の全論文化) |
+| `agent-aca54d335e29a97e0` | `209ea724` | **1 本** | メタ M8(pdftotext の実装固定・キャッシュ鍵に実装を刻む) |
+| `agent-a8694348a9f3da295` | `e0aa4666` | 0 本 | —— |
+| `agent-a8bcf6e2fcb74e7e9` | `a5e88099` | 0 本 | —— |
+| `agent-ae703d5a5ed149810` | `78c2cd5b` | 0 本 | ★作業ツリーに **`tools/source-health.mjs`(未 commit)** が居る。メタ第 6 回 M16 の本体で **D12 に積んである**もの。★commit されていないので、消すと**復元できない** |
+| `…/scratchpad/pnt-trial` | `055408da`(detached) | —— | 数学トラックの試し |
+
+★★**危ないのは `agent-ae703d5a5ed149810` だけ**である(未 commit の成果が 1 本)。
+他の 3 本は commit 済みなので、worktree を畳んでも枝が残っていれば失われない。
+★**この回では何も消していない。**
+
+---
+
+## M15(続き)。**当てた**(メタ第 8 回、2026-09-06。`tools/check.mjs`、実装済(提案))
+
+- **状態**: 実装済(提案)。★第 7 回は「再現と直し方だけ」だったが、**今回は当てた**。
+
+### 測定 1 —— 偽陽性を **selftest に固定した**(第 1036 と同じ文言で再現する)
+
+新しい fixture `tools/selftest-fixtures/d45-needs-kind-spelled-in-string.lean`:
+
+```lean
+def spelledinstring.src : ABC3.Meta.Source :=
+  { paper := "pGC", pdfPage := 3, item := "Proposition 1.1", sectionId := "prop-1-1" }
+def spelledinstring.needs : List ABC3.Meta.ProofObligation :=
+  [ .folklore "第 1036 で .implicitStep という綴りを本文から外して回避した" 3 ]
+```
+
+**修正前**にこれを通すと出る NG は
+
+```
+G6 `spelledinstring.needs` が物理 p.1036 を指しているが範囲外(1..9, pGC)
+```
+
+——**第 1036 に出た文言そのもの**である(あちらは GenEll で 1..19)。
+★偽陽性の条件が正確に分かった: **本文中の数値が、区切りに化ける綴りより「前」にあるとき**。
+後ろにあるときは末尾の本物の頁が勝つので出ない。だから今まで 1 回しか出ていない。
+
+★対にした `d46-needs-bad-page-with-kind-in-string.lean` は
+「文字列に `.otherPaper` と綴ってあるが、頁 999 は範囲外」——**落ちなければならない**方。
+D31/D32(文字列内の `sorry`)と同じ設計である。潰す側だけ入れると本物を見逃す。
+
+### 測定 2 —— **今日の木では 1 件も数字が動かない**(巻き添えの実測)
+
+`.needs` の本体 **982 件 / obligation 3,432 件**を、旧(生の body を走査)と
+新(`maskLeanStrings` した body を走査)で切り出して突き合わせた:
+
+| | 旧 | 新 |
+|---|---|---|
+| `.needs` 本体 | 982 | 982 |
+| obligation 合計 | **3,432** | **3,432** |
+| 切り出し結果(種別/頁/tag/item)が変わる `.needs` | —— | **0 件** |
+
+集計欄(印字される「規模」)も**全 10 欄で差 0**:
+citation 1857 / folklore 40 / implicitStep 1312 / otherPaper 143 / derivation 80 /
+inMathlib 399 / inProject 1399 / inProgress 1 / absent 57 / unmeasured 1。
+★つまり**今日の数字は 1 つも動かない。将来の罠だけを塞ぐ**変更である。
+
+### 測定 3 —— `--brief` の**全出力**が selftest の 1 行しか変わらない
+
+隔離 worktree で旧/新を同条件で走らせ、**出力を丸ごと diff した**(各 35 行):
+
+```
+2c2
+< selftest: 46/46 PASS
+---
+> selftest: 48/48 PASS
+```
+
+**これだけ。** NG は前後とも **14 件**(内訳: G9 の CorrHyp 13 件 + `lake build 失敗` 1 件)。
+★**本体の基準 13 件と一致する**(worktree に `.lake` の実体が無いので lake の 1 件が乗る)。
+
+### ★★測定 4 —— 隔離 worktree で `check.mjs --brief` を **111 秒 / 10 秒**で測る手順
+
+第 7 回は「cold な PDF 抽出が 20 分を超えても終わらなかった」と書いた。
+**原因は PDF ではなく `lake build` だった。** 今回 3 点で切り分けた:
+
+1. `ResearchPaper/0_Source` を本体へ **junction** で張る
+   (`fs.symlinkSync(target, link, 'junction')`。★`cmd /c mklink` と
+   `git checkout master -- …` は隔離フックに弾かれる。`git archive master lean tools ResearchPaper | tar -x` は通る)。
+2. `PATH` から `elan` を外して走らせる ⇒ `lake` が ENOENT で即死し、
+   **`lake build 失敗` の 1 NG だけ**が乗る。他の段は全部走る。
+   ★★**worktree で `lake build` を走らせてはいけない**——今回 1 本流し切って測った:
+   **50 分 1 秒**(冷ビルド。`.lake` の実体が無いため)。第 7 回の「20 分を超えても終わらなかった」の
+   正体はこれである。★同じ回の NG は **5,055 件**で、その全部が「引用照合: PDF を読めない」だった
+   (`0_Source` を張る前に流したため)——第 7 回の 5,348 件と同じ型の空振りである。
+   ⇒ **50 分 → 111 秒(PDF 冷)/ 10 秒(PDF 温)**。27〜300 倍。
+3. `.cache/pdf-pages.json` は本体からコピーし、**キーの絶対パスを worktree のものに書き換え**、
+   `self` を**そのとき走らせるスクリプトの sha1 に打ち直す**
+   (鍵に `check.mjs` 自身のハッシュが入るため。★PDF の抽出・正規化を 1 行も触っていないときだけ正当)。
+
+実測: **PDF キャッシュ無し 111 秒 / 有り 10 秒**(193 頁)。★**20 分ではない。**
+
+### 触ったファイル(巻き添え範囲)
+
+- `tools/check.mjs` —— **実コードは 4 行**(`maskLeanStrings` の定義 2 行 +
+  区切り走査 1 行 + 集計 2 行)。ほかは注釈と fixture の登録。
+- `tools/selftest-fixtures/d45-…lean` / `d46-…lean` —— **新規 2 本**。
+- ★**`lean/ABC3/` は 1 行も触っていない。** `graph.mjs` / `frontier.mjs` /
+  `decl-index.mjs` は `check.mjs` を読まないので影響しない。
+
+### 副作用の確認
+
+- `node tools/check.mjs --selftest` … **46/46 → 48/48 PASS**(★件数が 2 増えた)。
+- `node tools/check.mjs --brief` … NG **14 → 14**(lake の 1 件込み。本体基準 13 と整合)。
+  出力の全 35 行のうち**変わったのは selftest の 1 行だけ**。
+- `node tools/graph.mjs` … ノード **2,146** / 辺 **6,124** / `sorry` **23** —— 第 7 回と同じ。
+- **採否**: 未着手(本体が書く)
+
+---
+
+## M20. ★`decl-index.mjs` の `statementOf` も同じ壊れ方(**実装済(提案)**、メタ第 8 回)
+
+- **状態**: 実装済(提案)(2026-09-06)
+- **観測**: `statementOf` は `s.search(/:=|\bwhere\b/)` で素朴に切っていた。
+  ★第 7 回(M17)が `unwired.mjs` を書いたときに「5 件で結論を壊す」と気づいた場所で、
+  **名前欄(M14)は第 1036 で直したが statement 欄は放置**されていた。
+- **壊れ方は 2 つ**(どちらも「構文で切る前に文字列と括弧を見ていない」):
+  1. **括弧の中の `:=`** —— 名前つき引数 `f (p := p)`・autoParam `(h : a+1=b := by omega)`・
+     `(priority := 100)`。**ここで切ると結論が丸ごと落ちる。**
+  2. **文字列の中の `:=` / `where` / `--`**。
+- **直し方**: `maskStrings`(長さを保つマスク)を当ててから、
+  **深さ 0 の `:=` / `where` でだけ切る**。深さは `( [ { ⟨ ⦃` で数え、**行をまたいで持ち越す**。
+
+### 実測(2026-09-06。索引を作り直して 1 行ずつ突き合わせた)
+
+| | 旧 | 新 |
+|---|---|---|
+| `.cache/decl-index.txt` 行数 | **23,170** | **23,170**(変化なし) |
+| `.cache/src-index.txt` 行数 | **4,571** | **4,571**(変化なし) |
+| `.cache/mathlib-index.txt` 行数 | **249,273** | **249,273**(変化なし) |
+| 鍵(種別/名前/場所)が片側だけ | —— | **0 / 0** |
+| ★ABC3 で statement が直った | —— | **979 件(4.2%)** |
+| ★mathlib で statement が直った | —— | **6,271 件(2.5%)** |
+| 短くなった statement | —— | **0 件**(全部「長くなった」= 落ちていた結論が戻った) |
+| 深さ 0 の `:=` が残る statement | —— | **0 / 23,170**、**0 / 249,273** |
+
+★**行数が 1 行も動かない**のが要点である(動いたら別の何かを壊している)。
+
+**壊れていた実例**(結論が丸ごと消えていた):
+
+| 宣言 | 旧(索引に載っていた statement) | 新 |
+|---|---|---|
+| `Skeleton/PGC/Section1.lean:61 cyclotomicCharacter_recoverable` | `… : (cyclotomicCharacterObject (p` | `… (p := p)).RecoverableFromAbsGal` |
+| `Skeleton/PGC/Section2.lean:90 prop_2_1` | `… : RecoverableAsAddModule (p` | `… (p := p) (fun K => K.closure)` |
+| `Skeleton/PGC/Section4.lean:122 theorem_4_2` | `… (naturalOuterIso RF hnat (K` | `… (K := K) (K' := K'))` |
+| mathlib `composableArrows₅` | `abbrev composableArrows₅ (n₀ n₁ : ℤ) (hn₁ : n₀ + 1 = n₁` | `… := by omega) : ComposableArrows C 5` |
+| mathlib `SpectralObject…HomologyData.cc` | `abbrev cc (hn₁ : n₀ + 1 = n₁` | `… : CokernelCofork ((page X data r hr).d pq pq')` |
+
+★★**mathlib の autoParam がこの穴の主因**である。`(h : … := by omega)` を持つ宣言は
+**結論が索引に 1 文字も入っていなかった**。`CLAUDE.md` は
+「ABC3 側は `decl-index.txt` を**結論のリテラル**で引く」と定めているので、
+**その引き方が 6,271 件で成立していなかった**ことになる。M14(名前欄)と同じ回路の 2 例目。
+
+### ★第 7 回の「5 件」は今日の木では **3 件**(隠さない)
+
+母集団は一致する(`Skeleton` の `sorry` を持つ宣言 **56 件** —— M17 の「57(Skeleton 56 /
+`Meta/Calibration` 1)」と同じ)。そのうち素朴な `:=` で署名が壊れるのは **3 件**であり、
+第 7 回の **5 件**は再現しない。差は `unwired.mjs` 側の切り出し規則か、
+第 1035/1036 で `Chebotarev.lean`・`WeilPairingDef.lean` が動いたことによる。
+★索引全体では 979 / 6,271 件なので、**この 3 対 5 は結論に影響しない**。
+
+### ★M17(`unwired.mjs`、D14 で保留中)への影響 —— **較正を取り直すこと**
+
+`unwired.mjs` は**結論の語**を鍵にして在庫に当てる道具である。その結論の切り出しは
+`decl-index.mjs` とは別実装だが**同じ素朴な規則**なので、取り込むときは:
+
+1. `unwired.mjs` 側の署名切り出しも**深さ 0 の `:=`** に揃える。
+2. ★**較正 6/6 を取り直す。** 結論が長くなる = 鍵語が増える = idf 重みが変わるので、
+   順位(2/3・1/3 …)は動きうる。★**今回この worktree に `unwired.mjs` は入っていないので、
+   較正は取っていない。**
+
+### 触ったファイル
+
+- `tools/decl-index.mjs` のみ(`maskStrings` の追加 + `statementOf` の書き換え)。
+  ★`lean/ABC3/` は 1 行も触っていない。
+- 所要: `node tools/decl-index.mjs --mathlib` **5.7 秒 → 8.7 秒**(+3.0 秒)。
+  1 文字ずつ深さを数えるぶんだけ遅い。**索引作りは 1 日に数回なので許容**と判断した。
+- **採否**: 未着手(本体が書く)
+
+---
+
+## M21. 同じ壊れ方の棚卸し —— **Lean を読む常用ツール 13 本のうち、構文で切るのは 4 本**
+
+- **状態**: 測定済(2026-09-06 第 8 回)。★**直していない。件数だけ。**
+- **測り方**: `tools/*.mjs`(使い捨て `_*.mjs` を除く **26 本**)のうち、
+  `.lean` を `readFileSync` するもの **13 本**を 1 本ずつ開いた。
+
+| 区分 | 本数 | 中身 |
+|---|---|---|
+| ★**Lean を構文で切る**(宣言 / `sorry` / obligation の区切り) | **4** | `check.mjs`・`decl-index.mjs`・`graph.mjs`・`brief.mjs` |
+| 文字列の**中身がほしい**(`.src` の `paper :=`・`item :=` を読む) | 6 | `corrhyp-progress` `frdi-progress` `genell-progress` `graph-layers` `absent-recheck` `index-html` |
+| Lean を構文で切っていない | 3 | `leanfile`(lakefile)・`mojibake`・`hedge-index`(読むのは `.txt`) |
+
+★**構文で切る 4 本は、今日ぜんぶ文字列を潰している**——
+`graph.mjs` と `brief.mjs` は 2026-09-03 に(「47 件中 8 件が誤検出だった」と注釈がある)、
+`check.mjs` と `decl-index.mjs` は**今回**。
+中身がほしい 6 本は**潰してはいけない**側なので、これで正しい。
+⇒ **この系統の穴はいったん塞がった。**
+
+### ★おまけ: 素朴な `sorry` grep は **13.3 倍**に見える(第 7 回の 114→57 の取り直し)
+
+`lean/ABC3` を行単位で数えると **素朴 759 行 → 潰すと 57 行**。
+内訳(素朴 → 実): `Found` 442 → **0** / `Skeleton` 217 → **56** / `Check` 62 → **0** /
+`Interface` 24 → **0** / `Meta` 8 → **1** / `Gap` 4 → **0**。
+★**57 = Skeleton 56 + Meta/Calibration 1** は M17 の数字と完全に一致する(器具は正しい)。
+★`Found` の 442 は全部 `.needs` の説明文である——**「Found に sorry がある」と
+素朴な grep で報告されたら、それは 100% 誤報**である。
+- **採否**: —(測定のみ。実装なし)
+
+---
+
+## M22. ★索引が `_root_` 宣言に名前空間を付けてしまう(**未着手**。M14 の 3 例目)
+
+- **状態**: 測定済・**未実装**(2026-09-06 第 8 回。★「1 回の起動で直すのは 1 件」の規約で見送った)
+- **測り方**: M20 で索引を作り直したついでに、名前欄に**成分の重複**か**8 段以上**の
+  ネストがあるものを数えた。
+- **観測**:
+
+  | | 件数 |
+  |---|---|
+  | `.cache/mathlib-index.txt` の名前欄に `._root_.` が入っている | **3,041** |
+  | 名前の先頭が `_root_.` | 52 |
+  | 名前欄に成分の重複 or 8 段以上 | 738 |
+  | `.cache/decl-index.txt`(ABC3 側) | **0**(この書き方をしていない) |
+
+  実例:
+  - `CategoryTheory.GradedObject.Monoidal._root_.CategoryTheory.GradedObject.HasGoodTensorTensor₂₃`
+    ——正しくは `CategoryTheory.GradedObject.HasGoodTensorTensor₂₃`。
+  - `Order.Frame.MinimalAxioms.Order.Coframe.MinimalAxioms.CompleteDistribLattice.MinimalAxioms.…`
+    ——`namespace`/`end` の対応が取れず**積み上がった**もの。
+- **原因**: `scan()` が `[...nsStack, m[2]].join('.')` と無条件に連結している。
+  Lean の `_root_.` は**名前空間を抜ける**指示なので、付けてはいけない。
+  積み上がりの方は `END_RE` が `^\s*end\s+NAME\s*$` で、
+  `end Foo -- コメント` のような行を pop できないためと見られる(未確認)。
+- **なぜ効くか**: ★**M14(名前が非 ASCII で切れる、24,659 件)と同じ回路の 3 例目**である。
+  「mathlib に無い」の誤判定はこの木で 5 件出ており、そのうち 1 件は索引の穴だった。
+  3,093 件は mathlib 索引の **1.2%**。
+- **直し方(1 行)**: `const full = m[2].startsWith('_root_.') ? m[2].slice(7) : [...nsStack, m[2]].join('.')`。
+  積み上がりの方は `END_RE` を `^\s*end\s+(NAME)\s*(--.*)?$` にする。
+  ★**回帰の見張り**: 索引の**行数が動かないこと**(23,170 / 249,273)。
+- **効果**: —(未実装)
+- **採否**: —

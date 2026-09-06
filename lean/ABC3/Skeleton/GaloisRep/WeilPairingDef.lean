@@ -149,7 +149,7 @@ def weilPairing_add_left.needs : List ProofObligation :=
   [ .implicitStep
       "★★★★★★★★**2026-08-20: 第 184 + 第 191 ブロックで証明された**。3 点について**同じ `μ`・同じ `τ`** で witness を作り、第 183 の `(τg₁/g₁)(τg₂/g₂) = τg₃/g₃` を当てる。★`P₁ + P₂ = O` の場合は第 141 の `f_P·f_{−P} = c(x−x_P)^n` から別に出す(第 191)(0 ブロック)" 19,
     .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.8.1(a)(双線型性)"
-      (.absent "mathlib に Weil 対は 0 件(2026-08-20、`WeilPairing|weil_pairing` で全文検索して 0 件)") 19,
+      (.absent "mathlib に Weil 対は 0 件(2026-08-20、`WeilPairing|weil_pairing` で全文検索して 0 件)。★2026-09-06 に再測: re:`WeilPairing|weilPairing|weil_pairing`→0") 19,
     .otherPaper "GenEll" "Theorem 3.8(Weil 対 e_n の定義)" 19,
     .implicitStep
       "★★第 1 変数の加法性は `f_{P₁+P₂} = f_{P₁}·f_{P₂}·(主因子)` に帰着する。主因子の因子が 0 であることは第 182 の `elem_relation_of_add` で済んだ(0 ブロック)" 19,
@@ -165,7 +165,7 @@ def weilPairing_self.needs : List ProofObligation :=
   [ .implicitStep
       "★★★★★★★★★**2026-08-20: 第 190 + 第 191 ブロックで証明された**。`H := ∏_{i<n} τ_{iP'}^*(g)`(`nP' = P`)の `n` 乗が定数になり、`τ_{P'}^* H = H` の伸縮で `τ_P^*(g) = g`(0 ブロック)" 19,
     .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.8.1(b)(交代性)"
-      (.absent "mathlib に Weil 対は 0 件(2026-08-20、同上の検索)") 19,
+      (.absent "mathlib に Weil 対は 0 件(2026-08-20、同上の検索)。★2026-09-06 に再測: re:`WeilPairing|weilPairing|weil_pairing`→0") 19,
     .otherPaper "GenEll" "Theorem 3.8(Weil 対 e_n の定義)" 19,
     .implicitStep
       "★★`∏_{j} τ_{jP}(g_P)` の telescoping。★`n` 等分点 `P'` は第 186 で**分割多項式を使わずに**取れた(位数 `#E[n] = n²` の数え上げだけ)。★★極の位数 `−n` は第 187(値群の全射性)、積が定数になることは第 188、交換則 `τ_T ∘ [n]^* = [n]^* ∘ τ_{nT}` は第 189(0 ブロック)" 19,
@@ -181,7 +181,7 @@ def weilPairing_nondeg.needs : List ProofObligation :=
   [ .implicitStep
       "★★★★★★★★★★**2026-09-06(第 1036): 閉じた。以下の implicitStep の項はすべて**解決済みの履歴**である**。★下で「残る 1 行」として挙げられていた `x([n]P) = Φ_n/ΨSq_n` は、第 325-327(2026-08-26)が **EDS 恒等式も双対同種も使わず**(第 42-52 の `MulOK` の帰納を再利用して)回避しており、`Skeleton/GaloisRep/WeilFunctionField.lean` の sorry は 0 である。★非退化性の本体は `Found.GaloisRep.exists_pairing_ne_one`(`Found/GaloisRep/WeilNondegFull.lean:161`)と `weilPairing_nondegenerate`(同 :189)であり、本宣言はそこへの配線 5 行である。★★消費者 `det_galRep_eq_cyclotomic` はこれとは独立に `Found` を直接使って既に閉じていたので、本宣言の `sorry` は**宙に浮いていた**(0 ブロック)" 19,
     .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.8.1(c)(非退化性)"
-      (.absent "mathlib に Weil 対は 0 件(2026-08-20、同上の検索)") 19,
+      (.absent "mathlib に Weil 対は 0 件(2026-08-20、同上の検索)。★2026-09-06 に再測: re:`WeilPairing|weilPairing|weil_pairing`→0") 19,
     .otherPaper "GenEll" "Theorem 3.8(Weil 対 e_n の定義)" 19,
     .implicitStep
       "★★★★★★★★★**2026-08-20: 残る入力は 1 つだけになった**(第 196・197 ブロック)。`e_n(P,·) ≡ 1 ⟹ τ_Q(g) = g ⟹ g ∈ [n]^*F(E) ⟹ v^n = f_P ⟹ XYIdeal(P) = (v) ⟹ toClass P = 0 ⟹ P = O` のうち、**`g ∈ [n]^*F(E)` 以外は全部証明した**(`Found/GaloisRep/NondegStep.lean` の `nondeg_of_fixedField`)(0 ブロック)" 19,
@@ -205,7 +205,7 @@ def weilPairing_galois.needs : List ProofObligation :=
   [ .implicitStep
       "★★★★★★★★★**2026-08-20: 第 192-194 ブロックで証明された**。第 178 の `WeilSpec` は**データの存在**なので、witness を `σ` で輸送すれば良い。★`σ` は係数を固定するので `W.polynomial` を固定し、`AdjoinRoot.lift` で座標環の**半線型**自己同型 `Σ_R` が作れる(第 192)。★★関数体へは局所化で延び、`Σ_F` になる(0 ブロック)" 19,
     .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.8.1(d)(Galois 同変性)"
-      (.absent "mathlib に Weil 対は 0 件(2026-08-20、同上の検索)") 19,
+      (.absent "mathlib に Weil 対は 0 件(2026-08-20、同上の検索)。★2026-09-06 に再測: re:`WeilPairing|weilPairing|weil_pairing`→0") 19,
     .otherPaper "GenEll" "Theorem 3.8(Weil 対 e_n の定義)" 19,
     .implicitStep
       "★★★★★★★**mathlib の `Point.map` では足りなかった**(2026-08-20 実測)。`Point.map` は `f : F →ₐ[S] K` を要求するので**半線型写像を表せない**(`σ` が底体 `L` に非自明に効く)。★そこで加法公式(`negY`・`addX`・`addY`・`slope`)を直接輸送して `semiPoint` を作り、加法準同型であることを示した(第 193)。★★`slope` の場合分けは `σ` の単射性で対応が付く(0 ブロック)" 19,

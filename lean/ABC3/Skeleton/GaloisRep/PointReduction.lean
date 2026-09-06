@@ -91,7 +91,7 @@ def pullbackPrime_eq_xyIdeal_nsmul.needs : List ProofObligation :=
   [ .implicitStep
       "★★★★★★★★**2026-08-20: 本節点は証明された**(第 162-164 ブロック)。第 162 で還元の核 `E₁` が加法で閉じていること(Vieta の第 2 基本対称式で打ち消しを回避)、第 163 で `redPoint` が群準同型であること(`redHom`)、第 164 で `P' = XYIdeal(n·Q_v)` が出た。★形式群も値群の構造も使っていない(0 ブロック)" 19,
     .citation "[Silverman]" "The Arithmetic of Elliptic Curves, VII.2(還元写像が群準同型であること)"
-      (.absent "mathlib に点の還元写像は無い(2026-08-20 実測)。`Point.map` は体の間の単射代数準同型にしか使えず、`Reduction.lean` は曲線の還元(極小モデル)である") 19,
+      (.absent "mathlib に点の還元写像は無い(2026-08-20 実測)。`Point.map` は体の間の単射代数準同型にしか使えず、`Reduction.lean` は曲線の還元(極小モデル)である。★2026-09-06 に再測: re:`WeierstrassCurve[A-Za-z0-9_.]*[Pp]oint[A-Za-z0-9_.]*[Rr]educ|WeierstrassCurve[A-Za-z0-9_.]*[Rr]educ[A-Za-z0-9_.]*[Pp]oint|reductionMap|reducePoint`→0。EllipticCurve/Reduction.lean にあるのは曲線の還元(WeierstrassCurve.reduction ほか 14 宣言)だけである") 19,
     .implicitStep
       "★★★★★★**台の同定は第 151 ブロックで済んだ**——`count_v(μ f_P) ≠ 0 ⟺ I_P = P'`(`count_ne_zero_iff`)。剰余体も点の還元も経由せず、イデアルの等式として書けた。★§9-461 の見積もり 8-20 ブロックは 1 ブロックで済んだ(0 ブロック)" 19,
     .implicitStep

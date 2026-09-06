@@ -71,3 +71,4 @@
 - [mathlib在庫: Kummerは1本の巡回拡大のみ、Hilbert 90は有限次必須、X^n-C aの既約判定は奇数n限定](mathlib-kummer-hilbert90-inventory-2026-09-05.md) — pGC経路Cの落とし穴2つ。IsCyclic.index_powMonoidHom_rangeがgcd(n,q−1)そのもの。
 - [Frobenius元はmathlibにある(IsArithFrobAt/arithFrobAt)——名前が違うので旧regexに当たらなかった](mathlib-frobenius-element-exists.md) — 2026-09-06。「不在」の誤りは2日で5件目。名前で引けないときは概念の別名を複数試す。
 - [decl-index の名前欄は非ASCIIで切れていた——mathlib 24,659 宣言が誤名で載っていた](mathlib-index-nonascii-truncation.md) — 2026-09-06 修正。「不在の誤判定」5件と同じ回路。
+- [Interface の構造体に場が足りないと ∀ 量化した Skeleton の主張が原典より強くなるか偽になる](interface-forall-too-strong.md) — 2026-09-06 に 2 件確定(pGC Prop 1.2 は「強すぎる」、CorrHyp Thm 6.1 は「偽」)。本物が Found にできたら ∀ をやめてその項に固定する。

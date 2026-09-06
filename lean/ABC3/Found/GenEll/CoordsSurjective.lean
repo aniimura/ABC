@@ -196,7 +196,7 @@ def exists_coords_surjective.needs : List ABC3.Meta.ProofObligation :=
     .citation "[ABC3]" "mem_range_globalAwayHom(§9-842) / range_appLE_subset_global(§9-843)"
       (.inProject "ABC3" "ABC3.Found.GenEll.mem_range_globalAwayHom") 2,
     .citation "[Stacks]" "Lemma 01PW(の消費側——チャートの座標環が生成される段)"
-      (.absent "mathlib に ample は無い(2026-08-28 実測)。本定理は前層加群の言葉で独自に組んだ") 7,
+      (.absent "mathlib に ample は無い(2026-08-28 実測)。本定理は前層加群の言葉で独自に組んだ。★2026-09-06 に再測: re:`AlgebraicGeometry[.][A-Za-z0-9_.]*[Aa]mple|IsAmple|IsVeryAmple|ampleLineBundle`→0。名前に ample を含む 19 件はすべて別物(Analysis/Convex/AmpleSet.lean の凸性、sampleableExt、example_ の部分一致)") 7,
     .implicitStep
       ("★**循環しかけた**——試験元 T はチャート X_{sc 0} の座標環の生成元だが sc は T から作る。" ++
        "★★しかし X_{s^{⊗(n+1)}} = X_s は **n に依らない**(§9-844)ので、" ++

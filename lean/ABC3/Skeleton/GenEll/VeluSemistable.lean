@@ -213,6 +213,37 @@ Liouville（第 598）と「`R = ∏_{w∈T∖0}(℘(z+w)−e)` が偶関数」�
 ☆恒等式から `v(Δ′_Vélu) = 12(l−1)k` が出るが、`v(j(E′)) ≥ 0` と突き合わせると
 `c₄′ = c₄ + 240v` に大きな相殺が要り、それは形式群の現象
 （`Σ_{j} j^{−4} ≡ 0 mod l`）である。★**形式群（または Néron モデル）が本体**である。
+
+## ★★★★★★★★★★★★★★★★対偶に切り替えた（2026-09-06、第 1442）
+
+★☆**順方向（`v(c₄′) ≥ 4S`）はやめた**——形式群が本体なのは
+**順方向についてだけ**である。対偶で行くと形式群も Néron モデルも要らない:
+
+    jExp p E′ < 0
+      → E′ の `l`-巡回商は jExp < 0            …… ①
+      → その商が E と同じ j を持つ（双対同種）  …… ②
+      → jExp p E < 0 で矛盾
+
+| 枚 | 内容 | 状態 |
+|---|---|---|
+| ② | 双対同種の `j`（`ℂ` の一意化 → `L̄` → 有限次拡大） | ★**閉じた**（第 1442、`Found/GenEll/VeluDualJ.lean`、sorry 0） |
+| ① | `jExp < 0` は `l`-巡回商で保たれる | ☆**残る**（新しい節点） |
+
+★②は `exists_dual_veluQuot_j_numberField`（`Found/GenEll/VeluDualJ.lean`）である:
+`L` の有限次拡大 `M` と `E′ ⊗ M` の位数 `l` の点 `Q′` があって
+`j((E′ ⊗ M)/⟨Q′⟩) = j(E ⊗ M)`。☆道は `Λ ⊂ Λ′ ⊂ (1/l)Λ` と
+`(1/l)Λ ∼ Λ`（相似）だけで、`ℂ` の `l`-捩れ点を `L̄` へ引き戻すのは
+**個数の勘定**（`torsion_card`）である。
+
+### ☆①に何が要るか（測定、2026-09-06）
+
+在庫の `semistableAt_veluQuot_badPrime_all`（第 1436、sorry 0、`p ∣ l` でも動く）は
+**`SemistableAt p X` を要求する**。★`jExp p X < 0` だけでは
+加法還元（`c₄` が単元でない）でありうるので、そのままでは使えない。
+☆①には「潜在的乗法還元は 2 次拡大で乗法還元になる」
+（＝`j` が同じ 2 曲線は 2 次拡大で同型）が要る。
+★`jExp` は `jExp_baseChange` で符号を保存かつ反映するので、
+**拡大に上げてよい**——だから①は「2 次のねじれを外す」1 本になる。
 -/
 
 namespace ABC3.Skeleton.GenEll
@@ -247,6 +278,13 @@ theorem semistableAt_veluQuotientFull {L : Type} [Field L] [NumberField L] [Deci
   -- ☆古典的にはモジュラー多項式 `Φ_l(j, j′) = 0` の単項性、
   -- あるいは Néron–Ogg–Shafarevich から出る。どちらも mathlib に無い。
   intro hlu hj
+  -- ★★★★★**2026-09-06（第 1442）**——対偶の②は閉じた:
+  -- `ABC3.Found.GenEll.exists_dual_veluQuot_j_numberField`
+  -- （`Found/GenEll/VeluDualJ.lean`、sorry 0、無条件）が
+  -- 有限次拡大 `M` と `E′ ⊗ M` の位数 `l` の点 `Q′` を与え、
+  -- `j((E′ ⊗ M)/⟨Q′⟩) = j(E ⊗ M)` である。
+  -- ☆残るのは①（`jExp < 0` は `l`-巡回商で保たれる）だけである
+  -- ——上の docstring の「①に何が要るか」を参照。
   sorry
 
 /-- ★★★★★★★★★★★★**`SSCurve` の語彙で**（第 1345）。 -/
@@ -283,6 +321,10 @@ def semistableAt_veluQuotientFull.src : Source :=
 def semistableAt_veluQuotientFull.needs : List ProofObligation :=
   [ .citation "[ABC3]" "semistableAt_veluQuot_all_of_jExp(第 1439、証明済み)"
       (.inProject "ABC3" "ABC3.Found.GenEll.semistableAt_veluQuot_all_of_jExp") 1,
+    .citation "[ABC3]" "exists_dual_veluQuot_j_numberField(第 1442、証明済み——道 C の②。双対同種を格子で作って数体へ降ろした。737 行・sorry 0)"
+      (.inProject "ABC3" "ABC3.Found.GenEll.exists_dual_veluQuot_j_numberField") 17,
+    .implicitStep
+      "★★★★★2026-09-06(第 1042): **道 C(対偶・Tate)の②が丸ごと閉じた**。残るのは① `jExp P X < 0 ⇒ jExp P (X/⟨Q′⟩) < 0` だけである。★止まった理由は**数学が足りない**(配管ではない)。在庫の `semistableAt_veluQuot_badPrime_all` は `SemistableAt p X` を要求するが、`jExp p X < 0` だけでは加法還元でありうる。しかも `semistableAt_veluQuot_all_of_jExp` を経由すると**循環する**(未知なのがまさに `p ∣ l` かつ `E` 良還元の場合だから)。★①は下位 2 つに落ちる: (i) 潜在的乗法還元は有限次拡大で乗法還元になる(＝ j が等しい 2 曲線は代数閉体上で VariableChange で移り合う。★`ofJ` 側の半安定性は計算のみで出る見込み: `v(c₄) = 0`、`v(Δ) = −v(j) > 0`)、(ii) 深い核の Velu の商の `jExp < 0`。★`jExp_baseChange` が符号を保存かつ反映するので**拡大に上げてよい**——だから①は「2 次のねじれを外す」1 本に落ちる" 17,
     .citation "[Sil]" "The Arithmetic of Elliptic Curves(同種で j の整性が保たれること)"
       (.absent
         ("`E` が `p` で良還元なら同種な `E′` の `j` も整である。" ++

@@ -201,7 +201,7 @@ def exists_pow_mul_eq_of_unit_scaling.needs : List ABC3.Meta.ProofObligation :=
     .citation "[ABC3]" "trivValue_transUnit / transUnit_restrict(在庫、LocalMetric.lean)"
       (.inProject "ABC3" "ABC3.Found.Arakelov.trivValue_transUnit") 3,
     .citation "[Stacks]" "Lemma 01PW(の大域化の段)"
-      (.absent "mathlib に ample は無い(2026-08-28 実測)") 7,
+      (.absent "mathlib に ample は無い(2026-08-28 実測)。★2026-09-06 に再測: re:`AlgebraicGeometry[.][A-Za-z0-9_.]*[Aa]mple|IsAmple|IsVeryAmple|ampleLineBundle`→0。名前に ample を含む 19 件はすべて別物(Analysis/Convex/AmpleSet.lean の凸性、sampleableExt、example_ の部分一致)") 7,
     .implicitStep
       ("★重なりでは「同じ g に f_i^N を掛けたもの」対「同じ g に f_j^N = (f_i·u)^N を掛けたもの」" ++
        "なので **u^N だけずれている**。★★そのずれは D(f) の上では等式だが " ++

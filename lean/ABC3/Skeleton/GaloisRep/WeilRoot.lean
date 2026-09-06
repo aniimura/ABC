@@ -108,7 +108,7 @@ def exists_nthRoot_comp_mulByN.src : Source :=
 
 def exists_nthRoot_comp_mulByN.needs : List ProofObligation :=
   [ .citation "[Silverman]" "The Arithmetic of Elliptic Curves, III.8.1 の証明(g_P の存在)"
-      (.absent "mathlib に Weil 対およびその構成要素は 0 件(2026-08-20、`WeilPairing|weil_pairing` で全文検索して 0 件)") 19,
+      (.absent "mathlib に Weil 対およびその構成要素は 0 件(2026-08-20、`WeilPairing|weil_pairing` で全文検索して 0 件)。★2026-09-06 に再測: re:`WeilPairing|weilPairing|weil_pairing`→0") 19,
     .implicitStep
       "★★★★★★**2026-08-20: 本節点自身の `sorry` は消えた**——`WeilDivisor.lean` の D1(`exists_fractionalIdeal_pow`)・D2(`fractionalIdeal_isPrincipal`)と第 139 ブロック(`exists_nthRoot_of_fractionalIdeal`)から証明される。残る `sorry` は D1・D2 の 2 つだけである(0 ブロック)" 19,
     .implicitStep

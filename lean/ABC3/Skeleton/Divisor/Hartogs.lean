@@ -117,7 +117,7 @@ def mem_of_forall_heightOne.needs : List ProofObligation :=
     .citation "[ABC3]" "mem_Rsub_of_forall_heightOne（★本体。sorry なしで閉じた）"
       (.inProject "ABC3" "ABC3.Found.Divisor.Hartogs.mem_Rsub_of_forall_heightOne") 110,
     .citation "[mathlib]" "IsKrullDomain / 高さ 1 の素にわたる交わり"
-      (.absent "Mathlib/RingTheory/ に KrullDomain は無い(KrullDimension のみ)。LocalProperties/IntegrallyClosed.lean にも高さ 1 版は無い(2026-08-25 に ls で実測)") 110,
+      (.absent "Mathlib/RingTheory/ に KrullDomain は無い(KrullDimension のみ)。LocalProperties/IntegrallyClosed.lean にも高さ 1 版は無い(2026-08-25 に ls で実測)。★2026-09-06 に再測: re:`IsKrullDomain|KrullDomain`→0") 110,
     .citation "[mathlib]" "AlgebraicGeometry.isField_of_universallyClosed(proper なら Γ(X,⊤) は体)"
       (.inMathlib "AlgebraicGeometry.isField_of_universallyClosed") 110,
     .citation "[mathlib]" "AlgebraicGeometry.finite_appTop_of_universallyClosed(Γ(X,⊤) は k 上有限)"

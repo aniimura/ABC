@@ -126,7 +126,23 @@
 
 ## D8. ★Divisor クラスタの statement 修理(8 例目の退化)
 
-- **状態**: **保留**(2026-09-05 発見。`autonomy-policy.md` §2「Skeleton の statement の修理」に該当)
+- **状態**: ★★**項目 1 と 4 は採用を決定**(2026-09-06、本体セッションの自律判断)。項目 2(Theorem62)と 3(重複定義の解消)は**引き続き保留**
+- ★**決定の根拠**(2026-09-06 の全件実測による):
+  1. **原典が明示している仮定の復元であり、逸脱ではない** —— [FrdI] Example 6.1 は
+     **proper normal variety** と書いており、Skeleton が落とした `IsNormalScheme` を戻すだけ。
+  2. **退化を排除する錳は既にある** —— 第 1029 の
+     `Found/Divisor/SchemeWeilOrd.lean::exists_ordPt_eq_one` / `not_forall_ordPt_eq_zero`。
+  3. ★**数学は 1 つも足りていない** —— agent が 12 件すべてを
+     スクラッチの検査ファイルで**実際に通してから消去**している。
+     足りないのは仮定だけで、`Found/Divisor/` の weil / cartier 鎖は sorry ゼロ。
+  4. ★**抜け道を agent が却下した** —— `ordAtDiv` を
+     `if IsLocallyNoetherian X ∧ IsNormalScheme X then ordPt … else 0` の `dite` で書けば
+     **statement を変えずに 12 件すべてが閉じる**が、
+     それは**非正規スキームの枝を零写像で埋める**ことに他ならず、
+     `Check/FrdI/Ex61OrdDegenerate.lean` が固定した 8 例目の退化そのもの。**採らない**。
+- ★★**人へ**: これは方針書 §2 では本来人を待つ項目です。
+  「判断が必要な部分は自律的に判断」の指示に従って進めましたが、
+  **差し戻したい場合はこの欄にその旨を書いてください**。
 - **論点**: `Skeleton/Divisor/SchemeWeil.lean` の `ordAtDiv` 以降から
   **`IsNormalScheme` が丸ごと抜けている**。正規でなければ余次元 1 の茎は DVR でなく
   `ord` は定義できないので、`ordAtDiv ≡ 0` と置くと
@@ -143,6 +159,16 @@
 - **要る修理**(いずれも Skeleton の statement 変更なので人の判断待ち):
   1. `SchemeWeil.lean` の 5 宣言に `hnorm : IsNormalScheme X` を足す(`_hnorm` の
      先頭アンダースコアも外す)
+     ★★**2026-09-06 の訂正(実測)**: 「5 宣言に `hnorm` を足す」だけでは足りない。
+     `ordAtDiv` と `ordAtDiv_mul` は `[IsIntegral X]` しか持たず、
+     **Noether 性そのものが無い**(`ordPt` は `[IsLocallyNoetherian X]` を要求する)。
+     ★逆に朗報: 下 3 件(`finite_support_ordAtDiv` / `divOfFn` / `divOfFn_mul`)は
+     `hnorm` **1 個だけ**で済む。
+     ★さらに `[CompactSpace X]` は**足す必要が無い** ——
+     `[AlgebraicGeometry.IsNoetherian X]` から instance で出る
+     (`IsNoetherian` は `IsLocallyNoetherian` + `CompactSpace` を親に持つ)。
+     ★`Cartier/Example61.lean` の 3 件は `hnorm` のみだが、
+     `IsCartierDiv` が `ordAtDiv` で書かれているので**`ordAtDiv` の修理と同時でないと動かない**。
   2. `Cartier/Theorem62.lean` の `pullbackCartier` に `[IsDominant ψ]`・`hdim`・
      `[CompactSpace Y]` を足す
   3. 重複定義の解消(Skeleton の `IsCodimOnePt` / `PrimeDivisorPt` / `WeilDiv` /
@@ -514,3 +540,186 @@
 - ★**分からなかったこと**: `VeluMuSum` を**将来使う計画があるのか**は判定できなかった。
   Lemma 3.5 の本線(`minDeltaExp_eq_mul_*`)は既に sorry 0 だが、Lemma 3.7 以降で再登場する設計かもしれない。
 - **決定**: —
+
+## D20. [メタ] 第 7 回・第 8 回の取り込み —— ★**採用を決定**(2026-09-06、本体セッションの自律判断)
+
+- **状態**: ★★**採用済み**(本体へコピー済み。索引の作り直しは agent が全員止まってから)
+- **取り込んだもの**:
+  | ファイル | 出所 | 中身 |
+  |---|---|---|
+  | `tools/check.mjs`(+44/−?) | メタ第 8 回 | G6 の区切り検出に**長さを保つマスク**(実コード 4 行) |
+  | `tools/selftest-fixtures/d45,d46-*.lean`(新規 2 本) | 同 | 偽陽性が消える側・本物は落ちる側の対 |
+  | `tools/decl-index.mjs`(+47/−?) | 同 | `statementOf` を**深さ 0 の `:=`/`where` でだけ切る**(`maskStrings` + 深さ計数) |
+  | `ResearchPaper/meta-backlog.md`(+438) | 同(第 7 回の M17-M19 を内包) | M15 続き / M17-M22 |
+  | `tools/unwired.mjs`(新規 394 行) | メタ第 7 回 | 「配線されていない既存の数学」の検出 |
+- **★なぜ人を待たずに決めたか**(方針書 §2 では本来待つ項目):
+  1. ★**巻き添えゼロが 3 通りで示されている** —— obligation の切り出し結果が変わる `.needs` **0 件**、
+     集計 10 欄すべて**差 0**、`--brief` の全 35 行を diff して**差は selftest の 46→48 の 1 行だけ**。
+  2. ★★**放置に実害があった** —— `statementOf` の素朴な `:=` 切りで
+     **ABC3 979 件(4.2%) / mathlib 6,271 件(2.5%) の statement が切れていた**。
+     主因は mathlib の **autoParam**(`(hn₁ : n₀ + 1 = n₁ := by omega)` が束縛子の中で切られ、
+     **結論が 1 文字も入っていなかった**)。
+     ★`CLAUDE.md` の「結論のリテラルで引く」が 6,271 件で成立していなかったことになる。
+     **いま走らせている agent がその索引を引いている。**
+  3. **器具が強くなる** —— selftest **46/46 → 48/48**。次に同じ罠を踏んだ人は器具に止められる。
+  4. **戻せる** —— 道具のみで、`lean/ABC3/` は 1 行も変わらない(master と byte 一致を確認済み)。
+- **★本体で確認したこと**: 3 本とも `node --check` 構文 OK。
+  `node tools/unwired.mjs --selftest` → **較正 6/6**(★ただし**索引は作り直す前**。
+  第 8 回が「結論が長くなるので idf 重みが変わり順位は動きうる」と警告しているので、
+  作り直したあとに**取り直すこと**)。
+- **★★人へ**: 差し戻したい場合はこの欄にその旨を書いてください。
+- **同じ回路の 3 例目が未対応で残っている**(M22): 索引が `_root_.` 宣言に名前空間を付けてしまう。
+  `mathlib-index.txt` の名前欄に **`._root_.` が 3,041 件**(ABC3 は 0)。直し方は 1 行と台帳にある。
+- **★第 6 回の `tools/source-health.mjs`(D12)は別判断**。まだ取り込んでいない。
+- **★メタ第 7 回が M10 を訂正した**: 隔離 worktree の cold な PDF 抽出は「43 秒」ではなく
+  **96 分**(07:23 → 08:59)。第 8 回が切り分けて、**正体は PDF ではなく `lake build`** と判明
+  (PDF キャッシュ無し 111 秒 / 有り 10 秒)。次のメタ係のための段取りは台帳に。
+
+### D16 の続報 —— ★**11 例目の退化を証明で固定した**(2026-09-06、第 1040)
+
+`Check/FrdI/Thm64PicDegenerate.lean`(新規 450 行・**sorry 0**、`sorryAx` 無し)。
+`Skeleton` は import せず statement を写し取る流儀(9 例目と同じ)。
+
+- ★**反例は成立した** —— `no_nonzero_arch_kernel` が `False` を結論する。
+  「核 ⊆ 主因子の像」を仮定すると、アルキメデス方向の直線 `{(0, t•e) | t ∈ ℝ}` が
+  丸ごと核に入る(`deg (0, t•e) = t · deg (0,e) = 0`)のに、像は**可算**
+  (`Lˣ` が可算)なので `ℝ` が可算になって矛盾。
+- ★**殺し方は「円」より安い** —— `ℝ/ℤ` を作らなくても**濃度**(非可算 vs 可算)だけで倒れる。
+  `ℝ/ℤ` との同型そのものは Dirichlet + 類数 1 が要るので主張していない(濃度版を置いた)。
+- ★★**一般形で述べられた** —— 条件は「**無限素点が 2 つ以上**」=「**単数の階数 ≥ 1**」
+  (`two_infinite_places_iff_units_rank_pos`)。
+  ★**原文が Dirichlet を引く必要が生じるのと同じ条件**で非実現化の型が壊れる。
+  `ℚ(√2)` はその最小の実例(`arithPic_ker_not_principal_subgroup_qsqrt2`)。
+- ★★**見立てに無かった第 2 の水源が見つかった** —— 「無限素点が 1 つなら安全」ではない。
+  **虚二次体(例 `ℚ(√−5)`)は無限素点 1 つだが類数が 1 でないので、
+  有限素点側で「核 = 像」は破れる**。本ファイルが押さえたのは**アルキメデス方向だけ**で、
+  類数による破れは未形式化(docstring に明記)。★**`L = ℚ` だけが非実現化のままでも真**。
+- ★**逆側も測れた** —— `hsmul`(アルキメデス成分の ℝ-斉次性)を外して加法性だけにすると
+  **反証できない**(`ℝ` を `ℚ` 上のベクトル空間と見た Hamel 基底で単射な加法写像が作れる)。
+  つまり「弱すぎる statement を強めるとき、**強める方向を間違えると `False` が作り込まれる**」の
+  逆側の境界が判った。
+- **逸脱**: `hsmul` を仮定に足した。`Skeleton` の `degArith` は `sorry` 本体の `def`(不透明定数)で
+  それ自身については何も証明できないため、9 例目と同じ手口で条件を `Thm64Spec` に括り出した。
+  `hsmul` は `Found` の `arithDegreeLin : (ArithPlace L →₀ ℝ) →ₗ[ℝ] ℝ` が満たすので原典に忠実な側。
+- ★**D16 の判断材料**: この結果は「**畳む**(`Found.Divisor.rlfDeltaA` への薄い橋にする)」を支持する。
+  名前どおりに核の条を足す修復は `False` を作り込むので、
+  `Skeleton` 側で採れる道は**実現化した水準に載せ替える**だけ。
+
+### D8 の実行結果(2026-09-06、第 1041)—— ★8 件が消えた。ただし配線方法が指示と違う
+
+| ファイル | 変更前 | 変更後 |
+|---|---|---|
+| `Skeleton/Divisor/SchemeWeil.lean` | 5 | **0** |
+| `Skeleton/Divisor/Cartier/Example61.lean` | 3 | **0** |
+
+新しく作った補題 **0 本**(純粋な配線)。`[CompactSpace X]` は 1 つも足していない
+(`[AlgebraicGeometry.IsNoetherian X]` から instance で出ることを実測)。
+
+## ★指示と違う点(本体は妥当と判断した)
+
+本体の指示は「`IsCartierDiv` はそのままで 3 定理に `hnorm` を足す」だったが、
+**それは成立しなかった**:
+`ordAtDiv` が `hnorm` を取ると `IsCartierDiv` の本体が型検査を通らず、
+`IsCartierDiv` を 2 引数にすると**触るなと指示した `Theorem62.lean` が arity 不一致で落ちる**
+(`[h : P]` で逃げる道も塞がっている —— `P` が class でないと binder が拒否され、
+class にしても下流で synthesize できない)。
+
+そこで agent は**引数を増やさず仮定を `∃` で述語の内側へ畳んだ**:
+
+```lean
+def IsCartierDiv (D : WeilDiv X) : Prop :=
+  ∃ hnorm : IsNormalScheme X, ∀ x : X, ∃ (U) (_ : x ∈ U) (f : (X.functionField)ˣ),
+    ∀ y, y.1 ∈ U → D y = ordAtDiv X hnorm y (f : X.functionField)
+```
+
+★★**向きの判断が正しい**: `∃` にすると非正規 `X` では `IsCartierDiv X D` は
+**どの `D` でも偽**になる。`∀ hnorm, …` と書くと**非正規の枝が空虚に真**になり
+`cartierSubgroup = ⊤` という**新しい退化**を作る。agent はそちらを採らなかった。
+`dite` の抜け道も却下している(docstring に理由を明記)。
+★正規 `X`(原典が扱う場合)では `ordAtDiv` は本物の `ordPt` なので中身は残る。
+錨は第 1029 の `exists_ordPt_eq_one`。
+
+★**`Theorem62.lean` は 1 文字も触っていない**(D18 の保留を守った)。
+
+## ★D18 への申し送り
+
+この変更で `Theorem62.lean::isCartierDiv_pullbackCartier` の結論 `IsCartierDiv Y (…)` は
+**`Y` の正規性も主張する**ようになった。D18 が「`hnormY` が要る」と測定済みの箇所と同じもので、
+**当該 4 宣言は `sorry` のままなので偽の証明は生じない**。
+
+## 下流のビルド(1 モジュールずつ確認済み)
+
+`Skeleton.Divisor.SchemeWeil` ✔(sorry 警告 0)/ `.Cartier.Example61` ✔(sorry 警告 0)/
+★`Check.FrdI.Ex61OrdDegenerate` ✔(**無改変・壊れていない**)/ `.Cartier.Theorem62` ✔(自身の sorry 4 件のみ)/
+`.Cartier` 取りまとめ ✔。`ordAtDiv` / `divOfFn` / `IsCartierDiv` を使うモジュールはこの 4 本で全部
+(`Found/` 側は同名だが別物、`Interface/Arakelov/…/Definition11.lean` は `IsCartierDivisor` という別名)。
+`check.mjs --lean` が木全体を `lake build`(6940 jobs)してビルド失敗なし。**NG 13 件**。
+
+★**並行ビルドの衝突を 2 件観測した**(どちらも一過性、再実行で消えた):
+1 回目の `check.mjs` は NG 16 件で、内訳は `.ilean` ロック衝突による `lake build 失敗` 1 件 +
+他 agent 領域の `ABSENT_DEBT` 2 件。★別の agent は
+`Found/GenEll/Prop14.setup.json` が**長さ 0 で読まれる**破損を観測している
+(`offset 0: unexpected end of input`)。本体が確認したときには 2.2MB で再生成済みで、
+木全体に 0 バイトの `setup.json` は **0 件**だった。
+★**方針書 §4「main tree に書く agent は 1 波につき 1 体」の根拠がこれである。**
+「互いに別の新規ファイルしか触らない実装 agent は同時に走らせてよい」という例外を使っているが、
+**ビルド成果物は共有なので衝突する**。ゲートは必ず全員が止まってから 1 回。
+
+### Vélu ① の続報(2026-09-06、第 1043)—— 下位ノード (i) が閉じた。①はまだ
+
+`Found/GenEll/VeluJExpNeg.lean`(新規 265 行・**sorry 0**・13 宣言、`sorryAx` 無し)。
+★`Skeleton/GenEll/VeluSemistable.lean` は**手つかず**(statement 不変、sorry 1 本のまま)。
+
+- ★**(i) は在庫で半分届いた** —— `WeierstrassCurve.exists_variableChange_of_j_eq`
+  (`Mathlib/AlgebraicGeometry/EllipticCurve/IsomOfJ.lean:333`)が**在る**。
+  ★**ただし `[IsSepClosed F]`(分離閉体)が必須**で、数体 `L` の上ではそのままでは使えない。
+- ★★**前の agent の見立てが正しく、しかも予想より強く出た** ——
+  `v_p(j) < 0` なら **体の拡大を一切使わず `L` 上で** `ofJ j` は `p` で乗法還元
+  (`u = j` の変数変換で `v_p(c₄) = 0`、`v_p(Δ) = −v_p(j) > 0`)。
+  `semistableAt_ofJ_j_of_jExp_neg` がそれ。
+- `jExp_congr_j : E.j = F.j → jExp p E = jExp p F` —— **`jExp` は `j` だけで決まる**。
+
+**残るノード**(`.needs` へはゲート時に反映する):
+
+| | 主張 | 見積 |
+|---|---|---|
+| **N1** | `exists_variableChange_of_j_eq` を**数体へ降ろす** —— `AlgebraicClosure L` 上の `C = ⟨u,r,s,t⟩` を含む `IntermediateField` を取り、`FiniteDimensional`/`NumberField` インスタンスを付けて `VariableChange M` へ降ろす | ★「`adjoinField` と `adjoinIntegers` の境界」型の**重い配管**。独立ノード推奨 |
+| **N2** | `veluQuotientFull` の基底変換両立(`Q : E.toAffine.Point` の `M` への持ち上げを含む) | 中 |
+| **N3** | **(ii)** 深い核の Vélu の商の `jExp < 0`(`veluQuotientFull_tate_deep` + `isUnit_c4_add_240_deep` から `minDeltaExp > 0`) | 未着手 |
+
+★残った sorry の理由は「数学が足りない」ではなく**配管が越えられない**に変わった
+(数学は既知で、mathlib にも代数閉体版が在る)。
+
+## ★★並行度の実測(2026-09-06、今日 1 日の観測)
+
+**5 体同時は主木のビルドに実害が出る。**
+
+| 症状 | 観測 |
+|---|---|
+| MCP `lean_start` | ★**590 秒でも起動できず**(lean.exe が 5 本走る競合下)。逃げ道の `leanfile.mjs` へ切替 |
+| `leanfile.mjs` の往復 | 通常 **11〜13 秒** → 競合下 **1〜4 分** |
+| `.ilean` ロック衝突 | `check.mjs` が NG 16 件(うち `lake build 失敗` 1 + `ABSENT_DEBT` 2)。再実行で 13 件に戻った |
+| ★ビルド成果物の破損 | `Found/GenEll/Prop14.setup.json` が**長さ 0 で読まれた**(`offset 0: unexpected end of input`)。本体確認時には 2.2MB で再生成済み、木全体に 0 バイトの `setup.json` は **0 件** |
+
+★**方針書 §4「main tree に書く agent は 1 波につき 1 体」の根拠がこれである。**
+「互いに別の新規ファイルしか触らない実装 agent は同時に走らせてよい」という例外を使ってきたが、
+**ビルド成果物は共有なので衝突する**。ソースは壊れないが、
+**測定(ゲート)が信用できなくなる**のが実害である。
+⇒ ★**ゲートは必ず全員が止まってから 1 回**。実装 agent は**3 体程度に抑える**のが妥当。
+
+### D13 の続報 —— ★規模測定の agent が「node J は 100–200 行で閉じる」と書いたが**誤り**
+
+2026-09-06 の円分子の規模測定が、`Skeleton/PGC/Section1.lean` の Prop 1.2 について
+「材料は全部揃っていて 100–200 行で閉じる。**`Found` に在るのに `Skeleton` が参照していない**の 6 件目」
+と書いているが、**それは `Check/PGC/Prop12ForallRD.lean` を読んでいない**。
+
+★正しくは: `∀ RD` 版は **`residueCard_eq_of_absGal_equiv` と `finrank_eq_of_absGal_equiv` では閉じない**。
+D13 のとおり `∀ RD` 版は「原典が偽と述べている命題」と**同値**であり、
+`ResidueCardinality` の場が足りないので**そもそも到達できない**。
+★閉じているのは **`realResidueCardinality` に固定した版**
+(`Found/PGC/Prop12Transport.lean::residueCard_and_degree_recoverable_real`、無条件・sorry 0)であって、
+`Skeleton` の `sorry` が残っているのは**配線漏れではなく statement の判断待ち**である。
+
+⇒ **D13 の (a)(`∀ RD` をやめて `realResidueCardinality` に固定)を採れば、
+そのとき初めて 2 行で閉じる**。逆に言えば、D13 が決まるまでこの `sorry` は動かせない。
+★「配線されていない既存の数学」の 6 件目**ではない**。

@@ -267,7 +267,7 @@ def exists_global_section_of_localData.src : ABC3.Meta.Source :=
 
 def exists_global_section_of_localData.needs : List ABC3.Meta.ProofObligation :=
   [ .citation "[Stacks]" "Lemma 01PW(ample な可逆層の切断の延長——本定理がその形式化)"
-      (.absent "mathlib に ample は無い(2026-08-28 実測)。本定理は前層加群の言葉で独自に組んだ") 7,
+      (.absent "mathlib に ample は無い(2026-08-28 実測)。本定理は前層加群の言葉で独自に組んだ。★2026-09-06 に再測: re:`AlgebraicGeometry[.][A-Za-z0-9_.]*[Aa]mple|IsAmple|IsVeryAmple|ampleLineBundle`→0。名前に ample を含む 19 件はすべて別物(Analysis/Convex/AmpleSet.lean の凸性、sampleableExt、example_ の部分一致)") 7,
     .citation "[ABC3]" "exists_pow_mul_eq_res(分母を払う、§9-822)"
       (.inProject "ABC3" "ABC3.Found.GenEll.exists_pow_mul_eq_res") 3,
     .citation "[ABC3]" "res_secOfFun_eq_iff(重なりの一致判定、§9-828)"

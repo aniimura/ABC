@@ -111,7 +111,7 @@ def lattice_eq_of_g₂_g₃_eq.needs : List ProofObligation :=
     .implicitStep
       "★★★★**なぜ要るか(下流)**: `C • W = latticeCurve P` と `C' • W = latticeCurve P'` のとき `D := C'C⁻¹` の `u` について `g₂(P') = u⁻⁴g₂(P)`・`g₃(P') = u⁻⁶g₃(P)`、すなわち `P'` と `scalePair P u` は同じ `(g₂,g₃)` を持つ。★本節点があれば `archInv P' = archInv (scalePair P u) = archInv P`(第 349 `archInv_scalePair`)となり、**`archInv` が曲線の関数になる**。★★これが界面の欠陥 #6(`htFalt` が固定されず `prop_3_4` が恒等的に成り立つ)を塞ぐ鍵である" 17,
     .citation "[Silverman]" "The Arithmetic of Elliptic Curves, VI.3(格子は g₂, g₃ で決まる)"
-      (.absent "mathlib の `Analysis/SpecialFunctions/Elliptic/Weierstrass.lean` を `Injective|lattice_eq_of|valence` で検索して 0 件(2026-08-26 実測)。`Mathlib` 全体を `valence` で検索しても modular forms の valence 公式は無い") 17,
+      (.absent "mathlib の `Analysis/SpecialFunctions/Elliptic/Weierstrass.lean` を `Injective|lattice_eq_of|valence` で検索して 0 件(2026-08-26 実測)。`Mathlib` 全体を `valence` で検索しても modular forms の valence 公式は無い。★2026-09-06 に再測: re:`valenceFormula|valence_formula|ModularForm[A-Za-z0-9_.]*valence|lattice_eq_of|PeriodPair[A-Za-z0-9_.]*[Ii]njective`→0。★valence 単体は Equivalence の部分一致で 1443 件当たるので検索語にしてはならない") 17,
     .otherPaper "GenEll" "Proposition 3.4(Faltings 高さと無限遠因子)" 17 ]
 
 end ABC3.Skeleton.GenEll

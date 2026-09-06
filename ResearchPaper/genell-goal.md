@@ -32542,7 +32542,7 @@ grep して **0 件**——円分体の分岐理論は mathlib に無い。
 | # | 場所 | 内容 | 効く先 |
 |---|---|---|---|
 | 1 | `Skeleton/GenEll/VeluSemistable.lean:245` | ★**形式群**——`p ∣ l` かつ良い素点で核の座標が `p` で整（`Ê(𝔪)[l] ∩ ⟨Q⟩ = 0`） | §3・§4 |
-| 2 | `Skeleton/GenEll/GaloisLocal.lean:70` | ★**`alpha_in_modl_image`**——乗法還元の素点で `α = (1 1 / 0 1)` が mod `l` 像に入る | §3・§4 |
+| ~~2~~ ★**閉じた**(2026-09-06、第 1042) | `Skeleton/GenEll/GaloisLocal.lean:70` | ~~`alpha_in_modl_image`~~——乗法還元の素点で `α = (1 1 / 0 1)` が mod `l` 像に入る | §3・§4 |
 | 3 | `Skeleton/GenEll/Section2Converse.lean:108, 278` | ☆§2 `Theorem 2.1` の逆向き | §2 |
 | 4 | `Skeleton/GenEll/SigmaConvolution.lean:110` | ☆`sigma_one_convolution`（ラマヌジャンの畳み込み）——**消費側が無い**（死んだ葉） | なし |
 
@@ -32622,7 +32622,7 @@ grep して **0 件**——円分体の分岐理論は mathlib に無い。
 | # | 場所 | 内容 | 効く先 |
 |---|---|---|---|
 | 1 | `VeluSemistable.lean:250` | ★**`j(E′)` の整性**——`p ∣ l` かつ良い素点で `0 ≤ jExp p E′`（モジュラー多項式が mathlib に無い） | §3・§4 |
-| 2 | `GaloisLocal.lean:70` | ★**`alpha_in_modl_image`**——Tate 加群の Galois 像（15-30 ブロック） | §3・§4 |
+| ~~2~~ ★**閉じた**(2026-09-06、第 1042。`Found` へ 2 行の合成で配線) | `GaloisLocal.lean:70` | ~~`alpha_in_modl_image`~~——Tate 加群の Galois 像（15-30 ブロック） | §3・§4 |
 | 3 | `SigmaConvolution.lean:110` | ☆ラマヌジャンの畳み込み——**消費側が無い**（死んだ葉） | なし |
 
 ★★★★**したがって次の仕事は上の 3 つの欄／`sorry` である**——

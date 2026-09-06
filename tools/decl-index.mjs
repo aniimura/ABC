@@ -103,21 +103,58 @@ const ANON = '⟨無名⟩';
 const NS_RE = /^\s*namespace\s+([A-Za-z_][\w'.₀-₉]*)/;
 const END_RE = /^\s*end\s+([A-Za-z_][\w'.₀-₉]*)\s*$/;
 
+/** 文字列リテラルを**長さを保ったまま**空白へ伏せる。
+ *
+ * ★長さが 1 文字も変わらないのが要点である。伏せた側で見つけた**添字を
+ * そのまま原文の `slice` に使える**ので、切り出しの位置がずれない。
+ * `tools/check.mjs` の `maskLeanStrings` と同じ型(backlog M15)。 */
+const maskStrings = (s) => s.replace(/"(?:[^"\\\n]|\\.)*"/g, (m) => ' '.repeat(m.length));
+
 /** 宣言の statement(型)を 1 行に畳んで返す。
  *
  * ★どこまでを statement とするか: 宣言行から `:=` / `where` / 次の宣言 の手前まで。
  *   証明本体は入れない——入れると索引が本文と同じ大きさになり、`grep` の意味が消える。
  * ★上限 400 文字。長い型は先頭だけで十分に効く(結論のリテラルは前の方に出る)。
+ *
+ * ★★★2026-09-06(backlog M15/M20)。**素朴な `search(/:=|\bwhere\b/)` は結論を壊す**。
+ * 壊れ方は 2 つあり、どちらも「構文で切る前に文字列と括弧を見ていない」ことに由来する:
+ *
+ *   1. **括弧の中の `:=`**。名前つき引数 `f (p := p)`・`(priority := 100)`・
+ *      `{ x := 0 }` で切れてしまう。第 7 回(M17)が `unwired.mjs` を書いたとき
+ *      **5 件で結論が壊れる**と実測した。→ **深さ 0 の `:=` でだけ切る**。
+ *   2. **文字列の中の `:=` / `where` / `--`**。docstring ではなく
+ *      `def foo.src := { paper := "…" }` のような**台帳の本文**に出る。
+ *      → **伏せてから切る**(`maskStrings`)。
+ *
+ * ★深さは `( [ { ⟨ ⦃` で数える。行をまたいで持ち越す(複数行の署名があるため)。
+ * ★`--` の行コメント落としも**伏せた側**で探す。伏せないと
+ *   文字列に `--` を含む行が途中で切れる。
  */
 const STATEMENT_MAX = 400;
+const OPEN = '([{⟨⦃';
+const CLOSE = ')]}⟩⦄';
 function statementOf(lines, start) {
   const buf = [];
+  let depth = 0;
   for (let j = start; j < Math.min(start + 24, lines.length); j++) {
-    let s = lines[j];
-    if (j > start && (DECL_RE.test(s) || ANON_INST_RE.test(s) || NS_RE.test(s) || END_RE.test(s))) break;
-    // 行コメントを落とす(`--` の前だけ残す)
-    s = s.replace(/--.*$/, ' ');
-    const cut = s.search(/:=|\bwhere\b/);
+    const raw = lines[j];
+    if (j > start && (DECL_RE.test(raw) || ANON_INST_RE.test(raw) || NS_RE.test(raw) || END_RE.test(raw))) break;
+    // 行コメントを落とす(`--` の前だけ残す)。★伏せた側で探す。
+    let s = raw;
+    let m = maskStrings(raw);
+    const c = m.indexOf('--');
+    if (c >= 0) { s = `${s.slice(0, c)} `; m = `${m.slice(0, c)} `; }
+    // ★深さ 0 の `:=` / `where` でだけ切る。
+    let cut = -1;
+    for (let k = 0; k < m.length; k++) {
+      const ch = m[k];
+      if (OPEN.includes(ch)) { depth++; continue; }
+      if (CLOSE.includes(ch)) { if (depth > 0) depth--; continue; }
+      if (depth !== 0) continue;
+      if (ch === ':' && m[k + 1] === '=') { cut = k; break; }
+      if (ch === 'w' && m.startsWith('where', k) && !/[\w'!?]/.test(m[k - 1] ?? ' ')
+          && !/[\w'!?]/.test(m[k + 5] ?? ' ')) { cut = k; break; }
+    }
     if (cut >= 0) { buf.push(s.slice(0, cut)); break; }
     buf.push(s);
     if (buf.join(' ').length > STATEMENT_MAX * 2) break;

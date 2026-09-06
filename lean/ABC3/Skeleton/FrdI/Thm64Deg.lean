@@ -160,7 +160,7 @@ def exists_smul_eq_of_addEquiv.needs : List ProofObligation :=
     .citation "[mathlib]" "NNReal の順序と加法(le_iff_exists_add)"
       (.inMathlib "le_iff_exists_add") 114,
     .citation "[mathlib]" "単調加法自己同型が線形であること"
-      (.absent "Mathlib/Analysis/ に AddMonoidHom.toRealLinearMap(連続性を要求)しかなく、単調版・NNReal 版は無い(2026-08-25)") 114,
+      (.absent "Mathlib/Analysis/ に AddMonoidHom.toRealLinearMap(連続性を要求)しかなく、単調版・NNReal 版は無い(2026-08-25)。★2026-09-06 に再測: re:`Monotone[.]to[A-Za-z]*Linear|toRealLinearMapOfMonotone|toLinearMapOfMonotone|[Ll]inear[A-Za-z]*_of_monotone|_of_monotone[A-Za-z_]*[Ll]inear`→0、連続版だけが re:`AddMonoidHom[.]toRealLinearMap`→1 に当たる") 114,
     .derivation "加法性から f(q·x) = q·f x(q : ℚ≥0)、単調性と ℚ の稠密性で f x = f 1 · x" 114,
     .implicitStep
       "★原文は「Φ^rlf₁(A₁) ≅ Φ^rlf₂(A₂) は単系の同型だから順序を保つ」と 1 行で書く" 114 ]

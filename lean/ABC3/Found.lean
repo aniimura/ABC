@@ -1714,6 +1714,12 @@ import ABC3.Found.PGC.UnramifiedClosureRoots
 import ABC3.Found.PGC.DegreeTransport
 import ABC3.Found.PGC.InertiaKummer
 import ABC3.Found.PGC.UnramifiedGalCharCount
+import ABC3.Found.PGC.InertiaKummerBound
+import ABC3.Found.PGC.ResidueCardTransport
+import ABC3.Found.PGC.Prop12Transport
+import ABC3.Found.PGC.CyclotomicRecovery
+import ABC3.Found.GenEll.VeluDualJ
+import ABC3.Found.GenEll.VeluJExpNeg
 /-!
 # Found — 実装済みの基礎
 

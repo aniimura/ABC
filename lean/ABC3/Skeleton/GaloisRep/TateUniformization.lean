@@ -91,7 +91,7 @@ def tate_uniformization.src : Source :=
 
 def tate_uniformization.needs : List ProofObligation :=
   [ .citation "[FC]" "Degenerations of Abelian Varieties, Chapter III, Corollary 7.3(Tate 一意化)"
-      (.absent "mathlib に Tate 曲線・Tate 一意化はいずれも 0 件(2026-08-20、EllipticCurve/ 配下の全ファイルを確認)") 15,
+      (.absent "mathlib に Tate 曲線・Tate 一意化はいずれも 0 件(2026-08-20、EllipticCurve/ 配下の全ファイルを確認)。★2026-09-06 に再測: re:`TateCurve|tateCurve|Tate curve|tateUniformization|TateUniformization`→0") 15,
     .implicitStep
       "★(a) 両側級数 X(u,q), Y(u,q) の収束。完備付値体での議論が要る——mathlib の `Valued` と DVR の接続から作る(10-20 ブロック)" 15,
     .implicitStep
