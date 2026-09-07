@@ -42,6 +42,7 @@ import ABC3.Check.PGC.Cor13Degenerate
 import ABC3.Check.PGC.Prop12Degenerate
 import ABC3.Check.PGC.Prop12ForallRD
 import ABC3.Check.PGC.Theorem42NaiveGC
+import ABC3.Check.PGC.CentralizerNeedsInput
 import ABC3.Check.PGC.Theorem42PinnedNondegenerate
 import ABC3.Check.PGC.CyclotomicCharacterNontrivial
 import ABC3.Check.FrdI.TwistedFrobenioid

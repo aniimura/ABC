@@ -234,10 +234,88 @@ export function errLikeQuotes(text) {
   return out;
 }
 
+//   `lean-idioms.md` を読んだ / 探した記録があるか」。★あるなら仮説 (2)(引いても防げない)、
+//   ★無いなら仮説 (1)(引かれていない)。★ログを歩くので 20 秒ほどかかる(digest を使わない)。
+//   ★★書きの規則は rescan より**厳しい**(`>` / `>>` / `tee` を要求)。理由: `cat tools/lean-idioms.md`
+//     は rescan では「書き」に落ちるが、★これは**読み**である。読みを取り落とすと仮説 (1) に
+//     有利な方へ偏るので、★こちらは読みとして数える(自分に不利な側へ倒す)。
+export const IDFILE = /lean-idioms\.md/i;
+export const IDWRITE = /(>>?\s*["']?[^"'\s]*lean-idioms\.md)|(\btee\b[^\n]{0,80}lean-idioms\.md)/;
+export const IDLOOK = /\b(grep|rg|sed|head|tail|awk|less|cat|wc|nl)\b/;
+// ★★「読んだ」だけでは仮説を分けられない —— ★**何を探したか**で分ける。
+//   ★`^## #25[012]` は「次の節番号を採りに行った」であって「似た節を探した」ではない。
+//   ★見出しと番号だけからなる pattern を **numbering** とし、内容語を含むものだけ **content** とする。
+export const STRUCTPAT = /^[\^$#\s0-9\[\]\-|()?*+.\\/]*$/;
+/** ★引用符の外の `;` `|` `&` だけで命令を切る(`"motive\|carrier"` の中で切らない)。 */
+export function splitShell(cmd) {
+  const out = []; let cur = '', q = '';
+  for (const ch of String(cmd)) {
+    if (q) { cur += ch; if (ch === q) q = ''; continue; }
+    if (ch === '"' || ch === "'") { q = ch; cur += ch; continue; }
+    if (ch === ';' || ch === '|' || ch === '&') { out.push(cur); cur = ''; continue; }
+    cur += ch;
+  }
+  out.push(cur);
+  return out.filter(s => s.trim());
+}
+// ★★命令を `;` `&&` `||` `|` で切り、★**lean-idioms.md を含む区間だけ**を見る。
+//   ★そうしないと `git add … tools/lean-idioms.md && git commit … | tail -1` の `tail` を
+//   「末尾を見た」と数えてしまう(★実際に 1 度そう数えて、selftest に落とされた)。
+export function lookKind(kind, pat) {
+  const p = String(pat || '');
+  if (kind === 'Read') return 'range';
+  if (kind === 'Grep') return STRUCTPAT.test(p) ? 'numbering' : 'content';
+  const segs = splitShell(p).filter(s => IDFILE.test(s));
+  let best = 'other';
+  const rank = { other: 0, range: 1, numbering: 2, content: 3 };
+  for (const s of segs) {
+    const gs = [...s.matchAll(/(?:grep|rg)\b[^\n"']*"([^"]*)"/g)].map(m => m[1])
+      .concat([...s.matchAll(/(?:grep|rg)\b[^\n"']*'([^']*)'/g)].map(m => m[1]));
+    let k = 'other';
+    if (gs.length) k = gs.some(g => !STRUCTPAT.test(g)) ? 'content' : 'numbering';
+    else if (/\b(tail|head|sed|cat|less|nl|wc)\b/.test(s)) k = 'range';
+    if (rank[k] > rank[best]) best = k;
+  }
+  return best;
+}
 // 語が広すぎないか —— コーパス中の出現率で切る
 export const GENERIC_RATE = 0.01;
 export function isDistinctive(sig, corpusHits, corpusSize) {
   return corpusSize > 0 && corpusHits <= Math.max(1, Math.floor(corpusSize * GENERIC_RATE));
+}
+
+// ---------- ★★重複して書かれた idiom(M195 / 規則は M199 に事前登録) ----------
+// ★問題: 同じ失敗形が別々の言い方で何度も節になる。★M193 が `expected 'lemma'` で見つけた。
+// ★「重複」を字面の**完全一致**で測ると取り落とす —— `unexpected token 'set_option'; expected 'lemma'`
+//   と `unexpected token 'omit'; expected 'lemma'` は別の文字列だが同じ罠である。
+// ⇒ ★**字面の長さ GRAM_N の n-gram を共有するか**で繋ぐ。上の 2 つは `; expected 'lemma'` で繋がる。
+// ★汎用句(`failed to synthesize` 等)で全部が繋がるのを防ぐため、★**既存の `isDistinctive` を通した
+//   n-gram だけ**を辺に使う(新しい閾値を持ち込まない)。
+export const GRAM_N = 16;
+export function gramsOf(lits, n = GRAM_N) {
+  const out = new Set();
+  for (const lit of lits) { const s = String(lit); for (let i = 0; i + n <= s.length; i++) out.add(s.slice(i, i + n)); }
+  return out;
+}
+/** n-gram を共有する節を連結成分にまとめる。keep(g) が偽の n-gram は辺にしない。 */
+export function dupClusters(gramSets, keep = () => true) {
+  const g2s = new Map();
+  gramSets.forEach((gs, i) => { for (const g of gs) { let a = g2s.get(g); if (!a) g2s.set(g, a = new Set()); a.add(i); } });
+  const shared = [...g2s].filter(([g, set]) => set.size >= 2 && keep(g)).map(([g, set]) => ({ g, set }));
+  const par = gramSets.map((_, i) => i);
+  const find = x => { while (par[x] !== x) { par[x] = par[par[x]]; x = par[x]; } return x; };
+  for (const { set } of shared) { const a = [...set]; for (let k = 1; k < a.length; k++) { const r = find(a[0]), q = find(a[k]); if (r !== q) par[q] = r; } }
+  const comp = new Map();
+  gramSets.forEach((_, i) => { const r = find(i); if (!comp.has(r)) comp.set(r, []); comp.get(r).push(i); });
+  const clusters = [...comp.values()].filter(c => c.length >= 2).sort((a, b) => b.length - a.length);
+  return { clusters, shared };
+}
+// ★見出しの中の backtick の中身 —— 「人が節を探すときに打つであろう語」の代理。
+//   ★これが先行節の本文に**literal で出るか**を見ることで、「grep で見つけられたか」を機械で測る。
+export function headSpans(head) {
+  const out = new Set();
+  for (const m of String(head).matchAll(/`([^`\n]{4,80})`/g)) { const n = norm(m[1]); if (n.length >= 4) out.add(n); }
+  return out;
 }
 
 // ---------- ログ走査 ----------
@@ -440,6 +518,55 @@ function selftest() {
     [...errLikeQuotes('`failed to read file X.olean: incompatible header`')].length,
   ], [0, 1]);
   eq('S52 errLike ignores plain prose', [...errLikeQuotes('`this sentence is long enough but says nothing bad`')], []);
+  // ★★重複クラスタ(M195 / 規則は M199 に事前登録)
+  eq('S53 gramsOf window count', gramsOf(['abcdefgh'], 4).size, 5);
+  eq('S54 gramsOf drops too short', gramsOf(['abc'], 4).size, 0);
+  eq('S55 gramsOf unions literals', [...gramsOf(['abcd', 'abcd', 'zbcd'], 4)].sort(), ['abcd', 'zbcd']);
+  // ★要: 字面が**違っても**共有 n-gram で繋がること(`'set_option'` と `'omit'` の実例の縮小版)
+  eq('S56 dup links different literals via shared gram', dupClusters([
+    gramsOf(["unexpected token 'set_option'; expected 'lemma'"], 16),
+    gramsOf(["unexpected token 'omit'; expected 'lemma'"], 16),
+    gramsOf(['something else entirely and long'], 16),
+  ]).clusters, [[0, 1]]);
+  // ★共有する 16-gram が **ちょうど 1 つ**になるように組んである(接尾辞 16 字だけが共通)
+  eq('S57a the pair shares exactly one gram', dupClusters([gramsOf(['aaaaGENERICGENERICGE'], 16), gramsOf(['bbbbGENERICGENERICGE'], 16)]).shared.map(x => x.g), ['GENERICGENERICGE']);
+  eq('S57b dup keep() drops that gram', dupClusters([
+    gramsOf(['aaaaGENERICGENERICGE'], 16), gramsOf(['bbbbGENERICGENERICGE'], 16),
+  ], g => g !== 'GENERICGENERICGE').clusters, []);
+  eq('S58 dup is transitive', dupClusters([
+    gramsOf(['AAAAAAAAAAAAAAAAxxxx'], 16), gramsOf(['AAAAAAAAAAAAAAAAxxxxBBBBBBBBBBBBBBBB'], 16), gramsOf(['BBBBBBBBBBBBBBBByyyy'], 16),
+  ]).clusters.map(c => c.slice().sort()), [[0, 1, 2]]);
+  eq('S59 dup ignores singletons', dupClusters([gramsOf(['AAAAAAAAAAAAAAAAAAAA'], 16), gramsOf(['BBBBBBBBBBBBBBBBBBBB'], 16)]).clusters, []);
+  eq('S60 dup empty sets are not a cluster', dupClusters([new Set(), new Set(), new Set()]).clusters, []);
+  // ★見出しの語(「人が打つであろう語」)—— 省略記号の綴りが違えば literal では当たらない
+  eq('S61 headSpans picks backticked', [...headSpans('## `omit [Inst] in` は docstring の**前**に置く')], ['omit [Inst] in']);
+  eq('S62 headSpans drops short', [...headSpans('## `in` と `x`')], []);
+  // ★「読んだ」ではなく「何を探したか」で仮説を分ける(M195)
+  eq('S64 lookKind numbering vs content', [
+    lookKind('Bash', 'grep -nE "^## +#?25[012]" tools/lean-idioms.md; tail -20 tools/lean-idioms.md'),
+    lookKind('Bash', 'grep -n "motive\\|carrier" tools/lean-idioms.md | head -20'),
+    lookKind('Bash', 'tail -30 tools/lean-idioms.md'),
+    lookKind('Bash', 'git add tools/lean-idioms.md && git commit -m x | tail -1'),
+    lookKind('Read', 'offset=4736 limit=10'),
+    lookKind('Grep', '^## #[0-9]+'),
+    lookKind('Grep', 'docstring'),
+  ], ['numbering', 'content', 'range', 'other', 'range', 'numbering', 'content']);
+  eq('S65 lookKind single quotes too', lookKind('Bash', "grep -n 'set_option' tools/lean-idioms.md"), 'content');
+  eq('S66 splitShell keeps quoted pipes', splitShell('grep -n "a\\|b" f.md | head -20'), ['grep -n "a\\|b" f.md ', ' head -20']);
+  // ★D9(突然変異)が素通りした穴 —— **単引用符**の中の `|` で切ってはいけない
+  eq('S67 splitShell keeps single-quoted pipes', splitShell("grep -n 'a\\|b' f.md | head"), ["grep -n 'a\\|b' f.md ", ' head']);
+  eq('S68 lookKind single-quoted pattern with pipe', lookKind('Bash', "grep -n 'motive\\|carrier' tools/lean-idioms.md | head -20"), 'content');
+  // ★D2(突然変異)が素通りした穴 —— **既定の GRAM_N** を通る道が 1 本も無かった
+  // ★★最初の書き方(`gramsOf(['x'.repeat(GRAM_N)])`)は **GRAM_N を両辺に使っていた**ので
+  //   定数を 4 に書き換えても素通りした(突然変異 D2)。★幅そのものを外から固定する。
+  eq('S69 GRAM_N is the value M199 registered', GRAM_N, 16);
+  const shortShare = [['AAAAAAAAAAAAAAAA' + 'SHARED12CHRS'], ['BBBBBBBBBBBBBBBB' + 'SHARED12CHRS']];
+  eq('S70 default width ignores a 12-char overlap', dupClusters(shortShare.map(x => gramsOf(x))).clusters, []);
+  eq('S71 width 4 would join it (so the width is what decides)', dupClusters(shortShare.map(x => gramsOf(x, 4))).clusters, [[0, 1]]);
+  eq('S63 ellipsis spelling breaks literal grep', [
+    '## `set_option ... in` を置けない'.includes('set_option … in'),
+    '## `set_option … in` は前'.includes('set_option ... in'),
+  ], [false, false]);
   const bad = T.filter(t => !t.ok);
   for (const t of bad) console.log('  NG', t.name, '\n     got', JSON.stringify(t.a), '\n     want', JSON.stringify(t.b));
   console.log(`selftest ${T.length - bad.length}/${T.length}`);
@@ -645,5 +772,165 @@ if (has('--calibrate')) {
   console.log('    `already been declared` を **1 度も出していない**(別の手で見つけたか、合図が別の顔で出た)。');
   console.log('  ★★だから「scratch の `already been declared` = 意図した合図」と**逆向きには使えない**。');
   console.log('    ★言えるのは「合図は必ず scratch に落ちる」までで、★合図の総数は**下から**しか押さえられない。');
+}
+// ★★`--dupes` —— 「同じ失敗形が別々の節に何度書かれたか」と「書いた後も出続けているか」。
+//   ★規則は M199 に**測る前に**事前登録した。★`--gram N` で感度を見られる(既定 16)。
+if (has('--dupes') || has('--retro')) {
+  const GN = ARGV.includes('--gram') ? Number(ARGV[ARGV.indexOf('--gram') + 1]) : GRAM_N;
+  const build = n => {
+    const sets = secs.map(s => gramsOf(s.lits, n));
+    const r = dupClusters(sets, g => isDistinctive(g, hitsOf(g), N));
+    return { sets, ...r };
+  };
+  const { sets, clusters, shared } = build(GN);
+  const inClu = new Set(); for (const c of clusters) for (const i of c) inClu.add(i);
+  // ★★M199 に「代表 = 繋いだ n-gram のうち**最長**」と書いたが、★共有 n-gram はどれも長さ GN で
+  //   **同着**である。★事前登録した規則が ill-defined だった。★勝手に選び直さず、両方出す:
+  //   (a) 事前登録の規則 + 決定的な同着処理(節数が最多、同数なら辞書順の最初)
+  //   (b) 直した規則(クラスタの共有 n-gram の**どれか**に当たる診断を数える)
+  const repOf = c => {
+    const own = new Set(c); let best = null;
+    for (const { g, set } of shared) { if (![...set].every(i => own.has(i))) continue; if (!best || set.size > best.n || (set.size === best.n && g < best.g)) best = { g, n: set.size }; }
+    return best ? best.g : '';
+  };
+  const rows = clusters.map((c, ci) => {
+    const ss = c.map(i => secs[i]).sort((a, b) => (a.regTs || 0) - (b.regTs || 0));
+    const own = new Set(c);
+    const gs = shared.filter(x => [...x.set].every(i => own.has(i))).sort((a, b) => b.set.size - a.set.size || (a.g < b.g ? -1 : 1));
+    const t0 = Math.min(...ss.filter(s => s.regTs).map(s => s.regTs));
+    return { ci, c, ss, gs, rep: repOf(c), t0, totalAny: 0, afterAny: 0, totalRep: 0, afterRep: 0 };
+  });
+  // ★診断を 1 度だけ舐めて、どのクラスタの共有 n-gram に当たるかを数える(gram ごとに 14k 件を舐めない)
+  const g2c = new Map(); rows.forEach(r => { for (const { g } of r.gs) if (!g2c.has(g)) g2c.set(g, r); });
+  for (const e of errs) {
+    const touched = new Set();
+    for (let i = 0; i + GN <= e.n.length; i++) { const r = g2c.get(e.n.slice(i, i + GN)); if (r) touched.add(r); }
+    for (const r of touched) { r.totalAny++; if (isFinite(r.t0) && e.ts > r.t0) r.afterAny++; }
+    for (const r of rows) { if (r.rep && e.n.includes(r.rep)) { r.totalRep++; if (isFinite(r.t0) && e.ts > r.t0) r.afterRep++; } }
+  }
+  console.log(`\n-- dupes(規則 M199: 字面の ${GN}-gram を共有 + isDistinctive / --errwords ${ERRWORDS_VER}) --`);
+  console.log(`  字面を持つ節            : ${secs.filter(s => s.lits.size).length} / ${secs.length}`);
+  console.log(`  ★重複クラスタ           : ${clusters.length} 個`);
+  console.log(`  ★クラスタに入る節       : ${inClu.size} 節`);
+  console.log(`  ★最大クラスタ           : ${clusters[0] ? clusters[0].length : 0} 節`);
+  console.log(`  ★書いた後も再発(代表 gram / 事前登録の規則): ${rows.filter(r => r.afterRep > 0).length} クラスタ / 事象 ${rows.reduce((a, r) => a + r.afterRep, 0)} 件`);
+  console.log(`  ★書いた後も再発(共有 gram のどれか / 直した規則): ${rows.filter(r => r.afterAny > 0).length} クラスタ / 事象 ${rows.reduce((a, r) => a + r.afterAny, 0)} 件`);
+  console.log('\n  -- クラスタ(全部。★標本ではない) --');
+  for (const r of rows) {
+    console.log(`  [${String(r.ss.length).padStart(2)} 節] 代表 ${JSON.stringify(r.rep)} (共有 gram ${r.gs.length} 個)  総数 rep ${r.totalRep} / any ${r.totalAny}  ―  T0 後 rep ${r.afterRep} / any ${r.afterAny}`);
+    // ★「後から書いた節の見出しの語で、先行節を grep できたか」を機械で見る(M195 の仮説 1 の検査)
+    for (let k = 0; k < r.ss.length; k++) {
+      const s = r.ss[k];
+      const prior = r.ss.slice(0, k).map(p => p.head + '\n' + p.body.join('\n')).join('\n');
+      const sp = [...headSpans(s.head)];
+      const hit = k === 0 ? '' : (sp.some(x => prior.includes(x)) ? '見つかる' : '★見つからない');
+      console.log(`      L${String(s.line).padStart(5)} ${s.regTs ? new Date(s.regTs * 1000).toISOString().slice(0, 10) : '   ?      '} ${hit.padEnd(12)} ${s.head.slice(0, 62)}`);
+      if (k > 0 && sp.length) console.log(`               見出しの語: ${sp.slice(0, 4).map(x => JSON.stringify(x)).join(' ')}`);
+    }
+  }
+  const later = rows.flatMap(r => r.ss.slice(1).map((s, k) => ({ s, prior: r.ss.slice(0, k + 1) })));
+  const grepOk = later.filter(x => { const prior = x.prior.map(p => p.head + '\n' + p.body.join('\n')).join('\n'); return [...headSpans(x.s.head)].some(g => prior.includes(g)); }).length;
+  console.log(`\n  ★後から書かれた節 ${later.length} 件のうち、見出しの語で先行節を grep できたのは ${grepOk} 件 (${later.length ? (grepOk / later.length * 100).toFixed(0) : 0}%)`);
+  if (has('--gram-sweep')) {
+    console.log('\n  -- 感度(★選び直しではなく全部見せる) --');
+    console.log('     N   クラスタ   節   最大');
+    for (const n of [12, 16, 24, 32]) { const b = build(n); const s2 = new Set(); for (const c of b.clusters) for (const i of c) s2.add(i); console.log(`   ${String(n).padStart(3)}${String(b.clusters.length).padStart(9)}${String(s2.size).padStart(6)}${String(b.clusters[0] ? b.clusters[0].length : 0).padStart(6)}`); }
+  }
+  // ★★`--retro` —— 「節を書く**前**に『似た節がある』と言う口」が、実際に先行節を出せたかを
+  //   **その時点の `lean-idioms.md`(git の版)**に対して確かめる。★口の価値の主指標。
+  if (has('--retro')) {
+    const g = a => { try { return execFileSync('git', a, { encoding: 'utf8', maxBuffer: 1 << 28 }); } catch { return ''; } };
+    console.log('\n  -- retro: その時点の lean-idioms.md に対して口を当てたら先行節を出せたか --');
+    let ok = 0, no = 0, nohist = 0, self = 0;
+    for (const r of rows) for (let k = 1; k < r.ss.length; k++) {
+      const s = r.ss[k]; if (!s.regTs) { nohist++; continue; }
+      const sha = g(['log', '--before=' + new Date((s.regTs - 1) * 1000).toISOString(), '-1', '--format=%H', '--', 'tools/lean-idioms.md']).trim();
+      if (!sha) { nohist++; continue; }
+      const md0 = g(['show', sha + ':tools/lean-idioms.md']); if (!md0) { nohist++; continue; }
+      const hs = sections(md0).map(x => ({ x, lits: errLits(x.head + '\n' + x.body.join('\n')) })).filter(x => headingKey(x.x.head) !== headingKey(s.head));
+      const mine = gramsOf(s.lits, GN);
+      const found = hs.filter(x => { for (const q of gramsOf(x.lits, GN)) if (mine.has(q) && isDistinctive(q, hitsOf(q), N)) return true; return false; });
+      if (sections(md0).some(x => headingKey(x.head) === headingKey(s.head))) self++;
+      if (found.length) ok++; else no++;
+      console.log(`      L${String(s.line).padStart(5)} ${sha.slice(0, 8)} ${found.length ? '★出せた ' + found.length + ' 節: L' + found.slice(0, 3).map(x => x.x.line).join(', L') : '出せない'}   ${s.head.slice(0, 46)}`);
+    }
+    console.log(`  ⇒ ★出せた ${ok} / 出せない ${no} / 版が取れない ${nohist}   (★書いた版に自分が既に居た: ${self} 件)`);
+  }
+}
+// ★★`--reads` —— M195 の 2 仮説を分ける。「重複した節を書く前に、同じセッションで
+if (has('--reads')) {
+  const GN = ARGV.includes('--gram') ? Number(ARGV[ARGV.indexOf('--gram') + 1]) : GRAM_N;
+  const sets = secs.map(s => gramsOf(s.lits, GN));
+  const { clusters } = dupClusters(sets, g => isDistinctive(g, hitsOf(g), N));
+  const target = new Map(); for (const c of clusters) for (const i of c) target.set(secs[i].head, secs[i]);
+  const found = new Map();
+  for (const f of walk(LOGROOT)) {
+    const ev = [];
+    const rl = readline.createInterface({ input: fs.createReadStream(f), crlfDelay: Infinity });
+    for await (const line of rl) {
+      if (!line.includes('lean-idioms')) continue;
+      let o; try { o = JSON.parse(line); } catch { continue; }
+      const ts = o.timestamp ? Math.floor(Date.parse(o.timestamp) / 1000) : 0;
+      const c = o.message?.content; if (!ts || !Array.isArray(c)) continue;
+      for (const x of c) {
+        if (x.type !== 'tool_use') continue;
+        const inp = x.input || {}; const fp = String(inp.file_path || inp.path || ''); const cmd = String(inp.command || '');
+        const body = String(inp.new_string ?? inp.content ?? '');
+        if (IDFILE.test(fp) && body) ev.push({ ts, kind: 'write', text: body });
+        else if (x.name === 'Bash' && IDWRITE.test(cmd)) ev.push({ ts, kind: 'write', text: cmd });
+        else if (x.name === 'Read' && IDFILE.test(fp)) ev.push({ ts, kind: 'Read', pat: `offset=${inp.offset ?? '-'} limit=${inp.limit ?? '-'}` });
+        else if (x.name === 'Grep' && (IDFILE.test(fp) || IDFILE.test(String(inp.glob || '')))) ev.push({ ts, kind: 'Grep', pat: String(inp.pattern || '') });
+        else if (x.name === 'Bash' && IDFILE.test(cmd) && IDLOOK.test(cmd)) ev.push({ ts, kind: 'Bash', pat: cmd.replace(/\s+/g, ' ') });
+      }
+    }
+    ev.sort((a, b) => a.ts - b.ts);
+    for (let i = 0; i < ev.length; i++) {
+      if (ev[i].kind !== 'write') continue;
+      for (const [head] of target) {
+        if (!ev[i].text.includes(head)) continue;
+        let prev = null; for (let j = i - 1; j >= 0; j--) if (ev[j].kind !== 'write') { prev = ev[j]; break; }
+        const rec = { ts: ev[i].ts, prev, nBefore: ev.slice(0, i).filter(e => e.kind !== 'write').length };
+        if (!found.has(head) || found.get(head).ts > rec.ts) found.set(head, rec);
+      }
+    }
+  }
+  const rows = [...target.values()].sort((a, b) => a.line - b.line);
+  const wrote = rows.filter(s => found.has(s.head));
+  const withLook = wrote.filter(s => found.get(s.head).prev);
+  console.log(`\n-- reads(重複クラスタの ${rows.length} 節。★書きの規則は rescan より厳しい) --`);
+  console.log(`  書きの記録が取れた節              : ${wrote.length} / ${rows.length}`);
+  console.log(`  ★書く前に同じセッションで読み/探しがあった: ${withLook.length} / ${wrote.length}`);
+  const byKind = {}; for (const s of withLook) { const k = found.get(s.head).prev.kind; byKind[k] = (byKind[k] || 0) + 1; }
+  console.log(`  直前の手段                        : ${JSON.stringify(byKind)}`);
+  const byWhat = {}; for (const s of withLook) { const p = found.get(s.head).prev; const k = lookKind(p.kind, p.pat); byWhat[k] = (byWhat[k] || 0) + 1; }
+  console.log(`  ★★直前に**何を**探したか           : ${JSON.stringify(byWhat)}`);
+  console.log(`     content=内容語で探した / numbering=見出し番号を採りに行った / range=末尾か行範囲を見た / other=探していない(git 等)`);
+  console.log('\n  -- ★content と判定されたもの(★全部。目で見るため) --');
+  for (const s of withLook) { const p = found.get(s.head).prev; if (lookKind(p.kind, p.pat) !== 'content') continue; console.log(`  L${String(s.line).padStart(5)} ${JSON.stringify(p.pat).slice(0, 150)}`); }
+  const only = ARGV.includes('--only') ? ARGV[ARGV.indexOf('--only') + 1] : '';
+  console.log('\n  -- 節ごと(★--only <語> で見出しを絞れる) --');
+  for (const s of rows) {
+    if (only && !s.head.includes(only)) continue;
+    const r = found.get(s.head);
+    if (!r) { console.log(`  L${String(s.line).padStart(5)} 書きの記録なし        ${s.head.slice(0, 60)}`); continue; }
+    const p = r.prev;
+    console.log(`  L${String(s.line).padStart(5)} ${new Date(r.ts * 1000).toISOString().slice(0, 16)} ${p ? '★読/探 ' + Math.round((r.ts - p.ts) / 60) + ' 分前 ' + p.kind : '読み無し           '}  ${s.head.slice(0, 52)}`);
+    if (p) console.log(`             ${JSON.stringify(p.pat).slice(0, 130)}`);
+  }
+}
+// ★★`--similar <file>` —— 提案の口そのもの。新しく書こうとしている節の下書きを渡すと、
+//   同じ字面の n-gram を持つ既存の節を名指しする。★`--dupes` と**同じ規則**を使う。
+if (has('--similar')) {
+  const p = ARGV[ARGV.indexOf('--similar') + 1];
+  const GN = ARGV.includes('--gram') ? Number(ARGV[ARGV.indexOf('--gram') + 1]) : GRAM_N;
+  if (!p) { console.error('--similar <下書きのファイル>'); process.exit(2); }
+  const txt = p === '-' ? fs.readFileSync(0, 'utf8') : fs.readFileSync(p, 'utf8');
+  const mine = gramsOf(errLits(txt), GN);
+  const hit = [];
+  for (const s of secs) { const sh = []; for (const q of gramsOf(s.lits, GN)) if (mine.has(q) && isDistinctive(q, hitsOf(q), N)) sh.push(q); if (sh.length) hit.push({ s, g: sh.sort((a, b) => b.length - a.length)[0] }); }
+  console.log(`-- similar(${GN}-gram / --errwords ${ERRWORDS_VER}) 下書きの字面 ${errLits(txt).size} 個 --`);
+  if (!hit.length) console.log('  似た節は無い。');
+  for (const h of hit) console.log(`  L${String(h.s.line).padStart(5)} <${h.g}> ${h.s.head.slice(0, 76)}`);
+  console.log(`  ⇒ ${hit.length} 節`);
 }
 if (has('--json')) fs.writeFileSync(ARGV[ARGV.indexOf('--json') + 1], JSON.stringify(secs.map(s => ({ line: s.line, head: s.head, regTs: s.regTs, regSrc: s.regSrc, sigs: s.sigs, ev: s.ev }))));

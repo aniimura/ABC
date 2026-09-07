@@ -11828,3 +11828,148 @@ GUESS[CENT-b]: 抽象核は「無限 Galois 群の中心化群」で、p 進の�
 GUESS[CENT-c]: Krasner か「K̄ の元の共役が K 上で動く」から出る（★本体の見立て。拘束ではない）
 GUESS[CENT-d]: 有限次拡大に降ろせば有限群の中心化群になり、Galois 対応で閉じる
 ```
+
+## ★★★★★★塔の減衰 —— ☆★**持ち場の目標が偽だった。★代替の道で Ax の定数が出た**（2026-09-08）
+
+`lean/ABC3/Found/PGC/AxTowerDecay.lean` **627 行 / 20 宣言、`sorry` 0**。
+`build.mjs` → **jobs 3,681 / error 0 / sorry 0 / 11.6 秒**。★**MCP 使用 0 回。正規性を使う宣言 0 本。**
+
+### ☆★★★「`Σ_j i_j/e_j` の収束」は**偽**（★測って示された）
+
+★円分塔 `F_n = ℚ_p(μ_{p^n})`（p 奇素数）:
+`v_p(𝔡) = n − 1/(p−1)` ⇒ `(p−1)(i_n+1) = e_n` ⇒
+★**`i_n/e_n = (p^{n−1}−1)/(p^{n−1}(p−1)) → 1/(p−1) > 0`** ⇒ ★**`Σ` は発散。**
+
+☆★★**しかも「sharp な `(p−1)i ≤ e_L` を証明すれば直る」話ではない** ——
+★**その塔は sharp 評価をほぼ等号で満たしている。**
+⇒ ★★**直前の波が「未着手・価値がある」と名指しした different の評価を埋めても、Ax の定数は出ない。**
+★**次の波がそこに費やすのを止めるため docstring に書き**、
+★★**骨（各項が正の定数以上 ⇒ 部分和が非有界）を `sum_unbounded_of_pos_le` として形式化した。**
+★同じく「1 段の一様定数を頑張れば閉じる」も **`prod_unbounded_of_one_lt` で形式的に否定**した。
+
+### ★★★代替の道が通った —— ★**原典 Ax 1970 の定数そのもの**
+
+★★`axLemma_of_wildDescent_geometric`: ★**`c k ≤ p^{(1/(p−1))(1/p)^k}` ⇒ `AxLemma K (axConstant p)`**、
+★`axConstant p = p^{p/(p−1)²} = |p|^{−p/(p−1)²}`。★`axSenTate_of_wildDescent_geometric` まで繋がった。
+★**非空虚性 `axWildDescent_pow` は無条件に真。**
+
+★★**原典より短い道 2 つ**:
+1. ★**予算関数 `F` で降下を書くと積を帰納法の中で分解しなくて済む** ——
+   `exists_mem_of_descent_budget` は **20 行短く**、しかも一般（後者が系として 12 行で出る）。
+   ★**原典（Ax/Sen）は勘定を地の文で回すのでこの分離が無い。**
+2. ★★**降下の複雑さを次数ではなく wild 深さ `v_p([K(x):K])` で測ると、tame 側が仮説から消える** ——
+   ★**基底段が木の重心補題で埋まる。**★原典は次数で帰納するのでこの分離が無い。
+
+★抽象核 **8 本**は分岐・付値・Galois・p 進の語彙が 1 語も出ない。
+
+### ★★「索引に無い ⇒ 不在」の反例 **5 例目**
+
+★`sum_le_hasSum` —— 索引に無いが `#check` で**在った**。
+（★既出 4 つ: `public` 修飾子 / `grep -i` の埋没 / 「定理名 0 件でも部品は在る」/ `to_additive` の生成名）
+
+### ★残るのはただ 1 点
+
+★**「wild 深さ `k` の 1 段の損失を `p^k` から `p^{(1/(p−1))p^{−k}}` に落とす」**
+＝ ★**「深い段では `ε` が減る」**（`σ^p x − x = Tr_{M/M′}(σx − x)` と、激しく分岐した拡大での
+跡の評価 `Tr(𝒪_M) ⊆ 𝔭^c`, `c > 0`）。
+★**これを落とせば `axLemma_of_wildDescent_geometric` に代入するだけで `AxSenTate K` が閉じる。**
+
+☆★**`AxDescentStep` と `AxWildDescent` は比較不能**（どちらの向きの導出もできていない）。
+★実装者の見立て: ★**`AxDescentStep`（`ε` 保存）の方が偽に近い**（wild な段では `g ≡ 1` が成り立たない）。
+
+## ★★`VERDICT:`
+
+```
+VERDICT[TOWER-a]: 外れ — Herbrand の合成則は 1 本も使わなかった
+VERDICT[TOWER-b]: 半分 — 抽象核 8 本は分岐の語彙 0 だが、中身は区分線型でなく「幾何級数と予算つき降下」
+VERDICT[TOWER-c]: 外れ — Hasse-Arf は使わなかった（★1 段でも塔でも要らなかった）
+VERDICT[TOWER-d]: 当たり — 定数は p/(p−1)² の形で出て、最良性は出ていない
+```
+```
+COST[Tower]: 並 | 持ち場=塔に沿った跳びの減衰  — 目標は円分塔で偽だと測れた。代わりに予算つき降下と Ax の定数が通った
+```
+☆★**本体は 2 本外して 1 本半分。★今日 13 度目。**
+☆★★**そして本体が配った「目標」自体が偽だった** —— ★**今日 3 度目**
+（`K_π = K_{π′}` / `colim_S H¹ = 0` / 今回）。
+★**ただし今回は「前の波の申し送りをそのまま渡した」ので、本体の発明ではない。**
+⇒ ★**申し送り: 前の波が名指しした次のノードも、配る前に真偽を疑う。**
+
+## ★★`GUESS:` —— ★**配る前に書いた**（深い段では ε が減る）
+
+```
+GUESS[EPS-a]: σ^p x − x = Tr_{M/M′}(σx − x) は 1 行で出る（跡の定義そのもの）
+GUESS[EPS-b]: 跡の評価 Tr(𝒪_M) ⊆ 𝔭^c は different と同値で、木の ramIndex 族が効く
+GUESS[EPS-c]: 抽象核は「p 個の共役の和のノルム」で、超距離が効いて max より真に小さくなる
+GUESS[EPS-d]: 指数 (1/(p−1))p^{−k} の形は wild 深さの帰納から出る
+```
+
+## ★★★★★★中心化群 —— ★**「一般論からは絶対に出ない」ことが反例つきで確定**（2026-09-08）
+
+`Found/PGC/CentralizerReduction.lean`（425 行）+ `Check/PGC/CentralizerNeedsInput.lean`（109 行）、
+どちらも **`sorry` 0**。★**MCP 使用 0 回**（`leanfile.mjs` 13 往復）。
+
+### ★★★形式的証明が存在しないことの確定（★3 段）
+
+1. ★`centralizerActsTriviallyOnBase_eq_abstract` が ★**`rfl` で現行定義と一致**することを保証。
+2. ★★**その抽象版は `(ℝ, ℂ, ℂ)` で偽**（`not_centralizerActsTriviallyOnBaseAbstract_real`）。
+3. ★★**純群論版 `C_G(H) ⊆ H` も一般に偽**（`not_forall_centralizer_le`）。
+
+⇒ ★★★**体・群の一般論からは出ない。★p 進固有の入力が要る。**
+★**数学的には真**（`Z(Γ_F) = 1` から従う既知定理）。
+
+### ★★★原典より短い道（今日 24 回目）
+
+★★**無限 Galois 対応 1 本**（`InfiniteGalois.fixedField_fixingSubgroup`）だけで
+★**「σ は全中間体を保つ ⟹ `σ y ∈ K(y)`」**が出る。
+★ここから障害・判定条件・**有限次還元 5 本**が全部落ちた。
+★★**`_of_finiteLevelAlg` は `K^ρ` も `Z(Γ_F)=1` も踏まない**（★原典の道の 2 歩目・4 歩目を回避）。
+★★**代数閉包を 1 度も見ない有限次の条件**まで下がり、うち 1 本は
+★**「有限群 1 個の中心化群 `C_G(H) ⊆ H`」**である。
+
+★抽象核 2 本（`fixed_of_comm_of_fixed` / `smul_fixed_of_comm_of_fixed`）は
+★★**`does not depend on any axioms`**（★型クラス 0 個。群も環も体も出ない）。
+★**可判定性は 1 か所も使っていない。**★正規性は有限次還元の 3 本だけ。
+
+### ☆★見立てが外れた点（★実装者が自分から）
+
+☆★**「`σ y ∈ K(y)` だけで閉じるのでは」は外れ** —— 紙で詰めると `ρ` が `K^×/(K^×)²` に
+自明に働くところまでしか出ず、★**不分岐 2 次では Frobenius が square class に自明に働くので
+`_of_sq_witness` では原理的に排除できない。**⇒ ★一般次数版 `_of_root_witness` を主役にした。
+★**この観察は形式化していない＝紙の上**とも明記。
+
+### ★★在庫調査で「部品で引いたら全部在った」（★6 例目）
+
+★前任の 3 手（`centralizer` で 0 件）は追試して一致。
+☆★★**そのうえで「部品」で引き直したら必要なものは全部在った**:
+`InfiniteGalois.fixedField_fixingSubgroup` / `AlgEquiv.restrictNormalHom_surjective` /
+`IntermediateField.coe_algebraMap_apply` / 木の `isGalois_closure`。
+★**測って分かった不在**: `IsGalois K.carrier K.closure` は **synth しない**（`haveI` で置く）。
+
+## ★★`VERDICT:`
+
+```
+VERDICT[CENT-a]: 当たり — mathlib にも木にも無い（追試で一致）。★ただし「部品」は全部在った
+VERDICT[CENT-b]: 半分 — 抽象核は「無限 Galois 群の中心化群」よりさらに薄く、★型クラス 0 個・公理 0 個だった
+VERDICT[CENT-c]: 外れ — Krasner も共役の議論も使わず、無限 Galois 対応 1 本で落ちた
+VERDICT[CENT-d]: 半分 — 有限群の中心化群まで下がったが、★Galois 対応では閉じない（群論版も偽）
+```
+```
+COST[Centralizer]: 安 | 持ち場=中心化群  — 13 往復・MCP 0・本体は無限 Galois 対応 1 本で落ちた
+```
+
+### ★★★本体の判断: ★**単射性はここで止める**
+
+★残る道は 3 つ（N1 具体的 witness / N2 `K^ρ` の構成 / ★**N3 `Z(Γ_F) = 1` = 研究レベル**）で、
+★**N1・N2 を埋めても N3 が残る。**
+⇒ ★**単射性はここで止め、★未着手の葉に人を回す。**
+★**`prop_2_2` の葉（`reciprocityUnits` の α-同変性）は誰も手を付けていない**唯一の葉であり、
+★**研究レベルではない。**
+
+## ★★`GUESS:` —— ★**配る前に書いた**（`reciprocityUnits` の α-同変性）
+
+```
+GUESS[RECEQ-a]: 抽象 α 版の同変性は在庫に無い（実装者が測って報告済み）
+GUESS[RECEQ-b]: 入口は Lubin-Tate データの選択非依存性（reciprocityUnits_eq_of_transport）
+GUESS[RECEQ-c]: 抽象核は「2 つの塔の間の同変な全単射」で、Lubin-Tate の語彙が消える
+GUESS[RECEQ-d]: α が体の同型から来る場合は既に在る（reciprocityUnits_semilinear_conj）ので、そこから一般 α へ持ち上げる
+```
