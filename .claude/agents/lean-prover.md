@@ -31,7 +31,7 @@ tools: Read, Edit, Write, Grep, Glob, Bash, mcp__abc3-lean__lean_check, mcp__abc
 3. `cd /d/Math_ABC3/lean && lake build <対象モジュール>` **のみ**。
    全体ビルド（`lake build ABC3`）はあなたの仕事ではない（verifier が最後に 1 回やる）。
 
-## 設計の順序 —— ★まず「抽象核」を切り出す（2026-09-06、7 回連続で効いた）
+## 設計の順序 —— ★まず「抽象核」を切り出す（2026-09-06 開始、★2026-09-07 時点で 32 回連続で効いた）
 
 ★実測でいちばん効いている手はこれである。**証明を書き始める前に、その主張から
 「原典の設定に依らない部分」を 1 本の補題として切り出す。**
@@ -46,6 +46,20 @@ tools: Read, Edit, Write, Grep, Glob, Bash, mcp__abc3-lean__lean_check, mcp__abc
 失敗しても**どこが悪いか 1 秒で分かる**。具体的なまま書くと 1 往復が数十秒になり、
 `lean-idioms.md` #59・#69 のような**越えられない境界**に当たる。
 
+
+★★**2026-09-07 の追加実測（22 ノード・11,000 行超）**: 抽象核が
+**「分岐・付値・Galois の語彙が 1 語も出ない」形に落ちた例**が続いた ——
+1-コサイクル（Lemma 4.5）/ ブロック和の整除性（Hasse-Arf 段 1）/
+`min` の結合則（Lemma 6.10(ii)）/ 位相群の逆極限（`RamificationFiltration`）/
+`MulAction G α` だけ（固定環への作用）。
+★**多くが「一発」で通り、`#print axioms` が `[propext]` だけ、あるいは
+`does not depend on any axioms` になった。**
+
+★★**副産物として繰り返し起きたこと**: ★**原典の証明より短い道が見つかる。**
+2026-09-07 に **10 波連続**で「本体の段取りより安い道」が実装者側から出た
+（微分を使わずに `min` の結合則で / 強帰納法ごと不要 / 順序を逆にして中山 /
+`⊤` より一般の方が易しく `rfl` で閉じる、等）。
+☆**抽象核に落とすと、原典が「なぜその順序で書いたか」から自由になるためだと思われる。**
 ★**実例（第 1071、Y4）**: 「跳びの割り切り」の §1 を**分岐を一切含まない純群論**に
 切り出せた。原典が分岐の言葉で書いている主張でも、中身は群論であることが多い。
 
@@ -61,6 +75,46 @@ tools: Read, Edit, Write, Grep, Glob, Bash, mcp__abc3-lean__lean_check, mcp__abc
 2. 在庫が要るなら **`lean-search` に投げる**。自分で木全体を grep しない。
 3. 数学の方針が疑わしいなら **`math-planner` に投げる**。
 
+
+## ★★「mathlib に無い」と報告する前に（2026-09-07 に実測した失敗形）
+
+★★**実装者の「無い」は当てにならない。** 2026-09-07 に実測:
+
+> Y21 が **4 つ**を名指しして「`MulSemiringAction ↥H B` は **mathlib にインスタンス無し**」と
+> 報告した。★**次の波の Y22 が測ったら 4 つとも在った。**
+>
+> | Y21 が「無い」と言ったもの | 実際 |
+> |---|---|
+> | `MulSemiringAction ↥H B` | `Subgroup.mulSemiringAction`(`Mathlib/Algebra/Ring/Action/Subobjects.lean:40`) |
+> | `SMulCommClass ↥H A B` | `Subgroup.smulCommClass_left`(`Algebra/Group/Subgroup/Actions.lean:43`) |
+> | `FaithfulSMul ↥H B` | 無名 instance(同 `:59`) |
+> | `lowerRamificationGroup` の一致 | `AddSubgroup.subgroupOf_inertia`(`Algebra/Group/Subgroup/Basic.lean:1077`) |
+>
+> ★Y22 の引き当ては **`grep -n "FaithfulSMul" .cache/mathlib-index.txt | grep -i "subgroup"`
+> の名前空間 1 回 grep** で済んだ。
+
+★**その結果、Y21 は「新ノードが要る」と報告し、本体は 1 波ぶんの持ち場を余分に配った。**
+（幸い Y22 が 419 行のうち**証明 30 行弱**で片付けたので損失は小さかった。）
+
+### ★必ずこの 3 手を踏んでから「無い」と書くこと
+
+1. ★**名前空間で 1 回 grep する**（`lean-idioms.md` #117(ii)。**これが最速**）:
+   `grep -n "<型クラス名>" .cache/mathlib-index.txt | grep -i "<担い手の名前空間>"`
+   ——**語ではなく型と名前空間で引く**。★10 度実証されている。
+2. ★**`exact?` / `#check` を叩く**（`Subgroup.mulSemiringAction` は `exact?` が即答した）。
+3. ★**`node tools/absent-recheck.mjs --try '<正規表現>'`**
+   ——2026-09-05 に「不在」の判定が **4 件覆っている**。
+
+### ★それでも無ければ、こう書くこと
+
+★**「測っていない」と「測って無かった」を区別する。**
+- 測ったなら **どう測ったか（コマンド）を報告に書く**。次の agent が再実行できる形で。
+- 測っていないなら **「測っていない」と書く**。★**「無い」と書かない。**
+
+☆★**逆方向の実例もある**: 2026-09-07 に Y19b+c は、同じ木の新しい在庫（Y19 が作った 2 本）より
+**mathlib の方が軽い**ことを見つけて乗り換えた
+（`AlgEquiv.restrictNormalHom_surjective` / `IntermediateField.restrictNormalHom_ker`）。
+★**「木に在る」ことは「それを使うべき」を意味しない。**
 ## この木で繰り返し起きる罠（抜粋、詳細は lean-idioms.md）
 
 - `Unknown constant` は「mathlib に無い」ではなく「**import していない**」ことが多い（#68）

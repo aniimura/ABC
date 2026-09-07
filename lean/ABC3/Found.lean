@@ -1781,9 +1781,28 @@ import ABC3.Found.PGC.RamificationFiltrationBuild
 import ABC3.Found.PGC.LubinTateCompletionDegree
 import ABC3.Found.PGC.LubinTateCompletionGalois
 import ABC3.Found.PGC.LubinTateCompletionNorm
+import ABC3.Found.PGC.TorsionPointCriterion
 import ABC3.Found.PGC.UnramifiedBaseChangeInvariance
 import ABC3.Found.PGC.RamificationFiltrationZero
 import ABC3.Found.PGC.AbsClosureModules
+import ABC3.Found.PGC.AbelianClosureSplit
+import ABC3.Found.PGC.AbelianClosure
+import ABC3.Found.PGC.LubinTateUpperRamificationVanish
+import ABC3.Found.PGC.LubinTateRamificationBreak
+import ABC3.Found.PGC.AbelianSubfieldInLubinTate
+import ABC3.Found.PGC.LubinTateQuotientDescent
+import ABC3.Found.PGC.FixedRingAdjoinIso
+import ABC3.Found.PGC.LubinTateRamificationBookkeeping
+import ABC3.Found.PGC.LocalClassFieldTheory
+import ABC3.Found.PGC.ArtinMap
+import ABC3.Found.PGC.LubinTateUniformizerIndependence
+import ABC3.Found.PGC.LubinTateReciprocityIndependence
+import ABC3.Found.PGC.CyclotomicFromAbelianization
+import ABC3.Found.PGC.LubinTateThetaLinear
+import ABC3.Found.PGC.LubinTateEndoTwisted
+import ABC3.Found.PGC.CyclotomicRecoverable
+import ABC3.Found.PGC.TwistedLTComplete
+import ABC3.Found.PGC.ArtinEquivariance
 /-!
 # Found — 実装済みの基礎
 

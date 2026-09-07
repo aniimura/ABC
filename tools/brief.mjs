@@ -36,6 +36,18 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+/* ★名前つき実体の表は `tools/entities.mjs` に 1 本化した(2026-09-07 メタ第 15 回、M53)。
+ *   ★ここが**開けていなかった**もの: 生きた `1_Structured` 69 本で使われる 53 種のうち
+ *   `&otimes;`(4 回)・`&eacute;`(3 回)・`&ouml;`(1 回)の **3 種・延べ 8 回**。
+ *   `&otimes;`(テンソル積)は数学の記号なので、体裁ではなく**内容の穴**だった。
+ *   ★import 束縛はモジュール本体より先に初期化されるので、下の「関数宣言だけ」の
+ *     規約(TDZ 回避)とは衝突しない。 */
+import { ENTITIES, decodeEntities } from './entities.mjs';
+/* ★見出しの形の判定（M59 / M65 / M71 / M76）は `tools/heading-shape.mjs` に 1 本化した
+ *   (2026-09-07 メタ第 20 回、M80)。★理由: 見張りが `--audit-proof` の側にしか無く
+ *   **ゲートで落ちなかった**ため、`check.mjs --selftest` からも同じ実装を叩けるようにした。
+ *   ★`check.mjs` に写すのではなく共有モジュールにしたのは、写すと「写した方を測る」ことになるから。 */
+import { headingRe, headingLineShape, itemHeadingRes, pickHeading } from './heading-shape.mjs';
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 
@@ -46,6 +58,12 @@ const opt = (f) => { const i = args.indexOf(f); return i >= 0 ? args[i + 1] : nu
 const relArg = opt('--node');
 const modArg = opt('--mod');
 const paperArg = opt('--paper');
+
+// ★`--audit-proof`: `proofParagraphOf`（1b の Proof 段落抽出）の**無音の失敗**を数える。
+//   メタ第 14 回（backlog M47-1）。★**出力するだけで、brief の挙動は 1 行も変えない。**
+//   ここに相乗りさせた理由: 測る対象が `proofParagraphOf` という **brief.mjs の内部関数**で、
+//   別ファイルに写すと「写した方を測っている」ことになるため（`_*.mjs` を増やさない、も兼ねる）。
+if (flag('--audit-proof')) { auditProof(flag('--json')); process.exit(0); }
 
 // ★新しい入口は既存の 2 つと排他。ここで分岐して抜ける（以下の既存経路は無傷）。
 if (paperArg) { paperBrief(paperArg, opt('--item'), opt('--id'), flag('--list'), flag('--json')); process.exit(0); }
@@ -284,32 +302,14 @@ function papersJson() { return join(ROOT, 'ResearchPaper', 'papers.json'); }
  *  （`1_Structured/README.md` §3。1 つの体系・2 つの表現）。 */
 function decorClasses() { return 'ul1|ul2|bar|hat|tilde|dot1|dot2|bb|scr|frak|prime'; }
 
-function entTable() {
-  return {
-  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ',
-  ldquo: '“', rdquo: '”', lsquo: '‘', rsquo: '’',
-  minus: '−', times: '×', ge: '≥', le: '≤', ne: '≠', equiv: '≡', cong: '≅',
-  rarr: '→', larr: '←', harr: '↔', rArr: '⇒', lArr: '⇐', hArr: '⇔', mapsto: '↦',
-  sube: '⊆', supe: '⊇', sub: '⊂', sup: '⊃', isin: '∈', notin: '∉', ni: '∋',
-  cap: '∩', cup: '∪', empty: '∅', sum: '∑', prod: '∏', part: '∂', infin: '∞',
-  or: '∨', and: '∧', not: '¬', forall: '∀', exist: '∃', radic: '√', prop: '∝',
-  sect: '§', hellip: '…', mdash: '—', ndash: '–', middot: '·', bull: '•',
-  prime: '′', Prime: '″', deg: '°', plusmn: '±', divide: '÷', sdot: '⋅',
-  alpha: 'α', beta: 'β', gamma: 'γ', delta: 'δ', epsilon: 'ε', zeta: 'ζ',
-  eta: 'η', theta: 'θ', iota: 'ι', kappa: 'κ', lambda: 'λ', mu: 'μ', nu: 'ν',
-  xi: 'ξ', pi: 'π', rho: 'ρ', sigma: 'σ', tau: 'τ', upsilon: 'υ', phi: 'φ',
-  chi: 'χ', psi: 'ψ', omega: 'ω',
-  Gamma: 'Γ', Delta: 'Δ', Theta: 'Θ', Lambda: 'Λ', Xi: 'Ξ', Pi: 'Π',
-  Sigma: 'Σ', Phi: 'Φ', Psi: 'Ψ', Omega: 'Ω',
-  };
-}
-function decodeEnt(s) {
-  const ent = entTable();
-  return s
-    .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => String.fromCodePoint(parseInt(h, 16)))
-    .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(parseInt(d, 10)))
-    .replace(/&([a-zA-Z]+);/g, (m, n) => (n in ent ? ent[n] : m));
-}
+/** 名前つき実体の表。★実体は `tools/entities.mjs`(`check.mjs` と共有の 113 種)。
+ *  ★ここで**別の表を持たない**こと —— 90 種の写しを持っていた間、
+ *  生きた HTML の `&otimes;` `&eacute;` `&ouml;` が延べ 8 回**開かれずに出ていた**。 */
+function entTable() { return ENTITIES; }
+/** ★名前は数字を含みうる(`sup1` `sup2` `sup3` が legacy に実在する)。
+ *  旧実装の `/&([a-zA-Z]+);/` はそれらを 1 件も開かなかった。共有の実装に寄せる。 */
+function decodeEnt(s) { return decodeEntities(s); }
+
 
 /**
  * HTML の断片を平文にする。
@@ -557,24 +557,37 @@ proof lemma theorem proposition corollary definition remark section chapter equa
  *
  * ★**単独の大文字は本当にその記号のこともある**（Yoshida は `L/K` の `L` を使う）ので、
  * 曖昧なものは曖昧と書く。
+ *
+ * ★★**`S`（⋃）と `L`（⊕）は 2026-09-07 に落とした**（メタ第 17 回、backlog M60 / M64）。
+ * 標本ではなく**全数**で数えた —— `--audit-proof` が Proof を取れた 160 件を母数に、
+ * `S` が出る **18 件**・`L` が出る **15 件**の一致箇所を 1 つずつ原文で読んだ:
+ *
+ * | 記号 | 凡例が出た項目 | ★本当にその記号 | 偽陽性 |
+ * |---|---|---|---|
+ * | `S` | 18 | ★**0**（Sylow 部分群 / スキーム `S` / 有限集合 `S`） | 18/18 |
+ * | `L` | 15 | ★**0**（体 `L/K` / 直線束 `L`。[BK] の 1 件だけ大演算子だが正体は `Σ` で `⊕` ではない） | 15/15 |
+ * | `T` | 7 | **2**（[Yoshida08] `cor-5-12` / `lemma-5-13` の `⋂m≥1`） | 5/7 |
+ *
+ * ⇒ `S` / `L` は**当たったためしが無い**ので落とす。★**`T` は残す**——
+ * 全数 7 件中 2 件（29%）が本物で、これは捨てるには高い
+ * （★メタ第 16 回は標本 12 件から「≒2 箇所」と**外挿**していたが、
+ *   実数を数えると「7 件中 2 件」= 3 倍以上の当たり率だった）。
+ * ★**却下した案**: 「行末に単独で立ち、次の行が添字で始まるものだけ拾う」に絞ると
+ * `lemma-5-13` の本物の `T` を落とす（本物 2 → 1）。**絞り込みは退行**なので採らなかった。
  */
 function glyphLegend() {
   return [
     { tok: 'Q', means: '∏', re: /(^|\s)Q(\s|$)/m, note: '' },
     { tok: 'P', means: 'Σ', re: /(^|\s)P(\s|$)/m, note: '' },
-    { tok: 'L', means: '⊕', re: /(^|\s)L(\s|$)/m, note: '★曖昧（体の名前の `L` と区別できない）' },
-    { tok: 'S', means: '⋃', re: /(^|\s)S(\s|$)/m, note: '★曖昧' },
-    { tok: 'T', means: '⋂', re: /(^|\s)T(\s|$)/m, note: '★曖昧' },
+    { tok: 'T', means: '⋂', re: /(^|\s)T(\s|$)/m, note: '★曖昧（全数 7 件中 本物は 2 件。残りはスキーム / 有限集合の名前 `T`）' },
     { tok: 'b + 大文字', means: 'ハット（`bK` = `K̂`）', re: /(^|\s)b\s*[A-Z]/m, note: '★上付き・下付きのハットは `b` として残る。本文サイズでは丸ごと落ちる' },
     { tok: '∼ = （2 行に割れる）', means: '≅', re: /∼/m, note: '' },
     { tok: '̸=', means: '≠', re: /̸=/m, note: '★`pdftotext` 側では斜線が落ちて `=` に見える' },
   ];
 }
 
-/** 原典の見出し行を捕まえる正規表現（`.txt` は行頭に見出しが立つ——48 本で実測）。 */
-function headingRe() {
-  return /^(Theorem|Proposition|Corollary|Definition|Lemma|Remark|Example|Claim|Fact|Exercise)\s+[0-9]+(?:\.[0-9]+)*\.?/;
-}
+/* ★`headingRe`（M51）は `tools/heading-shape.mjs` へ移した（メタ第 20 回 M80）。
+ *   ここには**実装を残さない** —— 2 つある状態を作らないため。 */
 
 /**
  * ★**原典の Proof 段落を `0_Source/<file>.txt` から出す。**
@@ -589,6 +602,11 @@ function headingRe() {
  * ★抽出器は **PyMuPDF**（`tools/source-text.py`）——`pdftotext` とは壊れ方が違う
  * （`≠` は `̸=` で残る／ハットは本文サイズで落ち上付きでは `b` になる）。
  */
+
+/* ★`headingLineShape`（M59）は `tools/heading-shape.mjs` へ移した（メタ第 20 回 M80）。
+ *   ★動機と実測（誤った境界 36/36 を落とし、失う真の見出しは [Tate] の 1 個だけ）は移した先に全部ある。
+ *   ここには**実装を残さない** —— 2 つある状態を作らないため。 */
+
 function proofParagraphOf(meta, key, sec, item) {
   if (!meta?.file) return null;
   // ★原典に見出しが無い単位（我々が切り出した setup / 暗黙の定義）は、
@@ -615,13 +633,39 @@ function proofParagraphOf(meta, key, sec, item) {
     const m = /(Theorem|Proposition|Corollary|Definition|Lemma|Remark|Example|Claim)\s+([A-Z])(?![a-zA-Z0-9])/.exec(item ?? '');
     if (m) { kind = m[1]; num = m[2]; } else return { err: 'nokey', implicit };
   }
-  const want = new RegExp(`^${kind}\\s+${num.replace(/\./g, '\\.')}(?!\\.?[0-9])`);
-  let at = lines.findIndex((l) => want.test(l));
+  // ★M51 / M62 / M64（番号先行の見出し・`(?![a-z])` で閉じる理由）と
+  // ★正規表現 2 本の作り方（`want` / `wantDot` と、末尾ドットの落とし穴）は
+  //   `tools/heading-shape.mjs` の `itemHeadingRes` に移した（メタ第 20 回 M80）。
+  const { want, wantDot } = itemHeadingRes(kind, num);
+  // ★★★★★M71（折り返した相互参照を見出しと誤認する壊れ方）と M76（その見張り）の
+  //   実装は `tools/heading-shape.mjs` の `pickHeading` に移した（メタ第 20 回 M80）。
+  //   ★**「行頭 + 見出しの形」で全部拾い、最初を採る**。`hits` が 2 本以上なら破れうる持ち場。
+  //   ★この規則は `check.mjs --selftest` の `txtCases` がゲートで毎回叩く。
+  // ★探す順。**下に行くほど信頼度が落ちる**。★最後の段は従来の挙動そのままで、
+  //   「形の判定でどれも通らなかったときに退行しない」ための保険である（実測で 337 件がここに残る）。
+  const picked = pickHeading(lines, kind, num);   // 1) 行頭に立ち、かつ**見出しの形**
+  const shapedAtLines = picked.hits;
+  let at = picked.at > 0 ? picked.at - 1 : -1;
+  let forcedRunin = false;
+  if (at < 0) {                                     // 2) **字下げされた**行頭（2 段組の走査）
+    // [Tate] "   Theorem 1. We have…" / [BK] "  Lemma 3.8.1. Let V be…"。
+    // ★M66 は「[Tate] の真の見出しは .txt に 1 行も残っていない」と書いたが、★**それは誤りだった**
+    //   —— 555 行に字下げで立っている（`^` に当たらないので見えていなかっただけ）。
+    // ★段組の走査は本文が左右で混ざるので、`runin` を立てて**信頼度を落として**出す
+    //   （`runin` は境界の判定も行中形に切り替えるので、切り出しが 200 行に膨らむのを防ぐ）。
+    for (let i = 0; i < lines.length; i++) {
+      const t = lines[i].replace(/^\s+/, '');
+      const m = wantDot.exec(t);
+      if (m && headingLineShape(t, m)) { at = i; forcedRunin = true; break; }
+    }
+  }
+  if (at < 0) at = lines.findIndex((l) => want.test(l));   // 3) 従来どおり（形を問わない）
+  const shapedAt = (i) => { if (i < 0) return null; const t = (lines[i] ?? '').replace(/^\s+/, ''); const m = wantDot.exec(t); return !!(m && headingLineShape(t, m)); };
   // ★退避: 見出しが**走り込み式**（行中に出る）論文がある。実測 2026-09-07:
   //   行頭に立つ = BK CorrHyp EtTh GenEll LocProP NCBelyi pGC SemiAnbd Stacks Tate Yoshida08、
   //   行中に走り込む = MilneCFT(154 件) Sharifi(973 件)。
   //   ★このときは切り出しの信頼度が落ちるので `runin` を立てて出力側で断る。
-  let runin = false;
+  let runin = forcedRunin;
   if (at < 0) {
     const anywhere = new RegExp(`(?:^|\\s)${kind}\\s+${num.replace(/\./g, '\\.')}(?!\\.?[0-9])`);
     at = lines.findIndex((l) => anywhere.test(l));
@@ -644,6 +688,11 @@ function proofParagraphOf(meta, key, sec, item) {
     for (let i = 0; i < lines.length; i++) {
       const m = nextHead.exec(lines[i]);
       if (!m) continue;
+      // ★★2026-09-07（メタ第 16 回 M59）**行頭に立った「見出しに見える語」の大半は
+      //   折り返した相互参照である。** `.txt` は折り返しが固定なので
+      //   `… uniformizer of K by` の次の行が `Proposition 4.4(ii), which shows v(β) = qi.`
+      //   になり、これが境界と誤認されて **文の途中で証明が切れていた**（実測 54 件中 36 件）。
+      if (!headingLineShape(lines[i], m)) continue;
       const k = lines[i].slice(m.index, m.index + m[0].length).trim();
       if (seen.has(k)) continue;      // 2 度目以降は引用か折り返し
       seen.add(k);
@@ -667,32 +716,73 @@ function proofParagraphOf(meta, key, sec, item) {
     const lead = lines.slice(lead0, at).join('\n').replace(/^\s+|\s+$/g, '');
     return {
       err: 'noproof', key: `${kind} ${num}`, headingLine: at + 1, stopLine: stop,
+      headShaped: shapedAt(at), headText: (lines[at] ?? '').trim().slice(0, 90),
+      shapedHits: shapedAtLines,
       lead: lead || null, leadFrom: lead0 + 1, leadTo: at,
       rel: `ResearchPaper/0_Source/${meta.file}.txt`,
     };
   }
-  // 終端: 証明終わりの記号の行（単独でも行末でもよい）／次の見出し／200 行。
+  // 終端: 証明終わりの記号の行（単独でも行末でもよい）／次の見出し／行数の上限（下記 CAP）。
   // ★**記号は論文ごとに違う**（2026-09-07 実測）: Yoshida08 は `□`、
   //   ★Mochizuki は `⃝`（U+20DD 囲み丸。`… assertion (iv). ⃝` のように行末に付く）。
   //   ⇒ GenEll の 16 件が全部「終端なし」だったのはこれが理由だった。
   const END = new RegExp('(\u25A1|\u2293\u2294|\u2294\u2293|\u25A0|\u220E|\u20DD|\u25CB|\u25EF'
     + '|Q\\.\\s?E\\.\\s?D\\.)\\s*$');
   let pe = ps;
-  const cap = Math.min(ps + 200, lines.length);
+  /* ★★上限（メタ第 19 回 M72。★**200 → 800**）
+   *
+   * 200 だった理由は「暴走を止める」だけで、★**原典の証明の長さを測って決めた数字ではなかった**。
+   * 2026-09-07 に 360 件の全数で測った結果:
+   *   · 上限に当たっていたのは **6 件**。真の長さは 351 / 274 / 740×4 行。
+   *   · 上限を外す（10 万行）と 6 件とも終端記号に当たって `ok` になり、**他の 354 件は 1 件も動かない**。
+   *   · ★**800 と 10 万行は今日の 48 本では同じ結果**（1b 総行数 13052 で一致）。
+   *     ⇒ 800 は「暴走を止める」役目を保ったまま、今日の原典を**取り足りなく**しない最小級の数字。
+   * ★**なぜ 400 のような中間値を採らないか**（実測）: 400 では [IUTchIII] の 4 件（740 行）が
+   *   依然 `trunc` のまま **各 +200 行だけ太る** ＝ 1b が +1025 行増えて誰も救われない。
+   *   ★中間値は「高くつくのに直らない」ので**支配されている**。
+   * ★★決め手（`cor-3-12-step-xi` の実測）: この項目は `Step (xi-e), (xi-f)` を名指しているが、
+   *   その本体は **12468–12506 行**にあり、200 行の打ち切り（12061 行）より **407 行うしろ**である。
+   *   ⇒ ★**その項目の主題が 1 行も載っていなかった。** 鍵語の数でも 0 対 17。
+   * ★`BRIEF_PROOF_CAP` で上書きできる（測り直し用。★本番では立てない）。 */
+  const CAP = Number(process.env.BRIEF_PROOF_CAP) || 800;
+  const cap = Math.min(ps + CAP, lines.length);
   for (let i = ps; i < cap; i++) {
     pe = i;
     if (i > ps && isBoundary(i)) { pe = i - 1; break; }
     if (END.test(lines[i])) break;
   }
   const text = lines.slice(ps, pe + 1).join('\n').replace(/\s+$/, '');
+  const truncated = pe >= cap - 1 && !END.test(lines[pe] ?? '');
+  /* ★★上限で切ったとき「**残りが何行あるか**」を数える（メタ第 19 回 M72）。
+   *
+   * なぜ本文ではなく行数だけを出すのか:
+   *   終端を**探す**のは `.txt` を走査するだけで済む（本文を brief に載せる必要が無い）。
+   *   ⇒ 1 行で「取り足りない」を**数字で**言える。読み手が「200 行で終わり」と誤解しない。
+   * ★実測（2026-09-07、360 件）: 上限に当たっているのは 6 件で、真の長さは
+   *   [FrdI] Thm 3.4 = 351 行 / Thm 4.2 = 274 行 / [IUTchIII] Corollary 3.12 = **740 行**（4 件が共有）。
+   *   ★`cor-3-12-step-xi` が指す **Step (xi) は 12339 行から**始まる ＝ 上限 200 行の
+   *   打ち切り（12061 行）より **278 行うしろ**。★**その項目の本体が 1 行も載っていない。**
+   *   ⇒ 「あと何行あるか」を言わないと、読み手はそこを読みに行く理由を持てない。 */
+  let restTo = null, restEndFound = false;
+  if (truncated) {
+    for (let i = cap; i < lines.length; i++) {
+      if (isBoundary(i)) { restTo = i; break; }               // 直前の行までが証明
+      if (END.test(lines[i])) { restTo = i + 1; restEndFound = true; break; }
+    }
+    if (restTo === null) restTo = lines.length;               // 終端も見出しも無いまま EOF
+  }
   return {
     text,
     fromLine: ps + 1,
     toLine: pe + 1,
     headingLine: at + 1,
+    headShaped: shapedAt(at), headText: (lines[at] ?? '').trim().slice(0, 90),
+    shapedHits: shapedAtLines,
     runin,
     endFound: END.test(lines[pe] ?? ''),
-    truncated: pe >= cap - 1 && !END.test(lines[pe] ?? ''),
+    truncated, cap: CAP,
+    restTo, restEndFound,
+    restLines: restTo === null ? 0 : restTo - (pe + 1),
     rel: `ResearchPaper/0_Source/${meta.file}.txt`,
   };
 }
@@ -948,12 +1038,24 @@ function paperBrief(paperKey, itemArg, idArg, listOnly, asJson) {
     }
   } else {
     O.push(`出所: \`${proof.rel}\` の **${proof.fromLine}–${proof.toLine} 行**`
-      + `（見出しは ${proof.headingLine} 行目）${proof.truncated ? ' ★**終端記号に届かず 200 行で打ち切った**' : ''}`);
+      + `（見出しは ${proof.headingLine} 行目）${proof.truncated ? ` ★**終端記号に届かず ${proof.cap} 行で打ち切った**` : ''}`);
+    if (proof.truncated && proof.restLines > 0) {
+      // ★M72（メタ第 19 回）: 「200 行で終わり」と読まれないよう、**残りを数字で**言う。
+      O.push('');
+      O.push(`★★**この証明はまだ ${proof.restLines} 行つづく**`
+        + `（\`${proof.rel}\` の **${proof.toLine + 1}–${proof.restTo} 行**`
+        + `${proof.restEndFound ? '、そこで終端記号に当たる' : '、終端記号は見つからない'}）。`);
+      O.push(`  ★**上に出したのは全 ${proof.restTo - proof.fromLine + 1} 行中の先頭 ${proof.toLine - proof.fromLine + 1} 行`
+        + `（${Math.round((proof.toLine - proof.fromLine + 1) * 100 / (proof.restTo - proof.fromLine + 1))}%）にすぎない。**`);
+      O.push('  ★この項目の根拠が後半にあるなら、上の行番号で `.txt` を直読すること。');
+    }
     if (proof.runin) {
       O.push('');
       O.push('★★**見出しか `Proof` が行頭に立たず、行中で拾った**（走り込み式の組版）。');
       O.push('  この切り出しは**前後を巻き込んでいる可能性が高い**。行番号から `.txt` を直読すること。');
-    } else if (!proof.endFound) {
+    } else if (!proof.endFound && !proof.truncated) {
+      // ★`truncated` のときは「次の見出しの手前で切った」は**嘘**（切ったのは行数の上限）。
+      //   M72 の注記を上で出しているので、ここは重ねない（メタ第 19 回で直した）。
       O.push('');
       O.push('★**終端記号（`□` 等）に当たらず、次の見出しの手前で切った。**');
       O.push('  証明の末尾が落ちているか、次の項目を巻き込んでいるかもしれない。');
@@ -1096,4 +1198,138 @@ function paperBrief(paperKey, itemArg, idArg, listOnly, asJson) {
     }
   }
   console.log(O.join('\n'));
+}
+
+/**
+ * ★`proofParagraphOf` の**無音の失敗**を数える（メタ第 14 回、backlog M47-1）。
+ *
+ * 動機: 1b の Proof 段落は「16 人の実装者が役に立ったと報告した」機能だが、
+ * **切り出しに失敗しても brief はその節を黙って落とすだけ**である。
+ * 失敗の件数も、失敗が集中する論文も、誰も数えたことがなかった。
+ *
+ * ★結果の読み方（`ok` でも当たっているとは限らない。信頼度の印を分けて数える）:
+ *   ok            … Proof ブロックを取れた
+ *     /runin      … 見出しか `Proof` が**行中**に走り込んでいた（切り出しの信頼度が落ちる）
+ *     /noend      … 証明終わりの記号が見つからず、**次の見出しか行数の上限**で切った
+ *     /trunc      … 行数の上限で切った（＝**取り足りない**）。★メタ第 19 回（M72）に
+ *                   上限を 200 → 800 にしたので、★**今日の 48 本では 0 件**である。
+ *                   （200 のときの 6 件の真の長さ: [FrdI] Thm 3.4 = 351 / Thm 4.2 = 274 /
+ *                     [IUTchIII] Corollary 3.12 = 740 行を 4 件が共有）。
+ *                   ★1 件でも立ったら「上限が原典に追い付いていない」合図。
+ *                   brief 本体には「まだ N 行つづく（X–Y 行）」の 3 行が出る。
+ *   noproof/lead  … `Proof` が無く、直前の地の文を代わりに出した（[pGC] 型）
+ *   noproof/nolead… `Proof` が無く、代わりも無い（★brief に 1b が出ない）
+ *   noheading     … `.txt` に見出しが見つからない（★無音の失敗の本体）
+ *   nokey         … `data-item` が見出し語でない（setup など。★これは正常）
+ *   missing       … `0_Source/<file>.txt` が無い（gitignore 下。★環境の話）
+ */
+function auditProof(asJson) {
+  const reg = JSON.parse(readFileSync(papersJson(), 'utf8')).papers;
+  const rows = [];
+  for (const pk of structuredPaperKeys()) {
+    const meta = reg[pk];
+    for (const sec of collectPaper(pk)) {
+      const item = sec.attrs['data-item'] ?? '';
+      const r = meta ? proofParagraphOf(meta, itemKeyOf(item), sec, item) : null;
+      let outcome;
+      if (!meta) outcome = 'nopaper';
+      else if (r === null) outcome = 'nofile';
+      else if (r.err === 'noproof') outcome = r.lead ? 'noproof/lead' : 'noproof/nolead';
+      else if (r.err) outcome = r.err;
+      else {
+        outcome = 'ok';
+        if (r.truncated) outcome += '/trunc';
+        else if (!r.endFound) outcome += '/noend';
+        if (r.runin) outcome += '/runin';
+      }
+      // ★`glyphLegend` の被覆も同時に測る（メタ第 14 回、backlog M47-3）:
+      //   「実際に出た字だけを出す」表が、何件の持ち場で何行になるか。
+      const gl = r && r.text ? glyphLegend().filter((g) => g.re.test(r.text)).map((g) => g.tok) : [];
+      // ★診断欄（メタ第 17 回 M65）: `headingLine` が**本当に見出しの行か**を後から機械で検算するため。
+      //   `.txt` の行を読み直せば `headingLineShape`（M59）に掛けられる。出力の文面は変えない。
+      rows.push({ paper: pk, id: sec.attrs['id'] ?? '', item, outcome,
+        lines: r && r.text ? r.text.split('\n').length : 0, glyphs: gl,
+        headingLine: (r && r.headingLine) ?? null, rel: (r && r.rel) ?? null,
+        // ★診断欄（メタ第 18 回 M71）: **どこからどこまでを出したか**を後から機械で突き合わせるため。
+        //   `headingLine` だけでは「見出しは動かずに本文の範囲だけ動いた」退行を見逃す。
+        //   ★出力（brief 本体）の文面は変えない。`--audit-proof --json` の診断欄だけが増える。
+        from: (r && (r.fromLine ?? r.leadFrom)) ?? null,
+        to: (r && (r.toLine ?? r.leadTo)) ?? null,
+        leadLines: r && r.lead ? r.lead.split('\n').length : 0,
+        headShaped: (r && r.headShaped) ?? null, headText: (r && r.headText) ?? null,
+        // ★見張り（メタ第 19 回）: 形が合う行が**何箇所あったか**。2 箇所以上なら
+        //   「最初を採る」規則が破れうる持ち場（＝人が見るべき上界）。
+        shapedHits: (r && r.shapedHits) ?? [],
+        restLines: (r && r.restLines) ?? 0, restTo: (r && r.restTo) ?? null });
+    }
+  }
+  if (asJson) { console.log(JSON.stringify(rows, null, 1)); return; }
+  const tally = new Map();
+  for (const r of rows) tally.set(r.outcome, (tally.get(r.outcome) ?? 0) + 1);
+  console.log(`# proofParagraphOf の被覆 —— 構造化された項目 ${rows.length} 件`);
+  console.log('');
+  for (const [k, v] of [...tally].sort((a, b) => b[1] - a[1])) {
+    console.log(`  ${String(v).padStart(4)}  ${(v * 100 / rows.length).toFixed(1).padStart(5)}%  ${k}`);
+  }
+  console.log('');
+  console.log('## 論文ごと（★ok 以外が多い論文＝切り出しが効いていない論文）');
+  const byPaper = new Map();
+  for (const r of rows) {
+    if (!byPaper.has(r.paper)) byPaper.set(r.paper, new Map());
+    const m = byPaper.get(r.paper);
+    m.set(r.outcome, (m.get(r.outcome) ?? 0) + 1);
+  }
+  const okOf = (m) => [...m].filter(([k]) => k.startsWith('ok')).reduce((a, [, v]) => a + v, 0);
+  const rowsP = [...byPaper].map(([p, m]) => {
+    const n = [...m.values()].reduce((a, b) => a + b, 0);
+    return { p, n, ok: okOf(m), m };
+  }).sort((a, b) => (a.ok / a.n) - (b.ok / b.n) || b.n - a.n);
+  for (const { p, n, ok, m } of rowsP) {
+    const det = [...m].sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}=${v}`).join(' ');
+    console.log(`  ${p.padEnd(12)} ${String(ok).padStart(3)}/${String(n).padEnd(4)} ok  ${det}`);
+  }
+  console.log('');
+  console.log('## glyphLegend の被覆（Proof を取れた持ち場だけが母数）');
+  const withText = rows.filter((r) => r.outcome.startsWith('ok'));
+  const withGl = withText.filter((r) => r.glyphs.length);
+  console.log(`  Proof を取れた ${withText.length} 件 / うち凡例が出る ${withGl.length} 件` +
+    `（${(withGl.length * 100 / Math.max(1, withText.length)).toFixed(0)}%）`);
+  const gt = new Map();
+  for (const r of withText) for (const g of r.glyphs) gt.set(g, (gt.get(g) ?? 0) + 1);
+  for (const [g, n] of [...gt].sort((a, b) => b[1] - a[1])) console.log(`    ${String(n).padStart(4)}  ${g}`);
+  console.log('');
+  console.log('## ★noheading（`.txt` に見出しが見つからない＝無音の失敗）の明細');
+  const bad = rows.filter((r) => r.outcome === 'noheading');
+  for (const r of bad) console.log(`  [${r.paper}] ${r.id.padEnd(20)} ${r.item}`);
+  if (!bad.length) console.log('  （0 件）');
+
+  /* ★★見張り 1（メタ第 19 回）: M71 が自分から申告した「破れる形」。
+   *   「形が合う最初の行」を採る規則は、★**同じ鍵が見出しの形で 2 箇所以上に立つとき**にだけ破れうる。
+   *   ⇒ その持ち場を**厳密に**数えて明細を出す。★増えたら人が見る。 */
+  console.log('');
+  console.log('## ★★見張り: 同じ鍵が「見出しの形」で 2 箇所以上に立つ持ち場');
+  console.log('   （M71 の危険側。「最初を採る」規則が破れうるのはここだけ ＝ **上界**）');
+  const amb = rows.filter((r) => (r.shapedHits ?? []).length >= 2);
+  const ambPapers = new Set(amb.map((r) => r.paper));
+  console.log(`  ${amb.length} 件 / ${rows.length} 件（${ambPapers.size} 本の論文）`);
+  const seen = new Set();
+  for (const r of amb) {
+    const k = `${r.paper}|${r.shapedHits.join(',')}`;
+    if (seen.has(k)) continue;                    // 同じ見出しを共有する項目は 1 行にまとめる
+    seen.add(k);
+    const others = r.shapedHits.filter((n) => n !== r.headingLine);
+    console.log(`  [${r.paper}] ${r.item.padEnd(24)} 採用 L${r.headingLine} / ほか L${others.join(' L')}`);
+  }
+  if (!amb.length) console.log('  （0 件）');
+
+  /* ★★見張り 2（メタ第 19 回 M72）: 行数の上限に当たった持ち場と、その「残り」。
+   *   ★上限を 800 にしたので今日は 0 件。1 件でも立ったら上限が原典に追い付いていない。 */
+  console.log('');
+  console.log('## ★★見張り: 行数の上限で切れている持ち場（`ok/trunc`）と残りの行数');
+  const tr = rows.filter((r) => r.outcome.includes('trunc'));
+  for (const r of tr) {
+    console.log(`  [${r.paper}] ${r.id.padEnd(22)} 出した ${r.lines} 行 / ★残り ${r.restLines} 行`
+      + `（〜${r.restTo} 行。全 ${r.lines + r.restLines} 行）`);
+  }
+  if (!tr.length) console.log('  （0 件）');
 }

@@ -103,7 +103,7 @@ theorem isSharp_rlfCone_of_perfFactorial (h : IsPerfFactorial M) : IsSharp (rlfC
 
 /-- ★locator —— perf-factorial なら実化の錐は sharp。 -/
 def isSharp_rlfCone_of_perfFactorial.src : ABC3.Meta.Source :=
-  { paper := "FrdI", pdfPage := 51,
+  { paper := "FrdI", pdfPage := 47,
     item := "Definition 2.4, (i) — realification(perf-factorial なら錐は sharp)",
     sectionId := "frdi-def-2-4" }
 

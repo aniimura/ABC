@@ -369,7 +369,7 @@ noncomputable def phiRlfConeOnOfPos (Φ : MonoidOn.{v, u, w} D)
 `Def24.lean` の素点分解版・`Def24Rlf.lean` のテンソル版とは別の模型であり、
 一致は未証明)。 -/
 def rlfCone.src : ABC3.Meta.Source :=
-  { paper := "FrdI", pdfPage := 51, item := "Definition 2.4, (i) — realification(錐模型)",
+  { paper := "FrdI", pdfPage := 47, item := "Definition 2.4, (i) — realification(錐模型)",
     sectionId := "frdi-def-2-4" }
 
 /-- ★locator —— `Φ^rlf` が `𝒟` 上の単系であること。 -/

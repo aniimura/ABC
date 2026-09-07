@@ -653,7 +653,14 @@ set_option maxHeartbeats 1000000 in
 /-- **原典 LEMMA 3.11 の言い方**:`ξ ↦ ξ^σ/ξ` は `(𝒪_{K̂^{ur}})ˣ` 上**全射**。
 
 ★原典が主張している「kernel は `A^×`」の部分は形式化していない
-(モジュール docstring の逸脱記録)。 -/
+(モジュール docstring の逸脱記録)。
+
+★★**同じ主張が Yoshida 2008 の Proposition 4.8 として独立に立っている**
+(2026-09-07 に構造化側が発見)。Milne CFT は乗法版を 1 行で畳むが、
+Yoshida は同じ主張を**命題として立てて証明を書いている**ので、
+逐語の出典としてはそちらが細かい。`.src` は Yoshida を指す。
+その証明の骨格(`θ ↦ θ^{q-1}` で第 1 段 → Artin-Schreier で帰納段)は
+下の Lean の証明と一致している。 -/
 theorem surjective_unramGalCompletionUnits_div_self (K : PAdicLocalField p) :
     Function.Surjective (fun ξ : (↥(unramifiedCompletionInt K))ˣ =>
       unramGalCompletionUnits K (arithFrobenius K) ξ * ξ⁻¹) := by
@@ -663,6 +670,9 @@ theorem surjective_unramGalCompletionUnits_div_self (K : PAdicLocalField p) :
   show unramGalCompletionUnits K (arithFrobenius K) ξ * ξ⁻¹ = u
   rw [hξ, mul_comm (ξ : (↥(unramifiedCompletionInt K))ˣ) u, mul_assoc,
     mul_inv_cancel, mul_one]
+
+def surjective_unramGalCompletionUnits_div_self.src : ABC3.Meta.Source :=
+  { paper := "Yoshida08", pdfPage := 8, item := "Proposition 4.8", sectionId := "prop-4-8" }
 
 /-! ## 6. 主定理 -/
 

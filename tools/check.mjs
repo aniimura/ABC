@@ -161,6 +161,20 @@ import { createHash } from 'node:crypto';
 import { join, dirname, relative, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
+/* ★名前つき実体の表は `tools/entities.mjs` に 1 本化した(2026-09-07 メタ第 15 回、M53)。
+ *   同じ表が `brief.mjs` にも別に在り、★生きた HTML の 3 種・延べ 8 回を
+ *   **brief だけが開けていなかった**(`&otimes;` 4 / `&eacute;` 3 / `&ouml;` 1)。
+ *   ★共有先は**副作用の無いデータだけ**のモジュールである(CLI を import すると
+ *   相手の CLI が自分の argv で走り出す)。 */
+import { ENTITIES, decodeEntities } from './entities.mjs';
+/* ★`.txt` の見出し判定（M59/M65/M71/M76）。★**selftest の `txtCases` からしか使わない。**
+ *   本番の検査には 1 行も効かない —— ここに import した理由は
+ *   ★**「見張りをゲートで落ちるようにする」**ことだけである（メタ第 20 回 M80、本体の設計判断）。
+ *   ★★`SELF_HASH`（PDF キャッシュの鍵）には**入れない**。鍵の不変条件は
+ *   「`squash()`(pdftotext 出力の正規化)に効くものは全部鍵に入っている」であり、
+ *   このファイルは `.txt` の行の形しか見ないのでキャッシュの中身に 1 バイトも効かない。
+ *   （`entities.mjs` は `decodeEntities` 経由で `squash` に効くので鍵に入っている。★対称ではない。） */
+import { pickHeading } from './heading-shape.mjs';
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const SOURCE_DIR = join(ROOT, 'ResearchPaper', '0_Source');
@@ -220,6 +234,21 @@ const SRC_ITEM_DEBT = new Set([
   'pGC#cor-3-1#Section 3',
 ]);
 
+/** G1「`.src` の頁が項目の範囲の外」の繰り越し表(規則 R′。メタ第 14 回、backlog M43)。
+ *
+ *  鍵は `論文#sectionId#頁`。★行番号もファイル名も使わない(どちらも動く)。
+ *
+ *  ★★**導入時点で該当は 0 件**である。第 13 回が `.src` **4,646 件**に規則 R′ を当てて
+ *  出た **3 件**(`FrdI#frdi-def-2-4` の `pdfPage := 51`。誤報 0)を、
+ *  本体が 2026-09-07 に `47` へ直したため。★**だからこの表は空で入る。**
+ *  ★**この表は空のまま保つこと。**新しい `.src` はその場で頁を直す
+ *  (`brief.mjs` の雛形が出す頁をそのまま写せば起きない)。
+ *  ☆どうしても正当な例外が出たら、**なぜ範囲外の頁を指すのに逐語を引かないのか**を
+ *  ここにコメントで書いてから足すこと。 */
+const SRC_PAGE_DEBT = new Set([
+  // (空。導入時点で該当 0 件。上の docstring を読むこと)
+]);
+
 /** ★`--brief`: 落ちたものと結論だけを出す(2026-09-03、第 1453)。
  *
  *  動機(実測): 既定の出力は **29,243 バイト / 270 行**ある。ブロックの末尾で毎回走らせるので、
@@ -252,35 +281,42 @@ const h1 = (s) => console.log(`\n=== ${s} ===`);
 // テキスト正規化 / HTML の最小パーサ
 // ────────────────────────────────────────────────────────────────
 
-const ENTITIES = {
-  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ',
-  ldquo: '“', rdquo: '”', lsquo: '‘', rsquo: '’',
-  minus: '−', times: '×', ge: '≥', le: '≤',
-  rarr: '→', larr: '←', harr: '↔',
-  sube: '⊆', supe: '⊇', sub: '⊂', sup: '⊃',
-  cong: '≅', or: '∨', and: '∧',
-  Gamma: 'Γ', alpha: 'α', chi: 'χ', prime: '′',
-  sect: '§', hellip: '…', mdash: '—', ndash: '–',
-  // ★★2026-09-07 追加。★理由: Yoshida §2–§4 の構造化(68 件)で **S4 が 12 件落ちた**が、
-  //   原因は逐語の誤りではなく **この表が標準の名前つき実体を取りこぼしていた**ことだった。
-  //   ★実体はコーパス全体で使われている(`&middot;` 既存 55 / `&sigma;` 45 / `&isin;` 22)ので、
-  //   ★**追加の前後で NG 件数を測ってから採った**(増えたら戻す、という手順を踏んだ)。
-  //   ★`&ne;` は `≠` に開くが、`pdftotext` は斜線を落とすので
-  //   **`data-txt="="` を併記しないと通らない**([[pdftotext-drops-negation]])。
-  isin: '∈', ni: '∋', middot: '·', cap: '∩', cup: '∪',
-  equiv: '≡', ne: '≠', empty: '∅', infin: '∞', bull: '•',
-  rArr: '⇒', lArr: '⇐', hArr: '⇔', Prime: '″',
-  prod: '∏', sum: '∑', part: '∂', radic: '√',
-  pi: 'π', theta: 'θ', sigma: 'σ', beta: 'β', psi: 'ψ', phi: 'φ',
-  lambda: 'λ', mu: 'µ', nu: 'ν', tau: 'τ', rho: 'ρ', delta: 'δ',
-  Lambda: 'Λ', Sigma: 'Σ', Theta: 'Θ', Phi: 'Φ', Delta: 'Δ', Omega: 'Ω',
-};
 
-function decodeEntities(s) {
-  return s
-    .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => String.fromCodePoint(parseInt(h, 16)))
-    .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(parseInt(d, 10)))
-    .replace(/&([a-zA-Z]+);/g, (m, name) => (name in ENTITIES ? ENTITIES[name] : m));
+/** ★`--entities`: この表がコーパスを覆えているかを**数える**(2026-09-07、メタ第 13 回)。
+ *
+ *  動機(実測): 名前つき実体の表は**手で維持されている**。表に無い名前は
+ *  `decodeEntities` が**黙ってそのまま返す**ので、S4 の逐語照合が
+ *  「`&Pi;` と `Π` は違う文字列だ」と正しく落ちる —— ★**原因が見えない偽 NG になる。**
+ *  今日の 29 件がそれだった。★**穴があるかどうかを人の記憶に頼らない。**
+ */
+function auditEntities() {
+  const all = walk(STRUCT_DIR).filter((p) => p.endsWith('.html'));
+  const live = all.filter((p) => !basename(p).includes('.legacy.'));
+  const seen = new Map(); // name -> { live, legacy, where }
+  for (const f of all) {
+    const isLive = !basename(f).includes('.legacy.');
+    for (const m of readFileSync(f, 'utf8').matchAll(/&([a-zA-Z][a-zA-Z0-9]*);/g)) {
+      const e = seen.get(m[1]) ?? { live: 0, legacy: 0, where: relative(ROOT, f) };
+      if (isLive) { e.live++; if (e.live === 1) e.where = relative(ROOT, f); } else e.legacy++;
+      seen.set(m[1], e);
+    }
+  }
+  const miss = [...seen.entries()].filter(([n]) => !(n in ENTITIES))
+    .sort((a, b) => (b[1].live - a[1].live) || (b[1].legacy - a[1].legacy));
+  const missLive = miss.filter(([, e]) => e.live > 0);
+  console.log(`HTML ${all.length} 本(ゲート対象 ${live.length} / legacy ${all.length - live.length})`);
+  console.log(`名前つき実体 異なり ${seen.size} 種 / 表 ${Object.keys(ENTITIES).length} 種`);
+  console.log(`表に無い: ${miss.length} 種(うちゲート対象に出るもの ${missLive.length} 種)`);
+  for (const [n, e] of miss) {
+    console.log(`  &${n};  ゲート ${e.live} / legacy ${e.legacy}  例 ${e.where}`);
+  }
+  // ★ゲート対象に出る取りこぼしだけを NG にする。legacy は検査の対象外なので数えるだけ。
+  if (missLive.length) {
+    ng('tools/check.mjs', `ENTITIES に無い実体が 1_Structured に ${missLive.length} 種ある: ` +
+      missLive.map(([n]) => `&${n};`).join(' '));
+  } else {
+    ok(`ENTITIES はゲート対象 ${live.length} 本を覆っている(${seen.size} 種を確認)`);
+  }
 }
 
 /**
@@ -551,11 +587,18 @@ function printPdftotextInfo() {
  */
 const CACHE_DIR = join(ROOT, '.cache');
 const PDF_CACHE = join(CACHE_DIR, 'pdf-pages.json');
+/* ★★2026-09-07 メタ第 15 回: 鍵は **`check.mjs` + `entities.mjs`** の両方から作る。
+ *   キャッシュに入るのは `squash(pdftotext の出力)` であり、`squash` → `normalize` →
+ *   ★`decodeEntities` と**名前つき実体の表に依存している**。表を別ファイルへ出した
+ *   ことで、「`check.mjs` のハッシュに入っているから正規化を変えれば必ず作り直される」
+ *   という CLAUDE.md の約束が**片肺になっていた**(表だけ変えても鍵が動かない)。
+ *   ★M8 が 1 時間を失ったのと同じ形の穴なので、出した当日に塞ぐ。 */
 const SELF_HASH = (() => {
   try {
-    return createHash('sha1')
-      .update(readFileSync(fileURLToPath(import.meta.url)))
-      .digest('hex').slice(0, 12);
+    const h = createHash('sha1').update(readFileSync(fileURLToPath(import.meta.url)));
+    try { h.update(readFileSync(join(dirname(fileURLToPath(import.meta.url)), 'entities.mjs'))); }
+    catch { h.update('no-entities'); }
+    return h.digest('hex').slice(0, 12);
   } catch { return 'nohash'; }
 })();
 
@@ -818,10 +861,63 @@ function collectStructuredIds() {
       map.get(paper).set(id, {
         item: attrs['data-item'] ?? '',
         page: attrs['data-pdf-page'] === undefined ? null : Number(attrs['data-pdf-page']),
+        // ★`file` はメタ第 14 回(規則 R′)で足した。項目の頁の範囲を作るには
+        //   「同じ HTML ファイルの中の出現順」が要るが、この Map は論文単位に
+        //   平らにしてしまうのでファイル境界が消える。
+        file: f,
       });
     }
   }
   return map;
+}
+
+/** 項目 → その項目が載りうる頁の範囲 `[lo, hi]`(メタ第 14 回、backlog M43 の規則 R′)。
+ *
+ *  作り方: 同じ HTML ファイルの中で `data-pdf-page` を**出現順**に並べ、
+ *  「その項目より後で**最初に頁が進む**項目の頁」を `hi` とする。
+ *  ★`hi` を「次の項目の頁 − 1」にしないのは、項目が頁をまたぐのが普通だからである
+ *  (FrdI `Theorem 3.4` は p.62 から 8 頁。M31 の 985 件はここを見誤って出た)。
+ *  ファイル最後の項目の `hi` は論文の総頁。
+ *
+ *  @returns {Map<string, [number, number]>} `"<paper>#<id>"` → `[lo, hi]`
+ */
+function itemPageSpans(structuredIds, reg) {
+  const span = new Map();
+  for (const [paper, ids] of structuredIds) {
+    const maxPage = reg[paper]?.pdfPages ?? Number.MAX_SAFE_INTEGER;
+    const byFile = new Map();
+    for (const [id, info] of ids) {
+      if (!Number.isInteger(info.page)) continue;
+      if (!byFile.has(info.file)) byFile.set(info.file, []);
+      byFile.get(info.file).push([id, info.page]);
+    }
+    for (const seq of byFile.values()) {
+      for (let i = 0; i < seq.length; i++) {
+        const lo = seq[i][1];
+        let hi = maxPage;
+        for (let j = i + 1; j < seq.length; j++) {
+          if (seq[j][1] > lo) { hi = seq[j][1]; break; }
+        }
+        span.set(`${paper}#${seq[i][0]}`, [lo, hi]);
+      }
+    }
+  }
+  return span;
+}
+
+/** その Lean ファイルが**逐語で引いている**原典の頁(規則 R′ の第 2 条件)。
+ *
+ *  ★`原文 (<タグ> p.N):` **だけ**を拾う。この見出しはゲートの引用照合(G6/引用照合)が
+ *  実際に PDF と突き合わせているので、番号が正しいことが保証されている。
+ *  ★★**「物理 p.N」という散文を使ってはならない**(メタ第 13 回の実測):
+ *  それは `.src` と**同じ誤った番号を写しているだけ**のことがあり
+ *  (`Found/FrdI/Def24RlfCone.lean` が実例。「物理 p.51 / p.103」と書いてある)、
+ *  数えると本物のずれを見逃す。 */
+const QUOTE_PAGE_RE = /原文[^\n(]*\([^)\n]*?p\.\s*(\d+)[^)\n]*\)/g;
+function quotedPagesOf(src) {
+  const s = new Set();
+  for (const m of src.matchAll(QUOTE_PAGE_RE)) s.add(Number(m[1]));
+  return s;
 }
 
 /** 項目名から「種別 + 番号」だけを取る(付記・訳注・部分番号の書き方の揺れを捨てる)。
@@ -1456,6 +1552,11 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
   let nSrcOk = 0;
   let nSrcOkFound = 0;
   const seenSrcItemDebt = new Set();
+  // ★規則 R′(メタ第 14 回)。`itemSpan` は論文全体で 1 度だけ作る。
+  //   `quoted` は Lean ファイル単位の memo(同じファイルに `.src` が何本もあるため)。
+  const itemSpan = itemPageSpans(structuredIds, reg);
+  const quoted = new Map();
+  const seenSrcPageDebt = new Set();
   for (const d of decls.filter((x) => x.bucket === 'Skeleton' || x.bucket === 'Found')) {
     const required = d.bucket === 'Skeleton';
     // 台帳の付随宣言そのものには出典を要求しない
@@ -1517,6 +1618,46 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
         }
       }
     }
+    // ── G1(頁の範囲。規則 R′): `.src` の `pdfPage` が
+    //    (a) その項目の頁の範囲 `[lo−1, hi]` の**外**であり、かつ
+    //    (b) **そのファイルが逐語で引いている頁のどれとも違う**
+    //    とき、locator は本当にずれている(backlog M43、メタ第 13〜14 回)。
+    //
+    //    ★なぜ 2 条件なのか(実測。母数 `.src` 4,646 件):
+    //      | 規則                          | 出る件数 | 誤報 |
+    //      | 頁の完全一致(M31 の当初案)  |    985   | ほぼ全部 |
+    //      | 範囲 `[lo−1, hi]` だけ        |      6   |  3(50%) |
+    //      | ★上の 2 条件(規則 R′)       |    ★3   | ★0     |
+    //    (a) だけだと「§1 の設定を引いて Proposition 1.4 に貼る」「複数頁を引く」
+    //    という**正当な運用**を 3 件落とす。(b) を足すとその 3 件が全部消える。
+    //    `lo−1` の 1 頁の余裕は、項目の見出しが前頁の最終行に来る組版のため。
+    //
+    //    ★これを既定の段に入れてよいと判断した根拠:
+    //      1. `.lean` の locator を守る検査であり、G1 の他の条項と同じ性質。
+    //         (`--entities` は legacy まで数える棚卸しなので既定に入れなかった。ここは違う)
+    //      2. 導入時点の該当が **0 件**(本体が 2026-09-07 に 3 件を直した)。
+    //         ★**基準値を動かさずに入れられる。**
+    //      3. 誤報 0 を 4,646 件で実測している。
+    //      4. 逃げ道(`SRC_PAGE_DEBT`)を G1/G9/G11 と同じ形で用意した。
+    const sp = itemSpan.get(`${paper}#${sectionId}`);
+    if (sp) {
+      const [lo, hi] = sp;
+      if (page < lo - 1 || page > hi) {
+        if (!quoted.has(d.file)) quoted.set(d.file, quotedPagesOf(texts.get(d.file) ?? ''));
+        const q = quoted.get(d.file);
+        if (!q.has(page)) {
+          const debtKey = `${paper}#${sectionId}#${page}`;
+          seenSrcPageDebt.add(debtKey);
+          if (!SRC_PAGE_DEBT.has(debtKey)) {
+            ng(at(d), `G1 locator のずれ(頁): \`.src\` の pdfPage=${page} が項目 "${sectionId}" の` +
+                      ` 頁の範囲 [${lo}..${hi}] の外で、かつこのファイルが逐語で引く頁` +
+                      ` {${[...q].sort((a, b) => a - b).join(', ') || 'なし'}} のどれとも違う` +
+                      '——`brief.mjs` の雛形が出す頁を写すか、その頁の逐語を `原文 (タグ p.N):` で引く');
+            continue;
+          }
+        }
+      }
+    }
     if (required) nSrcOk++; else nSrcOkFound++;
   }
   // ★繰り越し表の掃除は**本物の木を見たときだけ**(G9 と同じ。selftest は fixture 1 本しか見ない)。
@@ -1530,6 +1671,17 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
     const nSrcItemDebt = [...seenSrcItemDebt].filter((k) => SRC_ITEM_DEBT.has(k)).length;
     if (nSrcItemDebt > 0) {
       console.log(`  -- G1 繰り越し ${nSrcItemDebt} 件(locator のずれ)` +
+                  '——新規は落とす。既存はこの数を減らしていく');
+    }
+    for (const stale of SRC_PAGE_DEBT) {
+      if (!seenSrcPageDebt.has(stale)) {
+        ng('tools/check.mjs (SRC_PAGE_DEBT)',
+          `G1 の繰り越し表(頁)に不要な項目がある: ${stale}。該当が消えたので表から削ること`);
+      }
+    }
+    const nSrcPageDebt = [...seenSrcPageDebt].filter((k) => SRC_PAGE_DEBT.has(k)).length;
+    if (nSrcPageDebt > 0) {
+      console.log(`  -- G1 繰り越し ${nSrcPageDebt} 件(locator のずれ・頁)` +
                   '——新規は落とす。既存はこの数を減らしていく');
     }
   }
@@ -1887,6 +2039,12 @@ function selftest() {
       'd47-src-item-points-elsewhere.lean', true],
     ['D48 未構造化の項目を最寄りの section にぶら下げるのは通る', 'Found',
       'd48-src-item-unstructured-nearest.lean', false],
+    // ★G1(頁の範囲。規則 R′): backlog M43、メタ第 13〜14 回。D49/D50 は**対**である
+    //   ——「範囲の外なら落とす」だけを入れると実木で誤報 50%(6 件中 3 件)。
+    ['D49 .src の頁が項目の範囲の外で、その頁の逐語も引いていない', 'Found',
+      'd49-src-page-far-outside.lean', true],
+    ['D50 頁は範囲の外だが、その頁の逐語を引いていれば通る', 'Found',
+      'd50-src-page-outside-but-quoted.lean', false],
   ];
   const FIXTURES = join(ROOT, 'tools', 'selftest-fixtures');
   for (const [label, bucket, fixture, shouldFail] of leanCases) {
@@ -1902,6 +2060,78 @@ function selftest() {
       (shouldFail
         ? (failed ? '落とせた' : '★素通りした')
         : (failed ? '★落ちた(偽陽性)' : '通った')));
+    if (good) passed++;
+  }
+
+  /* ★★★`.txt` 側の較正（メタ第 20 回 M80。★本体の設計判断で新設した**別の表**）
+   *
+   * ここまでの `cases`(HTML) と `leanCases`(.lean) は「壊れた入力を落とせるか」を見る表である。
+   * ★これ(`txtCases`)は**原典の `.txt` の行の形**を見る表で、fixture が `.lean` ではなく
+   * ★**「`.txt` の 2〜4 行」**なので `leanCases` には入れられない（表を分けた理由がこれ）。
+   *
+   * ★★何を守るのか: `brief.mjs` が「その項目の見出しは `.txt` の何行目か」を決める規則
+   *   ——「**行頭に立ち、かつ見出しの形をしていて、最初に出るもの**」（M59 + M65 + M71）。
+   *   M76 はこの規則が破れうる持ち場を 24 件 / 360 と数えて見張りを付けたが、
+   *   ★**見張りは `brief.mjs --audit-proof` の側にしかなく、ゲートでは落ちなかった**。
+   *   ★★落ちない見張りはやがて誰も見なくなる ⇒ ゲート（`--selftest`）へ移した。
+   *
+   * ★★**行は全部 `ResearchPaper/0_Source/*.txt` の実物**である（作った行は 1 つも無い）。
+   *   OCR の壊れ（`ForanyextensionV` / `DefinitionS.uppose` / `?v`）もそのまま写してある。
+   *   ★ここを「読みやすく」直すと、守っている当のものが消える。
+   *
+   * ★対で置くこと（D45/D46・D47/D48・D49/D50 と同じ作法）:
+   *   T4(拾う `DefinitionS`) と T5(拾わない `Definitions`) が M65 の対、
+   *   T1(2 箇所とも見出し) と T2(序文の折り返しは見出しでない) が M71 の対である。
+   *
+   * 形式: [ラベル, `.txt` の行, 種別, 番号, 期待する採用行(1 始まり。0 = 見つからない), 期待する形の合う行]
+   */
+  const txtCases = [
+    // ★M76 の見張りが**発火する**形そのもの。[IUTchIII] 10489 行(真の見出し)と
+    //   11870 行(折り返した相互参照だが見出しの形)。★採用は**先**でなければならない。
+    ['T1 同じ鍵が見出しの形で 2 箇所に立つ(採用は先)', [
+      'We are now ready to discuss the main theorem of the present series of papers.',
+      'Theorem 3.11.',
+      '(Multiradial Algorithms via LGP-Monoids/Frobenioids)',
+      'that −|log(Θ)| ≥0 > −|log(q)|]. Now suppose that we are in the situation of',
+      'Theorem 3.11. For n ∈Z, write',
+    ], 'Theorem', '3.11', 2, [2, 5]],
+    // ★M71 が直した壊れ方（**間違った場所を自信を持って指す**）。序文 272 行の折り返しは
+    //   `Theorem 3.11, (ii);` で、★見出しの形ではない ⇒ 採用は真の見出しへ行く。
+    ['T2 序文の折り返し `Theorem 3.11, (ii);` は見出しではない', [
+      'Theorem 3.11, (ii); Theorem A, (ii), below].',
+      'Theorem 3.11 gives an algorithm for describing, up to certain relatively',
+      'Theorem 3.11.',
+    ], 'Theorem', '3.11', 3, [3]],
+    // ★M51: [Falt1] は**番号先行**（`1.1. Lemma.`）。実物 204 行 / 2218 行（見張りの表に出る組）。
+    ['T3 番号先行の見出し(Falt1)も 2 箇所として数える', [
+      '1.1. Lemma.ForanyextensionV c W, as above,thenaturalmap Kv ?v W',
+      '1.1. Lemma. Thereexistsan e independenotf n suchthatthenormalization',
+    ], 'Lemma', '1.1', 1, [1, 2]],
+    // ★M65 の対(正): OCR がピリオドを 1 文字ずらした [Falt1] 279 行。`\b` では立たない。
+    ['T4 OCR が崩した `2.1. DefinitionS.uppose` も見出し', [
+      '2.1. DefinitionS.uppose A is a ring,B an A-algebra.B is calledan almost',
+    ], 'Definition', '2.1', 1, [1]],
+    // ★M65 の対(負): 複数形は見出しではない。[Brinon-Conrad] 3727 行の実物。
+    //   ★`(?![a-z])` を外すと**ここが通ってしまう**（節の見出しを項目の見出しと誤認する）。
+    ['T5 複数形 `5.1. Definitions and examples` は見出しではない', [
+      '5.1. Definitions and examples. Let F be a field and G be a group. Let B be an F -',
+    ], 'Definition', '5.1', 0, []],
+    // ★M59 の対。括弧が**詰まっている** `4.4(ii)` は相互参照 ⇒ 拾わない。[Yoshida08] 1162 行の実物。
+    //   ★この 1 行が M59 の動機そのもの（Prop 6.14 の証明がここで切れていた）。
+    ['T6 `Proposition 4.4(ii), which shows` は相互参照(拾わない)', [
+      'Proposition 4.4(ii), which shows v(β) = qi. Now σ(α) = [u]f(α) = α+f β ≡α+β (mod αβ),',
+    ], 'Proposition', '4.4', 0, []],
+    // ★M59 の対(正): **空白 + `(`** は見出し。[Yoshida08] 981 行の実物。
+    //   ★T6 だけを入れると「括弧が続いたら相互参照」に倒れて、この行を失う。
+    ['T7 `Proposition 6.6 (Sen [14]).` は見出し(拾う)', [
+      'Proposition 6.6 (Sen [14]). Let σ ∈G1, and |⟨σ⟩| = pm for m ≥1 (by Proposition 6.2).',
+    ], 'Proposition', '6.6', 1, [1]],
+  ];
+  for (const [label, txt, kind, num, wantAt, wantHits] of txtCases) {
+    const got = pickHeading(txt, kind, num);
+    const good = got.at === wantAt && got.hits.join(',') === wantHits.join(',');
+    console.log(`  ${good ? 'ok ' : 'NG '} ${label} → 採用 L${got.at} / 形が合う ${got.hits.length} 箇所`
+      + (good ? '' : ` ★期待 採用 L${wantAt} / [${wantHits.join(' ')}]`));
     if (good) passed++;
   }
 
@@ -1926,7 +2156,7 @@ function selftest() {
   }
 
   rmSync(tmp, { recursive: true, force: true });
-  const total = cases.length + 1 + leanCases.length + identCases.length;
+  const total = cases.length + 1 + leanCases.length + txtCases.length + identCases.length;
   IN_SELFTEST = false;
   console.log(`\n  selftest: ${passed}/${total} PASS`);
   if (passed !== total) NG++;
@@ -1953,6 +2183,26 @@ if (only('--pdftotext')) {
   printPdftotextInfo();
   console.log = saved;
   process.exit(0);
+}
+
+// ★`--entities`: 実体表の被覆を数える(メタ第 13 回)。★**既定の段には入れない** ——
+//   legacy を含めて数えるので、ゲートの NG 件数の基準を動かさないため。
+if (only('--entities')) { h1('ENTITIES の被覆'); auditEntities(); console.log(`\n${NG === 0 ? 'PASS' : `NG ${NG} 件`}`); process.exit(NG === 0 ? 0 : 1); }
+
+// ★`--ledger`: `--lean` から **`lake build` だけ**を外した段(メタ第 14 回)。
+//
+//   動機(実測): G1/G2/G3/G4/G10/G11/Gap の台帳検査は **`.lean` を読むだけ**で
+//   **1.4 秒**で終わるのに、`checkLean()` の中で `lake build` に溶接されていた。
+//   そのため隔離 worktree では cold build(M35/M41 の実測 **50 分**)を払わないと
+//   **locator の検査を 1 度も走らせられない**。メタ係・実装 agent が
+//   「`.src` を直したが確かめられない」で止まる原因がここにある。
+//   ★判定は `--lean` と**同じ関数**(`checkLeanLedger`)を呼ぶので、結論は一致する。
+//   ★**既定の段には入れない** —— `--lean` が同じ検査を走らせるので二重計上になる。
+if (only('--ledger')) {
+  h1('Lean 台帳(lake build を外した段)');
+  checkLeanLedger({ dir: LEAN_SRC, axiomExempt: AXIOM_EXEMPT });
+  console.log(`\n${NG === 0 ? 'PASS' : `NG ${NG} 件`}`);
+  process.exit(NG === 0 ? 0 : 1);
 }
 
 if (all || only('--selftest')) selftest();

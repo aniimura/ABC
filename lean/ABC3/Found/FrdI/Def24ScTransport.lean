@@ -501,12 +501,12 @@ end Retract
 /-! ### ★出典の紐付け -/
 
 def isCharacteristicallyInjective_scMap_of_nsmul_retraction.src : ABC3.Meta.Source :=
-  { paper := "FrdI", pdfPage := 51,
+  { paper := "FrdI", pdfPage := 47,
     item := "Definition 2.4, (i) — k 倍の引き戻しがあれば係数拡大は単射性を保つ",
     sectionId := "frdi-def-2-4" }
 
 def isCharacteristicallyInjective_scMap_of_retraction.src : ABC3.Meta.Source :=
-  { paper := "FrdI", pdfPage := 51,
+  { paper := "FrdI", pdfPage := 47,
     item := "Definition 2.4, (i) — 引き戻しがあれば係数拡大は単射性を保つ",
     sectionId := "frdi-def-2-4" }
 
