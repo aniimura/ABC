@@ -54,8 +54,11 @@ const IDIOMS = path.join(REPO, 'tools', 'lean-idioms.md');
 const CACHE = path.join(REPO, '.cache', 'idiom-recur-digest.json');
 // ★digest の版。v1 は `error:` 書式だけ・出所なし。v2 で MCP REPL の診断と出所を足した。
 //   ★v3(メタ第 27 回)で **診断を出した agent の `toolUseId`** と 出所 `meta` を足した。
+//   ★v4(メタ第 39 回 / M208)で **`writes` の規則を `isIdiomWrite` に一本化**した。
+//     ★v3 の digest は `cat tools/lean-idioms.md`(読み)を書きとして 157 件抱えているので、
+//     ★版を上げて**必ず作り直させる**(黙って古い分母で判定させない)。
 //   ★版が違う digest は黙って使わない(古い数字で判定してしまうため)。
-const DIGEST_V = 3;
+const DIGEST_V = 5;
 const LOGROOT = path.join(os.homedir(), '.claude', 'projects', 'D--Math-ABC3');
 
 // ---------- 純関数群(selftest はここだけを叩く) ----------
@@ -241,7 +244,85 @@ export function errLikeQuotes(text) {
 //     有利な方へ偏るので、★こちらは読みとして数える(自分に不利な側へ倒す)。
 export const IDFILE = /lean-idioms\.md/i;
 export const IDWRITE = /(>>?\s*["']?[^"'\s]*lean-idioms\.md)|(\btee\b[^\n]{0,80}lean-idioms\.md)/;
+// ★★M223 (1) / M226(メタ第 41 回) —— `sed -i` の**その場書き換え**。
+//   ★区間の**先頭**が `sed` で、★`-i` が**独立した argv**(直前が空白)であることを要求する。
+//   ★★空白を要求しないと `lean-idioms.md` の中の `-i`(id**i**oms)に当たり、
+//     `sed -n '8553,8600p' tools/lean-idioms.md` という**読み**が全部「書き」に落ちる
+//     (★M226 段 A で実際に踏んだ。★誤って 90 件出る)。
+//   ★実データは 5 命令 / 6 区間(M226 段 A に逐語)。
+//     ★うち 1 区間は置換の前後が字面まで同一の **no-op**、
+//     1 命令は同じ命令に `>>` があるので**既に**拾えている ⇒ ★**新しく拾えるのは 4 命令**。
+//   ★足さなかった動詞(実例が無いので入れない): `perl -i` / `ex -sc` / `awk -i inplace` / `Set-Content`。
+export const IDSEDI = /^\s*sed\s+(?:[^\n]*?\s)?-i(?:\.[\w]+|''|""|)(?=\s)/;
 export const IDLOOK = /\b(grep|rg|sed|head|tail|awk|less|cat|wc|nl)\b/;
+// ★★M207 / M208(メタ第 39 回) —— `rescan()` は別の**緩い**規則
+//   `/(cat|tee|printf|echo)[^\n]{0,80}lean-idioms\.md/` を持っていて、
+//   ★(a) 語境界が無いので `Rami-cat-ion` / `Multipli-cat-ive` の `cat` に当たり、
+//   ★(b) `cat tools/lean-idioms.md`(ただの読み)を「書き」に数えていた。
+//   ★実測: Bash 376 件のうち **157 件(41.8%)が読み** / unknown 23 件(git status・git add)。
+//   ⇒ ★**規則を 1 本にする。**★`--reads` と `rescan` が同じ関数を見る。
+//   ★区間で切るのは `git add … lean-idioms.md && node x > /tmp/y` のような並びで
+//     別の区間の `>` を当てないため(★実測では食い違い 0 件だが、規則としてはこちらが正しい)。
+// ★★M214 / M216(メタ第 40 回) —— 上の規則は**本物の書きを 27 件 / 47 節ぶん取り落としていた**。
+//   ★M214 は「`[^\n]{0,80}` が改行を越えられないから」と見立てたが、★27 件を読むと**違う**:
+//     ファイル名は `p` / `path` / `q` / `P` / `dst` という**変数**に束ねられ、書きの動詞は
+//     その変数にしか掛かっていない(`p = r'…lean-idioms.md'` … `io.open(p,'w').write(s)`)。
+//   ⇒ ★**改行を潰しても 1 件も拾えない。★束縛(名前 → 直前に代入された値)を追う。**
+//   ★★「**直前の**代入」を見るのが要 —— 実データに `p = …mathlib-gap.json` → 書き →
+//     `p = …lean-idioms.md` → 書き と `p` を使い回す命令が実在する(M216 (6))。
+//     「同じ命令に名前と動詞がある」で判定すると **別のファイルへの書きを idiom の書きと数える**。
+const IDNAME = '[A-Za-z_$][\\w$]*';
+const IDTARGET = `(${IDNAME}|["'][^"'\\n]*["'])`;
+// ★右辺は `;` `&` `|` `\n` で止める。★止めないと `node -e "const p='x.json'; …" && git add …lean-idioms.md`
+//   の**行の残り全部**が右辺になり、★別のファイルへの書きを idiom の書きと数える(S99 で捕まえた)。
+export const IDASG = new RegExp(`(?:^|[\\s;({])(?:const |let |var )?(${IDNAME})\\s*=(?![=~])\\s*([^\\n;&|]*)`, 'g');
+/** python `open`/`io.open` —— 第 2 引数の mode に `w`/`a`/`x` があるときだけ書き(`'r'` は読み) */
+export const IDPYOPEN = new RegExp(`(?:\\bio\\.)?\\bopen\\s*\\(\\s*${IDTARGET}\\s*,\\s*["']([^"'\\n]*)["']`, 'g');
+export const IDJSWRITE = new RegExp(`\\b(?:writeFileSync|appendFileSync)\\s*\\(\\s*${IDTARGET}`, 'g');
+export const IDOSREPL = new RegExp(`\\bos\\.replace\\s*\\(\\s*[^,()\\n]*,\\s*${IDTARGET}\\s*\\)`, 'g');
+/** ★変数に束ねられた `lean-idioms.md` への書きを拾う(M216 段 B の式そのもの)。 */
+export function bindingWrite(cmd) {
+  const s = String(cmd || '');
+  if (!IDFILE.test(s)) return false;
+  const asg = [];
+  IDASG.lastIndex = 0;
+  for (let m; (m = IDASG.exec(s));) asg.push({ at: m.index, name: m[1], val: m[2] });
+  const idiomTarget = (tok, at) => {
+    if (tok[0] === '"' || tok[0] === "'") return IDFILE.test(tok);
+    let last = null;
+    for (const a of asg) if (a.name === tok && a.at < at) last = a;   // ★**直前の**代入だけを見る
+    return last ? IDFILE.test(last.val) : false;
+  };
+  for (const [re, modeIdx] of [[IDPYOPEN, 2], [IDJSWRITE, 0], [IDOSREPL, 0]]) {
+    re.lastIndex = 0;
+    for (let m; (m = re.exec(s));) {
+      if (modeIdx && !/[wax]/.test(m[modeIdx])) continue;
+      if (idiomTarget(m[1], m.index)) return true;
+    }
+  }
+  return false;
+}
+export function isIdiomWrite(cmd) {
+  return splitShell(String(cmd || '')).filter(s => IDFILE.test(s)).some(s => IDWRITE.test(s) || IDSEDI.test(s))
+    || bindingWrite(cmd);
+}
+/** ★ログの `tool_use` 1 つを見て「idiom への書き込み」なら {how, text} を返す。
+ *  ★★`rescan()` の**呼び出し側ごと**試験に載せるために切り出した(M208 の突然変異 M8 が素通りしたため)。
+ *  ★ここを緩めると selftest が鳴る。 */
+export function writeOf(x) {
+  if (!x || x.type !== 'tool_use') return null;
+  const fp = String(x.input?.file_path || '');
+  if (/lean-idioms\.md$/i.test(fp)) {
+    const b = String(x.input?.new_string ?? x.input?.content ?? '');
+    return b ? { how: x.name, text: b } : null;
+  }
+  if (x.name === 'Bash') {
+    const cmd = String(x.input?.command || '');
+    // ★M208: 規則は `isIdiomWrite`(= `--reads` と同じ)。★読みを「書き」に数えない。
+    if (isIdiomWrite(cmd)) return { how: 'Bash', text: cmd };
+  }
+  return null;
+}
 // ★★「読んだ」だけでは仮説を分けられない —— ★**何を探したか**で分ける。
 //   ★`^## #25[012]` は「次の節番号を採りに行った」であって「似た節を探した」ではない。
 //   ★見出しと番号だけからなる pattern を **numbering** とし、内容語を含むものだけ **content** とする。
@@ -277,6 +358,14 @@ export function lookKind(kind, pat) {
     if (rank[k] > rank[best]) best = k;
   }
   return best;
+}
+// ☆★★M205 / 持ち場 3 —— 「`--similar` の口が実際に叩かれたか」を数えるための判定。
+//   ★★**同じ命令の別の場所に `--similar` の字が出るだけ**では呼び出しではない
+//     (★実測: 本体が採否の diff を取る `for f in tools/idiom-recur.mjs …` が 1 件当たった)。
+//   ⇒ ★**同じ区間の中に `node` と `idiom-recur.mjs` と `--similar` が揃うこと**を要求する。
+export function isSimilarCall(cmd) {
+  return splitShell(String(cmd || '')).some(s =>
+    /\bnode\b/.test(s) && /idiom-recur\.mjs/.test(s) && /--similar(\s|$)/.test(s));
 }
 // 語が広すぎないか —— コーパス中の出現率で切る
 export const GENERIC_RATE = 0.01;
@@ -394,15 +483,8 @@ async function rescan() {
       if (hasId) {
         const c = o.message?.content;
         if (Array.isArray(c)) for (const x of c) {
-          if (x.type !== 'tool_use') continue;
-          const fp = String(x.input?.file_path || '');
-          if (/lean-idioms\.md$/i.test(fp)) {
-            const b = String(x.input?.new_string ?? x.input?.content ?? '');
-            if (b) writes.push({ ts, how: x.name, text: b });
-          } else if (x.name === 'Bash') {
-            const cmd = String(x.input?.command || '');
-            if (/>>?\s*["']?[^"'\s]*lean-idioms\.md/.test(cmd) || /(cat|tee|printf|echo)[^\n]{0,80}lean-idioms\.md/.test(cmd)) writes.push({ ts, how: 'Bash', text: cmd });
-          }
+          const w = writeOf(x);
+          if (w) writes.push({ ts, ...w });
         }
       }
       if (hasErr) for (const { id, text: t } of resultTexts(o)) {
@@ -563,6 +645,85 @@ function selftest() {
   const shortShare = [['AAAAAAAAAAAAAAAA' + 'SHARED12CHRS'], ['BBBBBBBBBBBBBBBB' + 'SHARED12CHRS']];
   eq('S70 default width ignores a 12-char overlap', dupClusters(shortShare.map(x => gramsOf(x))).clusters, []);
   eq('S71 width 4 would join it (so the width is what decides)', dupClusters(shortShare.map(x => gramsOf(x, 4))).clusters, [[0, 1]]);
+  // ★★M207 / M208(メタ第 39 回)—— 「読み」を「書き」と数えない。
+  //   ★命令は**ログから逐語で採った形**を置く(M188 の規約。作り物を試験しない)。
+  eq('S72 M207 the bug itself: plain cat is a read', isIdiomWrite('cat tools/lean-idioms.md'), false);
+  eq('S73 no word boundary: "Ramification" contains cat',
+    isIdiomWrite('git status --short lean/ABC3/Found/PGC/RamificationJumpDivisibility.lean tools/lean-idioms.md'), false);
+  eq('S74 git add is not a write', isIdiomWrite('git add lean/ABC3/Found.lean tools/lean-idioms.md && git commit -m x'), false);
+  eq('S75 grep+tail is a read', isIdiomWrite('grep -n "^## #2[0-9][0-9]" tools/lean-idioms.md | tail -5'), false);
+  eq('S76 git show is a read', isIdiomWrite('git show HEAD:tools/lean-idioms.md | grep -n "^## #23" | tail -10'), false);
+  eq('S77 append heredoc is a write', isIdiomWrite("cat >> tools/lean-idioms.md <<'EOF'"), true);
+  eq('S78 printf redirect is a write', isIdiomWrite('printf "## #1 x" >> tools/lean-idioms.md'), true);
+  eq('S79 tee -a is a write', isIdiomWrite('node x.mjs | tee -a tools/lean-idioms.md'), true);
+  // ★区間で切っているか —— **別の区間の `>`** を当てないこと
+  eq('S80 redirect in another segment does not count',
+    isIdiomWrite('git add tools/lean-idioms.md && node tools/check.mjs > /tmp/out.txt'), false);
+  // ★★旧規則と新規則が**食い違う**ことをここに固定する(直したことの証拠。M207)
+  eq('S81 the old loose rule said "write" for that same read',
+    /(cat|tee|printf|echo)[^\n]{0,80}lean-idioms\.md/.test('cat tools/lean-idioms.md'), true);
+  // ★★M223 (1) / M226(メタ第 41 回) —— `sed -i` 。★**4 本ともログの逐語**(作り物を足さない)。
+  eq('S105 sed -i s|..|..| is a write (2026-09-01T00:04:52Z)',
+    isIdiomWrite("sed -i 's|^在庫を引く前に書き始めない$|x|' tools/lean-idioms.md"), true);
+  eq('S106 sed -i with line number is a write (2026-09-05T00:14:03Z)',
+    isIdiomWrite("sed -i '4818s/^## 38\./## 55./' tools/lean-idioms.md"), true);
+  eq('S107 sed -i in a && chain is a write (2026-09-05T01:34:20Z)',
+    isIdiomWrite("grep -n '^## 5[5-9]\.' tools/lean-idioms.md | tail -6 && sed -i '4889s/^## 56\./## 57./' tools/lean-idioms.md && git add tools/lean-idioms.md"), true);
+  // ★★これが落ちると `-i` を `lean-idioms` の i に当てている(★誤って 90 件拾う形)。
+  eq('S108 sed -n range print stays a read (ログの支配的な形)',
+    isIdiomWrite("sed -n '8553,8600p' tools/lean-idioms.md"), false);
+  // ★★呼び出し側(rescan が使う分類)そのものを試験に載せる —— 突然変異 M8 が素通りしたため
+  const TU = (name, input) => ({ type: 'tool_use', id: 'x', name, input });
+  eq('S82 writeOf: Edit on the idiom file is a write',
+    writeOf(TU('Edit', { file_path: 'D:/Math_ABC3/tools/lean-idioms.md', new_string: '## #1 x' })), { how: 'Edit', text: '## #1 x' });
+  eq('S83 writeOf: Bash read is not a write',
+    writeOf(TU('Bash', { command: 'cat tools/lean-idioms.md' })), null);
+  eq('S84 writeOf: Bash append is a write',
+    writeOf(TU('Bash', { command: "cat >> tools/lean-idioms.md <<'EOF'" })), { how: 'Bash', text: "cat >> tools/lean-idioms.md <<'EOF'" });
+  eq('S85 writeOf: Read on the idiom file is not a write',
+    writeOf(TU('Read', { file_path: 'tools/lean-idioms.md' })), null);
+  eq('S86 writeOf: not a tool_use', writeOf({ type: 'text', name: 'Bash', input: { command: 'cat >> tools/lean-idioms.md' } }), null);
+  // ★file_path は**末尾一致**でなければならない(この木には `*.bak-2026-09-03` が実在する)
+  eq('S88 writeOf: a backup of the idiom file is not the idiom file',
+    writeOf(TU('Write', { file_path: 'tools/lean-idioms.md.bak-2026-09-03', content: '## #1 x' })), null);
+  // ★★M205 / 持ち場 3 —— 「口が叩かれた」の判定。★字が出るだけでは呼び出しではない
+  eq('S89 similar call: the real invocation counts',
+    isSimilarCall('node tools/idiom-recur.mjs --similar /tmp/draft.md | tail -20'), true);
+  eq('S90 similar call: naming the file is not calling it',
+    isSimilarCall('for f in tools/idiom-recur.mjs ResearchPaper/meta-backlog.md; do echo "$f --similar"; done'), false);
+  eq('S92 similar call: the one real invocation in the log(逐語)',
+    isSimilarCall("cd /d/Math_ABC3 && cat /tmp/draft.md && echo \"===== --similar =====\" && time node tools/idiom-recur.mjs --similar /tmp/draft.md 2>&1 | head -20"), true);
+  eq('S91 similar call: another tool with --similar does not count',
+    isSimilarCall('node tools/agent-timing.mjs --similar'), false);
+  // ★digest の版 —— ★v4 で writes の規則が変わった。★戻すと古い分母を黙って使うことになる
+  // ★★M216(メタ第 40 回)で v5。★束縛を追う書きを足したので writes の中身が変わる
+  eq('S87 digest version is the one M216 bumped to', DIGEST_V, 5);
+  // ★★M214 / M216 —— **変数に束ねられた書き**(★実データの 27 件はすべてこの形)
+  const PYW = "'python.exe' - <<'PYEOF'\nimport io\np = r'D:\\Math_ABC3\\tools\\lean-idioms.md'\ns = io.open(p, encoding='utf-8').read()\nio.open(p, 'w', encoding='utf-8', newline='\\n').write(s + add)\nPYEOF";
+  eq('S93 python: a write through a variable is a write', isIdiomWrite(PYW), true);
+  eq('S94 python: opening with no mode is a read',
+    isIdiomWrite("import io\np = 'tools/lean-idioms.md'\ns = io.open(p, encoding='utf-8').read()"), false);
+  eq('S95 python: mode "r" is a read',
+    isIdiomWrite("import io\npath = 'tools/lean-idioms.md'\nwith io.open(path, 'r', encoding='utf-8') as f: s = f.read()"), false);
+  // ☆★★実データにある形 —— 1 つの命令の中で `p` を**使い回す**。★直前の代入だけを見ること
+  eq('S96 the LAST binding before the write decides (idiom is written second)',
+    isIdiomWrite("p = 'ResearchPaper/mathlib-gap.json'\nio.open(p,'w').write(a)\np = 'tools/lean-idioms.md'\nio.open(p,'w').write(b)"), true);
+  eq('S97 the LAST binding before the write decides (idiom is only read)',
+    isIdiomWrite("p = 'tools/lean-idioms.md'\ns = io.open(p).read()\np = 'ResearchPaper/mathlib-gap.json'\nio.open(p,'w').write(a)"), false);
+  eq('S98 node: appendFileSync through a const is a write',
+    isIdiomWrite("node -e \"const p='tools/lean-idioms.md'; fs.appendFileSync(p, add);\""), true);
+  eq('S99 node: writeFileSync on another file is not a write',
+    isIdiomWrite("node -e \"const p='ResearchPaper/mathlib-gap.json'; fs.writeFileSync(p, j);\" && git add tools/lean-idioms.md"), false);
+  eq('S100 python: os.replace(tmp, path) is a write',
+    isIdiomWrite("path = 'tools/lean-idioms.md'\nwith os.fdopen(fd, 'wb') as f: f.write(data)\nos.replace(tmp, path)"), true);
+  eq('S101 a quoted literal target needs no binding',
+    isIdiomWrite("fs.writeFileSync('D:/Math_ABC3/tools/lean-idioms.md', s)"), true);
+  eq('S102 bindingWrite needs the file to appear at all', bindingWrite("p='x.md'\nio.open(p,'w').write(s)"), false);
+  // ☆★★逐語 —— ログ 2026-08-27T18:45:39Z の命令から**行をそのまま**取った(間の散文だけ落とした)。
+  //   ★idiom を書いた**後**で同じ `p` を別のファイルに束ね直す。★位置の守りを外すと false になる。
+  eq('S103 the idiom is written first, then p is rebound (verbatim shape)', isIdiomWrite(
+    "p = r'D:\\Math_ABC3\\tools\\lean-idioms.md'\nio.open(p,'w',encoding='utf-8',newline='\\n').write(s)\n"
+    + "p = r'D:\\Math_ABC3\\ResearchPaper\\mathlib-gap.json'\nd = json.load(io.open(p, encoding='utf-8'))"), true);
   eq('S63 ellipsis spelling breaks literal grep', [
     '## `set_option ... in` を置けない'.includes('set_option … in'),
     '## `set_option … in` は前'.includes('set_option ... in'),
@@ -813,6 +974,11 @@ if (has('--dupes') || has('--retro')) {
   console.log(`  ★重複クラスタ           : ${clusters.length} 個`);
   console.log(`  ★クラスタに入る節       : ${inClu.size} 節`);
   console.log(`  ★最大クラスタ           : ${clusters[0] ? clusters[0].length : 0} 節`);
+  // ☆★★M206(メタ第 39 回)—— ★この数字を「重複が N 件」と読ませないための断り。★常時印字する。
+  console.log('  ☆★★断り: この「クラスタ」は**重複ではない**。★`failed to synthesize` 等の**族**でも繋がる。');
+  console.log('     ★実測(メタ第 39 回): 目で確かめた重複 12 節のうち **1 つのクラスタに入るのは 9 節**、');
+  console.log('     ★残り 3 節は共有 16-gram が無く**孤立**する。★逆に最大クラスタ 22 節は同じ罠ではない。');
+  console.log('     ⇒ ★**上の 3 行は「目で読むべき候補の量」であって、重複の件数ではない。**(M206 / M209)');
   console.log(`  ★書いた後も再発(代表 gram / 事前登録の規則): ${rows.filter(r => r.afterRep > 0).length} クラスタ / 事象 ${rows.reduce((a, r) => a + r.afterRep, 0)} 件`);
   console.log(`  ★書いた後も再発(共有 gram のどれか / 直した規則): ${rows.filter(r => r.afterAny > 0).length} クラスタ / 事象 ${rows.reduce((a, r) => a + r.afterAny, 0)} 件`);
   console.log('\n  -- クラスタ(全部。★標本ではない) --');
@@ -877,7 +1043,7 @@ if (has('--reads')) {
         const inp = x.input || {}; const fp = String(inp.file_path || inp.path || ''); const cmd = String(inp.command || '');
         const body = String(inp.new_string ?? inp.content ?? '');
         if (IDFILE.test(fp) && body) ev.push({ ts, kind: 'write', text: body });
-        else if (x.name === 'Bash' && IDWRITE.test(cmd)) ev.push({ ts, kind: 'write', text: cmd });
+        else if (x.name === 'Bash' && isIdiomWrite(cmd)) ev.push({ ts, kind: 'write', text: cmd });
         else if (x.name === 'Read' && IDFILE.test(fp)) ev.push({ ts, kind: 'Read', pat: `offset=${inp.offset ?? '-'} limit=${inp.limit ?? '-'}` });
         else if (x.name === 'Grep' && (IDFILE.test(fp) || IDFILE.test(String(inp.glob || '')))) ev.push({ ts, kind: 'Grep', pat: String(inp.pattern || '') });
         else if (x.name === 'Bash' && IDFILE.test(cmd) && IDLOOK.test(cmd)) ev.push({ ts, kind: 'Bash', pat: cmd.replace(/\s+/g, ' ') });
@@ -932,5 +1098,45 @@ if (has('--similar')) {
   if (!hit.length) console.log('  似た節は無い。');
   for (const h of hit) console.log(`  L${String(h.s.line).padStart(5)} <${h.g}> ${h.s.head.slice(0, 76)}`);
   console.log(`  ⇒ ${hit.length} 節`);
+}
+// ☆★★`--similar-usage` —— M205 の宿題。★「口を置いた」ことと「口が叩かれた」ことは別。
+//   ★本体が `.claude/agents/lean-prover.md` に置いたので、★**次の波から呼ばれるはず**。
+//   ★ここは「呼ばれた回数」を数えるだけの口である(効いたかは別 —— 対照群が無いので言えない)。
+if (has('--similar-usage')) {
+  const CALL = isSimilarCall;
+  const rows = [];
+  for (const f of walk(LOGROOT)) {
+    const ag = agentOf(f);
+    const rl = readline.createInterface({ input: fs.createReadStream(f), crlfDelay: Infinity });
+    for await (const line of rl) {
+      if (!line.includes('--similar')) continue;
+      let o; try { o = JSON.parse(line); } catch { continue; }
+      const ts = o.timestamp ? Math.floor(Date.parse(o.timestamp) / 1000) : 0;
+      const c = o.message?.content; if (!ts || !Array.isArray(c)) continue;
+      for (const x of c) {
+        if (x.type !== 'tool_use' || x.name !== 'Bash') continue;
+        const cmd = String(x.input?.command || '');
+        if (CALL(cmd)) rows.push({ ts, ag: ag.type || '(本体)', cmd: cmd.replace(/\s+/g, ' ').slice(0, 120) });
+      }
+    }
+  }
+  rows.sort((a, b) => a.ts - b.ts);
+  // ★★3 つに分ける。★「本体セッションの試し打ち」を数学トラックに混ぜない(混ぜると 0 が 1 に見える)。
+  const mine = rows.filter(r => r.ag === 'meta-optimizer');
+  const top = rows.filter(r => r.ag === '(本体)');
+  const real = rows.filter(r => r.ag !== 'meta-optimizer' && r.ag !== '(本体)');
+  console.log('\n-- similar-usage(★口が実際に叩かれた回数。M205 / 持ち場 3) --');
+  console.log(`  ☆★数学トラックの agent からの呼び出し : ${real.length} 回`);
+  console.log(`  (本体セッション自身の試し打ち         : ${top.length} 回 —— ★採否を決めるための試験。効果の証拠ではない)`);
+  console.log(`  (改善係自身の試し打ち                 : ${mine.length} 回 —— ★同上)`);
+  const by = {}; for (const r of real) by[r.ag] = (by[r.ag] || 0) + 1;
+  console.log(`  呼び手の内訳                          : ${JSON.stringify(by)}`);
+  for (const r of rows.slice(0, 20)) console.log(`   ${new Date(r.ts * 1000).toISOString().slice(0, 16)} [${r.ag}] ${r.cmd}`);
+  // ★「あと何波で言えるか」—— 節が増える速さから見積もる(★言えるのは回数だけ。効果ではない)
+  const day = 86400, now = Math.floor(Date.now() / 1000);
+  const recent = secs.filter(s => s.regTs && s.regTs > now - 7 * day).length;
+  console.log(`  参考: 直近 7 日に登録された節 ${recent} 件(= 1 日あたり ${(recent / 7).toFixed(1)} 節)。`);
+  console.log('  ☆★**「効いた」と言うには「重複が減った」が要るが、★対照群が無いので言えない。**');
+  console.log('     ★言えるのは「呼ばれた / 呼ばれていない」だけである。');
 }
 if (has('--json')) fs.writeFileSync(ARGV[ARGV.indexOf('--json') + 1], JSON.stringify(secs.map(s => ({ line: s.line, head: s.head, regTs: s.regTs, regSrc: s.regSrc, sigs: s.sigs, ev: s.ev }))));

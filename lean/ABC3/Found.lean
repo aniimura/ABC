@@ -1785,6 +1785,8 @@ import ABC3.Found.PGC.TorsionPointCriterion
 import ABC3.Found.PGC.UnramifiedBaseChangeInvariance
 import ABC3.Found.PGC.RamificationFiltrationZero
 import ABC3.Found.PGC.AbsClosureModules
+import ABC3.Found.PGC.Prop22FixedForm
+import ABC3.Found.PGC.Prop22IntegersSuffice
 import ABC3.Found.PGC.AbelianClosureSplit
 import ABC3.Found.PGC.AbelianClosure
 import ABC3.Found.PGC.LubinTateUpperRamificationVanish
@@ -1822,6 +1824,26 @@ import ABC3.Found.PGC.RamificationImageUnits
 import ABC3.Found.PGC.LubinTateSharpRamificationImage
 import ABC3.Found.PGC.RamificationImageStage
 import ABC3.Found.PGC.PadicLogIntegers
+import ABC3.Found.PGC.Section3RealParameters
+import ABC3.Found.PGC.Prop22FilteredHypothesis
+import ABC3.Found.PGC.ReciprocityAlphaTransport
+import ABC3.Found.PGC.ArtinKerInertia
+import ABC3.Found.PGC.AxSenTate
+import ABC3.Found.PGC.AxLemma
+import ABC3.Found.PGC.SenLemma
+import ABC3.Found.PGC.CyclicJumpNorm
+import ABC3.Found.PGC.AxTowerDecay
+import ABC3.Found.PGC.AxEpsilonDecay
+import ABC3.Found.PGC.StageNaturality
+import ABC3.Found.PGC.StageTransport
+import ABC3.Found.PGC.StageUpperNaturality
+import ABC3.Found.PGC.Theorem42Bijectivity
+import ABC3.Found.PGC.CentralizerReduction
+import ABC3.Found.PGC.WildDepthDescent
+import ABC3.Found.PGC.WildDepthFieldDescent
+import ABC3.Found.PGC.RamificationJumpBound
+import ABC3.Found.PGC.MinpolyOrbitSplit
+import ABC3.Found.PGC.CyclicLayerDescent
 /-!
 # Found — 実装済みの基礎
 

@@ -146,6 +146,22 @@ grep -c "\b<名前>\b" .cache/decl-index.txt (本ファイルの全宣言名に�
 ★**`g ≡ 1` は wild な段では成立しない**(`ε` は実際に増える)ので
 `AxDescentStep` の方が偽に近い。★`AxWildDescent` を勧める。
 
+## ★★★後の波による訂正 —— 本ファイルの `hdecay` は**指数が 1 つずれており、満たせない**
+
+☆★★`axLemma_of_wildDescent_geometric` の仮説
+`c k ≤ p^{(1/(p−1))(1/p)^k}` は、★**`k = 1` で古典的な最良定数 `p^{1/(p−1)}` を下回る**。
+`AxWildDescent K c` は深さ 1 の `x` について `d(x,K) ≤ c 1 · ε` を含意し
+(`AxEpsilonDecay.axWildDescent_depth_one`)、`K = ℚ_p(ζ_p)`・`x = p^{1/p}` が
+`d(x,K) = p^{1/(p−1)}·ε` を実現するので **`c 1 ≥ p^{1/(p−1)}`** が強制される。
+⇒ ★★`axLemma_of_wildDescent_geometric` は**真だが空虚**な含意である。
+★合図は「仮説の指数の総和 `Σ_{k≥1}(1/(p−1))p^{−k} = 1/(p−1)²` が
+**結論の `p/(p−1)²` より小さい**」ことだった(=仮説が強すぎる)。
+
+★★**正しい形は `Found/PGC/AxEpsilonDecay.lean` の `axDecay p k = p^{(1/(p−1))(1/p)^{k−1}}`**
+で、指数の総和がちょうど `p/(p−1)²` になる(`axLemma_of_axDecay` / `axSenTate_of_axDecay`)。
+★`rpow_geometric_le_axDecay` が「旧仮説 ⇒ 新仮説」を機械で示している。
+★★**次の波は `AxWildDescent K (axDecay p)` を掘ること。本ファイルの `hdecay` を掘らないこと。**
+
 ## ★残った穴(正直に書く)
 
 ★★**`AxLemma K C` の項は作れていない。** 作れたのは

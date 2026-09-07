@@ -93,6 +93,57 @@ tools: Read, Edit, Write, Grep, Glob, Bash, mcp__abc3-lean__lean_check, mcp__abc
 3. 数学の方針が疑わしいなら **`math-planner` に投げる**。
 
 
+## ★★★★探し方 —— **`find /` と「カレントからの再帰 grep」を投げるな**（2026-09-08、6 回踏んだ）
+
+★**mathlib の実パス**（これを知らないと `find` に手が伸びる）:
+```
+D:\Math_ABC3\lean\.lake\packages\mathlib\Mathliblean/.lake/packages/mathlib/Mathlib/       (Git Bash)
+```
+
+★★**`find /` は投げてはならない。** この環境では **120 秒で背景化され、費用だけかかって戻らない**。
+★2026-09-08 に 1 件が **3 時間以上ぶら下がったまま残った**（本体が止めた）。
+
+★★**`grep -rn ... .`（カレントからの再帰）も投げてはならない。**
+`external/`（FLT・mathlib のソース）と `lean/.lake/build/ir/*.setup.json`
+（1 本 1.7 万行級が数百本）まで舐めるので桁違いに遅い。★**範囲を必ず書く**:
+```
+grep -rn '<語>' lean/ABC3/ --include=*.lean
+grep -rn '<語>' ResearchPaper/ tools/ --include=*.md
+```
+
+★**順番**: ① `.cache/decl-index.txt` / `.cache/mathlib-index.txt` を grep
+（無ければ `node tools/decl-index.mjs`。★これは `.cache/*.txt` を**書く**ので同時に 1 体だけ）
+→ ② 無ければ上の実パスを `ls` で確かめて `sed -n` → ③ `#158`（同じ名前で書いて
+`already been declared` を出させる）。
+★**木全体（20 万行）を grep しない。**
+
+★★**索引は 2 通りの嘘をつく**:
+1. ★**「無い」が嘘**（今日 7 例）—— `Ideal.inertia` / `Finset.sum_range_sub` /
+   `IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg` / `Polynomial.aeval_eq_sum_range'` /
+   `Polynomial.splits_iff_card_roots` など。★`to_additive` 生成名や**改名**（`relindex` → `relIndex`）に注意。
+2. ★★**「形」が嘘**（#297）—— 索引の行は section の `variable (R)` を**含まない**ので、
+   ★索引どおりに書くと**明示引数が 1 つ多い**。逐語:
+   `Application type mismatch: The argument … has type ∀ (n : ℕ), ‖↑n‖ ≤ 1 but is expected to have type ‖↑j‖ ≤ 1`
+
+★★**名前ではなく部品で引け。** 2026-09-08 の実装者は 6 波連続で
+「持ち場が名指しした補題」を外し、★**その 1 つ手前の部品**で通している
+（集合の等式ではなく群同型 / `differentIdeal` ではなく `f'(π)` を 2 通りに測る /
+`exists_multiset_of_splits` ではなく `splits_iff_card_roots`）。
+
+## ★★★★配られた字面を疑え —— **2026-09-08 は 8 本中 6 本が偽だった**
+
+★着手して最初に、**配られた数学の文が真かを自分で検算する**（30 秒〜数分）。
+1. ★指数・定数の**族**が出てきたら、**総和 / 総積を閉じた形で書き、結論が要求する量と突き合わせる。**
+2. ★**最小の段を具体例で 1 度**手計算する（`ℚ_p` / `ℚ_p(ζ_p)` / `p^{1/p}` / 有限群なら `A₄`・`S₄`）。
+3. ★★**古典的な定理の字面と突き合わせる**（★2026-09-08 の実測ではこれが**いちばん効いた**）。
+   ★条件が 1 つ落ちていないか（例: `K_π = K_{π′}` は偽で、正しくは `K_π ⊔ K^ur = K_{π′} ⊔ K^ur`）。
+4. ★**木に既に「偽」と書いていないか grep する**（0.3 秒。木の在庫は `偽` 702 行 / `反例` 280 行）:
+   `grep -rn '<主張の記号>' lean/ABC3/ --include=*.lean | grep -E '偽|反例'`
+
+★★**偽だと分かった時点で報告してよい。★それが最も価値のある結果である。**
+★偽なら**反例を形式化**し、**正しい形に直してから**進め。
+★直したことと**なぜ間違っていたか**を docstring の冒頭に書く（次の波を止めるため）。
+
 ## ★★「mathlib に無い」と報告する前に（2026-09-07 に実測した失敗形）
 
 ★★**実装者の「無い」は当てにならない。** 2026-09-07 に実測:

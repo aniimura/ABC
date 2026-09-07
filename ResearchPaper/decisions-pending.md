@@ -11973,3 +11973,913 @@ GUESS[RECEQ-b]: 入口は Lubin-Tate データの選択非依存性（reciprocit
 GUESS[RECEQ-c]: 抽象核は「2 つの塔の間の同変な全単射」で、Lubin-Tate の語彙が消える
 GUESS[RECEQ-d]: α が体の同型から来る場合は既に在る（reciprocityUnits_semilinear_conj）ので、そこから一般 α へ持ち上げる
 ```
+
+## ★★★★★ε の減衰 —— ☆★**配った目標が空虚だった。★指数が 1 つずれていた**（2026-09-08）
+
+`lean/ABC3/Found/PGC/AxEpsilonDecay.lean` **661 行 / 25 宣言、`sorry` 0**。
+`build.mjs` → **jobs 3,682 / error 0 / sorry 0**。★**MCP 使用 0 回。**
+
+### ☆★★★診断が機械的だった（★これが一番価値がある）
+
+★**旧仮説 `c k ≤ p^{(1/(p−1))(1/p)^k}` は空虚**である。
+★反例: `K = ℚ_p(ζ_p)`, `x = p^{1/p}`（`wildDepth = 1`）が ★**`c 1 ≥ p^{1/(p−1)}` を強制**するが、
+★旧仮説は `c 1 ≤ p^{1/(p(p−1))}` を要求する。
+⇒ ★`axLemma_of_wildDescent_geometric` は**真だが空虚な含意**だった。
+
+★★**合図は機械的に見える**: ★**仮説の指数の総和 `Σ_{k≥1}(1/(p−1))p^{−k} = 1/(p−1)²` が
+結論の `p/(p−1)²` より小さい。**
+⇒ ★**正しい指数は `(1/p)^{k−1}`**（★総和がちょうど `p/(p−1)²`）。
+★★**`axDecay p 1 = p^{1/(p−1)}` が古典的最良定数と一致する。**
+
+⇒ ★**既存宣言は触らず**、新定理 `axLemma_of_axDecay` / `axSenTate_of_axDecay` と
+★**包含 `rpow_geometric_le_axDecay`（旧仮説 ⇒ 新仮説、機械が検査）**を足し、
+★**`AxTowerDecay.lean` のモジュール docstring にだけ訂正節を書いた**（★次の波を止めるため）。
+
+### ★★★原典より短い道（今日 25 回目）
+
+☆★★**本体が持ち場に挙げた `σ^p x − x = Tr_{M/M′}(σx − x)` は使えない** ——
+★**σ の位数が p のとき両辺 0 になる。**
+★★**実際に効くのは望遠鏡和 ＋ `‖(p:K)‖ = 1/p`**:
+`σ^n x − x = n·y + Σ_{j<n}(σ^j y − y)` ⇒ `‖σ^n x − x‖ ≤ max(‖(n:K)‖, b)·‖σx−x‖`。
+★★**跡写像も `Tr(𝒪_M) ⊆ 𝔭^c` も要らなかった。**
+★分岐理論が要るのは第 2 のつまみ `b` を与える 1 点だけ。
+
+★抽象核 8 本は**分岐・付値・Galois・p 進が 1 語も出ず**、core1/core2 は**一発**。
+★**正規性・分離性の仮定は 1 つも使っていない。**
+
+### ★「索引に無い ⇒ 不在」の反例 **6 例目**
+
+★`Finset.sum_range_sub` / `Finset.sum_Ico_eq_sum_range` /
+`IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg` —— ★**索引に無いが 3 本とも在った。**
+☆★★**しかも `AxLemma.lean` の docstring が「超距離での和の一様上界は mathlib に無い」と書いていた**
+——★**Finset 版は在る**（Multiset 版が無いのは本当）。★**実害のある誤記。**
+
+## ★★`VERDICT:`
+
+```
+VERDICT[EPS-a]: 外れ — σ^p x − x = Tr(...) はそもそも使えない（σ の位数が p のとき両辺 0）
+VERDICT[EPS-b]: 外れ — 跡の評価も ramIndex 族も要らなかった
+VERDICT[EPS-c]: 半分 — 超距離は効いたが「p 個の共役の和」ではなく望遠鏡和だった
+VERDICT[EPS-d]: 外れ — ★その指数自体が誤りだった（正しくは (1/p)^{k−1}）
+```
+```
+COST[EpsDecay]: 安 | 持ち場=深い段では ε が減る  — 抽象核は一発、配った目標が偽だと測れた
+```
+☆★**本体は 3 本外して 1 本半分。★今日 15 度目。**
+☆★★**そして本体が配った目標が偽だったのは今日 4 度目**
+（`K_π = K_{π′}` / `colim_S H¹ = 0` / 「`Σ i_j/e_j` の収束」/ 今回）。
+★**うち 2 度は「前の波の申し送りをそのまま渡した」ものである。**
+⇒ ★★**申し送り（更新）**: ★**前の波が名指しした次のノードでも、★指数や定数の「総和が結論と合うか」を
+配る前に 1 度だけ検算する。**★**今回はそれで気づけたはずだった。**
+
+### ★残る 2 点
+
+1. ★**sharp な different 評価 `(p−1)i ≤ e_L`**（1 段、`axDecay p 1` を出す）—— ★**数学が足りない。**
+2. ★「Sylow p 部分群の固定体で wild 深さが 1 だけ下がる」—— ★**配管が越えられない**（★中間体 2 層、#59/#69）。
+
+## ★★`GUESS:` —— ★**配る前に書いた**（sharp な different 評価）
+
+```
+GUESS[DIFF-a]: (p−1)i ≤ e_L は mathlib に無い（★測らせる）
+GUESS[DIFF-b]: 木の CyclicJumpNorm の桁展開がそのまま入口になる
+GUESS[DIFF-c]: 抽象核は「離散付値環の p 乗写像の像」で、Galois の語彙が消える
+GUESS[DIFF-d]: 総和の検算: axDecay p 1 = p^{1/(p−1)} は 1 段の最良定数と一致しているので、この 1 本で k=1 は閉じる
+```
+☆★**`DIFF-d` は今回の教訓（総和の検算）を先に自分でやったものである。**
+
+## ★待ち行列（枠が空いたら即配る）—— 「wild 深さが 1 段下がる中間体」（2026-09-08）
+
+★**本体が §4 の上限（`lake` を回す実装 agent は main tree で同時 2 体、3 体以上は未検証）を
+自分で破って 3 体目を出し、着手直後に止めた。**★失った作業は無い（ファイルを読み始めた段階）。
+☆★**規約を書いたのは本体自身であり、破ったのも本体自身である。**★配る前に上限を数えていなかった。
+
+⇒ ★★**申し送り（配り方）**: ★**持ち場を配る前に、走っている実装 agent の数を数える。**
+★`ListAgents` か、直前の dispatch の記録で足りる。★30 秒で済む。
+
+### 待たせているノードの中身（そのまま再利用できる）
+
+★**`AxWildDescent K (axDecay p)` の `k ≥ 2`**:
+`wildDepth K x = k ≥ 2` のとき、中間体 `M`（`K ⊆ M ⊆ K(x)`）で `wildDepth M x = k − 1` を取る。
+
+★★**前の波の「配管が越えられない（#59/#69、中間体 2 層）」は古い判断の可能性が高い。**
+★`tools/lean-idioms.md` に迂回路が 3 本ある:
+- **#153**（8409 行〜）`FiniteGaloisIntermediateField.adjoin` で有限次 Galois 中間体、
+  instance 4 つが `inferInstance`（実測 0.30 秒）。★`Subgroup.comap` を使えば **#59 に触らずに済む**と明記。
+- **#59 の定型 (c)**（8725 行付近）`IntermediateField.restrict` + `restrict_algEquiv` +
+  `LinearEquiv.finrank_eq`。`IntermediateField.finrank_eq_fixingSubgroup_index` は
+  ★`[Normal k L]` を要求しない。
+- **#165**（8730 行付近）商群の作用の道具が `Found/PGC/HasseArfInduction.lean` §4 に**6 本**。
+
+★**抽象核の見込み**（★測定ではない）: 「位数 `p^k`（`k ≥ 1`）の有限 p 群には指数 `p` の
+正規部分群が在る」——★分岐・付値・Galois・p 進の語彙が 1 語も出ない。
+★★**先に検算すべき点**: `K(x)/K` は Galois とは限らない。Galois 閉包で `wildDepth` がどう動くか。
+
+
+## ★★★★★`reciprocityUnits` の α-同変性 —— ☆★**無条件版は偽。★機械が「`K_π = K_{π′}` と等価」だと証明した**（2026-09-08）
+
+`lean/ABC3/Found/PGC/ReciprocityAlphaTransport.lean` **601 行 / 宣言 43 本、`sorry` 0**。
+`build.mjs ABC3.Found` → **jobs 6945 / 22.2 秒 / error 0 / 自ファイル sorry 0**。
+`check.mjs --brief` → **NG 13、全部 `Skeleton/CorrHyp/**`（D26、触っていない）= 自ファイル由来 0**。
+★**MCP 使用 0 回**（`leanfile.mjs` を 7 往復、10.3〜13.0 秒/往復）。
+
+### ☆★★★配った文は偽だった —— ★**しかも `α = id` で偽になる**
+
+```lean
+artinKerTransport_refl_iff_lubinTateClosure_eq :   -- ReciprocityAlphaTransport.lean:550
+  ArtinKerTransport (lubinTateArtinFilteredDatum … π f …)
+                    (lubinTateArtinFilteredDatum … π' f' …) (ContinuousMulEquiv.refl K.absGal)
+    ↔ lubinTateClosure K … f … = lubinTateClosure K … f' …
+```
+★右辺 `K_π = K_{π′}` は木が**偽**と記録している
+（`Found/PGC/LubinTateUniformizerIndependence.lean:31`、反例 `K = ℚ_p`(p 奇)・`π = p`・`π′ = −p`）。
+★★**つまり「無条件の α-同変性」は `α = id` ですら成り立たない。**
+★（反例そのものの形式化は既存 docstring 止まりで、今回もそこは埋めていない。）
+
+☆★★**同じ日に「配った目標が偽」は 5 例目**である（`K_π = K_{π′}` /
+`colim_S H¹ = 0` / `Σ i_j/e_j` の収束 / `c k ≤ p^{(1/(p−1))(1/p)^k}` / 今回）。
+★★**今回の持ち場には誤りが 2 つ入っていた**:
+(1) 無条件の α-同変性、(2) ★「これが立てば `prop_2_2` が閉じる」。
+★(2) も**成立しない** —— 作れたのは**底体の** `𝒪_K ≃+ 𝒪_{K'}`（Γ は自明に作用）であって、
+要求されている `𝒪_{K̄} ≃+ 𝒪_{K̄'}` の **Γ-同変**同型ではない。★実装者が自分で見つけて申告した。
+
+### ★★★埋まったもの（★仮説を「核の対応」に置き換えれば仮定ゼロで通る）
+
+★**抽象核（型クラスは `Group` 4 つだけ。分岐・付値・Galois・Lubin-Tate が 1 語も出ない）**:
+- ★到達点 `exists_intertwines_iff`:
+  **「α に沿って全射準同型を運べる」⟺「`Subgroup.map α (ker φ) = ker φ'`」**
+- `map_map_of_intertwines`（★**部分群の族はそのまま運ばれる。核の仮説すら不要**）
+- `intertwines_refl_conj`（標的が可換なら内部自己同型に沿った運びは**恒等**）
+
+★**具体層**: `ArtinFilteredDatum`（★型に Lubin-Tate が出ない）+ `nonempty_artinFilteredDatum`（★**仮定ゼロ**）、
+★`map_principalUnits_unitsTransport`（**すべての `n` で `U^n_K ↦ U^n_{K'}`**）、
+★★`integersTransport : 𝒪[K] ≃+ 𝒪[K']` —— pGC Prop 2.2 の**第一段**。
+
+### ★★原典より短い道（今日 26・27 回目）
+
+1. ★**上付き→下付き→上付きの番号付けの往復を 1 度も行わない。**
+   `Art(Γ^n) = U^n` を上付きのまま使い `log` で `𝒪` に落とす。
+2. ☆★★**`e_K = e_{K'}` を示さずに済ませた** —— 段の番号に**公倍数 `2·e_K·e_{K'}`** を使う
+   （K 側は `r = 2e_{K'}`、K′ 側は `r = 2e_K`、どちらも `r ≥ 2`）。
+   ★**「絶対分岐指数が α から復元できるか」という未解決の問いを丸ごと回避できた。**
+
+### ★★「持ち場が名指しした道」を **2 度とも外した** —— ★**部品で引くのが正しい**
+
+| 持ち場の表が指した先 | 実際に効いたもの |
+|---|---|
+| `smul_padicLog_image_ramificationFiltration_eq_integers`（**集合**の等式） | ★その 1 つ手前の**群同型** `PadicLogIntegers.lean:531::padicLogPrincipalUnitsEquiv` |
+| `reciprocityUnits_semilinear_conj` / `_eq_of_transport` | ★**どちらも使わなかった**。要ったのは `reciprocityUnits_surjective` と `map_ramificationFiltration_reciprocityUnits_eq_principalUnits`（どちらも仮定ゼロ） |
+
+★mathlib 側は 4 つとも在った（`QuotientGroup.congr` / `quotientKerEquivOfSurjective` /
+`MulEquiv.subgroupMap` / `MulEquiv.subgroupCongr` / `IntermediateField.restrictNormalHom_ker` /
+`AddEquiv.toMultiplicative`）。★**`.absent` は 1 件も書いていない。**
+
+### ★★衝突検査が火を吹いた —— ★**新しい面が 1 つ**
+
+```
+error: ABC3/Found.lean:1:0: import ABC3.Found.PGC.ReciprocityAlphaTransport failed,
+environment already contains 'ABC3.Found.PGC.ArtinDatum.mk.noConfusion'
+  from ABC3.Found.PGC.Section3RealParameters
+```
+★`leanfile.mjs` でも `build.mjs <自分のモジュール>` でも**出ない**（相手を import していないから）。
+★★**新しい面**: 書いたのは `structure ArtinDatum` だが、★**エラーが名指すのは自動生成の
+`ArtinDatum.mk.noConfusion`** である ⇒ このエラー文を grep するときは `.mk.noConfusion` を落とす。
+
+☆★★**実装者は新節を作らなかった** —— `idiom-recur.mjs --similar` を引き、
+`ext` 後の `∈ ↑φ.ker` は **#276 が既に同じ罠を（linter の文言まで含めて）書いている**と判定し、
+`environment already contains` も既存 5 箇所＋#158 が扱っているので
+★**L1515 の既存節に「4 回目」として 1 ブロック追記するに留めた**（11945 → 11961 行）。
+★★**これは `idiom-recur.mjs`（メタ第 39 回で採用）が節の重複を実際に止めた 1 例目である。**
+
+### ★`#print axioms`
+
+- ★**`[Quot.sound]` のみ**: `Intertwines`, `intertwines_unique`
+- ★**`[propext, Quot.sound]`（選択公理を使わない）**: `ker_map_eq_of_intertwines`,
+  `map_map_of_intertwines`, `intertwines_refl_conj`
+- 残り 21 本は `[propext, Classical.choice, Quot.sound]`（`Nonempty` 経由の
+  `MulEquiv.ofBijective` / `quotientKerEquivOfSurjective` / Lubin-Tate の選択のため）
+- ★`Normal` を使うのは **43 本中 2 本だけ**。★可判定性は **1 本も使っていない**。
+
+## ★★`VERDICT:`
+
+```
+VERDICT[RECEQ-a]: 当たり — 在庫に無く、抽象核から作った
+VERDICT[RECEQ-b]: 外れ — 入口は選択非依存性ではなく reciprocityUnits_surjective だった
+VERDICT[RECEQ-c]: 当たり — 抽象核は Group 4 つだけで、Lubin-Tate も分岐も付値も消えた
+VERDICT[RECEQ-d]: 外れ — reciprocityUnits_semilinear_conj は 1 度も使わなかった
+```
+```
+COST[RecEquiv]: 安 | 持ち場=reciprocityUnits の α-同変性  — 無条件版は偽（α=id でも K_π=K_π′ と等価だと機械検査）、核の対応を仮説にすれば 𝒪_K ≃+ 𝒪_K′ まで仮定ゼロで通った
+```
+★本体は 4 本中 2 本外し。★**今日 16 度目。**
+
+### ★新しく必要になったノード
+
+- **N1**「`ker(Art_K) ∩ I_K` は群論的に標準」
+  （`ker Art_K ∩ I_K = Gal(K̄/K^{ab}) ∩ I_K`、右辺は閉包した交換子群 ∩ 惰性群）。
+  ★これが立てば**惰性群に制限した Artin 写像の α-同変性が仮説なしで**出る。
+  要るのは局所 Kronecker–Weber（`LocalClassFieldTheory.lean`、★**木にある**）と `K_π ⊔ K^ur = K^{ab}`。
+  ★**本シフトでは測っていない**（着手していない）。
+- **N2**「`𝒪_{K̄} = colim_L 𝒪_L` の Γ-同変な余極限」。
+  ★`IntKbarTransportFiltered` への**唯一の橋**。★整合性が非自明。
+
+
+## ★★★★改善係 第 40 回 —— ★**M218 を採用した**（2026-09-08、本体の判断）
+
+### 採用したもの: **M218** `tools/idiom-recur.mjs` の書き検出（`bindingWrite`）
+
+★worktree `.claude/worktrees/meta40`（detached `69c8283c`）から本体へ複製。
+★**差分は報告どおり `+70 / −3`**（1055 → 1122 行、md5 `04de53a5c487`、LF・CR 0）。
+★**基底の一致を確認した**: 第 39 回の採用（`--similar`）が両側に 21 箇所で入っている
+⇒ ★worktree は本体の未 commit 状態から切られており、**第 39 回を巻き戻していない**。
+
+★**採用後の実測（本体で回した）**:
+```
+node tools/idiom-recur.mjs --selftest   → 104/104   （採用前 93/93）
+node tools/idiom-recur.mjs --rescan     → 完走（digest v4 → v5）
+  idiom(節) 572 / 出所 {git:161, log:Bash:321, log:Edit:79, none:11}
+  ★測れる 152 / 登録後の再出現 idiom 11 件・事象 90 件
+```
+
+☆★**改善係の予想と 2 欄ずれた。★これは劣化ではない**:
+`log:Edit` 76 → **79**、`測れる` 150 → **152**。
+★改善係は `T = 1788817719` で切って比較しているが、★**本体はその後に回した** ——
+その間に実装エージェント 2 体が `lean-idioms.md` に書いている
+（`ReciprocityAlphaTransport` の既存節への追記など）。★**新しい実事象が入った分である。**
+★`git` 161 / `log:Bash` 321 は**予想と完全一致**した。
+
+### ★本当の効果
+
+★**45 節の登録時刻が `git`（commit 時刻）→ `log:Bash`（本当の書き時刻）に変わった。**
+★**中央 1.21 時間 / 最大 6.55 時間 前へ動き、後ろへ動いたものは 0。**
+★`--reads` は 81 → 87 節、「書く前に読み／探しがあった」は **87/87 で 100% のまま**
+（★M200 の結論は変わらない）。
+
+### ☆★★**M214 の見立ては外れていた（件数だけ当たっていた）**
+
+★M214 は「`[^\n]{0,80}` が改行を越えられないのが原因、改行を潰せば直る」と書いたが、
+★**27 事象に `>` / `tee` の形は 1 件も無い。★改行を潰しても 1 件も拾えない。**
+実際はファイル名が `p` / `path` / `q` / `P` / `dst` という**変数**に束ねられ、
+書きの動詞がその変数にしか掛かっていなかった。
+⇒ ★**`bindingWrite`（名前 → 直前に代入された値）が正しい直し方だった。**
+★「直前」が要る —— `p = mathlib-gap.json` → 書き → `p = lean-idioms.md` → 書き、と
+**`p` を使い回す命令が実データに在る**。
+
+### ★★採らなかったもの（★改善係自身がそう勧めた）
+
+- **M219（`k* = 7`）—— 採らない。** 標本が族 2 つで、`bottleneck(族2)=7` は**辺 1 本**で決まっている。
+  ★`k*` は族を足すと下がる一方なので **7 は上界**にすぎない。
+  ★既定を変えるのは族が 3 つ以上たまってから。入れるなら `--k <n>` の任意の口として。
+  ☆★**ただし選び方は族 2 を作る前に commit されている**（曲線を見た後に選ばない作法）。
+  ★**`k = 8` では族 2 が割れる** ⇒ 曲線から選んでいたら目で確かめた重複を壊していた。
+- **M220（`--similar` が呼ばれた）—— 率も因果も言えない。** 分母 1。
+  ★（本体注: その後 `ReciprocityAlphaTransport` の実装者が `--similar` を引いて
+  ★**新節を作らずに既存節への追記に留めた**。★分母は 2 になったが、まだ率は出せない。）
+
+### ★★試験の質（★ここが第 40 回の一番よいところ）
+
+`mutate.mjs` 11 通りで**発火 9 / 素通り 1 / 当たらない 1**。
+★**X1（M214 のバグそのもの）が発火した** —— これが鳴らなければ試験は無意味だった。
+★X11 は**わざと当たらない置換**で `NOTAPPLIED` を正しく区別（★台の較正）。
+★素通り 1（X10）は「試験が薄い」のではなく**論理的に等価**であることを
+★**Bash 命令 31,782 件で食い違い 0 件**を実測して裏を取り、★**作り物の試験を足さなかった。**
+★途中で**本物の穴を 2 つ塞いだ**（S99: 代入の右辺が行末まで伸びて別ファイルへの書きを数えていた、
+S103: X3 が素通りしかけたので実ログの命令から**行をそのまま**取って試験にした）。
+
+★**盲検の予想を 1 つ外し、隠さず台帳に書いた**（「280 前後」→ 実際 324）。
+★**「登録後の再出現が増えた」を効果と読んでいない**（`regTs` は候補を足すと前へしか動かないので単調に増えて当然）。
+
+### ★副作用なし（teardown の実測）
+
+| ゲート | 立ち上げ | 帰り |
+|---|---|---|
+| `check.mjs --selftest --structured` | NG 0 / 67/67 / S1-S6 PASS | 同じ |
+| `check.mjs --ledger` | NG 13 | NG 13 |
+| `graph.mjs` | 2281 / 6531 / md5 `b752fd28dd75` | 同じ |
+| `idiom-recur.mjs --selftest` | 93/93 | **104/104** |
+
+★`lean/ABC3/**` は 1 行も触っていない。★`tools/_*.mjs` を 1 本も増やしていない（probe 7 本は scratchpad のみ）。
+
+```
+COST[Meta40]: 並 | 持ち場=取り落とした書きと k の選択  — 27 件は全部本物の書きで、M214 の「改行が原因」だけが外れていた
+```
+
+
+## ★★★★★★sharp な跳びの上界 `(p−1)i ≤ e_L` —— ☆★**配った文が真だった。★しかも等号が実現する**（2026-09-08）
+
+`lean/ABC3/Found/PGC/RamificationJumpBound.lean` **561 行 / 宣言 15 本 + `.src` 6 本、`sorry` 0**。
+`build.mjs ABC3.Found.PGC.RamificationJumpBound` → **jobs 2302 / 9.1 秒 / error 0 / warning 0 / sorry 0**。
+`declaration uses` 0 件。★**MCP 使用 0 回**（`leanfile.mjs` 8.6〜9.2 秒 × 7 往復）。
+
+☆★★**今日 6 本配って、真だったのはこれが 2 本目である**（1 本目は Prop 2.1）。
+
+### ★★実装者が自分で検算した（新しい規約「配る前の 3 手」を実装側でも回した）
+
+| 例 | p | e_K | e_L | 跳び i | (p−1)i | 判定 |
+|---|---|---|---|---|---|---|
+| `ℚ₂(√2)/ℚ₂` | 2 | 1 | 2 | 2 | 2 | ★★**等号** |
+| `ℚ₂(√−1)/ℚ₂` | 2 | 1 | 2 | 1 | 1 | 狭義 |
+| `ℚ_p(ζ_{p²})/ℚ_p(ζ_p)` | p | p−1 | p(p−1) | p−1 | (p−1)² | 狭義（差 p−1） |
+
+★`ℚ₂(√2)`: `v_L(σ√2 − √2) = v_L(2√2) = 3 = i+1` ⟹ `i = 2`、`(p−1)i = 2 = e_L`。
+☆★★**等号が実際に起きるので、これ以上強い形は存在しない。**
+★等号条件も証明した（`(p−1)i = p·e_K` ⟹ `(p−1) ∣ e_K` かつ `p ∣ i`）。
+対偶が `sub_one_mul_lt_of_not_dvd`（`p ∤ i` ⟹ 狭義）。
+
+### ★★★通った道 —— (A) だが **`differentIdeal` を一度も通らない**
+
+★**(B)（単数の norm / 望遠鏡）は測って潰れた**（docstring に記録）:
+`N(1+c) = 1` から `Σ_{m=1}^p e_m = 0` が出るが、`e_m ≈ C(p,m)c^m` の誤差が
+`‖σc − c‖ ≤ ‖π‖^{2i}` までしか落ちず、★`p ≥ 3` で `2i < pi` なので `e_p` が最小項として分離しない。
+★素朴な (C) も `Tr(σπ − π) = 0` が恒等的に真になるだけで `i ≤ e_L`（既存と同じ定数）止まり。
+☆★**本体が「一番短い」と見ていた (C) が外れた。**
+
+★★**効いたのは `f'(π)` を 2 通りに測るだけ**:
+1. **根の側**: `f = (X − π)·g` ⟹ `f'(π) = g(π) = ∏_{k≠0}(π − σ^kπ)`、ノルムは `(‖π‖^{i+1})^{p−1}`。
+2. **係数の側**: `f'(π) = Σ_{l<p} f'_l π^l` は **K 係数の桁展開**なので
+   `CyclicJumpNorm.nnnorm_sum_digit_eq_sup`（桁の分離）で `≥ ‖(p:L)‖·‖π‖^{p−1}`（`f'_{p−1} = p`、monic）。
+
+★★**原典より短い道（今日 28 回目）**: 原典（Serre III §6 Prop 13）は
+「相異なる剰余類 mod e の項は相殺しない」を **Eisenstein 多項式**に当てるが、
+★その補題は木に `nnnorm_sum_digit_eq_sup` として**既に在った**。
+⇒ ★★**Eisenstein 性も `n` の素数性も要らず、monic だけで足りる。**
+
+### ★★抽象核 —— ★**全 15 宣言が `[propext, Classical.choice, Quot.sound]`**（`sorryAx` なし）
+
+分岐・付値・Galois・p 進の語彙が 1 語も出ない核:
+- `eval_derivative_of_eq_X_sub_C_mul`（可換環だけ。`F = (X−a)g ⟹ F'(a) = g(a)`）
+- `norm_multiset_prod_map_eq_pow`（ノルム体だけ）
+- ★`norm_natCast_mul_pow_le_norm_aeval_derivative`（**心臓**。`‖(n:L)‖·‖π‖^{n−1} ≤ ‖f'(π)‖`）
+- `rpow_inv_natCast_le_of_le_pow`（実数だけ）/ `sub_one_mul_lt_of_not_dvd`（ℕ だけ）
+- ☆★★`norm_iterate_sub_self_eq_of_coprime`（**§7**。`f` が等長で差を保ち `f^[p] = id`、
+  `gcd(k,p) = 1` ⟹ `‖f^[k]π − π‖ = ‖fπ − π‖`）——
+  ★★**「跳びは生成元の取り方に依らない」= `G_{i+1}` が部分群であることを、
+  群論も分岐理論も使わずに証明した。**
+
+### ★在庫の測定（★コマンドは docstring に全部残っている）
+
+★**「自前で書きかけたが在った」7 例目**: `Polynomial.aeval_eq_sum_range'`
+（`natDegree < n` ⟹ `aeval = Σ_{i<n} coeff i • x^i`）——
+★**これが「多項式を桁展開に直す」再添字の作業を丸ごと消した。**
+★`Polynomial.eval_multiset_prod_X_sub_C_derivative` も在るが `DecidableEq` を要求するので、
+★**可換環で済む 3 行の自前核に置き換えた方が仮定が減った**（在庫を使わない方が良い例）。
+
+★**測って無かったもの**（★コマンドつき。`.absent` の作法どおり）:
+- `grep -n "coprime_succ_self\|coprime_pred\|succ_coprime" .cache/mathlib-index.txt` → **0 件**。
+  `Nat.coprime_sub_self_left` で作った。
+- `eq_prod_roots_of_monic_of_splits_id` は無く、★**`Polynomial.Splits.eq_prod_roots_of_monic` に改名**されていた。
+- `grep -n "differentIdeal" ... | grep -i "dvd\|_le_\|sub_one"` → 出るのは**下からの評価**
+  `pow_sub_one_dvd_differentIdeal` と `dvd_differentIdeal_iff` だけで、
+  ★**`d ≤ e−1+v_L(e)` の形は無い**。★**本ファイルはそれを必要としないので障害にならなかった。**
+
+### ★★出口は `axDecay p 1` そのもの
+
+```lean
+norm_sub_digit_zero_le_rpow_mul :  ‖x − a₀‖ ≤ p^{1/(p−1)} · ‖σx − x‖
+```
+★右辺の定数は `AxEpsilonDecay.axDecay p 1` **そのもの**である。★解析の芯は閉じた。
+
+### ★残りはちょうど 4 点（**すべて具体層の配管**）
+
+1. `wildDepth K x = 1`（`[K(x):K] = p·m`, `p ∤ m`）から全分岐 p 次の 1 段へ落とす塔の分解
+   （tame 側は `descentStep_of_natDegree_tame` が既に在る）。
+2. 桁展開 `x = Σ_{j<p} a_j π^j`。★`UniformizerExpansion.exists_digits` の基底は
+   `∏σ^iπ` であって `π^j` ではない（CyclicJumpNorm が警告済み）——**ここが食い違う**。
+3. `hval` / `hchar` / `‖(p:L)‖ = (p:ℝ)⁻¹`（idiom #291 の `Padic.norm_p`）の供給。
+4. `hsplit`: `minpoly K π` が `L` 上で `∏_k (X − σ^kπ)` に分解すること。
+   ★★**これさえ来れば `hbreak` は §7 が自動で埋める。**
+
+### ★`lean-idioms.md` に 2 節（★先に `--similar` を引いた ⇒ 分母 3）
+
+- **#293** `← Nat.cast_one` は ℕ の引き算の中の `1` まで書き換える（#240 と同族だが落ち方が違う）
+- **#294** `Unknown constant Nat.coprime_succ_self_left` → `Nat.coprime_sub_self_left` で作る手順つき
+
+## ★★`VERDICT:`
+
+```
+VERDICT[DIFF-a]: 当たり — mathlib に無い（differentIdeal の上からの評価は不在と実測）。ただし本件はそれを必要としなかった
+VERDICT[DIFF-b]: 当たり — CyclicJumpNorm.nnnorm_sum_digit_eq_sup がまさに入口だった
+VERDICT[DIFF-c]: 外れ — 核は「p 乗写像の像」ではなく「f'(π) を 2 通りに測る」だった（Galois の語彙が消えたのは当たり）
+VERDICT[DIFF-d]: 半分 — 定数は axDecay p 1 とぴったり一致したが、k=1 は解析の芯だけで、具体層の配管が 4 点残った
+```
+```
+COST[JumpBound]: 安 | 持ち場=sharp な different 評価  — 配った文が真で、等号が実現するので sharp。differentIdeal を通らずに済んだ
+```
+★本体は 4 本中 2 本当たり・1 本半分。★★**今日はじめて「配った道（C）が外れたのに、配った文は真だった」**。
+
+### ★次のノード（実装者の提案）
+
+★**「`minpoly` の根 = `σ`-軌道」だけを切り出したノード**（上の点 4）。
+`Polynomial.Splits.eq_prod_roots_of_monic` と `IsGalois` があれば足り、
+`exists_multiset_of_splits`（`Splits` + `Separable` ⟹ `π ::ₘ T` にほどく）が**受け口として既に在る**。
+★**これ 1 本で `hbreak` も自動的に埋まる（§7）ので、点 4 と点 3 は同じ波でまとめられる。**
+
+
+## ★★`GUESS:` —— ★**配る前に書いた**（「`minpoly` の根 = `σ`-軌道」＋供給、点 3・点 4）
+
+```
+GUESS[ROOT-a]: Polynomial.Splits.eq_prod_roots_of_monic + IsGalois で足りる（実装者の見立てをそのまま追認する）
+GUESS[ROOT-b]: 本当の難所は点 4 ではなく点 2（桁展開の基底が ∏σ^iπ と π^j で食い違う）で、そちらが重い
+GUESS[ROOT-c]: 抽象核は「有限群の軌道と monic 多項式の根が個数で一致する」で、体論の語彙が消える
+GUESS[ROOT-d]: ‖(p:L)‖ = (p:ℝ)⁻¹ は idiom #291 でそのまま出る（数学ではなく配管）
+```
+★**ROOT-b は「配った道が外れる」方に賭けている** —— 今日は本体の名指しが 3 波連続で外れた。
+
+## ★★`GUESS:` —— 改善係 第 41 回（配る前に書いた）
+
+```
+GUESS[M41-a]: 「配った文が偽」の率は、本体の持ち場に「総和/最小例の検算」の跡があるかで分かれる
+GUESS[M41-b]: 偽だった 5 件は、どれも「前の波の申し送りをそのまま渡した」か「原典の字面をそのまま渡した」のどちらか
+GUESS[M41-c]: decisions-pending.md から機械的に「配った文」を取り出すのは、字面が定型でないので当てにならない
+GUESS[M41-d]: 分母は 1 セッションでは足りない（20 件未満）ので、率は出せず「列挙と分類」までしか言えない
+```
+
+
+## ★★★★★★★★wild 深さの降下 —— ☆★**配った文は偽（反例を形式化）。★正しい形で `k ≥ 1` が全部閉じた**（2026-09-08）
+
+- 新規 `lean/ABC3/Found/PGC/WildDepthDescent.lean`（**701 行、`sorry` 0**）
+- 新規 `lean/ABC3/Found/PGC/WildDepthFieldDescent.lean`（**152 行、`sorry` 0**）
+- `build.mjs ABC3.Found` → **error 0 / sorry 2**（外部依存 `Wiener.lean:323,342`、既知・無関係）
+- `check.mjs --brief` → **NG 13、全部 `Skeleton/CorrHyp/**`、増減なし**
+- ★**MCP 使用 0 回**（`leanfile.mjs` 14 往復 / `build.mjs` 5 回）
+
+### ☆★★★★配った文は偽だった —— ★**しかも反例を形式化した**
+
+配った形「`wildDepth K x = k ≥ 2` ⇒ 深さ `k−1` の**中間体** `M`（`K ⊆ M ⊆ K(x)`）が在る」は**偽**。
+
+★Galois 対応での翻訳: `wildDepth K x = v_p(H.index)`、中間体 ↔ `H ≤ H₁ ≤ G`、
+`wildDepth M x = v_p(H.relIndex H₁)`。
+★★**反例**: `G = A₄`, `H` = 1 点固定群（位数 3）, `p = 2`。`H.index = 4`（`v₂ = 2`）で
+★`H` は**極大**なので `H.relIndex H₁ ∈ {1, 4}`、`v₂ ∈ {0, 2}` ⇒ ★**`v₂ = 1` は取れない。**
+★形式化済み: `not_forall_exists_relIndex_padicValNat_eq`。
+
+★**Galois 閉包を取っても直らない**: 上の `A₄` は `ℚ₂` 上で実現する
+（`F = ℚ₂(ζ₇)` の 1 単数群 `≅ ℤ₂[C₃]` から `V₄ ⋊ C₃ = A₄`、`L = E^{C₃}` は 4 次で中間体なし）。
+★（実現部分は手計算で、形式化していない。）★`(S₄, S₃)` でも同じ。
+★**`≤ k−1` に弱めても駄目** —— `M = K(x)` で `0 ≤ k−1` になり空虚。
+☆★★**中間体という枠組み自体が誤りだった。**
+
+★★**正しい形**: `AxWildDescent K c` は `x'` が `K(x)` に入ることを**要求していない**。
+`P` = `H` の p-Sylow、`P ≤ Q`・`[Q:P] = p`（★`Q` は `H` を含まない）を取り
+`y := (1/p)Σ_{c∈Q/P} c•x`。★`v_p(Q.index) = k−1` がちょうど出る。
+
+### ☆★★★配管は抜けた —— ★**前回の「越えられない」は覆った**
+
+★★`WildDepthFieldDescent.lean` が **`AxWildDescent K (fun _ => (p:ℝ))` を無条件に証明した**
+（`axWildDescent_prime` / `axWildDescent_normInv`）。
+
+★**効いた一手は #153 ではなく #296（今回書いた新節）**:
+☆★★**`K(x)` を `IntermediateField` として作らない。**
+`wildDepth` を `MulAction.stabilizer` の**指数**で測る（`index_stabilizer_eq_natDegree_minpoly`）
+⇒ ★**#59 の「中間体 2 層の `rfl`」に一度も触らない。** 作った中間体は Galois 閉包 `M` の 1 層だけ。
+
+★#153 も使えた（測定）: `haveI := isGalois_closure K`
+（`Found/PGC/SubgroupCorrespondenceConstruction.lean:50`、★**木に既存**）を先に置けば
+`FiniteGaloisIntermediateField.adjoin` から `FiniteDimensional`/`Normal` が `inferInstance`、
+`Algebra.IsSeparable` は `IntermediateField.isSeparable_tower_bot` 1 行。
+★さらに `NormedField ↥M` / `IsUltrametricDist ↥M` /
+`DistribMulAction (↥M ≃ₐ[K.carrier] ↥M) ↥M` も**3 つとも `inferInstance`**。
+★`‖(a : ↥M)‖ = ‖(a : K.closure)‖` と `((a−b : ↥M) : K.closure) = …` が**どちらも `rfl`**。
+★**体の層は 1 往復で通った。**
+★★**#165（商群の作用）は要らなかった** —— 平均化は `Q ⧸ P` の和で済み、★**`P ◁ Q` すら不要**。
+
+### ★抽象核（分岐・付値・Galois・p 進の語彙が 0 語）
+
+- §1 反例: `relIndex_eq_one_or_index_of_isCoatom` / `alt4_stabilizer_isCoatom` /
+  `alt4_padicValNat_index` / `alt4_no_intermediate` / `not_forall_exists_relIndex_padicValNat_eq`
+- §2 正しい降下: `exists_le_card_eq_prime_mul` / `index_eq_prime_mul_index` / `relIndex_eq_prime` /
+  `padicValNat_index_eq_succ` / ★`exists_pgroup_descent`
+- §3 平均化（超距離のみ）: `norm_sum_smul_sub_nsmul_le` / `cosetSmul` / `norm_map_sum_quotient_sub_le`
+- §4 貼り合わせ: ★★`exists_smul_invariant_of_padicValNat_index_succ`
+- §5/§6: ★★`index_stabilizer_eq_natDegree_minpoly` / ★★★`exists_natDegree_minpoly_descent(_div)`
+
+★`#print axioms` は全部 `[propext, Classical.choice, Quot.sound]`
+（`Sylow` / `Fintype.ofFinite` / `Quotient.out` が選択公理を引く。★今日の最良 `[Quot.sound]` には届かず）。
+
+### ★在庫 —— ★**「索引に無い ⇒ 不在」の 7 例目と、★新しい顔**
+
+- `IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg` —— 索引 grep **0 件**、`#check` は在る（7 例目、#292 に追記）
+- ☆★★**新形**: `grep -nE "\tSubgroup\.relindex"` → 1 件（別物）だが
+  ★**`relIndex`（I が大文字）で 30 本**。★**改名を見落として「無い」と書きかねない**（#292 に追記）
+- `alternatingGroup.isPreprimitive_of_three_le_card` +
+  `MulAction.IsPreprimitive.isCoatom_stabilizer_of_isPreprimitive` ⇒ ★**`A₄` の反例が証明 6 行**
+- `Sylow.exists_subgroup_card_pow_succ` ⇒ 「p 群を 1 段ずつ上がる鎖」を自作せずに済んだ
+- ★本当に無いもの（測った）: `IsUltrametricDist.norm_sub_le_max`（`norm_add_le_max` は在る。
+  ★`to_additive` が片方だけ）、`Subgroup.index_ne_zero`
+- ★衝突検査: 新規 23 宣言すべて 0 件を確認
+
+### ★★残りはちょうど 1 点 —— **定数だけ**
+
+| 出典 | `c k` | `∏_{k∈Icc 1 n} c k` |
+|---|---|---|
+| `AxTowerDecay.axWildDescent_pow`（前の波） | `p^k` | `p^{n(n+1)/2}` |
+| ★今回 `axWildDescent_prime` | **`p`** | `p^n` |
+| `AxEpsilonDecay.axDecay`（目標） | `p^{(1/(p−1))p^{1−k}}` | `p^{p/(p−1)²}`（★有界） |
+
+★`p^n` は非有界なので `AxLemma` はまだ出ない。
+★★**残りは「1 段の損失を `p` → `p^{(1/(p−1))p^{1−k}}` に絞る」ただ 1 点**
+（＝分岐・異なるイデアル・跳び）。
+☆★★**深さの降り方・平均化・指数の勘定はもう詰まっていない。**
+
+### ★持ち場の記述で外れていた点（実装者の申告、5 点）
+
+1. ★**「`k ≥ 2` の中間体で 1 段下がる」が偽**（最重要）
+2. ★**「`k ≥ 2` は `k = 1` と別扱い」も不要だった** —— 中間体で降りようとしたから別に見えていた
+3. ★見込み「位数 `p^k` の p 群には指数 `p` の正規部分群がある」は真だが**使わなかった** ——
+   要るのは `P ≤ Q ≤ G`（★`Q` は p 群でなくてよい）で `[Q:P] = p`。★**正規性も不要**
+4. ★#165（商群の作用）は**不要**だった
+5. ★`AxEpsilonDecay.lean` の docstring「`k ≥ 2` は #59/#69 の中間体 2 層の壁」は**今や古い**。
+   ★同ファイルの「望遠鏡和が ε 減衰の中身」という診断も、実際に効いたのは**剰余類上の平均**だった
+
+## ★★`VERDICT:`
+
+```
+VERDICT[WD-a]: 外れ — 中間体で 1 段下がるという枠組み自体が偽（A₄ の反例を形式化した）
+VERDICT[WD-b]: 外れ — k≥2 と k=1 を分ける必要が無かった
+VERDICT[WD-c]: 半分 — 純群論の核は取れたが、内容は「指数 p の正規部分群」ではなく Sylow から 1 段上がる鎖だった
+VERDICT[WD-d]: 当たり — 配管（#59/#69）は抜けた。ただし効いたのは #153 ではなく「中間体を作らない」#296
+```
+```
+COST[WildDepth]: 安 | 持ち場=wild 深さが 1 段下がる核  — 配った文は偽だったが、正しい形で k≥1 が全部閉じ、配管の「越えられない」も覆った
+```
+☆★**「配った文が偽」は今日 5 例目。★だが今回は反例が形式化され、正しい形まで出た。**
+
+### ★次のノード（実装者の提案）
+
+1. ★★**唯一残った点**: `AxWildDescent K (fun k => p^{(1/(p−1))p^{1−k}})`。
+   `axWildDescent_prime` の証明中の「`‖y − p•x‖ ≤ Δ` を `p` で割る」箇所を、
+   `Q/P` が巡回 `p` 次であることと異なるイデアルの評価で `‖p‖^{−1} → ‖p‖^{−1/(p−1)}` に絞る。
+   ★**§6 の `exists_natDegree_minpoly_descent_div` を差し替えるだけ**の形になっている。
+2. `‖Σ_{c∈Q/P}(c•x − x)‖ ≤ ‖π‖^d · Δ` 型の「深い段ほど得をする」評価（`axDecay` の `p^{1−k}` の出どころ）。
+
+
+### ☆★★**GUESS 登録を忘れた（3 度目）**
+
+★`WildDepth` の波は、持ち場に見込みを 4 つ書いたのに
+★**`decisions-pending.md` に `GUESS[WD-a..d]` を登録しなかった。**
+★遡っての登録は規約で禁じている（メタ第 14 回）ので、★**`VERDICT[WD-*]` は分母を持たない。**
+★`unverified.mjs` は正しく弾いており、判定済は 125 のまま動いていない。★**道具の側は正しい。**
+⇒ ★**申し送り**: `Agent` を呼ぶ**直前**に GUESS を書く。★持ち場の本文に見込みを書いた時点では足りない。
+
+## ★★`GUESS:` —— ★**配る前に書いた**（深い段ほど得をする評価、`p^{1−k}` の出どころ）
+
+```
+GUESS[DEEP-a]: 深さの得は「Q/P の剰余類の和が π の高い冪で割れる」ことから来る（異なるイデアルではなく直接評価）
+GUESS[DEEP-b]: 抽象核は「有限群の軌道和が軌道の長さで割れる」で、分岐も付値も出ない
+GUESS[DEEP-c]: 1 段ぶんの改良（p → p^{1/(p−1)}）は RamificationJumpBound の出口をそのまま差し込めば出る
+GUESS[DEEP-d]: 総和の検算: Σ_k (1/(p−1))p^{1−k} = p/(p−1)² は目標と一致するので、指数の形は正しい
+```
+★**DEEP-d は新規約（配る前に総和を検算する）を自分で回したものである。**
+
+
+## ★★★★★★`minpoly` の根 = `σ`-軌道 —— ☆★**字面は偽。★正しい形は Galois より弱い**（2026-09-08）
+
+`lean/ABC3/Found/PGC/MinpolyOrbitSplit.lean`（**693 行 / 宣言 25 本（定理 17・`.src` 8）、`sorry` 0、warning 0**）。
+`build.mjs ABC3.Found` → **jobs 6949 / error 0 / sorry 2**（外部依存、既知）。
+`check.mjs --brief` → **NG 13 のまま**。★**MCP 使用 0 回**（`leanfile.mjs` 8 往復 / `build.mjs` 3 回）。
+
+### ☆★★配った字面は偽 —— ★**実装者が自分で反例を構成した**
+
+「全分岐 `p` 次なら `minpoly K π` の根 = `σ`-軌道」は ★**`L/K` が Galois でないと偽**。
+★反例: `p` 奇素数、`K = ℚ_p`、`π = p^{1/p}`、`L = K(π)`、`minpoly = X^p − p`（Eisenstein、全分岐 `p` 次）。
+`ζ_p ∈ L` なら `p−1 ∣ p` で `p = 2` に限る ⇒ ★奇素数では `ζ_p ∉ L`、
+★**`L` 内の根は `π` ただ 1 つ、`Aut(L/K) = 1`、軌道は長さ 1 なのに根は `p` 個。**
+
+★在庫の裏づけ: `Normal.minpoly_eq_iff_mem_orbit`（`FieldTheory/Normal/Basic.lean:238`）が
+「根 = 軌道」そのもので、★**`[Normal F E]` の下でのみ**主張している。
+
+★★**正しい形（Galois より弱い）**: `p` 素数・`σ : L →ₐ[K] L`・`σ^[p] π = π`・`σ π ≠ π`・
+`(minpoly K π).natDegree = p` ⟹ `minpoly` は `∏_{k<p}(X − σ^[k]π)` に分解。
+☆★**`Normal` も `IsGalois` も `Finite` も要らない。**
+
+☆★★**`Separable` は仮定にも結論にも要らなかった。**
+`Polynomial.splits_iff_card_roots`（根の個数 = 次数 ⟺ Splits）経由なので
+★**分離性は結論として出る。★標数の仮定を 1 つも置いていない。**
+
+### ★点 4 / 点 3 / 点 2 —— **3 点とも閉じた**
+
+- **点 4（hsplit）: 閉じた。** `map_minpoly_eq_prod_iterate` / `exists_multiset_iterate_of_minpoly`
+- **点 3**: `hchar` は完全に閉じた（`norm_natCast_eq_one_of_lt_prime`、★Bézout だけ）。
+  `hval` は 2 行に落ちた。`‖(p:L)‖ = (p:ℝ)⁻¹` は仮定のまま（具体層 `Padic.norm_p` の仕事）。
+- ★★**点 2（基底の食い違い）: 測った。重くなかった（20 行）。**
+  `exists_digits` は「基底 `∏σ^iπ`／係数 `𝒪[K]`／`Finset.Ico`／イデアル近似」で、
+  要るのは「`K`-ベクトル空間 `L = ⊕_{j<p} Kπ^j` の座標（等式）」——★**別物だった。**
+  ★`modByMonic` + `aeval_eq_sum_range'` で `exists_digitSum_of_mem_adjoin` が 20 行。
+  ☆★**「`exists_digits` を使わない」という一手で消えた。**
+
+### ★★一段の評価は閉じた
+
+```lean
+exists_norm_sub_algebraMap_le_axDecay_of_orbit :
+  L = K(π) が全分岐巡回 p 次 ⇒ ∀ x ∈ L, ∃ c ∈ K, ‖x − c‖ ≤ p^(1/(p−1)) · ‖σx − x‖
+```
+★右辺の定数は `axDecay p 1` そのもの。
+
+### ★★残りはちょうど 1 点 —— **点 1（塔の分解）**
+
+★継ぎ目を実装者が測って表にした（ファイル docstring に記録）:
+
+| `exists_natDegree_minpoly_descent_div`（平均の道） | 本ファイル（桁展開の道） |
+|---|---|
+| `E/F` 有限次 Galois だけ | `L = K(π)`・`[L:K] = p`・`σ` が `π` 上で位数 `p` |
+| 分岐を見ない | 全分岐（hval）と跳び `i ≥ 1` |
+| 損失 `‖(p:E)‖⁻¹ = p` | 損失 `p^{1/(p−1)}`（★`p ≥ 3` で真に良い） |
+| `x` はどこでもよい | ★**`x ∈ K(π)` が要る** |
+
+☆★★**差し替えの障害は定数ではなく「`x` が全分岐巡回 `p` 次の層に入ること」である。**
+
+### ★抽象核（★体論の語彙が消えた）
+
+- ★`eq_of_iterate_eq_of_coprime` —— `Function.iterate` と `Nat` だけ。
+  ★★**「位数 `p` の巡回群に非自明部分群なし」を、群も部分群も使わずに書いた。**
+- `injOn_iterate_of_prime` / `eq_prod_X_sub_C_of_nodup_of_card`（多項式だけ）
+- `norm_natCast_eq_one_of_coprime`（超距離ノルム体 + Bézout）
+- `norm_iterate_sub_self_eq_of_coprime_of_fix`（★`f^[p] = id` を `f^[p]π = π` に**弱めた**）
+
+★`#print axioms`: **17 宣言すべて `[propext, Classical.choice, Quot.sound]`、`sorryAx` 0。**
+
+### ★★在庫 —— ★**索引の「新しい嘘」（8 例目、★不在ではなく引数の数）**
+
+★**#297**: `.cache/mathlib-index.txt` の行は ★**section の `variable (R)` を含まない**。
+逐語エラー:
+```
+Application type mismatch: The argument IsUltrametricDist.norm_natCast_le_one ?m.71
+has type ∀ (n : ℕ), ‖↑n‖ ≤ 1 but is expected to have type ‖↑j‖ ≤ 1
+```
+⇒ ★**索引どおりに書くと明示引数が 1 つ多い。**
+★逆向きの罠（`modByMonic_add_div` は索引どおり正しく `Monic` 仮定は無い）も同節に記録。
+☆★★**これまでの 7 例は「索引に無いが在る」だった。★8 例目は「在るが形が違う」である。**
+
+★「索引に無いと思ったが在った」: `Polynomial.splits_iff_card_roots` ——
+★**これが要で、分離性の仮定を丸ごと消した。**
+★「在るが使わない方が良かった」: `RamificationJumpBound.exists_multiset_of_splits`
+（`Separable` + `Splits` を要求）——★根の個数から `Splits` を**結論**する道の方が仮定が 2 つ少ない。
+★`prodXSubSMul` も在るが有限群作用を要求するので不使用。★`.absent` は 1 件も書いていない。
+
+## ★★`VERDICT:`
+
+```
+VERDICT[ROOT-a]: 半分 — 受け口の名前（改名も含め）は当たっていたが、IsGalois は要らなかった（もっと弱い仮定で足りた）
+VERDICT[ROOT-b]: 外れ — 点 2 は重くなかった（20 行）。exists_digits を使わないという一手で消えた
+VERDICT[ROOT-c]: 当たり — 抽象核は「軌道の長さ = 根の個数」で、体論の語彙が消えた
+VERDICT[ROOT-d]: 半分 — ‖(p:L)‖ は配管という見立ては当たりだが、本波では仮定のまま残した
+```
+```
+COST[MinpolyOrbit]: 安 | 持ち場=minpoly の根 = σ-軌道  — 字面は偽で反例を構成、正しい形は Galois より弱く、点 4・3・2 が閉じた
+```
+★本体は 4 本中 1 本当たり・2 本半分・1 本外し。
+☆★★**「配った文が偽」は今日 6 例目**（配った 8 本中 6 本）。★**ただし 6 回とも正しい形が出ている。**
+
+### ★次のノード（実装者の提案 —— ★警告つき）
+
+★**「wild 深さ 1 の `x` から全分岐巡回 `p` 次の層を切り出す（点 1）」ただ 1 点。**
+☆★**ただし実装者は「素朴な形は一般には取れない可能性が高い」と警告している** ——
+★平均の道が「中間体で 1 段下がる」枠組みを回避したのと**同じ理由**である。
+⇒ ★**次の波はまず「それが取れるか」を測ること。**
+★取れない場合の代替は「`K` を**順分岐拡大** `K'` に取り替えてから `σ` を選ぶ」形（★Ax の原典の順序）で、
+★そのとき `axDecay` の指数が `Σ_k (1/(p−1))p^{−(k−1)}` になる仕組みが見えるはずである。
+
+
+## ★★`GUESS:` —— ★**配る前に書いた**（点 1：層の切り出し ＋ 深い段の得。★`DEEP-*` もこの波で判定する）
+
+```
+GUESS[LAYER-a]: 素朴な形（wild 深さ 1 の x を含む全分岐巡回 p 次の層を取る）は偽である（実装者の警告に賭ける）
+GUESS[LAYER-b]: 正しい形は「K を順分岐拡大 K' に取り替えてから σ を選ぶ」（Ax の原典の順序）で、順分岐は深さを変えない
+GUESS[LAYER-c]: 抽象核は「p 群の作用で、指数が p の部分群の固定点を取ると深さが 1 下がる」で、体の語彙が消える
+GUESS[LAYER-d]: 総和の検算: Σ_{k≥1}(1/(p−1))p^{−(k−1)} = p/(p−1)² は目標と一致する（新規約を自分で回した）
+```
+
+## ★★`GUESS:` —— ★**配る前に書いた**（N1：`ker(Art_K) ∩ I_K` は群論的に標準）
+
+```
+GUESS[N1-a]: 局所 Kronecker-Weber は木の LocalClassFieldTheory.lean にあり、そのまま使える
+GUESS[N1-b]: 抽象核は「全射準同型の核と、閉包した交換子群の交わり」で、局所体の語彙が消える
+GUESS[N1-c]: K_π ⊔ K^ur = K^ab が必要になり、それは木に無い（ここが本当の穴）
+GUESS[N1-d]: これが立つと ReciprocityAlphaTransport の 43 宣言が無条件になるが、prop_2_2 はまだ閉じない（N2 が要る）
+```
+
+
+## ☆★★★★★★訂正 —— **本体が「配った文が偽」の件数を誤って広めた（4 度目）**（2026-09-08、改善係 第 41 回の実測）
+
+★★**本体は本波で「今日 6 本配って 4 本が偽」「同じ日に 5 例目」「6 例目」と繰り返し書いたが、
+★どれも測定ではなく、実測と合わない。**
+
+★改善係が期間を切って数えた（`git show 3beec898:…decisions-pending.md | wc -l` → 9483、削除行 0 ⇒
+**09-08 は 9484 行目以降 = 2,912 行 / 92 節**）:
+
+| 本体が書いた件 | 実際の決着日 | 根拠 |
+|---|---|---|
+| `colim_S H¹(S,A) = 0` | ★**2026-09-07** | 決着は L9156 / L9218（`VERDICT[CC-a]`）、どちらも 9483 以下 |
+| `K_π = K_{π′}` | ★**2026-09-07** | `autonomy-policy.md:404` が「2026-09-07 の実害」と明記 |
+
+⇒ ★★**2026-09-08 に「配った文が偽」だったのは 3 件**（Tower / EpsDecay / RecEquiv）。
+★本体は**前日の 2 件を今日の数に混ぜていた。**
+
+☆★★**さらに、分母も取れない。**
+`GUESS` 節 20 ≠ `COST` 21 ≠ 実際の配り数。
+★L11566 が「今日 2 度目の『GUESS 無しで配った』（1 度目は今朝の 12 件）」と自己申告している。
+★広義に D30/D31 を数えると 7 になる。
+☆★★**根本は「配った文」の境界が定義されていないことである。**
+
+★★**「配った文が偽」という字面は、決着した節に 1 度も書かれていない**（正規表現 3 通りで 0 件）。
+読めるのは本体が手で書いた累積リスト（L11893 / L12030 / L12099）だけ。
+⇒ ★**機械では列挙できない。**★「率」を出すには、配る時点で印を打つしかない。
+
+### ★★★これは本体の測定誤りの 4 度目である
+
+過去 3 度: (a) `lake build` 5,929 回 / 「無駄 5.1–6.4 h」（真は 4,739 / 0.56 h）、
+(b) 「ゲート一式 = 2.7 時間」（正典は 4.52 h）、(c) 「中央 29.9 秒」（対象を落としていた）。
+★**今回は「自分の失敗の件数を多めに言った」形である。**★方向は違うが、測っていない点は同じ。
+
+## ★★★前検査の効き方（改善係の実測）—— ★**policy の順序が間違っていた**
+
+| # | (a) 総和 | (b) 最小の段（3 例） | (c) 古典的定理の字面 |
+|---|---|---|---|
+| 1 `K_π=K_{π′}` | × | × | ★**○** `⊔K^ur` が落ちているのが字面で見える |
+| 2 `colim_S H¹=0` | × | ×（反例は `G=Ẑ, A=ℚ/ℤ`。★**3 例はどれも体で当たらない**） | × |
+| 3 `Σ i_j/e_j` | ○ | ○ | × |
+| 4 `c k ≤ …` | ○ | ○ | ○ |
+| 5 `reciprocityUnits` | × | ×（効く最小例は体でなく `α=id`） | ★**○** |
+
+★**3 手のどれかで捕まる 4/5。どれでも捕まらないのは 1 件（#2）。**
+☆★★**(c) がいちばん効く（3/5）のに、policy では 3 番目・条件つきに書いてある。**
+★しかも #1/#5 は「最良定数」ではなく**古典的な定理の字面**との突き合わせで捕まる。
+★**(b) の 3 例は体に偏っている**（#2 の反例は群、#5 は `α=id`）。
+
+### ☆★★★(d) —— **3 手のどれでもなく、grep 1 本で 2 件捕まる（★機械だけでできる）**
+
+```
+grep -rn 'K_π' lean/ABC3/ --include=*.lean | grep -E '偽|反例'      ← 0.274 秒
+  → LubinTateUniformizerIndependence.lean:31 ほか 2 行
+```
+★その docstring は逐語でこう書いてある:
+「この `⊔ K^ur` を落とすと主張は偽になるので、後続ノードは落とさないこと。」
+☆★★**そう書いてあるのに、その後 2 回配られた**（#1 = 09-07、#5 = 09-08）。
+★木の在庫は `偽` 702 行 / `反例` 280 行。
+⇒ ★★**(a)(b)(c) は人の手計算だが、(d) は機械だけでできる。**
+★ただし (d) は「既に木に書いてある」件にしか効かない（#3/#4 には無力）。
+
+### ★申し送り由来は **2 件**（本体の記憶と一致した）
+
+#3（L11894 が明示）と #4（L11871–76「残るのはただ 1 点」→ L11897 が同じ文言で配る）。
+★#5 は本体が自分で選んだ葉。
+
+### ☆★★改善係が「後知恵の圧力」を自分から書いた
+
+★「いちばん強いのは #4。★**policy の 3 手は #4 の 1 件から逆算して書かれており
+（節題が『4 例目』）、『#4 が 3 手で捕まる』はほぼ同語反復である。**」
+★さらに「#1 の (b) は書きかけて止めた（偽と知らなければ 2 つ目の素元を試す発想が出ない）」
+★★「**倒さないと自分の事前登録 GUESS が当たってしまう側だったので、意識して逆に倒した**」。
+☆★**改善係が自分の当たりを減らす方向に判定した。★4 度目の自己申告である。**
+
+## ★★★M230 —— ★**本体は同じ形の穴に自分で落ちていた**
+
+★`autonomy-policy.md` §4.5 は「mathlib の実パスと再帰 grep 禁止を**持ち場に毎回貼れ**」と書いてある。
+☆★★**ところが `.claude/agents/*.md` 5 本のうち 0 本に入っていない**
+（`grep -c 'packages/mathlib'` / `grep -c 'grep -rn'` とも全部 0）。
+★改善係自身の brief にも無く、★**改善係が 6 度目の `find /`／再帰 grep を踏んだ。**
+
+☆★★**これは持ち場 1 の結論とまったく同じ形である**:
+★**「直し方を、直す主体が読まない場所に書いている。」**
+⇒ ★**本体の是正**: `.claude/agents/lean-prover.md` 等に直接書き込む（下記で実施）。
+
+## ★採用: `tools/idiom-recur.mjs` の `+21 / −1`（`IDSEDI`）
+
+★worktree `.claude/worktrees/meta41`（branch `meta41-work`、`HEAD 0d1b3992`、4 commit で
+事前登録 → 段A/B → 持ち場1 → 残りの順序が git に残っている）。
+★md5 `7b23ef76cb353fc2`、**1142 行**、LF（CR 0）。
+★**同 worktree の `CLAUDE.md` / `lean-idioms.md` / `autonomy-policy.md` は採らない**
+（`meta-setup.mjs` が起動時に写しただけで、★**本体の方が新しい** ——
+lean-idioms 12146 vs 12013、autonomy-policy 477 vs 461）。
+
+★**本体で回した実測**: `--selftest 104/104 → 108/108`、`--rescan` 完走
+（idiom 576 / `{git:161, log:Bash:323, log:Edit:81, none:11}` / 測れる 154）。
+
+☆★**改善係は「採る理由は数ではなく規則の一貫性」と明言した** ——
+`登録時刻の出所` も `測れる` も `再出現` も **1 欄も動かない**（`sed -i` の最新は 09-06 で直近 2 日 0 件）。
+★いまは「`>>` なら書き、`sed -i` なら読み」という不整合があり、それが消える。★正味 +4 件。
+★**採用に要る 1 回きりの手順**: `--rescan`（3.5 秒）。★digest の版を上げていないので鳴らない。
+
+★**わざと壊す試験**: 発火 3 / 素通り 2 / 当たらない 0。
+★素通り 2 件は実データ 1,149 命令で裏を取り、★**作り物の試験を足さなかった。**
+★★**X3 は差を 1 件作るが、それは改善係自身が今日書いた命令だった**
+（自分の probe と selftest がコーパスに入り、自分の測定を動かした ——★M229 (3) に逐語）。
+
+★**副作用 0**: `check.mjs --selftest --structured` NG 0 / 67/67 / S1-S6 PASS、`--ledger` NG 13、
+`graph.mjs` **2281 / 6531 / md5 `b752fd28dd75` が byte 一致**、`mutate --selftest` 18/18。
+
+## ★★持ち場 2 —— ★**「あと N 件」では言えない（対照群が構造的に作れない）**
+
+`--similar` の分母は **3 ではなく 4**。★`lean-prover` 4 体が叩き、
+★**4 体すべてが呼んだ 0〜1 分後に `Edit` で書いている。呼ばなかったのは 0 体。**
+⇒ ★★**対照群が無いので率は原理的に出せない。**「あと何件」の問いへの答えは
+★**「件数の問題ではない」**である（道が 3 つあることを M227 (3) に登録）。
+
+## ★★持ち場 4 —— ★**M149 の「剪定の危険」は、まだ実在しない**
+
+★`m149-watch.json` の `obs[].first`（ログの左端）は
+☆★**3 観測とも `2026-09-03T17:50:38.807Z` で 1 ミリ秒も動いていない。**
+⇒ ★剪定は 1 度も起きておらず、★**「4 日」は保存期間ではなくログが始まった日である可能性が高い。**
+★**本体の見立て「剪定の危険が実在する」は、まだ裏づけが無い。**
+★判定できるのは「左端が動いた観測が 1 度でも出たとき」。★口が毎回印字しているので新しい道具は不要。
+
+★`--mcp-watch` は第 34〜41 回と **8 セッション動いていない**。
+
+## ★改善係が自分で踏んだ穴（M229）
+
+1. ★`grep -rn … .` を投げて 2 分半 0 バイト（★本体が止めた。§4.5 の**6 度目** → M230）
+2. `-i` が `lean-idioms` の `i` に当たって **90 件の偽陽性**（空白を要求して 6 件に。試験 S108 に固定）
+3. ★★**自分の probe と selftest がコーパスに入り、自分の測定を動かした**（flip +1、ドリフト +3）
+4. ★`python - <<'PYEOF'` が exit 49（★**この環境の python は `-` を受けない**）→ `node` に切替
+
+★scratchpad に `.mjs` 9 本、★**リポジトリには 1 本も置いていない。**★`--teardown` 済み。
+
+```
+COST[Meta41]: 並 | 持ち場=配った文の真偽  — 機械では列挙できないと分かり、本体の手書きの分子が壊れていた（前日の 2 件が混入）
+```
+
+
+## ★★★★★N1 `ker(Art_K) ⊓ I_K` —— ★**真だった。★pGC Prop 2.2 の第一段が α だけから出た**（2026-09-08）
+
+`Found/PGC/ArtinKerInertia.lean`（**604 行 / 宣言 28 本 + `.src` 13、`sorry` 0**）。
+`lake build ABC3.Found` error 0 / 22.7 秒。`check --brief` NG 13 のまま。★MCP 0 回。
+
+★**到達点（仮説をひとつも受け取らない）**:
+```lean
+nonempty_integers_addEquiv_of_filteredIso (α : FilteredGroup.Iso (pgcFilteredGroup K) (pgcFilteredGroup K')) :
+    Nonempty (𝒪[K.carrier] ≃+ 𝒪[K'.carrier])
+```
+★核 `artinKerInertiaTransport` は ★**α に濾過すら要らない**（位相群同型だけ）。
+★証明は書き換え 4 つ: `ker(Art_π) ⊓ I_K = Gal(K̄/K_π) ⊓ Gal(K̄/K^ur) = Gal(K̄/(K_π⊔K^ur)) = Gal(K̄/K^ab) = ‾⁅Γ,Γ⁆`。
+☆★**π 依存性は `⊔ K^ur` で消える** —— これが機構の全部。
+★退化の自己検査 `topCommutator_ne_absInertia` も入れた（無いと N1 は空虚でありうる）。
+
+### ★VERDICT
+```
+VERDICT[N1-a]: 当たり — 局所 KW は LocalClassFieldTheory.lean:723 に在った（実測）
+VERDICT[N1-b]: 外れ — 使ったのは「閉交換子群を含む」ではなく、木に既存の map_topCommutator と「部分群に制限した核の移送」
+VERDICT[N1-c]: 外れ — K_π ⊔ K^ur = K^ab は木に在り、しかも局所 KW と同じ 1 件だった。★穴は 0 件
+VERDICT[N1-d]: 半分 — 43 宣言のうち仮説に依存していたのは 9 本だけ。無条件の並行な鎖を作るのが正しい形だった
+```
+```
+COST[ArtinKerInertia]: 安 | 持ち場=Artin 写像の核と惰性群  — 字面は真、∩I_K は冗長、穴は 0 件だった
+```
+
+### ★在庫（★書く前に測って 4 件回避）
+`map_topCommutator` / `map_commutator_of_mulEquiv` / `map_topologicalClosure_of_homeo`（木の `TopAbelianization.lean`）、
+`IntermediateField.fixingSubgroup_sup`（mathlib、★`FiniteDimensional` 不要）。
+★**`grep -nE "topologicalClosure" .cache/decl-index.txt | grep -E "commutator"` の 1 回で 3 件同時に当たった**（語ではなく部品で引いた）。
+★#297 の再発 2 件（索引の行に明示引数が出ない）。★`Nontrivial (𝒪[K])ˣ` は mathlib に無く 4 行で自作。
+★抽象核 3 本が ★**`[propext, Quot.sound]`（選択公理なし）**。
+
+### ★持ち場の外れ（★6 波連続）
+①「43 宣言が無条件になる」は過大（実際は 9 本）②「局所 KW」と「`K_π⊔K^ur=K^ab`」は同じ 1 件で穴 0
+③`∩ I_K` は冗長 ④抽象核の見込みは使われなかった
+
+### ★次の 1 点
+★**`α` の「濾過つき」を落とせるか** —— 濾過を使うのは `map α I_K = I_{K'}` の 1 箇所だけ。
+`I_K` が `Γ_K` の中で群論的に特徴づけられれば（Jannsen–Wingberg の方向）、仮定は「位相群同型」だけになる。
+
+
+## ★★★★★層の切り出しと深い段の得（2026-09-08）—— `Found/PGC/CyclicLayerDescent.lean` 879 行 / 33 宣言 / `sorry` 0
+
+**①真偽**: ★**素朴な形は偽。反例を形式化した**（`exists_wildDepth_one_not_mem_prime_layer`：
+`K = ℚ`, `x = ζ₇`, `p = 3`。`deg minpoly = 6`, `v₃(6) = 1` で深さ 1 だが `[F:ℚ]=3` な層は無い）。
+☆★**壊れるのは分岐の段ではなく次数の段**（`x ∈ L`, `[L:K]=p` なら `deg minpoly ∣ p` だが、
+`wildDepth = 1` は `p ∥ deg` しか言わない）。
+
+☆★★**本体の持ち場が外していた最大の点: 層は障害ではなかった。**
+Sylow 降下（`exists_pgroup_descent`）が既に層を供給している（`M^Q ⊆ M^P` が次数 `p`、`Q` が p 群なので巡回）。
+★取れないのは「**`K` の直上に**」だけで、底が `M^Q` でも `Δ_{M^Q}(x) ≤ Δ_K(x)` なので損失に影響しない。
+
+★★★**`p^{1−k}` の出どころ = hockey-stick 恒等式**（`D := σ−1`、`1≤l<p` で `p ∣ C(p,l)`）。
+★機械が `axDecay_eq_axDecay_one_mul_gains` / `axDecay_exponent_eq_sub_geomSum` で
+**`axDecay p k` にちょうど一致する**ことを検査した。
+
+☆★★★**否定的な測定（形式化済み）**: `axDecay_one_le_orbit_average_loss` により
+★**平均の道の損失は必ず `axDecay p 1` 以上**で、`axDecay p k < axDecay p 1`（`k≥2`）。
+⇒ ★**本体が書いた「`‖p‖^{−1} → ‖p‖^{−(1/(p−1))p^{1−k}}` に置き換わる」は原理的に起きない。**
+★**得は損失側ではなく `ε` 側にある。**
+
+**②在庫**: 「無いと思ったが在った」`IsUltrametricDist.norm_nsmul_le`（★`to_additive` 生成名を索引が拾わない → #300）。
+「在るが import されていない」`Nat.Prime.dvd_choose_self`（★`Unknown constant` ではなく
+`Invalid field` の顔で出る → #299）。★測って無かった: 「p 群の指数 p の部分群は正規」
+（`Sylow.exists_subgroup_card_pow_succ` は正規性を返さない）。`pow_le_pow_left` → `pow_le_pow_left₀` に改名。
+★全 33 宣言 `[propext, Classical.choice, Quot.sound]`。
+
+**③次の 1 点** → ★**ちょうど 2 点**:
+1. 群論: 深さ `k` で降下生成元 `σ` を「位数 `p^k` の `τ` の `p^{k−1}` 乗」に取れること（＋`P ⊴ Q`）。mathlib に無い。
+2. 分岐: 位数 `p^m` の `σ` に `i(σ) ≤ e/(p^{m−1}(p−1))`。★`m=1` は `RamificationJumpBound` に在る、`m≥2` は無い。
+★この 2 本で `axDecay p k` が出て、`AxLemma` / `AxSenTate` は自動的に出る（勘定は検算済み）。
+
+**④判定**
+```
+VERDICT[LAYER-a]: 当たり — 素朴な形は偽（反例を形式化）
+VERDICT[LAYER-b]: 外れ — 順分岐への取り替えはそもそも不要だった（Sylow 降下が層を供給する）
+VERDICT[LAYER-c]: 半分 — 抽象核は取れたが、内容は「固定点で深さが下がる」ではなく hockey-stick 恒等式
+VERDICT[LAYER-d]: 当たり — 総和は一致し、機械が axDecay p k との一致を検査した
+VERDICT[DEEP-a]: 外れ — 得は「剰余類の和が高い冪で割れる」ではなく ε 側の縮み
+VERDICT[DEEP-b]: 半分 — 抽象核に分岐も付値も出ないのは当たり、内容は二項係数の可除性
+VERDICT[DEEP-c]: 外れ — RamificationJumpBound を差し込む形にはならない（損失側は改善不能）
+VERDICT[DEEP-d]: 当たり — 指数の形は正しかった
+COST[CyclicLayer]: 並 | 持ち場=層の切り出しと深い段の得  — 素朴な形は偽、層は障害でなく、得は ε 側だと判明。残り 2 点
+```
