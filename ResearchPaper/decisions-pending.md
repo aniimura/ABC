@@ -2908,3 +2908,2655 @@ Milne は `f(α)=0 ⟹ g(θ(α))=0` を書くとき **`θ(α)` がどの環の�
 `PowerSeries.aeval` が離散性を要求しないことは仮定欄からの逆算。
 
 - **決定**: —
+
+### ★D27 の判定条件を訂正(第 1079)—— 「10 秒で返ったら異常」は**粗すぎた**
+
+本体は第 1077 で「★**見分け方**: `lean_start` が **90 秒でなく 10 秒で返ったら**、
+他 agent の環境を掴んでいる」と書いたが、★**これは誤り**である。
+
+M3 の実装係(2026-09-07)の実測: `lean_start` は **10.6 秒**で返ったが
+**imports は要求どおり**で、`#check` も自分の宣言が全部見えた。
+⇒ ★**所要時間は合図にならない**(キャッシュが温まっていれば速く返るのは正常)。
+
+★**正しい判定条件**: `lean_status` の **imports が自分の要求と一致しているか**を見る。
+一致していれば正常、他 agent のものに差し替わっていれば異常。
+`lean-idioms.md` #100 に記録済み(#98 の判定条件の訂正)。
+
+★**運用は変えない** —— 同時 2 体のとき MCP REPL を使うのは 1 体まで、2 体目は `leanfile.mjs`。
+★**ただし 1 体目も `lean_start` の後に `lean_status` で imports を確認すること。**
+
+- **決定**: —
+
+### ★★M3 が着地(第 1079)—— `ClosureCompletion.lean`(659 行、sorry 0)
+
+★**測定係が「実機で通していない。M3 の最初の関門」とした instance 連鎖は 0.07 秒で越えた。**
+`completableTopField_closure` を `letI` で置いた直後に `inferInstance` で出て、
+★**`Valued` ダイヤモンドも起きなかった**(`Valued.v z = ‖z‖₊` は `rfl`)。
+⇒ ★**見積上端 700 の理由(ダイヤモンドが荒れる)は発生しなかった。**
+
+★**完了判定は通った**: `closureCompletionEval : PowerSeries 𝒪_{K̂^ur} →ₐ 𝒪_{ℂ_K}` が型検査を通り、
+`evalAtTorsionPoint`(`Λ_n` の元での評価)まで到達。
+
+★**抽象核が切り出せた**(9 回連続 → **10 回連続**)。
+`normBallIdeal` / `isLinearTopology_of_norm_le_one` / `completeSpace_of_norm_le_one_iff` が
+**`NormedField` + `IsUltrametricDist` だけ**で書けた(分岐・付値・Galois が 1 語も出ない、**0.36 秒**)。
+★**同じ構成が `AdjoinIntegers.lean:225/265/278` に具体的なまま重複している**が、
+着地済みなので書き換えず、**差し替え可能な形**にしてある。
+⇒ ★段取り 3・4 の「128 + 119 + 84 行の逐語転写」は、抽象核を先に切ったことで **§4 が 20 行**になった。
+
+★**`ValuationSubring` に揃えた**(理由: `unramifiedCompletionInt` が `ValuationSubring` なので
+`ι_ur` の制限が同形で書ける / `IsLocalRing`・`ValuationRing`・`maximalIdeal` が無料 ——
+`AdjoinIntegers` の素朴 `Subring` 版は `ValuationRing` を手証明していた)。
+
+☆逸脱: `.src` を書いていない(MilneCFT 未構造化。★**嘘の `sectionId` は書いていない**)/
+★**`IsAdicComplete` / `IsDiscreteValuationRing` / `IsAlgClosed` は作っていない**
+(前 2 者は**偽**であることを理由つきで docstring に記録)/ `ℂ_K` と `K̂^ur` の関係は等長単射まで。
+
+☆★**「他に依存しない葉」ではなくなった** —— `IsScalarTower` のために
+`Algebra 𝒪_K 𝒪_{K̂^ur}` が在庫に無く、`baseIntHom`(`DworkFixedRing.lean:164`)を使うため
+**`DworkFixedRing` を import した**。Λ6 消費側の入口という位置づけとは整合する。
+
+☆新しく必要になったノード: `ℂ_K` の**代数閉性**が下流で本当に要るかの判定
+(★本ファイルの想定「`∏(θλ − ι r) = 0` から整域性だけで所属を出す」が破れた場合のみ)。
+
+---
+
+## 第 1071 波 —— Λ7 の Sen が完結し、Yoshida §2–§4 が構造化された(2026-09-07)
+
+### Y7b 着地 —— Prop 6.6 (iii)、これで Sen (i)(ii)(iii) が揃った
+
+`Found/PGC/SenValuationCongruence.lean` **656 行、sorry 0**、`#print axioms` は
+`[propext, Classical.choice, Quot.sound]` のみ(5 宣言すべて)。
+`lake build ABC3.Found.PGC.SenValuationCongruence` 成功(2984 jobs, 7.9 秒)。
+
+主定理 `ramIndex_pow_pow_congr`: `p^{j+1} ∣ i_{j+1} − i_j`(有限代表 `c d : ℕ` を取り ℤ で合同)。
+`_or_top`(∞ 規約込み)と `PAdicLocalField` 具体層 2 本も同梱。
+
+★**抽象核が 11 回連続で効いた**。§1+§2(`dvd_sub_of_forall_dvd_succ` /
+`add_ne_add_of_not_dvd` / `eq_of_add_eq_add_of_chain` / `map_sum_ne_of_pairwise_ne` /
+`smul_sum_range_sub_self`)は **ℤ の整除性と一般の `AddValuation` だけ**で書け、
+**0.31 秒・一発**で通った。抽象層 §3 が 1.51 秒、具体層 §4 が 1.64 秒(差分 0.13 秒)。
+
+★★**シフト法は Lean で本当に組めた。しかも安い。**
+`s' + i_{j+1} = i_j + E` という**等式で `s'` を定義**したので、
+**ℕ の引き算を一度も書いていない**。分岐指数 `e` も分数体も不要で、
+`addVal : 𝒪 → ℕ∞` だけで足りた。段 7 は実質 25 行。
+★原文 (ii)/(iii) の `a ≥ 1` 対 `a < 0` の齟齬も自動的に塞がる。
+
+★★**見積より安かった** —— 610–970 行 → **656 行**(うち docstring 130 行なので Lean は約 500 行)。
+段 1 は Y6 の `map_sum_eq_of_lt` をそのまま、段 2 は Y5 の
+`addVal_add_le_addVal_smul_sub_self` が既にあり **新規 0 行**(見積 30–50 行)。
+段 9(見積 110–180)は抽象核に落ちて 3 本 25 行 + 具体側 60 行。
+★逆に段 11 の強帰納法だけは見積より厚い(`σ` の全称量化 + `σ^p` の位数を
+`exists_orderOf_pow_eq` で取り直し + `j'+1 < m'` を `ramIndex_pow_pow_eq_top_iff` 経由で復元)。
+
+★★**新しい退化species を実測で潰した** —— `ℕ∞` の切り詰め引き算では
+`a < b ⟹ a − b = 0` なので `c ∣ a − b` が**空虚に真**になる
+(`example (a b c : ℕ∞) (h : a < b) : c ∣ a - b` が `tsub_eq_zero_of_le` 2 行で閉じる、
+前景・背景で 2 度確認)。⇒ **有限代表を取り出して ℤ で合同を書く**のが正しい形。
+`lean-idioms.md` **#102**。あわせて **#101**(`rw [iff補題]` は `≠` ゴールに当たらない ——
+`Did not find an occurrence of the pattern` を実際に踏んだ)。
+
+★**原文 p.15 の "Let j = 1" 誤植の影響を受けない形に組めた** ——
+シフト後の強帰納法が `j ≥ 0` 全域で回り、`j = 0` では `σ^p` への IH が
+`mod p^0` で自明になるだけ。⇒ **erratum を回避する必要がなかった**。
+
+★**MCP REPL は一切使っていない**(全往復 `node tools/leanfile.mjs`、9–11 秒/往復、往復 9 回)。
+D27 の「2 体目は leanfile.mjs」規約が実際に機能した。異常なし。
+
+### ★★Yoshida §2・§3・§4 が構造化された —— フォルダ計 68 件
+
+| ファイル | 件数 |
+|---|---|
+| `section-2.html`(p.2–4) | 11 |
+| `section-3.html`(p.4–6) | 14 |
+| `section-4.html`(p.6–9) ★優先 | 13 |
+| (既存 `section-1` 1 / `section-5` 11 / `section-6` 17) | |
+
+構造化係が `check.mjs` の `normalize`/`squash`/`matchProjection`/`extractSections`/`PDF_MODES` を
+**逐語で写した使い捨て検査**を書き、較正済み Xpdf 4.00 で照合 → **68 件中 NG 0**。
+(★`section-6.html` の既存 17 件で先に一致を確認して**器具を較正**してから測っている。)
+モード内訳 layout 29 / default 5 / raw 34。`mojibake.mjs` → ok。
+★**`check.mjs` と `lake` は回していない**(3 人目の利用者にならないため)。
+
+### ★★Definition 4.10 が確定した —— 測定係の推測は否だった
+
+PDF p.9 を `pdftoppm -r 170` で目視した結果:
+
+- ★**`K^m := K^ur L^m_f` が定義**である。`K^m = K̂^m ∩ K^sep` は**そこから従う等式**
+  (f 非依存性の根拠)であって定義ではない。
+- ★**「with L/K finite」は §4.1 と矛盾しない** —— `Definition 2.4` が
+  「**E/K が有限なら L = Ê = E**」と明記しており、**有限不分岐拡大 `K_n` 自身が
+  complete unramified extension** である。制限の理由は `L^m_f` を `K^sep` の中に置くため
+  (`L = K̂` だと代数的でなくなる)。
+- 論理の順序: (1) 定義 → (2) 完備化 `K̂L^m_f = K̂^m_f` が **Cor 4.9** で f 非依存 →
+  (3) ★**Lemma 2.2(iii) `Ê ∩ K^sep = E`**(= Milne `Lemma 3.12` の役)で代数側へ降ろす →
+  (4) `K^m` も f 非依存。
+- `W(K^LT/K) ≅ W(K̂^LT/K)`(下は K であって K̂ ではない)も画像で確認。
+
+### Λ6 消費側・Λ7 Y14 の原典対応が確定した
+
+| この木のノード | Yoshida08 の id |
+|---|---|
+| #7 `DworkThetaEval` | ★**`lemma-4-6`**(p.8) |
+| 着地済み `surjective_unramGalCompletionUnits_div_self` | ★**`prop-4-8`**(p.8) |
+| #9 + #10 | ★**`cor-4-9`**(p.9) |
+| Thm 6.15 (LKW) の §4 側 | `def-4-10` |
+
+★**Prop 6.14 の §4 側依存先を p.17 の証明の逐行で特定した ——「3 つだけ」**:
+`prop-4-4`(ii)(α が素元 ⇒ `i(σ)=v(σ(α)−α)`)・`prop-4-4`(iii)(ρ_{f,m} で翻訳)・
+`lemma-4-3-ii`(`β ∈ µ^×_{f,m−i}`)。
+★**`section-6.html` の依存表は「Prop 4.3(ii)」と書いていたが、原典で 4.3 は Lemma** ——
+§6 側 2 箇所を訂正した。
+
+### ★人を待たない判断として積むもの(本体が後で処理する)
+
+1. ★★**`surjective_unramGalCompletionUnits_div_self` の `.src` が Milne LEMMA 3.11 を指している**が、
+   Yoshida08 では `prop-4-8` である。証明の骨格(逆極限 → `θ^{q−1}` 全射 → Artin–Schreier)は
+   Lean 側と一致しているので**間違いではない**が、Yoshida を主軸に据えた今は
+   `prop-4-8` を指すほうが整合する。★**今は書き換えない**(既存 `Found/PGC/*.lean` を触ると
+   走行中の agent の import が再ビルドになる)。**ゲート後に単独で行う。**
+2. ★**`class="statement example"` を規約に足すか** —— 構造化係が `ex-3-6` `ex-3-8` `ex-4-2` で
+   使ったが、README §3 の第 2 語の一覧に `example` が**無い**。既存コーパスに
+   非 legacy 3 ファイル・4 件の先例がある。⇒ **README §3 に追記する**(実態が先行している)。
+3. ★**`papers.json` の `Yoshida08` に `verifiedPages` フィールドがそもそも無い**。
+   README §2-3 は記録を要求している。p.2–9 を今回 170dpi で全面目視したので
+   **1–17 を入れる作業が残っている**。
+4. `section-6.html` を 2 箇所変更した(依存表の訂正・末尾 `p.open` の「§4 未構造化」解消)。
+   `.verbatim` は不変。**ゲートで S1–S6 を確認する。**
+
+### ★★新たに実測した脱落 —— ハットは版面上の大きさで 2 通りに壊れる
+
+★**本文サイズでは丸ごと落ちて `K`、上付き・下付きサイズでは帽子が `b` という文字になって残る**
+(`Θ^{K̂,×}` → `Θ b K,×`、`𝒪_{K̂}` → `O b K`)。
+★★**`Lemma 2.2(iii)` は帽子が落ちると `E ∩ K^sep = E` という自明な式に見える。**
+他に `∐`/`⋃`/`∏` は出力なし、`⟼`→`−→`・`↦`→`→`(縦棒が消える)、`⟹`→`=⇒`、
+**行末ハイフネーションが本文に残る**(p.4 `ex-amples`)、`µ` は U+00B5。
+★**`⊂` は落ちない**(本体が brief に書いた説明と実測が食い違った点。brief の誤り 7 件目)。
+`≠`→`=` は Prop 4.8 で再現し `data-txt="="` で明示した。
+
+⇒ [[pdftotext-drops-negation]] のメモに**ハットの 2 通りの壊れ方**を足すこと。
+
+### ★記法の復元に失敗／不完全と申告された箇所(取り繕わない)
+
+- **太字 µ・太字 𝔭**: 原典は `\boldsymbol\mu` を一貫して使うが対象の区別に効いていないので
+  装飾クラスを付けていない(README §5「同定に関わらない装飾は落としてよい」)。
+- **`∐` と `⋃` の字形判定**: どちらも `pdftotext` 出力が空なので照合では区別できない。
+  画像で Prop 4.7(i) は `∐`、それ以外は `⋃` と読んだが**低解像度では紛らわしい**。
+- **`φ` の 2 種**: 算術 Frobenius `\varphi` の出力は **U+03D5**、§6 の Herbrand 関数 `\phi_G` は
+  **U+03C6**。表示側も出力に合わせたが**字形そのものは検証していない**。
+- ページ境界で原典の 1 項目を 2 単位に割った(`Lemma 4.3` → `lemma-4-3` + `lemma-4-3-ii`、
+  `Definition 3.2` → `def-3-2` + `setup-3-1-hom`)。両ファイルに明記済み。
+- 証明本体は未収録(§6 と同じ方針)。§2.1 のノルム付値の式(分数の横線が落ちる)も未収録。
+
+### ★ゲートで確認すべきこと(本体の宿題)
+
+Y7b が走行中に見た `check.mjs --brief` は **NG 42** だった(平常は NG 13)。
+★**構造化係が `1_Structured/` を編集している最中に測った値**なので、
+**確定した数字ではない**。★**ゲートで測り直すまで「NG が増えた」と言わないこと。**
+期待: ノード 2,190 → 2,192(M3 + Y7b。走行中の #7・Y8 が着地すればさらに +2)、
+sorry ノード 14(不変)、`1_Structured: S1–S6 すべて PASS`、G1 の新規 NG 0。
+
+---
+
+## 第 1072 波 —— Cor 6.7 が着地し、brief が原典の Proof を出すようになった(2026-09-07)
+
+### Y8 着地 —— Corollary 6.7（跳び位置の p 進展開）
+
+`Found/PGC/SenJumpExpansion.lean` **448 行(うち証明は約 180 行)、sorry 0**、
+`#print axioms` は主要 4 本すべて `[propext, Classical.choice, Quot.sound]`。
+`lake build ABC3.Found.PGC.SenJumpExpansion` 成功(2985 jobs, 7.8 秒)。往復 7 回・各 11–13 秒。
+
+主定理 `exists_padicDigits_card_lowerRamificationGroup`:
+`∃ nn : ℕ → ℕ, (∀ i, 1 ≤ nn i) ∧ ∀ j, 1 ≤ j → j+1 ≤ m → ∀ n,`
+`Nat.card (G_n) = p^(m−j) ↔ (Σ_{i<j} nn i * p^i < n ∧ n ≤ Σ_{i≤j} nn i * p^i)`。
+
+★★**本体の机上検算「`n_0 := i_0 − 1`」は正しかった**(訂正なし)。
+Lean の中で `i_j = 1 + Σ_{i≤j} n_i p^i`(`j < m`)が出て、原文の `Σ_{i<j} < n ≤ Σ_{i≤j}` が
+`i_{j−1} ≤ n < i_j` にちょうど化けた。★**`n_0 ≥ 1` は `σ ∈ G_1` から 1 度だけ使って出る**
+—— つまり原典が `n_i ∈ ℤ_{≥1}` と書いたこと自体がこの読み方を強制していた、という読みが確認された。
+
+★★**巡回群の位数から部分群を復元する補題は「不要になった」** —— mathlib を探す前に
+別ルートが見つかった: `|G_n| = p^{m−(j+1)} < p^m ⟹ σ ∉ G_n ⟹ i_0 ≤ n`、`i_m = ⊤ ⟹ ¬(i_m ≤ n)`、
+よって §1 の `exists_index_boundary` で `i_k ≤ n < i_{k+1}` なる `k < m` が取れ、
+順方向を当てて `Nat.pow_right_injective` で `k = j`。
+★**部分群の分類も `IsCyclic` の一意性も使っていない**(見積 40–80 行 → **実測 20 行**)。
+⇒ ★**本体が brief で「ここだけ見積が外れやすい」と警告した箇所が、逆に最も安かった。**
+
+★**抽象核が 12 回連続で効いた**。`exists_padicDigits_of_lt_of_dvd_sub`(純 ℕ/ℤ の望遠鏡和)+
+`exists_index_boundary`(純 ℕ)が **1 往復 12 秒・修正 1 回**、
+純群論の `orderOf_pow_pow_eq` / `exists_generator_of_isCyclic` が **1 往復 11 秒・一発**。
+
+逸脱 6 件(docstring に記載)。主なもの: `hσ : σ ∈ G_1` は**仮定**(Prop 6.2 未形式化)/
+`G ≅ ℤ/p^mℤ` を `(htop : zpowers σ = ⊤, hord : orderOf σ = p^m)` の対に翻訳/
+`1 ≤ j ≤ m−1` → `1 ≤ j ∧ j+1 ≤ m`(ℕ の切り詰め引き算回避、端点は落としていない)。
+`lean-idioms.md` に **#103**(`omega` は `p^(k+1)*c` と `c*p^(k+1)` を別原子として数える)・
+**#104**(述語引数の補題は呼ぶ側が `(P := fun k => …)` を書く)。
+
+### ★★`brief.mjs` に「1b. 原典の Proof 段落」を足した(+約 90 行)
+
+**動機**: Y7a と Y7b の実装者が**独立に**「brief に Proof が無く、`0_Source/*.txt` を
+直読して段落を取ったのが決定打だった」と報告した(Y7b は 981–1030 行を直読して
+12 段の段取りをそのまま得た)。★**同じ報告が 2 回出たら道具にする**、という運用。
+
+`0_Source/<file>.txt` から**行頭の見出し / `Proof` / `□` で切り出す**。
+★**必ず行番号を添えて出す**(発見的な切り出しなので、読み手が直読できるようにする)。
+
+**実測(Yoshida08 の 68 項目)**: ★**Proof が出た 31 / 原典に Proof なし 20 /
+原典に見出しを持たない単位(我々が切り出した `setup`・`remark`)17**。
+★Prop 6.6 では **986–1021 行**が出て、Y7b の実装者が手で探し当てた 981–1030 とほぼ同じだった。
+
+**この機能が効く論文(実測)**: 行頭に見出しが立つ 11 本 ——
+`BK CorrHyp EtTh GenEll LocProP NCBelyi pGC SemiAnbd Stacks Tate Yoshida08`。
+`MilneCFT`(154 件)・`Sharifi`(973 件)は**走り込み式**なので退避経路で拾い、`runin` を立てて断る。
+★**効かない 2 本**: `Falt1`(スキャン由来で見出し 0 件。`elementaryfibration` のように語が繋がる)・
+`DelSB616`(仏語 `Lemme 1.6.-` かつ文字化け)。★**これは道具の限界であって直せない。**
+
+### ★★[pGC] は `Proof:` ブロックを持たない —— 論証が主張の**手前**にある
+
+★実測: pGC 33 項目のうち **Proof が出たのは 4 件だけ**。しかしこれは欠落ではなく、
+★**Mochizuki が地の文で導いてから `Proposition 1.2:` と宣言する書き方**だからである
+(`.txt` 95–114 行が Prop 1.2 の論証そのもので、"Thus, it follows from the above isomorphism that"
+で終わって主張に入る)。
+⇒ ★**`noproof` のときは「直前の地の文」を 40 行を上限に出す**ようにした。
+★**これは我々の北極星（pGC Prop 1.1/1.2）に直接効く。**
+
+★あわせて直した 3 件:
+1. ★**見出しの正規表現が末尾のピリオドを弾いていた** —— `Definition 2.4.` の "." が
+   否定先読み `(?![0-9.])` に当たって**行頭の見出しを見落とし、走り込み退避が
+   「Lemma 4.6, ...」という本文中の引用を掴んでいた**。`(?!\.?[0-9])` に直した。
+   ★**退避経路は「見つからない」より悪い誤りを作りうる**という実例。
+2. `setup` / `remark` / `data-implicit` の単位は「見出しが無い」ではなく
+   **「原典に見出しを持たない単位（欠落ではない）」**と言わせる。
+3. `itemKeyOf`(check.mjs G1 と共有。**触っていない**)は数字番号しか拾わないので、
+   `Theorem A` のような英字番号は `data-item` から拾い直す。
+
+★`--json` にも `proof` を足した。`--node` モードは無変更。
+
+### ★人を待たない判断として積むもの(前波からの継続 + 追加)
+
+前波の 1–4 は未処理のまま。追加:
+
+5. ★**`brief.mjs` の Proof 抽出は 200 行で打ち切る**。Yoshida08 では打ち切り 0 件だったが、
+   長い証明を持つ論文では効く可能性がある。★**上限を上げるかは、実際に打ち切りが出てから決める**
+   (今上げると出力が膨らむだけ)。
+6. ★`GenEll` は Proof 16 件すべてが「終端記号なし」だった。
+   ⇒ **論文ごとに証明終端の記号が違う**。`GenEll` の終端が何かは未測定。
+
+---
+
+## 第 1073 波 —— Λ6 消費側の入口が開いた + brief の境界判定を直した(2026-09-07)
+
+### #7 着地 —— `DworkThetaEval`（= Yoshida `Lemma 4.6`、Milne Prop 3.10 の消費側）
+
+`Found/PGC/DworkThetaEval.lean` **807 行(見積 450–840 の範囲内)、sorry 0**。
+`#print axioms` は主要 7 本すべて `[propext, Classical.choice, Quot.sound]`。
+`lake build ABC3.Found.PGC.DworkThetaEval` 成功(3431 jobs、当該モジュール 27 秒、警告 0)。
+★**#7a / #7b / #7c すべて入った**(分割せずに済んだ)。
+
+★**抽象核が 13 回連続で効いた**。`subst_iteratedLubinTate_of_semilinear_intertwine`
+(`CommRing A` + `ψ : A →+* A` だけ)が **0.15 秒**、
+`exists_mem_roots_of_eval_map_eq_zero`(`IsDomain` だけ)が **0.06 秒**、
+`subst_intertwine_of_comp_inverse` が **0.07 秒**。具体層は 1.18–3.07 秒。
+
+★★**代数閉性なしで根の同定ができた**(段取りの想定どおり)。
+`exists_mem_roots_of_eval_map_eq_zero` は `IsAlgClosed` を一切要求せず、
+`Q = ∏(X−r)` を写して `∏(θλ − ι r) = 0` にし、`Multiset.prod_eq_zero_iff` だけで所属を出した。
+⇒ ★**M3 の報告で挙がっていた「`ℂ_K` の代数閉性が要るか」という新ノードは、不要と確定した。**
+
+★★**半線形 `aeval` の橋は要らなかった**(段取りの「新規 40–70 行」は**不要**)。
+`f, g` を `map (baseIntHom K)` で先に `𝒪_{K̂^ur}` 係数へ上げると絡みの両辺が**同じ係数環**になり、
+既存の `aeval_subst_eq_aeval_aeval` がそのまま当たる。半線形性は `(PowerSeries.map ψ)^[n]` として
+**冪級数の側だけに閉じ込めた**。★段取りより安い方向の差分。
+
+★**M3 の `closureCompletionEval` はそのまま使えた**(`rfl` で通った)。
+足りなかったのは 1 点だけ ——「`‖θ(λ)‖ ≤ ‖λ‖` ゆえに値がまた `HasEval`」で、新規約 25 行
+(`norm_aeval_closureCompletionInt_le` / `norm_evalAt_lt_one` / `hasEval_evalAt`)。
+☆**M3 に引っ越す価値がある**が、走行中の判断ではないので**動かしていない**。
+
+★**原典の省略の合図を 1 つ潰した**: 51 頁 "The argument extends without difficulty … for all n" を、
+はじめから任意の `n` で証明した。
+逸脱 6 件(docstring に記載)。`.src` は書いていない(MilneCFT は `1_Structured/` に無い。
+★**嘘の `sectionId` は書いていない**)。
+`lean-idioms.md` に **#105**(statement に instance が要るなら `haveI` では間に合わない ——
+`attribute [local instance]`)・**#106**(`Polynomial.coe_map` は無い。正しくは `Polynomial.polynomial_map_coe`)。
+
+★同時実行の異常なし。`lean_start` 1 回(26 秒)→ `lean_status` で imports 一致を確認 →
+以後 `lean_check` 38 回、`lean_reset` 0 回。最後の `lean_status` でも imports は自分の 3 本のまま。
+⇒ ★**D27 の「MCP REPL は 1 体だけ・2 体目は leanfile.mjs」規約が 2 度目も機能した。**
+
+### ★新しく必要になったノード —— `Lemma 4.5`（実測して確認した）
+
+Cor 4.9 の証明は**ちょうど 3 つ**を消費する: Prop 4.8(θ の存在、着地済み)・
+**Lemma 4.6**(体の一致、= #7 が今日着地)・**Lemma 4.5**(`[θ]^{(j)}[xπ_j] = [xπ′_j][θ]`)。
+★**Lemma 4.5 は木に無い**(`decl-index.txt` 24,255 宣言に対して 0 件。
+`DworkTheta.lean:42` の docstring に名前が出るだけ)。
+⇒ ★**Cor 4.9 の後半(`ρ_{f,m} = ρ_{f′,m}`)は Lemma 4.5 待ちで、前半(体の一致)だけを #9 として配った。**
+
+### ★★`brief.mjs` の境界判定を直した —— 「行頭に見出し語がある」だけでは境界にならない
+
+★**実測した不具合**: Yoshida `Corollary 4.9` の証明の中に、折り返しのせいで
+`Proposition 4.8. Lemma 4.6 shows bKm` という**行頭に見出し語が立つ行**ができ、
+**見出しと誤認されて証明が 6 行のうち 2 行で切れていた**。
+★道具自身は「終端記号に当たらず切った」と警告を出していたので**気づけた**
+—— ☆**警告を出す設計にしておいたことが効いた実例**。
+
+**直し方**: ★**各見出し鍵の「最初の出現」だけを境界として採る**
+(項目は原典の中で昇順に一度だけ立つ、という性質を使う)。`boundary` / `isBoundary`。
+
+**退行の測定**（件数は動かず、「終端記号なし」だけが減った）:
+
+| 論文 | 項目 | Proof が出た | 原典に Proof なし | 見出しを持たない単位 | 終端記号なし |
+|---|---|---|---|---|---|
+| Yoshida08 | 68 | 31 | 20 | 17 | **2**(旧 5) |
+| GenEll | 36 | 16 | 16 | 0 | **4** |
+| pGC | 33 | 4 | 29 | 0 | **0**(旧 4) |
+
+☆★**正直な留保**: 「終端記号なし」が減ったのは**切り出しが伸びた**ことを意味するが、
+**伸びた先が正しいかは 1 件(cor-4-9、516–529 行・`□` で終わる)しか目視していない。**
+
+### ★メタ第 12 回を起動した(隔離 worktree)
+
+★**メタ係は第 11 回以来動いていなかった**ので起動した。持ち場は 3 つ:
+(1) **M22・M24**(索引の正規表現が非 ASCII / `_root_` で壊れる。M14 の 3 例目・4 例目、未着手)
+—— ★`.cache/decl-index.txt` は 24,255 宣言まで育ち、**全実装者の唯一の在庫入口**になっている。
+(2) `brief.mjs` の新機能を**残り 10 論文**で測る(本体は 4 本しか測っていない)。
+(3) ★**本体の brief の誤り 7 件のうち、機械で事前に捕まえられたのは何件か**の測定のみ。
+
+★規約どおり `lake build` と `check.mjs --lean` を禁じた(M35: 隔離 worktree で `--lean` を叩くと
+**cold build 50 分**が始まる)。★MCP REPL も禁じた。
+★**本体が `brief.mjs` を worktree 作成後に変えた**ので、その旨と新しい基準値を伝えてある
+——**採用は「差分の提案」の形で受ける**(ファイル全体の置き換えは採用しない)。
+
+### Y9 着地 —— Lemma 6.8（商で測った i は剰余類上の平均）
+
+`Found/PGC/QuotientRamIndexAverage.lean` **478 行、sorry 0**。
+`#print axioms` は 5 本すべて `[propext, Classical.choice, Quot.sound]`。
+`lake build ABC3.Found.PGC.QuotientRamIndexAverage` 成功(2986 jobs, 9.0 秒)。
+★往復 **7 回**、失敗は **1 回だけ**。MCP REPL は使わず全往復 `leanfile.mjs`(11.99 秒/往復)。
+
+主定理 `card_mul_ramIndex_eq_sum_ramIndex`:
+`(Nat.card H : ℕ∞) * ramIndex ϖ σ = ∑ τ : H, ramIndex π' (σ * τ)`。
+★★**除算も切り詰め引き算も 1 箇所も書いていない**(掛け算形。#102 の処方どおり)。
+
+★★**商群 `G ⧸ H` を作らずに済んだ ——「一段まるごと消える」という段取りの見込みが当たった。**
+`MulSemiringAction (G ⧸ H) C` は 1 行も書いていない。`G` を `C` に直接作用させ、
+`hHtriv : ∀ ρ ∈ H, ∀ c : C, ρ • c = c` を仮定に置くだけで `i(σ̄)` が書ける。
+★★**副産物: `H` の正規性 `G ▷ H` も明示的な仮定として要らなかった** ——
+正規性が担っていた内容(σ が `K″` を保つ)は `[MulSemiringAction G C]` と
+`hcomp`(`algebraMap C B` の `G`-同変性)に吸収されている。
+
+★**抽象核が 14 回連続で効いた**。`associated_map_sub_self_prod`(一般の可換整域 `R`、
+`φ : R →+* R` のみ。分岐・付値・Galois の語彙が 1 つも出ない)が **1 往復 12 秒で一発**。
+具体層・付値層も各 1 往復で一発。原文の 2 段(`a ∣ b` / `b ∣ a`)が
+`dvd_prod_sub_map_of_coeff` と `prod_sub_map_dvd` の 2 本にそのまま写った。
+
+★**見積 500–900 行 → 実測 478 行(思ったより安い)**。安くなった要因 3 つ:
+(1) 商群を作らなかった (2) ★**「`g(X) − π″` が `f` で割れる」を仮定に置かずに導けた**
+(`Multiset.prod_X_sub_C_dvd_iff_le_roots` + `Multiset.le_iff_subset` +
+`eq_one_of_smul_eq_of_adjoin_eq_top` による根の相異性。段取りは「仮定でよい」という含みだった)
+(3) `B^H = 𝒪_{K″}` と `𝒪_{K″} = 𝒪[π″]` を `hfix` 1 本に畳めた。
+★段取りが挙げた在庫 7 本のうち**実際に使ったのは 3 本**だけ。
+
+★**`addVal_prod`(`addVal (∏) = ∑ addVal`)は mathlib に無かったので Y9 が作った。**
+`lean-idioms.md` **#105**(`Algebra.adjoin_singleton_eq_range_aeval` の `obtain` は
+`.toRingHom` を被せて返すので `have hq' : (aeval t) q = y := hq` を 1 行挟む)。
+
+### ★★Y9 が仮定に置いたもの = 新しいノード（Y10 として配った）
+
+```
+hram : ∀ c : C, addVal B (algebraMap C B c) = (Nat.card H : ℕ∞) * addVal C c
+```
+★**Y9 は在庫を両側(ABC3・mathlib)で測ったうえで「無かった。仮定に置いた。導いていない」と
+正直に書いた。** ★mathlib の `Ideal.ramificationIdx` は
+`IsDiscreteValuationRing.addVal` と接続されていない。
+
+⇒ **Y10 `FixedRingRamificationIndex` として配った**。
+★`.src` は書けない(Yoshida はこれを独立の主張として立てておらず "totally ramified" に畳んでいる)。
+★★**本体は 2 つの道(共役の積=ノルム / Artin + e·f=n)を挙げたが、どちらが閉じるかを
+実機で確かめていない**ことを持ち場に明記し、**測って選ぶこと・閉じなければ正直に報告すること**を
+指示した。★段 1(「離散付値の延長は素元での値だけで決まる」)だけでも価値がある形で分割可にした。
+
+### ★`brief.mjs` に字形の凡例を足した（Y9 の実装者の要請）
+
+Y9 の報告: 「1b は**決定的に役に立った**。段取りを 1 分で確定でき、`lean-search` を 1 回も
+呼ばずに済んだ。原文の `f^σ(π′) = ±b` の **`±`** が明示されていたので、
+符号を単位として吸収する補題を**最初から**用意でき、符号で往復する事故が起きなかった」。
+
+★**改善要求もそのまま出てきた**: 「`Q τ∈H(στ(π′)−π′)` の `Q` が `∏` だと**推測**できたから
+読めた。凡例があれば推測が要らない」。
+⇒ ★**実測して凡例を足した**（`Q`=∏ / `P`=Σ / `L`=⊕ / `S`=⋃ / `T`=⋂ / `b`+大文字=ハット /
+`∼ =`=≅ / `̸=`=≠）。★**引用の中に実際に出ているものだけ**を表にして出す(noise を出さない)。
+★**単独の大文字は本当にその文字のこともある**(Yoshida は体の名前に `L` を使う)ので、
+曖昧なものは「★曖昧」と明示する。
+あわせて「`.txt` には `===== [page N] =====` が行として挿入されるのでページ境界で文が割れる」
+(Y9 が「by Lemma / 5.11.」で踏んだ)を注記に入れた。
+
+☆Y9 の 3 つ目の指摘「『腑に落ちなければ `.txt` を直読』の誘導は今回不要だった」は
+**採らなかった**——1b は発見的な切り出しであり、直読の逃げ道を消すのは危険なため。
+
+### #9 着地 —— Corollary 4.9 の**前半**（体の f 非依存性）
+
+`Found/PGC/LubinTateTowerFIndependent.lean` **722 行(うち docstring 約 270 行)、sorry 0**。
+`#print axioms` は `[propext, Classical.choice, Quot.sound]`。
+`lake build ABC3.Found.PGC.LubinTateTowerFIndependent` 成功(3432 jobs, 25 秒、警告 0)。
+
+主定理 `lubinTateCompletionField_eq`:
+`lubinTateCompletionField … f … n = lubinTateCompletionField … g … n`
+(`:= IntermediateField.adjoin (unramifiedCompletion K) (closureCompletionCoe K '' ↑Λ_{f,n})`
+= `ℂ_K` の中の `K̂^ur(Λ_{f,n})` = 原典の `K̂^m_f`)。★**両方の包含が入った**(`le_antisymm`)。
+
+### ★★#8 `SubfieldClosed` の決着 —— **「0 行」は誤りだった。約 45 行である**
+
+段取りでは「#8 → 0 行(削除提案)。完備体の有限次拡大は完備だから自動で出るはず」と
+**推測**していた。★**#9 が実機で測った結果、0 行ではなく約 45 行**。
+ただし段取りが恐れた 250 行でもない。
+
+★★**決め手は 1 点**: `Submodule.closed_of_finiteDimensional` は **`NormedSpace` を要求しない**
+(`[NontriviallyNormedField 𝕜] [CompleteSpace 𝕜] [Module 𝕜 E] [ContinuousSMul 𝕜 E]
+[T2Space E] [IsTopologicalAddGroup E]` だけ)。
+⇒ `NormedSpace K̂^ur ℂ_K`(`‖a•x‖ = ‖a‖‖x‖`)を組む必要がない。
+★**これは名前でなく型で引いて初めて分かった**(`#check` 一発、0.15 秒)。**在庫を型で引く」の 9 度目の実証。**
+
+自前で置いたのは 5 本だけ(`Algebra` と `IsScalarTower` の scoped instance 2 本 /
+`ContinuousSMul` 3 行 / `closureCompletionAlgHom` + `isIntegral_closureCompletionCoe` /
+抽象核 `isClosed_intermediateField_of_finiteDimensional` 8 行)。
+
+★**抽象核が 15 回連続で効いた**。`aeval_mem_of_isClosed`(**閉部分環は冪級数の値を含む**、
+0.28 秒)は分岐・付値・Lubin-Tate・Galois の語彙がゼロ。
+★★**段取り係の提案「全単射 ⇒ adjoin ⊇」ではなく、「閉部分環 + 評価点 + 係数環の像 ⇒
+冪級数の値も入る」という形に切り出された** —— 全単射では足りないという段取りの警告は正しく、
+`trunc N θ` の極限で吸収する形が正解だった。
+★実際 `exists_bijOn_iteratedLubinTateTorsionPoints`(#7 の完成形)は**使われなかった**。
+使われたのは `exists_mem_torsionPoints_evalAt` と `coe_aeval_evalAt_comp_inverse` の 2 本。
+
+★**Λ6 の結論には `constantCoeff θ' = 0` が含まれていない**ことが判明し、
+新補題 `constantCoeff_of_subst_eq_X`(`θ∘θ′ = X` と `θ(0)=0` から)を用意して導いた。
+
+`lean-idioms.md` に **#107**(★`open … in` は docstring の**前**に置く。
+`lean_check` では docstring を省くので**ファイルに書いた瞬間に初めて出る** ⇒
+**docstring を足したら `lake build` の前にもう一度 `lean_check` に通すこと**。#105 と同型)・
+**#108**(「有限次元なら閉」は `NormedSpace` を要求しない。
+`Algebra.fg_adjoin_of_finite` は根名前空間)。
+
+☆逸脱 4 件。うち 3 番: **原典に無い「整数側の影」を併記した**が、
+`Subring.topologicalClosure` を取った形で述べており、`𝒪_{K̂^ur}[Λ]` **自身**が閉であることは
+扱っていない(原典に対応するのは体の側で、そちらは有限次元だから自動的に閉)。
+
+### ★brief の誤りの 8 件目にならずに済んだ例
+
+★**段取りが「#8 は 0 行かもしれないが確かめていない。測ること」と書いた**ので、
+実装者は測ってから進み、45 行という正しい答えを出した。
+☆**「推測を推測として渡す」ことが機能した実例**として記録する
+(過去 7 件の誤りは、いずれも推測を断定として渡したものだった)。
+
+### ★実装者からの `brief.mjs` の指摘 2 件 —— 1 件は既に直っており、1 件は**採らない**
+
+#9 の実装者は**私が境界規則を直す前の版**を見ており、`cor-4-9` の切り出しが 4 行で
+切れたと報告した。現在は **516–529 行**(`□` まで全文)が出る。
+
+- 提案 1「行全体が `□` を終端に足す」→ ★**既に入っている**(`END` が行末の `□` に当たる)。
+- 提案 2「**直前の行が空行でない見出し候補は無視する**」→ ★★**採らない。実測で否定された。**
+  Yoshida の `.txt` では**見出しの直前は常に本文**である(85 行目 `Definition 2.1.` の前は
+  "…E = S K′ = Frac(OE)."、88・104・129・142・179・196・218 行も同様)。
+  ⇒ この規則を入れると**見出しが 1 つも取れなくなる**。
+  本体が入れた「**各見出し鍵の最初の出現だけを境界にする**」規則の方が正しい。
+- 提案 3「行番号を出しているのは非常に良い。この 1 点で往復が 1 回で済んだ」→ 維持する。
+
+### 新しく配った持ち場: `Lemma 4.5`（Cor 4.9 の後半を解禁する）
+
+★**Cor 4.9 の後半 `ρ_{f,m} = ρ_{f′,m}` は Lemma 4.5 だけを待っている。**
+★抽象核は **1-コサイクル**である(原文が "argue by induction in both directions" と
+書いているのがそれ) —— `a (j+j') = σ^j (a j') * a j` を満たす 2 つが `j = 1` で一致すれば
+`∀ j : ℤ` で一致する、という純群論。
+★**`j` は Weil 群の Frobenius 次数なので負の `j` が本当に要る**ことを明記した。
+★在庫: **`uniformizerProd (σ : G) (π : B) (n : ℕ)`(`UniformizerExpansion.lean:164`)が
+Yoshida の `π_m = ∏_{t<m} π^{ϕ^t}` と同じ形**で既にある(★型で引いて見つけた)。
+ℤ へ延ばすか ℤ 版を新設するかは**本体が確かめていない**ので、測って選ぶよう指示した。
+
+### ★Prop 6.9（Herbrand）の先読み —— **主張そのものより先に必要な節点が 2 つある**
+
+原典(`.txt` 1054–1065 行、証明は 6 行で完全)を本体が直読した。
+
+> Proposition 6.9 (Herbrand). Define **φ_H(n) := −1 + (1/|H|) Σ_{τ∈H} min{i(τ), n+1}** for **n ∈ ℝ≥0**.
+> Also, for n ∈ ℝ≥0, define **G_n := {σ ∈ G | i(σ) ≥ n + 1}**。Then **G_n H/H = (G/H)_{φ_H(n)}**.
+
+★★**この木の `lowerRamificationGroup` は ℕ 添字である**(`((𝔪_B)^(n+1)).inertia G`)。
+Herbrand は **実数添字**を要求する。⇒ **先に立てる節点が 2 つ**:
+
+1. ★**実数添字の `G_n`**(`{σ | i(σ) ≥ n+1}`、`n : ℝ≥0`)。整数 `n` で Definition 6.1 と
+   一致することも要る(原典が "i.e. `G_n = G_i` if `i ∈ ℤ≥0` and `n ∈ (i−1, i]`" と明記)。
+2. ★★**`φ_H` の定義 —— ここで初めて「除算」が避けられない。**
+   `φ_H(n) = −1 + (1/|H|) Σ min{i(τ), n+1}` は**本質的に有理数値**である。
+   ⇒ ★**`ℕ∞` から出て `ℝ`(または `ℚ`)へ移る決断がここで要る。**
+   ★これまで(#102 以来)「除算を書かない・掛け算形で持つ」で通してきたが、
+   **Herbrand 関数はその方針が原理的に通らない最初の場所**である。
+   `i(τ) = ⊤`(τ = id)があるので `min{⊤, n+1} = n+1` の扱いも要る
+   ⇒ `ℝ≥0∞` を経由するか、`i` を有限値に落としてから和を取るか。★**未決**。
+
+★**Y9 の掛け算形はここで正しく効く**: 原典の証明は Lemma 6.8 を
+`i(σ̄) = φ_H(m−1) + 1` の形で使うが、Y9 の
+`(Nat.card H : ℕ∞) * ramIndex ϖ σ = ∑ τ, ramIndex π' (σ*τ)` に
+`i(στ) = min{i(τ), m}` を代入すれば **`|H| · i(σ̄) = Σ min{i(τ), m}`** となり、
+`φ_H` の定義式と**除算を挟まずに**突き合わせられる。
+⇒ ☆**除算は `φ_H` の定義の中だけに閉じ込められる見込み**(★本体は実機で確かめていない)。
+
+★証明が使うもう 1 つの材料: **`i(στ) = min{i(τ), m}`**。
+これは `i(τ) ≥ min{i(στ), i(σ^{-1})}`(★**i の超距離不等式**)から出る。
+★**この不等式が木にあるかは未測定。**
+
+⇒ **次に配る持ち場は Herbrand 本体ではなく「実数添字の `G_n` と `φ_H`」**とする。
+★Y10(`e = |H|`)が走行中で実装枠が埋まっているため、着地を待って配る。
+
+---
+
+## 第 1074 波 —— メタ第 12 回を採用した + Y10 が段 2 を閉じた(2026-09-07)
+
+### ★★索引が「偽と判明した statement」を在庫として配っていた（M38。採用済）
+
+メタ第 12 回が **M24 の測定中に別の壊れ方を見つけた**。
+★**`decl-index.mjs` は注釈を 1 度も飛ばしていなかった** ——
+`.cache/mathlib-index.txt` に **648 行**、`.cache/decl-index.txt` に **38 行**の
+「ソースではコメントの中＝実在しない宣言」が載っていた。
+
+★★**これは M14/M20/M22/M24 と向きが逆の害である。** あれらは「在るのに引けない」、
+これは**「無いのに引ける」**。ABC3 の 38 件には
+`Check/PGC/Theorem42Degenerate.lean:21 theorem theorem_4_2` と
+`Check/PGC/FreeTermFunctionRefutation.lean` の `prop_2_2` / `cor_3_1` / `cor_3_3` ——
+★**docstring 冒頭に「現行形は偽」と書いてある引用**——が入っていた。
+⇒ **索引だけを見た実装者は「`theorem_4_2` は在る」と読む。**
+
+同じ回路で `namespace` / `end` も注釈から拾っていた。実例:
+`Topology/AlexandrovDiscrete.lean:40` の docstring の折り返し
+「… in the root / namespace instead. -/」を `namespace instead.` と読み、
+★**以降 46 宣言に `instead.` が被っていた**。
+
+**本体で検算した(採用後)**:
+| 検査 | 結果 |
+|---|---|
+| `theorem_4_2`(注釈の中)が索引から消えたか | ★**0 件（消えた）** |
+| `instead.` の名前空間汚染 | ★**0 件（消えた）** |
+| `AlgebraicGeometry.ΓSpec.adjunction` | 0 → **1 件** |
+| `AlgebraicTopology.DoldKan.Γ₀.obj` | 0 → **1 件** |
+| `lp.evalCLM` | 0 → **1 件** |
+| `mathlib-index.txt` | 249,273 → **248,636**(−637) |
+| `decl-index.txt` | 24,255 → **24,285**(★新着 3 ファイル分 +67、注釈由来 −38 の差し引き) |
+| `--mathlib` 所要 | 4.4 → **5.2 秒**(+0.7) |
+
+★**M22 は既に master に入っていた** —— メタ係は起動直後に「もう直っていないか」を
+30 秒で数えて確認し(`._root_.` 3,041 → 0)、**やることが無いと判断して M24 に移った**。
+☆**台帳を鵜呑みにせず先に数える**という運用が効いた実例。
+
+★**M24 の実測は台帳の見積り(133 件)の 2.4 倍(325 件)**だった。
+台帳は `namespace` 行だけ数えていて **`end` 58 件・`section` 40 件**を数えていなかった。
+害は「拾えない」ことではなく**開閉の非対称**(`namespace Isδ₀` は `Is` として積まれ
+`end Isδ₀` は落とせない ⇒ 以降の宣言に `Is.` が残る)。
+
+### ★`brief.mjs` の誤報 20 件を直した（M39。本体で実装）
+
+★**`proofParagraphOf` は `kind` が見出し語かを検査していなかった。**
+`itemKeyOf`(check.mjs G1 と共有)は `Section` / `Chapter` / `Step` / `Assertion` も拾うので、
+`key = "Section 2"` が [pGC] の `.txt` 138 行目の節見出し
+「Section 2: Higher Ramification Groups」に当たり、
+★**その手前 13 行が 9 件の項目すべての「証明」として出ていた**。
+
+`HEADWORD` 検査 2 行を足した。**退行測定(3 論文 137 項目)**:
+Proof が出た件数は **31 / 16 / 4 のまま不変**。
+pGC の `noproof` が 29 → 9 に減り(20 件が正しく「原典に見出しを持たない単位」になった)、
+Yoshida08 の「見出し不明」17 → 0(同じ 17 件が正しい経路を通るようになった。表示は同じ)。
+あわせて `END` に `Q.E.D.` を足した(メタの提案。BK の 6 件。★空文字列に当たらないことを検算済み)。
+
+☆メタ係の測定「`END` に足すべきものは無い」は**正しかった**——
+記号が残る 7 本では**見つかった記号の数と `^Proof` 行の数がきっかり一致**する
+(Yoshida08 `□` 41/41、GenEll `⃝` 14/14、pGC 3/3、CorrHyp 12/12、EtTh 37/37、
+LocProP 55/55、SemiAnbd 36/36)。★**Falt1 は OCR が `□` を小文字 `o` にしているが、
+`o` を足してはいけない**("also" "two" "zero" に当たる)。
+
+### ★★本体の見立ての訂正 —— 誤り #7 は「grep で反証できた」は成立しない
+
+本体はメタ係に「7 件目(`pdftotext` は `⊂` を落とす、という誤り)は
+**`0_Source/*.txt` を grep すれば 1 秒で反証できた**」と書いた。
+★**これは誤りだった。** メタ係の実測:
+
+- pGC の `.txt` の `⊂` は **0 件**なので、grep は**偽の主張を裏づけてしまう**
+  (真相は「pGC は `⊂` ではなく `⊆` を使っている」)。
+- 反証には **(a) その字を実際に含む対照(Yoshida08)** と
+  **(b) `.txt` ではなく `pdftotext` を走らせること**の両方が要る
+  (実測: Yoshida08 で pdftotext `⊂` = 53、PyMuPDF = 55)。
+- ★**`.txt` は pdftotext 製ではない** —— [[pdftotext-two-implementations-hazard]] の罠の **2 例目**。
+
+⇒ ★**brief の誤り 7 件のうち、機械で捕まえられるのは 2 件、半分が 1 件、4 件は捕まえられない**
+(メタ係の結論)。★**「捕まえられない」と正直に測ったことに価値がある。**
+
+### Y10 着地 —— `e(K′/K′′) = |H|` を本当に証明した（Y9 の `hram` が埋まった）
+
+`Found/PGC/FixedRingRamificationIndex.lean` **531 行、13 宣言、sorry 0**。
+`#print axioms` 4 本すべて `[propext, Classical.choice, Quot.sound]`。
+`lake build ABC3.Found.PGC.FixedRingRamificationIndex` 成功(2987 jobs, 8.3 秒, warning 0)。
+往復 **11 回**(うち失敗 5 回、★原因はすべて mathlib の改名)。
+
+★★**本体の段取りは順序が誤っていた。実装者が逆順にして閉じた** ——
+本体は「`addVal C ϖ₀ = 1` を示せば `e = |H|` が出る」と書いたが、
+★**`addVal C ϖ₀ = 1` を直接示す道は無く、逆順が正しい**:
+1. 道 A の前半(`ϖ₀ := ∏_{τ∈H} τ•π` は H 不変・`addVal B ϖ₀ = |H|`)から **`e ≤ |H|`**
+2. `M := span_C{π^i : i<e}` に対し「`v(b) ≥ j` なら `M` の元を引いて `v ≥ e` にできる」を
+   **j の有限降下帰納**で示し、★**中山の補題**
+   (`Submodule.le_of_le_smul_of_le_jacobson_bot`)で `M = ⊤`
+   ⇒ `π` は `C` 上**次数 e の monic 関係**を満たす(`exists_pow_eq_sum`、★これが抽象核)
+3. 係数が H 不変 ⇒ 相異なる共役 `τ•π` が全部その根 ⇒ 次数比較で **`|H| ≤ e`**
+★**`addVal C ϖ₀ = 1` は系として落ちた**(宣言 25 行・証明本体 14 行)。「山」ではなくなった。
+★**道 B(Artin + `e·f = n`)は使わなかった** —— Y9 が「mathlib に橋が無い」と測った箇所は迂回できる。
+
+★**抽象核が 16 回連続で効いた**。段 1(`addVal_map_eq_mul_addVal`)は **測定ノイズ以下**、
+中山の `exists_pow_eq_sum` が **0.31 秒**、根の数え上げ `card_le_of_pow_eq_sum` が **0.28 秒**。
+★**最大の山と目された中山の段は 1 往復で通った。**
+
+★**Y9 の在庫は 4 本中 3 本がそのまま使えた**(`addVal_prod` / `prod_X_sub_C_dvd_of_forall_isRoot` /
+`smul_coeff_conjProd` + `eval_prod_X_sub_C`)。
+使えなかった 3 本は **Y9 の設定 `SMulCommClass G A B` が Y10 の設定と合わない**ため
+(Y10 では `G` は `C` を固定しない。H だけが固定する)。★**設計の差であって欠陥ではない。**
+
+★**本体の指示に無かった退化条件を 1 つ追加発見**: **`[FaithfulSMul G B]` を落とすと偽**
+(H が自明作用なら `C = B`, `e = 1`)。
+★`e = 0` を許すと段 1 が偽で、しかも**単射性からは出ない**(反例 `ℤ_p ↪ ℚ_p[[t]]`)。
+`isUnit_of_isUnit_map` で塞いだ。
+
+★逸脱 4 件。うち 1 番: **`hres`(`K′/K′′` の完全分岐)を結論の側で仮定に置いた** ——
+「`K′/K` 完全分岐 ⇒ `K′/K′′` 完全分岐」がこの木にも mathlib にも無いため。
+⇒ ☆**新ノード候補**: 上流が Lemma 6.8 を `..._of_fixedRing` に差し替えるなら、
+`hres` と `hAC`(`𝒪 ⊆ 𝒪_{K″}`)を供給する小ノードが 1 つ要る。
+
+`lean-idioms.md` **#107(Y10 版)**: 2026-09-07 に名前が動いていた 5 つ
+(`Irreducible.not_unit`→`not_isUnit` / `le_or_lt` は無い / `isUnit_of_mul_eq_one`→
+`IsUnit.of_mul_eq_one` / `Algebra.algebraMap_mem`→`Subalgebra.algebraMap_mem` /
+`IsIntegral` を無名構成子で開くと goal は `aeval` ではなく `eval₂`)。
+
+### Lemma 4.5 着地 —— 抽象核は本当に「1-コサイクル」だった
+
+`Found/PGC/UniformizerCocycle.lean` **519 行、sorry 0**。
+`#print axioms` 主要 11 宣言すべて `[propext, Classical.choice, Quot.sound]`
+(`IsZCocycle.ext` は `[propext, Quot.sound]` のみ)。
+`lake build ABC3.Found.PGC.UniformizerCocycle` 成功(3433 jobs、本モジュール 8.9 秒)。
+`lean_start` 1 回(12.3 秒、`lean_status` で imports 一致を確認。差し替わり無し)、
+`lean_check` 14 回、`leanfile.mjs` 2 回。
+
+★★**段取りの見立て「抽象核は 1-コサイクル」が当たった。**
+`IsZCocycle` / `IsZCocycle.ext`(一意性) / `zpowProd`(存在)が**純群論**で書け、
+★**抽象版 Lemma 4.5 本体は `IsZCocycle.ext` に投げるだけで 0.06 秒・6 行**。
+★**原典の "argue by induction in both directions" は `IsZCocycle.ext` 1 本に完全に吸収された。**
+
+★**負の `j` が入った**(すべて `j : ℤ`。`ℕ` に逃げていない)。
+符号の場合分けは `zpowProd`(`toNat` の一様式)と `zpowProd_step` の証明の 2 箇所に閉じ込めた。
+★**第 2 主張は代入で出た**(第 1 主張を `∀ π′, ∀ θ` の一般形で述べたので `π′ := ϕ π`・`θ := π`)。
+
+★**`uniformizerProd` を延ばさず ℤ 版 `zpowProd` を新設した**(測って決めた)。理由:
+`uniformizerProd` は `[Monoid G] [MulSemiringAction G B]` の上にあり
+(i) `j : ℤ` の `σ^j` が作れない (ii) `B` が環なので `j<0` の `(π_{−j})⁻¹` が作れない。
+★`M := Lˣ`・`σ : MulAut M` へ移すと両方が同時に解け、しかも
+**分母の非零を `Units.ne_zero` が無条件に供給する**(除算の前提を持ち回らずに済む)。
+
+★★**逸脱 2 は重要**: 「`Θ` の `θ ∈ 𝒪_L`」を落とした。
+★**落とさないと原典の第 2 主張が `j < 0` で意味を持たない**(`π_j ∉ 𝒪_L`)。
+逸脱 1: `Θ^L` を商でなく**交差積** `θ^ϕ·π = θ·π′` で書いた。
+★根拠は**原典 Definition 3.3 自身の "It is an additive group"**
+(加法群なら `0 ∈ Θ` で、`0^ϕ/0` は定義できない)。
+☆★**この 1 文は `0_Source` の `.txt` の直読で見つかった** ——
+`grep -an "Definition 3.3" -A 10`。★**これが無ければ `θ = 0` を除外する不要な仮定を付けていた。**
+
+★**思ったより高かったのは `zpowProd_step`(符号の場合分け)だけ**で、ここだけ 4 往復。
+`Finset.prod_range_succ'`(先頭を切る版)が要ることに気づくまでが山だった。
+`lean-idioms.md` **#109**(ℤ 上の両方向の帰納法で踏んだ 4 つ。
+★**環自己同型の `ℤ` 乗は `RingAut R →* MulAut Rˣ` を 1 本作れば場合分けが消える**)。
+
+### ★字形の凡例について —— 「出なかった」は正しい挙動である
+
+Lemma 4.5 の実装者は「**字形の凡例は私の 2 件の brief には表として出なかった**」と報告した。
+★**これは設計どおりである** ——**引用の中に実際に出ている字形だけ**を表にする
+(noise を出さないため)。`lemma-4-5` の Proof(401–407 行)には
+`Q` も `P` も `̸=` も `b`+大文字も含まれていないので、**出さないのが正しい**。
+☆ただし**実装者からは「役に立たなかった」と見える**ので、
+**次に凡例が出た持ち場で「役に立ったか」を聞き直す**こと(Prop 4.7 の持ち場に入れた)。
+
+### 新しく配った持ち場: `Proposition 4.7`（Weil 群への延長）
+
+★**Cor 4.9 の後半 `ρ_{f,m} = ρ_{f′,m}` は、その `ρ_{f,m}` 自体が木に無い**ので、
+**先に Prop 4.7(ii) が要る**(本体が測って確認した)。
+
+★**在庫が両側から揃っている**のが分かった:
+- **ℤ 方向** = 今日 Lemma 4.5 が作った `uniformizerZ` / `zpow_apply_mul_uniformizerZ`
+- **単数方向** = 既存の `LubinTateReciprocityIsomorphism.lean`(**425 行**)の
+  `galoisUnitReciprocityMap` / `_injective` / `_surjective` / `galoisReciprocityEquiv`
+  ——★**これが Yoshida `Prop 4.4(iii)` に当たると本体は見ているが、型で確かめていない**ので
+  「違ったらそう報告すること」を持ち場に明記した。
+
+★**未確定の点を持ち場に明示した**: `∐_{j∈ℤ} µ^{(j),×}_{f,m}` の `∐` は、
+構造化係が「170dpi では `∐` と `⋃` が紛らわしい」と申告している箇所である
+(どちらも `pdftotext` 出力が空)。Lean では `Σ j : ℤ` でも「`j` が `x` から決まる」形でもよく、
+**どちらで書いたかを報告**させる。
+
+---
+
+## 第 1075 波 —— ★★Herbrand が形式化された(2026-09-07)
+
+### Y11 着地 —— Proposition 6.9 (Herbrand) + その土台 3 つ、**全部入った**
+
+`Found/PGC/HerbrandFunction.lean` **596 行、宣言 27 本、sorry 0**。
+`#print axioms` 主要 7 本とも `[propext, Classical.choice, Quot.sound]`
+(`ultrametric_mul_eq_min` は `[propext]` のみ)。
+`lake build ABC3.Found.PGC.HerbrandFunction` 成功(2988 jobs, 6.8 秒)。往復 **8 回**。
+
+★★**Λ7 の欠落 3 つのうち 2 つ目(N8 = Herbrand)が閉じた。**
+主結論 `herbrand_mem_iff` / `herbrand_coe_mul_coe_eq`(`G_n H = (G/H)_{φ_H(n)}` の集合版)。
+
+★**段取りの見立て「先に立てる節点が 3 つある」が当たり、4 つとも 1 波で入った**:
+§1 `i` の超距離不等式(`min_ramIndex_le_ramIndex_mul` / `ramIndex_inv`。★在庫に無かった) /
+§2 実数添字の `G_n`(`ramificationGroupReal`) / §3 `φ_H`(`herbrandPhi`) / §4 Herbrand 本体。
+
+★**抽象核が 17 回連続で効いた**。`ultrametric_mul_eq_min` / `exists_max_on_coset` /
+`upperSubgroup` / `mem_mul_subgroup_iff` / `RealLeENat` / `truncENat` の 6 本が
+★**初回の往復で 0 エラー**(`exact?` 4 本と同居させた 13.58 秒の往復に全部入っていた)。
+
+### ★★原文より安い道が 2 つ見つかった
+
+1. ★**原文の 2 つの場合分け(`i(τ) ≥ m` / `i(τ) < m`)は不要だった。**
+   `ultrametric_mul_eq_min` の仮定は `f(στ) ≤ f(σ)`(剰余類の中で σ が最大)の 1 本だけで、
+   そこから `f(στ) = min{f(τ), f(σ)}` が 2 行で出る。
+   ★原文が場合分けしている理由は `i(σ⁻¹)` を経由する不等式の向きを説明するためで、
+   Lean では **`min_eq_right` 1 回で吸収される**。
+2. ★**`σ ∈ G_n H/H ⟺ m ≥ n+1` は「最大値が m」だけで出る**(単調性 1 本)。
+   代表の取り替えを済ませてしまえば**両向きとも 1 行**。
+
+### ★★除算は `φ_H` の定義式 1 箇所に閉じ込められた（本体の見込みどおり）
+
+★`ℝ` で持った(`ℚ` でも掛け算形でもない)。理由: 原典が `n ∈ ℝ≥0` と**実数の添字**を要求しており、
+`(G/H)_{φ_H(n)}` を書くには `φ_H : ℝ → ℝ` でなければならない。
+`ℚ` にすると `G_n` の添字型と食い違い、`ℚ ↪ ℝ` の橋が余計に要る。
+
+★★**証明本体は `card_mul_herbrandPhi_add_one`(`|H|·(φ_H(n)+1) = herbrandSum`)だけを使い、
+除算を一度も見ない。** ⇒ ★**Y9 の掛け算形 Lemma 6.8 がそのまま噛み合った。**
+☆**#102(「`ℕ∞` の除算・切り詰め引き算を書かない」)以来の方針が、
+「除算が原理的に避けられない場所」でも定義の 1 行に閉じ込める形で生き延びた。**
+
+`min{i(τ), n+1}` は `ℝ≥0∞`/`EReal` を使わず自前の
+`truncENat (x : ℕ∞) (r : ℝ) : ℝ := if x = ⊤ then r else min (x.toNat : ℝ) r` に落とした
+(理由: 2 段 coercion より `cases x` + `simp` の方が補題名を探さずに済む。関連 5 本はすべて 1–3 行)。
+
+### ★添字の一致を確かめた（下流がずれないため）
+
+`realLeENat_natCast_iff : RealLeENat (m:ℝ) x ↔ (m:ℕ∞) ≤ x` を橋にして、
+`ramificationGroupReal_eq_of_mem_Ioc`(★**原典の "`G_n = G_i` if `i ∈ ℤ≥0` and `n ∈ (i−1,i]`"
+そのもの**)と系 `ramificationGroupReal_natCast` を証明した。
+★**原典が `(i−1, i]` と書いている両側の境界を両方仮定に置いてあるので、
+`n ≥ 0` を落としても下流がずれない**(`n > −1` が自動で出る)。
+
+### ★Y10 の成果がそのまま使えた
+
+`card_mul_ramIndex_eq_sum_ramIndex_of_fixedRing`(Y10 の `hram` 無し版)は
+★**引数順を写すだけで通り、本ファイルが新たに足した仮定は 1 つも無い**。
+`hres`(`K′/K′′` 完全分岐)と `hAC` は依然として仮定のまま。
+
+### ★★`leanfile.mjs` の測定限界が判明した（D27 の逃げ道の唯一の実質的な損）
+
+★Y11 の実測: `leanfile.mjs` は 1 往復 **9.6–13.6 秒**で、
+**うち import 読み込みが 10.7 秒**(`example : 1 = 1 := rfl` だけのファイルで実測)。
+⇒ ★★**宣言ごとの秒数(抽象核 0.05 秒 / 具体層 2 秒 の刻み)は測定ノイズに埋もれる。**
+**MCP `lean_check` の 0.05 秒刻みは leanfile では再現できない。**
+☆これが「MCP は 1 体・2 体目は leanfile」という D27 の規約の**唯一の実質的な損**である。
+⇒ ★**leanfile 側の持ち場では「往復何回・一発かどうか」を報告させることにした**
+(秒数を求めると嘘を書かせることになる)。
+
+### ★brief の 1b は 5 人目も「決定的」と報告
+
+Y11:「1b の 6 行がそのまま §1〜§4 の設計図になり、`lean-search` を 1 回も呼ばずに済んだ。
+★**字形の凡例(`φ` が U+03C6、`Σ` と分数の横線が pdftotext に出ない)のおかげで
+docstring の逐語を作り直す往復が 0 回**だった」。
+⇒ ☆**凡例は「出た持ち場」では効いている**(Lemma 4.5 では該当字形が無く出なかった)。
+
+`lean-idioms.md` **#110**(`Subgroup G` を `Set G` に落とすとき `G` が推論できない)・
+**#111**(`field_simp [f]` は `def f` を展開しない)・
+**#112**(★`push_neg` が 2026-09-07 に deprecated)。
+
+### 新しく配った持ち場: `Lemma 6.10`（Hasse-Arf の直前）
+
+★本体が原文(`.txt` 1077–1101 行)を直読し、**(ii) が独立の山**であることを確認した:
+「φ は連続で区分線形だから**微分だけ比べればよい**」という 3 行が、Lean では
+**「区分線形関数の一致判定」という節点**になる(構造化係も同じ指摘をしていた)。
+⇒ ★**2 つの道(A: 原文どおり微分 / B: 差分。微分積分を使わない)を挙げ、
+どちらが安いかを測って選ばせる**ことにした。★本体は確かめていない。
+★Y11 の `ramificationGroupReal_eq_of_mem_Ioc` が**区間ごとの議論の土台として既に在る**。
+
+★**Hasse-Arf (Thm 6.11) にはさらに 2 つ要る**(本体が原文 1102–1124 行を直読して確認):
+**Prop 6.2**(`G_1` が p 群・`G ≅ ⊕ ℤ/p^{m_i}ℤ`)と **Cor 6.3**(`G_n ≠ G_{n+1} ⇒ e_0 ∣ n`)。
+★**どちらもまだ木に無い見込み**(★Cor 6.3 は索引で未確認)。
+
+### ★Hasse-Arf に要るものを索引で測り直した —— **欠けているのは Cor 6.3 だけ**
+
+本体は前波で「**Prop 6.2 と Cor 6.3 はどちらもまだ木に無い見込み**(★Cor 6.3 は索引で未確認)」と
+書いた。★**測ったら半分が誤りだった。**
+
+| 原典 | 木の状態 | 実体 |
+|---|---|---|
+| **Prop 6.2**(θ_0・θ_n の 2 本の単射) | ★**在る** | Y3 `RamificationQuotientEmbedding.lean`(745 行)の `ramCoeff` 一族 |
+| `G_1` が p 群 | ★**在る** | `isPGroup_lowerRamificationGroup_one` / `_Adjoin` |
+| **Cor 6.3**(`G` 可換 ∧ `G_n ≠ G_{n+1}` ⇒ `e_0 ∣ n`) | ★★**無い** | —— |
+| Cor 6.7 | 在る | Y8 `SenJumpExpansion.lean` |
+| Prop 6.9 (Herbrand) | 在る | Y11 `HerbrandFunction.lean` |
+| Lemma 6.10 | **走行中** | Y12 |
+| 有限アーベル p 群の構造定理 | 未測定 | mathlib にあるはず(★型で引くこと) |
+
+⇒ ★**Hasse-Arf の手前で本当に欠けているのは Cor 6.3 の 1 本だけ**である。
+
+### ★Cor 6.3 は在庫が揃っている（本体が原文と型の両方を読んだ）
+
+原文(`.txt` 930–945 行、`□` まで)の骨格:
+1. `θ_n(στσ⁻¹)` を `π′ = σ⁻¹(π)` で計算する。`τ(π′) = π′(1+a)`(`a ∈ 𝔭^n`)なら
+   `στσ⁻¹(π) = π(1 + σ(a))` ゆえ `θ_n(στσ⁻¹) = σ(a) mod 𝔭^{n+1}`。
+2. `a = bπ^n`・`σ(π) = uπ` と書くと `σ(a) = σ(b)u^nπ^n ≡ b u^n π^n = u^n a (mod 𝔭^{n+1})`
+   (`σ(b) ≡ b mod 𝔭`)。⇒ ★**`θ_n(στσ⁻¹) = u^n · θ_n(τ)`**。
+3. `G` 可換なら `στσ⁻¹ = τ` ゆえ `a ≡ u^n a`。`G_n ≠ G_{n+1}` から `θ_n(τ) ≠ 0` なる τ が取れ、
+   `θ_0(σ) = u` が `G_0/G_1` を生成するよう σ を取れば **`e_0 ∣ n`**。
+
+★**在庫(型で引いて実測)**:
+- ★**`ramCoeff_smul_conj : ramCoeff (τ • α) n (τ*σ*τ⁻¹) = τ • ramCoeff α n σ`**
+  (`RamificationJumpDivisibility.lean:164`) —— ★**上の 1.+2. がほぼそのまま在る**
+- `ramCoeff_independent`(`RamificationQuotientEmbedding.lean:480`) —— π 非依存性
+- `ramCoeff` 一族 10 本(`ramCoeff_mul` / `pow_mul_ramCoeff` / `isUnit_one_add_ramCoeff_zero` ほか)
+
+⇒ 見積 **250–500 行**。★**実装枠(2 体)が空き次第これを配る。**
+
+★★**記法の罠**: 原典の `G_n ≠ G_{n+1}` は `pdftotext` で **`=` にしか出ない**
+(斜線がベクター描画)。★**テキストだけを読むと主張が反転する**
+([[pdftotext-drops-negation]])。構造化係は `data-txt="="` で明示済み。
+★**持ち場に必ず書くこと。**
+
+### Prop 4.7 着地（部分）—— (i) の全単射と (ii) の同型性が入り、4 件を新ノードに切り出した
+
+`Found/PGC/WeilReciprocityExtension.lean` **697 行、宣言 42 件、sorry 0**。
+`#print axioms` 12 宣言すべて `[propext, Classical.choice, Quot.sound]`
+(`negFiberSigmaEquiv` と `weilDegKerEquiv` は **`Classical.choice` すら不要**)。
+`lake build ABC3.Found.PGC.WeilReciprocityExtension` 成功(3434 jobs、当該モジュール 7.7 秒)。
+MCP 側なので秒数が測れた: 抽象核 **0.25–0.55 秒** / 具体層 **0.26–0.34 秒**、
+`lean_check` の総計 **3 秒程度**。
+
+| | 入った | 落とした |
+|---|---|---|
+| (i) 全単射 | ★`prop_4_7_i_equiv` | — |
+| (i)「`L^m_f` は `K` 上 Galois」 | — | ★**全部**(Prop 4.4(ii) と Lemma 4.6 が木に無い) |
+| (ii) `ρ` が同型 | ★`weilReciprocityEquiv` | — |
+| (ii) `ρ` の構成 | 準同型性の代数計算のみ | ★`ρ` 自体(`µ_{f,m}` 上の `W` の作用が要る) |
+| 極限 `ρ_f` | — | ★全部 |
+
+### ★★`∐` の読みが確定した —— 構造化係の申告が解決した
+
+構造化係は「170dpi では `∐` と `⋃` が紛らわしい」と申告していた(どちらも pdftotext 出力が空)。
+★**実装者が Lean で確かめて `∐` が正しいと確定させた**:
+`Σ j : ℤ, B j`(依存和)で書くと型として非交和になり、
+`negFiberSigmaEquiv_fst : (Θ x).1 = -w x` が「`j` は `x` から `v(x) = −j` で決まる」を与える。
+★★**`⋃` と読むと `j` の一意性が落ちて像の合併になり、全単射が主張できない。**
+⇒ 原典の丸括弧 `(v(x) = −j)` が `j` を一意に決めているので **`∐` が正しい**。
+
+### ★★本体の推測が誤っていた（今日 8 件目）—— ただし「未確認」と書いたので覆った
+
+本体は持ち場に「`galoisUnitReciprocityMap` 系(既存 425 行)は Yoshida `Prop 4.4(iii)` に
+当たると見ているが、**型で確かめていない**ので違ったら報告すること」と書いた。
+★**実測の結果、違った。**
+
+`galoisReciprocityEquiv` の型は
+`(K.carrier⟮x⟯ ≃ₐ[K.carrier] K.carrier⟮x⟯) ≃* (𝒪[K.carrier] ⧸ Ideal.span {π^n})ˣ`
+すなわち ★**`L = K`(p 進局所体そのもの)の場合の古典的 Lubin-Tate 主定理**である。
+Yoshida の Prop 4.4(iii) は `L` = `K` の**完備不分岐拡大**に対するもので、
+★★**Prop 4.7(ii) が使うのは `L = K̂`(不分岐閉包の完備化)の場合**。
+⇒ ★**既存 425 行は Prop 4.7(ii) の入力を直接は供給しない。**
+さらに `L^m_f = L(µ_{f,m})` ではなく `K.carrier⟮x⟯`(原始点 1 個の添加)で書かれており、
+その同一視も statement に無い。
+
+★実装者は `u : w.ker ≃* Rˣ` / `e : res.ker ≃* v.ker` を**仮定に取る**ことで、
+`K̂` 版が立った時点で代入できる形にした。★**通すために statement をねじ曲げていない。**
+
+☆★**「推測を推測として渡す」が 2 度目も機能した**(1 度目は #8 SubfieldClosed の 45 行)。
+
+### ★★字形の凡例が決定的だった（2 件目の証言）—— しかも設計を救った
+
+Prop 4.7 の実装者:
+> 字形の凡例は今回は表として出た(`b + 大文字` → ハット、`∼ =` の 2 行割れ → `≅`)。
+> ★**これが決定的で、`.txt` の `L = bK` が `L = K̂`(K ではない)だと分かった**
+> —— これが無いと「(ii) は `L = K`」と読んでしまい、`W(K̂^m_f/K)` の設計を丸ごと間違えていた。
+
+★**Lemma 4.5 で凡例が出なかったのは「引用に該当する字形が無ければ出ない」設計どおりで、
+正しい挙動だと確認できた**(実装者自身がそう書いた)。
+⇒ ☆**前波で積んだ「次に凡例が出た持ち場で聞き直す」が解決した。**
+
+### ★Weil 群は「対」のまま持った（本体の見立てどおり安かった）
+
+`weilGroup res ϕ : Subgroup (Γ × Multiplicative ℤ)`、carrier は `{(σ,j) | res σ = ϕ^j}`。
+理由: (a) 群構造が積の部分群として自動で付く(**0.25 秒**) (b) `deg` が第 2 成分の射影なので
+`Classical.choose` が不要 ⇒ ★**`ϕ` の位数無限を仮定しなくてよい**
+(`Subgroup.zpowers ϕ` の逆写像を作る道だと無限位数が必須になる)
+(c) 原典の元の書き方(`ϕ^j on K̂, α ↦ [xπ_j](α)`)とそのまま一致する。
+
+★**Lemma 4.5 の投資がそのまま効いた**: ℤ の両方向帰納法(#109)は `Int.induction_on` の
+3 場合を 1 回書いただけで済んだ(`uniformizerZ` 側が全部 `j : ℤ` で用意されていたため)。
+
+`lean-idioms.md` **#113**(ℤ で添字づけた `Σ` 型を作るときの 4 つの穴。
+★`Equiv.sigmaFiberEquiv` と `Equiv.sigmaCongrLeft'` の合成は `Eq.mpr` が挟まって
+`_apply` が `rfl` にならない、ほか)。
+
+### 新しく必要になったノード（Prop 4.7 が切り出した 4 件）
+
+1. **Prop 4.7(i) 前半「`L^m_f` は `K` 上 Galois」**(Prop 4.4(ii) と Lemma 4.6 が前提)
+2. **Lemma 4.6**(`[θ] : µ_{f,m} ≅ µ_{f′,m}` かつ `L^m_f = L^m_{f′}`)
+3. ★**Proposition 4.4 の (ii)(iii) を `L = K̂` で**(既存 425 行は `L = K` 版なので流用不可)
+4. **`ρ_f`(`m → ∞` の極限)**
+
+### 新しく配った持ち場: Y13 `Corollary 6.3`（Hasse-Arf の最後の欠落）
+
+★在庫が揃っていることを本体が型で確かめてから配った(`ramCoeff_smul_conj` /
+`ramCoeff_independent` / `ramCoeff` 一族 10 本)。
+★★**`ramCoeff_smul_conj` が原文の `θ_n(στσ⁻¹) = u^n θ_n(τ)` に当たるという見立ては
+実機で確かめていない**ので、「違ったら遠慮なく訂正して報告すること」を明記した
+(★本体の誤りが今日 8 件目になったことも書いた)。
+★**記法の罠を最重要事項として書いた**: 原典の `G_n ≠ G_{n+1}` は
+`pdftotext` に `=` としか出ず、**テキストだけ読むと主張が反転する**。
+
+### Y12 着地 —— Lemma 6.10 (i)(ii) 両方、★★第 3 の道で閉じた
+
+`Found/PGC/HerbrandComposition.lean` **699 行 / 29 宣言、sorry 0**。
+`#print axioms` 10 宣言すべて `[propext, Classical.choice, Quot.sound]`。
+`lake build ABC3.Found.PGC.HerbrandComposition` 成功(2989 jobs, 7.1 秒)。
+`leanfile.mjs` 往復 **13 回**、MCP は指示どおり一度も触っていない。
+
+★**落とした主張は無い。** 逆に (i) は原典の 2 文(`φ_G(0)=0` と `n ∈ ℤ≥1` の閉じた形)が
+`n : ℕ` の**1 本の式に収まった**(`n=0` で `Finset.Icc 1 0 = ∅`)。★**原典より強い。**
+
+### ★★(ii) は道 A（微分）でも道 B（差分）でもなかった
+
+本体は 2 つの道を挙げたが、実装者は**どちらでもない道**で閉じた:
+掛け算形で書くと (ii) は `Σ_{σ∈G} min{i(σ),n+1} = Σ_{σ∈G} min{i_ϖ(σ), φ_H(n)+1}` と同値で、
+★**`H` の剰余類ごとに `min` の結合則だけで一致する**。
+剰余類 `σH` の最大代表 `σρ`(`m := i(σρ)`)について両辺とも `Σ_{τ∈H} min{i(τ), min{m, n+1}}` になる。
+
+- ★**`deriv` も `Continuous` も使っていない。** 解析的な道具は `Monotone.map_min` **1 本だけ**。
+- ★★**「mathlib に区分線形関数の一致判定が在るか」は調べていない ——
+  探す前に不要になった。** ☆**実装者はこれを正直に書いた**(在庫照会をサボったのではなく道が消えた)。
+- ★★**剰余類への分割すら要らなかった**: `Σ_{σ∈G} Σ_{τ∈H}` を `Finset.sum_comm` で入れ替え、
+  `σ ↦ στ` が `G` の全単射(`Equiv.mulRight`)であることを使うと `|H| · Σ_{σ∈G}` になる。
+  ⇒ ★**商群 `G ⧸ H` を作らずに閉じる**(Y9・Y10・Y11 と同じ流儀が 4 波続いた)。
+
+### ★`|G_n H/H|` を取り出す必要が生じなかった
+
+原文の `G_n/H_n = G_n/(H ∩ G_n) ≅ G_nH/H`(**第 2 同型定理**)は**この道では一度も現れない**。
+★難しくて避けたのではなく、微分を比べないので `|(G/H)_{φ_H(n)}|` も `|G_nH/H|` も出てこない。
+⇒ ★**Y11 が挙げていた「`(G_n : Set G) * (H : Set G)` を `Subgroup` に述べ直すノード」は
+不要になった**(必要なら別途立てればよいが Lemma 6.10 のためには要らない)。
+
+代わりに `φ_{G/H}` の同定を `phiOf_comp_of_card_fiber` → `phiOf_quotient` →
+`herbrandPhiGroup_eq_phiOf_quotient` で立てた。根拠は `|G| = |H|·|G/H|` と
+「`i_ϖ` は `H` 剰余類上で定数」の 2 つだけ。
+
+### ★★添字ずれ（`Σ_{i=0}` 対 `Σ_{i=1}`）を構造的に防いだ
+
+★**抽象核を 2 段に分けた**: `phiOf_natCast` が `Σ_{i=0}^{n}`(**原文の途中式そのもの**)、
+`phiOf_natCast_of_pos` が `f > 0` を使って `i=0` の項(`= |S|`)を `−1` と相殺して
+`Σ_{i=1}^{n}`(原文の結論)。
+★★**2 つの差がちょうど `pos_ramIndex`(`i(σ) ≥ 1`)であることを退化検査に書いた。**
+☆この論文には既に erratum が 2 件あるので、**ずれる場所を宣言の形で見えるようにしたのは良い設計**。
+
+### ★配管の実測 2 つ
+
+- ★**`Fintype ↥(⊤ : Subgroup G)` は `[Fintype G]` から推論されない**(probe で確認)。
+  ⇒ `φ_G` は `G` 全体の上の和として `herbrandPhiGroup` を新規定義し、
+  `herbrandPhiGroup_eq_herbrandPhi_top` で Y11 の `herbrandPhi α ⊤` と一致することを確かめた。
+- `lean-idioms.md` **#114**: ★**束縛子の型を書かないと `(τ : G)` が coe ではなく型注釈に読まれる**。
+  `fun τ => pos_ramIndex huni (τ : G)` と書くと `τ : G` に固定されて
+  **`failed to synthesize Fintype G`** が出る(インスタンスの問題に見えるが原因は elaboration の順序)。
+  直しは `fun τ : H => …`。
+
+★**逸脱 3 が重要**: **(ii) で `H` の正規性 `G ▷ H` を仮定していない**。
+`φ_{G/H}` を `G` 上の和で書くので商群を作らず、計算は正規性を使わない
+(`[H.Normal]` は `φ_{G/H}` の同定補題 3 本にだけ置いた)。
+
+★**見積との差**: 本体は「(ii) は重いから (i) だけでもよい」と書いたが、
+★**(ii) の本体(`herbrandPhiGroup_comp`)は 1 往復で一発**だった。
+高かったのは**(i) の `ℕ∞ ↔ ℝ` の橋**の方(cast まわりで 4 往復)。
+★brief の 1b は「特に (i) の `Σ_{i=0}^{n}|G_i|` という**途中式**が原文に明示されていたので、
+添字ずれの罠を最初から避けられた」。字形の凡例(`∼ =` → `≅`、合成記号 `◦` = U+25E6)も効いた。
+
+★★**Hasse-Arf (Thm 6.11) は `herbrandPhiGroup_natCast` と `herbrandPhiGroup_comp` の両方を
+そのまま入力にできる形になっている。**
+
+### 新しく配った持ち場: Y14 `hres` / `hAC` の供給（3 ノードが引きずる債務）
+
+★**Y10・Y11・Y12 の 3 本(計 1,826 行)が同じ 2 つの仮定を持ち回っている。**
+Y10 と Y11 の実装者が**独立に「供給する小ノードが 1 つ要る」と挙げた**ので配った。
+★本体の見立て「`A → C → B` の塔が立てば `hres` はほぼ自明で、実質は塔を立てること」は
+**実機で確かめていない**ので、「外れたらそう報告すること」を明記した。
+★`C` の構成は道 A(`FixedPoints.subring`)/ 道 B(抽象のまま存在を述べる)を挙げて測らせる。
+★**既存 3 本から `hres` を消して回らないこと**を明示した(差し替えはゲート後の本体判断)。
+
+### ★★★本体の手順の穴 —— **道具が出していた警告を自分で切り落としていた**
+
+Y13 の持ち場は「Cor 6.3 は木に無い」という前提で書いたが、★**既に埋まっていた**
+(`RamificationJumpDivisibility.lean`、第 1071・コミット `08e1bdbe`、`Found.lean:1745` で import 済み。
+`nat_card_quot_zero_dvd_of_ne` / `nat_card_quot_top_dvd_of_ne` /
+`nat_card_quot_lowerRamificationGroupAdjoin_one_dvd` の 3 形)。
+
+★★**`brief.mjs` は冒頭 8 行目でちゃんと警告していた**:
+```
+★**この項目は既に木にある**: `Found/PGC/RamificationJumpDivisibility.lean`
+  ⇒ 新規ファイルではない。`node tools/brief.mjs --node …` の方が情報が多い。
+```
+★★**本体が `sed -n '/## 1\./,/…/p'` で出力を絞ったため、この行を切り落としていた。**
+(索引の grep でも `e_?0` 等の語で引いたが、実際の宣言名は `nat_card_quot_*` だったので当たらなかった
+——★**「在庫は型で引く」を本体自身が守っていなかった**。)
+
+⇒ ★★**規則: `brief.mjs --paper` の出力は必ず冒頭から読む。`sed` で絞るなら `head` を併用する。**
+☆**道具が正しく警告を出していたのに人間側の絞り込みで消していた**、という失敗形である。
+★次の持ち場(Thm 6.11)では冒頭を確認してから配った(木に無いことを確かめた)。
+
+★**同じ持ち場でもう 1 つ誤っていた**: 本体は
+「`ramCoeff_smul_conj` が原文の `θ_n(στσ⁻¹) = u^n θ_n(τ)` に当たる」と書いたが、
+★**違った**。`ramCoeff_smul_conj` は**素元取り替えと共役の整合だけ**で `u^n` の因子を持たない。
+原文に当たるのは同ファイル **185 行の `residue_ramCoeff_conj`**:
+`residue (ramCoeff α n (τσ6τ⁻¹)) = residue (1 + ramCoeff α 0 τ)^n * residue (ramCoeff α n σ)`。
+★**捻れ `u^n` は `residue_ramCoeff_change_uniformizer` 側から来ており、
+`ramCoeff_smul_conj` からは来ない。本体の対応表は 1 リンクずれていた。**
+☆ただし**持ち場に「実機で確かめていない。違ったら訂正して報告すること」と書いたので覆った**
+(この形式が機能したのは 3 度目)。
+
+### Y13 着地 —— 持ち場を組み替えて別の価値を出した
+
+`Found/PGC/AbelianJumpDivisibility.lean` **487 行 / 21 宣言(証明本体は約 90 行)、sorry 0**。
+`#print axioms` 9 本すべて `[propext, Classical.choice, Quot.sound]`。
+`lake build` 成功(2981 jobs, 6.6 秒)。★**1 度も詰まらず `lean_check` 往復 11 回で全部通った。**
+
+★**既に埋まっていると分かった後、実装者は中身を 2 つに組み替えた**:
+- **(A) 原文の段取りに忠実な別証明**(先行ノードは `Monoid.exponent` 経由で原文の経路ではない)。
+  `e_0` の 2 つの表し方(`Nat.card (G ⧸ G_1)` と「生成元 `σ` の `θ_0(σ)` の位数」)の
+  **一致を証明**した。
+- ★★**(B) Hasse-Arf 最終段が Cor 6.3 から取り出す形**(原文が **`hence` の 1 語で畳んだ部分**)。
+  `dvd_sum_natCard_lowerRamificationGroup` と `dvd_of_sum_eq_natCard_mul`。
+  ★**原文の "hence `e_0 ∣ Σ|H_i|`" は純算術だった**と見抜き、
+  `sum_Ico_block_eq` / `dvd_sum_Ico_mul_of_step` / `dvd_sum_Icc_of_step` に切り出した
+  (**0.01–0.15 秒**)。
+
+★**`G` 可換を 1 行に閉じ込めた**(`hconj : τ * σ * τ⁻¹ = σ` ただ 1 行)。
+★**`G` 可換を `∀ x y : G, x * y = y * x` の命題で渡す**(`CommGroup` 構造だと具体層に当たらない)。
+★**逸脱 4 が良い設計**: 最後の一歩(`e_0 ∣ φ_H(n)`)は Lemma 6.10(i) を
+`hk : Σ = |G_1| * k` という**仮定として受け取る** ——
+Λ7 が Lemma 6.10 を**同時走行中**だったので**依存を作らず「差し込むだけ」の形**にした。
+
+`lean-idioms.md` **#115**(4 項目)。とくに (b) ★**`Nat.mul_le_mul_left e (Nat.le_succ m)` は
+`e * m.succ` を作り `omega` が `e * (m+1)` と別原子として扱う**(#103 と同型)。
+
+### 新しく配った持ち場: Y15 `Theorem 6.11 (Hasse-Arf)` —— ★★入力が全部揃った
+
+★**本体は今回、`brief.mjs` の冒頭を確認してから配った**(木に無いことを確認済み)。
+
+| 原典 | 木の宣言 |
+|---|---|
+| Cor 6.3 | `nat_card_quot_*`(Y4) + ★**Y13 の受け渡し口 `dvd_of_sum_eq_natCard_mul`** |
+| Cor 6.7 | `exists_padicDigits_card_lowerRamificationGroup`(Y8) |
+| Prop 6.9 | `herbrand_mem_iff`(Y11) |
+| Lemma 6.10 (i)(ii) | `herbrandPhiGroup_natCast` / `herbrandPhiGroup_comp`(Y12) |
+| Prop 6.2 | `residue_ramCoeff_conj` ほか(Y3) |
+| `G_1` が p 群 | `isPGroup_lowerRamificationGroup_one` |
+
+★**未確認として残したのは 1 点**: 有限アーベル p 群の構造定理が mathlib に在るか
+(★**本体は名前を確かめていない**)。持ち場には
+「無ければ『非自明な巡回商 `G/H ≅ ℤ/p^mℤ` が取れる』だけで回すこと ——
+★**原文が実際に使っているのはそれだけ**」と書いた。
+
+### Y14 着地 —— `hres` / `hAC` が本当に埋まった（§3 まで入った）
+
+`Found/PGC/FixedRingTower.lean` **434 行、sorry 0**。
+`lake build ABC3.Found.PGC.FixedRingTower` 成功(2990 jobs、自ファイル 6.5 秒)。
+`lean_check` 往復 **11 回**。
+★`#print axioms` で **`exists_sub_mem_of_exists_image` は "does not depend on any axioms"**。
+
+★★**本体の見立て「塔が立てば `hres` はほぼ自明」は当たった。しかも塔すら要らなかった。**
+`hres` の中身は `hAC` から **3 行**(`exists_sub_mem_of_exists_image`)で、
+`Algebra A C` のインスタンスを立てる必要がない。
+★**本ノードの実質は `hAC` の側**で、それは `[SMulCommClass G A B]` から
+```lean
+smul_algebraMap_eq_self : ρ • algebraMap A B a = algebraMap A B a := by
+  rw [Algebra.algebraMap_eq_smul_one, smul_comm, smul_one]
+```
+の **1 行**だった。⇒ ★**§1・§2 は本体の見立てより安く、代わりに §3 が重心になった**(約 100 行)。
+
+### ★★`C` を `FixedPoints.subring` で作った理由が実測で出た（道 A）
+
+`fixedRing B H := FixedPoints.subring B ↥H`。★**`Subring B` なので
+`Algebra ↥(fixedRing B H) B` / `IsScalarTower` / `IsDomain` が
+すべて mathlib のインスタンスで即座に付いた**(`#synth` **0.03 秒**で確認)。
+★**道 B(抽象のまま存在を述べる)を採ると `[IsDiscreteValuationRing C]` を
+永久に仮定のまま持ち回ることになり、Y10 の債務が消えない。**
+☆Y9・Y10 が一貫して採ってきた「抽象のまま受ける」流儀を、**ここで初めて逆に振った**
+——**債務を閉じるノードでは具体的に作るほうが正しい**、という設計判断である。
+
+### ★★§3 の発見: `B^H` が DVR であるのに**完全分岐は要らない**
+
+`instance fixedRing_isDiscreteValuationRing`(仮定は `[Fintype ↥H]` のみ)。
+★**`H` が有限でありさえすれば `B^H` は DVR** である。
+抽象核は「離散付値環 `B` の部分環 `C` が (i) 単元が降りる (ii) 割り算で閉じている
+(iii) 非零非単元を持つ、なら `C` は DVR」で、★**群も Galois も分岐も出ない**
+(`v(C∖0) ⊆ ℕ` が差で閉じた部分モノイド → `Nat.find` で最小正元 → 強帰納法 →
+`ofHasUnitMulPowIrreducibleFactorization`)。**0.47 秒・2 往復**(誤りは `Associated` の向き 1 箇所)。
+
+**主結論**(仮定は**底の設定だけ**):
+```lean
+addVal_map_eq_card_mul_fixedRing (hπ) (hresA) (hadjA) (c) :
+  addVal B (algebraMap (fixedRing B H) B c) = (Nat.card H : ℕ∞) * addVal (fixedRing B H) c
+```
+系 `addVal_map_uniformizer_eq_card_fixedRing`(`e(K′/K″) = |H|`)。
+
+### ★同時実行での良い判断（記録に値する）
+
+Y14 は `lean_status` の imports が自分の要求と一致しなかったが、
+★**自分が引く在庫が全部その部分集合だと確かめて `lean_start` を 1 回も呼ばなかった**
+(他体が使っている env を壊さないため)。最終確認だけ `leanfile.mjs` + `lake build`。
+☆**D27 の規約が想定していなかった第 3 の選択肢**であり、**次の持ち場に前例として書いた**。
+
+`lean-idioms.md` **#116**: ★(a)**`def` が包む部分構造は担い手の型を明示引数にしないと
+メタ変数になり、症状が `MulSemiringAction G ?m` / `OfNat (↥(fixedRing H)) 0 is stuck` として
+5 箇所に散る**(原因は型クラスではなく暗黙引数の設計)/ (b) `associated_one_iff_isUnit` の向き /
+(c) `rw [← h]` は等式ゴールの左右両方を書き換える。
+
+### 新しく配った持ち場: Y16「`H ⊴ G` なら `G` は `B^H` に環作用する」
+
+★Y14 が供給**できなかった**のは 3 つだけ:
+`[MulSemiringAction G C]` / `hcomp` / `hHtriv`。理由は
+★**`G` が `B^H` に作用するのは `H ⊴ G` のときだけ**で、Y14 は正規性を仮定していなかったため。
+★**実装者自身が「必要なら 1 ノードを別に立てるのが正しい切り方」と提案した**ので配った。
+
+★★**これが入ると Λ7 の鎖(Y10 → Y11 Herbrand → Y12 Lemma 6.10 → Y15 Hasse-Arf、
+計 2,300 行超)が原典 §6.1–§6.2 の設定だけに載る。**
+★mathlib に既にある可能性があるので「**在ったら在ったと報告すること**」を明記した。
+
+### Y16 着地 —— Λ7 の債務が 8 つ中 7 つ消えた（213 行、思ったより安い）
+
+`Found/PGC/FixedRingAction.lean` **213 行、sorry 0**（見積 150–350 の内）。
+`lake build` 成功(2991 jobs, 6.1 秒)。
+★`lean_check` **4 回**(0.01–0.61 秒)、`leanfile.mjs` **1 往復で ok(警告 0)**。
+
+★**抽象核が 22 回連続で効いた。しかも段取りより 1 段一般化された**:
+```lean
+smul_mem_fixedPoints_of_normal {α G} [Group G] [MulAction G α] {H : Subgroup G}
+  (hH : H.Normal) (ρ : G) (ha : ∀ τ ∈ H, τ • a = a) (hτ : τ ∈ H) : τ • (ρ • a) = ρ • a
+```
+★**環すら出てこない**（`MulAction G α` だけ）。**0.14 秒・一発**。
+`#print axioms` は **`[propext]` のみ**。
+
+★**段取りの見立てがすべて当たった**（この波は珍しく訂正が無い）:
+- `hcomp` は **`rfl` 1 語**、`hHtriv` は **`Subtype.ext` 1 語**（見立て「1–3 行」どおり）
+- `H ⊴ G` を使ったのは **1 箇所だけ**（`hH.conj_mem'`。grep で確認済み）
+- `[Fintype ↥H]` は §1・§2 では **要らなかった**（§3 でだけ要る）
+
+### ★★mathlib には「商群版しか無かった」
+
+`Mathlib/RingTheory/Invariant/Basic.lean:98` に
+`instance (H : Subgroup G) [H.Normal] : MulSemiringAction (G ⧸ H) (FixedPoints.subring B H)`。
+★**Y10 が要求するのは `MulSemiringAction G C`(`G` そのもの)なのでそのままでは使えない。**
+加えて `Mathlib.RingTheory.Invariant.Basic` は本木のどこからも import されていない
+(`Algebra.IsInvariant` が `Unknown constant`、0.01 秒で確認)。
+`MulSemiringAction.compHom (QuotientGroup.mk' H)` で引き戻す道はあるが
+**mathlib import を 1 本増やすだけで `hcomp` はどちらでも `rfl`** なので直接構成した。
+☆**「在ったら在ったと報告すること」と書いた結果、"部分的に在った" という正確な答えが返った。**
+
+★**主結果 `card_mul_ramIndex_eq_sum_ramIndex_fixedRing`**:
+Y10 が持ち回っていた `[MulSemiringAction G C]` / `hcomp` / `hHtriv` / `hinj` / `hfixC` /
+`hres` / `hAC` / `[IsDiscreteValuationRing C]` が**すべて消えた**。
+
+`lean-idioms.md` **#117**:
+★(i)**素の `def` 包み(`fixedRing B H := FixedPoints.subring B ↥H`)は `instances` 透明度で
+展開されないので mathlib のインスタンスが降りてこない**(害)が、逆に
+**自前インスタンスが mathlib 側と衝突しない**(益)/
+★(ii)**在庫調査は名前空間で `.cache/mathlib-index.txt` を 1 回 grep するのが最速**
+(`FixedPoints\.` で 60 行、「商群版しか無い」が確定)/
+★(iv)★★**この環境では `cat > f << 'EOF'` のヒアドキュメントが PreToolUse フックで壊れる。
+Lean ファイルは Write ツールで書くこと**(実際に踏んだ)。
+
+### 新しく配った持ち場: Y17 `hfix`（Λ7 に残った最後の 1 つ）
+
+残った唯一の仮定は
+`hfix : ∀ y : B, (∀ ρ ∈ H, ρ • y = y) → y ∈ Algebra.adjoin A {ι ϖ}`
+= ★**原典 Lemma 5.11 を `K″/K` に当てた形**(`𝒪_{K″} = 𝒪[π″]`)。
+★**数学が足りない側の穴であり、配管の穴ではない**(Y16 の実装者の判定)。
+
+★本体が**型で**在庫を測ってから配った(`adjoin_uniformizer_eq_top` /
+`exists_algebraMap_fixedRing` / `exists_sub_mem_fixedRing` / `adjoin_fixedRing_eq_top` /
+`adjoin_eq_top_of_image`)。
+★**本体が特定した重心**: `Algebra A C` のインスタンスが無い可能性が高い
+(Y14 は「立てる必要がない」と書いて**避けている**)。★**実機で確かめていないので測らせる。**
+★★**`brief.mjs --id lemma-5-11` の冒頭を確認するよう明記した**
+——**本体は今回それを確認していない**ので、agent に確認させる形にした
+(2026-09-07 の失敗形 [[brief-header-carries-the-warning]] の再発防止)。
+
+★これが埋まると **Λ7 の鎖(計 2,500 行超)が原典 §6.1–§6.2 の設定だけに載る。**
+
+### Y15 着地（部分）—— Hasse-Arf の 3 段のうち **2 段が sorry 0 で埋まった**
+
+`Found/PGC/HasseArf.lean` **615 行、sorry 0**。
+`#print axioms` 全部 `[propext, Classical.choice, Quot.sound]`。
+`lake build ABC3.Found.PGC.HasseArf` 成功(2991 jobs, 6.8 秒)。`lean_check` **13 往復**(うち失敗 3)。
+`lean_start` は 1 回だけ、`lean_status` で imports 一致を確認済み。
+
+| 段 | 状態 |
+|---|---|
+| **段 1**(`j=1`、巡回) | ★**完全に入った**。`exists_natCast_herbrandPhiGroup_of_isCyclic` |
+| **段 2**(`j>1` の帰納) | ★**入っていない**(理由は**配管**。下記) |
+| **段 3**(`G ≠ G_1`) | ★**入った**。`natCard_quot_dvd_of_herbrandPhi_natCast` |
+
+### ★★段 1 は原文と経路が違う —— しかもそのおかげで退化が自動で通った
+
+★**Corollary 6.7 の p 進展開を経由しなかった。**
+`i_{j+1} − i_j` が `p^{j+1}` で割れる(Prop 6.6 (iii) = Y7b)ことから
+**直接 `p^m ∣ Σ_{k=1}^n |G_k|`** を出した。
+⇒ ★**`n_i ≥ 1` も `1 ≤ j ≤ m−1` も要らず、`m = 0, 1` の退化も自動で通る。**
+☆本体は持ち場で「Cor 6.7 を使う」と原文どおり書いたが、**実装者はより短い道を見つけた**
+(直近 8 波すべてで同じことが起きている)。
+
+★**Y13 の `dvd_of_sum_eq_natCard_mul` はそのまま差し込めた**(段 3)。
+追加は `(G_i).subgroupOf G_1` を `Subgroup.subgroupOfEquivOfLe` で潰す一手だけ。
+★**Y12 の `herbrandPhi_natCast` / `herbrandPhiGroup_natCast` もそのまま使えた。**
+★**使えなかったのは `herbrandPhiGroup_comp`(Lemma 6.10(ii))だけ** —— 固定環 `C` と
+**7 本の適合条件**が要るため、結論の形だけを仮定 `hcomp` として受け取った。
+
+★**思ったより安い**: 見積 500–1000 行に対し **615 行**。効いたのは
+(a) 段 1 を「p 進展開の値」ではなく**ブロック和の整除性**に読み替えたこと、
+(b) ★**原文が `hence` / `by definition` で畳んだ 3 箇所(ブロック分割・跳びの位置・順分岐の φ)が
+いずれも抽象核として切り出せた**こと(**0.08–0.13 秒**)。
+
+### ★★有限アーベル p 群の構造定理は mathlib に在った（ただし未 import）
+
+Y15 が実測(`Unknown constant` で 0.03 秒判別。★#68「無い」ではなく「import していない」):
+- `AddCommGroup.equiv_directSum_zmod_of_finite` — `Mathlib/GroupTheory/FiniteAbelian/Basic.lean:135`
+- `AddCommGroup.equiv_directSum_zmod_of_finite'` — 同 :151
+- 双対: `CommGroup.exists_apply_ne_one_of_hasEnoughRootsOfUnity` — `.../Duality.lean:64`
+
+★**olean はビルド済み**なので **import 1 行で使える**。
+★ただし Y15 は「**構造定理があっても段 2 は閉じない**(塔が要る)」と判定して使わなかった。
+
+### ★★★段 2 が止まった理由が、走行中に解消していた
+
+Y15 の判定:
+> 段 2 — 入っていない。理由は**配管**(数学ではない): 帰納の各段が
+> 「商 `G/H` が固定環 `C` に忠実に作用する」ことを要求し、木の Prop 6.9 / Lemma 6.10(ii) は
+> その `C` と **7 本の適合条件**を仮定で受ける形になっている。
+
+★★**その 7 本を、Y16 が Y15 の走行中に供給した**(`fixedRingMulSemiringAction` /
+`algebraMap_smul_fixedRing` / `smul_fixedRing_eq_self` ほか)。
+さらに Y14 が `fixedRing_isDiscreteValuationRing` / `addVal_map_eq_card_mul_fixedRing` を出している。
+⇒ ★**Y15 は Y16 を知らないまま止まった。**
+
+☆★**これは並列化の副作用である**: 2 体を同時に走らせると、
+**片方の成果がもう片方の「越えられない」判定を無効化する**ことがある。
+★**規約に足すべきこと**: 「越えられない」と報告された持ち場は、
+**その波で他に着地したものを突き合わせてから**新ノードにすること。
+
+⇒ **Y15b `HasseArfInduction` として即座に配った**(Y15 と Y16 の両方を import させ、
+「Y15 の判定は今は成り立たない可能性が高い。★**ただし本体は実機で確かめていない**。
+確かめて、まだ足りなければ具体名で報告すること」と明記)。
+★Y17 が `hfix` を**同時に**埋めているので「要るなら仮定として受け取り、
+★**Y17 の着地を待たないこと**」も書いた。
+
+`lean-idioms.md` **#118**(`Nat.cast` 経由の `min`/`1` は `min_eq_left` の前に `Nat.cast_one` /
+`Order.le_of_lt_add_one` の名前つき引数は `x`,`y` /
+`irreducible_iff_uniformizer` は `open IsDiscreteValuationRing` 必須 —— #68 の変種)。
+
+### Y17 着地 —— ★★Λ7 の鎖から最後の仮定が消えた
+
+`Found/PGC/FixedRingMonogenic.lean` **376 行、sorry 0**。
+`#print axioms` 5 本すべて `[propext, Classical.choice, Quot.sound]`。
+`lake build` 成功(2992 jobs, 6.2 秒)。
+
+主定理 `fixedRing_mem_adjoin_uniformizer` = `hfix` そのもの。
+これを Y16 に流し込んだ `card_mul_ramIndex_eq_sum_ramIndex_fixedRing_of_irreducible`
+(および `hAne` を自動化した `..._of_injective`)で、**Lemma 6.8 形から `hfix` が消えた**。
+⇒ ★★**Λ7 の鎖(Y10 → Y11 Herbrand → Y12 Lemma 6.10 → Y14 → Y16 → Y15 Hasse-Arf)が
+原典 §6.1–§6.2 の設定だけに載った。** 今朝は 8 つの仮定を持ち回っていた。
+
+### ★★brief の冒頭警告が、入れた当日に機能した
+
+★**Y17 は `brief.mjs --id lemma-5-11` の冒頭で**
+> ★**この項目は既に木にある**: `Found/PGC/LowerRamificationGroup.lean`
+
+**を読み、一般形(`adjoin_uniformizer_eq_top` / `exists_uniformizer_adjoin_eq`)が既にあると
+気づいた。** そのうえで
+★**「本ノードは同じ原典項目を `K″ = (K′)^H` に当てた実例」**という正しい切り方をし、
+`.src` を重ねた(同一 item への複数 `.src` は本木で普通 —— `GenEll p17 Prop 3.4` は
+**63 件**と実測して確認したうえで判断している)。
+☆**2026-09-07 に本体が踏んだ失敗形([[brief-header-carries-the-warning]])が、
+同じ日に道具と持ち場の両方で塞がり、実際に機能した。**
+
+### ★本体の見立てが外れた（今日 9 件目）—— ただし今回も覆った
+
+本体は持ち場に「★`Algebra A C` のインスタンスが無い可能性が高い。
+**これが本ノードの重心かもしれない**」と書いた。★**外れた。実質 2 行で立った。**
+
+```lean
+@[reducible] def Subring.algebraOfMapsTo (S : Subring B) (h : ∀ a, algebraMap A B a ∈ S) :
+    Algebra A ↥S := ((algebraMap A B).codRestrict S h).toAlgebra
+haveI : IsScalarTower A ↥S B := IsScalarTower.of_algebraMap_eq fun _ => rfl   -- ★rfl 一発
+```
+★★**鍵は「大域インスタンスにしない」こと。** `hfix` の statement に `Algebra A C` が
+現れないので `letI` で証明の中に閉じ込められる(★#117(i) の害を回避)。
+`lean-idioms.md` **#119** に記録。
+
+★**本体の段取りより安かった点が 5 つ**:
+(1) `hres` の「向きが違う」問題は**起きなかった**(局所環では非単元の逆像が非単元、**2 行**)
+(2) ★**`hadjA`(`𝒪_{K′}=𝒪[π′]`)は §1・§2 で 1 度も使っていない** ——
+`K′/K` の完全分岐だけで `K″/K` 版の Lemma 5.11 が出る
+(3) ★**`H ⊴ G` は §1・§2 で不要**(固定環は正規性なしに部分環。§3 でだけ復活)
+(4) `B` への輸送は **1 行**(`AlgHom.map_adjoin` + `Set.image_singleton` +
+`IsScalarTower.coe_toAlgHom'`)
+(5) 重かったのは `[Module.Finite A C]` の供給だけで、それも `Module.Finite.of_injective` 1 行
+
+☆逸脱 4 が誠実: ★**`hϖ : Irreducible ϖ` が新たに要る**(Y16 は任意の `ϖ` を取れたが、
+`hfix` を供給するには素元でなければならない —— 単元なら `𝒪_{K″} ≠ 𝒪[ϖ]`)。
+★**statement をねじ曲げてはいない**(`ϖ` は原典で `K″` の素元)。
+逸脱 2・3 で `[IsNoetherian A B]` と `hAne` を足したことも明記
+(**仮定を足しただけで弱めていない**)。
+
+☆新ノード候補(急ぎではない): `[IsNoetherian A B]` と `hAne` を Lubin-Tate の具体設定で供給する
+——「`𝒪_{K′}` は `𝒪_K` 上有限」。★**数学が足りない側ではなく在庫調べの問題。**
+
+### 新しく配った持ち場: Y18 `Definition 6.12`（上付き番号付け）+ `Corollary 6.13`
+
+★★**pGC 本体に直接効く数少ないノードである。** 構造化係の注記:
+> pGC §2(**Definition 2.3、上付き番号付けの高次分岐群**)と**同じ対象を定義**しており、
+> ★**Λ7 はこちらを実装本体にして pGC 側をその上に載せる予定。**
+
+★**本ノードの本当の中身は `φ_G` の逆写像の存在**である。構造化係の注記:
+> ★**その全単射性は原典では明示されていない**(Lemma 6.10 の形から読み取れ、という扱い)——
+> ★**Lean 化では `φ_G` の狭義単調性・連続性・非有界性が独立の節点になる。**
+
+在庫は `strictMono_herbrandPhi`(Y11)だけで、★**連続性と非有界性は在庫に無い見込み**
+(★本体は索引で確かめていない)。本体の見当(有限個の `min` の和だから連続 /
+`i(1) = ⊤` だから非有界)を**「実機で確かめていない。外れたら訂正して報告すること」**と
+明記して配った。
+
+★**本体は今回 `def-6-12` / `cor-6-13` の冒頭を確認してから配った**(どちらも木に無い)。
+
+### Y18 着地 —— 上付き番号付け（Def 6.12）と Cor 6.13 (i)(ii)
+
+`Found/PGC/UpperRamificationGroup.lean` **650 行 / 宣言 41 件、sorry 0**。
+`#print axioms` 主要 14 宣言すべて `[propext, Classical.choice, Quot.sound]`。
+`lake build` 成功(2990 jobs, 6.7 秒)。`lean_check` 13 回(合計 3 秒弱)＋ `leanfile.mjs` 3 回。
+★**`lean_start` も `lean_reset` も呼んでいない**(4 回連続)。
+
+★**本体の見当は 2 つとも当たった**: 連続性は「有限個の `min` の和」で
+`Continuous.min` + `continuous_finsetSum`、非有界(上)は `i(1) = ⊤` から `φ_G(n) ≥ −1 + (n+1)/|G|`。
+連続性・非有界性は在庫に無く、自分で書いた(4 補題・約 45 行)。
+
+### ★★本体の段取りより 1 段安い道があった（10 度連続の実証）
+
+本体は `StrictMono.orderIsoOfSurjective` / `Continuous.surjOn_Icc` で
+`[0,∞)` 上の全単射を作れと書いたが ——
+★★**`i(τ) ≥ 1` から `n ≤ 0` では全項が `min{i(τ), n+1} = n+1` になり `φ_G(n) = n`**
+(`phiOf_of_nonpos`、**6 行**)。つまり ★**`φ_G` は `(−∞,0]` 上で恒等写像**で下にも非有界。
+⇒ ★**`φ_G : ℝ → ℝ` が全域の全単射**になり、`SurjOn`・`Ici` への制限が一切要らず、
+`intermediate_value_Icc` **1 回(6 行)**で全射性が出た。逆写像は `Function.invFun` で足りた。
+
+★**(i) は新たな仮定を 1 つも足していない** —— `φ_{G/H}` については単射性(狭義単調性、仮定不要)
+しか使わないので `ϖ` が `C` の一意化元であることを足す必要が無かった。
+★**商群 `G ⧸ H` は作らずに済んだ(5 波連続)。**
+
+★**(iii) は落とした**(新ノード)。理由: **Theorem 6.11 の一般の可換 `G` に対する形**が要り、
+`HasseArf.lean` は巡回群・馴分岐商までしか無い。★**入口の第 1 文だけは入れた**
+(`upperRamificationGroup_eq_lowerRamificationGroup`)。
+`lean-idioms.md` **#120**(`if` を割った直後の `Continuous fun r => r` を `simp` は閉じない /
+`continuous_finset_sum` は deprecated / `a ≤ b → a/c ≤ b/c` は **`gcongr` が一発**)。
+
+### Y15b 着地 —— Hasse-Arf 段 2 が `hind` 以外すべて閉じた
+
+`Found/PGC/HasseArfInduction.lean` **703 行、sorry 0**。
+`#print axioms` 全宣言 `[propext, Classical.choice, Quot.sound]`。
+`lake build` 成功(3107 jobs, 6.9 秒)。★`lean_start` は呼んでいない(5 回連続)。
+
+★★**本体の見立て「Y15 の『配管が越えられない』は今は成り立たない可能性が高い」は当たった。**
+Y15 が挙げた 7 本のうち **`hcomp`・`hHtriv`・`hinj`・`hfixC`・`hres`・`hAC`・
+`[MulSemiringAction G C]`・`[IsDiscreteValuationRing C]` が全部消えた**(Y14 + Y16)。
+
+★★**しかし Y15 が気づいていない別の債務があった**(実装者が発見):
+段 2 は Y15 の段 1 を**商 `G ⧸ H` が `C` に作用する形**で使うので、`G` の作用(Y16)では足りない。
+- `[MulSemiringAction (G ⧸ H) C]` と `hq` → ★**本ノードが払った**(`hq` は `rfl`)
+- ★**`FaithfulSMul (G ⧸ H) B^H` → 本ノードが払った**(予定外の収穫。
+  Y16 の Lemma 6.8 で `|H|·i_ϖ(σ)=⊤` ⇒ 和の項が `⊤` ⇒ `στ=1`)
+
+### ★構造定理は「インターフェースは巡回商、エンジンは構造定理」に落ち着いた
+
+★段 2 は成分の位数 `p^{m_i}` を **1 度も使わない**。位数は `IsPGroup.to_quotient` で別に出る。
+`H := ker ψ` で終わるので分解を経由するより安い。
+import は **1 行 `Mathlib.GroupTheory.FiniteAbelian.Basic`**
+(★乗法版 `CommGroup.equiv_prod_multiplicative_zmod_of_finite` があるので `Additive` 往復が不要)。
+Duality は `HasEnoughRootsOfUnity` のインスタンスが要り高い。
+
+★**Y12 の `herbrandPhiGroup_comp` が今回は使えた**(Y15 では使えなかった)。
+差は **`C` を抽象のまま両方の作用付きで持つ**設計にしたこと。
+
+☆逸脱 3 が誠実: **`hind`(`φ_H(n) ∈ ℤ≥0` の再帰呼び出し)は仮定で受ける ——
+数学ではなく配管**。
+☆予定外に高かった点も正直に: `orderOf σ̄ = p^m` と `σ̄ ∈ (G/H)_1` は**仮定に置かず導いた**
+(`h1 : G_1 = ⊤` から)。★**原典「First assume G = G_1」に忠実になった。**
+
+`lean-idioms.md` **#121**(`ℕ∞` に `WithTop.sum_eq_top` を `rw` できない / `mul_top` は無く
+`ENat.mul_top` / `Set G` の積に `open Pointwise`)・**#122**(`IsPGroup.of_equiv` はドット記法 /
+`Subgroup.zpowers` の所属を開くと β 未簡約の項が出るので `show` を挟む)。
+
+### 新しく配った持ち場 2 つ
+
+**Y19 `RamificationFiltration` の構成**（★**pGC §2 が入力に要求している対象そのもの**）。
+`Interface/PGC/LocalFieldData.lean:160` の構造体は
+`Gv : (K : PAdicLocalField p) → ℝ → Subgroup K.absGal`(★**絶対 Galois 群の上**)で、
+`waiting` に「**Herbrand の定理を要する**」と書いてある。
+★★**Y18 の Cor 6.13(i)(`G^m H/H = (G/H)^m`)こそが
+「有限 Galois 部分拡大の逆極限として `Γ_K^v` を定義できる」根拠**である。
+★**本体が見つけた穴を明示して配った**: Λ7 の鎖は `K′/K` の完全分岐を仮定しているが、
+**一般の有限 Galois 拡大は完全分岐ではない**。道 A(惰性群に制限)/ B / C を挙げ、
+★**どれが正しいかを測って選ばせる**(本体は確かめていない)。
+
+**Y20 Hasse-Arf 段 2 の残り配管 3 本**。Y15b が名指しした
+`Algebra A ↥(fixedRing B H)` / `CharP (ResidueField …) p` / Y17 の `hfix`・`hadjC`。
+★**Y17 が `Subring.algebraOfMapsTo` と `adjoin_uniformizer_subring_eq_top` を作り置きしている**
+ので、★**そのまま使えるかを測らせる**(本体は型を突き合わせていない)。
+★1 を**大域インスタンスにするか `letI` に留めるか**が設計の要
+(#117(i) と #119 が衝突しうる)。
+
+### Y20 着地 —— 段 2 の配管 3 本が全部埋まった（337 行、思ったより安い）
+
+`Found/PGC/FixedRingBaseAlgebra.lean` **337 行、sorry 0**。
+`lake build` 成功(3109 jobs, 9.4 秒、警告 0)。`leanfile.mjs` **4 往復・実質 1 エラーのみ**。
+★抽象核 `smulCommClass_of_smul_algebraMap` は **`does not depend on any axioms`**。
+
+| Y15b が名指しした債務 | 供給した宣言 |
+|---|---|
+| `Algebra A ↥(fixedRing B H)` | `fixedRingAlgebra` |
+| `SMulCommClass (G ⧸ H) A C` | `smulCommClass_quotient_fixedRing` |
+| `hresC` | `exists_sub_mem_maximalIdeal_fixedRing` |
+| `CharP (ResidueField C) p` | `charP_residueField_fixedRing` |
+| `hfix` / `hadjC` | ★**Y17 の 2 本がそのまま嵌った** |
+
+★★**段 2 の仮定は「原典 §6.1–§6.2 の底の設定」と `hind` だけになった。**
+
+### ★★本体の見立てが外れた（今日 11 件目）—— 今回は「要ると書いた仮定が要らなかった」
+
+本体は「2（`CharP`）は `K′/K` が完全分岐なら剰余体が同じ」と書いたが ——
+★★**`hresA`（完全分岐）は 2 には要らなかった。** `IsLocalHom` すら要らず、
+Y17 の `mem_maximalIdeal_of_map_mem`（単元の像は単元、という**易しい向き**）と
+`CharP.charP_iff_prime_eq_zero` の **2 本で 3 行**。
+★**不分岐でも剰余体が伸びるだけで標数は `p` のまま。**
+⇒ `charP_residueField_fixedRing` は `hresA` を受け取っていない。
+
+### ★`Algebra A C` は `letI` に留めた —— 測って決めた
+
+本体は「大域インスタンスにするか `letI` に留めるかが設計の要」と書いた。実装者の判定:
+> 系の**結論**に `Algebra A C` が現れず、現れるのは `hadjC`/`hresC` 側だけで、
+> それは本ファイルが自分で供給する ⇒ **系の statement から `Algebra A C` が完全に消える**。
+> ★**逆に大域にすると `A := ℤ` で `Int.instAlgebra` とダイヤモンドになる。**
+> ★**`#117(i)` とは衝突しなかった** —— `fixedRing B H : Subring B` は型としては
+> `↥(Subring …)` なので `Subring.toAlgebra`・`IsDomain ↥S` は普通に降りてくる
+> （`fixedRing` を**定義まで開く場面が無い**）。
+
+★**Y17 の `Subring.algebraOfMapsTo` と `adjoin_fixedRing_uniformizer_eq_top` は
+新しく書かずにそのまま使えた**（`letI` の入れ方が Y17 と同一項なので
+`exact` の既定透明度で一致）。
+
+★**`lean_start` を呼ばずに済ませたのは 6 回連続。** Y20 の判断が良い前例:
+自分の在庫が共有 env の**部分集合でない**と判明したので、
+**mathlib のみの `#check`・抽象核だけ共有 REPL で測り、ABC3 在庫を引く部分は
+`leanfile.mjs` に回した**。Y19 の環境は無傷。
+
+`lean-idioms.md` **#123**: ★**`haveI := f (A := A) (fun σ c => …)` のように
+引数がラムダだけだと `B`・`G`・`H` が決まらず `typeclass instance problem is stuck` が出る**
+——`haveI :=` には**期待型が無い**のが原因。暗黙引数を名前で全部渡せば直る
+（同じ項を `exact` の引数位置に置くと期待型があるので何も渡さずに通る）。
+併せて「局所環の代数写像に沿って剰余体の標数は降りる（`IsLocalHom` 不要・分岐不要）」を在庫として記録。
+
+### 新しく配った持ち場: Y21 `hind` の除去 —— ★Hasse-Arf が閉じる最後の 1 本
+
+Y15b と Y20 の実装者が**揃って**言っている:
+> `hind` を消すには「**部分群 `H ⊆ G` すべてについて `φ_H` の主張を強帰納法で回す**」
+> 新ノードが要る（各段で塔 `K′/K^H/K` を立て直すため）。
+> ★**Y20 の 3 本が入ったので、その新ノードは底の設定だけから塔を組めるようになった。**
+
+★本体の見当（★**実機で確かめていない**と明記して配った）:
+- 帰納の測度は **`Nat.card H` の強帰納法**（`H ⊊ G` ⟹ `|H| < |G|`）
+  ——原文は「`j`（巡回成分の個数）」だが、★**Y15b は成分の位数を 1 度も使っていない**
+- `H = H_1` は `H ≤ G = G_1` から出るはず
+
+★**閉じれば Theorem 6.11（Hasse-Arf）が 3 段そろって完成する。**
+
+---
+
+## ★★★Λ6 §4 を `L = K̂` で立てる道が測定で決着した（読み取り専用の測定、2026-09-07）
+
+本体は「Λ6 §4 の実体は『新しい数学』ではなく『`L = K` から `L = K̂` への一般化』かもしれないが、
+★**規模を測っていない**」として在庫調査係に測らせた。**答えが出た。**
+
+### 測定 1: Lubin-Tate 在庫 **57 ファイル / 14,525 行 / 471 宣言**の担い手
+
+| 分類 | 件数 | ファイル | 行数 |
+|---|---|---|---|
+| `PAdicLocalField p` 特化 | **194** | 26 | 7,301 |
+| **抽象環**(`{A}[CommRing][IsLocalRing][IsDomain]…`) | **269** | 31 | 7,224 |
+| 担い手なしの汎用補題 | 8 | — | — |
+
+★**主要 4 宣言のうち 3 つは抽象環**(`iteratedLubinTateDistinguished` / `LubinTateEndo` /
+`formalGroupLaw`)。`iteratedLubinTateTorsionPoints` が `K` 特化なのは
+**根を取る先に代数閉体 `K.closure` が要るから**だけ。
+
+★測定の工夫として記録に値する: **「statement + その宣言より前にある `variable` 行」を
+突き合わせないと 121 件が未分類になる**(`variable` 束縛は索引の statement 欄に現れない)。
+
+### ★★★測定 2: `unramifiedCompletion K` は `PAdicLocalField p` に **ならない**（2 つの独立な理由）
+
+**理由 1（定義から）** `Skeleton/PGC/Setup.lean:40` の `PAdicLocalField` は
+`[FiniteDimensional ℚ_[p] carrier]` を要求する。`K̂^ur` は `K^ur` を含むので **ℚ_p 上無限次元**。
+
+**理由 2（型で矛盾が出る）** ——★**これが決定的**:
+- Lubin-Tate 在庫の抽象環 269 件のうち **100 件**が
+  `[Fintype (IsLocalRing.ResidueField A)]` + `hq : card (ResidueField A) = pp^ff` を要求する
+- しかし `isAlgClosed_residueField_unramifiedCompletionInt`(`UnramifiedResidueField.lean:935`)
+  により **`𝒪_{K̂^ur}` の剰余体は代数閉**
+- mathlib の `instance [Field K] [IsAlgClosed K] : Infinite K` と衝突する
+
+★**`lean_check` で実測(0.01 秒)**:
+```lean
+example (κ : Type) [Field κ] [IsAlgClosed κ] [Fintype κ] : False := by
+  have := (inferInstance : Infinite κ); exact not_finite κ
+```
+⇒ ★★**「既存の Lubin-Tate 機械を `K̂` に代入するだけ」は論理的に成立しない。**
+
+☆未測定として明記された点: `𝒪[unramifiedCompletion K]`(ノルムの付値環)と
+`unramifiedCompletionInt K` を同一視する定理は木に **0 件**。理由 2 を Lean で完結させるなら 1 本要る。
+
+### ★★測定 3: 有限剰余体が**本質的に**効いているのは 2 箇所しかない
+
+`hq` の**本質的**使用(引数の受け渡しではない)は corpus 全体で **14 箇所**:
+`1 < pp^ff` に使うもの **12 件** / `0 < pp^ff` に使うもの **2 件**。
+★**この 14 箇所は `hq1 : 1 < pp^ff` に置き換えれば有限性が不要になる。**
+
+★**真に有限体を使うのは 1 本だけ**: `mvPowerSeries_pow_card_eq_expand`
+(`Found/PGC/FrobeniusExpand.lean:47`、**59 行**)と、その呼び出し側 2 箇所。
+これは原典 Lemma 3.4 の合同を **φ = id と特殊化**したもの。
+
+★★★**その φ 捻り版は既に木にある** —— Λ5b/Λ6 が同じ壁に当たって作っていた:
+`pow_subst_eq_subst_map_iterateFrobenius`(`DworkThetaStep2.lean:448`)。
+★**有限性を仮定しない**(任意の `[CommRing R] [ExpChar R pp]`)。
+★`DworkThetaStep2.lean:81` と `:446` のコメントが
+**「`mvPowerSeries_pow_card_eq_expand` は有限体専用なのでここでは使えない(`𝓀_{K̂^ur}` は無限)」**と
+明示的に書いている。☆**過去の自分が既に同じ壁に当たり、回避策を残していた。**
+
+### ★★★決定（D28）: **道 A（基底変換）を採る**
+
+| | 道 A（基底変換） | 道 B（原典の一般性 `f ∈ 𝒪_L[X]`） |
+|---|---|---|
+| 中身 | `f ∈ 𝒪_K[[X]]` のまま `L^m_f := K̂^ur(µ_{f,m})` を `ℂ_K` の中で取る | φ 捻りを 269 宣言の**型**に通す |
+| 既存への影響 | ★★**Lubin-Tate 機械 471 宣言を 1 件も触らない** | 広い署名変更（件数は**未測定**） |
+| 木の現状 | ★**既にこの道を採っている**(`lubinTateCompletionField`、`LubinTateTowerFIndependent.lean:364`) | — |
+| 数学的な壁 | 無し | 1 本(`FrobeniusExpand`)。★**代替は既に在る** |
+
+★★**道 A を採る。理由**: (1) 既存 14,525 行に一切触らない (2) ★**木は #9(Cor 4.9 前半)で
+既にこの道を採っており、`lubinTateCompletionField` がその実体である** (3) 道 B は
+数学的な壁こそ無いが**署名変更の件数が測れていない**。
+☆**これは技術的な経路選択であり人を待つ判断ではない**ので、決定として記録する。
+
+### ★道 A で要るのは 3 本だけ（測定で確定）
+
+1. **`[K̂^m_f : K̂^ur] = q^n − q^{n−1}`** —— 木に **0 件**。
+   材料は `totallyRamifiedAdjoin_inf_unramifiedClosure`(`TotallyRamified.lean:687`)と
+   `inf_eq_bot_of_isUnramified_of_isTotallyRamified`(`RamifiedUnramifiedDisjoint.lean:46`)にあるが、
+   ★**`K^ur → K̂^ur` の完備化を渡る段が無い**
+2. **`Gal(K̂^m_f/K̂^ur) ≃* (𝒪_K/π^n)^×`**（＝ Prop 4.4(iii) の `L = K̂` 版）—— 木に **0 件**
+3. **`N(−α) = π`** —— 木に **0 件**。
+   ★`Algebra.norm` を型に含む宣言は木全体で **4 件**(Arakelov 3・SixExp 1)、`Found/PGC` には **0 件**
+
+☆★**在庫調査係は「私は見積もっていない」と明記した**(`L=K` 版の対応物が
+68 + 153 + 425 行であることは書いたが、それは類似物の行数であって見積もりではない、と)。
+★**この誠実さは正しい。** 本体も見積もりを捏造しない。
+
+### ★その他の測定結果
+
+- **mathlib に Lubin-Tate は無い**(`grep -ci lubin` → **0**、
+  `absent-recheck.mjs --try 'lubin.?tate'` → **0 件**)。
+  最も近いのは `FormalGroup`(`Mathlib/RingTheory/FormalGroup/Basic.lean:53`)の **12 宣言のみ**で、
+  形式 `O`-加群も Lubin-Tate 級数も無い。
+- **`K̂` 側の在庫は 149 件 / 11 ファイル**。`𝒪_{K̂^ur}` の環論的構造は既に揃っている
+  (`isDiscreteValuationRing_` / `isAdicComplete_` / `maximalIdeal_…_eq_span` /
+  `expChar_residueField_` / `isAlgClosed_residueField_`)。
+- **Prop 4.4(i) の `𝒪/𝔭^m ≃ₗ µ_{f,m}` という 1 本の同型は木に無い**(部品は揃っている)。
+- ★**Prop 4.7(ii) の原文は「Let L = K̂」で確定**(`.txt` 行 421 が `(ii) Let L = bK.`)。
+
+### Y19 着地（部分）—— `RamificationFiltration` の抽象核が完全に埋まった
+
+`Found/PGC/AbsGalRamificationFiltration.lean` **577 行、sorry 0**（見積 600–1200 に対し ★安い）。
+`#print axioms` 全 20 宣言が `[propext, Classical.choice, Quot.sound]`
+（`comap_compat_of_coe_mul_coe_eq` と `directed_openNormalBase` は **`Classical.choice` すら不要**）。
+`lake build` 成功(3021 jobs, 6.4 秒)。★`lean_start` は呼んでいない（7 回連続）——
+共有 REPL で `lean_check` 9 回（合計 **1.5 秒弱**）、`leanfile.mjs` 7 往復。
+
+★★**`ramificationFiltrationOfStages : (∀ K, StageFiltration K.absGal) → RamificationFiltration p`
+が出て、4 フィールド（`Gv`/`isClosed`/`isNormal`/`antitone`）全部が埋まった。**
+⇒ ★**あとは各有限段のデータを 1 点作れば、pGC §2 の入力の本物が出る。**
+
+★**抽象核は位相群の言葉だけ**（分岐・付値・Galois が 1 語も出ない）で **0.03–0.36 秒**。
+最大の山と目された**コンパクト性論法**（`coe_limit_mul_coe`：極限は各段へ全射）が
+★**1 往復 + 1 修正**で通った。一意性 `eq_limit_of_isClosed`（各段へ全射する閉部分群は極限に限る）は
+**コンパクト性すら不要**。
+
+### ★★★本体が挙げた「道 C」を、実装者が**反例で否定した**（記録に値する）
+
+本体は完全分岐の穴の埋め方として道 A / B / C を挙げた。Y19 の判定:
+
+> **道 C は使えないと確定**: ★**完全分岐な有限 Galois 部分拡大の族は有向でない。**
+> 反例 `ℚ_3(√3) · ℚ_3(√−3) ∋ √−1`、`ℚ_3(√−1)` は**不分岐**
+> （`−1` は mod 3 で平方非剰余）。**逆極限の底にできない。**
+
+☆★**本体は 3 つの道を挙げただけで、どれが偽かを知らなかった。**
+**具体的な反例で潰されたのは今日初めて**であり、
+「測って選ばせる」形式の価値がまた 1 つ実証された。
+
+⇒ Y19 は **道 A/B（惰性部分に寄せる）**を選び、`L₀ := L ∩ K^ur` として
+`L/L₀` に Yoshida §6 の設定を当てる方針にした。
+
+### ★Y18 の結論の「形」がそのまま効いた（設計の連鎖）
+
+> `upperRamification_coe_mul_coe_eq` の**結論の形がそのまま `compat` の形**だった
+> ——★**Y18 が商群を作らず集合積で書いたのが効いた。**
+
+☆Y9・Y10・Y11・Y12・Y18 と **5 波続けて商群を作らなかった**選択が、
+**6 波目（Y19）の逆極限の定義をそのまま可能にした。**
+★ただし**実際には代入していない**——仮定 10 個が各有限段で完全分岐を要求するため、
+橋（`comap_compat_of_coe_mul_coe_eq`）だけ先に置いた。
+
+★**退化 witness を作って明示した**: `trivialRamificationFiltration`（`v>0` で `⊥`）。
+★**「原典の `Γ_K^v` ではない」「G2 に使うな」と docstring に書いてある**
+——☆**構造体を満たす項が存在することを示しつつ、それが本物でないと自分で釘を刺した。**
+
+`lean-idioms.md` **#124**: ★**`AlgEquiv.restrictNormalHom` と `restrictNormalHom_surjective` は
+`E` と `K₁` の役割が逆**（素直に名前付き引数を書くと `failed to synthesize Algebra E ↥L`）/
+`∃ P, (IsOpen (P : Set Γ) ∧ P.Normal)` は型注釈が無いと `P : Γ → Prop` に潰れ
+**`Function.Normal` という謎エラー**になる。
+
+### 新しく配った持ち場: Y19b+c 惰性への還元
+
+Y19 が名指しした残りの数学 2 つ:
+> (a) 下付き分岐群が**不分岐底変換で不変** ——★実装者いわく「**付値が同じという理由だけ**」
+> (b) `Gal(L′/L′₀) ↠ Gal(L/L₀)` の全射性と、その商が Cor 6.13(i) の `G/H` に一致すること
+
+★Y19 が **`surjective_restrictNormalHom`** と **`ker_restrictNormalHom_eq_fixingSubgroup`**
+（体論の部分）を既に作ってあるので、**`L₀` 側に移すのが仕事**のはず。
+★本体の見当「`G_i ⊆ G_0 = Gal(L/L₀)` だから一致する」は
+**実機で確かめていない**と明記して配った。
+★§3（段データの組み立て = Y19d）は余力扱い。
+★★**これが済めば `Skeleton/PGC/Section2` の入力の本物が出る。**
+
+---
+
+## ★★★★★Yoshida 2008 の証明に**論理の穴**を見つけた（erratum の 3 件目。今度は誤植ではない）
+
+Y21（`HasseArfStrongInduction.lean`、491 行、sorry 0）が段 2 を閉じる過程で発見した。
+
+### 原文（Theorem 6.11、`.txt` 1102–1124 行）
+
+> For j > 1, if `G_n ≠ G_{n+1}` we can find H with `G/H ≅ ℤ/p^{m_i}ℤ`, and `G_nH/H ≠ G_{n+1}H/H`.
+> **We have `φ_H(n) ∈ ℤ≥0` by inductive hypothesis**, …
+
+★★**この「by inductive hypothesis」が引けないことがある。**
+帰納法の仮定は **`H_n ≠ H_{n+1}`** を要求するが、`H_i = H ∩ G_i` なので**成り立たない場合がある**。
+
+### ★実装者が挙げた反例
+
+`G ≅ (ℤ/p)²`、`G = G_1`、跳びが 2 つ `n₁ < n₂`（`G_i = C`（位数 p）for `n₁ < i ≤ n₂`）。
+`n = n₂` のとき原文の `H` は `|H| = p` かつ `C ⊄ H` ⇒ `H ≠ C` ⇒ `H ∩ C = 1`
+⇒ ★**`H_{n₂} = H_{n₂+1} = 1`**（＝帰納法の仮定が引けない）。
+
+★★**しかも `φ_H(n₂) = n₁ + (n₂−n₁)/p` で、その整数性は結論そのものと同値である。**
+⇒ ★★**原文はこの場合、結論と同値のものを「帰納法の仮定」として引いている。**
+
+### ★★★そして実装者は帰納法ごと消して穴を塞いだ
+
+`Nat.strong_induction_on` は **1 つも書いていない**。
+`exists_natCast_herbrandPhi_of_jump` が **Proposition 6.9 だけから** `φ_H(n) ∈ ℤ` を出す:
+
+> `t := i_ϖ(x) − 1` は**整数**で `φ_H(n) ≤ t < φ_H(n+1)`。ここで
+> `|H|·φ_H(n) = Σ_{i=1}^n |H_i|`、`|H|(φ_H(n+1) − φ_H(n)) = |H_{n+1}|` であり、
+> `H_{n+1} ≤ H_i` (i ≤ n) と Lagrange から **`|H_{n+1}|` は `Σ|H_i|` と `|H|` の両方を割る**。
+> ★**長さ `|H_{n+1}|` の半開区間に入る `|H_{n+1}|` の倍数は左端だけ** ⟹ `φ_H(n) = t`。
+
+★**抽象核は純算術 2 本 + 純群論 1 本**（`eq_of_le_of_lt_add_of_dvd` /
+`div_eq_natCast_of_dvd_of_le_of_lt` / `natCard_dvd_sum_natCard`）で、共有 REPL **0.12 秒**。
+`eq_of_le_of_lt_add_of_dvd` は `#print axioms` が **`[propext, Quot.sound]` のみ**。
+
+★**見積 400–800 行 → 491 行だが内訳が全く違う**（強帰納法 **0 行**、代わりに整除性 3 本）。
+往復は合計 **6 回**（うち一発が 2 回）。★**本体の段取り（`Nat.card` の強帰納法）は
+「測度自体が不要になった」という形で外れた**（今日 12 件目）。
+
+☆★**この論文で見つけた erratum は 3 件目**だが、前 2 件（Lemma 6.5 の 1 ずれ /
+Prop 6.6 の "Let j = 1"）は**誤植**であり、★**今回は論理の穴である**。
+★**Lean 化がなければ気づけなかった種類の発見**である。
+★**ユーザーに報告すべき事項として記録する。**
+
+### Y21 のその他
+
+★**`brief.mjs` の 1b が発見の入口だった**（実装者の証言）:
+> 冒頭で「既に木にある」が分かり、**1b の `.txt` 抽出（`̸=` が生きている形）**で
+> `H_n ≠ H_{n+1}` が帰納の前提であることが読め、★**それが穴の発見につながった。**
+
+☆**`pdftotext` は `≠` を `=` に潰す**（[[pdftotext-drops-negation]]）。
+★**PyMuPDF 製の `.txt` は `̸=` を残す**ので 1b では読めた ——
+**抽出器の違いが数学的発見の分かれ目になった実例。**
+
+`lean-idioms.md` **#125**（★`SetLike` の台集合等式を `∈` ゴールに `rw` できない /
+`Nat.dvd_sub'` の消滅 / `MulSemiringAction G ↥(fixedRing B H)` に `[H.Normal]` が要る）。
+
+### 新しく配った持ち場: Y22「部分群 `H` を群として見る橋」
+
+★**Hasse-Arf が 3 段そろう最後の 1 本**。段 3（Y15）が持つ `hk : φ_{G_1}(n) ∈ ℤ≥0` を
+段 1+2 から供給するために要る。Y21 が名指しした 4 つ:
+`MulSemiringAction ↥H B`（**mathlib にインスタンス無し**と Y21 が報告）/
+`herbrandPhi α H n = herbrandPhiGroup ↥H α n` /
+`lowerRamificationGroup B ↥H i = (… G i).subgroupOf H` /
+`FaithfulSMul ↥H B`・`SMulCommClass ↥H A B` の移送。
+
+★**手がかりとして `herbrandPhiGroup_eq_herbrandPhi_top`（`⊤` の場合の橋）が既にある**ことを
+持ち場に書いた（★**本体の見当。実機で確かめていない**と明記）。
+★Y12 の実測「`Fintype ↥(⊤ : Subgroup G)` は `[Fintype G]` から推論されない」も警告した。
+
+### Y19b+c 着地 —— 惰性への還元（632 行 / 34 宣言、sorry 0）
+
+`Found/PGC/InertiaReduction.lean`。`lake build` 成功(3083 jobs, 8.9 秒)。
+`#print axioms` 全 20 宣言が `[propext, Classical.choice, Quot.sound]`。
+★`lean_start` は **1 回も呼んでいない**(9 回連続)——共有 REPL の `lean_check` **18 回** +
+`leanfile.mjs` 8 往復。
+
+★**§1 の抽象核は原典より仮定が弱い形で立った**: `𝔪.inertia G ≤ H` なる**任意の** `H` で
+`Subgroup.map H.subtype (G_n(H)) = G_n(G)`。**分岐・付値・Galois の語彙ゼロ、0.08 秒。**
+§2 の抽象核(純群論)は **0.02 / 0.45 秒・一発**。
+
+### ★★本体の段取りが「必要より強い要求」だった（今日 13 件目の訂正）
+
+本体の見当の当否（実装者の報告）:
+- 「`G_i ⊆ G_0` だから `G_0 ≤ H` で一致」→ ★**当たり**(`subgroupOf` が `rfl` なので 3 行)
+- 「`G_0 = 惰性群`」→ ★**当たり**(`lowerRamificationGroupAdjoin_zero_eq_ker_residueGalHom`)
+- 「`惰性群 = Gal(L/L₀)`」→ ★**半分だけ当たり**。証明できたのは **`Gal(L/L₀) ≤ G_0` の片側だけ**
+
+★★**しかし消費側が要るのは半分のほうだった**:
+`lowerRamificationGroup_inertiaGal_zero_eq_top : G_0(L/L₀) = ⊤`、
+すなわち **`L/L₀` は完全分岐**が `Gal(L/L₀) ≤ G_0` **だけ**から出る。
+⇒ ★★**本体の段取り (a)「`G_i` が不分岐底変換で不変」は必要より強い要求だった。**
+☆**「外れた」ではなく「過剰だった」という訂正であり、実装者が消費側から逆算して気づいた。**
+
+### ★Y19 の在庫を使わずに済ませた判断
+
+`surjective_restrictNormalHom` / `ker_restrictNormalHom_eq_fixingSubgroup`(Y19 が作ったもの)は
+**使わなかった**。両方 mathlib に同等物があり
+(`AlgEquiv.restrictNormalHom_surjective` / `IntermediateField.restrictNormalHom_ker`)、
+`L₀` 側への移送は `Subgroup.comap_map_eq` + `map_sup_of_le_ker` の純群論で済んだ。
+★★**中間体の塔(`↥L` 上の `↥L'`)を一切作っていない**（`lean-idioms.md` **#59** 回避）。
+☆**同じ木の中の新しい在庫より mathlib の方が軽かった、という珍しい例。**
+
+### ★★退化 witness が 2 つ揃った（どちらも「本物ではない」と明記されている）
+
+- Y19 の `trivialRamificationFiltration`（`v>0` で `⊥`）＝ ★**下からの退化**
+- Y19b+c の `inertiaStageFiltration`（`v ≥ 0` で `I_K`）＝ ★**上からの近似**
+
+★★**両方の実装者が自分で docstring に「原典の `Γ_K^v` ではない」「本物として使うな」と
+書いている。** ☆**構造体を満たす項を作ってしまえる場所で、自分から釘を刺す作法が
+2 波続けて守られた。**
+
+### ★実装者が正直に申告した残りの穴 2 つ
+
+1. `G_0 = Gal(L/L₀)` の**逆包含**（＝等式）は未証明。
+   ★消費側が要るのは片側だけなので**急ぎではない**、と実装者自身が判定している。
+   埋めるには還元射 `Gal(L/K) → Gal(k_L/k)` の**全射性**が要り、在庫の
+   `residueGalHom_bijective` は `IsUnramifiedAdjoin` を仮定するので一般の `L` に当たらない。
+2. 合成体の Galois 群の同型 2 つ（`Gal(L'/L'₀) ⊓ Gal(L'/L) = Gal(L'/L·L'₀)`）は未証明。
+
+`lean-idioms.md` **#126**（★`IntermediateField.fixingSubgroup` の `Normal` は
+**mathlib のインスタンスではない** —— 商群が**宣言の型**に出ると `haveI` では間に合わないので
+**前もって `instance` を置く**）・**#127**（★`iff` の前に明示引数があると `.mp` が
+「Unknown constant」になる。`rw` は通るのに term モードで落ちる）。
+
+### 新しく配った持ち場: Y19d 段データの組み立て —— ★pGC §2 の入力の**本物**
+
+★3 波（Y18 → Y19 → Y19b+c）でここまで来た。★**残るのは「各有限段のデータを 1 点作る」だけ。**
+★★**持ち場に「近似で埋めて『できた』と言わないこと」を明記した** ——
+退化 witness が 2 つ既にあるので、**本物と取り違える危険が実在する**ため。
+★Y19 が「仮定 10 個が各有限段で完全分岐を要求するので代入できていない」と書いた障害が
+**Y19b+c の `L/L₀` 完全分岐性で消えたか**を確かめさせる（★本体は確かめていない）。
+
+### Y22 着地 —— ★★Hasse-Arf の 3 段が合流した（419 行、うち証明は 30 行弱）
+
+`Found/PGC/SubgroupActionBridge.lean` **419 行、sorry 0**。
+`lake build` 成功(3111 jobs, 6.2 秒)。`leanfile.mjs` **4 往復・本体は一発**。
+★`lean_start` / `lean_reset` は **1 度も呼んでいない**(10 回連続)。
+`#print axioms` 全宣言 `[propext, Classical.choice, Quot.sound]`(`comm_subtype` は `[propext]` のみ)。
+
+### ★★★Y21 の「mathlib に無い」は誤りだった —— 4 つとも在った
+
+Y21 は 4 つを名指しして「`MulSemiringAction ↥H B` は **mathlib にインスタンス無し**」と報告した。
+★**Y22 が測ったら 4 つとも在った**:
+
+| 要るもの | 実際 |
+|---|---|
+| `MulSemiringAction ↥H B` | ★`Subgroup.mulSemiringAction`(`Mathlib/Algebra/Ring/Action/Subobjects.lean:40`)。`exact?` が即答 |
+| `SMulCommClass ↥H A B` | ★`Subgroup.smulCommClass_left`(`Algebra/Group/Subgroup/Actions.lean:43`) |
+| `FaithfulSMul ↥H B` | ★無名 instance(同 `:59`) |
+| `lowerRamificationGroup` の一致 | ★`AddSubgroup.subgroupOf_inertia`(`Algebra/Group/Subgroup/Basic.lean:1077`)。`Ideal.inertia` が reducible なので**定義展開すら不要** |
+
+★**引き当ては名前空間 1 回 grep**(`grep -n "FaithfulSMul" .cache/mathlib-index.txt | grep -i subgroup`)。
+★**新しい `instance` は 1 つも書いていない**(2 本立ちを避けるため)。
+☆★**「無い」の報告は実装者からでも疑うべき**、という実例。
+本体は Y22 の持ち場に「★**あなた自身で確かめること**」と書いており、それが効いた。
+⇒ ★**Y23 の持ち場に「mathlib を先に引いたか」を返す項目として入れた。**
+
+### ★★本体の見当が外れた（今日 14 件目）—— しかも向きが逆だった
+
+本体は「`herbrandPhiGroup_eq_herbrandPhi_top`(`⊤` の場合の橋)が既にあるから、
+**一般の `H` でも同じ道が通るはず**」と書いた。★**外れた。一般の方が易しかった。**
+
+```lean
+  rw [herbrandPhi_eq_phiOf, herbrandPhiGroup]
+  rfl            -- ★これで閉じる
+```
+★★**`⊤` の困難は「一般化が難しい」のではなく `↥⊤ ≠ G` という型の食い違いだった。**
+`⊤` 版は `Fintype.sum_equiv Subgroup.topEquiv` + `Nat.card_congr` を要していた。
+`lean-idioms.md` **#129** に「★`⊤` 版が既にある補題は**一般の方が易しいことがある。
+まず `rfl` を叩く**」として記録された。
+
+★Y12 が警告した `Fintype ↥(⊤ : Subgroup G)` の穴には**落ちなかった**
+(`[Fintype ↥(lowerRamificationGroup B G 1)]` を段 3 と同じくインスタンス引数として受け取ったため)。
+
+### ★★思ったより桁違いに安い —— 4 項目のうち実質の証明は 1 つだけ
+
+見積 300–600 行に対し **419 行だが、うち証明は 30 行弱**で残りは docstring。
+★**実質的な証明を要したのは `hne` の移送(`subgroupOf_injOn` + antitone、**5 行**)だけ。**
+その分を余力扱いだった §5・§6・§7 に回し、★**3 段の合流
+`exists_natCast_herbrandPhiGroup_of_abelian` まで作った。**
+
+☆逸脱 1 が誠実: ★**`hne` の移送は `1 ≤ n` でしか成り立たない**(数学であって配管ではない)。
+`n = 0` では `G_0` と `G_1` の `H = G_1` への制限がどちらも `⊤` に潰れる。
+★**原文も別扱いにしている**("If n = 0 then φH(0) = 0.")ので §4 は場合分けを持つ。
+☆★**その 1 文を `brief.mjs` の 1b が教えた** ——実装者いわく
+「★**これが無ければ `n = 0` で `hne` の移送に失敗して数往復していた**」。
+
+### Hasse-Arf の現状 —— ★段 1+2 は完全に閉じた
+
+- 段 1+2 側は**完全に閉じた**(`G = G_1` 分岐では `C` も `hC` も一切使わない)
+- 段 3 側は残る入力が **`hcomp` / `honeC` の 2 つだけ**で、
+  ★**`G ≠ G_1` のときにだけ要求される形**に絞れた
+- 3 つ目の `htopC` は Y22 が供給済み(`ramIndex_fixedRing_eq_top_of_mem`、
+  ★**`ramIndex_eq_top_iff` + `mem_fixedRing` を 1 回ずつ、分岐の議論ゼロ**)
+
+`lean-idioms.md` **#128**(部分群への作用の制限は mathlib に全部ある)・
+**#129**(上記)・**#130**(`rw [Nat.cast_zero, Nat.cast_zero]` は 2 つ目で必ず落ちる)。
+
+### 新しく配った持ち場: Y23「順分岐商 `K′^{G_1}/K` の塔」
+
+★**Hasse-Arf が仮定ゼロで閉じる最後の 2 本**(`hcomp` / `honeC`)。
+★Y22 が「`htopC` は供給済み、`C := fixedRing B G_1` と `[H.Normal]` まで**道が付いている**」と
+書いているので、そのまま配った。
+★`honeC`(`σ ∉ G_1 ⟹ i_ϖ(σ) = 1`)は **`htopC` と同じ道が通るか**を測らせる。
+★★**「mathlib を先に引いたか」を返す項目に入れた**(Y21 の誤報告の直後なので)。
+
+---
+
+## ★★★★★Theorem 6.11（Hasse-Arf）が**仮定ゼロで閉じた**（2026-09-07、4 波）
+
+`Found/PGC/TameQuotientTower.lean`（Y23）**445 行・10 定理、sorry 0**。
+`#print axioms` 6 本すべて `[propext, Classical.choice, Quot.sound]`。
+`lake build` 成功(3112 jobs, 6.3 秒)。★`lean_start` は呼んでいない（**11 回連続**）。
+
+```lean
+exists_natCast_herbrandPhiGroup_of_abelian_of_setup
+    … (hπ' : Irreducible π') (hresA) (hadj) (hAinj)
+    (h0 : lowerRamificationGroup B G 0 = ⊤) (habel : ∀ x y : G, x * y = y * x)
+    {n : ℕ} (hne : lowerRamificationGroup B G n ≠ lowerRamificationGroup B G (n + 1)) :
+    ∃ k : ℕ, herbrandPhiGroup G π' (n : ℝ) = (k : ℝ)
+```
+★★**残る仮定は原典 §6.1–§6.2 の底の設定と `G` 可換だけ。`hC` は消えた。**
+非負性は `herbrandPhiGroup_nonneg_of_abelian_of_setup`。
+
+### ★4 波の内訳（1 日で組み上がった）
+
+| 波 | 行 | 出したもの |
+|---|---|---|
+| **Y15** | 615 | 段 1（巡回）・段 3（`G ≠ G_1`）。★段 1 は **Cor 6.7 を経由しない**短い道 |
+| **Y21** | 491 | ★段 2 を **`hind` ごと**（**帰納法不要**）。★★**原典の論理の穴を発見** |
+| **Y22** | 419 | ★段 3 の `hk` を段 1+2 から供給。3 段の合流。★**証明は 30 行弱** |
+| **Y23** | 445 | ★`hcomp` / `honeC`。★**仮定ゼロで閉じた** |
+
+★★**Hasse-Arf は Milne も Serre 1961 も Sharifi も証明を外注していた唯一の定理**である
+（2026-09-06 の文献調査で確定していた）。
+
+### ★本体の見立ての当否（Y23）
+
+- 「`hcomp` は新ノード扱いになるかも」→ ★**遥かに安かった**。
+  **10 個の適合条件は Y14・Y16・Y17 の在庫でそのまま供給でき**、
+  `herbrandPhiGroup_comp` への**1 回の代入（項 1 本、証明 5 行）**。
+  `hϖ : ι ϖ = π″` は `rfl`、`hcomp`（包含の同変性）も Y16 が `rfl` で出していた。
+- 「`honeC` は付値の定義に戻るだけ / 分岐の議論は要らない」→ ★**外れた**（今日 15 件目）。
+  `htopC`（Y22）は `ramIndex_eq_top_iff` + `mem_fixedRing` で済んだが、
+  ★**`honeC` は `(G/G_1)_1` が p 群であること（`isPGroup_lowerRamificationGroup_one`）を
+  経由しないと出ない。** ただし経由さえすれば残りは 3 行。
+
+★**`brief.mjs` の 1b が決定打だった**（実装者の証言）:
+> `As φG/H(n) = n/e0 for n ∈R≥0 by definition` の `by definition` が
+> 「順分岐商の第 1 分岐群が自明」に等しいこと、そして直後の
+> `As e0 and |H| are coprime` が **§1 の抽象核そのもの**であることを教えてくれた。
+> ★**これが無ければ `φ_{G/H}(n)=n/e_0` を実数の等式として証明しようとして数往復していた。**
+
+★**mathlib を先に引き、新しい `instance` / `def` を 1 つも書いていない**
+（Y21 の誤報告 → Y22 の訂正の直後に配った持ち場で、指示が守られた）。
+
+`lean-idioms.md` **#131**（`Eq.ge` の `.le` は落ちる）・**#132**（`ENat.one_le_iff_ne_zero` 非推奨）・
+★★**#133**（**`letI`/`haveI` は宣言の境界を越えない** —— 抽象核と具体層に割ると
+`haveI` で入れたインスタンスが片側にしか残らない。
+★**Y23 の唯一の失敗がこれで、数学ではなく分割の副作用だった**）。
+
+☆**再利用のために独立させた 2 本**（実装者の配慮）:
+`lowerRamificationGroup_quotient_fixedRing_one_eq_bot`（順分岐商の第 1 分岐群が自明）と
+★`herbrandPhiGroup_comp_fixedRing`（**`H` が `G_1` である必要が無く任意の有限正規部分群で成り立つ形**）。
+
+### 新しく配った持ち場: Y24 `Corollary 6.13 (iii)`
+
+★**Y18 が「一般の可換 `G` に対する Hasse-Arf が要る」として落とした項目**。
+★**その前提がいま満たされた。**
+★本体の見当（θ_0 で `q−1` / θ_n で `q` / 跳びは高々 `m−1` 回 / 望遠鏡積）を
+**「実機で確かめていない。外れたら訂正して報告すること」**と明記して配った。
+★`m = 0` の退化（`(q−1)q^{−1}` は整数でない）を明示させる。
+
+---
+
+## ★★Λ7 の節点表を実態に合わせて作り直す（2026-09-07。★旧表は破棄）
+
+★★**ユーザーの指摘で発覚した**: 「Y は全部で 24 個か」という問いに答えるため数え直したところ、
+★**旧表（Y1–Y16）と実際のラベルが食い違っていた。**
+
+- 旧表の **Y15 は「LKW（Theorem 6.15）」、Y16 は「`Art(U^v)=Γ^v`」**だった
+- ★**実際の Y15 は Hasse-Arf、Y16 は固定環への作用**になっている（**番号を使い回した**）
+- 旧表が想定していなかった**基盤ノード**（Y14・Y16・Y17・Y20 はすべて固定環の配管）が
+  実際には必要になり、そこに番号を消費した
+- 枝番（`Y7a/Y7b`・`Y15/Y15b`・`Y19/Y19b+c/Y19d`）で **27 ラベル**に膨らんだ
+
+⇒ ★★**ラベルの番号は進捗の指標として当てにならない。**
+**原典の項目で数えること。** 以下を正とする。
+
+### ★Yoshida §6 の項目（設定 2 つを除く 15 項目）
+
+| 原典 | 状態 | 実体 |
+|---|---|---|
+| `def-6-1` 下付き分岐群 | ✅ | `LowerRamificationGroup`（Y1+Y2） |
+| `prop-6-2` θ_0・θ_n の単射 | ✅ | `RamificationQuotientEmbedding`（Y3） |
+| `cor-6-3` `e_0 ∣ n` | ✅ | `RamificationJumpDivisibility`（Y4）＋ `AbelianJumpDivisibility`（Y13、原文に忠実な別証明＋下流の受け渡し口） |
+| `lemma-6-4` | ✅ | `ConjugateSumValuation`（Y5） |
+| `lemma-6-5` | ✅ | `UniformizerExpansion`（Y6。★erratum 1 件目を掛け算形で回避） |
+| `prop-6-6` Sen (i)(ii)(iii) | ✅ | `SenJumpFiltration`（Y7a）＋ `SenValuationCongruence`（Y7b） |
+| `cor-6-7` p 進展開 | ✅ | `SenJumpExpansion`（Y8） |
+| `lemma-6-8` 平均公式 | ✅ | `QuotientRamIndexAverage`（Y9） |
+| `prop-6-9` **Herbrand** | ✅ | `HerbrandFunction`（Y11） |
+| `lemma-6-10` 閉じた形と合成則 | ✅ | `HerbrandComposition`（Y12） |
+| ★**`thm-6-11` Hasse-Arf** | ✅ **仮定ゼロ** | `HasseArf`（Y15）→ `HasseArfInduction`（Y15b）→ `HasseArfStrongInduction`（Y21）→ `SubgroupActionBridge`（Y22）→ `TameQuotientTower`（Y23） |
+| `def-6-12` 上付き番号付け | ✅ | `UpperRamificationGroup`（Y18） |
+| `cor-6-13` (i)(ii) | ✅ | 同上 |
+| `cor-6-13` (iii) | **走行中** | Y24 |
+| ★**`prop-6-14`** | **未着手** | ★Λ6 §4（`prop-4-4`(ii)(iii)・`lemma-4-3-ii`）待ち |
+| ★★**`thm-6-15` LKW** | **未着手** | ★**Λ7 の目的地** |
+
+⇒ ★**15 項目中 13 が着地、1 が走行中、残り 2。**
+
+### ★Yoshida の項目に対応しない基盤ノード（旧表に無かったもの）
+
+`FixedRingRamificationIndex`（Y10、`e(K′/K″)=|H|`）/ `FixedRingTower`（Y14）/
+`FixedRingAction`（Y16）/ `FixedRingMonogenic`（Y17）/ `FixedRingBaseAlgebra`（Y20）——
+★**この 5 本はすべて「固定環の配管」**で、Λ7 の鎖を原典の設定だけに載せるために要った。
+`AbsGalRamificationFiltration`（Y19）/ `InertiaReduction`（Y19b+c）/
+`RamificationFiltrationBuild`（Y19d、走行中）—— ★**pGC §2 の入力を作るためのもの**で、
+これも旧表に無い。
+
+### ☆番号の振り直しについて
+
+★**ユーザーに判断を委ねた**（勝手に振り直すと過去の記録との対応が切れるため）。
+★**当面は「原典の項目で数える」を正とし、Y ラベルは持ち場の識別子としてのみ使う。**
+
+### Y19d 着地（部分）—— ★「完全分岐の穴」を抜けた。`compat` 以外は全部埋まった
+
+`Found/PGC/RamificationFiltrationBuild.lean` **670 行、sorry 0**（見積 400–900 の内）。
+`lake build` 成功(3199 jobs, 9.7 秒)。★`lean_start` **0 回**（12 回連続）——
+共有 REPL の `lean_check` 14 回 + `leanfile.mjs` 13 往復。
+`#print axioms` すべて `[propext, Classical.choice, Quot.sound]`。
+
+### ★★★Y19 が「代入できていない」とした障害が消えた
+
+Y19 は「Y18 の**仮定 10 個**が各有限段で完全分岐を要求するため、
+橋（`comap_compat_of_coe_mul_coe_eq`）だけ先に置いた」と書いていた。
+★★**Y19d が 10 個すべてを供給した**（証拠は `stage_upperRamification_coe_mul_coe_eq`）。
+
+★★**穴の出口は Teichmüller の抽象核 1 本だった**:
+`exists_fixed_sub_mem_maximalIdeal`（「`H` が剰余体に自明に作用するなら
+`B^H` の剰余体＝`B` の剰余体」、**分岐・付値・Galois の語彙ゼロ、0.12 秒・一発**）。
+そこから `exists_sub_mem_maximalIdeal_inertiaFixedRing`（★`L/L₀` が完全分岐）と
+★★★`exists_uniformizer_adjoin_inertiaFixedRing_eq_top`（★**`𝒪_L = 𝒪_{L₀}[π]`**）が出た。
+★実装者いわく **`hadj` の供給が要だった**。
+
+### ★★近似で埋めなかった（規律が守られた）
+
+★**持ち場に「近似で埋めて『できた』と言わないこと」と明記した結果、
+Y19d は「`compat` は埋まらなかった — 近似では埋めていない」と正直に報告した。**
+★さらに **`exists_absGalStage_ne_inertiaStageFiltration`** を作り、
+★**自分が作ったものが近似 witness と値が食い違うことを証明した**
+（`v ≤ 0` で `I_K ⊔ N`、`v` 大で `N` ⇒ `inertiaStageFiltration` とも
+`trivialStageFiltration` とも異なる）。
+☆**「本物である」を主張するのではなく「近似ではない」を証明する形にしたのが良い。**
+
+### ★本体の見当の当否
+
+- 見当 1（`lowerRamificationGroup_inertiaGal_zero_eq_top` が §6.1 の設定を与える）→ **当たり**。
+  ★ただし**実際に要ったのは `G_0(L/L₀) = ⊤` ではなく、
+  `Gal(L/L₀) ≤ G_0` から Teichmüller で作る `hres`** の方だった。
+- 見当 3（Y19 の `comap_compat_of_coe_mul_coe_eq` が橋）→
+  ★**橋としては正しいが渡れない**。橋の手前で「不分岐底変換での上付き番号付けの不変性」が要る。
+- Y19b+c が残した穴のうち **逆包含 `G_0 ≤ Gal(L/L₀)` は要らなかった**
+  （使ったのは `Gal(L/L₀) ≤ G_0` の側だけ）。
+  ★**合成体の Galois 群の同型は要る。これが `compat` を止めている。**
+
+`lean-idioms.md` **#134**（名前 4 連発）・**#135**（構造体の引数に依存する項を
+`rw [← h]` すると motive が壊れる）・**#136**（`dite` の条件が `Nonempty`）・
+★**#137**（**Y18 の右辺 `upperRamificationGroup G ϖ m` は `C` の上で計算した群**）。
+
+☆逸脱 1・2 が誠実: 一意化元 `π` と原始元 `x` を**選択で 1 つ選んでおり、
+非依存性は未証明**と明記している。
+
+### 新しく配った持ち場: Y19e `compat` の心臓
+
+★Y19d が名指しした残り 2 本:
+1. `C = (𝒪_{L′})^{Gal(L′/L·L′₀)} ≅ 𝒪_{L·L′₀}`（Galois 降下）
+2. ★**不分岐底変換で上付き番号付けが不変**（環同型＋群同型に沿った輸送）
+
+★★**この 2 本が入れば `ramificationFiltrationOfCompat` に代入するだけで
+`RamificationFiltration p` の本物が立ち、`Skeleton/PGC/Section2.lean` の
+`prop_2_1` / `prop_2_2` が動く。**
+
+★**mathlib を先に引かせる**（`Algebra.IsInvariant` / `FixedPoints` 系。
+★`Mathlib.RingTheory.Invariant.Basic` は本木のどこからも import されていないと Y16 が実測しており、
+**import 1 行で使えるかもしれない**）。
+★**近似で埋めない規律**と、**Y19d の `exists_absGalStage_ne_...` に倣って
+「近似ではない」を証明すること**を明記した。
+
+### Y24 着地 —— Corollary 6.13 (iii)。★本体の見当が 4 つとも当たった（今日初）
+
+`Found/PGC/UpperRamificationIndex.lean` **395 行（うち証明は 90 行弱）、sorry 0**。
+`#print axioms` 11 宣言すべて `[propext, Classical.choice, Quot.sound]`。
+`lake build` 成功(3114 jobs, 6.5 秒、警告 0)。★`lean_start` は呼んでいない（**13 回連続**）。
+
+主定理 `index_upperRamificationGroup_dvd`:
+`(G^m).index ∣ (Nat.card (ResidueField B) − 1) * Nat.card (ResidueField B) ^ (m − 1)`。
+
+★★**本体の見当（θ_0 で `q−1` / θ_n で `q` / 跳びは高々 `m−1` 回 / 望遠鏡積）は 4 つとも当たった。**
+☆**今日は本体の見立てが 15 回訂正されているので、4 つとも当たったのは記録に値する。**
+差分は 2 つだけ:
+1. `|G_{i−1}/G_i|` は **`Subgroup.relIndex` で書くのが最安**
+   （`Subgroup.index_eq_card` で Y3 の `thetaMulQuot`/`thetaAddQuot` の定義域とそのまま一致、
+   望遠鏡積は `Subgroup.relIndex_mul_index` の帰納 **4 行**）
+2. ★**跳びの数え上げに `φ_G` の「値」は不要**で、原文の `0 ≤ φ_G(i−1) ≤ φ_G(n−1) < m` は
+   **`φ_G(0)=0` と `φ_G(ψ_G(m))=m` の 2 回の狭義単調性**に落ちる
+
+★**Y23 の Hasse-Arf（仮定ゼロ版）はそのまま使えた** ——1 回呼ぶだけで、
+仮定の付け足しも読み替えも不要。★**本ノードは Y23 の仮定に 1 つも足していない。**
+
+★**抽象核が `Subgroup` と `Finset` と `ℕ` だけ**で書け（**0.03 / 0.23 秒**）、
+★**具体層は `F i := G_i`, `e := q−1`, `M := m−1`, `g i := ⌊φ_G(i)⌋₊` を代入するだけ**になった。
+★**#133（`letI`/`haveI` が宣言の境界を越えない）には当たらなかった** ——
+抽象核が `[Group G]` 以外のインスタンスを 1 つも要求しない形に落ちたので、
+★**`letI`/`haveI` を一度も書いていない。**
+
+★**mathlib を先に引き、新しい `def` / `instance` を 1 つも書いていない。**
+★★**`Nat.card_units : Nat.card αˣ = Nat.card α − 1` が `[GroupWithZero α]` だけで
+有限性を要求しない**ことを見つけ、★**剰余体の有限性を仮定せずに済ませた**
+（逸脱 5: 無限なら両辺 0 で自明に真）。
+
+☆**`m = 0` の退化を明示**: ℕ の切り詰め引き算で `q^{0−1} = 1`、右辺は `q−1`、
+左辺は `|G/G^0| = 1`（`index_upperRamificationGroup_zero` を別宣言で用意）。**主張は真のまま。**
+
+☆★**`brief.mjs` の冒頭は「半分ミスリード」だった**と実装者が報告:
+「既に木にある: `UpperRamificationGroup.lean`」は **(i)(ii) だけで (iii) は無い**。
+★**1b が決定打**——「(iii) の 4 行が段取りそのもので、
+これを読まずに書き始めていたら**跳びの回数の上界を自分で組み直していた**」（10 人目の証言）。
+
+`lean-idioms.md` **#138**（`Subgroup.card_dvd_of_injective` は行き先の型で単一化する）・
+**#139**（`Subgroup.relIndex` は `Subgroup.index_eq_card` でそのまま商の `Nat.card` になる）。
+
+### ★Λ7 の残りは 2 項目、どちらも Λ6 §4 に塞がれている
+
+★**15 項目中 14 が着地**（`cor-6-13`(iii) が入った）。残るのは **`prop-6-14`** と
+★★**`thm-6-15`（LKW＝Λ7 の目的地）**。
+構造化係が p.17 の証明を逐行で特定したところ、**Prop 6.14 が使うのは
+`prop-4-4`(ii)・`prop-4-4`(iii)・`lemma-4-3-ii` の 3 つだけ**である。
+
+⇒ ★**D28（道 A）で確定した 3 本のうち 1 本目
+`[K̂^m_f : K̂^ur] = q^n − q^{n−1}` を配った。**
+★在庫調査係が名指しした穴「★**`K^ur → K̂^ur` の完備化を渡る段が無い**」が
+本当に中身かを測らせる（★本体は確かめていない）。
+★★**Lubin-Tate 機械（57 ファイル / 14,525 行）を 1 行も触らないこと**を明記した
+（D28 の「道 A は 471 宣言を 1 件も触らない」を守るため）。
+★**`[Fintype (ResidueField _)]` を要求する在庫に当たったら、それが D28 の予測どおりの
+詰まり所である**ことも警告した。
+
+### ★`brief.mjs` の「既に木にある」を項目の**部分**まで断るようにした（Y24 の指摘）
+
+★**Y24 の報告**: 「冒頭の『既に木にある: `UpperRamificationGroup.lean`』は**半分ミスリード**
+（(i)(ii) だけで (iii) は無い）」。
+★**照合は `data-item` の「項目」単位なので、原典の 1 項目が (i)(ii)(iii) に分かれていると
+「一部だけ埋まっている」場合に誤解を招く。**
+
+**直し方**: 逐語に**部分番号**（`(i)` `(ii)` `(iii)` `(1)` …）が **2 つ以上**見えるときだけ、
+冒頭と末尾の両方に断りを足す（noise を出さないため）。
+
+**検算**:
+| 項目 | 部分番号 | 木にある | 断りが出るか |
+|---|---|---|---|
+| `cor-6-13` | (i)(ii)(iii) | ✅ | ★**出る**（正しい） |
+| `prop-6-6` | (i)(ii)(iii) | ✅ | ★出る |
+| `cor-6-7` | 無し | ✅ | ★**出ない**（正しい。noise を出さない） |
+
+★`--json` は無変更（`selfNodes` は元から入っている）。
+★**Proof 抽出に退行なし**（Yoshida08 68 項目で 31/20/0 のまま）。
+
+☆★**道具の警告が「半分正しい」ときがいちばん危ない**、という実例。
+2026-09-07 の朝は**本体が警告を切り落として**既出の項目を配り、
+夕方は**警告が粗すぎて**実装者に「半分ミスリード」と言われた。
+★**どちらも道具側で塞いだ**（冒頭＋末尾の二重掲示 → 部分番号の断り）。
+
+### Λ6 §4-a 着地 —— `[K̂^m_f : K̂^ur] = q^n − q^{n−1}`（D28 の 1 本目）
+
+`Found/PGC/LubinTateCompletionDegree.lean` **514 行（証明本体は 120 行弱）、sorry 0**。
+`#print axioms` 7 宣言すべて `[propext, Classical.choice, Quot.sound]`。
+`lake build` 成功(3433 jobs, 10 秒)。★`lean_start` **0 回**（14 回連続）。
+往復は具体層 8・抽象核 4 の**計 12 回**、うち **6 宣言が一発**。
+
+★**抽象核 3 本がすべて「分岐・付値・Lubin-Tate が 1 語も出ない」形に落ちた**
+（`finrank_adjoin_of_isEisensteinAt` **0.12 秒・一発** /
+`isEisensteinAt_map_of_maximalIdeal_eq_span` 0.26 / `adjoin_image_eq_adjoin_simple` 0.07・一発）。
+**36 回連続。**
+
+### ★★在庫調査係が名指しした穴は「半分外れていた」—— 本当の穴は別だった
+
+在庫調査係（D28）は「★`K^ur → K̂^ur` の**完備化を渡る段が無い**」と書いた。
+★**実装者の判定: 整数環のレベルでは既に木に在った**
+（`maximalIdeal_unramifiedCompletionInt_eq_span` + `baseIntHom_eq_uniformizerCompletionInt`）。
+足りなかったのは**その等式を Eisenstein 多項式に載せる 1 本**（抽象核、**20 行**）だけで、
+★**局所準同型も DVR も要求しない**（単元が単元へ写るだけで足りる）。
+
+★★**本当の穴は `Λ_n ⊆ K(α)`（原典 (ii) の `µ_{f,m} ⊂ L(α)`）で、
+`L = K` の場合ですら木に無かった。** これが最大の未知だったが、
+`iteratedLubinTateTorsionPoints_eq_union` + `iteratedLubinTatePsiTorsionPoints_subset_adjoin` +
+`lubinTateActionAtTorsionPoint_pi_mem_…` の `n` 帰納法 **40 行**で閉じた
+（★決定打は **`lubinTateActionAtTorsionPoint` の値がそもそも `adjoinIntegers K α ⊆ K(α)` にある**こと）。
+★★**原典 (i)（`𝒪/𝔭^m ≅ µ_{f,m}`）を作らずに済んだ。**
+
+### ★D28 の予測は当たった
+
+- ★**`[Fintype (ResidueField _)]` で詰まらなかった** —— `𝒪_{K̂ur}` について `Fintype` を
+  要求する在庫を**一度も使っていない**（`isDiscreteValuationRing_` と
+  `maximalIdeal_…_eq_span` の 2 本だけで足りた）。
+- ★★**Lubin-Tate 機械 471 宣言を 1 行も触っていない**（道 A の約束が守られた）。
+- ★**`L = K` 版の次数は流用できず書き直しになった** ——
+  あちらは `Gal(K(α)/K) ≃ (𝒪/π^n)^×` から次数を読む道で、底を替えると
+  **Galois 群の同定からやり直し**になる。本ノードは**多項式の既約性から直接**読んだ
+  （Eisenstein → Gauss → `minpoly`）。★**原典 p.7 の証明（付値の挟み撃ち）より短い。**
+
+★**1b が決定打**（12 人目の証言）:
+> ★**1b を読んで初めて「原典は付値の挟み撃ちで既約性を出している」と分かり、
+> 木の Eisenstein 在庫で置き換えれば付値を一切通らずに済むと判断できた。
+> 1b が無ければ原典の段取りを組みに行って数十往復していた。**
+
+`lean-idioms.md` **#140**（`Polynomial.Monic` の項に**ドット記法は使えない**）・
+★**#141**（★**`lean/ABC3/Found.lean` は CRLF**。Python の置換は `'rb'`/`'wb'` で。
+`python - <<'PYEOF'` も PreToolUse フックに潰される＝#117(iv) の Python 版）。
+
+### ★★★本体の持ち場の誤り（今日 16 件目）—— `pdfPage` を手で書いて間違えた
+
+本体は持ち場に `pdfPage := 8` と書いた。★**誤り。正しくは 7。**
+検算: 構造化 HTML の `data-pdf-page="7"` / `brief.mjs` の雛形も **7**。
+★**実装者が「指示が誤りだと思われる」と申告し、機械抽出値の 7 を採った。正しい判断。**
+
+☆★**原因は本体が雛形を写さず手で書いたこと。**
+★**規則: `.src` は `brief.mjs` の雛形をそのまま写す。手で書き直さない。**
+（M31 が「G1 は `.src` の `pdfPage` と HTML の `data-pdf-page` の一致を見ていない」と
+測っているので、★**この種の誤りはゲートで捕まらない。**）
+
+### 新しく配った持ち場: Λ6 §4-b `Gal(K̂^m_f/K̂^ur) ≃* (𝒪_K/π^n)^×`（D28 の 2 本目）
+
+★Λ6 §4-a の実装者が「**本ノードの `lubinTateCompletionField_eq_adjoin_simple` と
+`finrank_lubinTateCompletionField` をそのまま入力にできる**」と書いているので、そのまま配った。
+★**Λ6 §4-a が「底を替えると Galois 群の同定からやり直しになる」と指摘した、その同定が中身。**
+★`.src` は**雛形をそのまま写すこと**を明記（本体の誤りの再発防止）。
+★**#69（`adjoinField`/`adjoinIntegers` の境界は 212 秒で timeout）に当たる公算が高い**ことを警告
+（`Λ` の作用＝整数側と `Gal`＝体側を行き来するため）。
+
+### ★★測定: `.src` の `pdfPage` を機械で検査できるか —— **今日の誤りは捕まらない**（負の結果）
+
+本体が `pdfPage := 8` と書いて誤った（正しくは 7）ので、
+★**同じ種類の誤りをゲートで捕まえられるか**を測った（★`check.mjs` は書き換えていない）。
+
+**前提**: M32（メタ第 11 回）は「`.src` の `pdfPage` と HTML の `data-pdf-page` の**完全一致**」を
+測って **誤報 985 件**と判定し、★**頁の検査を意図的に外した**
+（項目が数頁にまたがるとき、`.src` は引いている段の頁を、HTML は項目の先頭頁を指すため）。
+
+**本測定が試したのはより弱い条件**: 「`.src` の `pdfPage` が
+**その項目の頁の範囲**に入っているか」（範囲 = [項目の `data-pdf-page`,
+同じファイルで次に頁が進む項目の `data-pdf-page`]）。
+
+**結果（`.src` 総数 4,644、うち構造化に id があるもの 4,641）**:
+
+| ずれ | 件数 |
+|---|---|
+| −3 | 1 |
+| −2 | 2 |
+| **−1** | **56**（★系統的。見出しが前頁の末尾から始まる） |
+| **0（範囲内）** | **4,576** |
+| +1 | 2 |
+| +3 | 4 |
+
+⇒ ★**規則を「[lo−1, hi] に入ること」にすると誤報は 6 件**（重複除去後）で、
+M32 の 985 件より **2 桁小さい**:
+```
+FrdI#frdi-def-2-4        pdfPage=51 範囲=[47..48] ずれ +3  （3 ファイル）
+GenEll#genell-lemma-3-5  pdfPage=15 範囲=[17..18] ずれ −2
+GenEll#genell-prop-1-4   pdfPage=3  範囲=[6..8]   ずれ −3
+GenEll#genell-prop-1-4   pdfPage=9  範囲=[6..8]   ずれ +1
+```
+
+### ★★★しかし本測定の結論は「この検査では今日の誤りは捕まらない」
+
+★**`Yoshida08#prop-4-4` の範囲は `[7, 8]` と計算される**（次に頁が進む項目が p.8 にあるため）。
+⇒ ★★**本体が書いた `pdfPage := 8` は「範囲内」と判定され、捕まらない。**
+
+☆★**負の結果を正直に記録する。** 検査を作っても動機となった誤りは防げない。
+★**頁の 1 つのずれを機械で捕まえるには PDF 本文まで読む必要がある**が、
+`check.mjs` は既に逐語照合で `pdftotext` を叩いており、そこまでやると
+**ゲートが重くなる**（キャッシュがあっても 7 秒 → 55 秒の実績）。
+
+⇒ ★**本当の対策は道具ではなく手順**である:
+★★**`.src` は `brief.mjs` の雛形をそのまま写す。手で書き直さない。**
+（本体の誤りは「雛形を見ずに手で書いた」ことが原因だった。実装者は雛形を採って正した。）
+
+☆**副産物**: 上の 6 件は**実際に locator がずれている可能性がある**。
+★**急ぎではない**（G1 の項目名照合は通っているので、頁だけの問題）が、
+**人が見る価値のある候補**として記録する。
+
+☆**再測定のコマンド**（本体が再実行できる形）:
+`node <scratchpad>/outliers.mjs`（測定スクリプトは scratchpad。
+★**ヒアドキュメントでは書けない** —— バックスラッシュが食われる（#117(iv)）。
+**Write ツールで書くこと**。本測定で実際に 1 度踏んだ）。
+
+### Λ6 §4-b 着地 —— `Gal(K̂^m_f/K̂^ur) ≃* (𝒪_K/π^n)^×`（D28 の 2 本目）
+
+`Found/PGC/LubinTateCompletionGalois.lean` **635 行・宣言 22 本、sorry 0**。
+`#print axioms` 5 本すべて `[propext, Classical.choice, Quot.sound]`。
+`lake build` 成功(3436 jobs、自モジュール 16 秒)。★`lean_start` は呼んでいない（**16 回連続**）。
+抽象核 7 本は `lean_check` 4 往復（★**4 本まとめて 0.30 秒・一発**）、具体層 15 本は
+`leanfile.mjs` **2 往復**。
+
+### ★★★本体の見立てが 2 つとも外れた（今日 17 件目・18 件目）—— どちらも良い方向
+
+1. **「`L = K` 版の骨格を `L = K̂` で書き直す仕事」→ ★丸ごと流用できた。**
+   ★**原典の 2 段（`Gal ≅ Aut_𝒪(µ) ≅ (𝒪/𝔭^m)^×`）を経由しない**設計にし、
+   `galoisCompletionEquivBase : Gal(K̂^ur(α)/K̂^ur) ≃* Gal(K(α)/K)` を作って
+   **既存 425 行の `galoisReciprocityEquiv` をそのまま合成**した。
+   ★★**安くなった理由: `minpoly_{K̂^ur}(ι α) = ψ_n = minpoly_K(α)`
+   （Eisenstein が完備化を渡るので**底を替えても最小多項式が変わらない**）。**
+   ⇒ 単射は「`x` での値で決まる」だけ、全射は `PowerBasis.equivOfMinpoly` だけ。
+   ★本体が挙げた在庫のうち `unitActionQuotientLift` / `lubinTateActionAtTorsionPoint` /
+   `principalUnitsQuotientEquiv` / `reciprocityMap` は **1 つも直接使っていない**。
+2. **「#69（`adjoinField`/`adjoinIntegers` の境界）に確実に当たる」→ ★当たらなかった。**
+   ★**整数側に一度も降りない設計**にしたため（`Λ` の作用は `galoisReciprocityEquiv` の
+   内側に閉じ込め、体側の在庫だけで回した）。
+
+★**Λ6 §4-a の出力はそのまま入力にできた**（`lubinTateCompletionField_eq_adjoin_simple` を 2 回）。
+★**`finrank_lubinTateCompletionField` は使わなかった**（次数を経由せずに済んだ）。
+★**`[Fintype (ResidueField _)]` に詰まらなかった**（§4-a と同じく一度も使わずに済んだ）。
+★**mathlib を先に引き、「無い」と判定した項目はゼロ**（5 波連続）。
+
+☆**`brief.mjs` の冒頭が効いた**（今日入れた部分番号の断りが初めて役に立った）:
+> 冒頭の「既に木にある／部分番号 (i)(ii)(iii) に注意」で
+> ★**(ii) の次数だけが埋まっていて (iii) は空**と即断できた。
+★**1b も効いた**: 「原典も単射＋濃度で押している」と分かり、
+**こちらは濃度の代わりに最小多項式で全射を直接出す**（濃度計算も Galois 性も不要）判断ができた。
+
+☆逸脱 3 が誠実: `galoisCompletionReciprocityEquiv` は**原始点 `α` の選択に依存する**
+（原典の `ρ_{f,m}` は `α` に依らない）。★**選択を隠した形 `nonempty_…` を別に用意した。**
+
+`lean-idioms.md` **#142**（`set` は他の仮説の型に現れる項を抽象化するとその仮説を `τ✝` に化けさせる。
+1.72 秒 → 0.26 秒）・**#143**（`∃!` に `refine ⟨_, ?_, ?_⟩` すると β 簡約されず `rw` が落ちる。
+★**一意性側は `intro` が β 簡約するので非対称**）・**#144**（複数行の `calc` の第 1 項が
+関数適用だとパーサが途中で切る）。
+
+### ★測るべき重複（§4-b の実装者が指摘）
+
+`galoisCompletionEquivBase`（`Gal(K̂^ur(α)/K̂^ur) ≃* Gal(K(α)/K)`）は
+★**汎用の「不分岐底変換」**で、★**同時に走っている `UnramifiedBaseChangeInvariance`（Y19e）と
+主張が近い可能性がある。** ⇒ 次の持ち場（§4-c）に「重複を測ること。走行中なら
+『測れなかった』でよい。★**待たないこと**」と書いた。
+
+### 新しく配った持ち場: Λ6 §4-c `N(−α) = π` と「α が素元」（D28 の 3 本目）
+
+★**D28 の 3 本のうち 2 本が今日着地した**ので、残り 1 本。
+★あわせて Prop 4.4(ii) の残り「α が素元」も含めた（原典が同じ 1 文で述べている）。
+★★**在庫調査係の測定: `Algebra.norm` を型に含む宣言は木全体で 4 件、`Found/PGC` には 0 件。**
+⇒ ★**ノルムは本当に新しい領域である。** mathlib を先に引かせる。
+★本体の見当「`N(−α)` は最小多項式の定数項に落ちる」を
+**「実機で確かめていない。外れたら訂正して報告すること」**と明記して配った
+（★**本体の見立ては今日 18 回訂正されている**と数字も添えた）。
+
+---
+
+## ★★★★★`RamificationFiltration p` の**本物が仮定ゼロで立った**（Y19e、2026-09-07）
+
+`Found/PGC/UnramifiedBaseChangeInvariance.lean` **960 行 / 54 宣言、sorry 0**。
+`#print axioms` **14 宣言すべて `[propext, Classical.choice, Quot.sound]`**。
+`lake build` 成功(3212 jobs, 17 秒)。★`lean_start` **0 回**（共有 REPL が使用中だったため
+`leanfile.mjs` のみ、約 27 往復）。
+
+```lean
+noncomputable def ramificationFiltration (p : ℕ) [Fact p.Prime] : RamificationFiltration p
+-- ★★仮定は 1 つも無い
+```
+
+★**`Interface/PGC/LocalFieldData.lean:160` の構造体は
+`Skeleton/PGC/Section2.lean` の `prop_2_1` / `prop_2_2` が入力に要求しているもの**で、
+`waiting` に「**Herbrand の定理を要する**」と書かれていた。
+★★**Herbrand は今日 Y11 が着地させ、5 波（Y18 → Y19 → Y19b+c → Y19d → Y19e）で
+本物が立った。**
+
+### ★★退化していないことを 3 通りで示した
+
+木には退化 witness が 2 つある（Y19 の `trivialStageFiltration`＝下からの `⊤`、
+Y19b+c の `inertiaStageFiltration`＝上からの `I_K`）。
+★**Y19e は自分の作ったものが両方と値が食い違うことを証明した**
+（`exists_stage_ne_inertiaStageFiltration` / `stage_ne_trivialStageFiltration`）。
+★★さらに **`coe_ramificationFiltration_mul_coe`**（`Γ_K^v · M = Gal(L/L₀)^v` の引き戻し。
+**退化した族では成り立たない式**）を作った。
+☆**「本物である」を主張するのではなく「近似ではない」を 3 通りで証明する形**が守られた。
+
+### ★★★本体の見当が 3 つとも訂正された（今日 19・20・21 件目）
+
+1. 「環同型＋群同型に沿った輸送」→ ★**半分外れ**。要るのは
+   ★**全射準同型に沿った輸送**（`I(L′/K) ↠ I(L/K)` は**同型ではない**）。
+   ★**`ramIndex` さえ対応すれば `G_n`・`φ`・`ψ`・`G^m` が自動で対応する**、という形に落ちた。
+2. 「(1) 固定環＝底の整数環が要る」→ ★★**要らなかった。**
+   `C = (𝒪_{L′})^H` を `𝒪_{L·L′₀}` と同定せず、
+   **`𝒪_L → C` の埋め込みだけ作って「素元が素元のまま」を示す道**に変えたので
+   **(1) は 1 行も使っていない**（★段取りとの最大の差分）。
+3. ★★**本体が予期していなかった真の残りは `e = |I|`** だった
+   （`ramificationIndex_eq_card_inertiaGal`）。これも埋めた。決め手は
+   `AbelianSplitUnramified.lean` の `exists_unramified_subextension`（最大不分岐部分拡大の次数が `f`）
+   ＋ Y19b+c の `lift_fixedField_inertiaGal`。
+
+★**mathlib を先に引き、11 本を採用**。★**`Nat.sSup_le` と `IntermediateField.finrank_lift` は
+測って不在**（`#check` で `Unknown constant`）と正しく判定し、`csSup_Iic` と
+`IntermediateField.equivMap` + `LinearEquiv.finrank_eq` で代替した。
+★`Algebra.IsInvariant` は**引いたが使わなかった**（(1) が不要になったため）。
+
+`lean-idioms.md` **#145**（`adjoinIntegersIncl` の係数を 2 層いっぺんに `rfl` で潰すと
+**kernel deterministic timeout**）・
+★★**#146**（**`ker_restrictNormalHom_eq_fixingSubgroup` は同名が 2 つある** ——
+`AbsGalRamificationFiltration.lean:492` と `LubinTateClosure.lean:127`。
+両方が import 圏に入ると曖昧で落ちる → mathlib の `IntermediateField.restrictNormalHom_ker`）・
+**#147**（mathlib の `Subgroup.mul_normal` は `↑(H ⊔ N) = ↑H * ↑N` の向き。教科書の記憶と逆）。
+☆`set_option maxHeartbeats` を 3 宣言で使用（逸脱 6 に明記）。
+
+### ★★`prop_2_2` の 3 要求のうち 2 つが今日埋まった
+
+`Skeleton/PGC/Section2.lean` の `prop_2_2` が挙げる「依拠する境界外の結果」:
+
+| 要求 | 状態 |
+|---|---|
+| `RamificationFiltration p` | ★★**Y19e が今日作った（仮定ゼロ）** |
+| 上付き↔下付き番号付けの変換（Serre Ch. IV） | ★**Y18 が作った** |
+| ★**`Γ_K^0 = I_K`**（Cor 1.3 の系） | **残り。Y19f として配った** |
+
+☆★**`prop_2_1` も近い**: 3 つの要求のうち
+**p 進対数は解消済み**（`padicLog_bijOn`、sorry 無し）、
+**Verlagerung は mathlib にある**（`MonoidHom.transfer`）。
+残るのは `.implicitStep`「log による `U_K⊗Q_p ≅ K` と Verlagerung の両立性から
+Prop 2.1 自体への一段」だけ。
+
+### 新しく配った持ち場: Y19f `Γ_K^0 = I_K`
+
+★**入口は Y19d の `absGalStage_of_nonpos`（`v ≤ 0` で `I_K ⊔ N`）**のはず、と見当を書いた
+（★**実機で確かめていない**と明記）。
+★抽象核は「開正規部分群の基本近傍系を走る `⋂_N (H ⊔ N) = H`（`H` が閉のとき）」という
+**純位相群論**に落ちるはず。
+★★**退化 witness で「出した」ことにしないこと**を強く書いた ——
+`inertiaStageFiltration` なら `Γ_K^0 = I_K` は**自明に成り立ってしまう**ため。
+★**#146（同名 2 つ）に確実に当たる**ことも警告した（両方を import する圏に入るので）。
+
+### Y19f 着地 —— `Γ_K^0 = I_K`。★★本体の見当が当たり、18 回続いた訂正が止まった
+
+`Found/PGC/RamificationFiltrationZero.lean` **356 行 / 16 宣言、sorry 0**。
+`lake build` 成功(3224 jobs, 6.4 秒)。★`lean_start` **0 回**（18 回連続）。
+`leanfile.mjs` **3 往復**、`set_option maxHeartbeats` は**不要だった**。
+
+主定理 `ramificationFiltration_Gv_zero : (ramificationFiltration p).Gv K 0 = absInertia K`。
+
+★**抽象核が `ContinuousMul` だけで済んだ**（★`N` の開性すら要らない）:
+`Subgroup.iInf_sup_eq_self_of_isClosed`（**0.19 秒**）。
+★さらに**一般形** `Subgroup.iInf_sup_eq_topologicalClosure`（`H` に**何も仮定せず**
+`= H.topologicalClosure`）を **0.14 秒・一発**で出し、
+★**必要性** `Subgroup.isClosed_iInf_sup`（左辺は常に閉 ⇒ `IsClosed H` は落とせない）まで作った。
+☆**「仮定が要る」ことを自分で証明する形**は良い作法。
+
+★**本体の見当「`absGalStage_of_nonpos` を逆極限に通せば出る」はそのまま当たった。**
+☆**今日 18 回連続で続いていた本体の訂正が、ここで止まった。**
+
+### ★退化 witness で「出した」ことにしない規律が 3 通りで守られた
+
+1. 主定理の主語が `(ramificationFiltration p).Gv K 0` そのもので、
+   ★**証明が `ramificationFiltration` の定義を経由することを型で強制**している。
+2. ★**`trivialStageFiltration_limit_zero_ne_absInertia`** —— 退化 witness では
+   `Γ^0 = ⊤ ≠ I_K` で**本定理は偽**。
+   ★**`absInertia_ne_top` を無条件で証明**（`Γ_K/I_K` が任意の `ℤ/n` へ全射することから）。
+   ⇒ ★**主定理は「どんな段データでも成り立つ空虚な主張」ではない。**
+3. `exists_coe_ramificationFiltration_mul_coe_ne_inertiaStage` ——
+   ★**`inertiaStageFiltration`（`Γ^0 = I_K` が自明に成り立つ上からの近似）とも値が食い違う。**
+
+### ★★本体の持ち場に対する訂正 1 件（実装者の測定）
+
+本体は「`Skeleton/PGC/Section1Cor13.lean` の `inertia_recoverable` から `Γ_K^0 = I_K` が出るか」
+と書いた。★**測った結果 NO。両者は論理的に独立。**
+`inertia_recoverable` は「`I_K` が `Γ_K` から**群論的に復元できる**」であって
+★**`Γ_K^0` の値については何も言わない。**
+`Γ_K^0 = I_K` には分岐論の入力（`v ≤ 0` で上付き分岐群＝惰性群）が要る。
+★**Corollary 1.3 が効くのは後半**（「`Γ_K^0 = I_K` なので `Γ_K^0` が復元できる」の側）で、
+それを `ramificationFiltration_Gv_zero_recoverable` として別宣言に置いた。
+☆★**1b が訂正の入口だった**: 「原典はこの項目に Proof を付けていない/論証が主張の**手前**にある」
+で cor-1-3 の地の文が「不分岐判定 `q_L = q^{[Γ_K:H]}`」であって `Γ_K^0` の値ではないと分かった。
+
+### ★★`prop_2_2` の名指しの 3 入力が全部そろった
+
+| 要求 | 実体 |
+|---|---|
+| `RamificationFiltration p` | `ramificationFiltration`（Y19e、**仮定ゼロ**） |
+| 上付き↔下付き変換 | `upperRamificationGroup_eq_lowerRamificationGroup`（Y18） |
+| `Γ_K^0 = I_K` | `ramificationFiltration_Gv_zero`（Y19f） |
+
+★**ただし実装者は「`prop_2_2` 自体が閉じるとは言っていない」と正しく留保した** ——
+同定理は `IntKbar` / `CompKbar` を**未構築の対象として抽象化**しており、
+★**具体構成が「別途 `Found/` の課題」として残っている。**
+
+☆`#146`（同名 2 つ）に**当たらなかった**理由も報告された:
+`ker_restrictNormalHom_eq_fixingSubgroup` を一度も書かず、木の包み
+`ker_restrictNormalHom_unramifiedClosure` を引いたため。
+★**import 圏には両方入っていたので、名前を書いていたら確実に落ちていた。**
+`#147` には当たったが、★**先に idiom を読んでいたので往復 0 で済んだ。**
+`lean-idioms.md` **#148**（`∀ U ∈ s, P U` の穴に `{U}` を暗黙にした補題は嵌まらない）。
+
+### 新しく配った持ち場: Y25 `𝒪_{K̄}` と `K̄^∧` を `Γ_K`-加群として構成する
+
+★★**`prop_2_2` の docstring の前提が今日の M3 で古くなっていた**（本体が実測）:
+docstring は「スペクトルノルムは**有限次拡大にのみ適用**なのでそのままでは使えない」と書くが、
+★**`closureNormedField`（`K.closure` 全体のノルム）と
+`closureCompletion K`（= `K̄^∧`）と `closureCompletionInt` が既にある**
+（★**M3 は今日着地したばかり**）。`absGal` と `closure` を同時に含む宣言は **65 件**。
+
+⇒ ★**`CompKbar K := closureCompletion K` はそのまま使えるはず**、
+★**`IntKbar K := {x : K.closure // ‖x‖ ≤ 1}`**（★`closureCompletionInt` は
+**完備化の**整数環なので別物。`K̄ ⊊ ℂ_K`）と見当を書いた（★**実機で確かめていない**と明記）。
+★★**自明な作用（`σ • x = x`）で型クラスを満たしたことにしないこと**を強く書いた ——
+`DistribMulAction` は自明作用でも満たせてしまうため。
+
+### Λ6 §4-c 着地 —— ★★★原典の等号が木の設定では**偽**だと分かった（4 件目の食い違い）
+
+`Found/PGC/LubinTateCompletionNorm.lean` **444 行、sorry 0**。
+`lake build` 成功(3437 jobs、自モジュール 15 秒)。
+★`lean_start` **1 回だけ**（17.3 秒。見積 90 秒より速い）、以後 `lean_check` **11 回**、
+`leanfile.mjs` は不要だった。
+
+### ★★★`N(−α) = π^{ϕ^{m−1}}` は字面のまま偽 —— 原典と木で `f` の型が違う
+
+★**原典は `f ∈ 𝒪_L[X]`（多項式）に限っている**（逐語 "Let m ≥ 1 and f ∈ O_L[X] as above"、
+Lemma 4.3(i) の証明中 "as f_m is a monic in O_L[X]"）。
+そのとき `f_m/f_{m−1}` は**多項式の商**で定数項がちょうど `π^{ϕ^{m−1}}`。
+
+★★**ところが木の Lubin-Tate 機械は `f : PowerSeries 𝒪_K` を扱い、
+`ψ_n` は `[π^n]/[π^{n−1}]` の Weierstrass distinguished 部分である。**
+木の `iteratedLubinTatePsi_coeff_zero_mul` は `ψ_n.coeff 0 · U'_n(0) = π` としか言っておらず、
+★**木自身も `norm_iteratedLubinTatePsi_coeff_zero` で「ノルムが等しい」までしか主張していない。**
+
+★**実装者が反例を挙げた**（手計算、Lean には書いていないと明記）:
+`K = ℚ_2, π = 2, q = 2, f = 2X + X² + 2X³`（★木の 3 仮定をすべて満たす）。
+`r_1 = 2 + X + 2X²`、`𝔪` 内の根は `α ≡ 22 (mod 32)`、`ψ_1 = X − α`、
+★**`ψ_1(0) = −α ≡ 10 (mod 32) ≠ 2`**。`[K̂^1_f : K̂^ur] = q−1 = 1` なので `N(−β) = −α ≠ π`。
+★**`v(−α) = 1`（素元性）は保たれ、単元倍だけずれる。**
+
+⇒ ★**3 段で述べた**（statement をねじ曲げず、正しい形に直した）:
+(1) `N(−β) = ψ_n.coeff 0`（**無仮定・厳密**）/
+(2) `N(−β) = π·u`（`u ∈ 𝒪_K^×`）・`‖N(−β)‖ = ‖π‖`・`(N(−β)) = (π)` /
+(3) `U'_n(0) = 1` を仮定して**原典の字面** `N(−β) = π`。
+
+☆★**この論文で見つけた食い違いは 4 件目**だが、性質が違う:
+1・2 件目は**誤植**（Lemma 6.5 の 1 ずれ / Prop 6.6 の "Let j = 1"）、
+3 件目は**論理の穴**（Thm 6.11 の帰納法の仮定が引けない、Y21 が発見）、
+★**4 件目は「原典と我々で設定が違う」**（原典は多項式、木は冪級数）。
+★**原典に誤りは無い。我々の方が一般な設定を採っている。**
+
+### ★本体の見当の当否
+
+- 「`N(−α)` は最小多項式の定数項に落ちる」→ ★**当たった**
+  （`PowerBasis.norm_gen_eq_coeff_zero_minpoly` 系でそのまま）
+- 「定数項が `π`」→ ★**外れた**（`π` の単元倍まで）
+- 「`π^{ϕ^{m−1}}` は `L = K̂^ur` で `π` に落ちる」→ ★**当たった**（`π ∈ 𝒪_K` は `ϕ` で固定）
+- ★**「α が素元」は閉じた**（`‖α‖^[K̂^m_f:K̂^ur] = ‖π‖`）
+
+★**抽象核の中身が「原典が `N(α)` でなく `N(−α)` と書く理由」だった**:
+「`N(−1) = (−1)^{dim}` と mathlib の `(−1)^{dim}·coeff 0` が打ち消し合う」だけ（**0.18–0.33 秒**）。
+☆**原典の記法の理由が形式化で説明された例。**
+
+★**§4-b と Y19e の重複は「無し」と測れた**（`grep -c "unramifiedCompletion\|closureCompletion"
+`UnramifiedBaseChangeInvariance.lean` → **0**）。Y19e の `restrictGalHom` は**同じ底 `K` 上での
+`L ≤ L'` の制限**、§4-b は**底の取り替え `K → K̂^ur`**。★**別物。**
+
+★**#69 に当たらなかった** —— 中間体の整数環 `𝒪_{K̂^m_f}` を一度も作らず、
+「素元」を**ノルムの言葉**で書いた（§4-b と同じ「整数側に降りない設計」が 2 波続いた）。
+★**mathlib を先に引き、「無い」と判定した項目は 0**（8 波連続）。
+★本体の在庫表に無かった `norm_iteratedLubinTatePsi_coeff_zero` /
+`spectralNorm_root_iteratedLubinTatePsi`（`LubinTatePsiNorm.lean`）が
+**「素元」を 2 往復で片付けた**。
+
+★**1b が今回の最大の当たり**（実装者の証言、13 人目）:
+> 「the constant term of `f_m/f_{m−1}` reads `π^{ϕ^{m−1}}`」を読んで初めて
+> ★**原典が多項式の商を取っていると分かり、木の `ψ_n` とのズレに気づけた。**
+> ★**1b が無ければ `ψ_n.coeff 0 = π` を証明しようとして無限に往復していた。**
+
+`lean-idioms.md` **#149**（`π` は `hπmax` の型に現れるので `rw [← h]` は必ず
+`motive is not type correct`。移項補題に切り替えると 1 往復）。
+
+### ★D28（道 A）の 3 本が全部閉じた
+
+| # | 内容 | 実体 |
+|---|---|---|
+| 1 | `[K̂^m_f : K̂^ur] = q^n − q^{n−1}` | `LubinTateCompletionDegree.lean`（514 行） |
+| 2 | `Gal(K̂^m_f/K̂^ur) ≃* (𝒪_K/π^n)^×` | `LubinTateCompletionGalois.lean`（635 行） |
+| 3 | `N(−α) = π`（正しい形）・α が素元 | `LubinTateCompletionNorm.lean`（444 行） |
+
+★★**Lubin-Tate 機械 57 ファイル / 14,525 行を 1 行も触っていない**（3 波とも D28 の約束を守った）。
+
+☆新ノード候補（★**Λ7 の閉路には入っていない**と実装者が判定）:
+「`f` が多項式なら `U'_n(0) = 1`」——これが埋まれば原典の字面が完全に復元する。
+★**数学が足りないのではなく、木が原典より一般の `f` を扱っているために生じた節点。**
+
+### ★★Prop 6.14 には `Definition 5.3`（§5）も要ることが分かった
+
+`prop-6-14` の逐語: 「Let `L = K_n` and `K^m_x` **as in Definition 5.3**」。
+⇒ ★**Λ7 の終盤は §4 だけでなく §5 の定義も要る。** 本体は当初「§4 の 3 つだけ」と見ていた
+（構造化係の測定は「Prop 6.14 が使う **§4 側の**依存先は 3 つだけ」であって、
+★**§5 側は数えていなかった**）。★**新規配布を止め、ゲートを優先する。**
+
+---
+
+## ★★★★ゲート前検査で **NG 42 → 13** —— 29 件は道具の取りこぼしだった（2026-09-07）
+
+`Y25` が走行中でも `check.mjs` は **lake を使わない**ので、ゲート本体（全体ビルド）の前に回した。
+
+### 経過
+
+| 段階 | NG | 内容 |
+|---|---|---|
+| 初回 | **44** | |
+| 本体が 2 件直した後 | **42** | 今日の Lean 由来の NG は 0 になった |
+| ★**実体表を広げた後** | ★★**13** | ★**29 件は偽の NG だった** |
+
+### ★本体が直した 2 件（今日の Lean 由来。実体は「逐語の写し方」）
+
+1. `SubgroupActionBridge.lean:331` —— `Z[bb]_{≥0}` と書いていたが
+   ★**正しい docstring 用の形は `Z[bb]_≥0`（波括弧なし）**。
+   `brief.mjs` の「docstring に貼る逐語」と 1 文字ずつ突き合わせて直した。
+2. `UpperRamificationIndex.lean:298` —— `G_{i−1} ≠ G_i` と書いていたが
+   ★**`pdftotext` は `≠` の斜線を落とす**ので `G_i−1 = G_i` が正しい投影
+   （[[pdftotext-drops-negation]]）。★**波括弧も出ない。**
+   ⇒ 直したうえで「これは `pdftotext` の投影である」と docstring に明記した。
+
+☆★**どちらも `brief.mjs` の雛形を写していれば起きなかった**
+（★本体の `pdfPage := 8` の誤りと同じ原因）。
+
+### ★★★29 件の偽 NG の正体 —— `check.mjs` の `ENTITIES` が標準実体を取りこぼしていた
+
+Yoshida §2–§4 の構造化（68 件）で **S4 が 12 件落ちていた**が、
+★**逐語の誤りではなく `check.mjs` が `&isin;` `&pi;` `&middot;` `&cap;` `&equiv;` `&rArr;`
+などを解釈できなかった**ためだった（`decodeEntities` は表に無い実体を**そのまま残す**）。
+
+★**これらはコーパス全体で使われている**（実測: `&middot;` 既存 55 / `&sigma;` 45 /
+`&isin;` 22 / `&pi;` 29）。★**構造化係は正しく書いていたのに、道具が読めていなかった。**
+
+☆**構造化係は正しく気づいていた**: 報告の「守れなかった・迷ったもの」に
+> README への追記が §7 の「状態表」を少しはみ出した ——
+> 「`.verbatim` で使える名前つき実体は `check.mjs` の `ENTITIES` にあるものだけ」という
+> 失敗形の注を 1 段落足した
+
+と書いていた。★★**つまり「道具の制約に合わせて書き方を狭める」方向で対処されており、
+道具の側を直す発想が無かった。** ★**今回は道具を直した。**
+
+**直し方**: `ENTITIES` に 30 個追加（`isin` `ni` `middot` `cap` `cup` `equiv` `ne` `empty`
+`infin` `bull` `rArr` `lArr` `hArr` `Prime` `prod` `sum` `part` `radic` および
+ギリシャ小文字 12・大文字 6）。
+
+**手順（★増えたら戻す、を先に決めてから測った）**:
+| 検査 | 結果 |
+|---|---|
+| NG 件数 | **42 → 13**（★**29 件減、増加ゼロ**） |
+| `check.mjs --selftest` | ★**50/50 PASS**（器具は壊れた入力を落とせている） |
+| `mojibake.mjs` | ok 文字化けなし |
+
+★★**13 はセッション開始時の真の基準値と一致する。**
+⇒ ★**今日の 26 ファイル・約 15,000 行は NG を 1 件も増やしていない。**
+
+☆★**`&ne;` は `≠` に開くが `pdftotext` は斜線を落とす**ので、
+★**`data-txt="="` を併記しないと通らない**ことをコメントに残した。
+
+### ★残る 13 件は既存の繰り越し
+
+G9 繰り越し **27 件**（CorrHyp の非空虚性対照が無い）と G1 繰り越し **3 件**は
+**別枠で数えられている**（`NG 13` には含まれない集計）。
+★**どちらも `CorrHyp/**` 由来で、D26 により本セッションでは触らない。**

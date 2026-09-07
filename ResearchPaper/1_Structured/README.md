@@ -80,7 +80,13 @@ pdftoppm -png -r 150 -f <ページ> -l <ページ> "0_Source/<論文>.pdf" out
 </section>
 ```
 
-`class` の第2語: `definition` / `proposition` / `lemma` / `theorem` / `corollary` / `remark` / `setup`(地の文)。
+`class` の第2語: `definition` / `proposition` / `lemma` / `theorem` / `corollary` / `example` / `remark` / `setup`(地の文)。
+★**`example` は 2026-09-07 に追記した——規約より実態が先行していた。** コーパス実測で **7 件 / 6 ファイル**
+(非 legacy 5: [GenEll] `section-1` 1 / [Fon92] `section-3` 1 / Yoshida08 `section-3` **2**・`section-4` 1 /
+[Faltings] `exemple-1-4` 1、legacy 1: [TopicsII] `corollary3.7-…legacy` 1)。
+原典が `Example` という見出し語で立てている単位はこれを使う
+——`remark` に丸めると、Lean 側が「具体的な f を 1 本取る」ときの根拠を失う。
+★**`resolved` は legacy 専用**(`.legacy.html` 2 件のみ、記法の目視確定を記録する枠)。新規では使わない。
 
 **必須属性**: `id` / `data-paper` / `data-pdf-page` / `data-item` / `data-notation-checked`。1つでも欠けると `check.mjs` が落とす。
 
@@ -206,10 +212,13 @@ another local p-adic field K<span class="prime" data-txt="">&prime;</span>,
 | **IUTchIII** | §3 Theorem 3.11 / Corollary 3.12(物理 p.153・154・156・173・174) | **本規約で作成済み**(2026-08-14、目視確認 5 ページ。構造単位 9 件) |
 | IUTchIII | Thm 3.11 の (i)(a)(b)(c)・(ii) 全体、Cor 3.12 の証明、§1・§2 | 未着手 |
 | **Yoshida08** | §1(Theorem A)/ §5 物理 p.10–13 / **§6 全体**(物理 p.14–17、statement 15 件すべて) | **本規約で作成済み**(2026-09-06、目視確認 p.1・10・11・12・13・14・15・16・17 の 9 ページ。構造単位 30 件) |
-| Yoshida08 | §2・§3・§4・§5 の p.9・Appendix I/II | 未着手(§4 は Prop 6.14 が依存する) |
+| **Yoshida08** | **§2 全体**(物理 p.2–4)/ **§3 全体**(物理 p.4–6)/ **§4 全体**(物理 p.6–9) | **本規約で作成済み**(2026-09-07、目視確認 p.2–9 の 8 ページを追加。構造単位 38 件 = §2 11 + §3 14 + §4 13。★**statement は全部入っているが証明本体は未収録**)。★**Def 4.10 の読めなかった 1 行を PDF 目視で確定**、★**Prop 6.14 の §4 側の依存先(Lemma 4.3(ii)・Prop 4.4(ii)(iii))を特定** |
+| Yoshida08 | §2–§4 と §6 の**証明本体**・§5 の p.9・§1 の Notation・Appendix I/II・References | 未着手 |
 | その他7論文 | — | `*.legacy.*` として残置。必要になった時点で本規約で再作成 |
 
 > **注**: この表は全論文を網羅していない(2026-09-06 時点で `1_Structured` には 21 フォルダ・66 文書・構造単位 322 件がある)。**表に無い論文について、この表は何も言っていない**。
+
+> ★**2026-09-07 に §3 の規約で 2 回落とした失敗形**(Yoshida08 §2・§3 で実測)。`.verbatim` で使ってよい**名前つき HTML 実体は `check.mjs` の `ENTITIES` 表にあるものだけ**である。表に無い名前(`&Prime;` `&rsquo;` `&pi;` `&theta;` `&micro;` 等)は実体が解決されず、**照合射影に文字列 `&Prime;` がそのまま残って S4 が落ちる**。ギリシャ文字・特殊記号は**数値実体**(`&#960;` 等)で書くこと。§3 の記法クラスの表と並べて覚える価値がある(この規約は `check.mjs` 側の `ENTITIES` を増やすことでも解消できるが、**それは道具の変更なので本作業では行っていない**)。
 
 ## 8. 改訂履歴
 

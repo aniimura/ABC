@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>[Yoshida08] Section 3: Formal groups and Lubin-Tate groups</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.7; color: #222; }
+  h1 { font-size: 1.25em; border-bottom: 2px solid #333; padding-bottom: .3em; }
+  h2 { font-size: 1.05em; margin-top: 2em; }
+  section.statement { border-left: 4px solid #1554b0; padding: .5em 1em; margin: 1.6em 0; background: #f7f9fc; }
+  section.statement.proposition { border-left-color: #0a7d1e; background: #f2f9f2; }
+  section.statement.theorem     { border-left-color: #7d0a1e; background: #fbf2f4; }
+  section.statement.corollary   { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.definition  { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.lemma       { border-left-color: #1554b0; background: #f7f9fc; }
+  section.statement.remark      { border-left-color: #666;    background: #f5f5f5; }
+  section.statement.example     { border-left-color: #666;    background: #f5f5f5; }
+  section.statement.setup       { border-left-color: #bbb;    background: #fafafa; }
+  .hdr { font-size: .8em; color: #777; margin-bottom: .4em; }
+  .hdr b { color: #333; }
+  .verbatim { background: #fff; border: 1px solid #ddd; padding: .6em .9em; margin: .5em 0; }
+  .reading  { font-size: .93em; color: #333; margin: .5em 0 0; }
+  .reading::before { content: "読み: "; font-weight: bold; color: #1554b0; }
+  p.open { background: #fff8e1; border-left: 4px solid #c9a227; padding: .4em .9em; margin: .6em 0; }
+  p.open::before { content: "未解決: "; font-weight: bold; }
+  code { background: #f5f5f5; padding: 1px 4px; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: #f0f0f0; }
+  /* 記法クラス — .txt で脱落する装飾を表示側で復元する(README §3) */
+  .ul1  { text-decoration: underline; }
+  .ul2  { text-decoration: underline; text-decoration-style: double; }
+  .bar  { text-decoration: overline; }
+  .hat::after   { content: "\0302"; }
+  .tilde::after { content: "\0303"; }
+  .dot1::after  { content: "\0307"; }
+  .dot2::after  { content: "\0308"; }
+  .bb   { font-weight: bold; }
+  .scr  { font-style: italic; }
+  .frak { font-style: italic; }
+</style>
+</head>
+<body>
+
+<p><a href="index.html">&larr; [Yoshida08] 目次</a></p>
+
+<h1>[Yoshida08] Section 3: Formal groups and Lubin-Tate groups</h1>
+
+<p class="hdr">
+原典: <b>Local Class Field Theory via Lubin-Tate Theory</b> (T. Yoshida, 2008; arXiv math/0606108v2)&nbsp;/&nbsp;
+範囲: <b>物理ページ 4&ndash;6</b>(&sect;3 の見出しは p.4 の下半分から。p.6 は Definition 3.9 まで、
+以降は <a href="section-4.html">&sect;4</a>)&nbsp;/&nbsp;
+記法の目視確認: <b>2026-09-07</b>(p.4&middot;5&middot;6 を 170dpi 画像で全面目視)&nbsp;/&nbsp;
+規約: <a href="../README.md">1_Structured/README.md</a>
+</p>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-3-1"
+         data-paper="Yoshida08" data-pdf-page="4" data-item="Section 3.1 (Formal groups, setup)"
+         data-notation-checked="2026-09-07">
+<p class="hdr"><b>&sect;3 見出し &amp; &sect;3.1 冒頭</b>(A[[X]] と合成のモノイド) &mdash; 物理 p.4</p>
+
+<div class="verbatim">
+3. Formal groups and Lubin-Tate groups 3.1. Formal groups. Let A be a ring, not the zero ring. In the formal power series ring of one variable A[[X]] := lim<sub data-txt="&larr;&minus;m">&#8592;m</sub> A[X]/(X<sup>m</sup>) over A, the ideal (X) &sub; A[[X]], consisting of all the elements with constant term equal to 0, is a monoid under the composition f &#9702; g := f(g(X)) with X as the identity. For f &isin; (X), there exists an f<sup>&minus;1</sup> satisfying f &#9702; f<sup>&minus;1</sup> = f<sup>&minus;1</sup> &#9702; f = X if and only if the coefficient of X in f belongs to A<sup>&times;</sup>.
+</div>
+
+<div class="reading">
+&sect;3.1 は<b>任意の環 A 上の形式群</b>を扱う(局所体は &sect;3.2 から)。
+土台は「<code>(X) &sub; A[[X]](定数項 0 の冪級数)は合成についてモノイド</code>」と
+「<b>可逆 &hArr; 1 次の係数が A<sup>&times;</sup></b>」の 2 つ。
+<br>★<b>記法の脱落</b>: 逆極限の <code>lim<sub>&#8592;</sub></code> は
+<code>pdftotext</code> では <code>lim</code> / <code>&#8592;&minus;</code> / <code>m</code> の
+<b>3 トークンに割れて縦に並ぶ</b>(<code>data-txt="&#8592;&minus;m"</code>)。
+また合成記号 <code>&#8728;</code>(<code>\circ</code>)の出力は <code>&#9702;</code>(U+25E6, WHITE BULLET)であり、
+<b>本ファイルは出力側の U+25E6 をそのまま使う</b>(&sect;6 は <code>data-txt</code> で明示していたが、
+&sect;3&middot;&sect;4 は <code>&#9702;</code> の出現が多すぎるので表示側も U+25E6 に揃えた。
+★<b>&sect;6 と流儀が違う</b>ことをここに記録する)。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement definition"
+         id="def-3-1"
+         data-paper="Yoshida08" data-pdf-page="4" data-item="Definition 3.1"
+         data-notation-checked="2026-09-07">
+<p class="hdr"><b>Definition 3.1</b>(形式群) &mdash; 物理 p.4</p>
+
+<div class="verbatim">
+Definition 3.1. A formal group over A is a formal power series of two variables F(X, Y ) &isin; A[[X, Y ]] which satisfies the following: (i) F(X, Y ) &equiv; X + Y (mod deg 2), (ii) F(F(X, Y ), Z) = F(X, F(Y, Z)), (iii) F(X, Y ) = F(Y, X).
+</div>
+
+<div class="reading">
+形式群の定義。(i) は<b>1 次までは加法</b>、(ii) は<b>結合律</b>、(iii) は<b>可換律</b>。
+逆元の存在は要求されておらず、後の段落で<b>導かれる</b>(次の項目 <a href="#def-3-1-plus">def-3-1-plus</a>)。
+原典は直後に「Precisely speaking, these are commutative formal groups of dimension 1」と注記する。
+<br>Lean 化の観点: mathlib に <code>FormalGroup</code> は無い。
+<code>PowerSeries</code>(2 変数は <code>MvPowerSeries</code>)上に (i)(ii)(iii) を課す構造体が節点になる。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement definition"
+         id="def-3-1-plus"
+         data-paper="Yoshida08" data-pdf-page="4" data-item="Section 3.1 (implicit: i_F and +_F)"
+         data-implicit="true"
+         data-notation-checked="2026-09-07">
+<p class="hdr">★<b>地の文の暗黙の定義</b>(逆元 i<sub>F</sub> と加法 +<sub>F</sub>) &mdash; 物理 p.4</p>
+
+<div class="verbatim">
+Therefore we can solve F(X, Y ) = 0 with respect to Y and get a unique i<sub>F</sub> (X) &isin; A[[X]] satisfying F(X, i<sub>F</sub> (X)) = 0. If we define the addition +<sub>F</sub> on the ideal (X) &sub; A[[X]] by f +<sub>F</sub> g := F(f(X), g(X)), then (X) becomes an abelian group with 0 as the identity and i<sub>F</sub> &#9702; f as the inverse of f.
+</div>
+
+<div class="reading">
+★<b>見出し語を持たないが実質的な定義</b>(README §3「地の文に埋め込まれた暗黙の定義」)。
+<b>2 つの対象</b>が定義されている:
+<b>(a)</b> <code>i<sub>F</sub> &isin; A[[X]]</code>(形式的な逆元。<code>F(X, i<sub>F</sub>(X)) = 0</code> で一意に決まる)、
+<b>(b)</b> <code>+<sub>F</sub></code>((X) 上の加法 <code>f +<sub>F</sub> g := F(f(X), g(X))</code>)。
+<b>これで (X) がアーベル群になる</b>。
+<br>★<b>&sect;4 が使うのはもっぱら (b)</b>&mdash;&mdash;
+<a href="section-4.html#prop-4-4">Proposition 4.4</a>(i) の
+「<code>&#181;<sub>f,m</sub> は <code>+<sub>F<sub>f</sub></sub></code> と <code>[&middot;]<sub>f</sub></code> によって <span class="scr">O</span>-加群」が
+この <code>+<sub>F</sub></code> のことである。
+<b>ここを切り出しておかないと Lean 側で作り直しになる</b>。
+<br>原典は <code>i<sub>F</sub></code> の存在を「Therefore we can solve &hellip;」の 1 語で畳んでいる
+&mdash;&mdash;実際には <b>形式的逆関数定理</b>(Y の 1 次係数が可逆)を使う。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement remark"
+         id="remark-3-1-examples"
+         data-paper="Yoshida08" data-pdf-page="4" data-item="Section 3.1 (basic examples)"
+         data-notation-checked="2026-09-07">
+<p class="hdr"><b>基本例</b>(形式的加法群 &#372;<sub>a</sub> と乗法群 &#372;<sub>m</sub>) &mdash; 物理 p.4</p>
+
+<div class="verbatim">
+Precisely speaking, these are commutative formal groups of dimension 1. The basic <span data-txt="ex-amples">examples</span> are the additive group <span class="hat" data-txt="G"><span class="bb">G</span></span><sub>a</sub>(X, Y ) := X +Y and the multiplicative group <span class="hat" data-txt="G"><span class="bb">G</span></span><sub>m</sub>(X, Y ) := X + Y + XY .
+</div>
+
+<div class="reading">
+形式的加法群 <code><span class="hat"><span class="bb">G</span></span><sub>a</sub> = X + Y</code> と
+形式的乗法群 <code><span class="hat"><span class="bb">G</span></span><sub>m</sub> = X + Y + XY</code>。
+後者は <a href="#ex-3-6">Example 3.6</a> で <code>K = <span class="bb">Q</span><sub>p</sub></code> の Lubin-Tate 群として再登場し、
+<a href="section-4.html#ex-4-2">Example 4.2</a> で<b>円分拡大</b>を与える。
+<br>★<b>記法の脱落 2 種</b>:
+(a) <code><span class="hat"><span class="bb">G</span></span></code>(<code>\widehat{\mathbb G}</code>)は
+<code>pdftotext</code> に <code>G</code> としか出ない(帽子も黒板太字も落ちる)。
+(b) ★<b>行末のハイフネーション</b>&mdash;&mdash;原典 p.4 では &ldquo;examples&rdquo; が
+&ldquo;ex-&rdquo; / &ldquo;amples&rdquo; に折られており、<code>pdftotext</code> の出力は
+<b><code>ex-amples</code></b>(ハイフンが本文に残る)。
+<code>data-txt="ex-amples"</code> で明示している&mdash;&mdash;
+<b>これは装飾ではなく組版由来の差だが、README §3 の <code>data-txt</code> がそのまま使える</b>。
+本論文の物理 p.4&ndash;9 でこの折れ方が起きるのは<b>3 箇所だけ</b>(p.4 の ex-amples、
+p.7 の O- module、p.8 の ar-gue)で、後 2 者は証明中なので本フォルダの逐語には現れない。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement definition"
+         id="def-3-2"
+         data-paper="Yoshida08" data-pdf-page="4" data-item="Definition 3.2"
+         data-notation-checked="2026-09-07">
+<p class="hdr"><b>Definition 3.2</b>(形式群の準同型) &mdash; 物理 p.4</p>
+
+<div class="verbatim">
+Definition 3.2. Let F, G be formal groups over A. A power series f(X) &isin; (X) &sub; A[[X]] is called a homomorphism from F to G if it satisfies f &#9702; F = G &#9702; f, i.e. f(F(X, Y )) = G(f(X), f(Y )),
+</div>
+
+<div class="reading">
+準同型の定義。<b>p.4 の最終行で切れており</b>、続き
+(&ldquo;and we write f : F &rarr; G. &hellip;&rdquo;)は p.5 にある
+&mdash;&mdash;逐語照合は 1 ページ単位なので、続きは
+<a href="#setup-3-1-hom"><code>setup-3-1-hom</code></a>(p.5)に分けた。
+<br>ここでの <code>f &#9702; F</code>・<code>G &#9702; f</code> は &sect;3.1 冒頭で定義された
+<b>多変数への合成の略記</b>(<code>f &#9702; F := f(F(X<sub>1</sub>, &hellip;, X<sub>n</sub>))</code>、
+<code>F &#9702; f := F(f(X<sub>1</sub>), &hellip;, f(X<sub>n</sub>))</code>)である。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-3-1-hom"
+         data-paper="Yoshida08" data-pdf-page="5" data-item="Section 3.1 (Hom_A, End_A)"
+         data-implicit="true"
+         data-notation-checked="2026-09-07">
+<p class="hdr"><b>Definition 3.2 の続き</b> + <b>暗黙の定義</b>(Hom<sub>A</sub>(F, G) と End<sub>A</sub>(F)) &mdash; 物理 p.5</p>
+
+<div class="verbatim">
+and we write f : F &rarr; G. Two homomorphisms compose via the composition of power series, with f(X) = X as the identity id : F &rarr; F. If f<sup>&minus;1</sup> exists, it defines f<sup>&minus;1</sup> : G &rarr; F and f &#9702; f<sup>&minus;1</sup> = f<sup>&minus;1</sup> &#9702; f = id. In this case f is called an isomorphism and we write f : F <span data-txt="&#8764; =">&cong;</span><span data-txt="&minus;&rarr;">&#10230;</span> G. The set Hom<sub>A</sub>(F, G) of all homomorphisms from F to G is an abelian group under +<sub>G</sub>. Moreover, End<sub>A</sub>(F) := Hom<sub>A</sub>(F, F) is a (not necessarily commutative) ring with +<sub>F</sub> as the addition and &#9702; as the multiplication.
+</div>
+
+<div class="reading">
+★<b>暗黙の定義が 2 つ</b>: <code>Hom<sub>A</sub>(F, G)</code>(<code>+<sub>G</sub></code> によるアーベル群)と
+<code>End<sub>A</sub>(F)</code>(<code>+<sub>F</sub></code> を加法、<code>&#9702;</code> を乗法とする環)。
+<a href="#cor-3-7">Corollary 3.7</a>(i) の
+「<code>[&middot;]<sub>f</sub> : <span class="scr">O</span> &rarr; End<sub><span class="scr">O</span><sub>L</sub></sub>(F<sub>f</sub>)</code> は<b>単射環準同型</b>」が
+この環構造を指す&mdash;&mdash;<b>形式 <span class="scr">O</span>-加群</b>という言葉の中身はここにある。
+<br>★<b>記法</b>: 同型を表す <code>&cong;</code> つき矢印は <code>pdftotext</code> で
+<code>&#8764;</code> / <code>=</code> / <code>&minus;&rarr;</code> の<b>3 トークンに割れて縦に並ぶ</b>。
+<code>check.mjs</code> の正規化は<b>隣接した</b> <code>&#8764;=</code> しか <code>&cong;</code> に畳まないので、
+本ファイルは <code>data-txt="&#8764; ="</code>(空白込み)+ <code>data-txt="&minus;&rarr;"</code> と 2 つに分けて書いている。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-3-2"
+         data-paper="Yoshida08" data-pdf-page="5" data-item="Section 3.2 (Lubin-Tate groups, setup)"
+         data-notation-checked="2026-09-07">
+<p class="hdr"><b>&sect;3.2 冒頭</b>(局所体 K・完備不分岐拡大 L・Frobenius &#981;) &mdash; 物理 p.5</p>
+
+<div class="verbatim">
+3.2. Lubin-Tate groups. We return to the notation of &sect;2.2, i.e. K is a local field with the ring of integers <span class="scr">O</span> and its maximal ideal <span class="frak">p</span>, and <span class="scr">O</span>/<span class="frak">p</span> <span data-txt="&#8764; =">&cong;</span> <span class="bb">F</span><sub>q</sub> where q is a power of p. Let L be a complete unramified extension of K (&sect;2.2). As <span class="frak">p</span><sub>L</sub> = <span class="frak">p</span><span class="scr">O</span><sub>L</sub>, we write mod <span class="frak">p</span> for mod <span class="frak">p</span><span class="scr">O</span><sub>L</sub>. Let &#981; be the arithmetic Frobenius, extended to a K-automorphism of L. For &#945; &isin; L and i &isin; <span class="bb">Z</span>, we write &#945;<sup>&#981;<sup>i</sup></sup> := &#981;<sup>i</sup>(&#945;). For a power series F over <span class="scr">O</span><sub>L</sub>, we define F<sup>&#981;<sup>i</sup></sup> by applying &#981;<sup>i</sup> to all coefficients of F. If F is a formal group over <span class="scr">O</span><sub>L</sub>, so is F<sup>&#981;<sup>i</sup></sup>.
+</div>
+
+<div class="reading">
+&sect;3.2 以降の固定された設定: <b>K は局所体</b>、<b>L は K の完備不分岐拡大</b>、
+<b>&#981; は算術 Frobenius を L へ延長したもの</b>。
+係数に <code>&#981;<sup>i</sup></code> を施す操作 <code>F &#8614; F<sup>&#981;<sup>i</sup></sup></code> がここで定義され、
+これが Lubin-Tate 条件 <code>f&prime; &#9702; F = F<sup>&#981;</sup> &#9702; f</code>(<a href="#lemma-3-4">Lemma 3.4</a>)の
+右辺に現れる&mdash;&mdash;<b>&sect;3&middot;&sect;4 全体を通じて最も基本的な操作</b>。
+<br>★<b>記法</b>: <code>&#981;</code> は原典が <code>\varphi</code>(U+03C6 の字形)だが、
+<code>pdftotext</code> の出力は <b>U+03D5(GREEK PHI SYMBOL)</b>である。
+&sect;6 の <code>&#966;<sub>G</sub></code>(Herbrand 関数、<code>\phi</code>)が U+03C6 で出るのと
+<b>符号位置が逆になっている</b>&mdash;&mdash;この論文には
+<b>U+03D5(Frobenius)と U+03C6(Herbrand 関数)の 2 つの phi が別対象として存在する</b>ので、
+<code>grep</code> するときは取り違えないこと。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement definition"
+         id="def-3-3"
+         data-paper="Yoshida08" data-pdf-page="5" data-item="Definition 3.3"
+         data-notation-checked="2026-09-07">
+<p class="hdr">★<b>Definition 3.3</b>(&#920;<sup>L</sup><sub>&#960;,&#960;&prime;</sub>) &mdash; 物理 p.5</p>
+
+<div class="verbatim">
+Definition 3.3. For uniformizers &#960;, &#960;&prime; of L, set &#920;<sup>L</sup><sub>&#960;,&#960;&prime;</sub> := {&#952; &isin; <span class="scr">O</span><sub>L</sub> | &#952;<sup>&#981;</sup>/&#952; = &#960;&prime;/&#960;}. It is an additive group. If &#952; &isin; &#920;<sup>L</sup><sub>&#960;,&#960;&prime;</sub> and &#952;&prime; &isin; &#920;<sup>L</sup><sub>&#960;&prime;,&#960;&prime;&prime;</sub>, then &#952;&#952;&prime; &isin; &#920;<sup>L</sup><sub>&#960;,&#960;&prime;&prime;</sub>. We have <span class="scr">O</span> &sub; &#920;<sup>L</sup><sub>&#960;,&#960;</sub> (actually we will see <span class="scr">O</span> = &#920;<sup>L</sup><sub>&#960;,&#960;</sub> by Lemma 5.2(i)).
+</div>
+
+<div class="reading">
+★<b>&Lambda;6 が「Dwork のねじれ元」と呼んでいる対象の原典側の名前</b>。
+2 つの素元 &pi;, &pi;&prime; に対し
+<code>&#920;<sup>L</sup><sub>&pi;,&pi;&prime;</sub> = {&theta; &isin; <span class="scr">O</span><sub>L</sub> | &theta;<sup>&#981;</sup>/&theta; = &pi;&prime;/&pi;}</code>。
+<br>3 つの性質が同時に述べられている:
+<b>(a)</b> 加法群、<b>(b)</b> <b>合成則</b>
+<code>&#920;<sub>&pi;,&pi;&prime;</sub> &middot; &#920;<sub>&pi;&prime;,&pi;&Prime;</sub> &sub; &#920;<sub>&pi;,&pi;&Prime;</sub></code>
+(&pi; を頂点とする<b>亜群</b>の構造)、<b>(c)</b> <code><span class="scr">O</span> &sub; &#920;<sup>L</sup><sub>&pi;,&pi;</sub></code>
+(等号は Lemma 5.2(i) &mdash;&mdash; <code>&#981;<sup>n</sup></code> の固定体が K<sub>n</sub> であること)。
+<br>★<b>&sect;4 での使われ方</b>: 単元だけを取り出した
+<code>&#920;<sup>L,&times;</sup><sub>&pi;,&pi;&prime;</sub> := &#920;<sup>L</sup><sub>&pi;,&pi;&prime;</sub> &cap; <span class="scr">O</span><sub>L</sub><sup>&times;</sup></code>
+(<a href="#cor-3-7">Corollary 3.7</a>(ii))が
+<a href="section-4.html#lemma-4-6">Lemma 4.6</a>(= &Lambda;6 #7)の仮定であり、
+<b>その非空性が <a href="section-4.html#prop-4-8">Proposition 4.8</a></b>(= 着地済みの Dwork 乗法版)である。
+<br>★<b>記法</b>: 2 重プライム <code>&#960;&prime;&prime;</code> は <code>pdftotext</code> では
+<b>U+2032 が 2 つ</b>として出る(U+2033 <code>&amp;Prime;</code> ではない)。
+★<b>ここで一度落とした</b>&mdash;&mdash;<code>&amp;Prime;</code> と書くと
+<b><code>check.mjs</code> の実体表(<code>ENTITIES</code>)に <code>Prime</code> が無い</b>ため
+実体が解決されず、逐語照合の投影に文字列 <code>&amp;Prime;</code> がそのまま残って S4 が落ちる。
+本ファイルは <code>&amp;prime;&amp;prime;</code>(2 つ)と書いて回避している。
+★<b>教訓</b>: <code>.verbatim</code> で使ってよい名前つき実体は
+<code>check.mjs</code> の <code>ENTITIES</code> にあるものだけ。
+それ以外は<b>数値実体</b>(<code>&amp;#960;</code> 等)で書くこと
+&mdash;&mdash;<code>&amp;pi;</code> や <code>&amp;theta;</code> も表に無い。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement lemma"
+         id="lemma-3-4"
+         data-paper="Yoshida08" data-pdf-page="5" data-item="Lemma 3.4"
+         data-notation-checked="2026-09-07">
+<p class="hdr">★<b>Lemma 3.4</b>(Lubin-Tate の一意存在補題。条件 (3.2.1) の定義を含む) &mdash; 物理 p.5</p>
+
+<div class="verbatim">
+Lemma 3.4. Let &#960; be a uniformizer of L, and let f &isin; <span class="scr">O</span><sub>L</sub>[[X]] satisfy: (3.2.1) f(X) &equiv; &#960;X (mod deg 2), f(X) &equiv; X<sup>q</sup> (mod <span class="frak">p</span>). Let &#960;&prime;, f&prime; be another such pair. Assume that &#952;<sub>1</sub>, . . . , &#952;<sub>t</sub> &isin; &#920;<sup>L</sup><sub>&#960;,&#960;&prime;</sub>. Then there is a unique F &isin; <span class="scr">O</span><sub>L</sub>[[X<sub>1</sub>, . . . , X<sub>t</sub>]] satisfying the following: F &equiv; &#952;<sub>1</sub>X<sub>1</sub> + &middot; &middot; &middot; + &#952;<sub>t</sub>X<sub>t</sub> (mod deg 2), f&prime; &#9702; F = F<sup>&#981;</sup> &#9702; f.
+</div>
+
+<div class="reading">
+★<b>&sect;3 の技術的な心臓部</b>。Lubin-Tate 条件 <b>(3.2.1)</b>
+(<code>f &equiv; &pi;X (mod deg 2)</code> かつ <code>f &equiv; X<sup>q</sup> (mod <span class="frak">p</span>)</code>)を満たす
+2 つの f, f&prime; と <code>&theta;<sub>1</sub>, &hellip;, &theta;<sub>t</sub> &isin; &#920;<sup>L</sup><sub>&pi;,&pi;&prime;</sub></code> に対し、
+<b>1 次部分を指定すれば <code>f&prime; &#9702; F = F<sup>&#981;</sup> &#9702; f</code> を満たす F が一意に存在する</b>。
+<br>証明は次数 m についての帰納法で、<b>各次数で係数が一意に決まる</b>ことを示す
+(<code>&alpha; = &minus;&beta; &minus; &sum;<sub>i&ge;1</sub>(&pi;<sup>m+1</sup>/&pi;&prime;)<sup>1+&#981;+&hellip;&#981;<sup>i&minus;1</sup></sup>&beta;<sup>&#981;<sup>i</sup></sup></code>
+という<b>無限和</b>が出るので、Appendix I の収束が要る)。
+<br>★<b>この 1 つの補題から &sect;3 の残り全部が出る</b>&mdash;&mdash;
+<a href="#prop-3-5">Proposition 3.5</a> の (i)(ii)(iii) はすべて
+「Lemma 3.4 を t = 1, 2, 3 で使う」だけである。
+Lean 化ではここが &sect;3 で唯一の重い節点になる。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement proposition"
+         id="prop-3-5"
+         data-paper="Yoshida08" data-pdf-page="5" data-item="Proposition 3.5"
+         data-notation-checked="2026-09-07">
+<p class="hdr">★<b>Proposition 3.5</b>(Lubin-Tate 群 F<sub>f</sub> と [&#952;]<sub>f,f&prime;</sub>) &mdash; 物理 p.5</p>
+
+<div class="verbatim">
+Proposition 3.5. Let f, f&prime; &isin; <span class="scr">O</span><sub>L</sub>[[X]] be as above, with linear coefficients &#960;, &#960;&prime; respectively. (i) There exists a unique formal group F<sub>f</sub> over <span class="scr">O</span><sub>L</sub> such that f &isin; Hom<sub><span class="scr">O</span><sub>L</sub></sub>(F<sub>f</sub>, F<sup>&#981;</sup><sub>f</sub>). (We call F<sub>f</sub> the Lubin-Tate group associated to f.) (ii) There is a unique map [&middot;]<sub>f,f&prime;</sub> : &#920;<sup>L</sup><sub>&#960;,&#960;&prime;</sub> &rarr; (X) &sub; <span class="scr">O</span><sub>L</sub>[[X]] such that: [&#952;]<sub>f,f&prime;</sub>(X) &equiv; &#952;X (mod deg 2), f&prime; &#9702; [&#952;]<sub>f,f&prime;</sub> = [&#952;]<sup>&#981;</sup><sub>f,f&prime;</sub> &#9702; f. It satisfies [&#952;]<sub>f,f&prime;</sub> +<sub>F<sub>f&prime;</sub></sub> [&#952;&prime;]<sub>f,f&prime;</sub> = [&#952; + &#952;&prime;]<sub>f,f&prime;</sub>, [&#952;&prime;]<sub>f&prime;,f&prime;&prime;</sub> &#9702; [&#952;]<sub>f,f&prime;</sub> = [&#952;&#952;&prime;]<sub>f,f&prime;&prime;</sub>. (iii) We have [&#952;]<sub>f,f&prime;</sub> &isin; Hom<sub><span class="scr">O</span><sub>L</sub></sub>(F<sub>f</sub>, F<sub>f&prime;</sub>) for all &#952; &isin; &#920;<sup>L</sup><sub>&#960;,&#960;&prime;</sub>.
+</div>
+
+<div class="reading">
+★<b>&Lambda;6 消費側が「Lubin-Tate 群の構成」と呼んでいる主張の原典</b>。3 つの主張:
+<ul>
+<li><b>(i)</b> 各 f に対し<b>形式群 F<sub>f</sub> が一意に存在</b>し、f は
+    <code>F<sub>f</sub> &rarr; F<sup>&#981;</sup><sub>f</sub></code> の準同型になる。</li>
+<li>★<b>(ii)</b> <code>[&middot;]<sub>f,f&prime;</sub> : &#920;<sup>L</sup><sub>&pi;,&pi;&prime;</sub> &rarr; (X)</code> が一意に存在し、
+    <b>加法的</b>(<code>[&theta;] +<sub>F<sub>f&prime;</sub></sub> [&theta;&prime;] = [&theta;+&theta;&prime;]</code>)かつ
+    <b>合成が積</b>(<code>[&theta;&prime;] &#9702; [&theta;] = [&theta;&theta;&prime;]</code>)。</li>
+<li><b>(iii)</b> <code>[&theta;]<sub>f,f&prime;</sub></code> は形式群の準同型 <code>F<sub>f</sub> &rarr; F<sub>f&prime;</sub></code>。</li>
+</ul>
+証明はすべて <a href="#lemma-3-4">Lemma 3.4</a> の一意性を
+<code>t = 1, 2, 3</code> で当てるだけ&mdash;&mdash;
+「<b>2 つの式が同じ条件を満たすから等しい</b>」という論法を 5 回繰り返す。
+<br>★<b>&sect;4 での消費先</b>: (ii)(iii) が
+<a href="section-4.html#lemma-4-6">Lemma 4.6</a>(= &Lambda;6 #7)の
+「<code>[&theta;]</code> は <span class="scr">O</span>-準同型」の根拠。
+(i) が <a href="section-4.html#prop-4-4">Proposition 4.4</a>(i) の <code>+<sub>F<sub>f</sub></sub></code>。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement example"
+         id="ex-3-6"
+         data-paper="Yoshida08" data-pdf-page="6" data-item="Example 3.6"
+         data-notation-checked="2026-09-07">
+<p class="hdr"><b>Example 3.6</b>(<span class="bb">Q</span><sub>p</sub> の場合は形式的乗法群) &mdash; 物理 p.6</p>
+
+<div class="verbatim">
+Example 3.6. If K = <span class="bb">Q</span><sub>p</sub>, &#960; = p and f = (1 + X)<sup>p</sup> &minus; 1, then F<sub>f</sub> = <span class="hat" data-txt="G"><span class="bb">G</span></span><sub>m</sub> = X + Y + XY .
+</div>
+
+<div class="reading">
+<code>K = <span class="bb">Q</span><sub>p</sub></code>・<code>&pi; = p</code>・<code>f = (1+X)<sup>p</sup>&minus;1</code> のとき
+<b>Lubin-Tate 群は形式的乗法群 <code><span class="hat"><span class="bb">G</span></span><sub>m</sub></code></b>。
+<a href="section-4.html#ex-4-2">Example 4.2</a> で<b>円分拡大が Lubin-Tate 拡大の特別な場合</b>であることに繋がる。
+Lean 化のとき<b>最初に通すべき健全性検査</b>がこれ。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement corollary"
+         id="cor-3-7"
+         data-paper="Yoshida08" data-pdf-page="6" data-item="Corollary 3.7"
+         data-notation-checked="2026-09-07">
+<p class="hdr">★<b>Corollary 3.7</b>(形式 <span class="scr">O</span>-加群構造と &#920;<sup>L,&times;</sup> の定義) &mdash; 物理 p.6</p>
+
+<div class="verbatim">
+Corollary 3.7. (i) The map [&middot;]<sub>f</sub> := [&middot;]<sub>f,f</sub> : <span class="scr">O</span> <span data-txt="&minus;&rarr;">&#10230;</span> End<sub><span class="scr">O</span><sub>L</sub></sub>(F<sub>f</sub>) is an injective ring homomorphism. (Hence (F<sub>f</sub>, [&middot;]<sub>f</sub>) is a formal <span class="scr">O</span>-module.) (ii) If &#952; &isin; &#920;<sup>L,&times;</sup><sub>&#960;,&#960;&prime;</sub> := &#920;<sup>L</sup><sub>&#960;,&#960;&prime;</sub> &cap; <span class="scr">O</span><sup>&times;</sup><sub>L</sub>, then [&#952;]<sub>f,f&prime;</sub> is an isomorphism with the inverse [&#952;<sup>&minus;1</sup>]<sub>f&prime;,f</sub>.
+</div>
+
+<div class="reading">
+★<b>(ii) が <code>&#920;<sup>L,&times;</sup><sub>&pi;,&pi;&prime;</sub></code> の定義そのもの</b>
+&mdash;&mdash;<a href="section-4.html#lemma-4-6">Lemma 4.6</a>(&Lambda;6 #7)と
+<a href="section-4.html#prop-4-8">Proposition 4.8</a>(着地済み)が
+どちらもこの記号を仮定/結論に持つので、<b>ここが両者の共通の入口</b>である。
+&theta; が単元なら <code>[&theta;]<sub>f,f&prime;</sub></code> は<b>同型で、逆は <code>[&theta;<sup>&minus;1</sup>]<sub>f&prime;,f</sub></code></b>。
+<br>(i) は <code><span class="scr">O</span> &rarr; End(F<sub>f</sub>)</code> が<b>単射環準同型</b>であること
+&mdash;&mdash;これで <code>(F<sub>f</sub>, [&middot;]<sub>f</sub>)</code> が<b>形式 <span class="scr">O</span>-加群</b>になる。
+<code>&#920;<sup>L</sup><sub>&pi;,&pi;</sub> &supe; <span class="scr">O</span></code>(<a href="#def-3-3">Definition 3.3</a>)の
+上で Proposition 3.5(ii) を読み直しただけ。
+<br>★<b>記法</b>: <code>&#10230;</code>(<code>\longrightarrow</code>)は <code>pdftotext</code> に
+<code>&minus;&rarr;</code>(U+2212 + U+2192)の 2 文字として出る。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement example"
+         id="ex-3-8"
+         data-paper="Yoshida08" data-pdf-page="6" data-item="Example 3.8"
+         data-notation-checked="2026-09-07">
+<p class="hdr"><b>Example 3.8</b>(f 自身が [&#960;]) &mdash; 物理 p.6</p>
+
+<div class="verbatim">
+Example 3.8. We have &#960; &isin; &#920;<sup>L</sup><sub>&#960;,&#960;<sup>&#981;</sup></sub>, and [&#960;]<sub>f,f<sup>&#981;</sup></sub> = f : F<sub>f</sub> &rarr; F<sup>&#981;</sup><sub>f</sub> for f satisfying (3.2.1), by uniqueness. (Also note that F<sup>&#981;</sup><sub>f</sub> = F<sub>f<sup>&#981;</sup></sub> and [&#952;]<sup>&#981;</sup><sub>f,f&prime;</sub> = [&#952;<sup>&#981;</sup>]<sub>f<sup>&#981;</sup>,f&prime;<sup>&#981;</sup></sub> by uniquness.)
+</div>
+
+<div class="reading">
+<b>f それ自身が <code>[&pi;]<sub>f,f<sup>&#981;</sup></sub></code> である</b>という同定。
+<a href="#def-3-9">Definition 3.9</a> の
+<code>f<sub>m</sub> = [&pi;<sub>m</sub>]<sub>f,f<sup>&#981;<sup>m</sup></sup></sub></code> はこれを m 回合成しただけ。
+括弧内の 2 つ(<code>F<sup>&#981;</sup><sub>f</sub> = F<sub>f<sup>&#981;</sup></sub></code> と
+<code>[&theta;]<sup>&#981;</sup><sub>f,f&prime;</sub> = [&theta;<sup>&#981;</sup>]<sub>f<sup>&#981;</sup>,f&prime;<sup>&#981;</sup></sub></code>)は
+<b>Frobenius と Lubin-Tate 構成が可換</b>であること&mdash;&mdash;
+&sect;4.2 の <code>( )<sup>(i)</sup></code> 記法(<a href="section-4.html#setup-4-2">setup-4-2</a>)が
+黙って使う性質である。
+<br>★<b>原典の誤植をそのまま写している</b>: 最後の語は
+&ldquo;uniqu<b>n</b>ess&rdquo;(&ldquo;uniqueness&rdquo; の e が落ちている)。
+<b>逐語は原典に忠実にする</b>ので修正しない(README §5)。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement definition"
+         id="def-3-9"
+         data-paper="Yoshida08" data-pdf-page="6" data-item="Definition 3.9"
+         data-notation-checked="2026-09-07">
+<p class="hdr">★<b>Definition 3.9</b>(f<sub>m</sub> と &#960;<sub>m</sub>) &mdash; 物理 p.6</p>
+
+<div class="verbatim">
+Definition 3.9. Generalizing Example 3.8, define f<sub>m</sub> := f<sup>&#981;<sup>m&minus;1</sup></sup> &#9702; &middot; &middot; &middot; &#9702; f<sup>&#981;</sup> &#9702; f &isin; <span class="scr">O</span><sub>L</sub>[[X]] for m &ge; 1, and set f<sub>0</sub>(X) := X. Then, by Example 3.8 and Proposition 3.5(ii): f<sub>m</sub> = [&#960;<sup>&#981;<sup>m&minus;1</sup></sup>]<sub>f<sup>&#981;<sup>m&minus;1</sup></sup>,f<sup>&#981;<sup>m</sup></sup></sub> &#9702; &middot; &middot; &middot; &#9702; [&#960;<sup>&#981;</sup>]<sub>f<sup>&#981;</sup>,f<sup>&#981;<sup>2</sup></sup></sub> &#9702; [&#960;]<sub>f,f<sup>&#981;</sup></sub> = [&#960;<sub>m</sub>]<sub>f,f<sup>&#981;<sup>m</sup></sup></sub> (&#8704;m &ge; 0), where we define &#960;<sub>m</sub> &isin; <span class="scr">O</span><sub>L</sub> by &#960;<sub>m</sub> := <span data-txt="">&prod;</span><sup>m&minus;1</sup><sub>t=0</sub> &#960;<sup>&#981;<sup>t</sup></sup> and &#960;<sub>0</sub> := 1.
+</div>
+
+<div class="reading">
+★<b>&sect;4 が最も頻繁に引く定義</b>。<code>f<sub>m</sub></code> は f を Frobenius をずらしながら m 回合成したもので、
+<a href="section-4.html#def-4-1">Definition 4.1</a> の <code>L<sup>m</sup><sub>f</sub></code>(= f<sub>m</sub> の分解体)と
+<code>&#181;<sub>f,m</sub></code>(= f<sub>m</sub> の根)がこれで定義される。
+同時に <code>&#960;<sub>m</sub> := &prod;<sub>t=0</sub><sup>m&minus;1</sup>&#960;<sup>&#981;<sup>t</sup></sup></code> が定義され、
+<a href="section-4.html#setup-4-2">&sect;4.2</a> でこれを<b>負の j へ延長</b>して <code>&#960;<sub>j</sub></code> にする。
+<br>★<b>記法の脱落</b>: 総乗記号 <code>&prod;</code> は <code>pdftotext</code> に<b>一切出力されない</b>
+(<code>data-txt=""</code>)&mdash;&mdash;出力は <code>&#960;<sub>m</sub> := m&minus;1 t=0 &#960;<sup>&#981;<sup>t</sup></sup></code> となり、
+<b>「これが積である」という情報が消える</b>。
+&sect;6 の <code>&sum;</code> の脱落(Lemma 6.4・6.8 等)と同型。
+<br>また <code>&middot; &middot; &middot;</code>(<code>\cdots</code>)は <code>pdftotext</code> で
+<b>U+00B7 が 3 つ</b>として出る(U+22EF ではない)。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<h2>本節の依存関係</h2>
+
+<table>
+<tr><th>節点</th><th>直接使うもの</th><th>物理ページ</th></tr>
+<tr><td><a href="#def-3-1">Def 3.1</a>(形式群)</td><td>&sect;3.1 冒頭(A[[X]] のモノイド構造)</td><td>4</td></tr>
+<tr><td><a href="#def-3-1-plus">i<sub>F</sub>, +<sub>F</sub></a>(暗黙)</td><td>Def 3.1 (i)(ii)(iii)</td><td>4</td></tr>
+<tr><td><a href="#def-3-2">Def 3.2</a>(準同型)</td><td>Def 3.1</td><td>4&ndash;5</td></tr>
+<tr><td><a href="#setup-3-1-hom">Hom<sub>A</sub>, End<sub>A</sub></a>(暗黙)</td><td>Def 3.2、+<sub>F</sub></td><td>5</td></tr>
+<tr><td><a href="#def-3-3">Def 3.3</a>(&#920;<sup>L</sup><sub>&#960;,&#960;&prime;</sub>)</td><td>&sect;3.2 冒頭(L, &#981;)</td><td>5</td></tr>
+<tr><td><b><a href="#lemma-3-4">Lemma 3.4</a></b></td><td>Def 3.3、Appendix I(無限和の収束)</td><td>5</td></tr>
+<tr><td><b><a href="#prop-3-5">Prop 3.5</a></b></td><td><b>Lemma 3.4</b>(t = 1, 2, 3)、Def 3.1、Def 3.2</td><td>5&ndash;6</td></tr>
+<tr><td><a href="#cor-3-7">Cor 3.7</a></td><td>Prop 3.5(ii)、Def 3.3、End<sub>A</sub></td><td>6</td></tr>
+<tr><td><a href="#ex-3-8">Ex 3.8</a></td><td>Lemma 3.4 の一意性</td><td>6</td></tr>
+<tr><td><b><a href="#def-3-9">Def 3.9</a></b></td><td>Ex 3.8、Prop 3.5(ii)</td><td>6</td></tr>
+</table>
+
+<p>
+★<b>&sect;3 の外に出る依存は 2 本だけ</b>&mdash;&mdash;
+<b>&sect;2.2</b>(局所体 K・完備不分岐拡大 L・算術 Frobenius &#981;。&sect;3.2 冒頭が丸ごと参照する)と
+<b>Appendix I</b>(<a href="#lemma-3-4">Lemma 3.4</a> の証明に現れる無限和の収束)。
+<a href="#def-3-3">Definition 3.3</a> の括弧内が <b>Lemma 5.2(i)</b> を前借りしているが、
+これは主張には使われていない(&ldquo;actually we will see&rdquo;)。
+</p>
+
+<h2>★&sect;4 への出口</h2>
+
+<table>
+<tr><th>&sect;3 の項目</th><th>&sect;4 側の消費先</th></tr>
+<tr><td><a href="#def-3-3">Def 3.3</a>(&#920;<sup>L</sup>)</td>
+    <td><a href="section-4.html#lemma-4-5">Lemma 4.5</a>、<a href="section-4.html#lemma-4-6">Lemma 4.6</a></td></tr>
+<tr><td><a href="#lemma-3-4">Lemma 3.4</a>(条件 (3.2.1))</td>
+    <td><a href="section-4.html#def-4-1">Def 4.1</a></td></tr>
+<tr><td><a href="#prop-3-5">Prop 3.5</a>(ii)(iii)</td>
+    <td><b><a href="section-4.html#lemma-4-6">Lemma 4.6</a></b>(= &Lambda;6 #7)、
+        <a href="section-4.html#lemma-4-3-ii">Lemma 4.3(ii)</a></td></tr>
+<tr><td><a href="#cor-3-7">Cor 3.7</a>(i)</td>
+    <td><a href="section-4.html#prop-4-4">Prop 4.4</a>(i)(<span class="scr">O</span>-加群構造)</td></tr>
+<tr><td><b><a href="#cor-3-7">Cor 3.7</a>(ii)</b>(&#920;<sup>L,&times;</sup>)</td>
+    <td><b><a href="section-4.html#lemma-4-6">Lemma 4.6</a></b>、
+        <b><a href="section-4.html#prop-4-8">Prop 4.8</a></b>(着地済み)</td></tr>
+<tr><td><b><a href="#def-3-9">Def 3.9</a></b>(f<sub>m</sub>, &#960;<sub>m</sub>)</td>
+    <td><a href="section-4.html#def-4-1">Def 4.1</a>、<a href="section-4.html#lemma-4-3-ii">Lemma 4.3(ii)</a>、
+        <a href="section-4.html#setup-4-2">&sect;4.2 の &#960;<sub>j</sub></a></td></tr>
+</table>
+
+<p class="open">
+&sect;3 の <b>証明本体は本ファイルに収録していない</b>(&sect;4&middot;&sect;6 と同じ方針)。
+<a href="#lemma-3-4">Lemma 3.4</a> の証明(物理 p.5、8 行)は
+&sect;3 で唯一の非自明な計算であり、Lean 化に着手する時点で逐語を切り出す必要がある。
+</p>
+
+<p class="open">
+<b>Appendix I</b>(冪級数・無限和の収束)は未構造化。
+<a href="#lemma-3-4">Lemma 3.4</a> の証明の最終行の無限和
+<code>&sum;<sub>i=1</sub><sup>&infin;</sup>(&#960;<sup>m+1</sup>/&#960;&prime;)<sup>1+&#981;+&hellip;&#981;<sup>i&minus;1</sup></sup>&#946;<sup>&#981;<sup>i</sup></sup></code>
+がそこを参照している。
+</p>
+
+<p class="open">
+<b>&sect;2 は未構造化</b>。<a href="#setup-3-2">&sect;3.2 冒頭</a>が
+&ldquo;We return to the notation of &sect;2.2&rdquo; と丸ごと参照しているので、
+&sect;2.2(局所体・K<sub>n</sub>・K<sup>ur</sup>・Frobenius・Weil 群 Definition 2.4/2.5)の構造化が要る。
+</p>
+
+</body>
+</html>

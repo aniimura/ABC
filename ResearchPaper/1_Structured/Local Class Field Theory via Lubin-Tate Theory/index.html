@@ -17,6 +17,9 @@
   p.open { background: #fff8e1; border-left: 4px solid #c9a227; padding: .5em .9em; }
   .bb { font-weight: bold; }
   .scr, .frak { font-style: italic; }
+  .hat::after { content: "\0302"; }
+  .bar { text-decoration: overline; }
+  ol { line-height: 1.7; }
 </style>
 </head>
 <body>
@@ -49,10 +52,19 @@ W<sup>ab</sup><sub>K</sub> の上への同型になる。さらに有限分離�
 <tr><th>節</th><th>内容</th><th>物理ページ</th><th>状態</th></tr>
 <tr><td><b>&sect;1</b></td><td><b>Introduction</b>(Theorem A、Notation)</td><td>1</td>
     <td class="done"><a href="section-1.html">構造化済み</a>(2026-09-06、2 件。Abstract/Notation は未着手)</td></tr>
-<tr><td>&sect;2</td><td>Local fields and complete extensions</td><td>2&ndash;4</td><td class="todo">未着手</td></tr>
-<tr><td>&sect;3</td><td>Formal groups and Lubin-Tate groups</td><td>4&ndash;6</td><td class="todo">未着手</td></tr>
-<tr><td>&sect;4</td><td>Lubin-Tate extensions and Artin maps(Prop 4.3・4.4・4.7、Def 4.10)</td><td>6&ndash;9</td>
-    <td class="todo">未着手 &mdash; <b>&sect;6 が依存する</b>(Prop 6.14)</td></tr>
+<tr><td><b>&sect;2</b></td><td><b>Local fields and complete extensions</b><br>
+      2.1 Complete discrete valuation fields (p.2) / 2.2 Local fields and their complete extensions (p.3&ndash;4)</td><td>2&ndash;4</td>
+    <td class="done"><a href="section-2.html">構造化済み</a>(2026-09-07、11 件。
+      <b>Lemma 2.2・Def 2.4・Def 2.5・Def 2.5 後の注意</b>を収録。証明本体と
+      &sect;2.1 のノルム付値の式は未収録)</td></tr>
+<tr><td><b>&sect;3</b></td><td><b>Formal groups and Lubin-Tate groups</b><br>
+      3.1 Formal groups (p.4&ndash;5) / 3.2 Lubin-Tate groups (p.5&ndash;6)</td><td>4&ndash;6</td>
+    <td class="done"><a href="section-3.html">構造化済み</a>(2026-09-07、14 件。
+      <b>&sect;3 の全 statement</b> + 暗黙の定義 3 件。証明本体は未収録)</td></tr>
+<tr><td><b>&sect;4</b></td><td><b>Lubin-Tate extensions and Artin maps</b><br>
+      4.1 Lubin-Tate extensions (p.6&ndash;8) / 4.2 Artin map (p.7&ndash;9)</td><td>6&ndash;9</td>
+    <td class="done"><a href="section-4.html">構造化済み</a>(2026-09-07、13 件。
+      <b>&sect;4 の全 statement</b>。<b>Prop 6.14 の &sect;4 側の依存先を特定済み</b>。証明本体は未収録)</td></tr>
 <tr><td><b>&sect;5</b></td><td><b>Galois Groups, Norm Groups and the Base Change</b><br>
       5.1 (p.9&ndash;10) / 5.2 Coleman operator and norm groups (p.10&ndash;12) /
       5.3 Base change and LCFT for Lubin-Tate extensions (p.12&ndash;13)</td><td>9&ndash;13</td>
@@ -67,12 +79,56 @@ W<sup>ab</sup><sub>K</sub> の上への同型になる。さらに有限分離�
 <tr><td>&mdash;</td><td>Historical remarks / References</td><td>21</td><td class="todo">未着手</td></tr>
 </table>
 
-<h2>収録した構造単位(30 件)</h2>
+<h2>収録した構造単位(68 件)</h2>
 <table>
 <tr><th>ファイル</th><th>id</th><th>原典の呼称</th><th>物理ページ</th></tr>
 <tr><td rowspan="2"><a href="section-1.html">section-1</a></td>
     <td><code>setup-1-intro</code></td><td>Section 1 (Introduction, opening)</td><td>1</td></tr>
 <tr><td><code>thm-A</code></td><td><b>Theorem A</b> (Local Class Field Theory)</td><td>1</td></tr>
+
+<tr><td rowspan="11"><a href="section-2.html">section-2</a></td>
+    <td><code>setup-2-1</code></td><td>Section 2.1 (CDVR, e and f)</td><td>2</td></tr>
+<tr><td><code>setup-2-1-ring</code></td><td>Section 2.1(暗黙: <span class="scr">O</span><sub>E</sub>, <span class="frak">p</span><sub>E</sub>)</td><td>2</td></tr>
+<tr><td><code>def-2-1</code></td><td>Definition 2.1(finitely ramified)</td><td>2</td></tr>
+<tr><td><b><code>lemma-2-2</code></b></td><td><b>Lemma 2.2</b>(<span class="hat">E</span> &cap; K<sup>sep</sup> = E)</td><td>2</td></tr>
+<tr><td><code>setup-2-2</code></td><td>Section 2.2(局所体 K)</td><td>3</td></tr>
+<tr><td><code>lemma-2-3</code></td><td>Lemma 2.3(Hensel)</td><td>3</td></tr>
+<tr><td><code>setup-2-2-kur</code></td><td>Section 2.2(暗黙: K<sub>n</sub>, K<sup>ur</sup>, &#981;, W)</td><td>3</td></tr>
+<tr><td><b><code>def-2-4</code></b></td><td><b>Definition 2.4</b>(complete unramified extension)</td><td>3</td></tr>
+<tr><td><code>setup-2-4-khat</code></td><td>Section 2.2(暗黙: <span class="hat">K</span>, <span class="hat"><span class="scr">O</span></span>, <span class="hat"><span class="frak">p</span></span>)</td><td>3</td></tr>
+<tr><td><b><code>def-2-5</code></b></td><td><b>Definition 2.5</b>(Galois over K, Weil 群, v)</td><td>3</td></tr>
+<tr><td><b><code>remark-after-2-5</code></b></td><td><b>Definition 2.5 の後の注意</b>(W(E&prime;/K) &cong; W(L&prime;/K))</td><td>4</td></tr>
+
+<tr><td rowspan="14"><a href="section-3.html">section-3</a></td>
+    <td><code>setup-3-1</code></td><td>Section 3.1 (Formal groups, setup)</td><td>4</td></tr>
+<tr><td><code>def-3-1</code></td><td>Definition 3.1(形式群)</td><td>4</td></tr>
+<tr><td><code>def-3-1-plus</code></td><td>Section 3.1(暗黙: i<sub>F</sub>, +<sub>F</sub>)</td><td>4</td></tr>
+<tr><td><code>remark-3-1-examples</code></td><td>Section 3.1(基本例 <span class="hat"><span class="bb">G</span></span><sub>a</sub>, <span class="hat"><span class="bb">G</span></span><sub>m</sub>)</td><td>4</td></tr>
+<tr><td><code>def-3-2</code></td><td>Definition 3.2(準同型)</td><td>4</td></tr>
+<tr><td><code>setup-3-1-hom</code></td><td>Section 3.1(暗黙: Hom<sub>A</sub>, End<sub>A</sub>)</td><td>5</td></tr>
+<tr><td><code>setup-3-2</code></td><td>Section 3.2 (Lubin-Tate groups, setup)</td><td>5</td></tr>
+<tr><td><b><code>def-3-3</code></b></td><td><b>Definition 3.3</b>(&#920;<sup>L</sup><sub>&#960;,&#960;&prime;</sub>)</td><td>5</td></tr>
+<tr><td><b><code>lemma-3-4</code></b></td><td><b>Lemma 3.4</b>(一意存在。条件 (3.2.1))</td><td>5</td></tr>
+<tr><td><b><code>prop-3-5</code></b></td><td><b>Proposition 3.5</b>(F<sub>f</sub> と [&#952;]<sub>f,f&prime;</sub>)</td><td>5</td></tr>
+<tr><td><code>ex-3-6</code></td><td>Example 3.6(<span class="bb">Q</span><sub>p</sub> &rarr; <span class="hat"><span class="bb">G</span></span><sub>m</sub>)</td><td>6</td></tr>
+<tr><td><b><code>cor-3-7</code></b></td><td><b>Corollary 3.7</b>(形式 <span class="scr">O</span>-加群、&#920;<sup>L,&times;</sup>)</td><td>6</td></tr>
+<tr><td><code>ex-3-8</code></td><td>Example 3.8(f = [&#960;])</td><td>6</td></tr>
+<tr><td><b><code>def-3-9</code></b></td><td><b>Definition 3.9</b>(f<sub>m</sub>, &#960;<sub>m</sub>)</td><td>6</td></tr>
+
+<tr><td rowspan="13"><a href="section-4.html">section-4</a></td>
+    <td><code>setup-4-1</code></td><td>Section 4.1 (Lubin-Tate extensions, setup)</td><td>6</td></tr>
+<tr><td><code>def-4-1</code></td><td>Definition 4.1(L<sup>m</sup><sub>f</sub>, &#181;<sub>f,m</sub>)</td><td>6</td></tr>
+<tr><td><code>ex-4-2</code></td><td>Example 4.2(円分)</td><td>6</td></tr>
+<tr><td><code>lemma-4-3</code></td><td>Lemma 4.3(見出し + (i))</td><td>6</td></tr>
+<tr><td><b><code>lemma-4-3-ii</code></b></td><td><b>Lemma 4.3(ii)</b>(&#181;<sub>f,m</sub> の特徴づけ)&mdash;<b>Prop 6.14 が使う</b></td><td>7</td></tr>
+<tr><td><b><code>prop-4-4</code></b></td><td><b>Proposition 4.4</b>(&#181;<sub>f,m</sub> の構造・完全分岐・&#961;<sub>f,m</sub>)&mdash;<b>Prop 6.14 が使う</b></td><td>7</td></tr>
+<tr><td><code>setup-4-2</code></td><td>Section 4.2 (Artin map, notation &#960;<sub>j</sub>)</td><td>7</td></tr>
+<tr><td><code>lemma-4-5</code></td><td>Lemma 4.5</td><td>7</td></tr>
+<tr><td><b><code>lemma-4-6</code></b></td><td><b>Lemma 4.6</b>(&Lambda;6 #7 <code>DworkThetaEval</code>)</td><td>8</td></tr>
+<tr><td><code>prop-4-7</code></td><td>Proposition 4.7(&#961;<sub>f,m</sub> の Weil 群への延長)</td><td>8</td></tr>
+<tr><td><b><code>prop-4-8</code></b></td><td><b>Proposition 4.8</b>(&psi; の全射性 &mdash; <b>Lean 着地済み</b>)</td><td>8</td></tr>
+<tr><td><b><code>cor-4-9</code></b></td><td><b>Corollary 4.9</b>(&Lambda;6 #9 + #10)</td><td>9</td></tr>
+<tr><td><b><code>def-4-10</code></b></td><td><b>Definition 4.10</b>(K<sup>LT</sup>, Art<sub>K</sub>)&mdash;<b>「読めなかった 1 行」を確定</b></td><td>9</td></tr>
 
 <tr><td rowspan="11"><a href="section-5.html">section-5</a></td>
     <td><code>def-5-3</code></td><td>Definition 5.3</td><td>10</td></tr>
@@ -159,9 +215,59 @@ arXiv の LaTeX 版なので本文の抽出は良好だが、<b>数式中の記�
     黒板太字 <b>&#8484; &#8477; &#120125;</b> &rarr; <code>Z R F</code>、上線 <b>&sigma;&#772;</b> &rarr; <code>&sigma;</code>。
     いずれも README §1 の「基底文字だけが残る」通り。</li>
 </ul>
+
+<p>★<b>&sect;2&ndash;&sect;4 の構造化(2026-09-07)で新たに実測した脱落</b>:</p>
+<ul>
+<li>★★<b>ハット <code><span class="hat">K</span></code>(<code>\widehat</code>)は<b>版面上の大きさで 2 通りに壊れる</b></b>&mdash;&mdash;
+    <b>本文サイズでは帽子が丸ごと落ちて <code>K</code></b>、
+    <b>上付き・下付きサイズでは帽子が <code>b</code> という文字になって残り <code>bK</code></b>。
+    前者は <code>data-txt="K"</code>、後者は <code>data-txt="bK"</code>。
+    例: <code>&#920;<sup><span class="hat">K</span>,&times;</sup></code>(Prop 4.8)は <code>Θ b K,×</code>、
+    <code><span class="scr">O</span><sub><span class="hat">K</span></sub></code>(p.3)は <code>O b K</code>。
+    ★<b>Lemma 2.2(iii) は帽子が落ちると <code>E &cap; K<sup>sep</sup> = E</code> という自明な式に見える</b>。</li>
+<li>★<b>&#8720;</b>(<code>\coprod</code>、非交和)&rarr; 出力なし(Prop 4.7(i))。
+    <b>非交和を取っていることが消える</b>。</li>
+<li><b>&prod;</b>(<code>\prod</code>)&rarr; 出力なし(Def 3.9 の <code>&#960;<sub>m</sub></code>)。
+    <b>「これが積である」が消える</b>。&sect;6 の <code>&sum;</code> と同型。</li>
+<li><b>&#10236;</b>(<code>\longmapsto</code>)&rarr; <code>&minus;&rarr;</code>、
+    <b>&#8614;</b>(<code>\mapsto</code>)&rarr; <code>&rarr;</code>。<b>縦棒が消える</b>。</li>
+<li><b>&#10233;</b>(<code>\Longrightarrow</code>)&rarr; <code>=</code> + <code>&rArr;</code> の 2 文字(Lemma 2.2(iii))。</li>
+<li>★<b>2 つの phi が別対象</b>: 算術 Frobenius <code>\varphi</code> の出力は <b>U+03D5</b>(<code>&#981;</code>)、
+    &sect;6 の Herbrand 関数 <code>\phi<sub>G</sub></code> の出力は <b>U+03C6</b>(<code>&#966;</code>)。
+    <b>符号位置が逆</b>なので <code>grep</code> で取り違えないこと。</li>
+<li>★<b>行末のハイフネーションが本文に残る</b>&mdash;&mdash;p.4 の &ldquo;examples&rdquo; は
+    <code>ex-amples</code> と出る(他に p.7 の <code>O- module</code>、p.8 の <code>ar-gue</code>。
+    物理 p.2&ndash;9 ではこの 3 箇所だけ)。<code>data-txt</code> で明示する。</li>
+<li><b>&#181;</b>(太字 <code>\boldsymbol\mu</code>)&rarr; <b>U+00B5(MICRO SIGN)</b>。
+    <code>&amp;micro;</code> ではなく <code>&amp;#181;</code> と書くこと(下記参照)。</li>
+</ul>
+
+<p class="open">
+★★<b>逐語(<code>.verbatim</code>)で使ってよい名前つき HTML 実体は
+<code>check.mjs</code> の <code>ENTITIES</code> 表にあるものだけ</b>である。
+表に無い名前(<code>&amp;Prime;</code>・<code>&amp;rsquo;</code>・<code>&amp;pi;</code>・<code>&amp;theta;</code>・<code>&amp;micro;</code> 等)は
+<b>実体が解決されず、投影に文字列がそのまま残って S4 が落ちる</b>
+&mdash;&mdash;2026-09-07 の作業で <code>&amp;Prime;</code> と <code>&amp;rsquo;</code> で実際に 2 回落とした。
+ギリシャ文字・特殊記号は<b>数値実体</b>(<code>&amp;#960;</code> 等)で書くこと。
+表にある安全な名前は <code>&amp;isin; &amp;ni; &amp;sub; &amp;cap; &amp;cup; &amp;ge; &amp;le; &amp;equiv; &amp;ne;
+&amp;times; &amp;middot; &amp;minus; &amp;prime; &amp;rarr; &amp;larr; &amp;lArr; &amp;rArr; &amp;cong; &amp;sim;
+&amp;empty; &amp;infin; &amp;prod; &amp;sum; &amp;alpha; &amp;Gamma; &amp;chi; &amp;sect;</code> など。
+</p>
+
 <p>
-目視確認済みの物理ページ: <b>1・10・11・12・13・14・15・16・17</b>(いずれも全面、150dpi 画像)。<br>
-<b>未確認</b>: 2&ndash;9・18&ndash;21。<b>記録に無いページの記法については何も言えない</b>(README §2-3)。
+目視確認済みの物理ページ: <b>1&ndash;17 の全 17 ページ</b>
+(<b>2&middot;3&middot;4&middot;5&middot;6&middot;7&middot;8&middot;9</b> は 2026-09-07 に 170dpi 画像で追加、
+<b>1&middot;10&ndash;17</b> は 2026-09-06 に 150dpi 画像で確認済み。いずれも全面)。<br>
+<b>未確認</b>: 18&ndash;21(Appendix I / II / References)。
+<b>記録に無いページの記法については何も言えない</b>(README §2-3)。
+</p>
+
+<p class="open">
+★<b><code>papers.json</code> の <code>Yoshida08</code> に <code>verifiedPages</code> フィールドが無い。</b>
+README §2-3 は「見たページは <code>papers.json</code> の <code>verifiedPages</code> に記録する」と定めているが、
+本論文の項目にはこのフィールドがそもそも存在しない。
+<b>&sect;2&ndash;&sect;4 の構造化係は <code>papers.json</code> の変更を持ち場から外されていた</b>ため足していない。
+<b>1&ndash;17 を <code>verifiedPages</code> に入れる作業が残っている</b>。
 </p>
 
 <h2>★照合モードについて(本論文に固有の事情)</h2>
@@ -175,8 +281,9 @@ arXiv の LaTeX 版なので本文の抽出は良好だが、<b>数式中の記�
 <p>
 <code>check.mjs</code> は <code>layout &rarr; default &rarr; raw</code> の順に 3 モードを試し、
 <b>どれかで一致すれば S4 は通る</b>(layout 以外で一致した件数は情報として印字される)。
-本フォルダの 30 件の内訳は <b>layout 14 件 / default 4 件 / raw 12 件</b>で、
-これは版面の性質であって転写の誤りではない。
+本フォルダの <b>68 件</b>の内訳は <b>layout 29 件 / default 5 件 / raw 34 件</b>で、
+これは版面の性質であって転写の誤りではない
+(2026-09-06 時点の 30 件では layout 14 / default 4 / raw 12 だった)。
 </p>
 
 <h2>本論文を選んだ理由(依存グラフ上の位置)</h2>
@@ -192,6 +299,40 @@ arXiv の LaTeX 版なので本文の抽出は良好だが、<b>数式中の記�
 外に出る依存は &sect;5 の 2 件(Lemma 5.11・Prop 5.4)と &sect;4 の Lubin-Tate 側だけである
 &mdash;&mdash;<a href="section-6.html">section-6.html</a> 末尾の依存表を参照。
 </p>
+
+<h2>★2026-09-07 に確定させたこと(&sect;2&ndash;&sect;4 の構造化)</h2>
+<ol>
+<li>★★<b>Definition 4.10 の 1 行を PDF 目視で確定した</b>(物理 p.9、170dpi)。
+    <b><code>K<sup>m</sup> := K<sup>ur</sup>L<sup>m</sup><sub>f</sub></code> が定義</b>であり、
+    <code>K<sup>m</sup> = <span class="hat">K</span><sup>m</sup> &cap; K<sup>sep</sup></code> は<b>そこから従う等式</b>。
+    「<code>K<sup>m</sup> := <span class="hat">K</span><sup>m</sup> &cap; K<sup>sep</sup></code> と読むのでは」という推測は<b>否</b>。
+    <br>また <b>&ldquo;with L/K finite&rdquo; は &sect;4.1 と矛盾しない</b>&mdash;&mdash;
+    <a href="section-2.html#def-2-4">Definition 2.4</a> が
+    「<b>E/K が有限なら L = <span class="hat">E</span> = E</b>」と明記しているので、
+    <b>有限不分岐拡大 K<sub>n</sub> 自身が complete unramified extension である</b>。
+    Def 4.10 はその中で L/K 有限に制限しているだけで、理由は
+    <b><code>L<sup>m</sup><sub>f</sub></code> を <code>K<sup>sep</sup></code> の中に置きたい</b>から。
+    詳細は <a href="section-4.html#def-4-10">section-4.html#def-4-10</a>。</li>
+<li>★<b>Proposition 6.14 の &sect;4 側の依存先を特定した</b>(物理 p.17 の証明を逐行で追った)。
+    <b><a href="section-4.html#prop-4-4">Proposition 4.4(ii)</a></b>(&alpha; が素元 &rArr;
+    <code>i(&sigma;) = v(&sigma;(&alpha;)&minus;&alpha;)</code>)、
+    <b><a href="section-4.html#prop-4-4">Proposition 4.4(iii)</a></b>(<code>&#961;<sub>f,m</sub></code> による翻訳)、
+    <b><a href="section-4.html#lemma-4-3-ii">Lemma 4.3(ii)</a></b>(<code>&beta; &isin; &#181;<sup>&times;</sup><sub>f,m&minus;i</sub></code>)
+    の<b>3 つだけ</b>。&Lambda;7 の Y14 が待っていたのはこれ。</li>
+<li>★<b><a href="section-6.html">section-6.html</a> の依存表の呼称に誤りがある</b>&mdash;&mdash;
+    「Prop 4.3(ii)」と書かれているが、原典で <b>4.3 は Proposition ではなく Lemma</b>
+    (物理 p.6 &ldquo;Lemma 4.3.&rdquo;)。
+    <b>&sect;6 側は持ち場の外なので変更していない</b>。記録だけ残す。</li>
+<li><b>&Lambda;6 消費側との対応が id を持った</b>:
+    #7 <code>DworkThetaEval</code> = <a href="section-4.html#lemma-4-6"><code>lemma-4-6</code></a>、
+    着地済みの <code>surjective_unramGalCompletionUnits_div_self</code> =
+    <a href="section-4.html#prop-4-8"><code>prop-4-8</code></a>、
+    #9 + #10 = <a href="section-4.html#cor-4-9"><code>cor-4-9</code></a>。
+    <br>★<b><code>surjective_unramGalCompletionUnits_div_self</code> の <code>.src</code> は
+    現在 Milne CFT の LEMMA 3.11 を指しており、Yoshida08 を指していない。</b>
+    本論文には同じ主張が<b>独立の Proposition として証明つきで</b>立っている
+    (<code>lean/**</code> は持ち場の外なので変更していない)。</li>
+</ol>
 
 </body>
 </html>

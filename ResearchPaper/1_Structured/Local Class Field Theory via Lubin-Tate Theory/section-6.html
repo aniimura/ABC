@@ -437,7 +437,9 @@ Proposition 6.14 + Corollary 6.13(ii)(iii) で次数を押さえて出す。
 <tr><td><a href="#thm-6-11">Thm 6.11</a>(Hasse-Arf)</td><td>Prop 6.2、Cor 6.3、Cor 6.7、Prop 6.9、Lemma 6.10</td><td>16&ndash;17</td></tr>
 <tr><td><a href="#def-6-12">Def 6.12</a>(上付き)</td><td>Lemma 6.10(&#966;<sub>G</sub> の可逆性)</td><td>17</td></tr>
 <tr><td><a href="#cor-6-13">Cor 6.13</a></td><td>Prop 6.9、Lemma 6.10、<b>Thm 6.11</b>、Prop 6.2</td><td>17</td></tr>
-<tr><td><a href="#prop-6-14">Prop 6.14</a></td><td>Prop 4.3・4.4(&sect;4)、Lemma 6.10(i)</td><td>17</td></tr>
+<tr><td><a href="#prop-6-14">Prop 6.14</a></td>
+    <td><a href="section-4.html#lemma-4-3-ii"><b>Lemma</b> 4.3(ii)</a>・<a href="section-4.html#prop-4-4">Prop 4.4(ii)(iii)</a>(&sect;4)、Lemma 6.10(i)
+    <br>★初版は「Prop 4.3」と書いていたが、原典で <b>4.3 は Lemma</b> である(2026-09-07 訂正)</td><td>17</td></tr>
 <tr><td><a href="#thm-6-15">Thm 6.15</a>(LKW)</td><td>Prop 5.4、Prop 6.14、Cor 6.13(ii)(iii)</td><td>17</td></tr>
 </table>
 
@@ -445,9 +447,15 @@ Proposition 6.14 + Corollary 6.13(ii)(iii) で次数を押さえて出す。
 <b>&sect;6 の外に出る依存</b>は 3 本だけである&mdash;&mdash;
 <a href="section-5.html#lemma-5-11">Lemma 5.11</a>(&sect;5)、
 <a href="section-5.html#prop-5-4">Proposition 5.4</a>(&sect;5)、
-そして <b>&sect;4 の Lubin-Tate 側</b>(Proposition 4.3(ii)・4.4(ii)(iii))。
-&sect;4 は本フォルダでは<b>未構造化</b>であり、Proposition 6.14 の Lean 化に着手する時点で
-&sect;4 の該当箇所を構造化する必要がある。<b>今それが無いことを、ここに印として残す。</b>
+そして <b>&sect;4 の Lubin-Tate 側</b>。
+<br>★<b>2026-09-07 に &sect;4 が構造化され、この印は解消した。</b>
+&sect;4 側の依存先は <a href="section-4.html">section-4.html</a> に id を持って入っている:
+<a href="section-4.html#lemma-4-3-ii"><code>lemma-4-3-ii</code></a>(Lemma 4.3(ii))、
+<a href="section-4.html#prop-4-4"><code>prop-4-4</code></a>(Proposition 4.4(ii)(iii))。
+Theorem 6.15 が使う <code>K<sup>LT</sup></code>・<code>Art<sub>K</sub></code> は
+<a href="section-4.html#def-4-10"><code>def-4-10</code></a>(Definition 4.10)。
+<br>★<b>初版はここを「Proposition 4.3(ii)」と書いていたが、原典で 4.3 は Lemma である</b>
+(物理 p.6 &ldquo;Lemma 4.3.&rdquo;)。上の依存表とあわせて訂正した。
 </p>
 
 <p class="open">

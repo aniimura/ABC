@@ -261,6 +261,19 @@ const ENTITIES = {
   cong: '≅', or: '∨', and: '∧',
   Gamma: 'Γ', alpha: 'α', chi: 'χ', prime: '′',
   sect: '§', hellip: '…', mdash: '—', ndash: '–',
+  // ★★2026-09-07 追加。★理由: Yoshida §2–§4 の構造化(68 件)で **S4 が 12 件落ちた**が、
+  //   原因は逐語の誤りではなく **この表が標準の名前つき実体を取りこぼしていた**ことだった。
+  //   ★実体はコーパス全体で使われている(`&middot;` 既存 55 / `&sigma;` 45 / `&isin;` 22)ので、
+  //   ★**追加の前後で NG 件数を測ってから採った**(増えたら戻す、という手順を踏んだ)。
+  //   ★`&ne;` は `≠` に開くが、`pdftotext` は斜線を落とすので
+  //   **`data-txt="="` を併記しないと通らない**([[pdftotext-drops-negation]])。
+  isin: '∈', ni: '∋', middot: '·', cap: '∩', cup: '∪',
+  equiv: '≡', ne: '≠', empty: '∅', infin: '∞', bull: '•',
+  rArr: '⇒', lArr: '⇐', hArr: '⇔', Prime: '″',
+  prod: '∏', sum: '∑', part: '∂', radic: '√',
+  pi: 'π', theta: 'θ', sigma: 'σ', beta: 'β', psi: 'ψ', phi: 'φ',
+  lambda: 'λ', mu: 'µ', nu: 'ν', tau: 'τ', rho: 'ρ', delta: 'δ',
+  Lambda: 'Λ', Sigma: 'Σ', Theta: 'Θ', Phi: 'Φ', Delta: 'Δ', Omega: 'Ω',
 };
 
 function decodeEntities(s) {

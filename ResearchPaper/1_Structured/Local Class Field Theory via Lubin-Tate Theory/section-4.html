@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>[Yoshida08] Section 4: Lubin-Tate extensions and Artin maps</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.7; color: #222; }
+  h1 { font-size: 1.25em; border-bottom: 2px solid #333; padding-bottom: .3em; }
+  h2 { font-size: 1.05em; margin-top: 2em; }
+  section.statement { border-left: 4px solid #1554b0; padding: .5em 1em; margin: 1.6em 0; background: #f7f9fc; }
+  section.statement.proposition { border-left-color: #0a7d1e; background: #f2f9f2; }
+  section.statement.theorem     { border-left-color: #7d0a1e; background: #fbf2f4; }
+  section.statement.corollary   { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.definition  { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.lemma       { border-left-color: #1554b0; background: #f7f9fc; }
+  section.statement.remark      { border-left-color: #666;    background: #f5f5f5; }
+  section.statement.example     { border-left-color: #666;    background: #f5f5f5; }
+  section.statement.setup       { border-left-color: #bbb;    background: #fafafa; }
+  .hdr { font-size: .8em; color: #777; margin-bottom: .4em; }
+  .hdr b { color: #333; }
+  .verbatim { background: #fff; border: 1px solid #ddd; padding: .6em .9em; margin: .5em 0; }
+  .reading  { font-size: .93em; color: #333; margin: .5em 0 0; }
+  .reading::before { content: "読み: "; font-weight: bold; color: #1554b0; }
+  p.open { background: #fff8e1; border-left: 4px solid #c9a227; padding: .4em .9em; margin: .6em 0; }
+  p.open::before { content: "未解決: "; font-weight: bold; }
+  p.resolved { background: #f2f9f2; border-left: 4px solid #0a7d1e; padding: .4em .9em; margin: .6em 0; }
+  p.resolved::before { content: "確定: "; font-weight: bold; }
+  code { background: #f5f5f5; padding: 1px 4px; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: #f0f0f0; }
+  /* 記法クラス — .txt で脱落する装飾を表示側で復元する(README §3) */
+  .ul1  { text-decoration: underline; }
+  .ul2  { text-decoration: underline; text-decoration-style: double; }
+  .bar  { text-decoration: overline; }
+  .hat::after   { content: "\0302"; }
+  .tilde::after { content: "\0303"; }
+  .dot1::after  { content: "\0307"; }
+  .dot2::after  { content: "\0308"; }
+  .bb   { font-weight: bold; }
+  .scr  { font-style: italic; }
+  .frak { font-style: italic; }
+</style>
+</head>
+<body>
+
+<p><a href="index.html">&larr; [Yoshida08] 目次</a></p>
+
+<h1>[Yoshida08] Section 4: Lubin-Tate extensions and Artin maps</h1>
+
+<p class="hdr">
+原典: <b>Local Class Field Theory via Lubin-Tate Theory</b> (T. Yoshida, 2008; arXiv math/0606108v2)&nbsp;/&nbsp;
+範囲: <b>物理ページ 6&ndash;9</b>(&sect;4 の見出しは p.6 の下半分から。p.9 は Definition 4.10 まで、
+以降は <a href="section-5.html">&sect;5</a>)&nbsp;/&nbsp;
+記法の目視確認: <b>2026-09-07</b>(p.6&middot;7&middot;8&middot;9 を 170dpi 画像で全面目視)&nbsp;/&nbsp;
+規約: <a href="../README.md">1_Structured/README.md</a>
+</p>
+
+<p class="hdr">
+★<b>照合モードについて</b>: 本論文は arXiv の LaTeX 版で、<code>pdftotext -layout</code> は上付き・下付きを
+組版位置の順に吐くため添字が本文に割り込む(&sect;4 では特に p.7&middot;p.8 の版面が乱れる)。
+<code>-raw</code> は<b>読み順</b>(基底 &rarr; 上付き &rarr; 下付き)で吐くので、本ファイルの逐語は
+主として <code>-raw</code> モードで一致する。<code>check.mjs</code> は
+<code>layout &rarr; default &rarr; raw</code> の 3 モードを順に試すので照合は通るが、
+「layout 以外のモードで一致した」と印字される&mdash;&mdash;これは版面の情報であって異常ではない。
+</p>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-4-1"
+         data-paper="Yoshida08" data-pdf-page="6" data-item="Section 4.1 (Lubin-Tate extensions, setup)"
+         data-notation-checked="2026-09-07">
+<p class="hdr"><b>&sect;4 見出し &amp; &sect;4.1 冒頭</b>(L の固定) &mdash; 物理 p.6</p>
+
+<div class="verbatim">
+4. Lubin-Tate extensions and Artin maps 4.1. Lubin-Tate extensions. Here we fix a complete unramified extension L of K.
+</div>
+
+<div class="reading">
+&sect;4 全体を通じての約束: <b>L は K の「完備不分岐拡大」</b>(Definition 2.4)。
+★<b>ここが &sect;4 を読むときの最初の落とし穴</b>&mdash;&mdash;Definition 2.4 は
+「<code>L = <span class="hat">E</span></code>(有限分岐拡大 E の完備化)を K の<b>完備拡大</b>と呼ぶ。
+<b>E/K が有限なら L = E</b>」と明記しているので、
+<b>有限不分岐拡大 K<sub>n</sub> それ自身も「完備不分岐拡大」である</b>。
+つまり L は <code><span class="hat">K</span> = <span class="hat">K<sup>ur</sup></span></code> のような無限次のものだけを指すのではない。
+<a href="#def-4-10">Definition 4.10</a> の「with L/K finite」はこの範囲内での<b>制限</b>であって、
+&sect;4.1 との矛盾ではない(下の「確定」欄を見よ)。
+<br>&pi; は L の素元、&#981; は算術 Frobenius を L の K-自己同型へ延長したもの(&sect;3.2)。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement definition"
+         id="def-4-1"
+         data-paper="Yoshida08" data-pdf-page="6" data-item="Definition 4.1"
+         data-notation-checked="2026-09-07">
+<p class="hdr"><b>Definition 4.1</b>(Lubin-Tate 拡大 L<sup>m</sup><sub>f</sub> と分点 &#181;<sub>f,m</sub>) &mdash; 物理 p.6</p>
+
+<div class="verbatim">
+Definition 4.1. Let f &isin; <span class="scr">O</span><sub>L</sub>[X] be a monic polynomial satisfying (3.2.1) for a uniformizer &#960; of L. For m &ge; 1, let L<sup>m</sup><sub>f</sub> be the splitting field of f<sub>m</sub> &isin; <span class="scr">O</span><sub>L</sub>[X] (Definition 3.9) over L, and let &#181;<sub>f,m</sub> := {&#945; &isin; L<sup>m</sup><sub>f</sub> | f<sub>m</sub>(&#945;) = 0}.
+</div>
+
+<div class="reading">
+Lubin-Tate 拡大の定義。<code>f<sub>m</sub> = f<sup>&#981;<sup>m&minus;1</sup></sup> &#9702; &hellip; &#9702; f<sup>&#981;</sup> &#9702; f</code>
+(<a href="section-3.html#def-3-9">Definition 3.9</a>)の分解体を <code>L<sup>m</sup><sub>f</sub></code> と書き、
+その根の集合を <code>&#181;<sub>f,m</sub></code> と書く。
+<code>(3.2.1)</code> は <code>f(X) &equiv; &pi;X (mod deg 2)</code> かつ <code>f(X) &equiv; X<sup>q</sup> (mod <span class="frak">p</span>)</code>
+という Lubin-Tate 条件(<a href="section-3.html#lemma-3-4">Lemma 3.4</a>)。
+<br>★<b>f は多項式</b>(&sect;3 の f は形式的冪級数 <code><span class="scr">O</span><sub>L</sub>[[X]]</code> だった)。
+&sect;4 では分解体を取りたいので <code><span class="scr">O</span><sub>L</sub>[X]</code> に制限される
+&mdash;&mdash;この制限は &sect;4 の冒頭で静かに入る。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement example"
+         id="ex-4-2"
+         data-paper="Yoshida08" data-pdf-page="6" data-item="Example 4.2"
+         data-notation-checked="2026-09-07">
+<p class="hdr"><b>Example 4.2</b>(円分の場合) &mdash; 物理 p.6</p>
+
+<div class="verbatim">
+Example 4.2. In Example 3.6, we have f<sub>m</sub>(X) = [p<sup>m</sup>]<sub>f</sub>(X) = (1 + X)<sup>p<sup>m</sup></sup> &minus; 1, &#181;<sub>f,m</sub> = {&#950; &minus; 1 | &#950; &isin; &#181;<sub>p<sup>m</sup></sub>} and L<sup>m</sup><sub>f</sub> = L(&#181;<sub>p<sup>m</sup></sub>) for all m &ge; 0.
+</div>
+
+<div class="reading">
+<code>K = <span class="bb">Q</span><sub>p</sub></code>、<code>&pi; = p</code>、<code>f = (1+X)<sup>p</sup> &minus; 1</code> のとき
+Lubin-Tate 拡大は<b>円分拡大</b>に一致する。この 1 行が「Lubin-Tate 理論は円分体論の一般化である」の内容。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement lemma"
+         id="lemma-4-3"
+         data-paper="Yoshida08" data-pdf-page="6" data-item="Lemma 4.3"
+         data-notation-checked="2026-09-07">
+<p class="hdr"><b>Lemma 4.3</b>(見出し &amp; (i)。(ii) は次の項目) &mdash; 物理 p.6</p>
+
+<div class="verbatim">
+Lemma 4.3. Let m &ge; 1 and f &isin; <span class="scr">O</span><sub>L</sub>[X] as above, and set L&prime; := L<sup>m</sup><sub>f</sub> and [&middot;] := [&middot;]<sub>f</sub>. (i) The extension L&prime;/L is separable and &#181;<sub>f,m</sub> &sub; <span class="frak">p</span><sub>L&prime;</sub>. (In particular, we can substitute the elements of &#181;<sub>f,m</sub> into power series over <span class="scr">O</span><sub>L</sub> (see Appendix I).)
+</div>
+
+<div class="reading">
+(i) は「分点は<b>極大イデアルの中</b>にある」&mdash;&mdash;冪級数を代入できる(収束する)ための前提。
+分離性は <code>char K = 0</code> なら自動、一般には Appendix II の Proposition II.1 に外注される。
+<br>★<b>Lemma 4.3 は物理 p.6 と p.7 にまたがる。</b> 逐語照合は 1 ページ単位なので、
+本ファイルは見出し+(i) を <code>lemma-4-3</code>(p.6)、(ii) を
+<a href="#lemma-4-3-ii"><code>lemma-4-3-ii</code></a>(p.7)に分けている&mdash;&mdash;
+<b>原典で 1 つの Lemma を 2 つの構造単位に割った</b>ことをここに明記する。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement lemma"
+         id="lemma-4-3-ii"
+         data-paper="Yoshida08" data-pdf-page="7" data-item="Lemma 4.3(ii)"
+         data-notation-checked="2026-09-07">
+<p class="hdr"><b>Lemma 4.3(ii)</b>(分点の特徴づけ) &mdash; 物理 p.7</p>
+
+<div class="verbatim">
+(ii) For x &isin; K<sup>&times;</sup> with v(x) = m and &#945; &isin; <span class="frak">p</span><sub>L<sup>sep</sup></sub> : &#945; &isin; &#181;<sub>f,m</sub> &lArr;&rArr; [x](&#945;) = 0 &lArr;&rArr; [a](&#945;) = 0 (&#8704;a &isin; <span class="frak">p</span><sup>m</sup>).
+</div>
+
+<div class="reading">
+★<b>Proposition 6.14 が直接消費する 3 つのうちの 1 つ</b>(&sect;6 の依存表は初版で
+「Prop 4.3(ii)」と書いていたが、指しているのは<b>この Lemma 4.3(ii)</b> である
+&mdash;&mdash;原典で 4.3 は Proposition ではなく <b>Lemma</b>。下の「&sect;6 への出口」を見よ)。
+<br>内容: <code>&#181;<sub>f,m</sub></code> は「<code>[x]</code> の核」であり、
+かつ「<code><span class="frak">p</span><sup>m</sup></code> 全体で消える元の集合」。
+証明は <code>[x] = [x/&pi;<sub>m</sub>]<sub>f<sup>&#981;<sup>m</sup></sup>,f</sub> &#9702; f<sub>m</sub></code> と
+<code>[x/&pi;<sub>m</sub>]</code> の可逆性の 2 行。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement proposition"
+         id="prop-4-4"
+         data-paper="Yoshida08" data-pdf-page="7" data-item="Proposition 4.4"
+         data-notation-checked="2026-09-07">
+<p class="hdr"><b>Proposition 4.4</b>(&#181;<sub>f,m</sub> の <span class="scr">O</span>-加群構造・完全分岐性・&#961;<sub>f,m</sub>) &mdash; 物理 p.7</p>
+
+<div class="verbatim">
+Proposition 4.4. Let m &ge; 1 and f &isin; <span class="scr">O</span><sub>L</sub>[X] as above, with the linear coefficient &#960;. (i) The set &#181;<sub>f,m</sub> is an <span class="scr">O</span>-module by +<sub>F<sub>f</sub></sub> and [&middot;]<sub>f</sub>. For any &#945; &isin; &#181;<sup>&times;</sup><sub>f,m</sub> := &#181;<sub>f,m</sub> \ &#181;<sub>f,m&minus;1</sub>, the following is an isomorphism of <span class="scr">O</span>-modules: <span class="scr">O</span>/<span class="frak">p</span><sup>m</sup> &ni; a mod <span class="frak">p</span><sup>m</sup> <span data-txt="&minus;&rarr;">&#10236;</span> [a]<sub>f</sub>(&#945;) &isin; &#181;<sub>f,m</sub>. (ii) If &#945; &isin; &#181;<sup>&times;</sup><sub>f,m</sub>, then L<sup>m</sup><sub>f</sub> = L(&#945;), N<sub>L<sup>m</sup><sub>f</sub>/L</sub>(&minus;&#945;) = &#960;<sup>&#981;<sup>m&minus;1</sup></sup> and &#945; is a uniformizer of L<sup>m</sup><sub>f</sub>. The L<sup>m</sup><sub>f</sub>/L is totally ramified Galois extension of degree |&#181;<sup>&times;</sup><sub>f,m</sub>| = q<sup>m&minus;1</sup>(q &minus; 1). (iii) We have canonical isomorphisms of abelian groups: &#961;<sub>f,m</sub> : Gal(L<sup>m</sup><sub>f</sub>/L) <span data-txt="&#8764; =">&cong;</span><span data-txt="&minus;&rarr;">&#10230;</span> Aut<sub><span class="scr">O</span></sub>(&#181;<sub>f,m</sub>) <span data-txt="&#8764; =">&cong;</span><span data-txt="&minus;&rarr;">&#10230;</span> (<span class="scr">O</span>/<span class="frak">p</span><sup>m</sup>)<sup>&times;</sup>. (&#945; <span data-txt="&rarr;">&#8614;</span> [u]<sub>f</sub>(&#945;), &#8704;&#945; &isin; &#181;<sub>f,m</sub>) <span data-txt="&minus;&rarr;">&#10236;</span> u mod <span class="frak">p</span><sup>m</sup>
+</div>
+
+<div class="reading">
+★<b>&sect;4 の中心</b>。3 つの主張が別々に &sect;6 で消費される:
+<ul>
+<li><b>(i)</b> <code><span class="scr">O</span>/<span class="frak">p</span><sup>m</sup> &cong; &#181;<sub>f,m</sub></code>
+    (<code>a &#8614; [a]<sub>f</sub>(&alpha;)</code>)&mdash;&mdash;分点が階数 1 の自由 <code><span class="scr">O</span>/<span class="frak">p</span><sup>m</sup></code>-加群。</li>
+<li>★<b>(ii)</b> <code>&alpha; &isin; &#181;<sup>&times;</sup><sub>f,m</sub></code> が
+    <code>L<sup>m</sup><sub>f</sub></code> の<b>素元</b>であり、<code>L<sup>m</sup><sub>f</sub>/L</code> が
+    <b>完全分岐ガロア</b>で次数 <code>q<sup>m&minus;1</sup>(q&minus;1)</code>。
+    ★<b>Proposition 6.14 が最初に使うのはこれ</b>&mdash;&mdash;素元だから
+    <code>i(&sigma;) = v(&sigma;(&alpha;) &minus; &alpha;)</code> と書ける(Definition 6.1 の
+    「&pi; の取り方に依らない」を具体的な &alpha; で使う)。</li>
+<li>★<b>(iii)</b> <code>&#961;<sub>f,m</sub> : Gal(L<sup>m</sup><sub>f</sub>/L) &cong; (<span class="scr">O</span>/<span class="frak">p</span><sup>m</sup>)<sup>&times;</sup></code>。
+    ★<b>Proposition 6.14 が 2 番目に使う</b>&mdash;&mdash;<code>&sigma;</code> を
+    <code>u mod <span class="frak">p</span><sup>m</sup></code> に翻訳して <code>&sigma;(&alpha;) = [u]<sub>f</sub>(&alpha;)</code> と書き直す。</li>
+</ul>
+★<b>記法の脱落</b>: <code>&#10236;</code>(<code>\longmapsto</code>)は <code>pdftotext</code> に
+<code>&minus;&rarr;</code> としか出ず、<code>&#8614;</code>(<code>\mapsto</code>)は <code>&rarr;</code> としか出ない
+&mdash;&mdash;<b>縦棒(&#8614; の起点)が消える</b>。
+<code>&cong;</code> は <code>&#8764;</code> と <code>=</code> の 2 トークンに割れる(&sect;6 と同じ)。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-4-2"
+         data-paper="Yoshida08" data-pdf-page="7" data-item="Section 4.2 (Artin map, notation)"
+         data-notation-checked="2026-09-07">
+<p class="hdr"><b>&sect;4.2 冒頭</b>(Artin 写像の記法: ( )<sup>(i)</sup> と &#960;<sub>j</sub>) &mdash; 物理 p.7</p>
+
+<div class="verbatim">
+4.2. Artin map. In this subsection we use the notation ( )<sup>(i)</sup> := ( )<sup>&#981;<sup>i</sup></sup> and &#181;<sup>(i)</sup><sub>f,m</sub> := &#181;<sub>f<sup>(i)</sup>,m</sub> for all i &isin; <span class="bb">Z</span>. We extend Definition 3.9 to define &#960;<sub>j</sub> &isin; L<sup>&times;</sup> for all j &isin; <span class="bb">Z</span> by requiring &#960;<sub>j+j&prime;</sub> = &#960;<sup>(j)</sup><sub>j&prime;</sub>&#960;<sub>j</sub> for all j, j&prime; &isin; <span class="bb">Z</span>, i.e. &#960;<sub>j</sub> := (&#960;<sup>&minus;1</sup><sub>&minus;j</sub>)<sup>(j)</sup> for j &lt; 0. Then v<sub>L</sub>(&#960;<sub>j</sub>) = j for all j &isin; <span class="bb">Z</span>.
+</div>
+
+<div class="reading">
+&sect;4.2 だけで通用する 2 つの略記:
+<b>(a)</b> <code>( )<sup>(i)</sup></code> は Frobenius の i 乗を掛けること、
+<b>(b)</b> <code>&#960;<sub>j</sub></code>(<a href="section-3.html#def-3-9">Definition 3.9</a> の
+<code>&#960;<sub>m</sub> = &prod;<sub>t=0</sub><sup>m&minus;1</sup>&#960;<sup>&#981;<sup>t</sup></sup></code>)を
+<b>負の j へ延長</b>したもの。<code>v<sub>L</sub>(&#960;<sub>j</sub>) = j</code> なので
+<code>&#960;<sub>j</sub></code> は「付値 j の標準的な元」として働く。
+<br>Lean 化の観点: (b) は <code>&#960;<sub>&bull;</sub> : <span class="bb">Z</span> &rarr; L<sup>&times;</sup></code> が
+<b>1-コサイクル</b>(<code>&#960;<sub>j+j&prime;</sub> = &#960;<sub>j&prime;</sub><sup>(j)</sup>&#960;<sub>j</sub></code>)
+であることの言い換えであり、これ自体が独立の節点になる。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement lemma"
+         id="lemma-4-5"
+         data-paper="Yoshida08" data-pdf-page="7" data-item="Lemma 4.5"
+         data-notation-checked="2026-09-07">
+<p class="hdr"><b>Lemma 4.5</b>(&#920; の元と &#960;<sub>j</sub> の関係) &mdash; 物理 p.7</p>
+
+<div class="verbatim">
+Lemma 4.5. If &#952; &isin; &#920;<sup>L</sup><sub>&#960;,&#960;&prime;</sub>, then &#952;<sup>(j)</sup>/&#952; = &#960;&prime;<sub>j</sub>/&#960;<sub>j</sub> for all j &isin; <span class="bb">Z</span>. Also, &#960;<sub>j</sub> &isin; &#920;<sup>L</sup><sub>&#960;,&#960;<sup>(j)</sup></sub>.
+</div>
+
+<div class="reading">
+<a href="section-3.html#def-3-3">Definition 3.3</a> の <code>&#920;<sup>L</sup><sub>&pi;,&pi;&prime;</sub> = {&theta; | &theta;<sup>&#981;</sup>/&theta; = &pi;&prime;/&pi;}</code>
+が <b>j = 1 の場合</b>であり、本補題はそれを<b>全ての j へ持ち上げる</b>(両方向の帰納法)。
+第 2 主張 <code>&#960;<sub>j</sub> &isin; &#920;<sup>L</sup><sub>&pi;,&pi;<sup>(j)</sup></sub></code> は
+<code>&pi;&prime; = &pi;<sup>&#981;</sup></code>・<code>&theta; = &pi;</code> と取った系。
+<br>Proposition 4.7(i) が <code>x&#960;<sub>j</sub> &isin; &#920;<sup>L,&times;</sup><sub>&pi;,&pi;<sup>(j)</sup></sub></code> を出すのに使う。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement lemma"
+         id="lemma-4-6"
+         data-paper="Yoshida08" data-pdf-page="8" data-item="Lemma 4.6"
+         data-notation-checked="2026-09-07">
+<p class="hdr">★<b>Lemma 4.6</b>(&#952; による分点の同型 &mdash; 拡大体の f 非依存性) &mdash; 物理 p.8</p>
+
+<div class="verbatim">
+Lemma 4.6. Let f, f&prime; &isin; <span class="scr">O</span><sub>L</sub>[X] be as above with linear coefficients &#960;, &#960;&prime;, respectively. If &#952; &isin; &#920;<sup>L,&times;</sup><sub>&#960;,&#960;&prime;</sub> (see Corollary 3.7(ii)), then for all m &ge; 1, it gives an isomorphism [&#952;] = [&#952;]<sub>f,f&prime;</sub> : &#181;<sub>f,m</sub> &rarr; &#181;<sub>f&prime;,m</sub> of <span class="scr">O</span>-modules, and L<sup>m</sup><sub>f</sub> = L<sup>m</sup><sub>f&prime;</sub>.
+</div>
+
+<div class="reading">
+★<b>&Lambda;6 消費側 #7(<code>DworkThetaEval</code>)に対応する項目</b>。
+&theta; が <b>単元</b>(<code>&#920;<sup>L,&times;</sup> = &#920;<sup>L</sup> &cap; <span class="scr">O</span><sub>L</sub><sup>&times;</sup></code>)であれば
+<code>[&theta;]<sub>f,f&prime;</sub></code> は<b>分点の間の <span class="scr">O</span>-加群同型</b>を与え、
+その結果 <b>分解体が一致する</b>(<code>L<sup>m</sup><sub>f</sub> = L<sup>m</sup><sub>f&prime;</sub></code>)。
+<br>証明は 3 行: (a) <code>f&prime;<sub>m</sub> &#9702; [&theta;] = [&theta;]<sup>(m)</sup> &#9702; f<sub>m</sub></code> で行き先が分点に入る、
+(b) <span class="scr">O</span>-準同型性は <a href="section-3.html#prop-3-5">Proposition 3.5</a>(ii)(iii)、
+(c) 逆は <code>[&theta;<sup>&minus;1</sup>]</code>。
+係数が <code><span class="scr">O</span><sub>L</sub>[[X]]</code> にあるので両向きの包含が出て体が一致する。
+<br>★<b>この補題が「f の取り方に依らない」を担う唯一の道具</b>である
+&mdash;&mdash;<a href="#cor-4-9">Corollary 4.9</a> は本補題 + <a href="#prop-4-8">Proposition 4.8</a> の 2 つだけで出る。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement proposition"
+         id="prop-4-7"
+         data-paper="Yoshida08" data-pdf-page="8" data-item="Proposition 4.7"
+         data-notation-checked="2026-09-07">
+<p class="hdr"><b>Proposition 4.7</b>(K 上のガロア性と &#961;<sub>f,m</sub> の Weil 群への延長) &mdash; 物理 p.8</p>
+
+<div class="verbatim">
+Proposition 4.7. Let m &ge; 1 and f &isin; <span class="scr">O</span><sub>L</sub>[X] as above, with the linear coefficient &#960;. (i) The L<sup>m</sup><sub>f</sub> is Galois over K, and the following map is bijective for any &#945; &isin; &#181;<sup>&times;</sup><sub>f,m</sub>: K<sup>&times;</sup>/(1 + <span class="frak">p</span><sup>m</sup>) &ni; x mod 1 + <span class="frak">p</span><sup>m</sup> <span data-txt="&minus;&rarr;">&#10236;</span> [x&#960;<sub>j</sub>]<sub>f,f<sup>(j)</sup></sub>(&#945;) &isin; <span data-txt="">&#8720;</span><sub>j&isin;<span class="bb">Z</span></sub> &#181;<sup>(j),&times;</sup><sub>f,m</sub> (v(x) = &minus;j). (ii) Let L = <span class="hat" data-txt="K">K</span>. The &#961;<sub>f,m</sub> of Proposition 4.4(iii) extend to isomorphisms: &#961;<sub>f,m</sub> : W(<span class="hat" data-txt="K">K</span><sup>m</sup><sub>f</sub>/K) <span data-txt="&#8764; =">&cong;</span><span data-txt="&minus;&rarr;">&#10230;</span> K<sup>&times;</sup>/(1 + <span class="frak">p</span><sup>m</sup>). (&#981;<sup>j</sup> on <span class="hat" data-txt="K">K</span>, &#945; <span data-txt="&rarr;">&#8614;</span> [x&#960;<sub>j</sub>](&#945;), &#8704;&#945; &isin; &#181;<sub>f,m</sub>) <span data-txt="&minus;&rarr;">&#10236;</span> x mod 1 + <span class="frak">p</span><sup>m</sup> (v(x) = &minus;j) Setting <span class="hat" data-txt="K">K</span><sup>LT</sup><sub>f</sub> := <span data-txt="">&#8899;</span><sub>m&ge;1</sub> <span class="hat" data-txt="K">K</span><sup>m</sup><sub>f</sub>, we get &#961;<sub>f</sub> : W(<span class="hat" data-txt="K">K</span><sup>LT</sup><sub>f</sub>/K) <span data-txt="&#8764; =">&cong;</span><span data-txt="&minus;&rarr;">&#10230;</span> K<sup>&times;</sup> by passing to the limit.
+</div>
+
+<div class="reading">
+★<b>Artin 写像の逆写像 &#961; が構成される場所</b>。
+(i) は「<code>L<sup>m</sup><sub>f</sub></code> は L 上だけでなく <b>K 上ガロア</b>」で、
+&sect;6 の <a href="section-6.html#prop-6-14">Proposition 6.14</a> が
+<code>Gal(K<sup>m</sup><sub>x</sub>/L)</code> を語れる前提になる。
+(ii) は <code>L = <span class="hat">K</span></code> と置いたときに
+<code>&#961;<sub>f,m</sub></code> が <b>Weil 群 W(<span class="hat">K</span><sup>m</sup><sub>f</sub>/K)</b> 全体へ延び、
+<code>K<sup>&times;</sup>/(1+<span class="frak">p</span><sup>m</sup>)</code> と同型になること。極限で <code>&#961;<sub>f</sub> : W(<span class="hat">K</span><sup>LT</sup><sub>f</sub>/K) &cong; K<sup>&times;</sup></code>。
+<br>★<b>記法の脱落(4 種)</b>:
+(a) <code>&#8720;</code>(<code>\coprod</code>、非交和)は <code>pdftotext</code> に<b>出力されない</b>
+(<code>data-txt=""</code>)&mdash;&mdash;下付きの <code>j&isin;<span class="bb">Z</span></code> だけが本文に落ちる。
+(b) <code>&#8899;</code>(<code>\bigcup</code>)も同様に出力なし。
+(c) <code><span class="hat">K</span></code>(<code>\widehat K</code>)は<b>本文サイズでは帽子が丸ごと落ちて <code>K</code></b>。
+(d) <code>&cong;</code> は <code>&#8764;</code> + <code>=</code> の 2 トークン。
+★<b>(a)(b) の脱落は主張の型を壊す</b>&mdash;&mdash;テキストだけを読むと
+「<code>[x&#960;<sub>j</sub>](&alpha;) &isin; j&isin;<span class="bb">Z</span> &#181;<sup>(j),&times;</sup><sub>f,m</sub></code>」となり、
+<b>非交和を取っていることが消える</b>。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement proposition"
+         id="prop-4-8"
+         data-paper="Yoshida08" data-pdf-page="8" data-item="Proposition 4.8"
+         data-notation-checked="2026-09-07">
+<p class="hdr">★<b>Proposition 4.8</b>(&#968; : &#952; &#8614; &#952;<sup>&#981;</sup>/&#952; の全射性 = Dwork の補題の乗法版) &mdash; 物理 p.8</p>
+
+<div class="verbatim">
+Proposition 4.8. The map &#968; : <span class="hat" data-txt="O"><span class="scr">O</span></span><sup>&times;</sup> &ni; &#952; <span data-txt="&minus;&rarr;">&#10236;</span> &#952;<sup>&#981;</sup>/&#952; &isin; <span class="hat" data-txt="O"><span class="scr">O</span></span><sup>&times;</sup> is surjective. In particular, for any pair of uniformizers &#960;, &#960;&prime; of <span class="hat" data-txt="K">K</span>, we have &#920;<sup><span class="hat" data-txt="bK">K</span>,&times;</sup><sub>&#960;,&#960;&prime;</sub> <span data-txt="=">&ne;</span> &empty;.
+</div>
+
+<div class="reading">
+★★<b>&Lambda;6 消費側で<b>着地済み</b>の項目</b>&mdash;&mdash;
+<code>lean/ABC3/Found/PGC/DworkMultiplicative.lean</code> の
+<code>surjective_unramGalCompletionUnits_div_self</code> が<b>この主張そのもの</b>である
+(現在の <code>.src</code> は Milne CFT の LEMMA 3.11 を指している。
+★<b>本論文にも同じ主張が独立の Proposition として立っている</b>ことを、ここに記録する)。
+<br>証明: <code><span class="hat"><span class="scr">O</span></span><sup>&times;</sup> &cong; lim&#8592; <span class="hat"><span class="scr">O</span></span><sup>&times;</sup>/(1+<span class="hat"><span class="frak">p</span></span><sup>m</sup>)</code> と
+<code>&psi;(1+<span class="hat"><span class="frak">p</span></span><sup>m</sup>) &sub; 1+<span class="hat"><span class="frak">p</span></span><sup>m</sup></code> で m についての逐次近似に落とし、
+第 1 段は <code>&theta; &#8614; &theta;<sup>q&minus;1</sup></code> が <code><span class="bb">F</span><sub>q</sub><sup>&times;</sup></code> 上全射(代数閉剰余体)、
+帰納段は <code>&beta; &#8614; &beta;<sup>q</sup>&minus;&beta;</code> が <code><span class="bb">F</span><sub>q</sub></code> 上全射(Artin-Schreier)。
+&mdash;&mdash;<b>Lean 側の証明の骨格と一致する</b>。
+<br>★★<b>記法の脱落(この論文で最も危険なもの)</b>:
+<code>&ne;</code> の斜線は <code>pdftotext</code> に出ず、出力は <code>=</code> だけ。
+<b>「&#920; = &empty;」と読めてしまい、主張が完全に反転する</b>
+(&sect;6 の Cor 6.3・Lemma 6.5・Thm 6.11 と同じ脱落形)。
+<br>★もう 1 つ: <code>&#920;<sup><span class="hat">K</span>,&times;</sup></code> の
+<b>上付き位置にある <code><span class="hat">K</span></code> は帽子が <code>b</code> という別の文字になって残る</b>
+(<code>data-txt="bK"</code>)。本文サイズでは丸ごと落ちて <code>K</code> になるのに、
+<b>添字サイズでは <code>bK</code> になる</b>&mdash;&mdash;同じ記号が位置によって 2 通りに壊れる。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement corollary"
+         id="cor-4-9"
+         data-paper="Yoshida08" data-pdf-page="9" data-item="Corollary 4.9"
+         data-notation-checked="2026-09-07">
+<p class="hdr">★<b>Corollary 4.9</b>(<span class="hat">K</span><sup>m</sup><sub>f</sub> と &#961;<sub>f,m</sub> の f 非依存性) &mdash; 物理 p.9</p>
+
+<div class="verbatim">
+Corollary 4.9. The <span class="hat" data-txt="K">K</span><sup>m</sup><sub>f</sub> and &#961;<sub>f,m</sub>, hence also <span class="hat" data-txt="K">K</span><sup>LT</sup><sub>f</sub> and &#961;<sub>f</sub>, of Proposition 4.7(ii) do not depend on f. (We will drop the subscript f and write <span class="hat" data-txt="K">K</span><sup>m</sup>, &#961;<sub>m</sub>, <span class="hat" data-txt="K">K</span><sup>LT</sup> and &#961;.)
+</div>
+
+<div class="reading">
+★<b>&Lambda;6 消費側 #9 + #10 に対応する項目</b>。
+2 つの独立な主張を 1 文にまとめている:
+<b>(a) 体が一致する</b>(<code><span class="hat">K</span><sup>m</sup><sub>f</sub> = <span class="hat">K</span><sup>m</sup><sub>f&prime;</sub></code>)と
+<b>(b) 写像が一致する</b>(<code>&#961;<sub>f,m</sub> = &#961;<sub>f&prime;,m</sub></code>)。
+<br>証明は 2 行で、消費するのは<b>ちょうど 3 つ</b>:
+<a href="#prop-4-8">Proposition 4.8</a>(&theta; の存在)&rarr;
+<a href="#lemma-4-6">Lemma 4.6</a>((a))&rarr;
+<a href="#lemma-4-5">Lemma 4.5</a>((b): <code>[&theta;]<sup>(j)</sup>[x&#960;<sub>j</sub>] = [x&#960;&prime;<sub>j</sub>][&theta;]</code>)。
+<br>★<b>ここで初めて添字 f が落ちる</b>&mdash;&mdash;以降 <code><span class="hat">K</span><sup>m</sup></code>・<code>&#961;<sub>m</sub></code>・
+<code><span class="hat">K</span><sup>LT</sup></code>・<code>&#961;</code> はどの f から作ったかを問わない。
+<a href="#def-4-10">Definition 4.10</a> の Artin 写像が well-defined であることの土台。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement definition"
+         id="def-4-10"
+         data-paper="Yoshida08" data-pdf-page="9" data-item="Definition 4.10"
+         data-notation-checked="2026-09-07">
+<p class="hdr">★<b>Definition 4.10</b>(K<sup>m</sup>・K<sup>LT</sup>・Artin 写像 Art<sub>K</sub>) &mdash; 物理 p.9</p>
+
+<div class="verbatim">
+Definition 4.10. For any f &isin; <span class="scr">O</span><sub>L</sub>[X] with L/K finite, set K<sup>m</sup> := K<sup>ur</sup>L<sup>m</sup><sub>f</sub>. Then K<sup>m</sup>/K is finitely ramified, and Galois by Proposition 4.7(i). By Lemma 2.2, the completion of K<sup>m</sup> is <span class="hat" data-txt="K">K</span>L<sup>m</sup><sub>f</sub> = <span class="hat" data-txt="K">K</span><sup>m</sup> and K<sup>m</sup> = <span class="hat" data-txt="K">K</span><sup>m</sup> &cap; K<sup>sep</sup>, thus independent of f. Setting K<sup>LT</sup> := <span data-txt="">&#8899;</span><sub>m&ge;1</sub> K<sup>m</sup> = <span class="hat" data-txt="K">K</span><sup>LT</sup> &cap;K<sup>sep</sup>, we have W(K<sup>LT</sup>/K) <span data-txt="&#8764; =">&cong;</span> W(<span class="hat" data-txt="K">K</span><sup>LT</sup>/K) by the remark after Definition 2.5. We call a finite extension of K a Lubin-Tate extension if it is contained in K<sup>LT</sup>. We call the inverse of &#961; the Artin map of K and write Art<sub>K</sub> : K<sup>&times;</sup> <span data-txt="&#8764; =">&cong;</span><span data-txt="&minus;&rarr;">&#10230;</span> W(K<sup>LT</sup>/K). We have v <span data-txt="&#9702;">&#8728;</span> Art<sub>K</sub> = v.
+</div>
+
+<p class="resolved">
+★<b>測定係が「読めなかった」と報告していた 1 行を、PDF 目視で確定させた</b>(2026-09-07、
+物理 p.9 を <code>pdftoppm -r 170</code> で画像化して全面目視)。
+</p>
+
+<div class="reading">
+<b>確定した本文</b>(上の <code>.verbatim</code> がそれ):
+<code>K<sup>m</sup> := K<sup>ur</sup>L<sup>m</sup><sub>f</sub></code> が<b>定義</b>であり、
+<code>K<sup>m</sup> = <span class="hat">K</span><sup>m</sup> &cap; K<sup>sep</sup></code> は<b>そこから従う等式</b>である
+(定義ではない)。「<code>K<sup>m</sup> := <span class="hat">K</span><sup>m</sup> &cap; K<sup>sep</sup></code> と読むのではないか」という
+推測は<b>否</b>&mdash;&mdash;原典はそう書いていない。
+<br>★<b>「with L/K finite」は &sect;4.1 と矛盾しない。</b> 測定係が矛盾と見たのは
+「&sect;4.1 は L を complete unramified extension と固定している」という点だったが、
+<a href="section-2.html#def-2-4">Definition 2.4</a> が
+「<b>E/K が有限なら L = <span class="hat">E</span> = E</b>」と明記しており、
+<b>有限不分岐拡大 K<sub>n</sub> は complete unramified extension の一種である</b>。
+Definition 4.10 はその中で <b>L/K が有限なもの</b>に制限しているだけ&mdash;&mdash;
+制限する理由は明白で、<b>L<sup>m</sup><sub>f</sub> を K 上代数的な体にしたい</b>から
+(<code>L = <span class="hat">K</span></code> のままだと <code>L<sup>m</sup><sub>f</sub> &#8836; K<sup>sep</sup></code> になり
+<code>K<sup>ur</sup>L<sup>m</sup><sub>f</sub></code> が <code>K<sup>sep</sup></code> の部分体にならない)。
+<br>論理の流れ: <b>(1)</b> <code>K<sup>m</sup> := K<sup>ur</sup>L<sup>m</sup><sub>f</sub></code>(f と L に依存<b>しうる</b>)&rarr;
+<b>(2)</b> その完備化は <code><span class="hat">K</span>L<sup>m</sup><sub>f</sub> = <span class="hat">K</span><sup>m</sup><sub>f</sub></code>、
+これは <a href="#cor-4-9">Corollary 4.9</a> で <b>f に依らない</b> &rarr;
+<b>(3)</b> <a href="section-2.html#lemma-2-2">Lemma 2.2</a>(iii)
+(<code><span class="hat">E</span> &cap; K<sup>sep</sup> = E</code>)で
+<code>K<sup>m</sup> = <span class="hat">K</span><sup>m</sup> &cap; K<sup>sep</sup></code> &rarr;
+<b>(4)</b> ゆえに <code>K<sup>m</sup></code> も f に依らない。
+★<b>Lemma 2.2(iii) が「完備側の一意性を代数側へ降ろす」役をしている</b>
+&mdash;&mdash;Milne CFT の <code>Lemma 3.12</code> と同じ役回り。
+<br><b>Artin 写像</b>は <code>&#961;</code>(Proposition 4.7(ii) の極限)の<b>逆</b>として定義され、
+<code>Art<sub>K</sub> : K<sup>&times;</sup> &cong; W(K<sup>LT</sup>/K)</code>、<code>v &#9702; Art<sub>K</sub> = v</code>。
+&sect;5 の Corollary 5.16 と &sect;6 の Theorem 6.15 が消費するのはこの Art<sub>K</sub> である。
+<br>★<b>記法の脱落</b>: <code>&#8899;</code> は出力なし、<code><span class="hat">K</span></code> は本文サイズで帽子が落ちて <code>K</code>、
+<code>&#8728;</code>(<code>\circ</code>)は <code>&#9702;</code>(U+25E6, WHITE BULLET)として出る。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<h2>本節の依存関係(&sect;4 内 + 外へ出るもの)</h2>
+
+<table>
+<tr><th>節点</th><th>直接使うもの</th><th>物理ページ</th></tr>
+<tr><td><a href="#def-4-1">Def 4.1</a>(L<sup>m</sup><sub>f</sub>, &#181;<sub>f,m</sub>)</td>
+    <td><a href="section-3.html#def-3-9">Def 3.9</a>(f<sub>m</sub>)、<a href="section-3.html#lemma-3-4">Lemma 3.4</a>((3.2.1))</td><td>6</td></tr>
+<tr><td><a href="#lemma-4-3">Lemma 4.3</a>(i)</td><td>Def 4.1、Appendix II Prop II.1(分離性)</td><td>6</td></tr>
+<tr><td><a href="#lemma-4-3-ii">Lemma 4.3(ii)</a></td><td>Def 3.9、<a href="section-3.html#prop-3-5">Prop 3.5</a>(ii)</td><td>7</td></tr>
+<tr><td><b><a href="#prop-4-4">Prop 4.4</a></b></td><td>Lemma 4.3(i)(ii)、<a href="section-3.html#cor-3-7">Cor 3.7</a>(i)</td><td>7</td></tr>
+<tr><td><a href="#setup-4-2">&sect;4.2 記法</a>(&#960;<sub>j</sub>)</td><td>Def 3.9</td><td>7</td></tr>
+<tr><td><a href="#lemma-4-5">Lemma 4.5</a></td><td><a href="section-3.html#def-3-3">Def 3.3</a>(&#920;<sup>L</sup><sub>&#960;,&#960;&prime;</sub>)、&sect;4.2 記法</td><td>7&ndash;8</td></tr>
+<tr><td><b><a href="#lemma-4-6">Lemma 4.6</a></b></td><td><a href="section-3.html#prop-3-5">Prop 3.5</a>(ii)(iii)、<a href="section-3.html#cor-3-7">Cor 3.7</a>(ii)</td><td>8</td></tr>
+<tr><td><a href="#prop-4-7">Prop 4.7</a></td><td>Lemma 4.5、Lemma 4.6、Prop 4.4(ii)(iii)、Def 2.5(Weil 群)</td><td>8</td></tr>
+<tr><td><b><a href="#prop-4-8">Prop 4.8</a></b></td><td>逆極限 + Artin-Schreier(&sect;4 の外に依存を持たない)</td><td>8&ndash;9</td></tr>
+<tr><td><b><a href="#cor-4-9">Cor 4.9</a></b></td><td>Prop 4.8、Lemma 4.6、Lemma 4.5、Prop 4.7(ii)</td><td>9</td></tr>
+<tr><td><b><a href="#def-4-10">Def 4.10</a></b></td><td>Cor 4.9、Prop 4.7(i)、<b>Lemma 2.2</b>(&sect;2)、Def 2.5 の後の注意</td><td>9</td></tr>
+</table>
+
+<h2>★&sect;6 への出口(Proposition 6.14 が &sect;4 に求めているもの)</h2>
+
+<p>
+<a href="section-6.html">section-6.html</a> 末尾の <code>p.open</code> が
+「&sect;4 は未構造化であり、Proposition 6.14 の Lean 化に着手する時点で &sect;4 の該当箇所を構造化する必要がある」と
+印を残していた。<b>その該当箇所を特定した</b>&mdash;&mdash;
+<a href="section-6.html#prop-6-14">Proposition 6.14</a> の証明が &sect;4 から直接引くのは<b>次の 3 つだけ</b>である
+(物理 p.17 の証明を逐行で追って確認):
+</p>
+
+<table>
+<tr><th>Prop 6.14 の証明の段</th><th>&sect;4 の該当項目</th></tr>
+<tr><td><code>i(&#963;) = v(&#963;(&#945;)&minus;&#945;)</code> と書けること(&#945; が素元だから)</td>
+    <td><b><a href="#prop-4-4">Proposition 4.4(ii)</a></b></td></tr>
+<tr><td><code>&#961;<sub>f,m</sub>(&#963;) = u mod <span class="frak">p</span><sup>m</sup></code> と翻訳して <code>&#963;(&#945;) = [u]<sub>f</sub>(&#945;)</code> を得る</td>
+    <td><b><a href="#prop-4-4">Proposition 4.4(iii)</a></b></td></tr>
+<tr><td><code>&#946; := [u&minus;1]<sub>f</sub>(&#945;) &isin; &#181;<sup>&times;</sup><sub>f,m&minus;i</sub></code>(v<sub>K</sub>(u&minus;1) = i のとき)</td>
+    <td><b><a href="#lemma-4-3-ii">Lemma 4.3(ii)</a></b></td></tr>
+<tr><td><code>&#946;</code> が <code>K<sup>m&minus;i</sup><sub>x</sub></code> の素元 &rArr; <code>v(&#946;) = q<sup>i</sup></code></td>
+    <td><b><a href="#prop-4-4">Proposition 4.4(ii)</a></b>(再)</td></tr>
+</table>
+
+<p class="resolved">
+★<b>&sect;6 の依存表の呼称に誤りがあった。</b>
+<a href="section-6.html">section-6.html</a> の初版は「<b>Prop</b> 4.3(ii)・4.4(ii)(iii)」と書いていたが、
+原典で <b>4.3 は Proposition ではなく Lemma</b> である(物理 p.6 &ldquo;Lemma 4.3.&rdquo;)。
+本ファイルは <code>data-item="Lemma 4.3(ii)"</code> を正とし、
+<b>&sect;6 側(依存表と末尾の <code>p.open</code> の 2 箇所)も 2026-09-07 に訂正した</b>
+&mdash;&mdash;<code>.verbatim</code> には手を触れていないので S4 は影響を受けない。
+</p>
+
+<p>
+★もう 1 つの出口: <a href="section-6.html#thm-6-15">Theorem 6.15</a>(局所 Kronecker-Weber)の証明は
+<code>K<sup>LT</sup></code>・<code>Art<sub>K</sub></code>・<code>K<sup>ram</sup><sub>x</sub></code> を使う。
+このうち <code>K<sup>LT</sup></code> と <code>Art<sub>K</sub></code> は
+<b><a href="#def-4-10">Definition 4.10</a></b> が与える(<code>K<sup>ram</sup><sub>x</sub></code> は &sect;5 の Definition 5.3)。
+</p>
+
+<h2>★&Lambda;6 消費側との対応</h2>
+
+<table>
+<tr><th>&Lambda;6 の番号</th><th>&sect;4 の項目</th><th>Lean 側の状態</th></tr>
+<tr><td>#7 <code>DworkThetaEval</code></td><td><b><a href="#lemma-4-6">Lemma 4.6</a></b>(物理 p.8)</td><td>未着手</td></tr>
+<tr><td>&mdash;(着地済み)</td><td><b><a href="#prop-4-8">Proposition 4.8</a></b>(物理 p.8)</td>
+    <td><code>surjective_unramGalCompletionUnits_div_self</code>
+        (<code>lean/ABC3/Found/PGC/DworkMultiplicative.lean</code>。
+        <code>.src</code> は現在 <b>Milne</b> を指しており Yoshida08 を指していない)</td></tr>
+<tr><td>#9 + #10</td><td><b><a href="#cor-4-9">Corollary 4.9</a></b>(物理 p.9)</td><td>未着手</td></tr>
+</table>
+
+<p class="open">
+&sect;4 の <b>証明本体は本ファイルに収録していない</b>(&sect;6 と同じ方針で、
+statement の逐語と読みだけを置いた)。Lean 化で証明の各段を節点に割るときは、
+物理 p.6&ndash;9 の <code>Proof.</code> 段落を改めて逐語で切り出す必要がある。
+</p>
+
+<p class="open">
+<b>Appendix I</b>(冪級数への代入・逆極限)と <b>Appendix II</b>(f<sub>m</sub> の分離性、Proposition II.1)は
+未構造化。<a href="#lemma-4-3">Lemma 4.3</a>(i) の分離性が Appendix II へ、
+「冪級数に代入できる」が Appendix I へ、それぞれ外注されている。
+</p>
+
+<p class="open">
+<b>&sect;2 は未構造化</b>である。本ファイルは
+<code>section-2.html#def-2-4</code>・<code>#lemma-2-2</code>・<code>#def-2-5</code> へリンクしているが、
+<b>これらのリンクは現時点で切れている</b>。<a href="#def-4-10">Definition 4.10</a> の読みが
+Lemma 2.2(iii) と Definition 2.4 に全面的に依存しているので、
+<b>&sect;2 の構造化を &sect;4 の次に置くべきである</b>。
+</p>
+
+</body>
+</html>

@@ -100,9 +100,28 @@ const ANON_INST_RE = new RegExp(`^\\s*(?:@\\[[^\\]]*\\]\\s*)?${MODS}instance\\b(
 const INST_NAME_RE = new RegExp(`^\\s*(?:\\(\\s*priority\\s*:=[^)]*\\)\\s*)?(${NAME})(?=\\s|:|$)`);
 const ANON = '⟨無名⟩';
 
-const NS_RE = /^\s*namespace\s+([A-Za-z_][\w'.₀-₉]*)/;
-const END_RE = /^\s*end\s+([A-Za-z_][\w'.₀-₉]*)\s*(?:--.*)?$/;
-const SEC_RE = /^\s*section\b\s*([A-Za-z_][\w'.₀-₉]*)?\s*(?:--.*)?$/;
+/** ★★2026-09-07(backlog M24)。**scope 側の文字類も `NAME` に揃える。**
+ *
+ * 宣言名の文字類は M14(第 1036)で非 ASCII に広げたが、`namespace` / `end` / `section` の
+ * 3 本は `[A-Za-z_][\w'.₀-₉]*` のまま **ASCII の `\w`** で取り残されていた。
+ * 実測(2026-09-07、mathlib 8,173 本):
+ *   `namespace` 14,002 行のうち **拾えない 15 / 途中で切れる 5**
+ *   `end`       27,364 行のうち **拾えない 58**
+ *   `section`   13,281 行のうち **拾えない 40**  ←★台帳 M24 はここを数えていなかった
+ *
+ * ★害は「拾えない」こと自体ではなく**開閉の非対称**である。
+ *   `namespace Isδ₀` は `Is` として**積まれ**、`end Isδ₀` は**落とせない**。
+ *   その結果 `FunctorGamma.lean` の 70 行目以降の宣言すべてに `Is.` が被り続ける。
+ *   同型: `Memℓp` → `Mem`(2 ファイル)/ `Congr!` → `Congr` / `Mathlib.Tactic.Erw?` → `…Erw`。
+ * ★逆に `namespace ΓSpec` / `end ΓSpec` のように**両方落ちる**ものは段は釣り合うが、
+ *   中の宣言から `ΓSpec.` が丸ごと消える(`ΓSpec.adjunction` が名前欄で引けない)。
+ *
+ * ★入れてはいけないもの: `«Prop»`(U+00AB/U+00BB)・`namespace $typeName`(マクロ)・
+ * docstring 中の `namespace \`Complex\`.`。これらは今も両側とも一致せず**釣り合っている**。
+ * `end --section`(裸の `end` + コメント)は `END_BARE_RE` が拾うので触らない。 */
+const NS_RE = new RegExp(`^\\s*namespace\\s+(${NAME})`);
+const END_RE = new RegExp(`^\\s*end\\s+(${NAME})\\s*(?:--.*)?$`);
+const SEC_RE = new RegExp(`^\\s*section\\b\\s*(${NAME})?\\s*(?:--.*)?$`);
 const END_BARE_RE = /^\s*end\s*(?:--.*)?$/;
 
 /** 開いている scope の積み。**成分 1 つ = 1 段**で積む。
@@ -218,6 +237,42 @@ function statementOf(lines, start) {
   return buf.join(' ').replace(/\s+/g, ' ').trim().slice(0, STATEMENT_MAX);
 }
 
+/** 各行が**ブロックコメント / docstring の中で始まるか**を返す(長さ = 行数)。
+ *
+ * ★★2026-09-07(backlog M38。M24 の測定中に見つかった別の壊れ方)。
+ * `scan()` は注釈を 1 度も飛ばしていなかったので、**地の文に引用された宣言**が
+ * そのまま索引に載っていた。実測(2026-09-07):
+ *   `.cache/mathlib-index.txt` **648 行** / `.cache/decl-index.txt` **38 行**が
+ *   「ソースではコメントの中」= **実在しない宣言**である。
+ *
+ * ★これは M14/M20/M22/M24 と**向きが逆**の害である。あれらは「在るのに引けない」、
+ * これは**「無いのに引ける」**。とくに ABC3 側の 38 件には
+ *   `Check/PGC/Theorem42Degenerate.lean:21  theorem theorem_4_2`
+ * が入っている —— ★これは**偽と判明した旧形**を反証の記録として引用した地の文であり、
+ * 索引だけを見た実装者は「`theorem_4_2` は在る」と読む。
+ *
+ * ★同じ回路で `namespace` / `end` も注釈から拾っていた。実例:
+ *   `Topology/AlexandrovDiscrete.lean:40` の docstring の折り返し
+ *   「… in the root / namespace instead. -/」を `namespace instead.` と読み、
+ *   **以降 46 宣言に `instead.` が被っていた**。
+ *
+ * 入れ子は Lean の規則どおり数える。`--` の行コメントは深さ 0 のときだけ効く
+ * (コメントの中の `--` で閉じない)。文字列は先に伏せる。 */
+function commentMask(lines) {
+  const inC = new Array(lines.length);
+  let depth = 0;
+  for (let i = 0; i < lines.length; i++) {
+    inC[i] = depth > 0;
+    const L = maskStrings(lines[i]);
+    for (let j = 0; j < L.length - 1; j++) {
+      if (depth === 0 && L[j] === '-' && L[j + 1] === '-') break; // 行コメント
+      if (L[j] === '/' && L[j + 1] === '-') { depth++; j++; }
+      else if (L[j] === '-' && L[j + 1] === '/') { if (depth > 0) depth--; j++; }
+    }
+  }
+  return inC;
+}
+
 /** 1 本の木を舐めて宣言と locator を集める。 */
 function scan(srcRoot, { collectSrc }) {
   const decls = [];
@@ -226,8 +281,10 @@ function scan(srcRoot, { collectSrc }) {
     const rel = relative(srcRoot, file).replace(/\\/g, '/');
     const lines = readFileSync(file, 'utf8').split(/\r?\n/);
     const nsStack = [];
+    const inComment = commentMask(lines); // ★M38: 注釈の中の「宣言」を索引に入れない
     let pendingSrcDecl = null;
     for (let i = 0; i < lines.length; i++) {
+      if (inComment[i]) continue;
       const line = lines[i];
       const ns = NS_RE.exec(line);
       if (ns) { pushNamespace(nsStack, ns[1]); continue; }

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>[Yoshida08] Section 2: Local fields and complete extensions</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 2em auto; line-height: 1.7; color: #222; }
+  h1 { font-size: 1.25em; border-bottom: 2px solid #333; padding-bottom: .3em; }
+  h2 { font-size: 1.05em; margin-top: 2em; }
+  section.statement { border-left: 4px solid #1554b0; padding: .5em 1em; margin: 1.6em 0; background: #f7f9fc; }
+  section.statement.proposition { border-left-color: #0a7d1e; background: #f2f9f2; }
+  section.statement.theorem     { border-left-color: #7d0a1e; background: #fbf2f4; }
+  section.statement.corollary   { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.definition  { border-left-color: #7d5a0a; background: #fbf6ec; }
+  section.statement.lemma       { border-left-color: #1554b0; background: #f7f9fc; }
+  section.statement.remark      { border-left-color: #666;    background: #f5f5f5; }
+  section.statement.example     { border-left-color: #666;    background: #f5f5f5; }
+  section.statement.setup       { border-left-color: #bbb;    background: #fafafa; }
+  .hdr { font-size: .8em; color: #777; margin-bottom: .4em; }
+  .hdr b { color: #333; }
+  .verbatim { background: #fff; border: 1px solid #ddd; padding: .6em .9em; margin: .5em 0; }
+  .reading  { font-size: .93em; color: #333; margin: .5em 0 0; }
+  .reading::before { content: "読み: "; font-weight: bold; color: #1554b0; }
+  p.open { background: #fff8e1; border-left: 4px solid #c9a227; padding: .4em .9em; margin: .6em 0; }
+  p.open::before { content: "未解決: "; font-weight: bold; }
+  code { background: #f5f5f5; padding: 1px 4px; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: #f0f0f0; }
+  /* 記法クラス — .txt で脱落する装飾を表示側で復元する(README §3) */
+  .ul1  { text-decoration: underline; }
+  .ul2  { text-decoration: underline; text-decoration-style: double; }
+  .bar  { text-decoration: overline; }
+  .hat::after   { content: "\0302"; }
+  .tilde::after { content: "\0303"; }
+  .dot1::after  { content: "\0307"; }
+  .dot2::after  { content: "\0308"; }
+  .bb   { font-weight: bold; }
+  .scr  { font-style: italic; }
+  .frak { font-style: italic; }
+</style>
+</head>
+<body>
+
+<p><a href="index.html">&larr; [Yoshida08] 目次</a></p>
+
+<h1>[Yoshida08] Section 2: Local fields and complete extensions</h1>
+
+<p class="hdr">
+原典: <b>Local Class Field Theory via Lubin-Tate Theory</b> (T. Yoshida, 2008; arXiv math/0606108v2)&nbsp;/&nbsp;
+範囲: <b>物理ページ 2&ndash;4</b>(&sect;2 の見出しは p.2 の中ほどから。p.4 は Definition 2.5 の後の注意まで、
+以降は <a href="section-3.html">&sect;3</a>)&nbsp;/&nbsp;
+記法の目視確認: <b>2026-09-07</b>(p.2&middot;3&middot;4 を 170dpi 画像で全面目視)&nbsp;/&nbsp;
+規約: <a href="../README.md">1_Structured/README.md</a>
+</p>
+
+<p class="hdr">
+★<b>なぜ &sect;2 を構造化したか</b>: <a href="section-4.html#def-4-10">Definition 4.10</a>(Artin 写像の定義)の
+読みが <b>Lemma 2.2(iii)</b>・<b>Definition 2.4</b>・<b>Definition 2.5 の後の注意</b>の 3 つに
+全面的に依存しており、これらが無いと「<code>K<sup>m</sup> = <span class="hat">K</span><sup>m</sup> &cap; K<sup>sep</sup></code> が
+なぜ f に依らないのか」が読めないため。
+★<b>Lemma 2.2(iii)(<code><span class="hat">E</span> &cap; K<sup>sep</sup> = E</code>)は
+Milne CFT の <code>Lemma 3.12</code> と同じ役</b>を果たす。
+</p>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-2-1"
+         data-paper="Yoshida08" data-pdf-page="2" data-item="Section 2.1 (CDVR, e and f)"
+         data-notation-checked="2026-09-07">
+<p class="hdr"><b>&sect;2 見出し &amp; &sect;2.1 冒頭</b>(CDVR・分岐指数 e・剰余次数 f) &mdash; 物理 p.2</p>
+
+<div class="verbatim">
+2. Local fields and complete extensions 2.1. Complete discrete valuation fields (see Appendix I). Let K be the fraction field of a CDVR <span class="scr">O</span> := <span class="scr">O</span><sub>K</sub> (the ring of integers of K) with maximal ideal <span class="frak">p</span> := <span class="frak">p</span><sub>K</sub>, such that its residue field k := <span class="scr">O</span>/<span class="frak">p</span> is a perfect field. A generator of <span class="frak">p</span> is called a uniformizer of K. We denote its valuation by v = v<sub>K</sub> : K<sup>&times;</sup> &rarr; <span class="bb">Z</span>. If K&prime;/K is a finite separable extension, then K&prime; is the fraction field of a CDVR <span class="scr">O</span><sub>K&prime;</sub>, namely the integral closure of <span class="scr">O</span> in K&prime;, and the residue field k&prime; of K&prime; is a finite extension of k. The ramification index e = e(K&prime;/K) and the residue degree f = f(K&prime;/K) of K&prime;/K are defined by <span class="frak">p</span><span class="scr">O</span><sub>K&prime;</sub> = <span class="frak">p</span><sup>e</sup><sub>K&prime;</sub> and [k&prime; : k] = f. Then [K&prime; : K] = ef, and v<sub>K&prime;</sub>|<sub>K<sup>&times;</sup></sub> = e&middot;v<sub>K</sub> by definition.
+</div>
+
+<div class="reading">
+&sect;2.1 は<b>完備離散付値環(CDVR)一般</b>の言葉づかいを固定する段。
+<code><span class="scr">O</span></code>・<code><span class="frak">p</span></code>・<code>k</code>・<code>v<sub>K</sub></code>・
+<code>e</code>・<code>f</code> の記号がここで確定し、<b>以降 21 頁を通じて変わらない</b>。
+剰余体は<b>完全体</b>としか仮定されていない(有限体になるのは &sect;2.2 から)。
+<br>この後、原典は <code>e</code>・<code>f</code> の乗法性と
+<code>v<sub>K</sub> &#9702; N<sub>K&prime;/K</sub> = f &middot; v<sub>K&prime;</sub></code> を示す。
+★<b>この式の導出は分数の横線を含む数式ディスプレイで、<code>pdftotext</code> が横線を落として
+分子と分母を並べるだけになる</b>(<code>1/e(F/K)</code> &rarr; <code>1 e(F/K)</code>)ため、
+本ファイルでは逐語に含めていない&mdash;&mdash;
+<b>必要になった時点で <code>data-txt</code> つきで足すこと</b>(&sect;6 の Lemma 6.8 と同型の脱落)。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement definition"
+         id="setup-2-1-ring"
+         data-paper="Yoshida08" data-pdf-page="2" data-item="Section 2.1 (implicit: O_E and p_E for infinite E)"
+         data-implicit="true"
+         data-notation-checked="2026-09-07">
+<p class="hdr">★<b>地の文の暗黙の定義</b>(無限次拡大の整数環 <span class="scr">O</span><sub>E</sub> と <span class="frak">p</span><sub>E</sub>) &mdash; 物理 p.2</p>
+
+<div class="verbatim">
+For any separable extension E/K (not necessarily finite) in K<sup>sep</sup>, the ring of integers <span class="scr">O</span><sub>E</sub> of E is defined as the integral closure of <span class="scr">O</span> in E. If E = <span data-txt="">&#8899;</span><sub>K&prime;</sub> K&prime;, where K&prime;/K are finite separable, then <span class="scr">O</span><sub>E</sub> = <span data-txt="">&#8899;</span><sub>K&prime;</sub> <span class="scr">O</span><sub>K&prime;</sub>. As <span class="frak">p</span><sub>K&prime;</sub> &sub; <span class="frak">p</span><sub>K&prime;&prime;</sub> whenever K&prime; &sub; K&prime;&prime;, we have an ideal <span class="frak">p</span><sub>E</sub> := <span data-txt="">&#8899;</span><sub>K&prime;</sub> <span class="frak">p</span><sub>K&prime;</sub> of <span class="scr">O</span><sub>E</sub>, and <span class="scr">O</span><sup>&times;</sup><sub>E</sub> = <span data-txt="">&#8899;</span><sub>K&prime;</sub> <span class="scr">O</span><sup>&times;</sup><sub>K&prime;</sub> = <span class="scr">O</span><sub>E</sub> \ <span class="frak">p</span><sub>E</sub>. Therefore <span class="scr">O</span><sub>E</sub> is a local ring with the maximal ideal <span class="frak">p</span><sub>E</sub>, and E = <span data-txt="">&#8899;</span> K&prime; = Frac(<span class="scr">O</span><sub>E</sub>).
+</div>
+
+<div class="reading">
+★<b>見出し語を持たないが実質的な定義</b>(README §3)。
+<b>無限次分離拡大 E に対する <code><span class="scr">O</span><sub>E</sub></code>・<code><span class="frak">p</span><sub>E</sub></code>・
+<code><span class="scr">O</span><sup>&times;</sup><sub>E</sub></code></b> がここで定義され、
+「<code><span class="scr">O</span><sub>E</sub></code> は極大イデアル <code><span class="frak">p</span><sub>E</sub></code> をもつ<b>局所環</b>」が示される
+(★<b>離散付値環とは言っていない</b>&mdash;&mdash;それが <a href="#lemma-2-2">Lemma 2.2</a>(i) の主張である)。
+<br>Lean 化の観点: <code>K<sup>ur</sup></code>(無限次)の整数環がこの意味で定義されるので、
+mathlib の <code>integralClosure</code> による定義と、
+「有限部分拡大の合併」という定義の<b>一致</b>が節点になる。
+<br>★<b>記法の脱落</b>: 合併記号 <code>&#8899;</code> は <code>pdftotext</code> に<b>一切出力されない</b>&mdash;&mdash;
+下付きの <code>K&prime;</code> だけが本文に落ちて <code>E = K&prime; K&prime;</code> のように見える。
+<b>テキストだけを読むと「E は K&prime; と K&prime; の積」と読めてしまう</b>。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement definition"
+         id="def-2-1"
+         data-paper="Yoshida08" data-pdf-page="2" data-item="Definition 2.1"
+         data-notation-checked="2026-09-07">
+<p class="hdr"><b>Definition 2.1</b>(無限次の不分岐・完全分岐・<b>finitely ramified</b>) &mdash; 物理 p.2</p>
+
+<div class="verbatim">
+Definition 2.1. We call a separable extension E/K unramified (resp. totally ramified) if it is a union of unramified (resp. totally ramified) finite extensions of K. We say E/K is finitely ramified if E is a finite extension of an unramified extension of K.
+</div>
+
+<div class="reading">
+★<b>本論文に固有の用語 &ldquo;finitely ramified&rdquo; がここで定義される</b>&mdash;&mdash;
+「<b>不分岐拡大の有限次拡大</b>」。標準的な語ではないので注意。
+<code>K<sup>ur</sup></code>(無限次)自身も、その有限次拡大も finitely ramified。
+<br><a href="section-4.html#def-4-10">Definition 4.10</a> の
+「<code>K<sup>m</sup>/K</code> is finitely ramified」はこの意味であり、
+<code>K<sup>m</sup> = K<sup>ur</sup>L<sup>m</sup><sub>f</sub></code> が
+<b><code>K<sup>ur</sup></code> の有限次拡大</b>であることを言っている
+(<code>L<sup>m</sup><sub>f</sub>/L</code> が有限次で <code>L/K</code> も有限次だから)。
+&mdash;&mdash;<b>これが <a href="#lemma-2-2">Lemma 2.2</a> を適用できる条件</b>である。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement lemma"
+         id="lemma-2-2"
+         data-paper="Yoshida08" data-pdf-page="2" data-item="Lemma 2.2"
+         data-notation-checked="2026-09-07">
+<p class="hdr">★★<b>Lemma 2.2</b>(完備化と代数側の往復) &mdash; 物理 p.2</p>
+
+<div class="verbatim">
+Lemma 2.2. Let E &sub; K<sup>sep</sup> be finitely ramified over K. (i) The ring of integers <span class="scr">O</span><sub>E</sub> is a DVR. (ii) If E&prime;/E is finite separable, then E&prime;<span class="hat" data-txt="E">E</span> = <span class="hat" data-txt="E">E</span>&prime; and <span class="hat" data-txt="E">E</span> &cap; E&prime; = E. (iii) <span class="hat" data-txt="E">E</span> &cap; K<sup>sep</sup> = E. (Hence <span class="hat" data-txt="E">E</span> = <span class="hat" data-txt="E">E</span>&prime; <span data-txt="=&rArr;">&#10233;</span> E = E&prime; for E, E&prime;/K finitely ramified.)
+</div>
+
+<div class="reading">
+★★<b>&sect;4 の Definition 4.10 が立つための鍵</b>。3 つの主張:
+<ul>
+<li><b>(i)</b> finitely ramified なら <code><span class="scr">O</span><sub>E</sub></code> は<b>離散付値環</b>
+    (無限次でも!)。<code>K<sup>ur</sup></code> の整数環が DVR であることを含む。</li>
+<li><b>(ii)</b> <code>E&prime;<span class="hat">E</span> = <span class="hat">E&prime;</span></code>(完備化と有限次拡大が可換)かつ
+    <code><span class="hat">E</span> &cap; E&prime; = E</code>。</li>
+<li>★★<b>(iii)</b> <code><span class="hat">E</span> &cap; K<sup>sep</sup> = E</code>
+    &mdash;&mdash;<b>完備化から代数的な部分を切り出すと元に戻る</b>。
+    系として <b>完備化が一致すれば元も一致する</b>
+    (<code><span class="hat">E</span> = <span class="hat">E&prime;</span> &rArr; E = E&prime;</code>)。</li>
+</ul>
+★<b>(iii) の役回り</b>: <a href="section-4.html#cor-4-9">Corollary 4.9</a> は
+<b>完備側</b>(<code><span class="hat">K</span><sup>m</sup><sub>f</sub></code>)の f 非依存性しか与えない。
+それを<b>代数側</b>(<code>K<sup>m</sup></code>)へ降ろすのが (iii) である
+&mdash;&mdash;<b>Milne CFT の <code>Lemma 3.12</code> と同じ役</b>。
+<br>証明は 3 行で、(ii) は Appendix I の Proposition I.1(ii) に外注、(iii) は (ii) の系。
+<br>★<b>記法の脱落 2 種</b>:
+(a) <code><span class="hat">E</span></code>(<code>\widehat E</code>)は本文サイズで<b>帽子が丸ごと落ちて <code>E</code></b>。
+★<b>したがってテキストだけを読むと (iii) は「E &cap; K<sup>sep</sup> = E」という<b>自明な式</b>に見える</b>
+&mdash;&mdash;本論文で最も誤読しやすい行の 1 つ。
+(b) <code>&#10233;</code>(<code>\Longrightarrow</code>)は <code>=</code> + <code>&rArr;</code> の 2 文字として出る。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement setup"
+         id="setup-2-2"
+         data-paper="Yoshida08" data-pdf-page="3" data-item="Section 2.2 (local field K)"
+         data-notation-checked="2026-09-07">
+<p class="hdr"><b>&sect;2.2 冒頭</b>(局所体 K の定義) &mdash; 物理 p.3</p>
+
+<div class="verbatim">
+2.2. Local fields and their complete extensions. In the rest of the article, we fix a prime p, and let K denote a local field, i.e. a complete discrete valuation field whose residue field k is a finite field <span class="bb">F</span><sub>q</sub> of characteristic p. Then char K = 0 or p, and if char K = 0, then K is a finite extension of the p-adic field <span class="bb">Q</span><sub>p</sub>. Finite unramified extensions of local fields are classified using the following lemma (see Appendix I for its proof):
+</div>
+
+<div class="reading">
+★<b>本論文の &ldquo;local field&rdquo; の定義</b>: <b>完備離散付値体で剰余体が有限体</b>。
+標数 0(<code><span class="bb">Q</span><sub>p</sub></code> の有限次拡大)と標数 p(<code><span class="bb">F</span><sub>q</sub>((t))</code>)の<b>両方</b>を含む
+&mdash;&mdash;&sect;6 の Hasse-Arf まで標数を分けずに通す。
+<br>&sect;3.2 冒頭(<a href="section-3.html#setup-3-2">setup-3-2</a>)の
+&ldquo;We return to the notation of &sect;2.2&rdquo; が指しているのはこの段落である。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement lemma"
+         id="lemma-2-3"
+         data-paper="Yoshida08" data-pdf-page="3" data-item="Lemma 2.3 (Hensel's lemma)"
+         data-notation-checked="2026-09-07">
+<p class="hdr"><b>Lemma 2.3</b>(Hensel の補題) &mdash; 物理 p.3</p>
+
+<div class="verbatim">
+Lemma 2.3. (Hensel&#8217;s lemma) Let n &ge; 1 with (p, n) = 1. Then &#181;<sub>n</sub> &sub; k &lArr;&rArr; &#181;<sub>n</sub> &sub; K.
+</div>
+
+<div class="reading">
+「p と素な n について、<b>n 乗根が剰余体にあることと K にあることは同値</b>」。
+証明は Appendix I に外注されている。
+これが <code>K<sub>n</sub> := K(&#181;<sub>q<sup>n</sup>&minus;1</sub>)</code> による
+<b>有限不分岐拡大の分類</b>(次の項目)の唯一の道具。
+<br>★<b>記法</b>: 引用符 <code>&#8217;</code>(Hensel&#8217;s)は
+<code>check.mjs</code> の正規化が <code>&#39;</code> に畳むので、字形の差は照合に効かない。
+★<b>ただし名前つき実体 <code>&amp;rsquo;</code> では通らない</b>&mdash;&mdash;
+<code>check.mjs</code> の <code>ENTITIES</code> 表に <code>rsquo</code> が無いので
+実体が解決されず、投影に文字列 <code>&amp;rsquo;</code> が残る。
+<b>ここで一度落とした</b>。数値実体 <code>&amp;#8217;</code> で書くこと。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement definition"
+         id="setup-2-2-kur"
+         data-paper="Yoshida08" data-pdf-page="3" data-item="Section 2.2 (implicit: K_n, K^ur, Frobenius, Weil group)"
+         data-implicit="true"
+         data-notation-checked="2026-09-07">
+<p class="hdr">★<b>地の文の暗黙の定義</b>(K<sub>n</sub>・K<sup>ur</sup>・算術 Frobenius &#981;・Weil 群 W(E&prime;/K)) &mdash; 物理 p.3</p>
+
+<div class="verbatim">
+For n &ge; 1, let K<sub>n</sub> := K(&#181;<sub>q<sup>n</sup>&minus;1</sub>) and k<sub>n</sub> be its residue field. Then K<sub>n</sub>/K is unramified (Proposition I.2), and <span class="bb">F</span><sub>q<sup>n</sup></sub> &sub; k<sub>n</sub> by the above lemma. As Gal(K<sub>n</sub>/K) <span data-txt="&#8764; =">&cong;</span> Gal(k<sub>n</sub>/<span class="bb">F</span><sub>q</sub>) shows that an element of Gal(k<sub>n</sub>/<span class="bb">F</span><sub>q</sub>) is determined by its action on &#181;<sub>q<sup>n</sup>&minus;1</sub>, we have k<sub>n</sub> = <span class="bb">F</span><sub>q<sup>n</sup></sub> and [K<sub>n</sub> : K] = n. Conversely, if K&prime;/K is unramified of degree n, then the residue field of K&prime; is <span class="bb">F</span><sub>q<sup>n</sup></sub>, hence &#181;<sub>q<sup>n</sup>&minus;1</sub> &sub; K&prime; by the above lemma, and we see K&prime; = K<sub>n</sub> by comparing the degrees. As K<sub>n</sub> &sub; K<sub>n&prime;</sub> for n | n&prime;, the union K<sup>ur</sup> := <span data-txt="">&#8899;</span><sub>n&ge;1</sub> K<sub>n</sub> is an infinite Galois extension of K (the maximal unramified extension of K), and by the above isomorphism: Gal(K<sup>ur</sup>/K) <span data-txt="&#8764; =">&cong;</span><span data-txt="&minus;&rarr;">&#10230;</span> lim<sub data-txt="&larr;&minus;">&#8592;</sub> Gal(<span class="bb">F</span><sub>q<sup>n</sup></sub>/<span class="bb">F</span><sub>q</sub>) <span data-txt="&#8764; =">&cong;</span> Gal(<span class="bar" data-txt="F"><span class="bb">F</span></span><sub>q</sub>/<span class="bb">F</span><sub>q</sub>) <span data-txt="&#8764; =">&cong;</span><span data-txt="&minus;&rarr;">&#10230;</span> <span class="hat" data-txt="Z"><span class="bb">Z</span></span>. The arithmetic Frobenius &#981; &isin; Gal(K<sup>ur</sup>/K) is defined as the element which reduces mod <span class="frak">p</span> to the q-th power Frobenius map of <span class="bar" data-txt="F"><span class="bb">F</span></span><sub>q</sub>, and its inverse is denoted by Frob<sub>K</sub> := &#981;<sup>&minus;1</sup> (geometric Frobenius). Unramified extensions of K are none other than subfields of K<sup>ur</sup>, hence always abelian over K. If E&prime;/K is a separable extension, then E&prime; and E := E&prime; &cap; K<sup>ur</sup> have the same residue fields. When E&prime;/K is Galois, we define its Weil group by W(E&prime;/K) := {&#963; &isin; Gal(E&prime;/K) | &#963;|<sub>E</sub> &isin; Frob<sup><span class="bb">Z</span></sup><sub>K</sub>}, which is an extension of W(E/K) (a quotient group of <span class="bb">Z</span>) by Gal(E&prime;/E). If E/K is finite, then W(E&prime;/K) = Gal(E&prime;/K).
+</div>
+
+<div class="reading">
+★<b>この 1 段落に定義が 4 つ</b>入っている:
+<b>(a)</b> <code>K<sub>n</sub> := K(&#181;<sub>q<sup>n</sup>&minus;1</sub>)</code> と
+「<b>K の n 次不分岐拡大はこれしかない</b>」(分類定理)、
+<b>(b)</b> <code>K<sup>ur</sup> := &#8899;<sub>n&ge;1</sub> K<sub>n</sub></code> と
+<code>Gal(K<sup>ur</sup>/K) &cong; <span class="hat"><span class="bb">Z</span></span></code>、
+<b>(c)</b> <b>算術 Frobenius &#981;</b>(剰余体上で q 乗)と幾何 Frobenius <code>Frob<sub>K</sub> = &#981;<sup>&minus;1</sup></code>、
+<b>(d)</b> <b>Weil 群</b> <code>W(E&prime;/K) = {&sigma; | &sigma;|<sub>E</sub> &isin; Frob<sup><span class="bb">Z</span></sup><sub>K</sub>}</code>。
+<br>★<b>(d) が本論文の枠組みの中心</b>&mdash;&mdash;Yoshida は Galois 群ではなく
+<b>Weil 群</b>で Artin 写像を述べる(<a href="section-4.html#prop-4-7">Proposition 4.7</a>(ii)、
+<a href="section-4.html#def-4-10">Definition 4.10</a>)。
+これは「<code>&#8484;</code> ではなく <code><span class="hat"><span class="bb">Z</span></span></code> に落ちる部分を切り落とす」ためで、
+&sect;1 が言う「コンパクト性の議論を避ける」の実装がここにある。
+<br>★<b>記法の脱落 4 種</b>:
+<code>&#8899;</code> は出力なし / <code><span class="hat"><span class="bb">Z</span></span></code> は <code>Z</code> /
+<code><span class="bar"><span class="bb">F</span></span><sub>q</sub></code>(代数閉包)は <code>Fq</code>
+&mdash;&mdash;★<b><code>Gal(<span class="bar"><span class="bb">F</span></span><sub>q</sub>/<span class="bb">F</span><sub>q</sub>)</code> が
+テキストでは <code>Gal(Fq/Fq)</code> になり、<b>自明な群に見える</b></b> /
+<code>lim<sub>&#8592;</sub></code> は <code>lim</code> と <code>&#8592;&minus;</code> に割れる。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement definition"
+         id="def-2-4"
+         data-paper="Yoshida08" data-pdf-page="3" data-item="Definition 2.4"
+         data-notation-checked="2026-09-07">
+<p class="hdr">★★<b>Definition 2.4</b>(complete extension / <b>complete unramified extension</b>) &mdash; 物理 p.3</p>
+
+<div class="verbatim">
+Definition 2.4. We call the completion L = <span class="hat" data-txt="E">E</span> of a finitely ramified (&sect;2.1) extension E of K a complete extension of K (if E/K is finite, then L = E). Then <span class="scr">O</span><sub>L</sub> = <span class="hat" data-txt="O"><span class="scr">O</span></span><sub>E</sub> is a CDVR with the maximal ideal <span class="frak">p</span><sub>L</sub> = <span class="frak">p</span><sub>E</sub><span class="scr">O</span><sub>L</sub>. The complete extensions correspond bijectively to finitely ramified extensions E/K by Lemma 2.2(iii). When E/K is unramified, we call L = <span class="hat" data-txt="E">E</span> a complete unramified extension of K.
+</div>
+
+<div class="reading">
+★★<b>&sect;4.1 の &ldquo;a complete unramified extension L of K&rdquo; の定義</b>。
+<b>「finitely ramified な E の完備化」が complete extension</b>、
+そのうち <b>E/K が不分岐なものが complete unramified extension</b>。
+<br>★★<b>括弧の 1 行が決定的</b>: <b>&ldquo;if E/K is finite, then L = E&rdquo;</b>
+&mdash;&mdash;<b>有限拡大は完備なので、それ自身が complete extension である</b>。
+したがって <b>有限不分岐拡大 <code>K<sub>n</sub></code> は complete unramified extension の一種</b>であり、
+<a href="section-4.html#def-4-10">Definition 4.10</a> の
+&ldquo;with L/K finite&rdquo; は &sect;4.1 の設定と<b>矛盾しない</b>
+(これが「Def 4.10 の 1 行が読めない」という報告の正体だった)。
+<br>&ldquo;correspond bijectively &hellip; by Lemma 2.2(iii)&rdquo;:
+<b>完備拡大 &harr; finitely ramified 拡大の 1 対 1 対応</b>が
+<a href="#lemma-2-2">Lemma 2.2</a>(iii) で与えられる。
+<a href="section-4.html#def-4-10">Definition 4.10</a> はこの対応を
+<code>K<sup>m</sup> &harr; <span class="hat">K</span><sup>m</sup></code> に当てている。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement definition"
+         id="setup-2-4-khat"
+         data-paper="Yoshida08" data-pdf-page="3" data-item="Section 2.2 (implicit: K-hat, O-hat, p-hat)"
+         data-implicit="true"
+         data-notation-checked="2026-09-07">
+<p class="hdr">★<b>地の文の暗黙の定義</b>(<span class="hat">K</span> := <span class="hat">K<sup>ur</sup></span>、<span class="hat"><span class="scr">O</span></span>、<span class="hat"><span class="frak">p</span></span>、および埋め込みの約束) &mdash; 物理 p.3</p>
+
+<div class="verbatim">
+The <span class="hat" data-txt="K">K</span> := <span class="hat" data-txt="K">K</span><sup>ur</sup> is a complete unramified extension of K, and we write <span class="hat" data-txt="O"><span class="scr">O</span></span> := <span class="scr">O</span><sub><span class="hat" data-txt="bK">K</span></sub>, <span class="hat" data-txt="p"><span class="frak">p</span></span> := <span class="frak">p</span><sub><span class="hat" data-txt="bK">K</span></sub>. We consider every complete unramified extension L/K as a subfield of <span class="hat" data-txt="K">K</span>, in which case <span class="frak">p</span><sub>L</sub> = <span class="frak">p</span><span class="scr">O</span><sub>L</sub> and a uniformizer of L is also a uniformizer of <span class="hat" data-txt="K">K</span>. Let L&prime; = <span class="hat" data-txt="E">E</span>&prime; be a complete extension of K, and set E := E&prime; &cap; K<sup>ur</sup>. Then L = <span class="hat" data-txt="E">E</span> is a complete unramified extension of K, and L&prime;, E&prime;, E, L all have the same residue fields, i.e. L&prime;/L is totally ramified. We consider every complete extension L&prime;/K as a subfield of <span class="hat" data-txt="K">K</span><sup>sep</sup> via L &sub; <span class="hat" data-txt="K">K</span>.
+</div>
+
+<div class="reading">
+★<b>記号 <code><span class="hat">K</span></code> の定義</b>(<code><span class="hat">K</span> := <span class="hat">K<sup>ur</sup></span></code>、
+<code>K<sup>ur</sup></code> の完備化)と、<code><span class="hat"><span class="scr">O</span></span></code>・<code><span class="hat"><span class="frak">p</span></span></code>。
+&sect;4 の <a href="section-4.html#prop-4-7">Proposition 4.7</a>(ii)・
+<a href="section-4.html#prop-4-8">Proposition 4.8</a>・<a href="section-4.html#cor-4-9">Corollary 4.9</a> が
+使う <code><span class="hat">K</span></code> はすべてこれ。
+<br>もう 1 つ重要なのは<b>埋め込みの約束</b>&mdash;&mdash;
+「complete unramified extension は <code><span class="hat">K</span></code> の部分体、
+complete extension は <code><span class="hat">K</span><sup>sep</sup></code> の部分体として見る」。
+これがあるので合成体 <code>K<sup>ur</sup>L<sup>m</sup><sub>f</sub></code>
+(<a href="section-4.html#def-4-10">Definition 4.10</a>)が意味を持つ。
+<br>★★<b>記法の脱落(位置で 2 通りに壊れる)</b>:
+<code><span class="hat">K</span></code> は<b>本文サイズでは帽子が丸ごと落ちて <code>K</code></b> になるのに、
+<b>下付き位置(<code><span class="scr">O</span><sub><span class="hat">K</span></sub></code> の添字)では
+帽子が <code>b</code> という文字になって残り <code>bK</code></b> になる。
+同じ記号が版面上の大きさで 2 通りに壊れる&mdash;&mdash;
+<code>data-txt</code> をそれぞれ <code>"K"</code> と <code>"bK"</code> に書き分けている。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement definition"
+         id="def-2-5"
+         data-paper="Yoshida08" data-pdf-page="3" data-item="Definition 2.5"
+         data-notation-checked="2026-09-07">
+<p class="hdr">★<b>Definition 2.5</b>(&ldquo;Galois over K&rdquo; の定義と Weil 群 W(L&prime;/K)、v = v<sub>K</sub>) &mdash; 物理 p.3</p>
+
+<div class="verbatim">
+Definition 2.5. Let L&prime; be a totally ramified extension of a complete unramified extension L/K. When L&prime;/L is finite, we say L&prime; is Galois over K if for all i &isin; <span class="bb">Z</span>, the &#981;<sup>i</sup> = Frob<sup>&minus;i</sup><sub>K</sub> &isin; Aut(L/K) extends to [L&prime; : L] distinct elements of Aut(L&prime;/K). In general, we say L&prime; is Galois over K if it is a union of finite extensions of L which are Galois over K. In this case we define the Weil group of L&prime;/K by W(L&prime;/K) := {&#963; &isin; Aut(L&prime;/K) | &#963;|<sub>L</sub> &isin; Frob<sup><span class="bb">Z</span></sup><sub>K</sub>}, which is an extension of W(L/K) (a quotient group of <span class="bb">Z</span>) by Gal(L&prime;/L). When L = <span class="hat" data-txt="K">K</span>, define v = v<sub>K</sub> : W(L&prime;/K) &rarr; <span class="bb">Z</span> by &#963;|<sub>L</sub> = Frob<sup>v(&#963;)</sup><sub>K</sub>.
+</div>
+
+<div class="reading">
+★<b>完備体は代数的ではないので、通常のガロア理論が使えない</b>&mdash;&mdash;
+そこで「<code>L&prime;/K</code> が Galois である」を
+<b>&ldquo;各 &#981;<sup>i</sup> がちょうど [L&prime;:L] 通りに延長する&rdquo;</b> と<b>定義し直す</b>。
+これが本論文が「コンパクト性を避ける」ための仕掛けの中核。
+<br>同時に <b>Weil 群 <code>W(L&prime;/K)</code></b> と
+<b>付値 <code>v = v<sub>K</sub> : W(L&prime;/K) &rarr; <span class="bb">Z</span></code></b> が定義される。
+<a href="section-4.html#def-4-10">Definition 4.10</a> の
+<code>v &#9702; Art<sub>K</sub> = v</code> の<b>右辺の v がこれ</b>
+(左辺の v は <code>K<sup>&times;</sup></code> 上の付値)&mdash;&mdash;
+<b>同じ字 v が別の対象に使われている</b>ので Lean 化では分けること。
+<br>★<b>記法</b>: <code>Frob<sup>&minus;i</sup><sub>K</sub></code>・<code>Frob<sup><span class="bb">Z</span></sup><sub>K</sub></code>・
+<code>Frob<sup>v(&#963;)</sup><sub>K</sub></code> はいずれも
+<code>pdftotext</code> が<b>上付き &rarr; 下付きの順</b>で吐く
+(<code>Frob−iK</code> / <code>FrobZK</code> / <code>Frobv(&#963;)K</code>)。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<section class="statement remark"
+         id="remark-after-2-5"
+         data-paper="Yoshida08" data-pdf-page="4" data-item="Section 2.2 (the remark after Definition 2.5)"
+         data-notation-checked="2026-09-07">
+<p class="hdr">★★<b>Definition 2.5 の後の注意</b>(<a href="section-4.html#def-4-10">Def 4.10</a> が名指しで引く箇所) &mdash; 物理 p.4</p>
+
+<div class="verbatim">
+This terminology coincides with the usual one when L/K is finite. When L&prime; = <span class="hat" data-txt="E">E</span>&prime; for finitely ramified Galois E&prime;/K, then every &#963; &isin; Gal(E&prime;/K) induces <span class="scr">O</span>-automorphisms of <span class="scr">O</span><sub>E&prime;</sub> and <span class="scr">O</span><sub>E&prime;</sub>/<span class="frak">p</span><sup>m</sup><sub>E&prime;</sub> for all m &ge; 1, hence of <span class="scr">O</span><sub>L&prime;</sub> = <span class="hat" data-txt="O"><span class="scr">O</span></span><sub>E&prime;</sub>. Therefore it extends to a K-automorphism of L&prime;, and we have a canonical injection Gal(E&prime;/K) &rarr; Aut(L&prime;/K). Therefore, as a totally ramified extension of L = <span class="hat" data-txt="E">E</span> for E = E&prime; &cap; K<sup>ur</sup>, we see that L&prime; is Galois over K (because [L&prime; : L] = [E&prime; : E] by Lemma 2.2(ii)), and canonically W(E&prime;/K) <span data-txt="&#8764; =">&cong;</span> W(L&prime;/K). By passing to the limit, this last isomorphism extends to the case where L&prime; = E&prime;L with a general Galois extension E&prime;/K.
+</div>
+
+<div class="reading">
+★★<b><a href="section-4.html#def-4-10">Definition 4.10</a> の
+&ldquo;by the remark after Definition 2.5&rdquo; が指しているのはこの段落である</b>
+(&sect;4 の構造化で特定した)。
+<br>主張は <b><code>W(E&prime;/K) &cong; W(L&prime;/K)</code></b>
+&mdash;&mdash;<b>代数側の Weil 群と完備側の Weil 群が一致する</b>。
+最後の 1 文が「極限を取れば一般のガロア拡大 <code>E&prime;/K</code> でも成り立つ」と言っており、
+これが Definition 4.10 の <code>W(K<sup>LT</sup>/K) &cong; W(<span class="hat">K</span><sup>LT</sup>/K)</code> の根拠。
+<br>論法: <code>&sigma; &isin; Gal(E&prime;/K)</code> が
+<code><span class="scr">O</span><sub>E&prime;</sub>/<span class="frak">p</span><sup>m</sup><sub>E&prime;</sub></code> の
+自己同型を誘導する &rarr; 逆極限を取って完備化の自己同型 &rarr;
+<b>次数が変わらない(Lemma 2.2(ii))ので Definition 2.5 の意味で Galois</b>。
+<br>Lean 化の観点: ★<b>「完備化を取っても Weil 群が変わらない」が独立の節点</b>になる。
+<code>&Lambda;7</code> が <code>K<sup>LT</sup> = K<sup>ab</sup></code> を代数側で述べるなら、
+&sect;4 の完備側の結果をここで降ろすことになる。
+</div>
+</section>
+
+<!-- ================================================================= -->
+<h2>本節の依存関係と、&sect;3&middot;&sect;4 への出口</h2>
+
+<table>
+<tr><th>&sect;2 の項目</th><th>消費先</th></tr>
+<tr><td><a href="#def-2-1">Def 2.1</a>(finitely ramified)</td>
+    <td><a href="#lemma-2-2">Lemma 2.2</a>、<a href="#def-2-4">Def 2.4</a>、
+        <a href="section-4.html#def-4-10">Def 4.10</a></td></tr>
+<tr><td><b><a href="#lemma-2-2">Lemma 2.2</a>(ii)</b></td>
+    <td><a href="#remark-after-2-5">Def 2.5 後の注意</a>([L&prime;:L] = [E&prime;:E])</td></tr>
+<tr><td><b><a href="#lemma-2-2">Lemma 2.2</a>(iii)</b></td>
+    <td><a href="#def-2-4">Def 2.4</a>(完備拡大 &harr; finitely ramified の 1 対 1)、
+        <b><a href="section-4.html#def-4-10">Def 4.10</a></b>(K<sup>m</sup> = <span class="hat">K</span><sup>m</sup> &cap; K<sup>sep</sup>)</td></tr>
+<tr><td><a href="#setup-2-2-kur">K<sub>n</sub>, K<sup>ur</sup>, &#981;</a></td>
+    <td><a href="section-3.html#setup-3-2">&sect;3.2 冒頭</a>、&sect;5.1(L = K<sub>n</sub>)、&sect;6 全体</td></tr>
+<tr><td><b><a href="#def-2-4">Def 2.4</a></b></td>
+    <td><b><a href="section-4.html#setup-4-1">&sect;4.1 冒頭</a></b>(&ldquo;a complete unramified extension L of K&rdquo;)、
+        <a href="section-3.html#setup-3-2">&sect;3.2 冒頭</a></td></tr>
+<tr><td><a href="#setup-2-4-khat"><span class="hat">K</span>, <span class="hat"><span class="scr">O</span></span>, <span class="hat"><span class="frak">p</span></span></a></td>
+    <td><a href="section-4.html#prop-4-7">Prop 4.7</a>(ii)、<a href="section-4.html#prop-4-8">Prop 4.8</a>、
+        <a href="section-4.html#cor-4-9">Cor 4.9</a></td></tr>
+<tr><td><b><a href="#def-2-5">Def 2.5</a></b>(Galois over K, W, v)</td>
+    <td><a href="section-4.html#prop-4-7">Prop 4.7</a>、<b><a href="section-4.html#def-4-10">Def 4.10</a></b>、&sect;5</td></tr>
+<tr><td><b><a href="#remark-after-2-5">Def 2.5 後の注意</a></b></td>
+    <td><b><a href="section-4.html#def-4-10">Def 4.10</a></b>(W(K<sup>LT</sup>/K) &cong; W(<span class="hat">K</span><sup>LT</sup>/K))</td></tr>
+</table>
+
+<p class="open">
+&sect;2 の <b>証明本体と、&sect;2.1 の <code>v<sub>K</sub> &#9702; N<sub>K&prime;/K</sub> = f &middot; v<sub>K&prime;</sub></code> の導出</b>
+(分数の横線が落ちる数式ディスプレイ)は本ファイルに収録していない。
+</p>
+
+<p class="open">
+<b>&sect;1 の Notation 段落</b>(物理 p.1&ndash;2、<code>&#10216;x&#10217;</code>・<code>&#181;<sub>n</sub></code>・
+<code><span class="hat"><span class="bb">Z</span></span></code> の記法)は未構造化。
+本ファイルの <a href="#setup-2-2-kur">setup-2-2-kur</a> がそこの記法を前提にしている。
+<b>Appendix I</b>(Proposition I.1・I.2、Hensel の補題の証明)も未構造化。
+</p>
+
+</body>
+</html>

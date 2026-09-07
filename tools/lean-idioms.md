@@ -7034,3 +7034,1266 @@ DVR の補題を書くときに「必要なものを全部並べる」と
 **直し方**: `lean_start` を撃ち直すと相手の環境を壊して往復戦争になる（役割定義の 313 回問題）。
 **`node tools/leanfile.mjs <path>` に切り替える**（olean を書かないので並行安全、12 秒/往復）。
 ★実測: Y7a は §1 の 4 補題だけ MCP で通し、以降は leanfile.mjs で 3 往復。ファイル 455 行は初回で通った。
+
+## #99 `rw` の末尾 `rfl` は reducible 止まりなので、部分体の coe のノルム一致を閉じられない（2026-09-07、M3）
+
+`E : IntermediateField K L` の元 `x` について `‖x‖ = ‖(x : L)‖` は **`rfl` で通る**
+（`↥E` のノルムは `L` のノルムの制限そのもの）。ところが
+
+    rw [foo, bar]          -- ゴールが `‖↑x‖ = ‖x‖` になって止まる
+
+`rw` が最後に試す `rfl` は **reducible 透明度**なので、`SubfieldClass` 経由のノルムの
+定義を開けず閉じられない。エラーは `unsolved goals ⊢ ‖↑x‖ = ‖x‖` という、
+一見「同じ式なのに」に見える形で出る。
+★直し方は**名前付き補題を 1 本置いて `rw` の鎖に入れる**（`rfl` を単独のタクティクとして
+書き足してもよいが、同じ形が何度も出るので補題にする方が安い）:
+
+    theorem norm_coe_sub (x : ↥E) : ‖(x : L)‖ = ‖x‖ := rfl   -- 0.03 秒
+    ... rw [foo, bar, norm_coe_sub]
+
+## #100 `lean_start` が 10 秒で返っても、`lean_status` の imports が自分のものなら正常（2026-09-07、M3）
+
+#98 は「10 秒で返ったら他 agent の環境を掴んでいる」と書いたが、**それだけでは判定にならない**。
+実測（M3、並行 2 体）: `lean_start(["…UnramifiedCompletion","…AdjoinIntegers"])` が **10.6 秒**で
+返り、`imports:` は**要求どおり**、`#check` も自分の宣言が全部見えた（olean が OS の
+ページキャッシュに乗っていた）。★**判定は所要時間ではなく `lean_status` の imports 一致で行う。**
+一致していれば撃ち直さない（撃ち直しがそのまま費用になる）。
+
+
+## #101 `rw [iff補題]` はゴールが `≠` だと当たらない —— `intro` を先に打つ（2026-09-07、Y7b）
+
+`ramIndex_pow_pow_eq_top_iff : ramIndex π (σ ^ p ^ k) = ⊤ ↔ m ≤ k` を、ゴール
+`ramIndex π (σ ^ p ^ k) ≠ ⊤` に `rw` で当てると
+
+    error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+
+になる。`Ne a b` は `a = b → False` で、`rw` は `Ne` を展開しないまま
+`a = b` を探すため（`ne_eq` を `simp only` で剥がすか、下のように `intro` する）。
+
+    -- ✗
+    refine ENat.coe_toNat ?_
+    rw [ramIndex_pow_pow_eq_top_iff (A := A) hp.one_lt hadj hord k]
+    omega
+    -- ✓
+    refine ENat.coe_toNat ?_
+    intro hc
+    have h2 := (ramIndex_pow_pow_eq_top_iff (A := A) hp.one_lt hadj hord k).1 hc
+    omega
+
+★同じ形は `x ∉ S`（= `x ∈ S → False`）でも起きる。**`≠` / `∉` のゴールは
+`rw` ではなく `intro` して `.1` / `.2` を当てる**のが速い。
+
+## #102 `ℕ∞` の引き算は切り詰めるので「合同」を書くと空虚に真になる（2026-09-07、Y7b）
+
+`a < b` なら `ℕ∞` で `a - b = 0`（`tsub_eq_zero_of_le`）。したがって
+`(p ^ j : ℕ∞) ∣ (i_j - i_{j+1})` は **`simp` で通る内容ゼロの定理**である
+（実測: `example (a b c : ℕ∞) (h : a < b) : c ∣ a - b` が 2 行で閉じる）。
+★`ℕ∞` 値の量の「合同」を主張するときは、**有限代表 `c d : ℕ` を仮定
+（`f j = (c : ℕ∞)`）で取り出し、`ℤ` の中の `(d : ℤ) - (c : ℤ)` で書く**こと。
+`⊤` の側は「`f (j+1) = ⊤ ∨ ∃ c d, …`」の場合分けで明示する。
+
+## #103 `omega` は積を**向きごと**に別の原子として数える（2026-09-07、Y8）
+
+`obtain ⟨c, hc⟩ := (h : p ^ (k+1) ∣ f (k+1) - f k)` が返す `hc` は
+`f (k+1) - f k = p ^ (k+1) * c`（**割る数が左**）。一方ゴールは
+`f (k+1) = f k + c * p ^ (k+1)`（**係数が左**）と書きたい。この 2 つを一緒に `omega` へ渡すと
+
+    omega could not prove the goal:
+     g := ↑(p ^ (k + 1)) * ↑c
+     h := ↑c * ↑(p ^ (k + 1))
+
+と、**同じ積を 2 つの原子 `g` `h` として並べたまま**落ちる（`g - h ≤ -1` が反例に出る）。
+`omega` は線形算術なので、非線形な積は原子として**構文で**同一視する。
+
+    -- ✓ 先に向きを揃えてから omega に渡す
+    have hc' : f (k + 1) - f k = c * p ^ (k + 1) := by rw [hc, mul_comm]
+    omega
+
+★`ring_nf at hc ⊢` でもよいが、`have` で**欲しい向きの等式を 1 本置く**方が読みやすい。
+
+## #104 仮定から述語を逆算させない —— `(P := fun k => …)` を明示する（2026-09-07、Y8）
+
+`theorem exists_index_boundary {P : ℕ → Prop} (h0 : P 0) : ∀ M, ¬ P M → …` に
+`exists_index_boundary h0 m hm` と当てると
+
+    Application type mismatch: hm has type ¬ramIndex π (σ ^ p ^ m) ≤ ↑n
+    but is expected to have type ¬?m.312 m
+
+になる。`h0 : ramIndex π (σ ^ p ^ 0) ≤ ↑n` から `P` を作るのは高階の逆算で、
+Lean は `P := fun _ => (その命題)` の方を先に選んでしまう。
+
+    -- ✓
+    exists_index_boundary (P := fun k => ramIndex π (σ ^ p ^ k) ≤ (n : ℕ∞)) h0 m hm
+
+★#92（群 `G` が結論に出ない補題）と同じ「明示に固定する」対処。**述語を引数に取る補題は
+呼ぶ側が必ず `(P := …)` を書く**と決めておくと往復が 1 回減る。
+★ついでに `Subgroup.eq_top_iff'` は部分群を**明示引数**で取るので `Subgroup.eq_top_iff'.2 hg`
+は `Invalid projection: Projections cannot be used on functions` になる。`(Subgroup.eq_top_iff' _).2 hg` と書く。
+
+## #105 statement に instance が要るなら `haveI` では間に合わない —— `attribute [local instance]`（2026-09-07、Λ#7）
+
+`PowerSeries.aeval hz θ` を **statement に**書くと、その型に `IsLinearTopology S S` や
+`ContinuousSMul A S` が要る。`ClosureCompletion.lean` はこれらを `theorem` として持っていて
+（`instance` ではない）、`def` の中では `haveI := isLinearTopology_closureCompletionInt K` と
+借りている。同じ手を **theorem の statement** でやると
+
+    theorem foo … : ‖PowerSeries.aeval hz θ‖ ≤ ‖z‖ := by
+      haveI := isLinearTopology_closureCompletionInt K   -- ← 遅い
+    → failed to synthesize instance  IsLinearTopology ↥(closureCompletionInt K) …
+
+になる（statement の elaborate は `haveI` より前）。#85「`haveI` では遅い」の instance 版。
+
+    -- ✓ ファイル冒頭（namespace の中）で 1 回
+    attribute [local instance] isLinearTopology_closureCompletionInt continuousSMul_closureCompletionInt
+
+`local` なのでファイルの外へは漏れない（他ファイルの instance 探索を汚さない）。
+★`attribute` の直前に `/-- … -/` を置くと `unexpected token 'attribute'; expected 'lemma'`。
+説明は `/-! … -/` で書く。
+
+## #106 `Polynomial.coe_map` は無い —— `Polynomial.polynomial_map_coe`（2026-09-07、Λ#7）
+
+`PowerSeries.map φ ↑P = ↑(P.map φ)` が欲しいときの名前は
+`Polynomial.polynomial_map_coe : Polynomial.map φ f = PowerSeries.map φ ↑f`
+（`RingTheory/PowerSeries/Basic.lean`）。`← Polynomial.polynomial_map_coe` で使う。
+`Polynomial.coe_map` は `Unknown constant`。
+★ついでに `Multiset.prod_eq_zero_iff.mp h` が返すのは **`0 ∈ s` という所属**であって
+`⟨w, hw, hw0⟩` に分解できるタプルではない（`rcases failed: … is not an inductive datatype`）。
+`Multiset.mem_map.mp (Multiset.prod_eq_zero_iff.mp h)` と繋ぐ。
+
+## #105 `Algebra.adjoin_singleton_eq_range_aeval` の `obtain` は `.toRingHom` を被せて返す（2026-09-07、Y9）
+
+`rw [Algebra.adjoin_singleton_eq_range_aeval] at hy; obtain ⟨q, hq⟩ := hy` の `hq` は
+
+    hq : (aeval t).toRingHom q = y
+
+であって `(aeval t) q = y` **ではない**（`AlgHom.range` の membership が
+`RingHom.range` 経由で展開される）。そのため直後の
+
+    rw [← hq, aeval_def, eval₂_eq_eval_map]   -- ✗
+
+は `Did not find an occurrence of the pattern (aeval ?x) ?p` で落ちる。
+
+    -- ✓ defeq で型を付け替える 1 行を挟む
+    have hq' : (aeval t) q = y := hq
+    rw [← hq', aeval_def, eval₂_eq_eval_map]
+
+★同じ形は `AlgHom.range` / `RingHom.range` / `MonoidHom.mrange` の `obtain` 全般で起きる。
+**`rw` が「無いはずのない項が見つからない」と言ったら、まず `have` で defeq に付け替える。**
+`simp only [AlgHom.toRingHom_eq_coe, RingHom.coe_coe]` でも直るが、`have` の方が 1 行短く速い。
+
+## #107 `open ... in` は docstring の**前**に置く（2026-09-07、Y9）
+
+```lean
+-- x  unexpected token 'open'; expected 'lemma'
+/-- 説明 -/
+open scoped PowerSeries.WithPiTopology in
+theorem foo ...
+
+-- o
+open scoped PowerSeries.WithPiTopology in
+/-- 説明 -/
+theorem foo ...
+```
+
+★#105 の `attribute` と同じ形の罠（`/-- … -/` の直後に来られるのは宣言だけ）。
+`lean_check` では docstring を省いて通していたので**ファイルに書いた瞬間に初めて出る**
+——docstring を足したら `lake build` の前にもう一度 `lean_check` に通すこと。
+
+## #108 完備体上の「有限次元なら閉」は `NormedSpace` を要求しない（2026-09-07、Y9）
+
+`Submodule.closed_of_finiteDimensional` の仮定は
+
+    [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜] [AddCommGroup E] [TopologicalSpace E]
+    [IsTopologicalAddGroup E] [Module 𝕜 E] [ContinuousSMul 𝕜 E] [T2Space E]
+
+で、**`NormedSpace 𝕜 E` も `E` のノルムも要らない**。完備化 `ℂ_K` の上で
+「`K̂^{ur}` 上有限次元の中間体は閉」を出すのに `NormedSpace K̂^{ur} ℂ_K` を
+組もうとすると `‖a • x‖ = ‖a‖‖x‖` の証明で時間を溶かす——**組まなくてよい**。
+必要なのは `Algebra`（RingHom から `.toAlgebra`）と `ContinuousSMul`（`continuous_mul`
+と埋め込みの連続性の合成）の 2 つだけ。中間体版は 8 行:
+
+    theorem isClosed_intermediateField_of_finiteDimensional (E : IntermediateField 𝕜 L)
+        [FiniteDimensional 𝕜 E] : IsClosed (E : Set L) := by
+      haveI : FiniteDimensional 𝕜 ↥(Subalgebra.toSubmodule E.toSubalgebra) :=
+        inferInstanceAs (FiniteDimensional 𝕜 E)
+      have h := Submodule.closed_of_finiteDimensional (Subalgebra.toSubmodule E.toSubalgebra)
+      rwa [Subalgebra.coe_toSubmodule] at h
+
+★`Algebra.fg_adjoin_of_finite` は **`Algebra.` が付かない**（根名前空間の
+`fg_adjoin_of_finite`）。中間体なら `IntermediateField.finiteDimensional_adjoin`
+（`[Finite S]` が instance 引数なので `haveI := hS.to_subtype` を先に置く）。
+
+## #107 2026-09-07 に名前が動いていた 5 つ（Y10）
+
+`lean_check` を使わず `node tools/leanfile.mjs` だけで 8 往復した際に踏んだもの。
+**どれも「昔の名前を書くと `Unknown identifier` / deprecated 警告」**で、直し方は名前の置換だけ。
+
+| 書きたかったもの | 通る名前 |
+| --- | --- |
+| `hirr.not_unit`（`Irreducible` の構造体フィールド） | **`hirr.not_isUnit`** |
+| `rcases le_or_lt a b with h \| h` | `le_or_lt` は無い。**`by_cases h : a ≤ b` + `Nat.not_le.mp h`** |
+| `isUnit_of_mul_eq_one a b h` | **`IsUnit.of_mul_eq_one b h`**（第 1 引数が消えた） |
+| `Algebra.algebraMap_mem S r` | **`Subalgebra.algebraMap_mem S r`** |
+| `Polynomial.eval_finset_sum` / `ENat.one_le_iff_ne_zero` / `mul_le_mul_left'` / `push_neg` | `Polynomial.eval_finsetSum` / `Order.one_le_iff_ne_zero` / `mul_le_mul_right` / `push Not` |
+
+★**`IsIntegral R x` を無名構成子で開くと、残る goal は `aeval` ではなく `eval₂` である。**
+
+    refine ⟨q, hqm, ?_⟩
+    -- ⊢ eval₂ (algebraMap C B) π q = 0     ← `(aeval π) q = 0` ではない
+    rw [Polynomial.aeval_def]            -- ✗ Did not find an occurrence of the pattern (aeval π) q
+    rw [Polynomial.eval₂_eq_eval_map]    -- ✓ そのまま `map` に移れる
+
+同じ「`rw` が無いはずのない項を見つけられない」形は #105 と同種。**まず goal を見る。**
+
+## #109 ℤ 上の両方向の帰納法まわりで踏んだ 4 つ（2026-09-07、Y4b / Lemma 4.5）
+
+`Yoshida08 Lemma 4.5`（`θ^{(j)}/θ = π′_j/π_j`、`j : ℤ`）を書くときに踏んだもの。
+**どれも「ℤ を負の側まで通す」ときにだけ出る。**
+
+| 書きたかったもの | 通る形 |
+| --- | --- |
+| `rcases lt_or_le j 0 with hj \| hj` | `lt_or_le` は無い。**`rcases (by omega : j < 0 ∨ 0 ≤ j) with hj \| hj`**（omega が選言そのものを証明する。ℤ/ℕ ならこれが一番壊れない） |
+| `induction j using Int.induction_on with \| hz \| hp \| hn` | 場合の名前は **`zero` / `succ` / `pred`**（`hz`/`hp`/`hn` は古い。`Invalid alternative name` と出る） |
+| `Units.val_prod` | 無い。**`map_prod (Units.coeHom L) f s`** |
+| `(-(n:ℤ)).toNat = 0` / `(-(-(n:ℤ))).toNat = n` | **`by omega`** が両方通す（`Int.toNat_*` の名前を探さない） |
+
+★**`map_prod (Units.coeHom L) …` を `rw` に渡すと必ず失敗する。**
+goal には `↑(∏ …)`（`Units.val` の coercion）が出ていて `(Units.coeHom L) (∏ …)` は
+**構文的に一致しない**（defeq ではある）。`refine (map_prod …).trans ?_` にすれば通る:
+
+    rw [uniformizerZ, zpowProd_natCast, natProd]
+    refine (map_prod (Units.coeHom L) (fun t => ((unitsRingAutHom L ϕ) ^ t) π)
+      (Finset.range n)).trans ?_
+    exact Finset.prod_congr rfl fun t _ => coe_unitsRingAutHom_pow ϕ t π
+
+★**`ring` / `linear_combination` は defeq を見ない。**
+`↑(σ u)`（`Units.val` を通した像）と `ϕ ↑u` は defeq だが `ring` には別の原子に見え、
+`ring failed, ring expressions not equal` になる。**`rfl` の `have` を 1 本挟んで
+`rw` で構文を揃えてから** `linear_combination` を呼ぶ:
+
+    have hcoe : ((((unitsRingAutHom L ϕ) x) : Lˣ) : L) = ϕ ((x : Lˣ) : L) := rfl
+    rw [hcoe] at hsub
+    linear_combination -hsub
+
+★**環自己同型を `ℤ` 乗したいときは `MonoidHom` を 1 本作る。**
+`RingAut R →* MulAut Rˣ`（`toFun ϕ := Units.mapEquiv ϕ.toMulEquiv`、`map_one'`/`map_mul'`
+はどちらも `by ext u; rfl`）を作っておけば `map_zpow` が使えて
+`((σ^j) u : R) = (ϕ^j) (u : R)` が `rw [← map_zpow …]; rfl` の 1 行で出る。
+**符号の場合分けが要らなくなる**のが効き目。
+
+## #110 `Subgroup G` を `Set G` に落とすとき `G` が推論できない（2026-09-07、Y11 / Prop 6.9）
+
+`Subgroup` の carrier を `Set` として書く statement
+
+    (ramificationGroupReal π' n : Set G) * (H : Set G) = …
+
+は **`Type mismatch: … has type Subgroup ?m.130 but is expected to have type Set G`**
+で落ちる。`ramificationGroupReal α n : Subgroup G` の `G` は
+`[MulSemiringAction G B]` からしか決まらないので、`: Set G` という型上昇の**外側**の
+`G` が中の `?m` に伝わらない。★`SetLike` の coercion は「先に `Subgroup ?G` を
+elaborate してから `Set ?G` に落とす」ので、`Set G` の `G` は unifier に見えていない。
+
+通る形（2 段に分けて `G` を明示する）:
+
+    ((ramificationGroupReal (G := G) π' n : Subgroup G) : Set G) * (H : Set G)
+
+★`(H : Set G)` は `H : Subgroup G` が既に explicit な変数なので落ちない。
+落ちるのは**返り値の型引数が implicit な関数**の像だけである。
+
+## #111 `field_simp [f]` は `def f` を展開しない（2026-09-07、Y11）
+
+`herbrandPhi α H n := -1 + herbrandSum α H n / (Nat.card H : ℝ)` に対し
+
+    field_simp [herbrandPhi]
+
+は `herbrandPhi` を展開せずに `unsolved goals` を残す（simp 引数に def 名を渡しても
+equation lemma が使われない場面がある）。**`simp only [herbrandPhi]` を先に打ってから
+`field_simp`**、さらに `field_simp` が `-c + S + c = S` の形で止まるので **最後に `ring`**。
+
+    simp only [herbrandPhi]
+    field_simp
+    ring
+
+★同じ落とし穴は `rw [herbrandSum]` にもある（`unfold herbrandSum` なら通る）。
+
+## #112 `push_neg` が 2026-09-07 に deprecated になった（Y11）
+
+`by_contra hc; push_neg at hc` は **warning: `push_neg` has been deprecated.
+Prefer using `push Not` instead.** を出す。`ℕ` の `¬ (a < b)` を返すだけなら
+**`Nat.not_lt.1 hc`**（一般には `not_lt.1`）で置き換えるのが一番安い。
+
+★`lake build` は warning では落ちないが、`leanfile.mjs` の出力が warning で
+埋まって本物のエラーが見えにくくなる。
+
+## #113 ℤ で添字づけた `Σ` 型（非交和）を作るときの 4 つの穴（Y-Prop4.7）
+
+**(a) `Equiv.sigmaFiberEquiv` と `Equiv.sigmaCongrLeft'` の合成は `rfl` にならない。**
+`(Equiv.sigmaFiberEquiv w).symm.trans (Equiv.sigmaCongrLeft' (Equiv.neg ℤ))` で
+`X ≃ Σ j, {x // w x = -j}` は作れるが、`sigmaCongrLeft'` が `Eq.mpr` を挟むので
+`apply` 補題が `rfl` で証明できない（`Not a definitional equality`）。
+**`Equiv` を手で組む方が安い**（`toFun`/`invFun` を明示すれば `_apply` が全部 `rfl`）。
+`right_inv` の依存等式は **`obtain ⟨x, hx⟩ := y; have hj : j = -w x := by omega; subst hj; rfl`**
+——添字 `j` を `subst` で潰せば証明無関係で `rfl` になる。
+
+**(b) `Function.Bijective.1` は β 簡約した等式を受け取らない。**
+`hbij : Function.Bijective (fun g : S => (⟨ρ g, _⟩ : T))` に
+`Subtype.ext h : (⟨ρ a, _⟩ : T) = ⟨ρ b, _⟩` を渡すと
+`Application type mismatch`（期待は `(fun g => …) ?a = (fun g => …) ?b`）。
+**`have h' : (fun g : S => …) ⟨a, ha⟩ = (fun g : S => …) ⟨b, hb⟩ := Subtype.ext hab`**
+と、ラムダを書いたままの型で `have` を立ててから渡す。
+
+**(c) `MonoidHom.ker` の標的は乗法群でなければならない。**
+`v : Q →* ℤ` の `v.ker` は通らない（ℤ は乗法モノイドで群でない）。
+付値は **`Q →* Multiplicative ℤ`** で持つこと。
+`{x // Multiplicative.toAdd (w x) = -j}` と `{y // w y = Multiplicative.ofAdd (-j)}` は
+**defeq なので `Equiv.trans` がそのまま通る**（型合わせの `cast` は要らない）。
+
+**(d) `MulEquiv.ofBijective` は noncomputable。**
+`def foo … : G ≃* H := MulEquiv.ofBijective ρ h` は
+`failed to compile definition, consider marking it as 'noncomputable'` で落ちる。
+★**全単射性の `theorem` と `≃*` の `noncomputable def` を分けて書く**と、
+下流が `Bijective` だけ欲しいときに `noncomputable` が伝染しない。
+
+## #114 束縛子の型を書かないと `(τ : G)` が「coe」ではなく「型注釈」に読まれる（Y12・Lemma 6.10）
+
+`H : Subgroup G` の上で立てた補題に渡す関数を
+
+```lean
+rw [phiOf_natCast_of_pos _ (fun τ => pos_ramIndex huni (τ : G)) n]
+```
+
+と書くと、`τ` の型がまだメタ変数なので **`(τ : G)` が型注釈として働き `τ : G` に固定される**。
+その結果 `phiOf_natCast_of_pos` の `{S}` が `S := G` に解かれ、
+**`failed to synthesize Fintype G`**（本来は `Fintype ↥H` で足りるはず）が出る。
+エラーが「`Fintype G` が無い」と言うので**インスタンスの問題に見えるが、原因は elaboration の順序**である。
+
+★直し方: **束縛子に型を書く**。
+
+```lean
+rw [phiOf_natCast_of_pos _ (fun τ : H => pos_ramIndex huni (τ : G)) n]
+```
+
+こうすると `(τ : G)` は `↥H → G` の coe として読まれ、`S := ↥H` に解ける。
+★同じ形は `Finset.sum_congr rfl (fun τ => …)` / `Fintype.sum_equiv … (fun τ => …)` でも起きる。
+**部分群の上の和を扱うラムダは、常に `fun τ : H =>` と書くこと。**
+
+## #115 `ℕ` の区間和で踏んだ 3 つ（Y13・Corollary 6.3 / Hasse-Arf 受け渡し）
+
+**(a) `Nat.Ico_succ_right` は無い。** `Finset.Icc 1 n` と `Finset.Ico 1 (n+1)` を行き来したいとき
+`rw [← Nat.Ico_succ_right]` は `Unknown constant` で落ちる（2026-09-07 時点）。
+在庫は `Finset.Ico_succ_right_eq_Icc` / `Order.Ico_succ_right` だが、どちらも `Order.succ` 版で
+`ℕ` に当てるのに一手要る。★**その場で作る方が速い**:
+
+```lean
+have h : Finset.Icc 1 (e * m) = Finset.Ico 1 (e * m + 1) := by
+  ext x; simp only [Finset.mem_Icc, Finset.mem_Ico]; omega
+```
+
+**(b) `Nat.mul_le_mul_left e (Nat.le_succ m)` は `e * m.succ` を作り、`omega` が
+`e * (m + 1)` と別物として扱う。** 帰納法の `succ` 分岐で
+
+```lean
+have hle : e * m + 1 ≤ e * (m + 1) + 1 := by
+  have := Nat.mul_le_mul_left e (Nat.le_succ m); omega   -- ✗ 反例を出して落ちる
+```
+
+とすると `a := ↑e * ↑m.succ` と `c := ↑e * ↑(m + 1)` が**別の原子**になり `omega` が
+「反例があるかもしれない」と言う（掛け算の中は `omega` が正規化しない）。★直し方は
+**`Nat.mul_succ` で先に展開する**:
+
+```lean
+have hle : e * m + 1 ≤ e * (m + 1) + 1 := by rw [Nat.mul_succ]; omega   -- ○
+```
+
+同じ理由で `e * (m+1) ≤ e * k` から `e*m + e ≤ e*k` を出すのも `rw [Nat.mul_succ] at h` が要る。
+
+**(c) `exists_prime_orderOf_dvd_card`（Cauchy）は `Fintype` を要求し、`Nat.card` を受けない。**
+`[Finite Q]` と `p ∣ Nat.card Q` から使うには 2 行はさむ:
+
+```lean
+haveI : Fintype Q := Fintype.ofFinite Q
+rw [Nat.card_eq_fintype_card] at hp
+obtain ⟨q, hq⟩ := exists_prime_orderOf_dvd_card (G := Q) p hp
+```
+
+`Fintype` が無いまま呼ぶと `rcases` が
+`x✝ : ?m is not an inductive datatype` という**原因と無関係な形**で落ちる。
+
+**(d) 仮定に `[Finite (… G …)]` を持つ補題は `(G := G)` を明示しないと
+「typeclass instance problem is stuck」になる。**
+`obtain ⟨τ, hτ⟩ := exists_orderOf_thetaMul_eq_natCard_quot (A := A) hα hα0 hadj` は
+`(A := A)` だけでは `G` がメタ変数のままなので、`[Finite (↥(lowerRamificationGroup B ?G 0) ⧸ …)]`
+の解決が止まる。★**インスタンス引数に現れる暗黙引数は全部明示する**（ここでは `(G := G)` も）。
+
+## #116 `def` が包む部分構造は「担い手の型」を明示引数にしないとメタ変数になる（2026-09-07、Y14 / 固定環の塔）
+
+`FixedPoints.subring B ↥H` を薄く包んで
+
+```lean
+def fixedRing {B : Type*} [CommRing B] {G : Type*} [Group G] [MulSemiringAction G B]
+    (H : Subgroup G) : Subring B := FixedPoints.subring B ↥H     -- ✗
+```
+
+と書くと、`fixedRing H` からは **`B` が復元できない**（`H : Subgroup G` は `G` しか決めない）。
+その結果、使う側で
+
+```
+typeclass instance problem is stuck
+  MulSemiringAction G ?m.6
+```
+
+が出る。★エラーは `MulSemiringAction` の解決失敗に見えるが、原因は
+**`def` の暗黙引数の設計**である。`↥(fixedRing H)` の `0` すら
+`OfNat (↥(fixedRing H)) 0 is stuck` になって、症状が 5 箇所に散らばる。
+
+★直し方は **担い手の型を明示引数にする**:
+
+```lean
+def fixedRing (B : Type*) [CommRing B] {G : Type*} [Group G] [MulSemiringAction G B]
+    (H : Subgroup G) : Subring B := FixedPoints.subring B ↥H     -- ○（以後 `fixedRing B H`）
+```
+
+同じ穴は `Submodule` / `Subalgebra` / `Subfield` を部分群やイデアルで添字づけて包むとき
+すべてに出る。★**「返り値の型に現れているから推論できる」は嘘** ——
+Lean は返り値の型からは暗黙引数を解かない。
+
+**(b) `associated_one_iff_isUnit` の向きは `Associated a 1`。**
+`Associated 1 c` が欲しいときは `.symm` が要る:
+
+```lean
+exact ⟨0, by rw [pow_zero]; exact (associated_one_iff_isUnit.mpr hcu).symm⟩
+```
+
+**(c) `rw [← h]` は等式ゴールの左右両方を書き換える。**
+`a * (ρ • x) = a * x` のようなゴールで `rw [← smul_… , ← h]` と繋ぐと、
+狙っていない側まで潰れて `unsolved goals` になる。★片側だけ動かしたいときは
+`conv_lhs` ではなく **`calc` に開く**のがいちばん短い（Y14 は 1 往復で直った）。
+
+---
+
+## #117 `def` で包んだ部分構造には mathlib のインスタンスが降りてこない（2026-09-07、Y16 / 固定環への作用）
+
+★#116(a) の続き。`fixedRing B H := FixedPoints.subring B ↥H` のように
+**mathlib の部分構造を素の `def` で包む**と、
+
+* mathlib が `FixedPoints.subring B ↥H` に付けているインスタンス
+  （例: `Mathlib/RingTheory/Invariant/Basic.lean:98` の
+  `MulSemiringAction (G ⧸ H) (FixedPoints.subring B H)`、`[H.Normal]` 付き）は
+  **`↥(fixedRing B H)` には降りてこない**。インスタンス探索は `instances` 透明度で
+  動くので、素の `def` を展開しないからである。
+
+★これは**害と益の両方**である。
+
+* 害: 「mathlib に在るのに使えない」。使いたければ
+  `inferInstanceAs (MulSemiringAction (G ⧸ H) ↥(FixedPoints.subring B ↥H))` で
+  明示的に橋を架けるか、`fixedRing` を `abbrev` にする。
+* 益: **自前のインスタンスを `↥(fixedRing B H)` に立てても mathlib 側と衝突しない**
+  （ダイヤモンドが立たない）。Y16 は `MulSemiringAction G ↥(fixedRing B H)` を
+  直接構成したが、mathlib の商群版と共存できる。
+
+★★**在庫調査の教訓（10 度目の実証）**: 「`H ⊴ G` なら `G` は `B^H` に作用する」を
+語で探しても出ない。**`.cache/mathlib-index.txt` を `FixedPoints\.` で 1 回 grep する**と、
+`def` / `instance` / `lemma` が 60 行にまとまって出て、
+「在るのは `G ⧸ H` 版であって `G` 版ではない」が **1 往復で確定した**。
+★型でも語でもなく、**名前空間で grep する**のがいちばん速いことがある。
+
+★併せて #68 の再確認: そのインスタンスは在るのに `inferInstance` が落ちた。
+理由は「無い」ではなく **`Mathlib.RingTheory.Invariant.Basic` を import していない**
+（`Algebra.IsInvariant` が `Unknown constant` になるかで 0.01 秒で判別できる）。
+
+★Bash の落とし穴（Lean ではない）: `cat > file << 'EOF'` のヒアドキュメントは
+この環境の PreToolUse フックで壊れることがある（`unexpected EOF while looking for
+matching '` が出る）。**Lean ファイルは Write ツールで書く**。
+
+## #118 `Nat.cast` 経由の `min` / `1` は `min_eq_left` に食わせる前に `Nat.cast_one` する（2026-09-07、Y15 / Hasse-Arf）
+
+`truncENat_coe : truncENat (k : ℕ∞) r = min (k : ℝ) r` を `k = 1` で使うと、
+左辺は `min ((1 : ℕ) : ℝ) (x + 1)`、目標の右辺は `(1 : ℝ)` になる。
+この 2 つは `Nat.cast_one` で等しいが**構文的には別**なので、
+
+```lean
+exact min_eq_left (by push_cast; linarith)   -- ✗ linarith failed（goal が False になる）
+```
+
+と落ちる（`min_eq_left : a ≤ b → min a b = a` の `a` が `((1:ℕ):ℝ)` に固定され、
+右辺 `(1:ℝ)` と合わないため、unifier が別の分解を試して壊れる）。**先に潰す**:
+
+```lean
+rw [show (1 : ℕ∞) = ((1 : ℕ) : ℕ∞) by rfl, truncENat_coe, Nat.cast_one]
+exact min_eq_left (by linarith)              -- ✓ 0.06 秒
+```
+
+★同型の罠: `Order.le_of_lt_add_one` の名前つき引数は `a` / `b` ではなく **`x` / `y`**。
+`(a := …)` と書くと `Invalid argument name` で落ちる（エラーが候補を出してくれる）。
+
+★`IsDiscreteValuationRing.irreducible_iff_uniformizer` は
+`open IsDiscreteValuationRing` が無いと `Unknown identifier`。#68 の変種で、
+「mathlib に無い」ではなく「**名前空間を開いていない**」。
+`Found/PGC` の DVR まわりは `open IsLocalRing IsDiscreteValuationRing` を既定にする。
+
+## #119 部分環に `Algebra A ↥S` を立てるのは 2 行。★大域インスタンスにせず `letI` で入れる（2026-09-07、Y17 / 固定環の単項生成）
+
+`S : Subring B` が `A` の像を含むとき（`h : ∀ a : A, algebraMap A B a ∈ S`）、
+
+```lean
+@[reducible]
+def Subring.algebraOfMapsTo (S : Subring B) (h : ∀ a : A, algebraMap A B a ∈ S) : Algebra A ↥S :=
+  ((algebraMap A B).codRestrict S h).toAlgebra
+```
+
+で立つ。★★**塔は `IsScalarTower.of_algebraMap_eq fun _ => rfl` で出る**（実測、一発）。
+`RingHom.codRestrict` は `SubsemiringClass` で一般化されているので `Subring` にそのまま当たる。
+
+★**証明 `h` を引数に取るので大域インスタンスにはできない**（したくもない）。
+消費側では **`letI` で証明の中に入れる**。★結論の statement に `Algebra A ↥S` が
+現れないなら、それでまったく困らない（`x ∈ Algebra.adjoin A {algebraMap ↥S B ϖ}` のように
+`B` の側で述べておけば、`letI` は proof term の中に閉じる）。
+★どうしても `↥S` の側で述べたいときは **statement の中に `letI ... ;` を書ける**:
+
+```lean
+theorem foo ... :
+    letI : Algebra A ↥S := Subring.algebraOfMapsTo S hS
+    Algebra.adjoin A ({ϖ} : Set ↥S) = ⊤ := by
+  letI : Algebra A ↥S := Subring.algebraOfMapsTo S hS
+  ...
+```
+
+★これは #117(i)（素の `def` 包みには mathlib のインスタンスが降りてこない）の**逃げ道**でもある。
+`fixedRing B H := FixedPoints.subring B ↥H` は型としては `Subring B` なので、
+`Subring` に対して立てた `Algebra` / `IsScalarTower` はそのまま当たる。
+
+★クラス型を返す `def` には **`@[reducible]` が要る**（付けないと
+`Definition ... of class type must be marked with `@[reducible]`` の警告）。
+
+★併せて: `Module.Finite.of_injective` は `[IsNoetherian R N]` を要求する
+**半線形版**（`f : M →ₛₗ[σ] N`）だが、`(IsScalarTower.toAlgHom A C B).toLinearMap` を
+渡せば `σ = RingHom.id` で普通に unify する。「中間環が有限生成」はこれ 1 行。
+
+## #120 `if` を割った直後の `Continuous fun r => r` を `simp` は閉じない（2026-09-07、Y18 / 上付き分岐群）
+
+**失敗形**: `truncENat x r = if x = ⊤ then r else min (x.toNat : ℝ) r` の連続性を
+
+```lean
+unfold truncENat
+by_cases hx : x = ⊤
+· simp [hx]        -- ⊢ Continuous fun r => r  が残る（エラー: unsolved goals）
+```
+
+`simp` は `if_pos` までは進めるが、**η 展開された恒等写像 `fun r => r` に
+`continuous_id` を当ててくれない**（`continuous_id` の左辺は `id` であって `fun r => r`）。
+
+**直し**: `simp only` で `if` だけ潰し、`exact continuous_id` を手で当てる。
+
+```lean
+by_cases hx : x = ⊤
+· simp only [hx, if_true]; exact continuous_id
+· simp only [hx, if_false]; exact continuous_const.min continuous_id
+```
+
+★同じ形の和の連続性は `continuous_finsetSum`（`continuous_finset_sum` は 2026-09 に
+deprecated）＋ `Continuous.div_const` で 1 行。`φ_G(n) = −1 + (Σ_τ min{i(τ), n+1})/|G|` の
+連続性はこれだけで出る（Y18 実測 0.04 秒、一発）。
+
+★併せて: `a ≤ b → 0 < c → a / c ≤ b / c` は名前で引くと
+`div_le_div_of_nonneg_right` の引数が `0 ≤ c` だったり `0 < c` だったりして当たらない。
+**`gcongr` が一発で閉じる**（`positivity` が `0 < ↑(Nat.card S)` を拾う）。
+
+## #121 `ℕ∞` に `WithTop` の補題を `rw` で当てられない（2026-09-07、Y15b / Hasse-Arf 段 2）
+
+**失敗形**: `htop : ∑ τ : H, ramIndex π' (σ * ↑τ) = (⊤ : ℕ∞)` に対して
+
+```lean
+rw [WithTop.sum_eq_top] at htop
+-- Did not find an occurrence of the pattern
+--   @Eq (WithTop ?m.213) (∑ i ∈ ?m.215, ?m.216 i) ⊤
+-- in the target expression
+--   @Eq ℕ∞ (∑ τ, ramIndex π' (σ * ↑τ)) ⊤
+```
+
+`ℕ∞` は `WithTop ℕ` だが、`rw` の統一は `instances` 透明度なので**畳んだままの
+`ℕ∞` を開いてくれない**。
+
+**直し**: `rw` をやめて**項の形**で当て、型を名前つき引数で固定する。
+
+```lean
+obtain ⟨τ, -, hτ⟩ := (WithTop.sum_eq_top (M := ℕ)).1 htop
+```
+
+★併せて 3 つ:
+
+* `mul_top` は `ℕ∞` には**無い**（`Unknown identifier`）。`ENat.mul_top (h : m ≠ 0)` を使う。
+  `WithTop.mul_top` は `[DecidableEq α]` を要求するので `ENat` 版の方が軽い。
+* `(Nat.card ↥H : ℕ∞) ≠ 0` は `by exact_mod_cast (Nat.card_pos (α := H)).ne'`。
+* `Set G` の積（`(M : Set G) * (H : Set G)`）は **`open Pointwise` が無いと
+  `failed to synthesize HMul (Set G) (Set G) ?m`**。Y11 の `herbrand_coe_mul_coe_eq` を
+  引くファイルは必ず要る。
+
+## #122 `IsPGroup.of_equiv` は「自分」が第 1 引数（2026-09-07、Y15b）
+
+**失敗形**:
+
+```lean
+IsPGroup.of_equiv Subgroup.topEquiv (h1 ▸ isPGroup_lowerRamificationGroup_one …)
+-- Type mismatch: has type IsPGroup p ↥⊤ … but is expected to have type ?m ≃* G
+```
+
+`of_equiv` / `of_surjective` / `to_quotient` はどれも `variable (hG : IsPGroup p G)` を
+**暗黙のセクション変数として第 1 引数に持つ**。ドット記法で書くこと。
+
+```lean
+(h1 ▸ isPGroup_lowerRamificationGroup_one (A := A) p huniB hπ'.ne_zero hadj).of_equiv
+  Subgroup.topEquiv
+```
+
+★`Subgroup.zpowers` の所属を `refine ⟨t, ?_⟩` で開くと、ゴールが
+**β 簡約されない `(fun x ↦ ↑σ ^ x) t = ↑g`** の形で出て `rw [← QuotientGroup.mk_zpow]` が
+当たらない。`show (QuotientGroup.mk σ : G ⧸ H) ^ t = QuotientGroup.mk g` を 1 行挟む。
+
+## #123 `letI` の下で「引数がラムダだけ」の補題を呼ぶと暗黙型が決まらない（2026-09-07、Y20）
+
+**失敗形**（`haveI` で `SMulCommClass` を入れる 1 行）:
+
+```lean
+haveI := smulCommClass_quotient_fixedRing (A := A) (fun σ c => quotientSMul_mk_fixedRing σ c)
+-- typeclass instance problem is stuck
+--   Subgroup.Normal ?m.172
+```
+
+`smulCommClass_quotient_fixedRing {A B G H}` の `B`・`G`・`H` は**引数のラムダからは
+決まらない**（ラムダの型は期待型から来るが、`haveI :=` には期待型が無い）。
+その結果 `[H.Normal]` の合成が `?m` のまま走って止まる。
+
+**直し方**: 期待型を書くか、**暗黙引数を全部名前で渡す**。後者が短い。
+
+```lean
+haveI := smulCommClass_quotient_fixedRing (A := A) (B := B) (G := G) (H := H)
+  (fun σ c => quotientSMul_mk_fixedRing σ c)
+```
+
+★同じ行を `exact` の引数位置に置くと**期待型があるので何も渡さなくても通る**
+（本ファイルの `hq` の 2 度目の出現がそれ）。★「stuck」の語が出たら
+**その項に期待型が付いているかどうか**を先に見ること。
+
+★併せて 1 つ（在庫）: **局所環の間の代数写像に沿って剰余体の標数は降りる**。
+`IsLocalHom` も剰余体の同型も要らず、`mem_maximalIdeal_of_map_mem`（単元の像は単元、
+という易しい向き）と `CharP.charP_iff_prime_eq_zero`（`[Nontrivial R]` が要る）の 2 本で
+3 行。`CharP (ResidueField B) p → CharP (ResidueField C) p`。
+★分岐（完全分岐か不分岐か）は**1 度も要らない**。
+
+## #124 `AlgEquiv.restrictNormalHom` と `restrictNormalHom_surjective` は `E` と `K₁` の役割が逆（2026-09-07、Y19 / 絶対 Galois 群のフィルトレーション）
+
+```
+@AlgEquiv.restrictNormalHom      : ... {K₁} [Algebra F K₁] → (E) [Algebra E K₁] [Normal F E] → Gal(K₁/F) →* Gal(E/F)
+@AlgEquiv.restrictNormalHom_surjective : ... {K₁} → (E) [Algebra K₁ E] [Normal F K₁] [Normal F E] → Surjective (restrictNormalHom K₁)
+```
+
+**同じ字 `E` が、片方では小さい体（制限先）、もう片方では大きい体（制限元）である。**
+「`Gal(K̄/K) ↠ Gal(L/K)` の全射性」を素直に
+`AlgEquiv.restrictNormalHom_surjective (F := F) (K₁ := ↥L) (E := E)` の形の
+名前付き引数で書こうとして `restrictNormalHom (K₁ := ↥L)` と書くと
+
+```
+failed to synthesize instance of type class
+  Algebra E ↥L
+```
+
+で落ちる（大小が逆なので `Algebra` の向きが合わない）。正しい書き方:
+
+```lean
+theorem surjective_restrictNormalHom {F E : Type*} [Field F] [Field E] [Algebra F E]
+    [Normal F E] (L : IntermediateField F E) [Normal F L] :
+    Function.Surjective (AlgEquiv.restrictNormalHom (F := F) (K₁ := E) (L : Type _)) :=
+  AlgEquiv.restrictNormalHom_surjective (F := F) (K₁ := (L : Type _)) E
+```
+
+★核が固定化部分群であること（`(restrictNormalHom ↥L).ker = L.fixingSubgroup`）は
+`AlgEquiv.restrictNormal_commutes` を 2 回使って 10 行。`ext σ` のあと
+`MonoidHom.mem_ker` と `IntermediateField.mem_fixingSubgroup_iff` で開き、
+`simp only [AlgEquiv.restrictNormalHom, MonoidHom.mk'_apply, AlgEquiv.one_apply]` で
+`restrictNormal` の形に落とすところが要点（`ext x` は `Subtype.ext` まで進むので
+`show` で書き直そうとすると `1 x` が残って合わない）。
+
+★併せて 1 つ（同じセッションで踏んだ）: **`∃ P, (IsOpen (P : Set Γ) ∧ P.Normal)` は
+型注釈が無いと `P : Γ → Prop` に潰れる**（`(P : Set Γ)` の強制が先に効く）。
+出るエラーは `Invalid field 'Normal': ... does not contain 'Function.Normal'` で、
+一見なにが起きたか分からない。`∃ P : Subgroup Γ, ...` と書けば直る。
+
+## #125 `SetLike` の台集合の等式は `∈` のゴールに `rw` できない（2026-09-07、Y21 / Hasse-Arf 段 2）
+
+Proposition 6.9 は「`(G_n : Set G) * (H : Set G) = (G_{φ(n)} : Set G)`」という
+**台集合の等式**で述べてある（商群を作らずに済ませるため）。`G_{n+1} ≤ H` を入れると
+
+```lean
+heq : (↑H : Set G) = ↑(ramificationGroupReal ϖ (herbrandPhi π' H (↑n + 1)))
+⊢ x ∈ H
+```
+
+になるが、ここで `rw [heq]` は
+
+```
+Did not find an occurrence of the pattern ↑H in the target expression  x ∈ H
+```
+
+で落ちる。★**ゴールの `x ∈ H` は `SetLike` の membership であって `x ∈ (↑H : Set G)`
+ではない**（`Set.mem` に unfold されていない）。直し方は、`Set` の形で `have` を立ててから
+`SetLike` の membership に渡すこと:
+
+```lean
+have hxmem : x ∈ (H : Set G) := by rw [heq]; exact hc
+exact hxH hxmem     -- `hxH : x ∉ H` にそのまま通る（こちらは defeq で通る）
+```
+
+★逆向き（`Set` の形のゴールに `SetLike` の仮定を渡す）は `SetLike.mem_coe` で開く。
+
+★併せて 2 つ（同じセッションで踏んだ）:
+
+* **`Nat.dvd_sub'` は消えた。** `Nat.dvd_sub' hb ha : N ∣ b - a` と書くと `Unknown constant`。
+  いまは `(Nat.dvd_sub_iff_left hab ha).mpr hb`（`hab : a ≤ b`）。
+  ★`exact?` が 0.02 秒で出すので、`Nat` の割り算・引き算まわりは名前を覚えず投げるのが速い。
+* **`MulSemiringAction G ↥(fixedRing B H)` には `[H.Normal]` が要る**
+  （`fixedRingMulSemiringAction`、Y16）。`G` の作用が固定環に降りるのは `H` が正規のときだけ
+  なので当たり前だが、`fixedRing B H` を「ただの部分環」と思って
+  `[Fintype H]` だけ書くと `failed to synthesize MulSemiringAction G ↥(fixedRing B H)` が
+  **補題の宣言行ではなく本体の `fun r => ...` の位置に出る**ので原因が見えにくい。
+
+## #126 `IntermediateField.fixingSubgroup` の `Normal` は mathlib のインスタンスではない —— 商群を「型に」書けない（2026-09-07、Y19b+c / 不分岐部分の除去）
+
+`L/K` が normal でも `(L.fixingSubgroup : Subgroup Gal(K̄/K)).Normal` は
+**インスタンスとして登録されていない**。そのため
+
+```lean
+def foo ... : (↥(I ⊔ N') ⧸ L.fixingSubgroup.subgroupOf (I ⊔ N')) ≃* ... := ...
+```
+
+のように**宣言の型**に商群が現れると
+
+```
+failed to synthesize instance of type class
+  Mul (↥(I ⊔ N') ⧸ L.fixingSubgroup.subgroupOf (I ⊔ N'))
+failed to synthesize instance of type class
+  (L.fixingSubgroup.subgroupOf (I ⊔ N')).Normal
+```
+
+が出る。★**証明の中の `haveI` では間に合わない**（型のほうが先に elaborate される）。
+直し方は、その `def` より**前**にインスタンスとして置くこと:
+
+```lean
+instance normal_fixingSubgroup_of_normal (K : PAdicLocalField p)
+    (L : IntermediateField K.carrier K.closure) [Normal K.carrier L] :
+    (L.fixingSubgroup : Subgroup K.absGal).Normal := by
+  rw [← IntermediateField.restrictNormalHom_ker (K := K.carrier) (L := K.closure) (E := L)]
+  infer_instance
+```
+
+★根拠は `IntermediateField.restrictNormalHom_ker`（`(restrictNormalHom E).ker = E.fixingSubgroup`）
+——「核だから正規」。★`#124` と併せて `restrictNormalHom` 系はこの 2 点で必ず止まる。
+
+★同じ形の在庫: `Subgroup.subgroupOf` の正規性は `Normal` から自動で降りる
+（`H.Normal → (H.subgroupOf S).Normal` はインスタンスがある）ので、
+足りないのは**いちばん外側の 1 つだけ**である。
+
+## #127 `iff` の前に**明示引数**があると `.mp` が「Unknown constant」になる（2026-09-07、Y19b+c）
+
+```lean
+IsLocalRing.residue_eq_zero_iff.mp h
+-- Unknown constant `IsLocalRing.residue_eq_zero_iff.mp`
+```
+
+`rw [IsLocalRing.residue_eq_zero_iff]` は通るのに `.mp` が通らない。理由:
+
+```
+@IsLocalRing.residue_eq_zero_iff : ∀ {R} [CommRing R] [IsLocalRing R] (x : R),
+  residue R x = 0 ↔ x ∈ maximalIdeal R
+```
+
+★**`(x : R)` が明示引数**なので、この定数の型は `Iff` ではなく `Pi` である。
+定数に対する `C.mp` は**名前解決**（`C.mp` という定数を探す）なので落ちる。
+（暗黙引数だけなら型は `Iff` に見えるので `.mp` が通る——そこが紛らわしい。）
+
+直し方は `_` を 1 つ入れるだけ:
+
+```lean
+(IsLocalRing.residue_eq_zero_iff _).mp h     -- OK
+```
+
+★**見分け方**: `#check @foo` して、`↔` の**前**に `(...)` の丸括弧があれば `.mp` は使えない。
+★`rw` / `simp` は引数を自分で埋めるので気づかない。**term モードに移した瞬間に出る。**
+
+## #128 「mathlib に無い」の 3 連続誤判定 —— 部分群への作用の制限は**全部ある**（2026-09-07、Y22）
+
+先行ノード（Y21）が「`MulSemiringAction ↥H B` は mathlib にインスタンスが無い」と報告したが、
+**誤りだった**。実際は `↥H` への制限に必要なものが 3 つとも在る:
+
+| 要るもの | mathlib の宣言 | 場所 |
+|---|---|---|
+| `MulSemiringAction ↥H B` | `Subgroup.mulSemiringAction` | `Algebra/Ring/Action/Subobjects.lean:40` |
+| `SMulCommClass ↥H A B` | `Subgroup.smulCommClass_left` | `Algebra/Group/Subgroup/Actions.lean:43` |
+| `FaithfulSMul ↥H B` | 無名 instance | `Algebra/Group/Subgroup/Actions.lean:59` |
+
+★どれも `inferInstance` で一発で解決する。**自分で `instance` を書いてはならない**
+（書くと mathlib のものと 2 本立ちして、`herbrandPhi` のような
+`[Fintype ↥H]` を持ち回る定義で**別インスタンスに分岐する**）。
+
+★★**引き方**: `.cache/mathlib-index.txt` を「型」ではなく
+**名前空間 + 型クラス名**で grep する（#117(ii)）。1 回で出る:
+
+```
+grep -n "FaithfulSMul" .cache/mathlib-index.txt | grep -i "subgroup\|submonoid"
+```
+
+★同じ探索で `AddSubgroup.subgroupOf_inertia` も出た:
+
+```
+(I.inertia G).subgroupOf H = I.inertia ↥H        -- Algebra/Group/Subgroup/Basic.lean:1077
+```
+
+`Ideal.inertia` は `(Submodule.toAddSubgroup I).inertia` の **reducible** な別名なので、
+`lowerRamificationGroup B G n := (𝔪^(n+1)).inertia G` と定義してあれば
+
+```lean
+theorem lowerRamificationGroup_subtype (H : Subgroup G) (n : ℕ) :
+    lowerRamificationGroup B ↥H n = (lowerRamificationGroup B G n).subgroupOf H :=
+  (AddSubgroup.subgroupOf_inertia _ H).symm
+```
+
+が**定義を展開せずに**通る（`n` について全域、端点の例外なし）。
+
+## #129 `⊤` の場合が既にある補題は、一般の部分群の方が**易しい**ことがある（2026-09-07、Y22）
+
+`herbrandPhiGroup_eq_herbrandPhi_top`（`φ_G = φ_⊤`）は
+`Fintype.sum_equiv Subgroup.topEquiv` と `Nat.card_congr` を要していた。
+`↥(⊤ : Subgroup G)` と `G` が**別の型**だからである。
+
+ところが一般の `H` については
+
+```lean
+theorem herbrandPhi_eq_herbrandPhiGroup_subtype (α : B) (H : Subgroup G) [Fintype ↥H] (n : ℝ) :
+    herbrandPhi α H n = herbrandPhiGroup ↥H α n := by
+  rw [herbrandPhi_eq_phiOf, herbrandPhiGroup]
+  rfl
+```
+
+★**`rfl` で閉じる**（0.02 秒）。両辺とも添字型が同じ `↥H` で、
+`ramIndex (G := ↥H) α τ` と `ramIndex (G := G) α ↑τ` は定義的に等しいからである。
+
+★教訓: 「`⊤` で苦労した補題だから一般でも苦労する」は**逆**のことがある。
+`⊤` の困難は `↥⊤ ≠ G` という**型の食い違い**であって、一般化の困難ではない。
+★まず `rfl` を 1 回叩くこと（0.02 秒で終わるか、即座に落ちる）。
+
+## #130 `rw [Nat.cast_zero, Nat.cast_zero]` は 2 つ目で必ず落ちる（2026-09-07、Y22）
+
+`rw` は**その書き換えの全出現**を一度に潰す。`herbrandPhi π H ↑0 = ↑0` のように
+`↑0` が左右に 1 つずつある形で `Nat.cast_zero` を 2 回並べると、
+1 回目で両方消えるので 2 回目が
+
+```
+Tactic `rewrite` failed: Did not find an occurrence of the pattern ↑0
+```
+
+で落ちる。★「左右にあるから 2 回」と数えないこと。`simp` に逃げる前に**まず 1 回で試す**。
+
+
+## #131 `Eq.ge` の `.le` は落ちる —— 等式から割り切りへ渡すのは `▸` の一択（2026-09-07、Y23 / 順分岐商の塔）
+
+`hk : Nat.card ↑N = p ^ k` から `p ∣ Nat.card ↑N` を作りたくて
+
+```lean
+dvd_trans (dvd_pow_self p hk0.ne') hk.ge.le
+```
+
+と書いたら
+
+```
+Invalid field `le`: The environment does not contain `Nat.le.le`,
+so it is not possible to project the field `le` from an expression Eq.ge hk
+```
+
+`Eq.ge` が返すのは `Nat.le`（構造そのもの）であって `LE.le` の**ドット記法が効く形**
+ではない。★等式で型を移すだけなら **`hk ▸ e`** が一番短い:
+
+```lean
+(hk ▸ dvd_pow_self p hk0.ne' : p ∣ Nat.card ↑N).trans hdvd
+```
+
+★型注釈を付けること（付けないと `▸` の書き換え方向が決まらない）。
+
+## #132 `ENat.one_le_iff_ne_zero` は非推奨。名前空間ごと `Order.` に移った（2026-09-07、Y23）
+
+`ℕ∞` で `0 < x` と `¬ (1 < x)` から `x = 1` を出すとき
+
+```lean
+le_antisymm (by exact_mod_cast not_lt.mp hnot) (ENat.one_le_iff_ne_zero.mpr hpos.ne')
+```
+
+は**通るが warning が出る**。置き換えは `Order.one_le_iff_ne_zero`。
+★★**ドット記法が使えなくなる**点に注意（`x.one_le_iff_ne_zero` →
+`Order.one_le_iff_ne_zero x`）。上の形は `.mpr` を付けているだけなので
+名前を差し替えるだけで通る。
+
+## #133 `haveI` で入れたインスタンスは**補題を切り出すと消える**（2026-09-07、Y23）
+
+証明を 2 本の宣言に割ったとき、元の証明の中で
+
+```lean
+haveI := smulCommClass_quotient_fixedRing (A := A) (B := B) (G := G) (H := H) hq
+```
+
+としていたものが、切り出した側にしか残らず、呼び出し側で
+
+```
+failed to synthesize instance of type class
+  SMulCommClass (G ⧸ lowerRamificationGroup B G 1) A ↥(fixedRing B (lowerRamificationGroup B G 1))
+```
+
+になった。★**`letI`/`haveI` は宣言の境界を越えない。**
+抽象核と具体層に割るときは、`haveI` を**両方に**書くか、
+インスタンス引数として明示的に持ち回ること。
+★これは「抽象核をまず切り出す」設計と必ずセットで起きる失敗形である
+（1 往復 11 秒で直る。落ちる場所も 1 行で分かる）。
+
+## #134 名前が「無い」4 連発 —— `Subgroup.map_top` / `Subgroup.comap_bot` / `Ideal.pow_le_pow_left` / `IsGalois.toNormal`（2026-09-07、Y19d / 段データの組み立て）
+
+いずれも**綴りが違うだけ**で mathlib にある（#68 の「import していないだけ」とは別種）。
+
+| 書いた名前 | 実際 | 備考 |
+|---|---|---|
+| `Ideal.pow_le_pow_left` | **`Ideal.pow_right_mono`** | `I ≤ J → I^n ≤ J^n` |
+| `Subgroup.comap_bot` | **`MonoidHom.comap_bot`** | `comap f ⊥ = f.ker`。名前空間が `Subgroup` でない |
+| `Subgroup.map_top` / `map_top_eq_range` | **無い** | `Subgroup.map H.subtype ⊤ = H` は `simp` も閉じない。`le_antisymm (Subgroup.map_subtype_le _) (fun g hg => ⟨⟨g, hg⟩, Subgroup.mem_top _, rfl⟩)` と手で書く（3 行） |
+| `IsGalois.toNormal` | **無い** | `haveI := hgal; infer_instance` で `Normal F E` が出る |
+
+★`exact?` は 0.02〜0.09 秒で返る。**綴りを 3 回試すより 1 回 `exact?` を投げる**方が安い。
+
+## #135 構造体の**引数に依存する項**を `rw [← h]` で書き換えると motive が壊れる（2026-09-07、Y19d）
+
+```lean
+structure StageGenerator (K) (N : Subgroup K.absGal) where
+  fixingSubgroup_eq : (adjoin K {gen}).fixingSubgroup = N
+...
+theorem le_stage (g : StageGenerator K N) : N ≤ g.stage v := by
+  rw [← g.fixingSubgroup_eq]   -- ★落ちる
+```
+
+```
+motive is not type correct: fun _a ↦ _a ≤ g.stage v
+  g has type StageGenerator K N but is expected to have type StageGenerator K _a
+```
+
+★`g` の**型が `N` に依存している**ので、`N` を書き換えると `g` の型も変わる。
+**直し方**: ゴールの `N` を書き換えず、**仮定の側**を書き換える。
+
+```lean
+  intro σ hσ
+  have h1 : σ ∈ (adjoin K {g.gen}).fixingSubgroup := by rw [g.fixingSubgroup_eq]; exact hσ
+```
+
+★同じ理由で `calc` を使うと通る場面もある（`rw [← hv]` が `N` を全部書き換えてしまう例）。
+
+## #136 `dite` の条件が `Nonempty` だと `Decidable` が付かない —— `letI := Classical.dec` を**定義の中**に（2026-09-07、Y19d）
+
+```lean
+noncomputable def absGalStage (K) (N) (v : ℝ) : Subgroup K.absGal :=
+  if h : Nonempty (StageGenerator K N) then h.some.stage v else ⊤
+```
+→ `failed to synthesize Decidable (Nonempty (StageGenerator K N))`。
+
+★直し方は `letI := Classical.dec (Nonempty (StageGenerator K N))` を**本体の先頭に置く**。
+そのうえで、展開する補題は
+
+```lean
+  rw [absGalStage]          -- ここまで
+  exact dif_pos h           -- ★`rw [absGalStage, dif_pos h]` は通らない
+```
+
+と**2 段に割る**（`rw` は `letI` の下の `dite` のインスタンスを合わせられない）。
+
+## #137 Y18 `upperRamification_coe_mul_coe_eq` の右辺は `C` で計算した `G^m` である（2026-09-07、Y19d）
+
+```lean
+{ϖ : C} (hϖ : algebraMap C B ϖ = π'') ...
+  ↑(upperRamificationGroup G π' m) * ↑H = ↑(upperRamificationGroup G ϖ m)
+```
+
+右辺の `ϖ` は **`C = B^H` の元**であり、`upperRamificationGroup G ϖ m` は
+**`C` の上で**（`G` の `C` への作用と `C` の付値で）計算した部分群である
+——`π'' = algebraMap C B ϖ` を渡すのではない。`π''` は `hfix` にしか出てこない。
+★`algebraMap C B ϖ` と書いて型不一致で 1 往復落とした。
+★これが「(G/H)^m の引き戻し」の正体で、`H` の商群を作らずに済ませる仕掛けである。
+
+## #138 `Subgroup.card_dvd_of_injective` は**行き先の型で単一化する** —— `Multiplicative X` は `show` で先に据える（2026-09-07、Y24 / Cor 6.13 (iii)）
+
+```lean
+-- θ_n : G_n/G_{n+1} ↪ Multiplicative (ResidueField B)
+rw [show (…).relIndex (…) = Nat.card (… ⧸ …) from Subgroup.index_eq_card _]
+exact Subgroup.card_dvd_of_injective _ (thetaAddQuot_injective (A := A) hα hα0 hadj hi)
+```
+→ `failed to synthesize Group (ResidueField B)` ＋ `Application type mismatch`。
+
+原因は `Subgroup.card_dvd_of_injective (f : α →* H) : Nat.card α ∣ Nat.card H` の
+**`H` が結論の右辺 `Nat.card (ResidueField B)` から先に決まる**こと。
+`ResidueField B` は体なので `Group` にはならず、そこで止まる。
+
+★直し方は**行き先を先に据える**:
+
+```lean
+show _ ∣ Nat.card (Multiplicative (ResidueField B))
+exact Subgroup.card_dvd_of_injective _ (thetaAddQuot_injective (A := A) hα hα0 hadj hi)
+```
+
+`Multiplicative X` は型シノニムなので `Nat.card (Multiplicative X) = Nat.card X` は
+定義的に等しく、`show` 1 行で通る（`rfl` 補題を探しに行かなくてよい）。
+★同じ形は `Additive` 側でも起きる。
+
+## #139 `Subgroup.relIndex` は `Subgroup.index_eq_card` で商の `Nat.card` になる（2026-09-07、Y24）
+
+`H.relIndex K` の定義は `(H.subgroupOf K).index` なので、
+
+```lean
+show (lowerRamificationGroup B G 1).relIndex (lowerRamificationGroup B G 0)
+  = Nat.card (lowerRamificationGroup B G 0 ⧸
+      (lowerRamificationGroup B G 1).subgroupOf (lowerRamificationGroup B G 0)) from
+  Subgroup.index_eq_card _
+```
+
+が**そのまま通る**（`Subgroup.relIndex` を `unfold` しなくてよい）。
+★この木の `thetaMulQuot` / `thetaAddQuot`（Prop 6.2）の定義域はまさにこの商なので、
+**分岐群の商の位数は `relIndex` で書くのがいちばん安い**。
+望遠鏡積 `[G : F n] = ∏_{i<n} [F i : F (i+1)]` も
+`Subgroup.relIndex_mul_index : H ≤ K → H.relIndex K * K.index = H.index` の帰納 4 行で出る
+（★`mul_comm` を 1 つ挟む必要がある —— `Finset.prod_range_succ` の向きが逆）。
+
+## #140 `Polynomial.Monic` の項に**ドット記法は使えない** —— `Eq` の名前空間へ落ちる（2026-09-07、Y25 / Λ6 §4-a）
+
+`Polynomial.Monic p` は `p.leadingCoeff = 1` の `def` である。したがって
+
+```lean
+rw [(hmonic.map φ).natDegree_eq_of_map] at hk   -- ✗
+```
+
+は `Polynomial.Monic.natDegree_eq_of_map` ではなく **`Eq.natDegree_eq_of_map`** を探しに行き、
+
+```
+Invalid field `natDegree_eq_of_map`: The environment does not contain `Eq.natDegree_eq_of_map`,
+so it is not possible to project the field `natDegree_eq_of_map` from an expression
+  Monic.map φ hmonic
+of type `(map φ g).leadingCoeff = 1`
+```
+
+という**行き先の名前空間が違う**エラーになる（「そんな補題は無い」ではない）。
+★直し方は「元の `Monic` 項に補題を当てる」:
+
+```lean
+have hdegmap : (g.map φ).natDegree = g.natDegree := hmonic.natDegree_map φ   -- ○
+```
+
+`Polynomial.Monic.natDegree_map (hmo : P.Monic) (f : R →+* S) : (P.map f).natDegree = P.natDegree`。
+★同じ理由で `(hmonic.map φ).leadingCoeff` は**書ける**（`Monic.leadingCoeff` は
+`Monic` の項を取る補題で、ドット記法が `Eq` に落ちても引数として渡るため）。
+★★一般則: **`def` で `Prop` に展開される述語（`Monic` / `IsUnit` ではない方）**の項に
+ドット記法を使うときは、展開先の名前空間（ここでは `Eq`）が優先されると思ってよい。
+
+## #141 `lean/ABC3/Found.lean` は **CRLF** —— Python の文字列置換は `'rb'` で読むこと（2026-09-07、Y25）
+
+`Found.lean` に import を 1 行足すとき、
+
+```python
+s = io.open(p, encoding='utf-8').read()      # ← 既定は universal newlines
+assert s.count('import ABC3.Found.PGC.Foo\n') == 1   # ✗ 0 になることがある
+```
+
+は `newline=''` を付けると `\r\n` のまま入るので `\n` で数えると **0 件**になり、
+逆に `newline` 既定だと読めても**書き戻しで CRLF が LF に潰れて 1786 行全部が diff に出る**。
+★安全なのは **binary で読んで binary で書く**:
+
+```python
+raw = io.open(p, 'rb').read()
+eol = b'\r\n' if raw.count(b'\r\n') > 0 else b'\n'
+old = b'import ABC3.Found.PGC.Bar' + eol
+raw = raw.replace(old, old + b'import ABC3.Found.PGC.Foo' + eol)
+io.open(p, 'wb').write(raw)
+```
+
+★★`git diff --stat lean/ABC3/Found.lean` が **1 行**であることを必ず確認する
+（並行セッションが足した行が混ざるので `git diff` の中身も見ること）。
+★`cat >> f << 'EOF'` / `python - <<'PYEOF'` はどちらも PreToolUse フックに
+潰される（#117(iv)）。**`.py` を Write して呼ぶ**のがいちばん速い。
+
+## #142 `set` は**他の仮説の型に現れる項**を抽象化すると、その仮説を `τ✝` に化けさせる（2026-09-07、Λ6 §4-b）
+
+```lean
+(τ : ↥(IntermediateField.adjoin F' ({φ x} : Set M)) ≃ₐ[F'] ↥(IntermediateField.adjoin F' ({φ x} : Set M)))
+...
+set B := IntermediateField.adjoin F' ({φ x} : Set M) with hB   -- ✗
+```
+
+`set` は**ゴールと文脈の両方**を書き換えるので、`τ` の型も `↥B ≃ₐ[F'] ↥B` に変わる。
+このとき Lean は `τ` を**新しい局所変数に取り替え**、元の `τ` は `τ†` として残る。
+結果、ゴールに出てくるのは `τ†` の方で、`exact hsx`（`hsx` は新しい `τ` の言明）が
+
+```
+Type mismatch: has type ↑(τ† ⟨φ y, ⋯⟩) = φ (s y) but is expected to have type ↑(τ ⟨φ y, ⋯⟩) = φ (s y)
+```
+
+で落ちる。★**束縛変数の型に現れる項に `set` を使わない。** 長くて読みにくくても
+`have hkey : <長い式> = <長い式> := by ...` と**その場に書き下す**方が速い（実測 1.72 秒 → 0.26 秒）。
+
+## #143 `∃!` に `refine ⟨_, ?_, ?_⟩` するとβ簡約されず、`rw` が「パターンが見つからない」と言う（2026-09-07、Λ6 §4-b）
+
+`∃! ρ, P ρ` は `∃ ρ, P ρ ∧ ∀ y, P y → y = ρ` なので、`refine ⟨a, ?_, ?_⟩` の第 1 ゴールは
+
+```
+⊢ (fun ρ ↦ closureCompletionCoe K ↑(ρ ⟨x, hmem⟩) = ↑(τ ⟨…⟩)) a
+```
+
+という**β簡約されていない**形で出る。ここで `rw [coe_algEquivRestrictSelf]` は
+`Did not find an occurrence of the pattern` で落ちる（パターンはラムダの中にある）。
+
+★直し方は 2 つ。**`have hmain : <明示的な型> := by …` を先に作って `refine ⟨a, hmain, ?_⟩`**
+（これがいちばん安全。型を書くので以後 `rw` が効く）か、`dsimp only` でβ簡約する。
+★一意性側（`intro ρ hρ`）は `intro` がβ簡約するので**そのままで通る**（非対称なので注意）。
+
+## #144 複数行にまたがる `calc` の第 1 項が関数適用だと、パーサが途中で切る（2026-09-07、Λ6 §4-b）
+
+```lean
+calc closureCompletionCoe K
+    ((… : ↥(IntermediateField.adjoin K.carrier ({x} : Set K.closure))) : K.closure)
+    = closureCompletionCoe K (…) := by …
+  _ = … := …
+```
+
+は `invalid 'calc' step, left-hand side is … but previous right-hand side is closureCompletionCoe K`
+（＝**第 1 項が `closureCompletionCoe K` だけだと解釈された**）で落ち、続けて
+`unexpected token '_'` になる。★**長い `calc` は書かず、`have h1 : … := …` を並べて
+最後に `rw […]; exact …` で閉じる**方が安い（実測: `calc` 4 段を `have` 1 本 + `rw` 1 本に潰せた）。
+
+## #145 `adjoinIntegersIncl` の係数を 2 層いっぺんに `rfl` で潰すと kernel が落ちる（2026-09-07、Y19e）
+
+`#full-check`
+
+```lean
+-- ★NG: (kernel) deterministic timeout
+theorem coeC (hle) (z : adjoinIntegers K x) :
+    (((adjoinIntegersIncl K hle z : adjoinIntegers K x') : ↥K.carrier⟮x'⟯) : K.closure)
+      = ((z : ↥K.carrier⟮x⟯) : K.closure) := rfl
+-- ★NG も同じ: ((adjoinIntegersIncl K hle z).1.1 : K.closure) = (z.1.1 : K.closure) := rfl
+```
+
+★**1 層なら通る**（実測 0.1 秒台）:
+
+```lean
+theorem val_adjoinIntegersIncl (hle) (z : adjoinIntegers K x) :
+    ((adjoinIntegersIncl K hle z).1 : ↥K.carrier⟮x'⟯) = ⟨(z.1 : K.closure), hle z.1.2⟩ := rfl
+```
+
+2 層目は **`congrArg Subtype.val` で上げる**（`rfl` で書かない）。
+★`TotallyRamified.lean` の `norm_mk_of_le` が同じ回避を先にやっている（#59 の親戚）。
+
+## #146 `ABC3.Found.PGC.ker_restrictNormalHom_eq_fixingSubgroup` は同名が 2 つある（2026-09-07、Y19e）
+
+`AbsGalRamificationFiltration.lean:492`（`(L : IntermediateField F E)` が最後の明示引数）と
+`LubinTateClosure.lean:127`（`(E : IntermediateField F Ω)` が明示引数）。
+**片方しか import されていないうちは動くが、両方が import 圏に入ると曖昧になって落ちる**
+（`AbelianSplitUnramified` を足した瞬間に `Application type mismatch` が出た）。
+
+★直し方: mathlib の **`IntermediateField.restrictNormalHom_ker (K := …) (L := …) (E := …)`** を使う。
+★同じ罠は他の重複名にもある。`grep -c "^theorem <名前>" ` ではなく
+`grep -n "PGC\.<名前>" .cache/decl-index.txt` で**何個あるか**を先に見ること。
+
+## #147 この mathlib の `Subgroup.mul_normal` は `↑(H ⊔ N) = ↑H * ↑N` の向き（2026-09-07、Y19e）
+
+`rw [Subgroup.mul_normal]` は `↑(H ⊔ N)` を探し、`rw [← Subgroup.mul_normal]` が `↑H * ↑N` を探す。
+★教科書の記憶（`↑H * ↑N = ↑(H ⊔ N)`）と逆なので、**1 往復無駄にしやすい**。
+`Did not find an occurrence of the pattern ↑(?H ⊔ ?N)` が出たら向きを疑うこと。
+
+## #148 `∀ U ∈ s, P U` の穴に、`{U}` を暗黙にした補題は嵌まらない（2026-09-07、Y19f）
+
+近傍基の仮説
+
+```lean
+(hbasis : ∀ U ∈ nhds (1 : Γ), ∃ N ∈ F.base, (N : Set Γ) ⊆ U)
+```
+
+に、こう書いた補題を渡すと落ちる:
+
+```lean
+theorem foo (K) (hcompat) {U : Set K.absGal} (hU : U ∈ nhds 1) : ∃ N ∈ …, ↑N ⊆ U
+```
+
+```
+Application type mismatch: the argument `foo K hcompat` has type
+  ?m ∈ nhds 1 → ∃ N ∈ …, ↑N ⊆ ?m
+but is expected to have type
+  ∀ U ∈ nhds 1, ∃ N ∈ …, ↑N ⊆ U
+```
+
+★`U` が暗黙だと**先頭の `∀ U` が消える**ので、`∀ U ∈ …` の形と合わない。
+直し方は 2 つ: 補題側の `U` を**明示引数にする**（推奨。1 文字の差）か、
+呼び出し側で `fun U hU => foo K hcompat hU` と η 展開する。
+★「近傍基」「開被覆」など `∀ U ∈ …` を仮説に取る抽象核を書くときに必ず当たる。
+
+## #149 `π` は `hπmax` の型に現れるので、`rw [← h]`（`h : … = π`）は必ず `motive is not type correct` になる（2026-09-07、Λ6 §4-c）
+
+Lubin-Tate の木では素元 `π` が
+
+```lean
+{π : 𝒪[K.carrier]} (hπmax : IsLocalRing.maximalIdeal 𝒪[K.carrier] = Ideal.span {π})
+```
+
+の形で**すべての宣言の添字**になっている。したがって `h : a * u = π` を得ても
+
+```lean
+rw [← h]   -- ✗ motive is not type correct:
+           --   fun _a => … = _a * ↑u⁻¹ の中で hπmax の型が壊れる
+```
+
+は通らない（`iteratedLubinTatePsi hq hπmax …` が `hπmax : … = span {_a}` を要求してしまう）。
+
+★直し方は「**書き換えずに済ませる**」——`Units` の移項補題をそのまま使う:
+
+```lean
+exact ⟨u⁻¹, (Units.eq_mul_inv_iff_mul_eq u).mpr h⟩
+```
+
+（`Units.eq_mul_inv_iff_mul_eq (c : αˣ) {a b} : a = b * ↑c⁻¹ ↔ a * ↑c = b`。
+★`c` が**明示**・`a b` が暗黙なので `(… u).mpr h` の順で書く。`.mpr` を先に書くと
+`Invalid field 'mpr'` になる。）
+★同じ形は `π` を右辺に持つ等式すべてに出る。`conv` や `nth_rewrite` で逃げるより、
+移項補題を探す方が速い（実測 1 往復）。
+
+
+## #150 抽象核の「不変性」仮説を `∀ (c : M) {x : A}, x ∈ s → c • x ∈ s` と書くと、代入側の `fun σ hx => …` が暗黙引数に食われる（2026-09-07、Y25）
+
+不変部分環へ作用を制限する抽象核
+
+```lean
+def mulSemiringActionOfSubringClass … (s : S)
+    (hs : ∀ (c : M) {x : A}, x ∈ s → c • x ∈ s) : MulSemiringAction M ↥s
+```
+
+に対して、具体層で
+
+```lean
+mulSemiringActionOfSubringClass (absClosureInt K) (fun σ hx => smul_mem_absClosureInt K σ hx)
+```
+
+と書くと、`hx` が**暗黙の `{x : A}`** に束縛されて
+
+```
+Application type mismatch: The argument hx has type `K.closure` of sort `Type`
+but is expected to have type `?m ∈ s` of sort `Prop`
+```
+
+となる。★悪いのはさらに先で、instance の定義が壊れたまま下流へ伝播し、
+`↑(σ • w) = σ ↑w` が `rfl` で閉じない（"Not a definitional equality"）という
+**別の顔のエラーが 4、5 個同時に出る**。原因は 1 行目だけである。
+
+★直し方: **抽象核側で `x` を明示にする**。
+
+```lean
+    (hs : ∀ (c : M) (x : A), x ∈ s → c • x ∈ s)
+  smul c x := ⟨c • (x : A), hs c x x.2⟩        -- 呼び出し側は `fun σ _ hx => …`
+```
+
+★教訓：**抽象核の仮説に暗黙引数を置かない**。
+抽象核は「代入するだけ」にするのが目的なので、仮説の引数は全部明示の方が安い。
+（#148 と同じ味である——「穴を暗黙にした抽象核は嵌まらない」。）

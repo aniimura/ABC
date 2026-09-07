@@ -548,6 +548,155 @@ proof lemma theorem proposition corollary definition remark section chapter equa
     .split(/\s+/).filter(Boolean));
 }
 
+/**
+ * ★**PyMuPDF が大きな演算子を 1 文字に潰す**ときの凡例（2026-09-07 に Yoshida08 で実測）。
+ *
+ * Y9 の実装者の要請で足した ——「`Q τ∈H(στ(π′)−π′)` の `Q` が `∏` だと**推測**できたから
+ * 読めた。凡例が付いていれば推測が要らない」。
+ * ★`pdftotext` 側の壊れ方とは**別物**である（あちらは `Σ` を落とす）。
+ *
+ * ★**単独の大文字は本当にその記号のこともある**（Yoshida は `L/K` の `L` を使う）ので、
+ * 曖昧なものは曖昧と書く。
+ */
+function glyphLegend() {
+  return [
+    { tok: 'Q', means: '∏', re: /(^|\s)Q(\s|$)/m, note: '' },
+    { tok: 'P', means: 'Σ', re: /(^|\s)P(\s|$)/m, note: '' },
+    { tok: 'L', means: '⊕', re: /(^|\s)L(\s|$)/m, note: '★曖昧（体の名前の `L` と区別できない）' },
+    { tok: 'S', means: '⋃', re: /(^|\s)S(\s|$)/m, note: '★曖昧' },
+    { tok: 'T', means: '⋂', re: /(^|\s)T(\s|$)/m, note: '★曖昧' },
+    { tok: 'b + 大文字', means: 'ハット（`bK` = `K̂`）', re: /(^|\s)b\s*[A-Z]/m, note: '★上付き・下付きのハットは `b` として残る。本文サイズでは丸ごと落ちる' },
+    { tok: '∼ = （2 行に割れる）', means: '≅', re: /∼/m, note: '' },
+    { tok: '̸=', means: '≠', re: /̸=/m, note: '★`pdftotext` 側では斜線が落ちて `=` に見える' },
+  ];
+}
+
+/** 原典の見出し行を捕まえる正規表現（`.txt` は行頭に見出しが立つ——48 本で実測）。 */
+function headingRe() {
+  return /^(Theorem|Proposition|Corollary|Definition|Lemma|Remark|Example|Claim|Fact|Exercise)\s+[0-9]+(?:\.[0-9]+)*\.?/;
+}
+
+/**
+ * ★**原典の Proof 段落を `0_Source/<file>.txt` から出す。**
+ *
+ * 2026-09-07 に足した。Y7a と Y7b の実装者が**独立に**「brief に Proof が無く、
+ * `.txt` を直読して段落を取ったのが決定的だった」と報告したため
+ * （Y7b は 981–1030 行を直読して 12 段の段取りをそのまま得た）。
+ *
+ * ★**これは発見的な切り出しである。** 当てにならない場合があるので、
+ * 必ず**行番号を添えて**出し、読み手が `.txt` を直読できるようにする。
+ * ★`0_Source` は gitignore 下なので、無ければ静かに落とす（`hedge` と同じ作法）。
+ * ★抽出器は **PyMuPDF**（`tools/source-text.py`）——`pdftotext` とは壊れ方が違う
+ * （`≠` は `̸=` で残る／ハットは本文サイズで落ち上付きでは `b` になる）。
+ */
+function proofParagraphOf(meta, key, sec, item) {
+  if (!meta?.file) return null;
+  // ★原典に見出しが無い単位（我々が切り出した setup / 暗黙の定義）は、
+  //   「見つからない」ではなく「原典に無い」と言わせる（2026-09-07 の実測で 68 件中 17 件がこれ）。
+  const implicit = /\b(setup|remark)\b/.test(sec?.attrs?.['class'] ?? '')
+    || (sec?.attrs?.['data-implicit'] ?? '') === 'true';
+  const p = join(ROOT, 'ResearchPaper', '0_Source', `${meta.file}.txt`);
+  if (!existsSync(p)) return { err: 'missing', want: `ResearchPaper/0_Source/${meta.file}.txt` };
+  const lines = readFileSync(p, 'utf8').split('\n');
+  const HEAD = headingRe();
+  // 見出しの同定。`Proposition 6.6` は `Proposition 6.6.` とも `Proposition 6.6 (Sen [14]).` とも出る。
+  // ★`itemKeyOf`（check.mjs G1 と共有）は数字番号しか拾わないので、
+  //   `Theorem A` のような**英字番号**はここで `data-item` から拾い直す。
+  let [kind, num] = (key ?? '').split(/\s+/);
+  // ★★2026-09-07（メタ第 12 回 M39）**`kind` が見出し語かを検査していなかった。**
+  //   `itemKeyOf`（check.mjs G1 と共有）は `Section` / `Chapter` / `Step` / `Assertion` も拾うので、
+  //   `key = "Section 2"` が [pGC] の `.txt` 138 行目の節見出し
+  //   「Section 2: Higher Ramification Groups」に当たり、
+  //   ★**その手前 13 行が 9 件の項目すべての「証明」として出ていた**（誤報 20 件）。
+  //   ⇒ 見出し語でなければ「原典に見出しを持たない単位」として扱う（それが実態）。
+  const HEADWORD = /^(Theorem|Proposition|Corollary|Definition|Lemma|Remark|Example|Claim|Fact|Exercise)$/;
+  if (kind && !HEADWORD.test(kind)) { kind = null; num = null; }
+  if (!kind || !num) {
+    const m = /(Theorem|Proposition|Corollary|Definition|Lemma|Remark|Example|Claim)\s+([A-Z])(?![a-zA-Z0-9])/.exec(item ?? '');
+    if (m) { kind = m[1]; num = m[2]; } else return { err: 'nokey', implicit };
+  }
+  const want = new RegExp(`^${kind}\\s+${num.replace(/\./g, '\\.')}(?!\\.?[0-9])`);
+  let at = lines.findIndex((l) => want.test(l));
+  // ★退避: 見出しが**走り込み式**（行中に出る）論文がある。実測 2026-09-07:
+  //   行頭に立つ = BK CorrHyp EtTh GenEll LocProP NCBelyi pGC SemiAnbd Stacks Tate Yoshida08、
+  //   行中に走り込む = MilneCFT(154 件) Sharifi(973 件)。
+  //   ★このときは切り出しの信頼度が落ちるので `runin` を立てて出力側で断る。
+  let runin = false;
+  if (at < 0) {
+    const anywhere = new RegExp(`(?:^|\\s)${kind}\\s+${num.replace(/\./g, '\\.')}(?!\\.?[0-9])`);
+    at = lines.findIndex((l) => anywhere.test(l));
+    runin = at >= 0;
+  }
+  if (at < 0) return { err: 'noheading', key: `${kind} ${num}`, implicit };
+  // 次の見出しまでの範囲でだけ `Proof` を探す（他の項目の証明を掴まないため）。
+  const nextHead = runin
+    ? new RegExp(`(?:^|\\s)(Theorem|Proposition|Corollary|Definition|Lemma|Remark|Example|Claim|Fact|Exercise)\\s+[0-9]+(?:\\.[0-9]+)*\\.`)
+    : HEAD;
+  // ★★**「行頭に見出しが立っている」だけでは境界にならない。** 2026-09-07 に実測:
+  //   Yoshida `Corollary 4.9` の証明の中で、折り返しのせいで
+  //   `Proposition 4.8. Lemma 4.6 shows bKm` という行ができ、**見出しと誤認されて
+  //   証明が 6 行のうち 2 行で切れた**。★引用や折り返しは同じ見出し語を**再出現**させる。
+  //   ⇒ **各見出し鍵の「最初の出現」だけを境界として採る**（項目はファイル内で
+  //   昇順に一度だけ立つ、という原典の性質を使う）。
+  const boundary = new Set();
+  {
+    const seen = new Set();
+    for (let i = 0; i < lines.length; i++) {
+      const m = nextHead.exec(lines[i]);
+      if (!m) continue;
+      const k = lines[i].slice(m.index, m.index + m[0].length).trim();
+      if (seen.has(k)) continue;      // 2 度目以降は引用か折り返し
+      seen.add(k);
+      boundary.add(i);
+    }
+  }
+  const isBoundary = (i) => boundary.has(i);
+  let stop = lines.length;
+  for (let i = at + 1; i < lines.length; i++) if (isBoundary(i)) { stop = i; break; }
+  let ps = -1;
+  for (let i = at; i < stop; i++) if (/^\s*Proof\b/.test(lines[i])) { ps = i; break; }
+  // ★`Proof` も走り込むことがある（`… . Proof. Let …`）。行頭で取れなければ行中を探す。
+  if (ps < 0) for (let i = at; i < stop; i++) if (/(?:^|[.\s])(Proof|PROOF)\b/.test(lines[i])) { ps = i; runin = true; break; }
+  if (ps < 0) {
+    // ★**論証が主張の「手前」にある論文がある。** [pGC] §1 で実測(2026-09-07):
+    //   Mochizuki は `Proof:` ブロックを置かず、地の文で導いてから
+    //   `Proposition 1.2:` と宣言する。⇒ 直前の地の文こそが証明である。
+    //   ★40 行を上限に、直前の見出しは越えずに拾う。
+    let lead0 = Math.max(0, at - 40);
+    for (let i = at - 1; i >= lead0; i--) if (isBoundary(i)) { lead0 = i + 1; break; }
+    const lead = lines.slice(lead0, at).join('\n').replace(/^\s+|\s+$/g, '');
+    return {
+      err: 'noproof', key: `${kind} ${num}`, headingLine: at + 1, stopLine: stop,
+      lead: lead || null, leadFrom: lead0 + 1, leadTo: at,
+      rel: `ResearchPaper/0_Source/${meta.file}.txt`,
+    };
+  }
+  // 終端: 証明終わりの記号の行（単独でも行末でもよい）／次の見出し／200 行。
+  // ★**記号は論文ごとに違う**（2026-09-07 実測）: Yoshida08 は `□`、
+  //   ★Mochizuki は `⃝`（U+20DD 囲み丸。`… assertion (iv). ⃝` のように行末に付く）。
+  //   ⇒ GenEll の 16 件が全部「終端なし」だったのはこれが理由だった。
+  const END = new RegExp('(\u25A1|\u2293\u2294|\u2294\u2293|\u25A0|\u220E|\u20DD|\u25CB|\u25EF'
+    + '|Q\\.\\s?E\\.\\s?D\\.)\\s*$');
+  let pe = ps;
+  const cap = Math.min(ps + 200, lines.length);
+  for (let i = ps; i < cap; i++) {
+    pe = i;
+    if (i > ps && isBoundary(i)) { pe = i - 1; break; }
+    if (END.test(lines[i])) break;
+  }
+  const text = lines.slice(ps, pe + 1).join('\n').replace(/\s+$/, '');
+  return {
+    text,
+    fromLine: ps + 1,
+    toLine: pe + 1,
+    headingLine: at + 1,
+    runin,
+    endFound: END.test(lines[pe] ?? ''),
+    truncated: pe >= cap - 1 && !END.test(lines[pe] ?? ''),
+    rel: `ResearchPaper/0_Source/${meta.file}.txt`,
+  };
+}
+
 function paperBrief(paperKey, itemArg, idArg, listOnly, asJson) {
   /* ── 論文の同定。★構造化されていなければ**素直に失敗する**（劣化出力を出さない）。 */
   const reg = JSON.parse(readFileSync(papersJson(), 'utf8')).papers;
@@ -692,6 +841,9 @@ function paperBrief(paperKey, itemArg, idArg, listOnly, asJson) {
       { encoding: 'utf8', maxBuffer: 1 << 24 });
   } catch { hedge = null; }
 
+  /* ── ★原典の Proof 段落（2026-09-07 に足した。実装者 2 名が独立に「これが決定打」と報告）。 */
+  const proof = proofParagraphOf(meta, key, sec, item);
+
   const srcTemplate =
     `{ paper := "${paperKey}", pdfPage := ${page}, item := "${key ?? item}", sectionId := "${id}" }`;
 
@@ -705,7 +857,7 @@ function paperBrief(paperKey, itemArg, idArg, listOnly, asJson) {
       setup: setup ? { id: setup.attrs['id'], item: setup.attrs['data-item'], verbatim: renderText(setup.verbatim ?? '', false, true) } : null,
       srcTemplate, refs: refNodes, citedBy, selfNodes,
       inventory: neighbourDecls, priorItems, wordHits: wordHits.map(([r, n]) => ({ ...r, matched: n })),
-      hedge,
+      hedge, proof,
     }, null, 1));
     return;
   }
@@ -722,10 +874,24 @@ function paperBrief(paperKey, itemArg, idArg, listOnly, asJson) {
   }
   O.push(`構造化: \`${sec.file}\` の \`#${id}\`${sec.sectionTitle ? `（${sec.sectionTitle}）` : ''}`);
   O.push(`同定: ${how}`);
+  /* ── ★★照合は**項目単位**である。原典の 1 項目が (i)(ii)(iii) に分かれていると
+   *    「一部だけ埋まっている」場合に誤解を招く（2026-09-07、Y24 の報告）:
+   *    `cor-6-13` で「既に木にある」と出たが、埋まっていたのは (i)(ii) だけで
+   *    ★**(iii) は無かった**。実装者は「半分ミスリード」と評した。
+   *    ⇒ 逐語に部分番号が見えるときは、それを名指しして断る。 */
+  const partRe = /\((i{1,3}|iv|v|vi{1,3}|[1-9])\)/g;
+  const partsFound = [...new Set([...(renderText(sec.verbatim ?? '', false, true).match(partRe) ?? [])])];
   if (selfNodes.length) {
     O.push('');
     O.push(`★**この項目は既に木にある**: ${selfNodes.map((n) => `\`${n.rel}\`${n.hasSorry ? '（sorry あり）' : ''}`).join(' / ')}`);
     O.push(`  ⇒ 新規ファイルではない。\`node tools/brief.mjs --node ${selfNodes[0].rel}\` の方が情報が多い。`);
+    if (partsFound.length >= 2) {
+      O.push('');
+      O.push(`★★**ただしこの照合は「項目」単位である。** 逐語に部分番号 ${partsFound.join(' ')} が見える`);
+      O.push('  ので、★**一部だけが埋まっている可能性がある**（2026-09-07 に `cor-6-13` で実際に起きた');
+      O.push('  ——(i)(ii) は埋まっていたが (iii) は無く、実装者は「半分ミスリード」と評した）。');
+      O.push('  ★**上のファイルを直読して、どの部分が埋まっているかを自分で確かめること。**');
+    }
   }
   O.push('');
   O.push('## 1. ★原文の逐語（これを読まずに段取りを書かないこと）');
@@ -748,6 +914,73 @@ function paperBrief(paperKey, itemArg, idArg, listOnly, asJson) {
     O.push('```');
     O.push('');
     O.push('</details>');
+  }
+  O.push('');
+  O.push('## 1b. ★原典の Proof 段落（`0_Source` の `.txt` から機械で切り出した）');
+  O.push('');
+  if (!proof) {
+    O.push('（この論文の `0_Source` の入口が引けない）');
+  } else if (proof.err === 'missing') {
+    O.push(`（\`${proof.want}\` が無い。\`0_Source\` は gitignore 下なので手元にしか置かれない）`);
+  } else if (proof.err === 'nokey' || (proof.err === 'noheading' && proof.implicit)) {
+    O.push('★**この項目は原典に見出しを持たない**——`setup` / `remark` / 暗黙の定義として');
+    O.push('  **我々が切り出した単位**なので、Proof 段落が無いのは当然である（欠落ではない）。');
+    O.push('  記号の出所を知りたければ、この節の**前後の項目**の Proof を見ること。');
+  } else if (proof.err === 'noheading') {
+    O.push(`★**\`.txt\` の行頭にも行中にも "${proof.key}" という見出しが見つからなかった。**`);
+    O.push('  抽出器が見出しを潰しているか、番号の書式が違う。`.txt` を直に grep すること。');
+  } else if (proof.err === 'noproof') {
+    O.push(`★**原典はこの項目に \`Proof\` を付けていない**（見出しは \`.txt\` の ${proof.headingLine} 行目、`);
+    O.push(`  次の見出しまで ${proof.stopLine - proof.headingLine} 行）。定義・設定・系ではこれが普通である。`);
+    O.push('  ★**「証明が無い」＝「自明」ではない。** §5 の省略の合図を見ること。');
+    if (proof.lead) {
+      O.push('');
+      O.push('★★**論証が主張の「手前」にある論文がある。** [pGC] は `Proof:` ブロックを置かず、');
+      O.push('地の文で導いてから `Proposition 1.2:` と宣言する（2026-09-07 に実測）。');
+      O.push(`直前の地の文（\`${proof.rel}\` の **${proof.leadFrom}–${proof.leadTo} 行**、上限 40 行）:`);
+      O.push('');
+      O.push('```');
+      O.push(proof.lead);
+      O.push('```');
+      O.push('');
+      O.push('★**これが証明とは限らない**——ただの導入かもしれない。行番号から `.txt` を直読して');
+      O.push('  どこから論証が始まっているかを自分で決めること。');
+    }
+  } else {
+    O.push(`出所: \`${proof.rel}\` の **${proof.fromLine}–${proof.toLine} 行**`
+      + `（見出しは ${proof.headingLine} 行目）${proof.truncated ? ' ★**終端記号に届かず 200 行で打ち切った**' : ''}`);
+    if (proof.runin) {
+      O.push('');
+      O.push('★★**見出しか `Proof` が行頭に立たず、行中で拾った**（走り込み式の組版）。');
+      O.push('  この切り出しは**前後を巻き込んでいる可能性が高い**。行番号から `.txt` を直読すること。');
+    } else if (!proof.endFound) {
+      O.push('');
+      O.push('★**終端記号（`□` 等）に当たらず、次の見出しの手前で切った。**');
+      O.push('  証明の末尾が落ちているか、次の項目を巻き込んでいるかもしれない。');
+    }
+    O.push('');
+    O.push('```');
+    O.push(proof.text);
+    O.push('```');
+    O.push('');
+    // ★凡例（この Proof の中に**実際に出ている**ものだけ挙げる。noise を出さない）
+    const hits = glyphLegend().filter((g) => g.re.test(proof.text));
+    if (hits.length) {
+      O.push('★**この抽出器（PyMuPDF）の字形の潰れ方**——上の引用に実際に出ているものだけ:');
+      O.push('');
+      O.push('| 見えている形 | 原典 | |');
+      O.push('|---|---|---|');
+      for (const g of hits) O.push(`| \`${g.tok}\` | ${g.means} | ${g.note} |`);
+      O.push('');
+      O.push('★**単独の大文字は本当にその文字のこともある**（Yoshida は体の名前に `L` を使う）。');
+      O.push('  曖昧な行は行番号から `.txt` を直読して決めること。');
+      O.push('');
+    }
+    O.push('★**これは発見的な切り出しである**（行頭の見出し／`Proof`／証明終端記号で区切っただけ）。');
+    O.push('原文の意図が取れないと感じたら**上の行番号から `.txt` を直読すること**——');
+    O.push('2026-09-07 に Y7a・Y7b の実装者が独立に「直読が決定打だった」と報告している。');
+    O.push('★`.txt` には `===== [page N] =====` が**行として挿入される**ので、');
+    O.push('  ページ境界で 1 つの文が割れる（Y9 が「by Lemma / 5.11.」で踏んだ）。');
   }
   O.push('');
   O.push('## 2. `.src` の雛形（★属性から機械で取った。手で書き直さないこと）');
@@ -836,5 +1069,31 @@ function paperBrief(paperKey, itemArg, idArg, listOnly, asJson) {
   O.push('3. 書いたら `lake build <対象モジュール>` のみ。全体ビルドは最後に 1 回。');
   O.push('4. 配管で詰まったら `tools/lean-idioms.md` を引く。新しい失敗形なら 1 行足す。');
   O.push('5. 逸脱（原典の読み替え・前提の追加）をしたら docstring に必ず記録する。');
+
+  /* ── ★★「既に木にある」を**末尾にも**出す（2026-09-07）。
+   *    本体が `sed -n '/## 1\./,/…/p'` で出力を絞ったせいで冒頭の警告を切り落とし、
+   *    ★**既に埋まっている項目（Cor 6.3）を持ち場として配ってしまった**。
+   *    実装者が 5 分で気づいて内容を組み替えたが、道具の側で塞げる失敗形である。
+   *    ⇒ **冒頭と末尾の両方に出す。** どちらか片方だけを読んでも当たる。
+   *    ★`--json` には `selfNodes` として既に入っているので変更しない。 */
+  if (selfNodes.length) {
+    O.push('');
+    O.push('---');
+    O.push('');
+    O.push('# ★★★警告（冒頭にも出している）: この項目は**既に木にある**');
+    O.push('');
+    for (const n of selfNodes) O.push(`- \`lean/ABC3/${n.rel}\`${n.hasSorry ? ' ★**sorry あり**' : ' ✓ sorry なし'}`);
+    O.push('');
+    O.push('★**新規ファイルの持ち場として配られたなら、その前提が誤っている。**');
+    O.push('  まず `node tools/brief.mjs --node ' + selfNodes[0].rel + '` を読み、');
+    O.push('  **何が既にあり何が無いかを測ってから**進むこと。');
+    O.push('  ★**そのまま新規に書き直すと、同じ数学を 2 度形式化することになる。**');
+    if (partsFound.length >= 2) {
+      O.push('');
+      O.push(`★★**ただし照合は「項目」単位である。** 逐語に部分番号 ${partsFound.join(' ')} が見えるので、`);
+      O.push('  ★**一部だけが埋まっている可能性がある**（2026-09-07 に `cor-6-13` で実際に起きた）。');
+      O.push('  ★**「既に在る」を鵜呑みにせず、どの部分が埋まっているかを直読で確かめること。**');
+    }
+  }
   console.log(O.join('\n'));
 }

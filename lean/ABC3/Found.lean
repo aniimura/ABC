@@ -1743,15 +1743,47 @@ import ABC3.Found.PGC.AbelianSplitOverSubfield
 import ABC3.Found.PGC.LowerRamificationGroup
 import ABC3.Found.PGC.RamificationQuotientEmbedding
 import ABC3.Found.PGC.RamificationJumpDivisibility
+import ABC3.Found.PGC.AbelianJumpDivisibility
 import ABC3.Found.PGC.ConjugateSumValuation
 import ABC3.Found.PGC.UniformizerExpansion
 import ABC3.Found.PGC.SenJumpFiltration
+import ABC3.Found.PGC.SenValuationCongruence
+import ABC3.Found.PGC.SenJumpExpansion
+import ABC3.Found.PGC.QuotientRamIndexAverage
 import ABC3.Found.PGC.LubinTateFieldFIndependent
+import ABC3.Found.PGC.ClosureCompletion
+import ABC3.Found.PGC.DworkThetaEval
+import ABC3.Found.PGC.LubinTateTowerFIndependent
+import ABC3.Found.PGC.UniformizerCocycle
+import ABC3.Found.PGC.WeilReciprocityExtension
+import ABC3.Found.PGC.FixedRingRamificationIndex
+import ABC3.Found.PGC.HerbrandFunction
+import ABC3.Found.PGC.HerbrandComposition
+import ABC3.Found.PGC.HasseArf
+import ABC3.Found.PGC.FixedRingTower
+import ABC3.Found.PGC.FixedRingAction
+import ABC3.Found.PGC.FixedRingMonogenic
+import ABC3.Found.PGC.HasseArfInduction
+import ABC3.Found.PGC.FixedRingBaseAlgebra
+import ABC3.Found.PGC.HasseArfStrongInduction
+import ABC3.Found.PGC.UpperRamificationGroup
+import ABC3.Found.PGC.AbsGalRamificationFiltration
+import ABC3.Found.PGC.InertiaReduction
+import ABC3.Found.PGC.SubgroupActionBridge
+import ABC3.Found.PGC.TameQuotientTower
+import ABC3.Found.PGC.UpperRamificationIndex
 import ABC3.Found.GenEll.VeluDualJ
 import ABC3.Found.GenEll.VeluJExpNeg
 import ABC3.Found.GenEll.VeluJDescent
 import ABC3.Found.GenEll.VeluJExpAssemble
 import ABC3.Found.GenEll.VeluJExpDeep
+import ABC3.Found.PGC.RamificationFiltrationBuild
+import ABC3.Found.PGC.LubinTateCompletionDegree
+import ABC3.Found.PGC.LubinTateCompletionGalois
+import ABC3.Found.PGC.LubinTateCompletionNorm
+import ABC3.Found.PGC.UnramifiedBaseChangeInvariance
+import ABC3.Found.PGC.RamificationFiltrationZero
+import ABC3.Found.PGC.AbsClosureModules
 /-!
 # Found — 実装済みの基礎
 
