@@ -93,6 +93,19 @@ tools: Read, Edit, Write, Grep, Glob, Bash, mcp__abc3-lean__lean_check, mcp__abc
 3. 数学の方針が疑わしいなら **`math-planner` に投げる**。
 
 
+## ★★`leanfile.mjs` は既定で**要点だけ**出す（2026-09-08 変更）
+
+★全文は `.cache/leanfile-<モジュール>.log` に入り、標準出力は**診断ブロックだけ**（上限 60 行）。
+★後から**`lean` を呼ばずに**切り出せる:
+```
+node tools/leanfile.mjs --errors <file>            # 診断だけ
+node tools/leanfile.mjs --grep 'unknown identifier' <file>
+node tools/leanfile.mjs --full <file>              # 全文
+```
+★**理由**: 往復の出力が文脈に溜まると圧縮が起き、
+★**「どのタクティクをなぜ失敗したか」が消えて同じタクティクを再試行する。**
+★長いエラーを読み返したいときは `--grep` を使い、全文を貼り直さないこと。
+
 ## ★★★★探し方 —— **`find /` と「カレントからの再帰 grep」を投げるな**（2026-09-08、6 回踏んだ）
 
 ★**mathlib の実パス**（これを知らないと `find` に手が伸びる）:
