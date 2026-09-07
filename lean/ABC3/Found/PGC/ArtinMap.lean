@@ -1,5 +1,6 @@
 import ABC3.Found.PGC.LocalClassFieldTheory
 import ABC3.Found.PGC.LubinTateClosureTopology
+import ABC3.Found.PGC.UnitsPowP
 
 /-!
 # Artin 写像 `Art_π` —— Yoshida 2008 §4.2 / Definition 4.10

@@ -1,6 +1,6 @@
 import ABC3.Found.PGC.ClosureCompletion
 import ABC3.Found.PGC.RamificationFiltrationZero
-import ABC3.Skeleton.PGC.Section2
+import ABC3.Skeleton.PGC.Section2Defs
 
 /-!
 # `𝒪_{K̄}` と `K̄^∧` を `Γ_K`-加群として構成する —— [pGC] Proposition 2.2 の主語

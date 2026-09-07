@@ -771,7 +771,40 @@ function proofParagraphOf(meta, key, sec, item) {
     }
     if (restTo === null) restTo = lines.length;               // 終端も見出しも無いまま EOF
   }
+  /* ★★見張り（メタ第 21 回 M84。M81 が「直さないと決めた」ことの**上界だけ**を数える）
+   *
+   * 埋め込み補題（embedded lemma）: 外側の証明の中に `Lemma` / `Claim` が立つと、
+   * 境界の規則が**正しく働いた結果として**外側の証明が切れる。実測（M77 / M81）:
+   * `[CorrHyp] corrhyp-thm-5-3` は真の長さ 151 行のうち **17 行（11%）**しか出ていない。
+   * ★これは `trunc` とは**別の壊れ方**で、★`noend` の中にしか出ない。
+   *
+   * ★**直さない**（M81 の実測: V1「終端まで走る」は 1 件助けて **21 件を壊す**、
+   *   V2 も CorrHyp を直せない）。★**数えるだけ**にする。M76 と同じ「上界を数える」作法。
+   *
+   * 条件（M84 のとおり 3 つ）:
+   *   (a) `noend`（終端記号に当たらず**境界で**切った）
+   *   (b) 止めた境界の行が `Lemma` / `Claim` の見出し
+   *   (c) ★**その先に終端記号がある**（＝終端記号を持つ論文である。
+   *       [Falt1] / [Stacks] / [NCBelyi] / [Tate] は `.txt` に 1 つも無いので落ちる）
+   * ★★上界の意味: ここに出た件数だけが V3（M81）の得になりうる。★今日は 1 件。
+   *   ★2 件目が出たら V3 の損得が変わる ⇒ そのときに人が判断する。
+   * ★出す `embedEndAt` は「境界の先で**最初に**出る終端記号」であって、
+   *   ★**外側の証明の終端とは限らない**（CorrHyp では埋め込み補題自身の ⃝ が先に出る）。
+   *   上界なので、これでよい。★推測して外側を当てにいかない。 */
+  let embedKind = null; let embedEndAt = null;
+  if (!truncated && !END.test(lines[pe] ?? '')) {
+    const b = lines[pe + 1] ?? '';
+    const m = /(?:^|\s)(Lemma|Claim)\s+\d/.exec(b) || /^\s*\d+(?:\.\d+)*\.\s*(Lemma|Claim)\b/.exec(b);
+    if (m) {
+      embedKind = m[1];
+      for (let i = pe + 2; i < lines.length; i++) {
+        if (END.test(lines[i])) { embedEndAt = i + 1; break; }
+      }
+      if (embedEndAt === null) embedKind = null;              // (c) を満たさない
+    }
+  }
   return {
+    embedKind, embedEndAt, embedBoundaryAt: embedKind ? pe + 2 : null,
     text,
     fromLine: ps + 1,
     toLine: pe + 1,
@@ -1260,7 +1293,11 @@ function auditProof(asJson) {
         // ★見張り（メタ第 19 回）: 形が合う行が**何箇所あったか**。2 箇所以上なら
         //   「最初を採る」規則が破れうる持ち場（＝人が見るべき上界）。
         shapedHits: (r && r.shapedHits) ?? [],
-        restLines: (r && r.restLines) ?? 0, restTo: (r && r.restTo) ?? null });
+        restLines: (r && r.restLines) ?? 0, restTo: (r && r.restTo) ?? null,
+        // ★見張り（メタ第 21 回 M84）: 埋め込み補題で切れた**上界**。
+        embedKind: (r && r.embedKind) ?? null,
+        embedBoundaryAt: (r && r.embedBoundaryAt) ?? null,
+        embedEndAt: (r && r.embedEndAt) ?? null });
     }
   }
   if (asJson) { console.log(JSON.stringify(rows, null, 1)); return; }
@@ -1332,4 +1369,17 @@ function auditProof(asJson) {
       + `（〜${r.restTo} 行。全 ${r.lines + r.restLines} 行）`);
   }
   if (!tr.length) console.log('  （0 件）');
+
+  /* ★★見張り 3（メタ第 21 回 M84）: 埋め込み補題で外側の証明が切れている持ち場の**上界**。
+   *   ★M81 が「直さない」と決めた壊れ方を、**数えるところだけ**残す。 */
+  console.log('');
+  console.log('## ★★見張り: 埋め込み補題で切れた持ち場（`ok/noend` の中。★**上界**）');
+  console.log('   （M77/M81。境界が `Lemma`/`Claim` で、かつその先に終端記号がある ＝ V3 の得になりうる件数）');
+  const emb = rows.filter((r) => r.embedKind && r.outcome.includes('noend'));
+  console.log(`  ${emb.length} 件 / ${rows.length} 件`);
+  for (const r of emb) {
+    console.log(`  [${r.paper}] ${r.id.padEnd(22)} 出した ${r.lines} 行（L${r.from}-${r.to}）`
+      + ` / 境界 L${r.embedBoundaryAt} は ${r.embedKind} / 先の終端記号 L${r.embedEndAt}`);
+  }
+  if (!emb.length) console.log('  （0 件）');
 }

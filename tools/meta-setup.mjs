@@ -56,6 +56,7 @@
  * ------
  *   node tools/meta-setup.mjs            # 立ち上げ(同期 → 整列 → junction → cache → ゲート)
  *   node tools/meta-setup.mjs --dry-run  # 1 バイトも書かずに「何をするか」だけ出す
+ *   node tools/meta-setup.mjs --selftest # ★M10 の原因判定だけを較正する(git を呼ばない)
  *   node tools/meta-setup.mjs --no-gate  # ゲートを回さない(9 秒節約)
  *   node tools/meta-setup.mjs --teardown # ★★本当に最後。junction を外す(帰り際)
  *                                        #   ゲートを**先に回して数字を印字してから**外す
@@ -147,6 +148,39 @@ function measureLag() {
   const ahead = (git('rev-list', '--count', 'master..HEAD').stdout || '').trim();
   const head = (git('log', '--oneline', '-1').stdout || '').trim();
   return { behind: Number(behind || -1), ahead: Number(ahead || -1), head };
+}
+
+/**
+ * ★★M10(worktree が毎回 1209〜1210 commit 遅れる)の**原因**を測る。
+ *
+ * ★第 21 回までの見立て:「push すれば直る」→ ★**外れ**(push したら 1209 → 1210 に増えた)。
+ * ★第 22 回の測定: worktree の枝は **リポジトリの既定枝(origin/main)** から切られている。
+ *   ところが本体が押しているのは `master` なので `origin/main` は動かない。
+ *   ⇒ ★**push では永久に解消しない。** 本体側で 1 度 `master` を `main` に流すしかない。
+ * ★ここは**測って印字するだけ**。worktree の中からは直せない(押す先が worktree の外)。
+ */
+function diagnoseLag(lag, g = git) {
+  if (!(lag.behind > 0)) return null;
+  const out = [];
+  for (const ref of ['origin/main', 'origin/master', 'main', 'master']) {
+    if (g('rev-parse', '--verify', '--quiet', ref).status !== 0) continue;
+    out.push({
+      ref,
+      cutHere: g('merge-base', '--is-ancestor', 'HEAD', ref).status === 0,
+      // ★HEAD からその枝の先端までの距離。★**切り元なら 0**(HEAD がその枝の先端そのもの)。
+      dist: Number((g('rev-list', '--count', `HEAD..${ref}`).stdout || '').trim() || '-1'),
+      gap: Number((g('rev-list', '--count', `${ref}..master`).stdout || '').trim() || '-1'),
+      tip: (g('log', '-1', '--format=%h %ad %s', '--date=short', ref).stdout || '').trim().slice(0, 60),
+    });
+  }
+  // ★★M98 の宿題: 「HEAD はこの枝の中にある」は **HEAD を含む枝すべて**に付くので識別に効かない
+  //   (使い捨て repo で 4/4 に付いた)。★HEAD を含む枝のうち **距離が最小のもの** だけを候補にする。
+  //   ★同点なら同点のまま出す(同じ commit を指す別名のことがある)。★1 本に絞らない = 断定しない。
+  const contains = out.filter((r) => r.cutHere && r.dist >= 0);
+  const near = contains.length ? Math.min(...contains.map((r) => r.dist)) : -1;
+  for (const r of out) r.nearest = r.cutHere && r.dist === near;
+  const cause = out.find((r) => r.cutHere && Math.abs(r.gap - lag.behind) <= 2);
+  return { refs: out, cause, near };
 }
 
 // ────────────────────────────────────────────────────────────────
@@ -451,9 +485,86 @@ if (TEARDOWN) {
   process.exit(0);
 }
 
+/** ★M10 の原因判定の較正。★本物の git を呼ばない(スタブを注入する)。 */
+function selftestLag() {
+  const stub = (refs, cutRef) => (...a) => {
+    const [cmd, x, y, z] = a;
+    if (cmd === 'rev-parse') return { status: refs[z] === undefined ? 1 : 0, stdout: '' };
+    if (cmd === 'merge-base') return { status: z === cutRef ? 0 : 1, stdout: '' };
+    if (cmd === 'rev-list') {
+      const arg = String(y);
+      if (arg.startsWith('HEAD..')) return { status: 0, stdout: arg.slice(6) === cutRef ? '0' : '99' };
+      return { status: 0, stdout: String(refs[arg.replace('..master', '')] ?? 0) };
+    }
+    return { status: 0, stdout: 'deadbeef 2026-09-03 tip' };
+  };
+  const R = { 'origin/main': 1210, 'origin/master': 0, master: 0 };
+  // ★★M98 が使い捨て repo で観測した形(HEAD が **全枝の祖先**)を作る。
+  //   dist: origin/main と main は 0(切り元)、origin/master と master は 3。
+  const allContain = (dists) => (...a) => {
+    const [cmd, x, y, z] = a;
+    if (cmd === 'rev-parse') return { status: dists[z] === undefined ? 1 : 0, stdout: '' };
+    if (cmd === 'merge-base') return { status: 0, stdout: '' };          // ★どの枝も HEAD を含む
+    if (cmd === 'rev-list') {
+      const arg = String(y);
+      if (arg.startsWith('HEAD..')) return { status: 0, stdout: String(dists[arg.slice(6)] ?? 0) };
+      return { status: 0, stdout: '3' };
+    }
+    void x; void cmd;
+    return { status: 0, stdout: 'deadbeef 2026-09-03 tip' };
+  };
+  const D = { 'origin/main': 0, 'origin/master': 3, main: 0, master: 3 };
+  const marked = diagnoseLag({ behind: 3 }, allContain(D)).refs.filter((r) => r.nearest);
+  const checks = [
+    // ★★M98 の宿題: 全枝が HEAD を含む形でも、印は**最も近い枝だけ**に付くこと。
+    //   ★これが壊れる(印を cutHere に戻す)と 4 本になって鳴る。
+    ['★全枝が HEAD を含んでも印は最短の枝だけに付く(4 → 2)', marked.length === 2],
+    ['★印が付くのは距離 0 の枝(origin/main と main)',
+      marked.map((r) => r.ref).sort().join(',') === 'main,origin/main'],
+    ['★距離を測って持っている', diagnoseLag({ behind: 3 }, allContain(D)).refs
+      .every((r) => Number.isFinite(r.dist))],
+    ['★同点はどちらも残す(1 本に絞って断定しない)', marked.length > 1],
+    ['★最短の距離を返す', diagnoseLag({ behind: 3 }, allContain(D)).near === 0],
+    ['遅れが 0 なら何も言わない', diagnoseLag({ behind: 0 }, stub(R, 'origin/main')) === null],
+    ['origin/main から切られていれば原因と断定する',
+      diagnoseLag({ behind: 1210 }, stub(R, 'origin/main'))?.cause?.ref === 'origin/main'],
+    ['遅れの数と枝の古さが食い違えば断定しない',
+      !diagnoseLag({ behind: 7 }, stub(R, 'origin/main'))?.cause],
+    ['どの枝にも入っていなければ断定しない',
+      !diagnoseLag({ behind: 1210 }, stub(R, 'nowhere'))?.cause],
+    ['無い枝は表に出さない',
+      diagnoseLag({ behind: 1210 }, stub(R, 'origin/main')).refs.every((r) => r.ref !== 'main')],
+  ];
+  let ok = 0;
+  for (const [label, pass] of checks) { say(`  ${pass ? 'ok ' : 'NG '} ${label}`); if (pass) ok++; }
+  say(`\n  selftest(M10 の原因判定): ${ok}/${checks.length} PASS`);
+  return ok === checks.length;
+}
+if (has('--selftest')) process.exit(selftestLag() ? 0 : 1);
+
 const lag = measureLag();
 result.lag = lag;
 step('1. master との差', `★behind ${lag.behind} / ahead ${lag.ahead} —— HEAD = ${lag.head}`);
+const lagWhy = diagnoseLag(lag);
+result.lagWhy = lagWhy;
+if (lagWhy) {
+  for (const r of lagWhy.refs) {
+    const mark = r.nearest ? '  ★HEAD に最も近い(= 切り元の候補)'
+      : r.cutHere ? `  (この枝にも含まれる。HEAD から ${r.dist} commit 先)`
+      : '  (HEAD を含まない)';
+    say(`        ${r.ref.padEnd(14)} master より ${String(r.gap).padStart(5)} commit 古い` +
+      `${mark}  ${r.tip}`);
+  }
+  if (lagWhy.cause) {
+    say(`  ! ★★M10 の原因はこれ: worktree は **${lagWhy.cause.ref}** から切られており、`);
+    say(`        その枝が master より ${lagWhy.cause.gap} commit 古い。`);
+    say('        ⇒ ★**本体が master へ push しても解消しない**(第 21 回に実測。1209 → 1210 に増えただけ)。');
+    say("        ⇒ 直すのは本体側で 1 度だけ: `git push origin master:main`(または PR を 1 本 merge)。");
+    say('        ⇒ それまでは下の「2. 同期」が毎回 merge して埋める(★7 回連続、競合 0)。');
+  } else {
+    say('  ! ★M10 の原因は特定できなかった(切り元の枝が見つからない)。★そう書いて次へ進むこと。');
+  }
+}
 
 const sy = sync(lag);
 result.sync = sy;

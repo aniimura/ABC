@@ -1,4 +1,4 @@
-import ABC3.Skeleton.PGC.Section1
+import ABC3.Skeleton.PGC.Section1Defs
 import ABC3.Found.PGC.GaloisTransferContinuous
 import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
 

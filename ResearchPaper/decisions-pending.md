@@ -8235,3 +8235,1249 @@ VERDICT[HS-d]: 当たり — 1+2 が入り 3 は入らなかった（★ただ�
 ★これは ★**「原典に書いてあること」と「この木のこのノードで実際に要ること」は別**という形の誤り。
 ★§4.7 の手順（射程を原典で確かめる）は**必要条件であって十分条件ではない**。
 ⇒ ★**次から「原典で確かめた」だけでなく「このノードの射程で要るか」を分けて書くこと。**
+
+## ★★★★★局所 Tate 双対性の道を測り切った —— ★**mathlib が 3 日で変わっていた**（2026-09-07）
+
+`lean/ABC3/Found/PGC/LocalTateDualityRoute.lean` **523 行、`sorry` 0**。
+`lake build` **成功（3,677 ジョブ、8.8 秒）**。`#print axioms` は 14 宣言すべて標準公理。
+
+★**Prop 1.1 と同値な `∃`-free の 1 文**まで縮んだ:
+```
+CyclotomicCharacterModPowTransport p :=
+  ∀ K K' (α : ContinuousMulEquiv K.absGal K'.absGal) (n : ℕ) (g : K.absGal),
+    cycloCharUnitsModPow K' n (α g) = cycloCharUnitsModPow K n g
+```
+★★**`recoverable_iff_modPowTransport` で Prop 1.1 と同値**（★実装者は「論理的に弱くなっていない」と
+自分から明記）。価値は (i) 目標が**双対性の届く `mod p^n` の高さ**に下りたこと、(ii) `∃ φ` が消えたこと。
+
+★★★**2 本の道が同じ 1 点に着地することを Lean 上で確認した**（`modPowTransport_of_artinEquivariance`）。
+
+### ★★★★mathlib が 2026-09-04 から**変わっていた**（★測り直しの価値の実例）
+
+| 測定対象 | 2026-09-04 の記録 | ★**2026-09-07 実測** |
+|---|---|---|
+| `continuousCohomology` | `RepresentationTheory/…`、対象は `Action (TopModuleCat R) G` | ★**移動**（`Algebra/Category/ContinuousCohomology/`）。<br>★★**新規に `RepresentationTheory/Continuous/Basic.lean`（`ContRepresentation`、40+ 宣言）** |
+| `groupCohomology` | 在る | ★★**`LongExactSequence`(19) / `FiniteCyclic`(9) / `Hilbert90`(7) が増えている** |
+| `TateCohomology` | 在る | 33 宣言 |
+| `BrauerGroup` | 不在 | 定義だけ 9 件（不変写像も crossed product も無い） |
+| 局所 Tate 双対性 / Poitou-Tate / Artin 相互律 | 不在 | ★**不在のまま**（`absent-recheck.mjs` で 0 件） |
+
+⇒ ★★**「定義はある、道具はまだ無い」という判定が古くなっている可能性がある。**
+★**次の波に「新しい mathlib で (c) を測り直す」を配った。**
+
+### ★★離散側の欠落 3 つ（★実装者が名指し）
+
+- **(a)** `Finite (groupCohomology.H2 A)` が `[Finite G]` 付きでも `failed to synthesize`
+- **(b)** `e : G ≃* H` に沿った `H2 (Rep.res e.toMonoidHom A) ≅ H2 A` を `exact?` が閉じられない
+  （★`map`/`congr` から組めるが束ねられていない）
+- ★★**(c) 本質的な壁**: `H2InfRes` も `groupCohomology.colimitIso` も `Unknown constant`。
+  ★**inflation-restriction は次数 1 だけ**なので、有限次で得た情報を `Γ_K` に上げられない。
+  ★**(c) は 1・2 より桁違いに重い。**
+
+★**行けるところは行った**: `M_ψ = ZMod m(ψ)` は作れ、`Nat.card (groupCohomology.H2 A)` も**型が付く**。
+
+### ★★接続点の訂正（★本体が指したものは違った）
+
+本体は `cyclotomicCharacterObject_transport_of_moduleEquiv` を接続点として指したが、
+★★**双対性はこれを直接は供給しない** —— 双対性が語るのは**有限長加群 `M ≅ ℤ/p^n`** であって
+`ℤ_[p]` 上の線形同型ではない。
+★**正しい接続点は `cyclotomicCharacterObject_recoverable_iff` + `PadicInt.ext_of_toZModPow`。**
+★逆向き（`mod p^n` → その仮説、`φ = id`）は `moduleEquiv_hypothesis_of_modPowTransport` で証明した。
+
+### ★★仮定に置いたものを名指しした（★良い作法）
+
+★**`LocalTateDualityData`（structure）は仮定である。作っていない。**
+3 フィールド: `cardH2` / `isGroupTheoretic` / `cardH2_eq_natCard`（局所 Tate 双対性を**位数のレベル**で）。
+★★**「双対性がある」と仮定して配線だけ書いた形にはしていない** ——
+`cardH2_eq_natCard` は**位数の等式という検証可能な形**にとどめ、
+★**原典の判定条件 `cardH2_eq_iff`（`= p^n ⟺ ψ = χ`）は抽象核から定理として導いた**
+（★**結論を仮定に書いていないことの証拠**）。★Kummer は使っていない。
+
+### 抽象核（★分岐・付値・Galois・**コホモロジー**の語彙が 1 語も無い）
+
+`forall_of_natCard_subtype_eq` / `natCard_subtype_eq_of_forall` /
+`natCard_charTwistFixed_eq_iff` / `natCard_charTwistFixed_eq_iff'` —— ★**0.14 秒・一発**。
+★**`G` は群である必要すら無く、`R` は有限モノイドでよい**ところまで弱めた。
+★`natCard_charTwistFixed_eq_iff` が原典の「`M ≅ ℤ/p^nℤ(1)` ⟺ `H²(K,M) ≅ ℤ/p^nℤ`」の
+★**代数の中身そのもの**である。
+
+### 逸脱の記録（docstring）
+
+1. 原典の `H²(K,M) ≅ ℤ/p^nℤ`（同型）を **`|H²| = p^n`（位数）**に置換（階数 1 なので等価）。
+2. 「continuous Γ_K-action」を「指標かつ**核が開**」で表現
+   （★`(ZMod (p^n))ˣ` に**位相インスタンスが無い**ことを実測）。★**仮定を弱める方向。**
+3. `M∨(1)` の Pontrjagin 双対 + Tate 捩れを指標レベルで `ψ⁻¹·χ` と表現。
+
+### `lean-idioms.md` #193–#195
+
+- **#193** `(ZMod m)ˣ` に位相は無い → 核が開で書く（`Subgroup.isOpen_mono` が決め手）。
+- **#194** `MonoidHom.comap_ker` は逆向き、`←` が要る。
+- ★★**#195** ★**`Nat.card (H2 A)` は型が付くが `Finite` は付かない**
+  —— ★**「書ける」を「使える」と読み違えない。**
+
+### ★新ノード 4 本
+
+1. `Finite (groupCohomology.H2 A)`（有限群・有限係数）⇒ ★**次の波に配った**
+2. `H2` の群同型不変性 ⇒ ★**同じノードに入れた**
+3. ★★**`H²` の inflation-restriction と有限次塔の colimit** ——★**双対性の道の本体の壁**
+4. 局所 Tate 双対性そのもの（`LocalTateDualityData` の構成）
+
+---
+
+## ★`GUESS:` —— 走行中の 2 体
+
+### 持ち場 `ArtinEquivarianceProof`（Lubin-Tate 経由、走行中）
+
+```
+GUESS[AE-a]: 「点で評価する層」が工数の本体になる | 確度=中 | 検算=なし
+GUESS[AE-b]: LubinTateEndoTwisted の関数等式と合成則を消費する | 確度=中 | 検算=型
+GUESS[AE-c]: 素元非依存性を今度こそ消費する | 確度=中 | 検算=なし
+GUESS[AE-d]: 閉じずに「残り 1 文」を更に細かくして返す | 確度=低 | 検算=なし
+```
+★**AE-c は前回 `確度=高 / 検算=原文` で外した見当を、今度は `確度=中` に下げて再提出**したもの
+（★**同じ見当を確度だけ変えて出し直すのが正直な形か**は次回のメタで測る価値がある）。
+
+### 持ち場 `GroupCohomologyFinite`（双対性の軽い 2 本 + (c) の再測定、走行中）
+
+```
+GUESS[GC-a]: (a) Finite (H2 A) は mathlib の有限性補題を組めば入る | 確度=中 | 検算=なし
+GUESS[GC-b]: (b) 群同型不変性は map/congr から 20 行で組める | 確度=中 | 検算=なし
+GUESS[GC-c]: (c) は新しい mathlib（ContRepresentation / LongExactSequence）でも届かない | 確度=中 | 検算=索引
+GUESS[GC-d]: mathlib の記録が 2026-09-07 の測定から更に変わってはいない | 確度=高 | 検算=索引
+```
+★★**`検算=索引` を 2 件出した** —— ★メタ第 19・20 回が
+「★**索引指定はあと 3 件の VERDICT で有意になる（Bonferroni）**」と書いた欄である。
+
+## ★★★★★Artin 同変性の壁がもう 1 段下がった —— ★**`Ẑ` 成分は条件に現れない**（2026-09-07）
+
+`lean/ABC3/Found/PGC/ArtinEquivarianceProof.lean` **871 行 / 30 宣言、`sorry` 0**。
+`lake build ABC3.Found.PGC.ArtinEquivarianceProof` **成功（3,684 ジョブ）**。
+`Found.lean:1806` に import（★バイト検証 CRLF 1813 = LF 1813）。
+★**本体がゲートで G1 照合を確認: NG 13 = 基準どおり**（★実装者が「再測が要る」と正直に残した箇所）。
+
+★**残った壁**（`ArtinUnitEquivariance`）:
+```
+∀ F n S (hS : S.Normal) (hopen : IsOpen S), S ≤ muFixer F (p^n) → ∀ g : Γ_F,
+  ∃ E : Gal(L^ab/L) ≃* 𝒪_L^× × Ẑ,     -- L := L_S
+    ∀ x, x^{p^n} = 1 → u(E(Ψ_g x)) = σ_g (u(E x))
+```
+★★★**測って分かった新事実: `Ẑ` 成分（Frobenius 部分）は条件に現れない。壁は `𝒪_L^×` 成分だけ。**
+★**Λ12 の申し送りは「Artin 写像の同変性」としか書いていなかった** ⇒ ★**射程が狭まった。**
+
+### ★★同値性を `iff` に強化した（★空虚性の検査）
+
+`artinUnitEquivariance_iff_cyclotomeConj` により、新しい壁は Λ11 の壁と**同値**
+＝ ★**言い換えで強くも弱くもしていない**。
+★**逆向きの証明で `S ≤ muFixer` を実際に使う**ので、★**この仮定を落としていない**。
+★易しい半分（`g ∈ S`）は ★**両辺が独立の理由で恒等になる**ことを実際に証明し、
+★**どの `E` についても成り立つ**形にした。
+
+### ★★「点で評価する層」は要った。★**そして埋まった**
+
+Λ12 が名指しした入力 (b) が `map_mem_iteratedLubinTateTorsionPoints`（§13）として証明できた:
+> `Φ : K̄ →+* K̄` が `φ : 𝒪_K ≃+* 𝒪_K` について半線型なら、`Λ_{f,n}` の元は `Λ_{f^φ,n}` に写る。
+
+3 段の合成（根は根に写る + Weierstrass 分解の自然性 + `D_n` の自然性）。
+★**`Φ` に `K`-線型性を仮定していない**（★仮定すると `φ = id` で主張が空になる）。
+
+★★**思ったより安かった**: Λ12 が「次の節点 1 本ぶん」と見積もった段が、
+木の在庫 + mathlib の Weierstrass 一意性で ★**§11–§13 合計 ~120 行**で埋まった。
+
+### ★★★本体の見立ての訂正（★2 波連続で同じ 2 件を外した）
+
+1. ★「`LubinTateEndoTwisted` を消費できるはず」→ ★★**消費しなかった**（★消費宣言 **0 本**）。
+   理由: それは `[θ]` の**冪級数の等式**を与えるが、本波が要ったのは
+   「`f^σ` が Lubin-Tate 級数であること」（＝その**入力**側）と「`D_n` の自然性」だった。
+   ★**`[θ]` を実際に使うのは残った 1 段（`ρ` の intertwining）。**
+2. ★「素元非依存性を今度こそ消費する」→ ★**消費しなかった**（Λ12 と同じ）。
+   ★ただし本波はその**手前**（`σ(π)` が素元、`f^σ` が LT 級数）を用意した。
+
+### 抽象核（★12 本すべて「分岐・付値・Galois・Lubin-Tate の語彙が 1 語も出ない」）
+
+`eq_pow_of_transport` / `transport_eq_pow` は `#print axioms` が ★**`[Quot.sound]` のみ**。
+`maximalIdeal_eq_span_map` は `[propext, Quot.sound]`。
+★**`leanfile.mjs` に最初から寄せた**（共有 REPL が別 import で並行走行中だったため）。
+★★**import だけの基準を実測（11.75 秒）して差し引いた**ので、
+★**抽象核の周辺は 0.1–0.2 秒**と読める（★良い測り方）。
+★ファイル全体（871 行・30 宣言）は **15.0 秒**（周辺 3.2 秒）。
+
+### #158 が 3 件当たった（★この波でいちばん効いた）
+
+- `integerRingEquiv`（`ResidueCardinality.lean:77`）—「σ が整数環を保つ」を書かずに済んだ
+- ★★**`map_iteratedLubinTate`**（`DworkThetaEval.lean:278`）
+- ★★**`map_subst_powerSeries`**（`DworkThetaStep2.lean:258`）
+
+★★**後の 2 本は「Dwork の θ のために作られたもの」で、捩れ点のためではない。**
+⇒ ★**「作られた目的ではなく型で引く」の実例がまた 2 件。§12 はこの 2 本のおかげで 15 行で済んだ。**
+
+★mathlib の収穫: ★**`PowerSeries.IsWeierstrassFactorization.unique`** —— §11 の自然性がこれ 1 本で出た。
+★**「mathlib に無い」と書いた箇所は 0 件。**
+
+### ☆正直な申告（★2 件）
+
+- ★**`brief.mjs` の Yoshida08 側（`prop-4-7` / `lemma-4-6`）を読んでいない** ——
+  道が「Λ9/Λ11/Λ12 の在庫を継ぐ」形に落ちたため。
+  ★**次の agent はここを読む必要がある**、と自分から書いた。⇒ ★**次の持ち場に明記した。**
+- ★`.src` の逐語は投影ではなく**既知良好の committed 文字列を逐語コピー**した。
+  ★**「再測が要るなら次の波で確認すること」と正直に書いた** ⇒ ★**本体が確認し、NG 13 で通った。**
+
+### 原典より短い道が 1 本
+
+★逆向きの証明を「部分型を経由せず `Gal(L^ab/L)` の**元の等式** `Ψ_g x = x^{χ_n(g)}` に落とす」と、
+`powTorsion` の座標を通らずに済む（`abelianGalConj_eq_pow_of_wall`）。
+☆**思ったより高かった所**: その同値性の逆向きが **4 往復**（強制の層と `Subtype.val` の iota が噛んだ）。
+
+### 逸脱の記録（★新しい仮定は 1 つも置いていない）
+
+`ArtinUnitEquivariance` は `CyclotomeConjIsCyclotomic` と**同値**（証明済み）。
+`σ_g` が `𝒪_L` を保つことを付値ではなく**スペクトルノルム保存**で出している（局所体では同値）。
+原典が局所 Tate 双対性を論拠にするのに本経路が局所類体論を通る点は既記録の逸脱。
+
+### `lean-idioms.md` #196–#199
+
+- **#196** `rw [map_pow]` が `cyclotome` / `powTorsion` の境界で落ちる（instances 透明度）。
+- ★**#197** ★**`PowerSeries.map_map` と `Prod.fst_pow` は無い**（`map_comp` + `rfl` / `rfl`）。
+- **#198** `∀ a, α a = β a` 型の合同補題は `(α := …)` を明示（高階単一化）。
+- ★**#199** `IsWeierstrassFactorization.unique` は `refine … ?_` では `?m` が決まらない
+  → **3 引数すべて書いた `have`** にする。
+
+### ★残るノードは 1 本だけ（★入力は全部用意されている）
+
+「`σ_g` が Lubin-Tate 塔を運ぶ段」:
+(i) §13 を `adjoin` に持ち上げて `σ_g(K_{f,n}) = K_{f^{σ_g},n}` /
+(ii) `ρ_{f^{σ_g}}(gτg⁻¹) = σ_g(ρ_f(τ))` /
+(iii) `reciprocityHom_eq_of_intertwiner` + 素元非依存性で `π` に戻す。
+★★**ここで初めて `LubinTateEndoTwisted` と素元非依存性が消費されるはず。**
+⇒ ★**次のノードとして配った**（`LubinTateTowerTransport.lean`）。
+
+---
+
+## ★★★`VERDICT:` —— Lubin-Tate 側 4 件
+
+```
+VERDICT[AE-a]: 当たり — 「点で評価する層」が本体だった。★ただし思ったより安く §11–§13 で ~120 行
+VERDICT[AE-b]: 外れ — LubinTateEndoTwisted の消費宣言は 0 本。使うのは残った 1 段の内側
+VERDICT[AE-c]: 外れ — 素元非依存性も消費しなかった（★2 波連続で同じ見当を外した）
+VERDICT[AE-d]: 当たり — 閉じずに「残り 1 文」を更に細かくして返した（★壁は 𝒪_L^× 成分だけと判明）
+```
+
+☆★★**`AE-c` は「前回 `確度=高 / 検算=原文` で外した見当を `確度=中` に下げて再提出」したもの**で、
+★**下げても外れた**。⇒ ★**確度を下げることは的中率を上げない**（★1 件では何も言えないが、
+★**メタ第 22 回が測っている「確度の識別力」の観測点として記録する**）。
+
+## ★★★★双対性の道の (a)(b) が**全次数で**埋まり、★**記録の誤りが 1 点訂正された**（2026-09-07）
+
+`lean/ABC3/Found/PGC/GroupCohomologyFinite.lean` **474 行 / 28 宣言、`sorry` 0**。
+`lake build` **成功（3,833 ジョブ、8.8 秒）**、warning 0。
+`Found.lean` に import（★バイト検証 CRLF 1813 → 1814）。
+
+- **(a)** `finiteGroupCohomology : [Finite G] → [Finite ↑A] → Finite ↑(groupCohomology A n)`（instance）
+  ★**全次数**。おまけに `natCard_groupCohomology_le` と
+  ★**`H2π_surjective`（mathlib は帰納法原理しか持たない）**。
+- **(b)** `groupCohomologyMulEquivIso (e : G ≃* H) …` ★**全次数**、`hom_inv_id`/`inv_hom_id` 両方証明。
+
+### ★★★(c) の測定 —— ★**2026-09-04 の記録が誤りだった**
+
+> ★**「inflation-restriction は次数 1 だけ」は不正確。**
+> ★★**`groupCohomology.infNatTrans (S) [S.Normal] (n : ℕ)` は全次数の自然変換**で、
+> ★**`n = 2` でも射が作れる。**
+⇒ 直前の波が `inflation` / `inflationH2` として宣言に残した（`lean_check` **0.03 秒・一発**）。
+
+★★**足りないものの名指し 4 つ**:
+1. ★**`n ≥ 2` での inflation-restriction の完全性**（`H1InfRes_exact` は `n = 1` のみ）⇒ ★**次のノードに配った**
+2. 開正規部分群の有向系についての `colim_S H^n(G/S, A^S) ≅ H^n_cont(G, A)`
+3. `ContRepresentation` と `Action (TopModuleCat R) G` を繋ぐ**比較関手**（★**両者は無関係に存在**）
+4. 局所 Tate 双対性そのもの
+
+★**測定の内訳**（★再測不要）:
+- `RepresentationTheory/Continuous/` は **57 宣言だがコホモロジーは 0 件**
+  ⇒ ★**「連続コホモロジーの土台」であって連続コホモロジーではない。**
+- `ContinuousCohomology` は 19 宣言だが ★**同定されているのは次数 0（invariants）だけ**。
+- ★**`LongExactSequence`(19) は同じ群 `G` の短完全列の `δ` なので (c) に効かない。**
+- `absent-recheck.mjs` で infRes / Tate / Poitou 関連は **0 件**。
+
+### ★★★★「通すために偽の仮説を作らない」判断（★この波の白眉）
+
+★**`ofDiscrete` 構成子を意図的に書かなかった**:
+> `discreteCardH2`（離散群コホモロジー）を `cardH2` に入れると `isGroupTheoretic` は定理として埋まるが、
+> ★★**`cardH2_eq_natCard`（双対性）は偽になる**ので、★**偽の仮説からの空虚な構成を避けた。**
+
+代わりに `discreteCardH2_isGroupTheoretic` を証明した ——
+★**消費側 `LocalTateDualityData.isGroupTheoretic` と同じ形で、しかも `IsOpen` 仮定すら不要なので強い。**
+⇒ ★★**測定結果としての意味: 3 フィールドのうち `isGroupTheoretic` は構造的に自動であり、
+障害はすべて (c) に集約される。**
+
+### 抽象核
+
+`surjective_of_inductionOn` / `finite_of_inductionOn` —— ★**語彙ゼロ、`Sort*` でよい、
+`#print axioms` が `does not depend on any axioms`**（0.04 秒・一発）。
+★`resResIso` は ★**「群同型は不要、`f.comp g = id` の片側だけで足りる」**と
+★**原典より一般で易しい形**にした（0.16 秒）。
+`lean_start` **1 回**（13.1 秒）、`lean_check` 約 29 回、★**ファイル全体は `leanfile.mjs` で一発 ok**。
+
+### 引用の作法（★踏襲する価値がある）
+
+★**3 通りの投影すべてで一致する区間だけを選んだ。**
+★**避けた区間**: `≅` vs `∼=`（投影で揺れる）/ `isomorphic` vs `iso-morphic` / `ΓKab` vs `ΓabK`。
+
+### `lean-idioms.md` #200–#204
+
+- ★★**#200** ★**`Rep k G` は構造体になった**（`Action (ModuleCat k) G` ではない）
+  → `Action.mkIso` は当たらず `Rep.mkIso (Representation.Equiv.mk …)`。
+- **#201** `groupCohomology.congr` の `h ▸ φ` は扱えない → `f₁ f₂` 変数量化 + `subst`。
+- ★★★**#202** ★**`groupCohomology.map` 系を暗黙引数で当てると `isDefEq` timeout（13 秒）**
+  → ★**全明示で 0.5 秒。**
+- **#203** `Finite (groupCohomology A n)` は 3 行（`show Finite ((Fin n → G) → A)` を挟むのが鍵）。
+- **#204** `Iso.toEquiv` は `Type` 専用 → `(forget (ModuleCat k)).mapIso` を通す。
+
+---
+
+## ★★★`VERDICT:` —— 双対性側 4 件
+
+```
+VERDICT[GC-a]: 当たり — Finite (H2 A) は埋まった。★しかも全次数で（3 行、抽象核を挟むのが鍵）
+VERDICT[GC-b]: 当たり — 群同型不変性も埋まった。★しかも全次数で
+VERDICT[GC-c]: 半分 — (c) は届かなかったが、★理由が変わった。「次数 1 だけ」は誤りで、射は全次数で作れる。足りないのは完全性
+VERDICT[GC-d]: 当たり — mathlib の記録は 2026-09-07 の測定から変わっていなかった（09:38 索引と一致）
+```
+
+★★**`検算=索引` の 2 件（GC-c 半分 / GC-d 当たり）が付いた** ——
+★メタ第 19・20 回が「あと 3 件で有意になる」と書いた欄である。
+★★**ただしメタ第 21 回が「標本が 8 件増えただけで兆しが両方消えた」と実演している**ので、
+★**向きを断定しない。**
+
+## ★★★★★メタ第 22 回 —— 道具に「向きを断定するな」を守らせた + ★**M10 の原因が割れた**（2026-09-07）
+
+### 採用（4 本、★すべて独立に採れる）
+
+`tools/unverified.mjs`（**+342 −22**）/ `tools/check.mjs`（+27 −7）/
+`tools/meta-setup.mjs`（+71）/ `meta-backlog.md`（+281、M90〜M93）。
+★採用後の実測: `unverified.mjs` **selftest 10 → 34/34 PASS**、
+ゲートは **60/60・S1-S6 PASS・`--ledger` NG 13** で不変。
+
+### ★★★道具が向きを断定するのをやめた
+
+**前**（★道具自身が M45 の轍を踏んでいた）:
+> ★**断定(確度=高)の覆った率 33% 対 断り付き(中・低)の 46%** —— 断り付きの方がよく覆っている…
+
+**後**（★率の大小を読み上げる文を**全部削除**。族は**データを見る前に**コードへ固定）:
+```
+比較                                件数(覆り)      Fisher両側    ×m   判定
+確度: 高 対 中・低                  3/10 対 14/31      0.4797  1.0000  言えない
+確度: 高 対 低(単調性)              3/10 対 3/9        1.0000  1.0000  言えない
+検算: なし 対 あり                 10/27 対 7/14       0.5121  1.0000  言えない
+検算: なし 対 あり(★確度=中 の層)   7/16 対 4/6        0.6351  1.0000  言えない
+⇒ ★★どれも閾を割らない。★「言えない」は「差が無い」ではない。★そして向きも書かない。
+```
+★Fisher は **BigInt で厳密実装**（scipy 1.17.1 と 4 桁一致を selftest に固定）。
+★「あと何件で言えるか」も**多重比較を織り込んで**出す（★確度は**あと 369 件**）。
+
+### ★★交絡が p = 0.0021 —— ★**2 つの欄はほぼ同じものを指している**
+
+```
+確度＼検算   なし    型   索引   原文     計
+高           2/0   3/0   2/2   2/1    9/3
+中          12/6   2/1   1/0   1/1   16/8
+低           8/3     ·     ·     ·    8/3
+```
+★**`確度=低` は全部 `検算=なし`。**2×2 に畳むと Fisher 両側 **p = 0.0021**。
+
+★★**さらに新しい無駄を見つけた**: ★**33 件は 8 束（持ち場）から来ていて独立でない**
+（`L12` 4/4・`B6` 0/4）。★**ICC 0.104 / DEFF 1.33 ⇒ 有効件数は約 25。今の p は甘い側。**
+
+### ★★★M10 の原因が割れた（★10 度の再発の正体）
+
+```
+origin/main = d2bcac84 (Sep 3)
+git rev-list --count origin/main..master → 1210   ★遅れと一致
+git log --oneline master..origin/main    → 7 件、全部 PR merge commit
+```
+★★**worktree は既定枝 `main` から切られるが、本体が押しているのは `master`。**
+⇒ ★**`origin/main` は動かないので push では解消せず、押すたび遅れは増える**（1209 → 1210）。
+
+★★★**これは人の判断待ちにする**（下記の独立した節に積んだ）。
+★実害は小さい（`git merge master --no-edit` が **7 回連続・競合 0**）。
+
+### ★★selftest が自分の誤りを 2 つ捕まえた
+
+① `p = 0.012 × 4 = 0.048 < 0.05` を「言えない」と書いていた**閾の計算違い**。
+② `out.includes('★言える')` が見出し `★★★言えるか` に当たって ★**常に真の空虚な検査**だった
+（判定字面を `★言える(補正後)` に変えて一意化）。
+★**わざと壊した回数**: `unverified.mjs` **5 通り**、`meta-setup.mjs` **4 通り** —— 全部発火・全部復帰（md5 確認）。
+
+### ★`--projection` の当たりすぎ + ★**総数の表示が嘘だった**（別バグ）
+
+| | 前 | 後 |
+|---|---|---|
+| `--find 'K'` | 216 行 / 63,799 B（★総数「212」は**嘘**） | **20 行 / 4,320 B**（★真の総数 771 を正しく表示） |
+| `--find 'Γ_K^ab'` | 13 行 / 2,494 B | ★**1 バイトも変わらない** |
+
+### ☆測れなかったもの・危険側（★隠していない）
+
+- ★`--projection` の `--limit` は **selftest に固定していない**（CLI の口の中）。
+  ★**次の人が壊してもゲートは鳴らない。**既定 12 の根拠も弱い。
+- ★**M92 の印字経路そのものは発火していない**（起動直後に merge すると `behind 0` になるため）。
+  ★**論理はスタブで較正（5/5）、事実は git で直接確認したが、実物の遅れた worktree で印字を見ていない。**
+- ★BigInt のまま外挿したら **25.3 秒**かかった → 対数ガンマ版に切替えて 0.16 秒。
+  ★**両実装の一致（300 表、最大差 7.1e-15）を selftest に固定**。
+- ★束の ICC は 8 束しかなく粗い（点推定のみ）。
+- ★`autonomy-policy.md:228` の「selftest（10 件）」が古い ⇒ ★**本体が 34 に直した。**
+
+### ★8 人目の利用者報告
+
+`meta-setup.mjs` は使えたが ★**起動時には worktree に存在しなかった**（1,210 commit 前には未作成）。
+⇒ ★**「台帳を読む」の前に手で `git merge master --no-edit` が要る。**
+★2 回目の起動で「自分が触っている。本体の版で上書きしない」が **4 本**に効き、
+★**作業途中の再実行が安全**だと確認できた。`git checkout` / `git stash` は 1 度も叩いていない。
+
+---
+
+## ★★★人の判断待ち —— `origin/main` を `master` に追いつかせるか
+
+★**メタ第 22 回が原因を確定した**（上記）。★**解消するには本体側で 1 度だけ**:
+- 案 A: `git push origin master:main`
+- 案 B: GitHub 上で PR を 1 本 merge する
+
+★★**本体は実行していない。**理由:
+★**`origin/main` には `master` に無い commit が 7 件ある**（全部 PR merge commit）ので、
+★**案 A は fast-forward にならず `--force` が要る** —— ★**公開リポジトリの既定枝を
+力ずくで書き換える操作**であり、外向きで取り返しがつきにくい。
+★**無人で行う `git push origin master` は許可されているが、既定枝の付け替えはその範囲を超える。**
+
+★**実害は小さい**: `git merge master --no-edit` が **7 回連続・競合 0** で通っており、
+`meta-setup.mjs` が自動化している（立ち上がり 6〜7 秒）。
+★**急がない。人が決めるまで現状のままでよい。**
+
+## ★★★★(i)「`σ_g` が Lubin-Tate 塔を運ぶ」が完成 —— ★**残るは (ii) の 3 本**（2026-09-07）
+
+`lean/ABC3/Found/PGC/LubinTateTowerTransport.lean` **669 行 / 21 宣言、`sorry` 0**。
+`lake build` **成功（3,685 ジョブ、12.0 秒）**。
+`Found.lean` に import（★CRLF 1815 = LF 1815 をバイトで検証）。
+`#print axioms` はすべて `[propext, Classical.choice, Quot.sound]`。
+
+★**(i) 本体**: `image_lubinTateLevelField`（`σ_g(K_{f,n}) = K_{f^{σ_g},n}`）。
+★**`Γ_F` の橋**: `fixedFieldClosureAut` ほか。★**`absGalConjCME_apply` は `rfl`**。
+★**抽象核 `conj_spec_transfer` / `eq_of_conj_spec_of_existsUnique` は `#print axioms` が空。**
+
+### ★★思ったより安かった 3 点
+
+- ★★**`Ψ_g` は `Φ_g := Θ⁻¹∘g∘Θ` による共役そのもので、等式は `rfl`。**
+  ★**#59 に 1 度も当たらなかった**（★本体の申し送りは「(a) か (e) になる見込み」だった）——
+  `closureEquivFixedField` を `RingEquiv` に潰した時点で中間体の層が消えた（★定型 (d)）。
+- ★★**(i) は濃度で押して 1 行。** 前波の結果は包含だけだが、`Φ` は単射で `|Λ_{f,n}| = q^n` なので
+  `Finset.eq_of_subset_of_card_le` で等号。★**逆写像を作る必要が無かった。**
+- ★★**`IntermediateField.adjoin_map` は使えない**（基礎体を固定する `AlgHom` 専用）。
+  ★**`Subfield.closure` に落とすと 3 行。**
+
+### ★★★★本体の見立てが **3 波連続**で外れた —— ★**理由が判明した**
+
+★**「`LubinTateEndoTwisted` を消費するはず」を 3 回配って 3 回とも外した。**
+★★**理由**: ★**`f` と `f^φ` は同じ環の上なので `ϕ = id` で、untwisted の
+`powerSeries_uniqueness`（`LubinTateUniqueness.lean:174`）で足りる。**
+★同様に ★**「素元非依存性を消費する」も 3 回外れている**（★使うのは (iii) の内側）。
+⇒ ★**次の持ち場に「要らない見込み。要ったらそう報告すること」と書いた。**
+
+### ★★残る (ii) の 3 本（★どれも `aeval_powerSeries_comm_twist` に代入する段）
+
+1. ★★**`Φ` を `adjoinIntegers K x → adjoinIntegers K (Φ x)` に制限する段**。
+   像の等式は在庫で出る。★**残るのは (a) 半線型版のノルム保存**（★`norm_algEquiv_eq` は
+   `≃ₐ[K.carrier]` 専用）、**(b) 制限の連続性**。
+   ★★**これが木が「cross-point instance bridging」と呼んで避けてきた段で、半線型では避けられない**
+   （★既存の回避策は `σ(x) ∈ K⟮x⟯` に依存するが、★**`Φ x` は `f^φ` の捩れ点なので留まらない**）。
+2. ★**`reciprocityUnits` の捩れ点上の spec**（★木にあるのは核の記述だけ）。
+3. ★**生成元列の付け替え**（`f^φ` 側の `psiGenSeq` は `Φ '' (f 側)` とは限らない）。
+
+### ★★★(iii) が必要な理由を**測って確かめた**
+
+> ★**`ρ_f ≠ ρ_{f^{σ_g}}`**（`Art(π)` の像が違う）。
+> ★★**一致するのは慣性部分＝`Ẑ` 成分が 1 の部分＝`p^n` 捩れが乗る部分だけ**で、
+> これが Cor 4.9 の **`j = 0` の場合**。
+> ★★**`ArtinUnitEquivariance` が `p^n` 捩れ上でしか要求していないことがここで効く。**
+
+★**原典の直読（`.txt` 400–530 行）で分かったこと**:
+★**Cor 4.9 の `ρ` 一致は `[θ]` の `𝒪`-線型性しか使わない**
+（★`j = 0` では **Lemma 4.5 が不要**、`θ^{(0)} = θ`）。
+⇒ ★**(iii) は「`j = 0` の場合だけ」で足りる見込み**（★次の持ち場に測らせる）。
+
+### mathlib / #158 / REPL
+
+★**「無い」と書いたのは `Subfield.map_closure` の 1 件だけ**（自分で書いた）。
+★**#158 は 4 本試して 0 件**。★一方 ★**結論の grep（`.cache/decl-index.txt`）が
+`powerSeries_uniqueness` を引き当て、一意性がそれ 1 本で済んだ** ⇒ ★**両方やる価値がある。**
+★`lean_start` は **1 度も触らず**（共有 REPL が別 import）`leanfile.mjs` に寄せた
+（17 往復、★**基準 9.6 秒**、★**12 断片中 9 個が一発**）。
+
+### `lean-idioms.md` #205–#206
+
+- ★★**#205** ★**`rw` は `⇑↑Φ` と `⇑Φ` を別物として扱う** → **`RingEquiv` 版ラッパを別宣言に。**
+- **#206** 暗黙引数未解決の項に `.injective` を付けると `function expected`。
+
+---
+
+## ★★`VERDICT:` —— 塔の輸送
+
+```
+VERDICT[LT-a]: 当たり — (i) は入った。★ただし「濃度で押して 1 行」で、思ったより安かった
+VERDICT[LT-b]: 外れ — LubinTateEndoTwisted は要らなかった（★3 波連続で外した。理由は ϕ = id）
+VERDICT[LT-c]: 外れ — 素元非依存性も消費しなかった（★3 波連続）
+VERDICT[LT-d]: 外れ — #59 の回避は (a) でも (e) でもなく (d)（RingEquiv に潰す）だった
+```
+☆★★**本体は「何を消費するか」の見当を 3 波連続で外している。**
+★**共通の形**: ★**「その道具が作られた文脈」と「このノードが実際に置かれている文脈」を混同**している
+（★ねじれ版は `ϕ ≠ id` のために作られたが、このノードは `ϕ = id` の側にいた）。
+⇒ ★**「型で引く」の裏返し: ★道具を配るときも「型が合うか」を先に見ること。**
+
+## ★★★★★`H²` の inflation-restriction が着地 —— ★**(c)-1 が消えた**（2026-09-07）
+
+`lean/ABC3/Found/PGC/InflationRestrictionH2.lean` **883 行 / 42 宣言、`sorry` 0**。
+`lake build` **成功（3,834 ジョブ、8.2 秒）**。
+`Found.lean` に import（★CRLF 1815 → 1816、LF も 1816、★**バイト差 +46 で検証**）。
+
+★**`H¹(S,A) = 0` のもとで `0 → H²(G⧸S, Aˢ) → H²(G,A) → H²(S,A)` が完全**。
+★★**当初の「最低限の到達点」（単射性か右端の完全性のどちらか）を選べと言われたが、両方入った。**
+★理由: ★**抽象核に落としたことで完全性の側も 1 発で通った**
+（`exists_inflation_preimage` は **71 行の証明が初回で通った**）。
+
+★**mathlib に無いものを 1 本作った**: `map₂_one`（`map (1 : G →* H) φ 2 = 0`。`map₁_one` の n=2 版）。
+
+### ★★抽象核が徹底している
+
+★**核は `[Group G] [AddCommGroup A]` と `ρ : G → A →+ A` だけ**で受ける ——
+★★**`k` も `Rep` も `groupCohomology` も分岐も付値も Galois も 1 語も出ない。**
+★★**`H¹(S,A)=0` すら「関数の述語」に落とした**:
+`hH1 : ∀ f : G → A, (1-コサイクル条件) → ∃ a, ∀ s ∈ S, f s = ρ s a - a`。
+★`exists_cochain_right` は ★**`#print axioms` が `[propext]` のみ**。
+
+★**原典より一般にした点**:
+- `exists_cochain_right/left` は代表元関数 `r` を**引数で受ける**ので ★**選択公理を使わない**。
+- `cocycle₂_right_coset_invariant` は ★**`S` の正規性すら要らない**。
+
+### ★仮定は 1 つだけ（★名指し）+ 退化検査
+
+★**唯一 `H¹(S, A) = 0`**（`IsZero` 版も併設）。`axiom` / `structure` / `sorry` は 0。
+★**偽の仮説は作っていない** —— 退化検査 `inflation₂_bijective_bot`
+（★`S = ⊥` では仮定が自動で、`inf` は**全単射**）で空虚でないことを確認。
+★transgression 自体は作っていない（★**次のノードとして配った**）。
+
+### mathlib / #158（★測定のコマンドつき）
+
+```
+awk -F'\t' '$2 ~ /[Ii]nf(Res|NatTrans|lation)/ {print $2"\t"$3}' .cache/mathlib-index.txt
+→ H1InfRes / H1InfRes_exact / infNatTrans / groupHomology.coinfNatTrans のみ
+absent-recheck.mjs --try 'H2InfRes|infNatTrans_exact|map₂_one|H2_infRes|inflationRestriction' → 0 件
+REPL #check: H2InfRes / map₂_one / map_one / mem_coboundaries₂_iff → すべて Unknown constant
+```
+★**#158 は 42 宣言すべてを積んで 0 件**（★mathlib と重複していないことを測って確認）。
+★引用は `--projection` で **3 通りとも一致する区間**だけ採用（★`≅` vs `∼=` を含む区間は避けた）。
+
+### #202 の別の顔
+
+★**timeout 版には当たらなかった**（全 check 1 秒未満）。
+★代わりに**同じ原因の「型不一致」版**に当たり、`map (A := …) (B := A) …` と全明示で直った（#208）。
+
+### ★★★(c) の見通しが更新された
+
+- ★**(c)-1（`H²` の inflation-restriction）は消えた** ——
+  ★**「有限次で得た情報を上げる」段として使える形で在庫になった。**
+- ★★**(c)-2（`colim_S H^n(G/S, A^S) ≅ H^n_cont`）は見通しが良くなった** ——
+  `H1InfRes_exact` + `H2InfRes_exact` で ★**塔の各段の比較射が単射**になるので、
+  colimit の構成は「単射系の合併」で済む。
+  ★**ただし連続コホモロジー側の定義が mathlib に無い（次数 0 のみ）ままなので (c)-3 に依存する。**
+- (c)-3（比較関手）・(c)-4（双対性）: 変化なし。
+
+### `lean-idioms.md` #207–#209
+
+- **#207** `@[simps] _f` の `rw` が instances 透明度で壊れる → 生の `map` について述べて `exact` で移す。
+- ★★**#208** `Rep.ofHom` の暗黙引数（#202 の**型不一致版**）→ 全明示。
+- ★★**#209** ★**抽象核の作用は `ρ : G → A →+ A` で受けるのが最安。**
+
+### ★新ノード 3 本
+
+1. ★**transgression `H¹(S,A)^{G/S} → H²(G/S,Aˢ)` の構成**
+   （★これがあれば `H¹(S,A)=0` の仮定が外れて 5 項完全列全体になる）⇒ ★**配った**
+2. 開正規部分群の有向系についての colimit（(c)-2）
+3. 消費側が `H¹(S,A) = 0` を供給できるか（`Γ_K` の有限商の塔で）
+
+---
+
+## ★★`VERDICT:` —— inflation-restriction
+
+```
+VERDICT[IR-a]: 当たり（上回った）— 単射性か完全性のどちらかを選べと配ったが、★両方入った
+VERDICT[IR-b]: 当たり — 仮定は H¹(S,A)=0 の 1 つだけで、名指しで報告された
+VERDICT[IR-c]: 半分 — #202 の timeout 版には当たらず、★同じ原因の「型不一致」版に当たった
+VERDICT[IR-d]: 当たり — mathlib に無いことを 3 通り（awk-grep / absent-recheck / #check）で測った
+```
+★**「最低限を選べ」と配ったのに両方入った**のは、★**抽象核に落とすと完全性の側も 1 発で通る**から。
+⇒ ★★**「最低限」を指定するときは、抽象核に落とせるかを先に考えるべきだった。**
+
+## ★★★★★★20 波以上「避けてきた」壁を正面突破した（2026-09-07）
+
+`lean/ABC3/Found/PGC/SemilinearRestriction.lean` **848 行 / 22 宣言、`sorry` 0**。
+`lake build` **成功（3,686 ジョブ、12 秒）**。
+`Found.lean` に import（★CRLF 1816 → 1817 = LF 同数をバイトで検証）。
+`#print axioms` は全 12 宣言とも標準公理（★`conjSemilinearAlgEquiv` は **`[Quot.sound]` のみ**）。
+
+### ★★★越え方は抽象核 1 本
+
+> `spectralNorm k Ω (Φ ·)` を `AbsoluteValue` に束ね、mathlib の
+> ★**`spectralNorm_unique_field_norm_ext`**（★完備な基点上でノルムを延長する絶対値は
+> spectralNorm だけ）に代入する。★★**`Φ` の `k`-線型性をどこにも使わない。**
+
+- **(a) ノルム保存**: これで出る。基点側は `spectralNorm_eq_of_equiv` で **1 行**。
+- **(b) 連続性**: (a) の**系**（等長 ⇒ 連続）。
+  ★★**`LinearMap.continuous_of_finiteDimensional`（線型性が要る＝半線型では塞がっている）を回避した。**
+- ★★**`Φ x ∈ K⟮x⟯` は 1 度も使っていない**（★実際 `Φ x` は `f^σ` の捩れ点なので留まらない）。
+  ★**終域は `adjoinIntegers K (Φ x)` という別の環。**
+
+### ★★★★副産物 —— 点をまたぐ Galois 同変性が落ちた
+
+`algEquiv_lubinTateActionAtTorsionPoint_cross : τ(a·x) = a·(τ x)`。
+★**右辺は `adjoinIntegers K (τ x)` の中の本物の作用**
+（★「`x` の座標系での代用品」`lubinTateActionAtAlgEquivPoint` ではない）。
+★**抽象核に `σ := AlgEquiv.refl` を入れるだけで出た。**
+⇒ ★★**木が 20 波以上「cross-point instance bridging」と呼んで避けてきた形の正面突破。**
+★`τ x ∈ K⟮x⟯` を使わないので**留まらない場合にも成り立つ**。
+
+### ★測ってみたら 2 と 3 は要らなかった
+
+★**2（`reciprocityUnits` の捩れ点上の spec）/ 3（生成元列の付け替え）は有限段では要らなかった。**
+木の `reciprocityMap`（レベル `n`・点 `x` 固定）は定義そのものが「`x` の上での記述」で、
+一意性も在庫。★**しかも (ii) が任意の `ψ_n` の根 `x` について成り立つので、
+3 の「任意生成元に移す」は statement の側で済んでいる。**
+⇒ ★**2 と 3 が要るのは極限（`reciprocityUnits` / `psiGenSeq`）へ上げるときだけ。**
+
+### ★(iii) も有限段では 1 度も要らなかった
+
+有限段の (ii) は `ρ_{f,n}` と `ρ_{f^σ,n}` を**それぞれ自分の塔の上で**比べる形なので、
+★**2 つの塔が一致する必要がない。**
+⇒ ★**(iii) が要るのは「同じ `ρ` である」と言いたいとき＝`E` を作る段。**
+
+### ★★★★本体の見立てが **4 波連続**で外れた
+
+★**「`LubinTateEndoTwisted` を消費するはず」を 4 回配って 4 回とも外した。**
+★直前の波は ★**`powerSeries_uniqueness` すら直接は使わず**、`map_LubinTateAction` に代入するだけ。
+★**素元非依存性も 4 波連続で外している。**
+
+### mathlib / 引用
+
+★**`grep -n "spectralNorm" .cache/mathlib-index.txt` が
+`spectralNorm_unique_field_norm_ext` / `spectralNorm_eq_of_equiv` / `spectralMulAlgNorm` を
+一度に出し、★それが全体の鍵になった。**★**「無い」と書いた箇所は 0 件。**
+★衝突検査は **18 個の新規名を decl-index で**（全部 0 件）。
+★★**引用の良い作法**: `K^m_f` の部分は ★**layout `Kfm` / raw `Kmf` で食い違う**ので
+★**引用から外し**、★**3 通り一致する区間だけを引いた。**
+
+### `#59` に 1 度も当たらず（★22 波連続）
+
+中間体は `K⟮x⟯` **1 層だけ**、`restrictScalars`（体の）も `restrictNormalHom` も書いていない（定型 (d)）。
+
+### `lean-idioms.md` #210–#211
+
+- ★★**#210** 半線型な環同型のノルム保存は**最小多項式ではなく** `spectralNorm_unique_field_norm_ext`。
+  ★**「等長 ⇒ 連続」で `LinearMap.continuous_of_finiteDimensional` を回避できる。**
+- ★★**#211** `(fixedFieldAut S g).restrictScalars ℚ_[p]` を裸で引数に置くと instance が落ちる
+  → ★**`(k := …)` で基礎型を先に固定する**（#205 の親戚）。
+
+### ★★次の壁が名指しされた
+
+1. 極限への持ち上げ（★`reciprocityMap` の**点非依存性が木に無い**。§10 ＋作用の乗法性で出る見込み。★**未測定**）
+2. ★★★**`Gal(L^{ab}/L) ≅ 𝒪_L^× × Ẑ` の `E` を `ρ` 由来のものに取り替える段。★ここが次の壁。**
+   ★`nonempty_abelianGalContinuousEquivUnitsZHat` が与えるのは**同型の存在だけで、
+   それが `ρ` から来ていることを言っていない。**
+3. (iii) 素元非依存 —— 2 の内側
+4. `Γ_F` への代入（★機械的。`absGalConjCME_eq_conjSemilinearAlgEquiv` は `rfl`）
+⇒ ★**次のノードとして配った**（`ReciprocityLimitEquivariance.lean`）。
+
+---
+
+## ★★`VERDICT:` —— 半線型の制限
+
+```
+VERDICT[SR-a]: 当たり — 1（cross-point bridging）が本持ち場の重心で、実際に埋まった
+VERDICT[SR-b]: 外れ — 2 と 3 は有限段では要らなかった（極限へ上げるときだけ）
+VERDICT[SR-c]: 半分 — (iii) は「j=0 だけで足りる」より更に弱く、★有限段では 1 度も要らなかった
+VERDICT[SR-d]: 外れ — LubinTateEndoTwisted は要らなかった（★4 波連続で外した）
+```
+☆★★**本体の「何を消費するか」の見当は 4 波連続で外れている。**
+★**共通の形**: ★**「その道具が作られた文脈」と「このノードが置かれている文脈」の混同**。
+★**今回はさらに「有限段で要るもの」と「極限で要るもの」の混同**が加わった。
+⇒ ★**持ち場を書くときに「有限段か極限か」を明示すること。**
+
+## ★★★★★transgression が構成され、★**5 項完全列の右 2 箇所が仮定なしで入った**（2026-09-07）
+
+`lean/ABC3/Found/PGC/Transgression.lean` **1,166 行 / 79 宣言、`sorry` 0、`axiom` 0**。
+`lake build` **成功（3,835 ジョブ、8.9 秒、警告 0）**。
+
+| 宣言 | 内容 |
+|---|---|
+| `transgressionLin A S : invariantsH1 A S →ₗ[k] H²(G⧸S, Aˢ)` | ★**transgression（`k`-線形）** |
+| `ker_transgressionLin` | `ker(tg) = comap subtype (range res)` ★**仮定なし** |
+| ★`range_transgressionLin` | ★★**`range(tg) = ker(inf₂)` ★仮定なし** |
+| `fiveTermExact` | 上 2 つの連言 |
+| ★`inflation₂_injective_of_subsingleton_H1` | ★★**直前の波の定理が本ファイルの系に降格した** |
+
+★**抽象核 6 本は `#print axioms` が `[propext]` のみ。**
+★**`H¹(S,A)=0` は外れた**（`H²(G⧸S,Aˢ)` での完全性）。
+★**外れないのは旧 `H2InfRes_exact`**（`H²(G,A)` での完全性）—— ★5 項完全列の**外側**で、
+LHS スペクトル系列の `E₂^{1,1}` が効くため。★**名指しで報告された。**
+
+### ★★★(c)-2 の見通しが変わった（★これが今回いちばん効く）
+
+> ★**`inf₂` が単射にならない理由が完全に同定された**: `ker(inf₂) = range(tg)`。
+> 塔 `S ↓ 1` の colimit では ★**`colim_S H¹(S,A) = 0`（A 離散）なので
+> transgression の source が消え、比較射は極限で単射になる。**
+> ⇒ ★★**(c)-2 は「`H¹(S,A)=0` を仮定する」から「colimit で自動的に消える」に変わった。**
+
+⇒ ★**次のノードとして配った**（`CohomologyColimit.lean`）。
+
+### ★★作法が徹底している
+
+★**「関数の述語」で先に書いた**。§1 は `[Group G] [AddCommGroup A]` と `ρ : G → A →+ A` だけで、
+★**`k`・`Rep`・`groupCohomology`・分岐の語彙が 1 語も出ない**（27 宣言）。
+★**選択公理を避ける形**（代表元と証人を引数で受ける）。
+★★**ただし `#print axioms` では検証できない**（`abel` が `Classical.choice` を引く）と**正直に書いた**。
+★★**正規性を使う宣言・使わない宣言を全部列挙した**（★使わない側が 9 本）。
+★**思ったより安かった点**: 正規化代表元を `cosetRep S g * (cosetRep S 1)⁻¹` にしたら
+★**可判定性も正規性も不要になった**（#214）。
+★**退化の自己検査 4 本**（うち `inflation₂_tgClass` の証明は **`rfl` 1 個**）。
+
+`lean_check` **約 30 往復、全て 0.9 秒未満**、★**24 ブロック中 14 が一発**。
+★**#158 は 79 宣言を実名前空間に積んで 0 件**、主要 17 名を両索引で `grep -c` して 0 件 / 0 件。
+★引用は `--projection` で **3 通りとも 1 件ずつ**を確認。
+
+### ★mathlib の本質的な欠落
+
+★**`H^n(S,A)` への `G⧸S` の共役作用が mathlib に無い**
+⇒ コチェインの述語 `IsGInvariantH1` で代用し、`invariantsH1 : Submodule` で名前を正当化した（逸脱 2）。
+
+### `lean-idioms.md` #212–#217（6 形）
+
+---
+
+## ★★★★メタ第 24 回 —— 事前登録した族を実行し、★**自分で「2 度目の覗き」を申告した**
+
+### 採用（3 本、★すべて LF）
+
+`tools/agent-timing.mjs`（650 → 927、★**selftest 50 → 89/89**）/
+`tools/meta-setup.mjs`（612 → 652、selftest 5 → 10）/ `meta-backlog.md`（+256、M101〜M108）。
+
+### ★★★事前登録した族の判定
+
+| 説明変数 | n | ρ | Holm | 判定 |
+|---|---|---|---|---|
+| 行数 | 52 | 0.758 | 0.0003 | 言える |
+| tool_uses | 52 | 0.801 | 0.0003 | 言える |
+| subagent_tokens | 52 | 0.916 | 0.0003 | 言える |
+| 抽象核の本数 | 52 | 0.359 | 0.0307 | ☆**下記の留保つき** |
+| lean_check の回数 / 失敗回数 | 52 | 0.141 / 0.172 | 0.4576 | 言えない |
+| ★**見積中点（事前登録）** | 51 | **0.527** | **0.0006** | ★**言える(補正後)** |
+
+★★**M96 の探索値 0.529 が、事前登録した検定でも 0.527 として再現した。**
+★**族を増やしたのに既存 6 本は 1 つも動かなかった** —— Holm の倍率は `(m − k)` なので
+★**より小さい p を持つ仮説を足すと m も k も 1 増えて不変**。★**弱い欄を足したときだけ既存が罰される。**
+
+### ★★★「抽象核の本数」—— ★**本体の判断: 「言える」として使わない**
+
+★メタ係の申告:
+> M95 の数字は **1 桁も違わずに再現**した。つまり ★**閾を割らせたのは盤面の変化ではなく標本 +1 件だけ**。
+> 族は事前固定だったが ★**止め時を決めていない**ので、★**同じ欄を 2 度覗いて 2 度目に割った**。
+> ★**言えるのは「2 度目の覗きで閾を割った」まで。**
+
+⇒ ★★**本体の判断: 「言える」として使わない。**
+★★**事前登録**: ★**「抽象核の本数」は n = 80 に達したときに 1 度だけ見る**（規約 §4.7 に書いた）。
+
+### ★★`COST` の書式（★本体が規約 §4.7 に載せた）
+
+```
+COST[<持ち場>]: <安|並|高>  — <一言>
+COST[<鍵>]: <安|並|高> | 持ち場=<agent に配った呼び名>  — <一言>
+```
+★★**今回いちばん重い発見**: ★**書式を足しただけでは繋がらない。**
+`decisions-pending.md` の鍵 13 個のうち ★**agent の呼び名に当たるのは 2 個だけ**
+（`段1` `C49` `L9` `TL` `L12` `HS` `AE` `GC` `LT` `IR` `SR` は略号で当たらない）
+⇒ ★**`| 持ち場=` の橋を書式に足した。★この 1 行が無いと申告は書かれても実測に繋がらない。**
+
+★置き場は **`agent-timing.mjs`**（★`unverified.mjs` ではない）。根拠 3 つ:
+①実測を持つのはこの道具だけ、②`unverified.mjs` は **Bonferroni の族を固定してある**ので
+別種の欄を足すと m の意味が濁る、③`unverified.mjs` は import すると即座に集計が走る。
+
+### ★★孤児 VERDICT が 4 → **12 件**（★本体の落ち度が定量化された）
+
+★★**M99 の「鍵の字面の食い違い」は誤り** —— ★**`GUESS[LT` `GUESS[IR` `GUESS[SR` は 1 件も存在しない。**
+★**本体が VERDICT だけ書いて GUESS を書かなかった。**
+⇒ ★**当否の記録 53 本のうち 12 本（23%）が分母に入らない。**
+★遡及は規約で禁じられているので**分母は 41 のまま**。★**次から必ず先に書く。**
+
+### ★★改善係の費用 —— ★**「返した時間」は測れないが「引かれた回数」は測れる**
+
+★会話ログ 601MB を走査した実測（★lean-prover 109 本のうち叩いた本数）:
+
+| 道具 | 本体 | lean-prover | meta-opt | lean-prover の何 % |
+|---|---|---|---|---|
+| `brief` | 91 | 85 | 243 | **43%** |
+| `absent-recheck` | 11 | 17 | 0 | 8% |
+| ★**`--projection`**（★09-07 に入ったばかり） | 1 | **10** | 15 | — |
+| `unverified` / `agent-timing` / `meta-setup` ほか 7 本 | — | **0** | — | ★**0%** |
+| ★**`unverified.mjs --open`** | 0 | 0 | 0 | ★**1 度も叩かれたことがない** |
+
+★★**片側だけ言える**: ★**呼ばれ回数 0 の口は返した時間も 0（上界が 0）。**
+⇒ ★**`--open` は捨てるか手順に載せるかを決められる。**★**本体の判断: 手順に載せる**（規約 §4.7 に既にある）。
+
+### ☆危険側（★隠していない）
+
+- ★**「行数」は盤面が動くと値が変わる**: `lines`（いまのファイル）対 `linesWritten`（当時）で
+  ★**ρ = 0.758 対 0.511**。★**50 件中 33 件で行数が当時と違う。**
+- ★`--cost` は**実データで動かしていない**（申告が 0 件のため）。
+- ★★**本体の申し送りを 1 つ訂正**: ★**CRLF は `check.mjs` だけ。**
+  他の `tools/*.mjs` と `meta-backlog.md` は全部 LF。
+  ★★**`grep -c $'\r'` は Git Bash で嘘をつく**（★これで 1 度誤診した）。★`od -c` か node で数えること。
+- ★**わざと壊した 12 通りのうち 1 件が黙った** —— ★**自分の検査が空虚だった**
+  （値の側が列挙外なので鍵の番人を外しても null）。★**直して 12/12 鳴るようにした。**
+
+---
+
+## ★`COST:` —— 本体が今日の波について書く（★規約 §4.7 の新しい欄）
+
+```
+COST[Transgression]: 安 | 持ち場=transgression と 5 項完全列  — 見積 600–1000 行に対し 1166 行だが、★仮定が 1 つ外れて前の波の定理が系に降格した
+COST[SemilinearRestriction]: 安 | 持ち場=半線型の制限とρのspec  — ★20 波以上避けてきた壁が抽象核 1 本で越えられた
+COST[InflationRestrictionH2]: 安 | 持ち場=H2 の inflation-restriction 完全列  — ★「最低限どちらか」と配ったのに両方入った
+COST[LubinTateTowerTransport]: 並 | 持ち場=σ_g が Lubin-Tate 塔を運ぶ段  — (i) は 1 行で済んだが (ii) が 3 本に割れた
+COST[GroupCohomologyFinite]: 安 | 持ち場=H2 の有限性と inflation-restriction  — (a)(b) が全次数で入った
+```
+
+## ★★★★★★`ArtinUnitEquivariance` が「名前の付いた仮定ちょうど 1 本」に還元された（2026-09-07）
+
+`lean/ABC3/Found/PGC/ReciprocityLimitEquivariance.lean` **829 行 / 22 宣言、`sorry` 0**
+（★証明本体は約 300 行）。`lake build` **成功（3,687 ジョブ、12 秒）**。
+`Found.lean` に import（★CRLF 1818 → 1819、lone LF 0、+52 バイトをバイトで検証）。
+
+★**残った穴はちょうど 1 本**:
+```
+ReciprocityDatumIndependenceOnTorsion p :=
+  同じ K 上の 2 つの Lubin-Tate データ (π,f)・(π',f') について、
+  Gal(K^ab/K) への制限が p^m 捩れである θ の上では ρ_f(θ) = ρ_{f'}(θ)
+```
+★★**`artinUnitEquivariance_of_reciprocityDatumIndependenceOnTorsion` は証明済み。**
+⇒ ★★★**これを埋めれば `cyclotomicCharacter_recoverable` まで配線が全部繋がる。**
+
+### ★★★空虚でないことを反例で確かめた
+
+★**捩れの条件を落とすと偽**: `θ := Art_{π'}(π')` は `ρ_{f'}(θ) = 1` だが `ρ_f(θ) = π'/π ≠ 1`。
+★**捩れに限ると `Ẑ` が捩れ無しゆえ `θ` は慣性に入り、慣性上では素元非依存 ⇒ 古典的に真。**
+★docstring に記録済み。
+
+### ★★本体が「次の壁」と名指しした 2 は **半分外れていた**
+
+> ★**「同型の存在だけで `ρ` 由来を言っていない」は半分外れ。**
+> `Nonempty` に包む**前**の `abelianGalEquivUnitsZHat` は ★**最初から `ρ` 由来**で、
+> 証明は ★**木の在庫 2 本を継ぐだけ**（`abelianGalEquivProd_restrictNormalHom` +
+> `lubinTateClosureGalEquivUnits_restrictNormalHom`）。★**一発。**
+⇒ ★**壁は 3（素元非依存）だけだった。**
+
+### ★★点非依存性は抽象核 4 行に落ちた（★新しい数学は 1 つも要らなかった）
+
+`reciprocityMap_point_indep`（★**一発**）。推移性/自由性は在庫、乗法性も在庫、
+★**同変性は直前の波の副産物 `algEquiv_lubinTateActionAtTorsionPoint_cross`。**
+★**申し送りの「3 生成元列の付け替え」はこれ 1 本に吸収された。**
+
+### 抽象核
+
+★`act_cocycle_indep`（**+0.2 秒・一発**、★**`#print axioms` = `does not depend on any axioms`**）
+—— 可換群の作用と可換写像だけ。★**分岐・付値・Galois の語彙 0。**
+`sub_mem_span_pow_map`（+0.1 秒・一発、純環論）。
+★`lean_start` / `lean_reset` **0 回**（`lean_status` 1 回のみ）。
+
+### ★★★本体の見立て
+
+- ★**`LubinTateEndoTwisted`: 5 波連続で外れ**（★`powerSeries_uniqueness` すら出てこない）。
+- ★★**素元非依存性は 4 回外して 5 回目に当たった** —— ★**今回初めて本当に要った**
+  （2 の内側、★**捩れの上だけ**で、★**仮定として切り出せる形**だった）。
+
+### mathlib / 衝突検査 / 引用
+
+★**「mathlib に無い」と書いた箇所は 0 件。**★衝突検査 **18 本 → 0 件**（両方の索引で）。
+★引用は `--projection` で **3 通り一致**を確認。
+★★**`K^{LT}_f` / `K^m_f` は layout=`KfLT/Kfm` vs raw=`KLTf/Kmf` で食い違うので引用から外した**
+（★直前の波と同じ作法。★**2 波連続で同じ判断**）。
+
+### ★思ったより安い
+
+見積 600–1000 行に対し **829 行**。★**2 の半分は在庫だった**、★**点非依存性は抽象核 4 行**。
+
+### `lean-idioms.md` #218–#219
+
+- **#218** 証明項を引数に取る作用を `Subtype` に包んだら `rw` ではなく `exact`。
+- ★★**#219** ★**木の Lubin-Tate 補題を `rw` に渡すときは明示引数を全部書く**
+  （`hf0` 等がメタ変数のまま goal になる）／`rw` 後の自動 `rfl` は reducible。
+
+### ★★★残るノードは 1 本だけ
+
+★**`ReciprocityDatumIndependenceOnTorsion` を埋める**（＝ Yoshida Corollary 4.9 本体）。
+★**足りないのは `θ ∈ Θ^{K̂}_{π,π'}`（完備不分岐拡大上の Lubin-Tate 同型）の構成のみ。**
+★**捩れの上に制限してあるので `Ẑ` 成分の議論は不要。**
+
+★★★**本体の観測**: ★**その `Θ ≠ ∅` は今日すでに証明済み**である ——
+Yoshida **Proposition 4.8**「`ψ : θ ↦ θ^ϕ/θ` is surjective. In particular, for any pair of
+uniformizers π, π′, `Θ^{K,×}_{π,π′} ≠ ∅`」が
+`DworkMultiplicative.lean::surjective_unramGalCompletionUnits_div_self` として在り、
+★**今日その `.src` を Milne LEMMA 3.11 から Yoshida `prop-4-8` に付け直したところ**である。
+⇒ ★**次のノードとして配った**（`ReciprocityDatumIndependence.lean`）。
+
+---
+
+## ★★`VERDICT:` / `COST:` —— 極限への持ち上げ
+
+```
+VERDICT[RL-a]: 半分 — 2（E を ρ 由来に）は「次の壁」と名指ししたが、★半分は在庫だった。壁は 3 だけ
+VERDICT[RL-b]: 当たり — 点非依存性は §10 ＋乗法性で出た（★抽象核 4 行、一発）
+VERDICT[RL-c]: 外れ — LubinTateEndoTwisted は要らなかった（★5 波連続）
+VERDICT[RL-d]: 当たり — 素元非依存性は「(iii) の内側でだけ要る」という留保どおり、今回初めて要った
+```
+```
+COST[ReciprocityLimitEquivariance]: 安 | 持ち場=極限への持ち上げと E の取り替え  — ★2 の半分が在庫で、点非依存性が抽象核 4 行に落ちた
+```
+☆★**`LubinTateEndoTwisted` の見立ては 5 波連続で外している。**
+★**共通の形は「その道具が作られた文脈（`ϕ ≠ id`）と、このノードが置かれた文脈（`ϕ = id`）の混同」。**
+★**次の波は `K̂^ur` 上（`ϕ = arithFrobenius ≠ id`）なので、★今度こそ要る可能性がある**
+—— ★**そう書いて配った。★外れたらまた記録する。**
+
+## ★★★★★(c)-2 が閉じた —— ★**本体の前提が偽だったことが実証された**（2026-09-07）
+
+`lean/ABC3/Found/PGC/CohomologyColimit.lean` **917 行 / 68 宣言、`sorry` 0、★`axiom` 0**。
+`lake build` **成功（3,836 ジョブ、8.7 秒、警告 0）**。
+`Found.lean` に import（★bare LF 1820 = CRLF 1820 を検証）。
+
+★**1 / 2 / 3 が入った**: 有向系と colimit（`h2Sys` / `H2Colim`）、比較射 `H2ColimToH2`、
+★**`H2ColimToH2_injective`（比較射が極限で単射）**、
+colimit を経由しない `exists_inflH2Step_eq_zero`。
+
+### ★★★★本体の前提が訂正された —— ★**離散側では `colim_S H¹(S,A) = 0` は偽**
+
+> mathlib の `groupCohomology` は離散群コホモロジーで、`H¹(S,A)` は**連続でないコサイクル**の類を含む。
+> ★**反例**: `G = Ẑ`, `A = ℚ/ℤ`（自明作用）。`φ : Ẑ → ℚ/ℤ` の類が `nẐ` で消えるのは
+> `φ` が `ℤ/n` を経由するときに限り、★**連続でない `φ` はどの `nẐ` でも消えない。**
+
+★★**実装者は偽の仮説を作らず 2 通りに分けた**:
+- ★★**仮定なしの定理** `smoothH1Colim_eq_zero` —— 「`1` の近傍で恒等的に消える 1-コサイクル」が
+  定める部分加群 `H¹_sm` の colimit は **0**（★要るのは `IsNhdsOneBasis` と有向性だけ）。
+  ★副有限の実例版 `smoothH1Colim_profinite_eq_zero` も置いた。
+- 仮定つき `H1Colim_eq_zero`（`IsSmoothTowerH1`）。★**非空虚性を 2 本で証明**
+  （連続＋離散 / 塔が `⊥` に達する）。
+- ★**橋渡し** `smoothH1_eq_top_of_continuousAt` —— どの 1-コサイクルも `1` で連続なら `H¹_sm = H¹`。
+
+★**`A` の離散性を使った場所は 1 箇所だけ**（`vanishesNearOne_of_continuousAt`）。
+
+### ★★思ったより安かった点
+
+★★**`IsTgLift.of_le` を切り出したら「inflation と transgression の可換性」が
+`congr 1` + `QuotientGroup.induction_on` + `rfl` で閉じた**
+—— ★**原典が畳んでいる箇所の中身がまるごと 1 行の抽象核だった。**
+★さらに **`Module.DirectLimit` は `DirectedSystem` を要求しない**（#221）ので、
+関手性の証明は「自己検査」としてのみ必要だった。
+
+★抽象核 4 本は `#print axioms` が ★**`[propext, Quot.sound]` のみ**
+（`lift_injective_of_ker_eq_range` / `IsTgLift.of_le` / `IsCocycleOn.of_le` / `exists_le_forall_eq_zero`）。
+`lean_check` **28 往復・全部 1.1 秒未満**。
+
+### mathlib / 衝突検査 / 引用
+
+★**在庫は在った**（自作しない）: `Module.DirectLimit` **32 件**、
+`DirectedSystem` / `IsDirectedOrder` ほか **41 件**、
+★★**`ProfiniteGrp.exist_openNormalSubgroup_sub_open_nhds_of_one`**
+（★**束ねられていない形**で使える）—— ★**これで近傍基が 6 行で済んだ。**
+★衝突検査: `grep -rl` で **37 名 → 0 件**、`grep -c` で mathlib **12 名 → 0 件**、
+★**REPL で 68 宣言を実名前空間に積んで `already declared` 0 件**。
+★引用は `--projection` で **3 通り一致**。
+
+### ★正規性・可判定性・選択公理を全部列挙した（★作法）
+
+★**正規性を使わない宣言が 29 本**（★`H¹` の制限は正規性と無関係）。
+★可判定性は `Module.DirectLimit` が要求 —— ★**型が instance に依存するので
+`Classical.decEq` を差し込まず引数で受けた**（#221）。
+
+### ★★(c) の見通し
+
+- ★**(c)-3 は難易度が下がった**: 「colim 側」は完全に立ったので、
+  ★**残るは「連続コチェイン複体 `C^n_cont(G,A)` を定義して `H^n_cont` を作り、
+  `H2ColimToH2` の相手にする」だけ。**
+  ★★**`smoothCocycles₁` が「次数 1 の連続コチェイン」の正しい形であることが実測で確認された**
+  ので、★**次数 `n` への一般化の雛形が既にある。**
+- ★**(c)-4**: 変わらない。★ただし ★**`H2ColimToH2` の全射性**が残りとしてはっきり名指しできるようになった
+  （★単射は出た）。
+⇒ ★**(c)-3 を次のノードとして配った**（`ContinuousCochain.lean`）。
+
+### `lean-idioms.md` #220–#223
+
+---
+
+## ★★`VERDICT:` / `COST:` —— colimit
+
+```
+VERDICT[CC-a]: 外れ — 「colim_S H¹(S,A) = 0 を示せ」と配ったが、★離散側では偽だった（反例つき）
+VERDICT[CC-b]: 当たり — 比較射が極限で単射になることは出た（★ただし smooth 版の仮定つき）
+VERDICT[CC-c]: 当たり — 「有向系の colimit で source が消えるなら比較射は単射」は純粋な代数として切り出せた
+VERDICT[CC-d]: 半分 — (c)-3 に触れて止まった位置が名指しされた（★相手側の対象そのものが存在しない）
+```
+```
+COST[CohomologyColimit]: 安 | 持ち場=コホモロジーの colimit  — ★IsTgLift.of_le の切り出しで可換性が rfl になった
+```
+☆★★**本体が「示せ」と配った命題が偽だったのは今日 2 度目**
+（1 度目は `K_π = K_{π′}`）。★**どちらも実装者が反例で気づいて真の形に直した。**
+★**共通の形**: ★**「原典が連続の設定で述べていることを、離散の在庫で置き換えられると思った」**。
+⇒ ★**持ち場を書く前に「原典の設定と木の在庫の設定が同じか」を確かめること。**
+
+## ★★★★★メタ第 26 回を採用 —— ★**コーパスが 65% 欠けていた**（2026-09-07）
+
+★★★**最大の発見**: MCP `lean_check` の診断は `error 15:53` と書く（★**コロンが無い**）。
+道具は `error:` 書式しか読めておらず、★**4,838 件しか見ていなかった**。
+MCP 書式 8,946 件を足して ★**13,784 件**（2.8 倍）。
+☆★**CLAUDE.md が「推論効率」として勧めている速い経路（`lean_check` 0.01 秒）が、
+測定からは丸ごと抜け落ちていた。**
+
+### ★採用（2 本、両方 LF）
+
+| ファイル | 増減 | 検算 |
+|---|---|---|
+| `tools/idiom-recur.mjs` | 328 → **501** 行 | md5 `7c912070673ec6a3b78dfa89c0129520`（申告と一致）、selftest **36/36** |
+| `ResearchPaper/meta-backlog.md` | 6029 → **6271** 行 | ★**前 6029 行が完全一致**（末尾追記のみ）を `cmp` で確認 |
+
+★`tools/agent-timing.mjs` は md5 `5e3761e35d040144dcbe068863ae46e7` で ★**本体と 1 バイトも違わない**
+（「触っていない」という申告どおり）。
+★他 6 ゲートは全部不変（selftest 67/67・NG 13・34/34・94/94・10/10・graph md5 `7e52fc65a568`）。
+
+### ★★★本体の誤りが 1 つ覆された（★訂正済み）
+
+> ★**M109 の「補題名で照合する設計には構造的な偽陰性がある」は誤り。**
+> ★**補題名はエラー文に入っていた** —— `… mem_fixingSubgroup_iff ?m.216 has function type`
+> （2026-09-07T06:56）。★いま引くと **6 件**出る。
+> ★**取り落としていたのは設計ではなくコーパス。**
+
+⇒ ★**失敗形として名前を付ける**: ★★**「測って言えない」と「測れていない」の取り違え。**
+★前者は結論だが、後者は**まだ何も測っていない**。★n が小さいときは必ずこれを疑うこと。
+
+★訂正した先 **3 箇所**:
+1. `meta-backlog.md` の M109 本文（☆訂正を挿入。本文は消していない）
+2. `.claude/agents/lean-prover.md`（494/389 → **500/395**、「8 件・後 5 回」→ **40 件・2 つの顔**、
+   ★**誤った理由づけを削除**）
+3. `tools/lean-idioms.md` に **#224** を新設（下記）
+
+### ★★M116 を採用 —— ★**1 つの罠に 2 つの顔があった**
+
+★「明示引数が残っている補題に `.mp` / `.1` を打つ」という **1 つの罠**が、
+`Invalid projection: Projections cannot be used on functions…` と
+``Invalid field `mp`: The environment does not contain `Function.mp`…`` の **2 つの顔**を持つ。
+★**合わせて 40 件、08-27 から 09-07 まで毎日、09-07 だけで 6 件。**
+★同じ現場（`mem_fixingSubgroup_iff`）が 09-06 に後者、09-07 に前者を出している。
+
+☆★**なぜ書いても効かなかったか**: ★**既に #72 / #104 / #114 / #125 の 4 節に散っており、
+4 つとも逐語でなかった**（引用符が `'`、途中が `...`）。★人の grep も機械の照合も当たらない。
+
+⇒ **#224** を新設し、★**2 行を逐語で並べ**、散った 4 節を名指しした。
+★★**一般化できる作法**: ★**1 つの罠が複数のエラー文を持つときは、その全部を逐語で並べる。**
+
+### ★却下も差し替えもしないもの
+
+- **M117**（M111 = 完了時点の行数）: ★改善係自身が ★**「差し替えない」と結論**した。
+  ★M111 の誤り **26%** > `lines` の汚染 **5%**（残り 21 件のうち **19 件は同じファイルを
+  Bash でも書いている**ので M111 は定義上見ない）。⇒ ★**正典は `lines` のまま、Holm の階段は 1 段も動かない。**
+- **M119 / M120**: ★未着手のまま第 27 回に配り直した。
+
+### ☆改善係の費用（★隠さない）
+
+★今日 `meta-optimizer` は **14 件 / 中央値 31.1 分 / 合計 451.6 分**。
+今日の全 agent 73 件・1959.1 分に対し ★**23.1%**。★**これは費用であって、返した時間ではない。**
+
+---
+
+## ★★`GUESS:` —— ★**事前登録**（★本体は今日 12 本の VERDICT を GUESS 無しで書いた。もう繰り返さない）
+
+```
+GUESS[Meta27-a]: 持ち場1（族ごとの往復あたり費用）は「n が足りない」で終わる。Bonferroni 後に有意にならない
+GUESS[Meta27-b]: 持ち場2 の env:ABC3.* 23 件は「decl-index を引けば分かった」が過半 —— 索引の欠落でなく手順の問題
+GUESS[Meta27-c]: 持ち場3 は出所の族に `meta` を足す形で塞がる（ファイル名依存をやめる）
+```
+☆★**上の 3 本は agent を配った直後・結果が 1 件も返る前に書いた。**★遡及ではない。
+
+```
+GUESS[RDI-a]: Θ ≠ ∅ は surjective_unramGalCompletionUnits_div_self がそのまま使える（新しい数学は要らない）
+GUESS[RDI-b]: 捩れに制限してあるので Ẑ 成分の議論は 1 行も要らない
+GUESS[RDI-c]: LubinTateEndoTwisted は ★今度こそ要る（K̂^ur 上なので ϕ = arithFrobenius ≠ id）
+GUESS[CoC-a]: C^n_cont の定義は smoothCocycles₁ を次数 n に持ち上げるだけで済む（新しい mathlib は要らない）
+GUESS[CoC-b]: (c)-4（H2ColimToH2 の全射性）は本波では出ない
+```
+☆★**上の 5 本は agent が走っている最中に書いた**（★結果は 1 件も返っていない）。
+★**次からは配る前に書く。**
+
+## ★★★★pGC の鎖は**一直線**だった —— ★**Section1 の 1 行が 3 本を止めている**（2026-09-07）
+
+★`frontier.mjs --all` と `Skeleton/PGC/*.lean` の `sorry` 分布を実測した。
+
+| ノード | 下流 | 項目 | 止めているもの |
+|---|---|---|---|
+| `Skeleton/PGC/Section1.lean` | **38** | 30 | ★**残り `sorry` 1 件**（`cyclotomicCharacter_recoverable`、:65） |
+| `Skeleton/PGC/Section2.lean` | 10 | 8 | ★**Section1 だけ** |
+| `Skeleton/PGC/Section3.lean` | 6 | 3 | Section1 + Section2 |
+| `Skeleton/PGC/Section4.lean` | 4 | 0 | Section1 + 2 + 3（★保留 D24） |
+
+★★**`Found/PGC/` の `sorry` は 0 件。**★`grep` が拾う 134 件は**全部 docstring の「sorry 無し」という日本語**
+（`grep -o 'sorry [^ ]*'` で確認: 「sorry 無しで揃った」「sorry 無しで証明した」…）。
+⇒ ★**35 本・22,971 行の成果に穴は 1 つも無い。**
+
+★**Proposition 1.2 は既に閉じている**（`residueCard_and_degree_recoverable` は
+`Found/PGC/Prop12Transport.lean` へ委譲、`sorry` 無し）。
+⇒ ★★★**RDI が着地すれば pGC Section 1 が丸ごと閉じ、Section 2 が着手可能になる。**
+
+★前線が薄い理由も測れた: `CorrHyp` 系（Section2/3/4/5）は **D26 で触らない**、
+`Divisor` 系 2 件は **D8 / D10 で人待ち**、`GenEll/SigmaConvolution` は**消費者なし**、
+`Meta/Calibration` は下流 0。⇒ ★**pGC 以外に配れる前線は実質いま無い。**
+
+---
+
+## ★★次波の持ち場を**先に検算して**書き置いた（Prop 2.1）
+
+★**今日 2 度「偽の命題を配った」ので、今度は配る前に原典と在庫を全部引いた。**
+
+★原典（`.txt` を直接読んだ。pGC p.4、138–160 行）:
+> the p-adic logarithm defines a natural isomorphism of UK (modulo torsion)
+> onto an open subgroup of K. In particular, it defines an isomorphism of UK ⊗Zp Qp with K.
+> … the morphism UK →UL may be recovered group-theoretically by means of the
+> “Verlagerung, or transfer, map”
+
+★**在庫は 4 つとも実在を確認した**（★「あるはず」ではない）:
+
+| 要るもの | 実測した場所 |
+|---|---|
+| `padicLog_mul` | `Found/PGC/PadicLogMul.lean:285` |
+| `padicLog_injOn` | `Found/PGC/PadicLogInjective.lean:104` |
+| `padicLog_bijOn` | `Found/PGC/PadicLogSurjective.lean:194`（★**半径 1/4 の球の上**） |
+| Verlagerung | ★**mathlib** `GroupTheory/Transfer.lean:148` `MonoidHom.transfer [FiniteIndex H] : G →* A`（★行番号まで一致） |
+
+★★**本体が名指しした implicit step の中身**（★これが本当の仕事）:
+1. ★`padicLog_bijOn` は**半径 1/4 の球でしか全単射でない**。`U_K ⊗ Q_p ≅ K` に上げるには
+   ★**その球が `U_K` の中で開かつ有限指数**であることが要る。★**原典の「In particular」が畳んでいる箇所。**
+2. ★**K̄ は有限拡大についての colimit** であり、遷移写像を作るのが Verlagerung の役目。
+   ★**1 つの L で K を作るだけでは閉じない。**
+
+★★★**今日の副産物がそのまま効く見込み**: `Found/PGC/CohomologyColimit.lean`（917 行、`axiom` 0）で
+`Module.DirectLimit` **32 件**・`IsDirectedOrder`・`ProfiniteGrp.exist_openNormalSubgroup_sub_open_nhds_of_one`
+を測ってある。★**同じ道具を 2 度作らせない。**
+
+---
+
+## ★★`GUESS:` —— ★**配る前に書いた**（★今回は遡及でない）
+
+```
+GUESS[P21-a]: 在庫 4 本（padicLog 3 本 + MonoidHom.transfer）はそのまま使え、新しい解析は要らない
+GUESS[P21-b]: 本当の難所は「半径 1/4 の球 → U_K ⊗ Q_p ≅ K」の一段（開かつ有限指数を言う所）
+GUESS[P21-c]: K̄ の colimit は今日の CohomologyColimit.lean の在庫を再利用して建つ（新規の圏論は不要）
+GUESS[P21-d]: MonoidHom.transfer の [FiniteIndex H] の供給が配管の山になる
+```
+
+## ★★★★★★★★★★★★pGC **Proposition 1.1 が無条件で立ち、§1 が丸ごと閉じた**（2026-09-07）
+
+`lean/ABC3/Found/PGC/ReciprocityDatumIndependence.lean` **1,013 行 / 38 宣言、`sorry` 0**。
+★`#print axioms` は **4 本とも `[propext, Classical.choice, Quot.sound]`**。★**`sorryAx` は出ない。**
+
+| 宣言 | 状態 |
+|---|---|
+| `reciprocityDatumIndependenceOnTorsion_holds` | ★**残っていた唯一の穴（無条件）** |
+| `artinUnitEquivariance_holds` | ★**20 波避けてきた壁が無条件で出た** |
+| `cyclotomicCharacter_recoverable_holds` | ★★★**pGC Proposition 1.1（無条件）** |
+
+★**Proposition 1.2 は既に閉じていた**ので、⇒ ★★★★**pGC Section 1 が丸ごと閉じた。**
+`lake build ABC3` の `declaration uses sorry` 一覧から `Skeleton/PGC/Section1.lean` が**消えた**。
+`graph.mjs` の ★**`sorry` ノードが 14 → 13**。
+
+### ★★★本体の見立てが 3 つとも当たり／外れで割れた
+
+- ★**`Θ ≠ ∅` は使われなかった。** Λ6 の `exists_arithFrobenius_isCoherent_dworkThetaStep2` が
+  ★**冪級数 `θ` を直接**くれるので、係数 `θ ∈ Θ` を経由する必要が無かった。
+  ☆★**本体は「足りないのは `Θ ≠ ∅` だけ」と 2 波にわたって書いたが、それは要らなかった。**
+  ★**`Θ ≠ ∅` は「係数が在る」、持ち場が要ったのは「冪級数 `[θ]` が在る」** —— 別物だった。
+- ★★★**`LubinTateEndoTwisted` は 6 波目で初めて要った**（5 波連続で外していた）。
+  ★使ったのは **`powerSeries_uniqueness_twisted` と `subst_twisted_intertwine_comp` だけ**で、
+  ★`[θ]_{f,f′}` の**構成**は使っていない。★**「今度こそ要る」と書いて配ったのが当たった。**
+- ★**原典の `j ≠ 0`（Weil 群の Frobenius 方向）は 1 度も出てこない。**
+  捩れに制限すると `Ẑ` が捩れ無しゆえ `θ` は慣性に入り、
+  ★**Lemma 4.5（`uniformizerZ` の 1-コサイクル）を消費せずに済む。**
+  ⇒ ★**「捩れに制限すると安くなる」の中身がこれだった。**
+
+### ★抽象核（71 → 72 連勝）
+
+`subst_comm_of_twisted_intertwine`（★実質 0.1 秒・一発）。
+★**分岐・付値・Galois・Lubin-Tate の語彙 0。**可換環・形式冪級数・環準同型だけ。
+
+---
+
+## ★★★★配線で **import 循環が 2 本**出た —— ★**この木の潜在的な脆さが 2 つ見つかった**
+
+`Skeleton/PGC/Section1.lean` に `Found/PGC/ReciprocityDatumIndependence` を import した途端、
+`lake build` が **`build cycle detected`** を出した。
+
+### 循環 1: `Section1 → RDI → … → CyclotomicRecovery → Section1`
+
+★原因: ★**`cyclotomicCharacterObject` は「定義」なのに定理ファイル `Section1.lean` に置かれていた。**
+⇒ `Found/PGC/CyclotomicRecovery.lean` が**定理ファイル**を import せざるを得ず、
+Prop 1.1 を配線した瞬間に閉路になる。
+★**直し**: 定義を `Section1Defs.lean` へ移した。★**名前空間が同じ `ABC3.Skeleton.PGC` なので
+完全修飾名は 1 文字も変わらない。**
+☆★**この分離は既にこの木の作法だった** —— `Section1Defs.lean` の冒頭に
+「★なぜ定義と主張を分けたか(2026-09-06、D13 の実行時)」という節が既にある。
+★**本体は同じ理由を 1 日遅れで 2 度目に踏んだ。**
+
+### 循環 2: `Section1 → RDI → AbsClosureModules → Section2 → Section1`
+
+★同じ形。`RecoverableAsAddModule` と `closureDistribMulAction` が定理ファイル `Section2.lean` に在った。
+★**直し**: `Skeleton/PGC/Section2Defs.lean` を新設（`Section1Defs` と同じ作法、3,961 バイト）。
+★`AbsClosureModules` が使う `prop_2_2` の **10 箇所は全部 docstring** で、実使用は定義だけだった。
+
+### ☆★★おまけで見つかった潜在的な脆さ
+
+★**`ArtinMap.lean` は `unitsToCarrier` を自分では import せず、
+`CyclotomicRecovery → Skeleton.Section1 → Prop12Transport → DegreeTransport → UnitsPowP`
+という偶然の推移経路で受け取っていた。**
+⇒ 循環を断った瞬間に `Unknown identifier` で 3 箇所落ちた。★**直接 import を足した。**
+☆★**「ビルドが通っている」は「依存が正しく書かれている」を意味しない。**
+
+⇒ ★**申し送り**: ★★**Skeleton の定義は最初から `*Defs.lean` に置く。**
+★Section3 / Section4 を配線するときも同じ循環が出るはずである。
+
+---
+
+## ★★`VERDICT:` —— ★**事前登録した GUESS に対する当否**
+
+```
+VERDICT[RDI-a]: 外れ — Θ ≠ ∅ は使わなかった。Λ6 が冪級数 θ を直接くれた（係数と冪級数は別物）
+VERDICT[RDI-b]: 当たり — 捩れに制限したので Ẑ 成分は不要。★さらに j ≠ 0 も Lemma 4.5 も要らなかった
+VERDICT[RDI-c]: 当たり — LubinTateEndoTwisted は 6 波目で初めて要った（ねじれ一意性と合成則だけ）
+VERDICT[CoC-a]: 当たり — C^n_cont は smoothCocycles₁ の次数 n 版で済み、mathlib から取るだけだった
+VERDICT[CoC-b]: 当たり — (c)-4 は出なかった。★ただし「全射性を示す」でなく「相手を H²_cont に差し替える」が先だと判明
+VERDICT[Meta27-a]: 当たり — 10 通りすべて「言えない/件数不足」。1 群 121〜2,671 件要る
+VERDICT[Meta27-b]: 外れ — 索引を引けば分かったのは 7/23 だけ。★16 件は診断の時点で木に無かった
+VERDICT[Meta27-c]: 当たり — agentType で meta を判定（ファイル名依存をやめた）。実地試験で v2=tree → v3=meta
+```
+```
+COST[ReciprocityDatumIndependence]: 安 | 持ち場=Cor 4.9 を捩れの上で  — 在庫が厚く新しい配管は 3 本、11 宣言が一発
+COST[ContinuousCochain]: 安 | 持ち場=連続コチェイン複体  — mathlib の cochainsMap が在って inflation の可換性が 3 行
+COST[Meta27]: 並 | 持ち場=完全コーパスで費用を測る  — 判定 0 件。代わりに「観測点が仕事の 88% を見ていない」が出た
+```
+
+### ★★★メタ第 27 回の最大の観測 —— ★**観測点が仕事の 88% を見ていない**
+
+| | `tree` の診断 |
+|---|---|
+| 子 agent（200 本、`duration_ms` を持つ） | **203 件（4.6%）** |
+| ★**本体セッション**（3 本、`duration_ms` を持たない） | **4,176 件** |
+
+⇒ ★**「族 → 時間」を測ろうとしても、時間と結び付く診断が 4.6% しか無い。**
+★あと何件要るかも出た: **1 群 121〜2,671 件**（★ICC 0.089 / DEFF 4.16 なのでさらに 4 倍）。
+★★**M125（本体セッションの費用は測れる。tool_use 36,251 件・合計 86.0 時間）**が次の 1 件。
+
+### ☆★本体の落ち度（★隠さない）
+
+★**改善係に隔離 worktree を渡し忘れた。** 起動時の cwd が `D:\Math_ABC3`（master そのもの）で、
+`meta-setup.mjs` が ★**「本体が見つからない」と言って止まった。**
+☆★**自衛が効いた実例**である（`--main` を渡して押し通していたら本体の作業ツリーを直接書き換えていた）。
+⇒ ★**次から `isolation: "worktree"` を必ず指定する。**

@@ -1803,6 +1803,17 @@ import ABC3.Found.PGC.LubinTateEndoTwisted
 import ABC3.Found.PGC.CyclotomicRecoverable
 import ABC3.Found.PGC.TwistedLTComplete
 import ABC3.Found.PGC.ArtinEquivariance
+import ABC3.Found.PGC.ArtinEquivarianceProof
+import ABC3.Found.PGC.LocalTateDualityRoute
+import ABC3.Found.PGC.GroupCohomologyFinite
+import ABC3.Found.PGC.InflationRestrictionH2
+import ABC3.Found.PGC.Transgression
+import ABC3.Found.PGC.CohomologyColimit
+import ABC3.Found.PGC.LubinTateTowerTransport
+import ABC3.Found.PGC.SemilinearRestriction
+import ABC3.Found.PGC.ReciprocityLimitEquivariance
+import ABC3.Found.PGC.ContinuousCochain
+import ABC3.Found.PGC.ReciprocityDatumIndependence
 /-!
 # Found — 実装済みの基礎
 

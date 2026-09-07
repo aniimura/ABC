@@ -624,8 +624,13 @@ function saveDiskCache() {
 process.on('exit', saveDiskCache);
 
 const pageCache = new Map();
-/** @returns {Array<[string, string]>|null} [モード名, squash済みテキスト] の配列 */
-function pdfPageTexts(pdfPath, page) {
+/**
+ * @param {boolean} [cachedOnly] ★true なら `pdftotext` を**呼ばない**(キャッシュに無ければ
+ *   `undefined` を返す)。`--projection` が「頁数の多い論文で 1 頁ずつ抽出し始める」
+ *   のを避けるためだけの口で、★検査の経路からは渡さない(既定は false = 従来どおり)。
+ * @returns {Array<[string, string]>|null|undefined} [モード名, squash済みテキスト] の配列
+ */
+function pdfPageTexts(pdfPath, page, cachedOnly = false) {
   const key = `${pdfPath}#${page}`;
   if (pageCache.has(key)) return pageCache.get(key);
   let stamp = null;
@@ -637,6 +642,7 @@ function pdfPageTexts(pdfPath, page) {
     pageCache.set(key, cached);
     return cached;
   }
+  if (cachedOnly) return undefined;
   const out = [];
   for (const [name, flags] of PDF_MODES) {
     try {
@@ -649,6 +655,93 @@ function pdfPageTexts(pdfPath, page) {
   pageCache.set(key, val);
   if (dkey !== null) { disk[dkey] = val; diskDirty = true; }
   return val;
+}
+
+/**
+ * ★★逐語照合が落ちたときの診断（2026-09-07、メタ第 21 回。backlog M85）。
+ *
+ * ★**なぜ書き換えたか**（本体が同じ日に **4 往復・測定 6 回**を失った実例）:
+ *   旧実装は `次に来るはず: "abK≅(K×)∧wherethesuperscripted…"` と出していたが、
+ *   ★この字面は **PDF ではなく我々の docstring の側**だった。
+ *   見出しが「PDF がこう言っている」としか読めないので、本体は
+ *   docstring を `abK` のまま整えて 2 往復失った。★正解は `ΓKab`
+ *   （下付き K が `ab` の**前**）で、それは `.cache/pdf-pages.json` を
+ *   空白除去して grep して初めて分かった。
+ *   ★★同じ誤りが `tools/lean-idioms.md` の「引用照合」の項にもあり
+ *   （「『次に来るはず』に出るのは **PDF 側の実物**」と書いてある）、
+ *   ★道具と手引きが**同じ嘘を共有していた**。手引きも直すこと。
+ *
+ * ★**出すもの**（両側を並べ、どちらがどちらかを名前で書く）:
+ *   1. 変種ごとの一致長。★`PDF_MODES` は **3 つ**（`layout` / `default` / `raw`）で、
+ *      本体はその存在を知らなかった。最良に ★ を付けて**全部**出す。
+ *   2. 一致が切れる直前の共通部分（PDF 中の位置の手がかり）。
+ *   3. ★**我々の写し**の続き と ★**PDF の実物**の続き（同じ幅のラベルで並べる）。
+ *   4. 1 文字も一致しないときは「我々の逐語の何文字目から先なら PDF に在るか」を探す。
+ *
+ * ★PDF 側は「一致した前置き」を PDF 本文で `indexOf` して作る。前置きが短いと
+ *   複数箇所に当たるので、★**当たった箇所数をそのまま書き**、続きが食い違うときは
+ *   2 つまで出す（推測して 1 つに決めない）。
+ *
+ * @param {string} proj  我々の側の照合射影（空白除去済み）
+ * @param {Array<[string,string]>} pages `[モード名, squash 済みテキスト]`
+ * @returns {string} `ng()` の 2 行目以降に足す文字列（先頭に改行は付けない）
+ */
+function quoteMismatchDetail(proj, pages, indent = '      ') {
+  const W = 36;                                   // 前後に出す文字数
+  const per = pages.map(([mode, t]) => {
+    let lo = 0; let hi = proj.length;
+    while (lo < hi) {                             // 前置き一致は単調なので二分探索でよい
+      const mid = Math.ceil((lo + hi) / 2);
+      if (t.includes(proj.slice(0, mid))) lo = mid; else hi = mid - 1;
+    }
+    return { mode, t, lo };
+  });
+  let best = per[0] || { mode: '(なし)', t: '', lo: 0 };
+  for (const p of per) if (p.lo > best.lo) best = p;   // 同点は PDF_MODES の順で先勝ち
+
+  const L = [];
+  L.push(`${indent}変種ごとの一致長: `
+    + per.map((p) => `${p.mode === best.mode ? '★' : ''}${p.mode} ${p.lo}`).join(' / ')
+    + `（我々の逐語は ${proj.length} 文字）`);
+  if (best.lo > 0) {
+    L.push(`${indent}一致の末尾  : ...${JSON.stringify(proj.slice(Math.max(0, best.lo - W), best.lo))}`);
+  }
+  L.push(`${indent}我々の写し  → ${JSON.stringify(proj.slice(best.lo, best.lo + W))}`);
+
+  // ★PDF 側の実物。一致した前置きが PDF のどこに在るかを引き、その続きを出す。
+  const anchor = proj.slice(0, best.lo);
+  const at = [];
+  if (best.lo > 0) {
+    for (let i = best.t.indexOf(anchor); i >= 0 && at.length < 64; i = best.t.indexOf(anchor, i + 1)) at.push(i);
+  }
+  const conts = [...new Set(at.map((i) => best.t.slice(i + best.lo, i + best.lo + W)))];
+  if (!conts.length) {
+    L.push(`${indent}PDF の実物  → （先頭 1 文字も一致しないので位置が決まらない）`);
+  } else {
+    L.push(`${indent}PDF の実物  → ${JSON.stringify(conts[0])}`
+      + `（${best.mode}${at.length > 1 ? `。同じ前置きが ${at.length} 箇所` : ''}）`);
+    if (conts.length > 1) L.push(`${indent}  〃 別の箇所 → ${JSON.stringify(conts[1])}`);
+  }
+
+  // ★1 文字も一致しないとき: 我々の逐語の**どこから先なら PDF に在るか**を探す。
+  //   先頭の 1 語を写し損ねた形（一番多い）はこれで一発で分かる。
+  if (best.lo === 0 && proj.length >= 24) {
+    const SEED = 24;
+    let found = null;
+    for (let j = 1; j + SEED <= proj.length && j <= 400; j++) {
+      const k = best.t.indexOf(proj.slice(j, j + SEED));
+      if (k >= 0) { found = { j, k }; break; }
+    }
+    if (found) {
+      L.push(`${indent}★我々の逐語は ${found.j} 文字目から先なら PDF に在る`
+        + `（${best.mode}。先頭 ${found.j} 文字が写し違い）`);
+      L.push(`${indent}  PDF はその手前に → ...${JSON.stringify(best.t.slice(Math.max(0, found.k - W), found.k))}`);
+    } else {
+      L.push(`${indent}★我々の逐語は ${SEED} 文字続けて当たる箇所が 1 つも無い（頁違いを疑う）`);
+    }
+  }
+  L.push(`${indent}★PDF 側を自分で引く: node tools/check.mjs --projection --paper <鍵> --find '<空白を除いた語>'`);
+  return L.join('\n');
 }
 
 // ────────────────────────────────────────────────────────────────
@@ -760,21 +853,9 @@ function checkStructured({ files = null, papersPath = PAPERS_JSON, quiet = false
       if (hit) {
         if (hit[0] !== PDF_MODES[0][0]) nonPrimaryMode.push(`${at} (${hit[0]})`);
       } else {
-        // 最も長く一致したモードで、どこまで一致したかを二分探索で示す
-        let best = { mode: '', lo: -1 };
-        for (const [mode, t] of texts) {
-          let lo = 0;
-          let hi = proj.length;
-          while (lo < hi) {
-            const mid = Math.ceil((lo + hi) / 2);
-            if (t.includes(proj.slice(0, mid))) lo = mid; else hi = mid - 1;
-          }
-          if (lo > best.lo) best = { mode, lo };
-        }
-        ng(at,
-          `S4 逐語が物理 p.${page} に見つからない(最良 ${best.mode} モードで先頭 ${best.lo}/${proj.length} 文字まで一致)\n` +
-          `      一致した末尾: ...${JSON.stringify(proj.slice(Math.max(0, best.lo - 60), best.lo))}\n` +
-          `      次に来るはず: ${JSON.stringify(proj.slice(best.lo, best.lo + 60))}`);
+        // ★どこまで一致したか / **PDF 側が実際に持っている字面**を並べて出す
+        //   (メタ第 21 回 M85。旧実装は我々の側を「次に来るはず」と出していた)
+        ng(at, `S4 逐語が物理 p.${page} に見つからない\n${quoteMismatchDetail(proj, texts)}`);
       }
     }
   }
@@ -1409,18 +1490,10 @@ function checkLeanLedger({ dir, axiomExempt = [], papersPath = PAPERS_JSON, quie
       const pages = existsSync(pdfPath) ? pdfPageTexts(pdfPath, page) : null;
       if (!pages) { ng(where, `引用照合: PDF を読めない(${paper.file})`); continue; }
       if (!pages.some(([, t]) => t.includes(proj))) {
-        let best = { mode: '', lo: -1 };
-        for (const [mode, t] of pages) {
-          let lo = 0; let hi = proj.length;
-          while (lo < hi) {
-            const mid = Math.ceil((lo + hi) / 2);
-            if (t.includes(proj.slice(0, mid))) lo = mid; else hi = mid - 1;
-          }
-          if (lo > best.lo) best = { mode, lo };
-        }
+        // ★★ここが本体を 4 往復迷わせた場所(メタ第 21 回 M85)。
+        //   旧実装の「次に来るはず」は **我々の docstring の側**の続きだった。
         ng(where,
-          `引用照合: 逐語が ${tag} 物理 p.${page} に見つからない(${best.mode} で ${best.lo}/${proj.length} 文字まで一致)\n` +
-          `      次に来るはず: ${JSON.stringify(proj.slice(best.lo, best.lo + 60))}`);
+          `引用照合: 逐語が ${tag} 物理 p.${page} に見つからない\n${quoteMismatchDetail(proj, pages)}`);
       }
     }
   }
@@ -2155,8 +2228,88 @@ function selftest() {
     if (good) passed++;
   }
 
+  /* ★★D51: 照合が落ちたときの診断が **PDF 側の字面**を出しているか
+   * (2026-09-07、メタ第 21 回 M85)。
+   *
+   * ★ここに置く理由: 直したのは**メッセージの文面**なので、ゲートの NG 件数は
+   *   1 件も動かない。★**落ちない見張りはやがて誰も見なくなる**(M80 の教訓)ので、
+   *   selftest に固定する。★PDF は読まない(頁テキストを直に渡す純関数の検査)。
+   *
+   * ★入力は 2026-09-07 に本体が実際に踏んだ形そのもの:
+   *   我々の写しが `ΓabK`(下付き K が後ろ) / PDF の実物は `ΓKab`(前)。
+   *   旧実装はここで `abK…`(＝**我々の側**)を「次に来るはず」と出し、本体は
+   *   それを PDF 側と読んで **4 往復**失った。 */
+  const P = (s) => s;   // 頁テキストは squash 済みのつもりで直に書く
+  const detailCases = [
+    ['D51 診断は「我々の写し」と「PDF の実物」を取り違えない',
+      'thatwehaveanaturalisomorphismΓabK≅(K×)∧wherethesuperscripted',
+      [['layout', P('classfieldtheory(see,e.g.,[3])thatwehaveanaturalisomor-phismΓKab≅(K×)∧wherethesuperscripted"ab"denotes')],
+        ['default', P('classfieldtheory(see,e.g.,[3])thatwehaveanaturalisomorphismΓKab≅(K×)∧wherethesuperscripted"ab"denotes')],
+        ['raw', P('classfieldtheory(see,e.g.,[3])thatwehaveanaturalisomor-phismΓabK∼=(K×)∧wherethesuperscripted"ab"denotes')]],
+      // 期待: 我々の側は `abK…`、★PDF 側は `Kab…`。最良の変種は default。
+      ['我々の写し  → "abK', 'PDF の実物  → "Kab', '★default 30']],
+  ];
+  for (const [label, proj, pages, wants] of detailCases) {
+    const got = quoteMismatchDetail(proj, pages, '');
+    const miss = wants.filter((w) => !got.replace(/^ +/gm, '').includes(w.replace(/^ +/, '')));
+    const good = miss.length === 0;
+    console.log(`  ${good ? 'ok ' : 'NG '} ${label} → ${good ? '両側が並んだ' : `★出ていない: ${miss.join(' | ')}`}`);
+    if (good) passed++;
+  }
+
+  /* ★★D52-D57: `--projection` の**印字の上限**(M91)を selftest に固定する
+   * (2026-09-07、メタ第 23 回)。
+   *
+   * ★ここに置く理由: M91 は「印字の上限を壊してもゲートは鳴らない。直すなら口を
+   *   関数に割ること」と自分で宿題を書いた。★`projectionBlock` に割ったのでここで固定する。
+   * ★PDF は読まない(hits の配列を直に渡す純関数の検査)。 */
+  const mkHits = (spec) => {          // spec: [[頁, 件数], …]
+    const h = [];
+    for (const [pg, n] of spec) for (let i = 0; i < n; i++) h.push([pg, 'default', 'aa', 'bb']);
+    return h;
+  };
+  const projCases = [
+    ['D52 既定の上限 12 で切る(20 件 → 本文 12 行 + 案内 4 行)',
+      mkHits([[3, 20]]), 12,
+      (L) => L.length === 16 && L.filter((x) => x.includes('【x】')).length === 12
+        && L.some((x) => x.includes('残り 8 件は出さない(--limit 12)'))],
+    ['D53 --limit 0 は全部出す(案内を出さない)',
+      mkHits([[3, 20]]), 0,
+      (L) => L.length === 20 && !L.some((x) => x.includes('残り'))],
+    ['D54 件数が上限以下なら案内を出さない(境界 12/12)',
+      mkHits([[3, 12]]), 12,
+      (L) => L.length === 12 && !L.some((x) => x.includes('当たりすぎ'))],
+    /* ★★この 2 件は**空虚な検査になりやすい**。★頁番号の昇順と件数の降順が
+     *   たまたま一致する標本を置くと、並べ方を壊しても鳴らない(メタ第 23 回に実際に踏んだ)。
+     *   ⇒ ★**2 つの順序がぶつかる**標本(D55)と、★**同数のときの割り方**(D55')を対で置く。 */
+    ['D55 頁ごとの内訳は 件数の降順(★頁の昇順とわざと逆にした標本)',
+      mkHits([[2, 1], [5, 3], [7, 10]]), 1,
+      (L) => L.some((x) => x.includes('頁ごと: p.7×10 p.5×3 p.2×1'))],
+    ["D55' 同数のときだけ 頁の昇順で割る",
+      mkHits([[9, 3], [5, 3], [7, 3], [2, 1]]), 1,
+      (L) => L.some((x) => x.includes('頁ごと: p.5×3 p.7×3 p.9×3 p.2×1'))],
+    /* ★D56 は「畳んだと書くこと」と「実際に 20 頁しか並べないこと」を**両方**見る。
+     *   ★片方だけだと `slice(0,30)` にしても鳴らない(メタ第 23 回に実際に踏んだ)。 */
+    ['D56 21 頁以上なら 20 頁だけ並べて「…他 N 頁」で畳む',
+      mkHits(Array.from({ length: 25 }, (_, i) => [i + 1, 2])), 1,
+      (L) => {
+        const line = L.find((x) => x.includes('頁ごと:'));
+        return !!line && line.includes('…他 5 頁') && (line.match(/p\.\d+×/g) || []).length === 20;
+      }],
+    ['D57 0 件なら 1 行も出さない',
+      [], 12,
+      (L) => L.length === 0],
+  ];
+  for (const [label, hits, limit, want] of projCases) {
+    const L = projectionBlock(hits, 'x', limit);
+    const good = want(L);
+    console.log(`  ${good ? 'ok ' : 'NG '} ${label} → ${good ? '合った' : `★出力 ${L.length} 行: ${JSON.stringify(L.slice(0, 3))}`}`);
+    if (good) passed++;
+  }
+
   rmSync(tmp, { recursive: true, force: true });
-  const total = cases.length + 1 + leanCases.length + txtCases.length + identCases.length;
+  const total = cases.length + 1 + leanCases.length + txtCases.length + identCases.length
+    + detailCases.length + projCases.length;
   IN_SELFTEST = false;
   console.log(`\n  selftest: ${passed}/${total} PASS`);
   if (passed !== total) NG++;
@@ -2188,6 +2341,134 @@ if (only('--pdftotext')) {
 // ★`--entities`: 実体表の被覆を数える(メタ第 13 回)。★**既定の段には入れない** ——
 //   legacy を含めて数えるので、ゲートの NG 件数の基準を動かさないため。
 if (only('--entities')) { h1('ENTITIES の被覆'); auditEntities(); console.log(`\n${NG === 0 ? 'PASS' : `NG ${NG} 件`}`); process.exit(NG === 0 ? 0 : 1); }
+
+/** ★`--projection` の印字を作る。**純関数**(selftest の `projCases` が直接叩く)。
+ *
+ * ★ここに切り出した理由(メタ第 23 回): M91 が入れた「印字の上限」は
+ *   **CLI の口の中**にあったので selftest に固定できず、壊してもゲートが鳴らなかった
+ *   (M91 自身が「直すなら口を関数に割ること」と書いた宿題)。
+ *
+ * @param {Array<[number,string,string,string]>} hits  [頁, 変種, 前, 後]
+ * @param {string} needle  探し語
+ * @param {number} limit   印字の上限。0 以下なら全部出す
+ * @returns {string[]} 出す行(先頭の空白込み)
+ */
+function projectionBlock(hits, needle, limit) {
+  const L = [];
+  const shown = limit > 0 ? hits.slice(0, limit) : hits;
+  for (const [p, mode, pre, post] of shown) {
+    L.push(`  p.${p}  ${mode.padEnd(7)} ...${pre}【${needle}】${post}`);
+  }
+  if (shown.length < hits.length) {
+    const perPage = new Map();
+    for (const [p] of hits) perPage.set(p, (perPage.get(p) || 0) + 1);
+    const top = [...perPage].sort((a, b) => b[1] - a[1] || a[0] - b[0]);
+    L.push(`  … 残り ${hits.length - shown.length} 件は出さない(--limit ${limit})`);
+    L.push(`  頁ごと: ${top.slice(0, 20).map(([p, n]) => `p.${p}×${n}`).join(' ')}` +
+      (top.length > 20 ? ` …他 ${top.length - 20} 頁` : ''));
+    L.push('  ★★当たりすぎ。★**探し語を長くする**のが正しい直し方(引用は 1 箇所に定まるはず)。');
+    L.push(`     ・語を伸ばす: --find '${needle}…'   ・頁を絞る: --pages ${top[0][0]}` +
+      '   ・全部出す: --limit 0');
+  }
+  return L;
+}
+
+/* ★★`--projection`: **引用を docstring に書く前に**、PDF 側の投影を見る口
+ * (2026-09-07、メタ第 21 回。backlog M85)。★**既定の段には入れない**(検査ではない)。
+ *
+ *   node tools/check.mjs --projection --paper pGC --find 'Γ_K^ab'
+ *   node tools/check.mjs --projection --paper Yoshida08 --find 'W(K^m_f/K)' --pages 5-9
+ *   node tools/check.mjs --projection --paper pGC --find 'K' --limit 0   # ★全部出す(既定は 12 件)
+ *
+ * ★動機(実測): 2026-09-07 に本体は `ΓKab` を `abK` と写して **4 往復**失った。
+ *   そのとき実際に使った手は `.cache/pdf-pages.json` を空白除去して grep する
+ *   **5 行の `node -e`** で、長すぎて次に人が使えない。★1 行にする。
+ *
+ * ★探し語は **`leanQuoteProjection`** を通す。すなわち docstring に書く形
+ *   (`Γ_K^ab` / `Z[bb]_p` / 空白入り)をそのまま貼ってよい。
+ *
+ * ★★出力の要点は「**変種ごとに当たり方が違う**」ことを見せること。
+ *   `raw` だけ 0 件なら、その語は変種で字が違う(= `ΓKab` 対 `ΓabK`)。
+ *
+ * ★頁の選び方: 既定は**キャッシュに在る頁だけ**を見る(`pdftotext` を 1 回も呼ばない)。
+ *   そこで 0 件かつ論文が `--max-extract`(既定 60)頁以下なら、残りを抽出して引き直す。
+ *   ★Stacks(数千頁)で暴走しないための上限である。`--pages A-B` で範囲を指定できる。 */
+if (only('--projection')) {
+  const opt = (f, d = null) => { const i = args.indexOf(f); return (i >= 0 && args[i + 1] && !args[i + 1].startsWith('--')) ? args[i + 1] : d; };
+  const raw = process.stdout.write.bind(process.stdout);
+  const say = (...a) => raw(`${a.map(String).join(' ')}\n`);
+  const reg = JSON.parse(readFileSync(PAPERS_JSON, 'utf8')).papers;
+  const tag = opt('--paper');
+  const findRaw = opt('--find');
+  if (!tag || !reg[tag]) {
+    say(`--paper が要る(鍵は papers.json)。今ある鍵 ${Object.keys(reg).length} 個:`);
+    say(`  ${Object.keys(reg).join(' ')}`);
+    process.exit(2);
+  }
+  if (!findRaw) { say("--find が要る。例: --find 'Γ_K^ab'"); process.exit(2); }
+  const needle = leanQuoteProjection(findRaw);
+  if (!needle) { say(`--find が投影で空になった(${JSON.stringify(findRaw)})`); process.exit(2); }
+  const paper = reg[tag];
+  const pdfPath = join(SOURCE_DIR, `${paper.file}.pdf`);
+  if (!existsSync(pdfPath)) { say(`PDF が無い: ${pdfPath}`); process.exit(2); }
+  const around = Number(opt('--around', '240'));
+  const before = 40;
+  const maxExtract = Number(opt('--max-extract', '60'));
+  const rangeArg = opt('--pages') || opt('--page');
+  let pages;
+  if (rangeArg) {
+    const m = /^(\d+)(?:-(\d+))?$/.exec(rangeArg);
+    if (!m) { say(`--pages は N か A-B(${JSON.stringify(rangeArg)} は読めない)`); process.exit(2); }
+    const a = Number(m[1]); const b = Number(m[2] ?? m[1]);
+    pages = []; for (let p = a; p <= b; p++) pages.push(p);
+  } else {
+    pages = []; for (let p = 1; p <= (paper.pdfPages || 0); p++) pages.push(p);
+  }
+
+  const HARD = 2000;   // ★収集の上限(印字の上限は --limit)。★頁の走査ごと止める。
+  const scan = (cachedOnly) => {
+    const hits = []; const seenPages = []; let cut = false;
+    for (const p of pages) {
+      if (cut) break;
+      const texts = pdfPageTexts(pdfPath, p, cachedOnly);
+      if (texts === undefined || texts === null) continue;
+      seenPages.push(p);
+      for (const [mode, t] of texts) {
+        for (let i = t.indexOf(needle); i >= 0; i = t.indexOf(needle, i + 1)) {
+          hits.push([p, mode, t.slice(Math.max(0, i - before), i), t.slice(i + needle.length, i + needle.length + around)]);
+          if (hits.length >= HARD) { cut = true; break; }
+        }
+        if (cut) break;
+      }
+    }
+    return { hits, seenPages, cut };
+  };
+
+  let { hits, seenPages, cut } = scan(true);
+  let extracted = false;
+  if (!hits.length && pages.length <= maxExtract) { extracted = true; ({ hits, seenPages, cut } = scan(false)); }
+
+  say(`== 投影 [${tag}] ${JSON.stringify(needle)} ==  (探し語も leanQuoteProjection を通してある)`);
+  say(`   対象 ${seenPages.length}/${pages.length} 頁${extracted ? '(キャッシュに無い頁は抽出した)' : '(キャッシュに在る頁だけ)'}`
+    + `  抽出器 ${pdftotext().ident}`);
+  const perMode = Object.fromEntries(PDF_MODES.map(([m]) => [m, 0]));
+  for (const [, mode] of hits) if (mode in perMode) perMode[mode]++;
+  // ★★当たりすぎたら**本文を出さない**(メタ第 22 回 / M91)。
+  //   実測: `--find 'K'` は 212 件・**63,799 バイト**を吐いた(読む側の文脈が焼ける)。
+  //   ★語を長くすれば減るので、道具は「減らし方」を出す。全部見たいときは `--limit 0`。
+  const limit = Number(opt('--limit', '12'));
+  for (const line of projectionBlock(hits, needle, limit)) say(line);
+  if (!hits.length) {
+    say('  (0 件)  ★この形では当たらない。変種で字が違う可能性がある——');
+    say(`          短くして引き直すこと(例: --find '${needle.slice(0, Math.max(4, Math.floor(needle.length / 2)))}')`);
+  }
+  say(`  合計 ${hits.length} 件${cut ? '(★収集を ' + HARD + ' 件で打ち切った。語が短すぎる)' : ''}  ` + PDF_MODES.map(([m]) => `${m} ${perMode[m]}`).join(' / '));
+  const zero = PDF_MODES.map(([m]) => m).filter((m) => perMode[m] === 0);
+  if (hits.length && zero.length) {
+    say(`  ★${zero.join(' / ')} には 0 件 —— **変種によって字が違う**(照合はどれか 1 つに当たれば通る)`);
+  }
+  process.exit(0);
+}
 
 // ★`--ledger`: `--lean` から **`lake build` だけ**を外した段(メタ第 14 回)。
 //

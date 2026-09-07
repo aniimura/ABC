@@ -122,4 +122,25 @@ noncomputable def inertiaObject (RD : ResidueCardinality p) (SC : SubgroupCorres
 def inertiaObject.src : Source :=
   { paper := "pGC", pdfPage := 3, item := "Corollary 1.3", sectionId := "cor-1-3" }
 
+/-! ## Proposition 1.1 の対象
+
+★**ここに置く理由**（2026-09-07）: `Found/PGC/CyclotomicRecovery.lean` が
+`cyclotomicCharacterObject` を使う。定義が定理ファイル `Section1.lean` にあると、
+`Found` が定理ファイルを import することになり、
+★**Prop 1.1 の配線（`Section1` → `Found`）で import 循環になる**。
+★名前空間は同じ `ABC3.Skeleton.PGC` なので完全修飾名は変わらない。 -/
+
+/-- 円分指標 `χ_K : Γ_K → ℤ_[p]ˣ` を「K に付随する対象」として束ねたもの。
+
+`χ_K` 自体は mathlib の `cyclotomicCharacter` から得る——**これは K(と K̄)を使って定義される**。
+Proposition 1.1 が主張するのは、こうして作った対象が実は Γ_K だけで決まる、ということ。
+移送は「α で引き戻す」= `f ∘ α.symm`。 -/
+noncomputable def cyclotomicCharacterObject : AssociatedObject p where
+  Obj := fun K => K.absGal → ℤ_[p]ˣ
+  obj := fun K g => cyclotomicCharacter K.closure p g.toRingEquiv
+  transport := fun α f g' => f (α.toMulEquiv.symm g')
+
+def cyclotomicCharacterObject.src : Source :=
+  { paper := "pGC", pdfPage := 3, item := "Proposition 1.1", sectionId := "prop-1-1" }
+
 end ABC3.Skeleton.PGC

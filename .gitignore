@@ -32,3 +32,7 @@ external/
 
 # 検査器のページキャッシュ(pdftotext の結果。原本が変われば自動で外れる)
 .cache/
+
+# ★agent の作業用 Lean 断片(lean_check に通す前の下書き。成果は Found/ に書かれる)
+#   2026-09-07 追加。RDI0..6 のような使い捨てが git status を埋めるため。
+lean/_scratch/

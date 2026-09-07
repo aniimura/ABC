@@ -1,5 +1,6 @@
 import ABC3.Skeleton.PGC.Section1Defs
 import ABC3.Found.PGC.Prop12Transport
+import ABC3.Found.PGC.ReciprocityDatumIndependence
 
 /-!
 # [pGC] §1 — 命題
@@ -18,18 +19,6 @@ variable {p : ℕ} [Fact p.Prime]
 
 /-! ## Proposition 1.1 -/
 
-/-- 円分指標 `χ_K : Γ_K → ℤ_[p]ˣ` を「K に付随する対象」として束ねたもの。
-
-`χ_K` 自体は mathlib の `cyclotomicCharacter` から得る——**これは K(と K̄)を使って定義される**。
-Proposition 1.1 が主張するのは、こうして作った対象が実は Γ_K だけで決まる、ということ。
-移送は「α で引き戻す」= `f ∘ α.symm`。 -/
-noncomputable def cyclotomicCharacterObject : AssociatedObject p where
-  Obj := fun K => K.absGal → ℤ_[p]ˣ
-  obj := fun K g => cyclotomicCharacter K.closure p g.toRingEquiv
-  transport := fun α f g' => f (α.toMulEquiv.symm g')
-
-def cyclotomicCharacterObject.src : Source :=
-  { paper := "pGC", pdfPage := 3, item := "Proposition 1.1", sectionId := "prop-1-1" }
 
 /-- **[pGC] Proposition 1.1**
 
@@ -61,8 +50,8 @@ Corollary 3.12 が現在の `Interface` の下で偽だったこと(`Check/IUTch
 **閉じていることが証明済み**(円分指標は可換群への準同型なので内部自己同型で動かない)。
 探した範囲は `Check/PGC/RefutationAttempts.lean`。 -/
 theorem cyclotomicCharacter_recoverable :
-    (cyclotomicCharacterObject (p := p)).RecoverableFromAbsGal := by
-  sorry
+    (cyclotomicCharacterObject (p := p)).RecoverableFromAbsGal :=
+  ABC3.Found.PGC.cyclotomicCharacter_recoverable_holds
 
 def cyclotomicCharacter_recoverable.src : Source :=
   { paper := "pGC", pdfPage := 3, item := "Proposition 1.1", sectionId := "prop-1-1" }
