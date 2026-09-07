@@ -2,6 +2,8 @@ import ABC3.Skeleton.PGC.Section3
 import ABC3.Skeleton.PGC.Section4Defs
 import ABC3.Found.PGC.OpenSubgroupSpan
 import ABC3.Found.PGC.RamificationNaturality
+import ABC3.Found.PGC.UnramifiedBaseChangeInvariance
+import ABC3.Found.PGC.StageUpperNaturality
 
 /-!
 # [pGC] §4 — 命題(主定理)
@@ -109,10 +111,55 @@ pgc-ramification-naturality-gap.md`、下の `.needs` の implicitStep と同じ
 `RamificationFiltration` が構成された時点でこの仮説は落ちる。
 
 ★仮説 `IsNaturalFiltration` は空虚ではない
-(`Found.PGC.exists_isNaturalFiltration`——退化した `Gv ≡ ⊤` が満たす)。 -/
-theorem theorem_4_2 (RF : RamificationFiltration p) (hnat : IsNaturalFiltration RF)
-    (K K' : PAdicLocalField p) :
-    Function.Bijective (naturalOuterIso RF hnat (K := K) (K' := K')) := sorry
+(`Found.PGC.exists_isNaturalFiltration`——退化した `Gv ≡ ⊤` が満たす)。
+
+## ★★★★★2026-09-08(D32 採用): ★**旧形は `∀ RF` のせいで偽だった。実物に固定した**
+
+☆★★**旧形(`RF` を自由に取る形)は、原典自身が偽と述べている素朴 Grothendieck 予想を含意する。**
+`Check/PGC/Theorem42NaiveGC.lean::theorem_4_2_current_form_implies_naive_GC` が示し、
+`::not_theorem_4_2_current_form_of_nonisomorphic` が
+「[8] Jarden-Ritter の例が 1 組でも入れば現行形は倒れる」と述べている。
+
+★★**理由は 1 行で言える**: ★**`IsNaturalFiltration` は退化した `Gv ≡ ⊤` が満たす**ので、
+`∀ RF` の形だと ★**`OutFilt` が「濾過を保つ外部同型」ではなく「ただの外部同型」になり、
+全射性がそのまま素朴版になってしまう。**
+★原典の `OutF ilt(Γ_K, Γ_K')` は ★**上付き番号付けの高次分岐群による濾過**を指す。
+
+☆★★★**これは D13(Prop 1.2 の `∀ RD`)・D30(Prop 2.2 の自由な型族)・
+D31(Cor 3.1/3.3 の自由な述語・写像)と同じ「同型不変性」の欠落であり、★4 例目である。**
+★**pGC の残り 4 件が 4 件とも同じ病気だった。**
+
+⇒ ★**実物 `ABC3.Found.PGC.ramificationFiltration p`
+(`Found/PGC/UnramifiedBaseChangeInvariance.lean:949`、`compat` まで無条件)に固定する。**
+★これは**原典の主張を弱めたのではなく、原典が言っていない主張を落とした**ものである。
+
+## ★★★★★★2026-09-08(後刻): ★**自然性が無条件で証明され、仮説が 0 本になった**
+
+★★**`ABC3.Found.PGC.isNaturalFiltration_ramificationFiltration p`**(仮定ゼロ・`sorry` ゼロ)——
+`Found/PGC/StageNaturality.lean` + `StageTransport.lean` + `StageUpperNaturality.lean`(4 段の梯子)。
+⇒ ★**本定理は `(K K' : PAdicLocalField p)` だけを取る形になった。★残るのは全射性だけ。**
+
+★★**原典より短い道**: ★**局所類体論を 1 度も経由していない。**
+原典 §4 は「自然な射」を Artin 写像の自然性で述べるが、実際に使ったのは
+(i) 無限 Galois 対応 `InfiniteGalois.normal_iff_isGalois`、
+(ii) スペクトルノルムの保存 `norm_extendToClosure`、
+(iii) Herbrand 関数の全射準同型に沿った不変性 `map_upperRamificationGroup_eq` の 3 つだけ。
+★`Found/PGC/LubinTate*.lean` 57 本からは **`addVal_ringEquiv` 1 本**を借りただけである。
+★惰性群の輸送は Corollary 1.3 の押し出し **20 行**、
+★★**延長 `ᾱ` の選択非依存性は「正規性」だけ(3 行)** —— これが
+★**「原典が `Out`(外部同型)で述べる理由」の中身**である。
+
+## ★残る 1 つ(数学)
+
+★**全射性**(★射 `naturalOuterIso` は 2026-09-05 に構成済み)。
+   ★原典の道: Cor 3.3 → `α_K : K ≅ K'` の構成 → Lemma 4.1(★**閉じている**) →
+   ★**"standard general nonsense argument"** で有限次拡大へ。
+   ☆★**その "general nonsense" は `hedge-index.mjs` の語彙に無く、0 件と報告される**
+   (2026-09-08 に本体が実測)。★**畳まれた量は測れていない。** -/
+theorem theorem_4_2 (K K' : PAdicLocalField p) :
+    Function.Bijective
+      (naturalOuterIso (ABC3.Found.PGC.ramificationFiltration p)
+        (ABC3.Found.PGC.isNaturalFiltration_ramificationFiltration p) (K := K) (K' := K')) := sorry
 
 def theorem_4_2.src : Source :=
   { paper := "pGC", pdfPage := 7, item := "Theorem 4.2", sectionId := "theorem-4-2" }

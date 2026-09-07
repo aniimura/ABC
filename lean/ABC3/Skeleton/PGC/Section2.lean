@@ -105,12 +105,42 @@ def prop_2_1.needs : List ProofObligation :=
 - `RamificationFiltration p`(Herbrand の定理、mathlib 不在——
   `Interface/PGC/LocalFieldData.lean`)。
 - 上付き↔下付き番号付けの変換([6] Serre, Chapter IV)。
-- `Γ_K^0 = I_K`(Corollary 1.3 の系、§1 への直接依存)。 -/
-theorem prop_2_2 (_RF : RamificationFiltration p)
-    (IntKbar CompKbar : PAdicLocalField p → Type*)
-    [∀ K, AddCommGroup (IntKbar K)] [∀ K, DistribMulAction K.absGal (IntKbar K)]
-    [∀ K, AddCommGroup (CompKbar K)] [∀ K, DistribMulAction K.absGal (CompKbar K)] :
-    RecoverableAsAddModule IntKbar ∧ RecoverableAsAddModule CompKbar := sorry
+- `Γ_K^0 = I_K`(Corollary 1.3 の系、§1 への直接依存)。
+
+## ★★★★2026-09-08(D30 採用): 逸脱の記録——★**旧形は偽だった。実物に固定した**
+
+☆★**旧形(`IntKbar`・`CompKbar` を自由な型族として取る形)は偽である。**
+`Check/PGC/Prop22FreeForm.lean::prop_2_2_free_form_false`(`sorry` 無し)が証明した。
+
+★反例は病的な作用ではなく**自明な作用**で、落ちるのは**型族の側**である:
+`Γ_K ≅ Γ_K'`(位相群)なのに `K ≠ K'` である項の対が実在するので
+(`twistedField p` / `selfField p`)、「`K = twistedField p` のときだけ `ℤ`、他は `0`」
+という型族を取れば `ℤ ≃+ 0` を要求して落ちる。
+★**落とした条件は D13(Prop 1.2 の `∀ RD`)とまったく同じ「同型不変性」である。**
+☆★**2026-09-05 に `SMul` → `DistribMulAction` と強めた修理では足りなかった** ——
+あれは作用の側を塞いだが、★**型族の側が空いたままだった。**
+
+⇒ ★**実物 `IntKbar` / `CompKbar`(`Found/PGC/AbsClosureModules.lean`)に固定する。**
+★これは**原典の主張を弱めたのではなく、原典が言っていない主張を落とした**ものである
+(D13 と同じ判断。★**10 例目の退化、11 例目の修理**)。
+
+## ★残る穴はちょうど 1 つ
+
+★`Found/PGC/Prop22FixedForm.lean::prop_2_2_real_of_isometric`(`sorry` 無し)が
+★**`IsometricallyRecoverableClosure p → IntKbarRecoverable ∧ CompKbarRecoverable`** を与える。
+★`IsometricallyRecoverableClosure p` = 「Prop 2.1 の同変同型を**等長に取れる**」。
+★**分岐フィルトレーションが担う内容はここ 1 点に集約された。**
+★空虚でないことは `isometricTransport_galContinuousMulEquiv` が示す
+(★**反例が使う α そのもの**で成り立つ)。
+
+★★**原典より短い道**: 原典は「有限次拡大 L/K へ降りて Prop 2.1 を使い、
+上付き→下付き→上付きと番号付けを往復する」と書くが、
+★**有限次への降下も Herbrand の変換も 1 度も使っていない。**
+★等長同変加法同型の「単位球への制限」と「完備化への延長」の 2 本だけで
+★**`𝒪_{K̄}` と `ℂ_K` の両方が同時に出る。** -/
+theorem prop_2_2 (_RF : RamificationFiltration p) :
+    ABC3.Found.PGC.IntKbarRecoverable (p := p) ∧
+      ABC3.Found.PGC.CompKbarRecoverable (p := p) := sorry
 
 def prop_2_2.src : Source :=
   { paper := "pGC", pdfPage := 5, item := "Proposition 2.2", sectionId := "prop-2-2" }

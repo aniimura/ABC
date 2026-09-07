@@ -16,6 +16,10 @@
 //   node tools/agent-timing.mjs --denominator           … ★★数えているのは「実行」か「書かれた字面」か(M142)
 //   node tools/agent-timing.mjs --m149                  … ★★★事前登録(0b)の実行。★件数が届くまで検定しない
 //   node tools/agent-timing.mjs --solo                  … ★★M159 「他と混ざらない命令だけ」を**規則を焼いて**数える
+//   node tools/agent-timing.mjs --concurrency           … ★★★M166 同時実行数の上限 2 は妥当か(事前登録つき)
+//   node tools/agent-timing.mjs --mcp-watch             … ★★M173 「MCP の名指し」の前後を見張る(★分母つき)
+//   node tools/agent-timing.mjs --supply 2026-09-07     … ★M179 その日の持ち場が frontier に載っていたか
+//   node tools/agent-timing.mjs --supply 2026-09-07 --history … ★★歴史の木を立てて測り直す(重い)
 //   node tools/agent-timing.mjs --selftest              … 自己検査
 //   共通: --type lean-prover  --day 2026-09-07  --name <正規表現>  --limit N  --json
 //         --since 2026-09-07T16:35:29Z  --until …  … ★時刻で絞る(ISO。辞書順 = 時刻順)
@@ -64,6 +68,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import readline from 'node:readline';
+import { execFileSync } from 'node:child_process';
 
 // ════════════════════════════════════════════════════════════════════
 // 0. 比較の族 —— ★データを見る前に固定する(本体の brief が挙げた候補そのもの)
@@ -219,6 +224,10 @@ export function m149Gate(rows, need = M149_NEED, key = M149_PRIMARY) {
  */
 export const M149_WATCH_REL = 'ResearchPaper/m149-watch.json';
 
+/** ★M171: これ未満の間隔では `perDay` / `etaDays` を出さない(0.25 日 = 6 時間)。
+ *  ★書き換えたら selftest が鳴る。 */
+export const M149_WATCH_MIN_DAYS = 0.25;
+
 /** ★純関数。いまの観測 1 件を作る。 */
 export function m149Observation(recs, usable, at = new Date().toISOString()) {
   const ts = recs.map((r) => r.ts).filter((x) => typeof x === 'string').sort();
@@ -258,7 +267,21 @@ export function m149WatchVerdict(prev, cur, need = M149_NEED) {
   }
   const dtDays = (Date.parse(cur.at) - Date.parse(prev.at)) / 86400000;
   let perDay = null, etaDays = null;
-  if (dtDays > 0) {
+  /* ★★M171(メタ第 34 回) —— **最小間隔の守り**。
+   *   ★M170 の実測: 2 つの観測の間隔が **14.2 分**しかないのに
+   *   `usable` が 1 → 2 と 1 件増えただけで `perDay = 101 件/日 ⇒ あと 1.3 日` が出た。
+   *   ★外挿の分母が小さすぎる。★しかも**楽観に振れる**ので「まだ余裕がある」と読ませる ——
+   *     M160 の目的(刈られていないかの見張り)に対して**危険側**である。
+   *   ⇒ `dtDays < M149_WATCH_MIN_DAYS` なら perDay / etaDays を **出さない**(null)。
+   *   ★`level` の判定(alarm / warn)は間隔に依らないので**そのまま**である。 */
+  let tooShort = null;
+  if (dtDays > 0 && dtDays < M149_WATCH_MIN_DAYS) {
+    /* ★★この行は **異常の報せではない**(見張りの結論は別に出す)。
+     *   ⇒ `lines` に直接積むと「★単調に増えている。刈られた形跡は無い。」を押し出してしまう。
+     *   ★実測(2026-09-08、実データ 54.7 分): 最初の実装がまさにその行を消した。 */
+    tooShort = `★間隔が短すぎる(${(dtDays * 24 * 60).toFixed(1)} 分 < ${(M149_WATCH_MIN_DAYS * 24).toFixed(0)} 時間)。`
+      + '★速さ(件/日)と残り日数は**出さない**。★半日以上あけてから叩くこと。';
+  } else if (dtDays > 0) {
     perDay = (cur.usable - prev.usable) / dtDays;
     const short = Math.max(0, need - cur.usable);
     if (short === 0) etaDays = 0;
@@ -266,7 +289,231 @@ export function m149WatchVerdict(prev, cur, need = M149_NEED) {
     else { etaDays = Infinity; bump('warn'); lines.push('★増えていない(この間隔では 0 件/日)。★届く見込みが立たない。'); }
   }
   if (level === 'ok' && !lines.length) lines.push('★単調に増えている。刈られた形跡は無い。');
+  if (tooShort) lines.push(tooShort);          // ★M171: 見張りの結論の**後ろ**に添える
   return { level, lines, perDay, etaDays };
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// ★★★M166 —— 「同時実行数の上限 2 は妥当か」の事前登録(メタ第 33 回 2026-09-08 02:5x JST)
+// ══════════════════════════════════════════════════════════════════════════
+/**
+ * ★★★この節は **outcome の値を 1 つも見る前に**書いた。
+ *   見たのは (i) 子 agent の jsonl に timestamp があること、
+ *   (ii) tool の**名前**の一覧(Bash 10608 / lean_check 2089 / lean_start 102 / …)だけである。
+ *   ★error の字面・所要時間・同時数のどれも見ていない。
+ *
+ * ── 問い ────────────────────────────────────────────────────────────
+ *   D27 の「実装 agent は最大 2」は測って決めた数ではない。★3〜4 にしてよいか。
+ *
+ * ── ★測れないことを先に書く(交絡) ──────────────────────────────────
+ *   (1) ★**難しい波ほど同時本数が多い**。⇒「同時数 → 悪化」の**因果は測れない**。
+ *       測れるのは相関と、下の (a)(b)(c) の**件数**だけ。
+ *   (2) ★**露出の作り方そのものが所要時間と機械的に絡む**: 長く走る agent ほど
+ *       誰かと重なりやすいので `overlapMax` は duration と自動的に相関する。
+ *       ⇒ ★**一次の露出は `overlapAtStart`**(自分が**始まった瞬間**に走っていた本数)にする。
+ *         これは配る側が実際に決めている量であり、自分の duration では動かない。
+ *         `overlapMax` / `overlapMean` は**参考**。
+ *   (3) ★標本は独立でない(同じ波の agent は束)。ICC / DEFF を必ず出す。
+ *
+ * ── 露出(exposure) ────────────────────────────────────────────────
+ *   agent i の区間は [s_i, e_i]、e_i = Date.parse(ts)、s_i = e_i − durationMs。
+ *   `overlapAtStart(i)` … s_i の瞬間に走っていた本数(★i を含む。1 なら「1 人きり」)
+ *   `overlapMax(i)`     … 区間中の同時本数の最大(i を含む)
+ *   `overlapMean(i)`    … 区間中の同時本数の時間平均(i を含む)
+ *   ★母集団は 2 つ作る:
+ *     `all`   … 全 agent(読み取り専用も含む)
+ *     `impl`  … ★`agentType === 'lean-prover'` だけ。★**D27 が上限を掛けているのはこちら**。
+ *   ★一次は **`impl` の `overlapAtStart`**。
+ *
+ * ── 転帰(outcome)—— ★族は 4 本。★後から欄を足さない ─────────────────
+ *   (a) `mcpInfra`   … MCP(`mcp__abc3-lean__*`)の tool_result のうち **配管の失敗**の件数。
+ *                      ★判定は下の `MCP_INFRA_RE`(★データを見ずに書いた字面)。
+ *                      ★Lean の型エラーは**入らない**(それは仕事であって取り合いではない)。
+ *   (b) `sharedFile` … その agent が Write/Edit した本のうち、**区間が重なる別の agent も
+ *                      Write/Edit した本**の数(distinct)。★衝突の**機会**であって衝突そのものではない。
+ *   (c) `lakeWaitMs` … `LAKE_RE` に当たる Bash 呼び出しの**実時間の中央値**
+ *                      (tool_use の timestamp → tool_result の timestamp)。
+ *   (d) `msPerTool`  … `durationMs / toolUses`。★`durationMs` そのものは (2) で機械的に絡むので一次にしない。
+ *
+ * ── 検定 ──────────────────────────────────────────────────────────
+ *   Spearman ρ / 並べ替え p(seed 固定、20000 回)/ Holm(m = 4)。
+ *   ★欄ごとの最小件数は `MIN_N`(8)。届かない欄は**検定しない**。
+ *   ★判定は「言える / 言えない」の 2 値だけ。★**向きを断定しない**(M90 の規律)。
+ *   ★★どの欄が「言える」になっても、それは**相関**であって「3 本にしてよい」の根拠にはならない。
+ *     根拠になるのは (a)(b)(c) の**件数が水準ごとにどうなっているか**の表である。
+ *
+ * ── ★判断の規則(★データを見る前に決める。これが結論の出し方) ──────────
+ *   `impl` の `overlapAtStart` が 3 以上の区画に **agent が MIN_N 件以上**あり、かつ
+ *   その区画の (a)+(b)+(c) の**発火件数が 0 件**なら「★3 でも配管は壊れていない」と**書いてよい**。
+ *   1 件でも出たら件数を名指しし、★**「2 のままにすべき」と書く**。
+ *   ★水準 3 以上の agent が MIN_N に届かないなら「★**言えない。あと何件**」と書いて止まる。
+ */
+export const FAMILY_C = [
+  { key: 'mcpInfra',   label: '(a) MCP 配管の失敗の件数' },
+  { key: 'sharedFile', label: '(b) 重なる agent と同じ本を書いた数' },
+  { key: 'lakeWaitMs', label: '(c) lake build の実時間(中央値ms)' },
+  { key: 'msPerTool',  label: '(d) 1 tool あたりの実時間(ms)' },
+];
+
+/**
+ * ★★★v1 —— **事前登録した**(a) の検出器。★★実データでの感度は **0/19 だった**(下記)。
+ * ★捨てずに残す。理由: 「事前登録した通りに走らせたら何が出たか」を後から再現できるようにするため。
+ * ★★この定数を (a) の判定に使ってはいけない(`MCP_INFRA_RE` を使うこと)。
+ */
+export const MCP_INFRA_RE_V1 = new RegExp(
+  [
+    'no (running|active)( lean)? (session|instance|server)',
+    '(session|instance|environment) (not found|expired|closed|died|invalid|mismatch)',
+    'MCP error',
+    'connection (closed|refused|reset|lost)',
+    'ECONNRE', 'EPIPE', 'ETIMEDOUT',
+    'server (not connected|disconnected|crashed|died|unavailable)',
+    'not connected',
+    'lean_start .{0,40}(fail|error)',
+    'imports? (do not match|mismatch)',
+    '環境が(違|異な)', 'インスタンスが(違|無|な)', 'セッションが(切|無|な)',
+    'imports が(違|合わ)',
+    '再起動が必要', 'restart(ing)? the (lean|server|session)',
+  ].join('|'), 'i');
+
+/**
+ * ★★★v2(★**事後**。データを見て直した。★確証ではなく探索である)——
+ *   メタ第 33 回が v1 を実データに当てたら **2,307 件中 0 件**しか鳴らなかった。
+ *   ★ところが同じ木に `エラー: REPL は処理中(直列にしか使えない)` が **19 件**ある。
+ *   ★これは #236 の取り合いそのものであり、v1 は **感度がゼロ**だった。
+ *   ⇒ ★**「0 件」は「起きていない」ではなく「検出器が英語しか知らなかった」**である。
+ *   ★★教訓: **鳴らないことを確かめていない検出器の 0 は、数字ではない。**
+ *     ⇒ `MCP_INFRA_FIXTURES` を置き、selftest が**実物の字面で鳴ることを毎回確かめる**。
+ *
+ * ★正常形は入れない: `OK (0.07 秒)` / `エラー N 件` (= Lean の型エラー。仕事であって取り合いではない)
+ *   / `REPL を落とした(再生用の控えも捨てた)` (= `lean_reset` の成功) は**数えない**。
+ */
+export const MCP_INFRA_RE = new RegExp(
+  [
+    // ★実データから(メタ第 33 回に全数を数えて拾った 3 形)
+    'REPL は処理中',                       // ★取り合いそのもの(直列にしか使えない)
+    '秒で応答が無いので REPL を落とした',   // ★時間切れで落ちた(240〜600 秒)
+    'まだ lean_start を呼んでいない',       // ★環境が消えている / 手順違い
+    // ★v1 の英語側(将来の実装で出うる形。★いまの木では 1 件も鳴らない)
+    'no (running|active)( lean)? (session|instance|server)',
+    '(session|instance|environment) (not found|expired|closed|died|invalid|mismatch)',
+    'MCP error',
+    'connection (closed|refused|reset|lost)',
+    'ECONNRE', 'EPIPE', 'ETIMEDOUT',
+    'server (not connected|disconnected|crashed|died|unavailable)',
+  ].join('|'), 'i');
+
+/**
+ * ★★検出器の**感度**を毎回確かめる実物の字面(メタ第 33 回に木から全数で拾った)。
+ * ★`want: true` は鳴らなければならない、`false` は鳴ってはいけない。
+ * ★★この表があるかぎり「(a) が 0 件」は**検出器が生きている上での 0** である。
+ */
+export const MCP_INFRA_FIXTURES = [
+  { want: true,  n: 19, s: 'エラー: REPL は処理中(直列にしか使えない)' },
+  { want: true,  n: 17, s: 'エラー: 600 秒で応答が無いので REPL を落とした。次の呼び出しで自動的に再起動して import を読み直す。' },
+  { want: true,  n: 6,  s: '[{"type":"text","text":"まだ lean_start を呼んでいない。imports を指定して lean_start を呼ぶこと。"}]' },
+  { want: false, n: 4,  s: '[{"type":"text","text":"REPL を落とした(再生用の控えも捨てた)。"}]' },
+  { want: false, n: 0,  s: '[{"type":"text","text":"OK (0.07 秒)"}]' },
+  { want: false, n: 0,  s: '[{"type":"text","text":"エラー 1 件 (1.01 秒)\\n\\nerror 15:53\\nunsolved goals"}]' },
+  { want: false, n: 1,  s: 'Error: result (75,857 characters across 971 lines) exceeds maximum allowed tokens.' },
+];
+
+/** ★`lake build` の待ちとみなす Bash(★データを見る前に固定)。 */
+export const LAKE_RE = /\blake\s+(build|env)\b|tools[\\/]build\.mjs/;
+
+/** ★書き込み衝突の機会を数える対象(★データを見る前に固定)。 */
+export const CONFLICT_RE = /\.lean$|lean-idioms\.md$/i;
+
+/** ★区画(水準)の切り方。★データを見る前に固定。4 以上は 1 区画にまとめる。 */
+export const CONC_BINS = [1, 2, 3, 4];
+export const concBin = (k) => (k >= 4 ? 4 : k);
+
+/**
+ * ★純関数。区間の配列から同時本数の 3 つの露出を作る。
+ * iv: [{ id, s, e }]  ★s <= e。s === e(duration 0)も落とさない。
+ * 返り値: Map(id -> { atStart, max, mean })
+ */
+export function overlapStats(iv) {
+  const out = new Map();
+  for (const a of iv) {
+    // 開始の瞬間に走っている本数(★自分を含む。境界は「開いていれば走っている」= s_j <= s_a <= e_j)
+    let atStart = 0;
+    for (const b of iv) if (b.s <= a.s && a.s <= b.e) atStart++;
+    // 区間中の同時本数の最大と時間平均。★変化点は他の区間の端点だけ。
+    const pts = [a.s, a.e];
+    for (const b of iv) {
+      if (b.e < a.s || b.s > a.e) continue;
+      if (b.s > a.s && b.s < a.e) pts.push(b.s);
+      if (b.e > a.s && b.e < a.e) pts.push(b.e);
+    }
+    pts.sort((x, y) => x - y);
+    let max = 0, acc = 0;
+    const span = a.e - a.s;
+    for (let i = 0; i + 1 < pts.length; i++) {
+      const mid = (pts[i] + pts[i + 1]) / 2;
+      let k = 0;
+      for (const b of iv) if (b.s <= mid && mid <= b.e) k++;
+      if (k > max) max = k;
+      acc += k * (pts[i + 1] - pts[i]);
+    }
+    if (pts.length < 2) { max = atStart; acc = 0; }
+    out.set(a.id, { atStart, max: Math.max(max, atStart), mean: span > 0 ? acc / span : atStart });
+  }
+  return out;
+}
+
+/**
+ * ★純関数。子 agent の jsonl 本文から M166 の転帰を作る。
+ * 返り値 { mcpInfra, mcpCalls, lakeCalls, lakeWaitMs, lakeMsList, wrote:Set, leanStarts }
+ */
+export function concurrencyOutcomesFromText(text) {
+  const c = { mcpInfra: 0, mcpCalls: 0, lakeCalls: 0, lakeWaitMs: NaN, lakeMsList: [],
+              wrote: new Set(), leanStarts: 0, mcpV1: 0, kind: { busy: 0, timeout: 0, nostart: 0, other: 0 } };
+  const pendingMcp = new Set();
+  const pendingLake = new Map();   // tool_use_id -> t0(ms)
+  for (const ln of text.split('\n')) {
+    if (!ln) continue;
+    let o; try { o = JSON.parse(ln); } catch { continue; }
+    const msg = o.message; if (!msg) continue;
+    const t = o.timestamp ? Date.parse(o.timestamp) : NaN;
+    const content = Array.isArray(msg.content) ? msg.content : [];
+    for (const b of content) {
+      if (b.type === 'tool_use') {
+        const n = b.name || '';
+        if (n.startsWith('mcp__abc3-lean__')) { c.mcpCalls++; pendingMcp.add(b.id); }
+        if (n.endsWith('lean_start')) c.leanStarts++;
+        if (n === 'Bash' && typeof b.input?.command === 'string' && LAKE_RE.test(b.input.command)) {
+          c.lakeCalls++;
+          if (Number.isFinite(t)) pendingLake.set(b.id, t);
+        }
+        const fp = b.input && (b.input.file_path || b.input.filePath);
+        if (typeof fp === 'string' && CONFLICT_RE.test(fp)
+            && (n === 'Write' || n === 'Edit' || n === 'MultiEdit')) {
+          c.wrote.add(fp.replace(/\\/g, '/').toLowerCase());
+        }
+      } else if (b.type === 'tool_result') {
+        if (pendingMcp.has(b.tool_use_id)) {
+          pendingMcp.delete(b.tool_use_id);
+          const s = typeof b.content === 'string' ? b.content : JSON.stringify(b.content ?? '');
+          if (MCP_INFRA_RE_V1.test(s)) c.mcpV1++;          // ★事前登録した検出器(比較のためだけに残す)
+          if (MCP_INFRA_RE.test(s)) {
+            c.mcpInfra++;
+            if (/REPL は処理中/.test(s)) c.kind.busy++;
+            else if (/秒で応答が無いので REPL を落とした/.test(s)) c.kind.timeout++;
+            else if (/まだ lean_start を呼んでいない/.test(s)) c.kind.nostart++;
+            else c.kind.other++;
+          }
+        }
+        if (pendingLake.has(b.tool_use_id)) {
+          const t0 = pendingLake.get(b.tool_use_id);
+          pendingLake.delete(b.tool_use_id);
+          if (Number.isFinite(t) && t >= t0) c.lakeMsList.push(t - t0);
+        }
+      }
+    }
+  }
+  if (c.lakeMsList.length) c.lakeWaitMs = quantile(c.lakeMsList, 0.5);
+  return c;
 }
 
 /**
@@ -1052,6 +1299,616 @@ function cmdDenominator(recs, repoRoot) {
 }
 
 // ════════════════════════════════════════════════════════════════════
+// 4.55 --concurrency —— ★★★M166 の事前登録をそのまま実行する口(メタ第 33 回)
+// ════════════════════════════════════════════════════════════════════
+/** ★純関数。recs(+ 本文)から M166 の行を作る。text は id -> 本文の Map(試験で差し替えられる)。 */
+export function concurrencyRows(recs, texts) {
+  const iv = recs
+    .filter((r) => typeof r.ts === 'string' && Number.isFinite(r.durationMs))
+    .map((r) => ({ id: r.toolUseId, s: Date.parse(r.ts) - r.durationMs, e: Date.parse(r.ts), r }))
+    .filter((x) => Number.isFinite(x.s) && Number.isFinite(x.e));
+  const ovAll = overlapStats(iv);
+  const ivImpl = iv.filter((x) => x.r.agentType === 'lean-prover');
+  const ovImpl = overlapStats(ivImpl);
+
+  const rows = iv.map((x) => {
+    const t = texts.get(x.id);
+    const o = t ? concurrencyOutcomesFromText(t) : null;
+    const a = ovAll.get(x.id), m = ovImpl.get(x.id) ?? null;
+    return {
+      ...x.r, s: x.s, e: x.e,
+      allAtStart: a.atStart, allMax: a.max, allMean: a.mean,
+      implAtStart: m ? m.atStart : NaN, implMax: m ? m.max : NaN, implMean: m ? m.mean : NaN,
+      mcpInfra: o ? o.mcpInfra : NaN,
+      mcpV1: o ? o.mcpV1 : NaN,
+      busy: o ? o.kind.busy : NaN,
+      timeoutK: o ? o.kind.timeout : NaN,
+      nostart: o ? o.kind.nostart : NaN,
+      mcpCalls: o ? o.mcpCalls : 0,
+      leanStarts: o ? o.leanStarts : NaN,
+      lakeCalls: o ? o.lakeCalls : 0,
+      lakeWaitMs: o ? o.lakeWaitMs : NaN,
+      wrote: o ? o.wrote : new Set(),
+      msPerTool: x.r.toolUses > 0 ? x.r.durationMs / x.r.toolUses : NaN,
+    };
+  });
+  // (b) 重なる相手と同じ本を書いた数。★区間が重なることが条件。
+  for (const A of rows) {
+    let n = 0;
+    for (const f of A.wrote) {
+      for (const B of rows) {
+        if (B === A) continue;
+        if (B.e < A.s || B.s > A.e) continue;
+        if (B.wrote.has(f)) { n++; break; }
+      }
+    }
+    A.sharedFile = n;
+  }
+  return rows;
+}
+
+/**
+ * ★★★事後(探索)—— 「REPL は処理中」が**起きた瞬間**に、MCP を使う agent が何本走っていたか。
+ * ★これは事前登録に無い。★メタ第 33 回が (a) の検出器を直したあとで思いついた測り方である。
+ *   ⇒ ★**確証ではない。**★ただし「取り合いか否か」を直接見るのはこの量だけである。
+ * ★母集団を lean-prover に絞らない: ★**REPL は親セッションとも共有される**(#236)。
+ * 返り値 [{ t, id, agents, mcpAgents }]  ★mcpAgents は「その瞬間 MCP を 1 度でも使う agent の本数」。
+ */
+export function busyEvents(rows, texts) {
+  const usesMcp = new Map();
+  for (const r of rows) usesMcp.set(r.toolUseId, (r.mcpCalls || 0) > 0);
+  const out = [];
+  for (const r of rows) {
+    const t = texts.get(r.toolUseId);
+    if (!t) continue;
+    const pend = new Set();
+    for (const ln of t.split('\n')) {
+      if (!ln) continue;
+      let o; try { o = JSON.parse(ln); } catch { continue; }
+      const cs = Array.isArray(o.message?.content) ? o.message.content : [];
+      for (const b of cs) {
+        if (b.type === 'tool_use' && String(b.name || '').startsWith('mcp__abc3-lean__')) pend.add(b.id);
+        else if (b.type === 'tool_result' && pend.has(b.tool_use_id)) {
+          pend.delete(b.tool_use_id);
+          const s = typeof b.content === 'string' ? b.content : JSON.stringify(b.content ?? '');
+          if (!/REPL は処理中/.test(s)) continue;
+          const at = o.timestamp ? Date.parse(o.timestamp) : NaN;
+          if (!Number.isFinite(at)) continue;
+          let agents = 0, mcpAgents = 0;
+          for (const q of rows) {
+            if (q.s <= at && at <= q.e) { agents++; if (usesMcp.get(q.toolUseId)) mcpAgents++; }
+          }
+          out.push({ t: new Date(at).toISOString(), id: r.toolUseId, desc: r.description, agents, mcpAgents });
+        }
+      }
+    }
+  }
+  return out.sort((a, b) => (a.t < b.t ? -1 : 1));
+}
+
+/**
+ * ★★★★★事後(探索)—— **無音の環境すり替わり**を構造で見つける。
+ *
+ * ★D27 の訂正(decisions-pending 第 1077)が名指しした、いちばん重い壊れ方:
+ *   > `lean_start(...)` は **10.2 秒**で「成功」と返ったが、`lean_status` の imports が
+ *   > **もう 1 体の agent のもの**に差し替わっていた。
+ * ★★これは **error の字面をひとつも出さない**。⇒ (a) の検出器では**原理的に捕まらない**。
+ *   ⇒ ★代わりに **「自分が頼んだ imports」と「道具が報告した imports」の食い違い**で見る。
+ *
+ * ★判定(★保守的に倒す。誤報を出さないほうを選ぶ):
+ *   - その agent 自身の `lean_start` の入力 `imports` の集合を**すべて**覚える。
+ *   - `lean_start` / `lean_status` の出力の `imports: A, B, C` を集合にする。
+ *   - ★**自分が頼んだどの集合とも一致しない**なら食い違い 1 件。
+ *   - ★まだ 1 度も `lean_start` を呼んでいない agent の `lean_status` は**数えない**
+ *     (誰の環境かを問う資格が無い。★ここを数えると誤報が出る)。
+ * 返り値 [{ t, id, desc, got:[], want:[[...]] }]
+ */
+export function envMismatchEvents(rows, texts) {
+  const out = [];
+  const setKey = (a) => [...new Set(a)].map((s) => s.trim()).filter(Boolean).sort().join('|');
+
+  // ── ★1 周目: 「誰がどの imports を頼んだか」の全体表を作る(★相手を名指しするため)
+  const askedBy = new Map();   // setKey -> [{ id, desc, s, e }]
+  for (const r of rows) {
+    const text = texts.get(r.toolUseId);
+    if (!text) continue;
+    for (const ln of text.split('\n')) {
+      if (!ln) continue;
+      let o; try { o = JSON.parse(ln); } catch { continue; }
+      const cs = Array.isArray(o.message?.content) ? o.message.content : [];
+      for (const b of cs) {
+        if (b.type === 'tool_use' && /lean_start$/.test(String(b.name || ''))) {
+          const k = setKey(Array.isArray(b.input?.imports) ? b.input.imports : []);
+          if (!k) continue;
+          if (!askedBy.has(k)) askedBy.set(k, []);
+          askedBy.get(k).push({ id: r.toolUseId, desc: r.description, s: r.s, e: r.e });
+        }
+      }
+    }
+  }
+
+  for (const r of rows) {
+    const text = texts.get(r.toolUseId);
+    if (!text) continue;
+    const asked = new Set();
+    const askedRaw = [];
+    const pend = new Map();
+    for (const ln of text.split('\n')) {
+      if (!ln) continue;
+      let o; try { o = JSON.parse(ln); } catch { continue; }
+      const cs = Array.isArray(o.message?.content) ? o.message.content : [];
+      for (const b of cs) {
+        if (b.type === 'tool_use' && /lean_start$/.test(String(b.name || ''))) {
+          const im = Array.isArray(b.input?.imports) ? b.input.imports : [];
+          asked.add(setKey(im)); askedRaw.push(im);
+          pend.set(b.id, 'start');
+        } else if (b.type === 'tool_use' && /lean_status$/.test(String(b.name || ''))) {
+          pend.set(b.id, 'status');
+        } else if (b.type === 'tool_result' && pend.has(b.tool_use_id)) {
+          const kind = pend.get(b.tool_use_id); pend.delete(b.tool_use_id);
+          const s = typeof b.content === 'string' ? b.content : JSON.stringify(b.content ?? '');
+          const m = /imports:\s*([^\\\n"]+)/.exec(s);
+          if (!m) continue;
+          const got = m[1].split(',').map((x) => x.trim()).filter(Boolean);
+          if (!got.length) continue;
+          if (asked.size === 0) continue;            // ★自分で起動していないなら問わない
+          if (asked.has(setKey(got))) continue;      // ★自分が頼んだ形と一致
+          // ★★相手を名指しできるか: 同じ imports を頼んだ**別の** agent が、この瞬間に走っていたか。
+          const at = o.timestamp ? Date.parse(o.timestamp) : NaN;
+          const cands = (askedBy.get(setKey(got)) ?? []).filter((x) => x.id !== r.toolUseId);
+          const culprit = Number.isFinite(at)
+            ? (cands.find((x) => x.s <= at && at <= x.e) ?? null) : null;
+          out.push({ t: o.timestamp ?? null, id: r.toolUseId, desc: r.description, kind,
+                     got, want: askedRaw.map((a) => a.join(', ')),
+                     culprit: culprit ? culprit.desc : null,
+                     anyOwner: cands.length > 0 });
+        }
+      }
+    }
+  }
+  return out.sort((a, b) => (String(a.t) < String(b.t) ? -1 : 1));
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// ★★M173 —— 「MCP の名指し」(2026-09-08 の規約変更)は効いたか。★見張るだけの口
+// ══════════════════════════════════════════════════════════════════════════
+/**
+ * ★★族を増やさない。★分子は **第 33 回の `envMismatchEvents` をそのまま**使う。
+ * ★足したのは **分母**(照合の回数)だけである。分母が無いと「減った」が言えない
+ *   ——★件数だけを見ると「agent の本数が減っただけ」と区別できない。
+ *
+ * ★分母の定義: 「**自分で `lean_start` を呼んだ** agent が受け取った、
+ *   `imports:` を含む返答」1 つを 1 回の照合と数える。
+ *   ⇒ `envMismatchEvents` が食い違いを探している母集団と**同じ**である(定義を合わせてある)。
+ */
+export function envCheckEvents(rows, texts) {
+  const out = [];
+  for (const r of rows) {
+    const text = texts.get(r.toolUseId);
+    if (!text) continue;
+    let started = false;
+    const pend = new Map();
+    for (const ln of text.split('\n')) {
+      if (!ln) continue;
+      let o; try { o = JSON.parse(ln); } catch { continue; }
+      const cs = Array.isArray(o.message?.content) ? o.message.content : [];
+      for (const b of cs) {
+        if (b.type === 'tool_use' && /lean_start$/.test(String(b.name || ''))) { started = true; pend.set(b.id, 1); }
+        else if (b.type === 'tool_use' && /lean_status$/.test(String(b.name || ''))) pend.set(b.id, 1);
+        else if (b.type === 'tool_result' && pend.has(b.tool_use_id)) {
+          pend.delete(b.tool_use_id);
+          if (!started) continue;
+          const s = typeof b.content === 'string' ? b.content : JSON.stringify(b.content ?? '');
+          if (/imports:\s*[^\\\n"]+/.test(s)) out.push({ t: o.timestamp ?? null, id: r.toolUseId, desc: r.description });
+        }
+      }
+    }
+  }
+  return out.sort((a, b) => (String(a.t) < String(b.t) ? -1 : 1));
+}
+
+/** ★規約が変わった時刻。★**機械で決めた**: 本体の `.claude/agents/lean-prover.md` の mtime
+ *  (= 「あなたは MCP を使う側か、使わない側か」を書き込んだ瞬間)。★2026-09-08 03:16:13 JST。
+ *  ★書き換えたら selftest が鳴る。 */
+export const MCP_WATCH_CUTOFF = '2026-09-07T18:16:13.331Z';
+
+/** ★0 件のまま基準率 p0 を片側 α で棄却するのに要る照合の回数。
+ *  ★(1 − p0)^n ≤ α ⇔ n ≥ ln α / ln(1 − p0)。★p0 が 0 か 1 以上なら**判定不能**(null)。 */
+export function binomNeedZero(p0, alpha = 0.05) {
+  if (!(p0 > 0) || p0 >= 1) return null;
+  return Math.ceil(Math.log(alpha) / Math.log(1 - p0));
+}
+
+/**
+ * ★★事前登録した判定（★データを見る前に規則を書いた）:
+ *   p0     = 変更**前**の実測率(食い違い / 照合)。
+ *   need   = binomNeedZero(p0)。
+ *   ・変更後に 1 件でも出たら → **`まだ起きている`**（★「減った」とは言わない）
+ *   ・0 件のまま n ≥ need    → **`言える`**（率は p0 より低い。片側 α=0.05）
+ *   ・それ以外               → **`まだ言えない`** + あと何件かを出す
+ * ★★「減った」と言えるのは 3 番目ではなく 2 番目だけである。
+ */
+export function mcpWatchVerdict(c, alpha = 0.05) {
+  const { beforeChecks, beforeMiss, afterChecks, afterMiss } = c;
+  const p0 = beforeChecks > 0 ? beforeMiss / beforeChecks : null;
+  const need = p0 === null ? null : binomNeedZero(p0, alpha);
+  const lines = [];
+  let level;
+  if (p0 === null) { level = 'まだ言えない'; lines.push('★変更前の標本が無い。基準率が作れない。'); return { level, p0, need, short: null, lines }; }
+  if (afterMiss > 0) {
+    level = 'まだ起きている';
+    lines.push(`★★変更の後にも **${afterMiss} 件**出ている(照合 ${afterChecks} 回)。★規約は破られている。`);
+    return { level, p0, need, short: null, lines };
+  }
+  if (afterChecks >= need) {
+    level = '言える';
+    lines.push(`★★0 件のまま照合 ${afterChecks} 回(必要 ${need})。★率は ${(100 * p0).toFixed(1)}% より低い(片側 α=${alpha})。`);
+    return { level, p0, need, short: 0, lines };
+  }
+  const short = need - afterChecks;
+  level = 'まだ言えない';
+  lines.push(`★照合 ${afterChecks} 回 / 必要 ${need} 回。★★**あと ${short} 回**。★いまは何も言えない。`);
+  return { level, p0, need, short, lines };
+}
+
+/**
+ * ★★純関数。★**「このままでは溜まらない」を口が自分で言う**ための量(メタ第 37 回・持ち場 4)。
+ *   ★背景: `--mcp-watch` は第 34・35・36 回と **3 セッション続けて「あと 26 回」から動いていない**。
+ *   ★理由は「いまの波が MCP を使わない側に振られている」ことで、★これは**観測すれば言える**のに
+ *   ★口は「あと 26 回」としか言わないので、★**人が「もうすぐ溜まる」と誤読しうる**。
+ *   ⇒ ★変更後の**実測の速さ**(件/日)から、★残りに要る日数を出し、★溜まっていないならそう言う。
+ *   ★これは判定(検定)ではない。★**溜まり方の観測**である。
+ * 引数はすべて ISO 文字列 / 数。返り値の `level` は 3 通り:
+ *   'reached'  … もう必要件数に届いている(この口では速さを言わない)
+ *   'accruing' … 変更後に照合が増えており、残り日数が出せる
+ *   'stalled'  … ★変更後の照合が増えていない(速さ 0)⇒ ★**このままでは溜まらない**
+ */
+export const MCP_ACCRUAL_STALL_DAYS = 60;
+/** ★変更後の照合がこれ未満なら **速さを出さない**(M174 が `perDay` でやったのと同じ守り)。 */
+export const MCP_ACCRUAL_MIN_N = 5;
+export function mcpAccrual({ cut, lastTs, lastCheckTs = null, afterChecks, short }) {
+  const t0 = Date.parse(cut), t1 = Date.parse(lastTs ?? '');
+  const days = Number.isFinite(t0) && Number.isFinite(t1) && t1 > t0 ? (t1 - t0) / 86400000 : 0;
+  const tc = Date.parse(lastCheckTs ?? '');
+  const droughtH = Number.isFinite(tc) && Number.isFinite(t1) && t1 > tc ? (t1 - tc) / 3600000 : null;
+  const say = [];
+  if (short === 0 || short === null) return { level: 'reached', days, perDay: null, needDays: null, droughtH, lines: [] };
+  if (afterChecks === 0 || days <= 0) {
+    say.push(`★★変更後の照合は **${afterChecks} 回 / ${days.toFixed(2)} 日**。★速さは 0 である。`);
+    say.push(`★★**このままでは溜まらない。** ★「あと ${short} 回」は待てば来る数ではない。`);
+    say.push('★この口が動くには「規約変更より後に自分で `lean_start` を呼ぶ agent」が要る。');
+    return { level: 'stalled', days, perDay: 0, needDays: null, droughtH, lines: say };
+  }
+  if (afterChecks < MCP_ACCRUAL_MIN_N) {
+    // ★★ここが要 —— 少ない標本から速さを外挿しない。★時間の事実だけを言う。
+    say.push(`★変更後の照合は **${afterChecks} 回**(必要 ${MCP_ACCRUAL_MIN_N} 回未満)。★★**速さ(件/日)は出さない**。`);
+    say.push(`  ★理由: 変更の直後の数件から外挿すると「あと ${(days / Math.max(1, afterChecks) * short).toFixed(1)} 日」のような`
+      + '嘘の安心が出る(M171 / M174 が `perDay` で踏んだ形)。');
+    if (droughtH !== null) say.push(`★時間の事実だけ言う: **最後の照合から ${droughtH.toFixed(1)} 時間**、新しい照合は 1 件も無い。`);
+    say.push(`★★**このままでは溜まらない**と読むべきである。★「あと ${short} 回」は待てば来る数ではない。`);
+    say.push('★この口が動くには「規約変更より後に自分で `lean_start` を呼ぶ agent」が要る。');
+    return { level: 'stalled', days, perDay: null, needDays: null, droughtH, lines: say };
+  }
+  const perDay = afterChecks / days;
+  const needDays = short / perDay;
+  const stalled = needDays > MCP_ACCRUAL_STALL_DAYS;
+  say.push(`${stalled ? '★★' : '★'}変更後 ${afterChecks} 回 / ${days.toFixed(2)} 日 = ${perDay.toFixed(2)} 件/日`
+    + ` ⇒ 残り ${short} 回に **${needDays.toFixed(1)} 日**。`);
+  if (stalled) say.push(`★★**このままでは溜まらない**(${MCP_ACCRUAL_STALL_DAYS} 日を超える)。★待つのではなく波の振り方を変えるしかない。`);
+  return { level: stalled ? 'stalled' : 'accruing', days, perDay, needDays, droughtH, lines: say };
+}
+
+/**
+ * ★★★純関数。区間の集合について「同時 k 本だった時間」を返す(時間重み)。
+ * ★これが「上限が効いているか」を直接答える量である:
+ *   ★上限 2 は、**同時 2 本だった時間**の間しか効かない。そこが短ければ 3 に上げても何も増えない。
+ * 返り値 { total, byK: Map(k -> ms), span }
+ *   total … 少なくとも 1 本走っていた時間の合計、span … 窓の端から端まで
+ */
+export function occupancy(iv) {
+  const ev = [];
+  for (const a of iv) { ev.push([a.s, +1]); ev.push([a.e, -1]); }
+  ev.sort((x, y) => (x[0] - y[0]) || (x[1] - y[1]));
+  const byK = new Map();
+  let k = 0, prev = null, total = 0;
+  for (const [t, d] of ev) {
+    if (prev !== null && t > prev && k > 0) {
+      byK.set(k, (byK.get(k) || 0) + (t - prev));
+      total += t - prev;
+    }
+    k += d; prev = t;
+  }
+  const ts = iv.map((a) => a.s).concat(iv.map((a) => a.e)).sort((a, b) => a - b);
+  return { total, byK, span: ts.length ? ts[ts.length - 1] - ts[0] : 0 };
+}
+
+/** ★純関数。族の階段(転帰 vs 露出)。★族は FAMILY_C の 4 本に固定。 */
+export function concurrencyLadder(rows, expKey) {
+  const usable = [];
+  for (const f of FAMILY_C) {
+    const sub = rows.filter((r) => Number.isFinite(r[f.key]) && Number.isFinite(r[expKey]));
+    if (sub.length >= MIN_N
+      && new Set(sub.map((r) => r[f.key])).size > 1
+      && new Set(sub.map((r) => r[expKey])).size > 1) usable.push({ f, sub });
+  }
+  const raw = usable.map(({ f, sub }) => ({
+    key: f.key, label: f.label, n: sub.length,
+    rho: spearman(sub.map((r) => r[expKey]), sub.map((r) => r[f.key])),
+    p: permP(sub.map((r) => r[expKey]), sub.map((r) => r[f.key])),
+  }));
+  const adj = holm(raw.map((r) => r.p));
+  raw.forEach((r, i) => { r.holm = adj[i]; r.say = adj[i] < 0.05; });
+  return { rows: raw, skipped: FAMILY_C.filter((f) => !usable.some((u) => u.f.key === f.key)) };
+}
+
+/** ★★M173 —— 「MCP の名指し」の前後を見る口。★見張るだけ。★階段は計算しない。 */
+function cmdMcpWatch(recs) {
+  const texts = new Map();
+  for (const r of recs) {
+    if (r.subagentFile && fs.existsSync(r.subagentFile)) texts.set(r.toolUseId, fs.readFileSync(r.subagentFile, 'utf8'));
+  }
+  const rows = concurrencyRows(recs, texts);
+  const checks = envCheckEvents(rows, texts);
+  const miss = envMismatchEvents(rows, texts);
+  const cut = MCP_WATCH_CUTOFF;
+  const c = {
+    beforeChecks: checks.filter((e) => String(e.t) <= cut).length,
+    beforeMiss: miss.filter((e) => String(e.t) <= cut).length,
+    afterChecks: checks.filter((e) => String(e.t) > cut).length,
+    afterMiss: miss.filter((e) => String(e.t) > cut).length,
+  };
+  const v = mcpWatchVerdict(c);
+  console.log('## ★★M173 「MCP の名指し」は効いたか(★分子は第 33 回の検出器のまま。★足したのは分母だけ)\n');
+  console.log(`  規約が変わった時刻 : ${cut}(.claude/agents/lean-prover.md の mtime)`);
+  const ts = checks.map((e) => e.t).filter(Boolean).sort();
+  console.log(`  ログの窓           : ${ts[0] ?? '—'} 〜 ${ts[ts.length - 1] ?? '—'}`);
+  console.log(`  照合の総数         : ${checks.length}(自分で lean_start を呼んだ agent の imports 付きの返答)`);
+  console.log('');
+  console.log('           照合   食い違い     率');
+  console.log(`  変更前 ${String(c.beforeChecks).padStart(7)}${String(c.beforeMiss).padStart(10)}   `
+    + (c.beforeChecks ? (100 * c.beforeMiss / c.beforeChecks).toFixed(1) + '%' : '—'));
+  console.log(`  変更後 ${String(c.afterChecks).padStart(7)}${String(c.afterMiss).padStart(10)}   `
+    + (c.afterChecks ? (100 * c.afterMiss / c.afterChecks).toFixed(1) + '%' : '—'));
+  console.log(`\n  ★判定: **${v.level}**`);
+  for (const l of v.lines) console.log(`    ${l}`);
+  // ★★溜まり方(メタ第 37 回・持ち場 4)——「あと N 回」を「もうすぐ溜まる」と読ませない
+  // ★★分母は「照合の窓の終わり」ではなく **ログ全体の終わり**である。
+  //   ★照合の窓で割ると、変更の 10 分後に 1 件あるだけで「135 件/日」という嘘の速さが出る
+  //   (★M171 が `perDay` で踏んだのと同じ形。★実際に一度この形で書いて気づいた)。
+  const logTs = recs.map((r) => r.ts).filter((x) => typeof x === 'string').sort();
+  const afterTs = checks.map((e) => String(e.t)).filter((x) => x > cut).sort();
+  const acc = mcpAccrual({
+    cut, lastTs: logTs[logTs.length - 1] ?? null,
+    lastCheckTs: afterTs[afterTs.length - 1] ?? null,
+    afterChecks: c.afterChecks, short: v.short,
+  });
+  if (acc.lines.length) {
+    console.log('\n  ★溜まり方(★判定ではなく観測):');
+    for (const l of acc.lines) console.log(`    ${l}`);
+  }
+  console.log('\n  ★★この口は件数を見るだけで、**族を増やさない**(M166 の FAMILY_C は動かない)。');
+  console.log('  ★「減った」と言えるのは **0 件のまま必要回数に届いたとき**だけである。');
+}
+
+function cmdConcurrency(recs, repoRoot) {
+  const texts = new Map();
+  for (const r of recs) {
+    if (r.subagentFile && fs.existsSync(r.subagentFile)) {
+      texts.set(r.toolUseId, fs.readFileSync(r.subagentFile, 'utf8'));
+    }
+  }
+  const rows = concurrencyRows(recs, texts);
+  const impl = rows.filter((r) => r.agentType === 'lean-prover');
+
+  console.log('## ★★★M166 同時実行数の上限 2 は妥当か(★事前登録はコードに焼いてある)\n');
+  console.log(`  母集団   : 全 agent ${rows.length} 件 / うち lean-prover **${impl.length} 件**`);
+  const ts = rows.map((r) => r.s).sort((a, b) => a - b);
+  if (ts.length) {
+    console.log(`  ログの窓 : ${new Date(ts[0]).toISOString()} 〜 ${new Date(ts[ts.length - 1]).toISOString()}`
+      + `(${((ts[ts.length - 1] - ts[0]) / 86400000).toFixed(1)} 日)`);
+  }
+  console.log(`  本文が読めた : ${texts.size} 件(読めない agent は (a)(b)(c) が欠測)\n`);
+
+  // ── ★★★検出器の感度(★これを先に出す。鳴らない検出器の「0 件」は数字ではない)
+  const fx = MCP_INFRA_FIXTURES.map((f) => ({ ...f, got: MCP_INFRA_RE.test(f.s), v1: MCP_INFRA_RE_V1.test(f.s) }));
+  const bad = fx.filter((f) => f.got !== f.want);
+  console.log('### ★★★(a) の検出器の感度(★実物の字面で毎回確かめる)\n');
+  console.log('  期待  実測  v1(事前登録)  木での件数  字面');
+  for (const f of fx) {
+    console.log(`  ${f.want ? '鳴る' : '黙る'}  ${f.got ? '鳴る' : '黙る'}${f.got === f.want ? '  ' : '★NG'}`
+      + `  ${f.v1 ? '鳴る' : '★黙る'}       ${String(f.n).padStart(4)}  ${f.s.slice(0, 46).replace(/\s+/g, ' ')}`);
+  }
+  const v1Tot = rows.reduce((s, r) => s + (Number.isFinite(r.mcpV1) ? r.mcpV1 : 0), 0);
+  const v2Tot = rows.reduce((s, r) => s + (Number.isFinite(r.mcpInfra) ? r.mcpInfra : 0), 0);
+  console.log(`\n  ★★事前登録した v1 が木で鳴った回数 : **${v1Tot} 件** / v2 : **${v2Tot} 件**`);
+  if (v1Tot === 0 && v2Tot > 0) {
+    console.log('  ⇒ ★★★**事前登録した (a) は感度ゼロだった。**「0 件」は「起きていない」ではない。');
+    console.log('     ★以下の (a) は **事後に直した検出器**の数字であり、★**確証ではなく探索**である。');
+  }
+  if (bad.length) console.log(`  ★★★検出器が壊れている(${bad.length} 件が期待と違う)。★数字を信じないこと。`);
+  console.log('');
+
+  for (const [pop, set, keyStart, keyMax] of [
+    ['★lean-prover(D27 が上限を掛けている母集団。★一次)', impl, 'implAtStart', 'implMax'],
+    ['参考: 全 agent', rows, 'allAtStart', 'allMax'],
+  ]) {
+    console.log(`### ${pop}\n`);
+    console.log('  水準は「自分が**始まった瞬間**に走っていた本数」(★自分を含む)');
+    console.log('  水準  体数   (a)配管 /体   ★取合い /体   (b)同じ本  (c)lake中央s (d)1toolあたりs  tool_uses中央');
+    const bins = new Map();
+    for (const r of set) {
+      const k = Number.isFinite(r[keyStart]) ? concBin(r[keyStart]) : null;
+      if (k === null) continue;
+      if (!bins.has(k)) bins.set(k, []);
+      bins.get(k).push(r);
+    }
+    for (const k of [...bins.keys()].sort((a, b) => a - b)) {
+      const g = bins.get(k);
+      const sum = (key) => g.reduce((s, r) => s + (Number.isFinite(r[key]) ? r[key] : 0), 0);
+      const med = (key) => {
+        const v = g.map((r) => r[key]).filter(Number.isFinite);
+        return v.length ? quantile(v, 0.5) : NaN;
+      };
+      const f1 = (x) => (Number.isFinite(x) ? x.toFixed(1) : '—');
+      const rate = (key) => (sum(key) / g.length).toFixed(2);
+      console.log(`  ${String(k === 4 ? '4+' : k).padStart(3)} ${String(g.length).padStart(5)}`
+        + `${String(sum('mcpInfra')).padStart(9)} ${rate('mcpInfra').padStart(5)}`
+        + `${String(sum('busy')).padStart(9)} ${rate('busy').padStart(5)}`
+        + `${String(sum('sharedFile')).padStart(11)}`
+        + `${f1(med('lakeWaitMs') / 1000).padStart(13)}${f1(med('msPerTool') / 1000).padStart(15)}`
+        + `${f1(med('toolUses')).padStart(15)}`);
+    }
+    console.log('');
+    console.log('  ★★(a)(b) は**合計件数**、(c)(d) は中央値。★件数の欄は「発火が 0 か否か」だけを読むこと。\n');
+  }
+
+  // ── 事前登録した階段(一次の露出だけ)
+  console.log('### 階段(Spearman ρ / 並べ替え p / Holm、m = 4。★向きは断定しない)\n');
+  const lad = concurrencyLadder(impl, 'implAtStart');
+  if (!lad.rows.length) {
+    console.log('  ★どの欄も MIN_N に届かない、または分散ゼロ。★検定しない。');
+  } else {
+    console.log('  欄                                        n     ρ        p      Holm   判定');
+    for (const r of lad.rows) {
+      console.log(`  ${padr(r.label, 40)}${pad(r.n, 4)} ${pad(r.rho.toFixed(3), 7)} `
+        + `${pad(r.p.toFixed(4), 7)} ${pad(r.holm.toFixed(4), 7)}   ${r.say ? '★言える' : '言えない'}`);
+    }
+  }
+  for (const s of lad.skipped) console.log(`  ${padr(s.label, 40)}  —— ★件数不足か分散ゼロ。検定しない`);
+  console.log('');
+
+  // ── 事前登録した判断の規則をそのまま当てる
+  const hi = impl.filter((r) => Number.isFinite(r.implAtStart) && r.implAtStart >= 3);
+  const hiFire = hi.reduce((s, r) => s + (r.mcpInfra || 0) + (r.sharedFile || 0), 0);
+  console.log('### ★事前登録した判断の規則をそのまま当てる\n');
+  console.log(`  水準 3 以上で走った lean-prover : **${hi.length} 件**(必要 ${MIN_N} 件)`);
+  if (hi.length < MIN_N) {
+    console.log(`  ⇒ ★★**言えない。** あと **${MIN_N - hi.length} 件**。`);
+  } else {
+    console.log(`  その区画の (a)+(b) の発火 : **${hiFire} 件**`);
+    console.log(hiFire === 0
+      ? '  ⇒ ★3 でも (a)(b) は 1 件も発火していない(★(c)(d) は中央値の表を見ること)。'
+      : '  ⇒ ★★発火している。★**2 のままにすべき**。下に内訳を出す。');
+    if (hiFire) {
+      for (const r of hi) {
+        if ((r.mcpInfra || 0) + (r.sharedFile || 0) === 0) continue;
+        console.log(`     - ${r.ts} ${padr(String(r.description).slice(0, 34), 36)}`
+          + ` 水準${r.implAtStart} (a)${r.mcpInfra} (b)${r.sharedFile}`);
+      }
+    }
+  }
+  console.log('');
+
+  // ── ★★★上限が効いているか(★これが「2 を 3 にして得があるか」の本体)
+  console.log('### ★★★上限は**効いて**いるか —— 同時 k 本だった**時間**\n');
+  console.log('  ★上限 2 は「同時 2 本だった時間」の間しか効かない。★そこが短ければ 3 に上げても何も増えない。\n');
+  for (const [pop, set] of [['★lean-prover(D27 の上限の対象)', impl], ['参考: 全 agent', rows]]) {
+    const oc = occupancy(set.map((r) => ({ s: r.s, e: r.e })));
+    const h = (ms) => (ms / 3600000).toFixed(1);
+    console.log(`  ${pop} —— 窓 ${h(oc.span)} 時間 / 誰かが走っていた ${h(oc.total)} 時間`
+      + `(窓の ${(100 * oc.total / (oc.span || 1)).toFixed(0)}%)`);
+    console.log('    同時 k    時間h     走っていた時間に占める割合');
+    const ks = [...oc.byK.keys()].sort((a, b) => a - b);
+    for (const k of ks) {
+      console.log(`    ${String(k).padStart(6)} ${h(oc.byK.get(k)).padStart(9)}`
+        + `        ${(100 * oc.byK.get(k) / (oc.total || 1)).toFixed(1)}%`);
+    }
+    const atCap = ks.filter((k) => k >= 2).reduce((s, k) => s + oc.byK.get(k), 0);
+    console.log(`    ★同時 2 本以上だった時間 : ${h(atCap)} 時間`
+      + `(走っていた時間の ${(100 * atCap / (oc.total || 1)).toFixed(1)}% / 窓の ${(100 * atCap / (oc.span || 1)).toFixed(1)}%)`);
+    console.log('');
+  }
+
+  // ── ★★★事後(探索): 取り合いが起きた瞬間の同時本数
+  const ev = busyEvents(rows, texts);
+  console.log('### ★★★事後(探索)—— 「REPL は処理中」が起きた**瞬間**に何本走っていたか\n');
+  console.log('  ★事前登録に無い測り方(検出器を直した後に思いついた)。★確証ではない。');
+  console.log(`  事象 **${ev.length} 件**。★母集団は全 agent(REPL は親セッションとも共有される。#236)\n`);
+  if (ev.length) {
+    const hist = new Map();
+    for (const e of ev) hist.set(e.mcpAgents, (hist.get(e.mcpAgents) || 0) + 1);
+    console.log('  その瞬間に走っていた「MCP を使う agent」の本数   事象の数');
+    for (const k of [...hist.keys()].sort((a, b) => a - b)) {
+      console.log(`  ${String(k).padStart(6)}                                       ${String(hist.get(k)).padStart(6)}`);
+    }
+    const alone = ev.filter((e) => e.mcpAgents <= 1).length;
+    console.log(`\n  ★★MCP を使う agent が **1 本以下**のときに起きた事象 : **${alone} 件 / ${ev.length}**`);
+    console.log(alone
+      ? '  ⇒ ★★★**取り合いの相手は agent だけではない。**★agent を 1 本に絞っても消えない事象がある\n'
+        + '     (親セッション / 隔離 worktree / 別プロジェクトの REPL が同じ実体を握りうる)。'
+      : '  ⇒ ★すべて agent 同士の取り合いだった。');
+    console.log('');
+    console.log('  内訳(新しい順に 10 件):');
+    for (const e of ev.slice(-10)) {
+      console.log(`     ${e.t} 走行${String(e.agents).padStart(2)} うちMCP${String(e.mcpAgents).padStart(2)}`
+        + `  ${String(e.desc).slice(0, 34)}`);
+    }
+  }
+  console.log('');
+
+  // ── ★★★★★事後(探索): 無音の環境すり替わり(D27 訂正 第 1077 の壊れ方)
+  const mm = envMismatchEvents(rows, texts);
+  console.log('### ★★★★★事後(探索)—— **無音**の環境すり替わり(字面のエラーが出ない壊れ方)\n');
+  console.log('  ★D27 の訂正(第 1077)が名指しした壊れ方。★`lean_start` は「成功」と返る。');
+  console.log('  ★判定: 自分が頼んだ imports と、道具が報告した imports が一致しない回。');
+  console.log(`  ★★食い違い **${mm.length} 件**`
+    + '(★自分で lean_start を呼んでいない agent の lean_status は数えない)\n');
+  if (mm.length) {
+    const byAgent = new Set(mm.map((e) => e.id));
+    const named = mm.filter((e) => e.culprit);
+    const owned = mm.filter((e) => e.anyOwner);
+    console.log(`  ★のべ ${mm.length} 件 / ★agent ${byAgent.size} 体`);
+    console.log(`  ★★このうち **${named.length} 件**は「同じ imports を頼んだ**別の agent が同時に走っていた**」`);
+    console.log(`  ★  さらに **${owned.length} 件**は「その imports を頼んだ agent がログの中に居る」`
+      + '(★時刻は重ならないが、環境が残っていた形)');
+    const byDay = new Map();
+    for (const e of mm) { const d = String(e.t).slice(0, 10); byDay.set(d, (byDay.get(d) || 0) + 1); }
+    console.log('  ★日ごと: ' + [...byDay.entries()].sort().map(([d, n]) => `${d} ${n} 件`).join(' / '));
+    console.log('  ★★D27(2026-09-07 ユーザー承認)より**後**にも出ているかを、この行で毎回見ること。\n');
+    for (const e of mm) {
+      console.log(`     ${e.t} [${e.kind}] ${String(e.desc).slice(0, 30)}`);
+      console.log(`        頼んだ : ${e.want[e.want.length - 1] || '(空)'}`.slice(0, 118));
+      console.log(`        ★報告 : ${e.got.join(', ')}`.slice(0, 118));
+      console.log(`        ★★相手: ${e.culprit ? '**' + e.culprit + '**(同時に走っていた)'
+        : (e.anyOwner ? '(同じ imports を頼んだ agent は居るが同時ではない)' : '—— 特定できず')}`);
+    }
+  } else {
+    console.log('  ⇒ ★いまの木では 1 件も出ない。★★ただし「起きていない」ではなく');
+    console.log('     **この検出器で見えない**可能性を残す(下の限界を読むこと)。');
+  }
+  console.log('');
+
+  // ── 交絡(★都合よく隠さない)
+  console.log('### ★交絡 —— 「難しい波ほど同時本数が多い」を数字で出す\n');
+  const xs = impl.filter((r) => Number.isFinite(r.implAtStart));
+  const co = (k) => {
+    const sub = xs.filter((r) => Number.isFinite(r[k]));
+    return sub.length >= MIN_N ? spearman(sub.map((r) => r.implAtStart), sub.map((r) => r[k])) : NaN;
+  };
+  for (const k of ['toolUses', 'tokens', 'durationMs']) {
+    const v = co(k);
+    console.log(`  ρ(水準, ${padr(k, 12)}) = ${Number.isFinite(v) ? v.toFixed(3) : '—(件数不足)'}`);
+  }
+  const groups = new Map();
+  for (const r of xs) { const d = r.day || '?'; if (!groups.has(d)) groups.set(d, []); groups.get(d).push(r.implAtStart); }
+  const ic = icc1([...groups.values()]);
+  console.log(`  束(日ごと) ICC(1) = ${Number.isFinite(ic.icc) ? ic.icc.toFixed(3) : '—'}`
+    + ` / DEFF = ${Number.isFinite(ic.deff) ? ic.deff.toFixed(2) : '—'}`
+    + ` / 実効 n = ${Number.isFinite(ic.nEff) ? ic.nEff.toFixed(1) : '—'}(生 n = ${ic.N})`);
+  console.log('  ★★露出そのものが持ち場の重さと絡む。★**因果は測れない**(事前登録の (1))。\n');
+
+  // ── 素の在庫(★件数を隠さない)
+  const tot = (key, set2) => set2.reduce((s, r) => s + (Number.isFinite(r[key]) ? r[key] : 0), 0);
+  console.log('### 素の在庫(全 agent)\n');
+  console.log(`  MCP 呼び出し ${tot('mcpCalls', rows)} 件 / うち配管の失敗 **${tot('mcpInfra', rows)} 件**`);
+  console.log(`    内訳: ★取り合い(REPL は処理中) **${tot('busy', rows)} 件** / `
+    + `時間切れ ${tot('timeoutK', rows)} 件 / 環境が無い ${tot('nostart', rows)} 件`);
+  console.log(`  lean_start   ${tot('leanStarts', rows)} 件`);
+  console.log(`  lake build   ${tot('lakeCalls', rows)} 件`);
+  console.log(`  同じ本を重なって書いた延べ **${tot('sharedFile', rows)} 件**`);
+}
+
+// ════════════════════════════════════════════════════════════════════
 // 4.6 --m149 —— ★事前登録(0b)をそのまま実行する口。★停止規則を道具が強制する
 // ════════════════════════════════════════════════════════════════════
 /** ★M160 —— 見張り。★`--record` を渡したときだけ履歴に書く(読むだけでは汚さない)。 */
@@ -1140,6 +1997,276 @@ function cmdM149(recs, repoRoot) {
   console.log('  ★これは**事前登録した 1 回の検定**である。★2 度目の覗きではない。');
 }
 
+// ════════════════════════════════════════════════════════════════════
+// 4b. ★★M179 —— frontier の「供給」を測る口(メタ第 35 回)
+// ════════════════════════════════════════════════════════════════════
+//
+// ★なぜ要るか(M173 = メタ第 34 回の答え)
+//   `frontier.mjs` の「着手可能 N 件」は **ファイル**を数えている。実測では
+//   2026-09-07 に配った lean-prover 67 本のうち **65 本(97.0%)がその一覧に載っていない**本を
+//   書いていた。★本体はそれを供給量として読んでいた。
+// ★★ところが M173 の測定は**使い捨て 10 本**で行われ、M1 に従って全部消された。
+//   ⇒ ★**再実行できない**。★第 34 回自身がそう書いた(M179)。ここがその口である。
+//
+// ★★重い。既定では**歴史の木を作らない**:
+//   `--supply 2026-09-07`            … いまの木の frontier と突き合わせる(約 3 秒)
+//   `--supply 2026-09-07 --history`  … ★その日の朝の commit を `git worktree add --detach` して
+//                                       そこで frontier / graph を立てる(★約 40 秒。既定では走らない)
+// ★★`--history` を付けないと「その日の朝の一覧」ではない。★出力にそう書く。
+
+/** ★`.lean` のパスを graph.mjs と同じ `rel`(例 `Found/PGC/X.lean`)に直す。純関数。 */
+export function toRel(p) {
+  if (typeof p !== 'string') return null;
+  const s = p.replace(/\\/g, '/');
+  const i = s.toLowerCase().lastIndexOf('lean/abc3/');
+  if (i < 0) return null;
+  const r = s.slice(i + 'lean/abc3/'.length);
+  return /\.lean$/i.test(r) ? r : null;
+}
+
+/** ★その agent が **Write / Edit した** `.lean` の rel。純関数。
+ *  ★`covariatesFromText` の `files` を使わない理由: あちらは `Found/` に絞ってあり(M149 の族の分母)、
+ *    ★`Skeleton/` を書いた agent が「木に無い」に化ける。★族には触らずに別の口を作る。 */
+export function writtenLeanRels(text) {
+  const out = new Set();
+  for (const line of String(text).split('\n')) {
+    if (!line) continue;
+    let o; try { o = JSON.parse(line); } catch { continue; }
+    const content = Array.isArray(o.message?.content) ? o.message.content : [];
+    for (const b of content) {
+      if (b.type !== 'tool_use') continue;
+      if (!/^(Write|Edit|MultiEdit)$/.test(b.name || '')) continue;
+      const rel = toRel(b.input?.file_path ?? b.input?.filePath);
+      if (rel) out.add(rel);
+    }
+  }
+  return [...out].sort();
+}
+
+export const SUPPLY_CLASSES = ['着手可能', '着手不可', 'sorry なし', '木に無い', '書いていない'];
+
+/** ★1 本を frontier の一覧に照らして分類する。純関数。
+ *  @param {string|null} rel   その agent の主ファイル
+ *  @param {Map<string,{startable:boolean}>} frontierByRel
+ *  @param {Set<string>} treeRels  その時点の木にある rel */
+export function supplyClass(rel, frontierByRel, treeRels) {
+  if (!rel) return '書いていない';
+  const f = frontierByRel.get(rel);
+  if (f) return f.startable ? '着手可能' : '着手不可';
+  if (treeRels.has(rel)) return 'sorry なし';
+  return '木に無い';
+}
+
+/** ★`rel` が推移的に import している startable ノード。純関数。
+ *  ★M173 の「52 本が `Skeleton/PGC/Section1` ただ 1 つの下流だった」はこれで再現する。
+ *  ★木に無い rel は空を返す(★「辿れない」と「上流に startable が無い」を区別しない —— 危険側)。 */
+export function startableUpstream(rel, nodes, startableRels) {
+  const byMod = new Map(); const byRel = new Map();
+  for (const n of nodes) { byMod.set(n.mod, n); byRel.set(n.rel, n); }
+  const start = byRel.get(rel);
+  if (!start) return [];
+  const seen = new Set([start.mod]);
+  const stack = [start];
+  const out = new Set();
+  while (stack.length) {
+    const n = stack.pop();
+    for (const m of (n.imports ?? [])) {
+      if (seen.has(m)) continue;
+      seen.add(m);
+      const nx = byMod.get(m);
+      if (!nx) continue;
+      if (startableRels.has(nx.rel)) out.add(nx.rel);
+      stack.push(nx);
+    }
+  }
+  return [...out].sort();
+}
+
+/** ★Lean の `import ABC3.…` を読む。純関数。★行コメントの中は取らない。 */
+export function parseImports(src) {
+  const out = [];
+  for (const line of String(src).split('\n')) {
+    const m = /^\s*import\s+([A-Za-z0-9_.]+)\s*$/.exec(line);
+    if (m) out.push(m[1]);
+  }
+  return out;
+}
+
+/** ★★その時点の木に**無かった**本を、いまの木の import で辿れるようにする合成節点。
+ *  ★なぜ要るか: 2026-09-07 に配った 71 本のうち **53 本はその朝の木に存在しない**。
+  *  ★合成しないと `startableUpstream` が空を返し、★M173 の「52 本が Section1 の下流」が再現しない。
+ *  ★★危険側: 借りているのは**いまの** import であって、当時のものではない。★出力にそう書く。 */
+export function synthNode(rel, src) {
+  return { mod: `★合成 ${rel}`, rel, imports: parseImports(src) };
+}
+
+/** ★その agent に渡した brief(最初の user メッセージ)。純関数。 */
+export function briefTextOf(text) {
+  for (const line of String(text).split('\n')) {
+    if (!line) continue;
+    let o; try { o = JSON.parse(line); } catch { continue; }
+    const m = o.message;
+    if (m && m.role === 'user' && typeof m.content === 'string') return m.content;
+  }
+  return '';
+}
+
+/** ★字面に現れる `Skeleton/…/….lean` の集合。純関数。
+ *  ★★これは**辺ではない**。「その持ち場がどの節点の話か」を人が書いた字面から拾うだけである。
+ *  ★import の辺で辿れない理由(実測 2026-09-07): 配った 72 本の主ファイルは `Found/PGC/*` で、
+ *    ★**着手可能だった `Skeleton/PGC/Section1` はそれらを import していない**(配線がまだ無い)。 */
+export function mentionedSkeletons(text) {
+  const out = new Set();
+  for (const m of String(text).matchAll(/Skeleton[\\/][A-Za-z0-9]+[\\/][A-Za-z0-9]+\.lean/g)) {
+    out.add(m[0].replace(/\\/g, '/'));
+  }
+  return [...out].sort();
+}
+
+/** ★分類の集計。純関数(印字と分けてある —— M91 の教訓)。 */
+export function supplyTally(rows) {
+  const byClass = new Map(SUPPLY_CLASSES.map((c) => [c, 0]));
+  const byAnc = new Map();
+  for (const r of rows) {
+    byClass.set(r.klass, (byClass.get(r.klass) ?? 0) + 1);
+    if (r.klass === '着手可能' || r.klass === '着手不可') continue;
+    for (const a of r.upstream ?? []) byAnc.set(a, (byAnc.get(a) ?? 0) + 1);
+  }
+  const n = rows.length;
+  const listed = (byClass.get('着手可能') ?? 0);
+  const tally = (key) => {
+    const m = new Map();
+    for (const r of rows) for (const x of r[key] ?? []) m.set(x, (m.get(x) ?? 0) + 1);
+    return [...m.entries()].sort((a, b) => b[1] - a[1]);
+  };
+  return {
+    n, listed,
+    listedPct: n ? (100 * listed) / n : 0,
+    byClass,
+    byAncestor: [...byAnc.entries()].sort((a, b) => b[1] - a[1]),
+    byBrief: tally('briefNodes'),
+    byBody: tally('bodyNodes'),
+    briefHit: rows.filter((r) => (r.briefNodes ?? []).length).length,
+    bodyHit: rows.filter((r) => (r.bodyNodes ?? []).length).length,
+  };
+}
+
+/** ★その木の依存グラフ(`graph.mjs --json`)。 */
+function graphAt(root) {
+  const G = JSON.parse(execFileSync('node', [path.join(root, 'tools', 'graph.mjs'), '--json'],
+    { cwd: root, encoding: 'utf8', maxBuffer: 1 << 28 }));
+  return G.nodes ?? [];
+}
+
+/** ★★歴史の木を 1 本立てて frontier / graph を読む(重い)。★立てた木は必ず外す。 */
+function withTreeAt(repoRoot, day, useHistory, fn) {
+  if (!useHistory) return fn(repoRoot, null);
+  const commit = execFileSync(
+    'git', ['rev-list', '-1', `--before=${day}T00:00:00Z`, 'master'],
+    { cwd: repoRoot, encoding: 'utf8' }).trim();
+  if (!commit) throw new Error(`${day} より前の commit が見つからない`);
+  const tmp = path.join(os.tmpdir(), `abc3-supply-${day}-${process.pid}`);
+  execFileSync('git', ['worktree', 'add', '--detach', tmp, commit], { cwd: repoRoot, stdio: 'ignore' });
+  try { return fn(tmp, commit); }
+  finally { try { execFileSync('git', ['worktree', 'remove', '--force', tmp], { cwd: repoRoot, stdio: 'ignore' }); } catch { /* 残っても数字は出ている */ } }
+}
+
+/** ★その木の frontier(--json)。★古い commit では旗が無いことがあるので順に落とす。 */
+function frontierAt(root) {
+  const tries = [
+    ['--json', '--all', '--limit', '0', '--no-marks'],
+    ['--json', '--all', '--limit', '0'],
+    ['--json', '--all'],
+    ['--json'],
+  ];
+  let last = null;
+  for (const a of tries) {
+    try {
+      const s2 = execFileSync('node', [path.join(root, 'tools', 'frontier.mjs'), ...a],
+        { cwd: root, encoding: 'utf8', maxBuffer: 1 << 28 });
+      const j = JSON.parse(s2);
+      return { rows: j.frontier ?? j, flags: a };
+    } catch (e) { last = e; }
+  }
+  throw new Error(`frontier が立たない: ${last?.message ?? '?'}`);
+}
+
+function cmdSupply(recs, repoRoot, day, useHistory) {
+  const rows0 = recs.filter((r) => r.day === day && r.agentType === DIAG_TYPE);
+  console.log(`## ★★M179 frontier の「供給」(${day}、${DIAG_TYPE})\n`);
+  if (!rows0.length) {
+    console.log(`  その日の ${DIAG_TYPE} は 0 本。★--day を付けていると二重に絞られる。`);
+    return;
+  }
+  const t0 = Date.now();
+  const out = withTreeAt(repoRoot, day, useHistory, (root, commit) => {
+    const F = frontierAt(root);
+    const nodes = graphAt(root);
+    // ★★当時の木に**無かった**本は、当時のグラフでは 1 歩も辿れない(実測 54 本中 52 本が届かなかった)。
+    //   ⇒ ★**いまのグラフ**を借りて辿る。★借りているのは辺だけで、`startable` は当時のものを使う。
+    const nodesNow = root === repoRoot ? nodes : graphAt(repoRoot);
+    const nowHasRel = new Set(nodesNow.map((n) => n.rel));
+    const treeRels = new Set(nodes.map((n) => n.rel));
+    const frontierByRel = new Map(F.rows.map((r) => [r.rel, r]));
+    const startableRels = new Set(F.rows.filter((r) => r.startable).map((r) => r.rel));
+    const rows = rows0.map((r) => {
+      const text = r.subagentFile && fs.existsSync(r.subagentFile) ? fs.readFileSync(r.subagentFile, 'utf8') : '';
+      const rels = writtenLeanRels(text);
+      const rel = rels[0] ?? null;
+      const klass = supplyClass(rel, frontierByRel, treeRels);
+      let use = nodes, synth = false;
+      if (rel && klass === '木に無い') {
+        synth = true;
+        use = nodesNow;
+        if (!nowHasRel.has(rel)) {
+          // ★いまの木にも無い(消えた / 名前が変わった)。★せめてファイルが残っていれば合成する。
+          const cur = path.join(repoRoot, 'lean', 'ABC3', rel);
+          if (fs.existsSync(cur)) use = [synthNode(rel, fs.readFileSync(cur, 'utf8')), ...nodesNow];
+        }
+      }
+      const upstream = rel ? startableUpstream(rel, use, startableRels) : [];
+      const briefNodes = mentionedSkeletons(briefTextOf(text));
+      const bodyNodes = mentionedSkeletons(text);
+      return { rel, rels, klass, upstream, synth, briefNodes, bodyNodes };
+    });
+    return { rows, commit, nodes: nodes.length, frontier: F.rows.length,
+             startable: startableRels.size, flags: F.flags };
+  });
+  const T = supplyTally(out.rows);
+  console.log(`  木        : ${useHistory ? `★${day} 直前の commit ${String(out.commit).slice(0, 8)}` : '★いまの作業木(その日の朝ではない)'}`);
+  console.log(`  frontier  : ${out.frontier} 節点(うち着手可能 ${out.startable})/ グラフ ${out.nodes} 節点`);
+  console.log(`  旗        : ${out.flags.join(' ')}`);
+  console.log(`  配った    : ${T.n} 本`);
+  console.log('');
+  console.log('   分類            本数     割合');
+  for (const c of SUPPLY_CLASSES) {
+    const v = T.byClass.get(c) ?? 0;
+    console.log(`   ${padr(c, 14)}${pad(v, 5)}${pad(((100 * v) / T.n).toFixed(1) + '%', 9)}`);
+  }
+  console.log(`\n  ★★「着手可能」に載っていたのは ${T.listed} 本(${T.listedPct.toFixed(1)}%)。`);
+  if (T.byAncestor.length) {
+    console.log('\n   一覧の外の本を辿ると、上流の着手可能ノードは:');
+    for (const [rel, n] of T.byAncestor.slice(0, 8)) console.log(`   ${pad(n, 5)} 本 ← ${rel}`);
+    console.log('   ★★1 つの着手可能ノードから何本の持ち場が切り出せているか —— これが**供給量**である。');
+    const bor = out.rows.filter((r) => r.synth && r.upstream.length).length;
+    if (bor) console.log(`   ★★うち ${bor} 本は**当時の木に無かった**ので、★いまのグラフの辺を借りて辿った(借り物)。`);
+  }
+  console.log('\n   ── ★★帰属の水路は 3 本ある。★どれも同じ数にならない(それが答えである)。');
+  const chan = [
+    ['① import の辺(強い)', T.byAncestor, out.rows.filter((r) => r.upstream.length).length],
+    ['② brief の字面(中)', T.byBrief, T.briefHit],
+    ['③ 本文の字面(弱い)', T.byBody, T.bodyHit],
+  ];
+  for (const [name, list, hit] of chan) {
+    const top = list[0];
+    console.log(`   ${padr(name, 22)} 届いた ${pad(hit, 3)} / ${T.n} 本` +
+      (top ? `   最多 ${top[1]} 本 ← ${top[0]}` : '   ——'));
+  }
+  console.log('   ★★①が届かないのは配線がまだ無いからで、agent が遊んでいたからではない。');
+  console.log(`\n  (${((Date.now() - t0) / 1000).toFixed(1)} 秒。${useHistory ? '★歴史の木を立てて外した' : '★--history を付けると その日の朝の木で測り直す'})`);
+  console.log('  ★★測れないこと: agent が**主ファイル以外**も書いた場合、ここは最初の 1 本しか見ない。');
+  console.log('  ★★`書いていない` は「.lean を 1 本も Write/Edit しなかった」であって、失敗とは限らない。');
+}
 // ════════════════════════════════════════════════════════════════════
 // 5. selftest
 // ════════════════════════════════════════════════════════════════════
@@ -1745,7 +2872,443 @@ function selftest() {
       })());
       t('M160: 履歴の置き場所は整列で運ばれる ResearchPaper/',
         M149_WATCH_REL.startsWith('ResearchPaper/'));
+
+      // ★★M171(メタ第 34 回)—— 最小間隔の守り。★M170 が踏んだ「14 分で 101 件/日」を再現して塞ぐ。
+      const D14 = '2026-09-08T00:14:12Z';                    // ★M170 の実測(14.2 分)
+      const D6h = '2026-09-08T06:00:00Z';                    // ★ちょうど 6 時間
+      const D6hm = '2026-09-08T05:59:00Z';                   // ★6 時間の 1 分手前
+      t('M171: ★★14 分の間隔では perDay を出さない',
+        m149WatchVerdict(O(D0, 9, 1, 'a'), O(D14, 11, 2, 'a')).perDay === null);
+      t('M171: ★★14 分の間隔では etaDays を出さない',
+        m149WatchVerdict(O(D0, 9, 1, 'a'), O(D14, 11, 2, 'a')).etaDays === null);
+      t('M171: ★短すぎると言葉で告げる',
+        m149WatchVerdict(O(D0, 9, 1, 'a'), O(D14, 11, 2, 'a')).lines.some((l) => l.includes('間隔が短すぎる')));
+      t('M171: ★★間隔が短くても level は変わらない(減りは alarm のまま)',
+        m149WatchVerdict(O(D0, 9, 5, 'a'), O(D14, 9, 3, 'a')).level === 'alarm');
+      t('M171: ★間隔が短くても古い側が進めば warn',
+        m149WatchVerdict(O(D0, 9, 5, 'a'), O(D14, 10, 6, 'b')).level === 'warn');
+      t('M171: ★★6 時間の 1 分手前は まだ出さない',
+        m149WatchVerdict(O(D0, 9, 5, 'a'), O(D6hm, 12, 8, 'a')).perDay === null);
+      t('M171: ★ちょうど 6 時間なら出す',
+        m149WatchVerdict(O(D0, 9, 5, 'a'), O(D6h, 12, 8, 'a')).perDay === 12);
+      t('M171: ★1 日あけた既定の道は変わらない(3 件/日)',
+        m149WatchVerdict(O(D0, 9, 5, 'a'), O(D1, 12, 8, 'a')).perDay === 3);
+      t('M171: ★★短い間隔では「横ばい ⇒ warn」も出さない(0 件/日 と言えないから)',
+        m149WatchVerdict(O(D0, 9, 5, 'a'), O(D14, 9, 5, 'a')).level === 'ok');
+      t('M171: 最小間隔は 6 時間', M149_WATCH_MIN_DAYS === 0.25);
+      t('M171: ★★短い間隔でも「単調に増えている」を押し出さない(第 34 回が実データで踏んだ)',
+        m149WatchVerdict(O(D0, 9, 1, 'a'), O(D14, 11, 2, 'a')).lines.some((l) => l.includes('単調に増えている')));
+      t('M171: ★見張りの結論が先、間隔の断りが後ろ', (() => {
+        const ls = m149WatchVerdict(O(D0, 9, 1, 'a'), O(D14, 11, 2, 'a')).lines;
+        return ls.length === 2 && ls[0].includes('単調に増えている') && ls[1].includes('間隔が短すぎる');
+      })());
+      t('M171: ★alarm のときも間隔の断りは後ろに付く', (() => {
+        const v = m149WatchVerdict(O(D0, 9, 5, 'a'), O(D14, 9, 3, 'a'));
+        return v.level === 'alarm' && v.lines[v.lines.length - 1].includes('間隔が短すぎる');
+      })());
+
+      // ★★M173(メタ第 34 回)—— 「MCP の名指し」の見張り。★分子は第 33 回の検出器のまま。
+      t('M173: ★0 件で 10.58% を棄却するのに要る回数は 27',
+        binomNeedZero(11 / 104) === 27);
+      t('M173: ★率が高いほど早く言える(50% なら 5 回)', binomNeedZero(0.5) === 5);
+      t('M173: ★率 0 なら判定不能(null)', binomNeedZero(0) === null);
+      t('M173: ★率 1 以上なら判定不能(null)', binomNeedZero(1) === null);
+      t('M173: ★★変更後に 1 件でも出たら「まだ起きている」',
+        mcpWatchVerdict({ beforeChecks: 104, beforeMiss: 11, afterChecks: 50, afterMiss: 1 }).level === 'まだ起きている');
+      t('M173: ★★1 件出たら「言える」には絶対にならない(回数が足りていても)',
+        mcpWatchVerdict({ beforeChecks: 104, beforeMiss: 11, afterChecks: 999, afterMiss: 1 }).level !== '言える');
+      t('M173: ★0 件のまま必要回数に届けば「言える」',
+        mcpWatchVerdict({ beforeChecks: 104, beforeMiss: 11, afterChecks: 27, afterMiss: 0 }).level === '言える');
+      t('M173: ★1 回足りなければ「まだ言えない」', (() => {
+        const v = mcpWatchVerdict({ beforeChecks: 104, beforeMiss: 11, afterChecks: 26, afterMiss: 0 });
+        return v.level === 'まだ言えない' && v.short === 1;
+      })());
+      t('M173: ★実データの形(照合 1 / 0 件)は あと 26 回', (() => {
+        const v = mcpWatchVerdict({ beforeChecks: 104, beforeMiss: 11, afterChecks: 1, afterMiss: 0 });
+        return v.level === 'まだ言えない' && v.short === 26;
+      })());
+      t('M173: ★変更前が空なら基準率が作れない',
+        mcpWatchVerdict({ beforeChecks: 0, beforeMiss: 0, afterChecks: 9, afterMiss: 0 }).p0 === null);
+      // ★★M192b(メタ第 37 回・持ち場 4)—— 「このままでは溜まらない」を口が自分で言う
+      t('M192b: ★変更後 0 件なら stalled(速さ 0)', (() => {
+        const a = mcpAccrual({ cut: '2026-09-07T18:16:13Z', lastTs: '2026-09-08T18:16:13Z', afterChecks: 0, short: 26 });
+        return a.level === 'stalled' && a.perDay === 0;
+      })());
+      // ★★★少ない標本から速さを外挿しない —— これが M171 / M174 の守りの再演
+      t('M192b: ★★実データの形(変更後 1 回)は stalled で、★速さを出さない', (() => {
+        const a = mcpAccrual({ cut: '2026-09-07T18:16:13Z', lastTs: '2026-09-07T20:25:21Z', lastCheckTs: '2026-09-07T18:26:52Z', afterChecks: 1, short: 26 });
+        return a.level === 'stalled' && a.perDay === null && a.needDays === null;
+      })());
+      t('M192b: ★★その場合でも「最後の照合から何時間」は言う', (() => {
+        const a = mcpAccrual({ cut: '2026-09-07T18:16:13Z', lastTs: '2026-09-07T20:25:21Z', lastCheckTs: '2026-09-07T18:26:52Z', afterChecks: 1, short: 26 });
+        return a.droughtH > 1.9 && a.droughtH < 2.1;
+      })());
+      t('M192b: ★★「このままでは溜まらない」を必ず口に出す', (() => {
+        const a = mcpAccrual({ cut: '2026-09-07T18:16:13Z', lastTs: '2026-09-07T20:25:21Z', afterChecks: 1, short: 26 });
+        return a.lines.some((l) => l.includes('このままでは溜まらない'));
+      })());
+      t('M192b: ★標本が MIN_N 以上なら速さを出す', (() => {
+        const a = mcpAccrual({ cut: '2026-09-01T00:00:00Z', lastTs: '2026-09-08T00:00:00Z', afterChecks: 70, short: 26 });
+        return a.level === 'accruing' && a.needDays < 3 && a.perDay > 9;
+      })());
+      t('M192b: ★遅すぎれば stalled(60 日超)', (() => {
+        const a = mcpAccrual({ cut: '2026-09-01T00:00:00Z', lastTs: '2026-09-08T00:00:00Z', afterChecks: 5, short: 260 });
+        return a.level === 'stalled' && a.needDays > MCP_ACCRUAL_STALL_DAYS;
+      })());
+      t('M192b: ★もう届いていれば速さを言わない', (() => {
+        const a = mcpAccrual({ cut: '2026-09-01T00:00:00Z', lastTs: '2026-09-08T00:00:00Z', afterChecks: 30, short: 0 });
+        return a.level === 'reached' && a.lines.length === 0;
+      })());
+      t('M192b: ★時刻が壊れていても落ちない(stalled として扱う)', (() => {
+        const a = mcpAccrual({ cut: 'x', lastTs: null, afterChecks: 3, short: 5 });
+        return a.level === 'stalled' && a.days === 0;
+      })());
+      t('M173: 規約が変わった時刻は 2026-09-07T18:16:13.331Z',
+        MCP_WATCH_CUTOFF === '2026-09-07T18:16:13.331Z');
+      t('M173: ★分母は「自分で lean_start を呼んだ agent」だけ', (() => {
+        const mk = (arr) => arr.map((o) => JSON.stringify(o)).join('\n');
+        // 自分では start していない agent(status だけ)は数えない
+        const noStart = mk([{ timestamp: 'T1', message: { content: [
+          { type: 'tool_use', id: 'u1', name: 'mcp__lean__lean_status', input: {} }] } },
+          { timestamp: 'T1', message: { content: [
+            { type: 'tool_result', tool_use_id: 'u1', content: 'imports: A, B' }] } }]);
+        const withStart = mk([{ timestamp: 'T2', message: { content: [
+          { type: 'tool_use', id: 'u0', name: 'mcp__lean__lean_start', input: { imports: ['A'] } }] } },
+          { timestamp: 'T2', message: { content: [
+            { type: 'tool_result', tool_use_id: 'u0', content: 'imports: A' }] } }]);
+        const rows = [{ toolUseId: 'x', description: 'x', s: 0, e: 1 }, { toolUseId: 'y', description: 'y', s: 0, e: 1 }];
+        const texts = new Map([['x', noStart], ['y', withStart]]);
+        const ev = envCheckEvents(rows, texts);
+        return ev.length === 1 && ev[0].id === 'y';
+      })());
+      t('M173: ★imports を含まない返答は照合に数えない', (() => {
+        const mk = (arr) => arr.map((o) => JSON.stringify(o)).join('\n');
+        const text = mk([{ timestamp: 'T', message: { content: [
+          { type: 'tool_use', id: 'u0', name: 'mcp__lean__lean_start', input: { imports: ['A'] } }] } },
+          { timestamp: 'T', message: { content: [
+            { type: 'tool_result', tool_use_id: 'u0', content: 'ok(no imports here)' }] } }]);
+        return envCheckEvents([{ toolUseId: 'z', description: 'z', s: 0, e: 1 }], new Map([['z', text]])).length === 0;
+      })());
     }
+
+    // ── ★★★M166(同時実行数)—— 露出と転帰の純関数 ──────────────────
+    {
+      const ov = (iv) => overlapStats(iv);
+      t('M166: 1 本きりなら atStart=1 / max=1',
+        (() => { const m = ov([{ id: 'a', s: 0, e: 100 }]); return m.get('a').atStart === 1 && m.get('a').max === 1; })());
+      t('M166: ★重ならない 2 本は互いに 1',
+        (() => { const m = ov([{ id: 'a', s: 0, e: 10 }, { id: 'b', s: 20, e: 30 }]);
+                 return m.get('a').atStart === 1 && m.get('b').atStart === 1; })());
+      t('M166: ★後から始まった側の atStart が 2(先に始まった側は 1)',
+        (() => { const m = ov([{ id: 'a', s: 0, e: 100 }, { id: 'b', s: 50, e: 150 }]);
+                 return m.get('a').atStart === 1 && m.get('b').atStart === 2; })());
+      t('M166: ★★atStart は自分の duration で動かない(同じ開始・違う長さ)',
+        (() => { const m = ov([{ id: 'a', s: 0, e: 1000 }, { id: 'b', s: 0, e: 10 }]);
+                 return m.get('a').atStart === m.get('b').atStart; })());
+      t('M166: ★max は後から重なった本を拾う(atStart=1 でも max=2)',
+        (() => { const m = ov([{ id: 'a', s: 0, e: 100 }, { id: 'b', s: 50, e: 150 }]);
+                 return m.get('a').atStart === 1 && m.get('a').max === 2; })());
+      t('M166: ★mean は時間平均(半分だけ 2 本 ⇒ 1.5)',
+        (() => { const m = ov([{ id: 'a', s: 0, e: 100 }, { id: 'b', s: 50, e: 150 }]);
+                 return Math.abs(m.get('a').mean - 1.5) < 1e-9; })());
+      t('M166: ★3 本が重なれば 3',
+        (() => { const m = ov([{ id: 'a', s: 0, e: 100 }, { id: 'b', s: 1, e: 100 }, { id: 'c', s: 2, e: 100 }]);
+                 return m.get('c').atStart === 3 && m.get('a').max === 3; })());
+      t('M166: 区画は 4 以上を 1 つにまとめる',
+        concBin(1) === 1 && concBin(3) === 3 && concBin(4) === 4 && concBin(9) === 4);
+      t('M166: 占有 —— 1 本きりなら k=1 に全部',
+        (() => { const o = occupancy([{ s: 0, e: 100 }]); return o.byK.get(1) === 100 && o.total === 100; })());
+      t('M166: 占有 —— 半分重なれば k=1 が 100 / k=2 が 50', (() => {
+        const o = occupancy([{ s: 0, e: 100 }, { s: 50, e: 150 }]);
+        return o.byK.get(1) === 100 && o.byK.get(2) === 50 && o.total === 150;
+      })());
+      t('M166: 占有 —— ★隙間は数えない(誰も走っていない時間)', (() => {
+        const o = occupancy([{ s: 0, e: 10 }, { s: 90, e: 100 }]);
+        return o.total === 20 && o.span === 100 && !o.byK.has(0);
+      })());
+      t('M166: 占有 —— ★端が接するだけなら重ならない', (() => {
+        const o = occupancy([{ s: 0, e: 50 }, { s: 50, e: 100 }]);
+        return !o.byK.has(2) && o.byK.get(1) === 100;
+      })());
+      t('M166: 占有 —— 3 本の入れ子', (() => {
+        const o = occupancy([{ s: 0, e: 30 }, { s: 10, e: 30 }, { s: 20, e: 30 }]);
+        return o.byK.get(1) === 10 && o.byK.get(2) === 10 && o.byK.get(3) === 10;
+      })());
+
+      // 本文の組み立て(★実物と同じ形。★試験のために最小限)
+      const L = (o) => JSON.stringify(o);
+      const use = (id, name, input, ts) => L({ timestamp: ts, message: { role: 'assistant', content: [{ type: 'tool_use', id, name, input }] } });
+      const res = (id, body, ts) => L({ timestamp: ts, message: { role: 'user', content: [{ type: 'tool_result', tool_use_id: id, content: body }] } });
+      const T0 = '2026-09-08T00:00:00.000Z', T1 = '2026-09-08T00:00:30.000Z';
+
+      t('M166(a): ★配管の失敗を拾う(MCP error)',
+        concurrencyOutcomesFromText([
+          use('1', 'mcp__abc3-lean__lean_check', { code: 'x' }, T0),
+          res('1', 'MCP error -32000: no running lean session', T1),
+        ].join('\n')).mcpInfra === 1);
+      // ★★★感度の試験。★これが無いと「0 件」が嘘になる(メタ第 33 回が実際に踏んだ)。
+      for (const f of MCP_INFRA_FIXTURES) {
+        t(`M166(a) 感度: ${f.want ? '鳴る' : '黙る'} 「${f.s.slice(0, 26).replace(/\s+/g, ' ')}…」`,
+          MCP_INFRA_RE.test(f.s) === f.want);
+      }
+      t('M166(a): ★★事前登録した v1 は「REPL は処理中」に鳴らない(★この失敗を記録として残す)',
+        MCP_INFRA_RE_V1.test('エラー: REPL は処理中(直列にしか使えない)') === false);
+      t('M166(a): ★取り合いだけを別に数える(kind.busy)',
+        concurrencyOutcomesFromText([use('1', 'mcp__abc3-lean__lean_check', {}, T0),
+          res('1', 'エラー: REPL は処理中(直列にしか使えない)', T1)].join('\n')).kind.busy === 1);
+      t('M166(a): ★時間切れは取り合いに数えない(kind.timeout)', (() => {
+        const o = concurrencyOutcomesFromText([use('1', 'mcp__abc3-lean__lean_check', {}, T0),
+          res('1', 'エラー: 600 秒で応答が無いので REPL を落とした。', T1)].join('\n'));
+        return o.kind.busy === 0 && o.kind.timeout === 1 && o.mcpInfra === 1;
+      })());
+      t('M166(a): ★lean_reset の成功は配管の失敗ではない',
+        concurrencyOutcomesFromText([use('1', 'mcp__abc3-lean__lean_reset', {}, T0),
+          res('1', '[{"type":"text","text":"REPL を落とした(再生用の控えも捨てた)。"}]', T1)].join('\n')).mcpInfra === 0);
+      t('M166(a): ★★Lean の型エラーは配管に数えない(ここを混ぜると全部 1 になる)',
+        concurrencyOutcomesFromText([
+          use('1', 'mcp__abc3-lean__lean_check', { code: 'x' }, T0),
+          res('1', 'error: unknown identifier "foo"\nエラー 1 件', T1),
+        ].join('\n')).mcpInfra === 0);
+      t('M166(a): ★MCP でない道具の失敗も数えない',
+        concurrencyOutcomesFromText([
+          use('1', 'Bash', { command: 'ls' }, T0),
+          res('1', 'MCP error: connection closed', T1),
+        ].join('\n')).mcpInfra === 0);
+      t('M166(a): lean_start を数える',
+        concurrencyOutcomesFromText(use('1', 'mcp__abc3-lean__lean_start', {}, T0)).leanStarts === 1);
+      t('M166(c): ★lake build の実時間を tool_use → tool_result の時刻差で測る',
+        (() => { const o = concurrencyOutcomesFromText([
+          use('1', 'Bash', { command: 'lake build ABC3' }, T0), res('1', 'ok', T1)].join('\n'));
+          return o.lakeCalls === 1 && o.lakeWaitMs === 30000; })());
+      t('M166(c): ★build.mjs も lake の待ちに数える',
+        concurrencyOutcomesFromText(use('1', 'Bash', { command: 'node tools/build.mjs ABC3' }, T0)).lakeCalls === 1);
+      t('M166(c): ★lake でない Bash は数えない',
+        concurrencyOutcomesFromText(use('1', 'Bash', { command: 'node tools/check.mjs --brief' }, T0)).lakeCalls === 0);
+      t('M166(b): ★Write した .lean を拾う(Read は拾わない)',
+        (() => { const o = concurrencyOutcomesFromText([
+          use('1', 'Write', { file_path: 'D:/x/A.lean', content: '' }, T0),
+          use('2', 'Read', { file_path: 'D:/x/B.lean' }, T0)].join('\n'));
+          return o.wrote.size === 1 && o.wrote.has('d:/x/a.lean'); })());
+      t('M166(b): ★lean-idioms.md も衝突の対象に入れる',
+        concurrencyOutcomesFromText(use('1', 'Edit', { file_path: 'D:/x/tools/lean-idioms.md' }, T0)).wrote.size === 1);
+      t('M166(b): ★★重なっていなければ同じ本を書いても数えない', (() => {
+        const R = [{ toolUseId: 'a', ts: '2026-09-08T00:01:00Z', durationMs: 60000, agentType: 'lean-prover', toolUses: 10, day: 'd' },
+                   { toolUseId: 'b', ts: '2026-09-08T00:10:00Z', durationMs: 60000, agentType: 'lean-prover', toolUses: 10, day: 'd' }];
+        const tx = new Map([['a', use('1', 'Write', { file_path: 'X.lean' }, T0)],
+                            ['b', use('2', 'Write', { file_path: 'X.lean' }, T0)]]);
+        return concurrencyRows(R, tx).every((r) => r.sharedFile === 0);
+      })());
+      t('M166(b): ★★重なって同じ本を書いたら両方 1', (() => {
+        const R = [{ toolUseId: 'a', ts: '2026-09-08T00:01:00Z', durationMs: 60000, agentType: 'lean-prover', toolUses: 10, day: 'd' },
+                   { toolUseId: 'b', ts: '2026-09-08T00:01:30Z', durationMs: 60000, agentType: 'lean-prover', toolUses: 10, day: 'd' }];
+        const tx = new Map([['a', use('1', 'Write', { file_path: 'X.lean' }, T0)],
+                            ['b', use('2', 'Write', { file_path: 'X.lean' }, T0)]]);
+        return concurrencyRows(R, tx).every((r) => r.sharedFile === 1);
+      })());
+      t('M166(b): ★重なっても違う本なら 0', (() => {
+        const R = [{ toolUseId: 'a', ts: '2026-09-08T00:01:00Z', durationMs: 60000, agentType: 'lean-prover', toolUses: 10, day: 'd' },
+                   { toolUseId: 'b', ts: '2026-09-08T00:01:30Z', durationMs: 60000, agentType: 'lean-prover', toolUses: 10, day: 'd' }];
+        const tx = new Map([['a', use('1', 'Write', { file_path: 'X.lean' }, T0)],
+                            ['b', use('2', 'Write', { file_path: 'Y.lean' }, T0)]]);
+        return concurrencyRows(R, tx).every((r) => r.sharedFile === 0);
+      })());
+      t('M166: ★lean-prover でない agent は impl の水準に入らない(NaN)', (() => {
+        const R = [{ toolUseId: 'a', ts: '2026-09-08T00:01:00Z', durationMs: 60000, agentType: 'general', toolUses: 10, day: 'd' }];
+        return Number.isNaN(concurrencyRows(R, new Map())[0].implAtStart);
+      })());
+      t('M166(d): msPerTool = duration / tool_uses', (() => {
+        const R = [{ toolUseId: 'a', ts: '2026-09-08T00:01:00Z', durationMs: 60000, agentType: 'lean-prover', toolUses: 10, day: 'd' }];
+        return concurrencyRows(R, new Map())[0].msPerTool === 6000;
+      })());
+      t('M166: ★族は 4 本(後から欄を足していない)', FAMILY_C.length === 4);
+      t('M166: ★族の欄はこの 4 つで固定',
+        FAMILY_C.map((f) => f.key).join(',') === 'mcpInfra,sharedFile,lakeWaitMs,msPerTool');
+      t('M166: ★件数が MIN_N 未満なら検定しない', (() => {
+        const rs = Array.from({ length: 5 }, (_, i) => ({ implAtStart: i % 3 + 1, mcpInfra: i, sharedFile: i, lakeWaitMs: i, msPerTool: i }));
+        return concurrencyLadder(rs, 'implAtStart').rows.length === 0;
+      })());
+      t('M166: ★分散ゼロの欄は検定しない(全部 0 の欄)', (() => {
+        const rs = Array.from({ length: 20 }, (_, i) => ({ implAtStart: i % 4 + 1, mcpInfra: 0, sharedFile: i, lakeWaitMs: i, msPerTool: i }));
+        const l = concurrencyLadder(rs, 'implAtStart');
+        return l.skipped.some((s) => s.key === 'mcpInfra') && l.rows.every((r) => r.key !== 'mcpInfra');
+      })());
+      t('M166: 事象 —— ★取り合いの瞬間の同時本数を数える', (() => {
+        const R = [{ toolUseId: 'a', ts: '2026-09-08T00:02:00Z', durationMs: 120000, agentType: 'lean-prover', toolUses: 5, day: 'd' },
+                   { toolUseId: 'b', ts: '2026-09-08T00:02:30Z', durationMs: 120000, agentType: 'lean-prover', toolUses: 5, day: 'd' }];
+        const tx = new Map([
+          ['a', [use('1', 'mcp__abc3-lean__lean_check', {}, '2026-09-08T00:01:00Z'),
+                 res('1', 'エラー: REPL は処理中(直列にしか使えない)', '2026-09-08T00:01:10Z')].join('\n')],
+          ['b', use('2', 'mcp__abc3-lean__lean_check', {}, '2026-09-08T00:01:00Z')]]);
+        const ev = busyEvents(concurrencyRows(R, tx), tx);
+        return ev.length === 1 && ev[0].agents === 2 && ev[0].mcpAgents === 2;
+      })());
+      t('M166: 事象 —— ★MCP を使わない agent は mcpAgents に数えない', (() => {
+        const R = [{ toolUseId: 'a', ts: '2026-09-08T00:02:00Z', durationMs: 120000, agentType: 'lean-prover', toolUses: 5, day: 'd' },
+                   { toolUseId: 'b', ts: '2026-09-08T00:02:30Z', durationMs: 120000, agentType: 'lean-prover', toolUses: 5, day: 'd' }];
+        const tx = new Map([
+          ['a', [use('1', 'mcp__abc3-lean__lean_check', {}, '2026-09-08T00:01:00Z'),
+                 res('1', 'エラー: REPL は処理中(直列にしか使えない)', '2026-09-08T00:01:10Z')].join('\n')],
+          ['b', use('2', 'Bash', { command: 'ls' }, '2026-09-08T00:01:00Z')]]);
+        const ev = busyEvents(concurrencyRows(R, tx), tx);
+        return ev.length === 1 && ev[0].agents === 2 && ev[0].mcpAgents === 1;
+      })());
+      // ── ★★★★★無音のすり替わり(D27 訂正 第 1077 の壊れ方)
+      {
+        const R2 = (a, b) => [
+          { toolUseId: 'a', ts: '2026-09-08T00:05:00Z', durationMs: 300000, agentType: 'lean-prover', toolUses: 5, day: 'd' },
+          { toolUseId: 'b', ts: '2026-09-08T00:05:00Z', durationMs: 300000, agentType: 'lean-prover', toolUses: 5, day: 'd' },
+        ];
+        const start = (id, imports, ts) => use(id, 'mcp__abc3-lean__lean_start', { imports }, ts);
+        const status = (id, ts) => use(id, 'mcp__abc3-lean__lean_status', {}, ts);
+        const okRes = (id, imports, ts) => res(id,
+          `[{"type":"text","text":"起動: あり\\nimports: ${imports.join(', ')}\\n基準環境: 5"}]`, ts);
+        const T = (m) => `2026-09-08T00:0${m}:00Z`;
+
+        t('M166 無音: ★一致していれば鳴らない', (() => {
+          const tx = new Map([['a', [start('1', ['X'], T(1)), okRes('1', ['X'], T(1)),
+            status('2', T(2)), okRes('2', ['X'], T(2))].join('\n')], ['b', '']]);
+          return envMismatchEvents(concurrencyRows(R2(), tx), tx).length === 0;
+        })());
+        t('M166 無音: ★★★別 agent の imports に差し替わったら鳴る', (() => {
+          const tx = new Map([
+            ['a', [start('1', ['X'], T(1)), okRes('1', ['X'], T(1)),
+                   status('2', T(2)), okRes('2', ['Y', 'Z'], T(2))].join('\n')],
+            ['b', [start('3', ['Y', 'Z'], T(1)), okRes('3', ['Y', 'Z'], T(1))].join('\n')]]);
+          const ev = envMismatchEvents(concurrencyRows(R2(), tx), tx);
+          return ev.length === 1 && ev[0].culprit !== null;
+        })());
+        t('M166 無音: ★順序が違うだけでは鳴らない(集合で見る)', (() => {
+          const tx = new Map([['a', [start('1', ['X', 'Y'], T(1)),
+            status('2', T(2)), okRes('2', ['Y', 'X'], T(2))].join('\n')], ['b', '']]);
+          return envMismatchEvents(concurrencyRows(R2(), tx), tx).length === 0;
+        })());
+        t('M166 無音: ★★自分で lean_start を呼んでいなければ数えない(誤報を出さない側)', (() => {
+          const tx = new Map([['a', [status('2', T(2)), okRes('2', ['Q'], T(2))].join('\n')], ['b', '']]);
+          return envMismatchEvents(concurrencyRows(R2(), tx), tx).length === 0;
+        })());
+        t('M166 無音: ★2 回 lean_start したらどちらの形でも鳴らない', (() => {
+          const tx = new Map([['a', [start('1', ['X'], T(1)), start('2', ['Y'], T(2)),
+            status('3', T(3)), okRes('3', ['X'], T(3)),
+            status('4', T(4)), okRes('4', ['Y'], T(4))].join('\n')], ['b', '']]);
+          return envMismatchEvents(concurrencyRows(R2(), tx), tx).length === 0;
+        })());
+        t('M166 無音: ★★相手が同時に走っていなければ culprit は null', (() => {
+          const R3 = [
+            { toolUseId: 'a', ts: '2026-09-08T00:05:00Z', durationMs: 120000, agentType: 'lean-prover', toolUses: 5, day: 'd' },
+            { toolUseId: 'b', ts: '2026-09-08T09:00:00Z', durationMs: 60000, agentType: 'lean-prover', toolUses: 5, day: 'd' }];
+          const tx = new Map([
+            ['a', [start('1', ['X'], T(3)), status('2', T(4)), okRes('2', ['Y'], T(4))].join('\n')],
+            ['b', start('3', ['Y'], '2026-09-08T08:59:00Z')]]);
+          const ev = envMismatchEvents(concurrencyRows(R3, tx), tx);
+          return ev.length === 1 && ev[0].culprit === null && ev[0].anyOwner === true;
+        })());
+        t('M166 無音: ★★imports が空(区切りだけ)でも鳴らない', (() => {
+          const tx = new Map([['a', [start('1', ['X'], T(1)),
+            status('2', T(2)),
+            res('2', '[{"type":"text","text":"起動: あり\\nimports:  ,  ,\\n基準環境: 5"}]', T(2))].join('\n')], ['b', '']]);
+          return envMismatchEvents(concurrencyRows(R2(), tx), tx).length === 0;
+        })());
+        t('M166 無音: ★imports 行が無い出力では鳴らない', (() => {
+          const tx = new Map([['a', [start('1', ['X'], T(1)),
+            status('2', T(2)), res('2', '[{"type":"text","text":"起動: なし"}]', T(2))].join('\n')], ['b', '']]);
+          return envMismatchEvents(concurrencyRows(R2(), tx), tx).length === 0;
+        })());
+      }
+      t('M166: ★Holm は m = 使えた欄の数で掛かる', (() => {
+        const rs = Array.from({ length: 30 }, (_, i) => ({ implAtStart: i % 4 + 1, mcpInfra: i % 7, sharedFile: i % 5, lakeWaitMs: i % 3, msPerTool: i % 11 }));
+        const l = concurrencyLadder(rs, 'implAtStart');
+        return l.rows.length === 4 && l.rows.every((r) => r.holm >= r.p - 1e-12);
+      })());
+    }
+  }
+
+  // --- ★M179 supply(メタ第 35 回)
+  {
+    t('M179: toRel は Windows の絶対パスを rel にする',
+      toRel('D:\\Math_ABC3\\lean\\ABC3\\Found\\PGC\\X.lean') === 'Found/PGC/X.lean');
+    t('M179: toRel は / のパスも同じ', toRel('lean/ABC3/Skeleton/PGC/Section1.lean') === 'Skeleton/PGC/Section1.lean');
+    t('M179: toRel は worktree の中でも rel を取る',
+      toRel('/d/Math_ABC3/.claude/worktrees/w1/lean/ABC3/Found/A.lean') === 'Found/A.lean');
+    t('M179: toRel は .lean でなければ null', toRel('lean/ABC3/Found/A.md') === null);
+    t('M179: toRel は lean/ABC3 の外なら null', toRel('tools/graph.mjs') === null);
+    t('M179: toRel は文字列でなければ null', toRel(null) === null);
+    const jl = [
+      JSON.stringify({ message: { content: [
+        { type: 'tool_use', name: 'Write', input: { file_path: 'lean/ABC3/Found/A.lean' } },
+        { type: 'tool_use', name: 'Read',  input: { file_path: 'lean/ABC3/Found/B.lean' } },
+      ] } }),
+      JSON.stringify({ message: { content: [{ type: 'tool_use', name: 'Edit', input: { file_path: 'lean/ABC3/Skeleton/C.lean' } }] } }),
+      JSON.stringify({ message: { content: [{ type: 'tool_use', name: 'Bash', input: { command: 'lean/ABC3/Found/D.lean' } }] } }),
+      'これは JSON ではない',
+    ].join('\n');
+    t('M179: Write / Edit した .lean だけを取る',
+      JSON.stringify(writtenLeanRels(jl)) === JSON.stringify(['Found/A.lean', 'Skeleton/C.lean']));
+    t('M179: Read は数えない', !writtenLeanRels(jl).includes('Found/B.lean'));
+    t('M179: Bash の中の path は数えない', !writtenLeanRels(jl).includes('Found/D.lean'));
+    t('M179: 壊れた行で落ちない', writtenLeanRels('{{{').length === 0);
+    const FR = new Map([['S/A.lean', { startable: true }], ['S/B.lean', { startable: false }]]);
+    const TR = new Set(['S/A.lean', 'S/B.lean', 'F/C.lean']);
+    t('M179: 着手可能', supplyClass('S/A.lean', FR, TR) === '着手可能');
+    t('M179: 着手不可', supplyClass('S/B.lean', FR, TR) === '着手不可');
+    t('M179: 木にあるが sorry 無し', supplyClass('F/C.lean', FR, TR) === 'sorry なし');
+    t('M179: 木に無い', supplyClass('F/NEW.lean', FR, TR) === '木に無い');
+    t('M179: 書いていない', supplyClass(null, FR, TR) === '書いていない');
+    const NODES = [
+      { mod: 'M.F', rel: 'F/C.lean', imports: ['M.S1'] },
+      { mod: 'M.S1', rel: 'S/A.lean', imports: ['M.S2'] },
+      { mod: 'M.S2', rel: 'S/B.lean', imports: [] },
+    ];
+    t('M179: 上流の着手可能を辿る',
+      JSON.stringify(startableUpstream('F/C.lean', NODES, new Set(['S/A.lean']))) === JSON.stringify(['S/A.lean']));
+    t('M179: 自分自身は返さない',
+      JSON.stringify(startableUpstream('S/A.lean', NODES, new Set(['S/A.lean']))) === JSON.stringify([]));
+    t('M179: 2 段上でも辿る',
+      JSON.stringify(startableUpstream('F/C.lean', NODES, new Set(['S/B.lean']))) === JSON.stringify(['S/B.lean']));
+    t('M179: 木に無い rel は空', startableUpstream('X.lean', NODES, new Set(['S/A.lean'])).length === 0);
+    // ★★2026-09-08: 「自分自身を返さない」の見張りは**環が無いと効かない**(突然変異 S7 が素通りした)。
+    t('M179: ★環の中でも自分自身は返さない', startableUpstream('S/A.lean',
+      [{ mod: 'M.F', rel: 'F/C.lean', imports: ['M.S1'] }, { mod: 'M.S1', rel: 'S/A.lean', imports: ['M.F'] }],
+      new Set(['S/A.lean'])).length === 0);
+    t('M179: 環があっても止まる', startableUpstream('F/C.lean',
+      [{ mod: 'M.F', rel: 'F/C.lean', imports: ['M.S1'] }, { mod: 'M.S1', rel: 'S/A.lean', imports: ['M.F'] }],
+      new Set(['S/A.lean'])).length === 1);
+    const TL = supplyTally([
+      { klass: '着手可能', upstream: ['S/Z.lean'] },   // ★★一覧に載っていた本の上流は数えない(S9)
+      { klass: '木に無い', upstream: ['S/A.lean'] },
+      { klass: '木に無い', upstream: ['S/A.lean'] },
+      { klass: 'sorry なし', upstream: ['S/A.lean', 'S/B.lean'] },
+    ]);
+    t('M179: 配った本数', TL.n === 4);
+    t('M179: 一覧に載っていた本数', TL.listed === 1);
+    t('M179: 割合', close(TL.listedPct, 25));
+    t('M179: 上流の集計は一覧の外だけを数える', TL.byAncestor[0][0] === 'S/A.lean' && TL.byAncestor[0][1] === 3);
+    t('M179: ★一覧に載っていた本の上流は 1 件も混ぜない', !TL.byAncestor.some(([k]) => k === 'S/Z.lean'));
+    t('M179: 分類は 5 つ', SUPPLY_CLASSES.length === 5);
+    t('M179: import を読む',
+      JSON.stringify(parseImports('import ABC3.A\nimport ABC3.B\n\ntheorem x := 1')) === JSON.stringify(['ABC3.A', 'ABC3.B']));
+    t('M179: import の後ろに語があれば取らない', parseImports('import ABC3.A -- なにか').length === 0);
+    t('M179: import で始まらない行は取らない', parseImports('  -- import ABC3.A').length === 0);
+    t('M179: brief は最初の user の文字列', briefTextOf([
+      JSON.stringify({ message: { role: 'assistant', content: 'x' } }),
+      JSON.stringify({ message: { role: 'user', content: 'これが brief。Skeleton/PGC/Section1.lean' } }),
+      JSON.stringify({ message: { role: 'user', content: '2 つ目' } }),
+    ].join('\n')).startsWith('これが brief'));
+    t('M179: user が無ければ空', briefTextOf('{}') === '');
+    t('M179: 字面から Skeleton を拾う',
+      JSON.stringify(mentionedSkeletons('… Skeleton/PGC/Section1.lean と Skeleton\\PGC\\Section2.lean …'))
+      === JSON.stringify(['Skeleton/PGC/Section1.lean', 'Skeleton/PGC/Section2.lean']));
+    t('M179: 重複は 1 つに畳む', mentionedSkeletons('Skeleton/A/B.lean Skeleton/A/B.lean').length === 1);
+    t('M179: Found は拾わない', mentionedSkeletons('Found/PGC/X.lean').length === 0);
+    const TL2 = supplyTally([
+      { klass: '木に無い', upstream: [], briefNodes: ['S/A.lean'], bodyNodes: ['S/A.lean', 'S/B.lean'] },
+      { klass: '木に無い', upstream: [], briefNodes: [], bodyNodes: ['S/A.lean'] },
+    ]);
+    t('M179: brief の水路', TL2.briefHit === 1 && TL2.byBrief[0][1] === 1);
+    t('M179: 本文の水路', TL2.bodyHit === 2 && TL2.byBody[0][0] === 'S/A.lean' && TL2.byBody[0][1] === 2);
+    t('M179: 合成節点は rel を持ち、import を辿れる',
+      JSON.stringify(startableUpstream('F/NEW.lean',
+        [synthNode('F/NEW.lean', 'import M.S1'), { mod: 'M.S1', rel: 'S/A.lean', imports: [] }],
+        new Set(['S/A.lean']))) === JSON.stringify(['S/A.lean']));
   }
 
   console.log(`\nselftest: ${ok}/${ok + ng}`);
@@ -2549,6 +4112,9 @@ async function main() {
   if (has('--denominator')) { cmdDenominator(recs, repoRoot); return; }
   // ★M160 は `--m149` より先に見る(`--m149-watch` は `--m149` を含む文字列ではないが、
   //   将来 `has()` が前方一致になっても取り違えないように順序で守る)。
+  if (has('--supply')) { cmdSupply(recs, repoRoot, val('--supply', null), has('--history')); return; }
+  if (has('--mcp-watch')) { cmdMcpWatch(recs); return; }
+  if (has('--concurrency')) { cmdConcurrency(recs, repoRoot); return; }
   if (has('--m149-watch')) { cmdM149Watch(recs, repoRoot, has('--record')); return; }
   if (has('--m149')) { cmdM149(recs, repoRoot); return; }
   if (has('--diag')) {

@@ -39,6 +39,11 @@
 // 使い方: node tools/hedge-index.mjs [--paper FrdI] [--json] [--cite] [--item "Proposition 1.10"]
 //         node tools/hedge-index.mjs --all          … 全論文の被覆表
 //         node tools/hedge-index.mjs --papers       … 使える論文の鍵の一覧
+//         node tools/hedge-index.mjs --selftest     … ★語彙の自己試験(原文を読まない。0.05 秒)
+//         node tools/hedge-index.mjs --src-summary … ★「済 / 未実装」の項目数(M176 の分母。1.6 秒)
+//
+// ★2026-09-08(メタ第 35 回、M176 v2a)。語彙に 4 語(+ well-known のハイフン無)を足し、
+//   **この道具に初めて `--selftest` を付けた**。それまで語を足しても何も鳴らなかった。
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
@@ -78,7 +83,8 @@ const HEDGES = [
   { key: 'one verifies', re: /\b(?:one|One)\s+(?:verifies|checks|computes)\b/, note: '短いことが多い' },
   { key: 'easily', re: /\beasil(?:y|ier)\b/i, note: '短いことが多い' },
   { key: 'clearly', re: /\bclearl(?:y)\b/i, note: '短いことが多い' },
-  { key: 'well-known', re: /\bwell-known\b/i, note: '★外部の在庫を指す。mathlib を測ること' },
+  // ★2026-09-08(メタ第 35 回、M176 v2a): ハイフン無しの `well known` を同じ鍵で拾う(実測 +10 件 / 3 本)。
+  { key: 'well-known', re: /\bwell[- ]known\b/i, note: '★外部の在庫を指す。mathlib を測ること' },
   { key: 'similarly', re: /\b(?:similarly|in a similar (?:way|manner)|(?:is|are) similar)\b/i, note: '前の議論の再演' },
   // ★★2026-09-06 追加(第 1055、Λ6 の段取り係が [MilneCFT] の Dwork 節を逐語で読んで指摘)。
   //   Dwork 節(行 2455-2620)の合図 6 個のうち 5 個を旧語彙が見ていなかった:
@@ -90,7 +96,134 @@ const HEDGES = [
   { key: 'obviously', re: /\bobviously\b/i, note: '短いことが多い。clearly と同族' },
   { key: 'straightforward', re: /\bstraightforward(?:ly)?\b/i, note: '手数はあるが新材料は要らない' },
   { key: 'left to the reader', re: /\bleft (?:as an exercise )?(?:to|for) the reader\b/i, note: '★原文が明示的に投げている' },
+  // ★★2026-09-08 追加(メタ第 35 回、M176 の v2a = 保守案)。
+  //   本体が pGC 1 本で見つけた `general nonsense` の漏れを、メタ第 34 回が **53 本 / 696,484 行**に
+  //   広げて数えた。その表から**保守側の 4 語**(+ well-known のハイフン無)だけを採る。
+  //   ★合図の総数 7,523 → 7,793(**+270、+3.6%**)。上の「Thus, を足すと +124%」の **1/34**。
+  //   ★裏取り: v1 では合図 0 だったのに v2a で合図が付いた「済」の項目は**ちょうど 1 件**、
+  //     ★★`pGC Theorem 4.2`(本体が 2026-09-08 に手で名指ししたのと同じ 1 件)。
+  //   ★★★**候補ごとの精度(何件が本物の畳みか)は測っていない。** 下の件数は raw であって精度ではない。
+  //   ★`easy`(形容詞)まで広げる案(v2b、+9.9%)は**採らない** —— 増分が MilneANT / MilneAV /
+  //     MilneCFT すなわち**我々が典拠に引く本**に集中し、しかも精度が測られていないため。
+  { key: 'general nonsense', re: /\bgeneral nonsense\b/i, note: '★本体が pGC Thm 4.2 で名指し。量が小さい' },
+  // ★`standard` を裸で取ると **939 件**(37 本)に膨れる(formal / obvious と同じ罠)。名詞を絞る。
+  //   ★★メタ第 34 回(M176)は「絞った形で raw 30 / 7 本」と記録したが、**正規表現そのものは残していない**
+  //     ⇒ 第 35 回は再現できなかった。代わりに**広めの形の一致行 28 本を全部目で読んで**名詞を選び直した:
+  //       `standard argument(s)` 13 件 … 「A standard argument, breaking our exact sequence …」等、ほぼ本物
+  //       `standard fact(s)`      3 件 … 「the proof uses the standard fact that …」= 外部の在庫を指す
+  //       `standard result(s)`    9 件 … ★**「Here is the standard result characterizing …」= これから述べる
+  //                                       定理の名指しが大半**。畳みではない ⇒ 落とす
+  //       `standard way`          3 件 … ★「in the standard way by removing the point at infinity」= 構成の名指し ⇒ 落とす
+  { key: 'standard argument', re: /\bstandard\s+(?:argument|technique|fact)s?\b/i, note: '★絞った形。裸の standard は取らない' },
+  { key: 'we leave', re: /\bwe leave\b/i, note: '★原文が投げている。left to the reader の語形の穴' },
+  { key: 'similar to that', re: /\bsimilar to (?:that|those)\b/i, note: 'similarly の語形の穴' },
 ];
+
+/** ★1 行に当たる合図の鍵。★純関数なので `--selftest` から直接叩ける
+ *  (M176 まで、この道具には**自己試験が 1 つも無かった** —— 語を足しても何も鳴らなかった)。
+ *  ★`re` に /g は付けない(付けると `test` が lastIndex を持ち回り、1 行おきに落とす)。 */
+export function hedgeKeysOf(line) {
+  const out = [];
+  for (const h of HEDGES) if (h.re.test(line)) out.push(h.key);
+  return out;
+}
+
+/** ★合図の語ごとの「精度」(何件が本物の畳みか)は**測っていない**。件数は raw である。
+ *  ★出力に毎回この断りを出すのは、`--all` の数字が見積として一人歩きしたためである(M176)。 */
+export const PRECISION_NOTE = '★★語ごとの**精度**(何件が本物の畳みか)は測っていない。上は raw の件数である。';
+
+/** ★「語ごとの件数」の印字を作る。**純関数**(selftest が直接叩く)。
+ *  ★M91 と同じ理由でここに出した —— **CLI の口の中にある印字は試験に届かない**。
+ *    実際、2026-09-08 の突然変異で「欄幅を 18 → 4 に戻す」と「精度の断りを消す」の 2 つが
+ *    **素通りした**。純関数にして初めて鳴るようになった。
+ *  @param {Map<string,number>} perHedge 語 → 件数
+ *  @param {{key:string,note:string}[]} hedges 語の表(既定は HEDGES) */
+export function formatHedgeCounts(perHedge, hedges = HEDGES) {
+  const W = Math.max(...hedges.map((h) => h.key.length));   // ★語を足しても桁が崩れない
+  const out = [];
+  for (const h of hedges) {
+    const n = perHedge.get(h.key) ?? 0;
+    if (n) out.push(`   ${h.key.padEnd(W)} ${String(n).padStart(4)}   ${h.note}`);
+  }
+  out.push(`   ${PRECISION_NOTE}`);   // ★★必ず最後に付ける(件数だけが独り歩きしたのが M176)
+  return out;
+}
+
+if (args.includes('--selftest')) {
+  let pass = 0, fail = 0;
+  const t = (name, got, want) => {
+    if (JSON.stringify(got) === JSON.stringify(want)) pass += 1;
+    else { fail += 1; console.log(`  x ${name}: got ${JSON.stringify(got)} want ${JSON.stringify(want)}`); }
+  };
+  // ── 2026-09-08 に足した 4 語(M176 v2a)。★実物の字面で鳴ることを見る。
+  t('pGC Thm 4.2 の general nonsense(本体が手で名指しした 1 件)',
+    hedgeKeysOf('and then conclude via a standard general nonsense argument.'),
+    ['general nonsense']);   // ★`standard argument` は鳴らない —— 間に語が挟まるため(重複して数えない)
+  t('pGC Thm 4.2 の similar to that', hedgeKeysOf('First of all, by an argument similar to that'), ['similar to that']);
+  t('similar to those も同じ鍵', hedgeKeysOf('by arguments similar to those of §2'), ['similar to that']);
+  // ★★これが M176 の言う穴そのもの: 既存の `left to the reader` は「We leave … to the reader」を落とす。
+  t('we leave(大文字)。★`left to the reader` は鳴らない', hedgeKeysOf('We leave the proof to the reader.'), ['we leave']);
+  t('we leave(小文字)', hedgeKeysOf('which we leave to the refer to formalize.'), ['we leave']);
+  t('standard argument', hedgeKeysOf('A standard argument, breaking our exact sequence'), ['standard argument']);
+  t('standard facts(複数形)', hedgeKeysOf('This follows from standard facts about higher ramification'), ['standard argument']);
+  t('ハイフン無しの well known', hedgeKeysOf('It is well known that this is exact.'), ['well-known']);
+  t('ハイフン有りの well-known', hedgeKeysOf('the well-known theorem of Tate'), ['well-known']);
+  // ── ★落とすと決めたもの(★ここが鳴かないことが v2b を採らない根拠である)
+  t('裸の standard は取らない(939 件に膨れる)', hedgeKeysOf('the standard topology on the adeles'), []);
+  t('standard result は取らない(定理の名指し)', hedgeKeysOf('Here is the standard result characterizing Jacobson schemes.'), []);
+  t('standard way は取らない(構成の名指し)', hedgeKeysOf('obtained in the standard way by removing the point'), []);
+  t('裸の formal は取らない(2026-09-06 の教訓)', hedgeKeysOf('a formal group law over R'), []);
+  t('裸の obvious は取らない(the obvious map)', hedgeKeysOf('the obvious map X to Y'), []);
+  t('easy(形容詞)は取らない(v2b は採らない)', hedgeKeysOf('it is easy to see that'), []);
+  t('trivially は取らない', hedgeKeysOf('the map is trivially injective'), []);
+  // ── ★既存の語が壊れていないこと(語を足す作業で巻き添えにしやすい)
+  t('routine', hedgeKeysOf('a routine verification shows'), ['routine']);
+  t('formally', hedgeKeysOf('formally, this follows from'), ['formally']);
+  t('immediately / immediate', hedgeKeysOf('this is immediate from the definitions'), ['immediately']);
+  t('One verifies(★この鍵だけ /i が無い)', hedgeKeysOf('One verifies easily that'), ['one verifies', 'easily']);
+  t('one verifies は小文字でも鳴る(re に one|One を書いてある)', hedgeKeysOf('one checks that'), ['one verifies']);
+  t('clearly', hedgeKeysOf('clearly the map is injective'), ['clearly']);
+  t('is similar(語形)', hedgeKeysOf('The proof for B^x is similar.'), ['similarly']);
+  t('straightforward', hedgeKeysOf('a straightforward computation'), ['straightforward']);
+  t('left to the reader', hedgeKeysOf('left as an exercise to the reader'), ['left to the reader']);
+  t('合図の無い行は空', hedgeKeysOf('Let K be a p-adic local field.'), []);
+  t('空行は空', hedgeKeysOf(''), []);
+  // ── ★同じ行を 2 度読んでも同じ答え(★/g を付けた瞬間に落ちる見張り)
+  t('2 度呼んでも同じ', hedgeKeysOf('a routine verification'), hedgeKeysOf('a routine verification'));
+  t('語の総数(★語を足したら必ずここを更新する)', HEDGES.length, 15);
+  t('鍵は重複しない', new Set(HEDGES.map((h) => h.key)).size, HEDGES.length);
+  t('re に /g が付いていない', HEDGES.filter((h) => h.re.global).length, 0);
+  t('★one verifies は /i を付けない設計(大文字だけの行は取らない)', hedgeKeysOf('ONE VERIFIES THAT'), []);
+  // ── ★印字(純関数にしてから届くようになった。★突然変異 M12 / M13 がここで鳴る)
+  const fh = formatHedgeCounts(new Map([['routine', 3], ['general nonsense', 1]]),
+    [{ key: 'routine', note: 'A' }, { key: 'general nonsense', note: 'B' }, { key: 'we leave', note: 'C' }]);
+  t('件数 0 の語は出さない', fh.length, 3);
+  t('★件数の桁が揃う(長い鍵で崩れない)', fh[0].indexOf('3'), fh[1].indexOf('1'));
+  t('★最後の行は必ず精度の断り', fh[fh.length - 1].trim(), PRECISION_NOTE);
+  t('断りは空でない', PRECISION_NOTE.length > 20, true);
+  // ── ★srcSummary(M176 の分母。★切り方を書き落としたのが第 34 回の宿題だった)
+  const mk = (key, rows) => ({ key, rows });
+  const R = (state, total, aside = 0) => ({ state, total, aside });
+  const S1 = srcSummary([
+    mk('A', [R('済', 2), R('未', 3), R('条つき1', 1)]),
+    mk('B', [R('未', 9)]),                      // ★済が 0 なので論文ごと落ちる
+    mk('C', [R('済', 0, 1), R('未', 0, 0)]),    // ★合図 0 でも傍注があれば数える / 無ければ落ちる
+  ]);
+  t('済の論文だけを残す', [...S1.per.keys()], ['A', 'C']);
+  t('済の項目数', S1.done, 2);
+  t('済が抱える合図', S1.doneHedge, 2);
+  t('未実装は条つきを含む', S1.todo, 2);
+  t('未実装に残る合図', S1.todoHedge, 4);
+  t('合図も傍注も 0 の項目は数えない', srcSummary([mk('A', [R('済', 1), R('未', 0, 0)])]).todo, 0);
+  t('err の論文は飛ばす', srcSummary([{ key: 'X', err: 'missing' }, mk('A', [R('済', 1)])]).done, 1);
+  t('空でも落ちない', srcSummary([]).done, 0);
+  // ★`--all` の側の断りは CLI の口の中にあるので、**字面が残っていること**だけを見る(弱い見張り)。
+  const selfSrc = readFileSync(fileURLToPath(import.meta.url), 'utf8');
+  t('★CLI の口 2 つ(--all / --src-summary)にも精度の断りが残っている', 
+    (selfSrc.match(/console\.log\(`   \$\{PRECISION_NOTE\}`\)/g) ?? []).length, 2);
+  console.log(`hedge-index.mjs selftest: ${pass}/${pass + fail} PASS`);
+  process.exit(fail ? 1 : 0);
+}
 
 // ───────────────── 第 2 の水路: 角括弧の傍注 ─────────────────
 // ★2026-09-05(メタ第 5 回、M12)。上の HEDGES は **FrdI 較正の語彙**であり、
@@ -353,6 +486,32 @@ function measure(key, leanByPaper) {
   };
 }
 
+/** ★`.src` がある論文の「済 / 未実装」を数える。**純関数**(selftest が直接叩く)。
+ *  ★分母の切り方は M176(メタ第 34 回)に合わせる —— 2 つとも明示しておく:
+ *    1) 項目は **合図か傍注を 1 つ以上抱えるもの**だけ(`--json` の `rows` と同じ規則)。
+ *    2) 論文は **「済」の項目を 1 つ以上持つもの**だけ(実測 8 本)。
+ *       ★この 2 つを書かずに「済 110」とだけ書いたので、第 35 回は分母の再現に
+ *       ★**外部の使い捨て 3 本 / 37 秒**を使うはめになった(M1 が言う無駄の再発)。
+ *  @param {{key:string,err?:string,rows:{state:string,total:number,aside:number}[]}[]} measures */
+export function srcSummary(measures) {
+  const keep = (r) => r.total > 0 || r.aside > 0;
+  const per = new Map();
+  for (const m of measures) {
+    if (m.err) continue;
+    const st = { done: 0, doneHedge: 0, todo: 0, todoHedge: 0 };
+    for (const r of m.rows.filter(keep)) {
+      if (r.state === '済') { st.done += 1; st.doneHedge += r.total; }
+      else { st.todo += 1; st.todoHedge += r.total; }
+    }
+    if (st.done > 0) per.set(m.key, st);
+  }
+  const T = { done: 0, doneHedge: 0, todo: 0, todoHedge: 0 };
+  for (const st of per.values()) {
+    T.done += st.done; T.doneHedge += st.doneHedge; T.todo += st.todo; T.todoHedge += st.todoHedge;
+  }
+  return { per, ...T };
+}
+
 // ───────────────────────── 口 ─────────────────────────
 
 if (args.includes('--papers')) {
@@ -362,6 +521,30 @@ if (args.includes('--papers')) {
     console.log(`   ${ok ? ' ' : '×'} ${k.padEnd(11)} ${v.title ?? v.file}`);
   }
   console.log('\n   × = 0_Source に .txt が無い(pdftotext -layout で作る。M11 を見よ)');
+  process.exit(0);
+}
+
+if (args.includes('--src-summary')) {
+  const leanByPaper = scanLean();
+  const out = [];
+  for (const k of PAPERS.keys()) out.push(measure(k, leanByPaper));
+  const S = srcSummary(out);
+  if (asJson) {
+    console.log(JSON.stringify({
+      papers: [...S.per.keys()], done: S.done, doneHedge: S.doneHedge,
+      todo: S.todo, todoHedge: S.todoHedge,
+      per: Object.fromEntries(S.per),
+    }, null, 1));
+    process.exit(0);
+  }
+  console.log('★`.src` がある論文の「済 / 未実装」(node tools/hedge-index.mjs --src-summary)\n');
+  console.log('   論文          済  抱える合図   未実装  残る合図');
+  for (const [k, st] of [...S.per.entries()].sort((a, b) => b[1].done - a[1].done)) {
+    console.log(`   ${k.padEnd(12)}${String(st.done).padStart(4)}${String(st.doneHedge).padStart(12)}${String(st.todo).padStart(9)}${String(st.todoHedge).padStart(10)}`);
+  }
+  console.log(`\n   計 ${S.per.size} 本 / 済 ${S.done} 項目(合図 ${S.doneHedge}) / 未実装 ${S.todo} 項目(合図 ${S.todoHedge})`);
+  console.log('   ★分母: 合図か傍注を 1 つ以上抱える項目だけ / 「済」を 1 つ以上持つ論文だけ(M176 の切り方)。');
+  console.log(`   ${PRECISION_NOTE}`);
   process.exit(0);
 }
 
@@ -402,10 +585,11 @@ if (args.includes('--all')) {
     ` (${((100 * T.at) / T.h).toFixed(1)}%) / 傍注 ${T.as}(うち推論 ${T.inf})`);
   const st = done.filter((r) => r.asideStyle);
   console.log(`   ★畳み方が「傍注式」の論文: ${st.length} 本 —— ${st.map((r) => r.key).join(' ')}`);
-  console.log('     この ${n} 本では**既定 8 語だけでは下界を取り落とす**(傍注/KB 1.87 対 既定/KB 0.60)。'
-    .replace('${n}', String(st.length)));
+  console.log('     この ${n} 本では**既定 ${w} 語だけでは下界を取り落とす**(傍注/KB 1.87 対 既定/KB 0.60)。'
+    .replace('${n}', String(st.length)).replace('${w}', String(HEDGES.length)));
   console.log('   ★合図 0 の論文は「省略が無い」ではなく「合図の語が英語なので測れていない」');
   console.log('     ことがある(仏語の原典 —— Asterisque / EGA / Del)。');
+  console.log(`   ${PRECISION_NOTE}`);
   process.exit(0);
 }
 
@@ -456,20 +640,17 @@ console.log(`   見出し ${M.headings} 件(${M.runIn ? '走り込み' : '行独
 console.log(`   畳み方 **${M.asideStyle ? '傍注式' : '語式'}**(傍注/KB ${M.asidePerKb.toFixed(2)}、閾 ${ASIDE_STYLE_MIN})`
   + ` / 角括弧の傍注 ${M.asideTotal} 件(うち推論 ${M.inferTotal} 件)、${M.asideAttr} 件を項目に帰属`);
 if (M.asideStyle) {
-  console.log('   ★この論文は**語ではなく角括弧で畳む**。既定 8 語だけを数えると下界を取り落とす。');
+  console.log(`   ★この論文は**語ではなく角括弧で畳む**。既定 ${HEDGES.length} 語だけを数えると下界を取り落とす。`);
 }
 console.log('');
 console.log('-- 語ごとの件数(論文全体)');
-for (const h of HEDGES) {
-  const n = M.perHedge.get(h.key) ?? 0;
-  if (n) console.log(`   ${h.key.padEnd(13)} ${String(n).padStart(4)}   ${h.note}`);
-}
 if (M.hedgeTotal === 0) console.log('   (0 件。合図の語は英語なので、仏語の原典では測れない)');
+for (const line of formatHedgeCounts(M.perHedge)) console.log(line);
 
 if (onlyItem) {
   for (const r of rows) {
     console.log(`\n-- ${r.item}(物理 p.${r.page ?? '?'}、状態 ${r.state})`);
-    for (const h of r.hits) console.log(`   ${h.key.padEnd(13)} 行 ${h.line}  p.${h.page ?? '?'}`);
+    for (const h of r.hits) console.log(`   ${h.key.padEnd(18)} 行 ${h.line}  p.${h.page ?? '?'}`);
     // ★第 2 の水路。「既定 8 語が 0 件」を「原文が畳んでいない」と読ませないための欄。
     //   実測: [GenEll] Lemma 3.5 は既定 0 件だが推論傍注 1 件(3 主張を 1 文に畳んでいる)。
     if (r.aside) {
@@ -482,7 +663,7 @@ if (onlyItem) {
     if (r.total === 0 && r.aside === 0) {
       console.log('   ★合図も傍注も 0 件。**この項目は原文が畳んでいない**(見つからないのではない)。');
     } else if (r.total === 0) {
-      console.log(`   ★既定 8 語は 0 件だが、**傍注が ${r.aside} 件ある**。`);
+      console.log(`   ★既定 ${HEDGES.length} 語は 0 件だが、**傍注が ${r.aside} 件ある**。`);
       console.log(`     この論文は傍注/KB ${M.asidePerKb.toFixed(2)} の**${M.asideStyle ? '傍注式' : '語式'}**である`
         + `(閾 ${ASIDE_STYLE_MIN})。「原文が畳んでいない」と読まないこと。`);
     }

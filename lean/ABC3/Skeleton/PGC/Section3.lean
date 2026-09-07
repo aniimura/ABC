@@ -1,5 +1,6 @@
 import ABC3.Skeleton.PGC.Section2
 import ABC3.Skeleton.PGC.Section3Defs
+import ABC3.Found.PGC.Section3RealParameters
 
 /-!
 # [pGC] §3 — 命題
@@ -102,16 +103,28 @@ variable {p : ℕ} [Fact p.Prime]
 現状の道具では構成できない、0/3 反証できなかった)と**同一の根本原因**
 であり、`isHodgeTate` 固有の新しい罠ではない。したがって本項目は
 `Prop 1.1`・`Prop 1.2`・`Cor 1.3` と同じ意味で「反証もできないし証明も
-できない」——未解決のまま、`isHodgeTate` を制約する訂正は不要と見る。 -/
-theorem cor_3_1 (RF : RamificationFiltration p)
-    (isHodgeTate : ∀ (K : PAdicLocalField p) (V : Type)
-      [AddCommGroup V] [Module ℚ_[p] V] [SMul K.absGal V], Prop) :
-    ∀ {K K' : PAdicLocalField p}
-      (α : FilteredGroup.Iso (filteredGroupOf RF K) (filteredGroupOf RF K'))
-      (V : Type) [AddCommGroup V] [Module ℚ_[p] V] [FiniteDimensional ℚ_[p] V]
-      (sK : SMul K.absGal V) (sK' : SMul K'.absGal V)
-      (_hcompat : ∀ (g : K.absGal) (x : V), sK'.smul (α.equiv g) x = sK.smul g x),
-      @isHodgeTate K V _ _ sK ↔ @isHodgeTate K' V _ _ sK' := sorry
+できない」——未解決のまま、`isHodgeTate` を制約する訂正は不要と見る。
+
+## ★★★★2026-09-08(D31 採用): ★**上の監査は誤りだった。旧形は反証済みである**
+
+☆★**上の「反証もできない」は 2026-09-06 以降 誤りである。**
+`Check/PGC/FreeTermFunctionRefutation.lean::not_cor_3_1_current_form`(:258、`sorry` 無し)が
+★**`↔` を示すより強い「反証」を既に出していた**(★`cor_3_3` 側も `:373` に在る)。
+★倒し方は `selfField p` と `twistedField p`
+(ℚ_p-代数として同型だが**項としては相異なる** 2 つの `PAdicLocalField p`)に
+自由パラメータが**別の値を割り当てられる**こと。
+★**D13(Prop 1.2 の `∀ RD`)・D30(Prop 2.2 の自由な型族)と同じ「同型不変性」の欠落である。**
+
+⇒ ★**実物に固定した `ABC3.Found.PGC.Cor31Pinned` に差し替えた**
+(`Found/PGC/Section3RealParameters.lean`。`isHodgeTate` を `CompKbar` 上の**固有空間**で書いた形)。
+★**固定後は「両辺恒等的に偽で `↔` が自明に真」にならない**ことも確かめてある
+(`Check/PGC/Cor3PinnedParameters.lean`)。
+
+☆★**残る穴は数学**: `d_V(i)` の値は**まだ何も出ていない**。
+★**`d_triv(0) = 1` すら Ax–Sen–Tate(`ℂ_K^{Γ_K} = K`)と重み空間の有限次元性を要する**
+(`Module.finrank` は無限次元で `0` を返すので `≥ 1` すら出ない)。 -/
+theorem cor_3_1 (RF : RamificationFiltration p) :
+    ABC3.Found.PGC.Cor31Pinned (p := p) RF := sorry
 
 def cor_3_1.src : Source :=
   { paper := "pGC", pdfPage := 6, item := "Corollary 3.1", sectionId := "cor-3-1" }
@@ -180,13 +193,8 @@ Corollary 3.1 と同じ理由(原文「the filtered group Γ_K」、裸の同型
 経由しない反証・証明のどちらも現状の道具では届かないという壁)に帰着する
 ——`ρ,ρ'` の非拘束それ自体は独立した罠ではない。 -/
 theorem cor_3_3 (RF : RamificationFiltration p)
-    (E : Type*) [Field E] [Algebra ℚ_[p] E]
-    (toGal : ∀ K : PAdicLocalField p, {x : K.carrier // ‖x‖ = (1 : ℝ)} → K.absGal) :
-    ∀ {K K' : PAdicLocalField p}
-      (α : FilteredGroup.Iso (filteredGroupOf RF K) (filteredGroupOf RF K'))
-      (ρ : K.absGal →* Eˣ) (ρ' : K'.absGal →* Eˣ)
-      (_hρ : ∀ g : K.absGal, ρ' (α.equiv g) = ρ g),
-      IsUniformizing K E (toGal K) ρ ↔ IsUniformizing K' E (toGal K') ρ' := sorry
+    (E : Type) [Field E] [Algebra ℚ_[p] E] :
+    ABC3.Found.PGC.Cor33Pinned (p := p) RF E := sorry
 
 def cor_3_3.src : Source :=
   { paper := "pGC", pdfPage := 6, item := "Corollary 3.3", sectionId := "cor-3-3" }

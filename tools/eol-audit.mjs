@@ -82,12 +82,37 @@ export function* walk(root, rel = '') {
   }
 }
 
+/**
+ * ★★★M164(メタ第 33 回)—— **git が追跡している本の集合**を返す。
+ * ★なぜ要るか(実測): 既定の `audit()` は D:\Math_ABC3 で **15,662 本**を舐めるが、
+ *   ★**git が追跡しているのは 2,638 本(16.8%)だけ**である。残り 13,024 本の内訳は
+ *   `external/` 10,285 / `scratch/` 2,380 / `tools/`(生成物) 355。
+ * ★★M155 の公表値 `crlf 9,534` は、★**その 9,249(97%)が git の知らない本**だった。
+ *   ⇒ ★「プロジェクトの姿」ではなく「他人の repo の姿」を数えていた。
+ * ★`git ls-files` は実測 **0.1 秒**。★木が git でないときは null を返す(呼び手が既定に落ちる)。
+ */
+export function trackedSet(root) {
+  const r = spawnSync('git', ['ls-files'], {
+    cwd: root, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024, shell: false,
+  });
+  if (r.status !== 0) return null;
+  const s = new Set();
+  for (const line of String(r.stdout || '').split('\n')) {
+    const p = line.trim();
+    if (p) s.add(p);
+  }
+  return s.size ? s : null;
+}
+
 export function audit(root, opts = {}) {
   const exts = opts.exts ?? DEF_EXT;
   const sub = opts.dir ?? '';
+  // ★M164: `tracked` を渡すと git が追跡している本だけを見る。★既定は従来どおり(公表値を動かさない)。
+  const only = opts.tracked ? (opts.trackedSet ?? trackedSet(root)) : null;
   const rows = [];
   for (const rel of walk(root, sub)) {
     if (exts.length && !exts.includes(path.extname(rel).toLowerCase())) continue;
+    if (only && !only.has(rel.split(path.sep).join('/'))) continue;
     let st;
     try { st = fs.statSync(path.join(root, rel)); } catch { continue; }
     let buf;
@@ -250,6 +275,17 @@ function selftest() {
     t('audit: ★飛ばした先は表に出ない', rows.length === 2 && !rows.some(r => /\.git|\.lake|node_modules|\.cache|0_Source/.test(r.file)));
     t('audit: ★CRLF の本を crlf と判定する', rows.find(r => r.file === 'ok/a.md').kind === 'crlf');
     t('audit: ★LF の本を lf と判定する', rows.find(r => r.file === 'top.md').kind === 'lf');
+    // ★★M164(メタ第 33 回)—— `tracked` で母集団を絞る
+    t('M164: ★tracked の集合に無い本は落ちる',
+      audit(base, { exts: ['.md'], tracked: true, trackedSet: new Set(['top.md']) })
+        .map(r => r.file).join(',') === 'top.md');
+    t('M164: ★tracked を渡さなければ従来どおり(既定を動かしていない)',
+      audit(base, { exts: ['.md'] }).length === 2);
+    t('M164: ★tracked が空集合なら 0 本(黙って全部通さない)',
+      audit(base, { exts: ['.md'], tracked: true, trackedSet: new Set() }).length === 0);
+    t('M164: ★path の区切りは / で突き合わせる(Windows の \\ でも当たる)',
+      audit(base, { exts: ['.md'], tracked: true, trackedSet: new Set(['ok/a.md']) })
+        .map(r => r.file).join(',') === 'ok/a.md');
     fs.rmSync(base, { recursive: true, force: true });
   }
   // ★★M161 —— `git ls-files --eol` の読み(★git を呼ばない純関数として較正する)
@@ -370,18 +406,31 @@ function main() {
 
   const extArg = val('--ext', null);
   const exts = extArg ? extArg.split(',').map(s => (s.startsWith('.') ? s : '.' + s).toLowerCase()) : DEF_EXT;
-  const rows = audit(root, { exts, dir: val('--dir', '') });
+  // ★★M164(メタ第 33 回)—— `--tracked` で「git が追跡している本」だけに絞る。
+  //   ★既定は**変えない**。M155 / M161 / M162 の公表値がこの母集団で出ているため。
+  const wantTracked = has('--tracked');
+  const only = wantTracked ? trackedSet(root) : null;
+  if (wantTracked && !only) {
+    console.error('★--tracked: `git ls-files` が読めない(この木は git ではない?)。既定の母集団に落とす。');
+  }
+  const rows = audit(root, { exts, dir: val('--dir', ''), tracked: !!only, trackedSet: only });
 
   let show = rows;
   if (has('--mixed')) show = rows.filter(r => r.kind === 'mixed');
   else if (!has('--all')) show = rows.filter(r => r.crlf > 0 || r.cr > 0);
 
-  if (has('--json')) { console.log(JSON.stringify({ root, n: rows.length, rows: show }, null, 1)); return; }
+  if (has('--json')) { console.log(JSON.stringify({ root, tracked: !!only, n: rows.length, rows: show }, null, 1)); return; }
 
   const by = {};
   for (const r of rows) by[r.kind] = (by[r.kind] || 0) + 1;
   console.log(`== eol-audit —— ${root}`);
-  console.log(`   走査 ${rows.length} 本 (${exts.join(' ')})`);
+  console.log(`   走査 ${rows.length} 本 (${exts.join(' ')})`
+    + (only ? `  ★--tracked: git の追跡下 ${only.size} 本に絞った` : ''));
+  if (!only) {
+    console.log('   ★★母集団は**木の中の全ファイル**である(M164)。'
+      + '★`external/` や `scratch/` を含むので');
+    console.log('     ★「プロジェクトの姿」を見たいときは **`--tracked`** を付けること。');
+  }
   console.log(`   内訳: ` + Object.entries(by).sort().map(([k, v]) => `${k} ${v}`).join(' / '));
   console.log('');
   if (!show.length) { console.log('   ★CRLF / 裸の CR を含む本は無い。'); return; }

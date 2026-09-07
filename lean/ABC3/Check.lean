@@ -37,10 +37,12 @@ import ABC3.Check.PGC.Theorem42Degenerate
 import ABC3.Check.PGC.Def32Degenerate
 import ABC3.Check.PGC.Cor33Degenerate
 import ABC3.Check.PGC.Prop22Degenerate
+import ABC3.Check.PGC.Prop22FreeForm
 import ABC3.Check.PGC.Cor13Degenerate
 import ABC3.Check.PGC.Prop12Degenerate
 import ABC3.Check.PGC.Prop12ForallRD
 import ABC3.Check.PGC.Theorem42NaiveGC
+import ABC3.Check.PGC.Theorem42PinnedNondegenerate
 import ABC3.Check.PGC.CyclotomicCharacterNontrivial
 import ABC3.Check.FrdI.TwistedFrobenioid
 import ABC3.Check.FrdI.AutAmpleGap
@@ -60,6 +62,7 @@ import ABC3.Check.GaloisRep.HtFaltPinned
 import ABC3.Check.Arakelov.ProjectiveCaseWeak
 import ABC3.Check.GaloisRep.TorsionEquivWeak
 import ABC3.Check.PGC.FreeTermFunctionRefutation
+import ABC3.Check.PGC.Cor3PinnedParameters
 /-!
 # Check — 我々のモデルについての検査
 

@@ -10591,3 +10591,1240 @@ p 進対数の段の「付値環の核」/ 今回の Maschke + Krasner）
 ⇒ ★★**申し送り（更新）**: ★**持ち場に「重い道具」を書くのをやめる。**
 ★**書くのは「消せるはずの語彙」と「在庫の場所」だけにする。**
 ★**原典の道は `.needs` に既に書いてあるので、持ち場で繰り返さない。**
+
+## ★★`VERDICT:` —— `FilteredGroup` の移設
+
+```
+VERDICT[FG-a]: 当たり — Setup.lean へそのまま移せた（★Interface でない理由は 3 つ測られた）
+VERDICT[FG-b]: 半分 — 完全修飾名は動いたが、export で旧名を残したのでコード書き換えは 1 箇所だけ
+VERDICT[FG-c]: 半分 — Section4Defs は 0/209 で完全、★Section3Defs は 1/209 が残った（IsUniformizing の ‖x‖ が scoped instance を要求する）
+VERDICT[FG-d]: 当たり — Section3Defs / Section4Defs を同じ波で作れた
+```
+```
+COST[FilteredGroupMove]: 安 | 持ち場=FilteredGroup を Interface へ出す  — export で旧名を残したので書き換え 1 箇所
+```
+☆★**`FG-c` の外れ方が良い**: ★**`import-audit --plan-all` はコードに現れる名前しか追わないので
+`scoped instance`（`Norm K.carrier`）への依存を検出できない。**★**道具の限界が名指しされた。**
+
+---
+
+## ★★`GUESS:` —— ★**配る前に書いた**（pGC の残り 4 件のうち着手できる 2 本）
+
+★**pGC の残りは 4 件**: `prop_2_2` / `cor_3_1` / `cor_3_3` / ★**主定理 `theorem_4_2`**。
+★`prop_2_1` が閉じ、分岐入力と p 進対数の段も入ったので、★**`prop_2_2` は組み立てに入れる。**
+★`Section3Defs` ができたので ★**§3 の配線も循環しない。**
+
+```
+GUESS[P22-a]: prop_2_2 は「Prop 2.1 を有限拡大 L/K に適用して colimit」で、新しい数学は要らない
+GUESS[P22-b]: IntKbar は smul_padicLog_image_ramificationFiltration_eq_integers から直に出る
+GUESS[P22-c]: CompKbar（p 進完備化）のほうが重い（完備化の Γ_K-加群構造の輸送）
+GUESS[P22-d]: AbsClosureModules.lean の IntKbarRecoverable / CompKbarRecoverable がそのまま消費先
+GUESS[S3-a]: toGal は artinMap（ArtinMap.lean:450）に固定できる
+GUESS[S3-b]: 行き先の違い（Gal(M/K) 対 K.absGal）は制限の全射性からの持ち上げで埋まる
+GUESS[S3-c]: isHodgeTate は CompKbar（AbsClosureModules.lean）で書ける
+GUESS[S3-d]: 固定したあとの cor_3_1 は Prop 2.2 からの形式的な系（原典が「formal consequence」と書いている）
+```
+☆★**本体は今日 5 度「重い道具」を持ち場に書いて外した。**
+⇒ ★**この 2 本の持ち場には「原典が使う道具」を書かない。**
+★**書くのは「消せるはずの語彙」と「在庫の場所」だけにする。**
+
+## ★★★★★★★メタ第 33 回 —— ★**無音の環境すり替わりを 9 件で相手ごと名指しした**（2026-09-08）
+
+### ☆★★★事前登録した検出器が、実データで**感度ゼロ**だった
+
+★改善係が自分から書いた最大の反省:
+> ★**2,307 件中 0 件しか鳴らず、「取り合いは起きていない」と読みかけました。**
+> 監査したら同じ木に ★**`エラー: REPL は処理中(直列にしか使えない)` が 19 件**ありました。
+> ★**私の正規表現は英語しか知りませんでした。**
+
+⇒ ★**第 34 回に「他の検出器にも同じ穴が無いか」を配った。**
+☆★★**これは「測って言えない」と「測れていない」の取り違えの 3 例目である。**
+
+### ★★★★★事後（探索）で決定的なものが出た
+
+★**無音の環境すり替わり**（頼んだ imports 対 報告された imports の食い違い）:
+
+| | 実測 |
+|---|---|
+| 食い違い | **11 件 / agent 9 体** |
+| ★**うち相手を名指しできた**（同じ imports を頼んだ別 agent が同時に走っていた） | ★**9 件** |
+| ★人手の記録（第 1077 の事件）との一致 | ★**そのまま再現**（★検出器の裏取り） |
+| 日ごと | 09-05 **8** / 09-06 **2** / ☆★**09-07 1 件 —— D27 承認より後** |
+
+☆★★**この事故は error の字面を 1 つも出さない**ので、事前登録した (a) では**原理的に捕まらない**。
+
+★`エラー: REPL は処理中` 18 件の瞬間の同時 MCP 利用者数: ★**15/18 が 2 本以上**
+（★3 件は 1 本以下 ⇒ 相手は agent だけではない）。
+
+### ★★時間重み —— ★**過半の時間で天井に当たっている**
+
+lean-prover の同時 **1 が 13.6h（40.8%）/ 2 が 18.0h（54.2%）/ 3 が 1.0h / 4 が 0.7h**。
+★M25 の「上限 5 は 1 度も効いていない」とは**状況が違う**。
+
+### ★★★改善係の結論（★本体は採った）
+
+> ★**「2 という数」を議論しても効かない。**★**壊しているのは MCP REPL の同時利用**であり、
+> ★**D27 は既に「MCP は 1 体」と書いている。**
+> ★**無駄は数の設定ではなく、規約が破られていることと、それが無音で起きるので誰も気づけないこと。**
+
+★**上限を 3 に上げてよい条件は 1 つ**: ★**3 本目が MCP を一切使わないこと。**
+★「速さ」では言えない（事前登録の 4 族すべて Holm 後「言えない」、★**実効 n は 22.5**）。
+
+### ★★本体が即座にやったこと
+
+1. ★**規約 §4.5 に節を新設**: 「MCP を使う agent を持ち場に名指しする」。
+2. ★**`.claude/agents/lean-prover.md` の冒頭**に
+   「★**あなたは MCP を使う側か、使わない側か。書いていなければ使わない側**」を置いた。
+3. ★★**走行中の 2 体に即座に名指しを送った**（Prop 2.2 が MCP 側、§3 固定が `leanfile.mjs` のみ）。
+4. ★MCP 側に ★**「`lean_start` の直後に `lean_status` で imports を照合し、
+   照合回数と食い違い回数を報告せよ」**と依頼した。★**新しい実測点である。**
+
+### ★採用（4 本）
+
+`agent-timing.mjs` 2,632 → **3,519**（selftest **239 → 292/292**）/
+`eol-audit.mjs` 397 → **446**（**36 → 40/40**）/ 台帳 +310（M166–M172）/ `m149-watch.json` 15 → 23。
+★わざと壊して **17/18 発火**（☆★最初は 13 中 3 が素通り、うち **2 件は自分の試験台の壊れ**、
+1 件は**本物の穴**。★残る 1 件は**等価な突然変異**で手で突き合わせて確認）。
+
+### ☆★M164 が M155 の罠を踏んでいた
+
+★**「3.5 秒 → 0.8 秒」は worktree(2,632 本) と本体(15,662 本) を比べていた** ——
+☆★**M155 自身が書いた「どの木で数えたか」の罠。**
+★本体での実測は **19.0〜30.5 秒 → 1.2〜1.6 秒**（★本体で追試: **1.49 秒**）。
+★飲んでいたのは `external` 8,558 ではなく ★**git 追跡外 13,024 本（83%）**で、
+★M164 が名指ししなかった `scratch/` 2,380 本を含む。★**mixed の 3 件は同じ 3 件**（失うもの 0）。
+
+### ★M169 —— NUL バイト（★本体が 1 件直した）
+
+★`tools/graph-layers.mjs` の NUL 2 個は ★**意図的**（Map の鍵の区切り）⇒ **触らない**。
+☆★`memory/heredoc-eats-backslash.md` の NUL 1 個は ★**事故** ——
+★★**まさにその実装を説明する文の中で、エスケープ列のつもりが生の NUL になっていた。**
+⇒ ★**本体が直した**（NUL 1 → 0、2,293 → 2,296 バイト）。
+★`git ls-files --eol` が `-text` → **`i/lf w/lf attr/text=auto eol=lf`** になり、
+★**`.gitattributes` が効いていることも同時に確認できた。**
+
+### ☆★★説明できていない食い違い（★第 34 回の主題）
+
+☆★**上限は走行時間の 54.2% で天井に当たっている**のに、
+☆★**同じ日の `frontier.mjs` では「保留でも空撃ちでもない着手可能」が 1 件しかない。**
+★**改善係は「説明できない」と書いた**（M167）。
+
+★★**本体の観測**: ★**今日、`frontier.mjs` が「着手不可」と印した `Skeleton/PGC/Section2` を配って成功している**
+（★原典 §2 が名指しするのは Prop 1.2 と Cor 1.3 だけで、Prop 1.1 に依存しなかった）。
+⇒ ★**`frontier.mjs` の「着手可能」はファイル単位の近似で、項目単位の依存を見ていない疑いがある。**
+☆★★**本体はこの道具を毎波「次に何を配るか」の判断に使っている** ——
+★**供給の測り方が間違っていれば、配り方そのものが空回りする。**
+⇒ ★**第 34 回の最優先に配った。**
+
+## ★★★★★★★D30 —— ★**`prop_2_2` の文は偽だった。実物に固定した**（2026-09-08）
+
+`Check/PGC/Prop22FreeForm.lean::prop_2_2_free_form_false`（★**`sorry` 無し**）が証明した。
+
+☆★**反例は病的な作用ではなく自明な作用で、落ちるのは型族の側**:
+`Γ_K ≅ Γ_K'`（位相群）なのに `K ≠ K'` である項の対が実在するので
+（`twistedField p` / `selfField p`）、「`K = twistedField p` のときだけ `ℤ`、他は `0`」
+という型族を取れば `ℤ ≃+ 0` を要求して落ちる。
+★**落とした条件は D13（Prop 1.2 の `∀ RD`）とまったく同じ「同型不変性」。**
+☆★★**2026-09-05 に `SMul` → `DistribMulAction` と強めた修理では足りなかった** ——
+★**あれは作用の側を塞いだが、型族の側が空いたままだった。**
+
+★★**本体の判断（D30）**: ★**文を実物に固定した。**
+```lean
+theorem prop_2_2 (_RF : RamificationFiltration p) :
+    ABC3.Found.PGC.IntKbarRecoverable (p := p) ∧
+      ABC3.Found.PGC.CompKbarRecoverable (p := p) := sorry
+```
+★`import-audit --edge` で循環しないことを先に確認。★`build.mjs` で **error 0 / sorry 1**。
+☆★**偽の文の上の `sorry` を、真の文の上の `sorry` に替えた** —— ★**これが今回いちばん大事な変更である。**
+★**10 例目の退化、11 例目の修理**（D13 と同じ判断）。
+
+### ★残る穴はちょうど 1 つ
+
+`Found/PGC/Prop22FixedForm.lean::prop_2_2_real_of_isometric`（`sorry` 無し）が
+★**`IsometricallyRecoverableClosure p → IntKbarRecoverable ∧ CompKbarRecoverable`** を与える。
+★`IsometricallyRecoverableClosure p` = 「**Prop 2.1 の同変同型を等長に取れる**」。
+★★**分岐フィルトレーションが担う内容はここ 1 点に集約された。**
+★空虚でないことも示されている（★**反例が使う α そのもの**で成り立つ、`isometricTransport_galContinuousMulEquiv`）。
+
+### ★★★原典より短い道（今日 16 回目）
+
+★原典は「有限次拡大 L/K へ降りて Prop 2.1 を使い、上付き→下付き→上付きと番号付けを往復する」と書くが、
+★★**有限次への降下も Herbrand の変換も 1 度も使っていない。**
+★**等長同変加法同型の「単位球への制限」と「完備化への延長」の 2 本だけで
+`𝒪_{K̄}` と `ℂ_K` の両方が同時に出る。**
+★原文が `K̄^∧` について別途述べる段も `addEquivCompletion` 1 本に吸収された。
+
+★**新しい補題**: `norm_extendToClosure` ——
+★**ℚ_p-代数同型の代数閉包への延長はスペクトルノルムを保つ**（★木にも mathlib にも無かった）。
+
+★`#print axioms`: ★**3 宣言が「依存なし」**、2 宣言が `propext` のみ、
+★3 宣言が `Quot.sound` のみ（**選択公理を使わない**）。
+★**`DecidableEq` の仮定は全宣言でゼロ**（`if` を避けて `{n | ¬P → n = 0}` で書いた）。
+★**`[Normal]` / `[IsGalois]` の仮定も全宣言でゼロ。**
+
+### ★★★MCP の名指しが効いた（★新しい実測点）
+
+★**照合 2 回 / 食い違い 0 回。**★`lean_start` は **1 回だけ**（15.1 秒）、★**`lean_reset` は 0 回。**
+★返ってきた imports は 2 回とも指定どおり。★`lean_check` 6 回で以降は `leanfile.mjs` に切り替えた。
+⇒ ★**規約 §4.5 の「MCP を使う agent を名指しする」は、初回から守られた。**
+
+## ★★`VERDICT:`
+
+```
+VERDICT[P22-a]: 外れ — 有限次への降下は 1 度も使われず、しかも新しい補題(norm_extendToClosure)が要った
+VERDICT[P22-b]: 外れ — IntKbar は p 進対数の段からではなく、等長性 1 点に集約された
+VERDICT[P22-c]: 外れ — CompKbar が重いのではなく、抽象核 2 本で両方が同時に出た
+VERDICT[P22-d]: 当たり — AbsClosureModules の IntKbarRecoverable / CompKbarRecoverable がそのまま消費先だった
+```
+```
+COST[Prop22]: 安 | 持ち場=pGC Proposition 2.2  — 自由版は偽、実物版は等長性 1 点へ還元
+```
+☆★**本体は 3 本外した。今日 6 度目の「重く見積もって薄い道を見落とす」型である。**
+
+---
+
+## ★★`GUESS:` —— ★**配る前に書いた**（`IsometricallyRecoverableClosure`）
+
+```
+GUESS[ISO-a]: 等長性は Prop 2.1 の証明を作り直さず、既存の同変同型に後から付けられる
+GUESS[ISO-b]: 入口は PadicLogIntegers::smul_padicLog_image_ramificationFiltration_eq_integers（分岐から 𝒪_K が出る）
+GUESS[ISO-c]: 抽象核は「単位球を保つ加法同型は等長」で、分岐・付値の語彙が消える
+GUESS[ISO-d]: norm_extendToClosure（今日入った）がそのまま使える
+```
+
+## ★★★孤児の待ち合わせループを 3 つ止めた —— ★**2 時間以上生きていた**（2026-09-08）
+
+★本体が `TaskStop` で止めた 3 つ:
+
+```
+bpxshqqfp  until grep -qE "^(ok|NG)" ".../tasks/bcngp377t.output" 2>/dev/null; do sleep 10; done
+bcngp377t  cat > .../scratchpad/x 2>/dev/null; cat > .../scratchpad/core2.lean <<'EOF' … EOF
+           timeout 600 node tools/leanfile.mjs …
+bdk0hyxx9  cd .claude/worktrees/meta33 && (time node tools/check.mjs --brief) …
+```
+
+### ☆★★原因が見えた
+
+★**`bcngp377t` の先頭の `cat > …/x 2>/dev/null` に入力が繋がっていない。**
+★heredoc は**2 つ目の** `cat` に付いているので、★**1 つ目は stdin を永久に待つ。**
+★そして `bpxshqqfp` がその出力を **10 秒おきに 2 時間以上ポーリングし続けた。**
+
+☆★**行き先のパスが `7183e299f317` と、本物（`7183e229f317`）と 1 文字違う**点も見える。
+★連鎖コマンドが壊れた形跡である（★CLAUDE.md が言う「フックはコマンドとデータを区別していない」に整合）。
+
+★**成果物への影響は無い**（当の agent が「その後の検査は全部やり直して通っている」と確認済み）。
+★`bdk0hyxx9` はメタ第 33 回が `--teardown` で junction を外した worktree に `cd` していた孤児。
+
+### ☆★★メタ第 33 回の数字を訂正する材料
+
+★第 33 回は「待ち合わせループを**無駄と断定できない**。
+★**数えられる損は打ち切り 4 件 / 0.67 h、確実に失われたのは 1 件 / 0.17 h = Bash 時間の 0.2%**」と書いた。
+⇒ ☆★**いま 2 時間以上のものが 1 件、実物で出た。**★**0.2% は過小である。**
+★**ただし「壁時計時間の損」であって「本体が待った時間」ではない**（背景で回っていた）。
+★**そこを混ぜないこと。**
+
+### ★★申し送り（★本体の作法）
+
+1. ★**ゴール確認の通知に出てくる shell ジョブは、持ち主の agent が完了しているかを見る。**
+   ★**完了していれば孤児であり、止めてよい。**
+2. ★**`cat > file` を入力なしで書かない。**★連鎖の途中に置くと**必ず止まる。**
+3. ★**`until … done` のポーリングを書かない**（本体の運用指針にもある）。
+   ★**待つなら `run_in_background` と完了通知を使う。**
+
+## ★★★★★★★D31 —— ★**`cor_3_1` / `cor_3_3` の文も偽だった（★しかも 09-06 に既に反証されていた）**（2026-09-08）
+
+☆★★**実装者が「新しく書く必要はなかった」と報告した** ——
+`Check/PGC/FreeTermFunctionRefutation.lean`（★**2026-09-06**）が
+★**`↔` を示すより強い「反証」を既に出していた**:
+`not_cor_3_1_current_form`（:258）/ `not_cor_3_3_current_form`（:373）、★どちらも `sorryAx` 無し。
+★**転写されている statement はスケルトンの現行の文と逐語一致**する。
+⇒ ★**実装者は「D13 形の `↔` を新規に書くのは厳密に弱い成果になる」と判断して書かなかった。★正しい。**
+
+☆★★★**つまり pGC の残り 4 件のうち 3 件（`prop_2_2` / `cor_3_1` / `cor_3_3`）が
+「偽の文の上の `sorry`」だった。**★**同じ「同型不変性」の欠落**（D13・D30・D31 で 3 例目）。
+☆★**そして `cor_3_1` / `cor_3_3` は 2 日前に反証されていたのに、
+本体はそれを知らずに「自由パラメータを固定できるか」を配っていた。**
+⇒ ★**申し送り**: ★**`Check/PGC/` は「何が偽と分かっているか」の台帳である。持ち場を書く前に引くこと。**
+
+### ★★本体がやったこと（D31）
+
+★`import-audit --edge`（循環しない）を先に引いてから、★**2 文とも実物に差し替えた**:
+```lean
+theorem cor_3_1 (RF : RamificationFiltration p) : ABC3.Found.PGC.Cor31Pinned (p := p) RF := sorry
+theorem cor_3_3 (RF : RamificationFiltration p) (E : Type) [Field E] [Algebra ℚ_[p] E] :
+    ABC3.Found.PGC.Cor33Pinned (p := p) RF E := sorry
+```
+★`build.mjs` で **error 0 / sorry 3**（★3 つとも真の文の上）。
+★**古くなった docstring（「反証もできないし証明もできない」）にも訂正を挿した。**
+
+### ★実装者の成果
+
+`Found/PGC/Section3RealParameters.lean` **518 行 / 46 宣言、`sorry` 0** +
+`Check/PGC/Cor3PinnedParameters.lean` 73 行。
+
+- ★**`toGal` ← `exists_artinMap`**（`ArtinMap.lean:632`、★**仮定ゼロ・LKW 特殊化済み**）。
+  ☆★**本体が持ち場で指した `:450` は引数 8 個**で、★**同じファイルに無仮定版が在った。**
+- ★**行き先の違いの答は「持ち上げは要る」**: `IsUniformizing` は `toGal x` を
+  `ρ : K.absGal →* Eˣ` に食わせるので ★**`Gal(M/K)` の上では完結しない。**
+  `AlgEquiv.restrictNormalHom_surjective` + `Function.surjInv` で持ち上げた。
+  ★**ただし合成は選択に依らない**（`artinUnitChar_artinToGal`）。
+- ★**`isHodgeTate` ← 固有空間**（Tate 捻りの型同義語を作らず）:
+  `d_V(i) = dim_K {z ∈ ℂ_K ⊗ V | ∀σ, (σ⊗σ)z = χ(σ)^i·z}`。
+- ★**`isUniformizing_artin`** —— Definition 3.2 が**真になる**実例（`I = U_K`, `ι = id`, `E = K`）。
+- ★**固定後の `↔` は自明に真にならない**（`badToGal_ne_artinToGal` ほか）。★**板挟みの片側が解けた。**
+
+☆★**正直な留保**: ★**`d_V(i)` の値はまだ何も出ていない。**
+★**`d_triv(0) = 1` すら Ax–Sen–Tate（`ℂ_K^{Γ_K} = K`）と重み空間の有限次元性を要する**
+（`Module.finrank` は無限次元で `0` を返すので `≥ 1` すら出ない）。
+
+### ★★★MCP の規約が完璧に機能した（★2 例目）
+
+★**MCP の使用は 1 回のみ**（`lean_status`）。★`lean_start` **0 回**、`lean_check` **0 回**、`lean_reset` **0 回**。
+☆★★**`lean_status` で見えた基準環境の imports が自分の指定でないことを見て、
+起動し直さず `leanfile.mjs` に切り替えた。**
+⇒ ★**無音のすり替わりを、起きる前に避けた実例である。**
+
+## ★★`VERDICT:`
+
+```
+VERDICT[S3-a]: 半分 — 固定はできたが、使ったのは exists_artinMap(:632、仮定ゼロ)。本体が指した :450 は引数 8 個だった
+VERDICT[S3-b]: 当たり — 制限の全射性からの持ち上げで埋まった。★おまけに「合成は選択に依らない」まで出た
+VERDICT[S3-c]: 当たり — isHodgeTate は CompKbar 上の固有空間で書けた
+VERDICT[S3-d]: 外れ — 「Prop 2.2 からの形式的な系」ではない。d_V(i) には Ax–Sen–Tate が要る
+```
+```
+COST[S3Fix]: 安 | 持ち場=§3 の自由パラメータを実物に固定  — 判定 1 は既に木に在り、固定は両方通った
+```
+
+---
+
+## ★★`GUESS:` —— ★**配る前に書いた**（Ax–Sen–Tate）
+
+```
+GUESS[AST-a]: Ax–Sen–Tate（ℂ_K^{Γ_K} = K）は mathlib に無い（★測っていないので断定しない）
+GUESS[AST-b]: 木の spectralNorm 機構（LocalFieldNorm.lean）と closureCompletion が入口になる
+GUESS[AST-c]: 抽象核は「完備な非アルキメデス体の稠密部分体の不変元」で、Galois の語彙が消える
+GUESS[AST-d]: 重み空間の有限次元性は Ax–Sen–Tate より軽い（χ の固有空間分解が先に立つ）
+```
+
+## ★★★★★★★★D32 —— ★**pGC の残り 4 件が「4 件とも同じ病気」だった**（2026-09-08）
+
+☆★**本体は D31 で「`Check/PGC/` は台帳である。持ち場を書く前に引くこと」と申し送りを書いた。**
+★**その直後に自分でそれを実行した。**★`Check/` の反証・退化の宣言を全部並べたところ:
+
+```
+cor_1_3_statement_false / cor_3_3_statement_false / not_cor_3_1_current_form /
+not_cor_3_3_current_form / not_prop_2_2_current_form / prop_1_2_statement_false /
+★not_theorem_4_2_current_form_of_nonisomorphic / not_forall_RD_recoverable_of_nonisomorphic …
+```
+
+★★★**主定理も入っていた。**
+
+### ★★★主定理の現行形が偽である理由（★1 行で言える）
+
+`Check/PGC/Theorem42NaiveGC.lean::theorem_4_2_current_form_implies_naive_GC` が示すとおり、
+★**旧形は原典自身が偽と述べている素朴 Grothendieck 予想を含意する。**
+
+☆★★**`IsNaturalFiltration` は退化した `Gv ≡ ⊤` が満たす**ので、`∀ RF` の形だと
+★★**`OutFilt` が「濾過を保つ外部同型」ではなく「ただの外部同型」になり、
+全射性がそのまま素朴版になってしまう。**
+★原典の `OutFilt(Γ_K, Γ_K')` は ★**上付き番号付けの高次分岐群による濾過**を指している。
+
+☆★★**しかも `Section4.lean` の docstring には 2026-09-05 の「この形は偽である」→「直した」
+という記録が既にあった。**★**直したつもりが、`∀ RF` の穴が残っていた。**★**2 度目の修理である。**
+
+### ★★★4 例が全部同じ形だった
+
+| 決定 | 項目 | 自由にしていたもの |
+|---|---|---|
+| D13（09-06） | Prop 1.2 | `∀ RD : ResidueCardinality` |
+| ★**D30**（09-08） | Prop 2.2 | 自由な**型族** `IntKbar` / `CompKbar` |
+| ★**D31**（09-08） | Cor 3.1 / 3.3 | 自由な**述語** `isHodgeTate` / 自由な**写像** `toGal` |
+| ★**D32**（09-08） | ★**Theorem 4.2（主定理）** | 自由な**分岐フィルトレーション** `∀ RF` |
+
+★★**落とした条件は 4 件とも同じ「同型不変性」。**
+★**倒し方も同じ**: `selfField p` と `twistedField p`
+（ℚ_p-代数として同型だが**項としては相異なる** 2 つの `PAdicLocalField p`）。
+
+☆★★★**申し送り（★これが今日いちばん一般化できる）**:
+★**「自由なデータ引数を取る主張」は、この木では既定で疑うこと。**
+★**`PAdicLocalField p` は項の同一性が体の同型より細かい**ので、
+★**自由なパラメータは必ず「同型で結ばれた 2 つの項」に別の値を割り当てられる。**
+⇒ ★**スケルトンに新しい主張を書くときは、最初から実物に固定する。**
+
+### ★本体がやったこと（D32）
+
+★`import-audit --edge`（循環しない）を先に引き、★**実物に固定した**:
+```lean
+theorem theorem_4_2 (hnat : IsNaturalFiltration (ABC3.Found.PGC.ramificationFiltration p))
+    (K K' : PAdicLocalField p) :
+    Function.Bijective
+      (naturalOuterIso (ABC3.Found.PGC.ramificationFiltration p) hnat (K := K) (K' := K')) := sorry
+```
+★`build.mjs` で **error 0 / sorry 4**（★Section2→3→4 の連鎖が全部通っている）。
+
+### ★残る 2 つ（どちらも数学）
+
+1. ★**`IsNaturalFiltration (ramificationFiltration p)`** —— ★**未証明**なので明示の仮説にした。
+   ☆★`exists_isNaturalFiltration` は**退化版で満たされる**ので、これの代わりにはならない。
+   ★**実物 `ramificationFiltration p` は `compat` まで無条件で構成済み**なので、
+   ★**この自然性は証明できるはずである。**⇒ ★**次のノードになる。**
+2. ★**全射性**（★射は 2026-09-05 に構成済み）。原典の道は
+   Cor 3.3 → `α_K` の構成 → Lemma 4.1（★**閉じている**）→ ★**"standard general nonsense argument"**。
+   ☆★**その語は `hedge-index.mjs` の語彙に無く 0 件と報告される。**★**畳まれた量は測れていない。**
+
+### ★★★pGC の現在地（★ゴールに対して）
+
+★**残り 4 件、★すべて「真の文の上の `sorry`」になった**（★今日の午前は 4 件とも偽の文の上だった）。
+
+| 項目 | 残っているもの |
+|---|---|
+| `prop_2_2` | `IsometricallyRecoverableClosure`（★配布中） |
+| `cor_3_1` | `d_V(i)` の値 ⇒ ★**Ax–Sen–Tate**（★配布中） |
+| `cor_3_3` | 同上 ＋ [1] Ch III App §5 の判定 |
+| ★**`theorem_4_2`** | `IsNaturalFiltration (ramificationFiltration p)` ＋ 全射性 |
+
+## ★★★★★★★M167 に決着 —— ★**`frontier.mjs` は間違っていない。答えている問いが違う**（2026-09-08）
+
+☆★★**本体の見立て「どちらかの測り方が間違っている」は外れだった。**
+
+★`frontier` が答えるのは ★**「どの**ファイル**が上流の `sorry` で塞がっていないか」。**
+☆★★**本体が読んでいたのは「いま何本の agent に配れるか」で、それは答えていない。**
+
+| 日 | 配った lean-prover | 着手可能に入っていた | ★**どちらでもない** |
+|---|---|---|---|
+| 2026-09-06 | 39 | 5（12.8%） | **33（84.6%）** |
+| 2026-09-07 | 67 | ★**1（1.5%）** | ★**65（97.0%）** |
+
+★★**比は 1 : 52。**★65 本のうち ★**52 本が `Skeleton/PGC/Section1` ただ 1 つの下流**で、
+★その Section1 は 09-07 の始まりに `sorry` が **1 個**しか残っていなかった。
+★**起動時点で木に無かった本が 106/120（88.3%）** ⇒ ★**`frontier` が構造上名指しできないのは 95%。**
+⇒ ★★★**「着手可能 1 件」と「同時 2 本が 54.2%」は、はじめから矛盾していなかった。**
+
+★照合は**甘い側**（読んだだけの本も「入っていた」と数える）に倒してある。
+★`.needs` から供給を数える道は**空**だった（`mathEdges` の行き先は木全体で 1 本）。
+
+### ☆★★★これはユーザーの指示が正しかったことの実測である
+
+★`/loop` の指示は最初から
+> 「持ち場は前線ノード（`frontier.mjs`）に限らず、★**鎖の内側（`Found` の未着手ノード）も含める**」
+
+と書いてあった。★**実測はその比を 1 : 52 と出した。**
+⇒ ★★**本体は毎波 `frontier` を見ていたが、供給の 98% は「鎖の内側」から来ていた。**
+★**申し送り**: ★**`frontier` は「塞がっていないファイル」の一覧として読む。**
+★**「何本配れるか」は `Found/` の未着手ノードと `.needs` と原典から数える。**
+
+### ★採用（3 本）
+
+`tools/frontier.mjs` +87（★**selftest 新設 17/17**。「残り」欄と
+「ここはファイルを数えている / これは供給量ではない / これも下限である」の注記＋実測 1 : 52 を印字）/
+`tools/agent-timing.mjs` +221（**292 → 318/318**、`--mcp-watch` と最小間隔の守り）/ `meta-backlog.md` +309。
+★**わざと壊して 32/32 発火。**★おまけに ★**`frontier.mjs` の改行混在も解消**（混在 3 → 2 本）。
+
+### ★★M175 —— ★**MCP の規約が効いたかは「まだ言えない」**
+
+| | 照合 | 食い違い | 率 |
+|---|---|---|---|
+| 規約変更**前** | 104 | **11** | 10.6% |
+| 規約変更**後** | **1** | **0** | — |
+
+★事前登録した規則（0 件のまま `need = ⌈ln0.05/ln(1−p0)⌉ = 27` に届けば「言える」）に照らし、
+★★**判定「まだ言えない。あと 26 回」。**
+☆★**改善係は「効いた」とも「効いていない」とも書かなかった。★正しい。**
+（★本体の観測: ★**その後の 2 波はどちらも規約を守っている** —— 照合 2 回・食い違い 0 / MCP 1 回のみ。）
+
+### ★★M176 —— ★**hedge の語彙。★検出器の裏取りが取れた**
+
+★保守案で **合図 +270（+3.6%）、31/53 本が動く**。
+★★**「済」の項目は 110 → 111 で、増えた 1 件は `pGC Theorem 4.2` ただ 1 つ** ——
+☆★★**本体が同日に手で名指ししたのと同じ 1 件である。**
+⇒ ★**本体の判断: 保守案 v2a を採る。`easy` まで広げる v2b は採らない**
+（+9.9% で増分が我々が典拠に引く本に集中し、★**精度が測られていない**）。⇒ ★第 35 回に配った。
+
+### ☆★改善係が自分で見つけた壊れ 2 件（★作法が定着している）
+
+1. ★**冷えた 1 回目の 16.6 秒を根拠に「16.6 → 16.8 秒」と書きかけ、測り直して取り消した。**
+2. ★★**最小間隔の実装が「★単調に増えている」を押し出していた** ——
+   ☆★**selftest は鳴らず、実データを目で見て気づいた。**★試験を 3 本足して塞いだ。
+
+### ☆★他の検出器の日本語の穴（★27 件）
+
+★`MCP_INFRA_RE_V1` は **0/27**（第 33 回の 0/2307 を独立に再現）。
+★本物の穴は **27 件**（`REPL は処理中` 18 / `600 秒タイムアウト` 9）——
+☆★**英語の `timeout` は語彙に入っているのに日本語が無い**＝★**設計判断ではなく取りこぼし。**
+★残り 161 件は別の穴（error 名が語彙に無い）。
+⇒ ★**`idiom-recur` の `ERRWORDS` は M114 の族に触るので、事前登録してから直させる**（第 35 回）。
+
+## ★★★★★等長版は**必要より強かった** —— ★穴が `IntKbarRecoverable` 1 点に縮んだ（2026-09-08）
+
+`lean/ABC3/Found/PGC/Prop22IntegersSuffice.lean` **644 行 / 64 宣言、`sorry` 0**。
+`build.mjs` → **jobs 3,621 / error 0 / sorry 0 / 11.9 秒**。★**MCP 使用 0 回。**
+
+```
+IsometricallyRecoverableClosure ⟹ UnitBallRecoverableClosure ⟺ IntKbarRecoverable ⟹ Prop 2.2 の両方
+```
+
+| 主結果 | 内容 |
+|---|---|
+| ★`compKbar_transport_of_intKbarTransport` | ★**`𝒪_{K̄}` の同変加法同型から `ℂ_K` の移送が無条件に出る** |
+| ★★`recoverableAsAddModule_closure_of_intKbar` | ★★**Proposition 2.1 も `𝒪_{K̄}` から出る** |
+| `unitBallTransport_iff_intKbarTransport` | 単位球版と `𝒪` 版は**同値** |
+| ★`prop_2_2_real_of_isometric_via_intKbar` | ★**旧仮説から同じ結論が出ることの機械検査**（＝弱めただけで強めていない） |
+
+★**非空虚性**（`intKbarTransport_{refl,symm,trans}` / `_inner` / `_galContinuousMulEquiv`）も付いている。
+
+### ★★抽象核（★`PAdicLocalField` が 1 語も出ない）
+
+★**抽象核 C** `transportEquiv` —— ★**鍵は「`ψ` が加法的であるだけで `ψ(n•w) = n•ψ w` が自動」**、
+すなわち ★**`𝒪` の同型は自動的に `p` 倍と可換**。
+★**抽象核 D** `continuous_of_unitBall_bound` —— ノルム付き加法群だけ。
+★`smul_mem_of_coe_smul` は ★**`does not depend on any axioms`**。
+★**正規性・可判定性は新ファイルのどこにも現れない**（`if` を 1 つも使っていない）。
+
+### ★★原典より短い道（今日 17 回目）
+
+★原文は `K̄^∧` を「`𝒪_{K̄}` の p 進完備化 ⊗ ℚ_p」として別途扱うが、
+★**`𝒪` の移送 → 局所化 → 完備化の 1 本で済む**（★有限次への降下も番号付けの往復も通らない）。
+★**等長性は不要**（★`K^al` の値群は `p^ℚ` で稠密なので、★**球の対応から等長性は出ない＝等長版は真に強い**）。
+
+## ★★`VERDICT:`
+
+```
+VERDICT[ISO-a]: 外れ — 等長性を「後から付ける」のではなく、★要らないことが分かった（より弱い仮説で足りる）
+VERDICT[ISO-b]: 半分 — PadicLogIntegers の入口はまだ使われず、次のノードへ送られた
+VERDICT[ISO-c]: 外れ — 「単位球を保つ加法同型は等長」は採られなかった（稠密な値群のため一般には偽と見込む）。実際の核は「加法的なら n 倍と可換」
+VERDICT[ISO-d]: 外れ — norm_extendToClosure は使われなかった
+```
+```
+COST[Isometric]: 安 | 持ち場=IsometricallyRecoverableClosure  — 抽象核 2 本がほぼ一発、穴は「等長」から「𝒪 だけ」に縮んだ
+```
+☆★**本体は 3 本外した。今日 8 度目の「重く見積もって薄い道を見落とす」型である。**
+
+---
+
+## ★★★★実装者が指摘した退化 —— ★**本体の判断が要る（D33）**
+
+☆★★**原文 Prop 2.2 は「`Γ_K` **と** `Γ_K^v`」を与えられたデータとする。**
+☆★★**ところが `Skeleton/PGC/Section2Defs.lean::RecoverableAsAddModule` が量化する `α` は
+位相群の同型だけで、`Section2.lean::prop_2_2` の `(_RF : RamificationFiltration p)` は
+★先頭 `_` の未使用引数である。**
+
+⇒ ★**つまり現行の `prop_2_2` は「分岐フィルトレーションを使わずに `𝒪_{K̄}` を復元せよ」と言っている。**
+★**Noether の定理より野性分岐では `𝒪_L` は `𝒪_K[Gal]`-自由でない**ので、
+★**正規底経由の Prop 2.1 の議論は `𝒪` には効かない。**
+⇒ ★★**`IntKbarRecoverable` は原典より強い可能性がある。**
+★**ただし偽だとは示されていない（測っていない）。**
+
+### ★★本体の判断（D33）
+
+☆★★**これは D13・D30・D31・D32 と同じ「主張の強さがずれている」族だが、★向きが逆である。**
+★D13〜D32 は「自由すぎて偽」、★**今回は「仮説が配線されていなくて強すぎる」。**
+
+★★**§3 は既に正しくやっている**: `Cor31Pinned` / `Cor33Pinned` は
+★**`α : FilteredGroup.Iso (filteredGroupOf RF K) (filteredGroupOf RF K')`** を量化している。
+⇒ ★**`prop_2_2` も同じ形にすべきである。**
+
+★**`RecoverableAsAddModule` 自体は変えない** —— ★**Prop 2.1 は原典どおり「`Γ_K` だけ」から復元する主張**で、
+★**実際にそれで閉じた**（`prop_2_1`、無条件）。★**変えるのは Prop 2.2 の側だけ。**
+⇒ ★**濾過つきの変種を足し、`prop_2_2` をそれで述べ直す。**
+★実装者が「本ファイルの主結果はすべて **α ごと**の形なので、
+後で α にフィルトレーション両立性を課してもそのまま使える」と書いているので、★**壊れない。**
+
+⇒ ★**次のノードに、濾過つきの変種の定義と `IntKbarTransport`（α ごと）をまとめて配る。**
+
+## ★★`GUESS:` —— ★**配る前に書いた**
+
+```
+GUESS[IKB-a]: 濾過つきの変種は Cor31Pinned と同じ形（FilteredGroup.Iso を量化）でそのまま書ける
+GUESS[IKB-b]: α ごとの IntKbarTransport は群体なので、生成元の α だけ示せばよい（refl/symm/trans は在庫）
+GUESS[IKB-c]: 濾過を配線すると、PadicLogIntegers と RamificationImageStage の在庫が初めて効く
+GUESS[IKB-d]: 野性分岐の障害（𝒪_L が 𝒪_K[Gal]-自由でない）は、濾過を配線すれば迂回できる
+```
+
+## ★★★★★★★葉が **1 つ**になった —— `d_triv(0) = 1 ↔ AxSenTate K`（2026-09-08）
+
+`lean/ABC3/Found/PGC/AxSenTate.lean` **505 行 / 23 宣言、`sorry` 0**。
+`build.mjs` → **jobs 3,676 / error 0 / sorry 0 / 13.7 秒**。★**MCP 使用 0 回。**
+
+★★★**主結果は `↔` である**: `hodgeTateDim_trivial_zero_eq_one_iff : d_triv(0) = 1 ↔ AxSenTate K`。
+⇒ ★★**`d_triv(0) = 1` を Ax–Sen–Tate より弱い仮定から出すことは不可能だと証明されている。**
+⇒ ★★★**§3 の全部（`d_V(i)` の値・有限次元性・`IsHodgeTate` の実例）が これ 1 つだけに依存する。
+依存グラフの葉が 1 つになった。**
+
+★他に出たもの: `hodgeTateDim_le_finrank`（`AxSenTate → d_V(i) ≤ dim V`）/
+`finiteDimensional_hodgeTateWeightSpace` / ★**`isHodgeTate_trivial`
+（`IsHodgeTate` を実際に満たす表現の最初の 1 つ）**/ `K ⊆ ℂ_K^{Γ_K}` は**無条件に真**。
+
+### ★★在庫調査を最初にやり、★**コマンドを残した**（★作法として良い）
+
+★**Ax–Sen–Tate は mathlib にも木にも無い**（`AxSen|Ax_Sen|SenTate` → **0 件**、`hodgeTate` → **0 件**）。
+★周辺は在る（`WittVector.fontaineTheta` / `BDeRham` / `PreTilt.untilt`）が `ℂ_K^{Γ_K} = K` は無い。
+★木では docstring 5 行だけで**宣言は 0**。★**`Check/PGC/` の台帳 18 本も引いた**（衝突しない）。
+☆★**「在る」側も自分で `#check` した** —— 5 つのインスタンスが `inferInstance` で通ることを確認。
+
+### ★★★原典より短い道（今日 18 回目、★4 つ同時）
+
+1. ★**`G` に群構造が要らない**（合成も逆元も単位元も使わない。`G` は `Type*` のまま）。
+2. ★**`aut g` の単射性も要らない**（台が縮むのは `aut g 0 = 0` だけから）。
+3. ★★**Galois コホモロジーを 1 行も書いていない** —— ★**Hilbert 90 も Tate の `H^i(Γ_K, ℂ_K(j))` も不要。**
+   ★`Finset.card` の強帰納法だけ。
+4. ★**`Finsupp` を経由しない**（`linearIndependent_iff''` で書くと `mapRange` 系が 1 つも要らない）。
+
+★**抽象核の非空虚性も付いている**（`linearIndependent_complex_of_real` ——
+★`F=ℝ, A=ℂ, aut=`共役 で仮説が全部真になる）。
+
+### ★逸脱 1（★空虚でないことの確認）
+
+★**`AxSenTate` は `sorry` ではなく明示的な仮説**。★**真だが未証明**である ——
+★`PAdicLocalField p` は `Setup.lean:40` で「`ℚ_[p]` の有限次拡大」と定義されており、
+★**古典的 Ax–Sen–Tate の仮定そのもの**。★**空虚に成り立っているのではない。**
+
+## ★★`VERDICT:`
+
+```
+VERDICT[AST-a]: 当たり — mathlib にも木にも無い（測って 0 件。★断定しないと書いたが、測った上で断定できた）
+VERDICT[AST-b]: 外れ — spectralNorm も closureCompletion も入口にならなかった（★付値も完備性も 1 度も出てこない）
+VERDICT[AST-c]: 外れ — 「完備体の稠密部分体の不変元」は使われず、核は「半線型作用の固有ベクトルの一次独立性の降下」だった
+VERDICT[AST-d]: 外れ — ★重み空間の有限次元性は Ax–Sen–Tate より「軽く」ない。★↔ なので逃げ道が無いことまで証明された
+```
+```
+COST[AxSenTate]: 並 | 持ち場=Ax–Sen–Tate と重み空間  — 本体は埋めていないが「足りないのはこれ 1 つ」を ↔ で確定させた
+```
+☆★**本体は 3 本外した。★今日 9 度目の「重く見積もって薄い道を見落とす」型。**
+☆★★**しかも `AST-d` は「軽い」と見積もって、実際は「不可能」だった** ——
+★**向きまで逆だった。**★**見立ての質が問われる。**
+
+---
+
+## ★★`GUESS:` —— ★**配る前に書いた**（Ax の補題）
+
+★**残る唯一の葉**: ★**Ax の補題**（`‖σ(x) − x‖ ≤ ε` なら `∃ y ∈ K, ‖x − y‖ ≤ Cε`）→ `ℂ_K^{Γ_K} = K`。
+
+```
+GUESS[AX-a]: Ax の補題は mathlib に無い（★AxSenTate が無い以上ほぼ確実だが、測らせる）
+GUESS[AX-b]: 抽象核は「有限群の平均化＋距離評価」で、Galois の語彙が消える
+GUESS[AX-c]: 木の spectralNorm 機構（LocalFieldNorm.lean）と Krasner が入口になる
+GUESS[AX-d]: 定数 C は p と [K:ℚ_p] に依らず取れる
+```
+☆★**本体は今日 9 度、道具の見立てを外している。**
+⇒ ★**持ち場には「在庫の場所」と「消せるはずの語彙」だけを書き、道は指定しない。**
+
+## ★★次波の持ち場を検算した —— `IsNaturalFiltration (ramificationFiltration p)`（2026-09-08）
+
+★**pGC の残り 4 件の葉は 3 つ**で、うち 2 つは走行中。★**この 3 つ目は誰も手を付けていない。**
+
+| pGC の項目 | 葉 | 状態 |
+|---|---|---|
+| `prop_2_2` | 濾過つき `IntKbarRecoverable` | ★配布中 |
+| `cor_3_1` / `cor_3_3` | ★**Ax の補題 → `AxSenTate`** | ★配布中（★`↔` で「これ 1 つ」と確定済み） |
+| ★**`theorem_4_2`（主定理）** | ★**`IsNaturalFiltration (ramificationFiltration p)`** ＋ 全射性 | ★**未着手** |
+
+### ★埋める文（★木に既にある）
+
+```lean
+-- Found/PGC/RamificationNaturality.lean:69
+def IsNaturalFiltration (RF : RamificationFiltration p) : Prop :=
+  ∀ {K K' : PAdicLocalField p} (α : K.carrier ≃ₐ[ℚ_[p]] K'.carrier) (v : ℝ),
+    Subgroup.map (galContinuousMulEquiv α).toMulEquiv (RF.Gv K v) = RF.Gv K' v
+```
+★つまり ★**「ℚ_p-代数同型 α は分岐フィルトレーションを運ぶ」。**
+☆★**退化版 `topFiltration`（`Gv ≡ ⊤`）はこれを満たす**ので、★**空虚ではないが、実物では別の証明が要る。**
+
+### ★在庫（★本体が索引で引いた。★**使えという意味ではない**）
+
+| 何 | 場所 |
+|---|---|
+| ★`extendToClosure`（α の代数閉包への延長） | `Found/PGC/GaloisTransfer.lean:56` |
+| ★`galMulEquivOf` / `galMulEquivOf_indep`（★**外部同型としては一意**） | 同 `:180` |
+| ★`galContinuousMulEquiv` / `galContinuousMulEquivOf`（連続性） | `Found/PGC/GaloisTransferContinuous.lean:124` / `:112` |
+| ★★**`norm_extendToClosure`**（★**延長はスペクトルノルムを保つ**。★今日入った） | `Found/PGC/Prop22FixedForm.lean` |
+| ★実物の分岐フィルトレーション | `Found/PGC/UnramifiedBaseChangeInvariance.lean:949` |
+| `coe_ramificationFiltration_mul_coe` | 同 `:953` |
+| `addVal_algebraMap_eq_ramificationIndex` / `ramificationIndex_eq_card_inertiaGal` | 同 `:726` / `:832` |
+| ★**`ramIndex_eq_of_adjoin_eq_top`**（★**底環を取り替えられる**。3 行） | `Found/PGC/RamificationImageStage.lean` |
+| 上付き分岐群・Herbrand | `Found/PGC/UpperRamificationGroup.lean` / `HerbrandComposition.lean` |
+
+★★**本体の観測**: ★**`norm_extendToClosure`（今日入ったばかり）が中心に見える** ——
+★分岐は付値で決まり、★**延長がスペクトルノルムを保つなら付値も保つ**はず。
+☆★**ただしこれは本体の見立てであり、今日 9 度外している。★拘束にしない。**
+
+## ★★`GUESS:` —— ★**配る前に書いた**
+
+```
+GUESS[NAT-a]: norm_extendToClosure が中心になり、分岐指数の保存がそこから出る
+GUESS[NAT-b]: 抽象核は「ノルムを保つ環同型は付値を保つ」で、Galois の語彙が消える
+GUESS[NAT-c]: 上付き番号付けまで運ぶには Herbrand の輸送が要る（★下付きだけなら軽い）
+GUESS[NAT-d]: 実物の ramificationFiltration の構成（absGalStage 経由）をほどく必要はない
+```
+☆★**本体は今日 9 度、道具と軽重の見立てを外している。**
+★**持ち場には「在庫の場所」と「消せるはずの語彙」だけを書く。**
+
+## ★★★★濾過つき変種が立った —— ★**ただし穴は 1 mm も塞がっていない**（2026-09-08）
+
+`lean/ABC3/Found/PGC/Prop22FilteredHypothesis.lean` **450 行 / 35 宣言、`sorry` 0**。
+`build.mjs` → **jobs 3,624 / error 0 / sorry 0 / 10.9 秒**。★**MCP 使用 0 回。**
+
+### ★★退化判定を 5 点やった（★作法として良い）
+
+1. ★**空虚ではない** —— `filteredIsoRefl` と ★**すべての内部自己同型**が濾過つき同型（無条件）。
+   ★核は `A.isNormal v` ＋ mathlib の `Subgroup.Normal.map_conj_eq` **だけ**。
+2. ★**強すぎない** —— `IntKbarRecoverable ⟹ IntKbarRecoverableFiltered`（弱める向き）。
+3. ★★**`v ≤ 0` の条件は完全に無内容** —— `Γ_K^v = I_K`（`v ≤ 0`）＋ Cor 1.3（無条件）から、
+   ★**どんな連続同型でも `α(Γ_K^v) = Γ_{K'}^v` が `v ≤ 0` で自動**。
+   ⇒ ★**増えた制約は `v > 0` の部分だけ**で、★**原典が `v > 0` しかデータに入れていないことと一致**。
+   ★**我々の `Iso`（全実数）が原典のデータより強くないことを型で証明した**（★逸脱ではないと確定）。
+4. ★**退化フィルトレーションではない** —— `Γ_K^0 = I_K ≠ ⊤`。★**D32 の罠は回避されている。**
+5. ☆★★**未解決**: ★**`v > 0` の条件が実際に α を切り落とすかは分からない。**
+   ★全連続同型が上付き濾過を保つなら `IntKbarRecoverableFiltered ≡ IntKbarRecoverable` で
+   ★**D33 の修理は空振りになる。**★これは「上付き分岐濾過が `Γ_K` から群論的に復元できるか」そのもので、
+   ★**原典も `Out_Filt` と `Out` を区別している以上、開いたまま。**
+   ⇒ ☆★**D33 の修理は「効くかもしれないが、効くと示せてはいない」。**
+
+### ★★直前の波の主結果が**そのまま繋がった**
+
+★**7 本すべて書き換えなし。**★接続に要ったのは `filteredIsoEquiv`（1 層の射影）**だけ**。
+⇒ ★**直前の実装者の見立て（「α ごとの形なので後で濾過を課してもそのまま使える」）は正しかった。**
+
+### ★★★原典より短い道（今日 19 回目）★次のノードが**半分**になった
+
+★★**`isNaturalFiltration_ramificationFiltration_iff_pos`** ——
+★**`IsNaturalFiltration`（全実数 `v`）は `v > 0` だけ確かめれば十分。**
+★`v ≤ 0` は Corollary 1.3 で既に済んでいる。
+⇒ ★★**本体が直前に検算して書き置いた持ち場（`IsNaturalFiltration`）の証明義務が実質半分になった。**
+
+### ☆★正直な留保（★実装者が自分から書いた）
+
+☆★★**「濾過を課しても、`IntKbarTransport` が言える α の集合は 1 つも増えていない」**
+（恒等・内部・体の同型のみ）。★★**残る穴は移動していない。**
+☆★**本体の表にあった `PadicLogIntegers` / `RamificationImageStage` は使われなかった** ——
+★理由は「`reciprocityUnits` の**抽象 α 版の同変性**が在庫に無い」こと。★**測り方も報告に書かれている。**
+
+## ★★`VERDICT:`
+
+```
+VERDICT[IKB-a]: 当たり — 濾過つきの変種は Cor31Pinned と同じ形でそのまま書けた
+VERDICT[IKB-b]: 当たり — 群体性が示され、refl/inner/symm/trans が繋がった（★接続は 1 層の射影だけ）
+VERDICT[IKB-c]: 外れ — PadicLogIntegers も RamificationImageStage も使われなかった（reciprocityUnits の抽象 α 版が無い）
+VERDICT[IKB-d]: 外れ — ★野性分岐の障害は迂回できていない。★穴は 1 mm も塞がっていない
+```
+```
+COST[IntKbar]: 安 | 持ち場=濾過つき IntKbarRecoverable  — 抽象核は正規性 1 本、具体層は rfl 4 本。ただし穴は塞がっていない
+```
+☆★**本体は 2 本外した。★今日 10 度目。**
+
+### ★新しく必要になったノード（★実装者が名指しした）
+
+1. ★★**`reciprocityUnits` の α-同変性**（抽象 `α : Γ_K ≃ₜ* Γ_{K'}` に沿った Artin 写像の移送）。
+   ★**これが立てば `smul_padicLog_image_ramificationFiltration_eq_integers` と繋いで
+   「`Γ^v` から `𝒪_K`」が α で運べる。**★前提として Lubin-Tate データの選択非依存性が要る。
+2. ★`IsNaturalFiltration (ramificationFiltration p)`（★**`v > 0` だけで済む**ことは今回示された）。
+3. ★**「濾過を保たない連続同型は存在するか」**（★上の判定 5。これが D33 の修理の可否を決める）。
+
+## ★★★★★★Ax の補題 —— ★**「Ax–Sen–Tate が無い」≠「部品が無い」**（2026-09-08）
+
+`lean/ABC3/Found/PGC/AxLemma.lean` **535 行 / 22 宣言、`sorry` 0**。
+`build.mjs` → **jobs 3,678 / error 0 / sorry 0 / 11.4 秒**。★**MCP 使用 0 回。**
+
+### ★★★在庫調査が決定的だった
+
+★直前の波の測定（`AxSen|SenTate` → 0 件、`hodgeTate` → 0 件）を**追試して一致**。
+☆★★**しかし「型と名前空間で引き直したら部品はほぼ全部 mathlib に在り、全部使った」。**
+
+| 引いたもの | 使い道 |
+|---|---|
+| ★**`IsConjRoot.exists_algEquiv`** / `isConjRoot_iff_mem_minpoly_aroots` | 「minpoly の根 = Γ_K の軌道」を **2 行**で。★**中間体も正規閉包も経由せずに済んだ**（#59/#69 の危険地帯を回避） |
+| `InfiniteGalois.fixedField_bot` | ★**`K̄^{Γ_K} = K` が無料** |
+| `IsUniformInducing.isComplete_range` | `K` が `ℂ_K` で閉 |
+| `Polynomial.Splits.nextCoeff_eq_neg_sum_roots_of_monic` | 共役の和 |
+| `padicNorm.nat_eq_one_iff` | `‖(n:K)‖ = 1 ↔ p ∤ n` |
+
+☆★★**申し送り**: ★**「定理の名前で引いて 0 件」でも「部品で引く」と在ることがある。**
+★**#158 の技（名前を書いて `already declared` を撃たせる）は「我々が付けたい名前」の話で、
+★mathlib の在庫は「型」と「名前空間」で引く。**
+
+### ★★主結果
+
+★★★**`exists_norm_sub_algebraMap_le_div_norm_natDegree` —— ★無条件に**
+`∃ y ∈ K, ‖x − y‖ ≤ ε / ‖([K(x):K] : K)‖`。
+★★`axSenTate_of_axLemma (hC : 0 ≤ C) : AxLemma K C → AxSenTate K`。
+★tame の場合（`p ∤ [K(x):K]`）は `C = 1` で閉じる。★非空虚性つき。
+
+### ★★★原典より短い道（今日 20 回目、★4 つ同時）
+
+1. ★★**跡写像を使わない** —— 教科書は `(1/n)Tr_{L/K}` で書くが、
+   ★**`Σ` 共役 = `minpoly` の `nextCoeff`** なので `Algebra.trace` も有限次 Galois の中間体も 1 行も要らない。
+2. ★★**中間体を 1 つも作らない**（`IsConjRoot` API で直接。★#59/#69 に触れずに済んだ）。
+3. ★**完備化からの降下に群構造が要らない**（`G` は `Type*`、`S` は部分群でなくただの閉集合、超距離性も不要）。
+4. ★**`K̄^{Γ_K} = K` は無料**（`InfiniteGalois.fixedField_bot` 1 本）。
+
+★抽象核 5 本のうち `multisetSum_map_const_sub` は **`[propext, Quot.sound]`**（★選択公理すら不要）。
+
+### ★残る穴は「定数の一様性」ただ 1 点
+
+★`‖x − y‖ ≤ ε / ‖n‖` は**無条件に出た**ので、
+★**残るのは定数 `‖n‖⁻¹ = p^{v_p(n)}` が x について非有界であること**だけ。
+⇒ ★**新ノード「巡回 `p` 次拡大の different の評価（Sen の補題）」**
+→ x に依らない `C = |p|^{-p/(p-1)^2}` が出て `AxLemma K C` が閉じる。
+
+## ★★`VERDICT:`
+
+```
+VERDICT[AX-a]: 当たり — Ax の補題も Ax–Sen–Tate も mathlib に無い（追試で一致）
+VERDICT[AX-b]: 外れ — 「有限群の平均化」ではなく「minpoly の nextCoeff による重心」だった。★群構造すら要らない
+VERDICT[AX-c]: 外れ — spectralNorm 機構も Krasner も入口にならなかった
+VERDICT[AX-d]: 半分 — tame では C = 1（x に依らない）。★一般の C はまだ出ていない（それが残る穴）
+```
+```
+COST[AxLemma]: 安 | 持ち場=Ax の補題  — MCP 0 回・leanfile 13 往復・build 2 回で 22 宣言 sorry 0
+```
+☆★**本体は 2 本外して 1 本半分。★今日 11 度目。**
+
+---
+
+## ☆★★★本体の誤りが 1 つ訂正された —— ★**「`Found.lean` は CRLF」は誤り**
+
+☆★**実装者が raw byte で測り直し、本体が追試した**:
+```
+node -e "…" lean/ABC3/Found.lean  →  CR=0  LF=1836  CRLF=0    ★LF である
+node tools/eol-audit.mjs --tracked --ext lean → crlf 265 / lf 2042
+tools/check.mjs → CR=2494 LF=2494  ★CRLF（こちらは正しかった）
+```
+★原因: ★★**`grep -c $'\r'` がこの Bash ツールで展開されず、全行にマッチする。**
+☆★**本体はこの誤った一覧を、いくつもの持ち場に書いて agent に渡していた。**
+（★幸い ★**規約と `.claude/agents/lean-prover.md` には入っていなかった** —— 一時文だけ。）
+
+⇒ ★**規約 §4.5 に節を新設した**: ★**「特定のファイルを『これは CRLF だ』と書き置かない。
+その木で `eol-audit --tracked` で毎回自分で数える」。**
+★**本体が 2 度誤った経緯（①一つの木の一覧を全体の事実として渡した、②`grep -c $'\r'` の誤読）も書いた。**
+★`lean-idioms.md` #271 に逐語で入っている（★#141/#185 の記述は古い）。
+
+## ★★★★★メタ第 35 回 —— ★**合図の語彙が主定理を拾えるようになった**（2026-09-08）
+
+### ★★M176 v2a を実装（★数字が予告と一致）
+
+| | v1 | ★**v2a** | 予告 |
+|---|---|---|---|
+| 合図（53 本） | 7,523 | **7,777**（+3.4%） | 7,793 |
+| 「済」項目 / 合図 | 110 / 310 | ★**111 / 316** | 111 / 316 |
+| 「未実装」項目 / 合図 | 64 / 110 | **66 / 115** | 66 / 115 |
+
+★★**新しく合図が付いた「済」は `pGC Theorem 4.2` ただ 1 件**（★予告どおり）。★本体が追試した出力:
+```
+-- Theorem 4.2(物理 p.7、状態 済)
+   general nonsense   行 334  p.8
+   similar to that    行 345  p.8
+```
+☆★★**以前この道具は `--item "Theorem 4.2"` に対して
+「合図も傍注も 0 件。この項目は原文が畳んでいない」と★偽を印字していた。**
+★**主定理の全射性がその語で畳まれている**のに。
+
+★★**`hedge-index.mjs` には自己試験が 1 つも無かった** ⇒ ★**`--selftest` 45/45 を新設**。
+★★**採らないと決めた語（裸の `standard` / `standard result` / `easy`＝v2b / 裸の `formal` / 裸の `obvious`）を
+「鳴らない側の見張り」として固定** ⇒ ★**v2b を採らない判断がコードに焼かれた。**
+★`--src-summary` も新設（1.5 秒。★同じ数を使い捨てで数えると **37 秒** = **25 倍**）。
+★**「語ごとの精度は測っていない」を 3 か所で常時印字**させた。
+
+### ★★★M177/M178 は「採らない」—— ★**当て先が違った**
+
+☆★★**`ERRWORDS` の唯一の使い道は `lean-idioms.md` の 1 節の本文**であり、
+★**子 agent のログを 1 文字も見ない。**★`lean-idioms.md` に当該の日本語は **0 件**。
+☆★★**さらに、M177 が名指しした日本語 2 語は `agent-timing.mjs` の `MCP_INFRA_RE` に既に入っている**
+（★0/27 と測ったのは**直す前の `MCP_INFRA_RE_V1`**）。★**「日本語の 27 件」は既に塞がっていた。**
+⇒ ★**効果 0 で M114 の族の分母を触る危険だけが残る。★採らない。**
+★事前登録 → 実行 → 「A → B → A で 8 つの数字が 1 つも動かない」を示した上での判断である。
+★`idiom-recur.mjs` は ★**本体が `cmp` で「1 文字も変わっていない」ことを確認済み。**
+
+### ☆★★★本体の報告を 1 つ訂正する —— 「52 : 1」
+
+☆★**本体は前波で「65 本のうち 52 本が `Skeleton/PGC/Section1` ただ 1 つの下流」と報告した。**
+★★**これは再現できない。**★import の辺では **15 本**（brief の字面 20 / 本文の字面 43）。
+
+★★**理由が本当の発見である**:
+> ★**その日の成果物は `Found/PGC/*` なのに、着手可能だった `Skeleton/PGC/Section1` はそれらを
+> import していない**（Section1 の import は 3 行）。
+> ★★**配線がまだ無いだけで、agent が遊んでいたのではない。**
+
+★**核心（`frontier` は違う問いに答えている／97% は「着手可能」に入っていない）は再現した**
+（09-06 89.7% / 09-07 **97.2%**）。★**訂正が要るのは「52」という数だけ。**
+⇒ ★**`--supply <日>` として口が作られた**（3.9 秒、★`--history` は既定で走らない）。
+
+### ★M149 / MCP の見張り（★3 件目）
+
+★M149: 通知 **218** / T より後 **11** / 使える **7** / ★**あと 127**。
+★★**M174 の守り（最小間隔 6 時間）が 3 件目で実際に発火**（96.9 分）——
+★**速さと残り日数は出ていない。**★**本体の判定はまだ出さない。**
+★`--mcp-watch`: ★**「まだ言えない。あと 26 回」**（変更後の照合が 1 件から増えていない）。
+
+### ★採用（3 本）
+
+`tools/hedge-index.mjs` 562 → **743**（★selftest **新設 45/45**）/
+`tools/agent-timing.mjs` 3,739 → **4,102**（**318 → 356/356**、`--supply`）/ `meta-backlog.md` +372（M181–M186）。
+★`tools/idiom-recur.mjs` は ★**触られていない**（`cmp` で確認）。★他ゲートは全部不変。
+
+★**わざと壊して**: hedge **14/15**（☆最初 10/13、★**素通り 3 件はすべて自分の試験の穴**。
+★**残る 1 件も「見た目だけ・試験を書いていない」と正直に残した**）/
+agent-timing **14/14**（☆最初 12/14、★素通り 2 件は自分の標本の穴）。
+
+### ☆★測れなかったこと
+
+★**語ごとの精度は `standard *` の 28 行以外は測っていない。**★`we leave` 178 件のうち
+★**Stacks の 99 行は未読**。★既存語（`immediately` 2,955 件など）は元から未測定。
+★**「未実装に残る合図」は +4.5% で見積が増える向き**なので楽観には振れない。
+☆★**M173 の「52 本」「12.8%」、M176 の「raw 30」は規則が台帳に無く再現不能** ⇒ **M186** に登記。
+
+## ★★ゲートを前倒しで回した（2026-09-08、★D30/D31/D32 の後）
+
+| ゲート | 結果 |
+|---|---|
+| `node tools/build.mjs ABC3` | ★**error 0** / sorry **14** / jobs **7,078** / 21.6 秒 |
+| `check.mjs --ledger --brief` | ★**NG 13**（★基準線。全部 `Skeleton/CorrHyp/**` の繰り越し） |
+| `check.mjs --selftest --structured --brief` | **67/67 PASS** / S1-S6 PASS |
+| `graph.mjs` | **2,272 ノード** |
+
+★★**D30/D31/D32（`prop_2_2` / `cor_3_1` / `cor_3_3` / `theorem_4_2` の文を実物に固定）と、
+今日入った新規 8 本を含めて木全体が通っている。**
+☆★**docstring を大量に足したが引用照合は基準線のまま**（★逐語引用に波括弧を書かない作法が効いている）。
+
+★`sorry` 14 の内訳: pGC **4**（`prop_2_2` / `cor_3_1` / `cor_3_3` / `theorem_4_2`）＋ pGC の外 10
+（`Meta/Calibration` 1 / ★第三者の `PrimeNumberTheoremAnd/Wiener` 2 / `GenEll` 1 / `Divisor` 6）。
+★★**4 件とも「真の文の上の `sorry`」である**（★今朝は 4 件とも偽の文の上だった）。
+
+★**実装 2 体が止まったら `build.mjs ABC3` を 1 度回し直して commit・push する。**
+★他の 3 ゲートはこの時点の値をそのまま使える見込み。
+
+## ★★★★★★メタ第 36 回 —— ★**「供給は在庫ではなく流量」**（2026-09-08）
+
+☆★★**本体の仮説「`def X : Prop` で結論とする theorem が木に無いもの」は外れた**
+（22 件しか出ず、★**波の 0/14 に当たる**）。★正しい切り方は「★**無条件の**証明が無い」。
+
+★★**2026-09-08 の波（lean-prover 14 本）を、波の開始時点の commit `3beec898` で測った**:
+
+| 問い | 数 |
+|---|---|
+| **持ち場そのもの**が在庫に載っていた | **3 / 14（21.4%）** |
+| **その持ち場が仕えるゴール**を brief が名指し | **8 / 14（57.1%）**（★比較: ファイル一覧では **0 / 73**） |
+| ★★**名前そのものが波の開始時点に無かった** | ★★**6 / 14（43%）** |
+
+★★**連鎖が 6/6 機械で確認された**:
+`SmoothModelCarrier`→`HasCoherentFunctional`→`IsometricallyRecoverableClosure`→`AxSenTate`→`AxLemma`、
+`IntKbarRecoverableFiltered`。★**6 本とも `3beec898` の `decl-index.txt` に 1 件も無い。**
+
+⇒ ★★★**供給は在庫ではなく流量である。**★**静的な一覧では原理的に答えが出ない。**
+★**使い方は「ゴールを選ぶ」。**★**1 波分の本数はそこからは出ない。**
+☆★★**これはユーザーの指示「鎖の内側も含める」が正しかったことの 2 度目の実測である。**
+
+★**採用**: `tools/frontier.mjs` +315（★`--jobs` 新設、**1.6 秒**。selftest **17 → 50/50**。
+★**既定の出力は diff 空 + md5 一致**）/ `meta-backlog.md` +291（M187–M191）。
+
+☆★**わざと壊して 19/19。★最初は 9/19。**★**素通り 7 件はすべて自分の試験の穴**、
+☆★★**当たらなかった 3 件は「この木の `.mjs` は CRLF なので探索文字列の `\n` が当たらない」** ——
+★**「当たらない」と「素通り」は見分けが付かない**という新しい失敗形を台帳に登記した。
+
+### ☆★M178 も「当て先違い」だった（★3 度目）—— ★**だが別の本物の穴が出た**
+
+★`ERRWORDS` の呼び出し元は 1 箇所だけで、★**ログ側は別の口が拾っている。★塞がっている。**
+☆★★**ただし本物の穴**: ★**548 節のうち 23 節**が「エラーらしい引用があるのに字面 0」で永久に落ちる。
+★**ログの実エラー 12,456 件のうち 4,096 件（32.9%）が `ERRWORDS` に当たらない。**
+★上位は ``Tactic `rewrite` failed``(809) / `Lean exited with code 1`(744) / `exact? could not close the goal`(272)。
+⇒ ★★**日本語の穴ではなく Lean 4 の書式変更である。**
+
+### ★M149 / MCP の見張り（4 件目）
+
+★M149: 通知 221 / T より後 14 / 使える 8 / ★**あと 126**。★**最小間隔の守りが 2 回連続で発火。**
+☆★`--mcp-watch` は ★**3 セッション連続で「あと 26 回」から動いていない** ——
+★**いまの波は MCP を使わない側なので、このままでは溜まらない**（★観測であって判定ではない）。
+⇒ ★**本体の判断: それでよい。**★**規約の費用は 0 なので、測れなくても外さない。**
+
+---
+
+## ★★★★Sen の補題 —— ★**`AxDescentStep → AxSenTate` の完全な還元**（2026-09-08）
+
+`lean/ABC3/Found/PGC/SenLemma.lean` **744 行 / 18 宣言、`sorry` 0**。
+`build.mjs` → **jobs 3,680 / error 0 / sorry 0 / 11.9 秒**。★**MCP 使用 0 回。**
+
+★★**different による無条件評価**: `‖x‖ ≤ 1` なら ★**`d(x,K) ≤ ‖D‖⁻¹ ε`**。
+★★`axSenTate_of_axDescentStep : AxDescentStep K C → AxSenTate K`。★非空虚性つき（tame）。
+
+### ★★★原典より短い道（今日 21 回目）
+
+★★**`Lagrange.coeff_eq_sum` が本命だった** —— Euler の等式 `Σ_r g(r)/f′(r) = 1` を
+★**中間体も `PowerBasis` も跡写像も作らずに**証明できた（★#59/#69 の境界を回避）。
+★`traceDual` 経由だと `K(x)` を作る必要があり、そちらは重い。
+★抽象核 3 本のうち `multisetSum_weighted_const_sub` は **`[propext, Quot.sound]`**（選択公理なし）。
+
+### ☆★★実装者が自分で見立てを 2 つ覆した（★作法として非常に良い）
+
+1. ☆★**「different の評価を一様化すれば `C` が出る」は外れ** ——
+   ★**同変な重み `w` の最小ノルムは `‖D_{K(x)/K}‖⁻¹` で、`K(p^{1/pⁿ})` の塔で非有界。**
+   ⇒ ★★**「1 回の平均化」では Ax の定数は絶対に出ない。**
+   ★★**次の波がここを掘るのを止めるため docstring に明記した。**★**これが一番価値がある。**
+2. ☆★**`AxDescentStep` を「定数 1」で書いて通してから、自分で反例に気づいて直した** ——
+   ★**`AxLemma K 1` は偽**（`K = ℚ_p(ζ_p)`, `x = p^{1/p}` で `d(x,K) = |p|^{−1/(p−1)}·ε > ε`）。
+   ★定数 `C` 付き＋「1 段で元の `ε` を保つ」条件に書き換えた。
+
+☆★**本体の落ち度**: ★**この持ち場に `GUESS` を登記していなかった。**★当否を書けない。
+★**今日 2 度目の「GUESS 無しで配った」**（★1 度目は今朝の 12 件）。★**次から必ず先に書く。**
+
+### ★残るのは wild な 1 段
+
+★**新ノード**:「巡回 `p` 次拡大の跳び `i` と `‖σx − x‖` の関係」（★1 段の定数は `|π_L|^{−i}`）。
+★入力になりうるのは `Found/PGC/LowerRamificationGroup.lean` / `HerbrandFunction.lean` / `HasseArf*.lean`。
+
+## ★★`GUESS:` —— ★**配る前に書いた**
+
+```
+GUESS[JUMP-a]: 跳び i と ‖σx − x‖ の関係は LowerRamificationGroup.lean の i(σ) の定義そのものから出る
+GUESS[JUMP-b]: 抽象核は「離散付値環の自己同型の差のノルム」で、Galois の語彙が消える
+GUESS[JUMP-c]: Hasse-Arf（跳びの整数性）は要らない（1 段なので）
+GUESS[JUMP-d]: 定数 |π_L|^{−i} から x に依らない C を出すには、i の上界が要る（そこが残る）
+```
+
+## ★★★★★★★★分岐濾過の自然性が**無条件**で証明された —— ★主定理の仮説が 0 本になった（2026-09-08）
+
+`Found/PGC/StageNaturality.lean`（370）+ `StageTransport.lean`（477）+ `StageUpperNaturality.lean`（369）
+**合計 1,216 行、`sorry` 0、★`sorryAx` 0**。★**MCP 使用 0 回**（`leanfile.mjs` 24 往復のみ）。
+
+```lean
+theorem isNaturalFiltration_ramificationFiltration (p : ℕ) [Fact p.Prime] :
+    IsNaturalFiltration (ramificationFiltration p)      -- ★仮定ゼロ
+```
+
+⇒ ★★★**本体が `Skeleton/PGC/Section4.lean::theorem_4_2` に配線した。**
+★`import-audit --edge`（循環しない）を先に引き、`build.mjs` で **error 0 / sorry 4**。
+★★**主定理は `(K K' : PAdicLocalField p)` だけを取る形になり、★残るのは全射性だけ。**
+
+### ★★★原典より短い道（今日 22 回目）—— ★**局所類体論を 1 度も経由していない**
+
+★原典 §4 は「自然な射」を Artin 写像の自然性で述べるが、実際に使ったのは 3 つだけ:
+(i) 無限 Galois 対応 `InfiniteGalois.normal_iff_isGalois`、
+(ii) スペクトルノルムの保存 `norm_extendToClosure`、
+(iii) Herbrand 関数の全射準同型に沿った不変性 `map_upperRamificationGroup_eq`。
+★★**`Found/PGC/LubinTate*.lean` 57 本からは `addVal_ringEquiv` 1 本を借りただけ。**
+
+★**惰性群の輸送は Corollary 1.3 の押し出し 20 行**。
+★★**延長 `ᾱ` の選択非依存性は「正規性」だけ（3 行）** ——
+★**これが「原典が `Out`（外部同型）で述べる理由」の中身**である。
+
+★抽象核 4 本のうち 3 本は**純群論**（分岐・付値・体が 1 語も出ない）。
+★`map_comap_eq_comap_map` と `comap_mem_openNormalBase` は **`[propext, Quot.sound]`**（選択公理なし）。
+
+### ☆★実装者が自分の見立てを 2 つ覆した
+
+1. ☆★「§5 は 300〜500 行の instance 格闘」→ ★**150 行・9 往復**
+   （★`stageUpperRamification_eq_map_upperRamificationGroup` と `ramIndex_ringHom_eq` が噛み合った）。
+2. ☆★「中間体の像 `ᾱ(K⟮x⟯) = K'⟮ᾱx⟯` が最大の壁」→ ★**`IntermediateField.adjoin_toSubfield` +
+   `Subfield` の Galois 接続で 25 行**。
+
+### ☆★★本体の見立てが 1 つ実測で覆された（★持ち場の定型文を直す）
+
+☆★**本体は持ち場に「抽象核は 0.05 秒で通る」と何度も書いてきた。**
+★**MCP を使わない側では往復コストは import 読み込みで固定され、抽象/具体で差が出ない**（★どちらも 10 秒）。
+⇒ ★**「抽象核は速い」は MCP 側の話である。**★**`leanfile.mjs` 側の持ち場にその数字を書かない。**
+
+## ★★`VERDICT:`
+
+```
+VERDICT[NAT-a]: 当たり — norm_extendToClosure が 3 本の柱の 1 つとして使われた
+VERDICT[NAT-b]: 半分 — 抽象核 4 本のうち 3 本は「純群論」で、ノルムの話ではなかった
+VERDICT[NAT-c]: 半分 — HerbrandComposition も HasseArf* も UpperRamificationGroup も使われず、map_upperRamificationGroup_eq 1 本だけだった
+VERDICT[NAT-d]: 外れ — 実物の構成はほどかれた（4 段の梯子で逆極限を落とし有限段へ降りた）
+```
+```
+COST[Naturality]: 安 | 持ち場=分岐濾過の自然性  — 4 段の梯子で完全に閉じた。局所類体論も Lubin-Tate 塔も要らなかった
+```
+
+### ★★★pGC の現在地（★ゴールに対して）
+
+| 項目 | 残っているもの |
+|---|---|
+| `prop_2_2` | ★`IntKbarRecoverableFiltered`（★`reciprocityUnits` の α-同変性が本命） |
+| `cor_3_1` / `cor_3_3` | ★`AxSenTate` ← `AxDescentStep` ← ★**wild な 1 段**（★配布中） |
+| ★★**`theorem_4_2`（主定理）** | ★★**全射性だけ**（★仮説 0 本） |
+
+★**主定理の全射性の道**（原典 p.7–8）: Cor 3.3 → `α_K : K ≅ K'` の構成 →
+Lemma 4.1（★**閉じている**）→ ★**"standard general nonsense argument"** で有限次拡大へ。
+☆★**その語は 2026-09-08 に `hedge-index` の語彙に足され、いま拾える**
+（`general nonsense 行 334 p.8` / `similar to that 行 345 p.8`）。
+
+## ★★`GUESS:` —— ★**配る前に書いた**（pGC 主定理 `theorem_4_2` の全単射性）
+
+★**仮説が 0 本になったので、いま配れる。**★原典 p.7–8 の骨格:
+- **単射性**: `Γ^ab_K ≅ (K^×)^∧` から。★原典は別解も添える(「`Γ_K` の `Γ_{ℚ_p}` における中心化群が自明」)。
+- **全射性**: ★**Cor 3.3**（★**まだ閉じていない**）→ `α_K : K ≅ K'` の構成 →
+  Lemma 4.1（★**閉じている**）→ ★**"standard general nonsense argument"**。
+
+☆★**したがって全射性は Cor 3.3 に依存する。**★**単射性は独立に閉じられるはず。**
+
+```
+GUESS[T42-a]: 単射性は artinMapAbelian_injective（ArtinMap.lean:624）から独立に閉じられる
+GUESS[T42-b]: 原典の別解（中心化群が自明）のほうが安い（局所類体論を経由しない）
+GUESS[T42-c]: 全射性は Cor 3.3 を仮説として受け取る形にしか書けない（Cor 3.3 が未了のため）
+GUESS[T42-d]: "standard general nonsense argument" は有限次拡大への降下で、木の colimit 在庫が効く
+```
+☆★**本体は今日 11 度、道具と軽重の見立てを外している。**
+★**持ち場には「在庫の場所」と「消せるはずの語彙」だけを書き、道は指定しない。**
+
+## ★ゲート再確認（2026-09-08、★自然性 3 本 + 主定理の配線の後）
+
+`node tools/build.mjs ABC3` → ★**error 0 / sorry 14 / jobs 7,083 / 4.2 秒**（warm）。
+★pGC の 4 件は `Section2:141`（`prop_2_2`）/ `Section3:126`（`cor_3_1`）/ `:195`（`cor_3_3`）/
+`Section4:159`（`theorem_4_2`）ちょうど。
+
+### ★本体の判断（★人を待つ判断ではない）
+
+☆★自然性の実装者が残した申し送り:
+> `Found/PGC/Prop22FilteredHypothesis.lean::filteredIsoOfAlgEquiv` /
+> `intKbarTransportFiltered_algEquiv` の `hnat` 除去（★いま `StageUpperNaturality.lean` に
+> プライム付き版を置いてある。★元を書き換えるかは別判断）
+
+⇒ ★**本体の判断: 元は書き換えない。**★**プライム付きの無条件版が既に在り、それを使えばよい。**
+★理由: ★**元を書き換えると、`hnat` を明示に取る形の履歴が消える**——
+★**D32 で「`∀ RF` は偽」と分かった経緯を追えなくすることになる。**
+★**無条件版が在ることは `StageUpperNaturality.lean` の docstring に書かれている。**
+
+### ★★pGC の葉（★いまの姿）
+
+| 項目 | 葉 | 状態 |
+|---|---|---|
+| `prop_2_2` | `IntKbarRecoverableFiltered` ← ★`reciprocityUnits` の α-同変性 | 未着手 |
+| `cor_3_1` / `cor_3_3` | `AxSenTate` ← `AxDescentStep` ← ★**wild な 1 段** | ★配布中 |
+| ★**`theorem_4_2`（主定理）** | ★**全射性だけ**（★仮説 0 本） | ★**配布中** |
+
+★★**主定理の全射性は `Cor 3.3` に依存する**ので、★**`AxSenTate` が閉じれば
+`cor_3_1` → `cor_3_3` → `theorem_4_2` が順に開く。**
+⇒ ★★**いま走っている 2 本はどちらもその一直線の上にある。**
+
+## ★★★★★巡回 p 次拡大の跳びとノルム —— ★**1 段の最良定数が等式で出た**（2026-09-08）
+
+`lean/ABC3/Found/PGC/CyclicJumpNorm.lean` **636 行 / 15 宣言、`sorry` 0**。
+`build.mjs` → **jobs 1,621 / error 0 / warning 0 / sorry 0 / 16.5 秒**。★**MCP 使用 0 回。**
+
+★★**持ち場の目標そのもの**: ★**`d(x,K) = ‖π‖^{−i}·‖σx−x‖`**（`‖σπ−π‖ = ‖π‖^{i+1}` が跳び `i`）。
+★★**上下から押さえた等式**なので ★**`|π_L|^{−i}` が 1 段の最良定数である。**
+
+★**原典より弱い仮定になった**: ★**`σ` に Galois 性・全単射性・等長性のどれも要らない**（`K`-代数準同型だけ）。
+★分岐理論の仮定は `hval`（全分岐）と `hchar`（`n = p`・剰余標数 `p`）に分解された。
+★**正規性はどの宣言も使っていない。**★抽象核 4 本は分岐・付値・Galois の語彙 0。
+
+### ★★★★「索引で 0 件」がまた不在ではなかった（★4 例目）
+
+☆★★**索引は `to_additive` の生成名を持たない。**
+```
+grep -n "nnnorm_sum_eq_sup|norm_sum_eq_sup" .cache/mathlib-index.txt  → 0 件
+leanfile.mjs で #check                                                 → ★在った
+  IsUltrametricDist.nnnorm_sum_eq_sup_of_pairwise_ne
+```
+★★**これが本波の心臓部**（「相異なるノルムの有限和のノルム = sup」）で、★**60 行浮いた。**
+★`lean-idioms.md` #280 に逐語で入った。
+
+☆★**「索引に無い ⇒ 不在」でない実例が 4 つ揃った**:
+①`public` 修飾子（本体が直した、+845 宣言）/ ②`grep -i` の埋没（`OrthonormalBasis`）/
+③「定理の名前で 0 件でも部品は在る」（`IsConjRoot` / `Lagrange.coeff_eq_sum`）/
+④★**`to_additive` の生成名**。
+⇒ ★★**申し送り: `.absent` を書く前に必ず `#check` を投げる。★索引は下限である。**
+
+### ☆★★実装者が自分の見立てを 2 つ覆した（★次の波を止めるため docstring に明記）
+
+1. ☆★★**「1 段が一様なら `AxDescentStep` が埋まる」は外れ。**
+   ★**超距離は和を `max` に潰すが、積は潰さない。**
+   ★塔で降りると `ε_{j+1} = C_j·ε_j` になり、`a = v_p([K(x):K])` 段で `Π_j C_j` ⇒ ★**発散する。**
+   ★★**Ax の指数 `p/(p−1)² = Σ_{k≥1}(1/(p−1))p^{−(k−1)}` は
+   「各段の損失 `i_j/e_j` が幾何級数的に減る」ことを使っており、
+   ★これは上付き番号（Herbrand `φ`/`ψ`）の話で 1 段の話ではない。**
+2. ☆★**`i ≤ e_L` は出るが、それでは既存と同じ定数で価値がない。**
+   ★価値があるのは sharp な `(p−1)i ≤ e_L` で、それには different の評価が要る。★**本波は未着手。**
+
+## ★★`VERDICT:`
+
+```
+VERDICT[JUMP-a]: 半分 — 関係は出たが LowerRamificationGroup.lean は使わず、ノルム言語で自前に組んだ
+VERDICT[JUMP-b]: 当たり — 抽象核 4 本は分岐・付値・Galois の語彙 0
+VERDICT[JUMP-c]: 当たり — 1 段では Hasse-Arf は要らなかった（★ただし次の段で要ると判明）
+VERDICT[JUMP-d]: 半分 — i の上界だけでは足りず、★塔に沿った減衰が要ると判明した（★より深い）
+```
+```
+COST[Jump]: 安 | 持ち場=巡回 p 次拡大の跳びとノルム  — 抽象核 4 本が全部一発、to_additive の生成名 1 本で最大の山が消えた
+```
+
+---
+
+## ★★`GUESS:` —— ★**配る前に書いた**（塔に沿った跳びの減衰）
+
+★**新ノード**: ★**「塔 `K = K_0 ⊂ … ⊂ K_a` に沿った跳びの減衰 —— 上付き番号での `Σ i_j/e_j` の収束」。**
+★入力は `CyclicJumpNorm.lean` ＋ `HerbrandFunction.lean` / `HerbrandComposition.lean` /
+`UpperRamificationGroup.lean` / `HasseArf*.lean`。
+
+```
+GUESS[TOWER-a]: Herbrand の合成則（herbrandPhiGroup_comp）が中心になる
+GUESS[TOWER-b]: 抽象核は「単調増加な区分線型関数の合成の傾き」で、分岐の語彙が消える
+GUESS[TOWER-c]: Hasse-Arf（跳びの整数性）が今度は要る（★1 段では要らなかった）
+GUESS[TOWER-d]: 定数は p/(p−1)^2 の形で出るが、最良性までは出ない
+```
+
+## ★★★★★★pGC 主定理 —— ★**単射性が群論の 1 文と「同値」になった**（2026-09-08）
+
+`lean/ABC3/Found/PGC/Theorem42Bijectivity.lean`（新規、`sorry` 0、jobs 3,655 / 10.5 秒）＋
+`lean/ABC3/Check/PGC/Theorem42PinnedNondegenerate.lean`（新規、`sorry` 0）。★**MCP 使用 0 回。**
+
+★★★**`injective_naturalOuterIso_iff`（`sorry` 無し・両向き）**:
+```
+Function.Injective (naturalOuterIso RF hnat (K := K) (K' := K)) ↔ CentralizerActsTriviallyOnBase K
+```
+★**濾過を 1 度も使っていない**ので `RF` は何でもよい。
+★全射性も 1 文に還元（`surjective_naturalOuterIso_of_forall_extension`）。
+★**両者を合わせた `bijective_naturalOuterIso_ramificationFiltration` が
+`theorem_4_2` の結論と同じ形**で立っている（★仮説 2 本を取るので配線はまだできない）。
+
+### ★★★原典より短い道（今日 23 回目、★2 つ）
+
+1. ★★**原典の「centralizer is trivial」は必要以上に強い。**
+   ★使ったのは `C_{Γ_ℚp}(Γ_K) ⊆ Γ_K` だけで、★★**しかもそれが単射性と同値**である。
+   ★「centralizer = 1」まで示す必要はない。
+2. ★★**原典が先に挙げる道（`Γ_K^ab ≅ (K^×)^∧` 経由）は、この木では通れない** ——
+   ★`ArtinEquivariance` が未証明（★在庫調査で確認: 出現は全部**仮説位置**、証明 0 件）。
+   ★★**原典が括弧書きで添えた群論的な道は、その壁を 1 度も踏まない。**
+
+★抽象核 `exists_comm_of_conj_eq_conj` は ★**分岐・付値・Galois が 1 語も出ず**、
+★**`[propext, Quot.sound]`**（選択公理なし）、★**一発（6.0 秒）**。
+★**正規性・可判定性はどの宣言も使っていない**（`grep` で 0 件）。
+
+### ☆★実装者が自分から書いた 2 つの留保
+
+1. ☆★**「単射性は独立に無条件で閉じられるはず」は外れた** —— ★**同値変形までしか行けない。**
+2. ☆★**非空虚性の witness が弱い**: `Aut(ℚ_p/ℚ_p)` が 1 点なので自明。
+   ★**「条件が矛盾していない」以上のことを言わない。**★**過不足なさの根拠は同値定理の方**、と docstring に明記。
+
+### ★`Check/` を先に読んだ（★作法どおり）
+
+★D32 の反証は `RF := topFiltration p` の代入に依存していた ⇒
+★**`ramificationFiltration_ne_topFiltration`（`sorry` 無し、3 行）で逃げ道が塞がっていることを機械検査。**
+☆★**ただし「現行形は真」とは言っていない**（★`v > 0` で `Γ^v` が真に減るかは測っていない）。
+
+## ★★`VERDICT:`
+
+```
+VERDICT[T42-a]: 外れ — artinMapAbelian の道は ArtinEquivariance 未証明で塞がっており、単射性は独立にも閉じなかった
+VERDICT[T42-b]: 当たり — 原典の別解（中心化群）のほうが安く、★この木ではそれだけが通れた
+VERDICT[T42-c]: 半分 — Cor33Pinned は使われず、より手前の「共役で書ける」1 文に還元された
+```
+（★`T42-d` は手が付いていないので判定を書かない。）
+```
+COST[Thm42]: 安 | 持ち場=pGC 主定理の全単射性  — MCP 0 回・leanfile 6 往復で、単射性が群論 1 文と同値になった
+```
+
+### ★★pGC の葉（★いま 3 つ）
+
+| 項目 | 葉 |
+|---|---|
+| `prop_2_2` | `IntKbarRecoverableFiltered` ← `reciprocityUnits` の α-同変性 |
+| `cor_3_1` / `cor_3_3` | `AxSenTate` ← `AxDescentStep` ← ★**塔に沿った跳びの減衰**（★配布中） |
+| ★**`theorem_4_2`** | ★**N1 `C_{Γ_ℚp}(Γ_K) ⊆ Γ_K`（単射性、★同値）** ＋ N2 全射性の 1 文（★Cor 3.3 経由） |
+
+## ★★`GUESS:` —— ★**配る前に書いた**（N1 = 中心化群）
+
+```
+GUESS[CENT-a]: mathlib にも木にも無い（★実装者が 3 手で測って不在を確認済み）
+GUESS[CENT-b]: 抽象核は「無限 Galois 群の中心化群」で、p 進の語彙が消える
+GUESS[CENT-c]: Krasner か「K̄ の元の共役が K 上で動く」から出る（★本体の見立て。拘束ではない）
+GUESS[CENT-d]: 有限次拡大に降ろせば有限群の中心化群になり、Galois 対応で閉じる
+```

@@ -178,19 +178,58 @@ export function declNames(text) {
 
 // 「字面」その 2 —— idiom が引用している Lean のエラー文そのもの。
 export const LIT_MIN = 30;
-export const ERRWORDS = /failed to synthesize|could not synthesize|type mismatch|unknown identifier|unknown constant|function expected|motive is not type correct|no goals|unsolved goals|maximum recursion depth|timeout|invalid field|invalid projection|ambiguous, possible interpretations|made no progress|has already been declared|does not contain/i;
-export function errLits(text) {
+// ★★v1 —— メタ第 37 回まで唯一の版。★**凍結する**(消さない)。
+//   ★理由: M182(メタ第 35 回)は `MCP_INFRA_RE_V1` を残してあったので「なぜ動かないか」が割れた。
+//   ★同じ作法で残す。`--errwords v1` で変更前の数字がいつでも再現できる。
+export const ERRWORDS_V1 = /failed to synthesize|could not synthesize|type mismatch|unknown identifier|unknown constant|function expected|motive is not type correct|no goals|unsolved goals|maximum recursion depth|timeout|invalid field|invalid projection|ambiguous, possible interpretations|made no progress|has already been declared|does not contain/i;
+// ★★v2 —— v1 + **Lean 4 が書式を変えた 6 語**(M189 が名指し / M192 で事前登録)。
+//   ★M189 の実測: ログの実エラー 12,456 件のうち 4,096 件(32.9%)が v1 のどの語にも当たらず、
+//     上位は ``Tactic `rewrite` failed``(809)/ `Lean exited with code 1`(744)/
+//     ``` `exact?` could not close the goal ```(272)。★旧書式 `rewrite tactic failed` は v1 にも無い。
+//   ★★ただし `ERRWORDS` の当て先は **`tools/lean-idioms.md` の節**であって
+//     ログのエラー本文ではない(M189 が呼び出し元を機械で辿った)。★4,096 件が直接動くのではない。
+//   ★`tactic [^ ]{1,40} failed` は M189 の提案 `Tactic .* failed` を絞った形
+//     (`.*` は貪欲で 240 字の引用を跨ぐ。`` `rewrite` `` は空白を含まないのでこれで届く)。
+export const ERRWORDS_V2 = /failed to synthesize|could not synthesize|type mismatch|unknown identifier|unknown constant|function expected|motive is not type correct|no goals|unsolved goals|maximum recursion depth|timeout|invalid field|invalid projection|ambiguous, possible interpretations|made no progress|has already been declared|does not contain|tactic [^ ]{1,40} failed|exited with code|could not close the goal|failed to compile definition|unexpected token|unknown namespace/i;
+export const ERRWORDS_VER = (() => {
+  const i = ARGV.indexOf('--errwords');
+  const v = i >= 0 ? ARGV[i + 1] : 'v2';
+  if (v !== 'v1' && v !== 'v2') { console.error(`--errwords は v1 か v2(受け取った: ${JSON.stringify(v)})`); process.exit(2); }
+  return v;
+})();
+export const ERRWORDS = ERRWORDS_VER === 'v1' ? ERRWORDS_V1 : ERRWORDS_V2;
+export function errLits(text, re = ERRWORDS) {
   const out = new Set();
   for (const m of String(text).matchAll(/`([^`\n]{12,240})`/g)) {
     const n = norm(m[1]);
-    if (n.length >= LIT_MIN && ERRWORDS.test(n)) out.add(n);
+    if (n.length >= LIT_MIN && re.test(n)) out.add(n);
   }
   let fence = false;
   for (const ln of String(text).split(/\r?\n/)) {
     if (/^\s*```/.test(ln)) { fence = !fence; continue; }
     if (!fence) continue;
     const n = norm(ln);
-    if (n.length >= LIT_MIN && ERRWORDS.test(n)) out.add(n);
+    if (n.length >= LIT_MIN && re.test(n)) out.add(n);
+  }
+  return out;
+}
+// ★★「エラーらしい引用」—— ★M189 の「23 節」を**再現可能にする**ための規則(M188 の規約)。
+//   ★M189 が使った規則は台帳に残っていないので、★これは**別の規則**である。23 と一致する保証はない。
+//   ★規則: LIT_MIN 以上の引用(backtick の内側 / fence の中の行)であって、下の語のどれかを含むもの。
+export const ERRLIKE = /error|failed|unknown|invalid|unexpected|cannot|could not|no goals|mismatch|ambiguous|expected|does not|not type correct|timeout|deprecated/i;
+/** ★節の本文から「エラーらしい引用」を全部返す(字面として採れたかは問わない)。 */
+export function errLikeQuotes(text) {
+  const out = new Set();
+  for (const m of String(text).matchAll(/`([^`\n]{12,240})`/g)) {
+    const n = norm(m[1]);
+    if (n.length >= LIT_MIN && ERRLIKE.test(n)) out.add(n);
+  }
+  let fence = false;
+  for (const ln of String(text).split(/\r?\n/)) {
+    if (/^\s*```/.test(ln)) { fence = !fence; continue; }
+    if (!fence) continue;
+    const n = norm(ln);
+    if (n.length >= LIT_MIN && ERRLIKE.test(n)) out.add(n);
   }
   return out;
 }
@@ -374,6 +413,33 @@ function selftest() {
   eq('S33 sub env our own tree', subKey('Invalid field `filt`: The environment does not contain `ABC3.Interface.PGC.RamificationFiltration.filt`', 'Invalid field'), 'env:ABC3.Interface.PGC.RamificationFiltration');
   eq('S34 sub falls back to 3 words', subKey('has already been declared here and there ok', 'has already been declared'), 'here and there');
   eq('S35 sub absent family', subKey('nothing', 'Invalid field'), '');
+  // ★★ERRWORDS v2 —— Lean 4 の書式変更(M189 / 事前登録 M192)。★v1 を凍結したことも試す。
+  const q4 = '```\nTactic `rewrite` failed: Did not find an occurrence of the pattern\n```';
+  eq('S45 v2 catches new tactic format', [...errLits(q4, ERRWORDS_V2)], ['Tactic `rewrite` failed: Did not find an occurrence of the pattern']);
+  eq('S46 v1 is frozen and misses it', [...errLits(q4, ERRWORDS_V1)], []);
+  eq('S47 v2 catches the other five', [
+    errLits('`Lean exited with code 1 Some required targets failed`', ERRWORDS_V2).size,
+    errLits('```\n`exact?` could not close the goal. Try `apply?` first\n```', ERRWORDS_V2).size,
+    errLits('`failed to compile definition, consider marking it noncomputable`', ERRWORDS_V2).size,
+    errLits("`unexpected token 'set_option'; expected 'lemma'`", ERRWORDS_V2).size,
+    errLits('`unknown namespace AlgebraicGeometry`', ERRWORDS_V2).size,
+  ], [1, 1, 1, 1, 1]);
+  eq('S48 v1 misses the other five', [
+    errLits('`Lean exited with code 1 Some required targets failed`', ERRWORDS_V1).size,
+    errLits('```\n`exact?` could not close the goal. Try `apply?` first\n```', ERRWORDS_V1).size,
+    errLits('`failed to compile definition, consider marking it noncomputable`', ERRWORDS_V1).size,
+    errLits("`unexpected token 'set_option'; expected 'lemma'`", ERRWORDS_V1).size,
+    errLits('`unknown namespace AlgebraicGeometry`', ERRWORDS_V1).size,
+  ], [0, 0, 0, 0, 0]);
+  // ★`tactic … failed` が貪欲でないこと(M189 の提案 `Tactic .* failed` を絞った理由)
+  eq('S49 tactic word does not span', ERRWORDS_V2.test('tactic here is a very long sentence with many words that eventually failed'), false);
+  eq('S50 tactic word still reaches backticked name', ERRWORDS_V2.test('Tactic `simp` failed'), true);
+  // ★「エラーらしい引用」の規則(M189 の 23 節を再現可能にするため。★M189 の規則とは別物)
+  eq('S51 errLike finds what errLits misses', [
+    [...errLits('`failed to read file X.olean: incompatible header`', ERRWORDS_V1)].length,
+    [...errLikeQuotes('`failed to read file X.olean: incompatible header`')].length,
+  ], [0, 1]);
+  eq('S52 errLike ignores plain prose', [...errLikeQuotes('`this sentence is long enough but says nothing bad`')], []);
   const bad = T.filter(t => !t.ok);
   for (const t of bad) console.log('  NG', t.name, '\n     got', JSON.stringify(t.a), '\n     want', JSON.stringify(t.b));
   console.log(`selftest ${T.length - bad.length}/${T.length}`);
@@ -449,6 +515,32 @@ console.log(`  ★測れる       : ${measurable.length} 件`);
 console.log(`  ★登録後の再出現: idiom ${withEv.length} 件 / 事象 ${secs.reduce((a, s) => a + s.ev.length, 0)} 件`);
 console.log(`  広すぎて捨てた字面: ${dropped.size} 個 (コーパスの ${(GENERIC_RATE * 100).toFixed(0)}% 超)`);
 
+// ★★`--lits-audit` —— 「エラーらしい引用はあるのに字面が 0 の節」を**名指しで**数える。
+//   ★M189(メタ第 36 回)が「23 節」と書いたが規則を残さなかったので、★規則ごと道具に入れる(M188)。
+//   ★規則は `ERRLIKE`(上)。★M189 の規則とは別物なので、23 と一致する保証は無い。
+//   ★同時に v1 → v2 で**新たに字面が取れるようになった節**を全部出す(これが効果の主指標)。
+if (has('--lits-audit')) {
+  const rows = secs.map(s => {
+    const txt = s.head + '\n' + s.body.join('\n');
+    return { s, v1: errLits(txt, ERRWORDS_V1), v2: errLits(txt, ERRWORDS_V2), like: errLikeQuotes(txt) };
+  });
+  const cnt = f => rows.filter(f).length;
+  console.log('\n-- lits-audit(規則: ERRLIKE / LIT_MIN = ' + LIT_MIN + ') --');
+  console.log(`  節 ${rows.length}`);
+  console.log(`  字面が取れた節          : v1 ${cnt(r => r.v1.size)} → v2 ${cnt(r => r.v2.size)}`);
+  console.log(`  ★エラーらしい引用はあるのに字面 0 : v1 ${cnt(r => !r.v1.size && r.like.size)} → v2 ${cnt(r => !r.v2.size && r.like.size)}`);
+  console.log(`  ★v1 で 0 → v2 で非 0(効果の主指標): ${cnt(r => !r.v1.size && r.v2.size)} 節`);
+  console.log('\n-- v1 で 0 → v2 で非 0 の節(全部) --');
+  for (const r of rows.filter(r => !r.v1.size && r.v2.size)) {
+    console.log(`  L${String(r.s.line).padStart(5)} ${r.s.head.slice(0, 76)}`);
+    for (const g of [...r.v2].slice(0, 2)) console.log(`         + ${JSON.stringify(g.slice(0, 100))}`);
+  }
+  console.log('\n-- v2 でもまだ字面 0 だが「エラーらしい引用」を持つ節(全部) --');
+  for (const r of rows.filter(r => !r.v2.size && r.like.size)) {
+    console.log(`  L${String(r.s.line).padStart(5)} ${r.s.head.slice(0, 76)}`);
+    for (const g of [...r.like].slice(0, 1)) console.log(`         ? ${JSON.stringify(g.slice(0, 100))}`);
+  }
+}
 if (has('--hits')) {
   console.log('\n-- 再出現があった idiom(名指し) --');
   for (const s of withEv.sort((a, b) => b.ev.length - a.ev.length)) {
