@@ -1,4 +1,5 @@
 import ABC3.Skeleton.PGC.Section3
+import ABC3.Skeleton.PGC.Section4Defs
 import ABC3.Found.PGC.OpenSubgroupSpan
 import ABC3.Found.PGC.RamificationNaturality
 
@@ -6,30 +7,20 @@ import ABC3.Found.PGC.RamificationNaturality
 # [pGC] §4 — 命題(主定理)
 
 設定・記号は `ABC3/Skeleton/PGC/Setup.lean`。§2 の `RamificationFiltration`・
-`FilteredGroup`(`Found/PGC/FilteredGroup.lean`)を継続して使う。
+`FilteredGroup`(`Skeleton/PGC/Setup.lean`)を継続して使う。
 
 構造化: `ResearchPaper/1_Structured/A Version of the Grothendieck Conjecture for p-adic
 Local Fields/section-4.html`(PDF 目視確認 2026-09-03、物理 p.6末尾-7)。
+
+## ★2026-09-08: 定義を `Section4Defs.lean` へ割った
+
+`ABC3.Interface.PGC.RamificationFiltration.filt`(**定義**)とその `.src` は
+`ABC3/Skeleton/PGC/Section4Defs.lean` へ移した。本ファイルには**定理だけ**が残る
+(`Section1Defs.lean`・`Section2Defs.lean` と同じ作法)。
+★完全修飾名は `ABC3.Interface.PGC.RamificationFiltration.filt` のまま変わらない。
+理由(`Found/PGC/` の 202 本すべてが本ファイルを import できなかったこと)は
+`Section4Defs.lean` の docstring に測定つきで書いた。
 -/
-
-/-- `K` の絶対 Galois 群を、`RF` の与える高次分岐群のフィルトレーションで飾った
-filtered group(`Found/PGC/FilteredGroup.lean` の `FilteredGroup`)。
-
-★`RamificationFiltration`(`Interface/`)自体は `FilteredGroup`(`Found/`)を知らない
-(Interface は Found を import しない、`Interface/PGC/LocalFieldData.lean` 冒頭の規約)。
-この橋渡しは両方を import できる `Skeleton/` に置く——ファイル先頭の
-`namespace ABC3.Skeleton.PGC` の**外側**で完全修飾名を使う必要がある
-(内側で `def Foo.Bar.baz` と書くと `ABC3.Skeleton.PGC.Foo.Bar.baz` になってしまう)。 -/
-noncomputable def ABC3.Interface.PGC.RamificationFiltration.filt {p : ℕ} [Fact p.Prime]
-    (RF : ABC3.Interface.PGC.RamificationFiltration p) (K : ABC3.Skeleton.PGC.PAdicLocalField p) :
-    ABC3.Found.PGC.FilteredGroup :=
-  { G := K.absGal, Gv := RF.Gv K, isClosed := RF.isClosed K,
-    isNormal := RF.isNormal K, antitone := RF.antitone K }
-
-/-- 台帳の付随宣言(橋渡しの `def` であり、原典の項目そのものではない)。 -/
-def ABC3.Interface.PGC.RamificationFiltration.filt.src : ABC3.Meta.Source :=
-  { paper := "pGC", pdfPage := 4, item := "Section 2 (RamificationFiltration.filt)",
-    sectionId := "setup-2-herbrand" }
 
 namespace ABC3.Skeleton.PGC
 

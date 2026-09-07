@@ -115,6 +115,52 @@ tools: Read, Edit, Write, Grep, Glob, Bash, mcp__abc3-lean__lean_check, mcp__abc
 **mathlib の方が軽い**ことを見つけて乗り換えた
 （`AlgEquiv.restrictNormalHom_surjective` / `IntermediateField.restrictNormalHom_ker`）。
 ★**「木に在る」ことは「それを使うべき」を意味しない。**
+## ★★★スクリプトでファイルを壊さない（2026-09-08 に実害が出た）
+
+★★**`io.open(p, 'w')` は書き込みが失敗する**前**にファイルを切り詰めます。**
+
+☆★**2026-09-08**: 実装者が `tools/lean-idioms.md`（**10,468 行**）を **0 バイト**にした
+（Python の中で `𝒪` を lone surrogate として書き `UnicodeEncodeError`）。
+☆★**本体も同じ事故で `decisions-pending.md` を 5,822 行 → 72 行にしている。**
+
+```python
+data = s.encode('utf-8')          # ★先に encode（ここで落ちてもファイルは無傍）
+tmp = p + '.tmp'
+with open(tmp, 'wb') as f: f.write(data)
+os.replace(tmp, p)                # ★原子的に差し替え
+```
+
+★**そもそも `.md` への追記は Write/Edit ツールを使うほうが安全。**
+★★**壊したら `git checkout` を使わない** —— HEAD に戻るだけなので
+★**他の agent の未 commit 追記を失う**。
+★`~/.claude/projects/D--Math-ABC3/<session>/subagents/agent-*.jsonl` を grep して
+`Edit` の `old_string`/`new_string` を再適用する（手順は `lean-idioms.md` #241）。
+
+## ★★`lake build` を **1 命令に 2 回書かない**
+
+★**実測（2026-09-08、★2 度訂正した後の数字）**: `lake build` は本体の tool 待ちの最大項（**41.6 時間**）。
+★★**あなたが使う数字は「対象を指定した build の中央値 = 14.9 秒」である。**
+☆★本体は最初「中央値 29.9 秒」とだけ書いたが、★**それは木全部の build（34.8 秒）の話で主語が落ちていた。**
+★**木全部を建てるのはあなたの仕事ではない。**★自分の対象を指定すること。
+★**1 命令の中で同じ対象を 2 度叩いているものが 217 件**。
+★**何も書かずに建て直しているものが 846 回 / 7.3 時間**。
+★**道具がある**: `node tools/build.mjs <target>` が 1 回だけ回して
+`.cache/build-<target>.log` に落とし、`--errors` （0.14 秒）で引ける。
+
+```
+×  lake build X 2>&1 | grep error; lake build X 2>&1 | tail
+○  lake build X > .cache/b.log 2>&1; grep error .cache/b.log; tail -3 .cache/b.log
+```
+
+★**見たいものが 2 つあるなら build を 2 回ではなく grep を 2 回にする。**
+
+## ★★`grep sorry` は当てにならない
+
+★**`lean/ABC3/Found/PGC/` を `grep sorry` すると 134 件出るが、★全部 docstring の日本語**（「sorry 無しで証明した」等）で、**本物は 0 件**である。
+★**本物は `lake build` の `declaration uses \`sorry\`` で数える。**
+☆★**2026-09-07 に実装者がこれで `ArtinEquivariance.lean` を
+「`sorry` 3 件で未解決」と誤読した**（実際は 0 件）。
+
 ## この木で繰り返し起きる罠（抜粋、詳細は lean-idioms.md）
 
 - `Unknown constant` は「mathlib に無い」ではなく「**import していない**」ことが多い（#68）

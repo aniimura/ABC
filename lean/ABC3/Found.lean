@@ -1814,6 +1814,14 @@ import ABC3.Found.PGC.SemilinearRestriction
 import ABC3.Found.PGC.ReciprocityLimitEquivariance
 import ABC3.Found.PGC.ContinuousCochain
 import ABC3.Found.PGC.ReciprocityDatumIndependence
+import ABC3.Found.PGC.SmoothModelTransport
+import ABC3.Found.PGC.NormalBasisFunctional
+import ABC3.Found.PGC.CoherentFunctional
+import ABC3.Found.PGC.CountableGenerators
+import ABC3.Found.PGC.RamificationImageUnits
+import ABC3.Found.PGC.LubinTateSharpRamificationImage
+import ABC3.Found.PGC.RamificationImageStage
+import ABC3.Found.PGC.PadicLogIntegers
 /-!
 # Found — 実装済みの基礎
 

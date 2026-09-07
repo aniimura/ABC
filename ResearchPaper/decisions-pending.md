@@ -9481,3 +9481,1113 @@ COST[Meta27]: 並 | 持ち場=完全コーパスで費用を測る  — 判定 0
 `meta-setup.mjs` が ★**「本体が見つからない」と言って止まった。**
 ☆★**自衛が効いた実例**である（`--main` を渡して押し通していたら本体の作業ツリーを直接書き換えていた）。
 ⇒ ★**次から `isolation: "worktree"` を必ず指定する。**
+
+## ★★★双対性の道は臨界路から外れた（2026-09-07、★本体の判断）
+
+★**`LocalTateDualityRoute` / `Transgression` / `CohomologyColimit` / `ContinuousCochain` の 4 本は
+`cyclotomicCharacter_recoverable`（Prop 1.1）の**予備**として建てた。**
+★**Prop 1.1 は経路 Λ で無条件に閉じた**ので、⇒ ★**(c)-3b と (c)-4′ は臨界路から外す。**
+
+★**捨てるのではない**: 4 本とも `sorry` 0（うち 2 本は `axiom` 0）で木に在り、
+局所 Tate 双対性は pGC の後段（§3 の `filteredGroupOf`）や CorrHyp で要る可能性がある。
+★**「いま人手を割かない」だけである。**★このことを記録しておかないと、
+次の波が「未完だから続きを」と誤読する。
+
+☆★**測れたこと**: ★**同じ命題に 2 本の道を通した費用**が出た ——
+道 Λ が 6 本（`ArtinEquivariance` 系）、双対性の道が 4 本。★**先に着いたのは道 Λ。**
+☆★**ただし「双対性の道が無駄だった」とは言えない**: ★道 Λ の最後の 1 本（RDI）は
+双対性の道の副産物を 1 つも使っていないが、★**`SemilinearRestriction`（20 波避けた壁）は
+両方の道が要求していた**ので、分離できない。
+
+---
+
+## ★★次の 2 本を配った
+
+### 1. Prop 2.1（Γ_K-加群としての K̄ の復元）—— ★**在庫の追送をした**
+
+☆★**本体の落ち度**: 持ち場を書くとき `padicLog_mul` / `injOn` / `bijOn` の 3 本しか引かず、
+★**その 1 段上を引いていなかった。**★走行中に追送した:
+
+| 見落としていた在庫 | 場所 |
+|---|---|
+| ★**`padicLogUnitsEquiv : smallPrincipalUnits K ≃* Multiplicative (smallBall K)`** | `PrincipalUnitsLog.lean:168` |
+| ★**`module_finite_smallBall` / `module_free_smallBall` / `finrank_smallBall`** | `PrincipalUnitsRank.lean:147`/`:155`/`:166` |
+| `smallBallSubmodule : Submodule ℤ_[p] K.carrier` / `smallBallMul`（単射つき） | 同 `:66` / `:100` |
+| `principalUnits K π n`（＝ `U^n_K`）/ `principalUnitsQuotientEquiv` | `AdjoinIntegers.lean:1608` / `:1788` |
+
+★**本体が「本当の仕事」と名指しした 1 番目（半径 1/4 の球 → `U_K ⊗ Q_p ≅ K`）は、
+これでほぼ埋まっている可能性が高い。**
+☆★**失敗形として記録**: ★**「持ち場に引いた在庫が 1 段浅かった」。**
+★**次から、名前の一部（`padicLog`）でなく、その周りの名前空間（`principalUnits*`）まで引く。**
+
+### 2. §2 の分岐入力 —— ★**片側は既に証明済みだった**
+
+原典 pGC p.4:
+> the image of Γv_K in Γab_K is equal to U v_K ⊆UK
+
+★★**在庫**: `mem_principalUnits_reciprocityUnits_iff`（`LubinTateClosureTopology.lean:302`）が
+★**「相互律の像が `U^{m+1}` に入る ⟺ σ が第 m 層の捩れ点を固定する」**を既に言っている。
+⇒ ★**残るは「Lubin-Tate の層」と「上付き分岐群 `Γ^v`」を繋ぐ一段だけ。**
+★今日の `upperRamificationGroup_iteratedLubinTatePsi_eq_bot` はその片側である。
+
+---
+
+## ★★`GUESS:` —— ★**配る前に書いた**
+
+```
+GUESS[RF-a]: mem_principalUnits_reciprocityUnits_iff がそのまま片側になり、新しい解析は要らない
+GUESS[RF-b]: 残りは「Lubin-Tate の層 = 上付き分岐群」の一段で、Hasse-Arf 一式を消費する
+GUESS[RF-c]: 添字のずれは 2 つとも +1 で揃う（原典の n−1 < v ≤ n と在庫の m+1）
+GUESS[RF-d]: 整数 v だけで閉じ、実数 v への拡張は別ノードとして残る
+```
+
+## ★★人を待つ判断（★止まらず次へ進む）
+
+- ★**`origin/main` が `d2bcac84` で止まっている**（本体は `master` に push している）。
+  `git push origin master:main` は fast-forward でない（`origin/main` に 7 コミット在る）ので
+  ★**公開既定ブランチへの `--force` が要る。**⇒ ★**人の判断待ち。**（既出、変更なし）
+- ★D24（Section4 の保留）は Section2・Section3 が閉じるまで効かない。★**いま人を待つ必要はない。**
+
+## ★★★★★Prop 2.1 —— ★**原典より短い道が見つかった（今日 9 回目）**（2026-09-07）
+
+`lean/ABC3/Found/PGC/SmoothModelTransport.lean` **469 行 / 33 宣言、`sorry` 0、`axiom` 0**。
+`lake build` 成功（3,229 ジョブ、10.8 秒）。
+
+★**`prop_2_1` そのものは埋まっていない。**★**埋まったのは「古典定理 1 本への `sorry` 無しの還元」と、その定理の有限次段。**
+
+### ★★★原典の道を 3 つとも捨てた
+
+原典 §2 は **p 進対数 + Verlagerung + 局所類体論**。★**実装者は 3 つとも使わなかった。**
+代わりに使ったのは ★**正規底 `K̄ ≅ C^∞(Γ_K, K)` 1 本**で、
+もう一方の入力 `[K:ℚ_p] = [K′:ℚ_p]` は既に `sorry` 無しの在庫（`DegreeTransport.lean`）。
+★**主張は原典と同一で、道筋だけが違う。**
+
+★**抽象核が 2 段出た**:
+- `SemilinearAddEquiv α A B`（★分岐・付値・Galois の語彙 0）。
+  ★★`sandwich` は **`#print axioms` = `[propext, Quot.sound]`** —— ★**選択公理すら使わない。**
+- `locallyConstantSourceCongr (α : G ≃ₜ* G')`（★位相群だけ）—— ★**「群論的に回復できる」の内実。**
+
+★**無条件の非空虚性**も出た: `recoverableAsAddModule_locallyConstant (M)`。
+
+### ★残るのは 1 本
+
+`SmoothModelCarrier K`（＝**無限次 Galois 拡大に対する正規底定理** `K̄ ≅ C^∞(Γ_K, K)`）。
+★**配線は `prop_2_1_of_smoothModelCarrier` 1 本で済む。**
+★実装者の段取り: (i) `K̄` を有限次 Galois 部分拡大の colimit として書く、
+(ii) Maschke（`char K = 0`）で `K[G′] ↠ K[G]` の単元持ち上げ、
+(iii) 局所体の有限次拡大は可算なので `ℕ` 上の全射逆系 ⇒ 極限が空でない。
+⇒ ★**次のノードとして配った。**★**真偽を自分で確かめるよう明記した。**
+
+### ☆★危険側（★実装者が自分から書いた）
+
+★**「正規底定理は mathlib に無い」は誤判定だった。**
+`grep -i "normalBasis"` が ★**`OrthonormalBasis` に飲み込まれていた**。
+★**`.absent` を 1 件でっち上げる寸前だった。**★正しい引き方は
+`grep -n "NormalBasis" .cache/mathlib-index.txt | grep -v -i orthonormal` ⇒ `IsGalois.normalBasis` が在る。
+★`lean-idioms.md` #232 に逐語で入れた。
+
+---
+
+## ★★★本体の誤りが 1 つ（★検算して直した）
+
+実装者は「`Found/PGC/ArtinEquivariance.lean` は **`sorry` 3 件で未解決**」と読み、
+★それを理由に原典の道を避けた。★**本体が検算したところ本物の `sorry` は 0 件**で、
+3 件は ★**「`Skeleton/PGC/Section1.lean` の `sorry` はまだ埋まっていない」という地の文**だった
+（★**しかもその記述はその日のうちに古くなっていた**）。
+
+⇒ ★**3 箇所を訂正した**（「2026-09-07 に埋まった。本ファイルに本物の `sorry` は 1 件も無い」）。
+⇒ ★**規約 §4.5 に足した**: ★★**`grep sorry` は当てにならない。本物は
+`lake build` の `declaration uses sorry` で数える。**
+☆★**これはメタ第 26 回の「測って言えない／測れていない の取り違え」と同じ型である。**
+★**道筋自体は良かったが、理由が事実と違った。**
+
+---
+
+## ★★`VERDICT:` —— ★**本体は 4 本中 3 本を外した**
+
+```
+VERDICT[P21-a]: 外れ — 在庫 4 本（padicLog 3 本 + MonoidHom.transfer）は 1 つも使われなかった
+VERDICT[P21-b]: 外れ — 難所は「半径 1/4 の球」ではなく「無限次正規底定理の coherence」だった
+VERDICT[P21-c]: 半分 — colimit は要るが本波では建たず、次のノードとして名指しされた
+VERDICT[P21-d]: 外れ — MonoidHom.transfer は 1 度も使われなかった
+```
+```
+COST[Prop21]: 並 | 持ち場=Γ_K-加群としての K̄ の復元  — 還元は sorry 0 で閉じ、残りは無限次正規底定理 1 本
+```
+
+☆★★**共通の形（★これが今日いちばん学べること）**:
+★**本体の見立て 4 本は「原典の道をなぞる」前提で立っていた。**
+★**実装者は原典を捨てて短い道を見つけた。**⇒ ★**見立てが全部外れた。**
+★**だが結果は良い。**★**「見立てが当たること」と「安く着くこと」は別物である。**
+⇒ ★**申し送り**: ★**持ち場に在庫を書くときは「原典が使う道具」だけでなく
+「その主張を出せる道具」も書く**（今回なら正規底定理）。
+★**原典の道を書くのは段取りの参考であって、拘束ではないと明記する。**
+
+☆★**本体の在庫の引き方も 1 段浅かった**（走行中に `padicLogUnitsEquiv` 等を追送したが、
+★**実装者はそれも読んだうえで使わなかった。捨てた作業はゼロ**——その道に着手する前だった）。
+
+### ★★運用上の発見（#236）
+
+★**MCP の基準環境は並行セッションと共有される。**
+`lean_start` 成功直後に身に覚えのない instance エラーが出て、
+★**`lean_status` の imports が自分の指定と 1 本も一致しなかった。**
+⇒ ★**並走時は `node tools/leanfile.mjs`（約 10 秒/往復）に切り替える。**
+★**`lean_reset` で他の agent を巻き込まないこと。**★持ち場に明記するようにした。
+
+## ★★★★★pGC の残りは **5 本**（2026-09-08 未明、★ゴールに対する現在地）
+
+★`lake build ABC3` の `declaration uses sorry` で数えた（★`grep sorry` ではない）。
+
+| # | 定理 | 場所 | 状態 |
+|---|---|---|---|
+| 1 | `prop_2_1` | `Skeleton/PGC/Section2.lean:42` | ★**還元済み。残るノードは「無限次正規底定理」1 本**（配布中） |
+| 2 | `prop_2_2` | 同 `:86` | 分岐入力の片側は在庫。★**分岐フィルトレーションを構成する本体** |
+| 3 | `cor_3_1` | `Section3.lean:111` | 未着手 |
+| 4 | `cor_3_3` | 同 `:231` | 未着手 |
+| 5 | ★★**`theorem_4_2`（pGC の主定理）** | `Section4.lean:122` | ★**射は構成済み。残るのは全単射性** |
+
+★**閉じたもの**: `Prop 1.1` / `Prop 1.2` / `Cor 1.3` / ★**`Lemma 4.1`**
+（`lemma_4_1` は `Found.PGC.lemma_4_1` へ委譲済み、`sorry` 無し）。
+
+### ★★主定理の形
+
+```lean
+theorem theorem_4_2 (RF : RamificationFiltration p) (hnat : IsNaturalFiltration RF)
+    (K K' : PAdicLocalField p) :
+    Function.Bijective (naturalOuterIso RF hnat (K := K) (K' := K')) := sorry
+```
+★★**射 `naturalOuterIso` は既に構成されている**（`Found/PGC/RamificationNaturality.lean`、2026-09-05）。
+⇒ ★**残るのは「全単射である」だけ。**
+★仮説 `IsNaturalFiltration` は**空虚でない**（`exists_isNaturalFiltration`）。
+★★**そして docstring が言うとおり、`RamificationFiltration` が構成された時点でこの仮説は落ちる。**
+
+### ★★★依存の形（★これが見通しを良くする）
+
+⇒ ★★**`prop_2_2` は「分岐フィルトレーションを構成する」ノードでもある。**
+★**それが閉じれば `theorem_4_2` の仮説 2 本が同時に落ちる。**
+⇒ ★**臨界路は `prop_2_1` → `prop_2_2` →（`cor_3_1`・`cor_3_3`）→ `theorem_4_2` の一直線。**
+
+★**いま走っている 2 本はどちらもこの臨界路の上にある**
+（「無限次正規底定理」= #1 の最後の 1 本、「分岐群の像 = 単数フィルトレーション」= #2 の入力）。
+
+## ★★★★★メタ第 28 回を採用 —— ★**本体の無駄が定量化された**（2026-09-08）
+
+### ★★★本体の tool 待ちは **86.2 時間**。そのうち `lake build` が **44.1 時間（51%）**
+
+| | 回数 | 中央 | 合計 |
+|---|---|---|---|
+| ★**`lake build`** | **5,929** | 14.87 秒 | ★**44.1 時間（全 tool 待ちの 51%）** |
+| うち★**木全部**（引数なし / `ABC3`） | **4,089** | — | ★**30.5 時間（全体の 35%）** |
+| `lean_check` | 9,833 | 2.45 秒 | 10.9 時間 |
+| Bash 全体 | 19,429 | — | 59.9 時間（69.4%） |
+
+☆★★**確実に無駄と言えたもの**: ★**1 命令の中で `lake build` を 2 回以上叩いているものが 983 件**
+（うち **683 件は同じ対象**）。★**余分な build の見積 5.1–6.4 時間。**
+★**出力をファイルに落としているのは 97 / 5,929 件だけ。**
+
+☆★**本体は今日それをやった** —— `lake build ABC3.Skeleton.PGC.Section1` を 2 回、
+`ABC3.Found.PGC.ReciprocityDatumIndependence` を 2 回叩いている。
+⇒ ★**規約 §4.5 に足した**: ★★**`lake build` を 1 命令に 2 回書かない。
+1 度だけ回してファイルに落とし、あとは grep する。**
+⇒ ★**メタ第 29 回に「その道具を作る」持ち場を配った。**
+
+### ★★★循環の 3 度目を**予言できるようになった**
+
+`tools/import-audit.mjs`（新規 301 行、selftest **23/23**）。★**0.4 秒**で判定する。
+
+```
+node tools/import-audit.mjs --edge lean/ABC3/Found/PGC/RamificationJumpDivisibility.lean ABC3.Skeleton.PGC.Section4
+  ★循環する(引き先が引く側を推移的に import している)
+  ★戻ってくる経路の入口: ABC3.Skeleton.PGC.Section3
+  ★引き先の定義 1 件: ABC3.Interface.PGC.RamificationFiltration.filt
+  ⇒ ★定義だけを Skeleton/PGC/Section4Defs.lean に割れば引ける
+```
+
+★**`Section1Defs` / `Section2Defs` / `Setup` を引く場合は循環 0（0%）**、
+★**`Section1` / `Section2` / `Section3` / `Section4` を引くと Found/PGC 202 本のうち 191〜193 本（95〜96%）が引けない。**
+⇒ ★**「定義は `*Defs.lean` に置く」は例外ではなく規則である。**★木全体では罠が **19 / 94 本**。
+
+☆★**「使っているのに直接 import していない」は 10,203 組中 5,981 組（58.6%）が経路 1 本**だが、
+★**Lean では推移 import は普通なのでこれは誤りではない。**
+★言えるのは「1 本切ると落ちる箇所が 5,981 ある」まで —— ★**改善係が自分でそう書いた。**
+
+### ★採用（3 本、すべて LF・独立）
+
+`tools/agent-timing.mjs` 1,236 → **1,662**（`--main`。selftest **119 → 144**）/
+`tools/import-audit.mjs` **新規 301**（selftest **23/23**）/ `meta-backlog.md` +250（M128–M135）。
+★他ゲートは全部不変。★**わざと壊して 16/16 発火。**
+
+### ☆★測れなかったもの（★改善係が自分から書いた）
+
+- ★**「agent に配れたはずの塊」は反実仮想なので測れない。** 代理で数えると **2 / 2,802 塊**。
+  ★**形が違う**（agent = 49+ 往復 1 ファイル、本体 = 塊の中央値 2 往復）。
+- ★**`lean_check` 9,833 件には「どのファイルの仕事か」の印が無い** ⇒ ファイル別の費用は**原理的に測れない**。
+- ★再ビルド 1,392 回 / 9.6 時間は「無駄」と**断定できない**（キャッシュ無効化事由がログに無い）。
+- ★**本体の Bash 19,429 件のうち 7,073 件（36.4%）が「ファイルを書く形」**（heredoc/python/sed）
+  ⇒ Write/Edit だけ数える解析は本体には使えない。
+
+### ☆★本体の落ち度（2 回連続）
+
+★**改善係の worktree で 2 回続けて立ち上がりを落とした。**
+第 27 回は**渡し忘れ**（自衛が働いて止まった）、第 28 回は ★**`isolation: "worktree"` が `main` から切り、
+master より 1,210 commit 前だった**（`meta-setup.mjs` すら無く `MODULE_NOT_FOUND`）。
+⇒ ★**`git reset --hard master` で 0.4 秒で復帰する**と持ち場の冒頭に書くようにした（規約にも足した）。
+⇒ ★M135（`meta-setup` が「master より N commit 前」を最初に印字する）を第 29 回に配った。
+
+---
+
+## ★★★pGC §3 を読んだ —— ★**D13 と同じ手当てが要る見込み**（★人を待つ判断ではない）
+
+原典 pGC p.6（★`.txt` を直接読んだ、238–268 行）:
+
+> Corollary 3.1:
+> Given a continuous Qp[ΓK]-vector space of finite Qp-dimension, the
+> issue of whether or not V is Hodge-Tate (as well as the invariants dV (i)) can be determined
+> entirely group-theoretically from the filtered group ΓK.
+
+> Corollary 3.3:
+> Given a continuous E[ΓK]-module V of E-dimension 1, the issue of
+> whether or not V is uniformizing can be determined entirely group-theoretically from the
+> filtered group ΓK.
+
+★**Cor 3.1 は原典自身が「a formal consequence of Proposition 2.2」と書いている。**
+★**Cor 3.3 は Cor 3.1 ＋ 引用 [1] Ch III Appendix §5**（`d_V(1) = [E:K]`・`d_V(0) = [E:K]·([K:ℚ_p]−1)`）。
+
+★★**ところが木のスケルトンは 2 本とも「自由なデータ引数」を取っている**:
+- `cor_3_1 (isHodgeTate : ∀ K V …, Prop)` —— ★**`isHodgeTate` が自由**
+- `cor_3_3 (toGal : ∀ K, {x // ‖x‖ = 1} → K.absGal)` —— ★**`toGal` が自由**
+
+☆★**これは D13 が Prop 1.2 で退化と判定した「∀ RD」と同じ形である。**
+★スケルトン自身の docstring も板挟みを認めている
+（「`toGal` を悪く選べば両辺とも偽で ↔ は自明に真、良い `toGal` を選ぶには相互律相当の構成が要る」）。
+
+★★★**本体の観測**: ★**自由にした理由（「構成が未構築」）は、局所類体論が閉じた今、消えている可能性が高い。**
+★**今日 `LocalClassFieldTheory.lean` で Theorem 6.15 が仮定ゼロで立ち**、
+`galoisReciprocityEquiv : Gal(K⟮x⟯/K) ≃* (𝒪_K ⧸ π^n)ˣ` も `ArtinMap.lean` も在る。
+☆★**Prop 1.2 でも同じことが起きた**——「`Interface` に仮説として置いた理由(構成が未構築)は第 1012 で消えている」。
+
+⇒ ★**申し送り**: ★**§3 に着手する前に、まず `toGal` を `ArtinMap` の実物に固定できるかを測る。**
+★**`isHodgeTate` も `K̂`（`CompKbar`、`AbsClosureModules.lean` に構成済み）で書けるはず。**
+★**これは人の判断ではなく、測ってから決める作業である。**★Prop 2.2 が閉じた直後の波に置く。
+
+## ★★★★★分岐群の像 = 単数フィルトレーション —— ★**原典より短い道（今日 10 回目）**（2026-09-08）
+
+`lean/ABC3/Found/PGC/RamificationImageUnits.lean` **618 行 / 36 宣言、`sorry` 0**。
+`lake build` 成功（3,040 ジョブ、当モジュール 10 秒）。★`sorryAx` は 0。
+
+★★**Serre XV §2 は Herbrand 関数経由だが、本証明は Herbrand も微分も使わない。**
+使ったのは ★**`ker(Art) = ⋂ᵢ Art⁻¹(U^{n+i})`（＝ `⋂(1+m^n) = 1`、`𝒪_K` の分離性）＋ 位相補題 1 本**だけ。
+
+★**抽象核 6 本が 0.2 秒台で通った**。うち ★**`map_eq_of_coe_mul_coe_ker_eq` は
+`#print axioms` = `[propext, Quot.sound]`** —— ★**選択公理を使わない。**
+★`open scoped Classical` は最終版で**外した**（無くても通る）。★`Decidable` 仮定は 1 つも無い。
+
+★**包含 `⊆` は仮定 1 本で出た**（コンパクト性も全射性も不要、`v` は実数のまま）。
+★**等号**と ★**仮定 2 本の非空虚性を構成で証明**（`lubinTateStageFiltration`）。
+
+### ★添字のずれは**無かった**
+
+★**2 つのずれは同じで打ち消し合う。** `psiGenSeq … m` は `ψ_{m+1}` の根なので
+`K(x_m) = K_{f,m+1}` は塔の第 `m+1` 段 ⇒ ★**「レベル `m+1` ↔ 段 `m+1`」でずれていない**
+（`psiGenSeq` が 0 始まりなだけ）。★`⌈v⌉₊` が原典の `n−1 < v ≤ n` と一致することも証明した
+（`natCeil_eq_of_sub_one_lt_le`、`v = 0` を含む）。
+☆★**実装者は「1 ずれる」と踏んで外していた**——★自分でそう報告した。
+
+### ★残った穴（★次のノードとして配った）
+
+★**Yoshida Prop 6.14 の「鋭い形」** `Gal(K_{f,m}/K)^v = ρ_{f,m}^{-1}(U^{⌈v⌉}/U^m)`。
+木には「消える」側しか無い。
+★★**本体が原典の証明を直接読んだところ、鋭い形は証明の中に逐語で在った**:
+> Thus for G = Gal(Km_x /L) and 1 ≤i ≤m, we have |Gn| = |ρ−1_f,m(1+pi)| = qm−i for qi−1 −1 < n ≤qi −1.
+
+★**しかも `i(σ) = q^i` は今日 `LubinTateRamificationBreak.lean`（784 行）で等号まで出ている。**
+⇒ ★**在庫は揃っている。配った。**
+
+★他に 2 つ（★**臨界路ではない**）: 「`Γ^v ⊆ 惰性群`」（`Γ^ab_K` の言葉で述べたいとき）、「実数 `v` 版」。
+
+---
+
+## ★★★★★事故と復旧 —— ★**`lean-idioms.md` が 0 バイトになり、全部戻った**
+
+☆★**実装者が `io.open(p,'w')` の truncate で 10,468 行のファイルを 0 バイトにした**
+（Python 中に `𝒪` を lone surrogate で書いて `UnicodeEncodeError`）。
+☆★★**本体が今日 `decisions-pending.md` を 5,822 → 72 行にしたのと同じ事故である。**
+
+★★★**復旧の手際が良い**（★本体が検算した: **10,592 行 / 177 節**、
+`#224` `#232` `#237` `#238` `#241` すべて健在、見出し位置一致、LF 維持）:
+> ★**`git checkout` は使わなかった** —— HEAD に戻すだけで**他 agent の未 commit 追記を失う**ため。
+> ★`~/.claude/projects/.../subagents/agent-*.jsonl` を `grep -l '## #232'` で引き、
+> `tool_use` の `Edit` の `old_string`/`new_string` を取り出して**同じ Edit を再適用**した。
+
+⇒ ★**#241 に手順が入った。**
+
+☆★**本体の落ち度**: ★**truncate の警告を meta 係の持ち場にしか書いていなかった。**
+★**実装者の常設ファイル `.claude/agents/lean-prover.md` に入れていなかった。**
+⇒ ★**入れた。**★ついでに「`lake build` を 1 命令に 2 回書かない」「`grep sorry` は当てにならない」も常設化した。
+
+---
+
+## ★★`VERDICT:`
+
+```
+VERDICT[RF-a]: 当たり — mem_principalUnits_reciprocityUnits_iff がそのまま片側になり、新しい解析は要らなかった
+VERDICT[RF-b]: 外れ — Hasse-Arf 一式は 1 本も消費しなかった。★Herbrand を避けて位相補題 1 本で等号が出た
+VERDICT[RF-c]: 当たり — 添字は揃った（2 つのずれが同じで打ち消し合う）
+VERDICT[RF-d]: 当たり — 整数 v で閉じ、実数版は別ノードとして残った
+```
+```
+COST[RamFilt]: 安 | 持ち場=分岐群の像 = 単数フィルトレーション  — 抽象核 6 本が 0.2 秒台、等号は位相補題 1 本
+```
+☆★**`RF-b` の外し方は良い外れ方である** —— ★**本体は「Hasse-Arf を消費する」と重く見積もったが、
+実装者はもっと安い道を見つけた。**★**今日 2 度目の同じ形**（Prop 2.1 でも起きた）。
+⇒ ★**申し送り**: ★**「原典が使う重い道具」を持ち場に書くと、それが天井ではなく床になる恐れがある。**
+★**「この主張を出せる道具」を並べて、重い道具は『原典はこう通っている』と注記するに留める。**
+
+## ★★★★★メタ第 29 回を採用 —— ☆★**本体が広めた数字が誤りだった**（2026-09-08）
+
+### ☆★★★訂正（★本体は前波でこの数字を報告し、規約と `lean-prover.md` に書き込んでいた）
+
+★**原因**: 判定が Bash の命令文を**素で**見ており、
+☆★★**本体が `cat > log.md <<'EOF' … lake build ABC3 … EOF` と
+記録の本文に自分のコマンドを書き写すのを build 1 回と数えていた**
+（★しかも引数が読めず「引数なし＝木全部」に落ちていた）。
+
+| | M130（誤・本体が広めた） | ★訂正 |
+|---|---|---|
+| `lake build` を叩いた命令 | 5,929 | **4,739** |
+| 木全部 | 4,089 回 / 30.5 h | **2,362 回 / 25.0 h** |
+| 中央値 | 14.9 秒 | ★**29.9 秒（2 倍）** |
+| 1 命令に 2 回以上 | 983 件（同対象 683） | **313 件（同対象 217）** |
+| 余分な build | 5.1–6.4 時間 | ★**0.56 時間** |
+
+★**前処理を素のままにすると 4,053 / 1,353 が出て M130 をほぼ再現する** ⇒ ★**手順は特定できた。**
+⇒ ★**規約 §4.5 と `.claude/agents/lean-prover.md` の両方を訂正した。**
+
+☆★★**教訓（★これが今日いちばん一般化できる）**: ★**自分の記録が自分の測定に混ざる。**
+★**コマンドを数える道具は「実行されたか」と「書かれたか」を分けなければならない。**
+☆★**メタ第 26 回の「測って言えない／測れていない の取り違え」に続いて、
+本体の測定装置が誤っていた 2 例目である。**
+
+### ★★確実に無駄と言えたのは 3 つだけ = **7.84 / 41.5 時間（18.9%、1 日 36 分）**
+
+| 形 | 回数 | 中央 | 合計 |
+|---|---|---|---|
+| 何も書かずに木全部を建て直し | 503 | 9.3 秒 | **4.5 時間**（☆★**上限**。子ログが 2.2 日分しかなく 503 中 499 は確かめられない） |
+| 同じくモジュール | 343 | 13.8 秒 | **2.8 時間** |
+| 1 命令で同じ対象を 2 度 | 217 | — | **0.56 時間** |
+
+★★**どれも「対象を絞る」ことを含まない** ⇒ ★**見落としは 1 件も増えない。**
+
+### ★★★ゲートの順番は答えが出た —— 「変えても得はない」
+
+★**木全部 build の直後 10 分に check+graph+ledger が揃ったもの: 0 / 2,198。**
+★13.1 日で `graph.mjs` は 103 回（commit の 4.3%）、`ledger` 17 回、`check --selftest` 18 回。
+★**ゲート一式は合計 2.7 時間 / build 41.6 時間。**⇒ ★★**ゲートは費用ではない。削るなら `lake build`。**
+
+### ★採用（4 本、すべて LF・独立）
+
+`tools/build.mjs` **新規 358**（selftest **40/40**、突然変異 **14/14**）/
+`tools/import-audit.mjs` 301 → **475**（**42/42**、突然変異 10/10）/
+`tools/meta-setup.mjs` 652 → **722**（**22/22**、★`master~1250` で実際に発火を確認）/
+`meta-backlog.md` +297（M136–M144）。
+★★**改善係が「採らないでください」と名指しした 4 本（`CLAUDE.md`・`lean-idioms.md`・
+`autonomy-policy.md`・`agent-timing.mjs`）は採らなかった**（★`cmp` で確認: 3 本は同一、
+`autonomy-policy.md` だけ本体のほうが新しい）。
+
+### ★★`--plan` が M132 を**半分否定した**
+
+★**`Section3` は 199/200、`Section4` は 201/202 が詰まり、原因は 1 つ、同じもの**:
+☆★★**`FilteredGroup` が `Found/PGC/FilteredGroup.lean` にしかない。**
+⇒ ★手順は「**先に `FilteredGroup` を出す**」→「Defs に割る」の **2 段**。
+★19 本のうち**そのまま割れば直るのは 5 本だけ**、`Divisor` 系 4 本は 1 本も直らない。
+
+★**本体の判断（M141）**: ★**`FilteredGroup` の構造体定義を `Interface/` か `Skeleton/PGC/Setup.lean` へ出す方向で検討する。**
+★**根拠**: ★`Interface/PGC/LocalFieldData.lean` は既に `ResidueCardinality` / `RamificationFiltration` という
+同種のデータ型を持っており、★**`FilteredGroup` はそこに属するべき「定義」である。**
+★**ただし移動の効果を先に測らせる**（メタ第 30 回の持ち場 3）。★**測ってから動かす。**
+
+### ☆★測れなかったこと（★改善係が自分から書いた）
+
+- ★**実機で `lake build` を 1 度も回していない。** 7.84 時間は 13.1 日のログからの**再構成**。
+- ★**4.5 時間は上限**（子 agent のログが 2.2 日分しかない）。
+- ★`--if-stale` は **mtime しか見ない** ⇒ ★**既定にしていない。**
+- ★`--plan` の名前判定は**字面**。★「詰まらせている本」は**候補であって断定ではない。**
+- ★★**突然変異が改善係自身の誤りを 2 つ捕まえた**（`--sorry` が隣の warning を数えて 14 件／真値 7、
+  `--plan` の数え直しが同語反復）。★**後者を直したことで `FilteredGroup` という具体的な障害物が出た。**
+  ☆★**「発火 0/14」を最初に見たとき、壊れていたのは道具ではなく試験の側だった**（写しの名前が自衛に弾かれていた）。
+
+⇒ ★**メタ第 30 回に配った**: ★**M142（同じ取り違えが `agent-timing.mjs` にもあるか）を最優先**。
+★**あれば事前登録した Holm の判定の分母が動く。**★これは正しさの問題である。
+
+## ★★★★★★Prop 6.14 の「鋭い形」が**追加仮定ゼロ**で閉じた（2026-09-08）
+
+`lean/ABC3/Found/PGC/LubinTateSharpRamificationImage.lean` **728 行 / 17 宣言、`sorry` 0**。
+`lake build` 成功（3,618 ジョブ、15 秒）。★`#print axioms` は 17 本とも `[propext, Classical.choice, Quot.sound]`。
+
+★★**`Gal(K(x)/K)^I = ρ_{f,m}^{-1}(U^I/U^{M+1})`（`1 ≤ I ≤ M+1`）** が出て、
+★さらに **`Γ_K` へ持ち上がった**（`comap_upperRamificationGroup_eq_absGalPrincipalLevel`
+＝ `res^{-1}(Gal(K_{f,M+1}/K)^I) = Art^{-1}(U^I_K)`）。
+★**消費先の `∀ i` の形そのもの**（`forall_comap_upperRamificationGroup_eq_absGalPrincipalLevel`）まで出ている。
+
+### ★★★原典より短い道（今日 11 回目）
+
+> ★**原典は `φ_G` を `q^m − 1` の 1 点でしか評価しない。
+> 同じ計算を `q^I − 1` で回すだけで `0 ≤ I ≤ m` の全段が出た。**
+> ★★**新しい数学は 1 行も要らなかった。**
+
+★既存 `sum_Ico_pow_blocks`（重み `K` を持ち歩く全区間版）を**上端 `I` を動かす部分区間版**に
+取り替えると、帰納法の 1 段で切るブロックが 1 つになり `q^I·q^j = q^M` に潰れる（重み消滅）。
+
+★他に 2 つ: §3 の両立性は Serre XV §2 の Herbrand 経由を通らず **4 行**。
+★★**`AlgEquiv.restrictNormalHom` を使わず `algEquivRestrictSelfHom` を自作したので
+`Normal K.carrier K⟮x⟯` インスタンスを立てずに済んだ** —— ★**#59 回避の新しい形（6 つ目）。**
+
+### ★★添字の**独立検算**が入った（★作法として良い）
+
+`ker_algEquivRestrictSelfHom_eq_absGalPrincipalLevel` は `I = M+1` に既存の `G^{M+1} = ⊥` を代入して
+`ker(Γ_K → Gal(K_{f,M+1}/K)) = Art^{-1}(U^{M+1}_K)` を出す。
+★**左辺は Galois 対応、右辺は消費先の `absGalPrincipalLevel (M+1)`。一致した。**
+⇒ ★**前の波の「レベル `m` と段 `m` はずれない」を、別経路で追試して確認した。**
+
+### ★見立ての当否
+
+- 「`hρ` を落とした記録が本当かを確かめよ」→ ★**本当だった**（鋭い形にも追加仮定は 1 つも要らない）。
+- 「Herbrand `φ_G` を通す」→ ★**そのとおり**。★ただし要ったのは `herbrandPhiGroup_natCast` だけで、
+  ★**合成則も `HasseArf*` も使っていない**（本体は「Hasse-Arf 一式を消費する」と重く見積もっていた）。
+
+---
+
+## ★★`GUESS:` —— ★**配る前に書いた**（N1 = `StageFiltration` の `compat`）
+
+★**残るのはこの 1 本**で、`RamificationFiltrationBuild.lean` 自身が
+「★★**残る入力は `compat` ただ 1 つ**」と書いている。★**在庫 4 本すべて実在を確かめた**
+（`comap_compat_of_coe_mul_coe_eq` / `upperRamification_coe_mul_coe_eq` / `absGalStage` /
+`comap_upperRamificationGroup_eq_absGalPrincipalLevel`）。
+
+```
+GUESS[N1-a]: (1) 固定環と整数環の同定は FixedRingAdjoinIso.lean::fixedRingAdjoinEquiv がそのまま使える
+GUESS[N1-b]: (2) 不分岐底変換で上付き番号付けが変わらないことが本当の仕事で、herbrandPhiGroup の輸送が要る
+GUESS[N1-c]: 抽象核は「環同型と群同型に沿った ramIndex の輸送」で、分岐の語彙が消える
+GUESS[N1-d]: compat が閉じれば RamificationImageUnits の等号の仮定 2 本が同時に落ちる
+```
+☆★**GUESS[N1-b] は「重い道具を書くと天井でなく床になる」型の失敗を今日 2 度やった直後**なので、
+★**持ち場には「原典はこう通っている」と注記に留め、拘束しないと明記する。**
+
+## ★★★★★★索引が **`public` 修飾子を読めていなかった** —— ★在庫調査の根幹の穴（2026-09-08）
+
+★**発端**: 実装者が「`IsGalois.normalBasis` は実在するのに `.cache/mathlib-index.txt` で引けない」と報告
+（★前の波では同じ人が `grep -i` の `OrthonormalBasis` 埋没を疑い、`.absent` をでっち上げる寸前だった。
+★**今回は索引そのものが落としていた**）。
+
+★★**本体が原因を特定した**: mathlib が新しいモジュールシステムの `public` 修飾子を使い始めている。
+```
+public noncomputable def normalBasis : Module.Basis Gal(L/K) K L :=
+public theorem normalBasis_apply (e : Gal(L/K)) : …
+```
+★`tools/decl-index.mjs:58` の
+`const MODS = '(?:private|protected|noncomputable|scoped|local)*'` に ★**`public` が無い。**
+⇒ ★★**`public` が付いた宣言が丸ごと索引から落ちていた。**
+
+★**直した**（`public` と `nonrec` を追加）。★**効果を実測**:
+
+| | 前 | 後 |
+|---|---|---|
+| `mathlib-index.txt` | 248,636 | ★**249,481（+845 宣言）** |
+| `FieldTheory/Galois/NormalBasis.lean` の宣言 | 2 | ★**5** |
+| `IsGalois.normalBasis` | ★**0 件（引けない）** | ★**引ける** |
+
+☆★**+845 は相対では 0.34% だが、これは「mathlib の最も新しい宣言」である** ——
+★**我々が探しているのはたいていそこにある。**
+
+☆★**本体の落ち度が 2 つ**:
+1. ★**自分の規約を破った** —— 「解析スクリプトはシェルに埋めず Write で書く」と CLAUDE.md にあるのに
+   heredoc に埋め、★**バックスラッシュが壊れて 2 回失敗した**（#117(iv) の再発）。
+   ⇒ ★**Edit ツールで直した。**★**次から最初から Edit / Write を使う。**
+2. ☆★**メタ第 24 回の「CRLF は `check.mjs` と `Found.lean` の 2 本だけ」は不完全だった** ——
+   ★**`tools/decl-index.mjs` も CRLF である**（350 行、lone LF 0）。
+   ⇒ ★**「CRLF のファイルは触る前に node で数える」に改める。**★数えないで直すと必ず混ざる。
+
+---
+
+## ★★★★無限次正規底 —— ★**同値な 1 命題に完全還元**（★原典より短い道 12 回目）
+
+`lean/ABC3/Found/PGC/NormalBasisFunctional.lean` **744 行 / 42 宣言、`sorry` 0、`axiom` 0**。
+`lake build` 成功（3,230 ジョブ、12 秒）。
+
+★★★**`smoothModelCarrier_iff_hasCoherentFunctional : SmoothModelCarrier K ↔ HasCoherentFunctional K`**
+—— ★**逆向きも証明したので、切り出した仮説に損失が無い。**
+★`prop_2_1_of_hasCoherentFunctional` まで配線済み。
+
+### ★★★短い道の中身
+
+> 前段は「各 `L` で正規底生成元 `θ_L` を選び `θ_L = Tr θ_{L′}` の両立系を作る + colimit」だった。
+> ★★**汎関数 `λ` に移すと両立系の選択も colimit 機械も丸ごと消える**（`λ` を制限するだけ）。
+> ★副産物で**降下が Maschke も跡写像も使わずに出た**（`A^{ker π} = range ι` と π 全射だけ）。
+
+★**遷移の可換性 `orbitFun_comp` は証明 3 行**、★**`#print axioms` = `[propext, Quot.sound]`**（選択公理を使わない）。
+★`orbitFun` / `orbitFun_apply` / `orbitFun_smul` は ★**`[propext]` のみ。**
+
+### ★指示した 3 点の検算は全部やった
+
+1. ★**遷移の向き**: 体側は包含、模型側は引き戻し。★**汎関数で書くと無条件に可換。**
+2. ★**逆元の位置**: `Φ_λ(a)(g) = λ(g⁻¹•a)` で `(h·f)(g) = f(h⁻¹g)` に一致することを保証。
+3. ★**Maschke**: 「分裂する」より強く、要るのは**中心冪等元による角分解**。
+   ★`exists_unit_of_central_idempotent`（持ち上げは `u ↦ a·e + (1−e)`）。
+
+### ★見立てが外れた点
+
+★**#59（中間体 2 層）は一度も当たらなかった** —— 汎関数形式は `Γ_K` と 1 つの `L` しか同時に触らない。
+☆★**前段の予告は、前段の設計では正しかったがこの設計では無効だった。**
+
+### ★残るのは 1 点
+
+`HasCoherentFunctional K` := `∃ λ : K̄ →+ K` で**すべての**有限次 Galois `L/K` について `Φ_{λ|_L}` が全単射。
+1. **Maschke 上げ**（★環論核は在る。群環 `K[G']` との同一視の配線が未）。
+2. ★★**「局所体の与えられた次数の拡大は有限個 ⇒ 有限次部分拡大は可算」** ——
+   ★実装者が測った: Krasner の補題**そのものは mathlib に在る**（`IsKrasner`、
+   `Mathlib/Analysis/Normed/Field/Krasner.lean`）が、
+   ★**`finite_extensions` / `countable … IntermediateField` は 0 件、本木にも無い。**
+   ★**有向集合上の全射逆系は極限が空になりうるので可算共終列が必須。**
+
+---
+
+## ★★`VERDICT:` / `GUESS:`
+
+```
+VERDICT[CoC-a]: (既出)
+```
+```
+GUESS[HCF-a]: 「有限次拡大の可算性」は Krasner(mathlib に在る)＋「各次数の拡大は有限個」で出る
+GUESS[HCF-b]: Maschke 上げは環論核が既に在るので、群環との同一視の配線だけで済む
+GUESS[HCF-c]: 2 つのうち可算性のほうが重い（Krasner から「各次数有限個」を出す一段が要る）
+GUESS[HCF-d]: 汎関数形式のおかげで #59 にも colimit にも当たらない
+```
+☆★**GUESS[HCF-c] は「重い道具を書くと床になる」型を今日 3 度やった直後**なので、
+★**持ち場には「本体の見立てにすぎない」と明記する。**
+
+## ★★★§3 の自由パラメータ `toGal` は**実物に固定できる**（2026-09-08、★本体が索引で検算）
+
+★**`cor_3_3` は `toGal : ∀ K, {x : K.carrier // ‖x‖ = 1} → K.absGal` を自由に取っている。**
+☆★D13 が Prop 1.2 で退化と判定した「∀ RD」と同じ形で、
+★スケルトンの docstring 自身が「良い `toGal` を選ぶには相互律相当の構成が要る」と板挟みを認めている。
+
+★★**その構成は在る**（★本体が実在を確かめた）:
+
+| 在るもの | 場所 |
+|---|---|
+| ★**`artinMap : (K.carrier)ˣ →* (M ≃ₐ[K.carrier] M)`**（`M = K^LT ⊔ K^ur`） | `Found/PGC/ArtinMap.lean:450` |
+| ★`artinMap_unitsToCarrier`（`𝒪_K^×` の像を名指し） | 同 `:484` |
+| `artinMap_uniformizer` / `artinMap_injective` / `artinMap_unramified_component` | 同 `:495` / `:514` / `:473` |
+| `artinMapAbelian` / `artinMapAbelian_injective` | 同 `:619` / `:624` |
+
+★★**残る一段**: ★`artinMap` の行き先は `Gal(M/K)` であって `K.absGal = Gal(K̄/K)` ではない。
+★**制限 `Gal(K̄/K) ↠ Gal(M/K)` の全射性からの持ち上げ**が要る（★選択を使う）。
+★**あるいは `IsUniformizing` が合成 `ρ ∘ toGal` しか見ないなら `Gal(M/K)` の上で完結できる。**
+★**どちらかを先に測ること。**
+
+⇒ ★**申し送り**: ★**`prop_2_2` が閉じたら、§3 は「自由パラメータを実物に固定する」波から始める**
+（★D13 が Prop 1.2 でやったのと同じ手当て）。★**これは人の判断ではなく、測ってから決める作業である。**
+
+---
+
+## ★待ち時間の検算（★`decl-index.mjs` の修正がゲートを壊していないこと）
+
+`check.mjs --selftest --structured --brief` → **67/67 PASS、S1-S6 PASS**（変化なし）。
+`decl-index.txt` **26,078 宣言** / `src-index.txt` **4,741 locator**（回帰なし。木の在庫も引ける）。
+
+☆★**改善係の agent が `until grep -qE "^(ok|NG)" …` という待ち合わせループを書いている**のを観測した。
+★**これは費用だけかかって何も返さない形**である（本体の運用指針でも「polling するな」と書いている）。
+⇒ ★**次のメタに「agent が待ち合わせループを書いていないか」を測らせる。**
+
+## ★★★★★★消費先の仮定 2 本が**両方落ちた** —— ★分岐と単数の対応が本物の `F` で成立（2026-09-08）
+
+`lean/ABC3/Found/PGC/RamificationImageStage.lean` **492 行 / 22 宣言、`sorry` 0**。
+`node tools/build.mjs` → **jobs 3,631 / error 0 / sorry 0 / 20.7 秒**（★新しい道具が実戦投入された）。
+
+★★★**`map_ramificationFiltration_reciprocityUnits_eq_principalUnits`** ——
+★`F` は Y19e の**本物**（`ramificationFiltration p`）で、★**退化 witness ではない。**
+★消費先 `RamificationImageUnits.lean` の `hbase` / `hstage` が**両方**落ちた。
+
+### ☆★★本体の持ち場が**古い前提**に立っていた
+
+★**`compat` は着手前に既に埋まっていた**（commit `916b7082`、第 1079、
+`Found/PGC/UnramifiedBaseChangeInvariance.lean` の `absGalStage_compat`、960 行）。
+★本体が挙げた「残り 2 つ」（固定環と中間体整数環の同定、不分岐底変換での輸送）も
+そこに `stageBaseHom` / `ramIndex_ringHom_eq` として入っていた。
+☆★**本体は `RamificationFiltrationBuild.lean` の 48–72 行を読んで持ち場を書いたが、
+その記述が古かった。**
+⇒ ★**実装者はゴールのほう（消費先の仮定 2 本）を埋めた。★判断が正しい。**
+⇒ ★**申し送り**: ★**持ち場を書く前に「その記述はいつのものか」を疑う。**
+★**`git log -1 --format=%ci -- <file>` で最終更新を見る**のが 1 行で済む。
+
+### ★★★原典より短い道（今日 13 回目）
+
+1. ★★★**選択独立性は `compat` の系である。** 教科書は「生成元・素元に依らない」を先に示すが、
+   ★**逆向きに `compat` へ `M = N` を代入して 2 行で出た。**
+   ⇒ Y19d 逸脱 2 と Y19e の「証明していないこと」が消えた。
+2. ★**素元の独立性に Herbrand も微分も要らない**（`ramIndex_eq_of_adjoin_eq_top`、**3 行**）。
+   ★**しかも底環を取り替えられる**ので `𝒪_L^I`（Yoshida §6.1）と `𝒪_K`（Lubin-Tate）が繋がった。
+3. ★**塔の正規性を群の正規性から降ろした**（`Art^{-1}(U^{m+1})` が正規 ⇒ `K_{f,m+1}/K` が Galois）。
+   ★**Lubin-Tate の「アーベル性」を再証明していない。**
+
+★抽象核 2 本は **`[propext, Quot.sound]`**（★選択公理なし）。
+
+### ★★正直な留保（★実装者が自分から書いた）
+
+- ★**`Γ_K^n = Art^{-1}(U^n)` は成り立たない**（右辺は `ker(Art)` を丸ごと含む）。
+  ★本ファイルが言うのは**包含と像の等号**だけ。
+- ★実数 `v` 版は**配管でなく数学**が足りない（Hasse-Arf の跳びの整数性）。
+- ★`Γ^ab_K` の言葉への翻訳は配管（`ramificationFiltration_Gv_le_absInertia` は在るが繋いでいない）。
+
+## ★★`VERDICT:`
+
+```
+VERDICT[N1-a]: 無効 — compat は着手前に既に埋まっていた（本体の持ち場が古い前提に立っていた）
+VERDICT[N1-b]: 無効 — 同上。不分岐底変換の輸送も既に在った
+VERDICT[N1-c]: 当たり — 抽象核は「底環を取り替えられる ramIndex の輸送」で、3 行・分岐の語彙なし
+VERDICT[N1-d]: 当たり — 仮定 2 本が同時に落ちた
+```
+```
+COST[Compat]: 安 | 持ち場=StageFiltration の compat  — 実際に要ったのは「compat を M=N に当てる 2 行」と段の値の計算
+```
+☆★**`N1-a` / `N1-b` を「外れ」でなく「無効」と書く**: ★**問いが古かったので当否を問えない。**
+★**分母には入れない**（`unverified.mjs` が拾うのは 当たり/外れ/半分 のみ）。
+
+---
+
+## ★★`GUESS:` —— ★**配る前に書いた**（Prop 2.2 の**独立な半分**）
+
+★**Prop 2.1 の完了を待たない**節を配る。原典 pGC p.4–5（★`.txt` を直接読んだ）:
+
+> Moreover, it follows from the theory of the p-adic logarithm (see, e.g., [5], Chapter IV, §1) that the submodule
+> p−r · U v_K ⊆UK ⊗Zp Qp
+> corresponds to the submodule OK ⊆K under the isomorphism induced by the p-adic logarithm.
+
+★在庫: `padicLogUnitsEquiv`（`PrincipalUnitsLog.lean:168`）/ `smallBallSubmodule`・`finrank_smallBall`
+（`PrincipalUnitsRank.lean:66`/`:166`）/ `principalUnits`（`AdjoinIntegers.lean:1608`）/
+★**今日入った `map_ramificationFiltration_reciprocityUnits_eq_principalUnits`。**
+
+```
+GUESS[PLog-a]: padicLogUnitsEquiv + smallBallSubmodule で「p^{-r}·U^v ↔ 𝒪_K」はほぼ在庫で出る
+GUESS[PLog-b]: r の値（原典は r ≥ 2 の整数）は q や e_K に依らず、p 進対数の収束半径だけで決まる
+GUESS[PLog-c]: 抽象核は「離散付値環の単数フィルトレーションと加法フィルトレーションの対応」で分岐の語彙が消える
+GUESS[PLog-d]: 実数 v は要らない（整数 n = ⌈v⌉ で閉じる）
+```
+☆★**本体は今日 3 度「原典が使う重い道具」を書いて外した**ので、
+★**この持ち場でも「原典はこう通っている、拘束ではない」と明記する。**
+
+## ★★★★★メタ第 30 回を採用 —— ★**「事前登録した判定を書き換えるな」と止められた**（2026-09-08）
+
+### ★★M142 は片付いた（★族は無事）
+
+★**族の 7 欄は Bash の命令文を 1 文字も読んでいない。**
+★実証: 子 agent 201 本の命令文 **9,793 件すべて**を罠語入り heredoc に置換
+（`lake build ABC3` / `tools/check.mjs` / `error` / `✗` / `failed`）→
+★★**共変量が動いた agent 0 / 204。**
+⇒ ★**M95・M101・M110・M112 はこの理由では崩れない。**
+
+### ☆★★★だが**別の**分母の誤りが見つかり、`cores` が落ちる
+
+| | 実測 |
+|---|---|
+| `lines`/`cores` の対象が決まった agent | 138 |
+| うち ★**自分では 1 度も Write/Edit していない本**（読んだだけ） | ★**47（34%）** |
+
+| 欄 | いまのまま | 「自分が書いた本」に限る |
+|---|---|---|
+| `lines` | ρ 0.291 Holm 0.0038 ★言える | ρ **0.458** Holm **0.0003** ★言える |
+| ★**`cores`（抽象核の本数）** | ρ 0.264 Holm 0.0049 ★言える | ρ **0.081** Holm **0.4071** ★**言えない** |
+| `checkFails` | 0.0309 ★言える | 0.0463 ★言える（★動かない） |
+
+★★★**改善係が本体を止めた**:
+> ☆★**v1/v2 はデータを見た後に決めた分母＝2 度目の覗きです**（第 24 回 M102 と同じ）。
+> ★**`cores` を「言えない」に書き換えないでください。**
+
+⇒ ★★**本体は書き換えていない。**★手順は M149 に事前登録形で置かれ、★**第 31 回に配った。**
+☆★**これは「改善係が本体の勇み足を止めた」2 例目**である（1 例目は第 24 回の「抽象核の本数」）。
+
+### ★★幽霊は `lake build` だけではなかった
+
+★`BASH_KINDS` が順序を持つため、heredoc に `lake build` と書いた `git commit` が
+★**`git` ではなく `lake build` に数えられていた**。
+
+| 族 | 素 | 剥ぐ | 差 |
+|---|---|---|---|
+| `lake build` | 5,940 | 4,758 | −1,182 |
+| ★**`git`** | 2,568 | **3,322** | ★**+754（真の 22.7%）** |
+| ★**`check.mjs`** | 1,278 | **1,565** | ★**+287（18.3%）** |
+
+★幽霊合計 1,239 件 / 2.79 時間。⇒ ★**第 31 回に「本体が広めた数字の洗い直し」を配った。**
+
+### ★★★実機の数字が出た（★第 29 回は「実機で 1 度も回していない」と正直に書いていた）
+
+| | 実測 | jobs |
+|---|---|---|
+| `lake build ABC3` **no-op** | ★**4.32 / 4.25 / 4.62 秒** | 7,059 |
+| `lake build ABC3.Found.PGC.QpRootsOfUnity` no-op | 3.33 秒 | 3,012 |
+| `build.mjs --if-stale` 建てる / 建てない | 4.6 秒 / ★**0.19 秒** | — |
+
+★★**木が最新なら対象を絞って得られるのは 1.0 秒だけ。**
+★**M138 の「37.7 対 14.8 秒」は lake の固定費ではなく、下流を本当に建てている時間**である。
+★遅れの実測: master の commit 間隔は中央 **188 秒** ⇒ 「commit 前に 1 回」なら遅れは中央 **3.1 分**。
+
+☆★**M138 の 18% は再現できていない**（「触った本」の定義で **8%〜56%** に動く。
+最も素直な定義で 15%）。★**改善係が自分でそう書いた。**
+
+### ★★`--plan` の 19 本は**本物**だった
+
+★**2,236 対を 1 本ずつ `wouldCycle` で検算 → 2,236 OK / 0 NG**、偽陰性も 0。
+★`PGC/Section3` / `Section4` は**曖昧さ 0** ⇒ ★**`FilteredGroup` 単一障害物という主張は検算に耐える。**
+
+★**移動の効果は「402 本」ではなく 2 本**（1,289 → 1,291）。
+★★**本当の得は数ではない**: ★**移動前は `Section3Defs` が `ABC3.Found.PGC.FilteredGroup` を持ち越す＝
+Skeleton の Defs が Found を import する必要があったが、移動後は不要になり「割る作業が 1 段で閉じる」。**
+⇒ ★**本体の判断: この理由で移す。**★**ただし Lean が通ることは未確認**（写した木で build していない）
+なので、★**実装枠が空いたら 1 波使って移す。**
+
+### ☆★改善係が自分の測定の嘘を 2 つ捕まえた
+
+1. ★**`Found/PGC/FilteredGroup.lean` は CRLF** で、`split('\n')` 後の `===` 比較が黙って失敗し
+   ★**「200/200」が偽物になった。**⇒ 件数を数えて止めるようにして測り直した。
+2. ★★**Bash の heredoc に正規表現を書くとフックが `\` を `\` に潰す** ——
+   `/Found[\/]/` が `/Found[\/]/` になって **138 件が黙って 0 件**になった。
+   ⇒ ★以後 `Write` で書いている。☆★**本体も同じ罠で今日 2 回失敗している。**
+
+★★**CRLF の一覧が増え続けている**: `tools/check.mjs` / `tools/decl-index.mjs` /
+`lean/ABC3/Found.lean` / ★**`lean/ABC3/Found/PGC/FilteredGroup.lean`**。
+⇒ ★**第 31 回に「CRLF のファイル一覧を出す口」を配った。**★数え上げないと必ずまた混ざる。
+
+### ★採用（2 本、LF）
+
+`tools/agent-timing.mjs` 1,662 → **1,960**（selftest **144 → 170/170**、突然変異 **18/18**、
+★**`--explain` の 7 欄は既定のまま同値**＝判定は 1 ビットも動いていない）/ `meta-backlog.md` +229（M145–M151）。
+★他ゲートは全部不変。
+
+## ★★ゲート前倒し —— ★**`build.mjs` を本体が実戦投入した**（2026-09-08）
+
+★**規約に足した形（1 回だけ回してファイルに落とす）を、本体が自分で守って回した。**
+
+```
+node tools/build.mjs ABC3
+  ok  Build completed  jobs 7062  error 0  warning 761  sorry 15   —— 37.1 秒
+  → .cache/build-ABC3.log  以後は --errors / --sorry / --jobs / --grep で切り出す（★lake を呼ばない）
+```
+
+★**`--sorry` は lake を呼ばずに 0.2 秒で切り出せた。**★これが「build を 2 回叩かない」の実体である。
+
+### ★pGC の `sorry` はちょうど **5 件**（★回帰なし）
+
+| 場所 | 件数 |
+|---|---|
+| ★`Skeleton/PGC/Section2.lean:42`（`prop_2_1`）・`:86`（`prop_2_2`） | 2 |
+| `Skeleton/PGC/Section3.lean:111`（`cor_3_1`）・`:231`（`cor_3_3`） | 2 |
+| ★`Skeleton/PGC/Section4.lean:122`（**pGC の主定理** `theorem_4_2`） | 1 |
+| ★★**`Found/PGC/` 全体** | ★**0** |
+
+★pGC の外は 10 件（`Meta/Calibration` 1 / ★第三者の `PrimeNumberTheoremAnd/Wiener` 2 /
+`GenEll/SigmaConvolution` 1 / `Divisor` 系 6）。
+
+⇒ ★★**今日ここまでで新規に入った Lean 6 本（`SmoothModelTransport` 469 /
+`RamificationImageUnits` 618 / `LubinTateSharpRamificationImage` 728 /
+`NormalBasisFunctional` 744 / `RamificationImageStage` 492 / `ContinuousCochain` 918）は
+すべて `error 0` で通っている。**
+
+## ★★★★★p 進対数の段が埋まった —— ★**原典の段落全体が繋がった**（2026-09-08）
+
+`lean/ABC3/Found/PGC/PadicLogIntegers.lean` **593 行 / 25 宣言、`sorry` 0**。
+`build.mjs` → **jobs 3,632 / error 0 / sorry 0 / 81 秒**。
+
+| 主定理 | 中身 |
+|---|---|
+| `smul_padicLog_image_principalUnits_eq_integers` | ★**`p^{-r}·log(U^v_K) = 𝒪_K`**（`v = r·e_K`, `r ≥ 2`） |
+| `padicLogPrincipalUnitsEquiv` | ★**群同型 `U^v_K ≃* Multiplicative 𝒪_K`** |
+| ★★`smul_padicLog_image_ramificationFiltration_eq_integers` | ★**原典の段落全体**。今日入った `map_ramificationFiltration_reciprocityUnits_eq_principalUnits` と繋いで **`p^{-r}·log(Art(Γ^v_K)) = 𝒪_K`** |
+
+### ★★★原典より短い道（今日 14 回目、★3 つ同時）
+
+1. ★★**イデアルを一度も経由しない。** 教科書は `𝔪^v = p^r 𝒪_K` をイデアルで出してから対数を取るが、
+   `‖p‖ = ‖π‖^{e_K}` さえ出れば `{‖x‖ ≤ ‖π‖^{r e_K}} = {‖x‖ ≤ ‖p‖^r}` は ★**`pow_mul` 1 回**。
+   ★イデアル版は**系として**置いてある（本体は使っていない）。
+2. ★**`e_K = ramificationIdx` の同定に Dedekind 環の因子分解が要らない** ——
+   `Ideal.ramificationIdx_spec` の第 2 条件が ★**`nlinarith` 1 行**に落ちる。
+3. ★**対数の全単射性を小さい球へ落とすのに解析が一切要らない**（★級数の評価を書き直していない）。
+
+### ★`r ≥ 2` がどこで効くか（★名指しさせた）
+
+★**`‖p‖^r ≤ 1/4` の 2 箇所**: ①`padicLog_bijOn` が**半径 1/4 の球でしか全単射でない**ので
+`𝔪^{r·e_K} = p^r·𝒪_K` がその球に入る必要がある、②`‖log(u−1)‖ = ‖u−1‖ ≤ ‖p‖^r`。
+★加えて `r ≠ 0` が `r·e_K ≠ 0` に効く（`r = 0` なら `U^0 = 𝒪_K^×` で対数は全単射にならない）。
+
+☆★**実装者の正直な留保**: ★**本証明が実際に使う条件は `‖p‖^r ≤ 1/4` で、
+古典的な最良条件 `v > e_K/(p−1)` より弱い。**★`r = 1` は本証明では `p ≥ 5` でしか通らない
+（古典的には `p ≥ 3` で真）。★**原典の `r ≥ 2` は `p` に依らず一様に通る十分条件**なのでそれを採った。
+
+### ☆★選択公理についての正直な報告
+
+★**25 宣言すべてが `Classical.choice` に依存**。☆★**ただし証明が意図的に選択を使った箇所は 1 つも無い** ——
+★**`Norm` だけの抽象核ですら `Classical.choice` を持つのは `ℝ` の順序が mathlib で古典的だから**
+（★実数を比較した時点で入る）。★**「選択を使わない宣言は 0 本」と書いた。**
+★正規性は §1〜§5 の 23 宣言が**一切使っていない**。★可判定性は全 25 宣言で未使用。
+
+### ☆★切り出せなかったもの（★隠さず書かれた）
+
+★**`e_K` の同定を一般の DVR 拡大に切り出せなかった** ——
+`Valued` ＋ `IsUltrametricDist` ＋ `NormedField` の三重の階層が繋がっていないため。
+★**別ノードにできるが、本持ち場の主定理には不要だった。**
+
+## ★★`VERDICT:`
+
+```
+VERDICT[PLog-a]: 半分 — 在庫でほぼ出たが padicLogUnitsEquiv / smallBallSubmodule は使わず、自前で組み直した
+VERDICT[PLog-b]: 当たり — r は q にも e_K にも依らず、対数の収束半径(‖p‖^r ≤ 1/4)だけで決まる
+VERDICT[PLog-c]: 外れ — 抽象核は「付値環の対応」ではなく ★Norm だけの球の補題 2 本だった。付値環の話は具体層に残った
+VERDICT[PLog-d]: 当たり — 実数 v は要らず、v = r·e_K（r : ℕ）で閉じた
+```
+```
+COST[PLog]: 安 | 持ち場=p 進対数が単数を整数環に写す  — lean_check 12 往復・合計 5 秒未満、build 1 回
+```
+☆★**`PLog-c` の外し方**: ★**本体は「付値環の言葉が核だ」と見たが、核はもっと薄く `Norm` だけだった。**
+★**今日の 4 度目の「本体が重く見積もり、実装者が薄い核を見つけた」型**である。
+⇒ ★**申し送り**: ★**抽象核の見立ては「使う語彙」でなく「消せる語彙」で書く。**
+★「付値環の対応」ではなく「**付値も分岐も消えるはず**」とだけ書けば、床にならない。
+
+---
+
+## ★★`GUESS:` —— ★**配る前に書いた**（`FilteredGroup` を Interface へ出す）
+
+★**第 30 回が 2,236 対を検算して「`FilteredGroup` 単一障害物」を確認済み。**
+★**得は数（1,289 → 1,291、2 本）ではなく**、★★**「Skeleton の `*Defs` が Found を import しなくて済み、
+割る作業が 1 段で閉じる」**こと。★**本体はこの理由で移すと決めた。**
+☆★**ただし第 30 回は「Lean が通ることは確かめていない」と書いている。**
+
+```
+GUESS[FG-a]: FilteredGroup の構造体定義は Interface/PGC/ か Skeleton/PGC/Setup.lean にそのまま移せる
+GUESS[FG-b]: 名前空間が変わるので完全修飾名が動き、参照側の書き換えが要る（Section1Defs のときは不要だった）
+GUESS[FG-c]: 移動後 import-audit --plan の Section3 は 200/200、Section4 は 202/202 になる
+GUESS[FG-d]: Section3Defs / Section4Defs を同じ波で作れる（1 段で閉じる）
+```
+
+## ★★★★★★メタ第 31 回 —— ★**事前登録を commit で刻み、「判定を出さない」で止めた**（2026-09-08）
+
+### ★★★手続きが正しい
+
+★**M149 の手順 (A)〜(F) を `agent-timing.mjs` の 0b 節にコメントとして書き、
+★それを commit してから（`7584dac6`、01:47:19 JST）初めて `--m149` を叩いた。**
+★**順序が git に残っている。**★締切 `T` も機械で決めた（2 つのファイルの mtime の遅いほう）。
+
+| | 実測 |
+|---|---|
+| 通知 全部 | 207 件 |
+| ★**T より後** | ★**0 件** |
+| 判定 | ★★**出さない（階段を計算していない）** |
+
+★★**「言えない」ですらなく「出さない」が正しい状態である**と書いた。★**第 30 回の測定から 12 分しか経っておらず、波が 1 度も回っていない。**
+
+★**あと何件で実行できるか**: **134 件**（ρ=0.30・検出力 0.80・α=0.05/7）。
+`written` 分母で `cores` が取れる割合が **52.7%** なので ★**agent 約 255 本 ≒ 6.2 日**。
+
+★★**本体の判断: `M149_NEED = 134`（ρ=0.30）をそのまま使う。緩めない。**
+★理由: ★**結果を見る前に緩めるのは事前登録の意味を薄める**。★**約 6 日で貯まるなら待てる。**
+
+☆★**最大の危険は保存期間**（★改善係が自分から書いた）: ★**貯まる前に古い側が刈られると
+この検定は永久に実行できない。**⇒ ★第 32 回に「T より後の件数が単調に増えているか見る口」を配った。
+
+### ☆★★★本体が広めた数字 —— ★**2 件を直した**
+
+| 場所 | 誤 | ★訂正 |
+|---|---|---|
+| `autonomy-policy.md` | ゲート一式 **2.7 時間** | ★**4.52 時間（1.7 倍）**。★**結論は不変**（4.5 対 41.6） |
+| `.claude/agents/lean-prover.md` | `lake build` 中央値 **29.9 秒** | ☆★**主語が落ちていた。**木全部 **34.8 秒** / ★**対象指定 14.9 秒**。実装者が使うのは後者 |
+
+☆★**2 番目は実害が具体的**: ★実装者は「全体ビルドはあなたの仕事ではない」を読んだ 110 行あとで
+「中央値 29.9 秒」を読み、★**自分の対象指定 build を 30 秒だと思う。**⇒ ★書き直した。
+
+★他 2 件（`decisions-pending.md` の日付付き記録 2 行）は ★**歴史として残し、ここに訂正を置く**:
+- ★「中央値 14.9 → 29.9（**2 倍**）」は ★**2 つの母集団を比べていた。**
+  同じ母集団なら 14.86 → 17.65（**×1.19**）、木全部だけなら 34.79 → 34.85（★**ほぼ動かない**）。
+  ★**「2 倍」は幽霊の効果ではない。**
+- ★M128 の行（5,929 / 44.1 h / 51%）の剥いだ値は **4,758 / 41.55 h / 48.1%**。
+
+★**幽霊に汚れていたのは「時間」だけで、「回数」は汚れていない**（M139 の公表値はほぼ一致）。
+
+### ★★★改行の根本原因が判明した —— ☆★**本体は 3 回これで誤った**
+
+★★**`core.autocrlf=true` かつ `.gitattributes` 無し**なので、
+★**同じ commit でも作業ツリーによって改行が真逆**になる
+（隔離 worktree: CRLF 2,355 / LF 273、★**本体: LF 2,667 / CRLF 318**）。
+
+☆★**したがって**:
+- ★メタ第 24 回の「CRLF は `check.mjs` と `Found.lean` の 2 本だけ」は**木を書いていないので再現しない**。
+- ★第 30 回が「`FilteredGroup.lean` は CRLF」と書いたのは**その worktree では正しい**が、
+  ★**本体では LF** である。
+- ☆★★**本体はその一覧を走行中の agent に渡してしまった。**⇒ ★**即座に訂正を送った。**
+  ★**「触る前にその木で自分で数えよ」**と書き直した。
+
+⇒ ★**申し送り**: ★★**「この本は CRLF」と書くときは必ず「どの木で数えたか」を添える。**
+
+### ★★新しい道具が初回で本体の欠陥を捕まえた
+
+`node tools/eol-audit.mjs --mixed` →
+☆★**`lean/ABC3/Skeleton/PGC/Section2Defs.lean`（★本体が今日作ったファイル）が混在**
+（CRLF 48 / lone LF 19）。★**LF のヘッダに CRLF の本文を継いだため。**
+⇒ ★**CRLF に揃えた**（CRLF 76 / lone LF 0）。★`build.mjs` で `error 0` を確認。
+★他に混在は 3 本（`memory/pgc-unramified-extension-progress.md` / `tools/frontier.mjs` / `tools/hedge-index.mjs`）。
+
+### ★採用（4 本、すべて追加のみ・削除 0 行）
+
+`tools/agent-timing.mjs` 1,960 → **2,175**（selftest **193/193**、★**既定の出力は byte 同一**を diff で実証）/
+`tools/eol-audit.mjs` **新規 176**（**16/16**）/ `tools/meta-setup.mjs` +8（M151）/ `meta-backlog.md` +283。
+★わざと壊して **28/28 発火**（☆★**最初は 15/18 で、素通り 3 件のうち 2 件は自分の試験の穴**と正直に書いた）。
+
+### ☆★待ち合わせループは「無駄」と断定できない
+
+`until … done` **42 件 / 3.71 時間**、うち本体が観測した形は **3 件 / 0.25 時間**。
+★**確実に失われたのは 1 件 / 0.17 時間 = Bash 時間の 0.2% だけ**。
+★**環境が前景 `sleep` を止めて until ループを指示している**ので規約違反でもない。
+⇒ ★**本体の見立ては過大だった。**★記録して終わりにする。
+
+## ★★★★★メタ第 32 回 —— ★**本体の見立てが 2 つとも覆された**（2026-09-08）
+
+### ☆★①「`.gitattributes` を入れると巨大な差分になる」は**過大だった**
+
+★**index は既に 100% LF（2,637 本、`-text` 2 本）**なので、
+`git add --renormalize .` の差分は **0**。★★**巨大 commit になる本は 0 本。**
+★使い捨て repo での実測: `.gitattributes` を足す → `git status` **+1 行だけ**、`git diff --stat` **0**。
+★**足しただけでは作業ツリーは書き換わらない**（次の checkout から LF）。
+
+⇒ ★★**本体は `.gitattributes`（`* text=auto eol=lf`）を入れた。**
+★本体でも確認: `git status` は +1 行のみ、`git diff --stat` に出るのは**今日の実内容だけ**（改行の水増しなし）。
+
+### ☆★★②「混在だけが危ない、一貫していれば安全」は**逆だった**
+
+★`--mixed` が捕まえるのは**いま 3 本**だけで、
+★★**一貫して CRLF の 2,363 本（worktree 側）を素通りさせる。**
+☆★**そこが道具を壊してきた**（第 30 回の「200/200 が偽物」事故）。
+⇒ ★**`--mixed` ゲートは `.gitattributes` の代替ではなく補完である。**
+
+### ★`lake build` は改行に鈍感（★実測）
+
+★LF / CRLF / 混在の 3 つの姿を Lean 4 v4.31.0 に食わせて ★**全部 exit 0・同じ出力**。
+★自然実験: `lean/ABC3` が **100% CRLF（2,253 本）**の木と LF 主体の本体で、
+★**`graph.mjs` の md5 が両方 `9910cd3f57df`**。
+⇒ ★★**これは「ビルドのため」ではなく「ファイルを読む道具のため」の設定である。**
+
+### ☆★★③「2.7 と 4.52 の差は定義の差」も**ほぼ否定された**
+
+★solo 規則を 4 通りで数え直した: **0.00 / 3.56 / 3.81 / 4.52 時間**。
+★★**2.70 はどれでもない。**★最も保守的な定義でも 3.56（1.32 倍）。
+☆★**M139 の 2.70 がどこから出たかは特定できない**（生の手順が残っていない）。
+⇒ ★**正典は `L1 SOLO-1 = 4.52 時間`。**★**これ以上は「言えない」。**
+
+### ★★M157 の盾が入り、逆方向も確認された
+
+| 状態 | 前 | 後 |
+|---|---|---|
+| 編集しただけ（未 commit） | `=`（守られる） | `=` |
+| ★**commit した直後** | ★**`+`（上書きする）** | ★**`=`（守られる）** |
+| 触っていない本 | `+` | ★**`+` のまま**（★逆方向も確認） |
+
+★**第 31 回が失いかけたのと同じ 4 本**を、全部 commit した状態で守れることを実証した。
+
+### ★採用（5 本）
+
+`tools/meta-setup.mjs` 730 → **827**（selftest **22 → 37/37**）/
+`tools/agent-timing.mjs` 2,175 → **2,632**（**193 → 239/239**）/
+`tools/eol-audit.mjs` 176 → **397**（**16 → 36/36**）/
+`meta-backlog.md` +257（M159–M165）/ `ResearchPaper/m149-watch.json` 新規 14。
+★他ゲートは全部不変（check 67/67・NG 13・graph md5 `9910cd3f57df`）。
+
+### ☆★M149 の窓は**現実的に危ない**
+
+★通知 209 / T より後 **2** / 使える **1**（★必要 **134**）。
+☆★★**ログの窓は 4.0 日、T より後は約 32 分ぶんしかない。**
+★**必要日数 3〜6 日と同じ桁**なので、★**貯まる前に古い側が刈られる恐れが現実的。**
+⇒ ★**第 33 回に「履歴 2 件目・単調性の判定」を配った。**
+
+### ☆★改善係が自分の試験の穴を 4 件申告した
+
+★selftest で素通り 4 件、★**全部が自分の試験体の壊れ**（`t0 = 0` を書き、
+道具が正しく落としているのを「落ちた」と誤読）。★試験体を直し、試験を 1 本足した。
+☆★**第 30・31 回とまったく同じ形の反省**である。★**この係の作法として定着している。**
+
+### ☆★新しい無駄を 1 件（M164、未着手）
+
+★`eol-audit` の既定が `external/_refs` の **8,558 本**を舐めており、
+★**本体での数字（crlf 9,534）がプロジェクトの姿ではない。**
+★直すと `--mixed` が 3.5 秒 → **0.8 秒**。⇒ ★**第 33 回に配った。**
+
+---
+
+## ★★★本体の判断: **同時実行数の上限 2 を測り直す**（第 33 回の主題）
+
+☆★**決定 D27 の「実装 agent は最大 2」は、測って決めたものではない。**
+★**ゴールは「効率化を進めながら pGC 完了」であり、同時実行数は throughput に直結する。**
+★**3〜4 本が安全なら進みは 1.5〜2 倍になる。**
+
+★測らせる候補（★事前登録させた）: (a) MCP REPL の取り合い（#236）/
+(b) 同じファイルへの書き込み衝突（`Found.lean` の import 行、`lean-idioms.md`）/
+(c) `lake build` のロック待ち / (d) agent 1 本あたりの所要時間。
+★**交絡（難しい波ほど同時本数が多い）を先に書かせた。**★**因果は測れないと明記した。**
+
+## ★★★★★★★★pGC **Proposition 2.1 が無条件で閉じた**（2026-09-08）
+
+`lean/ABC3/Found/PGC/CoherentFunctional.lean`（642 行 / 31 宣言）+
+`CountableGenerators.lean`（286 行 / 11 宣言）—— 合計 **928 行 / 42 宣言、`sorry` 0、`axiom` 0**。
+
+- ★**`hasCoherentFunctional (K) : HasCoherentFunctional K`** —— ★**無条件（仮説なし）**
+- ★★★**`prop_2_1 : RecoverableAsAddModule (fun K => K.closure)`** —— **[pGC] Prop 2.1 本体**
+
+★★**`sorryAx` は 1 件も無い。**★`prop_2_1` の依存に `SmoothModelTransport` と
+`NormalBasisFunctional` の全体が入るので、★**その連鎖全体が sorry-free であることの証明にもなっている。**
+
+### ★★★原典より短い道（今日 15 回目）—— ★**本体と前段の見立てが 2 つとも重すぎた**
+
+1. ☆★★**Maschke に群環 `K[G′]` は要らなかった。**
+   前段は「`exists_unit_of_central_idempotent` は在る、残るのは群環との同一視の配線だけ」と見たが、
+   ★実際に要るのは「同変な収縮 `ρ` があれば `Ψ := ι∘φ∘ρ + (1 − ι∘ρ)` が同変自己同型」という
+   ★**初等的観察だけ**。★★**`exists_unit_of_central_idempotent` は 1 度も使っていない**
+   （中心冪等元・単元の持ち上げ・半単純性・跡写像もすべて不要）。
+2. ☆★★**可算性に「ℚ 上代数的」も Krasner も要らなかった。**
+   ★**係数を `K` 自身の可算稠密部分集合から取れば足りる**
+   （`TopologicalSpace.exists_countable_dense`。★`SeparableSpace` は**インスタンスでそのまま出る**）。
+   ★**ℚ ⊆ ℚ_p ⊆ K の稠密性の持ち上げが丸ごと消えた。**
+3. ★**#59 回避（7 つ目の型）**: 中間体 2 層を**作らず**、`Gal(L′/K) ↠ Gal(L/K)` を
+   `Γ_K` の余核性（`MonoidHom.liftOfSurjective`）で作った。
+
+★抽象核 4 本のうち `avgSum` 系 5 本と `ApxRoot.apxCoeff` は **`[propext, Quot.sound]`**（選択公理なし）。
+
+### ★★配線した（★`import-audit --edge` を先に引いた）
+
+```
+node tools/import-audit.mjs --edge lean/ABC3/Skeleton/PGC/Section2.lean ABC3.Found.PGC.CoherentFunctional
+  ★循環しない
+```
+☆★★**先に `Section2Defs` に割っておいたのがここで効いた** —— 割っていなければ 3 度目の循環だった。
+
+★`Skeleton/PGC/Section2.lean:45` を `:= ABC3.Found.PGC.prop_2_1` に書き換え、
+★docstring に「★**原典の道（Verlagerung も p 進対数も）を 1 つも通らずに閉じた**」ことを記録。
+
+☆★**並行編集を検知した**: `FilteredGroup` 移動の agent が同じ `Section2.lean` のヘッダを書き換えていた
+（`Section2Defs` の import が消えていた）。⇒ ★**争わずにその agent へ引き継ぎ**、
+配線の維持・`import` の追加・`--sorry` が 15 → 14 に減ることの確認を依頼した。
+
+⇒ ★★★**pGC の残りは 5 → 4 件**: `prop_2_2` / `cor_3_1` / `cor_3_3` / ★**主定理 `theorem_4_2`**。
+
+## ★★`VERDICT:`
+
+```
+VERDICT[HCF-a]: 外れ — Krasner でも「各次数有限個」でもなく、K 自身の可算稠密部分集合で出た
+VERDICT[HCF-b]: 外れ — 環論核(中心冪等元)は 1 度も使われず、初等的な収縮の観察だけで済んだ
+VERDICT[HCF-c]: 外れ — どちらも重くなかった。2 つとも崩れた
+VERDICT[HCF-d]: 当たり — 汎関数形式のおかげで #59 にも colimit にも当たらなかった
+```
+```
+COST[HCF]: 安 | 持ち場=HasCoherentFunctional  — 抽象核 4 本が 0.1〜0.7 秒、群環も p 進対数も要らず Prop 2.1 まで閉じた
+```
+
+☆★★★**本体が重く見積もり、実装者が薄い道を見つけたのは今日 5 度目である。**
+（Prop 2.1 の p 進対数 + Verlagerung / 分岐入力の Hasse-Arf / 鋭形の Herbrand 合成則 /
+p 進対数の段の「付値環の核」/ 今回の Maschke + Krasner）
+⇒ ★★**申し送り（更新）**: ★**持ち場に「重い道具」を書くのをやめる。**
+★**書くのは「消せるはずの語彙」と「在庫の場所」だけにする。**
+★**原典の道は `.needs` に既に書いてあるので、持ち場で繰り返さない。**

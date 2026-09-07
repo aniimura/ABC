@@ -6678,6 +6678,28 @@ Cauchy 条件 `hcauchy` の型に `I^m • ⊤` が出るので**そちらは埋
     refine IsHausdorff.haus (I := IsLocalRing.maximalIdeal ↥(unramifiedCompletionInt K))
       inferInstance _ (fun N => ?_)
 
+★★**この罠は 2 つ目の顔を持つ**（2026-09-08、pGC §2 分岐入力）。`(I := …)` を書いても
+`inferInstance` を**書き忘れる**と、今度は型不一致になる（`haus` は構造体フィールドなので
+`self` を明示的に取る＝引数が 1 つ多い）:
+
+```
+error: Type mismatch
+  IsHausdorff.haus ?m.109 ?m.110
+has type
+  (∀ (n : ℕ), ?m.110 ≡ 0 [SMOD maximalIdeal ↥𝒪[K.carrier] ^ n • ⊤]) → ?m.110 = 0
+but is expected to have type
+  ↑u - 1 = 0
+```
+
+★**引数は `(I := …) inferInstance x h` の 4 つ**である。`(M := …)` を足しても
+
+```
+error: typeclass instance problem is stuck
+  Module ↥𝒪[K.carrier] ?m.101
+```
+
+が出るだけで直らない。
+
 ## #75 `SModEq` は `I^n • ⊤` の形なので、差の所属に落とす補題を 1 本置く（2026-09-06、Λ6）
 
 `IsPrecomplete.prec` / `IsHausdorff.haus` が使う形は `f m ≡ f n [SMOD I ^ m • ⊤]` で、
@@ -10320,3 +10342,689 @@ error: unexpected token 'λ'; expected ')'
 
 `λ` は Lean 4 の予約トークンなので、`eλ`・`heλ` のような**λ を含む識別子は作れない**
 （`θ`・`π`・`ϖ`・`σ` は使える）。★`elam`・`helam` に直す。
+
+## #232 ★★★`grep -i` の「部分文字列に飲み込まれる」形 —— 正規底定理を「mathlib に無い」と誤判定した（2026-09-08、pGC Prop 2.1）
+
+★**Lean のエラーではなく測定の失敗形**だが、実害は同じ（`.absent` を 1 件でっち上げるところだった）。
+
+やったこと:
+
+```
+grep -in "normalBasis\|normal_basis" .cache/mathlib-index.txt | head -30
+```
+
+返ってきたのは `OrthonormalBasis`・`orthonormalBasis` **ばかり 30 行**で、
+`Orthonormal**Basis**` の中に `normalBasis` が部分文字列として入っているため
+本命が `head` の外に押し出されていた。★実際には在る:
+
+```
+Mathlib/FieldTheory/Galois/NormalBasis.lean
+  IsGalois.normalBasis (K L) : Module.Basis Gal(L/K) K L
+  IsGalois.normalBasis_apply (e : Gal(L/K)) : normalBasis K L e = e (normalBasis K L 1)
+```
+
+★**直し方（3 手、どれも 1 秒）**:
+
+1. **大文字小文字を区別して型名で引く**: `grep -n "NormalBasis" .cache/mathlib-index.txt`
+2. **飲み込む語を除く**: `... | grep -v -i orthonormal`
+3. **`head` を付けるなら `wc -l` も見る**（30 行で切った時点で「全部見た」と思わない）
+
+★同型の飲み込み例: `Basis`↔`OrthonormalBasis`/`HilbertBasis`、`Norm`↔`Enorm`/`Seminorm`、
+`Inv`↔`Invariant`/`Involutive`、`Gal`↔`Galois`/`generalized`。
+
+★★見つけたあとの最初のエラーは**不在ではなく import 漏れ**（#68）だった:
+
+```
+error(lean.unknownIdentifier): Unknown constant `IsGalois.normalBasis`
+```
+
+`import Mathlib.FieldTheory.Galois.NormalBasis` の 1 行で消えた。
+
+## #233 `DistribMulAction` の instance を `where` の中で直接 `simp` すると `•` が開かない（2026-09-08、同上）
+
+```
+error: `simp` made no progress
+error: unsolved goals
+⊢ (g • 0) x = 0
+error: unsolved goals
+⊢ (g • (f₁ + f₂)) x = (g • f₁) x + (g • f₂) x
+```
+
+定義中の instance の `smul` フィールドは、その instance 自身の証明フィールドからは
+**`simp` が展開できない**（インスタンスがまだ環境に無い）。
+
+★**直し方**: 作用を先に `def` で切り出し、`smul := translate` と書いてから
+各フィールドを `show` で開く。
+
+```lean
+def translate (g : G) (f : LocallyConstant G M) : LocallyConstant G M :=
+  LocallyConstant.comap (leftTranslation g) f
+
+scoped instance : DistribMulAction G (LocallyConstant G M) where
+  smul := translate
+  one_smul f := by ext x; show f (1⁻¹ * x) = f x; simp
+  smul_add g f₁ f₂ := by
+    ext x; show (f₁ + f₂) (g⁻¹ * x) = f₁ (g⁻¹ * x) + f₂ (g⁻¹ * x); simp
+```
+
+## #234 `rw [h]`（`h : α = α'`）は依存する項があると motive エラー（2026-09-08、同上）
+
+```
+Tactic `rewrite` failed: motive is not type correct:
+  fun _a => _a g • e.toAddEquiv a = α' g • e.toAddEquiv a
+Error: Application type mismatch: The argument
+  e
+has type
+  SemilinearAddEquiv α A B
+but is expected to have type
+  SemilinearAddEquiv _a A B
+```
+
+★**直し方**: `rw` ではなく `subst`。
+
+```lean
+def ofEq {α α' : G ≃* G'} (h : α = α') (e : SemilinearAddEquiv α A B) :
+    SemilinearAddEquiv α' A B := by
+  subst h; exact e
+```
+
+## #235 `simpa using h` は `e.symm.toAddEquiv` と `e.toAddEquiv.symm` を同一視しない（2026-09-08、同上）
+
+```
+error: Type mismatch: After simplification, term
+  h2
+ has type
+  @Eq B (eB.symm.toAddEquiv (α g • e.toAddEquiv (eA.toAddEquiv a)))
+    (α g • eB.symm.toAddEquiv (e.toAddEquiv (eA.toAddEquiv a)))
+but is expected to have type
+  @Eq B (eB.toAddEquiv.symm (α g • e.toAddEquiv (eA.toAddEquiv a)))
+    (α g • eB.toAddEquiv.symm (e.toAddEquiv (eA.toAddEquiv a)))
+```
+
+`symm` を自分で定義した構造では `e.symm.toAddEquiv` と `e.toAddEquiv.symm` は
+**defeq だが構文的に別**。`simpa` は構文で照合するので落ちる。
+
+★**直し方**: `have` に**明示的な型を書いて** defeq で受け、`exact` する。
+
+```lean
+have h2 : eB.toAddEquiv.symm (α g • c) = α g • eB.toAddEquiv.symm c :=
+  eB.symm.map_smul (α g) c
+```
+
+## #236 ★★MCP の基準環境は**並行セッションと共有**される —— 自分の `lean_start` が上書きされる（2026-09-08、同上）
+
+`lean_start` が「起動して import を読み込んだ (107.7 秒)」と**成功を返した直後**に、
+
+```
+error: failed to synthesize instance of type class
+  AddCommGroup (LocallyConstant X Z)
+error: Unknown constant `LocallyConstant.comapMonoidHom`
+```
+
+が出た。`Mathlib.Topology.LocallyConstant.Algebra` は確かに import 指定していたのに、である。
+`lean_status` を見ると:
+
+```
+imports: ABC3.Found.PGC.AbsGalRamificationFiltration, ABC3.Found.PGC.LubinTateClosureTopology,
+         ABC3.Found.PGC.LubinTateReciprocityMapLimitSurjective
+建て直し 1 回
+```
+
+★**自分が指定した 3 本が 1 本も入っていない**（別セッションの import で建て直されていた）。
+
+★**直し方**: 「Unknown constant なのに import したはず」と思ったら
+**まず `lean_status` で imports を見る**。違っていたら**再起動を試みず**
+`node tools/leanfile.mjs lean/ABC3/.../Foo.lean` へ切り替える（11〜13 秒/往復、olean を書かない）。
+
+## #237 `Basis.equivFun` の往復を `simp` で潰すと総和に展開されて閉じない（2026-09-08、同上）
+
+```
+error: unsolved goals
+⊢ ∑ x, f x * (Finsupp.single x 1) ρ = f ρ
+```
+
+`b.equivFun (b.equivFun.symm f) ρ = f ρ` に `simp` を当てると、
+`Basis.equivFun_symm_apply`（`∑ i, x i • b i`）と `repr_self` が先に発火して
+**総和に展開されてから**戻れなくなる。
+
+★**直し方**: `rw [LinearEquiv.apply_symm_apply]`（往復をまず消す）。
+
+## #238 `IsCompact.nonempty_iInter_of_directed_nonempty_isCompact_isClosed` は `ι : Type*` しか取らない（2026-09-08、pGC §2 分岐入力）
+
+添字を `{ι : Sort*}` で書くと、**最後の引数だけ**が通らない:
+
+```
+error: Application type mismatch: The argument
+  htcl
+has type
+  ∀ (i : ι), IsClosed (t i)
+but is expected to have type
+  ∀ (i : ?m.281), IsClosed (?m.284 i)
+in the application
+  IsCompact.nonempty_iInter_of_directed_nonempty_isCompact_isClosed ?m.284 ?m.285 ?m.287 (fun i => ?m.294) htcl
+```
+
+★`?m.284 : ?m.281 → Set Γ` の `?m.281` が `Type` 宇宙に固定されているので `Sort*` の `ι` が入らない。
+**直し方: `{ι : Type*}` にする**（`Sort*` にする理由は無い）。
+★「4 つ目までは通るのに 5 つ目で落ちる」ので、自分の `htcl` の側を疑って時間を溶かしやすい。
+
+## #239 派生した族を渡すと、ユニフィケーションが「族そのもの」を間違える（2026-09-08、同上）
+
+`{T : ι → Subgroup Γ}` を持つ補題を `F.S (T i) v` の形で使うと:
+
+```
+error: Application type mismatch: The argument
+  hdir
+has type
+  Directed (fun x1 x2 => x1 ≥ x2) T
+but is expected to have type
+  Directed (fun x1 x2 => x1 ≥ x2) fun i => F.S (T i) v
+```
+
+★最後の引数（`↑S * ↑(T i) = …`）から `?T := fun i => F.S (T i) v` と**先に**拉致されている。
+**直し方: `(T := T)` を名前付きで渡す**。★直したあとは
+`IsClosed ↑(F.S (T i) v)` を渡していた所が `IsClosed ↑(T i)` に変わるので、
+
+```
+error: Type mismatch
+  isClosed_S F (hbase i) v
+has type
+  IsClosed ↑(F.S (T i) v)
+but is expected to have type
+  IsClosed ↑(T i)
+```
+
+が続けて出る。**2 段階で直る**（`Subgroup.isClosed_of_isOpen _ (F.isOpen_base (hbase i))`）。
+
+## #240 `Nat.ceil_eq_iff` の右辺は切り捨て引き算 `↑(n - 1)`（2026-09-08、同上）
+
+```
+error: Application type mismatch: The argument
+  h1
+has type
+  ↑n - 1 < v
+but is expected to have type
+  ↑(n - 1) < v
+in the application
+  And.intro h1
+```
+
+★原典の丸め「`n − 1 < v ≤ n`」を `Nat.ceil_eq_iff` に渡すとここで落ちる。
+**直し方: `1 ≤ n` を出して `rwa [Nat.cast_sub hn, Nat.cast_one]`**。
+★`n = 0` は `Nat.ceil_eq_iff` の側条件（`n ≠ 0`）で弾かれるので、
+**`rcases Nat.eq_zero_or_pos n` で先に場合分けする**。`v ≥ 0` なら `n = 0` のとき
+`v = 0` なので `⌈v⌉₊ = 0` で合う。
+
+## #241 ★★★Python の `io.open(p,'w')` は**書く前に空にする** —— `UnicodeEncodeError` でファイルが消える（2026-09-08、同上）
+
+★**Lean のエラーではなく、木を壊した実害の形**である。`tools/lean-idioms.md`（10468 行）を
+**0 バイトにした。**
+
+```
+Traceback (most recent call last):
+  File "...add_idioms.py", line 97, in <module>
+    io.open(p, 'w', encoding='utf-8', newline='\n').write(s)
+UnicodeEncodeError: 'utf-8' codec can't encode characters in position 236660-236661: surrogates not allowed
+```
+
+原因は、Write ツールに渡した Python の中に `𝒪`(U+1D4AA) を
+**`\ud835\udcaa` というサロゲート対のエスケープ**で書いたこと。Python 3 の文字列では
+これは「対」にならず `'\ud835'` 単体（lone surrogate）になり、`utf-8` で書けない。
+★**`'w'` はファイルを開いた瞬間に truncate する**ので、`.write` が例外を投げた時点で
+中身は失われている。
+
+★**直し方（3 つとも守る）**:
+1. ★**Markdown/Lean への追記は Edit ツールでやる**（Edit は失敗すれば何も書かない）。
+2. Python でやるなら **BMP 外の文字はエスケープせず直に書く**（`𝒪`・`ℝ`）。
+   どうしてもエスケープするなら `\U0001D4AA`（大文字 `U` + 8 桁）。
+3. Python でやるなら **一時ファイルに書いてから `os.replace`**（原子的に差し替える）。
+
+★★**復旧の道（実際にこれで全部戻した）**: 未 commit の変更でも、
+書き込んだ agent の**サブエージェント・ログ**に `Edit` の `old_string` / `new_string` が
+そのまま残っている。
+
+```
+C:\Users\Aruta\.claude\projects\D--Math-ABC3\<session>\subagents\agent-*.jsonl
+grep -l '## #232' *.jsonl
+```
+
+で当たりを引き、`tool_use` の `input` を JSON として取り出して同じ Edit を再適用すればよい。
+★`git checkout` は **HEAD に戻すだけ**なので、未 commit の他 agent の追記を失う。先にログを見ること。
+
+## #242 主張の中の `letI := …hfd` は、インスタンスが既に合成できると**消える**（2026-09-08、Yoshida Prop 6.14 の鋭い形）
+
+構造体のフィールド（`(psiGenSeq … m).hfd : FiniteDimensional …`）を主張に持ち込もうとして
+
+```lean
+example … : letI := (psiGenSeq K … m).hfd
+    reciprocityMap K … (psiGenSeq K … m).pt … σ = … := by
+  intro _
+  …
+```
+
+と書くと：
+
+```
+Tactic `introN` failed: There are no additional binders or `let` bindings in the goal to introduce
+```
+
+★原因は「`letI` が効かなかった」ではなく **`letI` が要らなかった**。
+インスタンス探索が `FiniteDimensional K.carrier K⟮(psiGenSeq … m).pt⟯` を自力で見つけたので
+`letI` が elaboration で潰れ、`intro` する束縛子が無くなっている。
+
+★**直し方**: `letI` も `intro` も書かない。★**先に測ること**——
+
+```lean
+example … : True := by
+  have h1 : FiniteDimensional K.carrier (IntermediateField.adjoin K.carrier
+      ({(psiGenSeq K hq hπmax hπne0 f hf0 hf1 hf M).pt} : Set K.closure)) := by infer_instance
+  trivial
+```
+
+が 0.26 秒で通れば、主張に `[FiniteDimensional …]` 束縛子を足す必要も無い。
+★この木では `Fintype (K⟮x⟯ ≃ₐ[K.carrier] K⟮x⟯)` も同様に合成できる。
+
+## #243 `show` の中の `_` は「明示引数の証明」を埋められない（2026-09-08、同上）
+
+`MulEquiv.ofBijective` の外側を剥がすために
+
+```lean
+    show galoisUnitReciprocityMap K … (M + 1) (by omega) _ _ _ _
+        (algEquivRestrictSelf K … (M + 1) (by omega) _ _ _ _ σ) = _
+```
+
+と書くと：
+
+```
+don't know how to synthesize placeholder for argument `hxψ`
+context:
+⊢ (psiGenSeq K hq hπmax hπne0 f hf0 hf1 hf M).pt ∈
+    iteratedLubinTatePsiTorsionPoints K hq hπmax hπne0 f hf0 hf1 hf (M + 1) ⋯
+```
+
+★`show` は目標との**構文的**な照合をしないので、`_` に入る `hxψ : x ∈ …`（Prop だが明示引数）を
+逆算できない。★**全部書き下す**か、次の形にする（こちらが安い）：
+
+```lean
+theorem galoisUnitReciprocityEquiv_apply (y : …) :
+    galoisUnitReciprocityEquiv K … n hn x hxψ hxn hmem y
+      = galoisUnitReciprocityMap K … n hn x hxψ hxn hmem y := rfl
+```
+
+を `variable` 節（`(n) (hn) (x) (hxψ) (hxn) (hmem)`）の中で 1 本立てて `rw` する。
+★引数が 13 個あるとき、`show` を 1 回書くより `_apply` 補題 1 本のほうが短い。
+
+## #244 `apply e.injective` のあとの `rw` は「defeq だが構文が違う」ところで止まる（2026-09-08、同上）
+
+`reciprocityMapLimitFamily` は `match n with | 0 => … | n+1 => principalUnitsQuotientEquiv … (reciprocityMap …)`
+という `def` である。`apply (principalUnitsQuotientEquiv …).injective` して
+`rw [principalUnitsQuotientEquiv_apply_mk, …, hkey]` まで進めると：
+
+```
+unsolved goals
+⊢ (principalUnitsQuotientEquiv K hπmax (m + 1) ⋯)
+      (reciprocityMap K hq hπmax hπne0 f hf0 hf1 hf (m + 1) ⋯ (psiGenSeq K hq hπmax hπne0 f hf0 hf1 hf m).pt ⋯ ⋯ ⋯ σ) =
+    reciprocityMapLimitFamily K hq hπmax hπne0 f hf0 hf1 hf σ (m + 1)
+```
+
+★両辺は **defeq**（右辺を `m+1` で展開すると左辺そのもの）だが、`rw` は最後に
+`Eq.refl` の**構文的**照合しかしないので閉じない。★**`rfl` を 1 行足すだけ**でよい
+（`rfl` は default transparency なので `def` の `match` を展開する）。
+
+## #249 `.cache/mathlib-index.txt` は**取りこぼす** —— 索引に無いことは不在の証拠にならない(2026-09-08)
+
+☆★**本体の追記(2026-09-08)**: ★**原因を特定して直した。**
+mathlib が新しいモジュールシステムの `public` 修飾子を使い始めており
+(`public noncomputable def normalBasis` / `public theorem normalBasis_apply`)、
+★`tools/decl-index.mjs:58` の `MODS` に `public` が無かったため
+★**`public` の付いた宣言が丸ごと索引から落ちていた。**
+★`public` と `nonrec` を足して作り直した: ★**248,636 → 249,481 宣言(+845)**、
+`IsGalois.normalBasis` が引けるようになった。
+★**それでも「索引に無い ⇒ 不在」は言えない。**`.absent` を書く前に `#check @Foo` で確かめること。
+☆★**この節は元々 `## 489.` と書かれており、`^## #` に当たらないので
+`idiom-recur.mjs` から不可視だった。**★**番号は既存の最大＋1 にすること。**
+
+**現象**: `IsGalois.normalBasis`(有限次 Galois 拡大の正規底、
+`Mathlib/FieldTheory/Galois/NormalBasis.lean`)を索引で引くと**出ない**。
+
+```
+$ grep -n "normalBasis" .cache/mathlib-index.txt | head
+16238:def  Complex.isometryOfOrthonormal  Analysis/InnerProductSpace/PiL2.lean:902 ...
+...(OrthonormalBasis ばかり。IsGalois.normalBasis は 1 件も無い)
+$ grep -n "Galois/NormalBasis.lean" .cache/mathlib-index.txt
+236152:theorem exists_linearIndependent_algEquiv_apply_of_finite ...
+236153:theorem exists_linearIndependent_algEquiv_apply_of_infinite ...
+```
+
+★**ファイル自体は索引されているのに、その中の `noncomputable def normalBasis` だけが
+落ちている。**「同ファイルから 2 件出るのだから網羅されているはず」という推論は誤り。
+
+**確かめ方(11 秒)**: スクラッチに 2 行書いて `node tools/leanfile.mjs` に投げる。
+
+```lean
+import Mathlib.FieldTheory.Galois.NormalBasis
+#check @IsGalois.normalBasis
+```
+```
+IsGalois.normalBasis : (K : Type u_1) → (L : Type u_2) → [inst : Field K] → … → Module.Basis Gal(L/K) K L
+```
+
+**How to apply**: 「mathlib に無い」と書く前に、★索引の grep だけで済ませない。
+(i) 名前空間で grep、(ii) `#check @<推定名>` を 1 回投げる、(iii) `exact?`。
+★2026-09-07 に Y21 が 4 件を「不在」と誤報告した件(#117(ii))の**逆側の失敗形**である
+——あちらは grep の書き方、こちらは**索引そのものの欠落**。
+
+★同じ 2026-09-08 の測定で、**本当に不在**だったものも記録しておく:
+Krasner の補題は**在る**(`IsKrasner` / `IsKrasner.krasner`,
+`Mathlib/Analysis/Normed/Field/Krasner.lean`)が、その系
+「局所体の与えられた次数の拡大は有限個」「有限次部分拡大は可算」は
+`grep -n "finite_extensions\|countable.*IntermediateField" .cache/mathlib-index.txt` が
+**0 件**で、本木にも無い。★「在る/無い」は 1 語ではなく**主張の形**で測ること。
+
+## #245 ★★余計な `haveI : Fintype … := Fintype.ofFinite _` を書くと、**見た目が同一の項に `rw` が当たらない**（2026-09-08、pGC「Art(Γ^n)=U^n」）
+
+```
+error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  upperRamificationGroup (↥(inertiaGalAdjoin K x)) (stageUniformizer K x) v
+in the target expression
+  Subgroup.map (inertiaGalAdjoin K x).subtype
+      (upperRamificationGroup (↥(inertiaGalAdjoin K x)) (stageUniformizer K x) v) =
+    upperRamificationGroup Gal(↥K.carrier⟮x⟯/K.carrier) α v
+```
+
+★★**パターンと的が印字上まったく同じ**である。違うのは印字されない
+`[Fintype ↥(inertiaGalAdjoin K x)]` インスタンス引数だけで、
+`upperRamificationGroup` の型がそれを取っている。
+
+**原因**: 証明の冒頭に
+`haveI : Fintype ↥(inertiaGalAdjoin K x) := Fintype.ofFinite _` と書いたため、
+的の中では木の canonical instance（`RamificationFiltrationBuild.lean` の
+`fintypeInertiaGalAdjoin`）が使われ、`rw` する補題の側では `Fintype.ofFinite _` が
+使われて、**構文が一致しない**。
+
+**直し方**: ★**その `haveI` を消す。** 木に instance が既に在るなら書かない。
+★一般則: `rw` が「同じに見える項」で失敗したら、**インスタンス引数を疑う**
+（`set_option pp.explicit true` で 1 回だけ見ると 5 秒で分かる）。
+★これは #126（型に現れるインスタンスは `haveI` では間に合わない）の**裏側**で、
+あちらは「足りない」、こちらは「**余計**」である。
+
+## #246 `IsGalois` から `Normal` を `.toNormal` で取り出せない（2026-09-08、同上）
+
+```
+error: Invalid field `toNormal`: The environment does not contain `IsGalois.toNormal`, so it is not possible to project the field `toNormal` from an expression
+  (InfiniteGalois.normal_iff_isGalois K.carrier⟮(psiGenSeq K hq hπmax hπne0 f hf0 hf1 hf m).pt⟯).mp hnorm
+of type
+  IsGalois K.carrier ↥K.carrier⟮(psiGenSeq K hq hπmax hπne0 f hf0 hf1 hf m).pt⟯
+```
+
+**直し方**: フィールド射影ではなく**インスタンス探索**に載せる:
+
+```lean
+theorem normal_… : Normal K.carrier ↥L := by
+  haveI := isGalois_… ;  infer_instance
+```
+
+★`IsGalois` は `Normal` と `Algebra.IsSeparable` を **instance として持つ**が、
+`toNormal` という名前の射影は無い。★同じ形は `IsGalois.toIsSeparable` でも起きる。
+
+## #247 `Subgroup.map_comap_eq` は `f.range` を**左**に置く（2026-09-08、同上）
+
+```
+error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  ?a ⊓ ⊤
+in the target expression
+  ⊤ ⊓ upperRamificationGroup Gal(↥K.carrier⟮x⟯/K.carrier) α v = upperRamificationGroup Gal(↥K.carrier⟮x⟯/K.carrier) α v
+```
+
+`rw [Subgroup.map_comap_eq, Subgroup.range_subtype, htop]` のあとに
+`inf_top_eq` を書いて落ちた。★`Subgroup.map_comap_eq f H = f.range ⊓ H` なので
+正しくは **`top_inf_eq`** である。
+★1 秒で直るが、`⊓` の向きは `Submodule` / `Ideal` 版と揃っていないので毎回測ること。
+
+## #248 ★★★「段データが選択に依らない」は `compat` を `M = N` に当てるだけで出る（2026-09-08、同上）
+
+配管ではなく**設計**の記録。`StageFiltration` のような
+「`N ≤ M` のとき `S N v · M = S M v`」型の両立性を持つ構成では、
+★**`M := N` を代入すると、`N ≤ S N v` と合わせて `S N v = S' N v`（別の選択で作った側）が出る**。
+
+```lean
+theorem coe_mul_coe_eq_self {Γ : Type*} [Group Γ] {S N : Subgroup Γ} (h : N ≤ S) :
+    ((S : Set Γ) * (N : Set Γ)) = (S : Set Γ) := …   -- 2 行、[propext, Quot.sound]
+
+theorem stage_eq_stage (g g' : StageGenerator K N) (v : ℝ) : g.stage v = g'.stage v :=
+  eq_of_coe_mul_coe_eq_coe (le_stage g v) (stage_mul_coe_eq h K g g' le_rfl v)
+```
+
+★実測: `Found/PGC/RamificationFiltrationBuild.lean` は「生成元 `x` の選択に依らないことは
+**証明していない**」（逸脱 2）と書き、`UnramifiedBaseChangeInvariance.lean` も
+「★証明していないこと」に挙げていた。★**その `compat` 自身が独立性を含んでいた。**
+★教訓: **「両立性を証明したのに独立性が未証明」と書いてあったら、まず `M = N` を代入する。**
+
+## #250 `Set.mem_image` を `obtain` で開くと、出てくる等式は**β 簡約されていない**ので `rw` が当たらない（2026-09-08、pGC「p 進対数が単数を整数環に写す」）
+
+`rw [← image_… ] at h` のあと `obtain ⟨u, hu, hux⟩ := h` とすると、`hux` の左辺は
+**関数適用のまま**（`(fun u => ↑↑u - 1) u`）で残る。ゴールの側は β 簡約済みなので
+`rw [hux]` が当たらない。逐語のエラー文:
+
+```
+error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  (fun u => ↑↑u - 1) u
+in the target expression
+  (↑p ^ r)⁻¹ * padicLog K (↑↑u - 1) = ↑(Multiplicative.toAdd y)
+…
+hux : (fun u => ↑↑u - 1) u = x
+⊢ (↑p ^ r)⁻¹ * padicLog K (↑↑u - 1) = ↑(Multiplicative.toAdd y)
+```
+
+★**仮定とゴールが画面上ほぼ同じ字面なのに当たらない**ので、見つけにくい。
+直し方は**型を書いて写し直す**だけ（`show`/`simp only []`/`beta_reduce` より短い）:
+
+```lean
+have hux' : (((u : (𝒪[K.carrier])ˣ) : 𝒪[K.carrier]) : K.carrier) - 1 = x := hux
+rw [hux']
+```
+
+★同じことは `Set.BijOn.surjOn` / `Set.image_eq` を経由した `obtain` すべてで起きる。
+
+## #251 `c • (c⁻¹ * y) = y` に `field_simp` を撃つと止まる —— `mul_inv_cancel_left₀` を直に使う（2026-09-08、同上）
+
+`Set.smul_set` の逆像を作るところで出る形。`simp only [smul_eq_mul]` のあとに
+`field_simp` を置くと、体でない（`NormedDivisionRing`）ため次で止まる:
+
+```
+error: `field_simp` made no progress on the goal
+```
+
+`exact mul_inv_cancel_left₀ hc y`（`hc : c ≠ 0`）で 1 行。
+★抽象核 `smul_setOf_norm_le : c • {x | ‖x‖ ≤ s} = {y | ‖y‖ ≤ ‖c‖ * s}`
+（`Found/PGC/PadicLogIntegers.lean`）はこれで閉じる。
+
+## #252 `Ideal.ramificationIdx` の同定に Dedekind 環の因子分解は要らない —— 第 2 条件はノルム 1 本（2026-09-08、同上）
+
+`Ideal.ramificationIdx_spec (hle : map f p ≤ P ^ n) (hgt : ¬ map f p ≤ P ^ (n+1)) : ramificationIdx f p P = n`
+の `hgt` は、離散付値環では **`‖π‖ < 1` だけ**で出る（`IsDedekindDomain.ramificationIdx_eq_*` を通さない）:
+
+```lean
+intro hcon
+have hmem := hcon (Ideal.mem_span_singleton_self _)   -- p ∈ 𝔪^(e+1)
+rw [Ideal.span_singleton_pow] at hmem
+have hn := norm_le_of_mem_span_pow K (e + 1) _ hmem   -- ‖p‖ ≤ ‖π‖^(e+1)
+rw [h3, hnorm, pow_succ] at hn                        -- ‖π‖^e ≤ ‖π‖^e * ‖π‖
+nlinarith [pow_pos hπpos e, norm_pi_lt_one K hπmax]
+```
+
+★`map (algebraMap ℤ_[p] 𝒪_K) (maximalIdeal ℤ_[p]) = span {(p : 𝒪_K)}` は
+`rw [PadicInt.maximalIdeal_eq_span_p, Ideal.map_span]; simp` で出る（`simp` が像の単集合を潰す）。
+★★**mathlib の名前は `IsDiscreteValuationRing.ideal_eq_span_pow_uniformizer` ではなく
+`…ideal_eq_span_pow_irreducible`**（`Unknown constant` を撃った）。
+`x = u * ϖ^n` が欲しいだけなら `IsDiscreteValuationRing.eq_unit_mul_pow_irreducible` の方が直接。
+
+## #253 `σ • x` と `σ x` は defeq だが **`rw` は当たらない** —— `exact`/`show` に替える（2026-09-08、pGC `HasCoherentFunctional`）
+
+`MulSemiringAction` 由来の `•` は適用と defeq だが、**`rw` は構文照合**なので落ちる。
+`coe_levelPi_apply (g) (b) : ↑((levelPi K L g) b) = g ↑b` を `↑(levelPi K L' γ • a)` に当てようとすると:
+
+```
+error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  ↑(((levelPi ?K ?L) ?g) ?b)
+in the target expression
+  ↑((levelPi K L') γ • a) = ↑a
+```
+
+同じ罠は `exact` の**向きを間違えたとき**に別の顔で出る（★こちらは defeq が効いているので
+`.symm` を外すだけで通る。「型が合わない」ように見えて実は向きの問題）:
+
+```
+error: Type mismatch
+  Eq.symm (coe_levelPi_apply K L' γ (avgSum (levelRes K L L' h).ker x))
+has type
+  γ ↑(avgSum (levelRes K L L' h).ker x) = ↑(((levelPi K L') γ) (avgSum (levelRes K L L' h).ker x))
+but is expected to have type
+  ↑((levelPi K L') γ • avgSum (levelRes K L L' h).ker x) = γ ↑(avgSum (levelRes K L L' h).ker x)
+```
+
+★直し方は 2 つ。(i) `rw` をやめて `exact <補題>`（defeq で通る）。
+(ii) 目標側を `show` で**適用の形に書き換えてから** `rw` する:
+`show ((levelPi K L' γ (levelIncl K L L' h b) : L') : K.closure) = _`。
+★`rw [← coe_levelPi_apply K L' γ a]` と**逆向きに使う**手もある（`γ ↑a` を `↑(… a)` に戻す）。
+
+## #254 データを `have` で置くと本体を忘れる —— `show` が「defeq でない」と言い出す（2026-09-08、同上）
+
+`have e : N ≃ N := { toFun := …, invFun := …, … }` としてから `Fintype.sum_bijective e e.bijective`
+に渡すと、最後の点ごとの等式で:
+
+```
+error: 'show' tactic failed, pattern
+  g • ↑n • a = (g * ↑n * g⁻¹) • g • a
+is not definitionally equal to target
+  g • ↑n • a = ↑(e n) • g • a
+```
+
+`have` は **Prop でなくても本体を捨てる**（`e` は不透明な局所仮定になる）。
+★直し方: 関数を `refine` の中に**直に書く**（`refine Fintype.sum_bijective (fun n : N => ⟨g * n * g⁻¹, …⟩) ?_ _ _ ?_`）。
+全単射性は `Function.bijective_iff_has_inverse` に逆写像を渡すのが軽い（`Equiv` を組み立てなくてよい）。
+
+## #255 `Finset.sum_congr rfl (fun n _ => h n n.2)` の `n.2` が **G の元に潰れる**（2026-09-08、同上）
+
+`∑ n : ↥N, (n : G) • a` の項に `Finset.sum_congr` を当てると、ラムダの `n` が
+**強制で `G` に coerce されてから**射影を取ろうとして落ちる:
+
+```
+error: Invalid projection: Projection operates on types of the form `C ...` where C is a constant. The expression
+  n
+has type `G` which does not have the necessary form.
+```
+
+★直し方: 先に `have hn : ∀ n : N, (n : G) • a = a := fun n => h (n : G) n.2` と**外へ出して**から
+`rw [Finset.sum_congr rfl (fun n _ => hn n)]`。
+
+## #256 `F⟮α⟯` 記法は**スコープ外だと 2 つのエラーに割れる**（2026-09-08、同上）
+
+`x ∈ K.carrier⟮α⟯` と書くと、記法が入っていない環境では `∈` までで切れて:
+
+```
+error(lean.synthInstanceFailed): failed to synthesize instance of type class
+  Membership K.closure Type
+error: expected token
+```
+
+★1 つ目のエラーが「`Membership _ Type`」——**右辺が `Type` になっている**のが合図である
+（`K.carrier` そのものを集合と読んでいる）。
+★直し方: `IntermediateField.adjoin K.carrier {α}` と書く（記法に依存しない）。
+`IntermediateField.adjoin_simple_le_iff : F⟮α⟯ ≤ K ↔ α ∈ K` はそのまま当たる（定義が同じ）。
+
+## #257 `.lean`/`.md` を `cat > f <<'EOF'` で書くと**この環境では壊れる**（2026-09-08、同上）
+
+Bash の PreToolUse フックがコマンドを書き換えるため、引用符付き heredoc でも:
+
+```
+/usr/bin/bash: -c: line 188: unexpected EOF while looking for matching `''
+```
+
+（★ファイルは**作られない**ので実害は往復 1 回ぶんだが、`>` が先に効く形だと切り詰めが起きうる。）
+★直し方: **Write/Edit ツールで書く**。★`sed -i` のような 1 行編集は通る。
+
+## #258 並行セッションの `lake build` は **`no such file or directory` で落ちる** —— 自分のエラーではない（2026-09-08、pGC `HasCoherentFunctional`）
+
+同じワークツリーで別の agent が `lake build` していると、olean の書き込みが衝突して落ちる:
+
+```
+✖ [3199/3232] Building ABC3.Found.PGC.LubinTateReciprocityLimitCompat (8.5s)
+error: no such file or directory (error code: 4294963238)
+  file: D:\Math_ABC3\lean\.lake\build\lib\lean\ABC3\Found\PGC\LubinTateReciprocityLimitCompat.olean
+```
+
+`leanfile.mjs` でも同じ原因で別の顔になる（★依存の olean が**消えている**瞬間に読む）:
+
+```
+ABC3/Found/PGC/CoherentFunctional.lean:1:0: error: object file
+'…\ABC3\Found\PGC\LubinTateGeneralUniqueness.olean' of module
+ABC3.Found.PGC.LubinTateGeneralUniqueness does not exist
+```
+
+★**合図**: 落ちている宣言が**自分の持ち場と無関係**で、しかも
+`build.mjs` の要約が `error 0 / sorry 0` のまま「★失敗」になる。
+★直し方: **もう一度同じコマンドを打つだけ**（2026-09-08 に 2 回とも 1 回の再実行で通った。
+198.6 秒 → 116.4 秒、379.3 秒 → 75.3 秒）。★ファイルを直さないこと。
+
+## #259 `pow_lt_pow_left` は改名された + `zero_le` は NNReal では**関数ではない**（2026-09-08、同上）
+
+```
+error(lean.unknownIdentifier): Unknown identifier `pow_lt_pow_left`
+```
+
+★正しい名前は **`pow_lt_pow_left₀ (hab : a < b) (ha : 0 ≤ a) (hn : n ≠ 0) : a ^ n < b ^ n`**
+（`Mathlib/Algebra/Order/GroupWithZero/Basic.lean`）。順序付きモノイド版は `pow_lt_pow_left'`。
+★続けて `(zero_le _)` と書くと NNReal では次で落ちる（`zero_le : 0 ≤ a` は**引数を取らない**）:
+
+```
+error: Function expected at
+  zero_le
+but this term has type
+  0 ≤ ?m.968
+```
+
+★直し方: `pow_lt_pow_left₀ hδ2 zero_le hd.ne'`。
+
+## #260 宣言を `Found/` から `Skeleton/` へ移すと **`check.mjs` G1 が `.src` を新たに要求する**（2026-09-08、pGC `FilteredGroup` の移設）
+
+`Found/PGC/FilteredGroup.lean` にあった `structure FilteredGroup.Iso` /
+`def FilteredGroup.OuterIso` を `Skeleton/PGC/Setup.lean` へ移したところ、
+★**中身を 1 文字も変えていないのに** `node tools/check.mjs --ledger --brief` が 2 件増えた:
+
+```
+NG  lean\ABC3\Skeleton\PGC\Setup.lean:215
+      G1 出典が無い: `FilteredGroup.Iso.src : ABC3.Meta.Source` を書く
+NG  lean\ABC3\Skeleton\PGC\Setup.lean:234
+      G1 出典が無い: `FilteredGroup.OuterIso.src : ABC3.Meta.Source` を書く
+```
+
+★G1 は `Skeleton/` と `Interface/` の宣言にだけ `.src` を要求する（`Found/` には要求しない）。
+★**移設は「移すだけ」では終わらない**——移す前に、移す本の bucket が変わるかを見て、
+変わるなら `.src` を同時に書くこと。
+
+★原典が定義を読者に委ねている（我々自身の定式化である）場合は、bare な `"Definition 2.3"` に
+せず `item := "Definition 2.3 (FilteredGroup.Iso)"` と注記を付ける
+——bare だと G9（非空虚性の対照）の対象になる。
+
+★逆向きの注意: `Interface/` へ移すと今度は **G2**（`check.mjs:1041`）が
+`X.nonvacuous` か `X.waiting` を要求する。★`structure` を移す先を決める前に、
+G1 / G2 / G8 / G9 のどれが新たに掛かるかを数えること。
+
+## #261 node で `.lean`/`.md` を `latin1` で読むと、UTF-8 の文字列リテラルと**照合が必ず外れる**（2026-09-08、同上）
+
+CRLF を保ったまま行を消す・入れ替えるスクリプトを書くとき、改行を数える都合で
+`fs.readFileSync(p, 'latin1')` としたくなる。★しかしその文字列に対して
+スクリプト中の日本語リテラル（node は UTF-8 で読む）を `includes` すると**必ず false** になる:
+
+```
+NG: docstring のアンカーが無い
+```
+
+★ASCII だけの検算（`/-! ## Corollary 3.1 -/` など）は通ってしまうので、
+**「一部だけ通って一部だけ落ちる」**という分かりにくい形で出る。
+★直し方: **読むのも書くのも `utf8`**。`\r` は普通の文字なので CRLF は utf8 でもそのまま保たれる
+（`(s.match(/\r\n/g)||[]).length` で前後を数えて確かめる）。
+★書き出しは `fs.writeFileSync(p+'.tmp', Buffer.from(out,'utf8'))` → `fs.renameSync` の順にする
+（失敗しても元ファイルが無傷）。
+

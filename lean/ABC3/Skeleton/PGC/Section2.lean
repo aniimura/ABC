@@ -1,5 +1,7 @@
 import ABC3.Skeleton.PGC.Section1
 import ABC3.Skeleton.PGC.Section1Cor13
+import ABC3.Skeleton.PGC.Section2Defs
+import ABC3.Found.PGC.CountableGenerators
 import ABC3.Found.PGC.FilteredGroup
 import ABC3.Found.PGC.LocalFieldNorm
 
@@ -8,8 +10,11 @@ import ABC3.Found.PGC.LocalFieldNorm
 
 設定・記号は `ABC3/Skeleton/PGC/Setup.lean`。
 `Definition 2.3`(filtered group)は原典が境界外入力を要求しない純粋な定義なので、
-`sorry` 無しで `ABC3/Found/PGC/FilteredGroup.lean` に直接置いた(G8/G9 は
+`sorry` 無しで `ABC3/Skeleton/PGC/Setup.lean` に直接置いた(G8/G9 は
 `theorem`/`lemma` のみを見るので、`structure` はそもそも対象外)。
+★2026-09-08 まで置き場は `ABC3/Found/PGC/FilteredGroup.lean` だった——
+`Skeleton/PGC/Section3Defs` / `Section4Defs` が `Found` を import せずに立つよう
+`Setup.lean` へ降ろした(旧名は `Found/PGC/FilteredGroup.lean` の `export` で残してある)。
 
 構造化: `ResearchPaper/1_Structured/A Version of the Grothendieck Conjecture for p-adic
 Local Fields/section-2.html`(PDF 目視確認 2026-09-03、物理 p.4-5)。
@@ -38,8 +43,26 @@ Verlagerung による有限拡大への遷移の両立性)がそのまま論拠�
 - Verlagerung(転送写像)自体は **mathlib に存在する**(`MonoidHom.transfer`、
   `Mathlib/GroupTheory/Transfer.lean:148`)——§1・§2 でこれまで調べた境界外入力の中で
   初めて「公理化不要」と判明した対象。ただし本命題全体の証明には他に p進対数の
-  定量評価(境界外、[5])も必要。 -/
-theorem prop_2_1 : RecoverableAsAddModule (p := p) (fun K => K.closure) := sorry
+  定量評価(境界外、[5])も必要。
+
+## ★★★2026-09-08: 埋まった —— ★**原典の道を 1 つも通らずに閉じた**
+
+★上に挙げた **Verlagerung も p 進対数も、結局 1 度も使っていない**。
+実際に通った道は `Found/PGC/` の 3 本:
+
+- `SmoothModelTransport.lean` —— `K̄ ≅ C^∞(Γ_K, K)` から Prop 2.1 への還元(★汎関数形式)
+- `NormalBasisFunctional.lean` —— ★`SmoothModelCarrier K ↔ HasCoherentFunctional K`(**同値**)
+- `CoherentFunctional.lean` / `CountableGenerators.lean` —— ★**`HasCoherentFunctional` を無条件に構成**
+
+★**Maschke の群環も、Krasner も要らなかった**:
+同変な収縮があれば `Ψ := ι∘φ∘ρ + (1 − ι∘ρ)` が同変自己同型という初等的観察だけで足り、
+可算性は **`K` 自身の可算稠密部分集合**(`TopologicalSpace.exists_countable_dense`、
+`SeparableSpace` はインスタンスで出る)から出た。
+
+★`#print axioms ABC3.Found.PGC.prop_2_1` に `sorryAx` は無い ——
+★**依存の連鎖(上記 3 本すべて)が sorry-free であることの証明にもなっている。** -/
+theorem prop_2_1 : RecoverableAsAddModule (p := p) (fun K => K.closure) :=
+  ABC3.Found.PGC.prop_2_1
 
 def prop_2_1.src : Source :=
   { paper := "pGC", pdfPage := 4, item := "Proposition 2.1", sectionId := "prop-2-1" }

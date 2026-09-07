@@ -12,8 +12,13 @@
 //   node tools/agent-timing.mjs --explain               … 何が時間を説明するか(族は固定)
 //   node tools/agent-timing.mjs --estimate              … brief の見積 行数 と 実測 行数
 //   node tools/agent-timing.mjs --cost                  … 自己申告 COST[…] を実測に突き合わせる
+//   node tools/agent-timing.mjs --main                  … ★本体セッションの費用(道具ごと / 失敗形ごと / ファイル塊)
+//   node tools/agent-timing.mjs --denominator           … ★★数えているのは「実行」か「書かれた字面」か(M142)
+//   node tools/agent-timing.mjs --m149                  … ★★★事前登録(0b)の実行。★件数が届くまで検定しない
+//   node tools/agent-timing.mjs --solo                  … ★★M159 「他と混ざらない命令だけ」を**規則を焼いて**数える
 //   node tools/agent-timing.mjs --selftest              … 自己検査
 //   共通: --type lean-prover  --day 2026-09-07  --name <正規表現>  --limit N  --json
+//         --since 2026-09-07T16:35:29Z  --until …  … ★時刻で絞る(ISO。辞書順 = 時刻順)
 //         --ms 919271,1086819,…  … duration_ms を並べて過去の表をそのまま再現する
 //
 // ★統計の作法(M90 に倣う):
@@ -58,6 +63,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import readline from 'node:readline';
 
 // ════════════════════════════════════════════════════════════════════
 // 0. 比較の族 —— ★データを見る前に固定する(本体の brief が挙げた候補そのもの)
@@ -93,6 +99,175 @@ export const FAMILY = [
 
 /** ★欄ごとの最小件数。これ未満なら検定しない(★データを見る前に決める)。 */
 export const MIN_N = 8;
+
+// ════════════════════════════════════════════════════════════════════
+// 0b. ★★★M149 の事前登録(メタ第 31 回 2026-09-08 01:4x JST。★データを見る前に書いた)
+// ════════════════════════════════════════════════════════════════════
+/**
+ * ★背景。メタ第 30 回 M145 が測った: `lines`/`cores` が見る「代表ファイル」は
+ *   「`.lean` の path が tool_use の入力に現れた回数が最大の本」なので **Read しかしていない本が選ばれる**。
+ *   実測 **138 件中 47 件(34%)** が「自分では 1 度も Write/Edit していない本」だった。
+ *   分母を `written` に直すと `cores` の Holm が 0.0049 → 0.4071 に落ちる(= 判定が消える)。
+ *   ★だが v1 は**データを見た後に**決めた分母なので、その p は事前登録の p と同じ資格を持たない
+ *   (メタ第 24 回 M102 と同じ「2 度目の覗き」)。
+ *
+ * ★★以下は M149 が指示した手順そのものである。★**この節を書いた時点で新しい標本は 1 件も見ていない。**
+ *
+ * ── (A) 定義の決定(★データに依らない。いま決める) ────────────────────────────
+ *   `lines`/`cores` の分母は「**その agent 自身が Write/Edit した `.lean` のうち最も多く触った本**」
+ *   (= `covariatesFromText(..., {fileSource:'written'})`)が**正しい**。
+ *   ★理由は相関の大小ではない: 「行数」と名付けた共変量が **その agent が 1 行も書いていない本の行数**を
+ *   指しているのは**測定の誤り**であって、モデルの選択ではない。★だから検定の結果に依らず決まる。
+ *   ★★ただし **この波では既定を差し替えない**(M149 の手順 1 は「コメントとして事前登録する」)。
+ *   差し替えは (B) の結果を添えて本体が決める。★`FAMILY` は 7 本のまま、`m` は動かさない。
+ *
+ * ── (B) 検定の対象(★これだけが経験的な問い) ──────────────────────────────
+ *   問い: 「**抽象核の本数は所要時間を説明する**」(M101/M110 の判定)は、
+ *         分母を (A) に直しても立つか。
+ *   標本: ★**M145 が見ていない agent だけ**。= `ts > M149_CUTOFF` の通知。
+ *   統計: `familyLadder`(既存・事前登録済み)。★族は 7 本のまま。
+ *         Spearman ρ / 並べ替え p(seed 固定)/ Holm。判定は `Holm < 0.05` の 2 値のみ。向きは断定しない。
+ *   一次: `cores`(v1)。★他の 6 欄と v0 は**参考**で、判定の根拠にしない。
+ *
+ * ── (C) 締切 T の決め方(★結果に触れずに機械で決めた) ─────────────────────────
+ *   `M149_CUTOFF` = 本体チェックアウトの `tools/agent-timing.mjs`(1,960 行 = M146 を本体が採用した版)と
+ *   `ResearchPaper/meta-backlog.md`(M145–M151 を書き足した版)の **mtime の遅いほう**を秒に切り上げた時刻。
+ *   実測(メタ第 31 回の起動時): 2026-09-08 01:35:28.365 / .458 JST = 2026-09-07T16:35:28.4Z。
+ *   ⇒ ★この時刻は **M145 が測った瞬間より必ず後**である(測ってから報告し、本体が採用したのだから)。
+ *     ⇒ これより後に始まった agent を M145 が見たことは**ありえない**。★安全側に倒してある。
+ *
+ * ── (D) 停止規則(★これがいちばん大事。★逐次の覗きを禁じる) ─────────────────────
+ *   ★標本は時間とともに増える。★n=10 で覗いてから n=40 で検定するのは**逐次の覗き**で、
+ *   第一種の過誤が膨らむ。⇒ ★**n が `M149_NEED` に届くまで階段を計算しない**。
+ *   `--m149` は届いていなければ **件数と不足数だけ**を印字して止まる(★道具が規則を強制する)。
+ *
+ *   `M149_NEED` = 134。導出(★データを使っていない):
+ *     Fisher-z 近似 n = 3 + ((z_{α/2} + z_β)/atanh ρ)^2、両側、検出力 0.80、
+ *     α = 0.05/7(Holm の最悪の段 = Bonferroni)、
+ *     ρ = **0.30**(★「実務で意味のある最小の効果」として**データを見ずに**決めた。
+ *       これ未満の ρ なら「核の本数で工数を見積もる」という使い道が立たない)。
+ *     ⇒ z=2.6901 / 0.8416 → n = 133.2 ⇒ **134**。
+ *     ★参考(同じ式): ρ=0.20 → 307 / ρ=0.25 → 195 / ρ=0.35 → 97 / ρ=0.40 → 73。
+ *   ★★危険側を先に書く: 標本は独立でない(M95 の束 / ICC)。DEFF > 1 なので
+ *     **134 は下限**である。★束が効いていれば実効 n はこれより小さい。
+ *
+ * ── (E) M149 の手順 3(M111 も同時に決める) ─────────────────────────────
+ *   ★「完了時点の行数」(M111)は **メタ第 26 回 M117 が既に測って決着している**:
+ *     M111 の誤り 26%(21/82) > `lines` の汚染 5%(M110 の 4/81)、しかも n が 137 → 82 に落ちる。
+ *   ⇒ ★**M111 は族に入れないし正典にもしない。この波でも次の波でも再開しない。**
+ *     ★行数の候補 3 つ(`lines` / `linesWritten` / M111)のうち残る論点は
+ *     **分母(touched か written か)だけ**であり、それが上の (A)(B) である。
+ *   ⇒ ★これで「3 つの候補を別々の波で試して m を増やす」ことを避けられる(M149 の手順 3 の趣旨)。
+ *
+ * ── (F) 実行不能のときの答え方 ────────────────────────────────────────
+ *   ★n が届かないときは「あと何件」を印字して**止まる**。★それが正しい結果である。
+ */
+export const M149_CUTOFF = '2026-09-07T16:35:29Z';   // ★(C) で決めた締切。★書き換えたら selftest が鳴る
+export const M149_NEED = 134;                        // ★(D) で決めた必要件数。★書き換えたら selftest が鳴る
+export const M149_PRIMARY = 'cores';                 // ★一次の欄
+export const M149_DENOM = 'written';                 // ★(A) で決めた分母
+
+/** ★M145 が見ていない通知だけを返す純関数(★ts は ISO 文字列。辞書順 = 時刻順)。 */
+export function freshRows(recs, cutoff = M149_CUTOFF) {
+  return recs.filter(r => typeof r.ts === 'string' && r.ts > cutoff);
+}
+
+/**
+ * ★`--since` / `--until` の絞り込み(★純関数にした理由: CLI に埋めると selftest が届かず、
+ *   ★第 31 回の突然変異 A10「--since を無視する」が**素通りした**)。
+ * ★境界: `since` は**含まない**(freshRows と同じ)、`until` は**含む**。
+ */
+export function filterByTime(recs, since = null, until = null) {
+  let out = recs;
+  if (since) out = out.filter(r => typeof r.ts === 'string' && r.ts > since);
+  if (until) out = out.filter(r => typeof r.ts === 'string' && r.ts <= until);
+  return out;
+}
+
+/**
+ * ★M149 の停止規則を**道具として**強制する純関数。
+ * rows は既に `fileSource:'written'` で共変量を付けたもの。
+ * 返り値: { n, need, open, ladder }  ★open が false なら ladder は **null**(計算すらしない)。
+ */
+export function m149Gate(rows, need = M149_NEED, key = M149_PRIMARY) {
+  const n = usableRows(rows, key).length;
+  const open = n >= need;
+  return { n, need, open, short: Math.max(0, need - n), ladder: open ? familyLadder(rows) : null };
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// ★★★M160 —— M149 の標本が**貯まっているか**を見張る(メタ第 32 回。持ち場 4)
+// ══════════════════════════════════════════════════════════════════════════
+/**
+ * ★★**いちばん大きな危険は保存期間である**(第 31 回の名指し)。
+ *   M149 は「あと 134 件貯まるまで検定しない」という停止規則で待っている。
+ *   ★ところが ★**古い側のログが刈られると、待っている間に標本が減りうる。**
+ *   ★そうなると `--m149` は永久に開かないまま、しかも**それに気づけない**
+ *   (`--m149` は「あと N 件」としか言わないので、N が増えても減っても同じ顔をする)。
+ *
+ * ⇒ ★**件数の履歴を外に持ち、単調に増えているかを見る。**
+ *
+ * ★★**履歴の置き場所が肝**: 改善係は毎回まっさらな隔離 worktree で起動し、
+ *   `.cache/` は `meta-setup` の整列対象外(SKIP_SEG)なので**次の起動に残らない**。
+ *   ⇒ ★`ResearchPaper/m149-watch.json` に置く(`COPY_ROOTS` に入っているので整列で運ばれる)。
+ *
+ * ★見る量は 3 つ。★どれが動いても意味が違う:
+ *   - `usable` … 検定に使える件数。★**減ったら刈られている**(赤)。
+ *   - `afterT` … 締切 T より後の通知。★減ったら刈られている(赤)。
+ *   - `first`  … 記録全体のいちばん古い時刻。★**進んだら古い側が消えている**(黄)。
+ *     ★これは `usable` が減る**前に**出る早期の合図である(T より前が先に刈られるため)。
+ */
+export const M149_WATCH_REL = 'ResearchPaper/m149-watch.json';
+
+/** ★純関数。いまの観測 1 件を作る。 */
+export function m149Observation(recs, usable, at = new Date().toISOString()) {
+  const ts = recs.map((r) => r.ts).filter((x) => typeof x === 'string').sort();
+  return {
+    at,
+    nRecs: recs.length,
+    afterT: freshRows(recs).length,
+    usable,
+    first: ts[0] ?? null,
+    last: ts[ts.length - 1] ?? null,
+  };
+}
+
+/**
+ * ★純関数。前回と今回を比べて判定を返す。
+ * 返り値 { level: 'ok'|'warn'|'alarm', lines: string[], perDay: number|null, etaDays: number|null }
+ */
+export function m149WatchVerdict(prev, cur, need = M149_NEED) {
+  const lines = [];
+  let level = 'ok';
+  if (!prev) {
+    return { level: 'first', lines: ['★初回の観測。次に叩いたときから増減が見える。'], perDay: null, etaDays: null };
+  }
+  const bump = (l) => { if (l === 'alarm' || (l === 'warn' && level === 'ok')) level = l; };
+  if (cur.usable < prev.usable) {
+    bump('alarm');
+    lines.push(`★★★使える件数が **減った**(${prev.usable} → ${cur.usable})。★ログが刈られている。`);
+  }
+  if (cur.afterT < prev.afterT) {
+    bump('alarm');
+    lines.push(`★★★T より後の件数が **減った**(${prev.afterT} → ${cur.afterT})。★ログが刈られている。`);
+  }
+  if (prev.first && cur.first && cur.first > prev.first) {
+    bump('warn');
+    lines.push(`★★いちばん古い記録が **進んだ**(${prev.first} → ${cur.first})。`
+      + '★古い側から消えている ⇒ ★このまま待つと T より後にも届く。');
+  }
+  const dtDays = (Date.parse(cur.at) - Date.parse(prev.at)) / 86400000;
+  let perDay = null, etaDays = null;
+  if (dtDays > 0) {
+    perDay = (cur.usable - prev.usable) / dtDays;
+    const short = Math.max(0, need - cur.usable);
+    if (short === 0) etaDays = 0;
+    else if (perDay > 0) etaDays = short / perDay;
+    else { etaDays = Infinity; bump('warn'); lines.push('★増えていない(この間隔では 0 件/日)。★届く見込みが立たない。'); }
+  }
+  if (level === 'ok' && !lines.length) lines.push('★単調に増えている。刈られた形跡は無い。');
+  return { level, lines, perDay, etaDays };
+}
 
 /**
  * ★★事前登録(メタ第 25 回)—— 自己申告 COST を FAMILY に足してよいか。
@@ -407,12 +582,33 @@ export function collect(opts = {}) {
 }
 
 /** 子 agent の本文から共変量を読む(重いので必要なときだけ)。 */
-export function covariates(rec, repoRoot) {
+export function covariates(rec, repoRoot, opts = {}) {
   const zero = { leanChecks: 0, checkFails: 0, writes: 0, edits: 0, bashes: 0,
                  briefChars: 0, est: null, estMid: NaN, files: [], lines: NaN, cores: NaN, file: null,
                  linesWritten: NaN, coresWritten: NaN };  // ★linesWritten は「最後の Write の本文」であって完了時の行数ではない(その後の Edit を含まない)
   if (!rec.subagentFile || !fs.existsSync(rec.subagentFile)) return zero;
-  const text = fs.readFileSync(rec.subagentFile, 'utf8');
+  const text = opts.text ?? fs.readFileSync(rec.subagentFile, 'utf8');
+  return covariatesFromText(text, repoRoot, opts);
+}
+
+/**
+ * ★本文(jsonl の中身)から共変量を作る純関数。★`covariates` はこれに委譲するだけ。
+ * ★分けた理由(メタ第 30 回): ★**分母を突然変異させて族が動くかを試す**ため。
+ *   ファイルを書き換えずに本文だけ差し替えられないと、`--denominator` の実証ができない。
+ *
+ * opts:
+ *   fileSource : 'touched'(既定・現行) … `.lean` の path が tool_use の入力に現れた本すべて
+ *                'written'             … ★その agent が Write|Edit した本だけ
+ *   failRule   : 'text'(既定・現行)    … 結果の字面に /error|✗|failed/i があれば失敗
+ *                'header'              … ★lean_check 自身の見出し「エラー N 件」で数える
+ * ★既定は現行と 1 ビットも変わらないこと(selftest が見ている)。
+ */
+export function covariatesFromText(text, repoRoot, opts = {}) {
+  const fileSource = opts.fileSource ?? 'touched';
+  const failRule = opts.failRule ?? 'text';
+  const zero = { leanChecks: 0, checkFails: 0, writes: 0, edits: 0, bashes: 0,
+                 briefChars: 0, est: null, estMid: NaN, files: [], lines: NaN, cores: NaN, file: null,
+                 linesWritten: NaN, coresWritten: NaN };
   const lines = text.split('\n');
   const c = { ...zero, files: [] };
   const fileHits = new Map();
@@ -433,7 +629,8 @@ export function covariates(rec, repoRoot) {
         if (/lean_check$/.test(n)) { c.leanChecks++; pendingCheck.add(b.id); }
         const fp = b.input && (b.input.file_path || b.input.filePath);
         if (typeof fp === 'string' && /\.lean$/i.test(fp) && /Found[\\/]/.test(fp)) {
-          fileHits.set(fp, (fileHits.get(fp) || 0) + 1);
+          const isW = (n === 'Write' || n === 'Edit' || n === 'MultiEdit');
+          if (fileSource !== 'written' || isW) fileHits.set(fp, (fileHits.get(fp) || 0) + 1);
           // ★完了時点の行数。★ファイルは後から別の agent に書き換えられるので、
           //   「いま wc -l した行数」ではなく **その agent が書いた最後の本文** を採る。
           if (n === 'Write' && typeof b.input.content === 'string') {
@@ -444,7 +641,8 @@ export function covariates(rec, repoRoot) {
         if (pendingCheck.has(b.tool_use_id)) {
           pendingCheck.delete(b.tool_use_id);
           const s = typeof b.content === 'string' ? b.content : JSON.stringify(b.content ?? '');
-          if (/error|✗|failed/i.test(s)) c.checkFails++;
+          const bad = failRule === 'header' ? /エラー\s*\d+\s*件/.test(s) : /error|✗|failed/i.test(s);
+          if (bad) c.checkFails++;
         }
       }
     }
@@ -689,6 +887,260 @@ function cmdCost(rows, paths) {
 }
 
 // ════════════════════════════════════════════════════════════════════
+// 4.5 --denominator —— ★「数えているのは実行か、書かれた字面か」を欄ごとに確かめる
+// ════════════════════════════════════════════════════════════════════
+/**
+ * ★M142(メタ第 29 回が残した宿題)の口。
+ * ★M136 が `lake build` で見つけた取り違え —— **記録の本文に書き写した命令を実行と数える** ——
+ *   が、事前登録した族 FAMILY にも入っているかを、★**実データで**確かめる。
+ * ★判定を差し替えるためのものではない。**並べて出すだけ**。
+ */
+
+/** 族 7 本の Holm の階段を返す純関数(★cmdExplain と同じ規則: MIN_N 以上 かつ 全件同値でない)。 */
+export function familyLadder(rows) {
+  const usable = [];
+  for (const f of FAMILY) {
+    const sub = usableRows(rows, f.key);
+    if (sub.length >= MIN_N && new Set(sub.map(r => r[f.key])).size > 1) usable.push({ f, sub });
+  }
+  const raw = usable.map(({ f, sub }) => ({
+    key: f.key, label: f.label, n: sub.length,
+    rho: spearman(sub.map(r => r[f.key]), sub.map(r => r.durationMs)),
+    p: permP(sub.map(r => r[f.key]), sub.map(r => r.durationMs)),
+  }));
+  const adj = holm(raw.map(r => r.p));
+  raw.forEach((r, i) => { r.holm = adj[i]; r.say = adj[i] < 0.05; });
+  return raw;
+}
+
+/** ★族の欄ごとの「出所」。★コードを読んで書いた表ではなく、下の突然変異が裏を取る。 */
+export const PROVENANCE = [
+  { key: 'lines',      from: '実行(tool_use の入力 file_path)+ 円盤の中身', note: '★どの本を採るかは「path が現れた回数」なので Read も混ざる' },
+  { key: 'toolUses',   from: '実行(完了通知 <tool_uses>)',                  note: '系が数えた値。字面ではない' },
+  { key: 'tokens',     from: '実行(完了通知 <subagent_tokens>)',            note: '系が数えた値。字面ではない' },
+  { key: 'cores',      from: '実行(同上)+ 円盤の中身',                      note: '★lines と同じ本を見る' },
+  { key: 'leanChecks', from: '実行(tool_use の name)',                      note: '本文には作れない' },
+  { key: 'checkFails', from: '★字面(tool_result の中身 /error|✗|failed/i)', note: '★道具自身の見出しと突き合わせる' },
+  { key: 'estMid',     from: '字面(brief の本文。★意図的)',                 note: '見積は書かれた字面そのもの' },
+];
+
+/** ★突然変異: Bash の命令文を「罠語だらけ」に置換した本文を作る。★族が動けば字面を読んでいる証拠。 */
+export function trapMutate(text, trap) {
+  const out = [];
+  let n = 0;
+  for (const line of text.split('\n')) {
+    if (!line || !line.includes('"Bash"')) { out.push(line); continue; }
+    let o; try { o = JSON.parse(line); } catch { out.push(line); continue; }
+    const cs = Array.isArray(o.message?.content) ? o.message.content : [];
+    let hit = false;
+    for (const b of cs) if (b.type === 'tool_use' && b.name === 'Bash' && b.input && typeof b.input.command === 'string') { b.input.command = trap; hit = true; }
+    if (!hit) { out.push(line); continue; }
+    n++; out.push(JSON.stringify(o));
+  }
+  return { text: out.join('\n'), n };
+}
+
+export const TRAP_CMD = "cat > log.md <<'EOF'\nlake build ABC3 && node tools/check.mjs && node tools/graph.mjs\nlean/ABC3/Found/ZZZPhantom.lean error ✗ failed lean_check\nEOF";
+
+function cmdDenominator(recs, repoRoot) {
+  const KEYS = ['lines', 'cores', 'leanChecks', 'checkFails', 'estMid', 'writes', 'edits', 'bashes'];
+  console.log('## ★1. 族の 7 欄は「実行」を数えているか「書かれた字面」を数えているか');
+  console.log('');
+  console.log('  欄            出所                                            覚え書き');
+  for (const p of PROVENANCE) console.log(`  ${padr(p.key, 13)} ${padr(p.from, 46)} ${p.note}`);
+  console.log('');
+
+  // -- 突然変異: Bash の命令文をすべて罠語に置き換える
+  let mutated = 0, moved = 0;
+  const movedRows = [];
+  for (const r of recs) {
+    if (!r.subagentFile || !fs.existsSync(r.subagentFile)) continue;
+    const src = fs.readFileSync(r.subagentFile, 'utf8');
+    const m = trapMutate(src, TRAP_CMD);
+    mutated += m.n;
+    if (!m.n) continue;
+    const a = covariates(r, repoRoot);
+    const b = covariates(r, repoRoot, { text: m.text });
+    const d = KEYS.filter(k => String(a[k]) !== String(b[k]));
+    if (d.length) { moved++; movedRows.push([String(r.description).slice(0, 32), d.join(',')]); }
+  }
+  console.log('## ★2. 突然変異 —— Bash の命令文を丸ごと「罠語」に置き換える');
+  console.log('');
+  console.log(`  置換した命令 ${mutated} 件 / ★共変量が動いた agent ${moved} / ${recs.length}`);
+  for (const x of movedRows.slice(0, 10)) console.log(`    ${x[0]} : ${x[1]}`);
+  console.log(moved === 0
+    ? '  ⇒ ★**族の 7 欄は Bash の命令文を 1 文字も読んでいない**(M136 の heredoc 取り違えは族に入っていない)。'
+    : '  ⇒ ★★命令文の字面が族に効いている。上の欄を疑うこと。');
+  console.log('');
+
+  // -- lines/cores の分母: 読んだだけの本か、自分が書いた本か
+  let nT = 0, nW = 0, onlyRead = 0;
+  for (const r of recs) {
+    const a = covariates(r, repoRoot);
+    const b = covariates(r, repoRoot, { fileSource: 'written' });
+    if (a.file) nT++;
+    if (b.file) nW++;
+    if (a.file && a.file !== b.file) onlyRead++;
+  }
+  console.log('## ★3. lines / cores の分母 —— 「触った本」か「自分が書いた本」か');
+  console.log('');
+  console.log(`  対象が決まった agent: 触った本 ${nT} / 自分が書いた本 ${nW} / ★代表が入れ替わる ${onlyRead}`);
+  console.log('  ★入れ替わる分は「読んだだけの本の行数」を仕事の大きさとして数えていた。');
+  console.log('');
+
+  // -- checkFails の字面判定は、道具自身の見出しと何件食い違うか
+  let nChk = 0, byText = 0, byHead = 0, dis = 0;
+  for (const r of recs) {
+    if (!r.subagentFile || !fs.existsSync(r.subagentFile)) continue;
+    const pend = new Set();
+    for (const line of fs.readFileSync(r.subagentFile, 'utf8').split('\n')) {
+      if (!line) continue;
+      let o; try { o = JSON.parse(line); } catch { continue; }
+      for (const b of (Array.isArray(o.message?.content) ? o.message.content : [])) {
+        if (b.type === 'tool_use') { if (/lean_check$/.test(b.name || '')) pend.add(b.id); }
+        else if (b.type === 'tool_result' && pend.has(b.tool_use_id)) {
+          pend.delete(b.tool_use_id);
+          const s = typeof b.content === 'string' ? b.content : JSON.stringify(b.content ?? '');
+          const t = /error|✗|failed/i.test(s), h = /エラー\s*\d+\s*件/.test(s);
+          nChk++; if (t) byText++; if (h) byHead++; if (t !== h) dis++;
+        }
+      }
+    }
+  }
+  console.log('## ★3b. checkFails の字面判定は道具自身の見出しと合っているか');
+  console.log('');
+  console.log(`  lean_check の結果 ${nChk} 件 / 字面 /error|✗|failed/i ${byText} / 見出し「エラー N 件」${byHead} / ★食い違い ${dis}`);
+  console.log(dis * 200 < nChk
+    ? '  ⇒ ★食い違いは 0.5% 未満。★checkFails の字面判定は**動かない**(直しても判定は変わらない。下の v2)。'
+    : '  ⇒ ★★食い違いが大きい。checkFails の分母を疑うこと。');
+  console.log('');
+
+  // -- 階段
+  const mk = (opts) => recs.map(r => ({ ...r, ...covariates(r, repoRoot, opts) })).filter(r => Number.isFinite(r.durationMs));
+  const V = [
+    ['v0 いまのまま(事前登録)', {}],
+    ['v1 lines/cores を「自分が書いた本」に限る', { fileSource: 'written' }],
+    ['v2 checkFails を lean_check 自身の見出しで数える', { failRule: 'header' }],
+  ];
+  const tab = V.map(([nm, o]) => [nm, familyLadder(mk(o))]);
+  console.log('## ★4. 分母を直したときに Holm の階段はどう動くか');
+  console.log('');
+  for (const [nm, st] of tab) {
+    console.log(`  [${nm}]`);
+    console.log('   説明変数        n       ρ    並べ替え p   Holm 後   判定');
+    for (const s of st) {
+      console.log(`   ${padr(s.key, 13)}${pad(s.n, 5)}${pad(s.rho.toFixed(3), 9)}${pad(fmtP(s.p), 12)}${pad(fmtP(s.holm), 10)}   ${s.say ? '★言える(補正後)' : '言えない'}`);
+    }
+    console.log('');
+  }
+  const base = tab[0][1];
+  console.log('  -- 動いた欄 --');
+  let flips = 0;
+  for (const [nm, st] of tab.slice(1)) {
+    for (const s of st) {
+      const b = base.find(x => x.key === s.key);
+      if (!b) continue;
+      if (b.say !== s.say) { flips++; console.log(`   ★${nm.slice(0, 2)} ${padr(s.key, 12)} 判定 ${b.say ? '言える' : '言えない'} → ${s.say ? '言える' : '言えない'}(Holm ${fmtP(b.holm)} → ${fmtP(s.holm)}、n ${b.n} → ${s.n})`); }
+      else if (b.n !== s.n) console.log(`    ${nm.slice(0, 2)} ${padr(s.key, 12)} 判定は同じ(n ${b.n} → ${s.n}、Holm ${fmtP(b.holm)} → ${fmtP(s.holm)})`);
+    }
+  }
+  if (!flips) console.log('   ★判定が反転した欄は無い。');
+  console.log('');
+  console.log('  ★★これは「2 度目の覗き」である。★v1/v2 は**データを見た後に**決めた分母なので、');
+  console.log('    ★ここに出る p を事前登録の p と同じ資格で読んではいけない(メタ第 24 回 M102 と同じ)。');
+  console.log('    ★言えるのは「事前登録の判定は分母の取り方に**耐えない**」ということだけ。');
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 4.6 --m149 —— ★事前登録(0b)をそのまま実行する口。★停止規則を道具が強制する
+// ════════════════════════════════════════════════════════════════════
+/** ★M160 —— 見張り。★`--record` を渡したときだけ履歴に書く(読むだけでは汚さない)。 */
+function cmdM149Watch(recs, repoRoot, record) {
+  const rows = freshRows(recs)
+    .map((r) => ({ ...r, ...covariates(r, repoRoot, { fileSource: M149_DENOM }) }))
+    .filter((r) => Number.isFinite(r.durationMs));
+  const g = m149Gate(rows);
+  const cur = m149Observation(recs, g.n);
+  const p = path.join(repoRoot, M149_WATCH_REL);
+  let hist = [];
+  if (fs.existsSync(p)) {
+    try { hist = JSON.parse(fs.readFileSync(p, 'utf8')).obs || []; } catch { hist = []; }
+  }
+  const prev = hist.length ? hist[hist.length - 1] : null;
+  const v = m149WatchVerdict(prev, cur);
+
+  console.log('## ★M160 M149 の標本の見張り(★保存期間が最大の危険。第 31 回の名指し)');
+  console.log('');
+  console.log(`  履歴          : ${M149_WATCH_REL}(観測 ${hist.length} 件)`);
+  console.log(`  いま          : 通知 ${cur.nRecs} / T より後 ${cur.afterT} / ★使える ${cur.usable}`
+    + ` / 必要 ${M149_NEED}(あと ${Math.max(0, M149_NEED - cur.usable)})`);
+  console.log(`  ログの窓      : ${cur.first ?? '?'} 〜 ${cur.last ?? '?'}`);
+  if (prev) {
+    console.log(`  前回          : ${prev.at} —— 通知 ${prev.nRecs} / T より後 ${prev.afterT} / 使える ${prev.usable}`);
+    console.log(`                  ログの窓 ${prev.first ?? '?'} 〜 ${prev.last ?? '?'}`);
+  }
+  console.log('');
+  const mark = { first: '  ', ok: '  ', warn: '★ ', alarm: '★★' }[v.level] || '  ';
+  for (const l of v.lines) console.log(`  ${mark}${l}`);
+  if (v.perDay !== null) {
+    console.log('');
+    console.log(`  増える速さ    : ${v.perDay.toFixed(2)} 件/日`
+      + (Number.isFinite(v.etaDays) ? `  ⇒ 届くのは あと ${v.etaDays.toFixed(1)} 日` : '  ⇒ ★届かない'));
+  }
+  console.log('');
+  if (record) {
+    hist.push(cur);
+    fs.mkdirSync(path.dirname(p), { recursive: true });
+    fs.writeFileSync(p, JSON.stringify({ v: 1, need: M149_NEED, cutoff: M149_CUTOFF, obs: hist }, null, 1));
+    console.log(`  ★履歴に書いた(観測 ${hist.length} 件目)。`);
+  } else {
+    console.log('  ※ 読んだだけ。履歴に残すには `--record` を足す。');
+  }
+  console.log('  ★★この口は「使える件数」を見るだけで、**階段を計算しない**(停止規則を破らない)。');
+  return v.level;
+}
+
+function cmdM149(recs, repoRoot) {
+  console.log('## ★M149 の事前登録(0b)をそのまま実行する');
+  console.log('');
+  console.log(`  締切 T           : ${M149_CUTOFF}(★M145 が見た標本を全部外す)`);
+  console.log(`  分母             : fileSource='${M149_DENOM}'(★(A) データに依らず決めた)`);
+  console.log(`  一次の欄         : ${M149_PRIMARY}`);
+  console.log(`  必要件数 M149_NEED: ${M149_NEED}(両側・検出力 0.80・α=0.05/7・ρ=0.30。★DEFF>1 なので下限)`);
+  console.log('');
+  const fresh = freshRows(recs);
+  console.log(`  通知 全部 ${recs.length} 件 / ★T より後 ${fresh.length} 件`);
+  const rows = fresh
+    .map(r => ({ ...r, ...covariates(r, repoRoot, { fileSource: M149_DENOM }) }))
+    .filter(r => Number.isFinite(r.durationMs));
+  const g = m149Gate(rows);
+  console.log(`  うち ${M149_PRIMARY} が取れる(= 自分が書いた .lean がある): ★${g.n} 件`);
+  console.log('');
+  if (!g.open) {
+    console.log(`  ★★停止規則により **階段を計算しない**。あと ★${g.short} 件 必要。`);
+    console.log('');
+    console.log('  ★理由: 標本は時間とともに増える。届く前に覗いてから検定すると逐次の覗きになり、');
+    console.log('    第一種の過誤が膨らむ。⇒ 届くまでは**件数だけ**を見る(これが正しい結果である)。');
+    console.log('  ★次の人へ: この口をもう一度叩くだけでよい。締切も分母も必要件数もコードに固定してある。');
+    console.log(`    node tools/agent-timing.mjs --m149`);
+    console.log('  ★★`M149_CUTOFF` / `M149_NEED` を書き換えないこと(selftest が鳴る)。');
+    return;
+  }
+  console.log('  ★★件数が届いた。事前登録どおり族 7 本の階段を 1 度だけ計算する。');
+  console.log('');
+  console.log('   説明変数        n       ρ    並べ替え p   Holm 後   判定');
+  for (const s of g.ladder) {
+    console.log(`   ${padr(s.key, 13)}${pad(s.n, 5)}${pad(s.rho.toFixed(3), 9)}${pad(fmtP(s.p), 12)}${pad(fmtP(s.holm), 10)}   ${s.say ? '★言える(補正後)' : '言えない'}`);
+  }
+  const pr = g.ladder.find(s => s.key === M149_PRIMARY);
+  console.log('');
+  console.log(pr
+    ? `  ★★一次の答え: 「抽象核の本数は所要時間を説明する」は ${pr.say ? '★立つ' : '★立たない'}(Holm ${fmtP(pr.holm)}、n ${pr.n})。`
+    : `  ★一次の欄 ${M149_PRIMARY} は族の階段に載らなかった(全件同値)。`);
+  console.log('  ★これは**事前登録した 1 回の検定**である。★2 度目の覗きではない。');
+}
+
+// ════════════════════════════════════════════════════════════════════
 // 5. selftest
 // ════════════════════════════════════════════════════════════════════
 function selftest() {
@@ -874,6 +1326,145 @@ function selftest() {
   // ★★COST(自己申告)は n が足りるまで族に入れない —— 事前登録(メタ第 25 回)。
   //    条件は 2 つとも満たすこと: (a) 突き合わせ 8 件以上 (b) 各水準に 3 件以上。
   t('family: ★COST はまだ族に入れない', !FAMILY.some(f => f.key === 'costLevel'));
+
+  // ── M142(メタ第 30 回): heredoc を剥ぐ / 分母の突然変異 ────────────────
+  t('heredoc: 素の本文は残る', stripHeredocs('lake build ABC3').includes('lake build'));
+  t('heredoc: ★本文の中の lake build が消える',
+    !stripHeredocs("cat > a.md <<'EOF'\nlake build ABC3\nEOF\ngit status").includes('lake build'));
+  t('heredoc: ★heredoc の外の git は残る',
+    stripHeredocs("cat > a.md <<'EOF'\nlake build ABC3\nEOF\ngit status").includes('git status'));
+  t('heredoc: 引用符なしの tag も剥ぐ',
+    !stripHeredocs('cat > a.md <<EOF\nlake build\nEOF').includes('lake build'));
+  // ★引用符なしの tag を取り落とすと「終端が来ない」ことになり、★後ろが丸ごと消える(黙って分母が減る)
+  t('heredoc: ★引用符なしでも終端の後ろが残る',
+    stripHeredocs('cat > a.md <<EOF\nlake build\nEOF\ngit status').includes('git status'));
+  t('heredoc: <<- も剥ぐ', !stripHeredocs('cat <<-EOF\nlake build\nEOF').includes('lake build'));
+  t('heredoc: 閉じないまま終わっても落ちない', stripHeredocs("cat <<'EOF'\nlake build") === 'cat <<\'EOF\'');
+  t('heredoc: 空/未定義でも落ちない', stripHeredocs(undefined) === '' && stripHeredocs('') === '');
+  t('heredoc: ★分類が変わる(素は lake build、剥ぐと git)',
+    classifyBash("git commit -F- <<'EOF'\nlake build ABC3\nEOF") === 'lake build'
+    && classifyBash(stripHeredocs("git commit -F- <<'EOF'\nlake build ABC3\nEOF")) === 'git');
+  t('heredoc: ★既定の classifyBash は変えていない', classifyBash("x <<'E'\nlake build\nE") === 'lake build');
+  {
+    // trapMutate: Bash の命令文だけを置き換え、他の行はそのまま返す
+    const l1 = JSON.stringify({ message: { content: [{ type: 'tool_use', name: 'Bash', id: 'a', input: { command: 'ls' } }] } });
+    const l2 = JSON.stringify({ message: { content: [{ type: 'tool_use', name: 'Read', id: 'b', input: { file_path: 'x.lean' } }] } });
+    const m = trapMutate([l1, l2, 'not json'].join('\n'), 'ZZZ');
+    t('trap: Bash の件数を数える', m.n === 1);
+    t('trap: ★命令文が置き換わる', m.text.includes('ZZZ'));
+    t('trap: Bash 以外の行は素通り', m.text.includes('x.lean') && m.text.includes('not json'));
+  }
+  {
+    // covariatesFromText の opts が既定では現行と同じで、明示すると効くこと
+    const mk = (name) => JSON.stringify({ message: { content: [{ type: 'tool_use', name, id: name, input: { file_path: 'D:/r/lean/ABC3/Found/A.lean' } }] } });
+    const chk = [
+      JSON.stringify({ message: { content: [{ type: 'tool_use', name: 'mcp__x__lean_check', id: 'c1', input: {} }] } }),
+      JSON.stringify({ message: { content: [{ type: 'tool_result', tool_use_id: 'c1', content: 'OK (0.1 秒)\ninfo: Foo.error_bound' }] } }),
+    ];
+    const text = [mk('Read'), mk('Read'), mk('Write'), ...chk].join('\n');
+    const a = covariatesFromText(text, '.');
+    const b = covariatesFromText(text, '.', { fileSource: 'written' });
+    t('cov: 既定は Read も数える(files に載る)', a.files.length === 1 && a.leanChecks === 1);
+    t('cov: written に限っても Write があれば載る', b.files.length === 1);
+    t('cov: ★字面規則では OK でも error を含めば失敗に数える', a.checkFails === 1);
+    t('cov: ★見出し規則なら失敗に数えない', covariatesFromText(text, '.', { failRule: 'header' }).checkFails === 0);
+    const textRO = [mk('Read'), mk('Read')].join('\n');
+    t('cov: ★読んだだけの本は written では落ちる',
+      covariatesFromText(textRO, '.').files.length === 1
+      && covariatesFromText(textRO, '.', { fileSource: 'written' }).files.length === 0);
+    const textME = [mk('Read'), mk('MultiEdit')].join('\n');
+    t('cov: ★MultiEdit も「自分が書いた」に数える',
+      covariatesFromText(textME, '.', { fileSource: 'written' }).files.length === 1);
+  }
+  {
+    // familyLadder は cmdExplain と同じ規則(MIN_N 以上・全件同値でない)
+    const rows = Array.from({ length: 20 }, (_, i) => ({
+      durationMs: (i + 1) * 1000, lines: (i + 1) * 10, toolUses: i + 1, tokens: (i + 1) * 7,
+      cores: i % 3, leanChecks: i % 4, checkFails: i % 5, estMid: 100,
+    }));
+    const L = familyLadder(rows);
+    t('ladder: 全件同値の欄は落ちる(estMid)', !L.some(x => x.key === 'estMid'));
+    t('ladder: 6 本が残る', L.length === 6);
+    t('ladder: Holm は p 以上', L.every(x => x.holm >= x.p - 1e-12));
+    t('ladder: ★Holm は少なくとも 1 本で p を厳密に上回る(補正が効いている)',
+      L.some(x => x.holm > x.p + 1e-9));
+    t('ladder: 単調(lines)は言える', L.find(x => x.key === 'lines').say === true);
+    t('ladder: ★言えない欄がある(閾が効いている)', L.some(x => x.say === false));
+    t('ladder: n が足りない欄は落ちる', familyLadder(rows.slice(0, 5)).length === 0);
+  }
+
+  // ── ★★★M149 の事前登録(メタ第 31 回)。★黙って書き換わったら鳴る ───────────
+  {
+    t('M149: 締切は 2026-09-07T16:35:29Z のまま', M149_CUTOFF === '2026-09-07T16:35:29Z');
+    t('M149: 必要件数は 134 のまま', M149_NEED === 134);
+    t('M149: 一次の欄は cores', M149_PRIMARY === 'cores');
+    t('M149: 分母は written(touched ではない)', M149_DENOM === 'written');
+    // ★導出を式で固定する(定数だけ直しても鳴るように)
+    const need = (rho, alpha) => {
+      // Acklam の逆正規(±4.5e-4 の精度。★閾の 134 を判定するには十分)
+      const inv = (p) => {
+        const a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02,
+          1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+        const b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02,
+          6.680131188771972e+01, -1.328068155288572e+01];
+        const c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00,
+          -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00];
+        const d = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00, 3.754408661907416e+00];
+        const pl = 0.02425;
+        if (p < pl) { const q = Math.sqrt(-2 * Math.log(p)); return (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1); }
+        if (p > 1 - pl) return -inv(1 - p);
+        const q = p - 0.5, r = q * q;
+        return (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q /
+          (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1);
+      };
+      return 3 + ((inv(1 - alpha / 2) + inv(0.80)) / Math.atanh(rho)) ** 2;
+    };
+    t('M149: ★必要件数 134 は「ρ=0.30・検出力 0.80・α=0.05/7」から出る',
+      Math.ceil(need(0.30, 0.05 / FAMILY.length)) === M149_NEED);
+    t('M149: ★ρ が小さいほど必要件数は増える', need(0.20, 0.05 / 7) > need(0.30, 0.05 / 7));
+    t('M149: ★α が緩いほど必要件数は減る', need(0.30, 0.05) < need(0.30, 0.05 / 7));
+    // freshRows —— 締切の前後で確実に割れる
+    const rr = [{ ts: '2026-09-07T16:35:28Z' }, { ts: '2026-09-07T16:35:29Z' },
+      { ts: '2026-09-07T16:35:30Z' }, { ts: null }, {}];
+    t('M149: freshRows は締切より後だけ', freshRows(rr).length === 1
+      && freshRows(rr)[0].ts === '2026-09-07T16:35:30Z');
+    t('M149: freshRows は ts が無い行を落とす', freshRows([{ ts: null }, {}]).length === 0);
+    // ★filterByTime(第 31 回の突然変異 A10 が素通りしたので純関数に割って試験を足した)
+    t('M149: --since は境界を含まない', filterByTime(rr, '2026-09-07T16:35:29Z').length === 1);
+    t('M149: --until は境界を含む', filterByTime(rr, null, '2026-09-07T16:35:29Z').length === 2);
+    t('M149: --since と --until を両方効かせる',
+      filterByTime(rr, '2026-09-07T16:35:28Z', '2026-09-07T16:35:29Z').length === 1);
+    t('M149: どちらも無ければ素通し', filterByTime(rr).length === rr.length);
+    // ★停止規則 —— 届かなければ ladder を **作らない**
+    const mk = (n) => Array.from({ length: n }, (_, i) => ({
+      durationMs: (i + 1) * 1000, lines: i + 1, cores: i % 7, toolUses: i + 2,
+      tokens: (i + 1) * 10, leanChecks: i % 5, checkFails: i % 3, estMid: 100 + i,
+    }));
+    const gLo = m149Gate(mk(M149_NEED - 1));
+    t('M149: ★届かなければ open=false', gLo.open === false);
+    t('M149: ★届かなければ ladder は null(計算すらしない)', gLo.ladder === null);
+    t('M149: ★不足数を出す', gLo.short === 1 && gLo.n === M149_NEED - 1);
+    const gHi = m149Gate(mk(M149_NEED));
+    t('M149: ★届けば open=true', gHi.open === true);
+    t('M149: ★届けば ladder は族の階段', Array.isArray(gHi.ladder) && gHi.ladder.length >= 1
+      && gHi.ladder.every(x => Number.isFinite(x.holm)));
+    t('M149: ★届いたときの不足数は 0', gHi.short === 0);
+    // ★分母が written であることを実データ形式で確かめる(touched なら Read だけの本が代表になる)
+    {
+      const mkLine = (o) => JSON.stringify({ message: { role: 'assistant', content: o } });
+      const rd = { type: 'tool_use', id: 'r1', name: 'Read', input: { file_path: 'lean/ABC3/Found/A.lean' } };
+      const wr = { type: 'tool_use', id: 'w1', name: 'Write', input: { file_path: 'lean/ABC3/Found/B.lean', content: 'x\ny\n' } };
+      const txt = [mkLine([rd]), mkLine([rd]), mkLine([rd]), mkLine([wr])].join('\n');
+      const cT = covariatesFromText(txt, '.', {});
+      const cW = covariatesFromText(txt, '.', { fileSource: 'written' });
+      t('M149: touched は Read だけの本を代表にする(これが M145 の誤り)', cT.file === 'lean/ABC3/Found/A.lean');
+      t('M149: ★written は自分が書いた本を代表にする', cW.file === 'lean/ABC3/Found/B.lean');
+      t('M149: ★written は Read しかしていない agent で欠測する',
+        covariatesFromText([mkLine([rd])].join('\n'), '.', { fileSource: 'written' }).file === null);
+    }
+    // ★M111 は族に入れない(M149 手順 3 の決着を固定する)
+    t('M149: ★M111(完了時点の行数)は族に入れない', !FAMILY.some(f => /^lines(Written|AtDone)$/.test(f.key)));
+  }
   t('cost: ★族に入れる条件(8 件かつ各水準 3 件)', costFamilyReady([]) === false
      && costFamilyReady(['安', '安', '安', '並', '並', '並', '高', '高']) === false
      && costFamilyReady(['安', '安', '安', '並', '並', '並', '高', '高', '高']) === true);
@@ -981,6 +1572,180 @@ function selftest() {
     const outE = gr(() => cmdDiag(recsA, digEmpty));
     t('diag: 診断ゼロでも落ちない(全部 件数不足)', (outE.match(/件数不足/g) || []).length === 10);
     t('diag: 突き合わせられない件数を印字する', outD.includes('本体セッション'));
+  }
+
+  // --- 5c. --main(本体セッションの費用。★事前登録した単位が本当にその単位か)
+  {
+    t('main: normLean 絶対パス', normLean('D:\\Math_ABC3\\lean\\ABC3\\Found\\X.lean') === 'ABC3/Found/X.lean');
+    t('main: normLean 相対パス', normLean('lean/ABC3/Found/PGC/ArtinMap.lean') === 'ABC3/Found/PGC/ArtinMap.lean');
+    t('main: normLean ABC3 が無ければそのまま', normLean('tools/check.mjs') === 'tools/check.mjs');
+    t('main: leanTarget は file_path から', leanTarget('Edit', { file_path: 'D:/Math_ABC3/lean/ABC3/Found/A.lean' }) === 'ABC3/Found/A.lean');
+    t('main: leanTarget は .lean 以外の file_path を採らない', leanTarget('Read', { file_path: 'ResearchPaper/x.md' }) === null);
+    t('main: leanTarget は Bash の本文からも拾う', leanTarget('Bash', { command: 'lake build ABC3.Found.B 2>&1 | head; wc -l lean/ABC3/Found/B.lean' }) === 'ABC3/Found/B.lean');
+    t('main: leanTarget 無ければ null', leanTarget('Bash', { command: 'git status' }) === null);
+    t('main: classifyBash は lake build を node より先に当てる', classifyBash('cd x && lake build ABC3 && node tools/check.mjs') === 'lake build');
+    t('main: classifyBash 既定は その他', classifyBash('ls -la') === 'その他');
+    // bundleByFile —— ファイルで分かれ、gap で切れる
+    const mk = (id, t0, ms, tgt, n = 'Bash', bk = '') => ({ id, s: 'S', n, bk, t0, t1: t0 + ms, tgt, e: 0 });
+    const cs = [mk('1', 0, 1000, 'ABC3/A.lean'), mk('2', 60000, 1000, 'ABC3/A.lean'),
+                mk('3', 120000, 1000, 'ABC3/B.lean'),
+                mk('4', 60000 * 100, 1000, 'ABC3/A.lean'), mk('5', 0, 1, null)];
+    const bs = bundleByFile(cs, 30);
+    t('main: 塊はファイルで分かれる', bs.filter(b => b.file === 'ABC3/B.lean').length === 1);
+    t('main: 30 分空いたら別の塊', bs.filter(b => b.file === 'ABC3/A.lean').length === 2);
+    t('main: 対象の無い呼び出しは塊に入らない', bs.reduce((s, b) => s + b.calls.length, 0) === 4);
+    // delegLike —— (a)(b)(c) が独立に効く
+    const many = (file, k, lean) => ({ file, start: 0, end: 1000 * k, calls: Array.from({ length: k }, (_, i) =>
+      mk('x' + i, i * 1000, 100, file, lean && i === 0 ? 'mcp__abc3-lean__lean_check' : 'Bash')) });
+    t('main: (a) 短い塊は輪郭に入らない', delegLike(many('ABC3/A.lean', 5, true), [], 20).ok === false);
+    t('main: (c) Lean を叩かない塊は入らない', delegLike(many('ABC3/A.lean', 30, false), [], 20).why === 'Lean を叩いていない');
+    t('main: 3 条件を満たせば入る', delegLike(many('ABC3/A.lean', 30, true), [], 20).ok === true);
+    const foreign = [{ ...mk('w', 5000, 10, 'ABC3/OTHER.lean', 'Edit'), }];
+    t('main: (b) 期間内に他の .lean を書いたら入らない', /他の \.lean/.test(delegLike(many('ABC3/A.lean', 30, true), foreign, 20).why));
+    t('main: (b) 同じファイルへの Write は落とさない',
+      delegLike(many('ABC3/A.lean', 30, true), [{ ...mk('w', 5000, 10, 'ABC3/A.lean', 'Edit') }], 20).ok === true);
+    // activeMs —— 頭打ちが効く
+    // ★t0 = 0 は「時刻が取れなかった」印なので activeMs は外す。★試験も 0 を使わない。
+    t('main: 稼働の代理は間隔を cap で頭打ちにする',
+      activeMs([mk('a', 1000, 1000, null), mk('b', 3601000, 1000, null)], 300) === 1000 + 300000 + 1000);
+    t('main: 時刻の無い呼び出し(t0=0)は稼働に数えない', activeMs([mk('a', 0, 1000, null)], 300) === 0);
+    // attributeDiagnostics —— 秒で割る / 割れないものは黙って寄せない / agent の分は扱わない
+    const cA = mk('c1', 10000, 2000, 'ABC3/A.lean');            // t1 = 12000 → 秒 12
+    const cB = mk('c2', 11000, 1000, 'ABC3/B.lean');            // t1 = 12000 → 秒 12
+    const E = (ts, file, msg, ag = '') => ({ ts, file, msg, src: 'tree', ag });
+    const a1 = attributeDiagnostics([cA], [E(12, 'lean/ABC3/A.lean', 'unsolved goals')]);
+    t('main: 診断を秒で呼び出しに割り当てる', a1.matched === 1 && a1.byCall.get('c1').fam[1] === 1);
+    const a2 = attributeDiagnostics([cA, cB], [E(12, 'lean/ABC3/B.lean', 'unsolved goals')]);
+    t('main: 同じ秒でもファイルで割れる', a2.matched === 1 && a2.byCall.has('c2'));
+    const a3 = attributeDiagnostics([cA, cB], [E(12, 'lean/ABC3/Z.lean', 'unsolved goals')]);
+    t('main: 割れないものは ambiguous に数える(寄せない)', a3.matched === 0 && a3.ambiguous === 1);
+    const a4 = attributeDiagnostics([cA], [E(12, 'lean/ABC3/A.lean', 'unsolved goals', 'toolu_agent')]);
+    t('main: agent の診断は本体に数えない', a4.matched === 0);
+    const a5 = attributeDiagnostics([cA], [E(99, 'lean/ABC3/A.lean', 'unsolved goals')]);
+    t('main: 対応する呼び出しが無ければ unmatched', a5.unmatched === 1);
+    const a6 = attributeDiagnostics([cA], [{ ts: 12, file: 'x', msg: 'unsolved goals', src: 'scratch', ag: '' }]);
+    t('main: 既定のスコープは tree だけ', a6.matched === 0);
+  }
+
+  // ────────────────────────────────────────────────────────────
+  // ★★M159 —— 「他と混ざらない命令だけ」の規則(SOLO-1)の較正
+  // ★★第 30 回・第 31 回の反省を踏まえ、**素通りしそうな側を先に書く**:
+  //   混ざっている命令を落とせるか / heredoc の幽霊を落とせるか / 時間の付け方。
+  // ────────────────────────────────────────────────────────────
+  {
+    const NL = String.fromCharCode(10);
+    t('solo: 単独の check.mjs は当たる', soloOf('node tools/check.mjs --brief') === 'check.mjs');
+    t('solo: Windows の \\ 区切りでも当たる', soloOf('node tools\\check.mjs --brief') === 'check.mjs');
+    t('solo: ★2 本混ざったら落とす',
+      soloOf('node tools/check.mjs --brief && node tools/graph.mjs') === null);
+    t('solo: ★lake build が混ざったら落とす',
+      soloOf('lake build ABC3 && node tools/check.mjs') === null);
+    t('solo: ★lake env lean が混ざったら落とす',
+      soloOf('lake env lean X.lean; node tools/graph.mjs') === null);
+    t('solo: どれにも当たらなければ null', soloOf('git status') === null);
+    t('solo: 空でも落ちない', soloOf('') === null && soloOf(null) === null && soloOf(undefined) === null);
+    t('solo: ★git や grep が繋がっていても L1 では単独(★既知の穴。文書化済)',
+      soloOf('git status && node tools/check.mjs --brief') === 'check.mjs');
+    // ★heredoc の幽霊(M146)。本文に別の道具名が書き写されている記録。
+    {
+      const cmd = ['cat > x.md <<EOF', 'node tools/graph.mjs をここで叩いた', 'EOF',
+        'node tools/check.mjs --brief'].join(NL);
+      t('solo: ★L0(素)は heredoc の本文に騙されて落とす', soloOf(cmd, 0) === null);
+      t('solo: ★★L1 は heredoc を剥いで正しく check.mjs に当てる', soloOf(cmd, 1) === 'check.mjs');
+    }
+    // ★L2(厳格)—— 他の tools/ を許さない
+    t('solo: L1 は他の tools/ を許す',
+      soloOf('node tools/check.mjs && node tools/hedge-index.mjs', 1) === 'check.mjs');
+    t('solo: ★L2 は他の tools/ を許さない',
+      soloOf('node tools/check.mjs && node tools/hedge-index.mjs', 2) === null);
+    t('solo: L2 でも本当に単独なら当たる', soloOf('node tools/check.mjs --brief', 2) === 'check.mjs');
+    t('solo: ★L2 は python が混ざったら落とす',
+      soloOf('node tools/check.mjs && python x.py', 2) === null
+      && soloOf('node tools/check.mjs && python x.py', 1) === 'check.mjs');
+    t('solo: 同じ道具を 2 回書いても 1 件(★既知の穴。文書化済)',
+      soloOf('node tools/check.mjs; node tools/check.mjs') === 'check.mjs');
+    t('solo: mentioned は基底名を拾う',
+      [...soloToolsMentioned('node tools/a.mjs && node tools\\b.py')].sort().join(',') === 'a.mjs,b.py');
+    // ★集計(tallySolo)—— 時間の付け方と、母集団から落ちるもの
+    {
+      const C = (cmd, t0, t1) => ({ cmd, t0, t1 });
+      const cs = [
+        C('node tools/check.mjs', 1000, 8000),          // 7 秒
+        C('node tools/check.mjs', 1000, 4000),          // 3 秒
+        C('node tools/graph.mjs', 1000, 4000),          // 3 秒
+        C('node tools/check.mjs && node tools/graph.mjs', 1000, 100000),  // ★混ざり: 落ちる
+        C('node tools/ledger.mjs', 5000, 0),            // ★対にならず: 落ちる
+        C('node tools/mojibake.mjs', 0, 90000),         // ★t0 が無い: 落ちる
+        C('git status', 1000, 90000),                   // 対象外
+      ];
+      const g = tallySolo(cs, [1])[1];
+      const row = (id) => g.rows.find((r) => r.id === id);
+      t('solo: 単独だけを数える(件数 3)', g.n === 3);
+      t('solo: ★混ざった 99 秒を合計に入れない', Math.abs(g.hours - 13 / 3600) < 1e-9);
+      t('solo: ★t1 が無い呼び出しを落とす', row('ledger.mjs').n === 0);
+      t('solo: ★t0 が無い呼び出しも落とす', row('mojibake.mjs').n === 0);
+      t('solo: 道具ごとに割れる', row('check.mjs').n === 2 && row('graph.mjs').n === 1);
+      t('solo: 中央値を出す(7s と 3s → 5.0s)', row('check.mjs').med === 5);
+      t('solo: 1 件なら中央値はその値', row('graph.mjs').med === 3);
+      t('solo: 空なら中央値は null', row('mojibake.mjs').med === null);
+      t('solo: 中央値の偶数個は平均', soloMedian([1000, 2000, 3000, 6000]) === 2.5);
+      t('solo: 中央値の空は null', soloMedian([]) === null);
+      t('solo: ★L0/L1/L2 が同時に出る', Object.keys(tallySolo(cs)).sort().join(',') === '0,1,2');
+    }
+    // ★L3(素朴)—— M139 の 2.7 時間がどの定義から出たのかを探すために足した
+    {
+      t('solo: L3 は繋がっていない 1 本だけ当てる', soloOf('node tools/check.mjs --brief', 3) === 'check.mjs');
+      t('solo: ★L3 は git と繋がっていたら落とす(L1 は当てる)',
+        soloOf('git status && node tools/check.mjs', 3) === null
+        && soloOf('git status && node tools/check.mjs', 1) === 'check.mjs');
+      t('solo: ★L3 は パイプでも落とす',
+        soloOf('node tools/check.mjs | tail -5', 3) === null);
+      t('solo: ★L3 は 改行でも落とす',
+        soloOf('cd x' + String.fromCharCode(10) + 'node tools/check.mjs', 3) === null);
+      t('solo: soloSegments が本数を数える',
+        soloSegments('a && b ; c | d') === 4 && soloSegments('a') === 1 && soloSegments('') === 0);
+    }
+    // ────────────────────────────────────────────────────────
+    // ★★M160 —— 保存期間の見張り。★**刈られた形を先に書いてから**道具を試す。
+    // ────────────────────────────────────────────────────────
+    {
+      const O = (at, afterT, usable, first) => ({ at, nRecs: 100, afterT, usable, first, last: 'z' });
+      const D0 = '2026-09-08T00:00:00Z';
+      const D1 = '2026-09-09T00:00:00Z';
+      t('M160: 初回は判定を出さない', m149WatchVerdict(null, O(D0, 2, 1, 'a')).level === 'first');
+      t('M160: ★★使える件数が減ったら alarm',
+        m149WatchVerdict(O(D0, 9, 5, 'a'), O(D1, 9, 3, 'a')).level === 'alarm');
+      t('M160: ★★T より後が減ったら alarm',
+        m149WatchVerdict(O(D0, 9, 5, 'a'), O(D1, 7, 5, 'a')).level === 'alarm');
+      t('M160: ★いちばん古い記録が進んだら warn',
+        m149WatchVerdict(O(D0, 9, 5, 'a'), O(D1, 10, 6, 'b')).level === 'warn');
+      t('M160: 増えていれば ok',
+        m149WatchVerdict(O(D0, 9, 5, 'a'), O(D1, 12, 8, 'a')).level === 'ok');
+      t('M160: ★横ばい(0 件/日)は warn',
+        m149WatchVerdict(O(D0, 9, 5, 'a'), O(D1, 9, 5, 'a')).level === 'warn');
+      t('M160: 速さを 件/日 で出す',
+        m149WatchVerdict(O(D0, 9, 5, 'a'), O(D1, 12, 8, 'a')).perDay === 3);
+      t('M160: ★届く日数を出す(134 まで あと 126 を 3 件/日)',
+        Math.abs(m149WatchVerdict(O(D0, 9, 5, 'a'), O(D1, 12, 8, 'a')).etaDays - 126 / 3) < 1e-9);
+      t('M160: ★増えないなら届かない(Infinity)',
+        m149WatchVerdict(O(D0, 9, 5, 'a'), O(D1, 9, 5, 'a')).etaDays === Infinity);
+      t('M160: ★alarm は warn に負けない(減りと古い側が同時でも alarm)',
+        m149WatchVerdict(O(D0, 9, 5, 'a'), O(D1, 9, 3, 'b')).level === 'alarm');
+      t('M160: 観測を組み立てる(窓の端を拾う)', (() => {
+        const o = m149Observation([{ ts: '2026-09-01' }, { ts: '2026-09-09' }, { ts: '2026-08-30' }], 7, D0);
+        return o.first === '2026-08-30' && o.last === '2026-09-09' && o.nRecs === 3 && o.usable === 7;
+      })());
+      t('M160: ★T より後だけを afterT に数える', (() => {
+        const o = m149Observation([{ ts: '2026-09-06T00:00:00Z' }, { ts: '2026-09-08T00:00:00Z' }], 0, D0);
+        return o.afterT === 1;
+      })());
+      t('M160: 記録が空でも落ちない', (() => {
+        const o = m149Observation([], 0, D0);
+        return o.first === null && o.last === null && o.afterT === 0;
+      })());
+      t('M160: 履歴の置き場所は整列で運ばれる ResearchPaper/',
+        M149_WATCH_REL.startsWith('ResearchPaper/'));
+    }
   }
 
   console.log(`\nselftest: ${ok}/${ok + ng}`);
@@ -1169,9 +1934,584 @@ function cmdDiag(recs, digest) {
 }
 
 // ════════════════════════════════════════════════════════════════════
+// 5c. 本体セッションの費用(`--main`)—— ★★事前登録(メタ第 28 回。M125 が残した宿題)
+// ════════════════════════════════════════════════════════════════════
+//
+// ★なぜ要るか(M122 の実測): Lean を叩く仕事の **88%** は本体がやっているのに、
+//   本体は agent ではないので `duration_ms` が無い。★だが `tool_use` と `tool_result` は
+//   どちらも時刻つきで会話ログに残っており、`tool_use_id` で対にできる(M125 が 36,251 件で確認)。
+//
+// ★★事前登録(★M125 が「データを見る前にコードへ焼け」と書いたもの。★後から欄を足さない)
+// ------------------------------------------------
+//   母集団 : 親セッションのログ `~/.claude/projects/<slug>/*.jsonl`(`subagents/` は入れない)。
+//            ★`isSidechain: true` の行は外す(子の会話が混ざる場合の保険。M122 は 3 本とも 0 行と実測)。
+//   対応   : `tool_use.id` → 後続の `tool_result.tool_use_id`。時刻は**行の** `timestamp`。
+//   ★Y3   : 対の経過秒(= 道具そのものの遅さ)。★人の思考・生成の時間は**入らない**。
+//   ★Y2   : 塊あたりの呼び出し数(往復数)。
+//   束     : ★**ファイル塊** —— 対象が同じ `.lean` である呼び出しを時刻順に並べ、
+//            間隔が MAIN_GAP_MIN(30 分)を超えたら別の塊にする。
+//            ★「日」でも「診断の前後」でもなく **ファイル** を単位にすると**先に**決めた。理由は
+//            本体の問い(「agent に配れたはずの塊はどれか」)の単位が **1 ファイル = 1 持ち場**だから
+//            (agent への brief は「このファイルを埋めよ」の形で配られている)。
+//   族     : DIAG_FAMILIES(M122 の 5 つ)を**動かさない**(m の意味が濁ると既存の判定が動く)。
+//
+// ★★★測れないこと(★先に書く。後から言い訳しない)
+//   - 「**配れたはず**」は反実仮想であり、ログからは決して測れない。★因果も測れない。
+//   - ★代わりに測るのは「**既に配った塊の輪郭に入るか**」だけ。輪郭の閾は実データから取るが、
+//     ★規則はここに固定する:
+//       (a) 呼び出し数 ≥ 実際に配った `lean-prover` agent の `tool_uses` の第 1 四分位
+//       (b) 塊の期間に **他の `.lean` を Write/Edit していない**(= 1 ファイルで閉じている)
+//       (c) `lean_check` か `lake build` を 1 回以上含む(= Lean を実際に叩いている)
+//     ⇒ ★これは「**似ている**」であって「配れた」ではない。★言えるのはそこまで。
+//   - ★Y3 に人の思考時間は入らない。「稼働時間」は隣接呼び出しの間隔を MAIN_ACTIVE_GAP_S(300 秒)で
+//     頭打ちにした**代理**であって、実際に机に向かっていた時間ではない。
+export const MAIN_GAP_MIN = 30;
+export const MAIN_ACTIVE_GAP_S = 300;
+export const MAIN_CACHE_V = 2;   // ★v2: heredoc を剥いだ bkS/tgtS を足した(M142)。v1 の cache は捨てられる。
+
+/** `D:\…\lean\ABC3\Found\X.lean` などを `ABC3/Found/X.lean` に正規化する。★純関数。 */
+export function normLean(p) {
+  const s = String(p || '').replace(/\\/g, '/');
+  const i = s.lastIndexOf('ABC3/');
+  return i >= 0 ? s.slice(i) : s;
+}
+
+const LEAN_IN_TEXT = /[A-Za-z0-9_.\/\\:-]*ABC3[\\/][A-Za-z0-9_.\/\\-]*\.lean/;
+
+/** 呼び出し 1 件の「対象 .lean」。引数に無ければコマンド本文から拾う。無ければ null。 */
+export function leanTarget(name, input) {
+  const i = input || {};
+  for (const k of ['file_path', 'filePath', 'path', 'notebook_path']) {
+    const v = i[k];
+    if (typeof v === 'string' && /\.lean$/i.test(v)) return normLean(v);
+  }
+  const txt = String(i.command ?? i.snippet ?? i.code ?? i.pattern ?? '');
+  const m = txt.match(LEAN_IN_TEXT);
+  return m ? normLean(m[0]) : null;
+}
+
+/**
+ * ★ヒアドキュメントの本文は「実行した命令」ではない。判定から外す。
+ * ★規則は `tools/hooks/bash-guard.mjs` と同じ(あちらは 2026-08-21 の誤爆で入った)。
+ * ★★これが要る理由(M136): 本体は `cat > log.md <<'EOF' … lake build ABC3 … EOF` の形で
+ *   **記録の本文に自分のコマンドを書き写す**。素の正規表現はそれを呼び出しとして数える。
+ * ★★**既定の判定は変えない**(既存の M95/M101/M110/M112/M128 の分母が動くため)。
+ *   剥いだほうは `--main` の「剥いだ」欄と `--denominator` にだけ出す。
+ */
+export function stripHeredocs(src) {
+  const lines = String(src ?? '').split('\n');
+  const out = [];
+  let tag = null;
+  for (const line of lines) {
+    if (tag !== null) { if (line.trim() === tag) tag = null; continue; }
+    out.push(line);
+    const m = line.match(/<<-?\s*(?:'([A-Za-z_][A-Za-z0-9_]*)'|"([A-Za-z_][A-Za-z0-9_]*)"|([A-Za-z_][A-Za-z0-9_]*))/);
+    if (m) tag = m[1] || m[2] || m[3];
+  }
+  return out.join('\n');
+}
+
+/** Bash の中身の分類(★記述であって検定ではない。★順序が意味を持つ —— 上から先に当てる)。 */
+export const BASH_KINDS = [
+  { id: 'lake build', re: /\blake\s+build\b/ },
+  { id: 'lake env lean', re: /\blake\s+env\s+lean\b/ },
+  { id: 'check.mjs', re: /tools[\\/]check\.mjs/ },
+  { id: 'graph.mjs', re: /tools[\\/]graph\.mjs/ },
+  { id: 'ledger.mjs', re: /tools[\\/]ledger\.mjs/ },
+  { id: 'decl-index.mjs', re: /tools[\\/]decl-index\.mjs/ },
+  { id: 'leanfile.mjs', re: /tools[\\/]leanfile\.mjs/ },
+  { id: 'tools/ その他', re: /tools[\\/][A-Za-z0-9_.-]+\.(mjs|py|js)/ },
+  { id: 'git', re: /(^|[\s;|&(])git\s/ },
+  { id: 'grep/rg/find', re: /(^|[\s;|&(])(grep|rg|findstr|find)\s/ },
+  { id: 'python', re: /(^|[\s;|&(])(python|py311env)/ },
+  { id: 'node(その他)', re: /(^|[\s;|&(])node\s/ },
+];
+export function classifyBash(cmd) {
+  const s = String(cmd || '');
+  for (const k of BASH_KINDS) if (k.re.test(s)) return k.id;
+  return 'その他';
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// ★★★M159 —— 「他と混ざらない命令だけ」の**規則を 1 つに決めて焼く**(メタ第 32 回)
+// ══════════════════════════════════════════════════════════════════════════
+/**
+ * ★なぜ要るか: ★**M139 は「他と混ざらない命令だけ」で 2.7 時間と公表したが、
+ *   その規則は台帳にもコードにも無く、再現できない。**★第 31 回は自分の定義で数え直して
+ *   4.52 時間を得たが、★「2.7 と 4.52 の差には定義の差も混ざる」と正直に書いて終わっている。
+ *   ⇒ ★**ここに規則を焼く。**以後は誰でも同じ数字が出せる(`--solo`)。
+ *
+ * ★★**正典の規則 SOLO-1**(★これを既定とする。理由は下の「なぜ L1 か」)
+ * ------------------------------------------------------------------
+ *   Bash 呼び出し 1 件が「道具 T の単独実行」であるとは、
+ *     (0) `stripHeredocs` で **heredoc の本文を外した**あと(★M146: 記録の本文に
+ *         自分のコマンドを書き写す癖があり、素のままだと幽霊を数える)、
+ *     (1) `SOLO_SET` の中で **T だけ**が現れ(他の 5 本は現れない)、
+ *     (2) `lake build` も `lake env lean` も現れない
+ *   の 3 つがすべて成り立つこと。
+ *
+ * ★**測る量**: その呼び出しの `tool_result` までの実時間(`t1 - t0`)。
+ * ★**母集団**: 親セッション(`isSidechain !== true`)の Bash 呼び出しのみ。
+ *
+ * ★★**なぜ L1 を正典にするか**: ★M153(第 31 回)が使った定義と**同じ**だから。
+ *   ★ここで新しい定義を正典にすると、比べる相手(4.52 時間)が無くなる。
+ *   ★より厳しい L2 と、より素朴な L0 も**同時に**数えて並べる ⇒
+ *   ★「どちらが正しいか」ではなく「**どの定義でいくつか**」が読めるようにする。
+ *
+ * ★**この規則が数えないもの(既知の穴。隠さず書く)**:
+ *   - `&&` で `git` や `grep` が繋がった呼び出しは L1 では**単独**に数える
+ *     (それらは `SOLO_SET` に居ないため)。⇒ L2 でも `tools/` 以外は落とさない。
+ *   - 同じ道具を 1 命令の中で 2 回叩いた場合も 1 件と数える(★M130 の「2 度建て」と同じ形)。
+ *   - `tool_result` が対になっていない呼び出しは母集団から落ちる(時間が測れないため)。
+ */
+export const SOLO_SET = [
+  { id: 'check.mjs', re: /tools[\\/]check\.mjs/ },
+  { id: 'mojibake.mjs', re: /tools[\\/]mojibake\.mjs/ },
+  { id: 'decl-index.mjs', re: /tools[\\/]decl-index\.mjs/ },
+  { id: 'graph.mjs', re: /tools[\\/]graph\.mjs/ },
+  { id: 'unverified.mjs', re: /tools[\\/]unverified\.mjs/ },
+  { id: 'ledger.mjs', re: /tools[\\/]ledger\.mjs/ },
+];
+export const SOLO_LAKE = /\blake\s+(?:build|env\s+lean)\b/;
+/** ★L2 でだけ使う: 命令文に出てくる `tools/xxx.(mjs|py|js)` の**基底名**を全部拾う。 */
+export function soloToolsMentioned(s) {
+  const out = new Set();
+  const re = /tools[\\/]([A-Za-z0-9_.-]+\.(?:mjs|py|js))/g;
+  let m;
+  while ((m = re.exec(String(s || '')))) out.add(m[1]);
+  return out;
+}
+
+/**
+ * ★純関数。命令文 1 本が「どの道具の単独実行か」を返す(該当しなければ `null`)。
+ * @param {string} cmd   Bash の命令文(素のまま渡してよい。L>=1 は中で剥ぐ)
+ * @param {number} level 0=素(剥がない) / 1=★正典 SOLO-1 / 2=厳格(他の tools/ も許さない)
+ *                       / 3=素朴(★命令が 1 本だけ。`&&` `;` `|` で繋がっていない)
+ */
+export function soloOf(cmd, level = 1) {
+  const raw = String(cmd ?? '');
+  const s = level >= 1 ? stripHeredocs(raw) : raw;
+  if (SOLO_LAKE.test(s)) return null;                 // (2) lake は混ぜない
+  const hit = SOLO_SET.filter((k) => k.re.test(s));
+  if (hit.length !== 1) return null;                  // (1) ちょうど 1 本
+  if (level >= 2) {
+    const mentioned = soloToolsMentioned(s);
+    if (mentioned.size !== 1) return null;            // ★他の tools/ が居たら落とす
+    if (/(^|[\s;|&(])(python|py311env)/.test(s)) return null;
+  }
+  if (level >= 3 && soloSegments(s) !== 1) return null; // ★命令が 1 本だけ
+  return hit[0].id;
+}
+
+/**
+ * ★L3 でだけ使う: 命令文がいくつの「命令」から成るか。
+ * ★`&&` `||` `;` `|` と改行で割り、空でない断片を数える。
+ * ★これは**近似**である(引用符の中の `;` も割ってしまう)。★近似だと分かるように名前を分けてある。
+ */
+export function soloSegments(s) {
+  return String(s ?? '')
+    .split(/&&|\|\||[;|\n]/)
+    .map((x) => x.trim())
+    .filter(Boolean).length;
+}
+
+/** ★中央値(ミリ秒の配列 → 秒)。★空なら null。 */
+export function soloMedian(ms) {
+  if (!ms.length) return null;
+  const a = ms.slice().sort((x, y) => x - y);
+  const n = a.length;
+  const v = n % 2 ? a[(n - 1) / 2] : (a[n / 2 - 1] + a[n / 2]) / 2;
+  return v / 1000;
+}
+
+/** ★純関数。呼び出しの配列 → 定義ごと・道具ごとの集計。★I/O をしない ⇒ selftest で較正できる。 */
+export function tallySolo(calls, levels = [0, 1, 2]) {
+  const out = {};
+  for (const lv of levels) {
+    const per = {};
+    for (const k of SOLO_SET) per[k.id] = [];
+    for (const c of calls) {
+      if (!c.cmd) continue;
+      if (!(c.t0 > 0 && c.t1 > 0 && c.t1 >= c.t0)) continue;
+      const id = soloOf(c.cmd, lv);
+      if (id) per[id].push(c.t1 - c.t0);
+    }
+    const rows = SOLO_SET.map((k) => ({
+      id: k.id, n: per[k.id].length,
+      hours: per[k.id].reduce((a, b) => a + b, 0) / 3600000,
+      med: soloMedian(per[k.id]),
+    }));
+    out[lv] = { rows, n: rows.reduce((a, r) => a + r.n, 0), hours: rows.reduce((a, r) => a + r.hours, 0) };
+  }
+  return out;
+}
+
+/** 親セッションのログを舐めて `tool_use` ↔ `tool_result` の対を作る。★重いので cache を持つ。 */
+export async function scanMainCalls(opts = {}) {
+  const roots = opts.roots ?? projectRoots();
+  const files = [];
+  for (const root of roots) {
+    if (!fs.existsSync(root)) continue;
+    for (const f of fs.readdirSync(root)) if (f.endsWith('.jsonl')) files.push(path.join(root, f));
+  }
+  files.sort();
+  const sig = files.map(f => { const s = fs.statSync(f); return `${f}:${s.size}:${Math.floor(s.mtimeMs)}`; }).join('|');
+  const cache = opts.cache ?? null;
+  if (cache && fs.existsSync(cache)) {
+    try {
+      const c = JSON.parse(fs.readFileSync(cache, 'utf8'));
+      if (c.v === MAIN_CACHE_V && c.sig === sig) return { ...c, nFiles: files.length, cached: true };
+    } catch { /* 作り直す */ }
+  }
+  const calls = [];
+  let uses = 0, sidechain = 0, unpaired = 0;
+  for (const f of files) {
+    const sess = path.basename(f, '.jsonl').slice(0, 8);
+    const pend = new Map();
+    const rl = readline.createInterface({ input: fs.createReadStream(f), crlfDelay: Infinity });
+    for await (const line of rl) {
+      if (!line.includes('"tool_use"') && !line.includes('"tool_result"')) continue;
+      let o; try { o = JSON.parse(line); } catch { continue; }
+      if (o.isSidechain === true) { sidechain++; continue; }
+      const ts = o.timestamp ? Date.parse(o.timestamp) : 0;
+      const c = o.message?.content;
+      if (!Array.isArray(c)) continue;
+      for (const b of c) {
+        if (b.type === 'tool_use') {
+          uses++;
+          const cmd = b.name === 'Bash' ? String(b.input?.command || '') : '';
+          // ★`bk`/`tgt` は**素の命令文**(事前登録の分母。既存の判定を動かさない)。
+          // ★`bkS`/`tgtS` は**heredoc の本文を外した**もの(M142 の新しい欄。並べて出すだけ)。
+          const stripped = cmd ? stripHeredocs(cmd) : '';
+          pend.set(b.id, { id: b.id, s: sess, n: String(b.name || '?'), bk: cmd ? classifyBash(cmd) : '',
+                           bkS: cmd ? classifyBash(stripped) : '',
+                           t0: ts, t1: 0, tgt: leanTarget(b.name, b.input),
+                           tgtS: leanTarget(b.name, cmd ? { ...b.input, command: stripped } : b.input) });
+        } else if (b.type === 'tool_result') {
+          const u = pend.get(b.tool_use_id);
+          if (!u) continue;
+          pend.delete(b.tool_use_id);
+          u.t1 = ts; u.e = b.is_error === true ? 1 : 0;
+          calls.push(u);
+        }
+      }
+    }
+    unpaired += pend.size;
+  }
+  calls.sort((a, b) => a.t0 - b.t0);
+  const out = { v: MAIN_CACHE_V, sig, uses, sidechain, unpaired, calls };
+  if (cache) { fs.mkdirSync(path.dirname(cache), { recursive: true }); fs.writeFileSync(cache, JSON.stringify(out)); }
+  return { ...out, nFiles: files.length, cached: false };
+}
+
+/**
+ * ★M159 —— `--solo` **専用**の走査。★`scanMainCalls` の cache には**手を触れない**。
+ *
+ * ★★なぜ別の走査にするか(★これは設計上の判断であって手抜きではない):
+ *   `scanMainCalls` の記録は `bk`(分類)しか持たず**命令文そのものを捨てている**ので、
+ *   規則を後から当て直せない。★命令文を足すには `MAIN_CACHE_V` を上げるしかなく、
+ *   ★そうすると **M128 / M139 / M149 が寄りかかっている cache が作り直される**。
+ *   台帳は繰り返し「★既定の判定は変えない」と書いている ⇒ ★**別の口・別の cache**にする。
+ */
+export const SOLO_CACHE_V = 1;
+export async function scanSoloCalls(opts = {}) {
+  const roots = opts.roots ?? projectRoots();
+  const files = [];
+  for (const root of roots) {
+    if (!fs.existsSync(root)) continue;
+    for (const f of fs.readdirSync(root)) if (f.endsWith('.jsonl')) files.push(path.join(root, f));
+  }
+  files.sort();
+  const sig = files.map((f) => { const s = fs.statSync(f); return `${f}:${s.size}:${Math.floor(s.mtimeMs)}`; }).join('|');
+  const cache = opts.cache ?? null;
+  if (cache && fs.existsSync(cache)) {
+    try {
+      const c = JSON.parse(fs.readFileSync(cache, 'utf8'));
+      if (c.v === SOLO_CACHE_V && c.sig === sig) return { ...c, nFiles: files.length, cached: true };
+    } catch { /* 作り直す */ }
+  }
+  const calls = [];
+  let bashUses = 0, sidechain = 0, unpaired = 0;
+  for (const f of files) {
+    const pend = new Map();
+    const rl = readline.createInterface({ input: fs.createReadStream(f), crlfDelay: Infinity });
+    for await (const line of rl) {
+      if (!line.includes('"tool_use"') && !line.includes('"tool_result"')) continue;
+      let o; try { o = JSON.parse(line); } catch { continue; }
+      if (o.isSidechain === true) { sidechain++; continue; }
+      const ts = o.timestamp ? Date.parse(o.timestamp) : 0;
+      const c = o.message?.content;
+      if (!Array.isArray(c)) continue;
+      for (const b of c) {
+        if (b.type === 'tool_use') {
+          if (b.name !== 'Bash') continue;            // ★母集団は Bash だけ
+          bashUses++;
+          // ★規則は走査の時点で当てず、命令文を持って帰る(定義を後から並べ替えられるように)。
+          pend.set(b.id, { t0: ts, t1: 0, cmd: String(b.input?.command || '') });
+        } else if (b.type === 'tool_result') {
+          const u = pend.get(b.tool_use_id);
+          if (!u) continue;
+          pend.delete(b.tool_use_id);
+          u.t1 = ts;
+          // ★どの定義にも当たらない命令文は**捨てる**(cache を小さく保つ。L0/L1/L2 のいずれかに当たれば残す)
+          if (soloOf(u.cmd, 0) || soloOf(u.cmd, 1) || soloOf(u.cmd, 2)) calls.push(u);
+        }
+      }
+    }
+    unpaired += pend.size;
+  }
+  calls.sort((a, b) => a.t0 - b.t0);
+  const out = { v: SOLO_CACHE_V, sig, bashUses, sidechain, unpaired, calls };
+  if (cache) { fs.mkdirSync(path.dirname(cache), { recursive: true }); fs.writeFileSync(cache, JSON.stringify(out)); }
+  return { ...out, nFiles: files.length, cached: false };
+}
+
+/** 呼び出しの種別(★塊の条件 (c) に使う)。 */
+export const isLeanCheck = (c) => /lean_check$/.test(c.n);
+export const isLakeBuild = (c) => c.bk === 'lake build';
+export const isWriteEdit = (c) => c.n === 'Write' || c.n === 'Edit' || c.n === 'MultiEdit' || c.n === 'NotebookEdit';
+
+/** ★ファイル塊(束の単位)。同じ `.lean` の呼び出しを時刻順に並べ、gap 分で切る。★純関数。 */
+export function bundleByFile(calls, gapMin = MAIN_GAP_MIN) {
+  const byFile = new Map();
+  for (const c of calls) {
+    if (!c.tgt) continue;
+    if (!byFile.has(c.tgt)) byFile.set(c.tgt, []);
+    byFile.get(c.tgt).push(c);
+  }
+  const out = [];
+  for (const [file, cs] of byFile) {
+    cs.sort((a, b) => a.t0 - b.t0);
+    let cur = null;
+    for (const c of cs) {
+      const end = Math.max(c.t1 || 0, c.t0);
+      if (!cur || (c.t0 - cur.end) > gapMin * 60000) { cur = { file, start: c.t0, end, calls: [] }; out.push(cur); }
+      cur.calls.push(c);
+      cur.end = Math.max(cur.end, end);
+    }
+  }
+  out.sort((a, b) => a.start - b.start);
+  return out;
+}
+
+/**
+ * ★「既に配った塊の輪郭に入るか」。★これは「配れた」の判定ではない(反実仮想は測れない)。
+ * ★規則は事前登録(a)(b)(c)。★理由の文字列も返す(落ちた理由が数えられるように)。
+ */
+export function delegLike(bundle, writeEdits, minCalls) {
+  const n = bundle.calls.length;
+  if (n < minCalls) return { ok: false, why: `短い(<${minCalls})` };
+  if (!bundle.calls.some(c => isLeanCheck(c) || isLakeBuild(c))) return { ok: false, why: 'Lean を叩いていない' };
+  let foreign = 0;
+  for (const w of writeEdits) {
+    if (w.t0 < bundle.start) continue;
+    if (w.t0 > bundle.end) break;
+    if (w.tgt && w.tgt !== bundle.file) foreign++;
+  }
+  if (foreign > 0) return { ok: false, why: `他の .lean を ${foreign} 回書いている` };
+  return { ok: true, why: '' };
+}
+
+/** 稼働時間の代理。★隣接呼び出しの間隔を cap で頭打ちにして足す(★実作業時間ではない)。 */
+export function activeMs(calls, capS = MAIN_ACTIVE_GAP_S) {
+  const cs = calls.filter(c => c.t0).slice().sort((a, b) => a.t0 - b.t0);
+  let sum = 0;
+  for (let i = 0; i < cs.length; i++) {
+    const end = Math.max(cs[i].t1 || 0, cs[i].t0);
+    sum += end - cs[i].t0;
+    if (i + 1 < cs.length) { const gap = cs[i + 1].t0 - end; if (gap > 0) sum += Math.min(gap, capS * 1000); }
+  }
+  return sum;
+}
+
+/**
+ * digest(idiom-recur v3)の**本体セッション**の診断を、秒で呼び出しに割り当てる。
+ * ★同じ秒に複数の呼び出しが終わっているときは対象ファイルで割り、割れなければ **ambiguous** に数える
+ *   (★黙って片方に寄せない)。★agent の診断(`ag` あり)はここでは扱わない。
+ */
+export function attributeDiagnostics(calls, errors, srcs = ['tree'], families = DIAG_FAMILIES) {
+  const bySec = new Map();
+  for (const c of calls) {
+    if (!c.t1) continue;
+    const k = Math.floor(c.t1 / 1000);
+    if (!bySec.has(k)) bySec.set(k, []);
+    bySec.get(k).push(c);
+  }
+  const byCall = new Map();
+  let matched = 0, ambiguous = 0, unmatched = 0;
+  for (const e of errors || []) {
+    if (e.ag) continue;
+    if (!srcs.includes(e.src || 'tree')) continue;
+    const cs = bySec.get(e.ts) || [];
+    let pick = null;
+    if (cs.length === 1) pick = cs[0];
+    else if (cs.length > 1) {
+      const f = normLean(e.file || '');
+      const same = cs.filter(c => c.tgt && f && c.tgt === f);
+      if (same.length === 1) pick = same[0];
+      else { ambiguous++; continue; }
+    }
+    if (!pick) { unmatched++; continue; }
+    matched++;
+    let r = byCall.get(pick.id);
+    if (!r) { r = { total: 0, fam: families.map(() => 0) }; byCall.set(pick.id, r); }
+    r.total++;
+    const msg = String(e.msg || '');
+    families.forEach((f2, i) => { if (msg.includes(f2.key)) r.fam[i]++; });
+  }
+  return { byCall, matched, ambiguous, unmatched };
+}
+
+const hr = (ms) => (ms / 3600000).toFixed(1);
+const sec1 = (ms) => (ms / 1000).toFixed(2);
+
+async function cmdMain(recs, digest, opts = {}) {
+  const t0 = Date.now();
+  const sc = await scanMainCalls({ cache: opts.cache });
+  const calls = sc.calls.filter(c => c.t1 && c.t1 >= c.t0);
+  const dur = calls.map(c => c.t1 - c.t0);
+  const D = describe(dur);
+  console.log('== --main: 本体セッションの費用(★事前登録。★記述のみ。因果は測れない) ==\n');
+  console.log(`  親セッション: ${sc.nFiles} 本 / tool_use ${sc.uses} 件 / 対になった ${calls.length} 件`
+    + `(${(100 * calls.length / Math.max(1, sc.uses)).toFixed(1)}%) / 対にならなかった ${sc.unpaired} 件`
+    + ` / isSidechain で外した行 ${sc.sidechain}`);
+  console.log(`  ★Y3(対の経過秒): 中央値 ${sec1(D.med)} / 四分位 ${sec1(D.q1)} — ${sec1(D.q3)}`
+    + ` / 最大 ${sec1(D.max)} / ★合計 ${hr(D.sum)} 時間`);
+  const act = activeMs(calls);
+  console.log(`  ★稼働の代理(間隔を ${MAIN_ACTIVE_GAP_S} 秒で頭打ち): ${hr(act)} 時間`
+    + ` ⇒ ★道具の待ちが占めるのは ${(100 * D.sum / Math.max(1, act)).toFixed(1)}%(★残りは思考・生成・人の待ち。★内訳は測れない)`);
+  console.log(`  ★取得 ${((Date.now() - t0) / 1000).toFixed(1)} 秒(${sc.cached ? 'cache' : '走査'})`);
+
+  // -- 1. 道具ごと
+  const byTool = new Map();
+  for (const c of calls) {
+    let r = byTool.get(c.n); if (!r) { r = { n: 0, ms: [], err: 0 }; byTool.set(c.n, r); }
+    r.n++; r.ms.push(c.t1 - c.t0); r.err += c.e || 0;
+  }
+  const rows = [...byTool.entries()].map(([k, r]) => ({ k, n: r.n, d: describe(r.ms), err: r.err }))
+    .sort((a, b) => b.d.sum - a.d.sum);
+  console.log('\n  -- 1. 道具ごと(★1 回あたりの所要 と 回数。合計の降順) --');
+  console.log('   道具                          回数   中央値 秒   四分位 秒        合計 時間   占有%   is_error');
+  for (const r of rows) {
+    console.log(`   ${padr(r.k.replace(/^mcp__abc3-lean__/, 'mcp:'), 28)}${pad(r.n, 6)}${pad(sec1(r.d.med), 10)}`
+      + `${pad(sec1(r.d.q1) + '—' + sec1(r.d.q3), 16)}${pad(hr(r.d.sum), 12)}${pad((100 * r.d.sum / D.sum).toFixed(1), 8)}${pad(r.err, 10)}`);
+  }
+
+  // -- 2. Bash の中身
+  const byBash = new Map();
+  for (const c of calls) {
+    if (c.n !== 'Bash') continue;
+    let r = byBash.get(c.bk || 'その他'); if (!r) { r = { n: 0, ms: [] }; byBash.set(c.bk || 'その他', r); }
+    r.n++; r.ms.push(c.t1 - c.t0);
+  }
+  const brows = [...byBash.entries()].map(([k, r]) => ({ k, n: r.n, d: describe(r.ms) })).sort((a, b) => b.d.sum - a.d.sum);
+  // ★★M142 の新しい欄: heredoc の本文を外したときの回数と合計。★既定の列は動かさない。
+  const bashCalls = calls.filter(c => c.n === 'Bash');
+  const strN = new Map(), strMs = new Map(), ghostN = new Map(), ghostMs = new Map();
+  let gN = 0, gMs = 0;
+  for (const c of bashCalls) {
+    const k0 = c.bk || 'その他', k1 = c.bkS || 'その他', d = c.t1 - c.t0;
+    strN.set(k1, (strN.get(k1) || 0) + 1); strMs.set(k1, (strMs.get(k1) || 0) + d);
+    if (k0 !== k1) { ghostN.set(k0, (ghostN.get(k0) || 0) + 1); ghostMs.set(k0, (ghostMs.get(k0) || 0) + d); gN++; gMs += d; }
+  }
+  console.log('\n  -- 2. Bash の中身(★分類は BASH_KINDS。上から先に当てる) --');
+  console.log('   ★「剥いだ」= heredoc の本文を判定から外したとき(M142)。★既定の判定は左の列のまま。');
+  console.log('   種類                          回数   中央値 秒   四分位 秒        合計 時間  ★剥いだ回数  ★剥いだ合計h  ★幽霊件数');
+  for (const r of brows) {
+    console.log(`   ${padr(r.k, 28)}${pad(r.n, 6)}${pad(sec1(r.d.med), 10)}${pad(sec1(r.d.q1) + '—' + sec1(r.d.q3), 16)}${pad(hr(r.d.sum), 12)}`
+      + `${pad(strN.get(r.k) ?? 0, 13)}${pad(hr(strMs.get(r.k) ?? 0), 14)}${pad(ghostN.get(r.k) ?? 0, 11)}`);
+  }
+  const tgtRaw = calls.filter(c => c.tgt).length, tgtStr = calls.filter(c => c.tgtS).length;
+  console.log(`   ★幽霊(素で当たり、剥ぐと当たらない)= ${gN} 件 / ${hr(gMs)} 時間`
+    + ` —— ★上の族の順序のせいで、下の族(git・check.mjs 等)は素の列で**少なく**出る。`);
+  console.log(`   ★対象 .lean が付いた呼び出し: 素 ${tgtRaw} → 剥ぐと ${tgtStr}(差 ${tgtStr - tgtRaw})`
+    + ' —— ★下の「ファイル塊」はこの素の側で作ってある。');
+
+  // -- 3. 失敗形ごと(★スコープは M122 が事前登録した A / B をそのまま使う)
+  const errs = digest?.errors || [];
+  const callById = new Map(calls.map(c => [c.id, c]));
+  let at = null;
+  console.log('\n  -- 3. 失敗形ごと(★族は M122 の 5 つ。★足していない) --');
+  for (const s of DIAG_SCOPES) {
+    const a = attributeDiagnostics(calls, errs, s.srcs);
+    if (s.id === 'A') at = a;
+    const mine = errs.filter(e => !e.ag && s.srcs.includes(e.src || 'tree')).length;
+    console.log(`\n   [スコープ ${s.id}] ${s.label}`);
+    console.log(`   本体の診断 ${mine} 件 → 呼び出しに割り当てられた ${a.matched}`
+      + ` / 同じ秒で割れない ${a.ambiguous} / 対応する呼び出しが無い ${a.unmatched}`);
+    console.log('   族                              診断件数  それを出した呼び出し  中央値 秒  合計 時間');
+    for (let i = 0; i < DIAG_FAMILIES.length; i++) {
+      const f = DIAG_FAMILIES[i];
+      let cnt = 0; const ms = [];
+      for (const [id, r] of a.byCall) {
+        if (!r.fam[i]) continue;
+        cnt += r.fam[i];
+        const c = callById.get(id); if (c) ms.push(c.t1 - c.t0);
+      }
+      const d = ms.length ? describe(ms) : null;
+      console.log(`   ${padr(f.key.slice(0, 30), 32)}${pad(cnt, 8)}${pad(ms.length, 20)}`
+        + `${pad(d ? sec1(d.med) : '—', 11)}${pad(d ? hr(d.sum) : '—', 10)}`);
+    }
+  }
+  console.log('   ★この「合計 時間」は**その診断が出た呼び出しそのものの所要**であって、');
+  console.log('     ★その失敗形に費やした時間ではない(直し方を考える時間も、直す往復も入らない)。');
+
+  // -- 4. ファイル塊 と 「配った塊の輪郭」
+  const bundles = bundleByFile(calls);
+  const withTgt = calls.filter(c => c.tgt).length;
+  const pop = recs.filter(r => r.agentType === DIAG_TYPE && r.toolUses >= 1);
+  const minCalls = pop.length ? Math.round(quantile(pop.map(r => r.toolUses), 0.25)) : NaN;
+  const writeEdits = calls.filter(c => isWriteEdit(c) && c.tgt).sort((a, b) => a.t0 - b.t0);
+  const judged = bundles.map(b => ({ b, v: delegLike(b, writeEdits, minCalls) }));
+  const like = judged.filter(x => x.v.ok);
+  const bcalls = (b) => b.calls.length;
+  const bms = (b) => b.calls.reduce((s, c) => s + (c.t1 - c.t0), 0);
+  console.log('\n  -- 4. ファイル塊(★束の単位。gap ' + MAIN_GAP_MIN + ' 分) --');
+  console.log(`   対象 .lean が取れた呼び出し ${withTgt} / ${calls.length} 件 ⇒ 塊 ${bundles.length} 本`
+    + ` / 触った .lean ${new Set(bundles.map(b => b.file)).size} 本`);
+  if (bundles.length) {
+    const dB = describe(bundles.map(bcalls));
+    console.log(`   ★Y2(塊あたりの往復数): 中央値 ${dB.med} / 四分位 ${dB.q1} — ${dB.q3} / 最大 ${dB.max}`);
+  }
+  console.log(`   ★輪郭の閾(a): 配った lean-prover ${pop.length} 件の tool_uses の第 1 四分位 = ${minCalls} 往復`);
+  console.log(`   ★輪郭に入る塊: ${like.length} / ${bundles.length} 本`
+    + `(呼び出し ${like.reduce((s, x) => s + bcalls(x.b), 0)} 件 / 対の合計 ${hr(like.reduce((s, x) => s + bms(x.b), 0))} 時間)`);
+  const why = new Map();
+  for (const x of judged) if (!x.v.ok) { const k = x.v.why.replace(/\d+/g, 'N'); why.set(k, (why.get(k) || 0) + 1); }
+  console.log('   ★落ちた理由: ' + [...why.entries()].sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(' / '));
+  const lim = opts.limit ?? 15;
+  console.log(`\n   -- 輪郭に入った塊(往復の多い順 ${lim} 本) --`);
+  console.log('   開始(UTC)          往復  対の分  幅の分  check  build  診断  ファイル');
+  for (const x of like.slice().sort((a, b) => bcalls(b.b) - bcalls(a.b)).slice(0, lim)) {
+    const b = x.b;
+    const nd = b.calls.reduce((s, c) => s + (at.byCall.get(c.id)?.total || 0), 0);
+    console.log(`   ${padr(new Date(b.start).toISOString().replace('T', ' ').slice(0, 16), 18)}`
+      + `${pad(b.calls.length, 5)}${pad((bms(b) / 60000).toFixed(1), 8)}${pad(((b.end - b.start) / 60000).toFixed(1), 8)}`
+      + `${pad(b.calls.filter(isLeanCheck).length, 7)}${pad(b.calls.filter(isLakeBuild).length, 7)}${pad(nd, 6)}  ${b.file}`);
+  }
+  console.log('   ★★この表は「**配れたはず**」ではない。「配った塊と同じ形をしている」までである。');
+  console.log('     ★判断(本当に配れるか)は brief が書けるかどうかで決まり、それはログからは測れない。');
+
+  // -- 5. lake build の反復
+  const lb = calls.filter(isLakeBuild);
+  if (lb.length) {
+    const d = describe(lb.map(c => c.t1 - c.t0));
+    let runs = 0, maxRun = 0, cur = 0;
+    for (const c of calls) {
+      if (isLakeBuild(c)) { cur++; maxRun = Math.max(maxRun, cur); }
+      else { if (cur >= 3) runs++; cur = 0; }
+    }
+    if (cur >= 3) runs++;
+    console.log(`\n  -- 5. lake build の反復 --`);
+    console.log(`   ${lb.length} 回 / 中央値 ${sec1(d.med)} 秒 / 合計 ${hr(d.sum)} 時間`
+      + ` / ★間に何も挟まず 3 回以上続いた塊 ${runs} 本(最長 ${maxRun} 連)`);
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
 // 6. CLI
 // ════════════════════════════════════════════════════════════════════
-function main() {
+async function main() {
   const argv = process.argv.slice(2);
   const has = (f) => argv.includes(f);
   const val = (f, d) => { const i = argv.indexOf(f); return i >= 0 && argv[i + 1] ? argv[i + 1] : d; };
@@ -1186,6 +2526,7 @@ function main() {
   if (type) recs = recs.filter(r => r.agentType === type);
   if (day) recs = recs.filter(r => r.day === day);
   if (name) recs = recs.filter(r => new RegExp(name).test(r.description));
+  recs = filterByTime(recs, val('--since', null), val('--until', null));
   const ms = val('--ms', null);           // ★duration_ms のリストで拾う(過去の表を再現するため)
   if (ms) {
     const want = new Set(ms.split(/[,\s]+/).filter(Boolean).map(Number));
@@ -1205,6 +2546,11 @@ function main() {
   if (has('--stats')) { cmdStats(recs); console.log(''); cmdIcc(recs); return; }
   if (has('--explain')) { cmdExplain(recs); cmdIcc(recs); return; }
   if (has('--estimate')) { cmdEstimate(recs); return; }
+  if (has('--denominator')) { cmdDenominator(recs, repoRoot); return; }
+  // ★M160 は `--m149` より先に見る(`--m149-watch` は `--m149` を含む文字列ではないが、
+  //   将来 `has()` が前方一致になっても取り違えないように順序で守る)。
+  if (has('--m149-watch')) { cmdM149Watch(recs, repoRoot, has('--record')); return; }
+  if (has('--m149')) { cmdM149(recs, repoRoot); return; }
   if (has('--diag')) {
     // ★digest は `idiom-recur.mjs --rescan` が作る。v3 でないと `ag`(toolUseId)が無い。
     const dp = val('--digest', path.join(repoRoot, '.cache', 'idiom-recur-digest.json'));
@@ -1212,6 +2558,56 @@ function main() {
     const dg = JSON.parse(fs.readFileSync(dp, 'utf8'));
     if ((dg.v || 1) < 3) { console.error(`digest が古い(v${dg.v || 1}、要 v3 以上)。\`node tools/idiom-recur.mjs --rescan\` で作り直すこと。`); process.exit(2); }
     cmdDiag(recs, dg);
+    return;
+  }
+  if (has('--solo')) {
+    // ★★M159: M139 の「他と混ざらない命令だけ」の**規則をコードで固定して**数え直す。
+    const t = Date.now();
+    const sc = await scanSoloCalls({ cache: path.join(repoRoot, '.cache', 'solo-timing.json') });
+    const tal = tallySolo(sc.calls, [0, 1, 2, 3]);
+    const LV = {
+      0: '★L0 素(heredoc を剥がない)',
+      1: '★★L1 正典 SOLO-1(= M153 の定義)',
+      2: '★L2 厳格(他の tools/ も許さない)',
+      3: '★L3 素朴(命令が 1 本だけ。`&&` `;` で繋がっていない)',
+    };
+    console.log('== --solo —— 「他と混ざらない命令だけ」(★規則はコードに焼いてある。M159) ==');
+    console.log(`  ログ ${sc.nFiles} 本 / 親の Bash 呼び出し ${sc.bashUses} 件 / sidechain 除外 ${sc.sidechain} / 対にならず ${sc.unpaired}`);
+    console.log(`  走査 ${((Date.now() - t) / 1000).toFixed(1)}s${sc.cached ? '(cache)' : ''}`);
+    if (sc.calls.length) {
+      const d0 = new Date(sc.calls[0].t0), d1 = new Date(sc.calls[sc.calls.length - 1].t0);
+      console.log(`  期間 ${d0.toISOString().slice(0, 10)} 〜 ${d1.toISOString().slice(0, 10)}`
+        + `(${((d1 - d0) / 86400000).toFixed(1)} 日)`);
+    }
+    for (const lv of [0, 1, 2, 3]) {
+      const g = tal[lv];
+      console.log('');
+      console.log(`  ${LV[lv]}   —— 合計 ${g.n} 件 / ★${g.hours.toFixed(2)} 時間`);
+      console.log('    道具              件数    合計h    中央値s');
+      for (const r of g.rows) {
+        console.log(`    ${r.id.padEnd(16)} ${String(r.n).padStart(5)} ${r.hours.toFixed(2).padStart(8)}`
+          + `   ${(r.med === null ? '—' : r.med.toFixed(1)).padStart(7)}`);
+      }
+    }
+    console.log('');
+    console.log('  ★過去の公表値との比較(★同じ母集団ではないので「訂正」ではなく「定義の差」):');
+    console.log(`     M139(メタ第 29 回。規則は台帳に無い)  合計 2.70 時間`);
+    console.log(`     M153(メタ第 31 回。剥いだ・私の定義)  合計 4.52 時間`);
+    console.log(`     ★M159 L1(正典。この道具)             合計 ${tal[1].hours.toFixed(2)} 時間`);
+    return;
+  }
+  if (has('--main')) {
+    // ★本体セッションの費用(M125)。★族の割り当てに digest を使う(無ければ族の表だけ空になる)。
+    const dp = val('--digest', path.join(repoRoot, '.cache', 'idiom-recur-digest.json'));
+    let dg = null;
+    if (fs.existsSync(dp)) {
+      dg = JSON.parse(fs.readFileSync(dp, 'utf8'));
+      if ((dg.v || 1) < 3) { console.error(`digest が古い(v${dg.v || 1}、要 v3 以上)。\`node tools/idiom-recur.mjs --rescan\``); process.exit(2); }
+    } else console.error(`※ digest が無い(${dp}) —— 族の表は空になる。\`node tools/idiom-recur.mjs --rescan\` で作れる。`);
+    await cmdMain(recs, dg, {
+      cache: path.join(repoRoot, '.cache', 'main-timing.json'),
+      limit: Number(val('--limit', '15')),
+    });
     return;
   }
   if (has('--cost')) {

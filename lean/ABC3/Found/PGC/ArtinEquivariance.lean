@@ -332,7 +332,7 @@ def cyclotomicCharacter_recoverable_of_artinEquivariance.src : ABC3.Meta.Source 
 > group-theoretically from Γ_K.
 
 円分指標の群論的復元は、いまや **Artin 写像の同変性** 1 本だけに依存している。
-★`Skeleton/PGC/Section1.lean` の `sorry` は**まだ埋まっていない**。 -/
+☆★**2026-09-07 に埋まった**（`Found/PGC/ReciprocityDatumIndependence.lean::cyclotomicCharacter_recoverable_holds`、★仮定ゼロ）。★本ファイルに本物の `sorry` は 1 件も無い。 -/
 theorem cyclotomicCharacter_recoverable_of_artinEquivariance
     (h : ArtinEquivariance p) :
     (cyclotomicCharacterObject (p := p)).RecoverableFromAbsGal :=
@@ -816,7 +816,7 @@ theorem artinEquivarianceGal_iff_cyclotomeConj :
 > The cyclotomic character χ : Γ_K → Z[bb]_p^× can be recovered entirely
 > group-theoretically from Γ_K.
 
-★`Skeleton/PGC/Section1.lean` の `sorry` は**まだ埋まっていない**。 -/
+☆★**2026-09-07 に埋まった**（`Found/PGC/ReciprocityDatumIndependence.lean::cyclotomicCharacter_recoverable_holds`、★仮定ゼロ）。★本ファイルに本物の `sorry` は 1 件も無い。 -/
 theorem cyclotomicCharacter_recoverable_of_artinEquivarianceGal
     (h : ArtinEquivarianceGal p) :
     (cyclotomicCharacterObject (p := p)).RecoverableFromAbsGal :=
@@ -931,7 +931,7 @@ def cyclotomicCharacter_recoverable_of_artinEquivarianceLocalField.src : ABC3.Me
 
 ★★**Proposition 1.1 は「Λ9 の同型 `tors_{p^n}(Γ_L^{ab}) ≅ μ_{p^n}(L)` が
 `σ_g` と同変に取れる」1 点だけに依存している。**
-★`Skeleton/PGC/Section1.lean` の `sorry` は**まだ埋まっていない**。 -/
+☆★**2026-09-07 に埋まった**（`Found/PGC/ReciprocityDatumIndependence.lean::cyclotomicCharacter_recoverable_holds`、★仮定ゼロ）。★本ファイルに本物の `sorry` は 1 件も無い。 -/
 theorem cyclotomicCharacter_recoverable_of_artinEquivarianceLocalField
     (h : ArtinEquivarianceLocalField p) :
     (cyclotomicCharacterObject (p := p)).RecoverableFromAbsGal :=

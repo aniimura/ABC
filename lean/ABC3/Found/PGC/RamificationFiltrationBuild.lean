@@ -50,7 +50,20 @@ import ABC3.Found.PGC.SubgroupCorrespondenceConstruction
   - `absGalStageFiltration` / `ramificationFiltrationOfCompat` ——
     ★★**残る入力は `compat` ただ 1 つ**。
 
-**★★埋まっていないもの(次のノード)**
+**☆★★2026-09-08 の訂正 —— 以下の「埋まっていないもの」は**もう古い****
+
+★★**`compat` は commit `916b7082`(第 1079)で無条件に埋まった**
+(`Found/PGC/UnramifiedBaseChangeInvariance.lean` の `absGalStage_compat` /
+`unramifiedBaseChange` / `ramificationFiltration p`)。
+★下に挙げた「あと 2 つ」(固定環と中間体整数環の同定、不分岐底変換での輸送)も
+そこに `stageBaseHom` / `ramIndex_ringHom_eq` として入っている。
+★★**さらに 2026-09-08 に `Found/PGC/RamificationImageStage.lean` が
+「段データは生成元・素元の選択に依らない」を `compat` の系として出した**
+(`stage_eq_stage` / `absGalStage_eq_stage_any`、★`compat` に `M = N` を代入する 2 行)。
+☆★**本体はこの古い記述を読んで持ち場を書き、agent に無駄足を踏ませかけた。**
+★**記述を残すときは「いつのものか」が分かるようにすること。**
+
+**(以下は 2026-09-06 時点の記述。★歴史として残す)**
 
 ★★**`compat`(`↑(S N' v) · N = ↑(S N v)`、`N' ≤ N`)は埋まっていない。**
 ★**近似(`trivialStageFiltration` / `inertiaStageFiltration`)で埋めることは

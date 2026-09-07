@@ -55,7 +55,7 @@ function walk(dir, acc = []) {
   return acc;
 }
 
-const MODS = '(?:private\\s+|protected\\s+|noncomputable\\s+|scoped\\s+|local\\s+)*';
+const MODS = '(?:public\\s+|private\\s+|protected\\s+|noncomputable\\s+|scoped\\s+|local\\s+|nonrec\\s+)*';
 /** ★★★★★**名前の文字類**(2026-09-06 に拡張。第 1036)。
  *
  * ★旧版は `[A-Za-z_][\w'!?₀-₉]*` だったが、JS の `\w` は **ASCII だけ**である。

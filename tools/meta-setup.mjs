@@ -124,6 +124,14 @@ const git = (...a) => run('git', a);
 function resolveMain() {
   const forced = optOf('--main');
   if (forced) return forced;
+  // ★★★M151(メタ第 31 回)—— ★**4 人続けてここで止まった**(第 27・28・29・30 回)。
+  //   ★ここが**本体そのもの**なら `.git` は**ファイルではなくディレクトリ**である。
+  //   従来は下の `readFileSync` が EISDIR で落ち、保険の当てずっぽうも外れて `null` を返し、
+  //   ★「本体が見つからない。`--main <パス>` を渡すこと」という**見当違いの**文で終わっていた
+  //   (★本体は目の前にある。足りないのは worktree のほうである)。
+  //   ⇒ ★**WT 自身を返す**。すると下の「WT === 本体」の番人が発火し、
+  //     `noWorktreeMsg()` が **worktree の作り方**を名指しで出す(それが要る文である)。
+  try { if (statSync(join(WT, '.git')).isDirectory()) return WT; } catch { /* .git が無ければ下へ */ }
   try {
     const dotgit = readFileSync(join(WT, '.git'), 'utf8').trim();
     const m = /^gitdir:\s*(.+)$/.exec(dotgit);
@@ -181,6 +189,57 @@ function diagnoseLag(lag, g = git) {
   for (const r of out) r.nearest = r.cutHere && r.dist === near;
   const cause = out.find((r) => r.cutHere && Math.abs(r.gap - lag.behind) <= 2);
   return { refs: out, cause, near };
+}
+
+/**
+ * ★★M135(第 28 回の宿題)—— **遅れているなら、まず大きく警告して逃げ道を出す**。
+ *
+ * ★なぜ要るか: **3 回続けて立ち上がりで落ちている**。
+ *   第 27 回 = worktree が渡されていない / 第 28 回 = `main` から切られ master より 1,210 commit 前
+ *   (`tools/meta-setup.mjs` すら無く MODULE_NOT_FOUND) / 第 29 回 = また worktree が渡されていない。
+ * ★逃げ道は **`git reset --hard master`(実測 0.4 秒)** だが、これは台帳の奥にしか書いていなかった。
+ * ★ここは**純関数**(行の配列を返すだけ)。★git を呼ばない ⇒ selftest で較正できる。
+ */
+export function lagBanner(lag) {
+  if (!(lag && lag.behind > 0)) return [];
+  const n = lag.behind;
+  const loud = n >= 100 ? '★★★★' : n >= 10 ? '★★★' : '★★';
+  return [
+    '',
+    `  ${loud} 警告 —— この worktree は master より ${n} commit 前である。`,
+    '     ⇒ このままでは **本体に無い道具・無い台帳**を見ることになり、数字が本体と食い違う。',
+    `     ⇒ ★**逃げ道は 1 つ**(自分の枝を動かすだけ。実測 0.4 秒):`,
+    '',
+    '           git reset --hard master && node tools/meta-setup.mjs',
+    '',
+    n >= 1000
+      ? '     ★遅れが 1,000 を超える = **`main` から切られている**(M92 / M135)。この場合 `tools/` に'
+        + '\n       `meta-setup.mjs` すら無く、最初の起動が MODULE_NOT_FOUND で落ちる。★先に reset すること。'
+      : '     ★下の「2. 同期」も merge で埋めにいくが、遅れが大きいときは reset の方が速い。',
+  ];
+}
+
+/**
+ * ★★隔離 worktree が**そもそも渡されていない**ときの案内。★純関数(行の配列)。
+ * ★第 27 回と第 29 回がこれ。★従来の文は「worktree へ写してから叩け」だけで、
+ *   ★**worktree の作り方**が書いていなかった(無いものへは写せない)。
+ */
+export function noWorktreeMsg(wt, nth = 'NN') {
+  return [
+    '',
+    '★★止めた —— cwd が **本体そのもの**である(WT と 本体 が同じ)。',
+    `   いま : ${wt}`,
+    '   `WT` は自分自身の置き場所から決まるので、このまま進むと**本体を書き換える**。',
+    '',
+    '   ★隔離 worktree が渡されていないなら、**自分で 1 本作る**(実測 1 秒):',
+    '',
+    `       git worktree add -b meta${nth} /d/Math_ABC3/.claude/worktrees/meta${nth} master`,
+    `       cd /d/Math_ABC3/.claude/worktrees/meta${nth}`,
+    '       node tools/meta-setup.mjs',
+    '',
+    '   ★`-b` で**新しい枝**を切るので master は動かない。帰り際は `--teardown` のあと',
+    '     `git worktree remove` は**しない**(本体が採否を読む)。',
+  ];
 }
 
 // ────────────────────────────────────────────────────────────────
@@ -259,24 +318,55 @@ const sha1lf = (p) => {
 };
 
 /**
- * ★**自分の作業を上書きしないための盾**(第 15 回に踏みかけた)。
+ * ★**自分の作業を上書きしないための盾**(第 15 回に踏みかけた)。★純関数(git を呼ばない)。
  *
  * 整列は「本体 → worktree」に写す。ところが**同じ道具を作業の途中でもう一度叩くと、
  * こちらが書いた `meta-backlog.md` や `tools/*.mjs` が本体の版で消える。**
  * ⇒ ★**HEAD と中身が違うファイル(= 自分が触ったもの)には触らない。**
  *   `git diff --name-only` は CRLF の幻を出さない(M10 第 4 回。`git status` は出す)。
+ *
+ * ★★**M157(第 31 回が踏んだ)—— `git diff` だけ見ると commit で盾が外れる。**
+ *   事前登録は「データを見る前に書いた」ことを示すため ★**commit で時刻を刻むのが作法**である
+ *   (M152 はそうした)。ところが commit した瞬間にその本は `git diff --name-only` から消え、
+ *   ★**「自分の作業」でなくなって次の整列で本体の版に上書きされる。**
+ *   ★実測(第 32 回が再現): commit 前は `= tools/meta-setup.mjs`、commit 直後は `+ tools/meta-setup.mjs`。
+ *   ⇒ ★**枝側の差分 `master...HEAD` を足す**。3 点(merge-base からの差)なので、
+ *     master が進んでも**自分の commit だけ**が入る(本体の前進を「自分の作業」と誤認しない)。
+ *
+ * @param workOut      `git diff --name-only` の stdout
+ * @param untrackedOut `git ls-files --others --exclude-standard` の stdout
+ * @param branchOut    `git diff --name-only master...HEAD` の stdout(読めなければ '')
  */
-function locallyChanged() {
-  const d = git('diff', '--name-only');
-  const s = new Set((d.stdout || '').split('\n').map((x) => x.trim()).filter(Boolean));
-  const u = git('ls-files', '--others', '--exclude-standard');
-  for (const l of (u.stdout || '').split('\n')) { const t = l.trim(); if (t) s.add(t); }
-  return s;
+export function changedSets(workOut, untrackedOut, branchOut) {
+  const toSet = (s) => new Set(String(s ?? '').split('\n').map((x) => x.trim()).filter(Boolean));
+  const work = toSet(workOut);
+  for (const x of toSet(untrackedOut)) work.add(x);
+  const branch = toSet(branchOut);
+  const all = new Set(work);
+  for (const x of branch) all.add(x);
+  // ★commit したから盾が外れかけていた本(= 枝にしか居ない本)。印字して見せる。
+  const onlyCommitted = [...branch].filter((x) => !work.has(x)).sort();
+  return { all, work, branch, onlyCommitted };
+}
+
+/** ★上を本物の git で呼ぶ薄い皮。★`g` を差し替えると selftest で較正できる。 */
+function locallyChanged(g = git) {
+  const out = (r) => (r && r.status === 0 ? (r.stdout || '') : '');
+  // ★`master` が無い / HEAD が master そのもの、でも落ちないこと(status≠0 は空として扱う)。
+  return changedSets(
+    out(g('diff', '--name-only')),
+    out(g('ls-files', '--others', '--exclude-standard')),
+    out(g('diff', '--name-only', 'master...HEAD')),
+  );
 }
 
 function alignWith(main) {
-  const plan = { copy: [], crlf: [], reportOnly: [], tooBig: [], skipped: [], missingInMain: 0 };
-  const mine = locallyChanged();
+  const plan = {
+    copy: [], crlf: [], reportOnly: [], tooBig: [], skipped: [], missingInMain: 0, savedByCommit: [],
+  };
+  const changed = locallyChanged();
+  const mine = changed.all;
+  plan.onlyCommitted = changed.onlyCommitted;
   const scan = (roots, mode) => {
     for (const root of roots) {
       const abs = join(main, root.replace(/\//g, sep));
@@ -294,7 +384,13 @@ function alignWith(main) {
         // ★自分が触ったファイルは**写さない**(本体の版で自分の作業が消える)。
         //   ★限界: 1 回目の整列で写したものも「HEAD と違う」ので以後は守られる側に回る。
         //   本体が走っている最中に追いつきたいときは `--force-align`(★上書きする)。
-        if (mode === 'copy' && mine.has(rel) && !FORCE) { plan.skipped.push(rel); continue; }
+        if (mode === 'copy' && mine.has(rel) && !FORCE) {
+          plan.skipped.push(rel);
+          // ★M157: 「commit したから `git diff` から消えていた」本を名指しで数える。
+          //   ここが 0 のままなら盾の新しい半分は一度も効いていない ⇒ 効果を測れる。
+          if (!changed.work.has(rel)) plan.savedByCommit.push(rel);
+          continue;
+        }
         (mode === 'copy' ? plan.copy : plan.reportOnly).push(rel);
       }
     }
@@ -428,10 +524,8 @@ say(`  本体     : ${main}`);
 {
   const norm = (p) => { try { return realpathSync(p).replace(/[\\/]+$/, '').toLowerCase(); } catch { return String(p).toLowerCase(); } };
   if (norm(WT) === norm(main)) {
-    console.error('');
-    console.error('★★止めた —— この道具を**本体の版のまま**叩いている(WT と 本体 が同じ)。');
-    console.error('   `WT` は自分自身の置き場所から決まるので、このまま進むと本体を書き換える。');
-    console.error('   ★先に隔離 worktree へ写してから叩くこと:');
+    for (const l of noWorktreeMsg(WT)) console.error(l);
+    console.error('   ★既に worktree があるのにここへ来たなら、先に写してから叩くこと:');
     console.error('     cp /d/Math_ABC3/tools/meta-setup.mjs tools/meta-setup.mjs && node tools/meta-setup.mjs');
     process.exit(2);
   }
@@ -485,6 +579,55 @@ if (TEARDOWN) {
   process.exit(0);
 }
 
+/**
+ * ★★M157 の盾の較正。★本物の git を呼ばない(スタブを注入する)。
+ * ★試験の穴を作らないための約束(第 30 回・第 31 回の反省):
+ *   - ★**純関数 `changedSets` だけでなく、`locallyChanged` の配線も試す**
+ *     (第 31 回は `--since` を CLI に埋めていて selftest が届かなかった)。
+ *   - ★**逆(守らない側)も試す**。守りすぎると worktree が本体に追いつけなくなる。
+ */
+function selftestShield() {
+  // git のスタブ。呼ばれた引数を記録する。
+  const calls = [];
+  const mk = (work, untracked, branch, branchStatus = 0) => (...a) => {
+    calls.push(a.join(' '));
+    if (a[0] === 'ls-files') return { status: 0, stdout: untracked };
+    if (a[2] === 'master...HEAD') return { status: branchStatus, stdout: branch };
+    return { status: 0, stdout: work };
+  };
+  const S = (o) => [...o.all].sort().join(',');
+  const both = changedSets('a.md\nb.md', 'u.md', 'c.mjs');
+  return [
+    // —— 純関数として ——
+    ['★M157 commit 済みの変更も「自分の作業」に入る', both.all.has('c.mjs')],
+    ['★M157 未 commit の変更は今までどおり入る', both.all.has('a.md') && both.all.has('b.md')],
+    ['★M157 untracked も今までどおり入る', both.all.has('u.md')],
+    ['★M157 全部で 4 本(重複なし)', both.all.size === 4],
+    ['★M157 枝にしか居ない本を名指しできる', S({ all: new Set(both.onlyCommitted) }) === 'c.mjs'],
+    ['★M157 work と枝で重なる本は onlyCommitted に出さない',
+      changedSets('x.md', '', 'x.md').onlyCommitted.length === 0
+      && changedSets('x.md', '', 'x.md').all.size === 1],
+    ['★M157 空でも落ちない', changedSets('', '', '').all.size === 0],
+    ['★M157 null/undefined でも落ちない',
+      changedSets(null, undefined, null).all.size === 0],
+    ['★M157 空行と余白を落とす', changedSets('  a.md  \n\n\n', '', '').all.size === 1],
+    // —— ★配線として(locallyChanged 経由。ここが第 31 回の穴) ——
+    ['★★M157 locallyChanged が 3 点 master...HEAD を引く',
+      (() => { calls.length = 0; locallyChanged(mk('', '', '')); return calls.includes('diff --name-only master...HEAD'); })()],
+    ['★★M157 locallyChanged が commit 済みを盾に入れる',
+      locallyChanged(mk('', '', 'k.mjs')).all.has('k.mjs')],
+    ['★★M157 master が無くて(status≠0)も落ちず、work だけで動く',
+      (() => { const r = locallyChanged(mk('w.md', '', 'ゴミ', 128)); return r.all.has('w.md') && !r.all.has('ゴミ') && r.all.size === 1; })()],
+    ['★M157 従来の 2 本(diff / ls-files)を引き続き引く',
+      (() => { calls.length = 0; locallyChanged(mk('', '', '')); return calls.includes('diff --name-only') && calls.includes('ls-files --others --exclude-standard'); })()],
+    // —— ★逆(守りすぎないこと)——
+    ['★★M157 触っていない本は盾に入らない(整列は今までどおり進む)',
+      !locallyChanged(mk('a.md', 'u.md', 'c.mjs')).all.has('CLAUDE.md')],
+    ['★M157 何も触っていなければ盾は空(全部写す)',
+      locallyChanged(mk('', '', '')).all.size === 0],
+  ];
+}
+
 /** ★M10 の原因判定の較正。★本物の git を呼ばない(スタブを注入する)。 */
 function selftestLag() {
   const stub = (refs, cutRef) => (...a) => {
@@ -534,6 +677,28 @@ function selftestLag() {
       !diagnoseLag({ behind: 1210 }, stub(R, 'nowhere'))?.cause],
     ['無い枝は表に出さない',
       diagnoseLag({ behind: 1210 }, stub(R, 'origin/main')).refs.every((r) => r.ref !== 'main')],
+    // ★★M135(第 29 回で実装)—— 立ち上がりで 3 回落ちているので、警告そのものを試験する。
+    ['★遅れ 0 なら警告を出さない', lagBanner({ behind: 0 }).length === 0],
+    ['★遅れ 0 は ahead があっても黙る', lagBanner({ behind: 0, ahead: 5 }).length === 0],
+    ['★lag が無くても落ちない', lagBanner(null).length === 0 && lagBanner(undefined).length === 0],
+    ['★遅れ 1 でも警告する', lagBanner({ behind: 1 }).length > 0],
+    ['★警告に遅れの数が入る', lagBanner({ behind: 1210 }).join('\n').includes('1210 commit 前')],
+    ['★★警告に逃げ道(reset --hard master)が入る',
+      lagBanner({ behind: 1210 }).join('\n').includes('git reset --hard master')],
+    ['★遅れが大きいほど星が増える',
+      lagBanner({ behind: 1210 }).join('\n').includes('★★★★')
+      && !lagBanner({ behind: 3 }).join('\n').includes('★★★★')],
+    ['★1000 超なら main から切られた形だと言う',
+      lagBanner({ behind: 1210 }).join('\n').includes('MODULE_NOT_FOUND')
+      && !lagBanner({ behind: 30 }).join('\n').includes('MODULE_NOT_FOUND')],
+    // ★worktree が渡されていない場合(第 27 回・第 29 回)
+    ['★★worktree の作り方を出す', noWorktreeMsg('D:/Math_ABC3').join('\n').includes('git worktree add -b')],
+    ['★作る場所に master を指定している', noWorktreeMsg('D:/Math_ABC3').join('\n').includes('worktrees/metaNN master')],
+    ['★いまの cwd を出す', noWorktreeMsg('D:/Math_ABC3').join('\n').includes('D:/Math_ABC3')],
+    ['★番号を差し替えられる', noWorktreeMsg('X', 29).join('\n').includes('meta29')],
+    // ★★★M157(第 31 回が踏み、第 32 回が再現した)—— commit すると盾が外れる。
+    //   ★実測の再現: commit 前 `= tools/meta-setup.mjs` / commit 直後 `+ tools/meta-setup.mjs`。
+    ...selftestShield(),
   ];
   let ok = 0;
   for (const [label, pass] of checks) { say(`  ${pass ? 'ok ' : 'NG '} ${label}`); if (pass) ok++; }
@@ -545,6 +710,8 @@ if (has('--selftest')) process.exit(selftestLag() ? 0 : 1);
 const lag = measureLag();
 result.lag = lag;
 step('1. master との差', `★behind ${lag.behind} / ahead ${lag.ahead} —— HEAD = ${lag.head}`);
+// ★★M135: 遅れているなら **原因の診断より先に** 大きく警告し、逃げ道を出す。
+for (const l of lagBanner(lag)) say(l);
 const lagWhy = diagnoseLag(lag);
 result.lagWhy = lagWhy;
 if (lagWhy) {
@@ -578,7 +745,15 @@ result.alignList = plan.copy;
 step('3. 本体の未 commit と整列',
   `写した ★${plan.copy.length} 本(+ 行末だけ違う ${plan.crlf.length} 本)/ 報告のみ ${plan.reportOnly.length} 本`
   + (plan.skipped.length ? ` / ★自分の作業なので写さなかった ${plan.skipped.length} 本` : ''));
-for (const rel of plan.skipped) say(`        = ${rel}(★自分が触っている。本体の版で上書きしない)`);
+for (const rel of plan.skipped) {
+  // ★M157: commit で `git diff` から消えていた本は、そう名指しする(盾のどちら半分が効いたか)。
+  const why = plan.savedByCommit.includes(rel) ? '★commit 済みだが自分の作業' : '★自分が触っている';
+  say(`        = ${rel}(${why}。本体の版で上書きしない)`);
+}
+if (plan.savedByCommit.length) {
+  say(`        ! ★★M157 の盾が効いた —— commit 済みの ${plan.savedByCommit.length} 本を守った`
+    + '(旧版はここで本体の版に戻していた)。');
+}
 for (const rel of plan.copy.slice(0, 40)) say(`        + ${rel}`);
 if (plan.copy.length > 40) say(`        + …他 ${plan.copy.length - 40} 本`);
 /* ★★★★6 人目が実際に踏んだ穴(メタ第 20 回、M83)。**印字で塞ぐ**。
