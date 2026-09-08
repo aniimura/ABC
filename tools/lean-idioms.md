@@ -13277,3 +13277,40 @@ def integerSubring (M : Type*) [NormedField M] [IsUltrametricDist M] : Subring M
 
 ★測り方: `sed -n '<原因が書いてある行範囲>p' <その罠を記録したファイル>` で
 **原因の記述まで読む**。見出しだけで判断しない。
+
+## #333 `class` 型を返す `def` には `@[implicit_reducible]` が要る（2026-09-09、IntegerRingInstances）
+
+```
+warning: Definition `ABC3.Found.PGC.IntegerNorm.integerMulSemiringAction` of class type must be
+marked with `@[reducible]` or `@[implicit_reducible]`
+```
+
+仮説（ここでは `hiso : ∀ g z, ‖g • z‖ = ‖z‖`）を受け取るので `instance` にできず、
+`def` ＋ `letI` で貼る（木の流儀、#165）。★そのとき **`@[implicit_reducible]` を付けないと警告**になる。
+
+```lean
+@[implicit_reducible] def integerMulSemiringAction {G : Type*} [Monoid G] [MulSemiringAction G M]
+    (hiso : ∀ (g : G) (z : M), ‖g • z‖ = ‖z‖) :
+    MulSemiringAction G ↥(integerSubring M) where
+  smul g x := ⟨g • (x : M), by rw [mem_integerSubring, hiso]; exact x.2⟩
+  one_smul x := Subtype.ext (one_smul G (x : M))
+  mul_smul g h x := Subtype.ext (mul_smul g h (x : M))
+  smul_zero g := Subtype.ext (smul_zero g)
+  smul_add g x y := Subtype.ext (smul_add g (x : M) (y : M))
+  smul_one g := Subtype.ext (smul_one g)
+  smul_mul g x y := Subtype.ext (smul_mul' g (x : M) (y : M))   -- ★フィールド名は smul_mul、中身は smul_mul'
+```
+
+★`MulSemiringAction` のフィールドは `smul_mul` だが、`M` 側で使う補題は **`smul_mul'`**
+（`MulDistribMulAction.smul_mul' : a • (b * c) = a • b * a • c`）。名前が 1 文字違う。
+
+★部分型の座標が元の作用と一致することは **`rfl`**:
+
+```lean
+theorem coe_smul_integer (hiso) (g : G) (x : ↥(integerSubring M)) :
+    letI := integerMulSemiringAction hiso
+    ((g • x : ↥(integerSubring M)) : M) = g • (x : M) := rfl
+```
+
+★これを `simpa [coe_smul_integer hiso] using …` で使うと、
+`↑(σ • x) - ↑x` と `σ • ↑x - ↑x` の食い違い（`Type mismatch: After simplification …`）が消える。
