@@ -25,10 +25,26 @@ hne : (τ ^ p ^ k) π ≠ π
   `orderOf τ ∣ [M : F] = p`、
 * ゆえに `τ ^ p = 1`、したがって `1 ≤ k` なら `τ ^ (p ^ k) = 1` で `π` を**動かせない**。
 
-★★これを形式化したのが `algHom_pow_pow_apply_eq_self` / `conj_pure_absurd_of_one_le` である。
-★★**`_of_conj_pure`(および `_of_conj_free` / `_of_jumps_free`)は `1 ≤ k` では
-仮説が両立せず、空虚に真**である。使えるのは `k = 0` だけで、そのとき定数は
-`∏_{j ∈ Icc 1 1} axDecay p j = axDecay p 1 = p^{1/(p−1)}` になる。
+★★これを形式化したのが `algHom_pow_pow_apply_eq_self` / `conj_pure_absurd_of_one_le` /
+`break_absurd_of_one_le` である。★★影響を受けるのは**次の 6 本**(`grep` で数えた:
+`grep -n "τ : M →ₐ\[F\] M" lean/ABC3/Found/PGC/Gained*.lean`):
+
+* `GainedBridgeSupply.exists_norm_sub_algebraMap_le_prod_axDecay_of_jumps`
+* `GainedJumpSeq.exists_norm_sub_algebraMap_le_prod_axDecay_of_jumps`
+* `GainedJumpSeq.exists_norm_sub_algebraMap_le_prod_axDecay_of_conj`
+* `GainedJumpFree.exists_norm_sub_algebraMap_le_prod_axDecay_of_jumps_free`
+* `GainedJumpFree.exists_norm_sub_algebraMap_le_prod_axDecay_of_conj_free`
+* `GainedJumpFree.exists_norm_sub_algebraMap_le_prod_axDecay_of_conj_pure`
+
+★★これらは `1 ≤ k` では仮説が両立せず、**空虚に真**である。使えるのは `k = 0` だけで、
+そのとき定数は `∏_{j ∈ Icc 1 1} axDecay p j = axDecay p 1 = p^{1/(p−1)}` になる。
+
+★★★**`τ : M →+ M` を取る版は影響を受けない**
+(`exists_norm_sub_algebraMap_le_prod_axDecay_lt` / `..._le_gainedLoss_lt` /
+`norm_sub_digit_zero_le_*`)。★★つまり**塔の降下の骨組み自体は健在**で、
+壊れているのは「`τ` を `F`-代数準同型に強めた」包み紙の 6 本だけである。
+★消費側は 0 本(`grep -rn "of_conj_pure\|of_conj_free\|of_jumps_free" lean/ABC3/ --include=*.lean`
+は `GainedJumpFree.lean` 自身以外に当たらない)なので、木は壊れていない。
 
 ### ★なぜこうなったか(`GainedJumpSeq` との差)
 
@@ -226,6 +242,34 @@ theorem conj_pure_absurd_of_one_le {p : ℕ} [Fact p.Prime] {k : ℕ} (hk : 1 �
     (htop : Algebra.adjoin F ({π} : Set M) = ⊤)
     (hne : (τ ^ p ^ k) π ≠ π) : False :=
   hne (algHom_pow_pow_apply_eq_self (Fact.out : p.Prime).pos hk hdeg htop τ π)
+
+omit [IsUltrametricDist M] in
+/-- ★★★★★★**`hbreak` を持つ版もすべて `1 ≤ k` で空虚**。
+
+`‖(τ^{p^k})π − π‖ = ‖π‖^{i+1} > 0` は `τ^{p^k}` が `π` を動かすことを意味するので、
+`algHom_pow_pow_apply_eq_self` と矛盾する。★これで次の **6 本**が `1 ≤ k` で空虚だと分かる:
+
+* `GainedBridgeSupply.exists_norm_sub_algebraMap_le_prod_axDecay_of_jumps`
+* `GainedJumpSeq.exists_norm_sub_algebraMap_le_prod_axDecay_of_jumps`
+* `GainedJumpSeq.exists_norm_sub_algebraMap_le_prod_axDecay_of_conj`
+* `GainedJumpFree.exists_norm_sub_algebraMap_le_prod_axDecay_of_jumps_free`
+* `GainedJumpFree.exists_norm_sub_algebraMap_le_prod_axDecay_of_conj_free`
+* `GainedJumpFree.exists_norm_sub_algebraMap_le_prod_axDecay_of_conj_pure`
+
+★★`τ : M →+ M` を取る `exists_norm_sub_algebraMap_le_prod_axDecay_lt`
+(および `..._le_gainedLoss_lt`、`norm_sub_digit_zero_le_*`)は**影響を受けない**。
+そこでは `F`-線形なのは `σ = τ^{p^k}` の方だけで、これが正しい設定である。
+
+★`hπ0 : 0 < ‖π‖` は `hnormp` / `heM` / `he` から出る(6 本すべてがその 3 本を持つ)ので、
+実質「仮説が両立しない」ことを言っている。 -/
+theorem break_absurd_of_one_le {p : ℕ} [Fact p.Prime] {i k : ℕ} (hk : 1 ≤ k)
+    {π : M} (τ : M →ₐ[F] M) (hπ0 : 0 < ‖π‖)
+    (hdeg : (minpoly F π).natDegree = p)
+    (htop : Algebra.adjoin F ({π} : Set M) = ⊤)
+    (hbreak : ‖(τ ^ p ^ k) π - π‖ = ‖π‖ ^ (i + 1)) : False := by
+  rw [algHom_pow_pow_apply_eq_self (Fact.out : p.Prime).pos hk hdeg htop τ π, sub_self,
+    norm_zero] at hbreak
+  exact absurd hbreak.symm (ne_of_gt (pow_pos hπ0 _))
 
 end Vacuous
 
@@ -433,6 +477,9 @@ def algHom_pow_pow_apply_eq_self.src : ABC3.Meta.Source :=
 def conj_pure_absurd_of_one_le.src : ABC3.Meta.Source :=
   { paper := "pGC", pdfPage := 6, item := "Corollary 3.1", sectionId := "cor-3-1" }
 
+def break_absurd_of_one_le.src : ABC3.Meta.Source :=
+  { paper := "pGC", pdfPage := 6, item := "Corollary 3.1", sectionId := "cor-3-1" }
+
 def WildStep.src : ABC3.Meta.Source :=
   { paper := "pGC", pdfPage := 6, item := "Corollary 3.1", sectionId := "cor-3-1" }
 
@@ -448,6 +495,7 @@ def WildStep.prod_axDecay_via_conj_pure.src : ABC3.Meta.Source :=
 #print axioms algHom_pow_eq_one_of_natDegree
 #print axioms algHom_pow_pow_apply_eq_self
 #print axioms conj_pure_absurd_of_one_le
+#print axioms break_absurd_of_one_le
 #print axioms norm_algEquiv_eq
 #print axioms norm_algHom_eq
 #print axioms WildStep.hfix
