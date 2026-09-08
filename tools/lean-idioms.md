@@ -12337,3 +12337,62 @@ in the application
 `Finset.Icc (b+1) (deg x₁)` を割る補題に `b ≤ deg x₁` を要求すると
 `omega could not prove the goal` になるので、`Nat.lt_or_ge (deg x₁) (b+1)` で
 **空積の枝を分ける**。空積側は `Finset.Icc_eq_empty` + `omega`。
+
+## #304 `field_simp` は `(1/a)^n` を `(a)⁻¹ ^ n` のまま残す —— 先に `one_div_pow`（2026-09-08、対の予算の閉じた形）
+
+`axDecay p i = p ^ ((1/(p-1)) * (1/p)^(i-1))` の有限積を閉じた形にする帰納で、
+`congr 1` のあと `field_simp; ring` を撃つと **`ring` が閉じない**:
+
+```
+error: unsolved goals
+case succ.e_a
+⊢ -(↑p * ↑p ^ (d * 2) * ↑p ^ (k' * 2) * (↑p)⁻¹ ^ d * (↑p)⁻¹ ^ k') - ↑p ^ 2 * ↑p ^ d * ↑p ^ k' +
+        ↑p ^ 2 * ↑p ^ (d * 2) * ↑p ^ k' +
+Try this:
+  [apply] ring_nf
+  
+  The `ring` tactic failed to close the goal. Use `ring_nf` to obtain a normal form.
+```
+
+★読み方: 正規形に **`↑p ^ (d*2)`（分母を払った跡）と `(↑p)⁻¹ ^ d`（払えなかった跡）が同居**している。
+`field_simp` は `1/a` は分母として拾うが、**`(1/a)^n`（`n` が変数）は拾わない**。
+
+★直し方は `field_simp` の**前**に `one_div_pow` を 1 個足すだけ:
+
+```lean
+rw [..., ← Real.rpow_add (by positivity), one_div_pow]
+congr 1
+field_simp
+ring
+```
+
+`one_div_pow : (1 / a) ^ n = 1 / a ^ n`。これで分母が `a ^ n` の 1 個になり `field_simp` が払える。
+★`(1/a)^n` が指数 `n` を**リテラルでなく変数**で持つときだけ起きる（リテラルなら `norm_num` が潰す）。
+
+## #305 `deg` で強帰納する降下核は、結論に **`deg x' ≤ deg x` を足しておく**（2026-09-08、対の予算）
+
+「1 段で `deg` が `d → d'` に落ち、損失は `∏_{k ∈ [d'+1, d]} c k`」という核で、
+再帰の戻り値 `x'` が `deg x₁` より**上**に居る場合を潰せず、予算の分割
+`(∏_{[deg x'+1, deg x₁]}) * (∏_{[deg x₁+1, deg x]}) = ∏_{[deg x'+1, deg x]}`
+の仮定 `deg x' ≤ deg x₁` が出せない。無理に出そうとすると:
+
+```
+error: Application type mismatch: The argument
+  hcon
+has type
+  deg x₁ < deg x'
+but is expected to have type
+  deg x' < deg x₁
+in the application
+  lt_of_le_of_lt (le_refl (deg x')) hcon
+```
+
+★直し方: **結論を 1 つ強くする**。`∃ x', deg x' ≤ b ∧ deg x' ≤ deg x ∧ ‖x - x'‖ ≤ …`
+と書けば、基底枝は `le_refl _`、帰納枝は `le_trans hle (le_of_lt h1)` で通り、
+再帰の戻り値に `deg x' ≤ deg x₁` が付いてくる。
+
+★★もう 1 つの罠（こちらは**主張が偽になる**）: 着地の予算を
+`∏_{k ∈ [b+1, deg x]} c k`（閾値 `b` で書く）とすると**偽**である。
+`b = 1`, `deg x = 2` で途中 `deg x' = 0` まで落ちると、支払いは `∏_{[1,2]}` で
+許容 `∏_{[2,2]}` を超える。★正しくは**着地の `deg x'` で書く**:
+`∏_{k ∈ [deg x' + 1, deg x]} c k`。
