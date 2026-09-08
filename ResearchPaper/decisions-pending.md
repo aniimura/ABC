@@ -13533,3 +13533,51 @@ GUESS[HY-c]: hlayer と hlayerZ の重複は、塔の帰納を j ≤ k に制限
 GUESS[HY-d]: 本体の見立ては 10 波連続で外れている。これも外れる
 ```
 
+
+## ★★★★★仮説 17 → 13（`hstep` 含む 7 本が落ちた）—— `Found/PGC/GainedBridgeSupply.lean` 561 行 / 12 宣言 / `sorry` 0
+
+**①真偽**: 「残りは配管」は `hchar`/`hlayer`/`hπE`/`hπ0`/`hπ1` については**真**。
+`hstep` については**偽に近い**（配管ではなく「分岐群の定義は生成元 1 個で書ける」補題が要った）が、★**木に在った。**
+
+★**本体の見立ての当否**:
+- ☆★**外れ**: 「`hstep` の部品は `RamificationJumpDivisibility` にある」——
+  `pow_char_pow_mem_lowerRamificationGroup`(344 行) は `σ ∈ G_1 ⟹ σ^{p^k} ∈ G_{1+k}` しか出さず、
+  ★`t_{j+1} = 1+j` に当たるので **`p·t_{j+1} ≤ t_{j+2}` を満たさない**（`p(1+j) ≤ 2+j` は偽）。
+  ★**跳びが `p` 倍で伸びることは `G_n/G_{n+1}` が指数 `p` であることからは出ない。**
+- ★**当たり**: `hlayer`/`hlayerZ` の重複は `j ≤ k` に制限すれば消える
+- ★**当たり**: `hchar` は `MinpolyOrbitSplit`(323 行) が持っており写すだけ
+
+**②在庫**: ☆★★**「無い」が嘘だった（10 例目）** —— `hstep` の核は
+`CyclicJumpNorm.norm_algHom_sub_mul_norm_eq`（**504 行**）に**等式**で在った
+（`‖σx−x‖·‖π‖ = ‖σπ−π‖·‖x−a₀‖`）。★これに `norm_digitSum_sub_digit_zero_le`(354 行) を掛けて
+`‖π‖` で割るだけ。☆★**「新しい数学は 1 行もない」。**
+★木の `LowerRamificationGroup.mem_lowerRamificationGroup_iff`(277 行) は `𝒪_M` 上の**加法的**条件で、
+`hstep` が要るのは `M` 全体の**斉次**条件（後者が強い。本ファイルが埋めたのはその強い方）。
+
+**③落ちた / 残った**:
+★落ちた 7 本: `hσ` `hstep` `hlayer` `hπ0` `hπ1` `hπE` `hchar`
+★入った 2 本（正規化）: `hnormp : ‖(p:M)‖ = p⁻¹`、`heM : ‖(p:M)‖ = ‖π‖^{p^{k+1}e}`
+★強めた: `ht0 : 0 ≤ t` → `ht1 : 1 ≤ t`（逸脱として記録）
+
+★**残り**: `hval`（★`F` が局所体という**入力**で `M` 側からは出ない）／`hbreak`/`hti`（`i` の定義）／
+★`hstepZ`/`hlayerZ`（★**`ℤ` 側、Hasse–Arf の内容**）／`hnormp`/`heM`/`hdeg`/`htop`（正規化と `M = F(π)`）。
+★★**pGC の Ax–Sen–Tate はまだ閉じていない。**
+
+```
+VERDICT[HY-a]: 当たり — hchar は MinpolyOrbitSplit にあり写すだけだった
+VERDICT[HY-b]: 外れ — RamificationJumpDivisibility では足りず、核は CyclicJumpNorm 504 行だった
+VERDICT[HY-c]: 当たり — j ≤ k に制限して重複が消えた
+VERDICT[HY-d]: 半分 — 3 本中 2 本は当たった（10 波連続の外れは途切れた）
+COST[Supply]: 安 | 持ち場=仮説を分岐群の定義から落とす  — 7 本落ち、hstep の核も木の在庫で「新しい数学は 1 行もない」
+```
+★`lean-idioms` に **#310**。★`unexpected token 'omit'` は既に 5 箇所在ったので**追加しなかった**（重複を避ける作法）。
+
+## ★`GUESS:`（配る前に書いた —— 残る仮説を落とす）
+
+```
+GUESS[HA-a]: hstepZ / hlayerZ は Hasse–Arf の内容で、木の HasseArfInduction.lean に部品がある
+GUESS[HA-b]: hval / hnormp / heM / hdeg / htop は PAdicLocalField の構造から出る（入力の言い換え）
+GUESS[HA-c]: 一番重いのは hstepZ（跳びが p 倍で伸びること）で、これは上付き番号付けの内容
+GUESS[HA-d]: 本体の見立ては直前で 2/3 当たった。今回も半分は当たる
+```
+
