@@ -13693,3 +13693,44 @@ consider restructuring your `variable` declarations so that the variables are no
 
 ★★警告文が提案する `omit [Fact (Nat.Prime p)] in` は**そのまま貼れる**が、
 `variable` で `[Fact p.Prime]` と書いていれば `omit [Fact p.Prime] in` でも通る。
+
+## #346 ★数値リテラルを `rw [show (2:ℕ) = 1 + 1 from rfl]` で開かない（2026-09-09、BudgetFiniteExcess）
+
+`∏ j ∈ Finset.Icc 1 2, f j` を `Finset.prod_Icc_succ_top` で開こうとして
+`2` を `1 + 1` に書き換えたら:
+
+```
+error: Tactic `rewrite` failed: motive is not type correct:
+  fun _a ↦ ∏ j ∈ Finset.Icc 1 _a, cEx j = axDecay 3 1 * 3 ^ (↑4 / ↑18)
+Error: Application type mismatch: The argument
+  Nat.instNeZeroSucc
+has type
+  NeZero (1 + 1)
+but is expected to have type
+  NeZero _a
+in the application
+  @Nat.instAtLeastTwoHAddOfNat _a Nat.instNeZeroSucc
+```
+
+★原因: 数値リテラル `2` は `OfNat` を経由し、その instance が `NeZero` を抱えている。
+`2` を変数に抽象化すると `NeZero _a` が合わなくなり、motive が型付けできない。
+
+★直し方: **リテラルの集合を `decide` で書き下してから畳む**。
+
+```lean
+have hset : Finset.Icc (1:ℕ) 2 = {1, 2} := by decide
+rw [hset, Finset.prod_insert (by decide), Finset.prod_singleton]
+```
+
+★`Finset.Icc (1:ℕ) 2 = {1, 2}` も `(1:ℕ) ∉ ({2} : Finset ℕ)` も `decide` で 0 秒。
+
+## #347 ★`Nat.Prime 3` は `norm_num` では出ない —— `Nat.prime_three`（2026-09-09、BudgetFiniteExcess）
+
+```
+error: unsolved goals
+⊢ Nat.Prime 3
+```
+
+`haveI : Fact (Nat.Prime 3) := ⟨by norm_num⟩` が落ちる。
+★`⟨Nat.prime_three⟩` と書く（`2` は `Nat.prime_two`）。
+★`by decide` でも通るが遅い。

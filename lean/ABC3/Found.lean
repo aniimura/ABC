@@ -1899,6 +1899,7 @@ import ABC3.Found.PGC.AxDecayKnobCircular
 import ABC3.Found.PGC.FirstJumpRouteEquiv
 import ABC3.Found.PGC.BudgetRecast
 import ABC3.Found.PGC.BudgetFiniteExcess
+import ABC3.Found.PGC.ExitLossDepth
 /-!
 # Found — 実装済みの基礎
 
