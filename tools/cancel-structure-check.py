@@ -152,6 +152,77 @@ def top_component_test(p, n, trials, seed=20260909, mod=None):
           f"   最大 = {max(hist)}")
 
 
+def rand_elt(L, tail_only, biased=True):
+    """𝒪_L の元を {μ^s π^i} 基底で乱択。tail_only なら i = 0 の成分を 0 にする。"""
+    acc = [0] * L.N
+    lo = 1 if tail_only else 0
+    for s in range(L.S):
+        ms = L.F.powm(L.mu, s)
+        for i in range(lo, L.p):
+            if biased:
+                c = L.p ** random.randrange(0, 5) * random.randrange(0, L.p ** 4)
+            else:
+                c = random.randrange(0, L.p ** 4)
+            if c == 0:
+                continue
+            t = L.F.mul(ms, L.F.powm(L.F.PI, i))
+            acc = [a + c * b for a, b in zip(acc, t)]
+    return acc
+
+
+def tail_only_test(p, n, trials, seed=20260909):
+    """★★`f₀ = 0`（尾だけ）で測る —— 打ち消しの原因が `f₀` かどうかが 1 回で決まる。
+
+    `f₀ = 0` なら最近点は `x′ = 0` なので `d(x,E₁) = v_L(x)`、
+    かつ `‖σx′ − x′‖ = 0 < ‖σy − y‖` は自明に成り立つ
+    （`FirstJumpWitness.norm_smul_sub_self_eq_of_lt` の仮説）。
+    ⇒ ★もし尾だけで打ち消しが起きなければ、原因は `f₀` だと確定する。
+    """
+    L = hf.Layer(p, n)
+    random.seed(seed)
+    iv = {a: L.F.v(L.F.sub(L.F.sigma_pi(a), L.F.PI)) for a in L.HK}
+    firstj = [a for a in L.HK if iv[a] == L.i1 + 1]
+    for tail_only in (True, False):
+        hist = {}
+        fj = {}
+        dcheck = 0
+        for _ in range(trials):
+            y = rand_elt(L, tail_only)
+            d = L.dist_to_E1(y)
+            e = L.eps(y)
+            if d is None or e is None:
+                continue
+            if tail_only and L.F.v(y) == d:
+                dcheck += 1
+            hist[e - d] = hist.get(e - d, 0) + 1
+            best = None
+            for a in firstj:
+                w = L.F.v([u - v for u, v in zip(sigma_apply(L, a, y), y)])
+                if w is None:
+                    continue
+                if best is None or w < best:
+                    best = w
+            if best is not None:
+                fj[best - d] = fj.get(best - d, 0) + 1
+        tot = sum(hist.values())
+        tag = "★尾だけ (f0 = 0)" if tail_only else "  対照 (f0 あり)"
+        print(f"  {tag}  p={p} n={n} e={L.N} i1={L.i1}  n={tot}")
+        print(f"      loss = eps − d の分布       = {dict(sorted(hist.items()))}"
+              f"   最大 {max(hist)}")
+        print(f"      第1跳びの打ち消し深さの分布 = {dict(sorted(fj.items()))}"
+              f"   最大 {max(fj)}")
+        if tail_only:
+            print(f"      （d = v_L(x) の確認: {dcheck}/{tot}）")
+
+
+def tail():
+    print("=== ★★尾だけ（f₀ = 0）で打ち消しは起きるか ===")
+    tail_only_test(3, 3, 6000)
+    tail_only_test(3, 4, 1500)
+    tail_only_test(2, 4, 6000)
+    tail_only_test(2, 5, 3000)
+
+
 def firstjump_cancel_test(p, n, trials, seed=20260909):
     """★★読めた法則の検証 —— **第 1 跳びの元での打ち消しは高々 2 目盛り**。
 

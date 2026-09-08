@@ -1917,6 +1917,7 @@ import ABC3.Found.PGC.FirstJumpNotAchieved
 import ABC3.Found.PGC.HformPopulation
 import ABC3.Found.PGC.LossUnitLaw
 import ABC3.Found.PGC.FirstJumpWitness
+import ABC3.Found.PGC.TailNoCancel
 /-!
 # Found — 実装済みの基礎
 
