@@ -15183,3 +15183,65 @@ GUESS[TW-c]: WildDepthDescent.lean:285 not_forall_exists_relIndex_padicValNat_eq
 GUESS[TW-d]: 本体の名指しは前波で 3 つ外した。今回も少なくとも 1 つ外す
 ```
 
+
+## ★★★塔のデータ 4 つは無料、巡回性は次数から出ない（定理）—— 第 1136（2026-09-09）
+
+**①安い順の測定**:
+
+| 項目 | 結果 |
+|---|---|
+| `τ` / `hτ` | ★★**無料**（`g` の加法部分。`hτ` は **`rfl`**） |
+| `s` / `hsg` | ★★**無料**（`g^{p^j}` の環準同型部分。`hsg` は **`rfl`**） |
+| `g` / `hg` | ★`IsCyclic` ＋ `Nat.card = p^{k+1}` から出る |
+| 巡回性そのもの | ★★★**出ない** |
+
+⇒ ★**6 つの塔のデータが `IsCyclic` と `Nat.card` の 2 つになった**
+（`exists_norm_sub_algebraMap_le_prod_axDecay_of_cyclic_adjoin`）。
+
+**②★★★主な成果は否定的結果**:
+`not_forall_exists_orderOf_eq_card` —— **位数が `p^{k+1}` であるだけでは位数 `p^{k+1}` の元は取れない**。
+反例は `(ℤ/2)²`。⇒ 出口の `hg : orderOf g = p^{k+1}` は `hnK` と Galois 性だけからは**得られない**。
+
+★★**体の側でも同じ**（★形式化していない。手での検算として docstring に記録）——
+`ℚ₂(√−1, √2)/ℚ₂` は次数 4 の★**完全分岐 Galois** 拡大で Galois 群は `(ℤ/2)²`。
+中間の 2 次体は `√−1` / `√2` / `√−2` の 3 つでどれも分岐する
+（`ℚ₂` の不分岐 2 次拡大は `ℚ₂(√−3)` だけ）。
+⇒ ★★**`ht`（完全分岐）＋ `hnK`（次数）＋ Galois 性でも巡回性は出ない。**
+さらに ★`K(x)/K` はそもそも Galois とは限らない。
+
+**③止まった場所**: ★原典の道は「`K(x)` 自身を巡回とする」ではなく
+★**Galois 閉包に移って wild inertia（`p`-群）の正規列を取る**こと。
+- `p`-群性の供給元は `RamificationJumpDivisibility.lean:361 isPGroup_lowerRamificationGroup_one` で、
+  その仮説は★**本連鎖ですでに全部揃っている**（`IntegerMiscInstances` / `IntegerRingInstances` /
+  `IntegerResidueBase`）。`h1` も `IntegerMiscInstances.lowerRamificationGroup_one_eq_top` で出る。
+  ⇒ ★**`IsPGroup p G` は届く。しかし `IsPGroup` は巡回を意味しない。**
+- ★素朴な部分群降下は**既に封じられている** —— `WildDepthDescent.lean:280
+  not_forall_exists_relIndex_padicValNat_eq`（`A₄` の反例、実装者が以前に形式化）。
+- ⇒ ★★★**残るのは「`p`-群の中に巡回な商の列を取る」ノード**。
+  `TotallyRamifiedLayer.exists_pgroup_descent_cyclic`（第 1082）が既にあるが、
+  ★それを `AxWildDescent` の形に繋ぐのは**本波では行っていない**。
+
+**①不分岐側との関係**: ★依然生きている。★ただし本波の反例は不分岐側とは**独立**
+（`ℚ₂(√−1,√2)` は完全分岐で不分岐層を含まない）。
+
+```
+VERDICT[TW-a]: 当たり（IsPGroup の供給元が特定され、仮説は本連鎖で全部揃っていた）
+VERDICT[TW-b]: 当たり（巡回性は出ない。しかも群の側で反例が定理になった）
+VERDICT[TW-c]: 当たり（A₄ の反例が素朴な降下を封じていることを実装者が確認）
+VERDICT[TW-d]: ★外れ（「少なくとも 1 つ外す」と書いたが 3 つとも当たった）
+COST[TowerData]: 安 | 持ち場=塔のデータ  — 4 つ無料、巡回性の不可能性を定理化、残りが「p-群の巡回商の列」1 点に
+```
+
+
+## ★`GUESS:`（配る前に書いた —— `exists_pgroup_descent_cyclic` を `AxWildDescent` に繋ぐ）
+
+★木の `TotallyRamifiedLayer.lean:457` 自身が「★★ただし『全分岐』は**言えない**(§6)。★そこが一般化の
+止まる場所である」と断定している。本体はその §6 を**読んでいない**。
+
+```
+GUESS[PD-a]: 木の「全分岐は言えない」は今も真。ただし出口 ..._of_cyclic_adjoin は ht(完全分岐)を要求するので、そこが噛み合わない場所になる
+GUESS[PD-b]: 段数の噛み合わせも問題になる。descent_cyclic が出すのは 1 段(|Q/P| = p)だが、出口は Nat.card = p^{k+1} を要求する。本体はこの突き合わせを行っていない
+GUESS[PD-c]: 逃げ道は AxWildDescent が要求するのが「wildDepth が真に下がる x'」だけで、塔全体ではないこと。1 段で足りるなら k = 0 の出口(既に定理)で済むかもしれない
+GUESS[PD-d]: 本体の名指しは前波で 3 つとも当たった。今回は外れに戻る
+```
+
