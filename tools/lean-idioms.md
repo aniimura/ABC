@@ -13185,3 +13185,32 @@ theorem hiso_g2 (z : M2) : ‖g2 z‖ = ‖z‖ := (spectralNorm_eq_of_equiv g2 
 
 ★`NormedAlgebra` も `NormedAlgebra.norm_eq_spectralNorm` も経由せずに 1 行で済む。
 ★`spectralNorm_eq_of_equiv` の向きは `spectralNorm K L y = spectralNorm K L (σ y)`（`.symm` が要る）。
+
+## #330 自作する前に `grep -rn "theorem <名前>" lean/ABC3/Found/PGC/*.lean` —— 重複を 2 本作っていた（2026-09-09、JumpStrictMono）
+
+```
+ABC3/Found/PGC/JumpStrictMono.lean:102:8: error: `ABC3.Found.PGC.norm_pow_sub_pow_le` has already been declared
+```
+
+★このエラーで初めて気づいた（#158 の「同名で書いて `already been declared` を出させる」が
+**意図せず**効いた形）。実測:
+
+```
+grep -rn "theorem norm_pow_sub_pow_le" lean/ABC3/Found/PGC/*.lean
+  → 3 本。GainedTowerStep.lean:159 が欲しかったもの:
+    norm_pow_sub_pow_le (hπ0 : 0 < ‖π‖) (hw : ‖w‖ ≤ ‖π‖) (m) : ‖w^m − π^m‖ ≤ ‖π‖^{m−1}·‖w − π‖
+```
+
+★さらに `norm_sum_le_of_forall_le`（有限和の超距離上界）も **`GainedTowerStep.lean` に在った**。
+私は前波（#325）で「mathlib に無い」と正しく測ったが、★**木に在るかを測っていなかった**ので
+`WildBreakLowerBound` §1 に**重複**を作っていた（引数の並びが違うだけ）。
+
+★**教訓（測定手順）**: 「無い」と判定する前に **2 か所**測る。
+
+```
+grep -n "<名前>" .cache/mathlib-index.txt                     # mathlib
+grep -rn "theorem <名前>" lean/ABC3/Found/PGC/*.lean           # ★木（これを忘れていた）
+```
+
+★`.cache/decl-index.txt` は古いことがある（`exists_pgroup_descent` が 0 件だった実例、2026-09-08）ので、
+★**実ファイルを直接 grep する**方が確実。範囲は `lean/ABC3/Found/PGC/*.lean` に切る（木全体を舐めない）。
