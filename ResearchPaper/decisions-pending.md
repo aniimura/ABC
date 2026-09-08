@@ -14288,3 +14288,42 @@ VERDICT[HasseArf-bridge]: 外れ（本体は「橋が無い」を疑えとしか
 COST[HasseArfCongruence]: 安 | 持ち場=Hasse–Arf の合同  — 木で既に閉じていたと判明し、残りが hrec 1 本に絞れた
 ```
 
+
+## ★★★分岐群とノルムの橋が両向きで通った —— `Found/PGC/RamificationGroupNormBridge.lean` 240 行 / `sorry` 0（2026-09-09）
+
+**①真偽**: ★前波で実装者自身が書いた「`h ∈ G_{t−1}` までしか出ない（真は `h ∈ G_t`）」は**埋まった**。
+★★`mem_ramification_iff` : **`(∀ z, ‖z‖ ≤ 1 → ‖h z − z‖ ≤ ‖π‖^{i+1}) ↔ i ≤ t`**（両向き）。
+補助は `norm_le_norm_pi_of_le_one`（`0 < l < n` で `‖c·π^l‖ ≤ 1` ⇒ `≤ ‖π‖`。
+指数 `n·m + l` は `≤1` から `≥0`、`n ∤ l` から `≠0`、ゆえ `≥1`）と
+`norm_sub_apply_le_of_norm_le_one`。★左辺は `LowerRamificationGroup.lean:270
+mem_lowerRamificationGroup_iff_forall` の**ノルム版そのもの**。
+★本体が渡した `:277 mem_lowerRamificationGroup_iff`（`B = A[α]` 版）は**使わなかった** ——
+`:270` の全称形で足り、`hadj` を要求しないため。★証拠 2 本の比較を実装者が実測して選んだ。
+
+**②在庫の測定（#330 の 2 か所測定）**: 漸化式は★**在庫に在った** ——
+`HerbrandComposition.lean:455 herbrandPhiGroup_natCast`（`φ_G(n) = (Σ_{i∈Icc 1 n}|G_i|)/|G|`）、
+`HasseArfStrongInduction.lean:183 herbrandPhi_succ_natCast`（1 段版）。
+`φ(n+1) − φ(n) = |G_{n+1}|/|G|` は `Finset.sum_Icc_succ_top` で **1 行**。書く必要が無い。
+
+**③止まった場所（★数学ではなく型）**: `|G_i|` を `u` で書き下す部分。
+数学は尽きている（`mem_ramification_iff` ＋ `norm_pow_apply_sub_eq` ⇒ `g^j ∈ G_i ⟺ i ≤ u_{v_p(j)}`
+⇒ `|G_i| = p^{k+1−m_i}`）。止まるのは `herbrandPhiGroup` が要求する `B` 側の 4 つ:
+
+| 要るもの | 実装者の実測 | ★本体の追測 |
+|---|---|---|
+| `IsDiscreteValuationRing B` | 型 `AdjoinIntegers.lean:70 adjoinIntegers` は在るがインスタンスは同ファイルに無い | ★`isDiscreteValuationRing_adjoinIntegers` は**在る**。木の 10 ファイル以上が `attribute [local instance]` で貼っている（`LowerRamificationGroup.lean:669` 等）。★「無い」ではなく「`instance` ではなく定理で、意図的に local」 |
+| `MulSemiringAction G B` | 無い（`hiso` から作れるはず） | ★`FixedRingAdjoinIso.lean:445/528/584` が `K⟮x⟯` の Galois 群で**取っている** |
+| `maximalIdeal B = Ideal.span {π}` | 無い | ★`AbelianSubfieldInLubinTate.lean:311/357/403/504/565`、`FixedRingAdjoinIso.lean:571` が `huni` として**仮説で取る流儀**が既に在る |
+| `𝒪_M = 𝒪_K[π]` | 中身は本波が出した（`norm_algebraMap_le_one_of_le_one`）。型に載せていないだけ | — |
+
+★#69「`adjoinField` / `adjoinIntegers` の境界は越えられない（212 秒 timeout）」の**危険区間**。
+⇒ (b) は配管であって数学の穴ではない。★ただし `PAdicLocalField p` は D13/D30–D32 の
+同型不変性の罠がある領域なので、型を建てる前に #323（重い型クラスを外した層）と
+#296（型を作らず指数で測る）を見積もること。
+
+```
+VERDICT[1つ分のずれ]: 当たり（実装者の前波の自己申告どおり、単元で l=0 の項が消えることで埋まった）
+VERDICT[証拠1の2本]: 本体は「どちらが効くか未測定」と書いた → 実装者が測って :270 を選んだ。★渡し方は正しかった
+COST[RamificationGroupNormBridge]: 安 | 持ち場=hrec の橋  — (a) を両向きで閉じ、(c) は在庫と判明、(b) の止まる場所を型 4 つに確定
+```
+
