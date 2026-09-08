@@ -13797,3 +13797,47 @@ GUESS[MD-c]: hjump（下付き分岐群の定義）は CyclicJumpNorm の桁展�
 GUESS[MD-d]: 本体の見立ては今日 2/4 前後。半分は外れる
 ```
 
+
+## ★★★★★★4 点 → 2 点 —— `Found/PGC/GainedTowerModel.lean` 836 行 / 31 宣言 / `sorry` 0
+
+**①真偽**: ★**真。しかも独立に 3 経路で裏を取った。**
+`(p,k,e,u) = (3,1,2,(2,8))` を原典を見ずに Serre IV §4 から再計算して一致。
+★差積を **3 通り**（表／閉じた形／塔の公式）で計算し `45` が一致（`ℚ₃(ζ₈₁)` では `189`）——
+★**表を 1 段でも間違えると合わない。**
+★`u₁ = 8` は下界（鎖）・上界（`hbnd`）・**Hasse–Arf の合同**の 3 本で**一意に決まる**（`Zeta27.uz_one_forced`）。
+★★**`k = 2` の模型も取れた**: `ℚ₃(ζ₈₁)/ℚ₃(ζ₃)`、`(3,2,2,(2,8,26))`。
+
+**②成果**: ★**点 4（`hu`）完全に落ちた**（`pow_le_of_strictMono_of_dvd`、純 ℤ）。
+★★**到達点 `..._of_cyclic`: 入力は「巡回群 1 個（`orderOf g = p^{k+1}`）＋ `π` の原始性 ＋ `hvalj`」だけ。**
+★`E` の族・`hdegj`・`htopj`・`hfixj`・**上の体 `F` 自身**・`hdeg`・`htop`・`hu` が**全部消えた**。
+★`pow_le_of_chain` が「★**点 3 が閉じれば点 4 は自動で落ちる**」ことも示している。
+
+**③在庫**: ★**無いと思ったが在った** `Field.primitive_element_iff_minpoly_natDegree_eq` /
+`IntermediateField.adjoin_eq_top_of_adjoin_eq_top`（層をまたぐ原始元）/ `IsUltrametricDist.norm_natCast_le_one`。
+★**#297 の再発 2 件**（明示引数のずれ）。
+★**無い**: 高次分岐群 `G_i`、★**`IsTotallyRamified` は 0 件**（`differentIdeal` / `Ideal.ramificationIdx` は在る）。
+
+**④残りはちょうど 2 点**:
+1. ★**`hvalj`**（`e(M/E_j) = [M:E_j]` ＝全分岐）。★群論＋超距離では決まらない
+   （★**不分岐拡大が `hdegj`/`htopj`/`hfixj` を同じく満たす**）。
+   落とすには `d_j ≤ [M:E_j]`（1 層）と `d_j/d_{j+1} ≤ [E_{j+1}:E_j]`（★**2 層 = #59 の危険帯**）。
+2. 体・ノルム込みの**模型そのもの**（`ℚ₃` の 18 次全分岐拡大の構成）。
+
+```
+VERDICT[MD-a]: 外れ — 既存 Zeta27.* は 5 ファイル 40 行すべて ℝ の数値主張で、NormedField も Padic も出ない
+VERDICT[MD-b]: 当たり — #314 の構えで #59/#69 に一度も当たらなかった（層どうしを比較せず全部底 K から測る）
+VERDICT[MD-c]: 外れ — hjump は桁展開からは出ない。σ → σ^p に渡すのは p ∣ C(p,r) だった
+VERDICT[MD-d]: 当たり — hu は Hasse–Arf から落ちた
+COST[TowerModel]: 安 | 持ち場=k ≥ 1 の模型を構成する  — 点 4 完了・点 2 ほぼ・点 3 一段。入力が巡回群 1 個まで縮んだ
+```
+★**逸脱なし**（`hu` を Hasse–Arf の合同に置き換えたのは**仮説を弱めた**方向）。★`lean-idioms` **#315**。
+
+## ★`GUESS:`（配る前に書いた —— `hvalj`（全分岐）を落とす）
+
+```
+GUESS[TR-a]: 全分岐は「π が素元で e = [M:E]」なので、π の原始性（既に入力にある）から 1 層ぶんは出る
+GUESS[TR-b]: 2 層をまたぐ比 d_j/d_{j+1} が #59 の危険帯だが、#314 の「全部底から測る」構えで回避できる
+GUESS[TR-c]: mathlib に IsTotallyRamified が 0 件なので、木に自前の述語を作ることになる
+GUESS[TR-d]: 本体の見立ては今日 2/4 前後。半分は外れる
+```
+
