@@ -12750,3 +12750,42 @@ of sort `Type ?u.49` in the application
 
 ⇒ **1 つ足りない**ときは `Set` を要求され、**2 つ足りない**ときは `Type` を要求される。
 どちらも「引数が 1 つ多い」ではなく**何個多いか**をエラーの期待型から読むのが速い。
+
+## #316 `omit [Inst] in` は docstring の**前**に置く（後ろだと `unexpected token 'omit'`）（2026-09-08、TotallyRamifiedValueGroup）
+
+section 変数が使われないと linter が
+
+```
+warning: automatically included section variable(s) unused in theorem `…norm_pos_of_normp`:
+  [IsUltrametricDist M]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsUltrametricDist M] in theorem ...
+```
+
+と言ってくる。案内どおり `omit … in` を足すとき、**docstring `/-- … -/` の後ろ**に置くと
+
+```
+error: unexpected token 'omit'; expected 'lemma'
+```
+
+で落ちる。★正しい順は `omit [Inst] in` → `/-- … -/` → `theorem`。
+（`@[simp]` などの属性と違い、`omit … in` は宣言修飾子ではなく**コマンド前置**なので
+docstring より前に来る。）
+
+## #317 `.cache/mathlib-index.txt` に `AddSubgroup.mem_closure_singleton` は出ないが**在る**（2026-09-08、TotallyRamifiedValueGroup）
+
+```
+grep -n "mem_closure_singleton" .cache/mathlib-index.txt
+  → Subgroup.mem_closure_singleton / Submonoid.mem_closure_singleton / AddSubmonoid.mem_closure_singleton
+    ★AddSubgroup 版だけ出ない
+```
+
+`to_additive` 生成名なので索引に無い。実際は在り、
+
+```lean
+have hmem : m ∈ H ↔ ∃ k : ℤ, k • a = m := by
+  rw [ha]; exact AddSubgroup.mem_closure_singleton
+```
+
+がそのまま通る。★「索引に無い ⇒ mathlib に無い」と書く前に、
+**乗法版の名前を `Add`/`AddSub` に読み替えて 1 回叩く**（#95 の 8 例目）。
