@@ -14246,3 +14246,45 @@ COST[DegPFree]: 安 | 持ち場=hiso と k≥1 への接続  — 接続できな
 COST[StrictMono]: 安 | 持ち場=Hasse–Arf と狭義単調  — 狭義単調を超距離だけで定理にし、harith が 4 条件 → 実質 3 条件になった
 ```
 
+
+## ★★★★「橋が無い」は偽だった —— `Found/PGC/HasseArfCongruence.lean` 169 行 / `sorry` 0（2026-09-09）
+
+**①真偽**: ★★**配った字面（`HasseArfInduction.lean:101-108`「`[Algebra A C]` —— まだ無い」）は偽**。
+★**2 段で古かった**:
+1. `FixedRingBaseAlgebra.lean:178 fixedRingAlgebra` が `Algebra A ↥(fixedRing B H)` を**供給済み**
+2. `HasseArfStrongInduction.lean:447 exists_natCast_herbrandPhiGroup_of_lowerRamificationGroup_one_eq_top`
+   が `hind`（帰納）も**供給済み**（同 :106「`hind` は §3 が供給するので、ここに帰納法は無い」）
+
+⇒ ★★**`G` 可換・`G_1 = ⊤` の Hasse–Arf は木で既に閉じている。我々の設定はちょうどそれ**
+（全分岐 ⇒ `G_0 = G`、`p` 群 ⇒ `G_1 = G = ⊤`、巡回 ⇒ 可換）。
+★同ファイルが「閉じていない」と言う**段 3（順分岐商 `G_1 ⊊ G_0`）は我々には要らない**。
+★元の docstring は他が読むので**直さず**、訂正を新ファイルに書いた（債務返済ファイルの規約）。
+⇒ ★**#331「docstring の『まだ無い』は後続ファイルが埋めていることがある」。今日 13 例目の「無いが嘘」。**
+
+**②成果**:
+- ★**抽象核** `dvd_sub_of_phi_intCast` —— `φ` が各段で整数値 ＋ Herbrand の漸化式
+  `φ(m+1) = φ(m) + (u(m+1)−u m)/p^{m+1}` ⇒ **`p^{m+1} ∣ u(m+1) − u m`**。
+  ★分岐・付値・Galois・群の語彙が **1 語も出ない**。これが `harith` (3) の中身のすべて。
+- ★★**独立性を定理化** `congruence_not_implied_by_ultrametric` ——
+  `p=3, k=1, e=1, u₀=2, u₁=4` は (1)(2)(4) を全部満たすのに `3 ∤ (4−2)`。
+  ⇒ ★**(3) は (1)(2)(4) から出ない**＝Hasse–Arf は独立の入力として要る。
+  定量形 `u₀ + min E u₀ ≤ u₁` を足しても同じ（`congruence_not_implied_even_with_quantitative`）。
+
+**③在庫の測定 —— 捨てた道**: 証拠 1・2（`RamificationJumpDivisibility` / `AbelianJumpDivisibility`
+の `e_0 ∣ n` 路線）は★**我々の設定では空虚**。全分岐かつ `p` 群 ⇒ `G_0 = G_1` ⇒ `e_0 = 1` ⇒
+`e_0 ∣ n` は常に真＝情報ゼロ。
+
+**④残る 1 点（＝止まった場所を正確に）**: 木の Hasse–Arf は**環の言葉**（`herbrandPhiGroup G π'`）、
+`u m` は**ノルムの言葉**。繋ぐのに要るのは
+`hrec : ∀ m, φ (m+1) = φ m + (u(m+1) − u m)/p^{m+1}` **1 本だけ**。
+★片側は測れた: `LowerRamificationGroup.lean:270` は `σ ∈ G_n ↔ ∀ x : B, σ•x − x ∈ 𝔪^{n+1}`。
+前波の `norm_sub_apply_le_mul` は `‖z‖ ≤ 1` で `≤ ‖π‖^t` しか出さないので
+★**`h ∈ G_{t−1}` までしか出ない**（真は `h ∈ G_t`）。ずれの原因は
+「単元 `z` では `l = 0` の項が消える」を使っていないこと。
+⇒ ★残りは **(a) 単元に対する 1 つ分の改良** と **(b) `|G_i|` を `u` で書き下す部分**。両方未着手。
+
+```
+VERDICT[HasseArf-bridge]: 外れ（本体は「橋が無い」を疑えとしか言えず、実装者が「2 段で古い」まで測った） | GUESS は「無いが嘘の 13 例目かもしれない」→ 当たり
+COST[HasseArfCongruence]: 安 | 持ち場=Hasse–Arf の合同  — 木で既に閉じていたと判明し、残りが hrec 1 本に絞れた
+```
+
