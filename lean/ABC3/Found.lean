@@ -1905,6 +1905,7 @@ import ABC3.Found.PGC.CosetSumFixedRing
 import ABC3.Found.PGC.FirstJumpRouteGap
 import ABC3.Found.PGC.UnramifiedLayerFree
 import ABC3.Found.PGC.UnramifiedStepFixed
+import ABC3.Found.PGC.DepthLowerBound
 /-!
 # Found — 実装済みの基礎
 
