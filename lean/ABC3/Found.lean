@@ -1878,6 +1878,7 @@ import ABC3.Found.PGC.IntegerSubringNorm
 import ABC3.Found.PGC.IntegerRingInstances
 import ABC3.Found.PGC.IntegerDVR
 import ABC3.Found.PGC.BaseIntegerAlgebra
+import ABC3.Found.PGC.IntegerResidueBase
 /-!
 # Found — 実装済みの基礎
 
