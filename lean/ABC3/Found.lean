@@ -1887,6 +1887,7 @@ import ABC3.Found.PGC.WildBreakPowDegree
 import ABC3.Found.PGC.HarithAssembly
 import ABC3.Found.PGC.HarithConcreteCheck
 import ABC3.Found.PGC.HarithPAdicSupply
+import ABC3.Found.PGC.TotallyRamifiedCriterion
 /-!
 # Found — 実装済みの基礎
 
