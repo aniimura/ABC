@@ -1891,6 +1891,7 @@ import ABC3.Found.PGC.TotallyRamifiedCriterion
 import ABC3.Found.PGC.RamificationIndexNorm
 import ABC3.Found.PGC.TotallyRamifiedAdjoinNorm
 import ABC3.Found.PGC.TotallyRamifiedAdjoinSupply
+import ABC3.Found.PGC.SpectralNormBridge
 /-!
 # Found — 実装済みの基礎
 
