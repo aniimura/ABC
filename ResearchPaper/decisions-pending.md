@@ -14776,3 +14776,18 @@ VERDICT[本体の「(2)(3) は m < k に限られている」]: ★当たり（(
 COST[HarithAssembly + HarithConcreteCheck]: 安 | 持ち場=組み立て  — harith と htop が出口から消え、k=1 で検算まで通った
 ```
 
+
+## ★`GUESS:`（配る前に書いた —— `PAdicLocalField` 側から `hnK`/`hvalK`/`heM` を供給）
+
+★前回同じ持ち場を配ったときの記録（`decisions-pending.md:14060-14080`）で止まった 3 点のうち、
+**2 番（`harith` の下界 `1 ≤ u`、等長性）は本日 `one_le_jump_zero_pow` で落ちた**。残るのは
+1（不分岐側 `f = p` の 1 段）と 3（体の側の翻訳、#59 の危険区間）。
+前回の `VERDICT[GT-c]` は「半分 —— `heM` は定理になったが `hnormp` は落ちない」だった。
+
+```
+GUESS[PLF-a]: hnormp（‖(p:M)‖ = p⁻¹）は spectralNorm が ℚ_p のノルムを延長することから出る。前回「落ちない」とされたが、今日 #337（instance が既に在る）と #329（NormedAlgebra 不要）の手が増えたので今回は落ちる
+GUESS[PLF-b]: hnK（finrank = p^{k+1}）は WildDepthFieldDescent の Sylow 降下が層を出すが、全分岐であることは別に要る（前回 VERDICT[GT-a] が「半分」だった理由）
+GUESS[PLF-c]: 一番高いのは hvalK（K の値群が ‖π‖^{qℤ} に入る）で、これは「その層が全分岐」と同値に近い
+GUESS[PLF-d]: 本体の名指しは 12 波連続で外れている。今回も少なくとも 1 つ外す
+```
+
