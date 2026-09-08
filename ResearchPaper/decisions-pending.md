@@ -15889,3 +15889,66 @@ GUESS[HF-c]: ①不分岐側が heq に効くので、この道を進むと①�
 GUESS[HF-d]: 本体の名指しは直近 16 波で 12 回外している。今回も少なくとも 1 つ外す
 ```
 
+
+## ★★★★①不分岐側は「難しい側」ではなく最良定数 `1` の側 —— `UnramifiedLayerFree.lean` 184 行 / `sorry` 0（2026-09-09）
+
+**★実装者が①を選んだ理由（本体が判断を委ねた点）**: ①前波で初めて①が本筋に入った
+（`heq : e_{E₁} = p·e_K` は完全分岐の帰結）②`hform` は**新しい降下の機構**が要ると測れており 1 波では
+入らないと見た ③①は本日ずっと未着手で、4 か所の docstring が「別の議論が要る」と書いているだけで
+★**中身を測った波が 1 つも無い**。
+
+**①真偽 —— ★★★①は「別の議論」ではなく「無料の側」**:
+跡による降下（`NormalizedTraceDescent.lean:179`）の損失は `‖a‖`（`Σ_{g∈s} g·a = 1` の `a`）で:
+- **`one_le_norm_of_sum_smul_eq_one`** —— ★**`1 ≤ ‖a‖` は無条件**
+  （超距離で `1 = ‖Σ g·a‖ ≤ max‖g·a‖ = ‖a‖`）。
+  ⇒ ★**跡による降下の損失は決して `1` を下回れない。`1` が最良定数。**
+- **`norm_sub_traceAverage_le_of_norm_le_one`** —— `‖a‖ ≤ 1` なら損失は **`ε`（定数 `1`）**。
+- `norm_eq_one_of_sum_smul_eq_one` —— よって `‖a‖ ≤ 1 ⟺ ‖a‖ = 1`。
+
+★`‖a‖ ≤ 1` が取れるのは「跡が整数環の上に全射」＝ **層が不分岐**（different が自明）のとき。
+⇒ ★★**不分岐の層は最良定数 `1` で通り、積の勘定に一切効かない。**
+
+**★木の断定の読み方を訂正**: `TotallyRamifiedLayer.lean:328-341` の「不分岐側では `hvalK` は偽」は
+**真**（本日 3 度読んで確認）。しかし「⇒ 別の議論が要る」は★**「難しい」という意味ではない** ——
+偽になるのは**全分岐を仮定したその出口の仮説**であって、降下そのものではない。
+同 `:37-41` の「`p ∤ deg minpoly` と『層が不分岐』を同一視しない」警告は**今も正しく**、
+本ファイルは同一視していない（`‖a‖ ≤ 1` だけを仮定し、次数にも分岐にも触れていない）。
+
+**②成果**: ★**全部が抽象核**（超距離な可換環＋等長な群作用だけ。分岐・付値・Galois・`p` 進の語彙 0）——
+`one_le_norm_of_sum_smul_eq_one` / `norm_sub_traceAverage_le_of_norm_le_one` /
+`norm_eq_one_of_sum_smul_eq_one` / `traceAverage_best_constant` / `barycenter_loss_le_of_norm_le_one`。
+
+**③在庫の測定（★2 か所）**: `Algebra.intTrace`（`RingTheory/IntegralClosure/IntegralRestrict.lean:260`）、
+★`Algebra.trace_quotient_eq_of_isDedekindDomain`（`RingTheory/Trace/Quotient.lean:90`、
+`Tr_{k_L/k_M}(x̄) = intTrace(x) mod p`）。木の `Found/PGC` には `intTrace` 無し。
+⇒ ★**「不分岐 ⇒ `∃ a ∈ 𝒪_L, Tr(a) = 1`」の道具は mathlib に在る**
+（不分岐なら剰余体の拡大が分離的 ⇒ `Tr_{k_L/k_M}` 全射 ⇒ `intTrace(x)` が単元になる `x` が取れ、
+`a := x/intTrace(x)`）。★これが次の 1 点の正確な形。
+
+**★正直に未了と書いた 2 点**:
+(a) `‖a‖ ≤ 1` を**仮説のまま**受けている（「不分岐 ⇒ その `a` が在る」を形式化していない）。
+(b) 平均化した `Σ g·(a·x)` が下の体に入ること（深さが下がること）を示していない。
+⇒ ★**①は「閉じた」とは書かない。**「難しい側ではない」ところまでが本波の成果。
+
+**穴の現状**: ①不分岐 ★**「難しい側」ではないと測れた**（最良定数 `1`）が上の 2 点が残る /
+②′ / ③幾何減衰 / ⑤出口の限界 は変わらず。④は消えたまま。
+
+```
+VERDICT[HF-a][HF-b]: 未判定（実装者は hform ではなく①を選んだ。理由は 3 つとも測定に基づく）
+VERDICT[HF-c]: 半分（①が本筋に入ったのは当たりだが、「先に閉じる必要」ではなく「①は易しい」が答えだった）
+VERDICT[HF-d]: 当たり
+★★本体が「残り時間の使い方の判断もあなたに任せる」と書いたことが、本日 1 つも測られていなかった
+  ①に初めて光を当てた。★持ち場は「疑う対象」だけでなく「選ばせること」でも効く。
+COST[UnramifiedLayerFree]: 安 | 持ち場=hform または①  — ①を選び、最良定数 1 と判明。残り 2 点も特定
+```
+
+
+## ★`GUESS:`（配る前に書いた —— ①の残り 2 点）
+
+```
+GUESS[UL-a]: (a)「不分岐 ⇒ ∃ a ∈ 𝒪_L, Tr(a) = 1」は Algebra.trace_quotient_eq_of_isDedekindDomain(RingTheory/Trace/Quotient.lean:90)から出るが、IsDedekindDomain の仮説を DVR で満たす配管が要る
+GUESS[UL-b]: (b) 深さが下がることは WildDepthFieldDescent の配管が既に持っているので安い
+GUESS[UL-c]: ①が閉じると FirstJumpRoute の heq(完全分岐の帰結)が「不分岐の層は先に潰せる」形で正当化され、⑤の回避に効く可能性がある
+GUESS[UL-d]: 本体の名指しは直近 17 波で 12 回外している。今回も少なくとも 1 つ外す
+```
+
