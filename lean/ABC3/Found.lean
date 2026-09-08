@@ -1872,6 +1872,7 @@ import ABC3.Found.PGC.WildBreakUpperBound
 import ABC3.Found.PGC.ConcreteDegPFree
 import ABC3.Found.PGC.JumpStrictMono
 import ABC3.Found.PGC.HasseArfCongruence
+import ABC3.Found.PGC.RamificationGroupNormBridge
 /-!
 # Found — 実装済みの基礎
 
