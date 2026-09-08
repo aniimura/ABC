@@ -12622,3 +12622,28 @@ theorem norm_sub_le_max' (x y : M) : ‖x - y‖ ≤ max ‖x‖ ‖y‖ := by
 zpow 版は `zpow_le_zpow_right_of_le_one₀`（★こちらは `_of_le_one₀` で在る）。
 
 測り方: `import Mathlib` を書かず、**木の既存ファイルを 1 本 import した probe に `#check @Foo` を並べる**（10.8 秒で 10 個まとめて判る）。
+
+## #313 索引の行は section の `variable` を含まないので「明示引数があるように見える」——`IntermediateField.finrank_top'` は引数ゼロ（2026-09-08、PureStepSetup）
+
+```
+error: Function expected at
+  IntermediateField.finrank_top'
+but this term has type
+  finrank ?m.129 ↥⊤ = finrank ?m.129 ?m.131
+
+Note: Expected a function because this term is being applied to the argument
+  _
+```
+
+`.cache/mathlib-index.txt` の行は
+
+```
+theorem  	IntermediateField.finrank_top'	FieldTheory/IntermediateField/Adjoin/Basic.lean:304	@[simp] theorem finrank_top' : finrank F (⊤ : IntermediateField F E) = finrank F E
+```
+
+で `F` と `E` が本文に出るので `IntermediateField.finrank_top' F M` と書きたくなるが、
+★`F` / `E` は section の `variable` であって**明示引数ではない**。
+直し方: 引数を全部落として `IntermediateField.finrank_top'` とだけ書く。
+
+★#297 と同じ穴だが、#297 は「明示引数が **1 つ多い**」（`∀ (n : ℕ), ‖↑n‖ ≤ 1` vs `‖↑j‖ ≤ 1`）で、
+本節は「**全部が暗黙**（引数ゼロ）」。`Function expected at` が出たら**まず引数を全部消して**みる。
