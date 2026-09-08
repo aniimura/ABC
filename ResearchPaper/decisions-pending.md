@@ -14851,3 +14851,13 @@ VERDICT[PLF-d]: ★外れ —— 「今回も少なくとも 1 つ外す」と�
 COST[HarithPAdicSupply]: 安 | 持ち場=PAdicLocalField 側からの供給  — 3 本と e が落ち、残り 2 本が「内容そのもの」と確定
 ```
 
+
+## ★`GUESS:`（配る前に書いた —— `hnK` / `hvalK` ＝ 全分岐の層を作る）
+
+```
+GUESS[TR-a]: TotallyRamified.lean と AbelianSplitUnramified.lean:196 exists_totallyRamified_abelian_split が既に「全分岐層の存在」を出しており、hvalK はそこから来る
+GUESS[TR-b]: 足りないのは次数が p^{k+1} ちょうどであること（hnK）で、Sylow の p 部分を取る段が要る
+GUESS[TR-c]: TotallyRamifiedValueGroup.lean:430 exists_norm_sub_algebraMap_le_prod_axDecay_of_cyclic_totallyRamified が既に hvalK 込みの出口を持っているので、本波の仕事は「その仮説と HarithPAdicSupply の仮説を突き合わせる」ことに帰着する
+GUESS[TR-d]: 本体の名指しは前波で 13 波ぶりに当たった。今回は外れに戻る
+```
+
