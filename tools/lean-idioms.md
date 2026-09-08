@@ -12310,3 +12310,30 @@ nlinarith [hc d]
 `by ext k; simp only [Finset.mem_Icc, Finset.mem_Ioc]; omega` で作る
 （そのうえで `Finset.prod_Ioc_consecutive` が `∏_{(0,d']}·∏_{(d',d]} = ∏_{(0,d]}` をくれる）。
 `` Unknown identifier `le_or_lt` `` → `Nat.lt_or_ge a b : a < b ∨ a ≥ b` を使う。
+
+## #303 `generalize hn : deg x = n` の強帰納では `rw [hn] at *` ではなく `subst hn`（2026-09-08、深い降下の反例）
+
+```
+error: Application type mismatch: The argument
+  hstep'
+has type
+  c (deg x) ≤ ∏ k ∈ Finset.Icc (b + 1) (deg x), c k
+but is expected to have type
+  c (deg x) ≤ ∏ k ∈ Finset.Icc (b + 1) n, c k
+in the application
+  mul_le_mul_of_nonneg_right hstep'
+```
+
+`generalize hn : deg x = n; induction n using Nat.strong_induction_on generalizing x` の枝の中は
+ゴールが `n`、`have` で作った補題が `deg x` になり、**両方が同時に見えている**ので
+`exact` が上のように落ちる。★`rw [hn] at *` で揃えようとすると `hn` 自身や `ih` まで巻き込んで
+別の `Application type mismatch` に化ける（実際に 2 往復とかした）。
+
+★直し方は `intro` を済ませた直後に **`subst hn` の 1 行**。`n` が `deg x` に消え、
+`ih : ∀ m < deg x, …` も自動で揃う。以後 `hn` は書かない。
+
+★ついでに: この形の帰納で `hstep` から得た `x₁` は `deg x₁ < deg x` しか言えず、
+**`b ≤ deg x₁` は言えない**（一気に閾値の下へ落ちうる）。
+`Finset.Icc (b+1) (deg x₁)` を割る補題に `b ≤ deg x₁` を要求すると
+`omega could not prove the goal` になるので、`Nat.lt_or_ge (deg x₁) (b+1)` で
+**空積の枝を分ける**。空積側は `Finset.Icc_eq_empty` + `omega`。
