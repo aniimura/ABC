@@ -1896,6 +1896,7 @@ import ABC3.Found.PGC.TowerDataFromCyclic
 import ABC3.Found.PGC.PGroupDescentToAxWild
 import ABC3.Found.PGC.JumpGeometricDecay
 import ABC3.Found.PGC.AxDecayKnobCircular
+import ABC3.Found.PGC.FirstJumpRouteEquiv
 /-!
 # Found — 実装済みの基礎
 
