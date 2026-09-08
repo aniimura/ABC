@@ -1860,6 +1860,7 @@ import ABC3.Found.PGC.GainedJumpSeq
 import ABC3.Found.PGC.GainedJumpFree
 import ABC3.Found.PGC.PureStepSetup
 import ABC3.Found.PGC.GainedTowerStep
+import ABC3.Found.PGC.GainedTowerModel
 /-!
 # Found — 実装済みの基礎
 
