@@ -1865,6 +1865,7 @@ import ABC3.Found.PGC.TotallyRamifiedValueGroup
 import ABC3.Found.PGC.JumpFromValueGroup
 import ABC3.Found.PGC.ConcreteNormedModel
 import ABC3.Found.PGC.ConcreteNormedModelP3
+import ABC3.Found.PGC.ConcreteNormedModelK1
 /-!
 # Found — 実装済みの基礎
 
