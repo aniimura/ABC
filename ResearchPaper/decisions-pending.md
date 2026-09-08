@@ -13939,3 +13939,55 @@ GUESS[CM-c]: hvalK（全分岐）は円分体では ζ_{p^n}−1 が素元であ
 GUESS[CM-d]: 本体の見立ては今日 2/4 前後。半分は外れる
 ```
 
+
+## ★★★★★★★★体・ノルム込みの模型ができた —— ★**2 本、`sorry` 0 かつ仮説 0**（2026-09-08）
+
+`Found/PGC/ConcreteNormedModel.lean`（`p=2`）と `ConcreteNormedModelP3.lean`（`p=3`）。
+★出口 `model_exists` / `model3_exists` は ★**`#print axioms` が `[propext, Classical.choice, Quot.sound]`、`sorryAx` なし。**
+★`hnormp` / `heM` / `hvalK` / `htop` / `hnK` / `harith` を**すべて証明**
+（★`harith` は本体が「触らなくてよい」としたが `k=0` なので閉じた）。
+
+**①真偽**: ★真。★**ただし本体が名指しした体は選べなかった**（逸脱として記録済み）——
+☆★**`Irreducible (cyclotomic 27 ℚ_[3])` が mathlib に無い**
+（`NumberTheory/Padics/` は 12 ファイルで `cyclotom` は **0 件**、`IsCyclotomicExtension` の 221 行にも `Padic` は 1 件も出ない）。
+⇒ ★**Kummer 側**（`FieldTheory/KummerPolynomial.lean` / `KummerExtension.lean`）を通した。
+
+☆★★**副産物が決定的**: 本体が名指しした `ℚ₃(ζ₉)/ℚ₃(ζ₃)` と実装者が作った `F3(π^{1/3})/F3` は**跳びが違う**:
+
+| 模型 | `u₀` | `harith` の上界 `(p−1)u₀ ≤ p^{k+1}e` |
+|---|---|---|
+| `ℚ₃(ζ₉)/ℚ₃(ζ₃)` | 2 | `4 ≤ 6`（余裕） |
+| ★本模型 | 3 | ★★**`6 = 6`（等号）** |
+
+⇒ ★★**定数の勘定を「境界で」1 度検算したことになる。**
+★`ℚ₃(ζ₉)` 側の `u₀=2` は木の `Zeta81` の `u=(2,8,26)` と整合。
+
+**②在庫**: ★**索引の嘘**（`IsUltrametricDist.norm_add_eq_max_of_norm_ne_norm` は
+乗法版しか索引に出ないが `to_additive` 版が在る）。★`PowerBasis.finiteDimensional` は **0 件**（正は `PowerBasis.finite`）。
+★`exact?` が `IsPrimitiveRoot (-1 : ℚ_[2]) 2` を**見つけられず**、索引 grep で当たった。
+★`spectralNorm` を **2 段**重ねて `ℚ_[3] → F3 → M3` が通り、`spectralNorm.completeSpace` で
+底の完備性も `infer_instance` で出た（実測をファイルに残した）。
+
+**③残り**: ★**`k ≥ 1`（`p²` 次以上）の模型が未着手。**
+☆★**`k=0` では `harith` の中段 2 条件が空虚**なので、
+★★**Hasse–Arf の合同（`p^{m+1} ∣ u_{m+1} − u_m`）はまだ 1 度も具体例で試されていない。**
+
+```
+VERDICT[CM-a]: 外れ — IsCyclotomicExtension × Padic は mathlib に 0 件。Kummer 側を通った
+VERDICT[CM-b]: 外れ — spectralNorm は 2 段重ねてそのまま通り、重くなかった
+VERDICT[CM-c]: 半分 — 全分岐は出たが、円分の素元ではなく Kummer の π から
+VERDICT[CM-d]: 当たり — 半分どころか 3/4 外した
+COST[ConcreteModel]: 安 | 持ち場=ℚ₃ の全分岐拡大の模型を作る  — 名指しの体は取れなかったが 2 本を仮説 0 で閉じ、しかも境界（等号）で検算になった
+```
+★`lean-idioms` **#319**（`node -e` の中の Lean docstring のバッククォートがシェルに食われ、
+★**`ok` が出るのに語だけ消える**）/ **#320**。
+
+## ★`GUESS:`（配る前に書いた —— `k ≥ 1` の模型）
+
+```
+GUESS[K1-a]: k ≥ 1 も Kummer で作れる（p² 乗根、あるいは 2 段の Kummer 塔）
+GUESS[K1-b]: 巡回性（orderOf g = p^{k+1}）が k=0 より重い。ζ_{p²} が要る可能性がある
+GUESS[K1-c]: Hasse–Arf の合同が具体例で初めて試されるので、そこで偽が出る可能性がある
+GUESS[K1-d]: 本体の見立ては今日 3/4 外している。今回も外れる
+```
+
