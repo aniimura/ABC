@@ -1851,6 +1851,7 @@ import ABC3.Found.PGC.WildDescentMultiStep
 import ABC3.Found.PGC.DeepDescentRepair
 import ABC3.Found.PGC.WildDescentDistanceOnly
 import ABC3.Found.PGC.DeepDescentPairDirect
+import ABC3.Found.PGC.EquivariantProjectionDescent
 /-!
 # Found — 実装済みの基礎
 
