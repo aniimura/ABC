@@ -13841,3 +13841,51 @@ GUESS[TR-c]: mathlib に IsTotallyRamified が 0 件なので、木に自前の�
 GUESS[TR-d]: 本体の見立ては今日 2/4 前後。半分は外れる
 ```
 
+
+## ★★★★★★`hvalj` が落ちた —— `Found/PGC/TotallyRamifiedValueGroup.lean` 536 行 / 13 宣言 / `sorry` 0
+
+**①真偽**: ☆★**前波の「2 層をまたぐ必要がある（#59 の危険帯）」は偽。**
+★層どうし（`E_j` と `E_{j+1}`）を比べる代わりに ★**`E_j` を底 `K` と直接比べる**と同じ結論が出る:
+```
+d_j · [Γ_{E_j} : Γ_K] = [Γ_M : Γ_K] = p^{k+1},  [Γ_{E_j} : Γ_K] ≤ [E_j : K] = p^j
+⟹ d_j ≥ p^{k+1−j},  上からは d_j ≤ p^{k+1−j}  ⟹ 挟んで等号
+```
+★使ったのは **1 層ぶんの 1 次独立を 2 回**だけ。★`IntermediateField` を使ったのに
+★★**#59/#69 に一度も当たっていない**（11 往復すべて 12 秒以内）。
+
+★`hvalj` 自身は偽でも空虚でもない（`numeric_nonvacuous` で `k=1` の非空虚性を機械確認）。
+
+**②成果**: ★★**`hvalj`（層ごと `k+1` 本）が `hvalK`（底 `K` の 1 本）＋ `hnK` に置き換わった。**
+★抽象核 `linearIndependent_of_norm_pairwise_notMem_coset`（★超距離ノルム体だけ）/
+`int_subgroup_dvd`（ℤ だけ）。★主定理 `exists_zpow_norm_intermediate`: 任意の中間体で `Γ_E ⊆ ‖π‖^{[M:E]ℤ}`。
+★★`valK_forces_ramified` —— **不分岐なら `hvalK` は `n=1` を強いる**。
+★前波の反例の**形式化**であり、「★`hvalK` はこれ以上落とせない」ことの根拠。
+
+**③在庫**: ★**索引の「無い」の 8 例目** —— `AddSubgroup.mem_closure_singleton` は
+`Subgroup`/`Submonoid`/`AddSubmonoid` 版が出るのに**これだけ出ない**（`to_additive` 生成名）→ **#317**。
+★`IsTotallyRamified` は mathlib **0 件**（追認）。★**ただし自前の述語は作らなかった** ——
+`∀ a ≠ 0, ∃ m, ‖a‖ = ‖π‖^(n·m)` の素の命題で 4 本通る（★**定義を増やす方が高くつく**という判断）。
+
+**④残り**（★実装者は本体の指示に従い「ちょうど 1 点」とは書かなかった）:
+1. ★**体・ノルム込みの模型**（`ℚ₃` の 18 次全分岐拡大）は**未構成**。§6 の非空虚性は**数値側だけ**。
+2. `hjump : ∀ j < k` —— ★**本波で `hvalj` への依存が外れたので、次の波で取れる。**
+
+```
+VERDICT[TR-a]: 当たり — 1 層ぶんは π の原始性まわりから出た
+VERDICT[TR-b]: 半分 — #59 は回避できたが、そもそも 2 層をまたぐ必要が無かった
+VERDICT[TR-c]: 外れ — 自前の述語は作らなかった（素の命題の方が安い）
+VERDICT[TR-d]: 当たり — 2/4 だった
+COST[TotRam]: 安 | 持ち場=hvalj（全分岐）を落とす  — 層ごと k+1 本が底の 1 本になり、#59 にも当たらなかった
+```
+★**逸脱**: `hnK : finrank K M = p^{k+1}` を**足した**（原典では自動だが、前の形では `hvalj 0` に隠れていた）。
+★これがあると `E 0 = K` になり**全部底から測れる**（#59 回避の鍵）。★`lean-idioms` **#316** / **#317**。
+
+## ★`GUESS:`（配る前に書いた —— `hjump` を落とす）
+
+```
+GUESS[JP-a]: hjump は jump_succ_of_jump_of_step（GainedTowerModel:659）の hstep 依存が外れたので繋がる
+GUESS[JP-b]: 核は p ∣ C(p,r) の二項展開（前波が「桁展開ではない」と特定済み）
+GUESS[JP-c]: 底から測る構え（#314 + 今回の hnK）をそのまま使えば #59 に当たらない
+GUESS[JP-d]: 本体の見立ては今日 2/4 前後。半分は外れる
+```
+
