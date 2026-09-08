@@ -1849,6 +1849,7 @@ import ABC3.Found.PGC.FirstJumpLedger
 import ABC3.Found.PGC.NormalizedTraceDescent
 import ABC3.Found.PGC.WildDescentMultiStep
 import ABC3.Found.PGC.DeepDescentRepair
+import ABC3.Found.PGC.WildDescentDistanceOnly
 /-!
 # Found — 実装済みの基礎
 
