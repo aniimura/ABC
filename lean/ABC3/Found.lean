@@ -1915,6 +1915,7 @@ import ABC3.Found.PGC.ProjectionDefectVerified
 import ABC3.Found.PGC.PairBudgetVerified
 import ABC3.Found.PGC.FirstJumpNotAchieved
 import ABC3.Found.PGC.HformPopulation
+import ABC3.Found.PGC.LossUnitLaw
 /-!
 # Found — 実装済みの基礎
 
