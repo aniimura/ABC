@@ -1,7 +1,70 @@
 import ABC3.Found.PGC.WildBreakUpperBound
 
 /-!
-# 骨組み(作業中) —— 跳びの狭義単調 `u m < u (m+1)`
+# [pGC] `harith` の **`hult`(狭義単調 `u m < u (m+1)`)は定理である**
+
+`GainedTowerModel.exists_norm_sub_algebraMap_le_prod_axDecay_of_cyclic` /
+`JumpFromValueGroup.…_of_cyclic_jumpFree` が要求する `harith` は 4 条件
+
+    (1) 1 ≤ u 0                         (2) ∀ m < k, u m < u (m+1)
+    (3) ∀ m < k, p^{m+1} ∣ u(m+1) − u m  (4) (p−1)·u k ≤ p^{k+1}·e
+
+からなる。★**本ファイルは (2) を証明して仮説から落とす。**
+
+## ★★測ったこと(先に結論)
+
+* (2) は★**剰余体も different も Hasse–Arf も使わずに**、超距離と基底展開だけで出る。
+  中身は Serre の `v(σ z − z) ≥ v(z) + i_σ`(§2)と、
+  `h^pπ/π = ∏_{j<p}(1 + h^j b)` の 1 次の項の評価(§1・§3)である。
+* ★`1 ≤ u m` が要る(`t ≥ 1` を使って `‖π‖^t < 1` にする)。
+  ★したがって (2) は **(1) から従う**(`one_le_jump_of_zero`)。
+  ⇒ ★★`harith` の 4 条件は実質 **(1) (3) (4) の 3 本**に減った。
+* ★残る本丸は **(3) Hasse–Arf の合同**である。本ファイルでは**触っていない**。
+
+## 証明の筋(★圧縮で消えても復元できるようここに書く)
+
+`h := g^{p^m}`、`b := hπ/π − 1`(`‖b‖ = ‖π‖^t`, `t = u m ≥ 1`)と置く。telescoping で
+
+    h^p π / π = ∏_{j<p} h^j(hπ/π) = ∏_{j<p} (1 + h^j b).
+
+§1 `norm_prod_one_add_sub_one_sub_sum_le` で 1 次の項を取り出すと残りは `‖b‖²`。
+1 次の項は `Σ_{j<p} h^j b = p·b + Σ_{j<p}(h^j b − b)` と分け、
+§2 `norm_pow_sub_apply_le_mul`(`‖h^j z − z‖ ≤ ‖z‖·‖π‖^t`)で
+`‖Σ_j h^j b‖ ≤ ‖b‖·max(‖p‖, ‖π‖^t)`。`‖b‖² = ‖b‖·‖π‖^t` なので合わせて
+
+    ‖h^pπ/π − 1‖ ≤ ‖b‖·max(‖p‖, ‖π‖^t) < ‖b‖      (‖p‖ < 1 かつ t ≥ 1)
+
+両辺 `‖π‖` 倍して `‖h^pπ − π‖ < ‖hπ − π‖`。★これが `u m < u(m+1)`。
+
+§2 の中身は「`z = Σ_{l<n} c_l π^l`(素元冪が基底)で各項のノルムが `‖z‖` 以下」
+(`exists_coeff_norm_le`、`WildBreak.norm_le_norm_sum_of_pairwise_ne'` を使う)と、
+`‖(hπ)^l − π^l‖ ≤ ‖π‖^{l−1}·‖hπ − π‖` だけである。
+
+## 節の構成
+
+* §1 抽象核(超距離) —— `‖∏(1+η) − 1 − Σ η‖ ≤ r²`
+* §2 `exists_coeff_norm_le` / ★`norm_sub_apply_le_mul` / `norm_pow_sub_apply_le_mul`
+* §3 ★★`norm_pow_prime_sub_lt`(`‖h^pπ − π‖ < ‖hπ − π‖`)/ ★★★`jump_lt_succ`(＝ `hult`)/
+  `one_le_jump_of_zero`((1) から (2) が全段で従う)
+
+## ★在庫の測定(コマンドを残す)
+
+```
+grep -rn "theorem norm_pow_sub_pow_le" lean/ABC3/Found/PGC/*.lean
+  → ★3 本ある。`GainedTowerStep.lean:159` の
+    `norm_pow_sub_pow_le (hπ0 : 0 < ‖π‖) (hw : ‖w‖ ≤ ‖π‖) (m) : ‖w^m − π^m‖ ≤ ‖π‖^{m−1}·‖w − π‖`
+    が本ファイルの要。★自作しかけて `has already been declared` で気づいた(#158 の手)。
+  → `norm_sum_le_of_forall_le` も同ファイルに在る。★私が `WildBreakLowerBound` §1 で
+    自作したものは**重複**であった(引数の並びが違うだけ)。★「無い」と判定する前に
+    `grep -rn "theorem <名前>" lean/ABC3/Found/PGC/*.lean` を打つこと。
+#check @Finset.sum_sub_distrib / @Commute.mul_geom_sum₂ / @pow_le_pow_of_le_one → 在る
+```
+
+## 逸脱の記録
+
+1. `hpM : ‖(p : M)‖ < 1` を仮説に置いた(`hnormp` から出るが、本ファイルは正規化を要らない形にした)。
+2. `hiso`(等長)は仮説。`ConcreteDegPFree.hiso_g2` の道(スペクトルノルムなら `rfl` 1 行)で供給される。
+3. `GainedTowerStep` / `WildBreak*` は**読むだけ**で 1 行も書き換えていない。
 -/
 
 namespace ABC3.Found.PGC
@@ -238,7 +301,69 @@ theorem norm_pow_prime_sub_lt [FiniteDimensional K M] {p n t : ℕ} {π : M}
     _ < ‖b‖ * 1 := by exact mul_lt_mul_of_pos_left hclt hbpos
     _ = ‖b‖ := mul_one _
 
+
+/-- ★★★★★★★**`harith` の `hult`(狭義単調)は定理である**。
+
+`u m` を `‖(g^{p^m}) π − π‖ = ‖π‖^{u m + 1}` で定めるとき、`1 ≤ u m` なら `u m < u (m+1)`。 -/
+theorem jump_lt_succ [FiniteDimensional K M] {p n : ℕ} {π : M} {u : ℕ → ℤ} {m : ℕ}
+    (g : M ≃ₐ[K] M) (hiso : ∀ w : M, ‖g w‖ = ‖w‖)
+    (hπ0 : 0 < ‖π‖) (hπ1 : ‖π‖ < 1) (hn : Module.finrank K M = n)
+    (hvalK : ∀ a : K, a ≠ 0 → ∃ m : ℤ, ‖algebraMap K M a‖ = ‖π‖ ^ ((n : ℤ) * m))
+    (hpM : ‖(p : M)‖ < 1) (hum : 1 ≤ u m)
+    (hbm : ‖(g ^ p ^ m) π - π‖ = ‖π‖ ^ (u m + 1))
+    (hbm1 : ‖(g ^ p ^ (m + 1)) π - π‖ = ‖π‖ ^ (u (m + 1) + 1)) :
+    u m < u (m + 1) := by
+  have hisoh : ∀ w : M, ‖(g ^ p ^ m) w‖ = ‖w‖ := WildBreak.norm_pow_apply g hiso (p ^ m)
+  have hti : (((u m).toNat : ℕ) : ℤ) = u m := Int.toNat_of_nonneg (by omega)
+  have hbr : ‖(g ^ p ^ m) π - π‖ = ‖π‖ ^ ((u m).toNat + 1) := by
+    rw [hbm, ← zpow_natCast ‖π‖ ((u m).toNat + 1)]
+    congr 1
+    push_cast [hti]
+    ring
+  have hpow : (g ^ p ^ m) ^ p = g ^ p ^ (m + 1) := by
+    rw [← pow_mul, ← pow_succ]
+  have hlt := norm_pow_prime_sub_lt (p := p) (g ^ p ^ m) hisoh hπ0 hπ1 hn hvalK hpM
+    (by omega : 1 ≤ (u m).toNat) hbr
+  rw [hpow, hbm1, hbm] at hlt
+  by_contra hcon
+  rw [not_lt] at hcon
+  exact absurd hlt (not_lt.mpr (zpow_le_zpow_right_of_le_one₀ hπ0 (le_of_lt hπ1) (by omega)))
+
+/-- ★★系: `1 ≤ u 0` から**すべての段で** `1 ≤ u m` かつ狭義単調。 -/
+theorem one_le_jump_of_zero [FiniteDimensional K M] {p n : ℕ} {π : M} {u : ℕ → ℤ}
+    (g : M ≃ₐ[K] M) (hiso : ∀ w : M, ‖g w‖ = ‖w‖)
+    (hπ0 : 0 < ‖π‖) (hπ1 : ‖π‖ < 1) (hn : Module.finrank K M = n)
+    (hvalK : ∀ a : K, a ≠ 0 → ∃ m : ℤ, ‖algebraMap K M a‖ = ‖π‖ ^ ((n : ℤ) * m))
+    (hpM : ‖(p : M)‖ < 1) (hu0 : 1 ≤ u 0)
+    (hb : ∀ j : ℕ, ‖(g ^ p ^ j) π - π‖ = ‖π‖ ^ (u j + 1)) :
+    ∀ m : ℕ, 1 ≤ u m ∧ u m < u (m + 1) := by
+  intro m
+  induction m with
+  | zero =>
+      exact ⟨hu0, jump_lt_succ g hiso hπ0 hπ1 hn hvalK hpM hu0 (hb 0) (hb 1)⟩
+  | succ m ih =>
+      have h1 : 1 ≤ u (m + 1) := by have ha := ih.1; have hb2 := ih.2; omega
+      exact ⟨h1, jump_lt_succ g hiso hπ0 hπ1 hn hvalK hpM h1 (hb (m + 1)) (hb (m + 2))⟩
 end Mono
+
+/-! ## §4 `.src` と 公理 -/
+
+def norm_sub_apply_le_mul.src : ABC3.Meta.Source :=
+  { paper := "pGC", pdfPage := 6, item := "Corollary 3.1", sectionId := "cor-3-1" }
+
+def norm_pow_prime_sub_lt.src : ABC3.Meta.Source :=
+  { paper := "pGC", pdfPage := 6, item := "Corollary 3.1", sectionId := "cor-3-1" }
+
+def jump_lt_succ.src : ABC3.Meta.Source :=
+  { paper := "pGC", pdfPage := 6, item := "Corollary 3.1", sectionId := "cor-3-1" }
+
+#print axioms norm_prod_one_add_sub_one_sub_sum_le
+#print axioms exists_coeff_norm_le
+#print axioms norm_sub_apply_le_mul
+#print axioms norm_pow_sub_apply_le_mul
+#print axioms norm_pow_prime_sub_lt
+#print axioms jump_lt_succ
+#print axioms one_le_jump_of_zero
 
 end JumpMono
 

@@ -1870,6 +1870,7 @@ import ABC3.Found.PGC.TotallyRamifiedLayer
 import ABC3.Found.PGC.WildBreakLowerBound
 import ABC3.Found.PGC.WildBreakUpperBound
 import ABC3.Found.PGC.ConcreteDegPFree
+import ABC3.Found.PGC.JumpStrictMono
 /-!
 # Found — 実装済みの基礎
 
