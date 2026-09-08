@@ -13314,3 +13314,66 @@ theorem coe_smul_integer (hiso) (g : G) (x : ↥(integerSubring M)) :
 
 ★これを `simpa [coe_smul_integer hiso] using …` で使うと、
 `↑(σ • x) - ↑x` と `σ • ↑x - ↑x` の食い違い（`Type mismatch: After simplification …`）が消える。
+## #334 `smul_pow` と `smul_pow'` は**向きも形も違う**（2026-09-09、IntegerMiscInstances）
+
+`MulSemiringAction` で `g • (x ^ n)` を `(g • x) ^ n` にしたくて `smul_pow` を叩くと:
+
+```
+error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  (?r • ?x) ^ ?n
+in the target expression
+  g • z * g • π ^ n = h • z * h • π ^ n
+```
+
+欲しいのは ★**`smul_pow'`**（`Algebra/Group/Action/Basic.lean:188`）:
+
+```lean
+@[simp] lemma smul_pow' (r : M) (x : A) (n : ℕ) : r • x ^ n = (r • x) ^ n
+```
+
+`smul_pow`（`Algebra/Group/Action/Defs.lean:487`）は別物で
+`(r • x) ^ n = r ^ n • x ^ n`。★**ダッシュの有無で左辺も右辺も違う**ので、
+「`smul_pow` が向き違いなので `← smul_pow`」としても通らない。
+
+```
+grep -n "smul_pow" .cache/mathlib-index.txt   # 0.3 秒。2 本並ぶので形を見比べる
+```
+
+## #335 ★★ノルムの無い体 `K` には `NormedField.induced` で引き戻せば、既存の定理を**写さずに**使える（2026-09-09、IntegerMiscInstances）
+
+状況: `[Field K] [NormedField M] [Algebra K M]` で、`M` 側には
+`IsDiscreteValuationRing ↥(integerSubring M)` がもうある。
+`K` 側の整数環（像のノルムで定義した `baseIntegerSubring K M`）も DVR にしたい。
+
+★**証明を複写しない**。`K` 自体をノルム体にする:
+
+```lean
+@[implicit_reducible] def inducedNormedField (K M : Type*) [Field K] [NormedField M]
+    [Algebra K M] : NormedField K :=
+  NormedField.induced K M (algebraMap K M) (algebraMap K M).injective
+```
+
+実測した事実（これが鍵、どちらも `rfl` で通る）:
+
+```lean
+example (a : K) : letI := inducedNormedField K M; ‖a‖ = ‖algebraMap K M a‖ := rfl
+example : letI := inducedNormedField K M; letI := inducedIsUltrametricDist K M
+    integerSubring K = baseIntegerSubring K M := Subring.ext (fun _ => Iff.rfl)
+```
+
+★`NormedField.induced` は `fast_instance%` で包まれているが、
+**`Norm` の射影は還元される**（ここを疑って 5 分止まったので書く）。
+★`R S` は**明示引数**（`variable (R S)`。索引の行には出ない、#297 の形）。
+
+非アルキメデス性は
+`IsUltrametricDist.isUltrametricDist_of_forall_norm_natCast_le_one`
+（`Analysis/Normed/Field/Ultra.lean:103`）で `‖(n : K)‖ ≤ 1` だけ確かめればよい。
+
+⇒ `isDiscreteValuationRing_integerSubring` を `M := K` で呼んで
+`rw [integerSubring_eq_baseIntegerSubring]` するだけで閉じる（実測 7 行）。
+
+★★一般化: **単射な環準同型 `f : R →+* S` と `S` の構造があるなら、
+`R` に引き戻して「`S` 向けに書いた定理」を `R` で使えないかを先に測る。**
+mathlib には `NormedRing.induced` / `NormedCommRing.induced` /
+`NormedDivisionRing.induced` / `NormedAddCommGroup.induced` が並んでいる
+（`Analysis/Normed/Ring/Basic.lean:831` 付近）。
