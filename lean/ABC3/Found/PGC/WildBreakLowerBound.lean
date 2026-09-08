@@ -235,6 +235,84 @@ theorem exists_sub_algebraMap_norm_le [FiniteDimensional K M] {π : M} {n : ℕ}
 
 end Residue
 
+/-! ## §3 抽象核(体＋超距離) —— 積・二項・「`x^p = 1 ⇒ x = 1`」のノルム版 -/
+
+section ProdBinom
+
+variable {M : Type*} [NormedField M] [IsUltrametricDist M]
+
+/-- ★★**抽象核** —— `‖η i‖ ≤ r ≤ 1` なら `‖∏ (1 + η i) − 1‖ ≤ r`。 -/
+theorem norm_prod_one_add_sub_one_le {ι : Type*} (s : Finset ι) (η : ι → M) {r : ℝ}
+    (hr0 : 0 ≤ r) (hr1 : r ≤ 1) (h : ∀ i ∈ s, ‖η i‖ ≤ r) :
+    ‖(∏ i ∈ s, (1 + η i)) - 1‖ ≤ r := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simpa using hr0
+  | insert a s ha ih =>
+      have hha : ‖η a‖ ≤ r := h a (Finset.mem_insert_self a s)
+      have h1 : ‖1 + η a‖ ≤ 1 := by
+        refine (IsUltrametricDist.norm_add_le_max _ _).trans ?_
+        simpa using hha.trans hr1
+      have h2 : ‖(∏ i ∈ s, (1 + η i)) - 1‖ ≤ r :=
+        ih (fun i hi => h i (Finset.mem_insert_of_mem hi))
+      rw [Finset.prod_insert ha,
+        show (1 + η a) * (∏ i ∈ s, (1 + η i)) - 1
+          = (1 + η a) * ((∏ i ∈ s, (1 + η i)) - 1) + η a by ring]
+      refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ?_ hha)
+      rw [norm_mul]
+      calc ‖1 + η a‖ * ‖(∏ i ∈ s, (1 + η i)) - 1‖ ≤ 1 * r :=
+            mul_le_mul h1 h2 (norm_nonneg _) zero_le_one
+        _ = r := one_mul r
+
+/-- ★★**抽象核** —— `‖t‖ ≤ 1` なら `‖(1+t)^p − 1 − t^p‖ ≤ ‖(p : M)‖`。
+
+★中身は「`0 < k < p` なら `p ∣ C(p,k)`」だけ。★超距離で各項を潰す。 -/
+theorem norm_one_add_pow_sub_le {p : ℕ} (hp : p.Prime) {t : M} (ht : ‖t‖ ≤ 1) :
+    ‖(1 + t) ^ p - 1 - t ^ p‖ ≤ ‖(p : M)‖ := by
+  classical
+  obtain ⟨q, rfl⟩ : ∃ q, p = q + 1 := ⟨p - 1, by have := hp.pos; omega⟩
+  have hbin : (1 + t) ^ (q + 1)
+      = ∑ k ∈ Finset.range (q + 1 + 1), t ^ k * ((q + 1).choose k : M) := by
+    rw [add_comm (1 : M) t]
+    simpa using add_pow t 1 (q + 1)
+  have hpeel : (1 + t) ^ (q + 1) - 1 - t ^ (q + 1)
+      = ∑ k ∈ Finset.range q, t ^ (k + 1) * ((q + 1).choose (k + 1) : M) := by
+    rw [hbin, Finset.sum_range_succ, Finset.sum_range_succ']
+    simp
+    ring
+  rw [hpeel]
+  refine norm_sum_le_of_forall_le _ _ (norm_nonneg _) (fun k hk => ?_)
+  have hkq : k < q := Finset.mem_range.mp hk
+  obtain ⟨d, hd⟩ : (q + 1) ∣ (q + 1).choose (k + 1) :=
+    hp.dvd_choose_self (Nat.succ_ne_zero k) (by omega)
+  rw [norm_mul, hd]
+  push_cast
+  rw [norm_mul, norm_pow]
+  have h1 : ‖t‖ ^ (k + 1) ≤ 1 := pow_le_one₀ (norm_nonneg _) ht
+  have h2 : ‖(d : M)‖ ≤ 1 := IsUltrametricDist.norm_natCast_le_one M d
+  calc ‖t‖ ^ (k + 1) * (‖((q : M) + 1)‖ * ‖(d : M)‖) ≤ 1 * (‖((q : M) + 1)‖ * 1) :=
+        mul_le_mul h1 (mul_le_mul_of_nonneg_left h2 (norm_nonneg _)) (by positivity) zero_le_one
+    _ = ‖((q : M) + 1)‖ := by ring
+
+/-- ★★★**抽象核** —— `‖A‖ = 1`・`‖A^p − 1‖ ≤ c`・`‖(p:M)‖ ≤ c` なら `‖A − 1‖^p ≤ c`。
+
+★これが「標数 `p` で `x^p = 1 ⇒ x = 1`」のノルム版である。★体の分岐も剰余体も出てこない。 -/
+theorem norm_sub_one_pow_le {p : ℕ} (hp : p.Prime) {A : M} {c : ℝ}
+    (hA : ‖A‖ = 1) (hc : ‖(p : M)‖ ≤ c) (hAp : ‖A ^ p - 1‖ ≤ c) : ‖A - 1‖ ^ p ≤ c := by
+  have hs1 : ‖A - 1‖ ≤ 1 := by
+    have h := IsUltrametricDist.norm_add_le_max A (-1 : M)
+    simpa [sub_eq_add_neg, hA] using h
+  have hbin : ‖(1 + (A - 1)) ^ p - 1 - (A - 1) ^ p‖ ≤ ‖(p : M)‖ :=
+    norm_one_add_pow_sub_le hp hs1
+  rw [show (1 : M) + (A - 1) = A by ring] at hbin
+  calc ‖A - 1‖ ^ p = ‖(A - 1) ^ p‖ := (norm_pow _ _).symm
+    _ = ‖(A ^ p - 1) + -(A ^ p - 1 - (A - 1) ^ p)‖ := by ring_nf
+    _ ≤ max ‖A ^ p - 1‖ ‖-(A ^ p - 1 - (A - 1) ^ p)‖ :=
+        IsUltrametricDist.norm_add_le_max _ _
+    _ ≤ c := by rw [norm_neg]; exact max_le hAp (hbin.trans hc)
+
+end ProdBinom
+
 end WildBreak
 
 end ABC3.Found.PGC
