@@ -13214,3 +13214,33 @@ grep -rn "theorem <名前>" lean/ABC3/Found/PGC/*.lean           # ★木（こ�
 
 ★`.cache/decl-index.txt` は古いことがある（`exists_pgroup_descent` が 0 件だった実例、2026-09-08）ので、
 ★**実ファイルを直接 grep する**方が確実。範囲は `lean/ABC3/Found/PGC/*.lean` に切る（木全体を舐めない）。
+
+## #331 docstring の「まだ無い」は**後続ファイルが埋めていることがある** —— 2 段たどる（2026-09-09、HasseArfCongruence）
+
+Lean のエラーではなく**調査の失敗形**。実測した連鎖:
+
+```
+HasseArfInduction.lean:101-108
+  「2. ★★[Algebra A C] —— まだ無い。C = B^H は Subring B なので Algebra C B は付くが、
+     Algebra A C(底 𝒪 ⊆ 𝒪_{K″})は木にインスタンスが無い。」
+        ↓ ★実は
+FixedRingBaseAlgebra.lean:178  fixedRingAlgebra : Algebra A ↥(fixedRing B H)   ← 供給済み
+  同ファイル冒頭「★★3 本とも埋まった」「★残るのは hind だけ になった」
+        ↓ ★その hind も
+HasseArfStrongInduction.lean:447
+  exists_natCast_herbrandPhiGroup_of_lowerRamificationGroup_one_eq_top
+    (habel) (h1 : lowerRamificationGroup B G 1 = ⊤) (hne) : ∃ j : ℕ, herbrandPhiGroup G π' n = j
+  同ファイル 106 行「★★hind は §3 が供給するので、ここに帰納法は無い」   ← 帰納も済み
+```
+
+★**「無い」と書いた docstring は、その債務を返した後続ファイルを知らない。**
+債務を返すファイルは「既存を書き換えない」規約のため、★**元の docstring を直さずに新設される**。
+⇒ 「無い」を読んだら **`grep -rln "<その名前>" lean/ABC3/Found/PGC/*.lean` で
+参照している全ファイルを出し、日付／依存の後ろ側を見る**。
+
+```
+grep -rln "fixedRing" lean/ABC3/Found/PGC/*.lean      # 誰が供給側か当たりを付ける
+grep -n "^theorem\|^def\|^instance" <後続ファイル>     # 実際に在るかを見る
+```
+
+★これで今日 13 例目の「無いが嘘」。★**「前の波がそう書いたから」は根拠にならない**の実例。
