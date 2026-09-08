@@ -47,8 +47,21 @@ import ABC3.Found.PGC.TotallyRamifiedLayer
 
 * §1 抽象核(超距離だけ) —— 有限和のノルム上界／狭義上界／★**ノルムが相異なる族では各項 ≤ 和**
 * §2 ★★★`exists_sub_algebraMap_norm_le` —— **全分岐 ⇒ 剰余体が下りる**(剰余体を作らない)
-* §3 抽象核(可換環＋超距離) —— `∏(1+η) − 1` の上界／`(1+s)^p − 1 − s^p` の上界
-* §4 組み立て
+* §3 抽象核(体＋超距離) —— `∏(1+η) − 1` の上界／`(1+s)^p − 1 − s^p` の上界／
+  ★`norm_sub_one_pow_le`(「標数 `p` で `x^p = 1 ⇒ x = 1`」のノルム版)
+* §4 ★★★★★★`norm_sub_le_sq_of_totallyRamified` —— **`‖gπ − π‖ ≤ ‖π‖²`**(＝ `1 ≤ t`)
+* §5 ★★★★★`..._of_uniformizer_deg_p_upper` —— 出口の分岐の仮説が★**上界 1 本だけ**になった
+
+## ★★何が閉じ、何が残ったか(実測)
+
+| 出口 | 分岐についての仮説 |
+|---|---|
+| `TotallyRamifiedLayer.…_of_uniformizer_deg_p`(前波) | `1 ≤ t` **かつ** `(p−1)t ≤ p·e` |
+| ★本ファイル `…_of_uniformizer_deg_p_upper` | ★**`(p−1)t ≤ p·e` だけ**(＋ `hiso`) |
+
+★残り 1 点は**上界** `(p−1)t ≤ p·e`(Serre, Local Fields IV の「異なり」の評価)。
+★その筋は「`f'(π) = ∏_{j≠0}(π − g^jπ)` と Eisenstein 多項式の係数評価」で、
+★下界と違って**最小多項式の係数が整**であることが要る。★本ファイルでは**測っていない**。
 
 ## ★在庫の測定(コマンドを残す)
 
@@ -61,6 +74,12 @@ grep -n "IsUltrametricDist" .cache/mathlib-index.txt | grep -i "sum\|max\|add"
 #check @zpow_le_zpow_right_of_le_one₀ / @one_lt_zpow_of_neg₀ / @zpow_right_inj₀  → 3 本とも在る
 #check @Submodule.mem_span_range_iff_exists_fun → 在る(基底展開はこれ 1 本)
 #check @Finset.exists_max_image / @Finset.add_sum_erase → 在る
+grep -n "pow_lt_pow_left" .cache/mathlib-index.txt
+  → ★`pow_lt_pow_left` は Unknown identifier。正しい名は `pow_lt_pow_left₀` と
+    ★`le_of_pow_le_pow_left₀ (hn : n ≠ 0) (hb : 0 ≤ b) : a^n ≤ b^n → a ≤ b`(こちらを使った)。
+#check @AlgEquiv.mul_apply       → 在る。`(e₁ * e₂) x = e₁ (e₂ x)`。`g^{j+1}` の分解に使う。
+#check @pow_le_one₀ / @pow_le_pow_of_le_one / @zpow_lt_zpow_right_of_lt_one₀ → 3 本とも在る
+#check @Nat.Prime.dvd_choose_self → 在る (k ≠ 0 → k < p → p ∣ p.choose k)
 ```
 -/
 
@@ -318,6 +337,7 @@ section Assembly
 
 variable {K M : Type*} [Field K] [NormedField M] [IsUltrametricDist M] [Algebra K M]
 
+omit [IsUltrametricDist M] in
 /-- 等長性は冪に伝わる。 -/
 theorem norm_pow_apply (g : M ≃ₐ[K] M) (hiso : ∀ z : M, ‖g z‖ = ‖z‖) :
     ∀ (j : ℕ) (z : M), ‖(g ^ j) z‖ = ‖z‖ := by
@@ -326,6 +346,7 @@ theorem norm_pow_apply (g : M ≃ₐ[K] M) (hiso : ∀ z : M, ‖g z‖ = ‖z�
   | zero => intro z; simp
   | succ j ih => intro z; rw [pow_succ, AlgEquiv.mul_apply, ih, hiso]
 
+omit [IsUltrametricDist M] in
 /-- telescoping —— `∏_{j<n} g^{j+1}π / g^jπ = g^nπ / π`。 -/
 theorem prod_telescope (g : M ≃ₐ[K] M) {π : M} (hπ : π ≠ 0)
     (hne : ∀ j : ℕ, (g ^ j) π ≠ 0) (n : ℕ) :
@@ -442,7 +463,73 @@ theorem norm_sub_le_sq_of_totallyRamified [FiniteDimensional K M] {p e : ℕ} (h
   rw [hfin, norm_mul, sq]
   exact mul_le_mul_of_nonneg_left hu1' (norm_nonneg π)
 
+
 end Assembly
+
+/-! ## §5 ★★★出口 —— 残る分岐の仮説は**上界だけ**になった -/
+
+section Exit
+
+open GainedTowerModel GainedTowerModel.GaloisTower TotallyRamifiedLayer
+
+variable {M : Type*} [NormedField M] [IsUltrametricDist M]
+
+/-- ★★★★★**`..._of_uniformizer_deg_p` の `hbreak` から下界が消えた形**。
+
+`TotallyRamifiedLayer.exists_norm_sub_algebraMap_le_axDecay_of_uniformizer_deg_p` は
+分岐の仮説として `1 ≤ t ∧ (p−1)·t ≤ p·e` を要求していた。
+★本定理は**下界 `1 ≤ t` を証明して消し**、残りを `hupper`(上界)1 本にする。
+★代償は `hiso`(`g` が等長)で、これは `PureStepSetup.norm_algEquiv_eq` が供給する。 -/
+theorem exists_norm_sub_algebraMap_le_axDecay_of_uniformizer_deg_p_upper
+    {K : Type*} [Field K] [Algebra K M] [FiniteDimensional K M]
+    {p : ℕ} [Fact p.Prime] {π : M}
+    (g : M ≃ₐ[K] M) (hg : orderOf g = p) (hiso : ∀ z : M, ‖g z‖ = ‖z‖)
+    (hupper : ∀ (e : ℕ) (t : ℤ), 0 < e → ‖(p : M)‖ = ‖π‖ ^ (p * e) →
+      ‖g π - π‖ = ‖π‖ ^ (t + 1) → ((p : ℤ) - 1) * t ≤ (p : ℤ) * (e : ℤ))
+    (hnK : Module.finrank K M = p)
+    (hvalK : ∀ a : K, a ≠ 0 → ∃ m : ℤ, ‖algebraMap K M a‖ = ‖π‖ ^ ((p : ℤ) * m))
+    (hnormp : ‖(p : M)‖ = ((p : ℝ))⁻¹) (hπlt : ‖π‖ < 1) (x : M) :
+    ∃ y : twr g p 0, ‖x - algebraMap (twr g p 0) M y‖ ≤ axDecay p 1 * ‖g x - x‖ := by
+  have hp : p.Prime := Fact.out
+  have hπ0 : 0 < ‖π‖ := norm_pos_of_valK (p := p) (n := p) hnormp hvalK
+  refine exists_norm_sub_algebraMap_le_axDecay_of_uniformizer_deg_p g hg ?_ hnK hvalK hnormp hπlt x
+  intro e t he heM hbr
+  refine ⟨?_, hupper e t he heM hbr⟩
+  have hgp : g ^ p = 1 := by rw [← hg]; exact pow_orderOf_eq_one g
+  have hle := norm_sub_le_sq_of_totallyRamified hp g hgp hiso hπ0 hπlt hnK hvalK he heM
+  by_contra hcon
+  rw [not_le] at hcon
+  have hz2 : ‖π‖ ^ (2 : ℤ) = ‖π‖ ^ (2 : ℕ) := by
+    rw [show (2 : ℤ) = ((2 : ℕ) : ℤ) by norm_num, zpow_natCast]
+  have hlt2 : ‖π‖ ^ (2 : ℤ) < ‖π‖ ^ (t + 1) :=
+    zpow_lt_zpow_right_of_lt_one₀ hπ0 hπlt (by omega)
+  rw [hz2, ← hbr] at hlt2
+  linarith
+
+end Exit
+
+/-! ## §6 `.src`(原典の対応箇所) -/
+
+def exists_sub_algebraMap_norm_le.src : ABC3.Meta.Source :=
+  { paper := "pGC", pdfPage := 6, item := "Corollary 3.1", sectionId := "cor-3-1" }
+
+def norm_sub_le_sq_of_totallyRamified.src : ABC3.Meta.Source :=
+  { paper := "pGC", pdfPage := 6, item := "Corollary 3.1", sectionId := "cor-3-1" }
+
+def exists_norm_sub_algebraMap_le_axDecay_of_uniformizer_deg_p_upper.src : ABC3.Meta.Source :=
+  { paper := "pGC", pdfPage := 6, item := "Corollary 3.1", sectionId := "cor-3-1" }
+
+/-! ## §7 使っている公理の一覧 -/
+
+#print axioms norm_sum_le_of_forall_le
+#print axioms norm_le_norm_sum_of_pairwise_ne
+#print axioms norm_le_norm_sum_of_pairwise_ne'
+#print axioms exists_sub_algebraMap_norm_le
+#print axioms norm_prod_one_add_sub_one_le
+#print axioms norm_one_add_pow_sub_le
+#print axioms norm_sub_one_pow_le
+#print axioms norm_sub_le_sq_of_totallyRamified
+#print axioms exists_norm_sub_algebraMap_le_axDecay_of_uniformizer_deg_p_upper
 
 end WildBreak
 
