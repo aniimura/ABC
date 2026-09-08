@@ -1906,6 +1906,7 @@ import ABC3.Found.PGC.FirstJumpRouteGap
 import ABC3.Found.PGC.UnramifiedLayerFree
 import ABC3.Found.PGC.UnramifiedStepFixed
 import ABC3.Found.PGC.DepthLowerBound
+import ABC3.Found.PGC.WitnessScope
 /-!
 # Found — 実装済みの基礎
 
