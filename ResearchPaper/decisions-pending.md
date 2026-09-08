@@ -15173,3 +15173,13 @@ VERDICT[SN-d]: 当たり（「少なくとも 1 つ外す」→ 3 つ外した�
 COST[SpectralNormBridge]: 安 | 持ち場=スペクトルノルムの橋  — 橋は不要で、底を替えて避けた。ノルムの仮説が全部消えた
 ```
 
+
+## ★`GUESS:`（配る前に書いた —— 塔のデータ `g` / `hg`）
+
+```
+GUESS[TW-a]: Gal(K(x)/K) が p-群であることは HasseArfInduction.lean:533 の hpG : IsPGroup p G の作り方が写せる（そこは h1 から出している）
+GUESS[TW-b]: 巡回性（hg : orderOf g = p^{k+1}）は p-群では出ない。可換ですらない。ここが本当の内容で、一般の x には成り立たない ⇒ x を選ぶ側（塔の各段を取る）に降りる必要がある
+GUESS[TW-c]: WildDepthDescent.lean:285 not_forall_exists_relIndex_padicValNat_eq（A₄ ⊃ C₃ の反例）が、その「降りる」道が素朴には塞がっていることの既存の記録である
+GUESS[TW-d]: 本体の名指しは前波で 3 つ外した。今回も少なくとも 1 つ外す
+```
+
