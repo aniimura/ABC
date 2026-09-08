@@ -14861,3 +14861,61 @@ GUESS[TR-c]: TotallyRamifiedValueGroup.lean:430 exists_norm_sub_algebraMap_le_pr
 GUESS[TR-d]: 本体の名指しは前波で 13 波ぶりに当たった。今回は外れに戻る
 ```
 
+
+## ★★★`hvalK` は 1 つの数の等式、`#69` の境界は越えられる —— `TotallyRamifiedCriterion.lean` 186 行 / `sorry` 0（2026-09-09）
+
+**①真偽**: ★本体が「名前からすると既に全分岐込みの出口」と渡した
+`TotallyRamifiedValueGroup.lean:430 exists_norm_sub_algebraMap_le_prod_axDecay_of_cyclic_totallyRamified`
+は★**名前に反して古い形**。跳びの列 `u` と `hu0`/`hult`/`hudvd`/`hbnd`/`hjump`/`hbreak`/`hti` を
+まだ要求し、★**`hnK` と `hvalK` はそこでも仮説**。
+⇒ ★**仕事は縮まなかった。木のどの形でも `hnK`/`hvalK` は仮説。**
+
+**②成果 1 —— `hvalK` は 1 つの数の等式**:
+`c` ＝「`‖K^×‖` の生成元」（`TotallyRamifiedValueGroup.lean:252 exists_valSub_gen` が与える）として
+```
+hvalK ⟺ n ∣ c ⟺ c = n     （n = [M:K]）
+```
+- `valK_iff_dvd`（`hvalK ⟺ n ∣ c`）
+- `valIndex_le_finrank`（`c ≤ n`。`π^0,…,π^{c−1}` が `K` 上 1 次独立、`TotallyRamified.card_le_finrank_of_ne_mod`）
+- `valK_iff_valIndex_eq`（合わせて `hvalK ⟺ c = n`）
+⇒ ★**`hvalK` は「ノルムの言葉での完全分岐 `e = n`」そのもの**。
+
+**★★★成果 2 —— `#69` の境界はここでは越えられる（訂正）**:
+```lean
+theorem adjoinIntegers_eq_integerSubring (K : PAdicLocalField p) (x : K.closure) :
+    adjoinIntegers K x
+      = IntegerNorm.integerSubring (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :=
+  Subring.ext (fun _ => Iff.rfl)
+```
+★**8.9 秒**。両方とも `{y | ‖y‖ ≤ 1}` を `Subring.mk` しただけ
+（`AdjoinIntegers.lean:70-91` と `IntegerSubringNorm.lean:100-113` は**完全に同じ形**）。
+★`#69` が止まったのは `Valued` / `isCompact_closedBall` を経由したときであり、
+★これは `#69` の出所である `AdjoinIntegers.lean:20-33` の docstring **自身がそう書いている**。
+⇒ **#341**。★本日 3 度目の「罠は層に固有」（#332 / #337 に続く）。
+⇒ ★★**`IntegerNorm.*` の道具一式（DVR / `𝔪 = (π)` / `mem_lowerRamificationGroup_iff_norm` /
+剰余体の標数 / Noether）は `adjoinIntegers K x` にそのまま移せる。**
+
+**③止まった場所（`file:line`）**: ★**`ramificationIndex K x = c`**（体の側の `e` とノルムの側の `c` の一致）。
+- 定義 `UnramifiedExtension.lean:425 ramificationIndex`
+  ＝ `(𝔪 𝒪[K.carrier]).ramificationIdx (𝔪 (adjoinIntegers K x))`
+- `IsTotallyRamifiedAdjoin K x` は `TotallyRamified.lean:54` で `inertiaDegree K x = 1`、
+  `UnramifiedExtension.lean:444 ramificationIndex_mul_inertiaDegree` で `e·f = [K(x):K]`
+  ⇒ ★`IsTotallyRamifiedAdjoin ⇒ e = [K(x):K]` は出る
+- ⇒ ★★**残る 1 ノードは `ramificationIdx = c`**、すなわち「`𝒪_K` の極大イデアルが `(π)^c` に
+  ちょうど入る」をノルムで言うこと。★本波はそこに降りていない。
+
+**④前回の①③の現在**:
+- ①不分岐側（`f = p`）→ ★**依然生きている**。★`WildDepthFieldDescent.lean:141` の docstring は
+  自分で「`∏_{k∈Icc 1 n} p = p^n` は非有界なので `AxLemma` は出ない。残っているのは**分岐による絞り込み**
+  だけである」と書いており、★**本連鎖の出口（`axDecay`）が埋めようとしている穴と一致する**。
+- ③`IntermediateField` の層 → ★★**本波で 1 枚剥がれた**（部分環の同一性は越えられる）。
+  残るのは**イデアルの側**（`ramificationIdx`）。
+
+```
+VERDICT[TR-a]: 半分（全分岐層の存在は在るが hvalK はそこからは来ない）
+VERDICT[TR-b]: 未判定（Sylow の段には降りていない）
+VERDICT[TR-c]: ★外れ（:430 は名前に反して古い形で、仕事は縮まなかった）
+VERDICT[TR-d]: 当たり（「外れに戻る」と書いた。TR-c を外した）
+COST[TotallyRamifiedCriterion]: 安 | 持ち場=hnK/hvalK  — hvalK が 1 つの数の等式になり、#69 の境界が 1 枚剥がれた
+```
+
