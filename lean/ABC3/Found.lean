@@ -1912,6 +1912,7 @@ import ABC3.Found.PGC.CyclotomicNumbersVerified
 import ABC3.Found.PGC.CyclotomicJumpsVerified
 import ABC3.Found.PGC.DeepDescentNumbersVerified
 import ABC3.Found.PGC.ProjectionDefectVerified
+import ABC3.Found.PGC.PairBudgetVerified
 /-!
 # Found — 実装済みの基礎
 
