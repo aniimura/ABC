@@ -1914,6 +1914,7 @@ import ABC3.Found.PGC.DeepDescentNumbersVerified
 import ABC3.Found.PGC.ProjectionDefectVerified
 import ABC3.Found.PGC.PairBudgetVerified
 import ABC3.Found.PGC.FirstJumpNotAchieved
+import ABC3.Found.PGC.HformPopulation
 /-!
 # Found — 実装済みの基礎
 
