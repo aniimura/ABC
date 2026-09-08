@@ -1847,6 +1847,7 @@ import ABC3.Found.PGC.CyclicLayerDescent
 import ABC3.Found.PGC.WildJumpChain
 import ABC3.Found.PGC.FirstJumpLedger
 import ABC3.Found.PGC.NormalizedTraceDescent
+import ABC3.Found.PGC.WildDescentMultiStep
 /-!
 # Found — 実装済みの基礎
 

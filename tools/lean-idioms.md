@@ -12269,3 +12269,44 @@ haveI : Fact (Nat.Prime 3) := ⟨Nat.prime_three⟩   -- ok
 `Nat.prime_two` / `Nat.prime_three` / `Nat.prime_five` / `Nat.prime_seven` /
 `Nat.prime_eleven` は `Mathlib/Data/Nat/Prime/Defs.lean` に在る（`decide` を書く必要も無い）。
 測ったコマンド: `grep -n "Nat.prime_three" .cache/mathlib-index.txt`。
+
+## #302 ℝ の有限積に `Finset.single_le_prod'` は使えない —— `MulLeftMono ℝ`（2026-09-08、多段降下の台帳）
+
+「積の 1 因子は積以下」を `Finset.single_le_prod'` で書くと、ℝ では逐語:
+
+```
+ABC3/Found/PGC/WildDescentMultiStep.lean:124:9: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+  MulLeftMono ℝ
+```
+
+```
+ABC3/Found/PGC/WildDescentMultiStep.lean:124:53: error: Application type mismatch: The argument
+  zero_le_one
+has type
+  0 ≤ 1
+but is expected to have type
+  1 ≤ 1
+```
+
+★2 つ目は仮説が `0 ≤ f i` ではなく **`1 ≤ f i`** であることの合図（順序付き**モノイド**の補題だから）。
+★1 つ目が本体で、**ℝ は乗法について順序モノイドではない**（負数がある）ので
+`Finset.single_le_prod'` / `Finset.prod_le_prod'` 族は ℝ には当たらない。
+
+★★**直し方（`nlinarith` に落とす）** —— 1 因子を `Finset.mul_prod_erase` で外に出す:
+
+```lean
+have hmem : d ∈ s := by simp only [Finset.mem_Icc]; omega
+have hsplit := Finset.mul_prod_erase s c hmem      -- c d * ∏ (s.erase d) = ∏ s
+have h1 : (1:ℝ) ≤ ∏ k ∈ s.erase d, c k := Finset.one_le_prod (fun i _ => hc i)
+rw [← hsplit]
+nlinarith [hc d]
+```
+
+★`Finset.one_le_prod`（`1 ≤ f i` から `1 ≤ ∏`）は ℝ で**そのまま通る**
+（順序付き半環の補題で、乗法モノイドの順序を要求しない）。ここが分かれ目。
+
+★同じ命令で名前が 2 つ動いていた（索引の「無いが嘘」ではなく本当に無い）:
+`` Unknown constant `Nat.Icc_succ_left` `` → `Finset.Icc 1 d = Finset.Ioc 0 d` は
+`by ext k; simp only [Finset.mem_Icc, Finset.mem_Ioc]; omega` で作る
+（そのうえで `Finset.prod_Ioc_consecutive` が `∏_{(0,d']}·∏_{(d',d]} = ∏_{(0,d]}` をくれる）。
+`` Unknown identifier `le_or_lt` `` → `Nat.lt_or_ge a b : a < b ∨ a ≥ b` を使う。
