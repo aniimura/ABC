@@ -1882,6 +1882,7 @@ import ABC3.Found.PGC.IntegerResidueBase
 import ABC3.Found.PGC.IntegerMiscInstances
 import ABC3.Found.PGC.HerbrandIntegralNorm
 import ABC3.Found.PGC.HerbrandRecurrence
+import ABC3.Found.PGC.HasseArfCongruenceNorm
 /-!
 # Found — 実装済みの基礎
 
