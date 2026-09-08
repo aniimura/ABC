@@ -13558,3 +13558,11 @@ theorem adjoinIntegers_eq_integerSubring (K : PAdicLocalField p) (x : K.closure)
 違うなら ★**10 秒払って実測する**。
 （本日この手で 3 件覚した: #332（`Subring` なら軽い）、
 #337（`FixedPoints.subfield` なら `IntermediateField` の層に入らない）、本節。）
+
+★★**追記（2026-09-09、RamificationIndexNorm）**: 同じ手で （= ）の層も透明だった。
+下の 4 つはすべて通る（ §1）:
+
+
+
+⇒ ★ 経由の遅さは**所属・型・部分環の同一性**には現れない。
+遅いのは位相（ など）を見に行ったときだけである。
