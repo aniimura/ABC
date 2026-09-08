@@ -15435,3 +15435,67 @@ GUESS[FJ-c]: hm : p^{k−1} ≤ m k(m は次数か重複度)が、本日ずっ�
 GUESS[FJ-d]: 本体の名指しは直近 9 波で 7 回外している。今回も少なくとも 1 つ外す
 ```
 
+
+## ★★★★`FirstJumpRoute` は再パラメータ化、距離 1 本で `AxSenTate` —— `FirstJumpRouteEquiv.lean` 217 行 / `sorry` 0（2026-09-09）
+
+**①真偽**:
+- ★本体の観察「`hjump` の右辺の係数が違う」は**正しいが矛盾ではない**。
+  `NormalizedTraceDescent.lean:214-221` の定義で `j` = **下の層 `E₁/F`** の跳び、`m = e(L/E₁)`、
+  `e = e_{E₁}`、`m·e = e_L`。⇒ `hjump` は `RamificationJumpBound.lean:334
+  sub_one_mul_le_of_norm_natCast_eq_pow`（`(p−1)i ≤ e_L`）を**下の層**に当てたもの、
+  `harith` (4) は同じ 1 本を**塔の頂上 `M`** に当てたもの。★原典で測る必要はない。
+- ★★★**主結果: `FirstJumpRoute` の 4 仮説は `c k ≤ axDecay p k` と同値**（`exists_firstJump_data_iff`）。
+  `⇒` は木の `JumpArith.rpow_div_le_axDecay` そのもの、`⇐` は `j=1, m=p^{k−1}, e=p−1` で**等号**。
+  ⇒ ★**`axLemma_of_firstJump` は `axLemma_of_axDecay` の再パラメータ化で、新しい情報を 1 ビットも持たない。**
+  木の「閉じた十分条件」は字面としては真だが、★**同値なので前進ではない**。
+- ★★**具体層は木がすでに測っていて破れている**。`WildDescentDistanceOnly.lean`（★本連鎖は本波で初めて開いた）が
+  `ℚ₃(ζ₂₇)/ℚ₃(ζ₃)`（`k=2`, `e_L=18`）の**実在する `x`** で `i − gain = 4` を厳密整数演算で出しており、
+  要求 `2·3·4 = 24 ≤ 18` は偽。⇒ `not_exists_firstJump_data_cyclotomic`（`ℕ` だけの 1 行）。
+  ★**4 つ目の穴**。★ただし木自身が「反例ではなく**反証候補**」と明記（`M` の外の `x′` を排除していない）。
+
+**★★★実装者の前波の主張の訂正（2 つとも外れ）**:
+1. 「残る 1 点は `ε` の伸びを `c_k → 1` にできるか」→ ★**外れ**。
+   `WildDescentDistanceOnly.lean:201 axWildDescent_of_dist` が「`ε` の伸びは `1 ≤ c k` と超距離性から
+   **無償**」をすでに定理にしていた。⇒ ★★**残るのは距離の評価 1 本**。
+   ⇒ ★★★**`axSenTate_of_dist_axDecay`（距離の評価 1 本から `AxSenTate K`）** を新設。
+2. 「`FirstJumpRoute` の仮説は 3 つの穴のどれにも塞がれていない」→ ★**測り方が甘かった**。
+
+**②成果**: 抽象核（`ℝ`/`ℕ` のみ、分岐語彙 0）—— `axDecay_eq_rpow_one_div` /
+**`exists_firstJump_data_iff`** / `forall_firstJump_data_iff` / **`not_exists_firstJump_data_cyclotomic`**。
+具体層 —— ★★**`axSenTate_of_dist_axDecay`** / `axLemma_of_dist_axDecay`。
+
+**③★木の docstring 同士の食い違いを発見**:
+- `NormalizedTraceDescent.lean:374-386`「★★**定数の勘定はここで完全に閉じている**。残っているのは具体層だけ」
+- `WildDescentDistanceOnly.lean:10-16`「★★**`AxWildDescent K (axDecay p)` は閉じていない。**」
+★**後者が新しく、厳密整数演算の裏づけを持つ。** 前者の「定数の勘定は閉じている」は**同値だから**真だが、
+「あとは具体層だけ」という見立ては後者に否定されている。★どちらの docstring も書き換えていない。
+
+★**最大の在庫の穴**: mathlib には**上付き/下付き分岐群も Herbrand 関数も無い**
+（在るのは `ValuationSubring.decompositionSubgroup` / `inertiaSubgroup` / `differentIdeal`）。
+
+**④次の 1 点（★木が指名しており実装者も同意）**: `WildDescentDistanceOnly.lean:98-101` が名指しする
+**`AxTowerDecay.exists_mem_of_descent_budget` への載せ替え** ——「★危ういのは『段ごとに一様な予算 `c k`』
+という**記法**であって、Ax の定数ではない」（同じ `x` で `AxLemma` 側の予算
+`axDecay 3 2 · axDecay 3 1` には**大きく余っている**、と木が数値で測っている）。★本波では載せ替えていない。
+
+```
+VERDICT[FJ-a]: 半分（係数の食い違いは実在したが、層が違うだけで矛盾ではなかった）
+VERDICT[FJ-b]: 外れ（道自体が同値で、対応を測る話ではなかった）
+VERDICT[FJ-c]: 外れ（m は e(L/E₁) で巡回性とは無関係）
+VERDICT[FJ-d]: 当たり
+★ただし本体が「係数が違う。未突合」と書いたことが、実装者の最初の測定点になった。
+COST[FirstJumpRouteEquiv]: 安 | 持ち場=FirstJumpRoute の具体層  — 同値と判明し 4 つ目の穴が出たが、距離 1 本で AxSenTate が出る形に整理された
+```
+
+
+## ★`GUESS:`（配る前に書いた —— 予算関数 `F` への載せ替え）
+
+★木自身が 2 か所で指名している道（`WildDescentDistanceOnly.lean:98-101`）。
+
+```
+GUESS[BD-a]: 載せ替えれば 4 つ目の穴(ℚ₃(ζ₂₇) の反証候補)は消える。木が「合成は無傷、同じ x で予算に大きく余っている」と数値で測っているから
+GUESS[BD-b]: ②一様定数 no-go と ③幾何減衰 no-go も「段ごとに一様な c k」を前提にしているので、予算関数 F では当たらない可能性がある。本体はこれを測っていない
+GUESS[BD-c]: 残る本当の穴は①不分岐側だけになる
+GUESS[BD-d]: 本体の名指しは直近 10 波で 8 回外している。今回も少なくとも 1 つ外す
+```
+
