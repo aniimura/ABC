@@ -12789,3 +12789,43 @@ have hmem : m ∈ H ↔ ∃ k : ℤ, k • a = m := by
 
 がそのまま通る。★「索引に無い ⇒ mathlib に無い」と書く前に、
 **乗法版の名前を `Add`/`AddSub` に読み替えて 1 回叩く**（#95 の 8 例目）。
+
+## #318 書き込みが空振りしても `leanfile` は `ok` を返す —— 2 手あとで `Unknown identifier` になる（2026-09-08、JumpFromValueGroup）
+
+`python - <<'PY' … PY` はフックに書き換えられて**本体が走らない**ことがある。出た出力はこれだけ:
+
+```
+Python Python ok
+```
+
+（`Python` はフックが差し替えた側の出力。最後の `ok` は**別の**スクリプトのもの。）
+続けて走らせた検査は
+
+```
+ok  ABC3/Found/PGC/JumpFromValueGroup.lean  —— 10.4 秒
+```
+
+と**通ってしまう**（ファイルが 1 バイトも変わっていないので当然通る）。
+実害が出たのは 2 手あと、次の節を足したときで:
+
+```
+ABC3/Found/PGC/JumpFromValueGroup.lean:158:20: error(lean.unknownIdentifier): Unknown identifier `exists_jump_seq`
+ABC3/Found/PGC/JumpFromValueGroup.lean:158:9: error: Tactic `rcases` failed: `x✝ : ?m.278` is not an inductive datatype
+```
+
+★`Unknown identifier` が**自分がさっき足したはずの宣言**なら、まず
+`grep -n "^theorem\|^def" <file>` で**本当に入っているか**を見る（#68 の「import していない」ではない）。
+★手順: スクリプトは `.py` に書いて `python <file>.py` で呼ぶ。書き込み側に `print` を必ず入れ、
+**その出力が見えなければ書けていない**と扱う。
+
+同じ回に踏んだ 2 つ目: **argv に非 ASCII を渡すと Windows 側で化ける**。
+
+```
+Traceback (most recent call last):
+  File "C:\Users\Aruta\AppData\Local\Temp\insert.py", line 6, in <module>
+    assert s.count(marker)==1, s.count(marker)
+AssertionError: 0
+```
+
+`marker` は `"/-! ## §4 出口"`。ファイルには確かに在るのに `count == 0` になる。
+★挿入位置の目印は **ASCII だけ**にする（`"section Exit"` にしたら一発で通った）。
