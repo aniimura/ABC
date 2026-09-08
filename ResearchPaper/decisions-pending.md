@@ -13581,3 +13581,52 @@ GUESS[HA-c]: 一番重いのは hstepZ（跳びが p 倍で伸びること）で
 GUESS[HA-d]: 本体の見立ては直前で 2/3 当たった。今回も半分は当たる
 ```
 
+
+## ★★★★★`ℤ` 側が丸ごと落ちた —— `Found/PGC/GainedJumpSeq.lean` 735 行 / 14 宣言 / `sorry` 0
+
+**①真偽**: ★出口は真。★**本体の見立ては 2 つとも外れ。**
+- ☆★★**`hstepZ` はそもそも仮定する必要がなかった** —— 結論
+  `∃ y, ‖x−y‖ ≤ (∏ axDecay p j)·‖τx−x‖` に**跳びの列 `t` が出てこない**ので、
+  ★**`t` は仮説の側にあり「都合のよい `t` を作って代入する」ことが許される**（`exists_jump_seq`）。
+  ★数値の反例も形式化: `p=3`, 実際の跳び `u=(2,5)` で `hstepZ` は偽（`6 ≤ 5`）だが、
+  `t=(1,5)` を構成すれば通る。`ℚ₃(ζ₂₇)` の `u=(2,8)` では列を壊さず `t=(2,8)` を返す。
+- ☆★**(B) は「入力の言い換え」ではなかった** —— `PAdicLocalField` は
+  ★`Interface` ではなく **`Skeleton/PGC/Setup.lean:40`** にあり、中身は
+  `carrier / Field / Algebra ℚ_p / FiniteDimensional` の **4 つだけ**。
+  ★★**素元もノルムも分岐指数も持っていない。**★⇒ (B) は**まだ存在しない構造**を作る仕事である。
+
+**②成果**: 仮説 **13 → 11**。消えたのは `ht1` / ★`hstepZ` / ★`hlayerZ`(∀ j)、
+入ったのは `hu : ∀ m ≤ k, p^m ≤ u_m` の 1 本。★`hu ⟸ ht1 + hstepZ` なので**真に弱い**。
+`hbnd` と `hbreak` も落とした版（`..._of_conj`）も作った。
+★抽象核は `ℤ` の算術だけ（`chain` / `exists_jump_seq`）。`#print axioms` 14 本すべて標準 3 つ。
+
+**③在庫**: ★**索引の嘘 11 例目** —— 頂点の跳びの上界は
+`RamificationJumpBound.sub_one_mul_le_of_norm_natCast_eq_pow`(**334 行**) に在った。
+☆★**Hasse–Arf は木に在るが設定が違う** —— すべて `[CommRing A] [CommRing B]` の `herbrandPhi` で、
+本件の `[Field F] [NormedField M]` に**橋が無い**。
+★`PAdicLocalField` の場所は索引の言う `Interface` ではなく `Skeleton` だった。
+
+**④残り**:
+1. ★`hu : ∀ m ≤ k, p^m ≤ u_m` —— ★**Hasse–Arf の中身が残る唯一の点**（下付き跳びが伸びること）。
+   ★木は同じ内容を**別の設定**で持つが橋が無い。
+2. (B) の配管 6 本 ＋ Galois 構造 4 本 —— ★**新しい `structure` を作る仕事**。
+
+```
+VERDICT[HA-a]: 外れ — hstepZ は Hasse–Arf を要さず、都合のよい列を構成すれば済んだ
+VERDICT[HA-b]: 外れ — PAdicLocalField は 4 フィールドだけで素元もノルムも持たない。(B) は新構造の作成
+VERDICT[HA-c]: 半分 — hstepZ が重いという方向は合っていたが、要らなかった
+VERDICT[HA-d]: 外れ — 半分も当たらなかった（0/3）
+COST[JumpSeq]: 安 | 持ち場=残る仮説を落とす  — ℤ 側が丸ごと落ち、Hasse–Arf は「橋が無い」1 点に絞られた
+```
+★`lean-idioms` に **#311**（★`python - <<'PY'` がガードに潰されて `Python` の 1 語だけ出し、
+書き込みが起きないまま `leanfile.mjs` が**古いファイルを見て `ok` を返す**）。★危険な失敗形である。
+
+## ★`GUESS:`（配る前に書いた —— Hasse–Arf の橋 ＋ 局所体の構造）
+
+```
+GUESS[LF-a]: hu は Hasse–Arf の [CommRing] 版から [NormedField] へ橋を架けるのが本筋（実装者の申告どおり）
+GUESS[LF-b]: だが hstepZ が「構成で回避できた」ように、hu も回避できるかもしれない（結論に u が出るかを確かめよ）
+GUESS[LF-c]: 局所体の構造 (B) は Found/PGC 内に閉じた新 structure として作れる（Skeleton を触らずに済む）
+GUESS[LF-d]: 本体の見立ては直前 0/3。今回も外れる
+```
+
