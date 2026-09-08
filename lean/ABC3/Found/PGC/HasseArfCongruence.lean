@@ -64,6 +64,18 @@ sed -n '440,470p' lean/ABC3/Found/PGC/HasseArfStrongInduction.lean     # hind �
 
 ★§1 はその `hrec` さえ来れば合同が出ることを示す(＝残りは `hrec` **1 本**)。
 
+★**橋の片側は測れた**: `LowerRamificationGroup.lean:270` の
+
+    σ ∈ lowerRamificationGroup B G n ↔ ∀ x : B, σ • x - x ∈ (maximalIdeal B) ^ (n + 1)
+
+は、ノルムの言葉では `∀ x ∈ 𝒪_M, ‖σ x − x‖ ≤ ‖π‖^{n+1}` である。
+★前波の `JumpMono.norm_sub_apply_le_mul`(`‖h z − z‖ ≤ ‖z‖·‖π‖^t`)は
+`‖z‖ ≤ 1` で `‖h z − z‖ ≤ ‖π‖^t` を出すので、★**`h ∈ G_{t−1}` までしか出ない**
+(真は `h ∈ G_t`)。★1 つずれるのは、単元 `z`(`v(z) = 0`)のとき
+`l = 0` の項が消えることを使っていないからである。
+⇒ ★**橋の残りは「単元に対する 1 つ分の改良」と、`|G_i|` を `u` で書き下す部分**である。
+★本ファイルはどちらも**やっていない**。
+
 ## ★★測定 3 —— 前波までの超距離だけの道では (3) は**出ない**(形式化した)
 
 §2 `congruence_not_implied_by_ultrametric` を見ること。
