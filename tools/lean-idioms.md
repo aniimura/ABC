@@ -13527,3 +13527,34 @@ theorem norm_natCast_p {M : Type*} [NormedField M] [NormedAlgebra ℚ_[p] M] :
 `PureStepSetup.norm_algHom_eq (k := k) (F := K) (σ : M →ₐ[K] M) z` で ★**1 行**。
 ★「素の `[Field K]` では等長性は出ない」は真だが、
 **底を 1 つ下に敷けば出る**。「出ない」と書く前に塔を 1 段伸ばすこと。
+## #341 ★★★#69「`adjoinIntegers` の境界は越えられない」は**経路に固有**である（2026-09-09、TotallyRamifiedCriterion）
+
+★**#69 を書き換えない**（他が参照している）。ここに追記する。
+
+#69 は「`adjoinField` / `adjoinIntegers` の境界は越えられない（212 秒 timeout）」と言うが、
+★★**部分環としての同一性は 8.9 秒で越えられる**:
+
+```lean
+theorem adjoinIntegers_eq_integerSubring (K : PAdicLocalField p) (x : K.closure) :
+    adjoinIntegers K x
+      = IntegerNorm.integerSubring
+          (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :=
+  Subring.ext (fun _ => Iff.rfl)
+```
+
+理由は両方とも `{y | ‖y‖ ≤ 1}` を `Subring.mk` しただけのものだからである
+（`Found/PGC/AdjoinIntegers.lean:70-91` と `Found/PGC/IntegerSubringNorm.lean:100-113`）。
+
+★★**止まっていたのは `Valued` / `isCompact_closedBall` を経由したときだけ**。
+これは #69 の出所である `AdjoinIntegers.lean:20-33` のモジュール docstring 自身が
+
+> `NormedField.toValued` を導入し、`Valued.integer`・`Valued.integer.mem_iff`・
+> `isCompact_closedBall` を組み合わせようとすると、**120秒を超えても終わらない**
+
+と書いている（対処も同じ所に「`Valued` を一切使わず `Subring.mk` で直接構成する」とある）。
+
+★★★**手順**: 「境界を越えられない」と書いてある節を引いたら、
+**その節が名指ししている経路**と、今自分が取ろうとしている経路が**同じか**を確かめる。
+違うなら ★**10 秒払って実測する**。
+（本日この手で 3 件覚した: #332（`Subring` なら軽い）、
+#337（`FixedPoints.subfield` なら `IntermediateField` の層に入らない）、本節。）
