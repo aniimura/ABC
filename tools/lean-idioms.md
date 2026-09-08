@@ -12623,6 +12623,22 @@ zpow 版は `zpow_le_zpow_right_of_le_one₀`（★こちらは `_of_le_one₀` 
 
 測り方: `import Mathlib` を書かず、**木の既存ファイルを 1 本 import した probe に `#check @Foo` を並べる**（10.8 秒で 10 個まとめて判る）。
 
+追記（2026-09-08、GainedTowerStep）: 和の上界は **NNReal 版しか無い**。実数版を書くと
+
+```
+probe1.lean:4:8: error(lean.unknownIdentifier): Unknown constant `IsUltrametricDist.norm_sum_le_of_forall_le`
+```
+
+実数版は `lift` 1 行で作れる（`exact_mod_cast` だけだと `C : ℝ` と `C : ℝ≥0` が繋がらない）:
+
+```lean
+theorem norm_sum_le_of_forall_le {ι : Type*} {s : Finset ι} {f : ι → M} {C : ℝ} (hC : 0 ≤ C)
+    (h : ∀ i ∈ s, ‖f i‖ ≤ C) : ‖∑ i ∈ s, f i‖ ≤ C := by
+  lift C to NNReal using hC with C'
+  exact_mod_cast IsUltrametricDist.nnnorm_sum_le_of_forall_le
+    (fun i hi => by exact_mod_cast h i hi)
+```
+
 ## #313 索引の行は section の `variable` を含まないので「明示引数があるように見える」——`IntermediateField.finrank_top'` は引数ゼロ（2026-09-08、PureStepSetup）
 
 ```
@@ -12647,3 +12663,31 @@ theorem  	IntermediateField.finrank_top'	FieldTheory/IntermediateField/Adjoin/Ba
 
 ★#297 と同じ穴だが、#297 は「明示引数が **1 つ多い**」（`∀ (n : ℕ), ‖↑n‖ ≤ 1` vs `‖↑j‖ ≤ 1`）で、
 本節は「**全部が暗黙**（引数ゼロ）」。`Function expected at` が出たら**まず引数を全部消して**みる。
+
+## #314 塔（中間体の列）は `IntermediateField` を作らず **型の族 `E : ℕ → Type*`** で置くと #59/#69 に一度も当たらない（2026-09-08、GainedTowerStep）
+
+`M/F₀ ⊃ … ⊃ F_k = F` の各層で「`[M : F_j] = p^{k+1−j}`、`M = F_j(π)`、`σ_j` が `F_j` を固定」
+を使いたいとき、`IntermediateField F₀ M` の列を作ると #59（2 層をまたぐ `rfl` が kernel を止める）
+と #69（`adjoinField` / `adjoinIntegers` の境界）に当たる。★**層を独立した型の族にすると触らずに済む**:
+
+```lean
+theorem foo {E : ℕ → Type*} [∀ j, Field (E j)] [∀ j, Algebra (E j) M]
+    (hdegj : ∀ j, j < k → (minpoly (E j) π).natDegree = p ^ (k + 1 - j))
+    (htopj : ∀ j, j < k → Algebra.adjoin (E j) ({π} : Set M) = ⊤)
+    (hvalj : ∀ j, j < k → ∀ d : E j, d ≠ 0 →
+        ∃ m : ℤ, ‖algebraMap (E j) M d‖ = ‖π‖ ^ (((p ^ (k + 1 - j) : ℕ) : ℤ) * m))
+    (hfixj : ∀ j, j < k → ∀ d : E j, s j (algebraMap (E j) M d) = algebraMap (E j) M d) : …
+```
+
+`{E : ℕ → Type*}` ＋ `[∀ j, Field (E j)]` ＋ `[∀ j, Algebra (E j) M]` は**そのまま elaborate する**
+（`Field (E j)` は `∀ j, Field (E j)` から instance 解決される）。`E` は `hdegj` から推論されるので
+呼ぶ側で明示しなくてよい。★実測: `GainedTowerStep.lean`(483 行)は #59/#69 の症状が 1 度も出ず、
+`leanfile.mjs` 1〜2 往復で各節が通った。★#296（`MulAction.stabilizer` の指数で次数を測る）と
+同じ「中間体を作らない」系の手で、こちらは**層が可変個**のときに効く。
+
+★もう 1 つの効き目: 層ごとの補題は「`σ : M →+* M` と、`σ` が固定する係数での桁展開」だけを要求する形に
+書けるので（`z = ∑_{m<n} a_m π^m`、`σ a_m = a_m`、`‖a_m π^m‖ ≤ ‖z‖`）、
+★**抽象核からは体そのものが消える**。体は §2 の橋（`exists_digitSum_of_adjoin_eq_top` ＋
+`nnnorm_sum_digit_eq_sup`）でだけ出てくる。
+
+ついでの不在（`#check` で測った）: `Unknown constant `Nat.pos_pow_of_pos``。`pow_pos` を使う。
