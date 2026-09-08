@@ -14460,3 +14460,52 @@ VERDICT[本体の順序 1→2→3→4]: 外れ（実装者が定義を読んで�
 COST[IntegerRingInstances]: 安 | 持ち場=型クラス 4 つ  — 3 つ載り、残りは IsDiscreteValuationRing 1 本
 ```
 
+
+## ★★★`IsDiscreteValuationRing 𝒪_M` が載った —— `IntegerDVR.lean` 133 行 ＋ `BaseIntegerAlgebra.lean` 100 行 / `sorry` 0（2026-09-09）
+
+**①真偽**: ★実装者の断定「中身は `exists_pow_mul_unit` で尽きている」は★**今回は当たり**（3 波ぶり）。
+入口の字面を実測 ——
+`RingTheory/DiscreteValuationRing/Basic.lean:145-150` の
+`HasUnitMulPowIrreducibleFactorization R := ∃ p, Irreducible p ∧ ∀ {x}, x ≠ 0 → ∃ n, Associated (p^n) x`
+は★**`exists_pow_mul_unit` そのもの**。候補 1（`ofHasUnitMulPowIrreducibleFactorization`）を採用。
+候補 2 は UFM が要る／候補 3 は `Valued` 経由で `K₀` と `integerSubring M` の同一視が要るので不採用。
+`[IsDomain ↥(integerSubring M)]` は `inferInstance` で降り、`IsLocalRing` は入力に不要だった。
+
+★**本波で新たに覆した断定**: 「`K` は素の `Field` でノルムを持たないから `𝒪_K` が作れない」は★**偽**。
+★**像のノルム** `{a : K | ‖algebraMap K M a‖ ≤ 1}` で定義でき、超距離だけで `Subring` になる。
+⇒ `herbrandPhiGroup_natCast` の `[Algebra A B]` は `codRestrict` 1 本で載った。
+
+**②成果**:
+
+| 宣言 | 内容 |
+|---|---|
+| ★`irreducible_pi` | `π` は `𝒪_M` の既約元（`π = ab` で両方非単元なら `‖π‖ ≤ ‖π‖²` で矛盾） |
+| ★★★`isDiscreteValuationRing_integerSubring` | **`IsDiscreteValuationRing 𝒪_M`** ＝ 前波の「残り 1 本」 |
+| `baseIntegerSubring` | ★`{a : K \| ‖algebraMap K M a‖ ≤ 1}` が `Subring K` |
+| `baseRingHom` / ★`baseAlgebra` | **`Algebra 𝒪_K 𝒪_M`** |
+
+**③残り —— `herbrandPhiGroup_natCast` の仮説を実測した過不足**:
+
+| 要求 | 現状 |
+|---|---|
+| `[IsDomain B]` `[IsDiscreteValuationRing B]` `[MulSemiringAction G B]` `huni` | ★**全部済** |
+| `[Algebra A B]`（`A = 𝒪_K`） | ★**本波で済** |
+| `[SMulCommClass G 𝒪_K 𝒪_M]` | ★未（`G` が底を固定することから出るはず） |
+| `hadj : Algebra.adjoin 𝒪_K {π'} = ⊤` | ★**中身は在る**（`norm_algebraMap_le_one_of_le_one` ＋ `JumpMono.exists_coeff_norm_le`）が★部分環の statement にしていない |
+| `[Fintype G]` | ★未（`G = ⟨g⟩` は有限なので容易） |
+
+さらに Hasse–Arf 本体（`HasseArfStrongInduction.lean:447`）は `hresA` / `hAinj` / `habel` /
+`h1 : lowerRamificationGroup B G 1 = ⊤` を要求。★`h1` は `mem_lowerRamificationGroup_iff_norm` ＋
+`1 ≤ u 0` から出るはずだが★**未測定**。
+
+⇒ ★**次の 1 ノードは「`hadj`（`𝒪_M = 𝒪_K[π]`）を部分環の statement にする」**（中身は 2 本揃っている）。
+
+**逸脱**: `IsDiscreteValuationRing` / `Algebra` は大域 `instance` にせず `theorem`/`def`
+（`@[implicit_reducible]`）＋ `letI`。木の `LowerRamificationGroup.lean:669` の流儀に合わせた。
+
+```
+VERDICT[「尽きている」]: 当たり（3 波ぶり。入口の字面が exists_pow_mul_unit そのものだった）
+VERDICT[「K はノルムを持たないから 𝒪_K が作れない」]: 外れ（像のノルムで作れた。実装者が自分で覆した）
+COST[IntegerDVR + BaseIntegerAlgebra]: 安 | 持ち場=DVR 1 本  — 2 ファイルともほぼ一発で通り、新しい失敗形なし
+```
+
