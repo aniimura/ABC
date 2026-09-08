@@ -14984,3 +14984,13 @@ VERDICT[RI-d]: ★外れ —— 「今回も少なくとも 1 つ外す」と書
 COST[RamificationIndexNorm]: 安 | 持ち場=ramificationIdx = c  — 落ち、整数環の層が完全に透明と判明した
 ```
 
+
+## ★`GUESS:`（配る前に書いた —— `hcompat` と `IsTotallyRamifiedAdjoin ⇒ c = n`）
+
+```
+GUESS[TN-a]: hcompat は adjoinIntegersAlgebraMap が codRestrict で作られているので rfl か 1 行で落ちる
+GUESS[TN-b]: 高いのは「π を実際に取る」方（adjoinIntegers K x が DVR）で、IntegerDVR の isDiscreteValuationRing_integerSubring が前波の透明性でそのまま移る
+GUESS[TN-c]: IsTotallyRamifiedAdjoin ⇒ c = n は e·f = [K(x):K] と本波の ramificationIdx_maximalIdeal_eq を突き合わせるだけで、新しい数学は要らない
+GUESS[TN-d]: 本体の名指しは 3 波中 2 波で外さなかった。今回は外れに戻る
+```
+
