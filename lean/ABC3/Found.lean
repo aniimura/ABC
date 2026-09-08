@@ -1868,6 +1868,7 @@ import ABC3.Found.PGC.ConcreteNormedModelP3
 import ABC3.Found.PGC.ConcreteNormedModelK1
 import ABC3.Found.PGC.TotallyRamifiedLayer
 import ABC3.Found.PGC.WildBreakLowerBound
+import ABC3.Found.PGC.WildBreakUpperBound
 /-!
 # Found — 実装済みの基礎
 
