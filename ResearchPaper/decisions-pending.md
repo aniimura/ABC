@@ -13630,3 +13630,50 @@ GUESS[LF-c]: 局所体の構造 (B) は Found/PGC 内に閉じた新 structure �
 GUESS[LF-d]: 本体の見立ては直前 0/3。今回も外れる
 ```
 
+
+## ★★★★★★★★跳びの列ごと落ちた —— `Found/PGC/GainedJumpFree.lean` 527 行 / 9 宣言 / `sorry` 0
+
+**①真偽**: ★配った字面は真。★**本体の見立て「`hstepZ` と同じ手で `hu` も回避できないか」は当たり。**
+★一方 `GainedJumpSeq` の docstring にあった「`hjump` は下付き分岐群の定義そのものなので消えない」は
+★**外れ**で、実際は消えた。
+
+★★**`..._of_conj_pure`: `u_m = if m = k then i else 0` を代入して★跳びの列 `u` と `hjump` が丸ごと消えた。**
+★なぜ通るか: 結論の定数 `∏_{j∈[1,k+1]} axDecay p j` は「**下の層で 1 つも得をしない**」最悪でも足りる
+（`gainedLoss_fits` が `Λ = i` と `(p−1)i ≤ p^{k+1}e` から閉じる）。
+
+★鍵は `norm_algHom_sub_le_self`（★縮小率 1 の端）。既存の `..._of_break` は `θ < 1` を要求する
+（桁の**等式**が `‖σπ−π‖ < ‖π‖` を要る）ので、★**等式を使わず `sup` と超距離の和の上界だけで別証した。**
+
+☆★★**Hasse–Arf の橋は要らなくなった** —— 本ファイルは `HasseArf*.lean` を **import しない**。
+
+**②在庫**: 木に在った `nnnorm_sum_digit_eq_sup`(310 行) / `map_digitSum`(301 行、★σ に等長性も全単射性も不要)。
+mathlib に在った `IsUltrametricDist.nnnorm_sum_le_of_forall_le`。
+★**無い**: `IsUltrametricDist.norm_sub_le_max`（`norm_add_le_max` から 1 行で作った）、
+`pow_le_pow_right_of_le_one`（正は `pow_le_pow_of_le_one`）、`le_or_lt`（`le_or_gt`）。
+★`PAdicLocalField` が 4 フィールドだけという記述は**実測で正しかった**。
+
+**③残りはちょうど 11 点**（`..._of_conj_pure`）:
+★`hi : 0 < i` だけが「跳び」に関するもので、★これは `i = 0` だと桁の等式が壊れる**境界そのもの**（構成では回避不能）。
+★★**残り 10 本は全部 (B) の配管** ——「`M = F(π)` が `p` 次全分岐で `π` が素元、
+ノルムが `‖p‖ = 1/p` に正規化」という設定で、★`PAdicLocalField` からは出ない（★**新しい `structure` を作る仕事**）。
+
+☆★★**つまり Ax–Sen–Tate の数学は終わっている。残るのは構造の作成と接続である。**
+
+```
+VERDICT[LF-a]: 外れ — Hasse–Arf の橋は要らなくなった
+VERDICT[LF-b]: 当たり — hstepZ と同じ「構成で回避」が hu にも効いた（跳びの列ごと消えた）
+VERDICT[LF-c]: 未判定 — 新 structure には着手していない
+VERDICT[LF-d]: 外れ — 今回は当たった（LF-b）
+COST[JumpFree]: 安 | 持ち場=局所体の構造と Hasse-Arf の橋  — hu どころか跳びの列ごと落ち、Hasse–Arf の import が不要になった
+```
+★`lean-idioms` に **#312**。
+
+## ★`GUESS:`（配る前に書いた —— 局所体の構造を作る）
+
+```
+GUESS[ST-a]: 新 structure は Found/PGC 内に閉じて作れる（Skeleton/PGC/Setup.lean を触らずに済む）
+GUESS[ST-b]: ノルムの正規化 ‖p‖ = 1/p と素元の存在は Found/PGC/LocalFieldNorm.lean のスペクトルノルム機構から出る
+GUESS[ST-c]: hsep / hsp / hconj / hne（Galois 構造 4 本）は MinpolyOrbitSplit が既に持っている形に近い
+GUESS[ST-d]: hi : 0 < i は「i = 0 なら x は既に F にある」ので場合分けで消える（境界だが回避可能）
+```
+
