@@ -12883,3 +12883,34 @@ VERDICT[DEEP-c]: 外れ — RamificationJumpBound を差し込む形にはなら
 VERDICT[DEEP-d]: 当たり — 指数の形は正しかった
 COST[CyclicLayer]: 並 | 持ち場=層の切り出しと深い段の得  — 素朴な形は偽、層は障害でなく、得は ε 側だと判明。残り 2 点
 ```
+
+## ★★★解決: `origin/main` が `d2bcac84` で止まっていた件（2026-09-08、ユーザー指示）
+
+★**force は不要だった。** `origin/main` にしか無い 7 本（PR #2〜#8 のマージコミット）は
+★**内容の差分が 0**（`git diff --stat HEAD...origin/main` が空）。
+⇒ `git merge origin/main` → ★**マージ前後で内容差 0**（`git diff b69d851d HEAD` が空、`error 0`）
+→ `git push origin master:main` が **fast-forward** で通った。
+★`main` = `master` = `551bc883`。★7 本の履歴も残っている。
+☆★**「force が要る」と決めつけて人を待たせていたが、測ったら要らなかった。**
+
+## ★`GUESS:`（配る前に書いた —— `axDecay p k` の残り 2 点）
+
+```
+GUESS[ORD-a]: 点 1 の字面は偽（一般の p 群に位数 p^k の元は無い。(ℤ/p)^k が反例）
+GUESS[ORD-b]: 正しい形は「G の中で σ の位数を上げる」であって H の中ではない（Q は G から取る）
+GUESS[ORD-c]: 点 2（位数 p^m の跳びの上界 m≥2）は mathlib に無く、m=1 の RamificationJumpBound を塔で回す
+GUESS[ORD-d]: 2 点のうち先に落ちるのは点 2 で、点 1 が本当の穴
+```
+
+
+## ★★ブランチ方針の変更（2026-09-08、ユーザー判断）
+
+★**作業ブランチは `main` のみ。** 本体はローカル `main`（`origin/main` を追跡）に切り替えた。
+★`master` は `551bc883` で**凍結**し、★**一定期間保存してから削除する**（★勝手に消さない）。
+★`main` と `master` は `551bc883` で完全一致しているので、凍結時点で失われている commit は無い。
+★切り替えは同一 SHA なので**作業ツリーは 1 バイトも動いていない**（実装 agent が稼働中だったため確認した）。
+
+★（観察、着手はしていない）`git worktree list` に **40 本以上**の worktree が残っている
+（`agent-*` 27 本 + `meta27〜41`）。★大半は完了済みエージェントのもの。
+★掃除は「削除」に当たるので、ユーザーの指示があるまで手を付けない。
+

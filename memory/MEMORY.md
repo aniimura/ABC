@@ -19,7 +19,7 @@
 - [F.map g は平の射へ束縛し直す](lean-rebind-morphisms-clean-types.md) — `(F.obj A)` と `A` は構文が違うので `≫` の型検査が落ち、巻き添えで `IsIso (𝟙 X)` すら合成できなくなる。`obtain ⟨aa, haa⟩ : ∃ aa : X ⟶ Y, aa = F.map g := ⟨_, rfl⟩`。
 - [heredoc はバックスラッシュを 1 段食う](heredoc-eats-backslash.md) — `<<'EOF'` でも。`` がバックスペース文字(0x08)になり、正規表現が静かに一致しなくなる。器具が嘘の測定値を出した。Write/Edit を使う。
 - [形式化は葉から積む](leaf-first-with-graph-feedback.md) — 依存グラフの葉(層が小さいもの)から。途中で必要物が出たらスケルトンを足してグラフを更新し、新しい葉から再開する。★目的は「大きな塊を壁として認識しない」こと。2026-08-17 に Prop 3.2 を上から掘って**カウンタが 1 も動かなかった**実例つき。
-- [Lean の検査は MCP の lean_check で](lean-check-via-mcp-repl.md) — `lake env lean` はファイル全体を再検査する(3,800 行で数分)。`abc3-lean` MCP なら 0.01 秒。★ただし**確定は必ず `lake build`**(書いた順序・`variable`・リンタは build でしか出ない)。Windows では `repl.exe` を直に spawn してはならない(`lake env` 経由)。
+- [Lean の検査は leanfile.mjs で（★MCP は 2026-09-08 に使用禁止）](lean-check-via-mcp-repl.md) — 環境が無音ですり替わる事故 11 件。確定は build.mjs。ファイル全体の再検査は重いので小さく保つ
 - [「残っている」と書いた条は着手前に Lean を読む](stale-status-read-lean-first.md) — 台帳の status は書いた時点の見立て。6 回とも既に閉じていた。★Skeleton に sorry があっても Found では閉じていることがある。
 - [葉は測る、当てない](leaves-are-measured-not-guessed.md) — `node tools/frdi-leaves.mjs` で「未実装依存の数」と「波及」を出す。★ページ順では葉が分からない実例つき(`Theorem 5.2` は §5 の大物に見えて依存 0 の葉・波及 6 件だった)。
 - [WideSubcategory / toElem の型の罠](widesubcategory-type-trap.md) — `{ obj := A }.obj.base` は `A.base` と構文上別物。`rw` 失敗・instance 合成失敗・motive 不整合として**別々の症状に見える**。射の構成は素の型を取る補題に出す。
@@ -63,7 +63,7 @@
 - [ABC3b/cとは.git自体を共有——他セッションのcommitで自分のコミット内容が合流・作業ツリーが差し戻ることがある。.lake/buildキャッシュでも類似の再現性トラブルを観測](shared-git-repo-race-hazard.md) — commit直後は`git log -1 --stat`で自分のメッセージか確認、触る前は`git status`/`git diff`でHEADとの一致を確認してから編集する。多相化した補題は型注釈を省略しない。2026-09-04実測。
 - [Scheme等"大きな圏"のデータはType 1に住む——interfaceのSpace:Typeと衝突する](corrhyp-scheme-universe-mismatch.md) — HyperbolicCurveData.SpaceをType uに universe 多相化して解決。既存の具体化には無影響。エラーは後続フィールドの行に出ることがあるので孤立させて再現すること。
 - [ユーザーは会話内の報告を日本語で書くことを明示的に指示した](user-prefers-japanese-reports.md) — 2026-09-04。ターン末尾の要約・状況報告は日本語で。
-- [進め方は「外部依存グラフが真実、agentには持ち場だけ」](orchestration-graph-first.md) — 2026-09-05に切替。設計はResearchPaper/orchestration.md。次にどこを叩くかはtools/frontier.mjs、持ち場の切り出しはtools/brief.mjs、役割は.claude/agents/。
+- [依存グラフが真実、agent には持ち場だけ](orchestration-graph-first.md) — ★2026-09-08: 役割は lean-prover / lean-search / lean-verifier の 3 本のみ。1 波 1 体。持ち場は短く
 - [並列agent数の上限は5程度](orchestration-parallel-cap-5.md) — 2026-09-05ユーザー指示。前線が狭い(着手可能13件)・worktree共有・統合コストの3点が理由。frontier.mjsの既定--limitも5。
 - [原文を読む経路は 2 本ある——check.mjs は PDF(pdftotext)、他 7 本は .txt(★PyMuPDF 製)](pdftotext-two-implementations-hazard.md) — 2026-09-06 訂正。「.txt は pdftotext 製」は誤りだった。check.mjs 側のキャッシュの罠は第 1024 で対策済み。
 - [mathlib在庫: 局所Tate双対性はカップ積が無く述べることすらできない](mathlib-cohomology-inventory-2026-09-05.md) — continuousCohomologyは在るがH⁰以外に定理なし。BrauerGroupには乗算すら無い。2026-09-05実測。
