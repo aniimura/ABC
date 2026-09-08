@@ -12419,3 +12419,40 @@ Command did not complete within its 120s timeout and was moved to the background
 ABC3 の module は Mathlib を推移的に持つので、`Mathlib` 全体の olean を読む理由はまず無い。
 ★`--similar` で先行節を探すときは **`--similar <下書きのファイル>`**（文字列ではなくパス）:
 文字列を渡すと `Error: ENOENT: no such file or directory, open 'D:\Math_ABC3\unsolved goals'`。
+
+## #307 `positivity` は `↑p - 1` の引き算で止まる／ℕ の台帳から正の因子を約す 3 行（2026-09-08、跳びと different のトレードオフ）
+
+**失敗形**（`Found/PGC/JumpDefectTradeoff.lean`、`2 ≤ p` は**仮定**にある）
+
+```lean
+have hpos : (0:ℤ) < ((p:ℤ) - 1) * (p:ℤ) ^ 2 := by positivity
+```
+
+```
+error: failed to prove positivity/nonnegativity/nonzeroness
+```
+
+★`positivity` は**式の形だけ**を見るので、仮定 `2 ≤ p` から来る `0 < ↑p - 1` は見えない
+（先行節「`positivity` が `≠ 0` を出せないとき」と同じ根。あちらはノルム、こちらは引き算）。
+
+**直し方**: 引き算の因子だけ `linarith` に回し、残りは `positivity` に任せる。
+
+```lean
+have hpos : (0:ℤ) < ((p:ℤ) - 1) * (p:ℤ) ^ 2 := mul_pos (by linarith) (by positivity)
+```
+
+★ついでに（同じ証明で必要になった)。ℕ の台帳
+`(p-1)^2 * p^(0+2) * J ≤ (p^2-1) * p * (p^2*e)` から正の因子 `(p−1)p²` を約すのは
+
+```lean
+zify [h1, h2]                       -- h1 : 1 ≤ p, h2 : 1 ≤ p ^ 2（ℕ の引き算を外す）
+have e1 : LHS = (X) * (((p:ℤ)-1) * (p:ℤ)^2) := by ring   -- ★右に因子を寄せる
+have e2 : RHS = (Y) * (((p:ℤ)-1) * (p:ℤ)^2) := by ring
+rw [e1, e2, mul_le_mul_iff_left₀ hpos]
+```
+
+の 3 行。★`nlinarith` に丸投げすると `linarith failed to find a contradiction` で落ちる
+（約分は非線形なので、`↑p ^ (0 + 2)` が残っていると特にだめ。`ring` を通す `show`/`have` で
+指数の `0 + 2` ごと潰すのが早い）。★名前は `mul_le_mul_left` ではない——それは
+`(bc : b ≤ c) (a : α) : b * a ≤ c * a` で iff ではない。`mul_le_mul_iff_left₀ (a0 : 0 < a) : b * a ≤ c * a ↔ b ≤ c`
+を `grep -n "mul_le_mul_iff" .cache/mathlib-index.txt`（0.2 秒）で引く。
