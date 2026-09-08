@@ -13763,3 +13763,38 @@ NG  lean\ABC3\Found\PGC\PairBudgetVerified.lean:122
 同一ファイル内に同じ短名の宣言が 2 つあり**両方に `.src` がある**場合、
 2 つ目は 1 つ目の locator で検証される（`WildDescentMultiStep.lean:608/:688` は
 内容が同一なので実害無し。★**内容が違えば黙って通る**）。
+
+## #349 ★★`python.exe -c "…"` の中の backtick は bash に食われる —— docstring が**黙って空になる**（2026-09-09、TwoIsDegenerate）
+
+Bash ツールで Python を `-c` に**二重引用符**で渡し、その中に Markdown の backtick を書くと、
+bash が**コマンド置換**として解釈する。エラーは出るが**スクリプト自体は成功で終わる**ため、
+気づかないと docstring の表が空のまま commit される。
+
+実際に出た文（逐語）:
+
+```
+/usr/bin/bash: command substitution: line 26: syntax error near unexpected token `$'f\202\202''
+/usr/bin/bash: command substitution: line 26: `v(f₂) − v(f₁)'
+/usr/bin/bash: line 26: {0:: command not found
+```
+
+★**そのあと `patched` と `ok 258` が出て、`leanfile.mjs` も `ok` を返した。**
+書き込まれた Lean は次のようになっていた（backtick の中身が**全部消えている**）:
+
+```
+|  | 深さの分布 |
+|---|---|
+| **0** |  |
+★★**深さ 2 は  のときだけ現れる。**
+```
+
+直し方:
+
+1. ★**`-c "…"` に Markdown を入れない。** `.py` ファイルを Write ツールで書いて実行する
+   （CLAUDE.md「解析スクリプトはシェルに埋めず Write で .py に書く」はこの形の実害）。
+2. 既に壊した `.md` / `.lean` の修復は **Edit ツール**で行う（シェルを通さない）。
+3. ★どうしても `-c` を使うなら**シングルクォート**で囲む。ただし Python 側の文字列に
+   `'` が出ると詰むので、結局 1. が安全。
+
+★検査: 書いたあと `grep -n "対照実験" -A 18 <file>` のように**実際の行を見る**。
+`leanfile.mjs` は docstring の中身を見ないので **`ok` は無罪の証拠にならない**。
