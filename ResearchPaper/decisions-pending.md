@@ -15697,3 +15697,64 @@ GUESS[FJ2-c]: ⑤の頭打ちは、1 段で払う額を「塔ぜんぶの予算�
 GUESS[FJ2-d]: 本体の名指しは直近 13 波で 10 回外している。今回も少なくとも 1 つ外す
 ```
 
+
+## ★★★Herbrand の 2 本を形式化、在庫の穴が 1 つ埋まった —— `HerbrandFirstJump.lean` 253 行 / `sorry` 0（2026-09-09）
+
+**①真偽**: ★★★**実装者の前波の断定「木に Herbrand は無い ⇒ 最大の在庫の穴」は偽**。★本体の grep が正しかった。
+実装者が測り直した: `herbrandPhiGroup` は `HerbrandComposition.lean:395/455/477/621`、
+`HasseArfStrongInduction.lean:183/447`、`TameQuotientTower.lean:152`。
+上付きは `AbelianSubfieldInLubinTate.lean:308/354/400/538`。
+★**mathlib に無いのは真だが、木には在る。**
+★実装者の自己診断: 「mathlib の測定を木の測定に**読み替えていた**（#330 の『2 か所で測る』を
+片方しかやっていなかった）」。
+
+**②成果 —— `FirstJumpLedger.lean:99-110` が名指ししていた 2 本**:
+同ファイルは「★足りないのは `u₁ ≤ i(σ̄)`。これは Herbrand（`φ_{L/K}` が `u ≤ u₁` で恒等）、
+同値に Serre IV §1 Prop.3。★本ファイルは形式化していない」と書いていた。★**それを形式化した。**
+抽象核（`ℕ∞`/`ℝ`/`Fintype` だけ、分岐語彙 0）——
+**`phiOf_eq_self_of_forall_lt`**（★第 1 跳びの下で `φ_f(n) = n`）/ **`lt_of_coset_sum`** /
+`truncENat_eq_of_lt` / `forall_lt_ramIndex_of_first_jump`（純群論）。
+具体層 —— **`lt_ramIndex_quotient_of_coset_sum`（`u₁ < i_ϖ(σ)`）** / `herbrandPhi_eq_self_of_first_jump`。
+
+**③★残り 1 点（数学ではなく配管）**: `lt_ramIndex_quotient_of_coset_sum` は剰余類和の恒等式を
+仮説 `hcoset` で受けている。★それは木の **`HerbrandComposition.lean:532 coset_sum_truncENat` そのもの**。
+⇒ 残るのは **その 10 仮説（`hcomp`/`hHtriv`/`hπ'`/`hinj`/`hfixC`/`hres`/`hAC`/`hϖ`/`hadj`/`hfix`）を
+`PAdicLocalField` の塔で揃える配管だけ**。★本波では揃えていない（docstring に明記）。
+
+**④★★本体も実装者も未読だった `FirstJumpLedger.lean` を読んだ**。そこには既に:
+- **`chain_ledger_forces_max` / `dvd_of_chain_ledger` / `not_chain_ledger_of_not_dvd`** ——
+  「★鎖の台帳が閉じるのは `s_m = 1`（最後の跳びが最大）**のときだけ**」で、`p ∤ i` の実データでは
+  端から閉じない。
+- 「点 3（深さがちょうど 1 下がる）は**そもそも要らない**」（`AxWildDescent` も
+  `exists_mem_of_descent_budget` も `<` しか要求しない）。
+- 「点 2 は木に既に在った」（`RamificationJumpBound.norm_natCast_le_pow_of_splits`）。
+
+⇒ ★**点 1（`u₁ ≤ i(σ̄)`）を閉じても鎖の道は閉じない。**
+★★ただしそれは `CyclicLayerDescent` の**鎖**の勘定（`σ_j = τ^{p^j}` の収縮率の積）であって、
+`FirstJumpRoute` の勘定（`p^{j/(m·e)}`）とは**別**である（★実装者が 2 つの字面を突き合わせた）。
+★**どちらに効くかは測っていない。**
+
+**穴の現状（本波で増減なし）**: ①不分岐 / ②′ / ③幾何減衰 / ⑤出口の限界。④は消えたまま。
+★本波の成果は**在庫の穴を 1 つ埋めた**こと。
+
+```
+VERDICT[FJ2-a]: ★当たり（「mathlib に無い」は真だが「木に無い」は偽。実装者が自己診断まで書いた）
+VERDICT[FJ2-b]: 未判定（最下段/最上段の向きには降りていない）
+VERDICT[FJ2-c]: 未判定（段ごとに分けて払う形は測っていない）
+VERDICT[FJ2-d]: 外れ（「少なくとも 1 つ外す」と書いたが、判定できたものは当たった）
+COST[HerbrandFirstJump]: 安 | 持ち場=第 1 跳びの構成  — 在庫の穴が偽と判明し、名指しされていた 2 本が定理になった
+```
+
+
+## ★`GUESS:`（配る前に書いた —— `coset_sum_truncENat` の 10 仮説を塔で揃える）
+
+★本体が `HerbrandComposition.lean:532-545` の字面を読んで数えた（★結論ではない）: `C` は固定環
+`B^H` の役どころ。木には `FixedRing*` が 5 ファイルある。
+
+```
+GUESS[CS-a]: C = fixedRing B H を取れば hcomp / hHtriv / hfixC は定義から出る。木の FixedRingBaseAlgebra.lean:178 fixedRingAlgebra が Algebra A C を既に供給している(本日の第 1115 で確認済み)
+GUESS[CS-b]: 高いのは hres(剰余体が C まで降りる)と hAC。ただし hres は本日の IntegerResidueBase.exists_sub_mem_maximalIdeal と同じ形
+GUESS[CS-c]: IsDiscreteValuationRing C(固定環が DVR)が一番高い。本日 𝒪_M で使った exists_pow_mul_unit の道が固定環にも効くかは未測定
+GUESS[CS-d]: 本体の名指しは直近 14 波で 10 回外している。今回も少なくとも 1 つ外す
+```
+
