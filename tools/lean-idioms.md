@@ -12829,3 +12829,58 @@ AssertionError: 0
 
 `marker` は `"/-! ## §4 出口"`。ファイルには確かに在るのに `count == 0` になる。
 ★挿入位置の目印は **ASCII だけ**にする（`"section Exit"` にしたら一発で通った）。
+
+## #319 `node -e "…"` の中に Lean の docstring を書くと**バッククォートがシェルに食われる**（2026-09-08、ConcreteNormedModel）
+
+Lean のファイルを `node -e` で書き足そうとして、テンプレート文字列の中に
+Lean の docstring `/-- ★`n = p` が素数なら … -/` を入れたところ:
+
+```
+/usr/bin/bash: line 18: n: command not found
+/usr/bin/bash: line 18: p: command not found
+ok  ABC3/Found/PGC/ConcreteNormedModel.lean  —— 11.3 秒
+```
+
+★**`ok` が出るので気づかない。** 実際にファイルに入っていたのは
+
+```
+/-- ★ が素数なら自己同型の位数はちょうど 。 -/
+```
+
+で、**バッククォートで囲んだ語だけが消えていた**（`` `n` `` → 空、`` `p` `` → 空）。
+Lean は通るので `leanfile` も `build` も何も言わない（#318 の親戚。今回は
+「空振り」ではなく「**一部だけ消える**」）。
+
+★直し方（3 つ、上ほど安全）:
+
+1. `cat > file <<'EOF' … EOF`（★クォート付きヒアドキュメント。`$` もバッククォートも素通し）
+2. Lean の**文章**（docstring・コメント）は Write/Edit ツールで書く
+3. `node - <<'NODEEOF' … NODEEOF`（node のスクリプト自体をヒアドキュメントで渡す）
+
+★**確かめ方**: 書いた直後に `grep -n "<入れたはずのバッククォート付きの語>" <file>`。
+本件は `grep -n "が素数なら自己同型の位数" file` で 1 行出て、`` `n` `` が消えているのが見えた。
+
+## #320 `1 ≤ a` から `1 ≤ a ^ 3` を `nlinarith` は出さない —— `one_le_pow₀` を渡す（2026-09-08、ConcreteNormedModelP3）
+
+`‖α‖³ = ‖π‖ < 1` から `‖α‖ < 1` を出すところで:
+
+```
+ABC3/Found/PGC/ConcreteNormedModelP3.lean:217:40: error: linarith failed to find a contradiction
+hc : 1 ≤ ‖alpha‖
+a✝ : ‖alpha‖ ^ 3 < 1
+⊢ False
+failed
+```
+
+`nlinarith [hc]` でも同じ（3 乗は 2 段の掛け算が要るので積の候補に出ない）。
+
+★直し方は補題を 1 つ名指しするだけ:
+
+```lean
+have h3 : (1 : ℝ) ≤ ‖alpha‖ ^ 3 := one_le_pow₀ h
+```
+
+★対になるのは `pow_lt_one₀ (h₀ : 0 ≤ a) (h₁ : a < 1) (hn : n ≠ 0)` と
+`one_lt_pow₀ (ha : 1 < a) (hn : n ≠ 0)`。
+`x ^ n = 1`（`x ≥ 0`）から `x = 1` を出すのも、`nlinarith` ではなく
+`rcases lt_trichotomy x 1` ＋ この 2 本が速い（本ファイル `norm_zeta3`）。
