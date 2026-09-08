@@ -13244,3 +13244,36 @@ grep -n "^theorem\|^def\|^instance" <後続ファイル>     # 実際に在る�
 ```
 
 ★これで今日 13 例目の「無いが嘘」。★**「前の波がそう書いたから」は根拠にならない**の実例。
+
+## #332 「重い」と記録された罠は**層に固有**のことがある —— 同じ構成を素の型変数の上でやると速い（2026-09-09、IntegerSubringNorm）
+
+`#69`（`adjoinField`/`adjoinIntegers` の境界、212 秒 timeout）を根拠に
+「`𝒪_M` を建てるのは危険」と判断しかけたが、★**原因の記述を読むと層に固有**だった。
+`AdjoinIntegers.lean:18-36`（逐語）:
+
+```
+`IntermediateField.adjoin K.carrier {x}` に `Valued _ NNReal := NormedField.toValued` を
+導入し、… **120秒を超えても終わらない**深刻な単一化の詰まりに繰り返し遭遇した
+(`maxHeartbeats` を200万まで上げても解決せず)。原因は未特定だが、
+`IntermediateField extends Subfield extends Subring extends Submonoid ...` という
+何層にも重なった部分構造の上で、新しく導入した `Valued` 由来の位相と、
+既存の `NormedField` 由来の位相(の定義的な一致)を検査するコストが高いためと推測される。
+```
+
+★**素の型変数 `{M : Type*} [NormedField M] [IsUltrametricDist M]` の上で同じ
+「単位閉球の `Subring`」を建てたら 8.8 秒で通った**（`leanfile.mjs` 実測）:
+
+```lean
+def integerSubring (M : Type*) [NormedField M] [IsUltrametricDist M] : Subring M where
+  carrier := {z : M | ‖z‖ ≤ 1}
+  add_mem' := fun ha hb => le_trans (IsUltrametricDist.norm_add_le_max _ _) (max_le ha hb)
+  ...
+```
+
+★**教訓**: `#59` / `#69` / `#323` のような「重い」記録は
+**どの層で測られたか**を必ず読む。★`IntermediateField`/`Subfield` の積み重ねの上での測定を、
+素の型変数の層に**そのまま持ち込まない**（#323 は逆向きに同じことを言っている：
+`NormedField` の層で重い所属判定が `[Field M]` だけの層では軽い）。
+
+★測り方: `sed -n '<原因が書いてある行範囲>p' <その罠を記録したファイル>` で
+**原因の記述まで読む**。見出しだけで判断しない。
