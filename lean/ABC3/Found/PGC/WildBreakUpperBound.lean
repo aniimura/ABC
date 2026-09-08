@@ -320,6 +320,65 @@ theorem exists_norm_sub_algebraMap_le_axDecay_of_uniformizer_deg_p_free
 end Exit
 
 
+/-! ## §5 ★★★測定への回答 —— **`k = 0` の出口は `k ≥ 1` の 1 段としては使えない**
+
+持ち場から「`…_deg_p_free` は `k ≥ 1` の塔の 1 段としてそのまま使えるか」を訊かれた。
+★**答: 使えない。**★理由は分岐ではなく**定数**である(以下、形式化した)。
+
+`…_deg_p_free` が出す損失は**どの段でも同じ** `axDecay p 1 = p^{1/(p−1)}` である。
+ところが `AxEpsilonDecay.axLemma_of_axDecay` が要求するのは
+★深さ `k` の段で `c k ≤ axDecay p k`(★**`k` とともに 1 に減衰する**)であり、
+
+    axDecay p 2 = p^{(1/(p−1))·(1/p)}  <  p^{1/(p−1)} = axDecay p 1
+
+なので★**`k = 2` の段で仮説が破れる**(`axDecay_two_lt_axDecay_one`)。
+さらに一様定数で押し通すと `AxTowerDecay.prod_unbounded_of_one_lt` により
+★**積が非有界**になる(`uniform_step_prod_unbounded`)。
+
+⇒ ★★**深い段ほど得をする**という `axDecay p k` の減衰は、次数 `p` の 1 段の事実からは出ない。
+それを供給するのが `harith` の中の**Hasse–Arf の合同** `p^{m+1} ∣ u(m+1) − u m` と
+**狭義単調** `u m < u (m+1)` であり、★本ファイルが閉じた `1 ≤ t` と `(p−1)t ≤ p·e` は
+★**`k = 0` でしか `harith` を尽くさない**。
+
+★★**先行する記録の追認**: `Found/PGC/AxTowerDecay.lean` の冒頭(物理 61〜63 行)は
+「☆★直前の波は『価値があるのは sharp な `(p−1)i ≤ e_L`…未着手』と書き残したが、
+★その未着手項目を埋めても Ax の定数は出ない」と書いている。★**これは正しい。**
+本ファイルはその「未着手項目」を実際に埋めたが、★**それだけでは Ax の定数は出ない**
+——★ただし `k = 0` の出口からは仮説が全部消えたので、無駄ではない。 -/
+
+section Measure
+
+/-- `1 < axDecay p 1`。 -/
+theorem one_lt_axDecay_one (p : ℕ) [Fact p.Prime] : 1 < axDecay p 1 := by
+  have h1 : (1:ℝ) < (p:ℝ) := by exact_mod_cast (Fact.out : p.Prime).one_lt
+  rw [axDecay_one]
+  refine (Real.one_lt_rpow_iff_of_pos (by linarith)).mpr ?_
+  exact Or.inl ⟨h1, div_pos one_pos (by linarith)⟩
+
+/-- ★★`axDecay p 2 < axDecay p 1` —— **深い段の方が損失が小さい**。 -/
+theorem axDecay_two_lt_axDecay_one (p : ℕ) [Fact p.Prime] : axDecay p 2 < axDecay p 1 := by
+  have h1 : (1:ℝ) < (p:ℝ) := by exact_mod_cast (Fact.out : p.Prime).one_lt
+  have hinv : 0 < 1 / ((p:ℝ) - 1) := div_pos one_pos (by linarith)
+  have hlt : (1 / (p:ℝ)) < 1 := by rw [div_lt_one (by linarith)]; exact h1
+  simp only [axDecay]
+  refine (Real.rpow_lt_rpow_left_iff h1).mpr ?_
+  have hi2 : (0:ℝ) < ((p:ℝ) - 1)⁻¹ := inv_pos.mpr (by linarith)
+  have hp1 : ((p:ℝ))⁻¹ < 1 := by rw [inv_lt_one_iff₀]; right; exact h1
+  norm_num
+  exact mul_lt_of_lt_one_right hi2 hp1
+
+/-- ★★★**一様定数 `axDecay p 1` は `axLemma_of_axDecay` の `hdecay` を満たさない**。 -/
+theorem uniform_axDecay_one_fails_hdecay (p : ℕ) [Fact p.Prime] :
+    ¬ (∀ k : ℕ, axDecay p 1 ≤ axDecay p k) :=
+  fun h => absurd (h 2) (not_le.mpr (axDecay_two_lt_axDecay_one p))
+
+/-- ★★★**一様定数で段を重ねると積が非有界**(`AxTowerDecay.prod_unbounded_of_one_lt`)。 -/
+theorem uniform_step_prod_unbounded (p : ℕ) [Fact p.Prime] (C : ℝ) :
+    ∃ n : ℕ, C < ∏ _k ∈ Finset.Icc 1 n, axDecay p 1 :=
+  prod_unbounded_of_one_lt (one_lt_axDecay_one p) (fun _ => le_rfl) C
+
+end Measure
+
 /-! ## §5 `.src`(原典の対応箇所) -/
 
 def norm_pow_apply_sub_eq.src : ABC3.Meta.Source :=
@@ -341,6 +400,9 @@ def exists_norm_sub_algebraMap_le_axDecay_of_uniformizer_deg_p_free.src : ABC3.M
 #print axioms sub_one_mul_le_of_totallyRamified
 #print axioms hupper_of_totallyRamified
 #print axioms exists_norm_sub_algebraMap_le_axDecay_of_uniformizer_deg_p_free
+#print axioms axDecay_two_lt_axDecay_one
+#print axioms uniform_axDecay_one_fails_hdecay
+#print axioms uniform_step_prod_unbounded
 
 end WildBreakUpper
 
