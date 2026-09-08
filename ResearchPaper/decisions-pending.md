@@ -14509,3 +14509,45 @@ VERDICT[「K はノルムを持たないから 𝒪_K が作れない」]: 外�
 COST[IntegerDVR + BaseIntegerAlgebra]: 安 | 持ち場=DVR 1 本  — 2 ファイルともほぼ一発で通り、新しい失敗形なし
 ```
 
+
+## ★★`hresA` と `hadj` が閉じた —— `Found/PGC/IntegerResidueBase.lean` 161 行 / `sorry` 0（2026-09-09）
+
+**①真偽**: ★配った字面「`#323`（`Algebra.adjoin` の所属で `isDefEq` timeout、3 回焼き切れ）に注意」は
+★**部分環の層では効かない**。probe で実測 ——
+`(⟨π, hπmem⟩ : ↥(integerSubring M))^l ∈ Algebra.adjoin ↥(baseIntegerSubring K M) {⟨π, hπmem⟩}`
+が `pow_mem (Algebra.self_mem_adjoin_singleton _ _) l` で ★**8.2 秒（baseline）**。
+⇒ ★**`#323` も `#69` と同じく層に固有**（#332 の形が 2 例目で確認された）。
+
+**②成果**:
+
+| 宣言 | 内容 |
+|---|---|
+| ★★`exists_sub_mem_maximalIdeal` | **`hresA`**: `∀ b : 𝒪_M, ∃ a : 𝒪_K, b − algebraMap a ∈ 𝔪_{𝒪_M}` |
+| ★★★`adjoin_pi_eq_top` | **`hadj`**: `Algebra.adjoin 𝒪_K {π'} = ⊤`（＝ `𝒪_M = 𝒪_K[π]`） |
+
+★実装者の断定「中身は在る」は**当たり**（2 波連続）。
+
+**③在庫の測定 —— ★実装者が自分の帰属ミスを見つけた**: 前波の報告で係数の補題を
+`IntegerSubringNorm.norm_algebraMap_le_one_of_le_one` と書いたが★**誤り**で、実際は
+`RamificationGroupNormBridge.lean:202`（名前空間 `RamNormBridge`）。`Unknown identifier` で気づき
+`grep -rn "theorem <名前>" lean/ABC3/Found/PGC/*.lean` で確定（#330 が効いた形）。
+もう 1 件 —— `Algebra.algebraMap_mem` は無く `Subalgebra.algebraMap_mem`。
+
+**④残り —— `HasseArfStrongInduction.lean:447-459` の全仮説に対する実測（9 項目）**:
+
+| 要求 | 現状 |
+|---|---|
+| `[CommRing A]` `[IsDomain A]` / `B` 側すべて / `[MulSemiringAction G B]` / `hπ'` / **`hresA`** / **`hadj`** | ★**済** |
+| ★`[IsDiscreteValuationRing A]`（**`𝒪_K` 側**） | ★未・**重い**。第 1123 の証明が効くかは未測定（値群の生成元は `TotallyRamifiedValueGroup.exists_valSub_gen` が出すはず） |
+| ★`[IsNoetherian A B]` | ★未・**重い** |
+| `[Fintype G]` / `hAinj` / `habel` | ★未（容易な見込み） |
+| `[SMulCommClass G A B]` / `[FaithfulSMul G B]` | ★未 |
+| `[CharP (ResidueField B) p]` | ★未（`‖p‖ < 1 ⇒ p ∈ 𝔪` から出る見込み） |
+| `h1 : lowerRamificationGroup B G 1 = ⊤` | ★未。`mem_lowerRamificationGroup_iff_norm` ＋ `1 ≤ u 0` から出るはずだが★**測っていない** |
+
+```
+VERDICT[#323 の危険]: 外れ（層に固有。部分環の上では 8.2 秒。#332 の 2 例目）
+VERDICT[「中身は在る」]: 当たり（2 波連続）
+COST[IntegerResidueBase]: 安 | 持ち場=hadj  — hresA と同時に閉じ、出口の仮説の残りが 9 項目に確定
+```
+
