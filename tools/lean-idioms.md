@@ -13607,3 +13607,54 @@ error: failed to synthesize instance of type class
 ★★**見分け方**: `exact`/`apply` は defeq を見るので通るのに、
 `inferInstance` / 暗黙の instance 引数だけが落ちる。
 ★**「さっき `rfl` で通ったのに instance が見つからない」ならこの形である。**
+## #343 ★★instance diamond は「橋を掛ける」前に**底を変えられないか**を測る（2026-09-09、SpectralNormBridge）
+
+状況: `M := K.carrier⟮x⟯` のノルムは `spectralNorm K.carrier K.closure` の制限だが、
+使いたい補題は `[NormedAlgebra ℚ_[p] M]` を要求する（こちらは `spectralNorm ℚ_[p] M`）。
+
+```
+error: failed to synthesize instance of type class
+  NormedAlgebra ℚ_[p] ↥K.carrier⟮x⟯
+error: failed to synthesize instance of type class
+  Algebra.IsAlgebraic ℚ_[p] ↥K.carrier⟮x⟯
+```
+
+木の docstring（`Found/PGC/AdjoinPAdicLocalField.lean:44-49`）は
+「両者の一致を橋渡す補題を先に用意する」と書いているが、
+★★**橋は不要だった** —— 完備な底を `ℚ_[p]` ではなく **`K.carrier` 自身**にすると
+下は全部 `inferInstance` で出る:
+
+```lean
+noncomputable example (K : PAdicLocalField p) : CompleteSpace K.carrier := inferInstance
+noncomputable example (K : PAdicLocalField p) (x : K.closure) :
+    NormedAlgebra K.carrier (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) :=
+  inferInstance
+example (K : PAdicLocalField p) (x : K.closure) :
+    Algebra.IsAlgebraic K.carrier
+      (IntermediateField.adjoin K.carrier ({x} : Set K.closure)) := inferInstance
+```
+
+★手順: 「完備な底が要る」系の補題（`spectralNorm` ・ `norm_algEquiv_eq` など）で詰まったら、
+★**底を 1 段上げられないか**（`ℚ_p` → 中間の局所体）を先に 10 秒で測る。
+局所体はそれ自体完備なので、底を上げても仮説は強くならない。
+（#340 の「『出ない』と書く前に塔を 1 段伸ばす」の反対向きである。）
+
+## #344 ★`[Algebra K M]` と `[NormedAlgebra K M]` を**両方書かない**（2026-09-09、SpectralNormBridge）
+
+linter が diamond を名指ししてくれる:
+
+```
+warning: Overlapping instance parameters in `…`:
+`[Algebra K M]` and `[NormedAlgebra K M]` can be used to infer conflicting versions of `[SMul K M]`.
+Of these, `[Algebra K M]` may be removed.
+```
+
+★放置すると別の場所で
+
+```
+error: failed to synthesize instance of type class
+  FiniteDimensional K M
+```
+
+が出る（`Module K M` が 2 通りになるため）。★**`[Algebra K M]` を消す**。
+`NormedAlgebra` は `Algebra` を含むので何も失わない。
