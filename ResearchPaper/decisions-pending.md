@@ -14551,3 +14551,56 @@ VERDICT[「中身は在る」]: 当たり（2 波連続）
 COST[IntegerResidueBase]: 安 | 持ち場=hadj  — hresA と同時に閉じ、出口の仮説の残りが 9 項目に確定
 ```
 
+
+## ★★★★★出口の 9 項目が全部載り、組み立てが通った —— `IntegerMiscInstances.lean` 393 行 ＋ `HerbrandIntegralNorm.lean` 119 行 / `sorry` 0（2026-09-09）
+
+**①真偽**: 配った 9 項目の一覧は**真**。★ただし**実装者自身の前波の断定 2 つが偽**（覆すのは 5・6 回目）:
+
+1. ★**偽**「`K` にノルムが無いから `𝒪_K` は DVR にできない／写しが要る」——
+   `NormedField.induced K M (algebraMap K M) _`（`Analysis/Normed/Field/Basic.lean:335`）で
+   ★**`K` 自体をノルム体にできる**。その下で `‖a‖ = ‖algebraMap K M a‖` が **`rfl`**、
+   ★**`integerSubring K = baseIntegerSubring K M` が `Subring.ext (fun _ => Iff.rfl)`**。
+   ⇒ 既存の `isDiscreteValuationRing_integerSubring` を `M := K` でそのまま呼べ、★**写しは 0 行**。
+2. ★**偽**「項目 1・2（DVR / Noetherian）は高い」—— 実測は **7 行と 4 行**。
+
+**②成果**（新規 14 宣言、全部 `[propext, Classical.choice, Quot.sound]`）:
+
+| 項目 | 宣言 | 種別 |
+|---|---|---|
+| `hAinj` | `injective_baseRingHom` | 具体層 |
+| `[SMulCommClass G A B]` | `smulCommClass_base` | 具体層 |
+| `[CharP (ResidueField B) p]` | `charP_residueField` | 具体層 |
+| `[FaithfulSMul G B]` | `faithfulSMul_integer` | 具体層 |
+| `habel` | ★**`mul_comm_of_forall_zpow`** | 抽象核（純群論） |
+| `h1 : G_1 = ⊤` | ★**`eq_top_of_generator_mem`** ＋ `lowerRamificationGroup_one_eq_top` | 抽象核＋具体層 |
+| `[IsDiscreteValuationRing A]` | `inducedNormedField` / `integerSubring_eq_baseIntegerSubring` ほか | 核は「単射な環準同型 1 本」 |
+| `[IsNoetherian A B]` | `module_finite_baseIntegerSubring` / `isNoetherian_baseIntegerSubring` | 具体層 |
+| `[Fintype G]` | `AlgEquiv.fintype`（`FieldTheory/Fixed.lean:318`、instance）| ★**無償だった** |
+
+★`h1` の抽象核が最も効いた ——「`G_1` は部分群だから**生成元 1 つを見ればよい**」。分岐の語が 1 語も要らない。
+
+★★★**組み立てが通った** —— `HerbrandIntegralNorm.exists_herbrandPhiGroup_natCast_of_norm`。
+`exists_natCast_herbrandPhiGroup_of_lowerRamificationGroup_one_eq_top` を実際に適用し、
+★**環・イデアル・分岐群の語を 1 つも仮説に持たない**形で `φ_G(m) ∈ ℕ` が出た。
+仮説は `K`・`M`・`π`・`π_K`・`g` とノルムの不等式のみ。残る仮説 `hne : G_m ≠ G_{m+1}` は原典でも仮説。
+
+**③在庫の測定**:
+★**形が違った** —— `smul_pow'`（`Algebra/Group/Action/Basic.lean:188`、`r • x^n = (r•x)^n`）と
+`smul_pow`（`Defs.lean:487`、`(r•x)^n = r^n • x^n`）は**左辺も右辺も違う**。⇒ #334。
+★**無いと思ったが在った（instance だった）** —— `AlgEquiv.fintype`、
+`isNoetherian_of_isNoetherianRing_of_finite`。
+★`NormedField.induced` の `R S` は**明示引数**（索引の行に出ない `variable (R S)`、#297 の形）。
+⇒ #335「ノルムの無い体に `NormedField.induced` で引き戻し、既存定理を写さずに使う」。
+
+**④残り —— ★★ちょうど 1 点**: `HasseArfCongruence.dvd_sub_of_phi_intCast` の 2 入力のうち
+**`hrec`**（`φ(m+1) = φ(m) + (u(m+1)−u m)/p^{m+1}`）。`hint` は本波で供給済み。
+`hrec` の証拠は `HerbrandComposition.lean:460 herbrandPhiGroup_natCast`
+（`φ_G(n) = (Σ_{i=1}^{n}|G_i|)/|G|`）で、★**その仮説は本波で全部揃った**。
+⇒ 残るのは `Nat.card G_i` を `u` で書く算術のみ（`RamificationSubgroupCard.card_eq_pow_of_mem_iff`）。
+
+```
+VERDICT[「重いのは 2 つ」]: 外れ（実装者自身の見込み。実測 7 行と 4 行）
+VERDICT[「𝒪_K は写しが要る」]: 外れ（NormedField.induced で写し 0 行。実装者が自分で覆した）
+COST[IntegerMiscInstances + HerbrandIntegralNorm]: 安 | 持ち場=残り 9 項目  — 全部載り、組み立てまで通って残り 1 点
+```
+
