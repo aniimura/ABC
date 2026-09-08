@@ -215,6 +215,66 @@ def tail_only_test(p, n, trials, seed=20260909):
             print(f"      （d = v_L(x) の確認: {dcheck}/{tot}）")
 
 
+def depth_dense(p, n, want, seed=20260909, maxdraw=400000):
+    """★★`d ≡ 1 (mod p)` の点だけを集めて**打ち消しの深さ**の分布を見る。
+
+    `D = d + i₁ = d + (p−1)` を「主項の位」とする。前波で証明した必要条件は
+    `p ∣ D`（⟺ `d ≡ 1 mod p`）だった。★母集団をそこに絞ると打ち消しが `p` 倍濃く出る。
+
+    深さ = `min_{σ: i(σ)=i₁+1} v_L(σx − x) − D`。
+    ★同時に、その最小を実現する **𝒪_{E₁} 成分の番号 j** も記録する
+    （位は `j (mod p)` に合同なので、`D` の上の「空き枠」は
+      `D+1, …, D+(p−1)`（尾の成分）と `D+p`（`E₁` 成分）である）。
+    """
+    L = hf.Layer(p, n)
+    random.seed(seed)
+    iv = {a: L.F.v(L.F.sub(L.F.sigma_pi(a), L.F.PI)) for a in L.HK}
+    firstj = [a for a in L.HK if iv[a] == L.i1 + 1]
+    depth = {}
+    slot = {}
+    got = 0
+    draws = 0
+    while got < want and draws < maxdraw:
+        draws += 1
+        y = rand_elt(L, False)
+        d = L.dist_to_E1(y)
+        if d is None or (d - 1) % p != 0:
+            continue
+        got += 1
+        best = None
+        besta = None
+        for a in firstj:
+            w = L.F.v([u - v for u, v in zip(sigma_apply(L, a, y), y)])
+            if w is None:
+                continue
+            if best is None or w < best:
+                best, besta = w, a
+        if best is None:
+            continue
+        D = d + L.i1
+        depth[best - D] = depth.get(best - D, 0) + 1
+        Av = coords_v(L, [u - v for u, v in
+                          zip(sigma_apply(L, besta, y), y)])
+        j = min((jj for jj in range(p) if Av[jj] is not None),
+                key=lambda jj: Av[jj] + jj)
+        slot[(best - D, j)] = slot.get((best - D, j), 0) + 1
+    print(f"  p={p} n={n} e={L.N} i1={L.i1}   d≡1 (mod {p}) の点 {got} 件"
+          f"（抽選 {draws} 回）")
+    print(f"    ★深さ = v(σx−x) − D の分布 = {dict(sorted(depth.items()))}"
+          f"   ★最大 {max(depth) if depth else None}")
+    print(f"    深さと成分 j の対応 = "
+          f"{dict(sorted((k, v) for k, v in slot.items()))}")
+
+
+def dense():
+    print("=== ★★d ≡ 1 (mod p) に絞った打ち消しの深さ ===")
+    depth_dense(3, 3, 4000)
+    depth_dense(2, 4, 4000)
+    depth_dense(3, 4, 1200)
+    depth_dense(2, 5, 2000)
+    depth_dense(5, 3, 250)
+
+
 def tail():
     print("=== ★★尾だけ（f₀ = 0）で打ち消しは起きるか ===")
     tail_only_test(3, 3, 6000)

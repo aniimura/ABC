@@ -1918,6 +1918,7 @@ import ABC3.Found.PGC.HformPopulation
 import ABC3.Found.PGC.LossUnitLaw
 import ABC3.Found.PGC.FirstJumpWitness
 import ABC3.Found.PGC.TailNoCancel
+import ABC3.Found.PGC.SlotStructure
 /-!
 # Found — 実装済みの基礎
 
