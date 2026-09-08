@@ -14791,3 +14791,63 @@ GUESS[PLF-c]: 一番高いのは hvalK（K の値群が ‖π‖^{qℤ} に入�
 GUESS[PLF-d]: 本体の名指しは 12 波連続で外れている。今回も少なくとも 1 つ外す
 ```
 
+
+## ★★★★★`ℚ_p` の上の塔での出口 —— `HarithPAdicSupply.lean` 256 行 / `sorry` 0（2026-09-09）
+
+**①安い順の測定結果**:
+
+| 本 | 結果 | 供給元 |
+|---|---|---|
+| `hnormp` | ★**3 行で落ちた** | `norm_algebraMap'`（mathlib）＋ `Padic.norm_p` |
+| `hiso` | ★**1 行で落ちた** | `PureStepSetup.lean:291 norm_algHom_eq` を `k := ℚ_[p]` で |
+| `heM` / `he` | ★**落ちた**（`e` は**出力**に） | 本ファイル `exists_absRamIndex` |
+| `hnK` | ★残る | — |
+| `hvalK` | ★残る | — |
+
+★★★**`e`（絶対分岐指数）が入力ではなくなった** —— `p ∈ K` なので `hvalK` から
+`‖(p:M)‖ = ‖π‖^{q·m}`、`‖(p:M)‖ = p⁻¹ < 1` と `‖π‖ < 1` から `m ≥ 1`、`e := m.toNat`。
+結論に `e` が現れないので存在量化で消せる。
+
+**②★台帳の前回の測定の訂正**: `VERDICT[GT-c]: 半分 — heM は定理になったが hnormp は落ちない` は
+★**`[NormedAlgebra ℚ_[p] M]` がある設定では偽**。`LocalFieldNorm.lean:78 normedAlgebra` が
+その instance を `PAdicLocalField` に与えており、`norm_algebraMap' M x`（`[NormOneClass A]` だけ）で **3 行**。
+★実装者は訂正を自分のファイル冒頭に書き、台帳・他ファイルは書き換えていない。
+
+**③前回止まった 3 点の生死（本体の依頼に対する実測）**:
+- ①不分岐側（`f = p`）の 1 段 → ★**生きている。本波は触っていない。**
+- ②`1 ≤ u` に剰余体と等長性が要る → ★★**完全に死んだ**（剰余体は `one_le_jump_zero_pow` で不要に、
+  等長性は本波で落ちた）
+- ③`IntermediateField` の層（#59） → ★★**出口の形を書くのには不要になった**。§4 は `M` を
+  `adjoin` でなく★**もう一つの `PAdicLocalField` の `carrier`** として取るので
+  `AdjoinPAdicLocalField.lean:44-49` が警告する instance diamond に入らない。
+  ★ただし**一般の `K` と `x` からその `L` を作る側**には依然 `adjoin` が要る ⇒ ★**構成側にのみ生きている**。
+
+**④成果**:
+
+| 宣言 | 内容 |
+|---|---|
+| `norm_natCast_p` / `norm_algEquiv` | `hnormp` / `hiso` |
+| ★★`exists_absRamIndex` | **`e` と `heM` を値群から作る** |
+| ★★★`exists_norm_sub_algebraMap_le_prod_axDecay_of_padic` | **`ℚ_p` の上の塔での出口** |
+| ★★`exists_norm_sub_algebraMap_le_prod_axDecay_of_localField` | `PAdicLocalField` の 2 つ組での出口 |
+
+**⑤★残る 2 本の意味**: `hnK : finrank K M = p^{k+1}` と `hvalK` は合わせて
+★**「`M/K` は素元 `π` を持つ次数 `p^{k+1}` の全分岐拡大」**であり、これは
+「一般の `K` と `x` から塔を作る」という★**内容そのもの**。★配管では落ちない。
+
+**逸脱**: §4 は `IsScalarTower ℚ_[p] K.carrier L.carrier` を**仮説で受ける**
+（`PAdicLocalField` は `Algebra ℚ_[p] carrier` を各々独立に持つので、二つの体の間の塔の整合性は
+型からは出ない —— **D13/D30–D32**）。
+
+**配管**: **#339**（ラムダで包むと暗黙引数が決まらず `typeclass instance problem is stuck
+Algebra.IsAlgebraic ℚ_[?m.263 z] M`。見分け方は**メタ変数に束縛変数が適用されている**こと）、
+**#340**（`norm_algebraMap'` の存在と「『出ない』と書く前に**塔を 1 段伸ばす**」）。
+
+```
+VERDICT[PLF-a]: ★当たり（hnormp は落ちた。前回「落ちない」は NormedAlgebra がある設定では偽だった）
+VERDICT[PLF-b]: 当たり（hnK は残り、全分岐が別に要る）
+VERDICT[PLF-c]: 半分（hvalK が一番高いのではなく、hnK と hvalK が分離できず一体だった）
+VERDICT[PLF-d]: ★外れ —— 「今回も少なくとも 1 つ外す」と書いたが、★13 波ぶりに本体の名指しが外れなかった
+COST[HarithPAdicSupply]: 安 | 持ち場=PAdicLocalField 側からの供給  — 3 本と e が落ち、残り 2 本が「内容そのもの」と確定
+```
+
