@@ -3134,6 +3134,19 @@ grep する。☆`node tools/decl-index.mjs` の索引を
 `·` の中身も入れ替えること。`le_or_gt` / `lt_or_ge` は在るが、
 `by_cases` なら名前を覚えなくてよい。
 
+★**2026-09-08 追記（第 1073、`WildJumpChain`）**: 同じ罠にまた落ちた。
+★上の字面 `Unknown identifier 'le_or_lt'` は**引用符が違うので grep でも機械照合でも当たらない**。
+★現行の Lean が印字する**逐語**はこちらである:
+
+```
+error(lean.unknownIdentifier): Unknown identifier `le_or_lt`
+Tactic `rcases` failed: `x✝ : ?m.54` is not an inductive datatype
+```
+
+★2 行目が必ず伴う（`rcases` の引数が elaborate できないため）。
+★`rcases le_or_lt a b with h | h` → `rcases le_or_gt a b with h | h` で**そのまま通る**
+（分岐の順は `≤` が先のままなので `·` の中身を入れ替えなくてよい。★`by_cases` より安い）。
+
 ## `omit ... in` は docstring の**前**に置く(2026-09-02、第 1271)
 
 **失敗形**: `/-- doc -/` の直後に `omit [Inst] in` を挟むと
