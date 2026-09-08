@@ -1908,6 +1908,7 @@ import ABC3.Found.PGC.UnramifiedStepFixed
 import ABC3.Found.PGC.DepthLowerBound
 import ABC3.Found.PGC.WitnessScope
 import ABC3.Found.PGC.KrasnerCeiling
+import ABC3.Found.PGC.CyclotomicNumbersVerified
 /-!
 # Found — 実装済みの基礎
 
