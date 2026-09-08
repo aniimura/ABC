@@ -1855,6 +1855,7 @@ import ABC3.Found.PGC.EquivariantProjectionDescent
 import ABC3.Found.PGC.JumpDefectTradeoff
 import ABC3.Found.PGC.GainedTowerDescent
 import ABC3.Found.PGC.GainedDescentBridge
+import ABC3.Found.PGC.GainedBridgeSupply
 /-!
 # Found — 実装済みの基礎
 
