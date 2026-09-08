@@ -15370,3 +15370,68 @@ GUESS[WD-c]: 平均化の段で ε の伸び p を落とす道の方が安い。
 GUESS[WD-d]: 本体の名指しは直近 8 波で 6 回外している。今回も少なくとも 1 つ外す
 ```
 
+
+## ★★★★★`AxWildDescentDecay` は `AxLemma` と同値（循環）—— `AxDecayKnobCircular.lean` 278 行 / `sorry` 0（2026-09-09）
+
+**①真偽**:
+- ★木の警告の**数の突き合わせは正しい**（`axDecay_one_lt_axConstant`）——
+  `axDecay p 1 = p^{1/(p−1)} < p^{p/(p−1)²} = axConstant p`（通分して `p−1 < p`）。
+- ★★★**しかし本当の理由は「良すぎる」ことではない ——`AxWildDescentDecay` は `AxLemma` と同値。**
+  `AxLemma K C` から `AxWildDescentDecay K C θ` が**どんな `θ ≥ 0` でも**出る:
+  `x′ := algebraMap y` を取れば `wildDepth K x′ = 0 < wildDepth K x`、`‖x − x′‖ ≤ C·ε`、
+  ★**`K` の元は `Γ_K` で固定される**ので `‖σ•x′ − x′‖ = 0 ≤ θ·ε`。逆は木の `axLemma_of_wildDescentDecay`。
+  ```
+  axWildDescentDecay_iff_axLemma : 1 ≤ C → 0 ≤ θ → θ ≤ 1 →
+    (AxWildDescentDecay K C θ ↔ AxLemma K C)
+  ```
+  ★`θ` の値は**何も効いていない**（`axWildDescentDecay_inert`）。
+  ⇒ ★**非空虚性の答え: 空虚でないのはちょうど `AxLemma K C` が真であるとき。掘っても何も減らない。**
+- ★**対比（`axDecay_route_not_circular`）**: 同じ議論は `AxWildDescent K c` には**半分しか効かない**。
+  `c = axDecay p` では `C > 1` に対して `∀k, C ≤ axDecay p k` が**偽**（前波 `not_forall_le_axDecay`）。
+  ⇒ ★★**`AxWildDescent K (axDecay p)` は循環ではない。掘る価値があるのはこちら。**
+
+**②在庫の測定 —— ★本連鎖が初めて開いた 2 か所**:
+- ★`AxLemma.lean:248` / `AxSenTate.lean:317` を**開いた**。`AxLemma K C` は
+  `∃ y : K.carrier, ‖x − algebraMap y‖ ≤ C·ε`。★**この「`y` が `K` の元」という 1 点が循環の全部**だった。
+- ★`NormalizedTraceDescent.lean` を**開いた** —— 跡の平均化は sharp の**ちょうど `(p−1)` 倍**を払うので
+  `p ≥ 3` では閉じない（`:262 traceLoss_eq_sharpLoss_rpow`、`p=2` なら一致）。
+  ★★**しかし同 `:379 FirstJumpRoute.axLemma_of_firstJump` が閉じた十分条件を持っている**:
+  `c k ≤ p^{j_k/(m_k·e_k)}`・`p^{k−1} ≤ m_k`・`(p−1)·j_k ≤ e_k` ⇒ `AxLemma K (axConstant p)`。
+  ★この `c` は `k` に依って 1 に収束するので**②一様定数 no-go に当たらず**、
+  ③幾何減衰 no-go は `ε` の**変位の比**の話で**損失**の話ではないので**当たらない**。
+  ⇒ ★★★**`FirstJumpRoute` の仮説は 3 つの穴のどれにも塞がれていない。**
+
+**③★抽象核は切り出さなかった（理由を記録）**: 中身が「`K` の元は `Γ_K` で固定される」
+（`smul_algebraMap` 1 行）だけで、切り出すと核が空になる。
+
+**④残る 1 点（実装者の見込み、未測定）**: `FirstJumpRoute` が仮定として残している `AxWildDescent K c` を
+「`c k ≤ p^{j_k/(m_k e_k)}`・`p^{k−1} ≤ m_k`」の形で埋めること。
+★`AxWildDescent` は損失と `ε` の伸びを**同じ `c`** で押さえるので、
+★★**`ε` の伸びを `c_k → 1` にできるか**が本当の 1 点。
+`axWildDescent_prime` の伸びは `p`（平均化の `1/p`）なので、そこが差。
+
+```
+VERDICT[WD-a]: 外れ（「θ ≤ 1 は偽で反例が作れる」ではなく「同値なので偽でも真でもなく循環」だった）
+VERDICT[WD-b]: 外れ（θ の値は何も効かない）
+VERDICT[WD-c]: 半分（平均化のファイルを開いたのは当たりだが、効いたのは (p−1)× ではなく FirstJumpRoute の発見）
+VERDICT[WD-d]: 当たり
+★★持ち場の見積もり 2「AxLemma / AxSenTate を一度開けば埋めなくてよい穴が見つかるかも」が★当たり。
+  ⇒ 本体の役割は「疑う対象と未読の場所を並べること」だと 2 波連続で確認。
+COST[AxDecayKnobCircular]: 安 | 持ち場=AxWildDescentDecay の非空虚性  — 掘る必要が無いと確定し、3 つの穴に塞がれない道(FirstJumpRoute)が見つかった
+```
+
+
+## ★`GUESS:`（配る前に書いた —— `FirstJumpRoute` の具体層）
+
+★本体が `NormalizedTraceDescent.lean:370-400` を読んで測ったこと（★結論ではなく字面）——
+同 `:392 axSenTate_of_firstJump` は同じ仮説から★**`AxSenTate K` そのもの**を出す。
+docstring は「★★これが `AxWildDescent K (axDecay p)` を出す**閉じた十分条件**である。
+残っているのは『そういう `x′` を作る』具体層だけで、★**定数の勘定はここで完全に閉じている**」と断定。
+
+```
+GUESS[FJ-a]: hjump : (p−1)·j k ≤ e k は harith の (4) と同じ形で、本日 hupper_of_totallyRamified_pow が出したもの（ただし本日のは p^{k+1}·e、こちらは e で、係数が違う可能性がある）
+GUESS[FJ-b]: hform : c k ≤ p^{j/(m·e)} の「損失」は本日の出口 ..._of_uniformizer_deg_p / ..._of_cyclic_adjoin が出す axDecay p 1 · ‖g x − x‖ に対応する
+GUESS[FJ-c]: hm : p^{k−1} ≤ m k(m は次数か重複度)が、本日ずっと相手にしてきた「巡回性・塔の段数」に化ける。ここが 3 つの穴のうち①に触れる
+GUESS[FJ-d]: 本体の名指しは直近 9 波で 7 回外している。今回も少なくとも 1 つ外す
+```
+
