@@ -312,6 +312,137 @@ theorem norm_sub_one_pow_le {p : ℕ} (hp : p.Prime) {A : M} {c : ℝ}
     _ ≤ c := by rw [norm_neg]; exact max_le hAp (hbin.trans hc)
 
 end ProdBinom
+/-! ## §4 組み立て -/
+
+section Assembly
+
+variable {K M : Type*} [Field K] [NormedField M] [IsUltrametricDist M] [Algebra K M]
+
+/-- 等長性は冪に伝わる。 -/
+theorem norm_pow_apply (g : M ≃ₐ[K] M) (hiso : ∀ z : M, ‖g z‖ = ‖z‖) :
+    ∀ (j : ℕ) (z : M), ‖(g ^ j) z‖ = ‖z‖ := by
+  intro j
+  induction j with
+  | zero => intro z; simp
+  | succ j ih => intro z; rw [pow_succ, AlgEquiv.mul_apply, ih, hiso]
+
+/-- telescoping —— `∏_{j<n} g^{j+1}π / g^jπ = g^nπ / π`。 -/
+theorem prod_telescope (g : M ≃ₐ[K] M) {π : M} (hπ : π ≠ 0)
+    (hne : ∀ j : ℕ, (g ^ j) π ≠ 0) (n : ℕ) :
+    ∏ j ∈ Finset.range n, ((g ^ (j + 1)) π / (g ^ j) π) = (g ^ n) π / π := by
+  induction n with
+  | zero => simp [div_self hπ]
+  | succ n ih =>
+      rw [Finset.prod_range_succ, ih]
+      field_simp
+      exact mul_div_cancel_left₀ _ (hne n)
+
+/-- ★★★★★★**次数 `p` の全分岐拡大は暴分岐である** —— 跳びの**下界**。
+
+`‖g π − π‖ ≤ ‖π‖^2`、すなわち `‖g π − π‖ = ‖π‖^{t+1}` と書いたときの `1 ≤ t`。
+
+★仮説は「`g^p = 1`」「`g` が等長」「全分岐(`hvalK`)」「`[M:K] = p`」「`‖p‖ = ‖π‖^{p·e}`, `e ≥ 1`」。
+★等長性 `hiso` は `PureStepSetup.norm_algEquiv_eq`(スペクトルノルム)が供給する。 -/
+theorem norm_sub_le_sq_of_totallyRamified [FiniteDimensional K M] {p e : ℕ} (hp : p.Prime)
+    {π : M} (g : M ≃ₐ[K] M) (hgp : g ^ p = 1) (hiso : ∀ z : M, ‖g z‖ = ‖z‖)
+    (hπ0 : 0 < ‖π‖) (hπ1 : ‖π‖ < 1) (hn : Module.finrank K M = p)
+    (hvalK : ∀ a : K, a ≠ 0 → ∃ m : ℤ, ‖algebraMap K M a‖ = ‖π‖ ^ ((p : ℤ) * m))
+    (he : 0 < e) (heM : ‖(p : M)‖ = ‖π‖ ^ (p * e)) :
+    ‖g π - π‖ ≤ ‖π‖ ^ 2 := by
+  classical
+  have hπne : π ≠ 0 := norm_pos_iff.mp hπ0
+  have hgj : ∀ (j : ℕ) (z : M), ‖(g ^ j) z‖ = ‖z‖ := norm_pow_apply g hiso
+  have hfne : ∀ j : ℕ, (g ^ j) π ≠ 0 := fun j => norm_pos_iff.mp (by rw [hgj]; exact hπ0)
+  set u : M := g π / π with hudef
+  have hu1 : ‖u‖ = 1 := by rw [hudef, norm_div, hiso]; exact div_self (ne_of_gt hπ0)
+  have hgu : ∀ j : ℕ, (g ^ j) u = (g ^ (j + 1)) π / (g ^ j) π := by
+    intro j
+    rw [hudef, map_div₀, ← AlgEquiv.mul_apply, ← pow_succ]
+  have hprod : ∏ j ∈ Finset.range p, (g ^ j) u = 1 := by
+    simp_rw [hgu]
+    rw [prod_telescope g hπne hfne p, hgp]
+    simpa using div_self hπne
+  obtain ⟨a, ha⟩ := exists_sub_algebraMap_norm_le (n := p) hp.one_lt hπ0 hπ1 hn hvalK
+    (le_of_eq hu1)
+  set A : M := algebraMap K M a with hAdef
+  have hAnorm : ‖A‖ = 1 := by
+    have hlt : ‖A - u‖ < ‖u‖ := by
+      rw [norm_sub_rev, hu1]
+      exact lt_of_le_of_lt ha hπ1
+    have := IsUltrametricDist.norm_add_eq_max_of_norm_ne_norm (x := u) (y := A - u)
+      (ne_of_gt hlt)
+    rw [show u + (A - u) = A by ring] at this
+    rw [this, max_eq_left (le_of_lt hlt), hu1]
+  have hAne : A ≠ 0 := norm_pos_iff.mp (by rw [hAnorm]; norm_num)
+  have hgA : ∀ j : ℕ, (g ^ j) A = A := fun j => (g ^ j).commutes a
+  set η : ℕ → M := fun j => (g ^ j) u / A - 1 with hηdef
+  have hfactor : ∀ j : ℕ, (g ^ j) u = A * (1 + η j) := by
+    intro j
+    rw [hηdef]
+    field_simp
+    ring
+  have hηnorm : ∀ j : ℕ, ‖η j‖ ≤ ‖π‖ := by
+    intro j
+    have h1 : η j = ((g ^ j) u - A) / A := by rw [hηdef]; field_simp
+    have h2 : (g ^ j) u - A = (g ^ j) (u - A) := by rw [map_sub, hgA j]
+    rw [h1, norm_div, hAnorm, div_one, h2, hgj]
+    exact ha
+  have hprodA : A ^ p * ∏ j ∈ Finset.range p, (1 + η j) = 1 := by
+    have hcong : ∏ j ∈ Finset.range p, (g ^ j) u = ∏ j ∈ Finset.range p, (A * (1 + η j)) :=
+      Finset.prod_congr rfl (fun j _ => hfactor j)
+    rw [Finset.prod_mul_distrib, Finset.prod_const, Finset.card_range] at hcong
+    rw [← hcong]
+    exact hprod
+  have hP : ‖(∏ j ∈ Finset.range p, (1 + η j)) - 1‖ ≤ ‖π‖ :=
+    norm_prod_one_add_sub_one_le _ _ (le_of_lt hπ0) (le_of_lt hπ1) (fun j _ => hηnorm j)
+  have hApm1 : ‖A ^ p - 1‖ ≤ ‖π‖ := by
+    have hAp : ‖A ^ p‖ = 1 := by rw [norm_pow, hAnorm, one_pow]
+    have hid : A ^ p - 1 = A ^ p * (1 - ∏ j ∈ Finset.range p, (1 + η j)) := by
+      rw [mul_sub, mul_one, hprodA]
+    rw [hid, norm_mul, hAp, one_mul, ← norm_neg]
+    simpa using hP
+  -- `A^p − 1` は `K` の元なので、値群から `‖π‖^p` まで下がる
+  have hApK : A ^ p - 1 = algebraMap K M (a ^ p - 1) := by
+    rw [map_sub, map_pow, map_one, hAdef]
+  have hApm1' : ‖A ^ p - 1‖ ≤ ‖π‖ ^ p := by
+    rcases eq_or_ne (a ^ p - 1) 0 with h0 | h0
+    · rw [hApK, h0, map_zero, norm_zero]
+      exact pow_nonneg (norm_nonneg π) p
+    · obtain ⟨m, hm⟩ := hvalK (a ^ p - 1) h0
+      rw [hApK, hm]
+      have hlt1 : ‖π‖ ^ ((p : ℤ) * m) < 1 := by
+        rw [← hm, ← hApK]
+        exact lt_of_le_of_lt hApm1 hπ1
+      have hpos : 0 < (p : ℤ) * m := (zpow_lt_one_iff_right_of_lt_one₀ hπ0 hπ1).mp hlt1
+      have hm1 : 1 ≤ m := by
+        by_contra hcon
+        rw [not_le] at hcon
+        nlinarith [hpos, (by exact_mod_cast hp.pos : (0:ℤ) < p)]
+      have hple : (p : ℤ) ≤ (p : ℤ) * m := by
+        nlinarith [(by exact_mod_cast hp.pos : (0:ℤ) < p)]
+      calc ‖π‖ ^ ((p : ℤ) * m) ≤ ‖π‖ ^ ((p : ℕ) : ℤ) :=
+            zpow_le_zpow_right_of_le_one₀ hπ0 (le_of_lt hπ1) hple
+        _ = ‖π‖ ^ p := zpow_natCast _ _
+  -- `‖p‖ ≤ ‖π‖^p`
+  have hcp : ‖(p : M)‖ ≤ ‖π‖ ^ p := by
+    rw [heM]
+    exact pow_le_pow_of_le_one (norm_nonneg π) (le_of_lt hπ1) (Nat.le_mul_of_pos_right p he)
+  -- 核: `‖A − 1‖^p ≤ ‖π‖^p`
+  have hAB : ‖A - 1‖ ^ p ≤ ‖π‖ ^ p := norm_sub_one_pow_le hp hAnorm hcp hApm1'
+  have hA1 : ‖A - 1‖ ≤ ‖π‖ := le_of_pow_le_pow_left₀ hp.pos.ne' (norm_nonneg π) hAB
+  -- `‖u − 1‖ ≤ ‖π‖`
+  have hu1' : ‖u - 1‖ ≤ ‖π‖ := by
+    have hsplit : u - 1 = (u - A) + (A - 1) := by ring
+    rw [hsplit]
+    exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ha hA1)
+  -- 仕上げ
+  have hfin : g π - π = π * (u - 1) := by
+    rw [hudef]
+    field_simp
+  rw [hfin, norm_mul, sq]
+  exact mul_le_mul_of_nonneg_left hu1' (norm_nonneg π)
+
+end Assembly
 
 end WildBreak
 
