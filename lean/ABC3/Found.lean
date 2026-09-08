@@ -1893,6 +1893,7 @@ import ABC3.Found.PGC.TotallyRamifiedAdjoinNorm
 import ABC3.Found.PGC.TotallyRamifiedAdjoinSupply
 import ABC3.Found.PGC.SpectralNormBridge
 import ABC3.Found.PGC.TowerDataFromCyclic
+import ABC3.Found.PGC.PGroupDescentToAxWild
 /-!
 # Found — 実装済みの基礎
 

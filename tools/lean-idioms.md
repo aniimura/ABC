@@ -13658,3 +13658,38 @@ error: failed to synthesize instance of type class
 
 が出る（`Module K M` が 2 通りになるため）。★**`[Algebra K M]` を消す**。
 `NormedAlgebra` は `Algebra` を含むので何も失わない。
+
+## #345 ★doc コメントは `omit … in` の**後ろ**に書く（2026-09-09、PGroupDescentToAxWild）
+
+`omit [Fact p.Prime] in` を付けた定理に、後から docstring を足したら:
+
+```
+error: unexpected token 'omit'; expected 'lemma'
+```
+
+★原因は順番だけ。`/-- … -/` を `omit … in` の**前**に置くと、
+doc コメントが `omit` に付こうとして落ちる。
+
+```lean
+-- NG
+/-- doc -/
+omit [Fact p.Prime] in
+theorem foo ...
+
+-- OK
+omit [Fact p.Prime] in
+/-- doc -/
+theorem foo ...
+```
+
+★`omit … in` を足すきっかけになる警告はこれ:
+
+```
+warning: automatically included section variable(s) unused in theorem `…`:
+  [Fact (Nat.Prime p)]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Fact (Nat.Prime p)] in theorem ...
+```
+
+★★警告文が提案する `omit [Fact (Nat.Prime p)] in` は**そのまま貼れる**が、
+`variable` で `[Fact p.Prime]` と書いていれば `omit [Fact p.Prime] in` でも通る。
