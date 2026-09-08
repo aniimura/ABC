@@ -13030,3 +13030,58 @@ exact Subgroup.NormalizerCondition.normal_of_coatom _ Group.normalizerCondition_
 `IsPGroup p ↥Q` が `∀ (g : ↥Q), ∃ k, g ^ p ^ k = 1` に展開されて
 ``Invalid field `isNilpotent`: The environment does not contain `Function.isNilpotent` `` になるので、
 `IsPGroup.isNilpotent (p := p) hQ` と**フルネームで**書く。
+
+## #325 `IsUltrametricDist` の**加法形**は索引に出ないが在る／有限和版は**無い**（2026-09-08、WildBreakLowerBound）
+
+```
+ABC3/Found/PGC/_probe.lean:8:8: error(lean.unknownIdentifier): Unknown constant `IsUltrametricDist.norm_sum_le`
+```
+
+`grep -n "IsUltrametricDist" .cache/mathlib-index.txt | grep -i "sum\|max\|add"` は
+**乗法形しか出さない**（`norm_mul_le_max` / `norm_mul_eq_max_of_norm_ne_norm`）。
+★しかし `to_additive` 生成の
+
+```
+IsUltrametricDist.norm_add_le_max (x y : S) : ‖x + y‖ ≤ max ‖x‖ ‖y‖
+IsUltrametricDist.norm_add_eq_max_of_norm_ne_norm (h : ‖x‖ ≠ ‖y‖) : ‖x + y‖ = max ‖x‖ ‖y‖
+```
+
+は**在る**（`#check` で確認。索引の「無い」の嘘、既知例に追加）。
+★一方 **`Finset` の和の版は本当に無い**。`Finset.induction_on` で 6 行:
+
+```lean
+theorem norm_sum_le_of_forall_le {ι : Type*} (s : Finset ι) (x : ι → M) {r : ℝ}
+    (hr : 0 ≤ r) (h : ∀ i ∈ s, ‖x i‖ ≤ r) : ‖∑ i ∈ s, x i‖ ≤ r := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simpa using hr
+  | insert a s ha ih =>
+      rw [Finset.sum_insert ha]
+      refine (IsUltrametricDist.norm_add_le_max _ _).trans ?_
+      exact max_le (h a (Finset.mem_insert_self a s))
+        (ih (fun i hi => h i (Finset.mem_insert_of_mem hi)))
+```
+
+★`0 < r` の狭義版も同じ形で通る（`empty` は `simpa using hr`）。
+
+## #326 `pow_lt_pow_left` は無い —— `₀` 付きの `le_of_pow_le_pow_left₀`（2026-09-08、WildBreakLowerBound）
+
+```
+ABC3/Found/PGC/WildBreakLowerBound.lean:435:12: error(lean.unknownIdentifier): Unknown identifier `pow_lt_pow_left`
+```
+
+`‖a‖^p ≤ ‖b‖^p` から `‖a‖ ≤ ‖b‖` を出すのに `by_contra` ＋ `pow_lt_pow_left` を書くと落ちる。
+`grep -n "pow_lt_pow_left" .cache/mathlib-index.txt` で出るのは
+
+```
+le_of_pow_le_pow_left₀ (hn : n ≠ 0) (hb : 0 ≤ b) (h : a ^ n ≤ b ^ n) : a ≤ b
+pow_lt_pow_left₀ (hab : a < b) (ha : 0 ≤ a) : n ≠ 0 → a ^ n < b ^ n
+```
+
+★`by_contra` は要らない。1 行で済む:
+
+```lean
+have hA1 : ‖A - 1‖ ≤ ‖π‖ := le_of_pow_le_pow_left₀ hp.pos.ne' (norm_nonneg π) hAB
+```
+
+★`pow_le_pow_iff_left` は `MulLeftStrictMono` を要求するので **ℝ では効かない**（負数があるため）。
