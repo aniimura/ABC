@@ -12246,3 +12246,26 @@ IsUltrametricDist.norm_pow_le  Analysis/Normed/Group/Ultra.lean:139
 (ii) 名前を機械的に読み替えて（`pow→nsmul`, `zpow→zsmul`, `mul→add`, `prod→sum`, `div→sub`）
 (iii) **`#check` で確かめる**。
 ★これで「索引に無い ⇒ 不在」の誤判定を 1 件回避した（`norm_nsmul_le`）。
+
+## #301 `Fact (Nat.Prime 3) := ⟨by norm_num⟩` は **`unsolved goals ⊢ Nat.Prime 3`** で落ちる（2026-09-08、正規化した跡の道）
+
+具体的な素数で `Fact` を立てるとき、`norm_num` が原始性を落とさないことがある。逐語:
+
+```
+ABC3/Found/PGC/NormalizedTraceDescent.lean:105:33: error: unsolved goals
+⊢ Nat.Prime 3
+```
+
+★`norm_num` の素数拡張は `Mathlib.Tactic.NormNum.Prime` に在り、
+`ABC3.Found.PGC.AxEpsilonDecay` の import 連鎖には**入っていない**。
+★`Unknown constant` ではなく `unsolved goals` で出るので #68 の合図には見えない。
+
+★★**直し方（import を足さずに済む）**: mathlib が持っている名前つきの証明を使う。
+
+```lean
+haveI : Fact (Nat.Prime 3) := ⟨Nat.prime_three⟩   -- ok
+```
+
+`Nat.prime_two` / `Nat.prime_three` / `Nat.prime_five` / `Nat.prime_seven` /
+`Nat.prime_eleven` は `Mathlib/Data/Nat/Prime/Defs.lean` に在る（`decide` を書く必要も無い）。
+測ったコマンド: `grep -n "Nat.prime_three" .cache/mathlib-index.txt`。

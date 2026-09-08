@@ -1846,6 +1846,7 @@ import ABC3.Found.PGC.MinpolyOrbitSplit
 import ABC3.Found.PGC.CyclicLayerDescent
 import ABC3.Found.PGC.WildJumpChain
 import ABC3.Found.PGC.FirstJumpLedger
+import ABC3.Found.PGC.NormalizedTraceDescent
 /-!
 # Found — 実装済みの基礎
 

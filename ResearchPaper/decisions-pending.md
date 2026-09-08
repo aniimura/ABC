@@ -13027,3 +13027,65 @@ COST[FirstJumpLedger]: 安 | 持ち場=Herbrand と降下の配置替え  — 3 
 ★`sub_one_mul_first_jump_le` は ★**公理なし**（今日 3 例目）。★`lean-idioms.md` への追加は無し
 （★**1 往復目で通り、新しいエラー文を 1 つも踏まなかった** —— 逐語引用が無いので節を書かない、という作法どおり）。
 
+
+## ★`GUESS:`（配る前に書いた —— 正規化した跡による別の道）
+
+```
+GUESS[TR-a]: 古典的な Ax-Sen-Tate（Tate 版）の道は y := Tr_{L/K}(x)/[L:K] で、‖x − y‖ を different で押さえる
+GUESS[TR-b]: differentIdeal と Algebra.intTrace は在庫にある（木が GenEll で使っている）ので配管は通る
+GUESS[TR-c]: 1 段（次数 p、跳び i）の different は (p−1)(i+1) で、RamificationJumpBound の (p−1)i ≤ e_L がそのまま効く
+GUESS[TR-d]: 塔の積が p^{p/(p−1)²} に収束するのは、different の指数が塔で幾何的に減るから（鎖の s_j ではなく different で勘定する）
+```
+★本体の測定: `grep` で PGC 側に跡写像の宣言は 0 件。docstring は「使わなかった」と書くだけで
+★**「使えない」とは書いていない** ⇒ **未着手の道**である。
+
+
+## ★★★★★★正規化した跡 —— ★**跡は閉じない。★だが閉じる道が特定され、定数の勘定が完全に閉じた**（2026-09-08）
+
+`Found/PGC/NormalizedTraceDescent.lean`（theorem 16 + `.src` 16、`sorry` 0、`sorryAx` 0）。
+`build.mjs ABC3.Found` error 0 / `check --brief` NG 13 据え置き。
+
+**①真偽**: ★**配った跡の道は `p ≥ 3` で閉じない。**
+☆★★**理由は一言**: ★**跡が与える指数は sharp な指数のちょうど `(p−1)` 倍である**
+（`traceLoss_eq_sharpLoss_rpow` が機械検査）。
+跡の 1 段の損失は `p^{(p−1)i/e_L}`、sharp は `p^{i/e_L}`。`(p−1)i ≤ e_L` を入れると
+sharp は `p^{1/(p−1)} = axDecay p 1`（等号実現）だが、★跡は `p^1 = p` で `k=1` の段で既に超える。
+★しかも跡は `k` に依らない定数 `p` しか出せず `∏ p = p^n` は非有界。
+★`p = 2` だけは `(p−1)=1` で跡＝sharp（単独では役に立たない）。
+
+☆★★★**閉じる道を特定した（Herbrand、第 1 跳び）**: `Gal(L/F)` の第 1 跳び `i₁` は
+`G_{i₁+1}` の固定体 `E₁`（`[E₁:F]=p`）の跳び `j` と一致する（`ψ_{L/E₁}(j)=j`）。すると
+`i₁/e_L ≤ (1/(p−1))p^{1−k}` ⇒ ★**`p^{i₁/e_L} ≤ axDecay p k` にちょうど一致。**
+
+反例データ `p=3, ℚ₃(ζ₂₇)/ℚ₃(ζ₃)`（`e_L=18`、目標 `axDecay 3 2 = 3^{1/6}`）:
+
+| 測り方 | 跳び | 指数 | |
+|---|---|---|---|
+| 跡（上の層） | `i=8` | `8/9` | ★超える（5.33 倍） |
+| 跡（`L/F` 全体） | — | `14/9` | ★もっと悪い |
+| sharp（上の層） | `i=8` | `4/9` | ★超える |
+| ★★sharp（**第 1 跳び**） | `i₁=2` | `1/9` | ★★**収まる** |
+
+**②在庫**: ★**索引の嘘の 8 例目** —— `grep norm_sum_le_of_forall_le` は 0 件だが
+`#check @IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg` は**在る**。
+`div_le_div_iff` は素では無い（`div_le_div_iff₀`、#2116 に既出）。
+★`Fact (Nat.Prime 3) := ⟨by norm_num⟩` は `unsolved goals ⊢ Nat.Prime 3` で落ちる（→ **#301**）。
+★PGC 側の `intTrace|Algebra.trace` は本ファイル以前 **0 件**（本体の見立ては当たり）。★**在庫はあるが要らなかった。**
+
+**③次の 1 点**: ★★**定数の勘定はここで完全に閉じた**（`JumpArith.rpow_div_le_axDecay` /
+`FirstJumpRoute.axLemma_of_firstJump` / `axSenTate_of_firstJump`）。
+★残るのは「wild 深さ `k` の `x` に対し `‖x−x′‖ ≤ p^{j/(m·e)}·ε` かつ `∀σ ‖σx′−x′‖ ≤ 同` を満たす
+**深さ `<k` の `x′` を作る**」ただ 1 点。`j`・`m`（`p^{k−1} ≤ m`）・`e`（`(p−1)j ≤ e`）の
+3 条件を満たせば `axLemma_of_firstJump` が受ける。
+
+**④判定**
+```
+VERDICT[TR-a]: 当たり — 古典の道は正規化した跡である（ただし axDecay には届かない）
+VERDICT[TR-b]: 当たり — differentIdeal / intTrace は在庫だった。★ただし使わずに済んだ
+VERDICT[TR-c]: 半分 — (p−1)i ≤ e_L はそのまま効いたが、different 経由ではなく sharp の側で効いた
+VERDICT[TR-d]: 外れ — 塔で幾何的に減るのは different の指数ではなく「第 1 跳び」だった
+COST[NormTrace]: 安 | 持ち場=正規化した跡による別の道  — 跡は (p−1) 倍で届かないと 1 行で診断し、代わりに第 1 跳びの道で定数の勘定を閉じた
+```
+★実装者は ★**具体層を作らなかった**（結論が出ないと分かっている道に剰余類代表の構成費用を払わない）——
+★**正しい判断である。**★手計算の誤り（`4π²` を落として `i=3` としたのを `i=2` に修正）も自分で docstring に記録した。
+
