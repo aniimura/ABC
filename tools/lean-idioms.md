@@ -12691,3 +12691,62 @@ theorem foo {E : ℕ → Type*} [∀ j, Field (E j)] [∀ j, Algebra (E j) M]
 `nnnorm_sum_digit_eq_sup`）でだけ出てくる。
 
 ついでの不在（`#check` で測った）: `Unknown constant `Nat.pos_pow_of_pos``。`pow_pos` を使う。
+
+## #315 `simp` は `k • x` を `↑k * x` に潰すので、線形写像を通せなくなる（2026-09-08、GainedTowerModel）
+
+`Commute.add_pow` で `(1 + D)^p`（`D : Module.End ℤ M`）を展開して `π` に当てたら、
+`simp` 一発で次が残った:
+
+```
+error: unsolved goals
+D : Module.End ℤ M := endOf σ - 1
+⊢ ∑ x ∈ range p, (D ^ (p - x)) (↑(p.choose x) * π) = ∑ x ∈ range p, ↑(p.choose x) * (D ^ (p - x)) π
+```
+
+原因: `Module.End.natCast_apply` が `(↑k : Module.End R M) π = k • π` を出した**直後**に
+`nsmul_eq_mul` が `k • π` を `↑k * π` に潰す。`D` は `ℤ`-線形であって `M`-線形ではないので、
+`*` の形になると `map_nsmul` が二度と当たらず、`D (a * π) = a * D π` は**偽**（証明できない）。
+
+直し: `map_nsmul` を先に当てる `simp only` を 1 段挟む。★`simp [..., map_nsmul]` と
+1 回で書くと `nsmul_eq_mul` の方が先に当たって同じ所で止まる（実測）。
+
+```lean
+    rw [h1, hsplit, (Commute.one_left D).add_pow p, LinearMap.sum_apply,
+      Finset.sum_range_succ]
+    simp only [one_pow, one_mul, Module.End.mul_apply, Module.End.natCast_apply, map_nsmul]
+    simp
+```
+
+ついでの不在／別名（`--errors` で測った）:
+`Unknown constant `Module.End.coe_sum``。`Finset` の和を当てるのは `LinearMap.sum_apply`。
+
+★同じファイルで #313／#297（索引の行が section の `variable` を落とす）が**また**出た。逐語:
+
+```
+error: Application type mismatch: The argument
+  t
+has type
+  ℕ
+of sort `Type` but is expected to have type
+  Type ?u.424
+of sort `Type (?u.424 + 1)` in the application
+  @IsUltrametricDist.norm_natCast_le_one t
+```
+
+索引の行は `lemma norm_natCast_le_one (n : ℕ) : ‖(n : R)‖ ≤ 1` だが、実際は `R` が明示引数。
+`IsUltrametricDist.norm_natCast_le_one M t` と書く。★同様に
+`IntermediateField.adjoin_eq_top_of_algebra` も索引は `(hS)` だけだが実際は `(F) (S) (hS)`:
+
+```
+error: Application type mismatch: The argument
+  htop
+has type
+  K[π] = ⊤
+of sort `Prop` but is expected to have type
+  Set ?m.48
+of sort `Type ?u.49` in the application
+  IntermediateField.adjoin_eq_top_of_algebra K htop
+```
+
+⇒ **1 つ足りない**ときは `Set` を要求され、**2 つ足りない**ときは `Type` を要求される。
+どちらも「引数が 1 つ多い」ではなく**何個多いか**をエラーの期待型から読むのが速い。
