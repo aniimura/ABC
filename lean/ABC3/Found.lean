@@ -1877,6 +1877,7 @@ import ABC3.Found.PGC.RamificationSubgroupCard
 import ABC3.Found.PGC.IntegerSubringNorm
 import ABC3.Found.PGC.IntegerRingInstances
 import ABC3.Found.PGC.IntegerDVR
+import ABC3.Found.PGC.BaseIntegerAlgebra
 /-!
 # Found — 実装済みの基礎
 
