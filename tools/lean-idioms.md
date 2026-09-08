@@ -12593,3 +12593,32 @@ ok  ABC3/Scratch/JS.lean  —— 11.0 秒
 直し方:
 - Python は必ずフルパスで叩く（`PYTHONIOENCODING=utf-8 'C:\Users\Aruta\miniforge3\envs\py311env\python.exe' script.py`）。
 - ★書き込みと検査を `&&` で 1 命令に繋がない。`wc -l` で行数が増えたことを見てから検査する。
+
+## #312 超距離に `norm_sub_le_max` は無い / `pow_le_pow_right_of_le_one` も無い（2026-09-08、GainedJumpFree）
+
+```
+probe_gjs.lean:8:8: error(lean.unknownIdentifier): Unknown constant `IsUltrametricDist.norm_sub_le_max`
+probe_gjs.lean:9:8: error(lean.unknownIdentifier): Unknown constant `IsUltrametricDist.nnnorm_sum_le`
+```
+
+```
+ABC3/Found/PGC/GainedJumpFree.lean:369:12: error(lean.unknownIdentifier): Unknown identifier `pow_le_pow_right_of_le_one`
+```
+
+在るのは **`IsUltrametricDist.norm_add_le_max`**（`‖x + y‖ ≤ max ‖x‖ ‖y‖`）だけ。
+差の版は 1 行で作る:
+
+```lean
+theorem norm_sub_le_max' (x y : M) : ‖x - y‖ ≤ max ‖x‖ ‖y‖ := by
+  simpa [sub_eq_add_neg] using IsUltrametricDist.norm_add_le_max x (-y)
+```
+
+和の上界は **`IsUltrametricDist.nnnorm_sum_le_of_forall_le`**
+（`(∀ i ∈ s, ‖f i‖₊ ≤ C) → ‖∑ i ∈ s, f i‖₊ ≤ C`）。`nnnorm_sum_le` / `nnnorm_sum_le_sup` は無い。
+`sup` の**等式**が要るときだけ `IsUltrametricDist.nnnorm_sum_eq_sup_of_pairwise_ne`（ノルムが相異なることが要る）。
+
+底が `≤ 1` で指数を下げる補題は **`pow_le_pow_of_le_one`**
+（`0 ≤ a → a ≤ 1 → n ≤ m → a^m ≤ a^n`）。`pow_le_pow_right_of_le_one` は存在しない。
+zpow 版は `zpow_le_zpow_right_of_le_one₀`（★こちらは `_of_le_one₀` で在る）。
+
+測り方: `import Mathlib` を書かず、**木の既存ファイルを 1 本 import した probe に `#check @Foo` を並べる**（10.8 秒で 10 個まとめて判る）。
