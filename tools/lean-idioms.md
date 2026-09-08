@@ -12955,3 +12955,78 @@ have h2 : B ^ 2 = (-1 : ℤ_[2]) := Subtype.ext hcoe
 ★続けて `PadicInt.toZModPow 2 : ℤ_[2] →+* ZMod (2 ^ 2)` に送ると
 「`−1` は `ℚ₂` の平方でない」が `revert`＋`decide` で閉じる（`ZMod 4` の 4 元）。
 ★`exact?` はこの形を見つけない。
+
+## #323 `NormedField M` のまま `Algebra.adjoin K {π}` の**所属**を書くと `isDefEq` が焼き切れる（2026-09-08、TotallyRamifiedLayer）
+
+```
+ABC3/Found/PGC/TotallyRamifiedLayer.lean:18:10: error: (deterministic) timeout at `isDefEq`, maximum number of heartbeats (200000) has been reached
+ABC3/Found/PGC/TotallyRamifiedLayer.lean:10:0: error: (deterministic) timeout at `whnf`, maximum number of heartbeats (200000) has been reached
+```
+
+落ちた形（★24.3 秒 / 22.7 秒 / 20.4 秒 と 3 回落ちた）:
+
+```lean
+variable {K M : Type*} [Field K] [NormedField M] [IsUltrametricDist M] [Algebra K M]
+
+theorem foo [FiniteDimensional K M] {π : M} {n : ℕ} (hspan : ...) :
+    Algebra.adjoin K ({π} : Set M) = ⊤ := by
+  have hle : Submodule.span K (Set.range (fun l : Fin n => π ^ (l : ℕ)))
+      ≤ Subalgebra.toSubmodule (Algebra.adjoin K ({π} : Set M)) := by
+    refine Submodule.span_le.2 ?_
+    rintro z ⟨l, rfl⟩
+    exact pow_mem (Algebra.self_mem_adjoin_singleton K π) (l : ℕ)   -- ★ここ(18:10)
+```
+
+★`Algebra.subset_adjoin rfl` に替えても、`simp only [SetLike.mem_coe, Subalgebra.mem_toSubmodule]`
+を前置しても落ちる。★`LinearIndependent` を作る側（`linearIndependent_of_ne_mod` の適用）は
+同じ文脈で **10.4 秒で ok** なので、犯人は `Algebra.adjoin` への**所属**の defeq だけである。
+
+**直し方 —— 同じ証明を `[Field M]` だけの補題に切り出して代入する（10.4 秒で ok）**:
+
+```lean
+theorem adjoin_eq_top_of_span_powers {K M : Type*} [Field K] [Field M] [Algebra K M]
+    [FiniteDimensional K M] {π : M} {n : ℕ}
+    (hspan : Submodule.span K (Set.range (fun l : Fin n => π ^ (l : ℕ))) = ⊤) :
+    Algebra.adjoin K ({π} : Set M) = ⊤ := ...     -- ★ノルムが 1 語も出ない
+-- 使う側（NormedField のまま）
+exact adjoin_eq_top_of_span_powers (hli.span_eq_top_of_card_eq_finrank' hcard)
+```
+
+★`NormedField M → Field M`（`NormedField.toField`）を毎回展開しに行くのが原因なので、
+**`Field` だけの層で書いて代入する**と展開が起きない。
+★「抽象核を切る」のは設計の趣味ではなく、ここでは**通るか落ちるかの差**である。
+
+## #324 `Subgroup.NormalizerCondition.normal_of_coatom` は `H` が**明示引数**（索引の行に出ない）（2026-09-08、TotallyRamifiedLayer）
+
+```
+error: Application type mismatch: The argument
+  isCoatom_of_index_prime Fact.out h
+has type
+  IsCoatom (P.subgroupOf Q)
+of sort `Prop` but is expected to have type
+  Subgroup ?m.22
+of sort `Type ?u.23` in the application
+  NormalizerCondition.normal_of_coatom (isCoatom_of_index_prime Fact.out h)
+```
+
+`.cache/mathlib-index.txt` の行は
+
+```
+Subgroup.NormalizerCondition.normal_of_coatom (hnc : NormalizerCondition G) (hmax : IsCoatom H) : H.Normal
+```
+
+だが、実ソース `Algebra/Group/Subgroup/Order.lean:44` は section で `variable (H : Subgroup G)` と
+**明示**に取っている。⇒ 実際の引数は `(H) (hnc) (hmax)` の 3 本。★#297 と同じ嘘の 2 例目。
+
+直し方: `_` を 1 つ足す。
+
+```lean
+exact Subgroup.NormalizerCondition.normal_of_coatom _ Group.normalizerCondition_of_isNilpotent
+  (isCoatom_of_index_prime Fact.out h)
+```
+
+★あわせて `IsPGroup.isNilpotent` は `Unknown constant`（#68 の形）になる ——
+`import Mathlib.GroupTheory.Nilpotent` が要る。★`hQ.isNilpotent` とドット記法で書くと
+`IsPGroup p ↥Q` が `∀ (g : ↥Q), ∃ k, g ^ p ^ k = 1` に展開されて
+``Invalid field `isNilpotent`: The environment does not contain `Function.isNilpotent` `` になるので、
+`IsPGroup.isNilpotent (p := p) hQ` と**フルネームで**書く。

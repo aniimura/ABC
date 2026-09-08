@@ -1866,6 +1866,7 @@ import ABC3.Found.PGC.JumpFromValueGroup
 import ABC3.Found.PGC.ConcreteNormedModel
 import ABC3.Found.PGC.ConcreteNormedModelP3
 import ABC3.Found.PGC.ConcreteNormedModelK1
+import ABC3.Found.PGC.TotallyRamifiedLayer
 /-!
 # Found — 実装済みの基礎
 
