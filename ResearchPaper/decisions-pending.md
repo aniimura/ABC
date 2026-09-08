@@ -14327,3 +14327,41 @@ VERDICT[証拠1の2本]: 本体は「どちらが効くか未測定」と書い�
 COST[RamificationGroupNormBridge]: 安 | 持ち場=hrec の橋  — (a) を両向きで閉じ、(c) は在庫と判明、(b) の止まる場所を型 4 つに確定
 ```
 
+
+## ★★★`|G_i| = p^{k+1−m}` が純群論で閉じた —— `Found/PGC/RamificationSubgroupCard.lean` 201 行 / `sorry` 0（2026-09-09）
+
+**①選び方**: ★★**本体が挙げた 3 つの道（(α) 型クラス適合を測る／(β) #296 で迂回／(γ) #323 の薬）を
+どれも取らず、第 4 の道**を実装者が見つけた。着手前の見積り（逐語）:
+> (b) の中身は「`G_i` が `⟨g^{p^m}⟩` のどれかであること」で、それは **`Gr` が部分群であること**と
+> `⟨g^j⟩ = ⟨g^{p^{v_p(j)}}⟩` だけから出る。★環も付値もノルムも要らない。
+
+⇒ `Gr` を**任意の部分群**として受けることで、`lowerRamificationGroup` にも `𝒪_M` にも降りずに済んだ。
+★★**#69 の危険区間にも D13/D30–D32 の同型不変性にも触れていない。**
+
+**②成果**（★分岐・付値・ノルム・環の語彙が 1 語も出ない）:
+`orderOf_pow_prime_pow` / `zpowers_pow_eq_of_not_dvd` / `zpowers_pow_eq_zpowers_pow_padicValNat`
+→ ★★`eq_zpowers_of_mem_iff`（`g^{p^s} ∈ Gr ⟺ i ≤ u s` ⇒ **`Gr = ⟨g^{p^m}⟩`**）
+→ ★★★`card_eq_pow_of_mem_iff`（**`Nat.card Gr = p^{k+1−m}`**）。
+入力 `hmem` は前波の `mem_ramification_iff` が**ノルムの言葉で供給**（`h := g^{p^s}`, `t := u s`）。
+
+**③在庫の測定（#330 の 2 か所）**:
+在った —— `pow_padicValNat_dvd` / `pow_succ_padicValNat_not_dvd` / `ZMod.coe_mul_inv_eq_one` /
+`Nat.pow_div` / `Nat.gcd_eq_right` / `orderOf_pow'` / `Nat.card_zpowers` / `mem_powers_iff_mem_zpowers`。
+無かった（#68 の形、`Unknown constant`）—— `Nat.ord_proj_mul_ord_compl_eq_self` /
+`Nat.not_dvd_ord_compl` / `Nat.ord_proj_dvd`。`pow_padicValNat_dvd` ＋ `Nat.mul_div_cancel'` で代替。
+★配管の差分: `ZMod (p^r)` は**体でない**ので前波（`ZMod p`）の `field_simp` は「made no progress」。
+`ZMod.coe_mul_inv_eq_one x (h : Coprime x n)` に替えて通った。
+
+**④残り —— ★`hrec` の橋に残るのは 1 ノードだけ**:
+`lowerRamificationGroup B G i`（`LowerRamificationGroup.lean:265`、`B` は DVR、`𝔪_B^{i+1}` の inertia）を
+ノルムの言葉の `{σ | ∀ z, ‖z‖ ≤ 1 → ‖σz − z‖ ≤ ‖π‖^{i+1}}` と**同一視**すること。
+★これには `B = 𝒪_M` を型として建てるしかない（`herbrandPhiGroup` が
+`[IsDiscreteValuationRing B] [MulSemiringAction G B]` で `B` を要求するため）。
+★本体の追測どおり 3 つの型クラスは「無い」ではなかったが、★**本波はそこに降りていない**。
+降りるときの既知の危険 —— #69（212 秒 timeout）／D13・D30–D32（同型不変性）／#323（`isDefEq` 焼き切れ）。
+
+```
+VERDICT[本体の3つの道]: ★全部外れ（実装者が第 4 の道を見つけて環を建てずに済ませた）。★本体が「拘束ではない」と書いたことが効いた
+COST[RamificationSubgroupCard]: 安 | 持ち場=|G_i| を u で書き下す  — 純群論で閉じ、hrec の残りが 1 ノードになった
+```
+
