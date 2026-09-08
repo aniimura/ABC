@@ -1856,6 +1856,7 @@ import ABC3.Found.PGC.JumpDefectTradeoff
 import ABC3.Found.PGC.GainedTowerDescent
 import ABC3.Found.PGC.GainedDescentBridge
 import ABC3.Found.PGC.GainedBridgeSupply
+import ABC3.Found.PGC.GainedJumpSeq
 /-!
 # Found — 実装済みの基礎
 
