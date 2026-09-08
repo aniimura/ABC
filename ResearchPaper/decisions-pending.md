@@ -14365,3 +14365,51 @@ VERDICT[本体の3つの道]: ★全部外れ（実装者が第 4 の道を見�
 COST[RamificationSubgroupCard]: 安 | 持ち場=|G_i| を u で書き下す  — 純群論で閉じ、hrec の残りが 1 ノードになった
 ```
 
+
+## ★★★`𝒪_M` は抽象ノルム体の上で 8.8 秒で建つ —— `Found/PGC/IntegerSubringNorm.lean` 182 行 / `sorry` 0（2026-09-09）
+
+**①真偽**: ★★配った字面（＝**実装者自身の前波の断定**）「`𝒪_M` を建てると `#69` の 212 秒 timeout の
+危険区間に入る」は**偽**。★実装者が自分の断定を覆した。
+
+- `AdjoinIntegers.lean:18-36` を**原因の記述まで**読むと、`Valued` を避けた理由は
+  ★**`IntermediateField.adjoin K.carrier {x}` の上でだけ**起きた詰まりだった ——
+  「`IntermediateField extends Subfield extends Subring extends Submonoid ...` という
+  何層にも重なった部分構造の上で…位相の定義的な一致を検査するコストが高い」。
+  ★我々の `M` は**素の型変数**。
+- ★実測: 素の `Subring.mk` で単位閉球を建てて **8.8 秒**。212 秒には当たらない。
+
+⇒ ★**#332「『重い』と記録された罠は層に固有のことがある。見出しだけで判断せず
+`sed -n` で原因の記述まで読む」**（#323 が逆向きに同じことを言っている点も明記）。
+
+**②成果**（どの経路でも要る中身。★型クラスはまだ載せていない）:
+
+| 宣言 | 内容 |
+|---|---|
+| `integerSubring` | `{z : M \| ‖z‖ ≤ 1}` が `Subring M`（超距離のみ） |
+| ★★`exists_pow_mul_unit` | **`z ≠ 0`, `‖z‖ ≤ 1` ⇒ `z = π^n · w`（`‖w‖ = 1`）** ＝ DVR の心臓 |
+| ★`dvd_iff_norm_le` | `π ∣ z ⟺ ‖z‖ ≤ ‖π‖` ＝ `𝔪 = (π)` の中身 |
+| `maps_integerSubring` | 等長な自己同型は単位球を保つ ＝ `MulSemiringAction G 𝒪_M` の中身 |
+
+**③在庫の測定（#330 の 2 か所）**:
+★**無い** —— 閉球の `Subring` は mathlib にも木にも無い
+（`Subsemigroup.unitBall` は**開球**、`Analysis/Normed/Field/UnitBall.lean:32`）。本ファイルで建てた。
+★**在る（＝`Valued` 経由も塞がっていない）** ——
+`Valuation.valuationSubring_isDiscreteValuationRing`（`RingTheory/Valuation/Discrete/Basic.lean:453`、
+★**値群が巡回かつ非自明だけで DVR**）、`IsNonarchimedeanLocalField` の
+`instance : IsDiscreteValuationRing 𝒪[K]`（`NumberTheory/LocalField/Basic.lean:108`）、
+`NormedField.toValued`（`Topology/Algebra/Valued/NormedValued.lean:67`）。
+
+**④残り —— ★数学はもう無く、型クラスを載せる作業 4 つ**（いずれも未着手）:
+1. `IsDiscreteValuationRing ↥(integerSubring M)` ← 中身は `exists_pow_mul_unit`
+2. `MulSemiringAction G ↥(integerSubring M)` ← 中身は `maps_integerSubring`
+3. `IsLocalRing.maximalIdeal ↥(integerSubring M) = Ideal.span {π}` ← 中身は `dvd_iff_norm_le`
+4. `lowerRamificationGroup ↥(integerSubring M) G i` を `mem_ramification_iff` と突き合わせ
+
+★これで `RamCard.card_eq_pow_of_mem_iff` → `HerbrandComposition.lean:455 herbrandPhiGroup_natCast`
+→ `HasseArfCongruence.dvd_sub_of_phi_intCast` と繋がり **`harith` の (3) が閉じる**。
+
+```
+VERDICT[#69 の危険]: 外れ（実装者自身の断定であり、実装者自身が原因記述を読んで覆した。8.8 秒 vs 212 秒）
+COST[IntegerSubringNorm]: 安 | 持ち場=𝒪_M を型として建てる  — 罠が層固有と判明し、DVR/𝔪/作用の中身が 4 本揃った
+```
+
