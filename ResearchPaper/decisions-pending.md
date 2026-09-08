@@ -16325,3 +16325,66 @@ GUESS[SW-c]: JumpDefectTradeoff は「γ = v_M(p) − (p−1)t の等式」「�
 GUESS[SW-d]: 本体の名指しは直近 23 波で 17 回外している。今回も少なくとも 1 つ外す
 ```
 
+
+## ★★★★`AxDeepDescent` の否定の土台が再現、掃討 4/6 —— `DeepDescentNumbersVerified.lean` ＋ `tools/deepdescent-repair-check.py`（2026-09-09）
+
+**★実装者が `DeepDescentRepair` を選んだ理由**: ①★**掛け金が最も高い**（「`AxDeepDescent` が false」の土台）
+②★**最も安い** —— 同 `:35` が `x` を**明示**している（`x = π³ + 2·π_E + π_E⁵`）ので乱択探索が不要で、
+`d(x, ℚ₃(ζ₉))` / `d(x, ℚ₃(ζ₃))` は前波の `tools/zeta27-distance-check.py` が**そのまま使える**。
+
+**①★★★★結果 —— 表の 4 値すべてが一致**:
+
+| `DeepDescentRepair.lean:37-42` | 再導出 |
+|---|---|
+| `[F(x):F] = 9`（⇒ `wildDepth = 2`） | **9** ✓ |
+| `min_{σ≠1} v_L(σx−x) = 23`（`23,23,27,23,23,27,23,23`） | ★**並びまで一致** ✓ |
+| `d(x, E₁) = 19` / `d(x, F) = 15` / `v_L(π_E) = 3` | **19 / 15 / 3** ✓ |
+
+⇒ 要求 `v ≥ 23 − 3 = 20` に対し `19 < 20` かつ `15 < 20` ⇒ ★★**`L` の中に証人は無い**。
+★★**`deepDescent_to_E1_false` / `deepDescent_to_base_false` が使う指数は正しく、否定的結果の土台は在る。**
+
+**②`JumpDefectTradeoff` はスクリプト不要と判明（もう 1 箇所）**: 同 `:106` は scratchpad を名指しするが
+★**主結果はすべて既に Lean の定理**（`defect_eq` / `covered_iff` / `witness_five_*` /
+`min_cost_fits_of_le_three`）で、スクリプトが支えているのは**総当たりの表だけ**。
+⇒ 閉じた形「覆う ⟺ `(p−1)(p−4) ≤ 0`」を素ごとに Lean で固定（`p = 2,3` は覆い、`p = 5,7` は覆わない）。
+
+**③★数値が合わない箇所は見つからなかった（正直に）**: 本波の範囲では全一致。
+前波（円分塔の跳び）でも前々波（`WildDescentDistanceOnly`）でも一致した。
+⇒ ★★**木の機械計算の記録は、測った範囲では正確である（3 波連続）。**
+
+**④掃討の現状 —— 6 箇所中 4 箇所**:
+
+| ファイル | 状態 |
+|---|---|
+| `WildDescentDistanceOnly.lean` | ★塞いだ（`x` を回復） |
+| `GainedTowerDescent.lean:94` | ★跳びの数値は塞いだ（`L = 8, 26`）。総当たりの表は未 |
+| **`DeepDescentRepair.lean:110`** | ★★**塞いだ（本波）** |
+| **`JumpDefectTradeoff.lean:106`** | ★★**塞いだ（本波、スクリプト不要と判明）** |
+| `DeepDescentPairDirect.lean:37,51,147` | ★未（`ℤ[π]/(g)` 上 95,298 件の乱択。本波の道具で届く） |
+| `EquivariantProjectionDescent.lean:19` | ★未 |
+
+**★未測定として引き継ぐ点**: `DeepDescentRepair.lean:59-62` が自認する
+「`x'` が `L` の外に在る可能性は排除していない」は★**本波でも排除していない**。
+同ファイルの結論は「降下先を Galois 閉包に取る限り偽」まで。
+
+**配管**: `padicValNat 3 9 = 2` は `decide` が **reduction got stuck**（`Nat.find` 由来）→
+`padicValNat.prime_pow`（`NumberTheory/Padics/PadicVal/Basic.lean:402`）で解決。
+
+```
+VERDICT[SW-a]: ★当たり（DeepDescentRepair が最安かつ掛け金最大だった）
+VERDICT[SW-b]: ★外れ（「1 つは数値が合わない」→ 3 波連続で全一致）
+VERDICT[SW-c]: ★当たり（JumpDefectTradeoff は式で閉じており、スクリプト不要だった）
+VERDICT[SW-d]: 当たり
+COST[DeepDescentNumbersVerified]: 安 | 持ち場=掃討の続き  — 2 箇所塞がり、AxDeepDescent の否定の土台が確定
+```
+
+
+## ★`GUESS:`（配る前に書いた —— 掃討の残り 2 箇所）
+
+```
+GUESS[SW2-a]: DeepDescentPairDirect の 95,298 件は seed が書いていないので「同じ 95,298 件」は再現できない。再現すべきは件数ではなく「見つかった/見つからなかった」の結論
+GUESS[SW2-b]: EquivariantProjectionDescent は「同変性には使える」の側なので、否定的結果ではなく肯定的な構成。数値より式で閉じている可能性が高い(JumpDefectTradeoff と同じ形)
+GUESS[SW2-c]: 4 波連続で全一致しているので、残り 2 箇所も一致する。木の機械計算の記録は正確
+GUESS[SW2-d]: 本体の名指しは直近 24 波で 17 回外している。今回も少なくとも 1 つ外す
+```
+
