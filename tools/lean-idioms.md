@@ -13439,3 +13439,47 @@ example (h : M ≃ₐ[K] M) (z : M) :
 ★★これは #332（「重い」と記録された罠は**層に固有**）のもう 1 例である。
 #59/#69 の危険は `IntermediateField extends Subfield extends Subring …` の層に固有であり、
 ★**素の `Subfield` なら 10 秒で通る**。中間体が要ると思ったらまずこちらを試す。
+## #338 ★★「全域の `∀`」を要求する補題に「`k` 以下しか無い仮説」を渡す —— **列を延ばす**（2026-09-09、HarithAssembly）
+
+自分で書いた補題が
+
+```lean
+(hsmono : ∀ s t : ℕ, s < t → u s < u t)   -- ★全域
+```
+
+を要求しているのに、呼び出し側の仮説は `∀ m, m < k → u m < u (m+1)` しか無い。
+★補題を弱める（既に commit 済み・他が参照している）より、
+★★**列を `k` の先へ延ばす**方が安い:
+
+```lean
+set uN : ℕ → ℕ := fun j => if j ≤ k then (u j).toNat else (u k).toNat + (j - k) with huN
+have huNle : ∀ j, j ≤ k → uN j = (u j).toNat := by intro j hj; simp [huN, hj]
+```
+
+* `j ≤ k` では元の列に一致するので、仮説（`j ≤ k` のみ）も結論（`m+1 ≤ k`）もそのまま通る。
+* `k` の先は `+1` ずつ増やすだけなので全域で狭義単調になる。
+* ★`omega` は `Int.toNat` を扱えるので、`ℤ → ℕ` の乗り換えも同じ手で潰せる。
+
+場分けは 3 つ（`b ≤ k` / `a ≤ k < b` / `k < a < b`）で、
+どれも `rw [huNle …]` の後 `omega` で閉じる。
+
+★★**先に単調性を `∀ b ≤ k, ∀ a < b` の形で取っておく**こと。
+`∀ a b, a < b → b ≤ k → …` の形で `induction b` すると、
+周囲の `have` が全部 `ih` に一般化されて
+
+```
+error: Application type mismatch: The argument
+  ih ?m.992 ?m.993 ?m.994
+has type
+  ‖↑p‖ = ‖π‖ ^ (p ^ (r + 1) * e) → …
+```
+
+のように巨大な含意の連鎖になる。★**`induction` する変数を最外側に出してから入る**:
+
+```lean
+have hmono_lt : ∀ b : ℕ, b ≤ k → ∀ a : ℕ, a < b → u a < u b := by
+  intro b
+  induction b with
+  | zero => intro _ a ha; omega
+  | succ r ih => …
+```
