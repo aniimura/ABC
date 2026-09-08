@@ -12495,3 +12495,44 @@ Note: The full type of `@max_le` is
 `max_cases a b : (max a b = a ∧ b ≤ a) ∨ (max a b = b ∧ a < b)`。★`rw [hm]` で `max` が
 消えるので、以後は `nlinarith` に素直に渡せる。★`unfold` してから `rcases` する順序に注意
 （`unfold` 前だと `max` が `sharpTwoCost` の中に隠れていて `max_cases` の引数が書けない）。
+
+## #309 `AddMonoid.End L` は `L →+ L` の**別名**だが、型注釈だけではインスタンスが切り替わらない（2026-09-08、降下の得の補題）
+
+`τ : L →+ L` を `n` 乗したい（`τ^[p^k]` を作用素として扱いたい）とき、
+`AddMonoid.End L` が `L →+ L` の `def` だからと `(τ : AddMonoid.End L) ^ n` と書くと落ちる。
+
+```
+failed to synthesize instance of type class
+  HPow (L →+ L) ℕ ?m.113
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+```
+
+★型注釈 `(e : T)` は `T` が `def` で展開可能なとき**推論された型をそのまま残す**ので、
+`Monoid (AddMonoid.End L)` インスタンスが見つからない（`Monoid (L →+ L)` は無い）。
+
+**直し方**: `def` の返り値型で通す。
+
+```lean
+def toEnd {A : Type*} [AddCommGroup A] (τ : A →+ A) : AddMonoid.End A := τ
+
+@[simp] theorem coe_toEnd {A : Type*} [AddCommGroup A] (τ : A →+ A) : ⇑(toEnd τ) = ⇑τ := rfl
+```
+
+以後 `(toEnd τ) ^ n : AddMonoid.End A` が書け、
+`AddMonoid.End.coe_pow A (toEnd τ) n : ⇑((toEnd τ) ^ n) = (⇑τ)^[n]` で関数の反復に戻せる。
+
+★関連する 2 つ目の落とし穴: `AddMonoidHom.finsetSum_apply` を `AddMonoid.End` の和に
+`rw` しようとすると、**字面は同じに見えるのに**当たらない。
+
+```
+Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  (∑ x ∈ range (n + 1), 1 ^ x * (f - 1) ^ (n - x) * ↑(n.choose x)) x
+in the target expression
+  (∑ m ∈ range (n + 1), 1 ^ m * (f - 1) ^ (n - m) * ↑(n.choose m)) x =
+```
+
+`FunLike` インスタンスが `AddMonoid.End` 側と `AddMonoidHom` 側で別物だからである。
+★**`Commute.add_pow` を `AddMonoid.End` で回して最後に `x` を代入する道は、ここで詰まる。**
+代わりに `x` の上で直接帰納する方が短い（Pascal `Nat.choose_succ_succ` と
+`Finset.sum_range_succ'` だけで 20 行、`GainedDescentBridge.iterate_eq_sum_choose_smul`）。
