@@ -12396,3 +12396,26 @@ in the application
 `b = 1`, `deg x = 2` で途中 `deg x' = 0` まで落ちると、支払いは `∏_{[1,2]}` で
 許容 `∏_{[2,2]}` を超える。★正しくは**着地の `deg x'` で書く**:
 `∏_{k ∈ [deg x' + 1, deg x]} c k`。
+
+## #306 scratch の Lean に `import Mathlib` と書くと `leanfile.mjs` が 354 秒（プロジェクトの module なら 8.6 秒）
+
+試作を scratchpad の `.lean` に置いて `node tools/leanfile.mjs <file>` で回すとき、
+先頭を `import Mathlib` にすると 1 往復が **354.5 秒**になる（2026-09-08 実測）。
+
+```
+ok  .../scratchpad/grad/T4.lean  —— 354.5 秒
+```
+
+そのうえ
+
+```
+Command did not complete within its 120s timeout and was moved to the background
+```
+
+で背景化するので、**待ちの往復がさらに 2 回増える**（同じ試作を
+`import ABC3.Found.PGC.DeepDescentPairDirect` に変えたら **8.9 秒**、40 倍差）。
+
+★直し方: 試作でも**その持ち場が最終的に import するプロジェクトの module** を import する。
+ABC3 の module は Mathlib を推移的に持つので、`Mathlib` 全体の olean を読む理由はまず無い。
+★`--similar` で先行節を探すときは **`--similar <下書きのファイル>`**（文字列ではなくパス）:
+文字列を渡すと `Error: ENOENT: no such file or directory, open 'D:\Math_ABC3\unsolved goals'`。
