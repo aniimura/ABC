@@ -14125,3 +14125,45 @@ COST[TotRamLayer]: 安 | 持ち場=一般の K から塔を作る  — 仮説 13
 COST[WildBreak]: 安 | 持ち場=跳びの下界 1 ≤ u  — 「剰余体が要る」は偽で超距離だけで済み、「止まる」も偽だった。新規約 2 つが最初の波で発火した
 ```
 
+
+## ★★★★★★★★上界も閉じ、`k=0` の出口から跳びの仮説が消えた —— `WildBreakUpperBound.lean` 347 行 / 8 宣言 / `sorry` 0
+
+**①真偽**: ☆★★**エージェントがまた自分の前波の記述を 2 件訂正した。**
+
+| 前波の記述 | 測定 |
+|---|---|
+| 「上界には★**最小多項式の係数が整**であることが要る」 | ★**偽**。`RamificationJumpBound.lean:316` の `norm_natCast_le_pow_of_splits` が要求するのは `Monic`/`natDegree`/`Separable`/`aeval=0`/`Splits`/`hbreak` の **6 本だけ**で、★**係数の整性も Eisenstein 性も一度も使わない** |
+| 「`IsGalois K M` が自動で出るかは測っていない」 | ★**測ったら出た**（`card_algHom_le_finrank` で `p ≤ … ≤ p` と挟める） |
+
+☆★★**本体が指した「証拠の場所」の方が正しかった** —— 同ファイル冒頭の「**monic だけで足りた**」という記述である。
+★**本体の結論ではなく `file:line` を渡す規約が、2 波連続で偽を潰した。**
+★どちらも**元の docstring は直さず**、新ファイルに「訂正（名指し）」として書いている。
+
+**②成果**: ★★★**出口の跳び `t` についての仮説が「無し」になった。**
+
+| 出口 | 跳び `t` の仮説 |
+|---|---|
+| `TotallyRamifiedLayer.…_of_uniformizer_deg_p` | `1 ≤ t` かつ `(p−1)t ≤ p·e` |
+| `WildBreak.…_deg_p_upper`（前波） | `(p−1)t ≤ p·e` だけ |
+| ★`WildBreakUpper.…_deg_p_free`（本波） | ★**無し** |
+
+★残るのは `orderOf g = p` / `[M:K] = p` / `hiso` / `hvalK` / `hnormp` / `hπlt` の **6 本**だけ。
+
+★抽象核: `norm_pow_apply_sub_eq`（★**共役はすべて等距離**。`p ∤ j` なら `g^j` も生成元なので両向きに使う）/
+★`exists_pow_of_isRoot`（**根はすべて `g` の軌道の中**）/ `isGalois_of_orderOf_eq_finrank` ——
+☆★**3 本とも `[Field M]` だけで書いた（ノルムが 1 語も出ない）。★#323 の薬をそのまま適用。**
+★`IntermediateField` は `K⟮π⟯` を 1 つ作ってその場で `⊤` に潰し、★**#59 の 2 層をまたがない。**
+
+**③在庫**: ★**#297/#324 の 3 例目** —— `card_algHom_le_finrank` は索引の行に見えないが `K M L` が明示引数 → **#327**。
+★改名 3 件（`ZMod.natCast_eq_zero_iff` / `le_or_lt` / `IntermediateField.finrank_top` は**向きが逆**）。
+
+**④残り**:
+1. 不分岐側（`f = p`）の 1 段 —— 未着手
+2. 体の側の翻訳 —— 未着手（#296/#314 の回避策は記録済み、まだ試していない）
+3. `hiso` は仮説のまま（★`PureStepSetup.lean:283` が供給すると測定済み）
+4. ★★**閉じたのは `k = 0`（1 段）だけ。★`k ≥ 1` の塔の `harith` は本ファイルの外。**
+
+```
+COST[WildBreakUpper]: 安 | 持ち場=上界 (p−1)t ≤ p·e  — 「係数が整が要る」は偽で monic だけで足り、跳びの仮説が全部消えた
+```
+
