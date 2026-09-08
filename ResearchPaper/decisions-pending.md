@@ -15831,3 +15831,61 @@ GUESS[HM-c]: これが出ると⑤が回避され、穴は①②′③の 3 つ�
 GUESS[HM-d]: 本体の名指しは直近 15 波で 11 回外している。今回も少なくとも 1 つ外す
 ```
 
+
+## ★★★★2 波連続の宿題に答えが出た —— `FirstJumpRouteGap.lean` 206 行 / `sorry` 0（2026-09-09）
+
+**①3 つの問いへの答え**:
+1. ★**どちらの勘定に効くか** → **`FirstJumpRoute` に効く。鎖には効かない。**
+   鎖（`CyclicLayerDescent`）は `FirstJumpLedger.lean:20-27` の測定 2 が「閉じるのは `s_m = 1` のときだけ」
+   を定理にしており★**点 1 とは独立の障害**。`FirstJumpRoute` では★**点 1 が `hjump` そのもの**になる。
+2. ★**本体の観察「右辺に `p` の差」** → ★**真だが差は消える**。
+   `NormalizedTraceDescent.lean:214-221` の定義で `e = e_{E₁}`（**下の層**の絶対分岐指数）で、
+   `E₁/K` は次数 `p` の完全分岐なので `e_{E₁} = p·e_K`。⇒ **`p·e_K = e_{E₁} = e k`**
+   （`hjump_of_sub_one_mul_le`、★公理依存ゼロ）。★本体が見た `p` は **`E₁/K` の分岐指数そのもの**だった。
+3. ★**本体が「最初に確かめる価値がある」と書いた点: `hm` が出ても⑤は消えるか** → ★★**消えない**。
+   実装者自身の 2 定理の突き合わせ（`exists_firstJump_data_iff` と `exit_does_not_realize_cEx`）で、
+   `hm`/`hjump`/`he` の **3 つは塔のデータから出る**（`firstJump_three_of_tower`）が、
+   ★★**4 つ目の `hform : c k ≤ p^{u/(m·e)}` は `c k = axDecay p 1` では `k ≥ 2` で満たせない**
+   （`not_hform_of_axDecay_one`、まとめ `firstJump_gap`）。
+   ★`hm` をいくら供給しても `hform` は変わらない —— `hform` は「降下が実際に**第 1 跳びの**損失を
+   達成すること」を要求し、本日の出口は**最後の跳び**を使うから。
+
+**②成果**: 抽象核 —— `hm_of_dvd` / **`hjump_of_sub_one_mul_le`** / `firstJump_three_of_tower` /
+**`not_hform_of_axDecay_one`** / **`firstJump_gap`**。
+具体層 —— ★**`axLemma_of_first_jump_loss` / `axSenTate_of_first_jump_loss`**: 塔のデータを渡すと
+`FirstJumpRoute` の**分岐論的仮説が全部落ち**、残るのは
+★**`hform`（第 1 跳びの損失を達成する降下）+ `hc` + `AxWildDescent K c` の 3 本だけ**。
+
+**③★★①不分岐側との関係 —— 本日初めて「①に依存する」項目が出た**:
+本波は `e k = p·eK k` を**仮説 `heq`** で受けている。★これは `E₁/K` が**完全分岐**であることの帰結で、
+不分岐なら `e_{E₁} = e_K` となり `heq` は偽。⇒ ★★**`FirstJumpRoute` の道は①と独立ではない。**
+本日の他の測定（②′・③・⑤）はすべて①と独立だったので、これだけが違う。
+
+**★未了として明記**: `heq : e k = p * eK k` と `hdvd : p^{k−1} ∣ m k` は**仮説のまま**（塔から導いていない）。
+
+**★次の 1 点（実装者の見込み、未測定）**: `hform` —— **第 1 跳びの損失 `p^{u₁/e_L}` を達成する降下の構成**。
+★本日閉じた `lt_ramIndex_quotient_fixedRing`（`u₁ < i_ϖ(σ)`）は「`σ̄` が `x` を動かす量」の下界であって
+「`x` を近似する `x′` の作り方」ではない。★繋がるかは測っていない。
+
+```
+VERDICT[HM-a]: ★当たり（p の差は e_K と e_{E₁} の取り違えで消えた）
+VERDICT[HM-b]: 半分（hm は hdvd として仮説のまま残った）
+VERDICT[HM-c]: ★外れ（⑤は消えなかった）
+VERDICT[HM-d]: 当たり
+★★本体が「最初に確かめる価値がある」と書いた問い 3 が、本波の最も重要な答えになった。
+COST[FirstJumpRouteGap]: 安 | 持ち場=hm と FirstJumpRoute  — 2 波連続の宿題に答え、残りが hform 1 本に絞れた
+```
+
+
+## ★`GUESS:`（配る前に書いた —— `hform`（第 1 跳びの損失を達成する降下）の構成）
+
+★実装者が測った形: 残るのは `hform` + `hc` + `AxWildDescent K c` の 3 本だけ。
+★本日の出口は**最後の跳び**を使い、`hform` は**第 1 跳び**を要求する。
+
+```
+GUESS[HF-a]: 第 1 跳びの層は塔の最下段(K に一番近い層 E₁)なので、本日の出口を「M から 1 段下りる」ではなく「K から 1 段上る」向きに使い直すのが構成の中身
+GUESS[HF-b]: しかし本日の出口(..._of_uniformizer_deg_p)は M の素元 π を使うので、E₁ の素元に取り替える必要がある。そこが実際の作業
+GUESS[HF-c]: ①不分岐側が heq に効くので、この道を進むと①を先に閉じる必要が出る。本日初めて①が本筋に入った
+GUESS[HF-d]: 本体の名指しは直近 16 波で 12 回外している。今回も少なくとも 1 つ外す
+```
+
