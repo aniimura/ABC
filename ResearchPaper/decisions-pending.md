@@ -14994,3 +14994,65 @@ GUESS[TN-c]: IsTotallyRamifiedAdjoin ⇒ c = n は e·f = [K(x):K] と本波の 
 GUESS[TN-d]: 本体の名指しは 3 波中 2 波で外さなかった。今回は外れに戻る
 ```
 
+
+## ★★★★完全分岐（体の言葉）⇒ `hvalK`（ノルムの言葉）—— `TotallyRamifiedAdjoinNorm.lean` 212 行 / `sorry` 0（2026-09-09）
+
+**①安い順の測定**: `hcompat` は ★★**`rfl`**（1 行）、`IsTotallyRamifiedAdjoin ⇒ e = n` は ★★**3 行**。
+★**両方落ちた**。本体が写した先例 `TotallyRamified.lean:60
+finrank_eq_one_of_isUnramified_of_isTotallyRamified` の 3 行がそのまま使えた。
+★`hcompat` が `rfl` な理由（実装者が本波で初めて**定義**を読んだ）——
+`adjoinIntegersAlgebra`（`AdjoinIntegers.lean:319`）は `adjoinIntegersAlgebraMap` の `toAlgebra` で、
+その写像が `y ↦ ⟨⟨algebraMap K.carrier K.closure y, _⟩, _⟩` だから。
+
+**②成果**:
+
+| 宣言 | 内容 |
+|---|---|
+| ★★★`coe_algebraMap_adjoinIntegers` | **`hcompat`**（`rfl`） |
+| ★★★`ramificationIndex_eq_finrank_of_isTotallyRamified` | **`e = [K(x):K]`** |
+| ★★`exists_zpow_norm_of_dvr` | ★**抽象核**。DVR → 値群の離散性（ノルム）。分岐の語が 1 語も出ない |
+| ★★★★`valK_of_ramificationIdx_eq` | ★**完全分岐（体の言葉）⇒ `hvalK`（ノルムの言葉）** |
+
+★`exists_zpow_norm_of_dvr` で**分数体の仮説は要らなかった** —— 非アルキメデス体では
+`‖z‖ ≤ 1` か `‖z⁻¹‖ ≤ 1` のどちらかが必ず成り立つので場分けで済む。
+
+**③止まった場所 —— ★§3 を `PAdicLocalField` に代入する 1 ノードだけ**。部品の場所は全部判明:
+
+| 部品 | 場所 |
+|---|---|
+| `hcompat` / `he : e = n` | ★本ファイル §1 |
+| `π`（`K(x)` の素元） | `UnramifiedExtension.lean:702`（`isDiscreteValuationRing_adjoinIntegers` ＋ `IsDiscreteValuationRing.exists_irreducible`） |
+| `πK`（`K` の素元） | 同 `:236 isDiscreteValuationRing_carrierIntegers` |
+| `hvalM` / `hvalKK` | ★本ファイル §2 |
+| `hiso` | `spectralNorm_extends`（`AdjoinIntegers.lean:102` が同じ手で使用） |
+| `hval` | `TotallyRamifiedValueGroup.lean:252 exists_valSub_gen` |
+
+★★**本波はこの代入に降りていない。** `UnramifiedExtension.lean:690-695` が
+「`Valued.integer.norm_irreducible_pos` 等は `[NontriviallyNormedField K]` を要求するので
+`letI := nontriviallyNormedField_adjoin K x` を先に置かないと**インスタンス探索が `whnf` で
+タイムアウトする**」と警告しており、そこは★**未測定**。
+
+**①③の現在**: ①不分岐側（`f = p`）→ ★**依然生きている**（本ファイルの `IsTotallyRamifiedAdjoin` は
+`f = 1` の場合）。③構成側の `adjoin` → ★★`hcompat` が `rfl` だったことで**さらに剥がれた**。
+
+★★**実装者の自己申告**: 「部品は全部揃っている」は★**代入を実行していないので断定ではなく見込み**。
+次波はそこを疑うこと（実装者自身がそう書いた）。
+
+```
+VERDICT[TN-a]: 当たり（hcompat は rfl）
+VERDICT[TN-b]: 半分（π は木の既存定理から取る形で、透明性の移植ではなかった。しかも未測定）
+VERDICT[TN-c]: 当たり（e·f を突き合わせるだけで新しい数学は要らなかった）
+VERDICT[TN-d]: 当たり（「外れに戻る」と書き、TN-b を半分外した）
+COST[TotallyRamifiedAdjoinNorm]: 安 | 持ち場=hcompat と c = n  — 2 つとも落ち、残りが代入 1 ノードになった
+```
+
+
+## ★`GUESS:`（配る前に書いた —— §3 を `PAdicLocalField` に代入する）
+
+```
+GUESS[SB-a]: UnramifiedExtension.lean:690-695 の警告どおり letI := nontriviallyNormedField_adjoin K x を先に置けば通る。置き忘れが唯一の落とし穴
+GUESS[SB-b]: hiso（spectralNorm_extends）は AdjoinIntegers.lean:102 と同じ 1〜2 行で出る
+GUESS[SB-c]: 実装者の「部品は全部揃っている」は当たりで、代入で hvalK が PAdicLocalField 上で出る。残るのは hnK だけになる
+GUESS[SB-d]: 本体の名指しは直近 4 波で 2 回外している。今回も少なくとも 1 つ外す
+```
+
