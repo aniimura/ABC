@@ -15119,3 +15119,57 @@ GUESS[SN-c]: Algebra.IsAlgebraic ℚ_[p] K(x) は FiniteDimensional ℚ_[p] K.ca
 GUESS[SN-d]: 本体の名指しは直近 5 波で 3 回外している。今回も少なくとも 1 つ外す
 ```
 
+
+## ★★★★★`PAdicLocalField` の上で出口が出た —— `SpectralNormBridge.lean` 203 行 / `sorry` 0（2026-09-09）
+
+**①真偽**: ★★実装者の前波の結論「次の 1 点は**2 つのスペクトルノルムの一致を橋渡す補題**」は
+★**必要なかった**。★★**完備な底を `ℚ_[p]` ではなく `K.carrier` 自身にすれば diamond に触れない。**
+★本体が持ち場に添えた 3 番目の提案（「`[NormedAlgebra ℚ_[p] M]` が**本当に要るか**を測る」）が当たった。
+
+先に測った 4 つ: (1) `CompleteSpace K.carrier` ★出る / (2) `NormedAlgebra K.carrier ↥K.carrier⟮x⟯`
+★★**出る** / (3) `Algebra.IsAlgebraic K.carrier ↥K.carrier⟮x⟯` ★★**出る** /
+(4) `‖(p : K(x))‖ = p⁻¹` は `spectralNorm_extends` 2 回（`NormedAlgebra ℚ_[p]` 不要）。
+★前波で見つからなかったのは **`ℚ_[p]` を底にしたときだけ**。
+`AdjoinPAdicLocalField.lean:44-49` の警告は**真だが必須ではない**。
+★★**スペクトルノルムの一致自体は本波も測っていない**（避けたので不要）。
+
+**②実測したエラーと直し方（#343 / #344）**: linter が diamond を名指しした ——
+```
+`[Algebra K M]` and `[NormedAlgebra K M]` can be used to infer conflicting versions of `[SMul K M]`.
+Of these, `[Algebra K M]` may be removed.
+```
+放置すると別の場所で `failed to synthesize FiniteDimensional K M` が出る（`Module K M` が 2 通りになる）。
+★`[Algebra K M]` を消す。
+
+**③成果**:
+
+| 宣言 | 内容 |
+|---|---|
+| `norm_natCast_p_adjoin` | `‖(p : K(x))‖ = p⁻¹`（`NormedAlgebra ℚ_[p]` なし） |
+| ★★★`exists_norm_sub_algebraMap_le_prod_axDecay_of_completeBase` | ★**底が完備なら出口が出る** |
+| ★★★★`exists_norm_sub_algebraMap_le_prod_axDecay_of_adjoin` | ★★**`PAdicLocalField` の上での出口** |
+
+**④★前波の自分の保留を検算した**: 前波は「『残るのは `hnK` だけ』は★まだ真ではない」と書いた。
+★本波で `..._of_adjoin` が通り、★★**ノルムの仮説は全部消えた**ことが確かめられた。残るのは
+- `ht : IsTotallyRamifiedAdjoin K x`（完全分岐）
+- `hnK : [K(x):K] = p^{k+1}`（次数）
+- 塔のデータ `g` / `hg` / `τ` / `hτ` / `s` / `hsg`
+
+の **3 群だけ**で、★すべて「一般の `K` と `x` から塔を作る」の**内容**。
+
+**①③の現在**: ①不分岐側 → ★依然生きている。③構成側の `adjoin` → ★★**配管は全部通った**。
+
+★**実装者の次の見込み（未測定と明示）**: 塔のデータ（`Gal(K(x)/K)` が位数 `p^{k+1}` の巡回群）は
+`IsTotallyRamifiedAdjoin` だけからは出ない —— **wild inertia が p-群であること**が要る。
+そこが「一般の `K` と `x`」に本当に降りる場所。
+
+```
+VERDICT[SN-a]: 外れ（norm_eq_spectralNorm は使わなかった。橋そのものが不要だった）
+VERDICT[SN-b]: 外れ（推移律も一意性も使わなかった）
+VERDICT[SN-c]: 外れ（ℚ_[p] を底にすること自体をやめたので無関係になった）
+VERDICT[SN-d]: 当たり（「少なくとも 1 つ外す」→ 3 つ外した）
+★ただし持ち場に添えた「逃げ道」の提案（NormedAlgebra が本当に要るか測れ）が★当たりだった。
+  ⇒ ★本体の役割は「数学の見込み」ではなく「疑う対象を並べること」にあると再確認。
+COST[SpectralNormBridge]: 安 | 持ち場=スペクトルノルムの橋  — 橋は不要で、底を替えて避けた。ノルムの仮説が全部消えた
+```
+
