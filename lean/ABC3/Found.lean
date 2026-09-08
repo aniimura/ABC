@@ -1903,6 +1903,7 @@ import ABC3.Found.PGC.ExitLossDepth
 import ABC3.Found.PGC.HerbrandFirstJump
 import ABC3.Found.PGC.CosetSumFixedRing
 import ABC3.Found.PGC.FirstJumpRouteGap
+import ABC3.Found.PGC.UnramifiedLayerFree
 /-!
 # Found — 実装済みの基礎
 
