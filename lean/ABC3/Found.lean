@@ -1900,6 +1900,7 @@ import ABC3.Found.PGC.FirstJumpRouteEquiv
 import ABC3.Found.PGC.BudgetRecast
 import ABC3.Found.PGC.BudgetFiniteExcess
 import ABC3.Found.PGC.ExitLossDepth
+import ABC3.Found.PGC.HerbrandFirstJump
 /-!
 # Found — 実装済みの基礎
 
