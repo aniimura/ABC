@@ -13397,3 +13397,45 @@ have h : Subgroup.zpowers g = ⊤ := (Subgroup.eq_top_iff' _).mpr htop
 ★見分け方: エラーが `Unknown constant` で、その名前の中に `'` の直後の `.` がある。
 同じ形は `Nat.lt_succ_iff'`・`Finset.sum_range_succ'` などプライム付き全般で起こる。
 ★`← foo'` の `rw` は問題ない（ドットを続けないから）。
+## #337 ★★中間体は `IntermediateField` ではなく `FixedPoints.subfield` で建てる（★instance は全部既に在る）（2026-09-09、WildBreakPowDegree）
+
+`h : M ≃ₐ[K] M` の固定体を使って `M/L` を次数 `p` の拡大にしたいとき、
+`MulSemiringAction.compHom` で `letI` を置くと次で落ちる:
+
+```
+error: failed to synthesize
+  FaithfulSMul (↥(Subgroup.zpowers h)) M
+```
+
+★原因は「`letI` で入れた `MulSemiringAction` 経由の `SMul`」と
+「TC が先に見つける `Submonoid` 経由の `SMul`」が別物だからである。
+
+★★**直し方は `letI` を書き直すことではなく、`letI` を消すこと**。
+下はすべて `inferInstance` / `rfl` で通る（実測、mathlib のみ）:
+
+```lean
+example (h : M ≃ₐ[K] M) : MulSemiringAction ↥(Subgroup.zpowers h) M := inferInstance
+example (h : M ≃ₐ[K] M) : FaithfulSMul     ↥(Subgroup.zpowers h) M := inferInstance
+example (h : M ≃ₐ[K] M) :
+    Algebra          ↥(FixedPoints.subfield ↥(Subgroup.zpowers h) M) M := inferInstance
+example (h : M ≃ₐ[K] M) :
+    FiniteDimensional ↥(FixedPoints.subfield ↥(Subgroup.zpowers h) M) M := inferInstance
+example (h : M ≃ₐ[K] M) :
+    IsGalois          ↥(FixedPoints.subfield ↥(Subgroup.zpowers h) M) M := inferInstance
+example (h : M ≃ₐ[K] M) (a : ↥(FixedPoints.subfield ↥(Subgroup.zpowers h) M)) :
+    algebraMap ↥(FixedPoints.subfield ↥(Subgroup.zpowers h) M) M a = (a : M) := rfl
+example (h : M ≃ₐ[K] M) (z : M) :
+    letI : Fintype ↥(Subgroup.zpowers h) := Fintype.ofFinite _
+    (FixedPoints.toAlgAutMulEquiv ↥(Subgroup.zpowers h) M ⟨h, Subgroup.mem_zpowers h⟩) z
+      = h z := rfl
+```
+
+次数は `FixedPoints.finrank_eq_card`（`FieldTheory/Fixed.lean:341`、
+`[Fintype G] [FaithfulSMul G F]`）で
+`finrank (FixedPoints.subfield G F) F = Fintype.card G`。
+`G := ↥(Subgroup.zpowers h)` なら `Nat.card_zpowers` で `orderOf h` になる
+（★`Subgroup.card_zpowers` ではない。`Unknown constant \`Subgroup.card_zpowers\`` が出る）。
+
+★★これは #332（「重い」と記録された罠は**層に固有**）のもう 1 例である。
+#59/#69 の危険は `IntermediateField extends Subfield extends Subring …` の層に固有であり、
+★**素の `Subfield` なら 10 秒で通る**。中間体が要ると思ったらまずこちらを試す。
