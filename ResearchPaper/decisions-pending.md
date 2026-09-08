@@ -16263,3 +16263,65 @@ GUESS[NW-c]: (A) の a の存在は、本波で Python の道具立てができ�
 GUESS[NW-d]: 本体の名指しは直近 22 波で 17 回外している。今回も少なくとも 1 つ外す
 ```
 
+
+## ★★★同じ形の穴は 5 ファイル・8 箇所、円分塔の跳び 3 つは全部一致 —— `CyclotomicJumpsVerified.lean` ＋ `tools/zeta-tower-check.py`（2026-09-09）
+
+**★実装者はまず数えた**: `grep -rn "scratchpad" lean/ABC3/Found/PGC/*.lean` → **8 箇所 / 5 ファイル**
+（`DeepDescentPairDirect` / `DeepDescentRepair` / `EquivariantProjectionDescent` /
+`GainedTowerDescent` / `JumpDefectTradeoff`）。名指しされたスクリプトは `tools/` に**1 本も無い**。
+⇒ 0〜1 なら記録して別候補に移る予定だったが 5 あったので掃討に入り、
+**本波の道具がそのまま効く**「円分塔の跳び」から始めた（`tools/zeta-tower-check.py`、`(p,n)` 一般版）。
+
+**①★★★検算 —— 3 つとも一致**:
+
+| 木の字面 | 再導出 | |
+|---|---|---|
+| `JumpFromValueGroup.lean:332 harith_zeta81` の `u = (2,8,26)` | `ℚ₃(ζ₈₁)` の wild break = **`[2,8,26]`**（`e = 54` も） | ✓ |
+| `GainedTowerDescent.lean:411 zeta27_sharp` の `L = 8` | 層の跳び **8** | ✓ |
+| `GainedTowerDescent.lean:417 zeta81_sharp` の `L = 26` | 層の跳び **26** | ✓ |
+
+おまけ: `ℚ₂(ζ₁₆)/ℚ₂` の break = `[1,3,7]`、`e = 8`、`|G_u| = [8,8,4,4,2,2,2,2,1]`。
+
+**②★測った目盛りの食い違い（★結論の訂正ではない）**:
+`GainedTowerDescent.lean:423 zeta16_sharp` は `(S,T) = (4,7)` で `max(7, 2·4) = 8` を使うが、
+`ℚ₂(ζ₁₆)/ℚ₂` の **break は `[1,3,7]`** で `4` は break ではない（`4` は `min i`、break は `3`）。
+★`ℚ₃` の 2 行はどちらも break なので★**`ℚ₂(ζ₁₆)` の行だけ目盛りが違う**（break で揃えると `max(7,6) = 7`）。
+★★**ただし木自身が同 `:421-423` で「非巡回・本ファイルの適用外」「測定であって定理ではない」と明記**
+⇒ **結論の誤りではなく目盛りの違い**。Lean に 3 本で固定した。
+
+**③Lean に固定**: `zeta81_hasseArf_first/_second`（`3∣8−2`, `9∣26−8`）/ `zeta81_strict_mono` /
+**`zeta81_upper`（`52 ≤ 54`）** / `zeta81_first_jump_pos`（★`harith_zeta81` の 4 条件の数値の裏づけ）/
+`zeta16_hasseArf_first/_second` / 目盛り 3 本 / 群の側 3 本。計 13 本。
+
+**★残っている同じ形の穴（次の波のための表）**:
+
+| ファイル | 名指しされたスクリプト | 状態 |
+|---|---|---|
+| `WildDescentDistanceOnly.lean` | （紛失） | ★前波で塞いだ |
+| `GainedTowerDescent.lean:94` | `sharp/{sharp,rec,rec2,closed,probe}.py` | ★跳びの数値だけ塞いだ。総当たりの表は未 |
+| `DeepDescentPairDirect.lean:37,51,147` | `pair/pairsearch.py`, `run2.py`, `awd/cyc.py` | ★未 |
+| `DeepDescentRepair.lean:110` | （再現スクリプト） | ★未 |
+| `EquivariantProjectionDescent.lean:19` | `grad/three.py`, `trnorm.py`, `maxloss.py` | ★未 |
+| `JumpDefectTradeoff.lean:106` | `trade/trade.py`, `trade2.py`, `closed2.py` | ★未 |
+
+★★`DeepDescentPairDirect` / `DeepDescentRepair` は `ℤ[π]/(g)` 上の乱択探索なので
+★**本波と前波の 3 本の `.py` がほぼそのまま使える**（次の波の最安の候補）。
+
+```
+VERDICT[NW-a]: ★当たり（同じ形の穴が 5 ファイル・8 箇所あった）
+VERDICT[NW-b]: 外れ（棚卸しではなく掃討を選んだ）
+VERDICT[NW-c]: 未判定
+VERDICT[NW-d]: 当たり
+COST[CyclotomicJumpsVerified]: 安 | 持ち場=選択自由  — 穴を数えて掃討に入り、円分塔の 3 数値が一致、目盛りの違いを 1 つ特定
+```
+
+
+## ★`GUESS:`（配る前に書いた —— 掃討の続き）
+
+```
+GUESS[SW-a]: DeepDescentPairDirect / DeepDescentRepair は実装者の見立てどおり最安で、既存 3 本の .py がほぼそのまま効く
+GUESS[SW-b]: 5 ファイルのうち 1 つは数値が合わない。本日この鎖は木の断定を 8 回覆しており、8 箇所すべてが正しい確率は低い
+GUESS[SW-c]: JumpDefectTradeoff は「γ = v_M(p) − (p−1)t の等式」「覆う ⟺ p ≤ 3」という閉じた形なので、数値ではなく式で検算でき、スクリプトが要らないかもしれない
+GUESS[SW-d]: 本体の名指しは直近 23 波で 17 回外している。今回も少なくとも 1 つ外す
+```
+
