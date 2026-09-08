@@ -13574,3 +13574,36 @@ example (K) : (𝒪[K.carrier] : Subring K.carrier) = IntegerNorm.integerSubring
 
 ⇒ ★`Valued` 経由の遅さは**所属・型・部分環の同一性**には現れない。
 遅いのは位相（`isCompact_closedBall` など）を見に行ったときだけである。
+## #342 ★★defeq だが字面の違う instance は TC が見つけられない —— **欲しい型を明示して受け直す**（2026-09-09、TotallyRamifiedAdjoinSupply）
+
+`adjoinIntegers K x` と `IntegerNorm.integerSubring ↥K.carrier⟮x⟯` は defeq（#341）だが、
+後者の形で instance を探すと見つからない:
+
+```
+error: failed to synthesize instance of type class
+  Algebra ↥(IntegerNorm.integerSubring K.carrier) ↥(IntegerNorm.integerSubring ↥K.carrier⟮x⟯)
+```
+
+★直し方は `letI`/`def` で**欲しい型を明示し、既存の instance を defeq で受け直す**:
+
+```lean
+@[implicit_reducible] noncomputable def integerAlgebra (K : PAdicLocalField p) (x : K.closure) :
+    Algebra ↥(IntegerNorm.integerSubring K.carrier)
+      ↥(IntegerNorm.integerSubring (IntermediateField.adjoin K.carrier ({x} : Set K.closure))) :=
+  adjoinIntegersAlgebra K x        -- ★型が違うように見えるが defeq なので通る
+```
+
+★同じ形は**引数に型を渡すとき**にも出る:
+
+```
+error: failed to synthesize instance of type class
+  IsDiscreteValuationRing ↥(adjoinIntegers K x)
+```
+
+★`haveI` で置いたのが `↥(IntegerNorm.integerSubring …)` の形だったため。
+⇒ `IsDiscreteValuationRing.exists_irreducible ↥(IntegerNorm.integerSubring …)` と
+**自分が置いた形で渡す**。
+
+★★**見分け方**: `exact`/`apply` は defeq を見るので通るのに、
+`inferInstance` / 暗黙の instance 引数だけが落ちる。
+★**「さっき `rfl` で通ったのに instance が見つからない」ならこの形である。**
