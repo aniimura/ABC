@@ -60,16 +60,18 @@ import ABC3.Found.PGC.RamificationJumpBound
 | ★★`WildBreakUpper.…_of_uniformizer_deg_p_free`(本ファイル) | ★**無し** |
 
 ★最終形に残るのは
-`orderOf g = p` / `[M:K] = p` / `IsGalois K M` / `hiso`(等長) / `hvalK`(全分岐) /
-`hnormp`(正規化) / `hπlt`(素元) の **7 本**で、★分岐の**数値**についての条件は 0 本。
+`orderOf g = p` / `[M:K] = p` / `hiso`(等長) / `hvalK`(全分岐) /
+`hnormp`(正規化) / `hπlt`(素元) の **6 本**で、★分岐の**数値**についての条件は 0 本。
+★`IsGalois K M` も仮説ではない —— §2 `isGalois_of_orderOf_eq_finrank` が
+`orderOf g = p` と `[M:K] = p` から出す(`card_algHom_le_finrank` で挟む)。
 
 ## ★閉じていないもの(正確に)
 
-* `IsGalois K M` を仮説に置いた。★`orderOf g = p` と `[M:K] = p` から自動で出るか
-  (`Fintype.card Gal ≤ finrank` が一般の有限次拡大で成り立つか)は★**測っていない**。
-  ★応用先(`M^P/M^Q`)は Galois なので、この仮説は無料である。
-* `hiso`(等長)は `PureStepSetup.lean:283 norm_algEquiv_eq` が供給する(第 1102 で測った)。
+* `hiso`(等長)は仮説として残る。★ただし `PureStepSetup.lean:283 norm_algEquiv_eq` が
+  スペクトルノルムの場合に供給する(第 1102 で測った)。
 * ★**不分岐側**(`f = p`)と★**体の側の翻訳**(`M^P/M^Q` を `IntermediateField` に)は未着手。
+* ★`k ≥ 1`(次数 `p^{k+1}` の塔)の `harith` は本ファイルの外である。
+  本ファイルが閉じたのは `k = 0`(1 段)だけ。
 
 ## ★在庫の測定(コマンドを残す)
 
@@ -183,6 +185,29 @@ theorem exists_pow_of_isRoot {K M : Type*} [Field K] [Field M] [Algebra K M]
   rw [hj', ← hσ]
   simp
 
+/-- ★★★**`IsGalois K M` は仮説ではない** —— `orderOf g = p` と `[M:K] = p` から出る。
+
+`Nat.card ⟨g⟩ = p ≤ Nat.card Gal(M/K) ≤ Nat.card (M →ₐ[K] M) ≤ [M:K] = p` で挟む。
+★★前波(第 1108)の docstring は「自動で出るかは**測っていない**」と書いたが、
+★**測ったら出た**(`card_algHom_le_finrank` が在庫に在った)。★ここに訂正を書く。
+
+★在庫の測定: `grep -n "card_algHom_le_finrank" .cache/mathlib-index.txt`
+→ `Nat.card (M →ₐ[K] L) ≤ finrank K M`。★`K M L` が**明示引数**(#297 の形)なので
+`card_algHom_le_finrank K M M` と 3 つ書く。 -/
+theorem isGalois_of_orderOf_eq_finrank {K M : Type*} [Field K] [Field M] [Algebra K M]
+    [FiniteDimensional K M] {p : ℕ} (g : M ≃ₐ[K] M) (hg : orderOf g = p)
+    (hnK : Module.finrank K M = p) : IsGalois K M := by
+  haveI : Finite (M ≃ₐ[K] M) := inferInstance
+  have h1 : Nat.card (M →ₐ[K] M) ≤ Module.finrank K M := card_algHom_le_finrank K M M
+  have h2 : Nat.card (M ≃ₐ[K] M) ≤ Nat.card (M →ₐ[K] M) :=
+    Nat.card_le_card_of_injective (fun σ => (σ : M →ₐ[K] M))
+      (fun a b h => AlgEquiv.ext (fun x => AlgHom.ext_iff.mp h x))
+  have h3 : p ≤ Nat.card (M ≃ₐ[K] M) := by
+    rw [← hg, ← Nat.card_zpowers g]
+    exact Nat.card_le_card_of_injective (Subtype.val) Subtype.val_injective
+  refine IsGalois.of_card_aut_eq_finrank K M ?_
+  omega
+
 end GaloisPart
 /-! ## §3 ★★★★上界 `(p−1)·i ≤ p·e` の供給 -/
 
@@ -273,12 +298,12 @@ variable {M : Type*} [NormedField M] [IsUltrametricDist M]
 /-- ★★★★★★★**`k = 0`(次数 `p` の層)の出口から、分岐についての仮説が全部消えた形**。
 
 残る仮説は
-「`g` が位数 `p`」「`[M:K] = p`」「`M/K` が Galois」「`g` が等長」
+「`g` が位数 `p`」「`[M:K] = p`」「`g` が等長」
 「全分岐(`hvalK`)」「ノルムの正規化(`hnormp`)」「`π` が素元(`hπlt`)」だけで、
 ★**跳び `t` についての条件は 1 本も無い**(下界は `WildBreakLowerBound` §4、
 上界は本ファイル §3 が定理として供給する)。 -/
 theorem exists_norm_sub_algebraMap_le_axDecay_of_uniformizer_deg_p_free
-    {K : Type*} [Field K] [Algebra K M] [FiniteDimensional K M] [IsGalois K M]
+    {K : Type*} [Field K] [Algebra K M] [FiniteDimensional K M]
     {p : ℕ} [Fact p.Prime] {π : M}
     (g : M ≃ₐ[K] M) (hg : orderOf g = p) (hiso : ∀ z : M, ‖g z‖ = ‖z‖)
     (hnK : Module.finrank K M = p)
@@ -286,12 +311,12 @@ theorem exists_norm_sub_algebraMap_le_axDecay_of_uniformizer_deg_p_free
     (hnormp : ‖(p : M)‖ = ((p : ℝ))⁻¹) (hπlt : ‖π‖ < 1) (x : M) :
     ∃ y : twr g p 0, ‖x - algebraMap (twr g p 0) M y‖ ≤ axDecay p 1 * ‖g x - x‖ := by
   have hp : p.Prime := Fact.out
+  haveI : IsGalois K M := isGalois_of_orderOf_eq_finrank g hg hnK
   have hπ0 : 0 < ‖π‖ := norm_pos_of_valK (p := p) (n := p) hnormp hvalK
   exact exists_norm_sub_algebraMap_le_axDecay_of_uniformizer_deg_p_upper g hg hiso
     (fun e t he heM hbr =>
       hupper_of_totallyRamified hp g hg hiso hπ0 hπlt hnK hvalK e t he heM hbr)
     hnK hvalK hnormp hπlt x
-
 end Exit
 
 
@@ -312,6 +337,7 @@ def exists_norm_sub_algebraMap_le_axDecay_of_uniformizer_deg_p_free.src : ABC3.M
 #print axioms norm_pow_apply_sub_eq
 #print axioms natDegree_minpoly_of_adjoin_eq_top
 #print axioms exists_pow_of_isRoot
+#print axioms isGalois_of_orderOf_eq_finrank
 #print axioms sub_one_mul_le_of_totallyRamified
 #print axioms hupper_of_totallyRamified
 #print axioms exists_norm_sub_algebraMap_le_axDecay_of_uniformizer_deg_p_free
