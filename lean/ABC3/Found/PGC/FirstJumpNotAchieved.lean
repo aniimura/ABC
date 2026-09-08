@@ -66,6 +66,32 @@ import ABC3.Found.PGC.PairBudgetVerified
 ⇒ ★次に測るべきは「この `x` が例外なのか、一般に破れるのか」である
 （★本波では 1 点しか測っていない。★正直に書く）。
 
+## ★★★訂正（自分の前段の書き方について。在庫を後から 2 か所で測って分かった）
+
+★**「第 1 跳びの字面が偽」は本波の新発見ではない。**木に既に 2 本ある:
+
+- `WildDescentMultiStep.lean:602`（`Zeta81.firstJump_bound_false`, `k = 3`）——
+  `d(y,E₁) = 3^{−3/54}` が `3^{2/54}·3^{−9/54} = 3^{−7/54}` を超える。
+- `WildDescentMultiStep.lean:682`（`Zeta27.firstJump_bound_false`, `k = 2`）——
+  `d(x,E₁) = 3^{−1/18}` が `3^{2/18}·3^{−4/18} = 3^{−2/18}` を超える（★ずれは指数で `1`）。
+
+⇒ ★本波が足したのは **(i) 2 つ目の測定点**（回復した `x`、★ずれは指数で `2` と
+**より大きい**）、**(ii) `NormalizedTraceDescent.lean:65-66` の表の初再現**、
+**(iii) Herbrand の同定 `i₁ = j = 2` の機械確認** の 3 つである。
+★★**「新しく否定を立てた」とは書かない。**
+
+## ★配管の記録（他所は直さない。ここに書くだけ）
+
+1. ★`WildDescentMultiStep.lean` の `:602` と `:682` は**同じ短名
+   `firstJump_bound_false` を 2 回**宣言している（名前空間 `Zeta81` / `Zeta27`）。
+   ★両方が `.src` を持つ。`lean-idioms.md` #348 が言う
+   「`check.mjs` は名前空間を落とした短名で `.src` を引く」衝突条件にちょうど当たる。
+   ★★**私は他所を直さないので、事実だけを記録する。**
+2. ★索引は「無い」と嘘をついた:
+   `grep -n "firstJump_bound_false" .cache/decl-index.txt` は **0 件**、
+   `grep -rn "^theorem firstJump" lean/ABC3/Found/PGC/*.lean` は **2 件**。
+   ⇒ #348 の衝突検査は★**索引ではなく実ファイル**で行うのが正しい。
+
 ## 逸脱の記録（CLAUDE.md「逸脱」）
 
 1. `.src` は付けていない（★**検算の記録**である）。
