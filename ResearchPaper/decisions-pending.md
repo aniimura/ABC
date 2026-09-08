@@ -14660,3 +14660,61 @@ VERDICT[本体の「添字が同じかは測っていない」]: ★渡し方が
 COST[HerbrandRecurrence + HasseArfCongruenceNorm]: 安 | 持ち場=hrec  — hrec に加えて harith (3) 本体まで閉じ、2 例で検算した
 ```
 
+
+## ★★★★★★★`harith` の 4 条件が全部 `p^{k+1}` 次で揃った —— `WildBreakPowDegree.lean` 553 行 / `sorry` 0（2026-09-09）
+
+**①真偽**:
+- ★本体が指した「`one_le_jump_of_zero` は `n` が自由」は**当たり** —— ただし同定理は
+  `hu0 : 1 ≤ u 0` を**仮説のまま**受けており **(1) を証明していない**。docstring の
+  「(1) からすべての段で `1 ≤ u m`」は真だが、★**入口である (1) 自体は `k=0` しか存在しなかった**。
+- ★`WildBreakUpperBound.lean:242-256` の `hbreak`（共役がすべて同じ距離）は `q = p^{k+1}` では**偽** ——
+  ℚ₃(ζ₈₁) では `u = (2,8,26)` で 3 通りの距離が出る。⇒ `K` の上で直接
+  `norm_natCast_le_pow_of_splits` を使う道は**閉じている**。
+- ★実装者が途中で自分の見積もりを覆した ——「(4) には中間体が要るので #59/#69 の危険区間」は**偽**。
+  中間体を `IntermediateField` ではなく ★**`FixedPoints.subfield ↥(Subgroup.zpowers h) M`（単なる `Subfield`）**
+  で建てれば危険区間に入らない。
+
+**②成果**:
+
+| 宣言 | 種別 |
+|---|---|
+| **`norm_sub_one_pow_pow_le`** | ★抽象核（純ノルム）`‖A^{p^r}−1‖ ≤ c ⇒ ‖A−1‖^{p^r} ≤ c` |
+| ★**`one_le_jump_zero_pow`** | **`harith` (1)** |
+| ★★**`valuation_of_fixed`** | ★抽象核「中間体の値群は `‖π‖^{pℤ}`」を**体を建てずに** |
+| `finrank_fixedSubfield_zpowers` | `[M : M^{⟨h⟩}] = orderOf h` |
+| ★**`hupper_of_totallyRamified_pow`** | **`harith` (4)**（ℤ 版、字面そのもの） |
+
+★**(1) で変わったのは 1 行だけ**。`k=0` の証明 5 段のうち素数性を使うのは 4 段目だけで、
+`p^r` に上げるのに `Nat.Prime.dvd_choose_pow`（実在）は**不要**——素数の場合を `r` 回反復する方が安い:
+`‖A−1‖^{p^{r+1}} = (‖A−1‖^p)^{p^r} ≤ max(‖A^p−1‖, ‖p‖)^{p^r} ≤ c`。
+
+★**(4) の鍵**は `valuation_of_fixed`。`p ∤ m` と仮定し `N := ∏_{j<p} h^jπ`（`h` 不変、`‖N‖ = ‖π‖^p`）と
+Bézout `a·m + b·p = 1` から `w := z^a N^b` を作ると `h w = w` かつ `‖w‖ = ‖π‖`。
+`v := w/π` は `‖v‖ = 1` で `‖h v − v‖ = ‖π‖^t` だが
+`RamNormBridge.norm_sub_apply_le_of_norm_le_one` は `≤ ‖π‖^{t+1}` を要求するので矛盾。
+
+**③在庫の測定 —— ★決め手**: 「`letI` で建てるしかない」と思ったが★**全部 instance として在った**
+（`MulSemiringAction ↥(Subgroup.zpowers h) M` / `FaithfulSMul` / `Algebra` / `FiniteDimensional` /
+`IsGalois`、いずれも `inferInstance`、`algebraMap … a = (a : M)` は `rfl`）。
+最初 `MulSemiringAction.compHom` で `letI` を置いて
+`failed to synthesize FaithfulSMul (↥(Subgroup.zpowers h)) M` で止まったが、★**両方 instance なので `letI` 自体が不要**だった ⇒ **#337**。
+★`Subgroup.card_zpowers` は**無い**（`Unknown constant`）。正しくは `Nat.card_zpowers`。
+
+★**測定した否定的事実**: `h := g^{p^k}` の telescoping だけでは `u k ≤ p^{k+1}·e` しか出ず
+★**係数 `p−1` が出ない**（`p ≥ 3` で不足）。数値でも確認 —— ℚ₃(ζ₈₁) は `2·26 = 52 ≤ 54` に対し
+弱い経路は `26 ≤ 54`。`k=1` の例（`1·8 ≤ 4·2`、等号）では偶然一致する。
+
+**④★★`harith` の残りは 0 点**。4 条件が全部 `p^{k+1}` 次で揃った:
+(1) `WildBreakPowDegree.one_le_jump_zero_pow` / (2) `JumpStrictMono.lean:308 jump_lt_succ` /
+(3) `HasseArfCongruenceNorm.dvd_sub_jump_of_norm` / (4) `WildBreakPowDegree.hupper_of_totallyRamified_pow`。
+
+★**未測定**: これら 4 本を `JumpFromValueGroup.lean:272-276` の `harith` の**その形**に実際に組み立てること。
+仮説の突き合わせ（`s j` と `g^{p^j}` の同一視、`hiso` を全 `σ` で受ける形、`hval` の供給元）は
+★**まだ 1 度も走らせていない**。次の 1 点はそこ。
+
+```
+VERDICT[本体の「n が自由なので (1) は既に一般かも」]: 半分（形は一般だが hu0 は仮説のままで (1) 自体が無かった）
+VERDICT[「(4) は #59/#69 の危険区間」]: 外れ（Subfield で建てれば入らない。実装者が自分で覆した）
+COST[WildBreakPowDegree]: 安 | 持ち場=(1)(4) の一般化  — 2 点とも落ち、harith の残りが 0 になった
+```
+
