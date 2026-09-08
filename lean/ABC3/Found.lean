@@ -1873,6 +1873,7 @@ import ABC3.Found.PGC.ConcreteDegPFree
 import ABC3.Found.PGC.JumpStrictMono
 import ABC3.Found.PGC.HasseArfCongruence
 import ABC3.Found.PGC.RamificationGroupNormBridge
+import ABC3.Found.PGC.RamificationSubgroupCard
 /-!
 # Found — 実装済みの基礎
 
