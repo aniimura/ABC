@@ -13559,10 +13559,18 @@ theorem adjoinIntegers_eq_integerSubring (K : PAdicLocalField p) (x : K.closure)
 （本日この手で 3 件覚した: #332（`Subring` なら軽い）、
 #337（`FixedPoints.subfield` なら `IntermediateField` の層に入らない）、本節。）
 
-★★**追記（2026-09-09、RamificationIndexNorm）**: 同じ手で （= ）の層も透明だった。
-下の 4 つはすべて通る（ §1）:
+★★**追記（2026-09-09、RamificationIndexNorm）**: 同じ手で
+`𝒪[·]`（= `Valued.integer`）の層も透明だった。
+下の 4 つはすべて通る（`Found/PGC/RamificationIndexNorm.lean` §1）:
 
+```lean
+example (K) (x) (I : Ideal ↥(adjoinIntegers K x)) :
+    Ideal ↥(IntegerNorm.integerSubring (IntermediateField.adjoin K.carrier {x})) := I  -- defeq
+example (K) (y : K.carrier) : y ∈ 𝒪[K.carrier] ↔ ‖y‖ ≤ 1 := Iff.rfl
+example (K) (y : 𝒪[K.carrier]) : ↥(IntegerNorm.integerSubring K.carrier) := y      -- defeq
+example (K) : (𝒪[K.carrier] : Subring K.carrier) = IntegerNorm.integerSubring K.carrier :=
+  Subring.ext (fun _ => Iff.rfl)
+```
 
-
-⇒ ★ 経由の遅さは**所属・型・部分環の同一性**には現れない。
-遅いのは位相（ など）を見に行ったときだけである。
+⇒ ★`Valued` 経由の遅さは**所属・型・部分環の同一性**には現れない。
+遅いのは位相（`isCompact_closedBall` など）を見に行ったときだけである。
