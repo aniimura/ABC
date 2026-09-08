@@ -13474,3 +13474,62 @@ GUESS[BR-c]: V §3 Lemme 4（Tr(𝔭^n) の計算）が一番重い（跡の像�
 GUESS[BR-d]: 非巡回の場合（ℚ₂(ζ₁₆)）は別ノードで、生成元 2 本の版の ℤ[Γ] 恒等式が要る
 ```
 
+
+## ★★★★★★★★橋が架かった —— `Found/PGC/GainedDescentBridge.lean`（645 行、`sorry` 0）（2026-09-08）
+
+★★**到達点（体の層、仮説つき）**:
+```
+exists_norm_sub_algebraMap_le_prod_axDecay :
+  ∃ y ∈ F, ‖x − y‖ ≤ (∏_{j∈[1,k+1]} axDecay p j) · ‖τx − x‖
+```
+★これは `AxLemmaGraded` の形そのもの。commit `763efd05`。
+
+**①真偽**: ☆★**配った 3 本のうち 1 本目は偽（★木に既に在った）。**
+`CyclicJumpNorm.norm_sub_digit_zero_eq_zpow_mul`（**542 行**）が 1 層の等式を**ノルム言語で等式として**持ち、
+`exists_norm_sub_algebraMap_eq_zpow_mul`（575 行）が最良近似であることまで付けていた。
+★`GainedTowerDescent` の docstring が「木にも mathlib にも無い」と書いていたのは
+★**Serre の 3 命題**であって、1 層の等式は**そこに入っていない** ——★**転記が 1 本ずれていた。**
+
+☆★★**「一番重い」と見立てた 3 本目（Serre V §3 Lemme 4、跡の像）は 1 度も使わなかった。**
+★理由は既に書かれていた ——「欠損 `γ` は `(1/p)Tr` を使うから発生するのであって**降下には不要**」。
+★2 本目も帰結 `(p−1)t ≤ e` のノルム版で足り、`RamificationJumpBound` が出している。
+
+☆★★★**本当に欠けていたのは、配られていなかった 4 本目** ——
+`(τ^p−1) ≡ (τ−1)^p (mod p)` の**得**の補題である。
+
+**②抽象核**（分岐・付値・Galois が 1 語も出ない）:
+`iterate_eq_sum_choose_smul`（可換加法群 + `A →+ A` だけ）/
+★`norm_iterate_prime_sub_self_le`（仮定は「超距離ノルム体」「τ が**加法的**」「収縮率 `θ ≤ 1`」のみ ——
+★**乗法性・等長性・全単射性は不要**）/ `norm_iterate_pow_sub_self_le`。
+★`#print axioms` 17 本すべて `[propext, Classical.choice, Quot.sound]`。
+
+**③在庫**: 「無いが嘘」`IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg`（★`to_additive` 生成名で索引に出ない）。
+#68（`Nat.Prime.dvd_choose_self` は索引に在るのに `Unknown constant` → import 不足）。
+#297（`norm_natCast_le_one m` が `Application type mismatch` → 型を明示）。★**#309** を追加。
+
+**④残り 4 点**（すべて仮説・配管。★数学ではない）:
+1. `hstep` / `hlayer` / `hbreak` / `hval` / `hchar` は仮説のまま（★**分岐群の定義から出す部分が本ファイルの外**）
+2. `hlayer` と `hlayerZ` を別々に取っている（仮説が 1 つ多い）
+3. `gainedLoss` の**第 2 枝**は体の層で未実現（第 1 枝 `A_m` で実現し `A ≤ Λ` で緩めた。
+   ★**予算側の結論は変わらない**。第 2 枝には中間体の塔が要り #59/#69 に当たるので避けた）
+4. ★**非巡回の塔（`ℚ₂(ζ₁₆)`）は適用外**
+
+```
+VERDICT[BR-a]: 外れ — 入口は MinpolyOrbitSplit ではなく CyclicJumpNorm の 542 行で、しかも既に等式で在った
+VERDICT[BR-b]: 半分 — (p−1)t ≤ e のノルム版で足り、d = (p−1)(t+1) 自体は要らなかった
+VERDICT[BR-c]: 外れ — 「一番重い」と見た V §3 Lemme 4 は 1 度も使わなかった
+VERDICT[BR-d]: 未判定 — 非巡回は別ノードのまま
+COST[Bridge]: 安 | 持ち場=模型を体の層へ橋渡しする  — 3 本のうち 1 本は在庫、1 本は不要で、欠けていたのは配っていない 4 本目だった
+```
+☆★**「木にも mathlib にも無い」という前波の記述を、次の実装者が実際に grep して覆した** ——
+★**「索引に無い ⇒ 不在」の反例の 9 例目であり、★今回は木の docstring そのものが嘘だった。**
+
+## ★`GUESS:`（配る前に書いた —— 仮説を分岐群の定義から落とす）
+
+```
+GUESS[HY-a]: hval / hchar / hbreak は既に MinpolyOrbitSplit / RamificationJumpBound が具体層で持っている（写すだけ）
+GUESS[HY-b]: hstep（τ^{p^j} ∈ Γ_{t_{j+1}}）が本命で、木の RamificationJumpDivisibility に部品がある
+GUESS[HY-c]: hlayer と hlayerZ の重複は、塔の帰納を j ≤ k に制限すれば消える（配管）
+GUESS[HY-d]: 本体の見立ては 10 波連続で外れている。これも外れる
+```
+
