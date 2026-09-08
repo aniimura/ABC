@@ -15758,3 +15758,76 @@ GUESS[CS-c]: IsDiscreteValuationRing C(固定環が DVR)が一番高い。本日
 GUESS[CS-d]: 本体の名指しは直近 14 波で 10 回外している。今回も少なくとも 1 つ外す
 ```
 
+
+## ★★★★`FirstJumpLedger` の「点 1」が閉じた —— `CosetSumFixedRing.lean` 218 行 / `sorry` 0（2026-09-09）
+
+**①真偽**: ★**配管は新しい補題を 1 本も書かずにそろった**。`TameQuotientTower.lean:83-98` が
+**既に一覧表**を持っていた（★本連鎖は本波で初めて開いた）。同 `:83` の断定
+「10 個の仮定は `C := ↥(fixedRing B H)` に対して**そのまま在庫でそろった**」は★**真だった**。
+
+| 仮定 | 供給 |
+|---|---|
+| `hcomp` | `algebraMap_smul_fixedRing`（`rfl`） |
+| `hHtriv` | `smul_fixedRing_eq_self` |
+| `hinj` / `hfixC` / `hres` / `hAC` | `fixedRing_injective` / `exists_algebraMap_fixedRing` / `exists_sub_mem_fixedRing` / `exists_algebraMap_fixedRing_eq` |
+| `hϖ` | ★`rfl` |
+| `hfix` | `fixedRing_mem_adjoin_uniformizer` |
+| `[IsDiscreteValuationRing C]` | ★**`FixedRingTower.lean:386` の instance（無料）** |
+
+⇒ `coset_sum_truncENat_fixedRing` は**代入 1 回（項 1 本）**。
+★本体の見立て「`FixedRingBaseAlgebra.lean:204/232` が対応」は近かったが、
+実際に効いたのは **`FixedRingTower.lean` の 6 本**だった。
+
+**②成果**:
+- **`coset_sum_truncENat_fixedRing`**（配管）
+- **`lt_ramIndex_quotient_fixedRing`** —— `u` が第 1 跳びの下で `σ ∉ H` なら **`u < i_ϖ(σ)`**。
+  ★前波の `hcoset` が**落ちた**。★`FirstJumpLedger.lean:105` が「本ファイルは形式化していない」と
+  書いた 1 本。
+- ★★**`sub_one_mul_first_jump_le_of_quotient`: `(p−1)·u₁ ≤ p·e_K`** ——
+  `FirstJumpLedger.lean:100-108` が「★**点 1 は閉じなかった**」と書いた**その点 1** が閉じた。
+
+★本ファイルは**新しい数学を 1 つも書いていない** —— 既存の 2 つの塊
+（`TameQuotientTower` の供給表と前波の `HerbrandFirstJump`）を**繋いだだけ**。
+
+**③在庫の測定（★今回は最初から 2 か所で測った）**:
+`FixedRingTower.lean:386 instance fixedRing_isDiscreteValuationRing`、
+供給表は `HasseArfInduction.lean:90` と `TameQuotientTower.lean:97` にもある。
+`coset_sum_truncENat` は木にのみ（mathlib 索引には無い）。
+★**実装者の前波の見込み「`IsDiscreteValuationRing C` が一番高い」は外れ** —— instance として無料。
+
+**④★それでも `axDecay p k` は出ない（点 1 が閉じても）**:
+`FirstJumpLedger.lean:20-27` の測定 2 が「★鎖の台帳が閉じるのは `s_m = 1` のときだけ」を定理にしている。
+⇒ **鎖の道は点 1 を閉じても閉じない。** ★★ただしそれは `CyclicLayerDescent` の**鎖**の勘定であって
+`FirstJumpRoute` とは**別**で、★**後者に効くかは本波でも測っていない**（前波と同じ。正直に繰り返した）。
+
+**穴の現状（増減なし）**: ①不分岐 / ②′ / ③幾何減衰 / ⑤出口の限界。④は消えたまま。
+★本波は**在庫の穴を 2 つ目に埋めた**。
+
+**★次の 1 点（実装者の見込み、未測定）**: 点 1 が閉じたので、`FirstJumpRoute`（`p^{j/(m·e)}` の勘定）の
+側で `j = u₁` を使ったときに `hm : p^{k−1} ≤ m` が塔から出るか。
+★出れば⑤（出口の損失が `axDecay p 1` で頭打ち）を回避できる可能性があるが未測定。
+
+```
+VERDICT[CS-a]: ★当たり（C = fixedRing で hcomp/hHtriv/hfixC は定義から出た）
+VERDICT[CS-b]: 外れ（hres も hAC も無料だった）
+VERDICT[CS-c]: ★外れ（IsDiscreteValuationRing C は instance として無料。一番高くなかった）
+VERDICT[CS-d]: 当たり
+COST[CosetSumFixedRing]: 安 | 持ち場=10 仮説の配管  — 新しい補題 0 本でそろい、点 1 が閉じた
+```
+
+
+## ★`GUESS:`（配る前に書いた —— `hm : p^{k−1} ≤ m` が塔から出るか）
+
+★本体が字面を並べただけの観察（★突き合わせは行っていない）: 本波で出た
+`sub_one_mul_first_jump_le_of_quotient` は **`(p−1)·u₁ ≤ p·e_K`** だが、
+`FirstJumpRoute` の `hjump` は **`(p−1)·j k ≤ e k`**。★**右辺に `p` の差がある**。
+前々波の測定（`NormalizedTraceDescent.lean:214-221`）では `m·e = e_L` で `e = e_{E₁}` だったので、
+`e_K` と `e_{E₁}` のどちらを指すかで差が消えるかもしれない。★未測定。
+
+```
+GUESS[HM-a]: p の差は e_K と e_{E₁} の取り違えで、m·e = e_L の関係を使えば消える
+GUESS[HM-b]: hm : p^{k−1} ≤ m は m = e(L/E₁) なので「塔の上部が p^{k−1} 以上分岐している」の意で、全分岐なら自動で出る
+GUESS[HM-c]: これが出ると⑤が回避され、穴は①②′③の 3 つに戻る
+GUESS[HM-d]: 本体の名指しは直近 15 波で 11 回外している。今回も少なくとも 1 つ外す
+```
+
