@@ -1895,6 +1895,7 @@ import ABC3.Found.PGC.SpectralNormBridge
 import ABC3.Found.PGC.TowerDataFromCyclic
 import ABC3.Found.PGC.PGroupDescentToAxWild
 import ABC3.Found.PGC.JumpGeometricDecay
+import ABC3.Found.PGC.AxDecayKnobCircular
 /-!
 # Found — 実装済みの基礎
 
