@@ -15056,3 +15056,66 @@ GUESS[SB-c]: 実装者の「部品は全部揃っている」は当たりで、�
 GUESS[SB-d]: 本体の名指しは直近 4 波で 2 回外している。今回も少なくとも 1 つ外す
 ```
 
+
+## ★★★代入が通った、次は diamond —— `TotallyRamifiedAdjoinSupply.lean` 293 行 / `sorry` 0（2026-09-09）
+
+**①★実装者は自分の依頼どおり、まず自分の見込みを疑った**。部品表の 4 つを先に 1 本ずつ測り、
+8 つの測定がすべて通過（(A) `K(x)` の素元 / (B) `K` の素元 / (C) 包含の等長性 ＝
+`spectralNorm_extends a` で **1 行** / (D) `Valued.integer.norm_irreducible_pos` が体の側でそのまま /
+(E) `Irreducible` の移植は**型を書き換えるだけ**（defeq）/ (F) DVR instance も defeq /
+(G) `ramificationIndex` の形は **`rfl`** / (H) `hcompat` は **`rfl`**）。
+★★`UnramifiedExtension.lean:690-695` の「`whnf` タイムアウト」警告は
+★**`letI := nontriviallyNormedField_adjoin K x` を置けば起きない**（実測 8.6–10.7 秒）。
+★警告自身がその対処を書いており、そのとおりにしただけ。
+
+**②唯一の詰まりと直し方（#342）**:
+```
+error: failed to synthesize instance of type class
+  Algebra ↥(IntegerNorm.integerSubring K.carrier) ↥(IntegerNorm.integerSubring ↥K.carrier⟮x⟯)
+```
+TC は `adjoinIntegersAlgebra`（`AdjoinIntegers.lean:319`）を見つけられない（型が defeq でも**字面が違う**）。
+→ ★**欲しい型を明示して defeq で受け直す**（`integerAlgebra`）。
+同じ形が `IsDiscreteValuationRing.exists_irreducible` にも出た。
+
+**③成果**: ★★★`valK_of_isTotallyRamifiedAdjoin` —— **`IsTotallyRamifiedAdjoin K x ⇒ π と `hvalK`**。
+
+**④★止まった場所 —— diamond**。出口が要求する 4 つの instance を実測（§3 に逐語）:
+
+| instance | 結果 |
+|---|---|
+| `IsUltrametricDist ↥K.carrier⟮x⟯` | ★出る |
+| `IsScalarTower ℚ_[p] K.carrier ↥K.carrier⟮x⟯` | ★出る |
+| `NormedAlgebra ℚ_[p] ↥K.carrier⟮x⟯` | ★★**出ない** |
+| `Algebra.IsAlgebraic ℚ_[p] ↥K.carrier⟮x⟯` | ★**出ない** |
+
+★★`NormedAlgebra` が出ない理由は★**ノルムの出所の違いそのもの** —— 本ファイルの `K(x)` のノルムは
+`closureNormedField K`（＝ `spectralNorm K.carrier K.closure` の制限）で、
+`spectralNorm.normedAlgebra ℚ_[p] _` が与えるのは `spectralNorm ℚ_[p] _` の方。
+★`AdjoinPAdicLocalField.lean:44-49` が**まさにこの diamond を警告している**
+（逐語: 「両者は(スペクトルノルムの延長の一意性から)数学的には一致するはずだが、
+**definitionally 一致するとは限らない**…または両者の一致を橋渡しする補題を先に用意する」）。
+⇒ ★★★**次の 1 点は「2 つのスペクトルノルムの一致を橋渡す補題」**。
+
+**★実装者の自己申告**: 「これで残るのは `hnK` だけ」は★**まだ真ではない** ——
+上の 2 つの instance が出ないので、出口への代入自体がまだ通っていない。
+
+**①③の現在**: ①不分岐側 → ★依然生きている。③構成側の `adjoin` → ★整数環・素元・`hcompat`・`e = n`
+まで**全部透明**。残るのは diamond だけ。
+
+```
+VERDICT[SB-a]: 半分（letI で警告は回避できたが、落とし穴はもう 1 つあった —— TC が字面で探す #342）
+VERDICT[SB-b]: 当たり（spectralNorm_extends で 1 行）
+VERDICT[SB-c]: ★半分（hvalK は出たが「残るのは hnK だけ」は偽。diamond が塞いでいる）
+VERDICT[SB-d]: 当たり（「今回も少なくとも 1 つ外す」と書き、SB-c を半分外した）
+COST[TotallyRamifiedAdjoinSupply]: 安 | 持ち場=PAdicLocalField への代入  — 通り、次の 1 点が diamond と確定
+```
+
+## ★`GUESS:`（配る前に書いた —— スペクトルノルムの一致の橋）
+
+```
+GUESS[SN-a]: mathlib の NormedAlgebra.norm_eq_spectralNorm(Analysis/Normed/Unbundled/SpectralNorm.lean:786、‖x‖ = spectralNorm K L x、[CompleteSpace K] が要る)が橋の本体になる
+GUESS[SN-b]: 効くのは「一意性を 2 回使って両方を ℚ_p 上のスペクトルノルムに落とす」形で、K.carrier 経由の推移律(spectralNorm.normedAlgebra' :912)は要らない
+GUESS[SN-c]: Algebra.IsAlgebraic ℚ_[p] K(x) は FiniteDimensional ℚ_[p] K.carrier(PAdicLocalField の定義に在るはず)から塔で出る
+GUESS[SN-d]: 本体の名指しは直近 5 波で 3 回外している。今回も少なくとも 1 つ外す
+```
+
