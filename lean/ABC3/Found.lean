@@ -1911,6 +1911,7 @@ import ABC3.Found.PGC.KrasnerCeiling
 import ABC3.Found.PGC.CyclotomicNumbersVerified
 import ABC3.Found.PGC.CyclotomicJumpsVerified
 import ABC3.Found.PGC.DeepDescentNumbersVerified
+import ABC3.Found.PGC.ProjectionDefectVerified
 /-!
 # Found — 実装済みの基礎
 
