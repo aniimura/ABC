@@ -15245,3 +15245,61 @@ GUESS[PD-c]: 逃げ道は AxWildDescent が要求するのが「wildDepth が真
 GUESS[PD-d]: 本体の名指しは前波で 3 つとも当たった。今回は外れに戻る
 ```
 
+
+## ★★★定数だけでは鎖は閉じない（定理）—— `PGroupDescentToAxWild.lean` 383 行 / `sorry` 0（2026-09-09）
+
+**①真偽**:
+- ★**(a) 本体が渡した「段数の噛み合わせ」の疑いは偽**。`AxWildDescent`（`AxTowerDecay.lean:473-478`）の
+  結論は `∃ x', wildDepth K x' < wildDepth K x ∧ …` で ★**1 段しか要求しない**。塔の再帰は
+  `axLemma_of_wildDescent`（同 `:491`）の側にある。⇒ 使うべき出口は `p^{k+1}` の
+  `..._of_cyclic_adjoin` ではなく ★**`k = 0` の `TotallyRamifiedLayer.lean:305
+  exists_norm_sub_algebraMap_le_axDecay_of_uniformizer_deg_p`**。★段数は合う。
+  （★決着は `grep -n "def AxWildDescent" -A 30` の **6 行**、定義を読むだけだった。）
+- ★**(b) 既済**。「`exists_pgroup_descent` を `AxWildDescent` に繋ぐ」は★**すでに木にある** ——
+  `WildDepthFieldDescent.lean:141 axWildDescent_prime : AxWildDescent K (fun _ => (p:ℝ))` が**無条件**。
+  ⇒ 本波が新しく買えるのは★**定数だけ**。
+
+**②★★本波の新しい否定的結果（配られていない。測って出た）**:
+次数 `p` の層 1 枚が与える損失は `axDecay p 1 · ‖g x − x‖` で★**深さに依らない**。
+⇒ **一様定数 `C > 1` は木の 3 つの出口の**どれにも**乗らない**（`const_descent_no_go`）。
+抽象核（分岐・付値・Galois の語彙 0）: `not_forall_prod_const_le` / `prod_Icc_const` /
+`not_forall_prod_Icc_const_le`（`ℝ` と `Finset` のみ）、`exists_padicValNat_index_lt`（純群論）。
+具体層: `axDecay_succ`（★**`axDecay p (k+1) = (axDecay p 1)^{(1/p)^k}` の閉じた形**）ほか。
+
+**③止まった場所 —— ★ちょうど 1 点**:
+足りないのは指数の `(1/p)^k` で、その源は「その段の `g` について `‖g x − x‖` が `ε` より**幾何的に**
+小さいこと」（`AxEpsilonDecay.lean:294` / `:427`）。
+★`exists_pgroup_descent_cyclic`（`TotallyRamifiedLayer.lean:460`）は
+**生成元が `σ^{p^k}` の形であることを言わない**。
+⇒ ★**残りは「降下で使う `g` を絶対 Galois 群の元 `σ` の `p^k` 乗として取れるか」**。
+取れれば `AxEpsilonDecay.lean:294 norm_iterate_pow_sub_self_le` で `(1/p)^k` が出て `axDecay` に届く。
+
+**★訂正（他ファイルは書き換えず自分のファイルに名指しで記録）**: `TowerDataFromCyclic.lean` 冒頭の
+「残るのは『`p`-群の中に巡回な商の列を取る』ノード」は★**足りない**（前波に本連鎖自身が書いた断定）。
+正しくは「巡回な商の列 ＋ **その生成元が `σ^{p^k}` の形であること**」。
+
+**①不分岐側との関係**: `TotallyRamifiedLayer.lean:342 not_valK_of_norm_eq` は今も真（読んで確認）。
+★本波の否定は**全分岐の側でも**成り立つので、★**2 つは別の穴**。不分岐側を閉じても定数の穴は残る。
+
+**在庫**: `Real.logb` は `Unknown constant`（#68）⇒ `log` を使わず `axDecay_succ_pow` で `p^k` 乗して回避。
+`pow_unbounded_of_one_lt` は索引の形どおり。`lt_of_pow_lt_pow_left₀` 等は `₀` 付きが現行名。
+配管 **#345**（`error: unexpected token 'omit'; expected 'lemma'` —— doc コメントは `omit … in` の後ろ）。
+
+```
+VERDICT[PD-a]: 半分（「全分岐は言えない」は生きているが、出口を k=0 に替えたので噛み合わせの問題ではなくなった）
+VERDICT[PD-b]: ★外れ（段数は合う。AxWildDescent は 1 段しか要求しない）
+VERDICT[PD-c]: ★当たり（「1 段で足りるなら k=0 の出口で済むかも」がそのとおりだった）
+VERDICT[PD-d]: 当たり（「外れに戻る」と書き、PD-b を外した）
+COST[PGroupDescentToAxWild]: 安 | 持ち場=降下を AxWild に繋ぐ  — 繋ぎは既済と判明し、代わりに「定数では閉じない」を定理化して残りを 1 点に絞った
+```
+
+
+## ★`GUESS:`（配る前に書いた —— `g` を `σ^{p^k}` の形で取る）
+
+```
+GUESS[SG-a]: 「生成元が σ^{p^k} の形」は Galois 閉包の絶対 Galois 群の像で考えると、σ が全体を生成する必要がある＝巡回性の要求に戻る。つまり循環している
+GUESS[SG-b]: 逃げ道は「幾何的な減衰の源を σ^{p^k} 以外に求める」こと。AxEpsilonDecay.lean:294 が要求している形を読み直すのが先
+GUESS[SG-c]: 本連鎖が今日建てた jump_lt_succ(狭義単調)が、まさに「p 乗で真に伸びる」を与えるので、そこから幾何的減衰が出るかもしれない
+GUESS[SG-d]: 本体の名指しは直近 7 波で 5 回外している。今回も少なくとも 1 つ外す
+```
+
