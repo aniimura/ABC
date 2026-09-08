@@ -1901,6 +1901,7 @@ import ABC3.Found.PGC.BudgetRecast
 import ABC3.Found.PGC.BudgetFiniteExcess
 import ABC3.Found.PGC.ExitLossDepth
 import ABC3.Found.PGC.HerbrandFirstJump
+import ABC3.Found.PGC.CosetSumFixedRing
 /-!
 # Found — 実装済みの基礎
 
