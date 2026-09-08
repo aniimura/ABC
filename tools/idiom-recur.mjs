@@ -695,6 +695,13 @@ function selftest() {
     isSimilarCall("cd /d/Math_ABC3 && cat /tmp/draft.md && echo \"===== --similar =====\" && time node tools/idiom-recur.mjs --similar /tmp/draft.md 2>&1 | head -20"), true);
   eq('S91 similar call: another tool with --similar does not count',
     isSimilarCall('node tools/agent-timing.mjs --similar'), false);
+  // ★S93/S94 —— `--similar` は文字列でもファイルでも通る(2026-09-08)
+  eq('S93 similar arg: a literal error message is used as text',
+    (function () { const q = 'error: Unknown constant `Foo.bar`';
+      return (fs.existsSync(q) && fs.statSync(q).isFile()) ? 'file' : 'text'; })(), 'text');
+  eq('S94 similar arg: an existing file is still read as a file',
+    (function () { const q = 'tools/idiom-recur.mjs';
+      return (fs.existsSync(q) && fs.statSync(q).isFile()) ? 'file' : 'text'; })(), 'file');
   // ★digest の版 —— ★v4 で writes の規則が変わった。★戻すと古い分母を黙って使うことになる
   // ★★M216(メタ第 40 回)で v5。★束縛を追う書きを足したので writes の中身が変わる
   eq('S87 digest version is the one M216 bumped to', DIGEST_V, 5);
@@ -1089,8 +1096,12 @@ if (has('--reads')) {
 if (has('--similar')) {
   const p = ARGV[ARGV.indexOf('--similar') + 1];
   const GN = ARGV.includes('--gram') ? Number(ARGV[ARGV.indexOf('--gram') + 1]) : GRAM_N;
-  if (!p) { console.error('--similar <下書きのファイル>'); process.exit(2); }
-  const txt = p === '-' ? fs.readFileSync(0, 'utf8') : fs.readFileSync(p, 'utf8');
+  if (!p) { console.error('--similar <下書きのファイル|エラー文そのもの|->'); process.exit(2); }
+  // ★2026-09-08: 引数がファイルでなければ**そのまま本文として扱う**。
+  //   実測: エージェントは `--similar '<エラー文>'` と叩き、ENOENT で落ちていた
+  //   (持ち場の記述も文字列を渡す形になっていた)。★どちらでも通るのが正しい。
+  const txt = p === '-' ? fs.readFileSync(0, 'utf8')
+    : (fs.existsSync(p) && fs.statSync(p).isFile() ? fs.readFileSync(p, 'utf8') : p);
   const mine = gramsOf(errLits(txt), GN);
   const hit = [];
   for (const s of secs) { const sh = []; for (const q of gramsOf(s.lits, GN)) if (mine.has(q) && isDistinctive(q, hitsOf(q), N)) sh.push(q); if (sh.length) hit.push({ s, g: sh.sort((a, b) => b.length - a.length)[0] }); }
