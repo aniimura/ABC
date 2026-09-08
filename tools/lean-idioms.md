@@ -12536,3 +12536,41 @@ in the target expression
 ★**`Commute.add_pow` を `AddMonoid.End` で回して最後に `x` を代入する道は、ここで詰まる。**
 代わりに `x` の上で直接帰納する方が短い（Pascal `Nat.choose_succ_succ` と
 `Finset.sum_range_succ'` だけで 20 行、`GainedDescentBridge.iterate_eq_sum_choose_smul`）。
+
+## #310 `mul_le_mul_right` / `mul_lt_mul_right` は ℝ では **iff ではない方**に解決される（2026-09-08、GainedDescentBridge の仮説の供給）
+
+**失敗形 1** —— `θ * ‖π‖ < 1 * ‖π‖` を `(mul_lt_mul_right hπ0).mpr hθ1` で出そうとした:
+
+```
+error(lean.synthInstanceFailed): failed to synthesize instance of type class
+  MulLeftStrictMono ℝ
+```
+
+**失敗形 2** —— `a * c ≤ b * c` を `0 < c` で割ろうとして `(mul_le_mul_right hπ0).mp h` と書いた:
+
+```
+error(lean.invalidField): Invalid field `mp`: The environment does not contain `Function.mp`, so it is not possible to project the field `mp` from an expression
+  mul_le_mul_right ?m.294
+of type
+  ∀ (a : ?m.288), a * ?m.292 ≤ a * ?m.293
+error: Application type mismatch: The argument
+  hπ0
+has type
+  0 < ‖π‖
+but is expected to have type
+  ?m.292 ≤ ?m.293
+```
+
+**原因**: `mul_le_mul_right` は順序付きモノイドの
+`∀ (a), b ≤ c → a * b ≤ a * c`（★掛ける相手が**左**、しかも iff ではない）に解決される。
+`mul_lt_mul_right` の方は厳密単調のインスタンス `MulLeftStrictMono` を要求し、
+ℝ には（この形では）付いていない。★型が ℝ でも順序体用の名前は別にある。
+
+**直し方**（どちらも 1 手で通った）:
+
+* 掛ける: `mul_lt_mul_of_pos_right hθ1 hπ0 : θ * ‖π‖ < 1 * ‖π‖`
+* 割る:   `le_of_mul_le_mul_right h hπ0`（`a * c ≤ b * c → 0 < c → a ≤ b`）
+
+`refine le_of_mul_le_mul_right ?_ hπ0` にしておくと、残った目標が
+`a * c ≤ b * c` の形のまま出るので `calc` に繋ぎやすい
+（`GainedBridgeSupply.norm_algHom_sub_le_mul_of_break`）。
