@@ -12574,3 +12574,22 @@ but is expected to have type
 `refine le_of_mul_le_mul_right ?_ hπ0` にしておくと、残った目標が
 `a * c ≤ b * c` の形のまま出るので `calc` に繋ぎやすい
 （`GainedBridgeSupply.norm_algHom_sub_le_mul_of_break`）。
+
+## #311 `python - <<'PY'` は Bash ガードに書き換えられて **`Python` とだけ表示して何もしない**——後続の `leanfile.mjs` が古いファイルを見て `ok` を返す（2026-09-08、GainedJumpSeq）
+
+```
+Python ABC3/Scratch/JS.lean:20:5: warning: Variable name `d` is not explicitly referenced.
+ok  ABC3/Scratch/JS.lean  —— 11.0 秒
+```
+
+`&&` で `python - <<'PY' ... PY` と `node ../tools/leanfile.mjs ...` を繋いだところ、
+ガードが python の起動を潰し、**書き込みが起きないまま** leanfile が
+（前回のままの）ファイルを検査して `ok` を返した。
+`ok` だけ見ていると「新しく足した §2 が通った」と誤読する。実際は 1 行も足されていない。
+
+見分け方: 出力の先頭に `Python` の 1 語だけが混ざり、
+`ok` の行の**所要秒数がほとんど増えていない**（10.7 秒 → 11.0 秒）。
+
+直し方:
+- Python は必ずフルパスで叩く（`PYTHONIOENCODING=utf-8 'C:\Users\Aruta\miniforge3\envs\py311env\python.exe' script.py`）。
+- ★書き込みと検査を `&&` で 1 命令に繋がない。`wc -l` で行数が増えたことを見てから検査する。
