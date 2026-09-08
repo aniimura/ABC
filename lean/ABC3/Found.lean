@@ -1919,6 +1919,7 @@ import ABC3.Found.PGC.LossUnitLaw
 import ABC3.Found.PGC.FirstJumpWitness
 import ABC3.Found.PGC.TailNoCancel
 import ABC3.Found.PGC.SlotStructure
+import ABC3.Found.PGC.LossPAddOneFalse
 /-!
 # Found — 実装済みの基礎
 
