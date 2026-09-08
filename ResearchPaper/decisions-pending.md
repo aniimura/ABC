@@ -14413,3 +14413,50 @@ VERDICT[#69 の危険]: 外れ（実装者自身の断定であり、実装者�
 COST[IntegerSubringNorm]: 安 | 持ち場=𝒪_M を型として建てる  — 罠が層固有と判明し、DVR/𝔪/作用の中身が 4 本揃った
 ```
 
+
+## ★★★環側とノルム側が繋がった —— `Found/PGC/IntegerRingInstances.lean` 273 行 / `sorry` 0（2026-09-09）
+
+**①真偽**: ★配った字面（＝**実装者自身の前波の順序づけ**「1→2→3→4」）は**誤り**。
+着手前に `LowerRamificationGroup.lean:265` の定義を読むと
+`lowerRamificationGroup (B) [CommRing B] [IsLocalRing B] (G) [MulSemiringAction G B] (n)`
+＝ `((maximalIdeal B)^(n+1)).inertia G` で、★**`IsDiscreteValuationRing` を要求していない**。
+⇒ **4 は 1 に依らない**。`IsDiscreteValuationRing` が要るのは `herbrandPhiGroup`（`ramIndex` 経由）だけ。
+★安い順が **(2)→IsLocalRing→(3)→(4)** と決まり、その順で載せた。
+★実装者が自分の断定を覆すのは **3 波連続**（「型を建てるしかない」／「#69 の危険区間」／今回の順序）。
+
+**②成果**:
+
+| 宣言 | 項目 |
+|---|---|
+| `isUnit_iff_norm_eq_one` | `𝒪_M` の単元 ⟺ `‖x‖ = 1` |
+| ★`isLocalRing_integerSubring` | `IsLocalRing 𝒪_M`（`of_isUnit_or_isUnit_one_sub_self` ＋ 超距離の `‖1−a‖ = 1`） |
+| ★★`integerMulSemiringAction` | **`MulSemiringAction G 𝒪_M`** ＝ 項目 2 |
+| `norm_le_norm_pi_of_lt_one` | 離散性 `‖x‖ < 1 ⇒ ‖x‖ ≤ ‖π‖` |
+| ★★`maximalIdeal_eq_span` | **`𝔪_{𝒪_M} = (π)`** ＝ 項目 3 |
+| `coe_smul_integer` | 制限した作用の座標は `M` の作用そのもの（`rfl`） |
+| ★★★`mem_lowerRamificationGroup_iff_norm` | **`σ ∈ G_i ⟺ ∀ z, ‖z‖ ≤ 1 → ‖σz − z‖ ≤ ‖π‖^{i+1}`** ＝ 項目 4 |
+
+★★最後の右辺は `RamificationGroupNormBridge.mem_ramification_iff` の**左辺そのもの**。
+⇒ **環側（`lowerRamificationGroup`）と体・ノルム側が繋がった。**
+
+**③在庫・配管の測定**: 在った —— `IsLocalRing.of_isUnit_or_isUnit_one_sub_self`、
+`isUnit_iff_exists_inv`（★`isUnit_of_mul_eq_one` は `Unknown identifier`）、
+`Ideal.span_singleton_pow`（★向きは `span {x}^n = span {x^n}` の順方向）。
+★#333 —— class 型を返す `def` には `@[implicit_reducible]` が必須（Lean が警告で要求）／
+`MulSemiringAction` のフィールドは `smul_mul` だが `M` 側の補題は `smul_mul'`（1 文字違い）。
+
+**④残り —— ★1 本だけ**: `IsDiscreteValuationRing ↥(integerSubring M)`。
+中身は `IntegerSubringNorm.exists_pow_mul_unit` で**尽きている**。入口候補（測定済み）——
+`Valuation.valuationSubring_isDiscreteValuationRing`（`RingTheory/Valuation/Discrete/Basic.lean:453`）／
+`NumberTheory/LocalField/Basic.lean:108`／`NormedField.toValued`（`Topology/Algebra/Valued/NormedValued.lean:67`）。
+★これが載ると `herbrandPhiGroup_natCast` が使え、項目 4 ＋ `card_eq_pow_of_mem_iff` で
+`|G_i| = p^{k+1−m}` が入り、`hrec` → `dvd_sub_of_phi_intCast` で **`harith` の (3) が閉じる**。
+
+**逸脱**: `MulSemiringAction` / `IsLocalRing` は**大域 `instance` にしていない**（`def`/`theorem` ＋ `letI`）。
+`hiso` を仮説で受けるため、および全体 import への影響を避けるため。
+
+```
+VERDICT[本体の順序 1→2→3→4]: 外れ（実装者が定義を読んで「4 は 1 に依らない」と測り、順序を組み替えた）
+COST[IntegerRingInstances]: 安 | 持ち場=型クラス 4 つ  — 3 つ載り、残りは IsDiscreteValuationRing 1 本
+```
+
