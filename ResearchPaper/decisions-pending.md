@@ -14929,3 +14929,58 @@ GUESS[RI-c]: 前波で adjoinIntegers = integerSubring が rfl で通ったの�
 GUESS[RI-d]: 本体の名指しは 14 波中 13 波外れている。今回も少なくとも 1 つ外す
 ```
 
+
+## ★★★★`ramificationIdx = c` がノルムだけで出た —— `RamificationIndexNorm.lean` 247 行 / `sorry` 0（2026-09-09）
+
+**①真偽**: ★実装者の前波の断定「`IntegerNorm.*` の道具一式は `adjoinIntegers K x` にそのまま移せる」を
+★**実際に移して確かめた**（4 つの測定がすべて通過）:
+`Ideal ↥(adjoinIntegers K x)` と `Ideal ↥(integerSubring (adjoin K.carrier {x}))` が **defeq**、
+`y ∈ 𝒪[K.carrier] ↔ ‖y‖ ≤ 1` が **`Iff.rfl`**、`(𝒪[K.carrier] : Subring) = integerSubring K.carrier` が
+`Subring.ext (fun _ => Iff.rfl)`。
+⇒ ★★★**`𝒪[·] = Valued.integer` の層も透明**。`#69` が名指しした `Valued` 経由の遅さは、
+少なくとも**所属・型・部分環の同一性**には現れない（#341 に追記）。
+★★**実装者の断定が覆らなかったのは 8 回目にして初めて。**
+
+**②成果**:
+
+| 宣言 | 内容 |
+|---|---|
+| ★★`ramificationIdx_eq_of_span` | ★**抽象核（純可換環論）**。分岐・付値・ノルムの語が 1 語も出ない |
+| `mem_span_pow_iff_norm_le` | `y ∈ (π^c) ↔ ‖y‖ ≤ ‖π‖^c` |
+| ★★★`ramificationIdx_eq_valIndex` | `ramificationIdx (π_K) (π) = c` |
+| ★★★★`ramificationIdx_maximalIdeal_eq` | ★**極大イデアルの形**（`UnramifiedExtension.lean:425` と同じ形） |
+
+抽象核の中身は `Ideal.ramificationIdx_spec` に `Ideal.map_span` を差し込むだけ。
+
+**③定義の字面（本体未読の箇所を実装者が読んだ）**:
+`NumberTheory/RamificationInertia/Ramification.lean:67` ——
+`noncomputable def ramificationIdx : ℕ := sSup {n | map f p ≤ P ^ n}`。
+★本体が引いた docstring「**何乗まで入るか**」は**正しい**。使ったのは同 `:80 ramificationIdx_spec`。
+★同名の `Ideal.ramificationIdx'`（`RingTheory/…`）は**別物**。Dedekind 側の補題は**使わなかった**。
+
+**④止まった場所 —— 2 つ。どちらも★配管ではなく内容**:
+1. ★`hcompat`（整数環の間の `algebraMap` が体の間のものの制限であること）を
+   `AdjoinIntegers.lean:89 adjoinIntegersAlgebraMap` から取ること。★本波は降りていない（仮説で受けた）。
+2. ★★**`IsTotallyRamifiedAdjoin K x` から `c = n` を出すこと**。
+   `TotallyRamified.lean:54` で `IsTotallyRamifiedAdjoin := inertiaDegree K x = 1`、
+   `UnramifiedExtension.lean:444` で `e·f = [K(x):K]` なので `e = n` は出る。
+   本ファイルは逆に `c` から `e` を計算するので、★この 2 つを繋げば
+   `IsTotallyRamifiedAdjoin ⇒ c = n ⇒ hvalK`。★ただし `π` を実際に取る（`adjoinIntegers K x` が DVR）
+   が先に要る。
+
+**①③の現在**: ①不分岐側（`f = p`）→ ★**依然生きている**。③構成側の `adjoin` → ★★**さらに剥がれた**。
+整数環の側（`𝒪[·]` と `adjoinIntegers`）は★**もう完全に透明**。残るのは上の 2 つだけ。
+
+**★事故と修復（記録）**: `python -c "…"` の二重引用符の中にバッククォートを書いたため
+`lean-idioms.md` への追記が **shell の command substitution で inline code と ```lean ブロックを失った**
+（`ecbe89cc`）。`.py` ファイルから書き直して修復（`15c3b2ad`）。
+★CLAUDE.md の「解析スクリプトはシェルに埋めず Write で `.py` に書く」の実例（#319 の系統）。
+
+```
+VERDICT[RI-a]: 当たり（本波で落ちた）
+VERDICT[RI-b]: 当たり（ramificationIdx_spec が効き、Dedekind 側は使わなかった）
+VERDICT[RI-c]: 当たり（移せた。しかも 𝒪[·] の層まで透明だった）
+VERDICT[RI-d]: ★外れ —— 「今回も少なくとも 1 つ外す」と書いたが 3 波中 2 波で外さなかった
+COST[RamificationIndexNorm]: 安 | 持ち場=ramificationIdx = c  — 落ち、整数環の層が完全に透明と判明した
+```
+
