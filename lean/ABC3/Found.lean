@@ -1890,6 +1890,7 @@ import ABC3.Found.PGC.HarithPAdicSupply
 import ABC3.Found.PGC.TotallyRamifiedCriterion
 import ABC3.Found.PGC.RamificationIndexNorm
 import ABC3.Found.PGC.TotallyRamifiedAdjoinNorm
+import ABC3.Found.PGC.TotallyRamifiedAdjoinSupply
 /-!
 # Found — 実装済みの基礎
 
