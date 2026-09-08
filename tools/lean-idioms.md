@@ -13377,3 +13377,23 @@ example : letI := inducedNormedField K M; letI := inducedIsUltrametricDist K M
 mathlib には `NormedRing.induced` / `NormedCommRing.induced` /
 `NormedDivisionRing.induced` / `NormedAddCommGroup.induced` が並んでいる
 （`Analysis/Normed/Ring/Basic.lean:831` 付近）。
+## #336 プライム付きの名前にドットを続けると**定数名としてパースされる**（2026-09-09、HerbrandRecurrence）
+
+```
+error(lean.unknownIdentifier): Unknown constant `Subgroup.eq_top_iff'.mpr`
+```
+
+`Subgroup.eq_top_iff'` は★**存在する**（`rw [Subgroup.eq_top_iff']` は通る）。
+落ちているのは名前解決ではなく**字句解析**であり、
+`eq_top_iff'.mpr` 全体が 1 つの定数名として読まれている。
+
+```lean
+-- ✗ Unknown constant `Subgroup.eq_top_iff'.mpr`
+have h : Subgroup.zpowers g = ⊤ := Subgroup.eq_top_iff'.mpr htop
+-- ✓ 括弧を入れる（`_` は部分群。#324 と同じ「明示引数が 1 つ多い」形）
+have h : Subgroup.zpowers g = ⊤ := (Subgroup.eq_top_iff' _).mpr htop
+```
+
+★見分け方: エラーが `Unknown constant` で、その名前の中に `'` の直後の `.` がある。
+同じ形は `Nat.lt_succ_iff'`・`Finset.sum_range_succ'` などプライム付き全般で起こる。
+★`← foo'` の `rw` は問題ない（ドットを続けないから）。
