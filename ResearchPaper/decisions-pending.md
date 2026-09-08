@@ -15568,3 +15568,67 @@ GUESS[BR-c]: c d < 1(1 段で ε より真に良い近似)は、本日の ③幾
 GUESS[BR-d]: 本体の名指しは直近 11 波で 8 回外している。今回も少なくとも 1 つ外す
 ```
 
+
+## ★★★★★穴④が消えた —— `BudgetFiniteExcess.lean` 299 行 / `sorry` 0（2026-09-09）
+
+**①★★★④ は予算形（＝積の形）で消える。記法の問題だった**（`cyclotomic_break_vanishes_in_prod`）。
+`WildDescentDistanceOnly.lean:282` の破れは「1 段の損失 `3^{4/18}` が `axDecay 3 2 = 3^{3/18}` を
+`3^{1/18}` だけ超える」。★しかし `axLemma_of_wildDescent_Icc`（`AxEpsilonDecay.lean:440`）が要求するのは
+★**点ごとの比較ではなく積が `C` 以下であること**だけ。証拠列
+```
+cEx 1 = axDecay 3 1 = 3^{9/18},  cEx 2 = 3^{4/18},  cEx d = 1 (d ≥ 3)
+```
+は★点ごとには破れる（`axDecay 3 2 < cEx 2`）が、
+★★**すべての `n` で `∏_{Icc 1 n} cEx = 3^{13/18} ≤ 3^{13.5/18} = axConstant 3`**。
+⇒ `AxWildDescent K cEx` から **`AxLemma K (axConstant 3)` と `AxSenTate K` が出る**。
+★木が `WildDescentDistanceOnly.lean:94-97` で**地の文で**書いた「**合成(`AxLemma`)は無傷である**」を
+★**定理にした** —— 中身は `13/18 ≤ 3/4` の 1 行。
+
+**★`g d > 1` の段が有限個の形（`sup F`）も形式化**（`budget_of_eventually_le_one`）——
+`F d := C · G^{min d N}` が 3 条件を**全部**満たす。★本体が「`hFg` が `d' < d` の**すべての対**を
+要求するかは読んでいない」と書いた点の答え: **すべての対を要求するが `min d N` を使えば通る**。
+`F` は `C·G^N` で有界。★ただし有界な `F` の予算形は `AxLemma K (sup F)` と同値なので**道は短くならない**。
+★効いているのは上の (1) の方。
+
+**②成果**: 抽象核（`ℝ`/`ℕ`/`Finset` だけ）—— **`budget_of_eventually_le_one`** /
+`budget_le_of_eventually_le_one` / **`prod_Icc_le_of_eventually_one`**。
+具体層 —— `cEx` ほか **`composite_bound`** / **`axLemma_of_wildDescent_cEx`** /
+`axSenTate_of_wildDescent_cEx` / **`cyclotomic_break_vanishes_in_prod`**。
+
+**③在庫・配管**: `Finset.prod_le_prod_of_subset_of_one_le`（`GroupWithZero` 版、`hf0` が要る）＋
+`Finset.prod_subset` で 8 行。`Nat.Prime 3` は `norm_num` では出ない ⇒ **`Nat.prime_three`**。
+★`rw [show (2:ℕ) = 1 + 1 from rfl]` は `motive is not type correct`
+（`Nat.instAtLeastTwoHAddOfNat` の `NeZero` が張り付く）⇒ `decide` で `Finset.Icc 1 2 = {1,2}` に。
+★**新しい失敗形なので idiom 節にする価値がある**（本波は未登録）。
+
+**★`c d < 1` は③と同じ不等式か → 別の量**（測定として記録、形式化なし）。
+③は**同じ `π` の、`σ` の冪による変位の比**の下界。`c d` は **`x` と部分体との距離**を `ε` で割ったもの。
+⇒ ★③はそのままでは `c d < 1` を否定しない。
+
+**★★4 つの穴の現状 —— 穴は 3 つ**: ①不分岐 生きている / ②一様定数 射程は `g` /
+③幾何減衰 生きている / ④測定点 ★**消えた**。
+
+**★まだ測っていないこと（実装者が正直に記録）**:
+- `WildDescentDistanceOnly.lean:98-99`「`ℚ₃(ζ₃)` の 40 個の巡回 3 次拡大で `d(x,N)` を実際に測る
+  必要がある。★測っていない」は**今も未測定**。★ただし (1) により**④ は `AxLemma` の道を塞がない**。
+- ★`cEx` は**実在する降下から作った列ではない** —— 「点ごとの比較が破れても積は通る」ことの**証拠列**。
+  ★実際の降下がこの列を実現するかは別問題で、測っていない。
+
+```
+VERDICT[BR-a]: ★外れ（④は消えた。破れは距離の側だが、要求が積なので点ごとの破れは効かなかった）
+VERDICT[BR-b]: 半分（sup F は形式化されたが道は短くならず、効いたのは積の形の方）
+VERDICT[BR-c]: 外れ（c d < 1 と ③ は別の量）
+VERDICT[BR-d]: 当たり
+COST[BudgetFiniteExcess]: 安 | 持ち場=④が予算形で消えるか  — 消えた。穴が 4 → 3 になり、木の地の文が定理になった
+```
+
+
+## ★`GUESS:`（配る前に書いた —— 実在する降下が `cEx` のような列を実現するか）
+
+```
+GUESS[RD-a]: 実在の降下は「1 段の損失が axDecay p 1 で一定」なので、cEx のように後半が 1 に落ちる列にはならない。本日の出口(..._of_uniformizer_deg_p)が出すのは各段 axDecay p 1
+GUESS[RD-b]: しかし積の形が効くなら、必要なのは「有限個の段だけ 1 を超える」ことで、それは wildDepth が有限であることから出るかもしれない。前波の budget_of_eventually_le_one がその形
+GUESS[RD-c]: 残る本当の壁は①不分岐側。②③は「一様」を前提にしており、積の形では効かない可能性がある
+GUESS[RD-d]: 本体の名指しは直近 12 波で 9 回外している。今回も少なくとも 1 つ外す
+```
+
