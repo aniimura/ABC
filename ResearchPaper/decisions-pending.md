@@ -15632,3 +15632,68 @@ GUESS[RD-c]: 残る本当の壁は①不分岐側。②③は「一様」を前�
 GUESS[RD-d]: 本体の名指しは直近 12 波で 9 回外している。今回も少なくとも 1 つ外す
 ```
 
+
+## ★★★★出口の損失は `axDecay p 1` が限界（穴⑤）—— `ExitLossDepth.lean` 268 行 / `sorry` 0（2026-09-09）
+
+**①真偽**:
+- ★本体の観察 1「出口の 1 段の損失は `axDecay p 1`（一定）に見える」→ ★**真。しかも `1` に落ちない。**
+  - `TotallyRamifiedLayer.lean:305`（`k=0`、次数 `p` の層 1 枚）の損失は **`axDecay p 1`（定数）**。
+  - 一般の `k` の出口 `:266` は `∃ y : twr g p k` を返すが `twr g p j` は `⟨g^{p^j}⟩` の固定体
+    （`GainedTowerModel.lean:293`）なので `twr g p k` は `[M : twr g p k] = p` の**1 段下**。
+    ★その 1 段に **`∏_{j∈Icc 1 (k+1)} axDecay p j`（塔ぜんぶの予算）**を払う。
+    ⇒ ★**深さが増えるほど 1 段の損失は大きくなる。**
+  - どちらの読み方でも `exitLoss p d ≥ axDecay p 1 > 1` で ★**`1` に落ちる段が 1 つも無い**。
+  ⇒ ★★★**前波の `cEx` は本日の出口では実現されない**（`exit_does_not_realize_cEx`）。
+  前波の逃げ道（`budget_of_eventually_le_one`、悪い段が有限個）は**使えず**、積は非有界。
+- ★本体の観察 2「深さが大きいほど良くなる必要があるか」→ ★**ある。`axDecay p k` がすでにその形。**
+  `axDecay p k` は `k → ∞` で **1 に収束**、一方 `exitLoss p d` は `d` について**増加**。★**向きが逆。**
+
+**★★★どこで止まるか**: `last_jump_bound_not_enough` —— `d ≥ 2` では sharp な `(p−1)i ≤ e` を満たす
+`(i,e)`（`i=1`, `e=p−1`）で `axDecay p d < p^{i/e}` となるものが**存在する**。
+⇒ **`RamificationJumpBound.lean:334` の `(p−1)i ≤ e_L` だけからは `p^{i/e_L} ≤ axDecay p 1` しか出ない。**
+`axDecay p d` を出すには `NormalizedTraceDescent.lean:379 FirstJumpRoute` の `hm : p^{k−1} ≤ m`、
+すなわち★**最後の跳びではなく第 1 跳びで測る**ことが要る
+（同 `:65-66` の表: 上の層 `i=8` → `3^{4/9}` **超える** / 第 1 跳び `i₁=2` → `3^{1/9}` **収まる**）。
+⇒ ★★**本日の出口は「上の層の跳び」を使っており、そこが `axDecay p 1` で頭打ちになる。**
+
+**②成果**: 抽象核 **`not_forall_prod_Icc_le_of_le`（②′）** —— ★②を「一様定数」から
+「**定数 `> 1` で下から抑えられる**」に**一般化**した。これが本日の出口に効く形。
+具体層 —— `exitLoss` / `axDecay_one_le_exitLoss` / `exitLoss_ne_one` /
+**`last_jump_bound_not_enough`** / **`exit_does_not_realize_cEx`**。
+
+**③配管**: `typeclass instance problem is stuck Fact (Nat.Prime ?m.12)` → `(p := p)` を補って解決（#339 の形）。
+`rw [BudgetFinite.cEx]` → `Failed to rewrite using equation theorems`（`def` を `rw` で展開しようとした誤り）。
+**#346**（`rw [show (2:ℕ) = 1+1 from rfl]` の `motive is not type correct`。直しは `decide` で `Finset.Icc 1 2 = {1,2}`）、
+**#347**（`Nat.Prime 3` は `norm_num` では出ない → `Nat.prime_three`）。★`--similar` で先行節 0 件を確認済み。
+
+**★★穴の現状**: ①不分岐 生きている / **②→②′ に一般化** / ③幾何減衰 生きている /
+④ 前波で消えた / ★★**⑤（本波）出口の損失は `axDecay p 1` が限界**。
+
+**★次の 1 点（実装者の見込み、未測定）**: 「第 1 跳びで測る降下」の**構成**（`x′` を作る側）。
+★木は「**mathlib には上付き/下付き分岐群も Herbrand 関数も無い**」と測っており、
+`FirstJumpRoute` の `i₁ = j` の同定は Herbrand を使う。⇒ ★そこが最大の在庫の穴だと見込むが未測定。
+
+```
+VERDICT[RD-a]: ★当たり（実在の降下は cEx にならない。しかも 1 に落ちる段が皆無）
+VERDICT[RD-b]: 外れ（「悪い段が有限個」の逃げ道は使えない）
+VERDICT[RD-c]: 外れ（①だけではなく⑤が出た）
+VERDICT[RD-d]: 当たり
+COST[ExitLossDepth]: 安 | 持ち場=cEx の実現可能性  — 実現しないと定理化し、②を②′に一般化し、頭打ちの原因を「第 1 跳びでなく上の層の跳び」と特定
+```
+
+
+## ★`GUESS:`（配る前に書いた —— 第 1 跳びで測る降下の構成）
+
+★本体が測った事実（★結論ではない）: 実装者は「mathlib には上付き/下付き分岐群も Herbrand 関数も
+無い」と書いたが、★**木には在る** —— `herbrandPhiGroup` を宣言に持つ定理・定義が **7 件**
+（`HerbrandComposition` / `HasseArfStrongInduction` / `TameQuotientTower` ほか）。
+★さらに本日の連鎖が `mem_lowerRamificationGroup_iff_norm`（`IntegerRingInstances`）と
+`card_eq_pow_of_mem_iff`（`RamificationSubgroupCard`）で**下付き分岐群をノルムの言葉に繋いだ**。
+
+```
+GUESS[FJ2-a]: 「mathlib に無い」は真だが「木に無い」は偽。本日の連鎖が下付き分岐群をノルムで書けるようにしたので、第 1 跳び i₁ の同定はその上でできる
+GUESS[FJ2-b]: 第 1 跳びを取るには塔の最下段(K に一番近い層)を見る必要があり、本日の出口は最上段(M)を見ている。向きを逆にするのが構成の中身
+GUESS[FJ2-c]: ⑤の頭打ちは、1 段で払う額を「塔ぜんぶの予算」にしていることから来るので、段ごとに分けて払えば消えるかもしれない
+GUESS[FJ2-d]: 本体の名指しは直近 13 波で 10 回外している。今回も少なくとも 1 つ外す
+```
+
