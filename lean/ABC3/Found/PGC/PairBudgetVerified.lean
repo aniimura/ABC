@@ -119,7 +119,7 @@ theorem axDecay_two_budget : (3 : ℤ) = 3 := rfl
 theorem pair_budget_value : (9 : ℤ) + 3 = 12 := by norm_num
 
 /-- ★予算はちょうど `12`（`J = 13` は入らない）。 -/
-theorem pair_budget_sharp : ¬ ((13 : ℤ) ≤ 12) := by norm_num
+theorem pair_budget_sharp_recheck : ¬ ((13 : ℤ) ≤ 12) := by norm_num
 
 end Budgets
 
@@ -132,7 +132,7 @@ end Budgets
 #print axioms one_step_budget_fails
 #print axioms pair_budget_fits
 #print axioms pair_budget_value
-#print axioms pair_budget_sharp
+#print axioms pair_budget_sharp_recheck
 
 end PairBudgetVerified
 

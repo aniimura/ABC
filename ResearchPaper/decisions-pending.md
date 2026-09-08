@@ -16443,3 +16443,42 @@ GUESS[LA-c]: 棚卸しは Lean ファイルではなく decisions-pending.md か
 GUESS[LA-d]: 本体の名指しは直近 25 波で 17 回外している。今回も少なくとも 1 つ外す
 ```
 
+
+## ★★★★★掃討完了 6/6 ＋ 棚卸しを埋め込み —— `PairBudgetVerified.lean` ＋ `tools/pair-budget-check.py`（2026-09-09）
+
+**★実装者が (L) を選んだ理由**: 前波で「seed が無いので件数は再現不能」と測ったが、
+★**結論の方は前々波で回復した `x` から直接出る**と分かり**安かった**。
+棚卸し (S) は「独立ファイル」ではなく★**このファイルの docstring に埋め込む**形にした
+（次の波が掃討の帰着点として必ず読む場所だから）。
+
+**①結果**: 回復した `x` で `ε = 11`, `d(x,E₁) = 7`, `d(x,K) = 3` ⇒
+**1 段の slack `= −1`** ✓、**対の slack `= +4`** ✓（木の字面と一致）。
+新しい乱択 20,000 件（seed `20260909`）: 1 段の最小 slack `−1` ✓ / 対の最小 slack `+4` ✓ /
+1 段の最悪の必要量 `4` ✓ / ★**対の予算の反例 0 件** ✓。
+★件数（49,000 / 95,298）は**再現していない**（seed が無い）。★**再現したのは結論**。
+
+**②★★掃討の最終状態 —— 6/6**: `WildDescentDistanceOnly`（`x` 回復、8 数値一致）/
+`GainedTowerDescent`（跳び `L = 8, 26`。★**総当たりの表は今も未再現**）/ `DeepDescentRepair` /
+`JumpDefectTradeoff`（スクリプト不要）/ `EquivariantProjectionDescent`（`γ = p−1` を 4 層）/
+★**`DeepDescentPairDirect`（本波、結論のみ）**。`tools/` に再現スクリプト **6 本**。
+★★**5 波で測った範囲では木の機械計算の記録はすべて正しく、合わなかったのは 1 度だけ ——
+それは実装者の 1 度目の `γ` の計算だった。**
+
+**③★次の波が最初に読むもの（`PairBudgetVerified.lean` の docstring に `file:line` つき）**:
+- **残る穴 4 つ**: ①不分岐（★(b) 閉、不分岐の段は**無料**。残るは (a) のみ）/ ②′（射程は `c` でなく **`g`**、
+  効かせるには**全深さで一様な証人**）/ ③幾何減衰 / ⑤出口の限界（`hm` を供給しても消えない）。
+  ★**④は消えた**（点ごとに破れても**積では通る**）。
+- **掘らなくてよいと確定した道 4 つ**: `AxWildDescentDecay` は **`AxLemma` と同値（循環）** /
+  予算関数 `F` への載せ替えも**同じ循環** / `FirstJumpRoute` は **`c k ≤ axDecay p k` の再パラメータ化** /
+  B2 は **Krasner では原理的に届かず、帰結も `AxLemma` を左右しない**。
+- **次の 1 点（実装者の見込み、未測定）**: `hform`。★塔のデータからの仮説 3 つは既に落ちており
+  （`FirstJumpRouteGap.axLemma_of_first_jump_loss`）、残るのは `hform` + `hc` + `AxWildDescent K c` の 3 本。
+
+```
+VERDICT[LA-a]: 外れ（「再現しない」ではなく結論を再現した）
+VERDICT[LA-b]: 半分（棚卸しはしたが独立ファイルではなく docstring に埋め込んだ）
+VERDICT[LA-c]: ★外れ（md ではなく Lean の docstring を選んだ。理由は「次の波が必ず読む場所」）
+VERDICT[LA-d]: 当たり
+COST[PairBudgetVerified]: 安 | 持ち場=最後の 1 箇所または棚卸し  — 掃討が 6/6 で完了し、棚卸しが帰着点に埋め込まれた
+```
+

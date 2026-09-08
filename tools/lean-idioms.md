@@ -13734,3 +13734,24 @@ error: unsolved goals
 `haveI : Fact (Nat.Prime 3) := ⟨by norm_num⟩` が落ちる。
 ★`⟨Nat.prime_three⟩` と書く（`2` は `Nat.prime_two`）。
 ★`by decide` でも通るが遅い。
+
+#### #348 検算ファイルの宣言名が既存と衝突すると `check.mjs` の G1 が誤爆する
+
+`PairBudgetVerified.lean:122` に `theorem pair_budget_sharp` を書いたところ
+`check.mjs --brief` が **NG 1 件増**:
+
+```
+NG  lean\ABC3\Found\PGC\PairBudgetVerified.lean:122
+    G1 `pair_budget_sharp.src` の中身を読めなかった(1行の正準形で書くこと)
+```
+
+★原因は**名前空間をまたいだ衝突**。`DeepDescentPairDirect.lean:428` に同名の
+`pair_budget_sharp` があり、同 `:502` に `pair_budget_sharp.src` がある。
+`check.mjs:1638` の `names.has(\`${d.name}.src\`)` は**名前空間を落とした短い名前**で引くので
+「`.src` は在る」と判定し、続く `texts.get(d.file)`（＝**新しい方のファイル**）から
+`pair_budget_sharp.src` を探して見つからず NG になる。★Lean 側は
+`Zeta27Pair.pair_budget_sharp` と `PairBudgetVerified.pair_budget_sharp` で衝突しないので通る。
+
+**直し**: 検算ファイル側の名前を変える（`pair_budget_sharp_recheck`）。★`#print axioms` の行も一緒に。
+**見分け方**: `.src` を 1 つも書いていないファイルで G1 が出たら、まずその宣言名を
+`grep -rn "^theorem <名前>" lean/ABC3/Found/PGC/*.lean` で数える。**2 以上なら衝突**。
