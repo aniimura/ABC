@@ -13483,3 +13483,47 @@ have hmono_lt : ∀ b : ℕ, b ≤ k → ∀ a : ℕ, a < b → u a < u b := by
   | zero => intro _ a ha; omega
   | succ r ih => …
 ```
+## #339 ラムダで包むと暗黙の引数が決まらず `instance problem is stuck` になる（2026-09-09、HarithPAdicSupply）
+
+`hiso` を `(fun z => norm_algEquiv g z)` と渡したところ:
+
+```
+error: typeclass instance problem is stuck
+  Algebra.IsAlgebraic ℚ_[?m.263 z] M
+
+Note: Lean will not try to resolve this typeclass instance problem because the first,
+third, and fifth type arguments to `Algebra.IsAlgebraic` contain metavariables.
+```
+
+★`norm_algEquiv` の `{p : ℕ}` は仮説 `[Fact p.Prime]` と `[NormedAlgebra ℚ_[p] M]`
+にしか現れないので、ラムダの中では `?m z`（**`z` に依存する**メタ変数）になる。
+
+```lean
+-- ✗ stuck
+... (fun z => norm_algEquiv g z) ...
+-- ✓
+... (fun z => norm_algEquiv (p := p) g z) ...
+```
+
+★見分け方: メタ変数に **束縛変数が適用されている**（`?m.263 z`）。
+これが出たらラムダの中で名前付き引数を与える。
+
+## #340 ★`‖algebraMap 𝕜 A x‖ = ‖x‖` は mathlib にある（`norm_algebraMap'`）（2026-09-09、HarithPAdicSupply）
+
+`‖(p : M)‖ = p⁻¹`（`M` は `ℚ_[p]` 上のノルム代数）は ★**3 行**:
+
+```lean
+theorem norm_natCast_p {M : Type*} [NormedField M] [NormedAlgebra ℚ_[p] M] :
+    ‖((p : ℕ) : M)‖ = ((p : ℝ))⁻¹ := by
+  have h : ((p : ℕ) : M) = algebraMap ℚ_[p] M ((p : ℕ) : ℚ_[p]) := by rw [map_natCast]
+  rw [h, norm_algebraMap' M, Padic.norm_p]
+```
+
+★`norm_algebraMap' A x : ‖algebraMap 𝕜 A x‖ = ‖x‖` は `[NormOneClass A]` だけで出る。
+`NormedField` は `NormOneClass` を含むので何も追加できない。
+★スペクトルノルムの `spectralNorm_extends` を探しに行く必要はない。
+
+★合わせて: `σ : M ≃ₐ[K] M` の等長性は、完備な底 `k` が下にあれば
+`PureStepSetup.norm_algHom_eq (k := k) (F := K) (σ : M →ₐ[K] M) z` で ★**1 行**。
+★「素の `[Field K]` では等長性は出ない」は真だが、
+**底を 1 つ下に敷けば出る**。「出ない」と書く前に塔を 1 段伸ばすこと。
