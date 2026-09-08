@@ -14042,3 +14042,42 @@ GUESS[GT-c]: hnormp / heM は PAdicLocalField のノルムの正規化から出�
 GUESS[GT-d]: 本体の見立ては今日 3/4 外している。今回も外れる
 ```
 
+
+## ★★★★★出口の仮説 13 → 7 —— `Found/PGC/TotallyRamifiedLayer.lean` 506 行 / 15 宣言 / `sorry` 0
+
+**①真偽**: ★**本体の見立ては 3 点中 2 点が外れ。**
+- ☆★**半分外れ**「塔は Sylow 降下が供給している」—— 供給されるのは**次数 `p` の 1 段だけ**で、
+  ★**全分岐とは限らない**（`e·f = p`）。★不分岐側では `hvalK` は**偽**（`not_valK_of_norm_eq` で形式化）
+  ⇒ ★**場合分けは避けられない。**
+- ★**外れ**「`descentStep_of_natDegree_tame` が使える」—— ★あれは **`x` の次数**の条件であって、
+  ★**層の分岐**の条件ではない（`SenLemma.lean:698` を読んで確認）。★**同一視できない。**
+- ★**当たり（`heM` のみ）** / ★**当たり**「`k=0` から取れ」
+
+**②成果**: ★★**`htop`（`M = K(π)`）も `e`/`he`/`heM` も「仮説」ではなく「定理」になった**
+（`adjoin_eq_top_of_valK` / `exists_absRamIndex`）。★明示引数 **13 → 7**。
+★`model_deg_p_exists`（`ℚ₂(√2)/ℚ₂`）で ★**仮説を 1 つも残さず**非空虚性を確認。
+★`exists_pgroup_descent_cyclic` で `CyclicLayerDescent` 冒頭が「測ったが書いていない」と残した穴も埋めた。
+
+**③在庫**: ★#297 の 2 例目（`Subgroup.NormalizerCondition.normal_of_coatom` の `H` が明示引数）→ **#324**。
+★`exists_pgroup_descent` は `.cache/decl-index.txt` に **0 件**（★索引が古い）。実ソースを読んで確認。
+
+☆★★**#323 が今日いちばんの実例**: `NormedField M` のまま `Algebra.adjoin K {π}` の所属を書くと
+★**`isDefEq` の timeout で 3 回焼き切れる**（24.3 / 22.7 / 20.4 秒）。
+★★**同じ証明を `[Field M]` だけの補題に切り出すと 10.4 秒で ok。**
+⇒ ★**抽象核を切ることが「通るか落ちるか」の差になった。**
+
+**④止まった場所（正確に）**:
+1. 不分岐側（`f = p`）の 1 段 —— 未着手
+2. ★`harith` の下界 `1 ≤ u` —— ★**剰余体**（`ū^p = 1 ⇒ ū = 1`）と ★**`g` の等長性**が要るが、
+   現設定 `NormedField M` + `g : M ≃ₐ[K] M` は★**等長性を含まない**。ここで止まる
+3. 体の側の翻訳（`M^P/M^Q` を `IntermediateField` に）—— #59 の危険区間、#296 の構えが要る
+
+```
+VERDICT[GT-a]: 半分 — 層は供給されるが 1 段だけで、全分岐とは限らない
+VERDICT[GT-b]: 外れ — tame の補題は x の次数の条件で、層の分岐の条件ではない
+VERDICT[GT-c]: 半分 — heM は定理になったが hnormp は落ちない
+VERDICT[GT-d]: 当たり — 3 点中 2 点を外した
+COST[TotRamLayer]: 安 | 持ち場=一般の K から塔を作る  — 仮説 13 → 7、htop と e が定理になり、止まる場所を等長性の 1 点まで絞った
+```
+★`lean-idioms` **#323** / **#324**。
+
