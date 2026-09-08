@@ -13085,3 +13085,43 @@ have hA1 : ‖A - 1‖ ≤ ‖π‖ := le_of_pow_le_pow_left₀ hp.pos.ne' (norm
 ```
 
 ★`pow_le_pow_iff_left` は `MulLeftStrictMono` を要求するので **ℝ では効かない**（負数があるため）。
+
+## #327 `card_algHom_le_finrank` も `K M L` が**明示引数**（#324 の 2 例目）（2026-09-08、WildBreakUpperBound）
+
+```
+error: Type mismatch
+  card_algHom_le_finrank
+has type
+  ∀ (K : Type ?u.43) (M : Type ?u.42) (L : Type ?u.44) [inst : CommRing K] [inst_1 : Ring M] [inst_2 : Algebra K M]
+    [Module.Free K M] [Module.Finite K M] [inst_5 : CommRing L] [IsDomain L] [inst_7 : Algebra K L],
+    Nat.card (M →ₐ[K] L) ≤ Module.finrank K M
+but is expected to have type
+  Nat.card (M →ₐ[K] M) ≤ Module.finrank K M
+```
+
+`.cache/mathlib-index.txt` の行は `theorem card_algHom_le_finrank : Nat.card (M →ₐ[K] L) ≤ finrank K M`
+で、★**3 つの型引数が明示であることが見えない**（#297 / #324 と同じ嘘）。
+`card_algHom_le_finrank K M M` と 3 つ書く。
+
+★これが効くと `IsGalois K M` は**仮説から落ちる**:
+
+```lean
+theorem isGalois_of_orderOf_eq_finrank {K M : Type*} [Field K] [Field M] [Algebra K M]
+    [FiniteDimensional K M] {p : ℕ} (g : M ≃ₐ[K] M) (hg : orderOf g = p)
+    (hnK : Module.finrank K M = p) : IsGalois K M := by
+  haveI : Finite (M ≃ₐ[K] M) := inferInstance          -- ★これは infer_instance で通る
+  have h1 : Nat.card (M →ₐ[K] M) ≤ Module.finrank K M := card_algHom_le_finrank K M M
+  have h2 : Nat.card (M ≃ₐ[K] M) ≤ Nat.card (M →ₐ[K] M) :=
+    Nat.card_le_card_of_injective (fun σ => (σ : M →ₐ[K] M))
+      (fun a b h => AlgEquiv.ext (fun x => AlgHom.ext_iff.mp h x))
+  have h3 : p ≤ Nat.card (M ≃ₐ[K] M) := by
+    rw [← hg, ← Nat.card_zpowers g]
+    exact Nat.card_le_card_of_injective (Subtype.val) Subtype.val_injective
+  refine IsGalois.of_card_aut_eq_finrank K M ?_
+  omega
+```
+
+★あわせて測った改名: `ZMod.natCast_zmod_eq_zero_iff_dvd` は**無く** `ZMod.natCast_eq_zero_iff`、
+`le_or_lt` は `Unknown identifier`（`by_cases` に書き換える）、
+`IntermediateField.finrank_top` は `finrank ↥⊤ E = 1` で**向きが逆**
+（`finrank K ↥⊤ = finrank K M` は `IntermediateField.topEquiv` ＋ `LinearEquiv.finrank_eq`）。
