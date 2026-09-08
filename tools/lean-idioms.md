@@ -13755,3 +13755,11 @@ NG  lean\ABC3\Found\PGC\PairBudgetVerified.lean:122
 **直し**: 検算ファイル側の名前を変える（`pair_budget_sharp_recheck`）。★`#print axioms` の行も一緒に。
 **見分け方**: `.src` を 1 つも書いていないファイルで G1 が出たら、まずその宣言名を
 `grep -rn "^theorem <名前>" lean/ABC3/Found/PGC/*.lean` で数える。**2 以上なら衝突**。
+
+★**#348 への追記（2026-09-09）**: 衝突の検査は **`.cache/decl-index.txt` ではなく実ファイル**で行うこと。
+実測: `grep -n "firstJump_bound_false" .cache/decl-index.txt` は **0 件**だが
+`WildDescentMultiStep.lean` には **2 件**ある（索引の嘘の①）。
+★また `check.mjs:1643-1645` は**ファイル内の最初の `.src` しか読まない**ので、
+同一ファイル内に同じ短名の宣言が 2 つあり**両方に `.src` がある**場合、
+2 つ目は 1 つ目の locator で検証される（`WildDescentMultiStep.lean:608/:688` は
+内容が同一なので実害無し。★**内容が違えば黙って通る**）。
