@@ -14604,3 +14604,59 @@ VERDICT[「𝒪_K は写しが要る」]: 外れ（NormedField.induced で写し
 COST[IntegerMiscInstances + HerbrandIntegralNorm]: 安 | 持ち場=残り 9 項目  — 全部載り、組み立てまで通って残り 1 点
 ```
 
+
+## ★★★★★★★`harith` の (3) Hasse–Arf の合同が定理になった —— `HerbrandRecurrence.lean` 340 行 ＋ `HasseArfCongruenceNorm.lean` 302 行 / `sorry` 0（2026-09-09）
+
+**①真偽 —— 着手前の検算で 2 つの偽を見つけた**:
+
+1. ★★**添字の対応**（本体が「測っていない」と明記した点の答え）—— `herbrandPhiGroup_natCast` の
+   `φ_G(n)`（`n` は分岐の添字）と `dvd_sub_of_phi_intCast` の `φ m`（`m` は跳びの段）は
+   ★**同じものではない**。正しい対応は `φ m := herbrandPhiGroup G π ((u m : ℕ) : ℝ)`、すなわち **`n = u m`**。
+   この対応の下でのみ分母が `p^{m+1}` になる（`|G_i| = p^{k−m}` と `|G| = p^{k+1}` の比で `k` が消える）。
+2. ★★**`RamificationSubgroupCard.lean:177` の `hmem` はノルムでは供給できない** ——
+   `(hmem : ∀ s ≤ k+1, g^{p^s} ∈ Gr ↔ i ≤ u s)` は **`s = k+1` で破綻**。
+   `orderOf g = p^{k+1}` ⇒ `g^{p^{k+1}} = 1` ⇒ `‖0‖ = 0 ≠ ‖π‖^{u(k+1)+1}`（右辺は常に正）。
+   ★**跳びの列 `u` が定義されるのは `s ≤ k` まで**。補題自体は真（仮説が強いだけ）なので
+   `hmem` を `∀ s ≤ k` に弱めた包みを立て、`s = k+1` は内部処理。既存ファイルは触っていない。
+3. ★実装者の前波の見積もりも 2 つ覆った ——「残りは `|G_{u m}| = p^{k+1−m}` の形だけ」は半分。
+   `m = k` では `G_{u k + 1}` が自明群で届かない。`s = k+1` の埋めを `u k` でなく **`i`** にすると
+   `m = k+1`（`p^0 = 1`）まで一本で扱える。また「`∀ m` で作る」は不要で、実際に要るのは **2 点だけ**。
+
+**②成果**（抽象核はどれも分岐・付値・Galois の語が 1 語も出ない）:
+
+| ファイル | 宣言 | 種別 |
+|---|---|---|
+| `HerbrandRecurrence` | `sum_Icc_eq_add_sum_Ioc` / `sum_Ioc_const` / **`herbrand_step_abstract`** | ★抽象核（`Finset`／ℝ） |
+| 〃 | **`card_eq_pow_of_mem_Ioc`** | ★抽象核（純群論） |
+| 〃 | ★★**`herbrandPhiGroup_step`** | **`hrec` 本体** |
+| `HasseArfCongruenceNorm` | **`card_eq_pow_of_minimal`**（`m = k+1` の自明群まで一本） | ★抽象核（純群論） |
+| 〃 | **`subgroup_ne_of_jump`** | ★抽象核（純群論） |
+| 〃 | **`dvd_sub_of_phi_eq`** | ★抽象核（純実数・整数） |
+| 〃 | ★★★**`dvd_sub_jump_of_norm`** | **`harith` (3)**。仮説は `K`・`M`・`π`・`π_K`・`g` とノルムの不等式のみ |
+
+**③★検算（example として形式化、4 本すべて通過）**:
+- (a) `ConcreteNormedModelK1.lean:561` `p=2, k=1, u=(4,8)`: `|G_i| = 4,4,4,4,2,2,2,2` ⇒
+  `φ(4)=4, φ(8)=6`。`6−4 = 2 = 4/2^1` ★一致
+- (b) `JumpFromValueGroup.lean:332` `p=3, k=2, u=(2,8,26)`: `|G_i| = 27(1–2), 9(3–8), 3(9–26), 1(≥27)`
+  ⇒ `φ(2)=2, φ(8)=4, φ(26)=6`。`4−2 = 2 = 6/3^1`、`6−4 = 2 = 18/3^2` ★両方一致
+- ★分母が飾りでないことも example に: `4 + (26−8)/3 = 10 ≠ 6`
+- (b) の表は `card_eq_pow_of_minimal` の予言とも一致（`27,9,3` / `9,3` / ★`|G_27| = 1 = p^0`）
+
+**④在庫の測定**:
+★**索引が「無い」と言うが在る** —— `Finset.sum_Ioc_consecutive`。索引は `prod_` 版しか出さないが
+加法版は `to_additive` 生成名で実在（索引の嘘の①）。
+★新しい失敗形 **#336** —— `Unknown constant 'Subgroup.eq_top_iff'.mpr'`。
+**プライム付きの名前にドットを続けると定数名として字句解析される**ので `(Subgroup.eq_top_iff' _).mpr` と括弧が要る。
+
+**⑤★★`harith`（`JumpFromValueGroup.lean:272-276`）の残りはちょうど 2 点**:
+- **(1) `1 ≤ u 0`** —— `k=0` では定理化済み（`JumpStrictMono.lean:333 one_le_jump_of_zero`）
+- **(4) `(p−1)·u k ≤ p^{k+1}·e`** —— `k=0` では定理化済み（`WildBreakUpperBound.sub_one_mul_le_of_totallyRamified`）
+- ★**`p^{k+1}` 次への一般化は未測定**（本波では降りていない）
+- (2)(3) は落ちた
+
+```
+VERDICT[「算術のみ」]: 半分（形は真だが添字の対応が違い、hmem が s=k+1 で破綻していた）
+VERDICT[本体の「添字が同じかは測っていない」]: ★渡し方が当たり（実装者が測って n = u m と確定した）
+COST[HerbrandRecurrence + HasseArfCongruenceNorm]: 安 | 持ち場=hrec  — hrec に加えて harith (3) 本体まで閉じ、2 例で検算した
+```
+
