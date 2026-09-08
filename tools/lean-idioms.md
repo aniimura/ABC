@@ -12884,3 +12884,74 @@ have h3 : (1 : ℝ) ≤ ‖alpha‖ ^ 3 := one_le_pow₀ h
 `one_lt_pow₀ (ha : 1 < a) (hn : n ≠ 0)`。
 `x ^ n = 1`（`x ≥ 0`）から `x = 1` を出すのも、`nlinarith` ではなく
 `rcases lt_trichotomy x 1` ＋ この 2 本が速い（本ファイル `norm_zeta3`）。
+
+## #321 数値リテラルが**型指数**に居るとき `rw [sq]` / `rw [show (2:ℕ) = 2^1 from rfl]` は motive で落ちる（2026-09-08、ConcreteNormedModelK1）
+
+`M4 = AdjoinRoot (X ^ 4 - C varpi)`（`varpi : K1 = AdjoinRoot (X ^ 2 - C (-1 : ℚ_[2]))`）の上で
+`(g4 ^ 2) pi4 = g4 (g4 pi4)` を `rw [sq, AlgEquiv.mul_apply]` で出そうとした:
+
+```
+error: Tactic `rewrite` failed: motive is not type correct:
+  fun _a ↦ (g4 ^ 2) pi4 = g4 (g4 pi4)
+Error: Application type mismatch: The argument
+  factIrrK1
+has type
+  Fact (Irreducible (X ^ 2 - C (-1)))
+but is expected to have type
+  Fact (Irreducible (_a - C (-1)))
+```
+
+`rw [show (2 : ℕ) = 2 ^ 1 from rfl, h]` でも同じ形で落ちる（今度は `ℚ_[2]` の側）:
+
+```
+error: Tactic `rewrite` failed: motive is not type correct:
+  fun _a ↦ (g4 ^ _a) pi4 = pi4
+Error: Application type mismatch: The argument
+  Nat.fact_prime_two
+has type
+  Fact (Nat.Prime 2)
+but is expected to have type
+  Fact (Nat.Prime _a)
+```
+
+★原因は同じ: 抽象化される `2` が **`ℚ_[2]` / `X ^ 2 - C c` の中**にも居るので、
+`fun _a => …` がインスタンス（`Fact (Nat.Prime _a)` / `Fact (Irreducible (_a - C _))`）で型検査に失敗する。
+★`#3225` の `ZMod (l^1)` と同じ罠だが、**こちらは `p` 進体・`AdjoinRoot` で `2` を書き換えた瞬間**に出る。
+
+★直し方は「等式を項に固定する」こと（`rw` に一般補題名を渡さない）:
+
+```lean
+-- ✗ rw [sq]                                    -- X ^ 2 の 2 まで拾う
+-- ✓ 書き換える項を明示して 1 か所に固定する
+rw [show (g4 ^ 2) = g4 * g4 from sq g4, AlgEquiv.mul_apply]
+
+-- ✗ rw [show (2 : ℕ) = 2 ^ 1 from rfl, h]      -- ℚ_[2] の 2 まで拾う
+-- ✓ 仮説の側を simp only で正規化する
+simp only [pow_one] at h                          -- h : g4 ^ 2 ^ 1 = 1  ⇒  g4 ^ 2 = 1
+```
+
+## #322 `PadicInt` は subtype なので `exact_mod_cast` ではなく `Subtype.ext`（2026-09-08、ConcreteNormedModelK1）
+
+`b : ℚ_[2]`, `‖b‖ ≤ 1` から `B : ℤ_[2] := ⟨b, _⟩` を作り `B ^ 2 = -1` を出そうとすると:
+
+```
+error: mod_cast has type
+  ↑(B ^ 2) = ↑(Int.negSucc 0)
+but is expected to have type
+  B ^ 2 = ↑(Int.negSucc 0)
+```
+
+★`push_cast` が `-1` を `Int.negSucc 0` に潰してしまい `norm_cast` の補題に当たらない。
+
+★直し方（`ℤ_[p]` は `{x : ℚ_[p] // ‖x‖ ≤ 1}` なので `Subtype.ext` がそのまま効く）:
+
+```lean
+have hcoe : ((B ^ 2 : ℤ_[2]) : ℚ_[2]) = ((-1 : ℤ_[2]) : ℚ_[2]) := by
+  simp only [PadicInt.coe_pow, PadicInt.coe_neg, PadicInt.coe_one]
+  exact hb2
+have h2 : B ^ 2 = (-1 : ℤ_[2]) := Subtype.ext hcoe
+```
+
+★続けて `PadicInt.toZModPow 2 : ℤ_[2] →+* ZMod (2 ^ 2)` に送ると
+「`−1` は `ℚ₂` の平方でない」が `revert`＋`decide` で閉じる（`ZMod 4` の 4 元）。
+★`exact?` はこの形を見つけない。
