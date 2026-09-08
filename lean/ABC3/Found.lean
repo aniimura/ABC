@@ -1885,6 +1885,7 @@ import ABC3.Found.PGC.HerbrandRecurrence
 import ABC3.Found.PGC.HasseArfCongruenceNorm
 import ABC3.Found.PGC.WildBreakPowDegree
 import ABC3.Found.PGC.HarithAssembly
+import ABC3.Found.PGC.HarithConcreteCheck
 /-!
 # Found — 実装済みの基礎
 
