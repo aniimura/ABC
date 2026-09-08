@@ -12456,3 +12456,42 @@ rw [e1, e2, mul_le_mul_iff_left₀ hpos]
 指数の `0 + 2` ごと潰すのが早い）。★名前は `mul_le_mul_left` ではない——それは
 `(bc : b ≤ c) (a : α) : b * a ≤ c * a` で iff ではない。`mul_le_mul_iff_left₀ (a0 : 0 < a) : b * a ≤ c * a ↔ b ≤ c`
 を `grep -n "mul_le_mul_iff" .cache/mathlib-index.txt`（0.2 秒）で引く。
+
+## #308 `max` が掛け算の**下**にあると `apply max_le` は当たらない——`rcases max_cases` で割る（2026-09-08、鋭い塔の降下）
+
+**失敗形**（`Found/PGC/GainedTowerDescent.lean`、`sharpTwoCost p S T = max T (p * S)`）
+
+```lean
+theorem sharpTwoCost_fits {p e S T : ℤ} (hp : 2 ≤ p) (he : 0 ≤ e)
+    (hS : (p - 1) * S ≤ p * e) (hT : (p - 1) * T ≤ p ^ 2 * e) :
+    (p - 1) * sharpTwoCost p S T ≤ pairBudget p e := by
+  unfold sharpTwoCost pairBudget
+  apply max_le
+```
+
+```
+error: Tactic `apply` failed: could not unify the conclusion of `@max_le`
+  max ?a ?b ≤ ?c
+with the goal
+  (p - 1) * max T (p * S) ≤ p * (p + 1) * e
+
+Note: The full type of `@max_le` is
+  ∀ {α : Type ?u.57} [inst : LinearOrder α] {a b c : α}, a ≤ c → b ≤ c → max a b ≤ c
+```
+
+★`max_le` の結論は `max a b ≤ c` という**先頭が `max` の形**なので、
+`(p−1) * max …` のように `max` が別の演算の引数に入っていると unify しない。
+★`max` が**ゴールの左辺そのもの**のときだけ通る（`gainedLoss_le_jumpSum` の側は
+`max A B ≤ G` なので `apply max_le` が通っている——同じファイルで両方が起きた）。
+
+**直し方**: `max` を掛け算の外に出す補題を探すより、**場合分けして書き換える**方が速い。
+
+```lean
+  rcases max_cases T (p * S) with ⟨hm, _⟩ | ⟨hm, _⟩ <;> rw [hm]
+  · nlinarith
+  · nlinarith
+```
+
+`max_cases a b : (max a b = a ∧ b ≤ a) ∨ (max a b = b ∧ a < b)`。★`rw [hm]` で `max` が
+消えるので、以後は `nlinarith` に素直に渡せる。★`unfold` してから `rcases` する順序に注意
+（`unfold` 前だと `max` が `sharpTwoCost` の中に隠れていて `max_cases` の引数が書けない）。

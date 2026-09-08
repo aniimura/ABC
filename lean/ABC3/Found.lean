@@ -1853,6 +1853,7 @@ import ABC3.Found.PGC.WildDescentDistanceOnly
 import ABC3.Found.PGC.DeepDescentPairDirect
 import ABC3.Found.PGC.EquivariantProjectionDescent
 import ABC3.Found.PGC.JumpDefectTradeoff
+import ABC3.Found.PGC.GainedTowerDescent
 /-!
 # Found — 実装済みの基礎
 
