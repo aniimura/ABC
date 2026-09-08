@@ -136,7 +136,109 @@ theorem norm_sub_apply_le_mul [FiniteDimensional K M] {π : M} {n t : ℕ}
           have := hnorm l
           rwa [Algebra.smul_def, norm_mul, norm_pow] at this
 
+
+/-- 冪でも同じ: `‖h^j z − z‖ ≤ ‖z‖·‖π‖^t`。 -/
+theorem norm_pow_sub_apply_le_mul [FiniteDimensional K M] {π : M} {n t : ℕ}
+    (h : M ≃ₐ[K] M) (hiso : ∀ w : M, ‖h w‖ = ‖w‖)
+    (hπ0 : 0 < ‖π‖) (hπ1 : ‖π‖ < 1) (hn : Module.finrank K M = n)
+    (hvalK : ∀ a : K, a ≠ 0 → ∃ m : ℤ, ‖algebraMap K M a‖ = ‖π‖ ^ ((n : ℤ) * m))
+    (hbr : ‖h π - π‖ = ‖π‖ ^ (t + 1)) (j : ℕ) (z : M) :
+    ‖(h ^ j) z - z‖ ≤ ‖z‖ * ‖π‖ ^ t := by
+  induction j with
+  | zero => simpa using mul_nonneg (norm_nonneg z) (by positivity : (0:ℝ) ≤ ‖π‖ ^ t)
+  | succ j ih =>
+      have hrw : (h ^ (j + 1)) z - z = h ((h ^ j) z - z) + (h z - z) := by
+        rw [map_sub, ← AlgEquiv.mul_apply, ← pow_succ']
+        ring
+      rw [hrw]
+      refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ?_ ?_)
+      · rw [hiso]; exact ih
+      · exact norm_sub_apply_le_mul h hiso hπ0 hπ1 hn hvalK hbr z
+
 end Expansion
+
+/-! ## §3 ★★★★★★狭義単調 `u m < u (m+1)` -/
+
+section Mono
+
+variable {K M : Type*} [Field K] [NormedField M] [IsUltrametricDist M] [Algebra K M]
+
+/-- ★★★★★★**跳びは `p` 乗で真に伸びる** —— `‖h^p π − π‖ < ‖h π − π‖`。
+
+★これが `harith` の `hult`(狭義単調 `u m < u (m+1)`)の中身である。
+
+筋: `u := hπ/π = 1 + b`(`‖b‖ = ‖π‖^t`)と telescoping で
+`h^pπ/π = ∏_{j<p}(1 + h^j b)`。§1 で 1 次の項を取り出すと残りは `‖b‖²`、
+1 次の項 `Σ_j h^j b = p·b + Σ_j (h^j b − b)` は §2 で `‖b‖·max(‖p‖, ‖π‖^t)` 以下。
+`t ≥ 1` と `‖p‖ < 1` から両方 `< ‖b‖`。★剰余体も different も出てこない。 -/
+theorem norm_pow_prime_sub_lt [FiniteDimensional K M] {p n t : ℕ} {π : M}
+    (h : M ≃ₐ[K] M) (hiso : ∀ w : M, ‖h w‖ = ‖w‖)
+    (hπ0 : 0 < ‖π‖) (hπ1 : ‖π‖ < 1) (hn : Module.finrank K M = n)
+    (hvalK : ∀ a : K, a ≠ 0 → ∃ m : ℤ, ‖algebraMap K M a‖ = ‖π‖ ^ ((n : ℤ) * m))
+    (hpM : ‖(p : M)‖ < 1) (ht : 1 ≤ t)
+    (hbr : ‖h π - π‖ = ‖π‖ ^ (t + 1)) :
+    ‖(h ^ p) π - π‖ < ‖h π - π‖ := by
+  classical
+  have hπne : π ≠ 0 := norm_pos_iff.mp hπ0
+  set b : M := h π / π - 1 with hbdef
+  have hb : π * b = h π - π := by rw [hbdef]; field_simp
+  have hbnorm : ‖b‖ = ‖π‖ ^ t := by
+    have h1 : ‖π‖ * ‖b‖ = ‖π‖ ^ t * ‖π‖ := by
+      rw [← norm_mul, hb, hbr, pow_succ]
+    have h2 : ‖π‖ * ‖b‖ = ‖π‖ * ‖π‖ ^ t := by rw [h1]; ring
+    exact mul_left_cancel₀ (ne_of_gt hπ0) h2
+  have hbt : ‖π‖ ^ t ≤ ‖π‖ := by
+    calc ‖π‖ ^ t ≤ ‖π‖ ^ 1 := pow_le_pow_of_le_one (le_of_lt hπ0) (le_of_lt hπ1) ht
+      _ = ‖π‖ := pow_one _
+  have hb1 : ‖b‖ ≤ 1 := by rw [hbnorm]; linarith
+  have hgj : ∀ (j : ℕ) (w : M), ‖(h ^ j) w‖ = ‖w‖ := WildBreak.norm_pow_apply h hiso
+  have hfne : ∀ j : ℕ, (h ^ j) π ≠ 0 := fun j => norm_pos_iff.mp (by rw [hgj]; exact hπ0)
+  have hgu : ∀ j : ℕ, (h ^ j) (h π / π) = 1 + (h ^ j) b := by
+    intro j
+    rw [hbdef, map_sub, map_one]
+    ring
+  have hprod : ∏ j ∈ Finset.range p, (1 + (h ^ j) b) = (h ^ p) π / π := by
+    rw [← WildBreak.prod_telescope h hπne hfne p]
+    refine Finset.prod_congr rfl (fun j _ => ?_)
+    rw [← hgu j, map_div₀, ← AlgEquiv.mul_apply, ← pow_succ]
+  set c : ℝ := max ‖(p : M)‖ (‖π‖ ^ t) with hcdef
+  have hc0 : 0 ≤ c := le_trans (norm_nonneg _) (le_max_left _ _)
+  have hclt : c < 1 := max_lt hpM (lt_of_le_of_lt hbt hπ1)
+  have hηnorm : ∀ j ∈ Finset.range p, ‖(h ^ j) b‖ ≤ ‖b‖ := fun j _ => le_of_eq (hgj j b)
+  have hlin : ‖(∏ j ∈ Finset.range p, (1 + (h ^ j) b)) - 1
+      - ∑ j ∈ Finset.range p, (h ^ j) b‖ ≤ ‖b‖ * ‖b‖ :=
+    norm_prod_one_add_sub_one_sub_sum_le _ _ (norm_nonneg b) hb1 hηnorm
+  have hsumeq : ∑ j ∈ Finset.range p, (h ^ j) b
+      = (p : M) * b + ∑ j ∈ Finset.range p, ((h ^ j) b - b) := by
+    rw [Finset.sum_sub_distrib, Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+    ring
+  have hsumbd : ‖∑ j ∈ Finset.range p, (h ^ j) b‖ ≤ ‖b‖ * c := by
+    rw [hsumeq]
+    refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ?_ ?_)
+    · rw [norm_mul, mul_comm]
+      exact mul_le_mul_of_nonneg_left (le_max_left _ _) (norm_nonneg b)
+    · refine le_trans (norm_sum_le_of_forall_le _ _ (by positivity) (fun j _ =>
+        norm_pow_sub_apply_le_mul h hiso hπ0 hπ1 hn hvalK hbr j b)) ?_
+      exact mul_le_mul_of_nonneg_left (le_max_right _ _) (norm_nonneg b)
+  have hPbd : ‖(h ^ p) π / π - 1‖ ≤ ‖b‖ * c := by
+    rw [← hprod,
+      show (∏ j ∈ Finset.range p, (1 + (h ^ j) b)) - 1
+        = ((∏ j ∈ Finset.range p, (1 + (h ^ j) b)) - 1 - ∑ j ∈ Finset.range p, (h ^ j) b)
+          + ∑ j ∈ Finset.range p, (h ^ j) b by ring]
+    refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ?_ hsumbd)
+    refine le_trans hlin ?_
+    refine mul_le_mul_of_nonneg_left ?_ (norm_nonneg b)
+    rw [hbnorm]
+    exact le_max_right _ _
+  have hbpos : 0 < ‖b‖ := by rw [hbnorm]; exact pow_pos hπ0 t
+  have hfin : (h ^ p) π - π = π * ((h ^ p) π / π - 1) := by field_simp
+  rw [hfin, norm_mul, ← hb, norm_mul]
+  refine mul_lt_mul_of_pos_left ?_ hπ0
+  calc ‖(h ^ p) π / π - 1‖ ≤ ‖b‖ * c := hPbd
+    _ < ‖b‖ * 1 := by exact mul_lt_mul_of_pos_left hclt hbpos
+    _ = ‖b‖ := mul_one _
+
+end Mono
 
 end JumpMono
 
