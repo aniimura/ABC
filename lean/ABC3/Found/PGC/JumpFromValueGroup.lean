@@ -71,7 +71,11 @@ grep -n "ext_of_adjoin_eq_top" .cache/mathlib-index.txt
     ★これで「生成元を固定する自己同型は恒等」が 5 行で書ける(自作しなかった)。
 grep -n "zpow_lt_zpow_right_of_lt_one₀" .cache/mathlib-index.txt
   → (ha₀ : 0 < a) (ha₁ : a < 1) (hmn : m < n) : a ^ n < a ^ m。★§6 の「真に弱い」の要。
-grep -n "Nat.pow_dvd_pow_iff_le_right" .cache/mathlib-index.txt   → 在る(1 < p で ↔)。
+grep -n "Nat.pow_dvd_pow_iff_le_right" .cache/mathlib-index.txt   → ★0 件(索引に出ない)
+grep -n "pow_dvd_pow_iff" .cache/mathlib-index.txt
+  → 出るのは pow_dvd_pow_iff (a ≠ 0, ¬IsUnit a) と UFM/IsIntegrallyClosed 版だけ。
+  ★しかし `(Nat.pow_dvd_pow_iff_le_right hp).1 hdvd` は**そのまま通る**(§2 が通っている)。
+  ⇒ 索引の「無い」は嘘（#317 に続く 2 例目。本セッションだけで 2 件）。
 grep -n "exists_zpow_norm" lean/ABC3/Found/PGC/TotallyRamifiedValueGroup.lean
   → 前波が作った Γ_M ⊆ ‖π‖^ℤ。★本ファイルはこれを**跳びの定義**に使う(前波は値群にしか使っていない)。
 ```
