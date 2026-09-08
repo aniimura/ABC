@@ -14919,3 +14919,13 @@ VERDICT[TR-d]: 当たり（「外れに戻る」と書いた。TR-c を外した
 COST[TotallyRamifiedCriterion]: 安 | 持ち場=hnK/hvalK  — hvalK が 1 つの数の等式になり、#69 の境界が 1 枚剥がれた
 ```
 
+
+## ★`GUESS:`（配る前に書いた —— `ramificationIdx = c`）
+
+```
+GUESS[RI-a]: ramificationIdx の定義は「map p ≤ P^n なる n の sSup」なので、ノルムでは ‖π_K‖ = ‖π‖^c から直接読める。本波で落ちる
+GUESS[RI-b]: 効くのは mathlib の ramificationIdx_spec 系（le_pow_ramificationIdx / ramificationIdx_eq_find）で、Dedekind 側の道具（IsDedekindDomain.ramificationIdx_eq_one_iff 等）は我々の設定では重い
+GUESS[RI-c]: 前波で adjoinIntegers = integerSubring が rfl で通ったので、IntegerNorm の maximalIdeal_eq_span がそのまま移り、両辺のイデアルが (π) と (π_K) の像で書ける
+GUESS[RI-d]: 本体の名指しは 14 波中 13 波外れている。今回も少なくとも 1 つ外す
+```
+
