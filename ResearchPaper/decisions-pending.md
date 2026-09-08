@@ -13677,3 +13677,69 @@ GUESS[ST-c]: hsep / hsp / hconj / hne（Galois 構造 4 本）は MinpolyOrbitSp
 GUESS[ST-d]: hi : 0 < i は「i = 0 なら x は既に F にある」ので場合分けで消える（境界だが回避可能）
 ```
 
+
+## ☆★★★★★★★訂正 —— `_of_conj_pure` は `k ≥ 1` で**空虚**だった（2026-09-08、`PureStepSetup.lean` 513 行 `sorry` 0）
+
+☆★★**本体は「Ax–Sen–Tate の数学は終わった」と報告したが、それは誤りである。**
+★実装者が着手直後の検算で見つけた:
+
+`hdeg : (minpoly F π).natDegree = p` ＋ `htop : Algebra.adjoin F {π} = ⊤` ⟹ `[M:F] = p`
+⟹ `τ : M →ₐ[F] M` は全単射（`AlgHom.bijective`）⟹ Artin ＋ 塔の公式で `orderOf τ ∣ p`
+⟹ ★**`τ^p = 1`** ⟹ `k ≥ 1` では `hne : (τ^{p^k}) π ≠ π` が**成り立たない**。
+★空虚性は `conj_pure_absurd_of_one_le` / `break_absurd_of_one_le` として**形式化した**。
+
+★**影響 6 本**（`grep -n "τ : M →ₐ\[F\] M" lean/ABC3/Found/PGC/Gained*.lean` で数えた）:
+`GainedBridgeSupply..._of_jumps` / `GainedJumpSeq..._of_jumps` / `..._of_conj` /
+`GainedJumpFree..._of_jumps_free` / `..._of_conj_free` / `..._of_conj_pure`。
+★★**消費側は 0 本**（`grep -rn "of_conj_pure\|of_conj_free\|of_jumps_free" lean/ABC3/ --include=*.lean` が
+当該ファイル自身以外に当たらない）⇒ ★**木は壊れていない。**
+
+☆★★**原因が特定されている**: `GainedJumpSeq...lt` は `τ : M →+ M`（**加法だけ**）で、
+`F`-線形なのは `σ = τ^{p^k}` の方だけ ——★**これが正しい設定**。
+★`GainedJumpFree` は `hstep` を導出するため `τ` を `M →ₐ[F] M` に**強めた**が、
+★**層 `j` で要るのは `F_j`-線形であって `F_k`-線形ではない。**
+⇒ ★★**`τ : M →+ M` を取る版は影響を受けない。★塔の降下の骨組み自体は健在。**
+
+★`k = 0` では非空虚だが、その主張は `MinpolyOrbitSplit.exists_norm_sub_algebraMap_le_axDecay_of_orbit`
+として**既に木に在る**。
+
+### ★★それでも進んだ分（配管 10 本のうち 5 本＋2 本が落ちた）
+
+★**落ちた**: `hsep` `hsp` `hconj` `hne`（★無条件・定理として）＋ `hnormp`（p 進局所体では）
+＋ `hfix`（Artin から無料）＋ `hiso`（★**スペクトルノルムから無料**）。
+★**残る 5 本**: `hdeg` `htop` `heM` `he` `hval`。
+★`structure WildStep p F M` を作り、10 本すべてを構造 1 つから供給する形にした。
+★`#print axioms` **20 本すべて** `[propext, Classical.choice, Quot.sound]`。
+
+**②在庫**: ★**「無いと思ったが在った」** `spectralNorm_eq_of_equiv` ＋ `NormedAlgebra.norm_eq_spectralNorm`
+（mathlib）で `hiso` が**無料**になった。`AlgHom.bijective` / `IntermediateField.finrank_fixedField_eq_card` /
+`Nat.card_zpowers` / `Polynomial.separable_prod_X_sub_C_iff'` もすべて mathlib に在った。
+★**「在るが形が違う」**: `IntermediateField.finrank_top'` は索引に `F` `E` が出るが**引数ゼロ**
+（`Function expected`）→ **#313**（#297 の姉妹形）。
+★**素元は別の場所に在った**: `UnramifiedExtension.lean:383` の `valuationRing_isDVR`、
+`ArtinMap.irreducible_uniformizer`。★本体の「`LocalFieldNorm` から出る」は**外れ**。
+★本体の「`hi : 0 < i` は場合分けで消える」も**外れ** —— 導出に**剰余体**が要る。
+
+**③残り 6 点**: ①`hdeg`/`htop` ②`heM`/`he` ③`hval` ④`hi`（要・剰余体）
+⑤`WildStep` を `PAdicLocalField` から**作る**（★`valuationRing_isDVR` が足がかり）
+⑥★**`k ≥ 1` の塔を `τ : M →+ M` の正しい形で書き直す**
+
+```
+VERDICT[ST-a]: 当たり — 新 structure は Found/PGC 内に閉じて作れた
+VERDICT[ST-b]: 半分 — スペクトルノルムから出たのは ‖p‖=1/p と等長性だけ。素元は UnramifiedExtension:383 だった
+VERDICT[ST-c]: 当たり — Galois 構造 4 本は無条件の定理として落ちた
+VERDICT[ST-d]: 外れ — hi は場合分けで消えない（剰余体が要る）
+COST[PureStep]: 安 | 持ち場=局所体の構造を作って接続する  — 配管 7 本が落ちたが、それ以上に「6 本が k ≥ 1 で空虚」を見つけたのが成果
+```
+☆★★**これは今日 14 回目の「配った字面が偽」であり、★本体の報告そのものの訂正でもある。**
+★★**実装者が着手直後の検算で見つけた** ——★規約「配られた字面を先に疑う」が働いた例である。
+
+## ★`GUESS:`（配る前に書いた —— `k ≥ 1` の塔を正しい形で書き直す）
+
+```
+GUESS[RW-a]: GainedJumpSeq...lt（τ : M →+ M）がそのまま骨組みになる（実装者の申告どおり）
+GUESS[RW-b]: hstep は τ が加法的なだけでも、層ごとの σ_j = τ^{p^j} が F_j-線形であることから出る
+GUESS[RW-c]: 中間体の塔 F = F_0 ⊂ F_1 ⊂ … ⊂ F_k が要るので #59/#69 に当たる
+GUESS[RW-d]: 本体の見立ては今日 2/4 前後。半分は外れる
+```
+
