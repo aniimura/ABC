@@ -15952,3 +15952,59 @@ GUESS[UL-c]: ①が閉じると FirstJumpRoute の heq(完全分岐の帰結)が
 GUESS[UL-d]: 本体の名指しは直近 17 波で 12 回外している。今回も少なくとも 1 つ外す
 ```
 
+
+## ★★★不分岐の 1 段は完全に無料（(b) が閉じた）—— `UnramifiedStepFixed.lean` 171 行 / `sorry` 0（2026-09-09）
+
+**★実装者が (b) を選んだ理由（本体が判断を委ねた点）**: (a) の費用を**先に 2 か所で測った**——
+- mathlib: `IsDiscreteValuationRing → IsDedekindDomain` の**直接の instance は無い**。在るのは
+  `IsDiscreteValuationRing.TFAE`（`RingTheory/DiscreteValuationRing/TFAE.lean:210`）で、
+  リストから取り出す形。`[IsNoetherianRing][IsLocalRing][IsDomain]` と `¬IsField R` が要る。
+- 木: `Found/PGC` に `IsDedekindDomain` の宣言が**無い**（`UnramifiedExtension.lean:218/:381` の
+  docstring が「ここから従う」と書いているだけ）。
+⇒ (a) は TFAE の取り出し＋`trace_quotient_eq_of_isDedekindDomain` の残り 4 仮説で**重い**。
+(b) は `Finset.smul_sum` と左移動の再添字だけで**軽い**と見た。★実際 1 往復で通った。
+
+**①成果**（★全部が抽象核。分岐・付値・Galois・`p` 進の語彙 0）:
+**`exists_fixed_step_free`** —— `‖a‖ ≤ 1` と `Σ_{g∈H} g·a = 1` と `∀ g : G, ‖g·x − x‖ ≤ ε` から
+★★**`∃ y`、`H` で固定され、`‖x − y‖ ≤ ε`（損失 `1`）かつ `∀ g : G, ‖g·y − y‖ ≤ ε`（伸び `1`）**。
+- **`smul_sum_subgroup`**（`Σ_{g∈H} g·b` は `H` で固定される。★これが (b) の中身）
+- `exists_fixed_norm_sub_le`（損失 `ε`）
+- 伸びは `WildDescentDistanceOnly.lean:161 norm_smul_sub_self_le_max` が**無償**で落とす
+
+⇒ ★★★**不分岐の層は `c = g = 1` で、`exists_mem_of_descent_budget` の予算にも
+`axLemma_of_wildDescent_Icc` の積にも一切効かない。**
+
+**②残る 1 点は (a) だけ**: `‖a‖ ≤ 1` かつ `Σ_{g∈H} g·a = 1` なる `a` の**存在**
+（＝「不分岐 ⇒ 跡が整数環に全射」）。★道具は mathlib に在るが `IsDedekindDomain` を DVR から出す
+配管が重い。★**本波では払っていない。**
+
+**③配管の失敗は 2 つだけ**: `Unknown identifier 'norm_smul_sub_self_le_max'` →
+**import していなかった**（#68 のとおり「無い」ではなく「import していない」）。
+`rw [norm_sub_rev] at this` より、ゴール側で `rw` してから `exact` の方が通った。
+
+**穴の現状**: ①不分岐 —— ★**(b) は閉じた**。前波の「難しい側ではない」に加えて本波で
+★**「無料である」**まで測れた。★ただし (a) が残るので**「①が閉じた」とは書かない**。
+②′ / ③ / ⑤ は変わらず。④は消えたまま。
+
+**★未了として明記**: (a) は仮説のまま。★`y` が「下の体に入る」ことは **`H` で固定される**という形で
+書いており、**`wildDepth` が真に下がる**ことまでは示していない。
+
+```
+VERDICT[UL-a]: ★当たり（trace_quotient から出るが IsDedekindDomain を DVR で満たす配管が重い、まで一致）
+VERDICT[UL-b]: 半分（(b) は安かったが、道具は WildDepthFieldDescent ではなく Finset.smul_sum。wildDepth は未接続）
+VERDICT[UL-c]: 未判定
+VERDICT[UL-d]: 当たり
+★本体が判断を委ねるのは 2 波連続で当たり。★実装者は「費用を先に測ってから選ぶ」を毎回している。
+COST[UnramifiedStepFixed]: 安 | 持ち場=①の 2 点  — (b) が閉じ、不分岐の層が完全に無料と判明
+```
+
+
+## ★`GUESS:`（配る前に書いた —— 次の 1 波）
+
+```
+GUESS[NX-a]: (a) は TFAE の取り出しが 1 行(IsDiscreteValuationRing.TFAE のリスト位置を測れば)で、残り 4 仮説のうち IsIntegrallyClosed が一番高い
+GUESS[NX-b]: wildDepth が真に下がることは、H で固定される + H が非自明 から出るはずで、WildDepthFieldDescent の既存配管に在る
+GUESS[NX-c]: 実装者は費用を先に測って安い方を選ぶので、(a) ではなく wildDepth の接続か hform を選ぶ
+GUESS[NX-d]: 本体の名指しは直近 18 波で 13 回外している。今回も少なくとも 1 つ外す
+```
+
