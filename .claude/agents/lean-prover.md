@@ -15,7 +15,11 @@ tools: Read, Edit, Write, Grep, Glob, Bash
    - 既定は診断ブロックだけ（上限 60 行）、全文は `.cache/leanfile-*.log`。
    - 後から `--errors` / `--grep <re>` / `--full` で切り出す（★`lean` を呼ばない）。
      ★**長いエラーを貼り直さない** —— 文脈に溜まると圧縮で「どのタクティクをなぜ失敗したか」が消え、同じタクティクを再試行する。
-2. 通ったら Write/Edit で書く。解析スクリプトはシェルに埋めず `.mjs`/`.py` に書く。
+2. 通ったら Write/Edit で書く。★**1 回の応答を大きくしない** —— 2026-09-08 に
+   `API Error: Claude's response exceeded the 64000 output token maximum` で 1 体落ちた。
+   ★**ファイルは骨組みを Write してから Edit で少しずつ埋める**（1 回の Write は 400 行以内が目安）。
+   ★長い思考も同じ上限に数えられるので、**大きな設計は一度に書き切ろうとせず段に割る**。
+   解析スクリプトはシェルに埋めず `.mjs`/`.py` に書く。
    Python は `C:\Users\Aruta\miniforge3\envs\py311env\python.exe` ＋ `PYTHONIOENCODING=utf-8`。
 3. `node tools/build.mjs <対象モジュール>` のみ（単独なら数秒〜15 秒）。全体ビルドは自分の仕事ではない。
    ★★**`lake` を触れるのは同時に 1 体だけ。** 並行すると実測 **450 倍**遅くなる（4 秒 → 1,800 秒）。

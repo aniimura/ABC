@@ -13158,3 +13158,13 @@ GUESS[DD-b]: 上限 axDecay p 2 が k に依らないのは、E₁ が常に次�
 GUESS[DD-c]: 証明の核は (1+c)^D−1 の評価と E₁ のコバウンダリの打ち消しの 2 本で、両方とも超距離だけで書ける
 GUESS[DD-d]: 本体は今日 4 度「点の数」を外している。これも最後の 1 点ではない
 ```
+
+## ★エージェントが API の出力上限で落ちた（2026-09-08、★新しい失敗形）
+
+★`AxDeepDescent` を配った 1 体が `API Error: Claude's response exceeded the 64000 output token maximum` で
+着手直後に終了。★**木は無事**（残骸 0、`build ABC3.Found` error 0、直前のファイルも 737 行のまま）。
+★数学の失敗ではなく**応答の大きさ**の問題。★長い思考も同じ上限に数えられる。
+⇒ ★`.claude/agents/lean-prover.md` に規則を追加:
+「**ファイルは骨組みを Write してから Edit で少しずつ埋める**（1 回の Write は 400 行以内が目安）。
+大きな設計は一度に書き切ろうとせず段に割る」。
+
