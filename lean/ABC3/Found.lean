@@ -1909,6 +1909,7 @@ import ABC3.Found.PGC.DepthLowerBound
 import ABC3.Found.PGC.WitnessScope
 import ABC3.Found.PGC.KrasnerCeiling
 import ABC3.Found.PGC.CyclotomicNumbersVerified
+import ABC3.Found.PGC.CyclotomicJumpsVerified
 /-!
 # Found — 実装済みの基礎
 
