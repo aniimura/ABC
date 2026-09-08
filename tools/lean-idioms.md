@@ -13125,3 +13125,63 @@ theorem isGalois_of_orderOf_eq_finrank {K M : Type*} [Field K] [Field M] [Algebr
 `le_or_lt` は `Unknown identifier`（`by_cases` に書き換える）、
 `IntermediateField.finrank_top` は `finrank ↥⊤ E = 1` で**向きが逆**
 （`finrank K ↥⊤ = finrank K M` は `IntermediateField.topEquiv` ＋ `LinearEquiv.finrank_eq`）。
+
+## #328 木に**同名の定理が 2 つ**あると `open` の下で意図しない方が解決される（2026-09-08、ConcreteDegPFree）
+
+```
+error: Application type mismatch: The argument
+  g2
+has type
+  Gal(M2/ℚ_[2])
+of sort `Type` but is expected to have type
+  ABC3.Skeleton.PGC.PAdicLocalField ?m.7
+of sort `Type 1` in the application
+  norm_algEquiv_eq g2
+error: Invalid argument name `k` for function `norm_algEquiv_eq`
+
+Hint: Perhaps you meant one of the following parameter names:
+  • `p`: k̵p̲
+  • `K`: k̵K̲
+  • `σ`: k̵σ̲
+  • `x`: k̵x̲
+```
+
+`norm_algEquiv_eq` は木に **2 本**ある:
+
+```
+lean/ABC3/Found/PGC/PureStepSetup.lean:283   {k M} 版（スペクトルノルム、NormedAlgebra が要る）
+lean/ABC3/Found/PGC/AdjoinIntegers.lean:1821 (K : PAdicLocalField p) 版
+```
+
+★`open ABC3.Found.PGC` の下では**後者**が解決される。`(k := …)` を付けても直らない
+（Hint の `k̵p̲` は「`k` ではなく `p`」の意味で、★**別の定理**だと言っている）。
+★直し方: 名前空間まで書く（`PureStepSetup.norm_algEquiv_eq`）か、★**別の道を探す**。
+
+★測り方: `grep -rn "<名前>" lean/ABC3/Found/PGC/*.lean | head` で**何本あるか数える**。
+
+## #329 `spectralNorm.normedField` を入れても `NormedAlgebra` は付いてこない（2026-09-08、ConcreteDegPFree）
+
+```
+failed to synthesize instance of type class
+  NormedAlgebra ℚ_[2] M2
+```
+
+`ConcreteNormedModel` は `normedFieldM2 : NormedField M2 := spectralNorm.normedField ℚ_[2] M2`
+を置いているが、★`NormedAlgebra ℚ_[2] M2` は**付いてこない**。
+mathlib の `spectralNorm.normedAlgebra` は
+
+```
+def normedAlgebra : @NormedAlgebra K L _ (seminormedRing K L)
+```
+
+で ★`def`（instance でない）かつ★**別のノルム構造に対する形**なので、そのまま挿せない。
+
+★**回り道の方が短い**（実測）—— ノルムは**定義そのもの**がスペクトルノルムなので
+
+```lean
+example (z : M2) : ‖z‖ = spectralNorm ℚ_[2] M2 z := rfl      -- ★通る
+theorem hiso_g2 (z : M2) : ‖g2 z‖ = ‖z‖ := (spectralNorm_eq_of_equiv g2 z).symm
+```
+
+★`NormedAlgebra` も `NormedAlgebra.norm_eq_spectralNorm` も経由せずに 1 行で済む。
+★`spectralNorm_eq_of_equiv` の向きは `spectralNorm K L y = spectralNorm K L (σ y)`（`.symm` が要る）。
