@@ -14718,3 +14718,61 @@ VERDICT[「(4) は #59/#69 の危険区間」]: 外れ（Subfield で建てれ�
 COST[WildBreakPowDegree]: 安 | 持ち場=(1)(4) の一般化  — 2 点とも落ち、harith の残りが 0 になった
 ```
 
+
+## ★★★★★★★★出口から `harith` と `htop` が消えた —— `HarithAssembly.lean` 390 行 ＋ `HarithConcreteCheck.lean` 106 行 / `sorry` 0（2026-09-09）
+
+**①持ち場の 3 問への実測**:
+1. `hsg`（`s j` ⟷ `g^{p^j}`）は ★**1 行**（`rw [← hsg j π]`）。
+2. `hiso` は `PureStepSetup.lean:283 norm_algEquiv_eq` から ★**出ない** ——
+   同定理は `[NontriviallyNormedField k] [IsUltrametricDist k] [CompleteSpace k] [NormedAlgebra k M]
+   [Algebra.IsAlgebraic k M]` を要求するが `harith` の `K` は素の `[Field K]`（ノルムなし）。
+   ⇒ `hiso : ∀ z, ‖g z‖ = ‖z‖`（**生成元だけ**）を仮説で受ける。★全 `σ` 版は `htop` と
+   `norm_zpow_apply` で**内部で作れる**ので仮説は 1 つで済む。
+   ★具体層では 1 行で消える —— `‖z‖ = spectralNorm K1 M4 z` が **`rfl`**、
+   `hiso_g4 := (spectralNorm_eq_of_equiv g4 z).symm`（★向きだけ違う。`NormedAlgebra` は不要、#329 の手）。
+3. ★本体が字面で数えた「(2)(3) は `∀ m < k` に限られている」——
+   (2) は**ちょうど合う**が ★★**(3) は合わなかった**。`dvd_sub_jump_of_norm` は `hsmono` を**全域**で
+   要求するが `harith` からは `k` 以下しか出ない。⇒ 跳びの列を `k` の先へ延ばして回避:
+   `uN j := if j ≤ k then (u j).toNat else (u k).toNat + (j − k)`。⇒ **#338**。
+
+**②成果**:
+
+| 宣言 | 内容 |
+|---|---|
+| ★★`exists_base_uniformizer` | **`K` の素元の存在** |
+| ★★★**`harith_of_norm`** | **`harith` の 4 条件をノルムの仮説だけから** |
+| ★★★**`exists_norm_sub_algebraMap_le_prod_axDecay_of_norm`** | **`harith` と `htop` が消えた出口** |
+
+**③在庫の測定 —— 内部で作れた（仮説で受けずに済んだ）もの**:
+
+| 必要 | 供給元 |
+|---|---|
+| `hπ0` | `TotallyRamifiedValueGroup.lean:391 norm_pos_of_normp` |
+| `hval`（`M` の値群） | 同 `:163 exists_zpow_norm` |
+| `Gal = ⟨g⟩` | `Subgroup.eq_top_of_card_eq` ＋ `IsGalois.card_aut_eq_finrank` |
+| ★`πK`（`K` の素元） | 同 `:252 exists_valSub_gen` |
+| `adjoin K {π} = ⊤` | `TotallyRamifiedLayer.adjoin_eq_top_of_valK` |
+
+★★**`πK` が一番危うい点だった** —— `hvalK` は「`K` の値群が `‖π‖^{qℤ}` に**入る**」しか言わないので
+生成元を**実現する元**があるかは別問題。`exists_valSub_gen` の同値式
+`(∃ d : K, d ≠ 0 ∧ ‖algebraMap K M d‖ = ‖π‖^m) ↔ (c : ℤ) ∣ m` を `m := c` で使うと★**元そのものが取れる**。
+
+**④検算**:
+- ★`harith_k1_via_norm` は `ConcreteNormedModelK1.lean:561 harith_k1` と**字面が完全に同じ**で
+  `harith_of_norm` への**代入 1 行**。原型は跳びの値 4, 8 ＋ `interval_cases` ＋ `decide` だったが
+  ★本定理は**跳びの値を一切使わない**。
+- ★`model_k1_exists_via_norm` は `harith_k1` も `adjoin_root_top` も渡さずに同じ結論を出す。
+- ★**検算できなかったもの**: `harith_zeta81` は `Zeta81.uz` の**数値の主張**で、ℚ₃(ζ₈₁) の
+  **ノルム付き模型が木に無い**ため `harith_of_norm` は適用できない。数値の一致は
+  `HasseArfCongruenceNorm.lean` §4 で確認済み（`φ = (2,4,6)`）。
+
+**⑤★残るノルムの仮説は `hiso` / `hnK` / `hvalK` / `hnormp` / `heM` の 5 本**（`hiso` は具体層で 1 行）。
+★次の 1 点は **`PAdicLocalField` 側から `hnK`・`hvalK`・`heM` を供給すること**
+（＝「一般の `K` と `x` から仮説を満たす塔を作る」）で、★実装者がこの鎖の**最初の波で
+「ここで止まる」と書いた場所**。★今どこまで詰まっているかは**未測定**。
+
+```
+VERDICT[本体の「(2)(3) は m < k に限られている」]: ★当たり（(3) が実際に合わず、実装者が列を延ばして回避した）
+COST[HarithAssembly + HarithConcreteCheck]: 安 | 持ち場=組み立て  — harith と htop が出口から消え、k=1 で検算まで通った
+```
+
