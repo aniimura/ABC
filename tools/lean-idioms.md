@@ -12311,6 +12311,18 @@ nlinarith [hc d]
 （そのうえで `Finset.prod_Ioc_consecutive` が `∏_{(0,d']}·∏_{(d',d]} = ∏_{(0,d]}` をくれる）。
 `` Unknown identifier `le_or_lt` `` → `Nat.lt_or_ge a b : a < b ∨ a ≥ b` を使う。
 
+★**再出現（2026-09-09、KummerNoCarry）**。逐語:
+
+```
+ABC3/Found/PGC/KummerNoCarry.lean:104:9: error(lean.unknownIdentifier): Unknown identifier `le_or_lt`
+ABC3/Found/PGC/KummerNoCarry.lean:104:27: error: Tactic `rcases` failed: `x✝ : ?m.89` is not an inductive datatype
+```
+
+★2 行目は 1 行目の**巻き添え**（`rcases` の対象が elaborate できていない）。★1 行目だけ読む。
+★`Nat.lt_or_ge a i` は `a < i ∨ a ≥ i` なので、★**場合分けの順が入れ替わる**（`·` の中身も入れ替える）。
+★★これで `pos_pow_of_pos`（#314）に続き **2 度目**の「記録済みの罠に再び落ちた」回である。
+⇒ ★**書く前に `grep -n <名前> tools/lean-idioms.md`**（`idiom-recur.mjs --similar` は 3 度とも 0 件）。
+
 ### #302b 同じ `MulLeftMono ℝ` が **冪**でも出る —— `le_self_pow`（2026-09-09、BaseLayerConstant）
 
 `(p:ℝ) ≤ (p:ℝ)^K₀`（`1 ≤ K₀`）を `le_self_pow` で書くと、逐語で**同じ 1 行**が出る:
