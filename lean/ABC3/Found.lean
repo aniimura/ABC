@@ -1935,6 +1935,7 @@ import ABC3.Found.PGC.BinomialFirstOrder
 import ABC3.Found.PGC.ComponentWitness
 import ABC3.Found.PGC.LossTwoPSubTwo
 import ABC3.Found.PGC.SeparatedComponent
+import ABC3.Found.PGC.ResidueSeparation
 /-!
 # Found — 実装済みの基礎
 
