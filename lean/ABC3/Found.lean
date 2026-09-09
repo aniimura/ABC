@@ -1940,6 +1940,7 @@ import ABC3.Found.PGC.ComponentFormulaScope
 import ABC3.Found.PGC.MaxMinIndex
 import ABC3.Found.PGC.ComponentExpansion
 import ABC3.Found.PGC.LossExponentMatch
+import ABC3.Found.PGC.ComponentBasisExpansion
 import ABC3.Found.Goal.Theory
 /-!
 # Found — 実装済みの基礎
