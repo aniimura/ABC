@@ -64,6 +64,9 @@ def run(p, n, trials, seed=20260909):
     n7b = [0, 0]
     n8 = [0, 0, 0, 0]
     n10 = [0, 0]
+    n15 = [0, 0, 0]              # [j0 スロットが支配されない, 総数, j0 スロットが空]
+    n13 = [0, 0]                 # [j >= 1 だけで成立, 総数]
+    n14 = [0, 0, None]           # [v(rem) %% p != j0 %% p, 総数, 破れの例]
     n12 = [0, 0, 0]              # [全 j で成立, 総数, j=0 だけで成立]
     n11 = [0, 0, None]           # [v(f_j) >= 0 の件数, 総数, 最小の v(f_j)]
     n9 = [0, 0, None]            # [成立, 総数, 最大の loss]            # [誤差が深い, ★同位, 誤差が浅い, 総数]
@@ -100,6 +103,7 @@ def run(p, n, trials, seed=20260909):
                     n11[2] = vf[j]
         # (n12) ★係数の動きの「係数の大きさ倍」評価: v(sigma f_j - f_j) >= v(f_j0) + 2p
         okall = True
+        oktail = True
         for j in range(p):
             gj = L._apply(L.sig[a0], Df[j])
             dv = F.v([u - z for u, z in zip(gj, Df[j])])
@@ -108,8 +112,13 @@ def run(p, n, trials, seed=20260909):
                 n12[2] += 1
             if not ok:
                 okall = False
+                if j >= 1:
+                    oktail = False
         n12[1] += 1
         n12[0] += okall
+        # (n13) ★j >= 1 だけなら成り立つか
+        n13[1] += 1
+        n13[0] += oktail
         # (n2)
         for j in tail:
             n2[1] += 1
@@ -161,6 +170,30 @@ def run(p, n, trials, seed=20260909):
         else:
             n8[2] += 1                        # 誤差の方が浅い（結論は出る）
 
+        # (n14) ★残り全部（R + 誤差）の位が j₀ と違う剰余類か
+        rem = [u - z for u, z in zip(actual, F.mul(Belt, F.powm(F.PI, j0)))]
+        vrem = F.v(rem)
+        n14[1] += 1
+        if vrem is None or (vrem - vD) % p != j0 % p:
+            n14[0] += 1
+        elif n14[2] is None:
+            n14[2] = (j0, vrem - vD, vf[j0])
+        # (n15) ★残りのスロット分解で、j₀ スロットが「最大でない」か
+        #      （SlotResidue.loss_le_of_remainder_slots の仮定そのもの）
+        crem = L.coords(rem)
+        vslot = []
+        for i in range(p):
+            zi = elt_from_coords(L, crem, i)
+            vv = F.v(zi)
+            vslot.append(None if vv is None else vv - vD + i)
+        others = [vslot[i] for i in range(p) if i != j0 and vslot[i] is not None]
+        n15[1] += 1
+        if vslot[j0] is None:
+            n15[2] += 1
+            if others:
+                n15[0] += 1
+        elif others and min(others) < vslot[j0]:
+            n15[0] += 1
         # (n10) 誤差が「係数の大きさ × ‖ρ‖²」以下か: v(err) ≥ v(f_{j₀}) + 2p
         n10[1] += 1
         if verr is None or verr - vD >= vf[j0] + 2 * p:
@@ -187,6 +220,11 @@ def run(p, n, trials, seed=20260909):
           f"  最小の v(f_j) = {n11[2]}")
     print(f"    (n12) ★v(σf_j−f_j) ≥ v(f_j₀)+2p: 全 j {n12[0]}/{n12[1]}"
           f"  （j=0 だけなら {n12[2]}/{n12[1]}）")
+    print(f"    (n13) ★j ≥ 1 だけなら深いか  : {n13[0]}/{n13[1]}")
+    print(f"    (n14) ★v(R+err) %% p ≠ j₀ %% p : {n14[0]}/{n14[1]}"
+          f"  破れの例 (j₀, v, v(f_j₀)) = {n14[2]}")
+    print(f"    (n15) ★j₀ スロットが最大でない: {n15[0]}/{n15[1]}"
+          f"  （うち j₀ スロットが空 {n15[2]}）")
     print(f"    (n2) p | v(f_j)              : {n2[0]}/{n2[1]}")
     print(f"    (n3) d の 2 通りの計算が一致 : {n3[0]}/{n3[1]}")
     print(f"    (n4) ★j₀ ≠ jstar             : {n4}/{n3[1]} 件"

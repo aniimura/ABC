@@ -13930,3 +13930,33 @@ def valueOf : ConstantInfo → Option Expr
 `exact?`（MCP REPL）で型から引くのも同じ理由で索引より強い。
 
 **関連**: 索引の嘘は 2 通り——「無いが嘘」（本項で 8 例目）と「形が嘘」（#297、明示引数が 1 つ多い）。
+
+## #355 `exact_mod_cast` は `‖·‖₊` → `‖·‖` を渡らない（2026-09-09、SlotResidue）
+
+`IsUltrametricDist.nnnorm_sum_eq_sup_of_pairwise_ne` は **`‖·‖₊`（`ℝ≥0`）で書かれている**ので、
+実数ノルムの主張に持っていくときに `exact_mod_cast` を使うと落ちる。
+
+実際に出た文（逐語）:
+
+```
+error: mod_cast has type
+  ‖∑ i ∈ t, y i‖₊ = ‖y j‖₊
+but is expected to have type
+  ‖∑ i ∈ t, y i‖ = ‖y j‖
+```
+
+★`push_cast`/`norm_cast` の simp set に `coe_nnnorm` が入っていないため、
+**両辺が `NNReal` の等式**のときは `mod_cast` の探索が始まらない。
+
+**直し方**（木が 2 箇所で使っている形）:
+
+```lean
+have h2 : ‖∑ i ∈ t, y i‖ = ‖y j‖ := by simpa using congrArg NNReal.toReal hnn
+```
+
+`congrArg NNReal.toReal` で `ℝ` の等式に落としてから `simpa`（`coe_nnnorm` が simp 補題）。
+★逆向き（`ℝ` の等式から `ℝ≥0`）も同じで、`exact_mod_cast` ではなく
+`congrArg` か `NNReal.coe_injective` を使う。
+
+**関連**: `‖·‖₊ ≤ ‖·‖₊` から `‖·‖ ≤ ‖·‖` は `exact_mod_cast` で**通る**（不等式は
+`NNReal.coe_le_coe` が `norm_cast` 補題として登録されているため）。★等式だけが落ちる。
