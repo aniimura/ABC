@@ -14035,3 +14035,18 @@ but is expected to have type
 ★**読み方の規律**: `--full` の出力は下から読まない。`sorryAx` は結果であって原因ではない。
 修正後にもう一度 `--full` を通し、★**3 公理だけ**（`propext` / `Classical.choice` / `Quot.sound`）
 になったことを確かめる。
+
+## #359 ファイル名と名前空間は一致しない —— 引く前に `grep -n '^namespace'`
+
+**失敗形**: 逐語 `error: Unknown identifier ` + '`NormalizedTraceDescent.JumpArith.rpow_div_le_axDecay`' + `。
+★`NormalizedTraceDescent.lean` は **`NormalizedTraceDescent` という名前空間を開いていない**。
+
+**測定**（2026-09-09、`grep -n '^namespace' lean/ABC3/Found/PGC/NormalizedTraceDescent.lean`）:
+`ABC3.Found.PGC`(:140) の下に **`TraceCore`(:147) / `JumpArith`(:209) / `FirstJumpRoute`(:367)** の 3 つ。
+⇒ 正しい名前は `ABC3.Found.PGC.JumpArith.rpow_div_le_axDecay`。
+
+**直し方**: 他ファイルの定理を引く前に `grep -n '^namespace' <file>` を 1 回。
+`.cache/decl-index.txt` は完全修飾名で持っているので、そちらを引くのも同じく確実。
+
+**関連**: #297（索引の「形が嘘」）/ #354（`to_additive` 名が索引に無い）。
+★索引・ファイル名・docstring の 3 つとも嘘をつきうる。当たるのは**本文**である。
