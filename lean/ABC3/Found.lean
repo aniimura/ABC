@@ -1938,6 +1938,7 @@ import ABC3.Found.PGC.SeparatedComponent
 import ABC3.Found.PGC.ResidueSeparation
 import ABC3.Found.PGC.ComponentFormulaScope
 import ABC3.Found.PGC.MaxMinIndex
+import ABC3.Found.PGC.ComponentExpansion
 /-!
 # Found — 実装済みの基礎
 
