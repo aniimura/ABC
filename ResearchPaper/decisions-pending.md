@@ -17946,3 +17946,28 @@ GenEll §3→§4、pGC §1→§4 をその形にするかは**人の判断**（D
 ★`CyclotomicJumpsVerified` / `CyclotomicNumbersVerified` は本体も実装者も**未読**。
 
 **VERDICT / COST**: 本体は今波もゲートのみ。★本日 commit 183 / 新規 `Found/PGC/*.lean` 79 本。
+
+---
+
+## 第 1114 —— 円分塔への代入、3 点のうち 1 点が定理に（実装者）／★本体の持ち場が外れた
+
+**真偽**: `hwn : ‖w‖ = ‖π‖^p` は ★**定理として供給できた**（`CyclotomicSubstitution.norm_w_eq_pow`）。
+理由は「`w` は単数倍の差でしか `μ` と違わない」（`w = ξ^b − 1`, `p ∤ b`）で、
+材料は全部実装者自身の定理（`ZetaUnitFactor.norm_pow_sub_one_eq` ＋ `ZetaStepRatio.norm_zeta_step`）。
+★`norm_pow_sub_one_eq` は前の波で「使い道が無いかもしれない」と思いながら書いた補題だった。
+`hvalK` は 1 段下（残るは「`E₁` の値群が `‖μ‖^ℤ`」）、`hfr` は半分が定理（残るは `finrank ≤ p`）。
+
+**★本体の誤り（持ち場の「証拠の場所」が外れた）**: 本体が名指しした
+`CyclotomicJumpsVerified` / `CyclotomicNumbersVerified` は、実装者が開いて測ったとおり
+★**`decide` / `norm_num` レベルの数値検算だけ**（`(4 : ZMod 27)^9 = 1` など）で、
+一般の `finrank` も値群の定理も **0 件**。★原因は**本体がファイル名から中身を推測した**こと。
+⇒ 「証拠の場所を書く」規約は、**本体が中身を見ていない場合はそう明示する**まで含めて守る必要がある。
+
+**在庫の測定（実装者）**: `IntermediateField.adjoin.finrank`（`Adjoin/Basic.lean:468`）と
+`minpoly.min`（`Minpoly/Basic.lean:134`）は**在る**。★罠: `minpoly.natDegree_le` は
+`natDegree ≤ finrank` で**向きが逆**（#297 の親戚）。★木の断定の検算 4 例目:
+`ℚ₂(ζ₁₆)` の break `[1,3,7]` ほかを `zeta-tower-check.py` で測り直し**一致**。
+
+**次の 1 点**: `finrank ≤ p` か「`E₁` の値群が `‖μ‖^ℤ`」。★`IntermediateField` は #59/#69 の領域。
+
+**VERDICT / COST**: 本体は今波もゲートのみ。★本体の GUESS（2 ファイルが使える）は**外れ**。
