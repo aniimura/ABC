@@ -17609,3 +17609,57 @@ loss_le_of_exp_ne (hp : 2 ≤ p) (hj : j ≤ p - 1)
 COST[SeparatedComponent]: 安 | 持ち場=hz の供給  — 一意性が不要と判明し、残りが 1 つの自然数の不等式に
 ```
 
+
+## ★★★★★★論証の全段が Lean に載った —— `ResidueSeparation.lean` 定理 2 / `sorry` 0（2026-09-09）
+
+**★8 つ目の規律（「まず 2 行を試す」）がまた効いた**: 前波が残した `hv : d + (p−1) + j ≠ v` を
+**まず短く書いてみたら通った** —— `p ∣ D` なら `(D + j) % p = j`
+（`Nat.mul_add_mod` ＋ `Nat.mod_eq_of_lt`）。★**`exp_ne_of_residue_ne`、5 行。**
+
+**★★★★★到達点**:
+```lean
+loss_le_of_residue_ne (hp : 2 ≤ p) (hj : j ≤ p-1) (hjp : j < p)
+    (hD : p ∣ (d + (p - 1)))              -- ★TailNoCancel の内容（証明済み）
+    (hB : ‖B‖ = ‖π‖ ^ (d + (p - 1)))      -- ★j が単数（証明済み）の帰結
+    (hR : ‖R‖ = ‖π‖ ^ v) (hv : v % p = j') (hne : j ≠ j') :
+    ‖π‖ ^ (d + (2 * p - 2)) ≤ ‖B * π ^ j + R‖               -- = loss ≤ 2p−2
+```
+
+**★★★論証は全段 Lean に載った**:
+
+| 段 | Lean |
+|---|---|
+| (0) `p ∣ d−1` が必要 | `TailNoCancel.dvd_add_sub_one_iff` |
+| (1) `ρ = w + wπ`、`v(w) = p` | `RhoFactorization`/`ZetaUnitFactor`/`ResidueUnitNorm` |
+| (2) 主項・残りは 2 次 | `BinomialFirstOrder.norm_add_pow_sub_linear_le` |
+| (3) `j₀` は単数 | `TopIndexSurvives.not_dvd_of_pos_lt` |
+| (4) `δ` は深い（`p ≥ 3`） | `TopIndexSurvives.delta_deeper_iff_three_le` |
+| (5) 上界の算術 | `TopIndexSurvives.loss_bound_from_index` |
+| (6) 成分から結論 | `ComponentWitness.loss_le_of_component_witness` |
+| (7) 全体 | `LossTwoPSubTwo.loss_le_two_p_sub_two_of_component` |
+| (8) `hz` の供給（2 行） | `SeparatedComponent.norm_le_of_norm_ne` |
+| (9) 分離 → 指数 | `SeparatedComponent.loss_le_of_exp_ne` |
+| ★(10) 指数 → 剰余 | ★**本波 `loss_le_of_residue_ne`** |
+
+★★**数学の論証で Lean になっていない段は、もう無い。**
+
+**★★残っているのは「具体層への代入」だけ**: `σx − x = B·π^j + R` の分解を実際に作れば
+本ファイルの仮説はすべて満たされる。その分解は本日証明した (1)(2)(3) から**代数的に決まる**
+（`B = w·j₀·f_{j₀} + 深い項`、`R = Σ_{j′≠j₀} B_{j′}π^{j′}`）。
+★**新しい数学の段は 1 つも無い。**
+
+**★★出口までの道（すべて既存の定理）**: 分解の代入 ⇒ `loss ≤ 2p−2` ⇒ `p^{(2p−2)/e_k}` ⇒
+`SharpPrizeBound.sharp_exponent_sum_le` が総和 `2p/(p−1)` を閉じる ⇒
+`axLemma_of_wildDescent` が **`AxLemma K (p^{2p/(p−1)})`** ⇒ **`AxSenTate`**（`cor_3_1` の入口）。
+
+**★母集団**: **`p ≥ 3`**（実測 4,187 件で破れ 0）。`p = 2` は `2p−1`、理由も証明済み。
+
+**逸脱**: ★★**具体層への代入はしていない。「`loss ≤ 2p−2` が（無条件に）定理になった」とは
+書いていない** —— 本ファイルの定理は**分解を仮説で受けた形**。
+★5 段の証明の**本文**は `TopIndexSurvives.lean` の docstring（5 波連続で明記）。
+★**規律 8 つ**も本ファイルの docstring にまとめた。次の波はそこから始められる。
+
+```
+COST[ResidueSeparation]: 安 | 持ち場=v(R) ≢ j (mod p)  — 5 行で通り、論証の全段が Lean に載った
+```
+
