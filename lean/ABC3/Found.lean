@@ -1956,6 +1956,7 @@ import ABC3.Found.PGC.PadicValueGroup
 import ABC3.Found.PGC.MonicRelation
 import ABC3.Found.PGC.JumpAtP
 import ABC3.Found.PGC.GeneralJumpBound
+import ABC3.Found.PGC.FirstJumpIsBottom
 import ABC3.Found.Goal.Theory
 /-!
 # Found — 実装済みの基礎
