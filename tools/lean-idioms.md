@@ -12311,6 +12311,27 @@ nlinarith [hc d]
 （そのうえで `Finset.prod_Ioc_consecutive` が `∏_{(0,d']}·∏_{(d',d]} = ∏_{(0,d]}` をくれる）。
 `` Unknown identifier `le_or_lt` `` → `Nat.lt_or_ge a b : a < b ∨ a ≥ b` を使う。
 
+### #302b 同じ `MulLeftMono ℝ` が **冪**でも出る —— `le_self_pow`（2026-09-09、BaseLayerConstant）
+
+`(p:ℝ) ≤ (p:ℝ)^K₀`（`1 ≤ K₀`）を `le_self_pow` で書くと、逐語で**同じ 1 行**が出る:
+
+```
+ABC3/Found/PGC/BaseLayerConstant.lean:267:14: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+  MulLeftMono ℝ
+```
+
+★`le_self_pow` は順序付き**モノイド**版なので ℝ の乗法には当たらない（#302 と同じ根）。
+★★**直し方は `₀` 付きに替えるだけ**（`GroupWithZero` 版は `1 ≤ a` を仮定に持つので ℝ で通る）:
+
+```lean
+-- 通らない: le_self_pow (h : 1 ≤ a) (hn : n ≠ 0) : a ≤ a ^ n
+-- 通る:
+simpa using pow_le_pow_right₀ (le_of_lt h1) hK   -- h1 : (1:ℝ) < p, hK : 1 ≤ K₀
+```
+
+★`a^1 ≤ a^K₀` が出るので `simpa` で `a^1 = a` を潰す。
+★同族: `pow_le_pow_left₀` / `one_le_pow₀` / `Finset.one_le_prod`（これは元から ℝ で通る、#302）。
+
 ## #303 `generalize hn : deg x = n` の強帰納では `rw [hn] at *` ではなく `subst hn`（2026-09-08、深い降下の反例）
 
 ```
