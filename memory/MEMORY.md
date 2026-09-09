@@ -76,3 +76,5 @@
 - [pdftotext は ≠ の斜線を落とし、ハットは 2 通りに壊れる](pdftotext-drops-negation.md) — Hasse-Arf を含む 3 箇所で主張が反転。★ハットは本文サイズで消え上付きでは `b` になる(Ê∩K^sep=E が自明に見える)。⊂ は落ちない(2026-09-07 訂正)
 - [道具の警告は出力を絞ると消える](brief-header-carries-the-warning.md) — brief.mjs は冒頭で「この項目は既に木にある」と言う。sed で絞って切り落とし、既出の Cor 6.3 を配った。★冒頭から読む／型で引く
 - [サブエージェントは lean-prover のみ（2026-09-08 ユーザー判断）](agent-budget-2026-09-08.md) — meta-optimizer / math-planner / general-purpose は廃止。★検証は外注でなく本体が inline。持ち場も記録も 1/3 に削る
+- [持ち場の主題はコンテキストを捨てないかで選ぶ](subagent-context-over-nearest-item.md) — 目盛りが近い項目への切り替えをユーザーが取り消した(2026-09-09)。
+- [確かめていない検証を「確かめた」と書かない](claimed-verification-not-run.md) — 2026-09-09 に本体と実装者で計 3 回。予防はコマンドを実際に叩くこと。
