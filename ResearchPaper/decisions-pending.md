@@ -17515,3 +17515,55 @@ COST[ComponentWitness]: 安 | 持ち場=成分抽出  — 5 段が Lean に並�
 ★本体が「あなたはまだ開いていない」と名指しした 2 件が、開いたら両方とも当たりだった。
 ```
 
+
+## ★★★★★`loss ≤ 2p−2` が 1 本の型になった（仮説 1 本）—— `LossTwoPSubTwo.lean` 定理 2 / `sorry` 0（2026-09-09）
+
+**★選び方**: 「展開の一意性」を測ったところ、`exists_coeff_norm_le` は**存在しか言わない**ので
+係数の一致（一意性）が要り、材料は `linearIndependent_of_ne_mod` に在るが
+★`Fin n` 添字の `LinearIndependent` から 2 表現の一致を出す**配管**が要る（★費用は書かない）。
+⇒ 本体が挙げたもう 1 つの道 —— **`hz` を仮説のまま残して 1 つの型として書く** —— を選んだ。
+★**今日この鎖の到達点が 1 本の定理の型に見えるようになる**から。
+
+**★★★★★到達点（次の波が最初に読む場所）**:
+```lean
+loss_le_two_p_sub_two_of_component
+    (hp : 2 ≤ p) (hj : j ≤ p - 1) (hB : ‖B‖ = ‖π‖ ^ (d + (p - 1)))
+    (hz : ‖B * π ^ j‖ ≤ ‖z‖) :          -- ★★唯一残っている仮説
+    ‖π‖ ^ (d + (2 * p - 2)) ≤ ‖z‖       -- ＝ loss ≤ 2p−2
+```
+
+**★★★5 段の現在地（★全部 Lean。仮説は 1 本だけ）**:
+
+| 段 | Lean | 状態 |
+|---|---|---|
+| (0) | `TailNoCancel.dvd_add_sub_one_iff` | ★定理 |
+| (1) | `RhoFactorization`/`ZetaUnitFactor`/`ResidueUnitNorm` | ★定理 |
+| (2) | `BinomialFirstOrder.norm_add_pow_sub_linear_le` | ★定理 |
+| (3) | `TopIndexSurvives.not_dvd_of_pos_lt` | ★定理 |
+| (4) | `TopIndexSurvives.delta_deeper_iff_three_le` | ★定理 |
+| (5) | `TopIndexSurvives.loss_bound_from_index` | ★定理 |
+| (6) | `ComponentWitness.loss_le_of_component_witness` | ★定理 |
+| ★(7) 全体 | ★**`LossTwoPSubTwo.lean`** | ★**定理（仮説 1 本）** |
+| ★★残り | `hz` の供給（展開の一意性） | ★**未着手** |
+
+**★★出口までの道（すべて既存の定理で繋がる）**:
+`hz` ⇒ `loss ≤ 2p−2` ⇒ 1 段の定数 `p^{(2p−2)/e_k}` ⇒ `SharpPrizeBound.sharp_exponent_sum_le` が
+総和 `2p/(p−1)` を閉じる ⇒ `axLemma_of_wildDescent` が **`AxLemma K (p^{2p/(p−1)})`** ⇒ **`AxSenTate`**。
+★★**残っているのは `hz` だけ。**
+
+**★母集団**: **`p ≥ 3`**。`p = 2` は上界が `2p−1 = 3` で理由も証明済み。
+実測は `p ≥ 3` で破れ **0**（4,187 件）、`p = 2` でのみ 5.7%。
+
+**★★今日この鎖が立てた規律 7 つ**（`LossTwoPSubTwo.lean` の docstring にまとめ）:
+1. 費用を先に測ってから選ぶ／2. 開いていないものは「未測定」と書き費用は書かない／
+3. 見積もらずに開いてから決める／4. 法則は 3 つ目の場合で測る（#350）／
+5.「偽」には母集団を添える／6.「無い」にはどこを測ったかを添える／7. 宣言名は実ファイルで数える（#348）
+
+**逸脱**: ★★**`hz` は証明していない。「`loss ≤ 2p−2` が（無条件に）定理になった」とは書いていない**
+—— 本ファイルの定理は**仮説 1 本つき**。★5 段の証明の**本文**は `TopIndexSurvives.lean` の docstring
+（3 波連続で明記）。
+
+```
+COST[LossTwoPSubTwo]: 安 | 持ち場=展開の一意性  — 一意性は配管が要ると測り、代わりに到達点を 1 本の型にした
+```
+
