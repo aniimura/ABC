@@ -12713,6 +12713,18 @@ theorem foo {E : ℕ → Type*} [∀ j, Field (E j)] [∀ j, Algebra (E j) M]
 
 ついでの不在（`#check` で測った）: `Unknown constant `Nat.pos_pow_of_pos``。`pow_pos` を使う。
 
+★**再出現（2026-09-09、DominantTermLowerBound）**。逐語:
+
+```
+ABC3/Found/PGC/DominantTermLowerBound.lean:194:28: error(lean.unknownIdentifier): Unknown constant `Nat.pos_pow_of_pos`
+```
+
+★直しは `pow_pos hp.pos a`（ℕ でも `pow_pos` が通る）。
+★この不在は **#8488 の表**にも別に書かれており（`Nat.pow_pos` を勧めている）、
+★★**2 箇所に書いてあってなお再発した**。原因は「書く前に `grep -n pos_pow_of_pos tools/lean-idioms.md`
+を叩かなかった」こと。★`Unknown constant` を見たら**まず lean-idioms.md を grep する**
+（`node tools/idiom-recur.mjs --similar` は 0 件を返したので、★grep の方が当たる）。
+
 ## #315 `simp` は `k • x` を `↑k * x` に潰すので、線形写像を通せなくなる（2026-09-08、GainedTowerModel）
 
 `Commute.add_pow` で `(1 + D)^p`（`D : Module.End ℤ M`）を展開して `π` に当てたら、

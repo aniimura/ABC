@@ -1972,6 +1972,7 @@ import ABC3.Found.PGC.GainedPriceIsEssential
 import ABC3.Found.PGC.GainedBudgetDeficit
 import ABC3.Found.PGC.LayerDegreeIsP
 import ABC3.Found.PGC.DigitLossFactor
+import ABC3.Found.PGC.DominantTermLowerBound
 import ABC3.Found.Goal.Theory
 /-!
 # Found — 実装済みの基礎
