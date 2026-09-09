@@ -1951,6 +1951,7 @@ import ABC3.Found.PGC.MainPartCoeffs
 import ABC3.Found.PGC.ErrorSplitAssembly
 import ABC3.Found.PGC.CyclotomicSubstitution
 import ABC3.Found.PGC.PowerSpanTop
+import ABC3.Found.PGC.ValKFromBase
 import ABC3.Found.Goal.Theory
 /-!
 # Found — 実装済みの基礎
