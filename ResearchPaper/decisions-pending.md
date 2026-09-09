@@ -18412,3 +18412,34 @@ import は推移閉包を追って 1 本で足りると確認（★余計な imp
 ★前例: `PureStepSetup` の 13 では **2** が自動だった。
 
 **VERDICT / COST**: 本体は今波ゲート＋検算 3 件＋パス実測のみ。
+
+---
+
+## 第 1132 —— ★★第 1131 の結論を撤回（実装者、自己訂正 19 度目）／本体の報告も誤りだった
+
+**真偽**: 第 1131 の「`F = K.carrier` と取れば `AxLemma K (axConstant p)` そのもの ⇒
+`AxWildDescent` も基底段の別扱いも要らない」→ ★**誤り**。
+`Gained*` 族の `F` は ★**`[M:F] = p`（`M` のすぐ下の体）**で、`F = K.carrier` と取れるのは
+★**wild 深さ 1 のときだけ**。⇒ `Gained*` も **1 層下る**だけで、`PureStepSetup` と同じ性質。
+★★**本体が検算して一致**（`GainedTowerStep.lean:423` の `hdeg : (minpoly F π).natDegree = p`）。
+★**本体がユーザーに出した「`AxWildDescent` を通らない出口」も誤り。訂正済み。**
+
+**★負の結果 2 例目（型になった）**: 1 層に `∏_{j ∈ Icc 1 k} axDecay p j` を払う道を積むと
+`∏_{k}(∏_{j≤k} …)` は ★**非有界**（`StepwiseApproxFree.prod_of_prod_unbounded`）。
+⇒ ★**1 層の値段は `axDecay p k` 単項でなければ `Gained*` ルートは閉じない。**
+
+**★★正の結果 —— `AxWildDescent` の第 3 条件は無料**:
+`norm_sub_le_of_approx`（★超距離＋等長だけ。全単射性も乗法性も Galois も不要）。
+⇒ ★これから供給する者は「深さが下がる」と「近い」の **2 つだけ**示せばよい
+（`axWildDescent_of_stepwise_approx`）。★木の `WildDepthDescent:517` の 6 行が不要になる
+（規約により既存ファイルは触っていない）。
+
+**★予防が働いた**: 実装者が「19 の内訳を数える作業は前提が崩れたため**実行していません**。
+★『数えた』と書かないためにここに明記します」と書いた。
+⇒ ★第 1128〜1129 で決めた予防（[[claimed-verification-not-run]]）が**実際に働いた初めての回**。
+
+**次の 1 点**: `Gained*` の 1 層の値段が `∏_{j=1}^{k+1} axDecay p j` なのは**緩い上界**か本質かを測る
+（`GainedDescentBridge.lean:527` 内の `rpow_le_prod_axDecay`）。★単項に落ちなければ閉じない。
+
+**VERDICT / COST**: 本体は今波ゲート＋検算 2 件＋パス実測のみ。
+★本体が読んだ箇所は通算 6 箇所になった。
