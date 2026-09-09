@@ -18386,3 +18386,29 @@ import は推移閉包を追って 1 本で足りると確認（★余計な imp
 
 **VERDICT / COST**: 本体は今波ゲート＋独立検算 2 件＋パス実測のみ。
 ★実装者は linter warning も 0 にしている（`simpa`→`simp` 2 件）。
+
+---
+
+## 第 1131 —— ★★`AxWildDescent` を通らない出口が出た（実装者）
+
+**測定**: `k ≥ 1` を扱う `Gained*` member は ★**存在する**（`GainedTowerStep:366 _of_tower` /
+`:404 _of_tower_jumps`、`GainedTowerModel:132/:363`）。★`k` の意味は docstring ではなく
+**仮説を読んで確定**（`hdegj`/`heM`/`hvalj` から `[M:F] = p^{k+1}` で全分岐 ⇒
+`M = K(x), F = K` なら **`k + 1 = wildDepth K x`**）。
+★前波の「深さ 1 だけでは足りない」で塞がったのは `PureStepSetup`（`k = 0` 専用）の道だけだった。
+
+**★★新しい出口**: `DepthApproxToAxLemma.axSenTate_of_prod_axDecay_approx`（:142）。
+`Gained*` の積は 1 つの層について既に `∏_{j=1}^{深さ}` の閉じた形なので ★**段を積む必要がない**。
+⇒ ★定数は `axConstant p` **ちょうど**（`AxWildDescent` 側で付いていた `p^{K₀}` の余分が消えた）。
+★本体が検算: `_of_tower_jumps` は `:404` に実在、新出口は `:142` に実在。
+
+**★実装者の自己評価**: 第 1125〜1130 で積んだ `AxWildDescent` 側の 5 本は ★**この道では使わない**と明記。
+★ただし第 1126 で「`axLemma_of_axDecay` の証明の中に埋まっていたので宣言に切り出した」
+`BaseLayerConstant.prod_axDecay_le` は**ここで効いた**（蓋 `≤ axConstant p`）。
+★成果を残す方向にも捨てる方向にも寄せていない。
+
+**次の 1 点**: `_of_tower_jumps` の **19 仮説**（本体の数え方では 18、`{`/`[` を含めるかの差）を
+`F := K.carrier`, `M := K(x)` で供給する。★19 のうち何本が `PAdicLocalField` から自動かは未測定。
+★前例: `PureStepSetup` の 13 では **2** が自動だった。
+
+**VERDICT / COST**: 本体は今波ゲート＋検算 3 件＋パス実測のみ。
