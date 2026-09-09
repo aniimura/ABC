@@ -64,6 +64,29 @@ def isMeta (s : String) : Bool :=
     || s.endsWith ".loadBearing" || s.endsWith ".waiting"
     || s.endsWith ".deviation" || s.endsWith ".note"
 
+/-- ★Lean が自動生成した宣言か。手で書いた主張ではないので孤児の数から除く。
+
+実測(2026-09-09): 孤児 156 件のうち **33 件**がこれ——`.mk.injEq` / `.recOn` /
+`.ctorIdx` / `.sizeOf_spec` / `.eq_1`、および `structure` の射影
+(`FilteredGroup.antitone` など)。構造体を消さない限り消せないので、
+「消費者がいない」の対象ではない。 -/
+def isGenerated (env : Environment) (n : Name) : Bool :=
+  let s := n.toString
+  let gen : List String :=
+    [".injEq", ".sizeOf_spec", ".ctorIdx", ".recOn", ".rec", ".casesOn",
+     ".noConfusion", ".noConfusionType", ".below", ".brecOn", ".ndrec",
+     ".mk", ".eq_def", ".sizeOf_inst", ".ofNat", ".toCtorIdx"]
+  if gen.any (fun t => s.endsWith t) then true
+  else
+    -- `foo.eq_1`, `foo.eq_2`, … (等式補題)
+    let last := n.getString!
+    if last.startsWith "eq_" && (last.drop 3).all Char.isDigit && last.length > 3 then true
+    else
+      -- `structure` の射影
+      match n with
+      | .str par f => isStructure env par && (getStructureFields env par).contains (Name.mkSimple f)
+      | _ => false
+
 /-- 型に `∀`/`→` が無い(＝閉じた住人)か。 -/
 def isClosedType : Expr -> Bool
   | .forallE .. => false
@@ -93,7 +116,7 @@ def report (env : Environment) : String := Id.run do
     abc3Count := abc3Count + 1
     for d in directDeps env n do
       if d != n then used := used.insert d
-    if hasPrefix n `ABC3.Skeleton && !(isMeta n.toString) then
+    if hasPrefix n `ABC3.Skeleton && !(isMeta n.toString) && !(isGenerated env n) then
       skelAll := skelAll.push n
     match conclHead ci.type with
     | some h =>
