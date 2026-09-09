@@ -18443,3 +18443,35 @@ import は推移閉包を追って 1 本で足りると確認（★余計な imp
 
 **VERDICT / COST**: 本体は今波ゲート＋検算 2 件＋パス実測のみ。
 ★本体が読んだ箇所は通算 6 箇所になった。
+
+---
+
+## 第 1133 —— ★「単項には落ちない」が確定（実装者）／木の重複 2 度目を自己申告
+
+**真偽**: 配られた問い「`Gained*` の 1 層の値段は単項に落ちるか」→ ★**落ちない。本質。**
+`GainedTowerDescent.lean:435 towerBudget_iff` の積の条件 `(p−1)²·J ≤ (p^{k+1}−p)·e` に対し
+単項の条件は `(p−1)·J ≤ p·e`。★**閾値の比は `(p^k−1)/(p−1)`** で `k=1` は一致、`k ≥ 2` は積が真に緩い。
+★測定（`tools/gained-single-vs-prod.py`、厳密整数、`gainedLoss` を定義どおり計算）:
+★**7 例すべてで単項が破れる**（`p ∈ {2,3,5}`, `n ≥ 2`）。
+★★しかも `norm_num` が**定義を展開して** `Λ = 8` を出す反例を Lean 側にも置き、Python と**独立**にした
+（測定の二重化は本日初）。
+⇒ ★★第 1132 の `prod_of_prod_unbounded` と合わせ、**素朴に積む道は閉じない**。
+
+**★木の重複 2 度目（自己申告）**: 第 1131 の `DepthApproxToAxLemma` は
+`DeepDescentPairDirect.lean:223 AxLemmaGraded` ＋ `:306 axSenTate_of_axLemmaGraded` の**重複**
+（`axConstant p` に丸める点だけが差）。★本体も `:223` の実在を検算。
+★予防（3 本目）: **名前を引くときは定義も開く**（実装者が決めた）。
+
+**★本当のギャップ**: `Gained*` は `M → F`（**1 層**）、`AxLemmaGraded` は `M → K`（**底まで**）。
+★**値段は同じ形で、違うのは範囲だけ**。⇒ 残るのは「1 層下りても `ε` を増やさない」帰納。
+
+**★本体の測定の罠（配管 #360 に記録）**: `grep 'def AxLemmaGraded'` が実装者の新ファイルの
+**docstring 内の引用**（:51）を拾い、「三重定義では」と疑った。実際の namespace は :86 から。
+⇒ ★**`^def` / `^theorem` で行頭を固定する。** 報告前に確かめたので誤報は出ていない。
+
+**次の 1 点**: `DeepDescentPairDirect.lean:252 axLemmaGraded_of_multi` の証明が `ε` をどう扱うかを読む。
+★本体が実在を検算: `AxWildDescentMulti` の定義は `WildDescentMultiStep.lean:233`
+（実装者は `DeepDescentPairDirect.lean:301` と書いていたが、定義はこちら）、
+`AxDeepDescentPair` は `DeepDescentRepair.lean:198`。
+
+**VERDICT / COST**: 本体は今波ゲート＋検算 4 件＋パス実測＋配管 #360 のみ。

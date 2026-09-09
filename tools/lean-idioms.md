@@ -14071,3 +14071,17 @@ but is expected to have type
 
 **関連**: #297（索引の「形が嘘」）/ #354（`to_additive` 名が索引に無い）。
 ★索引・ファイル名・docstring の 3 つとも嘘をつきうる。当たるのは**本文**である。
+
+## #360 `grep 'def X'` / `grep 'theorem X'` は docstring のコードブロックも拾う
+
+**失敗形**: 名前の衝突を測るつもりで `grep -rn 'def AxLemmaGraded' lean/ABC3/Found/PGC/*.lean` を
+叩くと、★**モジュール docstring 内に引用されたコードブロック**も一致する。
+2026-09-09 実測: `GainedPriceIsEssential.lean:51` が拾われたが、そこは docstring 内で、
+実際の `namespace` は `:86` から始まっていた（`grep -n '^namespace'` で確認）。
+★「三重定義したのでは」と誤報しかける。
+
+**直し方**: **行頭を固定する** —— `grep -rn '^def X'` / `^theorem X`。
+本プロジェクトの宣言は字下げなしで書かれているので、これで docstring の引用を落とせる。
+
+**関連**: `grep -c sorry` が docstring の「sorry」という**文字列**を拾うのと同じ形（#357 の周辺）。
+★宣言の数を数えるときは、`grep` の対象が**コードか文章か**を先に決める。
