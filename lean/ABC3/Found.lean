@@ -1946,6 +1946,7 @@ import ABC3.Found.PGC.SlotResidue
 import ABC3.Found.PGC.RemainderSlots
 import ABC3.Found.PGC.DominatedSlot
 import ABC3.Found.PGC.ComponentNormInput
+import ABC3.Found.PGC.SlotErrorBound
 import ABC3.Found.Goal.Theory
 /-!
 # Found — 実装済みの基礎
