@@ -17923,3 +17923,26 @@ GenEll §3→§4、pGC §1→§4 をその形にするかは**人の判断**（D
 
 **VERDICT / COST**: 本体は今波もゲートのみ。配管 #357 は実装者が追加
 （★`sed` の直後に**別ファイル**を通して `ok` を見て安心した、と自己記録。#352 と同型）。
+
+---
+
+## 第 1113 —— ★抽象側の鎖が閉じた（実装者）
+
+**真偽**: `hsplit` は「誤差 `e` は `A − 主部` の整数展開そのもの」で、
+`RemainderSlots.exists_integral_coeffs_of_valK` を当てるだけ（**4 行**）。
+
+**★在庫の測定（実装者が自発的にやった棚卸し）**: `loss_le_of_global_error` の全仮説を並べ、
+★**具体層（円分塔）から来るのは 3 つだけ**と確定 ——
+`hfr : finrank K M = p`（未着手）／ `hvalK`（(n2) 1060/1060）／ `hwn : ‖w‖ = ‖π‖^p`（(n1) 5/5）。
+残りはすべて自分の定理か定義（`MaxMinIndex` / `ComponentBasisExpansion` /
+`CoefficientIntegrality` / `SlotResidue` / `RemainderSlots` / `SlotErrorBound` / `MainPartCoeffs`）。
+⇒ ★★**抽象側（`p ≥ 3` の `loss ≤ 2p−2`）は閉じた。**
+
+**★2 つの入口**: `MainPartCoeffs.loss_le_of_main_coeffs`（スロット評価、330/330）と
+`ErrorSplitAssembly.loss_le_of_global_error`（全体評価、294/330）。
+★実装者は**自分の新しい方が仮定が強い**と判定し、「主定理と呼ぶのは前波の方」と書いた。
+
+**次の 1 点**: ★円分塔への代入（`hfr` / `hvalK` / `hwn` ＋ `A = σx − x`・`‖A‖ ≤ 1`）。
+★`CyclotomicJumpsVerified` / `CyclotomicNumbersVerified` は本体も実装者も**未読**。
+
+**VERDICT / COST**: 本体は今波もゲートのみ。★本日 commit 183 / 新規 `Found/PGC/*.lean` 79 本。
