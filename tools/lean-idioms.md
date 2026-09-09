@@ -14010,3 +14010,28 @@ theorem foo …
 **別のファイル**（scratch）を `leanfile.mjs` にかけて `ok` を見て安心した。
 ★`ok` はその scratch のものだった。#352 と同じ形（`ok` は無罪の証拠にならない）——
 ★**書き換えたファイル自身**を通してから次に進む。
+
+## #358 `#print axioms` に `sorryAx` が出たら、**上のエラーを先に読む**（2026-09-09、PadicValueGroup）
+
+型検査が落ちた宣言でも `#print axioms` の行は出る。★そのとき **`sorryAx` が混じる** ——
+エラー回復でエラボレータが `sorry` を入れるためで、★**`sorry` を書いた覚えがなくても出る**。
+
+実際に出た文（逐語。上に本当のエラーがあり、下に axioms が並ぶ）:
+
+```
+error: Application type mismatch: The argument
+  padic_value_group
+has type
+  ?m.61 ≠ 0 → ∃ m, ‖?m.61‖ = ‖↑?m.59‖ ^ m
+but is expected to have type
+  ∀ (a : ℚ_[p]), a ≠ 0 → ∃ m, ‖a‖ = ‖↑p‖ ^ m
+'ABC3.Found.PGC.PadicValueGroup.valbase_padic' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+```
+
+★このときの原因は**別のところ**にある: `padic_value_group` は `{x : ℚ_[p]}` が
+**暗黙**なので `∀ a, a ≠ 0 → …` の形に直接渡せない。
+**直し方**: `fun _ ha => padic_value_group ha` と η 展開する（#356 の親戚）。
+
+★**読み方の規律**: `--full` の出力は下から読まない。`sorryAx` は結果であって原因ではない。
+修正後にもう一度 `--full` を通し、★**3 公理だけ**（`propext` / `Classical.choice` / `Quot.sound`）
+になったことを確かめる。
