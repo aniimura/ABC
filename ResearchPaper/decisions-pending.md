@@ -18475,3 +18475,36 @@ import は推移閉包を追って 1 本で足りると確認（★余計な imp
 `AxDeepDescentPair` は `DeepDescentRepair.lean:198`。
 
 **VERDICT / COST**: 本体は今波ゲート＋検算 4 件＋パス実測＋配管 #360 のみ。
+
+---
+
+## 第 1134 —— ★★ギャップは「値段」でなく「着地の深さ」／★重複 3 件目と根本原因の測定
+
+**真偽**: `AxWildDescentMulti`（`WildDescentMultiStep.lean:233`）は**望遠鏡的**で、
+1 歩の値段は**飛ばした段だけの積** `∏_{Icc (d'+1) d}` ⇒ 合成すると `∏_{Icc 1 d}` に**畳まれる**。
+`Gained*` が払うのは `∏_{Icc 1 (k+1)}`（＝深さ 0 まで下りる値段）だが ★**着地は `d' ≥ 1`**。
+⇒ ★★**過払いの因子はちょうど `∏_{Icc 1 d'} axDecay p k`（等式として型にした）。**
+⇒ ★★★**要るのは値段を下げることではなく、着地を `K`（深さ 0）まで持っていくこと。
+それは `AxLemmaGraded` そのもの。**
+★三者同値も確認（`AxDeepDescentPair ⟺ AxWildDescentMulti K (axDecay p) ⟺ AxLemmaGraded`、
+`DeepDescentPairDirect.lean:295/:301`、`:306` で `AxSenTate`）。
+
+**★★重複 3 件目（自己申告）**: 第 1132 の `StepwiseApproxFree` §1・§3 は
+★`UltraCore.norm_smul_sub_self_le_of_norm_sub`（`WildDescentMultiStep.lean:142`）の重複。
+★本体が `^theorem` で検算し実在を確認（docstring に「★★★抽象核 1」）。
+★第 1128（`TraceGainKernel`）・第 1131（`DepthApproxToAxLemma`）に続き 3 件目。
+
+**★★根本原因の測定（実装者）**: 木には ★**名前空間が 145 個**（本体の測定。実装者は 144）あり、
+`UltraCore` / `ProdCore` / `PairLedger` / `JumpArith` / `GainedDescent` は
+★**抽象核だけを置く名前空間**。実装者は毎回「自分の言葉で書いた結論の形」で grep しており、
+★**抽象核の置き場を見ていなかった**。「抽象核」という語は木に **1075 箇所**。
+★**予防 4 本目: 抽象核を書く前に `grep -rn '抽象核' … | head -40` で先に見る。**
+★決めてすぐ本波で実行した（決めてすぐ使ったのは本日初）。
+
+**★★本体にも当てはまる**: 本体は毎波「証拠の場所」を**ファイル名**で渡してきたが、
+★**抽象核の名前空間を一度も渡していなかった**。⇒ 今波から名前空間も渡す運用に変更。
+
+**次の 1 点**: `Gained*` の中身（`exists_digitSum_of_adjoin_eq_top` による桁展開）が
+底の `K` まで一度に展開できるかを読む。★実装者も本体も未読。
+
+**VERDICT / COST**: 本体は今波ゲート＋検算 4 件（うち 1 件は `^theorem` で行頭固定）＋パス実測のみ。
