@@ -1967,6 +1967,7 @@ import ABC3.Found.PGC.TraceGainKernel
 import ABC3.Found.PGC.GainedToWildStep
 import ABC3.Found.PGC.WildStepFieldSupply
 import ABC3.Found.PGC.DepthApproxToAxLemma
+import ABC3.Found.PGC.StepwiseApproxFree
 import ABC3.Found.Goal.Theory
 /-!
 # Found — 実装済みの基礎
