@@ -13815,3 +13815,43 @@ bash が**コマンド置換**として解釈する。エラーは出るが**ス
 ★**2 点は 2 つの式を区別できない。** 特に `p = 2` は退化した場合が多い
 （`TwoIsDegenerate.lean`: 尾の枠が 1 本しかない、`p(p−1) = p` が成り立つ）。
 ★費用は小さい —— 本日の 4 件はどれも既存スクリプトの引数を変えるだけで壊れた。
+
+## #351 ★★再帰的 `def` を `simp only [f]` で開くと**再帰呼び出しまで開く** —— 仮説と原子がずれる（2026-09-09、AdmissibleClosedForm）
+
+`gainedLoss p t (m+2)` だけを開きたくて `simp only [gainedLoss]` と書いたら、
+中の `gainedLoss p t (m+1)` **も**開かれ、その項を指していた仮説と**別の原子**になった。
+
+実際に出た文（逐語。★エラー自体は無害な `linarith` の失敗に見えるので気づきにくい）:
+
+```
+error: linarith failed to find a contradiction
+hpL : t 1 ≤ p * gainedLoss p t (m + 1)
+a✝ :
+  t (m + 2) - (p - 1) * jumpSum t (m + 1) - t 1 +
+      p *
+        max (t (m + 1) - (p - 1) * jumpSum t m)
+          (max 0 (t (m + 1) - (p - 1) * jumpSum t m - t 1) + p * gainedLoss p t m) <
+    t (m + 1 + 1) - (p - 1) * jumpSum t (m + 1)
+⊢ False
+```
+
+★**仮説には `gainedLoss p t (m + 1)` が、ゴールにはその展開形が居る。**
+`linarith` は 2 つを無関係な原子として扱うので必ず失敗する。
+
+直し方 —— ★**外側 1 回だけ `rfl` で開く**:
+
+```lean
+have hunfold : gainedLoss p t (m + 2)
+    = max (t (m + 2) - (p - 1) * jumpSum t (m + 1))
+      (max 0 (t (m + 2) - (p - 1) * jumpSum t (m + 1) - t 1)
+        + p * gainedLoss p t (m + 1)) := rfl
+rw [hunfold, max_eq_right hpos, max_eq_right (by linarith)]
+```
+
+★構造的再帰の `def` は `n+1` の枝が定義的に成り立つので `rfl` で書ける。
+★逆に**仮説の側を開きたい**ときは `simp only [f] at IH ⊢` と**両方**開く
+（本ファイルの `t1_le_A` はこちらで直した。`jumpSum t (m+1)` と
+`jumpSum t m + t (m+1)` がずれていた）。
+
+★見分け方: `linarith failed` のとき、**仮説とゴールに同じ関数名が
+「折りたたまれた形」と「開いた形」で両方出ていないか**を見る。
