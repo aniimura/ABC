@@ -1928,6 +1928,7 @@ import ABC3.Found.PGC.ZetaUnitFactor
 import ABC3.Found.PGC.ResidueUnitNorm
 import ABC3.Found.PGC.GainedLossClosedForm
 import ABC3.Found.PGC.AdmissibleClosedForm
+import ABC3.Found.PGC.WitnessFiveRecursion
 /-!
 # Found — 実装済みの基礎
 
