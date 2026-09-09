@@ -17460,3 +17460,58 @@ COST[BinomialFirstOrder]: 安 | 持ち場=1 段の上界の形式化  — (3) �
 ★本体が「中身は読んでいない」と明示して渡した在庫が、開いたら形が違った。★明示が効いた形。
 ```
 
+
+## ★★★★★5 段が Lean に並んだ、残りは 1 点 —— `ComponentWitness.lean` 定理 2 / `sorry` 0（2026-09-09）
+
+**★★★実装者の自己訂正 —— 「相対の冪基底は無い」は測り方が狭かった**:
+前波まで「`𝒪_L = 𝒪_{E₁}[π]` の相対の冪基底は見つからない」と書いていたが
+★**木を開いたらノルムの言葉で在った**:
+- `TotallyRamifiedLayer.lean:133 adjoin_eq_top_of_valK` —— `[NormedField M] [IsUltrametricDist M]`
+  だけで「底の値群が `‖π‖^{nℤ}` なら `M = K(π)`」。★**`PAdicLocalField` を使っていない**
+- 同 `linearIndependent_of_ne_mod` —— `π^0…π^{n−1}` の 1 次独立性
+- ★★`JumpStrictMono.lean:116 exists_coeff_norm_le` —— **展開 `z = Σ c_l π^l` と `‖c_l π^l‖ ≤ ‖z‖`**
+
+★★**`exists_coeff_norm_le` の結論こそ、本波が要っていたもの**だった。
+★実装者が以前「向きが逆」と書いたのは同ファイル **`:167` の別定理**についてで `:116` ではなかった。
+⇒ ★**「mathlib に無い」は正しかったが、「木にも無い」は測っていなかった。**
+★自己訂正として「**『無い』と書くときはどこを測ったかを添える**」を docstring に記録
+（本日の「『偽』には母集団を添える」と同じ規律）。
+
+**★★★本波の定理**:
+```lean
+loss_le_of_component_witness (hj : j ≤ p - 1) (hB : ‖B‖ = ‖π‖ ^ D)
+    (hz : ‖B * π ^ j‖ ≤ ‖z‖) : ‖π‖ ^ (D + (p - 1)) ≤ ‖z‖
+```
+★仮説 `hz` は **`exists_coeff_norm_le` の結論そのもの**。
+
+⇒ ★★**5 段が Lean の上に並んだ**:
+
+| 段 | Lean |
+|---|---|
+| (0) `d ≡ 1 (mod p)` が必要 | `TailNoCancel.dvd_add_sub_one_iff` |
+| (1) `ρ = w + wπ`、`v(w) = p` | `RhoFactorization` / `ZetaUnitFactor` |
+| (2) 主項の同定・残りは 2 次 | `BinomialFirstOrder.norm_add_pow_sub_linear_le` |
+| (3) `j₀` は単数 | `TopIndexSurvives.not_dvd_of_pos_lt` |
+| (4) `δ` は深い（`p ≥ 3`） | `TopIndexSurvives.delta_deeper_iff_three_le` |
+| (5) 上界の算術 | `TopIndexSurvives.loss_bound_from_index` |
+| ★成分から結論へ | ★**本波（仮説 1 本つき）** |
+
+**★★残りはただ 1 つ（★名前がついた）**:
+> **仮説 `hz` を `exists_coeff_norm_le` から実際に供給すること。**
+
+そのために要るのは `σx − x` の `π`-展開の係数が、代数から計算した
+`B_{j₀} = w·j₀·f_{j₀} + (深い項)` と**一致する**こと（＝展開の**一意性**）。
+★`linearIndependent_of_ne_mod` がその材料。★**この 1 点だけが未着手**（開いたが試していない）。
+
+**★★★次の波が見落とさないための注記（2 波連続）**:
+★★**5 段の証明の本文は `TopIndexSurvives.lean` の docstring にある。**
+★`loss ≤ 2p−2` を**そのまま述べた Lean 定理はまだ無い** —— 本波の `loss_le_of_component_witness` が
+**その最後の 1 段**を仮説つきで載せた形。★母集団は **`p ≥ 3`**（`p=2` は `2p−1`、理由も証明済み）。
+
+**逸脱**: ★★**本波は仮説 `hz` を証明していない。「`loss ≤ 2p−2` が定理になった」とは書いていない。**
+
+```
+COST[ComponentWitness]: 安 | 持ち場=成分抽出  — 5 段が Lean に並び、残りが「展開の一意性」1 点に
+★本体が「あなたはまだ開いていない」と名指しした 2 件が、開いたら両方とも当たりだった。
+```
+
