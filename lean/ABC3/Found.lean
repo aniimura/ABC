@@ -1926,6 +1926,7 @@ import ABC3.Found.PGC.ZetaSubOnePrime
 import ABC3.Found.PGC.ZetaStepRatio
 import ABC3.Found.PGC.ZetaUnitFactor
 import ABC3.Found.PGC.ResidueUnitNorm
+import ABC3.Found.PGC.GainedLossClosedForm
 /-!
 # Found — 実装済みの基礎
 
