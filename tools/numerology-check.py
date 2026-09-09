@@ -64,6 +64,8 @@ def run(p, n, trials, seed=20260909):
     n7b = [0, 0]
     n8 = [0, 0, 0, 0]
     n10 = [0, 0]
+    n17 = [0, 0]                 # [j₀ スロット < 全体, 総数]
+    n16 = [0, 0, 0]              # [v(err) > v(R), 総数, R = 0 の件数]
     n15 = [0, 0, 0]              # [j0 スロットが支配されない, 総数, j0 スロットが空]
     n13 = [0, 0]                 # [j >= 1 だけで成立, 総数]
     n14 = [0, 0, None]           # [v(rem) %% p != j0 %% p, 総数, 破れの例]
@@ -178,6 +180,12 @@ def run(p, n, trials, seed=20260909):
             n14[0] += 1
         elif n14[2] is None:
             n14[2] = (j0, vrem - vD, vf[j0])
+        # (n16) ★‖err‖ < ‖R‖ か（hdom を split から導くときの仮定）
+        n16[1] += 1
+        if vR is None:
+            n16[2] += 1
+        elif verr is None or (verr - vD) > vR:
+            n16[0] += 1
         # (n15) ★残りのスロット分解で、j₀ スロットが「最大でない」か
         #      （SlotResidue.loss_le_of_remainder_slots の仮定そのもの）
         crem = L.coords(rem)
@@ -187,6 +195,10 @@ def run(p, n, trials, seed=20260909):
             vv = F.v(zi)
             vslot.append(None if vv is None else vv - vD + i)
         others = [vslot[i] for i in range(p) if i != j0 and vslot[i] is not None]
+        # (n17) ★j₀ スロット < 残り全体（DominatedSlot.loss_le_of_slot_lt の仮定そのもの）
+        n17[1] += 1
+        if vslot[j0] is None or (vrem is not None and vslot[j0] > vrem - vD):
+            n17[0] += 1
         n15[1] += 1
         if vslot[j0] is None:
             n15[2] += 1
@@ -225,6 +237,10 @@ def run(p, n, trials, seed=20260909):
           f"  破れの例 (j₀, v, v(f_j₀)) = {n14[2]}")
     print(f"    (n15) ★j₀ スロットが最大でない: {n15[0]}/{n15[1]}"
           f"  （うち j₀ スロットが空 {n15[2]}）")
+    print(f"    (n16) ★v(err) > v(R)         : {n16[0]}/{n16[1]}"
+          f"  （R = 0 は {n16[2]} 件）")
+    print(f"    (n17) ★j₀ スロット < 残り全体 : {n17[0]}/{n17[1]}"
+          f"  ← loss_le_of_slot_lt の仮定")
     print(f"    (n2) p | v(f_j)              : {n2[0]}/{n2[1]}")
     print(f"    (n3) d の 2 通りの計算が一致 : {n3[0]}/{n3[1]}")
     print(f"    (n4) ★j₀ ≠ jstar             : {n4}/{n3[1]} 件"
