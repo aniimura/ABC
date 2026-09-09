@@ -1929,6 +1929,7 @@ import ABC3.Found.PGC.ResidueUnitNorm
 import ABC3.Found.PGC.GainedLossClosedForm
 import ABC3.Found.PGC.AdmissibleClosedForm
 import ABC3.Found.PGC.WitnessFiveRecursion
+import ABC3.Found.PGC.SharpPrizeBound
 /-!
 # Found — 実装済みの基礎
 
