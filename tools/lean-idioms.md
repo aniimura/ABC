@@ -13976,3 +13976,37 @@ have h2 : ‖∑ i ∈ t, y i‖ = ‖y j‖ := by simpa using congrArg NNReal.t
 **関連**: `stmt% X`（`lean/ABC3/Meta/Stmt.lean`）は定数 `X` の型を項として返す。
 還元を含意で書くとき statement を書き写さずに済む。★`stmt%` 自身は `X` への依存を
 作らない（型を複製するだけ）——辺を作るのは `:= f @X` の側である。
+
+## #357 `omit … in` は doc コメントの**前**に置く（2026-09-09、MainPartCoeffs）
+
+`variable` で入れた不要なインスタンスを `omit` で外すとき、★**doc コメントとの順序**がある。
+
+実際に出た文（逐語）:
+
+```
+ABC3/Found/PGC/MainPartCoeffs.lean:79:34  unexpected token 'omit'; expected 'lemma'
+```
+
+落ちる書き方:
+
+```lean
+/-- 説明 -/
+omit [IsUltrametricDist M] in
+theorem foo …
+```
+
+通る書き方（`omit … in` が先）:
+
+```lean
+omit [IsUltrametricDist M] in
+/-- 説明 -/
+theorem foo …
+```
+
+★doc コメントは**宣言に直接**付く必要があり、`omit … in` は宣言の前置修飾なので
+間に挟めない。`variable … in` / `open … in` も同じ。
+
+★**測り方の教訓**（同じ波で踏んだ）: `sed` で `omit` を差し込んだ直後に
+**別のファイル**（scratch）を `leanfile.mjs` にかけて `ok` を見て安心した。
+★`ok` はその scratch のものだった。#352 と同じ形（`ok` は無罪の証拠にならない）——
+★**書き換えたファイル自身**を通してから次に進む。
