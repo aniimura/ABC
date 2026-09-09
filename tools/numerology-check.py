@@ -64,6 +64,8 @@ def run(p, n, trials, seed=20260909):
     n7b = [0, 0]
     n8 = [0, 0, 0, 0]
     n10 = [0, 0]
+    n18 = [0, 0]                 # [v(A_j0 - Bpred) > v(Bpred), 総数]
+    n19 = [0, 0]                 # [v(A_j0) = p + vf0, 総数]
     n17 = [0, 0]                 # [j₀ スロット < 全体, 総数]
     n16 = [0, 0, 0]              # [v(err) > v(R), 総数, R = 0 の件数]
     n15 = [0, 0, 0]              # [j0 スロットが支配されない, 総数, j0 スロットが空]
@@ -180,6 +182,18 @@ def run(p, n, trials, seed=20260909):
             n14[0] += 1
         elif n14[2] is None:
             n14[2] = (j0, vrem - vD, vf[j0])
+        # (n18)(n19) ★σx−x の j₀ 成分そのもの（★新しい設計で B に取るもの）
+        diff = [u - z for u, z in zip(L._apply(L.sig[a0], y), y)]
+        cb = L.coords(diff)
+        Aj0 = elt_from_coords(L, cb, j0)
+        vAj0 = F.v(Aj0)
+        n18[1] += 1
+        dv18 = F.v([u - z for u, z in zip(Aj0, Belt)])
+        if dv18 is None or (vB is not None and dv18 - vD > vB):
+            n18[0] += 1
+        n19[1] += 1
+        if vAj0 is not None and vAj0 - vD == p + vf[j0]:
+            n19[0] += 1
         # (n16) ★‖err‖ < ‖R‖ か（hdom を split から導くときの仮定）
         n16[1] += 1
         if vR is None:
@@ -241,6 +255,10 @@ def run(p, n, trials, seed=20260909):
           f"  （R = 0 は {n16[2]} 件）")
     print(f"    (n17) ★j₀ スロット < 残り全体 : {n17[0]}/{n17[1]}"
           f"  ← loss_le_of_slot_lt の仮定")
+    print(f"    (n18) ★v(A_j₀ − B) > v(B)    : {n18[0]}/{n18[1]}"
+          f"  ← 成分の公式が j₀ で真")
+    print(f"    (n19) ★v(A_j₀) = p + v(f_j₀) : {n19[0]}/{n19[1]}"
+          f"  ← 新しい設計の唯一の入力")
     print(f"    (n2) p | v(f_j)              : {n2[0]}/{n2[1]}")
     print(f"    (n3) d の 2 通りの計算が一致 : {n3[0]}/{n3[1]}")
     print(f"    (n4) ★j₀ ≠ jstar             : {n4}/{n3[1]} 件"
