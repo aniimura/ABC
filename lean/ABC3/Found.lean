@@ -1937,6 +1937,7 @@ import ABC3.Found.PGC.LossTwoPSubTwo
 import ABC3.Found.PGC.SeparatedComponent
 import ABC3.Found.PGC.ResidueSeparation
 import ABC3.Found.PGC.ComponentFormulaScope
+import ABC3.Found.PGC.MaxMinIndex
 /-!
 # Found — 実装済みの基礎
 

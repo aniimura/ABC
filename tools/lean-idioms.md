@@ -13855,3 +13855,40 @@ rw [hunfold, max_eq_right hpos, max_eq_right (by linarith)]
 
 ★見分け方: `linarith failed` のとき、**仮説とゴールに同じ関数名が
 「折りたたまれた形」と「開いた形」で両方出ていないか**を見る。
+
+## #352 ★★裸の `python` は Store のスタブで、**何もせず exit 49** —— ファイル編集が黙って消える（2026-09-09、MaxMinIndex）
+
+Bash ツールで `python - <<'PYEOF' … PYEOF` のヒアドキュメントを使い、Lean ファイルを
+書き換えたつもりで **3 回連続で 1 文字も書き換わっていなかった**。原因は
+**裸の `python` が Microsoft Store の App Execution Alias に解決される**こと。
+
+再現（逐語。`t.txt` は `BEFORE` のまま）:
+
+```
+$ echo "BEFORE" > t.txt && python - <<'PYEOF'
+open('t.txt','w').write('AFTER')
+print('wrote AFTER')
+PYEOF
+$ echo "exit=$?"; cat t.txt
+exit=49
+BEFORE
+```
+
+stdout は空、stderr は **7 バイトの `Python `** だけ（`od -c` で確認）。
+`which python` → `/c/Users/Aruta/AppData/Local/Microsoft/WindowsApps/python.exe`。
+
+★**実害はここから**: 書き換わっていないのに、そのあと走らせた
+
+```
+node tools/leanfile.mjs lean/ABC3/Found/PGC/MaxMinIndex.lean
+ok  ABC3/Found/PGC/MaxMinIndex.lean  —— 8.9 秒
+```
+
+が `ok` を返した。★**`ok` は「追記した §3 が通った」ではなく「§3 が無い古いファイルが通った」**
+だった。#349 の「`leanfile.mjs` の `ok` は無罪の証拠ではない」と**同じ穴**（原因は別）。
+
+直し方:
+1. Python は必ず `C:\Users\Aruta\miniforge3\envs\py311env\python.exe`（フルパス）で呼ぶ。
+2. ★**ファイル編集は Write/Edit ツールで行う**（成否がツールの返り値に出る）。
+3. どうしてもシェルから書くなら、直後に `wc -l <file>` か `grep -n '<足したはずの宣言名>' <file>`
+   を**同じ 1 命令の中で**叩き、**行数が増えたことを確かめてから** `leanfile.mjs` を呼ぶ。
