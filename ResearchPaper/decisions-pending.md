@@ -16982,3 +16982,48 @@ COST[TwoIsDegenerate]: 安 | 持ち場=機構の入れ替わり  — 1 秒の測
 COST[RhoFactorization]: 安 | 持ち場=2 本の柱を証明に上げる  — 3 秒で 1 本の恒等式に落ち、残る仮定が 1 つになった
 ```
 
+
+## ★★★★★最後の仮定が定理になった —— `ZetaSubOnePrime.lean` 定理 12 / `sorry` 0（2026-09-09）
+
+```lean
+norm_zeta_sub_one_pow : ‖ζ - 1‖ ^ (Nat.totient (p ^ (m + 1))) = ‖(p : F)‖
+```
+★「`ζ_{p^m} − 1` が素元」のノルム版で、★**前波まで唯一残っていた仮定**。
+⇒ ★★**前波の 2 本の柱が完全な証明になった。**
+
+**★費用の測定（3 つの道を先に比べた）**:
+| 道 | 判定 |
+|---|---|
+| (1) 大域から降ろす | `NumberField`（ℚ 上）で局所への降ろし方が要る ⇒ **不採用** |
+| (2) Eisenstein | ★mathlib に**在った**（`RingTheory/Polynomial/Eisenstein/IsIntegral.lean:77`） |
+| (3) ノルムの言葉で自前 | ★木の `TotallyRamified.lean:294 norm_pow_eq_of_monic_root` に**在った**。`NormedField` + `IsUltrametricDist` だけで**#69 を越えない** |
+
+⇒ ★★**(2)+(3) の合わせ技が最短**（5 往復）。★本体が挙げた証拠 4（ノルムの言葉の道具）の見立てが当たり。
+
+**★部品 4 本はすべて既存**（mathlib 3 ＋ 木 1）。本波が足したのは**橋 3 本**だけ。
+
+**★踏んだ罠 2 件（どちらも既存 idiom が当たった）**:
+1. `Unknown identifier` ⇒ **#68**（無いのではなく import していない）。★`import Mathlib` は書いていない（#306）
+2. `Application type mismatch: z has type ℤ of sort Type but is expected to have type Type ?u.20`
+   ⇒ ★★**#297 がそのまま当たった**（索引の行が section の `variable (R)` を落としており明示引数が 1 つ多い）。
+   ★**#297 が実際に当たったのは本日ここが初めて。**
+
+**★残り（実装者が正直に）**:
+1. ★`‖·‖` と `v_L` の対応の形式化 —— 変換 1 行だが木の `v_L` の定義と繋ぐところは未。★**配管**
+2. ★`‖p‖ < 1` を仮定している（`F` の剰余標数が `p`）。その instance は未提供
+
+```
+COST[ZetaSubOnePrime]: 安 | 持ち場=最後の仮定を引く  — 部品はすべて既存で、橋 3 本で定理になった
+```
+
+## ★★★方針転換（本体の判断、ユーザーへの報告済み）
+
+本日 `Found/PGC` に **61 本**積んだが ★**Skeleton の項目は 1 つも閉じていない**。
+実測: pGC Skeleton の `sorry` は 09-04:8 → 09-06:6 → 09-07:5 → 09-08:4 → **09-09:4（0 個）**。
+★ユーザーの認識（1 日 3 個 → 週 2 個）は正しく、直近 2 日は 1 個 → 0 個。
+
+⇒ ★**`cor_3_1`（`d_V(i)`、数十波規模）から `prop_2_2` に切り替える。**
+`prop_2_2` の穴は `Prop22FixedForm.lean:285 IsometricallyRecoverableClosure` の**ただ 1 点**で、
+★**Ax–Sen–Tate に依存しない**（`prop_2_2_real_of_isometric` が既に `sorry` 無しで橋を架けている）。
+★今日の Ax の鎖は資産として残す（否定 6 件・掘らなくてよい道 4 件・再現スクリプト 10 本）。
+
