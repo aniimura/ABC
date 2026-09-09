@@ -14108,3 +14108,39 @@ grep -n '^theorem X' <file> | awk -F: -v n="$ns" '$1 > n'
 
 **関連**: `grep -c sorry` が docstring の「sorry」という**文字列**を拾うのと同じ形（#357 の周辺）。
 ★宣言の数を数えるときは、`grep` の対象が**コードか文章か**を先に決める。
+
+## #361 順序補題の**引数の数**を間違えると「Function expected at」（2026-09-09、KummerReduction）
+
+`‖π‖^{i+1} < ‖π‖^1` を `pow_lt_pow_right_of_lt_one₀` で書き、穴を 2 つ空けたら逐語:
+
+```
+ABC3/Found/PGC/KummerReduction.lean:82:15: error: Function expected at
+  pow_lt_pow_right_of_lt_one₀ hπ0 hπ1 ?m.79
+but this term has type
+  ‖π‖ ^ ?m.77 < ‖π‖ ^ ?m.76
+
+Note: Expected a function because this term is being applied to the argument
+  ?_
+```
+
+★★**エラー文が答えを持っている** —— 「3 引数で既に `a^? < a^?` になっている」と書いてある。
+⇒ 正しい形（引数は **3 つ**、最後は `m < n`）:
+
+```lean
+-- 通らない: pow_lt_pow_right_of_lt_one₀ hπ0 hπ1 ?_ ?_
+-- 通る:
+pow_lt_pow_right_of_lt_one₀ hπ0 hπ1 (by omega)   -- hπ0 : 0 < a, hπ1 : a < 1, 最後は 1 < i+1
+```
+
+★同じ命令でもう 1 つ（**deprecation**、逐語）:
+
+```
+ABC3/Found/PGC/KummerReduction.lean:136:12: warning: `Nat.succ_mul_choose_eq` has been deprecated: Use `Nat.add_one_mul_choose_eq` instead
+```
+
+★`.cache/mathlib-index.txt` は **deprecated な名前も載せている**（`Data/Nat/Choose/Basic.lean:141`
+として `Nat.succ_mul_choose_eq` が出る）。★索引で引いた名前が deprecated かは
+**索引では分からない**。★`leanfile.mjs` の warning で気づく（`grep -c warning` を見る）。
+
+**関連**: #297（section の `variable (R)` で明示引数が 1 つ**多い**）と逆向きで、
+こちらは**渡しすぎ**。★どちらも「エラー文に出ている型」を読めば引数の数が分かる。
