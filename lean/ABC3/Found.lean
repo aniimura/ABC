@@ -1932,6 +1932,7 @@ import ABC3.Found.PGC.WitnessFiveRecursion
 import ABC3.Found.PGC.SharpPrizeBound
 import ABC3.Found.PGC.TopIndexSurvives
 import ABC3.Found.PGC.BinomialFirstOrder
+import ABC3.Found.PGC.ComponentWitness
 /-!
 # Found — 実装済みの基礎
 
