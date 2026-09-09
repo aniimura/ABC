@@ -18039,3 +18039,27 @@ GenEll §3→§4、pGC §1→§4 をその形にするかは**人の判断**（D
 
 **VERDICT / COST**: 本体は今波もゲートのみ。★`p ≥ 3` の `loss ≤ 2p−2` の円分塔での成立は、
 数学の入力が関係式 1 本を残すのみになった。
+
+---
+
+## 第 1118 —— ★最後の「数学」が定理になった、残りは模型の構成（実装者）
+
+**真偽**: 次数 `n` のモニック関係式は `Φ_N(X+1)` から出た。★**Eisenstein 性は要らず**、
+モニック性・次数・根の 3 つだけ（`cyclotomic.monic` / `natDegree_comp` ＋ `natDegree_cyclotomic` /
+`isRoot_cyclotomic` ＋ `map_cyclotomic`）。★同じ多項式を `ZetaSubOnePrime` は Eisenstein 性で使う。
+
+**★在庫の測定（実装者が本体の求めに応じて数えた）**: 残りは**模型の構成**のみ ——
+インスタンス **12 本**（`NormedField L` / `IsUltrametricDist L` / `CharZero L` / `NormOneClass L` /
+`Field E₁` / `NormedAlgebra ℚ_p L` / `Algebra ℚ_p E₁` / `Algebra E₁ L` / `IsScalarTower ℚ_p E₁ L` /
+`FiniteDimensional` ×3）と定義的な事実 **6 本**（`IsPrimitiveRoot` ×2 / `adjoin = ⊤` / `q ≠ 1` /
+`‖(p:L)‖ < 1` / `(p:L) ≠ 0`）。
+⇒ ★★**`p ≥ 3` の `loss ≤ 2p−2` の鎖は、模型を作れば閉じる。数学の入力は 0。**
+
+**★配管 #358 が同じ波で 2 度効いた**: `omit [Fact p.Prime] in` が
+`cannot omit referenced section variable` で落ち（`ℚ_[p]` の記法自体が参照するため）、
+そのとき `#print axioms` に `sorryAx` が出た。★上のエラーを先に読む、が働いた。
+
+**次の 1 点**: 模型の構成（`AdjoinRoot` か `IsCyclotomicExtension`）。
+★実装者が「#59/#69 の領域に入る可能性が高い」と**先に予告**している。★未着手。
+
+**VERDICT / COST**: 本体は今波もゲートのみ。★本日 commit 193 / 新規 `Found/PGC/*.lean` 84 本。
