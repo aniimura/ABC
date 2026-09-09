@@ -18139,3 +18139,29 @@ GenEll §3→§4、pGC §1→§4 をその形にするかは**人の判断**（D
 
 **VERDICT / COST**: 本体は今波ゲート＋在庫の字面確認のみ。
 ★本体の場所ミス 2 件を受けて「名指し前に `ls`/`grep`」に変えた運用が、今波は正しく働いた。
+
+---
+
+## 第 1122 —— 「跳びが上に有界なら総和は閉じる」を定理に、残り 1 本（実装者）
+
+**真偽**: 木の 2 つの docstring（`RamificationJumpBound.lean:334` の `e = e_L` と
+`NormalizedTraceDescent.lean:224` の `e = e_{E₁}`）は ★**食い違っていない** ——
+同じ定理を別の層に当てているだけ（層 `E₁/F` に当てれば「上の体」は `E₁`）。
+★第 1121 で実装者が疑った点はここで解消。
+
+**切り分け**: `RamificationJumpBound` が与えるのは ★**各層ごとの** `(p−1)i ≤ e`。
+鎖が要るのは ★**第 1 跳び `t k` が `k` に依らずに押さえられる**こと。
+★後者は木に**無い**（実装者が確認）。⇒ `BoundedJumpSum.sum_le_of_bounded_jump` は
+「`t k ≤ T` を**仮定すれば**閉じる」まで。★**残るは `t k ≤ T` の供給 1 本**。
+
+**木の docstring の検算 6 例目**: `RamificationJumpBound.lean:340` の `ℚ₂(√2)/ℚ₂` の例を
+手計算で確認 —— `σπ−π = −2√2` ⇒ `v_L = 3` ⇒ 跳び `i = 2`、`2 ∣ 2` ✓、★一致。
+
+**★★本体の誤り 3 件目（前 2 件より悪い）**: 持ち場で `FirstJumpCorrection.lean` を
+「★本体が `ls`/`grep` で確かめたもの」の一覧に入れたが、★**実際には確かめておらず存在しない**
+（正しくは `FirstJumpIsBottom.lean`）。★**確かめていない検証を「確かめた」と書いた**。
+⇒ 今波から**全パスを 1 本ずつ `ls` に通してから貼る**運用に変更（第 1123 の持ち場は 6 本すべて実施）。
+★併せて測定: `grep -c sorry` は docstring を拾うので使わない（`FirstJumpIsBottom.lean:24` /
+`NormalizedTraceDescent.lean:127` はどちらも文字列。`Found/` の実 `sorry` は **0**）。
+
+**VERDICT / COST**: 本体は今波ゲート＋パスの実測のみ。
