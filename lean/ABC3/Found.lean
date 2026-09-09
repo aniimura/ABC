@@ -1963,6 +1963,7 @@ import ABC3.Found.PGC.FiniteExceptions
 import ABC3.Found.PGC.FiniteExceptionsIcc
 import ABC3.Found.PGC.BaseLayerConstant
 import ABC3.Found.PGC.DeepLossExit
+import ABC3.Found.PGC.TraceGainKernel
 import ABC3.Found.Goal.Theory
 /-!
 # Found — 実装済みの基礎
