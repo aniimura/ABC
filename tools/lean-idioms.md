@@ -14080,8 +14080,19 @@ but is expected to have type
 実際の `namespace` は `:86` から始まっていた（`grep -n '^namespace'` で確認）。
 ★「三重定義したのでは」と誤報しかける。
 
-**直し方**: **行頭を固定する** —— `grep -rn '^def X'` / `^theorem X`。
-本プロジェクトの宣言は字下げなしで書かれているので、これで docstring の引用を落とせる。
+**直し方（★2026-09-09 に改訂。行頭固定だけでは足りない）**: module docstring の
+``` ブロックに引用されたコードも**列 0 から始まる**ので `^theorem` / `^def` を素通りする。
+実測: `LayerDegreeIsP.lean:18` が `^theorem exists_digitSum_of_adjoin_eq_top` に一致したが、
+そこは docstring 内で、`namespace` は `:85` から始まっていた。
+★**一致行が最初の `^namespace` より後か**を確かめること:
+
+```sh
+ns=$(grep -n '^namespace' <file> | head -1 | cut -d: -f1)
+grep -n '^theorem X' <file> | awk -F: -v n="$ns" '$1 > n'
+```
+
+★本体は 2026-09-09 に**この罠に 2 度当たった**（1 度目は #360 を書いた回、2 度目はその
+「直し方」が不十分だった回）。どちらも報告前に確かめたので誤報は出ていない。
 
 **関連**: `grep -c sorry` が docstring の「sorry」という**文字列**を拾うのと同じ形（#357 の周辺）。
 ★宣言の数を数えるときは、`grep` の対象が**コードか文章か**を先に決める。
