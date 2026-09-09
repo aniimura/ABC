@@ -1921,6 +1921,7 @@ import ABC3.Found.PGC.TailNoCancel
 import ABC3.Found.PGC.SlotStructure
 import ABC3.Found.PGC.LossPAddOneFalse
 import ABC3.Found.PGC.TwoIsDegenerate
+import ABC3.Found.PGC.RhoFactorization
 /-!
 # Found — 実装済みの基礎
 
