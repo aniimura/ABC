@@ -64,6 +64,7 @@ def run(p, n, trials, seed=20260909):
     n7b = [0, 0]
     n8 = [0, 0, 0, 0]
     n10 = [0, 0]
+    n12 = [0, 0, 0]              # [全 j で成立, 総数, j=0 だけで成立]
     n11 = [0, 0, None]           # [v(f_j) >= 0 の件数, 総数, 最小の v(f_j)]
     n9 = [0, 0, None]            # [成立, 総数, 最大の loss]            # [誤差が深い, ★同位, 誤差が浅い, 総数]
     worst = None
@@ -97,6 +98,18 @@ def run(p, n, trials, seed=20260909):
                 n11[0] += (vf[j] >= 0)
                 if n11[2] is None or vf[j] < n11[2]:
                     n11[2] = vf[j]
+        # (n12) ★係数の動きの「係数の大きさ倍」評価: v(sigma f_j - f_j) >= v(f_j0) + 2p
+        okall = True
+        for j in range(p):
+            gj = L._apply(L.sig[a0], Df[j])
+            dv = F.v([u - z for u, z in zip(gj, Df[j])])
+            ok = (dv is None) or (dv - vD >= vf[j0] + 2 * p)
+            if j == 0 and ok:
+                n12[2] += 1
+            if not ok:
+                okall = False
+        n12[1] += 1
+        n12[0] += okall
         # (n2)
         for j in tail:
             n2[1] += 1
@@ -172,6 +185,8 @@ def run(p, n, trials, seed=20260909):
     print(f"    (n1) v(w) = p                : {'成立' if vw == p else '★不成立'}")
     print(f"    (n11) ★x 整 ⇒ v(f_j) ≥ 0     : {n11[0]}/{n11[1]}"
           f"  最小の v(f_j) = {n11[2]}")
+    print(f"    (n12) ★v(σf_j−f_j) ≥ v(f_j₀)+2p: 全 j {n12[0]}/{n12[1]}"
+          f"  （j=0 だけなら {n12[2]}/{n12[1]}）")
     print(f"    (n2) p | v(f_j)              : {n2[0]}/{n2[1]}")
     print(f"    (n3) d の 2 通りの計算が一致 : {n3[0]}/{n3[1]}")
     print(f"    (n4) ★j₀ ≠ jstar             : {n4}/{n3[1]} 件"
