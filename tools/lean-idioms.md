@@ -13917,3 +13917,16 @@ def valueOf : ConstantInfo → Option Expr
 **関連**: `#eval show CoreM Unit from do …` は `run_cmd` の代わりに使える
 (`Mathlib.Tactic.RunCmd` はこの rev に無い)。書き出し先の相対パスは
 `lean/` から見た位置になるので `IO.FS.createDirAll ".cache"` を先に呼ぶ。
+
+## #354 `.cache/mathlib-index.txt` は `to_additive` 生成名を落とす（「無いが嘘」8 例目）
+
+**失敗形**: `grep -n "nnnorm_sum_eq_sup_of_pairwise_ne" .cache/mathlib-index.txt` → **0 件**。
+しかし `IsUltrametricDist.nnnorm_sum_eq_sup_of_pairwise_ne` は **mathlib に在る**
+（2026-09-09 実測、実装者）。★`to_additive` が生成した名前は索引に載らない。
+
+**直し方**: 名前で引いて 0 件だったら索引を疑い、**部品で引く**——
+木の中でその補題を実際に使っている箇所を読む。今回の経路は
+`lean/ABC3/Found/PGC/TotallyRamifiedValueGroup.lean:113`。
+`exact?`（MCP REPL）で型から引くのも同じ理由で索引より強い。
+
+**関連**: 索引の嘘は 2 通り——「無いが嘘」（本項で 8 例目）と「形が嘘」（#297、明示引数が 1 つ多い）。
