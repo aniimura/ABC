@@ -1924,6 +1924,7 @@ import ABC3.Found.PGC.TwoIsDegenerate
 import ABC3.Found.PGC.RhoFactorization
 import ABC3.Found.PGC.ZetaSubOnePrime
 import ABC3.Found.PGC.ZetaStepRatio
+import ABC3.Found.PGC.ZetaUnitFactor
 /-!
 # Found — 実装済みの基礎
 
