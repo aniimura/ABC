@@ -17839,3 +17839,25 @@ GenEll §3→§4、pGC §1→§4 をその形にするかは**人の判断**（D
 `p = 2` で定数が変わる。★`2p−1` で入れ直すと `Σ = (2p−1)p/((p−1)^2)`（本体の暗算、**未検算**）。
 ★どう扱うか（`p=2` を別枠にする / 定数を全体で緩める / 別ルート）は人の判断。
 ★実装者の持ち場は `p ≥ 3` で進めている。
+
+---
+
+## 第 1109 —— `hrem` が仮説から消え、展開の一意性も落ちた（実装者、本体はゲートのみ）
+
+**真偽**: `hrem` は `CoefficientIntegrality.exists_integral_expansion_of_valK` から出る、は真。
+★ただし返り値が `f : ℕ → M` で `SlotResidue` の要求する `z : ℕ → K` に渡せず、`K` 係数版を
+書き直して接続（10 行）。副産物として ★**展開の一意性** `coeffs_unique` が落ちた（8 行）。
+
+**在庫の測定 / ★木の docstring の誤り 4 例目**:
+`LossTwoPSubTwo.lean:22` は「材料は `TotallyRamifiedLayer.linearIndependent_of_ne_mod` に在る」
+と書くが ★**その名前は存在しない**。実体は `TotallyRamifiedValueGroup.lean:133`（名前空間
+`TotallyRamified`）で、`TotallyRamifiedLayer.lean:139` は**使っているだけ**。
+測定: `grep -rn "^theorem linearIndependent_of_ne_mod" lean/ABC3/Found/PGC/*.lean` → 1 件。
+★これで「木の docstring の断定」の実害は **3 → 4 例**。持ち場に疑わせる規約は効いている。
+同 `:23` の「費用は書かない」は実測 **8 行**だった。
+
+**次の 1 点**: 残った仮定はちょうど 2 つ —— `‖A‖ ≤ 1`（具体層で `x` を整に取る段に吸収）と
+★`hdom`（`j₀` スロットが最大でない、(n15) で p≥3 は 330/330）。★数学の中身は `hdom` に集まっている。
+
+**VERDICT / COST**: 実装者の「型がそのまま渡る」見立ては外れ（10 行の書き直し）。
+一方「一意性は `linearIndependent_of_ne_mod` で出る」は当たり（8 行）。本体は今波もゲートのみ。
