@@ -18357,3 +18357,32 @@ import は推移閉包を追って 1 本で足りると確認（★余計な imp
 ★済めば深さ 1 の定数が `p` から `axDecay p 1` に落ちる。
 
 **VERDICT / COST**: 本体は今波ゲート＋独立検算＋パス実測＋メモリ 1 件のみ。
+
+---
+
+## 第 1130 —— ★深さ 1 だけでは足りないことが型になった／`WildStep` は木に実例が無い
+
+**真偽**: 前波の実装者の「26 個の仮説を数える」→ ★**正しくは 13**（自己訂正 18 度目）。
+`PureStepSetup.lean:309` の `structure WildStep` が既に畳んでいた（データ 4 ＋ 証明 9）。
+★本体も独立に確認（`sed -n '309,330p' | grep -cE '^  \w+ :'` → **13**、一致）。
+
+**★★測定 —— `WildStep` は木の中で一度も構成されていない**: 実装者 0 件、
+★本体も独立に確認（`: WildStep` / `WildStep where` / `WildStep :=` を `PureStepSetup.lean` 以外で
+→ **0**。参照のみ 12 件）。★**仕様は在るが実例が無い。**
+
+**★★★決定的な負の結果（型になった）**: `PureStepSetup` の道は `k = 0` 専用
+（同ファイル :430 の docstring「`k ≥ 1` では `hne` が偽」）。⇒ 深さ 1 の段だけ改善しても
+`WildStepFieldSupply.prod_depth_one_only_unbounded` により ★**`AxLemma` は出ない**
+（`∏` が非有界）。★木にも実装者にも無かった形（`prod_unbounded_of_one_lt` に
+`D := min (axDecay p 1) p`）。⇒ ★**すべての深さ `k` で `axDecay p k` が要ることが確定。**
+
+**★道の選択（実装者の判断、理由は 2 つとも測定）**: `GainedDescentBridge`(26 仮説) ではなく
+`PureStepSetup`(13) を取った —— ①結論が `∏` でなく **`axDecay p 1` そのもの**（:414）
+②13 のうち **2 つが `PAdicLocalField` から供給済み**（同ファイル §5、前波まで未測定だった節）。
+
+**次の 1 点**: `k ≥ 1` の層（wild 深さ 2 以上）を扱う `Gained*` member が**存在するか**を測る。
+候補は `GainedTowerStep.lean`(598 行) / `GainedTowerModel.lean`(836 行) の `_of_tower*` 系。
+★それらの `k` が wild 深さと一致するかは未測定。★本体はこの 2 本を 1 行も読んでいない。
+
+**VERDICT / COST**: 本体は今波ゲート＋独立検算 2 件＋パス実測のみ。
+★実装者は linter warning も 0 にしている（`simpa`→`simp` 2 件）。
