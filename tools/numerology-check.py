@@ -64,6 +64,7 @@ def run(p, n, trials, seed=20260909):
     n7b = [0, 0]
     n8 = [0, 0, 0, 0]
     n10 = [0, 0]
+    n11 = [0, 0, None]           # [v(f_j) >= 0 の件数, 総数, 最小の v(f_j)]
     n9 = [0, 0, None]            # [成立, 総数, 最大の loss]            # [誤差が深い, ★同位, 誤差が浅い, 総数]
     worst = None
     for _ in range(trials):
@@ -85,6 +86,17 @@ def run(p, n, trials, seed=20260909):
         jstar = min(tail, key=lambda j: vf[j] + j)
         d = vf[jstar] + jstar
 
+        # (n11) ★係数の整数性: x が整なら v(f_j) ≥ 0 か
+        #      （CoefficientIntegrality.norm_coeff_le_one_of_valK が言っていること）
+        vx = F.v(y)
+        if vx is not None and vx >= 0:
+            for j in range(p):
+                if vf[j] is None:
+                    continue
+                n11[1] += 1
+                n11[0] += (vf[j] >= 0)
+                if n11[2] is None or vf[j] < n11[2]:
+                    n11[2] = vf[j]
         # (n2)
         for j in tail:
             n2[1] += 1
@@ -158,6 +170,8 @@ def run(p, n, trials, seed=20260909):
 
     print(f"  p={p} n={n} 標本 {trials}  v(w)={vw}  p={p}  2p−2={2 * p - 2}")
     print(f"    (n1) v(w) = p                : {'成立' if vw == p else '★不成立'}")
+    print(f"    (n11) ★x 整 ⇒ v(f_j) ≥ 0     : {n11[0]}/{n11[1]}"
+          f"  最小の v(f_j) = {n11[2]}")
     print(f"    (n2) p | v(f_j)              : {n2[0]}/{n2[1]}")
     print(f"    (n3) d の 2 通りの計算が一致 : {n3[0]}/{n3[1]}")
     print(f"    (n4) ★j₀ ≠ jstar             : {n4}/{n3[1]} 件"
