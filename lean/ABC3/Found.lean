@@ -1959,6 +1959,7 @@ import ABC3.Found.PGC.GeneralJumpBound
 import ABC3.Found.PGC.FirstJumpIsBottom
 import ABC3.Found.PGC.BoundedJumpSum
 import ABC3.Found.PGC.LossToExit
+import ABC3.Found.PGC.FiniteExceptions
 import ABC3.Found.Goal.Theory
 /-!
 # Found — 実装済みの基礎
