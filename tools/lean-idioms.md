@@ -13892,3 +13892,28 @@ ok  ABC3/Found/PGC/MaxMinIndex.lean  —— 8.9 秒
 2. ★**ファイル編集は Write/Edit ツールで行う**（成否がツールの返り値に出る）。
 3. どうしてもシェルから書くなら、直後に `wc -l <file>` か `grep -n '<足したはずの宣言名>' <file>`
    を**同じ 1 命令の中で**叩き、**行数が増えたことを確かめてから** `leanfile.mjs` を呼ぶ。
+
+## #353 `ConstantInfo.value?` はこの Lean 版で**定理に対して `none`** を返す
+
+**失敗形**: 依存グラフを歩く meta で `ci.value?` を使うと、定理の**証明項が丸ごと落ちる**。
+`abcConjecture_holds` から辿った到達集合が **3 件**(型からしか辿れていない)になり、
+`sorry` が 1 つも見つからない——「abc は証明済み」という**逆の結論**が出る。
+★ビルドは通るので気づかない。
+
+**測定**(2026-09-09、`lean/ABC3/Check/_Dbg.lean` で 1 回):
+`value?=false` かつ `.thmInfo v => v.value.getUsedConstants` は
+`#[abc_of_tops, top_genEll_thm21, …]` を返す。**値はある。`value?` が返さないだけ**。
+
+**直し方**: 構成子を直接見る。
+```lean
+def valueOf : ConstantInfo → Option Expr
+  | .defnInfo v => some v.value
+  | .thmInfo  v => some v.value
+  | .opaqueInfo v => some v.value
+  | _ => none
+```
+実物は `lean/ABC3/Check/GoalChain.lean`。
+
+**関連**: `#eval show CoreM Unit from do …` は `run_cmd` の代わりに使える
+(`Mathlib.Tactic.RunCmd` はこの rev に無い)。書き出し先の相対パスは
+`lean/` から見た位置になるので `IO.FS.createDirAll ".cache"` を先に呼ぶ。

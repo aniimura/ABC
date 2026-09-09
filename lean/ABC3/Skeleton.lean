@@ -54,6 +54,7 @@ import ABC3.Skeleton.Divisor.Normalization
 import ABC3.Skeleton.Divisor.Hartogs
 import ABC3.Skeleton.Divisor.NormalizationUniversal
 import ABC3.Skeleton.NumberField.Chebotarev
+import ABC3.Skeleton.Goal.ABC
 /-!
 # Skeleton — 論文の主張(証明しない)
 
