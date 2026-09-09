@@ -13960,3 +13960,19 @@ have h2 : ‖∑ i ∈ t, y i‖ = ‖y j‖ := by simpa using congrArg NNReal.t
 
 **関連**: `‖·‖₊ ≤ ‖·‖₊` から `‖·‖ ≤ ‖·‖` は `exact_mod_cast` で**通る**（不等式は
 `NNReal.coe_le_coe` が `norm_cast` 補題として登録されているため）。★等式だけが落ちる。
+
+## #356 先頭が暗黙束縛 `{p}` の命題を `{P : Prop}` の補助関数に渡すと `p` が先に具体化される
+
+**失敗形**: `theorem_4_2 : ∀ {p : ℕ} [Fact p.Prime] (K K' : …), …` を
+`viaBoth {P : Prop} (tree _paper : P) : P` に渡すと
+`Application type mismatch: … but is expected to have type ∀ (K K' : … p✝), …`。
+★`P` に入るのは**先頭の暗黙束縛を剥がした後**の命題であり、`∀ {p}` 付きの全体ではない。
+
+**直し方**: 結論まで eta 展開してから当てる。★`fun {p} [inst] K K' => …` は
+**束縛の型を書かないと `Unknown identifier \`inst\`` になる**（2 回落ちた）ので、
+`fun {p : ℕ} [inst : Fact (Nat.Prime p)] (K K' : PAdicLocalField p) => viaBoth (f (p := p) K K') …`
+と全部書く。実物は `lean/ABC3/Skeleton/Goal/Chain.lean` の `chain_theorem_4_2_both`。
+
+**関連**: `stmt% X`（`lean/ABC3/Meta/Stmt.lean`）は定数 `X` の型を項として返す。
+還元を含意で書くとき statement を書き写さずに済む。★`stmt%` 自身は `X` への依存を
+作らない（型を複製するだけ）——辺を作るのは `:= f @X` の側である。

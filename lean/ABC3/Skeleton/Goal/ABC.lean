@@ -3,6 +3,7 @@ import ABC3.Skeleton.GenEll.Section2
 import ABC3.Skeleton.GenEll.Section4
 import ABC3.Skeleton.IUTchIII.Cor312
 import ABC3.Skeleton.PGC.Section4
+import ABC3.Skeleton.Goal.Chain
 import Mathlib.Data.Nat.Factorization.Basic
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
@@ -97,7 +98,8 @@ def Top_GenEll_Cor44 : Prop :=
               + 6 * (D.degOfDefinition E : ℝ) * D.logDiffMell (D.cls E)
               + 2 * (∑ p ∈ S, Real.log p) + C * (D.degOfDefinition E : ℝ)
 
-theorem top_genEll_cor44 : Top_GenEll_Cor44 := @ABC3.Skeleton.GenEll.cor_4_4
+theorem top_genEll_cor44 : Top_GenEll_Cor44 :=
+  Chain.viaBoth @ABC3.Skeleton.GenEll.cor_4_4 @Chain.chain_cor_4_4
 
 /-- **[IUTchIII] Corollary 3.12** の型。 -/
 def Top_IUT_Cor312 : Prop :=
@@ -119,7 +121,8 @@ def Top_PGC_Thm42 : Prop :=
       (ABC3.Found.PGC.naturalOuterIso (ABC3.Found.PGC.ramificationFiltration p)
         (ABC3.Found.PGC.isNaturalFiltration_ramificationFiltration p) (K := K) (K' := K'))
 
-theorem top_pgc_thm42 : Top_PGC_Thm42 := @ABC3.Skeleton.PGC.theorem_4_2
+theorem top_pgc_thm42 : Top_PGC_Thm42 :=
+  @Chain.chain_theorem_4_2_both
 
 end Tops
 
