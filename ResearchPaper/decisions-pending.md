@@ -17971,3 +17971,24 @@ GenEll §3→§4、pGC §1→§4 をその形にするかは**人の判断**（D
 **次の 1 点**: `finrank ≤ p` か「`E₁` の値群が `‖μ‖^ℤ`」。★`IntermediateField` は #59/#69 の領域。
 
 **VERDICT / COST**: 本体は今波もゲートのみ。★本体の GUESS（2 ファイルが使える）は**外れ**。
+
+---
+
+## 第 1115 —— `hfr : finrank = p` が定理に、残るは `hvalK` 1 つ（実装者）
+
+**真偽**: 前波で実装者自身が書いた「`IntermediateField.adjoin.finrank` ＋ `minpoly.min` で出るが
+★#59/#69 の危険区間」→ ★**どちらも使わなかった**。
+`π^p = Σ_{j<p} c_j π^j`（モニックな関係式）→ 強帰納法で全冪が span に入る →
+`Algebra.adjoin_eq_span` で `span = ⊤` → `finrank_le_of_span_eq_top`（`Dimension/Constructions.lean:491`）。
+★`lean-idioms` #296「そもそも `IntermediateField` を作らず触らずに済む」がそのまま当たった。
+
+**★循環の回避（実装者が自分で見つけた）**: `TotallyRamifiedLayer.adjoin_eq_top_of_valK` は
+`finrank = n` を**仮定**するので使えない。`hadj`（`L = E₁(ζ)`）は塔の定義として受けた。
+
+**在庫の測定**: §1 の 2 本は `0 < p` を**要らない**（書いたが外して通った）。§3 では要る。
+★「仮定は書く前に外してみる」を 3 波連続で自分で適用している。
+
+**次の 1 点**: ★**`hvalK` だけ**（`E₁` の値群が `‖μ‖^ℤ`）。`finrank ℚ_p E₁ = φ(p^{m+1})` が要り、
+本波の §1–§2 がそのまま使える可能性がある、と実装者。★未着手。
+
+**VERDICT / COST**: 本体は今波もゲートのみ。★具体層の 3 点のうち 2 点（`hwn` / `hfr`）が定理になった。
