@@ -18243,3 +18243,34 @@ GenEll §3→§4、pGC §1→§4 をその形にするかは**人の判断**（D
 ★足りているかは本体には測れないので、次波の持ち場で**失われていたら報告するよう明示**した。
 
 **VERDICT / COST**: 本体は今波ゲート＋パス実測＋`grep` のみ。
+
+---
+
+## 第 1126 —— `B = p^{K₀}` は粗すぎ、正しくは `B = p`／出口の仮説が 6 → 2（実装者）
+
+**真偽**: 前波の実装者の見込み「`axWildDescent_pow` から `B = p^{K₀}` が取れそう」→ ★**粗すぎた**
+（自己訂正 14 度目）。正しくは ★**`B = p`（`k` に依らない）** ——
+`WildDepthFieldDescent.lean:141` の `axWildDescent_prime`。同ファイル :137 の docstring が
+自分で「`axWildDescent_pow` より真に良い」と言っている。
+★★**本体が名指ししたのは `axWildDescent_pow`(:606、実在は正しかった)で、効いたのは
+その 1 つ手前の部品**。★実装者いわく **20 波連続で同じ形**。
+⇒ 出口の定数は `p^{K₀²}` ではなく **`p^{K₀}·axConstant p`**。
+
+**★出口の仮説が 6 → 2**: `axSenTate_of_deep_bound (hbig) (hdeep)` のみ
+（`hc`/`hc1`/`hB`/`hd1`/`hD` が消えた。★「仮説を書く前に外せるか試す」で 5 本）。
+★本体が字面を確認（`BaseLayerConstant.lean:246`）。
+
+**在庫の測定（3 つとも記録に値する）**:
+- ★`axWildDescent_mono` は木に **2 件**（`FirstJumpLedger.lean:458` /
+  `PGroupDescentToAxWild.lean:202`）⇒ 3 度目を書かず、真に強い貼り合わせだけ足した（#348 が効いた）。
+- ★`hD` は**宣言としては木に無く**、`AxEpsilonDecay.axLemma_of_axDecay`(:532) の**証明の中**に
+  4 行で埋まっていた ⇒ 切り出した。★「埋まっているものは次のノードから引けない」。
+- ★`idiom-recur.mjs --similar` が「似た節は無い」と外し、`grep -n "MulLeftMono"` が当たった
+  ⇒ #302b として統合（新設せず）。★道具の失敗の記録。
+
+**★圧縮 4 回目の後も文脈は維持**（実装者が明示的に確認して報告）。本体の逐語引用で足りている。
+
+**次の 1 点**: `hbig` を満たす `cdeep` と `AxWildDescent K cdeep` を**深さ `K₀` 以上でだけ**作る。
+★浅い `K₀` 段は在庫だけで無条件に埋まった。
+
+**VERDICT / COST**: 本体は今波ゲート＋パス実測＋字面 1 箇所の確認のみ。
