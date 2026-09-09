@@ -14156,3 +14156,22 @@ ABC3/Found/PGC/KummerReduction.lean:136:12: warning: `Nat.succ_mul_choose_eq` ha
 
 **関連**: #297（section の `variable (R)` で明示引数が 1 つ**多い**）と逆向きで、
 こちらは**渡しすぎ**。★どちらも「エラー文に出ている型」を読めば引数の数が分かる。
+
+## #362 mathlib は定理を「人名」で名付けない —— **結論の形**で引く
+
+**失敗形**（2026-09-09、実装者）: Kummer の定理を探して
+`grep -in "lucas" .cache/mathlib-index.txt` → `LucasLehmer.*` だけ。「無い」と結論した。
+★**実際は在った** —— `Nat.factorization_choose'`（`Data/Nat/Choose/Factorization.lean:114`）が
+Kummer の定理そのもの（右辺が基数 `p` での**繰り上がりの回数**）。
+
+**測定**（本体が検算）: `grep -ic 'kummer' .cache/mathlib-index.txt` → **73 件**。
+★ただし全部 `KummerExtension` / `KummerDedekind` で、二項係数とは無関係。
+⇒ ★**人名で引くと「73 件あるのに全部外れ」という最悪の形になる。**
+
+**直し方**: ★**結論の形**で引く。`factorization_choose` / `choose` / `emultiplicity` のように
+**主語になっている関数の名前**を使う。本体の実測でも
+`grep -n "Nat.factorization_choose" .cache/mathlib-index.txt` で 1 行目に出る。
+
+**関連**: 索引の嘘は 4 通りになった —— 「無いが嘘」(#354)、「形が嘘」(#297)、
+「deprecated を載せる」(#361)、そして本項「**人名では引けない**」。
+★どれも「索引が悪い」のではなく**引き方**の問題である。

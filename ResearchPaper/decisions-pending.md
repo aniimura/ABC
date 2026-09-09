@@ -18631,3 +18631,30 @@ import は推移閉包を追って 1 本で足りると確認（★余計な imp
 **VERDICT / COST**: 本体は今波ゲート＋検算 2 件（木の仮説の向き、新 6 宣言）のみ。
 ★実装者の習慣「逸脱の記録に『測っていない』と書いたものを次の波で実際に測る」が
 **今日いちばん効いている**（第 1137 → 1138 がその実例）。
+
+---
+
+## 第 1139 —— ★★★Kummer は mathlib に在った（実装者）／人名では引けない
+
+**真偽**: 前波の実装者の「mathlib に Lucas / Kummer が無い」→ ★**偽**。
+`Nat.factorization_choose'`（`Data/Nat/Choose/Factorization.lean:114`）が Kummer の定理そのもの
+（右辺が基数 `p` の繰り上がり回数）。★本体が索引で実在を検算。
+★原因: `grep -in "lucas"` しか叩かず、`LucasLehmer` しか出なかった。
+★本体の測定: `grep -ic 'kummer'` は **73 件**ヒットするが**全部 Kummer 拡大 / Kummer–Dedekind**。
+⇒ ★★**人名で引くと「73 件あって全部外れ」になる。** 配管 #362 に記録。
+★★**予防 5 本目: 定理の「名前」ではなく「結論の形」（主語になっている関数名）で引く。**
+
+**★前波の目標を追い越した**: `factorization_choose'` は分けずに直接
+`not_dvd_choose_prime_pow_mul : ¬ p ∣ (p^a * m).choose (p^a)` を出す
+⇒ 第 1138 の `KummerReduction.not_dvd_choose_prime_pow_of_not_dvd` は**使う必要が無くなった**（誤りではない）。
+★繰り上がりが 0 の理由も型に: `i ≤ a` は両方 0 ／ `i = a+c` は `p ∤ m` から `(m−1)%p^c ≠ p^c−1`。
+★`p ∤ m` が効くのは後者だけ。
+
+**★記録済みの罠に再び落ちた 2 度目**: `le_or_lt` の不在（#302）。
+`idiom-recur.mjs --similar` は **3 度とも 0 件**で、grep が当たっている。
+
+**次の 1 点（未着手）**: `k = j−1`（形式微分、係数 `p^{−a}`）と `k = j−p^a`（係数 1）の 2 項の比較。
+`p^a·(‖δ‖/‖π‖)^{p^a−1}` と `1` の比較に落ちるはずだが ★**厳密整数でも Lean でも未確認**。
+
+**VERDICT / COST**: 本体は今波ゲート＋検算 3 件＋配管 #362 のみ。
+★本日 commit 235 / 新規 `Found/PGC/*.lean` 105 本。
